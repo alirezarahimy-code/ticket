@@ -1,0 +1,63 @@
+{
+  "accessMode": "integrated",
+  "ssoKey": "همان کلید app.key در config.php",
+  "brandName": "سامانه چاپ فیش غذا",
+  "brandLogo": "",
+  "admins": [
+    {
+      "username": "admin",
+      "password": "",
+      "role": "ادمین اصلی"
+    },
+    {
+      "username": "support",
+      "password": "",
+      "role": "مدیر پشتیبانی"
+    }
+  ],
+  "attendance": {
+    "path": "\\\\SERVER\\SHARE\\attendance.mdb",
+    "password": "",
+    "table": "",
+    "cutSourceRows": true,
+    "columns": {
+      "uid": "L_UID",
+      "card": "C_Card",
+      "name": "C_Name",
+      "date": "C_Date",
+      "time": "C_Time"
+    }
+  },
+  "orders": {
+    "mode": "live-odbc",
+    "path": "\\\\SERVER\\FOOD\\food_fish.accdb",
+    "password": "",
+    "table": "food_fish",
+    "columns": {
+      "national": "cod_meli",
+      "first": "naam",
+      "last": "famili",
+      "food": "nahar_entekhabi",
+      "food_date": "tarikh_entekhabi",
+      "reserve_date": "d",
+      "reserve_time": "s"
+    }
+  },
+  "printer": {
+    "mode": "windows-spooler",
+    "name": "نام چاپگر نصب‌شده در Windows",
+    "host": "192.168.1.50",
+    "port": 9100,
+    "encoding": "CP864",
+    "company": "نام سازمان",
+    "title": "فیش غذای پرسنل",
+    "footer": "نوش جان",
+    "cut": true
+  },
+  "exportPath": "C:\\FoodTicket\\Reports",
+  "pollSeconds": 5,
+  "guestCardUIDs": "",
+  "maxGuestTicketsPerDay": 20,
+  "guestFoodType": "مهمان",
+  "cutFromSource": true
+}

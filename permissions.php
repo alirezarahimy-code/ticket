@@ -1,0 +1,571 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Role-based permissions.
+ *
+ * Roles are stored in users.role (existing enum + new values added by upgrade-1.22).
+ * Permissions per role are stored in the role_permissions table.
+ * A permission row means "this role has this permission".
+ */
+
+function permission_roles(): array
+{
+    return [
+        'primary_admin' => 'ادمین اصلی',
+        // ۱.۳۷.۷ — نقش قدیمی «admin» به فهرست اضافه شد؛ پیش‌تر در permission_roles() نبود و
+        // به‌صورت ناخواسته فقط دسترسی‌های نقش «کاربر» را می‌گرفت، در حالی که is_admin_role() و
+        // require_admin() همه‌جا آن را ادمین کامل می‌شناسند.
+        'admin' => 'ادمین (نقش قدیمی)',
+        'supervisor' => 'سوپروایز',
+        'support_manager' => 'مدیر پشتیبانی',
+        'inspector' => 'بازرسی',
+        'manager' => 'مدیر',
+        'agent' => 'کارشناس',
+        'user' => 'کاربر',
+    ];
+}
+
+/**
+ * Full catalog grouped by area: group label => [permission => label].
+ */
+function permission_catalog(): array
+{
+    return [
+        [
+            'key' => 'base',
+            'label' => 'داشبورد و پایه',
+            'items' => [
+                ['code' => 'dash.view', 'label' => 'مشاهدهٔ داشبورد'],
+                ['code' => 'search.global', 'label' => 'جست‌وجوی سراسری'],
+                ['code' => 'notif.view', 'label' => 'اعلان‌های من'],
+                ['code' => 'profile.edit', 'label' => 'ویرایش پروفایل خودم'],
+            ],
+        ],
+        [
+            'key' => 'ticket',
+            'label' => 'تیکت',
+            'items' => [
+                ['code' => 'ticket.create', 'label' => 'ثبت تیکت جدید'],
+                ['code' => 'ticket.view_own', 'label' => 'مشاهدهٔ تیکت‌های خودم'],
+                ['code' => 'ticket.view_unit', 'label' => 'مشاهدهٔ تیکت‌های واحد/زیرمجموعه'],
+                ['code' => 'ticket.view_all', 'label' => 'مشاهدهٔ همهٔ تیکت‌ها'],
+                ['code' => 'ticket.reply', 'label' => 'پاسخ/مکالمه در تیکت'],
+                ['code' => 'ticket.edit', 'label' => 'ویرایش تیکت'],
+                ['code' => 'ticket.assign', 'label' => 'ارجاع تیکت به کارشناس'],
+                ['code' => 'ticket.bulk', 'label' => 'عملیات گروهی روی تیکت‌ها'],
+                ['code' => 'ticket.rate', 'label' => 'امتیازدهی به تیکت'],
+                ['code' => 'ticket.attach_asset', 'label' => 'اتصال دارایی به تیکت'],
+                ['code' => 'queue.view', 'label' => 'صف کاری'],
+                ['code' => 'supervisor.panel', 'label' => 'پنل سوپروایزر'],
+                ['code' => 'supervisor.decide', 'label' => 'تأیید/بستن تیکت'],
+                ['code' => 'supervisor.reopen', 'label' => 'بازگشایی/برگشت تیکت'],
+            ],
+        ],
+        [
+            'key' => 'services',
+            'label' => 'خدمات و دسته‌بندی',
+            'items' => [
+                ['code' => 'services.view', 'label' => 'مشاهدهٔ خدمات'],
+                ['code' => 'services.manage', 'label' => 'مدیریت خدمات'],
+                ['code' => 'service_cat.manage', 'label' => 'مدیریت دسته‌بندی خدمات'],
+                ['code' => 'service_field.manage', 'label' => 'مدیریت فیلدهای خدمت'],
+            ],
+        ],
+        [
+            'key' => 'knowledge',
+            'label' => 'دانش‌نامه',
+            'items' => [
+                ['code' => 'knowledge.view', 'label' => 'مشاهدهٔ دانش‌نامه'],
+                ['code' => 'knowledge.manage', 'label' => 'افزودن/ویرایش مقاله'],
+            ],
+        ],
+        [
+            'key' => 'cddvd',
+            'label' => 'کنترل CD/DVD',
+            'items' => [
+                ['code' => 'cddvd.view', 'label' => 'مشاهدهٔ فرم کنترل CD/DVD'],
+                ['code' => 'cddvd.submit_out', 'label' => 'ثبت خروج رسانه'],
+                ['code' => 'cddvd.submit_in', 'label' => 'ثبت ورود رسانه (بازرسی)'],
+                ['code' => 'cddvd.edit', 'label' => 'ویرایش/حذف ثبت‌ها'],
+                ['code' => 'cddvd.view_all', 'label' => 'مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)'],
+                ['code' => 'cddvd.history', 'label' => 'تاریخچهٔ سریال'],
+                ['code' => 'cddvd.export', 'label' => 'خروجی Excel/CSV'],
+            ],
+        ],
+        [
+            'key' => 'traffic',
+            'label' => 'کنترل تردد مراجعین',
+            'items' => [
+                ['code' => 'traffic.view', 'label' => 'مشاهدهٔ کنترل تردد'],
+                ['code' => 'traffic.manage', 'label' => 'ثبت/ویرایش/حذف تردد'],
+                ['code' => 'traffic.destinations', 'label' => 'مدیریت مقصدهای ملاقات'],
+            ],
+        ],
+        [
+            'key' => 'assets',
+            'label' => 'دارایی و شناسنامه فنی',
+            'items' => [
+                ['code' => 'assets.view', 'label' => 'فهرست شناسنامه‌ها'],
+                ['code' => 'assets.own_unit', 'label' => 'فقط دارایی‌های واحد خودم'],
+                ['code' => 'asset.view', 'label' => 'مشاهدهٔ شناسنامهٔ دارایی'],
+                ['code' => 'asset.edit', 'label' => 'ویرایش شناسنامه'],
+                ['code' => 'asset.extract', 'label' => 'استخراج سخت‌افزار (همین سرور)'],
+                ['code' => 'asset.remote_extract', 'label' => 'استخراج از راه دور (WMI)'],
+                ['code' => 'asset.history', 'label' => 'تاریخچهٔ دارایی'],
+                ['code' => 'asset.ping', 'label' => 'پینگ سیستم‌های انتخابی'],
+                ['code' => 'inventory.view', 'label' => 'فهرست موجودی'],
+                ['code' => 'inventory.diagnostics', 'label' => 'تشخیص موجودی'],
+                ['code' => 'domain.import', 'label' => 'ورود کامپیوترهای دامنه'],
+                ['code' => 'domain.scan', 'label' => 'اسکن دامنه'],
+            ],
+        ],
+        [
+            'key' => 'reports',
+            'label' => 'گزارش و تحلیل',
+            'items' => [
+                ['code' => 'reports.view', 'label' => 'گزارش‌ها'],
+                ['code' => 'analytics.view', 'label' => 'چارت‌ها'],
+                ['code' => 'audit.view', 'label' => 'ممیزی'],
+                ['code' => 'logs.view', 'label' => 'گزارش خطا'],
+                ['code' => 'logs.activity', 'label' => 'فعالیت کاربران'],
+                ['code' => 'logs.activity_export', 'label' => 'خروجی فعالیت کاربران'],
+            ],
+        ],
+        [
+            'key' => 'food',
+            'label' => 'چاپ فیش غذا',
+            'items' => [
+                ['code' => 'food.dashboard', 'label' => 'داشبورد'],
+                ['code' => 'food.monitor', 'label' => 'پایش لحظه‌ای'],
+                ['code' => 'food.orders', 'label' => 'سفارش‌های غذا'],
+                ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
+                ['code' => 'food.employees', 'label' => 'کارکنان'],
+                ['code' => 'food.guest', 'label' => 'کارت مهمان'],
+                ['code' => 'food.groups', 'label' => 'گروه‌های غذا (نماینده با L_UID و غیبت روزانه)'],
+                ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
+                ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
+                ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
+                ['code' => 'food.design', 'label' => 'طراحی فیش'],
+                ['code' => 'food.health', 'label' => 'سلامت سیستم'],
+                ['code' => 'food.menu', 'label' => 'مدیریت بانک غذا و برنامه غذایی'],
+                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز و مشاهدهٔ همهٔ سفارش‌ها'],
+            ],
+        ],
+        [
+            'key' => 'foodorder',
+            'label' => 'سفارش غذای کارکنان',
+            'items' => [
+                ['code' => 'foodorder.self', 'label' => 'ثبت و مشاهدهٔ سفارش خود'],
+                ['code' => 'foodorder.proxy', 'label' => 'ثبت سفارش برای کارکنان دیگر'],
+            ],
+        ],
+        [
+            'key' => 'org',
+            'label' => 'سازمان',
+            'items' => [
+                ['code' => 'org.view', 'label' => 'مشاهدهٔ چارت سازمانی'],
+                ['code' => 'org.manage', 'label' => 'مدیریت ساختار سازمانی'],
+            ],
+        ],
+        [
+            'key' => 'system',
+            'label' => 'تنظیمات و سیستم',
+            'items' => [
+                ['code' => 'settings.general', 'label' => 'تنظیمات عمومی'],
+                ['code' => 'settings.domain', 'label' => 'اتصال دامین و اسکن دامنه'],
+                ['code' => 'settings.users', 'label' => 'مدیریت کاربران و دسترسی‌ها'],
+                ['code' => 'settings.key_roles', 'label' => 'نقش‌های کلیدی'],
+                ['code' => 'backup.manage', 'label' => 'پشتیبان‌گیری/بازگردانی'],
+                ['code' => 'ola.manage', 'label' => 'تنظیمات OLA/SLA'],
+                ['code' => 'governance.manage', 'label' => 'تغییر و مشکل'],
+                ['code' => 'holidays.manage', 'label' => 'مدیریت تعطیلات'],
+            ],
+        ],
+    ];
+}
+
+function permission_all_codes(): array
+{
+    $codes = [];
+    foreach (permission_catalog() as $group) {
+        foreach ($group['items'] as $item) {
+            $codes[] = $item['code'];
+        }
+    }
+    return $codes;
+}
+
+/**
+ * Default permissions per role. primary_admin implicitly has all.
+ */
+function permission_defaults(): array
+{
+    $all = ['dash.view', 'search.global', 'notif.view', 'profile.edit', 'ticket.create', 'ticket.view_own', 'ticket.reply', 'ticket.rate', 'services.view', 'knowledge.view', 'cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'foodorder.self', 'org.view', 'governance.manage'];
+    $common = array_merge($all, ['ticket.view_unit', 'queue.view', 'assets.view', 'assets.own_unit', 'asset.view', 'asset.history', 'reports.view', 'inventory.view', 'cddvd.history', 'cddvd.export', 'traffic.manage']);
+    return [
+        'primary_admin' => permission_all_codes(),
+        // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
+        'admin' => permission_all_codes(),
+        'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
+        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.order_close', 'settings.general', 'settings.domain', 'holidays.manage']))),
+        'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
+        'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
+        'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
+        'user' => $all,
+    ];
+}
+
+function permission_table_ready(): bool
+{
+    static $ready = null;
+    if ($ready !== null) {
+        return $ready;
+    }
+    try {
+        db()->query('SELECT 1 FROM role_permissions LIMIT 1');
+        $ready = true;
+    } catch (Throwable $e) {
+        $ready = false;
+    }
+    return $ready;
+}
+
+/**
+ * Stored permission codes for a role (fallback to defaults when table missing/empty).
+ */
+/**
+ * ۱.۳۷.۷ — قانون «قابل‌مدیریت» دسترسی نقش‌ها (تصمیم کاربر، ۲۰۲۶-۱۰-۰۶):
+ *   • تا وقتی نقش از فرم «نقش‌ها و دسترسی‌ها» ذخیره نشده ⇒ پیش‌فرض‌های همین فایل اعمال می‌شود
+ *     (تغییر پیش‌فرض‌ها در نسخه‌های بعدی خودکار به این نقش‌ها می‌رسد).
+ *   • به‌محض «ذخیره» از فرم ⇒ دقیقاً همان مجموعه اولویت دارد؛ حتی اگر خالی باشد یا بعداً
+ *     پیش‌فرض کد عوض شود.
+ *   • «بازگردانی به پیش‌فرض کد» نقش را دوباره دست‌نخورده می‌کند.
+ * نشانهٔ «دست‌خورده» در جدول settings با کلید role_permissions_custom_<role> نگه داشته می‌شود؛
+ * هیچ ستون یا جدول تازه‌ای ساخته نمی‌شود.
+ */
+function role_permissions_custom(string $role): bool
+{
+    if (!function_exists('setting')) {
+        return false;
+    }
+    return setting('role_permissions_custom_' . $role) === '1';
+}
+
+function role_permissions_mark_custom(string $role, bool $custom = true): void
+{
+    if (!function_exists('save_setting')) {
+        return;
+    }
+    save_setting('role_permissions_custom_' . $role, $custom ? '1' : '0');
+}
+
+function role_permissions_normalize_codes(array $codes): array
+{
+    $codes = array_map('strval', $codes);
+    return array_values(array_unique(array_filter($codes, static fn (string $code): bool => $code !== '')));
+}
+
+/**
+ * مجموعهٔ مؤثر یک نقش (تابع خالص؛ بدون دیتابیس قابل آزمون است).
+ */
+function role_permission_effective_codes(string $role, array $storedCodes, bool $custom): array
+{
+    if ($custom) {
+        return role_permissions_normalize_codes($storedCodes);
+    }
+    $defaults = permission_defaults();
+    return role_permissions_normalize_codes($defaults[$role] ?? []);
+}
+
+/** مقایسهٔ مجموعه‌ای دو فهرست کد؛ ترتیب و تکرار مهم نیست. */
+function role_permissions_same_set(array $a, array $b): bool
+{
+    $a = role_permissions_normalize_codes($a);
+    $b = role_permissions_normalize_codes($b);
+    sort($a);
+    sort($b);
+    return $a === $b;
+}
+
+/** پاک‌کردن کش درون‌درخواستی (بعد از ذخیره/بازگردانی). */
+function role_permissions_flush_cache(?string $role = null): void
+{
+    if ($role === null) {
+        $GLOBALS['__role_permission_codes'] = [];
+        $GLOBALS['__role_permission_sets'] = [];
+        return;
+    }
+    unset($GLOBALS['__role_permission_codes'][$role], $GLOBALS['__role_permission_sets'][$role]);
+}
+
+function role_permission_codes(string $role): array
+{
+    $role = permission_roles()[$role] ?? null ? $role : 'user';
+    if (!isset($GLOBALS['__role_permission_codes']) || !is_array($GLOBALS['__role_permission_codes'])) {
+        $GLOBALS['__role_permission_codes'] = [];
+    }
+    if (!array_key_exists($role, $GLOBALS['__role_permission_codes'])) {
+        $stored = [];
+        if (permission_table_ready()) {
+            try {
+                $query = db()->prepare('SELECT permission FROM role_permissions WHERE role = ?');
+                $query->execute([$role]);
+                $stored = array_map('strval', $query->fetchAll(PDO::FETCH_COLUMN));
+            } catch (Throwable $exception) {
+                $stored = [];
+            }
+        }
+        $GLOBALS['__role_permission_codes'][$role] = role_permission_effective_codes($role, $stored, role_permissions_custom($role));
+    }
+    return $GLOBALS['__role_permission_codes'][$role];
+}
+
+/**
+ * نسخهٔ هش‌ست مجوزهای نقش برای بررسی سریع user_can (به‌جای in_array خطی).
+ */
+function role_permission_set(string $role): array
+{
+    $role = permission_roles()[$role] ?? null ? $role : 'user';
+    if (!isset($GLOBALS['__role_permission_sets']) || !is_array($GLOBALS['__role_permission_sets'])) {
+        $GLOBALS['__role_permission_sets'] = [];
+    }
+    if (!array_key_exists($role, $GLOBALS['__role_permission_sets'])) {
+        $GLOBALS['__role_permission_sets'][$role] = array_fill_keys(role_permission_codes($role), true);
+    }
+    return $GLOBALS['__role_permission_sets'][$role];
+}
+
+function role_permissions_seeded(): bool
+{
+    if (!permission_table_ready()) {
+        return false;
+    }
+    try {
+        return (int) db()->query('SELECT COUNT(*) FROM role_permissions')->fetchColumn() > 0;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+/**
+ * ۱.۳۷.۷ — پیش‌فرض‌های کد دیگر داخل جدول role_permissions ریخته نمی‌شوند.
+ * دلیل: با ریختن پیش‌فرض‌ها در جدول، همهٔ نقش‌ها از همان نصب اول «دست‌خورده» حساب می‌شدند و
+ * از آن به بعد هیچ تغییر پیش‌فرضی در نسخه‌های بعدی به آن‌ها نمی‌رسید.
+ *
+ * این تابع فقط یک‌بار وضعیت نصب‌های قبلی را آشتی می‌دهد: اگر دسترسی‌های ذخیره‌شدهٔ یک نقش با
+ * پیش‌فرض کد تفاوت داشته باشد (یعنی قبلاً دستی ویرایش شده)، همان نقش «ویرایش‌شده» علامت می‌خورد
+ * تا تغییرش حفظ شود. نقش‌هایی که تفاوتی ندارند، دست‌نخورده می‌مانند و پیش‌فرض‌های آینده به آن‌ها می‌رسد.
+ */
+function role_permissions_seed(bool $force = false): void
+{
+    if (!permission_table_ready()) {
+        return;
+    }
+    if (!$force && function_exists('setting') && setting('role_permissions_reconciled') === '2026-10-07') {
+        return;
+    }
+    foreach (array_keys(permission_roles()) as $role) {
+        if ($role === 'primary_admin' || role_permissions_custom($role)) {
+            continue;
+        }
+        $stored = [];
+        try {
+            $query = db()->prepare('SELECT permission FROM role_permissions WHERE role = ?');
+            $query->execute([$role]);
+            $stored = array_map('strval', $query->fetchAll(PDO::FETCH_COLUMN));
+        } catch (Throwable $exception) {
+            $stored = [];
+        }
+        if ($stored !== [] && !role_permissions_same_set($stored, role_permission_effective_codes($role, [], false))) {
+            role_permissions_mark_custom($role, true);
+        }
+    }
+    save_setting('role_permissions_reconciled', '2026-10-07');
+}
+
+/**
+ * ذخیرهٔ دسترسی‌های یک نقش از فرم. از این پس تا وقتی «بازگردانی به پیش‌فرض» زده نشود،
+ * همین مجموعه اولویت دارد.
+ */
+function role_permissions_save(string $role, array $codes): void
+{
+    if (!isset(permission_roles()[$role])) {
+        return;
+    }
+    $valid = permission_all_codes();
+    $codes = role_permissions_normalize_codes($codes);
+    $codes = array_values(array_intersect($codes, $valid));
+    if ($role === 'primary_admin') {
+        $codes = $valid;
+    }
+    if (permission_table_ready()) {
+        $delete = db()->prepare('DELETE FROM role_permissions WHERE role = ?');
+        $delete->execute([$role]);
+        $insert = db()->prepare('INSERT IGNORE INTO role_permissions (role, permission) VALUES (?, ?)');
+        foreach ($codes as $code) {
+            $insert->execute([$role, $code]);
+        }
+    }
+    // اگر مجموعه دقیقاً همان پیش‌فرض کد شد، نقش دوباره «دست‌نخورده» می‌ماند تا پیش‌فرض‌های
+    // نسخه‌های بعدی خودکار به آن برسد.
+    role_permissions_mark_custom($role, !role_permissions_same_set($codes, role_permission_effective_codes($role, [], false)));
+    role_permissions_flush_cache($role);
+}
+
+/**
+ * ۱.۳۷.۷ — بازگرداندن یک نقش به پیش‌فرض‌های داخل کد.
+ */
+function role_permissions_reset(string $role): void
+{
+    if (!isset(permission_roles()[$role])) {
+        return;
+    }
+    $defaults = role_permission_effective_codes($role, [], false);
+    if (permission_table_ready()) {
+        $delete = db()->prepare('DELETE FROM role_permissions WHERE role = ?');
+        $delete->execute([$role]);
+        $insert = db()->prepare('INSERT IGNORE INTO role_permissions (role, permission) VALUES (?, ?)');
+        foreach ($defaults as $code) {
+            $insert->execute([$role, $code]);
+        }
+    }
+    role_permissions_mark_custom($role, false);
+    role_permissions_flush_cache($role);
+}
+
+function user_role_code(array $user): string
+{
+    return (string) ($user['role'] ?? 'user');
+}
+
+function user_is_primary_admin(array $user): bool
+{
+    return user_role_code($user) === 'primary_admin'
+        || (user_role_code($user) === 'admin' && (int) ($user['is_primary_admin'] ?? 0) === 1);
+}
+
+/**
+ * True when the user's role has the given permission.
+ * primary_admin (and admin+is_primary_admin) always pass.
+ */
+function user_can(array $user, string $permission): bool
+{
+    if (!$user) {
+        return false;
+    }
+    if (user_is_primary_admin($user)) {
+        return true;
+    }
+    return isset(role_permission_set(user_role_code($user))[$permission]);
+}
+
+function user_can_any(array $user, array $permissions): bool
+{
+    foreach ($permissions as $permission) {
+        if (user_can($user, $permission)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** Requires an authenticated user with the given permission, else 403. */
+function require_permission(string $permission): array
+{
+    $user = require_login();
+    if (!user_can($user, $permission)) {
+        http_response_code(403);
+        exit('دسترسی به این بخش مجاز نیست.');
+    }
+    return $user;
+}
+
+function require_any_permission(array $permissions): array
+{
+    $user = require_login();
+    if (!user_can_any($user, $permissions)) {
+        http_response_code(403);
+        exit('دسترسی به این بخش مجاز نیست.');
+    }
+    return $user;
+}
+
+/**
+ * Inline SVG icon for role/group cards. Keeps the panel look consistent
+ * with the organization page (no emoji).
+ */
+function permission_icon(string $key): string
+{
+    $paths = [
+        'owner' => '<path d="M12 3l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 8.7l5.4-.8z"/>',
+        'supervisor' => '<path d="M12 3l7 3v5c0 4.4-2.9 8.3-7 9.5C7.9 19.3 5 15.4 5 11V6z"/><path d="M9.5 11.5l1.8 1.8 3.4-3.6"/>',
+        'manager' => '<path d="M4 20v-1.5a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4V20"/><circle cx="12" cy="8" r="3.4"/>',
+        'inspector' => '<circle cx="11" cy="11" r="6"/><path d="M20 20l-3.6-3.6"/>',
+        'expert' => '<path d="M14.5 5.5l4 4-8.5 8.5H6v-4z"/><path d="M13 7l4 4"/>',
+        'user' => '<circle cx="12" cy="8" r="3.4"/><path d="M5 20v-1.5A4.5 4.5 0 0 1 9.5 14h5A4.5 4.5 0 0 1 19 18.5V20"/>',
+        'g-base' => '<rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/>',
+        'g-ticket' => '<path d="M4 9V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2.4 2.4 0 0 0 0 6v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2.4 2.4 0 0 0 0-6z"/><path d="M12 7v10"/>',
+        'g-services' => '<circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>',
+        'g-knowledge' => '<path d="M4 6a2 2 0 0 1 2-2h5v16H6a2 2 0 0 1-2-2z"/><path d="M20 6a2 2 0 0 0-2-2h-5v16h5a2 2 0 0 0 2-2z"/>',
+        'g-cddvd' => '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6"/>',
+        'g-traffic' => '<path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M4 21h16"/><circle cx="12" cy="9" r="2.4"/><path d="M9 16.5c0-1.7 1.3-2.8 3-2.8s3 1.1 3 2.8"/>',
+        'g-assets' => '<rect x="4" y="5" width="16" height="11" rx="2"/><path d="M2 19h20"/>',
+        'g-reports' => '<path d="M4 20V6M10 20V10M16 20v-7M22 20H2"/>',
+        'g-food' => '<path d="M5 3v8a3 3 0 0 0 6 0V3"/><path d="M8 11v10"/><path d="M17 3c-1.7 1-2.5 3-2.5 5.5S15 13 17 13v8"/>',
+        'g-org' => '<rect x="9" y="3" width="6" height="5" rx="1.4"/><rect x="3" y="16" width="6" height="5" rx="1.4"/><rect x="15" y="16" width="6" height="5" rx="1.4"/><path d="M12 8v4M6 16v-4h12v4"/>',
+        'g-system' => '<circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
+    ];
+    $path = $paths[$key] ?? $paths['user'];
+    return '<svg class="perm-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' . $path . '</svg>';
+}
+
+/** Roles treated as staff (see queue/assignee logic). */
+function staff_role_codes(): array
+{
+    return ['agent', 'manager', 'supervisor', 'admin', 'primary_admin', 'support_manager', 'inspector'];
+}
+
+function is_staff_role(?string $role): bool
+{
+    return in_array((string) $role, staff_role_codes(), true);
+}
+
+/** Roles that can administer the whole system. */
+function admin_role_codes(): array
+{
+    return ['admin', 'primary_admin'];
+}
+
+function is_admin_role(?string $role): bool
+{
+    return in_array((string) $role, admin_role_codes(), true);
+}
+
+/** Roles allowed to see/handle the whole ticket pool. */
+function global_ticket_role_codes(): array
+{
+    return ['supervisor', 'admin', 'primary_admin', 'support_manager', 'inspector'];
+}
+
+function is_global_ticket_role(?string $role): bool
+{
+    return in_array((string) $role, global_ticket_role_codes(), true);
+}
+
+/** Roles scoped to their own unit/department (not the whole pool). */
+function is_department_scoped_role(?string $role): bool
+{
+    return in_array((string) $role, ['manager', 'support_manager'], true);
+}
+
+/** Roles that may be assigned tickets (ticket handlers). */
+function assignable_role_codes(): array
+{
+    return ['agent', 'manager', 'support_manager', 'admin', 'primary_admin'];
+}
+
+function is_assignable_role(?string $role): bool
+{
+    return in_array((string) $role, assignable_role_codes(), true);
+}
