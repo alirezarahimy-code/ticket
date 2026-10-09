@@ -14,16 +14,18 @@ function food_order_internal_map(string $isoDate): array
     if ($date === null) {
         throw new RuntimeException('تاریخ نقشهٔ سفارش داخلی معتبر نیست.');
     }
+    // فقط آیتم‌ها و غذاهای فعال؛ غذای غیرفعال‌شده فیش نمی‌شود.
     $stmt = db()->prepare("SELECT o.employee_id, u.national_code, c.food_name
         FROM food_orders o
         JOIN users u ON u.id = o.employee_id
-        JOIN food_calendar_items i ON i.id = o.calendar_item_id
-        JOIN food_catalog c ON c.id = i.food_id
+        JOIN food_calendar_items i ON i.id = o.calendar_item_id AND i.active = 1
+        JOIN food_catalog c ON c.id = i.food_id AND c.active = 1
         WHERE o.food_date = ? AND o.status = 'active'
         ORDER BY o.id");
     $stmt->execute([$date]);
     $map = [];
     $nationalOwners = [];
+    $conflicts = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $national = food_order_digits($row['national_code'] ?? '');
         $food = trim((string) ($row['food_name'] ?? ''));
@@ -31,13 +33,19 @@ function food_order_internal_map(string $isoDate): array
         if ($national === '' || $food === '') {
             continue;
         }
+        // کد ملی تکراری فقط همان فرد(ها) را از فیش خارج می‌کند؛ بقیهٔ کارکنان عادی چاپ می‌شوند.
         if (isset($nationalOwners[$national]) && $nationalOwners[$national] !== $employeeId) {
-            throw new RuntimeException('کد ملی تکراری در سفارش‌های فعال وجود دارد؛ برای جلوگیری از فیش اشتباه، نقشهٔ روز ساخته نشد.');
+            $conflicts[$national] = true;
+            continue;
         }
         $nationalOwners[$national] = $employeeId;
         $map[$national] = $food;
         $map[ltrim($national, '0') ?: '0'] = $food;
     }
+    foreach (array_keys($conflicts) as $bad) {
+        unset($map[$bad], $map[ltrim($bad, '0') ?: '0']);
+    }
+    $GLOBALS['__food_order_conflicts'][$date] = array_keys($conflicts);
     return $map;
 }
 

@@ -13,10 +13,6 @@ function permission_roles(): array
 {
     return [
         'primary_admin' => 'ادمین اصلی',
-        // ۱.۳۷.۷ — نقش قدیمی «admin» به فهرست اضافه شد؛ پیش‌تر در permission_roles() نبود و
-        // به‌صورت ناخواسته فقط دسترسی‌های نقش «کاربر» را می‌گرفت، در حالی که is_admin_role() و
-        // require_admin() همه‌جا آن را ادمین کامل می‌شناسند.
-        'admin' => 'ادمین (نقش قدیمی)',
         'supervisor' => 'سوپروایز',
         'support_manager' => 'مدیر پشتیبانی',
         'inspector' => 'بازرسی',
@@ -206,7 +202,6 @@ function permission_defaults(): array
     return [
         'primary_admin' => permission_all_codes(),
         // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
-        'admin' => permission_all_codes(),
         'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
         'support_manager' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.order_close', 'settings.general', 'settings.domain', 'holidays.manage']))),
         'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),

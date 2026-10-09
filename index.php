@@ -622,9 +622,6 @@ function render_header(string $title, ?array $user = null): void
         if (food_ticket_is_allowed($user)) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'چاپ فیش غذا', 'food') . '</li>';
         }
-        if (food_ticket_is_allowed($user) && (food_ticket_is_primary_admin($user) || user_can($user, 'food.orders'))) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket&food_api=orders-import', 'ایمپورت سفارش‌های قبلی', 'food') . '</li>';
-        }
         $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
         $menuItems[] = $submenu('menu-reports', 'گزارش‌ها', 'reports', $reportLinks);
         $menuItems[] = $submenu('menu-management', 'مدیریت', 'settings', $adminLinks);
@@ -4486,7 +4483,6 @@ if ($page === 'settings') {
     if ($canManageSettingsUsers) {
         $roleMeta = [
             'primary_admin' => ['icon' => 'owner', 'desc' => 'دسترسی کامل و غیرقابل‌تغییر', 'locked' => true],
-            'admin' => ['icon' => 'owner', 'desc' => 'نقش قدیمی سامانه (پیش‌فرض: دسترسی کامل)', 'locked' => false],
             'supervisor' => ['icon' => 'supervisor', 'desc' => 'نظارت و مدیریت تیکت‌ها', 'locked' => false],
             'support_manager' => ['icon' => 'manager', 'desc' => 'مدیریت تیم پشتیبانی', 'locked' => false],
             'inspector' => ['icon' => 'inspector', 'desc' => 'بازرسی و کنترل CD/DVD', 'locked' => false],
