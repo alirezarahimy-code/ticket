@@ -68,5 +68,22 @@ foreach (['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'gove
 check('پیش‌فرض user شامل سفارش غذای خود است', in_array('foodorder.self', $userDefaults, true));
 check('پیش‌فرض user شامل ثبت تیکت است', in_array('ticket.create', $userDefaults, true));
 
+// چاپ فیش فقط برای ادمین اصلی، مدیر پشتیبانی (محدود) و بازرس (داشبورد و گروه‌ها).
+$allDefaults = permission_defaults();
+$foodOf = static fn (array $codes): array => array_values(array_filter($codes, static fn ($c) => str_starts_with((string) $c, 'food.')));
+foreach (array_keys(permission_roles()) as $roleName) {
+    if (in_array($roleName, ['primary_admin', 'support_manager', 'inspector'], true)) {
+        continue;
+    }
+    check("نقش {$roleName} هیچ کد چاپ فیش ندارد", $foodOf($allDefaults[$roleName] ?? []) === []);
+}
+$inspFood = $foodOf($allDefaults['inspector'] ?? []);
+sort($inspFood);
+check('بازرس فقط داشبورد و گروه‌های غذا را دارد', $inspFood === ['food.dashboard', 'food.groups']);
+$supportFood = $foodOf($allDefaults['support_manager'] ?? []);
+check('مدیر پشتیبانی برنامهٔ غذایی را ثبت می‌کند', in_array('food.menu_edit', $supportFood, true));
+check('مدیر پشتیبانی به تنظیمات چاپ فیش دسترسی ندارد', !in_array('food.db', $supportFood, true) && !in_array('food.printer', $supportFood, true) && !in_array('food.design', $supportFood, true) && !in_array('food.health', $supportFood, true) && !in_array('food.guest', $supportFood, true));
+check('کد food.orders از کاتالوگ حذف شده', !in_array('food.orders', permission_all_codes(), true) && !in_array('food.orders_edit', permission_all_codes(), true));
+
 echo "\nنتیجه: $pass موفق، $fail ناموفق\n";
 exit($fail === 0 ? 0 : 1);

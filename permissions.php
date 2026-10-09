@@ -135,8 +135,6 @@ function permission_catalog(): array
                 ['code' => 'food.dashboard', 'label' => 'داشبورد'],
                 ['code' => 'food.monitor', 'label' => 'پایش لحظه‌ای'],
                 ['code' => 'food.monitor_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.orders', 'label' => 'سفارش‌های غذا'],
-                ['code' => 'food.orders_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
                 ['code' => 'food.employees', 'label' => 'کارکنان'],
                 ['code' => 'food.employees_edit', 'label' => 'ویرایش'],
@@ -225,7 +223,6 @@ function permission_edit_map(): array
         'org.view' => 'org.manage',
         'food.groups' => 'food.groups_edit',
         'food.monitor' => 'food.monitor_edit',
-        'food.orders' => 'food.orders_edit',
         'food.employees' => 'food.employees_edit',
         'food.guest' => 'food.guest_edit',
         'food.db' => 'food.db_edit',
@@ -257,7 +254,6 @@ function permission_legacy_parent_edit_pairs(): array
     return [
         'food.groups' => 'food.groups_edit',
         'food.monitor' => 'food.monitor_edit',
-        'food.orders' => 'food.orders_edit',
         'food.employees' => 'food.employees_edit',
         'food.guest' => 'food.guest_edit',
         'food.db' => 'food.db_edit',
@@ -300,6 +296,34 @@ function role_permissions_strip_orphan_edits(array $codes): array
 /**
  * Default permissions per role. primary_admin implicitly has all.
  */
+/** نقش‌هایی که به ماژول چاپ فیش دسترسی دارند؛ بقیه هیچ کد food.* ندارند. */
+function print_fish_allowed_roles(): array
+{
+    return ['primary_admin', 'support_manager', 'inspector'];
+}
+
+/** پیش‌فرض کدهای چاپ فیش برای نقش‌های غیرادمین مجاز. ادمین اصلی همهٔ کدها را دارد. */
+function print_fish_role_targets(): array
+{
+    return [
+        // مدیر پشتیبانی: داشبورد، پایش، گزارش، کارکنان، گروه‌ها، برنامهٔ غذایی و بستن روز؛ بدون تنظیمات.
+        'support_manager' => ['food.dashboard', 'food.monitor', 'food.monitor_edit', 'food.reports', 'food.employees', 'food.employees_edit', 'food.groups', 'food.groups_edit', 'food.groups_override', 'food.menu', 'food.menu_edit', 'food.order_close'],
+        // بازرس: فقط داشبورد و مشاهدهٔ گروه‌های غذا.
+        'inspector' => ['food.dashboard', 'food.groups'],
+    ];
+}
+
+/** کدهای چاپ فیش یک نقش را با پیش‌فرض‌های مجاز جایگزین می‌کند (ادمین اصلی دست‌نخورده). */
+function print_fish_role_codes(string $role, array $codes): array
+{
+    if ($role === 'primary_admin') {
+        return $codes;
+    }
+    $kept = array_values(array_filter($codes, static fn ($c): bool => !str_starts_with((string) $c, 'food.')));
+    $targets = print_fish_role_targets();
+    return array_values(array_unique(array_merge($kept, $targets[$role] ?? [])));
+}
+
 function permission_defaults(): array
 {
     $defaults = permission_defaults_raw();
@@ -317,6 +341,8 @@ function permission_defaults(): array
                 $codes[] = $legacyChild;
             }
         }
+        // بعد از افزودن ویرایش‌های قدیمی هم فیلتر می‌شود تا چیزی از چاپ فیش به نقش‌های غیرمجاز نرسد.
+        $codes = print_fish_role_codes($role, $codes);
         $defaults[$role] = array_values(array_unique($codes));
     }
     return $defaults;
@@ -442,6 +468,28 @@ function role_permissions_migrate_once(): void
     $done = true;
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
+    }
+    if (setting('print_fish_roles_v1') !== '1') {
+        // چاپ فیش فقط برای نقش‌های مجاز. نقش‌های دست‌نخورده از پیش‌فرض تازه می‌گیرند؛
+        // نقش‌های ویرایش‌شده فقط کدهای food.* غیرمجاز را از دست می‌دهند.
+        try {
+            db()->exec("DELETE FROM role_permissions WHERE permission IN ('food.orders', 'food.orders_edit')");
+            foreach (array_keys(permission_roles()) as $role) {
+                if ($role === 'primary_admin') {
+                    continue;
+                }
+                $allowed = in_array($role, print_fish_allowed_roles(), true);
+                if (!role_permissions_custom($role)) {
+                    db()->prepare('DELETE FROM role_permissions WHERE role = ?')->execute([$role]);
+                } elseif (!$allowed) {
+                    db()->prepare("DELETE FROM role_permissions WHERE role = ? AND permission LIKE 'food.%'")->execute([$role]);
+                }
+            }
+            save_setting('print_fish_roles_v1', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // دفعهٔ بعد دوباره تلاش می‌شود.
+        }
     }
     if (setting('user_defaults_narrowed_v1') !== '1') {
         // ردیف‌های ذخیره‌شدهٔ نقش user هم باید همین تغییر را ببینند. اگر ادمین آن را دستی تنظیم کرده باشد، دست نمی‌خورد.
@@ -602,6 +650,10 @@ function role_permissions_seed(bool $force = false): void
  */
 function role_permissions_save(string $role, array $codes): void
 {
+    // چاپ فیش فقط برای نقش‌های مجاز است.
+    if (!in_array($role, print_fish_allowed_roles(), true)) {
+        $codes = array_values(array_filter($codes, static fn ($c): bool => !str_starts_with((string) $c, 'food.')));
+    }
     if (!isset(permission_roles()[$role])) {
         return;
     }

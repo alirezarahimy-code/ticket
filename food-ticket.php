@@ -57,7 +57,7 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -72,7 +72,7 @@ function food_ticket_route_edit_permission(string $route): ?string
         return 'food.monitor_edit';
     }
     if ($route === 'orders-import') {
-        return 'food.orders_edit';
+        return 'food.db_edit';
     }
     if (in_array($route, ['employees', 'employees-import'], true)) {
         return 'food.employees_edit';
@@ -142,11 +142,11 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'dashboard' => 'food.dashboard',
         'monitoring' => 'food.monitor',
         'absent' => 'food.reports',
-        'orders' => 'food.orders',
+        'orders' => 'food.dashboard',
         'reports/export' => 'food.reports',
         'employees' => 'food.employees',
         'employees-import' => 'food.employees',
-        'orders-import' => 'food.orders',
+        'orders-import' => 'food.db',
         'employees-sample' => 'food.employees',
         'guest-cards' => 'food.guest',
         'food-groups' => 'food.groups',

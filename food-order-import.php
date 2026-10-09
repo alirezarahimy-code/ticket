@@ -376,7 +376,8 @@ function food_order_import_handle(array $user): never
 {
     $isPost = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
     $isPrimary = function_exists('food_ticket_is_primary_admin') ? food_ticket_is_primary_admin($user) : false;
-    $canUse = $isPrimary || (function_exists('user_can') && user_can($user, 'food.orders_edit'));
+    // ایمپورت یک‌باره است و فقط برای ادمین اصلی.
+    $canUse = $isPrimary;
     if (!$canUse) {
         http_response_code(403);
         exit('دسترسی به ایمپورت سفارش‌ها ندارید.');

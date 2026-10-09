@@ -4605,6 +4605,11 @@ if ($page === 'settings') {
                 echo '<div class="perm-search"><input type="search" class="perm-search-input" data-perm-search placeholder="جست‌وجوی دسترسی یا گروه..."></div>';
                 echo '<div class="groups-container">';
                 foreach ($catalog as $group) {
+                    // ماژول چاپ فیش فقط برای نقش‌های مجاز نمایش داده می‌شود.
+                    $groupAllFood = $group['items'] !== [] && array_reduce($group['items'], static fn (bool $carry, array $item): bool => $carry && str_starts_with((string) $item['code'], 'food.'), true);
+                    if ($groupAllFood && !in_array($roleCode, print_fish_allowed_roles(), true)) {
+                        continue;
+                    }
                     $groupCodes = array_map(static fn (array $item): string => $item['code'], $group['items']);
                     $checkedCount = count(array_intersect($groupCodes, $active));
                     $isEmpty = $checkedCount === 0;
