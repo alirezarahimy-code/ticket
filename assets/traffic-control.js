@@ -138,3 +138,26 @@
     input.addEventListener('input', apply);
     apply();
 }());
+
+(function () {
+    'use strict';
+    var alertBox = document.querySelector('[data-focus-form], #traffic-form-error');
+    if (!alertBox) {
+        return;
+    }
+    var formId = alertBox.getAttribute('data-focus-form');
+    var name = alertBox.getAttribute('data-focus-field');
+    var form = formId ? document.getElementById(formId) : null;
+    var field = form && name ? form.querySelector('[name="' + name + '"]') : null;
+    if (alertBox.scrollIntoView) {
+        alertBox.scrollIntoView({ block: 'center' });
+    }
+    if (field) {
+        field.focus();
+        if (field.select) {
+            field.select();
+        }
+    } else if (alertBox.focus) {
+        alertBox.focus();
+    }
+})();
