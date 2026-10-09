@@ -141,10 +141,8 @@ $lines[] = '── ۲) کدهای تزئینی (بی‌استفاده در کد)
 // این فهرست عمدی است: کدهایی که فقط «برچسب» هستند و در کد جایی استفاده نمی‌شوند.
 // افزودن کد بی‌اثر جدید یا وصل‌کردن یکی از این‌ها باید این فهرست را آگاهانه به‌روز کند.
 $knownUnused = [
-    'dash.view', 'search.global', 'notif.view',
-    'ticket.create', 'ticket.view_own', 'ticket.view_unit', 'ticket.view_all', 'ticket.reply', 'ticket.edit', 'ticket.bulk', 'ticket.rate',
-    'supervisor.decide', 'supervisor.reopen',
-    'assets.own_unit', 'asset.edit', 'asset.remote_extract',
+    // ۱.۳۷.۸: کدهایی که به بخش‌های واقعی وصل شدند از این فهرست خارج شدند.
+    'dash.view', 'ticket.reply', 'ticket.rate', 'ticket.edit', 'assets.own_unit', 'asset.remote_extract', 'foodorder.proxy',
 ];
 $root = APP_ROOT;
 $sourceFiles = [];

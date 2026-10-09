@@ -327,3 +327,88 @@ function org_restore_snapshot(array $snapshot): void
     }
     db()->commit();
 }
+
+/**
+ * ۱.۳۷.۸ — نقش خودکار بر اساس سمت در چارت سازمانی.
+ * هر کاربری که مدیر (یا عضو مدیریت) یک معاونت/مدیریت/واحد فعال باشد، اگر نقشش «کاربر» یا «کارشناس» باشد
+ * به «مدیر» تبدیل می‌شود. وقتی سمت برداشته شود و نقش را همین سازوکار تغییر داده باشد، به نقش قبلی برمی‌گردد.
+ * نقش‌های استثنا (بازرسی، سوپروایزر، مدیر پشتیبانی، ادمین اصلی) هرگز توسط این سازوکار تغییر نمی‌کنند.
+ */
+function org_position_unit_types(): array
+{
+    return ['ceo', 'deputy', 'department'];
+}
+
+function org_exempt_roles(): array
+{
+    return ['supervisor', 'support_manager', 'inspector', 'primary_admin', 'admin'];
+}
+
+function org_ensure_role_sync_columns(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    $columns = ['org_auto_role TINYINT(1) NOT NULL DEFAULT 0', 'org_prev_role VARCHAR(20) NULL'];
+    foreach ($columns as $column) {
+        try {
+            db()->exec('ALTER TABLE users ADD COLUMN IF NOT EXISTS ' . $column);
+        } catch (Throwable $ignored) {
+            try {
+                db()->exec('ALTER TABLE users ADD COLUMN ' . $column);
+            } catch (Throwable $alsoIgnored) {
+            }
+        }
+    }
+}
+
+/** @return int[] شناسهٔ کاربرانی که در حال حاضر سمت مدیریتی فعال دارند. */
+function org_position_user_ids(): array
+{
+    $types = "'" . implode("','", org_position_unit_types()) . "'";
+    $ids = [];
+    foreach (db()->query("SELECT manager_user_id FROM org_units WHERE is_active = 1 AND manager_user_id > 0 AND unit_type IN ($types)")->fetchAll(PDO::FETCH_COLUMN) as $id) {
+        $ids[] = (int) $id;
+    }
+    try {
+        $rows = db()->query("SELECT m.user_id FROM org_unit_managers m JOIN org_units u ON u.id = m.unit_id WHERE u.is_active = 1 AND u.unit_type IN ($types)")->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($rows as $id) {
+            $ids[] = (int) $id;
+        }
+    } catch (Throwable $ignored) {
+    }
+    return array_values(array_unique(array_filter($ids, static fn (int $v): bool => $v > 0)));
+}
+
+/** همگام‌سازی نقش مدیر با سمت‌های چارت سازمانی. */
+function org_sync_position_roles(): void
+{
+    if (db()->inTransaction()) {
+        return;
+    }
+    org_ensure_schema();
+    org_ensure_role_sync_columns();
+    $positions = org_position_user_ids();
+    $exempt = "'" . implode("','", org_exempt_roles()) . "'";
+    $placeholders = $positions ? implode(',', array_fill(0, count($positions), '?')) : '';
+
+    // ۱) ارتقا: کاربر/کارشناس با سمت مدیریتی → مدیر
+    if ($positions) {
+        $promote = db()->prepare("UPDATE users SET org_prev_role = role, org_auto_role = 1, role = 'manager' WHERE id IN ($placeholders) AND role IN ('user','agent') AND role NOT IN ($exempt)");
+        $promote->execute($positions);
+    }
+
+    // ۲) بازگردانی: کسانی که همین سازوکار مدیر کرده و دیگر سمت ندارند
+    $sql = "SELECT id, org_prev_role FROM users WHERE org_auto_role = 1 AND role = 'manager'";
+    if ($positions) {
+        $sql .= " AND id NOT IN ($placeholders)";
+    }
+    $stmt = db()->prepare($sql);
+    $stmt->execute($positions);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $previous = in_array((string) $row['org_prev_role'], ['user', 'agent'], true) ? (string) $row['org_prev_role'] : 'user';
+        db()->prepare('UPDATE users SET role = ?, org_auto_role = 0, org_prev_role = NULL WHERE id = ?')->execute([$previous, (int) $row['id']]);
+    }
+}

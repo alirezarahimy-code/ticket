@@ -390,8 +390,16 @@ function fetch_ticket(int $id): ?array
 
 function can_view_ticket(array $ticket, array $user): bool
 {
-    if ((int) $ticket['requester_id'] === (int) $user['id'] || is_global_ticket_role($user['role'])) {
+    // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ تیکت از سطوح دسترسی نقش‌ها خوانده می‌شود:
+    // ticket.view_own (تیکت‌های خودم)، ticket.view_unit (واحد/زیرمجموعه)، ticket.view_all (همهٔ تیکت‌ها).
+    if ((int) $ticket['requester_id'] === (int) $user['id'] && user_can($user, 'ticket.view_own')) {
         return true;
+    }
+    if (is_global_ticket_role($user['role']) && user_can($user, 'ticket.view_all')) {
+        return true;
+    }
+    if (!user_can($user, 'ticket.view_unit')) {
+        return false;
     }
     if ($user['role'] === 'agent') {
         return (string) ($ticket['service_group'] ?? '') === user_service_group($user);
@@ -610,22 +618,28 @@ function render_header(string $title, ?array $user = null): void
         }
         $menuItems = [
             '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
-            '<li>' . $menuLink('index.php?page=new-ticket', 'تیکت', 'ticket') . '</li>',
         ];
+        if (user_can($user, 'ticket.create')) {
+            $menuItems[] = '<li>' . $menuLink('index.php?page=new-ticket', 'تیکت', 'ticket') . '</li>';
+        }
         if (user_can($user, 'cddvd.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=cd-dvd', 'کنترل CD/DVD', 'disc') . '</li>';
         }
         if (user_can($user, 'traffic.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=traffic-control', 'کنترل تردد', 'traffic') . '</li>';
         }
-        $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
+        if (user_can($user, 'foodorder.self')) {
+            $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
+        }
         if (food_ticket_is_allowed($user)) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'چاپ فیش غذا', 'food') . '</li>';
         }
         $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
         $menuItems[] = $submenu('menu-reports', 'گزارش‌ها', 'reports', $reportLinks);
         $menuItems[] = $submenu('menu-management', 'مدیریت', 'settings', $adminLinks);
-        $menuItems[] = '<li class="notification-item"><a class="notification-link" href="index.php?page=notifications">' . $menuIcon('bell') . '<span>اعلان‌ها</span>' . ($notificationCount > 0 ? '<b>' . (int) $notificationCount . '</b>' : '') . '</a></li>';
+        if (user_can($user, 'notif.view')) {
+    $menuItems[] = '<li class="notification-item"><a class="notification-link" href="index.php?page=notifications">' . $menuIcon('bell') . '<span>اعلان‌ها</span>' . ($notificationCount > 0 ? '<b>' . (int) $notificationCount . '</b>' : '') . '</a></li>';
+        }
         $menuItems[] = '<li class="logout"><form method="post" class="logout-form">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">' . $menuIcon('logout') . '<span>خروج</span></button></form></li>';
         echo '<div class="header-tools"><form class="global-search header-search" method="get"><input type="hidden" name="page" value="search"><input name="q" placeholder="جست‌وجو در صفحه‌ها، تیکت، دارایی یا دانش‌نامه"></form><a class="profile-shortcut" href="index.php?page=profile#appearance">🎨 انتخاب تم</a><a class="profile-shortcut" href="index.php?page=profile">پروفایل: ' . e((string) $user['username']) . '</a></div>';
         echo '<nav class="navbar" aria-label="ناوبری اصلی"><ul class="menu">' . implode('', $menuItems) . '</ul></nav>';
@@ -693,6 +707,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
 
 $user = current_user();
 $page = (string) ($_GET['page'] ?? ($user ? 'dashboard' : 'login'));
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($page, ['organization', 'settings'], true)) {
+    register_shutdown_function(static function (): void {
+        try {
+            org_sync_position_roles();
+        } catch (Throwable $ignored) {
+        }
+    });
+}
 
 if ($user && function_exists('activity_log_view')) {
     activity_log_view($page);
@@ -1109,6 +1131,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         if ($action === 'supervisor_decision') {
             $supervisor = require_permission('supervisor.panel');
+            if (!user_can($supervisor, 'supervisor.decide')) {
+                throw new RuntimeException('دسترسی تأیید یا برگشت تیکت برای نقش شما فعال نیست.');
+            }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $decision = valid_choice(post_value('decision'), ['approve', 'rework'], 'rework');
             $ticket = fetch_ticket($ticketId);
@@ -1152,6 +1177,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'supervisor_reopen') {
             $supervisor = require_permission('supervisor.panel');
+            if (!user_can($supervisor, 'supervisor.reopen')) {
+                throw new RuntimeException('دسترسی بازگشایی تیکت برای نقش شما فعال نیست.');
+            }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
             if (!$ticket || $ticket['status'] !== 'closed') {
@@ -1433,6 +1461,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'save_inventory_form') {
             $inventoryUser = require_permission('inventory.view');
+            if (!user_can($inventoryUser, 'asset.edit')) {
+                throw new RuntimeException('ویرایش شناسنامهٔ دارایی برای نقش شما فعال نیست.');
+            }
             $assetId = (int) ($_POST['asset_id'] ?? 0);
             [$assetScope, $assetParams] = asset_scope($inventoryUser);
             $assetQuery = db()->prepare('SELECT * FROM assets a ' . ($assetScope ? $assetScope . ' AND a.id = ?' : 'WHERE a.id = ?') . ' LIMIT 1');
@@ -2125,6 +2156,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'bulk_update_tickets') {
             $queueUser = require_permission('queue.view');
+            if (!user_can($queueUser, 'ticket.bulk')) {
+                throw new RuntimeException('عملیات گروهی روی تیکت‌ها برای نقش شما فعال نیست.');
+            }
             $status = valid_choice(post_value('bulk_status'), ['in_progress', 'waiting_user', 'resolved'], 'in_progress');
             $ticketIds = array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['ticket_ids'] ?? [])))));
             if (!$ticketIds) {
@@ -2437,7 +2471,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->prepare('UPDATE users SET role = "manager", org_unit_id = ? WHERE id = ? AND role IN ("user", "agent")')->execute([$unitId, $managerId]);
             }
             if ($isPrimary === 1 && $managerId > 0) {
-                db()->prepare('UPDATE users SET role = "admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$managerId]);
+                db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$managerId]);
             }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot);
             save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'manager' => $managerId]);
@@ -2498,7 +2532,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = NULL, role = CASE WHEN role IN ("user", "agent") THEN "manager" ELSE role END WHERE id = ?')->execute([(int) $target['id'], $userId]);
             }
             if ((int) ($target['is_primary_admin'] ?? 0) === 1) {
-                db()->prepare('UPDATE users SET role = "admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$userId]);
+                db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$userId]);
             }
             db_commit('index.php');
             org_record_undo('انتصاب مدیر سازمان', $orgUndoSnapshot);
@@ -2709,7 +2743,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->prepare('UPDATE users SET role = "manager", org_unit_id = ? WHERE id = ? AND role IN ("user", "agent")')->execute([$unitId, $managerId]);
             }
             if ($isPrimary === 1 && $managerIds !== []) {
-                db()->prepare('UPDATE users SET role = "admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$managerIds[0]]);
+                db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$managerIds[0]]);
             }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot);
             save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'managers' => $managerIds]);
@@ -2822,19 +2856,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->beginTransaction();
             try {
                 foreach (array_diff($supervisors, $oldSupervisors) as $id) {
-                    db()->prepare('UPDATE users SET role = "supervisor" WHERE id = ? AND role <> "admin"')->execute([$id]);
+                    db()->prepare('UPDATE users SET role = "supervisor" WHERE id = ? AND role NOT IN ("admin", "primary_admin")')->execute([$id]);
                 }
                 foreach (array_diff($oldSupervisors, $supervisors) as $id) {
                     db()->prepare('UPDATE users SET role = "user" WHERE id = ? AND role = "supervisor"')->execute([$id]);
                 }
                 foreach (array_diff($itExperts, $oldExperts) as $id) {
-                    db()->prepare('UPDATE users SET role = "admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$id]);
+                    db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$id]);
                 }
                 foreach (array_diff($oldExperts, $itExperts) as $id) {
                     db()->prepare('UPDATE users SET is_primary_admin = 0 WHERE id = ?')->execute([$id]);
-                    db()->prepare('UPDATE users SET role = "user" WHERE id = ? AND role = "admin"')->execute([$id]);
+                    db()->prepare('UPDATE users SET role = "user" WHERE id = ? AND role IN ("admin", "primary_admin")')->execute([$id]);
                 }
-                $primaryCount = (int) db()->query('SELECT COUNT(*) FROM users WHERE role = "admin" AND is_primary_admin = 1 AND is_active = 1')->fetchColumn();
+                $primaryCount = (int) db()->query('SELECT COUNT(*) FROM users WHERE role = "primary_admin" AND is_primary_admin = 1 AND is_active = 1')->fetchColumn();
                 if ($primaryCount < 1) {
                     throw new RuntimeException('حداقل یک ادمین اصلی باید باقی بماند.');
                 }
@@ -3116,6 +3150,13 @@ if ($page === 'food-ticket') {
     exit;
 }
 
+if ($page === 'food-order' && $user && !user_can($user, 'foodorder.self')) {
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
 if ($page === 'food-order') {
     food_order_render_page($user ?? []);
 }
@@ -3343,6 +3384,13 @@ if ($page === 'knowledge') {
     exit;
 }
 
+if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
 if ($page === 'notifications') {
     $notificationUser = require_login();
     $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ? ORDER BY n.created_at DESC LIMIT 100');
@@ -3511,6 +3559,13 @@ if ($page === 'backup') {
     exit;
 }
 
+if ($page === 'search' && $user && !user_can($user, 'search.global')) {
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
 if ($page === 'search') {
     $searchUser = require_login();
     $searchTerm = trim((string) ($_GET['q'] ?? ''));
@@ -3649,6 +3704,13 @@ implode('', array_map(static fn ($y) => '<option value="' . $y . '"' . ($y === (
     exit;
 }
 
+if ($page === 'new-ticket' && $user && !user_can($user, 'ticket.create')) {
+    http_response_code(403);
+    render_header('عدم دسترسی', $user);
+    echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
+    render_footer();
+    exit;
+}
 if ($page === 'new-ticket') {
     $cdDvdRequestRecord = null;
     $subjectDefault = '';
