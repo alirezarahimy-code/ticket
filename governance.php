@@ -171,7 +171,7 @@ $user = require_staff();
 // ۱.۳۷.۷ — هم‌راستا با منو و کاتالوگ: ورود به «تغییر و مشکل» گذشته از نقش کارمندی، کد دسترسی هم
 // می‌خواهد. پیش‌فرض همهٔ نقش‌های کارمندی این کد را دارند؛ فقط اگر ادمین اصلی آن را از نقشی
 // بگیرد اثر می‌کند.
-if (function_exists('user_can') && !user_can($user, 'governance.manage')) {
+if (function_exists('user_can') && !user_can($user, 'governance.view')) {
     http_response_code(403);
     exit('دسترسی به بخش تغییر و مشکل برای نقش شما مجاز نیست.');
 }
@@ -195,6 +195,11 @@ if ($governanceTicketColumns) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // هر کار ثبتی (ایجاد/ویرایش/ارسال/تصمیم/انتقال/ارتباط) فقط با کد ویرایش «تغییر و مشکل»
+    if (function_exists('user_can') && !user_can($user, 'governance.manage')) {
+        http_response_code(403);
+        exit('دسترسی ویرایش تغییر و مشکل برای نقش شما مجاز نیست.');
+    }
     require_csrf();
     $action = gov_post('action');
     try {

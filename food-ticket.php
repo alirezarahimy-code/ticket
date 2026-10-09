@@ -62,6 +62,47 @@ function food_ticket_is_allowed(array $user): bool
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
 
+/** کد ویرایش لازم برای مسیرهای نوشتن هر بخش (نگاشت مسیر ← کد ویرایش). */
+function food_ticket_route_edit_permission(string $route): ?string
+{
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)) {
+        return 'food.groups_edit';
+    }
+    if (in_array($route, ['process', 'delivery', 'cleanup-source_row', 'reprint-errors'], true)) {
+        return 'food.monitor_edit';
+    }
+    if ($route === 'orders-import') {
+        return 'food.orders_edit';
+    }
+    if (in_array($route, ['employees', 'employees-import'], true)) {
+        return 'food.employees_edit';
+    }
+    if ($route === 'guest-cards') {
+        return 'food.guest_edit';
+    }
+    if (in_array($route, ['config', 'database-file', 'test-connections', 'diag-source_row-delete', 'browse-file', 'browse-folder', 'browse-list'], true)
+        || (function_exists('food_ticket_legacy_key') && $route === food_ticket_legacy_key('route_test'))
+        || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route))) {
+        return 'food.db_edit';
+    }
+    if (in_array($route, ['printers', 'test-print', 'calibrate-print', 'print-align', 'print-diag'], true)) {
+        return 'food.printer_edit';
+    }
+    if ($route === 'template' || $route === 'templates' || str_starts_with($route, 'templates/')) {
+        return 'food.design_edit';
+    }
+    if ($route === 'self-test') {
+        return 'food.health_edit';
+    }
+    return null;
+}
+
+/** این مسیرها حتی با GET کار ثبتی/مخرب انجام می‌دهند، پس همیشه کد ویرایش می‌خواهند. */
+function food_ticket_route_edit_always(string $route): bool
+{
+    return $route === 'diag-source_row-delete';
+}
+
 function food_ticket_route_allowed(array $user, string $route): bool
 {
     if (str_starts_with($route, 'food-menu/')) {
@@ -76,6 +117,10 @@ function food_ticket_route_allowed(array $user, string $route): bool
         };
         if ($menuPermission === null || !function_exists('user_can')) {
             return false;
+        }
+        // ذخیرهٔ کاتالوگ و روز (نوشتن) فقط با ویرایش برنامه غذایی.
+        if (in_array($route, ['food-menu/catalog', 'food-menu/day'], true) && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) !== 'GET') {
+            return user_can($user, 'food.menu_edit');
         }
         if ($menuPermission === 'food.menu|food.order_close') {
             return user_can($user, 'food.menu') || user_can($user, 'food.order_close');
@@ -135,10 +180,14 @@ function food_ticket_route_allowed(array $user, string $route): bool
         (function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('route_test') : 'test-source') => 'food.db',
         'cleanup-source_row' => 'food.monitor',
     ][$route] ?? null;
-    // «گروه‌های غذا»: مشاهده با کد بخش (food.groups)، هر کار ثبتی با کد «ویرایش» (food.groups_edit).
-    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)
-        && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) !== 'GET') {
-        $routePermission = 'food.groups_edit';
+    // مشاهده با کد بخش؛ هر کار ثبتی/مخرب با کد «ویرایش» همان بخش.
+    $routeEdit = food_ticket_route_edit_permission($route);
+    // فقط مسیرهایی که در نگاشت دسترسی‌اند تغییر می‌کنند؛ مسیر ناشناخته همچنان بسته می‌ماند.
+    if ($routeEdit !== null && $routePermission !== null) {
+        $routeIsRead = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET';
+        if (!$routeIsRead || food_ticket_route_edit_always($route)) {
+            $routePermission = $routeEdit;
+        }
     }
     return $routePermission !== null && user_can($user, $routePermission);
 }
@@ -4297,7 +4346,7 @@ function food_ticket_render_page(array $user): void
     $bootstrap = function_exists('food_ticket_web_host_bootstrap')
         ? food_ticket_web_host_bootstrap($apiBase, csrf_token(), is_array($brand) ? $brand : [], (string) ($user['role'] ?? ''), food_ticket_is_primary_admin($user), $nonce, function_exists('db_install_state') ? db_install_state() : null)
         : '';
-    $canMenuEdit = function_exists('user_can') ? user_can($user, 'food.menu') : food_ticket_is_primary_admin($user);
+    $canMenuEdit = function_exists('user_can') ? user_can($user, 'food.menu_edit') : food_ticket_is_primary_admin($user);
     $canOrderClose = function_exists('user_can') ? user_can($user, 'food.order_close') : food_ticket_is_primary_admin($user);
     $canFoodMenu = $canMenuEdit || $canOrderClose;
     // دسترسی هر بخش پنل از روی کدهای food.* (ادمین اصلی همه‌چیز). سرور هم هر درخواست را جداگانه کنترل می‌کند.

@@ -587,13 +587,13 @@ function render_header(string $title, ?array $user = null): void
         }
         // ۱.۳۷.۷ — «تغییر و مشکل» فقط برای کارمندان: پیش‌تر این آیتم در منوی کاربران عادی هم
         // دیده می‌شد، ولی خود صفحه با require_staff() رد می‌کرد.
-        if (user_can($user, 'governance.manage') && is_staff_role((string) $user['role'])) {
+        if (user_can($user, 'governance.view') && is_staff_role((string) $user['role'])) {
             $supportLinks[] = $submenuLink('governance.php', 'تغییر و مشکل');
         }
         if (user_can($user, 'supervisor.panel')) {
             $supportLinks[] = $submenuLink('index.php?page=supervisor', 'پنل سوپروایزر');
         }
-        if (user_can($user, 'ola.manage')) {
+        if (user_can($user, 'ola.view')) {
             $supportLinks[] = $submenuLink('ola.php', 'OLA');
         }
         $reportLinks = [];
@@ -613,7 +613,7 @@ function render_header(string $title, ?array $user = null): void
         if (user_can_any($user, ['settings.general', 'settings.domain', 'settings.users'])) {
             $adminLinks[] = $submenuLink('index.php?page=settings', 'تنظیمات');
         }
-        if (user_can($user, 'backup.manage')) {
+        if (user_can($user, 'backup.view')) {
             $adminLinks[] = $submenuLink('index.php?page=backup', 'پشتیبان‌گیری');
         }
         $menuItems = [
@@ -3092,9 +3092,9 @@ $pagePermissions = [
     'traffic-control' => 'traffic.view',
     'traffic-control-print' => 'traffic.view',
     'knowledge' => 'knowledge.view',
-    'backup' => 'backup.manage',
+    'backup' => 'backup.view',
     'organization' => 'org.view',
-    'holidays' => 'holidays.manage',
+    'holidays' => 'holidays.view',
     'services' => 'services.view',
     // 'food-ticket' — به‌جای یک کد تکی، با food_ticket_is_allowed() سنجیده می‌شود (پایین‌تر).
 ];
@@ -3533,7 +3533,7 @@ if ($page === 'activity-log') {
 }
 
 if ($page === 'backup') {
-    $backupUser = require_permission('backup.manage');
+    $backupUser = require_permission('backup.view');
     $runs = backup_runs();
     $databaseName = (string) cfg('database.name', 'persian_ticketing');
     $dumpAvailable = backup_mysql_binary('mysqldump') !== null;
@@ -3683,7 +3683,7 @@ if ($page === 'queue') {
 }
 
 if ($page === 'holidays') {
-    $holidayAdmin = require_permission('holidays.manage');
+    $holidayAdmin = require_permission('holidays.view');
     $holidayQuery = db()->query('SELECT h.*, u.full_name FROM holidays h LEFT JOIN users u ON u.id = h.created_by ORDER BY h.holiday_date');
     render_header('تقویم SLA', $holidayAdmin);
      echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section><section class="card form-card"><h2>افزودن تعطیلی</h2><form method="post"><input type="hidden" name="action" value="add_holiday">' . csrf_field() . '<div class="form-grid"><label class="date-picker-field">تاریخ جلالی<div class="jalali-picker" data-jalali-picker><input id="holiday-date" name="holiday_date" required autocomplete="off" placeholder="۱۴۰۵/۰۱/۰۱"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div><small class="field-help">پنج‌شنبه و جمعه در تقویم غیرفعال هستند و خودکار تعطیل محسوب می‌شوند.</small></label><label>عنوان تعطیلی<input name="holiday_title" required placeholder="نوروز"></label></div><button class="button" type="submit">افزودن به تقویم</button></form><div class="fixed-holidays"><span class="tag">تعطیلی ثابت</span><b>پنج‌شنبه و جمعه</b><small>در محاسبه SLA به‌صورت خودکار از روزهای کاری حذف می‌شوند.</small></div><hr><h2>تقویم سالانه — تیک روز تعطیل</h2>

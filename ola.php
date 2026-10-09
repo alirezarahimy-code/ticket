@@ -29,7 +29,7 @@ function ola_footer(): void
 // ۱.۳۷.۷ — این صفحه با require_admin() باز می‌شد، اما منوی برنامه و کاتالوگ دسترسی‌ها بر پایهٔ
 // کد «ola.manage» بود؛ هر دو یکی شد (ادمین اصلی همهٔ کدها را دارد و کد از تنظیمات ← نقش‌ها
 // قابل دادن/گرفتن است).
-$user = require_permission('ola.manage');
+$user = require_permission('ola.view');
 $tableCheck = db()->query("SHOW TABLES LIKE 'ola_policies'");
 if (!$tableCheck->fetchColumn()) {
     ola_header('سیاست‌های OLA', $user);
@@ -39,6 +39,11 @@ if (!$tableCheck->fetchColumn()) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ذخیره/تغییر وضعیت سیاست‌ها فقط با کد ویرایش OLA
+    if (!user_can($user, 'ola.manage')) {
+        http_response_code(403);
+        exit('دسترسی ویرایش OLA برای نقش شما مجاز نیست.');
+    }
     require_csrf();
     try {
         $action = ola_post('action');

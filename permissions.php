@@ -134,18 +134,27 @@ function permission_catalog(): array
             'items' => [
                 ['code' => 'food.dashboard', 'label' => 'داشبورد'],
                 ['code' => 'food.monitor', 'label' => 'پایش لحظه‌ای'],
+                ['code' => 'food.monitor_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.orders', 'label' => 'سفارش‌های غذا'],
+                ['code' => 'food.orders_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
                 ['code' => 'food.employees', 'label' => 'کارکنان'],
+                ['code' => 'food.employees_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.guest', 'label' => 'کارت مهمان'],
+                ['code' => 'food.guest_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.groups', 'label' => 'گروه‌های غذا (نماینده با L_UID و غیبت روزانه)'],
                 ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
                 ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
+                ['code' => 'food.db_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
+                ['code' => 'food.printer_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.design', 'label' => 'طراحی فیش'],
+                ['code' => 'food.design_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.health', 'label' => 'سلامت سیستم'],
-                ['code' => 'food.menu', 'label' => 'مدیریت بانک غذا و برنامه غذایی'],
+                ['code' => 'food.health_edit', 'label' => 'ویرایش'],
+                ['code' => 'food.menu', 'label' => 'برنامه غذایی و بانک غذا'],
+                ['code' => 'food.menu_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز و مشاهدهٔ همهٔ سفارش‌ها'],
             ],
         ],
@@ -173,10 +182,14 @@ function permission_catalog(): array
                 ['code' => 'settings.domain', 'label' => 'اتصال دامین و اسکن دامنه'],
                 ['code' => 'settings.users', 'label' => 'مدیریت کاربران و دسترسی‌ها'],
                 ['code' => 'settings.key_roles', 'label' => 'نقش‌های کلیدی'],
-                ['code' => 'backup.manage', 'label' => 'پشتیبان‌گیری/بازگردانی'],
-                ['code' => 'ola.manage', 'label' => 'تنظیمات OLA/SLA'],
-                ['code' => 'governance.manage', 'label' => 'تغییر و مشکل'],
-                ['code' => 'holidays.manage', 'label' => 'مدیریت تعطیلات'],
+                ['code' => 'backup.view', 'label' => 'پشتیبان‌گیری/بازگردانی'],
+                ['code' => 'backup.manage', 'label' => 'ویرایش'],
+                ['code' => 'ola.view', 'label' => 'تنظیمات OLA/SLA'],
+                ['code' => 'ola.manage', 'label' => 'ویرایش'],
+                ['code' => 'governance.view', 'label' => 'تغییر و مشکل'],
+                ['code' => 'governance.manage', 'label' => 'ویرایش'],
+                ['code' => 'holidays.view', 'label' => 'مدیریت تعطیلات'],
+                ['code' => 'holidays.manage', 'label' => 'ویرایش'],
             ],
         ],
     ];
@@ -207,6 +220,39 @@ function permission_edit_map(): array
         'asset.view' => 'asset.edit',
         'org.view' => 'org.manage',
         'food.groups' => 'food.groups_edit',
+        'food.monitor' => 'food.monitor_edit',
+        'food.orders' => 'food.orders_edit',
+        'food.employees' => 'food.employees_edit',
+        'food.guest' => 'food.guest_edit',
+        'food.db' => 'food.db_edit',
+        'food.printer' => 'food.printer_edit',
+        'food.design' => 'food.design_edit',
+        'food.health' => 'food.health_edit',
+        'food.menu' => 'food.menu_edit',
+        'ola.view' => 'ola.manage',
+        'governance.view' => 'governance.manage',
+        'holidays.view' => 'holidays.manage',
+        'backup.view' => 'backup.manage',
+    ];
+}
+
+/**
+ * بخش‌هایی که قبلاً نوشتن‌شان فقط با کد بخش کنترل می‌شد. کد ویرایش تازه‌شان به نقش‌هایی که بخش را دارند
+ * داده می‌شود تا دسترسی قبلی حفظ شود (پیش‌فرض‌ها و داده‌های ذخیره‌شده).
+ */
+function permission_legacy_parent_edit_pairs(): array
+{
+    return [
+        'food.groups' => 'food.groups_edit',
+        'food.monitor' => 'food.monitor_edit',
+        'food.orders' => 'food.orders_edit',
+        'food.employees' => 'food.employees_edit',
+        'food.guest' => 'food.guest_edit',
+        'food.db' => 'food.db_edit',
+        'food.printer' => 'food.printer_edit',
+        'food.design' => 'food.design_edit',
+        'food.health' => 'food.health_edit',
+        'food.menu' => 'food.menu_edit',
     ];
 }
 
@@ -244,9 +290,11 @@ function permission_defaults(): array
         $codes = role_permissions_normalize_codes($codes);
         // ویرایشِ بی‌والد نباشد؛ دسترسی‌های پیش‌فرض دیگری اضافه نمی‌شود.
         $codes = role_permissions_add_parents($codes);
-        // «گروه‌های غذا» قبلاً همهٔ کارهایش را با همین یک کد می‌داد؛ پس ویرایشش هم داده می‌شود تا رفتار حفظ شود.
-        if (in_array('food.groups', $codes, true)) {
-            $codes[] = 'food.groups_edit';
+        // بخش‌های قبلاً بی‌ویرایش: هرکس بخش را داشت، کارهای ثبتی‌اش را هم داشت؛ پس ویرایششان هم داده می‌شود.
+        foreach (permission_legacy_parent_edit_pairs() as $legacyParent => $legacyChild) {
+            if (in_array($legacyParent, $codes, true)) {
+                $codes[] = $legacyChild;
+            }
         }
         $defaults[$role] = array_values(array_unique($codes));
     }
@@ -366,12 +414,15 @@ function role_permissions_migrate_once(): void
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
     }
-    if (setting('perm_edit_v1') === '1') {
+    if (setting('perm_edit_v2') === '1') {
         return;
     }
     try {
-        db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT role, 'food.groups_edit' FROM role_permissions WHERE permission = 'food.groups'");
-        save_setting('perm_edit_v1', '1');
+        foreach (permission_legacy_parent_edit_pairs() as $legacyParent => $legacyChild) {
+            $copy = db()->prepare("INSERT IGNORE INTO role_permissions (role, permission) SELECT role, ? FROM role_permissions WHERE permission = ?");
+            $copy->execute([$legacyChild, $legacyParent]);
+        }
+        save_setting('perm_edit_v2', '1');
         role_permissions_flush_cache();
     } catch (Throwable $exception) {
         // در صورت خطا دفعهٔ بعد دوباره تلاش می‌شود.

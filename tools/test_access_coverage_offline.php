@@ -204,7 +204,7 @@ check('governance.php: require_staff()', str_contains($governance, '$user = requ
 check('governance.php: کد governance.manage بررسی می‌شود', str_contains($governance, "user_can(\$user, 'governance.manage')"));
 
 $ola = (string) file_get_contents(APP_ROOT . '/ola.php');
-check('ola.php: کد ola.manage بررسی می‌شود', str_contains($ola, "require_permission('ola.manage')"));
+check('ola.php: صفحه با ola.view و ثبت با ola.manage بررسی می‌شود', str_contains($ola, "require_permission('ola.view')") && str_contains($ola, "user_can(\$user, 'ola.manage')"));
 check('ola.php: دیگر فقط require_admin() نیست', !str_contains($ola, '$user = require_admin();'));
 
 $cd = (string) file_get_contents(APP_ROOT . '/cd-dvd.php');

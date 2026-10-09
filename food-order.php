@@ -746,7 +746,7 @@ function food_order_cancel_proxy(int $orderId, int $employeeId, string $national
 function food_order_catalog_save(array $body, array $user): array
 {
     food_order_schema_ensure();
-    food_order_require_permission($user, 'food.menu');
+    food_order_require_permission($user, 'food.menu_edit');
     $id = max(0, (int) ($body['id'] ?? 0));
     $name = trim((string) ($body['food_name'] ?? ''));
     $active = !empty($body['active']) ? 1 : 0;
@@ -798,7 +798,7 @@ function food_order_catalog_save(array $body, array $user): array
 function food_order_save_day(array $body, array $user): array
 {
     food_order_schema_ensure();
-    food_order_require_permission($user, 'food.menu');
+    food_order_require_permission($user, 'food.menu_edit');
     $iso = food_order_iso_date($body['date'] ?? '');
     if ($iso === null) {
         throw new RuntimeException('تاریخ برنامه معتبر نیست.');
