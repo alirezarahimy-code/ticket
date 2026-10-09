@@ -1203,6 +1203,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'rate_ticket') {
+            if (!user_can($user, 'ticket.rate')) {
+                throw new RuntimeException('دسترسی امتیازدهی به تیکت برای نقش شما مجاز نیست.');
+            }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
             $score = (int) ($_POST['score'] ?? 0);
@@ -1758,6 +1761,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'reply') {
+            if (!user_can($user, 'ticket.reply')) {
+                throw new RuntimeException('دسترسی پاسخ به تیکت برای نقش شما مجاز نیست.');
+            }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
             if (!$ticket || !can_view_ticket($ticket, $user)) {
@@ -1838,6 +1844,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'update_ticket') {
             $staffUser = require_login();
+            if (!user_can($staffUser, 'ticket.edit')) {
+                throw new RuntimeException('دسترسی ویرایش تیکت برای نقش شما مجاز نیست.');
+            }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
             if (!$ticket || !can_view_ticket($ticket, $staffUser)) {

@@ -47,7 +47,7 @@ function permission_catalog(): array
                 ['code' => 'ticket.view_unit', 'label' => 'مشاهدهٔ تیکت‌های واحد/زیرمجموعه'],
                 ['code' => 'ticket.view_all', 'label' => 'مشاهدهٔ همهٔ تیکت‌ها'],
                 ['code' => 'ticket.reply', 'label' => 'پاسخ/مکالمه در تیکت'],
-                ['code' => 'ticket.edit', 'label' => 'ویرایش تیکت'],
+                ['code' => 'ticket.edit', 'label' => 'ویرایش'],
                 ['code' => 'ticket.assign', 'label' => 'ارجاع تیکت به کارشناس'],
                 ['code' => 'ticket.bulk', 'label' => 'عملیات گروهی روی تیکت‌ها'],
                 ['code' => 'ticket.rate', 'label' => 'امتیازدهی به تیکت'],
@@ -241,6 +241,7 @@ function permission_edit_map(): array
         'settings.domain' => 'settings.domain_edit',
         'settings.users' => 'settings.users_edit',
         'settings.key_roles' => 'settings.key_roles_edit',
+        'ticket.view_unit' => 'ticket.edit',
     ];
 }
 
@@ -302,7 +303,11 @@ function permission_defaults(): array
         $codes = role_permissions_normalize_codes($codes);
         // ویرایشِ بی‌والد نباشد؛ دسترسی‌های پیش‌فرض دیگری اضافه نمی‌شود.
         $codes = role_permissions_add_parents($codes);
-        // بخش‌های قبلاً بی‌ویرایش: هرکس بخش را داشت، کارهای ثبتی‌اش را هم داشت؛ پس ویرایششان هم داده می‌شود.
+        // ویرایش تیکت: پیش‌تر کسانی تیکت را تغییر می‌دادند که مدیر ارجاع (ticket.assign) یا کارشناس قابل ارجاع بودند.
+        if (in_array('ticket.assign', $codes, true) || in_array($role, assignable_role_codes(), true)) {
+            $codes[] = 'ticket.edit';
+        }
+        // بخش‌های قبلاً بی‌ویرایش: هرکس بخش را داشت، کارهای ثبتی‌اش را هم داشت؛ پس ویرایش‌شان هم داده می‌شود.        // بخش‌های قبلاً بی‌ویرایش: هرکس بخش را داشت، کارهای ثبتی‌اش را هم داشت؛ پس ویرایششان هم داده می‌شود.
         foreach (permission_legacy_parent_edit_pairs() as $legacyParent => $legacyChild) {
             if (in_array($legacyParent, $codes, true)) {
                 $codes[] = $legacyChild;
@@ -425,6 +430,20 @@ function role_permissions_migrate_once(): void
     $done = true;
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
+    }
+    if (setting('perm_edit_v3') !== '1') {
+        try {
+            // پاسخ به تیکت پیش‌تر با کد کنترل نمی‌شد؛ پس به هر نقش ذخیره‌شده‌ای داده می‌شود تا دسترسی حفظ شود.
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.reply' FROM role_permissions");
+            // امتیازدهی به تیکت هم پیش‌تر کد نداشت؛ به همهٔ نقش‌های ذخیره‌شده داده می‌شود.
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.rate' FROM role_permissions");
+            $assignableList = implode(',', array_map(static fn (string $r): string => db()->quote($r), assignable_role_codes()));
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.edit' FROM role_permissions WHERE permission = 'ticket.assign' OR role IN ($assignableList)");
+            save_setting('perm_edit_v3', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // دفعهٔ بعد دوباره تلاش می‌شود.
+        }
     }
     if (setting('perm_edit_v2') === '1') {
         return;
