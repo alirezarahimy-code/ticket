@@ -160,7 +160,7 @@ body::before {
 .page {
     position: relative;
     z-index: 1;
-    width: min(1240px, 100%) !important;
+    width: min(1480px, 100%) !important;
     min-width: 0 !important;
     padding: 34px 28px 60px !important;
 }

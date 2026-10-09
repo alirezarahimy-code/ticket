@@ -188,7 +188,7 @@
     }).join('');
     var selectedStatus = day && day.order_status ? day.order_status : 'open';
     var statusControl = canClose
-      ? '<label class="fm-field">وضعیت سفارش‌گیری<select name="order_status" ' + (editorLocked ? 'disabled' : '') + '><option value="open" ' + (selectedStatus === 'open' ? 'selected' : '') + '>باز</option><option value="closed" ' + (selectedStatus === 'closed' ? 'selected' : '') + '>بسته</option></select></label>'
+      ? '<fieldset class="fm-field fm-status-choice"><legend>وضعیت سفارش‌گیری</legend><label class="fm-radio"><input type="radio" name="order_status" value="open" ' + (selectedStatus === 'open' ? 'checked' : '') + (editorLocked ? ' disabled' : '') + '>باز</label><label class="fm-radio"><input type="radio" name="order_status" value="closed" ' + (selectedStatus === 'closed' ? 'checked' : '') + (editorLocked ? ' disabled' : '') + '>بسته</label></fieldset>'
       : '<div class="fm-alert">وضعیت روز: ' + esc(selectedStatus === 'closed' ? 'بسته' : 'باز') + ' — برای تغییر وضعیت دسترسی food.order_close لازم است.</div>';
     var impactButtonsDisabled = state.daySaving ? ' disabled' : '';
     var pending = state.pendingImpact && state.pendingImpact.date === iso ? '<div class="fm-confirm-box"><strong>' + esc(state.pendingImpactMessage || 'این تغییر سفارش فعال را لغو می‌کند.') + '</strong><span>برای انجام تغییر و ثبت لغوها، تأیید کنید. حذف فیزیکی سفارش انجام نمی‌شود.</span><button class="btn danger" type="button" data-fm-action="confirm-impact"' + impactButtonsDisabled + '>تأیید و ادامه</button><button class="btn secondary" type="button" data-fm-action="cancel-impact"' + impactButtonsDisabled + '>بازگشت</button></div>' : '';
@@ -380,7 +380,7 @@
     } else {
       var formData = new FormData(form);
       var foodIds = Array.from(form.querySelectorAll('input[name="food_ids"]:checked')).map(function (input) { return Number(input.value); });
-      var statusField = form.querySelector('[name="order_status"]');
+      var statusField = form.querySelector('[name="order_status"]:checked');
       body = {
         date: state.selectedDate,
         food_ids: foodIds,

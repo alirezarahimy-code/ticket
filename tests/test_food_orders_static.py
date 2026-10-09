@@ -162,10 +162,10 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
         panel_html = read("food-ticket-web/index.html")
         self.assertIn('href="assets/food-order.css?v=11"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=10"', panel_html)
+        self.assertIn('href="assets/food-menu.css?v=11"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=10"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=11"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -256,8 +256,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         editor_start = js.index("function renderDayEditor()")
         editor_end = js.index("\n  function renderCatalog()", editor_start)
         editor = js[editor_start:editor_end]
-        self.assertIn('<option value="open"', editor)
-        self.assertIn('<option value="closed"', editor)
+        self.assertIn('value=\"open\"', editor)
+        self.assertIn('value=\"closed\"', editor)
         self.assertNotIn('name="reason"', editor)
         save_start = js.index("async function saveDay(")
         save_end = js.index("\n  async function saveCatalog", save_start)
