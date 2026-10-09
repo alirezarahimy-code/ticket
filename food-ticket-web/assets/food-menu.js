@@ -412,14 +412,26 @@
 
   async function saveCatalog(form) {
     if (!canMenu) return;
+    var isNew = form.id === 'fm-catalog-add';
     var data = new FormData(form);
     var body = { id: Number(data.get('id') || 0), food_name: String(data.get('food_name') || '').trim(), active: String(data.get('active') || '1') === '1' };
+    var saved = false;
     try {
       var result = await request('food-menu/catalog', null, { method: 'POST', body: JSON.stringify(body) });
       state.catalog = Array.isArray(result.items) ? result.items : [];
       state.notice = result.message || 'بانک غذا ذخیره شد.'; state.error = '';
+      saved = true;
     } catch (e) { state.error = e.message || 'ذخیرهٔ غذا ناموفق بود.'; }
     render();
+    if (isNew) {
+      // Keep the new-food box active: cleared after a successful add, text kept on error.
+      var input = global.document.querySelector('#fm-catalog-add input[name="food_name"]');
+      if (input) {
+        if (saved) input.value = '';
+        else input.value = String(data.get('food_name') || '');
+        input.focus();
+      }
+    }
   }
 
 
