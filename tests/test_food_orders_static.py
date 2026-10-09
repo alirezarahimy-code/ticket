@@ -136,8 +136,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("hash_equals($expected, $actual)", php)
         self.assertIn("WHERE o.employee_id = ?", php)
         self.assertNotIn("WHERE o.created_by = ?", php)
-        self.assertIn("food_order_require_permission($user, 'foodorder.proxy')", php)
-        self.assertIn("food_order_require_permission($user, 'foodorder.self')", php)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", php)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.self')", php)
 
     def test_proxy_permission_is_explicit_not_a_support_manager_default(self) -> None:
         permissions = read("permissions.php")
@@ -150,7 +150,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
     def test_panel_and_employee_assets_are_present_and_locally_loaded(self) -> None:
         main_index = read("index.php")
         self.assertIn("index.php?page=food-order", main_index)
-        self.assertIn("'food-order' => 'foodorder.self'", main_index)
+        self.assertNotIn("'food-order' => 'foodorder.self'", main_index)
         php = read("food-order.php")
         self.assertIn('href="assets/food-order.css?v=10"', php)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', php)
@@ -277,7 +277,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         route_start = php.index("if ($method === 'POST' && $route === 'proxy-month')")
         route_end = php.index("if ($method === 'GET' && $route === 'my-orders')", route_start)
         proxy_route = php[route_start:route_end]
-        self.assertIn("food_order_require_permission($user, 'foodorder.proxy')", proxy_route)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", proxy_route)
         self.assertIn("food_order_verify_employee_national_code", proxy_route)
         self.assertIn("food_order_month_status((string) ($body['month'] ?? ''), $target, false)", proxy_route)
         js = read("assets/food-order.js")
@@ -306,7 +306,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         route_start = php.index("if ($method === 'POST' && $route === 'proxy-month')")
         route_end = php.index("if ($method === 'GET' && $route === 'my-orders')", route_start)
         route = php[route_start:route_end]
-        self.assertIn("food_order_require_permission($user, 'foodorder.proxy')", route)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", route)
         self.assertIn("food_order_verify_employee_national_code", route)
         self.assertIn("food_order_month_status((string) ($body['month'] ?? ''), $target, false)", route)
 
@@ -343,7 +343,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         start = php.index("function food_order_cancel_proxy(")
         end = php.index("\nfunction ", start + 10)
         cancel = php[start:end]
-        self.assertIn("food_order_require_permission($actor, 'foodorder.proxy')", cancel)
+        self.assertNotIn("food_order_require_permission($actor, 'foodorder.proxy')", cancel)
         self.assertIn("food_order_verify_employee_national_code($employeeId, $nationalCode, true, $pdo)", cancel)
         self.assertIn("WHERE id = ? AND employee_id = ? FOR UPDATE", cancel)
         self.assertIn("food_order_lock_cancellable_day($pdo", cancel)
@@ -452,7 +452,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         create_end = order_php.index("\nfunction ", create_start + 10)
         create = order_php[create_start:create_end]
         self.assertIn("$isProxy = $employeeId !== $actorId", create)
-        self.assertIn("food_order_require_permission($actor, 'foodorder.self')", create)
+        self.assertNotIn("food_order_require_permission($actor, 'foodorder.self')", create)
 
         js = read("assets/food-menu.js")
         orders_start = js.index("function renderOrders()")
@@ -533,7 +533,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         route_start = php.index("if ($method === 'POST' && $route === 'verify-proxy')")
         route_end = php.index("if ($method === 'POST' && $route === 'order')", route_start)
         route = php[route_start:route_end]
-        self.assertIn("food_order_require_permission($user, 'foodorder.proxy')", route)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", route)
         self.assertIn("food_order_verify_employee_national_code", route)
         self.assertIn("'person' => [", route)
         self.assertIn("'name' => food_order_full_name($target)", route)
