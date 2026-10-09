@@ -179,9 +179,13 @@ function permission_catalog(): array
             'label' => 'تنظیمات و سیستم',
             'items' => [
                 ['code' => 'settings.general', 'label' => 'تنظیمات عمومی'],
+                ['code' => 'settings.general_edit', 'label' => 'ویرایش'],
                 ['code' => 'settings.domain', 'label' => 'اتصال دامین و اسکن دامنه'],
+                ['code' => 'settings.domain_edit', 'label' => 'ویرایش'],
                 ['code' => 'settings.users', 'label' => 'مدیریت کاربران و دسترسی‌ها'],
+                ['code' => 'settings.users_edit', 'label' => 'ویرایش'],
                 ['code' => 'settings.key_roles', 'label' => 'نقش‌های کلیدی'],
+                ['code' => 'settings.key_roles_edit', 'label' => 'ویرایش'],
                 ['code' => 'backup.view', 'label' => 'پشتیبان‌گیری/بازگردانی'],
                 ['code' => 'backup.manage', 'label' => 'ویرایش'],
                 ['code' => 'ola.view', 'label' => 'تنظیمات OLA/SLA'],
@@ -233,6 +237,10 @@ function permission_edit_map(): array
         'governance.view' => 'governance.manage',
         'holidays.view' => 'holidays.manage',
         'backup.view' => 'backup.manage',
+        'settings.general' => 'settings.general_edit',
+        'settings.domain' => 'settings.domain_edit',
+        'settings.users' => 'settings.users_edit',
+        'settings.key_roles' => 'settings.key_roles_edit',
     ];
 }
 
@@ -253,6 +261,10 @@ function permission_legacy_parent_edit_pairs(): array
         'food.design' => 'food.design_edit',
         'food.health' => 'food.health_edit',
         'food.menu' => 'food.menu_edit',
+        'settings.general' => 'settings.general_edit',
+        'settings.domain' => 'settings.domain_edit',
+        'settings.users' => 'settings.users_edit',
+        'settings.key_roles' => 'settings.key_roles_edit',
     ];
 }
 

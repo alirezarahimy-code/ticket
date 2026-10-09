@@ -1057,7 +1057,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=profile');
         }
         if ($action === 'save_food_ticket_brand') {
-            $settingsAdmin = require_permission('settings.users');
+            $settingsAdmin = require_permission('settings.users_edit');
             $brandName = post_value('food_ticket_brand_name');
             if ($brandName === '') {
                 throw new RuntimeException('نام سامانه چاپ فیش نمی‌تواند خالی باشد.');
@@ -2350,7 +2350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'save_cd_dvd_settings') {
-            $settingsAdmin = require_permission('settings.users');
+            $settingsAdmin = require_permission('settings.users_edit');
             $inspectionUserId = (int) ($_POST['cd_dvd_inspection_user_id'] ?? 0);
             if ($inspectionUserId > 0) {
                 $inspectionQuery = db()->prepare('SELECT id FROM users WHERE id = ? AND is_active = 1 LIMIT 1');
@@ -2822,7 +2822,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         if ($action === 'save_key_roles') {
-            $rolesAdmin = require_permission('settings.key_roles');
+            $rolesAdmin = require_permission('settings.key_roles_edit');
             $collectRoleIds = static function (string $field): array {
                 $raw = $_POST[$field] ?? [];
                 if (!is_array($raw)) {
@@ -2947,7 +2947,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'sync_ldap_users') {
-            $settingsAdmin = require_permission('settings.users');
+            $settingsAdmin = require_permission('settings.users_edit');
             $syncResult = ldap_sync_all_users();
             save_audit((int) $settingsAdmin['id'], 'ldap_bulk_sync', null, $syncResult);
             flash('success', 'همگام‌سازی کاربران دامین انجام شد. جدید: ' . $syncResult['created'] . '، به‌روزشده: ' . $syncResult['updated'] . '، غیرفعال: ' . $syncResult['disabled'] . '.');
@@ -2955,7 +2955,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'diagnose_ldap') {
-            $diagnoseAdmin = require_permission('settings.domain');
+            $diagnoseAdmin = require_permission('settings.domain_edit');
             $diagnoseResult = ldap_diagnose();
             save_audit((int) $diagnoseAdmin['id'], 'ldap_diagnosed', null, ['ok' => $diagnoseResult['ok']]);
             if ($diagnoseResult['ok']) {
@@ -2969,11 +2969,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'save_settings') {
             $settingsUser = require_login();
             $sectionPermission = [
-                'general' => 'settings.general',
-                'ldap' => 'settings.domain',
-                'domain_scan' => 'settings.domain',
-                'login_branding' => 'settings.general',
-            ][post_value('settings_section')] ?? 'settings.general';
+                'general' => 'settings.general_edit',
+                'ldap' => 'settings.domain_edit',
+                'domain_scan' => 'settings.domain_edit',
+                'login_branding' => 'settings.general_edit',
+            ][post_value('settings_section')] ?? 'settings.general_edit';
             if (!user_can($settingsUser, $sectionPermission)) {
                 http_response_code(403);
                 exit('دسترسی به این بخش مجاز نیست.');
@@ -4446,6 +4446,11 @@ if ($page === 'settings') {
     $canSettingsDomain = user_can($user, 'settings.domain');
     $canSettingsUsers = user_can($user, 'settings.users');
     $canSettingsKeyRoles = user_can($user, 'settings.key_roles');
+    // ویرایش هر بخش جدا از دیدن آن است؛ بدون کد ویرایش، فرم‌ها غیرفعال (inert) نمایش داده می‌شوند.
+    $canSettingsGeneralEdit = user_can($user, 'settings.general_edit');
+    $canSettingsDomainEdit = user_can($user, 'settings.domain_edit');
+    $canSettingsUsersEdit = user_can($user, 'settings.users_edit');
+    $canSettingsKeyRolesEdit = user_can($user, 'settings.key_roles_edit');
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
     $foodBrandName = setting('food_ticket_brand_name', $appName);
@@ -4491,7 +4496,7 @@ if ($page === 'settings') {
     echo '<section class="settings-stack">';
 
     if ($canSettingsGeneral) {
-    echo '<div class="settings-panel settings-panel-grid" id="general">';
+    echo '<div class="settings-panel settings-panel-grid" id="general"' . ($canSettingsGeneralEdit ? '' : ' inert') . '>';
     echo '<div class="card form-card"><h2>اطلاعات سامانه</h2><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="general"><label>نام سامانه<input name="app_name" required value="' . e($appName) . '"></label><label>لوگو<input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"><small>لوگوی جدید اختیاری است؛ PNG، JPG یا SVG تا ۲ مگابایت.</small></label><label>ظاهر نام کامپیوترها<select name="asset_hostname_style"><option value="short_lower"' . (setting('asset_hostname_style', 'short_lower') === 'short_lower' ? ' selected' : '') . '>فقط نام، با حروف کوچک (adminit2) — پیش‌فرض</option><option value="short"' . (setting('asset_hostname_style', 'short_lower') === 'short' ? ' selected' : '') . '>فقط نام، با حروف اصلی (ADMINIT2)</option><option value="full"' . (setting('asset_hostname_style', 'short_lower') === 'full' ? ' selected' : '') . '>نام کامل دامنه (ADMINIT2.DOMAIN.LOCAL)</option></select><small>روی فهرست شناسنامه‌ها، فهرست اسکن دامنه، فهرست سیستم‌ها و کمبوی «سیستم مرتبط» اثر دارد. نام کامل همیشه به‌صورت راهنما (tooltip) روی نام می‌ماند.</small></label>' . ($logo ? '<div class="current-logo"><img src="' . e($logo) . '" alt="لوگوی فعلی"><span>لوگوی فعلی</span></div>' : '') . '<button class="button" type="submit">ذخیره اطلاعات عمومی</button></form></div>';
     echo '<div class="card form-card login-branding-settings" id="login-branding"><h2>مدیریت صفحه ورود</h2><p class="muted">عنوان‌ها، پیام متحرک و لوگوی مخصوص صفحه ورود را تنظیم کنید. لوگو PNG یا JPG و حداکثر ۲ مگابایت باشد.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="login_branding"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>عنوان اصلی<input name="login_title" maxlength="120" value="' . e(setting('login_title', 'به سامانه پشتیبانی خوش آمدید')) . '"></label><label>متن معرفی<textarea name="login_intro" rows="2" maxlength="500">' . e(setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.')) . '</textarea></label><label>پیام متحرک ابتدای صفحه (اختیاری)<input name="login_announcement" maxlength="240" value="' . e(setting('login_announcement', '')) . '" placeholder="مثلاً اطلاعیه نگهداری سامانه در روز ..."></label><div class="form-grid"><label>عنوان کارت معرفی<input name="login_art_title" maxlength="100" value="' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '"></label><label>متن کارت معرفی<input name="login_art_text" maxlength="300" value="' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '"></label><label>عنوان راهنمای ورود<input name="login_note_title" maxlength="100" value="' . e(setting('login_note_title', 'ورود یکپارچه سازمانی')) . '"></label><label>متن راهنمای ورود<input name="login_note_text" maxlength="300" value="' . e(setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.')) . '"></label></div><label>لوگوی صفحه ورود<input type="file" name="login_logo" accept="image/png,image/jpeg"></label>' . (setting('app_login_logo', '') ? '<div class="current-logo"><img src="' . e((string) setting('app_login_logo', '')) . '" alt="لوگوی صفحه ورود"><span>لوگوی اختصاصی صفحه ورود</span></div>' : '') . '<button class="button" type="submit">ذخیره تنظیمات صفحه ورود</button></form></div>';
     echo '<div class="card form-card food-ticket-brand-settings" id="food-ticket-brand"><h2>هویت پنل چاپ فیش غذا</h2><p class="muted">این نام و لوگو هنگام ورود از سامانه اصلی به پنل چاپ فیش منتقل می‌شود و با تغییرات بعدی نیز همگام خواهد ماند.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_food_ticket_brand"><label>نام سامانه چاپ فیش<input name="food_ticket_brand_name" required value="' . e($foodBrandName) . '"></label><label>لوگوی پنل چاپ فیش<input type="file" name="food_ticket_logo" accept="image/png,image/jpeg"><small>PNG یا JPG، حداکثر ۲ مگابایت.</small></label>' . ($foodBrandLogo ? '<div class="current-logo"><img src="' . e($foodBrandLogo) . '" alt="لوگوی پنل چاپ فیش"><span>لوگوی فعلی پنل فیش</span></div>' : '') . '<button class="button" type="submit">ذخیره هویت پنل چاپ فیش</button></form></div>';
@@ -4510,7 +4515,7 @@ if ($page === 'settings') {
     }
 
     if ($canSettingsDomain) {
-    echo '<div class="settings-panel settings-panel-grid" id="domain">';
+    echo '<div class="settings-panel settings-panel-grid" id="domain"' . ($canSettingsDomainEdit ? '' : ' inert') . '>';
     echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';
     echo '<div class="card form-card" id="domain-scan"><h2>اسکن دامنه و استخراج از شبکه</h2><p class="muted">همهٔ کامپیوترهای دامنه از Active Directory خوانده می‌شوند، سپس در صورت آنلاین بودن، اطلاعات سخت‌افزاری آن‌ها از راه دور دریافت و در شناسنامه ثبت می‌شود. برای دریافت سخت‌افزار، حساب وارد‌شده باید روی کلاینت‌ها دسترسی ادمین محلی داشته باشد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="domain_scan"><input type="hidden" name="app_name" value="' . e($appName) . '"><p class="muted">استخراج اطلاعات سیستم‌های تیک‌خورده همیشه فعال است و نیازی به کلید فعال‌سازی ندارد. اگر نام کاربری را خالی بگذارید، از حساب سرویس Windows همین پنل استفاده می‌شود (باید ادمین محلی کلاینت‌ها باشد).</p><div class="form-grid"><label>دامنه (NetBIOS)<input name="domain_scan_domain" value="' . e(setting('domain_scan_domain', '')) . '" placeholder="COMPANY"></label><label>حساب کاربری ادمین<input name="domain_scan_username" value="' . e(setting('domain_scan_username', '')) . '" placeholder="administrator"></label><label>رمز حساب<input type="password" name="domain_scan_password" placeholder="بدون تغییر"></label><label>زمان انتظار پینگ (میلی‌ثانیه)<input type="number" name="domain_scan_timeout" min="500" max="30000" value="' . e(setting('domain_scan_timeout', '2500')) . '"></label><label>ترتیب پروتکل اتصال (۱.۳۷)<select name="domain_scan_protocols"><option value=""' . (setting('domain_scan_protocols', '') === '' ? ' selected' : '') . '>خودکار (اول DCOM، بعد WinRM)</option><option value="Wsman,Dcom"' . (setting('domain_scan_protocols', '') === 'Wsman,Dcom' ? ' selected' : '') . '>اول WinRM، بعد DCOM (اگر DCOM بسته است)</option><option value="Dcom"' . (setting('domain_scan_protocols', '') === 'Dcom' ? ' selected' : '') . '>فقط DCOM</option><option value="Wsman"' . (setting('domain_scan_protocols', '') === 'Wsman' ? ' selected' : '') . '>فقط WinRM (نیازمند Enable-PSRemoting روی سرور)</option></select></label></div><p class="muted">خطاهای رایج استخراج («RPC/WMI در دسترس نیست» و «دسترسی رد شد») در صفحهٔ «اسکن دامنه» با راه‌حل گام‌به‌گام نمایش داده می‌شوند؛ پس از هر اصلاح، از همان صفحه «تلاش دوباره برای ناموفق‌ها» را بزنید.</p><button class="button" type="submit">ذخیره تنظیمات اسکن دامنه</button></form></div>';
     echo '<div class="card form-card" id="ldap-sync"><h2>معرفی کاربران دامین</h2><p class="muted">همه کاربران قابل مشاهده در Base DN را بدون نیاز به اولین ورود به سامانه معرفی می‌کند. حساب‌هایی که دیگر در دامین پیدا نشوند یا غیرفعال باشند، غیرفعال می‌شوند.</p><div class="actions" style="margin-top:0"><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="sync_ldap_users"><button class="button" type="submit">همگام‌سازی همه کاربران دامین</button></form><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="diagnose_ldap"><button class="button secondary" type="submit">تشخیص اتصال دامنه</button></form></div></div>';
@@ -4519,7 +4524,7 @@ if ($page === 'settings') {
     }
 
     if ($canSettingsUsers) {
-    echo '<div class="card form-card settings-panel" id="users"><h2>کاربران</h2><p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
+    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2><p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
     foreach ($users as $managedUser) {
         echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
         if ($canManageSettingsUsers) {
@@ -4538,7 +4543,7 @@ if ($page === 'settings') {
         echo '</div>';
     }
     echo '</div>';
-    echo '<div id="key-roles" class="settings-subform"><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. «کارشناس IT» دسترسی ادمین اصلی می‌گیرد، «سوپروایز» نقش سوپروایزر را می‌گیرد و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را دارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
+    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. «کارشناس IT» دسترسی ادمین اصلی می‌گیرد، «سوپروایز» نقش سوپروایزر را می‌گیرد و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را دارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
     echo '</div>';
     }
 
