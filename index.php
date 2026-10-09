@@ -624,6 +624,9 @@ function render_header(string $title, ?array $user = null): void
         if (food_ticket_is_allowed($user)) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'چاپ فیش غذا', 'food') . '</li>';
         }
+        if (food_ticket_is_allowed($user) && (food_ticket_is_primary_admin($user) || user_can($user, 'food.orders'))) {
+            $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket&food_api=orders-import', 'ایمپورت سفارش‌های قبلی', 'food') . '</li>';
+        }
         $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
         $menuItems[] = $submenu('menu-reports', 'گزارش‌ها', 'reports', $reportLinks);
         $menuItems[] = $submenu('menu-management', 'مدیریت', 'settings', $adminLinks);

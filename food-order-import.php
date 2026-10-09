@@ -22,12 +22,19 @@ declare(strict_types=1);
 
 function food_order_import_column_keys(): array
 {
+    // نام‌های ستون بعد از food_order_import_key() (حروف کوچک، بدون فاصله/زیرخط)
     return [
         'nat' => ['codmeli', 'nationalcode', 'nationalid', 'meli', 'کدملی'],
-        'food' => ['naharentekhabi', 'nahar', 'foodname', 'foodtype', 'food', 'نامغذا', 'نوعغذا'],
-        'date' => ['tarikhentekhabi', 'fooddate', 'orderdate', 'tarikhghaza', 'تاریخغذا', 'تاریخ'],
+        'first' => ['naam', 'نام', 'firstname'],
+        'last' => ['famili', 'فامیلی', 'نامخانوادگی', 'lastname'],
+        'food' => ['naharentekhabi', 'nahar', 'foodname', 'foodtype', 'food', 'نامغذا', 'نوعغذا', 'نهارانتخابی'],
+        'date' => ['tarikhentekhabi', 'fooddate', 'orderdate', 'تاریخانتخابی', 'تاریخغذا'],
+        'resdate' => ['d', 'tarikhrezerv', 'reservedate', 'تاریخرزرو'],
+        'restime' => ['s', 'saatrezerv', 'reservetime', 'ساعترزرو', 'ساعترزرو'],
     ];
 }
+/** ستون‌های الزامی برای تطبیق؛ بقیه اختیاری‌اند (نام، تاریخ و ساعت رزرو فقط برای نمایش و ثبت در تاریخچه). */
+const FOOD_ORDER_IMPORT_REQUIRED = ['nat', 'food', 'date'];
 
 /** کلید مقایسه‌ای ستون: حروف کوچک، بدون فاصله/خط‌تیره/زیرخط. */
 function food_order_import_key(string $value): string
@@ -75,14 +82,14 @@ function food_order_import_read(string $path, string $name): array
                 }
             }
         }
-        if (count($found) === 3) {
+        if (count(array_intersect_key($found, array_flip(FOOD_ORDER_IMPORT_REQUIRED))) === count(FOOD_ORDER_IMPORT_REQUIRED)) {
             $header = $index;
             $cols = $found;
             break;
         }
     }
     if ($header === null) {
-        return ['ok' => false, 'error' => 'ستون‌های لازم پیدا نشد. فایل باید سه ستون cod_meli، nahar_entekhabi و tarikh_entekhabi داشته باشد.'];
+        return ['ok' => false, 'error' => 'ستون‌های لازم پیدا نشد. فایل باید حداقل cod_meli، nahar_entekhabi و tarikh_entekhabi داشته باشد. ستون‌های کامل: کد ملی، نام، نام خانوادگی، نهار انتخابی، تاریخ انتخابی، تاریخ رزرو، ساعت رزرو (d و s).'];
     }
 
     $rows = [];
@@ -90,13 +97,17 @@ function food_order_import_read(string $path, string $name): array
         if ($index <= $header || !is_array($cells)) {
             continue;
         }
-        $nat = trim((string) ($cells[$cols['nat']] ?? ''));
-        $food = trim((string) ($cells[$cols['food']] ?? ''));
-        $date = trim((string) ($cells[$cols['date']] ?? ''));
-        if ($nat === '' && $food === '' && $date === '') {
+        $val = static fn (string $field): string => isset($cols[$field]) ? trim((string) ($cells[$cols[$field]] ?? '')) : '';
+        $row = [
+            'line' => $index + 1,
+            'nat' => $val('nat'), 'first' => $val('first'), 'last' => $val('last'),
+            'food' => $val('food'), 'date' => $val('date'),
+            'resdate' => $val('resdate'), 'restime' => $val('restime'),
+        ];
+        if ($row['nat'] === '' && $row['food'] === '' && $row['date'] === '') {
             continue;
         }
-        $rows[] = ['line' => $index + 1, 'nat' => $nat, 'food' => $food, 'date' => $date];
+        $rows[] = $row;
     }
     return ['ok' => true, 'rows' => $rows];
 }
@@ -116,6 +127,27 @@ function food_order_import_date(string $raw): ?string
         return gmdate('Y-m-d', $ts);
     }
     return food_order_iso_date($raw);
+}
+
+/** ساعت رزرو: 1300، 13:00، 13:00:00 یا عدد Excel (کسری از روز) → HH:MM */
+function food_order_import_time(string $raw): ?string
+{
+    $raw = trim(food_order_normalize_digits($raw));
+    if ($raw === '') {
+        return null;
+    }
+    if (preg_match('/^(\d{1,2}):(\d{2})/', $raw, $m)) {
+        return sprintf('%02d:%02d', (int) $m[1], (int) $m[2]);
+    }
+    if (preg_match('/^\d{1,2}\.\d+$/', $raw) || preg_match('/^0?\.\d+$/', $raw)) {
+        $seconds = (int) round((float) $raw * 86400);
+        return sprintf('%02d:%02d', intdiv($seconds, 3600) % 24, intdiv($seconds % 3600, 60));
+    }
+    if (preg_match('/^\d{3,4}$/', $raw)) {
+        $raw = str_pad($raw, 4, '0', STR_PAD_LEFT);
+        return substr($raw, 0, 2) . ':' . substr($raw, 2, 2);
+    }
+    return null;
 }
 
 function food_order_import_norm_food(string $name): string
@@ -199,14 +231,20 @@ function food_order_import_plan(array $rows): array
     foreach ($plan as $p) {
         $row = $p['row'];
         $iso = $p['iso'];
+        $fileName = trim(($row['first'] ?? '') . ' ' . ($row['last'] ?? ''));
         $item = [
             'line' => $row['line'],
             'nat' => $row['nat'],
+            'file_name' => $fileName,
             'food' => $row['food'],
             'date' => $row['date'],
             'iso' => $iso,
+            'res_iso' => food_order_import_date((string) ($row['resdate'] ?? '')),
+            'res_time' => food_order_import_time((string) ($row['restime'] ?? '')),
+            'name_warning' => '',
             'employee_id' => null,
             'employee' => '',
+            'name_warning' => '',
             'calendar_id' => null,
             'calendar_item_id' => null,
             'action' => 'invalid',
@@ -239,6 +277,11 @@ function food_order_import_plan(array $rows): array
                 $employeeId = (int) $active[0]['id'];
                 $item['employee_id'] = $employeeId;
                 $item['employee'] = (string) ($active[0]['full_name'] ?? '');
+                $sysName = food_order_import_norm_food($item['employee']);
+                $fileNorm = food_order_import_norm_food($fileName);
+                if ($fileNorm !== '' && $sysName !== '' && $fileNorm !== $sysName) {
+                    $item['name_warning'] = 'نام در فایل («' . $fileName . '») با سامانه یکی نیست؛ با کد ملی تطبیق شد.';
+                }
                 $item['calendar_id'] = $calendar[$iso]['calendar_id'];
                 $item['calendar_item_id'] = $calendar[$iso]['items'][$food]['item_id'];
                 $key = $employeeId . '|' . $iso;
@@ -300,7 +343,9 @@ function food_order_import_apply(array $plan, int $actorId): array
                 $result['restored']++;
             }
             food_order_log($orderId, (int) $item['calendar_id'], 'order_import', $actorId, null,
-                ['calendar_item_id' => $itemId, 'employee_id' => $employeeId, 'line' => $item['line'], 'file_food' => $item['food']], 'ایمپورت از فایل سفارش‌های قبلی');
+                ['calendar_item_id' => $itemId, 'employee_id' => $employeeId, 'line' => $item['line'], 'file_food' => $item['food'],
+                 'reserved_date' => $item['res_iso'], 'reserved_time' => $item['res_time'], 'file_name' => $item['file_name']],
+                'ایمپورت از فایل سفارش‌های قبلی');
         }
         $pdo->commit();
     } catch (Throwable $e) {
@@ -412,12 +457,14 @@ function food_order_import_handle(array $user): never
                 . '<p class="muted">برای ثبت، همان فایل را دوباره انتخاب کنید.</p>'
                 . '<button class="g" type="submit" name="mode" value="apply">ثبت ' . $ready . ' سفارش</button></form>';
         }
-        $html .= '<table><thead><tr><th>ردیف</th><th>کد ملی</th><th>کارمند</th><th>غذا</th><th>تاریخ</th><th>وضعیت</th><th>توضیح</th></tr></thead><tbody>';
+        $html .= '<table><thead><tr><th>ردیف</th><th>کد ملی</th><th>نام (فایل)</th><th>نام (سامانه)</th><th>نهار انتخابی</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>توضیح</th></tr></thead><tbody>';
         foreach ($plan['rows'] as $r) {
             $cls = in_array($r['action'], ['create', 'restore'], true) ? 'ok' : (in_array($r['action'], ['conflict', 'duplicate'], true) ? 'warn' : ($r['action'] === 'exists' ? 'muted' : 'bad'));
             $label = ['create' => 'ثبت می‌شود', 'restore' => 'بازیابی', 'exists' => 'قبلاً ثبت', 'conflict' => 'تعارض', 'duplicate' => 'تکراری', 'invalid' => 'نامعتبر'][$r['action']] ?? $r['action'];
-            $html .= '<tr><td>' . (int) $r['line'] . '</td><td>' . $h($r['nat']) . '</td><td>' . $h($r['employee']) . '</td><td>' . $h($r['food']) . '</td><td>' . $h($r['iso'] ?? $r['date']) . '</td>'
-                . '<td class="' . $cls . '">' . $h($label) . '</td><td>' . $h($r['reason']) . '</td></tr>';
+            $reason = $r['reason'] . ($r['name_warning'] !== '' ? ' ⚠ ' . $r['name_warning'] : '');
+            $html .= '<tr><td>' . (int) $r['line'] . '</td><td>' . $h($r['nat']) . '</td><td>' . $h($r['file_name']) . '</td><td>' . $h($r['employee']) . '</td><td>' . $h($r['food']) . '</td><td>' . $h($r['iso'] ?? $r['date']) . '</td>'
+                . '<td>' . $h($r['res_iso'] ?? '') . '</td><td>' . $h($r['res_time'] ?? '') . '</td>'
+                . '<td class="' . $cls . '">' . $h($label) . '</td><td>' . $h($reason) . '</td></tr>';
         }
         $html .= '</tbody></table></div>';
     }
