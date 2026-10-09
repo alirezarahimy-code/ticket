@@ -357,16 +357,36 @@ function food_guest_cap_mode(): string
     return $mode === 'variable' ? 'variable' : 'fixed';
 }
 
+/** نرمال‌سازی ساعت (HH:MM یا HH:MM:SS) به HH:MM:SS؛ اگر معتبر نبود پیش‌فرض. */
+function food_guest_cap_clock($raw, string $default): string
+{
+    $raw = (string) ($raw ?? '');
+    if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $raw)) {
+        return $default;
+    }
+    return strlen($raw) === 5 ? $raw . ':00' : $raw;
+}
+
+/** ساعت شروع محاسبهٔ سقف متغیر (پیش‌فرض ۱۱:۰۰). */
+function food_guest_cap_start(): string
+{
+    $raw = function_exists('setting') ? setting('food_guest_cap_start', '11:00') : '11:00';
+    return food_guest_cap_clock($raw, '11:00:00');
+}
+
+/** ساعت صفر شدن سقف متغیر (پیش‌فرض ۱۵:۰۰). */
+function food_guest_cap_end(): string
+{
+    $raw = function_exists('setting') ? setting('food_guest_cap_end', '15:00') : '15:00';
+    return food_guest_cap_clock($raw, '15:00:00');
+}
+
 /** ساعت قطع سقف متغیر (HH:MM:SS). خروج مراجعین قبل از این ساعت (تا ۱۲:۰۰:۵۹) از سقف کم می‌شود؛ بعد از آن نه. */
 function food_guest_cap_cutoff(): string
 {
-    $raw = function_exists('setting') ? (string) (setting('food_guest_cap_cutoff', '12:01') ?? '12:01') : '12:01';
-    return preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $raw) ? (strlen($raw) === 5 ? $raw . ':00' : $raw) : '12:01:00';
+    $raw = function_exists('setting') ? setting('food_guest_cap_cutoff', '12:01') : '12:01';
+    return food_guest_cap_clock($raw, '12:01:00');
 }
-
-/** بازهٔ فعال سقف متغیر: هر روز از ۱۱:۰۰ تا قبل از ۱۵:۰۰. بیرون از بازه سقف صفر است. */
-const FOOD_GUEST_CAP_WINDOW_START = '11:00:00';
-const FOOD_GUEST_CAP_WINDOW_END = '15:00:00';
 
 /**
  * سقف متغیر = (تعداد کسانی که از اول روز وارد شده‌اند تا آن لحظه) − (تعداد کسانی که قبل از ساعت قطع خارج شده‌اند).
@@ -378,10 +398,16 @@ function food_guest_variable_cap_from_counts(int $entries, int $earlyExits): int
     return max(0, $entries - $earlyExits);
 }
 
-/** سقف متغیر در یک ساعت مشخص؛ بیرون از بازهٔ ۱۱ تا ۱۵ صفر است. */
+/** سقف متغیر در یک ساعت مشخص؛ بیرون از بازهٔ شروع تا پایان (تنظیمی) صفر است. */
 function food_guest_variable_cap_at(string $time, int $entries, int $earlyExits): int
 {
-    if ($time < FOOD_GUEST_CAP_WINDOW_START || $time >= FOOD_GUEST_CAP_WINDOW_END) {
+    $start = food_guest_cap_start();
+    $end = food_guest_cap_end();
+    if ($end <= $start) {
+        $start = '11:00:00';
+        $end = '15:00:00';
+    }
+    if ($time < $start || $time >= $end) {
         return 0;
     }
     return food_guest_variable_cap_from_counts($entries, $earlyExits);

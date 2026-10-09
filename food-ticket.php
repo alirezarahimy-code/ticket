@@ -2913,7 +2913,9 @@ function food_ticket_api_config(): array
         'guestCardUIDs' => implode(',', food_ticket_guest_cards($config)),
         'maxGuestTicketsPerDay' => (int) ($config['max_guest_daily'] ?? 20),
         'guestCapMode' => food_guest_cap_mode(),
+        'guestCapStart' => substr(food_guest_cap_start(), 0, 5),
         'guestCapCutoff' => substr(food_guest_cap_cutoff(), 0, 5),
+        'guestCapEnd' => substr(food_guest_cap_end(), 0, 5),
         'guestFoodType' => 'مهمان',
         'cutSourceRows' => !empty($config['cut_source_rows']),
         'enabled' => !empty($config['enabled']),
@@ -3414,8 +3416,11 @@ function food_ticket_api_save_config(array $data, array $user): void
     if (array_key_exists('guestCapMode', $data)) {
         save_setting('food_guest_cap_mode', (string) $data['guestCapMode'] === 'variable' ? 'variable' : 'fixed');
     }
-    if (array_key_exists('guestCapCutoff', $data) && preg_match('/^\d{2}:\d{2}$/', (string) $data['guestCapCutoff'])) {
-        save_setting('food_guest_cap_cutoff', (string) $data['guestCapCutoff'] . ':00');
+    $capTimeKeys = ['guestCapStart' => 'food_guest_cap_start', 'guestCapCutoff' => 'food_guest_cap_cutoff', 'guestCapEnd' => 'food_guest_cap_end'];
+    foreach ($capTimeKeys as $field => $settingKey) {
+        if (array_key_exists($field, $data) && preg_match('/^\d{2}:\d{2}$/', (string) $data[$field])) {
+            save_setting($settingKey, (string) $data[$field] . ':00');
+        }
     }
     if (((string) ($user['role'] ?? '') === 'admin' || (string) ($user['role'] ?? '') === 'primary_admin') && array_key_exists('brandName', $data) && trim((string) $data['brandName']) !== '') {
         save_setting('food_ticket_brand_name', trim((string) $data['brandName']));
