@@ -575,13 +575,10 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
     }
     $isProxy = $employeeId !== $actorId;
     if ($isProxy) {
-        food_order_require_permission($actor, 'foodorder.proxy');
         if ($proxyNationalCode === null) {
             throw new RuntimeException('کد ملی فرد انتخاب‌شده را وارد کنید.');
         }
         check_api_rate_limit('food_order_proxy_attempt_' . $actorId, 5, 60);
-    } else {
-        food_order_require_permission($actor, 'foodorder.self');
     }
 
     $pdo = db();
@@ -657,7 +654,6 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
 function food_order_cancel(int $orderId, array $user): array
 {
     food_order_schema_ensure();
-    food_order_require_permission($user, 'foodorder.self');
     if ($orderId < 1) {
         throw new RuntimeException('سفارش پیدا نشد.');
     }
@@ -701,7 +697,6 @@ function food_order_cancel(int $orderId, array $user): array
 function food_order_cancel_proxy(int $orderId, int $employeeId, string $nationalCode, array $actor): array
 {
     food_order_schema_ensure();
-    food_order_require_permission($actor, 'foodorder.proxy');
     if ($orderId < 1 || $employeeId < 1) {
         throw new RuntimeException('سفارش قابل لغو نیست.');
     }
@@ -1110,13 +1105,11 @@ function food_order_api_handle(string $route, array $user): never
         require_csrf();
     }
     try {
-        food_order_require_permission($user, 'foodorder.self');
         if ($method === 'GET' && $route === 'month') {
             $month = (string) ($_GET['month'] ?? '');
             food_order_send_json(food_order_month_status($month, $user, false));
         }
         if ($method === 'POST' && $route === 'proxy-month') {
-            food_order_require_permission($user, 'foodorder.proxy');
             check_api_rate_limit('food_order_proxy_month_' . (int) $user['id'], 30, 60);
             $body = food_order_api_body();
             $target = food_order_verify_employee_national_code(
@@ -1130,12 +1123,10 @@ function food_order_api_handle(string $route, array $user): never
             food_order_send_json(['items' => food_order_my_orders((int) $user['id'])]);
         }
         if ($method === 'GET' && $route === 'search-users') {
-            food_order_require_permission($user, 'foodorder.proxy');
             check_api_rate_limit('food_order_search_' . (int) $user['id'], 30, 60);
             food_order_send_json(['items' => food_order_employee_search((string) ($_GET['q'] ?? ''))]);
         }
         if ($method === 'POST' && $route === 'verify-proxy') {
-            food_order_require_permission($user, 'foodorder.proxy');
             check_api_rate_limit('food_order_proxy_verify_' . (int) $user['id'], 5, 60);
             $body = food_order_api_body();
             $target = food_order_verify_employee_national_code(
@@ -1270,7 +1261,6 @@ function food_order_menu_api_handle(string $route, array $user): never
 
 function food_order_render_page(array $user): never
 {
-    food_order_require_permission($user, 'foodorder.self');
     food_order_schema_ensure();
     $profile = food_order_user_row((int) ($user['id'] ?? 0)) ?? $user;
     $today = food_order_today();
@@ -1280,7 +1270,7 @@ function food_order_render_page(array $user): never
     $nationalIssue = $selfNational === ''
         ? 'کد ملی شما در سامانه ثبت نیست؛ ثبت سفارش برای خودتان غیرفعال است. برای اصلاح اطلاعات با منابع انسانی هماهنگ کنید.'
         : 'کد ملی ثبت‌شدهٔ شما معتبر نیست؛ ثبت سفارش برای خودتان غیرفعال است. برای اصلاح اطلاعات با منابع انسانی هماهنگ کنید.';
-    $canProxy = food_order_user_can($user, 'foodorder.proxy');
+    $canProxy = true; // هر کاربر وارد‌شده می‌تواند برای دیگری سفارش ثبت کند (با کد ملی فرد)
     render_header('سفارش غذا', $user);
     echo '<link rel="stylesheet" href="assets/food-order.css?v=10">';
     echo '<section class="food-order-page"><header class="page-heading"><div><span class="eyebrow">برنامه غذایی سازمان</span><h1>سفارش غذا</h1></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></header>';

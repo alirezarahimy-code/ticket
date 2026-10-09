@@ -618,9 +618,7 @@ function render_header(string $title, ?array $user = null): void
         if (user_can($user, 'traffic.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=traffic-control', 'کنترل تردد', 'traffic') . '</li>';
         }
-        if (user_can($user, 'foodorder.self')) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
-        }
+        $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
         if (food_ticket_is_allowed($user)) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'چاپ فیش غذا', 'food') . '</li>';
         }
@@ -3062,7 +3060,6 @@ $pagePermissions = [
     'cd-dvd-history' => 'cddvd.history',
     'traffic-control' => 'traffic.view',
     'traffic-control-print' => 'traffic.view',
-    'food-order' => 'foodorder.self',
     'knowledge' => 'knowledge.view',
     'backup' => 'backup.manage',
     'organization' => 'org.view',
