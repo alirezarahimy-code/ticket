@@ -9,7 +9,7 @@
 .fm-tabs { display:flex; gap:8px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:10px; }
 .fm-tab { border:1px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); padding:9px 14px; font-weight:700; cursor:pointer; }
 .fm-tab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
-.fm-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(270px,.8fr); gap:16px; align-items:start; }
+.fm-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 .fm-card { background:var(--card,#fff); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); padding:16px; min-width:0; }
 .fm-card h3 { margin:0 0 12px; color:var(--navy); font-size:17px; }
 .fm-card p { color:var(--muted); line-height:1.8; }
@@ -30,7 +30,7 @@
 .fm-food-selection > .fm-food-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; min-width:0; }
 .fm-food-selection .fm-food-check { display:flex; align-items:flex-start; min-width:0; padding:9px 10px; gap:8px; line-height:1.7; }
 .fm-food-check > span { min-width:0; overflow-wrap:anywhere; word-break:break-word; }
-.fm-food-check input { flex:0 0 auto; margin-top:4px; }
+.fm-food-check input { flex:0 0 auto; width:16px; height:16px; min-width:16px; margin:3px 0 0; padding:0; border:0; accent-color:var(--teal); }
 .fm-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
 .fm-actions .btn,.fm-actions .button { cursor:pointer; }
 .fm-small { font-size:11px; color:var(--muted); }
