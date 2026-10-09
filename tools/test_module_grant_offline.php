@@ -60,5 +60,13 @@ $_SERVER['REQUEST_METHOD'] = 'POST';
 check('ثبت غیبت گروه‌ها با food.groups_edit باز است', food_ticket_route_allowed($user, 'absence-save'));
 check('ثبت در فهرست سفارش‌ها بسته است', !food_ticket_route_allowed($user, 'orders-import'));
 
+// پیش‌فرض نقش user: بخش‌های چاپ فیش و نظارت برداشته شده‌اند؛ سفارش غذای خود باقی است.
+$userDefaults = permission_defaults()['user'] ?? [];
+foreach (['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'governance.manage', 'governance.view', 'cddvd.view', 'traffic.view'] as $removed) {
+    check("پیش‌فرض user بدون {$removed}", !in_array($removed, $userDefaults, true));
+}
+check('پیش‌فرض user شامل سفارش غذای خود است', in_array('foodorder.self', $userDefaults, true));
+check('پیش‌فرض user شامل ثبت تیکت است', in_array('ticket.create', $userDefaults, true));
+
 echo "\nنتیجه: $pass موفق، $fail ناموفق\n";
 exit($fail === 0 ? 0 : 1);

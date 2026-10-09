@@ -322,6 +322,12 @@ function permission_defaults(): array
     return $defaults;
 }
 
+/** کدهایی که از پیش‌فرض نقش user برداشته شدند (تصمیم کاربر). */
+function user_default_removed_codes(): array
+{
+    return ['cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.monitor_edit', 'food.orders_edit', 'governance.view', 'governance.manage'];
+}
+
 function permission_defaults_raw(): array
 {
     $all = ['dash.view', 'search.global', 'notif.view', 'profile.edit', 'ticket.create', 'ticket.view_own', 'ticket.reply', 'ticket.rate', 'services.view', 'knowledge.view', 'cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'foodorder.self', 'org.view', 'governance.manage'];
@@ -334,7 +340,9 @@ function permission_defaults_raw(): array
         'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
         'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
         'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
-        'user' => $all,
+        // کاربر عادی (از جمله کاربران AD): بخش‌های چاپ فیش، نظارت و سیاست‌های دارایی/ترافیک ندارد.
+        // «سفارش غذای خود» (foodorder.self) عمداً باقی است تا کاربر بتواند برای خودش سفارش دهد.
+        'user' => array_values(array_diff($all, user_default_removed_codes())),
     ];
 }
 
@@ -434,6 +442,24 @@ function role_permissions_migrate_once(): void
     $done = true;
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
+    }
+    if (setting('user_defaults_narrowed_v1') !== '1') {
+        // ردیف‌های ذخیره‌شدهٔ نقش user هم باید همین تغییر را ببینند. اگر ادمین آن را دستی تنظیم کرده باشد، دست نمی‌خورد.
+        try {
+            if (setting('role_permissions_custom_user') !== '1') {
+                $removed = user_default_removed_codes();
+                $placeholders = implode(',', array_fill(0, count($removed), '?'));
+                $delete = db()->prepare("DELETE FROM role_permissions WHERE role = 'user' AND permission IN ($placeholders)");
+                $delete->execute($removed);
+                save_setting('user_defaults_narrowed_report', (string) $delete->rowCount());
+            } else {
+                save_setting('user_defaults_narrowed_report', 'custom');
+            }
+            save_setting('user_defaults_narrowed_v1', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // دفعهٔ بعد دوباره تلاش می‌شود.
+        }
     }
     if (setting('legacy_admin_removed_v1') !== '1') {
         // نقش قدیمی «admin» حذف شد. ادمین اصلی به primary_admin می‌رود و بقیه به supervisor.
