@@ -784,8 +784,6 @@ CREATE TABLE IF NOT EXISTS food_ticket_config (
     enabled TINYINT(1) NOT NULL DEFAULT 0,
     attendance_path VARCHAR(500) NOT NULL DEFAULT '',
     attendance_password_enc TEXT NULL,
-    orders_path VARCHAR(500) NOT NULL DEFAULT '',
-    orders_table VARCHAR(128) NOT NULL DEFAULT 'food_fish',
     printer_mode ENUM('tcp_raw','windows_share') NOT NULL DEFAULT 'tcp_raw',
     printer_host VARCHAR(255) NOT NULL DEFAULT '',
     printer_port SMALLINT UNSIGNED NOT NULL DEFAULT 9100,

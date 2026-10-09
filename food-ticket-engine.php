@@ -349,7 +349,7 @@ function food_ticket_sort_punches(array $items): array
  * تصمیم برای یک ردیف source_row
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
-function food_ticket_decide_punch(array $item, array $config, array &$orderMaps, $ordersConnection): array
+function food_ticket_decide_punch(array $item, array $config, array &$orderMaps): array
 {
     // C_Date=20261002 ، C_Time=143940 ، L_UID=Number (377/0377/00377)
     $date = food_ticket_parse_date($item['date_raw'] ?? null);
@@ -512,7 +512,7 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps,
         ];
     }
 
-    return food_ticket_decide_for_user($user, $date, $base, $config, $orderMaps, $ordersConnection);
+    return food_ticket_decide_for_user($user, $date, $base, $config, $orderMaps);
 }
 
 /**
@@ -524,7 +524,7 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps,
  * @param array<string,mixed> $base فیلدهای مشترک رویداد (source_key, punch_date, ...)
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
-function food_ticket_decide_for_user(array $user, string $date, array $base, array $config, array &$orderMaps, $ordersConnection): array
+function food_ticket_decide_for_user(array $user, string $date, array $base, array $config, array &$orderMaps): array
 {
     if (!(int) ($user['is_active'] ?? 0)) {
         return [
@@ -709,7 +709,6 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
 
     $sourceDb = null;
     // Kept as a null compatibility argument for legacy decision hooks; no order DB connection exists.
-    $orders = null;
     try {
         if (!(int) ($config['enabled'] ?? 0)) {
             $summary['message'] = 'پردازش چاپ فیش غیرفعال است.';
@@ -745,7 +744,7 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
                 // اعضای واجد شرایط پیش از تشخیص کاربر/مهمان پردازش می‌شوند و ردیف SOURCE_TABLE خودشان مصرف نمی‌شود.
                 if (function_exists('food_ticket_group_try_process')) {
                     try {
-                        $groupResult = food_ticket_group_try_process($item, $config, $orderMaps, $orders, $summary);
+                        $groupResult = food_ticket_group_try_process($item, $config, $orderMaps, $summary);
                     } catch (Throwable $groupEx) {
                         // خطای ماژول گروه، پردازش عادی بقیهٔ ردیف‌ها را متوقف نمی‌کند و ردیف دست‌نخورده می‌ماند.
                         $summary['errors']++;
@@ -769,7 +768,7 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
                         continue;
                     }
                 }
-                $decision = food_ticket_decide_punch($item, $config, $orderMaps, $orders);
+                $decision = food_ticket_decide_punch($item, $config, $orderMaps);
                 $type = $decision['event_type'];
                 $payload = $decision['payload'];
 
