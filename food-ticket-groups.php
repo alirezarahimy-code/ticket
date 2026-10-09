@@ -448,7 +448,7 @@ function food_ticket_can_override_absence(array $user): bool
     } catch (Throwable) {
         // نادیده: بررسی مجوز کافی است
     }
-    return in_array((string) ($user['role'] ?? ''), ['admin', 'supervisor', 'support_manager'], true);
+    return in_array((string) ($user['role'] ?? ''), ['supervisor', 'support_manager'], true);
 }
 
 // ───────────────────────── گروه‌ها: بارگذاری و شناسایی ─────────────────────────

@@ -341,7 +341,7 @@ function org_position_unit_types(): array
 
 function org_exempt_roles(): array
 {
-    return ['supervisor', 'support_manager', 'inspector', 'primary_admin', 'admin'];
+    return ['supervisor', 'support_manager', 'inspector', 'primary_admin'];
 }
 
 function org_ensure_role_sync_columns(): void

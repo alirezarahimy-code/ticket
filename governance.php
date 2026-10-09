@@ -53,7 +53,7 @@ function gov_parse_datetime(string $value): ?string
 
 function gov_scope(array $user, string $alias = 'r'): array
 {
-    if (in_array($user['role'], ['admin', 'primary_admin', 'supervisor', 'support_manager', 'inspector'], true)) {
+    if (in_array($user['role'], ['primary_admin', 'supervisor', 'support_manager', 'inspector'], true)) {
         return ['', []];
     }
     $departmentId = (int) ($user['department_id'] ?? 0);
@@ -78,7 +78,7 @@ function gov_fetch_ticket(int $ticketId): ?array
 
 function gov_can_view_ticket(array $ticket, array $user): bool
 {
-    if (in_array($user['role'], ['admin', 'primary_admin', 'supervisor', 'support_manager', 'inspector'], true) || (int) $ticket['requester_id'] === (int) $user['id']) {
+    if (in_array($user['role'], ['primary_admin', 'supervisor', 'support_manager', 'inspector'], true) || (int) $ticket['requester_id'] === (int) $user['id']) {
         return true;
     }
     if ($user['role'] === 'agent') {
@@ -103,7 +103,7 @@ function gov_fetch_problem(int $problemId): ?array
 
 function gov_can_view_record(array $record, array $user): bool
 {
-    if (in_array($user['role'], ['admin', 'primary_admin', 'supervisor', 'support_manager', 'inspector'], true)) {
+    if (in_array($user['role'], ['primary_admin', 'supervisor', 'support_manager', 'inspector'], true)) {
         return true;
     }
     if (in_array((string) $user['role'], ['manager', 'support_manager'], true)) {
@@ -149,10 +149,10 @@ function gov_header(string $title, array $user): void
     $__notif = notification_header_summary((int) $user['id']);
     $notificationCount = $__notif['unread'];
     $staffLinks = '<a href="index.php?page=queue">صف کاری</a><a href="index.php?page=reports">گزارش‌ها</a><a href="index.php?page=assets">شناسنامه‌های فنی</a><a href="governance.php">تغییر و مشکل</a>';
-    if (in_array($user['role'], ['supervisor', 'admin', 'primary_admin', 'support_manager'], true)) {
+    if (in_array($user['role'], ['supervisor', 'primary_admin', 'support_manager'], true)) {
         $staffLinks .= '<a href="index.php?page=supervisor">پنل سوپروایزر</a>';
     }
-    if (in_array((string) $user['role'], ['admin', 'primary_admin'], true)) {
+    if (in_array((string) $user['role'], ['primary_admin'], true)) {
         $staffLinks .= '<a href="index.php?page=organization">سازمان</a><a href="index.php?page=settings">تنظیمات</a><a href="ola.php">OLA</a>';
     }
     echo '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a><nav class="topnav"><a href="index.php">داشبورد</a><a href="index.php?page=new-ticket">ثبت تیکت</a><a href="index.php?page=knowledge">دانش‌نامه</a>' . $staffLinks . '<a class="notification-link" href="index.php?page=notifications">اعلان‌ها' . ($notificationCount > 0 ? '<b>' . $notificationCount . '</b>' : '') . '</a><span class="user-chip">' . e($user['full_name']) . '</span><form class="logout-form" method="post" action="index.php">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">خروج</button></form></nav></div></header><div class="content-wrap"><div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $__notif['latest'] . '" aria-live="polite"></div>';
@@ -461,7 +461,7 @@ if ($selectedChange) {
     if (in_array($selectedChange['status'], ['draft', 'rejected'], true)) {
         echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="submit_change"><input type="hidden" name="change_id" value="' . (int) $selectedChange['id'] . '"><button class="button" type="submit">ارسال برای CAB</button></form>';
     }
-    if (in_array($user['role'], ['supervisor', 'admin', 'primary_admin', 'support_manager'], true) && in_array($selectedChange['status'], ['submitted', 'cab_review'], true)) {
+    if (in_array($user['role'], ['supervisor', 'primary_admin', 'support_manager'], true) && in_array($selectedChange['status'], ['submitted', 'cab_review'], true)) {
         echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="cab_decision"><input type="hidden" name="change_id" value="' . (int) $selectedChange['id'] . '"><input type="hidden" name="decision" value="approved"><input name="note" placeholder="یادداشت CAB اختیاری"><button class="button" type="submit">تأیید CAB</button></form><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="cab_decision"><input type="hidden" name="change_id" value="' . (int) $selectedChange['id'] . '"><input type="hidden" name="decision" value="rejected"><input name="note" placeholder="دلیل رد"><button class="button danger-button" type="submit">رد CAB</button></form>';
     }
     $transitions = ['approved' => 'زمان‌بندی', 'scheduled' => 'ثبت اجرای موفق', 'implemented' => 'بستن تغییر', 'rolled_back' => 'بستن پس از بازگشت'];

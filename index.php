@@ -2272,13 +2272,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('برای کارشناس یا مدیر، واحد رسیدگی IT یا پشتیبانی را انتخاب کنید.');
             }
             $isPrimaryAdmin = $role === 'primary_admin' ? 1 : ($role === 'admin' && !empty($_POST['is_primary_admin']) ? 1 : 0);
-            if ($userId === (int) $admin['id'] && !in_array($role, ['admin', 'primary_admin'], true)) {
+            if ($userId === (int) $admin['id'] && !in_array($role, ['primary_admin'], true)) {
                 throw new RuntimeException('ادمین اصلی فعلی نمی‌تواند خودش را از مدیریت اصلی خارج کند.');
             }
             if ($needsHandlingUnit && !$departmentId) {
                 throw new RuntimeException('برای کارشناس یا مدیر، واحد سازمانی را انتخاب کنید.');
             }
-            if (!in_array($role, ['admin', 'primary_admin'], true) && $isPrimaryAdmin) {
+            if (!in_array($role, ['primary_admin'], true) && $isPrimaryAdmin) {
                 throw new RuntimeException('فقط مدیر سامانه می‌تواند ادمین اصلی باشد.');
             }
             $targetQuery = db()->prepare('SELECT role, is_primary_admin, is_active, department_id FROM users WHERE id = ? LIMIT 1');
@@ -2288,7 +2288,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('کاربر پیدا نشد.');
             }
             $isActive = array_key_exists('is_active', $_POST) ? (!empty($_POST['is_active']) ? 1 : 0) : (int) $target['is_active'];
-            if ((int) $target['is_primary_admin'] === 1 && (!$isPrimaryAdmin || !in_array($role, ['admin', 'primary_admin'], true))) {
+            if ((int) $target['is_primary_admin'] === 1 && (!$isPrimaryAdmin || !in_array($role, ['primary_admin'], true))) {
                 $primaryCount = (int) db()->query('SELECT COUNT(*) FROM users WHERE (role = "admin" OR role = "primary_admin") AND is_primary_admin = 1 AND is_active = 1')->fetchColumn();
                 if ($primaryCount <= 1) {
                     throw new RuntimeException('حداقل یک ادمین اصلی باید باقی بماند.');

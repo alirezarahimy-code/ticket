@@ -435,6 +435,22 @@ function role_permissions_migrate_once(): void
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
     }
+    if (setting('legacy_admin_removed_v1') !== '1') {
+        // نقش قدیمی «admin» حذف شد. ادمین اصلی به primary_admin می‌رود و بقیه به supervisor.
+        // هیچ ادمینی بی‌صدا تنزل نمی‌یابد؛ تعداد هر گروه در تنظیمات ثبت می‌شود.
+        try {
+            $countPrimary = (int) db()->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND is_primary_admin = 1")->fetchColumn();
+            $countOther = (int) db()->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND (is_primary_admin = 0 OR is_primary_admin IS NULL)")->fetchColumn();
+            db()->exec("UPDATE users SET role = 'primary_admin', is_primary_admin = 1 WHERE role = 'admin' AND is_primary_admin = 1");
+            db()->exec("UPDATE users SET role = 'supervisor' WHERE role = 'admin'");
+            db()->exec("DELETE FROM role_permissions WHERE role = 'admin'");
+            save_setting('legacy_admin_removed_report', json_encode(['to_primary_admin' => $countPrimary, 'to_supervisor' => $countOther], JSON_UNESCAPED_UNICODE));
+            save_setting('legacy_admin_removed_v1', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // دفعهٔ بعد دوباره تلاش می‌شود.
+        }
+    }
     if (setting('perm_edit_v3') !== '1') {
         try {
             // پاسخ به تیکت پیش‌تر با کد کنترل نمی‌شد؛ پس به هر نقش ذخیره‌شده‌ای داده می‌شود تا دسترسی حفظ شود.
@@ -695,7 +711,7 @@ function permission_icon(string $key): string
 /** Roles treated as staff (see queue/assignee logic). */
 function staff_role_codes(): array
 {
-    return ['agent', 'manager', 'supervisor', 'admin', 'primary_admin', 'support_manager', 'inspector'];
+    return ['agent', 'manager', 'supervisor', 'primary_admin', 'support_manager', 'inspector'];
 }
 
 function is_staff_role(?string $role): bool
@@ -706,7 +722,7 @@ function is_staff_role(?string $role): bool
 /** Roles that can administer the whole system. */
 function admin_role_codes(): array
 {
-    return ['admin', 'primary_admin'];
+    return ['primary_admin'];
 }
 
 function is_admin_role(?string $role): bool
@@ -717,7 +733,7 @@ function is_admin_role(?string $role): bool
 /** Roles allowed to see/handle the whole ticket pool. */
 function global_ticket_role_codes(): array
 {
-    return ['supervisor', 'admin', 'primary_admin', 'support_manager', 'inspector'];
+    return ['supervisor', 'primary_admin', 'support_manager', 'inspector'];
 }
 
 function is_global_ticket_role(?string $role): bool
@@ -734,7 +750,7 @@ function is_department_scoped_role(?string $role): bool
 /** Roles that may be assigned tickets (ticket handlers). */
 function assignable_role_codes(): array
 {
-    return ['agent', 'manager', 'support_manager', 'admin', 'primary_admin'];
+    return ['agent', 'manager', 'support_manager', 'primary_admin'];
 }
 
 function is_assignable_role(?string $role): bool

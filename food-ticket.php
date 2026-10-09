@@ -4012,7 +4012,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 $target = db()->prepare('SELECT role, is_primary_admin FROM users WHERE id = ? LIMIT 1');
                 $target->execute([$id]);
                 $row = $target->fetch() ?: [];
-                if (in_array((string) ($row['role'] ?? ''), ['admin', 'primary_admin'], true) || (int) ($row['is_primary_admin'] ?? 0) === 1) {
+                if (in_array((string) ($row['role'] ?? ''), ['primary_admin'], true) || (int) ($row['is_primary_admin'] ?? 0) === 1) {
                     throw new RuntimeException('امکان غیرفعال کردن مدیر سامانه از این بخش وجود ندارد.');
                 }
                 db()->prepare('UPDATE users SET is_active = 0 WHERE id = ? AND employee_number IS NOT NULL AND role <> "admin"')->execute([$id]);

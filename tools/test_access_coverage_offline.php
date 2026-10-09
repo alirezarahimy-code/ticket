@@ -84,13 +84,13 @@ foreach ($defaults as $role => $codes) {
     }
 }
 check('همهٔ کدهای پیش‌فرض در کاتالوگ هستند', $badCodes === [], implode(', ', $badCodes));
-check('نقش قدیمی admin در فهرست نقش‌ها هست', isset($roles['admin']));
-check('پیش‌فرض admin کامل است', ($defaults['admin'] ?? []) === $catalog);
-check('admin و user یکسان نیستند', ($defaults['admin'] ?? []) !== ($defaults['user'] ?? []));
+check('نقش قدیمی admin از فهرست نقش‌ها حذف شده', !isset($roles['admin']));
+check('نقش admin در پیش‌فرض‌ها نیست', !isset($defaults['admin']));
+check('نقش user پیش‌فرض دارد', isset($defaults['user']));
 
 // بدون دیتابیس، جدول role_permissions آماده نیست ⇒ مسیر «پیش‌فرض» می‌آید.
 $adminSet = role_permission_set('admin');
-check('نقش admin بدون DB بی‌دسترسی نمی‌شود', count($adminSet) === count($catalog), 'تعداد: ' . count($adminSet) . ' از ' . count($catalog));
+check('نقش ناشناسِ admin به نقش user برمی‌گردد (بی‌دسترسی نیست)', $adminSet === role_permission_set('user'));
 check('نقش ناشناس ⇐ کاربر می‌شود (رفتار قبلی حفظ شد)', role_permission_set('no_such_role') === role_permission_set('user'));
 
 $permSource = (string) file_get_contents(APP_ROOT . '/permissions.php');
@@ -128,10 +128,10 @@ check('فرم: نشان «پیش‌فرض کد» / «ویرایش‌شده»', s
 check('فرم: نشان قبل از استفاده تعریف شده', ($badgeDefine = strpos($indexSource2, '$roleStateBadge = $isPrimary')) !== false && strpos($indexSource2, '\' . $roleStateBadge . \'') > $badgeDefine);
 check('فرم: دکمهٔ بازگردانی داخل همان فرم نقش است', str_contains($indexSource2, 'name="action" value="reset_role_defaults" data-confirm='));
 check('بازگردانی همهٔ نقش‌ها شامل نقش admin هم می‌شود', str_contains($indexSource2, 'foreach (array_keys(permission_roles()) as $resetRole)'));
-check('فرم: نقش admin در فهرست پنل‌ها', str_contains($indexSource2, "'admin' => ['icon' => 'owner', 'desc' => 'نقش قدیمی سامانه"));
+check('فرم: نقش admin در فهرست پنل‌ها نیست', !str_contains($indexSource2, "'admin' => ['icon' => 'owner'"));
 
 $staff = staff_role_codes();
-foreach (['manager', 'agent', 'supervisor', 'support_manager', 'inspector', 'admin'] as $need) {
+foreach (['manager', 'agent', 'supervisor', 'support_manager', 'inspector'] as $need) {
     check('نقش کارمندی ' . $need . ' در staff_role_codes()', in_array($need, $staff, true));
 }
 check('کاربر عادی کارمند حساب نمی‌شود', !in_array('user', $staff, true));

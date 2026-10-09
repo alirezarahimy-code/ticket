@@ -662,7 +662,7 @@ function require_login(): array
 function require_admin(): array
 {
     $user = require_login();
-    if (!(function_exists('is_admin_role') ? is_admin_role($user['role']) : in_array($user['role'], ['admin', 'primary_admin'], true))) {
+    if (!(function_exists('is_admin_role') ? is_admin_role($user['role']) : in_array($user['role'], ['primary_admin'], true))) {
         http_response_code(403);
         exit('دسترسی به این بخش مجاز نیست.');
     }
@@ -685,7 +685,7 @@ function require_primary_admin(): array
 function require_staff(): array
 {
     $user = require_login();
-    if (!(function_exists('is_staff_role') ? is_staff_role($user['role']) : in_array($user['role'], ['agent', 'manager', 'supervisor', 'admin'], true))) {
+    if (!(function_exists('is_staff_role') ? is_staff_role($user['role']) : in_array($user['role'], ['agent', 'manager', 'supervisor'], true))) {
         http_response_code(403);
         exit('دسترسی به این بخش مجاز نیست.');
     }
@@ -695,7 +695,7 @@ function require_staff(): array
 function require_supervisor(): array
 {
     $user = require_login();
-    if (!in_array($user['role'], ['supervisor', 'admin', 'primary_admin'], true)) {
+    if (!in_array($user['role'], ['supervisor', 'primary_admin'], true)) {
         http_response_code(403);
         exit('دسترسی به پنل سوپروایزر مجاز نیست.');
     }
@@ -704,7 +704,7 @@ function require_supervisor(): array
 
 function ticket_scope(array $user, string $alias = 't'): array
 {
-    if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor', 'admin'], true)) {
+    if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) {
         return ['', []];
     }
     if (in_array($user['role'], ['agent', 'manager'], true)) {
@@ -727,7 +727,7 @@ function user_service_group(array $user): string
 
 function asset_scope(array $user, string $alias = 'a'): array
 {
-    if ((function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor', 'admin'], true)) || (is_it_agent($user) && user_service_group($user) === 'it')) {
+    if ((function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) || (is_it_agent($user) && user_service_group($user) === 'it')) {
         return ['', []];
     }
     if (user_service_group($user) !== 'it') {
@@ -858,7 +858,7 @@ function ldap_role_for_groups(array $groups): string
         return 'user';
     }
     $groups = array_map(static fn (mixed $group): string => strtolower(trim((string) $group)), $groups);
-    foreach (['admin', 'supervisor', 'agent', 'manager'] as $role) {
+    foreach (['supervisor', 'agent', 'manager'] as $role) {
         foreach ((array) ($mapping[$role] ?? []) as $mappedGroup) {
             if (in_array(strtolower(trim((string) $mappedGroup)), $groups, true)) {
                 return $role;
