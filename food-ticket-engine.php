@@ -357,20 +357,34 @@ function food_guest_cap_mode(): string
     return $mode === 'variable' ? 'variable' : 'fixed';
 }
 
-/** ساعت قطع سقف متغیر (HH:MM:SS). خروج مراجعین قبل از این ساعت از سقف کم می‌شود؛ بعد از آن نه. */
+/** ساعت قطع سقف متغیر (HH:MM:SS). خروج مراجعین قبل از این ساعت (تا ۱۲:۰۰:۵۹) از سقف کم می‌شود؛ بعد از آن نه. */
 function food_guest_cap_cutoff(): string
 {
-    $raw = function_exists('setting') ? (string) (setting('food_guest_cap_cutoff', '12:00') ?? '12:00') : '12:00';
-    return preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $raw) ? (strlen($raw) === 5 ? $raw . ':00' : $raw) : '12:00:00';
+    $raw = function_exists('setting') ? (string) (setting('food_guest_cap_cutoff', '12:01') ?? '12:01') : '12:01';
+    return preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $raw) ? (strlen($raw) === 5 ? $raw . ':00' : $raw) : '12:01:00';
 }
 
+/** بازهٔ فعال سقف متغیر: هر روز از ۱۱:۰۰ تا قبل از ۱۵:۰۰. بیرون از بازه سقف صفر است. */
+const FOOD_GUEST_CAP_WINDOW_START = '11:00:00';
+const FOOD_GUEST_CAP_WINDOW_END = '15:00:00';
+
 /**
- * سقف متغیر = (تعداد کسانی که تا آن لحظه وارد شده‌اند) − (تعداد کسانی که قبل از ساعت قطع خارج شده‌اند).
+ * سقف متغیر = (تعداد کسانی که از اول روز وارد شده‌اند تا آن لحظه) − (تعداد کسانی که قبل از ساعت قطع خارج شده‌اند).
  * خروج بعد از ساعت قطع سقف را کم نمی‌کند، چون آن افراد فیش گرفته و غذا خورده‌اند.
+ * ورودی و خروج‌های قبل از ۱۱ هم در محاسبه‌اند؛ کسانی که قبل از ۱۱ آمده و هنوز داخل‌اند، ساعت ۱۱ جزو سقف‌اند.
  */
 function food_guest_variable_cap_from_counts(int $entries, int $earlyExits): int
 {
     return max(0, $entries - $earlyExits);
+}
+
+/** سقف متغیر در یک ساعت مشخص؛ بیرون از بازهٔ ۱۱ تا ۱۵ صفر است. */
+function food_guest_variable_cap_at(string $time, int $entries, int $earlyExits): int
+{
+    if ($time < FOOD_GUEST_CAP_WINDOW_START || $time >= FOOD_GUEST_CAP_WINDOW_END) {
+        return 0;
+    }
+    return food_guest_variable_cap_from_counts($entries, $earlyExits);
 }
 
 /**
@@ -389,7 +403,7 @@ function food_ticket_guest_variable_cap(?string $date, ?string $time): ?int
         );
         $query->execute([$date, $time, $date, $cutoff, $time]);
         $row = $query->fetch(PDO::FETCH_ASSOC) ?: ['entries' => 0, 'early_exits' => 0];
-        return food_guest_variable_cap_from_counts((int) $row['entries'], (int) $row['early_exits']);
+        return food_guest_variable_cap_at($time, (int) $row['entries'], (int) $row['early_exits']);
     } catch (Throwable $exception) {
         return null;
     }

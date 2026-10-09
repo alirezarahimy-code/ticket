@@ -55,7 +55,13 @@ check('سقف کارت ۲: صادرشده ۲ ⇒ بسته حتی اگر سقف �
 check('سقف کارت ۲: صادرشده ۱ ⇒ مجاز', food_ticket_guest_cap_reached(1, 10, 20, 1, 2) === false);
 
 // ۸) پیش‌فرض‌ها بدون تنظیمات: حالت ثابت و ساعت قطع ۱۲:۰۰.
-check('پیش‌فرض ساعت قطع ۱۲:۰۰:۰۰', food_guest_cap_cutoff() === '12:00:00');
+check('پیش‌فرض ساعت قطع ۱۲:۰۱:۰۰', food_guest_cap_cutoff() === '12:01:00');
+// بازهٔ ۱۱ تا ۱۵: قبل از ۱۱ و از ۱۵ به بعد سقف صفر است.
+check('ساعت ۱۰:۵۹ سقف صفر', food_guest_variable_cap_at('10:59:59', 3, 0) === 0);
+check('ساعت ۱۱:۰۰ سقف = حاضرین', food_guest_variable_cap_at('11:00:00', 3, 0) === 3);
+check('ساعت ۱۴:۵۹ هنوز فعال', food_guest_variable_cap_at('14:59:59', 4, 0) === 4);
+check('ساعت ۱۵:۰۰ سقف صفر و روز بعد دوباره از ۱۱', food_guest_variable_cap_at('15:00:00', 4, 0) === 0);
+check('خروج ۱۲:۰۰:۵۹ سقف را کم می‌کند', food_guest_variable_cap_at('12:01:00', 4, 1) === 3);
 check('پیش‌فرض حالت سقف ثابت', food_guest_cap_mode() === 'fixed');
 
 echo "\nنتیجه: $pass موفق، $fail ناموفق\n";
