@@ -28,6 +28,9 @@ if (is_file(__DIR__ . '/food-ticket-web-host.php')) {
 if (is_file(__DIR__ . '/food-ticket-templates.php')) {
     require_once __DIR__ . '/food-ticket-templates.php';
 }
+if (is_file(__DIR__ . '/food-order-import.php')) {
+    require_once __DIR__ . '/food-order-import.php';
+}
 if (is_file(__DIR__ . '/food-ticket-import.php')) {
     require_once __DIR__ . '/food-ticket-import.php';
 }
@@ -98,6 +101,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'reports/export' => 'food.reports',
         'employees' => 'food.employees',
         'employees-import' => 'food.employees',
+        'orders-import' => 'food.orders',
         'employees-sample' => 'food.employees',
         'guest-cards' => 'food.guest',
         'food-groups' => 'food.groups',
@@ -3936,6 +3940,10 @@ function food_ticket_api_handle(string $route, array $user): never
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($route, ['browse-file', 'browse-folder', 'browse-list'], true)) {
             food_ticket_api_json(food_ticket_windows_browse($route === 'browse-list' ? ((food_ticket_api_body()['mode'] ?? '') === 'folder' ? 'browse-folder' : 'browse-file') : $route, $user));
+        }
+        if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'POST'], true) && $route === 'orders-import' && function_exists('food_order_import_handle')) {
+            // فرم ایمپورت سفارش‌های قبلی (Access/Excel/CSV) → جدول داخلی food_orders
+            food_order_import_handle($user);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'employees-import') {
             // ورودی multipart است (نه JSON)؛ فایل در $_FILES و گزینه‌ها در $_POST.
