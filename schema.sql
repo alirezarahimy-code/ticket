@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_it_agent TINYINT(1) NOT NULL DEFAULT 0,
     is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
     role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector') NOT NULL DEFAULT 'user',
-    auth_source ENUM('local','ldap') NOT NULL DEFAULT 'local',
+    auth_source ENUM('local','ldap','food') NOT NULL DEFAULT 'local',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     last_login_at DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

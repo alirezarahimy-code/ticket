@@ -326,7 +326,7 @@ function food_ticket_import_apply(array $parsed, bool $updateExisting = true): a
     $seen = [];
     $out = [];
     $find = db()->prepare('SELECT id, first_name, last_name, national_code, full_name FROM users WHERE employee_number = ? LIMIT 1');
-    $insert = db()->prepare('INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (?, NULL, ?, ?, ?, ?, ?, \'user\', \'local\', 1)');
+    $insert = db()->prepare('INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (?, NULL, ?, ?, ?, ?, ?, \'user\', \'food\', 1)');
     $update = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, national_code = ? WHERE id = ?');
 
     foreach ($parsed['rows'] as $row) {
