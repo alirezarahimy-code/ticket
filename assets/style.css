@@ -1363,3 +1363,9 @@ html[data-theme="copper"] .card { border-top-color:#e5d2b8; }
     body.cd-dvd-print-selected > .cd-dvd-print-host .cd-dvd-record-row,
     body.cd-dvd-print-selected > .cd-dvd-print-host .cd-dvd-surface-row { break-inside:avoid; }
 }
+
+/* ویرایش زیر هر بخش: تورفتگی و حالت غیرفعال وقتی خودِ بخش تیک ندارد */
+.perm-item.perm-child { margin-right: 26px; background: #fbfcfe; border-style: dashed; }
+.perm-item.perm-child .perm-label { font-weight: 600; }
+.perm-item.perm-child.is-disabled { opacity: .5; cursor: not-allowed; }
+.perm-item.perm-child.is-disabled input { cursor: not-allowed; }

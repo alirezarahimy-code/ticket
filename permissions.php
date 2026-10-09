@@ -63,7 +63,7 @@ function permission_catalog(): array
             'label' => 'خدمات و دسته‌بندی',
             'items' => [
                 ['code' => 'services.view', 'label' => 'مشاهدهٔ خدمات'],
-                ['code' => 'services.manage', 'label' => 'مدیریت خدمات'],
+                ['code' => 'services.manage', 'label' => 'ویرایش'],
                 ['code' => 'service_cat.manage', 'label' => 'مدیریت دسته‌بندی خدمات'],
                 ['code' => 'service_field.manage', 'label' => 'مدیریت فیلدهای خدمت'],
             ],
@@ -73,7 +73,7 @@ function permission_catalog(): array
             'label' => 'دانش‌نامه',
             'items' => [
                 ['code' => 'knowledge.view', 'label' => 'مشاهدهٔ دانش‌نامه'],
-                ['code' => 'knowledge.manage', 'label' => 'افزودن/ویرایش مقاله'],
+                ['code' => 'knowledge.manage', 'label' => 'ویرایش'],
             ],
         ],
         [
@@ -83,7 +83,7 @@ function permission_catalog(): array
                 ['code' => 'cddvd.view', 'label' => 'مشاهدهٔ فرم کنترل CD/DVD'],
                 ['code' => 'cddvd.submit_out', 'label' => 'ثبت خروج رسانه'],
                 ['code' => 'cddvd.submit_in', 'label' => 'ثبت ورود رسانه (بازرسی)'],
-                ['code' => 'cddvd.edit', 'label' => 'ویرایش/حذف ثبت‌ها'],
+                ['code' => 'cddvd.edit', 'label' => 'ویرایش'],
                 ['code' => 'cddvd.view_all', 'label' => 'مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)'],
                 ['code' => 'cddvd.history', 'label' => 'تاریخچهٔ سریال'],
                 ['code' => 'cddvd.export', 'label' => 'خروجی Excel/CSV'],
@@ -94,7 +94,7 @@ function permission_catalog(): array
             'label' => 'کنترل تردد مراجعین',
             'items' => [
                 ['code' => 'traffic.view', 'label' => 'مشاهدهٔ کنترل تردد'],
-                ['code' => 'traffic.manage', 'label' => 'ثبت/ویرایش/حذف تردد'],
+                ['code' => 'traffic.manage', 'label' => 'ویرایش'],
                 ['code' => 'traffic.destinations', 'label' => 'مدیریت مقصدهای ملاقات'],
             ],
         ],
@@ -105,7 +105,7 @@ function permission_catalog(): array
                 ['code' => 'assets.view', 'label' => 'فهرست شناسنامه‌ها'],
                 ['code' => 'assets.own_unit', 'label' => 'فقط دارایی‌های واحد خودم'],
                 ['code' => 'asset.view', 'label' => 'مشاهدهٔ شناسنامهٔ دارایی'],
-                ['code' => 'asset.edit', 'label' => 'ویرایش شناسنامه'],
+                ['code' => 'asset.edit', 'label' => 'ویرایش'],
                 ['code' => 'asset.extract', 'label' => 'استخراج سخت‌افزار (همین سرور)'],
                 ['code' => 'asset.remote_extract', 'label' => 'استخراج از راه دور (WMI)'],
                 ['code' => 'asset.history', 'label' => 'تاریخچهٔ دارایی'],
@@ -138,8 +138,8 @@ function permission_catalog(): array
                 ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
                 ['code' => 'food.employees', 'label' => 'کارکنان'],
                 ['code' => 'food.guest', 'label' => 'کارت مهمان'],
-                ['code' => 'food.groups_view', 'label' => 'گروه‌های غذا: فقط مشاهدهٔ محتوا (بدون ویرایش)'],
                 ['code' => 'food.groups', 'label' => 'گروه‌های غذا (نماینده با L_UID و غیبت روزانه)'],
+                ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
                 ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
                 ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
@@ -162,7 +162,7 @@ function permission_catalog(): array
             'label' => 'سازمان',
             'items' => [
                 ['code' => 'org.view', 'label' => 'مشاهدهٔ چارت سازمانی'],
-                ['code' => 'org.manage', 'label' => 'مدیریت ساختار سازمانی'],
+                ['code' => 'org.manage', 'label' => 'ویرایش'],
             ],
         ],
         [
@@ -194,9 +194,66 @@ function permission_all_codes(): array
 }
 
 /**
+ * نقشهٔ «بخش ← ویرایش»: کد ویرایش فرزند کد مشاهدهٔ همان بخش است.
+ * فرزند فقط وقتی معنا دارد که والدش فعال باشد؛ با تیک بخش، ویرایش به‌صورت پیش‌فرض فعال می‌شود.
+ */
+function permission_edit_map(): array
+{
+    return [
+        'services.view' => 'services.manage',
+        'knowledge.view' => 'knowledge.manage',
+        'cddvd.view' => 'cddvd.edit',
+        'traffic.view' => 'traffic.manage',
+        'asset.view' => 'asset.edit',
+        'org.view' => 'org.manage',
+        'food.groups' => 'food.groups_edit',
+    ];
+}
+
+/** اگر کد ویرایش داخل مجموعه باشد ولی بخش (والد) نباشد، والد هم اضافه می‌شود (حفظ دسترسی‌های قبلی). */
+function role_permissions_add_parents(array $codes): array
+{
+    $set = array_fill_keys($codes, true);
+    foreach (permission_edit_map() as $parent => $child) {
+        if (isset($set[$child])) {
+            $set[$parent] = true;
+        }
+    }
+    return array_keys($set);
+}
+
+/** ویرایشِ بدون بخش حذف می‌شود؛ ویرایش بی‌والد معنی ندارد. */
+function role_permissions_strip_orphan_edits(array $codes): array
+{
+    $set = array_fill_keys($codes, true);
+    foreach (permission_edit_map() as $parent => $child) {
+        if (!isset($set[$parent])) {
+            unset($set[$child]);
+        }
+    }
+    return array_keys($set);
+}
+
+/**
  * Default permissions per role. primary_admin implicitly has all.
  */
 function permission_defaults(): array
+{
+    $defaults = permission_defaults_raw();
+    foreach ($defaults as $role => $codes) {
+        $codes = role_permissions_normalize_codes($codes);
+        // ویرایشِ بی‌والد نباشد؛ دسترسی‌های پیش‌فرض دیگری اضافه نمی‌شود.
+        $codes = role_permissions_add_parents($codes);
+        // «گروه‌های غذا» قبلاً همهٔ کارهایش را با همین یک کد می‌داد؛ پس ویرایشش هم داده می‌شود تا رفتار حفظ شود.
+        if (in_array('food.groups', $codes, true)) {
+            $codes[] = 'food.groups_edit';
+        }
+        $defaults[$role] = array_values(array_unique($codes));
+    }
+    return $defaults;
+}
+
+function permission_defaults_raw(): array
 {
     $all = ['dash.view', 'search.global', 'notif.view', 'profile.edit', 'ticket.create', 'ticket.view_own', 'ticket.reply', 'ticket.rate', 'services.view', 'knowledge.view', 'cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'foodorder.self', 'org.view', 'governance.manage'];
     $common = array_merge($all, ['ticket.view_unit', 'queue.view', 'assets.view', 'assets.own_unit', 'asset.view', 'asset.history', 'reports.view', 'inventory.view', 'cddvd.history', 'cddvd.export', 'traffic.manage']);
@@ -268,7 +325,8 @@ function role_permissions_normalize_codes(array $codes): array
 function role_permission_effective_codes(string $role, array $storedCodes, bool $custom): array
 {
     if ($custom) {
-        return role_permissions_normalize_codes($storedCodes);
+        // نقش‌های ذخیره‌شده: ویرایش بدون بخش (داده‌های قدیمی) بخش را هم می‌گیرد تا دسترسی قبلی حفظ شود.
+        return role_permissions_add_parents(role_permissions_normalize_codes($storedCodes));
     }
     $defaults = permission_defaults();
     return role_permissions_normalize_codes($defaults[$role] ?? []);
@@ -295,8 +353,34 @@ function role_permissions_flush_cache(?string $role = null): void
     unset($GLOBALS['__role_permission_codes'][$role], $GLOBALS['__role_permission_sets'][$role]);
 }
 
+/**
+ * مهاجرت یک‌باره: نقش‌هایی که «گروه‌های غذا» را داشتند، ویرایش آن را هم می‌گیرند (دسترسی قبلی حفظ شود).
+ */
+function role_permissions_migrate_once(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
+        return;
+    }
+    if (setting('perm_edit_v1') === '1') {
+        return;
+    }
+    try {
+        db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT role, 'food.groups_edit' FROM role_permissions WHERE permission = 'food.groups'");
+        save_setting('perm_edit_v1', '1');
+        role_permissions_flush_cache();
+    } catch (Throwable $exception) {
+        // در صورت خطا دفعهٔ بعد دوباره تلاش می‌شود.
+    }
+}
+
 function role_permission_codes(string $role): array
 {
+    role_permissions_migrate_once();
     $role = permission_roles()[$role] ?? null ? $role : 'user';
     if (!isset($GLOBALS['__role_permission_codes']) || !is_array($GLOBALS['__role_permission_codes'])) {
         $GLOBALS['__role_permission_codes'] = [];
@@ -392,6 +476,8 @@ function role_permissions_save(string $role, array $codes): void
     $valid = permission_all_codes();
     $codes = role_permissions_normalize_codes($codes);
     $codes = array_values(array_intersect($codes, $valid));
+    // ویرایش بدون بخش ذخیره نمی‌شود.
+    $codes = role_permissions_strip_orphan_edits($codes);
     if ($role === 'primary_admin') {
         $codes = $valid;
     }

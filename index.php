@@ -546,7 +546,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id']) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.22"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.23"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -681,7 +681,7 @@ function render_footer(): void
     } catch (Throwable) {
         echo "[]";
     }
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.20"></script></body></html>';
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.21"></script></body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {
@@ -4593,9 +4593,25 @@ if ($page === 'settings') {
                     $countClass = $isFull ? 'full' : ($isEmpty ? 'empty' : 'partial');
                     $pct = count($groupCodes) > 0 ? (int) round($checkedCount / count($groupCodes) * 100) : 0;
                     echo '<div class="group-card" data-perm-group-card="' . e($group['key']) . '" data-group-label="' . e($group['label']) . '"><div class="group-header" data-group-toggle="' . e($group['key']) . '"><span class="group-toggle">◀</span><span class="group-icon">' . permission_icon('g-' . $group['key']) . '</span><span class="group-info"><span class="group-name">' . e($group['label']) . '</span></span><span class="group-progress"><span class="group-count ' . $countClass . '" data-group-count>' . $checkedCount . ' از ' . count($groupCodes) . '</span><span class="group-bar"><span class="group-bar-fill" style="width:' . $pct . '%"></span></span></span><button type="button" class="group-select-all" data-group-all="' . e($group['key']) . '">' . ($isFull ? 'حذف همه' : 'انتخاب همه') . '</button></div><div class="group-body">';
+                    // ویرایش (فرزند بخش) زیر والدش با تورفتگی نمایش داده می‌شود و خودش جدا از فهرست اصلی نیست.
+                    $editMap = permission_edit_map();
+                    $editChildCodes = array_values($editMap);
+                    $itemsByCode = [];
+                    foreach ($group['items'] as $gItem) {
+                        $itemsByCode[$gItem['code']] = $gItem;
+                    }
+                    $renderPerm = static function (array $pItem, bool $isChild) use ($active, $group): void {
+                        $pChecked = in_array($pItem['code'], $active, true);
+                        echo '<label class="perm-item' . ($isChild ? ' perm-child' : '') . ($pChecked ? ' checked' : '') . '" data-perm-item' . ($isChild ? ' data-perm-edit="1"' : '') . ' data-perm-label="' . e($pItem['label']) . '" data-perm-group="' . e($group['key']) . '"><input type="checkbox" name="permissions[]" value="' . e($pItem['code']) . '"' . ($pChecked ? ' checked' : '') . '><span class="perm-check">✓</span><span class="perm-label">' . e($pItem['label']) . '</span></label>';
+                    };
                     foreach ($group['items'] as $item) {
-                        $checked = in_array($item['code'], $active, true);
-                        echo '<label class="perm-item' . ($checked ? ' checked' : '') . '" data-perm-item data-perm-label="' . e($item['label']) . '" data-perm-group="' . e($group['key']) . '"><input type="checkbox" name="permissions[]" value="' . e($item['code']) . '"' . ($checked ? ' checked' : '') . '><span class="perm-check">✓</span><span class="perm-label">' . e($item['label']) . '</span></label>';
+                        if (in_array($item['code'], $editChildCodes, true)) {
+                            continue;
+                        }
+                        $renderPerm($item, false);
+                        if (isset($editMap[$item['code']], $itemsByCode[$editMap[$item['code']]])) {
+                            $renderPerm($itemsByCode[$editMap[$item['code']]], true);
+                        }
                     }
                     echo '</div></div>';
                 }

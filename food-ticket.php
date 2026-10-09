@@ -57,7 +57,7 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_view', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -92,12 +92,6 @@ function food_ticket_route_allowed(array $user, string $route): bool
     }
     if (in_array($route, ['login', 'sso-login'], true)) {
         return food_ticket_is_allowed($user);
-    }
-    // مشاهدهٔ گروه‌های غذا (فقط خواندنی): GET با food.groups_view هم مجاز است؛ POST همچنان food.groups می‌خواهد.
-    if (in_array($route, ['food-groups', 'absence-status'], true)
-        && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
-        && user_can($user, 'food.groups_view')) {
-        return true;
     }
     $routePermission = [
         'dashboard' => 'food.dashboard',
@@ -141,6 +135,11 @@ function food_ticket_route_allowed(array $user, string $route): bool
         (function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('route_test') : 'test-source') => 'food.db',
         'cleanup-source_row' => 'food.monitor',
     ][$route] ?? null;
+    // «گروه‌های غذا»: مشاهده با کد بخش (food.groups)، هر کار ثبتی با کد «ویرایش» (food.groups_edit).
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)
+        && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) !== 'GET') {
+        $routePermission = 'food.groups_edit';
+    }
     return $routePermission !== null && user_can($user, $routePermission);
 }
 
@@ -4309,7 +4308,7 @@ function food_ticket_render_page(array $user): void
         'live' => $fpCan('food.monitor'),
         'employees' => $fpCan('food.employees'),
         'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close'),
-        'food-groups' => $fpCan('food.groups') || $fpCan('food.groups_view'),
+        'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),
         'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health'),
     ];
@@ -4320,7 +4319,7 @@ function food_ticket_render_page(array $user): void
         'ticket-design' => $fpCan('food.design'),
         'health' => $fpCan('food.health'),
     ];
-    $fpGroupsEdit = $fpCan('food.groups');
+    $fpGroupsEdit = $fpCan('food.groups_edit');
     $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections)
         . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
