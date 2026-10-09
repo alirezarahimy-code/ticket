@@ -57,7 +57,7 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_view', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -92,6 +92,12 @@ function food_ticket_route_allowed(array $user, string $route): bool
     }
     if (in_array($route, ['login', 'sso-login'], true)) {
         return food_ticket_is_allowed($user);
+    }
+    // مشاهدهٔ گروه‌های غذا (فقط خواندنی): GET با food.groups_view هم مجاز است؛ POST همچنان food.groups می‌خواهد.
+    if (in_array($route, ['food-groups', 'absence-status'], true)
+        && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+        && user_can($user, 'food.groups_view')) {
+        return true;
     }
     $routePermission = [
         'dashboard' => 'food.dashboard',
@@ -4295,7 +4301,29 @@ function food_ticket_render_page(array $user): void
     $canMenuEdit = function_exists('user_can') ? user_can($user, 'food.menu') : food_ticket_is_primary_admin($user);
     $canOrderClose = function_exists('user_can') ? user_can($user, 'food.order_close') : food_ticket_is_primary_admin($user);
     $canFoodMenu = $canMenuEdit || $canOrderClose;
-    $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
+    // دسترسی هر بخش پنل از روی کدهای food.* (ادمین اصلی همه‌چیز). سرور هم هر درخواست را جداگانه کنترل می‌کند.
+    $fpIsPrimary = food_ticket_is_primary_admin($user);
+    $fpCan = static fn (string $code): bool => $fpIsPrimary || (function_exists('user_can') && user_can($user, $code));
+    $fpViews = [
+        'dashboard' => $fpCan('food.dashboard'),
+        'live' => $fpCan('food.monitor'),
+        'employees' => $fpCan('food.employees'),
+        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close'),
+        'food-groups' => $fpCan('food.groups') || $fpCan('food.groups_view'),
+        'reports' => $fpCan('food.reports'),
+        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health'),
+    ];
+    $fpSections = [
+        'connections' => $fpCan('food.db'),
+        'printer' => $fpCan('food.printer'),
+        'guests' => $fpCan('food.guest'),
+        'ticket-design' => $fpCan('food.design'),
+        'health' => $fpCan('food.health'),
+    ];
+    $fpGroupsEdit = $fpCan('food.groups');
+    $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections)
+        . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
         . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false') . ';</script>';

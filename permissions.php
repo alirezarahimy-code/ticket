@@ -138,6 +138,7 @@ function permission_catalog(): array
                 ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
                 ['code' => 'food.employees', 'label' => 'کارکنان'],
                 ['code' => 'food.guest', 'label' => 'کارت مهمان'],
+                ['code' => 'food.groups_view', 'label' => 'گروه‌های غذا: فقط مشاهدهٔ محتوا (بدون ویرایش)'],
                 ['code' => 'food.groups', 'label' => 'گروه‌های غذا (نماینده با L_UID و غیبت روزانه)'],
                 ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
                 ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],

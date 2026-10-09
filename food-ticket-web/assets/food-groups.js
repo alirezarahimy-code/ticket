@@ -220,8 +220,13 @@
   }
 
   function html() {
-    return '<section><div class="heading"><div><h2>مدیریت گروه‌های غذا</h2><p>نمایندهٔ هر گروه با <b>L_UID</b> شناسایی می‌شود؛ با تردد نماینده، فیش اعضای واجد شرایط (دارای سفارش امروز، غیرغایب، بدون فیش قبلی) در صف چاپ قرار می‌گیرد. غیبت هر روز مستقل ثبت می‌شود و با نخستین تردد نمایندهٔ همان روز قفل می‌شود.</p></div></div>'
+    const out = '<section><div class="heading"><div><h2>مدیریت گروه‌های غذا</h2><p>نمایندهٔ هر گروه با <b>L_UID</b> شناسایی می‌شود؛ با تردد نماینده، فیش اعضای واجد شرایط (دارای سفارش امروز، غیرغایب، بدون فیش قبلی) در صف چاپ قرار می‌گیرد. غیبت هر روز مستقل ثبت می‌شود و با نخستین تردد نمایندهٔ همان روز قفل می‌شود.</p></div></div>'
       + '<div id="food-groups-root">' + body() + '</div></section>';
+    // کاربر فقط «مشاهده» دارد: ظاهر فرم‌ها غیرفعال می‌شود (سرور هم POST را با food.groups می‌بندد).
+    if (window.FOOD_TICKET_CAN_GROUPS_EDIT === false) {
+      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}</style>' + out.slice('<section>'.length);
+    }
+    return out;
   }
 
   function collect() {
