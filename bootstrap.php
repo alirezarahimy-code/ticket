@@ -975,6 +975,23 @@ function ldap_diagnose(): array
     ];
 }
 
+/**
+ * کد پرسنلی بعدی آزاد (از $start به بعد) برای کاربر دامینی که در AD کد ندارد.
+ * کدهای موجود در users (از جمله کدهای ایمپورت‌شده) رد می‌شوند تا تکراری ساخته نشود.
+ */
+function ldap_allocate_employee_number(int $start = 101): string
+{
+    $used = [];
+    foreach (db()->query("SELECT employee_number FROM users WHERE employee_number REGEXP '^[0-9]+$'")->fetchAll(PDO::FETCH_COLUMN) as $value) {
+        $used[(int) $value] = true;
+    }
+    $candidate = max(1, $start);
+    while (isset($used[$candidate])) {
+        $candidate++;
+    }
+    return (string) $candidate;
+}
+
 function ldap_sync_all_users(): array
 {
     if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect')) {
@@ -1025,7 +1042,7 @@ function ldap_sync_all_users(): array
         : '(&(objectClass=user)(sAMAccountName=*))');
     $attributes = ['distinguishedName', 'displayName', 'mail', 'department', 'sAMAccountName', 'employeeID', 'telephoneNumber', 'userAccountControl', 'memberOf'];
     $seen = [];
-    $result = ['created' => 0, 'updated' => 0, 'disabled' => 0, 'skipped' => 0];
+    $result = ['created' => 0, 'updated' => 0, 'disabled' => 0, 'skipped' => 0, 'code_assigned' => 0];
     $cookie = '';
     $processed = 0;
 
@@ -1068,10 +1085,16 @@ function ldap_sync_all_users(): array
                 'phone' => (string) ($entry['telephonenumber'][0] ?? ''),
                 'groups' => $groups,
             ];
-            $existingQuery = db()->prepare('SELECT id, is_active FROM users WHERE username = ? AND auth_source = "ldap" LIMIT 1');
+            $existingQuery = db()->prepare('SELECT id, is_active, employee_number FROM users WHERE username = ? AND auth_source = "ldap" LIMIT 1');
             $existingQuery->execute([$username]);
             $existingUser = $existingQuery->fetch() ?: null;
             $wasExisting = $existingUser !== null;
+            // کاربری که در AD کد پرسنلی ندارد و در سامانه هم کد ندارد: کد بعدی آزاد (۱۰۱ به بعد) داده می‌شود.
+            // اگر بعداً در AD کد گذاشته شود، همان مقدار AD در همگام‌سازی/ورود بعدی جایگزین می‌شود.
+            if ($identity['employee_number'] === '' && trim((string) ($existingUser['employee_number'] ?? '')) === '') {
+                $identity['employee_number'] = ldap_allocate_employee_number(101);
+                $result['code_assigned']++;
+            }
             $domainUser = upsert_domain_user($identity);
             $disabled = (((int) ($entry['useraccountcontrol'][0] ?? 0)) & 2) === 2;
             $shouldBeActive = !$disabled && (!$wasExisting || (int) ($existingUser['is_active'] ?? 0) === 1);
