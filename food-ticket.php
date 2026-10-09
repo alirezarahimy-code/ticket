@@ -84,7 +84,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
     }
     if (!function_exists('user_can')) {
         return food_ticket_is_support_manager($user)
-            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'dashboard', 'health', 'self-test', 'test-connections', 'test-orders', 'config', 'database-file', 'session'], true)
+            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'dashboard', 'health', 'self-test', 'test-connections', 'config', 'database-file', 'session'], true)
                 || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route)));
     }
     if (in_array($route, ['login', 'sso-login'], true)) {
@@ -110,7 +110,6 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'print-diag' => 'food.printer',
         'test-connections' => 'food.db',
         'test-attendance' => 'food.db',
-        'test-orders' => 'food.db',
         'template' => 'food.design',
         'templates' => 'food.design',
         'templates/preview' => 'food.design',
@@ -918,16 +917,6 @@ function food_ticket_row_value(array $row, array $names): mixed
     return null;
 }
 
-function food_ticket_row_column(array $columns, array $names): ?string
-{
-    foreach ($names as $name) {
-        $key = food_ticket_normalize_column($name);
-        if (isset($columns[$key])) {
-            return $columns[$key];
-        }
-    }
-    return null;
-}
 
 function food_ticket_access_rows($connection, string $table, int $limit = 500, ?string $orderSql = null, ?string $whereSql = null, bool $strict = false): array
 {
@@ -1344,33 +1333,6 @@ function food_ticket_find_user(string $personnelCode): ?array
     return $query->fetch() ?: null;
 }
 
-function food_ticket_order_map($connection, string $table, string $foodDate): array
-{
-    $rows = food_ticket_access_rows($connection, $table, 5000);
-    if (!$rows) {
-        return [];
-    }
-    $nationalNames = ['NationalCode', 'National_Code', 'NationalID', 'NatCode', 'NCode', 'cod_meli', 'CodeMelli', 'کدملی', 'کد ملی', 'كد ملي'];
-    $foodNames = ['nahar_entekhabi', 'FoodName', 'FoodType', 'Food', 'Meal', 'Menu', 'Food_Name', 'Food_Type', 'نوع غذا', 'نام غذا', 'نوع_غذا'];
-    $dateNames = ['tarikh_entekhabi', 'FoodDate', 'Food_Date', 'OrderDate', 'Date', 'MealDate', 'تاریخ', 'تاریخ غذا', 'تاريخ غذا'];
-    if (food_ticket_row_column($rows[0]['columns'], $nationalNames) === null || food_ticket_row_column($rows[0]['columns'], $foodNames) === null) {
-        throw new RuntimeException('ستون کد ملی یا نوع غذا در جدول سفارش پیدا نشد.');
-    }
-    $map = [];
-    foreach ($rows as $item) {
-        $row = $item['row'];
-        $dateValue = food_ticket_row_value($row, $dateNames);
-        if ($dateValue !== null && trim((string) $dateValue) !== '' && food_ticket_parse_date($dateValue) !== $foodDate) {
-            continue;
-        }
-        $national = food_ticket_digits(food_ticket_row_value($row, $nationalNames));
-        $food = trim((string) food_ticket_row_value($row, $foodNames));
-        if ($national !== '' && $food !== '') {
-            $map[$national] = $food;
-        }
-    }
-    return $map;
-}
 
 function food_ticket_guest_cards(array $config): array
 {
@@ -3103,28 +3065,6 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
     }, $query->fetchAll());
 }
 
-/**
- * همهٔ شکل‌های متنی رایج یک تاریخ (کلید yyyymmdd) در فیلد Short Text:
- * 1405/07/11 ، 1405/7/11 ، 1405-07-11 ، 1405.07.11 ، 14050711
- */
-function food_ticket_date_text_variants(string $key8): array
-{
-    if (!preg_match('/^(\d{4})(\d{2})(\d{2})$/', $key8, $m)) {
-        return [];
-    }
-    $y = $m[1];
-    $mo = $m[2];
-    $d = $m[3];
-    $mo2 = (string) (int) $mo;
-    $d2 = (string) (int) $d;
-    $out = [$key8];
-    foreach (['/', '-', '.'] as $sep) {
-        foreach ([[$mo, $d], [$mo2, $d2], [$mo, $d2], [$mo2, $d]] as $pair) {
-            $out[] = $y . $sep . $pair[0] . $sep . $pair[1];
-        }
-    }
-    return array_values(array_unique($out));
-}
 
 /** کلیدهای ۸رقمی (میلادی و شمسی) برای یک تاریخ میلادی Y-m-d */
 function food_ticket_date_keys_for_iso(string $isoDate): array
@@ -3140,33 +3080,6 @@ function food_ticket_date_keys_for_iso(string $isoDate): array
     return $keys;
 }
 
-/**
- * ردیف‌های جدول سفارش برای تاریخ(های) مشخص.
- * قبلاً فقط ۵۰۰۰ ردیفِ «اول» جدول خوانده می‌شد؛ با پر شدن جدول، سفارش‌های امروز هرگز خوانده نمی‌شد
- * و تعداد سفارش ۰ می‌شد. حالا ابتدا با فیلتر SQL روی tarikh_entekhabi خوانده می‌شود و فقط اگر نتیجه‌ای نبود
- * (مثلاً نوع ستون متفاوت)، کل جدول با سقف بالا خوانده می‌شود.
- */
-function food_ticket_orders_rows_for_keys($connection, string $table, array $keys8, int $fullLimit = 50000): array
-{
-    $values = [];
-    foreach ($keys8 as $key) {
-        foreach (food_ticket_date_text_variants((string) $key) as $variant) {
-            $values[$variant] = true;
-        }
-    }
-    if ($values !== []) {
-        $list = implode(', ', array_map(static fn ($v): string => "'" . str_replace("'", "''", (string) $v) . "'", array_keys($values)));
-        try {
-            $rows = food_ticket_access_rows($connection, $table, 5000, null, 'Trim([tarikh_entekhabi]) IN (' . $list . ')', true);
-            if ($rows !== []) {
-                return $rows;
-            }
-        } catch (Throwable $e) {
-            error_log('[food-orders] filtered read failed, reading whole table: ' . $e->getMessage());
-        }
-    }
-    return food_ticket_access_rows($connection, $table, $fullLimit);
-}
 
 /**
  * کلید ۸رقمی تاریخ برای فیلتر سفارش (شمسی یا میلادی)
@@ -3935,7 +3848,7 @@ function food_ticket_api_handle(string $route, array $user): never
             food_ticket_api_json(['ok' => true, 'role' => $user['role'] ?? 'manager']);
         }
         $isTestAttendance = function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route);
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($route === 'test-connections' || $isTestAttendance || $route === 'test-orders')) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($route === 'test-connections' || $isTestAttendance)) {
             $config = food_ticket_config(true);
             $result = [
                 'ok' => false,
