@@ -49,12 +49,12 @@ function permission_catalog(): array
                 ['code' => 'ticket.reply', 'label' => 'پاسخ/مکالمه در تیکت'],
                 ['code' => 'ticket.edit', 'label' => 'ویرایش'],
                 ['code' => 'ticket.assign', 'label' => 'ارجاع تیکت به کارشناس'],
-                ['code' => 'ticket.bulk', 'label' => 'عملیات گروهی روی تیکت‌ها'],
+                ['code' => 'ticket.bulk', 'label' => 'ویرایش'],
                 ['code' => 'ticket.rate', 'label' => 'امتیازدهی به تیکت'],
                 ['code' => 'ticket.attach_asset', 'label' => 'اتصال دارایی به تیکت'],
                 ['code' => 'queue.view', 'label' => 'صف کاری'],
                 ['code' => 'supervisor.panel', 'label' => 'پنل سوپروایزر'],
-                ['code' => 'supervisor.decide', 'label' => 'تأیید/بستن تیکت'],
+                ['code' => 'supervisor.decide', 'label' => 'ویرایش'],
                 ['code' => 'supervisor.reopen', 'label' => 'بازگشایی/برگشت تیکت'],
             ],
         ],
@@ -107,7 +107,7 @@ function permission_catalog(): array
                 ['code' => 'asset.view', 'label' => 'مشاهدهٔ شناسنامهٔ دارایی'],
                 ['code' => 'asset.edit', 'label' => 'ویرایش'],
                 ['code' => 'asset.extract', 'label' => 'استخراج سخت‌افزار (همین سرور)'],
-                ['code' => 'asset.remote_extract', 'label' => 'استخراج از راه دور (WMI)'],
+                ['code' => 'asset.remote_extract', 'label' => 'ویرایش'],
                 ['code' => 'asset.history', 'label' => 'تاریخچهٔ دارایی'],
                 ['code' => 'asset.ping', 'label' => 'پینگ سیستم‌های انتخابی'],
                 ['code' => 'inventory.view', 'label' => 'فهرست موجودی'],
@@ -242,6 +242,9 @@ function permission_edit_map(): array
         'settings.users' => 'settings.users_edit',
         'settings.key_roles' => 'settings.key_roles_edit',
         'ticket.view_unit' => 'ticket.edit',
+        'queue.view' => 'ticket.bulk',
+        'supervisor.panel' => 'supervisor.decide',
+        'domain.scan' => 'asset.remote_extract',
     ];
 }
 
@@ -266,6 +269,7 @@ function permission_legacy_parent_edit_pairs(): array
         'settings.domain' => 'settings.domain_edit',
         'settings.users' => 'settings.users_edit',
         'settings.key_roles' => 'settings.key_roles_edit',
+        'domain.scan' => 'asset.remote_extract',
     ];
 }
 
@@ -437,6 +441,10 @@ function role_permissions_migrate_once(): void
             db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.reply' FROM role_permissions");
             // امتیازدهی به تیکت هم پیش‌تر کد نداشت؛ به همهٔ نقش‌های ذخیره‌شده داده می‌شود.
             db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.rate' FROM role_permissions");
+            // داشبورد پیش‌تر همیشه باز بود؛ کد دیدنش به همهٔ نقش‌های ذخیره‌شده داده می‌شود.
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'dash.view' FROM role_permissions");
+            // اسکن دامنه پیش‌تر استخراج از راه دور هم بود؛ همان دسترسی برای کد ویرایش حفظ می‌شود.
+            db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'asset.remote_extract' FROM role_permissions WHERE permission = 'domain.scan'");
             $assignableList = implode(',', array_map(static fn (string $r): string => db()->quote($r), assignable_role_codes()));
             db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.edit' FROM role_permissions WHERE permission = 'ticket.assign' OR role IN ($assignableList)");
             save_setting('perm_edit_v3', '1');

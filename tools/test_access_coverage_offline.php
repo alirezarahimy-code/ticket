@@ -142,7 +142,7 @@ $lines[] = '── ۲) کدهای تزئینی (بی‌استفاده در کد)
 // افزودن کد بی‌اثر جدید یا وصل‌کردن یکی از این‌ها باید این فهرست را آگاهانه به‌روز کند.
 $knownUnused = [
     // ۱.۳۷.۸: کدهایی که به بخش‌های واقعی وصل شدند از این فهرست خارج شدند.
-    'dash.view', 'assets.own_unit', 'asset.remote_extract', 'foodorder.proxy',
+    'assets.own_unit', 'foodorder.proxy',
 ];
 $root = APP_ROOT;
 $sourceFiles = [];
