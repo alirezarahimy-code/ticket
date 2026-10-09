@@ -2861,7 +2861,6 @@ function food_ticket_api_config(): array
         'guestFoodType' => 'مهمان',
         'cutSourceRows' => !empty($config['cut_source_rows']),
         'enabled' => !empty($config['enabled']),
-        'exportPath' => '',
         'brandName' => (string) ($brand['brand_name'] ?? 'سامانه چاپ فیش غذا'),
         'brandLogo' => (string) ($brand['brand_logo'] ?? ''),
         'panelVersion' => FOOD_TICKET_PANEL_VERSION,

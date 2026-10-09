@@ -63,7 +63,8 @@ function food_ticket_find_user_strict(string $personnelCode): ?array
         return null;
     }
     $lookup = static function (array $index) use ($norm): ?array {
-        return $index['emp'][$norm] ?? $index['user'][$norm] ?? $index['nat'][$norm] ?? null;
+        // کد دستگاه فقط کد پرسنلی (employee_number) یا نام کاربری است؛ کد ملی هرگز کد دستگاه نیست.
+        return $index['emp'][$norm] ?? $index['user'][$norm] ?? null;
     };
     try {
         $found = $lookup(food_ticket_user_index());
@@ -561,6 +562,21 @@ function food_ticket_decide_for_user(array $user, string $date, array $base, arr
     if (!isset($orderMaps[$date])) {
         $orderMaps[$date] = food_ticket_order_map_lazy(null, 'food_orders', $date);
     }
+    $conflictCodes = $GLOBALS['__food_order_conflicts'][$date] ?? [];
+    if (in_array($national, $conflictCodes, true) || in_array(ltrim($national, '0') ?: '0', $conflictCodes, true)) {
+        return [
+            'event_type' => 'config_error',
+            'print' => false,
+            'delete' => true,
+            'payload' => $base + [
+                'user_id' => $user['id'],
+                'national_code' => $national,
+                'full_name' => $user['full_name'] ?? '',
+                'event_type' => 'config_error',
+                'last_error' => 'کد ملی این کارمند در سفارش‌های فعال این روز تکراری است؛ فیش چاپ نشد. سفارش‌ها را بررسی کنید.',
+            ],
+        ];
+    }
     $food = $orderMaps[$date][$national]
         ?? $orderMaps[$date][ltrim($national, '0') ?: '0']
         ?? null;
@@ -624,18 +640,22 @@ function food_ticket_read_source_rows_today($sourceDb, int $limit, string $today
 {
     static $goodMode = null;
     static $lastFallbackAt = 0;
+    // امروز و دیروز (تردد نیمه‌شب): ردیف‌های قدیمی‌تر دست‌نخورده می‌مانند.
+    $yesterdayYmd = (DateTimeImmutable::createFromFormat('Ymd', $todayYmd) ?: new DateTimeImmutable('today'))
+        ->modify('-1 day')->format('Ymd');
+    $allowedDays = [$todayYmd, $yesterdayYmd];
     // ستون C_Date در فایل منبع تردد متنی است (فیلتر عددی «Data type mismatch» می‌دهد)، پس متنی اول امتحان می‌شود.
     $filters = [
-        'text' => "(C_Date = '" . $todayYmd . "')",
-        'num' => '(C_Date = ' . $todayYmd . ')',
+        'text' => "(C_Date IN ('" . $todayYmd . "','" . $yesterdayYmd . "'))",
+        'num' => '(C_Date IN (' . $todayYmd . ',' . $yesterdayYmd . '))',
     ];
     $modes = array_keys($filters);
     if ($goodMode !== null && isset($filters[$goodMode])) {
         $modes = array_values(array_unique(array_merge([$goodMode], $modes)));
     }
-    $isToday = static function (array $it) use ($todayYmd): bool {
+    $isToday = static function (array $it) use ($allowedDays): bool {
         $d = food_ticket_parse_date($it['date_raw'] ?? null);
-        return $d === null || str_replace('-', '', $d) === $todayYmd; // تاریخ نامعتبر عبور می‌کند تا ثبت و بررسی شود
+        return $d === null || in_array(str_replace('-', '', $d), $allowedDays, true); // تاریخ نامعتبر عبور می‌کند تا ثبت و بررسی شود
     };
 
     foreach ($modes as $mode) {
