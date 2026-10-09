@@ -101,9 +101,11 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
     def test_legacy_access_order_fields_are_not_live_configuration(self) -> None:
         php = read("food-ticket.php")
-        self.assertIn("unset($config['orders_path'], $config['orders_table'])", php)
-        self.assertIn("'ordersPath' => ''", php)
-        self.assertIn("'ordersTable' => 'food_orders'", php)
+        self.assertNotIn("orders_path", php)
+        self.assertNotIn("orders_table", php)
+        self.assertNotIn("ordersPath", php)
+        self.assertNotIn("ordersTable", php)
+        self.assertFalse((ROOT / "food-ticket-web" / "Program.cs").exists())
         self.assertIn("if ($kind !== 'attendance')", php)
         self.assertIn("نوع فایل پشتیبانی نمی‌شود.", php)
         self.assertNotIn("بارگذاری Access سفارش غذا غیرفعال است", php)

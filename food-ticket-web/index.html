@@ -94,8 +94,8 @@ if(dbBoot.token!==''&&savedToken!==''&&savedToken!==dbBoot.token)return purgeDat
  function healthStatusLabel(ok,value){return ok?`<span class="status ok">${esc(value)}</span>`:`<span class="status bad">${esc(value)}</span>`}
  function renderHealthPayload(payload){
    const database=payload.database||{},access=payload.access||{},printer=payload.printer||{},queue=payload.queue||{};
-   const engineOn=Boolean(payload.php_worker||payload.dotnet);
-   const engineLabel=payload.php_worker?'سرویس PHP Worker (موتور پایش)':(payload.dotnet?'سرویس .NET':'موتور پایش');
+   const engineOn=Boolean(payload.php_worker);
+   const engineLabel=payload.php_worker?'سرویس PHP Worker (موتور پایش)':'موتور پایش';
    const records=Number(database.records||0);
    const rows=[
      [engineLabel,engineOn?'فعال':'غیرفعال',engineOn],

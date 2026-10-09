@@ -2,16 +2,15 @@
 
 ## ۱. پیش‌نیاز سرور
 
-- .NET 8 SDK نصب باشد (`dotnet --list-sdks` نسخهٔ `8.x` را نشان دهد).
+- سرویس C# (.NET) حذف شده است؛ موتور پایش فقط PHP Worker است.
 - Microsoft Access Database Engine متناسب با معماری Windows نصب باشد.
 - چاپگر شبکه در Windows به‌صورت اشتراکی نصب شده باشد.
-- دسترسی شبکه به فایل منبع تردد (Access) و فایل سفارش غذا برقرار باشد.
+- دسترسی شبکه به فایل منبع تردد (TENTER/Access) برقرار باشد. سفارش غذا از دیتابیس داخلی خوانده می‌شود.
 
-## ۲. راه‌اندازی سرویس
+## ۲. راه‌اندازی
 
-1. در ریشهٔ پروژه `food-ticket-web\install_prerequisites.bat` را اجرا کنید.
-2. `food-ticket-web\start_food_ticket.bat` را اجرا کنید؛ سرویس روی `http://127.0.0.1:8080` بالا می‌آید.
-3. پنل را باز کنید: `http://127.0.0.1:8080/index.html`.
+1. Worker را طبق `tools/install_food_ticket_worker.ps1` یا `install-food-worker-SERVICE.bat` به‌عنوان سرویس نصب کنید.
+2. پنل را از `index.php?page=food-ticket` باز کنید.
 
 ## ۳. تنظیمات اتصال
 

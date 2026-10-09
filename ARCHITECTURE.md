@@ -46,7 +46,7 @@
 | `[EP-API-INV]` | `api/inventory.php` | API دارایی | 🟡 |
 | `[EP-API-FOOD]` | `food-ticket.php` (`api/*`) | API پنل غذا (config، printers، orders، reports، …) | 🟡 |
 | `[EP-PANEL-FOOD]` | `food-ticket-web/index.html` + `food-ticket-web-host.php` | پنل وب غذا (فرانت) که از API بالا استفاده می‌کنه | 🟡 |
-| `[EP-CSHARP]` | `food-ticket-web/Program.cs` + `.csproj` | سرویس C# محلی (ویندوز)؛ SQLite + ODBC + WinForms. نقشش دقیق نیست | ❓ |
+| ~~`[EP-CSHARP]`~~ | ~~`food-ticket-web/Program.cs`~~ | **حذف شد** (سرویس .NET قدیمی؛ موتور پایش فقط PHP است) | ✅ حذف |
 
 ---
 
@@ -116,6 +116,7 @@
 | `[FD-ORDER-PANEL]` | `food-order` صفحه/`assets/food-order*.js/css` | — | 🟡 |
 | `[FD-PROXY]` | داخل `food-order.php` (نیابت، لغو) | `food_orders` | 🟡 |
 | `[FD-SRC]` | `food-ticket-order-source.php` (۸۶ خط) | نقشه سفارش روز: `food_order_internal_map()` → از `food_orders` (MySQL داخلی، بدون Access) | ✅ |
+| `[FD-ORDER-EXT]` | — | **وابستگی Access سفارش (food_fish / orders_path / orders_table) حذف شد.** | ✅ حذف |
 
 ### 4.2 تردد و تطبیق (محرک چاپ)
 | تگ | فایل | نقش | وضعیت |
@@ -139,7 +140,7 @@
 ### 4.4 منبع داده تردد (وابستگی Access)
 | تگ | شرح | وضعیت |
 |---|---|---|
-| `[SRC-TENTER]` | فایل Access (`attendance_path`)، جدول `C_Date`/`C_Time`/`UID` (نام جدول `TENTER`). هر ردیف پس از پردازش حذف می‌شه | ✅ |
+| `[SRC-TENTER]` | **تنها منبع خارجی باقی‌مانده.** فایل Access (`attendance_path`)، جدول `C_Date`/`C_Time`/`UID` (نام جدول `TENTER`). هر ردیف پس از پردازش حذف می‌شه | ✅ |
 | `[SRC-ACCESS-READ]` | `food-ticket.php`: `food_ticket_odbc()` و خواندن با PowerShell/OLEDB/ODBC | 🟡 |
 | `[SRC-ACCESS-TOOLS]` | `tools/diag_*.php`، `tools/set_attendance_password.php`، `tools/install_food_ticket_worker.ps1` | ❓ |
 
@@ -147,7 +148,7 @@
 | تگ | فایل | نقش | وضعیت |
 |---|---|---|---|
 | `[FD-PANEL]` | `food-ticket-web/index.html` + `assets/*.js` | پنل مدیریت/گزارش غذا (API: config, printers, orders, reports, reprint-errors, monitoring, …) | 🟡 |
-| `[FD-CSHARP]` | `food-ticket-web/Program.cs` | سرویس محلی C# (WinForms/ODBC/SQLite) | ❓ |
+| ~~`[FD-CSHARP]`~~ | — | **حذف شد** | ✅ حذف |
 
 ---
 
@@ -178,6 +179,8 @@
 
 ## ۷. وابستگی‌های بین بخش‌ها
 
+جریان نهایی (بعد از تغییر): `[SRC-TENTER]` → `[FD-ENGINE]` → `[FD-SRC]` (food_orders) → `[FD-RUNTIME]` → `[FD-PRINT-*]`
+
 - `[FD-*]` → `[TK-BOOT]` (اتصال DB، helperها از `bootstrap.php`)
 - `[FD-ENGINE]` → `[SRC-TENTER]` (خواندن و حذف ردیف) و `[FD-SRC]` (تطبیق)
 - `[FD-ENGINE]` → `[FD-RUNTIME]` (ثبت رویداد و صف)
@@ -207,7 +210,8 @@
 | `[RISK-HIST]` | تاریخچه گیت فقط یک commit دارد؛ نمی‌شه بررسی کرد آیا رمز قبلاً در تاریخچه بوده | متوسط |
 | `[RISK-DEAD]` | `app/` و `routes/` بی‌استفاده‌اند و باعث سردرگمی می‌شن | پایین |
 | `[RISK-MIGRATE]` | migrationها در runtime (`ALTER` داخل کد) اجرا میشن؛ schema کامل جایی ثبت نشده | متوسط |
-| `[RISK-ACCESS]` | محرک چاپ فیش به فایل Access وابسته است (`[SRC-TENTER]`) | بالا (برای هدف فعلی) |
+| `[RISK-ACCESS]` | محرک چاپ فیش به فایل TENTER وابسته است (`[SRC-TENTER]`). این وابستگی عمداً باقی مانده | مورد انتظار |
+| `[RISK-TESTS]` | تست‌های `SecurityTest.php`، `ArchitectureTest.php` و ۴ مورد `test_food_ticket_logic.php` از قبل روی مخزن fail هستن (قبل از این تغییر هم همین بود) | متوسط |
 
 ---
 

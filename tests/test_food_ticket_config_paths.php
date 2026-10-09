@@ -18,8 +18,6 @@ final class FoodTicketFakeDb
 $GLOBALS['food_ticket_test_db'] = new FoodTicketFakeDb([
     'id' => 1,
     'attendance_path' => 'C:\\Data\\attendance-selected.mdb',
-    'orders_path' => 'D:\\Food\\orders-selected.accdb',
-    'orders_table' => 'fish_food',
     'printer_mode' => 'tcp_raw',
     'printer_host' => '192.0.2.10',
     'printer_port' => 9100,
@@ -33,7 +31,7 @@ if ($config['attendance_path'] !== 'C:\\Data\\attendance-selected.mdb') {
     fwrite(STDERR, "FAIL attendance path was replaced by environment fallback\n");
     exit(1);
 }
-if (array_key_exists('orders_path', $config) || array_key_exists('orders_table', $config)) {
+if (array_key_exists('orders_path', $config) || array_key_exists('orders_table', $config) || array_key_exists('ordersPath', $config)) {
     fwrite(STDERR, "FAIL legacy Access-order configuration was exposed to the live PHP config\n");
     exit(1);
 }

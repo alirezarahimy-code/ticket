@@ -290,7 +290,6 @@ function food_ticket_config(bool $reload = false): array
         'max_guest_daily' => 20, 'cut_source_rows' => 1, 'updated_by' => null,
     ];
     try {
-        // Explicit allow-list: do not SELECT the legacy orders_path/orders_table columns.
         $colPath = food_ticket_db_column('attendance_path');
         $colPwd = food_ticket_db_column('attendance_password_enc');
         $colCut = food_ticket_db_column('cut_source_rows');
@@ -308,7 +307,6 @@ function food_ticket_config(bool $reload = false): array
             $row = food_ticket_config_alias_row($row);
         }
         $config = array_merge($defaults, $row);
-        unset($config['orders_path'], $config['orders_table']);
         $config['printer_mode'] = food_ticket_normalize_printer_mode($config['printer_mode'] ?? 'tcp_raw');
     } catch (Throwable) {
         $config = $defaults;
@@ -1344,36 +1342,6 @@ function food_ticket_find_user(string $personnelCode): ?array
     );
     $query->execute([$personnelCode, $code, $code]);
     return $query->fetch() ?: null;
-}
-
-function food_ticket_orders($connection, string $table, string $nationalCode, string $foodDate): ?string
-{
-    $rows = food_ticket_access_rows($connection, $table, 5000);
-    if (!$rows) {
-        return null;
-    }
-    $nationalNames = ['NationalCode', 'National_Code', 'NationalID', 'NatCode', 'NCode', 'cod_meli', 'CodeMelli', 'کدملی', 'کد ملی', 'كد ملي'];
-    $foodNames = ['nahar_entekhabi', 'FoodName', 'FoodType', 'Food', 'Meal', 'Menu', 'Food_Name', 'Food_Type', 'نوع غذا', 'نام غذا', 'نوع_غذا'];
-    $dateNames = ['tarikh_entekhabi', 'FoodDate', 'Food_Date', 'OrderDate', 'Date', 'MealDate', 'تاریخ', 'تاریخ غذا', 'تاريخ غذا'];
-    if (food_ticket_row_column($rows[0]['columns'], $nationalNames) === null || food_ticket_row_column($rows[0]['columns'], $foodNames) === null) {
-        throw new RuntimeException('ستون کد ملی یا نوع غذا در جدول سفارش پیدا نشد.');
-    }
-    foreach ($rows as $item) {
-        $row = $item['row'];
-        $orderedNational = food_ticket_row_value($row, $nationalNames);
-        if (food_ticket_digits($orderedNational) !== food_ticket_digits($nationalCode)) {
-            continue;
-        }
-        $dateValue = food_ticket_row_value($row, $dateNames);
-        if ($dateValue !== null && trim((string) $dateValue) !== '' && food_ticket_parse_date($dateValue) !== $foodDate) {
-            continue;
-        }
-        $food = trim((string) food_ticket_row_value($row, $foodNames));
-        if ($food !== '') {
-            return $food;
-        }
-    }
-    return null;
 }
 
 function food_ticket_order_map($connection, string $table, string $foodDate): array
@@ -2512,8 +2480,6 @@ function food_ticket_save_config(array $data, array $user): void
     }
     $current = food_ticket_config();
     // اتصال سفارش Access قطع است؛ مقادیر قبلی صرفاً برای rollback نگه داشته می‌شوند و از ورودی قابل تغییر نیستند.
-    $legacyOrdersPathForInsert = '';
-    $legacyOrdersTableForInsert = 'food_orders';
     $password = trim((string) ($data['attendance_password'] ?? ''));
     if ($password !== '') {
         $passwordEnc = food_ticket_encrypt($password);
@@ -2538,10 +2504,10 @@ function food_ticket_save_config(array $data, array $user): void
     $colPath = food_ticket_db_column('attendance_path');
     $colPwd = food_ticket_db_column('attendance_password_enc');
     $colCut = food_ticket_db_column('cut_source_rows');
-    $query = db()->prepare('INSERT INTO food_ticket_config (id, enabled, ' . $colPath . ', ' . $colPwd . ', orders_path, orders_table, printer_mode, printer_host, printer_port, printer_share, poll_seconds, max_batch, guest_card_uids, max_guest_daily, ' . $colCut . ', updated_by) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), ' . $colPath . ' = VALUES(' . $colPath . '), ' . $colPwd . ' = VALUES(' . $colPwd . '), printer_mode = VALUES(printer_mode), printer_host = VALUES(printer_host), printer_port = VALUES(printer_port), printer_share = VALUES(printer_share), poll_seconds = VALUES(poll_seconds), max_batch = VALUES(max_batch), guest_card_uids = VALUES(guest_card_uids), max_guest_daily = VALUES(max_guest_daily), ' . $colCut . ' = VALUES(' . $colCut . '), updated_by = VALUES(updated_by)');
+    $query = db()->prepare('INSERT INTO food_ticket_config (id, enabled, ' . $colPath . ', ' . $colPwd . ', printer_mode, printer_host, printer_port, printer_share, poll_seconds, max_batch, guest_card_uids, max_guest_daily, ' . $colCut . ', updated_by) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE enabled = VALUES(enabled), ' . $colPath . ' = VALUES(' . $colPath . '), ' . $colPwd . ' = VALUES(' . $colPwd . '), printer_mode = VALUES(printer_mode), printer_host = VALUES(printer_host), printer_port = VALUES(printer_port), printer_share = VALUES(printer_share), poll_seconds = VALUES(poll_seconds), max_batch = VALUES(max_batch), guest_card_uids = VALUES(guest_card_uids), max_guest_daily = VALUES(max_guest_daily), ' . $colCut . ' = VALUES(' . $colCut . '), updated_by = VALUES(updated_by)');
     $query->execute([
         !empty($data['enabled']) ? 1 : 0, trim((string) ($data['attendance_path'] ?? '')), $passwordEnc,
-        $legacyOrdersPathForInsert, $legacyOrdersTableForInsert, $wantedMode, $wantedHost,
+        $wantedMode, $wantedHost,
         $wantedPort, trim((string) ($data['printer_share'] ?? '')),
         max(1, min(60, (int) ($data['poll_seconds'] ?? 2))), max(1, min(5000, (int) ($data['max_batch'] ?? 100))),
         trim((string) ($data['guest_card_uids'] ?? '')), max(0, min(10000, (int) ($data['max_guest_daily'] ?? 20))),
@@ -2923,8 +2889,6 @@ function food_ticket_api_config(): array
         'attendancePath' => (string) ($config['attendance_path'] ?? ''),
         'attendanceTable' => food_ticket_source_table(),
         // مقادیر legacy برای سازگاری API؛ در رابط کاربری نمایش داده نمی‌شوند.
-        'ordersPath' => '',
-        'ordersTable' => 'food_orders',
         'pollSeconds' => (int) ($config['poll_seconds'] ?? 2),
         'guestCardUIDs' => implode(',', food_ticket_guest_cards($config)),
         'maxGuestTicketsPerDay' => (int) ($config['max_guest_daily'] ?? 20),
@@ -3980,8 +3944,6 @@ function food_ticket_api_handle(string $route, array $user): never
                 'orders_ok' => false,
                 'printer_ok' => false,
                 'attendance_path' => (string) ($config['attendance_path'] ?? ''),
-                'orders_path' => '',
-                'orders_table' => 'food_orders',
                 'enabled' => !empty($config['enabled']),
             ];
             $parts = [];
