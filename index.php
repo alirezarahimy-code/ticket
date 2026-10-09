@@ -3544,13 +3544,15 @@ if ($page === 'activity-log') {
 
 if ($page === 'backup') {
     $backupUser = require_permission('backup.view');
+    // ساخت و بازیابی فقط با backup.manage؛ بقیه فهرست نسخه‌ها را می‌بینند.
+    $backupInert = user_can($backupUser, 'backup.manage') ? '' : ' inert';
     $runs = backup_runs();
     $databaseName = (string) cfg('database.name', 'persian_ticketing');
     $dumpAvailable = backup_mysql_binary('mysqldump') !== null;
     $mysqlAvailable = backup_mysql_binary('mysql') !== null;
     render_header('پشتیبان‌گیری و بازیابی', $backupUser);
     echo '<section class="page-heading"><div><span class="eyebrow">Backup & Restore</span><h1>پشتیبان‌گیری و بازیابی</h1><p>این بخش فقط برای ادمین اصلی است و از اطلاعات دیتابیس و پیوست‌ها محافظت می‌کند.</p></div><span class="admin-badge">ادمین اصلی</span></section>';
-    echo '<section class="settings-grid backup-grid"><div class="card form-card"><h2>ساخت نسخه پشتیبان</h2><p class="muted">یک نسخه از دیتابیس و پوشه پیوست‌ها می‌سازد. قبل از هر بازیابی نیز یک نسخه ایمنی خودکار ساخته می‌شود.</p><p class="' . ($dumpAvailable ? 'alert success' : 'alert danger') . '">' . ($dumpAvailable ? 'ابزار mysqldump پیدا شد و پشتیبان‌گیری آماده است.' : 'mysqldump پیدا نشد؛ مسیر ITSM_MYSQLDUMP_PATH یا مسیر XAMPP را تنظیم کنید.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_backup"><button class="button" type="submit" ' . ($dumpAvailable ? '' : 'disabled') . '>ساخت نسخه پشتیبان اکنون</button></form><small class="muted">مسیر ذخیره: ' . e(backup_root_path()) . '</small></div>';
+    echo '<section class="settings-grid backup-grid"' . $backupInert . '><div class="card form-card"><h2>ساخت نسخه پشتیبان</h2><p class="muted">یک نسخه از دیتابیس و پوشه پیوست‌ها می‌سازد. قبل از هر بازیابی نیز یک نسخه ایمنی خودکار ساخته می‌شود.</p><p class="' . ($dumpAvailable ? 'alert success' : 'alert danger') . '">' . ($dumpAvailable ? 'ابزار mysqldump پیدا شد و پشتیبان‌گیری آماده است.' : 'mysqldump پیدا نشد؛ مسیر ITSM_MYSQLDUMP_PATH یا مسیر XAMPP را تنظیم کنید.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_backup"><button class="button" type="submit" ' . ($dumpAvailable ? '' : 'disabled') . '>ساخت نسخه پشتیبان اکنون</button></form><small class="muted">مسیر ذخیره: ' . e(backup_root_path()) . '</small></div>';
     echo '<div class="card form-card"><h2>بازیابی نسخه پشتیبان</h2><p class="muted">فقط فایل SQL را انتخاب کنید؛ فایل ZIP پیوست‌ها اختیاری است. پیش از بازیابی، سامانه نسخه ایمنی می‌سازد.</p><p class="alert danger">بازیابی می‌تواند اطلاعات فعلی را جایگزین کند. ابتدا روی staging آزمایش کنید.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="restore_backup"><input type="hidden" name="MAX_FILE_SIZE" value="268435456"><label class="file-input">فایل SQL<input type="file" name="sql_dump" accept=".sql,text/plain" required><small>حداکثر ۲۵۶ مگابایت</small></label><label class="file-input">آرشیو پیوست‌ها، اختیاری<input type="file" name="uploads_archive" accept=".zip,application/zip"><small>فقط ZIP ساخته‌شده توسط سامانه</small></label><label class="check-label"><input type="checkbox" name="restore_confirm" value="1" required> خطر جایگزینی اطلاعات فعلی را می‌پذیرم</label><button class="button danger-button" type="submit" ' . ($dumpAvailable && $mysqlAvailable ? '' : 'disabled') . '>بازیابی اطلاعات</button></form></div></section>';
     echo '<section class="card form-card"><h2>نسخه‌های موجود</h2><p class="muted">دانلود نسخه پشتیبان فقط برای ادمین اصلی فعال است. فایل تنظیمات شامل رمزها عمداً داخل این بسته‌ها قرار نمی‌گیرد.</p><div class="category-list backup-list">';
     foreach ($runs as $run) {
@@ -3693,10 +3695,12 @@ if ($page === 'queue') {
 }
 
 if ($page === 'holidays') {
+    // فقط کاربر با holidays.manage می‌تواند تعطیلی ثبت/حذف کند؛ بقیه فهرست را فقط می‌بینند.
+    $holidayInert = user_can($user, 'holidays.manage') ? '' : ' inert';
     $holidayAdmin = require_permission('holidays.view');
     $holidayQuery = db()->query('SELECT h.*, u.full_name FROM holidays h LEFT JOIN users u ON u.id = h.created_by ORDER BY h.holiday_date');
     render_header('تقویم SLA', $holidayAdmin);
-     echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section><section class="card form-card"><h2>افزودن تعطیلی</h2><form method="post"><input type="hidden" name="action" value="add_holiday">' . csrf_field() . '<div class="form-grid"><label class="date-picker-field">تاریخ جلالی<div class="jalali-picker" data-jalali-picker><input id="holiday-date" name="holiday_date" required autocomplete="off" placeholder="۱۴۰۵/۰۱/۰۱"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div><small class="field-help">پنج‌شنبه و جمعه در تقویم غیرفعال هستند و خودکار تعطیل محسوب می‌شوند.</small></label><label>عنوان تعطیلی<input name="holiday_title" required placeholder="نوروز"></label></div><button class="button" type="submit">افزودن به تقویم</button></form><div class="fixed-holidays"><span class="tag">تعطیلی ثابت</span><b>پنج‌شنبه و جمعه</b><small>در محاسبه SLA به‌صورت خودکار از روزهای کاری حذف می‌شوند.</small></div><hr><h2>تقویم سالانه — تیک روز تعطیل</h2>
+     echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section><div class="holiday-guard"' . $holidayInert . '><section class="card form-card"><h2>افزودن تعطیلی</h2><form method="post"><input type="hidden" name="action" value="add_holiday">' . csrf_field() . '<div class="form-grid"><label class="date-picker-field">تاریخ جلالی<div class="jalali-picker" data-jalali-picker><input id="holiday-date" name="holiday_date" required autocomplete="off" placeholder="۱۴۰۵/۰۱/۰۱"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div><small class="field-help">پنج‌شنبه و جمعه در تقویم غیرفعال هستند و خودکار تعطیل محسوب می‌شوند.</small></label><label>عنوان تعطیلی<input name="holiday_title" required placeholder="نوروز"></label></div><button class="button" type="submit">افزودن به تقویم</button></form><div class="fixed-holidays"><span class="tag">تعطیلی ثابت</span><b>پنج‌شنبه و جمعه</b><small>در محاسبه SLA به‌صورت خودکار از روزهای کاری حذف می‌شوند.</small></div><hr><h2>تقویم سالانه — تیک روز تعطیل</h2>
 <p class="muted">روی هر روز کلیک کنید تا به‌عنوان تعطیل ثبت یا حذف شود. رنگ <strong style="color:#dc2626">قرمز</strong> = تعطیل. پنج‌شنبه و جمعه ثابت‌اند.</p>
 <div class="year-holiday-board" data-year-holiday-board>
 <div class="board-head"><label>سال جلالی <select data-year-board-year">' .
@@ -3709,7 +3713,7 @@ implode('', array_map(static fn ($y) => '<option value="' . $y . '"' . ($y === (
     foreach ($holidayQuery->fetchAll() as $holiday) {
         echo '<div><span><strong>' . e(jalali_date($holiday['holiday_date'], false)) . ' • ' . e($holiday['title']) . '</strong><small>ثبت‌کننده: ' . e($holiday['full_name'] ?: 'سامانه') . '</small></span><form method="post" data-confirm="این روز تعطیل حذف شود؟">' . csrf_field() . '<input type="hidden" name="action" value="delete_holiday"><input type="hidden" name="holiday_id" value="' . (int) $holiday['id'] . '"><button class="mini-button danger" type="submit">حذف</button></form></div>';
     }
-    echo '</section>';
+    echo '</div></section>';
     render_footer();
     exit;
 }
