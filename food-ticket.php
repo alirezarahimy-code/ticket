@@ -3225,7 +3225,7 @@ function food_ticket_api_save_employee(array $data): void
         return;
     }
     $username = 'food_employee_' . substr(hash('sha256', $personnelCode), 0, 40);
-    $query = db()->prepare('INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (?, NULL, ?, ?, ?, ?, ?, "user", "local", ?)');
+    $query = db()->prepare('INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (?, NULL, ?, ?, ?, ?, ?, "user", "food", ?)');
     $query->execute([$username, $fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active]);
 }
 

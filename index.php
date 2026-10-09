@@ -4294,7 +4294,7 @@ if ($page === 'organization') {
     org_ensure_schema();
     $canManageOrg = user_can_manage_organization($organizationUser);
     $units = org_units_all(false);
-    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u ORDER BY u.full_name')->fetchAll();
+    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u WHERE u.auth_source <> \'food\' ORDER BY u.full_name')->fetchAll();
     $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
     $ceoUnit = null;
     $deputies = [];
@@ -4392,7 +4392,7 @@ if ($page === 'settings') {
     $foodBrandName = setting('food_ticket_brand_name', $appName);
     $foodBrandLogo = setting('food_ticket_brand_logo', $logo);
     $departments = db()->query('SELECT id, name, code FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll();
-    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id ORDER BY u.full_name')->fetchAll();
+    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.auth_source <> \'food\' ORDER BY u.full_name')->fetchAll();
     $canManageSettingsUsers = user_is_primary_admin($user);
     $roleSelectableUsers = array_values(array_filter($users, static fn (array $roleUser): bool => (int) ($roleUser['is_active'] ?? 0) === 1));
     $roleCards = '';
