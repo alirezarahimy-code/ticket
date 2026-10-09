@@ -726,7 +726,7 @@ function food_ticket_group_ticketed_keys(array $members, string $date): array
  * نقشهٔ سفارش یک تاریخ (کش ۳۰ ثانیه‌ای مشترک با موتور). در صورت خطا null برمی‌گرداند.
  * @return array<string,string>|null
  */
-function food_ticket_group_order_map(array &$orderMaps, $ordersConnection, string $date): ?array
+function food_ticket_group_order_map(array &$orderMaps, string $date): ?array
 {
     if (array_key_exists($date, $orderMaps)) {
         return $orderMaps[$date];
@@ -778,7 +778,7 @@ function food_ticket_group_overview(int $groupId, string $date, bool $withOrders
     $ordersAvailable = false;
     if ($withOrders) {
         // Compatibility parameter is null; internal-only map lookup never opens Access orders.
-        $orderMap = food_ticket_group_order_map($orderMaps, null, $date);
+        $orderMap = food_ticket_group_order_map($orderMaps, $date);
         $ordersAvailable = $orderMap !== null;
     }
     $plan = food_ticket_group_plan($members, $absentIds, $ticketed, food_ticket_group_food_lookup($orderMap), $date);
@@ -816,7 +816,7 @@ function food_ticket_group_overview(int $groupId, string $date, bool $withOrders
  * بدون سفارش، دارای فیش امروز، بدون کد ملی) تصمیم‌گیری و ثبت رویداد با همان
  * food_ticket_decide_for_user() موتور انجام می‌شود تا با مسیر تردد عادی یکسان باشد.
  */
-function food_ticket_group_try_process(array $item, array $config, array &$orderMaps, $ordersConnection, array &$summary): ?array
+function food_ticket_group_try_process(array $item, array $config, array &$orderMaps, array &$summary): ?array
 {
     $resolved = food_ticket_group_resolve($item);
     if ($resolved === null) {
@@ -911,7 +911,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
         $absentIds[(int) $uid] = true;
     }
     $ticketed = food_ticket_group_ticketed_keys($members, $date);
-    $orderMap = food_ticket_group_order_map($orderMaps, $ordersConnection, $date);
+    $orderMap = food_ticket_group_order_map($orderMaps, $date);
     $plan = food_ticket_group_plan($members, $absentIds, $ticketed, food_ticket_group_food_lookup($orderMap), $date);
     if (empty($plan['member_states']) && !empty($plan['rows'])) {
         foreach ($plan['rows'] as $row) {
@@ -971,7 +971,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
                 'personnel_code' => food_ticket_code($user['employee_number'] ?? ''),
                 'source_payload' => $payloadJson,
             ];
-            $decision = food_ticket_decide_for_user($user, $date, $base, $config, $orderMaps, $ordersConnection);
+            $decision = food_ticket_decide_for_user($user, $date, $base, $config, $orderMaps);
             try {
                 $eventId = food_ticket_add_event($decision['payload']);
             } catch (PDOException $pdoEx) {
