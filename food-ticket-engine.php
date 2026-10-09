@@ -350,20 +350,46 @@ function food_ticket_sort_punches(array $items): array
  * تصمیم برای یک ردیف source_row
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
+/** حالت سقف فیش مهمان: «fixed» (سقف ثابت) یا «variable» (تعداد مراجعین داخل ساختمان). */
+function food_guest_cap_mode(): string
+{
+    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'fixed') ?? 'fixed') : 'fixed';
+    return $mode === 'variable' ? 'variable' : 'fixed';
+}
+
+/** ساعت قطع سقف متغیر (HH:MM:SS). خروج مراجعین قبل از این ساعت از سقف کم می‌شود؛ بعد از آن نه. */
+function food_guest_cap_cutoff(): string
+{
+    $raw = function_exists('setting') ? (string) (setting('food_guest_cap_cutoff', '12:00') ?? '12:00') : '12:00';
+    return preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $raw) ? (strlen($raw) === 5 ? $raw . ':00' : $raw) : '12:00:00';
+}
+
 /**
- * تعداد مراجعینی که در لحظهٔ رویداد داخل ساختمان‌اند (از جدول تردد).
- * داخل = ورود همان روز، ورودش قبل از این لحظه، و خروجی ثبت‌نشده یا بعد از این لحظه.
- * null یعنی تردد در دسترس نیست؛ آن‌وقت سقف ثابت قدیمی (max_guest_daily) استفاده می‌شود.
+ * سقف متغیر = (تعداد کسانی که تا آن لحظه وارد شده‌اند) − (تعداد کسانی که قبل از ساعت قطع خارج شده‌اند).
+ * خروج بعد از ساعت قطع سقف را کم نمی‌کند، چون آن افراد فیش گرفته و غذا خورده‌اند.
  */
-function food_ticket_guest_inside_count(?string $date, ?string $time): ?int
+function food_guest_variable_cap_from_counts(int $entries, int $earlyExits): int
+{
+    return max(0, $entries - $earlyExits);
+}
+
+/**
+ * سقف متغیر در لحظهٔ رویداد از جدول تردد. null یعنی تردد در دسترس نیست و سقف ثابت استفاده می‌شود.
+ */
+function food_ticket_guest_variable_cap(?string $date, ?string $time): ?int
 {
     if ($date === null || $date === '' || $time === null || $time === '') {
         return null;
     }
+    $cutoff = food_guest_cap_cutoff();
     try {
-        $query = db()->prepare('SELECT COUNT(*) FROM traffic_visits WHERE visit_date = ? AND entry_time IS NOT NULL AND entry_time <= ? AND (exit_time IS NULL OR exit_time > ?)');
-        $query->execute([$date, $time, $time]);
-        return (int) $query->fetchColumn();
+        $query = db()->prepare(
+            'SELECT (SELECT COUNT(*) FROM traffic_visits WHERE visit_date = ? AND entry_time IS NOT NULL AND entry_time <= ?) AS entries,'
+            . ' (SELECT COUNT(*) FROM traffic_visits WHERE visit_date = ? AND exit_time IS NOT NULL AND exit_time < ? AND exit_time <= ?) AS early_exits'
+        );
+        $query->execute([$date, $time, $date, $cutoff, $time]);
+        $row = $query->fetch(PDO::FETCH_ASSOC) ?: ['entries' => 0, 'early_exits' => 0];
+        return food_guest_variable_cap_from_counts((int) $row['entries'], (int) $row['early_exits']);
     } catch (Throwable $exception) {
         return null;
     }
@@ -509,8 +535,9 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
         $cardCount = (int) $cardCountQ->fetchColumn();
         $cardLimit = (int) ($guestCard['daily_limit'] ?? 0);
         $maxGuest = (int) ($config['max_guest_daily'] ?? 0);
-        $insideNow = food_ticket_guest_inside_count($date, $time);
-        if (food_ticket_guest_cap_reached($guestCount, $insideNow, $maxGuest, $cardCount, $cardLimit)) {
+        // سقف متغیر فقط وقتی فعال است که حالت «متغیر» انتخاب شده باشد؛ وگرنه سقف ثابت.
+        $variableCap = food_guest_cap_mode() === 'variable' ? food_ticket_guest_variable_cap($date, $time) : null;
+        if (food_ticket_guest_cap_reached($guestCount, $variableCap, $maxGuest, $cardCount, $cardLimit)) {
             return [
                 'event_type' => 'guest_limit',
                 'print' => false,
