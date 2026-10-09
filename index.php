@@ -2265,7 +2265,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new RuntimeException('حداقل یک ادمین اصلی فعال باید باقی بماند.');
                 }
             }
-            db()->prepare('UPDATE users SET role = ?, employee_number = ?, national_code = ?, department_id = ?, handling_unit_id = ?, is_it_agent = ?, is_primary_admin = ?, is_active = ? WHERE id = ?')->execute([$role, $employeeNumber !== '' ? $employeeNumber : null, $nationalCode !== '' ? $nationalCode : null, $departmentId, $handlingUnitId, $isItAgent, $isPrimaryAdmin, $isActive, $userId]);
+            $employeeNumberValue = normalize_employee_number($employeeNumber);
+            if ($employeeNumberValue !== null && employee_number_owner($employeeNumberValue, $userId) > 0) {
+                throw new RuntimeException('این کد پرسنلی قبلاً به کاربر دیگری داده شده است. کد تکراری مجاز نیست.');
+            }
+            db()->prepare('UPDATE users SET role = ?, employee_number = ?, national_code = ?, department_id = ?, handling_unit_id = ?, is_it_agent = ?, is_primary_admin = ?, is_active = ? WHERE id = ?')->execute([$role, $employeeNumberValue, $nationalCode !== '' ? $nationalCode : null, $departmentId, $handlingUnitId, $isItAgent, $isPrimaryAdmin, $isActive, $userId]);
             if ($role === 'manager' && $departmentId) {
                 db()->prepare('UPDATE departments SET manager_user_id = NULL WHERE manager_user_id = ? AND id <> ?')->execute([$userId, $departmentId]);
                 db()->prepare('UPDATE departments SET manager_user_id = ? WHERE id = ?')->execute([$userId, $departmentId]);

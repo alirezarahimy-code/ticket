@@ -330,7 +330,7 @@ function food_ticket_import_apply(array $parsed, bool $updateExisting = true): a
     $update = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, national_code = ? WHERE id = ?');
 
     foreach ($parsed['rows'] as $row) {
-        $pc = trim((string) $row['pc']);
+        $pc = (string) (normalize_employee_number($row['pc']) ?? '');
         if ($row['status'] === 'skipped' || $pc === '') {
             $failed++;
             $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => trim($row['first'] . ' ' . $row['last']), 'status' => 'skipped', 'messages' => $row['messages']];

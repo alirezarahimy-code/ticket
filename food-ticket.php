@@ -3187,7 +3187,7 @@ function food_ticket_sync_guest_card_config(int $userId): void
 function food_ticket_api_save_employee(array $data): void
 {
     $id = max(0, (int) ($data['id'] ?? 0));
-    $personnelCode = trim((string) ($data['pc'] ?? $data['employee_number'] ?? ''));
+    $personnelCode = (string) (normalize_employee_number($data['pc'] ?? $data['employee_number'] ?? '') ?? '');
     $nationalCode = strtr(trim((string) ($data['nat'] ?? $data['national_code'] ?? '')), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
     $nationalCode = preg_replace('/\D+/', '', $nationalCode) ?? '';
     $firstName = trim((string) ($data['first'] ?? $data['first_name'] ?? ''));

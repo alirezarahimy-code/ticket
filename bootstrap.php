@@ -1025,7 +1025,7 @@ function ldap_sync_all_users(): array
         : '(&(objectClass=user)(sAMAccountName=*))');
     $attributes = ['distinguishedName', 'displayName', 'mail', 'department', 'sAMAccountName', 'employeeID', 'telephoneNumber', 'userAccountControl', 'memberOf'];
     $seen = [];
-    $result = ['created' => 0, 'updated' => 0, 'disabled' => 0, 'skipped' => 0];
+    $result = ['created' => 0, 'updated' => 0, 'disabled' => 0, 'skipped' => 0, 'code_conflict' => 0];
     $cookie = '';
     $processed = 0;
 
@@ -1073,6 +1073,9 @@ function ldap_sync_all_users(): array
             $existingUser = $existingQuery->fetch() ?: null;
             $wasExisting = $existingUser !== null;
             $domainUser = upsert_domain_user($identity);
+            if (!empty($domainUser['code_conflict'])) {
+                $result['code_conflict']++;
+            }
             $disabled = (((int) ($entry['useraccountcontrol'][0] ?? 0)) & 2) === 2;
             $shouldBeActive = !$disabled && (!$wasExisting || (int) ($existingUser['is_active'] ?? 0) === 1);
             db()->prepare('UPDATE users SET is_active = ? WHERE id = ?')->execute([$shouldBeActive ? 1 : 0, (int) $domainUser['id']]);
@@ -1868,6 +1871,24 @@ function ldap_authenticate(string $username, string $password): ?array
     ];
 }
 
+function normalize_employee_number(mixed $value): ?string
+{
+    $digits = ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'];
+    $code = trim(strtr(trim((string) $value), $digits));
+    return $code === '' ? null : $code;
+}
+
+// شناسه کاربری که این کد پرسنلی را دارد (۰ یعنی آزاد است). $exceptUserId برای ردیف خود کاربر.
+function employee_number_owner(?string $code, int $exceptUserId = 0): int
+{
+    if ($code === null) {
+        return 0;
+    }
+    $query = db()->prepare('SELECT id FROM users WHERE employee_number = ? AND id <> ? LIMIT 1');
+    $query->execute([$code, $exceptUserId]);
+    return (int) ($query->fetchColumn() ?: 0);
+}
+
 function upsert_domain_user(array $identity): array
 {
     $username = trim((string) ($identity['username'] ?? ''));
@@ -1889,15 +1910,22 @@ function upsert_domain_user(array $identity): array
         $effectiveDepartmentId = in_array($user['role'], ['agent', 'manager'], true) && (int) $user['department_id'] > 0
             ? (int) $user['department_id']
             : $departmentId;
-        $empNo = trim((string) ($identity['employee_number'] ?? ''));
-        if ($empNo === '') {
-            $empNo = trim((string) ($user['employee_number'] ?? '')); // اگر AD خالی است کد پرسنلی سامانه حفظ شود
+        $empNo = normalize_employee_number($identity['employee_number'] ?? '');
+        if ($empNo === null) {
+            $empNo = normalize_employee_number($user['employee_number'] ?? ''); // اگر AD خالی است کد پرسنلی سامانه حفظ شود
+        }
+        $codeConflict = false;
+        if ($empNo !== null && employee_number_owner($empNo, (int) $user['id']) > 0) {
+            // کد AD قبلاً به کاربر دیگری داده شده: کد این کاربر تغییر نمی‌کند و تداخل گزارش می‌شود.
+            $codeConflict = true;
+            $empNo = normalize_employee_number($user['employee_number'] ?? '');
         }
         $update = db()->prepare('UPDATE users SET full_name = ?, email = ?, employee_number = ?, phone = ?, department = ?, department_id = ?, auth_source = "ldap" WHERE id = ?');
         $update->execute([$identity['full_name'], $identity['email'], $empNo, $identity['phone'] ?? '', $identity['department'], $effectiveDepartmentId, $user['id']]);
         $user['department_id'] = $effectiveDepartmentId;
+        $user['employee_number'] = $empNo;
         link_agent_assets_to_user((int) $user['id'], (string) $identity['username'], $effectiveDepartmentId);
-        return array_merge($user, $identity, ['username' => $username]);
+        return array_merge($user, $identity, ['username' => $username, 'employee_number' => $empNo, 'code_conflict' => $codeConflict]);
     }
     $role = ldap_role_for_groups((array) ($identity['groups'] ?? []));
     $handlingUnitId = null;
@@ -1906,9 +1934,16 @@ function upsert_domain_user(array $identity): array
         $handlingUnitQuery->execute();
         $handlingUnitId = (int) ($handlingUnitQuery->fetchColumn() ?: 0) ?: null;
     }
+    $newCode = normalize_employee_number($identity['employee_number'] ?? '');
+    $codeConflict = $newCode !== null && employee_number_owner($newCode) > 0;
+    if ($codeConflict) {
+        $newCode = null; // کد تکراری ثبت نمی‌شود؛ ردیف بدون کد ساخته می‌شود
+    }
     $insert = db()->prepare('INSERT INTO users (username, full_name, email, employee_number, phone, department, department_id, handling_unit_id, role, is_it_agent, auth_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "ldap")');
-    $insert->execute([$username, $identity['full_name'], $identity['email'], $identity['employee_number'] ?? '', $identity['phone'] ?? '', $identity['department'], $departmentId, $handlingUnitId, $role, $role === 'agent' ? 1 : 0]);
+    $insert->execute([$username, $identity['full_name'], $identity['email'], $newCode, $identity['phone'] ?? '', $identity['department'], $departmentId, $handlingUnitId, $role, $role === 'agent' ? 1 : 0]);
     $identity['id'] = (int) db()->lastInsertId();
+    $identity['employee_number'] = $newCode;
+    $identity['code_conflict'] = $codeConflict;
     $identity['role'] = $role;
     $identity['is_it_agent'] = $role === 'agent' ? 1 : 0;
     $identity['is_active'] = 1;
