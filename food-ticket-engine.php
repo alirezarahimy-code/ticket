@@ -350,6 +350,40 @@ function food_ticket_sort_punches(array $items): array
  * تصمیم برای یک ردیف source_row
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
+/**
+ * تعداد مراجعینی که در لحظهٔ رویداد داخل ساختمان‌اند (از جدول تردد).
+ * داخل = ورود همان روز، ورودش قبل از این لحظه، و خروجی ثبت‌نشده یا بعد از این لحظه.
+ * null یعنی تردد در دسترس نیست؛ آن‌وقت سقف ثابت قدیمی (max_guest_daily) استفاده می‌شود.
+ */
+function food_ticket_guest_inside_count(?string $date, ?string $time): ?int
+{
+    if ($date === null || $date === '' || $time === null || $time === '') {
+        return null;
+    }
+    try {
+        $query = db()->prepare('SELECT COUNT(*) FROM traffic_visits WHERE visit_date = ? AND entry_time IS NOT NULL AND entry_time <= ? AND (exit_time IS NULL OR exit_time > ?)');
+        $query->execute([$date, $time, $time]);
+        return (int) $query->fetchColumn();
+    } catch (Throwable $exception) {
+        return null;
+    }
+}
+
+/**
+ * آیا فیش مهمانِ جدید مجاز نیست؟
+ * سقف کل = تعداد داخل ساختمان در همان لحظه (اگر تردد در دسترس باشد)، وگرنه سقف ثابت قدیمی.
+ * فیش‌های قبلاً صادرشده برگردانده نمی‌شوند؛ فقط صدور جدید بسته می‌شود.
+ */
+function food_ticket_guest_cap_reached(int $issuedToday, ?int $insideNow, int $fallbackMax, int $cardIssued, int $cardLimit): bool
+{
+    $capActive = $insideNow !== null || $fallbackMax > 0;
+    $totalCap = $insideNow ?? $fallbackMax;
+    if ($capActive && $issuedToday >= $totalCap) {
+        return true;
+    }
+    return $cardLimit > 0 && $cardIssued >= $cardLimit;
+}
+
 function food_ticket_decide_punch(array $item, array $config, array &$orderMaps): array
 {
     // C_Date=20261002 ، C_Time=143940 ، L_UID=Number (377/0377/00377)
@@ -475,7 +509,8 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
         $cardCount = (int) $cardCountQ->fetchColumn();
         $cardLimit = (int) ($guestCard['daily_limit'] ?? 0);
         $maxGuest = (int) ($config['max_guest_daily'] ?? 0);
-        if (($maxGuest > 0 && $guestCount >= $maxGuest) || ($cardLimit > 0 && $cardCount >= $cardLimit)) {
+        $insideNow = food_ticket_guest_inside_count($date, $time);
+        if (food_ticket_guest_cap_reached($guestCount, $insideNow, $maxGuest, $cardCount, $cardLimit)) {
             return [
                 'event_type' => 'guest_limit',
                 'print' => false,
