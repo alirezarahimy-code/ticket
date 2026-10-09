@@ -3812,7 +3812,8 @@ function food_ticket_api_handle(string $route, array $user): never
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'orders') {
             $reqDate = (string) ($_GET['date'] ?? date('Y-m-d'));
             $reqJalali = trim((string) ($_GET['jalali'] ?? ''));
-            food_ticket_api_json(['items' => food_ticket_api_orders($reqDate, $reqJalali)]);
+            $reqTo = trim((string) ($_GET['to'] ?? '')) ?: null;
+            food_ticket_api_json(['items' => food_ticket_api_orders($reqDate, $reqJalali, $reqTo)]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'print-diag') {
             food_ticket_api_json(food_ticket_api_print_diag());
