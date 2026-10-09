@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS users (
     profile_photo VARCHAR(255) NULL,
     email VARCHAR(190) NULL,
     employee_number VARCHAR(100) NULL,
+    UNIQUE KEY uq_users_employee_number (employee_number),
     national_code VARCHAR(30) NULL,
     phone VARCHAR(80) NULL,
     department VARCHAR(190) NULL,
