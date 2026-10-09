@@ -24,11 +24,13 @@
 .fm-food-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
 .fm-food-check { display:flex; align-items:center; gap:8px; padding:9px 10px; border:1px solid var(--line); border-radius:9px; background:#fff; font-size:12px; }
 .fm-food-check input { accent-color:var(--teal); }
-.fm-food-selection { grid-template-columns:minmax(150px,.4fr) minmax(0,1fr); align-items:center; gap:8px 12px; }
+.fm-food-selection { grid-template-columns:minmax(0,1fr); align-items:stretch; gap:8px; }
 .fm-food-selection-head { display:flex; align-items:center; gap:5px 10px; flex-wrap:wrap; }
 .fm-food-selection-head > strong { color:var(--ink); }
-.fm-food-selection > .fm-food-checks { display:flex; align-items:center; flex-wrap:wrap; gap:6px; min-width:0; }
-.fm-food-selection .fm-food-check { flex:0 1 auto; padding:5px 8px; gap:6px; }
+.fm-food-selection > .fm-food-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; min-width:0; }
+.fm-food-selection .fm-food-check { display:flex; align-items:flex-start; min-width:0; padding:9px 10px; gap:8px; line-height:1.7; }
+.fm-food-check > span { min-width:0; overflow-wrap:anywhere; word-break:break-word; }
+.fm-food-check input { flex:0 0 auto; margin-top:4px; }
 .fm-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
 .fm-actions .btn,.fm-actions .button { cursor:pointer; }
 .fm-small { font-size:11px; color:var(--muted); }

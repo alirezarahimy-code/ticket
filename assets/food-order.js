@@ -758,6 +758,13 @@
 
   root.addEventListener('keydown', function (event) {
     var input = event.target;
+    if (input && input.id === 'fo-national-code' && state.flowStage === 'proxy') {
+      if (event.key === 'Enter') {
+        event.preventDefault(); event.stopPropagation();
+        if (!state.flowSaving && !state.dropdownOpen) confirmProxyRecipient();
+      }
+      return;
+    }
     if (!input || input.id !== 'fo-search-name' || state.flowStage !== 'proxy') return;
     var people = employeeMatches();
     if (event.key === 'Escape') {

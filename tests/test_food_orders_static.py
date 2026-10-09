@@ -559,8 +559,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         manager_css = read("assets/food-menu.css")
         self.assertRegex(manager_css, re.compile(r"@media\s*\(max-width:\s*430px\).*?\.fm-calendar-card\s+\.fo-day-meals\s*\{\s*display:flex;", re.S))
         self.assertIn('class="fm-field fm-food-selection"', manager_js)
-        self.assertIn(".fm-food-selection > .fm-food-checks { display:flex", manager_css)
-        self.assertIn("grid-template-columns:minmax(150px,.4fr) minmax(0,1fr)", manager_css)
+        self.assertIn(".fm-food-selection > .fm-food-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr))", manager_css)
+        self.assertIn("grid-template-columns:minmax(0,1fr)", manager_css)
 
 
 if __name__ == "__main__":

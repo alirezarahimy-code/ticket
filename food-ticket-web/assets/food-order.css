@@ -130,7 +130,7 @@
 .fo-combobox { position:relative; margin:4px 0 12px; }
 .fo-combobox > input { width:100%; border:1px solid var(--line); border-radius:10px; padding:11px 12px; background:#fff; color:var(--ink); font:inherit; }
 .fo-combobox > input:focus { border-color:var(--teal); outline:0; box-shadow:0 0 0 3px rgba(43,149,104,.11); }
-.fo-combobox .fo-search-results { position:absolute; inset-inline:0; top:calc(100% + 4px); z-index:40; display:grid; max-height:min(250px,38vh); overflow:auto; margin:0; padding:6px; border:1px solid var(--line); border-radius:11px; background:#fff; box-shadow:0 14px 30px rgba(16,42,67,.16); }
+.fo-combobox .fo-search-results { position:static; z-index:auto; display:grid; max-height:min(260px,40vh); overflow:auto; overscroll-behavior:contain; margin:6px 0 0; padding:6px; border:1px solid var(--line); border-radius:11px; background:#fff; box-shadow:0 14px 30px rgba(16,42,67,.16); }
 .fo-search-results[hidden] { display:none !important; }
 .fo-search-result { width:100%; text-align:right; cursor:pointer; }
 .fo-search-result.is-highlighted,.fo-search-result[aria-selected="true"] { border-color:var(--teal); background:var(--teal-light); }
