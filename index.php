@@ -3087,7 +3087,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if (!$user && $page !== 'help') {
+if (!$user) {
     $loginTitle = setting('login_title', 'به سامانه پشتیبانی خوش آمدید');
     $loginIntro = setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.');
     $loginNoteTitle = setting('login_note_title', 'ورود یکپارچه سازمانی');
@@ -3096,7 +3096,7 @@ if (!$user && $page !== 'help') {
     $loginLogo = setting('app_login_logo', setting('app_logo', (string) cfg('app.logo', '')));
     $GLOBALS['ui_particles'] = true;
     render_header('ورود به سامانه');
-    echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button><a class="button secondary wide" href="index.php?page=help" style="margin-top:8px;text-align:center;display:block">راهنمای سامانه</a></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
+    echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
     render_footer();
     exit;
 }
@@ -3375,8 +3375,7 @@ if ($page === 'services') {
 }
 
 if ($page === 'help') {
-    // راهنما برای همه باز است (حتی قبل از ورود تا کاربران بتوانند فرم ورود را یاد بگیرند)
-    $helpUser = current_user();
+    $helpUser = require_login();
     render_header('راهنمای سامانه', $helpUser);
     require __DIR__ . '/help-guide.php';
     render_footer();
