@@ -55,9 +55,10 @@ $inspector = ['id' => 999003, 'role' => 'inspector'];
 $tomorrow = (new DateTimeImmutable(food_order_today() . ' +3 day'))->format('Y-m-d');
 $createdIds = [];
 
-check('نقش مدیر مجاز است', food_guest_request_allowed($manager));
-check('نقش کارشناس مجاز نیست', !food_guest_request_allowed($agent));
-check('بازرسی جزو مدیران است و مجاز است', food_guest_request_allowed($inspector));
+check('مدیر واحدِ زیر معاونت مجاز است', food_guest_request_allowed($manager));
+check('کارشناس بدون جایگاه در چارت مجاز نیست', !food_guest_request_allowed($agent));
+check('بازرس بدون جایگاه در چارت مجاز نیست', !food_guest_request_allowed($inspector));
+check('مدیر بدون معاونت در چارت مجاز نیست', !food_guest_request_allowed($orphanManager));
 
 check('معاونت کاربر از واحدِ مدیریتی به معاونت بالا می‌رود (حسابداری ← مالی)', food_guest_user_deputy_id($manager) === $depId);
 check('معاونت مدیر دوم، معاونت دوم است', food_guest_user_deputy_id($manager2) === $depId2);

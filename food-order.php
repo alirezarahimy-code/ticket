@@ -1177,9 +1177,10 @@ function food_guest_request_roles(): array
     return ['primary_admin', 'supervisor', 'support_manager', 'manager', 'inspector'];
 }
 
+/** فقط کسانی که جایگاه مدیریتی در چارت دارند (مدیر واحدی که زیر یک معاونت است)؛ نقش سامانه ملاک نیست. */
 function food_guest_request_allowed(array $user): bool
 {
-    return in_array((string) ($user['role'] ?? ''), food_guest_request_roles(), true);
+    return food_guest_user_deputy_id($user, true) > 0;
 }
 
 /** تعداد مهمان‌های درخواستی فعال برای یک روز (سقف حالت «درخواست مهمان»). null یعنی جدول در دسترس نیست. */
@@ -1258,7 +1259,7 @@ function food_guest_deputies(): array
  * معاونتِ کاربر از چارت سازمانی: از واحد خود کاربر (users.org_unit_id) و واحدهایی که مدیرشان است
  * شروع می‌کند و در سلسلهٔ والدها بالا می‌رود تا به واحد نوع deputy برسد. 0 یعنی پیدا نشد.
  */
-function food_guest_user_deputy_id(array $user): int
+function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
 {
     $uid = (int) ($user['id'] ?? 0);
     if ($uid <= 0) {
@@ -1266,6 +1267,9 @@ function food_guest_user_deputy_id(array $user): int
     }
     $starts = [];
     try {
+        if ($managedOnly) {
+            throw new RuntimeException('managed-only');
+        }
         $own = db()->prepare('SELECT org_unit_id FROM users WHERE id = ?');
         $own->execute([$uid]);
         $ownUnit = (int) ($own->fetchColumn() ?: 0);
@@ -1375,7 +1379,7 @@ function food_guest_request_create(array $user, array $body): array
     // نوع غذا حذف شده است؛ غذای مهمان را سلف طبق تشخیص مدیر تعیین می‌کند.
     $foodId = null;
     // معاونت از چارت سازمانی کاربر خوانده می‌شود؛ مقدار ارسال‌شدهٔ فرم نادیده گرفته می‌شود.
-    $deputyId = food_guest_user_deputy_id($user);
+    $deputyId = food_guest_user_deputy_id($user, true);
     if ($deputyId <= 0) {
         throw new RuntimeException('برای ثبت سفارش مهمان باید شما در چارت سازمانی زیر یک معاونت تعریف شده باشید (به‌عنوان عضو واحد یا مدیر واحد). با مدیر سامانه هماهنگ کنید.');
     }

@@ -215,7 +215,8 @@
   }
 
   function guestOrderButton() {
-    if (root.dataset.guestAllowed !== '1') return '';
+    // فقط وقتی سفارش برای خود کاربر است؛ در حالت نیابتی (سفارش برای پرسنل) دیده نمی‌شود
+    if (root.dataset.guestAllowed !== '1' || state.targetMode !== 'self') return '';
     return '<button type="button" class="button" data-fo-action="guest-order">سفارش غذای مهمان</button>';
   }
 
