@@ -681,7 +681,9 @@ function render_footer(): void
     } catch (Throwable) {
         echo "[]";
     }
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.21"></script></body></html>';
+    $pageParam = (string) ($_GET['page'] ?? '');
+    $withParticles = !empty($GLOBALS['ui_particles']) || $pageParam === '' || $pageParam === 'dashboard';
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.21"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . '</body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {
@@ -3078,6 +3080,7 @@ if (!$user) {
     $loginNoteText = setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.');
     $loginAnnouncement = setting('login_announcement', '');
     $loginLogo = setting('app_login_logo', setting('app_logo', (string) cfg('app.logo', '')));
+    $GLOBALS['ui_particles'] = true;
     render_header('ورود به سامانه');
     echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
     render_footer();
