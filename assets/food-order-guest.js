@@ -95,7 +95,7 @@
     dialog.innerHTML = ''
       + '<div class="fo-modal-inner">'
       + '<div class="fo-modal-head"><div><h2 id="fg-title">سفارش غذای مهمان</h2>'
-      + '<p>غذای مهمان طبق تشخیص مدیر سلف داده می‌شود؛ نوع غذا لازم نیست.</p></div>'
+      + '</div>'
       + '<button type="button" class="button secondary" data-fg-action="close">بستن</button></div>'
       + (state.loadError ? '<div class="alert danger" role="alert">' + esc(state.loadError) + '</div>' : '')
       + deputyBox
