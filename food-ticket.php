@@ -142,6 +142,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'dashboard' => 'food.dashboard',
         'monitoring' => 'food.monitor',
         'absent' => 'food.reports',
+        'guest-requests-report' => 'food.reports',
         'orders' => 'food.dashboard',
         'reports/export' => 'food.reports',
         'employees' => 'food.employees',
@@ -2946,6 +2947,49 @@ function food_ticket_api_config(): array
  * گزارش غایبین: سفارش داده‌اند ولی فیش چاپ‌شده ندارند.
  * @return list<array{nat:string,pc:string,first:string,last:string,food:string,foodDate:string,status:string}>
  */
+/**
+ * گزارش سفارش مهمان: فقط درخواست‌های فعال بازه؛ deputy = 'all' یا شناسهٔ معاونت.
+ * فهرست معاونت‌ها هم برای ساخت لیست کشویی برگردانده می‌شود.
+ */
+function food_ticket_api_guest_requests_report(string $from, string $to, string $deputy): array
+{
+    $deputies = [];
+    if (function_exists('org_deputy_units')) {
+        $deputies = array_map(
+            static fn (array $u): array => ['id' => (int) $u['id'], 'name' => (string) $u['name']],
+            org_deputy_units()
+        );
+    }
+    $sql = "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.deputy_unit_id,
+                   ou.name AS deputy_name, c.food_name
+              FROM food_guest_requests r
+              LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
+              LEFT JOIN food_catalog c ON c.id = r.food_id
+             WHERE r.status = 'active' AND r.request_date BETWEEN ? AND ?";
+    $params = [$from, $to];
+    if ($deputy !== 'all') {
+        $sql .= ' AND r.deputy_unit_id = ?';
+        $params[] = (int) $deputy;
+    }
+    $sql .= ' ORDER BY ou.name, r.request_date, r.id';
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $items = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $items[] = [
+            'id' => (int) $r['id'],
+            'date' => (string) $r['request_date'],
+            'organization' => (string) $r['organization'],
+            'guest_count' => (int) $r['guest_count'],
+            'food_name' => (string) ($r['food_name'] ?? ''),
+            'requester_name' => (string) $r['requester_name'],
+            'deputy_unit_id' => $r['deputy_unit_id'] === null ? null : (int) $r['deputy_unit_id'],
+            'deputy_name' => (string) ($r['deputy_name'] ?? ''),
+        ];
+    }
+    return ['items' => $items, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy];
+}
+
 function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
 {
     $fromDate = food_ticket_parse_date($fromDate) ?: trim($fromDate);
@@ -3866,6 +3910,19 @@ function food_ticket_api_handle(string $route, array $user): never
                 food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
             }
             food_ticket_api_json(['items' => food_ticket_api_absent($from, $to), 'from' => $from, 'to' => $to]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-requests-report') {
+            // گزارش درخواست‌های غذای مهمان مدیران؛ فیلتر معاونت: all یا شناسهٔ معاونت
+            $from = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $to = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($from === null || $to === null || $from > $to) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش معتبر نیست.'], 400);
+            }
+            $deputyRaw = trim((string) ($_GET['deputy_id'] ?? 'all'));
+            if ($deputyRaw !== 'all' && !ctype_digit($deputyRaw)) {
+                food_ticket_api_json(['error' => 'فیلتر معاونت معتبر نیست.'], 400);
+            }
+            food_ticket_api_json(food_ticket_api_guest_requests_report($from, $to, $deputyRaw));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'employees') {
             food_ticket_api_json(['items' => food_ticket_api_employees()]);

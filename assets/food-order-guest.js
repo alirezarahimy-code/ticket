@@ -8,7 +8,7 @@
   var apiBase = (root.dataset.api || '').replace(/&amp;/g, '&');
   var csrf = root.dataset.csrf || '';
   var requesterDefault = root.dataset.selfName || '';
-  var state = { items: [], foods: [], mode: 'fixed', loaded: false, error: '', saving: false, formError: '' };
+  var state = { items: [], foods: [], deputies: [], mode: 'fixed', loaded: false, error: '', saving: false, formError: '' };
 
   function esc(value) {
     return String(value == null ? '' : value).replace(/[&<>"']/g, function (m) {
@@ -52,6 +52,9 @@
     var modeNote = state.mode === 'requested'
       ? 'سقف مهمان‌های این روزها اکنون بر اساس مجموع درخواست‌های فعال همین بخش تعیین می‌شود.'
       : 'سقف مهمان‌های این روزها طبق تنظیم فعلی سامانه است؛ درخواست‌ها در سقف مهمان‌ها به حساب می‌آیند.';
+    var deputyOptions = '<option value="">انتخاب معاونت</option>' + state.deputies.map(function (d) {
+      return '<option value="' + d.id + '">' + esc(d.name) + '</option>';
+    }).join('');
     var rows = state.items.map(function (r) {
       var action = r.editable && r.status === 'active'
         ? '<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>'
@@ -60,6 +63,7 @@
       return '<tr>'
         + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
         + '<td>' + esc(r.organization) + '</td>'
+        + '<td>' + esc(r.deputy_name || '—') + '</td>'
         + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
         + '<td>' + esc(r.food_name || '—') + '</td>'
         + '<td>' + esc(r.requester_name) + '</td>'
@@ -69,7 +73,7 @@
     }).join('');
     var table = state.items.length
       ? '<div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr>'
-        + '<th>تاریخ</th><th>سازمان / شرکت</th><th>تعداد</th><th>نوع غذا</th><th>درخواست‌دهنده</th><th>ثبت‌کننده</th><th>وضعیت</th><th></th>'
+        + '<th>تاریخ</th><th>سازمان / شرکت</th><th>معاونت</th><th>تعداد</th><th>نوع غذا</th><th>درخواست‌دهنده</th><th>ثبت‌کننده</th><th>وضعیت</th><th></th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
       : '<p class="muted">درخواست فعالی برای روزهای آینده ثبت نشده است.</p>';
     root.innerHTML = ''
@@ -79,7 +83,8 @@
       + (state.formError ? '<div class="alert danger" role="alert">' + esc(state.formError) + '</div>' : '')
       + '<form id="fg-form" class="form-grid" novalidate>'
       + '<label>تاریخ مورد نیاز (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali name="request_date" required></label>'
-      + '<label>سازمان / شرکت<input type="text" name="organization" maxlength="190" required></label>'
+      + '<label>معاونت درخواست‌کننده<select name="deputy_unit_id" required>' + deputyOptions + '</select></label>'
+      + '<label>سازمان / شرکت مهمان<input type="text" name="organization" maxlength="190" required></label>'
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" required></label>'
       + '<label>نوع غذا (از فهرست غذاها)<select name="food_id">' + foodOptions + '</select></label>'
       + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(requesterDefault) + '" required></label>'
@@ -97,6 +102,7 @@
       var data = await request('guest-requests');
       state.items = data.items || [];
       state.foods = data.foods || [];
+      state.deputies = data.deputies || [];
       state.mode = data.mode || 'fixed';
       state.loaded = true;
       state.error = '';
@@ -118,11 +124,13 @@
       organization: String(fd.get('organization') || '').trim(),
       guest_count: normDigits(fd.get('guest_count') || '').trim(),
       food_id: Number(fd.get('food_id') || 0),
+      deputy_unit_id: Number(fd.get('deputy_unit_id') || 0),
       requester_name: String(fd.get('requester_name') || '').trim(),
       note: String(fd.get('note') || '').trim()
     };
     state.formError = '';
     if (!body.request_date) { state.formError = 'تاریخ را وارد کنید.'; return render(); }
+    if (!body.deputy_unit_id) { state.formError = 'معاونت درخواست‌کننده را انتخاب کنید.'; return render(); }
     if (!body.organization) { state.formError = 'نام سازمان یا شرکت را وارد کنید.'; return render(); }
     if (!/^\d{1,3}$/.test(body.guest_count) || Number(body.guest_count) < 1 || Number(body.guest_count) > 500) {
       state.formError = 'تعداد مهمان باید عددی بین ۱ تا ۵۰۰ باشد.'; return render();

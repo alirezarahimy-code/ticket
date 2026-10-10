@@ -1174,7 +1174,7 @@ function food_order_export_statistics_range(string $fromDate, string $toDate, ar
 /** نقش‌های مدیر و بالاتر که می‌توانند برای مهمان برای روزهای آینده غذا سفارش دهند. */
 function food_guest_request_roles(): array
 {
-    return ['primary_admin', 'supervisor', 'support_manager', 'manager'];
+    return ['primary_admin', 'supervisor', 'support_manager', 'manager', 'inspector'];
 }
 
 function food_guest_request_allowed(array $user): bool
@@ -1198,15 +1198,29 @@ function food_guest_requested_total(string $isoDate): ?int
     }
 }
 
+/** معاونت‌های فعال چارت سازمانی (فهرست انتخاب در فرم و گزارش). */
+function food_guest_deputies(): array
+{
+    if (!function_exists('org_deputy_units')) {
+        return [];
+    }
+    return array_map(
+        static fn (array $u): array => ['id' => (int) $u['id'], 'name' => (string) $u['name']],
+        org_deputy_units()
+    );
+}
+
 function food_guest_request_list(): array
 {
     food_order_schema_ensure();
     $today = food_order_today();
     $stmt = db()->prepare(
         "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.note, r.status,
-                r.created_at, r.food_id, c.food_name, TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS created_by_name
+                r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
+                TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS created_by_name
            FROM food_guest_requests r
            LEFT JOIN food_catalog c ON c.id = r.food_id
+           LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
            LEFT JOIN users u ON u.id = r.created_by
           WHERE r.request_date >= ?
           ORDER BY r.request_date ASC, r.id ASC
@@ -1223,6 +1237,8 @@ function food_guest_request_list(): array
             'guest_count' => (int) $r['guest_count'],
             'food_id' => $r['food_id'] === null ? null : (int) $r['food_id'],
             'food_name' => $r['food_name'] === null ? '' : (string) $r['food_name'],
+            'deputy_unit_id' => $r['deputy_unit_id'] === null ? null : (int) $r['deputy_unit_id'],
+            'deputy_name' => (string) ($r['deputy_name'] ?? ''),
             'requester_name' => (string) $r['requester_name'],
             'note' => (string) ($r['note'] ?? ''),
             'status' => (string) $r['status'],
@@ -1235,7 +1251,7 @@ function food_guest_request_list(): array
         static fn (array $f): array => ['id' => $f['id'], 'name' => $f['food_name']],
         array_filter(food_order_catalog(false), static fn (array $f): bool => $f['active'])
     ));
-    return ['items' => $items, 'foods' => $foods, 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'fixed'];
+    return ['items' => $items, 'foods' => $foods, 'deputies' => food_guest_deputies(), 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'fixed'];
 }
 
 function food_guest_request_create(array $user, array $body): array
@@ -1267,6 +1283,10 @@ function food_guest_request_create(array $user, array $body): array
     } else {
         $foodId = null;
     }
+    $deputyId = (int) ($body['deputy_unit_id'] ?? 0);
+    if ($deputyId <= 0 || !in_array($deputyId, array_column(food_guest_deputies(), 'id'), true)) {
+        throw new RuntimeException('معاونت درخواست‌کننده را از فهرست معاونت‌های فعال انتخاب کنید.');
+    }
     $requester = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['requester_name'] ?? '')));
     if (mb_strlen($requester) < 2 || mb_strlen($requester) > 150) {
         throw new RuntimeException('نام درخواست‌دهنده باید بین ۲ تا ۱۵۰ نویسه باشد.');
@@ -1276,13 +1296,13 @@ function food_guest_request_create(array $user, array $body): array
         throw new RuntimeException('یادداشت نباید بیش از ۵۰۰ نویسه باشد.');
     }
     $stmt = db()->prepare(
-        'INSERT INTO food_guest_requests (request_date, organization, guest_count, food_id, requester_name, note, status, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, \'active\', ?)'
+        'INSERT INTO food_guest_requests (request_date, organization, guest_count, food_id, requester_name, deputy_unit_id, note, status, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, \'active\', ?)'
     );
-    $stmt->execute([$date, $organization, $count, $foodId, $requester, $note === '' ? null : $note, (int) $user['id']]);
+    $stmt->execute([$date, $organization, $count, $foodId, $requester, $deputyId, $note === '' ? null : $note, (int) $user['id']]);
     $id = (int) db()->lastInsertId();
     food_order_audit('food_guest_request_create', $user, 'food_guest_request', $id, null, [
-        'request_date' => $date, 'organization' => $organization, 'guest_count' => $count, 'food_id' => $foodId, 'requester_name' => $requester,
+        'request_date' => $date, 'organization' => $organization, 'guest_count' => $count, 'food_id' => $foodId, 'requester_name' => $requester, 'deputy_unit_id' => $deputyId,
     ]);
     return ['id' => $id, 'request_date' => $date];
 }
