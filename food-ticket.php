@@ -3422,7 +3422,8 @@ function food_ticket_api_save_config(array $data, array $user): void
         'cut_source_rows' => $value($sourceDb, 'cut_source_rows', $value($data, 'cutSourceRows', $current['cut_source_rows'] ?? 1)),
     ], $user);
     if (array_key_exists('guestCapMode', $data)) {
-        save_setting('food_guest_cap_mode', (string) $data['guestCapMode'] === 'variable' ? 'variable' : 'fixed');
+        $guestCapModeIn = (string) ($data['guestCapMode'] ?? '');
+        save_setting('food_guest_cap_mode', in_array($guestCapModeIn, ['variable', 'requested'], true) ? $guestCapModeIn : 'fixed');
     }
     $capTimeKeys = ['guestCapStart' => 'food_guest_cap_start', 'guestCapCutoff' => 'food_guest_cap_cutoff', 'guestCapEnd' => 'food_guest_cap_end'];
     foreach ($capTimeKeys as $field => $settingKey) {
@@ -3875,7 +3876,9 @@ function food_ticket_api_handle(string $route, array $user): never
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
             // سقف فعلی سقف متغیر + تعداد داخل ساختمان برای باکس نمایش در فرم مهمان
             $nowTime = date('H:i:s');
-            $capNow = food_ticket_guest_variable_cap(date('Y-m-d'), $nowTime);
+            $capNow = food_guest_cap_mode() === 'requested'
+                ? food_guest_requested_total(date('Y-m-d'))
+                : food_ticket_guest_variable_cap(date('Y-m-d'), $nowTime);
             $insideNow = null;
             try {
                 $insideNow = (int) db()->query('SELECT COUNT(*) FROM traffic_visits WHERE visit_date = CURDATE() AND exit_time IS NULL')->fetchColumn();

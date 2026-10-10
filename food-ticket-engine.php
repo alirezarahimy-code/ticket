@@ -354,7 +354,7 @@ function food_ticket_sort_punches(array $items): array
 function food_guest_cap_mode(): string
 {
     $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'fixed') ?? 'fixed') : 'fixed';
-    return $mode === 'variable' ? 'variable' : 'fixed';
+    return in_array($mode, ['variable', 'requested'], true) ? $mode : 'fixed';
 }
 
 /** نرمال‌سازی ساعت (HH:MM یا HH:MM:SS) به HH:MM:SS؛ اگر معتبر نبود پیش‌فرض. */
@@ -575,8 +575,14 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
         $cardCount = (int) $cardCountQ->fetchColumn();
         $cardLimit = (int) ($guestCard['daily_limit'] ?? 0);
         $maxGuest = (int) ($config['max_guest_daily'] ?? 0);
-        // سقف متغیر فقط وقتی فعال است که حالت «متغیر» انتخاب شده باشد؛ وگرنه سقف ثابت.
-        $variableCap = food_guest_cap_mode() === 'variable' ? food_ticket_guest_variable_cap($date, $time) : null;
+                // حالت «متغیر»: سقف از تعداد داخل ساختمان؛ حالت «درخواست مهمان»: سقف = جمع مهمان‌های درخواستی مدیران برای همان روز.
+        $guestMode = food_guest_cap_mode();
+        $variableCap = null;
+        if ($guestMode === 'variable') {
+            $variableCap = food_ticket_guest_variable_cap($date, $time);
+        } elseif ($guestMode === 'requested' && function_exists('food_guest_requested_total')) {
+            $variableCap = food_guest_requested_total((string) $date);
+        }
         if (food_ticket_guest_cap_reached($guestCount, $variableCap, $maxGuest, $cardCount, $cardLimit)) {
             return [
                 'event_type' => 'guest_limit',
