@@ -3467,7 +3467,7 @@ function food_ticket_api_save_config(array $data, array $user): void
     ], $user);
     if (array_key_exists('guestCapMode', $data)) {
         $guestCapModeIn = (string) ($data['guestCapMode'] ?? '');
-        save_setting('food_guest_cap_mode', in_array($guestCapModeIn, ['variable', 'requested'], true) ? $guestCapModeIn : 'fixed');
+        save_setting('food_guest_cap_mode', $guestCapModeIn === 'variable' ? 'variable' : 'requested');
     }
     $capTimeKeys = ['guestCapStart' => 'food_guest_cap_start', 'guestCapCutoff' => 'food_guest_cap_cutoff', 'guestCapEnd' => 'food_guest_cap_end'];
     foreach ($capTimeKeys as $field => $settingKey) {

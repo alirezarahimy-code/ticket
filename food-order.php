@@ -1318,11 +1318,11 @@ function food_guest_request_list(array $user): array
            LEFT JOIN food_catalog c ON c.id = r.food_id
            LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
            LEFT JOIN users u ON u.id = r.created_by
-          WHERE r.request_date >= ?
+          WHERE r.request_date BETWEEN ? AND ?
           ORDER BY r.request_date ASC, r.id ASC
           LIMIT 300"
     );
-    $stmt->execute([$today]);
+    $stmt->execute([$today, (new DateTimeImmutable($today))->modify('+2 day')->format('Y-m-d')]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $items[] = [
@@ -1354,7 +1354,7 @@ function food_guest_request_list(array $user): array
             $myDeputy = $d;
         }
     }
-    return ['items' => $items, 'foods' => $foods, 'my_deputy' => $myDeputy, 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'fixed'];
+    return ['items' => $items, 'foods' => $foods, 'my_deputy' => $myDeputy, 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'requested'];
 }
 
 function food_guest_request_create(array $user, array $body): array

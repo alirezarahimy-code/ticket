@@ -350,11 +350,11 @@ function food_ticket_sort_punches(array $items): array
  * تصمیم برای یک ردیف source_row
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
-/** حالت سقف فیش مهمان: «fixed» (سقف ثابت) یا «variable» (تعداد مراجعین داخل ساختمان). */
+/** حالت سقف فیش مهمان: «requested» (جمع درخواست مهمان معاونت‌ها در روز جاری) یا «variable» (تعداد نفرات داخل ساختمان). */
 function food_guest_cap_mode(): string
 {
-    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'fixed') ?? 'fixed') : 'fixed';
-    return in_array($mode, ['variable', 'requested'], true) ? $mode : 'fixed';
+    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'requested') ?? 'requested') : 'requested';
+    return $mode === 'variable' ? 'variable' : 'requested';
 }
 
 /** نرمال‌سازی ساعت (HH:MM یا HH:MM:SS) به HH:MM:SS؛ اگر معتبر نبود پیش‌فرض. */
