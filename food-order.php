@@ -1198,25 +1198,40 @@ function food_guest_requested_total(string $isoDate): ?int
     }
 }
 
-/** جدول و ستون‌های سفارش مهمان (upgrade-1.39 و 1.40) آماده‌اند؟ بدون پرتاب خطا؛ صفحهٔ اصلی غذا را خراب نمی‌کند. */
-function food_guest_schema_ready(): bool
+/**
+ * موارد ناقص سفارش مهمان را برمی‌گرداند (خالی یعنی آماده). بدون پرتاب خطا.
+ * نام دیتابیس فعلی هم در پیام می‌آید تا اگر سامانه به دیتابیس دیگری وصل است معلوم شود.
+ */
+function food_guest_schema_missing(): array
 {
-    static $ready = null;
-    if ($ready !== null) {
-        return $ready;
-    }
     try {
-        $stmt = db()->query(
-            "SELECT COUNT(*) FROM information_schema.COLUMNS
-              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_guest_requests'
-                AND COLUMN_NAME IN ('request_date','organization','guest_count','food_id','requester_name','deputy_unit_id','status')"
+        $db = (string) db()->query('SELECT DATABASE()')->fetchColumn();
+        $tableStmt = db()->query("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_guest_requests'");
+        if ((int) $tableStmt->fetchColumn() === 0) {
+            return ['جدول food_guest_requests (upgrade-1.39)', 'دیتابیس فعلی: ' . $db];
+        }
+        $colStmt = db()->query(
+            "SELECT COLUMN_NAME FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_guest_requests'"
         );
-        $ready = (int) $stmt->fetchColumn() === 7;
+        $have = array_map('strval', $colStmt->fetchAll(PDO::FETCH_COLUMN));
+        $missing = [];
+        foreach (['request_date', 'organization', 'guest_count', 'food_id', 'requester_name', 'deputy_unit_id', 'status'] as $col) {
+            if (!in_array($col, $have, true)) {
+                $missing[] = 'ستون ' . $col . ' (upgrade-' . ($col === 'deputy_unit_id' ? '1.40' : '1.39') . ')';
+            }
+        }
+        return $missing;
     } catch (Throwable $e) {
         error_log('[food-order] guest schema check failed: ' . $e->getMessage());
-        $ready = false;
+        return ['بررسی دیتابیس انجام نشد'];
     }
-    return $ready;
+}
+
+/** جدول و ستون‌های سفارش مهمان آماده‌اند؟ */
+function food_guest_schema_ready(): bool
+{
+    return food_guest_schema_missing() === [];
 }
 
 /** برای API سفارش مهمان: اگر migration اجرا نشده، پیام فارسی روشن می‌دهد. */
@@ -1645,10 +1660,14 @@ function food_order_render_page(array $user): never
     }
     echo '<div id="food-order-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-id="' . (int) ($user['id'] ?? 0) . '" data-self-name="' . e(food_order_full_name($profile)) . '" data-today="' . e($today) . '" data-today-jalali="' . e($todayJalali) . '" data-has-national="' . ($hasNational ? '1' : '0') . '" data-can-proxy="' . ($canProxy ? '1' : '0') . '"><div class="food-order-loading card">در حال بارگذاری تقویم و سفارش‌های شما…</div></div>';
     echo '</section>';
+    if (food_guest_request_allowed($user) && !food_guest_schema_ready()) {
+        $missingItems = food_guest_schema_missing();
+        echo '<section class="food-guest-page"><div class="alert danger" role="alert"><b>بخش سفارش مهمان فعال نیست.</b> موارد ناقص: ' . e(implode('، ', $missingItems)) . '. migration را روی همان دیتابیسی اجرا کنید که سامانه به آن وصل است.</div></section>';
+    }
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<section class="food-guest-page"><div id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div></section>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=13"></script><script defer src="assets/food-order-guest.js?v=1"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=13"></script><script defer src="assets/food-order-guest.js?v=2"></script>';
     render_footer();
     exit;
 }
