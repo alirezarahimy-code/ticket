@@ -578,7 +578,6 @@ function render_header(string $title, ?array $user = null): void
         $supportLinks = [
             $submenuLink('index.php?page=services', 'خدمات'),
             $submenuLink('index.php?page=knowledge', 'دانش‌نامه'),
-            $submenuLink('index.php?page=help', 'راهنمای سامانه'),
         ];
         if (user_can($user, 'queue.view')) {
             $supportLinks[] = $submenuLink('index.php?page=queue', 'صف کاری');
@@ -638,6 +637,7 @@ function render_header(string $title, ?array $user = null): void
         $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
         $menuItems[] = $submenu('menu-reports', 'گزارش‌ها', 'reports', $reportLinks);
         $menuItems[] = $submenu('menu-management', 'مدیریت', 'settings', $adminLinks);
+        $menuItems[] = '<li>' . $menuLink('index.php?page=help', 'راهنما', 'support') . '</li>';
         if (user_can($user, 'notif.view')) {
     $menuItems[] = '<li class="notification-item"><a class="notification-link" href="index.php?page=notifications">' . $menuIcon('bell') . '<span>اعلان‌ها</span>' . ($notificationCount > 0 ? '<b>' . (int) $notificationCount . '</b>' : '') . '</a></li>';
         }
