@@ -214,6 +214,11 @@
     return 'دارای غذا';
   }
 
+  function guestOrderButton() {
+    if (root.dataset.guestAllowed !== '1') return '';
+    return '<button type="button" class="button" data-fo-action="guest-order">سفارش غذای مهمان</button>';
+  }
+
   function renderCalendar() {
     if (!state.monthData && state.loading) return '<div class="card fo-calendar-card"><div class="fo-loading-panel"><strong>در حال بارگذاری تقویم…</strong></div></div>';
     var map = state.monthData && state.monthData.days ? state.monthData.days : {};
@@ -243,7 +248,7 @@
       if (selectedOrder) meals += '<span class="fo-day-my-order">✓ ' + esc(orderOwnerLabel) + ': ' + esc(selectedOrder.food_name) + '</span>';
       return '<button type="button" class="' + classes.join(' ') + '" data-fo-day="' + esc(cell.iso) + '" data-current-month="' + (cell.isCurrentMonth ? '1' : '0') + '" data-has-food="' + (items.length ? '1' : '0') + '" data-has-order="' + (selectedOrder ? '1' : '0') + '" data-tooltip="' + esc(tip) + '" aria-label="' + esc(cell.jalali + '، ' + status + (holiday ? '، ' + holiday : '') + (items.length ? '، ' + items.map(function (x) { return x.food_name; }).join('، ') : '') + (selectedOrder ? '، ' + orderOwnerLabel + ': ' + selectedOrder.food_name : '')) + '"' + adjacentAttrs + '><span class="fo-day-number-row"><span class="fo-day-number">' + faDigits(cell.day) + '</span>' + (holiday ? '<span class="fo-day-status is-holiday">تعطیل</span>' : '') + '</span>' + badges + orderMarker + '<span class="fo-day-meals">' + meals + '</span></button>';
     }).join('');
-    return '<div class="card fo-calendar-card"><div class="fo-calendar-toolbar"><h2>تقویم شمسی</h2><div class="fo-month-label">' + esc(monthLabel()) + '</div><div class="fo-calendar-actions"><button type="button" class="button secondary" data-fo-action="prev">ماه قبل</button><button type="button" class="button secondary" data-fo-action="today">امروز</button><button type="button" class="button secondary" data-fo-action="next">ماه بعد</button></div></div>' + (state.error ? '<div class="alert danger" role="alert">' + esc(state.error) + '</div>' : '') + (state.loading ? '<div class="fo-modal-notice">در حال بارگذاری ماه…</div>' : '') + '<div class="fo-calendar-grid" role="grid" aria-label="تقویم سفارش غذا">' + headings + content + '</div><div class="fo-legend"><span><i class="legend-open"></i> سفارش باز</span><span><i class="legend-closed"></i> سفارش بسته</span><span><i class="legend-holiday"></i> تعطیل رسمی / پنجشنبه و جمعه</span><span><i class="legend-today"></i> امروز</span><span><i class="legend-order"></i> سفارش ثبت‌شده</span></div></div>';
+    return '<div class="card fo-calendar-card"><div class="fo-calendar-toolbar"><h2>تقویم شمسی</h2><div class="fo-month-label">' + esc(monthLabel()) + '</div><div class="fo-calendar-actions">' + guestOrderButton() + '<button type="button" class="button secondary" data-fo-action="prev">ماه قبل</button><button type="button" class="button secondary" data-fo-action="today">امروز</button><button type="button" class="button secondary" data-fo-action="next">ماه بعد</button></div></div>' + (state.error ? '<div class="alert danger" role="alert">' + esc(state.error) + '</div>' : '') + (state.loading ? '<div class="fo-modal-notice">در حال بارگذاری ماه…</div>' : '') + '<div class="fo-calendar-grid" role="grid" aria-label="تقویم سفارش غذا">' + headings + content + '</div><div class="fo-legend"><span><i class="legend-open"></i> سفارش باز</span><span><i class="legend-closed"></i> سفارش بسته</span><span><i class="legend-holiday"></i> تعطیل رسمی / پنجشنبه و جمعه</span><span><i class="legend-today"></i> امروز</span><span><i class="legend-order"></i> سفارش ثبت‌شده</span></div></div>';
   }
 
   function renderOrders() {
@@ -769,6 +774,7 @@
     var action = event.target.closest('[data-fo-action]');
     if (action) {
       var act = action.dataset.foAction;
+      if (act === 'guest-order') { if (window.FoodGuest) window.FoodGuest.open(); return; }
       if (act === 'prev') { var p = Cal.shiftMonth(state.year, state.month, -1); setMonth(p[0], p[1]); }
       if (act === 'next') { var n = Cal.shiftMonth(state.year, state.month, 1); setMonth(n[0], n[1]); }
       if (act === 'today') {

@@ -1372,16 +1372,8 @@ function food_guest_request_create(array $user, array $body): array
     if ($count === false) {
         throw new RuntimeException('تعداد مهمان باید عددی بین ۱ تا ۵۰۰ باشد.');
     }
-    $foodId = (int) ($body['food_id'] ?? 0);
-    if ($foodId > 0) {
-        $check = db()->prepare('SELECT COUNT(*) FROM food_catalog WHERE id = ? AND active = 1');
-        $check->execute([$foodId]);
-        if ((int) $check->fetchColumn() === 0) {
-            throw new RuntimeException('نوع غذای انتخاب‌شده فعال نیست.');
-        }
-    } else {
-        $foodId = null;
-    }
+    // نوع غذا حذف شده است؛ غذای مهمان را سلف طبق تشخیص مدیر تعیین می‌کند.
+    $foodId = null;
     // معاونت از چارت سازمانی کاربر خوانده می‌شود؛ مقدار ارسال‌شدهٔ فرم نادیده گرفته می‌شود.
     $deputyId = food_guest_user_deputy_id($user);
     if ($deputyId <= 0) {
@@ -1658,16 +1650,16 @@ function food_order_render_page(array $user): never
     if (!$hasNational) {
         echo '<div class="alert info" role="status">' . e($nationalIssue) . '</div>';
     }
-    echo '<div id="food-order-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-id="' . (int) ($user['id'] ?? 0) . '" data-self-name="' . e(food_order_full_name($profile)) . '" data-today="' . e($today) . '" data-today-jalali="' . e($todayJalali) . '" data-has-national="' . ($hasNational ? '1' : '0') . '" data-can-proxy="' . ($canProxy ? '1' : '0') . '"><div class="food-order-loading card">در حال بارگذاری تقویم و سفارش‌های شما…</div></div>';
+    echo '<div id="food-order-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-id="' . (int) ($user['id'] ?? 0) . '" data-self-name="' . e(food_order_full_name($profile)) . '" data-today="' . e($today) . '" data-guest-allowed="' . (food_guest_request_allowed($user) && food_guest_schema_ready() ? '1' : '0') . '" data-today-jalali="' . e($todayJalali) . '" data-has-national="' . ($hasNational ? '1' : '0') . '" data-can-proxy="' . ($canProxy ? '1' : '0') . '"><div class="food-order-loading card">در حال بارگذاری تقویم و سفارش‌های شما…</div></div>';
     echo '</section>';
     if (food_guest_request_allowed($user) && !food_guest_schema_ready()) {
         $missingItems = food_guest_schema_missing();
         echo '<section class="food-guest-page"><div class="alert danger" role="alert"><b>بخش سفارش مهمان فعال نیست.</b> موارد ناقص: ' . e(implode('، ', $missingItems)) . '. migration را روی همان دیتابیسی اجرا کنید که سامانه به آن وصل است.</div></section>';
     }
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
-        echo '<section class="food-guest-page"><div id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div></section>';
+        echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=13"></script><script defer src="assets/food-order-guest.js?v=2"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=14"></script><script defer src="assets/food-order-guest.js?v=3"></script>';
     render_footer();
     exit;
 }
