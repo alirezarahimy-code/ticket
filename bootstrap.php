@@ -124,9 +124,19 @@ function db_table_exists(string $table): bool
         return false;
     }
     try {
-        $query = db()->prepare('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ? LIMIT 1');
-        $query->execute([$table]);
-        return $cache[$table] = (bool) $query->fetchColumn();
+        static $all = null;
+        if ($all === null) {
+            $all = array_flip(array_map('strval', db()->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)));
+        }
+        if (isset($all[$table])) {
+            return $cache[$table] = true;
+        }
+        // جدولی که تازه ساخته شده را از فهرست قدیمی تشخیص نمی‌دهیم؛ برای نفی، یک بار دیگر دقیق بررسی می‌کنیم.
+        $exists = in_array($table, array_map('strval', db()->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN)), true);
+        if ($exists) {
+            $all[$table] = true;
+        }
+        return $cache[$table] = $exists;
     } catch (Throwable) {
         return $cache[$table] = false;
     }
@@ -348,7 +358,8 @@ function db_install_state(bool $refresh = false): array
         }
         $anyTable = true;
         try {
-            $counts[$table] = (int) db()->query('SELECT COUNT(*) FROM `' . $table . '`')->fetchColumn();
+            // فقط می‌دانیم جدول خالی است یا نه؛ COUNT(*) روی جدول‌های بزرگ (مثلاً رویدادهای کارت) هر درخواست را کند می‌کرد.
+            $counts[$table] = db()->query('SELECT 1 FROM `' . $table . '` LIMIT 1')->fetchColumn() ? 1 : 0;
         } catch (Throwable) {
             $counts[$table] = 0;
         }
@@ -1973,6 +1984,10 @@ function activity_logs_ensure(): void
     }
     $ready = true;
     try {
+        // هر درخواست DDL نمی‌فرستد؛ DDL روی جدول موجود می‌تواند با قفل‌های metadata، درخواست‌های دیگر را معطل کند.
+        if (db_table_exists('activity_logs')) {
+            return;
+        }
         db()->exec('CREATE TABLE IF NOT EXISTS activity_logs (
             id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             user_id INT UNSIGNED NULL,
