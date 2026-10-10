@@ -578,6 +578,7 @@ function render_header(string $title, ?array $user = null): void
         $supportLinks = [
             $submenuLink('index.php?page=services', 'خدمات'),
             $submenuLink('index.php?page=knowledge', 'دانش‌نامه'),
+            $submenuLink('index.php?page=help', 'راهنمای سامانه'),
         ];
         if (user_can($user, 'queue.view')) {
             $supportLinks[] = $submenuLink('index.php?page=queue', 'صف کاری');
@@ -3356,6 +3357,14 @@ if ($page === 'services') {
     if ($serviceModals !== '') {
         echo '<div class="service-modal-layer" data-service-modal-layer hidden>' . $serviceModals . '</div>';
     }
+    render_footer();
+    exit;
+}
+
+if ($page === 'help') {
+    $helpUser = require_login();
+    render_header('راهنمای سامانه', $helpUser);
+    require __DIR__ . '/help-guide.php';
     render_footer();
     exit;
 }
