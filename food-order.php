@@ -1210,7 +1210,55 @@ function food_guest_deputies(): array
     );
 }
 
-function food_guest_request_list(): array
+/**
+ * معاونتِ کاربر از چارت سازمانی: از واحد خود کاربر (users.org_unit_id) و واحدهایی که مدیرشان است
+ * شروع می‌کند و در سلسلهٔ والدها بالا می‌رود تا به واحد نوع deputy برسد. 0 یعنی پیدا نشد.
+ */
+function food_guest_user_deputy_id(array $user): int
+{
+    $uid = (int) ($user['id'] ?? 0);
+    if ($uid <= 0) {
+        return 0;
+    }
+    $starts = [];
+    try {
+        $own = db()->prepare('SELECT org_unit_id FROM users WHERE id = ?');
+        $own->execute([$uid]);
+        $ownUnit = (int) ($own->fetchColumn() ?: 0);
+        if ($ownUnit > 0) {
+            $starts[] = $ownUnit;
+        }
+    } catch (Throwable $e) {
+        // ستون org_unit_id هنوز ساخته نشده است؛ فقط مسیر مدیریت واحد بررسی می‌شود.
+    }
+    try {
+        $managed = db()->prepare('SELECT id FROM org_units WHERE manager_user_id = ? AND is_active = 1 UNION SELECT unit_id FROM org_unit_managers WHERE user_id = ?');
+        $managed->execute([$uid, $uid]);
+        foreach ($managed->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            $starts[] = (int) $id;
+        }
+    } catch (Throwable $e) {
+        // جدول‌های چارت سازمانی در دسترس نیستند.
+    }
+    $unitStmt = db()->prepare('SELECT id, parent_id, unit_type, is_active FROM org_units WHERE id = ?');
+    foreach (array_values(array_unique(array_filter($starts))) as $start) {
+        $current = (int) $start;
+        for ($depth = 0; $depth < 10 && $current > 0; $depth++) {
+            $unitStmt->execute([$current]);
+            $unit = $unitStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$unit) {
+                break;
+            }
+            if ((string) $unit['unit_type'] === 'deputy' && (int) $unit['is_active'] === 1) {
+                return (int) $unit['id'];
+            }
+            $current = (int) ($unit['parent_id'] ?? 0);
+        }
+    }
+    return 0;
+}
+
+function food_guest_request_list(array $user): array
 {
     food_order_schema_ensure();
     $today = food_order_today();
@@ -1251,7 +1299,14 @@ function food_guest_request_list(): array
         static fn (array $f): array => ['id' => $f['id'], 'name' => $f['food_name']],
         array_filter(food_order_catalog(false), static fn (array $f): bool => $f['active'])
     ));
-    return ['items' => $items, 'foods' => $foods, 'deputies' => food_guest_deputies(), 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'fixed'];
+    $myDeputyId = food_guest_user_deputy_id($user);
+    $myDeputy = null;
+    foreach (food_guest_deputies() as $d) {
+        if ($d['id'] === $myDeputyId) {
+            $myDeputy = $d;
+        }
+    }
+    return ['items' => $items, 'foods' => $foods, 'my_deputy' => $myDeputy, 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'fixed'];
 }
 
 function food_guest_request_create(array $user, array $body): array
@@ -1283,9 +1338,10 @@ function food_guest_request_create(array $user, array $body): array
     } else {
         $foodId = null;
     }
-    $deputyId = (int) ($body['deputy_unit_id'] ?? 0);
-    if ($deputyId <= 0 || !in_array($deputyId, array_column(food_guest_deputies(), 'id'), true)) {
-        throw new RuntimeException('معاونت درخواست‌کننده را از فهرست معاونت‌های فعال انتخاب کنید.');
+    // معاونت از چارت سازمانی کاربر خوانده می‌شود؛ مقدار ارسال‌شدهٔ فرم نادیده گرفته می‌شود.
+    $deputyId = food_guest_user_deputy_id($user);
+    if ($deputyId <= 0) {
+        throw new RuntimeException('برای ثبت سفارش مهمان باید شما در چارت سازمانی زیر یک معاونت تعریف شده باشید (به‌عنوان عضو واحد یا مدیر واحد). با مدیر سامانه هماهنگ کنید.');
     }
     $requester = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['requester_name'] ?? '')));
     if (mb_strlen($requester) < 2 || mb_strlen($requester) > 150) {
@@ -1364,7 +1420,7 @@ function food_order_api_handle(string $route, array $user): never
             if (!food_guest_request_allowed($user)) {
                 food_order_send_json(['error' => 'این بخش فقط برای مدیران و بالاتر فعال است.'], 403);
             }
-            food_order_send_json(food_guest_request_list() + ['allowed' => true]);
+            food_order_send_json(food_guest_request_list($user) + ['allowed' => true]);
         }
         if ($method === 'POST' && $route === 'guest-request') {
             if (!food_guest_request_allowed($user)) {
