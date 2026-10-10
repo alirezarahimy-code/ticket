@@ -544,23 +544,6 @@ function traffic_render_page(array $user): never
                 <article class="traffic-stat-card is-inside"><div class="traffic-stat-top"><span class="traffic-stat-icon">●</span><span class="traffic-stat-period">اکنون</span></div><strong><?= (int) $stats['inside'] ?></strong><small>افرادِ بدون ثبت خروج</small></article>
                 <article class="traffic-stat-card is-total"><div class="traffic-stat-top"><span class="traffic-stat-icon">▤</span><span class="traffic-stat-period">همهٔ سوابق</span></div><strong><?= (int) $stats['total'] ?></strong><small>مجموع ترددهای ثبت‌شده</small></article>
             </div>
-            <section class="card traffic-dashboard-panel" id="traffic-open-panel">
-                <div class="traffic-panel-heading"><div><span class="traffic-panel-kicker">بدون خروج امروز</span><h3>افراد داخل ساختمان (<?= (int) count($openVisits) ?>)</h3></div><span class="traffic-period-pill">ثبت سریع خروج</span></div>
-                <?php if ($openError !== ''): ?><div class="alert danger"><?= e($openError) ?></div>
-                <?php elseif (!$openVisits): ?><p class="muted">در حال حاضر فردی بدون خروج ثبت نشده است.</p>
-                <?php else: ?>
-                <div class="traffic-open-list">
-                    <?php foreach ($openVisits as $visit): ?>
-                    <div class="traffic-open-row" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid #e5e7eb">
-                        <span><strong><?= e($visit['full_name']) ?></strong> <small>(<?= e($visit['national_code']) ?>)</small><br><small>شماره برگ <?= e($visit['serial_no']) ?> · ورود <?= e(substr((string) $visit['entry_time'], 0, 5)) ?> · ملاقات با <?= e($visit['meeting_with'] ?? '-') ?></small></span>
-                        <?php if (user_can($user, 'traffic.manage')): ?>
-                        <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $visit['id'] ?>"><input type="hidden" name="return_tab" value="dashboard"><button class="mini-button" type="submit">ثبت خروج</button></form>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
-            </section>
             <div class="traffic-dashboard-grid">
                 <section class="card traffic-dashboard-panel traffic-trend-panel">
                     <div class="traffic-panel-heading"><div><span class="traffic-panel-kicker">روند مراجعه</span><h3>ترددهای ۱۴ روز اخیر</h3></div><span class="traffic-period-pill">دو هفته</span></div>
@@ -587,6 +570,23 @@ function traffic_render_page(array $user): never
                     </div>
                 </section>
             </div>
+            <section class="card traffic-dashboard-panel" id="traffic-open-panel">
+                <div class="traffic-panel-heading"><div><span class="traffic-panel-kicker">بدون خروج امروز</span><h3>افراد داخل ساختمان (<?= (int) count($openVisits) ?>)</h3></div><span class="traffic-period-pill">ثبت سریع خروج</span></div>
+                <?php if ($openError !== ''): ?><div class="alert danger"><?= e($openError) ?></div>
+                <?php elseif (!$openVisits): ?><p class="muted">در حال حاضر فردی بدون خروج ثبت نشده است.</p>
+                <?php else: ?>
+                <div class="traffic-open-list">
+                    <?php foreach ($openVisits as $visit): ?>
+                    <div class="traffic-open-row" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid #e5e7eb">
+                        <span><strong><?= e($visit['full_name']) ?></strong> <small>(<?= e($visit['national_code']) ?>)</small><br><small>شماره برگ <?= e($visit['serial_no']) ?> · ورود <?= e(substr((string) $visit['entry_time'], 0, 5)) ?> · ملاقات با <?= e($visit['meeting_with'] ?? '-') ?></small></span>
+                        <?php if (user_can($user, 'traffic.manage')): ?>
+                        <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $visit['id'] ?>"><input type="hidden" name="return_tab" value="dashboard"><button class="mini-button" type="submit">ثبت خروج</button></form>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+            </section>
         </section>
         <?php endif; ?>
 
