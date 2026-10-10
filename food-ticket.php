@@ -149,6 +149,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'orders-import' => 'food.db',
         'employees-sample' => 'food.employees',
         'guest-cards' => 'food.guest',
+        'guest-cap' => 'food.guest',
         'food-groups' => 'food.groups',
         'config' => 'food.db',
         'database-file' => 'food.db',
@@ -3863,6 +3864,25 @@ function food_ticket_api_handle(string $route, array $user): never
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cards') {
             food_ticket_api_json(['items' => food_ticket_api_guest_cards()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
+            // سقف فعلی سقف متغیر + تعداد داخل ساختمان برای باکس نمایش در فرم مهمان
+            $nowTime = date('H:i:s');
+            $capNow = food_ticket_guest_variable_cap(date('Y-m-d'), $nowTime);
+            $insideNow = null;
+            try {
+                $insideNow = (int) db()->query('SELECT COUNT(*) FROM traffic_visits WHERE visit_date = CURDATE() AND exit_time IS NULL')->fetchColumn();
+            } catch (Throwable) {
+                $insideNow = null;
+            }
+            $guestCfg = food_ticket_config();
+            food_ticket_api_json([
+                'mode' => food_guest_cap_mode(),
+                'time' => substr($nowTime, 0, 5),
+                'cap' => $capNow,
+                'inside' => $insideNow,
+                'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
+            ]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-groups') {
             $groupsDate = (string) ($_GET['date'] ?? '');

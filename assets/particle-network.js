@@ -25,8 +25,8 @@
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var CONFIG = {
-        density: 9000,      // هرچه عدد بزرگ‌تر، ذرات کمتر
-        maxParticles: 160,
+        density: 4500,      // هرچه عدد بزرگ‌تر، ذرات کمتر
+        maxParticles: 320,
         speed: 0.25,
         linkDistance: 130,
         mouseRadius: 180
