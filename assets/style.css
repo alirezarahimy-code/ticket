@@ -1256,8 +1256,6 @@ html[data-theme="copper"] .brand-mark { color:#805033; }
 .login-brand-logo img { width:100%; height:100%; object-fit:contain; }
 .login-announcement { display:flex; align-items:center; gap:10px; overflow:hidden; margin:15px 0 2px; padding:10px 12px; border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line)); border-radius:11px; color:var(--navy); background:color-mix(in srgb,var(--gold) 12%,white); font-size:12px; }
 .login-announcement span { color:var(--gold); flex:0 0 auto; }
-.login-announcement div { white-space:nowrap; animation:login-message-scroll 18s linear infinite; }
-@keyframes login-message-scroll { 0%,12%{transform:translateX(0)} 88%,100%{transform:translateX(-18%)} }
 .login-branding-settings { grid-column:1/-1; }
 .log-tabs { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 15px; }
 .log-tabs a { display:inline-flex; align-items:center; padding:9px 14px; border:1px solid var(--line); border-radius:999px; background:var(--white); color:var(--navy); font-size:11px; font-weight:700; }
@@ -1276,8 +1274,8 @@ html[data-theme="copper"] .brand-mark { color:#805033; }
 .search-not-found h2 { margin:5px 0; color:var(--navy); }
 .search-not-found p,.search-not-found small { color:var(--muted); }
 .search-empty-icon { display:inline-grid; place-items:center; width:45px; height:45px; border-radius:50%; background:var(--teal-light); color:var(--teal); font-size:27px; }
-.login-announcement div { flex:1; min-width:0; animation:login-message-scroll 18s linear infinite; }
-@keyframes login-message-scroll { from { transform:translateX(100%); } to { transform:translateX(-100%); } }
+.login-announcement div { flex:1; min-width:0; white-space:nowrap; font-weight:700; animation:login-message-scroll 18s linear infinite; }
+@keyframes login-message-scroll { from { transform:translateX(-100%); } to { transform:translateX(100%); } }
 @media (prefers-reduced-motion: reduce) { .login-announcement div { animation:none; white-space:normal; } }
 @media (max-width:800px) { .unified-log-table .table-head,.unified-log-table .table-row { grid-template-columns:1fr 1fr; } .login-branding-settings { grid-column:auto; } }
 /* نقش‌های تزئینی اختصاصی هر تم (pseudo-elements و شکل آیکون؛ بدون تغییر جای اجزا). */
@@ -1372,3 +1370,6 @@ html[data-theme="copper"] .card { border-top-color:#e5d2b8; }
 
 /* حوزهٔ خدمت: فیلدهای مربوط به حوزهٔ دیگر کاملاً پنهان شوند (label با display:block بالاتر، hidden را نادیده می‌گرفت) */
 .ticket-asset-field[hidden], .support-field[hidden] { display: none !important; }
+
+/* منوی واحد: اگر بلند بود، داخلی اسکرول می‌شود و از لبهٔ صفحه بیرون نمی‌زند. */
+.org-node-menu { max-height: calc(100vh - 90px); overflow-y: auto; }

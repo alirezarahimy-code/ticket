@@ -145,3 +145,9 @@
   .fo-recipient-banner { align-items:flex-start; flex-wrap:wrap; }
   .fo-recipient-change { margin-right:auto; }
 }
+
+/* نام غذا در سلول تقویم در یک خط نمایش داده می‌شود؛ اگر جا نشد با «…» کوتاه می‌شود. */
+.fo-day-meals { display:flex; flex-direction:column; gap:3px; min-width:0; }
+.fo-day-meal,
+.fo-day-my-order { display:block; width:100%; min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.5; }
+.fo-day-my-order { font-size:10px; }

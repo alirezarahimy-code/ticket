@@ -197,8 +197,8 @@
     var shownFrom = state.listFrom || (state.listRange ? isoToJalali(state.listRange.from) : '');
     var shownTo = state.listTo || (state.listRange ? isoToJalali(state.listRange.to) : '');
     return '<div class="card fo-list-filter" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px">'
-      + '<label>از تاریخ (شمسی)<input type="text" inputmode="numeric" data-fo-list-from value="' + esc(faDigits(shownFrom)) + '" placeholder="۱۴۰۵/۰۷/۰۱" style="display:block;margin-top:4px"></label>'
-      + '<label>تا تاریخ (شمسی)<input type="text" inputmode="numeric" data-fo-list-to value="' + esc(faDigits(shownTo)) + '" placeholder="۱۴۰۵/۰۷/۳۰" style="display:block;margin-top:4px"></label>'
+      + '<label>از تاریخ (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali data-fo-list-from value="' + esc(faDigits(shownFrom)) + '" placeholder="۱۴۰۵/۰۷/۰۱" style="display:block;margin-top:4px"></label>'
+      + '<label>تا تاریخ (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali data-fo-list-to value="' + esc(faDigits(shownTo)) + '" placeholder="۱۴۰۵/۰۷/۳۰" style="display:block;margin-top:4px"></label>'
       + '<button class="button" type="button" data-fo-action="apply-list-range">نمایش بازه</button>'
       + '<button class="button secondary" type="button" data-fo-action="reset-list-range">ماه جاری (از امروز)</button>'
       + '<small class="field-help" style="flex-basis:100%">پیش‌فرض: از امروز تا پایان ماه جاری. غذای روزهای گذشته خودکار از این فهرست خارج می‌شود.</small>'
@@ -401,6 +401,7 @@
       ? pageNotice + renderRecipientBanner() + renderCalendar() + (state.targetMode === 'self' ? renderListFilter() + '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderListFilter() + renderProxyOrders()) + renderModal()
       : pageNotice + '<div class="alert danger">تقویم شمسی مشترک بارگذاری نشده است. صفحه را تازه‌سازی کنید.</div>';
     root.innerHTML = body + renderRecipientDialog();
+    if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(root);
     var recipientDialog = root.querySelector('#fo-recipient-dialog');
     var foodDialog = root.querySelector('#fo-order-dialog');
     var dialog = recipientDialog || foodDialog;

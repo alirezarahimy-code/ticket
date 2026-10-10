@@ -1367,13 +1367,13 @@ function food_order_render_page(array $user): never
         : 'کد ملی ثبت‌شدهٔ شما معتبر نیست؛ ثبت سفارش برای خودتان غیرفعال است. برای اصلاح اطلاعات با منابع انسانی هماهنگ کنید.';
     $canProxy = true; // هر کاربر وارد‌شده می‌تواند برای دیگری سفارش ثبت کند (با کد ملی فرد)
     render_header('سفارش غذا', $user);
-    echo '<link rel="stylesheet" href="assets/food-order.css?v=11">';
+    echo '<link rel="stylesheet" href="assets/food-order.css?v=12">';
     echo '<section class="food-order-page"><header class="page-heading"><div><span class="eyebrow">برنامه غذایی سازمان</span><h1>سفارش غذا</h1></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></header>';
     if (!$hasNational) {
         echo '<div class="alert info" role="status">' . e($nationalIssue) . '</div>';
     }
     echo '<div id="food-order-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-id="' . (int) ($user['id'] ?? 0) . '" data-self-name="' . e(food_order_full_name($profile)) . '" data-today="' . e($today) . '" data-today-jalali="' . e($todayJalali) . '" data-has-national="' . ($hasNational ? '1' : '0') . '" data-can-proxy="' . ($canProxy ? '1' : '0') . '"><div class="food-order-loading card">در حال بارگذاری تقویم و سفارش‌های شما…</div></div>';
-    echo '</section><script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=12"></script>';
+    echo '</section><script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=13"></script>';
     render_footer();
     exit;
 }

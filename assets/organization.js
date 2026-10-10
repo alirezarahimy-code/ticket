@@ -293,6 +293,45 @@
         });
         wrapper.querySelector('[data-inline-cancel]').addEventListener('click', function () { wrapper.remove(); });
     };
+    // ویرایش نام، کد و (برای اداره) معاونت والد. مدیر فعلی و وضعیت مدیر اصلی دست‌نخورده می‌مانند.
+    var showInlineEdit = function (target) {
+        if (!target || !data.canManage) return;
+        var node = $('.org-node[data-unit="' + target.id + '"]');
+        if (!node) return;
+        $$('.org-inline-form-wrap').forEach(function (item) { item.remove(); });
+        var isDepartment = target.type === 'department';
+        var parentOptions = isDepartment ? children(root() ? root().id : 0, 'deputy').map(function (item) {
+            return '<option value="' + item.id + '"' + (Number(item.id) === Number(target.parentId) ? ' selected' : '') + '>' + esc(item.name) + '</option>';
+        }).join('') : '';
+        var wrapper = document.createElement('div');
+        wrapper.className = 'org-inline-form-wrap';
+        wrapper.innerHTML = '<div class="org-inline-form"><label>نام ' + (isDepartment ? 'اداره' : 'معاونت') + ' *</label><input data-inline-field="name" value="' + esc(target.name) + '">'
+            + '<label>کد اختیاری</label><input data-inline-field="code" value="' + esc(target.code || '') + '">'
+            + (isDepartment ? '<label>معاونت والد</label><select data-inline-field="parent">' + parentOptions + '</select>' : '')
+            + '<div><button class="org-btn org-btn-success" data-inline-submit="edit">✓ ذخیره تغییرات</button><button class="org-btn org-btn-ghost" data-inline-cancel>انصراف</button></div></div>';
+        node.appendChild(wrapper);
+        wrapper.addEventListener('click', function (event) { event.stopPropagation(); });
+        wrapper.querySelector('[data-inline-field="name"]').focus();
+        wrapper.querySelectorAll('input').forEach(function (input) { input.addEventListener('keydown', function (event) { if (event.key === 'Escape') wrapper.remove(); if (event.key === 'Enter') wrapper.querySelector('[data-inline-submit]').click(); }); });
+        wrapper.querySelector('[data-inline-submit]').addEventListener('click', function () {
+            var name = wrapper.querySelector('[data-inline-field="name"]').value.trim();
+            var code = wrapper.querySelector('[data-inline-field="code"]').value.trim();
+            var parentSelect = wrapper.querySelector('[data-inline-field="parent"]');
+            if (!name) return toast('نام الزامی است', iconFor('warning'));
+            var fields = {
+                node_type: target.type,
+                unit_id: target.id,
+                unit_name: name,
+                unit_code: code,
+                parent_id: parentSelect ? parentSelect.value : target.parentId,
+                unit_manager_id: target.managerId || 0
+            };
+            // فقط وقتی مدیر اصلی است این فیلد را بفرست؛ ارسال مقدار 0 هم سرور را مجبور به تغییر آن می‌کرد.
+            if (target.primaryAdmin) fields.is_primary_admin = 1;
+            submit('save_org_node', fields);
+        });
+        wrapper.querySelector('[data-inline-cancel]').addEventListener('click', function () { wrapper.remove(); });
+    };
     var showInlineAddDeputy = function () { if (root()) showInline('deputy', 0); else toast('ریشهٔ سازمان هنوز ساخته نشده است', iconFor('warning')); };
     var showInlineAddDepartment = function (parentId) { showInline('department', parentId); };
 
@@ -338,13 +377,16 @@
         var hasManager = Number(target.managerId) > 0;
         var items = [];
         if (target.type === 'ceo') items = [{ icon: iconFor('manager'), label: 'تغییر مدیرعامل', action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن معاونت', action: showInlineAddDeputy }, { divider: true }, { icon: iconFor('remove'), label: 'برداشتن از سمت', danger: true, action: function () { removeManager(target); } }];
-        if (target.type === 'deputy') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر مدیر' : 'تعیین مدیر', action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن اداره', action: function () { showInlineAddDepartment(target.id); } }, { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن مدیر', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل معاونت', danger: true, action: function () { removeUnit(target.id); } }];
-        if (target.type === 'department') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر رئیس' : 'تعیین رئیس', action: function () { openManagerPicker(target); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن رئیس', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل اداره', danger: true, action: function () { removeUnit(target.id); } }];
+        if (target.type === 'deputy') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر مدیر' : 'تعیین مدیر', action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن اداره', action: function () { showInlineAddDepartment(target.id); } }, { icon: iconFor('manage'), label: 'ویرایش معاونت', action: function () { showInlineEdit(target); } }, { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن مدیر', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل معاونت', danger: true, action: function () { removeUnit(target.id); } }];
+        if (target.type === 'department') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر رئیس' : 'تعیین رئیس', action: function () { openManagerPicker(target); } }, { icon: iconFor('manage'), label: 'ویرایش اداره', action: function () { showInlineEdit(target); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن رئیس', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل اداره', danger: true, action: function () { removeUnit(target.id); } }];
         items.forEach(function (item) {
             if (item.divider) { var divider = document.createElement('div'); divider.className = 'org-menu-divider'; menu.appendChild(divider); return; }
             var row = document.createElement('button'); row.type = 'button'; row.className = 'org-menu-item' + (item.danger ? ' danger' : ''); row.innerHTML = '<span>' + item.icon + '</span><b>' + esc(item.label) + '</b>'; row.addEventListener('click', function (event) { event.stopPropagation(); menu.remove(); item.action(); }); menu.appendChild(row);
         });
         button.closest('.org-node').appendChild(menu);
+        // اگر منو از پایین صفحه بیرون می‌زند، به سمت بالای کارت باز شود تا همهٔ گزینه‌ها (از جمله حذف) دیده شوند.
+        var menuBox = menu.getBoundingClientRect();
+        if (menuBox.bottom > window.innerHeight - 8) { menu.style.top = 'auto'; menu.style.bottom = '36px'; }
     };
     var removeManager = function (target) {
         if (!target.managerId) return;
