@@ -3264,6 +3264,13 @@ function food_ticket_api_save_employee(array $data): void
     if ($id > 0 && $existingId > 0 && $existingId !== $id) {
         throw new RuntimeException('این کد پرسنلی قبلاً ثبت شده است.');
     }
+    // کد ملی باید یکتا باشد: اگر برای کارمند دیگری ثبت شده، ذخیره نمی‌شود (در ویرایش، خود همین کارمند مستثنا است).
+    $ownerStmt = db()->prepare('SELECT id, full_name FROM users WHERE national_code = ? AND id <> ? LIMIT 1');
+    $ownerStmt->execute([$nationalCode, $id ?: $existingId]);
+    $owner = $ownerStmt->fetch();
+    if ($owner) {
+        throw new RuntimeException('این کد ملی قبلاً برای کارمند «' . (string) $owner['full_name'] . '» ثبت شده است.');
+    }
     $id = $id ?: $existingId;
     if ($id > 0) {
         $currentUser = db()->prepare('SELECT employee_number FROM users WHERE id = ? LIMIT 1');

@@ -43,6 +43,8 @@ function food_order_internal_map(string $isoDate): array
         $map[ltrim($national, '0') ?: '0'] = $food;
     }
     foreach (array_keys($conflicts) as $bad) {
+        // کلیدهای عددی آرایه (مثلاً 1234567890) در PHP به int تبدیل می‌شوند؛ ltrim فقط رشته می‌پذیرد.
+        $bad = (string) $bad;
         unset($map[$bad], $map[ltrim($bad, '0') ?: '0']);
     }
     $GLOBALS['__food_order_conflicts'][$date] = array_keys($conflicts);

@@ -1398,7 +1398,7 @@ function food_ticket_api_save_group(array $data, int $actorId): int
 
     // L_UID نباید برای گروه دیگر ثبت شده باشد (قاعده: هر L_UID فقط یک گروه)
     if ($lUid !== '') {
-        $dupe = db()->prepare('SELECT id, title, l_uid FROM food_ticket_groups WHERE id <> ? AND l_uid IS NOT NULL AND l_uid <> ""');
+        $dupe = db()->prepare("SELECT id, title, l_uid FROM food_ticket_groups WHERE id <> ? AND l_uid IS NOT NULL AND l_uid <> ''");
         $dupe->execute([$id]);
         foreach ($dupe->fetchAll() as $o) {
             if (food_ticket_code((string) $o['l_uid']) === $lUid) {
@@ -1520,7 +1520,18 @@ function food_ticket_api_save_group(array $data, int $actorId): int
             $pdo->rollBack();
         }
         if ($e instanceof PDOException && (int) $e->getCode() === 23000) {
-            throw new RuntimeException('ذخیره نشد: L_UID/کارت یا یکی از اعضا قبلاً در گروه دیگری ثبت شده است.');
+            // پیغام دقیق بر اساس کلید یکتای نقض‌شده (به‌جای پیغام خام پایگاه‌داده)
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'uq_food_group_uid')) {
+                throw new RuntimeException('L_UID «' . $lUid . '» قبلاً برای گروه دیگری ثبت شده است. یک L_UID دیگر انتخاب کنید.');
+            }
+            if (str_contains($msg, 'uq_food_group_card')) {
+                throw new RuntimeException('این شمارهٔ کارت قبلاً برای گروه دیگری ثبت شده است.');
+            }
+            if (str_contains($msg, 'uq_food_group_member_user')) {
+                throw new RuntimeException('یکی از اعضا قبلاً در گروه دیگری است؛ هر کارمند فقط در یک گروه می‌تواند باشد.');
+            }
+            throw new RuntimeException('ذخیره نشد: L_UID یا یکی از اعضا قبلاً ثبت شده است.');
         }
         throw $e;
     }
