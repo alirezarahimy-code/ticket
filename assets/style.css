@@ -1369,3 +1369,6 @@ html[data-theme="copper"] .card { border-top-color:#e5d2b8; }
 .perm-item.perm-child .perm-label { font-weight: 600; }
 .perm-item.perm-child.is-disabled { opacity: .5; cursor: not-allowed; }
 .perm-item.perm-child.is-disabled input { cursor: not-allowed; }
+
+/* حوزهٔ خدمت: فیلدهای مربوط به حوزهٔ دیگر کاملاً پنهان شوند (label با display:block بالاتر، hidden را نادیده می‌گرفت) */
+.ticket-asset-field[hidden], .support-field[hidden] { display: none !important; }
