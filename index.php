@@ -10,6 +10,7 @@ require __DIR__ . '/asset-inventory-page.php';
 require __DIR__ . '/organization.php';
 require __DIR__ . '/global-search.php';
 require __DIR__ . '/backup.php';
+require __DIR__ . '/system-update.php';
 require __DIR__ . '/cd-dvd.php';
 require __DIR__ . '/food-ticket.php';
 require __DIR__ . '/traffic-control.php';
@@ -1121,6 +1122,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             save_audit((int) $backupAdmin['id'], 'backup_restored', null, ['safety_backup' => $safetyBundle['name'], 'uploads' => $restoredUploads]);
             flash('success', 'بازیابی انجام شد. نسخه ایمنی قبل از بازیابی: ' . $safetyBundle['name']);
             redirect('index.php?page=backup');
+        }
+        if ($action === 'system_update') {
+            $updateAdmin = require_primary_admin();
+            require_permission('update.apply');
+            try {
+                $updateResult = system_update_apply($_FILES['update_package'] ?? [], $updateAdmin);
+            } catch (RuntimeException $updateError) {
+                flash('danger', 'به‌روزرسانی انجام نشد: ' . $updateError->getMessage());
+                redirect('index.php?page=settings');
+            }
+            flash('success', 'به‌روزرسانی به نسخهٔ ' . $updateResult['version'] . ' انجام شد. بکاپ: ' . $updateResult['backup'] . '، مهاجرت‌های اجراشده: ' . count($updateResult['migrations']) . '، فایل‌های کپی‌شده: ' . $updateResult['files'] . '.');
+            redirect('index.php?page=settings');
         }
         if ($action === 'mark_all_notifications') {
             db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0')->execute([(int) $user['id']]);
@@ -3074,7 +3087,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-if (!$user) {
+if (!$user && $page !== 'help') {
     $loginTitle = setting('login_title', 'به سامانه پشتیبانی خوش آمدید');
     $loginIntro = setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.');
     $loginNoteTitle = setting('login_note_title', 'ورود یکپارچه سازمانی');
@@ -3083,7 +3096,7 @@ if (!$user) {
     $loginLogo = setting('app_login_logo', setting('app_logo', (string) cfg('app.logo', '')));
     $GLOBALS['ui_particles'] = true;
     render_header('ورود به سامانه');
-    echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
+    echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button><a class="button secondary wide" href="index.php?page=help" style="margin-top:8px;text-align:center;display:block">راهنمای سامانه</a></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
     render_footer();
     exit;
 }
@@ -3362,7 +3375,8 @@ if ($page === 'services') {
 }
 
 if ($page === 'help') {
-    $helpUser = require_login();
+    // راهنما برای همه باز است (حتی قبل از ورود تا کاربران بتوانند فرم ورود را یاد بگیرند)
+    $helpUser = current_user();
     render_header('راهنمای سامانه', $helpUser);
     require __DIR__ . '/help-guide.php';
     render_footer();
@@ -4540,6 +4554,14 @@ if ($page === 'settings') {
     echo '</div>';
     }
 
+    if (user_can($user, 'update.view') && user_is_primary_admin($user)) {
+        $updateInert = user_can($user, 'update.apply') ? '' : ' inert';
+        echo '<section class="card form-card" id="system-update"' . $updateInert . '><h2>به‌روزرسانی سامانه</h2>'
+            . '<p class="muted">فایل ZIP پک به‌روزرسانی را انتخاب کنید. قبل از اعمال، نسخهٔ پشتیبان گرفته می‌شود و فقط نسخهٔ جدیدتر نصب می‌شود. نسخهٔ فعلی: ' . e(system_update_current_version()) . '</p>'
+            . '<form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="system_update">'
+            . '<label class="field">فایل به‌روزرسانی (ZIP)<input type="file" name="update_package" accept=".zip" required></label>'
+            . '<button class="button" type="submit">به‌روزرسانی</button></form></section>';
+    }
     if ($canSettingsDomain) {
     echo '<div class="settings-panel settings-panel-grid" id="domain"' . ($canSettingsDomainEdit ? '' : ' inert') . '>';
     echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';

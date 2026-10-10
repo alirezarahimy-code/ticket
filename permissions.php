@@ -186,6 +186,8 @@ function permission_catalog(): array
                 ['code' => 'settings.key_roles_edit', 'label' => 'ویرایش'],
                 ['code' => 'backup.view', 'label' => 'پشتیبان‌گیری/بازگردانی'],
                 ['code' => 'backup.manage', 'label' => 'ویرایش'],
+                ['code' => 'update.view', 'label' => 'مشاهدهٔ به‌روزرسانی سامانه'],
+                ['code' => 'update.apply', 'label' => 'اجرای به‌روزرسانی سامانه'],
                 ['code' => 'ola.view', 'label' => 'تنظیمات OLA/SLA'],
                 ['code' => 'ola.manage', 'label' => 'ویرایش'],
                 ['code' => 'governance.view', 'label' => 'تغییر و مشکل'],
