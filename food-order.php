@@ -12,7 +12,7 @@ function food_order_schema_ensure(): bool
     if ($ready) {
         return true;
     }
-    $tables = ['food_catalog', 'food_calendar', 'food_calendar_items', 'food_orders', 'food_order_logs', 'food_guest_requests'];
+    $tables = ['food_catalog', 'food_calendar', 'food_calendar_items', 'food_orders', 'food_order_logs'];
     $placeholders = implode(',', array_fill(0, count($tables), '?'));
     try {
         $stmt = db()->prepare("SELECT TABLE_NAME FROM information_schema.TABLES
@@ -1198,6 +1198,35 @@ function food_guest_requested_total(string $isoDate): ?int
     }
 }
 
+/** جدول و ستون‌های سفارش مهمان (upgrade-1.39 و 1.40) آماده‌اند؟ بدون پرتاب خطا؛ صفحهٔ اصلی غذا را خراب نمی‌کند. */
+function food_guest_schema_ready(): bool
+{
+    static $ready = null;
+    if ($ready !== null) {
+        return $ready;
+    }
+    try {
+        $stmt = db()->query(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_guest_requests'
+                AND COLUMN_NAME IN ('request_date','organization','guest_count','food_id','requester_name','deputy_unit_id','status')"
+        );
+        $ready = (int) $stmt->fetchColumn() === 7;
+    } catch (Throwable $e) {
+        error_log('[food-order] guest schema check failed: ' . $e->getMessage());
+        $ready = false;
+    }
+    return $ready;
+}
+
+/** برای API سفارش مهمان: اگر migration اجرا نشده، پیام فارسی روشن می‌دهد. */
+function food_guest_schema_ensure(): void
+{
+    if (!food_guest_schema_ready()) {
+        throw new RuntimeException('بخش سفارش مهمان هنوز فعال نشده است؛ ابتدا upgrade-1.39-food-guest-requests.sql و upgrade-1.40-food-guest-deputy.sql را روی دیتابیس اجرا کنید.');
+    }
+}
+
 /** معاونت‌های فعال چارت سازمانی (فهرست انتخاب در فرم و گزارش). */
 function food_guest_deputies(): array
 {
@@ -1260,7 +1289,7 @@ function food_guest_user_deputy_id(array $user): int
 
 function food_guest_request_list(array $user): array
 {
-    food_order_schema_ensure();
+    food_guest_schema_ensure();
     $today = food_order_today();
     $stmt = db()->prepare(
         "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.note, r.status,
@@ -1311,7 +1340,7 @@ function food_guest_request_list(array $user): array
 
 function food_guest_request_create(array $user, array $body): array
 {
-    food_order_schema_ensure();
+    food_guest_schema_ensure();
     $today = food_order_today();
     $date = food_order_iso_date($body['request_date'] ?? '');
     if ($date === null) {
@@ -1365,7 +1394,7 @@ function food_guest_request_create(array $user, array $body): array
 
 function food_guest_request_cancel(array $user, int $id): void
 {
-    food_order_schema_ensure();
+    food_guest_schema_ensure();
     $today = food_order_today();
     $stmt = db()->prepare('SELECT request_date, status, organization, guest_count FROM food_guest_requests WHERE id = ? FOR UPDATE');
     db()->beginTransaction();
@@ -1616,7 +1645,7 @@ function food_order_render_page(array $user): never
     }
     echo '<div id="food-order-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-id="' . (int) ($user['id'] ?? 0) . '" data-self-name="' . e(food_order_full_name($profile)) . '" data-today="' . e($today) . '" data-today-jalali="' . e($todayJalali) . '" data-has-national="' . ($hasNational ? '1' : '0') . '" data-can-proxy="' . ($canProxy ? '1' : '0') . '"><div class="food-order-loading card">در حال بارگذاری تقویم و سفارش‌های شما…</div></div>';
     echo '</section>';
-    if (food_guest_request_allowed($user)) {
+    if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<section class="food-guest-page"><div id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div></section>';
     }
     echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=13"></script><script defer src="assets/food-order-guest.js?v=1"></script>';
