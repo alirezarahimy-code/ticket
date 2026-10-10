@@ -1318,11 +1318,11 @@ function food_guest_request_list(array $user): array
            LEFT JOIN food_catalog c ON c.id = r.food_id
            LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
            LEFT JOIN users u ON u.id = r.created_by
-          WHERE r.request_date BETWEEN ? AND ?
+          WHERE r.request_date >= ?
           ORDER BY r.request_date ASC, r.id ASC
           LIMIT 300"
     );
-    $stmt->execute([$today, (new DateTimeImmutable($today))->modify('+2 day')->format('Y-m-d')]);
+    $stmt->execute([$today]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $items[] = [
