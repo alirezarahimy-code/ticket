@@ -381,19 +381,96 @@ function food_order_month_status(string $month, array $user, bool $includeCounts
     ];
 }
 
-function food_order_my_orders(int $employeeId, int $limit = 120): array
+/**
+ * تبدیل ورودی تاریخ بازهٔ لیست به Y-m-d میلادی.
+ * پذیرش: شمسی (۱۴۰۵/۰۷/۰۱ یا ۱۴۰۵-۰۷-۰۱، با ارقام فارسی) یا میلادی (۲۰۲۶-۱۰-۰۱).
+ * خالی ⇒ null.
+ */
+function food_order_list_date(string $raw): ?string
+{
+    $s = trim(food_order_normalize_digits($raw));
+    if ($s === '') {
+        return null;
+    }
+    if (!preg_match('/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})$/', $s, $m)) {
+        throw new RuntimeException('تاریخ «' . $raw . '» معتبر نیست؛ مثال: ۱۴۰۵/۰۷/۰۱');
+    }
+    $y = (int) $m[1];
+    $mo = (int) $m[2];
+    $d = (int) $m[3];
+    if ($y >= 1200 && $y <= 1600) {
+        if (!function_exists('jalali_to_gregorian') || $mo < 1 || $mo > 12 || $d < 1 || $d > 31) {
+            throw new RuntimeException('تاریخ شمسی «' . $raw . '» معتبر نیست.');
+        }
+        [$gy, $gm, $gd] = jalali_to_gregorian($y, $mo, $d);
+        // بررسی برگشتی: روز ۳۱ مهر یا ۳۰ بهمن (طول ماه شمسی) را رد می‌کند؛ بدون آن به روز بعد می‌رفت.
+        if (!checkdate($gm, $gd, $gy) || gregorian_to_jalali($gy, $gm, $gd) !== [$y, $mo, $d]) {
+            throw new RuntimeException('تاریخ شمسی «' . $raw . '» معتبر نیست.');
+        }
+    } else {
+        [$gy, $gm, $gd] = [$y, $mo, $d];
+    }
+    if (!checkdate($gm, $gd, $gy)) {
+        throw new RuntimeException('تاریخ «' . $raw . '» معتبر نیست.');
+    }
+    return sprintf('%04d-%02d-%02d', $gy, $gm, $gd);
+}
+
+/**
+ * بازهٔ نمایش سفارش‌ها.
+ * پیش‌فرض: از امروز تا پایان ماه شمسی جاری. بنابراین غذای روزهای گذشته خودکار از لیست خارج می‌شود.
+ * کاربر می‌تواند هر بازه‌ای (حداکثر ۴۰۰ روز) را انتخاب کند.
+ * @return array{from:string,to:string}
+ */
+function food_order_list_range(string $fromRaw, string $toRaw): array
+{
+    $today = food_order_today();
+    [$jy, $jm] = function_exists('gregorian_to_jalali')
+        ? gregorian_to_jalali((int) substr($today, 0, 4), (int) substr($today, 5, 2), (int) substr($today, 8, 2))
+        : [0, 0];
+    $monthEnd = $jy > 0 ? food_order_jalali_month_range(sprintf('%04d/%02d', $jy, $jm))['to'] : $today;
+
+    $from = food_order_list_date($fromRaw);
+    $to = food_order_list_date($toRaw);
+    if ($from === null && $to === null) {
+        $from = $today;
+        $to = $monthEnd;
+    } elseif ($from === null) {
+        $from = min($today, (string) $to);
+    } elseif ($to === null) {
+        $to = $monthEnd;
+    }
+    if ($from > $to) {
+        throw new RuntimeException('تاریخ شروع بازه نباید بعد از تاریخ پایان باشد.');
+    }
+    $days = (int) (new DateTimeImmutable($from, new DateTimeZone('UTC')))->diff(new DateTimeImmutable($to, new DateTimeZone('UTC')))->days;
+    if ($days > 400) {
+        throw new RuntimeException('بازهٔ انتخاب‌شده بیش از ۴۰۰ روز است؛ بازه را کوتاه‌تر کنید.');
+    }
+    return ['from' => $from, 'to' => $to];
+}
+
+/**
+ * سفارش‌های یک کارمند در بازه. اگر $from/$to داده نشود، همهٔ سفارش‌ها (تا $limit) برگردانده می‌شود.
+ */
+function food_order_my_orders(int $employeeId, int $limit = 120, ?string $from = null, ?string $to = null): array
 {
     food_order_schema_ensure();
-    $limit = max(1, min(200, $limit));
+    $limit = max(1, min(400, $limit));
+    $range = ($from !== null && $to !== null) ? ' AND o.food_date BETWEEN ? AND ?' : '';
+    $params = [$employeeId];
+    if ($range !== '') {
+        array_push($params, $from, $to);
+    }
     $stmt = db()->prepare("SELECT o.id, o.employee_id, o.calendar_item_id, o.food_date, o.status, o.created_at,
             u.full_name, u.first_name, u.last_name, u.national_code, c.food_name, i.food_id
         FROM food_orders o
         JOIN users u ON u.id = o.employee_id
         JOIN food_calendar_items i ON i.id = o.calendar_item_id
         JOIN food_catalog c ON c.id = i.food_id
-        WHERE o.employee_id = ?
+        WHERE o.employee_id = ?{$range}
         ORDER BY o.food_date DESC, o.id DESC LIMIT {$limit}");
-    $stmt->execute([$employeeId]);
+    $stmt->execute($params);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $created = (string) $row['created_at'];
@@ -1120,7 +1197,25 @@ function food_order_api_handle(string $route, array $user): never
             food_order_send_json(food_order_month_status((string) ($body['month'] ?? ''), $target, false));
         }
         if ($method === 'GET' && $route === 'my-orders') {
-            food_order_send_json(['items' => food_order_my_orders((int) $user['id'])]);
+            $range = food_order_list_range((string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? ''));
+            food_order_send_json([
+                'items' => food_order_my_orders((int) $user['id'], 400, $range['from'], $range['to']),
+                'range' => $range,
+            ]);
+        }
+        if ($method === 'POST' && $route === 'proxy-orders') {
+            check_api_rate_limit('food_order_proxy_orders_' . (int) $user['id'], 30, 60);
+            $body = food_order_api_body();
+            $target = food_order_verify_employee_national_code(
+                max(0, (int) ($body['employee_id'] ?? 0)),
+                (string) ($body['national_code'] ?? ''),
+                true
+            );
+            $range = food_order_list_range((string) ($body['from'] ?? ''), (string) ($body['to'] ?? ''));
+            food_order_send_json([
+                'items' => food_order_my_orders((int) $target['id'], 400, $range['from'], $range['to']),
+                'range' => $range,
+            ]);
         }
         if ($method === 'GET' && $route === 'search-users') {
             check_api_rate_limit('food_order_search_' . (int) $user['id'], 30, 60);
@@ -1278,7 +1373,7 @@ function food_order_render_page(array $user): never
         echo '<div class="alert info" role="status">' . e($nationalIssue) . '</div>';
     }
     echo '<div id="food-order-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-id="' . (int) ($user['id'] ?? 0) . '" data-self-name="' . e(food_order_full_name($profile)) . '" data-today="' . e($today) . '" data-today-jalali="' . e($todayJalali) . '" data-has-national="' . ($hasNational ? '1' : '0') . '" data-can-proxy="' . ($canProxy ? '1' : '0') . '"><div class="food-order-loading card">در حال بارگذاری تقویم و سفارش‌های شما…</div></div>';
-    echo '</section><script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=11"></script>';
+    echo '</section><script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=12"></script>';
     render_footer();
     exit;
 }

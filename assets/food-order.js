@@ -31,6 +31,13 @@
     targetMode: 'self',
     targetId: selfId,
     targetName: selfName,
+    listFrom: '',
+    listTo: '',
+    listRange: null,
+    listError: '',
+    proxyOrders: null,
+    proxyLoading: false,
+    proxyError: '',
     nationalCode: '',
     proxyCancelingOrderId: 0,
     proxyCancelConfirmingOrderId: 0,
@@ -129,15 +136,74 @@
     }
   }
 
+  // فهرست سفارش‌ها: در حالت «خودم» از my-orders، در حالت «دیگری» از proxy-orders، هر دو با بازهٔ انتخابی.
   async function loadMyOrders() {
+    if (state.targetMode === 'proxy') return loadProxyOrders();
+    state.listError = '';
     try {
-      var payload = await request('my-orders');
+      var params = {};
+      if (state.listFrom) params.from = state.listFrom;
+      if (state.listTo) params.to = state.listTo;
+      var payload = await request('my-orders', params);
       state.orders = Array.isArray(payload.items) ? payload.items : [];
+      state.listRange = payload.range || state.listRange;
     } catch (e) {
       state.orders = [];
-      state.error = state.error || (e.message || 'سفارش‌های شما بارگذاری نشد.');
+      state.listError = e.message || 'سفارش‌های شما بارگذاری نشد.';
     }
     render();
+  }
+
+  async function loadProxyOrders() {
+    if (!state.recipientReady || !state.targetId) return;
+    var code = normalizedDigits(state.nationalCode);
+    state.proxyOrders = null;
+    state.proxyError = '';
+    if (code.length !== 10) {
+      state.proxyOrders = [];
+      state.proxyError = 'برای مشاهدهٔ سفارش این شخص، ابتدا هویت او را دوباره تأیید کنید.';
+      render();
+      return;
+    }
+    state.proxyLoading = true;
+    render();
+    try {
+      var payload = await request('proxy-orders', null, {
+        method: 'POST',
+        body: JSON.stringify({ employee_id: state.targetId, national_code: code, from: state.listFrom, to: state.listTo })
+      });
+      state.proxyOrders = Array.isArray(payload.items) ? payload.items : [];
+      state.listRange = payload.range || state.listRange;
+    } catch (e) {
+      state.proxyOrders = [];
+      state.proxyError = e.message || 'سفارش‌های این شخص بارگذاری نشد.';
+    } finally {
+      state.proxyLoading = false;
+      render();
+    }
+  }
+
+  // بازهٔ وارد‌شده در فیلدهای شمسی را می‌خواند و فهرست را دوباره می‌گیرد. خالی = پیش‌فرض (امروز تا پایان ماه).
+  function applyListRange() {
+    var fromInput = root.querySelector('[data-fo-list-from]');
+    var toInput = root.querySelector('[data-fo-list-to]');
+    state.listFrom = fromInput ? fromInput.value.trim() : '';
+    state.listTo = toInput ? toInput.value.trim() : '';
+    loadMyOrders();
+  }
+
+  function renderListFilter() {
+    if (state.targetMode === 'proxy' && !state.recipientReady) return '';
+    var shownFrom = state.listFrom || (state.listRange ? isoToJalali(state.listRange.from) : '');
+    var shownTo = state.listTo || (state.listRange ? isoToJalali(state.listRange.to) : '');
+    return '<div class="card fo-list-filter" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:14px">'
+      + '<label>از تاریخ (شمسی)<input type="text" inputmode="numeric" data-fo-list-from value="' + esc(faDigits(shownFrom)) + '" placeholder="۱۴۰۵/۰۷/۰۱" style="display:block;margin-top:4px"></label>'
+      + '<label>تا تاریخ (شمسی)<input type="text" inputmode="numeric" data-fo-list-to value="' + esc(faDigits(shownTo)) + '" placeholder="۱۴۰۵/۰۷/۳۰" style="display:block;margin-top:4px"></label>'
+      + '<button class="button" type="button" data-fo-action="apply-list-range">نمایش بازه</button>'
+      + '<button class="button secondary" type="button" data-fo-action="reset-list-range">ماه جاری (از امروز)</button>'
+      + '<small class="field-help" style="flex-basis:100%">پیش‌فرض: از امروز تا پایان ماه جاری. غذای روزهای گذشته خودکار از این فهرست خارج می‌شود.</small>'
+      + (state.listError ? '<div class="alert danger" style="flex-basis:100%">' + esc(state.listError) + '</div>' : '')
+      + '</div>';
   }
 
   function dayStatus(day, holiday, cell) {
@@ -204,27 +270,24 @@
 
   function renderProxyOrders() {
     if (state.targetMode !== 'proxy' || !state.recipientReady) return '';
-    var days = state.monthData && state.monthData.days ? state.monthData.days : {};
-    var rows = Object.keys(days).map(function (date) {
-      var day = days[date] || {};
-      var order = day.my_order || null;
-      return order ? {
+    var rows = (state.proxyOrders || []).map(function (order) {
+      return {
         id: Number(order.id || 0),
-        food_date: date,
+        food_date: order.food_date || '',
         food_name: order.food_name || '',
         reserve_date: order.reserve_date || '',
         reserve_time: order.reserve_time || '',
         status: order.status || 'active',
-        day_status: day.order_status || '',
-      } : null;
-    }).filter(Boolean).sort(function (a, b) { return a.food_date.localeCompare(b.food_date); });
+        day_status: '',
+      };
+    });
     var content = '';
-    if (!state.monthData && state.loading) {
+    if (state.proxyLoading) {
       content = '<div class="card fo-empty">در حال بارگذاری سفارش‌ها…</div>';
-    } else if (!state.monthData && state.error) {
-      content = '<div class="card fo-empty">فهرست سفارش‌ها بارگذاری نشد.</div>';
+    } else if (state.proxyError) {
+      content = '<div class="card fo-empty">' + esc(state.proxyError) + '</div>';
     } else if (!rows.length) {
-      content = '<div class="card fo-empty">برای این ماه سفارشی ثبت نشده است.</div>';
+      content = '<div class="card fo-empty">در این بازه برای این شخص سفارشی ثبت نشده است.</div>';
     } else {
       content = '<div class="card fo-my-orders fo-proxy-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
         var reserveDate = row.reserve_date ? faDigits(isoToJalali(row.reserve_date)) : '—';
@@ -335,7 +398,7 @@
       ? '<div class="alert ' + (state.pageNotice.type === 'danger' ? 'danger' : 'success') + ' fo-page-notice" role="' + (state.pageNotice.type === 'danger' ? 'alert' : 'status') + '"><span>' + esc(state.pageNotice.message) + '</span><button type="button" class="fo-page-notice-close" data-fo-action="dismiss-notice" aria-label="بستن پیام">×</button></div>'
       : '';
     var body = Cal
-      ? pageNotice + renderRecipientBanner() + renderCalendar() + (state.targetMode === 'self' ? '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderProxyOrders()) + renderModal()
+      ? pageNotice + renderRecipientBanner() + renderCalendar() + (state.targetMode === 'self' ? renderListFilter() + '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderListFilter() + renderProxyOrders()) + renderModal()
       : pageNotice + '<div class="alert danger">تقویم شمسی مشترک بارگذاری نشده است. صفحه را تازه‌سازی کنید.</div>';
     root.innerHTML = body + renderRecipientDialog();
     var recipientDialog = root.querySelector('#fo-recipient-dialog');
@@ -407,8 +470,7 @@
     state.loading = true;
     state.dataLoaded = true;
     render();
-    var jobs = [loadMonth()];
-    if (state.targetMode === 'self') jobs.push(loadMyOrders());
+    var jobs = [loadMonth(), loadMyOrders()];
     Promise.all(jobs);
   }
 
@@ -585,8 +647,7 @@
       }
       state.pageNotice = { message: notice, type: 'success' };
       closeModal();
-      var refresh = [loadMonth()];
-      if (!isProxy) refresh.push(loadMyOrders());
+      var refresh = [loadMonth(), loadMyOrders()];
       await Promise.all(refresh);
     } catch (e) {
       var errorMessage = e.message || 'ثبت سفارش ناموفق بود.';
@@ -635,7 +696,7 @@
       }) });
       state.pageNotice = { message: response.message || 'سفارش فرد تأییدشده لغو شد.', type: 'success' };
       state.modalDate = '';
-      await loadMonth();
+      await Promise.all([loadMonth(), loadMyOrders()]);
     } catch (e) {
       var errorMessage = e.message || 'لغو سفارش نیابتی انجام نشد.';
       state.pageNotice = { message: errorMessage, type: 'danger' };
@@ -721,6 +782,8 @@
       if (act === 'cancel-proxy') requestProxyCancelConfirmation(Number(action.dataset.orderId || 0));
       if (act === 'confirm-cancel-proxy') cancelProxyOrder(Number(action.dataset.orderId || 0));
       if (act === 'dismiss-cancel-proxy') dismissProxyCancelConfirmation(Number(action.dataset.orderId || 0));
+      if (act === 'apply-list-range') applyListRange();
+      if (act === 'reset-list-range') { state.listFrom = ''; state.listTo = ''; loadMyOrders(); }
       return;
     }
     var dayButton = event.target.closest('[data-fo-day]');
