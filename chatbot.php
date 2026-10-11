@@ -86,10 +86,157 @@ function chatbot_score(string $question, array $faq): float
     return round($score, 2);
 }
 
-/** بهترین پاسخ را پیدا می‌کند و سؤال را لاگ می‌کند. */
+/** کلمه‌های نیت (intent) — با همان نرمال‌سازی و بدون فاصله مقایسه می‌شوند. */
+const CHATBOT_WORDS_HOW = ['کجا', 'چطور', 'چگونه', 'چجوری', 'چه طور'];
+const CHATBOT_WORDS_STATUS = ['وضعیت', 'پیگیری', 'تیکتم', 'تیکت های من', 'تیکتهای من', 'تیکت من', 'درخواستم', 'درخواست های من', 'درخواستهای من', 'چی شد', 'چی شده', 'جواب تیکت', 'نتیجه تیکت'];
+const CHATBOT_WORDS_CREATE = ['ثبت تیکت', 'تیکت جدید', 'تیکت بزنم', 'تیکت باز کنم', 'درخواست جدید', 'ثبت درخواست', 'تیکت ثبت کن', 'تیکت ثبت کنم', 'تیکت بفرستم'];
+const CHATBOT_WORDS_TICKET = ['تیکت', 'درخواست', 'شماره پیگیری', 'پیگیری'];
+const CHATBOT_WORDS_CANCEL = ['انصراف', 'لغو', 'بیخیال', 'ولش کن'];
+const CHATBOT_FLOW_TTL = 900;
+
+function chatbot_has_any(string $normalized, array $words): bool
+{
+    $compact = chatbot_compact($normalized);
+    foreach ($words as $word) {
+        $needle = chatbot_compact(chatbot_normalize($word));
+        if ($needle !== '' && str_contains($compact, $needle)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** ثبت پاسخ در لاگ و ساختن خروجی یکسان. */
+function chatbot_reply(array $user, string $question, string $answer, bool $matched, ?int $faqId, ?string $intent, float $score = 0.0, ?array $link = null): array
+{
+    $stmt = db()->prepare('INSERT INTO chatbot_logs (user_id, question, faq_id, intent, score, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
+    $stmt->execute([(int) $user['id'], $question, $faqId, $intent, $score]);
+    return [
+        'matched' => $matched,
+        'faq_id' => $faqId,
+        'answer' => $answer,
+        'link' => $link,
+        'log_id' => (int) db()->lastInsertId(),
+    ];
+}
+
+function chatbot_flow_active(): ?array
+{
+    $flow = $_SESSION['chatbot_flow'] ?? null;
+    if (!is_array($flow)) {
+        return null;
+    }
+    if (time() - (int) ($flow['at'] ?? 0) > CHATBOT_FLOW_TTL) {
+        unset($_SESSION['chatbot_flow']);
+        return null;
+    }
+    return $flow;
+}
+
+/** گام‌های ثبت تیکت از داخل بات: موضوع ← شرح ← انتقال به فرم موجود ثبت تیکت. */
+function chatbot_flow_step(array $flow, array $user, string $question): array
+{
+    if (chatbot_has_any(chatbot_normalize($question), CHATBOT_WORDS_CANCEL)) {
+        unset($_SESSION['chatbot_flow']);
+        return chatbot_reply($user, $question, 'ثبت تیکت لغو شد. هر وقت خواستید دوباره «ثبت تیکت» را بنویسید.', true, null, 'ticket_cancel');
+    }
+    if (!user_can($user, 'ticket.create')) {
+        unset($_SESSION['chatbot_flow']);
+        return chatbot_reply($user, $question, 'دسترسی ثبت تیکت برای حساب شما فعال نیست.', false, null, 'ticket_create');
+    }
+    if (($flow['step'] ?? '') === 'subject') {
+        if (mb_strlen($question, 'UTF-8') < 3) {
+            return chatbot_reply($user, $question, 'موضوع کمی کوتاه است. لطفاً موضوع درخواست را در یک جمله بنویسید.', true, null, 'ticket_create');
+        }
+        $_SESSION['chatbot_flow'] = ['step' => 'description', 'subject' => mb_substr($question, 0, 255, 'UTF-8'), 'at' => time()];
+        return chatbot_reply($user, $question, 'خوب. حالا شرح مشکل یا درخواست را بنویسید: چه کاری می‌خواهید انجام دهید و چه چیزی کار نمی‌کند؟', true, null, 'ticket_create');
+    }
+    if (mb_strlen($question, 'UTF-8') < 5) {
+        return chatbot_reply($user, $question, 'شرح کوتاه است؛ لطفاً کمی بیشتر توضیح دهید.', true, null, 'ticket_create');
+    }
+    $subject = (string) ($flow['subject'] ?? '');
+    unset($_SESSION['chatbot_flow']);
+    $link = [
+        'url' => 'index.php?page=new-ticket&' . http_build_query(['subject' => $subject, 'description' => mb_substr($question, 0, 5000, 'UTF-8')]),
+        'label' => 'ادامه و ثبت نهایی تیکت',
+    ];
+    return chatbot_reply($user, $question, 'متن درخواست آماده شد. با دکمهٔ زیر فرم ثبت تیکت باز می‌شود؛ نوع خدمت را انتخاب کنید و ثبت نهایی را بزنید.', true, null, 'ticket_create', 0.0, $link);
+}
+
+/** شماره تیکت (مثل SBU1-86-000123) یا شناسهٔ عددی را از پرسش بیرون می‌کشد. */
+function chatbot_ticket_ref(string $question): array
+{
+    $latin = strtr($question, ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']);
+    if (preg_match('/[A-Za-z]+\d*(?:-\d+)+/', $latin, $m)) {
+        return ['no' => strtoupper($m[0])];
+    }
+    if (preg_match_all('/\d+/', $latin, $nums) && $nums[0]) {
+        $largest = max(array_map('intval', $nums[0]));
+        return $largest > 0 ? ['id' => $largest] : [];
+    }
+    return [];
+}
+
+/** وضعیت یک تیکت مشخص؛ فقط اگر کاربر طبق ticket_scope (همان قاعدهٔ صفحهٔ تیکت‌ها) دسترسی دارد. */
+function chatbot_ticket_status(array $user, array $ref): ?array
+{
+    [$where, $params] = ticket_scope($user, 't');
+    $condition = isset($ref['no']) ? 'UPPER(t.ticket_no) = ?' : 't.id = ?';
+    $params[] = isset($ref['no']) ? $ref['no'] : (int) $ref['id'];
+    $sql = 'SELECT t.id, t.ticket_no, t.subject, t.status, t.updated_at FROM tickets t '
+        . ($where !== '' ? $where . ' AND ' : 'WHERE ') . $condition . ' LIMIT 1';
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+function chatbot_ticket_line(array $row): string
+{
+    $number = trim((string) ($row['ticket_no'] ?: ticket_number((int) $row['id'])));
+    return $number . ' | ' . $row['subject'] . ' | وضعیت: ' . status_label((string) $row['status']) . ' | به‌روزرسانی: ' . persian_date((string) $row['updated_at']);
+}
+
+/** بهترین پاسخ را پیدا می‌کند؛ اول نیت‌ها (تیکت و پیگیری)، بعد پرسش‌های متداول. */
 function chatbot_answer(string $question, array $user): array
 {
     $question = mb_substr(trim($question), 0, 500, 'UTF-8');
+    $norm = chatbot_normalize($question);
+
+    $flow = chatbot_flow_active();
+    if ($flow !== null) {
+        return chatbot_flow_step($flow, $user, $question);
+    }
+
+    $ref = chatbot_ticket_ref($question);
+    $asksStatus = chatbot_has_any($norm, CHATBOT_WORDS_STATUS);
+    $mentionsTicket = chatbot_has_any($norm, CHATBOT_WORDS_TICKET);
+    if ($ref && ($mentionsTicket || $asksStatus)) {
+        $row = chatbot_ticket_status($user, $ref);
+        $answer = $row
+            ? 'وضعیت تیکت ' . chatbot_ticket_line($row) . "\n\nبرای جزئیات و پاسخ‌ها، شماره تیکت را در فهرست تیکت‌های خود جست‌وجو کنید."
+            : 'تیکتی با این شماره پیدا نشد یا دسترسی شما به آن ندارد. شماره را دقیق از روی پیامک یا فرم تیکت کپی کنید.';
+        return chatbot_reply($user, $question, $answer, true, null, 'ticket_status');
+    }
+
+    if (chatbot_has_any($norm, CHATBOT_WORDS_CREATE)) {
+        if (!user_can($user, 'ticket.create')) {
+            return chatbot_reply($user, $question, 'دسترسی ثبت تیکت برای حساب شما فعال نیست. برای فعال شدن با مدیر سامانه تماس بگیرید.', true, null, 'ticket_create');
+        }
+        $_SESSION['chatbot_flow'] = ['step' => 'subject', 'at' => time()];
+        return chatbot_reply($user, $question, 'با چند سؤال کوتاه تیکت شما را آماده می‌کنم. ابتدا موضوع درخواست را در یک جمله بنویسید. (برای لغو «انصراف» بنویسید)', true, null, 'ticket_create');
+    }
+
+    if ($asksStatus && !chatbot_has_any($norm, CHATBOT_WORDS_HOW)) {
+        $stmt = db()->prepare('SELECT id, ticket_no, subject, status, updated_at FROM tickets WHERE requester_id = ? ORDER BY updated_at DESC LIMIT 5');
+        $stmt->execute([(int) $user['id']]);
+        $rows = $stmt->fetchAll();
+        $answer = $rows
+            ? "آخرین تیکت‌های شما:\n" . implode("\n", array_map('chatbot_ticket_line', $rows))
+            : 'شما تیکت ثبت‌شده‌ای ندارید. برای ثبت تیکت جدید، «ثبت تیکت» را بنویسید.';
+        return chatbot_reply($user, $question, $answer, true, null, 'ticket_status');
+    }
+
     $best = null;
     $bestScore = 0.0;
     foreach (db()->query('SELECT id, question, answer, keywords FROM chatbot_faq WHERE is_active = 1')->fetchAll() as $faq) {
@@ -100,18 +247,10 @@ function chatbot_answer(string $question, array $user): array
         }
     }
     $matched = $best !== null && $bestScore >= CHATBOT_THRESHOLD;
-
-    $stmt = db()->prepare('INSERT INTO chatbot_logs (user_id, question, faq_id, score, created_at) VALUES (?, ?, ?, ?, NOW())');
-    $stmt->execute([(int) $user['id'], $question, $matched ? (int) $best['id'] : null, $bestScore]);
-
-    return [
-        'matched' => $matched,
-        'faq_id' => $matched ? (int) $best['id'] : null,
-        'answer' => $matched
-            ? (string) $best['answer']
-            : 'متأسفانه پاسخ مشخصی برای این سؤال پیدا نکردم. می‌توانید سؤال را با کلمات دیگری بپرسید یا با ثبت تیکت از کارشناسان کمک بگیرید.',
-        'log_id' => (int) db()->lastInsertId(),
-    ];
+    if ($matched) {
+        return chatbot_reply($user, $question, (string) $best['answer'], true, (int) $best['id'], null, $bestScore);
+    }
+    return chatbot_reply($user, $question, 'متأسفانه پاسخ مشخصی برای این سؤال پیدا نکردم. می‌توانید سؤال را با کلمات دیگری بپرسید یا با نوشتن «ثبت تیکت» از کارشناسان کمک بگیرید.', false, null, null, $bestScore);
 }
 
 /** نقطهٔ ورود API بات. ورودی: پرسش (ask) یا بازخورد (feedback). خروجی JSON. */
@@ -155,6 +294,7 @@ function chatbot_api_handle(?array $user): void
         'ok' => true,
         'answer' => $result['answer'],
         'matched' => $result['matched'],
+        'link' => $result['link'],
         'log_id' => $result['log_id'],
         'can_ticket' => user_can($user, 'ticket.create'),
     ]);
@@ -201,7 +341,7 @@ function chatbot_render_admin(array $admin): void
     }
 
     $faqs = db()->query('SELECT f.*, (SELECT COUNT(*) FROM chatbot_logs l WHERE l.faq_id = f.id) AS asked, (SELECT COUNT(*) FROM chatbot_logs l WHERE l.faq_id = f.id AND l.helpful = 0) AS negative FROM chatbot_faq f ORDER BY f.is_active DESC, f.id')->fetchAll();
-    $unanswered = db()->query('SELECT question, COUNT(*) AS total, MAX(created_at) AS last_at FROM chatbot_logs WHERE faq_id IS NULL GROUP BY question ORDER BY total DESC, last_at DESC LIMIT 50')->fetchAll();
+    $unanswered = db()->query('SELECT question, COUNT(*) AS total, MAX(created_at) AS last_at FROM chatbot_logs WHERE faq_id IS NULL AND intent IS NULL GROUP BY question ORDER BY total DESC, last_at DESC LIMIT 50')->fetchAll();
 
     render_header('مدیریت بات پاسخ‌گو', $admin);
     echo '<section class="page-heading"><div><span class="eyebrow">پشتیبانی هوشمند</span><h1>مدیریت بات پاسخ‌گو</h1><p>پرسش‌های متداول و کلیدواژه‌های آن‌ها را مدیریت کنید. سؤال‌های بی‌پاسخ کاربران را از جدول پایین می‌توانید به‌سرعت پاسخ دهید.</p></div></section>';
@@ -290,7 +430,10 @@ function chatbot_render_widget(?array $user): string
       pending.textContent = j.ok ? j.answer : (j.error || "خطا در ارتباط با بات.");
       if (j.ok) {
         feedback(pending, j.log_id);
-        if (!j.matched && j.can_ticket) {
+        if (j.link) {
+          var lk = document.createElement("a"); lk.href = j.link.url; lk.textContent = j.link.label;
+          lk.style.display = "inline-block"; lk.style.marginTop = "6px"; pending.appendChild(lk);
+        } else if (!j.matched && j.can_ticket) {
           var a = document.createElement("a"); a.href = "index.php?page=new-ticket"; a.textContent = "ثبت تیکت جدید";
           a.style.display = "inline-block"; a.style.marginTop = "6px"; pending.appendChild(a);
         }

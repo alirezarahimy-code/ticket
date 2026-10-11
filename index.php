@@ -3793,6 +3793,11 @@ if ($page === 'new-ticket') {
                 . 'شرح اصلاح موردنیاز: ';
         }
     }
+    if ($cdDvdRequestRecord === null) {
+        // پیش‌پرکردن متن از بات پاسخ‌گو؛ خدمت و سایر فیلدها را کاربر خودش در همین فرم انتخاب می‌کند.
+        $subjectDefault = mb_substr(trim((string) ($_GET['subject'] ?? '')), 0, 255, 'UTF-8');
+        $descriptionDefault = mb_substr(trim((string) ($_GET['description'] ?? '')), 0, 5000, 'UTF-8');
+    }
     ticket_service_ensure_schema();
     $categories = db()->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
     $allAssets = db()->query('SELECT id, asset_tag, hostname, owner_user_id, ip_address FROM assets ORDER BY hostname')->fetchAll();
