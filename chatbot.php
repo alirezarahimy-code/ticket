@@ -214,9 +214,10 @@ function chatbot_answer(string $question, array $user): array
     if ($ref && ($mentionsTicket || $asksStatus)) {
         $row = chatbot_ticket_status($user, $ref);
         $answer = $row
-            ? 'وضعیت تیکت ' . chatbot_ticket_line($row) . "\n\nبرای جزئیات و پاسخ‌ها، شماره تیکت را در فهرست تیکت‌های خود جست‌وجو کنید."
+            ? 'وضعیت تیکت ' . chatbot_ticket_line($row)
             : 'تیکتی با این شماره پیدا نشد یا دسترسی شما به آن ندارد. شماره را دقیق از روی پیامک یا فرم تیکت کپی کنید.';
-        return chatbot_reply($user, $question, $answer, true, null, 'ticket_status');
+        $link = $row ? ['url' => 'index.php?page=ticket&id=' . (int) $row['id'], 'label' => 'مشاهدهٔ جزئیات تیکت'] : null;
+        return chatbot_reply($user, $question, $answer, true, null, 'ticket_status', 0.0, $link);
     }
 
     if (chatbot_has_any($norm, CHATBOT_WORDS_CREATE)) {
@@ -345,6 +346,52 @@ function chatbot_render_admin(array $admin): void
 
     render_header('مدیریت بات پاسخ‌گو', $admin);
     echo '<section class="page-heading"><div><span class="eyebrow">پشتیبانی هوشمند</span><h1>مدیریت بات پاسخ‌گو</h1><p>پرسش‌های متداول و کلیدواژه‌های آن‌ها را مدیریت کنید. سؤال‌های بی‌پاسخ کاربران را از جدول پایین می‌توانید به‌سرعت پاسخ دهید.</p></div></section>';
+
+    // گزارش بازه‌ای: آمار کلی، نیت‌ها، پرتکرارترین مدخل‌ها و بازخورد منفی اخیر (بدون نام کاربر)
+    $validDate = static fn(string $v): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) && strtotime($v) !== false;
+    $from = $validDate((string) ($_GET['from'] ?? '')) ? (string) $_GET['from'] : date('Y-m-d', strtotime('-30 days'));
+    $to = $validDate((string) ($_GET['to'] ?? '')) ? (string) $_GET['to'] : date('Y-m-d');
+    $range = [$from . ' 00:00:00', $to . ' 23:59:59'];
+    $statStmt = db()->prepare('SELECT COUNT(*) AS total, SUM(faq_id IS NOT NULL) AS answered, SUM(intent IS NOT NULL) AS intents, SUM(faq_id IS NULL AND intent IS NULL) AS unanswered, SUM(helpful = 1) AS yes_count, SUM(helpful = 0) AS no_count FROM chatbot_logs WHERE created_at BETWEEN ? AND ?');
+    $statStmt->execute($range);
+    $stats = $statStmt->fetch() ?: [];
+    $intentStmt = db()->prepare('SELECT intent, COUNT(*) AS c FROM chatbot_logs WHERE intent IS NOT NULL AND created_at BETWEEN ? AND ? GROUP BY intent ORDER BY c DESC');
+    $intentStmt->execute($range);
+    $intentRows = $intentStmt->fetchAll();
+    $topStmt = db()->prepare('SELECT f.question, COUNT(l.id) AS c, SUM(l.helpful = 0) AS neg FROM chatbot_logs l JOIN chatbot_faq f ON f.id = l.faq_id WHERE l.created_at BETWEEN ? AND ? GROUP BY f.id, f.question ORDER BY c DESC LIMIT 10');
+    $topStmt->execute($range);
+    $topRows = $topStmt->fetchAll();
+    $negStmt = db()->prepare('SELECT l.question, l.created_at, f.question AS faq_question FROM chatbot_logs l LEFT JOIN chatbot_faq f ON f.id = l.faq_id WHERE l.helpful = 0 AND l.created_at BETWEEN ? AND ? ORDER BY l.created_at DESC LIMIT 20');
+    $negStmt->execute($range);
+    $negRows = $negStmt->fetchAll();
+    $intentLabels = ['ticket_create' => 'ثبت تیکت', 'ticket_status' => 'پیگیری تیکت', 'ticket_cancel' => 'انصراف از ثبت تیکت'];
+
+    $total = (int) ($stats['total'] ?? 0);
+    $pct = static fn(int $part, int $whole): string => $whole > 0 ? round($part * 100 / $whole) . '٪' : '—';
+    echo '<div class="card"><h2>گزارش بازه‌ای</h2>'
+        . '<form method="get" action="index.php" class="inline-form"><input type="hidden" name="page" value="chatbot-admin">'
+        . 'از <input type="date" name="from" value="' . e($from) . '"> تا <input type="date" name="to" value="' . e($to) . '"> '
+        . '<button class="button secondary" type="submit">نمایش</button></form>'
+        . '<div class="stat-grid">'
+        . '<div><strong>' . $total . '</strong><small>کل پرسش‌ها</small></div>'
+        . '<div><strong>' . $pct((int) ($stats['answered'] ?? 0), $total) . '</strong><small>پاسخ از FAQ</small></div>'
+        . '<div><strong>' . $pct((int) ($stats['intents'] ?? 0), $total) . '</strong><small>ثبت/پیگیری تیکت</small></div>'
+        . '<div><strong>' . $pct((int) ($stats['unanswered'] ?? 0), $total) . '</strong><small>بی‌پاسخ</small></div>'
+        . '<div><strong>' . (int) ($stats['yes_count'] ?? 0) . ' / ' . (int) ($stats['no_count'] ?? 0) . '</strong><small>مفید / کمکی نکرد</small></div>'
+        . '</div>';
+    if ($intentRows) {
+        echo '<p class="muted">نیت‌ها: ' . e(implode('، ', array_map(static fn(array $r): string => ($intentLabels[$r['intent']] ?? $r['intent']) . ' (' . (int) $r['c'] . ')', $intentRows))) . '</p>';
+    }
+    echo '<h3>پرتکرارترین پاسخ‌ها</h3><table><thead><tr><th>پرسش متداول</th><th>دفعات</th><th>کمکی نکرد</th></tr></thead><tbody>';
+    foreach ($topRows as $row) {
+        echo '<tr><td>' . e($row['question']) . '</td><td>' . (int) $row['c'] . '</td><td>' . (int) $row['neg'] . '</td></tr>';
+    }
+    echo '</tbody></table>';
+    echo '<h3>آخرین بازخوردهای منفی</h3><table><thead><tr><th>سؤال کاربر</th><th>پاسخ داده‌شده</th><th>زمان</th></tr></thead><tbody>';
+    foreach ($negRows as $row) {
+        echo '<tr><td>' . e($row['question']) . '</td><td>' . e((string) ($row['faq_question'] ?? '—')) . '</td><td>' . e(persian_date((string) $row['created_at'])) . '</td></tr>';
+    }
+    echo '</tbody></table></div>';
 
     $formValues = $editing ?: ['id' => 0, 'question' => $prefill, 'answer' => '', 'keywords' => '', 'is_active' => 1];
     echo '<div class="card form-card"><h2>' . ($editing ? 'ویرایش مدخل #' . (int) $editing['id'] : 'افزودن مدخل جدید') . '</h2>'

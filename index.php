@@ -670,7 +670,7 @@ function render_header(string $title, ?array $user = null): void
 function render_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی</footer></div><script>window.ITSM_HOLIDAYS = ';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی</footer></div><script nonce="' . e(csp_nonce()) . '">window.ITSM_HOLIDAYS = ';
     try {
         $__h = db()->query("SELECT holiday_date, title FROM holidays WHERE is_active = 1")->fetchAll();
         $__out = [];
