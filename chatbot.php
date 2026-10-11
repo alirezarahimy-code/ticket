@@ -401,7 +401,7 @@ function chatbot_render_widget(?array $user): string
   <div class="cb-log" id="cb-log"><div class="cb-msg cb-bot">سلام! سؤال خود را درباره کار با سامانه بنویسید.</div></div>
   <form class="cb-form" id="cb-form"><input id="cb-input" maxlength="500" placeholder="سؤال خود را بنویسید..." autocomplete="off"><button type="submit">ارسال</button></form>
 </div>
-<script>
+<script nonce="' . e(csp_nonce()) . '">
 (function(){
   var csrf = ' . $token . ';
   var panel = document.getElementById("cb-panel"), log = document.getElementById("cb-log");
