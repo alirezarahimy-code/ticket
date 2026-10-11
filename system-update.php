@@ -134,6 +134,7 @@ function system_update_apply(array $upload, array $actor): array
                 '--host=' . (string) cfg('database.host', '127.0.0.1'),
                 '--port=' . (int) cfg('database.port', 3306),
                 '--user=' . (string) cfg('database.user', ''),
+                '--default-character-set=utf8mb4',
                 (string) cfg('database.name', 'persian_ticketing'),
             ], $stage . '/migrations/' . $migration);
         } catch (RuntimeException $migrationError) {

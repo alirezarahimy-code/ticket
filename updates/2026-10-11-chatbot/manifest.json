@@ -1,0 +1,7 @@
+{
+  "version": "1.41",
+  "title": "بات پاسخ‌گوی سامانه (فاز ۱)",
+  "date": "2026-10-11",
+  "migrations": ["001-chatbot-tables.sql", "002-chatbot-seed.sql"],
+  "notes": "جدول‌های chatbot_faq و chatbot_logs، پاسخ‌های اولیه، ویجت گفتگو، صفحهٔ مدیریت، مجوزهای chatbot.use و chatbot.manage."
+}

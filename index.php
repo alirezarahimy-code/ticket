@@ -10,6 +10,7 @@ require __DIR__ . '/asset-inventory-page.php';
 require __DIR__ . '/organization.php';
 require __DIR__ . '/global-search.php';
 require __DIR__ . '/backup.php';
+require __DIR__ . '/chatbot.php';
 require __DIR__ . '/system-update.php';
 require __DIR__ . '/cd-dvd.php';
 require __DIR__ . '/food-ticket.php';
@@ -617,6 +618,9 @@ function render_header(string $title, ?array $user = null): void
         if (user_can($user, 'backup.view')) {
             $adminLinks[] = $submenuLink('index.php?page=backup', 'پشتیبان‌گیری');
         }
+        if (user_can($user, 'chatbot.manage')) {
+            $adminLinks[] = $submenuLink('index.php?page=chatbot-admin', 'بات پاسخ‌گو');
+        }
         $menuItems = [
             '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
         ];
@@ -685,7 +689,7 @@ function render_footer(): void
     }
     $pageParam = (string) ($_GET['page'] ?? '');
     $withParticles = !empty($GLOBALS['ui_particles']) || $pageParam === '' || $pageParam === 'dashboard';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.21"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . '</body></html>';
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.21"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . '' . chatbot_render_widget(current_user()) . '</body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {
@@ -3087,6 +3091,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+if ($page === 'chatbot-api') {
+    chatbot_api_handle(current_user());
+}
+
 if (!$user) {
     $loginTitle = setting('login_title', 'به سامانه پشتیبانی خوش آمدید');
     $loginIntro = setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.');
@@ -3120,6 +3128,7 @@ $pagePermissions = [
     'traffic-control-print' => 'traffic.view',
     'knowledge' => 'knowledge.view',
     'backup' => 'backup.view',
+    'chatbot-admin' => 'chatbot.manage',
     'organization' => 'org.view',
     'holidays' => 'holidays.view',
     'services' => 'services.view',
@@ -3717,6 +3726,21 @@ if ($page === 'queue') {
 
     render_footer();
     exit;
+}
+
+if ($page === 'chatbot-admin') {
+    $chatbotAdmin = require_permission('chatbot.manage');
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+        require_csrf();
+        try {
+            chatbot_save_faq($_POST, $chatbotAdmin);
+            flash('success', 'مدخل بات ذخیره شد.');
+        } catch (RuntimeException $chatbotError) {
+            flash('danger', $chatbotError->getMessage());
+        }
+        redirect('index.php?page=chatbot-admin');
+    }
+    chatbot_render_admin($chatbotAdmin);
 }
 
 if ($page === 'holidays') {

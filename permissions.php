@@ -36,6 +36,7 @@ function permission_catalog(): array
                 ['code' => 'search.global', 'label' => 'جست‌وجوی سراسری'],
                 ['code' => 'notif.view', 'label' => 'اعلان‌های من'],
                 ['code' => 'profile.edit', 'label' => 'ویرایش پروفایل خودم'],
+                ['code' => 'chatbot.use', 'label' => 'استفاده از بات پاسخ‌گو'],
             ],
         ],
         [
@@ -188,6 +189,7 @@ function permission_catalog(): array
                 ['code' => 'backup.manage', 'label' => 'ویرایش'],
                 ['code' => 'update.view', 'label' => 'مشاهدهٔ به‌روزرسانی سامانه'],
                 ['code' => 'update.apply', 'label' => 'اجرای به‌روزرسانی سامانه'],
+                ['code' => 'chatbot.manage', 'label' => 'مدیریت پرسش‌ها و پاسخ‌های بات'],
                 ['code' => 'ola.view', 'label' => 'تنظیمات OLA/SLA'],
                 ['code' => 'ola.manage', 'label' => 'ویرایش'],
                 ['code' => 'governance.view', 'label' => 'تغییر و مشکل'],
@@ -358,7 +360,7 @@ function user_default_removed_codes(): array
 
 function permission_defaults_raw(): array
 {
-    $all = ['dash.view', 'search.global', 'notif.view', 'profile.edit', 'ticket.create', 'ticket.view_own', 'ticket.reply', 'ticket.rate', 'services.view', 'knowledge.view', 'cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'foodorder.self', 'org.view', 'governance.manage'];
+    $all = ['dash.view', 'search.global', 'notif.view', 'profile.edit', 'chatbot.use', 'ticket.create', 'ticket.view_own', 'ticket.reply', 'ticket.rate', 'services.view', 'knowledge.view', 'cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'foodorder.self', 'org.view', 'governance.manage'];
     $common = array_merge($all, ['ticket.view_unit', 'queue.view', 'assets.view', 'assets.own_unit', 'asset.view', 'asset.history', 'reports.view', 'inventory.view', 'cddvd.history', 'cddvd.export', 'traffic.manage']);
     return [
         'primary_admin' => permission_all_codes(),
