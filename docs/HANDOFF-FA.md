@@ -128,7 +128,7 @@
 
 ## ۷. گیت و push
 
-- شاخهٔ کاری: `arena-updates`. Remote: `origin` = `https://github.com/alirezarahimy-code/ticket.git` (بدون توکن در `.git/config`).
+- شاخهٔ کاری: `arena-updates`. remote محلی تنظیم نشده است (فایل `.git/config` در snapshot‌ها حذف می‌شود)؛ push همیشه با آدرس کامل انجام می‌شود: `https://github.com/alirezarahimy-code/ticket.git`.
 - برای push با توکن جدید، از دستور زیر استفاده شود (توکن را در فایل ننویس):
   ```
   git push "https://x-access-token:<TOKEN>@github.com/alirezarahimy-code/ticket.git" arena-updates:arena-updates
