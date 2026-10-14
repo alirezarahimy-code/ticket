@@ -161,3 +161,33 @@
         alertBox.focus();
     }
 })();
+
+// تردد خاص: با تیک «فقط اطلاع ورود»، فیلدهای اضافی پنهان و غیرفعال می‌شوند (ثبت ارسال نمی‌شوند).
+(function () {
+    'use strict';
+    var box = document.getElementById('traffic-notice-only');
+    var hint = document.getElementById('traffic-notice-hint');
+    var form = document.getElementById('traffic-new-form');
+    if (!box || !form) {
+        return;
+    }
+    function apply() {
+        var on = box.checked;
+        var parts = form.querySelectorAll('.traffic-full-only');
+        for (var i = 0; i < parts.length; i++) {
+            parts[i].style.display = on ? 'none' : 'contents';
+            var fields = parts[i].querySelectorAll('input, select, textarea');
+            for (var j = 0; j < fields.length; j++) {
+                fields[j].disabled = on;
+            }
+        }
+        if (hint) {
+            hint.hidden = !on;
+        }
+    }
+    box.addEventListener('change', apply);
+    form.addEventListener('reset', function () {
+        setTimeout(apply, 0);
+    });
+    apply();
+})();

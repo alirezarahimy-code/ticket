@@ -18,7 +18,7 @@ function domain_scan_ensure_schema(): void
                 }
             }
         } catch (Throwable $exception) {
-            error_log('[domain-scan] widen assets.source failed: ' . $exception->getMessage());
+            app_error_log('[domain-scan] widen assets.source failed: ' . $exception->getMessage());
         }
     }
     static $done = false;
@@ -142,7 +142,7 @@ function domain_scan_asset_for(string $hostname): int
     if ($hostname === '') {
         return 0;
     }
-    $query = db()->prepare('SELECT id FROM assets WHERE LOWER(hostname) = LOWER(?) ORDER BY id ASC LIMIT 1');
+    $query = db()->prepare('SELECT id FROM assets WHERE hostname = ? ORDER BY id ASC LIMIT 1');
     $query->execute([$hostname]);
     $assetId = (int) ($query->fetchColumn() ?: 0);
     if ($assetId > 0) {
@@ -249,7 +249,7 @@ function domain_scan_import(int $userId): array
         if ($host === '') {
             continue;
         }
-        $exists = db()->prepare('SELECT id FROM assets WHERE LOWER(hostname) = LOWER(?) LIMIT 1');
+        $exists = db()->prepare('SELECT id FROM assets WHERE hostname = ? LIMIT 1');
         $exists->execute([$host]);
         if ($exists->fetchColumn()) {
             $updated++;
@@ -456,7 +456,7 @@ function domain_scan_tcp_probe(array $targets, array $ports, int $timeoutMs): ar
             }
         }
     } catch (Throwable $exception) {
-        error_log('[domain-scan] tcp probe: ' . $exception->getMessage());
+        app_error_log('[domain-scan] tcp probe: ' . $exception->getMessage());
     }
     foreach ($pending as $row) {
         if (is_resource($row['socket'])) {
@@ -1035,7 +1035,7 @@ function domain_scan_process(int $runId, int $limit, int $userId): array
             try {
                 $remote = domain_scan_remote_inventory_many(array_map(static fn (array $row): string => (string) $row['hostname'], $onlineItems), 4);
             } catch (Throwable $exception) {
-                error_log('[domain-scan] remote inventory: ' . $exception->getMessage());
+                app_error_log('[domain-scan] remote inventory: ' . $exception->getMessage());
             }
             foreach ($onlineItems as $item) {
                 $queueId = (int) $item['id'];
@@ -1084,9 +1084,11 @@ function domain_scan_run(int $runId): ?array
     return $run ?: null;
 }
 
-function domain_scan_queue_rows(int $runId, int $limit = 100): array
+function domain_scan_queue_rows(int $runId, int $limit = 100, string $sort = '', string $dir = ''): array
 {
-    $query = db()->prepare('SELECT * FROM domain_scan_queue WHERE run_id = ? ORDER BY (status = "error") DESC, (status = "offline") DESC, id ASC LIMIT ' . max(1, min(1000, $limit)));
+    $sortMap = ['name' => 'hostname', 'status' => 'status', 'online' => 'online', 'message' => 'message', '__tie' => 'id'];
+    $order = log_sort_order($sortMap, $sort, $dir, ' ORDER BY (status = "error") DESC, (status = "offline") DESC, id ASC');
+    $query = db()->prepare('SELECT * FROM domain_scan_queue WHERE run_id = ?' . $order . ' LIMIT ' . max(1, min(1000, $limit)));
     $query->execute([$runId]);
     return $query->fetchAll();
 }

@@ -47,7 +47,7 @@ foreach ($candidates as $row) {
         if (db()->inTransaction()) {
             db()->rollBack();
         }
-        error_log('ticket_auto_close failed for #' . $ticketId . ': ' . $exception->getMessage());
+        app_error_log('ticket_auto_close failed for #' . $ticketId . ': ' . $exception->getMessage());
     }
 }
 

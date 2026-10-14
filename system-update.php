@@ -39,7 +39,7 @@ function system_update_migration_applied(string $version, string $migration): bo
 }
 
 /** پک را بررسی می‌کند و manifest را برمی‌گرداند. پرتاب خطا یعنی پک معتبر نیست. */
-function system_update_read_package(string $zipPath): array
+function system_update_read_package(string $zipPath, bool $allowDowngrade = false): array
 {
     if (!class_exists('ZipArchive')) {
         throw new RuntimeException('افزونهٔ ZipArchive در PHP فعال نیست.');
@@ -71,8 +71,17 @@ function system_update_read_package(string $zipPath): array
             throw new RuntimeException('شمارهٔ نسخهٔ پک معتبر نیست.');
         }
         $current = system_update_current_version();
-        if (version_compare($version, $current, '<=')) {
-            throw new RuntimeException('نسخهٔ پک (' . $version . ') از نسخهٔ نصب‌شده (' . $current . ') جدیدتر نیست.');
+        $cmp = version_compare($version, $current);
+        if ($cmp > 0) {
+            $mode = 'upgrade';
+        } elseif ($cmp === 0) {
+            // نصب مجدد همان نسخه (ترمیم فایل‌ها)؛ مهاجرت‌ها با schema_updates تکراری نمی‌شوند.
+            $mode = 'reinstall';
+        } else {
+            if (!$allowDowngrade) {
+                throw new RuntimeException('نسخهٔ پک (' . $version . ') قدیمی‌تر از نسخهٔ نصب‌شده (' . $current . ') است. برای برگشت به نسخهٔ قدیمی‌تر، گزینهٔ تأیید برگشت را فعال کنید.');
+            }
+            $mode = 'downgrade';
         }
         $migrations = $manifest['migrations'] ?? [];
         if (!is_array($migrations)) {
@@ -83,14 +92,14 @@ function system_update_read_package(string $zipPath): array
                 throw new RuntimeException('مهاجرت نامعتبر یا فایل آن در پک نیست: ' . $migration);
             }
         }
-        return ['manifest' => $manifest, 'version' => $version, 'migrations' => array_values($migrations)];
+        return ['manifest' => $manifest, 'version' => $version, 'mode' => $mode, 'current' => $current, 'migrations' => array_values($migrations)];
     } finally {
         $zip->close();
     }
 }
 
 /** فایل ZIP را اعتبارسنجی می‌کند، بکاپ می‌گیرد، مهاجرت‌ها را اجرا می‌کند و فایل‌ها را کپی می‌کند. */
-function system_update_apply(array $upload, array $actor): array
+function system_update_apply(array $upload, array $actor, bool $allowDowngrade = false): array
 {
     if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         throw new RuntimeException('فایل به‌روزرسانی آپلود نشد. ZIP را انتخاب کنید.');
@@ -101,7 +110,7 @@ function system_update_apply(array $upload, array $actor): array
     if ((int) $upload['size'] <= 0 || (int) $upload['size'] > SYSTEM_UPDATE_MAX_BYTES) {
         throw new RuntimeException('حجم فایل به‌روزرسانی مجاز نیست.');
     }
-    $package = system_update_read_package((string) $upload['tmp_name']);
+    $package = system_update_read_package((string) $upload['tmp_name'], $allowDowngrade);
     $version = $package['version'];
 
     $mysqlBinary = backup_mysql_binary('mysql');
@@ -174,6 +183,6 @@ function system_update_apply(array $upload, array $actor): array
 
     file_put_contents(APP_ROOT . '/VERSION', $version . "\n");
 
-    save_audit((int) ($actor['id'] ?? 0), 'system_updated', null, ['version' => $version, 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']]);
-    return ['version' => $version, 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']];
+    save_audit((int) ($actor['id'] ?? 0), 'system_updated', null, ['version' => $version, 'mode' => $package['mode'], 'from' => $package['current'], 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']]);
+    return ['version' => $version, 'mode' => $package['mode'], 'from' => $package['current'], 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']];
 }

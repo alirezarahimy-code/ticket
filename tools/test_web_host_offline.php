@@ -36,7 +36,7 @@ $assets = ['food-brand.js', 'food-designer.js', 'food-groups.js', 'food-ticket-p
 $bootstrap = food_ticket_web_host_bootstrap(
     'index.php?page=food-ticket&food_api=',
     'CSRF-TOKEN',
-    ['brand_name' => 'سامانه چاپ فیش غذا', 'brand_logo' => '', 'return_url' => 'index.php'],
+    ['brand_name' => 'سامانه مدیریت غذا', 'brand_logo' => '', 'return_url' => 'index.php'],
     'admin',
     true,
     'NONCE123'

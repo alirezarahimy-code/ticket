@@ -356,7 +356,7 @@ function food_order_import_apply(array $plan, int $actorId): array
         $result['restored'] = 0;
         $result['failed'] = 1;
         $result['errors'][] = $e->getMessage();
-        error_log('[food-order-import] rolled back: ' . $e->getMessage());
+        app_error_log('[food-order-import] rolled back: ' . $e->getMessage());
     }
     if (function_exists('system_log')) {
         system_log('info', 'food-orders', 'ایمپورت سفارش‌های غذا از فایل', [

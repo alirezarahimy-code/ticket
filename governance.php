@@ -164,7 +164,7 @@ function gov_header(string $title, array $user): void
 function gov_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی</footer></div><script src="assets/app.js"></script></body></html>';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js"></script></body></html>';
 }
 
 $user = require_staff();
@@ -402,7 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (db()->inTransaction()) {
             db()->rollBack();
         }
-        error_log('ITSM governance request failed: ' . $exception->getMessage());
+        app_error_log('ITSM governance request failed: ' . $exception->getMessage());
         flash('danger', $exception instanceof RuntimeException ? $exception->getMessage() : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
         redirect('governance.php');
     }

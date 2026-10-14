@@ -69,7 +69,7 @@ check('ساعت ۱۱:۰۰ سقف = حاضرین', food_guest_variable_cap_at('11
 check('ساعت ۱۴:۵۹ هنوز فعال', food_guest_variable_cap_at('14:59:59', 4, 0) === 4);
 check('ساعت ۱۵:۰۰ سقف صفر و روز بعد دوباره از ۱۱', food_guest_variable_cap_at('15:00:00', 4, 0) === 0);
 check('خروج ۱۲:۰۰:۵۹ سقف را کم می‌کند', food_guest_variable_cap_at('12:01:00', 4, 1) === 3);
-check('پیش‌فرض حالت سقف ثابت', food_guest_cap_mode() === 'fixed');
+check('پیش‌فرض حالت سقف متغیر', food_guest_cap_mode() === 'variable');
 
 // ۹) ساعت‌های قابل تنظیم: شروع، قطع و پایان از فرم کارت مهمان خوانده می‌شوند.
 $GLOBALS['test_settings'] = ['food_guest_cap_start' => '10:30', 'food_guest_cap_cutoff' => '12:30', 'food_guest_cap_end' => '14:00'];

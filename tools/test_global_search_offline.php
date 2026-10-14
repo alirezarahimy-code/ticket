@@ -65,7 +65,7 @@ check('کلمهٔ «ویزیتور» (مترادف انگلیسی) هم کار �
 $lines[] = '';
 $lines[] = '── ۳) عبارت‌های چندکلمه‌ای ──';
 $food = $titlesOf(global_search_sections($catalog, 'چاپ فیش', $allowAll));
-check('«چاپ فیش» ⇒ صفحهٔ فیش غذا', in_array('چاپ فیش غذا', $food, true));
+check('«چاپ فیش» ⇒ صفحهٔ فیش غذا', in_array('سامانه مدیریت غذا', $food, true));
 check('«چاپ فیش» نتیجهٔ تردد نمی‌دهد', !in_array('چاپ برگ تردد مراجعین', $food, true));
 check('«استخراج سیستم» ⇒ اسکن دامنه', in_array('اسکن دامنه و استخراج اطلاعات سیستم‌ها', $titlesOf(global_search_sections($catalog, 'استخراج سیستم', $allowAll)), true));
 check('«نقش دسترسی» ⇒ تنظیمات', in_array('تنظیمات سامانه', $titlesOf(global_search_sections($catalog, 'نقش دسترسی', $allowAll)), true));

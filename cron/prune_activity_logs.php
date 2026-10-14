@@ -16,4 +16,8 @@ activity_log([
     'module' => 'cron',
     'meta' => ['days' => $days, 'deleted' => $deleted],
 ]);
+$systemDeleted = system_logs_prune(30);
+$lowValue = ops_low_value_tables_prune();
+fwrite(STDOUT, 'Low-value tables pruned: ' . json_encode($lowValue) . "\n");
+fwrite(STDOUT, 'System (technical) log prune: ' . $systemDeleted . " rows older than 30 days removed.\n");
 fwrite(STDOUT, 'Activity log prune complete. Deleted ' . $deleted . ' rows older than ' . $days . " days.\n");

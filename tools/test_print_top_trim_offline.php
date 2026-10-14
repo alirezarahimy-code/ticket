@@ -115,6 +115,7 @@ check('۳-ب: به‌خاطر متن واقعی در ۱۲mm، طرح ۸mm بال
 
 /* ───────── ۴) تصویر: برش ردیف‌های سفید (اگر GD باشد) ───────── */
 $netprintFile = dirname(__DIR__) . '/food-ticket-netprint.php';
+if (!function_exists('app_error_log')) { function app_error_log(...$args): void {} }
 if (function_exists('imagecreatetruecolor')) {
     if (!function_exists('food_ticket_print_trim_info')) {
         eval(grabFunction($netprintFile, 'food_ticket_print_trim_info'));

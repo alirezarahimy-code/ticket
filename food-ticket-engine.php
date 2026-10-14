@@ -78,7 +78,7 @@ function food_ticket_find_user_strict(string $personnelCode): ?array
             return $lookup(food_ticket_user_index(true));
         }
     } catch (Throwable $e) {
-        error_log('[food-engine] user lookup failed: ' . $e->getMessage());
+        app_error_log('[food-engine] user lookup failed: ' . $e->getMessage());
     }
     return null;
 }
@@ -171,7 +171,7 @@ function food_ticket_card_map_ensure(): bool
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
         $ok = true;
     } catch (Throwable $e) {
-        error_log('[food-engine] card map table unavailable: ' . $e->getMessage());
+        app_error_log('[food-engine] card map table unavailable: ' . $e->getMessage());
         $ok = false;
     }
     return $ok;
@@ -192,7 +192,7 @@ function food_ticket_card_map_load(bool $refresh = false): array
                 $map[(string) $row['card_key']] = (int) $row['user_id'];
             }
         } catch (Throwable $e) {
-            error_log('[food-engine] card map load failed: ' . $e->getMessage());
+            app_error_log('[food-engine] card map load failed: ' . $e->getMessage());
         }
         $loadedAt = time();
     }
@@ -232,7 +232,7 @@ function food_ticket_card_map_learn(string $card, array $user): void
             ->execute([$key, $userId, food_ticket_code($user['employee_number'] ?? '')]);
         food_ticket_card_map_load(true);
     } catch (Throwable $e) {
-        error_log('[food-engine] card map learn failed: ' . $e->getMessage());
+        app_error_log('[food-engine] card map learn failed: ' . $e->getMessage());
     }
 }
 
@@ -294,7 +294,7 @@ function food_ticket_find_twin_event(string $date, ?string $time, ?array $user, 
         $q->execute([$date, $time, $windowSec]);
         $rows = $q->fetchAll();
     } catch (Throwable $e) {
-        error_log('[food-engine] twin lookup failed: ' . $e->getMessage());
+        app_error_log('[food-engine] twin lookup failed: ' . $e->getMessage());
         return null;
     }
     $ids = [];
@@ -350,11 +350,12 @@ function food_ticket_sort_punches(array $items): array
  * تصمیم برای یک ردیف source_row
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
-/** حالت سقف فیش مهمان: «requested» (جمع درخواست مهمان معاونت‌ها در روز جاری) یا «variable» (تعداد نفرات داخل ساختمان). */
+/** حالت سقف فیش مهمان: «variable» (پیش‌فرض؛ تعداد نفرات داخل ساختمان در بازهٔ زمانی) یا «requested» (جمع درخواست مهمان معاونت‌ها در روز جاری). */
 function food_guest_cap_mode(): string
 {
-    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'requested') ?? 'requested') : 'requested';
-    return $mode === 'variable' ? 'variable' : 'requested';
+    // پیش‌فرض از نسخهٔ ۱.۵۱: حالت متغیر (تعداد افراد داخل ساختمان در بازهٔ زمانی).
+    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'variable') ?? 'variable') : 'variable';
+    return $mode === 'requested' ? 'requested' : 'variable';
 }
 
 /** نرمال‌سازی ساعت (HH:MM یا HH:MM:SS) به HH:MM:SS؛ اگر معتبر نبود پیش‌فرض. */
@@ -773,7 +774,7 @@ function food_ticket_read_source_rows_today($sourceDb, int $limit, string $today
             if ($goodMode === $mode) {
                 $goodMode = null;
             }
-            error_log('[food-engine] source_row filter(' . $mode . ') failed: ' . $e->getMessage());
+            app_error_log('[food-engine] source_row filter(' . $mode . ') failed: ' . $e->getMessage());
             continue;
         }
         $goodMode = $mode;
@@ -797,7 +798,7 @@ function food_ticket_read_source_rows_today($sourceDb, int $limit, string $today
     try {
         $all = food_ticket_access_rows($sourceDb, food_ticket_source_table(), $limit, 'C_Date DESC, C_Time DESC', null, true);
     } catch (Throwable $e) {
-        error_log('[food-engine] source_row ordered read failed, using unordered read: ' . $e->getMessage());
+        app_error_log('[food-engine] source_row ordered read failed, using unordered read: ' . $e->getMessage());
         $all = food_ticket_access_rows($sourceDb, food_ticket_source_table(), $limit);
     }
     $stats['raw'] = count($all);
@@ -877,7 +878,7 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
                         // خطای ماژول گروه، پردازش عادی بقیهٔ ردیف‌ها را متوقف نمی‌کند و ردیف دست‌نخورده می‌ماند.
                         $summary['errors']++;
                         $summary['last_error'] = 'خطای پردازش گروه: ' . $groupEx->getMessage();
-                        error_log('[food-groups] hook failed: ' . $groupEx->getMessage());
+                        app_error_log('[food-groups] hook failed: ' . $groupEx->getMessage());
                         continue;
                     }
                     if ($groupResult !== null) {
@@ -939,6 +940,16 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
                     continue;
                 }
 
+                // تردد ناشناس (کارتی که به هیچ کاربری وصل نیست): رکورد پایش و گزارش ساخته نمی‌شود.
+                // فقط شمارش می‌شود و ردیف منبع پاک می‌شود (مثل skipped_old).
+                if ($type === 'unknown') {
+                    $summary['unknown']++;
+                    if (!empty($decision['delete'])) {
+                        @food_ticket_engine_delete_source($sourceDb, $item, $config, $summary, 0);
+                    }
+                    continue;
+                }
+
                 $eventId = 0;
                 try {
                     $eventId = food_ticket_add_event($payload);
@@ -980,7 +991,7 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
                         $summary['queue_early_printed'] = (int) ($summary['queue_early_printed'] ?? 0) + (int) ($early['printed'] ?? 0);
                         $summary['queue_early_failed'] = (int) ($summary['queue_early_failed'] ?? 0) + (int) ($early['failed'] ?? 0);
                     } catch (Throwable $earlyEx) {
-                        error_log('[food-engine] early print failed: ' . $earlyEx->getMessage());
+                        app_error_log('[food-engine] early print failed: ' . $earlyEx->getMessage());
                     }
                 } else {
                     if ($type === 'no_food' || $type === 'outside_meal') {
@@ -999,14 +1010,14 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
                 if (!$okDel) {
                     $summary['errors']++;
                     $summary['last_error'] = 'حذف از SOURCE_TABLE ناموفق بود (uid=' . ($item['uid'] ?? '') . ')';
-                    error_log('[food-engine] delete source_row failed uid=' . ($item['uid'] ?? ''));
+                    app_error_log('[food-engine] delete source_row failed uid=' . ($item['uid'] ?? ''));
                 }
 
                 $summary['processed']++;
             } catch (Throwable $ex) {
                 $summary['errors']++;
                 $summary['last_error'] = $ex->getMessage();
-                error_log('[food-engine] row error: ' . $ex->getMessage());
+                app_error_log('[food-engine] row error: ' . $ex->getMessage());
                 // ادامهٔ ردیف بعدی — worker متوقف نمی‌شود
             }
         }

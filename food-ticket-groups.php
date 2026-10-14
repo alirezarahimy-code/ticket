@@ -55,7 +55,7 @@ function food_ticket_audit(string $code, array $data = []): void
             'meta' => $meta,
         ]);
     } catch (Throwable $e) {
-        error_log('[food-groups] audit failed: ' . $e->getMessage());
+        app_error_log('[food-groups] audit failed: ' . $e->getMessage());
     }
 }
 
@@ -100,7 +100,7 @@ function food_ticket_groups_ensure(): bool
             )' . $engine);
         } catch (Throwable $fkError) {
             // اگر کلید خارجی ممکن نبود، جدول بدون FK ساخته می‌شود؛ UNIQUE(user_id) همچنان یک‌گروهی بودن را تضمین می‌کند.
-            error_log('[food-groups] members FK unavailable: ' . $fkError->getMessage());
+            app_error_log('[food-groups] members FK unavailable: ' . $fkError->getMessage());
             db()->exec($membersBase . ')' . $engine);
         }
         db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_group_uid_history (
@@ -140,7 +140,7 @@ function food_ticket_groups_ensure(): bool
         food_ticket_groups_migrate();
         $ok = true;
     } catch (Throwable $e) {
-        error_log('[food-groups] tables unavailable: ' . $e->getMessage());
+        app_error_log('[food-groups] tables unavailable: ' . $e->getMessage());
         $ok = false;
     }
     return $ok;
@@ -183,7 +183,7 @@ function food_ticket_groups_migrate(): void
             db()->exec($sql);
         } catch (Throwable $e) {
             // ستون/ایندکس از قبل وجود دارد یا موتور اجازه نمی‌دهد؛ در لاگ ثبت می‌شود.
-            error_log('[food-groups] migrate ' . $label . ': ' . $e->getMessage());
+            app_error_log('[food-groups] migrate ' . $label . ': ' . $e->getMessage());
         }
     };
 
@@ -229,7 +229,7 @@ function food_ticket_absence_ensure(): bool
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
         $ok = true;
     } catch (Throwable $e) {
-        error_log('[food-absence] table unavailable: ' . $e->getMessage());
+        app_error_log('[food-absence] table unavailable: ' . $e->getMessage());
         $ok = false;
     }
     return $ok;
@@ -258,7 +258,7 @@ function food_ticket_absence_load(string $date, ?int $groupId = null): array
         }
         return $out;
     } catch (Throwable $e) {
-        error_log('[food-absence] load failed: ' . $e->getMessage());
+        app_error_log('[food-absence] load failed: ' . $e->getMessage());
         return [];
     }
 }
@@ -278,7 +278,7 @@ function food_ticket_group_absence_locked(int $groupId, string $date): bool
         $q->execute([$groupId, $date]);
         return (bool) $q->fetchColumn();
     } catch (Throwable $e) {
-        error_log('[food-absence] lock check failed: ' . $e->getMessage());
+        app_error_log('[food-absence] lock check failed: ' . $e->getMessage());
         return false;
     }
 }
@@ -376,7 +376,7 @@ function food_ticket_absence_clear_group(int $groupId, string $date, string $rea
         $bq->execute([$date, $groupId]);
         $beforeIds = array_map('intval', $bq->fetchAll(PDO::FETCH_COLUMN));
     } catch (Throwable $e) {
-        error_log('[food-absence] clear lookup: ' . $e->getMessage());
+        app_error_log('[food-absence] clear lookup: ' . $e->getMessage());
     }
     $q = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE absence_date = ? AND group_id = ?');
     $q->execute([$date, $groupId]);
@@ -425,7 +425,7 @@ function food_ticket_absence_held_count(int $groupId, string $date): int
         $q->execute(array_merge([$date], $ids));
         return (int) $q->fetchColumn();
     } catch (Throwable $e) {
-        error_log('[food-absence] held count: ' . $e->getMessage());
+        app_error_log('[food-absence] held count: ' . $e->getMessage());
         return 0;
     }
 }
@@ -477,7 +477,7 @@ function food_ticket_groups_load(bool $refresh = false): array
                 ];
             }
         } catch (Throwable $e) {
-            error_log('[food-groups] load failed: ' . $e->getMessage());
+            app_error_log('[food-groups] load failed: ' . $e->getMessage());
         }
         $loadedAt = time();
     }
@@ -588,7 +588,7 @@ function food_ticket_group_event_ids_for_run(int $runId): array
         $ids = array_map('intval', $query->fetchAll(PDO::FETCH_COLUMN));
         return array_values(array_unique(array_filter($ids, static fn (int $id): bool => $id > 0)));
     } catch (Throwable $e) {
-        error_log('[food-groups] event lookup by run failed: ' . $e->getMessage());
+        app_error_log('[food-groups] event lookup by run failed: ' . $e->getMessage());
         return [];
     }
 }
@@ -717,7 +717,7 @@ function food_ticket_group_ticketed_keys(array $members, string $date): array
         }
         return $found;
     } catch (Throwable $e) {
-        error_log('[food-groups] ticketed lookup failed: ' . $e->getMessage());
+        app_error_log('[food-groups] ticketed lookup failed: ' . $e->getMessage());
         return [];
     }
 }
@@ -735,7 +735,7 @@ function food_ticket_group_order_map(array &$orderMaps, string $date): ?array
         $orderMaps[$date] = food_ticket_order_map_lazy(null, 'food_orders', $date);
         return $orderMaps[$date];
     } catch (Throwable $e) {
-        error_log('[food-groups] order map failed: ' . $e->getMessage());
+        app_error_log('[food-groups] order map failed: ' . $e->getMessage());
         // در مسیر داخلی، خطای MySQL نباید به «بدون سفارش» تبدیل شود.
         if (function_exists('food_order_mode') && food_order_mode() === 'INTERNAL-DB') {
             throw $e;
@@ -998,7 +998,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
         } catch (Throwable $ex) {
             $counts['error']++;
             $summary['last_error'] = $ex->getMessage();
-            error_log('[food-groups] member failed run=' . $runId . ' user=' . $userId . ': ' . $ex->getMessage());
+            app_error_log('[food-groups] member failed run=' . $runId . ' user=' . $userId . ': ' . $ex->getMessage());
         }
     }
 
@@ -1009,7 +1009,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             $summary['queue_early_printed'] = (int) ($summary['queue_early_printed'] ?? 0) + (int) ($early['printed'] ?? 0);
             $summary['queue_early_failed'] = (int) ($summary['queue_early_failed'] ?? 0) + (int) ($early['failed'] ?? 0);
         } catch (Throwable $printEx) {
-            error_log('[food-groups] print drain failed: ' . $printEx->getMessage());
+            app_error_log('[food-groups] print drain failed: ' . $printEx->getMessage());
         }
     }
 
@@ -1080,7 +1080,7 @@ function food_ticket_hold_ticket_for_absence(int $userId, string $date, array $a
         $q->execute([$userId, $date]);
         $rows = $q->fetchAll();
     } catch (Throwable $e) {
-        error_log('[food-absence-hold] lookup failed: ' . $e->getMessage());
+        app_error_log('[food-absence-hold] lookup failed: ' . $e->getMessage());
         return false;
     }
     $held = false;
@@ -1110,7 +1110,7 @@ function food_ticket_hold_ticket_for_absence(int $userId, string $date, array $a
                 ]);
             }
         } catch (Throwable $e) {
-            error_log('[food-absence-hold] update failed: ' . $e->getMessage());
+            app_error_log('[food-absence-hold] update failed: ' . $e->getMessage());
         }
     }
     return $held;
@@ -1132,7 +1132,7 @@ function food_ticket_release_held_ticket(int $userId, string $date, array $actor
         $q->execute([$userId, $date]);
         $rows = $q->fetchAll();
     } catch (Throwable $e) {
-        error_log('[food-absence-release] lookup failed: ' . $e->getMessage());
+        app_error_log('[food-absence-release] lookup failed: ' . $e->getMessage());
         return false;
     }
     $released = false;
@@ -1161,7 +1161,7 @@ function food_ticket_release_held_ticket(int $userId, string $date, array $actor
                 ]);
             }
         } catch (Throwable $e) {
-            error_log('[food-absence-release] update failed: ' . $e->getMessage());
+            app_error_log('[food-absence-release] update failed: ' . $e->getMessage());
         }
     }
     return $released;
@@ -1190,7 +1190,7 @@ function food_ticket_events_ensure_hold_status(): bool
             db()->exec('ALTER TABLE food_ticket_events MODIFY COLUMN print_status ENUM("not_printed","pending","printing","printed","print_error","failed","held_absent") NOT NULL DEFAULT "not_printed"');
         }
     } catch (Throwable $e) {
-        error_log('[food-absence-hold] ensure enum failed: ' . $e->getMessage());
+        app_error_log('[food-absence-hold] ensure enum failed: ' . $e->getMessage());
         $ready = false;
     }
     return $ready;
@@ -1209,7 +1209,7 @@ function food_ticket_group_uid_history_record(string $uid, ?int $groupId, string
         db()->prepare('INSERT INTO food_ticket_group_uid_history (uid, group_id, action, actor_id) VALUES (?, ?, ?, ?)')
             ->execute([$uid, $groupId !== null && $groupId > 0 ? $groupId : null, $action, $actorId > 0 ? $actorId : null]);
     } catch (Throwable $e) {
-        error_log('[food-groups] uid history: ' . $e->getMessage());
+        app_error_log('[food-groups] uid history: ' . $e->getMessage());
     }
     food_ticket_groups_load(true);
 }
@@ -1226,7 +1226,7 @@ function food_ticket_group_uid_history_has(string $uid): bool
         $q->execute([$uid]);
         return (bool) $q->fetchColumn();
     } catch (Throwable $e) {
-        error_log('[food-groups] uid history lookup: ' . $e->getMessage());
+        app_error_log('[food-groups] uid history lookup: ' . $e->getMessage());
         return false;
     }
 }
@@ -1274,7 +1274,7 @@ function food_ticket_group_try_unknown(array $item, array &$summary): ?array
         }
     } catch (Throwable $e) {
         // اگر ساختار جدول اجازه نداد، حداقل در لاگ سیستم ثبت می‌شود (خطای قابل‌مشاهده برای اپراتور)
-        error_log('[food-groups] unknown uid event: ' . $e->getMessage());
+        app_error_log('[food-groups] unknown uid event: ' . $e->getMessage());
         if (function_exists('system_log')) {
             try {
                 system_log('error', 'food_group', $message, ['uid' => $uid, 'date' => $date]);

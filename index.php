@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/xlsx-writer.php';
 require __DIR__ . '/inventory.php';
 require __DIR__ . '/asset-profile.php';
 require __DIR__ . '/domain-scan.php';
@@ -15,6 +16,8 @@ require __DIR__ . '/system-update.php';
 require __DIR__ . '/cd-dvd.php';
 require __DIR__ . '/food-ticket.php';
 require __DIR__ . '/traffic-control.php';
+require __DIR__ . '/local-accounts.php';
+require __DIR__ . '/system-health.php';
 
 ticket_number_ensure_schema(); // پیش از هر تراکنش: DDL اینجا بی‌خطر است و داخل تراکنش دیگر اجرا نمی‌شود
 ticket_number_autofill();
@@ -82,36 +85,61 @@ function excel_download(string $filename, string $title, array $headers, array $
     };
     $from = $jalaliLabel($from);
     $to = $jalaliLabel($to);
-    $mergeAcross = max(0, count($headers) - 1);
+    $from = $jalaliLabel($from);
+    $to = $jalaliLabel($to);
     $columnCount = max(2, count($headers));
-    $xml = '<?xml version="1.0" encoding="UTF-8"?>' .
-        '<?mso-application progid="Excel.Sheet"?>' .
-        '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' .
-        '<Styles><Style ss:ID="Title"><Font ss:FontName="Tahoma" ss:Bold="1" ss:Size="15"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style><Style ss:ID="Header"><Font ss:FontName="Tahoma" ss:Bold="1"/><Interior ss:Color="#EAF2FF" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style><Style ss:ID="Body"><Font ss:FontName="Tahoma"/><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/></Style><Style ss:ID="PeriodLabel"><Font ss:FontName="Tahoma" ss:Bold="1"/><Interior ss:Color="#F3F6FA" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style><Style ss:ID="PeriodValue"><Font ss:FontName="Tahoma"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style></Styles>' .
-        '<Worksheet ss:Name="Report"><Table ss:ExpandedColumnCount="' . $columnCount . '"><Row ss:StyleID="Title"><Cell ss:MergeAcross="' . $mergeAcross . '"><Data ss:Type="String">' . excel_cell($title) . '</Data></Cell></Row>' .
-        '<Row><Cell ss:StyleID="PeriodLabel"><Data ss:Type="String">تاریخ شروع</Data></Cell><Cell ss:StyleID="PeriodValue"><Data ss:Type="String">' . excel_cell($from) . '</Data></Cell></Row>' .
-        '<Row><Cell ss:StyleID="PeriodLabel"><Data ss:Type="String">تاریخ پایان</Data></Cell><Cell ss:StyleID="PeriodValue"><Data ss:Type="String">' . excel_cell($to) . '</Data></Cell></Row><Row>';
-    foreach ($headers as $header) {
-        $xml .= '<Cell ss:StyleID="Header"><Data ss:Type="String">' . excel_cell($header) . '</Data></Cell>';
-    }
-    $xml .= '</Row>';
+    $sheetRows = [];
+    $sheetRows[] = [['v' => $title, 's' => 'title']];
+    $sheetRows[] = [['v' => 'تاریخ شروع', 's' => 'header'], ['v' => $from, 's' => 'body']];
+    $sheetRows[] = [['v' => 'تاریخ پایان', 's' => 'header'], ['v' => $to, 's' => 'body']];
+    $sheetRows[] = array_map(static fn ($header): array => ['v' => (string) $header, 's' => 'header'], array_values($headers));
     foreach ($rows as $row) {
-        $xml .= '<Row ss:StyleID="Body">';
-        foreach ($row as $value) {
-            $xml .= '<Cell><Data ss:Type="String">' . excel_cell($value) . '</Data></Cell>';
-        }
-        $xml .= '</Row>';
+        // همهٔ مقادیر رشته‌ای می‌شوند تا صفرهای ابتدای کدها (مثل کد ملی) حفظ شود
+        $sheetRows[] = array_map(static fn ($value): array => ['v' => is_scalar($value) ? (string) $value : '', 's' => 'body'], array_values((array) $row));
     }
-    $xml .= '</Table></Worksheet></Workbook>';
-    header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-    header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode($filename));
-    echo "\xEF\xBB\xBF" . $xml;
-    exit;
+    $bytes = xlsx_build([[
+        'name' => 'گزارش',
+        'rows' => $sheetRows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 20),
+    ]]);
+    xlsx_send($filename, $bytes);
 }
 
 function valid_choice(string $value, array $allowed, string $fallback): string
 {
     return in_array($value, $allowed, true) ? $value : $fallback;
+}
+
+/** مرتب‌سازی سمت سرور لاگ‌ها: فقط کلیدهای مجاز از فهرست سفید می‌شوند. */
+function log_sort_order(array $map, string $key, string $dir, string $default): string
+{
+    if ($key === '' || !isset($map[$key])) {
+        return $default;
+    }
+    $direction = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
+    return ' ORDER BY ' . $map[$key] . ' ' . $direction . ', ' . ($map['__tie'] ?? 'l.id') . ' ' . $direction;
+}
+
+/** سرستون‌های قابل مرتب‌سازی؛ کلیک: صعودی ← نزولی ← بدون مرتب‌سازی. */
+function log_sort_header_row(array $columns, string $sortParam, string $dirParam, array $args, string $activeKey, string $activeDir, string $class = 'table-head'): string
+{
+    $html = '<div class="' . $class . '">';
+    foreach ($columns as [$key, $label]) {
+        if ($key === '') { $html .= '<span>' . e($label) . '</span>'; continue; }
+        $isActive = $key === $activeKey && $activeKey !== '';
+        $nextArgs = $args; unset($nextArgs[$sortParam], $nextArgs[$dirParam]);
+        if ($isActive) {
+            $arrow = strtolower($activeDir) === 'desc' ? ' ▼' : ' ▲';
+            if (strtolower($activeDir) !== 'desc') { $nextArgs[$sortParam] = $key; $nextArgs[$dirParam] = 'desc'; }
+        } else {
+            $arrow = '';
+            $nextArgs[$sortParam] = $key; $nextArgs[$dirParam] = 'asc';
+        }
+        $nextArgs['p'] = 1;
+        $html .= '<span><a class="log-sort" style="color:inherit;text-decoration:none" href="index.php?' . e(http_build_query($nextArgs)) . '" title="مرتب‌سازی بر اساس ' . e($label) . '">' . e($label) . e($arrow) . '</a></span>';
+    }
+    return $html . '</div>';
 }
 
 function activity_log_filters(): array
@@ -608,6 +636,9 @@ function render_header(string $title, ?array $user = null): void
         if (user_can_any($user, ['logs.activity', 'audit.view', 'logs.view'])) {
             $reportLinks[] = $submenuLink('index.php?page=activity-log', 'لاگ سامانه');
         }
+        if (user_can($user, 'system.health')) {
+            $reportLinks[] = $submenuLink('index.php?page=system-health', 'سلامت سامانه');
+        }
         $adminLinks = [];
         if (user_can($user, 'org.view')) {
             $adminLinks[] = $submenuLink('index.php?page=organization', 'سازمان');
@@ -616,7 +647,7 @@ function render_header(string $title, ?array $user = null): void
             $adminLinks[] = $submenuLink('index.php?page=settings', 'تنظیمات');
         }
         if (user_can($user, 'backup.view')) {
-            $adminLinks[] = $submenuLink('index.php?page=backup', 'پشتیبان‌گیری');
+            $adminLinks[] = $submenuLink('index.php?page=backup', 'به‌روزرسانی و پشتیبان‌گیری');
         }
         if (user_can($user, 'chatbot.manage')) {
             $adminLinks[] = $submenuLink('index.php?page=chatbot-admin', 'بات پاسخ‌گو');
@@ -637,7 +668,7 @@ function render_header(string $title, ?array $user = null): void
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
         }
         if (food_ticket_is_allowed($user)) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'چاپ فیش غذا', 'food') . '</li>';
+            $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'سامانه مدیریت غذا', 'food') . '</li>';
         }
         $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
         $menuItems[] = $submenu('menu-reports', 'گزارش‌ها', 'reports', $reportLinks);
@@ -667,10 +698,20 @@ function render_header(string $title, ?array $user = null): void
      }
  }
 
+/**
+ * صفحه‌هایی که لیست‌شان در سمت سرور محدود یا صفحه‌بندی شده است، مرتب‌ساز موقت را ندارند
+ * تا فقط بخشی از داده مرتب نشود. پس از اضافه‌شدن «کل نتایج فیلتر» این فهرست خالی می‌شود.
+ */
+function list_sort_page_off(): bool
+{
+    return in_array((string) ($_GET['page'] ?? ''), ['logs', 'activity-log', 'traffic-control', 'domain-scan'], true);
+}
+
 function render_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی</footer></div><script nonce="' . e(csp_nonce()) . '">window.ITSM_HOLIDAYS = ';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.ITSM_LIST_SORT_OFF = ' . (list_sort_page_off() ? 'true' : 'false') . '; window.ITSM_CSRF = "' . e(csrf_token()) . '";</script><script defer src="assets/list-sort.js?v=2"></script><script defer src="assets/server-sort.js?v=1"></script>';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script nonce="' . e(csp_nonce()) . '">window.ITSM_HOLIDAYS = ';
     try {
         $__h = db()->query("SELECT holiday_date, title FROM holidays WHERE is_active = 1")->fetchAll();
         $__out = [];
@@ -689,7 +730,7 @@ function render_footer(): void
     }
     $pageParam = (string) ($_GET['page'] ?? '');
     $withParticles = !empty($GLOBALS['ui_particles']) || $pageParam === '' || $pageParam === 'dashboard';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.21"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . '' . chatbot_render_widget(current_user()) . '</body></html>';
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.22"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . '' . chatbot_render_widget(current_user()) . '</body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {
@@ -715,6 +756,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
 
 $user = current_user();
 $page = (string) ($_GET['page'] ?? ($user ? 'dashboard' : 'login'));
+// ۱.۵۰: کاربر محلی/نگهبان به سفارش غذا هدایت می‌شود؛ رمز پیش‌فرض باید در اولین ورود عوض شود.
+if ($user && !isset($_GET['page'])) {
+    if ((int) ($user['must_change_password'] ?? 0) === 1) {
+        $page = 'change-password';
+    } elseif (lac_is_local_role($user)) {
+        $page = 'food-order';
+    }
+}
+if ($user && (int) ($user['must_change_password'] ?? 0) === 1 && !in_array($page, ['change-password'], true)) {
+    redirect('index.php?page=change-password');
+}
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($page, ['organization', 'settings'], true)) {
     register_shutdown_function(static function (): void {
         try {
@@ -849,7 +901,8 @@ if (($_GET['action'] ?? '') === 'export_activity_logs') {
     require_permission('logs.activity_export');
     activity_logs_ensure();
     [$where, $params] = activity_log_filters();
-    $query = db()->prepare('SELECT * FROM activity_logs l' . $where . ' ORDER BY l.created_at DESC, l.id DESC LIMIT 20000');
+    $exportOrder = log_sort_order(['time' => 'l.created_at', 'user' => 'l.full_name', 'event' => 'COALESCE(l.action_label, l.action_code)', 'module' => 'l.module', 'ip' => 'l.ip_address', 'meta' => 'l.meta_json'], (string) ($_GET['sort_a'] ?? ''), (string) ($_GET['dir_a'] ?? ''), ' ORDER BY l.created_at DESC, l.id DESC');
+    $query = db()->prepare('SELECT * FROM activity_logs l' . $where . $exportOrder . ' LIMIT 20000');
     $query->execute($params);
     $rows = [];
     foreach ($query->fetchAll() as $row) {
@@ -870,7 +923,7 @@ if (($_GET['action'] ?? '') === 'export_activity_logs') {
     activity_log(['action_code' => 'activity_logs_exported', 'action_label' => 'خروجی Excel فعالیت کاربران', 'module' => 'activity-log', 'meta' => ['rows' => count($rows)]]);
     $excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
     $excelTo = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
-    excel_download('activity-log-' . date('Y-m-d') . '.xls', 'گزارش فعالیت کاربران', ['زمان', 'کاربر', 'نام کاربری', 'نقش', 'عملیات', 'کد عملیات', 'صفحه', 'هدف', 'آی‌پی', 'نام کامپیوتر', 'جزئیات'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
+    excel_download('activity-log-' . date('Y-m-d') . '.xlsx', 'گزارش فعالیت کاربران', ['زمان', 'کاربر', 'نام کاربری', 'نقش', 'عملیات', 'کد عملیات', 'صفحه', 'هدف', 'آی‌پی', 'نام کامپیوتر', 'جزئیات'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
 }
 
 if (($_GET['action'] ?? '') === 'export_report') {
@@ -889,7 +942,47 @@ if (($_GET['action'] ?? '') === 'export_report') {
     }
     $excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
     $excelTo = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
-    excel_download('ticket-report-' . date('Y-m-d') . '.xls', 'گزارش کامل تیکت‌ها', ['شماره', 'عنوان', 'نوع', 'واحد', 'ثبت‌کننده', 'کارشناس', 'وضعیت', 'اولویت', 'ثبت', 'آخرین تغییر', 'ارجاع', 'اولین پاسخ', 'حل', 'بسته‌شدن', 'مهلت SLA', 'دقیقه SLA'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
+    excel_download('ticket-report-' . date('Y-m-d') . '.xlsx', 'گزارش کامل تیکت‌ها', ['شماره', 'عنوان', 'نوع', 'واحد', 'ثبت‌کننده', 'کارشناس', 'وضعیت', 'اولویت', 'ثبت', 'آخرین تغییر', 'ارجاع', 'اولین پاسخ', 'حل', 'بسته‌شدن', 'مهلت SLA', 'دقیقه SLA'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
+}
+
+// خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های همان صفحه؛ ترتیب از کاربر می‌آید)
+if (($_GET['action'] ?? '') === 'export_view_xlsx') {
+    require_login();
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        http_response_code(405);
+        exit('روش درخواست مجاز نیست.');
+    }
+    require_csrf();
+    $payload = json_decode((string) file_get_contents('php://input', false, null, 0, 2_000_000), true);
+    if (!is_array($payload) || !is_array($payload['headers'] ?? null) || !is_array($payload['rows'] ?? null)) {
+        http_response_code(400);
+        exit('داده‌های خروجی معتبر نیست.');
+    }
+    $clip = static fn ($v, int $max = 2000): string => mb_substr(is_scalar($v) ? (string) $v : '', 0, $max, 'UTF-8');
+    $headers = array_slice(array_map(static fn ($h) => $clip($h, 200), $payload['headers']), 0, 60);
+    $columnCount = max(1, count($headers));
+    $rows = array_slice($payload['rows'], 0, 20000);
+    $sheetRows = [];
+    $title = $clip($payload['title'] ?? 'گزارش', 200);
+    $sheetRows[] = [['v' => $title, 's' => 'title']];
+    $sheetRows[] = array_map(static fn (string $h): array => ['v' => $h, 's' => 'header'], $headers);
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $line = [];
+        foreach (array_slice(array_values($row), 0, $columnCount) as $value) {
+            $line[] = ['v' => $clip($value), 's' => 'body'];
+        }
+        $sheetRows[] = $line;
+    }
+    $bytes = xlsx_build([[
+        'name' => 'گزارش',
+        'rows' => $sheetRows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 20),
+    ]]);
+    xlsx_send($clip($payload['filename'] ?? 'report', 120) ?: 'report', $bytes);
 }
 
 if (($_GET['action'] ?? '') === 'export_assets') {
@@ -929,7 +1022,7 @@ if (($_GET['action'] ?? '') === 'export_assets') {
         }
         $rows[] = $exportRow;
     }
-    excel_download('asset-full-inventory-' . date('Y-m-d') . '.xls', 'گزارش کامل شناسنامه‌های فنی سیستم‌ها', $headers, $rows, ['from' => 'بدون فیلتر تاریخی', 'to' => 'بدون فیلتر تاریخی']);
+    excel_download('asset-full-inventory-' . date('Y-m-d') . '.xlsx', 'گزارش کامل شناسنامه‌های فنی سیستم‌ها', $headers, $rows, ['from' => 'بدون فیلتر تاریخی', 'to' => 'بدون فیلتر تاریخی']);
 }
 
 if (($_GET['action'] ?? '') === 'export_cd_dvd') {
@@ -963,6 +1056,11 @@ if (($_GET['action'] ?? '') === 'download_attachment') {
     header("Content-Disposition: attachment; filename*=UTF-8''" . rawurlencode((string) $attachment['original_name']));
     readfile($filePath);
     exit;
+}
+
+if ($page === 'food-personnel-link') {
+    require_once __DIR__ . '/food-personnel-link.php';
+    fpl_render_request();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -1131,13 +1229,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $updateAdmin = require_primary_admin();
             require_permission('update.apply');
             try {
-                $updateResult = system_update_apply($_FILES['update_package'] ?? [], $updateAdmin);
+                $updateResult = system_update_apply($_FILES['update_package'] ?? [], $updateAdmin, !empty($_POST['allow_downgrade']));
             } catch (RuntimeException $updateError) {
                 flash('danger', 'به‌روزرسانی انجام نشد: ' . $updateError->getMessage());
-                redirect('index.php?page=settings');
+                redirect('index.php?page=backup');
             }
-            flash('success', 'به‌روزرسانی به نسخهٔ ' . $updateResult['version'] . ' انجام شد. بکاپ: ' . $updateResult['backup'] . '، مهاجرت‌های اجراشده: ' . count($updateResult['migrations']) . '، فایل‌های کپی‌شده: ' . $updateResult['files'] . '.');
-            redirect('index.php?page=settings');
+            $modeLabel = ['upgrade' => 'به‌روزرسانی', 'reinstall' => 'نصب مجدد نسخهٔ فعلی', 'downgrade' => 'برگشت به نسخهٔ قدیمی‌تر'][$updateResult['mode']] ?? 'به‌روزرسانی';
+            flash('success', $modeLabel . ' به نسخهٔ ' . $updateResult['version'] . ' انجام شد. بکاپ: ' . $updateResult['backup'] . '، مهاجرت‌های اجراشده: ' . count($updateResult['migrations']) . '، فایل‌های کپی‌شده: ' . $updateResult['files'] . '.');
+            redirect('index.php?page=backup');
         }
         if ($action === 'mark_all_notifications') {
             db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0')->execute([(int) $user['id']]);
@@ -3084,7 +3183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (db()->inTransaction()) {
             db_rollback('index.php');
         }
-        error_log('ITSM request failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+        app_error_log('ITSM request failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
         system_log('error', 'request', $exception->getMessage(), ['uri' => (string) ($_SERVER['REQUEST_URI'] ?? ''), 'file' => $exception->getFile(), 'line' => $exception->getLine()]);
         flash('danger', $exception instanceof RuntimeException ? $exception->getMessage() : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
         redirect('index.php?page=' . urlencode($page));
@@ -3104,6 +3203,7 @@ if (!$user) {
     $loginLogo = setting('app_login_logo', setting('app_logo', (string) cfg('app.logo', '')));
     $GLOBALS['ui_particles'] = true;
     render_header('ورود به سامانه');
+    echo '<p class="auth-version" style="text-align:center;color:#64748b;font-size:13px;margin:0 0 8px">نسخهٔ سامانه: ' . e(app_version()) . '</p>';
     echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
     render_footer();
     exit;
@@ -3134,7 +3234,7 @@ $pagePermissions = [
     'services' => 'services.view',
     // 'food-ticket' — به‌جای یک کد تکی، با food_ticket_is_allowed() سنجیده می‌شود (پایین‌تر).
 ];
-// ۱.۳۷.۷ — دروازهٔ «چاپ فیش غذا» با فهرست کدهای food.* یکی شد: پیش‌تر منو با
+// ۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* یکی شد: پیش‌تر منو با
 // food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی صفحه فقط با food.monitor باز
 // می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌دید و به ۴۰۳ می‌خورد.
 if ($page === 'food-ticket' && !(function_exists('food_ticket_is_allowed') ? food_ticket_is_allowed($user) : user_can($user, 'food.monitor'))) {
@@ -3159,6 +3259,12 @@ if ($page === 'settings' && !user_can_any($user, ['settings.general', 'settings.
     exit;
 }
 
+if ($page === 'change-password') {
+    lac_change_password_request();
+}
+if ($page === 'local-accounts') {
+    lac_admin_request();
+}
 if ($page === 'profile') {
     $profileUser = require_login();
     $profileTheme = valid_choice((string) setting('theme_user_' . (int) $profileUser['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current');
@@ -3321,7 +3427,7 @@ if ($page === 'services') {
     echo '<section class="card form-card service-tab-panel" id="tab-list" hidden>';
     echo '<h2>لیست خدمات</h2><p class="muted">با انتخاب حوزه، فهرست سرویس‌ها فیلتر می‌شود.</p>';
      echo '<form method="get" class="service-filter-bar"><input type="hidden" name="page" value="services"><input type="hidden" name="tab" value="tab-list"><label>فیلتر حوزه خدمت<select name="group" data-service-filter><option value="" ' . ($serviceGroupFilter === '' ? 'selected' : '') . '>همه حوزه‌ها</option><option value="it" ' . ($serviceGroupFilter === 'it' ? 'selected' : '') . '>خدمات IT</option><option value="support" ' . ($serviceGroupFilter === 'support' ? 'selected' : '') . '>خدمات پشتیبانی</option></select></label><button class="button secondary service-filter-submit" type="submit">اعمال فیلتر</button></form>';
-    echo '<div class="service-list"><div class="service-row service-row-head"><span>خدمت</span><span>حوزه</span><span>دسته</span><span>واحد رسیدگی</span><span>اولویت</span>' . ($isServiceAdmin ? '<span>عملیات</span>' : '') . '</div>';
+    echo '<div class="service-list"><div class="service-row service-row-head"><span>خدمت</span><span>حوزه</span><span>دسته</span><span>واحد رسیدگی</span><span>اولویت</span>' . ($isServiceAdmin ? '<span data-no-sort>عملیات</span>' : '') . '</div>';
     foreach ($services as $service) {
         $sid = (int) $service['id'];
         echo '<div class="service-row"><span class="service-name"><strong>' . e($service['name']) . '</strong><small>' . e($service['code']) . ' • ' . (int) $service['field_count'] . ' فیلد' . ((int) $service['requires_asset'] === 1 ? ' • نیازمند شناسنامه' : '') . '</small></span>';
@@ -3460,10 +3566,14 @@ if ($page === 'audit') {
     redirect('index.php?page=activity-log');
 }
 
+if ($page === 'system-health') {
+    system_health_render(require_login());
+}
+
 if ($page === 'logs') {
     $legacyLogUser = require_login();
     if (!user_can_any($legacyLogUser, ['logs.view', 'logs.activity', 'audit.view'])) { http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.'); }
-    redirect('index.php?page=activity-log&category=errors');
+    redirect(user_can($legacyLogUser, 'system.health') ? 'index.php?page=system-health' : 'index.php?page=activity-log&category=errors');
 }
 
 if ($page === 'activity-log') {
@@ -3475,6 +3585,9 @@ if ($page === 'activity-log') {
     }
     if (!$canViewActivityLogs && $canViewSystemLogs && (string) ($_GET['category'] ?? 'errors') !== 'errors') {
         redirect('index.php?page=activity-log&category=errors');
+    }
+    if ((string) ($_GET['category'] ?? '') === 'errors' && user_can($logUser, 'system.health')) {
+        redirect('index.php?page=system-health');
     }
     activity_logs_ensure();
     $category = valid_choice((string) ($_GET['category'] ?? 'all'), ['all', 'auth', 'admin', 'errors'], 'all');
@@ -3517,11 +3630,14 @@ if ($page === 'activity-log') {
     $pages = max(1, (int) ceil(max($activityFilteredTotal, $systemFilteredTotal) / $perPage));
     $logPage = min($logPage, $pages);
     $offset = ($logPage - 1) * $perPage;
-    $activityQuery = db()->prepare('SELECT * FROM activity_logs l' . $logWhere . ' ORDER BY l.created_at DESC, l.id DESC LIMIT ' . $perPage . ' OFFSET ' . $offset);
+    $logSortA = (string) ($_GET['sort_a'] ?? ''); $logDirA = (string) ($_GET['dir_a'] ?? '');
+    $logSortS = (string) ($_GET['sort_s'] ?? ''); $logDirS = (string) ($_GET['dir_s'] ?? '');
+    $activityOrder = log_sort_order(['time' => 'l.created_at', 'user' => 'l.full_name', 'event' => 'COALESCE(l.action_label, l.action_code)', 'module' => 'l.module', 'ip' => 'l.ip_address', 'meta' => 'l.meta_json'], $logSortA, $logDirA, ' ORDER BY l.created_at DESC, l.id DESC');
+    $activityQuery = db()->prepare('SELECT * FROM activity_logs l' . $logWhere . $activityOrder . ' LIMIT ' . $perPage . ' OFFSET ' . $offset);
     $activityQuery->execute($logParams);
     $activityRows = $activityQuery->fetchAll();
     if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
-        $systemQuery = db()->prepare('SELECT s.*, u.username, u.full_name FROM system_logs s LEFT JOIN users u ON u.id = s.user_id' . $systemWhere . ' ORDER BY s.created_at DESC, s.id DESC LIMIT ' . $perPage . ' OFFSET ' . $offset);
+        $systemQuery = db()->prepare('SELECT s.*, u.username, u.full_name FROM system_logs s LEFT JOIN users u ON u.id = s.user_id' . $systemWhere . log_sort_order(['time' => 's.created_at', 'user' => 'u.full_name', 'level' => "FIELD(s.level, 'debug', 'info', 'warning', 'error')", 'context' => 's.context', 'request' => 's.request_uri', 'message' => 's.message', 'meta' => 's.meta_json', '__tie' => 's.id'], $logSortS, $logDirS, ' ORDER BY s.created_at DESC, s.id DESC') . ' LIMIT ' . $perPage . ' OFFSET ' . $offset);
         $systemQuery->execute($systemParams);
         $systemRows = $systemQuery->fetchAll();
     }
@@ -3555,7 +3671,7 @@ if ($page === 'activity-log') {
     }
     echo '<label>از تاریخ<input name="from" placeholder="۱۴۰۵/۰۷/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ<input name="to" placeholder="۱۴۰۵/۰۷/۳۰" value="' . e($_GET['to'] ?? '') . '"></label>' . ($canViewActivityLogs ? '<label>آی‌پی<input name="ip" placeholder="مثلاً 192.168.1." value="' . e($_GET['ip'] ?? '') . '"></label>' : '') . '<label class="full">جست‌وجوی متن<input type="search" name="q" placeholder="کاربر، عملیات، نام رایانه یا جزئیات" value="' . e($_GET['q'] ?? '') . '"></label></div><div class="actions"><button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="index.php?page=activity-log&category=' . e($category) . '">پاک‌کردن فیلترها</a></div></form></section>';
     if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
-        echo '<section class="card ticket-table audit-table unified-log-table system-error-table"><div class="log-section-heading"><h2>خطاها و هشدارهای فنی</h2><span class="muted">' . number_format($systemFilteredTotal) . ' مورد</span></div><div class="table-head"><span>زمان</span><span>کاربر</span><span>شدت و بخش</span><span>درخواست</span><span>پیام</span><span>جزئیات</span></div>';
+        echo '<section class="card ticket-table audit-table unified-log-table system-error-table"><div class="log-section-heading"><h2>خطاها و هشدارهای فنی</h2><span class="muted">' . number_format($systemFilteredTotal) . ' مورد</span></div>' . log_sort_header_row([['time','زمان'],['user','کاربر'],['level','شدت و بخش'],['request','درخواست'],['message','پیام'],['meta','جزئیات']], 'sort_s', 'dir_s', $queryArgs, $logSortS, $logDirS) . '';
         if ($systemRows) { foreach ($systemRows as $systemRow) {
             $systemMeta = activity_log_meta_lines(isset($systemRow['meta_json']) ? (string) $systemRow['meta_json'] : null);
             $systemDetails = $systemMeta ? '<details class="log-details"><summary>جزئیات فنی (' . count($systemMeta) . ')</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $systemMeta)) . '</dl></details>' : '<span class="muted">—</span>';
@@ -3563,7 +3679,7 @@ if ($page === 'activity-log') {
         }} else { echo '<div class="empty-state"><p>خطای فنی با فیلترهای انتخاب‌شده پیدا نشد.</p></div>'; }
         echo '</section>';
     }
-    echo '<section class="card ticket-table audit-table unified-log-table"><div class="log-section-heading"><h2>' . ($category === 'errors' ? 'ورودهای ناموفق و تلاش‌های مسدودشده' : 'فعالیت کاربران و ممیزی') . '</h2><span class="muted">' . number_format($activityFilteredTotal) . ' مورد</span></div><div class="table-head"><span>زمان</span><span>کاربر</span><span>رویداد</span><span>مورد/بخش</span><span>نشانی کاربر</span><span>جزئیات قابل‌خواندن</span></div>';
+    echo '<section class="card ticket-table audit-table unified-log-table"><div class="log-section-heading"><h2>' . ($category === 'errors' ? 'ورودهای ناموفق و تلاش‌های مسدودشده' : 'فعالیت کاربران و ممیزی') . '</h2><span class="muted">' . number_format($activityFilteredTotal) . ' مورد</span></div>' . log_sort_header_row([['time','زمان'],['user','کاربر'],['event','رویداد'],['module','مورد/بخش'],['ip','نشانی کاربر'],['meta','جزئیات قابل‌خواندن']], 'sort_a', 'dir_a', $queryArgs, $logSortA, $logDirA) . '';
     if($activityRows){ foreach($activityRows as $row){
         $metaLines=activity_log_meta_lines(isset($row['meta_json'])?(string)$row['meta_json']:null);
         $details=$metaLines?'<details class="log-details"><summary>جزئیات (' . count($metaLines) . ')</summary><dl>'.implode('',array_map(static fn(array $line):string=>'<div><dt>'.e((string)$line[0]).'</dt><dd>'.e((string)$line[1]).'</dd></div>',$metaLines)).'</dl></details>':'<span class="muted">بدون جزئیات افزوده</span>';
@@ -3584,8 +3700,17 @@ if ($page === 'backup') {
     $databaseName = (string) cfg('database.name', 'persian_ticketing');
     $dumpAvailable = backup_mysql_binary('mysqldump') !== null;
     $mysqlAvailable = backup_mysql_binary('mysql') !== null;
-    render_header('پشتیبان‌گیری و بازیابی', $backupUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">Backup & Restore</span><h1>پشتیبان‌گیری و بازیابی</h1><p>این بخش فقط برای ادمین اصلی است و از اطلاعات دیتابیس و پیوست‌ها محافظت می‌کند.</p></div><span class="admin-badge">ادمین اصلی</span></section>';
+    render_header('به‌روزرسانی و پشتیبان‌گیری', $backupUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">Backup & Restore</span><h1>به‌روزرسانی و پشتیبان‌گیری</h1><p>این بخش فقط برای ادمین اصلی است و از اطلاعات دیتابیس و پیوست‌ها محافظت می‌کند.</p></div><span class="admin-badge">ادمین اصلی</span></section>';
+    if (user_can($backupUser, 'update.view') && user_is_primary_admin($backupUser)) {
+        $updateInert = user_can($backupUser, 'update.apply') ? '' : ' inert';
+        echo '<section class="card form-card" id="system-update"' . $updateInert . '><h2>به‌روزرسانی سامانه</h2>'
+            . '<p class="muted">فایل ZIP پک به‌روزرسانی را انتخاب کنید. قبل از اعمال، نسخهٔ پشتیبان گرفته می‌شود و نسخهٔ جدیدتر نصب می‌شود. نصب مجدد همان نسخه مجاز است. برگشت به نسخهٔ قدیمی‌تر فقط با تیک تأیید انجام می‌شود و فایل‌های نسخهٔ جدیدتر را که در پک قدیمی نیستند حذف نمی‌کند. نسخهٔ فعلی: ' . e(system_update_current_version()) . '</p>'
+            . '<form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="system_update">'
+            . '<label class="field">فایل به‌روزرسانی (ZIP)<input type="file" name="update_package" accept=".zip" required></label>'
+            . '<label class="check-label"><input type="checkbox" name="allow_downgrade" value="1"> برگشت به نسخهٔ قدیمی‌تر را تأیید می‌کنم (فقط اگر پک قدیمی‌تر از نسخهٔ فعلی است)</label>'
+            . '<button class="button" type="submit">به‌روزرسانی</button></form></section>';
+    }
     echo '<section class="settings-grid backup-grid"' . $backupInert . '><div class="card form-card"><h2>ساخت نسخه پشتیبان</h2><p class="muted">یک نسخه از دیتابیس و پوشه پیوست‌ها می‌سازد. قبل از هر بازیابی نیز یک نسخه ایمنی خودکار ساخته می‌شود.</p><p class="' . ($dumpAvailable ? 'alert success' : 'alert danger') . '">' . ($dumpAvailable ? 'ابزار mysqldump پیدا شد و پشتیبان‌گیری آماده است.' : 'mysqldump پیدا نشد؛ مسیر ITSM_MYSQLDUMP_PATH یا مسیر XAMPP را تنظیم کنید.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_backup"><button class="button" type="submit" ' . ($dumpAvailable ? '' : 'disabled') . '>ساخت نسخه پشتیبان اکنون</button></form><small class="muted">مسیر ذخیره: ' . e(backup_root_path()) . '</small></div>';
     echo '<div class="card form-card"><h2>بازیابی نسخه پشتیبان</h2><p class="muted">فقط فایل SQL را انتخاب کنید؛ فایل ZIP پیوست‌ها اختیاری است. پیش از بازیابی، سامانه نسخه ایمنی می‌سازد.</p><p class="alert danger">بازیابی می‌تواند اطلاعات فعلی را جایگزین کند. ابتدا روی staging آزمایش کنید.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="restore_backup"><input type="hidden" name="MAX_FILE_SIZE" value="268435456"><label class="file-input">فایل SQL<input type="file" name="sql_dump" accept=".sql,text/plain" required><small>حداکثر ۲۵۶ مگابایت</small></label><label class="file-input">آرشیو پیوست‌ها، اختیاری<input type="file" name="uploads_archive" accept=".zip,application/zip"><small>فقط ZIP ساخته‌شده توسط سامانه</small></label><label class="check-label"><input type="checkbox" name="restore_confirm" value="1" required> خطر جایگزینی اطلاعات فعلی را می‌پذیرم</label><button class="button danger-button" type="submit" ' . ($dumpAvailable && $mysqlAvailable ? '' : 'disabled') . '>بازیابی اطلاعات</button></form></div></section>';
     echo '<section class="card form-card"><h2>نسخه‌های موجود</h2><p class="muted">دانلود نسخه پشتیبان فقط برای ادمین اصلی فعال است. فایل تنظیمات شامل رمزها عمداً داخل این بسته‌ها قرار نمی‌گیرد.</p><div class="category-list backup-list">';
@@ -4068,7 +4193,7 @@ if ($page === 'analytics') {
         return $html . '</section>';
     };
     render_header('تحلیل و چارت‌ها', $analyticsUser);
-     echo '<section class="page-heading"><div><span class="eyebrow">گزارش‌ساز مدیریتی</span><h1>تحلیل عملکرد سامانه</h1><p>توزیع وضعیت، اولویت، معاونت و رضایت از کارشناسان هر واحد.</p></div><a class="button secondary" href="index.php?page=reports">گزارش فیلترپذیر</a></section><section class="charts-grid">';
+     echo '<section class="page-heading"><div><span class="eyebrow">نمای تحلیلی مدیریتی</span><h1>تحلیل عملکرد سامانه</h1><p>توزیع وضعیت، اولویت، معاونت و رضایت از کارشناسان هر واحد.</p></div><a class="button secondary" href="index.php?page=reports">گزارش فیلترپذیر</a></section><section class="charts-grid">';
     echo $chart('توزیع وضعیت تیکت‌ها', $statusRows, static fn (array $row): string => status_label((string) $row['status']), static fn (array $row): float => (float) $row['total']);
     echo $chart('توزیع اولویت‌ها', $priorityRows, static fn (array $row): string => priority_label((string) $row['priority']), static fn (array $row): float => (float) $row['total']);
     echo $chart('تیکت بر اساس معاونت', $departmentRows, static fn (array $row): string => (string) $row['label'], static fn (array $row): float => (float) $row['total']);
@@ -4299,7 +4424,7 @@ if ($page === 'domain-scan') {
             echo '<form id="scan-next" method="post" hidden>' . csrf_field() . '<input type="hidden" name="action" value="domain_scan_batch"><input type="hidden" name="run_id" value="' . (int) $scanRun['id'] . '"></form>';
         }
         echo '</section>';
-        $scanRows = domain_scan_queue_rows((int) $scanRun['id'], 1000);
+        $scanRows = domain_scan_queue_rows((int) $scanRun['id'], 1000, (string) ($_GET['sort_d'] ?? ''), (string) ($_GET['dir_d'] ?? ''));
         // ۱.۳۷ — شکست‌ها بر اساس علت گروه‌بندی و راه‌حل گام‌به‌گام نشان داده می‌شوند تا
         // «RPC/WMI در دسترس نیست» و «دسترسی رد شد» بدون گشتن در لاگ‌ها قابل رفع باشند.
         $scanFailureGroups = domain_scan_failure_summary($scanRows);
@@ -4332,7 +4457,7 @@ if ($page === 'domain-scan') {
             echo '</div><p class="muted">ابزارهای کمک: <code>php tools\diag_connection.php --client=IP</code> برای آزمون دسترسی یک سیستم و <code>php tools\diag_connection.php --json</code> برای خلاصهٔ وضعیت. تنظیم حساب و ترتیب پروتکل اتصال: <a href="index.php?page=settings#domain-scan">تنظیمات ← اسکن دامنه</a>.</p></section>';
         }
         if ($scanRows !== []) {
-            echo '<section class="card ticket-table" id="scan-rows"><div class="table-head"><span>کامپیوتر</span><span>وضعیت</span><span>آنلاین</span><span>پیام</span></div>';
+            echo '<section class="card ticket-table" id="scan-rows">' . log_sort_header_row([['name', 'کامپیوتر'], ['status', 'وضعیت'], ['online', 'آنلاین'], ['message', 'پیام']], 'sort_d', 'dir_d', $_GET, (string) ($_GET['sort_d'] ?? ''), (string) ($_GET['dir_d'] ?? '')) . '';
             foreach ($scanRows as $scanRow) {
                 $statusLabel = ['pending' => 'در انتظار', 'running' => 'در حال اجرا', 'done' => 'انجام شد', 'offline' => 'آفلاین', 'error' => 'خطا'][(string) $scanRow['status']] ?? (string) $scanRow['status'];
                 echo '<div class="table-row"><span class="ticket-title"><b' . asset_name_attr((string) $scanRow['hostname']) . '>' . e(asset_display_name((string) $scanRow['hostname'])) . '</b></span><span>' . e($statusLabel) . '</span><span>' . ((int) $scanRow['online'] === 1 ? 'بله' : 'خیر') . '</span><span style="font-size:11px">' . e((string) ($scanRow['message'] ?? '')) . '</span></div>';
@@ -4421,7 +4546,7 @@ if ($page === 'organization') {
     org_ensure_schema();
     $canManageOrg = user_can_manage_organization($organizationUser);
     $units = org_units_all(false);
-    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u WHERE u.auth_source <> \'food\' ORDER BY u.full_name')->fetchAll();
+    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u WHERE u.auth_source <> \'food\' AND NOT (u.auth_source = \'local\' AND u.role IN (\'local_user\',\'guard\')) ORDER BY u.full_name')->fetchAll();
     $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
     $ceoUnit = null;
     $deputies = [];
@@ -4524,7 +4649,7 @@ if ($page === 'settings') {
     $foodBrandName = setting('food_ticket_brand_name', $appName);
     $foodBrandLogo = setting('food_ticket_brand_logo', $logo);
     $departments = db()->query('SELECT id, name, code FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll();
-    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.auth_source <> \'food\' ORDER BY u.full_name')->fetchAll();
+    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.auth_source <> \'food\' AND NOT (u.auth_source = \'local\' AND u.role IN (\'local_user\',\'guard\')) ORDER BY u.full_name')->fetchAll();
     $canManageSettingsUsers = user_is_primary_admin($user);
     $roleSelectableUsers = array_values(array_filter($users, static fn (array $roleUser): bool => (int) ($roleUser['is_active'] ?? 0) === 1));
     $roleCards = '';
@@ -4567,7 +4692,7 @@ if ($page === 'settings') {
     echo '<div class="settings-panel settings-panel-grid" id="general"' . ($canSettingsGeneralEdit ? '' : ' inert') . '>';
     echo '<div class="card form-card"><h2>اطلاعات سامانه</h2><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="general"><label>نام سامانه<input name="app_name" required value="' . e($appName) . '"></label><label>لوگو<input type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml"><small>لوگوی جدید اختیاری است؛ PNG، JPG یا SVG تا ۲ مگابایت.</small></label><label>ظاهر نام کامپیوترها<select name="asset_hostname_style"><option value="short_lower"' . (setting('asset_hostname_style', 'short_lower') === 'short_lower' ? ' selected' : '') . '>فقط نام، با حروف کوچک (adminit2) — پیش‌فرض</option><option value="short"' . (setting('asset_hostname_style', 'short_lower') === 'short' ? ' selected' : '') . '>فقط نام، با حروف اصلی (ADMINIT2)</option><option value="full"' . (setting('asset_hostname_style', 'short_lower') === 'full' ? ' selected' : '') . '>نام کامل دامنه (ADMINIT2.DOMAIN.LOCAL)</option></select><small>روی فهرست شناسنامه‌ها، فهرست اسکن دامنه، فهرست سیستم‌ها و کمبوی «سیستم مرتبط» اثر دارد. نام کامل همیشه به‌صورت راهنما (tooltip) روی نام می‌ماند.</small></label>' . ($logo ? '<div class="current-logo"><img src="' . e($logo) . '" alt="لوگوی فعلی"><span>لوگوی فعلی</span></div>' : '') . '<button class="button" type="submit">ذخیره اطلاعات عمومی</button></form></div>';
     echo '<div class="card form-card login-branding-settings" id="login-branding"><h2>مدیریت صفحه ورود</h2><p class="muted">عنوان‌ها، پیام متحرک و لوگوی مخصوص صفحه ورود را تنظیم کنید. لوگو PNG یا JPG و حداکثر ۲ مگابایت باشد.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="login_branding"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>عنوان اصلی<input name="login_title" maxlength="120" value="' . e(setting('login_title', 'به سامانه پشتیبانی خوش آمدید')) . '"></label><label>متن معرفی<textarea name="login_intro" rows="2" maxlength="500">' . e(setting('login_intro', 'برای ثبت و پیگیری درخواست‌های خود وارد شوید.')) . '</textarea></label><label>پیام متحرک ابتدای صفحه (اختیاری)<input name="login_announcement" maxlength="240" value="' . e(setting('login_announcement', '')) . '" placeholder="مثلاً اطلاعیه نگهداری سامانه در روز ..."></label><div class="form-grid"><label>عنوان کارت معرفی<input name="login_art_title" maxlength="100" value="' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '"></label><label>متن کارت معرفی<input name="login_art_text" maxlength="300" value="' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '"></label><label>عنوان راهنمای ورود<input name="login_note_title" maxlength="100" value="' . e(setting('login_note_title', 'ورود یکپارچه سازمانی')) . '"></label><label>متن راهنمای ورود<input name="login_note_text" maxlength="300" value="' . e(setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.')) . '"></label></div><label>لوگوی صفحه ورود<input type="file" name="login_logo" accept="image/png,image/jpeg"></label>' . (setting('app_login_logo', '') ? '<div class="current-logo"><img src="' . e((string) setting('app_login_logo', '')) . '" alt="لوگوی صفحه ورود"><span>لوگوی اختصاصی صفحه ورود</span></div>' : '') . '<button class="button" type="submit">ذخیره تنظیمات صفحه ورود</button></form></div>';
-    echo '<div class="card form-card food-ticket-brand-settings" id="food-ticket-brand"><h2>هویت پنل چاپ فیش غذا</h2><p class="muted">این نام و لوگو هنگام ورود از سامانه اصلی به پنل چاپ فیش منتقل می‌شود و با تغییرات بعدی نیز همگام خواهد ماند.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_food_ticket_brand"><label>نام سامانه چاپ فیش<input name="food_ticket_brand_name" required value="' . e($foodBrandName) . '"></label><label>لوگوی پنل چاپ فیش<input type="file" name="food_ticket_logo" accept="image/png,image/jpeg"><small>PNG یا JPG، حداکثر ۲ مگابایت.</small></label>' . ($foodBrandLogo ? '<div class="current-logo"><img src="' . e($foodBrandLogo) . '" alt="لوگوی پنل چاپ فیش"><span>لوگوی فعلی پنل فیش</span></div>' : '') . '<button class="button" type="submit">ذخیره هویت پنل چاپ فیش</button></form></div>';
+    echo '<div class="card form-card food-ticket-brand-settings" id="food-ticket-brand"><h2>هویت پنل سامانه مدیریت غذا</h2><p class="muted">این نام و لوگو هنگام ورود از سامانه اصلی به پنل چاپ فیش منتقل می‌شود و با تغییرات بعدی نیز همگام خواهد ماند.</p><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="save_food_ticket_brand"><label>نام سامانه چاپ فیش<input name="food_ticket_brand_name" required value="' . e($foodBrandName) . '"></label><label>لوگوی پنل چاپ فیش<input type="file" name="food_ticket_logo" accept="image/png,image/jpeg"><small>PNG یا JPG، حداکثر ۲ مگابایت.</small></label>' . ($foodBrandLogo ? '<div class="current-logo"><img src="' . e($foodBrandLogo) . '" alt="لوگوی پنل چاپ فیش"><span>لوگوی فعلی پنل فیش</span></div>' : '') . '<button class="button" type="submit">ذخیره هویت پنل چاپ فیش</button></form></div>';
     if (user_is_primary_admin($user)) {
         $activityRetention = activity_log_retention_days();
         $activityCount = 0;
@@ -4582,14 +4707,6 @@ if ($page === 'settings') {
     echo '</div>';
     }
 
-    if (user_can($user, 'update.view') && user_is_primary_admin($user)) {
-        $updateInert = user_can($user, 'update.apply') ? '' : ' inert';
-        echo '<section class="card form-card" id="system-update"' . $updateInert . '><h2>به‌روزرسانی سامانه</h2>'
-            . '<p class="muted">فایل ZIP پک به‌روزرسانی را انتخاب کنید. قبل از اعمال، نسخهٔ پشتیبان گرفته می‌شود و فقط نسخهٔ جدیدتر نصب می‌شود. نسخهٔ فعلی: ' . e(system_update_current_version()) . '</p>'
-            . '<form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="system_update">'
-            . '<label class="field">فایل به‌روزرسانی (ZIP)<input type="file" name="update_package" accept=".zip" required></label>'
-            . '<button class="button" type="submit">به‌روزرسانی</button></form></section>';
-    }
     if ($canSettingsDomain) {
     echo '<div class="settings-panel settings-panel-grid" id="domain"' . ($canSettingsDomainEdit ? '' : ' inert') . '>';
     echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';
@@ -4600,7 +4717,7 @@ if ($page === 'settings') {
     }
 
     if ($canSettingsUsers) {
-    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2><p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
+    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب نگهبان</a></p>' : '') . '<p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
     foreach ($users as $managedUser) {
         echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
         if ($canManageSettingsUsers) {
@@ -4736,7 +4853,7 @@ if ($page === 'logs') {
     if ($logRows) {
         foreach ($logRows as $logRow) {
             $levelClass = $logRow['level'] === 'error' ? 'critical' : ($logRow['level'] === 'warning' ? 'urgent' : 'normal');
-            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e($logRow['level']) . '</em></span><span>' . e($logRow['context']) . '</span><span class="muted">' . e($logRow['message']) . ($logRow['meta_json'] ? '<br><small>' . e((string) $logRow['meta_json']) . '</small>' : '') . '</span><span class="muted">' . e($logRow['request_uri']) . '</span></div>';
+            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e($logRow['level']) . '</em></span><span>' . e($logRow['context']) . '</span><span class="muted">' . e($logRow['message']) . system_log_meta_html((string) ($logRow['meta_json'] ?? '')) . '</span><span class="muted">' . e($logRow['request_uri']) . '</span></div>';
         }
     } else {
         echo '<div class="table-row"><span class="muted">گزارشی ثبت نشده است.</span></div>';

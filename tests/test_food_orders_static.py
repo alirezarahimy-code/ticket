@@ -293,7 +293,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         modal = js[modal_start:modal_end]
         self.assertIn("state.targetMode === 'proxy' && existingOrder", modal)
         self.assertIn("renderProxyCancelControl(existingOrder.id", modal)
-        self.assertIn("&& !isPast(state.modalDate) && day)", modal)
+        self.assertIn("&& !isPast(state.modalDate) && day && day.order_status === 'open')", modal)
         month_start = php.index("function food_order_month_status(")
         month_end = php.index("\nfunction ", month_start + 10)
         month = php[month_start:month_end]
@@ -386,7 +386,9 @@ class FoodOrdersStaticTests(unittest.TestCase):
         helper = index[helper_start:helper_end]
         self.assertIn("تاریخ شروع", helper)
         self.assertIn("تاریخ پایان", helper)
-        self.assertIn("ss:Horizontal=\"Center\"", helper)
+        self.assertIn("xlsx_build(", helper)  # خروجی واقعی XLSX
+        self.assertIn("xlsx_send(", helper)
+        self.assertNotIn("application/vnd.ms-excel", helper)
         self.assertIn("$excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''))", index)
         self.assertIn("['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : ''", index)
         self.assertIn("['from' => $from, 'to' => $to]", read("food-order.php"))

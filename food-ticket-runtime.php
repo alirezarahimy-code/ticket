@@ -180,7 +180,7 @@ function food_ticket_print_log(
 ): void {
     try {
         if (!db_table_exists('food_ticket_print_log')) {
-            error_log(sprintf(
+            app_error_log(sprintf(
                 '[food-ticket] %s job=%s event=%s status=%s retry=%d msg=%s',
                 date('c'),
                 $jobId,
@@ -204,7 +204,7 @@ function food_ticket_print_log(
             $message !== null ? mb_substr($message, 0, 500) : null,
         ]);
     } catch (Throwable $e) {
-        error_log('food_ticket_print_log: ' . $e->getMessage());
+        app_error_log('food_ticket_print_log: ' . $e->getMessage());
     }
 }
 
@@ -263,6 +263,13 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
     $maxRetry = max(1, (int) ($tpl['retry_count'] ?? 5));
     $delay = max(5, (int) ($tpl['retry_delay_seconds'] ?? 30));
     $summary = ['claimed' => 0, 'printed' => 0, 'failed' => 0, 'skipped' => 0];
+    // صف چاپ بدون آدرس چاپگر اجرا نمی‌شود؛ هر فیش بعداً وقتی چاپگر تنظیم شد چاپ می‌شود.
+    if (trim((string) ($config['printer_host'] ?? '')) === '' && trim((string) ($config['printer_share'] ?? '')) === '') {
+        return $summary;
+    }
+    // سقف زمانی هر اجرا و توقف با قطع اتصال چاپگر؛ بقیه در اجرای بعدی پردازش می‌شوند.
+    $queueStarted = microtime(true);
+    $printerDown = false;
 
     $claimable = '(print_status IN ("pending", "print_error", "failed")
         OR (print_status = "printing" AND updated_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)))';
@@ -280,6 +287,10 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
     }
 
     foreach ($rows as $event) {
+        if ($printerDown || (microtime(true) - $queueStarted) > 20) {
+            $summary['skipped']++;
+            continue;
+        }
         $id = (int) $event['id'];
         $retry = max((int) ($event['retry_count'] ?? 0), (int) ($event['print_attempts'] ?? 0));
         $jobId = (string) ($event['print_job_id'] ?? food_ticket_new_job_id((string) ($event['ticket_key'] ?? $id)));
@@ -294,11 +305,8 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
             try {
                 db()->prepare('UPDATE food_ticket_events SET print_status = "printed", next_retry_at = NULL, last_error = NULL WHERE id = ?')->execute([$id]);
                 food_ticket_print_log($id, $jobId, $event['source_key'] ?? null, $event['ticket_key'] ?? null, $printer, 'skipped', $retry, 'ticket already delivered; reprint skipped');
-                if (function_exists('system_log')) {
-                    system_log('warning', 'food_print', 'فیش تحویل‌شده دوباره چاپ نشد', ['event' => $id, 'ticket' => $event['ticket_key'] ?? '']);
-                }
             } catch (Throwable $e) {
-                error_log('[food-print] delivered guard: ' . $e->getMessage());
+                app_error_log('[food-print] delivered guard: ' . $e->getMessage());
             }
             $summary['skipped']++;
             continue;
@@ -361,7 +369,7 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
                         }
                     }
                 } catch (Throwable $ignoreFood) {
-                    error_log('[food-print] food re-lookup: ' . $ignoreFood->getMessage());
+                    app_error_log('[food-print] food re-lookup: ' . $ignoreFood->getMessage());
                     throw new RuntimeException('بازخوانی سفارش داخلی برای فیش ناموفق بود؛ چاپ فیش خالی انجام نمی‌شود.', 0, $ignoreFood);
                 }
             }
@@ -371,21 +379,12 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
                 'UPDATE food_ticket_events SET print_status = "printed", event_type = IF(event_type = "guest", "guest", "printed"), processed_at = NOW(), last_error = NULL WHERE id = ?'
             )->execute([$id]);
             $summary['printed']++;
-            if (function_exists('activity_log')) {
-                try {
-                    activity_log([
-                        'action_code' => 'food_ticket_print_success',
-                        'module' => 'food',
-                        'target_type' => 'food_ticket_event',
-                        'target_id' => $id,
-                        'target_label' => (string) ($event['ticket_key'] ?? ''),
-                        'meta' => ['printer' => $printer, 'job' => $jobId, 'mode' => (string) ($config['printer_mode'] ?? ''), 'try' => $retry + 1],
-                    ]);
-                } catch (Throwable) {
-                }
-            }
+            food_ticket_mark_delivered_on_print($id);
             food_ticket_print_log($id, $jobId, $event['source_key'] ?? null, $event['ticket_key'] ?? null, $printer, 'printed', $retry, 'ok' . (function_exists('food_ticket_tpl_log_suffix') ? food_ticket_tpl_log_suffix() : ''));
         } catch (Throwable $ex) {
+            if (preg_match('/connect|timed out|timeout|اتصال/iu', $ex->getMessage())) {
+                $printerDown = true;
+            }
             $next = date('Y-m-d H:i:s', time() + $delay);
             try {
                 db()->prepare(
@@ -399,18 +398,10 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
             $summary['failed']++;
             food_ticket_print_log($id, $jobId, $event['source_key'] ?? null, $event['ticket_key'] ?? null, $printer, 'failed', $retry + 1, $ex->getMessage());
             // علت شکست چاپ در لاگ worker (stderr) و app.log هم ثبت شود تا فقط به ستون last_error دیتابیس وابسته نباشیم
-            error_log('[food-print] FAILED event=' . $id . ' printer=' . $printer . ' try=' . ($retry + 1) . ' ' . get_class($ex) . ': ' . $ex->getMessage() . ' @' . basename($ex->getFile()) . ':' . $ex->getLine());
+            app_error_log('[food-print] FAILED event=' . $id . ' printer=' . $printer . ' try=' . ($retry + 1) . ' ' . get_class($ex) . ': ' . $ex->getMessage() . ' @' . basename($ex->getFile()) . ':' . $ex->getLine());
             if (function_exists('system_log')) {
                 try {
-                    system_log('error', 'food_print', 'چاپ فیش ناموفق بود', ['event' => $id, 'printer' => $printer, 'error' => $ex->getMessage(), 'where' => basename($ex->getFile()) . ':' . $ex->getLine()]);
-                    activity_log([
-                        'action_code' => 'food_ticket_print_failed',
-                        'module' => 'food',
-                        'target_type' => 'food_ticket_event',
-                        'target_id' => $id,
-                        'target_label' => (string) ($event['ticket_key'] ?? ''),
-                        'meta' => ['printer' => $printer, 'job' => $jobId, 'mode' => (string) ($config['printer_mode'] ?? ''), 'try' => $retry + 1, 'error' => $ex->getMessage()],
-                    ]);
+                    system_error_record('error', 'چاپ فیش', $ex->getMessage() . ' [پرینتر: ' . $printer . ']', basename($ex->getFile()) . ':' . $ex->getLine());
                 } catch (Throwable) {
                 }
             }
@@ -692,7 +683,7 @@ PS;
     $tmp = $spoolDir . DIRECTORY_SEPARATOR . 'ft_gfx_' . bin2hex(random_bytes(4)) . '.ps1';
     // BOM لازم است تا PowerShell 5 فایل UTF-8 را درست بخواند
     if (@file_put_contents($tmp, "\xEF\xBB\xBF" . $ps, LOCK_EX) === false) {
-        error_log('[food-ticket] graphic print: script could not be written');
+        app_error_log('[food-ticket] graphic print: script could not be written');
         return false;
     }
     try {
@@ -700,7 +691,7 @@ PS;
         $code = 0;
         @exec('powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ' . escapeshellarg($tmp) . ' 2>&1', $output, $code);
         if ($code !== 0) {
-            error_log('[food-ticket] graphic print failed (fallback to text): ' . implode(' ', $output));
+            app_error_log('[food-ticket] graphic print failed (fallback to text): ' . implode(' ', $output));
             return false;
         }
         return true;
@@ -848,17 +839,17 @@ function food_ticket_events_ensure_delivery(): bool
         db()->exec('ALTER TABLE food_ticket_events
             ADD COLUMN delivery_status ENUM("pending","delivered") NOT NULL DEFAULT "pending" AFTER print_status');
     } catch (Throwable $e) {
-        error_log('[food-delivery] add delivery_status: ' . $e->getMessage());
+        app_error_log('[food-delivery] add delivery_status: ' . $e->getMessage());
     }
     try {
         db()->exec('ALTER TABLE food_ticket_events ADD COLUMN delivered_at DATETIME NULL AFTER delivery_status');
     } catch (Throwable $e) {
-        error_log('[food-delivery] add delivered_at: ' . $e->getMessage());
+        app_error_log('[food-delivery] add delivered_at: ' . $e->getMessage());
     }
     try {
         db()->exec('ALTER TABLE food_ticket_events ADD COLUMN delivered_by INT UNSIGNED NULL AFTER delivered_at');
     } catch (Throwable $e) {
-        error_log('[food-delivery] add delivered_by: ' . $e->getMessage());
+        app_error_log('[food-delivery] add delivered_by: ' . $e->getMessage());
     }
     $ready = food_ticket_table_has_column('food_ticket_events', 'delivery_status');
     if ($ready) {
@@ -897,17 +888,17 @@ function food_ticket_events_ensure_source_delete(): bool
         db()->exec('ALTER TABLE food_ticket_events
             ADD COLUMN source_deleted TINYINT(1) NOT NULL DEFAULT 0 AFTER delivered_by');
     } catch (Throwable $e) {
-        error_log('[food-source-delete] add source_deleted: ' . $e->getMessage());
+        app_error_log('[food-source-delete] add source_deleted: ' . $e->getMessage());
     }
     try {
         db()->exec('ALTER TABLE food_ticket_events ADD COLUMN source_deleted_at DATETIME NULL AFTER source_deleted');
     } catch (Throwable $e) {
-        error_log('[food-source-delete] add source_deleted_at: ' . $e->getMessage());
+        app_error_log('[food-source-delete] add source_deleted_at: ' . $e->getMessage());
     }
     try {
         db()->exec('ALTER TABLE food_ticket_events ADD COLUMN source_delete_note VARCHAR(255) NULL AFTER source_deleted_at');
     } catch (Throwable $e) {
-        error_log('[food-source-delete] add source_delete_note: ' . $e->getMessage());
+        app_error_log('[food-source-delete] add source_delete_note: ' . $e->getMessage());
     }
     try {
         db()->exec('CREATE INDEX idx_food_events_src_deleted ON food_ticket_events (source_deleted, punch_date)');
@@ -922,6 +913,21 @@ function food_ticket_events_ensure_source_delete(): bool
 }
 
 /** یک فیش را «تحویل‌شده» می‌کند (idempotent) و Audit می‌زند. */
+/** چاپ موفق فیش یعنی تحویل شده؛ دکمهٔ جدا برای تحویل وجود ندارد (از ۱.۵۳). */
+function food_ticket_mark_delivered_on_print(int $eventId): void
+{
+    if ($eventId <= 0 || !food_ticket_events_ensure_delivery()) {
+        return;
+    }
+    try {
+        $stmt = db()->prepare('UPDATE food_ticket_events SET delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()), delivered_by = NULL WHERE id = ? AND delivery_status <> "delivered"');
+        // عمداً لاگ فعالیت نمی‌شود: گزارش تردد/چاپ در «پایش» دیده می‌شود.
+        $stmt->execute([$eventId]);
+    } catch (Throwable $e) {
+        app_error_log('[food-delivery] auto on print: ' . $e->getMessage());
+    }
+}
+
 function food_ticket_deliver_event(int $eventId, array $actor = [], string $reason = ''): bool
 {
     if ($eventId <= 0) {
@@ -1021,7 +1027,7 @@ function food_ticket_status_counts(string $date = ''): array
             }
         }
     } catch (Throwable $e) {
-        error_log('[food-delivery] counts failed: ' . $e->getMessage());
+        app_error_log('[food-delivery] counts failed: ' . $e->getMessage());
     }
     return $out;
 }

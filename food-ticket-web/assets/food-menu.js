@@ -26,6 +26,8 @@
     catalog: [],
     orders: [],
     ordersLoaded: false,
+    ordersSort: { key: 'row', dir: 'asc' },
+    ordersView: 'list',
     status: null,
     loading: false,
     loadingOrders: false,
@@ -179,12 +181,26 @@
     var impactPending = Boolean(state.pendingImpact && state.pendingImpact.date === iso);
     var editorLocked = Boolean(state.daySaving || impactPending || (day && day.order_status === 'closed' && !canClose) || (dayReadOnly && !isPrimary));
     var lockedMessage = day && day.order_status === 'closed' && !canClose ? 'این روز بسته است؛ برای تغییر برنامهٔ روز بسته مجوز food.order_close لازم است.' : (dayReadOnly && !isPrimary ? 'روز گذشته فقط‌خواندنی است؛ فقط ادمین اصلی می‌تواند برنامه‌اش را اصلاح کند.' : '');
-    var choices = (state.catalog || []).map(function (food) {
+    var choiceHtml = function (food) {
       var included = scheduledIds.indexOf(Number(food.id)) >= 0;
       var inactive = !food.active;
       var label = food.food_name + (inactive ? ' · غیرفعال' : '');
       var disabled = editorLocked || (inactive && !included);
       return '<label class="fm-food-check"><input type="checkbox" name="food_ids" value="' + Number(food.id) + '" ' + (included ? 'checked' : '') + (disabled ? ' disabled' : '') + '><span>' + esc(label) + (inactive && included ? ' (فقط حفظ/حذف از برنامه)' : '') + '</span></label>';
+    };
+    // دسته‌ها ریشه‌اند: «+» غذاهای دسته را دو ستونه باز می‌کند و «-» جمع می‌کند.
+    // بدنه همیشه در فرم می‌ماند (فقط hidden)، پس تیک‌های انتخاب‌شده هنگام جمع/باز شدن گم نمی‌شوند.
+    var choices = catalogCategoryNames().map(function (name) {
+      var foods = (state.catalog || []).filter(function (food) { return (food.category || 'سایر') === name; });
+      if (!foods.length) return '';
+      var open = !!dayCatalogOpen[name];
+      var picked = foods.filter(function (food) { return scheduledIds.indexOf(Number(food.id)) >= 0; }).length;
+      return '<div class="fm-cat-group' + (open ? ' open' : '') + '">'
+        + '<button type="button" class="fm-cat-toggle" data-fm-daycat="' + esc(name) + '" aria-expanded="' + (open ? 'true' : 'false') + '">'
+        + '<span class="fm-cat-sign" aria-hidden="true">' + (open ? '-' : '+') + '</span>'
+        + '<strong>' + esc(name) + '</strong>'
+        + '<span class="fm-small">' + faDigits(String(foods.length)) + ' غذا' + (picked ? ' · ' + faDigits(String(picked)) + ' انتخاب‌شده' : '') + '</span></button>'
+        + '<div class="fm-cat-items fm-food-checks"' + (open ? '' : ' hidden') + '>' + foods.map(choiceHtml).join('') + '</div></div>';
     }).join('');
     var selectedStatus = day && day.order_status ? day.order_status : 'open';
     var statusControl = canClose
@@ -193,15 +209,138 @@
     var impactButtonsDisabled = state.daySaving ? ' disabled' : '';
     var pending = state.pendingImpact && state.pendingImpact.date === iso ? '<div class="fm-confirm-box"><strong>' + esc(state.pendingImpactMessage || 'این تغییر سفارش فعال را لغو می‌کند.') + '</strong><span>برای انجام تغییر و ثبت لغوها، تأیید کنید. حذف فیزیکی سفارش انجام نمی‌شود.</span><button class="btn danger" type="button" data-fm-action="confirm-impact"' + impactButtonsDisabled + '>تأیید و ادامه</button><button class="btn secondary" type="button" data-fm-action="cancel-impact"' + impactButtonsDisabled + '>بازگشت</button></div>' : '';
     var message = state.dayError ? '<div class="fm-alert error">' + esc(state.dayError) + '</div>' : '';
-    var itemsLabel = state.catalog.length ? '<div class="fm-food-checks">' + choices + '</div>' : '<div class="fm-empty">ابتدا از تب «بانک غذا» حداقل یک غذا ثبت کنید.</div>';
-    return '<div class="fm-card"><div class="fm-toolbar"><div><h3>ویرایش برنامهٔ ' + esc(faDigits(title)) + '</h3><span class="fm-small">برای هر روز حداکثر سه گزینهٔ غذا می‌توانید ثبت کنید.</span></div>' + (canClose ? '<button class="btn secondary" type="button" data-fm-action="show-orders">سفارش‌های این روز</button>' : '') + '</div>' + (day && day.holiday_title ? '<div class="fm-alert warn">تعطیل رسمی: ' + esc(day.holiday_title) + ' — در صورت تصمیم سازمان، سفارش باز می‌تواند برقرار باشد.</div>' : '') + (lockedMessage ? '<div class="fm-alert warn">' + esc(lockedMessage) + '</div>' : '') + (inactiveSchedule.length ? '<div class="fm-alert warn">این برنامه شامل غذای غیرفعال است. آن را می‌توان برای حفظ سوابق نگه داشت یا پس از تأیید حذف کرد؛ سفارش جدید برای آن غذا ثبت نمی‌شود.</div>' : '') + message + pending + '<form id="fm-day-form" class="fm-day-editor"><div class="fm-field fm-food-selection"><div class="fm-food-selection-head"><strong>غذاهای این روز</strong><span class="fm-small">برای آینده؛ بدون تغییر سفارش‌های گذشته</span></div>' + itemsLabel + '</div>' + (canClose ? statusControl : '') + '<label class="fm-field">یادداشت کوتاه<input name="note" maxlength="255" value="' + esc(day && day.note ? day.note : '') + '" placeholder="اختیاری" ' + (editorLocked ? 'disabled' : '') + '></label><div class="fm-actions"><button class="btn primary" type="submit" ' + (editorLocked ? 'disabled' : '') + '>ذخیره برنامه</button><button class="btn secondary" type="button" data-fm-action="reload-month">بازخوانی</button></div></form></div>';
+    var itemsLabel = state.catalog.length ? '<div class="fm-cat-list">' + choices + '</div>' : '<div class="fm-empty">ابتدا از تب «بانک غذا» حداقل یک غذا ثبت کنید.</div>';
+    return '<div class="fm-card"><div class="fm-toolbar"><div><h3>ویرایش برنامهٔ ' + esc(faDigits(title)) + '</h3><span class="fm-small">برای هر روز حداکثر سه گزینهٔ غذا می‌توانید ثبت کنید.</span></div>' + '' + '</div>' + (day && day.holiday_title ? '<div class="fm-alert warn">تعطیل رسمی: ' + esc(day.holiday_title) + ' — در صورت تصمیم سازمان، سفارش باز می‌تواند برقرار باشد.</div>' : '') + (lockedMessage ? '<div class="fm-alert warn">' + esc(lockedMessage) + '</div>' : '') + (inactiveSchedule.length ? '<div class="fm-alert warn">این برنامه شامل غذای غیرفعال است. آن را می‌توان برای حفظ سوابق نگه داشت یا پس از تأیید حذف کرد؛ سفارش جدید برای آن غذا ثبت نمی‌شود.</div>' : '') + message + pending + '<form id="fm-day-form" class="fm-day-editor"><div class="fm-field fm-food-selection"><div class="fm-food-selection-head"><strong>غذاهای این روز</strong><span class="fm-small">برای آینده؛ بدون تغییر سفارش‌های گذشته</span></div>' + '<div class="fm-food-search"><input type="search" data-fm-day-search placeholder="جستجوی غذا..." autocomplete="off" aria-label="جستجوی غذا"></div>' + itemsLabel + '</div>' + (canClose ? statusControl : '') + '<label class="fm-field">یادداشت کوتاه<input name="note" maxlength="255" value="' + esc(day && day.note ? day.note : '') + '" placeholder="اختیاری" ' + (editorLocked ? 'disabled' : '') + '></label><div class="fm-actions"><button class="btn primary" type="submit" ' + (editorLocked ? 'disabled' : '') + '>ذخیره برنامه</button><button class="btn secondary" type="button" data-fm-action="reload-month">بازخوانی</button></div></form></div>';
+  }
+
+  var FOOD_CATEGORY_ORDER = ['کبابی', 'خورشتی', 'ساندویچ', 'پلو', 'خوراک', 'رژیمی', 'سایر'];
+  var catalogOpen = {};
+  var dayCatalogOpen = {};
+
+  function categoryOptions(selected) {
+    return FOOD_CATEGORY_ORDER.map(function (name) {
+      return '<option value="' + esc(name) + '"' + (name === (selected || 'سایر') ? ' selected' : '') + '>' + esc(name) + '</option>';
+    }).join('');
+  }
+
+  function catalogCategoryNames() {
+    var names = FOOD_CATEGORY_ORDER.slice();
+    (state.catalog || []).forEach(function (food) {
+      var name = food.category || 'سایر';
+      if (names.indexOf(name) < 0) names.push(name);
+    });
+    return names;
+  }
+
+  function foodCardHtml(food) {
+    return '<form class="fm-bank-item" data-fm-catalog-edit>'
+      + '<input type="hidden" name="id" value="' + Number(food.id) + '">'
+      + '<label class="fm-bank-field">نام غذا<input type="text" name="food_name" maxlength="190" value="' + esc(food.food_name) + '" aria-label="نام غذا"></label>'
+      + '<label class="fm-bank-field">دسته‌بندی<select name="category" aria-label="دسته‌بندی">' + categoryOptions(food.category) + '</select></label>'
+      + '<label class="fm-bank-field">وضعیت<select name="active" aria-label="وضعیت"><option value="1" ' + (food.active ? 'selected' : '') + '>فعال</option><option value="0" ' + (!food.active ? 'selected' : '') + '>غیرفعال</option></select></label>'
+      + '<button class="btn secondary" type="submit">ذخیره</button>'
+      + '</form>';
   }
 
   function renderCatalog() {
-    var rows = (state.catalog || []).map(function (food) {
-      return '<tr><td><form class="fm-name-form" data-fm-catalog-edit><input type="hidden" name="id" value="' + Number(food.id) + '"><input type="text" name="food_name" maxlength="190" value="' + esc(food.food_name) + '" aria-label="نام غذا"><select name="active" aria-label="وضعیت"><option value="1" ' + (food.active ? 'selected' : '') + '>فعال</option><option value="0" ' + (!food.active ? 'selected' : '') + '>غیرفعال</option></select><button class="btn secondary" type="submit">ذخیره</button></form></td><td>' + (food.active ? '<span class="fm-order-state">فعال</span>' : '<span class="fm-order-state cancelled">غیرفعال</span>') + '</td></tr>';
+    var catalog = state.catalog || [];
+    var groups = catalogCategoryNames().map(function (name) {
+      var foods = catalog.filter(function (food) { return (food.category || 'سایر') === name; });
+      var open = !!catalogOpen[name];
+      var body = '';
+      if (open) {
+        body = foods.length
+          ? '<div class="fm-bank-grid fm-cat-grid">' + foods.map(foodCardHtml).join('') + '</div>'
+          : '<div class="fm-empty">در این دسته غذایی ثبت نشده است.</div>';
+      }
+      return '<div class="fm-cat-group' + (open ? ' open' : '') + '">'
+        + '<button type="button" class="fm-cat-toggle" data-fm-cat="' + esc(name) + '" aria-expanded="' + (open ? 'true' : 'false') + '">'
+        + '<span class="fm-cat-sign" aria-hidden="true">' + (open ? '-' : '+') + '</span>'
+        + '<strong>' + esc(name) + '</strong>'
+        + '<span class="fm-small">' + faDigits(String(foods.length)) + ' غذا</span></button>'
+        + body + '</div>';
     }).join('');
-    return '<div class="fm-card"><div class="fm-toolbar"><div><h3>بانک غذا</h3><span class="fm-small">غیرفعال‌سازی به‌جای حذف فیزیکی انجام می‌شود. غذای استفاده‌شده در تقویم قابل تغییر نام نیست تا سابقهٔ سفارش حفظ شود.</span></div></div><form id="fm-catalog-add" class="fm-catalog-form"><label class="fm-field">نام غذای جدید<input type="text" name="food_name" maxlength="190" required placeholder="مثلاً چلو مرغ"></label><button class="btn primary" type="submit">افزودن غذا</button></form><div class="fm-table-wrap fm-manager-data-warning"><table class="fm-rows"><thead><tr><th>نام غذا و ویرایش</th><th>وضعیت فعلی</th></tr></thead><tbody>' + (rows || '<tr><td colspan="2" class="fm-empty">غذایی ثبت نشده است.</td></tr>') + '</tbody></table></div></div>';
+    var list = catalog.length ? '<div class="fm-cat-list">' + groups + '</div>' : '<div class="fm-empty">غذایی ثبت نشده است.</div>' + groups;
+    return '<div class="fm-card"><div class="fm-toolbar"><div><h3>بانک غذا</h3><span class="fm-small">هر غذا یک بار و با یک نام ثبت می‌شود؛ نام تکراری پذیرفته نمی‌شود. دسته‌بندی‌ها ریشه‌اند: با «+» غذاهای آن دسته (دو ستونه) باز می‌شود و با «-» جمع می‌شود. غیرفعال‌سازی به‌جای حذف فیزیکی انجام می‌شود. غذای استفاده‌شده در تقویم قابل تغییر نام نیست تا سابقهٔ سفارش حفظ شود.</span></div></div>'
+      + '<form id="fm-catalog-add" class="fm-catalog-form"><label class="fm-field">نام غذای جدید<input type="text" name="food_name" maxlength="190" required placeholder="مثلاً چلو مرغ"></label><label class="fm-field">دسته‌بندی<select name="category" aria-label="دسته‌بندی غذای جدید">' + categoryOptions('سایر') + '</select></label><button class="btn primary" type="submit">افزودن غذا</button></form>'
+      + list + '</div>';
+  }
+
+  var ORDER_COLUMNS = [
+    { key: 'row', label: 'ردیف' },
+    { key: 'national_code', label: 'کد ملی' },
+    { key: 'employee_number', label: 'کد پرسنلی' },
+    { key: 'full_name', label: 'نام' },
+    { key: 'food_name', label: 'غذا' },
+    { key: 'food_date', label: 'تاریخ غذا' },
+    { key: 'reserve_at', label: 'ثبت رزرو' },
+    { key: 'status_label', label: 'وضعیت' },
+    { key: 'record_type', label: 'نوع ثبت' },
+  ];
+
+  function orderSortValue(row, key, index) {
+    if (key === 'row') return index;
+    if (key === 'reserve_at') return (row.reserve_date || '') + ' ' + (row.reserve_time || '');
+    if (key === 'status_label') return row.status === 'active' ? 0 : 1;
+    if (key === 'record_type') return row.is_proxy ? 1 : 0;
+    return row[key] == null ? '' : row[key];
+  }
+
+  function sortOrderRows(rows) {
+    var key = state.ordersSort.key;
+    var dir = state.ordersSort.dir === 'desc' ? -1 : 1;
+    var decorated = rows.map(function (row, index) {
+      return { row: row, index: index, value: orderSortValue(row, key, index) };
+    });
+    decorated.sort(function (a, b) {
+      var c;
+      if (typeof a.value === 'number' && typeof b.value === 'number') c = a.value - b.value;
+      else c = String(a.value).localeCompare(String(b.value), 'fa', { numeric: true });
+      if (c === 0) c = a.index - b.index;
+      return c * dir;
+    });
+    return decorated.map(function (d) { return d.row; });
+  }
+
+  function orderRowHtml(row, position) {
+    var active = row.status === 'active';
+    var recordType = row.is_proxy ? 'نیابتی' : 'شخصی';
+    return '<tr><td>' + faDigits(position + 1) + '</td><td>' + esc(faDigits(row.national_code || '—')) + '</td><td>' + esc(faDigits(row.employee_number || '—')) + '</td><td>' + esc(row.full_name || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(jalaliFromIso(row.food_date))) + '</td><td>' + esc(faDigits(jalaliFromIso(row.reserve_date))) + ' ' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fm-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + recordType + '</td></tr>';
+  }
+
+  function orderTableHtml(rows) {
+    var sorted = sortOrderRows(rows);
+    var s = state.ordersSort;
+    var head = ORDER_COLUMNS.map(function (col) {
+      var mark = s.key === col.key ? (s.dir === 'desc' ? ' ▼' : ' ▲') : '';
+      return '<th><button type="button" class="fm-sort-btn" data-fm-sort="' + col.key + '">' + esc(col.label) + mark + '</button></th>';
+    }).join('');
+    var body = sorted.map(function (row, i) { return orderRowHtml(row, i); }).join('');
+    return '<table class="fm-rows" data-no-sort><thead><tr>' + head + '</tr></thead><tbody>'
+      + (body || '<tr><td colspan="' + ORDER_COLUMNS.length + '" class="fm-empty">برای این روز سفارشی پیدا نشد.</td></tr>')
+      + '</tbody></table>';
+  }
+
+  function orderByMenuHtml(rows) {
+    var groups = {};
+    rows.forEach(function (row) {
+      var key = Number(row.menu_no || 0);
+      (groups[key] = groups[key] || []).push(row);
+    });
+    var keys = Object.keys(groups).map(Number).sort(function (a, b) {
+      if (a === 0) return 1;
+      if (b === 0) return -1;
+      return a - b;
+    });
+    if (!keys.length) return orderTableHtml([]);
+    return keys.map(function (key) {
+      var list = groups[key];
+      var title = key > 0 ? 'منوی ' + faDigits(key) : 'بدون منو';
+      var foods = [];
+      list.forEach(function (row) { if (row.food_name && foods.indexOf(row.food_name) < 0) foods.push(row.food_name); });
+      return '<div class="fm-menu-group"><h4>' + esc(title) + ' — ' + esc(foods.join('، ') || '—')
+        + ' <span class="fm-small">(' + faDigits(list.length) + ' سفارش)</span></h4>' + orderTableHtml(list) + '</div>';
+    }).join('');
   }
 
   function renderOrders() {
@@ -210,12 +349,14 @@
     var dateLabel = faDigits(inputDate || '—');
     var actionsEnabled = state.ordersLoaded && !state.loadingOrders;
     var rows = state.orders || [];
-    var tableRows = rows.map(function (row, index) {
-      var active = row.status === 'active';
-      var recordType = row.is_proxy ? 'نیابتی' : 'شخصی';
-      return '<tr><td>' + faDigits(index + 1) + '</td><td>' + esc(faDigits(row.national_code || '—')) + '</td><td>' + esc(faDigits(row.employee_number || '—')) + '</td><td>' + esc(row.full_name || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(jalaliFromIso(row.food_date))) + '</td><td>' + esc(faDigits(jalaliFromIso(row.reserve_date))) + ' ' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fm-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + recordType + '</td></tr>';
-    }).join('');
-    var daily = '<section class="fm-card fm-daily-orders"><div class="fm-toolbar"><div><h3>سفارش‌های روز</h3><span class="fm-small">تاریخ: ' + esc(dateLabel) + ' — فهرست سفارش‌های تاریخ انتخاب‌شده</span></div></div><form id="fm-orders-date" class="fm-order-date"><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(inputDate)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="orders-today">امروز</button><button class="btn secondary" type="button" data-fm-action="orders-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="orders-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></form>' + (state.loadingOrders ? '<div class="fm-spinner">در حال بارگذاری سفارش‌ها…</div>' : '<div class="fm-table-wrap fm-manager-data-warning"><table class="fm-rows"><thead><tr><th>ردیف</th><th>کد ملی</th><th>کد پرسنلی</th><th>نام</th><th>غذا</th><th>تاریخ غذا</th><th>ثبت رزرو</th><th>وضعیت</th><th>نوع ثبت</th></tr></thead><tbody>' + (tableRows || '<tr><td colspan="9" class="fm-empty">برای این روز سفارشی پیدا نشد.</td></tr>') + '</tbody></table></div>') + '</section>';
+    var viewButton = function (view, label) {
+      return '<button class="btn ' + (state.ordersView === view ? 'primary' : 'secondary') + '" type="button" data-fm-action="orders-view" data-orders-view="' + view + '">' + label + '</button>';
+    };
+    var viewBar = '<div class="fm-view-switch">' + viewButton('list', 'فهرست یکجا') + viewButton('menu', 'نمایش بر اساس منو') + '</div>';
+    var body = state.ordersView === 'menu' ? orderByMenuHtml(rows) : orderTableHtml(rows);
+    var daily = '<section class="fm-card fm-daily-orders"><div class="fm-toolbar"><div><h3>سفارش‌های روز</h3><span class="fm-small">تاریخ: ' + esc(dateLabel) + ' — فهرست سفارش‌های تاریخ انتخاب‌شده</span></div></div><form id="fm-orders-date" class="fm-order-date"><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(inputDate)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="orders-today">امروز</button><button class="btn secondary" type="button" data-fm-action="orders-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="orders-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></form>'
+      + (state.loadingOrders ? '<div class="fm-spinner">در حال بارگذاری سفارش‌ها…</div>' : viewBar + '<div class="fm-table-wrap fm-manager-data-warning">' + body + '</div>')
+      + '</section>';
     return daily;
   }
 
@@ -268,7 +409,7 @@
       root.innerHTML = '<div class="fm-alert error">تقویم شمسی سامانه بارگذاری نشد. صفحه را تازه‌سازی کنید.</div>';
       return;
     }
-    var panel = state.tab === 'calendar' && canMenu ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'statistics' && canClose ? renderStatistics() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
+    var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'statistics' && canClose ? renderStatistics() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
     root.innerHTML = '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
@@ -379,7 +520,7 @@
       body.expected_impact = Number(expectedImpact || 0);
     } else {
       var formData = new FormData(form);
-      var foodIds = Array.from(form.querySelectorAll('input[name="food_ids"]:checked')).map(function (input) { return Number(input.value); });
+      var foodIds = orderedDayFoodIds(form, state.selectedDate);
       var statusField = form.querySelector('[name="order_status"]:checked');
       body = {
         date: state.selectedDate,
@@ -414,7 +555,7 @@
     if (!canMenu) return;
     var isNew = form.id === 'fm-catalog-add';
     var data = new FormData(form);
-    var body = { id: Number(data.get('id') || 0), food_name: String(data.get('food_name') || '').trim(), active: String(data.get('active') || '1') === '1' };
+    var body = { id: Number(data.get('id') || 0), food_name: String(data.get('food_name') || '').trim(), category: String(data.get('category') || 'سایر'), active: String(data.get('active') || '1') === '1' };
     var saved = false;
     try {
       var result = await request('food-menu/catalog', null, { method: 'POST', body: JSON.stringify(body) });
@@ -435,8 +576,55 @@
   }
 
 
+  // ترتیب خروجی همان ترتیب نمایش است: در نمای منو، گروه‌ها به ترتیب منو و در هر گروه طبق سرستون مرتب‌شده
+  function orderExportRows() {
+    var rows = state.orders || [];
+    if (state.ordersView !== 'menu') return sortOrderRows(rows);
+    var groups = {};
+    rows.forEach(function (row) {
+      var key = Number(row.menu_no || 0);
+      (groups[key] = groups[key] || []).push(row);
+    });
+    var keys = Object.keys(groups).map(Number).sort(function (a, b) {
+      if (a === 0) return 1;
+      if (b === 0) return -1;
+      return a - b;
+    });
+    var out = [];
+    keys.forEach(function (key) {
+      out = out.concat(sortOrderRows(groups[key]).map(function (row) { return { row: row, menu: key }; }));
+    });
+    return out;
+  }
+
+  function downloadOrdersCsv() {
+    var headers = ['منو'].concat(ORDER_COLUMNS.map(function (col) { return col.label; }));
+    var rows = orderExportRows().map(function (item) {
+      var row = item.row !== undefined ? item.row : item;
+      var menu = item.row !== undefined ? item.menu : Number(row.menu_no || 0);
+      return [
+        menu > 0 ? faDigits(menu) : 'بدون منو',
+        faDigits(row.national_code || '—'),
+        faDigits(row.employee_number || '—'),
+        row.full_name || '—',
+        row.food_name || '—',
+        faDigits(jalaliFromIso(row.food_date) || ''),
+        faDigits((jalaliFromIso(row.reserve_date) || '') + ' ' + (row.reserve_time || '').slice(0, 5)).trim(),
+        row.status === 'active' ? 'فعال' : 'لغوشده',
+        row.is_proxy ? 'نیابتی' : 'شخصی'
+      ];
+    });
+    var filename = 'orders-' + (state.ordersDate || 'day');
+    var api = global.ITSM_LIST_SORT;
+    if (api && api.exportXlsx) {
+      api.exportXlsx('فهرست سفارش‌های روز ' + faDigits(jalaliFromIso(state.ordersDate) || ''), headers, rows, filename, null);
+    }
+  }
+
   function downloadOrders() {
     if (!canClose || state.tab !== 'orders' || !state.ordersLoaded || state.loadingOrders || !state.ordersDate) return;
+    // اگر کاربر ترتیب نمایش را عوض کرده، خروجی همان ترتیب است؛ وگرنه خروجی سرور بدون تغییر
+    if (state.ordersSortTouched) { downloadOrdersCsv(); return; }
     global.location.href = buildUrl('food-menu/orders-export', { date: state.ordersDate });
   }
 
@@ -513,9 +701,163 @@
     if (tab === 'catalog' && !state.catalog.length && canMenu) loadCatalog().then(render);
   }
 
+  // ---- سفارش اضطراری (فقط food.emergency) ----
+  // ترتیب: ۱) انتخاب کاربر ۲) وارد کردن کد ملی و تطبیق با همان کاربر ۳) ثبت / تغییر سفارش یا لغو سفارش.
+  var canEmergency = global.FOOD_TICKET_CAN_EMERGENCY === true;
+  function emergencyEnsurePeople() {
+    var em = state.emergency = state.emergency || {};
+    if (em.people || em.peopleLoading) return;
+    em.peopleLoading = true;
+    request('food-menu/emergency/people', null).then(function (payload) {
+      em.people = payload.items || [];
+    }).catch(function (error) {
+      em.people = [];
+      em.error = error.message || 'فهرست کاربران بارگذاری نشد.';
+    }).then(function () {
+      em.peopleLoading = false;
+      render();
+    });
+  }
+  function emergencyPanel() {
+    if (!canEmergency || state.tab !== 'calendar') return '';
+    emergencyEnsurePeople();
+    var iso = state.selectedDate;
+    var day = getDay(iso);
+    var em = state.emergency || {};
+    var items = day && Array.isArray(day.items) ? day.items.filter(function (item) { return item.item_id && item.food_active !== false; }) : [];
+    var status = day && day.order_status === 'closed' ? 'بسته' : 'باز';
+    var head = '<div class="fm-card fm-emergency"><div class="fm-toolbar"><div><h3>سفارش اضطراری</h3><span class="fm-small">برای روز ' + esc(faDigits(jalaliFromIso(iso))) + ' (وضعیت: ' + esc(status) + ')؛ ابتدا کاربر را انتخاب کنید، سپس کد ملی او را برای تأیید وارد کنید.</span></div></div>';
+    var msgs = (em.error ? '<div class="fm-alert error">' + esc(em.error) + '</div>' : '') + (em.notice && !em.error ? '<div class="fm-alert good">' + esc(em.notice) + '</div>' : '');
+    if (!day) {
+      return head + msgs + '<div class="fm-empty">برای این روز برنامهٔ غذایی ثبت نشده است.</div></div>';
+    }
+    if (!em.person) {
+      var people = em.people || [];
+      var options = '<option value="">— یک کاربر را انتخاب کنید —</option>' + people.map(function (p) {
+        return '<option value="' + Number(p.id) + '"' + (Number(em.pickedId) === Number(p.id) ? ' selected' : '') + '>' + esc(p.name) + ' (' + esc(p.username) + ')</option>';
+      }).join('');
+      var pick = '<div class="fm-emergency-step"><label class="fm-field">۱. کاربر' + (em.peopleLoading ? ' (در حال بارگذاری…)' : '') + '<select name="emergency_person">' + options + '</select></label>'
+        + '<button type="button" class="fm-btn" data-em-action="pick"' + (em.peopleLoading ? ' disabled' : '') + '>انتخاب کاربر</button></div>';
+      var verify = em.pickedId
+        ? '<div class="fm-emergency-step"><label class="fm-field">۲. کد ملی ' + esc(em.pickedName || '') + '<input type="text" name="emergency_nc" inputmode="numeric" maxlength="10" value="' + esc(em.nc || '') + '" autocomplete="off"></label>'
+          + '<button type="button" class="fm-btn" data-em-action="verify">تأیید کد ملی</button></div>'
+        : '';
+      return head + msgs + pick + verify + '</div>';
+    }
+    var select = items.length
+      ? '<select name="emergency_item">' + items.map(function (item) { return '<option value="' + Number(item.item_id) + '">' + esc(item.food_name || '') + '</option>'; }).join('') + '</select>'
+      : '<div class="fm-empty">غذایی برای این روز تعریف نشده است.</div>';
+    var orders = em.orders || [];
+    var hasActive = orders.some(function (order) { return order.status === 'active'; });
+    var orderList = orders.length
+      ? '<ul class="fm-emergency-orders">' + orders.map(function (order) {
+          return '<li>' + esc(order.food_name || '') + ' <span class="fm-small">(' + esc(order.status === 'active' ? 'فعال' : (order.status === 'cancelled' ? 'لغو شده' : order.status)) + ')</span> '
+            + (order.status === 'active' ? '<button type="button" class="fm-btn secondary" data-em-action="cancel" data-order-id="' + Number(order.id) + '">لغو سفارش</button>' : '') + '</li>';
+        }).join('') + '</ul>'
+      : '<div class="fm-small">سفارشی برای این فرد در این روز ثبت نشده است.</div>';
+    return head + msgs
+      + '<div class="fm-alert good">فرد: ' + esc(em.person.name) + ' (' + esc(em.person.username) + ') — کد ملی تأیید شد.</div>'
+      + '<div class="fm-emergency-step"><label class="fm-field">غذا' + select + '</label>'
+      + (items.length ? '<button type="button" class="fm-btn" data-em-action="order">' + (hasActive ? 'تغییر سفارش' : 'ثبت سفارش') + '</button>' : '')
+      + '<button type="button" class="fm-btn secondary" data-em-action="reset">تغییر کاربر</button></div>'
+      + '<h4>سفارش‌های این فرد در این روز</h4>' + orderList + '</div>';
+  }
+  async function emergencyLoadOrders() {
+    var em = state.emergency;
+    if (!em || !em.person) return;
+    var payload = await request('food-menu/emergency/orders', { date: state.selectedDate, employee_id: em.person.id });
+    em.orders = payload.items || [];
+  }
+  function daySearchInput(event) {
+    var input = event.target.closest && event.target.closest('[data-fm-day-search]');
+    if (!input) return;
+    var q = String(input.value || '').trim().replace(/ي/g, 'ی').replace(/ك/g, 'ک').toLowerCase();
+    var editor = input.closest('.fm-food-selection') || root;
+    editor.querySelectorAll('.fm-cat-group').forEach(function (group) {
+      var visible = 0;
+      group.querySelectorAll('.fm-food-check').forEach(function (label) {
+        var text = String(label.textContent || '').replace(/ي/g, 'ی').replace(/ك/g, 'ک').toLowerCase();
+        var match = !q || text.indexOf(q) !== -1;
+        label.style.display = match ? '' : 'none';
+        if (match) visible++;
+      });
+      group.style.display = visible || !q ? '' : 'none';
+      if (q && visible) {
+        group.classList.add('open');
+        var items = group.querySelector('.fm-cat-items');
+        if (items) items.hidden = false;
+        var sign = group.querySelector('.fm-cat-sign');
+        if (sign) sign.textContent = '-';
+      }
+    });
+  }
+
+  async function emergencyClick(event) {
+    var button = event.target.closest('[data-em-action]');
+    if (!button || !canEmergency) return;
+    event.preventDefault();
+    var em = state.emergency = state.emergency || {};
+    var action = button.dataset.emAction;
+    em.error = ''; em.notice = '';
+    try {
+      if (action === 'pick') {
+        var picked = String((root.querySelector('[name="emergency_person"]') || {}).value || '');
+        if (!picked) throw new Error('ابتدا یک کاربر را انتخاب کنید.');
+        var person = (em.people || []).filter(function (p) { return Number(p.id) === Number(picked); })[0];
+        em.pickedId = Number(picked);
+        em.pickedName = person ? person.name : '';
+        em.nc = ''; em.person = null; em.orders = [];
+      } else if (action === 'verify') {
+        var nc = String((root.querySelector('[name="emergency_nc"]') || {}).value || '').trim();
+        em.nc = nc;
+        var found = await request('food-menu/emergency/lookup', null, { method: 'POST', body: JSON.stringify({ employee_id: em.pickedId, national_code: nc }) });
+        em.person = found.person;
+        await emergencyLoadOrders();
+      } else if (action === 'reset') {
+        state.emergency = { people: em.people };
+      } else if (action === 'order') {
+        var select = root.querySelector('[name="emergency_item"]');
+        var result = await request('food-menu/emergency/order', null, { method: 'POST', body: JSON.stringify({ food_date: state.selectedDate, employee_id: em.person.id, national_code: em.nc, calendar_item_id: Number(select && select.value), emergency: true }) });
+        em.notice = result.message || 'سفارش اضطراری ثبت شد.';
+        await emergencyLoadOrders();
+      } else if (action === 'cancel') {
+        var cancelled = await request('food-menu/emergency/cancel', null, { method: 'POST', body: JSON.stringify({ order_id: Number(button.dataset.orderId), employee_id: em.person.id, national_code: em.nc }) });
+        em.notice = cancelled.message || 'سفارش لغو شد.';
+        await emergencyLoadOrders();
+      }
+      if (typeof refreshAll === 'function') refreshAll();
+    } catch (error) {
+      em.error = error.message || 'عملیات انجام نشد.';
+    }
+    render();
+  }
+
   function eventClick(event) {
+    var dayCat = event.target.closest('[data-fm-daycat]');
+    if (dayCat) {
+      var group = dayCat.parentNode;
+      var body = group.querySelector('.fm-cat-items');
+      var willOpen = body.hidden;
+      body.hidden = !willOpen;
+      group.classList.toggle('open', willOpen);
+      dayCat.querySelector('.fm-cat-sign').textContent = willOpen ? '-' : '+';
+      dayCat.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      dayCatalogOpen[dayCat.dataset.fmDaycat] = willOpen;
+      return;
+    }
+    var catToggle = event.target.closest('[data-fm-cat]');
+    if (catToggle) { var catName = catToggle.dataset.fmCat; catalogOpen[catName] = !catalogOpen[catName]; render(); return; }
     var tab = event.target.closest('[data-fm-tab]');
     if (tab) { switchTab(tab.dataset.fmTab); return; }
+    var sortBtn = event.target.closest('[data-fm-sort]');
+    if (sortBtn) {
+      var sortKey = sortBtn.dataset.fmSort;
+      state.ordersSortTouched = true;
+      if (state.ordersSort.key === sortKey) state.ordersSort.dir = state.ordersSort.dir === 'asc' ? 'desc' : 'asc';
+      else state.ordersSort = { key: sortKey, dir: 'asc' };
+      render();
+      return;
+    }
     var action = event.target.closest('[data-fm-action]');
     if (action) {
       var act = action.dataset.fmAction;
@@ -532,6 +874,7 @@
       }
       if (act === 'confirm-impact') saveDay(true, state.pendingImpactExpected);
       if (act === 'cancel-impact') { state.pendingImpact = null; state.pendingImpactExpected = 0; state.pendingImpactMessage = ''; render(); }
+      if (act === 'orders-view') { state.ordersView = action.dataset.ordersView === 'menu' ? 'menu' : 'list'; state.ordersSortTouched = state.ordersSortTouched || state.ordersView === 'menu'; render(); }
       if (act === 'orders-export') downloadOrders();
       if (act === 'orders-print') printOrders();
       if (act === 'statistics-export') downloadStatistics();
@@ -547,8 +890,34 @@
     if (day) selectDay(day.dataset.fmDay, day.dataset.fmCurrent === '1');
   }
 
+  // ترتیب منو = ترتیب تیک زدن غذاها در روز. اولین غذای تیک‌خورده منوی ۱ است، و همین ترتیب ذخیره می‌شود.
+  function dayPickFor(iso) {
+    if (!state.dayPick || state.dayPick.date !== iso) {
+      var day = getDay(iso);
+      var saved = day && Array.isArray(day.items) ? day.items.map(function (item) { return Number(item.food_id); }) : [];
+      state.dayPick = { date: iso, ids: saved };
+    }
+    return state.dayPick;
+  }
+
+  function trackDayPick(input) {
+    var pick = dayPickFor(state.selectedDate);
+    var id = Number(input.value);
+    pick.ids = pick.ids.filter(function (x) { return x !== id; });
+    if (input.checked) pick.ids.push(id);
+  }
+
+  function orderedDayFoodIds(form, iso) {
+    var checked = Array.from(form.querySelectorAll('input[name="food_ids"]:checked')).map(function (input) { return Number(input.value); });
+    var ordered = [];
+    dayPickFor(iso).ids.forEach(function (id) { if (checked.indexOf(id) >= 0 && ordered.indexOf(id) < 0) ordered.push(id); });
+    checked.forEach(function (id) { if (ordered.indexOf(id) < 0) ordered.push(id); });
+    return ordered;
+  }
+
   function eventChange(event) {
     var input = event.target;
+    if (input && input.name === 'food_ids') { trackDayPick(input); return; }
     if (!input || input.name !== 'statistics_mode') return;
     var selectedMode = input.value === 'employee' ? 'employee' : 'food';
     var form = input.form;
@@ -606,8 +975,10 @@
     root = document.getElementById('food-menu-root');
     if (!root || root.dataset.fmMounted === '1') return;
     root.dataset.fmMounted = '1';
+    root.addEventListener('click', emergencyClick);
     root.addEventListener('click', eventClick);
     root.addEventListener('change', eventChange);
+    root.addEventListener('input', daySearchInput);
     root.addEventListener('submit', eventSubmit);
     var current = state.selectedDate ? jalaliMonthFromIso(state.selectedDate) : null;
     if (current) { state.year = current[0]; state.month = current[1]; }

@@ -514,7 +514,7 @@ function food_ticket_np_trim_edges(GdImage $im, array $cfg): array
         'last_ink_dots' => $lastInk,
     ]);
     if (function_exists('error_log')) {
-        error_log(sprintf(
+        app_error_log(sprintf(
             '[food-print] کوتاه‌سازی فیش: بالا %d نقطه (%.1fmm) ، پایین %d نقطه (%.1fmm) | جوهر: %d..%d از %d',
             $cutTop, $cutTop / $dpm, $cutBottom, $cutBottom / $dpm, $firstInk, $lastInk, $h
         ));
@@ -813,7 +813,7 @@ function food_ticket_np_escpos(GdImage $im, array $cfg): string
     // ۱.۳۷ — پروفایلِ کاملِ بایت‌های تراز در یک خط لاگ: با این خط می‌توان بدون حضور روی
     // سرور فهمید کاغذ عقب می‌رود یا نه (reverse_hex خالی = فرمان عقب‌راندن فرستاده نشده).
     if (!empty($cfg['log_align'])) {
-        error_log(sprintf(
+        app_error_log(sprintf(
             '[food-print-align] edge_align=%s head_offset=%.1fmm dpm=%.1f line_dots=%d reverse_cmd=%s reverse_hex=%s cut_hex=%s cut_feed_dots=%d img=%dx%d total_bytes=%d',
             $edgeAlign ? 'on' : 'off',
             $headOffsetMm,

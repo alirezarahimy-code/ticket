@@ -72,6 +72,63 @@ function cfg(string $path, mixed $default = null): mixed
 
 date_default_timezone_set((string) cfg('app.timezone', 'Asia/Tehran'));
 
+/** PDO با اندازه‌گیری زمان query() مستقیم (برای کوئری‌هایی که با prepare نمی‌آیند). */
+class AppPDO extends PDO
+{
+    public function query(string $query, ?int $fetchMode = null, mixed ...$fetchModeArgs): PDOStatement|false
+    {
+        $start = microtime(true);
+        $result = $fetchMode === null
+            ? parent::query($query)
+            : parent::query($query, $fetchMode, ...$fetchModeArgs);
+        $ms = (microtime(true) - $start) * 1000;
+        if ($ms >= 500 && empty($GLOBALS['__slow_query_guard'])) {
+            $GLOBALS['__slow_query_guard'] = true;
+            try {
+                system_log('warning', 'کندی کوئری', 'یک کوئری ' . (int) round($ms) . ' میلی‌ثانیه طول کشید', [
+                    'cause' => 'کوئری سنگین یا نبودن ایندکس مناسب روی جدول بزرگ.',
+                    'action' => 'اگر تکرار شد، بازهٔ گزارش را کوچک‌تر کنید یا برای توسعه‌دهنده ارسال کنید.',
+                    'technical' => mb_substr($query, 0, 300),
+                    'ms' => (int) round($ms),
+                ]);
+            } catch (Throwable) {
+            } finally {
+                $GLOBALS['__slow_query_guard'] = false;
+            }
+        }
+        return $result;
+    }
+}
+
+/**
+ * اجراکنندهٔ کوئری که کوئری‌های کندتر از ۵۰۰ میلی‌ثانیه را در لاگ فنی ثبت می‌کند.
+ * پارامترها ثبت نمی‌شوند؛ فقط متن کوئری کوتاه‌شده. ثبت لاگ خودش را دوباره اندازه نمی‌گیرد.
+ */
+class AppSlowStatement extends PDOStatement
+{
+    public function execute(?array $params = null): bool
+    {
+        $start = microtime(true);
+        $result = parent::execute($params);
+        $ms = (microtime(true) - $start) * 1000;
+        if ($ms >= 500 && empty($GLOBALS['__slow_query_guard'])) {
+            $GLOBALS['__slow_query_guard'] = true;
+            try {
+                system_log('warning', 'کندی کوئری', 'یک کوئری ' . (int) round($ms) . ' میلی‌ثانیه طول کشید', [
+                    'cause' => 'کوئری سنگین یا نبودن ایندکس مناسب روی جدول بزرگ.',
+                    'action' => 'اگر تکرار شد، بازهٔ گزارش را کوچک‌تر کنید یا برای توسعه‌دهنده ارسال کنید.',
+                    'technical' => mb_substr((string) $this->queryString, 0, 300),
+                    'ms' => (int) round($ms),
+                ]);
+            } catch (Throwable) {
+            } finally {
+                $GLOBALS['__slow_query_guard'] = false;
+            }
+        }
+        return $result;
+    }
+}
+
 function db(bool $reconnect = false): PDO
 {
     static $pdo = null;
@@ -106,11 +163,19 @@ function db(bool $reconnect = false): PDO
         (string) cfg('database.name', ''),
         (string) cfg('database.charset', 'utf8mb4')
     );
-    $pdo = new PDO($dsn, $user, (string) cfg('database.password', ''), [
+    $pdo = new AppPDO($dsn, $user, (string) cfg('database.password', ''), [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_STATEMENT_CLASS => [AppSlowStatement::class],
     ]);
+    // هم‌زمان کردن ساعت دیتابیس با ساعت برنامه: CURDATE()/CURTIME() باید با date() در PHP یکی باشد.
+    try {
+        $offset = (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('P');
+        $pdo->exec("SET time_zone = '" . $offset . "'");
+    } catch (Throwable) {
+        // اگر تنظیم نشد، همان ساعت پیش‌فرض سرور دیتابیس استفاده می‌شود.
+    }
     return $pdo;
 }
 
@@ -269,7 +334,7 @@ function record_login_failure(string $username): void
             ]);
         }
     } catch (Throwable) {
-        error_log('ITSM login rate-limit storage failed');
+        app_error_log('ITSM login rate-limit storage failed');
     }
 }
 
@@ -278,8 +343,19 @@ function clear_login_failures(string $username): void
     try {
         db()->prepare('DELETE FROM login_attempts WHERE attempt_key = ?')->execute([login_rate_key($username)]);
     } catch (Throwable) {
-        error_log('ITSM login rate-limit cleanup failed');
+        app_error_log('ITSM login rate-limit cleanup failed');
     }
+}
+
+/** نسخهٔ فعلی سامانه از فایل VERSION (نمایش در ورود و پایین صفحات). */
+function app_version(): string
+{
+    static $version = null;
+    if ($version === null) {
+        $raw = @file_get_contents(APP_ROOT . '/VERSION');
+        $version = is_string($raw) && trim($raw) !== '' ? trim($raw) : '—';
+    }
+    return $version;
 }
 
 function e(mixed $value): string
@@ -553,6 +629,199 @@ function system_log(string $level, string $context, string $message, array $meta
         $line = date('c') . ' [' . $level . '] ' . $context . ' — ' . $message . ($meta !== [] ? ' ' . json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '') . PHP_EOL;
         @file_put_contents($dir . '/app.log', $line, FILE_APPEND);
     } catch (Throwable) {
+    }
+}
+
+/**
+ * ترجمهٔ فارسی خطاهای فنی: [عنوان، علت احتمالی، اقدام پیشنهادی].
+ * پیام خام فنی فقط در جزئیات نگه داشته می‌شود.
+ */
+function system_error_explain(string $message): array
+{
+    $rules = [
+        ['A connection attempt failed', 'اتصال به دستگاه یا سرویس شبکه برقرار نشد', 'دستگاه (مثلاً چاپگر) روشن و در شبکه باشد؛ آدرس IP و پورت را در تنظیمات بررسی کنید.'],
+        ['timed out', 'مهلت پاسخ دستگاه یا سرویس تمام شد', 'دستگاه مقصد را بررسی کنید؛ اگر شبکه کند است، مهلت اتصال را بالا ببرید.'],
+        ['آدرس چاپگر تنظیم نشده', 'آدرس چاپگر در تنظیمات ثبت نشده است', 'در پنل فیش غذا، آدرس IP و پورت چاپگر را وارد کنید.'],
+        ['فونت فارسی', 'فونت فارسی برای رسم فیش پیدا نشد', 'فایل tahoma.ttf را در مسیر تنظیم‌شده قرار دهید یا مسیر فونت را اصلاح کنید.'],
+        ['imagecreate', 'کتابخانهٔ GD برای ساخت تصویر فیش فعال نیست', 'در php.ini افزونهٔ gd را فعال کنید و سرویس وب را ریستارت کنید.'],
+        ['imagepng', 'کتابخانهٔ GD برای ساخت تصویر فیش فعال نیست', 'در php.ini افزونهٔ gd را فعال کنید و سرویس وب را ریستارت کنید.'],
+        ['imagettftext', 'کتابخانهٔ GD (FreeType) برای نوشتن متن فارسی فعال نیست', 'در php.ini افزونهٔ gd و پشتیبانی FreeType را فعال کنید.'],
+        ['Too many connections', 'تعداد اتصال‌های دیتابیس پر شده است', 'بار همزمان سامانه را بررسی کنید؛ اگر تکرار شد، max_connections دیتابیس را افزایش دهید.'],
+        ['Lock wait timeout', 'قفل دیتابیس بیش از حد طول کشید', 'عملیات همزمان روی همان جدول را بررسی کنید؛ معمولاً با تکرار کم می‌شود.'],
+        ['Deadlock', 'دو عملیات همزمان روی دیتابیس یکدیگر را قفل کردند', 'اگر تکرار شد، اجرای همزمان گزارش‌ها و ایمپورت‌ها را جدا کنید.'],
+        ['Access denied for user', 'کاربر دیتابیس اجازهٔ دسترسی ندارد', 'نام کاربری و رمز دیتابیس در config.php و دسترسی کاربر در MySQL را بررسی کنید.'],
+        ['Unknown database', 'پایگاه‌داده پیدا نشد', 'نام دیتابیس در config.php را بررسی کنید.'],
+        ['Base table or view not found', 'جدول موردنیاز در پایگاه‌داده نیست', 'مهاجرت یا فایل SQL مربوط به آپدیت را اجرا کنید.'],
+        ['Unknown column', 'ستون موردنیاز در جدول نیست', 'مهاجرت به‌روزرسانی را اجرا کنید؛ احتمالاً نسخهٔ فایل‌ها با دیتابیس هم‌خوان نیست.'],
+        ['No space left on device', 'فضای دیسک سرور پر شده است', 'فضای دیسک را آزاد کنید و لاگ‌ها و فایل‌های موقت قدیمی را پاک کنید.'],
+        ['LdapErr', 'ارتباط با سرور دامین (LDAP) مشکل دارد', 'اگر فقط یک کاربر است، نام کاربری و رمز را بررسی کنید؛ اگر چند کاربر است، سرور دامین و تنظیمات LDAP را بررسی کنید.'],
+        ['Undefined variable', 'متغیر تعریف‌نشده در کد برنامه (باگ)', 'این خطای برنامه است؛ متن فنی و مکان خطا را برای توسعه‌دهنده بفرستید.'],
+        ['Undefined array key', 'داده ناقص یا کلید نامعتبر در برنامه (باگ)', 'این خطای برنامه است؛ متن فنی و مکان خطا را برای توسعه‌دهنده بفرستید.'],
+        ['Undefined index', 'داده ناقص یا کلید نامعتبر در برنامه (باگ)', 'این خطای برنامه است؛ متن فنی و مکان خطا را برای توسعه‌دهنده بفرستید.'],
+        ['Uncaught TypeError', 'نوع داده نادرست در برنامه (باگ)', 'متن فنی و مکان خطا را برای توسعه‌دهنده بفرستید.'],
+        ['Failed to open stream', 'فایل یا مسیر موردنظر باز نشد', 'وجود فایل، مسیر و دسترسی خواندن/نوشتن را بررسی کنید.'],
+        ['SQLSTATE[HY000] [2002]', 'اتصال به پایگاه‌داده برقرار نشد', 'سرویس MariaDB/MySQL را بررسی کنید و تنظیمات دیتابیس در config.php را کنترل کنید.'],
+        ['Connection refused', 'اتصال به یک سرویس رد شد', 'سرویس مقصد (دیتابیس یا سرویس جانبی) را بررسی کنید که روشن باشد.'],
+        ['SQLSTATE[HY000]: General error: 2006', 'اتصال دیتابیس قطع شد', 'سرور دیتابیس را بررسی کنید؛ اگر تکرار شد، تنظیم timeout را بالا ببرید.'],
+        ['SQLSTATE[42S02]', 'جدول موردنیاز در پایگاه‌داده وجود ندارد', 'مهاجرت یا فایل schema مربوط را اجرا کنید.'],
+        ['SQLSTATE[42S22]', 'ستون موردنیاز در جدول وجود ندارد', 'مهاجرت به‌روزرسانی را اجرا کنید؛ احتمالاً نسخهٔ فایل‌ها با دیتابیس هم‌خوان نیست.'],
+        ['SQLSTATE[23000]', 'داده تکراری یا وابستگی ناسازگار', 'داده تکراری را بررسی کنید یا ابتدا رکوردهای وابسته را جابه‌جا کنید.'],
+        ['Maximum execution time', 'اجرای درخواست بیش از حد طول کشید', 'بار سرور یا گزارش‌های سنگین را بررسی کنید؛ بازهٔ گزارش را کوچک‌تر کنید.'],
+        ['Allowed memory size', 'حافظهٔ PHP تمام شد', 'memory_limit را افزایش دهید یا گزارش را در بازه‌های کوچک‌تر اجرا کنید.'],
+        ['Call to undefined function', 'یک تابع پیدا نشد؛ احتمالاً فایل‌های سامانه ناهماهنگ‌اند', 'سامانه را از یک بستهٔ کامل نصب کنید و نسخهٔ فایل‌ها را یکسان کنید.'],
+        ['Class ', 'یک کلاس پیدا نشد؛ احتمالاً فایل‌های سامانه ناهماهنگ‌اند', 'سامانه را از یک بستهٔ کامل نصب کنید.'],
+        ['Permission denied', 'سامانه به یک فایل یا پوشه دسترسی ندارد', 'مجوز نوشتن پوشه‌های uploads و storage را برای کاربر وب بررسی کنید.'],
+        ['CSRF', 'توکن امنیتی فرم منقضی شده است', 'صفحه را تازه‌سازی کنید و دوباره تلاش کنید.'],
+    ];
+    foreach ($rules as [$needle, $title, $action]) {
+        if (str_contains($message, $needle)) {
+            return ['title' => $title, 'cause' => 'بر اساس متن خطا؛ برای تأیید جزئیات فنی را ببینید.', 'action' => $action];
+        }
+    }
+    return ['title' => 'خطای نامشخص سامانه', 'cause' => 'علت دقیق از روی متن خطا مشخص نیست.', 'action' => 'جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.'];
+}
+
+/** حذف اطلاعات حساس پیش از ثبت: کد ملی (۱۰ رقم)، رمز و کلیدها. */
+function system_error_mask(string $text): string
+{
+    $text = (string) preg_replace('/\b\d{10}\b/u', '[کد ملی مخفی]', $text);
+    $text = (string) preg_replace('/(password|pass|pwd|رمز)\s*[=:]\s*\S+/iu', '$1=[مخفی]', $text);
+    return mb_substr($text, 0, 2000);
+}
+
+/** ثبت یک خطای فنی با توضیح فارسی در system_logs (هیچ‌وقت خودش خطا ایجاد نمی‌کند). */
+function system_error_record(string $level, string $source, string $rawMessage, string $location = ''): void
+{
+    try {
+        $explain = system_error_explain($rawMessage);
+        $title = $explain['title'];
+        if ($title === 'خطای نامشخص سامانه') {
+            // عنوان عمومی همهٔ خطاهای ناشناخته یکی می‌شد؛ متن کوتاه خطا جای آن می‌نشیند تا گروه‌ها جدا بمانند.
+            $title = 'خطای ناشناخته: ' . mb_substr(system_error_mask($rawMessage), 0, 140);
+        }
+        system_log($level, $source, $title, [
+            'cause' => $explain['cause'],
+            'action' => $explain['action'],
+            'technical' => system_error_mask($rawMessage),
+            'location' => $location,
+        ]);
+    } catch (Throwable) {
+        // ثبت لاگ نباید خود باعث خطای دیگری شود.
+    }
+}
+
+// هندلرهای سراسری: استثنای نهایی‌نشده، خطای قاتل PHP و کندی صفحه.
+if (PHP_SAPI !== 'cli') {
+    $GLOBALS['__request_started_at'] = microtime(true);
+    set_exception_handler(static function (Throwable $e): void {
+        system_error_record('error', 'خطای نهایی‌نشده', $e->getMessage(), $e->getFile() . ':' . $e->getLine());
+        if (!headers_sent()) {
+            http_response_code(500);
+            header('Content-Type: text/html; charset=utf-8');
+        }
+        echo '<!doctype html><meta charset="utf-8"><body style="font-family:sans-serif;direction:rtl;padding:24px"><h2>خطای داخلی سامانه</h2><p>خطا ثبت شد و برای پیگیری در گزارش خطا قابل دیدن است.</p></body>';
+    });
+    register_shutdown_function(static function (): void {
+        $error = error_get_last();
+        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+            system_error_record('error', 'خطای قاتل PHP', (string) $error['message'], (string) $error['file'] . ':' . (string) $error['line']);
+        }
+        $elapsed = microtime(true) - (float) ($GLOBALS['__request_started_at'] ?? microtime(true));
+        if ($elapsed >= 2.0) {
+            $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+            $page = preg_match('/page=([a-z0-9_\-]+)/i', $uri, $m) ? $m[1] : 'نامشخص';
+            system_log('warning', 'کندی صفحه', 'صفحهٔ «' . $page . '» ' . round($elapsed, 1) . ' ثانیه طول کشید', [
+                'cause' => 'کندی معمولاً از کوئری سنگین، گزارش بزرگ یا بار بالای سرور است.',
+                'action' => 'اگر این پیام تکرار شد، بازهٔ گزارش یا تعداد رکوردها را بررسی کنید.',
+                'ms' => (int) round($elapsed * 1000),
+            ]);
+        }
+    });
+}
+
+/** نمایش فارسی جزئیات یک لاگ: علت احتمالی، اقدام پیشنهادی و جزئیات فنی زیر «جزئیات». */
+/**
+ * ثبت خطای برنامه هم در گزارش سرور و هم در «سلامت سامانه» (system_logs).
+ * یک پیام تکراری در هر ۶۰ ثانیه فقط یک‌بار در جدول ثبت می‌شود تا حلقه‌های خطا جدول را پر نکنند.
+ */
+function app_error_log(string $message): bool
+{
+    error_log($message);
+    static $recent = [];
+    $key = sha1($message);
+    $now = time();
+    if (isset($recent[$key]) && $now - $recent[$key] < 60) {
+        return true;
+    }
+    $recent[$key] = $now;
+    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+    $location = isset($trace[0]['file']) ? basename((string) $trace[0]['file']) . ':' . (int) ($trace[0]['line'] ?? 0) : '';
+    system_error_record('error', 'خطای برنامه', $message, $location);
+    return true;
+}
+
+function system_log_meta_html(string $json): string
+{
+    if ($json === '') {
+        return '';
+    }
+    $meta = json_decode($json, true);
+    if (!is_array($meta)) {
+        return '<br><small>' . e($json) . '</small>';
+    }
+    $html = '';
+    if (!empty($meta['cause'])) {
+        $html .= '<br><small><b>علت احتمالی:</b> ' . e((string) $meta['cause']) . '</small>';
+    }
+    if (!empty($meta['action'])) {
+        $html .= '<br><small><b>اقدام پیشنهادی:</b> ' . e((string) $meta['action']) . '</small>';
+    }
+    $technical = [];
+    foreach (['technical', 'location', 'ms'] as $key) {
+        if (isset($meta[$key]) && $meta[$key] !== '') {
+            $technical[] = $key . ': ' . (string) $meta[$key];
+        }
+    }
+    if ($technical) {
+        $html .= '<details><summary><small>جزئیات فنی</small></summary><small dir="ltr">' . e(implode("\n", $technical)) . '</small></details>';
+    }
+    return $html !== '' ? $html : '<br><small>' . e($json) . '</small>';
+}
+
+/**
+ * حذف دسته‌ای ردیف‌ها برای جلوگیری از قفل طولانی جدول و رشد ناگهانی undo-log.
+ * $table و $where فقط از کد خودِ برنامه می‌آیند (نه ورودی کاربر)؛ مقادیر با پارامتر می‌روند.
+ * سقف ۲۰۰ دسته × ۵۰۰۰ ردیف در هر اجرا؛ بقیه در اجرای بعدی حذف می‌شوند.
+ */
+function db_delete_in_batches(string $table, string $where, array $params, int $batch = 5000, int $maxBatches = 200): int
+{
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $table)) {
+        return 0;
+    }
+    $batch = max(100, min(20000, $batch));
+    $total = 0;
+    $sql = 'DELETE FROM `' . $table . '` WHERE ' . $where . ' LIMIT ' . $batch;
+    for ($i = 0; $i < $maxBatches; $i++) {
+        $stmt = db()->prepare($sql);
+        $stmt->execute($params);
+        $done = $stmt->rowCount();
+        $total += $done;
+        if ($done < $batch) {
+            break;
+        }
+    }
+    return $total;
+}
+
+/** حذف لاگ‌های فنی قدیمی‌تر از بازهٔ نگهداری (پیش‌فرض ۳۰ روز). */
+function system_logs_prune(int $days = 30): int
+{
+    $days = max(1, min(3650, $days));
+    try {
+        system_logs_ensure();
+        return db_delete_in_batches('system_logs', 'created_at < (NOW() - INTERVAL ? DAY)', [$days]);
+    } catch (Throwable) {
+        return 0;
     }
 }
 
@@ -1036,7 +1305,7 @@ function ldap_sync_all_users(): array
         : '(&(objectClass=user)(sAMAccountName=*))');
     $attributes = ['distinguishedName', 'displayName', 'mail', 'department', 'sAMAccountName', 'employeeID', 'telephoneNumber', 'userAccountControl', 'memberOf'];
     $seen = [];
-    $result = ['created' => 0, 'updated' => 0, 'disabled' => 0, 'skipped' => 0, 'code_conflict' => 0];
+    $result = ['created' => 0, 'updated' => 0, 'disabled' => 0, 'skipped' => 0, 'code_conflict' => 0, 'skipped_disabled' => 0, 'errors' => []];
     $cookie = '';
     $processed = 0;
 
@@ -1083,7 +1352,24 @@ function ldap_sync_all_users(): array
             $existingQuery->execute([$username]);
             $existingUser = $existingQuery->fetch() ?: null;
             $wasExisting = $existingUser !== null;
-            $domainUser = upsert_domain_user($identity);
+            // حساب غیرفعال در دامین: اگر در سامانه نیست، اصلاً ایمپورت نمی‌شود.
+            $adDisabled = (((int) ($entry['useraccountcontrol'][0] ?? 0)) & 2) === 2;
+            if ($adDisabled && !$wasExisting) {
+                $result['skipped_disabled']++;
+                $processed++;
+                continue;
+            }
+            try {
+                $domainUser = upsert_domain_user($identity);
+            } catch (RuntimeException $userError) {
+                // یک کاربر مشکل‌دار (مثلاً نام کاربری با حساب محلی برخورد دارد) نباید کل همگام‌سازی را متوقف کند.
+                $result['skipped']++;
+                $processed++;
+                if (count($result['errors']) < 50) {
+                    $result['errors'][] = $username . ': ' . $userError->getMessage();
+                }
+                continue;
+            }
             if (!empty($domainUser['code_conflict'])) {
                 $result['code_conflict']++;
             }
@@ -1931,8 +2217,11 @@ function upsert_domain_user(array $identity): array
             $codeConflict = true;
             $empNo = normalize_employee_number($user['employee_number'] ?? '');
         }
+        // ۱.۵۰: کاربری که از قبل کد پرسنلی دارد، نامش از فهرست رسمی پرسنل غذا می‌آید و از AD بازنویسی نمی‌شود.
+        $hasCode = trim((string) ($user['employee_number'] ?? '')) !== '';
+        $fullNameToSave = $hasCode ? (string) $user['full_name'] : $identity['full_name'];
         $update = db()->prepare('UPDATE users SET full_name = ?, email = ?, employee_number = ?, phone = ?, department = ?, department_id = ?, auth_source = "ldap" WHERE id = ?');
-        $update->execute([$identity['full_name'], $identity['email'], $empNo, $identity['phone'] ?? '', $identity['department'], $effectiveDepartmentId, $user['id']]);
+        $update->execute([$fullNameToSave, $identity['email'], $empNo, $identity['phone'] ?? '', $identity['department'], $effectiveDepartmentId, $user['id']]);
         $user['department_id'] = $effectiveDepartmentId;
         $user['employee_number'] = $empNo;
         link_agent_assets_to_user((int) $user['id'], (string) $identity['username'], $effectiveDepartmentId);
@@ -2240,8 +2529,17 @@ function activity_log(array $data): void
     }
 }
 
+/**
+ * بازدید صفحه (page_view) کم‌اهمیت و پرحجم است و جدول گزارش فعالیت را بی‌دلیل بزرگ و کند می‌کند.
+ * تصمیم ۱.۵۵: خاموش. ثبت عملیات واقعی (ایجاد/ویرایش/ورود/خروج...) ادامه دارد.
+ */
+const ACTIVITY_LOG_PAGE_VIEWS = false;
+
 function activity_log_view(string $page): void
 {
+    if (!ACTIVITY_LOG_PAGE_VIEWS) {
+        return;
+    }
     if (PHP_SAPI === 'cli' || ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
         return;
     }
@@ -2278,12 +2576,49 @@ function activity_logs_prune(int $days = 60): int
     $days = max(1, $days);
     try {
         activity_logs_ensure();
-        $query = db()->prepare('DELETE FROM activity_logs WHERE created_at < (NOW() - INTERVAL ? DAY)');
-        $query->execute([$days]);
-        return $query->rowCount();
+        return db_delete_in_batches('activity_logs', 'created_at < (NOW() - INTERVAL ? DAY)', [$days]);
     } catch (Throwable) {
         return 0;
     }
+}
+
+/**
+ * حداقل نگهداری برای داده‌های حسابرسی فیش غذا (چاپ و تحویل) — ۶ ماه.
+ * هیچ کد پاک‌سازی نباید جدول‌های food_ticket_events و food_ticket_print_log را کمتر از این مدت حذف کند.
+ */
+const FOOD_AUDIT_RETENTION_DAYS = 183;
+
+/**
+ * پاک‌سازی جدول‌های کم‌اهمیت و پرحجم که داده‌ای برای حسابرسی ندارند:
+ *  - chatbot_logs: بیش از ۹۰ روز
+ *  - api_rate_limits: پنجرهٔ شمارش بیش از ۱ روز
+ *  - login_attempts: پنجرهٔ قدیمی و بدون قفل فعال
+ * فیش‌های غذا و لاگ چاپ هرگز اینجا پاک نمی‌شوند.
+ * @return array<string,int> تعداد ردیف‌های حذف‌شده به تفکیک جدول
+ */
+function ops_low_value_tables_prune(): array
+{
+    $out = [];
+    try {
+        $out['chatbot_logs'] = db_delete_in_batches('chatbot_logs', 'created_at < (NOW() - INTERVAL ? DAY)', [90]);
+    } catch (Throwable) {
+        $out['chatbot_logs'] = 0;
+    }
+    try {
+        $out['api_rate_limits'] = db_delete_in_batches('api_rate_limits', 'window_started < (NOW() - INTERVAL ? DAY)', [1]);
+    } catch (Throwable) {
+        $out['api_rate_limits'] = 0;
+    }
+    try {
+        $out['login_attempts'] = db_delete_in_batches(
+            'login_attempts',
+            '(locked_until IS NULL OR locked_until < NOW()) AND window_started < (NOW() - INTERVAL ? DAY)',
+            [1]
+        );
+    } catch (Throwable) {
+        $out['login_attempts'] = 0;
+    }
+    return $out;
 }
 
 function activity_log_retention_days(): int

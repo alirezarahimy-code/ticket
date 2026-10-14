@@ -1,3 +1,4 @@
+SET NAMES utf8mb4;
 -- بات پاسخ‌گو: جدول پرسش‌های متداول و جدول لاگ سؤال‌ها (idempotent و افزایشی)
 CREATE TABLE IF NOT EXISTS chatbot_faq (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -498,7 +498,7 @@ function cd_dvd_export(array $user): never
     $period = $reportDates
         ? ['from' => $reportDates[0], 'to' => $reportDates[count($reportDates) - 1]]
         : ['from' => 'بدون دادهٔ تاریخی', 'to' => 'بدون دادهٔ تاریخی'];
-    excel_download('cd-dvd-report-' . date('Y-m-d') . '.xls', 'گزارش کنترل CD/DVD', ['ردیف', 'جهت', 'رسانه', 'شماره رسانه', 'نوع اطلاعات', 'شرح', 'تاریخ', 'تحویل‌گیرنده', 'واحد مقصد', 'شخص واردکننده', 'معاونت', 'ثبت‌کننده', 'برگه خروج', 'یادداشت'], $rows, $period);
+    excel_download('cd-dvd-report-' . date('Y-m-d') . '.xlsx', 'گزارش کنترل CD/DVD', ['ردیف', 'جهت', 'رسانه', 'شماره رسانه', 'نوع اطلاعات', 'شرح', 'تاریخ', 'تحویل‌گیرنده', 'واحد مقصد', 'شخص واردکننده', 'معاونت', 'ثبت‌کننده', 'برگه خروج', 'یادداشت'], $rows, $period);
 }
 
 function cd_dvd_render_surface(array $user, string $baseUrl): string

@@ -23,7 +23,7 @@ function ola_header(string $title, array $user): void
 function ola_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی</footer></div><script src="assets/app.js"></script></body></html>';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js"></script></body></html>';
 }
 
 // ۱.۳۷.۷ — این صفحه با require_admin() باز می‌شد، اما منوی برنامه و کاتالوگ دسترسی‌ها بر پایهٔ

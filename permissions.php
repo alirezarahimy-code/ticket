@@ -19,6 +19,8 @@ function permission_roles(): array
         'manager' => 'مدیر',
         'agent' => 'کارشناس',
         'user' => 'کاربر',
+        'local_user' => 'کاربر محلی',
+        'guard' => 'نگهبان',
     ];
 }
 
@@ -125,13 +127,14 @@ function permission_catalog(): array
                 ['code' => 'analytics.view', 'label' => 'چارت‌ها'],
                 ['code' => 'audit.view', 'label' => 'ممیزی'],
                 ['code' => 'logs.view', 'label' => 'گزارش خطا'],
+                ['code' => 'system.health', 'label' => 'سلامت سامانه و خطاهای فنی (وضعیت، پیگیری، نگهداری لاگ)'],
                 ['code' => 'logs.activity', 'label' => 'فعالیت کاربران'],
                 ['code' => 'logs.activity_export', 'label' => 'خروجی فعالیت کاربران'],
             ],
         ],
         [
             'key' => 'food',
-            'label' => 'چاپ فیش غذا',
+            'label' => 'سامانه مدیریت غذا',
             'items' => [
                 ['code' => 'food.dashboard', 'label' => 'داشبورد'],
                 ['code' => 'food.monitor', 'label' => 'پایش لحظه‌ای'],
@@ -144,6 +147,7 @@ function permission_catalog(): array
                 ['code' => 'food.groups', 'label' => 'گروه‌های غذا (نماینده با L_UID و غیبت روزانه)'],
                 ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
+                ['code' => 'food.emergency', 'label' => 'سفارش اضطراری غذا (ثبت و لغو برای هر فرد در روز بسته)'],
                 ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
                 ['code' => 'food.db_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
@@ -311,7 +315,7 @@ function print_fish_role_targets(): array
 {
     return [
         // مدیر پشتیبانی: داشبورد، پایش، گزارش، کارکنان، گروه‌ها، برنامهٔ غذایی و بستن روز؛ بدون تنظیمات.
-        'support_manager' => ['food.dashboard', 'food.monitor', 'food.monitor_edit', 'food.reports', 'food.employees', 'food.employees_edit', 'food.groups', 'food.groups_edit', 'food.groups_override', 'food.menu', 'food.menu_edit', 'food.order_close'],
+        'support_manager' => ['system.health', 'food.dashboard', 'food.monitor', 'food.monitor_edit', 'food.reports', 'food.employees', 'food.employees_edit', 'food.groups', 'food.groups_edit', 'food.groups_override', 'food.emergency', 'food.menu', 'food.menu_edit', 'food.order_close'],
         // بازرس: فقط داشبورد و مشاهدهٔ گروه‌های غذا.
         'inspector' => ['food.dashboard', 'food.groups'],
     ];
@@ -373,6 +377,10 @@ function permission_defaults_raw(): array
         // کاربر عادی (از جمله کاربران AD): بخش‌های چاپ فیش، نظارت و سیاست‌های دارایی/ترافیک ندارد.
         // «سفارش غذای خود» (foodorder.self) عمداً باقی است تا کاربر بتواند برای خودش سفارش دهد.
         'user' => array_values(array_diff($all, user_default_removed_codes())),
+        // کاربر محلی (پرسنل غذایی که در دامین نیستند): فقط سفارش غذای خود و پروفایل.
+        'local_user' => ['foodorder.self', 'profile.edit'],
+        // نگهبان: سفارش غذا، پروفایل، و کنترل CD/DVD و تردد با دسترسی کامل.
+        'guard' => ['foodorder.self', 'profile.edit', 'cddvd.view', 'cddvd.edit', 'traffic.view', 'traffic.manage', 'traffic.destinations'],
     ];
 }
 

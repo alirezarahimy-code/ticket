@@ -440,6 +440,29 @@ document.addEventListener('DOMContentLoaded', function () {
         input.addEventListener('input', update);
         update();
     };
+    // جستجوی زنده کاربران محلی (بدون اسکریپت درون‌خطی؛ CSP اجازهٔ آن را نمی‌دهد)
+    var lacInput = document.querySelector('[data-lac-filter]');
+    if (lacInput) {
+        var lacRows = Array.from(document.querySelectorAll('tr[data-lac]'));
+        var lacCount = document.querySelector('[data-lac-count]');
+        var lacNorm = function (value) {
+            return String(value || '').toLowerCase().replace(/[يى]/g, 'ی').replace(/ك/g, 'ک')
+                .replace(/[۰-۹]/g, function (d) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); })
+                .replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); })
+                .replace(/\s+/g, ' ').trim();
+        };
+        var lacFilter = function () {
+            var query = lacNorm(lacInput.value);
+            var visible = 0;
+            lacRows.forEach(function (row) {
+                var match = query === '' || lacNorm(row.textContent).indexOf(query) !== -1;
+                row.style.display = match ? '' : 'none';
+                if (match) visible += 1;
+            });
+            if (lacCount) lacCount.textContent = query === '' ? '' : visible + ' نتیجه';
+        };
+        lacInput.addEventListener('input', lacFilter);
+    }
     bindSettingsUserSearch();
     document.querySelectorAll('[data-digits-only]').forEach(function (field) {
         field.addEventListener('keydown', function (event) {

@@ -58,9 +58,10 @@
   }
 
   function userLabel(u) {
-    return esc(u.name || '—') + ' <small style="color:var(--muted)">(' + esc(u.pc) + ')</small>'
-      + (u.active ? '' : ' <span class="status bad">غیرفعال</span>')
+    const badges = (u.active ? '' : ' <span class="status bad">غیرفعال</span>')
       + (u.nat ? '' : ' <span class="status warn" title="بدون کد ملی، سفارش تطبیق داده نمی‌شود">بدون کد ملی</span>');
+    return '<span title="' + esc((u.name || '—') + ' (' + (u.pc || '') + ')') + '" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">'
+      + esc(u.name || '—') + (u.pc ? ' <small style="color:var(--muted)">(' + esc(u.pc) + ')</small>' : '') + badges + '</span>';
   }
 
   function form() {
@@ -72,8 +73,8 @@
     const mine = (S.groups.find((x) => x.id === g.id) || { members: [] }).members;
     const pool = [...mine, ...S.free].filter((u, i, a) => a.findIndex((v) => v.id === u.id) === i)
       .filter((u) => !q || (u.name + ' ' + u.pc + ' ' + u.nat).indexOf(q) >= 0);
-    const rows = pool.map((u) => '<label style="display:flex;gap:8px;align-items:center;padding:4px 0">'
-      + '<input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '> <span>' + userLabel(u) + '</span></label>').join('')
+    const rows = pool.map((u) => '<label class="fg-person">'
+      + '<span class="fg-person-name">' + userLabel(u) + '</span><input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '></label>').join('')
       || '<p class="muted">کاربر آزادی برای انتخاب وجود ندارد.</p>';
     return '<div class="card form-card" id="fg-form"><div class="form-section-head"><h2>' + (g.id ? 'ویرایش گروه' : 'گروه جدید') + '</h2></div>'
       + '<div class="form-grid">'
@@ -85,7 +86,7 @@
       + '<p class="muted" style="margin:6px 0">شناسایی نماینده فقط و فقط با <b>L_UID</b> انجام می‌شود (L_UID → گروه → اعضا → سفارش → غیبت امروز → واجد شرایط‌ها → فیش). شمارهٔ کارت (C_CARD) در این سامانه هیچ نقشی ندارد و از این فرم حذف شده است؛ گروه‌هایی که L_UID ندارند باید L_UID آن‌ها ثبت شود. تعداد فیش را سامانه محاسبه می‌کند.</p>'
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
-      + '<div id="fg-members" style="max-height:320px;overflow:auto;border:1px solid var(--line,#ddd);border-radius:8px;padding:6px 10px">' + rows + '</div>'
+      + '<div id="fg-members" class="fg-people-box">' + rows + '</div>'
       + '<div class="actions" style="margin-top:12px"><button class="btn primary" data-fg="save">ذخیره گروه</button><button class="btn ghost" data-fg="cancel">انصراف</button></div></div>';
   }
 
@@ -162,11 +163,10 @@
     const s = a.summary || {};
     const rows = (a.members || []).map((m) => {
       const disabled = (!editable || locked && !a.can_override) ? ' disabled' : '';
-      return '<label style="display:flex;gap:8px;align-items:center;padding:4px 0">'
-        + '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '> '
-        + '<span>' + esc(m.name) + ' <small style="color:var(--muted)">(' + esc(m.pc) + ')</small>'
+      return '<label class="fg-person">'
+        + '<span title="' + esc(m.name) + ' (' + esc(m.pc) + ')" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">' + esc(m.name) + ' <small style="color:var(--muted)">(' + esc(m.pc) + ')</small>'
         + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
-        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span></label>';
+        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span><input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '></label>';
     }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
       + '<h2>غیبت روزانه — ' + esc(a.group ? a.group.title : '') + (dateJalali ? ' <small style="color:var(--muted)">(' + esc(dateJalali) + ')</small>' : '') + '</h2>'
@@ -191,7 +191,7 @@
       + '</div>'
       + '<p class="muted">غیبت به‌صورت رکورد همان تاریخ ذخیره می‌شود؛ نبودِ رکورد یعنی «حاضر». با نخستین تردد معتبر نماینده، لیست این تاریخ قفل می‌شود (هیچ قاعده‌ای بر اساس ساعت وجود ندارد). '
       + 'اگر عضو غایب‌شده فیشِ چاپ‌نشده داشته باشد، فیشش خودکار <b>متوقف</b> می‌شود تا چاپ نشود و اگر بعداً «حاضر» شود، خودکار به صف چاپ برمی‌گردد.</p>'
-      + '<div style="max-height:320px;overflow:auto;border:1px solid var(--line,#ddd);border-radius:8px;padding:6px 10px">' + rows + '</div>'
+      + '<div class="fg-people-box">' + rows + '</div>'
       + '<div class="actions" style="margin-top:12px">'
       + '<button class="btn primary" data-fg="abs-save"' + (editable ? '' : ' disabled') + '>ذخیرهٔ غیبت این تاریخ</button>'
       + '<button class="btn ghost" data-fg="abs-clear"' + (editable ? '' : ' disabled') + '>همه حاضر</button>'

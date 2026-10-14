@@ -57,10 +57,11 @@ CREATE TABLE IF NOT EXISTS users (
     handling_unit_id INT UNSIGNED NULL,
     is_it_agent TINYINT(1) NOT NULL DEFAULT 0,
     is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
-    role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector') NOT NULL DEFAULT 'user',
+    role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector','local_user','guard') NOT NULL DEFAULT 'user',
     auth_source ENUM('local','ldap','food') NOT NULL DEFAULT 'local',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     last_login_at DATETIME NULL,
+    must_change_password TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_users_role (role),
     INDEX idx_users_department (department),
@@ -138,7 +139,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     serial_no VARCHAR(30) NOT NULL,
     visit_date DATE NOT NULL,
     full_name VARCHAR(190) NOT NULL,
-    national_code VARCHAR(10) NOT NULL,
+    national_code VARCHAR(10) DEFAULT NULL,
     phone VARCHAR(20) DEFAULT NULL,
     company VARCHAR(190) DEFAULT NULL,
     entry_time TIME DEFAULT NULL,
@@ -149,6 +150,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     meeting_with VARCHAR(190) DEFAULT NULL,
     approved_by VARCHAR(190) DEFAULT NULL,
     description TEXT,
+    is_notice TINYINT(1) NOT NULL DEFAULT 0,
     created_by INT UNSIGNED DEFAULT NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -981,6 +983,40 @@ CREATE TABLE IF NOT EXISTS system_logs (
     INDEX idx_system_logs_level (level)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS chatbot_faq (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    question VARCHAR(255) NOT NULL,
+    answer TEXT NOT NULL,
+    keywords VARCHAR(500) NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    INDEX idx_chatbot_faq_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS chatbot_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NULL,
+    question VARCHAR(500) NOT NULL,
+    faq_id INT UNSIGNED NULL,
+    intent VARCHAR(80) NULL,
+    score DECIMAL(6,3) NOT NULL DEFAULT 0,
+    helpful TINYINT(1) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_chatbot_logs_created (created_at),
+    INDEX idx_chatbot_logs_faq (faq_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS system_incidents (
+    fingerprint CHAR(40) NOT NULL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    status ENUM('open','investigating','resolved') NOT NULL DEFAULT 'open',
+    note TEXT NULL,
+    updated_by INT UNSIGNED NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS ticket_number_seq (
     prefix VARCHAR(20) NOT NULL PRIMARY KEY,
     seq INT UNSIGNED NOT NULL DEFAULT 0
@@ -1076,12 +1112,32 @@ CREATE TABLE IF NOT EXISTS food_ticket_templates (
 CREATE TABLE IF NOT EXISTS food_catalog (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     food_name VARCHAR(190) NOT NULL,
+    category VARCHAR(40) NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY uq_food_catalog_name (food_name),
     INDEX idx_food_catalog_active (active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS food_guest_requests (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    request_date DATE NOT NULL,
+    organization VARCHAR(190) NOT NULL,
+    guest_count SMALLINT UNSIGNED NOT NULL,
+    food_id INT UNSIGNED NULL,
+    requester_name VARCHAR(150) NOT NULL,
+    deputy_unit_id INT UNSIGNED NULL,
+    note VARCHAR(500) NULL,
+    status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    cancelled_by INT UNSIGNED NULL,
+    cancelled_at DATETIME NULL,
+    KEY idx_food_guest_requests_date_status (request_date, status),
+    KEY idx_food_guest_requests_deputy (deputy_unit_id, request_date),
+    CONSTRAINT fk_food_guest_requests_food FOREIGN KEY (food_id) REFERENCES food_catalog (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS food_calendar (

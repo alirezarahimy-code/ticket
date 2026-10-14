@@ -32,7 +32,7 @@ foreach ($query->fetchAll() as $ticket) {
         if (db()->inTransaction()) {
             db()->rollBack();
         }
-        error_log('ITSM SLA maintenance failed for ticket ' . (int) $ticket['id'] . ': ' . $exception->getMessage());
+        app_error_log('ITSM SLA maintenance failed for ticket ' . (int) $ticket['id'] . ': ' . $exception->getMessage());
     }
 }
 
@@ -84,12 +84,12 @@ try {
                 if (db()->inTransaction()) {
                     db()->rollBack();
                 }
-                error_log('ITSM OLA maintenance failed for ticket ' . (int) $ticket['id'] . ': ' . $exception->getMessage());
+                app_error_log('ITSM OLA maintenance failed for ticket ' . (int) $ticket['id'] . ': ' . $exception->getMessage());
             }
         }
     }
 } catch (Throwable $exception) {
-    error_log('ITSM OLA maintenance unavailable: ' . $exception->getMessage());
+    app_error_log('ITSM OLA maintenance unavailable: ' . $exception->getMessage());
 }
 
 fwrite(STDOUT, "SLA alerts created: {$alerts}; OLA alerts created: {$olaAlerts}\n");

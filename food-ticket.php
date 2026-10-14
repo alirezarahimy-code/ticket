@@ -113,6 +113,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
             'food-menu/status', 'food-menu/month' => 'food.menu|food.order_close',
             'food-menu/catalog', 'food-menu/day' => 'food.menu',
             'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export' => 'food.order_close',
+            'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel' => 'food.emergency',
             default => null,
         };
         if ($menuPermission === null || !function_exists('user_can')) {
@@ -281,9 +282,9 @@ function food_ticket_main_url(): string
 
 function food_ticket_brand_params(): array
 {
-    $name = trim((string) setting('food_ticket_brand_name', (string) setting('app_name', (string) cfg('app.name', 'سامانه چاپ فیش غذا'))));
+    $name = trim((string) setting('food_ticket_brand_name', (string) setting('app_name', (string) cfg('app.name', 'سامانه مدیریت غذا'))));
     if (function_exists('food_ticket_is_legacy_brand_name') ? food_ticket_is_legacy_brand_name($name) : $name === '') {
-        $name = 'سامانه چاپ فیش غذا';
+        $name = 'سامانه مدیریت غذا';
     }
     $logo = trim((string) setting('food_ticket_brand_logo', (string) setting('app_logo', (string) cfg('app.logo', ''))));
     if ($logo !== '' && !preg_match('#^https?://#i', $logo)) {
@@ -445,7 +446,7 @@ function food_ticket_ensure_printer_mode_column(): void
             db()->exec("ALTER TABLE food_ticket_config MODIFY printer_mode VARCHAR(20) NOT NULL DEFAULT 'tcp_raw'");
         }
     } catch (Throwable $e) {
-        error_log('[food-ticket] ensure printer_mode column: ' . $e->getMessage());
+        app_error_log('[food-ticket] ensure printer_mode column: ' . $e->getMessage());
     }
 }
 
@@ -520,7 +521,7 @@ function food_ticket_attendance_password(array $config): string
         }
         if (trim((string) ($candidates[0] ?? '')) !== '') {
             // ciphertext هست ولی باز نشد (app.key عوض شده) → به مسیرهای بعدی برمی‌گردیم
-            error_log('[food-ticket] attendance_password_enc decrypt failed (app.key mismatch?)');
+            app_error_log('[food-ticket] attendance_password_enc decrypt failed (app.key mismatch?)');
         }
     } catch (Throwable) {
         // دسترسی به جدول تنظیمات ممکن نبود → مسیرهای بعدی
@@ -934,7 +935,7 @@ PS;
     $ps = str_replace('__FT_PAYLOAD__', $payload, $ps);
     $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ft_del_' . bin2hex(random_bytes(4)) . '.ps1';
     if (@file_put_contents($tmp, $ps, LOCK_EX) === false) {
-        error_log('Food ticket PowerShell delete script could not be written.');
+        app_error_log('Food ticket PowerShell delete script could not be written.');
         return $fail('نوشتن اسکریپت PowerShell حذف ممکن نشد.');
     }
     try {
@@ -942,12 +943,12 @@ PS;
         $code = 0;
         @exec('powershell -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File ' . escapeshellarg($tmp) . ' 2>&1', $output, $code);
         if ($code !== 0) {
-            error_log('Food ticket Access DELETE failed: ' . implode(' ', $output));
+            app_error_log('Food ticket Access DELETE failed: ' . implode(' ', $output));
             return $fail('اجرای PowerShell با کد ' . $code . ' پایان یافت: ' . implode(' ', $output));
         }
         $result = json_decode(trim(implode("\n", $output)), true);
         if (!is_array($result)) {
-            error_log('Food ticket Access DELETE returned unparsable output: ' . implode(' ', $output));
+            app_error_log('Food ticket Access DELETE returned unparsable output: ' . implode(' ', $output));
             return $fail('خروجی PowerShell قابل خواندن نبود.');
         }
         return [
@@ -1578,7 +1579,7 @@ function food_ticket_source_delete_where(array $item): ?string
     $date = $item['date_raw'] ?? null;
     $time = $item['time_raw'] ?? null;
     if (($uid === '' && $card === '') || $date === null || $date === '' || $time === null || $time === '') {
-        error_log('[food-ticket] delete_source: exact uid/card/date/time identity is incomplete');
+        app_error_log('[food-ticket] delete_source: exact uid/card/date/time identity is incomplete');
         return null;
     }
 
@@ -1890,7 +1891,7 @@ function food_ticket_delete_source($connection, array $item, array $config, ?arr
     $candidates = food_ticket_source_delete_candidates($item);
     if (!$candidates) {
         $out['reason'] = 'شناسهٔ ردیف ناقص است (uid/کارت/تاریخ/ساعت یا کلید اصلی در دست نیست).';
-        error_log('[food-ticket] delete_source: incomplete identity uid=' . (string) ($item['uid'] ?? '') . ' key=' . $sourceKey);
+        app_error_log('[food-ticket] delete_source: incomplete identity uid=' . (string) ($item['uid'] ?? '') . ' key=' . $sourceKey);
         return false;
     }
 
@@ -1950,7 +1951,7 @@ function food_ticket_delete_source($connection, array $item, array $config, ?arr
             $out['strategy'] = $label;
             $out['deleted'] = true;
             $out['reason'] = '';
-            error_log('[food-ticket] delete_source OK strategy=' . $label . ' uid=' . (string) ($item['uid'] ?? '') . ' key=' . $sourceKey);
+            app_error_log('[food-ticket] delete_source OK strategy=' . $label . ' uid=' . (string) ($item['uid'] ?? '') . ' key=' . $sourceKey);
             return true;
         } catch (Throwable $e) {
             $errors[] = $label . ': ' . $e->getMessage();
@@ -1959,7 +1960,7 @@ function food_ticket_delete_source($connection, array $item, array $config, ?arr
 
     $out['reason'] = $errors ? implode(' | ', $errors) : 'حذف ناموفق بود.';
     $out['where'] = $candidates[count($candidates) - 1][1];
-    error_log('[food-ticket] delete_source FAILED uid=' . (string) ($item['uid'] ?? '')
+    app_error_log('[food-ticket] delete_source FAILED uid=' . (string) ($item['uid'] ?? '')
         . ' key=' . $sourceKey . ' tried=' . implode(',', $out['tried']) . ' detail=' . $out['reason']);
     return false;
 }
@@ -1991,7 +1992,7 @@ function food_ticket_mark_source_delete(int $eventId, bool $deleted, string $not
         ]);
         return true;
     } catch (Throwable $e) {
-        error_log('[food-source-delete] mark failed id=' . $eventId . ': ' . $e->getMessage());
+        app_error_log('[food-source-delete] mark failed id=' . $eventId . ': ' . $e->getMessage());
         return false;
     }
 }
@@ -2166,6 +2167,9 @@ function food_ticket_print_event(int $id, array $config, int $maxAttempts = 3): 
     try {
         food_ticket_send_to_printer($event, $config);
         db()->prepare('UPDATE food_ticket_events SET print_status = "printed", event_type = "printed", processed_at = NOW(), last_error = NULL WHERE id = ?')->execute([$id]);
+        if (function_exists('food_ticket_mark_delivered_on_print')) {
+            food_ticket_mark_delivered_on_print($id);
+        }
     } catch (Throwable $exception) {
         db()->prepare('UPDATE food_ticket_events SET print_status = "print_error", event_type = "print_error", processed_at = NOW(), last_error = ? WHERE id = ?')->execute([$exception->getMessage(), $id]);
         throw $exception;
@@ -2207,7 +2211,7 @@ function food_ticket_cleanup_source_rows(int $days = 7, bool $dryRun = false, ?i
         try {
             food_ticket_events_ensure_source_delete();
         } catch (Throwable $e) {
-            error_log('[food-cleanup] ensure failed: ' . $e->getMessage());
+            app_error_log('[food-cleanup] ensure failed: ' . $e->getMessage());
         }
     }
     $hasSourceDelete = function_exists('food_ticket_source_delete_supported') && food_ticket_source_delete_supported();
@@ -2265,7 +2269,7 @@ function food_ticket_cleanup_source_rows(int $days = 7, bool $dryRun = false, ?i
         try {
             food_ticket_mark_source_delete($eventId, $deleted, $note);
         } catch (Throwable $e) {
-            error_log('[food-cleanup] mark failed id=' . $eventId . ': ' . $e->getMessage());
+            app_error_log('[food-cleanup] mark failed id=' . $eventId . ': ' . $e->getMessage());
         }
     };
 
@@ -2321,7 +2325,7 @@ function food_ticket_cleanup_source_rows(int $days = 7, bool $dryRun = false, ?i
                     }
                 } catch (Throwable $e) {
                     $out['failed'] += count($chunk);
-                    error_log('[food-cleanup] batch delete failed: ' . $e->getMessage());
+                    app_error_log('[food-cleanup] batch delete failed: ' . $e->getMessage());
                 }
                 if ($dryRun) {
                     break;
@@ -2452,7 +2456,7 @@ function food_ticket_worker_heartbeat(array $result = [], ?Throwable $error = nu
             $error?->getMessage(), (int) ($result['processed'] ?? 0), (int) ($result['printed'] ?? 0), (int) ($result['errors'] ?? ($error ? 1 : 0)),
         ]);
     } catch (Throwable $heartbeatError) {
-        error_log('Food ticket heartbeat failed: ' . $heartbeatError->getMessage());
+        app_error_log('Food ticket heartbeat failed: ' . $heartbeatError->getMessage());
     }
 }
 
@@ -2921,7 +2925,7 @@ function food_ticket_api_config(): array
         'guestFoodType' => 'مهمان',
         'cutSourceRows' => !empty($config['cut_source_rows']),
         'enabled' => !empty($config['enabled']),
-        'brandName' => (string) ($brand['brand_name'] ?? 'سامانه چاپ فیش غذا'),
+        'brandName' => (string) ($brand['brand_name'] ?? 'سامانه مدیریت غذا'),
         'brandLogo' => (string) ($brand['brand_logo'] ?? ''),
         'panelVersion' => FOOD_TICKET_PANEL_VERSION,
         'printer' => [
@@ -3021,7 +3025,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
             ];
         }
     } catch (Throwable $e) {
-        error_log('[absent] internal orders query failed: ' . $e->getMessage());
+        app_error_log('[absent] internal orders query failed: ' . $e->getMessage());
         throw $e;
     }
 
@@ -3047,7 +3051,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
             }
         }
     } catch (Throwable $e) {
-        error_log('[absent] events: ' . $e->getMessage());
+        app_error_log('[absent] events: ' . $e->getMessage());
     }
 
     // «غایب اعلام‌شده»: کسانی که برای همان تاریخ در فرم گروه، غایب ثبت شده‌اند
@@ -3061,7 +3065,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
                 $declaredByDay[(string) $arow['absence_date']][(int) $arow['user_id']] = true;
             }
         } catch (Throwable $e) {
-            error_log('[absent] declared absence: ' . $e->getMessage());
+            app_error_log('[absent] declared absence: ' . $e->getMessage());
         }
     }
     $userIdsByNational = [];
@@ -3085,7 +3089,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
                     $declared = $uid > 0 && !empty($declaredByDay[(string) $day][$uid]);
                 }
             } catch (Throwable $e) {
-                error_log('[absent] user lookup: ' . $e->getMessage());
+                app_error_log('[absent] user lookup: ' . $e->getMessage());
             }
             $row['declared_absent'] = $declared;
             $row['status'] = $declared
@@ -3124,7 +3128,7 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
         'SELECT id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
         . 'event_type AS result, print_status' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
         . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group '
-        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? ORDER BY id DESC'
+        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown" ORDER BY id DESC'
     );
     $query->execute([$fromDate, $toDate]);
     return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete): array {
@@ -3632,10 +3636,10 @@ function food_ticket_api_health(): array
     $printError = 0;
     $lastError = '';
     try {
-        $records = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events')->fetchColumn();
-        $pending = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE print_status IN ("pending","printing")')->fetchColumn();
-        $printError = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE print_status IN ("print_error","failed")')->fetchColumn();
-        $last = db()->query('SELECT created_at, last_error FROM food_ticket_events ORDER BY id DESC LIMIT 1')->fetch();
+        $records = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown"')->fetchColumn();
+        $pending = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown" AND print_status IN ("pending","printing")')->fetchColumn();
+        $printError = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown" AND print_status IN ("print_error","failed")')->fetchColumn();
+        $last = db()->query('SELECT created_at, last_error FROM food_ticket_events WHERE event_type <> "unknown" ORDER BY id DESC LIMIT 1')->fetch();
         if ($last) {
             $lastEventAt = (string) ($last['created_at'] ?? '');
             $lastError = (string) ($last['last_error'] ?? '');
@@ -3708,7 +3712,7 @@ function food_ticket_api_self_test(): array
 
     // 2) MySQL events
     try {
-        $count = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events')->fetchColumn();
+        $count = (int) db()->query('SELECT COUNT(*) FROM food_ticket_events WHERE event_type <> "unknown"')->fetchColumn();
         $checks[] = ['name' => 'دیتابیس داخلی مانیتورینگ', 'ok' => true, 'message' => "جدول events قابل خواندن است؛ {$count} رکورد."];
     } catch (Throwable $e) {
         $checks[] = ['name' => 'دیتابیس داخلی مانیتورینگ', 'ok' => false, 'message' => $e->getMessage()];
@@ -3836,7 +3840,7 @@ function food_ticket_api_upload_access_file(array $user): never
             try {
                 save_audit((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
             } catch (Throwable $auditError) {
-                error_log('[food-ticket] database upload audit failed: ' . $auditError->getMessage());
+                app_error_log('[food-ticket] database upload audit failed: ' . $auditError->getMessage());
             }
         }
         food_ticket_config(true);
@@ -4145,7 +4149,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 try {
                     food_ticket_events_ensure_source_delete();
                 } catch (Throwable $e) {
-                    error_log('[food-source-delete] ensure failed: ' . $e->getMessage());
+                    app_error_log('[food-source-delete] ensure failed: ' . $e->getMessage());
                 }
             }
             $summary = food_ticket_process_batch();
@@ -4437,7 +4441,7 @@ function food_ticket_render_page(array $user): void
     $html = is_file($file) ? file_get_contents($file) : false;
     if (!is_string($html) || $html === '') {
         http_response_code(500);
-        error_log('food-ticket: food-ticket-web/index.html پیدا نشد یا خالی است: ' . $file);
+        app_error_log('food-ticket: food-ticket-web/index.html پیدا نشد یا خالی است: ' . $file);
         exit('رابط کامل چاپ فیش پیدا نشد. فایل food-ticket-web/index.html را بررسی کنید.');
     }
     $apiBase = 'index.php?page=food-ticket&food_api=';
@@ -4474,6 +4478,7 @@ function food_ticket_render_page(array $user): void
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ((food_ticket_is_primary_admin($user) || (function_exists('user_can') && user_can($user, 'food.emergency'))) ? 'true' : 'false')
         . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false') . ';</script>';
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
     // نگاشت از لایهٔ محیطی می‌آید تا سورس سامانه هیچ نام برندی نداشته باشد.
@@ -4523,10 +4528,10 @@ function food_ticket_render_page(array $user): void
         $html = (string) ($hosted['html'] ?? $html);
         $notes = (array) ($hosted['notes'] ?? []);
         if (!in_array('bootstrap:brand', $notes, true) && !in_array('bootstrap:already', $notes, true)) {
-            error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
+            app_error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
         }
         if (!$assetNames) {
-            error_log('food-ticket: پوشهٔ food-ticket-web/assets خالی یا ناموجود است؛ دارایی‌های پنل ناقص کپی شده‌اند.');
+            app_error_log('food-ticket: پوشهٔ food-ticket-web/assets خالی یا ناموجود است؛ دارایی‌های پنل ناقص کپی شده‌اند.');
         }
     }
     echo $html;

@@ -52,12 +52,12 @@ function traffic_fetch_record(int $id): ?array
     return $row ?: null;
 }
 
-function traffic_query_records(array $filters, int $limit = 300): array
+function traffic_query_records(array $filters, int $limit = 300, string $sort = '', string $dir = ''): array
 {
     $where = [];
     $params = [];
     if ($filters['search'] !== '') {
-        $where[] = '(full_name LIKE ? OR national_code LIKE ? OR serial_no LIKE ? OR company LIKE ?)';
+        $where[] = '(v.full_name LIKE ? OR v.national_code LIKE ? OR v.serial_no LIKE ? OR v.company LIKE ?)';
         $like = '%' . $filters['search'] . '%';
         array_push($params, $like, $like, $like, $like);
     }
@@ -73,7 +73,8 @@ function traffic_query_records(array $filters, int $limit = 300): array
     if ($where) {
         $sql .= ' WHERE ' . implode(' AND ', $where);
     }
-    $sql .= ' ORDER BY v.visit_date DESC, v.id DESC LIMIT ' . $limit;
+    $sortMap = ['serial' => 'v.serial_no', 'date' => 'v.visit_date', 'name' => 'v.full_name', 'national' => 'v.national_code', 'entry' => 'v.entry_time', 'exit' => 'v.exit_time', 'meeting' => 'v.meeting_with', 'recorder' => 'u.full_name', '__tie' => 'v.id'];
+    $sql .= log_sort_order($sortMap, $sort, $dir, ' ORDER BY v.visit_date DESC, v.id DESC') . ' LIMIT ' . $limit;
     $query = db()->prepare($sql);
     $query->execute($params);
     return $query->fetchAll();
@@ -87,7 +88,7 @@ function traffic_stats(): array
     $stats['inside'] = (int) db()->query("SELECT COUNT(*) FROM traffic_visits WHERE visit_date = CURDATE() AND exit_time IS NULL")->fetchColumn();
     $stats['total'] = (int) db()->query('SELECT COUNT(*) FROM traffic_visits')->fetchColumn();
 
-    $stats['by_destination'] = db()->query("SELECT COALESCE(NULLIF(meeting_with, ''), 'نامشخص') AS title, COUNT(*) AS cnt FROM traffic_visits WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 29 DAY) GROUP BY COALESCE(NULLIF(meeting_with, ''), 'نامشخص') ORDER BY cnt DESC LIMIT 6")->fetchAll();
+    $stats['by_destination'] = db()->query("SELECT CASE WHEN is_notice = 1 THEN 'تردد خاص' ELSE COALESCE(NULLIF(meeting_with, ''), 'نامشخص') END AS title, COUNT(*) AS cnt FROM traffic_visits WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 29 DAY) GROUP BY CASE WHEN is_notice = 1 THEN 'تردد خاص' ELSE COALESCE(NULLIF(meeting_with, ''), 'نامشخص') END ORDER BY cnt DESC LIMIT 6")->fetchAll();
 
     $daily = [];
     $rows = db()->query("SELECT visit_date, COUNT(*) AS cnt FROM traffic_visits WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL 13 DAY) GROUP BY visit_date")->fetchAll(PDO::FETCH_KEY_PAIR);
@@ -162,30 +163,36 @@ function traffic_export_report(): never
     );
     $query->execute($params);
     $rows = [];
+    $sortKeys = [];
     foreach ($query->fetchAll() as $record) {
+        $isNotice = (int) ($record['is_notice'] ?? 0) === 1;
+        $sortKeys[] = [(string) $record['visit_date'], (string) $record['entry_time'], count($rows)];
         $rows[] = [
             (string) $record['serial_no'],
             jalali_date((string) $record['visit_date'], false),
-            (string) $record['full_name'],
-            (string) $record['national_code'],
+            ($isNotice ? 'تردد خاص: ' : '') . (string) $record['full_name'],
+            $isNotice || empty($record['national_code']) ? '—' : (string) $record['national_code'],
             (string) ($record['phone'] ?? ''),
             (string) ($record['company'] ?? ''),
-            (string) ($record['meeting_with'] ?? ''),
+            $isNotice ? 'تردد خاص' : (string) ($record['meeting_with'] ?? ''),
             (string) ($record['approved_by'] ?? ''),
             substr((string) $record['entry_time'], 0, 5),
             $record['exit_time'] ? substr((string) $record['exit_time'], 0, 5) : '',
             (int) $record['no_visit'] === 1 ? 'بله' : 'خیر',
             (int) $record['with_car'] === 1 ? 'بله' : 'خیر',
             (int) $record['with_mobile'] === 1 ? 'بله' : 'خیر',
-            (string) ($record['description'] ?? ''),
+            $isNotice ? 'اطلاع ورود برای افزایش سقف مهمان غذا' : (string) ($record['description'] ?? ''),
             (string) ($record['recorder_name'] ?? ''),
         ];
     }
+    // مرتب‌سازی: جدیدترین تاریخ و ساعت اول (همان ترتیب قبلی برای ترددهای عادی).
+    usort($sortKeys, static fn (array $a, array $b): int => [$b[0], $b[1], $b[2]] <=> [$a[0], $a[1], $a[2]]);
+    $rows = array_map(static fn (array $key): array => $rows[$key[2]], $sortKeys);
     $destinationLabel = $allDestinations ? 'همه مقصدها' : implode('، ', $selectedDestinations);
     $title = 'گزارش تردد مراجعین | ' . jalali_date($fromDate, false) . ' تا ' . jalali_date($toDate, false)
         . ' | ' . $destinationLabel . ' | تعداد: ' . count($rows);
     excel_download(
-        'traffic-report-' . $fromDate . '-to-' . $toDate . '.xls',
+        'traffic-report-' . $fromDate . '-to-' . $toDate . '.xlsx',
         $title,
         ['شماره برگ', 'تاریخ', 'نام و نام خانوادگی', 'کد ملی', 'تلفن همراه', 'موسسه / شرکت', 'مقصد ملاقات', 'تأییدکننده', 'ساعت ورود', 'ساعت خروج', 'بدون بازدید', 'با خودرو', 'با تلفن همراه', 'هدف از تردد', 'ثبت‌کننده'],
         $rows,
@@ -292,6 +299,53 @@ function traffic_set_exit(array $user): void
     save_audit((int) $user['id'], 'traffic_visit_exit_set', null, ['visit_id' => $id]);
 }
 
+/** خودترمیمی ستون‌های تردد خاص: اگر مهاجرت اجرا نشده باشد، همین‌جا اضافه/اصلاح می‌شود (یک‌بار در هر درخواست). */
+function traffic_ensure_notice_schema(): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+    try {
+        $pdo = db();
+        $cols = [];
+        foreach ($pdo->query("SHOW COLUMNS FROM traffic_visits")->fetchAll(PDO::FETCH_ASSOC) as $c) {
+            $cols[strtolower((string) $c['Field'])] = $c;
+        }
+        if (!isset($cols['is_notice'])) {
+            $pdo->exec('ALTER TABLE traffic_visits ADD COLUMN is_notice TINYINT(1) NOT NULL DEFAULT 0');
+        }
+        if (isset($cols['national_code']) && strtoupper((string) $cols['national_code']['Null']) === 'NO') {
+            $pdo->exec('ALTER TABLE traffic_visits MODIFY national_code VARCHAR(10) NULL');
+        }
+    } catch (Throwable $e) {
+        // اگر دسترسی DDL نباشد، خطا همان‌جا ثبت می‌شود و صفحه از کار نمی‌افتد.
+        if (function_exists('app_error_log')) {
+            app_error_log('traffic schema check: ' . $e->getMessage());
+        }
+    }
+}
+
+traffic_ensure_notice_schema();
+
+/** تردد خاص: فقط نام؛ ورود همان لحظه ثبت می‌شود، برگه ندارد و مثل بقیهٔ ترددها در فهرست‌ها و سقف مهمان شمرده می‌شود. */
+function traffic_notice_create(array $user): int
+{
+    traffic_ensure_notice_schema();
+    $name = trim((string) ($_POST['full_name'] ?? ''));
+    if ($name === '') {
+        throw new TrafficInputException('نام و نام خانوادگی الزامی است.', 'full_name');
+    }
+    $name = mb_substr($name, 0, 190);
+    $serial = traffic_next_serial();
+    $stmt = db()->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, entry_time, exit_time, no_visit, with_car, with_mobile, is_notice, created_by) VALUES (?, CURDATE(), ?, NULL, CURTIME(), NULL, 0, 0, 0, 1, ?)');
+    $stmt->execute([$serial, $name, (int) $user['id']]);
+    $id = (int) db()->lastInsertId();
+    save_audit((int) $user['id'], 'traffic_notice_created', null, ['visit_id' => $id, 'serial' => $serial]);
+    return $id;
+}
+
 function traffic_save_destination(array $user): void
 {
     if (!traffic_can_manage($user)) {
@@ -340,13 +394,22 @@ function traffic_remember_form_error(RuntimeException $exception, string $tab): 
 /** همهٔ ترددهای بدون خروج (امروز و روزهای قبل). */
 function traffic_open_visits(): array
 {
-    return db()->query('SELECT id, serial_no, visit_date, full_name, national_code, entry_time, meeting_with FROM traffic_visits WHERE exit_time IS NULL ORDER BY visit_date ASC, entry_time ASC, id ASC LIMIT 500')->fetchAll(PDO::FETCH_ASSOC);
+    return db()->query('SELECT id, serial_no, visit_date, full_name, national_code, entry_time, meeting_with, is_notice FROM traffic_visits WHERE exit_time IS NULL ORDER BY visit_date ASC, entry_time ASC, id ASC LIMIT 500')->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function traffic_handle_post(string $action, array $user): void
 {
     if (!function_exists('user_can') || !user_can($user, 'traffic.manage')) {
         return;
+    }
+    if ($action === 'traffic_create' && !empty($_POST['notice_only'])) {
+        try {
+            traffic_notice_create($user);
+        } catch (RuntimeException $exception) {
+            traffic_remember_form_error($exception, 'new');
+        }
+        flash('success', 'تردد خاص ثبت شد.');
+        redirect('index.php?page=traffic-control&tab=new');
     }
     if ($action === 'traffic_create') {
         try {
@@ -517,7 +580,7 @@ function traffic_render_page(array $user): never
             if (function_exists('system_log')) {
                 system_log('error', 'traffic-dashboard', $dashboardError, ['file' => basename($exception->getFile()), 'line' => $exception->getLine()]);
             } else {
-                error_log($dashboardError);
+                app_error_log($dashboardError);
             }
             $stats = traffic_empty_stats();
             $statsError = 'آمار داشبورد از پایگاه داده دریافت نشد؛ پیام خطا در گزارش خطای سرور ثبت شده است.';
@@ -532,7 +595,7 @@ function traffic_render_page(array $user): never
     ?>
     <section class="traffic-page">
         <header class="cd-dvd-banner">
-            <div><span class="eyebrow">ثبت و پیگیری مراجعین و میهمانان</span><h1>کنترل تردد</h1><p>ثبت ورود/خروج، جست‌وجوی سریع با کد ملی و چاپ برگ ملاقات</p></div>
+            <div><span class="eyebrow">ثبت و پیگیری مراجعین و میهمانان</span><h1>کنترل تردد</h1></div>
             <a class="button" href="index.php">بازگشت به داشبورد</a>
         </header>
         <nav class="cd-dvd-tabs" aria-label="زیرفرم‌های کنترل تردد">
@@ -548,10 +611,10 @@ function traffic_render_page(array $user): never
         <?php if ($tab === 'dashboard'): ?>
         <section class="traffic-dashboard">
             <div class="traffic-dashboard-head">
-                <div><span class="eyebrow">نمای کلی مراجعات</span><h2>امروز در ورودی سازمان چه می‌گذرد؟</h2><p>خلاصهٔ ترددها، وضعیت افراد داخل ساختمان و مقصدهای پرتردد</p></div>
+                <div><span class="eyebrow">نمای کلی مراجعات</span><h2>امروز در ورودی سازمان چه می‌گذرد؟</h2></div>
                 <a class="button traffic-dashboard-action" href="index.php?page=traffic-control&amp;tab=new">＋ ثبت تردد جدید</a>
             </div>
-            <?php if ($statsError !== ''): ?><div class="alert danger traffic-dashboard-status" role="alert"><?= e($statsError) ?></div><?php elseif ($stats['total'] === 0): ?><div class="traffic-dashboard-empty"><span class="traffic-dashboard-empty-icon" aria-hidden="true">◌</span><div><strong>هنوز ترددی ثبت نشده است</strong><p>پس از ثبت اولین مراجعه، آمار روزانه و مقصدهای پرتردد در این صفحه نمایش داده می‌شوند.</p></div><a class="button traffic-dashboard-empty-action" href="index.php?page=traffic-control&amp;tab=new">ثبت اولین تردد</a></div><?php endif; ?>
+            <?php if ($statsError !== ''): ?><div class="alert danger traffic-dashboard-status" role="alert"><?= e($statsError) ?></div><?php elseif ($stats['total'] === 0): ?><div class="traffic-dashboard-empty"><span class="traffic-dashboard-empty-icon" aria-hidden="true">◌</span><div><strong>هنوز ترددی ثبت نشده است</strong></div><a class="button traffic-dashboard-empty-action" href="index.php?page=traffic-control&amp;tab=new">ثبت اولین تردد</a></div><?php endif; ?>
             <div class="traffic-stat-grid">
                 <article class="traffic-stat-card is-today"><div class="traffic-stat-top"><span class="traffic-stat-icon">◷</span><span class="traffic-stat-period">امروز</span></div><strong><?= (int) $stats['today'] ?></strong><small>تردد ثبت‌شده</small></article>
                 <article class="traffic-stat-card is-week"><div class="traffic-stat-top"><span class="traffic-stat-icon">↗</span><span class="traffic-stat-period">۷ روز</span></div><strong><?= (int) $stats['week'] ?></strong><small>تردد در هفتهٔ اخیر</small></article>
@@ -592,7 +655,7 @@ function traffic_render_page(array $user): never
                 <div class="traffic-open-list">
                     <?php foreach ($openVisits as $visit): ?>
                     <div class="traffic-open-row" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid #e5e7eb">
-                        <span><strong><?= e($visit['full_name']) ?></strong> <small>(<?= e($visit['national_code']) ?>)</small><br><small>تاریخ <?= e(jalali_date($visit['visit_date'], false)) ?> · شماره برگ <?= e($visit['serial_no']) ?> · ورود <?= e(substr((string) $visit['entry_time'], 0, 5)) ?> · ملاقات با <?= e($visit['meeting_with'] ?? '-') ?></small></span>
+                        <span><strong><?= e(((int) ($visit['is_notice'] ?? 0) === 1 ? 'تردد خاص: ' : '') . $visit['full_name']) ?></strong> <?php if (empty($visit['is_notice'])): ?><small>(<?= e($visit['national_code']) ?>)</small><?php endif; ?><br><small>تاریخ <?= e(jalali_date($visit['visit_date'], false)) ?> · شماره برگ <?= e($visit['serial_no']) ?> · ورود <?= e(substr((string) $visit['entry_time'], 0, 5)) ?> · ملاقات با <?= e($visit['meeting_with'] ?? '-') ?></small></span>
                         <?php if (user_can($user, 'traffic.manage')): ?>
                         <form method="post" class="traffic-open-exit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $visit['id'] ?>"><input type="hidden" name="return_tab" value="dashboard"><?php if ((string) $visit['visit_date'] !== (string) date('Y-m-d')): ?><label style="font-size:12px">ساعت خروج واقعی <input type="time" name="exit_time" required style="margin-inline-start:6px"></label><?php endif; ?><button class="mini-button" type="submit">ثبت خروج</button></form>
                         <?php endif; ?>
@@ -606,15 +669,18 @@ function traffic_render_page(array $user): never
 
         <?php if ($tab === 'new'): ?>
         <section class="card form-card traffic-form-card">
-            <div class="section-title"><div><span class="eyebrow">فرم ثبت</span><h2>ثبت تردد جدید</h2><p>ابتدا کد ملی را وارد کنید؛ در صورت وجود سابقه، اطلاعات به‌صورت خودکار پیشنهاد می‌شود.</p></div></div>
+            <div class="section-title"><div><span class="eyebrow">فرم ثبت</span><h2>ثبت تردد جدید</h2></div></div>
             <?php if ($lastCreated): ?><div class="alert success">ثبت با موفقیت انجام شد. شماره برگ: <b><?= e($lastCreated['serial_no']) ?></b> — برای چاپ از دکمهٔ فعال در پایین فرم استفاده کنید.</div><?php endif; ?>
             <div id="traffic-lookup-hint" class="alert info" hidden></div>
             <form method="post" id="traffic-quick-exit-form" hidden><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" id="traffic-quick-exit-id"></form>
             <form method="post" class="traffic-form" id="traffic-new-form">
                 <?= csrf_field() ?><input type="hidden" name="action" value="traffic_create">
+                <label class="check-label traffic-notice-toggle" style="margin-bottom:10px;justify-content:flex-start;width:max-content"><input type="checkbox" name="notice_only" value="1" id="traffic-notice-only" style="display:inline-block;width:auto;margin:0"> <span>تردد خاص</span></label>
+                
                 <div class="form-grid">
-                    <label>کد ملی<input name="national_code" id="traffic-national-code" required maxlength="10" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['national_code'] ?? '')) ?>"></label>
+                    <div class="traffic-full-only" style="display:contents"><label>کد ملی<input name="national_code" id="traffic-national-code" required maxlength="10" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['national_code'] ?? '')) ?>"></label></div>
                     <label>نام و نام خانوادگی<input name="full_name" id="traffic-full-name" required value="<?= e((string) ($formOld['full_name'] ?? '')) ?>"></label>
+                    <div class="traffic-full-only" style="display:contents">
                     <label>تلفن همراه<input name="phone" id="traffic-phone" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['phone'] ?? '')) ?>"></label>
                     <label>موسسه / شرکت<input name="company" id="traffic-company" value="<?= e((string) ($formOld['company'] ?? '')) ?>"></label>
                     <label>ملاقات با<select name="meeting_with" id="traffic-meeting-with"><option value="">— انتخاب کنید —</option><?php foreach ($destinations as $d): ?><option value="<?= e($d['title']) ?>"><?= e($d['title']) ?></option><?php endforeach; ?></select></label>
@@ -624,6 +690,7 @@ function traffic_render_page(array $user): never
                         <label><input type="checkbox" name="no_visit" value="1"> بدون بازدید</label>
                         <label><input type="checkbox" name="with_car" value="1"> با خودرو</label>
                         <label><input type="checkbox" name="with_mobile" value="1"> با تلفن همراه</label>
+                    </div>
                     </div>
                 </div>
                 <div class="actions"><button class="button" type="submit">ثبت تردد</button><button class="button secondary" type="reset">پاک‌کردن فرم</button><?php if ($lastCreated): ?><a class="button secondary" data-traffic-print-saved href="index.php?page=traffic-control-print&amp;id=<?= (int) $lastCreated['id'] ?>" target="_blank" rel="noopener">چاپ برگه ملاقات</a><?php else: ?><button class="button secondary" type="button" disabled aria-disabled="true" title="پس از ثبت تردد فعال می‌شود">چاپ برگه ملاقات</button><?php endif; ?></div>
@@ -635,7 +702,7 @@ function traffic_render_page(array $user): never
         <section class="card cd-dvd-history-panel">
             <div class="section-title"><div><span class="eyebrow">ردگیری</span><h2>سوابق تردد</h2></div><a class="button traffic-history-new-button" href="index.php?page=traffic-control&amp;tab=new">ثبت جدید</a></div>
             <section class="traffic-report-card" aria-labelledby="traffic-report-title">
-                <div class="traffic-report-heading"><span class="traffic-report-mark" aria-hidden="true">▤</span><div><span class="traffic-panel-kicker">خروجی مدیریتی</span><h3 id="traffic-report-title">استخراج گزارش تردد</h3><p>بازهٔ زمانی و یک یا چند مقصد ملاقات را انتخاب کنید.</p></div></div>
+                <div class="traffic-report-heading"><span class="traffic-report-mark" aria-hidden="true">▤</span><div><span class="traffic-panel-kicker">خروجی مدیریتی</span><h3 id="traffic-report-title">استخراج گزارش تردد</h3></div></div>
                 <form method="get" action="index.php" class="traffic-report-form" id="traffic-report-form">
                     <input type="hidden" name="action" value="export_traffic_report">
                     <div class="traffic-report-date-grid">
@@ -648,9 +715,9 @@ function traffic_render_page(array $user): never
                             <label class="traffic-report-destination traffic-report-all"><input type="checkbox" id="traffic-report-all" name="all_destinations" value="1" checked><span>همه</span></label>
                             <?php foreach ($destinations as $destination): ?><label class="traffic-report-destination"><input type="checkbox" name="destinations[]" value="<?= e($destination['title']) ?>" checked><span><?= e($destination['title']) ?></span></label><?php endforeach; ?>
                         </div>
-                        <?php if (!$destinations): ?><p class="traffic-report-empty">مقصد فعالی تعریف نشده؛ گزارش با انتخاب «همه» شامل همهٔ رکوردها خواهد بود.</p><?php endif; ?>
+                        <?php if (!$destinations): ?><?php endif; ?>
                     </fieldset>
-                    <div class="traffic-report-actions"><button class="button traffic-export-button" type="submit"><span aria-hidden="true">⇩</span>استخراج Excel</button><small>فایل اکسل شامل جزئیات مراجعه، ساعت‌ها و مشخصات مقصد خواهد بود.</small></div>
+                    <div class="traffic-report-actions"><button class="button traffic-export-button" type="submit"><span aria-hidden="true">⇩</span>استخراج Excel</button></div>
                 </form>
             </section>
             <form method="get" class="cd-dvd-history-filters"><input type="hidden" name="page" value="traffic-control"><input type="hidden" name="tab" value="history">
@@ -659,19 +726,19 @@ function traffic_render_page(array $user): never
                 <label><input type="checkbox" name="open_only" value="1" onchange="this.form.submit()" <?= $filters['open_only'] ? 'checked' : '' ?>> فقط ترددهای بدون خروج</label>
             </form>
             <div class="cd-dvd-record-table traffic-record-table" id="traffic-history-table">
-                <div class="cd-dvd-record-head"><span>شماره برگ</span><span>تاریخ</span><span>نام</span><span>کد ملی</span><span>ورود</span><span>خروج</span><span>ملاقات با</span><span>ثبت‌کننده</span><span>عملیات</span></div>
-                <?php foreach (traffic_query_records($filters) as $r): ?>
+                <?= log_sort_header_row([['serial', 'شماره برگ'], ['date', 'تاریخ'], ['name', 'نام'], ['national', 'کد ملی'], ['entry', 'ورود'], ['exit', 'خروج'], ['meeting', 'ملاقات با'], ['recorder', 'ثبت‌کننده'], ['', 'عملیات']], 'sort_t', 'dir_t', $_GET, (string) ($_GET['sort_t'] ?? ''), (string) ($_GET['dir_t'] ?? ''), 'cd-dvd-record-head') ?>
+                <?php foreach (traffic_query_records($filters, 300, (string) ($_GET['sort_t'] ?? ''), (string) ($_GET['dir_t'] ?? '')) as $r): ?>
                 <div class="cd-dvd-record-row" data-traffic-row data-search="<?= e(implode(' ', [(string) $r['full_name'], (string) $r['national_code'], (string) $r['serial_no'], (string) ($r['company'] ?? '')])) ?>">
                     <span><strong><?= e($r['serial_no']) ?></strong></span>
                     <span><?= e(jalali_date($r['visit_date'], false)) ?></span>
-                    <span><?= e($r['full_name']) ?></span>
-                    <span><?= e($r['national_code']) ?></span>
+                    <span><?= e((!empty($r['is_notice']) ? 'تردد خاص: ' : '') . $r['full_name']) ?></span>
+                    <span><?= empty($r['is_notice']) ? e($r['national_code']) : '—' ?></span>
                     <span><?= e(substr((string) $r['entry_time'], 0, 5)) ?></span>
                     <span><?= $r['exit_time'] ? e(substr((string) $r['exit_time'], 0, 5)) : '<em class="media-status inside">داخل</em>' ?></span>
                     <span><?= e($r['meeting_with'] ?? '-') ?></span>
                     <span><?= e($r['recorder_name'] ?? '-') ?></span>
                     <span class="actions">
-                        <a class="mini-button" href="index.php?page=traffic-control-print&amp;id=<?= (int) $r['id'] ?>" target="_blank">چاپ</a>
+                        <?php if (empty($r['is_notice'])): ?><a class="mini-button" href="index.php?page=traffic-control-print&amp;id=<?= (int) $r['id'] ?>" target="_blank">چاپ</a><?php endif; ?>
                         <?php if (!$r['exit_time']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $r['id'] ?>"><button class="mini-button" type="submit">ثبت خروج</button></form><?php endif; ?>
                         <?php if (traffic_can_manage($user)): ?><form method="post" data-confirm="این رکورد حذف شود؟"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_delete"><input type="hidden" name="record_id" value="<?= (int) $r['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form><?php endif; ?>
                     </span>
@@ -684,7 +751,7 @@ function traffic_render_page(array $user): never
 
         <?php if ($tab === 'destinations' && traffic_can_manage_destinations($user)): ?>
         <section class="card traffic-destinations-card">
-            <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقصدهای ملاقات</h2><p>همان لیست شیت Staff در فایل اکسل — گزینه‌های کمبوباکس «ملاقات با».</p></div></div>
+            <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقصدهای ملاقات</h2></div></div>
             <form method="post" class="inline-form traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><input name="title" placeholder="عنوان مقصد جدید" required><button class="button" type="submit">افزودن</button></form>
             <div class="category-list traffic-destinations-list">
                 <?php foreach (traffic_destinations(false) as $d): ?>
@@ -694,7 +761,7 @@ function traffic_render_page(array $user): never
         </section>
         <?php endif; ?>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=5"></script>
+    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=7"></script>
     <?php
     render_footer();
     exit;

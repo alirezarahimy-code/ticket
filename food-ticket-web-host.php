@@ -32,7 +32,7 @@ function food_ticket_web_host_bootstrap(string $apiBase, string $csrf, array $br
         . json_encode($apiBase, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         . ';window.FOOD_TICKET_CSRF=' . json_encode($csrf, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
         . ';window.FOOD_TICKET_BRAND=' . json_encode([
-            'name' => $brand['brand_name'] ?? 'سامانه چاپ فیش غذا',
+            'name' => $brand['brand_name'] ?? 'سامانه مدیریت غذا',
             'logo' => $brand['brand_logo'] ?? '',
             'returnUrl' => $brand['return_url'] ?? 'index.php',
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)

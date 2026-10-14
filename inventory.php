@@ -221,7 +221,7 @@ function inventory_server_asset_id(): int
     $params = [inventory_server_asset_tag()];
     $host = trim((string) (gethostname() ?: php_uname('n')));
     if ($host !== '') {
-        $conditions[] = 'LOWER(hostname) = LOWER(?)';
+        $conditions[] = 'hostname = ?';
         $params[] = $host;
     }
     $query = db()->prepare('SELECT id FROM assets WHERE (' . implode(' OR ', $conditions) . ') ORDER BY id ASC LIMIT 1');
@@ -383,7 +383,7 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
     $conditions = ['asset_tag = ?'];
     $params = [$assetTag];
     if ($host !== '') {
-        $conditions[] = 'LOWER(hostname) = LOWER(?)';
+        $conditions[] = 'hostname = ?';
         $params[] = $host;
     }
     if ($serial !== '') {
@@ -538,7 +538,7 @@ function inventory_collect_client_asset(array $user): ?int
         }
         return $assetId > 0 ? $assetId : null;
     } catch (Throwable $exception) {
-        error_log('ITSM client identity inventory failed: ' . $exception->getMessage());
+        app_error_log('ITSM client identity inventory failed: ' . $exception->getMessage());
         return null;
     }
 }

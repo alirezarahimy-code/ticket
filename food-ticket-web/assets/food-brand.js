@@ -17,18 +17,18 @@
         })
         .filter(Boolean);
     const LEGACY_LABELS = {
-        ' Access Ticket': ' سامانه چاپ فیش غذا',
+        ' Access Ticket': ' سامانه مدیریت غذا',
         ' Access': ' منبع تردد',
         '.mdb': '.mdb'
     };
     const escapeRegExp = function (value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
     const cleanBrandName = function (value) {
         const name = String(value || '').trim();
-        if (!name) return 'سامانه چاپ فیش غذا';
+        if (!name) return 'سامانه مدیریت غذا';
         const isLegacy = LEGACY_BRAND_WORDS.some(function (word) {
             return new RegExp(escapeRegExp(word), 'i').test(name);
         });
-        return isLegacy || /food\s*ticket/i.test(name) ? 'سامانه چاپ فیش غذا' : name;
+        return isLegacy || /food\s*ticket/i.test(name) ? 'سامانه مدیریت غذا' : name;
     };
     const cleanLegacyText = function (value) {
         let out = String(value || '');
@@ -110,7 +110,7 @@
     }
 
     function apply() {
-        document.title = model.name + ' | چاپ فیش غذا';
+        document.title = model.name + ' | سامانه مدیریت غذا';
         const walker = document.createTreeWalker(document.getElementById('app') || document, NodeFilter.SHOW_TEXT);
         const textNodes = [];
         while (walker.nextNode()) textNodes.push(walker.currentNode);
@@ -126,7 +126,7 @@
         const heading = document.querySelector('.brand h1');
         if (heading && heading.textContent !== model.name) heading.textContent = model.name;
         const subtitle = document.querySelector('.brand small');
-        if (subtitle && subtitle.textContent !== 'مدیریت چاپ فیش غذا') subtitle.textContent = 'مدیریت چاپ فیش غذا';
+        if (subtitle && subtitle.textContent !== 'مدیریت غذا') subtitle.textContent = 'مدیریت غذا';
         const topMeta = document.querySelector('.top-meta');
         if (topMeta) {
             topMeta.querySelectorAll(':scope > span:not(.pill)').forEach(function (item) { item.remove(); });

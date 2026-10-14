@@ -32,7 +32,7 @@
 .fm-grid > .fm-card { margin:0; }
 .fm-grid > .fm-card:last-child { min-width:0; }
 .fm-food-selection .fm-food-check { display:flex; align-items:flex-start; min-width:0; padding:9px 10px; gap:8px; line-height:1.7; }
-.fm-food-check > span { min-width:0; overflow-wrap:anywhere; word-break:break-word; }
+.fm-food-check > span { min-width:0; flex:1 1 auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .fm-food-check input { flex:0 0 auto; width:16px; height:16px; min-width:16px; margin:3px 0 0; padding:0; border:0; accent-color:var(--teal); }
 .fm-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-top:10px; }
 .fm-actions .btn,.fm-actions .button { cursor:pointer; }
@@ -126,3 +126,72 @@
   text-align: center !important;
   vertical-align: middle !important;
 }
+
+/* بانک غذا: دسته‌بندی، جستجوی زنده، و فهرست یک‌خطی */
+.fm-food-picker { display:flex; flex-direction:column; gap:8px; }
+.fm-food-search { width:100%; border:1px solid var(--line); border-radius:9px; padding:9px 11px; font:inherit; background:#fff; }
+.fm-food-group { border:1px solid var(--line); border-radius:10px; background:#fff; overflow:hidden; }
+.fm-food-group-toggle { width:100%; display:flex; align-items:center; gap:8px; padding:9px 12px; border:0; background:#f8fafc; font:inherit; font-weight:700; cursor:pointer; text-align:right; }
+.fm-food-group-toggle:hover { background:#eef6f5; }
+.fm-food-group-toggle small { color:var(--muted, #64748b); font-weight:400; }
+.fm-food-sign { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--teal, #0f766e); color:#fff; font-weight:700; line-height:1; }
+.fm-food-group .fm-food-checks { padding:8px; }
+.fm-food-group .fm-food-checks[hidden], .fm-food-check[hidden], .fm-food-group[hidden] { display:none !important; }
+.fm-name-form select { border:1px solid var(--line); border-radius:8px; padding:7px 9px; font:inherit; }
+.fm-name-form { white-space:nowrap; flex-wrap:wrap; }
+.fm-name-form input[type=text] { flex:1 1 160px; }
+#fm-catalog-add select { border:1px solid var(--line); border-radius:8px; padding:7px 9px; font:inherit; }
+
+/* ===== لیست کارکنان (غیبت و اعضای گروه): ۳ ستون «نام ـ تیک»، وسط‌چین، دو رنگ یک‌درمیان ===== */
+.fg-people-box { max-height:320px; overflow:auto; border:1px solid var(--line,#d6e2e0); border-radius:10px; padding:4px; background:#fff; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; }
+.fg-people-box > p { grid-column:1 / -1; margin:8px; }
+.fg-person { display:flex; align-items:center; justify-content:center; gap:8px; padding:9px 10px; min-width:0; background:#ffffff; cursor:pointer; border-bottom:1px solid #eef2f1; }
+.fg-person:nth-child(6n+4), .fg-person:nth-child(6n+5), .fg-person:nth-child(6n+6) { background:#eaf5f3; }
+.fg-person:hover { background:#d7ece8; }
+.fg-person-name, .fg-person > span:first-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
+.fg-person input[type=checkbox] { flex:0 0 auto; width:16px; height:16px; margin:0; accent-color:var(--teal,#0f766e); }
+.fg-person small { color:var(--muted,#64748b); }
+@media(max-width:700px) { .fg-people-box { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:460px) { .fg-people-box { grid-template-columns:1fr; } }
+
+/* ===== جعبهٔ انتخاب غذا: هم‌اندازهٔ فرم غیبت ===== */
+.fm-food-picker { max-height:320px; overflow:auto; border:1px solid var(--line,#d6e2e0); border-radius:8px; padding:6px 10px; background:#fff; }
+.fm-food-search { position:sticky; top:0; z-index:1; }
+
+/* ===== بانک غذا: هر غذا در یک خط (نام | دسته‌بندی | وضعیت | ذخیره)، هر ردیف دو غذا ===== */
+.fm-bank-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; }
+.fm-bank-item { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1.35fr) minmax(0,1fr) auto; gap:8px; align-items:end; border:1px solid var(--line,#d6e2e0); border-radius:12px; padding:10px; background:#fff; margin:0; }
+.fm-bank-item:nth-child(6n+4), .fm-bank-item:nth-child(6n+5), .fm-bank-item:nth-child(6n+6) { background:#f8fbfa; }
+.fm-bank-field { display:grid; gap:4px; font-size:11px; color:var(--muted,#64748b); font-weight:600; min-width:0; }
+.fm-bank-field input, .fm-bank-field select { width:100%; min-width:0; box-sizing:border-box; border:1px solid var(--line,#cfd9d7); border-radius:8px; padding:7px 8px; font:inherit; font-size:12px; color:#1f2937; background:#fff; }
+.fm-bank-item button { white-space:nowrap; }
+@media(max-width:1180px) { .fm-bank-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:760px) { .fm-bank-grid { grid-template-columns:1fr; } .fm-bank-item { grid-template-columns:1fr 1fr; } }
+
+/* ۱.۵۲: دسته‌بندی‌های ریشه در بانک غذا (+ باز / - جمع) */
+.fm-cat-list { display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+.fm-cat-group { border:1px solid var(--line,#d6e2e0); border-radius:12px; background:#fff; overflow:hidden; }
+.fm-cat-group.open { border-color:#9fc9c3; }
+.fm-cat-toggle { display:flex; align-items:center; gap:10px; width:100%; border:0; background:#f3f8f7; padding:10px 12px; cursor:pointer; font:inherit; text-align:right; }
+.fm-cat-toggle:hover { background:#e7f2f0; }
+.fm-cat-sign { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:6px; background:#0f766e; color:#fff; font-weight:700; line-height:1; }
+.fm-cat-group .fm-bank-grid.fm-cat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); margin:0; padding:10px; }
+.fm-cat-group > .fm-empty { padding:10px 12px; }
+@media(max-width:760px) { .fm-cat-group .fm-bank-grid.fm-cat-grid { grid-template-columns:1fr; } }
+
+/* ۱.۵۲: سفارش اضطراری — مراحل */
+.fm-emergency-step { display:flex; flex-wrap:wrap; gap:8px; align-items:end; margin-top:8px; }
+.fm-cat-items { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; padding:10px 12px; border-top:1px solid #e3ecea; }
+.fm-cat-items[hidden] { display:none !important; }
+@media(max-width:760px) { .fm-cat-items { grid-template-columns:1fr; } }
+
+/* جستجوی زنده غذا در ویرایش برنامهٔ روز */
+.fm-food-search { margin: 6px 0 10px; }
+.fm-food-search input[type="search"] { width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; }
+
+/* ۱.۵۶ — مرتب‌سازی ستون‌ها و گروه‌بندی سفارش‌های روز بر اساس منوی غذا */
+.fm-sort-btn { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; white-space: nowrap; }
+.fm-sort-btn:hover { text-decoration: underline; }
+.fm-view-switch { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.fm-menu-group { margin-bottom: 18px; }
+.fm-menu-group h4 { margin: 10px 0 6px; }

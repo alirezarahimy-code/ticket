@@ -63,7 +63,12 @@
 .fo-target-choice { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0; }
 .fo-target-choice button.active { background:var(--navy); color:#fff; }
 .fo-meal-options { display:grid; gap:8px; margin:12px 0; }
-.fo-meal-option { display:flex; align-items:center; gap:10px; padding:11px 13px; border:1px solid var(--line); border-radius:11px; background:#fff; color:var(--ink); cursor:pointer; }
+.fo-meal-option { display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); align-items:center; column-gap:10px; padding:11px 13px; border:1px solid var(--line); border-radius:11px; background:#fff; color:var(--ink); cursor:pointer; }
+.fo-meal-menu { font-size:13px; font-weight:700; color:var(--teal); white-space:nowrap; }
+.fo-meal-option input { grid-row:1; grid-column:1 / span 3; justify-self:center; margin:0; width:16px; height:16px; }
+.fo-meal-option .fo-meal-menu { grid-row:1; grid-column:1; }
+.fo-meal-option .fo-meal-name { grid-row:1; grid-column:3; }
+.fo-meal-name { font-weight:700; line-height:1.7; min-width:0; overflow-wrap:anywhere; text-align:left; }
 .fo-meal-option:has(input:checked) { border-color:var(--teal); background:var(--teal-light); box-shadow:0 0 0 2px rgba(43,149,104,.08); }
 .fo-meal-option input { accent-color:var(--teal); }
 .fo-modal .fo-form-field { display:grid; gap:5px; margin:10px 0; color:var(--muted); font-size:12px; font-weight:600; }

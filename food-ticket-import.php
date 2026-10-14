@@ -43,7 +43,7 @@ function food_ticket_import_normalize(string $value): string
 /** کلید مقایسه‌ای سرستون: فقط حروف و ارقام. */
 function food_ticket_import_key(string $value): string
 {
-    $value = food_ticket_import_normalize($value);
+    $value = mb_strtolower(food_ticket_import_normalize($value), 'UTF-8');
     $value = str_replace(['‌', '_', '-', '.', '/', '\\', '(', ')', ':', '|'], '', $value);
     return (string) preg_replace('/[^\p{L}\p{N}]/u', '', $value);
 }
@@ -315,61 +315,124 @@ function food_ticket_import_validate_row(array $row): array
 
 /**
  * اعمال ردیف‌ها روی جدول users: کلید یکتایی = employee_number (کد پرسنلی = L_UID).
- * @return array{created:int,updated:int,skipped:int,failed:int,rows:list<array>,duplicates:int}
+ * ۱.۵۰: فایل در اولویت است (نام و کد ملی از فایل). رکورد جدید = حساب محلی (نام کاربری = کد پرسنلی).
+ * رکورد موجود با auth_source='food' به حساب محلی تبدیل می‌شود. اگر نام آن در دامین (بدون کد) باشد، ساخته نمی‌شود.
+ * $preview = true: هیچ نوشتنی انجام نمی‌شود و فقط نتیجه گزارش می‌شود.
+ * @return array{created:int,updated:int,skipped:int,failed:int,rows:list<array>,duplicates:int,local_created:int,converted:int,domain_duplicates:int}
  */
-function food_ticket_import_apply(array $parsed, bool $updateExisting = true): array
+function food_ticket_import_apply(array $parsed, bool $updateExisting = true, bool $preview = false): array
 {
+    require_once __DIR__ . '/food-personnel-link.php';
+    require_once __DIR__ . '/local-accounts.php';
     $created = 0;
     $updated = 0;
     $failed = 0;
     $duplicates = 0;
+    $localCreated = 0;
+    $converted = 0;
+    $domainDuplicates = 0;
     $seen = [];
     $out = [];
-    $find = db()->prepare('SELECT id, first_name, last_name, national_code, full_name FROM users WHERE employee_number = ? LIMIT 1');
-    $insert = db()->prepare('INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (?, NULL, ?, ?, ?, ?, ?, \'user\', \'food\', 1)');
-    $update = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, national_code = ? WHERE id = ?');
+    $pdo = db();
+    $find = $pdo->prepare('SELECT id, first_name, last_name, national_code, full_name, auth_source FROM users WHERE employee_number = ? LIMIT 1');
+    $usernameTaken = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
+    $insert = $pdo->prepare("INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 'local_user', 'local', 1, 1)");
+    $update = $pdo->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, national_code = ? WHERE id = ?');
+    $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1, is_active = 1 WHERE id = ?");
+
+    // نام حساب‌های دامین که کد پرسنلی ندارند (برای تشخیص تکرار احتمالی)
+    $domainNoCode = [];
+    foreach ($pdo->query("SELECT full_name, first_name, last_name FROM users WHERE auth_source = 'ldap' AND (employee_number IS NULL OR employee_number = '')")->fetchAll() as $domainRow) {
+        $key = fpl_norm_name(fpl_person_name($domainRow));
+        if ($key !== '') {
+            $domainNoCode[$key] = true;
+        }
+    }
+    $defaultHash = $preview ? '' : lac_default_hash();
 
     foreach ($parsed['rows'] as $row) {
         $pc = (string) (normalize_employee_number($row['pc']) ?? '');
+        $first = trim((string) $row['first']);
+        $last = trim((string) $row['last']);
+        $fullName = trim($first . ' ' . $last);
         if ($row['status'] === 'skipped' || $pc === '') {
             $failed++;
-            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => trim($row['first'] . ' ' . $row['last']), 'status' => 'skipped', 'messages' => $row['messages']];
+            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'skipped', 'messages' => $row['messages']];
+            continue;
+        }
+        if ($fullName === '') {
+            $failed++;
+            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => '', 'status' => 'skipped', 'messages' => array_merge(['نام و نام خانوادگی خالی است؛ ردیف رد شد.'], $row['messages'])];
             continue;
         }
         if (isset($seen[$pc])) {
             $duplicates++;
-            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => trim($row['first'] . ' ' . $row['last']), 'status' => 'duplicate', 'messages' => ['این کد پرسنلی در همین فایل تکرار شده است (ردیف ' . $seen[$pc] . ').']];
+            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'duplicate', 'messages' => ['این کد پرسنلی در همین فایل تکرار شده است (ردیف ' . $seen[$pc] . ').']];
             continue;
         }
         $seen[$pc] = $row['row'];
-        $first = trim((string) $row['first']);
-        $last = trim((string) $row['last']);
-        $fullName = trim($first . ' ' . $last);
         $national = food_ticket_import_digits((string) $row['nat']);
+        if ($national !== '' && strlen($national) !== 10) {
+            $row['messages'][] = 'کد ملی ' . $national . ' ۱۰ رقمی نیست؛ ذخیره نشد و کد ملی قبلی حفظ شد.';
+            $national = '';
+        }
         try {
             $find->execute([$pc]);
             $existing = $find->fetch() ?: null;
             if ($existing) {
-                // کد ملی خالی در فایل، مقدار سالمِ موجود را پاک نمی‌کند.
-                $national = $national !== '' ? $national : (string) ($existing['national_code'] ?? '');
-                if ($updateExisting) {
-                    $update->execute([$fullName, $first, $last, $national, (int) $existing['id']]);
-                    $updated++;
-                    $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'updated', 'messages' => $row['messages']];
-                } else {
+                if (!$updateExisting) {
                     $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'exists', 'messages' => array_merge(['این کد پرسنلی از قبل ثبت شده بود و دست‌نخورده ماند.'], $row['messages'])];
+                    continue;
                 }
+                // فایل در اولویت است؛ خالی بودن مقدار فایل، مقدار قبلی را پاک نمی‌کند.
+                $keepFirst = $first !== '' ? $first : (string) ($existing['first_name'] ?? '');
+                $keepLast = $last !== '' ? $last : (string) ($existing['last_name'] ?? '');
+                $keepFull = trim($keepFirst . ' ' . $keepLast);
+                $keepNational = $national !== '' ? $national : (string) ($existing['national_code'] ?? '');
+                if (!$preview) {
+                    $update->execute([$keepFull, $keepFirst, $keepLast, $keepNational, (int) $existing['id']]);
+                }
+                $updated++;
+                $messages = $row['messages'];
+                if ((string) $existing['auth_source'] === 'food') {
+                    $usernameTaken->execute([$pc, (int) $existing['id']]);
+                    if ((int) $usernameTaken->fetchColumn() > 0) {
+                        $messages[] = 'نام کاربری «' . $pc . '» قبلاً استفاده شده؛ تبدیل به حساب محلی انجام نشد.';
+                    } else {
+                        if (!$preview) {
+                            $convert->execute([$pc, $defaultHash, (int) $existing['id']]);
+                        }
+                        $converted++;
+                        $messages[] = 'این پرسنل به حساب محلی تبدیل شد (نام کاربری = کد پرسنلی، رمز پیش‌فرض، تغییر رمز در ورود اول).';
+                    }
+                }
+                $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $keepFull, 'status' => 'updated', 'messages' => $messages];
                 continue;
             }
-            $insert->execute(['food_employee_' . substr(hash('sha256', $pc), 0, 40), $fullName, $first, $last, $pc, $national]);
+            // رکورد جدید: اگر نام تقریباً با یک حساب دامین بدون کد یکی است، ساخته نمی‌شود.
+            if (isset($domainNoCode[fpl_norm_name($fullName)])) {
+                $domainDuplicates++;
+                $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'domain_duplicate', 'messages' => array_merge(['نام این پرسنل با یک حساب دامین بدون کد پرسنلی یکی است؛ حساب محلی ساخته نشد. ابتدا با «ربط پرسنل غذا» یکی کنید.'], $row['messages'])];
+                continue;
+            }
+            $usernameTaken->execute([$pc, 0]);
+            if ((int) $usernameTaken->fetchColumn() > 0) {
+                $failed++;
+                $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'error', 'messages' => array_merge(['نام کاربری «' . $pc . '» قبلاً برای حساب دیگری استفاده شده است.'], $row['messages'])];
+                continue;
+            }
+            if (!$preview) {
+                $insert->execute([$pc, $defaultHash, $fullName, $first, $last, $pc, $national]);
+            }
             $created++;
-            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'created', 'messages' => $row['messages']];
+            $localCreated++;
+            $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'created', 'messages' => array_merge(['حساب محلی ساخته شد (نام کاربری = کد پرسنلی).'], $row['messages'])];
         } catch (Throwable $exception) {
             $failed++;
             $out[] = ['row' => $row['row'], 'pc' => $pc, 'name' => $fullName, 'status' => 'error', 'messages' => array_merge([$exception->getMessage()], $row['messages'])];
         }
     }
-    return ['created' => $created, 'updated' => $updated, 'skipped' => $failed, 'failed' => $failed, 'duplicates' => $duplicates, 'rows' => $out];
+    return ['created' => $created, 'updated' => $updated, 'skipped' => $failed, 'failed' => $failed, 'duplicates' => $duplicates, 'local_created' => $localCreated, 'converted' => $converted, 'domain_duplicates' => $domainDuplicates, 'rows' => $out];
 }
 
 /** نتیجهٔ آماده برای نمایش در پنل. */
@@ -395,6 +458,9 @@ function food_ticket_import_summary(array $parsed, array $applied, string $fileN
         'updated' => $applied['updated'],
         'skipped' => $applied['skipped'],
         'duplicates' => $applied['duplicates'],
+        'local_created' => $applied['local_created'] ?? 0,
+        'converted' => $applied['converted'] ?? 0,
+        'domain_duplicates' => $applied['domain_duplicates'] ?? 0,
         'rows' => array_slice($applied['rows'], 0, 300),
         'truncated' => count($applied['rows']) > 300,
         'message' => implode(' ', $messages),
@@ -442,9 +508,15 @@ function food_ticket_employees_import_handle(array $user): never
         food_ticket_api_json(['ok' => false, 'error' => 'در فایل هیچ ردیف داده‌ای پیدا نشد. نمونهٔ فایل را ببینید: سرستون‌ها «کد پرسنلی، نام، نام خانوادگی، کد ملی».', 'format' => $parsed['format']], 422);
     }
     $updateExisting = !isset($_POST['update']) || (string) $_POST['update'] !== '0';
-    $applied = food_ticket_import_apply($parsed, $updateExisting);
+    $preview = isset($_POST['preview']) && (string) $_POST['preview'] === '1';
+    $backupName = '';
+    if (!$preview) {
+        require_once __DIR__ . '/food-personnel-link.php';
+        $backupName = (string) fpl_backup_users(db());
+    }
+    $applied = food_ticket_import_apply($parsed, $updateExisting, $preview);
     $summary = food_ticket_import_summary($parsed, $applied, $name);
-    if (function_exists('system_log')) {
+    if (!$preview && function_exists('system_log')) {
         system_log('info', 'food-employees', 'ایمپورت لیست کارکنان از فایل', [
             'file' => $name,
             'rows' => $parsed['total'],
@@ -454,8 +526,8 @@ function food_ticket_employees_import_handle(array $user): never
             'by' => (int) ($user['id'] ?? 0),
         ]);
     }
-    if (function_exists('save_audit')) {
+    if (!$preview && function_exists('save_audit')) {
         save_audit((int) ($user['id'] ?? 0), 'food_employees_imported', null, ['file' => $name, 'created' => $applied['created'], 'updated' => $applied['updated']]);
     }
-    food_ticket_api_json(['ok' => true, 'items' => function_exists('food_ticket_api_employees') ? food_ticket_api_employees() : []] + $summary);
+    food_ticket_api_json(['ok' => true, 'items' => function_exists('food_ticket_api_employees') ? food_ticket_api_employees() : []] + $summary + ['preview' => $preview, 'backup' => $backupName]);
 }

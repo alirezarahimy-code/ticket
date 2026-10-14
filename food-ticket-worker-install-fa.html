@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>راهنمای نصب PHP Worker چاپ فیش غذا</title>
+<title>راهنمای نصب PHP Worker سامانه مدیریت غذا</title>
 <style>
 :root{--bg:#fff;--subtle:#fafafa;--muted:#f4f4f5;--line:#e4e4e7;--faint:#a1a1aa;--soft:#71717a;--text2:#52525b;--text:#18181b;--good:#15803d;--warn:#b45309}
 *{box-sizing:border-box}
@@ -46,7 +46,7 @@ footer{margin-top:32px;font-size:12px;color:var(--faint)}
 </head>
 <body>
 <main>
-  <h1>راهنمای نصب Worker چاپ فیش غذا</h1>
+  <h1>راهنمای نصب Worker سامانه مدیریت غذا</h1>
   <div class="meta">ویژهٔ Windows Server · لینک‌ها و صفحات رسمی بررسی‌شده در ۳۰ سپتامبر ۲۰۲۶</div>
   <p class="lead">اگر سامانهٔ PHP و دیتابیس MySQL/MariaDB شما همین حالا کار می‌کند، آن‌ها را دوباره نصب نکنید. Worker از PHP CLI همان سرور استفاده می‌کند؛ فقط اتصال Access، چاپگر و اجرای خودکار باید آماده شوند.</p>
 
@@ -140,7 +140,7 @@ SHOW TABLES LIKE 'food_ticket_print_log';</code>
     </section>
     <section class="step">
       <h3>تنظیم Access و چاپگر با Worker خاموش</h3>
-      <p>در سامانه، صفحهٔ «چاپ فیش غذا» را باز کنید و مسیر منبع تردد، فایل سفارش، نام جدول سفارش و چاپگر را ذخیره کنید. اگر فایل‌ها روی شبکه‌اند، مسیر UNC مثل <span class="path">\\server\share\file.mdb</span> بدهید؛ درایوهای Map شده ممکن است برای Task دیده نشوند. در این مرحله گزینهٔ فعال‌سازی Worker را خاموش نگه دارید.</p>
+      <p>در سامانه، صفحهٔ «سامانه مدیریت غذا» را باز کنید و مسیر منبع تردد، فایل سفارش، نام جدول سفارش و چاپگر را ذخیره کنید. اگر فایل‌ها روی شبکه‌اند، مسیر UNC مثل <span class="path">\\server\share\file.mdb</span> بدهید؛ درایوهای Map شده ممکن است برای Task دیده نشوند. در این مرحله گزینهٔ فعال‌سازی Worker را خاموش نگه دارید.</p>
     </section>
     <section class="step">
       <h3>اجرای نصب‌گر Windows</h3>
