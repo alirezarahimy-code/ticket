@@ -1,6 +1,6 @@
 # راهنمای کنترل سریع
 
-پس از نصب، `php tests/SecurityTest.php`، `php tests/ArchitectureTest.php` و `php tests/test_food_ticket_logic.php` را اجرا کنید. برای نسخهٔ ۱.۵۶ نیز `python3 tests/test_triangle_effect_static.py` را اجرا کنید؛ این آزمون به PHP یا پایگاه‌داده نیاز ندارد. `php tests/smoke.php` به نصب فعال و پایگاه‌داده متصل نیاز دارد و باید آخر اجرا شود.
+پس از نصب، `php tests/SecurityTest.php`، `php tests/ArchitectureTest.php` و `php tests/test_food_ticket_logic.php` را اجرا کنید. برای نسخهٔ ۱.۵۶ نیز `python3 tests/test_triangle_effect_static.py` و `python3 tests/test_particle_effect_static.py` و `node tests/test_particle_effect_runtime_node.js` را اجرا کنید؛ آزمون‌های ایستا و DOM shim به PHP یا پایگاه‌داده نیاز ندارند. `php tests/smoke.php` به نصب فعال و پایگاه‌داده متصل نیاز دارد و باید آخر اجرا شود.
 
 سپس این سناریوها را در مرورگر بررسی کنید:
 

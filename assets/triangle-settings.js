@@ -40,7 +40,10 @@
             return;
         }
 
-        var preview = window.TriangleMesh.mount(previewNode, readConfig());
+        var preview = null;
+        var effectTabs = Array.prototype.slice.call(form.querySelectorAll('[data-effect-tab]'));
+        var effectPanels = Array.prototype.slice.call(form.querySelectorAll('[data-effect-panel]'));
+        var activeEffectField = form.querySelector('[name="effect_type"]');
         var settingControls = Array.prototype.slice.call(form.querySelectorAll('[data-tm-key]'));
         var pageControls = Array.prototype.slice.call(form.querySelectorAll('input[name="triangle_pages[]"]'));
         var countNode = form.querySelector('[data-tm-count]');
@@ -88,10 +91,69 @@
             });
         }
 
+        function activeEffect() {
+            return activeEffectField && activeEffectField.value === 'particles' ? 'particles' : 'triangle';
+        }
+
+        function mountTrianglePreview() {
+            if (!preview) {
+                preview = window.TriangleMesh.mount(previewNode, readConfig());
+            }
+        }
+
+        function destroyTrianglePreview() {
+            if (preview) {
+                preview.destroy();
+                preview = null;
+            }
+        }
+
         function syncPreview() {
             updateOutputs();
-            preview.update(readConfig());
+            if (preview) {
+                preview.update(readConfig());
+            }
         }
+
+        function activateEffectTab(effect, updateField) {
+            if (effect !== 'particles') {
+                effect = 'triangle';
+            }
+            if (updateField && activeEffectField) {
+                activeEffectField.value = effect;
+            }
+            effectTabs.forEach(function (tab) {
+                var selected = tab.getAttribute('data-effect-tab') === effect;
+                tab.classList.toggle('active', selected);
+                tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+                tab.tabIndex = selected ? 0 : -1;
+            });
+            effectPanels.forEach(function (panel) {
+                panel.hidden = panel.getAttribute('data-effect-panel') !== effect;
+            });
+            if (effect === 'triangle') {
+                mountTrianglePreview();
+            } else {
+                destroyTrianglePreview();
+            }
+            document.dispatchEvent(new CustomEvent('ticket:effect-tab-change', { detail: { effect: effect } }));
+        }
+
+        effectTabs.forEach(function (tab, index) {
+            tab.addEventListener('click', function () {
+                activateEffectTab(tab.getAttribute('data-effect-tab'), true);
+            });
+            tab.addEventListener('keydown', function (event) {
+                if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') {
+                    return;
+                }
+                event.preventDefault();
+                var delta = event.key === 'ArrowLeft' ? 1 : -1;
+                var next = (index + delta + effectTabs.length) % effectTabs.length;
+                effectTabs[next].focus();
+                effectTabs[next].click();
+            });
+        });
 
         function updatePageCount() {
             var count = pageControls.reduce(function (total, control) {
@@ -183,16 +245,17 @@
         var rippleButton = form.querySelector('[data-tm-ripple]');
         if (rippleButton) {
             rippleButton.addEventListener('click', function () {
-                preview.ripple();
+                if (preview) {
+                    preview.ripple();
+                }
             });
         }
 
         updateOutputs();
         updatePageCount();
         filterPages();
-        window.addEventListener('pagehide', function () {
-            preview.destroy();
-        }, { once: true });
+        activateEffectTab(activeEffect(), false);
+        window.addEventListener('pagehide', destroyTrianglePreview, { once: true });
     }
 
     if (document.readyState === 'loading') {

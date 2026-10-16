@@ -1198,6 +1198,80 @@ function triangle_effect_sanitize_config(array $input): array
     return $out;
 }
 
+function display_effect_type(): string
+{
+    $effect = setting('display_effect_type', 'triangle');
+    return in_array($effect, ['triangle', 'particles'], true) ? $effect : 'triangle';
+}
+
+/** [حداقل، حداکثر، پیش‌فرض، تعداد رقم اعشار] */
+function particle_effect_config_spec(): array
+{
+    return [
+        'density' => [1800, 9000, 4500, 0],
+        'maxParticles' => [40, 450, 320, 0],
+        'speed' => [0, 1, 0.25, 2],
+        'linkDistance' => [50, 240, 130, 0],
+        'mouseRadius' => [60, 320, 180, 0],
+        'mouseStrength' => [0, 2, 1, 1],
+        'opacity' => [0.1, 1, 1, 2],
+        'dotScale' => [0.5, 2.5, 1, 1],
+    ];
+}
+
+function particle_effect_sanitize_config(array $input): array
+{
+    $out = [];
+    foreach (particle_effect_config_spec() as $key => [$min, $max, $default, $decimals]) {
+        $raw = $input[$key] ?? $default;
+        $value = is_numeric($raw) ? (float) $raw : (float) $default;
+        if (!is_finite($value)) {
+            $value = (float) $default;
+        }
+        $value = max((float) $min, min((float) $max, $value));
+        $out[$key] = $decimals > 0 ? round($value, $decimals) : (int) round($value);
+    }
+    $rawColor = $input['color'] ?? '#172b36';
+    $rawColor = is_string($rawColor) ? $rawColor : '#172b36';
+    $out['color'] = preg_match('/^#[0-9a-fA-F]{6}$/', $rawColor) === 1 ? strtolower($rawColor) : '#172b36';
+    foreach (['showDots', 'showLinks', 'connectCursor', 'autoMove'] as $key) {
+        $raw = $input[$key] ?? true;
+        if (is_bool($raw)) {
+            $out[$key] = $raw;
+        } elseif (is_int($raw) || is_float($raw)) {
+            $out[$key] = (float) $raw !== 0.0;
+        } elseif (is_string($raw)) {
+            $parsed = filter_var($raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $out[$key] = is_bool($parsed) ? $parsed : true;
+        } else {
+            $out[$key] = true;
+        }
+    }
+    return $out;
+}
+
+function particle_effect_default_config(): array
+{
+    return particle_effect_sanitize_config([]);
+}
+
+function particle_effect_config(): array
+{
+    $raw = (string) setting('particle_effect_config', '');
+    $decoded = $raw !== '' ? json_decode($raw, true) : null;
+    return particle_effect_sanitize_config(is_array($decoded) ? $decoded : []);
+}
+
+function particle_effect_enabled_for_current_page(): bool
+{
+    try {
+        return display_effect_type() === 'particles'
+            && in_array(triangle_effect_current_page_key(), triangle_effect_enabled_pages(), true);
+    } catch (Throwable) {
+        return false;
+    }
+}
+
 function triangle_effect_default_config(): array
 {
     return triangle_effect_sanitize_config([]);
@@ -1251,7 +1325,8 @@ function triangle_effect_current_page_key(): string
 function triangle_effect_enabled_for_current_page(): bool
 {
     try {
-        return in_array(triangle_effect_current_page_key(), triangle_effect_enabled_pages(), true);
+        return display_effect_type() === 'triangle'
+            && in_array(triangle_effect_current_page_key(), triangle_effect_enabled_pages(), true);
     } catch (Throwable) {
         return false;
     }
@@ -1262,7 +1337,7 @@ function triangle_effect_script_tag(): string
 {
     try {
         $pageKey = triangle_effect_current_page_key();
-        $enabled = in_array($pageKey, triangle_effect_enabled_pages(), true);
+        $enabled = display_effect_type() === 'triangle' && in_array($pageKey, triangle_effect_enabled_pages(), true);
         $user = current_user();
         $canPreview = $pageKey === 'settings' && $user !== null && user_can($user, 'settings.general');
         if (!$enabled && !$canPreview) {
@@ -1281,7 +1356,39 @@ function triangle_effect_script_tag(): string
         }
         $tag .= '></script>';
         if ($canPreview) {
-            $tag .= '<script src="assets/triangle-settings.js?v=1.56" defer></script>';
+            $tag .= '<script src="assets/triangle-settings.js?v=1.56.1" defer></script>';
+        }
+        return $tag;
+    } catch (Throwable) {
+        return '';
+    }
+}
+
+/** موتور ذرات فقط برای نوع افکت انتخاب‌شده و صفحه‌های ذخیره‌شده بارگذاری می‌شود. */
+function particle_effect_script_tag(): string
+{
+    try {
+        $pageKey = triangle_effect_current_page_key();
+        $enabled = particle_effect_enabled_for_current_page();
+        $user = current_user();
+        $canPreview = $pageKey === 'settings' && $user !== null && user_can($user, 'settings.general');
+        if (!$enabled && !$canPreview) {
+            return '';
+        }
+        $tag = '<script src="assets/particle-network.js?v=1.56.1" defer';
+        if ($enabled) {
+            $json = json_encode(
+                particle_effect_config(),
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+            );
+            if (!is_string($json)) {
+                return '';
+            }
+            $tag .= ' data-config="' . htmlspecialchars($json, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+        }
+        $tag .= '></script>';
+        if ($canPreview) {
+            $tag .= '<script src="assets/particle-settings.js?v=1.56.1" defer></script>';
         }
         return $tag;
     } catch (Throwable) {

@@ -576,7 +576,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id']) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.27"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.28"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -728,9 +728,7 @@ function render_footer(): void
     } catch (Throwable) {
         echo "[]";
     }
-    $pageParam = (string) ($_GET['page'] ?? '');
-    $withParticles = (!empty($GLOBALS['ui_particles']) || $pageParam === '' || $pageParam === 'dashboard') && !triangle_effect_enabled_for_current_page();
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.23"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . triangle_effect_script_tag() . chatbot_render_widget(current_user()) . '</body></html>';
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.23"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget(current_user()) . '</body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {
@@ -3095,7 +3093,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($action === 'save_triangle_effect') {
-            $triangleUser = require_permission('settings.general_edit');
+            $effectUser = require_permission('settings.general_edit');
             $postedPages = $_POST['triangle_pages'] ?? [];
             if (!is_array($postedPages)) {
                 $postedPages = [];
@@ -3115,22 +3113,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 static fn(string $pageKey): bool => isset($selectedPageKeys[$pageKey])
             ));
 
-            $postedConfig = $_POST['tm'] ?? [];
-            $postedConfig = is_array($postedConfig) ? $postedConfig : [];
+            $postedTriangleConfig = $_POST['tm'] ?? null;
+            $postedTriangleConfig = is_array($postedTriangleConfig) ? $postedTriangleConfig : triangle_effect_config();
             foreach (['showDots', 'maskVignette'] as $booleanKey) {
-                $value = $postedConfig[$booleanKey] ?? null;
-                $postedConfig[$booleanKey] = is_scalar($value) && (string) $value === '1';
+                $value = $postedTriangleConfig[$booleanKey] ?? null;
+                $postedTriangleConfig[$booleanKey] = is_scalar($value) && (string) $value === '1';
             }
-            $newConfig = triangle_effect_sanitize_config($postedConfig);
+            $newTriangleConfig = triangle_effect_sanitize_config($postedTriangleConfig);
+
+            $postedParticleConfig = $_POST['particle'] ?? null;
+            if (is_array($postedParticleConfig)) {
+                foreach (['showDots', 'showLinks', 'connectCursor', 'autoMove'] as $booleanKey) {
+                    $value = $postedParticleConfig[$booleanKey] ?? null;
+                    $postedParticleConfig[$booleanKey] = is_scalar($value) && (string) $value === '1';
+                }
+                $newParticleConfig = particle_effect_sanitize_config($postedParticleConfig);
+            } else {
+                $newParticleConfig = particle_effect_config();
+            }
+
+            $postedEffect = $_POST['effect_type'] ?? display_effect_type();
+            $activeEffect = is_string($postedEffect) && in_array(trim($postedEffect), ['triangle', 'particles'], true)
+                ? trim($postedEffect)
+                : 'triangle';
 
             $settingsPdo = db();
             $settingsPdo->beginTransaction();
             try {
                 save_setting('triangle_effect_pages', (string) json_encode($enabledPages, JSON_UNESCAPED_UNICODE));
                 save_setting('triangle_effect_config', (string) json_encode(
-                    $newConfig,
+                    $newTriangleConfig,
                     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
                 ));
+                save_setting('particle_effect_config', (string) json_encode(
+                    $newParticleConfig,
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+                ));
+                save_setting('display_effect_type', $activeEffect);
                 $settingsPdo->commit();
             } catch (Throwable $settingsError) {
                 if ($settingsPdo->inTransaction()) {
@@ -3139,7 +3158,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setting_forget_cache();
                 throw $settingsError;
             }
-            save_audit((int) $triangleUser['id'], 'triangle_effect_saved', null, ['pages' => count($enabledPages)]);
+            save_audit((int) $effectUser['id'], 'triangle_effect_saved', null, [
+                'pages' => count($enabledPages),
+                'effect' => $activeEffect,
+            ]);
             flash('success', 'تنظیمات افکت نمایشی ذخیره شد.');
             redirect('index.php?page=settings#triangle');
         }
@@ -3251,7 +3273,6 @@ if (!$user) {
     $loginNoteText = setting('login_note_text', 'کاربران شبکه با حساب Active Directory خود وارد می‌شوند.');
     $loginAnnouncement = setting('login_announcement', '');
     $loginLogo = setting('app_login_logo', setting('app_logo', (string) cfg('app.logo', '')));
-    $GLOBALS['ui_particles'] = true;
     render_header('ورود به سامانه');
     echo '<p class="auth-version" style="text-align:center;color:#64748b;font-size:13px;margin:0 0 8px">نسخهٔ سامانه: ' . e(app_version()) . '</p>';
     echo '<main class="auth-layout"><section class="auth-panel">' . ($loginLogo ? '<div class="login-brand-logo"><img src="' . e($loginLogo) . '" alt="لوگوی سامانه"></div>' : '') . '<div class="auth-kicker">' . e(setting('app_name', (string) cfg('app.name', 'مرکز خدمات سازمان'))) . '</div><h1>' . e($loginTitle) . '</h1><p class="muted">' . e($loginIntro) . '</p>' . ($loginAnnouncement !== '' ? '<div class="login-announcement"><span aria-hidden="true">✦</span><div>' . e($loginAnnouncement) . '</div></div>' : '') . '<form method="post" class="auth-form">' . csrf_field() . '<input type="hidden" name="action" value="login"><label>نام کاربری شبکه یا سامانه<input name="username" required autocomplete="username" autofocus placeholder="نام کاربری شما"></label><label>رمز عبور<input type="password" name="password" required autocomplete="current-password" placeholder="رمز عبور"></label><button class="button wide" type="submit">ورود امن</button></form><div class="login-note"><span>◆</span><div><strong>' . e($loginNoteTitle) . '</strong><small>' . e($loginNoteText) . '</small></div></div></section><aside class="auth-art"><div class="art-orb orb-one"></div><div class="art-orb orb-two"></div><div class="art-card"><span class="art-icon">ت</span><strong>' . e(setting('login_art_title', 'پشتیبانی، ساده و شفاف')) . '</strong><p>' . e(setting('login_art_text', 'هر درخواست یک شماره پیگیری دارد و مسیر رسیدگی آن برای شما روشن است.')) . '</p></div></aside></main>';
@@ -4763,9 +4784,15 @@ if ($page === 'settings') {
     if ($canSettingsGeneral) {
         $tmConfig = triangle_effect_config();
         $tmPages = triangle_effect_enabled_pages();
+        $particleConfig = particle_effect_config();
+        $activeEffect = display_effect_type();
         $tmRange = static function (string $key, string $label, string $hint, string $step) use ($tmConfig): string {
             $spec = triangle_effect_config_spec()[$key];
             return '<label class="tm-field"><span class="tm-field-head"><span>' . e($label) . '</span><output data-tm-out="' . e($key) . '">' . e((string) $tmConfig[$key]) . '</output></span><input type="range" name="tm[' . e($key) . ']" data-tm-key="' . e($key) . '" min="' . e((string) $spec[0]) . '" max="' . e((string) $spec[1]) . '" step="' . e($step) . '" value="' . e((string) $tmConfig[$key]) . '"><small>' . e($hint) . '</small></label>';
+        };
+        $particleRange = static function (string $key, string $label, string $hint, string $step) use ($particleConfig): string {
+            $spec = particle_effect_config_spec()[$key];
+            return '<label class="tm-field"><span class="tm-field-head"><span>' . e($label) . '</span><output data-particle-out="' . e($key) . '">' . e((string) $particleConfig[$key]) . '</output></span><input type="range" name="particle[' . e($key) . ']" data-particle-key="' . e($key) . '" min="' . e((string) $spec[0]) . '" max="' . e((string) $spec[1]) . '" step="' . e($step) . '" value="' . e((string) $particleConfig[$key]) . '"><small>' . e($hint) . '</small></label>';
         };
         $tmPagesHtml = '';
         foreach (triangle_effect_page_catalog() as $tmGroupLabel => $tmGroupPages) {
@@ -4775,10 +4802,16 @@ if ($page === 'settings') {
             }
             $tmPagesHtml .= '</fieldset>';
         }
+        $triangleActive = $activeEffect === 'triangle';
+        $particleActive = $activeEffect === 'particles';
         echo '<div class="settings-panel" id="triangle"' . ($canSettingsGeneralEdit ? '' : ' inert') . '>';
-        echo '<form method="post" class="tm-form" id="triangle-form">' . csrf_field() . '<input type="hidden" name="action" value="save_triangle_effect"><div class="tm-layout">';
-        echo '<div class="card form-card tm-pages-card"><h2>صفحه‌ها و فرم‌ها</h2><p class="muted">افکت فقط روی صفحه‌هایی نمایش داده می‌شود که انتخاب و ذخیره کنید. صفحه‌های چاپ مستقل برای حفظ چیدمان چاپ در این فهرست نیستند.</p><div class="tm-bulk"><button type="button" class="button secondary" data-tm-all="1">انتخاب همه</button><button type="button" class="button secondary" data-tm-all="0">پاک‌کردن انتخاب‌ها</button><span class="muted" data-tm-count></span></div><label class="tm-search"><span class="sr-only">جست‌وجوی صفحه</span><input type="search" data-tm-search placeholder="جست‌وجوی صفحه یا فرم…"></label><div class="tm-pages-list">' . $tmPagesHtml . '<p class="tm-no-results" data-tm-no-results hidden>صفحه‌ای با این نام پیدا نشد.</p></div></div>';
-        echo '<div class="card form-card tm-settings-card"><h2>پیش‌نمایش و تنظیمات افکت</h2><p class="muted">پیش‌نمایش زنده است؛ ماوس را روی آن حرکت دهید یا کلیک کنید. تنظیمات برای همهٔ صفحه‌های انتخاب‌شده یکسان است.</p><div class="tm-preview" id="triangle-preview" data-tm-preview></div><div class="tm-bulk"><button type="button" class="button secondary" data-tm-ripple>ایجاد موج آزمایشی</button><button type="button" class="button secondary" data-tm-preset="default">پیش‌فرض</button><button type="button" class="button secondary" data-tm-preset="ocean">امواج آرام</button><button type="button" class="button secondary" data-tm-preset="magnet">آهنربای قوی</button><button type="button" class="button secondary" data-tm-preset="soft">محو و ملایم</button></div><div class="tm-fields">';
+        echo '<form method="post" class="tm-form" id="triangle-form">' . csrf_field() . '<input type="hidden" name="action" value="save_triangle_effect"><input type="hidden" name="effect_type" id="display-effect-type" value="' . e($activeEffect) . '"><div class="tm-layout">';
+        echo '<div class="card form-card tm-pages-card"><h2>صفحه‌ها و فرم‌ها</h2><p class="muted">افکت انتخاب‌شده فقط روی صفحه‌هایی نمایش داده می‌شود که انتخاب و ذخیره کنید. صفحه‌های چاپ مستقل برای حفظ چیدمان چاپ در این فهرست نیستند.</p><div class="tm-bulk"><button type="button" class="button secondary" data-tm-all="1">انتخاب همه</button><button type="button" class="button secondary" data-tm-all="0">پاک‌کردن انتخاب‌ها</button><span class="muted" data-tm-count></span></div><label class="tm-search"><span class="sr-only">جست‌وجوی صفحه</span><input type="search" data-tm-search placeholder="جست‌وجوی صفحه یا فرم…"></label><div class="tm-pages-list">' . $tmPagesHtml . '<p class="tm-no-results" data-tm-no-results hidden>صفحه‌ای با این نام پیدا نشد.</p></div></div>';
+        echo '<div class="card form-card tm-settings-card"><h2>پیش‌نمایش و تنظیمات افکت</h2><div class="tm-effect-tabs" role="tablist" aria-label="نوع افکت نمایشی">';
+        echo '<button type="button" class="tm-effect-tab' . ($triangleActive ? ' active' : '') . '" id="tab-triangle-effect" role="tab" aria-selected="' . ($triangleActive ? 'true' : 'false') . '" aria-controls="triangle-effect-panel" data-effect-tab="triangle"' . ($triangleActive ? '' : ' tabindex="-1"') . '><span class="tm-effect-icon" aria-hidden="true">△</span><span>مثلث واکنش‌گرا</span></button>';
+        echo '<button type="button" class="tm-effect-tab' . ($particleActive ? ' active' : '') . '" id="tab-particle-effect" role="tab" aria-selected="' . ($particleActive ? 'true' : 'false') . '" aria-controls="particle-effect-panel" data-effect-tab="particles"' . ($particleActive ? '' : ' tabindex="-1"') . '><span class="tm-effect-icon" aria-hidden="true">✦</span><span>ذرات معلق</span></button></div>';
+        echo '<p class="tm-effect-note">فهرست صفحه‌ها برای هر دو افکت مشترک است. تب فعال پس از ذخیره، نوع افکتی را که روی صفحه‌های انتخاب‌شده نمایش داده می‌شود مشخص می‌کند.</p>';
+        echo '<section class="tm-effect-panel" id="triangle-effect-panel" data-effect-panel="triangle" role="tabpanel" aria-labelledby="tab-triangle-effect"' . ($triangleActive ? '' : ' hidden') . '><p class="muted">پیش‌نمایش زنده است؛ ماوس را روی آن حرکت دهید یا کلیک کنید. تنظیمات برای همهٔ صفحه‌های انتخاب‌شده یکسان است.</p><div class="tm-preview" id="triangle-preview" data-tm-preview></div><div class="tm-bulk"><button type="button" class="button secondary" data-tm-ripple>ایجاد موج آزمایشی</button><button type="button" class="button secondary" data-tm-preset="default">پیش‌فرض</button><button type="button" class="button secondary" data-tm-preset="ocean">امواج آرام</button><button type="button" class="button secondary" data-tm-preset="magnet">آهنربای قوی</button><button type="button" class="button secondary" data-tm-preset="soft">محو و ملایم</button></div><div class="tm-fields">';
         echo $tmRange('cellSize', 'اندازهٔ مثلث‌ها', 'کوچک‌تر = مثلث‌های بیشتر و سنگین‌تر', '1');
         echo $tmRange('opacity', 'شفافیت خطوط', 'کمتر = محوتر و کم‌مزاحمت‌تر', '0.05');
         echo $tmRange('mouseRadiusMult', 'شعاع اثر ماوس', 'ضریبی از اندازهٔ مثلث', '0.1');
@@ -4790,7 +4823,17 @@ if ($page === 'settings') {
         echo $tmRange('waveDuration', 'مدت موج کلیک', 'ثانیه', '0.1');
         echo $tmRange('waveWidth', 'ضخامت موج کلیک', 'پیکسل', '5');
         echo $tmRange('waveAmpMult', 'قدرت موج کلیک', 'شدت جابه‌جایی نقطه‌ها', '0.01');
-        echo '</div><div class="tm-colors"><label>رنگ خطوط<input type="color" name="tm[meshColor]" data-tm-key="meshColor" value="' . e($tmConfig['meshColor']) . '"></label><label>رنگ نقطه‌ها<input type="color" name="tm[dotColor]" data-tm-key="dotColor" value="' . e($tmConfig['dotColor']) . '"></label><label class="check-label"><input type="checkbox" name="tm[showDots]" value="1" data-tm-key="showDots"' . ($tmConfig['showDots'] ? ' checked' : '') . '> نمایش نقطه‌ها</label><label class="check-label"><input type="checkbox" name="tm[maskVignette]" value="1" data-tm-key="maskVignette"' . ($tmConfig['maskVignette'] ? ' checked' : '') . '> محو شدن لبه‌ها (وینیت)</label></div><div class="actions"><button class="button" type="submit">ذخیره تنظیمات افکت</button><span class="muted">پس از ذخیره، صفحه را تازه‌سازی کنید تا تغییر روی صفحات انتخاب‌شده دیده شود.</span></div></div></div></form>';
+        echo '</div><div class="tm-colors"><label>رنگ خطوط<input type="color" name="tm[meshColor]" data-tm-key="meshColor" value="' . e($tmConfig['meshColor']) . '"></label><label>رنگ نقطه‌ها<input type="color" name="tm[dotColor]" data-tm-key="dotColor" value="' . e($tmConfig['dotColor']) . '"></label><label class="check-label"><input type="checkbox" name="tm[showDots]" value="1" data-tm-key="showDots"' . ($tmConfig['showDots'] ? ' checked' : '') . '> نمایش نقطه‌ها</label><label class="check-label"><input type="checkbox" name="tm[maskVignette]" value="1" data-tm-key="maskVignette"' . ($tmConfig['maskVignette'] ? ' checked' : '') . '> محو شدن لبه‌ها (وینیت)</label></div><div class="actions"><button class="button" type="submit">ذخیره تنظیمات افکت</button><span class="muted">این گزینه نوع افکت فعال را مشخص می‌کند؛ صفحه‌های انتخاب‌نشده تغییری نمی‌کنند.</span></div></section>';
+        echo '<section class="tm-effect-panel" id="particle-effect-panel" data-effect-panel="particles" role="tabpanel" aria-labelledby="tab-particle-effect"' . ($particleActive ? '' : ' hidden') . '><p class="muted">پیش‌نمایش زندهٔ ذرات معلق است؛ حرکت ماوس و تنظیم‌ها را همین‌جا امتحان کنید.</p><div class="tm-preview particle-preview" id="particle-preview" data-particle-preview><span class="particle-preview-label">ذرات معلق · حرکت ماوس</span><span class="particle-preview-help">شبکهٔ ذرات واکنش‌گرا</span></div><div class="tm-bulk"><button type="button" class="button secondary" data-particle-preset="default">پیش‌فرض</button><button type="button" class="button secondary" data-particle-preset="calm">آرام و خلوت</button><button type="button" class="button secondary" data-particle-preset="dense">شبکهٔ متراکم</button><button type="button" class="button secondary" data-particle-preset="reactive">واکنش قوی</button></div><div class="tm-fields">';
+        echo $particleRange('density', 'تراکم ذرات', 'عدد کمتر = ذرات بیشتر', '100');
+        echo $particleRange('maxParticles', 'سقف تعداد ذرات', 'کنترل جزئیات و بار پردازشی', '10');
+        echo $particleRange('speed', 'سرعت حرکت', 'صفر = ذرات ثابت', '0.05');
+        echo $particleRange('linkDistance', 'فاصلهٔ اتصال ذرات', 'بیشتر = خطوط شبکهٔ بیشتر', '5');
+        echo $particleRange('mouseRadius', 'شعاع واکنش ماوس', 'فاصلهٔ تأثیر نشانگر', '10');
+        echo $particleRange('mouseStrength', 'قدرت واکنش ماوس', 'شدت روشن‌شدن خطوط نزدیک ماوس', '0.1');
+        echo $particleRange('opacity', 'شفافیت شبکه', 'کمتر = محوتر', '0.05');
+        echo $particleRange('dotScale', 'اندازهٔ نقطه‌ها', 'تنظیم اندازهٔ ذرات', '0.1');
+        echo '</div><div class="tm-colors"><label>رنگ شبکه<input type="color" name="particle[color]" data-particle-key="color" value="' . e($particleConfig['color']) . '"></label><label class="check-label"><input type="checkbox" name="particle[showDots]" value="1" data-particle-key="showDots"' . ($particleConfig['showDots'] ? ' checked' : '') . '> نمایش نقطه‌ها</label><label class="check-label"><input type="checkbox" name="particle[showLinks]" value="1" data-particle-key="showLinks"' . ($particleConfig['showLinks'] ? ' checked' : '') . '> اتصال ذرات به یکدیگر</label><label class="check-label"><input type="checkbox" name="particle[connectCursor]" value="1" data-particle-key="connectCursor"' . ($particleConfig['connectCursor'] ? ' checked' : '') . '> اتصال به ماوس</label><label class="check-label"><input type="checkbox" name="particle[autoMove]" value="1" data-particle-key="autoMove"' . ($particleConfig['autoMove'] ? ' checked' : '') . '> حرکت خودکار</label></div><div class="actions"><button class="button" type="submit">ذخیره تنظیمات ذرات</button><span class="muted">با ذخیرهٔ این تب، ذرات روی صفحه‌های انتخاب‌شده فعال می‌شوند؛ ورود و داشبورد بدون انتخاب صریح افکت نخواهند داشت.</span></div></section></div></div></form>';
         echo '</div>';
     }
 
