@@ -1,4 +1,24 @@
+# Python/test cache
 __pycache__/
 *.pyc
+.pytest_cache/
 
-storage/logs/
+# Generated packages and local agent scratch
+/exports/
+/.arena/
+
+# Local application secrets/configuration
+/.env
+/.env.*
+!/.env.example
+/config.php
+/food-ticket-env.php
+
+# Runtime data and user uploads must never be committed
+/storage/*
+!/storage/.htaccess
+/uploads/
+
+# Tool/dependency build output
+/node_modules/
+/vendor/

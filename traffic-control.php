@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/traffic-import.php';
+
 // کنترل تردد مراجعین و میهمانان — پورت‌شده از کنترل_تردد.xlsm
 // همه‌ی توابع با پیشوند traffic_ برای جلوگیری از تداخل نام با بقیه ماژول‌ها.
 
@@ -399,6 +401,9 @@ function traffic_open_visits(): array
 
 function traffic_handle_post(string $action, array $user): void
 {
+    if (in_array($action, ['traffic_import_preview', 'traffic_import_apply'], true)) {
+        traffic_import_handle_post($action, $user);
+    }
     if (!function_exists('user_can') || !user_can($user, 'traffic.manage')) {
         return;
     }
@@ -517,7 +522,13 @@ function traffic_render_page(array $user): never
     if (function_exists('require_permission')) {
         $user = require_permission('traffic.view');
     }
-    $tab = valid_choice((string) ($_GET['tab'] ?? 'dashboard'), ['dashboard', 'new', 'history', 'destinations'], 'dashboard');
+    $tab = valid_choice((string) ($_GET['tab'] ?? 'dashboard'), ['dashboard', 'new', 'history', 'destinations', 'import'], 'dashboard');
+    if ($tab === 'import') {
+        $user = require_permission('traffic.manage');
+        if (isset($_GET['template'])) {
+            traffic_import_download_template(valid_choice((string) $_GET['template'], ['xlsx', 'csv'], 'xlsx'));
+        }
+    }
     $filters = [
         'search' => trim((string) ($_GET['search'] ?? '')),
         'range' => valid_choice((string) ($_GET['range'] ?? 'week'), ['today', 'week', 'all'], 'week'),
@@ -676,7 +687,7 @@ function traffic_render_page(array $user): never
             <form method="post" class="traffic-form" id="traffic-new-form">
                 <?= csrf_field() ?><input type="hidden" name="action" value="traffic_create">
                 <label class="check-label traffic-notice-toggle" style="margin-bottom:10px;justify-content:flex-start;width:max-content"><input type="checkbox" name="notice_only" value="1" id="traffic-notice-only" style="display:inline-block;width:auto;margin:0"> <span>تردد خاص</span></label>
-                
+
                 <div class="form-grid">
                     <div class="traffic-full-only" style="display:contents"><label>کد ملی<input name="national_code" id="traffic-national-code" required maxlength="10" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['national_code'] ?? '')) ?>"></label></div>
                     <label>نام و نام خانوادگی<input name="full_name" id="traffic-full-name" required value="<?= e((string) ($formOld['full_name'] ?? '')) ?>"></label>
@@ -746,6 +757,53 @@ function traffic_render_page(array $user): never
                 <?php endforeach; ?>
                 <p class="traffic-history-empty" id="traffic-history-empty" hidden>موردی با این جست‌وجو یافت نشد.</p>
             </div>
+        </section>
+        <?php endif; ?>
+
+        <?php if ($tab === 'import'): $importPreview = traffic_import_current_preview((int) ($user['id'] ?? 0)); $importCounts = is_array($importPreview['counts'] ?? null) ? $importPreview['counts'] : []; $importReady = (int) ($importCounts['insert'] ?? 0); ?>
+        <section class="card traffic-import-card">
+            <div class="section-title"><div><span class="eyebrow">ابزار محدود مدیران تردد</span><h2>ورود سوابق قدیمی از Excel</h2></div><a class="button secondary" href="index.php?page=traffic-control&amp;tab=history">بازگشت به سوابق</a></div>
+            <p class="traffic-import-intro">این فرم در منو نمایش داده نمی‌شود و فقط با دسترسی‌های «مشاهده» و «مدیریت کنترل تردد» باز می‌شود. فایل‌های <b>XLSX / XLSM / CSV / TXT</b> تا ۱۰ مگابایت، ۱۰٬۰۰۰ ردیف و ۶۴ ستون پذیرفته می‌شود؛ از Excel فقط اولین کاربرگ خوانده می‌شود. فایل قدیمی <b>XLS</b> را ابتدا با Excel به XLSX یا CSV ذخیره کنید.</p>
+            <div class="traffic-import-template-actions">
+                <a class="button secondary" href="index.php?page=traffic-control&amp;tab=import&amp;template=xlsx">دانلود قالب Excel</a>
+                <a class="button secondary" href="index.php?page=traffic-control&amp;tab=import&amp;template=csv">دانلود قالب CSV</a>
+            </div>
+            <div class="traffic-import-columns"><strong>ستون‌های لازم:</strong> نام و نام خانوادگی، تاریخ تردد (شمسی، میلادی یا تاریخ Excel). ساعت ورود/خروج، کد ملی، تلفن، شرکت، شماره برگ، میزبان، تأییدکننده، توضیحات و پرچم‌های «بدون بازدید/خودرو/تلفن همراه/تردد خاص» اختیاری‌اند. اگر شماره برگ خالی باشد، شمارهٔ یکتا بر اساس تاریخ ساخته می‌شود.</div>
+            <form method="post" action="index.php?page=traffic-control&amp;tab=import" enctype="multipart/form-data" class="traffic-import-upload-form">
+                <?= csrf_field() ?><input type="hidden" name="action" value="traffic_import_preview">
+                <label>فایل سوابق تردد<input type="file" name="file" accept=".xlsx,.xlsm,.csv,.txt" required></label>
+                <button class="button" type="submit">بررسی فایل (بدون ذخیره)</button>
+            </form>
+            <p class="traffic-import-safety">ابتدا فقط پیش‌نمایش انجام می‌شود؛ ردیف‌های تکراری دوباره ثبت نمی‌شوند. پیش‌نمایش تا ۳۰ دقیقه معتبر است و برای ثبت نهایی باید همان فایل را دوباره انتخاب و تأیید کنید. آپلود موقت است و فایل در پوشهٔ سامانه ذخیره نمی‌شود.</p>
+
+            <?php if ($importPreview): ?>
+            <section class="traffic-import-preview" aria-labelledby="traffic-import-preview-title">
+                <h3 id="traffic-import-preview-title">پیش‌نمایش: <?= e((string) $importPreview['file_name']) ?></h3>
+                <div class="traffic-import-counts">
+                    <span><b><?= (int) ($importCounts['insert'] ?? 0) ?></b> قابل ثبت</span>
+                    <span><b><?= (int) ($importCounts['exists'] ?? 0) ?></b> از قبل موجود</span>
+                    <span><b><?= (int) ($importCounts['duplicate'] ?? 0) ?></b> تکراری در فایل</span>
+                    <span><b><?= (int) ($importCounts['invalid'] ?? 0) ?></b> نامعتبر</span>
+                    <span><b><?= (int) ($importCounts['warnings'] ?? 0) ?></b> دارای هشدار</span>
+                </div>
+                <?php if ($importReady > 0): ?>
+                <form method="post" action="index.php?page=traffic-control&amp;tab=import" enctype="multipart/form-data" class="traffic-import-confirm-form" data-confirm="<?= e('فقط ردیف‌های قابل ثبت به سوابق تردد اضافه می‌شوند. ادامه می‌دهید؟') ?>">
+                    <?= csrf_field() ?><input type="hidden" name="action" value="traffic_import_apply"><input type="hidden" name="preview_token" value="<?= e((string) $importPreview['token']) ?>">
+                    <label>برای ثبت، همان فایل پیش‌نمایش‌شده را دوباره انتخاب کنید<input type="file" name="file" accept=".xlsx,.xlsm,.csv,.txt" required></label>
+                    <button class="button" type="submit">ثبت <?= number_format($importReady) ?> تردد</button>
+                </form>
+                <?php else: ?><p class="traffic-import-no-ready">ردیف قابل ثبت پیدا نشد؛ فایل را اصلاح و دوباره بررسی کنید.</p><?php endif; ?>
+
+                <div class="traffic-import-table-wrap"><table class="traffic-import-table"><thead><tr><th>ردیف</th><th>شماره برگ</th><th>تاریخ</th><th>نام</th><th>کد ملی</th><th>ورود</th><th>خروج</th><th>وضعیت / توضیح</th></tr></thead><tbody>
+                <?php foreach ((array) ($importPreview['rows'] ?? []) as $previewRow): ?>
+                    <?php $status = (string) ($previewRow['action'] ?? 'invalid'); $statusLabels = ['insert' => 'قابل ثبت', 'exists' => 'از قبل موجود', 'duplicate' => 'تکراری در فایل', 'invalid' => 'نیاز به اصلاح']; ?>
+                    <tr class="traffic-import-<?= e($status) ?>"><td><?= (int) ($previewRow['line'] ?? 0) ?></td><td><?= e((string) ($previewRow['serial_no'] ?? '')) ?></td><td><?= !empty($previewRow['visit_date']) ? e(jalali_date((string) $previewRow['visit_date'], false)) : '—' ?></td><td><?= e((string) ($previewRow['full_name'] ?? '')) ?></td><td><?= e((string) ($previewRow['national_code'] ?? '')) ?></td><td><?= e((string) ($previewRow['entry_time'] ?? '')) ?></td><td><?= e((string) ($previewRow['exit_time'] ?? '')) ?></td><td><strong><?= e($statusLabels[$status] ?? $status) ?></strong><br><small><?= e((string) ($previewRow['reason'] ?? '')) ?></small></td></tr>
+                <?php endforeach; ?>
+                </tbody></table></div>
+                <?php if (!empty($importPreview['truncated'])): ?><p class="muted">برای خوانایی، فقط ۳۰۰ ردیف نخست نشان داده شده است؛ شمارش بالا شامل همهٔ <?= number_format((int) ($importPreview['total'] ?? 0)) ?> ردیف است.</p><?php endif; ?>
+                <p class="traffic-import-privacy">کد ملی در جدول پیش‌نمایش پوشانده شده و فقط چهار رقم پایانی دیده می‌شود.</p>
+            </section>
+            <?php endif; ?>
         </section>
         <?php endif; ?>
 

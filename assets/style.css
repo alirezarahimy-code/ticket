@@ -1059,6 +1059,34 @@ body:has(.organization-workspace) .org-node { border-color: var(--line); backgro
 .traffic-export-button:hover { background: linear-gradient(135deg, #1c6547, #267a56); color: #fff; }
 .traffic-export-button span { font-size: 18px; line-height: 1; }
 .traffic-report-actions small { color: #758179; font-size: 10px; }
+.traffic-import-card { box-sizing: border-box; width: min(100%, 1120px); margin: 0 auto; padding: 22px 24px; }
+.traffic-import-card .section-title { align-items: center; padding-bottom: 14px; border-bottom: 1px solid #e7ece7; }
+.traffic-import-intro, .traffic-import-columns, .traffic-import-safety, .traffic-import-privacy { color: #66766d; font-size: 12px; line-height: 1.9; }
+.traffic-import-columns { margin: 14px 0; padding: 11px 14px; border: 1px solid #dce9df; border-radius: 11px; background: #f7faf7; }
+.traffic-import-columns strong { color: #2c5d47; }
+.traffic-import-template-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.traffic-import-upload-form, .traffic-import-confirm-form { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; padding: 14px; border: 1px solid #e1e9e3; border-radius: 12px; background: #fbfdfb; }
+.traffic-import-upload-form label, .traffic-import-confirm-form label { flex: 1 1 360px; min-width: min(100%, 260px); color: #445f52; font-size: 11px; font-weight: 700; }
+.traffic-import-upload-form input[type="file"], .traffic-import-confirm-form input[type="file"] { display: block; margin-top: 7px; }
+.traffic-import-safety { margin: 10px 0 0; }
+.traffic-import-preview { margin-top: 22px; padding-top: 18px; border-top: 1px solid #e5ece6; }
+.traffic-import-preview h3 { margin: 0 0 13px; color: #203d38; font-size: 17px; overflow-wrap: anywhere; }
+.traffic-import-counts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+.traffic-import-counts span { padding: 10px 8px; border: 1px solid #e2eae3; border-radius: 10px; background: #f8fbf9; color: #586a60; font-size: 10px; text-align: center; }
+.traffic-import-counts b { display: block; color: #246b4d; font-size: 19px; }
+.traffic-import-confirm-form { margin: 12px 0 16px; border-color: #c9e0d0; background: #f2faf4; }
+.traffic-import-no-ready { padding: 11px 14px; border-radius: 10px; background: #fff7e8; color: #7a5a1e; font-size: 12px; }
+.traffic-import-table-wrap { max-width: 100%; overflow: auto; border: 1px solid #e2eae3; border-radius: 11px; }
+.traffic-import-table { width: 100%; min-width: 880px; border-collapse: collapse; font-size: 11px; }
+.traffic-import-table th, .traffic-import-table td { padding: 9px 10px; border-bottom: 1px solid #e8eee9; text-align: right; vertical-align: top; }
+.traffic-import-table th { position: sticky; top: 0; background: #eef5ef; color: #365749; white-space: nowrap; }
+.traffic-import-table td { color: #52645a; }
+.traffic-import-table td small { color: #758179; line-height: 1.7; }
+.traffic-import-table .traffic-import-insert td:first-child, .traffic-import-table .traffic-import-insert td:last-child strong { color: #167044; }
+.traffic-import-table .traffic-import-exists td:last-child strong { color: #647367; }
+.traffic-import-table .traffic-import-duplicate td:last-child strong { color: #906716; }
+.traffic-import-table .traffic-import-invalid td:last-child strong { color: #b42318; }
+.traffic-import-privacy { margin-bottom: 0; font-size: 10px; }
 .traffic-destinations-card { box-sizing: border-box; width: min(100%, 780px); margin: 0 auto; padding: 22px 24px; }
 .traffic-destinations-card .section-title { padding-bottom: 14px; border-bottom: 1px solid #e7ece7; }
 .traffic-destination-add-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 10px; max-width: 620px; margin: 18px auto 0; }
@@ -1090,6 +1118,13 @@ body:has(.organization-workspace) .org-node { border-color: var(--line); backgro
     .traffic-report-date-grid { grid-template-columns: 1fr; gap: 8px; }
     .traffic-report-actions { align-items: flex-start; flex-direction: column; gap: 8px; }
     .traffic-export-button { width: 100%; justify-content: center; box-sizing: border-box; }
+    .traffic-import-card { padding: 18px 14px; }
+    .traffic-import-card .section-title { align-items: flex-start; flex-direction: column; gap: 8px; }
+    .traffic-import-template-actions, .traffic-import-template-actions .button { width: 100%; box-sizing: border-box; }
+    .traffic-import-template-actions .button { justify-content: center; }
+    .traffic-import-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .traffic-import-upload-form, .traffic-import-confirm-form { align-items: stretch; flex-direction: column; }
+    .traffic-import-upload-form .button, .traffic-import-confirm-form .button { width: 100%; box-sizing: border-box; }
     .traffic-destinations-card { padding: 18px 14px; }
     .traffic-destination-add-form { grid-template-columns: 1fr; }
     .traffic-destination-add-form .button { width: 100%; box-sizing: border-box; }

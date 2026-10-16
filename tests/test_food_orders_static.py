@@ -86,6 +86,34 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertNotIn("CREATE TABLE", helper)
         self.assertNotIn("ALTER TABLE", helper)
 
+    def test_guest_requests_allow_today_only_through_a_configured_cutoff(self) -> None:
+        order = read("food-order.php")
+        self.assertIn("function food_guest_request_same_day_cutoff()", order)
+        self.assertIn("setting('food_guest_request_same_day_cutoff', '09:30')", order)
+        self.assertIn("$now->format('H:i') <= food_guest_request_same_day_cutoff()", order)
+        self.assertIn("food_guest_request_date_error($date)", order)
+        self.assertIn("'same_day_cutoff' => food_guest_request_same_day_cutoff()", order)
+        self.assertIn("'same_day_open' => food_guest_request_same_day_is_open($now)", order)
+
+        ticket = read("food-ticket.php")
+        self.assertIn("'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff()", ticket)
+        self.assertIn("save_setting('food_guest_request_same_day_cutoff', $guestRequestSameDayCutoff)", ticket)
+        self.assertIn("'config' => 'food.db'", ticket)
+        self.assertIn("return 'food.db_edit';", ticket)
+
+        panel = read("food-ticket-web/index.html")
+        self.assertIn('id="guest-request-cutoff"', panel)
+        self.assertIn("guestRequestSameDayCutoff:state.guests.requestSameDayCutoff||'09:30'", panel)
+        guest_form = read("assets/food-order-guest.js")
+        self.assertIn("data.same_day_open !== false", guest_form)
+        self.assertIn("تا پایان دقیقهٔ", guest_form)
+
+        guide = read("help-guide.php")
+        self.assertIn("تا پایان دقیقهٔ ۹:۳۰ صبح", guide)
+        self.assertIn("ساعت ۱۲:۰۱", guide)
+        chatbot = read("chatbot.php")
+        self.assertIn("food_guest_request_deadline", chatbot)
+
     def test_worker_has_one_internal_order_map_and_no_access_fallback(self) -> None:
         engine = read("food-ticket-engine.php")
         start = engine.index("function food_ticket_order_map_lazy(")

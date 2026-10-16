@@ -2922,6 +2922,7 @@ function food_ticket_api_config(): array
         'guestCapStart' => substr(food_guest_cap_start(), 0, 5),
         'guestCapCutoff' => substr(food_guest_cap_cutoff(), 0, 5),
         'guestCapEnd' => substr(food_guest_cap_end(), 0, 5),
+        'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff(),
         'guestFoodType' => 'مهمان',
         'cutSourceRows' => !empty($config['cut_source_rows']),
         'enabled' => !empty($config['enabled']),
@@ -3392,6 +3393,17 @@ function food_ticket_api_delete_guest_card(int $id, int $userId, string $cardNum
 
 function food_ticket_api_save_config(array $data, array $user): void
 {
+    $guestRequestSameDayCutoff = null;
+    if (array_key_exists('guestRequestSameDayCutoff', $data)) {
+        $rawCutoff = trim(food_ticket_normalize_digits((string) $data['guestRequestSameDayCutoff']));
+        if (!preg_match('/^(\d{1,2}):(\d{2})$/', $rawCutoff, $cutoffParts)
+            || (int) $cutoffParts[1] > 23
+            || (int) $cutoffParts[2] > 59) {
+            throw new RuntimeException('مهلت ثبت درخواست مهمان باید به‌صورت ساعت ۲۴ ساعته HH:MM باشد؛ مثلاً 09:30.');
+        }
+        $guestRequestSameDayCutoff = sprintf('%02d:%02d', (int) $cutoffParts[1], (int) $cutoffParts[2]);
+    }
+
     // اگر چاپگر ویندوز انتخاب شد، حالت صف ویندوز اولویت دارد
     // اگر از فرم printer.mode آمده، همان مبنا است (سوییچ Windows/TCP)
     $printer = is_array($data['printer'] ?? null) ? $data['printer'] : [];
@@ -3478,6 +3490,9 @@ function food_ticket_api_save_config(array $data, array $user): void
         if (array_key_exists($field, $data) && preg_match('/^\d{2}:\d{2}$/', (string) $data[$field])) {
             save_setting($settingKey, (string) $data[$field] . ':00');
         }
+    }
+    if ($guestRequestSameDayCutoff !== null) {
+        save_setting('food_guest_request_same_day_cutoff', $guestRequestSameDayCutoff);
     }
     if (((string) ($user['role'] ?? '') === 'admin' || (string) ($user['role'] ?? '') === 'primary_admin') && array_key_exists('brandName', $data) && trim((string) $data['brandName']) !== '') {
         save_setting('food_ticket_brand_name', trim((string) $data['brandName']));
@@ -3932,7 +3947,16 @@ function food_ticket_api_handle(string $route, array $user): never
             food_ticket_api_json(['items' => food_ticket_api_employees()]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cards') {
-            food_ticket_api_json(['items' => food_ticket_api_guest_cards()]);
+            $guestConfig = food_ticket_config();
+            food_ticket_api_json([
+                'items' => food_ticket_api_guest_cards(),
+                'maxGuestTicketsPerDay' => (int) ($guestConfig['max_guest_daily'] ?? 20),
+                'guestCapMode' => food_guest_cap_mode(),
+                'guestCapStart' => substr(food_guest_cap_start(), 0, 5),
+                'guestCapCutoff' => substr(food_guest_cap_cutoff(), 0, 5),
+                'guestCapEnd' => substr(food_guest_cap_end(), 0, 5),
+                'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff(),
+            ]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
             // سقف فعلی سقف متغیر + تعداد داخل ساختمان برای باکس نمایش در فرم مهمان

@@ -2769,6 +2769,7 @@ function activity_action_label(string $code): string
         'traffic_visit_updated' => 'ویرایش تردد مراجع',
         'traffic_visit_deleted' => 'حذف تردد مراجع',
         'traffic_visit_exit_set' => 'ثبت ساعت خروج مراجع',
+        'traffic_records_imported' => 'ورود گروهی سوابق تردد از Excel',
         'save_inventory_form' => 'ذخیرهٔ شناسنامهٔ فنی',
         'collect_inventory' => 'استخراج اطلاعات سیستم',
         'create_backup' => 'ایجاد پشتیبان',

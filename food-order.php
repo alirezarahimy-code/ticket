@@ -84,15 +84,24 @@ function food_order_iso_date(mixed $value): ?string
     return null;
 }
 
-function food_order_today(): string
+function food_order_timezone(): DateTimeZone
 {
     $timezone = (string) (function_exists('cfg') ? cfg('app.timezone', 'Asia/Tehran') : 'Asia/Tehran');
     try {
-        $zone = new DateTimeZone($timezone !== '' ? $timezone : 'Asia/Tehran');
+        return new DateTimeZone($timezone !== '' ? $timezone : 'Asia/Tehran');
     } catch (Throwable) {
-        $zone = new DateTimeZone('Asia/Tehran');
+        return new DateTimeZone('Asia/Tehran');
     }
-    return (new DateTimeImmutable('now', $zone))->format('Y-m-d');
+}
+
+function food_order_now(): DateTimeImmutable
+{
+    return new DateTimeImmutable('now', food_order_timezone());
+}
+
+function food_order_today(): string
+{
+    return food_order_now()->format('Y-m-d');
 }
 
 function food_order_jalali_label(string $isoDate): string
@@ -1248,7 +1257,7 @@ function food_order_export_statistics_range(string $fromDate, string $toDate, ar
     food_order_send_xlsx('آمار-سفارش-' . $mode . '-' . $rangeToken . '.xlsx', $title . ' ' . $rangeLabel, $headers, $data);
 }
 
-/** نقش‌های مدیر و بالاتر که می‌توانند برای مهمان برای روزهای آینده غذا سفارش دهند. */
+/** نقش‌های سامانه‌ای که ممکن است برای مهمان درخواست ثبت کنند؛ دسترسی واقعی همچنان از چارت سازمانی کنترل می‌شود. */
 function food_guest_request_roles(): array
 {
     return ['primary_admin', 'supervisor', 'support_manager', 'manager', 'inspector'];
@@ -1258,6 +1267,49 @@ function food_guest_request_roles(): array
 function food_guest_request_allowed(array $user): bool
 {
     return food_guest_user_deputy_id($user, true) > 0;
+}
+
+/** آخرین دقیقهٔ مجاز ثبت درخواست مهمان برای همان روز؛ مستقل از ساعت قطع سقف فیش مهمان است. */
+function food_guest_request_same_day_cutoff(): string
+{
+    $raw = function_exists('setting') ? setting('food_guest_request_same_day_cutoff', '09:30') : '09:30';
+    $raw = trim(food_order_normalize_digits($raw ?? ''));
+    if (!preg_match('/^(\d{1,2}):(\d{2})$/', $raw, $parts)) {
+        return '09:30';
+    }
+    $hour = (int) $parts[1];
+    $minute = (int) $parts[2];
+    if ($hour > 23 || $minute > 59) {
+        return '09:30';
+    }
+    return sprintf('%02d:%02d', $hour, $minute);
+}
+
+/** دقیقهٔ تنظیم‌شده هم مجاز است؛ مثلاً با ۰۹:۳۰، ثبت تا ۰۹:۳۰:۵۹ پذیرفته می‌شود. */
+function food_guest_request_same_day_is_open(?DateTimeImmutable $now = null): bool
+{
+    $now ??= food_order_now();
+    return $now->format('H:i') <= food_guest_request_same_day_cutoff();
+}
+
+/** خطای اعتبارسنجی تاریخ درخواست؛ null یعنی تاریخ در این لحظه قابل ثبت است. */
+function food_guest_request_date_error(string $date, ?DateTimeImmutable $now = null): ?string
+{
+    $now ??= food_order_now();
+    $today = $now->format('Y-m-d');
+    if ($date < $today) {
+        return 'درخواست غذای مهمان برای روزهای گذشته ثبت نمی‌شود.';
+    }
+    if ($date === $today && !food_guest_request_same_day_is_open($now)) {
+        $cutoff = food_guest_request_same_day_cutoff();
+        if (function_exists('food_ticket_fa_digits')) {
+            $cutoff = food_ticket_fa_digits($cutoff);
+        } else {
+            $cutoff = strtr($cutoff, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+        }
+        return 'مهلت ثبت درخواست غذای مهمان برای امروز تا ساعت ' . $cutoff . ' است؛ پس از آن فقط برای روزهای آینده می‌توانید درخواست ثبت کنید.';
+    }
+    return null;
 }
 
 /** تعداد مهمان‌های درخواستی فعال برای یک روز (سقف حالت «درخواست مهمان»). null یعنی جدول در دسترس نیست. */
@@ -1386,7 +1438,8 @@ function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
 function food_guest_request_list(array $user): array
 {
     food_guest_schema_ensure();
-    $today = food_order_today();
+    $now = food_order_now();
+    $today = $now->format('Y-m-d');
     $stmt = db()->prepare(
         "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.note, r.status,
                 r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
@@ -1431,19 +1484,29 @@ function food_guest_request_list(array $user): array
             $myDeputy = $d;
         }
     }
-    return ['items' => $items, 'foods' => $foods, 'my_deputy' => $myDeputy, 'today' => $today, 'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'requested'];
+    return [
+        'items' => $items,
+        'foods' => $foods,
+        'my_deputy' => $myDeputy,
+        'today' => $today,
+        'today_jalali' => food_order_jalali_label($today),
+        'same_day_cutoff' => food_guest_request_same_day_cutoff(),
+        'same_day_open' => food_guest_request_same_day_is_open($now),
+        'mode' => function_exists('food_guest_cap_mode') ? food_guest_cap_mode() : 'requested',
+    ];
 }
 
+/** ثبت درخواست مهمان؛ برای امروز تا پایان دقیقهٔ مهلت تنظیمی و برای آینده در هر ساعتی مجاز است. */
 function food_guest_request_create(array $user, array $body): array
 {
     food_guest_schema_ensure();
-    $today = food_order_today();
     $date = food_order_iso_date($body['request_date'] ?? '');
     if ($date === null) {
         throw new RuntimeException('تاریخ شمسی معتبر نیست.');
     }
-    if ($date <= $today) {
-        throw new RuntimeException('درخواست غذای مهمان فقط برای روزهای آینده ثبت می‌شود.');
+    $dateError = food_guest_request_date_error($date);
+    if ($dateError !== null) {
+        throw new RuntimeException($dateError);
     }
     $organization = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['organization'] ?? '')));
     if (mb_strlen($organization) < 2 || mb_strlen($organization) > 190) {
@@ -1815,7 +1878,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=14"></script><script defer src="assets/food-order-guest.js?v=3"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=14"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
     render_footer();
     exit;
 }

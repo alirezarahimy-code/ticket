@@ -35,7 +35,7 @@ $code = '';
 foreach (['gregorian_to_jalali', 'jalali_to_gregorian'] as $fn) {
     $code .= extract_php_function($bootstrap, $fn) . "\n";
 }
-foreach (['food_order_normalize_digits', 'food_order_today', 'food_order_list_date', 'food_order_list_range', 'food_order_jalali_month_range'] as $fn) {
+foreach (['food_order_normalize_digits', 'food_order_timezone', 'food_order_now', 'food_order_today', 'food_order_list_date', 'food_order_list_range', 'food_order_jalali_month_range'] as $fn) {
     $code .= extract_php_function($foodOrder, $fn) . "\n";
 }
 eval($code);

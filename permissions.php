@@ -97,7 +97,7 @@ function permission_catalog(): array
             'label' => 'کنترل تردد مراجعین',
             'items' => [
                 ['code' => 'traffic.view', 'label' => 'مشاهدهٔ کنترل تردد'],
-                ['code' => 'traffic.manage', 'label' => 'ویرایش'],
+                ['code' => 'traffic.manage', 'label' => 'ثبت، ویرایش و ورود گروهی سوابق'],
                 ['code' => 'traffic.destinations', 'label' => 'مدیریت مقصدهای ملاقات'],
             ],
         ],
