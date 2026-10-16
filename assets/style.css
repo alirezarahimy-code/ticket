@@ -1373,3 +1373,39 @@ html[data-theme="copper"] .card { border-top-color:#e5d2b8; }
 
 /* منوی واحد: اگر بلند بود، داخلی اسکرول می‌شود و از لبهٔ صفحه بیرون نمی‌زند. */
 .org-node-menu { max-height: calc(100vh - 90px); overflow-y: auto; }
+
+/* افکت نمایشی — صفحه‌های انتخاب‌شده */
+body.triangle-mesh-background-active > .app-shell { position: relative; z-index: 1; }
+body.triangle-mesh-background-active > .triangle-mesh-canvas { z-index: 0 !important; }
+
+/* افکت نمایشی — پنل تنظیمات */
+.tm-layout { display: grid; grid-template-columns: minmax(270px, .92fr) minmax(360px, 1.35fr); gap: 18px; align-items: start; }
+.tm-layout > .form-card { margin: 0; max-width: none; min-width: 0; }
+.tm-pages-card, .tm-settings-card { min-width: 0; }
+.tm-bulk { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 12px 0; }
+.tm-bulk .button { padding: 6px 12px; font-size: 12px; }
+.tm-search { display: block; margin: 10px 0 12px; }
+.tm-search input { width: 100%; max-width: none; }
+.tm-pages-list { max-height: 650px; overflow: auto; padding-left: 3px; scrollbar-width: thin; }
+.tm-group { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px 10px; margin: 0 0 12px; min-width: 0; }
+.tm-group legend { padding: 0 6px; font-size: 12px; font-weight: 700; color: var(--teal); }
+.tm-page { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 13px; cursor: pointer; }
+.tm-page[hidden], .tm-group[hidden], .tm-no-results[hidden] { display: none !important; }
+.tm-page input { width: auto; margin: 0; flex: 0 0 auto; }
+.tm-no-results { color: var(--muted); font-size: 12px; padding: 10px; }
+.tm-preview { position: relative; height: 260px; border: 1px solid var(--line); border-radius: 12px; background: #f8fafc; overflow: hidden; cursor: crosshair; margin: 8px 0 4px; isolation: isolate; }
+.tm-preview > .triangle-mesh-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: auto; }
+.tm-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 20px; margin-top: 14px; }
+.tm-field { display: block; min-width: 0; font-size: 12px; }
+.tm-field-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; }
+.tm-field-head output { font-variant-numeric: tabular-nums; color: var(--teal); font-weight: 700; direction: ltr; }
+.tm-field input[type="range"] { width: 100%; margin: 0; padding: 0; }
+.tm-field small { display: block; margin-top: 3px; color: var(--muted); }
+.tm-colors { display: flex; flex-wrap: wrap; gap: 14px 18px; align-items: center; margin-top: 16px; }
+.tm-colors label { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.tm-colors input[type="color"] { width: 38px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+.tm-colors .check-label input { width: auto; margin: 0; }
+.tm-form .actions { flex-wrap: wrap; align-items: center; }
+.tm-form .actions .muted { font-size: 11px; }
+@media (max-width: 1100px) { .tm-layout { grid-template-columns: minmax(240px, .8fr) minmax(330px, 1.2fr); } }
+@media (max-width: 900px) { .tm-layout, .tm-fields { grid-template-columns: 1fr; } .tm-pages-list { max-height: 460px; } }

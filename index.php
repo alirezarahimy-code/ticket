@@ -576,7 +576,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id']) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.26"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.27"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -729,8 +729,8 @@ function render_footer(): void
         echo "[]";
     }
     $pageParam = (string) ($_GET['page'] ?? '');
-    $withParticles = !empty($GLOBALS['ui_particles']) || $pageParam === '' || $pageParam === 'dashboard';
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.22"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . '' . chatbot_render_widget(current_user()) . '</body></html>';
+    $withParticles = (!empty($GLOBALS['ui_particles']) || $pageParam === '' || $pageParam === 'dashboard') && !triangle_effect_enabled_for_current_page();
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.23"></script>' . ($withParticles ? '<script src="assets/particle-network.js?v=1" data-color="0,0,0"></script>' : '') . triangle_effect_script_tag() . chatbot_render_widget(current_user()) . '</body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {
@@ -3094,6 +3094,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=settings#ldap-sync');
         }
 
+        if ($action === 'save_triangle_effect') {
+            $triangleUser = require_permission('settings.general_edit');
+            $postedPages = $_POST['triangle_pages'] ?? [];
+            if (!is_array($postedPages)) {
+                $postedPages = [];
+            }
+            $selectedPageKeys = [];
+            foreach ($postedPages as $pageKey) {
+                if (!is_string($pageKey) || strlen($pageKey) > 80) {
+                    continue;
+                }
+                $pageKey = trim($pageKey);
+                if ($pageKey !== '') {
+                    $selectedPageKeys[$pageKey] = true;
+                }
+            }
+            $enabledPages = array_values(array_filter(
+                triangle_effect_valid_keys(),
+                static fn(string $pageKey): bool => isset($selectedPageKeys[$pageKey])
+            ));
+
+            $postedConfig = $_POST['tm'] ?? [];
+            $postedConfig = is_array($postedConfig) ? $postedConfig : [];
+            foreach (['showDots', 'maskVignette'] as $booleanKey) {
+                $value = $postedConfig[$booleanKey] ?? null;
+                $postedConfig[$booleanKey] = is_scalar($value) && (string) $value === '1';
+            }
+            $newConfig = triangle_effect_sanitize_config($postedConfig);
+
+            $settingsPdo = db();
+            $settingsPdo->beginTransaction();
+            try {
+                save_setting('triangle_effect_pages', (string) json_encode($enabledPages, JSON_UNESCAPED_UNICODE));
+                save_setting('triangle_effect_config', (string) json_encode(
+                    $newConfig,
+                    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+                ));
+                $settingsPdo->commit();
+            } catch (Throwable $settingsError) {
+                if ($settingsPdo->inTransaction()) {
+                    $settingsPdo->rollBack();
+                }
+                setting_forget_cache();
+                throw $settingsError;
+            }
+            save_audit((int) $triangleUser['id'], 'triangle_effect_saved', null, ['pages' => count($enabledPages)]);
+            flash('success', 'تنظیمات افکت نمایشی ذخیره شد.');
+            redirect('index.php?page=settings#triangle');
+        }
+
         if ($action === 'save_settings') {
             $settingsUser = require_login();
             $sectionPermission = [
@@ -4679,6 +4729,9 @@ if ($page === 'settings') {
     if ($canSettingsDomain) {
         $tabLinks .= '<a class="' . (!$canSettingsGeneral && $canSettingsDomain ? 'active' : '') . '" href="#domain">اتصال دامین</a>';
     }
+    if ($canSettingsGeneral) {
+        $tabLinks .= '<a href="#triangle">افکت نمایشی</a>';
+    }
     if ($canSettingsUsers) {
         $tabLinks .= '<a class="' . (!$canSettingsGeneral && !$canSettingsDomain && $canSettingsUsers ? 'active' : '') . '" href="#users">کاربران</a>';
     }
@@ -4705,6 +4758,40 @@ if ($page === 'settings') {
         echo '<div class="card form-card" id="activity-log-settings"><h2>گزارش فعالیت کاربران</h2><p class="muted">تمام عملیات کاربران ثبت می‌شود. رکوردهای قدیمی‌تر از بازهٔ نگهداری به‌صورت خودکار با کران پاک می‌شوند. رکوردهای فعلی: ' . number_format($activityCount) . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="prune_activity_logs"><label>بازهٔ نگهداری (روز)<input type="number" name="retention_days" min="7" max="3650" value="' . (int) $activityRetention . '"></label><small>پیش‌فرض ۶۰ روز (حدود دو ماه).</small><button class="button secondary" type="submit">ذخیره و پاک‌سازی لاگ‌های قدیمی</button></form></div>';
     }
     echo '</div>';
+    }
+
+    if ($canSettingsGeneral) {
+        $tmConfig = triangle_effect_config();
+        $tmPages = triangle_effect_enabled_pages();
+        $tmRange = static function (string $key, string $label, string $hint, string $step) use ($tmConfig): string {
+            $spec = triangle_effect_config_spec()[$key];
+            return '<label class="tm-field"><span class="tm-field-head"><span>' . e($label) . '</span><output data-tm-out="' . e($key) . '">' . e((string) $tmConfig[$key]) . '</output></span><input type="range" name="tm[' . e($key) . ']" data-tm-key="' . e($key) . '" min="' . e((string) $spec[0]) . '" max="' . e((string) $spec[1]) . '" step="' . e($step) . '" value="' . e((string) $tmConfig[$key]) . '"><small>' . e($hint) . '</small></label>';
+        };
+        $tmPagesHtml = '';
+        foreach (triangle_effect_page_catalog() as $tmGroupLabel => $tmGroupPages) {
+            $tmPagesHtml .= '<fieldset class="tm-group"><legend>' . e((string) $tmGroupLabel) . '</legend>';
+            foreach ($tmGroupPages as $tmPageKey => $tmPageLabel) {
+                $tmPagesHtml .= '<label class="tm-page"><input type="checkbox" name="triangle_pages[]" value="' . e((string) $tmPageKey) . '"' . (in_array((string) $tmPageKey, $tmPages, true) ? ' checked' : '') . '><span>' . e((string) $tmPageLabel) . '</span></label>';
+            }
+            $tmPagesHtml .= '</fieldset>';
+        }
+        echo '<div class="settings-panel" id="triangle"' . ($canSettingsGeneralEdit ? '' : ' inert') . '>';
+        echo '<form method="post" class="tm-form" id="triangle-form">' . csrf_field() . '<input type="hidden" name="action" value="save_triangle_effect"><div class="tm-layout">';
+        echo '<div class="card form-card tm-pages-card"><h2>صفحه‌ها و فرم‌ها</h2><p class="muted">افکت فقط روی صفحه‌هایی نمایش داده می‌شود که انتخاب و ذخیره کنید. صفحه‌های چاپ مستقل برای حفظ چیدمان چاپ در این فهرست نیستند.</p><div class="tm-bulk"><button type="button" class="button secondary" data-tm-all="1">انتخاب همه</button><button type="button" class="button secondary" data-tm-all="0">پاک‌کردن انتخاب‌ها</button><span class="muted" data-tm-count></span></div><label class="tm-search"><span class="sr-only">جست‌وجوی صفحه</span><input type="search" data-tm-search placeholder="جست‌وجوی صفحه یا فرم…"></label><div class="tm-pages-list">' . $tmPagesHtml . '<p class="tm-no-results" data-tm-no-results hidden>صفحه‌ای با این نام پیدا نشد.</p></div></div>';
+        echo '<div class="card form-card tm-settings-card"><h2>پیش‌نمایش و تنظیمات افکت</h2><p class="muted">پیش‌نمایش زنده است؛ ماوس را روی آن حرکت دهید یا کلیک کنید. تنظیمات برای همهٔ صفحه‌های انتخاب‌شده یکسان است.</p><div class="tm-preview" id="triangle-preview" data-tm-preview></div><div class="tm-bulk"><button type="button" class="button secondary" data-tm-ripple>ایجاد موج آزمایشی</button><button type="button" class="button secondary" data-tm-preset="default">پیش‌فرض</button><button type="button" class="button secondary" data-tm-preset="ocean">امواج آرام</button><button type="button" class="button secondary" data-tm-preset="magnet">آهنربای قوی</button><button type="button" class="button secondary" data-tm-preset="soft">محو و ملایم</button></div><div class="tm-fields">';
+        echo $tmRange('cellSize', 'اندازهٔ مثلث‌ها', 'کوچک‌تر = مثلث‌های بیشتر و سنگین‌تر', '1');
+        echo $tmRange('opacity', 'شفافیت خطوط', 'کمتر = محوتر و کم‌مزاحمت‌تر', '0.05');
+        echo $tmRange('mouseRadiusMult', 'شعاع اثر ماوس', 'ضریبی از اندازهٔ مثلث', '0.1');
+        echo $tmRange('repulsionMult', 'قدرت دفع ماوس', 'شدت کنار رفتن نقطه‌ها از مسیر ماوس', '0.05');
+        echo $tmRange('springK', 'سفتی فنر', 'سرعت برگشت نقطه‌ها به جای اصلی', '0.005');
+        echo $tmRange('damping', 'میرایی حرکت', 'بیشتر = نرم‌تر و ماندگارتر', '0.01');
+        echo $tmRange('idleAmp', 'لرزش آرام (حالت بیکار)', 'صفر = ثابت و بدون حرکت خودکار', '0.1');
+        echo $tmRange('waveSpeed', 'سرعت موج کلیک', 'پیکسل بر ثانیه', '10');
+        echo $tmRange('waveDuration', 'مدت موج کلیک', 'ثانیه', '0.1');
+        echo $tmRange('waveWidth', 'ضخامت موج کلیک', 'پیکسل', '5');
+        echo $tmRange('waveAmpMult', 'قدرت موج کلیک', 'شدت جابه‌جایی نقطه‌ها', '0.01');
+        echo '</div><div class="tm-colors"><label>رنگ خطوط<input type="color" name="tm[meshColor]" data-tm-key="meshColor" value="' . e($tmConfig['meshColor']) . '"></label><label>رنگ نقطه‌ها<input type="color" name="tm[dotColor]" data-tm-key="dotColor" value="' . e($tmConfig['dotColor']) . '"></label><label class="check-label"><input type="checkbox" name="tm[showDots]" value="1" data-tm-key="showDots"' . ($tmConfig['showDots'] ? ' checked' : '') . '> نمایش نقطه‌ها</label><label class="check-label"><input type="checkbox" name="tm[maskVignette]" value="1" data-tm-key="maskVignette"' . ($tmConfig['maskVignette'] ? ' checked' : '') . '> محو شدن لبه‌ها (وینیت)</label></div><div class="actions"><button class="button" type="submit">ذخیره تنظیمات افکت</button><span class="muted">پس از ذخیره، صفحه را تازه‌سازی کنید تا تغییر روی صفحات انتخاب‌شده دیده شود.</span></div></div></div></form>';
+        echo '</div>';
     }
 
     if ($canSettingsDomain) {

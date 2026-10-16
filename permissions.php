@@ -181,8 +181,8 @@ function permission_catalog(): array
             'key' => 'system',
             'label' => 'تنظیمات و سیستم',
             'items' => [
-                ['code' => 'settings.general', 'label' => 'تنظیمات عمومی'],
-                ['code' => 'settings.general_edit', 'label' => 'ویرایش'],
+                ['code' => 'settings.general', 'label' => 'تنظیمات عمومی و افکت نمایشی'],
+                ['code' => 'settings.general_edit', 'label' => 'ویرایش تنظیمات عمومی و افکت نمایشی'],
                 ['code' => 'settings.domain', 'label' => 'اتصال دامین و اسکن دامنه'],
                 ['code' => 'settings.domain_edit', 'label' => 'ویرایش'],
                 ['code' => 'settings.users', 'label' => 'مدیریت کاربران و دسترسی‌ها'],

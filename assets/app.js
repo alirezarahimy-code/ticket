@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var definitions = [
             ['general', 'عمومی'],
             ['domain', 'اتصال دامین'],
+            ['triangle', 'افکت نمایشی'],
             ['users', 'کاربران'],
             ['roles', 'نقش‌ها و دسترسی‌ها']
         ];
