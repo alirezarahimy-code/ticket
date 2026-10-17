@@ -2773,6 +2773,8 @@ function activity_action_label(string $code): string
         'food_group_uid_changed' => 'تغییر L_UID نمایندهٔ گروه',
         'food_group_member_added' => 'افزودن عضو به گروه غذا',
         'food_group_member_removed' => 'حذف عضو از گروه غذا',
+        'food_day_visit_set' => 'خوداظهاری محل تحویل غذا برای امروز',
+        'food_day_visit_cleared' => 'لغو خوداظهاری محل تحویل غذا',
         'food_absence_set' => 'ثبت غیبت روزانه',
         'food_absence_cleared' => 'حذف غیبت روزانه',
         'food_absence_override' => 'اصلاح غیبت بعد از قفل',

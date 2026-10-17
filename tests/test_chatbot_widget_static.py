@@ -58,3 +58,15 @@ check("۱۰-ب. آریا، بات سخنگوی سامانه" in guide
       and "مدیریت بات سخنگو" in guide
       and "هر یک دقیقه دست تکان می‌دهد" not in guide,
       "the Persian guide documents Aria and the manageable greeting")
+check("CHATBOT_WORDS_ABOUT" in chatbot
+      and "معرفی کن" in chatbot
+      and "'about'" in chatbot
+      and "حدس نمی‌زنم" in chatbot,
+      "identity questions get an about-intent instead of a random guide dump")
+check("function chatbot_contains_word" in chatbot
+      and "function chatbot_guide_tokens" in chatbot
+      and "title_hits'] >= 1" in chatbot
+      and "زیررشتهٔ «کن» داخل «کنید»" in chatbot,
+      "guide matching requires a title word and whole-word hits, not short substrings")
+check("حدس نمی‌زند و بخش بی‌ربط را نمی‌خواند" in guide,
+      "the Persian guide says Aria does not guess unrelated sections")

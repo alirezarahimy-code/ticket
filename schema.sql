@@ -945,6 +945,19 @@ CREATE TABLE IF NOT EXISTS food_ticket_daily_absence (
     CONSTRAINT fk_food_absence_group FOREIGN KEY (group_id) REFERENCES food_ticket_groups(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- خوداظهاری یک‌روزه: کاربرِ بدون گروه دائم اعلام می‌کند امروز غذا را از کدام گروه می‌گیرد.
+CREATE TABLE IF NOT EXISTS food_ticket_day_visits (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    visit_date DATE NOT NULL,
+    group_id INT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_food_day_visit_user_date (user_id, visit_date),
+    INDEX idx_food_day_visit_group_date (group_id, visit_date),
+    CONSTRAINT fk_food_day_visit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_food_day_visit_group FOREIGN KEY (group_id) REFERENCES food_ticket_groups(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- تاریخچهٔ L_UID نماینده‌ها (تشخیص تردد با شناسهٔ ناشناخته + Audit)
 CREATE TABLE IF NOT EXISTS food_ticket_group_uid_history (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

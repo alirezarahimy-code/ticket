@@ -1683,6 +1683,21 @@ function food_order_api_handle(string $route, array $user): never
                 $user
             ));
         }
+        if ($method === 'GET' && $route === 'day-visit') {
+            food_order_require_permission($user, 'foodorder.self');
+            food_order_send_json(food_ticket_day_visit_state($user));
+        }
+        if ($method === 'POST' && $route === 'day-visit') {
+            food_order_require_permission($user, 'foodorder.self');
+            check_api_rate_limit('food_day_visit_' . (int) $user['id'], 20, 60);
+            $body = food_order_api_body();
+            food_order_send_json(food_ticket_day_visit_save($user, (int) ($body['group_id'] ?? 0)));
+        }
+        if ($method === 'POST' && $route === 'day-visit-cancel') {
+            food_order_require_permission($user, 'foodorder.self');
+            check_api_rate_limit('food_day_visit_' . (int) $user['id'], 20, 60);
+            food_order_send_json(food_ticket_day_visit_clear($user));
+        }
         food_order_send_json(['error' => 'مسیر API سفارش غذا پیدا نشد.'], 404);
     } catch (Throwable $e) {
         $status = str_contains($e->getMessage(), 'دسترسی') ? 403 : 400;
@@ -1864,7 +1879,7 @@ function food_order_render_page(array $user): never
         : 'کد ملی ثبت‌شدهٔ شما معتبر نیست؛ ثبت سفارش برای خودتان غیرفعال است. برای اصلاح اطلاعات با منابع انسانی هماهنگ کنید.';
     $canProxy = true; // هر کاربر وارد‌شده می‌تواند برای دیگری سفارش ثبت کند (با کد ملی فرد)
     render_header('سفارش غذا', $user);
-    echo '<link rel="stylesheet" href="assets/food-order.css?v=12">';
+    echo '<link rel="stylesheet" href="assets/food-order.css?v=13">';
     echo '<section class="food-order-page"><header class="page-heading"><div><span class="eyebrow">برنامه غذایی سازمان</span><h1>سفارش غذا</h1></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></header>';
     if (!$hasNational) {
         echo '<div class="alert info" role="status">' . e($nationalIssue) . '</div>';
@@ -1878,7 +1893,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=14"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=15"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
     render_footer();
     exit;
 }

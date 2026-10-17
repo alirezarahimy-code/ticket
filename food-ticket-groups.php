@@ -137,6 +137,15 @@ function food_ticket_groups_ensure(): bool
             UNIQUE KEY uq_food_group_run_source (source_key),
             INDEX idx_food_group_run_day (group_id, punch_date, run_kind)
         )' . $engine);
+        db()->exec('CREATE TABLE IF NOT EXISTS food_ticket_day_visits (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNSIGNED NOT NULL,
+            visit_date DATE NOT NULL,
+            group_id INT UNSIGNED NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uq_food_day_visit_user_date (user_id, visit_date),
+            INDEX idx_food_day_visit_group_date (group_id, visit_date)
+        )' . $engine);
         food_ticket_groups_migrate();
         $ok = true;
     } catch (Throwable $e) {
@@ -689,6 +698,200 @@ function food_ticket_group_members(int $groupId, bool $activeOnly = false): arra
     return $q->fetchAll() ?: [];
 }
 
+/** آیا کاربر عضو دائم هیچ گروه غذایی است؟ */
+function food_ticket_user_group_id(int $userId): ?int
+{
+    if ($userId <= 0 || !food_ticket_groups_ensure()) {
+        return null;
+    }
+    try {
+        $q = db()->prepare('SELECT group_id FROM food_ticket_group_members WHERE user_id = ? LIMIT 1');
+        $q->execute([$userId]);
+        $id = $q->fetchColumn();
+        return $id ? (int) $id : null;
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] home group lookup failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/** مهمانان یک‌روزهٔ یک گروه در یک تاریخ. */
+function food_ticket_day_visit_users(int $groupId, string $date): array
+{
+    if ($groupId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !food_ticket_groups_ensure()) {
+        return [];
+    }
+    try {
+        $q = db()->prepare(
+            'SELECT u.id, u.full_name, u.employee_number, u.national_code, u.is_active '
+            . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
+            . 'WHERE v.group_id = ? AND v.visit_date = ? ORDER BY v.id'
+        );
+        $q->execute([$groupId, $date]);
+        return $q->fetchAll() ?: [];
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] list failed: ' . $e->getMessage());
+        return [];
+    }
+}
+
+/** اعضای دائم + خوداظهاران همان تاریخ (بدون تکرار). */
+function food_ticket_group_members_for_date(int $groupId, string $date, bool $activeOnly = false): array
+{
+    $members = food_ticket_group_members($groupId, $activeOnly);
+    $seen = [];
+    foreach ($members as $m) {
+        $seen[(int) ($m['id'] ?? 0)] = true;
+    }
+    foreach (food_ticket_day_visit_users($groupId, $date) as $visitor) {
+        $id = (int) ($visitor['id'] ?? 0);
+        if ($id > 0 && !isset($seen[$id])) {
+            if ($activeOnly && !(int) ($visitor['is_active'] ?? 0)) {
+                continue;
+            }
+            $members[] = $visitor;
+            $seen[$id] = true;
+        }
+    }
+    return $members;
+}
+
+function food_ticket_day_visit_row(int $userId, string $date): ?array
+{
+    if ($userId <= 0 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !food_ticket_groups_ensure()) {
+        return null;
+    }
+    try {
+        $q = db()->prepare(
+            'SELECT v.group_id, g.title FROM food_ticket_day_visits v '
+            . 'JOIN food_ticket_groups g ON g.id = v.group_id '
+            . 'WHERE v.user_id = ? AND v.visit_date = ? LIMIT 1'
+        );
+        $q->execute([$userId, $date]);
+        $row = $q->fetch() ?: null;
+        return $row ?: null;
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] get failed: ' . $e->getMessage());
+        return null;
+    }
+}
+
+/** وضعیت خوداظهاری محل تحویل امروز برای صفحهٔ سفارش غذا. */
+function food_ticket_day_visit_state(array $user, string $date = ''): array
+{
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $userId = (int) ($user['id'] ?? 0);
+    $homeId = food_ticket_user_group_id($userId);
+    $homeTitle = '';
+    $groups = [];
+    foreach (food_ticket_groups_load() as $g) {
+        if (($g['status'] ?? '') !== 'active') {
+            continue;
+        }
+        $gid = (int) ($g['id'] ?? 0);
+        $title = (string) ($g['title'] ?? '');
+        $groups[] = ['id' => $gid, 'title' => $title];
+        if ($homeId !== null && $gid === $homeId) {
+            $homeTitle = $title;
+        }
+    }
+    $current = food_ticket_day_visit_row($userId, $date);
+    $currentOut = null;
+    $locked = false;
+    if ($current) {
+        $gid = (int) $current['group_id'];
+        $currentOut = ['group_id' => $gid, 'title' => (string) $current['title']];
+        $locked = food_ticket_group_absence_locked($gid, $date);
+    }
+    return [
+        'date' => $date,
+        'allowed' => $homeId === null,
+        'home_group_id' => $homeId,
+        'home_group_title' => $homeTitle,
+        'groups' => $groups,
+        'current' => $currentOut,
+        'locked' => $locked,
+        'reason' => $homeId === null
+            ? ''
+            : ('شما عضو دائم گروه «' . ($homeTitle !== '' ? $homeTitle : 'ثبت‌شده') . '» هستید و نیازی به خوداظهاری ندارید.'),
+    ];
+}
+
+function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''): array
+{
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
+    }
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    if ($date !== date('Y-m-d')) {
+        throw new RuntimeException('خوداظهاری فقط برای امروز مجاز است.');
+    }
+    $userId = (int) ($user['id'] ?? 0);
+    if ($userId <= 0 || $groupId <= 0) {
+        throw new RuntimeException('کاربر یا گروه معتبر نیست.');
+    }
+    $homeId = food_ticket_user_group_id($userId);
+    if ($homeId !== null) {
+        throw new RuntimeException('عضو دائم گروه نمی‌تواند محل تحویل را عوض کند.');
+    }
+    $g = db()->prepare('SELECT id, title, status FROM food_ticket_groups WHERE id = ? LIMIT 1');
+    $g->execute([$groupId]);
+    $group = $g->fetch() ?: null;
+    if (!$group || (string) $group['status'] !== 'active') {
+        throw new RuntimeException('این گروه فعال نیست.');
+    }
+    if (food_ticket_group_absence_locked($groupId, $date)) {
+        throw new RuntimeException('فیش این گروه برای امروز چاپ شده است؛ خوداظهاری بسته است.');
+    }
+    $existing = food_ticket_day_visit_row($userId, $date);
+    if ($existing && food_ticket_group_absence_locked((int) $existing['group_id'], $date)) {
+        throw new RuntimeException('اعلام قبلی قفل شده و قابل تغییر نیست.');
+    }
+    if ($existing) {
+        db()->prepare('UPDATE food_ticket_day_visits SET group_id = ? WHERE user_id = ? AND visit_date = ?')
+            ->execute([$groupId, $userId, $date]);
+    } else {
+        db()->prepare('INSERT INTO food_ticket_day_visits (user_id, visit_date, group_id) VALUES (?, ?, ?)')
+            ->execute([$userId, $date, $groupId]);
+    }
+    food_ticket_audit('food_day_visit_set', [
+        'target_type' => 'food_group',
+        'target_id' => $groupId,
+        'target_label' => (string) $group['title'],
+        'user_id' => $userId,
+        'new' => (string) $group['title'],
+        'meta' => ['date' => $date, 'group_id' => $groupId],
+    ]);
+    return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'برای امروز غذا را از «' . $group['title'] . '» می‌گیرید.'];
+}
+
+function food_ticket_day_visit_clear(array $user, string $date = ''): array
+{
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
+    }
+    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $userId = (int) ($user['id'] ?? 0);
+    $existing = food_ticket_day_visit_row($userId, $date);
+    if (!$existing) {
+        return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'اعلامی برای امروز ثبت نشده است.'];
+    }
+    $groupId = (int) $existing['group_id'];
+    if (food_ticket_group_absence_locked($groupId, $date)) {
+        throw new RuntimeException('فیش این گروه برای امروز چاپ شده است؛ لغو ممکن نیست.');
+    }
+    db()->prepare('DELETE FROM food_ticket_day_visits WHERE user_id = ? AND visit_date = ?')->execute([$userId, $date]);
+    food_ticket_audit('food_day_visit_cleared', [
+        'target_type' => 'food_group',
+        'target_id' => $groupId,
+        'target_label' => (string) $existing['title'],
+        'user_id' => $userId,
+        'old' => (string) $existing['title'],
+        'meta' => ['date' => $date, 'group_id' => $groupId],
+    ]);
+    return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'اعلام امروز لغو شد.'];
+}
+
 /**
  * کلیدهای فیش صادرشدهٔ امروزِ این اعضا (food:تاریخ:کدملی).
  * @param list<array<string,mixed>> $members
@@ -766,7 +969,7 @@ function food_ticket_group_food_lookup(?array $orderMap): callable
  */
 function food_ticket_group_overview(int $groupId, string $date, bool $withOrders = true): array
 {
-    $members = food_ticket_group_members($groupId);
+    $members = food_ticket_group_members_for_date($groupId, $date);
     $absences = food_ticket_absence_load($date, $groupId);
     $absentIds = [];
     foreach (array_keys($absences) as $uid) {
@@ -871,7 +1074,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             $f->execute([$groupId, $date]);
             $kind = $f->fetchColumn() ? 'repeat' : 'first';
         }
-        $membersTotal = count(food_ticket_group_members($groupId));
+        $membersTotal = count(food_ticket_group_members_for_date($groupId, $date));
         db()->prepare(
             'INSERT INTO food_ticket_group_runs (group_id, group_title, rfid_card, trigger_kind, trigger_uid, source_key, punch_date, punch_time, run_kind, status, members_total) '
             . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
@@ -904,7 +1107,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
     }
 
     // اجرای اول: محاسبهٔ واجد شرایط‌ها و پردازش فقط همان‌ها
-    $members = food_ticket_group_members($groupId);
+    $members = food_ticket_group_members_for_date($groupId, $date);
     $absences = food_ticket_absence_load($date, $groupId);
     $absentIds = [];
     foreach (array_keys($absences) as $uid) {
@@ -1642,6 +1845,20 @@ function food_ticket_api_absence_status(int $groupId, string $date, array $actor
             'active' => (bool) ($m['is_active'] ?? false),
             'absent' => isset($absences[$uid]),
             'reason' => (string) ($absences[$uid]['reason'] ?? ''),
+            'visitor' => false,
+        ];
+    }
+    foreach (food_ticket_day_visit_users($groupId, $date) as $m) {
+        $uid = (int) $m['id'];
+        $membersOut[] = [
+            'id' => $uid,
+            'pc' => (string) ($m['employee_number'] ?? ''),
+            'name' => (string) ($m['full_name'] ?? ''),
+            'national_code' => food_ticket_digits($m['national_code'] ?? ''),
+            'active' => (bool) ($m['is_active'] ?? false),
+            'absent' => false,
+            'reason' => '',
+            'visitor' => true,
         ];
     }
     $absentCount = count($absences);

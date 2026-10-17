@@ -166,7 +166,9 @@
       return '<label class="fg-person">'
         + '<span title="' + esc(m.name) + ' (' + esc(m.pc) + ')" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">' + esc(m.name) + ' <small style="color:var(--muted)">(' + esc(m.pc) + ')</small>'
         + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
-        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span><input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '></label>';
+        + (m.visitor ? ' <span class="status ok">مهمان امروز</span>' : '')
+        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span>'
+        + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>') + '</label>';
     }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
       + '<h2>غیبت روزانه — ' + esc(a.group ? a.group.title : '') + (dateJalali ? ' <small style="color:var(--muted)">(' + esc(dateJalali) + ')</small>' : '') + '</h2>'

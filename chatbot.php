@@ -95,6 +95,7 @@ const CHATBOT_WORDS_CANCEL = ['انصراف', 'لغو', 'بیخیال', 'ولش 
 const CHATBOT_FLOW_TTL = 900;
 const CHATBOT_WORDS_GREET = ['سلام', 'درود', 'صبح بخیر', 'عصر بخیر', 'شب بخیر', 'خداحافظ', 'خدافظ'];
 const CHATBOT_WORDS_THANKS = ['ممنون', 'مرسی', 'متشکرم', 'سپاس', 'تشکر'];
+const CHATBOT_WORDS_ABOUT = ['خودت را معرفی', 'خودت رو معرفی', 'خودتان را معرفی', 'معرفی کن', 'معرفی کنی', 'معرفی خود', 'تو کی هستی', 'شما کی هستید', 'کی هستی', 'اسمت چیه', 'اسم شما چیست', 'چه کار میکنی', 'چیکار میکنی', 'چه کاری میکنی', 'آریا کی', 'تو چی هستی'];
 const CHATBOT_SCOPE_FALLBACK = 'من فقط دربارهٔ کارهای همین سامانه راهنمایی می‌کنم؛ مثلاً ثبت و پیگیری درخواست، سفارش غذا، فیش، کنترل تردد، CD/DVD، گزارش‌ها یا به‌روزرسانی. سؤال خود را دربارهٔ یکی از این موارد بنویسید، یا «ثبت درخواست» را بنویسید تا از کارشناسان کمک بگیرید.';
 
 function chatbot_has_any(string $normalized, array $words): bool
@@ -211,6 +212,12 @@ function chatbot_answer(string $question, array $user): array
         return chatbot_flow_step($flow, $user, $question);
     }
 
+    if (chatbot_has_any($norm, CHATBOT_WORDS_ABOUT)) {
+        $botName = chatbot_widget_config()['name'];
+        $about = $botName . ' هستم؛ راهنمای همین سامانه. دربارهٔ ثبت و پیگیری درخواست، سفارش غذا، فیش، کنترل تردد، CD/DVD، گزارش‌ها و به‌روزرسانی می‌توانم کمک کنم. سؤال مشخص خود را بنویسید؛ اگر ندانم، حدس نمی‌زنم و بخش بی‌ربط راهنما را نمی‌خوانم.';
+        return chatbot_reply($user, $question, $about, true, null, 'about');
+    }
+
     // سلام و تشکر: پاسخ کوتاه و در محدوده (بدون حدس دربارهٔ موضوع‌های خارج از سامانه).
     if (mb_strlen($norm, 'UTF-8') <= 25 && count(explode(' ', $norm)) <= 4) {
         if (chatbot_has_any($norm, CHATBOT_WORDS_GREET)) {
@@ -317,7 +324,8 @@ function chatbot_answer(string $question, array $user): array
         return chatbot_reply($user, $question, (string) $best['answer'], true, (int) $best['id'], null, $bestScore);
     }
     $guide = chatbot_guide_search($question);
-    if ($guide !== null) {
+    // فقط وقتی عنوان بخش واقعاً در سؤال آمده؛ تطابق بدنه به‌تنهایی جواب کامل نمی‌سازد.
+    if ($guide !== null && (int) $guide['title_hits'] >= 1) {
         return chatbot_guide_reply($user, $question, $guide);
     }
     $suggestions = chatbot_guide_suggestions($question);
@@ -426,7 +434,32 @@ function chatbot_typo_match(string $word, string $text): bool
 }
 
 /** کلمه‌های عمومی روزمره که برای جست‌وجوی راهنما بی‌اثرند (مثلاً «هوا امروز چطوره» نباید به «غیبت امروز» برسد). */
-const CHATBOT_GUIDE_STOPWORDS = ['کجا', 'کی', 'کدوم', 'کدام', 'چی', 'چیه', 'چیست', 'چند', 'چرا', 'آیا', 'چطوره', 'چطورن', 'چطوریه', 'امروز', 'فردا', 'دیروز', 'الان', 'هوا', 'ساعت', 'لطفا', 'لطفاً', 'کمک', 'بگو', 'بگید', 'بگین', 'میشه', 'بشه', 'میخوام', 'می‌خوام', 'خوبه', 'چنده', 'کجاست'];
+const CHATBOT_GUIDE_STOPWORDS = ['کجا', 'کی', 'کدوم', 'کدام', 'چی', 'چیه', 'چیست', 'چند', 'چرا', 'آیا', 'چطوره', 'چطورن', 'چطوریه', 'امروز', 'فردا', 'دیروز', 'الان', 'هوا', 'ساعت', 'لطفا', 'لطفاً', 'کمک', 'بگو', 'بگید', 'بگین', 'میشه', 'بشه', 'میخوام', 'می‌خوام', 'خوبه', 'چنده', 'کجاست', 'خودت', 'خودم', 'شما', 'کامل', 'بکن', 'کنم', 'کنید', 'میکنم', 'هستی', 'هستم', 'باشه', 'میخواد'];
+
+/** واژهٔ کامل در متن نرمال‌شده (نه زیررشتهٔ «کن» داخل «کنید»). */
+function chatbot_contains_word(string $haystack, string $needle): bool
+{
+    if ($needle === '' || $haystack === '') {
+        return false;
+    }
+    return (bool) preg_match('/(?:^| )' . preg_quote($needle, '/') . '(?: |$)/u', $haystack);
+}
+
+/** کلمه‌های معنی‌دار پرسش برای جست‌وجوی راهنما. */
+function chatbot_guide_tokens(string $question): array
+{
+    $words = [];
+    foreach (chatbot_expand_words(explode(' ', chatbot_normalize($question))) as $w) {
+        if (mb_strlen($w, 'UTF-8') < 3) {
+            continue;
+        }
+        if (in_array($w, CHATBOT_STOPWORDS, true) || in_array($w, CHATBOT_GUIDE_STOPWORDS, true)) {
+            continue;
+        }
+        $words[$w] = true;
+    }
+    return $words;
+}
 
 /**
  * ایندکس بخش‌های راهنما (help-guide.php): هر عنوان h3/h4 یک واحد است و به عنوان h2 والد لینک می‌شود.
@@ -516,12 +549,7 @@ function chatbot_guide_index(): array
 /** بهترین بخش راهنما برای پرسش، یا null اگر تطابق کافی نیست. */
 function chatbot_guide_search(string $question): ?array
 {
-    $words = [];
-    foreach (chatbot_expand_words(explode(' ', chatbot_normalize($question))) as $w) {
-        if (mb_strlen($w, 'UTF-8') >= 2 && !in_array($w, CHATBOT_STOPWORDS, true) && !in_array($w, CHATBOT_GUIDE_STOPWORDS, true)) {
-            $words[$w] = true;
-        }
-    }
+    $words = chatbot_guide_tokens($question);
     if (!$words) {
         return null;
     }
@@ -532,14 +560,14 @@ function chatbot_guide_search(string $question): ?array
         $titleHits = 0;
         $bodyHits = 0;
         foreach (array_keys($words) as $w) {
-            if (str_contains($sec['title_norm'], $w) || chatbot_typo_match($w, $sec['title_norm'])) {
+            if (chatbot_contains_word($sec['title_norm'], $w) || chatbot_typo_match($w, $sec['title_norm'])) {
                 $titleHits++;
-            } elseif (str_contains($sec['body_norm'], $w)) {
+            } elseif (chatbot_contains_word($sec['body_norm'], $w)) {
                 $bodyHits++;
             }
         }
-        // حداقل یک کلمه در عنوان، یا سه کلمهٔ مختلف در متن؛ تا کلمه‌های عمومی مثل «امروز» تطابق نسازند.
-        if ($titleHits < 1 && $bodyHits < 3) {
+        // عنوان باید حداقل یک واژهٔ مشترک داشته باشد؛ سه واژه در بدنه به‌تنهایی کافی نیست.
+        if ($titleHits < 1) {
             continue;
         }
         $score = $titleHits * 3 + $bodyHits;
@@ -558,28 +586,22 @@ function chatbot_guide_search(string $question): ?array
  */
 function chatbot_guide_suggestions(string $question, int $limit = 3): array
 {
-    $words = [];
-    foreach (chatbot_expand_words(explode(' ', chatbot_normalize($question))) as $w) {
-        if (mb_strlen($w, 'UTF-8') >= 2 && !in_array($w, CHATBOT_STOPWORDS, true) && !in_array($w, CHATBOT_GUIDE_STOPWORDS, true)) {
-            $words[$w] = true;
-        }
-    }
+    $words = chatbot_guide_tokens($question);
     if (!$words) {
         return [];
     }
     $scored = [];
     foreach (chatbot_guide_index() as $sec) {
-        $score = 0;
+        $titleHits = 0;
         foreach (array_keys($words) as $w) {
-            if (str_contains($sec['title_norm'], $w)) {
-                $score += 3;
-            } elseif (str_contains($sec['body_norm'], $w)) {
-                $score += 1;
+            if (chatbot_contains_word($sec['title_norm'], $w) || chatbot_typo_match($w, $sec['title_norm'])) {
+                $titleHits++;
             }
         }
-        if ($score > 0) {
-            $scored[] = [$score, $sec['title']];
+        if ($titleHits < 1) {
+            continue;
         }
+        $scored[] = [$titleHits * 3, $sec['title']];
     }
     usort($scored, static fn(array $a, array $b): int => $b[0] <=> $a[0]);
     return array_values(array_unique(array_map(static fn(array $x): string => $x[1], array_slice($scored, 0, $limit))));

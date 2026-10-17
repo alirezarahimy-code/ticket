@@ -50,6 +50,10 @@
     loading: true,
     dataLoaded: false,
     pageNotice: null,
+    visit: null,
+    visitLoading: false,
+    visitError: '',
+    visitSaving: false,
   };
 
   function esc(value) {
@@ -117,6 +121,77 @@
     window.setTimeout(function () { node.remove(); }, 4800);
   }
 
+  async function loadVisit() {
+    if (state.targetMode !== 'self') { state.visit = null; return; }
+    state.visitLoading = true; state.visitError = '';
+    try {
+      state.visit = await request('day-visit');
+    } catch (e) {
+      state.visit = null;
+      state.visitError = e.message || 'محل تحویل بارگذاری نشد.';
+    } finally {
+      state.visitLoading = false;
+    }
+  }
+  async function saveVisit() {
+    if (state.visitSaving) return;
+    var select = root.querySelector('#fo-visit-group');
+    var groupId = select ? Number(select.value || 0) : 0;
+    if (!groupId) { toast('ابتدا گروه مقصد را انتخاب کنید.', true); return; }
+    state.visitSaving = true;
+    try {
+      state.visit = await request('day-visit', null, { method: 'POST', body: JSON.stringify({ group_id: groupId }) });
+      toast(state.visit.message || 'اعلام امروز ثبت شد.');
+      render();
+    } catch (e) {
+      toast(e.message || 'ثبت اعلام انجام نشد.', true);
+    } finally {
+      state.visitSaving = false;
+    }
+  }
+  async function cancelVisit() {
+    if (state.visitSaving) return;
+    state.visitSaving = true;
+    try {
+      state.visit = await request('day-visit-cancel', null, { method: 'POST', body: JSON.stringify({}) });
+      toast(state.visit.message || 'اعلام امروز لغو شد.');
+      render();
+    } catch (e) {
+      toast(e.message || 'لغو اعلام انجام نشد.', true);
+    } finally {
+      state.visitSaving = false;
+    }
+  }
+  function renderVisitCard() {
+    if (state.targetMode !== 'self' || !state.recipientReady) return '';
+    if (state.visitLoading && !state.visit) {
+      return '<div class="card fo-visit-card"><p>در حال بارگذاری محل تحویل امروز…</p></div>';
+    }
+    if (state.visitError) {
+      return '<div class="card fo-visit-card"><div class="alert danger" role="alert">' + esc(state.visitError) + '</div></div>';
+    }
+    var v = state.visit;
+    if (!v) return '';
+    if (!v.allowed) {
+      return '<div class="card fo-visit-card"><h2>محل تحویل امروز</h2><p>' + esc(v.reason || 'عضو دائم گروه هستید.') + '</p></div>';
+    }
+    var current = v.current;
+    var locked = !!v.locked;
+    var options = ['<option value="">انتخاب گروه / ساختمان</option>'].concat((v.groups || []).map(function (g) {
+      var selected = current && Number(current.group_id) === Number(g.id) ? ' selected' : '';
+      return '<option value="' + Number(g.id) + '"' + selected + '>' + esc(g.title) + '</option>';
+    }));
+    var status = current
+      ? '<p class="fo-visit-current">امروز غذا را از «' + esc(current.title) + '» می‌گیرید.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + '</p>'
+      : '<p>عضو هیچ گروهی نیستید. اگر امروز باید غذا را از سلف ساختمان دیگری بگیرید، گروه را انتخاب کنید. فقط برای امروز اعمال می‌شود.</p>';
+    var actions = locked
+      ? ''
+      : '<button type="button" class="button" data-fo-action="visit-save"' + (state.visitSaving ? ' disabled' : '') + '>اعلام برای امروز</button>'
+        + (current ? '<button type="button" class="button secondary" data-fo-action="visit-cancel"' + (state.visitSaving ? ' disabled' : '') + '>لغو اعلام</button>' : '');
+    return '<div class="card fo-visit-card"><h2>محل تحویل امروز</h2>' + status
+      + (locked ? '' : '<div class="fo-visit-row"><label class="field">گروه مقصد<select id="fo-visit-group">' + options.join('') + '</select></label>' + actions + '</div>')
+      + '</div>';
+  }
   async function loadMonth() {
     state.loading = true; state.error = '';
     render();
@@ -405,7 +480,7 @@
       ? '<div class="alert ' + (state.pageNotice.type === 'danger' ? 'danger' : 'success') + ' fo-page-notice" role="' + (state.pageNotice.type === 'danger' ? 'alert' : 'status') + '"><span>' + esc(state.pageNotice.message) + '</span><button type="button" class="fo-page-notice-close" data-fo-action="dismiss-notice" aria-label="بستن پیام">×</button></div>'
       : '';
     var body = Cal
-      ? pageNotice + renderRecipientBanner() + renderCalendar() + (state.targetMode === 'self' ? renderListFilter() + '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderListFilter() + renderProxyOrders()) + renderModal()
+      ? pageNotice + renderRecipientBanner() + renderVisitCard() + renderCalendar() + (state.targetMode === 'self' ? renderListFilter() + '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderListFilter() + renderProxyOrders()) + renderModal()
       : pageNotice + '<div class="alert danger">تقویم شمسی مشترک بارگذاری نشده است. صفحه را تازه‌سازی کنید.</div>';
     root.innerHTML = body + renderRecipientDialog();
     if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(root);
@@ -478,8 +553,8 @@
     state.loading = true;
     state.dataLoaded = true;
     render();
-    var jobs = [loadMonth(), loadMyOrders()];
-    Promise.all(jobs);
+    var jobs = [loadMonth(), loadMyOrders(), loadVisit()];
+    Promise.all(jobs).then(function () { render(); });
   }
 
   function startRecipientChoice() {
@@ -793,6 +868,8 @@
       if (act === 'dismiss-cancel-proxy') dismissProxyCancelConfirmation(Number(action.dataset.orderId || 0));
       if (act === 'apply-list-range') applyListRange();
       if (act === 'reset-list-range') { state.listFrom = ''; state.listTo = ''; loadMyOrders(); }
+      if (act === 'visit-save') saveVisit();
+      if (act === 'visit-cancel') cancelVisit();
       return;
     }
     var dayButton = event.target.closest('[data-fo-day]');
