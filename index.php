@@ -706,7 +706,7 @@ function render_header(string $title, ?array $user = null): void
             $adminLinks[] = $submenuLink('index.php?page=backup', 'به‌روزرسانی و پشتیبان‌گیری');
         }
         if (user_can($user, 'chatbot.manage')) {
-            $adminLinks[] = $submenuLink('index.php?page=chatbot-admin', 'بات پاسخ‌گو');
+            $adminLinks[] = $submenuLink('index.php?page=chatbot-admin', 'مدیریت بات سخنگو');
         }
         $menuItems = [
             '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
@@ -4285,8 +4285,23 @@ if ($page === 'chatbot-admin') {
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         require_csrf();
         try {
-            chatbot_save_faq($_POST, $chatbotAdmin);
-            flash('success', 'مدخل بات ذخیره شد.');
+            if (isset($_POST['tts_settings'])) {
+                chatbot_save_tts($_POST, $chatbotAdmin);
+                flash('success', 'تنظیمات گویندگی بات ذخیره شد.');
+            } elseif (isset($_POST['widget_settings'])) {
+                chatbot_save_widget($_POST, $chatbotAdmin);
+                flash('success', 'تنظیمات آریا ذخیره شد.');
+            } elseif (isset($_POST['tts_test'])) {
+                $ttsTest = chatbot_tts_say('تست صدای فارسی آریا');
+                if ($ttsTest['ok']) {
+                    flash('success', 'موتور صوتی سرور سالم است و فایل تست ساخته شد.');
+                } else {
+                    flash('danger', $ttsTest['error']);
+                }
+            } else {
+                chatbot_save_faq($_POST, $chatbotAdmin);
+                flash('success', 'مدخل بات ذخیره شد.');
+            }
         } catch (RuntimeException $chatbotError) {
             flash('danger', $chatbotError->getMessage());
         }
@@ -4346,7 +4361,7 @@ if ($page === 'new-ticket') {
         }
     }
     if ($cdDvdRequestRecord === null) {
-        // پیش‌پرکردن متن از بات پاسخ‌گو؛ خدمت و سایر فیلدها را کاربر خودش در همین فرم انتخاب می‌کند.
+        // پیش‌پرکردن متن از آریا؛ خدمت و سایر فیلدها را کاربر خودش در همین فرم انتخاب می‌کند.
         $subjectDefault = mb_substr(trim((string) ($_GET['subject'] ?? '')), 0, 255, 'UTF-8');
         $descriptionDefault = mb_substr(trim((string) ($_GET['description'] ?? '')), 0, 5000, 'UTF-8');
     }

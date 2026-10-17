@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /*
- * بات پاسخ‌گوی سامانه (فاز ۱): تطبیق قانون‌محور با پرسش‌های متداول.
+ * آریا، بات سخنگوی سامانه (فاز ۱): تطبیق قانون‌محور با پرسش‌های متداول.
  * - بدون سرویس خارجی و بدون سخت‌افزار اضافه
  * - جدول‌ها: chatbot_faq (پرسش/پاسخ/کلیدواژه) و chatbot_logs (سؤال‌ها و بازخورد)
  * - دسترسی: chatbot.use برای پاسخ، chatbot.manage برای مدیریت محتوا
@@ -321,7 +321,7 @@ function chatbot_answer(string $question, array $user): array
         return chatbot_guide_reply($user, $question, $guide);
     }
     $suggestions = chatbot_guide_suggestions($question);
-    $text = 'متأسفانه پاسخ مشخصی برای این سؤال پیدا نکردم. ';
+    $text = chatbot_widget_config()['unmatched_text'] . ' ';
     if ($suggestions) {
         $text .= "شاید این بخش‌های راهنما کمک کنند:\n- " . implode("\n- ", $suggestions) . "\nمی‌توانید سؤال را کوتاه‌تر یا با کلمه‌های دیگری بپرسید.";
     } else {
@@ -629,7 +629,7 @@ function chatbot_api_handle(?array $user): void
     if ($provided === '' || !hash_equals(csrf_token(), $provided)) {
         $send(403, ['ok' => false, 'error' => 'نشست منقضی شده است؛ صفحه را دوباره باز کنید.']);
     }
-    check_api_rate_limit('chatbot_' . (int) $user['id'], 30, 60);
+    check_api_rate_limit('chatbot_' . (int) $user['id'], chatbot_widget_config()['rate_limit'], 60);
 
     $op = (string) ($_GET['op'] ?? 'ask');
     if ($op === 'feedback') {
@@ -637,6 +637,25 @@ function chatbot_api_handle(?array $user): void
         $helpful = ($_POST['helpful'] ?? '') === '1' ? 1 : 0;
         db()->prepare('UPDATE chatbot_logs SET helpful = ? WHERE id = ? AND user_id = ?')->execute([$helpful, $logId, (int) $user['id']]);
         $send(200, ['ok' => true]);
+    }
+    if ($op === 'voice-status') {
+        $send(200, ['ok' => true, 'voice' => chatbot_tts_status()]);
+    }
+    if ($op === 'say') {
+        $sayText = trim((string) ($_POST['text'] ?? ''));
+        if ($sayText === '' || mb_strlen($sayText, 'UTF-8') > 2000) {
+            $send(400, ['ok' => false, 'error' => 'متن صوتی باید بین ۱ تا ۲۰۰۰ نویسه باشد.']);
+        }
+        $spoken = chatbot_tts_say($sayText);
+        if (!$spoken['ok']) {
+            $send(503, ['ok' => false, 'error' => $spoken['error']]);
+        }
+        $audio = (string) file_get_contents($spoken['file']);
+        header('Content-Type: audio/wav', true);
+        header('Content-Length: ' . strlen($audio));
+        header('Cache-Control: private, max-age=31536000');
+        echo $audio;
+        exit;
     }
 
     $question = trim((string) ($_POST['question'] ?? ''));
@@ -682,6 +701,324 @@ function chatbot_save_faq(array $input, array $admin): void
     save_audit((int) $admin['id'], 'chatbot_faq_saved', null, ['id' => $id, 'question' => $question]);
 }
 
+/** ذخیرهٔ تنظیمات گویندگی بات (صفحهٔ مدیریت بات). */
+function chatbot_save_tts(array $input, array $admin): void
+{
+    $mode = valid_choice(trim((string) ($input['tts_mode'] ?? 'auto')), ['auto', 'server', 'browser', 'off'], 'auto');
+    $speed = max(100, min(250, (int) ($input['tts_speed'] ?? 175)));
+    $voice = valid_choice(trim((string) ($input['tts_voice'] ?? 'default')), ['default', 'male', 'female'], 'default');
+    $path = trim((string) ($input['tts_espeak_path'] ?? ''));
+    if (mb_strlen($path, 'UTF-8') > 500) {
+        throw new RuntimeException('مسیر موتور صوتی بیش از حد طولانی است.');
+    }
+    if ($path !== '' && !is_file($path)) {
+        throw new RuntimeException('فایل موتور صوتی در این مسیر پیدا نشد.');
+    }
+    save_setting('chatbot_tts_mode', $mode);
+    save_setting('chatbot_tts_speed', (string) $speed);
+    save_setting('chatbot_tts_voice', $voice);
+    save_setting('chatbot_tts_espeak_path', $path);
+    save_audit((int) $admin['id'], 'chatbot_tts_saved', null, ['mode' => $mode, 'speed' => $speed, 'voice' => $voice]);
+}
+
+/** پیش‌فرض‌های نام، متن‌ها و رفتار آریا. */
+function chatbot_widget_defaults(): array
+{
+    return [
+        'name' => 'آریا',
+        'greet_enabled' => true,
+        'greet_interval' => 60,
+        'greet_text' => "سلام\nمن آریا هستم، کمکی از دستم بر میاد؟",
+        'greet_duration' => 5,
+        'greet_sound' => true,
+        'welcome_text' => 'سلام! من آریا هستم؛ سؤال خود را درباره کار با سامانه بنویسید.',
+        'input_placeholder' => 'سؤال خود را بنویسید...',
+        'send_label' => 'ارسال',
+        'pending_text' => 'در حال جست‌وجو...',
+        'feedback_yes' => 'مفید بود',
+        'feedback_no' => 'کمکی نکرد',
+        'feedback_thanks' => 'ممنون از بازخوردتان.',
+        'unmatched_text' => 'متأسفانه پاسخ مشخصی برای این سؤال پیدا نکردم.',
+        'autospeak' => false,
+        'rate_limit' => 30,
+        'position' => 'left',
+    ];
+}
+
+/** تنظیمات نام/متن/رفتار آریا از جدول settings (با اعتبارسنجی و پیش‌فرض امن). */
+function chatbot_widget_config(): array
+{
+    $defaults = chatbot_widget_defaults();
+    $text = static function (string $key, int $min, int $max) use ($defaults): string {
+        $value = trim((string) (setting('chatbot_' . $key, '') ?? ''));
+        if ($value === '') {
+            $value = $defaults[$key];
+        }
+        $len = mb_strlen($value, 'UTF-8');
+        if ($len < $min || $len > $max) {
+            return $defaults[$key];
+        }
+        return $value;
+    };
+    $bool = static function (string $key) use ($defaults): bool {
+        $raw = setting('chatbot_' . $key, null);
+        if ($raw === null || $raw === '') {
+            return $defaults[$key];
+        }
+        return $raw === '1';
+    };
+    $int = static function (string $key, int $min, int $max) use ($defaults): int {
+        $raw = setting('chatbot_' . $key, null);
+        if ($raw === null || $raw === '' || !is_numeric($raw)) {
+            return $defaults[$key];
+        }
+        return max($min, min($max, (int) $raw));
+    };
+    return [
+        'name' => $text('name', 2, 40),
+        'greet_enabled' => $bool('greet_enabled'),
+        'greet_interval' => $int('greet_interval', 15, 600),
+        'greet_text' => $text('greet_text', 3, 200),
+        'greet_duration' => $int('greet_duration', 2, 15),
+        'greet_sound' => $bool('greet_sound'),
+        'welcome_text' => $text('welcome_text', 3, 500),
+        'input_placeholder' => $text('input_placeholder', 3, 120),
+        'send_label' => $text('send_label', 2, 20),
+        'pending_text' => $text('pending_text', 2, 120),
+        'feedback_yes' => $text('feedback_yes', 2, 40),
+        'feedback_no' => $text('feedback_no', 2, 40),
+        'feedback_thanks' => $text('feedback_thanks', 2, 120),
+        'unmatched_text' => $text('unmatched_text', 10, 2000),
+        'autospeak' => $bool('autospeak'),
+        'rate_limit' => $int('rate_limit', 5, 120),
+        'position' => valid_choice((string) (setting('chatbot_position', 'left') ?? 'left'), ['left', 'right'], 'left'),
+    ];
+}
+
+/** ذخیرهٔ تنظیمات نام/متن/رفتار آریا (صفحهٔ مدیریت بات سخنگو). */
+function chatbot_save_widget(array $input, array $admin): void
+{
+    $get = static function (string $key) use ($input): string {
+        return trim((string) ($input[$key] ?? ''));
+    };
+    $texts = [
+        'w_name' => ['key' => 'chatbot_name', 'label' => 'نام ربات', 'min' => 2, 'max' => 40],
+        'w_greet_text' => ['key' => 'chatbot_greet_text', 'label' => 'متن حباب خوش‌آمد', 'min' => 3, 'max' => 200],
+        'w_welcome_text' => ['key' => 'chatbot_welcome_text', 'label' => 'پیام آغازین گفتگو', 'min' => 3, 'max' => 500],
+        'w_input_placeholder' => ['key' => 'chatbot_input_placeholder', 'label' => 'متن راهنمای کادر سؤال', 'min' => 3, 'max' => 120],
+        'w_send_label' => ['key' => 'chatbot_send_label', 'label' => 'برچسب دکمهٔ ارسال', 'min' => 2, 'max' => 20],
+        'w_pending_text' => ['key' => 'chatbot_pending_text', 'label' => 'متن «در حال جست‌وجو»', 'min' => 2, 'max' => 120],
+        'w_feedback_yes' => ['key' => 'chatbot_feedback_yes', 'label' => 'برچسب «مفید بود»', 'min' => 2, 'max' => 40],
+        'w_feedback_no' => ['key' => 'chatbot_feedback_no', 'label' => 'برچسب «کمکی نکرد»', 'min' => 2, 'max' => 40],
+        'w_feedback_thanks' => ['key' => 'chatbot_feedback_thanks', 'label' => 'پیام تشکر از بازخورد', 'min' => 2, 'max' => 120],
+        'w_unmatched_text' => ['key' => 'chatbot_unmatched_text', 'label' => 'پاسخ پیش‌فرضِ سؤال بی‌پاسخ', 'min' => 10, 'max' => 2000],
+    ];
+    foreach ($texts as $field => $rule) {
+        $len = mb_strlen($get($field), 'UTF-8');
+        if ($len < $rule['min'] || $len > $rule['max']) {
+            throw new RuntimeException($rule['label'] . ' باید بین ' . $rule['min'] . ' تا ' . $rule['max'] . ' نویسه باشد.');
+        }
+        save_setting($rule['key'], $get($field));
+    }
+    $ints = [
+        'w_greet_interval' => ['key' => 'chatbot_greet_interval', 'label' => 'فاصلهٔ پیام خوش‌آمد (ثانیه)', 'min' => 15, 'max' => 600],
+        'w_greet_duration' => ['key' => 'chatbot_greet_duration', 'label' => 'مدت نمایش حباب (ثانیه)', 'min' => 2, 'max' => 15],
+        'w_rate_limit' => ['key' => 'chatbot_rate_limit', 'label' => 'سقف درخواست در دقیقه', 'min' => 5, 'max' => 120],
+    ];
+    foreach ($ints as $field => $rule) {
+        $number = (int) $get($field);
+        if ($number < $rule['min'] || $number > $rule['max']) {
+            throw new RuntimeException($rule['label'] . ' باید بین ' . $rule['min'] . ' تا ' . $rule['max'] . ' باشد.');
+        }
+        save_setting($rule['key'], (string) $number);
+    }
+    save_setting('chatbot_greet_enabled', !empty($input['w_greet_enabled']) ? '1' : '0');
+    save_setting('chatbot_greet_sound', !empty($input['w_greet_sound']) ? '1' : '0');
+    save_setting('chatbot_autospeak', !empty($input['w_autospeak']) ? '1' : '0');
+    save_setting('chatbot_position', valid_choice($get('w_position'), ['left', 'right'], 'left'));
+    save_audit((int) $admin['id'], 'chatbot_widget_saved', null, ['name' => $get('w_name')]);
+}
+
+/** تنظیمات گویندگی آفلاین بات (موتور سرور eSpeak-NG + جایگزین مرورگر). */
+function chatbot_tts_config(): array
+{
+    $mode = valid_choice((string) (setting('chatbot_tts_mode', 'auto') ?? 'auto'), ['auto', 'server', 'browser', 'off'], 'auto');
+    $speed = max(100, min(250, (int) (setting('chatbot_tts_speed', '175') ?? '175')));
+    $customPath = trim((string) (setting('chatbot_tts_espeak_path', '') ?? ''));
+    $voice = valid_choice((string) (setting('chatbot_tts_voice', 'default') ?? 'default'), ['default', 'male', 'female'], 'default');
+    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice];
+}
+
+/** آیا PHP اجازهٔ اجرای موتور صوتی را دارد؟ */
+function chatbot_tts_proc_available(): bool
+{
+    if (!function_exists('proc_open') || !function_exists('proc_close') || !function_exists('proc_get_status')) {
+        return false;
+    }
+    $disabled = array_map('trim', explode(',', (string) ini_get('disable_functions')));
+    return !in_array('proc_open', $disabled, true);
+}
+
+/** پیدا کردن فایل اجرایی eSpeak-NG (فقط بررسی وجود فایل؛ بدون اجرای دستور). */
+function chatbot_tts_find_espeak(?string $configured = null): ?string
+{
+    $candidates = [];
+    if ($configured !== null && trim($configured) !== '') {
+        $candidates[] = trim($configured);
+    }
+    if (strtoupper(substr((string) PHP_OS, 0, 3)) === 'WIN') {
+        foreach (['ProgramFiles', 'ProgramFiles(x86)', 'ProgramW6432'] as $envKey) {
+            $base = getenv($envKey);
+            if (is_string($base) && $base !== '') {
+                $candidates[] = rtrim($base, '\\/') . DIRECTORY_SEPARATOR . 'eSpeak NG' . DIRECTORY_SEPARATOR . 'espeak-ng.exe';
+            }
+        }
+        $candidates[] = 'C:\\Program Files\\eSpeak NG\\espeak-ng.exe';
+        $candidates[] = 'C:\\Program Files (x86)\\eSpeak NG\\espeak-ng.exe';
+    } else {
+        $candidates[] = '/usr/bin/espeak-ng';
+        $candidates[] = '/usr/local/bin/espeak-ng';
+    }
+    foreach ($candidates as $candidate) {
+        if (is_string($candidate) && $candidate !== '' && is_file($candidate)) {
+            return $candidate;
+        }
+    }
+    return null;
+}
+
+/** وضعیت موتور گویندگی برای ویجت و صفحهٔ مدیریت. */
+function chatbot_tts_status(): array
+{
+    $config = chatbot_tts_config();
+    $exe = chatbot_tts_find_espeak($config['espeak_path']);
+    $serverReady = $exe !== null && chatbot_tts_proc_available();
+    $engine = 'none';
+    if ($config['mode'] === 'server') {
+        $engine = 'server';
+    } elseif ($config['mode'] === 'browser') {
+        $engine = 'browser';
+    } elseif ($config['mode'] === 'auto') {
+        $engine = $serverReady ? 'server' : 'browser';
+    }
+    return ['mode' => $config['mode'], 'speed' => $config['speed'], 'voice' => $config['voice'], 'server_ready' => $serverReady, 'espeak' => $exe, 'engine' => $engine];
+}
+
+/** آماده‌سازی متن پاسخ برای خوانده شدن: حذف پیوند، شماره‌ها به شکل خوانا، حذف شکلک. */
+function chatbot_tts_clean(string $text): string
+{
+    $text = (string) preg_replace('~https?://\S+~u', ' پیوند ', $text);
+    $text = (string) preg_replace('~\S*\.php\S*~u', ' پیوند ', $text);
+    $text = (string) preg_replace_callback(
+        '~\b([A-Z]{2,}\d?)-(\d+)-(\d+)\b~',
+        static fn(array $m): string => ' شماره پیگیری ' . $m[2] . ' ' . $m[3],
+        $text
+    );
+    $text = (string) preg_replace_callback(
+        '~\b([A-Z]{2,})-(\d+)\b~',
+        static fn(array $m): string => ' شماره ' . $m[2],
+        $text
+    );
+    $text = strtr($text, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+    $text = (string) preg_replace('~[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B00}-\x{2BFF}\x{FE00}-\x{FE0F}]+~u', ' ', $text);
+    $text = (string) preg_replace('~[^\p{L}\p{N}\s.,;:!?؟،؛٪٫٬\-()«»"\'/+=%*_]~u', ' ', $text);
+    $text = (string) preg_replace('~\s+~u', ' ', trim($text));
+    return mb_substr($text, 0, 800, 'UTF-8');
+}
+
+/** نگاشت نوع صدا به شناسهٔ صدای eSpeak-NG (فقط مقادیر مجاز؛ هرگز ورودی خام). */
+function chatbot_tts_voice_id(string $voice): string
+{
+    $map = ['default' => 'fa', 'male' => 'fa+m2', 'female' => 'fa+f2'];
+    return $map[$voice] ?? 'fa';
+}
+
+/** اجرای موتور با ورودی stdin (بدون shell) و مهلت ۲۰ ثانیه‌ای. */
+function chatbot_tts_run_espeak(string $exe, string $text, int $wpm, string $voiceId): array
+{
+    $command = [$exe, '-v', $voiceId, '-s', (string) $wpm, '--stdout'];
+    $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+    $process = @proc_open($command, $descriptors, $pipes);
+    if (!is_resource($process)) {
+        return ['ok' => false, 'error' => 'اجرای موتور صوتی ممکن نشد.'];
+    }
+    fwrite($pipes[0], $text);
+    fclose($pipes[0]);
+    stream_set_blocking($pipes[1], false);
+    stream_set_blocking($pipes[2], false);
+    $wav = '';
+    $stderr = '';
+    $deadline = microtime(true) + 20.0;
+    $timedOut = false;
+    do {
+        $out = fread($pipes[1], 8192);
+        if (is_string($out) && $out !== '') {
+            $wav .= $out;
+            if (strlen($wav) > 8 * 1024 * 1024) {
+                break;
+            }
+        }
+        $err = fread($pipes[2], 8192);
+        if (is_string($err) && $err !== '') {
+            $stderr .= $err;
+        }
+        $status = proc_get_status($process);
+        if ($status['running'] && microtime(true) > $deadline) {
+            $timedOut = true;
+            @proc_terminate($process);
+            break;
+        }
+        if ($status['running']) {
+            usleep(50000);
+        }
+    } while ($status['running']);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $exitCode = proc_close($process);
+    if ($timedOut) {
+        return ['ok' => false, 'error' => 'موتور صوتی در زمان مجاز پاسخ نداد.'];
+    }
+    if ($exitCode !== 0 || strlen($wav) < 100) {
+        app_error_log('chatbot TTS failed (exit ' . $exitCode . '): ' . mb_substr($stderr, 0, 500, 'UTF-8'));
+        return ['ok' => false, 'error' => 'خطای موتور صوتی؛ از صحت نصب صدای فارسی (fa) مطمئن شوید.'];
+    }
+    return ['ok' => true, 'wav' => $wav];
+}
+
+/** تولید (با کش) فایل صوتی یک پاسخ. */
+function chatbot_tts_say(string $text): array
+{
+    $config = chatbot_tts_config();
+    if ($config['mode'] === 'off') {
+        return ['ok' => false, 'error' => 'گویندگی بات خاموش است.'];
+    }
+    $clean = chatbot_tts_clean($text);
+    if ($clean === '') {
+        return ['ok' => false, 'error' => 'متنی برای خواندن وجود ندارد.'];
+    }
+    $exe = chatbot_tts_find_espeak($config['espeak_path']);
+    if ($exe === null || !chatbot_tts_proc_available()) {
+        return ['ok' => false, 'error' => 'موتور صوتی روی سرور نصب/فعال نیست.'];
+    }
+    $dir = APP_ROOT . '/storage/tts';
+    if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+        return ['ok' => false, 'error' => 'ساخت پوشهٔ کش صدا ممکن نشد.'];
+    }
+    $voiceId = chatbot_tts_voice_id($config['voice']);
+    $file = $dir . '/' . sha1($clean . '|' . $config['speed'] . '|' . $voiceId) . '.wav';
+    if (is_file($file) && (int) filesize($file) > 100) {
+        return ['ok' => true, 'file' => $file];
+    }
+    $result = chatbot_tts_run_espeak($exe, $clean, $config['speed'], $voiceId);
+    if (!$result['ok']) {
+        return $result;
+    }
+    if (@file_put_contents($file, $result['wav'], LOCK_EX) === false) {
+        return ['ok' => false, 'error' => 'ذخیرهٔ فایل صوتی ممکن نشد.'];
+    }
+    return ['ok' => true, 'file' => $file];
+}
+
 /** صفحهٔ مدیریت بات: مدخل‌ها، سؤال‌های بی‌پاسخ و بازخورد منفی. */
 function chatbot_render_admin(array $admin): void
 {
@@ -697,8 +1034,60 @@ function chatbot_render_admin(array $admin): void
     $faqs = db()->query('SELECT f.*, (SELECT COUNT(*) FROM chatbot_logs l WHERE l.faq_id = f.id) AS asked, (SELECT COUNT(*) FROM chatbot_logs l WHERE l.faq_id = f.id AND l.helpful = 0) AS negative FROM chatbot_faq f ORDER BY f.is_active DESC, f.id')->fetchAll();
     $unanswered = db()->query('SELECT question, COUNT(*) AS total, MAX(created_at) AS last_at FROM chatbot_logs WHERE faq_id IS NULL AND intent IS NULL GROUP BY question ORDER BY total DESC, last_at DESC LIMIT 50')->fetchAll();
 
-    render_header('مدیریت بات پاسخ‌گو', $admin);
-    echo '<section class="page-heading"><div><span class="eyebrow">پشتیبانی هوشمند</span><h1>مدیریت بات پاسخ‌گو</h1><p>پرسش‌های متداول و کلیدواژه‌های آن‌ها را مدیریت کنید. سؤال‌های بی‌پاسخ کاربران را از جدول پایین می‌توانید به‌سرعت پاسخ دهید.</p></div></section>';
+    render_header('مدیریت آریا (بات سخنگو)', $admin);
+    echo '<section class="page-heading"><div><span class="eyebrow">پشتیبانی هوشمند</span><h1>مدیریت آریا (بات سخنگو)</h1><p>پرسش‌های متداول و کلیدواژه‌های آن‌ها را مدیریت کنید. سؤال‌های بی‌پاسخ کاربران را از جدول پایین می‌توانید به‌سرعت پاسخ دهید.</p></div></section>';
+
+    $wcfg = chatbot_widget_config();
+    $wChecked = static fn(bool $on): string => $on ? ' checked' : '';
+    echo '<div class="card form-card"><h2>تنظیمات آریا</h2>'
+        . '<p class="muted">نام، پیام خوش‌آمد، متن‌ها و رفتار ربات. همهٔ تغییرات بلافاصله برای کاربران اعمال می‌شود.</p>'
+        . '<form method="post" action="index.php?page=chatbot-admin">' . csrf_field()
+        . '<input type="hidden" name="widget_settings" value="1">'
+        . '<h3>نام و هویت</h3>'
+        . '<label class="field">نام ربات (در سربرگ گفتگو)<input name="w_name" required maxlength="40" value="' . e($wcfg['name']) . '"></label>'
+        . '<h3>پیام خوش‌آمد (حباب کنار ربات)</h3>'
+        . '<label class="check"><input type="checkbox" name="w_greet_enabled" value="1"' . $wChecked($wcfg['greet_enabled']) . '> نمایش دوره‌ای حباب خوش‌آمد</label>'
+        . '<label class="field">فاصلهٔ تکرار (ثانیه)<input type="number" name="w_greet_interval" min="15" max="600" value="' . (int) $wcfg['greet_interval'] . '"></label>'
+        . '<label class="field">متن حباب (هر خط در یک سطر)<textarea name="w_greet_text" rows="2" maxlength="200">' . e($wcfg['greet_text']) . '</textarea></label>'
+        . '<label class="field">مدت نمایش حباب (ثانیه)<input type="number" name="w_greet_duration" min="2" max="15" value="' . (int) $wcfg['greet_duration'] . '"></label>'
+        . '<label class="check"><input type="checkbox" name="w_greet_sound" value="1"' . $wChecked($wcfg['greet_sound']) . '> پخش صدای بوق همراه حباب</label>'
+        . '<h3>متن‌های گفتگو</h3>'
+        . '<label class="field">پیام آغازین گفتگو<textarea name="w_welcome_text" rows="2" maxlength="500">' . e($wcfg['welcome_text']) . '</textarea></label>'
+        . '<label class="field">متن راهنمای کادر سؤال<input name="w_input_placeholder" required maxlength="120" value="' . e($wcfg['input_placeholder']) . '"></label>'
+        . '<label class="field">برچسب دکمهٔ ارسال<input name="w_send_label" required maxlength="20" value="' . e($wcfg['send_label']) . '"></label>'
+        . '<label class="field">متن «در حال جست‌وجو»<input name="w_pending_text" required maxlength="120" value="' . e($wcfg['pending_text']) . '"></label>'
+        . '<label class="field">برچسب «مفید بود»<input name="w_feedback_yes" required maxlength="40" value="' . e($wcfg['feedback_yes']) . '"></label>'
+        . '<label class="field">برچسب «کمکی نکرد»<input name="w_feedback_no" required maxlength="40" value="' . e($wcfg['feedback_no']) . '"></label>'
+        . '<label class="field">پیام تشکر از بازخورد<input name="w_feedback_thanks" required maxlength="120" value="' . e($wcfg['feedback_thanks']) . '"></label>'
+        . '<label class="field">پاسخ پیش‌فرضِ سؤال بی‌پاسخ<textarea name="w_unmatched_text" rows="3" maxlength="2000">' . e($wcfg['unmatched_text']) . '</textarea></label>'
+        . '<h3>رفتار</h3>'
+        . '<label class="check"><input type="checkbox" name="w_autospeak" value="1"' . $wChecked($wcfg['autospeak']) . '> خواندن خودکار پاسخ‌ها با صدا (بدون زدن دکمهٔ بلندگو)</label>'
+        . '<label class="field">سقف درخواست در دقیقه برای هر کاربر<input type="number" name="w_rate_limit" min="5" max="120" value="' . (int) $wcfg['rate_limit'] . '"></label>'
+        . '<label class="field">موقعیت ربات در صفحه<select name="w_position"><option value="left"' . ($wcfg['position'] === 'left' ? ' selected' : '') . '>پایین-چپ</option><option value="right"' . ($wcfg['position'] === 'right' ? ' selected' : '') . '>پایین-راست</option></select></label>'
+        . '<button class="button" type="submit">ذخیره تنظیمات آریا</button></form></div>';
+    $tts = chatbot_tts_status();
+    $ttsModes = ['auto' => 'خودکار (اول سرور، وگرنه مرورگر)', 'server' => 'فقط موتور سرور (آفلاین قطعی)', 'browser' => 'فقط صدای مرورگر', 'off' => 'خاموش'];
+    echo '<div class="card form-card"><h2>گویندگی بات (آفلاین)</h2>'
+        . '<p class="muted">وضعیت موتور سرور: ' . ($tts['server_ready'] ? 'فعال (' . e((string) $tts['espeak']) . ')' : 'پیدا نشد — راهنمای نصب پایین همین کارت') . '</p>'
+        . '<form method="post" action="index.php?page=chatbot-admin">' . csrf_field()
+        . '<input type="hidden" name="tts_settings" value="1">'
+        . '<label class="field">حالت گویندگی<select name="tts_mode">';
+    foreach ($ttsModes as $ttsModeValue => $ttsModeLabel) {
+        echo '<option value="' . $ttsModeValue . '"' . ($tts['mode'] === $ttsModeValue ? ' selected' : '') . '>' . e($ttsModeLabel) . '</option>';
+    }
+    echo '</select></label>'
+        . '<label class="field">مسیر فایل espeak-ng روی سرور (خالی = جست‌وجوی خودکار)<input name="tts_espeak_path" dir="ltr" maxlength="500" value="' . e((string) chatbot_tts_config()['espeak_path']) . '" placeholder="C:\Program Files\eSpeak NG\espeak-ng.exe"></label>'
+        . '<label class="field">سرعت گفتار (کلمه در دقیقه)<input type="number" name="tts_speed" min="100" max="250" value="' . (int) $tts['speed'] . '"></label>'
+        . '<label class="field">نوع صدا<select name="tts_voice">';
+    foreach (['default' => 'پیش‌فرض', 'male' => 'مرد', 'female' => 'زن'] as $ttsVoiceValue => $ttsVoiceLabel) {
+        echo '<option value="' . $ttsVoiceValue . '"' . ($tts['voice'] === $ttsVoiceValue ? ' selected' : '') . '>' . e($ttsVoiceLabel) . '</option>';
+    }
+    echo '</select></label>'
+        . '<button class="button" type="submit">ذخیره تنظیمات صدا</button></form>'
+        . '<form method="post" action="index.php?page=chatbot-admin" style="margin-top:8px">' . csrf_field()
+        . '<input type="hidden" name="tts_test" value="1">'
+        . '<button class="button secondary" type="submit">تست موتور سرور</button></form>'
+        . '<p class="muted">نصب موتور (یک‌بار روی سرور): بستهٔ eSpeak-NG ویندوز را از صفحهٔ انتشار رسمی بگیرید و نصب کنید، سپس با دستور <code dir="ltr">espeak-ng --voices=fa</code> از وجود صدای فارسی مطمئن شوید. همهٔ پردازش داخل شبکهٔ خودتان انجام می‌شود و صدا برای اینترنت ارسال نمی‌شود.</p></div>';
 
     // گزارش بازه‌ای: آمار کلی، نیت‌ها، پرتکرارترین مدخل‌ها و بازخورد منفی اخیر (بدون نام کاربر)
     $validDate = static fn(string $v): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) && strtotime($v) !== false;
@@ -780,6 +1169,26 @@ function chatbot_render_widget(?array $user): string
         return '';
     }
     $token = json_encode(csrf_token(), JSON_HEX_TAG | JSON_HEX_AMP);
+    $wcfg = chatbot_widget_config();
+    $wjs = static function (array $c): array {
+        return [
+            'greetOn' => (bool) $c['greet_enabled'],
+            'greetMs' => (int) $c['greet_interval'] * 1000,
+            'bubbleMs' => (int) $c['greet_duration'] * 1000,
+            'sound' => (bool) $c['greet_sound'],
+            'pending' => (string) $c['pending_text'],
+            'autospeak' => (bool) $c['autospeak'],
+            'fbYes' => (string) $c['feedback_yes'],
+            'fbNo' => (string) $c['feedback_no'],
+            'fbThanks' => (string) $c['feedback_thanks'],
+        ];
+    };
+    $wjson = json_encode($wjs($wcfg), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+    if (!is_string($wjson) || $wjson === '') {
+        $wjson = (string) json_encode($wjs(chatbot_widget_defaults()), JSON_UNESCAPED_UNICODE);
+    }
+    $wName = e($wcfg['name']);
+    $wBubble = str_replace(chr(10), '<br>', e(str_replace([Chr(13) . Chr(10), Chr(13)], Chr(10), $wcfg['greet_text'])));
     return '<style>
 .cb-bot-launch{position:fixed;left:20px;bottom:18px;width:150px;height:150px;z-index:9999;cursor:pointer;user-select:none;outline:none}.cb-bot-body{position:absolute;inset:0;animation:cbBob 3.2s ease-in-out infinite}@keyframes cbBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}.cb-layer{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}.cb-arm{transform-origin:32% 50%;transform:rotate(0deg)}.cb-bot-launch.cb-wave .cb-arm{animation:cbWave .5s ease-in-out 0s 5}@keyframes cbWave{0%{transform:rotate(118deg)}50%{transform:rotate(140deg)}100%{transform:rotate(118deg)}}.cb-bot-launch.cb-buzz .cb-bot-body{animation:cbShake .35s linear 2}@keyframes cbShake{0%{transform:translate(0,0)}25%{transform:translate(-3px,1px)}50%{transform:translate(3px,-1px)}75%{transform:translate(-2px,1px)}100%{transform:none}}.cb-bubble{position:absolute;left:150px;bottom:110px;background:#fff;color:#0f3d3e;border-radius:14px;padding:10px 13px;font-size:14px;font-weight:700;line-height:1.9;white-space:nowrap;box-shadow:0 8px 22px rgba(0,0,0,.25);opacity:0;transform:translateY(6px) scale(.96);transition:.25s;pointer-events:none}.cb-bubble::before{content:"";position:absolute;left:-7px;bottom:16px;border:7px solid transparent;border-right-color:#fff;border-left:0}.cb-bubble.show{opacity:1;transform:none}
 .cb-panel{position:fixed;left:18px;bottom:180px;z-index:9999;width:min(360px,calc(100vw - 36px));height:460px;display:none;flex-direction:column;background:#fff;border:1px solid #e2e8f0;border-radius:16px;box-shadow:0 16px 40px rgba(0,0,0,.25);overflow:hidden;direction:rtl}
@@ -792,29 +1201,31 @@ function chatbot_render_widget(?array $user): string
 .cb-user{align-self:flex-start;background:#dbeafe}
 .cb-bot{align-self:flex-end;background:#fff;border:1px solid #e2e8f0}
 .cb-fb{display:flex;gap:6px;margin-top:4px}
-.cb-fb button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:2px 8px;cursor:pointer;font:inherit;font-size:12px}
+.cb-fb button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:2px 8px;cursor:pointer;font:inherit;font-size:12px}.cb-say{border:0;background:transparent;cursor:pointer;font-size:15px;padding:0 2px;vertical-align:middle;opacity:.8}.cb-say:hover{opacity:1}.cb-say:disabled{opacity:.45;cursor:default}
 .cb-form{display:flex;gap:6px;padding:10px;border-top:1px solid #e2e8f0}
 .cb-form input{flex:1;padding:8px 10px;border:1px solid #cbd5e1;border-radius:10px;font:inherit}
 .cb-form button{background:#0f766e;color:#fff;border:0;border-radius:10px;padding:8px 14px;cursor:pointer;font:inherit}
-</style>
-<div class="cb-bot-launch" id="cb-open" role="button" tabindex="0" aria-label="راهنمای هوشمند" title="راهنمای هوشمند"><div class="cb-bubble" id="cb-bubble">سلام<br>کمکی از دستم بر میاد ؟؟؟</div><div class="cb-bot-body"><img class="cb-layer" alt="" src="assets/chatbot/robot-body.png"><img class="cb-layer cb-arm" alt="" src="assets/chatbot/robot-arm.png"></div></div>
-<div class="cb-panel" id="cb-panel" role="dialog" aria-label="بات پاسخ‌گو">
-  <div class="cb-head"><span>بات پاسخ‌گوی سامانه</span><span style="display:flex;gap:6px"><button class="cb-resize" type="button" id="cb-resize" title="بزرگ/کوچک">⤢</button><button class="cb-resize" type="button" id="cb-close" aria-label="بستن" title="بستن">✕</button></span></div>
-  <div class="cb-log" id="cb-log"><div class="cb-msg cb-bot">سلام! سؤال خود را درباره کار با سامانه بنویسید.</div></div>
-  <form class="cb-form" id="cb-form"><input id="cb-input" maxlength="500" placeholder="سؤال خود را بنویسید..." autocomplete="off"><button type="submit">ارسال</button></form>
+</style>' . ($wcfg['position'] === 'right' ? '<style>#cb-open{left:auto;right:20px}#cb-panel{left:auto;right:18px}#cb-bubble{left:auto;right:150px}#cb-bubble::before{left:auto;right:-7px;border:7px solid transparent;border-left-color:#fff;border-right:0}</style>' : '') . '
+<div class="cb-bot-launch" id="cb-open" role="button" tabindex="0" aria-label="' . $wName . '" title="' . $wName . '"><div class="cb-bubble" id="cb-bubble">' . $wBubble . '</div><div class="cb-bot-body"><img class="cb-layer" alt="" src="assets/chatbot/robot-body.png"><img class="cb-layer cb-arm" alt="" src="assets/chatbot/robot-arm.png"></div></div>
+<div class="cb-panel" id="cb-panel" role="dialog" aria-label="' . $wName . '">
+  <div class="cb-head"><span>' . $wName . '</span><span style="display:flex;gap:6px"><button class="cb-resize" type="button" id="cb-resize" title="بزرگ/کوچک">⤢</button><button class="cb-resize" type="button" id="cb-close" aria-label="بستن" title="بستن">✕</button></span></div>
+  <div class="cb-log" id="cb-log"><div class="cb-msg cb-bot">' . e($wcfg['welcome_text']) . '</div></div>
+  <form class="cb-form" id="cb-form"><input id="cb-input" maxlength="500" placeholder="' . e($wcfg['input_placeholder']) . '" autocomplete="off"><button type="submit">' . e($wcfg['send_label']) . '</button></form>
 </div>
 <script nonce="' . e(csp_nonce()) . '">
 (function(){
   var csrf = ' . $token . ';
+  var cfg = ' . $wjson . ';
   var panel = document.getElementById("cb-panel"), log = document.getElementById("cb-log");
   var form = document.getElementById("cb-form"), input = document.getElementById("cb-input");
   var bot = document.getElementById("cb-open"), bubble = document.getElementById("cb-bubble"), ac = null;
   function beep(){ try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); var o = ac.createOscillator(), g = ac.createGain(); o.type = "sawtooth"; o.frequency.value = 130; g.gain.setValueAtTime(0.0001, ac.currentTime); g.gain.exponentialRampToValueAtTime(0.2, ac.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.45); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 0.5); } catch (e) {} }
-  function greet(){ if (panel.classList.contains("open")) return; bot.classList.remove("cb-wave", "cb-buzz"); void bot.offsetWidth; bot.classList.add("cb-wave", "cb-buzz"); bubble.classList.add("show"); beep(); setTimeout(function(){ bubble.classList.remove("show"); }, 5000); setTimeout(function(){ bot.classList.remove("cb-wave"); }, 2700); }
-  function toggleBot(){ panel.classList.toggle("open"); bubble.classList.remove("show"); if (panel.classList.contains("open")) input.focus(); }
+  function greet(){ if (panel.classList.contains("open")) return; bot.classList.remove("cb-wave", "cb-buzz"); void bot.offsetWidth; bot.classList.add("cb-wave", "cb-buzz"); bubble.classList.add("show"); if (cfg.sound) { beep(); } setTimeout(function(){ bubble.classList.remove("show"); }, cfg.bubbleMs); setTimeout(function(){ bot.classList.remove("cb-wave"); }, 2700); }
+  function toggleBot(){ var willOpen = !panel.classList.contains("open"); panel.classList.toggle("open"); bubble.classList.remove("show"); if (willOpen) { input.focus(); } else { stopVoice(); } }
   bot.addEventListener("click", toggleBot);
   bot.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleBot(); } });
-  setInterval(greet, 60000);
+  document.getElementById("cb-close").addEventListener("click", function(){ panel.classList.remove("open"); bubble.classList.remove("show"); stopVoice(); });
+  if (cfg.greetOn) { setInterval(greet, cfg.greetMs); }
   document.getElementById("cb-resize").addEventListener("click", function(){ var big = panel.classList.toggle("cb-big"); this.textContent = big ? "⤡" : "⤢"; });
   function add(text, cls){ var d = document.createElement("div"); d.className = "cb-msg " + cls; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
   function post(op, params){
@@ -823,22 +1234,122 @@ function chatbot_render_widget(?array $user): string
   }
   function feedback(wrap, logId){
     var row = document.createElement("div"); row.className = "cb-fb";
-    [["1","مفید بود"],["0","کمکی نکرد"]].forEach(function(p){
+    [["1",cfg.fbYes],["0",cfg.fbNo]].forEach(function(p){
       var b = document.createElement("button"); b.type = "button"; b.textContent = p[1];
-      b.addEventListener("click", function(){ row.textContent = "ممنون از بازخوردتان."; post("feedback", {log_id: logId, helpful: p[0]}); });
+      b.addEventListener("click", function(){ row.textContent = cfg.fbThanks; post("feedback", {log_id: logId, helpful: p[0]}); });
       row.appendChild(b);
     });
     wrap.appendChild(row);
+  }
+  var voiceInfo = null, voiceLoading = null, currentAudio = null, speakingUtterance = null;
+  function stopVoice(){
+    try { if (currentAudio) { currentAudio.pause(); currentAudio = null; } } catch (e) {}
+    try { if (window.speechSynthesis) { window.speechSynthesis.cancel(); } } catch (e) {}
+    speakingUtterance = null;
+    var says = document.querySelectorAll(".cb-say");
+    for (var i = 0; i < says.length; i++) { says[i].textContent = "🔊"; says[i].disabled = false; }
+  }
+  function voiceStatus(){
+    if (voiceInfo) { return Promise.resolve(voiceInfo); }
+    if (!voiceLoading) {
+      voiceLoading = post("voice-status", {}).then(function(j){
+        voiceInfo = (j && j.ok && j.voice) ? j.voice : {engine:"none"};
+        return voiceInfo;
+      }).catch(function(){ voiceLoading = null; return {engine:"none"}; });
+    }
+    return voiceLoading;
+  }
+  function browserFaVoice(){
+    try {
+      var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      for (var i = 0; i < voices.length; i++) {
+        var lang = (voices[i].lang || "").toLowerCase();
+        if (lang === "fa" || lang.indexOf("fa-") === 0 || lang.indexOf("fa_") === 0) { return voices[i]; }
+      }
+    } catch (e) {}
+    return null;
+  }
+  function withVoicesReady(fn){
+    try {
+      var synth = window.speechSynthesis;
+      if (!synth || synth.getVoices().length > 0) { fn(); return; }
+      var done = false;
+      var timer = setTimeout(function(){ if (!done) { done = true; fn(); } }, 1200);
+      synth.onvoiceschanged = function(){ if (!done) { done = true; clearTimeout(timer); fn(); } };
+    } catch (e) { fn(); }
+  }
+  function speakServer(btn, text){
+    btn.textContent = "⏳"; btn.disabled = true;
+    var body = new URLSearchParams({text: text}); body.append("csrf", csrf);
+    fetch("index.php?page=chatbot-api&op=say", {method:"POST", body: body, credentials:"same-origin"}).then(function(r){
+      if (!r.ok) { return r.json().then(function(j){ throw new Error((j && j.error) || "خطای سرور"); }); }
+      return r.blob();
+    }).then(function(blob){
+      stopVoice();
+      var url = URL.createObjectURL(blob);
+      var audio = new Audio(url);
+      currentAudio = audio;
+      btn.textContent = "⏹"; btn.disabled = false;
+      audio.onended = function(){ URL.revokeObjectURL(url); stopVoice(); };
+      audio.onerror = function(){ URL.revokeObjectURL(url); stopVoice(); add("پخش صدا ممکن نشد.", "cb-bot"); };
+      audio.play().catch(function(){ URL.revokeObjectURL(url); stopVoice(); });
+    }).catch(function(err){
+      btn.textContent = "🔊"; btn.disabled = false;
+      add("گویندگی سرور در دسترس نیست (" + (err.message || "خطا") + ").", "cb-bot");
+    });
+  }
+  function speakBrowser(btn, text){
+    withVoicesReady(function(){
+      var voice = browserFaVoice();
+      if (!voice) { add("صدای فارسی در این دستگاه/مرورگر نصب نیست؛ از مدیر بخواهید موتور صوتی سرور را فعال کند.", "cb-bot"); return; }
+      stopVoice();
+      try {
+        var u = new SpeechSynthesisUtterance(text);
+        u.lang = "fa-IR"; u.voice = voice; u.rate = 1;
+        speakingUtterance = u;
+        btn.textContent = "⏹";
+        u.onend = function(){ if (speakingUtterance === u) { stopVoice(); } };
+        u.onerror = function(){ if (speakingUtterance === u) { stopVoice(); } };
+        window.speechSynthesis.speak(u);
+      } catch (e) { add("پخش صدای مرورگر ممکن نشد.", "cb-bot"); }
+    });
+  }
+  function sayButtonClicked(btn){
+    var wrap = btn.parentNode;
+    var text = wrap ? (wrap.getAttribute("data-say") || "") : "";
+    if (!text) { return; }
+    if (btn.textContent === "⏹") { stopVoice(); return; }
+    voiceStatus().then(function(info){
+      var engine = (info && info.engine) || "none";
+      if (engine === "server" && !(info && info.server_ready)) { engine = "none"; }
+      if (engine === "server") { speakServer(btn, text); }
+      else if (engine === "browser") { speakBrowser(btn, text); }
+      else { add("گویندگی فعال نیست. مدیر سامانه می‌تواند آن را از صفحهٔ مدیریت بات سخنگو روشن کند.", "cb-bot"); }
+    });
+  }
+  function attachSay(wrap, text){
+    voiceStatus().then(function(info){
+      if (!info || info.engine === "none") { return; }
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "cb-say"; b.textContent = "🔊"; b.title = "شنیدن پاسخ";
+      b.setAttribute("aria-label", "شنیدن پاسخ");
+      b.addEventListener("click", function(){ sayButtonClicked(b); });
+      wrap.setAttribute("data-say", text);
+      wrap.appendChild(document.createTextNode(" "));
+      wrap.appendChild(b);
+      if (cfg.autospeak) { sayButtonClicked(b); }
+    });
   }
   form.addEventListener("submit", function(e){
     e.preventDefault();
     var q = input.value.trim(); if (!q) return;
     add(q, "cb-user"); input.value = "";
-    var pending = add("در حال جست‌وجو...", "cb-bot");
+    var pending = add(cfg.pending, "cb-bot");
     post("ask", {question: q}).then(function(j){
       pending.textContent = j.ok ? j.answer : (j.error || "خطا در ارتباط با بات.");
       if (j.ok) {
         feedback(pending, j.log_id);
+        attachSay(pending, j.answer);
         if (j.link) {
           var lk = document.createElement("a"); lk.href = j.link.url; lk.textContent = j.link.label;
           lk.style.display = "inline-block"; lk.style.marginTop = "6px"; pending.appendChild(lk);
