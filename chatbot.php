@@ -1076,6 +1076,12 @@ function chatbot_tts_exec(array $command, string $stdin, float $timeoutSec): arr
     return ['ok' => true, 'stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit, 'error' => ''];
 }
 
+/** اعتبارسنجی سراند WAV (جلوگیری از پخش یا کش بایت خراب). */
+function chatbot_tts_is_valid_wav(string $wav): bool
+{
+    return strlen($wav) > 100 && substr($wav, 0, 4) === 'RIFF' && substr($wav, 8, 4) === 'WAVE';
+}
+
 /** اجرای موتور با خروجی فایل WAV (بدون باینری در pipe) و مهلت ۲۰ ثانیه‌ای. */
 function chatbot_tts_run_espeak(string $exe, string $text, int $wpm, string $voiceId): array
 {
@@ -1093,9 +1099,9 @@ function chatbot_tts_run_espeak(string $exe, string $text, int $wpm, string $voi
         app_error_log('chatbot TTS failed (' . $result['error'] . '): ' . mb_substr((string) $result['stderr'], 0, 500, 'UTF-8'));
         return ['ok' => false, 'error' => 'خطای موتور صوتی؛ از صحت نصب صدای فارسی (fa) مطمئن شوید.'];
     }
-    if (strlen($wav) < 100) {
-        app_error_log('chatbot TTS empty output; stderr: ' . mb_substr((string) $result['stderr'], 0, 500, 'UTF-8'));
-        return ['ok' => false, 'error' => 'موتور صوتی خروجی تولید نکرد.'];
+    if (!chatbot_tts_is_valid_wav($wav)) {
+        app_error_log('chatbot TTS invalid wav (bytes ' . strlen($wav) . ', head ' . bin2hex(substr($wav, 0, 32)) . '); stderr: ' . mb_substr((string) $result['stderr'], 0, 500, 'UTF-8'));
+        return ['ok' => false, 'error' => 'موتور صوتی خروجی معتبر تولید نکرد.'];
     }
     return ['ok' => true, 'wav' => $wav];
 }
@@ -1136,7 +1142,11 @@ function chatbot_tts_say(string $text): array
     $voiceId = chatbot_tts_voice_id($config['voice']);
     $file = $dir . '/' . sha1($clean . '|' . $config['speed'] . '|' . $voiceId) . '.wav';
     if (is_file($file) && (int) filesize($file) > 100) {
-        return ['ok' => true, 'file' => $file];
+        $head = (string) @file_get_contents($file, false, null, 0, 12);
+        if (substr($head, 0, 4) === 'RIFF' && substr($head, 8, 4) === 'WAVE') {
+            return ['ok' => true, 'file' => $file];
+        }
+        @unlink($file);
     }
     $result = chatbot_tts_run_espeak($exe, $clean, $config['speed'], $voiceId);
     if (!$result['ok']) {
@@ -1216,6 +1226,9 @@ function chatbot_render_admin(array $admin): void
         . '<form method="post" action="index.php?page=chatbot-admin" style="margin-top:8px">' . csrf_field()
         . '<input type="hidden" name="tts_test" value="1">'
         . '<button class="button secondary" type="submit">تست موتور سرور</button></form>'
+        . '<form method="post" action="index.php?page=chatbot-admin" style="margin-top:8px">' . csrf_field()
+        . '<input type="hidden" name="tts_sample" value="1">'
+        . '<button class="button secondary" type="submit">دانلود نمونه صدا</button></form>'
         . '<p class="muted">نصب موتور (یک‌بار روی سرور): بستهٔ eSpeak-NG ویندوز را از صفحهٔ انتشار رسمی بگیرید و نصب کنید، سپس با دستور <code dir="ltr">espeak-ng --voices=fa</code> از وجود صدای فارسی مطمئن شوید. همهٔ پردازش داخل شبکهٔ خودتان انجام می‌شود و صدا برای اینترنت ارسال نمی‌شود.</p></div>';
 
     // گزارش بازه‌ای: آمار کلی، نیت‌ها، پرتکرارترین مدخل‌ها و بازخورد منفی اخیر (بدون نام کاربر)
@@ -1414,6 +1427,15 @@ function chatbot_render_widget(?array $user): string
       if (!r.ok) { return r.json().then(function(j){ throw new Error((j && j.error) || "خطای سرور"); }); }
       return r.blob();
     }).then(function(blob){
+      if (blob.size < 200) {
+        btn.textContent = "🔊"; btn.disabled = false;
+        blob.text().then(function(t){
+          var msg = "پاسخ نامعتبر سرور";
+          try { var j = JSON.parse(t); if (j && j.error) { msg = j.error; } } catch (e) { if (t) { msg = t.slice(0, 200); } }
+          add("خطای گویندگی: " + msg, "cb-bot");
+        });
+        return;
+      }
       stopVoice();
       var url = URL.createObjectURL(blob);
       var audio = new Audio(url);

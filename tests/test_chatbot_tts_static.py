@@ -62,3 +62,13 @@ check("function chatbot_tts_voice_id" in chatbot and "fa+m2" in chatbot
       "male/female map to whitelisted eSpeak-NG Persian voice variants")
 check("sha1($clean . '|' . $config['speed'] . '|' . $voiceId)" in chatbot,
       "voice cache key includes the voice variant")
+check("function chatbot_tts_is_valid_wav" in chatbot and "'RIFF'" in chatbot
+      and "'WAVE'" in chatbot,
+      "synthesized output is validated as a real wav file")
+check("@unlink($file)" in chatbot,
+      "poisoned voice cache entries are deleted and regenerated")
+check("tts_sample" in chatbot and "tts_sample" in index
+      and "aria-test.wav" in index,
+      "admins can download a sample clip to diagnose playback")
+check("blob.size < 200" in chatbot,
+      "the widget surfaces small invalid audio responses as readable errors")

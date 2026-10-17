@@ -4298,6 +4298,18 @@ if ($page === 'chatbot-admin') {
                 } else {
                     flash('danger', $ttsTest['error']);
                 }
+            } elseif (isset($_POST['tts_sample'])) {
+                $ttsSample = chatbot_tts_say('تست صدای فارسی آریا');
+                if (!$ttsSample['ok']) {
+                    flash('danger', $ttsSample['error']);
+                    redirect('index.php?page=chatbot-admin');
+                }
+                $sampleAudio = (string) file_get_contents($ttsSample['file']);
+                header('Content-Type: audio/wav');
+                header('Content-Length: ' . strlen($sampleAudio));
+                header('Content-Disposition: attachment; filename="aria-test.wav"');
+                echo $sampleAudio;
+                exit;
             } else {
                 chatbot_save_faq($_POST, $chatbotAdmin);
                 flash('success', 'مدخل بات ذخیره شد.');
