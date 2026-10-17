@@ -5483,5 +5483,3 @@ if (!$tickets) {
 }
 echo '</section>';
 render_footer();
-tion>';
-render_footer();
