@@ -622,6 +622,30 @@ function chatbot_api_handle(?array $user): void
     if (!user_can($user, 'chatbot.use')) {
         $send(403, ['ok' => false, 'error' => 'دسترسی به بات فعال نیست.']);
     }
+    if ((string) ($_GET['op'] ?? 'ask') === 'say_audio') {
+        check_api_rate_limit('chatbot_say_audio_' . (int) $user['id'], 60, 60);
+        $clipId = (string) ($_GET['id'] ?? '');
+        if (!preg_match('/^[0-9a-f]{40}$/', $clipId)) {
+            $send(400, ['ok' => false, 'error' => 'شناسهٔ صوتی نامعتبر است.']);
+        }
+        $clipFile = APP_ROOT . '/storage/tts/' . $clipId . '.wav';
+        $clipHead = (is_file($clipFile) && (int) filesize($clipFile) > 100)
+            ? (string) @file_get_contents($clipFile, false, null, 0, 12)
+            : '';
+        if ($clipHead === '' || substr($clipHead, 0, 4) !== 'RIFF' || substr($clipHead, 8, 4) !== 'WAVE') {
+            if (is_file($clipFile)) {
+                @unlink($clipFile);
+            }
+            $send(404, ['ok' => false, 'error' => 'فایل صوتی یافت نشد؛ دوباره تلاش کنید.']);
+        }
+        $clipAudio = (string) file_get_contents($clipFile);
+        header('Content-Type: audio/wav', true);
+        header('Content-Length: ' . strlen($clipAudio));
+        header('Accept-Ranges: bytes');
+        header('Cache-Control: public, max-age=31536000, immutable');
+        echo $clipAudio;
+        exit;
+    }
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
         $send(405, ['ok' => false, 'error' => 'فقط POST مجاز است.']);
     }
@@ -650,12 +674,7 @@ function chatbot_api_handle(?array $user): void
         if (!$spoken['ok']) {
             $send(503, ['ok' => false, 'error' => $spoken['error']]);
         }
-        $audio = (string) file_get_contents($spoken['file']);
-        header('Content-Type: audio/wav', true);
-        header('Content-Length: ' . strlen($audio));
-        header('Cache-Control: private, max-age=31536000');
-        echo $audio;
-        exit;
+        $send(200, ['ok' => true, 'url' => 'index.php?page=chatbot-api&op=say_audio&id=' . $spoken['id']]);
     }
 
     $question = trim((string) ($_POST['question'] ?? ''));
@@ -705,7 +724,7 @@ function chatbot_save_faq(array $input, array $admin): void
 function chatbot_save_tts(array $input, array $admin): void
 {
     $mode = valid_choice(trim((string) ($input['tts_mode'] ?? 'auto')), ['auto', 'server', 'browser', 'off'], 'auto');
-    $speed = max(100, min(250, (int) ($input['tts_speed'] ?? 175)));
+    $speed = max(80, min(300, (int) ($input['tts_speed'] ?? 140)));
     $voice = valid_choice(trim((string) ($input['tts_voice'] ?? 'default')), ['default', 'male', 'female'], 'default');
     $path = trim((string) ($input['tts_espeak_path'] ?? ''));
     if (mb_strlen($path, 'UTF-8') > 500) {
@@ -849,7 +868,7 @@ function chatbot_save_widget(array $input, array $admin): void
 function chatbot_tts_config(): array
 {
     $mode = valid_choice((string) (setting('chatbot_tts_mode', 'auto') ?? 'auto'), ['auto', 'server', 'browser', 'off'], 'auto');
-    $speed = max(100, min(250, (int) (setting('chatbot_tts_speed', '175') ?? '175')));
+    $speed = max(80, min(300, (int) (setting('chatbot_tts_speed', '140') ?? '140')));
     $customPath = trim((string) (setting('chatbot_tts_espeak_path', '') ?? ''));
     $voice = valid_choice((string) (setting('chatbot_tts_voice', 'default') ?? 'default'), ['default', 'male', 'female'], 'default');
     return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice];
@@ -1121,6 +1140,54 @@ function chatbot_tts_probe_engine(string $exe): array
 }
 
 /** تولید (با کش) فایل صوتی یک پاسخ. */
+/** بررسی وجود صدای فارسی در موتور (yes/no/unknown؛ کش ۲۴ ساعته برای yes و ۱ ساعته برای بقیه). */
+function chatbot_tts_voice_status(string $exe, string $voiceId): array
+{
+    $base = strtolower((string) explode('+', $voiceId)[0]);
+    if ($base === '') {
+        $base = 'fa';
+    }
+    $dir = APP_ROOT . '/storage/tts';
+    $cacheFile = $dir . '/.voices.json';
+    $key = sha1($exe . '|' . $base);
+    $now = time();
+    if (is_file($cacheFile)) {
+        $decoded = json_decode((string) @file_get_contents($cacheFile), true);
+        if (is_array($decoded) && isset($decoded[$key]) && is_array($decoded[$key])) {
+            $entry = $decoded[$key];
+            $ttl = ((string) ($entry['status'] ?? '') === 'yes') ? 86400 : 3600;
+            if (($now - (int) ($entry['at'] ?? 0)) < $ttl) {
+                return ['status' => (string) ($entry['status'] ?? 'unknown'), 'detail' => (string) ($entry['detail'] ?? '')];
+            }
+        }
+    }
+    $status = 'unknown';
+    $detail = '';
+    $probe = chatbot_tts_exec([$exe, '--voices'], '', 20.0);
+    if ($probe['ok'] && trim((string) $probe['stdout']) !== '') {
+        $status = 'no';
+        foreach (preg_split('/\r?\n/', (string) $probe['stdout']) ?: [] as $line) {
+            if (preg_match('/(^|\s)' . preg_quote($base, '/') . '(\s|$)/i', (string) $line)) {
+                $status = 'yes';
+                $detail = trim((string) $line);
+                break;
+            }
+        }
+    }
+    if (is_dir($dir) || @mkdir($dir, 0775, true)) {
+        $all = [];
+        if (is_file($cacheFile)) {
+            $decoded = json_decode((string) @file_get_contents($cacheFile), true);
+            if (is_array($decoded)) {
+                $all = $decoded;
+            }
+        }
+        $all[$key] = ['status' => $status, 'detail' => mb_substr($detail, 0, 200, 'UTF-8'), 'at' => $now];
+        @file_put_contents($cacheFile, json_encode($all, JSON_UNESCAPED_UNICODE), LOCK_EX);
+    }
+    return ['status' => $status, 'detail' => $detail];
+}
+
 function chatbot_tts_say(string $text): array
 {
     $config = chatbot_tts_config();
@@ -1135,16 +1202,21 @@ function chatbot_tts_say(string $text): array
     if ($exe === null || !chatbot_tts_proc_available()) {
         return ['ok' => false, 'error' => 'موتور صوتی روی سرور نصب/فعال نیست.'];
     }
+    $voiceStatus = chatbot_tts_voice_status($exe, chatbot_tts_voice_id($config['voice']));
+    if ($voiceStatus['status'] === 'no') {
+        return ['ok' => false, 'error' => 'صدای فارسی در موتور صوتی یافت نشد؛ موتور را کامل نصب کنید یا حالت «فقط صدای مرورگر» را امتحان کنید.'];
+    }
     $dir = APP_ROOT . '/storage/tts';
     if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
         return ['ok' => false, 'error' => 'ساخت پوشهٔ کش صدا ممکن نشد.'];
     }
     $voiceId = chatbot_tts_voice_id($config['voice']);
-    $file = $dir . '/' . sha1($clean . '|' . $config['speed'] . '|' . $voiceId) . '.wav';
+    $id = sha1($clean . '|' . $config['speed'] . '|' . $voiceId);
+    $file = $dir . '/' . $id . '.wav';
     if (is_file($file) && (int) filesize($file) > 100) {
         $head = (string) @file_get_contents($file, false, null, 0, 12);
         if (substr($head, 0, 4) === 'RIFF' && substr($head, 8, 4) === 'WAVE') {
-            return ['ok' => true, 'file' => $file];
+            return ['ok' => true, 'file' => $file, 'id' => $id];
         }
         @unlink($file);
     }
@@ -1155,7 +1227,7 @@ function chatbot_tts_say(string $text): array
     if (@file_put_contents($file, $result['wav'], LOCK_EX) === false) {
         return ['ok' => false, 'error' => 'ذخیرهٔ فایل صوتی ممکن نشد.'];
     }
-    return ['ok' => true, 'file' => $file];
+    return ['ok' => true, 'file' => $file, 'id' => $id];
 }
 
 /** صفحهٔ مدیریت بات: مدخل‌ها، سؤال‌های بی‌پاسخ و بازخورد منفی. */
@@ -1206,8 +1278,21 @@ function chatbot_render_admin(array $admin): void
         . '<button class="button" type="submit">ذخیره تنظیمات آریا</button></form></div>';
     $tts = chatbot_tts_status();
     $ttsModes = ['auto' => 'خودکار (اول سرور، وگرنه مرورگر)', 'server' => 'فقط موتور سرور (آفلاین قطعی)', 'browser' => 'فقط صدای مرورگر', 'off' => 'خاموش'];
+    $ttsVoiceId = chatbot_tts_voice_id($tts['voice']);
+    $ttsVoiceLine = 'نامشخص (موتور پیدا نشد)';
+    if (is_string($tts['espeak']) && $tts['espeak'] !== '') {
+        $ttsVoiceCheck = chatbot_tts_voice_status((string) $tts['espeak'], $ttsVoiceId);
+        if ($ttsVoiceCheck['status'] === 'yes') {
+            $ttsVoiceLine = 'یافت شد (' . $ttsVoiceId . ')';
+        } elseif ($ttsVoiceCheck['status'] === 'no') {
+            $ttsVoiceLine = 'یافت نشد! خروجی موتور نامفهوم می‌شود — موتور را کامل نصب کنید';
+        } else {
+            $ttsVoiceLine = 'نامشخص (بررسی نشد)';
+        }
+    }
     echo '<div class="card form-card"><h2>گویندگی بات (آفلاین)</h2>'
         . '<p class="muted">وضعیت موتور سرور: ' . ($tts['server_ready'] ? 'فعال (' . e((string) $tts['espeak']) . ')' : 'پیدا نشد — راهنمای نصب پایین همین کارت') . '</p>'
+        . '<p class="muted">وضعیت صدای فارسی: ' . e($ttsVoiceLine) . '</p>'
         . '<form method="post" action="index.php?page=chatbot-admin">' . csrf_field()
         . '<input type="hidden" name="tts_settings" value="1">'
         . '<label class="field">حالت گویندگی<select name="tts_mode">';
@@ -1216,7 +1301,7 @@ function chatbot_render_admin(array $admin): void
     }
     echo '</select></label>'
         . '<label class="field">مسیر فایل espeak-ng روی سرور (خالی = جست‌وجوی خودکار)<input name="tts_espeak_path" dir="ltr" maxlength="500" value="' . e((string) chatbot_tts_config()['espeak_path']) . '" placeholder="C:\Program Files\eSpeak NG\espeak-ng.exe"></label>'
-        . '<label class="field">سرعت گفتار (کلمه در دقیقه)<input type="number" name="tts_speed" min="100" max="250" value="' . (int) $tts['speed'] . '"></label>'
+        . '<label class="field">سرعت گفتار (کلمه در دقیقه؛ کمتر = شمرده‌تر و واضح‌تر)<input type="number" name="tts_speed" min="80" max="300" value="' . (int) $tts['speed'] . '"></label>'
         . '<label class="field">نوع صدا<select name="tts_voice">';
     foreach (['default' => 'پیش‌فرض', 'male' => 'مرد', 'female' => 'زن'] as $ttsVoiceValue => $ttsVoiceLabel) {
         echo '<option value="' . $ttsVoiceValue . '"' . ($tts['voice'] === $ttsVoiceValue ? ' selected' : '') . '>' . e($ttsVoiceLabel) . '</option>';
@@ -1424,26 +1509,24 @@ function chatbot_render_widget(?array $user): string
     btn.textContent = "⏳"; btn.disabled = true;
     var body = new URLSearchParams({text: text}); body.append("csrf", csrf);
     fetch("index.php?page=chatbot-api&op=say", {method:"POST", body: body, credentials:"same-origin"}).then(function(r){
-      if (!r.ok) { return r.json().then(function(j){ throw new Error((j && j.error) || "خطای سرور"); }); }
-      return r.blob();
-    }).then(function(blob){
-      if (blob.size < 200) {
-        btn.textContent = "🔊"; btn.disabled = false;
-        blob.text().then(function(t){
-          var msg = "پاسخ نامعتبر سرور";
-          try { var j = JSON.parse(t); if (j && j.error) { msg = j.error; } } catch (e) { if (t) { msg = t.slice(0, 200); } }
-          add("خطای گویندگی: " + msg, "cb-bot");
-        });
-        return;
-      }
+      return r.text().then(function(t){
+        var j = null;
+        try { j = JSON.parse(t); } catch (e) { j = null; }
+        if (!r.ok || !j || !j.ok || !j.url) { throw new Error((j && j.error) || ("خطای سرور (" + r.status + ")")); }
+        return j.url;
+      });
+    }).then(function(url){
       stopVoice();
-      var url = URL.createObjectURL(blob);
-      var audio = new Audio(url);
+      var audio = new Audio();
+      audio.preload = "auto";
+      audio.src = url;
       currentAudio = audio;
       btn.textContent = "⏹"; btn.disabled = false;
-      audio.onended = function(){ URL.revokeObjectURL(url); stopVoice(); };
-      audio.onerror = function(){ URL.revokeObjectURL(url); stopVoice(); add("پخش صدا ممکن نشد.", "cb-bot"); };
-      audio.play().catch(function(){ URL.revokeObjectURL(url); stopVoice(); });
+      audio.onended = function(){ stopVoice(); };
+      audio.onerror = function(){ stopVoice(); add("پخش صدا ممکن نشد.", "cb-bot"); };
+      var played = null;
+      try { played = audio.play(); } catch (e) { played = null; }
+      if (played && played.catch) { played.catch(function(){ stopVoice(); }); }
     }).catch(function(err){
       btn.textContent = "🔊"; btn.disabled = false;
       add("گویندگی سرور در دسترس نیست (" + (err.message || "خطا") + ").", "cb-bot");

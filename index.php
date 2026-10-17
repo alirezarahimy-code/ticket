@@ -4294,7 +4294,17 @@ if ($page === 'chatbot-admin') {
             } elseif (isset($_POST['tts_test'])) {
                 $ttsTest = chatbot_tts_say('تست صدای فارسی آریا');
                 if ($ttsTest['ok']) {
-                    flash('success', 'موتور صوتی سرور سالم است و فایل تست ساخته شد.');
+                    $ttsTestExe = chatbot_tts_find_espeak(chatbot_tts_config()['espeak_path']);
+                    $ttsTestVoice = '';
+                    if ($ttsTestExe !== null) {
+                        $ttsTestVs = chatbot_tts_voice_status($ttsTestExe, chatbot_tts_voice_id(chatbot_tts_config()['voice']));
+                        if ($ttsTestVs['status'] === 'yes') {
+                            $ttsTestVoice = ' صدای فارسی هم تأیید شد.';
+                        } elseif ($ttsTestVs['status'] === 'unknown') {
+                            $ttsTestVoice = ' (وضعیت صدای فارسی نامشخص است.)';
+                        }
+                    }
+                    flash('success', 'موتور صوتی سرور سالم است و فایل تست ساخته شد.' . $ttsTestVoice);
                 } else {
                     flash('danger', $ttsTest['error']);
                 }

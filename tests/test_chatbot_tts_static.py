@@ -14,13 +14,13 @@ def check(condition: bool, message: str) -> None:
 
 check("$op === 'voice-status'" in chatbot and "$op === 'say'" in chatbot,
       "voice-status and say operations exist in the chatbot API")
-check("audio/wav" in chatbot and "Content-Length" in chatbot,
-      "the say operation streams audio bytes with a length header")
+check("'url' => 'index.php?page=chatbot-api&op=say_audio&id='" in chatbot,
+      "the say operation returns a playable audio URL instead of raw bytes")
 check(chatbot.find("user_can($user, 'chatbot.use')") < chatbot.find("$op === 'say'")
       and chatbot.find("!== 'POST'") < chatbot.find("$op === 'say'")
       and chatbot.find("hash_equals(csrf_token()") < chatbot.find("$op === 'say'")
       and chatbot.find("check_api_rate_limit('chatbot_'") < chatbot.find("$op === 'say'"),
-      "voice endpoints inherit login, chatbot.use, POST-only, CSRF and rate-limit guards")
+      "the say endpoint inherits login, chatbot.use, POST-only, CSRF and rate-limit guards")
 check("'-w', $tmp" in chatbot and "['pipe', 'r']" in chatbot
       and "sys_get_temp_dir" in chatbot,
       "the engine runs via argument array with stdin pipe and file-based wav output (no shell interpolation)")
@@ -70,5 +70,20 @@ check("@unlink($file)" in chatbot,
 check("tts_sample" in chatbot and "tts_sample" in index
       and "aria-test.wav" in index,
       "admins can download a sample clip to diagnose playback")
-check("blob.size < 200" in chatbot,
-      "the widget surfaces small invalid audio responses as readable errors")
+check("audio.src = url" in chatbot and "createObjectURL" not in chatbot,
+      "the widget plays server audio through a direct URL (no blob handling)")
+check("=== 'say_audio'" in chatbot
+      and chatbot.find("user_can($user, 'chatbot.use')") < chatbot.find("=== 'say_audio'")
+      and chatbot.find("=== 'say_audio'") < chatbot.find("!== 'POST'")
+      and "check_api_rate_limit('chatbot_say_audio_'" in chatbot
+      and "/^[0-9a-f]{40}$/" in chatbot,
+      "audio download is login-guarded, rate-limited, id-validated and GET-friendly")
+check("function chatbot_tts_voice_status" in chatbot and "'--voices'" in chatbot
+      and ".voices.json" in chatbot,
+      "Persian voice availability is probed and cached")
+check("صدای فارسی در موتور صوتی یافت نشد" in chatbot,
+      "a definitively missing Persian voice fails with a clear error instead of garbage audio")
+check("'140'" in chatbot and "?? 140" in chatbot,
+      "default speech speed is slower (140 wpm) for clearer Persian")
+check("Accept-Ranges" in chatbot and "immutable" in chatbot,
+      "served audio supports seeking and long-term caching")
