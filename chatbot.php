@@ -88,14 +88,14 @@ function chatbot_score(string $question, array $faq): float
 
 /** کلمه‌های نیت (intent) — با همان نرمال‌سازی و بدون فاصله مقایسه می‌شوند. */
 const CHATBOT_WORDS_HOW = ['کجا', 'چطور', 'چگونه', 'چجوری', 'چه طور'];
-const CHATBOT_WORDS_STATUS = ['وضعیت', 'پیگیری', 'تیکتم', 'تیکت های من', 'تیکتهای من', 'تیکت من', 'درخواستم', 'درخواست های من', 'درخواستهای من', 'چی شد', 'چی شده', 'جواب تیکت', 'نتیجه تیکت'];
-const CHATBOT_WORDS_CREATE = ['ثبت تیکت', 'تیکت جدید', 'تیکت بزنم', 'تیکت باز کنم', 'درخواست جدید', 'ثبت درخواست', 'تیکت ثبت کن', 'تیکت ثبت کنم', 'تیکت بفرستم'];
+const CHATBOT_WORDS_STATUS = ['وضعیت', 'پیگیری', 'تیکتم', 'تیکت های من', 'تیکتهای من', 'تیکت من', 'درخواستم', 'درخواست های من', 'درخواستهای من', 'چی شد', 'چی شده', 'جواب تیکت', 'نتیجه تیکت', 'جواب درخواست', 'نتیجه درخواست'];
+const CHATBOT_WORDS_CREATE = ['ثبت تیکت', 'تیکت جدید', 'تیکت بزنم', 'تیکت باز کنم', 'درخواست جدید', 'ثبت درخواست', 'درخواست بزنم', 'درخواست باز کنم', 'درخواست ثبت کن', 'درخواست ثبت کنم', 'درخواست بفرستم', 'تیکت ثبت کن', 'تیکت ثبت کنم', 'تیکت بفرستم'];
 const CHATBOT_WORDS_TICKET = ['تیکت', 'درخواست', 'شماره پیگیری', 'پیگیری'];
 const CHATBOT_WORDS_CANCEL = ['انصراف', 'لغو', 'بیخیال', 'ولش کن'];
 const CHATBOT_FLOW_TTL = 900;
 const CHATBOT_WORDS_GREET = ['سلام', 'درود', 'صبح بخیر', 'عصر بخیر', 'شب بخیر', 'خداحافظ', 'خدافظ'];
 const CHATBOT_WORDS_THANKS = ['ممنون', 'مرسی', 'متشکرم', 'سپاس', 'تشکر'];
-const CHATBOT_SCOPE_FALLBACK = 'من فقط دربارهٔ کارهای همین سامانه راهنمایی می‌کنم؛ مثلاً ثبت و پیگیری تیکت، سفارش غذا، فیش، کنترل تردد، CD/DVD، گزارش‌ها یا به‌روزرسانی. سؤال خود را دربارهٔ یکی از این موارد بنویسید، یا «ثبت تیکت» را بنویسید تا از کارشناسان کمک بگیرید.';
+const CHATBOT_SCOPE_FALLBACK = 'من فقط دربارهٔ کارهای همین سامانه راهنمایی می‌کنم؛ مثلاً ثبت و پیگیری درخواست، سفارش غذا، فیش، کنترل تردد، CD/DVD، گزارش‌ها یا به‌روزرسانی. سؤال خود را دربارهٔ یکی از این موارد بنویسید، یا «ثبت درخواست» را بنویسید تا از کارشناسان کمک بگیرید.';
 
 function chatbot_has_any(string $normalized, array $words): bool
 {
@@ -136,16 +136,16 @@ function chatbot_flow_active(): ?array
     return $flow;
 }
 
-/** گام‌های ثبت تیکت از داخل بات: موضوع ← شرح ← انتقال به فرم موجود ثبت تیکت. */
+/** گام‌های ثبت درخواست از داخل بات: موضوع ← شرح ← انتقال به فرم موجود ثبت درخواست. */
 function chatbot_flow_step(array $flow, array $user, string $question): array
 {
     if (chatbot_has_any(chatbot_normalize($question), CHATBOT_WORDS_CANCEL)) {
         unset($_SESSION['chatbot_flow']);
-        return chatbot_reply($user, $question, 'ثبت تیکت لغو شد. هر وقت خواستید دوباره «ثبت تیکت» را بنویسید.', true, null, 'ticket_cancel');
+        return chatbot_reply($user, $question, 'ثبت درخواست لغو شد. هر وقت خواستید دوباره «ثبت درخواست» را بنویسید.', true, null, 'ticket_cancel');
     }
     if (!user_can($user, 'ticket.create')) {
         unset($_SESSION['chatbot_flow']);
-        return chatbot_reply($user, $question, 'دسترسی ثبت تیکت برای حساب شما فعال نیست.', false, null, 'ticket_create');
+        return chatbot_reply($user, $question, 'دسترسی ثبت درخواست برای حساب شما فعال نیست.', false, null, 'ticket_create');
     }
     if (($flow['step'] ?? '') === 'subject') {
         if (mb_strlen($question, 'UTF-8') < 3) {
@@ -161,12 +161,12 @@ function chatbot_flow_step(array $flow, array $user, string $question): array
     unset($_SESSION['chatbot_flow']);
     $link = [
         'url' => 'index.php?page=new-ticket&' . http_build_query(['subject' => $subject, 'description' => mb_substr($question, 0, 5000, 'UTF-8')]),
-        'label' => 'ادامه و ثبت نهایی تیکت',
+        'label' => 'ادامه و ثبت نهایی درخواست',
     ];
-    return chatbot_reply($user, $question, 'متن درخواست آماده شد. با دکمهٔ زیر فرم ثبت تیکت باز می‌شود؛ نوع خدمت را انتخاب کنید و ثبت نهایی را بزنید.', true, null, 'ticket_create', 0.0, $link);
+    return chatbot_reply($user, $question, 'متن درخواست آماده شد. با دکمهٔ زیر فرم ثبت درخواست باز می‌شود؛ نوع خدمت را انتخاب کنید و ثبت نهایی را بزنید.', true, null, 'ticket_create', 0.0, $link);
 }
 
-/** شماره تیکت (مثل SBU1-86-000123) یا شناسهٔ عددی را از پرسش بیرون می‌کشد. */
+/** شماره درخواست (مثل SBU1-86-000123) یا شناسهٔ عددی را از پرسش بیرون می‌کشد. */
 function chatbot_ticket_ref(string $question): array
 {
     $latin = strtr($question, ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']);
@@ -180,13 +180,13 @@ function chatbot_ticket_ref(string $question): array
     return [];
 }
 
-/** وضعیت یک تیکت مشخص؛ فقط اگر کاربر طبق ticket_scope (همان قاعدهٔ صفحهٔ تیکت‌ها) دسترسی دارد. */
+/** وضعیت یک درخواست مشخص؛ فقط اگر کاربر طبق ticket_scope (همان قاعدهٔ صفحهٔ درخواست‌ها) دسترسی دارد. */
 function chatbot_ticket_status(array $user, array $ref): ?array
 {
     [$where, $params] = ticket_scope($user, 't');
     $condition = isset($ref['no']) ? 'UPPER(t.ticket_no) = ?' : 't.id = ?';
     $params[] = isset($ref['no']) ? $ref['no'] : (int) $ref['id'];
-    $sql = 'SELECT t.id, t.ticket_no, t.subject, t.status, t.updated_at FROM tickets t '
+    $sql = 'SELECT t.id, t.ticket_no, t.subject, t.status, t.updated_at, t.cancel_requested_at, t.assigned_to, t.first_response_at, t.resolved_at FROM tickets t '
         . ($where !== '' ? $where . ' AND ' : 'WHERE ') . $condition . ' LIMIT 1';
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
@@ -200,7 +200,7 @@ function chatbot_ticket_line(array $row): string
     return $number . ' | ' . $row['subject'] . ' | وضعیت: ' . status_label((string) $row['status']) . ' | به‌روزرسانی: ' . persian_date((string) $row['updated_at']);
 }
 
-/** بهترین پاسخ را پیدا می‌کند؛ اول مهلت درخواست غذای مهمان و نیت‌های تیکت، بعد پرسش‌های متداول. */
+/** بهترین پاسخ را پیدا می‌کند؛ اول مهلت درخواست غذای مهمان و نیت‌های درخواست، بعد پرسش‌های متداول. */
 function chatbot_answer(string $question, array $user): array
 {
     $question = mb_substr(trim($question), 0, 500, 'UTF-8');
@@ -214,7 +214,7 @@ function chatbot_answer(string $question, array $user): array
     // سلام و تشکر: پاسخ کوتاه و در محدوده (بدون حدس دربارهٔ موضوع‌های خارج از سامانه).
     if (mb_strlen($norm, 'UTF-8') <= 25 && count(explode(' ', $norm)) <= 4) {
         if (chatbot_has_any($norm, CHATBOT_WORDS_GREET)) {
-            return chatbot_reply($user, $question, 'سلام! من راهنمای این سامانه هستم. دربارهٔ ثبت تیکت، پیگیری تیکت، سفارش غذا، فیش، تردد، CD/DVD، گزارش‌ها یا به‌روزرسانی بپرسید.', true, null, 'greeting');
+            return chatbot_reply($user, $question, 'سلام! من راهنمای این سامانه هستم. دربارهٔ ثبت درخواست، پیگیری درخواست، سفارش غذا، فیش، تردد، CD/DVD، گزارش‌ها یا به‌روزرسانی بپرسید.', true, null, 'greeting');
         }
         if (chatbot_has_any($norm, CHATBOT_WORDS_THANKS)) {
             return chatbot_reply($user, $question, 'خواهش می‌کنم. اگر سؤال دیگری دربارهٔ سامانه دارید، بپرسید.', true, null, 'greeting');
@@ -239,25 +239,50 @@ function chatbot_answer(string $question, array $user): array
         ]);
     }
 
+    $mentionsTicket = chatbot_has_any($norm, CHATBOT_WORDS_TICKET);
+    $asksTicketCancellation = $mentionsTicket && chatbot_has_any($norm, CHATBOT_WORDS_CANCEL);
+    if ($asksTicketCancellation) {
+        $cancelRef = chatbot_ticket_ref($question);
+        $cancelRow = $cancelRef ? chatbot_ticket_status($user, $cancelRef) : null;
+        if (!$cancelRow) {
+            $cancelAnswer = user_can($user, 'ticket.create')
+                ? 'اگر شما ثبت‌کنندهٔ درخواست هستید، جزئیات درخواست را باز کنید و دلیل لغو را بنویسید. پیش از ارجاع، لغو مستقیم است؛ پس از ارجاع (حتی در وضعیت حل‌شده)، درخواست برای تصمیم مسئول همان حوزه ثبت می‌شود و تا تصمیم او گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است. لغو، حذف فیزیکی نیست و تاریخچه حفظ می‌شود.'
+                : 'لغو درخواست فقط برای ثبت‌کنندهٔ مجاز انجام می‌شود. در صورت ارجاع درخواست، درخواست باید به تأیید مسئول همان حوزه برسد و تا آن زمان گفت‌وگو ادامه دارد اما تغییر وضعیت متوقف است؛ تاریخچه حذف نمی‌شود.';
+        } elseif ((string) $cancelRow['status'] === 'cancelled') {
+            $cancelAnswer = 'این درخواست قبلاً لغو شده است. تاریخچهٔ آن حفظ می‌شود و برای نیاز تازه باید درخواست جدید ثبت کنید. ' . chatbot_ticket_line($cancelRow);
+        } elseif ((string) $cancelRow['status'] === 'closed') {
+            $cancelAnswer = 'این درخواست بسته شده و از مسیر لغو قابل لغو نیست. اگر مشکل همچنان باقی است، از جزئیات درخواست گزینهٔ بازگشایی/اعلام حل‌نشدن را بررسی کنید. ' . chatbot_ticket_line($cancelRow);
+        } elseif (!empty($cancelRow['cancel_requested_at'])) {
+            $cancelAnswer = 'لغو این درخواست در انتظار تصمیم مسئول است؛ تا آن زمان گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است. ' . chatbot_ticket_line($cancelRow);
+        } elseif (in_array((string) $cancelRow['status'], ['new', 'manager_review'], true) && empty($cancelRow['assigned_to']) && empty($cancelRow['first_response_at']) && empty($cancelRow['resolved_at'])) {
+            $cancelAnswer = 'این درخواست هنوز به کارشناس ارجاع نشده و رسیدگی آغاز نشده است؛ ثبت‌کنندهٔ مجاز می‌تواند از صفحهٔ جزئیات آن را مستقیماً لغو کند. سابقه حذف نمی‌شود. ' . chatbot_ticket_line($cancelRow);
+        } else {
+            $cancelAnswer = 'چون درخواست ارجاع شده یا رسیدگی در جریان است، ثبت‌کننده می‌تواند درخواست لغو را با ذکر دلیل ثبت کند؛ تا تصمیم مسئول همان حوزه، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است. ' . chatbot_ticket_line($cancelRow);
+        }
+        $cancelLink = $cancelRow
+            ? ['url' => 'index.php?page=ticket&id=' . (int) $cancelRow['id'], 'label' => 'بازکردن جزئیات درخواست']
+            : ['url' => 'index.php', 'label' => 'رفتن به فهرست درخواست‌ها'];
+        return chatbot_reply($user, $question, $cancelAnswer, true, null, 'ticket_cancellation', 0.0, $cancelLink);
+    }
+
     $ref = chatbot_ticket_ref($question);
     $asksStatus = chatbot_has_any($norm, CHATBOT_WORDS_STATUS);
-    $mentionsTicket = chatbot_has_any($norm, CHATBOT_WORDS_TICKET);
     if ($ref && ($mentionsTicket || $asksStatus)) {
         $row = chatbot_ticket_status($user, $ref);
         $answer = $row
-            ? 'وضعیت تیکت ' . chatbot_ticket_line($row)
-            : 'تیکتی با این شماره پیدا نشد یا دسترسی شما به آن ندارد. شماره را دقیق از روی پیامک یا فرم تیکت کپی کنید.';
-        $link = $row ? ['url' => 'index.php?page=ticket&id=' . (int) $row['id'], 'label' => 'مشاهدهٔ جزئیات تیکت'] : null;
+            ? 'وضعیت درخواست ' . chatbot_ticket_line($row)
+            : 'درخواستی با این شماره پیدا نشد یا دسترسی شما به آن ندارد. شماره را دقیق از روی پیامک یا فرم درخواست کپی کنید.';
+        $link = $row ? ['url' => 'index.php?page=ticket&id=' . (int) $row['id'], 'label' => 'مشاهدهٔ جزئیات درخواست'] : null;
         return chatbot_reply($user, $question, $answer, true, null, 'ticket_status', 0.0, $link);
     }
 
-    // «چطور ثبت تیکت کنم؟» یک سؤال راهنما است؛ فقط درخواست مستقیم فرایند ثبت را شروع می‌کند.
+    // «چطور ثبت درخواست کنم؟» یک سؤال راهنما است؛ فقط درخواست مستقیم فرایند ثبت را شروع می‌کند.
     if (chatbot_has_any($norm, CHATBOT_WORDS_CREATE) && !chatbot_has_any($norm, CHATBOT_WORDS_HOW)) {
         if (!user_can($user, 'ticket.create')) {
-            return chatbot_reply($user, $question, 'دسترسی ثبت تیکت برای حساب شما فعال نیست. برای فعال شدن با مدیر سامانه تماس بگیرید.', true, null, 'ticket_create');
+            return chatbot_reply($user, $question, 'دسترسی ثبت درخواست برای حساب شما فعال نیست. برای فعال شدن با مدیر سامانه تماس بگیرید.', true, null, 'ticket_create');
         }
         $_SESSION['chatbot_flow'] = ['step' => 'subject', 'at' => time()];
-        return chatbot_reply($user, $question, 'با چند سؤال کوتاه تیکت شما را آماده می‌کنم. ابتدا موضوع درخواست را در یک جمله بنویسید. (برای لغو «انصراف» بنویسید)', true, null, 'ticket_create');
+        return chatbot_reply($user, $question, 'با چند سؤال کوتاه درخواست شما را آماده می‌کنم. ابتدا موضوع درخواست را در یک جمله بنویسید. (برای لغو «انصراف» بنویسید)', true, null, 'ticket_create');
     }
 
     if ($asksStatus && !chatbot_has_any($norm, CHATBOT_WORDS_HOW)) {
@@ -265,8 +290,8 @@ function chatbot_answer(string $question, array $user): array
         $stmt->execute([(int) $user['id']]);
         $rows = $stmt->fetchAll();
         $answer = $rows
-            ? "آخرین تیکت‌های شما:\n" . implode("\n", array_map('chatbot_ticket_line', $rows))
-            : 'شما تیکت ثبت‌شده‌ای ندارید. برای ثبت تیکت جدید، «ثبت تیکت» را بنویسید.';
+            ? "آخرین درخواست‌های شما:\n" . implode("\n", array_map('chatbot_ticket_line', $rows))
+            : 'شما درخواست ثبت‌شده‌ای ندارید. برای ثبت درخواست جدید، «ثبت درخواست» را بنویسید.';
         return chatbot_reply($user, $question, $answer, true, null, 'ticket_status');
     }
 
@@ -692,7 +717,7 @@ function chatbot_render_admin(array $admin): void
     $negStmt = db()->prepare('SELECT l.question, l.created_at, f.question AS faq_question FROM chatbot_logs l LEFT JOIN chatbot_faq f ON f.id = l.faq_id WHERE l.helpful = 0 AND l.created_at BETWEEN ? AND ? ORDER BY l.created_at DESC LIMIT 20');
     $negStmt->execute($range);
     $negRows = $negStmt->fetchAll();
-    $intentLabels = ['ticket_create' => 'ثبت تیکت', 'ticket_status' => 'پیگیری تیکت', 'ticket_cancel' => 'انصراف از ثبت تیکت', 'guide_help' => 'راهنمای مرحله‌ای'];
+    $intentLabels = ['ticket_create' => 'ثبت درخواست', 'ticket_status' => 'پیگیری درخواست', 'ticket_cancel' => 'انصراف از ثبت درخواست', 'ticket_cancellation' => 'راهنمای لغو درخواست', 'guide_help' => 'راهنمای مرحله‌ای'];
 
     $total = (int) ($stats['total'] ?? 0);
     $pct = static fn(int $part, int $whole): string => $whole > 0 ? round($part * 100 / $whole) . '٪' : '—';
@@ -703,7 +728,7 @@ function chatbot_render_admin(array $admin): void
         . '<div class="stat-grid">'
         . '<div><strong>' . $total . '</strong><small>کل پرسش‌ها</small></div>'
         . '<div><strong>' . $pct((int) ($stats['answered'] ?? 0), $total) . '</strong><small>پاسخ از FAQ</small></div>'
-        . '<div><strong>' . $pct((int) ($stats['intents'] ?? 0), $total) . '</strong><small>ثبت/پیگیری تیکت</small></div>'
+        . '<div><strong>' . $pct((int) ($stats['intents'] ?? 0), $total) . '</strong><small>ثبت/پیگیری درخواست</small></div>'
         . '<div><strong>' . $pct((int) ($stats['unanswered'] ?? 0), $total) . '</strong><small>بی‌پاسخ</small></div>'
         . '<div><strong>' . (int) ($stats['yes_count'] ?? 0) . ' / ' . (int) ($stats['no_count'] ?? 0) . '</strong><small>مفید / کمکی نکرد</small></div>'
         . '</div>';
@@ -818,7 +843,7 @@ function chatbot_render_widget(?array $user): string
           var lk = document.createElement("a"); lk.href = j.link.url; lk.textContent = j.link.label;
           lk.style.display = "inline-block"; lk.style.marginTop = "6px"; pending.appendChild(lk);
         } else if (!j.matched && j.can_ticket) {
-          var a = document.createElement("a"); a.href = "index.php?page=new-ticket"; a.textContent = "ثبت تیکت جدید";
+          var a = document.createElement("a"); a.href = "index.php?page=new-ticket"; a.textContent = "ثبت درخواست جدید";
           a.style.display = "inline-block"; a.style.marginTop = "6px"; pending.appendChild(a);
         }
       }

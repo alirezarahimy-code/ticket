@@ -557,11 +557,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (categorySelector && categorySelector.tagName === 'INPUT') {
             categorySelector.value = (selectedService && selectedService.value !== '' ? (selectedService.getAttribute('data-category-id') || '') : '');
         }
-        // ۱.۳۷.۲ (درخواست کاربر): نمایش و الزامِ «سیستم مرتبط» بر پایهٔ «حوزه خدمت» است:
-        //   خدمات کامپیوتری ⇒ فیلد پیدا است و پرکردنش الزامی است.
-        //   خدمات پشتیبانی ⇒ فیلد کاملاً پنهان می‌شود و مقدارش هم پاک می‌گردد.
-        var requiresAsset = group === 'it';
-        if (assetField) assetField.hidden = !requiresAsset;
+        // طبق سیاست درخواست، برای هر خدمت IT انتخاب سیستم از شناسنامهٔ فنی الزامی است.
+        var isItGroup = group === 'it';
+        var hasSelectedService = !!(selectedService && selectedService.value !== '');
+        var requiresAsset = isItGroup && hasSelectedService;
+        if (assetField) assetField.hidden = !isItGroup;
+        var assetLabel = document.querySelector('[data-asset-label]');
+        if (assetLabel) {
+            assetLabel.textContent = !isItGroup ? 'فقط برای خدمات IT' : (!hasSelectedService ? 'پس از انتخاب خدمت مشخص می‌شود' : (requiresAsset ? 'برای خدمات IT الزامی' : 'اختیاری'));
+        }
         var assetErrorNode = document.querySelector('[data-asset-error]');
         if (assetErrorNode) {
             assetErrorNode.hidden = true;
@@ -575,10 +579,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (assetSelector) {
             assetSelector.required = false;
-            if (!requiresAsset) {
+            if (!isItGroup) {
                 assetSelector.value = '';
-                // ۱.۳۷: وقتی خدمت انتخاب‌شده به سیستم نیاز ندارد، متن نمایش‌داده‌شده در
-                // کمبوی «سیستم مرتبط» هم پاک می‌شود تا چیزی برخلاف مقدار ثبت‌شده نماند.
                 if (assetSearch) {
                     assetSearch.value = '';
                     assetSearch.removeAttribute('data-picked');
@@ -770,12 +772,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var ticketForm = assetSearch.closest('form');
         if (ticketForm) {
             ticketForm.addEventListener('submit', function (event) {
-                // ۱.۳۷.۲: در حوزهٔ خدمات کامپیوتری انتخاب «سیستم مرتبط» الزامی است.
-                if (getGroup() === 'it' && assetSelector.value === '') {
+                var submittedService = serviceSelector ? serviceSelector.options[serviceSelector.selectedIndex] : null;
+                var requiresAsset = getGroup() === 'it' && !!(submittedService && submittedService.value !== '');
+                if (requiresAsset && assetSelector.value === '') {
                     event.preventDefault();
                     var errNode = document.querySelector('[data-asset-error]');
                     if (errNode) {
-                        errNode.textContent = 'برای ثبت تیکت در حوزهٔ خدمات کامپیوتری، انتخاب «سیستم مرتبط» الزامی است؛ از فهرست زیر انتخاب کنید.';
+                        errNode.textContent = 'برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است؛ یک مورد را از فهرست انتخاب کنید.';
                         errNode.hidden = false;
                     }
                     if (assetField) assetField.classList.add('field-invalid');
@@ -1255,4 +1258,26 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    // ۱.۵۷ — چرخش پیام‌های متحرک صفحه ورود؛ هر پیام یک دور کامل می‌چرخد بعد پیام بعدی می‌آید.
+    var annBox = document.querySelector('[data-announcements]');
+    if (!annBox) { return; }
+    var textEl = annBox.querySelector('[data-announcement-text]');
+    if (!textEl) { return; }
+    var messages = [];
+    try { messages = JSON.parse(annBox.getAttribute('data-announcements') || '[]'); } catch (err) { messages = []; }
+    if (!Array.isArray(messages) || messages.length < 2) { return; }
+    var speed = parseInt(annBox.getAttribute('data-announcement-speed') || '18', 10);
+    if (isNaN(speed)) { speed = 18; }
+    speed = Math.max(5, Math.min(60, speed));
+    var index = 0;
+    window.setInterval(function () {
+        index = (index + 1) % messages.length;
+        textEl.textContent = messages[index];
+        textEl.style.animation = 'none';
+        void textEl.offsetWidth;
+        textEl.style.animation = '';
+    }, speed * 1000);
 });

@@ -43,22 +43,22 @@ function permission_catalog(): array
         ],
         [
             'key' => 'ticket',
-            'label' => 'تیکت',
+            'label' => 'درخواست',
             'items' => [
-                ['code' => 'ticket.create', 'label' => 'ثبت تیکت جدید'],
-                ['code' => 'ticket.view_own', 'label' => 'مشاهدهٔ تیکت‌های خودم'],
-                ['code' => 'ticket.view_unit', 'label' => 'مشاهدهٔ تیکت‌های واحد/زیرمجموعه'],
-                ['code' => 'ticket.view_all', 'label' => 'مشاهدهٔ همهٔ تیکت‌ها'],
-                ['code' => 'ticket.reply', 'label' => 'پاسخ/مکالمه در تیکت'],
+                ['code' => 'ticket.create', 'label' => 'ثبت درخواست جدید'],
+                ['code' => 'ticket.view_own', 'label' => 'مشاهدهٔ درخواست‌های خودم'],
+                ['code' => 'ticket.view_unit', 'label' => 'مشاهدهٔ درخواست‌های واحد/زیرمجموعه'],
+                ['code' => 'ticket.view_all', 'label' => 'مشاهدهٔ همهٔ درخواست‌ها'],
+                ['code' => 'ticket.reply', 'label' => 'پاسخ/مکالمه در درخواست'],
                 ['code' => 'ticket.edit', 'label' => 'ویرایش'],
-                ['code' => 'ticket.assign', 'label' => 'ارجاع تیکت به کارشناس'],
+                ['code' => 'ticket.assign', 'label' => 'ارجاع درخواست به کارشناس'],
                 ['code' => 'ticket.bulk', 'label' => 'ویرایش'],
-                ['code' => 'ticket.rate', 'label' => 'امتیازدهی به تیکت'],
-                ['code' => 'ticket.attach_asset', 'label' => 'اتصال دارایی به تیکت'],
+                ['code' => 'ticket.rate', 'label' => 'امتیازدهی به درخواست'],
+                ['code' => 'ticket.attach_asset', 'label' => 'اتصال دارایی به درخواست'],
                 ['code' => 'queue.view', 'label' => 'صف کاری'],
                 ['code' => 'supervisor.panel', 'label' => 'پنل سوپروایزر'],
                 ['code' => 'supervisor.decide', 'label' => 'ویرایش'],
-                ['code' => 'supervisor.reopen', 'label' => 'بازگشایی/برگشت تیکت'],
+                ['code' => 'supervisor.reopen', 'label' => 'بازگشایی/برگشت درخواست'],
             ],
         ],
         [
@@ -339,7 +339,7 @@ function permission_defaults(): array
         $codes = role_permissions_normalize_codes($codes);
         // ویرایشِ بی‌والد نباشد؛ دسترسی‌های پیش‌فرض دیگری اضافه نمی‌شود.
         $codes = role_permissions_add_parents($codes);
-        // ویرایش تیکت: پیش‌تر کسانی تیکت را تغییر می‌دادند که مدیر ارجاع (ticket.assign) یا کارشناس قابل ارجاع بودند.
+        // ویرایش درخواست: پیش‌تر کسانی درخواست را تغییر می‌دادند که مدیر ارجاع (ticket.assign) یا کارشناس قابل ارجاع بودند.
         if (in_array('ticket.assign', $codes, true) || in_array($role, assignable_role_codes(), true)) {
             $codes[] = 'ticket.edit';
         }
@@ -370,7 +370,7 @@ function permission_defaults_raw(): array
         'primary_admin' => permission_all_codes(),
         // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
         'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
-        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.order_close', 'settings.general', 'settings.domain', 'holidays.manage']))),
+        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.order_close', 'settings.general', 'settings.domain', 'holidays.manage']))),
         'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
         'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
         'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
@@ -539,9 +539,9 @@ function role_permissions_migrate_once(): void
     }
     if (setting('perm_edit_v3') !== '1') {
         try {
-            // پاسخ به تیکت پیش‌تر با کد کنترل نمی‌شد؛ پس به هر نقش ذخیره‌شده‌ای داده می‌شود تا دسترسی حفظ شود.
+            // پاسخ به درخواست پیش‌تر با کد کنترل نمی‌شد؛ پس به هر نقش ذخیره‌شده‌ای داده می‌شود تا دسترسی حفظ شود.
             db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.reply' FROM role_permissions");
-            // امتیازدهی به تیکت هم پیش‌تر کد نداشت؛ به همهٔ نقش‌های ذخیره‌شده داده می‌شود.
+            // امتیازدهی به درخواست هم پیش‌تر کد نداشت؛ به همهٔ نقش‌های ذخیره‌شده داده می‌شود.
             db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'ticket.rate' FROM role_permissions");
             // داشبورد پیش‌تر همیشه باز بود؛ کد دیدنش به همهٔ نقش‌های ذخیره‌شده داده می‌شود.
             db()->exec("INSERT IGNORE INTO role_permissions (role, permission) SELECT DISTINCT role, 'dash.view' FROM role_permissions");
@@ -823,7 +823,8 @@ function is_admin_role(?string $role): bool
 /** Roles allowed to see/handle the whole ticket pool. */
 function global_ticket_role_codes(): array
 {
-    return ['supervisor', 'primary_admin', 'support_manager', 'inspector'];
+    // مدیر پشتیبانی سراسری نیست؛ فقط حوزه پشتیبانی را می‌بیند (بدون دسترسی به درخواست‌های IT).
+    return ['supervisor', 'primary_admin', 'inspector'];
 }
 
 function is_global_ticket_role(?string $role): bool
@@ -834,7 +835,8 @@ function is_global_ticket_role(?string $role): bool
 /** Roles scoped to their own unit/department (not the whole pool). */
 function is_department_scoped_role(?string $role): bool
 {
-    return in_array((string) $role, ['manager', 'support_manager'], true);
+    // فقط مدیر واحد (manager) به معاونت خودش محدود است؛ مدیر پشتیبانی کل حوزه پشتیبانی را می‌بیند.
+    return in_array((string) $role, ['manager'], true);
 }
 
 /** Roles that may be assigned tickets (ticket handlers). */

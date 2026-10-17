@@ -10,7 +10,7 @@ function ola_post(string $key, string $default = ''): string
 
 function ola_header(string $title, array $user): void
 {
-    $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
+    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
     $__notif = notification_header_summary((int) $user['id']);
     $notificationCount = $__notif['unread'];
@@ -22,7 +22,7 @@ function ola_header(string $title, array $user): void
 
 function ola_footer(): void
 {
-    $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
+    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
     echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js?v=3.4.23"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . '</body></html>';
 }
 
@@ -102,7 +102,7 @@ echo '</select></label><label>معاونت<select name="department_id"><option v
 foreach ($departments as $department) {
     echo '<option value="' . (int) $department['id'] . '" ' . ((int) ($editPolicy['department_id'] ?? 0) === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
 }
-echo '</select></label><label>پاسخ داخلی، دقیقه<input type="number" min="1" name="response_minutes" value="' . $value('response_minutes', 60) . '" required></label><label>حل داخلی، دقیقه<input type="number" min="1" name="resolution_minutes" value="' . $value('resolution_minutes', 480) . '" required></label><label>Escalation سطح ۱، دقیقه<input type="number" min="1" name="escalation_1_minutes" value="' . $value('escalation_1_minutes', 480) . '" required></label><label>Escalation سطح ۲، دقیقه<input type="number" min="1" name="escalation_2_minutes" value="' . $value('escalation_2_minutes', 960) . '" required></label></div><button class="button" type="submit">ذخیره سیاست</button></form></div><div class="card form-card"><h2>منطق اجرا</h2><p class="muted">هر تیکت جدید بر اساس معاونت و اولویت به دقیق‌ترین سیاست فعال متصل می‌شود. اگر سیاست معاونت وجود نداشته باشد، سیاست سراسری همان اولویت استفاده می‌شود.</p><div class="category-list"><div><span><strong>پاسخ داخلی</strong><small>اگر اولین پاسخ ثبت نشود، اعلان OLA ساخته می‌شود.</small></span></div><div><span><strong>حل داخلی</strong><small>عبور از زمان حل، اعلان جداگانه برای تیم رسیدگی می‌سازد.</small></span></div><div><span><strong>Escalation سطح ۱</strong><small>برای پیگیری مدیریتی اولیه اعلان ایجاد می‌شود.</small></span></div><div><span><strong>Escalation سطح ۲</strong><small>سوپروایزرها و ادمین‌ها نیز اعلان مستقیم می‌گیرند.</small></span></div></div></div></section><section class="card form-card"><h2>سیاست‌های فعال و غیرفعال</h2><div class="category-list">';
+echo '</select></label><label>پاسخ داخلی، دقیقه<input type="number" min="1" name="response_minutes" value="' . $value('response_minutes', 60) . '" required></label><label>حل داخلی، دقیقه<input type="number" min="1" name="resolution_minutes" value="' . $value('resolution_minutes', 480) . '" required></label><label>Escalation سطح ۱، دقیقه<input type="number" min="1" name="escalation_1_minutes" value="' . $value('escalation_1_minutes', 480) . '" required></label><label>Escalation سطح ۲، دقیقه<input type="number" min="1" name="escalation_2_minutes" value="' . $value('escalation_2_minutes', 960) . '" required></label></div><button class="button" type="submit">ذخیره سیاست</button></form></div><div class="card form-card"><h2>منطق اجرا</h2><p class="muted">هر درخواست جدید بر اساس معاونت و اولویت به دقیق‌ترین سیاست فعال متصل می‌شود. اگر سیاست معاونت وجود نداشته باشد، سیاست سراسری همان اولویت استفاده می‌شود.</p><div class="category-list"><div><span><strong>پاسخ داخلی</strong><small>اگر اولین پاسخ ثبت نشود، اعلان OLA ساخته می‌شود.</small></span></div><div><span><strong>حل داخلی</strong><small>عبور از زمان حل، اعلان جداگانه برای تیم رسیدگی می‌سازد.</small></span></div><div><span><strong>Escalation سطح ۱</strong><small>برای پیگیری مدیریتی اولیه اعلان ایجاد می‌شود.</small></span></div><div><span><strong>Escalation سطح ۲</strong><small>سوپروایزرها و ادمین‌ها نیز اعلان مستقیم می‌گیرند.</small></span></div></div></div></section><section class="card form-card"><h2>سیاست‌های فعال و غیرفعال</h2><div class="category-list">';
 foreach ($policies as $policy) {
     echo '<div><span><strong>' . e($policy['name']) . '</strong><small>' . e(priority_label($policy['priority'])) . ' • ' . e($policy['department_name'] ?: 'سراسری') . ' • پاسخ ' . (int) $policy['response_minutes'] . ' دقیقه • حل ' . (int) $policy['resolution_minutes'] . ' دقیقه • E1 ' . (int) $policy['escalation_1_minutes'] . ' • E2 ' . (int) $policy['escalation_2_minutes'] . '</small></span><span class="actions"><em class="status ' . ((int) $policy['is_active'] === 1 ? 'open' : 'closed') . '">' . ((int) $policy['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</em><a class="mini-button" href="ola.php?edit=' . (int) $policy['id'] . '">ویرایش</a><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="toggle_ola_policy"><input type="hidden" name="policy_id" value="' . (int) $policy['id'] . '"><button class="mini-button" type="submit">تغییر وضعیت</button></form></span></div>';
 }

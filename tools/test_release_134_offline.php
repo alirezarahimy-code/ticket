@@ -72,9 +72,9 @@ foreach ($cards as [$label, $query]) {
     $needle = 'index.php?page=reports&amp;' . $query;
     check('۱-' . $label . ': کارت به گزارش فیلترشده لینک شده', strpos($index, $needle) !== false, $needle);
 }
-check('۱-ب: فیلتر «در حال پیگیری» همهٔ وضعیت‌های باز را می‌گیرد', strpos($index, 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user")') !== false);
-check('۱-پ: فیلتر «حل‌شده» تیکت‌های بسته‌شده را هم شامل می‌شود', strpos($index, 't.status IN ("resolved", "closed")') !== false);
-check('۱-ت: مقادیر active/all در فهرست مجاز فیلتر گزارش‌ها هستند', strpos($index, "'resolved', 'closed', 'active', 'all'") !== false);
+check('۱-ب: فیلتر «در حال پیگیری» همهٔ وضعیت‌های باز و قدیمی pending را می‌گیرد', strpos($index, 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")') !== false);
+check('۱-پ: فیلتر «حل‌شده» درخواست‌های بسته‌شده را هم شامل می‌شود', strpos($index, 't.status IN ("resolved", "closed")') !== false);
+check('۱-ت: مقادیر active/all و cancelled در فهرست مجاز فیلتر گزارش‌ها هستند', strpos($index, "'resolved', 'closed', 'cancelled', 'active', 'all'") !== false);
 check('۱-ث: CSS کارتِ لینک‌شده (حالت hover/focus) اضافه شده', strpos((string) file_get_contents($root . '/assets/style.css'), 'a.stat-card') !== false);
 
 /* ───────── ۲) حذف شمارهٔ کارت از فرم گروه غذا ───────── */

@@ -14,7 +14,7 @@
 --   mysql -u root -p -e "CREATE DATABASE persian_ticketing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 --   mysql -u root -p persian_ticketing < install-empty-db.sql
 --
--- ⚠️ هیچ دادهٔ کاربری، تیکت، دارایی، گروه غذا یا فایل پیوستی در این فایل نیست.
+-- ⚠️ هیچ دادهٔ کاربری، درخواست، دارایی، گروه غذا یا فایل پیوستی در این فایل نیست.
 -- ⚠️ پس از اجرا، «توکن نصب» ساخته می‌شود؛ مرورگر کاربران با دیدن توکن متفاوت،
 --    کش محلی خود (localStorage پنل غذا) را که به نصب قبلی تعلق دارد دور می‌ریزد.
 -- ============================================================================
@@ -257,13 +257,16 @@ CREATE TABLE IF NOT EXISTS tickets (
     support_location VARCHAR(255) NULL,
     support_equipment TEXT NULL,
     priority ENUM('normal','urgent','critical') NOT NULL DEFAULT 'normal',
-    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed') NOT NULL DEFAULT 'manager_review',
+    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review',
     requester_id INT UNSIGNED NOT NULL,
     assigned_to INT UNSIGNED NULL,
     assigned_at DATETIME NULL,
     first_response_at DATETIME NULL,
     resolved_at DATETIME NULL,
     closed_at DATETIME NULL,
+    cancel_requested_at DATETIME NULL,
+    cancel_requested_by INT UNSIGNED NULL,
+    cancel_request_reason TEXT NULL,
     due_at DATETIME NULL,
     sla_minutes INT UNSIGNED NULL,
     ola_policy_id INT UNSIGNED NULL,

@@ -4436,7 +4436,7 @@ function food_ticket_api_handle(string $route, array $user): never
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($route, ['login', 'sso-login'], true)) {
-            // در حالت یکپارچه با تیکتینگ، session از قبل معتبر است
+            // در حالت یکپارچه با سامانه درخواست، session از قبل معتبر است
             food_ticket_api_json([
                 'ok' => true,
                 'role' => (string) ($user['role'] ?? 'manager'),

@@ -987,6 +987,10 @@ function ticket_scope(array $user, string $alias = 't'): array
     if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) {
         return ['', []];
     }
+    if (($user['role'] ?? '') === 'support_manager') {
+        // مدیر پشتیبانی فقط حوزه پشتیبانی را می‌بیند؛ بدون فیلتر معاونت و بدون دسترسی به IT.
+        return ["WHERE {$alias}.service_group = ?", ['support']];
+    }
     if (in_array($user['role'], ['agent', 'manager'], true)) {
         $group = user_service_group($user);
         $departmentId = (int) ($user['department_id'] ?? 0);
@@ -996,6 +1000,12 @@ function ticket_scope(array $user, string $alias = 't'): array
         return $departmentId > 0 ? ["WHERE {$alias}.service_group = ? AND {$alias}.department_id = ?", [$group, $departmentId]] : ["WHERE {$alias}.service_group = ?", [$group]];
     }
     return ["WHERE {$alias}.requester_id = ?", [(int) $user['id']]];
+}
+
+function ticket_is_waiting_status(string $status): bool
+{
+    // مقدار قدیمی pending هم از نظر مکث SLA/OLA و پاسخ کاربر مثل waiting_user رفتار می‌کند.
+    return $status === 'waiting_user' || $status === 'pending';
 }
 
 function user_service_group(array $user): string
@@ -1096,8 +1106,8 @@ function triangle_effect_page_catalog(): array
             'change-password' => 'تغییر رمز عبور',
         ],
         'پشتیبانی و دارایی' => [
-            'new-ticket' => 'ثبت تیکت جدید',
-            'ticket' => 'جزئیات تیکت',
+            'new-ticket' => 'ثبت درخواست جدید',
+            'ticket' => 'جزئیات درخواست',
             'queue' => 'صف کاری',
             'services' => 'خدمات',
             'knowledge' => 'دانش‌نامه',
@@ -1119,7 +1129,7 @@ function triangle_effect_page_catalog(): array
             'food-order' => 'سفارش غذا',
         ],
         'گزارش‌ها' => [
-            'reports' => 'گزارش تیکت‌ها',
+            'reports' => 'گزارش درخواست‌ها',
             'analytics' => 'چارت‌ها',
             'activity-log' => 'لاگ سامانه',
             'logs' => 'گزارش خطا',
@@ -1788,13 +1798,13 @@ function ticket_number_prefix(string $serviceGroup): string
 }
 
 /**
- * آماده‌سازی جدول شماره‌گذاری تیکت — بدون DDL غیرضروری.
+ * آماده‌سازی جدول شماره‌گذاری درخواست — بدون DDL غیرضروری.
  *
  * ⚠️ درس گرفته‌شده (خطای «There is no active transaction»):
  * هر دستور DDL در MySQL یک COMMIT ضمنی می‌زند. قبلاً این تابع در هر بار «شماره‌گذاری»
  * یک CREATE TABLE IF NOT EXISTS اجرا می‌کرد و چون ticket_number_next() داخل تراکنش
- * ثبت تیکت صدا زده می‌شود، تراکنش همان‌جا بسته می‌شد؛ در پایان، db()->commit()
- * با خطای «There is no active transaction» سر می‌خورد — هرچند تیکت ثبت شده بود.
+ * ثبت درخواست صدا زده می‌شود، تراکنش همان‌جا بسته می‌شد؛ در پایان، db()->commit()
+ * با خطای «There is no active transaction» سر می‌خورد — هرچند درخواست ثبت شده بود.
  *
  * حالا: اول با SELECT وجود جدول/ستون بررسی می‌شود (بدون COMMIT ضمنی) و DDL فقط اگر
  * واقعاً لازم باشد و «تراکنشی باز نباشد» اجرا می‌شود.
@@ -1893,12 +1903,12 @@ function ticket_number_peek(string $prefix): string
 }
 
 /**
- * پرکردن شمارهٔ تیکت‌های قدیمی که ticket_no ندارند.
+ * پرکردن شمارهٔ درخواست‌های قدیمی که ticket_no ندارند.
  *
  * ⚠️ این تابع در ابتدای هر درخواست صدا زده می‌شد و هر بار یک SELECT روی کل جدول
  * tickets + یک DDL (CREATE TABLE IF NOT EXISTS) اجرا می‌کرد؛ روی سرور پرتردد
  * یکی از دلایل کندی بارگذاری صفحات بود. حالا نتیجهٔ «چیزی برای اصلاح نیست» در
- * تنظیمات ثبت می‌شود و تا وقتی تیکتی بدون شماره ساخته نشود، دوباره اسکن نمی‌شود.
+ * تنظیمات ثبت می‌شود و تا وقتی درخواستی بدون شماره ساخته نشود، دوباره اسکن نمی‌شود.
  *
  * @param bool $force true = اسکن دوباره حتی اگر نشانگر ثبت شده باشد (برای ابزار تعمیر)
  */
@@ -2182,16 +2192,64 @@ function ticket_sla_transition(array $ticket, string $newStatus, string $priorit
     $pauseMinutes = (int) ($ticket['sla_pause_minutes'] ?? 0);
     $pauseAt = !empty($ticket['sla_paused_at']) ? new DateTimeImmutable((string) $ticket['sla_paused_at'], $zone) : null;
     $oldStatus = (string) ($ticket['status'] ?? 'new');
-    if ($oldStatus === 'waiting_user' && $newStatus !== 'waiting_user' && $pauseAt) {
+    $wasWaiting = ticket_is_waiting_status($oldStatus);
+    $isWaiting = ticket_is_waiting_status($newStatus);
+    if ($wasWaiting && !$isWaiting && $pauseAt) {
         $pauseMinutes += business_elapsed_minutes($pauseAt, new DateTimeImmutable('now', $zone));
         $pauseAt = null;
-    } elseif ($oldStatus !== 'waiting_user' && $newStatus === 'waiting_user') {
+    } elseif (!$wasWaiting && $isWaiting) {
         $pauseAt = new DateTimeImmutable('now', $zone);
     }
     $createdAt = new DateTimeImmutable((string) $ticket['created_at'], $zone);
     $baseDue = business_due_at(priority_sla_minutes($priority), $createdAt);
     $dueAt = $pauseMinutes > 0 ? business_due_at($pauseMinutes, $baseDue) : $baseDue;
     return [$dueAt->format('Y-m-d H:i:s'), $pauseAt?->format('Y-m-d H:i:s'), $pauseMinutes];
+}
+
+/**
+ * بازتنظیم/تمدید OLA هنگام تغییر اولویت یا خروج از waiting_user.
+ * مهلت‌ها هنگام انتظار کاربر در cron متوقف می‌شوند و پس از پاسخ، زمان مکث به موعدها افزوده می‌شود.
+ */
+function ticket_ola_transition(array $ticket, string $newStatus, string $priority): array
+{
+    $zone = new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'));
+    $oldStatus = (string) ($ticket['status'] ?? 'new');
+    $departmentId = (int) ($ticket['department_id'] ?? 0) ?: null;
+    $oldPriority = (string) ($ticket['priority'] ?? 'normal');
+    $recalculate = $priority !== $oldPriority
+        || empty($ticket['ola_policy_id'])
+        || (!array_key_exists('ola_due_at', $ticket));
+
+    if ($recalculate) {
+        $deadlines = ola_deadlines($departmentId, $priority, (string) $ticket['created_at']);
+    } else {
+        $deadlines = [
+            'policy_id' => (int) $ticket['ola_policy_id'],
+            'response_due_at' => $ticket['ola_response_due_at'] ?? null,
+            'due_at' => $ticket['ola_due_at'] ?? null,
+            'escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+            'escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
+        ];
+    }
+
+    $pauseMinutes = 0;
+    if (ticket_is_waiting_status($oldStatus) && !ticket_is_waiting_status($newStatus) && !empty($ticket['sla_paused_at'])) {
+        $pauseAt = new DateTimeImmutable((string) $ticket['sla_paused_at'], $zone);
+        $pauseMinutes = business_elapsed_minutes($pauseAt, new DateTimeImmutable('now', $zone));
+    }
+    if ($recalculate) {
+        $pauseMinutes += (int) ($ticket['sla_pause_minutes'] ?? 0);
+    }
+    if ($pauseMinutes > 0) {
+        foreach (['response_due_at', 'due_at', 'escalation_1_at', 'escalation_2_at'] as $key) {
+            if (empty($deadlines[$key])) {
+                continue;
+            }
+            $deadline = new DateTimeImmutable((string) $deadlines[$key], $zone);
+            $deadlines[$key] = business_due_at($pauseMinutes, $deadline)->format('Y-m-d H:i:s');
+        }
+    }
+    return $deadlines;
 }
 
 function record_asset_history(int $assetId, string $eventType, string $title, ?int $userId = null, ?int $ticketId = null, string $details = '', array $before = [], array $after = []): void
@@ -2205,7 +2263,7 @@ function record_asset_history(int $assetId, string $eventType, string $title, ?i
 
 function status_label(string $status): string
 {
-    return ['new' => 'جدید', 'manager_review' => 'در انتظار بررسی مدیر واحد', 'assigned' => 'ارجاع‌شده به کارشناس', 'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر', 'open' => 'در حال بررسی', 'pending' => 'در انتظار پاسخ', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده'][$status] ?? $status;
+    return ['new' => 'جدید', 'manager_review' => 'در انتظار بررسی مدیر واحد', 'assigned' => 'ارجاع‌شده به کارشناس', 'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر', 'open' => 'در حال بررسی', 'pending' => 'در انتظار پاسخ', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده', 'cancelled' => 'لغوشده به درخواست ثبت‌کننده'][$status] ?? $status;
 }
 
 function priority_label(string $priority): string
@@ -2679,16 +2737,20 @@ function activity_action_label(string $code): string
         'page_view' => 'مشاهدهٔ صفحه',
         'profile_updated' => 'به‌روزرسانی پروفایل',
         'user_theme_changed' => 'تغییر تم شخصی',
-        'ticket_created' => 'ثبت تیکت جدید',
-        'ticket_replied' => 'پاسخ در تیکت',
-        'ticket_updated' => 'به‌روزرسانی تیکت',
-        'ticket_rated' => 'امتیازدهی به تیکت',
-        'ticket_reopened' => 'بازگشایی تیکت',
-        'ticket_reopened_by_user' => 'بازگشایی تیکت توسط کاربر (مشکل حل نشده)',
-        'ticket_claimed' => 'برداشتن تیکت توسط کارشناس',
+        'ticket_created' => 'ثبت درخواست جدید',
+        'ticket_replied' => 'پاسخ در درخواست',
+        'ticket_updated' => 'به‌روزرسانی درخواست',
+        'ticket_rated' => 'امتیازدهی به درخواست',
+        'ticket_reopened' => 'بازگشایی درخواست',
+        'ticket_reopened_by_user' => 'بازگشایی درخواست توسط کاربر (مشکل حل نشده)',
+        'ticket_cancelled_by_requester' => 'لغو درخواست توسط ثبت‌کننده',
+        'ticket_cancellation_requested' => 'درخواست لغو درخواست',
+        'ticket_cancellation_approved' => 'تأیید درخواست لغو درخواست',
+        'ticket_cancellation_rejected' => 'رد درخواست لغو درخواست',
+        'ticket_claimed' => 'برداشتن درخواست توسط کارشناس',
         'supervisor_approved' => 'تأیید سوپروایزر',
-        'supervisor_rework' => 'برگشت تیکت برای اصلاح',
-        'supervisor_reopened' => 'بازگشایی تیکت توسط سوپروایزر',
+        'supervisor_rework' => 'برگشت درخواست برای اصلاح',
+        'supervisor_reopened' => 'بازگشایی درخواست توسط سوپروایزر',
         'cd_dvd_in' => 'ثبت ورود رسانه (CD/DVD)',
         'cd_dvd_out' => 'ثبت خروج رسانه (CD/DVD)',
         'cd_dvd_updated' => 'ویرایش ثبت CD/DVD',
@@ -2748,11 +2810,11 @@ function activity_action_label(string $code): string
         'reset_org_structure' => 'بازنشانی ساختار سازمان',
         'delete_org_unit' => 'حذف واحد سازمانی',
         'undo_org_action' => 'بازگردانی آخرین تغییر سازمان',
-        'bulk_update_tickets' => 'عملیات گروهی روی تیکت‌ها',
-        'create_ticket' => 'ثبت تیکت جدید',
-        'update_ticket' => 'به‌روزرسانی تیکت',
-        'reply' => 'پاسخ در تیکت',
-        'rate_ticket' => 'امتیازدهی به تیکت',
+        'bulk_update_tickets' => 'عملیات گروهی روی درخواست‌ها',
+        'create_ticket' => 'ثبت درخواست جدید',
+        'update_ticket' => 'به‌روزرسانی درخواست',
+        'reply' => 'پاسخ در درخواست',
+        'rate_ticket' => 'امتیازدهی به درخواست',
         'mark_notification' => 'خواندن اعلان',
         'mark_all_notifications' => 'خواندن همهٔ اعلان‌ها',
         'cd_dvd_create' => 'ثبت رکورد CD/DVD',

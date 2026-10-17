@@ -212,13 +212,16 @@ CREATE TABLE IF NOT EXISTS tickets (
     support_location VARCHAR(255) NULL,
     support_equipment TEXT NULL,
     priority ENUM('normal','urgent','critical') NOT NULL DEFAULT 'normal',
-    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed') NOT NULL DEFAULT 'manager_review',
+    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review',
     requester_id INT UNSIGNED NOT NULL,
     assigned_to INT UNSIGNED NULL,
     assigned_at DATETIME NULL,
     first_response_at DATETIME NULL,
     resolved_at DATETIME NULL,
     closed_at DATETIME NULL,
+    cancel_requested_at DATETIME NULL,
+    cancel_requested_by INT UNSIGNED NULL,
+    cancel_request_reason TEXT NULL,
     due_at DATETIME NULL,
     sla_minutes INT UNSIGNED NULL,
     ola_policy_id INT UNSIGNED NULL,
@@ -1184,6 +1187,7 @@ ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `department_id` INT UNSIG
 ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `category_id` INT UNSIGNED NULL;
 ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `handling_unit_id` INT UNSIGNED NULL;
 ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `requires_asset` TINYINT(1) NOT NULL DEFAULT 1;
+UPDATE `service_catalog` SET `requires_asset` = 1 WHERE `service_group` = 'it';
 ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `default_ticket_type` ENUM('incident','request','problem','change') NOT NULL DEFAULT 'incident';
 ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `is_active` TINYINT(1) NOT NULL DEFAULT 1;
 ALTER TABLE `service_catalog` ADD COLUMN IF NOT EXISTS `created_by` INT UNSIGNED NULL;
@@ -1212,13 +1216,17 @@ ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `handling_unit_id` INT UNSIGNED N
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `support_location` VARCHAR(255) NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `support_equipment` TEXT NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `priority` ENUM('normal','urgent','critical') NOT NULL DEFAULT 'normal';
-ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `status` ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed') NOT NULL DEFAULT 'manager_review';
+ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `status` ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review';
+ALTER TABLE `tickets` MODIFY COLUMN `status` ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review';
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `requester_id` INT UNSIGNED NOT NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `assigned_to` INT UNSIGNED NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `assigned_at` DATETIME NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `first_response_at` DATETIME NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `resolved_at` DATETIME NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `closed_at` DATETIME NULL;
+ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `cancel_requested_at` DATETIME NULL;
+ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `cancel_requested_by` INT UNSIGNED NULL;
+ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `cancel_request_reason` TEXT NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `due_at` DATETIME NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `sla_minutes` INT UNSIGNED NULL;
 ALTER TABLE `tickets` ADD COLUMN IF NOT EXISTS `ola_policy_id` INT UNSIGNED NULL;

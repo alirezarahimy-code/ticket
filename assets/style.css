@@ -114,6 +114,11 @@ button { cursor: pointer; }
 .status.open { background: #ecfdf3; color: #027a48; }
 .status.pending { background: #fffaeb; color: #b54708; }
 .status.resolved, .status.closed { background: #f2f4f7; color: #475467; }
+.status.cancelled { background: #fef3f2; color: #b42318; }
+.cancellation-pending, .cancellation-decision { border-color: #fda29b; }
+.cancellation-pending { background: #fffafa; }
+.cancellation-pending h3, .cancellation-decision h3, .warning-text { color: #b42318; }
+.warning-text { display: block; font-weight: 700; }
 .status.submitted, .status.cab_review { background: #fff8e7; color: #9a6700; }
 .status.approved, .status.scheduled, .status.implemented { background: #ecfdf3; color: #027a48; }
 .status.rejected, .status.rolled_back { background: #fef3f2; color: #b42318; }
@@ -1189,7 +1194,7 @@ a.stat-card{text-decoration:none;color:inherit;cursor:pointer;transition:transfo
 a.stat-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,118,110,.18)}
 a.stat-card:focus-visible{outline:2px solid #0f766e;outline-offset:2px}
 
-/* ── ۱.۳۷ — کمبوی زندهٔ «سیستم مرتبط» در فرم ثبت تیکت ───────────────────────── */
+/* ── ۱.۳۷ — کمبوی زندهٔ «سیستم مرتبط» در فرم ثبت درخواست ───────────────────────── */
 .ticket-asset-field { position: relative; }
 .ticket-asset-field .asset-native { display: none; }
 .asset-results { position: absolute; z-index: 60; left: 0; right: 0; top: calc(100% + 4px); max-height: 262px; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: 11px; box-shadow: 0 16px 34px #17302d24; padding: 4px; direction: rtl; text-align: right; }

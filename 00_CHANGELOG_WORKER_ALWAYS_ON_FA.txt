@@ -82,8 +82,8 @@
 - پیام خطا حالا متن واقعی ODBC و شرط WHERE را در لاگ می‌نویسد.
 - فیلتر SOURCE_TABLE ابتدا به‌صورت متنی (C_Date = '20261003') امتحان می‌شود تا خطای تکراری «Data type mismatch» در لاگ نیاید.
 
-13) ادغام پچ گردش تیکت
-- فایل‌های index.php، bootstrap.php و cron/ticket_auto_close.php از پچ «گردش تیکت» روی همین نسخه اعمال شد؛
+13) ادغام پچ گردش درخواست
+- فایل‌های index.php، bootstrap.php و cron/ticket_auto_close.php از پچ «گردش درخواست» روی همین نسخه اعمال شد؛
   تغییرات قبلی (سقف درخواست، پیام ۴۲۹) در همین فایل‌ها حفظ شده است. شرح پچ: 00_CHANGELOG_TICKET_WORKFLOW_FA.txt
 
 14) کارت RFID: یک‌بار «مهمان»، یک‌بار «کاربر» (food-ticket.php, food-ticket-engine.php)

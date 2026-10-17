@@ -4,7 +4,7 @@ declare(strict_types=1);
 /* Reference only. install.php creates config.php with fresh random secrets. */
 return [
     'app' => [
-        'name' => 'سامانه پشتیبانی سازمان',
+        'name' => 'سامانه درخواست پشتیبانی',
         'logo' => '',
         'timezone' => 'Asia/Tehran',
         'base_url' => '',

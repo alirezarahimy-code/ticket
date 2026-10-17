@@ -371,7 +371,7 @@ function cd_dvd_update_record(array $user): void
     $id = (int) ($_POST['record_id'] ?? 0);
     $record = cd_dvd_fetch_record($id);
     if (!$record || !cd_dvd_can_edit_records($user)) {
-        throw new RuntimeException('ویرایش مستقیم CD/DVD فقط برای ادمین اصلی و سوپروایزر مجاز است؛ برای اصلاح این رکورد تیکت ثبت کنید.');
+        throw new RuntimeException('ویرایش مستقیم CD/DVD فقط برای ادمین اصلی و سوپروایزر مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
     }
     $payload = cd_dvd_validate_payload($_POST, $user, $id);
     db()->beginTransaction();
@@ -394,7 +394,7 @@ function cd_dvd_delete_record(array $user): void
     $id = (int) ($_POST['record_id'] ?? 0);
     $record = cd_dvd_fetch_record($id);
     if (!$record || !cd_dvd_can_edit_records($user)) {
-        throw new RuntimeException('حذف مستقیم CD/DVD فقط برای ادمین اصلی و سوپروایزر مجاز است؛ برای اصلاح این رکورد تیکت ثبت کنید.');
+        throw new RuntimeException('حذف مستقیم CD/DVD فقط برای ادمین اصلی و سوپروایزر مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
     }
     db()->beginTransaction();
     try {
@@ -615,7 +615,7 @@ function cd_dvd_render_page_legacy(array $user): never
     </section>
     <section class="card cd-dvd-form-card">
         <div class="section-title"><div><h2><?= $editRecord ? 'ویرایش ثبت رسانه' : 'ثبت گردش جدید' ?></h2><p>شماره خروج برای CD و DVD از بازه جداگانه سازمانی تولید می‌شود.</p></div><?php if ($editRecord): ?><a class="button secondary" href="index.php?page=cd-dvd">ثبت جدید</a><?php endif; ?></div>
-        <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی و سوپروایزر مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت تیکت درخواست اصلاح</a></div><?php endif; ?>
+        <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی و سوپروایزر مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
         <?php if (!$canIn): ?><div class="alert info">ثبت ورود فقط برای کاربر بازرسی فعال است. شما فعلاً فقط می‌توانید خروج رسانه را ثبت کنید.</div><?php endif; ?>
         <form method="post" class="cd-dvd-form" novalidate>
             <?= csrf_field() ?><input type="hidden" name="action" value="<?= e($formAction) ?>"><input type="hidden" name="record_id" value="<?= (int) $form['id'] ?>">
@@ -735,7 +735,7 @@ function cd_dvd_render_page(array $user): never
         <section id="cd-dvd-register" class="cd-dvd-subform" data-cd-dvd-panel="new" <?= $tab === 'new' ? '' : 'hidden' ?>>
             <section class="card cd-dvd-form-card cd-dvd-reference-form">
                 <div class="section-title"><div><span class="eyebrow">فرم ثبت</span><h2><?= $editRecord ? 'ویرایش رسانه ثبت‌شده' : 'ثبت رسانه جدید' ?></h2><p>فیلد ثبت‌کننده به‌صورت خودکار از حساب فعلی سامانه ذخیره می‌شود.</p></div><a class="button secondary" href="<?= e($tabUrl('dashboard')) ?>">بازگشت به داشبورد</a></div>
-                <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی و سوپروایزر مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت تیکت درخواست اصلاح</a></div><?php endif; ?>
+                <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی و سوپروایزر مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
                 <?php if (!$canIn): ?><div class="alert info">ثبت رسانه ورودی فقط برای کاربر منتسب به بازرسی فعال است.</div><?php endif; ?>
                 <form method="post" class="cd-dvd-form" novalidate>
                     <?= csrf_field() ?><input type="hidden" name="action" value="<?= e($formAction) ?>"><input type="hidden" name="record_id" value="<?= (int) $form['id'] ?>">

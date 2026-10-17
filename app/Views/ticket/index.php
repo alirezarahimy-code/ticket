@@ -8,8 +8,8 @@ include __DIR__ . '/../layout/header.php';
 
 <div class="tickets">
     <div class="page-header">
-        <h1>تیکت‌ها</h1>
-        <a href="index.php?page=new-ticket" class="btn btn-primary">ثبت تیکت جدید</a>
+        <h1>درخواست‌ها</h1>
+        <a href="index.php?page=new-ticket" class="btn btn-primary">ثبت درخواست جدید</a>
     </div>
     
     <div class="ticket-filters">
@@ -32,7 +32,7 @@ include __DIR__ . '/../layout/header.php';
     </div>
     
     <div class="ticket-list">
-        <p class="empty-state">لیست تیکت‌ها اینجا نمایش داده می‌شود.</p>
+        <p class="empty-state">لیست درخواست‌ها اینجا نمایش داده می‌شود.</p>
     </div>
 </div>
 

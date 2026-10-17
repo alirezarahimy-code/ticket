@@ -186,7 +186,7 @@ check('۱۵: CSS کادر تراز و گزارش اتصال موجود است',
 check('۱۶: نتیجهٔ آزمون اتصال خط‌به‌خط نمایش داده می‌شود (نه یک رشتهٔ طولانی)',
     str_contains($panel, '__ftConnLines') && str_contains($panel, 'function connIssuesBox()') && str_contains($foodTicket, "$" . "result['lines'] = array_values("));
 
-/* ── ۶) ۱.۳۷.۲: ریشهٔ «کارت کالیبراسیون چاپ نمی‌شود» و قاعده‌های فرم تیکت ────── */
+/* ── ۶) ۱.۳۷.۲: ریشهٔ «کارت کالیبراسیون چاپ نمی‌شود» و قاعده‌های فرم درخواست ────── */
 $netprint = (string) file_get_contents($root . '/food-ticket-netprint.php');
 $appJs = (string) file_get_contents($root . '/assets/app.js');
 $indexPhp = (string) file_get_contents($root . '/index.php');
@@ -205,7 +205,7 @@ check('۲۱: پنل کادر «وضعیت واقعی روی سرور» و ورو
     && str_contains($panel, "data-action=\"print-diag\""));
 check('۲۲: سوئیچ روش چاپ زنده است (بدون رندر مجدد و بدون پاک‌کردن IP)',
     str_contains($panel, 'function togglePrinterModeFields(') && str_contains($panel, "t.name==='mode'"));
-check('۲۳: فرم تیکت با حوزهٔ «خدمات کامپیوتری» باز می‌شود',
+check('۲۳: فرم درخواست با حوزهٔ «خدمات کامپیوتری» باز می‌شود',
     str_contains($indexPhp, "\$ticketDefaultGroup = \$cdDvdRequestRecord ? 'support' : 'it';"));
 check('۲۴: الزام «سیستم مرتبط» در حوزهٔ IT در سرور و پنل اعمال شده است',
     str_contains($indexPhp, "\$requiresAsset = \$serviceGroup === 'it' ? true :")

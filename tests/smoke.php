@@ -13,10 +13,10 @@ $checks['اتصال PDO'] = static function (): bool { return db() instanceof PD
 $checks['جدول تنظیمات'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'settings'")->fetchColumn(); };
 $checks['جدول واحدها'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'departments'")->fetchColumn(); };
 $checks['جدول کاربران'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'users'")->fetchColumn(); };
-$checks['جدول تیکت‌ها'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'tickets'")->fetchColumn(); };
+$checks['جدول درخواست‌ها'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'tickets'")->fetchColumn(); };
 $checks['جدول پیام‌ها'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'ticket_messages'")->fetchColumn(); };
 $checks['جدول رضایت‌سنجی'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'ticket_ratings'")->fetchColumn(); };
-$checks['جدول رویدادهای تیکت'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'ticket_events'")->fetchColumn(); };
+$checks['جدول رویدادهای درخواست'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'ticket_events'")->fetchColumn(); };
 $checks['جدول دارایی‌ها'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'assets'")->fetchColumn(); };
 $checks['جدول تاریخچه دارایی'] = static function (): bool { return (bool) db()->query("SHOW TABLES LIKE 'asset_history_events'")->fetchColumn(); };
 $checks['جداول Inventory ساختاریافته'] = static function (): bool {
@@ -90,7 +90,7 @@ $checks['ساختار نهایی CD/DVD بدون فرستنده'] = static funct
     $source = (string) file_get_contents($root . '/schema.sql');
     return is_file($root . '/rebuild-final.sql') && !str_contains($source, 'sender_unit') && !str_contains((string) file_get_contents($root . '/cd-dvd.php'), 'r.sender');
 };
-$checks['ستون‌های نسخه ۱.۵ تیکت'] = static function (): bool {
+$checks['ستون‌های نسخه ۱.۵ درخواست'] = static function (): bool {
     $columns = [];
     foreach (db()->query("SHOW COLUMNS FROM tickets")->fetchAll() as $column) {
         $columns[(string) $column['Field']] = true;
@@ -141,7 +141,7 @@ $checks['فرم و داشبورد کنترل تردد'] = static function () use
 $checks['تغییر بازه CD/DVD'] = static function () use ($root): bool { $script = (string) file_get_contents($root . '/assets/cd-dvd.js'); return str_contains($script, 'const bounds = mediaBounds(selectedMedia)') && str_contains($script, '!rangeIsValid') && str_contains($script, 'event.target.matches'); };
 $checks['فونت‌های محلی رابط کاربری'] = static function () use ($root): bool { foreach (['Vazirmatn-Regular.woff2', 'Vazirmatn-SemiBold.woff2', 'Vazirmatn-Bold.woff2', 'Shabnam-Regular.woff2', 'Shabnam-Medium.woff2', 'Shabnam-Bold.woff2', 'Samim-Regular.woff2', 'Vazir-Code.woff2'] as $font) { if (!is_file($root . '/assets/fonts/' . $font)) { return false; } } return !str_contains((string) file_get_contents($root . '/assets/style.css'), 'fonts.googleapis.com'); };
 $checks['نمونه و migration تقویم/سخت‌سازی/حاکمیت/OLA/مسیردهی/CD/DVD/پروفایل'] = static function () use ($root): bool { return is_file($root . '/calendar-template.csv') && is_file($root . '/calendar-template.ics') && is_file($root . '/upgrade-1.6-hardening.sql') && is_file($root . '/upgrade-1.7-governance.sql') && is_file($root . '/upgrade-1.8-final.sql') && is_file($root . '/upgrade-1.8-routing.sql') && is_file($root . '/upgrade-1.8-cd-dvd.sql') && is_file($root . '/upgrade-1.8-cd-dvd-identity.sql') && is_file($root . '/upgrade-1.10-priority.sql') && is_file($root . '/upgrade-1.11-user-profile.sql') && is_file($root . '/governance.php') && is_file($root . '/ola.php'); };
-$checks['شماره‌گذاری تیکت'] = static function (): bool { return ticket_number(86) === 'SBU1-86-000086'; };
+$checks['شماره‌گذاری درخواست'] = static function (): bool { return ticket_number(86) === 'SBU1-86-000086'; };
 $checks['SLA ساعات کاری'] = static function (): bool { return priority_sla_minutes('critical') === 240 && priority_sla_minutes('urgent') === 2880 && priority_sla_minutes('normal') === 4320; };
 $checks['اعتبارسنجی تاریخ جلالی'] = static function (): bool { return jalali_input_to_gregorian('۱۴۰۵/۰۱/۰۱') !== null && jalali_input_to_gregorian('۱۴۰۵/۱۳/۰۱') === null; };
 $checks['تنظیم نام سامانه'] = static function (): bool { return setting('app_name') !== null && setting('app_name') !== ''; };

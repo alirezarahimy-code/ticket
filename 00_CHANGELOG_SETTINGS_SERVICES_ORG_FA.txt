@@ -23,7 +23,7 @@
 - اکشن‌های جدید: edit_service, delete_service, save_service_category,
   delete_service_category (حذف نرم با is_active=0).
 
-۳) فرم ثبت تیکت
+۳) فرم ثبت درخواست
 - لیست کشویی «دسته‌بندی» حذف شد؛ دسته خودکار از خدمت انتخاب‌شده گرفته
   می‌شود (سمت سرور هم اگر دسته خالی باشد از service.category_id پر می‌شود).
 - متن راهنما و JS هماهنگ شد (assets/app.js).

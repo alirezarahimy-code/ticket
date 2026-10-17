@@ -17,7 +17,7 @@
                 └──────────────▲───────────────▲───────────┘
                                │               │
    ┌───────────────────────────┴──┐      ┌─────┴──────────────────────────┐
-   │ [ITSM] سامانه تیکتینگ و دارایی│      │ [FOOD] سامانه غذا / فیش / تردد  │
+   │ [ITSM] سامانه درخواست و دارایی│      │ [FOOD] سامانه غذا / فیش / تردد  │
    │ index.php + bootstrap.php     │      │ food-ticket*.php + food-order  │
    │ + ماژول‌های روی index         │      │ + cron/food_ticket_worker.php  │
    └───────────────────────────────┘      └──────────────▲─────────────────┘
@@ -28,7 +28,7 @@
                                           └────────────────────────────────┘
 ```
 
-- **[ITSM]** سامانه اصلی: تیکت، دارایی، تردد، گزارش، ادمین.
+- **[ITSM]** سامانه اصلی: درخواست، دارایی، تردد، گزارش، ادمین.
 - **[FOOD]** ماژول غذا و فیش: سفارش، تطبیق تردد با سفارش، صف چاپ، چاپ روی پرینتر.
 - **[SRC-TENTER]** فایل Access دستگاه تردد. الان محرک چاپ فیش است و **داخلی نیست**.
 
@@ -50,7 +50,7 @@
 
 ---
 
-## ۳. بخش ITSM (سامانه تیکتینگ و دارایی)
+## ۳. بخش ITSM (سامانه درخواست و دارایی)
 
 ### 3.1 هسته و احراز هویت
 | تگ | فایل | نقش | وضعیت |
@@ -61,7 +61,7 @@
 | `[TK-SETTINGS]` | داخل `index.php` (`page=settings`)، جدول `settings` | تنظیمات سامانه | 🟡 |
 | `[TK-AUDIT]` | `[TK-LOG]` | `activity_logs`، `system_logs`، صفحات `logs`، `activity-log`، `audit` | 🟡 |
 
-### 3.2 تیکت (Ticketing)
+### 3.2 درخواست (Ticketing)
 | تگ | فایل/صفحه | جدول‌ها | وضعیت |
 |---|---|---|---|
 | `[TK-CORE]` | `index.php` (`page=ticket`، `new-ticket`، `queue`، `supervisor`) | `tickets`، `ticket_messages`، `ticket_events`، `ticket_attachments`، `ticket_ratings`، `ticket_number_seq` | 🟡 |
@@ -157,7 +157,7 @@
 | دامنه | جدول‌ها |
 |---|---|
 | هویت/سازمان | `users`، `departments`، `org_units`، `org_unit_managers`، `handling_units`، `role_permissions`، `login_attempts`، `settings` |
-| تیکت | `tickets`، `ticket_messages`، `ticket_events`، `ticket_attachments`، `ticket_ratings`، `ticket_number_seq`، `ticket_sla_alerts`، `ticket_ola_alerts`، `categories`، `service_catalog`، `service_catalog_fields`، `knowledge_articles`، `notifications`، `holidays` |
+| درخواست | `tickets`، `ticket_messages`، `ticket_events`، `ticket_attachments`، `ticket_ratings`، `ticket_number_seq`، `ticket_sla_alerts`، `ticket_ola_alerts`، `categories`، `service_catalog`، `service_catalog_fields`، `knowledge_articles`، `notifications`، `holidays` |
 | تغییر/مشکل | `change_records`، `change_approvals`، `change_ticket_links`، `problem_records`، `problem_ticket_links`، `ola_policies` |
 | دارایی | `assets`، `asset_profiles`، `asset_relations`، `asset_history_events`، `asset_inventory_history`، `asset_memory_modules`، `asset_storage_devices`، `asset_graphics_adapters`، `asset_peripherals`، `domain_scan_runs`، `domain_scan_queue` |
 | تردد/CD | `traffic_visits`، `traffic_destinations`، `cd_dvd_records`، `cd_dvd_types` |
@@ -219,7 +219,7 @@
 
 | اگر گفتی… | برو به |
 |---|---|
-| تیکت، ارجاع، پاسخ، SLA | `[TK-CORE]`، `[TK-SLA]`، `index.php` |
+| درخواست، ارجاع، پاسخ، SLA | `[TK-CORE]`، `[TK-SLA]`، `index.php` |
 | دارایی، شناسنامه، سخت‌افزار | `[AS-CORE]`، `[AS-PROFILE]`، `[AS-INV]` |
 | دامنه، اسکن کامپیوتر | `[AS-DOMAIN]` |
 | کاربر، سازمان، نقش | `[ORG-USERS]`، `[ORG-CORE]`، `[TK-PERM]` |
