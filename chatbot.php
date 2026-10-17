@@ -729,8 +729,9 @@ function chatbot_save_tts(array $input, array $admin): void
     $path = trim((string) ($input['tts_espeak_path'] ?? ''));
     $piperPath = trim((string) ($input['tts_piper_path'] ?? ''));
     $piperModel = trim((string) ($input['tts_piper_model'] ?? ''));
+    $piperModelMale = trim((string) ($input['tts_piper_model_male'] ?? ''));
     $kind = valid_choice(trim((string) ($input['tts_kind'] ?? 'auto')), ['auto', 'piper', 'espeak'], 'auto');
-    if (mb_strlen($path, 'UTF-8') > 500 || mb_strlen($piperPath, 'UTF-8') > 500 || mb_strlen($piperModel, 'UTF-8') > 500) {
+    if (mb_strlen($path, 'UTF-8') > 500 || mb_strlen($piperPath, 'UTF-8') > 500 || mb_strlen($piperModel, 'UTF-8') > 500 || mb_strlen($piperModelMale, 'UTF-8') > 500) {
         throw new RuntimeException('مسیر موتور صوتی بیش از حد طولانی است.');
     }
     if ($path !== '' && !is_file($path)) {
@@ -757,12 +758,19 @@ function chatbot_save_tts(array $input, array $admin): void
     if ($piperModel !== '' && !preg_match('/\.onnx$/i', $piperModel)) {
         throw new RuntimeException('مدل Piper باید فایل .onnx باشد (فایل .onnx.json را کنارش بگذارید، نه به‌جایش).');
     }
+    if ($piperModelMale !== '' && !is_file($piperModelMale)) {
+        throw new RuntimeException('فایل مدل مرد (.onnx) در این مسیر پیدا نشد.');
+    }
+    if ($piperModelMale !== '' && !preg_match('/\.onnx$/i', $piperModelMale)) {
+        throw new RuntimeException('مدل مرد Piper باید فایل .onnx باشد (فایل .onnx.json را کنارش بگذارید، نه به‌جایش).');
+    }
     save_setting('chatbot_tts_mode', $mode);
     save_setting('chatbot_tts_speed', (string) $speed);
     save_setting('chatbot_tts_voice', $voice);
     save_setting('chatbot_tts_espeak_path', $path);
     save_setting('chatbot_tts_piper_path', $piperPath);
     save_setting('chatbot_tts_piper_model', $piperModel);
+    save_setting('chatbot_tts_piper_model_male', $piperModelMale);
     save_setting('chatbot_tts_kind', $kind);
     save_audit((int) $admin['id'], 'chatbot_tts_saved', null, ['mode' => $mode, 'speed' => $speed, 'voice' => $voice, 'kind' => $kind]);
 }
@@ -894,8 +902,9 @@ function chatbot_tts_config(): array
     $voice = valid_choice((string) (setting('chatbot_tts_voice', 'default') ?? 'default'), ['default', 'male', 'female'], 'default');
     $piperPath = trim((string) (setting('chatbot_tts_piper_path', '') ?? ''));
     $piperModel = trim((string) (setting('chatbot_tts_piper_model', '') ?? ''));
+    $piperModelMale = trim((string) (setting('chatbot_tts_piper_model_male', '') ?? ''));
     $kind = valid_choice((string) (setting('chatbot_tts_kind', 'auto') ?? 'auto'), ['auto', 'piper', 'espeak'], 'auto');
-    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice, 'piper_path' => $piperPath, 'piper_model' => $piperModel, 'kind' => $kind];
+    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice, 'piper_path' => $piperPath, 'piper_model' => $piperModel, 'piper_model_male' => $piperModelMale, 'kind' => $kind];
 }
 
 /** آیا PHP اجازهٔ اجرای موتور صوتی را دارد؟ */
@@ -961,10 +970,26 @@ function chatbot_tts_find_piper(?string $configured = null): ?string
     return null;
 }
 
-/** اولویت مدل فارسی: مانا (بهترین)، سپس gyro/amir، سپس هر fa_IR. */
-function chatbot_tts_piper_model_rank(string $path): int
+/** اولویت مدل: زن=مانا، مرد=امیر/gyro؛ در نبود مدل هم‌جنس، هر fa_IR. */
+function chatbot_tts_piper_model_rank(string $path, string $want = 'female'): int
 {
     $name = strtolower(basename($path));
+    $isFa = str_contains($name, 'fa_ir') || str_contains($name, 'fa-ir') || str_contains($name, 'farsi') || str_contains($name, 'persian') || str_contains($name, 'mana') || str_contains($name, 'amir') || str_contains($name, 'gyro') || str_contains($name, 'ganji');
+    if ($want === 'male') {
+        if (str_contains($name, 'amir')) {
+            return 0;
+        }
+        if (str_contains($name, 'gyro')) {
+            return 1;
+        }
+        if (str_contains($name, 'ganji')) {
+            return 2;
+        }
+        if (str_contains($name, 'mana')) {
+            return 8;
+        }
+        return $isFa ? 4 : 9;
+    }
     if (str_contains($name, 'mana')) {
         return 0;
     }
@@ -972,19 +997,16 @@ function chatbot_tts_piper_model_rank(string $path): int
         return 1;
     }
     if (str_contains($name, 'amir')) {
-        return 2;
+        return 8;
     }
     if (str_contains($name, 'ganji')) {
         return 3;
     }
-    if (str_contains($name, 'fa_ir') || str_contains($name, 'fa-ir') || str_contains($name, 'farsi') || str_contains($name, 'persian')) {
-        return 4;
-    }
-    return 9;
+    return $isFa ? 4 : 9;
 }
 
 /** پیدا کردن مدل فارسی .onnx (مسیر دستی یا کنار piper.exe / storage/tts/piper). */
-function chatbot_tts_piper_model(?string $configured = null, ?string $exe = null): ?string
+function chatbot_tts_piper_model(?string $configured = null, ?string $exe = null, string $want = 'female'): ?string
 {
     if ($configured !== null && trim($configured) !== '') {
         $manual = trim($configured);
@@ -1019,8 +1041,8 @@ function chatbot_tts_piper_model(?string $configured = null, ?string $exe = null
     if ($found === []) {
         return null;
     }
-    usort($found, static function (string $a, string $b): int {
-        $rank = chatbot_tts_piper_model_rank($a) <=> chatbot_tts_piper_model_rank($b);
+    usort($found, static function (string $a, string $b) use ($want): int {
+        $rank = chatbot_tts_piper_model_rank($a, $want) <=> chatbot_tts_piper_model_rank($b, $want);
         return $rank !== 0 ? $rank : strcasecmp(basename($a), basename($b));
     });
     return $found[0];
@@ -1031,7 +1053,9 @@ function chatbot_tts_active(?array $config = null): array
 {
     $config = $config ?? chatbot_tts_config();
     $piperExe = chatbot_tts_find_piper($config['piper_path'] ?? null);
-    $piperModel = chatbot_tts_piper_model($config['piper_model'] ?? null, $piperExe);
+    $want = (($config['voice'] ?? 'default') === 'male') ? 'male' : 'female';
+    $manual = $want === 'male' ? (string) ($config['piper_model_male'] ?? '') : (string) ($config['piper_model'] ?? '');
+    $piperModel = chatbot_tts_piper_model($manual !== '' ? $manual : null, $piperExe, $want);
     $espeakExe = chatbot_tts_find_espeak($config['espeak_path'] ?? null);
     $proc = chatbot_tts_proc_available();
     $piperReady = $proc && $piperExe !== null && $piperModel !== null;
@@ -1060,7 +1084,7 @@ function chatbot_tts_active(?array $config = null): array
 function chatbot_tts_length_scale(int $wpm): string
 {
     $scale = 140.0 / max(80, min(300, $wpm));
-    $scale *= 1.15;
+    $scale *= 1.25;
     $scale = max(0.5, min(2.0, $scale));
     return number_format($scale, 2, '.', '');
 }
@@ -1122,39 +1146,34 @@ function chatbot_tts_clean(string $text): string
  */
 function chatbot_tts_colloquial(string $text): string
 {
+    $text = str_replace("\xE2\x80\x8C", '', $text);
     $pairs = [
-        'نمی‌توانید' => 'نمی‌تونید', 'نمیتوانید' => 'نمیتونید',
-        'نمی‌توانم' => 'نمی‌تونم', 'نمیتوانم' => 'نمیتونم',
-        'نمی‌تواند' => 'نمی‌تونه', 'نمیتواند' => 'نمیتونه',
-        'نمی‌توانیم' => 'نمی‌تونیم', 'نمیتوانیم' => 'نمیتونیم',
-        'نمی‌توانند' => 'نمی‌تونن', 'نمیتوانند' => 'نمیتونن',
-        'می‌توانید' => 'می‌تونید', 'میتوانید' => 'میتونید',
-        'می‌توانم' => 'می‌تونم', 'میتوانم' => 'میتونم',
-        'می‌تواند' => 'می‌تونه', 'میتواند' => 'میتونه',
-        'می‌توانیم' => 'می‌تونیم', 'میتوانیم' => 'میتونیم',
-        'می‌توانند' => 'می‌تونن', 'میتوانند' => 'میتونن',
-        'می‌خواهید' => 'می‌خواید', 'میخواهید' => 'میخواید',
-        'می‌خواهم' => 'می‌خوام', 'میخواهم' => 'میخوام',
-        'می‌خواهد' => 'می‌خواد', 'میخواهد' => 'میخواد',
-        'می‌خواهیم' => 'می‌خوایم', 'میخواهیم' => 'میخوایم',
-        'می‌خواهند' => 'می‌خوان', 'میخواهند' => 'میخوان',
-        'می‌خواهی' => 'می‌خوای', 'میخواهی' => 'میخوای',
-        'نمی‌شود' => 'نمی‌شه', 'نمیشود' => 'نمیشه',
-        'می‌شوند' => 'می‌شن', 'میشوند' => 'میشن',
-        'می‌شود' => 'می‌شه', 'میشود' => 'میشه',
-        'می‌روید' => 'می‌رید', 'میروید' => 'میرید',
-        'می‌روم' => 'می‌رم', 'میروم' => 'میرم',
-        'می‌رود' => 'می‌ره', 'میرود' => 'میره',
-        'می‌رویم' => 'می‌ریم', 'میرویم' => 'میریم',
-        'می‌روند' => 'می‌رن', 'میروند' => 'میرن',
-        'می‌باشند' => 'هستن', 'میباشند' => 'هستن',
-        'می‌باشد' => 'هست', 'میباشد' => 'هست',
+        'نمی توانید' => 'نمی تونید', 'نمیتوانید' => 'نمی تونید', 'نمی‌توانید' => 'نمی تونید',
+        'نمی توانم' => 'نمی تونم', 'نمیتوانم' => 'نمی تونم', 'نمی‌توانم' => 'نمی تونم',
+        'نمی تواند' => 'نمی تونه', 'نمیتواند' => 'نمی تونه', 'نمی‌تواند' => 'نمی تونه',
+        'نمی توانیم' => 'نمی تونیم', 'نمیتوانیم' => 'نمی تونیم', 'نمی‌توانیم' => 'نمی تونیم',
+        'می توانید' => 'می تونید', 'میتوانید' => 'می تونید', 'می‌توانید' => 'می تونید',
+        'می توانم' => 'می تونم', 'میتوانم' => 'می تونم', 'می‌توانم' => 'می تونم',
+        'می تواند' => 'می تونه', 'میتواند' => 'می تونه', 'می‌تواند' => 'می تونه',
+        'می توانیم' => 'می تونیم', 'میتوانیم' => 'می تونیم', 'می‌توانیم' => 'می تونیم',
+        'می خواهید' => 'می خواید', 'میخواهید' => 'می خواید', 'می‌خواهید' => 'می خواید',
+        'می خواهم' => 'می خوام', 'میخواهم' => 'می خوام', 'می‌خواهم' => 'می خوام',
+        'می خواهد' => 'می خواد', 'میخواهد' => 'می خواد', 'می‌خواهد' => 'می خواد',
+        'می خواهیم' => 'می خوایم', 'میخواهیم' => 'می خوایم', 'می‌خواهیم' => 'می خوایم',
+        'می خواهی' => 'می خوای', 'میخواهی' => 'می خوای', 'می‌خواهی' => 'می خوای',
+        'نمی شود' => 'نمی شه', 'نمیشود' => 'نمی شه', 'نمی‌شود' => 'نمی شه',
+        'می شود' => 'می شه', 'میشود' => 'می شه', 'می‌شود' => 'می شه',
+        'می روید' => 'می رید', 'میروید' => 'می رید', 'می‌روید' => 'می رید',
+        'می روم' => 'می رم', 'میروم' => 'می رم', 'می‌روم' => 'می رم',
+        'می رود' => 'می ره', 'میرود' => 'می ره', 'می‌رود' => 'می ره',
+        'می رویم' => 'می ریم', 'میرویم' => 'می ریم', 'می‌رویم' => 'می ریم',
+        'می باشد' => 'هست', 'میباشد' => 'هست', 'می‌باشد' => 'هست',
         'بدهید' => 'بدید',
         'چگونه' => 'چطور',
-        'چیست' => 'چیه',
-        'کیست' => 'کیه',
-        'آن‌ها' => 'اونا', 'آنها' => 'اونا',
-        'این‌ها' => 'اینا', 'اینها' => 'اینا',
+        'چیست' => 'چی هست',
+        'کیست' => 'کی هست',
+        'آن ها' => 'اونا', 'آن‌ها' => 'اونا', 'آنها' => 'اونا',
+        'این ها' => 'اینا', 'این‌ها' => 'اینا', 'اینها' => 'اینا',
     ];
     uksort($pairs, static fn(string $a, string $b): int => mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8'));
     foreach ($pairs as $from => $to) {
@@ -1163,7 +1182,7 @@ function chatbot_tts_colloquial(string $text): string
     $text = (string) preg_replace('/(^|[\s])دیگر(?=[\s.؟!،؛]|$)/u', '$1دیگه', $text);
     $text = (string) preg_replace('/(^|[\s])آن(?=[\s.؟!،؛]|$)/u', '$1اون', $text);
     $text = (string) preg_replace('/(^|[\s])را(?=[\s.؟!،؛]|$)/u', '$1رو', $text);
-    $text = (string) preg_replace('/\s+است(?=[\s.؟!،؛]|$)/u', 'ه', $text);
+    $text = (string) preg_replace('/\s+است(?=[\s.؟!،؛]|$)/u', ' هست', $text);
     $text = (string) preg_replace('~\s+~u', ' ', trim($text));
     return $text;
 }
@@ -1179,6 +1198,82 @@ function chatbot_tts_phrase(string $text): string
         $text .= '.';
     }
     return $text;
+}
+
+/**
+ * واکه‌گذاری برای Piper: سَلام نه «سسسس»، و کسرهٔ اضافه (سفارشِ غذا نه سفارش + قطع + غذا).
+ * بعد از clean اجرا می‌شود تا اعراب پاک نشوند.
+ */
+function chatbot_tts_vocalize(string $text): string
+{
+    static $dict = [
+        'سلام' => 'سَلام',
+        'سفارش' => 'سَفارش',
+        'سوال' => 'سُوال',
+        'سؤال' => 'سُوال',
+        'ساعت' => 'ساعَت',
+        'سطح' => 'سَطح',
+        'سریال' => 'سِریال',
+        'سپس' => 'سِپَس',
+        'ثبت' => 'ثَبت',
+        'درخواست' => 'دَرخواست',
+        'پیگیری' => 'پِیگیری',
+        'گزارش' => 'گُزارِش',
+        'تردد' => 'تَرَدُد',
+        'سامانه' => 'سامانه',
+        'راهنمای' => 'راهنَمای',
+        'هستم' => 'هَستَم',
+        'بپرسید' => 'بِپُرسید',
+        'به‌روزرسانی' => 'بِه‌روزرِسانی',
+        'بروزرسانی' => 'بُرورِسانی',
+        'فیش' => 'فیش',
+        'غذا' => 'غَذا',
+    ];
+    uksort($dict, static fn(string $a, string $b): int => mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8'));
+    foreach ($dict as $from => $to) {
+        $text = (string) preg_replace('/(?<!\p{L})' . preg_quote($from, '/') . '(?!\p{L})/u', $to, $text);
+    }
+    $text = (string) preg_replace('/(^|[^\p{L}\p{M}])س(?=[بتثجچحخدذرزژسشصضطظعغفقکگلمنهیپچژگ])/u', '$1سَ', $text);
+    return chatbot_tts_ezafe($text);
+}
+
+/** کسرهٔ اضافه بین دو اسم: سفارشِ غذا. فعل و حرف اضافه را رد می‌کند. */
+function chatbot_tts_ezafe(string $text): string
+{
+    $skipFirst = ['از', 'در', 'به', 'که', 'و', 'با', 'تا', 'یا', 'اگر', 'نه', 'را', 'رو', 'هم', 'برای', 'من', 'تو', 'او', 'ما', 'شما', 'این', 'آن', 'اون', 'اینا', 'اونا'];
+    $skipSecond = ['است', 'هست', 'هستم', 'هستید', 'هستند', 'هَستَم', 'بود', 'باشد', 'شد', 'شود', 'کنید', 'کنم', 'کنیم', 'کن', 'بپرسید', 'بِپُرسید', 'باید', 'می', 'شد'];
+    $skipFirst = array_fill_keys($skipFirst, true);
+    $skipSecond = array_fill_keys($skipSecond, true);
+    $parts = preg_split('/(\s+|[.؟!،,;:]+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    if (!is_array($parts)) {
+        return $text;
+    }
+    $isWord = static fn(string $w): bool => (bool) preg_match('/^[\p{L}\p{M}]+$/u', $w);
+    $count = count($parts);
+    for ($i = 0; $i < $count; $i++) {
+        if (!$isWord($parts[$i])) {
+            continue;
+        }
+        $j = $i + 1;
+        while ($j < $count && trim($parts[$j]) === '') {
+            $j++;
+        }
+        if ($j >= $count || !$isWord($parts[$j])) {
+            continue;
+        }
+        $a = $parts[$i];
+        $b = $parts[$j];
+        $aBare = preg_replace('/[\p{M}]+/u', '', $a) ?? $a;
+        $bBare = preg_replace('/[\p{M}]+/u', '', $b) ?? $b;
+        if (isset($skipFirst[$aBare]) || isset($skipSecond[$bBare])) {
+            continue;
+        }
+        if (preg_match('/[اآویىیِٔ]$/u', $a)) {
+            continue;
+        }
+        $parts[$i] = $a . 'ِ';
+    }
+    return implode('', $parts);
 }
 
 /** نگاشت نوع صدا به شناسهٔ صدای eSpeak-NG (فقط مقادیر مجاز؛ هرگز ورودی خام). */
@@ -1364,8 +1459,8 @@ function chatbot_tts_run_piper(string $exe, string $model, string $text, string 
     if (@file_put_contents($txtPath, $text . "\n") === false) {
         return ['ok' => false, 'error' => 'ساخت فایل موقت متن ممکن نشد.'];
     }
-    $qCpp = ['--noise_scale', '0.667', '--noise_w', '0.8', '--sentence_silence', '0.40'];
-    $qPy = ['--noise-scale', '0.667', '--noise-w', '0.8', '--sentence-silence', '0.40'];
+    $qCpp = ['--noise_scale', '0.500', '--noise_w', '0.35', '--sentence_silence', '0.35'];
+    $qPy = ['--noise-scale', '0.500', '--noise-w', '0.35', '--sentence-silence', '0.35'];
     $attempts = [
         ['cmd' => array_merge([$exe, '--model', $model, '--output_file', $wavPath, '--length_scale', $lengthScale], $qCpp), 'stdin' => $text . "\n"],
         ['cmd' => array_merge([$exe, '-m', $model, '-f', $wavPath, '--length-scale', $lengthScale, '-i', $txtPath], $qPy), 'stdin' => ''],
@@ -1489,7 +1584,7 @@ function chatbot_tts_say(string $text): array
     if ($config['mode'] === 'off') {
         return ['ok' => false, 'error' => 'گویندگی بات خاموش است.'];
     }
-    $clean = chatbot_tts_phrase(chatbot_tts_colloquial(chatbot_tts_clean($text)));
+    $clean = chatbot_tts_phrase(chatbot_tts_vocalize(chatbot_tts_colloquial(chatbot_tts_clean($text))));
     if ($clean === '') {
         return ['ok' => false, 'error' => 'متنی برای خواندن وجود ندارد.'];
     }
@@ -1508,7 +1603,7 @@ function chatbot_tts_say(string $text): array
         return ['ok' => false, 'error' => 'ساخت پوشهٔ کش صدا ممکن نشد.'];
     }
     $voiceId = $active['kind'] === 'piper'
-        ? ('piper:' . basename((string) $active['model']) . '|q2')
+        ? ('piper:' . basename((string) $active['model']) . '|q4')
         : chatbot_tts_voice_id($config['voice']);
     $id = sha1($clean . '|' . $config['speed'] . '|' . $voiceId);
     $file = $dir . '/' . $id . '.wav';
@@ -1620,11 +1715,12 @@ function chatbot_render_admin(array $admin): void
     }
     echo '</select></label>'
         . '<label class="field">مسیر piper.exe (خالی = جست‌وجوی خودکار)<input name="tts_piper_path" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['piper_path']) . '" placeholder="C:\piper\piper.exe"></label>'
-        . '<label class="field">مسیر مدل فارسی .onnx (خالی = جست‌وجو کنار piper.exe)<input name="tts_piper_model" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['piper_model']) . '" placeholder="C:\piper\fa_IR-mana-medium.onnx"></label>'
+        . '<label class="field">مدل زن (مانا) — خالی = جست‌وجوی خودکار<input name="tts_piper_model" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['piper_model']) . '" placeholder="C:\piper\fa_IR-mana-medium.onnx"></label>'
+        . '<label class="field">مدل مرد (امیر) — خالی = جست‌وجوی خودکار<input name="tts_piper_model_male" dir="ltr" maxlength="500" value="' . e((string) ($ttsCfg['piper_model_male'] ?? '')) . '" placeholder="C:\piper\fa_IR-amir-medium.onnx"></label>'
         . '<label class="field">مسیر فایل espeak-ng روی سرور (خالی = جست‌وجوی خودکار)<input name="tts_espeak_path" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['espeak_path']) . '" placeholder="C:\Program Files\eSpeak NG\espeak-ng.exe"></label>'
         . '<label class="field">سرعت گفتار (کلمه در دقیقه؛ کمتر = شمرده‌تر و واضح‌تر)<input type="number" name="tts_speed" min="80" max="300" value="' . (int) $tts['speed'] . '"></label>'
-        . '<label class="field">نوع صدا<select name="tts_voice">';
-    foreach (['default' => 'پیش‌فرض', 'male' => 'مرد', 'female' => 'زن'] as $ttsVoiceValue => $ttsVoiceLabel) {
+        . '<label class="field">نوع صدا (Piper: زن=مانا، مرد=امیر)<select name="tts_voice">';
+    foreach (['default' => 'زن (مانا)', 'female' => 'زن (مانا)', 'male' => 'مرد (امیر)'] as $ttsVoiceValue => $ttsVoiceLabel) {
         echo '<option value="' . $ttsVoiceValue . '"' . ($tts['voice'] === $ttsVoiceValue ? ' selected' : '') . '>' . e($ttsVoiceLabel) . '</option>';
     }
     echo '</select></label>'
@@ -1635,7 +1731,7 @@ function chatbot_render_admin(array $admin): void
         . '<form method="post" action="index.php?page=chatbot-admin" style="margin-top:8px">' . csrf_field()
         . '<input type="hidden" name="tts_sample" value="1">'
         . '<button class="button secondary" type="submit">دانلود نمونه صدا</button></form>'
-        . '<p class="muted">نصب صدای طبیعی (یک‌بار روی سرور، بعدش آفلاین): ۱) فایل <a href="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip" dir="ltr">piper_windows_amd64.zip</a> را دانلود و در <code dir="ltr">C:\piper</code> از حالت فشرده خارج کنید تا <code dir="ltr">C:\piper\piper.exe</code> دیده شود. ۲) دو فایل مدل مانا را در همان پوشه ذخیره کنید: <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx" dir="ltr">fa_IR-mana-medium.onnx</a> و <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx.json" dir="ltr">fa_IR-mana-medium.onnx.json</a> (حتماً هر دو). ۳) همین‌جا موتور را «خودکار» بگذارید، مسیر piper.exe را <code dir="ltr">C:\piper\piper.exe</code> و مسیر مدل را <code dir="ltr">C:\piper\fa_IR-mana-medium.onnx</code> وارد کنید، ذخیره کنید، بعد «تست موتور سرور» و «دانلود نمونه صدا» را بزنید. اگر چند مدل کنار هم باشند مانا خودش انتخاب می‌شود. تا Piper آماده نباشد از eSpeak استفاده می‌شود. متن روی صفحه رسمی می‌ماند و فقط صدا محاوره‌ای خوانده می‌شود.</p></div>';
+        . '<p class="muted">نصب صدای طبیعی (یک‌بار روی سرور، بعدش آفلاین): ۱) فایل <a href="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip" dir="ltr">piper_windows_amd64.zip</a> را در <code dir="ltr">C:\piper</code> باز کنید تا <code dir="ltr">C:\piper\piper.exe</code> دیده شود. ۲) مدل زن (مانا) — هر دو فایل در همان پوشه: <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx" dir="ltr">fa_IR-mana-medium.onnx</a> و <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx.json" dir="ltr">.onnx.json</a>. ۳) مدل مرد (امیر) — هر دو فایل: <a href="https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx" dir="ltr">fa_IR-amir-medium.onnx</a> و <a href="https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx.json" dir="ltr">.onnx.json</a>. ۴) مسیر piper.exe و دو مسیر مدل را وارد کنید. «نوع صدا» مرد/زن همان مدل را انتخاب می‌کند. ذخیره، سپس تست و دانلود نمونه.</p></div>';
 
     // گزارش بازه‌ای: آمار کلی، نیت‌ها، پرتکرارترین مدخل‌ها و بازخورد منفی اخیر (بدون نام کاربر)
     $validDate = static fn(string $v): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) && strtotime($v) !== false;
