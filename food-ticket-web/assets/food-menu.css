@@ -142,15 +142,16 @@
 .fm-name-form input[type=text] { flex:1 1 160px; }
 #fm-catalog-add select { border:1px solid var(--line); border-radius:8px; padding:7px 9px; font:inherit; }
 
-/* ===== لیست کارکنان (غیبت و اعضای گروه): ۳ ستون «نام ـ تیک»، وسط‌چین، دو رنگ یک‌درمیان ===== */
-.fg-people-box { max-height:320px; overflow:auto; border:1px solid var(--line,#d6e2e0); border-radius:10px; padding:4px; background:#fff; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; }
+/* ===== لیست کارکنان (غیبت و اعضای گروه): ۴ ستون، تیک قبل از نام، یک خط، تیک‌ها زیر هم ===== */
+.fg-people-box { max-height:360px; overflow:auto; border:1px solid var(--line,#d6e2e0); border-radius:10px; padding:4px; background:#fff; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; align-items:stretch; }
 .fg-people-box > p { grid-column:1 / -1; margin:8px; }
-.fg-person { display:flex; align-items:center; justify-content:center; gap:8px; padding:9px 10px; min-width:0; background:#ffffff; cursor:pointer; border-bottom:1px solid #eef2f1; }
-.fg-person:nth-child(6n+4), .fg-person:nth-child(6n+5), .fg-person:nth-child(6n+6) { background:#eaf5f3; }
+.fg-person { display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:6px; padding:7px 8px; min-width:0; min-height:34px; background:#ffffff; cursor:pointer; border-bottom:1px solid #eef2f1; }
+.fg-person:nth-child(8n+5), .fg-person:nth-child(8n+6), .fg-person:nth-child(8n+7), .fg-person:nth-child(8n+8) { background:#eaf5f3; }
 .fg-person:hover { background:#d7ece8; }
-.fg-person-name, .fg-person > span:first-child { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center; }
-.fg-person input[type=checkbox] { flex:0 0 auto; width:16px; height:16px; margin:0; accent-color:var(--teal,#0f766e); }
+.fg-person input[type=checkbox] { flex:0 0 16px; width:16px; height:16px; margin:0; accent-color:var(--teal,#0f766e); }
+.fg-person-name, .fg-person > span { flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; display:block; }
 .fg-person small { color:var(--muted,#64748b); }
+@media(max-width:1100px) { .fg-people-box { grid-template-columns:repeat(3,minmax(0,1fr)); } .fg-person:nth-child(8n+5), .fg-person:nth-child(8n+6), .fg-person:nth-child(8n+7), .fg-person:nth-child(8n+8) { background:#ffffff; } .fg-person:nth-child(6n+4), .fg-person:nth-child(6n+5), .fg-person:nth-child(6n+6) { background:#eaf5f3; } }
 @media(max-width:700px) { .fg-people-box { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:460px) { .fg-people-box { grid-template-columns:1fr; } }
 

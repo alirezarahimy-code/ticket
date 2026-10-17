@@ -39,8 +39,11 @@
     } catch (e) { /* تقویم اختیاری است؛ ورودی دستی «۱۴۰۵/۰۷/۱۴» هم کار می‌کند */ }
   }
 
-  function load() {
-    if (S.loading) return;
+  function load(after) {
+    if (S.loading) {
+      if (typeof after === 'function') S._afterLoad = after;
+      return;
+    }
     S.loading = true;
     callApi('/api/food-groups').then((x) => {
       apply(x);
@@ -48,7 +51,19 @@
       S.error = '';
     }).catch((e) => {
       S.error = (e && e.message) || 'خطا در دریافت گروه‌ها';
-    }).then(() => { S.loading = false; draw(); });
+    }).then(() => {
+      S.loading = false;
+      if (S.editing && document.getElementById('fg-form')) {
+        try {
+          const keep = collect();
+          S.editing = Object.assign({}, S.editing, keep);
+        } catch (e) { /* فرم هنوز کامل نیست */ }
+      }
+      draw();
+      const next = S._afterLoad || after;
+      S._afterLoad = null;
+      if (typeof next === 'function') next();
+    });
   }
 
   function apply(x) {
@@ -60,8 +75,8 @@
   function userLabel(u) {
     const badges = (u.active ? '' : ' <span class="status bad">غیرفعال</span>')
       + (u.nat ? '' : ' <span class="status warn" title="بدون کد ملی، سفارش تطبیق داده نمی‌شود">بدون کد ملی</span>');
-    return '<span title="' + esc((u.name || '—') + ' (' + (u.pc || '') + ')') + '" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">'
-      + esc(u.name || '—') + (u.pc ? ' <small style="color:var(--muted)">(' + esc(u.pc) + ')</small>' : '') + badges + '</span>';
+    return '<span class="fg-person-name" title="' + esc((u.name || '—') + ' (' + (u.pc || '') + ')') + '">'
+      + esc(u.name || '—') + (u.pc ? ' <small>(' + esc(u.pc) + ')</small>' : '') + badges + '</span>';
   }
 
   function form() {
@@ -74,12 +89,12 @@
     const pool = [...mine, ...S.free].filter((u, i, a) => a.findIndex((v) => v.id === u.id) === i)
       .filter((u) => !q || (u.name + ' ' + u.pc + ' ' + u.nat).indexOf(q) >= 0);
     const rows = pool.map((u) => '<label class="fg-person">'
-      + '<span class="fg-person-name">' + userLabel(u) + '</span><input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '></label>').join('')
+      + '<input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '>' + userLabel(u) + '</label>').join('')
       || '<p class="muted">کاربر آزادی برای انتخاب وجود ندارد.</p>';
     const visitors = ((S.groups.find((x) => x.id === g.id) || {}).today_visitors) || [];
     const visitorsBlock = visitors.length
       ? '<div class="form-section-head" style="margin-top:14px"><h2>مهمانان امروز</h2><span class="muted">فقط امروز در چاپ فیش این گروه هستند؛ عضو دائم نیستند</span></div>'
-        + '<div class="fg-people-box">' + visitors.map((u) => '<div class="fg-person"><span class="fg-person-name">' + userLabel(u) + ' <span class="status ok">مهمان امروز</span></span></div>').join('') + '</div>'
+        + '<div class="fg-people-box">' + visitors.map((u) => '<div class="fg-person">' + userLabel(u) + '</div>').join('') + '</div>'
       : '';
     return '<div class="card form-card" id="fg-form"><div class="form-section-head"><h2>' + (g.id ? 'ویرایش گروه' : 'گروه جدید') + '</h2></div>'
       + '<div class="form-grid">'
@@ -170,11 +185,11 @@
     const rows = (a.members || []).map((m) => {
       const disabled = (!editable || locked && !a.can_override) ? ' disabled' : '';
       return '<label class="fg-person">'
-        + '<span title="' + esc(m.name) + ' (' + esc(m.pc) + ')" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">' + esc(m.name) + ' <small style="color:var(--muted)">(' + esc(m.pc) + ')</small>'
+        + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>')
+        + '<span class="fg-person-name" title="' + esc(m.name) + ' (' + esc(m.pc) + ')">' + esc(m.name) + ' <small>(' + esc(m.pc) + ')</small>'
         + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
         + (m.visitor ? ' <span class="status ok">مهمان امروز</span>' : '')
-        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span>'
-        + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>') + '</label>';
+        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span></label>';
     }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
       + '<h2>غیبت روزانه — ' + esc(a.group ? a.group.title : '') + (dateJalali ? ' <small style="color:var(--muted)">(' + esc(dateJalali) + ')</small>' : '') + '</h2>'
@@ -308,10 +323,21 @@
     const act = b.dataset.fg;
     const id = Number(b.dataset.id || 0);
     if (act === 'reload') { S.error = ''; S.loaded = false; draw(); load(); return; }
-    if (act === 'new') { S.filter = ''; S.editing = { id: 0, title: '', l_uid: '', description: '', active: true, members: [] }; draw(); return; }
+    if (act === 'new') {
+      S.filter = '';
+      S.editing = { id: 0, title: '', l_uid: '', description: '', active: true, members: [] };
+      draw();
+      load(function () {
+        if (S.editing && !S.editing.id) draw();
+      });
+      return;
+    }
     if (act === 'edit') {
-      const g = S.groups.find((x) => x.id === id);
-      if (g) { S.filter = ''; S.editing = { id: g.id, title: g.title, l_uid: g.l_uid, description: g.description, active: g.active, members: g.members.map((m) => m.id) }; S.absence = null; draw(); }
+      const openEdit = function () {
+        const g = S.groups.find((x) => x.id === id);
+        if (g) { S.filter = ''; S.editing = { id: g.id, title: g.title, l_uid: g.l_uid, description: g.description, active: g.active, members: g.members.map((m) => m.id) }; S.absence = null; draw(); }
+      };
+      load(openEdit);
       return;
     }
     if (act === 'cancel') { S.editing = null; draw(); return; }
@@ -395,6 +421,12 @@
     mount() {
       if (!window.FOOD_TICKET_API_BASE) return; // فقط در پنل یکپارچهٔ PHP
       if (!S.loaded && !S.loading) load();
+    },
+    reload() {
+      if (!window.FOOD_TICKET_API_BASE) return;
+      S.loaded = false;
+      S.error = '';
+      load();
     },
   };
 })();

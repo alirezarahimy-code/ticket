@@ -41,6 +41,11 @@ check("food_ticket_group_members_for_date($groupId, $date)" in groups, "group pr
 check("'visitor' => true" in groups and "مهمان امروز" in admin_js
       and "today_visitors" in groups and "today_visitors" in admin_js,
       "kitchen group list shows today's visitors separately from permanent members")
+css = (ROOT / "food-ticket-web/assets/food-menu.css").read_text(encoding="utf-8")
+check("grid-template-columns:repeat(4,minmax(0,1fr))" in css
+      and "data-fg-member" in admin_js
+      and "reload() {" in admin_js,
+      "group members are a 4-column checklist with checkbox before the name")
 check("$route === 'day-visit'" in order
       and "$route === 'day-visit-cancel'" in order
       and "function food_order_day_visit_subject" in order

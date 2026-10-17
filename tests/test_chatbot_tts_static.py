@@ -45,9 +45,10 @@ check("chatbot_tts_find_espeak" in chatbot and "eSpeak NG" in chatbot
       "engine auto-detection covers the Windows installer path")
 check("storage/tts" in chatbot and "sha1($clean" in chatbot,
       "synthesized clips are cached under storage/tts by content hash")
-check("function chatbot_tts_clean" in chatbot and "شماره پیگیری" in chatbot
-      and "800, 'UTF-8'" in chatbot,
-      "spoken text is cleaned (links/ticket numbers/emoji) and length-capped")
+check("function chatbot_tts_clean" in chatbot and "شمارهٔ پیگیری" in chatbot
+      and "function chatbot_tts_trim_length" in chatbot
+      and "int $max = 800" in chatbot,
+      "spoken text is cleaned (links/ticket numbers/emoji) and length-capped at a sentence boundary")
 check("cb-say" in chatbot and "attachSay(pending, j.answer)" in chatbot
       and "SpeechSynthesisUtterance" in chatbot and 'indexOf("fa-")' in chatbot,
       "widget adds a per-answer speaker button with Persian browser-voice fallback")
@@ -60,8 +61,9 @@ check("chatbot_tts_voice" in chatbot and 'name="tts_voice"' in chatbot,
 check("function chatbot_tts_voice_id" in chatbot and "fa+m2" in chatbot
       and "fa+f2" in chatbot,
       "male/female map to whitelisted eSpeak-NG Persian voice variants")
-check("sha1($clean . '|' . $config['speed'] . '|' . $voiceId)" in chatbot,
-      "voice cache key includes the voice variant")
+check("chatbot_tts_rules_version()" in chatbot and "chatbot_tts_lexicon_hash()" in chatbot
+      and "sha1($clean" in chatbot,
+      "voice cache key includes the voice variant, rules version and lexicon hash")
 check("function chatbot_tts_is_valid_wav" in chatbot and "'RIFF'" in chatbot
       and "'WAVE'" in chatbot,
       "synthesized output is validated as a real wav file")
@@ -89,8 +91,9 @@ check("Accept-Ranges" in chatbot and "immutable" in chatbot,
       "served audio supports seeking and long-term caching")
 check("function chatbot_tts_colloquial" in chatbot and "می خوام" in chatbot
       and "می شه" in chatbot and " هست" in chatbot
-      and "chatbot_tts_colloquial(chatbot_tts_clean" in chatbot,
-      "spoken-Tehrani rewrite is applied to TTS text only")
+      and "function chatbot_tts_prepare" in chatbot
+      and "chatbot_tts_colloquial_enabled" in chatbot,
+      "spoken-Tehrani rewrite exists but is off by default and only applies to TTS text")
 check("function chatbot_tts_run_piper" in chatbot and "--length_scale" in chatbot
       and "--output_file" in chatbot and ".onnx" in chatbot
       and "function chatbot_tts_probe_piper" in chatbot,
@@ -105,23 +108,26 @@ check("function chatbot_tts_active" in chatbot and "function chatbot_tts_find_pi
 check("piper_windows_amd64.zip" in chatbot and "fa_IR-mana-medium.onnx" in chatbot
       and "fa_IR-amir-medium.onnx" in chatbot and "huggingface.co" in chatbot,
       "the admin card documents the one-time offline Piper install")
-check("محاوره‌ای" in chatbot and "متن روی صفحه عوض نمی‌شود" in chatbot,
-      "admins are told on-screen text stays formal while speech is colloquial")
-check("موتور عصبی Piper" in index and "خواندن محاوره‌ای" in index,
-      "the server-engine test reports Piper vs eSpeak and colloquial reading")
+check("محاوره‌ای" in chatbot and "متن روی صفحه عوض نمی‌شود" in chatbot
+      and "پیش‌فرض خاموش" in chatbot,
+      "admins are told on-screen text stays formal and colloquial speech is opt-in")
+check("موتور عصبی Piper" in index and "chatbot_tts_colloquial_enabled" in index,
+      "the server-engine test reports Piper vs eSpeak and mentions colloquial only when enabled")
 check("Piper" in guide and "محاوره‌ای" in guide,
       "the Persian guide documents natural offline Piper speech and colloquial reading")
 check("function chatbot_tts_phrase" in chatbot and "function chatbot_tts_piper_model_rank" in chatbot
       and "mana" in chatbot and "amir" in chatbot and "sentence_silence" in chatbot
-      and "--noise_w" in chatbot and "0.35" in chatbot and "1.25" in chatbot,
-      "Piper quality is boosted: male/female models, less clipping, natural length")
+      and "--noise_w" in chatbot and "0.35" in chatbot
+      and "max(1.0, min(1.1" in chatbot,
+      "Piper quality is boosted: male/female models, less clipping, length_scale 1.0–1.1")
 check("function chatbot_tts_vocalize" in chatbot and "function chatbot_tts_ezafe" in chatbot
-      and "سَلام" in chatbot and "$a . 'ِ'" in chatbot
-      and "chatbot_tts_vocalize(chatbot_tts_colloquial" in chatbot
+      and "function chatbot_tts_lexicon_apply" in chatbot
+      and "$a . 'ِ'" in chatbot
       and "'ها', 'های'" in chatbot
       and "راهنَمای" not in chatbot
-      and "|q6" in chatbot,
-      "Piper text gets short vowels and ezafe so S does not stutter and noun pairs connect")
+      and "س(?=" not in chatbot
+      and "chatbot_tts_he_yezafe" in chatbot,
+      "Piper text gets lexicon vowels and ezafe; automatic سَ is gone; heh-yezafe is kept")
 check("function chatbot_tts_int_to_words" in chatbot
       and "function chatbot_tts_numbers_to_words" in chatbot
       and "function chatbot_tts_spell_acronyms" in chatbot

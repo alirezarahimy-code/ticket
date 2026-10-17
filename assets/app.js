@@ -1281,3 +1281,9 @@ document.addEventListener('DOMContentLoaded', function () {
         textEl.style.animation = '';
     }, speed * 1000);
 });
+
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});

@@ -3959,11 +3959,13 @@ function food_ticket_api_handle(string $route, array $user): never
             ]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
-            // سقف فعلی سقف متغیر + تعداد داخل ساختمان برای باکس نمایش در فرم مهمان
+            // سقف فعلی: یا جمع درخواست مهمان معاونت‌ها، یا تعداد داخل ساختمان
             $nowTime = date('H:i:s');
+            $today = function_exists('food_order_today') ? food_order_today() : date('Y-m-d');
+            $requested = function_exists('food_guest_requested_total') ? food_guest_requested_total($today) : null;
             $capNow = food_guest_cap_mode() === 'requested'
-                ? food_guest_requested_total(date('Y-m-d'))
-                : food_ticket_guest_variable_cap(date('Y-m-d'), $nowTime);
+                ? $requested
+                : food_ticket_guest_variable_cap($today, $nowTime);
             $insideNow = null;
             try {
                 $insideNow = (int) db()->query('SELECT COUNT(*) FROM traffic_visits WHERE visit_date = CURDATE() AND exit_time IS NULL')->fetchColumn();
@@ -3975,6 +3977,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 'mode' => food_guest_cap_mode(),
                 'time' => substr($nowTime, 0, 5),
                 'cap' => $capNow,
+                'requested' => $requested,
                 'inside' => $insideNow,
                 'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
             ]);

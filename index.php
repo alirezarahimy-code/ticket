@@ -4282,6 +4282,25 @@ if ($page === 'queue') {
 
 if ($page === 'chatbot-admin') {
     $chatbotAdmin = require_permission('chatbot.manage');
+    if (isset($_GET['lab_wav'])) {
+        $labName = basename((string) $_GET['lab_wav']);
+        if (!preg_match('/^[A-Za-z0-9_.-]+\\.wav$/', $labName)) {
+            http_response_code(400);
+            echo 'نام فایل نامعتبر است.';
+            exit;
+        }
+        $labFile = APP_ROOT . '/storage/tts/_lab/' . $labName;
+        if (!is_file($labFile) || filesize($labFile) < 100) {
+            http_response_code(404);
+            echo 'فایل آزمایشگاه یافت نشد.';
+            exit;
+        }
+        $labAudio = (string) file_get_contents($labFile);
+        header('Content-Type: audio/wav');
+        header('Content-Length: ' . strlen($labAudio));
+        echo $labAudio;
+        exit;
+    }
     if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         require_csrf();
         try {
@@ -4296,12 +4315,47 @@ if ($page === 'chatbot-admin') {
                 if ($ttsTest['ok']) {
                     $ttsActive = chatbot_tts_active();
                     $ttsTestVoice = ($ttsActive['kind'] === 'piper')
-                        ? ' موتور عصبی Piper و خواندن محاوره‌ای فعال است.'
-                        : ' موتور eSpeak با خواندن محاوره‌ای فعال است.';
+                        ? ' موتور عصبی Piper فعال است.'
+                        : ' موتور eSpeak فعال است.';
+                    if (chatbot_tts_colloquial_enabled()) {
+                        $ttsTestVoice .= ' خواندن محاوره‌ای روشن است.';
+                    }
                     flash('success', 'موتور صوتی سرور سالم است و فایل تست ساخته شد.' . $ttsTestVoice);
                 } else {
                     flash('danger', $ttsTest['error']);
                 }
+            } elseif (isset($_POST['tts_lab'])) {
+                $labText = (string) ($_POST['lab_text'] ?? '');
+                $labVariant = valid_choice((string) ($_POST['lab_variant'] ?? 'all'), ['all', 'a', 'b', 'c', 'd', 'e', 'f', 'g'], 'all');
+                $labWav = !empty($_POST['lab_wav']);
+                $labLines = preg_split('/\R/u', $labText) ?: [];
+                $labRows = [];
+                $labVars = $labVariant === 'all' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g'] : [$labVariant];
+                foreach ($labLines as $labLine) {
+                    $labLine = trim((string) $labLine);
+                    if ($labLine === '') {
+                        continue;
+                    }
+                    foreach ($labVars as $labV) {
+                        $one = chatbot_tts_lab_run($labLine, (string) $labV, $labWav);
+                        $labRows[] = [
+                            'input' => $labLine,
+                            'variant' => $labV,
+                            'stages' => $one['stages'] ?? [],
+                            'ipa' => $one['ipa'] ?? [],
+                            'wav' => $one['wav'] ?? '',
+                            'wav_error' => $one['wav_error'] ?? '',
+                            'final' => $one['final'] ?? '',
+                        ];
+                    }
+                }
+                chatbot_render_admin($chatbotAdmin, [
+                    'text' => $labText,
+                    'variant' => $labVariant,
+                    'wav' => $labWav,
+                    'rows' => $labRows,
+                ]);
+                exit;
             } elseif (isset($_POST['tts_sample'])) {
                 $ttsSample = chatbot_tts_say('سلام، می‌خواهم به شما کمک کنم. درخواست شما ثبت می‌شود.');
                 if (!$ttsSample['ok']) {
