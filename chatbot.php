@@ -1118,7 +1118,153 @@ function chatbot_tts_status(): array
     ];
 }
 
-/** آماده‌سازی متن پاسخ برای خوانده شدن: حذف پیوند، شماره‌ها به شکل خوانا، حذف شکلک. */
+/** رقم‌های فارسی و عربی را به ASCII. */
+function chatbot_tts_ascii_digits(string $s): string
+{
+    return strtr($s, [
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+    ]);
+}
+
+/** یک رقم ASCII را با حروف می‌گوید. */
+function chatbot_tts_digits_spoken(string $digits): string
+{
+    static $w = ['0' => 'صفر', '1' => 'یک', '2' => 'دو', '3' => 'سه', '4' => 'چهار', '5' => 'پنج', '6' => 'شش', '7' => 'هفت', '8' => 'هشت', '9' => 'نه'];
+    $digits = chatbot_tts_ascii_digits($digits);
+    $out = [];
+    $len = strlen($digits);
+    for ($i = 0; $i < $len; $i++) {
+        $out[] = $w[$digits[$i]] ?? '';
+    }
+    return trim(implode(' ', $out));
+}
+
+/** ۰ تا ۹۹۹ را به حروف. */
+function chatbot_tts_three_digit(int $n): string
+{
+    static $ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
+    static $teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+    static $tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+    static $hundreds = ['', 'صد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
+    $parts = [];
+    $h = intdiv($n, 100);
+    $r = $n % 100;
+    if ($h > 0) {
+        $parts[] = $hundreds[$h];
+    }
+    if ($r === 0) {
+        return implode(' و ', $parts);
+    }
+    if ($r < 10) {
+        $parts[] = $ones[$r];
+    } elseif ($r < 20) {
+        $parts[] = $teens[$r - 10];
+    } else {
+        $t = intdiv($r, 10);
+        $o = $r % 10;
+        $parts[] = $o === 0 ? $tens[$t] : ($tens[$t] . ' و ' . $ones[$o]);
+    }
+    return implode(' و ', $parts);
+}
+
+/** عدد صحیح را به حروف فارسی (قاعدهٔ نرمال‌ساز TTSهای فارسی، نه اعراب داخل واژه). */
+function chatbot_tts_int_to_words(int $n): string
+{
+    if ($n < 0) {
+        return 'منفی ' . chatbot_tts_int_to_words(-$n);
+    }
+    if ($n === 0) {
+        return 'صفر';
+    }
+    $parts = [];
+    foreach ([1000000000 => 'میلیارد', 1000000 => 'میلیون', 1000 => 'هزار'] as $div => $name) {
+        if ($n >= $div) {
+            $chunk = intdiv($n, $div);
+            $n %= $div;
+            if ($chunk === 1 && $name === 'هزار') {
+                $parts[] = 'هزار';
+            } else {
+                $parts[] = trim(chatbot_tts_three_digit($chunk) . ' ' . $name);
+            }
+        }
+    }
+    if ($n > 0) {
+        $parts[] = chatbot_tts_three_digit($n);
+    }
+    return implode(' و ', $parts);
+}
+
+/** رشتهٔ رقمی (با صفر پیشوند یا اعشار) را به گفتار. */
+function chatbot_tts_number_token(string $token): string
+{
+    $token = strtr(chatbot_tts_ascii_digits($token), ['٫' => '.', '٬' => '']);
+    if (str_contains($token, '.')) {
+        $bits = explode('.', $token, 2);
+        $left = chatbot_tts_number_int_string($bits[0] === '' ? '0' : $bits[0]);
+        $frac = $bits[1] ?? '0';
+        $right = ($frac !== '' && $frac[0] === '0')
+            ? chatbot_tts_digits_spoken($frac)
+            : chatbot_tts_number_int_string($frac === '' ? '0' : $frac);
+        return $left . ' ممیز ' . $right;
+    }
+    return chatbot_tts_number_int_string($token);
+}
+
+function chatbot_tts_number_int_string(string $s): string
+{
+    $s = chatbot_tts_ascii_digits($s);
+    if ($s === '' || !ctype_digit($s)) {
+        return 'صفر';
+    }
+    if ((strlen($s) > 1 && $s[0] === '0') || strlen($s) > 9) {
+        return chatbot_tts_digits_spoken($s);
+    }
+    return chatbot_tts_int_to_words((int) $s);
+}
+
+/** همهٔ عددهای متن را با حروف می‌گوید؛ درصد را «درصد». */
+function chatbot_tts_numbers_to_words(string $text): string
+{
+    $text = (string) preg_replace('/([0-9۰-۹٠-٩])[٬,](?=[0-9۰-۹٠-٩])/u', '$1', $text);
+    return (string) preg_replace_callback(
+        '/[0-9۰-۹٠-٩]+(?:[.,٫][0-9۰-۹٠-٩]+)?[٪%]?/u',
+        static function (array $m): string {
+            $raw = $m[0];
+            $percent = str_ends_with($raw, '%') || str_ends_with($raw, '٪');
+            if ($percent) {
+                $raw = mb_substr($raw, 0, -1, 'UTF-8');
+            }
+            $spoken = chatbot_tts_number_token($raw);
+            return $percent ? ($spoken . ' درصد') : $spoken;
+        },
+        $text
+    );
+}
+
+/** مخفف لاتین رایج در پاسخ‌های IT، به گفتار فارسی. */
+function chatbot_tts_spell_acronyms(string $text): string
+{
+    $pairs = [
+        'DVD' => 'دی وی دی',
+        'USB' => 'یو اس بی',
+        'PDF' => 'پی دی اف',
+        'CPU' => 'سی پی یو',
+        'RAM' => 'رم',
+        'SMS' => 'اس ام اس',
+        'URL' => 'آدرس',
+        'ID' => 'شناسه',
+        'OK' => 'اوکی',
+        'IT' => 'آی تی',
+        'CD' => 'سی دی',
+    ];
+    foreach ($pairs as $from => $to) {
+        $text = (string) preg_replace('/\b' . $from . '\b/i', $to, $text);
+    }
+    return $text;
+}
+
+/** آماده‌سازی متن پاسخ برای خوانده شدن: پیوند، مخفف، عدد به حروف، ی/ک عربی، شکلک. */
 function chatbot_tts_clean(string $text): string
 {
     $text = (string) preg_replace('~https?://\S+~u', ' پیوند ', $text);
@@ -1133,7 +1279,9 @@ function chatbot_tts_clean(string $text): string
         static fn(array $m): string => ' شماره ' . $m[2],
         $text
     );
-    $text = strtr($text, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+    $text = chatbot_tts_spell_acronyms($text);
+    $text = strtr($text, ['ي' => 'ی', 'ى' => 'ی', 'ك' => 'ک', 'ة' => 'ه', 'ۀ' => 'ه', 'أ' => 'ا', 'إ' => 'ا', 'ؤ' => 'و']);
+    $text = chatbot_tts_numbers_to_words($text);
     $text = (string) preg_replace('~[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B00}-\x{2BFF}\x{FE00}-\x{FE0F}]+~u', ' ', $text);
     $text = (string) preg_replace('~[^\p{L}\p{N}\s.,;:!?؟،؛٪٫٬\-()«»"\'/+=%*_]~u', ' ', $text);
     $text = (string) preg_replace('~\s+~u', ' ', trim($text));
@@ -1201,47 +1349,21 @@ function chatbot_tts_phrase(string $text): string
 }
 
 /**
- * واکه‌گذاری برای Piper: سَلام نه «سسسس»، و کسرهٔ اضافه (سفارشِ غذا نه سفارش + قطع + غذا).
- * بعد از clean اجرا می‌شود تا اعراب پاک نشوند.
+ * فقط دو کار: سِ در ابتدای واژه (سَلام نه سسسس)، و کسره بین دو واژهٔ جدا (سفارشِ غذا).
+ * داخل واژه اعراب نمی‌گذاریم تا راهنمای / سفارش‌های تکه نشوند.
  */
 function chatbot_tts_vocalize(string $text): string
 {
-    static $dict = [
-        'سلام' => 'سَلام',
-        'سفارش' => 'سَفارش',
-        'سوال' => 'سُوال',
-        'سؤال' => 'سُوال',
-        'ساعت' => 'ساعَت',
-        'سطح' => 'سَطح',
-        'سریال' => 'سِریال',
-        'سپس' => 'سِپَس',
-        'ثبت' => 'ثَبت',
-        'درخواست' => 'دَرخواست',
-        'پیگیری' => 'پِیگیری',
-        'گزارش' => 'گُزارِش',
-        'تردد' => 'تَرَدُد',
-        'سامانه' => 'سامانه',
-        'راهنمای' => 'راهنَمای',
-        'هستم' => 'هَستَم',
-        'بپرسید' => 'بِپُرسید',
-        'به‌روزرسانی' => 'بِه‌روزرِسانی',
-        'بروزرسانی' => 'بُرورِسانی',
-        'فیش' => 'فیش',
-        'غذا' => 'غَذا',
-    ];
-    uksort($dict, static fn(string $a, string $b): int => mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8'));
-    foreach ($dict as $from => $to) {
-        $text = (string) preg_replace('/(?<!\p{L})' . preg_quote($from, '/') . '(?!\p{L})/u', $to, $text);
-    }
+    $text = str_replace("\xE2\x80\x8C", '', $text);
     $text = (string) preg_replace('/(^|[^\p{L}\p{M}])س(?=[بتثجچحخدذرزژسشصضطظعغفقکگلمنهیپچژگ])/u', '$1سَ', $text);
     return chatbot_tts_ezafe($text);
 }
 
-/** کسرهٔ اضافه بین دو اسم: سفارشِ غذا. فعل و حرف اضافه را رد می‌کند. */
+/** کسره فقط بین دو کلمهٔ جدا با فاصله. پسوند ها/های و کلمه‌های مختوم به ی/ا/و/ه را لمس نمی‌کند. */
 function chatbot_tts_ezafe(string $text): string
 {
     $skipFirst = ['از', 'در', 'به', 'که', 'و', 'با', 'تا', 'یا', 'اگر', 'نه', 'را', 'رو', 'هم', 'برای', 'من', 'تو', 'او', 'ما', 'شما', 'این', 'آن', 'اون', 'اینا', 'اونا'];
-    $skipSecond = ['است', 'هست', 'هستم', 'هستید', 'هستند', 'هَستَم', 'بود', 'باشد', 'شد', 'شود', 'کنید', 'کنم', 'کنیم', 'کن', 'بپرسید', 'بِپُرسید', 'باید', 'می', 'شد'];
+    $skipSecond = ['است', 'هست', 'هستم', 'هستید', 'هستند', 'بود', 'باشد', 'شد', 'شود', 'کنید', 'کنم', 'کنیم', 'کن', 'بپرسید', 'باید', 'می', 'ها', 'های', 'تر', 'ترین', 'در', 'به', 'از', 'با', 'تا', 'برای', 'که', 'و', 'یا', 'اگر', 'روی'];
     $skipFirst = array_fill_keys($skipFirst, true);
     $skipSecond = array_fill_keys($skipSecond, true);
     $parts = preg_split('/(\s+|[.؟!،,;:]+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
@@ -1268,7 +1390,7 @@ function chatbot_tts_ezafe(string $text): string
         if (isset($skipFirst[$aBare]) || isset($skipSecond[$bBare])) {
             continue;
         }
-        if (preg_match('/[اآویىیِٔ]$/u', $a)) {
+        if (preg_match('/[اآویىیهةۀ]$/u', $aBare)) {
             continue;
         }
         $parts[$i] = $a . 'ِ';
@@ -1603,7 +1725,7 @@ function chatbot_tts_say(string $text): array
         return ['ok' => false, 'error' => 'ساخت پوشهٔ کش صدا ممکن نشد.'];
     }
     $voiceId = $active['kind'] === 'piper'
-        ? ('piper:' . basename((string) $active['model']) . '|q4')
+        ? ('piper:' . basename((string) $active['model']) . '|q6')
         : chatbot_tts_voice_id($config['voice']);
     $id = sha1($clean . '|' . $config['speed'] . '|' . $voiceId);
     $file = $dir . '/' . $id . '.wav';
@@ -1701,7 +1823,7 @@ function chatbot_render_admin(array $admin): void
     echo '<div class="card form-card"><h2>گویندگی بات (آفلاین)</h2>'
         . '<p class="muted">وضعیت موتور سرور: ' . $ttsServerLine . '</p>'
         . '<p class="muted">وضعیت صدای فارسی: ' . e($ttsVoiceLine) . '</p>'
-        . '<p class="muted">متن روی صفحه عوض نمی‌شود؛ فقط صدای خوانده‌شده محاوره‌ای (تهرانیِ روزمره) می‌شود.</p>'
+        . '<p class="muted">متن روی صفحه عوض نمی‌شود؛ فقط صدا محاوره‌ای خوانده می‌شود. عددها با حروف گفته می‌شوند و کسره فقط بین دو کلمهٔ جدا می‌آید (سفارشِ غذا)، نه داخل واژه (راهنمای / سفارش‌های).</p>'
         . '<form method="post" action="index.php?page=chatbot-admin">' . csrf_field()
         . '<input type="hidden" name="tts_settings" value="1">'
         . '<label class="field">حالت گویندگی<select name="tts_mode">';

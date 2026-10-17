@@ -117,5 +117,19 @@ check("function chatbot_tts_phrase" in chatbot and "function chatbot_tts_piper_m
       "Piper quality is boosted: male/female models, less clipping, natural length")
 check("function chatbot_tts_vocalize" in chatbot and "function chatbot_tts_ezafe" in chatbot
       and "سَلام" in chatbot and "$a . 'ِ'" in chatbot
-      and "chatbot_tts_vocalize(chatbot_tts_colloquial" in chatbot,
+      and "chatbot_tts_vocalize(chatbot_tts_colloquial" in chatbot
+      and "'ها', 'های'" in chatbot
+      and "راهنَمای" not in chatbot
+      and "|q6" in chatbot,
       "Piper text gets short vowels and ezafe so S does not stutter and noun pairs connect")
+check("function chatbot_tts_int_to_words" in chatbot
+      and "function chatbot_tts_numbers_to_words" in chatbot
+      and "function chatbot_tts_spell_acronyms" in chatbot
+      and "chatbot_tts_numbers_to_words($text)" in chatbot
+      and "chatbot_tts_spell_acronyms($text)" in chatbot
+      and "'ي' => 'ی'" in chatbot
+      and " درصد" in chatbot
+      and "سی دی" in chatbot
+      and "آی تی" in chatbot
+      and "ممیز" in chatbot,
+      "TTS normalizes Arabic letters, reads numbers as Persian words, and spells IT acronyms")
