@@ -21,14 +21,19 @@ check(chatbot.find("user_can($user, 'chatbot.use')") < chatbot.find("$op === 'sa
       and chatbot.find("hash_equals(csrf_token()") < chatbot.find("$op === 'say'")
       and chatbot.find("check_api_rate_limit('chatbot_'") < chatbot.find("$op === 'say'"),
       "voice endpoints inherit login, chatbot.use, POST-only, CSRF and rate-limit guards")
-check("[$exe, '-v', $voiceId" in chatbot and "'--stdout'" in chatbot
-      and "['pipe', 'r']" in chatbot,
-      "the engine runs via argument array with stdin pipe (no shell interpolation)")
+check("'-w', $tmp" in chatbot and "['pipe', 'r']" in chatbot
+      and "sys_get_temp_dir" in chatbot,
+      "the engine runs via argument array with stdin pipe and file-based wav output (no shell interpolation)")
 check("shell_exec" not in chatbot and "passthru" not in chatbot
       and "popen" not in chatbot and "pcntl" not in chatbot,
       "no shell backdoors anywhere in chatbot.php")
-check("proc_terminate" in chatbot and "20.0" in chatbot,
-      "engine execution has a timeout with process termination")
+check("proc_terminate" in chatbot and "20.0" in chatbot
+      and "chatbot_tts_taskkill" in chatbot,
+      "engine execution has a timeout with process termination and Windows force-kill")
+check("function chatbot_tts_exec" in chatbot
+      and "function chatbot_tts_probe_engine" in chatbot
+      and "chatbot_tts_probe_engine($path)" in chatbot,
+      "a shared hardened runner exists and manual engine paths are verified at save time")
 check("chatbot_tts_mode" in chatbot and "chatbot_tts_speed" in chatbot
       and "chatbot_tts_espeak_path" in chatbot,
       "voice mode, speed and engine-path settings are wired")

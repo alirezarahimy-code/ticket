@@ -714,6 +714,12 @@ function chatbot_save_tts(array $input, array $admin): void
     if ($path !== '' && !is_file($path)) {
         throw new RuntimeException('فایل موتور صوتی در این مسیر پیدا نشد.');
     }
+    if ($path !== '') {
+        $probe = chatbot_tts_probe_engine($path);
+        if (!$probe['ok']) {
+            throw new RuntimeException('موتور صوتی در این مسیر پاسخ معتبر نداد (' . $probe['error'] . '). مسیر را بررسی کنید.');
+        }
+    }
     save_setting('chatbot_tts_mode', $mode);
     save_setting('chatbot_tts_speed', (string) $speed);
     save_setting('chatbot_tts_voice', $voice);
@@ -933,56 +939,179 @@ function chatbot_tts_voice_id(string $voice): string
     return $map[$voice] ?? 'fa';
 }
 
-/** اجرای موتور با ورودی stdin (بدون shell) و مهلت ۲۰ ثانیه‌ای. */
-function chatbot_tts_run_espeak(string $exe, string $text, int $wpm, string $voiceId): array
+/** انتظار حداکثر چند ثانیه‌ای برای پایان فرآیند (بدون گیر کردن). */
+function chatbot_tts_wait_exit($process, float $seconds): bool
 {
-    $command = [$exe, '-v', $voiceId, '-s', (string) $wpm, '--stdout'];
+    $deadline = microtime(true) + $seconds;
+    do {
+        $status = @proc_get_status($process);
+        if (!is_array($status) || !$status['running']) {
+            return true;
+        }
+        usleep(100000);
+    } while (microtime(true) < $deadline);
+    $status = @proc_get_status($process);
+    return !is_array($status) || !$status['running'];
+}
+
+/** خاتمهٔ اجباری درخت فرآیند در ویندوز (آخرین راه‌حل در برابر گیر کردن). */
+function chatbot_tts_taskkill(int $pid): void
+{
+    if ($pid <= 0) {
+        return;
+    }
+    $taskkill = @proc_open(
+        ['taskkill', '/F', '/T', '/PID', (string) $pid],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+        $tkPipes
+    );
+    if (!is_resource($taskkill)) {
+        return;
+    }
+    fclose($tkPipes[0]);
+    @stream_set_blocking($tkPipes[1], false);
+    @stream_set_blocking($tkPipes[2], false);
+    $deadline = microtime(true) + 5.0;
+    do {
+        @fread($tkPipes[1], 8192);
+        @fread($tkPipes[2], 8192);
+        $status = @proc_get_status($taskkill);
+        if (!is_array($status) || !$status['running']) {
+            break;
+        }
+        usleep(50000);
+    } while (microtime(true) < $deadline);
+    @fclose($tkPipes[1]);
+    @fclose($tkPipes[2]);
+    @proc_close($taskkill);
+}
+
+/**
+ * اجرای امن یک دستور با ورودی stdin و مهلت مشخص.
+ * در همهٔ مسیرها (پایان عادی، تایم‌اوت، خروجی بزرگ) برمی‌گردد و گیر نمی‌کند.
+ */
+function chatbot_tts_exec(array $command, string $stdin, float $timeoutSec): array
+{
     $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
     $process = @proc_open($command, $descriptors, $pipes);
     if (!is_resource($process)) {
-        return ['ok' => false, 'error' => 'اجرای موتور صوتی ممکن نشد.'];
+        return ['ok' => false, 'stdout' => '', 'stderr' => '', 'exit' => null, 'error' => 'start'];
     }
-    fwrite($pipes[0], $text);
-    fclose($pipes[0]);
-    stream_set_blocking($pipes[1], false);
-    stream_set_blocking($pipes[2], false);
-    $wav = '';
+    $isWin = strtoupper(substr((string) PHP_OS, 0, 3)) === 'WIN';
+    $pid = 0;
+    $boot = @proc_get_status($process);
+    if (is_array($boot) && isset($boot['pid'])) {
+        $pid = (int) $boot['pid'];
+    }
+    @stream_set_blocking($pipes[0], false);
+    $rest = $stdin;
+    $writeDeadline = microtime(true) + 5.0;
+    while ($rest !== '') {
+        $written = @fwrite($pipes[0], $rest);
+        if (is_int($written) && $written > 0) {
+            $rest = substr($rest, $written);
+            continue;
+        }
+        if (microtime(true) > $writeDeadline) {
+            break;
+        }
+        usleep(20000);
+    }
+    @fclose($pipes[0]);
+    @stream_set_blocking($pipes[1], false);
+    @stream_set_blocking($pipes[2], false);
+    $stdout = '';
     $stderr = '';
-    $deadline = microtime(true) + 20.0;
+    $deadline = microtime(true) + $timeoutSec;
+    $exit = null;
     $timedOut = false;
-    do {
-        $out = fread($pipes[1], 8192);
+    while (true) {
+        $out = @fread($pipes[1], 8192);
         if (is_string($out) && $out !== '') {
-            $wav .= $out;
-            if (strlen($wav) > 8 * 1024 * 1024) {
+            $stdout .= $out;
+            if (strlen($stdout) > 12 * 1024 * 1024) {
+                $timedOut = true;
                 break;
             }
         }
-        $err = fread($pipes[2], 8192);
+        $err = @fread($pipes[2], 8192);
         if (is_string($err) && $err !== '') {
             $stderr .= $err;
+            if (strlen($stderr) > 65536) {
+                $stderr = substr($stderr, -65536);
+            }
         }
-        $status = proc_get_status($process);
-        if ($status['running'] && microtime(true) > $deadline) {
-            $timedOut = true;
-            @proc_terminate($process);
+        $status = @proc_get_status($process);
+        if (!is_array($status) || !$status['running']) {
+            $exit = is_array($status) ? (int) $status['exitcode'] : null;
             break;
         }
-        if ($status['running']) {
-            usleep(50000);
+        if (microtime(true) > $deadline) {
+            $timedOut = true;
+            break;
         }
-    } while ($status['running']);
-    fclose($pipes[1]);
-    fclose($pipes[2]);
-    $exitCode = proc_close($process);
-    if ($timedOut) {
-        return ['ok' => false, 'error' => 'موتور صوتی در زمان مجاز پاسخ نداد.'];
+        usleep(50000);
     }
-    if ($exitCode !== 0 || strlen($wav) < 100) {
-        app_error_log('chatbot TTS failed (exit ' . $exitCode . '): ' . mb_substr($stderr, 0, 500, 'UTF-8'));
+    if ($timedOut) {
+        @proc_terminate($process);
+        chatbot_tts_wait_exit($process, 3.0);
+        $still = @proc_get_status($process);
+        if ($isWin && is_array($still) && $still['running'] && $pid > 0) {
+            chatbot_tts_taskkill($pid);
+            chatbot_tts_wait_exit($process, 2.0);
+        }
+    }
+    @fclose($pipes[1]);
+    @fclose($pipes[2]);
+    $code = @proc_close($process);
+    if ($exit === null && is_int($code)) {
+        $exit = $code;
+    }
+    if ($timedOut) {
+        return ['ok' => false, 'stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit, 'error' => 'timeout'];
+    }
+    if ($exit !== 0) {
+        return ['ok' => false, 'stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit, 'error' => 'exit-' . (string) $exit];
+    }
+    return ['ok' => true, 'stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit, 'error' => ''];
+}
+
+/** اجرای موتور با خروجی فایل WAV (بدون باینری در pipe) و مهلت ۲۰ ثانیه‌ای. */
+function chatbot_tts_run_espeak(string $exe, string $text, int $wpm, string $voiceId): array
+{
+    $tmp = rtrim((string) sys_get_temp_dir(), '\\/') . DIRECTORY_SEPARATOR . 'aria-' . bin2hex(random_bytes(8)) . '.wav';
+    $result = chatbot_tts_exec([$exe, '-v', $voiceId, '-s', (string) $wpm, '-w', $tmp], $text, 20.0);
+    $wav = is_file($tmp) ? (string) @file_get_contents($tmp) : '';
+    if (is_file($tmp)) {
+        @unlink($tmp);
+    }
+    if (!$result['ok']) {
+        if ($result['error'] === 'timeout') {
+            app_error_log('chatbot TTS timeout: engine did not finish in 20s');
+            return ['ok' => false, 'error' => 'موتور صوتی در زمان مجاز پاسخ نداد.'];
+        }
+        app_error_log('chatbot TTS failed (' . $result['error'] . '): ' . mb_substr((string) $result['stderr'], 0, 500, 'UTF-8'));
         return ['ok' => false, 'error' => 'خطای موتور صوتی؛ از صحت نصب صدای فارسی (fa) مطمئن شوید.'];
     }
+    if (strlen($wav) < 100) {
+        app_error_log('chatbot TTS empty output; stderr: ' . mb_substr((string) $result['stderr'], 0, 500, 'UTF-8'));
+        return ['ok' => false, 'error' => 'موتور صوتی خروجی تولید نکرد.'];
+    }
     return ['ok' => true, 'wav' => $wav];
+}
+
+/** راستی‌آزمایی مسیر دستی موتور (اجرای --version با مهلت ۱۰ ثانیه‌ای). */
+function chatbot_tts_probe_engine(string $exe): array
+{
+    $result = chatbot_tts_exec([$exe, '--version'], '', 10.0);
+    if (!$result['ok']) {
+        return ['ok' => false, 'error' => $result['error'] === 'timeout' ? 'در زمان مجاز پاسخ نداد' : 'اجرا نشد'];
+    }
+    $banner = (string) $result['stdout'] . "\n" . (string) $result['stderr'];
+    if (stripos($banner, 'espeak') === false) {
+        return ['ok' => false, 'error' => 'خروجی موتور شناخته نشد'];
+    }
+    return ['ok' => true, 'error' => ''];
 }
 
 /** تولید (با کش) فایل صوتی یک پاسخ. */
