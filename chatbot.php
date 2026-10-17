@@ -727,23 +727,44 @@ function chatbot_save_tts(array $input, array $admin): void
     $speed = max(80, min(300, (int) ($input['tts_speed'] ?? 140)));
     $voice = valid_choice(trim((string) ($input['tts_voice'] ?? 'default')), ['default', 'male', 'female'], 'default');
     $path = trim((string) ($input['tts_espeak_path'] ?? ''));
-    if (mb_strlen($path, 'UTF-8') > 500) {
+    $piperPath = trim((string) ($input['tts_piper_path'] ?? ''));
+    $piperModel = trim((string) ($input['tts_piper_model'] ?? ''));
+    $kind = valid_choice(trim((string) ($input['tts_kind'] ?? 'auto')), ['auto', 'piper', 'espeak'], 'auto');
+    if (mb_strlen($path, 'UTF-8') > 500 || mb_strlen($piperPath, 'UTF-8') > 500 || mb_strlen($piperModel, 'UTF-8') > 500) {
         throw new RuntimeException('مسیر موتور صوتی بیش از حد طولانی است.');
     }
     if ($path !== '' && !is_file($path)) {
-        throw new RuntimeException('فایل موتور صوتی در این مسیر پیدا نشد.');
+        throw new RuntimeException('فایل موتور eSpeak در این مسیر پیدا نشد.');
     }
     if ($path !== '') {
         $probe = chatbot_tts_probe_engine($path);
         if (!$probe['ok']) {
-            throw new RuntimeException('موتور صوتی در این مسیر پاسخ معتبر نداد (' . $probe['error'] . '). مسیر را بررسی کنید.');
+            throw new RuntimeException('موتور eSpeak در این مسیر پاسخ معتبر نداد (' . $probe['error'] . '). مسیر را بررسی کنید.');
         }
+    }
+    if ($piperPath !== '' && !is_file($piperPath)) {
+        throw new RuntimeException('فایل piper.exe در این مسیر پیدا نشد.');
+    }
+    if ($piperPath !== '') {
+        $probePiper = chatbot_tts_probe_piper($piperPath);
+        if (!$probePiper['ok']) {
+            throw new RuntimeException('موتور Piper در این مسیر پاسخ معتبر نداد (' . $probePiper['error'] . '). مسیر را بررسی کنید.');
+        }
+    }
+    if ($piperModel !== '' && !is_file($piperModel)) {
+        throw new RuntimeException('فایل مدل فارسی (.onnx) در این مسیر پیدا نشد.');
+    }
+    if ($piperModel !== '' && !preg_match('/\.onnx$/i', $piperModel)) {
+        throw new RuntimeException('مدل Piper باید فایل .onnx باشد (فایل .onnx.json را کنارش بگذارید، نه به‌جایش).');
     }
     save_setting('chatbot_tts_mode', $mode);
     save_setting('chatbot_tts_speed', (string) $speed);
     save_setting('chatbot_tts_voice', $voice);
     save_setting('chatbot_tts_espeak_path', $path);
-    save_audit((int) $admin['id'], 'chatbot_tts_saved', null, ['mode' => $mode, 'speed' => $speed, 'voice' => $voice]);
+    save_setting('chatbot_tts_piper_path', $piperPath);
+    save_setting('chatbot_tts_piper_model', $piperModel);
+    save_setting('chatbot_tts_kind', $kind);
+    save_audit((int) $admin['id'], 'chatbot_tts_saved', null, ['mode' => $mode, 'speed' => $speed, 'voice' => $voice, 'kind' => $kind]);
 }
 
 /** پیش‌فرض‌های نام، متن‌ها و رفتار آریا. */
@@ -871,7 +892,10 @@ function chatbot_tts_config(): array
     $speed = max(80, min(300, (int) (setting('chatbot_tts_speed', '140') ?? '140')));
     $customPath = trim((string) (setting('chatbot_tts_espeak_path', '') ?? ''));
     $voice = valid_choice((string) (setting('chatbot_tts_voice', 'default') ?? 'default'), ['default', 'male', 'female'], 'default');
-    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice];
+    $piperPath = trim((string) (setting('chatbot_tts_piper_path', '') ?? ''));
+    $piperModel = trim((string) (setting('chatbot_tts_piper_model', '') ?? ''));
+    $kind = valid_choice((string) (setting('chatbot_tts_kind', 'auto') ?? 'auto'), ['auto', 'piper', 'espeak'], 'auto');
+    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice, 'piper_path' => $piperPath, 'piper_model' => $piperModel, 'kind' => $kind];
 }
 
 /** آیا PHP اجازهٔ اجرای موتور صوتی را دارد؟ */
@@ -912,12 +936,142 @@ function chatbot_tts_find_espeak(?string $configured = null): ?string
     return null;
 }
 
+/** پیدا کردن piper.exe (مسیر دستی، پوشهٔ کش، مسیرهای رایج ویندوز). */
+function chatbot_tts_find_piper(?string $configured = null): ?string
+{
+    $candidates = [];
+    if ($configured !== null && trim($configured) !== '') {
+        $candidates[] = trim($configured);
+    }
+    $candidates[] = APP_ROOT . '/storage/tts/piper/piper.exe';
+    $candidates[] = APP_ROOT . '/storage/tts/piper/piper';
+    if (strtoupper(substr((string) PHP_OS, 0, 3)) === 'WIN') {
+        $candidates[] = 'C:/piper/piper.exe';
+        $candidates[] = 'C:/Program Files/piper/piper.exe';
+        $candidates[] = 'C:/Program Files/Piper/piper.exe';
+    } else {
+        $candidates[] = '/usr/local/bin/piper';
+        $candidates[] = '/usr/bin/piper';
+    }
+    foreach ($candidates as $candidate) {
+        if (is_string($candidate) && $candidate !== '' && is_file($candidate)) {
+            return $candidate;
+        }
+    }
+    return null;
+}
+
+/** اولویت مدل فارسی: مانا (بهترین)، سپس gyro/amir، سپس هر fa_IR. */
+function chatbot_tts_piper_model_rank(string $path): int
+{
+    $name = strtolower(basename($path));
+    if (str_contains($name, 'mana')) {
+        return 0;
+    }
+    if (str_contains($name, 'gyro')) {
+        return 1;
+    }
+    if (str_contains($name, 'amir')) {
+        return 2;
+    }
+    if (str_contains($name, 'ganji')) {
+        return 3;
+    }
+    if (str_contains($name, 'fa_ir') || str_contains($name, 'fa-ir') || str_contains($name, 'farsi') || str_contains($name, 'persian')) {
+        return 4;
+    }
+    return 9;
+}
+
+/** پیدا کردن مدل فارسی .onnx (مسیر دستی یا کنار piper.exe / storage/tts/piper). */
+function chatbot_tts_piper_model(?string $configured = null, ?string $exe = null): ?string
+{
+    if ($configured !== null && trim($configured) !== '') {
+        $manual = trim($configured);
+        if (is_file($manual) && preg_match('/\.onnx$/i', $manual)) {
+            return $manual;
+        }
+    }
+    $found = [];
+    $dirs = [APP_ROOT . '/storage/tts/piper'];
+    if (is_string($exe) && $exe !== '') {
+        $dirs[] = dirname($exe);
+        $dirs[] = dirname($exe) . DIRECTORY_SEPARATOR . 'models';
+    }
+    foreach ($dirs as $dir) {
+        if (!is_dir($dir)) {
+            continue;
+        }
+        $names = @scandir($dir);
+        if (!is_array($names)) {
+            continue;
+        }
+        foreach ($names as $name) {
+            if (!preg_match('/\.onnx$/i', (string) $name)) {
+                continue;
+            }
+            $file = $dir . DIRECTORY_SEPARATOR . $name;
+            if (is_file($file) && (int) filesize($file) > 1000000) {
+                $found[] = $file;
+            }
+        }
+    }
+    if ($found === []) {
+        return null;
+    }
+    usort($found, static function (string $a, string $b): int {
+        $rank = chatbot_tts_piper_model_rank($a) <=> chatbot_tts_piper_model_rank($b);
+        return $rank !== 0 ? $rank : strcasecmp(basename($a), basename($b));
+    });
+    return $found[0];
+}
+
+/** موتور فعال: Piper اگر آماده باشد، وگرنه eSpeak (مگر اینکه مدیر یکی را اجبار کرده باشد). */
+function chatbot_tts_active(?array $config = null): array
+{
+    $config = $config ?? chatbot_tts_config();
+    $piperExe = chatbot_tts_find_piper($config['piper_path'] ?? null);
+    $piperModel = chatbot_tts_piper_model($config['piper_model'] ?? null, $piperExe);
+    $espeakExe = chatbot_tts_find_espeak($config['espeak_path'] ?? null);
+    $proc = chatbot_tts_proc_available();
+    $piperReady = $proc && $piperExe !== null && $piperModel !== null;
+    $espeakReady = $proc && $espeakExe !== null;
+    $want = (string) ($config['kind'] ?? 'auto');
+    if ($want === 'piper') {
+        return $piperReady
+            ? ['kind' => 'piper', 'exe' => $piperExe, 'model' => $piperModel]
+            : ['kind' => 'none', 'exe' => null, 'model' => null];
+    }
+    if ($want === 'espeak') {
+        return $espeakReady
+            ? ['kind' => 'espeak', 'exe' => $espeakExe, 'model' => null]
+            : ['kind' => 'none', 'exe' => null, 'model' => null];
+    }
+    if ($piperReady) {
+        return ['kind' => 'piper', 'exe' => $piperExe, 'model' => $piperModel];
+    }
+    if ($espeakReady) {
+        return ['kind' => 'espeak', 'exe' => $espeakExe, 'model' => null];
+    }
+    return ['kind' => 'none', 'exe' => null, 'model' => null];
+}
+
+/** نگاشت سرعت کلمه/دقیقه به length_scale پایپر (۱۴۰ = طبیعی؛ کمتر = شمرده‌تر). */
+function chatbot_tts_length_scale(int $wpm): string
+{
+    $scale = 140.0 / max(80, min(300, $wpm));
+    $scale *= 1.15;
+    $scale = max(0.5, min(2.0, $scale));
+    return number_format($scale, 2, '.', '');
+}
+
 /** وضعیت موتور گویندگی برای ویجت و صفحهٔ مدیریت. */
 function chatbot_tts_status(): array
 {
     $config = chatbot_tts_config();
     $exe = chatbot_tts_find_espeak($config['espeak_path']);
-    $serverReady = $exe !== null && chatbot_tts_proc_available();
+    $active = chatbot_tts_active($config);
+    $serverReady = $active['kind'] !== 'none';
     $engine = 'none';
     if ($config['mode'] === 'server') {
         $engine = 'server';
@@ -926,7 +1080,18 @@ function chatbot_tts_status(): array
     } elseif ($config['mode'] === 'auto') {
         $engine = $serverReady ? 'server' : 'browser';
     }
-    return ['mode' => $config['mode'], 'speed' => $config['speed'], 'voice' => $config['voice'], 'server_ready' => $serverReady, 'espeak' => $exe, 'engine' => $engine];
+    return [
+        'mode' => $config['mode'],
+        'speed' => $config['speed'],
+        'voice' => $config['voice'],
+        'kind' => $config['kind'],
+        'active_kind' => $active['kind'],
+        'server_ready' => $serverReady,
+        'espeak' => $exe,
+        'piper' => chatbot_tts_find_piper($config['piper_path']),
+        'piper_model' => $active['kind'] === 'piper' ? (string) $active['model'] : $config['piper_model'],
+        'engine' => $engine,
+    ];
 }
 
 /** آماده‌سازی متن پاسخ برای خوانده شدن: حذف پیوند، شماره‌ها به شکل خوانا، حذف شکلک. */
@@ -949,6 +1114,71 @@ function chatbot_tts_clean(string $text): string
     $text = (string) preg_replace('~[^\p{L}\p{N}\s.,;:!?؟،؛٪٫٬\-()«»"\'/+=%*_]~u', ' ', $text);
     $text = (string) preg_replace('~\s+~u', ' ', trim($text));
     return mb_substr($text, 0, 800, 'UTF-8');
+}
+
+/**
+ * بازنویسی متن برای خواندن محاوره‌ای تهرانی (فقط صدا؛ متن روی صفحه عوض نمی‌شود).
+ * انقباض‌های رایج گفتاری؛ اصطلاحات اداری و «شما»ی مؤدبانه حفظ می‌شوند.
+ */
+function chatbot_tts_colloquial(string $text): string
+{
+    $pairs = [
+        'نمی‌توانید' => 'نمی‌تونید', 'نمیتوانید' => 'نمیتونید',
+        'نمی‌توانم' => 'نمی‌تونم', 'نمیتوانم' => 'نمیتونم',
+        'نمی‌تواند' => 'نمی‌تونه', 'نمیتواند' => 'نمیتونه',
+        'نمی‌توانیم' => 'نمی‌تونیم', 'نمیتوانیم' => 'نمیتونیم',
+        'نمی‌توانند' => 'نمی‌تونن', 'نمیتوانند' => 'نمیتونن',
+        'می‌توانید' => 'می‌تونید', 'میتوانید' => 'میتونید',
+        'می‌توانم' => 'می‌تونم', 'میتوانم' => 'میتونم',
+        'می‌تواند' => 'می‌تونه', 'میتواند' => 'میتونه',
+        'می‌توانیم' => 'می‌تونیم', 'میتوانیم' => 'میتونیم',
+        'می‌توانند' => 'می‌تونن', 'میتوانند' => 'میتونن',
+        'می‌خواهید' => 'می‌خواید', 'میخواهید' => 'میخواید',
+        'می‌خواهم' => 'می‌خوام', 'میخواهم' => 'میخوام',
+        'می‌خواهد' => 'می‌خواد', 'میخواهد' => 'میخواد',
+        'می‌خواهیم' => 'می‌خوایم', 'میخواهیم' => 'میخوایم',
+        'می‌خواهند' => 'می‌خوان', 'میخواهند' => 'میخوان',
+        'می‌خواهی' => 'می‌خوای', 'میخواهی' => 'میخوای',
+        'نمی‌شود' => 'نمی‌شه', 'نمیشود' => 'نمیشه',
+        'می‌شوند' => 'می‌شن', 'میشوند' => 'میشن',
+        'می‌شود' => 'می‌شه', 'میشود' => 'میشه',
+        'می‌روید' => 'می‌رید', 'میروید' => 'میرید',
+        'می‌روم' => 'می‌رم', 'میروم' => 'میرم',
+        'می‌رود' => 'می‌ره', 'میرود' => 'میره',
+        'می‌رویم' => 'می‌ریم', 'میرویم' => 'میریم',
+        'می‌روند' => 'می‌رن', 'میروند' => 'میرن',
+        'می‌باشند' => 'هستن', 'میباشند' => 'هستن',
+        'می‌باشد' => 'هست', 'میباشد' => 'هست',
+        'بدهید' => 'بدید',
+        'چگونه' => 'چطور',
+        'چیست' => 'چیه',
+        'کیست' => 'کیه',
+        'آن‌ها' => 'اونا', 'آنها' => 'اونا',
+        'این‌ها' => 'اینا', 'اینها' => 'اینا',
+    ];
+    uksort($pairs, static fn(string $a, string $b): int => mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8'));
+    foreach ($pairs as $from => $to) {
+        $text = str_replace($from, $to, $text);
+    }
+    $text = (string) preg_replace('/(^|[\s])دیگر(?=[\s.؟!،؛]|$)/u', '$1دیگه', $text);
+    $text = (string) preg_replace('/(^|[\s])آن(?=[\s.؟!،؛]|$)/u', '$1اون', $text);
+    $text = (string) preg_replace('/(^|[\s])را(?=[\s.؟!،؛]|$)/u', '$1رو', $text);
+    $text = (string) preg_replace('/\s+است(?=[\s.؟!،؛]|$)/u', 'ه', $text);
+    $text = (string) preg_replace('~\s+~u', ' ', trim($text));
+    return $text;
+}
+
+/** نقطه‌گذاری برای مکث طبیعی Piper (جمله به جمله، نه یک نفس طولانی). */
+function chatbot_tts_phrase(string $text): string
+{
+    $text = strtr($text, ['؛' => '.', ';' => '.', '…' => '.']);
+    $text = str_replace('...', '.', $text);
+    $text = (string) preg_replace('/([.؟!،,])(?!\s|$)/u', '$1 ', $text);
+    $text = (string) preg_replace('~\s+~u', ' ', trim($text));
+    if ($text !== '' && !preg_match('/[.؟!]$/u', $text)) {
+        $text .= '.';
+    }
+    return $text;
 }
 
 /** نگاشت نوع صدا به شناسهٔ صدای eSpeak-NG (فقط مقادیر مجاز؛ هرگز ورودی خام). */
@@ -1125,6 +1355,71 @@ function chatbot_tts_run_espeak(string $exe, string $text, int $wpm, string $voi
     return ['ok' => true, 'wav' => $wav];
 }
 
+/** سنتز با Piper (خروجی فایل WAV؛ دو گویش CLI: باینری C++ و پایتون). */
+function chatbot_tts_run_piper(string $exe, string $model, string $text, string $lengthScale): array
+{
+    $tmp = rtrim((string) sys_get_temp_dir(), '\\/') . DIRECTORY_SEPARATOR . 'aria-' . bin2hex(random_bytes(8));
+    $wavPath = $tmp . '.wav';
+    $txtPath = $tmp . '.txt';
+    if (@file_put_contents($txtPath, $text . "\n") === false) {
+        return ['ok' => false, 'error' => 'ساخت فایل موقت متن ممکن نشد.'];
+    }
+    $qCpp = ['--noise_scale', '0.667', '--noise_w', '0.8', '--sentence_silence', '0.40'];
+    $qPy = ['--noise-scale', '0.667', '--noise-w', '0.8', '--sentence-silence', '0.40'];
+    $attempts = [
+        ['cmd' => array_merge([$exe, '--model', $model, '--output_file', $wavPath, '--length_scale', $lengthScale], $qCpp), 'stdin' => $text . "\n"],
+        ['cmd' => array_merge([$exe, '-m', $model, '-f', $wavPath, '--length-scale', $lengthScale, '-i', $txtPath], $qPy), 'stdin' => ''],
+        ['cmd' => [$exe, '--model', $model, '--output_file', $wavPath, '--length_scale', $lengthScale], 'stdin' => $text . "\n"],
+    ];
+    $result = ['ok' => false, 'stdout' => '', 'stderr' => '', 'exit' => null, 'error' => 'start'];
+    $wav = '';
+    foreach ($attempts as $attempt) {
+        $result = chatbot_tts_exec($attempt['cmd'], $attempt['stdin'], 40.0);
+        $wav = is_file($wavPath) ? (string) @file_get_contents($wavPath) : '';
+        if (chatbot_tts_is_valid_wav($wav)) {
+            break;
+        }
+        if (is_file($wavPath)) {
+            @unlink($wavPath);
+        }
+        if ($result['error'] === 'timeout') {
+            break;
+        }
+        $wav = '';
+    }
+    if (is_file($wavPath)) {
+        @unlink($wavPath);
+    }
+    if (is_file($txtPath)) {
+        @unlink($txtPath);
+    }
+    if (!chatbot_tts_is_valid_wav($wav)) {
+        if ($result['error'] === 'timeout') {
+            app_error_log('chatbot Piper timeout: engine did not finish in 40s');
+            return ['ok' => false, 'error' => 'موتور عصبی در زمان مجاز پاسخ نداد.'];
+        }
+        app_error_log('chatbot Piper failed (' . $result['error'] . '): ' . mb_substr((string) $result['stderr'], 0, 500, 'UTF-8'));
+        return ['ok' => false, 'error' => 'موتور عصبی خروجی معتبر تولید نکرد. مسیر piper.exe و فایل مدل .onnx را بررسی کنید.'];
+    }
+    return ['ok' => true, 'wav' => $wav];
+}
+
+/** راستی‌آزمایی مسیر دستی Piper. */
+function chatbot_tts_probe_piper(string $exe): array
+{
+    $help = chatbot_tts_exec([$exe, '--help'], '', 10.0);
+    $banner = (string) $help['stdout'] . "\n" . (string) $help['stderr'];
+    if (stripos($banner, 'model') !== false || stripos($banner, 'piper') !== false) {
+        return ['ok' => true, 'error' => ''];
+    }
+    $ver = chatbot_tts_exec([$exe, '--version'], '', 10.0);
+    $banner2 = (string) $ver['stdout'] . "\n" . (string) $ver['stderr'];
+    if (stripos($banner2, 'piper') !== false) {
+        return ['ok' => true, 'error' => ''];
+    }
+    return ['ok' => false, 'error' => 'خروجی موتور Piper شناخته نشد'];
+}
+
 /** راستی‌آزمایی مسیر دستی موتور (اجرای --version با مهلت ۱۰ ثانیه‌ای). */
 function chatbot_tts_probe_engine(string $exe): array
 {
@@ -1194,23 +1489,27 @@ function chatbot_tts_say(string $text): array
     if ($config['mode'] === 'off') {
         return ['ok' => false, 'error' => 'گویندگی بات خاموش است.'];
     }
-    $clean = chatbot_tts_clean($text);
+    $clean = chatbot_tts_phrase(chatbot_tts_colloquial(chatbot_tts_clean($text)));
     if ($clean === '') {
         return ['ok' => false, 'error' => 'متنی برای خواندن وجود ندارد.'];
     }
-    $exe = chatbot_tts_find_espeak($config['espeak_path']);
-    if ($exe === null || !chatbot_tts_proc_available()) {
-        return ['ok' => false, 'error' => 'موتور صوتی روی سرور نصب/فعال نیست.'];
+    $active = chatbot_tts_active($config);
+    if ($active['kind'] === 'none') {
+        return ['ok' => false, 'error' => 'موتور صوتی روی سرور نصب/فعال نیست. Piper (پیشنهادی) یا eSpeak را نصب کنید.'];
     }
-    $voiceStatus = chatbot_tts_voice_status($exe, chatbot_tts_voice_id($config['voice']));
-    if ($voiceStatus['status'] === 'no') {
-        return ['ok' => false, 'error' => 'صدای فارسی در موتور صوتی یافت نشد؛ موتور را کامل نصب کنید یا حالت «فقط صدای مرورگر» را امتحان کنید.'];
+    if ($active['kind'] === 'espeak') {
+        $voiceStatus = chatbot_tts_voice_status((string) $active['exe'], chatbot_tts_voice_id($config['voice']));
+        if ($voiceStatus['status'] === 'no') {
+            return ['ok' => false, 'error' => 'صدای فارسی در موتور صوتی یافت نشد؛ موتور را کامل نصب کنید یا حالت «فقط صدای مرورگر» را امتحان کنید.'];
+        }
     }
     $dir = APP_ROOT . '/storage/tts';
     if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
         return ['ok' => false, 'error' => 'ساخت پوشهٔ کش صدا ممکن نشد.'];
     }
-    $voiceId = chatbot_tts_voice_id($config['voice']);
+    $voiceId = $active['kind'] === 'piper'
+        ? ('piper:' . basename((string) $active['model']) . '|q2')
+        : chatbot_tts_voice_id($config['voice']);
     $id = sha1($clean . '|' . $config['speed'] . '|' . $voiceId);
     $file = $dir . '/' . $id . '.wav';
     if (is_file($file) && (int) filesize($file) > 100) {
@@ -1220,7 +1519,11 @@ function chatbot_tts_say(string $text): array
         }
         @unlink($file);
     }
-    $result = chatbot_tts_run_espeak($exe, $clean, $config['speed'], $voiceId);
+    if ($active['kind'] === 'piper') {
+        $result = chatbot_tts_run_piper((string) $active['exe'], (string) $active['model'], $clean, chatbot_tts_length_scale($config['speed']));
+    } else {
+        $result = chatbot_tts_run_espeak((string) $active['exe'], $clean, $config['speed'], chatbot_tts_voice_id($config['voice']));
+    }
     if (!$result['ok']) {
         return $result;
     }
@@ -1280,19 +1583,30 @@ function chatbot_render_admin(array $admin): void
     $ttsModes = ['auto' => 'خودکار (اول سرور، وگرنه مرورگر)', 'server' => 'فقط موتور سرور (آفلاین قطعی)', 'browser' => 'فقط صدای مرورگر', 'off' => 'خاموش'];
     $ttsVoiceId = chatbot_tts_voice_id($tts['voice']);
     $ttsVoiceLine = 'نامشخص (موتور پیدا نشد)';
-    if (is_string($tts['espeak']) && $tts['espeak'] !== '') {
+    $ttsCfg = chatbot_tts_config();
+    if (($tts['active_kind'] ?? '') === 'piper') {
+        $ttsVoiceLine = 'موتور عصبی Piper آماده است (' . basename((string) ($tts['piper_model'] ?? '')) . ')';
+    } elseif (is_string($tts['espeak']) && $tts['espeak'] !== '') {
         $ttsVoiceCheck = chatbot_tts_voice_status((string) $tts['espeak'], $ttsVoiceId);
         if ($ttsVoiceCheck['status'] === 'yes') {
-            $ttsVoiceLine = 'یافت شد (' . $ttsVoiceId . ')';
+            $ttsVoiceLine = 'eSpeak: یافت شد (' . $ttsVoiceId . ')';
         } elseif ($ttsVoiceCheck['status'] === 'no') {
-            $ttsVoiceLine = 'یافت نشد! خروجی موتور نامفهوم می‌شود — موتور را کامل نصب کنید';
+            $ttsVoiceLine = 'eSpeak: یافت نشد! خروجی موتور نامفهوم می‌شود — موتور را کامل نصب کنید';
         } else {
-            $ttsVoiceLine = 'نامشخص (بررسی نشد)';
+            $ttsVoiceLine = 'eSpeak: نامشخص (بررسی نشد)';
         }
     }
+    $ttsServerLine = 'پیدا نشد — راهنمای نصب پایین همین کارت';
+    if (($tts['active_kind'] ?? '') === 'piper') {
+        $ttsServerLine = 'فعال · Piper (' . e((string) ($tts['piper'] ?? '')) . ')';
+    } elseif ($tts['server_ready'] && is_string($tts['espeak']) && $tts['espeak'] !== '') {
+        $ttsServerLine = 'فعال · eSpeak (' . e((string) $tts['espeak']) . ')';
+    }
+    $ttsKinds = ['auto' => 'خودکار (اول Piper عصبی، وگرنه eSpeak)', 'piper' => 'فقط Piper (صدای طبیعی)', 'espeak' => 'فقط eSpeak (ربات‌گونه)'];
     echo '<div class="card form-card"><h2>گویندگی بات (آفلاین)</h2>'
-        . '<p class="muted">وضعیت موتور سرور: ' . ($tts['server_ready'] ? 'فعال (' . e((string) $tts['espeak']) . ')' : 'پیدا نشد — راهنمای نصب پایین همین کارت') . '</p>'
+        . '<p class="muted">وضعیت موتور سرور: ' . $ttsServerLine . '</p>'
         . '<p class="muted">وضعیت صدای فارسی: ' . e($ttsVoiceLine) . '</p>'
+        . '<p class="muted">متن روی صفحه عوض نمی‌شود؛ فقط صدای خوانده‌شده محاوره‌ای (تهرانیِ روزمره) می‌شود.</p>'
         . '<form method="post" action="index.php?page=chatbot-admin">' . csrf_field()
         . '<input type="hidden" name="tts_settings" value="1">'
         . '<label class="field">حالت گویندگی<select name="tts_mode">';
@@ -1300,7 +1614,14 @@ function chatbot_render_admin(array $admin): void
         echo '<option value="' . $ttsModeValue . '"' . ($tts['mode'] === $ttsModeValue ? ' selected' : '') . '>' . e($ttsModeLabel) . '</option>';
     }
     echo '</select></label>'
-        . '<label class="field">مسیر فایل espeak-ng روی سرور (خالی = جست‌وجوی خودکار)<input name="tts_espeak_path" dir="ltr" maxlength="500" value="' . e((string) chatbot_tts_config()['espeak_path']) . '" placeholder="C:\Program Files\eSpeak NG\espeak-ng.exe"></label>'
+        . '<label class="field">موتور صدا<select name="tts_kind">';
+    foreach ($ttsKinds as $ttsKindValue => $ttsKindLabel) {
+        echo '<option value="' . $ttsKindValue . '"' . (($tts['kind'] ?? 'auto') === $ttsKindValue ? ' selected' : '') . '>' . e($ttsKindLabel) . '</option>';
+    }
+    echo '</select></label>'
+        . '<label class="field">مسیر piper.exe (خالی = جست‌وجوی خودکار)<input name="tts_piper_path" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['piper_path']) . '" placeholder="C:\piper\piper.exe"></label>'
+        . '<label class="field">مسیر مدل فارسی .onnx (خالی = جست‌وجو کنار piper.exe)<input name="tts_piper_model" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['piper_model']) . '" placeholder="C:\piper\fa_IR-mana-medium.onnx"></label>'
+        . '<label class="field">مسیر فایل espeak-ng روی سرور (خالی = جست‌وجوی خودکار)<input name="tts_espeak_path" dir="ltr" maxlength="500" value="' . e((string) $ttsCfg['espeak_path']) . '" placeholder="C:\Program Files\eSpeak NG\espeak-ng.exe"></label>'
         . '<label class="field">سرعت گفتار (کلمه در دقیقه؛ کمتر = شمرده‌تر و واضح‌تر)<input type="number" name="tts_speed" min="80" max="300" value="' . (int) $tts['speed'] . '"></label>'
         . '<label class="field">نوع صدا<select name="tts_voice">';
     foreach (['default' => 'پیش‌فرض', 'male' => 'مرد', 'female' => 'زن'] as $ttsVoiceValue => $ttsVoiceLabel) {
@@ -1314,7 +1635,7 @@ function chatbot_render_admin(array $admin): void
         . '<form method="post" action="index.php?page=chatbot-admin" style="margin-top:8px">' . csrf_field()
         . '<input type="hidden" name="tts_sample" value="1">'
         . '<button class="button secondary" type="submit">دانلود نمونه صدا</button></form>'
-        . '<p class="muted">نصب موتور (یک‌بار روی سرور): بستهٔ eSpeak-NG ویندوز را از صفحهٔ انتشار رسمی بگیرید و نصب کنید، سپس با دستور <code dir="ltr">espeak-ng --voices=fa</code> از وجود صدای فارسی مطمئن شوید. همهٔ پردازش داخل شبکهٔ خودتان انجام می‌شود و صدا برای اینترنت ارسال نمی‌شود.</p></div>';
+        . '<p class="muted">نصب صدای طبیعی (یک‌بار روی سرور، بعدش آفلاین): ۱) فایل <a href="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip" dir="ltr">piper_windows_amd64.zip</a> را دانلود و در <code dir="ltr">C:\piper</code> از حالت فشرده خارج کنید تا <code dir="ltr">C:\piper\piper.exe</code> دیده شود. ۲) دو فایل مدل مانا را در همان پوشه ذخیره کنید: <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx" dir="ltr">fa_IR-mana-medium.onnx</a> و <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx.json" dir="ltr">fa_IR-mana-medium.onnx.json</a> (حتماً هر دو). ۳) همین‌جا موتور را «خودکار» بگذارید، مسیر piper.exe را <code dir="ltr">C:\piper\piper.exe</code> و مسیر مدل را <code dir="ltr">C:\piper\fa_IR-mana-medium.onnx</code> وارد کنید، ذخیره کنید، بعد «تست موتور سرور» و «دانلود نمونه صدا» را بزنید. اگر چند مدل کنار هم باشند مانا خودش انتخاب می‌شود. تا Piper آماده نباشد از eSpeak استفاده می‌شود. متن روی صفحه رسمی می‌ماند و فقط صدا محاوره‌ای خوانده می‌شود.</p></div>';
 
     // گزارش بازه‌ای: آمار کلی، نیت‌ها، پرتکرارترین مدخل‌ها و بازخورد منفی اخیر (بدون نام کاربر)
     $validDate = static fn(string $v): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) && strtotime($v) !== false;

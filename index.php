@@ -4292,24 +4292,18 @@ if ($page === 'chatbot-admin') {
                 chatbot_save_widget($_POST, $chatbotAdmin);
                 flash('success', 'تنظیمات آریا ذخیره شد.');
             } elseif (isset($_POST['tts_test'])) {
-                $ttsTest = chatbot_tts_say('تست صدای فارسی آریا');
+                $ttsTest = chatbot_tts_say('سلام، می‌خواهم به شما کمک کنم. درخواست شما ثبت می‌شود.');
                 if ($ttsTest['ok']) {
-                    $ttsTestExe = chatbot_tts_find_espeak(chatbot_tts_config()['espeak_path']);
-                    $ttsTestVoice = '';
-                    if ($ttsTestExe !== null) {
-                        $ttsTestVs = chatbot_tts_voice_status($ttsTestExe, chatbot_tts_voice_id(chatbot_tts_config()['voice']));
-                        if ($ttsTestVs['status'] === 'yes') {
-                            $ttsTestVoice = ' صدای فارسی هم تأیید شد.';
-                        } elseif ($ttsTestVs['status'] === 'unknown') {
-                            $ttsTestVoice = ' (وضعیت صدای فارسی نامشخص است.)';
-                        }
-                    }
+                    $ttsActive = chatbot_tts_active();
+                    $ttsTestVoice = ($ttsActive['kind'] === 'piper')
+                        ? ' موتور عصبی Piper و خواندن محاوره‌ای فعال است.'
+                        : ' موتور eSpeak با خواندن محاوره‌ای فعال است.';
                     flash('success', 'موتور صوتی سرور سالم است و فایل تست ساخته شد.' . $ttsTestVoice);
                 } else {
                     flash('danger', $ttsTest['error']);
                 }
             } elseif (isset($_POST['tts_sample'])) {
-                $ttsSample = chatbot_tts_say('تست صدای فارسی آریا');
+                $ttsSample = chatbot_tts_say('سلام، می‌خواهم به شما کمک کنم. درخواست شما ثبت می‌شود.');
                 if (!$ttsSample['ok']) {
                     flash('danger', $ttsSample['error']);
                     redirect('index.php?page=chatbot-admin');

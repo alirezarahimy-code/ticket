@@ -87,3 +87,28 @@ check("'140'" in chatbot and "?? 140" in chatbot,
       "default speech speed is slower (140 wpm) for clearer Persian")
 check("Accept-Ranges" in chatbot and "immutable" in chatbot,
       "served audio supports seeking and long-term caching")
+check("function chatbot_tts_colloquial" in chatbot and "می‌خوام" in chatbot
+      and "می‌شه" in chatbot and "chatbot_tts_colloquial(chatbot_tts_clean" in chatbot,
+      "spoken-Tehrani rewrite is applied to TTS text only")
+check("function chatbot_tts_run_piper" in chatbot and "--length_scale" in chatbot
+      and "--output_file" in chatbot and ".onnx" in chatbot
+      and "function chatbot_tts_probe_piper" in chatbot,
+      "Piper neural engine is wired with file-based wav output and a save-time probe")
+check("tts_piper_path" in chatbot and "tts_piper_model" in chatbot
+      and "tts_kind" in chatbot and "chatbot_tts_kind" in chatbot,
+      "Piper path, model and engine preference are managed admin settings")
+check("function chatbot_tts_active" in chatbot and "function chatbot_tts_find_piper" in chatbot
+      and "function chatbot_tts_length_scale" in chatbot,
+      "active engine prefers Piper when the exe and onnx model are present")
+check("piper_windows_amd64.zip" in chatbot and "fa_IR-mana-medium.onnx" in chatbot and "huggingface.co" in chatbot,
+      "the admin card documents the one-time offline Piper install")
+check("محاوره‌ای" in chatbot and "متن روی صفحه عوض نمی‌شود" in chatbot,
+      "admins are told on-screen text stays formal while speech is colloquial")
+check("موتور عصبی Piper" in index and "خواندن محاوره‌ای" in index,
+      "the server-engine test reports Piper vs eSpeak and colloquial reading")
+check("Piper" in guide and "محاوره‌ای" in guide,
+      "the Persian guide documents natural offline Piper speech and colloquial reading")
+check("function chatbot_tts_phrase" in chatbot and "function chatbot_tts_piper_model_rank" in chatbot
+      and "mana" in chatbot and "sentence_silence" in chatbot
+      and "--noise_scale" in chatbot and "1.15" in chatbot,
+      "Piper quality is boosted: Mana preference, sentence pauses, natural length and tone")
