@@ -799,6 +799,7 @@ function chatbot_save_tts(array $input, array $admin): void
     save_setting('chatbot_tts_piper_model_male', $piperModelMale);
     save_setting('chatbot_tts_kind', $kind);
     save_setting('chatbot_tts_colloquial', !empty($input['tts_colloquial']) ? '1' : '0');
+    save_setting('chatbot_tts_ezafe_mode', valid_choice(trim((string) ($input['tts_ezafe_mode'] ?? 'pairs')), ['pairs', 'heuristic'], 'pairs'));
     save_audit((int) $admin['id'], 'chatbot_tts_saved', null, ['mode' => $mode, 'speed' => $speed, 'voice' => $voice, 'kind' => $kind]);
 }
 
@@ -932,7 +933,8 @@ function chatbot_tts_config(): array
     $piperModelMale = trim((string) (setting('chatbot_tts_piper_model_male', '') ?? ''));
     $kind = valid_choice((string) (setting('chatbot_tts_kind', 'auto') ?? 'auto'), ['auto', 'piper', 'espeak'], 'auto');
     $colloquial = ((string) (setting('chatbot_tts_colloquial', '0') ?? '0')) === '1';
-    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice, 'piper_path' => $piperPath, 'piper_model' => $piperModel, 'piper_model_male' => $piperModelMale, 'kind' => $kind, 'colloquial' => $colloquial];
+    $ezafeMode = valid_choice((string) (setting('chatbot_tts_ezafe_mode', 'pairs') ?? 'pairs'), ['pairs', 'heuristic'], 'pairs');
+    return ['mode' => $mode, 'speed' => $speed, 'espeak_path' => $customPath, 'voice' => $voice, 'piper_path' => $piperPath, 'piper_model' => $piperModel, 'piper_model_male' => $piperModelMale, 'kind' => $kind, 'colloquial' => $colloquial, 'ezafe_mode' => $ezafeMode];
 }
 
 /** آیا PHP اجازهٔ اجرای موتور صوتی را دارد؟ */
@@ -1112,7 +1114,7 @@ function chatbot_tts_active(?array $config = null): array
 function chatbot_tts_length_scale(int $wpm): string
 {
     $scale = 140.0 / max(80, min(300, $wpm));
-    $scale = max(1.0, min(1.1, $scale));
+    $scale = max(0.9, min(1.15, $scale));
     return number_format($scale, 2, '.', '');
 }
 
@@ -1147,7 +1149,7 @@ function chatbot_tts_status(): array
 
 function chatbot_tts_rules_version(): string
 {
-    return '1.59.5';
+    return '1.59.6';
 }
 
 /** مرز واژهٔ فارسی: حرف / علامت ترکیبی / نیم‌فاصله. lookbehind تک‌نویسه (بدون عرض متغیر). */
@@ -1377,20 +1379,30 @@ function chatbot_tts_ids(string $text): string
     return is_string($out) ? $out : $text;
 }
 
-/** همهٔ عددهای متن را با حروف می‌گوید؛ درصد را «درصد». */
+/** همهٔ عددهای متن را با حروف می‌گوید؛ درصد را «درصد». منفی فقط با فاصله/ابتدای متن. */
 function chatbot_tts_numbers_to_words(string $text): string
 {
     $text = (string) preg_replace('/([0-9۰-۹٠-٩])[٬,](?=[0-9۰-۹٠-٩])/u', '$1', $text);
+    $speak = static function (string $raw): string {
+        $percent = str_ends_with($raw, '%') || str_ends_with($raw, '٪');
+        if ($percent) {
+            $raw = mb_substr($raw, 0, -1, 'UTF-8');
+        }
+        $spoken = chatbot_tts_number_token($raw);
+        return $percent ? ($spoken . ' درصد') : $spoken;
+    };
     $out = preg_replace_callback(
-        '/-?[0-9۰-۹٠-٩]+(?:[.,٫][0-9۰-۹٠-٩]+)?[٪%]?/u',
-        static function (array $m): string {
-            $raw = $m[0];
-            $percent = str_ends_with($raw, '%') || str_ends_with($raw, '٪');
-            if ($percent) {
-                $raw = mb_substr($raw, 0, -1, 'UTF-8');
-            }
-            $spoken = chatbot_tts_number_token($raw);
-            return $percent ? ($spoken . ' درصد') : $spoken;
+        '/(^|[\s\(\[«"\'])-([0-9۰-۹٠-٩]+(?:[.,٫][0-9۰-۹٠-٩]+)?[٪%]?)/u',
+        static function (array $m) use ($speak): string {
+            return $m[1] . 'منفی ' . $speak($m[2]);
+        },
+        $text
+    );
+    $text = is_string($out) ? $out : $text;
+    $out = preg_replace_callback(
+        '/[0-9۰-۹٠-٩]+(?:[.,٫][0-9۰-۹٠-٩]+)?[٪%]?/u',
+        static function (array $m) use ($speak): string {
+            return $speak($m[0]);
         },
         $text
     );
@@ -1718,36 +1730,46 @@ function chatbot_tts_phrase(string $text): string
 function chatbot_tts_limit_phrase(string $sentence, int $maxWords = 15): string
 {
     $sentence = trim($sentence);
-    $words = preg_split('/\\s+/u', $sentence, -1, PREG_SPLIT_NO_EMPTY);
+    $words = preg_split('/\s+/u', $sentence, -1, PREG_SPLIT_NO_EMPTY);
     if (!is_array($words) || count($words) <= $maxWords) {
         return $sentence;
     }
+    $preps = chatbot_tts_ezafe_skip_first();
+    $unsafeLast = static function (string $word) use ($preps): bool {
+        $bare = preg_replace('/[\p{M}]+/u', '', $word) ?? $word;
+        $bare = str_replace("\u{200C}", '', (string) $bare);
+        return $bare === 'و' || isset($preps[$bare]) || str_contains($word, 'ِ');
+    };
     $parts = [];
-    $buf = [];
-    foreach ($words as $word) {
-        $buf[] = $word;
-        $hit = (count($buf) >= 8 && (str_contains($word, '،') || $word === 'و' || str_ends_with($word, '،')));
-        if (count($buf) >= $maxWords || $hit) {
-            $parts[] = implode(' ', $buf);
-            $buf = [];
+    $start = 0;
+    $n = count($words);
+    for ($i = 0; $i < $n; $i++) {
+        $len = $i - $start + 1;
+        $bare = preg_replace('/[\p{M}]+/u', '', $words[$i]) ?? $words[$i];
+        $bare = str_replace("\u{200C}", '', (string) $bare);
+        $breakBeforeVa = ($bare === 'و' && ($i - $start) >= 8 && $i > $start);
+        $breakAfter = ($len >= $maxWords || (str_contains($words[$i], '،') && $len >= 8)) && !$unsafeLast($words[$i]);
+        if ($breakBeforeVa) {
+            $parts[] = implode(' ', array_slice($words, $start, $i - $start));
+            $start = $i;
+        } elseif ($breakAfter) {
+            $parts[] = implode(' ', array_slice($words, $start, $i - $start + 1));
+            $start = $i + 1;
         }
     }
-    if ($buf !== []) {
-        $parts[] = implode(' ', $buf);
+    if ($start < $n) {
+        $parts[] = implode(' ', array_slice($words, $start));
     }
     return implode('. ', $parts);
 }
 
-/**
- * واژه‌نامه + کسرهٔ اضافه. قاعدهٔ همگانی «س ← سَ» حذف شده.
- */
-function chatbot_tts_vocalize(string $text): string
+function chatbot_tts_vocalize(string $text, ?string $ezafeMode = null): string
 {
     $text = chatbot_tts_lexicon_apply($text);
     if (str_contains($text, '[[')) {
         return $text;
     }
-    return chatbot_tts_ezafe($text);
+    return chatbot_tts_ezafe($text, $ezafeMode);
 }
 
 function chatbot_tts_ezafe_skip_first(): array
@@ -1757,9 +1779,10 @@ function chatbot_tts_ezafe_skip_first(): array
         return $set;
     }
     $list = ['از', 'در', 'به', 'که', 'و', 'با', 'تا', 'یا', 'اگر', 'نه', 'را', 'رو', 'هم', 'برای', 'من', 'تو', 'او', 'ما', 'شما', 'این', 'آن', 'اون', 'اینا', 'اونا',
-        'نمایید', 'فرمایید', 'گردید', 'گردد', 'دهید', 'دهم', 'دهیم', 'دهد', 'شوید', 'شوم', 'شویم', 'شود', 'شدند',
+        'اما', 'ولی', 'پس', 'چون', 'زیرا', 'یعنی', 'مثلا', 'لطفا', 'خواهشا', 'سپس', 'نیز', 'فقط', 'دیگر', 'آیا', 'مگر', 'حتی', 'گرچه',
+        'روی', 'نمایید', 'فرمایید', 'گردید', 'گردد', 'دهید', 'دهم', 'دهیم', 'دهد', 'شوید', 'شوم', 'شویم', 'شود', 'شدند',
         'کرد', 'کردید', 'کردم', 'کردیم', 'کردند', 'دارد', 'دارید', 'ندارد', 'نیست', 'نیستید', 'نمود',
-        'کنید', 'کنم', 'کنیم', 'کن', 'بپرسید', 'باید'];
+        'کنید', 'کنم', 'کنیم', 'کن', 'بپرسید', 'باید', 'بگیرید', 'بگیرم', 'گرفت', 'توانید', 'می‌توانید', 'میتوانید'];
     $set = array_fill_keys($list, true);
     return $set;
 }
@@ -1772,12 +1795,38 @@ function chatbot_tts_ezafe_skip_second(): array
     }
     $list = ['است', 'هست', 'هستم', 'هستید', 'هستند', 'بود', 'باشد', 'شد', 'شود', 'کنید', 'کنم', 'کنیم', 'کن', 'بپرسید', 'باید', 'می', 'ها', 'های', 'تر', 'ترین', 'در', 'به', 'از', 'با', 'تا', 'برای', 'که', 'و', 'یا', 'اگر', 'روی',
         'را', 'رو', 'نمایید', 'فرمایید', 'گردید', 'گردد', 'دهید', 'دهم', 'دهیم', 'دهد', 'شوید', 'شوم', 'شویم', 'شدند',
-        'کرد', 'کردید', 'کردم', 'کردیم', 'کردند', 'دارد', 'دارید', 'ندارد', 'نیست', 'نیستید', 'نمود'];
+        'کرد', 'کردید', 'کردم', 'کردیم', 'کردند', 'دارد', 'دارید', 'ندارد', 'نیست', 'نیستید', 'نمود', 'بگیرید', 'گرفت'];
     $set = array_fill_keys($list, true);
     return $set;
 }
 
-function chatbot_tts_ezafe_pairs(): array
+function chatbot_tts_silent_heh(): array
+{
+    static $set = null;
+    if (is_array($set)) {
+        return $set;
+    }
+    $list = ['خانه', 'نامه', 'شماره', 'صفحه', 'برنامه', 'هفته', 'لحظه', 'استفاده', 'مشاهده', 'ادامه', 'سابقه', 'رابطه',
+        'نمونه', 'جمله', 'نقطه', 'زمینه', 'هزینه', 'فاصله', 'خلاصه', 'بنده', 'زنده', 'رفته', 'شده', 'گفته', 'نوشته',
+        'برده', 'آمده', 'داده', 'گرفته', 'کرده', 'نشده', 'خواسته', 'بسته', 'لیست', 'قسمت', 'فرصت', 'مدت'];
+    $set = array_fill_keys($list, true);
+    return $set;
+}
+
+function chatbot_tts_ezafe_nouns(): array
+{
+    static $set = null;
+    if (is_array($set)) {
+        return $set;
+    }
+    $list = ['ثبت', 'سفارش', 'غذا', 'راهنمای', 'سامانه', 'شماره', 'پرسنلی', 'وضعیت', 'درخواست', 'کد', 'ملی', 'فیش', 'تردد',
+        'تیکت', 'سلف', 'خانه', 'کتاب', 'کاربر', 'مدیر', 'رمز', 'گذرواژه', 'پشتیبانی', 'گروه', 'مهمان', 'چاپ', 'صفحه',
+        'برنامه', 'پاسخ', 'پرسش', 'راهنما', 'فهرست', 'دسترسی', 'پیگیری'];
+    $set = array_fill_keys($list, true);
+    return $set;
+}
+
+function chatbot_tts_ezafe_pairs_builtin(): array
 {
     return [
         'ثبت سفارش' => 'ثبتِ سفارش',
@@ -1790,24 +1839,94 @@ function chatbot_tts_ezafe_pairs(): array
     ];
 }
 
-/** کسره فقط بین دو کلمهٔ جدا. اگر نویسنده کسره یا «ه‌یِ» نوشته دست نمی‌زنیم. */
-function chatbot_tts_ezafe(string $text): string
+function chatbot_tts_overlay_map(string $rel): array
+{
+    if (!defined('APP_ROOT')) {
+        return [];
+    }
+    $file = APP_ROOT . '/' . ltrim($rel, '/');
+    if (!is_file($file)) {
+        return [];
+    }
+    $loaded = include $file;
+    if (!is_array($loaded)) {
+        return [];
+    }
+    $out = [];
+    foreach ($loaded as $from => $to) {
+        if (is_string($from) && is_string($to) && $from !== '') {
+            $out[chatbot_tts_ascii_letters($from)] = $to;
+        }
+    }
+    return $out;
+}
+
+function chatbot_tts_ezafe_pairs(): array
+{
+    $pairs = chatbot_tts_ezafe_pairs_builtin();
+    foreach (chatbot_tts_overlay_map('storage/tts/ezafe-pairs.php') as $from => $to) {
+        $pairs[$from] = $to;
+    }
+    foreach (chatbot_tts_lexicon() as $from => $to) {
+        if (str_contains($from, ' ') && (str_contains($to, 'ِ') || str_contains($to, 'یِ'))) {
+            $pairs[$from] = $to;
+        }
+    }
+    return $pairs;
+}
+
+function chatbot_tts_ezafe_mode(?array $opts = null): string
+{
+    if (is_array($opts) && isset($opts['ezafe_mode'])) {
+        return valid_choice((string) $opts['ezafe_mode'], ['pairs', 'heuristic'], 'pairs');
+    }
+    $config = chatbot_tts_config();
+    return valid_choice((string) ($config['ezafe_mode'] ?? 'pairs'), ['pairs', 'heuristic'], 'pairs');
+}
+
+function chatbot_tts_word_bare(string $word): string
+{
+    $bare = preg_replace('/[\p{M}]+/u', '', $word) ?? $word;
+    return str_replace("\u{200C}", '', (string) $bare);
+}
+
+function chatbot_tts_mark_ezafe_first(string $raw, string $bare): string
+{
+    if (str_contains($raw, 'ِ') || str_contains($raw, 'یِ') || str_contains($raw, "ه‌یِ")) {
+        return $raw;
+    }
+    $last = mb_substr($bare, -1, 1, 'UTF-8');
+    if ($last === 'ا' || $last === 'آ' || $last === 'و') {
+        return $raw . 'یِ';
+    }
+    if ($last === 'ه' && isset(chatbot_tts_silent_heh()[$bare])) {
+        return $raw . "\u{200C}یِ";
+    }
+    if ($last === 'ی') {
+        return $raw . 'ِ';
+    }
+    if ($last === 'ه') {
+        return $raw;
+    }
+    return $raw . 'ِ';
+}
+
+/** کسره پیش‌فرض فقط از فهرست دوواژه‌ای و spoken. حدسی فقط با تنظیم/آزمایشگاه و فهرست سفید اسم. */
+function chatbot_tts_ezafe(string $text, ?string $mode = null): string
 {
     if (str_contains($text, '[[')) {
         return $text;
     }
+    $mode = valid_choice((string) ($mode ?? chatbot_tts_ezafe_mode()), ['pairs', 'heuristic'], 'pairs');
     $pairs = chatbot_tts_ezafe_pairs();
-    uksort($pairs, static fn(string $a, string $b): int => mb_strlen($b, 'UTF-8') <=> mb_strlen($a, 'UTF-8'));
-    foreach ($pairs as $from => $to) {
-        $text = chatbot_tts_word_replace($text, $from, $to);
-    }
-    $skipFirst = chatbot_tts_ezafe_skip_first();
-    $skipSecond = chatbot_tts_ezafe_skip_second();
-    $parts = preg_split('/(\\s+|[.؟!،,;:]+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $parts = preg_split('/(\s+|[\.؟!،,;:]+)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
     if (!is_array($parts)) {
-        return $text;
+        return chatbot_tts_he_yezafe($text);
     }
     $isWord = static fn(string $w): bool => (bool) preg_match('/^[\p{L}\p{M}\x{200C}]+$/u', $w);
+    $skipFirst = chatbot_tts_ezafe_skip_first();
+    $skipSecond = chatbot_tts_ezafe_skip_second();
+    $nouns = chatbot_tts_ezafe_nouns();
     $count = count($parts);
     for ($i = 0; $i < $count; $i++) {
         if (!$isWord($parts[$i])) {
@@ -1825,23 +1944,21 @@ function chatbot_tts_ezafe(string $text): string
         if (str_contains($a, 'ِ') || str_contains($a, 'یِ') || str_contains($a, "ه‌یِ")) {
             continue;
         }
-        $aBare = preg_replace('/[\p{M}]+/u', '', $a) ?? $a;
-        $bBare = preg_replace('/[\p{M}]+/u', '', $b) ?? $b;
-        $aBare = str_replace("\u{200C}", '', $aBare);
-        $bBare = str_replace("\u{200C}", '', $bBare);
-        if (isset($skipFirst[$aBare]) || isset($skipSecond[$bBare])) {
+        $aBare = chatbot_tts_word_bare($a);
+        $bBare = chatbot_tts_word_bare($b);
+        $key = $aBare . ' ' . $bBare;
+        if (isset($pairs[$key])) {
+            $first = preg_split('/\s+/u', (string) $pairs[$key], 2)[0] ?? $a;
+            $parts[$i] = $first;
             continue;
         }
-        $last = mb_substr($aBare, -1, 1, 'UTF-8');
-        if ($last === 'ا' || $last === 'آ' || $last === 'و') {
-            $parts[$i] = $a . 'یِ';
-        } elseif ($last === 'ه') {
-            $parts[$i] = $a . "\u{200C}یِ";
-        } elseif ($last === 'ی') {
-            $parts[$i] = $a . 'ِ';
-        } else {
-            $parts[$i] = $a . 'ِ';
+        if ($mode !== 'heuristic') {
+            continue;
         }
+        if (isset($skipFirst[$aBare]) || isset($skipSecond[$bBare]) || !isset($nouns[$aBare])) {
+            continue;
+        }
+        $parts[$i] = chatbot_tts_mark_ezafe_first($a, $aBare);
     }
     return chatbot_tts_he_yezafe(implode('', $parts));
 }
@@ -1881,9 +1998,9 @@ function chatbot_tts_prepare(string $text, array $opts = []): string
     if (!empty($opts['colloquial']) || chatbot_tts_colloquial_enabled()) {
         $text = chatbot_tts_colloquial($text);
     }
-    $text = chatbot_tts_vocalize($text);
+    $text = chatbot_tts_vocalize($text, chatbot_tts_ezafe_mode($opts));
     $text = chatbot_tts_phrase($text);
-    return chatbot_tts_trim_length($text);
+    return $text;
 }
 
 function chatbot_tts_lab_variant(string $text, string $variant): string
@@ -1896,7 +2013,7 @@ function chatbot_tts_lab_variant(string $text, string $variant): string
         return str_replace("\u{200C}", '', $text);
     }
     if ($variant === 'e') {
-        return chatbot_tts_ezafe(chatbot_tts_he_yezafe(chatbot_tts_clean($text)));
+        return chatbot_tts_ezafe(chatbot_tts_he_yezafe(chatbot_tts_clean($text)), 'heuristic');
     }
     if ($variant === 'f') {
         return chatbot_tts_lab_harakat($text);
@@ -2412,6 +2529,112 @@ function chatbot_tts_voice_status(string $exe, string $voiceId): array
     return ['status' => $status, 'detail' => $detail];
 }
 
+function chatbot_tts_chunks(string $text, int $maxChars = 400): array
+{
+    $text = trim($text);
+    if ($text === '') {
+        return [];
+    }
+    $sents = preg_split('/(?<=[.؟!])\s+/u', $text) ?: [$text];
+    $chunks = [];
+    $buf = '';
+    foreach ($sents as $sent) {
+        $sent = trim((string) $sent);
+        if ($sent === '') {
+            continue;
+        }
+        $joined = $buf === '' ? $sent : ($buf . ' ' . $sent);
+        if ($buf !== '' && mb_strlen($joined, 'UTF-8') > $maxChars) {
+            $chunks[] = $buf;
+            $buf = $sent;
+        } else {
+            $buf = $joined;
+        }
+    }
+    if ($buf !== '') {
+        $chunks[] = $buf;
+    }
+    return $chunks === [] ? [$text] : $chunks;
+}
+
+function chatbot_tts_wav_parse(string $wav): ?array
+{
+    if (strlen($wav) < 44 || substr($wav, 0, 4) !== 'RIFF' || substr($wav, 8, 4) !== 'WAVE') {
+        return null;
+    }
+    $pos = 12;
+    $len = strlen($wav);
+    $fmt = null;
+    $data = null;
+    $rate = 0;
+    $ch = 0;
+    $bits = 0;
+    while ($pos + 8 <= $len) {
+        $id = substr($wav, $pos, 4);
+        $size = unpack('V', substr($wav, $pos + 4, 4))[1];
+        $pos += 8;
+        $take = min($size, $len - $pos);
+        $chunk = substr($wav, $pos, $take);
+        if ($id === 'fmt ' && strlen($chunk) >= 16) {
+            $fmt = $chunk;
+            $rate = unpack('V', substr($chunk, 4, 4))[1];
+            $ch = unpack('v', substr($chunk, 2, 2))[1];
+            $bits = unpack('v', substr($chunk, 14, 2))[1];
+        } elseif ($id === 'data') {
+            $data = $chunk;
+        }
+        $pos += $size;
+        if ($size % 2 === 1) {
+            $pos++;
+        }
+    }
+    if ($fmt === null || $data === null) {
+        return null;
+    }
+    return ['fmt' => $fmt, 'data' => $data, 'rate' => $rate, 'ch' => $ch, 'bits' => $bits];
+}
+
+function chatbot_tts_wav_concat(array $wavs): string
+{
+    $parsed = [];
+    foreach ($wavs as $wav) {
+        if (!is_string($wav)) {
+            continue;
+        }
+        $item = chatbot_tts_wav_parse($wav);
+        if ($item !== null) {
+            $parsed[] = $item;
+        }
+    }
+    if ($parsed === []) {
+        return '';
+    }
+    $first = $parsed[0];
+    $data = $first['data'];
+    $pad = 0;
+    if ($first['rate'] > 0 && $first['ch'] > 0 && $first['bits'] > 0) {
+        $pad = (int) round($first['rate'] * $first['ch'] * ($first['bits'] / 8) * 0.2);
+    }
+    $silence = $pad > 0 ? str_repeat("\x00", $pad) : '';
+    $n = count($parsed);
+    for ($i = 1; $i < $n; $i++) {
+        if ($parsed[$i]['rate'] !== $first['rate'] || $parsed[$i]['ch'] !== $first['ch'] || $parsed[$i]['bits'] !== $first['bits']) {
+            continue;
+        }
+        $data .= $silence . $parsed[$i]['data'];
+    }
+    $fmt = $first['fmt'];
+    $fmtSize = strlen($fmt);
+    $dataSize = strlen($data);
+    $out = 'RIFF' . pack('V', 36 + $fmtSize + $dataSize) . 'WAVE';
+    $out .= 'fmt ' . pack('V', $fmtSize) . $fmt;
+    if ($fmtSize % 2 === 1) {
+        $out .= "\x00";
+    }
+    $out .= 'data' . pack('V', $dataSize) . $data;
+    return $out;
+}
+
 function chatbot_tts_say(string $text): array
 {
     $config = chatbot_tts_config();
@@ -2448,15 +2671,24 @@ function chatbot_tts_say(string $text): array
         }
         @unlink($file);
     }
-    if ($active['kind'] === 'piper') {
-        $result = chatbot_tts_run_piper((string) $active['exe'], (string) $active['model'], $clean, chatbot_tts_length_scale($config['speed']));
-    } else {
-        $result = chatbot_tts_run_espeak((string) $active['exe'], $clean, $config['speed'], chatbot_tts_voice_id($config['voice']));
+    $chunks = chatbot_tts_chunks($clean);
+    $wavs = [];
+    foreach ($chunks as $chunk) {
+        if ($active['kind'] === 'piper') {
+            $result = chatbot_tts_run_piper((string) $active['exe'], (string) $active['model'], $chunk, chatbot_tts_length_scale($config['speed']));
+        } else {
+            $result = chatbot_tts_run_espeak((string) $active['exe'], $chunk, $config['speed'], chatbot_tts_voice_id($config['voice']));
+        }
+        if (!$result['ok']) {
+            return $result;
+        }
+        $wavs[] = $result['wav'];
     }
-    if (!$result['ok']) {
-        return $result;
+    $wav = count($wavs) === 1 ? (string) $wavs[0] : chatbot_tts_wav_concat($wavs);
+    if (!chatbot_tts_is_valid_wav($wav)) {
+        return ['ok' => false, 'error' => 'موتور صوتی خروجی معتبر تولید نکرد.'];
     }
-    if (@file_put_contents($file, $result['wav'], LOCK_EX) === false) {
+    if (@file_put_contents($file, $wav, LOCK_EX) === false) {
         return ['ok' => false, 'error' => 'ذخیرهٔ فایل صوتی ممکن نشد.'];
     }
     return ['ok' => true, 'file' => $file, 'id' => $id];
@@ -2480,6 +2712,16 @@ function chatbot_tts_lab_default_phrases(): array
         'خانه‌ام',
         'فیش تردد تیکت سلف',
         'درخواست شما ثبت شد. وضعیتِ درخواست را از فهرست پیگیری ببینید. اگر نیاز به راهنما دارید بپرسید.',
+        'می‌توانید سفارش را ثبت کنید',
+        'اما سفارش شما ثبت نشد',
+        'لطفا گذرواژه را وارد کنید',
+        'سپس روی دکمه کلیک کنید',
+        'تماس بگیرید با مدیر',
+        'اشتباه کاربر رخ داد',
+        'ولی سفارش لغو شد',
+        'ثبت کنید و سپس وضعیت را ببینید',
+        'مرحله-۲',
+        '-۱۲',
     ];
 }
 
@@ -2543,6 +2785,160 @@ function chatbot_tts_render_lab(?array $lab): void
         echo '</tbody></table>';
     }
     echo '</div>';
+}
+
+function chatbot_tts_write_overlay(string $rel, array $map): void
+{
+    if (!defined('APP_ROOT')) {
+        return;
+    }
+    $path = APP_ROOT . '/' . ltrim($rel, '/');
+    $dir = dirname($path);
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+    $lines = ["<?php", "declare(strict_types=1);", "return ["];
+    ksort($map, SORT_STRING);
+    foreach ($map as $from => $to) {
+        if (!is_string($from) || !is_string($to) || $from === '') {
+            continue;
+        }
+        $lines[] = '    ' . var_export($from, true) . ' => ' . var_export($to, true) . ',';
+    }
+    $lines[] = '];';
+    $lines[] = '';
+    @file_put_contents($path, implode("\n", $lines), LOCK_EX);
+}
+
+function chatbot_tts_corpus_texts(): array
+{
+    $texts = [];
+    if (defined('APP_ROOT')) {
+        $guide = APP_ROOT . '/help-guide.php';
+        if (is_file($guide)) {
+            $html = (string) file_get_contents($guide);
+            $texts[] = html_entity_decode(strip_tags($html), ENT_QUOTES, 'UTF-8');
+        }
+    }
+    try {
+        if (function_exists('db')) {
+            $rows = db()->query('SELECT question, answer FROM chatbot_faq')->fetchAll();
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $texts[] = (string) ($row['question'] ?? '');
+                    $texts[] = (string) ($row['answer'] ?? '');
+                }
+            }
+        }
+    } catch (Throwable $e) {
+    }
+    return $texts;
+}
+
+function chatbot_tts_propose_pair(string $a, string $b): string
+{
+    $marked = chatbot_tts_mark_ezafe_first($a, chatbot_tts_word_bare($a));
+    return $marked . ' ' . $b;
+}
+
+function chatbot_tts_mine_pairs(int $limit = 80): array
+{
+    $skip = chatbot_tts_ezafe_skip_first() + chatbot_tts_ezafe_skip_second();
+    $known = chatbot_tts_ezafe_pairs();
+    $counts = [];
+    foreach (chatbot_tts_corpus_texts() as $text) {
+        $norm = chatbot_tts_ascii_letters($text);
+        $norm = (string) preg_replace('/[^\p{L}\p{M}\x{200C}\s]+/u', ' ', $norm);
+        $words = preg_split('/\s+/u', trim($norm), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $n = count($words);
+        for ($i = 0; $i < $n - 1; $i++) {
+            $a = chatbot_tts_word_bare((string) $words[$i]);
+            $b = chatbot_tts_word_bare((string) $words[$i + 1]);
+            if (mb_strlen($a, 'UTF-8') < 2 || mb_strlen($b, 'UTF-8') < 2) {
+                continue;
+            }
+            if (isset($skip[$a]) || isset($skip[$b])) {
+                continue;
+            }
+            $key = $a . ' ' . $b;
+            if (isset($known[$key])) {
+                continue;
+            }
+            $counts[$key] = ($counts[$key] ?? 0) + 1;
+        }
+    }
+    arsort($counts);
+    $out = [];
+    foreach ($counts as $pair => $n) {
+        if ($n < 2) {
+            continue;
+        }
+        [$a, $b] = explode(' ', $pair, 2);
+        $out[] = ['pair' => $pair, 'count' => $n, 'proposed' => chatbot_tts_propose_pair($a, $b)];
+        if (count($out) >= $limit) {
+            break;
+        }
+    }
+    return $out;
+}
+
+function chatbot_tts_save_mined_pairs(array $input, array $admin): int
+{
+    $selected = $input['ezafe_pair'] ?? [];
+    if (!is_array($selected)) {
+        return 0;
+    }
+    $forms = $input['ezafe_form'] ?? [];
+    if (!is_array($forms)) {
+        $forms = [];
+    }
+    $lex = chatbot_tts_overlay_map('storage/tts/lexicon.php');
+    $pairs = chatbot_tts_overlay_map('storage/tts/ezafe-pairs.php');
+    $added = 0;
+    foreach ($selected as $pair) {
+        $pair = chatbot_tts_ascii_letters(trim((string) $pair));
+        if ($pair === '' || !str_contains($pair, ' ')) {
+            continue;
+        }
+        $form = trim((string) ($forms[$pair] ?? ''));
+        if ($form === '') {
+            $bits = explode(' ', $pair, 2);
+            $form = chatbot_tts_propose_pair($bits[0], $bits[1] ?? '');
+        }
+        $lex[$pair] = $form;
+        $pairs[$pair] = $form;
+        $added++;
+    }
+    if ($added > 0) {
+        chatbot_tts_write_overlay('storage/tts/lexicon.php', $lex);
+        chatbot_tts_write_overlay('storage/tts/ezafe-pairs.php', $pairs);
+        if (function_exists('save_audit')) {
+            save_audit((int) $admin['id'], 'chatbot_tts_ezafe_pairs', null, ['added' => $added]);
+        }
+    }
+    return $added;
+}
+
+function chatbot_tts_render_pair_miner(): void
+{
+    $rows = chatbot_tts_mine_pairs();
+    echo '<div class="card form-card"><h2>گسترش فهرست کسرهٔ اضافه</h2>'
+        . '<p class="muted">دوواژه‌های پرتکرار راهنما و FAQ (بدون فعل/حرف اضافه). موارد تأییدشده در <code dir="ltr">storage/tts/lexicon.php</code> ذخیره می‌شوند و در حالت پیش‌فرض «فقط فهرست» خوانده می‌شوند.</p>';
+    if ($rows === []) {
+        echo '<p class="muted">مورد جدیدی با تکرار ۲ یا بیشتر پیدا نشد.</p></div>';
+        return;
+    }
+    echo '<form method="post" action="index.php?page=chatbot-admin">' . csrf_field()
+        . '<input type="hidden" name="tts_ezafe_pairs" value="1">'
+        . '<table><thead><tr><th></th><th>جفت</th><th>تکرار</th><th>پیشنهاد</th></tr></thead><tbody>';
+    foreach ($rows as $row) {
+        $pair = (string) $row['pair'];
+        $form = (string) $row['proposed'];
+        echo '<tr><td><input type="checkbox" name="ezafe_pair[]" value="' . e($pair) . '"></td>'
+            . '<td>' . e($pair) . '</td><td>' . (int) $row['count'] . '</td>'
+            . '<td><input name="ezafe_form[' . e($pair) . ']" value="' . e($form) . '" maxlength="80"></td></tr>';
+    }
+    echo '</tbody></table><button class="button" type="submit">افزودن موارد تیک‌خورده به فهرست</button></form></div>';
 }
 
 function chatbot_render_admin(array $admin, ?array $lab = null): void
@@ -2640,6 +3036,10 @@ function chatbot_render_admin(array $admin, ?array $lab = null): void
     }
     echo '</select></label>'
         . '<label class="check"><input type="checkbox" name="tts_colloquial" value="1"' . (!empty($ttsCfg['colloquial']) ? ' checked' : '') . '> خواندن محاوره‌ای تهرانی (پیش‌فرض خاموش)</label>'
+        . '<label class="field">کسرهٔ اضافه<select name="tts_ezafe_mode">'
+        . '<option value="pairs"' . (($ttsCfg['ezafe_mode'] ?? 'pairs') === 'pairs' ? ' selected' : '') . '>فقط فهرست دوواژه‌ای و متن دست‌نویس (پیشنهادی)</option>'
+        . '<option value="heuristic"' . (($ttsCfg['ezafe_mode'] ?? 'pairs') === 'heuristic' ? ' selected' : '') . '>حدسی (فقط اسم‌های فهرست سفید؛ آزمایشی)</option>'
+        . '</select></label>'
         . '<button class="button" type="submit">ذخیره تنظیمات صدا</button></form>'
         . '<form method="post" action="index.php?page=chatbot-admin" style="margin-top:8px">' . csrf_field()
         . '<input type="hidden" name="tts_test" value="1">'
@@ -2650,6 +3050,7 @@ function chatbot_render_admin(array $admin, ?array $lab = null): void
         . '<p class="muted">نصب صدای طبیعی (یک‌بار روی سرور، بعدش آفلاین): ۱) فایل <a href="https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip" dir="ltr">piper_windows_amd64.zip</a> را در <code dir="ltr">C:\piper</code> باز کنید تا <code dir="ltr">C:\piper\piper.exe</code> دیده شود. ۲) مدل زن (مانا) — هر دو فایل در همان پوشه: <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx" dir="ltr">fa_IR-mana-medium.onnx</a> و <a href="https://huggingface.co/MahtaFetrat/Mana-Persian-Piper/resolve/main/fa_IR-mana-medium.onnx.json" dir="ltr">.onnx.json</a>. ۳) مدل مرد (امیر) — هر دو فایل: <a href="https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx" dir="ltr">fa_IR-amir-medium.onnx</a> و <a href="https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/fa/fa_IR/amir/medium/fa_IR-amir-medium.onnx.json" dir="ltr">.onnx.json</a>. ۴) مسیر piper.exe و دو مسیر مدل را وارد کنید. «نوع صدا» مرد/زن همان مدل را انتخاب می‌کند. ذخیره، سپس تست و دانلود نمونه.</p></div>';
 
     chatbot_tts_render_lab(is_array($lab) ? $lab : null);
+    chatbot_tts_render_pair_miner();
 
     // گزارش بازه‌ای: آمار کلی، نیت‌ها، پرتکرارترین مدخل‌ها و بازخورد منفی اخیر (بدون نام کاربر)
     $validDate = static fn(string $v): bool => (bool) preg_match('/^\d{4}-\d{2}-\d{2}$/', $v) && strtotime($v) !== false;

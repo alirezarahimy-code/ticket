@@ -118,16 +118,19 @@ check("Piper" in guide and "محاوره‌ای" in guide,
 check("function chatbot_tts_phrase" in chatbot and "function chatbot_tts_piper_model_rank" in chatbot
       and "mana" in chatbot and "amir" in chatbot and "sentence_silence" in chatbot
       and "--noise_w" in chatbot and "0.35" in chatbot
-      and "max(1.0, min(1.1" in chatbot,
-      "Piper quality is boosted: male/female models, less clipping, length_scale 1.0–1.1")
+      and "max(0.9, min(1.15" in chatbot,
+      "Piper quality is boosted: male/female models, less clipping, length_scale 0.9–1.15")
 check("function chatbot_tts_vocalize" in chatbot and "function chatbot_tts_ezafe" in chatbot
       and "function chatbot_tts_lexicon_apply" in chatbot
-      and "$a . 'ِ'" in chatbot
+      and "function chatbot_tts_mark_ezafe_first" in chatbot
       and "'ها', 'های'" in chatbot
       and "راهنَمای" not in chatbot
       and "س(?=" not in chatbot
-      and "chatbot_tts_he_yezafe" in chatbot,
-      "Piper text gets lexicon vowels and ezafe; automatic سَ is gone; heh-yezafe is kept")
+      and "chatbot_tts_he_yezafe" in chatbot
+      and "pairs" in chatbot
+      and "function chatbot_tts_chunks" in chatbot
+      and "function chatbot_tts_wav_concat" in chatbot,
+      "Piper text gets lexicon vowels; default ezafe is pairs-only; long text is chunked")
 check("function chatbot_tts_int_to_words" in chatbot
       and "function chatbot_tts_numbers_to_words" in chatbot
       and "function chatbot_tts_spell_acronyms" in chatbot

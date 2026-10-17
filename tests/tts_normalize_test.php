@@ -143,12 +143,46 @@ expect_not_contains($md, '**', '۱۳. مارک‌داون پاک');
 expect_not_contains($md, '😀', '۱۳. ایموجی پاک');
 
 $long = str_repeat('این یک جملهٔ کامل است. ', 40);
-$cut = chatbot_tts_prepare($long);
-expect_true(mb_strlen($cut, 'UTF-8') <= 800, '۱۴. سقف طول');
-expect_true((bool) preg_match('/[.؟!]$/u', $cut), '۱۴. برش در مرز جمله');
+$full = chatbot_tts_prepare($long);
+expect_true(mb_strlen($full, 'UTF-8') > 800, '۱۴. متن بلند بریده نمی‌شود');
+$chunks = chatbot_tts_chunks($full);
+expect_true(count($chunks) >= 2, '۱۴. چند قطعه در مرز جمله');
+expect_true(mb_strlen(implode(' ', $chunks), 'UTF-8') >= 800, '۱۴. همهٔ قطعه‌ها حفظ می‌شوند');
 
 $range = tts_bare('۵-۱۰');
 expect_contains($range, 'تا', 'بازه ۵-۱۰');
+
+expect_not_contains(tts_bare('مرحله-۲'), 'منفی', '۶. مرحله-۲ منفی خوانده نشود');
+expect_contains(tts_bare('-۱۲'), 'منفی', '۶. منفی فقط با ابتدای متن');
+
+$faqCases = [
+    'می‌توانید سفارش را ثبت کنید' => ['می‌توانیدِ', 'سفارشِ'],
+    'اما سفارش شما ثبت نشد' => ['امایِ', 'سفارشِ شما', 'ثبتِ نشد'],
+    'لطفا گذرواژه را وارد کنید' => ['لطفایِ'],
+    'سپس روی دکمه کلیک کنید' => ['سپسِ', 'رویِ'],
+    'تماس بگیرید با مدیر' => ['تماسِ'],
+    'اشتباه کاربر رخ داد' => ['اشتباه‌یِ', 'اشتباهِ', 'کاربرِ'],
+    'ولی سفارش لغو شد' => ['ولیِ', 'سفارشِ'],
+];
+foreach ($faqCases as $src => $bads) {
+    $got = tts_bare($src);
+    foreach ($bads as $bad) {
+        expect_not_contains($got, $bad, 'FAQ بدون کسرهٔ حدسی: ' . $src);
+    }
+}
+
+expect_eq(tts_bare('ثبت سفارش غذا'), 'ثبتِ سفارشِ غذا', 'جفت تأییدشده ثبتِ سفارشِ غذا');
+expect_not_contains(tts_bare('کوه بلند است'), 'کوه‌یِ', 'ه ملفوظ ه‌یِ نگیرد');
+expect_contains(tts_bare('خانهٔ من'), 'یِ', 'هٔ خانه تبدیل شود');
+
+$longVa = 'ثبت کنید و سپس وضعیت درخواست را از فهرست پیگیری ببینید و بعد ادامه دهید و نتیجه را در سامانه مشاهده نمایید';
+$phrased = chatbot_tts_limit_phrase($longVa, 8);
+expect_not_contains($phrased, 'و.', 'limit_phrase بعد از و نقطه نگذارد');
+
+expect_not_contains(tts_bare('کتاب جدید'), 'کتابِ', 'pairs: کتاب جدید بدون کسره');
+$GLOBALS['TEST_SETTINGS']['chatbot_tts_ezafe_mode'] = 'heuristic';
+expect_contains(tts_bare('کتاب جدید'), 'کتابِ', 'حدسی: کتابِ جدید');
+$GLOBALS['TEST_SETTINGS']['chatbot_tts_ezafe_mode'] = 'pairs';
 
 echo "\n$passed passed, $failed failed\n";
 exit($failed === 0 ? 0 : 1);

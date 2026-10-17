@@ -4324,6 +4324,9 @@ if ($page === 'chatbot-admin') {
                 } else {
                     flash('danger', $ttsTest['error']);
                 }
+            } elseif (isset($_POST['tts_ezafe_pairs'])) {
+                $addedPairs = chatbot_tts_save_mined_pairs($_POST, $chatbotAdmin);
+                flash('success', $addedPairs > 0 ? ('فهرست کسره با ' . $addedPairs . ' مورد به‌روز شد.') : 'موردی انتخاب نشد.');
             } elseif (isset($_POST['tts_lab'])) {
                 $labText = (string) ($_POST['lab_text'] ?? '');
                 $labVariant = valid_choice((string) ($_POST['lab_variant'] ?? 'all'), ['all', 'a', 'b', 'c', 'd', 'e', 'f', 'g'], 'all');
