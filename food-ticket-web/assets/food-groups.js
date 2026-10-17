@@ -76,6 +76,11 @@
     const rows = pool.map((u) => '<label class="fg-person">'
       + '<span class="fg-person-name">' + userLabel(u) + '</span><input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '></label>').join('')
       || '<p class="muted">کاربر آزادی برای انتخاب وجود ندارد.</p>';
+    const visitors = ((S.groups.find((x) => x.id === g.id) || {}).today_visitors) || [];
+    const visitorsBlock = visitors.length
+      ? '<div class="form-section-head" style="margin-top:14px"><h2>مهمانان امروز</h2><span class="muted">فقط امروز در چاپ فیش این گروه هستند؛ عضو دائم نیستند</span></div>'
+        + '<div class="fg-people-box">' + visitors.map((u) => '<div class="fg-person"><span class="fg-person-name">' + userLabel(u) + ' <span class="status ok">مهمان امروز</span></span></div>').join('') + '</div>'
+      : '';
     return '<div class="card form-card" id="fg-form"><div class="form-section-head"><h2>' + (g.id ? 'ویرایش گروه' : 'گروه جدید') + '</h2></div>'
       + '<div class="form-grid">'
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
@@ -87,6 +92,7 @@
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
       + '<div id="fg-members" class="fg-people-box">' + rows + '</div>'
+      + visitorsBlock
       + '<div class="actions" style="margin-top:12px"><button class="btn primary" data-fg="save">ذخیره گروه</button><button class="btn ghost" data-fg="cancel">انصراف</button></div></div>';
   }
 
@@ -95,7 +101,7 @@
     return '<div class="table-wrap"><table class="table"><thead><tr><th>نام گروه</th><th>L_UID نماینده</th><th>اعضا</th><th>غایب امروز</th><th>وضعیت</th><th></th></tr></thead><tbody>'
       + S.groups.map((g) => '<tr><td>' + esc(g.title) + (g.description ? '<small style="display:block;color:var(--muted)">' + esc(g.description) + '</small>' : '') + '</td>'
         + '<td dir="ltr">' + (g.l_uid ? esc(g.l_uid) : '<span class="status bad">تعریف نشده</span>') + '</td>'
-        + '<td>' + g.members.length + ' نفر</td>'
+        + '<td>' + g.members.length + ' نفر' + ((g.today_visitors && g.today_visitors.length) ? ' <small style="color:var(--muted)">+ ' + g.today_visitors.length + ' مهمان امروز</small>' : '') + '</td>'
         + '<td>' + ((g.today && g.today.absent) || 0) + ' نفر' + (g.today && g.today.locked ? ' <span class="status warn" title="لیست غیبت امروز قفل شده است">🔒</span>' : '') + '</td>'
         + '<td><span class="status ' + (g.active ? 'ok' : 'bad') + '">' + (g.active ? 'فعال' : 'غیرفعال') + '</span></td>'
         + '<td><button class="btn primary" data-fg="absence" data-id="' + g.id + '">غیبت امروز</button> '

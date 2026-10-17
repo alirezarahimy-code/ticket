@@ -38,22 +38,27 @@ check("عضو دائم گروه نمی‌تواند محل تحویل را عو�
       and "خوداظهاری فقط برای امروز مجاز است" in groups,
       "ungrouped-only and lock-after-print rules are in the save path")
 check("food_ticket_group_members_for_date($groupId, $date)" in groups, "group print includes today's visitors")
-check("'visitor' => true" in groups and "مهمان امروز" in admin_js,
-      "kitchen absence list shows today's visitors as read-only")
+check("'visitor' => true" in groups and "مهمان امروز" in admin_js
+      and "today_visitors" in groups and "today_visitors" in admin_js,
+      "kitchen group list shows today's visitors separately from permanent members")
 check("$route === 'day-visit'" in order
       and "$route === 'day-visit-cancel'" in order
+      and "function food_order_day_visit_subject" in order
       and "food_order_require_permission($user, 'foodorder.self')" in order,
-      "order API exposes visit routes behind foodorder.self")
+      "order API exposes visit routes for self and verified proxy subjects")
 check("'foodorder.self'" in perms, "existing self-order permission is reused; no extra grant needed")
 check("'food_day_visit_set'" in bootstrap and "'food_day_visit_cleared'" in bootstrap,
       "audit labels exist for set/clear")
-check("function renderVisitCard" in js
+check("function renderVisitDialog" in js
+      and "data-fo-action=\"change-cafeteria\"" in js
       and "data-fo-action=\"visit-save\"" in js
       and "data-fo-action=\"visit-cancel\"" in js
+      and "visitSaving = false" in js
       and "request('day-visit'" in js,
-      "food-order page has the today-visit card")
-check("خوداظهاری محل تحویل امروز" in guide
-      and "عضو دائم یک گروه نمی‌تواند خوداظهاری کند" in guide,
-      "Persian guide documents the self-declaration")
+      "cafeteria change is a popup next to person-change, for self and proxy")
+check("تغییر سلف امروز" in guide
+      and "کنار «تغییر شخص»" in guide
+      and "عضو دائم یک گروه نمی‌تواند سلف را عوض کند" in guide,
+      "Persian guide documents the cafeteria popup")
 
 print("all day-visit checks passed")

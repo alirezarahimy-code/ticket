@@ -123,6 +123,7 @@
 .fo-recipient-details { display:grid; flex:1; gap:2px; min-width:0; }
 .fo-recipient-details span,.fo-recipient-details small { color:var(--muted); font-size:11px; }
 .fo-recipient-details strong { color:var(--navy); font-size:15px; overflow-wrap:anywhere; }
+.fo-recipient-actions { display:flex; gap:8px; flex-wrap:wrap; flex:0 0 auto; }
 .fo-recipient-change { flex:0 0 auto; }
 .fo-recipient-dialog { width:min(540px,calc(100vw - 24px)); }
 .fo-person-choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0; }
@@ -154,7 +155,7 @@
   .fo-person-choices { grid-template-columns:1fr; }
   .fo-person-choice { min-height:92px; }
   .fo-recipient-banner { align-items:flex-start; flex-wrap:wrap; }
-  .fo-recipient-change { margin-right:auto; }
+  .fo-recipient-actions { margin-right:auto; }
 }
 
 /* نام غذا در سلول تقویم در یک خط نمایش داده می‌شود؛ اگر جا نشد با «…» کوتاه می‌شود. */

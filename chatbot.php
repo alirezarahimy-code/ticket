@@ -806,7 +806,7 @@ function chatbot_widget_defaults(): array
         'greet_interval' => 60,
         'greet_text' => "سلام\nمن آریا هستم، کمکی از دستم بر میاد؟",
         'greet_duration' => 5,
-        'greet_sound' => true,
+        'greet_sound' => false,
         'welcome_text' => 'سلام! من آریا هستم؛ سؤال خود را درباره کار با سامانه بنویسید.',
         'input_placeholder' => 'سؤال خود را بنویسید...',
         'send_label' => 'ارسال',
@@ -909,7 +909,7 @@ function chatbot_save_widget(array $input, array $admin): void
         save_setting($rule['key'], (string) $number);
     }
     save_setting('chatbot_greet_enabled', !empty($input['w_greet_enabled']) ? '1' : '0');
-    save_setting('chatbot_greet_sound', !empty($input['w_greet_sound']) ? '1' : '0');
+    save_setting('chatbot_greet_sound', '0');
     save_setting('chatbot_autospeak', !empty($input['w_autospeak']) ? '1' : '0');
     save_setting('chatbot_position', valid_choice($get('w_position'), ['left', 'right'], 'left'));
     save_audit((int) $admin['id'], 'chatbot_widget_saved', null, ['name' => $get('w_name')]);
@@ -1803,7 +1803,6 @@ function chatbot_render_admin(array $admin): void
         . '<label class="field">فاصلهٔ تکرار (ثانیه)<input type="number" name="w_greet_interval" min="15" max="600" value="' . (int) $wcfg['greet_interval'] . '"></label>'
         . '<label class="field">متن حباب (هر خط در یک سطر)<textarea name="w_greet_text" rows="2" maxlength="200">' . e($wcfg['greet_text']) . '</textarea></label>'
         . '<label class="field">مدت نمایش حباب (ثانیه)<input type="number" name="w_greet_duration" min="2" max="15" value="' . (int) $wcfg['greet_duration'] . '"></label>'
-        . '<label class="check"><input type="checkbox" name="w_greet_sound" value="1"' . $wChecked($wcfg['greet_sound']) . '> پخش صدای بوق همراه حباب</label>'
         . '<h3>متن‌های گفتگو</h3>'
         . '<label class="field">پیام آغازین گفتگو<textarea name="w_welcome_text" rows="2" maxlength="500">' . e($wcfg['welcome_text']) . '</textarea></label>'
         . '<label class="field">متن راهنمای کادر سؤال<input name="w_input_placeholder" required maxlength="120" value="' . e($wcfg['input_placeholder']) . '"></label>'
@@ -1963,7 +1962,7 @@ function chatbot_render_widget(?array $user): string
             'greetOn' => (bool) $c['greet_enabled'],
             'greetMs' => (int) $c['greet_interval'] * 1000,
             'bubbleMs' => (int) $c['greet_duration'] * 1000,
-            'sound' => (bool) $c['greet_sound'],
+            'sound' => false,
             'pending' => (string) $c['pending_text'],
             'autospeak' => (bool) $c['autospeak'],
             'fbYes' => (string) $c['feedback_yes'],
@@ -2006,9 +2005,8 @@ function chatbot_render_widget(?array $user): string
   var cfg = ' . $wjson . ';
   var panel = document.getElementById("cb-panel"), log = document.getElementById("cb-log");
   var form = document.getElementById("cb-form"), input = document.getElementById("cb-input");
-  var bot = document.getElementById("cb-open"), bubble = document.getElementById("cb-bubble"), ac = null;
-  function beep(){ try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); var o = ac.createOscillator(), g = ac.createGain(); o.type = "sawtooth"; o.frequency.value = 130; g.gain.setValueAtTime(0.0001, ac.currentTime); g.gain.exponentialRampToValueAtTime(0.2, ac.currentTime + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime + 0.45); o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 0.5); } catch (e) {} }
-  function greet(){ if (panel.classList.contains("open")) return; bot.classList.remove("cb-wave", "cb-buzz"); void bot.offsetWidth; bot.classList.add("cb-wave", "cb-buzz"); bubble.classList.add("show"); if (cfg.sound) { beep(); } setTimeout(function(){ bubble.classList.remove("show"); }, cfg.bubbleMs); setTimeout(function(){ bot.classList.remove("cb-wave"); }, 2700); }
+  var bot = document.getElementById("cb-open"), bubble = document.getElementById("cb-bubble");
+  function greet(){ if (panel.classList.contains("open")) return; bot.classList.remove("cb-wave", "cb-buzz"); void bot.offsetWidth; bot.classList.add("cb-wave", "cb-buzz"); bubble.classList.add("show"); setTimeout(function(){ bubble.classList.remove("show"); }, cfg.bubbleMs); setTimeout(function(){ bot.classList.remove("cb-wave"); }, 2700); }
   function toggleBot(){ var willOpen = !panel.classList.contains("open"); panel.classList.toggle("open"); bubble.classList.remove("show"); if (willOpen) { input.focus(); } else { stopVoice(); } }
   bot.addEventListener("click", toggleBot);
   bot.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleBot(); } });

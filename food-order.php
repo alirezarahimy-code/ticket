@@ -164,6 +164,21 @@ function food_order_require_permission(array $user, string $permission): void
     }
 }
 
+/** شخص موضوع خوداظهاری سلف: خود کاربر، یا همکار تأییدشده با کد ملی. */
+function food_order_day_visit_subject(array $actor, array $body): array
+{
+    $selfId = (int) ($actor['id'] ?? 0);
+    $employeeId = max(0, (int) ($body['employee_id'] ?? 0));
+    if ($employeeId <= 0 || $employeeId === $selfId) {
+        return $actor;
+    }
+    return food_order_verify_employee_national_code(
+        $employeeId,
+        (string) ($body['national_code'] ?? ''),
+        true
+    );
+}
+
 function food_order_log(?int $orderId, ?int $calendarId, string $action, ?int $userId, mixed $oldValue = null, mixed $newValue = null, ?string $reason = null): void
 {
     $encode = static function (mixed $value): ?string {
@@ -1685,18 +1700,25 @@ function food_order_api_handle(string $route, array $user): never
         }
         if ($method === 'GET' && $route === 'day-visit') {
             food_order_require_permission($user, 'foodorder.self');
-            food_order_send_json(food_ticket_day_visit_state($user));
+            $subject = food_order_day_visit_subject($user, [
+                'employee_id' => (int) ($_GET['employee_id'] ?? 0),
+                'national_code' => (string) ($_GET['national_code'] ?? ''),
+            ]);
+            food_order_send_json(food_ticket_day_visit_state($subject));
         }
         if ($method === 'POST' && $route === 'day-visit') {
             food_order_require_permission($user, 'foodorder.self');
             check_api_rate_limit('food_day_visit_' . (int) $user['id'], 20, 60);
             $body = food_order_api_body();
-            food_order_send_json(food_ticket_day_visit_save($user, (int) ($body['group_id'] ?? 0)));
+            $subject = food_order_day_visit_subject($user, $body);
+            food_order_send_json(food_ticket_day_visit_save($subject, (int) ($body['group_id'] ?? 0)));
         }
         if ($method === 'POST' && $route === 'day-visit-cancel') {
             food_order_require_permission($user, 'foodorder.self');
             check_api_rate_limit('food_day_visit_' . (int) $user['id'], 20, 60);
-            food_order_send_json(food_ticket_day_visit_clear($user));
+            $body = food_order_api_body();
+            $subject = food_order_day_visit_subject($user, $body);
+            food_order_send_json(food_ticket_day_visit_clear($subject));
         }
         food_order_send_json(['error' => 'مسیر API سفارش غذا پیدا نشد.'], 404);
     } catch (Throwable $e) {
@@ -1879,7 +1901,7 @@ function food_order_render_page(array $user): never
         : 'کد ملی ثبت‌شدهٔ شما معتبر نیست؛ ثبت سفارش برای خودتان غیرفعال است. برای اصلاح اطلاعات با منابع انسانی هماهنگ کنید.';
     $canProxy = true; // هر کاربر وارد‌شده می‌تواند برای دیگری سفارش ثبت کند (با کد ملی فرد)
     render_header('سفارش غذا', $user);
-    echo '<link rel="stylesheet" href="assets/food-order.css?v=13">';
+    echo '<link rel="stylesheet" href="assets/food-order.css?v=14">';
     echo '<section class="food-order-page"><header class="page-heading"><div><span class="eyebrow">برنامه غذایی سازمان</span><h1>سفارش غذا</h1></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></header>';
     if (!$hasNational) {
         echo '<div class="alert info" role="status">' . e($nationalIssue) . '</div>';
@@ -1893,7 +1915,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=15"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=16"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
     render_footer();
     exit;
 }

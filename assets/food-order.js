@@ -54,6 +54,7 @@
     visitLoading: false,
     visitError: '',
     visitSaving: false,
+    visitOpen: false,
   };
 
   function esc(value) {
@@ -121,11 +122,23 @@
     window.setTimeout(function () { node.remove(); }, 4800);
   }
 
+  function visitParams() {
+    if (state.targetMode !== 'proxy') return {};
+    return { employee_id: String(state.targetId || ''), national_code: normalizedDigits(state.nationalCode) };
+  }
+  function visitPayload(extra) {
+    var body = extra || {};
+    if (state.targetMode === 'proxy') {
+      body.employee_id = Number(state.targetId || 0);
+      body.national_code = normalizedDigits(state.nationalCode);
+    }
+    return body;
+  }
   async function loadVisit() {
-    if (state.targetMode !== 'self') { state.visit = null; return; }
+    if (!state.recipientReady) { state.visit = null; return; }
     state.visitLoading = true; state.visitError = '';
     try {
-      state.visit = await request('day-visit');
+      state.visit = await request('day-visit', visitParams());
     } catch (e) {
       state.visit = null;
       state.visitError = e.message || 'محل تحویل بارگذاری نشد.';
@@ -133,64 +146,84 @@
       state.visitLoading = false;
     }
   }
+  async function openVisitDialog() {
+    state.visitOpen = true;
+    state.modalDate = '';
+    render();
+    await loadVisit();
+    render();
+  }
+  function closeVisitDialog() {
+    state.visitOpen = false;
+    render();
+  }
   async function saveVisit() {
     if (state.visitSaving) return;
     var select = root.querySelector('#fo-visit-group');
     var groupId = select ? Number(select.value || 0) : 0;
     if (!groupId) { toast('ابتدا گروه مقصد را انتخاب کنید.', true); return; }
     state.visitSaving = true;
+    render();
     try {
-      state.visit = await request('day-visit', null, { method: 'POST', body: JSON.stringify({ group_id: groupId }) });
+      state.visit = await request('day-visit', null, { method: 'POST', body: JSON.stringify(visitPayload({ group_id: groupId })) });
       toast(state.visit.message || 'اعلام امروز ثبت شد.');
-      render();
     } catch (e) {
       toast(e.message || 'ثبت اعلام انجام نشد.', true);
     } finally {
       state.visitSaving = false;
+      render();
     }
   }
   async function cancelVisit() {
     if (state.visitSaving) return;
     state.visitSaving = true;
+    render();
     try {
-      state.visit = await request('day-visit-cancel', null, { method: 'POST', body: JSON.stringify({}) });
+      state.visit = await request('day-visit-cancel', null, { method: 'POST', body: JSON.stringify(visitPayload({})) });
       toast(state.visit.message || 'اعلام امروز لغو شد.');
-      render();
     } catch (e) {
       toast(e.message || 'لغو اعلام انجام نشد.', true);
     } finally {
       state.visitSaving = false;
+      render();
     }
   }
-  function renderVisitCard() {
-    if (state.targetMode !== 'self' || !state.recipientReady) return '';
+  function renderVisitDialog() {
+    if (!state.visitOpen || !state.recipientReady) return '';
+    var who = state.targetName || 'این شخص';
+    var inner;
     if (state.visitLoading && !state.visit) {
-      return '<div class="card fo-visit-card"><p>در حال بارگذاری محل تحویل امروز…</p></div>';
+      inner = '<p class="fo-modal-notice">در حال بارگذاری محل تحویل امروز…</p>';
+    } else if (state.visitError) {
+      inner = '<div class="fo-modal-notice error" role="alert">' + esc(state.visitError) + '</div>';
+    } else {
+      var v = state.visit || {};
+      if (!v.allowed) {
+        inner = '<div class="fo-modal-notice">' + esc(v.reason || 'این شخص عضو دائم یک گروه است.') + '</div>';
+      } else {
+        var current = v.current;
+        var locked = !!v.locked;
+        var options = ['<option value="">انتخاب سلف / گروه</option>'].concat((v.groups || []).map(function (g) {
+          var selected = current && Number(current.group_id) === Number(g.id) ? ' selected' : '';
+          return '<option value="' + Number(g.id) + '"' + selected + '>' + esc(g.title) + '</option>';
+        }));
+        var status = current
+          ? '<div class="fo-modal-notice">امروز غذای <strong>' + esc(who) + '</strong> از سلف «' + esc(current.title) + '» گرفته می‌شود.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + '</div>'
+          : '<div class="fo-modal-notice">اگر ' + esc(who) + ' امروز باید غذا را از سلف ساختمان دیگری بگیرد، گروه را انتخاب کنید. فقط برای امروز اعمال می‌شود و عضو دائم گروه نمی‌شود.</div>';
+        var actions = locked
+          ? ''
+          : '<div class="fo-modal-actions"><button type="button" class="button" data-fo-action="visit-save"' + (state.visitSaving ? ' disabled' : '') + '>' + (state.visitSaving ? 'در حال ذخیره…' : 'اعلام برای امروز') + '</button>'
+            + (current ? '<button type="button" class="button secondary" data-fo-action="visit-cancel"' + (state.visitSaving ? ' disabled' : '') + '>لغو اعلام</button>' : '')
+            + '<button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>';
+        inner = status
+          + (locked ? '<div class="fo-modal-actions"><button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>'
+            : '<label class="fo-form-field">سلف مقصد<select id="fo-visit-group"' + (state.visitSaving ? ' disabled' : '') + '>' + options.join('') + '</select></label>' + actions);
+      }
     }
-    if (state.visitError) {
-      return '<div class="card fo-visit-card"><div class="alert danger" role="alert">' + esc(state.visitError) + '</div></div>';
+    if (inner.indexOf('visit-close') < 0) {
+      inner += '<div class="fo-modal-actions"><button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>';
     }
-    var v = state.visit;
-    if (!v) return '';
-    if (!v.allowed) {
-      return '<div class="card fo-visit-card"><h2>محل تحویل امروز</h2><p>' + esc(v.reason || 'عضو دائم گروه هستید.') + '</p></div>';
-    }
-    var current = v.current;
-    var locked = !!v.locked;
-    var options = ['<option value="">انتخاب گروه / ساختمان</option>'].concat((v.groups || []).map(function (g) {
-      var selected = current && Number(current.group_id) === Number(g.id) ? ' selected' : '';
-      return '<option value="' + Number(g.id) + '"' + selected + '>' + esc(g.title) + '</option>';
-    }));
-    var status = current
-      ? '<p class="fo-visit-current">امروز غذا را از «' + esc(current.title) + '» می‌گیرید.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + '</p>'
-      : '<p>عضو هیچ گروهی نیستید. اگر امروز باید غذا را از سلف ساختمان دیگری بگیرید، گروه را انتخاب کنید. فقط برای امروز اعمال می‌شود.</p>';
-    var actions = locked
-      ? ''
-      : '<button type="button" class="button" data-fo-action="visit-save"' + (state.visitSaving ? ' disabled' : '') + '>اعلام برای امروز</button>'
-        + (current ? '<button type="button" class="button secondary" data-fo-action="visit-cancel"' + (state.visitSaving ? ' disabled' : '') + '>لغو اعلام</button>' : '');
-    return '<div class="card fo-visit-card"><h2>محل تحویل امروز</h2>' + status
-      + (locked ? '' : '<div class="fo-visit-row"><label class="field">گروه مقصد<select id="fo-visit-group">' + options.join('') + '</select></label>' + actions + '</div>')
-      + '</div>';
+    return '<dialog class="fo-modal fo-recipient-dialog" id="fo-visit-dialog" aria-labelledby="fo-visit-title"><div class="fo-modal-inner"><div class="fo-modal-head"><div><h2 id="fo-visit-title">تغییر سلف امروز</h2><p>سفارش برای <strong>' + esc(who) + '</strong></p></div><button class="fo-modal-close" type="button" data-fo-action="visit-close" aria-label="بستن">×</button></div>' + inner + '</div></dialog>';
   }
   async function loadMonth() {
     state.loading = true; state.error = '';
@@ -434,7 +467,12 @@
   function renderRecipientBanner() {
     if (!state.recipientReady) return '';
     var modeText = state.targetMode === 'self' ? 'سفارش شخصی' : 'ثبت سفارش به نیابت';
-    return '<div class="fo-recipient-banner"><div class="fo-recipient-avatar" aria-hidden="true">' + (state.targetMode === 'self' ? '👤' : '👥') + '</div><div class="fo-recipient-details"><span>' + modeText + '</span><strong>سفارش برای: ' + esc(state.targetName) + '</strong></div><button type="button" class="button secondary fo-recipient-change" data-fo-action="change-recipient">تغییر شخص</button></div>';
+    var cafeteria = state.visit && state.visit.current
+      ? '<small>سلف امروز: ' + esc(state.visit.current.title) + '</small>'
+      : (state.visit && !state.visit.allowed && state.visit.home_group_title
+        ? '<small>سلف گروه دائم: ' + esc(state.visit.home_group_title) + '</small>'
+        : '');
+    return '<div class="fo-recipient-banner"><div class="fo-recipient-avatar" aria-hidden="true">' + (state.targetMode === 'self' ? '👤' : '👥') + '</div><div class="fo-recipient-details"><span>' + modeText + '</span><strong>سفارش برای: ' + esc(state.targetName) + '</strong>' + cafeteria + '</div><div class="fo-recipient-actions"><button type="button" class="button secondary fo-recipient-change" data-fo-action="change-recipient">تغییر شخص</button><button type="button" class="button secondary fo-recipient-change" data-fo-action="change-cafeteria">تغییر سلف</button></div></div>';
   }
 
   function renderModal() {
@@ -480,23 +518,26 @@
       ? '<div class="alert ' + (state.pageNotice.type === 'danger' ? 'danger' : 'success') + ' fo-page-notice" role="' + (state.pageNotice.type === 'danger' ? 'alert' : 'status') + '"><span>' + esc(state.pageNotice.message) + '</span><button type="button" class="fo-page-notice-close" data-fo-action="dismiss-notice" aria-label="بستن پیام">×</button></div>'
       : '';
     var body = Cal
-      ? pageNotice + renderRecipientBanner() + renderVisitCard() + renderCalendar() + (state.targetMode === 'self' ? renderListFilter() + '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderListFilter() + renderProxyOrders()) + renderModal()
+      ? pageNotice + renderRecipientBanner() + renderCalendar() + (state.targetMode === 'self' ? renderListFilter() + '<div class="fo-section-title"><div><h2>سفارش‌های من</h2></div></div>' + renderOrders() : renderListFilter() + renderProxyOrders()) + renderModal()
       : pageNotice + '<div class="alert danger">تقویم شمسی مشترک بارگذاری نشده است. صفحه را تازه‌سازی کنید.</div>';
-    root.innerHTML = body + renderRecipientDialog();
+    root.innerHTML = body + renderRecipientDialog() + renderVisitDialog();
     if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(root);
     var recipientDialog = root.querySelector('#fo-recipient-dialog');
+    var visitDialog = root.querySelector('#fo-visit-dialog');
     var foodDialog = root.querySelector('#fo-order-dialog');
-    var dialog = recipientDialog || foodDialog;
+    var dialog = visitDialog || recipientDialog || foodDialog;
     if (dialog && !dialog.open) {
       try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', 'open'); }
     }
     if (dialog) {
       dialog.addEventListener('click', function (event) {
         if (event.target === dialog && dialog.id === 'fo-recipient-dialog') event.stopPropagation();
+        else if (event.target === dialog && dialog.id === 'fo-visit-dialog') closeVisitDialog();
         else if (event.target === dialog && dialog.id === 'fo-order-dialog') closeModal();
       });
       dialog.addEventListener('cancel', function (event) {
         if (dialog.id === 'fo-recipient-dialog') event.preventDefault();
+        else if (dialog.id === 'fo-visit-dialog') { event.preventDefault(); closeVisitDialog(); }
         else closeModal();
       });
     }
@@ -552,6 +593,7 @@
     state.monthData = null;
     state.loading = true;
     state.dataLoaded = true;
+    state.visitOpen = false;
     render();
     var jobs = [loadMonth(), loadMyOrders(), loadVisit()];
     Promise.all(jobs).then(function () { render(); });
@@ -573,6 +615,7 @@
     state.searchQuery = '';
     state.dropdownOpen = true;
     state.highlightedIndex = -1;
+    state.visitOpen = false;
     render();
   }
 
@@ -861,6 +904,8 @@
       if (act === 'close') closeModal();
       if (act === 'dismiss-notice') { state.pageNotice = null; render(); }
       if (act === 'change-recipient') startRecipientChoice();
+      if (act === 'change-cafeteria') openVisitDialog();
+      if (act === 'visit-close') closeVisitDialog();
       if (act === 'save-order') saveOrder();
       if (act === 'cancel' || act === 'cancel-current') cancelOrder(Number(action.dataset.orderId || 0));
       if (act === 'cancel-proxy') requestProxyCancelConfirmation(Number(action.dataset.orderId || 0));

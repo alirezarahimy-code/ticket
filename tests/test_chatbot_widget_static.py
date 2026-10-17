@@ -32,9 +32,12 @@ check("var cfg = ' . $wjson . ';" in chatbot
       "widget receives greeting/sound/autospeak config as JSON")
 check("setInterval(greet, 60000)" not in chatbot
       and "if (cfg.greetOn) { setInterval(greet, cfg.greetMs); }" in chatbot
-      and "if (cfg.sound) { beep(); }" in chatbot
+      and "function beep()" not in chatbot
+      and "if (cfg.sound) { beep(); }" not in chatbot
+      and "AudioContext" not in chatbot
+      and "پخش صدای بوق همراه حباب" not in chatbot
       and "}, cfg.bubbleMs);" in chatbot,
-      "the one-minute greeting (interval, duration, beep) is fully manageable")
+      "the greeting interval is manageable and the beep is removed")
 check("$wName" in chatbot and "$wBubble" in chatbot
       and "e($wcfg['welcome_text'])" in chatbot
       and "e($wcfg['input_placeholder'])" in chatbot
@@ -56,6 +59,7 @@ check('getElementById("cb-close")' in chatbot,
       "the panel close button actually closes the panel")
 check("۱۰-ب. آریا، بات سخنگوی سامانه" in guide
       and "مدیریت بات سخنگو" in guide
+      and "حباب خوش‌آمد بدون صدای بوق است" in guide
       and "هر یک دقیقه دست تکان می‌دهد" not in guide,
       "the Persian guide documents Aria and the manageable greeting")
 check("CHATBOT_WORDS_ABOUT" in chatbot

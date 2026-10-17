@@ -164,8 +164,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("hash_equals($expected, $actual)", php)
         self.assertIn("WHERE o.employee_id = ?", php)
         self.assertNotIn("WHERE o.created_by = ?", php)
-        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", php)
-        self.assertNotIn("food_order_require_permission($user, 'foodorder.self')", php)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", search)
+        self.assertNotIn("food_order_require_permission($user, 'foodorder.self')", search)
 
     def test_proxy_permission_is_explicit_not_a_support_manager_default(self) -> None:
         permissions = read("permissions.php")
@@ -180,9 +180,9 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("index.php?page=food-order", main_index)
         self.assertNotIn("'food-order' => 'foodorder.self'", main_index)
         php = read("food-order.php")
-        self.assertIn('href="assets/food-order.css?v=13"', php)
+        self.assertIn('href="assets/food-order.css?v=14"', php)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', php)
-        self.assertIn('src="assets/food-order.js?v=15"', php)
+        self.assertIn('src="assets/food-order.js?v=16"', php)
         employee_css = read("assets/food-order.css")
         self.assertIn(".fo-my-orders .table-head,.fo-my-orders .table-row", employee_css)
         self.assertIn("grid-template-columns:42px minmax(140px,1.35fr)", employee_css)

@@ -811,9 +811,11 @@ function food_ticket_day_visit_state(array $user, string $date = ''): array
         'groups' => $groups,
         'current' => $currentOut,
         'locked' => $locked,
+        'person_id' => $userId,
+        'person_name' => trim((string) ($user['full_name'] ?? '')),
         'reason' => $homeId === null
             ? ''
-            : ('شما عضو دائم گروه «' . ($homeTitle !== '' ? $homeTitle : 'ثبت‌شده') . '» هستید و نیازی به خوداظهاری ندارید.'),
+            : ('این شخص عضو دائم گروه «' . ($homeTitle !== '' ? $homeTitle : 'ثبت‌شده') . '» است و محل تحویلش همان گروه است.'),
     ];
 }
 
@@ -860,7 +862,7 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         'target_label' => (string) $group['title'],
         'user_id' => $userId,
         'new' => (string) $group['title'],
-        'meta' => ['date' => $date, 'group_id' => $groupId],
+        'meta' => ['date' => $date, 'group_id' => $groupId, 'subject_user_id' => $userId],
     ]);
     return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'برای امروز غذا را از «' . $group['title'] . '» می‌گیرید.'];
 }
@@ -1529,6 +1531,22 @@ function food_ticket_api_groups(string $overviewDate = ''): array
     foreach ($mrows as $r) {
         $byGroup[(int) $r['group_id']][] = $userOut($r);
     }
+    $visitorsByGroup = [];
+    try {
+        $vq = db()->prepare(
+            'SELECT v.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.is_active '
+            . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
+            . 'WHERE v.visit_date = ? ORDER BY u.full_name'
+        );
+        $vq->execute([$date]);
+        foreach ($vq->fetchAll() ?: [] as $r) {
+            $row = $userOut($r);
+            $row['visitor'] = true;
+            $visitorsByGroup[(int) $r['group_id']][] = $row;
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] groups list visitors failed: ' . $e->getMessage());
+    }
     $items = [];
     foreach ($groups as $g) {
         $gid = (int) $g['id'];
@@ -1544,6 +1562,7 @@ function food_ticket_api_groups(string $overviewDate = ''): array
             'active' => (string) $g['status'] === 'active',
             'created_at' => (string) $g['created_at'],
             'members' => $byGroup[$gid] ?? [],
+            'today_visitors' => $visitorsByGroup[$gid] ?? [],
             'today' => $overview,
         ];
     }
