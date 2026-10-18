@@ -20,6 +20,56 @@ function lac_default_hash(): string
     return password_hash(LAC_DEFAULT_PASSWORD, PASSWORD_DEFAULT);
 }
 
+/**
+ * ستون must_change_password و نقش‌های local_user/guard را در صورت نبودن اضافه می‌کند.
+ * خطا نباید صفحهٔ دیگری (مثل صف کاری) را بخواباند.
+ */
+function lac_ensure_schema(): bool
+{
+    static $ready = false;
+    if ($ready) {
+        return true;
+    }
+    if (!function_exists('db')) {
+        return false;
+    }
+    try {
+        $pdo = db();
+        $dbName = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
+        $stmt = $pdo->prepare("SELECT COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME IN ('role', 'must_change_password')");
+        $stmt->execute([$dbName !== '' ? $dbName : null]);
+        $types = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $types[strtolower((string) ($row['COLUMN_NAME'] ?? ''))] = (string) ($row['COLUMN_TYPE'] ?? '');
+        }
+        if (!isset($types['must_change_password'])) {
+            $pdo->exec('ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 0');
+        }
+        $roleType = $types['role'] ?? '';
+        if ($roleType !== '' && (!str_contains($roleType, "'local_user'") || !str_contains($roleType, "'guard'"))) {
+            preg_match('/^enum\\((.*)\\)$/i', $roleType, $match);
+            $values = [];
+            if (isset($match[1])) {
+                preg_match_all("/'((?:[^'\\\\]|\\\\.)*)'/", $match[1], $parts);
+                $values = $parts[1] ?? [];
+            }
+            foreach (['local_user', 'guard'] as $need) {
+                if (!in_array($need, $values, true)) {
+                    $values[] = $need;
+                }
+            }
+            if ($values !== []) {
+                $list = implode(',', array_map(static fn (string $value): string => "'" . str_replace("'", "\\'", $value) . "'", $values));
+                $pdo->exec('ALTER TABLE users MODIFY COLUMN role ENUM(' . $list . ') NOT NULL DEFAULT \'user\'');
+            }
+        }
+        $ready = true;
+        return true;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
 /** آیا این کاربر باید به سفارش غذا هدایت شود (کاربر محلی یا نگهبان)؟ */
 function lac_is_local_role(?array $user): bool
 {
@@ -113,6 +163,7 @@ function lac_admin_request(): never
         redirect('index.php?page=local-accounts');
     }
 
+    lac_ensure_schema();
     $rows = db()->query("SELECT id, username, full_name, national_code, role, is_active, must_change_password, is_primary_admin FROM users WHERE auth_source = 'local' ORDER BY role = 'guard' DESC, username, id")->fetchAll();
     $roles = permission_roles();
     $guardCount = 0;

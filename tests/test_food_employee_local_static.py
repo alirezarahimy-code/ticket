@@ -31,5 +31,9 @@ check("food_employee_local" in chatbot, "chatbot answers local account for new e
 check("function food_ticket_ensure_employee_local_accounts" in save, "existing food-only employees are backfilled to local accounts")
 check("food_ticket_ensure_employee_local_accounts()" in read("index.php"), "backfill runs automatically when the app loads")
 check("با باز شدن سامانه" in guide and "با باز شدن سامانه" in chatbot, "help and chatbot say existing employees get local accounts automatically")
+check("function lac_ensure_schema" in read("local-accounts.php"), "local account schema is ensured before convert")
+check("lac_ensure_schema" in save, "employee backfill waits for local account columns")
+check("catch (Throwable $exception)" in save[save.find("function food_ticket_ensure_employee_local_accounts"):save.find("function food_ticket_api_employees")], "backfill never crashes other pages")
+check("function ticket_cancel_ensure_schema" in read("bootstrap.php"), "queue cancel columns are auto-added if missing")
 
 print("all food employee local static checks passed")

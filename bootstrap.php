@@ -207,9 +207,12 @@ function db_table_exists(string $table): bool
     }
 }
 
-function db_table_columns(string $table): array
+function db_table_columns(string $table, bool $refresh = false): array
 {
     static $cache = [];
+    if ($refresh) {
+        unset($cache[$table]);
+    }
     if (array_key_exists($table, $cache)) {
         return $cache[$table];
     }
@@ -229,6 +232,78 @@ function db_missing_columns(string $table, array $required): array
 {
     $columns = db_table_columns($table);
     return array_values(array_filter($required, static fn (string $column): bool => !isset($columns[$column])));
+}
+
+function db_column_present(string $table, string $column): bool
+{
+    foreach (array_keys(db_table_columns($table)) as $name) {
+        if (strcasecmp((string) $name, $column) === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** ستون جاافتاده را اضافه می‌کند؛ خطا صفحه را نمی‌خواباند. */
+function db_add_missing_column(string $table, string $column, string $ddl): bool
+{
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $table) || !preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+        return false;
+    }
+    try {
+        if (db_column_present($table, $column)) {
+            return true;
+        }
+        db()->exec($ddl);
+        db_table_columns($table, true);
+        return true;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/** مقدارهای جاافتادهٔ ENUM را بدون حذف مقدارهای فعلی اضافه می‌کند. */
+function db_ensure_enum_values(string $table, string $column, array $needed, string $notNullDefault = ''): void
+{
+    if ($needed === [] || !preg_match('/^[A-Za-z0-9_]+$/', $table) || !preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+        return;
+    }
+    try {
+        $stmt = db()->prepare("SELECT COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+        $stmt->execute([$table, $column]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return;
+        }
+        $type = (string) ($row['COLUMN_TYPE'] ?? '');
+        if (!preg_match('/^enum\\((.*)\\)$/i', $type, $match)) {
+            return;
+        }
+        preg_match_all("/'((?:[^'\\\\]|\\\\.)*)'/", $match[1], $parts);
+        $values = $parts[1] ?? [];
+        $missing = [];
+        foreach ($needed as $need) {
+            $need = (string) $need;
+            if ($need !== '' && !in_array($need, $values, true)) {
+                $values[] = $need;
+                $missing[] = $need;
+            }
+        }
+        if ($missing === [] || $values === []) {
+            return;
+        }
+        $list = implode(',', array_map(static fn (string $value): string => "'" . str_replace("'", "\\'", $value) . "'", $values));
+        $nullSql = strtoupper((string) ($row['IS_NULLABLE'] ?? 'YES')) === 'NO' ? ' NOT NULL' : ' NULL';
+        $defaultSql = '';
+        if ($notNullDefault !== '') {
+            $defaultSql = " DEFAULT '" . str_replace("'", "\\'", $notNullDefault) . "'";
+        } elseif (($row['COLUMN_DEFAULT'] ?? null) !== null) {
+            $defaultSql = " DEFAULT '" . str_replace("'", "\\'", (string) $row['COLUMN_DEFAULT']) . "'";
+        }
+        db()->exec('ALTER TABLE `' . $table . '` MODIFY COLUMN `' . $column . '` ENUM(' . $list . ')' . $nullSql . $defaultSql);
+        db_table_columns($table, true);
+    } catch (Throwable) {
+    }
 }
 
 function client_ip(): string
@@ -1816,7 +1891,87 @@ function ticket_number_ensure_schema(): void
         return;
     }
     ticket_number_ensure_schema_run();
+    ticket_hot_schema_ensure();
     $ready = true;
+}
+
+/**
+ * ستون‌ها و مقدارهای ENUM که صفحات پرترافیک (صف کاری، داشبورد، جزئیات درخواست، ورود) به آن‌ها وابسته‌اند.
+ * مهاجرت جاافتاده صفحه را نمی‌خواباند؛ هر ALTER جدا و بی‌صدا است.
+ */
+function ticket_hot_schema_ensure(): void
+{
+    static $ready = false;
+    if ($ready) {
+        return;
+    }
+    $ready = true;
+    try {
+        $ticketAdds = [
+            'ticket_no' => 'ALTER TABLE tickets ADD COLUMN ticket_no VARCHAR(40) NULL',
+            'cancel_requested_at' => 'ALTER TABLE tickets ADD COLUMN cancel_requested_at DATETIME NULL',
+            'cancel_requested_by' => 'ALTER TABLE tickets ADD COLUMN cancel_requested_by INT UNSIGNED NULL',
+            'cancel_request_reason' => 'ALTER TABLE tickets ADD COLUMN cancel_request_reason TEXT NULL',
+            'requesting_unit_id' => 'ALTER TABLE tickets ADD COLUMN requesting_unit_id INT UNSIGNED NULL',
+            'sla_paused_at' => 'ALTER TABLE tickets ADD COLUMN sla_paused_at DATETIME NULL',
+            'sla_pause_minutes' => 'ALTER TABLE tickets ADD COLUMN sla_pause_minutes INT UNSIGNED NOT NULL DEFAULT 0',
+            'ola_policy_id' => 'ALTER TABLE tickets ADD COLUMN ola_policy_id INT UNSIGNED NULL',
+            'ola_response_due_at' => 'ALTER TABLE tickets ADD COLUMN ola_response_due_at DATETIME NULL',
+            'ola_due_at' => 'ALTER TABLE tickets ADD COLUMN ola_due_at DATETIME NULL',
+            'ola_escalation_1_at' => 'ALTER TABLE tickets ADD COLUMN ola_escalation_1_at DATETIME NULL',
+            'ola_escalation_2_at' => 'ALTER TABLE tickets ADD COLUMN ola_escalation_2_at DATETIME NULL',
+            'first_response_at' => 'ALTER TABLE tickets ADD COLUMN first_response_at DATETIME NULL',
+            'resolved_at' => 'ALTER TABLE tickets ADD COLUMN resolved_at DATETIME NULL',
+            'closed_at' => 'ALTER TABLE tickets ADD COLUMN closed_at DATETIME NULL',
+            'assigned_at' => 'ALTER TABLE tickets ADD COLUMN assigned_at DATETIME NULL',
+            'supervisor_id' => 'ALTER TABLE tickets ADD COLUMN supervisor_id INT UNSIGNED NULL',
+            'supervisor_approved_at' => 'ALTER TABLE tickets ADD COLUMN supervisor_approved_at DATETIME NULL',
+            'supervisor_note' => 'ALTER TABLE tickets ADD COLUMN supervisor_note TEXT NULL',
+            'support_location' => 'ALTER TABLE tickets ADD COLUMN support_location VARCHAR(255) NULL',
+            'support_equipment' => 'ALTER TABLE tickets ADD COLUMN support_equipment TEXT NULL',
+            'handling_unit_id' => 'ALTER TABLE tickets ADD COLUMN handling_unit_id INT UNSIGNED NULL',
+            'service_id' => 'ALTER TABLE tickets ADD COLUMN service_id INT UNSIGNED NULL',
+        ];
+        foreach ($ticketAdds as $column => $ddl) {
+            db_add_missing_column('tickets', $column, $ddl);
+        }
+        db_ensure_enum_values('tickets', 'status', ['cancelled'], 'manager_review');
+        $userAdds = [
+            'must_change_password' => 'ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 0',
+            'first_name' => 'ALTER TABLE users ADD COLUMN first_name VARCHAR(100) NULL',
+            'last_name' => 'ALTER TABLE users ADD COLUMN last_name VARCHAR(100) NULL',
+            'employee_number' => 'ALTER TABLE users ADD COLUMN employee_number VARCHAR(100) NULL',
+            'national_code' => 'ALTER TABLE users ADD COLUMN national_code VARCHAR(30) NULL',
+            'is_primary_admin' => 'ALTER TABLE users ADD COLUMN is_primary_admin TINYINT(1) NOT NULL DEFAULT 0',
+            'is_it_agent' => 'ALTER TABLE users ADD COLUMN is_it_agent TINYINT(1) NOT NULL DEFAULT 0',
+            'handling_unit_id' => 'ALTER TABLE users ADD COLUMN handling_unit_id INT UNSIGNED NULL',
+            'org_unit_id' => 'ALTER TABLE users ADD COLUMN org_unit_id INT UNSIGNED NULL',
+            'manager_user_id' => 'ALTER TABLE users ADD COLUMN manager_user_id INT UNSIGNED NULL',
+            'requesting_unit_id' => 'ALTER TABLE users ADD COLUMN requesting_unit_id INT UNSIGNED NULL',
+            'auth_source' => "ALTER TABLE users ADD COLUMN auth_source ENUM('local','ldap','food') NOT NULL DEFAULT 'local'",
+        ];
+        foreach ($userAdds as $column => $ddl) {
+            db_add_missing_column('users', $column, $ddl);
+        }
+        db_ensure_enum_values('users', 'role', ['local_user', 'guard', 'primary_admin', 'support_manager'], 'user');
+        db_ensure_enum_values('users', 'auth_source', ['food'], 'local');
+        if (function_exists('org_ensure_schema')) {
+            org_ensure_schema();
+        }
+        if (function_exists('org_ticket_schema_ensure')) {
+            org_ticket_schema_ensure();
+        }
+        if (function_exists('lac_ensure_schema')) {
+            lac_ensure_schema();
+        }
+    } catch (Throwable) {
+    }
+}
+
+/** نام قبلی؛ صفحه‌هایی که هنوز این را صدا می‌زنند همان ترمیم کامل را می‌گیرند. */
+function ticket_cancel_ensure_schema(): void
+{
+    ticket_hot_schema_ensure();
 }
 
 function ticket_number_ensure_schema_run(): void

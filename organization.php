@@ -8,6 +8,7 @@ function org_ensure_schema(): void
         return;
     }
     $done = true;
+    try {
     db()->exec(
         'CREATE TABLE IF NOT EXISTS org_units (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -48,7 +49,13 @@ function org_ensure_schema(): void
         db()->prepare('INSERT INTO org_units (name, code, parent_id, unit_type, is_active) VALUES (?, ?, NULL, "ceo", 1)')
             ->execute(['مدیرعامل', 'CEO']);
     }
+    } catch (Throwable $exception) {
+        if (function_exists('system_log')) {
+            system_log('error', 'org_schema', $exception->getMessage());
+        }
+    }
 }
+
 
 /**
  * ستون مستقل «معاونت درخواست‌کننده» روی درخواست‌ها (جدا از department_id که مسیر رسیدگی است).

@@ -2,6 +2,9 @@
 declare(strict_types=1);
 
 require dirname(__DIR__) . '/bootstrap.php';
+if (function_exists('ticket_hot_schema_ensure')) {
+    ticket_hot_schema_ensure();
+}
 
 if (PHP_SAPI !== 'cli') {
     http_response_code(404);

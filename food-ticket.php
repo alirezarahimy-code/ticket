@@ -3251,52 +3251,47 @@ function food_ticket_ensure_employee_local_accounts(): int
     try {
         $pdo = db();
         $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Throwable $exception) {
-        return 0;
-    }
-    if (!$rows) {
-        return 0;
-    }
-    if (is_file(__DIR__ . '/local-accounts.php')) {
-        require_once __DIR__ . '/local-accounts.php';
-    }
-    if (!function_exists('lac_default_hash')) {
-        return 0;
-    }
-    $domainNoCode = [];
-    if (is_file(__DIR__ . '/food-personnel-link.php')) {
-        require_once __DIR__ . '/food-personnel-link.php';
-    }
-    if (function_exists('fpl_norm_name') && function_exists('fpl_person_name')) {
-        try {
+        if (!$rows) {
+            return 0;
+        }
+        if (is_file(__DIR__ . '/local-accounts.php')) {
+            require_once __DIR__ . '/local-accounts.php';
+        }
+        if (function_exists('lac_ensure_schema') && !lac_ensure_schema()) {
+            return 0;
+        }
+        if (!function_exists('lac_default_hash')) {
+            return 0;
+        }
+        $domainNoCode = [];
+        if (is_file(__DIR__ . '/food-personnel-link.php')) {
+            require_once __DIR__ . '/food-personnel-link.php';
+        }
+        if (function_exists('fpl_norm_name') && function_exists('fpl_person_name')) {
             foreach ($pdo->query("SELECT full_name, first_name, last_name FROM users WHERE auth_source = 'ldap' AND (employee_number IS NULL OR TRIM(employee_number) = '')")->fetchAll(PDO::FETCH_ASSOC) as $domainRow) {
                 $key = fpl_norm_name(fpl_person_name($domainRow));
                 if ($key !== '') {
                     $domainNoCode[$key] = true;
                 }
             }
-        } catch (Throwable $exception) {
-            $domainNoCode = [];
         }
-    }
-    $usernameTaken = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
-    $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
-    $hash = null;
-    $converted = 0;
-    foreach ($rows as $row) {
-        $pc = function_exists('normalize_employee_number')
-            ? (string) (normalize_employee_number((string) ($row['employee_number'] ?? '')) ?? '')
-            : trim((string) ($row['employee_number'] ?? ''));
-        if ($pc === '') {
-            continue;
-        }
-        if ($domainNoCode !== [] && function_exists('fpl_person_name')) {
-            $key = fpl_person_name($row);
-            if ($key !== '' && isset($domainNoCode[$key])) {
+        $usernameTaken = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
+        $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
+        $hash = null;
+        $converted = 0;
+        foreach ($rows as $row) {
+            $pc = function_exists('normalize_employee_number')
+                ? (string) (normalize_employee_number((string) ($row['employee_number'] ?? '')) ?? '')
+                : trim((string) ($row['employee_number'] ?? ''));
+            if ($pc === '') {
                 continue;
             }
-        }
-        try {
+            if ($domainNoCode !== [] && function_exists('fpl_person_name')) {
+                $key = fpl_person_name($row);
+                if ($key !== '' && isset($domainNoCode[$key])) {
+                    continue;
+                }
+            }
             $usernameTaken->execute([$pc, (int) $row['id']]);
             if ((int) $usernameTaken->fetchColumn() > 0) {
                 continue;
@@ -3306,11 +3301,11 @@ function food_ticket_ensure_employee_local_accounts(): int
             }
             $convert->execute([$pc, $hash, (int) $row['id']]);
             $converted++;
-        } catch (Throwable $exception) {
-            continue;
         }
+        return $converted;
+    } catch (Throwable $exception) {
+        return 0;
     }
-    return $converted;
 }
 
 function food_ticket_api_employees(): array
@@ -3403,6 +3398,9 @@ function food_ticket_api_save_employee(array $data): void
     $id = $id ?: $existingId;
     if (is_file(__DIR__ . '/local-accounts.php')) {
         require_once __DIR__ . '/local-accounts.php';
+    }
+    if (function_exists('lac_ensure_schema')) {
+        lac_ensure_schema();
     }
     $usernameTaken = static function (string $username, int $exceptId): bool {
         $stmt = db()->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
