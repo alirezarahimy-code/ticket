@@ -3234,8 +3234,88 @@ function food_ticket_api_orders(string $foodDate, string $jalaliHint = '', ?stri
     return food_order_internal_items($from, $to);
 }
 
+/**
+ * کارمندانی که قبلاً فقط رکورد غذا (auth_source=food) داشتند، حساب محلی می‌گیرند.
+ * حساب دامین دست نمی‌خورد. اگر نام با کاربر دامینِ بدون کد پرسنلی یکی باشد، برای ربط پرسنل می‌ماند.
+ */
+function food_ticket_ensure_employee_local_accounts(): int
+{
+    static $done = false;
+    if ($done) {
+        return 0;
+    }
+    $done = true;
+    if (!function_exists('db')) {
+        return 0;
+    }
+    try {
+        $pdo = db();
+        $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Throwable $exception) {
+        return 0;
+    }
+    if (!$rows) {
+        return 0;
+    }
+    if (is_file(__DIR__ . '/local-accounts.php')) {
+        require_once __DIR__ . '/local-accounts.php';
+    }
+    if (!function_exists('lac_default_hash')) {
+        return 0;
+    }
+    $domainNoCode = [];
+    if (is_file(__DIR__ . '/food-personnel-link.php')) {
+        require_once __DIR__ . '/food-personnel-link.php';
+    }
+    if (function_exists('fpl_norm_name') && function_exists('fpl_person_name')) {
+        try {
+            foreach ($pdo->query("SELECT full_name, first_name, last_name FROM users WHERE auth_source = 'ldap' AND (employee_number IS NULL OR TRIM(employee_number) = '')")->fetchAll(PDO::FETCH_ASSOC) as $domainRow) {
+                $key = fpl_norm_name(fpl_person_name($domainRow));
+                if ($key !== '') {
+                    $domainNoCode[$key] = true;
+                }
+            }
+        } catch (Throwable $exception) {
+            $domainNoCode = [];
+        }
+    }
+    $usernameTaken = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
+    $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
+    $hash = null;
+    $converted = 0;
+    foreach ($rows as $row) {
+        $pc = function_exists('normalize_employee_number')
+            ? (string) (normalize_employee_number((string) ($row['employee_number'] ?? '')) ?? '')
+            : trim((string) ($row['employee_number'] ?? ''));
+        if ($pc === '') {
+            continue;
+        }
+        if ($domainNoCode !== [] && function_exists('fpl_person_name')) {
+            $key = fpl_person_name($row);
+            if ($key !== '' && isset($domainNoCode[$key])) {
+                continue;
+            }
+        }
+        try {
+            $usernameTaken->execute([$pc, (int) $row['id']]);
+            if ((int) $usernameTaken->fetchColumn() > 0) {
+                continue;
+            }
+            if ($hash === null) {
+                $hash = lac_default_hash();
+            }
+            $convert->execute([$pc, $hash, (int) $row['id']]);
+            $converted++;
+        } catch (Throwable $exception) {
+            continue;
+        }
+    }
+    return $converted;
+}
+
 function food_ticket_api_employees(): array
 {
+    food_ticket_ensure_employee_local_accounts();
     $query = db()->query("SELECT id, employee_number, national_code, first_name, last_name, full_name, is_active FROM users WHERE employee_number IS NOT NULL AND TRIM(employee_number) <> '' ORDER BY is_active DESC, employee_number");
     return array_map(static function (array $row): array {
         $first = trim((string) ($row['first_name'] ?? ''));
@@ -3321,10 +3401,19 @@ function food_ticket_api_save_employee(array $data): void
         throw new RuntimeException('این کد ملی قبلاً برای کارمند «' . (string) $owner['full_name'] . '» ثبت شده است.');
     }
     $id = $id ?: $existingId;
+    if (is_file(__DIR__ . '/local-accounts.php')) {
+        require_once __DIR__ . '/local-accounts.php';
+    }
+    $usernameTaken = static function (string $username, int $exceptId): bool {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
+        $stmt->execute([$username, $exceptId]);
+        return (int) $stmt->fetchColumn() > 0;
+    };
     if ($id > 0) {
-        $currentUser = db()->prepare('SELECT employee_number FROM users WHERE id = ? LIMIT 1');
+        $currentUser = db()->prepare('SELECT employee_number, auth_source FROM users WHERE id = ? LIMIT 1');
         $currentUser->execute([$id]);
-        if (trim((string) ($currentUser->fetchColumn() ?: '')) === '') {
+        $current = $currentUser->fetch(PDO::FETCH_ASSOC) ?: null;
+        if ($current === null || trim((string) ($current['employee_number'] ?? '')) === '') {
             throw new RuntimeException('کارمند پیدا نشد.');
         }
         $query = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?');
@@ -3336,11 +3425,23 @@ function food_ticket_api_save_employee(array $data): void
                 throw new RuntimeException('کارمند پیدا نشد.');
             }
         }
+        // رکورد قدیمی غذا (بدون ورود) مثل ایمپورت به حساب محلی تبدیل می‌شود؛ حساب دامین دست نمی‌خورد.
+        if ((string) ($current['auth_source'] ?? '') === 'food') {
+            if ($usernameTaken($personnelCode, $id)) {
+                throw new RuntimeException('نام کاربری «' . $personnelCode . '» قبلاً برای حساب دیگری استفاده شده است.');
+            }
+            $hash = function_exists('lac_default_hash') ? lac_default_hash() : password_hash('A@a12345', PASSWORD_DEFAULT);
+            db()->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1, is_active = ? WHERE id = ?")
+                ->execute([$personnelCode, $hash, $active, $id]);
+        }
         return;
     }
-    $username = 'food_employee_' . substr(hash('sha256', $personnelCode), 0, 40);
-    $query = db()->prepare('INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (?, NULL, ?, ?, ?, ?, ?, "user", "food", ?)');
-    $query->execute([$username, $fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active]);
+    if ($usernameTaken($personnelCode, 0)) {
+        throw new RuntimeException('نام کاربری «' . $personnelCode . '» قبلاً برای حساب دیگری استفاده شده است.');
+    }
+    $hash = function_exists('lac_default_hash') ? lac_default_hash() : password_hash('A@a12345', PASSWORD_DEFAULT);
+    $query = db()->prepare("INSERT INTO users (username, password_hash, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, 'local_user', 'local', ?, 1)");
+    $query->execute([$personnelCode, $hash, $fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active]);
 }
 
 function food_ticket_api_save_guest_card(array $data, int $userId): void

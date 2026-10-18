@@ -22,6 +22,9 @@ require __DIR__ . '/system-health.php';
 ticket_number_ensure_schema(); // پیش از هر تراکنش: DDL اینجا بی‌خطر است و داخل تراکنش دیگر اجرا نمی‌شود
 ticket_number_autofill();
 role_permissions_seed();
+if (function_exists('food_ticket_ensure_employee_local_accounts')) {
+    food_ticket_ensure_employee_local_accounts();
+}
 
 if (isset($_GET['installed'])) {
     flash('success', 'سامانه با موفقیت نصب شد.');
