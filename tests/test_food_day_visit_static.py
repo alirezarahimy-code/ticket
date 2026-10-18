@@ -68,7 +68,8 @@ check("تغییر سلف امروز" in guide
 check("visit_change_until" in groups
       and "function food_ticket_visit_change_is_open" in groups
       and "food_ticket_visit_change_guard" in groups
-      and "مهلت تغییر سلف" in admin_js,
+      and "مهلت تغییر سلف" in admin_js
+      and 'type="time"' in admin_js,
       "each food group has a configurable cafeteria-change deadline")
 check("visit_change_until TIME NULL" in schema
       and "visit_change_until TIME NULL" in install,

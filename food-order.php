@@ -964,12 +964,6 @@ function food_order_cancel_request_ensure(): void
     }
 }
 
-/** مدیر پشتیبانی یا مدیر اصلی که food.order_close دارد. */
-function food_order_user_is_cancel_reviewer(array $user): bool
-{
-    return food_order_user_can($user, 'food.order_close');
-}
-
 function food_order_require_cancel_reviewer(array $user): void
 {
     if (!$user || !food_order_user_is_cancel_reviewer($user)) {
@@ -982,44 +976,87 @@ function food_order_cancel_inbox_url(): string
     return 'index.php?page=dashboard#food-cancel-requests';
 }
 
+/** مدیر اصلی یا مدیر پشتیبانی — برای اعلان زنگوله و کارت داشبورد. */
+function food_order_user_is_cancel_reviewer(array $user): bool
+{
+    if (!$user) {
+        return false;
+    }
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+        return true;
+    }
+    if ((int) ($user['is_primary_admin'] ?? 0) === 1) {
+        return true;
+    }
+    $role = (string) ($user['role'] ?? '');
+    if ($role === 'primary_admin' || $role === 'support_manager') {
+        return true;
+    }
+    return food_order_user_can($user, 'food.order_close');
+}
+
 /** @return list<int> */
 function food_order_cancel_reviewer_ids(): array
 {
     $ids = [];
     try {
-        $roles = ['primary_admin', 'support_manager'];
-        if (function_exists('permission_roles') && function_exists('role_permission_set')) {
-            foreach (array_keys(permission_roles()) as $role) {
-                if (isset(role_permission_set((string) $role)['food.order_close'])) {
-                    $roles[] = (string) $role;
-                }
+        $stmt = db()->query('SELECT id, role, is_primary_admin FROM users WHERE is_active = 1');
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if (food_order_user_is_cancel_reviewer($row)) {
+                $ids[(int) $row['id']] = true;
             }
         }
-        $roles = array_values(array_unique($roles));
-        $in = implode(',', array_fill(0, count($roles), '?'));
-        $stmt = db()->prepare("SELECT id FROM users WHERE is_active = 1 AND (role IN ($in) OR (role = 'admin' AND is_primary_admin = 1))");
-        $stmt->execute($roles);
-        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $id) {
-            $ids[(int) $id] = true;
+    } catch (Throwable $e) {
+        if (function_exists('app_error_log')) {
+            app_error_log('[food-order] cancel reviewers: ' . $e->getMessage());
         }
-    } catch (Throwable) {
+    }
+    if ($ids === []) {
+        try {
+            $fallback = db()->query("SELECT id FROM users WHERE is_active = 1 AND (is_primary_admin = 1 OR role IN ('primary_admin','support_manager','admin'))");
+            foreach ($fallback->fetchAll(PDO::FETCH_COLUMN) as $id) {
+                $ids[(int) $id] = true;
+            }
+        } catch (Throwable $e) {
+            if (function_exists('app_error_log')) {
+                app_error_log('[food-order] cancel reviewers fallback: ' . $e->getMessage());
+            }
+        }
     }
     return array_keys($ids);
 }
 
 function food_order_notify_cancel_reviewers(string $type, string $title, string $body, int $excludeUserId = 0): void
 {
-    if (!function_exists('notify_user')) {
+    $ids = food_order_cancel_reviewer_ids();
+    if ($ids === []) {
+        if (function_exists('app_error_log')) {
+            app_error_log('[food-order] no cancel reviewers to notify');
+        }
         return;
     }
-    foreach (food_order_cancel_reviewer_ids() as $id) {
+    if (!function_exists('notify_user')) {
+        if (function_exists('app_error_log')) {
+            app_error_log('[food-order] notify_user missing');
+        }
+        return;
+    }
+    $sent = 0;
+    foreach ($ids as $id) {
         if ($excludeUserId > 0 && (int) $id === $excludeUserId) {
             continue;
         }
         try {
             notify_user((int) $id, $type, $title, $body, null);
-        } catch (Throwable) {
+            $sent++;
+        } catch (Throwable $e) {
+            if (function_exists('app_error_log')) {
+                app_error_log('[food-order] notify ' . $id . ': ' . $e->getMessage());
+            }
         }
+    }
+    if ($sent === 0 && function_exists('app_error_log')) {
+        app_error_log('[food-order] cancel notification sent to 0 reviewers');
     }
 }
 
@@ -1128,8 +1165,14 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
         $pdo->prepare('INSERT INTO food_order_cancel_requests (order_id, employee_id, requested_by, food_date, status) VALUES (?, ?, ?, ?, \'pending\')')
             ->execute([$orderId, $employeeId, $actorId, (string) $order['food_date']]);
         $requestId = (int) $pdo->lastInsertId();
-        food_order_log($orderId, $day['calendar_id'], 'order_cancel_request', $actorId, ['status' => 'active'], ['request_id' => $requestId, 'status' => 'pending']);
         $pdo->commit();
+        try {
+            food_order_log($orderId, $day['calendar_id'], 'order_cancel_request', $actorId, ['status' => 'active'], ['request_id' => $requestId, 'status' => 'pending']);
+        } catch (Throwable $logError) {
+            if (function_exists('app_error_log')) {
+                app_error_log('[food-order] cancel-request log: ' . $logError->getMessage());
+            }
+        }
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
@@ -2317,7 +2360,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=16"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=17"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
     render_footer();
     exit;
 }

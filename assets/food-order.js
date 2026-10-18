@@ -42,6 +42,7 @@
     proxyCancelingOrderId: 0,
     proxyCancelConfirmingOrderId: 0,
     cancelRequestBusyId: 0,
+    cancelRequestConfirmingId: 0,
     employeeChoices: [],
     employeeChoicesLoaded: false,
     employeeChoicesLoading: false,
@@ -390,9 +391,15 @@
     if (row.cancel_request && row.cancel_request.status === 'pending') {
       return '<span class="fo-order-state">در انتظار تأیید لغو</span>';
     }
-    var busy = Number(state.cancelRequestBusyId) === Number(row.id);
+    var id = Number(row.id);
+    var busy = Number(state.cancelRequestBusyId) === id;
+    if (busy) return '<button class="button secondary" type="button" disabled>در حال ارسال…</button>';
+    if (Number(state.cancelRequestConfirmingId) === id) {
+      var confirmAct = isProxy ? 'confirm-cancel-request-proxy' : 'confirm-cancel-request';
+      return '<span class="fo-proxy-cancel-confirm"><button class="button danger-button" type="button" data-fo-action="' + confirmAct + '" data-order-id="' + id + '">تأیید ارسال درخواست</button><button class="button secondary" type="button" data-fo-action="dismiss-cancel-request">انصراف</button></span>';
+    }
     var act = isProxy ? 'cancel-request-proxy' : 'cancel-request';
-    return '<button class="button secondary" type="button" data-fo-action="' + act + '" data-order-id="' + Number(row.id) + '"' + (busy ? ' disabled' : '') + '>' + (busy ? 'در حال ارسال…' : 'درخواست لغو') + '</button>';
+    return '<button class="button secondary" type="button" data-fo-action="' + act + '" data-order-id="' + id + '">درخواست لغو</button>';
   }
 
   function renderProxyCancelControl(orderId, buttonClass) {
@@ -877,9 +884,24 @@
     }
   }
 
+  function markCancelPending(orderId) {
+    var id = Number(orderId || 0);
+    if (!id) return;
+    var patch = function (row) {
+      if (row && Number(row.id) === id) row.cancel_request = { id: 0, status: 'pending' };
+    };
+    (state.orders || []).forEach(patch);
+    (state.proxyOrders || []).forEach(patch);
+    if (state.monthData && state.monthData.days) {
+      Object.keys(state.monthData.days).forEach(function (key) {
+        var day = state.monthData.days[key];
+        if (day && day.my_order) patch(day.my_order);
+      });
+    }
+  }
   async function requestCancelOrder(orderId, isProxy) {
     if (!orderId || state.cancelRequestBusyId) return;
-    if (!window.confirm('درخواست لغو این سفارش برای مدیر پشتیبانی ارسال شود؟ تا تأیید ایشان سفارش لغو نمی‌شود.')) return;
+    state.cancelRequestConfirmingId = 0;
     state.cancelRequestBusyId = Number(orderId);
     render();
     try {
@@ -890,13 +912,18 @@
         body.national_code = normalizedDigits(state.nationalCode);
       }
       var response = await request(route, null, { method: 'POST', body: JSON.stringify(body) });
-      state.pageNotice = { message: response.message || 'درخواست لغو ثبت شد.', type: 'success' };
+      markCancelPending(orderId);
+      var notice = response.message || 'درخواست لغو برای مدیر پشتیبانی و مدیر اصلی ثبت شد.';
+      state.pageNotice = { message: notice, type: 'success' };
+      toast(notice, false);
       if (state.targetMode === 'proxy') await loadProxyOrders();
       else await loadMyOrders();
       await loadMonth();
       await loadVisit();
     } catch (e) {
-      state.pageNotice = { message: e.message || 'ثبت درخواست لغو انجام نشد.', type: 'danger' };
+      var errorMessage = e.message || 'ثبت درخواست لغو انجام نشد.';
+      state.pageNotice = { message: errorMessage, type: 'danger' };
+      toast(errorMessage, true);
     } finally {
       state.cancelRequestBusyId = 0;
       render();
@@ -963,8 +990,11 @@
       if (act === 'visit-close') closeVisitDialog();
       if (act === 'save-order') saveOrder();
       if (act === 'cancel' || act === 'cancel-current') cancelOrder(Number(action.dataset.orderId || 0));
-      if (act === 'cancel-request') requestCancelOrder(Number(action.dataset.orderId || 0), false);
-      if (act === 'cancel-request-proxy') requestCancelOrder(Number(action.dataset.orderId || 0), true);
+      if (act === 'cancel-request') { state.cancelRequestConfirmingId = Number(action.dataset.orderId || 0); render(); return; }
+      if (act === 'cancel-request-proxy') { state.cancelRequestConfirmingId = Number(action.dataset.orderId || 0); render(); return; }
+      if (act === 'confirm-cancel-request') requestCancelOrder(Number(action.dataset.orderId || 0), false);
+      if (act === 'confirm-cancel-request-proxy') requestCancelOrder(Number(action.dataset.orderId || 0), true);
+      if (act === 'dismiss-cancel-request') { state.cancelRequestConfirmingId = 0; render(); }
       if (act === 'cancel-proxy') requestProxyCancelConfirmation(Number(action.dataset.orderId || 0));
       if (act === 'confirm-cancel-proxy') cancelProxyOrder(Number(action.dataset.orderId || 0));
       if (act === 'dismiss-cancel-proxy') dismissProxyCancelConfirmation(Number(action.dataset.orderId || 0));

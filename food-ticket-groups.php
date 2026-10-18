@@ -204,8 +204,8 @@ function food_ticket_groups_migrate(): void
         // کارت دیگر اجباری نیست (گروه‌های L_UID-محور کارت ندارند)
         $step('groups.card-nullable', 'ALTER TABLE food_ticket_groups MODIFY COLUMN rfid_card VARCHAR(120) NULL');
     }
-    if ($groupCols !== [] && !in_array('visit_change_until', $groupCols, true)) {
-        $step('groups.visit_change_until', 'ALTER TABLE food_ticket_groups ADD COLUMN visit_change_until TIME NULL AFTER description');
+    if ($groupCols === [] || !in_array('visit_change_until', $groupCols, true)) {
+        $step('groups.visit_change_until', 'ALTER TABLE food_ticket_groups ADD COLUMN visit_change_until TIME NULL');
     }
 
     $runCols = $columns('food_ticket_group_runs');
@@ -791,6 +791,10 @@ function food_ticket_visit_change_hhmm(mixed $value): string
     ]));
     if ($raw === '') {
         return '';
+    }
+    if (preg_match('/^(\d{3,4})$/', $raw, $compact)) {
+        $digits = str_pad($compact[1], 4, '0', STR_PAD_LEFT);
+        $raw = substr($digits, 0, 2) . ':' . substr($digits, 2, 2);
     }
     if (!preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $raw, $parts)) {
         return '';

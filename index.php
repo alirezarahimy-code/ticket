@@ -5243,7 +5243,7 @@ if ($page === 'organization') {
 </div>
 HTML;
     echo str_replace(['__CSRF__'], [csrf_field()], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=3"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=4"></script>';
     render_footer();
     exit;
 }

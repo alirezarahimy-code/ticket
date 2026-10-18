@@ -102,7 +102,7 @@
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
       + '<label class="field">L_UID نمایندهٔ گروه (شناسهٔ اصلی)<input id="fg-uid" value="' + esc(g.l_uid || '') + '" maxlength="80" dir="ltr" placeholder="مثلاً 0100"></label>'
       + '<label class="field"><span>وضعیت</span><select id="fg-active"><option value="1"' + (g.active ? ' selected' : '') + '>فعال</option><option value="0"' + (g.active ? '' : ' selected') + '>غیرفعال</option></select></label>'
-      + '<label class="field">مهلت تغییر سلف امروز<input id="fg-visit-until" value="' + esc(g.visit_change_until || '') + '" maxlength="5" dir="ltr" inputmode="numeric" placeholder="مثلاً 09:30"></label>'
+      + '<label class="field">مهلت تغییر سلف امروز<input id="fg-visit-until" type="time" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" dir="ltr" step="60"></label>'
       + '<label class="field full">توضیحات<input id="fg-desc" value="' + esc(g.description || '') + '" maxlength="500"></label>'
       + '</div>'
       + '<p class="muted" style="margin:6px 0">مهلت تغییر سلف فقط برای کسانی است که عضو دائم هیچ گروهی نیستند و می‌خواهند امروز غذا را از این سلف بگیرند. خالی یعنی بدون محدودیت ساعت؛ مثلاً ۰۹:۳۰ یعنی تا پایان همان دقیقه اعلام مجاز است. بعد از چاپ فیش گروه، اعلام همچنان قفل می‌شود.</p>'

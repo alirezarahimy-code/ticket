@@ -257,10 +257,14 @@
             deputies.forEach(function (deputy) {
                 html += '<li>' + renderDeputy(deputy);
                 var departments = children(deputy.id, 'department');
-                html += '<ul>';
-                departments.forEach(function (department) { html += '<li>' + renderDepartment(department) + renderExperts(department) + '</li>'; });
-                html += '<li>' + expertNode(deputy) + '</li>';
-                html += '</ul></li>';
+                var deputyExperts = expertsIn(deputy.id);
+                if (departments.length || deputyExperts.length) {
+                    html += '<ul>';
+                    departments.forEach(function (department) { html += '<li>' + renderDepartment(department) + renderExperts(department) + '</li>'; });
+                    if (deputyExperts.length) html += '<li>' + expertNode(deputy) + '</li>';
+                    html += '</ul>';
+                }
+                html += '</li>';
             });
             html += '</ul>';
         }

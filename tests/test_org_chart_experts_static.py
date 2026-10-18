@@ -54,8 +54,8 @@ check(
     "deputy card has department and expert add buttons",
 )
 check(
-    "html += '<li>' + expertNode(deputy) + '</li>';" in org_js,
-    "direct deputy experts render under the deputy",
+    "if (deputyExperts.length) html += '<li>' + expertNode(deputy) + '</li>';" in org_js,
+    "deputy expert box appears only after experts are assigned",
 )
 check(
     "expertHosts" in org_js

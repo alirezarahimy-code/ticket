@@ -279,7 +279,7 @@ function chatbot_answer(string $question, array $user): array
     $mentionsOrgChart = chatbot_has_any($norm, ['چارت', 'ساختار سازمان', 'ساختار سازمانی', 'نفرات سازمان']);
     $asksOrgExperts = $mentionsOrgChart && chatbot_has_any($norm, ['کارشناس', 'اداره', 'معاونت', 'محلی', 'دامینی', 'نفرات']);
     if ($mentionsOrgChart || $asksOrgExperts) {
-        $orgAnswer = 'در چارت سازمانی، بعد از معاونت هم اداره می‌توان ساخت و هم کارشناس مستقیم زیر همان معاونت. روی کارت معاونت سمت راست «افزودن اداره» و سمت چپ «افزودن کارشناس» است. فهرست نفرات همهٔ کاربران دامینی و محلی را نشان می‌دهد.';
+        $orgAnswer = 'در چارت سازمانی، بعد از معاونت هم اداره می‌توان ساخت و هم کارشناس مستقیم زیر همان معاونت. روی کارت معاونت سمت راست «افزودن اداره» و سمت چپ «افزودن کارشناس» است. کادر کارشناس فقط بعد از انتخاب نفرات زیر معاونت ظاهر می‌شود. فهرست نفرات همهٔ کاربران دامینی و محلی را نشان می‌دهد.';
         return chatbot_reply($user, $question, $orgAnswer, true, null, 'org_chart_experts', 0.0, [
             'url' => 'index.php?page=organization',
             'label' => 'رفتن به ساختار سازمانی',
