@@ -921,14 +921,16 @@ if (($_GET['action'] ?? '') === 'notification_feed') {
         @session_write_close();
     }
     $afterId = max(0, (int) ($_GET['after'] ?? 0));
-    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ? ORDER BY n.id ASC LIMIT 20');
+    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ? ORDER BY n.id ASC LIMIT 20');
     $feedQuery->execute([(int) $user['id'], $afterId]);
     $items = array_map(static function (array $item): array {
         return [
             'id' => (int) $item['id'],
             'ticket_id' => $item['ticket_id'] !== null ? (int) $item['ticket_id'] : null,
+            'notification_type' => (string) ($item['notification_type'] ?? ''),
             'title' => (string) $item['title'],
             'body' => (string) $item['body'],
+            'href' => notification_target_url($item),
         ];
     }, $feedQuery->fetchAll());
     header('Content-Type: application/json; charset=utf-8');
@@ -1305,6 +1307,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $notificationId = (int) ($_POST['notification_id'] ?? 0);
             db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?')->execute([$notificationId, (int) $user['id']]);
             redirect('index.php?page=notifications');
+        }
+        if ($action === 'food_order_cancel_decide') {
+            $reviewer = require_login();
+            if (!function_exists('food_order_cancel_request_decide')) {
+                throw new RuntimeException('ماژول سفارش غذا در دسترس نیست.');
+            }
+            $result = food_order_cancel_request_decide(
+                (int) ($_POST['request_id'] ?? 0),
+                (string) ($_POST['decision'] ?? ''),
+                $reviewer,
+                (string) ($_POST['note'] ?? '')
+            );
+            flash('success', (string) ($result['message'] ?? 'انجام شد.'));
+            redirect('index.php?page=dashboard#food-cancel-requests');
         }
         if ($action === 'supervisor_decision') {
             $supervisor = require_permission('supervisor.panel');
@@ -3956,7 +3972,7 @@ if ($page === 'notifications') {
     render_header('اعلان‌های داخلی', $notificationUser);
     echo '<section class="page-heading"><div><span class="eyebrow">اعلان داخلی آفلاین</span><h1>اعلان‌های شما</h1><p>تغییرات درخواست‌ها بدون نیاز به ایمیل یا پیامک در همین سامانه اعلام می‌شوند.</p></div><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_all_notifications"><button class="button secondary" type="submit">خوانده‌شدن همه</button></form></section><section class="card notification-list">';
     foreach ($notificationQuery->fetchAll() as $notification) {
-        $target = $notification['ticket_id'] ? 'index.php?page=ticket&id=' . (int) $notification['ticket_id'] : 'index.php?page=notifications';
+        $target = notification_target_url($notification);
         echo '<div class="notification-item ' . ((int) $notification['is_read'] === 0 ? 'unread' : '') . '"><a href="' . $target . '"><strong>' . e($notification['title']) . '</strong><span>' . e($notification['body']) . '</span><small>' . e(jalali_date($notification['created_at'])) . ($notification['subject'] ? ' • ' . e($notification['subject']) : '') . '</small></a>';
         if ((int) $notification['is_read'] === 0) { echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_notification"><input type="hidden" name="notification_id" value="' . (int) $notification['id'] . '"><button class="mini-button" type="submit">خوانده شد</button></form>'; }
         echo '</div>';
@@ -5543,6 +5559,9 @@ echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ?
 if ($cdDvdReady) {
     echo cd_dvd_render_surface($user, 'index.php');
      echo '<script src="assets/cd-dvd.js?v=3.4.8"></script>';
+}
+if (function_exists('food_order_render_pending_cancels_card')) {
+    echo food_order_render_pending_cancels_card($user);
 }
 echo '<section class="list-section"><div class="section-title"><div><h2>' . ($isStaff ? 'آخرین درخواست‌ها' : 'درخواست‌های من') . '</h2><p>آخرین تغییرات در ابتدا نمایش داده می‌شود.</p></div><a href="index.php?page=new-ticket">ثبت درخواست ←</a></div>';
 if (!$tickets) {

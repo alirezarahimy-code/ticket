@@ -2284,6 +2284,20 @@ function notify_user(int $userId, string $type, string $title, string $body, ?in
     db()->prepare('INSERT INTO notifications (user_id, ticket_id, notification_type, title, body) VALUES (?, ?, ?, ?, ?)')->execute([$userId, $ticketId, $type, $title, $body]);
 }
 
+function notification_target_url(array $notification): string
+{
+    $type = (string) ($notification['notification_type'] ?? $notification['type'] ?? '');
+    if ($type === 'food_cancel_request' || $type === 'food_cancel_decision') {
+        return function_exists('food_order_cancel_inbox_url')
+            ? food_order_cancel_inbox_url()
+            : 'index.php?page=dashboard#food-cancel-requests';
+    }
+    if (!empty($notification['ticket_id'])) {
+        return 'index.php?page=ticket&id=' . (int) $notification['ticket_id'];
+    }
+    return 'index.php?page=notifications';
+}
+
 function notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
 {
     $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
@@ -2822,6 +2836,7 @@ function activity_action_label(string $code): string
         'rate_ticket' => 'امتیازدهی به درخواست',
         'mark_notification' => 'خواندن اعلان',
         'mark_all_notifications' => 'خواندن همهٔ اعلان‌ها',
+        'food_order_cancel_decide' => 'رسیدگی به درخواست لغو غذا',
         'cd_dvd_create' => 'ثبت رکورد CD/DVD',
         'cd_dvd_update' => 'ویرایش رکورد CD/DVD',
         'cd_dvd_delete' => 'حذف رکورد CD/DVD',

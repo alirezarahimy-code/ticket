@@ -964,22 +964,103 @@ function food_order_cancel_request_ensure(): void
     }
 }
 
-function food_order_notify_support_managers(string $type, string $title, string $body): void
+/** مدیر پشتیبانی یا مدیر اصلی که food.order_close دارد. */
+function food_order_user_is_cancel_reviewer(array $user): bool
+{
+    return food_order_user_can($user, 'food.order_close');
+}
+
+function food_order_require_cancel_reviewer(array $user): void
+{
+    if (!$user || !food_order_user_is_cancel_reviewer($user)) {
+        throw new RuntimeException('دسترسی شما به رسیدگی درخواست لغو سفارش مجاز نیست.');
+    }
+}
+
+function food_order_cancel_inbox_url(): string
+{
+    return 'index.php?page=dashboard#food-cancel-requests';
+}
+
+/** @return list<int> */
+function food_order_cancel_reviewer_ids(): array
+{
+    $ids = [];
+    try {
+        $roles = ['primary_admin', 'support_manager'];
+        if (function_exists('permission_roles') && function_exists('role_permission_set')) {
+            foreach (array_keys(permission_roles()) as $role) {
+                if (isset(role_permission_set((string) $role)['food.order_close'])) {
+                    $roles[] = (string) $role;
+                }
+            }
+        }
+        $roles = array_values(array_unique($roles));
+        $in = implode(',', array_fill(0, count($roles), '?'));
+        $stmt = db()->prepare("SELECT id FROM users WHERE is_active = 1 AND (role IN ($in) OR (role = 'admin' AND is_primary_admin = 1))");
+        $stmt->execute($roles);
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            $ids[(int) $id] = true;
+        }
+    } catch (Throwable) {
+    }
+    return array_keys($ids);
+}
+
+function food_order_notify_cancel_reviewers(string $type, string $title, string $body, int $excludeUserId = 0): void
 {
     if (!function_exists('notify_user')) {
         return;
     }
-    try {
-        $rows = db()->query("SELECT id FROM users WHERE is_active = 1 AND role = 'support_manager'")->fetchAll(PDO::FETCH_COLUMN);
-    } catch (Throwable) {
-        return;
-    }
-    foreach ($rows as $id) {
+    foreach (food_order_cancel_reviewer_ids() as $id) {
+        if ($excludeUserId > 0 && (int) $id === $excludeUserId) {
+            continue;
+        }
         try {
             notify_user((int) $id, $type, $title, $body, null);
         } catch (Throwable) {
         }
     }
+}
+
+function food_order_notify_support_managers(string $type, string $title, string $body): void
+{
+    food_order_notify_cancel_reviewers($type, $title, $body);
+}
+
+function food_order_render_pending_cancels_card(array $user): string
+{
+    if (!food_order_user_is_cancel_reviewer($user)) {
+        return '';
+    }
+    try {
+        $items = food_order_cancel_request_list();
+    } catch (Throwable) {
+        return '';
+    }
+    $html = '<section class="list-section" id="food-cancel-requests"><div class="section-title"><div><h2>درخواست‌های لغو غذا</h2><p>سفارش روز بسته‌شده که منتظر تأیید مدیر پشتیبانی یا مدیر اصلی است. اعلان هم در «اعلان‌ها» ثبت می‌شود.</p></div>';
+    if (food_order_user_can($user, 'food.order_close')) {
+        $html .= '<a href="index.php?page=food-ticket">برنامهٔ غذایی ←</a>';
+    }
+    $html .= '</div>';
+    if ($items === []) {
+        $html .= '<div class="card empty-state"><p>درخواست لغو بازی نیست.</p></div></section>';
+        return $html;
+    }
+    $html .= '<div class="card ticket-table"><div class="table-head"><span>تاریخ غذا</span><span>نام پرسنل</span><span>غذا</span><span>درخواست‌دهنده</span><span>عملیات</span></div>';
+    foreach ($items as $row) {
+        $id = (int) ($row['id'] ?? 0);
+        $html .= '<div class="table-row"><span>' . e((string) ($row['food_date_jalali'] ?: $row['food_date'] ?? '')) . '</span>'
+            . '<span>' . e((string) ($row['employee_name'] ?? '')) . '</span>'
+            . '<span>' . e((string) ($row['food_name'] ?? '')) . '</span>'
+            . '<span>' . e((string) ($row['requester_name'] ?? '')) . '</span>'
+            . '<span class="supervisor-actions">'
+            . '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="food_order_cancel_decide"><input type="hidden" name="request_id" value="' . $id . '"><input type="hidden" name="decision" value="approve"><button class="mini-button" type="submit">لغو سفارش</button></form> '
+            . '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="food_order_cancel_decide"><input type="hidden" name="request_id" value="' . $id . '"><input type="hidden" name="decision" value="reject"><button class="mini-button" type="submit">رد درخواست</button></form>'
+            . '</span></div>';
+    }
+    $html .= '</div></section>';
+    return $html;
 }
 
 /** @param list<int> $orderIds @return array<int,array{id:int,status:string}> */
@@ -1042,7 +1123,7 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
         $dup->execute([$orderId]);
         if ($dup->fetchColumn()) {
             $pdo->commit();
-            return ['ok' => true, 'message' => 'درخواست لغو این سفارش قبلاً برای مدیر پشتیبانی ثبت شده است.', 'pending' => true];
+            return ['ok' => true, 'message' => 'درخواست لغو این سفارش قبلاً برای مدیر پشتیبانی و مدیر اصلی ثبت شده است.', 'pending' => true];
         }
         $pdo->prepare('INSERT INTO food_order_cancel_requests (order_id, employee_id, requested_by, food_date, status) VALUES (?, ?, ?, ?, \'pending\')')
             ->execute([$orderId, $employeeId, $actorId, (string) $order['food_date']]);
@@ -1058,10 +1139,11 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
     $who = food_order_full_name($subject);
     $dateLabel = food_order_jalali_label((string) $order['food_date']);
     food_order_audit('order_cancel_request', $actor, 'food_order', $orderId, null, ['request_id' => $requestId, 'food_date' => (string) $order['food_date']]);
-    food_order_notify_support_managers(
+    food_order_notify_cancel_reviewers(
         'food_cancel_request',
         'درخواست لغو سفارش غذا',
-        'برای سفارش ' . $who . ' در تاریخ ' . $dateLabel . ' درخواست لغو ثبت شد. از برنامهٔ غذایی می‌توانید آن را لغو یا رد کنید.'
+        'برای سفارش ' . $who . ' در تاریخ ' . $dateLabel . ' درخواست لغو ثبت شد. از داشبورد سامانه (درخواست‌های لغو غذا) یا برنامهٔ غذایی ← درخواست‌های لغو می‌توانید آن را لغو یا رد کنید.',
+        $actorId
     );
     if (function_exists('system_log')) {
         try {
@@ -1075,7 +1157,7 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
         } catch (Throwable) {
         }
     }
-    return ['ok' => true, 'message' => 'درخواست لغو برای مدیر پشتیبانی ثبت شد.', 'request_id' => $requestId, 'pending' => true];
+    return ['ok' => true, 'message' => 'درخواست لغو برای مدیر پشتیبانی و مدیر اصلی ثبت شد.', 'request_id' => $requestId, 'pending' => true];
 }
 
 function food_order_cancel_request_list(): array
@@ -1113,7 +1195,7 @@ function food_order_cancel_request_list(): array
 function food_order_cancel_request_decide(int $requestId, string $decision, array $actor, string $note = ''): array
 {
     food_order_cancel_request_ensure();
-    food_order_require_permission($actor, 'food.order_close');
+    food_order_require_cancel_reviewer($actor);
     $decision = $decision === 'reject' ? 'reject' : 'approve';
     $note = trim($note);
     if (function_exists('mb_substr')) {
@@ -1171,7 +1253,7 @@ function food_order_cancel_request_decide(int $requestId, string $decision, arra
     );
     $dateLabel = food_order_jalali_label((string) $request['food_date']);
     $message = $decision === 'approve'
-        ? 'سفارش تاریخ ' . $dateLabel . ' با تأیید مدیر پشتیبانی لغو شد.'
+        ? 'سفارش تاریخ ' . $dateLabel . ' با تأیید مسئول لغو شد.'
         : 'درخواست لغو سفارش تاریخ ' . $dateLabel . ' رد شد.';
     if (function_exists('notify_user')) {
         try {
@@ -2142,11 +2224,11 @@ function food_order_menu_api_handle(string $route, array $user): never
             food_order_send_json($result);
         }
         if ($method === 'GET' && $route === 'food-menu/cancel-requests') {
-            food_order_require_permission($user, 'food.order_close');
+            food_order_require_cancel_reviewer($user);
             food_order_send_json(['items' => food_order_cancel_request_list()]);
         }
         if ($method === 'POST' && $route === 'food-menu/cancel-request-decide') {
-            food_order_require_permission($user, 'food.order_close');
+            food_order_require_cancel_reviewer($user);
             $body = food_order_api_body();
             food_order_send_json(food_order_cancel_request_decide(
                 (int) ($body['id'] ?? 0),

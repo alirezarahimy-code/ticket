@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var toast = document.createElement('article');
             toast.className = 'notification-toast';
             var link = document.createElement('a');
-            link.href = item.ticket_id ? 'index.php?page=ticket&id=' + encodeURIComponent(item.ticket_id) : 'index.php?page=notifications';
+            link.href = item.href || (item.ticket_id ? 'index.php?page=ticket&id=' + encodeURIComponent(item.ticket_id) : 'index.php?page=notifications');
             var title = document.createElement('strong');
             title.textContent = item.title;
             var body = document.createElement('span');

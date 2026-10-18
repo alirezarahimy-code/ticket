@@ -73,5 +73,9 @@ check("visit_change_until" in groups
 check("visit_change_until TIME NULL" in schema
       and "visit_change_until TIME NULL" in install,
       "fresh-install schemas include cafeteria-change deadline")
+check('data-fg="members"' in admin_js
+      and "اعضای دائم گروه" in admin_js
+      and "اعضای مهمان یا موقت امروز" in admin_js,
+      "food groups have a members-list popup next to today's absence")
 
 print("all day-visit checks passed")

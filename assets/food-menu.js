@@ -135,7 +135,11 @@
   function navTabs() {
     var tabs = [];
     if (canMenu) tabs.push(['calendar', 'برنامهٔ روزانه'], ['catalog', 'بانک غذا']);
-    if (canClose) tabs.push(['orders', 'سفارش‌های روز'], ['cancel-requests', 'درخواست‌های لغو'], ['statistics', 'آمار سفارش‌ها']);
+    if (canClose) {
+      var cancelCount = (state.cancelRequests || []).length;
+      var cancelLabel = 'درخواست‌های لغو' + (cancelCount ? (' (' + faDigits(cancelCount) + ')') : '');
+      tabs.push(['orders', 'سفارش‌های روز'], ['cancel-requests', cancelLabel], ['statistics', 'آمار سفارش‌ها']);
+    }
     return '<div class="fm-tabs" role="tablist">' + tabs.map(function (tab) {
       return '<button class="fm-tab ' + (state.tab === tab[0] ? 'active' : '') + '" type="button" role="tab" aria-selected="' + (state.tab === tab[0] ? 'true' : 'false') + '" data-fm-tab="' + tab[0] + '">' + tab[1] + '</button>';
     }).join('') + '</div>';
@@ -377,7 +381,7 @@
             + '<button class="btn secondary" type="button" data-fm-action="cancel-req-reject" data-id="' + Number(row.id) + '">رد درخواست</button></td></tr>';
         }).join('') + '</tbody></table></div>';
     }
-    return '<section class="fm-card"><div class="fm-toolbar"><div><h3>درخواست لغو روزهای بسته‌شده</h3><span class="fm-small">کاربر وقتی روز سفارش بسته است درخواست می‌فرستد؛ شما می‌توانید همان سفارش را لغو یا درخواست را رد کنید. اعلان برای مدیر پشتیبانی هم ثبت می‌شود.</span></div><button class="btn secondary" type="button" data-fm-action="cancel-req-reload">تازه‌سازی</button></div>' + body + '</section>';
+    return '<section class="fm-card"><div class="fm-toolbar"><div><h3>درخواست لغو روزهای بسته‌شده</h3><span class="fm-small">کاربر وقتی روز سفارش بسته است درخواست می‌فرستد. همین فهرست در داشبورد مدیر پشتیبانی و مدیر اصلی هم هست؛ اعلان در زنگولهٔ سامانه ثبت می‌شود.</span></div><button class="btn secondary" type="button" data-fm-action="cancel-req-reload">تازه‌سازی</button></div>' + body + '</section>';
   }
 
   function renderStatistics() {
@@ -555,6 +559,7 @@
     var jobs = [];
     if (canMenu) { jobs.push(loadCatalog()); jobs.push(loadMonth()); }
     if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
+    if (canClose) jobs.push(loadCancelRequests());
     await Promise.all(jobs);
     render();
   }

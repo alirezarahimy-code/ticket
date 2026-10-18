@@ -14,6 +14,7 @@
     absenceError: '',
     absence: null,   // {group_id, date, locked, editable, can_override, members:[], summary:{}}
     absenceLoading: false,
+    membersPopup: 0,
   };
 
   const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -123,6 +124,7 @@
         + '<td>' + ((g.today && g.today.absent) || 0) + ' نفر' + (g.today && g.today.locked ? ' <span class="status warn" title="لیست غیبت امروز قفل شده است">🔒</span>' : '') + '</td>'
         + '<td><span class="status ' + (g.active ? 'ok' : 'bad') + '">' + (g.active ? 'فعال' : 'غیرفعال') + '</span></td>'
         + '<td><button class="btn primary" data-fg="absence" data-id="' + g.id + '">غیبت امروز</button> '
+        + '<button class="btn ghost" data-fg="members" data-id="' + g.id + '">لیست اعضاء</button> '
         + '<button class="btn ghost" data-fg="edit" data-id="' + g.id + '">ویرایش</button> '
         + '<button class="btn orange" data-fg="delete" data-id="' + g.id + '">حذف</button></td></tr>').join('')
       + '</tbody></table></div>';
@@ -237,12 +239,38 @@
       + '</tbody></table></div></div>';
   }
 
+  function personLine(u) {
+    return esc(u.name || '—') + (u.pc ? ' <small>(' + esc(u.pc) + ')</small>' : '')
+      + (u.active ? '' : ' <span class="status bad">غیرفعال</span>');
+  }
+
+  function membersPopup() {
+    const gid = Number(S.membersPopup || 0);
+    if (!gid) return '';
+    const g = S.groups.find((x) => x.id === gid);
+    if (!g) return '';
+    const perm = g.members || [];
+    const guests = g.today_visitors || [];
+    const block = (title, rows, empty) => '<h3 style="margin:12px 0 6px;font-size:15px">' + title + '</h3>'
+      + (rows.length
+        ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + rows.map((u) => '<li>' + personLine(u) + '</li>').join('') + '</ol>'
+        : '<p class="muted">' + empty + '</p>');
+    return '<div id="fg-members-overlay" style="position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px">'
+      + '<div class="card" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" style="max-width:440px;width:100%;max-height:80vh;overflow:auto">'
+      + '<div class="form-section-head"><h2 id="fg-members-title">لیست اعضای «' + esc(g.title) + '»</h2>'
+      + '<button type="button" class="btn ghost" data-fg="members-close">بستن</button></div>'
+      + block('اعضای دائم گروه', perm, 'عضو دائمی ثبت نشده است.')
+      + block('اعضای مهمان یا موقت امروز', guests, 'برای امروز مهمان یا عضو موقتی ثبت نشده است.')
+      + '</div></div>';
+  }
+
   function body() {
     if (S.error) return '<div class="card"><p style="color:var(--red)">' + esc(S.error) + '</p><button class="btn ghost" data-fg="reload">تلاش دوباره</button></div>';
     if (!S.loaded) return '<div class="card"><p class="muted">در حال بارگذاری…</p></div>';
     return (S.editing ? form() : '<div class="card"><div class="form-section-head"><h2>گروه‌های تعریف‌شده</h2><button class="btn primary" data-fg="new">＋ گروه جدید</button></div>' + list() + '</div>')
       + absencePanel()
-      + (S.editing ? '' : runs());
+      + (S.editing ? '' : runs())
+      + membersPopup();
   }
 
   function html() {
@@ -250,7 +278,7 @@
       + '<div id="food-groups-root">' + body() + '</div></section>';
     // کاربر فقط «مشاهده» دارد: ظاهر فرم‌ها غیرفعال می‌شود (سرور هم POST را با food.groups می‌بندد).
     if (window.FOOD_TICKET_CAN_GROUPS_EDIT === false) {
-      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}</style>' + out.slice('<section>'.length);
+      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}.fg-readonly button[data-fg="members"],.fg-readonly button[data-fg="members-close"]{pointer-events:auto;opacity:1}</style>' + out.slice('<section>'.length);
     }
     return out;
   }
@@ -321,11 +349,18 @@
   }, true);
 
   document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'fg-members-overlay') {
+      S.membersPopup = 0;
+      draw();
+      return;
+    }
     const b = e.target.closest('[data-fg]');
     if (!b) return;
     e.preventDefault();
     const act = b.dataset.fg;
     const id = Number(b.dataset.id || 0);
+    if (act === 'members') { S.membersPopup = id; draw(); return; }
+    if (act === 'members-close') { S.membersPopup = 0; draw(); return; }
     if (act === 'reload') { S.error = ''; S.loaded = false; draw(); load(); return; }
     if (act === 'new') {
       S.filter = '';

@@ -249,7 +249,7 @@ function chatbot_answer(string $question, array $user): array
     $mentionsFoodOrder = chatbot_has_any($norm, ['سفارش غذا', 'غذا']) && chatbot_has_any($norm, CHATBOT_WORDS_CANCEL);
     $mentionsClosedFoodDay = chatbot_has_any($norm, ['بسته', 'روز بسته', 'سفارش بسته']);
     if ($mentionsFoodOrder && $mentionsClosedFoodDay) {
-        $foodCancelAnswer = 'اگر روز سفارش بسته شده، خودتان نمی‌توانید سفارش را مستقیم لغو کنید. روی «درخواست لغو» بزنید تا به مدیر پشتیبانی و سامانه اعلام شود. مدیر پشتیبانی از برنامهٔ غذایی، برگهٔ «درخواست‌های لغو»، همان سفارش را لغو یا درخواست را رد می‌کند. سابقه حذف نمی‌شود.';
+        $foodCancelAnswer = 'اگر روز سفارش بسته شده، خودتان نمی‌توانید سفارش را مستقیم لغو کنید. روی «درخواست لغو» بزنید تا به مدیر پشتیبانی و مدیر اصلی اعلام شود. همان فهرست در داشبورد سامانه (بخش درخواست‌های لغو غذا) و در برنامهٔ غذایی، برگهٔ «درخواست‌های لغو» دیده می‌شود. سابقه حذف نمی‌شود.';
         return chatbot_reply($user, $question, $foodCancelAnswer, true, null, 'food_order_closed_cancel', 0.0, [
             'url' => 'index.php?page=food-order',
             'label' => 'رفتن به سفارش غذا',
@@ -270,10 +270,18 @@ function chatbot_answer(string $question, array $user): array
     $mentionsCafeteria = chatbot_has_any($norm, ['سلف', 'تغییر سلف', 'محل تحویل']);
     $asksCafeteriaDeadline = $mentionsCafeteria && chatbot_has_any($norm, ['مهلت', 'ساعت', 'تا کی', '۹:۳۰', '9:30', 'تا چه موقع']);
     if ($asksCafeteriaDeadline) {
-        $cafeAnswer = 'تغییر سلف امروز فقط برای کسی است که عضو دائم هیچ گروه غذایی نیست. مهلت ساعت را در همان گروه غذایی تنظیم می‌کنند؛ مثلاً تا ۰۹:۳۰. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود.';
+        $cafeAnswer = 'تغییر سلف امروز فقط برای کسی است که عضو دائم هیچ گروه غذایی نیست. مهلت ساعت در سامانه مدیریت غذا ← گروه‌های غذا ← ویرایش همان گروه، فیلد «مهلت تغییر سلف امروز» تنظیم می‌شود؛ مثلاً تا ۰۹:۳۰. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود.';
         return chatbot_reply($user, $question, $cafeAnswer, true, null, 'food_cafeteria_deadline', 0.0, [
             'url' => 'index.php?page=food-order',
             'label' => 'رفتن به سفارش غذا',
+        ]);
+    }
+    $asksGroupMembers = chatbot_has_any($norm, ['لیست اعضا', 'لیست اعضاء', 'اعضای گروه', 'عضو گروه غذا', 'مهمان امروز گروه']);
+    if ($asksGroupMembers) {
+        $membersAnswer = 'در سامانه مدیریت غذا ← گروه‌های غذا، کنار «غیبت امروز» دکمهٔ «لیست اعضاء» را بزنید. پنجره دو بخش دارد: اعضای دائم گروه، و اعضای مهمان یا موقت امروز.';
+        return chatbot_reply($user, $question, $membersAnswer, true, null, 'food_group_members_list', 0.0, [
+            'url' => 'index.php?page=food-ticket',
+            'label' => 'رفتن به گروه‌های غذا',
         ]);
     }
 
