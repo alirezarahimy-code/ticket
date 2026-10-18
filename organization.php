@@ -149,6 +149,16 @@ function org_ceo_unit_id(): int
     return (int) db()->lastInsertId();
 }
 
+/** واحدهایی که می‌توان کارشناس مستقیم به آن‌ها وصل کرد: اداره یا معاونت. */
+function org_unit_accepts_experts(?array $unit): bool
+{
+    if ($unit === null) {
+        return false;
+    }
+    $type = (string) ($unit['unit_type'] ?? '');
+    return in_array($type, ['department', 'deputy'], true) && (int) ($unit['is_active'] ?? 0) === 1;
+}
+
 function org_unit_by_id(int $id): ?array
 {
     $query = db()->prepare('SELECT * FROM org_units WHERE id = ? LIMIT 1');

@@ -632,7 +632,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id']) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.29"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.30"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -3028,8 +3028,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $orgUndoSnapshot = org_snapshot();
             $unitId = max(0, (int) post_value('unit_id', '0'));
             $unit = $unitId > 0 ? org_unit_by_id($unitId) : null;
-            if ($unit === null || (string) $unit['unit_type'] !== 'department' || (int) $unit['is_active'] !== 1) {
-                throw new RuntimeException('اداره انتخابی معتبر نیست.');
+            if (!org_unit_accepts_experts($unit)) {
+                throw new RuntimeException('واحد انتخابی برای کارشناس معتبر نیست.');
             }
             $userIds = $_POST['user_ids'] ?? [];
             $userIds = is_array($userIds) ? array_values(array_unique(array_filter(array_map('intval', $userIds)))) : [];
@@ -3042,7 +3042,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $query->execute($params);
             org_record_undo('عزل کارشناسان', $orgUndoSnapshot);
             save_audit((int) $orgAdmin['id'], 'org_experts_removed', null, ['unit_id' => $unitId, 'user_ids' => $userIds]);
-            flash('success', 'کارشناسان انتخاب‌شده از اداره عزل شدند.');
+            flash('success', 'کارشناسان انتخاب‌شده از واحد عزل شدند.');
             redirect('index.php?page=organization#unit-' . $unitId);
         }
 
@@ -3055,8 +3055,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $orgUndoSnapshot = org_snapshot();
             $unitId = max(0, (int) post_value('member_unit_id', '0'));
             $unit = $unitId > 0 ? org_unit_by_id($unitId) : null;
-            if ($unit === null || (string) $unit['unit_type'] !== 'department' || (int) $unit['is_active'] !== 1) {
-                throw new RuntimeException('اداره انتخابی معتبر نیست.');
+            if (!org_unit_accepts_experts($unit)) {
+                throw new RuntimeException('کارشناس را می‌توان به معاونت یا اداره وصل کرد.');
             }
             $userIds = $_POST['user_ids'] ?? [];
             $userIds = is_array($userIds) ? array_values(array_unique(array_filter(array_map('intval', $userIds)))) : [];
@@ -3077,7 +3077,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $assign->execute([$unitId, $managerId > 0 && $managerId !== $userId ? $managerId : null, $userId]);
             }
             db_commit('index.php');
-            org_record_undo('افزودن کارشناسان به اداره', $orgUndoSnapshot);
+            org_record_undo('افزودن کارشناسان', $orgUndoSnapshot);
             save_audit((int) $orgAdmin['id'], 'org_users_assigned', null, ['unit_id' => $unitId, 'user_ids' => $validIds]);
             flash('success', count($validIds) . ' کارشناس به «' . (string) $unit['name'] . '» اضافه شد.');
             redirect('index.php?page=organization#unit-' . $unitId);
@@ -5160,7 +5160,7 @@ if ($page === 'organization') {
     org_ensure_schema();
     $canManageOrg = user_can_manage_organization($organizationUser);
     $units = org_units_all(false);
-    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u WHERE u.auth_source <> \'food\' AND NOT (u.auth_source = \'local\' AND u.role IN (\'local_user\',\'guard\')) ORDER BY u.full_name')->fetchAll();
+    $users = db()->query("SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u WHERE COALESCE(u.auth_source, '') <> 'food' ORDER BY u.full_name")->fetchAll();
     $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
     $ceoUnit = null;
     $deputies = [];
@@ -5207,6 +5207,7 @@ if ($page === 'organization') {
             'active' => (int) $chartUser['is_active'] === 1,
             'unitId' => (int) ($chartUser['org_unit_id'] ?? 0),
             'managerId' => (int) ($chartUser['manager_user_id'] ?? 0),
+            'source' => ((string) ($chartUser['auth_source'] ?? '') === 'ldap') ? 'ldap' : 'local',
         ];
     }
     $orgUndo = org_undo_state();
@@ -5242,7 +5243,7 @@ if ($page === 'organization') {
 </div>
 HTML;
     echo str_replace(['__CSRF__'], [csrf_field()], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=2"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=3"></script>';
     render_footer();
     exit;
 }

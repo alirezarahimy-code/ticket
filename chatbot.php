@@ -276,6 +276,16 @@ function chatbot_answer(string $question, array $user): array
             'label' => 'رفتن به سفارش غذا',
         ]);
     }
+    $mentionsOrgChart = chatbot_has_any($norm, ['چارت', 'ساختار سازمان', 'ساختار سازمانی', 'نفرات سازمان']);
+    $asksOrgExperts = $mentionsOrgChart && chatbot_has_any($norm, ['کارشناس', 'اداره', 'معاونت', 'محلی', 'دامینی', 'نفرات']);
+    if ($mentionsOrgChart || $asksOrgExperts) {
+        $orgAnswer = 'در چارت سازمانی، بعد از معاونت هم اداره می‌توان ساخت و هم کارشناس مستقیم زیر همان معاونت. روی کارت معاونت سمت راست «افزودن اداره» و سمت چپ «افزودن کارشناس» است. فهرست نفرات همهٔ کاربران دامینی و محلی را نشان می‌دهد.';
+        return chatbot_reply($user, $question, $orgAnswer, true, null, 'org_chart_experts', 0.0, [
+            'url' => 'index.php?page=organization',
+            'label' => 'رفتن به ساختار سازمانی',
+        ]);
+    }
+
     $asksGroupMembers = chatbot_has_any($norm, ['لیست اعضا', 'لیست اعضاء', 'اعضای گروه', 'عضو گروه غذا', 'مهمان امروز گروه']);
     if ($asksGroupMembers) {
         $membersAnswer = 'در سامانه مدیریت غذا ← گروه‌های غذا، کنار «غیبت امروز» دکمهٔ «لیست اعضاء» را بزنید. پنجره دو بخش دارد: اعضای دائم گروه، و اعضای مهمان یا موقت امروز.';
@@ -3108,7 +3118,7 @@ function chatbot_render_admin(array $admin, ?array $lab = null): void
     $negStmt = db()->prepare('SELECT l.question, l.created_at, f.question AS faq_question FROM chatbot_logs l LEFT JOIN chatbot_faq f ON f.id = l.faq_id WHERE l.helpful = 0 AND l.created_at BETWEEN ? AND ? ORDER BY l.created_at DESC LIMIT 20');
     $negStmt->execute($range);
     $negRows = $negStmt->fetchAll();
-    $intentLabels = ['ticket_create' => 'ثبت درخواست', 'ticket_status' => 'پیگیری درخواست', 'ticket_cancel' => 'انصراف از ثبت درخواست', 'ticket_cancellation' => 'راهنمای لغو درخواست', 'guide_help' => 'راهنمای مرحله‌ای'];
+    $intentLabels = ['ticket_create' => 'ثبت درخواست', 'ticket_status' => 'پیگیری درخواست', 'ticket_cancel' => 'انصراف از ثبت درخواست', 'ticket_cancellation' => 'راهنمای لغو درخواست', 'guide_help' => 'راهنمای مرحله‌ای', 'org_chart_experts' => 'چارت سازمانی'];
 
     $total = (int) ($stats['total'] ?? 0);
     $pct = static fn(int $part, int $whole): string => $whole > 0 ? round($part * 100 / $whole) . '٪' : '—';
