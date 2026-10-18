@@ -247,7 +247,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertNotIn("employee_number", export)
         self.assertNotIn("food_order_export_excel_range", php)
         ticket = read("food-ticket.php")
-        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export' => 'food.order_close'", ticket)
+        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
 
         js = read("assets/food-menu.js")
         orders_start = js.index("function renderOrders()")
@@ -362,7 +362,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("reserve_date: order.reserve_date || ''", proxy_view)
         self.assertIn("reserve_time: order.reserve_time || ''", proxy_view)
         self.assertIn("<th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th>", proxy_view)
-        self.assertIn("var canCancel = active && !isPast(row.food_date) && row.id > 0", proxy_view)
+        self.assertIn("var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed' && row.id > 0", proxy_view)
         self.assertNotIn("national_code", proxy_view)
         self.assertNotIn("employee_number", proxy_view)
 
@@ -468,7 +468,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
     def test_admin_order_edit_route_and_controls_are_removed_owner_flow_remains(self) -> None:
         ticket = read("food-ticket.php")
         self.assertNotIn("food-menu/order-edit", ticket)
-        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export' => 'food.order_close'", ticket)
+        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
 
         order_php = read("food-order.php")
         self.assertNotIn("function food_order_admin_edit(", order_php)
@@ -591,6 +591,55 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn('class="fm-field fm-food-selection"', manager_js)
         self.assertIn(".fm-food-selection > .fm-food-checks { display:grid; grid-template-columns:repeat(2,minmax(0,1fr))", manager_css)
         self.assertIn("grid-template-columns:minmax(0,1fr)", manager_css)
+
+    def test_closed_day_cancel_request_and_masked_national_code(self) -> None:
+        order = read("food-order.php")
+        self.assertIn("function food_order_cancel_request_create(", order)
+        self.assertIn("function food_order_cancel_request_decide(", order)
+        self.assertIn("$route === 'cancel-request'", order)
+        self.assertIn("$route === 'food-menu/cancel-requests'", order)
+        self.assertIn("role = 'support_manager'", order)
+        self.assertIn("CREATE TABLE IF NOT EXISTS food_order_cancel_requests", order)
+        self.assertIn("CREATE TABLE IF NOT EXISTS food_order_cancel_requests", read("schema.sql"))
+        self.assertIn("CREATE TABLE IF NOT EXISTS food_order_cancel_requests", read("install-empty-db.sql"))
+
+        js = read("assets/food-order.js")
+        self.assertIn('id="fo-national-code"', js)
+        self.assertIn('type="password"', js)
+        self.assertIn("fo-national-secret", js)
+        self.assertIn("act === 'cancel-request'", js)
+        self.assertIn("درخواست لغو", js)
+        css = read("assets/food-order.css")
+        self.assertIn("-webkit-text-security: disc", css)
+
+        manager = read("assets/food-menu.js")
+        self.assertIn("cancel-requests", manager)
+        self.assertIn("food-menu/cancel-request-decide", manager)
+        self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
+
+        guide = read("help-guide.php")
+        self.assertIn("درخواست لغو", guide)
+        self.assertIn("ارقام داخل فیلد به‌صورت دایره یا ستاره", guide)
+        chatbot = read("chatbot.php")
+        self.assertIn("food_order_closed_cancel", chatbot)
+        self.assertIn("food_cafeteria_deadline", chatbot)
+        self.assertIn("food_order_list_range", chatbot)
+
+    def test_order_list_default_range_includes_next_jalali_month(self) -> None:
+        php = read("food-order.php")
+        start = php.index("function food_order_list_range(")
+        end = php.index("\nfunction ", start + 10)
+        helper = php[start:end]
+        self.assertIn("$employeeId = 0", helper)
+        self.assertIn("nextMonthEnd", helper)
+        self.assertIn("MAX(food_date)", helper)
+        js = read("assets/food-order.js")
+        self.assertIn("از امروز تا پایان ماه بعد", js)
+        self.assertIn("بازنشانی (از امروز)", js)
+        self.assertNotIn("ماه جاری (از امروز)", js)
+        guide = read("help-guide.php")
+        self.assertIn("از امروز تا پایان ماه شمسی بعد", guide)
+        self.assertIn("سفارش آبان هم دیده می‌شود", guide)
 
 
 if __name__ == "__main__":

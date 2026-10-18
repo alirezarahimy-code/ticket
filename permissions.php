@@ -158,7 +158,7 @@ function permission_catalog(): array
                 ['code' => 'food.health_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.menu', 'label' => 'برنامه غذایی و بانک غذا'],
                 ['code' => 'food.menu_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز و مشاهدهٔ همهٔ سفارش‌ها'],
+                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز، مشاهدهٔ همهٔ سفارش‌ها و رسیدگی به درخواست لغو'],
             ],
         ],
         [

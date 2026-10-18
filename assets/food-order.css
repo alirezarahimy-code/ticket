@@ -148,6 +148,12 @@
 .fo-search-result.is-highlighted,.fo-search-result[aria-selected="true"] { border-color:var(--teal); background:var(--teal-light); }
 .fo-combo-message { padding:11px 9px; color:var(--muted); font-size:12px; line-height:1.8; }
 .fo-proxy-code { margin-top:10px; }
+.fo-national-secret {
+  -webkit-text-security: disc;
+  text-security: disc;
+  letter-spacing: .35em;
+  font-family: ui-monospace, monospace;
+}
 .fo-day.is-adjacent,.fo-day:disabled { cursor:not-allowed; opacity:.38; filter:saturate(.65); }
 .fo-day.is-adjacent:hover,.fo-day.is-adjacent:focus-visible,.fo-day:disabled:hover { transform:none; box-shadow:none; border-color:var(--line); z-index:auto; outline:none; }
 .fo-day.is-adjacent::after,.fo-day:disabled::after { display:none; }

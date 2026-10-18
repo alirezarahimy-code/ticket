@@ -31,6 +31,8 @@
     status: null,
     loading: false,
     loadingOrders: false,
+    loadingCancelRequests: false,
+    cancelRequests: [],
     loadingStatistics: false,
     error: '',
     notice: '',
@@ -133,7 +135,7 @@
   function navTabs() {
     var tabs = [];
     if (canMenu) tabs.push(['calendar', 'برنامهٔ روزانه'], ['catalog', 'بانک غذا']);
-    if (canClose) tabs.push(['orders', 'سفارش‌های روز'], ['statistics', 'آمار سفارش‌ها']);
+    if (canClose) tabs.push(['orders', 'سفارش‌های روز'], ['cancel-requests', 'درخواست‌های لغو'], ['statistics', 'آمار سفارش‌ها']);
     return '<div class="fm-tabs" role="tablist">' + tabs.map(function (tab) {
       return '<button class="fm-tab ' + (state.tab === tab[0] ? 'active' : '') + '" type="button" role="tab" aria-selected="' + (state.tab === tab[0] ? 'true' : 'false') + '" data-fm-tab="' + tab[0] + '">' + tab[1] + '</button>';
     }).join('') + '</div>';
@@ -360,6 +362,24 @@
     return daily;
   }
 
+  function renderCancelRequests() {
+    var rows = state.cancelRequests || [];
+    var body;
+    if (state.loadingCancelRequests) {
+      body = '<div class="fm-spinner">در حال بارگذاری درخواست‌های لغو…</div>';
+    } else if (!rows.length) {
+      body = '<div class="fm-empty">درخواست لغو بازی برای روزهای بسته‌شده نیست.</div>';
+    } else {
+      body = '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ غذا</th><th>نام پرسنل</th><th>غذا</th><th>درخواست‌دهنده</th><th>عملیات</th></tr></thead><tbody>'
+        + rows.map(function (row) {
+          return '<tr><td>' + esc(faDigits(row.food_date_jalali || jalaliFromIso(row.food_date) || row.food_date || '')) + '</td><td>' + esc(row.employee_name || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(row.requester_name || '—') + '</td><td>'
+            + '<button class="btn danger" type="button" data-fm-action="cancel-req-approve" data-id="' + Number(row.id) + '">لغو سفارش</button> '
+            + '<button class="btn secondary" type="button" data-fm-action="cancel-req-reject" data-id="' + Number(row.id) + '">رد درخواست</button></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    return '<section class="fm-card"><div class="fm-toolbar"><div><h3>درخواست لغو روزهای بسته‌شده</h3><span class="fm-small">کاربر وقتی روز سفارش بسته است درخواست می‌فرستد؛ شما می‌توانید همان سفارش را لغو یا درخواست را رد کنید. اعلان برای مدیر پشتیبانی هم ثبت می‌شود.</span></div><button class="btn secondary" type="button" data-fm-action="cancel-req-reload">تازه‌سازی</button></div>' + body + '</section>';
+  }
+
   function renderStatistics() {
     var fallbackDate = state.selectedDate || (state.status && state.status.today) || localTodayIso();
     var from = jalaliFromIso(state.statisticsFrom || fallbackDate) || '';
@@ -409,7 +429,7 @@
       root.innerHTML = '<div class="fm-alert error">تقویم شمسی سامانه بارگذاری نشد. صفحه را تازه‌سازی کنید.</div>';
       return;
     }
-    var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'statistics' && canClose ? renderStatistics() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
+    var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
     root.innerHTML = '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
@@ -458,6 +478,38 @@
       state.error = '';
     } catch (e) { state.orders = []; state.ordersLoaded = false; state.error = e.message || 'سفارش‌های روز بارگذاری نشد.'; }
     finally { state.loadingOrders = false; render(); }
+  }
+
+  async function loadCancelRequests() {
+    if (!canClose) return;
+    state.loadingCancelRequests = true;
+    render();
+    try {
+      var result = await request('food-menu/cancel-requests');
+      state.cancelRequests = Array.isArray(result.items) ? result.items : [];
+      state.error = '';
+    } catch (e) {
+      state.cancelRequests = [];
+      state.error = e.message || 'درخواست‌های لغو بارگذاری نشد.';
+    } finally {
+      state.loadingCancelRequests = false;
+      render();
+    }
+  }
+
+  async function decideCancelRequest(id, decision) {
+    if (!id) return;
+    var ok = decision === 'approve'
+      ? window.confirm('سفارش این روز لغو شود؟ رکورد برای سوابق می‌ماند.')
+      : window.confirm('این درخواست لغو رد شود؟');
+    if (!ok) return;
+    try {
+      var result = await request('food-menu/cancel-request-decide', null, { method: 'POST', body: JSON.stringify({ id: Number(id), decision: decision }) });
+      notify(result.message || (decision === 'approve' ? 'سفارش لغو شد.' : 'درخواست رد شد.'));
+      await loadCancelRequests();
+    } catch (e) {
+      notify(e.message || 'عملیات انجام نشد.', true);
+    }
   }
 
   async function loadStatistics(fromDate, toDate, mode) {
@@ -688,8 +740,11 @@
   }
   function switchTab(tab) {
     if ((tab === 'calendar' || tab === 'catalog') && !canMenu) return;
-    if ((tab === 'orders' || tab === 'statistics') && !canClose) return;
+    if ((tab === 'orders' || tab === 'statistics' || tab === 'cancel-requests') && !canClose) return;
     state.tab = tab; state.error = ''; state.notice = ''; render();
+    if (tab === 'cancel-requests') {
+      loadCancelRequests();
+    }
     if (tab === 'orders') {
       var defaultOrderDate = state.ordersDate || state.selectedDate || (state.status && state.status.today) || localTodayIso();
       loadOrders(defaultOrderDate);
@@ -879,6 +934,9 @@
       if (act === 'orders-print') printOrders();
       if (act === 'statistics-export') downloadStatistics();
       if (act === 'statistics-print') printStatistics();
+      if (act === 'cancel-req-reload') loadCancelRequests();
+      if (act === 'cancel-req-approve') decideCancelRequest(Number(action.dataset.id || 0), 'approve');
+      if (act === 'cancel-req-reject') decideCancelRequest(Number(action.dataset.id || 0), 'reject');
       if (act === 'orders-today') {
         var todayIso = state.status && state.status.today ? state.status.today : localTodayIso();
         state.selectedDate = todayIso; state.ordersDate = todayIso;

@@ -882,6 +882,8 @@ CREATE TABLE IF NOT EXISTS food_ticket_groups (
     -- کارت RFID فقط برای سازگاری با گروه‌های قدیمی؛ مبنای شناسایی نماینده نیست
     rfid_card VARCHAR(120) NULL,
     description VARCHAR(500) NULL,
+    -- مهلت اعلام تغییر سلف امروز به این گروه (خالی = بدون محدودیت ساعت)
+    visit_change_until TIME NULL,
     status ENUM('active','inactive') NOT NULL DEFAULT 'active',
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1215,4 +1217,23 @@ CREATE TABLE IF NOT EXISTS food_order_logs (
     INDEX idx_food_order_logs_created (created_at),
     CONSTRAINT fk_food_order_log_order FOREIGN KEY (order_id) REFERENCES food_orders(id) ON DELETE SET NULL,
     CONSTRAINT fk_food_order_log_calendar FOREIGN KEY (calendar_id) REFERENCES food_calendar(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- درخواست لغو سفارش در روز بسته‌شده؛ تأیید با مدیر پشتیبانی
+CREATE TABLE IF NOT EXISTS food_order_cancel_requests (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT UNSIGNED NOT NULL,
+    employee_id INT UNSIGNED NOT NULL,
+    requested_by INT UNSIGNED NOT NULL,
+    food_date DATE NOT NULL,
+    note VARCHAR(300) NULL,
+    status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    decided_by INT UNSIGNED NULL,
+    decided_at DATETIME NULL,
+    decision_note VARCHAR(300) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_food_cancel_req_status (status, created_at),
+    INDEX idx_food_cancel_req_order (order_id),
+    INDEX idx_food_cancel_req_employee (employee_id, food_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

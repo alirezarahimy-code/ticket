@@ -419,7 +419,15 @@ function food_order_month_status(string $month, array $user, bool $includeCounts
                 'food_name' => (string) $order['food_name'],
                 'reserve_date' => substr((string) $order['created_at'], 0, 10),
                 'reserve_time' => substr((string) $order['created_at'], 11, 8),
+                'cancel_request' => null,
             ];
+        }
+        $pending = food_order_pending_cancel_map(array_map(static fn (array $day): int => (int) (($day['my_order']['id'] ?? 0)), $days));
+        foreach ($days as $date => $day) {
+            $oid = (int) (($day['my_order']['id'] ?? 0));
+            if ($oid > 0 && isset($pending[$oid])) {
+                $days[$date]['my_order']['cancel_request'] = $pending[$oid];
+            }
         }
     }
     ksort($days, SORT_STRING);
@@ -470,27 +478,51 @@ function food_order_list_date(string $raw): ?string
 
 /**
  * بازهٔ نمایش سفارش‌ها.
- * پیش‌فرض: از امروز تا پایان ماه شمسی جاری. بنابراین غذای روزهای گذشته خودکار از لیست خارج می‌شود.
+ * پیش‌فرض: از امروز تا پایان ماه شمسی بعد (و اگر سفارش دیرتری باشد تا همان تاریخ).
+ * غذای روزهای گذشته از فهرست پیش‌فرض خارج می‌شود؛ سفارش ماه بعد پنهان نمی‌ماند.
  * کاربر می‌تواند هر بازه‌ای (حداکثر ۴۰۰ روز) را انتخاب کند.
  * @return array{from:string,to:string}
  */
-function food_order_list_range(string $fromRaw, string $toRaw): array
+function food_order_list_range(string $fromRaw, string $toRaw, int $employeeId = 0): array
 {
     $today = food_order_today();
     [$jy, $jm] = function_exists('gregorian_to_jalali')
         ? gregorian_to_jalali((int) substr($today, 0, 4), (int) substr($today, 5, 2), (int) substr($today, 8, 2))
         : [0, 0];
     $monthEnd = $jy > 0 ? food_order_jalali_month_range(sprintf('%04d/%02d', $jy, $jm))['to'] : $today;
+    $nextMonthEnd = $monthEnd;
+    if ($jy > 0) {
+        $nextKey = $jm === 12
+            ? sprintf('%04d/%02d', $jy + 1, 1)
+            : sprintf('%04d/%02d', $jy, $jm + 1);
+        $nextMonthEnd = food_order_jalali_month_range($nextKey)['to'];
+    }
+    $defaultTo = $nextMonthEnd > $monthEnd ? $nextMonthEnd : $monthEnd;
+    if ($employeeId > 0 && function_exists('db')) {
+        try {
+            $latestStmt = db()->prepare('SELECT MAX(food_date) FROM food_orders WHERE employee_id = ? AND food_date >= ?');
+            $latestStmt->execute([$employeeId, $today]);
+            $latest = $latestStmt->fetchColumn();
+            if (is_string($latest) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $latest) && $latest > $defaultTo) {
+                $defaultTo = $latest;
+            }
+        } catch (Throwable) {
+        }
+    }
+    $maxTo = (new DateTimeImmutable($today, new DateTimeZone('UTC')))->modify('+400 days')->format('Y-m-d');
+    if ($defaultTo > $maxTo) {
+        $defaultTo = $maxTo;
+    }
 
     $from = food_order_list_date($fromRaw);
     $to = food_order_list_date($toRaw);
     if ($from === null && $to === null) {
         $from = $today;
-        $to = $monthEnd;
+        $to = $defaultTo;
     } elseif ($from === null) {
         $from = min($today, (string) $to);
     } elseif ($to === null) {
-        $to = $monthEnd;
+        $to = $defaultTo;
     }
     if ($from > $to) {
         throw new RuntimeException('تاریخ شروع بازه نباید بعد از تاریخ پایان باشد.');
@@ -541,8 +573,17 @@ function food_order_my_orders(int $employeeId, int $limit = 120, ?string $from =
             'reserve_time' => substr($created, 11, 8),
             'status' => (string) $row['status'],
             'day_status' => (string) ($row['day_status'] ?? ''),
+            'cancel_request' => null,
         ];
     }
+    $pending = food_order_pending_cancel_map(array_column($items, 'id'));
+    foreach ($items as &$item) {
+        $oid = (int) $item['id'];
+        if (isset($pending[$oid])) {
+            $item['cancel_request'] = $pending[$oid];
+        }
+    }
+    unset($item);
     return $items;
 }
 
@@ -889,6 +930,256 @@ function food_order_cancel_proxy(int $orderId, int $employeeId, string $national
         }
         throw $e;
     }
+}
+
+function food_order_cancel_request_ensure(): void
+{
+    static $ready = false;
+    if ($ready) {
+        return;
+    }
+    food_order_schema_ensure();
+    try {
+        db()->exec('CREATE TABLE IF NOT EXISTS food_order_cancel_requests (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            order_id BIGINT UNSIGNED NOT NULL,
+            employee_id INT UNSIGNED NOT NULL,
+            requested_by INT UNSIGNED NOT NULL,
+            food_date DATE NOT NULL,
+            note VARCHAR(300) NULL,
+            status ENUM(\'pending\',\'approved\',\'rejected\') NOT NULL DEFAULT \'pending\',
+            decided_by INT UNSIGNED NULL,
+            decided_at DATETIME NULL,
+            decision_note VARCHAR(300) NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_food_cancel_req_status (status, created_at),
+            INDEX idx_food_cancel_req_order (order_id),
+            INDEX idx_food_cancel_req_employee (employee_id, food_date)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+        $ready = true;
+    } catch (Throwable $e) {
+        app_error_log('[food-order] cancel-request table: ' . $e->getMessage());
+        throw new RuntimeException('جدول درخواست لغو سفارش در دسترس نیست.');
+    }
+}
+
+function food_order_notify_support_managers(string $type, string $title, string $body): void
+{
+    if (!function_exists('notify_user')) {
+        return;
+    }
+    try {
+        $rows = db()->query("SELECT id FROM users WHERE is_active = 1 AND role = 'support_manager'")->fetchAll(PDO::FETCH_COLUMN);
+    } catch (Throwable) {
+        return;
+    }
+    foreach ($rows as $id) {
+        try {
+            notify_user((int) $id, $type, $title, $body, null);
+        } catch (Throwable) {
+        }
+    }
+}
+
+/** @param list<int> $orderIds @return array<int,array{id:int,status:string}> */
+function food_order_pending_cancel_map(array $orderIds): array
+{
+    $ids = array_values(array_unique(array_filter(array_map('intval', $orderIds), static fn (int $id): bool => $id > 0)));
+    if ($ids === []) {
+        return [];
+    }
+    try {
+        food_order_cancel_request_ensure();
+    } catch (Throwable) {
+        return [];
+    }
+    $in = implode(',', array_fill(0, count($ids), '?'));
+    $stmt = db()->prepare("SELECT id, order_id, status FROM food_order_cancel_requests WHERE order_id IN ($in) AND status = 'pending'");
+    $stmt->execute($ids);
+    $map = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $map[(int) $row['order_id']] = ['id' => (int) $row['id'], 'status' => (string) $row['status']];
+    }
+    return $map;
+}
+
+function food_order_cancel_request_create(int $orderId, array $actor, ?array $subject = null): array
+{
+    food_order_cancel_request_ensure();
+    if ($orderId < 1) {
+        throw new RuntimeException('سفارش پیدا نشد.');
+    }
+    $subject ??= $actor;
+    $employeeId = (int) ($subject['id'] ?? 0);
+    $actorId = (int) ($actor['id'] ?? 0);
+    if ($employeeId < 1 || $actorId < 1) {
+        throw new RuntimeException('سفارش پیدا نشد.');
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? LIMIT 1');
+        $lookup->execute([$orderId]);
+        $order = $lookup->fetch(PDO::FETCH_ASSOC);
+        if (!$order || (int) $order['employee_id'] !== $employeeId) {
+            throw new RuntimeException('سفارش برای این فرد پیدا نشد.');
+        }
+        $day = food_order_lock_cancellable_day($pdo, (string) $order['food_date']);
+        if ((string) ($day['order_status'] ?? '') !== 'closed') {
+            throw new RuntimeException('برای روز باز، سفارش را مستقیم لغو کنید؛ درخواست لغو فقط برای روز بسته‌شده است.');
+        }
+        $locked = $pdo->prepare('SELECT id, employee_id, food_date, status FROM food_orders WHERE id = ? FOR UPDATE');
+        $locked->execute([$orderId]);
+        $order = $locked->fetch(PDO::FETCH_ASSOC);
+        if (!$order || (int) $order['employee_id'] !== $employeeId) {
+            throw new RuntimeException('سفارش برای این فرد پیدا نشد.');
+        }
+        if ((string) $order['status'] !== 'active') {
+            throw new RuntimeException('این سفارش فعال نیست.');
+        }
+        $dup = $pdo->prepare("SELECT id FROM food_order_cancel_requests WHERE order_id = ? AND status = 'pending' LIMIT 1");
+        $dup->execute([$orderId]);
+        if ($dup->fetchColumn()) {
+            $pdo->commit();
+            return ['ok' => true, 'message' => 'درخواست لغو این سفارش قبلاً برای مدیر پشتیبانی ثبت شده است.', 'pending' => true];
+        }
+        $pdo->prepare('INSERT INTO food_order_cancel_requests (order_id, employee_id, requested_by, food_date, status) VALUES (?, ?, ?, ?, \'pending\')')
+            ->execute([$orderId, $employeeId, $actorId, (string) $order['food_date']]);
+        $requestId = (int) $pdo->lastInsertId();
+        food_order_log($orderId, $day['calendar_id'], 'order_cancel_request', $actorId, ['status' => 'active'], ['request_id' => $requestId, 'status' => 'pending']);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+    $who = food_order_full_name($subject);
+    $dateLabel = food_order_jalali_label((string) $order['food_date']);
+    food_order_audit('order_cancel_request', $actor, 'food_order', $orderId, null, ['request_id' => $requestId, 'food_date' => (string) $order['food_date']]);
+    food_order_notify_support_managers(
+        'food_cancel_request',
+        'درخواست لغو سفارش غذا',
+        'برای سفارش ' . $who . ' در تاریخ ' . $dateLabel . ' درخواست لغو ثبت شد. از برنامهٔ غذایی می‌توانید آن را لغو یا رد کنید.'
+    );
+    if (function_exists('system_log')) {
+        try {
+            system_log('info', 'food_order', 'درخواست لغو سفارش روز بسته', [
+                'order_id' => $orderId,
+                'request_id' => $requestId,
+                'employee_id' => $employeeId,
+                'requested_by' => $actorId,
+                'food_date' => (string) $order['food_date'],
+            ]);
+        } catch (Throwable) {
+        }
+    }
+    return ['ok' => true, 'message' => 'درخواست لغو برای مدیر پشتیبانی ثبت شد.', 'request_id' => $requestId, 'pending' => true];
+}
+
+function food_order_cancel_request_list(): array
+{
+    food_order_cancel_request_ensure();
+    $stmt = db()->query("SELECT r.id, r.order_id, r.employee_id, r.requested_by, r.food_date, r.status, r.created_at,
+            emp.full_name AS employee_name, req.full_name AS requester_name, c.food_name, o.status AS order_status
+        FROM food_order_cancel_requests r
+        JOIN food_orders o ON o.id = r.order_id
+        JOIN users emp ON emp.id = r.employee_id
+        JOIN users req ON req.id = r.requested_by
+        JOIN food_calendar_items i ON i.id = o.calendar_item_id
+        JOIN food_catalog c ON c.id = i.food_id
+        WHERE r.status = 'pending'
+        ORDER BY r.created_at ASC, r.id ASC
+        LIMIT 200");
+    $items = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $items[] = [
+            'id' => (int) $row['id'],
+            'order_id' => (int) $row['order_id'],
+            'employee_id' => (int) $row['employee_id'],
+            'employee_name' => (string) ($row['employee_name'] ?? ''),
+            'requester_name' => (string) ($row['requester_name'] ?? ''),
+            'food_name' => (string) ($row['food_name'] ?? ''),
+            'food_date' => (string) $row['food_date'],
+            'food_date_jalali' => food_order_jalali_label((string) $row['food_date']),
+            'order_status' => (string) ($row['order_status'] ?? ''),
+            'created_at' => (string) $row['created_at'],
+        ];
+    }
+    return $items;
+}
+
+function food_order_cancel_request_decide(int $requestId, string $decision, array $actor, string $note = ''): array
+{
+    food_order_cancel_request_ensure();
+    food_order_require_permission($actor, 'food.order_close');
+    $decision = $decision === 'reject' ? 'reject' : 'approve';
+    $note = trim($note);
+    if (function_exists('mb_substr')) {
+        $note = mb_substr($note, 0, 300, 'UTF-8');
+    } else {
+        $note = substr($note, 0, 300);
+    }
+    $actorId = (int) ($actor['id'] ?? 0);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('SELECT id, order_id, employee_id, requested_by, food_date, status FROM food_order_cancel_requests WHERE id = ? FOR UPDATE');
+        $stmt->execute([$requestId]);
+        $request = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$request) {
+            throw new RuntimeException('درخواست لغو پیدا نشد.');
+        }
+        if ((string) $request['status'] !== 'pending') {
+            throw new RuntimeException('این درخواست قبلاً رسیدگی شده است.');
+        }
+        $orderId = (int) $request['order_id'];
+        $newStatus = $decision === 'approve' ? 'approved' : 'rejected';
+        $day = null;
+        if ($decision === 'approve') {
+            $day = food_order_lock_cancellable_day($pdo, (string) $request['food_date']);
+        }
+        $orderStmt = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? FOR UPDATE');
+        $orderStmt->execute([$orderId]);
+        $order = $orderStmt->fetch(PDO::FETCH_ASSOC);
+        if ($decision === 'approve') {
+            if ($order && (string) $order['status'] === 'active') {
+                $pdo->prepare("UPDATE food_orders SET status = 'cancelled', updated_at = CURRENT_TIMESTAMP WHERE id = ? AND status = 'active'")
+                    ->execute([$orderId]);
+                $old = ['calendar_item_id' => (int) $order['calendar_item_id'], 'status' => 'active'];
+                $new = ['status' => 'cancelled', 'via' => 'cancel_request'];
+                food_order_log($orderId, $day['calendar_id'], 'order_cancel_request_approved', $actorId, $old, $new, $note !== '' ? $note : null);
+            }
+        }
+        $pdo->prepare('UPDATE food_order_cancel_requests SET status = ?, decided_by = ?, decided_at = NOW(), decision_note = ? WHERE id = ?')
+            ->execute([$newStatus, $actorId, $note !== '' ? $note : null, $requestId]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+    food_order_audit(
+        $decision === 'approve' ? 'order_cancel_request_approved' : 'order_cancel_request_rejected',
+        $actor,
+        'food_order',
+        $orderId,
+        ['request_id' => $requestId, 'status' => 'pending'],
+        ['status' => $newStatus, 'note' => $note]
+    );
+    $dateLabel = food_order_jalali_label((string) $request['food_date']);
+    $message = $decision === 'approve'
+        ? 'سفارش تاریخ ' . $dateLabel . ' با تأیید مدیر پشتیبانی لغو شد.'
+        : 'درخواست لغو سفارش تاریخ ' . $dateLabel . ' رد شد.';
+    if (function_exists('notify_user')) {
+        try {
+            notify_user((int) $request['requested_by'], 'food_cancel_decision', $decision === 'approve' ? 'سفارش غذا لغو شد' : 'درخواست لغو سفارش رد شد', $message, null);
+        } catch (Throwable) {
+        }
+    }
+    return ['ok' => true, 'message' => $decision === 'approve' ? 'سفارش لغو شد.' : 'درخواست لغو رد شد.'];
 }
 
 function food_order_catalog_save(array $body, array $user): array
@@ -1634,7 +1925,7 @@ function food_order_api_handle(string $route, array $user): never
             food_order_send_json(['ok' => true, 'message' => 'درخواست غذای مهمان لغو شد.']);
         }
         if ($method === 'GET' && $route === 'my-orders') {
-            $range = food_order_list_range((string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? ''));
+            $range = food_order_list_range((string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? ''), (int) $user['id']);
             food_order_send_json([
                 'items' => food_order_my_orders((int) $user['id'], 400, $range['from'], $range['to']),
                 'range' => $range,
@@ -1648,7 +1939,7 @@ function food_order_api_handle(string $route, array $user): never
                 (string) ($body['national_code'] ?? ''),
                 true
             );
-            $range = food_order_list_range((string) ($body['from'] ?? ''), (string) ($body['to'] ?? ''));
+            $range = food_order_list_range((string) ($body['from'] ?? ''), (string) ($body['to'] ?? ''), (int) $target['id']);
             food_order_send_json([
                 'items' => food_order_my_orders((int) $target['id'], 400, $range['from'], $range['to']),
                 'range' => $range,
@@ -1697,6 +1988,21 @@ function food_order_api_handle(string $route, array $user): never
                 (string) ($body['national_code'] ?? ''),
                 $user
             ));
+        }
+        if ($method === 'POST' && $route === 'cancel-request') {
+            check_api_rate_limit('food_order_cancel_request_' . (int) $user['id'], 10, 60);
+            $body = food_order_api_body();
+            food_order_send_json(food_order_cancel_request_create((int) ($body['order_id'] ?? 0), $user));
+        }
+        if ($method === 'POST' && $route === 'cancel-request-proxy') {
+            check_api_rate_limit('food_order_cancel_request_' . (int) $user['id'], 10, 60);
+            $body = food_order_api_body();
+            $target = food_order_verify_employee_national_code(
+                max(0, (int) ($body['employee_id'] ?? 0)),
+                (string) ($body['national_code'] ?? ''),
+                true
+            );
+            food_order_send_json(food_order_cancel_request_create((int) ($body['order_id'] ?? 0), $user, $target));
         }
         if ($method === 'GET' && $route === 'day-visit') {
             food_order_require_permission($user, 'foodorder.self');
@@ -1834,6 +2140,20 @@ function food_order_menu_api_handle(string $route, array $user): never
                 food_order_send_json($result, 409);
             }
             food_order_send_json($result);
+        }
+        if ($method === 'GET' && $route === 'food-menu/cancel-requests') {
+            food_order_require_permission($user, 'food.order_close');
+            food_order_send_json(['items' => food_order_cancel_request_list()]);
+        }
+        if ($method === 'POST' && $route === 'food-menu/cancel-request-decide') {
+            food_order_require_permission($user, 'food.order_close');
+            $body = food_order_api_body();
+            food_order_send_json(food_order_cancel_request_decide(
+                (int) ($body['id'] ?? 0),
+                (string) ($body['decision'] ?? ''),
+                $user,
+                (string) ($body['note'] ?? '')
+            ));
         }
         if ($method === 'GET' && $route === 'food-menu/orders') {
             food_order_require_permission($user, 'food.order_close');

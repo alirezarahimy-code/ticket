@@ -101,8 +101,10 @@
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
       + '<label class="field">L_UID نمایندهٔ گروه (شناسهٔ اصلی)<input id="fg-uid" value="' + esc(g.l_uid || '') + '" maxlength="80" dir="ltr" placeholder="مثلاً 0100"></label>'
       + '<label class="field"><span>وضعیت</span><select id="fg-active"><option value="1"' + (g.active ? ' selected' : '') + '>فعال</option><option value="0"' + (g.active ? '' : ' selected') + '>غیرفعال</option></select></label>'
+      + '<label class="field">مهلت تغییر سلف امروز<input id="fg-visit-until" value="' + esc(g.visit_change_until || '') + '" maxlength="5" dir="ltr" inputmode="numeric" placeholder="مثلاً 09:30"></label>'
       + '<label class="field full">توضیحات<input id="fg-desc" value="' + esc(g.description || '') + '" maxlength="500"></label>'
       + '</div>'
+      + '<p class="muted" style="margin:6px 0">مهلت تغییر سلف فقط برای کسانی است که عضو دائم هیچ گروهی نیستند و می‌خواهند امروز غذا را از این سلف بگیرند. خالی یعنی بدون محدودیت ساعت؛ مثلاً ۰۹:۳۰ یعنی تا پایان همان دقیقه اعلام مجاز است. بعد از چاپ فیش گروه، اعلام همچنان قفل می‌شود.</p>'
       + '<p class="muted" style="margin:6px 0">شناسایی نماینده فقط و فقط با <b>L_UID</b> انجام می‌شود (L_UID → گروه → اعضا → سفارش → غیبت امروز → واجد شرایط‌ها → فیش). شمارهٔ کارت (C_CARD) در این سامانه هیچ نقشی ندارد و از این فرم حذف شده است؛ گروه‌هایی که L_UID ندارند باید L_UID آن‌ها ثبت شود. تعداد فیش را سامانه محاسبه می‌کند.</p>'
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
@@ -113,9 +115,10 @@
 
   function list() {
     if (!S.groups.length) return '<p class="muted">هنوز گروهی تعریف نشده است.</p>';
-    return '<div class="table-wrap"><table class="table"><thead><tr><th>نام گروه</th><th>L_UID نماینده</th><th>اعضا</th><th>غایب امروز</th><th>وضعیت</th><th></th></tr></thead><tbody>'
+    return '<div class="table-wrap"><table class="table"><thead><tr><th>نام گروه</th><th>L_UID نماینده</th><th>مهلت تغییر سلف</th><th>اعضا</th><th>غایب امروز</th><th>وضعیت</th><th></th></tr></thead><tbody>'
       + S.groups.map((g) => '<tr><td>' + esc(g.title) + (g.description ? '<small style="display:block;color:var(--muted)">' + esc(g.description) + '</small>' : '') + '</td>'
         + '<td dir="ltr">' + (g.l_uid ? esc(g.l_uid) : '<span class="status bad">تعریف نشده</span>') + '</td>'
+        + '<td>' + (g.visit_change_until ? ('تا ' + esc(g.visit_change_until)) : 'بدون محدودیت') + '</td>'
         + '<td>' + g.members.length + ' نفر' + ((g.today_visitors && g.today_visitors.length) ? ' <small style="color:var(--muted)">+ ' + g.today_visitors.length + ' مهمان امروز</small>' : '') + '</td>'
         + '<td>' + ((g.today && g.today.absent) || 0) + ' نفر' + (g.today && g.today.locked ? ' <span class="status warn" title="لیست غیبت امروز قفل شده است">🔒</span>' : '') + '</td>'
         + '<td><span class="status ' + (g.active ? 'ok' : 'bad') + '">' + (g.active ? 'فعال' : 'غیرفعال') + '</span></td>'
@@ -258,6 +261,7 @@
       title: (document.getElementById('fg-title') || {}).value || '',
       l_uid: (document.getElementById('fg-uid') || {}).value || '',
       description: (document.getElementById('fg-desc') || {}).value || '',
+      visit_change_until: (document.getElementById('fg-visit-until') || {}).value || '',
       active: ((document.getElementById('fg-active') || {}).value || '1') === '1',
       members: Array.from(document.querySelectorAll('[data-fg-member]:checked')).map((c) => Number(c.value)),
     };
@@ -325,7 +329,7 @@
     if (act === 'reload') { S.error = ''; S.loaded = false; draw(); load(); return; }
     if (act === 'new') {
       S.filter = '';
-      S.editing = { id: 0, title: '', l_uid: '', description: '', active: true, members: [] };
+      S.editing = { id: 0, title: '', l_uid: '', description: '', visit_change_until: '', active: true, members: [] };
       draw();
       load(function () {
         if (S.editing && !S.editing.id) draw();
@@ -335,7 +339,7 @@
     if (act === 'edit') {
       const openEdit = function () {
         const g = S.groups.find((x) => x.id === id);
-        if (g) { S.filter = ''; S.editing = { id: g.id, title: g.title, l_uid: g.l_uid, description: g.description, active: g.active, members: g.members.map((m) => m.id) }; S.absence = null; draw(); }
+        if (g) { S.filter = ''; S.editing = { id: g.id, title: g.title, l_uid: g.l_uid, description: g.description, visit_change_until: g.visit_change_until || '', active: g.active, members: g.members.map((m) => m.id) }; S.absence = null; draw(); }
       };
       load(openEdit);
       return;

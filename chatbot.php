@@ -246,6 +246,37 @@ function chatbot_answer(string $question, array $user): array
         ]);
     }
 
+    $mentionsFoodOrder = chatbot_has_any($norm, ['سفارش غذا', 'غذا']) && chatbot_has_any($norm, CHATBOT_WORDS_CANCEL);
+    $mentionsClosedFoodDay = chatbot_has_any($norm, ['بسته', 'روز بسته', 'سفارش بسته']);
+    if ($mentionsFoodOrder && $mentionsClosedFoodDay) {
+        $foodCancelAnswer = 'اگر روز سفارش بسته شده، خودتان نمی‌توانید سفارش را مستقیم لغو کنید. روی «درخواست لغو» بزنید تا به مدیر پشتیبانی و سامانه اعلام شود. مدیر پشتیبانی از برنامهٔ غذایی، برگهٔ «درخواست‌های لغو»، همان سفارش را لغو یا درخواست را رد می‌کند. سابقه حذف نمی‌شود.';
+        return chatbot_reply($user, $question, $foodCancelAnswer, true, null, 'food_order_closed_cancel', 0.0, [
+            'url' => 'index.php?page=food-order',
+            'label' => 'رفتن به سفارش غذا',
+        ]);
+    }
+    $mentionsOrderList = chatbot_has_any($norm, ['سفارش'])
+        && chatbot_has_any($norm, ['فهرست', 'لیست', 'پایین صفحه']);
+    $mentionsHiddenFuture = chatbot_has_any($norm, ['آبان', 'ماه بعد', 'ماه آینده'])
+        && chatbot_has_any($norm, ['سفارش'])
+        && chatbot_has_any($norm, ['فهرست', 'لیست', 'نمیاد', 'نمی‌آید', 'نشون', 'نشان داده']);
+    if ($mentionsOrderList || $mentionsHiddenFuture) {
+        $listAnswer = 'فهرست پایین صفحهٔ سفارش غذا به‌صورت پیش‌فرض از امروز تا پایان ماه شمسی بعد است؛ مثلاً در مهر، سفارش آبان هم دیده می‌شود. روزهای گذشته از این فهرست خارج می‌شوند. اگر بازه را دستی تنگ کرده باشید، «بازنشانی (از امروز)» را بزنید یا «تا تاریخ» را تا ماه بعد بگذارید.';
+        return chatbot_reply($user, $question, $listAnswer, true, null, 'food_order_list_range', 0.0, [
+            'url' => 'index.php?page=food-order',
+            'label' => 'رفتن به سفارش غذا',
+        ]);
+    }
+    $mentionsCafeteria = chatbot_has_any($norm, ['سلف', 'تغییر سلف', 'محل تحویل']);
+    $asksCafeteriaDeadline = $mentionsCafeteria && chatbot_has_any($norm, ['مهلت', 'ساعت', 'تا کی', '۹:۳۰', '9:30', 'تا چه موقع']);
+    if ($asksCafeteriaDeadline) {
+        $cafeAnswer = 'تغییر سلف امروز فقط برای کسی است که عضو دائم هیچ گروه غذایی نیست. مهلت ساعت را در همان گروه غذایی تنظیم می‌کنند؛ مثلاً تا ۰۹:۳۰. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود.';
+        return chatbot_reply($user, $question, $cafeAnswer, true, null, 'food_cafeteria_deadline', 0.0, [
+            'url' => 'index.php?page=food-order',
+            'label' => 'رفتن به سفارش غذا',
+        ]);
+    }
+
     $mentionsTicket = chatbot_has_any($norm, CHATBOT_WORDS_TICKET);
     $asksTicketCancellation = $mentionsTicket && chatbot_has_any($norm, CHATBOT_WORDS_CANCEL);
     if ($asksTicketCancellation) {

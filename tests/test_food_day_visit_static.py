@@ -65,5 +65,13 @@ check("تغییر سلف امروز" in guide
       and "کنار «تغییر شخص»" in guide
       and "عضو دائم یک گروه نمی‌تواند سلف را عوض کند" in guide,
       "Persian guide documents the cafeteria popup")
+check("visit_change_until" in groups
+      and "function food_ticket_visit_change_is_open" in groups
+      and "food_ticket_visit_change_guard" in groups
+      and "مهلت تغییر سلف" in admin_js,
+      "each food group has a configurable cafeteria-change deadline")
+check("visit_change_until TIME NULL" in schema
+      and "visit_change_until TIME NULL" in install,
+      "fresh-install schemas include cafeteria-change deadline")
 
 print("all day-visit checks passed")

@@ -41,6 +41,7 @@
     nationalCode: '',
     proxyCancelingOrderId: 0,
     proxyCancelConfirmingOrderId: 0,
+    cancelRequestBusyId: 0,
     employeeChoices: [],
     employeeChoicesLoaded: false,
     employeeChoicesLoading: false,
@@ -203,20 +204,29 @@
       } else {
         var current = v.current;
         var locked = !!v.locked;
+        var currentOpen = !current || current.change_open !== false;
+        var deadlineClosed = !locked && !currentOpen;
         var options = ['<option value="">انتخاب سلف / گروه</option>'].concat((v.groups || []).map(function (g) {
           var selected = current && Number(current.group_id) === Number(g.id) ? ' selected' : '';
-          return '<option value="' + Number(g.id) + '"' + selected + '>' + esc(g.title) + '</option>';
+          var until = g.visit_change_until ? (' — تا ' + faDigits(g.visit_change_until)) : '';
+          var closed = g.change_open === false ? ' (مهلت گذشته)' : '';
+          var disabled = g.change_open === false && !(current && Number(current.group_id) === Number(g.id)) ? ' disabled' : '';
+          return '<option value="' + Number(g.id) + '"' + selected + disabled + '>' + esc(g.title) + until + closed + '</option>';
         }));
+        var deadlineNote = current && current.visit_change_until
+          ? ' مهلت اعلام این سلف تا ساعت ' + faDigits(current.visit_change_until) + ' است.'
+          : '';
         var status = current
-          ? '<div class="fo-modal-notice">امروز غذای <strong>' + esc(who) + '</strong> از سلف «' + esc(current.title) + '» گرفته می‌شود.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + '</div>'
-          : '<div class="fo-modal-notice">اگر ' + esc(who) + ' امروز باید غذا را از سلف ساختمان دیگری بگیرد، گروه را انتخاب کنید. فقط برای امروز اعمال می‌شود و عضو دائم گروه نمی‌شود.</div>';
-        var actions = locked
+          ? '<div class="fo-modal-notice">امروز غذای <strong>' + esc(who) + '</strong> از سلف «' + esc(current.title) + '» گرفته می‌شود.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + (deadlineClosed ? ' مهلت تغییر سلف این گروه گذشته است.' : deadlineNote) + '</div>'
+          : '<div class="fo-modal-notice">اگر ' + esc(who) + ' امروز باید غذا را از سلف ساختمان دیگری بگیرد، گروه را انتخاب کنید. فقط برای امروز اعمال می‌شود و عضو دائم گروه نمی‌شود. اگر برای گروه مهلت ساعت تنظیم شده باشد، بعد از آن ساعت اعلام ممکن نیست.</div>';
+        var blocked = locked || deadlineClosed;
+        var actions = blocked
           ? ''
           : '<div class="fo-modal-actions"><button type="button" class="button" data-fo-action="visit-save"' + (state.visitSaving ? ' disabled' : '') + '>' + (state.visitSaving ? 'در حال ذخیره…' : 'اعلام برای امروز') + '</button>'
             + (current ? '<button type="button" class="button secondary" data-fo-action="visit-cancel"' + (state.visitSaving ? ' disabled' : '') + '>لغو اعلام</button>' : '')
             + '<button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>';
         inner = status
-          + (locked ? '<div class="fo-modal-actions"><button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>'
+          + (blocked ? '<div class="fo-modal-actions"><button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>'
             : '<label class="fo-form-field">سلف مقصد<select id="fo-visit-group"' + (state.visitSaving ? ' disabled' : '') + '>' + options.join('') + '</select></label>' + actions);
       }
     }
@@ -291,7 +301,7 @@
     }
   }
 
-  // بازهٔ وارد‌شده در فیلدهای شمسی را می‌خواند و فهرست را دوباره می‌گیرد. خالی = پیش‌فرض (امروز تا پایان ماه).
+  // بازهٔ وارد‌شده در فیلدهای شمسی را می‌خواند و فهرست را دوباره می‌گیرد. خالی = پیش‌فرض (امروز تا پایان ماه بعد / آخرین سفارش آینده).
   function applyListRange() {
     var fromInput = root.querySelector('[data-fo-list-from]');
     var toInput = root.querySelector('[data-fo-list-to]');
@@ -308,8 +318,8 @@
       + '<label>از تاریخ (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali data-fo-list-from value="' + esc(faDigits(shownFrom)) + '" placeholder="۱۴۰۵/۰۷/۰۱" style="display:block;margin-top:4px"></label>'
       + '<label>تا تاریخ (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali data-fo-list-to value="' + esc(faDigits(shownTo)) + '" placeholder="۱۴۰۵/۰۷/۳۰" style="display:block;margin-top:4px"></label>'
       + '<button class="button" type="button" data-fo-action="apply-list-range">نمایش بازه</button>'
-      + '<button class="button secondary" type="button" data-fo-action="reset-list-range">ماه جاری (از امروز)</button>'
-      + '<small class="field-help" style="flex-basis:100%">پیش‌فرض: از امروز تا پایان ماه جاری. غذای روزهای گذشته خودکار از این فهرست خارج می‌شود.</small>'
+      + '<button class="button secondary" type="button" data-fo-action="reset-list-range">بازنشانی (از امروز)</button>'
+      + '<small class="field-help" style="flex-basis:100%">پیش‌فرض: از امروز تا پایان ماه بعد؛ سفارش‌های ماه بعد هم دیده می‌شوند. روزهای گذشته از این فهرست خارج می‌شوند.</small>'
       + (state.listError ? '<div class="alert danger" style="flex-basis:100%">' + esc(state.listError) + '</div>' : '')
       + '</div>';
   }
@@ -366,8 +376,23 @@
     return '<div class="card fo-my-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام و نام خانوادگی</th><th>نوع غذا</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
       var active = row.status === 'active';
       var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed';
-      return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(row.full_name || selfName) + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(faDigits(isoToJalali(row.reserve_date))) + '</td><td>' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + (canCancel ? '<button class="button secondary" type="button" data-fo-action="cancel" data-order-id="' + Number(row.id) + '">لغو سفارش</button>' : '—') + '</td></tr>';
+      var action = canCancel
+        ? '<button class="button secondary" type="button" data-fo-action="cancel" data-order-id="' + Number(row.id) + '">لغو سفارش</button>'
+        : renderCancelRequestControl(row, false);
+      return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(row.full_name || selfName) + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(faDigits(isoToJalali(row.reserve_date))) + '</td><td>' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + action + '</td></tr>';
     }).join('') + '</tbody></table></div></div>';
+  }
+
+  function renderCancelRequestControl(row, isProxy) {
+    var active = row && row.status === 'active';
+    var closed = (row.day_status || (currentDay() && currentDay().order_status) || '') === 'closed';
+    if (!active || isPast(row.food_date || state.modalDate) || !closed || !row.id) return '—';
+    if (row.cancel_request && row.cancel_request.status === 'pending') {
+      return '<span class="fo-order-state">در انتظار تأیید لغو</span>';
+    }
+    var busy = Number(state.cancelRequestBusyId) === Number(row.id);
+    var act = isProxy ? 'cancel-request-proxy' : 'cancel-request';
+    return '<button class="button secondary" type="button" data-fo-action="' + act + '" data-order-id="' + Number(row.id) + '"' + (busy ? ' disabled' : '') + '>' + (busy ? 'در حال ارسال…' : 'درخواست لغو') + '</button>';
   }
 
   function renderProxyCancelControl(orderId, buttonClass) {
@@ -408,7 +433,7 @@
         var reserveTime = row.reserve_time ? faDigits(row.reserve_time.slice(0, 5)) : '—';
         var active = row.status === 'active';
         var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed' && row.id > 0;
-        var cancelButton = canCancel ? renderProxyCancelControl(row.id, 'button secondary') : '—';
+        var cancelButton = canCancel ? renderProxyCancelControl(row.id, 'button secondary') : renderCancelRequestControl(row, true);
         return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(state.targetName || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(reserveDate) + '</td><td>' + esc(reserveTime) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + cancelButton + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
     }
@@ -423,7 +448,7 @@
     if (isPast(state.modalDate)) return 'تاریخ گذشته است و فقط می‌توانید سفارش قبلی خود را ببینید.';
     if (holiday) return 'این روز تعطیل رسمی است؛ تعطیلی مانع سفارش نیست.';
     if (!day || !day.calendar_id || !day.items || !day.items.length) return 'برای این تاریخ هنوز برنامهٔ غذایی ثبت نشده است.';
-    if (day.order_status === 'closed') return 'سفارش‌گیری این روز بسته شده است.';
+    if (day.order_status === 'closed') return 'سفارش‌گیری این روز بسته شده است. اگر سفارش فعال دارید، می‌توانید درخواست لغو بفرستید تا مدیر پشتیبانی بررسی کند.';
     if (day.order_status !== 'open') return 'وضعیت سفارش این روز مشخص نیست.';
     return '';
   }
@@ -457,7 +482,7 @@
       ? '<div class="fo-combobox"><input type="search" id="fo-search-name" role="combobox" aria-autocomplete="list" aria-controls="fo-employee-results" aria-expanded="true"' + activeDescendant + ' autocomplete="off" placeholder="نام پرسنل را جست‌وجو کنید" value="' + esc(state.searchQuery) + '"' + (state.flowSaving ? ' disabled' : '') + '><div class="fo-search-results" id="fo-employee-results" role="listbox">' + renderEmployeeChoices() + '</div></div>'
       : '';
     var codeField = state.targetId > 0
-      ? '<div class="fo-proxy-code" id="fo-proxy-code-block"><label class="fo-form-field">کد ملی این شخص (۱۰ رقم)<input type="text" id="fo-national-code" inputmode="numeric" autocomplete="off" maxlength="10" value="' + esc(state.nationalCode) + '" placeholder="کد ملی را وارد کنید"' + (state.flowSaving ? ' disabled' : '') + '></label><div class="fo-modal-notice">کد ملی فقط برای تطبیق سمت سرور استفاده می‌شود؛ در فهرست نام‌ها نمایش داده نمی‌شود.</div></div>'
+      ? '<div class="fo-proxy-code" id="fo-proxy-code-block"><label class="fo-form-field">کد ملی این شخص (۱۰ رقم)<input type="password" id="fo-national-code" class="fo-national-secret" inputmode="numeric" autocomplete="new-password" maxlength="10" value="' + esc(state.nationalCode) + '" placeholder="کد ملی را وارد کنید"' + (state.flowSaving ? ' disabled' : '') + '></label><div class="fo-modal-notice">ارقام کد ملی به‌صورت دایره نشان داده می‌شوند و روی صفحه خوانده نمی‌شوند. تطبیق فقط سمت سرور انجام می‌شود.</div></div>'
       : '<div class="fo-modal-notice">پس از انتخاب پرسنل، کد ملی او را وارد کنید.</div>';
     var error = state.flowError ? '<div class="fo-modal-notice error" id="fo-flow-error" role="alert">' + esc(state.flowError) + '</div>' : (state.flowSaving ? '<div class="fo-modal-notice" role="status">در حال بررسی اطلاعات…</div>' : '');
     var canContinue = state.targetId > 0 && normalizedDigits(state.nationalCode).length === 10 && !state.flowSaving && !state.dropdownOpen;
@@ -504,6 +529,10 @@
       cancelHtml = '<button type="button" class="button danger-button" data-fo-action="cancel-current" data-order-id="' + Number(selfOrder.id) + '">لغو سفارش</button>';
     } else if (state.targetMode === 'proxy' && existingOrder && Number(existingOrder.id || 0) > 0 && !isPast(state.modalDate) && day && day.order_status === 'open') {
       cancelHtml = renderProxyCancelControl(existingOrder.id, 'button danger-button');
+    } else if (selfOrder && day && day.order_status === 'closed') {
+      cancelHtml = renderCancelRequestControl({ id: selfOrder.id, status: 'active', food_date: state.modalDate, day_status: 'closed', cancel_request: selfOrder.cancel_request }, false);
+    } else if (state.targetMode === 'proxy' && existingOrder && Number(existingOrder.id || 0) > 0 && day && day.order_status === 'closed') {
+      cancelHtml = renderCancelRequestControl({ id: existingOrder.id, status: 'active', food_date: state.modalDate, day_status: 'closed', cancel_request: existingOrder.cancel_request }, true);
     }
     return '<dialog class="fo-modal" id="fo-order-dialog" aria-labelledby="fo-modal-title"><div class="fo-modal-inner"><div class="fo-modal-head"><div><h2 id="fo-modal-title">انتخاب غذای روز</h2><p>' + esc(faDigits(dateLabel)) + (holiday ? ' • ' + esc(holiday) : '') + '</p></div><button class="fo-modal-close" type="button" data-fo-action="close" aria-label="بستن">×</button></div>' + recipientInfo + message + ownOrderHtml + (canOrderDay && items.length ? '<div class="fo-section-title"><div><h2>غذای موردنظر را انتخاب کنید</h2><p>برای هر شخص در هر روز فقط یک سفارش ثبت می‌شود.</p></div></div><div class="fo-meal-options">' + radios + '</div>' : '') + '<div class="fo-status-msg" id="fo-modal-error" aria-live="polite"></div><div class="fo-modal-actions">' + (saveAllowed ? '<button type="button" class="button" data-fo-action="save-order">' + (selfOrder ? 'ثبت تغییر سفارش' : 'ثبت سفارش') + '</button>' : '') + cancelHtml + '<button type="button" class="button secondary" data-fo-action="close">بستن</button></div></div></dialog>';
   }
@@ -848,6 +877,32 @@
     }
   }
 
+  async function requestCancelOrder(orderId, isProxy) {
+    if (!orderId || state.cancelRequestBusyId) return;
+    if (!window.confirm('درخواست لغو این سفارش برای مدیر پشتیبانی ارسال شود؟ تا تأیید ایشان سفارش لغو نمی‌شود.')) return;
+    state.cancelRequestBusyId = Number(orderId);
+    render();
+    try {
+      var route = isProxy ? 'cancel-request-proxy' : 'cancel-request';
+      var body = { order_id: Number(orderId) };
+      if (isProxy) {
+        body.employee_id = Number(state.targetId || 0);
+        body.national_code = normalizedDigits(state.nationalCode);
+      }
+      var response = await request(route, null, { method: 'POST', body: JSON.stringify(body) });
+      state.pageNotice = { message: response.message || 'درخواست لغو ثبت شد.', type: 'success' };
+      if (state.targetMode === 'proxy') await loadProxyOrders();
+      else await loadMyOrders();
+      await loadMonth();
+      await loadVisit();
+    } catch (e) {
+      state.pageNotice = { message: e.message || 'ثبت درخواست لغو انجام نشد.', type: 'danger' };
+    } finally {
+      state.cancelRequestBusyId = 0;
+      render();
+    }
+  }
+
   var page = root.closest ? root.closest('.food-order-page') : null;
   if (page) page.addEventListener('click', function (event) {
     if (!state.recipientReady && state.flowDismissed) {
@@ -908,6 +963,8 @@
       if (act === 'visit-close') closeVisitDialog();
       if (act === 'save-order') saveOrder();
       if (act === 'cancel' || act === 'cancel-current') cancelOrder(Number(action.dataset.orderId || 0));
+      if (act === 'cancel-request') requestCancelOrder(Number(action.dataset.orderId || 0), false);
+      if (act === 'cancel-request-proxy') requestCancelOrder(Number(action.dataset.orderId || 0), true);
       if (act === 'cancel-proxy') requestProxyCancelConfirmation(Number(action.dataset.orderId || 0));
       if (act === 'confirm-cancel-proxy') cancelProxyOrder(Number(action.dataset.orderId || 0));
       if (act === 'dismiss-cancel-proxy') dismissProxyCancelConfirmation(Number(action.dataset.orderId || 0));

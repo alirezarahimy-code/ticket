@@ -1,5 +1,11 @@
 /* سفارش غذا — از همان رنگ‌ها، کارت‌ها و فرم‌های assets/style.css سامانه استفاده می‌کند. */
 .food-order-page { color: var(--ink); }
+.fo-visit-card { padding:18px 20px; margin-bottom:18px; }
+.fo-visit-card h2 { margin:0 0 6px; font-size:18px; color:var(--navy); }
+.fo-visit-card p { margin:0 0 12px; color:var(--muted); }
+.fo-visit-row { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+.fo-visit-row .field { flex:1; min-width:220px; margin:0; }
+.fo-visit-current { font-weight:700; color:var(--navy); }
 .food-order-loading { padding:22px; text-align:center; color:var(--muted); }
 .fo-calendar-card { padding:clamp(14px,2.5vw,26px); margin-bottom:22px; }
 .fo-calendar-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
@@ -117,6 +123,7 @@
 .fo-recipient-details { display:grid; flex:1; gap:2px; min-width:0; }
 .fo-recipient-details span,.fo-recipient-details small { color:var(--muted); font-size:11px; }
 .fo-recipient-details strong { color:var(--navy); font-size:15px; overflow-wrap:anywhere; }
+.fo-recipient-actions { display:flex; gap:8px; flex-wrap:wrap; flex:0 0 auto; }
 .fo-recipient-change { flex:0 0 auto; }
 .fo-recipient-dialog { width:min(540px,calc(100vw - 24px)); }
 .fo-person-choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0; }
@@ -141,6 +148,12 @@
 .fo-search-result.is-highlighted,.fo-search-result[aria-selected="true"] { border-color:var(--teal); background:var(--teal-light); }
 .fo-combo-message { padding:11px 9px; color:var(--muted); font-size:12px; line-height:1.8; }
 .fo-proxy-code { margin-top:10px; }
+.fo-national-secret {
+  -webkit-text-security: disc;
+  text-security: disc;
+  letter-spacing: .35em;
+  font-family: ui-monospace, monospace;
+}
 .fo-day.is-adjacent,.fo-day:disabled { cursor:not-allowed; opacity:.38; filter:saturate(.65); }
 .fo-day.is-adjacent:hover,.fo-day.is-adjacent:focus-visible,.fo-day:disabled:hover { transform:none; box-shadow:none; border-color:var(--line); z-index:auto; outline:none; }
 .fo-day.is-adjacent::after,.fo-day:disabled::after { display:none; }
@@ -148,7 +161,7 @@
   .fo-person-choices { grid-template-columns:1fr; }
   .fo-person-choice { min-height:92px; }
   .fo-recipient-banner { align-items:flex-start; flex-wrap:wrap; }
-  .fo-recipient-change { margin-right:auto; }
+  .fo-recipient-actions { margin-right:auto; }
 }
 
 /* نام غذا در سلول تقویم در یک خط نمایش داده می‌شود؛ اگر جا نشد با «…» کوتاه می‌شود. */
