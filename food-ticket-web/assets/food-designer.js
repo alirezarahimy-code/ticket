@@ -438,22 +438,85 @@
       '<p class="fd-help">وضعیت فعلی: <b>' + (isGroup ? 'فیش مشترک برای هر گروه' : 'فیش جداگانه برای هر عضو') + '</b></p></div>';
   }
 
+  function groupLivePreviewHtml() {
+    const w = S.work, t = w.template, scale = 3, paperW = Number(w.paper_width) || 80;
+    const ignored = ['food_name', 'employee_name', 'personnel_code', 'national_code', 'department', 'meal', 'ticket_number', 'qrcode', 'free_text'];
+    const staticElements = t.elements.filter((e) => e.enabled && !ignored.includes(e.field));
+    const footers = t.elements.filter((e) => e.enabled && e.field === 'free_text');
+    const anchor = t.elements.find((e) => e.enabled && e.field === 'food_name') || t.elements.find((e) => e.enabled && e.field === 'employee_name') || null;
+    const menuStyle = t.elements.find((e) => e.enabled && e.field === 'food_name') || anchor || {};
+    const memberStyle = t.elements.find((e) => e.enabled && e.field === 'employee_name') || menuStyle;
+    const lines = groupPreviewLines();
+    let staticBottom = 0;
+    const staticHtml = staticElements.map((e) => {
+      const h = e.field === 'line' ? 0 : (e.field === 'logo' || e.field === 'qrcode' ? Number(e.height) : groupTextHeight(sampleText(e), e, Number(e.width)));
+      staticBottom = Math.max(staticBottom, Number(e.y) + h);
+      const style = 'position:absolute;left:' + e.x * scale + 'px;top:' + e.y * scale + 'px;width:' + e.width * scale + 'px;height:' + Math.max(e.height, h) * scale + 'px;box-sizing:border-box;';
+      if (e.field === 'line') return '<div style="' + style + 'border-top:1px dashed #333"></div>';
+      if (e.field === 'logo') {
+        const logo = logoUrl();
+        return logo ? '<img alt="" src="' + esc(logo) + '" style="' + style + 'object-fit:contain">' : '';
+      }
+      if (e.field === 'qrcode') return '<div style="' + style + 'background:repeating-conic-gradient(#000 0 25%,#fff 0 50%) 0 0/20% 20%"></div>';
+      const pt = num(e.font_size, 11) * 25.4 / 72 * scale;
+      return '<div style="' + style + 'font-family:\'' + esc(e.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (e.bold ? 700 : 400) + ';line-height:' + pt * num(e.line_height, 1.2) + 'px;text-align:' + (e.align || 'right') + ';white-space:pre-wrap;' + (e.border ? 'outline:1px solid #000;' : '') + '">' + esc(sampleText(e)).replace(/\n/g, '<br>') + '</div>';
+    }).join('');
+    const bodyX = anchor ? Number(anchor.x) : 6;
+    const bodyY = Math.max(staticBottom + 1.5, anchor ? Number(anchor.y) : 0);
+    const bodyW = Math.max(10, Math.min(paperW - Math.max(0, bodyX), anchor ? Number(anchor.width) : paperW - 12));
+    let usedH = 0;
+    const linesHtml = lines.map((line) => {
+      const style = line.kind === 'menu' ? menuStyle : memberStyle;
+      const lineBoxH = groupTextHeight(line.text, Object.assign({}, style, { height: 0.5 }), bodyW);
+      usedH += lineBoxH;
+      const pt = num(style.font_size, 11) * 25.4 / 72 * scale;
+      return '<div style="height:' + lineBoxH * scale + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + pt * num(style.line_height, 1.2) + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
+    }).join('');
+    const bodyH = Math.max(0.5, usedH + 1.0);
+    let bottom = Math.max(staticBottom, bodyY + bodyH);
+    const footerHtml = footers.map((e) => {
+      const y = bottom + 1;
+      const h = groupTextHeight(e.text, e, e.width);
+      bottom = y + h + 1;
+      const pt = num(e.font_size, 11) * 25.4 / 72 * scale;
+      return '<div style="position:absolute;left:' + e.x * scale + 'px;top:' + y * scale + 'px;width:' + e.width * scale + 'px;height:' + h * scale + 'px;font-family:\'' + esc(e.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (e.bold ? 700 : 400) + ';line-height:' + pt * num(e.line_height, 1.2) + 'px;text-align:' + (e.align || 'right') + ';white-space:pre-wrap">' + esc(e.text).replace(/\n/g, '<br>') + '</div>';
+    }).join('');
+    const height = Math.max(20, bottom + num(t.margin_bottom, 3));
+    const paperBorder = t.border ? '<div style="position:absolute;inset:' + num(t.border_inset, 3) * scale + 'px;border:1px solid #000;pointer-events:none"></div>' : '';
+    const bodyHtml = '<div style="position:absolute;left:' + bodyX * scale + 'px;top:' + bodyY * scale + 'px;width:' + bodyW * scale + 'px;height:' + bodyH * scale + 'px;box-sizing:border-box;' + (anchor && anchor.border ? 'outline:1px solid #000;' : '') + '">' + linesHtml + '</div>';
+    return '<div class="fd-group-live-preview"><div style="position:relative;background:#fff;margin:0 auto;width:' + paperW * scale + 'px;height:' + height * scale + 'px;direction:rtl;overflow:hidden;box-shadow:0 2px 10px #0002">' + paperBorder + staticHtml + bodyHtml + footerHtml + '</div></div>';
+  }
+
   function previewHtml() {
     const p = S.preview;
+    const isGroup = S.designTab === 'group';
     let inner;
-    if (S.previewBusy && !p) inner = '<p class="fd-help">در حال ساخت پیش‌نمایش…</p>';
+    if (isGroup) {
+      let actual;
+      if (S.previewBusy && !p) actual = '<p class="fd-help">در حال ساخت تصویر دقیق چاپ از سرور…</p>';
+      else if (!p) actual = '<p class="fd-help">تصویر دقیق چاپ پس از بارگذاری ساخته می‌شود.</p>';
+      else if (p.error) actual = '<p class="fd-warn">' + esc(p.error) + '</p>';
+      else {
+        const w = p.paper_mm.w * S.scale;
+        const fonts = Object.keys(p.fonts || {}).map((k) => esc(k) + (p.fonts[k] !== k ? ' ← ' + esc(p.fonts[k]) : '')).join('، ');
+        actual = '<div class="fd-pv-paper"><img src="' + p.image + '" alt="خروجی دقیق چاپ" style="width:' + w + 'px;image-rendering:pixelated"></div>' +
+          '<p class="fd-help">تصویر واقعی رندرشده در سرور؛ ' + p.width_px + '×' + p.height_px + ' نقطه.' + (fonts ? ' فونت‌های استفاده‌شده: ' + fonts : '') + '</p>' +
+          (p.warnings || []).map((x) => '<p class="fd-warn">' + esc(x) + '</p>').join('');
+      }
+      inner = '<h4 class="fd-live-title">پیش‌نمایش زندهٔ طراحی</h4>' + groupLivePreviewHtml() +
+        '<div class="fd-group-server-preview"><h4>خروجی دقیق چاپ</h4>' + actual + '</div>';
+    } else if (S.previewBusy && !p) inner = '<p class="fd-help">در حال ساخت پیش‌نمایش…</p>';
     else if (!p) inner = '<p class="fd-help">برای دیدن خروجی دقیق، «به‌روزرسانی پیش‌نمایش» را بزنید.</p>';
     else if (p.error) inner = '<p class="fd-warn">' + esc(p.error) + '</p>';
     else {
       const w = p.paper_mm.w * S.scale;
       const fonts = Object.keys(p.fonts || {}).map((k) => esc(k) + (p.fonts[k] !== k ? ' ← ' + esc(p.fonts[k]) : '')).join('، ');
-      const groupHint = S.designTab === 'group' ? ' نمونهٔ آزمایشی شامل ۳ منو و ۱۸ عضو است؛ در چاپ واقعی همهٔ منوها و نام‌های همان گروه درج می‌شوند و طول کاغذ با محتوا افزایش می‌یابد.' : '';
       inner = '<div class="fd-pv-paper"><img src="' + p.image + '" alt="پیش‌نمایش واقعی" style="width:' + w + 'px;image-rendering:pixelated"></div>' +
-        '<p class="fd-help">اندازهٔ تصویر ' + p.width_px + '×' + p.height_px + ' نقطه (چاپگر ' + p.dots_per_mm + ' نقطه بر میلی‌متر). این همان تصویر ارسالی به چاپگر شبکه است.' + groupHint + (fonts ? ' فونت: ' + fonts : '') + '</p>' +
+        '<p class="fd-help">اندازهٔ تصویر ' + p.width_px + '×' + p.height_px + ' نقطه (چاپگر ' + p.dots_per_mm + ' نقطه بر میلی‌متر). این همان تصویر ارسالی به چاپگر شبکه است.' + (fonts ? ' فونت: ' + fonts : '') + '</p>' +
         (p.warnings || []).map((x) => '<p class="fd-warn">' + esc(x) + '</p>').join('');
     }
-    const previewTitle = S.designTab === 'group' ? 'پیش‌نمایش واقعی چاپ گروهی' : 'پیش‌نمایش واقعی چاپ انفرادی';
-    return '<div class="fd-card fd-preview"><h3>' + previewTitle + '</h3>' + inner + '<div class="fd-actions"><button type="button" class="fd-btn" data-fd-preview="1">' + (S.previewBusy ? '…' : 'به‌روزرسانی پیش‌نمایش') + '</button></div></div>';
+    const previewTitle = isGroup ? 'پیش‌نمایش چاپ گروهی' : 'پیش‌نمایش واقعی چاپ انفرادی';
+    return '<div class="fd-card fd-preview"><h3>' + previewTitle + '</h3>' + inner + '<div class="fd-actions"><button type="button" class="fd-btn" data-fd-preview="1">' + (S.previewBusy ? 'در حال به‌روزرسانی…' : 'به‌روزرسانی پیش‌نمایش') + '</button></div></div>';
   }
 
   function body() {
@@ -492,7 +555,7 @@
       '.fd-border{position:absolute;border:1px solid #000;pointer-events:none}.fd-el{position:absolute;cursor:move;box-sizing:border-box;outline:1px dashed #9db4c0;direction:rtl}.fd-el.fd-sel{outline:2px solid #0f766e;z-index:5}.fd-el.fd-off{opacity:.3}.fd-text{width:100%;height:100%;overflow:visible;white-space:pre-wrap;color:#000}.fd-line{border-top:1px dashed #000;margin-top:3px}.fd-el img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}.fd-ph{font-size:11px;color:#9aa8b2}.fd-qr{background:repeating-conic-gradient(#000 0 25%,#fff 0 50%) 0 0/20% 20%;color:transparent}' +
       '.fd-h{position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;background:#0f766e;border:2px solid #fff;border-radius:3px;cursor:nwse-resize}.fd-dim{font-size:11px;color:#6d7c89;margin-top:6px}.fd-zoom{font-size:12px;margin:6px 0}.fd-zoom button{border:1px solid #cbd8df;background:#fff;border-radius:6px;width:28px;cursor:pointer}' +
       '.fd-layers{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow:auto}.fd-layer{display:flex;justify-content:space-between;align-items:center;border:1px solid #e3ebf0;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer}.fd-layer.on{border-color:#0f766e;background:#e9f7f5}.fd-layer.off{opacity:.55}.fd-lbtn button{border:0;background:transparent;cursor:pointer;color:#0f766e}' +
-      '.fd-pv-paper{background:#eef2f4;padding:10px;text-align:center;border-radius:10px;overflow:auto}.fd-pv-paper img{background:#fff;box-shadow:0 2px 10px #0003}.fd-group-mode{border-right:4px solid #0f766e}.fd-real-preview-title{margin:0 0 8px;font-size:15px}.fd-sample-toggle{margin:0 0 8px}.fd-sample-toggle .fd-btn{font-size:12px}';
+      '.fd-pv-paper{background:#eef2f4;padding:10px;text-align:center;border-radius:10px;overflow:auto}.fd-pv-paper img{background:#fff;box-shadow:0 2px 10px #0003}.fd-group-mode{border-right:4px solid #0f766e}.fd-live-title,.fd-group-server-preview h4{margin:10px 0 6px;font-size:13px}.fd-group-live-preview{background:#eef2f4;padding:10px;border-radius:10px;overflow:auto}.fd-group-server-preview{margin-top:14px;padding-top:8px;border-top:1px solid #dce5eb}.fd-real-preview-title{margin:0 0 8px;font-size:15px}.fd-sample-toggle{margin:0 0 8px}.fd-sample-toggle .fd-btn{font-size:12px}';
   }
 
   // ───────────────────────── تغییر داده و پیش‌نمایش ─────────────────────────
@@ -501,7 +564,7 @@
     if (S.designTab === 'group') { S.groupDirty = true; S.groupWork = workFrom(S.work); }
     else { S.individualDirty = true; S.individualWork = workFrom(S.work); }
     if (redraw !== false) draw();
-    schedulePreview(350);
+    schedulePreview(180);
   }
   function schedulePreview(ms) {
     clearTimeout(S.previewTimer);
@@ -520,7 +583,7 @@
     const w = workFrom(S.work);
     const sampleType = S.designTab === 'group' ? 'group' : S.previewKind;
     draw();
-    callApi('/api/templates/preview', { method: 'POST', body: JSON.stringify({ id: w.id, name: w.name, paper_width: w.paper_width, paper_height: w.paper_height, template: w.template, sample_type: sampleType }) })
+    callApi('/api/templates/preview', { method: 'POST', cache: 'no-store', body: JSON.stringify({ id: w.id, name: w.name, paper_width: w.paper_width, paper_height: w.paper_height, template: w.template, sample_type: sampleType }) })
       .then((x) => { if (seq === S.previewSeq) S.preview = x; })
       .catch((e) => { if (seq === S.previewSeq) S.preview = { error: (e && e.message) || 'پیش‌نمایش ساخته نشد' }; })
       .then(() => { if (seq === S.previewSeq) { S.previewBusy = false; draw(); } });

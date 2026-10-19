@@ -20,6 +20,9 @@ class FoodGroupTypographyStaticTests(unittest.TestCase):
     def test_group_designer_exposes_per_style_font_controls_and_refreshes_preview(self) -> None:
         source = (ROOT / "food-ticket-web/assets/food-designer.js").read_text(encoding="utf-8")
         self.assertIn("function groupTypographyPropsHtml(e)", source)
+        self.assertIn("function groupLivePreviewHtml()", source)
+        self.assertIn("پیش‌نمایش زندهٔ طراحی", source)
+        self.assertIn("cache: 'no-store'", source)
         self.assertIn('data-fd-prop="font_family"', source)
         self.assertIn("inp('line_height'", source)
         self.assertIn("data-fd-group-style-pick", source)
