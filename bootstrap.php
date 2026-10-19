@@ -4,16 +4,8 @@ declare(strict_types=1);
 const APP_ROOT = __DIR__;
 
 require_once __DIR__ . '/permissions.php';
-
-if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
-    session_set_cookie_params([
-        'path' => '/',
-        'httponly' => true,
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-        'samesite' => 'Lax',
-    ]);
-    session_start();
-}
+require_once __DIR__ . '/session_bootstrap.php';
+app_session_start();
 
 $configFile = (string) (getenv('ITSM_CONFIG_PATH') ?: APP_ROOT . '/config.php');
 if (!is_file($configFile)) {

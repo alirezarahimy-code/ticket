@@ -267,6 +267,16 @@ function chatbot_answer(string $question, array $user): array
             'label' => 'رفتن به سفارش غذا',
         ]);
     }
+    $asksSessionPersistence = chatbot_has_any($norm, ['نشست', 'ورود', 'لاگ آف'])
+        && chatbot_has_any($norm, ['بیکاری', 'قطع', 'خروج', 'مدت', 'ماندگار', 'دو ساعت', 'ساعت']);
+    if ($asksSessionPersistence) {
+        $sessionAnswer = 'نشست ورود تا حدود یک سال اعتبار دارد و کوکی آن با درخواست‌های سامانه تمدید می‌شود؛ چند ساعت بیکاری به‌تنهایی نباید باعث خروج شود. برای پایان‌دادن به نشست از دکمهٔ «خروج» استفاده کنید. پس از نصب این به‌روزرسانی ممکن است یک‌بار ورود مجدد لازم باشد.';
+        return chatbot_reply($user, $question, $sessionAnswer, true, null, 'session_persistence', 0.0, [
+            'url' => 'index.php?page=help',
+            'label' => 'مشاهدهٔ راهنمای ورود',
+        ]);
+    }
+
     $mentionsCafeteria = chatbot_has_any($norm, ['سلف', 'تغییر سلف', 'محل تحویل']);
     $asksCafeteriaDeadline = $mentionsCafeteria && chatbot_has_any($norm, ['مهلت', 'ساعت', 'تا کی', '۹:۳۰', '9:30', 'تا چه موقع']);
     if ($asksCafeteriaDeadline) {

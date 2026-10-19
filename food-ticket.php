@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.10';
+const FOOD_TICKET_PANEL_VERSION = '1.37.14';
 
 function food_ticket_panel_version(): string
 {
@@ -169,6 +169,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'templates/delete' => 'food.design',
         'templates/activate' => 'food.design',
         'templates/logo' => 'food.design',
+        'templates/group-mode' => 'food.design',
+        'templates/group-design' => 'food.design',
         'health' => 'food.health',
         'self-test' => 'food.health',
         'process' => 'food.monitor',

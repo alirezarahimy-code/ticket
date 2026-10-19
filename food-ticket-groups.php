@@ -1356,8 +1356,14 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
         }
     }
 
-    // چاپ: همان صف فعلی، یک‌جا برای همهٔ اعضای صف‌شده
-    if ($counts['printed'] > 0 && empty($config['_group_skip_print'])) {
+    $allOk = $counts['error'] === 0;
+    db()->prepare(
+        'UPDATE food_ticket_group_runs SET printed_count = printed_count + ?, repeat_count = repeat_count + ?, no_food_count = no_food_count + ?, '
+        . 'absent_count = ?, skipped_count = skipped_count + ?, error_count = error_count + ?, status = ? WHERE id = ?'
+    )->execute([$counts['printed'], $counts['repeat'], $counts['no_food'], $counts['absent'], $counts['skipped'], $counts['error'], $allOk ? 'done' : 'processing', $runId]);
+
+    // صف فقط پس از ثبت وضعیت نهایی run تخلیه می‌شود تا چاپ گروه فهرست ناقص اعضا نگیرد.
+    if ($allOk && $counts['printed'] > 0 && empty($config['_group_skip_print'])) {
         try {
             $early = food_ticket_process_print_queue_locked($config, max(30, $counts['printed']));
             $summary['queue_early_printed'] = (int) ($summary['queue_early_printed'] ?? 0) + (int) ($early['printed'] ?? 0);
@@ -1366,12 +1372,6 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
             app_error_log('[food-groups] print drain failed: ' . $printEx->getMessage());
         }
     }
-
-    $allOk = $counts['error'] === 0;
-    db()->prepare(
-        'UPDATE food_ticket_group_runs SET printed_count = printed_count + ?, repeat_count = repeat_count + ?, no_food_count = no_food_count + ?, '
-        . 'absent_count = ?, skipped_count = skipped_count + ?, error_count = error_count + ?, status = ? WHERE id = ?'
-    )->execute([$counts['printed'], $counts['repeat'], $counts['no_food'], $counts['absent'], $counts['skipped'], $counts['error'], $allOk ? 'done' : 'processing', $runId]);
 
     food_ticket_audit('food_group_tickets_issued', [
         'target_type' => 'food_group',

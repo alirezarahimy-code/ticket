@@ -455,9 +455,10 @@ function can_view_ticket(array $ticket, array $user): bool
     return false;
 }
 
-function choose_handling_agent(string $serviceGroup): ?int
+function choose_handling_agent(string $serviceGroup, ?int $departmentId = null): ?int
 {
     $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
+    $departmentId = (int) ($departmentId ?? 0);
     $loadJoin = ' LEFT JOIN tickets t ON t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled")';
 
     // مالک اصلی هر حوزه اولویت دارد: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
@@ -478,9 +479,11 @@ function choose_handling_agent(string $serviceGroup): ?int
         . 'LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
         . $loadJoin
         . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager", "support_manager", "primary_admin") AND hu.code = ?'
+        // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی تیکت است؛ از معاونت دیگری انتخاب نشود.
+        . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
         . ' GROUP BY u.id ORDER BY COUNT(t.id), u.id LIMIT 1'
     );
-    $fallback->execute([$serviceGroup]);
+    $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
     $id = $fallback->fetchColumn();
     return $id === false ? null : (int) $id;
 }
@@ -638,7 +641,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id'], $user) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.30"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.31"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -1886,7 +1889,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('عنوان و شرح مشکل الزامی است.');
             }
             db()->beginTransaction();
-            $agentId = choose_handling_agent($serviceGroup);
+            $agentId = choose_handling_agent($serviceGroup, $departmentId);
             $initialStatus = $agentId ? 'assigned' : 'manager_review';
             $ticketNo = ticket_number_next(ticket_number_prefix($serviceGroup));
             $query = db()->prepare('INSERT INTO tickets (ticket_no, subject, description, category_id, service_id, requesting_unit_id, ticket_type, parent_ticket_id, custom_fields, service_group, department_id, asset_id, handling_unit_id, support_location, support_equipment, priority, requester_id, assigned_to, assigned_at, status, sla_minutes, due_at, ola_policy_id, ola_response_due_at, ola_due_at, ola_escalation_1_at, ola_escalation_2_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ' . ($agentId ? 'NOW()' : 'NULL') . ', "' . $initialStatus . '", ?, ?, ?, ?, ?, ?, ?)');
@@ -5236,7 +5239,7 @@ if ($page === 'organization') {
   <div class="org-main-layout">
     <aside class="org-sidebar" id="org-sidebar"></aside>
     <main class="org-canvas" id="org-canvas">
-      <div class="org-canvas-toolbar"><input class="org-search" id="org-chart-search" type="search" placeholder="جستجوی واحد یا کاربر..."><div class="org-zoom-controls"><button type="button" data-org-zoom="out">−</button><span id="org-zoom-level">100٪</span><button type="button" data-org-zoom="in">+</button><button type="button" data-org-zoom="reset">↺</button></div></div>
+      <div class="org-canvas-toolbar"><input class="org-search" id="org-chart-search" type="search" placeholder="جستجوی واحد یا کاربر..." aria-label="جستجو در چارت سازمانی"><div class="org-zoom-controls"><button type="button" data-org-zoom="out" aria-label="کوچک‌نمایی">−</button><span id="org-zoom-level">100٪</span><button type="button" data-org-zoom="in" aria-label="بزرگ‌نمایی">+</button><button type="button" data-org-zoom="reset" aria-label="نمایش اندازهٔ پیش‌فرض">↺</button><button type="button" data-org-zoom="fit" aria-label="جا دادن کل چارت در صفحه" title="جا دادن کل چارت در صفحه">⛶</button></div><button class="org-focus-toggle" type="button" data-org-view="focus" aria-pressed="false">◫ <span>تمرکز روی نمودار</span></button></div>
       <div class="org-chart-wrap" id="org-chart-wrap"></div>
     </main>
     <aside class="org-pool-sidebar" id="org-pool-sidebar"></aside>
@@ -5249,7 +5252,7 @@ if ($page === 'organization') {
 </div>
 HTML;
     echo str_replace(['__CSRF__'], [csrf_field()], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=4"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=5"></script>';
     render_footer();
     exit;
 }
