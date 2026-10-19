@@ -606,7 +606,7 @@ $check('۱۵-پ: Audit تردد ناشناخته ثبت شد', in_array('food_gr
 $s15 = [];
 $check('۱۵-ت: تردد کاربر عادی (بدون سابقهٔ نمایندگی) دست‌نخورده ماند', food_ticket_group_try_unknown(['uid' => '666666', 'card' => '', 'date_raw' => $now, 'time_raw' => $now, 'row' => []], $s15) === null);
 
-// ۱۵-۵) آمار نگهبانی: غایب‌کردن بعد از صدور فیش → توقف خودکار چاپ، و برگشت با «حاضر»
+// ۱۵-۵) آمار بازرسی: غایب‌کردن بعد از صدور فیش → توقف خودکار چاپ، و برگشت با «حاضر»
 $heldUser = (int) $users['ali'];   // عضوی که فیش امروزش در صف چاپ است
 $q = db()->prepare('SELECT id, ticket_key, print_status FROM food_ticket_events WHERE user_id = ? AND punch_date = ?');
 $q->execute([$heldUser, $today]);
@@ -616,7 +616,7 @@ db()->prepare('UPDATE food_ticket_events SET print_status = "pending" WHERE id =
 
 $apiHold = food_ticket_api_absence_save([
     'group_id' => $gid, 'date' => $today,
-    'absent' => [$heldUser], 'present' => [], 'reason' => 'آمار نگهبانی: نیامده',
+    'absent' => [$heldUser], 'present' => [], 'reason' => 'آمار بازرسی: نیامده',
 ], $admin);
 $q = db()->prepare('SELECT print_status FROM food_ticket_events WHERE id = ?');
 $q->execute([(int) $heldEvent['id']]);
@@ -635,7 +635,7 @@ $check('۱۵-۵-ج: فیش متوقف در صف چاپ مجدد قرار نمی�
 // «حاضر» شدن دوباره → برگشت به صف چاپ
 $apiRelease = food_ticket_api_absence_save([
     'group_id' => $gid, 'date' => $today,
-    'absent' => [], 'present' => [$heldUser], 'reason' => 'اصلاح آمار نگهبانی',
+    'absent' => [], 'present' => [$heldUser], 'reason' => 'اصلاح آمار بازرسی',
 ], $admin);
 $q = db()->prepare('SELECT print_status FROM food_ticket_events WHERE id = ?');
 $q->execute([(int) $heldEvent['id']]);

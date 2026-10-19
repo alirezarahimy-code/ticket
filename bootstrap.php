@@ -2500,9 +2500,45 @@ function notify_ticket_staff(int $ticketId, string $type, string $title, string 
     }
 }
 
+/** اعلان درخواست لغو غذا فقط برای مدیر پشتیبانی و مدیر اصلی است؛ کاربر عادی نباید در زنگوله ببیند. */
+function notification_user_sees_food_cancel(int $userId, ?array $user = null): bool
+{
+    static $cache = [];
+    if (array_key_exists($userId, $cache)) {
+        return $cache[$userId];
+    }
+    $row = $user;
+    if (!$row || (int) ($row['id'] ?? 0) !== $userId) {
+        try {
+            $stmt = db()->prepare('SELECT id, role, is_primary_admin FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable) {
+            $row = [];
+        }
+    }
+    if (function_exists('food_order_user_is_cancel_reviewer')) {
+        return $cache[$userId] = food_order_user_is_cancel_reviewer($row);
+    }
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($row)) {
+        return $cache[$userId] = true;
+    }
+    $role = (string) ($row['role'] ?? '');
+    return $cache[$userId] = ($role === 'primary_admin' || $role === 'support_manager' || (int) ($row['is_primary_admin'] ?? 0) === 1);
+}
+
+function notification_visibility_sql(int $userId, ?array $user = null, string $alias = ''): string
+{
+    if (notification_user_sees_food_cancel($userId, $user)) {
+        return '';
+    }
+    $col = ($alias !== '' ? $alias . '.' : '') . 'notification_type';
+    return " AND {$col} <> 'food_cancel_request'";
+}
+
 function unread_notification_count(int $userId): int
 {
-    $query = db()->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0');
+    $query = db()->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0' . notification_visibility_sql($userId));
     $query->execute([$userId]);
     return (int) $query->fetchColumn();
 }
@@ -2510,14 +2546,14 @@ function unread_notification_count(int $userId): int
 /**
  * شمارش اعلان‌های نخوانده + آخرین شناسه با یک کوئری (برای کارایی؛ در هدر استفاده می‌شود).
  */
-function notification_header_summary(int $userId): array
+function notification_header_summary(int $userId, ?array $user = null): array
 {
     static $cache = [];
     if (array_key_exists($userId, $cache)) {
         return $cache[$userId];
     }
     try {
-        $query = db()->prepare('SELECT COALESCE(SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END), 0) AS unread, COALESCE(MAX(id), 0) AS latest FROM notifications WHERE user_id = ?');
+        $query = db()->prepare('SELECT COALESCE(SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END), 0) AS unread, COALESCE(MAX(id), 0) AS latest FROM notifications WHERE user_id = ?' . notification_visibility_sql($userId, $user));
         $query->execute([$userId]);
         $row = $query->fetch() ?: [];
         return $cache[$userId] = [
@@ -2531,7 +2567,7 @@ function notification_header_summary(int $userId): array
 
 function latest_notification_id(int $userId): int
 {
-    $query = db()->prepare('SELECT COALESCE(MAX(id), 0) FROM notifications WHERE user_id = ?');
+    $query = db()->prepare('SELECT COALESCE(MAX(id), 0) FROM notifications WHERE user_id = ?' . notification_visibility_sql($userId));
     $query->execute([$userId]);
     return (int) $query->fetchColumn();
 }

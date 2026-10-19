@@ -636,7 +636,7 @@ function render_header(string $title, ?array $user = null): void
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
     $flashes = take_flash();
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
-    $notificationSummary = $user ? notification_header_summary((int) $user['id']) : ['unread' => 0, 'latest' => 0];
+    $notificationSummary = $user ? notification_header_summary((int) $user['id'], $user) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
     echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.30"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
@@ -816,7 +816,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
 
 $user = current_user();
 $page = (string) ($_GET['page'] ?? ($user ? 'dashboard' : 'login'));
-// ۱.۵۰: کاربر محلی/نگهبان به سفارش غذا هدایت می‌شود؛ رمز پیش‌فرض باید در اولین ورود عوض شود.
+// ۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌فرض باید در اولین ورود عوض شود.
 if ($user && !isset($_GET['page'])) {
     if ((int) ($user['must_change_password'] ?? 0) === 1) {
         $page = 'change-password';
@@ -859,7 +859,7 @@ if ($page === 'food-order' && isset($_GET['food_api'])) {
         $foodOrderIsWrite = ($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET';
         check_api_rate_limit(
             'food_order_api_' . ($foodOrderIsWrite ? 'w_' : 'r_') . (int) $user['id'],
-            $foodOrderIsWrite ? 60 : 300,
+            $foodOrderIsWrite ? 180 : 300,
             60
         );
     }
@@ -927,7 +927,7 @@ if (($_GET['action'] ?? '') === 'notification_feed') {
         @session_write_close();
     }
     $afterId = max(0, (int) ($_GET['after'] ?? 0));
-    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ? ORDER BY n.id ASC LIMIT 20');
+    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . ' ORDER BY n.id ASC LIMIT 20');
     $feedQuery->execute([(int) $user['id'], $afterId]);
     $items = array_map(static function (array $item): array {
         return [
@@ -3973,7 +3973,7 @@ if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
 }
 if ($page === 'notifications') {
     $notificationUser = require_login();
-    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ? ORDER BY n.created_at DESC LIMIT 100');
+    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . ' ORDER BY n.created_at DESC LIMIT 100');
     $notificationQuery->execute([(int) $notificationUser['id']]);
     render_header('اعلان‌های داخلی', $notificationUser);
     echo '<section class="page-heading"><div><span class="eyebrow">اعلان داخلی آفلاین</span><h1>اعلان‌های شما</h1><p>تغییرات درخواست‌ها بدون نیاز به ایمیل یا پیامک در همین سامانه اعلام می‌شوند.</p></div><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_all_notifications"><button class="button secondary" type="submit">خوانده‌شدن همه</button></form></section><section class="card notification-list">';
@@ -5398,7 +5398,7 @@ if ($page === 'settings') {
     }
 
     if ($canSettingsUsers) {
-    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب نگهبان</a></p>' : '') . '<p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
+    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
     foreach ($users as $managedUser) {
         echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
         if ($canManageSettingsUsers) {

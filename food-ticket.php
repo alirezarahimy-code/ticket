@@ -153,6 +153,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'guest-cards' => 'food.guest',
         'guest-cap' => 'food.guest',
         'food-groups' => 'food.groups',
+        'food-visit-cancel' => 'food.groups',
         'config' => 'food.db',
         'database-file' => 'food.db',
         'printers' => 'food.printer',
@@ -3056,7 +3057,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
     }
 
     // «غایب اعلام‌شده»: کسانی که برای همان تاریخ در فرم گروه، غایب ثبت شده‌اند
-    // (آمار نگهبانی گروه‌های بیرون از ساختمان) — این‌ها با برچسب جداگانه نمایش داده می‌شوند.
+    // (آمار بازرسی گروه‌های بیرون از ساختمان) — این‌ها با برچسب جداگانه نمایش داده می‌شوند.
     $declaredByDay = [];
     if (function_exists('food_ticket_absence_ensure') && food_ticket_absence_ensure()) {
         try {
@@ -4087,7 +4088,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 $parsedDate = food_ticket_parse_date($groupsDate);
                 $groupsDate = $parsedDate ?? '';
             }
-            food_ticket_api_json(food_ticket_api_groups($groupsDate));
+            food_ticket_api_json(food_ticket_api_groups($groupsDate, $user));
         }
         // وضعیت غیبت روزانه برای فرم مدیریت گروه/کارکنان (بدون صفحهٔ جداگانه)
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absence-status') {
@@ -4267,7 +4268,12 @@ function food_ticket_api_handle(string $route, array $user): never
             } else {
                 food_ticket_api_save_group($body, (int) ($user['id'] ?? 0));
             }
-            food_ticket_api_json(['ok' => true] + food_ticket_api_groups());
+            food_ticket_api_json(['ok' => true] + food_ticket_api_groups('', $user));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-visit-cancel') {
+            $body = food_ticket_api_body();
+            $cleared = food_ticket_api_cancel_day_visit($user, (int) ($body['user_id'] ?? $body['employee_id'] ?? 0));
+            food_ticket_api_json(['ok' => true, 'message' => (string) ($cleared['message'] ?? 'اعلام امروز لغو شد.')] + food_ticket_api_groups('', $user));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'process') {
             // ستون‌های «وضعیت واقعی حذف منبع» یک‌بار پیش از پردازش تضمین می‌شوند (Migration 1.33).
@@ -4601,6 +4607,7 @@ function food_ticket_render_page(array $user): void
     $fpGroupsEdit = $fpCan('food.groups_edit');
     $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections)
         . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_CANCEL_VISIT=' . ((food_ticket_is_primary_admin($user) || (string) ($user['role'] ?? '') === 'support_manager') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')

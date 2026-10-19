@@ -51,6 +51,11 @@ check("$route === 'day-visit'" in order
       and "function food_order_day_visit_subject" in order
       and "food_order_require_permission($user, 'foodorder.self')" in order,
       "order API exposes visit routes for self and verified proxy subjects")
+ticket = read("food-ticket.php")
+check("'food-visit-cancel' => 'food.groups'" in ticket
+      and "food_ticket_api_cancel_day_visit" in ticket
+      and "FOOD_TICKET_CAN_CANCEL_VISIT" in ticket,
+      "food panel exposes support-manager cafeteria-cancel API")
 check("'foodorder.self'" in perms, "existing self-order permission is reused; no extra grant needed")
 check("'food_day_visit_set'" in bootstrap and "'food_day_visit_cleared'" in bootstrap,
       "audit labels exist for set/clear")
@@ -68,9 +73,13 @@ check("تغییر سلف امروز" in guide
 check("visit_change_until" in groups
       and "function food_ticket_visit_change_is_open" in groups
       and "food_ticket_visit_change_guard" in groups
+      and "function food_ticket_can_cancel_day_visit" in groups
+      and "function food_ticket_api_cancel_day_visit" in groups
       and "مهلت تغییر سلف" in admin_js
-      and 'type="time"' in admin_js,
-      "each food group has a configurable cafeteria-change deadline")
+      and 'id="fg-visit-until"' in admin_js
+      and "data-fg=\"visit-cancel\"" in admin_js
+      and "لغو تغییر سلف" in admin_js,
+      "each food group has a visible cafeteria-change deadline and support can cancel visits")
 check("visit_change_until TIME NULL" in schema
       and "visit_change_until TIME NULL" in install,
       "fresh-install schemas include cafeteria-change deadline")

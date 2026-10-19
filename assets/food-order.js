@@ -207,6 +207,7 @@
         var locked = !!v.locked;
         var currentOpen = !current || current.change_open !== false;
         var deadlineClosed = !locked && !currentOpen;
+        var canOverride = !!v.can_override;
         var options = ['<option value="">انتخاب سلف / گروه</option>'].concat((v.groups || []).map(function (g) {
           var selected = current && Number(current.group_id) === Number(g.id) ? ' selected' : '';
           var until = g.visit_change_until ? (' — تا ' + faDigits(g.visit_change_until)) : '';
@@ -218,17 +219,22 @@
           ? ' مهلت اعلام این سلف تا ساعت ' + faDigits(current.visit_change_until) + ' است.'
           : '';
         var status = current
-          ? '<div class="fo-modal-notice">امروز غذای <strong>' + esc(who) + '</strong> از سلف «' + esc(current.title) + '» گرفته می‌شود.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + (deadlineClosed ? ' مهلت تغییر سلف این گروه گذشته است.' : deadlineNote) + '</div>'
+          ? '<div class="fo-modal-notice">امروز غذای <strong>' + esc(who) + '</strong> از سلف «' + esc(current.title) + '» گرفته می‌شود.' + (locked ? ' فیش این گروه چاپ شده و اعلام قفل است.' : '') + (deadlineClosed ? ' مهلت تغییر سلف این گروه گذشته است.' : deadlineNote) + (deadlineClosed && canOverride ? ' مدیر پشتیبانی می‌تواند اعلام را لغو کند.' : '') + '</div>'
           : '<div class="fo-modal-notice">اگر ' + esc(who) + ' امروز باید غذا را از سلف ساختمان دیگری بگیرد، گروه را انتخاب کنید. فقط برای امروز اعمال می‌شود و عضو دائم گروه نمی‌شود. اگر برای گروه مهلت ساعت تنظیم شده باشد، بعد از آن ساعت اعلام ممکن نیست.</div>';
-        var blocked = locked || deadlineClosed;
-        var actions = blocked
+        var saveBlocked = locked || deadlineClosed;
+        var cancelAllowed = !!current && !locked && (!deadlineClosed || canOverride);
+        var selectHtml = saveBlocked
           ? ''
-          : '<div class="fo-modal-actions"><button type="button" class="button" data-fo-action="visit-save"' + (state.visitSaving ? ' disabled' : '') + '>' + (state.visitSaving ? 'در حال ذخیره…' : 'اعلام برای امروز') + '</button>'
-            + (current ? '<button type="button" class="button secondary" data-fo-action="visit-cancel"' + (state.visitSaving ? ' disabled' : '') + '>لغو اعلام</button>' : '')
-            + '<button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>';
-        inner = status
-          + (blocked ? '<div class="fo-modal-actions"><button type="button" class="button secondary" data-fo-action="visit-close">بستن</button></div>'
-            : '<label class="fo-form-field">سلف مقصد<select id="fo-visit-group"' + (state.visitSaving ? ' disabled' : '') + '>' + options.join('') + '</select></label>' + actions);
+          : '<label class="fo-form-field">سلف مقصد<select id="fo-visit-group"' + (state.visitSaving ? ' disabled' : '') + '>' + options.join('') + '</select></label>';
+        var actionBtns = [];
+        if (!saveBlocked) {
+          actionBtns.push('<button type="button" class="button" data-fo-action="visit-save"' + (state.visitSaving ? ' disabled' : '') + '>' + (state.visitSaving ? 'در حال ذخیره…' : 'اعلام برای امروز') + '</button>');
+        }
+        if (cancelAllowed) {
+          actionBtns.push('<button type="button" class="button secondary" data-fo-action="visit-cancel"' + (state.visitSaving ? ' disabled' : '') + '>لغو اعلام</button>');
+        }
+        actionBtns.push('<button type="button" class="button secondary" data-fo-action="visit-close">بستن</button>');
+        inner = status + selectHtml + '<div class="fo-modal-actions">' + actionBtns.join('') + '</div>';
       }
     }
     if (inner.indexOf('visit-close') < 0) {

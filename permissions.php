@@ -20,7 +20,7 @@ function permission_roles(): array
         'agent' => 'کارشناس',
         'user' => 'کاربر',
         'local_user' => 'کاربر محلی',
-        'guard' => 'نگهبان',
+        'guard' => 'بازرسی',
     ];
 }
 
@@ -379,7 +379,7 @@ function permission_defaults_raw(): array
         'user' => array_values(array_diff($all, user_default_removed_codes())),
         // کاربر محلی (پرسنل غذایی که در دامین نیستند): فقط سفارش غذای خود و پروفایل.
         'local_user' => ['foodorder.self', 'profile.edit'],
-        // نگهبان: سفارش غذا، پروفایل، و کنترل CD/DVD و تردد با دسترسی کامل.
+        // بازرسی: سفارش غذا، پروفایل، و کنترل CD/DVD و تردد با دسترسی کامل.
         'guard' => ['foodorder.self', 'profile.edit', 'cddvd.view', 'cddvd.edit', 'traffic.view', 'traffic.manage', 'traffic.destinations'],
     ];
 }

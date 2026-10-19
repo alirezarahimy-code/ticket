@@ -1,4 +1,4 @@
--- ۱.۵۰: نقش‌های کاربر محلی و نگهبان + اجبار تغییر رمز در اولین ورود.
+-- ۱.۵۰: نقش‌های کاربر محلی و بازرسی + اجبار تغییر رمز در اولین ورود.
 -- idempotent: اجرای دوباره خطا نمی‌دهد (MariaDB/XAMPP از ADD COLUMN IF NOT EXISTS پشتیبانی می‌کند).
 ALTER TABLE users
     MODIFY COLUMN role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector','local_user','guard') NOT NULL DEFAULT 'user';

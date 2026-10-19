@@ -752,14 +752,14 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
         if (!food_order_user_can($actor, 'food.emergency')) {
             throw new RuntimeException('دسترسی سفارش اضطراری ندارید.');
         }
-        check_api_rate_limit('food_order_emergency_' . $actorId, 30, 60);
+        check_api_rate_limit('food_order_emergency_' . $actorId, 120, 60);
     }
     if ($isProxy || $emergency) {
         if ($proxyNationalCode === null || trim($proxyNationalCode) === '') {
             throw new RuntimeException('کد ملی فرد انتخاب‌شده را وارد کنید.');
         }
-        // سقف تلاش کد ملی: برای سفارش اضطراری ۳۰ در دقیقه (مدیر پشتیبانی)، برای بقیه ۵.
-        check_api_rate_limit('food_order_proxy_attempt_' . $actorId, $emergency ? 30 : 5, 60);
+        // یک نفر ممکن است برای چند همکار سفارش بدهد؛ سقف در حد چند ده ثبت در دقیقه است نه چند تلاش.
+        check_api_rate_limit('food_order_proxy_attempt_' . $actorId, $emergency ? 120 : 80, 60);
     }
 
     $pdo = db();
@@ -884,7 +884,7 @@ function food_order_cancel_proxy(int $orderId, int $employeeId, string $national
     if ($orderId < 1 || $employeeId < 1) {
         throw new RuntimeException('سفارش قابل لغو نیست.');
     }
-    check_api_rate_limit('food_order_proxy_cancel_' . (int) ($actor['id'] ?? 0), food_order_user_can($actor, 'food.emergency') ? 30 : 5, 60);
+    check_api_rate_limit('food_order_proxy_cancel_' . (int) ($actor['id'] ?? 0), food_order_user_can($actor, 'food.emergency') ? 120 : 80, 60);
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -976,11 +976,14 @@ function food_order_cancel_inbox_url(): string
     return 'index.php?page=dashboard#food-cancel-requests';
 }
 
-/** مدیر اصلی یا مدیر پشتیبانی — برای اعلان زنگوله و کارت داشبورد. */
+/** مدیر اصلی یا مدیر پشتیبانی — تنها مخاطبان اعلان زنگوله و کارت داشبورد. food.order_close به‌تنهایی کافی نیست. */
 function food_order_user_is_cancel_reviewer(array $user): bool
 {
     if (!$user) {
         return false;
+    }
+    if (function_exists('food_order_is_primary_admin') && food_order_is_primary_admin($user)) {
+        return true;
     }
     if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
         return true;
@@ -989,10 +992,7 @@ function food_order_user_is_cancel_reviewer(array $user): bool
         return true;
     }
     $role = (string) ($user['role'] ?? '');
-    if ($role === 'primary_admin' || $role === 'support_manager') {
-        return true;
-    }
-    return food_order_user_can($user, 'food.order_close');
+    return $role === 'primary_admin' || $role === 'support_manager';
 }
 
 /** @return list<int> */
@@ -1000,27 +1000,13 @@ function food_order_cancel_reviewer_ids(): array
 {
     $ids = [];
     try {
-        $stmt = db()->query('SELECT id, role, is_primary_admin FROM users WHERE is_active = 1');
-        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            if (food_order_user_is_cancel_reviewer($row)) {
-                $ids[(int) $row['id']] = true;
-            }
+        $stmt = db()->query("SELECT id FROM users WHERE is_active = 1 AND (is_primary_admin = 1 OR role IN ('primary_admin','support_manager'))");
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $id) {
+            $ids[(int) $id] = true;
         }
     } catch (Throwable $e) {
         if (function_exists('app_error_log')) {
             app_error_log('[food-order] cancel reviewers: ' . $e->getMessage());
-        }
-    }
-    if ($ids === []) {
-        try {
-            $fallback = db()->query("SELECT id FROM users WHERE is_active = 1 AND (is_primary_admin = 1 OR role IN ('primary_admin','support_manager','admin'))");
-            foreach ($fallback->fetchAll(PDO::FETCH_COLUMN) as $id) {
-                $ids[(int) $id] = true;
-            }
-        } catch (Throwable $e) {
-            if (function_exists('app_error_log')) {
-                app_error_log('[food-order] cancel reviewers fallback: ' . $e->getMessage());
-            }
         }
     }
     return array_keys($ids);
@@ -2018,7 +2004,7 @@ function food_order_api_handle(string $route, array $user): never
             food_order_send_json(food_order_month_status($month, $user, false));
         }
         if ($method === 'POST' && $route === 'proxy-month') {
-            check_api_rate_limit('food_order_proxy_month_' . (int) $user['id'], 30, 60);
+            check_api_rate_limit('food_order_proxy_month_' . (int) $user['id'], 80, 60);
             $body = food_order_api_body();
             $target = food_order_verify_employee_national_code(
                 max(0, (int) ($body['employee_id'] ?? 0)),
@@ -2057,7 +2043,7 @@ function food_order_api_handle(string $route, array $user): never
             ]);
         }
         if ($method === 'POST' && $route === 'proxy-orders') {
-            check_api_rate_limit('food_order_proxy_orders_' . (int) $user['id'], 30, 60);
+            check_api_rate_limit('food_order_proxy_orders_' . (int) $user['id'], 80, 60);
             $body = food_order_api_body();
             $target = food_order_verify_employee_national_code(
                 max(0, (int) ($body['employee_id'] ?? 0)),
@@ -2075,7 +2061,7 @@ function food_order_api_handle(string $route, array $user): never
             food_order_send_json(['items' => food_order_employee_search((string) ($_GET['q'] ?? ''))]);
         }
         if ($method === 'POST' && $route === 'verify-proxy') {
-            check_api_rate_limit('food_order_proxy_verify_' . (int) $user['id'], 5, 60);
+            check_api_rate_limit('food_order_proxy_verify_' . (int) $user['id'], 80, 60);
             $body = food_order_api_body();
             $target = food_order_verify_employee_national_code(
                 max(0, (int) ($body['employee_id'] ?? 0)),
@@ -2135,7 +2121,7 @@ function food_order_api_handle(string $route, array $user): never
                 'employee_id' => (int) ($_GET['employee_id'] ?? 0),
                 'national_code' => (string) ($_GET['national_code'] ?? ''),
             ]);
-            food_order_send_json(food_ticket_day_visit_state($subject));
+            food_order_send_json(food_ticket_day_visit_state($subject, '', $user));
         }
         if ($method === 'POST' && $route === 'day-visit') {
             food_order_require_permission($user, 'foodorder.self');
@@ -2149,7 +2135,7 @@ function food_order_api_handle(string $route, array $user): never
             check_api_rate_limit('food_day_visit_' . (int) $user['id'], 20, 60);
             $body = food_order_api_body();
             $subject = food_order_day_visit_subject($user, $body);
-            food_order_send_json(food_ticket_day_visit_clear($subject));
+            food_order_send_json(food_ticket_day_visit_clear($subject, '', $user));
         }
         food_order_send_json(['error' => 'مسیر API سفارش غذا پیدا نشد.'], 404);
     } catch (Throwable $e) {
@@ -2360,7 +2346,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=17"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=18"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
     render_footer();
     exit;
 }

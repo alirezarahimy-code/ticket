@@ -15,6 +15,7 @@
     absence: null,   // {group_id, date, locked, editable, can_override, members:[], summary:{}}
     absenceLoading: false,
     membersPopup: 0,
+    canCancelVisit: window.FOOD_TICKET_CAN_CANCEL_VISIT === true,
   };
 
   const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -71,6 +72,11 @@
     S.groups = (x && x.groups) || [];
     S.free = (x && x.free_users) || [];
     S.runs = (x && x.runs) || [];
+    if (x && typeof x.can_cancel_visit !== 'undefined') {
+      S.canCancelVisit = !!x.can_cancel_visit;
+    } else if (typeof window.FOOD_TICKET_CAN_CANCEL_VISIT !== 'undefined') {
+      S.canCancelVisit = window.FOOD_TICKET_CAN_CANCEL_VISIT === true;
+    }
   }
 
   function userLabel(u) {
@@ -102,10 +108,10 @@
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
       + '<label class="field">L_UID نمایندهٔ گروه (شناسهٔ اصلی)<input id="fg-uid" value="' + esc(g.l_uid || '') + '" maxlength="80" dir="ltr" placeholder="مثلاً 0100"></label>'
       + '<label class="field"><span>وضعیت</span><select id="fg-active"><option value="1"' + (g.active ? ' selected' : '') + '>فعال</option><option value="0"' + (g.active ? '' : ' selected') + '>غیرفعال</option></select></label>'
-      + '<label class="field">مهلت تغییر سلف امروز<input id="fg-visit-until" type="time" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" dir="ltr" step="60"></label>'
+      + '<label class="field full">مهلت تغییر سلف امروز (ساعت ۲۴ ساعته، مثلاً 09:30)<input id="fg-visit-until" type="text" inputmode="numeric" dir="ltr" placeholder="خالی = بدون محدودیت" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" maxlength="5" autocomplete="off"></label>'
       + '<label class="field full">توضیحات<input id="fg-desc" value="' + esc(g.description || '') + '" maxlength="500"></label>'
       + '</div>'
-      + '<p class="muted" style="margin:6px 0">مهلت تغییر سلف فقط برای کسانی است که عضو دائم هیچ گروهی نیستند و می‌خواهند امروز غذا را از این سلف بگیرند. خالی یعنی بدون محدودیت ساعت؛ مثلاً ۰۹:۳۰ یعنی تا پایان همان دقیقه اعلام مجاز است. بعد از چاپ فیش گروه، اعلام همچنان قفل می‌شود.</p>'
+      + '<p class="muted" style="margin:6px 0">این فیلد ساعت آخرین مهلت اعلام «تغییر سلف امروز» به همین گروه است. فقط کسانی که عضو دائم هیچ گروهی نیستند تا این ساعت می‌توانند اعلام کنند. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود. مدیر پشتیبانی می‌تواند اعلام را از «لیست اعضاء» لغو کند.</p>'
       + '<p class="muted" style="margin:6px 0">شناسایی نماینده فقط و فقط با <b>L_UID</b> انجام می‌شود (L_UID → گروه → اعضا → سفارش → غیبت امروز → واجد شرایط‌ها → فیش). شمارهٔ کارت (C_CARD) در این سامانه هیچ نقشی ندارد و از این فرم حذف شده است؛ گروه‌هایی که L_UID ندارند باید L_UID آن‌ها ثبت شود. تعداد فیش را سامانه محاسبه می‌کند.</p>'
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
@@ -255,12 +261,20 @@
       + (rows.length
         ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + rows.map((u) => '<li>' + personLine(u) + '</li>').join('') + '</ol>'
         : '<p class="muted">' + empty + '</p>');
+    const guestItems = guests.length
+      ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + guests.map((u) => {
+          const btn = S.canCancelVisit
+            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">لغو تغییر سلف</button>'
+            : '';
+          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + btn + '</li>';
+        }).join('') + '</ol>'
+      : '<p class="muted">برای امروز مهمان یا عضو موقتی ثبت نشده است.</p>';
     return '<div id="fg-members-overlay" style="position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px">'
-      + '<div class="card" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" style="max-width:440px;width:100%;max-height:80vh;overflow:auto">'
+      + '<div class="card" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" style="max-width:520px;width:100%;max-height:80vh;overflow:auto">'
       + '<div class="form-section-head"><h2 id="fg-members-title">لیست اعضای «' + esc(g.title) + '»</h2>'
       + '<button type="button" class="btn ghost" data-fg="members-close">بستن</button></div>'
       + block('اعضای دائم گروه', perm, 'عضو دائمی ثبت نشده است.')
-      + block('اعضای مهمان یا موقت امروز', guests, 'برای امروز مهمان یا عضو موقتی ثبت نشده است.')
+      + '<h3 style="margin:12px 0 6px;font-size:15px">اعضای مهمان یا موقت امروز</h3>' + guestItems
       + '</div></div>';
   }
 
@@ -278,7 +292,7 @@
       + '<div id="food-groups-root">' + body() + '</div></section>';
     // کاربر فقط «مشاهده» دارد: ظاهر فرم‌ها غیرفعال می‌شود (سرور هم POST را با food.groups می‌بندد).
     if (window.FOOD_TICKET_CAN_GROUPS_EDIT === false) {
-      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}.fg-readonly button[data-fg="members"],.fg-readonly button[data-fg="members-close"]{pointer-events:auto;opacity:1}</style>' + out.slice('<section>'.length);
+      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}.fg-readonly button[data-fg="members"],.fg-readonly button[data-fg="members-close"],.fg-readonly button[data-fg="visit-cancel"]{pointer-events:auto;opacity:1}</style>' + out.slice('<section>'.length);
     }
     return out;
   }
@@ -361,6 +375,16 @@
     const id = Number(b.dataset.id || 0);
     if (act === 'members') { S.membersPopup = id; draw(); return; }
     if (act === 'members-close') { S.membersPopup = 0; draw(); return; }
+    if (act === 'visit-cancel') {
+      const uid = Number(b.dataset.user || 0);
+      if (!uid) return;
+      const guest = (S.groups.find((x) => x.id === S.membersPopup) || { today_visitors: [] }).today_visitors.find((u) => Number(u.id) === uid);
+      if (!window.confirm('اعلام تغییر سلف «' + ((guest && guest.name) || 'این نفر') + '» برای امروز لغو شود؟')) return;
+      callApi('/api/food-visit-cancel', { method: 'POST', body: JSON.stringify({ user_id: uid }) })
+        .then((x) => { apply(x); say((x && x.message) || 'اعلام لغو شد.'); draw(); })
+        .catch((err) => say(err.message || 'لغو اعلام انجام نشد.'));
+      return;
+    }
     if (act === 'reload') { S.error = ''; S.loaded = false; draw(); load(); return; }
     if (act === 'new') {
       S.filter = '';

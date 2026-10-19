@@ -840,10 +840,29 @@ function food_ticket_visit_change_guard(mixed $until, string $groupTitle): void
     throw new RuntimeException('مهلت تغییر سلف برای «' . $groupTitle . '» تا ساعت ' . $label . ' است و الان گذشته است.');
 }
 
+/** لغو اعلام تغییر سلف بعد از مهلت ساعت: فقط مدیر پشتیبانی یا مدیر اصلی. */
+function food_ticket_can_cancel_day_visit(array $user): bool
+{
+    if (!$user) {
+        return false;
+    }
+    if (function_exists('food_order_is_primary_admin') && food_order_is_primary_admin($user)) {
+        return true;
+    }
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+        return true;
+    }
+    if ((int) ($user['is_primary_admin'] ?? 0) === 1) {
+        return true;
+    }
+    return (string) ($user['role'] ?? '') === 'support_manager';
+}
+
 /** وضعیت خوداظهاری محل تحویل امروز برای صفحهٔ سفارش غذا. */
-function food_ticket_day_visit_state(array $user, string $date = ''): array
+function food_ticket_day_visit_state(array $user, string $date = '', ?array $actor = null): array
 {
     $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $actor = $actor ?? $user;
     $userId = (int) ($user['id'] ?? 0);
     $homeId = food_ticket_user_group_id($userId);
     $homeTitle = '';
@@ -898,6 +917,7 @@ function food_ticket_day_visit_state(array $user, string $date = ''): array
         'current' => $currentOut,
         'locked' => $locked,
         'change_open' => $currentOut ? $currentChangeOpen : true,
+        'can_override' => food_ticket_can_cancel_day_visit($actor),
         'person_id' => $userId,
         'person_name' => trim((string) ($user['full_name'] ?? '')),
         'reason' => $homeId === null
@@ -966,16 +986,17 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
     return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'برای امروز غذا را از «' . $group['title'] . '» می‌گیرید.'];
 }
 
-function food_ticket_day_visit_clear(array $user, string $date = ''): array
+function food_ticket_day_visit_clear(array $user, string $date = '', ?array $actor = null): array
 {
     if (!food_ticket_groups_ensure()) {
         throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
     }
     $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
+    $actor = $actor ?? $user;
     $userId = (int) ($user['id'] ?? 0);
     $existing = food_ticket_day_visit_row($userId, $date);
     if (!$existing) {
-        return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'اعلامی برای امروز ثبت نشده است.'];
+        return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'اعلامی برای امروز ثبت نشده است.'];
     }
     $groupId = (int) $existing['group_id'];
     if (food_ticket_group_absence_locked($groupId, $date)) {
@@ -989,7 +1010,9 @@ function food_ticket_day_visit_clear(array $user, string $date = ''): array
     } catch (Throwable) {
         $until = '';
     }
-    food_ticket_visit_change_guard($until, (string) $existing['title']);
+    if (!food_ticket_can_cancel_day_visit($actor)) {
+        food_ticket_visit_change_guard($until, (string) $existing['title']);
+    }
     db()->prepare('DELETE FROM food_ticket_day_visits WHERE user_id = ? AND visit_date = ?')->execute([$userId, $date]);
     food_ticket_audit('food_day_visit_cleared', [
         'target_type' => 'food_group',
@@ -997,9 +1020,27 @@ function food_ticket_day_visit_clear(array $user, string $date = ''): array
         'target_label' => (string) $existing['title'],
         'user_id' => $userId,
         'old' => (string) $existing['title'],
-        'meta' => ['date' => $date, 'group_id' => $groupId],
+        'meta' => ['date' => $date, 'group_id' => $groupId, 'cleared_by' => (int) ($actor['id'] ?? 0)],
     ]);
-    return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'اعلام امروز لغو شد.'];
+    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'اعلام امروز لغو شد.'];
+}
+
+function food_ticket_api_cancel_day_visit(array $actor, int $subjectUserId): array
+{
+    if (!food_ticket_can_cancel_day_visit($actor)) {
+        throw new RuntimeException('فقط مدیر پشتیبانی و مدیر اصلی می‌توانند اعلام تغییر سلف را لغو کنند.');
+    }
+    $subjectUserId = max(0, $subjectUserId);
+    if ($subjectUserId < 1) {
+        throw new RuntimeException('کاربر معتبر نیست.');
+    }
+    $stmt = db()->prepare('SELECT id, full_name, first_name, last_name, role, is_primary_admin FROM users WHERE id = ? LIMIT 1');
+    $stmt->execute([$subjectUserId]);
+    $subject = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$subject) {
+        throw new RuntimeException('کاربر پیدا نشد.');
+    }
+    return food_ticket_day_visit_clear($subject, '', $actor);
 }
 
 /**
@@ -1366,7 +1407,7 @@ function food_ticket_group_try_process(array $item, array $config, array &$order
 
 /**
  * ── نگه‌داشتن فیشِ چاپ‌نشده به‌خاطر اعلام غیبت ─────────────────────────────────
- * سناریوی کاری: آمار نگهبانی گروه‌های بیرون از ساختمان وارد می‌شود و مدیر همان روز
+ * سناریوی کاری: آمار بازرسی گروه‌های بیرون از ساختمان وارد می‌شود و مدیر همان روز
  * یک یا چند عضو را «غایب» می‌زند. اگر فیش آن عضو در صف چاپ باشد (هنوز چاپ نشده)،
  * باید چاپ نشود؛ پس وضعیتش «held_absent» می‌شود:
  *   • از صف چاپ خارج است (claim query فقط pending/print_error/failed و printing کهنه را می‌گیرد)،
@@ -1614,7 +1655,7 @@ function food_ticket_group_try_unknown(array $item, array &$summary): ?array
 // ───────────────────────── API مدیریت گروه‌ها ─────────────────────────
 
 /** @return array<string,mixed> */
-function food_ticket_api_groups(string $overviewDate = ''): array
+function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null): array
 {
     if (!food_ticket_groups_ensure()) {
         throw new RuntimeException('جدول‌های گروه غذا ساخته نشد؛ upgrade-1.13-food-groups.sql را اجرا کنید.');
@@ -1690,6 +1731,7 @@ function food_ticket_api_groups(string $overviewDate = ''): array
         'free_users' => array_map($userOut, $free),
         'runs' => $runs,
         'absence_date' => $date,
+        'can_cancel_visit' => $actor ? food_ticket_can_cancel_day_visit($actor) : false,
     ];
 }
 
