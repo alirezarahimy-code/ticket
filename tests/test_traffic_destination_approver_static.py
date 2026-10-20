@@ -35,15 +35,16 @@ def test_approver_autofills_for_new_and_edit_forms_and_history_is_two_column():
     assert "traffic-edit-meeting-with" in script
     assert ".traffic-change-list { grid-template-columns: repeat(2, minmax(0, 1fr));" in style
     assert "@media (max-width: 760px)" in style
-    assert 'assets/traffic-control.js?v=9' in source
+    assert 'assets/traffic-control.js?v=11' in source
 
 
 def test_release_manifest_and_download_page_list_new_destination_migration():
-    manifest = (ROOT / "updates/2026-10-20-release-161-10/manifest.json").read_text()
+    manifest = (ROOT / "updates/2026-10-21-release-161-10-r8/manifest.json").read_text()
     assert '"008-traffic-destination-approver.sql"' in manifest
     page = (ROOT / "downloads/index.html").read_text()
-    package = "ticket-update-1.61.10-traffic-destination-approver-r7-20261021.zip"
+    package = "ticket-update-1.61.10-traffic-phone-inspection-reminder-r8-20261021.zip"
     assert package in page and "CHANGE-REPORT-FA.md" in page
+    assert "traffic-destination-approver-r7-20261021.zip" not in page
     report = (ROOT / "docs/REPORT-FA.md").read_text()
     assert package in report
     assert "نسخه‌های پیشین در این صفحه نمایش داده نمی‌شوند" in report

@@ -233,7 +233,37 @@ class TrafficInputException extends RuntimeException
     }
 }
 
-function traffic_validate_payload(array $data, bool $allowBlankNationalCode = false): array
+function traffic_phone_normalized(mixed $value): string
+{
+    return strtr((string) $value, [
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+    ]);
+}
+
+function traffic_phone_digits(mixed $value): string
+{
+    return preg_replace('/\\D/', '', traffic_phone_normalized($value)) ?? '';
+}
+
+function traffic_phone_tail(mixed $value): string
+{
+    $digits = traffic_phone_digits($value);
+    if (str_starts_with($digits, '09')) {
+        $digits = substr($digits, 2);
+    } elseif (strlen($digits) === 12 && str_starts_with($digits, '989')) {
+        $digits = substr($digits, 3);
+    } elseif (strlen($digits) === 10 && str_starts_with($digits, '9')) {
+        $digits = substr($digits, 1);
+    } elseif (strlen($digits) > 9) {
+        $digits = substr($digits, -9);
+    }
+    return substr($digits, 0, 9);
+}
+
+function traffic_validate_payload(array $data, bool $allowBlankNationalCode = false, bool $allowBlankPhone = false): array
 {
     $name = trim((string) ($data['full_name'] ?? ''));
     $nationalCode = preg_replace('/\D/', '', strtr((string) ($data['national_code'] ?? ''), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']));
@@ -243,11 +273,16 @@ function traffic_validate_payload(array $data, bool $allowBlankNationalCode = fa
     if (!(($allowBlankNationalCode && $nationalCode === '') || valid_iranian_national_code((string) $nationalCode))) {
         throw new TrafficInputException('کد ملی وارد شده معتبر نیست.', 'national_code');
     }
-    $phone = preg_replace('/\D/', '', strtr((string) ($data['phone'] ?? ''), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']));
+    $phone = trim(traffic_phone_normalized($data['phone'] ?? ''));
+    if ($phone === '' && $allowBlankPhone) {
+        $phone = null;
+    } elseif (!preg_match('/^09[0-9]{9}$/', $phone)) {
+        throw new TrafficInputException('شماره تلفن همراه باید دقیقاً ۱۱ رقم باشد و با ۰۹ شروع شود.', 'phone');
+    }
     return [
         'full_name' => mb_substr($name, 0, 190),
         'national_code' => (string) $nationalCode,
-        'phone' => $phone !== '' ? mb_substr($phone, 0, 20) : null,
+        'phone' => $phone,
         'company' => mb_substr(trim((string) ($data['company'] ?? '')), 0, 190) ?: null,
         'meeting_with' => mb_substr(trim((string) ($data['meeting_with'] ?? '')), 0, 190) ?: null,
         'approved_by' => mb_substr(trim((string) ($data['approved_by'] ?? '')), 0, 190) ?: null,
@@ -368,7 +403,8 @@ function traffic_update_record(array $user): void
     if (!$record) {
         throw new RuntimeException('رکورد تردد پیدا نشد.');
     }
-    $payload = traffic_validate_payload($_POST, (int) ($record['is_notice'] ?? 0) === 1);
+    $isNoticeRecord = (int) ($record['is_notice'] ?? 0) === 1;
+    $payload = traffic_validate_payload($_POST, $isNoticeRecord, $isNoticeRecord);
     $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with'], $record);
     $visitDate = trim((string) ($_POST['visit_date'] ?? ''));
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visitDate)) {
@@ -932,7 +968,7 @@ function traffic_render_page(array $user): never
                     <div class="traffic-full-only" style="display:contents"><label>کد ملی<input name="national_code" id="traffic-national-code" required maxlength="10" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['national_code'] ?? '')) ?>"></label></div>
                     <label>نام و نام خانوادگی<input name="full_name" id="traffic-full-name" required value="<?= e((string) ($formOld['full_name'] ?? '')) ?>"></label>
                     <div class="traffic-full-only" style="display:contents">
-                    <label>تلفن همراه<input name="phone" id="traffic-phone" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['phone'] ?? '')) ?>"></label>
+                    <label>تلفن همراه<span class="traffic-phone-entry"><span class="traffic-phone-prefix" aria-label="پیش‌شمارهٔ ثابت">09</span><input type="text" id="traffic-phone-tail" data-phone-tail-for="traffic-phone" inputmode="numeric" pattern="[0-9۰-۹٠-٩]{9}" minlength="9" maxlength="9" required autocomplete="off" placeholder="۱۲۶۵۸۸۷۵۹" value="<?= e(traffic_phone_tail($formOld['phone'] ?? '')) ?>" aria-label="۹ رقم باقی‌ماندهٔ تلفن همراه"></span><input type="hidden" name="phone" id="traffic-phone" value="09<?= e(traffic_phone_tail($formOld['phone'] ?? '')) ?>"><small class="field-help">پیش‌شمارهٔ ۰۹ ثابت است؛ فقط ۹ رقم باقی‌مانده را وارد کنید (مجموعاً ۱۱ رقم).</small></label>
                     <label>موسسه / شرکت<input name="company" id="traffic-company" value="<?= e((string) ($formOld['company'] ?? '')) ?>"></label>
                     <label>ملاقات با<select name="meeting_with" id="traffic-meeting-with"><option value="">— انتخاب کنید —</option><?php foreach ($destinations as $d): ?><option value="<?= e($d['title']) ?>" data-approver="<?= e((string) ($d['approver_name'] ?? '')) ?>"><?= e($d['title']) ?></option><?php endforeach; ?></select></label>
                     <label>تأییدکننده<input id="traffic-approved-by" readonly aria-readonly="true" placeholder="با انتخاب مقصد نمایش داده می‌شود"><small class="field-help">این مقدار از تنظیم همان مقصد خوانده می‌شود.</small></label>
@@ -1016,7 +1052,8 @@ function traffic_render_page(array $user): never
                         <label>تاریخ مراجعه<input type="date" name="visit_date" required value="<?= e((string) ($formOld['visit_date'] ?? $editRecord['visit_date'])) ?>"></label>
                         <label>ساعت ورود<input class="traffic-time-24h" type="text" name="entry_time" required inputmode="numeric" maxlength="5" placeholder="09:05" value="<?= e(substr((string) ($formOld['entry_time'] ?? $editRecord['entry_time']), 0, 5)) ?>" title="ساعت ۲۴ساعته، مانند 14:30"></label>
                         <label>ساعت خروج <small>(خالی یعنی هنوز خارج نشده)</small><input class="traffic-time-24h" type="text" name="exit_time" inputmode="numeric" maxlength="5" placeholder="09:05" value="<?= e(substr((string) ($formOld['exit_time'] ?? $editRecord['exit_time'] ?? ''), 0, 5)) ?>" title="ساعت ۲۴ساعته؛ خالی یعنی هنوز خارج نشده"></label>
-                        <label>تلفن همراه<input name="phone" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only value="<?= e((string) ($formOld['phone'] ?? $editRecord['phone'] ?? '')) ?>"></label>
+                        <?php $editPhoneValue = (string) ($formOld['phone'] ?? $editRecord['phone'] ?? ''); $editPhoneTail = traffic_phone_tail($editPhoneValue); $isNoticeEdit = !empty($editRecord['is_notice']); ?>
+                        <label>تلفن همراه<span class="traffic-phone-entry"><span class="traffic-phone-prefix" aria-label="پیش‌شمارهٔ ثابت">09</span><input type="text" id="traffic-edit-phone-tail" data-phone-tail-for="traffic-edit-phone" inputmode="numeric" pattern="[0-9۰-۹٠-٩]{9}" minlength="<?= $isNoticeEdit ? '0' : '9' ?>" maxlength="9" <?= $isNoticeEdit ? '' : 'required' ?> autocomplete="off" placeholder="۱۲۶۵۸۸۷۵۹" value="<?= e($editPhoneTail) ?>" aria-label="۹ رقم باقی‌ماندهٔ تلفن همراه"></span><input type="hidden" name="phone" id="traffic-edit-phone" value="<?= $editPhoneValue !== '' ? '09' . e($editPhoneTail) : ($isNoticeEdit ? '' : '09') ?>"><small class="field-help">پیش‌شمارهٔ ۰۹ ثابت است؛ فقط ۹ رقم باقی‌مانده را وارد کنید (مجموعاً ۱۱ رقم).</small></label>
                         <label>موسسه / شرکت<input name="company" maxlength="190" value="<?= e((string) ($formOld['company'] ?? $editRecord['company'] ?? '')) ?>"></label>
                         <label>ملاقات با<?php $currentMeeting = (string) ($formOld['meeting_with'] ?? $editRecord['meeting_with'] ?? ''); $activeMeetings = array_map(static fn (array $destination): string => (string) $destination['title'], $destinations); ?><select name="meeting_with" id="traffic-edit-meeting-with"><option value="">— انتخاب کنید —</option><?php if ($currentMeeting !== '' && !in_array($currentMeeting, $activeMeetings, true)): ?><option value="<?= e($currentMeeting) ?>" data-approver="<?= e((string) ($editRecord['approved_by'] ?? '')) ?>" selected><?= e($currentMeeting) ?> (غیرفعال)</option><?php endif; ?><?php foreach ($destinations as $destination): $selectedMeeting = $currentMeeting === (string) $destination['title']; ?><option value="<?= e($destination['title']) ?>" data-approver="<?= e((string) ($destination['approver_name'] ?? '')) ?>" <?= $selectedMeeting ? 'selected' : '' ?>><?= e($destination['title']) ?></option><?php endforeach; ?></select></label>
                         <label>تأییدکننده<input id="traffic-edit-approved-by" readonly aria-readonly="true" placeholder="از تنظیم مقصد پر می‌شود" value="<?= e((string) ($formOld['approved_by'] ?? $editRecord['approved_by'] ?? '')) ?>"><small class="field-help">با تغییر مقصد، تأییدکنندهٔ متناظر نمایش داده می‌شود.</small></label>
@@ -1113,7 +1150,7 @@ function traffic_render_page(array $user): never
         </section>
         <?php endif; ?>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=9"></script>
+    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=11"></script>
     <?php
     render_footer();
     exit;

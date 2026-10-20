@@ -2,7 +2,7 @@
 ====================================
 
 آخرین به‌روزرسانی: ۱۴۰۵/۰۷/۲۹ (۲۰۲۶-۱۰-۲۱)
-نسخهٔ کاری: 1.61.10 (بستهٔ اصلاحی R7)
+نسخهٔ کاری: 1.61.10 (بستهٔ اصلاحی R8)
 شاخهٔ این نوبت: arena/8edbdf95-ticket
 
 هدف این سند
@@ -13,7 +13,7 @@
 --------------------
 ۱) برای همین متن: در مخزن alirezarahimy-code/ticket شاخهٔ arena/8edbdf95-ticket فایل docs/SYSTEM-DETAILS-FA.txt را باز کنید و Raw را بزنید؛ از صفحهٔ Raw می‌توان فایل را ذخیره کرد.
 ۲) برای کل کد و مستندات: در GitHub شاخهٔ همین نشست را باز کنید، از منوی Code گزینهٔ Download ZIP را انتخاب کنید.
-۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ اصلاحی فعلی R7 در downloads/ticket-update-1.61.10-traffic-destination-approver-r7-20261021.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-20-release-161-10/CHANGE-REPORT-FA.md قرار دارد.
+۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ اصلاحی فعلی R8 در downloads/ticket-update-1.61.10-traffic-phone-inspection-reminder-r8-20261021.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-21-release-161-10-r8/CHANGE-REPORT-FA.md قرار دارد.
 ۴) شاخهٔ نشست ممکن است هنوز با main ادغام نشده باشد؛ هنگام دریافت آخرین اصلاحات، شاخهٔ arena/8edbdf95-ticket را انتخاب کنید، نه main یا یک release قدیمی.
 
 معماری در یک نگاه
@@ -79,9 +79,9 @@
 
 نسخه و انتشار جاری
 ------------------
-- نسخه: 1.61.10، بستهٔ اصلاحی R7.
-- بستهٔ فعلی: downloads/ticket-update-1.61.10-traffic-destination-approver-r7-20261021.zip؛ بر پایهٔ بستهٔ تأییدشدهٔ R6 و دارای migration افزایشی 008-traffic-destination-approver.sql.
-- صفحهٔ دانلود: downloads/index.html؛ گزارش: updates/2026-10-20-release-161-10/CHANGE-REPORT-FA.md.
+- نسخه: 1.61.10، بستهٔ اصلاحی R8.
+- بستهٔ فعلی: downloads/ticket-update-1.61.10-traffic-phone-inspection-reminder-r8-20261021.zip؛ شامل پیش‌شمارهٔ ثابت تلفن و یادآور ساعت ۱۱ برای بازرسی؛ قابلیت‌های مقصد/تأییدکنندهٔ R7 را حفظ می‌کند.
+- صفحهٔ دانلود: downloads/index.html؛ گزارش: updates/2026-10-21-release-161-10-r8/CHANGE-REPORT-FA.md.
 - پیش از نصب در سامانهٔ واقعی از پایگاه داده و پوشهٔ برنامه پشتیبان بگیرید؛ روی چاپگر و داده‌های عملیاتی ابتدا آزمایش کنید.
 - بستهٔ به‌روزرسانی را با بستهٔ کامل سامانه اشتباه نگیرید. config.php، .env، اطلاعات اتصال، storage زنده و uploads محرمانه‌اند و از بسته حذف می‌شوند.
 

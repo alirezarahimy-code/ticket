@@ -12,6 +12,7 @@
     var fields = {
         full_name: document.getElementById('traffic-full-name'),
         phone: document.getElementById('traffic-phone'),
+        phoneTail: document.getElementById('traffic-phone-tail'),
         company: document.getElementById('traffic-company'),
         meeting_with: document.getElementById('traffic-meeting-with'),
         approved_by: document.getElementById('traffic-approved-by'),
@@ -75,7 +76,13 @@
                     setHint('آخرین تردد: ' + data.last_visit_label + '. اطلاعات پیشنهادی پر شد؛ در صورت نیاز اصلاح کنید.', 'success');
                 }
                 if (fields.full_name && !fields.full_name.value) fields.full_name.value = data.full_name || '';
-                if (fields.phone && !fields.phone.value) fields.phone.value = data.phone || '';
+                if (fields.phone && fields.phoneTail && !fields.phoneTail.value && data.phone) {
+                    var previousPhone = String(data.phone).replace(/[۰-۹]/g, function (digit) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)); }).replace(/[٠-٩]/g, function (digit) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)); }).replace(/\D/g, '');
+                    if (/^09\d{9}$/.test(previousPhone)) {
+                        fields.phoneTail.value = previousPhone.slice(2);
+                        fields.phone.value = previousPhone;
+                    }
+                }
                 if (fields.company && !fields.company.value) fields.company.value = data.company || '';
                 if (fields.meeting_with && data.meeting_with) fields.meeting_with.value = data.meeting_with;
                 syncNewDestinationApprover();
@@ -158,6 +165,7 @@
     var name = alertBox.getAttribute('data-focus-field');
     var form = formId ? document.getElementById(formId) : null;
     var field = form && name ? form.querySelector('[name="' + name + '"]') : null;
+    if (form && name === 'phone') field = form.querySelector('[data-phone-tail-for]') || field;
     if (alertBox.scrollIntoView) {
         alertBox.scrollIntoView({ block: 'center' });
     }
@@ -239,6 +247,40 @@
     });
 }());
 
+
+// پیش‌شمارهٔ ۰۹ ثابت است؛ فیلد قابل‌ویرایش فقط ۹ رقم پایانی را می‌پذیرد.
+(function () {
+    'use strict';
+    var tails = document.querySelectorAll('[data-phone-tail-for]');
+    var persian = '۰۱۲۳۴۵۶۷۸۹';
+    var arabic = '٠١٢٣٤٥٦٧٨٩';
+    function asciiDigits(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String(persian.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String(arabic.indexOf(digit)); });
+    }
+    tails.forEach(function (field) {
+        var fullNumber = document.getElementById(field.getAttribute('data-phone-tail-for'));
+        if (!fullNumber) return;
+        function sync() {
+            var digits = asciiDigits(field.value).replace(/\D/g, '');
+            if (digits.length === 11 && digits.indexOf('09') === 0) digits = digits.slice(2);
+            field.value = digits.slice(0, 9);
+            fullNumber.value = field.value ? '09' + field.value : (field.required ? '09' : '');
+        }
+        field.addEventListener('input', sync);
+        field.addEventListener('paste', function (event) {
+            var text = event.clipboardData && event.clipboardData.getData('text');
+            if (typeof text !== 'string') return;
+            var digits = asciiDigits(text).replace(/\D/g, '');
+            if (digits.length === 11 && digits.indexOf('09') === 0) digits = digits.slice(2);
+            event.preventDefault();
+            field.value = digits.slice(0, 9);
+            sync();
+        });
+        sync();
+    });
+}());
 
 // تأییدکننده در فرم ویرایش نیز فقط از مقصد انتخاب‌شده خوانده می‌شود.
 (function () {

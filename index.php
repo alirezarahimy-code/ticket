@@ -663,7 +663,7 @@ function render_header(string $title, ?array $user = null): void
         $layoutCss = '';
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.36">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '</head><body class="' . e($bodyPageClass) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.38">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '</head><body class="' . e($bodyPageClass) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -794,6 +794,26 @@ function list_sort_page_off(): bool
     return in_array((string) ($_GET['page'] ?? ''), ['logs', 'activity-log', 'traffic-control', 'domain-scan'], true);
 }
 
+function inspection_food_reminder_markup(?array $user): string
+{
+    if (!$user) {
+        return '';
+    }
+    $role = (string) ($user['role'] ?? '');
+    $isInspectionUser = in_array($role, ['inspector', 'guard'], true)
+        || (function_exists('user_is_key_role') && user_is_key_role($user, 'inspection'));
+    if (!$isInspectionUser) {
+        return '';
+    }
+
+    $now = new DateTimeImmutable('now', new DateTimeZone(date_default_timezone_get()));
+    $todayReminder = $now->setTime(11, 0, 0);
+    $dueNow = $now >= $todayReminder;
+    $nextReminder = $dueNow ? $todayReminder->modify('+1 day') : $todayReminder;
+    $name = trim((string) ($user['full_name'] ?? ''));
+    return '<div class="inspection-food-reminder" id="inspection-food-reminder" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="inspection-food-reminder-title" data-user-id="' . (int) ($user['id'] ?? 0) . '" data-timezone="' . e(date_default_timezone_get()) . '" data-server-now="' . $now->getTimestamp() . '" data-today-reminder-at="' . $todayReminder->getTimestamp() . '" data-next-reminder-at="' . $nextReminder->getTimestamp() . '" data-due-now="' . ($dueNow ? '1' : '0') . '"><section class="inspection-food-reminder-card"><div class="inspection-food-reminder-icon" aria-hidden="true">!</div><p class="inspection-food-reminder-heading">توجه</p><h2 id="inspection-food-reminder-title">آقای «' . e($name) . '» لطفا استعلام غایبین گروه های غذایی رو انجام بدید برای ثبت در گروه غذایی.</h2><button type="button" class="button inspection-food-reminder-dismiss">متوجه شدم</button></section></div>';
+}
+
 function render_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
@@ -819,7 +839,12 @@ function render_footer(): void
     } catch (Throwable) {
         echo "[]";
     }
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.24"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget(current_user()) . '</body></html>';
+    $inspectionReminder = inspection_food_reminder_markup($layoutUser);
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.24"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
+    if ($inspectionReminder !== '') {
+        echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
+    }
+    echo '</body></html>';
 }
 
 if (($_GET['action'] ?? '') === 'logout') {

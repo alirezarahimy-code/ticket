@@ -1,0 +1,11 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — تلفن تردد و یادآور روزانهٔ بازرسی (R8)",
+  "date": "2026-10-21",
+  "migrations": [
+    "006-food-meal-type.sql",
+    "007-traffic-visit-history.sql",
+    "008-traffic-destination-approver.sql"
+  ],
+  "notes": "R8 requires exactly an 11-digit visitor phone including the fixed 09 prefix and adds a once-daily 11:00 food-absence reminder popup, strictly limited to inspection users. It preserves the current R7 destination/approver and traffic-history features."
+}

@@ -11,6 +11,6 @@
 
 ## وضعیت فعلی
 
-- صفحهٔ جاری: `downloads/index.html`، فقط R7.
-- بسته: `downloads/ticket-update-1.61.10-traffic-destination-approver-r7-20261021.zip`.
-- انتشار جاری: `https://github.com/alirezarahimy-code/ticket/releases/tag/v1.61.10-r7`.
+- صفحهٔ جاری: `downloads/index.html`، فقط R8.
+- بسته: `downloads/ticket-update-1.61.10-traffic-phone-inspection-reminder-r8-20261021.zip`.
+- انتشار جاری: `https://github.com/alirezarahimy-code/ticket/releases/tag/v1.61.10-r8`.
