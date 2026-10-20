@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS food_catalog (
 CREATE TABLE IF NOT EXISTS food_calendar (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     order_status ENUM('open','closed') NOT NULL DEFAULT 'open',
     note VARCHAR(255) NULL,
     closed_by INT UNSIGNED NULL,
@@ -23,7 +24,7 @@ CREATE TABLE IF NOT EXISTS food_calendar (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_food_calendar_date (food_date),
+    UNIQUE KEY uq_food_calendar_date_meal (food_date, meal_type),
     INDEX idx_food_calendar_status_date (order_status, food_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -47,11 +48,12 @@ CREATE TABLE IF NOT EXISTS food_orders (
     employee_id INT UNSIGNED NOT NULL,
     calendar_item_id INT UNSIGNED NOT NULL,
     food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     created_by INT UNSIGNED NOT NULL,
     status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_food_order_employee_date (employee_id, food_date),
+    UNIQUE KEY uq_food_order_employee_date_meal (employee_id, food_date, meal_type),
     INDEX idx_food_orders_date_status (food_date, status),
     INDEX idx_food_orders_item_status (calendar_item_id, status),
     CONSTRAINT fk_food_order_calendar_item FOREIGN KEY (calendar_item_id) REFERENCES food_calendar_items(id) ON DELETE RESTRICT

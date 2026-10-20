@@ -19,6 +19,10 @@ function food_order_schema_ensure(): bool
             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ({$placeholders})");
         $stmt->execute($tables);
         $present = array_fill_keys(array_map('strval', $stmt->fetchAll(PDO::FETCH_COLUMN)), true);
+        $mealColumns = db()->prepare("SELECT TABLE_NAME FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('food_calendar', 'food_orders') AND COLUMN_NAME = 'meal_type'");
+        $mealColumns->execute();
+        $mealColumnsPresent = array_fill_keys(array_map('strval', $mealColumns->fetchAll(PDO::FETCH_COLUMN)), true);
     } catch (Throwable $e) {
         app_error_log('[food-order] schema check failed: ' . $e->getMessage());
         throw new RuntimeException('بررسی جدول‌های برنامه غذایی انجام نشد؛ وضعیت اتصال و دسترسی MySQL را بررسی کنید.', 0, $e);
@@ -26,6 +30,10 @@ function food_order_schema_ensure(): bool
     $missing = array_values(array_filter($tables, static fn (string $table): bool => !isset($present[$table])));
     if ($missing !== []) {
         throw new RuntimeException('جدول‌های برنامه غذایی ایجاد نشده‌اند (' . implode(', ', $missing) . ')؛ ابتدا upgrade-1.38-food-orders.sql را اجرا کنید.');
+    }
+    $missingMealColumns = array_values(array_diff(['food_calendar', 'food_orders'], array_keys($mealColumnsPresent)));
+    if ($missingMealColumns !== []) {
+        throw new RuntimeException('تفکیک وعده‌های غذایی آماده نیست؛ مهاجرت 006-food-meal-type.sql را اعمال کنید.');
     }
     $ready = true;
     return true;
@@ -327,30 +335,41 @@ function food_order_catalog(bool $includeInactive = true): array
 /**
  * ماه ورودی شمسی است. فقط سفارش‌های صاحب غذا در پاسخ کارمند قرار می‌گیرد؛ created_by هرگز فیلتر نمایش نیست.
  */
-function food_order_month_status(string $month, array $user, bool $includeCounts = false, bool $includeInactiveFoods = false): array
+function food_order_meal_type(mixed $value): string
+{
+    $meal = strtolower(trim((string) ($value ?? 'lunch')));
+    if (!in_array($meal, ['lunch', 'dinner'], true)) {
+        throw new RuntimeException('وعدهٔ غذایی معتبر نیست.');
+    }
+    return $meal;
+}
+
+function food_order_month_status(string $month, array $user, bool $includeCounts = false, bool $includeInactiveFoods = false, string $mealType = 'lunch'): array
 {
     food_order_schema_ensure();
+    $mealType = food_order_meal_type($mealType);
     $range = food_order_jalali_month_range($month);
     $employeeId = (int) ($user['id'] ?? 0);
     $countSelect = $includeCounts ? 'COUNT(o.id)' : '0';
     $foodJoin = $includeInactiveFoods ? 'f.id = i.food_id' : 'f.id = i.food_id AND f.active = 1';
-    $countJoin = $includeCounts ? " LEFT JOIN food_orders o ON o.calendar_item_id = i.id AND o.food_date = c.food_date AND o.status = 'active'" : '';
-    $groupBy = $includeCounts ? ' GROUP BY c.id, c.food_date, c.order_status, c.note, i.id, i.food_id, i.sort_order, f.food_name, f.active' : '';
-    $stmt = db()->prepare("SELECT c.id AS calendar_id, c.food_date, c.order_status, c.note,
+    $countJoin = $includeCounts ? " LEFT JOIN food_orders o ON o.calendar_item_id = i.id AND o.food_date = c.food_date AND o.meal_type = c.meal_type AND o.status = 'active'" : '';
+    $groupBy = $includeCounts ? ' GROUP BY c.id, c.food_date, c.meal_type, c.order_status, c.note, i.id, i.food_id, i.sort_order, f.food_name, f.active' : '';
+    $stmt = db()->prepare("SELECT c.id AS calendar_id, c.food_date, c.meal_type, c.order_status, c.note,
             i.id AS item_id, i.food_id, i.sort_order, f.food_name, f.active AS food_active, {$countSelect} AS order_count
         FROM food_calendar c
         LEFT JOIN food_calendar_items i ON i.calendar_id = c.id AND i.active = 1
         LEFT JOIN food_catalog f ON {$foodJoin}
         {$countJoin}
-        WHERE c.food_date BETWEEN ? AND ?{$groupBy}
+        WHERE c.food_date BETWEEN ? AND ? AND c.meal_type = ?{$groupBy}
         ORDER BY c.food_date, i.sort_order, i.id");
-    $stmt->execute([$range['from'], $range['to']]);
+    $stmt->execute([$range['from'], $range['to'], $mealType]);
     $days = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $date = (string) $row['food_date'];
         if (!isset($days[$date])) {
             $days[$date] = [
                 'date' => $date,
+                'meal_type' => $mealType,
                 'calendar_id' => (int) $row['calendar_id'],
                 'order_status' => (string) $row['order_status'],
                 'note' => (string) ($row['note'] ?? ''),
@@ -397,8 +416,8 @@ function food_order_month_status(string $month, array $user, bool $includeCounts
             FROM food_orders o
             JOIN food_calendar_items i ON i.id = o.calendar_item_id
             JOIN food_catalog c ON c.id = i.food_id
-            WHERE o.employee_id = ? AND o.food_date BETWEEN ? AND ? AND o.status = 'active'");
-        $own->execute([$employeeId, $range['from'], $range['to']]);
+            WHERE o.employee_id = ? AND o.food_date BETWEEN ? AND ? AND o.meal_type = ? AND o.status = 'active'");
+        $own->execute([$employeeId, $range['from'], $range['to'], $mealType]);
         foreach ($own->fetchAll(PDO::FETCH_ASSOC) as $order) {
             $date = (string) $order['food_date'];
             if (!isset($days[$date])) {
@@ -547,7 +566,8 @@ function food_order_my_orders(int $employeeId, int $limit = 120, ?string $from =
         array_push($params, $from, $to);
     }
     $stmt = db()->prepare("SELECT o.id, o.employee_id, o.calendar_item_id, o.food_date, o.status, o.created_at,
-            (SELECT cal.order_status FROM food_calendar cal WHERE cal.food_date = o.food_date LIMIT 1) AS day_status,
+            (SELECT cal.order_status FROM food_calendar cal WHERE cal.food_date = o.food_date AND cal.meal_type = o.meal_type LIMIT 1) AS day_status,
+            o.meal_type,
             u.full_name, u.first_name, u.last_name, u.national_code, c.food_name, i.food_id
         FROM food_orders o
         JOIN users u ON u.id = o.employee_id
@@ -569,6 +589,7 @@ function food_order_my_orders(int $employeeId, int $limit = 120, ?string $from =
             'food_name' => (string) $row['food_name'],
             'food_id' => (int) $row['food_id'],
             'food_date' => (string) $row['food_date'],
+            'meal_type' => (string) $row['meal_type'],
             'reserve_date' => substr($created, 0, 10),
             'reserve_time' => substr($created, 11, 8),
             'status' => (string) $row['status'],
@@ -587,22 +608,23 @@ function food_order_my_orders(int $employeeId, int $limit = 120, ?string $from =
     return $items;
 }
 
-function food_order_manager_orders(string $date): array
+function food_order_manager_orders(string $date, string $mealType = 'lunch'): array
 {
     food_order_schema_ensure();
     $iso = food_order_iso_date($date);
+    $mealType = food_order_meal_type($mealType);
     if ($iso === null) {
         throw new RuntimeException('تاریخ روز سفارش معتبر نیست.');
     }
-    $stmt = db()->prepare("SELECT o.id, o.employee_id, o.calendar_item_id, o.food_date, o.status, o.created_at, o.created_by,
+    $stmt = db()->prepare("SELECT o.id, o.employee_id, o.calendar_item_id, o.food_date, o.meal_type, o.status, o.created_at, o.created_by,
             u.full_name, u.first_name, u.last_name, u.employee_number, u.national_code, c.food_name, i.food_id, i.sort_order AS menu_no
         FROM food_orders o
         JOIN users u ON u.id = o.employee_id
         JOIN food_calendar_items i ON i.id = o.calendar_item_id
         JOIN food_catalog c ON c.id = i.food_id
-        WHERE o.food_date = ?
+        WHERE o.food_date = ? AND o.meal_type = ?
         ORDER BY CASE WHEN o.status = 'active' THEN 0 ELSE 1 END, u.full_name, o.id");
-    $stmt->execute([$iso]);
+    $stmt->execute([$iso, $mealType]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $created = (string) $row['created_at'];
@@ -620,6 +642,7 @@ function food_order_manager_orders(string $date): array
             'full_name' => food_order_full_name($row),
             'food_name' => (string) $row['food_name'],
             'food_date' => (string) $row['food_date'],
+            'meal_type' => (string) $row['meal_type'],
             'reserve_date' => substr($created, 0, 10),
             'reserve_time' => substr($created, 11, 8),
             'status' => (string) $row['status'],
@@ -629,10 +652,11 @@ function food_order_manager_orders(string $date): array
     return $items;
 }
 
-function food_order_statistics_range(string $fromDate, string $toDate, string $mode = 'food'): array
+function food_order_statistics_range(string $fromDate, string $toDate, string $mode = 'food', string $mealType = 'lunch'): array
 {
     food_order_schema_ensure();
     $mode = strtolower(trim($mode));
+    $mealType = food_order_meal_type($mealType);
     if (!in_array($mode, ['food', 'employee'], true)) {
         throw new RuntimeException('نوع آمار سفارش معتبر نیست.');
     }
@@ -649,7 +673,7 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
         $stmt = db()->prepare("SELECT u.id AS employee_id, u.full_name, u.first_name, u.last_name, COUNT(o.id) AS order_count
             FROM food_orders o
             JOIN users u ON u.id = o.employee_id
-            WHERE o.food_date BETWEEN ? AND ? AND o.status = 'active'
+            WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = ? AND o.status = 'active'
             GROUP BY u.id, u.full_name, u.first_name, u.last_name
             ORDER BY order_count DESC, u.last_name, u.first_name, u.id");
     } else {
@@ -657,11 +681,11 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
             FROM food_orders o
             JOIN food_calendar_items i ON i.id = o.calendar_item_id
             JOIN food_catalog f ON f.id = i.food_id
-            WHERE o.food_date BETWEEN ? AND ? AND o.status = 'active'
+            WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = ? AND o.status = 'active'
             GROUP BY f.id, f.food_name
             ORDER BY order_count DESC, f.food_name, f.id");
     }
-    $stmt->execute([$from, $to]);
+    $stmt->execute([$from, $to, $mealType]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         if ($mode === 'employee') {
@@ -680,10 +704,11 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
     return $items;
 }
 
-function food_order_ensure_orderable_day(PDO $pdo, string $isoDate, bool $allowClosed = false): array
+function food_order_ensure_orderable_day(PDO $pdo, string $isoDate, string $mealType = 'lunch', bool $allowClosed = false): array
 {
-    $stmt = $pdo->prepare('SELECT id, order_status FROM food_calendar WHERE food_date = ? FOR UPDATE');
-    $stmt->execute([$isoDate]);
+    $mealType = food_order_meal_type($mealType);
+    $stmt = $pdo->prepare('SELECT id, order_status FROM food_calendar WHERE food_date = ? AND meal_type = ? FOR UPDATE');
+    $stmt->execute([$isoDate, $mealType]);
     $calendar = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$calendar) {
         throw new RuntimeException('برای این تاریخ هنوز برنامهٔ غذایی ثبت نشده است.');
@@ -703,13 +728,14 @@ function food_order_ensure_orderable_day(PDO $pdo, string $isoDate, bool $allowC
  * بستن سفارش‌گیری جلوی ثبت/تغییر سفارش را می‌گیرد؛ لغو سفارش آینده را مسدود نمی‌کند.
  * همچنان ردیف تقویم را قفل می‌کنیم تا با تغییر هم‌زمان برنامه وضعیت سفارش دقیق بماند.
  */
-function food_order_lock_cancellable_day(PDO $pdo, string $isoDate): array
+function food_order_lock_cancellable_day(PDO $pdo, string $isoDate, string $mealType = 'lunch'): array
 {
     if (food_order_iso_date($isoDate) === null) {
         throw new RuntimeException('تاریخ سفارش معتبر نیست.');
     }
-    $stmt = $pdo->prepare('SELECT id, order_status FROM food_calendar WHERE food_date = ? FOR UPDATE');
-    $stmt->execute([$isoDate]);
+    $mealType = food_order_meal_type($mealType);
+    $stmt = $pdo->prepare('SELECT id, order_status FROM food_calendar WHERE food_date = ? AND meal_type = ? FOR UPDATE');
+    $stmt->execute([$isoDate, $mealType]);
     $calendar = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$calendar) {
         throw new RuntimeException('برای این تاریخ برنامهٔ غذایی پیدا نشد.');
@@ -739,9 +765,10 @@ function food_order_verify_employee_national_code(int $employeeId, string $provi
     return $target;
 }
 
-function food_order_create_or_change(int $employeeId, int $actorId, string $dateInput, int $itemId, array $actor, ?string $proxyNationalCode = null, bool $emergency = false): array
+function food_order_create_or_change(int $employeeId, int $actorId, string $dateInput, int $itemId, array $actor, ?string $proxyNationalCode = null, bool $emergency = false, string $mealType = 'lunch'): array
 {
     food_order_schema_ensure();
+    $mealType = food_order_meal_type($mealType);
     $iso = food_order_iso_date($dateInput);
     if ($iso === null || $itemId < 1 || $employeeId < 1 || $actorId < 1) {
         throw new RuntimeException('تاریخ یا انتخاب غذا معتبر نیست.');
@@ -765,7 +792,7 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
     $pdo = db();
     $pdo->beginTransaction();
     try {
-        $day = food_order_ensure_orderable_day($pdo, $iso, $emergency);
+        $day = food_order_ensure_orderable_day($pdo, $iso, $mealType, $emergency);
         if ($isProxy || $emergency) {
             $target = food_order_verify_employee_national_code($employeeId, (string) $proxyNationalCode, true, $pdo);
         } else {
@@ -793,8 +820,8 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
             throw new RuntimeException('این غذا دیگر برای تاریخ انتخاب‌شده قابل سفارش نیست.');
         }
 
-        $existingStmt = $pdo->prepare('SELECT id, calendar_item_id, status FROM food_orders WHERE employee_id = ? AND food_date = ? FOR UPDATE');
-        $existingStmt->execute([$employeeId, $iso]);
+        $existingStmt = $pdo->prepare('SELECT id, calendar_item_id, status FROM food_orders WHERE employee_id = ? AND food_date = ? AND meal_type = ? FOR UPDATE');
+        $existingStmt->execute([$employeeId, $iso, $mealType]);
         $existing = $existingStmt->fetch(PDO::FETCH_ASSOC);
         $old = $existing ? ['calendar_item_id' => (int) $existing['calendar_item_id'], 'status' => (string) $existing['status']] : null;
         $action = $isProxy ? 'order_proxy_create' : 'order_create';
@@ -808,8 +835,8 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
                 ->execute([$itemId, $actorId, (int) $existing['id']]);
             $orderId = (int) $existing['id'];
         } else {
-            $pdo->prepare("INSERT INTO food_orders (employee_id, calendar_item_id, food_date, created_by, status) VALUES (?, ?, ?, ?, 'active')")
-                ->execute([$employeeId, $itemId, $iso, $actorId]);
+            $pdo->prepare("INSERT INTO food_orders (employee_id, calendar_item_id, food_date, meal_type, created_by, status) VALUES (?, ?, ?, ?, ?, 'active')")
+                ->execute([$employeeId, $itemId, $iso, $mealType, $actorId]);
             $orderId = (int) $pdo->lastInsertId();
         }
         food_order_log($orderId, $day['calendar_id'], $action, $actorId, $old, ['calendar_item_id' => $itemId, 'food_name' => (string) $food['food_name'], 'employee_id' => $employeeId], null);
@@ -843,13 +870,13 @@ function food_order_cancel(int $orderId, array $user): array
     try {
         // Read date first without locking; then lock day → order, matching the
         // day-save/create lock order to reduce deadlocks under concurrent use.
-        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? LIMIT 1');
+        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, meal_type, status FROM food_orders WHERE id = ? LIMIT 1');
         $lookup->execute([$orderId]);
         $initial = $lookup->fetch(PDO::FETCH_ASSOC);
         if (!$initial || (int) $initial['employee_id'] !== (int) $user['id']) {
             throw new RuntimeException('سفارش قابل لغو نیست.');
         }
-        $day = food_order_lock_cancellable_day($pdo, (string) $initial['food_date']);
+        $day = food_order_lock_cancellable_day($pdo, (string) $initial['food_date'], (string) $initial['meal_type']);
         $stmt = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? FOR UPDATE');
         $stmt->execute([$orderId]);
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -890,15 +917,15 @@ function food_order_cancel_proxy(int $orderId, int $employeeId, string $national
     $pdo->beginTransaction();
     try {
         // Match the create lock order: order date → verified recipient → order row.
-        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? LIMIT 1');
+        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, meal_type, status FROM food_orders WHERE id = ? LIMIT 1');
         $lookup->execute([$orderId]);
         $initial = $lookup->fetch(PDO::FETCH_ASSOC);
         if (!$initial || (int) $initial['employee_id'] !== $employeeId) {
             throw new RuntimeException('سفارش برای فرد تأییدشده پیدا نشد یا قابل لغو نیست.');
         }
-        $day = food_order_lock_cancellable_day($pdo, (string) $initial['food_date']);
-        $statusStmt = $pdo->prepare('SELECT order_status FROM food_calendar WHERE food_date = ? LIMIT 1');
-        $statusStmt->execute([(string) $initial['food_date']]);
+        $day = food_order_lock_cancellable_day($pdo, (string) $initial['food_date'], (string) $initial['meal_type']);
+        $statusStmt = $pdo->prepare('SELECT order_status FROM food_calendar WHERE food_date = ? AND meal_type = ? LIMIT 1');
+        $statusStmt->execute([(string) $initial['food_date'], (string) $initial['meal_type']]);
         if ((string) $statusStmt->fetchColumn() === 'closed' && !$emergency) {
             throw new RuntimeException('سفارش این روز بسته شده و لغو آن فقط از برنامهٔ غذایی توسط مدیر پشتیبانی ممکن است.');
         }
@@ -1076,7 +1103,7 @@ function food_order_render_pending_cancels_card(array $user): string
         $html .= '<div class="table-row"><span>' . e((string) ($row['food_date_jalali'] ?: $row['food_date'] ?? '')) . '</span>'
             . '<span>' . e((string) ($row['employee_name'] ?? '')) . '</span>'
             . '<span>' . e((string) ($row['food_name'] ?? '')) . '</span>'
-            . '<span>' . e((string) ($row['requester_name'] ?? '')) . '</span>'
+            . '<span>' . e((string) ($row['requester_name'] ?? '')) . '<small class="food-cancel-request-time">زمان ثبت درخواست: ' . e((string) ($row['requested_at_label'] ?? $row['created_at'] ?? '')) . '</small></span>'
             . '<span class="supervisor-actions">'
             . '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="food_order_cancel_decide"><input type="hidden" name="request_id" value="' . $id . '"><input type="hidden" name="decision" value="approve"><button class="mini-button" type="submit">لغو سفارش</button></form> '
             . '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="food_order_cancel_decide"><input type="hidden" name="request_id" value="' . $id . '"><input type="hidden" name="decision" value="reject"><button class="mini-button" type="submit">رد درخواست</button></form>'
@@ -1099,11 +1126,16 @@ function food_order_pending_cancel_map(array $orderIds): array
         return [];
     }
     $in = implode(',', array_fill(0, count($ids), '?'));
-    $stmt = db()->prepare("SELECT id, order_id, status FROM food_order_cancel_requests WHERE order_id IN ($in) AND status = 'pending'");
+    $stmt = db()->prepare("SELECT id, order_id, status, created_at FROM food_order_cancel_requests WHERE order_id IN ($in) AND status = 'pending'");
     $stmt->execute($ids);
     $map = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $map[(int) $row['order_id']] = ['id' => (int) $row['id'], 'status' => (string) $row['status']];
+        $map[(int) $row['order_id']] = [
+            'id' => (int) $row['id'],
+            'status' => (string) $row['status'],
+            'created_at' => (string) $row['created_at'],
+            'requested_at_label' => function_exists('jalali_date') ? jalali_date((string) $row['created_at']) : (string) $row['created_at'],
+        ];
     }
     return $map;
 }
@@ -1123,13 +1155,13 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
     $pdo = db();
     $pdo->beginTransaction();
     try {
-        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? LIMIT 1');
+        $lookup = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, meal_type, status FROM food_orders WHERE id = ? LIMIT 1');
         $lookup->execute([$orderId]);
         $order = $lookup->fetch(PDO::FETCH_ASSOC);
         if (!$order || (int) $order['employee_id'] !== $employeeId) {
             throw new RuntimeException('سفارش برای این فرد پیدا نشد.');
         }
-        $day = food_order_lock_cancellable_day($pdo, (string) $order['food_date']);
+        $day = food_order_lock_cancellable_day($pdo, (string) $order['food_date'], (string) $order['meal_type']);
         if ((string) ($day['order_status'] ?? '') !== 'closed') {
             throw new RuntimeException('برای روز باز، سفارش را مستقیم لغو کنید؛ درخواست لغو فقط برای روز بسته‌شده است.');
         }
@@ -1151,9 +1183,12 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
         $pdo->prepare('INSERT INTO food_order_cancel_requests (order_id, employee_id, requested_by, food_date, status) VALUES (?, ?, ?, ?, \'pending\')')
             ->execute([$orderId, $employeeId, $actorId, (string) $order['food_date']]);
         $requestId = (int) $pdo->lastInsertId();
+        $createdAtQuery = $pdo->prepare('SELECT created_at FROM food_order_cancel_requests WHERE id = ? LIMIT 1');
+        $createdAtQuery->execute([$requestId]);
+        $requestCreatedAt = (string) ($createdAtQuery->fetchColumn() ?: date('Y-m-d H:i:s'));
         $pdo->commit();
         try {
-            food_order_log($orderId, $day['calendar_id'], 'order_cancel_request', $actorId, ['status' => 'active'], ['request_id' => $requestId, 'status' => 'pending']);
+            food_order_log($orderId, $day['calendar_id'], 'order_cancel_request', $actorId, ['status' => 'active'], ['request_id' => $requestId, 'status' => 'pending', 'requested_at' => $requestCreatedAt]);
         } catch (Throwable $logError) {
             if (function_exists('app_error_log')) {
                 app_error_log('[food-order] cancel-request log: ' . $logError->getMessage());
@@ -1167,11 +1202,12 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
     }
     $who = food_order_full_name($subject);
     $dateLabel = food_order_jalali_label((string) $order['food_date']);
-    food_order_audit('order_cancel_request', $actor, 'food_order', $orderId, null, ['request_id' => $requestId, 'food_date' => (string) $order['food_date']]);
+    $requestCreatedAtLabel = function_exists('jalali_date') ? jalali_date($requestCreatedAt) : $requestCreatedAt;
+    food_order_audit('order_cancel_request', $actor, 'food_order', $orderId, null, ['request_id' => $requestId, 'food_date' => (string) $order['food_date'], 'requested_at' => $requestCreatedAt]);
     food_order_notify_cancel_reviewers(
         'food_cancel_request',
         'درخواست لغو سفارش غذا',
-        'برای سفارش ' . $who . ' در تاریخ ' . $dateLabel . ' درخواست لغو ثبت شد. از داشبورد سامانه (درخواست‌های لغو غذا) یا برنامهٔ غذایی ← درخواست‌های لغو می‌توانید آن را لغو یا رد کنید.',
+        'برای سفارش ' . $who . ' در تاریخ ' . $dateLabel . ' درخواست لغو ثبت شد. زمان ثبت درخواست: ' . $requestCreatedAtLabel . '. از داشبورد سامانه (درخواست‌های لغو غذا) یا برنامهٔ غذایی ← درخواست‌های لغو می‌توانید آن را لغو یا رد کنید.',
         $actorId
     );
     if (function_exists('system_log')) {
@@ -1182,6 +1218,7 @@ function food_order_cancel_request_create(int $orderId, array $actor, ?array $su
                 'employee_id' => $employeeId,
                 'requested_by' => $actorId,
                 'food_date' => (string) $order['food_date'],
+                'requested_at' => $requestCreatedAt,
             ]);
         } catch (Throwable) {
         }
@@ -1193,7 +1230,7 @@ function food_order_cancel_request_list(): array
 {
     food_order_cancel_request_ensure();
     $stmt = db()->query("SELECT r.id, r.order_id, r.employee_id, r.requested_by, r.food_date, r.status, r.created_at,
-            emp.full_name AS employee_name, req.full_name AS requester_name, c.food_name, o.status AS order_status
+            emp.full_name AS employee_name, req.full_name AS requester_name, c.food_name, o.meal_type, o.status AS order_status
         FROM food_order_cancel_requests r
         JOIN food_orders o ON o.id = r.order_id
         JOIN users emp ON emp.id = r.employee_id
@@ -1212,10 +1249,13 @@ function food_order_cancel_request_list(): array
             'employee_name' => (string) ($row['employee_name'] ?? ''),
             'requester_name' => (string) ($row['requester_name'] ?? ''),
             'food_name' => (string) ($row['food_name'] ?? ''),
+            'meal_type' => (string) ($row['meal_type'] ?? 'lunch'),
             'food_date' => (string) $row['food_date'],
             'food_date_jalali' => food_order_jalali_label((string) $row['food_date']),
             'order_status' => (string) ($row['order_status'] ?? ''),
             'created_at' => (string) $row['created_at'],
+            'requested_at' => (string) $row['created_at'],
+            'requested_at_label' => function_exists('jalali_date') ? jalali_date((string) $row['created_at']) : (string) $row['created_at'],
         ];
     }
     return $items;
@@ -1249,7 +1289,10 @@ function food_order_cancel_request_decide(int $requestId, string $decision, arra
         $newStatus = $decision === 'approve' ? 'approved' : 'rejected';
         $day = null;
         if ($decision === 'approve') {
-            $day = food_order_lock_cancellable_day($pdo, (string) $request['food_date']);
+            $mealLookup = $pdo->prepare('SELECT meal_type FROM food_orders WHERE id = ? LIMIT 1');
+            $mealLookup->execute([(int) $request['order_id']]);
+            $requestMeal = food_order_meal_type($mealLookup->fetchColumn() ?: 'lunch');
+            $day = food_order_lock_cancellable_day($pdo, (string) $request['food_date'], $requestMeal);
         }
         $orderStmt = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? FOR UPDATE');
         $orderStmt->execute([$orderId]);
@@ -1382,6 +1425,7 @@ function food_order_save_day(array $body, array $user): array
     food_order_schema_ensure();
     food_order_require_permission($user, 'food.menu_edit');
     $iso = food_order_iso_date($body['date'] ?? '');
+    $mealType = food_order_meal_type($body['meal_type'] ?? 'lunch');
     if ($iso === null) {
         throw new RuntimeException('تاریخ برنامه معتبر نیست.');
     }
@@ -1412,19 +1456,19 @@ function food_order_save_day(array $body, array $user): array
     $pdo = db();
     $pdo->beginTransaction();
     try {
-        $find = $pdo->prepare('SELECT id, order_status, note, closed_by, closed_at FROM food_calendar WHERE food_date = ? FOR UPDATE');
-        $find->execute([$iso]);
+        $find = $pdo->prepare('SELECT id, order_status, note, closed_by, closed_at FROM food_calendar WHERE food_date = ? AND meal_type = ? FOR UPDATE');
+        $find->execute([$iso, $mealType]);
         $oldDay = $find->fetch(PDO::FETCH_ASSOC);
         if (!$oldDay) {
             try {
-                $pdo->prepare('INSERT INTO food_calendar (food_date, order_status, note, created_by) VALUES (?, ?, ?, ?)')
-                    ->execute([$iso, $status === 'closed' ? 'closed' : 'open', $note !== '' ? $note : null, (int) $user['id']]);
+                $pdo->prepare('INSERT INTO food_calendar (food_date, meal_type, order_status, note, created_by) VALUES (?, ?, ?, ?, ?)')
+                    ->execute([$iso, $mealType, $status === 'closed' ? 'closed' : 'open', $note !== '' ? $note : null, (int) $user['id']]);
             } catch (PDOException $e) {
                 if ((string) $e->getCode() !== '23000') {
                     throw $e;
                 }
             }
-            $find->execute([$iso]);
+            $find->execute([$iso, $mealType]);
             $oldDay = $find->fetch(PDO::FETCH_ASSOC);
         }
         if (!$oldDay) {
@@ -1521,11 +1565,21 @@ function food_order_status_summary(): array
 {
     food_order_schema_ensure();
     $today = food_order_today();
-    $stmt = db()->prepare("SELECT COUNT(*) FROM food_orders WHERE food_date = ? AND status = 'active'");
+    $stmt = db()->prepare("SELECT meal_type, COUNT(*) AS order_count FROM food_orders WHERE food_date = ? AND status = 'active' GROUP BY meal_type");
     $stmt->execute([$today]);
+    $counts = ['lunch' => 0, 'dinner' => 0];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $meal = (string) ($row['meal_type'] ?? 'lunch');
+        if (isset($counts[$meal])) {
+            $counts[$meal] = (int) $row['order_count'];
+        }
+    }
     return [
         'today' => $today,
-        'active_orders_today' => (int) $stmt->fetchColumn(),
+        'active_orders_today' => $counts['lunch'], // backward-compatible lunch total
+        'active_lunch_orders_today' => $counts['lunch'],
+        'active_dinner_orders_today' => $counts['dinner'],
+        'active_orders_total_today' => $counts['lunch'] + $counts['dinner'],
     ];
 }
 
@@ -1569,14 +1623,15 @@ function food_order_export_safe_value(mixed $value): string
     return $text;
 }
 
-function food_order_export_manager_orders(string $date, array $user): never
+function food_order_export_manager_orders(string $date, array $user, string $mealType = 'lunch'): never
 {
     food_order_require_permission($user, 'food.order_close');
     $iso = food_order_iso_date($date);
     if ($iso === null) {
         food_order_send_json(['error' => 'تاریخ روز سفارش معتبر نیست.'], 400);
     }
-    $items = food_order_manager_orders($iso);
+    $mealType = food_order_meal_type($mealType);
+    $items = food_order_manager_orders($iso, $mealType);
     $dateLabel = food_order_jalali_label($iso);
     $headers = ['ردیف', 'کد ملی', 'کد پرسنلی', 'نام پرسنل', 'نوع غذا', 'تاریخ غذا', 'تاریخ رزرو', 'ساعت رزرو', 'وضعیت', 'نوع ثبت'];
     $data = [];
@@ -1603,10 +1658,12 @@ function food_order_export_manager_orders(string $date, array $user): never
     unset($row);
     food_order_audit('food_order_daily_orders_export', $user, 'food_orders', 0, null, [
         'food_date' => $iso,
+        'meal_type' => $mealType,
         'row_count' => count($data),
     ]);
     $rangeToken = str_replace('-', '', $iso);
-    $title = 'فهرست سفارش‌های روز ' . $dateLabel;
+    $mealLabel = $mealType === 'dinner' ? 'شام' : 'ناهار';
+    $title = 'فهرست سفارش‌های ' . $mealLabel . ' روز ' . $dateLabel;
     food_order_send_xlsx('سفارش‌های-روز-' . $rangeToken . '.xlsx', $title, $headers, $data, $dateLabel);
 }
 
@@ -1633,9 +1690,10 @@ function food_order_send_xlsx(string $filename, string $title, array $headers, a
     xlsx_send($filename, $bytes);
 }
 
-function food_order_export_statistics_range(string $fromDate, string $toDate, array $user, string $mode = 'food'): never
+function food_order_export_statistics_range(string $fromDate, string $toDate, array $user, string $mode = 'food', string $mealType = 'lunch'): never
 {
     $mode = strtolower(trim($mode));
+    $mealType = food_order_meal_type($mealType);
     if (!in_array($mode, ['food', 'employee'], true)) {
         food_order_send_json(['error' => 'نوع آمار سفارش معتبر نیست.'], 400);
     }
@@ -1644,12 +1702,13 @@ function food_order_export_statistics_range(string $fromDate, string $toDate, ar
     if ($from === null || $to === null || $from > $to) {
         food_order_send_json(['error' => 'بازهٔ تاریخ آمار معتبر نیست.'], 400);
     }
-    $items = food_order_statistics_range($from, $to, $mode);
+    $items = food_order_statistics_range($from, $to, $mode, $mealType);
     $fromJalali = food_order_jalali_label($from);
     $toJalali = food_order_jalali_label($to);
     $rangeToken = str_replace('-', '', $from) . '-' . str_replace('-', '', $to);
     $rangeLabel = $from === $to ? $fromJalali : $fromJalali . ' تا ' . $toJalali;
-    $title = $mode === 'employee' ? 'آمار سفارش نفرات' : 'آمار نوع غذا';
+    $mealLabel = $mealType === 'dinner' ? 'شام' : 'ناهار';
+    $title = ($mode === 'employee' ? 'آمار سفارش نفرات' : 'آمار نوع غذا') . ' — ' . $mealLabel;
     $headers = $mode === 'employee'
         ? ['ردیف', 'نام پرسنل', 'تعداد سفارش فعال']
         : ['ردیف', 'نوع غذا', 'تعداد سفارش فعال'];
@@ -1667,6 +1726,7 @@ function food_order_export_statistics_range(string $fromDate, string $toDate, ar
     unset($row);
     food_order_audit('food_order_statistics_export', $user, 'food_orders', 0, null, [
         'mode' => $mode,
+        'meal_type' => $mealType,
         'from_date' => $from,
         'to_date' => $to,
         'row_count' => count($data),
@@ -2001,7 +2061,7 @@ function food_order_api_handle(string $route, array $user): never
     try {
         if ($method === 'GET' && $route === 'month') {
             $month = (string) ($_GET['month'] ?? '');
-            food_order_send_json(food_order_month_status($month, $user, false));
+            food_order_send_json(food_order_month_status($month, $user, false, false, food_order_meal_type($_GET['meal_type'] ?? 'lunch')));
         }
         if ($method === 'POST' && $route === 'proxy-month') {
             check_api_rate_limit('food_order_proxy_month_' . (int) $user['id'], 80, 60);
@@ -2011,7 +2071,7 @@ function food_order_api_handle(string $route, array $user): never
                 (string) ($body['national_code'] ?? ''),
                 true
             );
-            food_order_send_json(food_order_month_status((string) ($body['month'] ?? ''), $target, false));
+            food_order_send_json(food_order_month_status((string) ($body['month'] ?? ''), $target, false, false, food_order_meal_type($body['meal_type'] ?? 'lunch')));
         }
         if ($method === 'GET' && $route === 'guest-requests') {
             if (!food_guest_request_allowed($user)) {
@@ -2083,7 +2143,8 @@ function food_order_api_handle(string $route, array $user): never
                 (int) ($body['calendar_item_id'] ?? 0),
                 $user,
                 isset($body['national_code']) ? (string) $body['national_code'] : null,
-                !empty($body['emergency'])
+                !empty($body['emergency']),
+                food_order_meal_type($body['meal_type'] ?? 'lunch')
             );
             food_order_send_json($result);
         }
@@ -2184,7 +2245,9 @@ function food_order_emergency_handle(string $route, string $method, array $user)
             if ($date === null || $employeeId < 1) {
                 throw new RuntimeException('تاریخ یا فرد معتبر نیست.');
             }
-            food_order_send_json(['items' => food_order_my_orders($employeeId, 50, $date, $date)]);
+            $orders = food_order_my_orders($employeeId, 50, $date, $date);
+            $mealType = food_order_meal_type($_GET['meal_type'] ?? 'lunch');
+            food_order_send_json(['items' => array_values(array_filter($orders, static fn(array $order): bool => ($order['meal_type'] ?? 'lunch') === $mealType))]);
         }
         if ($method === 'POST' && $route === 'food-menu/emergency/order') {
             $result = food_order_create_or_change(
@@ -2194,7 +2257,8 @@ function food_order_emergency_handle(string $route, string $method, array $user)
                 (int) ($body['calendar_item_id'] ?? 0),
                 $user,
                 isset($body['national_code']) ? (string) $body['national_code'] : null,
-                true
+                true,
+                food_order_meal_type($body['meal_type'] ?? 'lunch')
             );
             food_order_send_json($result);
         }
@@ -2236,7 +2300,7 @@ function food_order_menu_api_handle(string $route, array $user): never
                 throw new RuntimeException('دسترسی food.menu یا food.order_close لازم است.');
             }
             $includeCounts = food_order_user_can($user, 'food.order_close');
-            food_order_send_json(food_order_month_status((string) ($_GET['month'] ?? ''), $user, $includeCounts, true));
+            food_order_send_json(food_order_month_status((string) ($_GET['month'] ?? ''), $user, $includeCounts, true, food_order_meal_type($_GET['meal_type'] ?? 'lunch')));
         }
         if ($method === 'GET' && $route === 'food-menu/catalog') {
             food_order_require_permission($user, 'food.menu');
@@ -2272,7 +2336,7 @@ function food_order_menu_api_handle(string $route, array $user): never
             if ($date === null) {
                 throw new RuntimeException('تاریخ روز سفارش معتبر نیست.');
             }
-            food_order_send_json(['date' => $date, 'items' => food_order_manager_orders($date)]);
+            food_order_send_json(['date' => $date, 'meal_type' => food_order_meal_type($_GET['meal_type'] ?? 'lunch'), 'items' => food_order_manager_orders($date, food_order_meal_type($_GET['meal_type'] ?? 'lunch'))]);
         }
         if ($method === 'GET' && $route === 'food-menu/orders-export') {
             food_order_require_permission($user, 'food.order_close');
@@ -2280,7 +2344,7 @@ function food_order_menu_api_handle(string $route, array $user): never
             if ($date === null) {
                 throw new RuntimeException('تاریخ روز سفارش معتبر نیست.');
             }
-            food_order_export_manager_orders($date, $user);
+            food_order_export_manager_orders($date, $user, food_order_meal_type($_GET['meal_type'] ?? 'lunch'));
         }
         if ($method === 'GET' && $route === 'food-menu/statistics') {
             food_order_require_permission($user, 'food.order_close');
@@ -2299,7 +2363,7 @@ function food_order_menu_api_handle(string $route, array $user): never
                 'from' => $fromIso,
                 'to' => $toIso,
                 'mode' => $mode,
-                'items' => food_order_statistics_range($fromIso, $toIso, $mode),
+                'items' => food_order_statistics_range($fromIso, $toIso, $mode, food_order_meal_type($_GET['meal_type'] ?? 'lunch')),
             ]);
         }
         if ($method === 'GET' && $route === 'food-menu/export') {
@@ -2308,7 +2372,8 @@ function food_order_menu_api_handle(string $route, array $user): never
                 (string) ($_GET['from'] ?? ''),
                 (string) ($_GET['to'] ?? ''),
                 $user,
-                (string) ($_GET['mode'] ?? 'food')
+                (string) ($_GET['mode'] ?? 'food'),
+                food_order_meal_type($_GET['meal_type'] ?? 'lunch')
             );
         }
         food_order_send_json(['error' => 'مسیر API برنامه غذایی پیدا نشد.'], 404);
@@ -2332,7 +2397,7 @@ function food_order_render_page(array $user): never
         : 'کد ملی ثبت‌شدهٔ شما معتبر نیست؛ ثبت سفارش برای خودتان غیرفعال است. برای اصلاح اطلاعات با منابع انسانی هماهنگ کنید.';
     $canProxy = true; // هر کاربر وارد‌شده می‌تواند برای دیگری سفارش ثبت کند (با کد ملی فرد)
     render_header('سفارش غذا', $user);
-    echo '<link rel="stylesheet" href="assets/food-order.css?v=14">';
+    echo '<link rel="stylesheet" href="assets/food-order.css?v=17">';
     echo '<section class="food-order-page"><header class="page-heading"><div><span class="eyebrow">برنامه غذایی سازمان</span><h1>سفارش غذا</h1></div><a class="button secondary" href="index.php">بازگشت به داشبورد</a></header>';
     if (!$hasNational) {
         echo '<div class="alert info" role="status">' . e($nationalIssue) . '</div>';
@@ -2346,7 +2411,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=18"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=20"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
     render_footer();
     exit;
 }

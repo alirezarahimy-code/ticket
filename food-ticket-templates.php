@@ -1159,7 +1159,8 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
             if ($food === '' || !$names) {
                 continue;
             }
-            $groupLines[] = ['kind' => 'menu', 'text' => (string) ($groupRow['label'] ?? 'منو') . ' — ' . $food];
+            $count = max(0, (int) ($groupRow['count'] ?? count($names)));
+            $groupLines[] = ['kind' => 'menu', 'text' => (string) ($groupRow['label'] ?? 'منو') . ' — ' . $food . ' — ' . $count . ' عدد'];
             foreach ($names as $name) {
                 $groupLines[] = ['kind' => 'member', 'text' => 'نام و نام خانوادگی: ' . $name];
             }
@@ -1192,6 +1193,9 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
                 ];
                 $items[] = $line;
                 $lineY += food_ticket_tpl_text_height_mm($line);
+                if (($groupLine['kind'] ?? '') === 'menu') {
+                    $lineY += 1.5; // فاصلهٔ بیشتر میان عنوان غذا و نخستین نام
+                }
             }
             $bodyH = max(0.5, $lineY - $bodyY + 1.0);
             if (!empty($anchor['border'])) {

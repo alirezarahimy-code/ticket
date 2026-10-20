@@ -14,6 +14,7 @@
     tab: canMenu ? 'calendar' : 'orders',
     year: 1405,
     month: 1,
+    mealType: 'lunch',
     selectedDate: '',
     ordersDate: '',
     statisticsFrom: '',
@@ -360,7 +361,7 @@
     };
     var viewBar = '<div class="fm-view-switch">' + viewButton('list', 'فهرست یکجا') + viewButton('menu', 'نمایش بر اساس منو') + '</div>';
     var body = state.ordersView === 'menu' ? orderByMenuHtml(rows) : orderTableHtml(rows);
-    var daily = '<section class="fm-card fm-daily-orders"><div class="fm-toolbar"><div><h3>سفارش‌های روز</h3><span class="fm-small">تاریخ: ' + esc(dateLabel) + ' — فهرست سفارش‌های تاریخ انتخاب‌شده</span></div></div><form id="fm-orders-date" class="fm-order-date"><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(inputDate)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="orders-today">امروز</button><button class="btn secondary" type="button" data-fm-action="orders-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="orders-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></form>'
+    var daily = '<section class="fm-card fm-daily-orders"><div class="fm-toolbar"><div><h3>سفارش‌های ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + ' — روز انتخاب‌شده</h3><span class="fm-small">تاریخ: ' + esc(dateLabel) + ' — فهرست سفارش‌های تاریخ انتخاب‌شده</span></div></div><form id="fm-orders-date" class="fm-order-date"><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(inputDate)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="orders-today">امروز</button><button class="btn secondary" type="button" data-fm-action="orders-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button>' + (state.mealType === 'lunch' ? '<button class="btn secondary" type="button" data-fm-action="orders-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button>' : '') + '</form>'
       + (state.loadingOrders ? '<div class="fm-spinner">در حال بارگذاری سفارش‌ها…</div>' : viewBar + '<div class="fm-table-wrap fm-manager-data-warning">' + body + '</div>')
       + '</section>';
     return daily;
@@ -374,9 +375,9 @@
     } else if (!rows.length) {
       body = '<div class="fm-empty">درخواست لغو بازی برای روزهای بسته‌شده نیست.</div>';
     } else {
-      body = '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ غذا</th><th>نام پرسنل</th><th>غذا</th><th>درخواست‌دهنده</th><th>عملیات</th></tr></thead><tbody>'
+      body = '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ غذا</th><th>وعده</th><th>نام پرسنل</th><th>غذا</th><th>درخواست‌دهنده</th><th>زمان ثبت درخواست</th><th>عملیات</th></tr></thead><tbody>'
         + rows.map(function (row) {
-          return '<tr><td>' + esc(faDigits(row.food_date_jalali || jalaliFromIso(row.food_date) || row.food_date || '')) + '</td><td>' + esc(row.employee_name || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(row.requester_name || '—') + '</td><td>'
+          return '<tr><td>' + esc(faDigits(row.food_date_jalali || jalaliFromIso(row.food_date) || row.food_date || '')) + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(row.employee_name || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(row.requester_name || '—') + '</td><td>' + esc(faDigits(row.requested_at_label || row.requested_at || row.created_at || '—')) + '</td><td>'
             + '<button class="btn danger" type="button" data-fm-action="cancel-req-approve" data-id="' + Number(row.id) + '">لغو سفارش</button> '
             + '<button class="btn secondary" type="button" data-fm-action="cancel-req-reject" data-id="' + Number(row.id) + '">رد درخواست</button></td></tr>';
         }).join('') + '</tbody></table></div>';
@@ -422,6 +423,11 @@
     return '<section class="fm-card fm-statistics"><div class="fm-toolbar"><div><h3>' + modeTitle + '</h3><span class="fm-small">بازه: ' + esc(rangeText) + '</span></div></div><form id="fm-statistics-date" class="fm-statistics-form"><div class="fm-stats-modes" role="radiogroup" aria-label="نوع آمار"><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="food"' + (mode === 'food' ? ' checked' : '') + ' required><span>آمار نوع غذا</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="employee"' + (mode === 'employee' ? ' checked' : '') + ' required><span>آمار سفارش نفرات</span></label></div><div class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="statistics-export"' + (actionsEnabled ? '' : ' disabled') + '>خروجی اکسل</button><button class="btn secondary" type="button" data-fm-action="statistics-print"' + (actionsEnabled ? '' : ' disabled') + '>پرینت</button></div></form>' + result + '</section>';
   }
 
+  function mealTypeSwitch() {
+    if (!['calendar', 'orders', 'statistics'].includes(state.tab)) return '';
+    return '<div class="fm-meal-switch" role="group" aria-label="وعدهٔ غذایی" style="display:flex;gap:8px;margin:0 0 12px"><button class="btn ' + (state.mealType === 'lunch' ? 'primary' : 'secondary') + '" type="button" data-fm-action="meal-type" data-meal-type="lunch">ناهار</button><button class="btn ' + (state.mealType === 'dinner' ? 'primary' : 'secondary') + '" type="button" data-fm-action="meal-type" data-meal-type="dinner">شام</button></div>';
+  }
+
   function render() {
     if (!root || !root.isConnected) root = document.getElementById('food-menu-root');
     if (!root) return;
@@ -435,7 +441,7 @@
     }
     var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
-    root.innerHTML = '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
+    root.innerHTML = '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel;
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
   }
 
@@ -462,7 +468,7 @@
     if (!canMenu) return;
     state.loading = true;
     try {
-      state.monthData = await request('food-menu/month', { month: monthKey() });
+      state.monthData = await request('food-menu/month', { month: monthKey(), meal_type: state.mealType });
     } catch (e) { state.error = e.message || 'تقویم بارگذاری نشد.'; state.monthData = null; }
     finally { state.loading = false; render(); }
   }
@@ -476,7 +482,7 @@
     state.loadingOrders = true;
     render();
     try {
-      var result = await request('food-menu/orders', { date: selected });
+      var result = await request('food-menu/orders', { date: selected, meal_type: state.mealType });
       state.orders = Array.isArray(result.items) ? result.items : [];
       state.ordersLoaded = true;
       state.error = '';
@@ -531,7 +537,7 @@
     var requestId = ++state.statisticsRequestId;
     render();
     try {
-      var result = await request('food-menu/statistics', { from: from, to: to, mode: selectedMode });
+      var result = await request('food-menu/statistics', { from: from, to: to, mode: selectedMode, meal_type: state.mealType });
       if (requestId !== state.statisticsRequestId) return;
       state.statistics = Array.isArray(result.items) ? result.items : [];
       state.statisticsLoaded = true;
@@ -581,6 +587,7 @@
       var statusField = form.querySelector('[name="order_status"]:checked');
       body = {
         date: state.selectedDate,
+        meal_type: state.mealType,
         food_ids: foodIds,
         order_status: statusField && !statusField.disabled ? String(statusField.value || '') : '',
         note: String(formData.get('note') || '').trim(),
@@ -682,7 +689,7 @@
     if (!canClose || state.tab !== 'orders' || !state.ordersLoaded || state.loadingOrders || !state.ordersDate) return;
     // اگر کاربر ترتیب نمایش را عوض کرده، خروجی همان ترتیب است؛ وگرنه خروجی سرور بدون تغییر
     if (state.ordersSortTouched) { downloadOrdersCsv(); return; }
-    global.location.href = buildUrl('food-menu/orders-export', { date: state.ordersDate });
+    global.location.href = buildUrl('food-menu/orders-export', { date: state.ordersDate, meal_type: state.mealType });
   }
 
   function printScopedReport(selector, bodyClass) {
@@ -715,13 +722,13 @@
   }
 
   function printOrders() {
-    if (!canClose || state.tab !== 'orders' || !state.ordersLoaded || state.loadingOrders) return;
+    if (!canClose || state.tab !== 'orders' || state.mealType !== 'lunch' || !state.ordersLoaded || state.loadingOrders) return;
     printScopedReport('.fm-daily-orders', 'fm-print-orders');
   }
 
   function downloadStatistics() {
     if (!canClose || !state.statisticsLoaded || !state.statisticsFrom || !state.statisticsTo) return;
-    global.location.href = buildUrl('food-menu/export', { from: state.statisticsFrom, to: state.statisticsTo, mode: state.statisticsMode || 'food' });
+    global.location.href = buildUrl('food-menu/export', { from: state.statisticsFrom, to: state.statisticsTo, mode: state.statisticsMode || 'food', meal_type: state.mealType });
   }
 
   function printStatistics() {
@@ -825,7 +832,7 @@
   async function emergencyLoadOrders() {
     var em = state.emergency;
     if (!em || !em.person) return;
-    var payload = await request('food-menu/emergency/orders', { date: state.selectedDate, employee_id: em.person.id });
+    var payload = await request('food-menu/emergency/orders', { date: state.selectedDate, employee_id: em.person.id, meal_type: state.mealType });
     em.orders = payload.items || [];
   }
   function daySearchInput(event) {
@@ -877,7 +884,7 @@
         state.emergency = { people: em.people };
       } else if (action === 'order') {
         var select = root.querySelector('[name="emergency_item"]');
-        var result = await request('food-menu/emergency/order', null, { method: 'POST', body: JSON.stringify({ food_date: state.selectedDate, employee_id: em.person.id, national_code: em.nc, calendar_item_id: Number(select && select.value), emergency: true }) });
+        var result = await request('food-menu/emergency/order', null, { method: 'POST', body: JSON.stringify({ food_date: state.selectedDate, employee_id: em.person.id, national_code: em.nc, calendar_item_id: Number(select && select.value), meal_type: state.mealType, emergency: true }) });
         em.notice = result.message || 'سفارش اضطراری ثبت شد.';
         await emergencyLoadOrders();
       } else if (action === 'cancel') {
@@ -921,6 +928,10 @@
     var action = event.target.closest('[data-fm-action]');
     if (action) {
       var act = action.dataset.fmAction;
+      if (act === 'meal-type') {
+        var nextMeal = action.dataset.mealType === 'dinner' ? 'dinner' : 'lunch';
+        if (nextMeal !== state.mealType) { state.mealType = nextMeal; state.pendingImpact = null; state.dayPick = null; state.monthData = state.tab === 'calendar' ? null : state.monthData; state.ordersLoaded = false; state.statisticsLoaded = false; if (state.tab === 'calendar') loadMonth(); else if (state.tab === 'orders') loadOrders(state.ordersDate || state.selectedDate); else if (state.tab === 'statistics' && state.statisticsFrom && state.statisticsTo) loadStatistics(state.statisticsFrom, state.statisticsTo, state.statisticsMode); else render(); }
+      }
       if (act === 'month-prev') { var p = Cal.shiftMonth(state.year, state.month, -1); changeMonth(p[0], p[1]); }
       if (act === 'month-next') { var n = Cal.shiftMonth(state.year, state.month, 1); changeMonth(n[0], n[1]); }
       if (act === 'month-today') {

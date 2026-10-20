@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS cd_dvd_records (
 CREATE TABLE IF NOT EXISTS traffic_destinations (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(190) NOT NULL,
+    approver_name VARCHAR(190) NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_traffic_destination (title)
@@ -179,6 +180,23 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     KEY idx_traffic_serial (serial_no),
     KEY idx_traffic_created_by (created_by),
     CONSTRAINT fk_traffic_visits_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS traffic_visit_history (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    visit_id INT UNSIGNED NOT NULL,
+    serial_no VARCHAR(30) NOT NULL,
+    visitor_name VARCHAR(190) NOT NULL DEFAULT '',
+    action VARCHAR(24) NOT NULL DEFAULT 'updated',
+    changed_by INT UNSIGNED NULL,
+    changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    before_json LONGTEXT NULL,
+    after_json LONGTEXT NULL,
+    changes_json LONGTEXT NOT NULL,
+    INDEX idx_traffic_history_visit (visit_id, changed_at),
+    INDEX idx_traffic_history_changed_at (changed_at),
+    INDEX idx_traffic_history_user (changed_by),
+    CONSTRAINT fk_traffic_history_user FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO traffic_destinations (title)
@@ -1149,6 +1167,7 @@ CREATE TABLE IF NOT EXISTS food_catalog (
 CREATE TABLE IF NOT EXISTS food_calendar (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     order_status ENUM('open','closed') NOT NULL DEFAULT 'open',
     note VARCHAR(255) NULL,
     closed_by INT UNSIGNED NULL,
@@ -1156,7 +1175,7 @@ CREATE TABLE IF NOT EXISTS food_calendar (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_food_calendar_date (food_date),
+    UNIQUE KEY uq_food_calendar_date_meal (food_date, meal_type),
     INDEX idx_food_calendar_status_date (order_status, food_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1180,11 +1199,12 @@ CREATE TABLE IF NOT EXISTS food_orders (
     employee_id INT UNSIGNED NOT NULL,
     calendar_item_id INT UNSIGNED NOT NULL,
     food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     created_by INT UNSIGNED NOT NULL,
     status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_food_order_employee_date (employee_id, food_date),
+    UNIQUE KEY uq_food_order_employee_date_meal (employee_id, food_date, meal_type),
     INDEX idx_food_orders_date_status (food_date, status),
     INDEX idx_food_orders_item_status (calendar_item_id, status),
     CONSTRAINT fk_food_order_calendar_item FOREIGN KEY (calendar_item_id) REFERENCES food_calendar_items(id) ON DELETE RESTRICT

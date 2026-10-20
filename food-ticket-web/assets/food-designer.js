@@ -247,7 +247,7 @@
       ['منو۳', 'قیمه', ['آزاده کریمی', 'جواد احمدی', 'مهدی نوری', 'الهام رستمی', 'فرهاد یوسفی', 'سمانه حیدری']],
     ];
     sampleRows.forEach(([label, food, names]) => {
-      lines.push({ kind: 'menu', text: label + ' — ' + food });
+      lines.push({ kind: 'menu', text: label + ' — ' + food + ' — ' + names.length + ' عدد' });
       names.forEach((name) => lines.push({ kind: 'member', text: 'نام و نام خانوادگی: ' + name }));
     });
     return lines;
@@ -285,8 +285,9 @@
       const styleElement = line.kind === 'menu' ? menuStyle : memberStyle;
       const lineHeight = num(style.font_size, 11) * 25.4 / 72 * sc * num(style.line_height, 1.2);
       const lineBoxH = groupTextHeight(line.text, Object.assign({}, style, { height: 0.5 }), bodyW);
-      const out = '<div data-fd-group-style-pick="1" data-fd-pick="' + esc(styleElement.id || '') + '" style="height:' + lineBoxH * sc + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + (num(style.font_size, 11) * 25.4 / 72 * sc) + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + lineHeight + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
-      lineTop += lineBoxH;
+      const gapAfter = line.kind === 'menu' ? 1.5 : 0;
+      const out = '<div data-fd-group-style-pick="1" data-fd-pick="' + esc(styleElement.id || '') + '" style="height:' + lineBoxH * sc + 'px;margin-bottom:' + gapAfter * sc + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + (num(style.font_size, 11) * 25.4 / 72 * sc) + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + lineHeight + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
+      lineTop += lineBoxH + gapAfter;
       return out;
     }).join('');
     const bodyH = Math.max(0.5, lineTop + 1.0);
@@ -468,9 +469,10 @@
     const linesHtml = lines.map((line) => {
       const style = line.kind === 'menu' ? menuStyle : memberStyle;
       const lineBoxH = groupTextHeight(line.text, Object.assign({}, style, { height: 0.5 }), bodyW);
-      usedH += lineBoxH;
+      const gapAfter = line.kind === 'menu' ? 1.5 : 0;
+      usedH += lineBoxH + gapAfter;
       const pt = num(style.font_size, 11) * 25.4 / 72 * scale;
-      return '<div style="height:' + lineBoxH * scale + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + pt * num(style.line_height, 1.2) + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
+      return '<div style="height:' + lineBoxH * scale + 'px;margin-bottom:' + gapAfter * scale + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + pt * num(style.line_height, 1.2) + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
     }).join('');
     const bodyH = Math.max(0.5, usedH + 1.0);
     let bottom = Math.max(staticBottom, bodyY + bodyH);

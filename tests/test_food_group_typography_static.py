@@ -17,6 +17,17 @@ class FoodGroupTypographyStaticTests(unittest.TestCase):
         self.assertIn("} elseif ($type === 'rect') {", source)
         self.assertIn("elseif ($t -eq 'rect') {", source)
 
+    def test_group_menu_counts_and_menu_to_member_spacing_are_rendered(self) -> None:
+        runtime = (ROOT / "food-ticket-runtime.php").read_text(encoding="utf-8")
+        templates = (ROOT / "food-ticket-templates.php").read_text(encoding="utf-8")
+        self.assertIn("$byFood[$food]['count']++", runtime)
+        self.assertIn("'count' => (int) $foodData['count']", runtime)
+        self.assertIn("$food . ' — ' . $count . ' عدد'", runtime)
+        self.assertIn("$lineY += 1.5; // فاصلهٔ بیشتر میان عنوان غذا و نخستین نام", templates)
+        designer = (ROOT / "food-ticket-web/assets/food-designer.js").read_text(encoding="utf-8")
+        self.assertIn("food + ' — ' + names.length + ' عدد'", designer)
+        self.assertGreaterEqual(designer.count("const gapAfter = line.kind === 'menu' ? 1.5 : 0;"), 2)
+
     def test_group_designer_exposes_per_style_font_controls_and_refreshes_preview(self) -> None:
         source = (ROOT / "food-ticket-web/assets/food-designer.js").read_text(encoding="utf-8")
         self.assertIn("function groupTypographyPropsHtml(e)", source)

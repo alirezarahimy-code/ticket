@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.14';
+const FOOD_TICKET_PANEL_VERSION = '1.37.15';
 
 function food_ticket_panel_version(): string
 {
@@ -4564,7 +4564,28 @@ function food_ticket_api_handle(string $route, array $user): never
 
         food_ticket_api_json(['error' => 'مسیر API چاپ فیش پیدا نشد.'], 404);
     } catch (Throwable $exception) {
+        $location = basename($exception->getFile()) . ':' . $exception->getLine();
+        app_error_log('[food-ticket-api] route=' . $route . ' failed at ' . $location . ': ' . $exception->getMessage());
+        if (function_exists('system_log')) {
+            system_log('error', 'food-ticket-api', $exception->getMessage(), ['route' => $route, 'location' => $location]);
+        }
         food_ticket_api_json(['error' => $exception->getMessage()], 400);
+    }
+}
+
+function food_ticket_render_safe_replace(string $search, string $replace, string $subject): string
+{
+    // PHP 8 throws ValueError for an empty search string. A stale/invalid label
+    // map must not make the food panel fail to render.
+    if ($search === '' || $subject === '') {
+        return $subject;
+    }
+    try {
+        $result = str_replace($search, $replace, $subject);
+        return is_string($result) ? $result : $subject;
+    } catch (Throwable $exception) {
+        app_error_log('food-ticket: optional HTML replacement skipped: ' . $exception->getMessage());
+        return $subject;
     }
 }
 
@@ -4618,8 +4639,18 @@ function food_ticket_render_page(array $user): void
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
     // نگاشت از لایهٔ محیطی می‌آید تا سورس سامانه هیچ نام برندی نداشته باشد.
     $legacyLabels = function_exists('food_ticket_legacy_display_map') ? food_ticket_legacy_display_map() : [];
+    if (!is_array($legacyLabels)) {
+        $legacyLabels = [];
+    }
     foreach ($legacyLabels as $legacy => $replacement) {
-        $html = str_replace((string) $legacy, (string) $replacement, $html);
+        if (!is_scalar($legacy) || !is_scalar($replacement)) {
+            continue;
+        }
+        $legacy = (string) $legacy;
+        if ($legacy === '') {
+            continue;
+        }
+        $html = food_ticket_render_safe_replace($legacy, (string) $replacement, $html);
     }
     $holidayJson = '[]';
     try {
@@ -4653,21 +4684,55 @@ function food_ticket_render_page(array $user): void
         }
     }
     if (function_exists('food_ticket_web_host_html')) {
-        $hosted = food_ticket_web_host_html($html, [
-            'nonce' => $nonce,
-            'bootstrap' => $bootstrap,
-            'jalali_boot' => $jalaliBoot,
-            'assets' => $assetNames,
-            'theme_href' => 'assets/style.css?v=3',
-        ]);
-        $html = (string) ($hosted['html'] ?? $html);
-        $notes = (array) ($hosted['notes'] ?? []);
-        if (!in_array('bootstrap:brand', $notes, true) && !in_array('bootstrap:already', $notes, true)) {
-            app_error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
+        try {
+            $hosted = food_ticket_web_host_html($html, [
+                'nonce' => $nonce,
+                'bootstrap' => $bootstrap,
+                'jalali_boot' => $jalaliBoot,
+                'assets' => $assetNames,
+                'theme_href' => 'assets/style.css?v=3.4.34',
+            ]);
+            if (is_array($hosted) && is_string($hosted['html'] ?? null)) {
+                $html = $hosted['html'];
+            }
+            $notes = (array) ($hosted['notes'] ?? []);
+            if (!in_array('bootstrap:brand', $notes, true) && !in_array('bootstrap:already', $notes, true)) {
+                app_error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
+            }
+        } catch (Throwable $exception) {
+            app_error_log('food-ticket: HTML host transformation skipped (' . basename($exception->getFile()) . ':' . $exception->getLine() . '): ' . $exception->getMessage());
         }
         if (!$assetNames) {
             app_error_log('food-ticket: پوشهٔ food-ticket-web/assets خالی یا ناموجود است؛ دارایی‌های پنل ناقص کپی شده‌اند.');
         }
+    }
+    // Page layout design is an optional enhancement: a missing helper or a stale
+    // saved layout must never prevent the print panel itself from opening.
+    $layoutCss = '';
+    $layoutAssets = '';
+    $layoutAdminFlag = '0';
+    try {
+        if (function_exists('admin_layout_design_css_for_page') && function_exists('admin_layout_design_is_admin')) {
+            $layoutCss = admin_layout_design_css_for_page('food-ticket');
+            $isLayoutAdmin = admin_layout_design_is_admin($user);
+            $layoutAdminFlag = $isLayoutAdmin ? '1' : '0';
+            if ($isLayoutAdmin) {
+                $layoutAssets = '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">';
+            }
+            if ($layoutCss !== '') {
+                $layoutAssets .= '<style id="admin-page-layout-rules">' . $layoutCss . '</style>';
+            }
+        }
+    } catch (Throwable $exception) {
+        app_error_log('food-ticket: page layout enhancement skipped: ' . $exception->getMessage());
+        $layoutCss = '';
+        $layoutAssets = '';
+        $layoutAdminFlag = '0';
+    }
+    $html = preg_replace('/<body\\b/', '<body data-layout-page="food-ticket" data-layout-design-admin="' . $layoutAdminFlag . '"', $html, 1) ?? $html;
+    $html = food_ticket_render_safe_replace('</head>', $layoutAssets . '</head>', $html);
+    if ($layoutAdminFlag === '1') {
+        $html = food_ticket_render_safe_replace('</body>', '<script src="assets/admin-layout-design.js?v=9"></script></body>', $html);
     }
     echo $html;
     return;

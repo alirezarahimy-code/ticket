@@ -17,6 +17,15 @@
         approved_by: document.getElementById('traffic-approved-by'),
     };
 
+    function syncNewDestinationApprover() {
+        if (!fields.meeting_with || !fields.approved_by) return;
+        var selected = fields.meeting_with.options[fields.meeting_with.selectedIndex];
+        fields.approved_by.value = selected ? (selected.getAttribute('data-approver') || '') : '';
+    }
+
+    if (fields.meeting_with) fields.meeting_with.addEventListener('change', syncNewDestinationApprover);
+    syncNewDestinationApprover();
+
     function setHint(html, kind) {
         hint.className = 'alert ' + (kind || 'info');
         hint.innerHTML = html;
@@ -69,7 +78,7 @@
                 if (fields.phone && !fields.phone.value) fields.phone.value = data.phone || '';
                 if (fields.company && !fields.company.value) fields.company.value = data.company || '';
                 if (fields.meeting_with && data.meeting_with) fields.meeting_with.value = data.meeting_with;
-                if (fields.approved_by && !fields.approved_by.value) fields.approved_by.value = data.approved_by || '';
+                syncNewDestinationApprover();
             })
             .catch(function () { clearHint(); });
     }
@@ -191,3 +200,56 @@
     });
     apply();
 })();
+
+// ورودی ساعت ثابت و صریح ۲۴ساعته؛ ورود چهار رقم مثل 1430 به 14:30 تبدیل می‌شود.
+(function () {
+    'use strict';
+    var fields = document.querySelectorAll('.traffic-time-24h');
+    if (!fields.length) return;
+    var persian = '۰۱۲۳۴۵۶۷۸۹';
+    var arabic = '٠١٢٣٤٥٦٧٨٩';
+    function asciiDigits(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String(persian.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String(arabic.indexOf(digit)); })
+            .replace(/：/g, ':');
+    }
+    fields.forEach(function (field) {
+        field.addEventListener('input', function () {
+            var current = asciiDigits(field.value);
+            if (current.indexOf(':') !== -1) {
+                if (current !== field.value) field.value = current;
+                return;
+            }
+            var digits = current.replace(/\D/g, '').slice(0, 4);
+            if (digits.length > 2) {
+                var caret = field.selectionStart || current.length;
+                field.value = digits.slice(0, 2) + ':' + digits.slice(2);
+                var nextCaret = caret > 2 ? caret + 1 : caret;
+                try { field.setSelectionRange(nextCaret, nextCaret); } catch (ignore) {}
+            } else if (current !== field.value) {
+                field.value = digits;
+            }
+        });
+        field.addEventListener('blur', function () {
+            var value = asciiDigits(field.value).trim();
+            var match = value.match(/^(\d{1,2}):(\d{1,2})$/);
+            if (match) field.value = match[1].padStart(2, '0') + ':' + match[2].padStart(2, '0');
+        });
+    });
+}());
+
+
+// تأییدکننده در فرم ویرایش نیز فقط از مقصد انتخاب‌شده خوانده می‌شود.
+(function () {
+    'use strict';
+    var destination = document.getElementById('traffic-edit-meeting-with');
+    var approver = document.getElementById('traffic-edit-approved-by');
+    if (!destination || !approver) return;
+    function sync() {
+        var option = destination.options[destination.selectedIndex];
+        approver.value = option ? (option.getAttribute('data-approver') || '') : '';
+    }
+    destination.addEventListener('change', sync);
+    sync();
+}());

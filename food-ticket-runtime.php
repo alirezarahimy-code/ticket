@@ -154,7 +154,9 @@ function food_ticket_render_from_template(array $event, ?array $template = null)
             if ($food === '' || !$names) {
                 continue;
             }
-            $lines[] = (string) ($groupRow['label'] ?? 'منو') . ' — ' . $food;
+            $count = max(0, (int) ($groupRow['count'] ?? count($names)));
+            $lines[] = (string) ($groupRow['label'] ?? 'منو') . ' — ' . $food . ' — ' . $count . ' عدد';
+            $lines[] = '';
             foreach ($names as $name) {
                 $lines[] = 'نام و نام خانوادگی: ' . $name;
             }
@@ -405,20 +407,23 @@ function food_ticket_print_group_run(array $event, array $config, array $tpl, in
     foreach ($eligible as $memberEvent) {
         $food = trim((string) $memberEvent['food_type']);
         $name = trim((string) $memberEvent['full_name']);
-        $byFood[$food] ??= [];
-        if (!in_array($name, $byFood[$food], true)) {
-            $byFood[$food][] = $name;
+        $byFood[$food] ??= ['members' => [], 'count' => 0];
+        $byFood[$food]['count']++;
+        if (!in_array($name, $byFood[$food]['members'], true)) {
+            $byFood[$food]['members'][] = $name;
         }
     }
     $groupRows = [];
     $menuNumber = 1;
-    foreach ($byFood as $food => $names) {
+    foreach ($byFood as $food => $foodData) {
+        $names = $foodData['members'];
         if (!$names) {
             continue;
         }
         $groupRows[] = [
             'label' => 'منو' . $menuNumber,
             'food' => $food,
+            'count' => (int) $foodData['count'],
             'members' => $names,
         ];
         $menuNumber++;
@@ -686,7 +691,8 @@ function food_ticket_graphic_rows(array $event, array $tpl): array
             if ($food === '' || !$names) {
                 continue;
             }
-            $rows[] = ['l' => (string) ($groupRow['label'] ?? 'منو'), 'v' => $fa($food)];
+            $count = max(0, (int) ($groupRow['count'] ?? count($names)));
+            $rows[] = ['l' => (string) ($groupRow['label'] ?? 'منو'), 'v' => $fa($food . ' — ' . $count . ' عدد')];
             foreach ($names as $name) {
                 $rows[] = ['l' => 'نام و نام خانوادگی', 'v' => $fa($name)];
             }

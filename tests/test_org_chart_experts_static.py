@@ -72,6 +72,14 @@ check(
     "deputy dual-add buttons have layout styles",
 )
 check(
+    "$bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';" in index
+    and "body class=" in index
+    and "e($bodyPageClass)" in index
+    and "body.page-organization" in style
+    and "body:has(.organization-workspace)" not in style,
+    "organization layout no longer depends on browser support for :has()",
+)
+check(
     "سمت راست «افزودن اداره»" in guide
     and "کاربران دامینی و محلی" in guide,
     "help guide describes deputy experts and local users",

@@ -18,13 +18,32 @@ function traffic_can_manage_destinations(array $user): bool
 
 function traffic_destinations(bool $activeOnly = true): array
 {
-    $sql = 'SELECT id, title FROM traffic_destinations' . ($activeOnly ? ' WHERE is_active = 1' : '') . ' ORDER BY title';
+    $sql = 'SELECT id, title, approver_name, is_active FROM traffic_destinations' . ($activeOnly ? ' WHERE is_active = 1' : '') . ' ORDER BY title';
     return db()->query($sql)->fetchAll();
 }
 
 function traffic_approvers(): array
 {
     return db()->query("SELECT DISTINCT approved_by FROM traffic_visits WHERE approved_by IS NOT NULL AND approved_by <> '' ORDER BY approved_by")->fetchAll(PDO::FETCH_COLUMN);
+}
+
+/** تأییدکنندهٔ تردد از مقصد فعال خوانده می‌شود؛ ورودی POST منبع معتبر نیست. */
+function traffic_destination_approver(string $title, ?array $existingRecord = null): ?string
+{
+    $title = trim($title);
+    if ($title === '') {
+        return null;
+    }
+    $query = db()->prepare('SELECT approver_name FROM traffic_destinations WHERE title = ? AND is_active = 1 LIMIT 1');
+    $query->execute([$title]);
+    $approver = $query->fetchColumn();
+    if ($approver !== false) {
+        return trim((string) $approver) !== '' ? trim((string) $approver) : null;
+    }
+    if ($existingRecord !== null && $title === (string) ($existingRecord['meeting_with'] ?? '')) {
+        return trim((string) ($existingRecord['approved_by'] ?? '')) !== '' ? trim((string) $existingRecord['approved_by']) : null;
+    }
+    throw new TrafficInputException('مقصد انتخاب‌شده معتبر یا فعال نیست.', 'meeting_with');
 }
 
 // شماره برگ به‌صورت تاریخ‌شمسی+شماره‌ترتیبی روزانه، مثل ۱۴۰۴۰۷۱۵-۰۰۰۱
@@ -214,34 +233,123 @@ class TrafficInputException extends RuntimeException
     }
 }
 
-function traffic_validate_payload(array $data): array
+function traffic_validate_payload(array $data, bool $allowBlankNationalCode = false): array
 {
     $name = trim((string) ($data['full_name'] ?? ''));
     $nationalCode = preg_replace('/\D/', '', strtr((string) ($data['national_code'] ?? ''), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']));
     if ($name === '') {
         throw new TrafficInputException('نام و نام خانوادگی الزامی است.', 'full_name');
     }
-    if (!valid_iranian_national_code((string) $nationalCode)) {
+    if (!(($allowBlankNationalCode && $nationalCode === '') || valid_iranian_national_code((string) $nationalCode))) {
         throw new TrafficInputException('کد ملی وارد شده معتبر نیست.', 'national_code');
     }
-    $phone = preg_replace('/\D/', '', (string) ($data['phone'] ?? ''));
+    $phone = preg_replace('/\D/', '', strtr((string) ($data['phone'] ?? ''), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']));
     return [
-        'full_name' => $name,
+        'full_name' => mb_substr($name, 0, 190),
         'national_code' => (string) $nationalCode,
-        'phone' => $phone !== '' ? $phone : null,
-        'company' => trim((string) ($data['company'] ?? '')) ?: null,
-        'meeting_with' => trim((string) ($data['meeting_with'] ?? '')) ?: null,
-        'approved_by' => trim((string) ($data['approved_by'] ?? '')) ?: null,
-        'description' => trim((string) ($data['description'] ?? '')) ?: null,
+        'phone' => $phone !== '' ? mb_substr($phone, 0, 20) : null,
+        'company' => mb_substr(trim((string) ($data['company'] ?? '')), 0, 190) ?: null,
+        'meeting_with' => mb_substr(trim((string) ($data['meeting_with'] ?? '')), 0, 190) ?: null,
+        'approved_by' => mb_substr(trim((string) ($data['approved_by'] ?? '')), 0, 190) ?: null,
+        'description' => mb_substr(trim((string) ($data['description'] ?? '')), 0, 5000) ?: null,
         'no_visit' => !empty($data['no_visit']) ? 1 : 0,
         'with_car' => !empty($data['with_car']) ? 1 : 0,
         'with_mobile' => !empty($data['with_mobile']) ? 1 : 0,
     ];
 }
 
+function traffic_visit_snapshot(array $record): array
+{
+    $fields = ['serial_no', 'visit_date', 'full_name', 'national_code', 'phone', 'company', 'entry_time', 'exit_time', 'no_visit', 'with_car', 'with_mobile', 'meeting_with', 'approved_by', 'description', 'is_notice'];
+    $snapshot = [];
+    foreach ($fields as $field) {
+        $snapshot[$field] = $record[$field] ?? null;
+    }
+    return $snapshot;
+}
+
+function traffic_record_history(array $before, ?array $after, array $user, string $action = 'updated'): void
+{
+    $beforeSnapshot = traffic_visit_snapshot($before);
+    $afterSnapshot = $after === null ? null : traffic_visit_snapshot($after);
+    $changes = [];
+    foreach ($beforeSnapshot as $field => $oldValue) {
+        $newValue = $afterSnapshot[$field] ?? null;
+        if ((string) ($oldValue ?? '') !== (string) ($newValue ?? '')) {
+            $changes[$field] = ['from' => $oldValue, 'to' => $newValue];
+        }
+    }
+    if ($changes === []) {
+        return;
+    }
+    $stmt = db()->prepare('INSERT INTO traffic_visit_history (visit_id, serial_no, visitor_name, action, changed_by, before_json, after_json, changes_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    $stmt->execute([
+        (int) $before['id'], (string) ($before['serial_no'] ?? ''), (string) ($before['full_name'] ?? ''), $action,
+        (int) ($user['id'] ?? 0) ?: null,
+        json_encode($beforeSnapshot, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE),
+        $afterSnapshot === null ? null : json_encode($afterSnapshot, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE),
+        json_encode($changes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE),
+    ]);
+}
+
+function traffic_history_records(int $limit = 50, int $offset = 0): array
+{
+    $limit = max(1, min(200, $limit));
+    $offset = max(0, $offset);
+    return db()->query('SELECT h.*, u.full_name AS editor_name FROM traffic_visit_history h LEFT JOIN users u ON u.id = h.changed_by ORDER BY h.changed_at DESC, h.id DESC LIMIT ' . $limit . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function traffic_history_count(): int
+{
+    return (int) db()->query('SELECT COUNT(*) FROM traffic_visit_history')->fetchColumn();
+}
+
+function traffic_history_field_label(string $field): string
+{
+    static $labels = [
+        'visit_date' => 'تاریخ مراجعه', 'full_name' => 'نام و نام خانوادگی', 'national_code' => 'کد ملی',
+        'phone' => 'تلفن همراه', 'company' => 'موسسه / شرکت', 'entry_time' => 'ساعت ورود', 'exit_time' => 'ساعت خروج',
+        'no_visit' => 'بدون بازدید', 'with_car' => 'با خودرو', 'with_mobile' => 'با تلفن همراه',
+        'meeting_with' => 'ملاقات با', 'approved_by' => 'تاییدکننده', 'description' => 'توضیحات', 'is_notice' => 'نوع تردد',
+    ];
+    return $labels[$field] ?? $field;
+}
+
+function traffic_normalize_time_input(mixed $value): string
+{
+    return trim(strtr((string) $value, [
+        '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+        '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+        '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+        '：' => ':',
+    ]));
+}
+
+function traffic_history_value(string $field, mixed $value): string
+{
+    if ($value === null || $value === '') {
+        return '—';
+    }
+    if (in_array($field, ['no_visit', 'with_car', 'with_mobile', 'is_notice'], true)) {
+        if ($field === 'is_notice') {
+            return (int) $value === 1 ? 'تردد خاص' : 'تردد عادی';
+        }
+        return (int) $value === 1 ? 'بله' : 'خیر';
+    }
+    if (in_array($field, ['entry_time', 'exit_time'], true)) {
+        return substr((string) $value, 0, 5);
+    }
+    if ($field === 'visit_date') {
+        return jalali_date((string) $value, false);
+    }
+    return (string) $value;
+}
+
 function traffic_create_record(array $user): int
 {
     $payload = traffic_validate_payload($_POST);
+    $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with']);
     $serial = traffic_next_serial();
     $stmt = db()->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, phone, company, entry_time, exit_time, no_visit, with_car, with_mobile, meeting_with, approved_by, description, created_by) VALUES (?, CURDATE(), ?, ?, ?, ?, CURTIME(), NULL, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([$serial, $payload['full_name'], $payload['national_code'], $payload['phone'], $payload['company'], $payload['no_visit'], $payload['with_car'], $payload['with_mobile'], $payload['meeting_with'], $payload['approved_by'], $payload['description'], (int) $user['id']]);
@@ -252,24 +360,81 @@ function traffic_create_record(array $user): int
 
 function traffic_update_record(array $user): void
 {
+    if (!traffic_can_manage($user)) {
+        throw new RuntimeException('ویرایش تردد فقط برای مدیران کنترل تردد مجاز است.');
+    }
     $id = (int) ($_POST['record_id'] ?? 0);
     $record = traffic_fetch_record($id);
     if (!$record) {
         throw new RuntimeException('رکورد تردد پیدا نشد.');
     }
-    $payload = traffic_validate_payload($_POST);
-    $stmt = db()->prepare('UPDATE traffic_visits SET full_name = ?, national_code = ?, phone = ?, company = ?, no_visit = ?, with_car = ?, with_mobile = ?, meeting_with = ?, approved_by = ?, description = ? WHERE id = ?');
-    $stmt->execute([$payload['full_name'], $payload['national_code'], $payload['phone'], $payload['company'], $payload['no_visit'], $payload['with_car'], $payload['with_mobile'], $payload['meeting_with'], $payload['approved_by'], $payload['description'], $id]);
+    $payload = traffic_validate_payload($_POST, (int) ($record['is_notice'] ?? 0) === 1);
+    $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with'], $record);
+    $visitDate = trim((string) ($_POST['visit_date'] ?? ''));
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visitDate)) {
+        throw new TrafficInputException('تاریخ مراجعه معتبر نیست.', 'visit_date');
+    }
+    [$year, $month, $day] = array_map('intval', explode('-', $visitDate));
+    if (!checkdate($month, $day, $year)) {
+        throw new TrafficInputException('تاریخ مراجعه معتبر نیست.', 'visit_date');
+    }
+    $parseTime = static function (mixed $value, bool $required, string $field): ?string {
+        $raw = traffic_normalize_time_input($value);
+        if ($raw === '' && !$required) {
+            return null;
+        }
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $raw)) {
+            throw new TrafficInputException($field === 'entry_time' ? 'ساعت ورود معتبر نیست.' : 'ساعت خروج معتبر نیست.', $field);
+        }
+        return $raw . ':00';
+    };
+    $entryTime = $parseTime($_POST['entry_time'] ?? '', true, 'entry_time');
+    $exitTime = $parseTime($_POST['exit_time'] ?? '', false, 'exit_time');
+    if ($exitTime !== null && $exitTime < (string) $entryTime) {
+        throw new TrafficInputException('ساعت خروج نمی‌تواند قبل از ساعت ورود باشد.', 'exit_time');
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('UPDATE traffic_visits SET visit_date = ?, full_name = ?, national_code = ?, phone = ?, company = ?, entry_time = ?, exit_time = ?, no_visit = ?, with_car = ?, with_mobile = ?, meeting_with = ?, approved_by = ?, description = ? WHERE id = ?');
+        $stmt->execute([$visitDate, $payload['full_name'], $payload['national_code'] !== '' ? $payload['national_code'] : null, $payload['phone'], $payload['company'], $entryTime, $exitTime, $payload['no_visit'], $payload['with_car'], $payload['with_mobile'], $payload['meeting_with'], $payload['approved_by'], $payload['description'], $id]);
+        $updated = traffic_fetch_record($id);
+        if (!$updated) {
+            throw new RuntimeException('رکورد تردد پس از ذخیره پیدا نشد.');
+        }
+        traffic_record_history($record, $updated, $user, 'updated');
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
     save_audit((int) $user['id'], 'traffic_visit_updated', null, ['visit_id' => $id]);
 }
 
 function traffic_delete_record(array $user): void
 {
     if (!traffic_can_manage($user)) {
-        throw new RuntimeException('حذف تردد فقط برای مدیر سامانه مجاز است.');
+        throw new RuntimeException('حذف تردد فقط برای مدیران کنترل تردد مجاز است.');
     }
     $id = (int) ($_POST['record_id'] ?? 0);
-    db()->prepare('DELETE FROM traffic_visits WHERE id = ?')->execute([$id]);
+    $record = traffic_fetch_record($id);
+    if (!$record) {
+        throw new RuntimeException('رکورد تردد پیدا نشد.');
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        traffic_record_history($record, null, $user, 'deleted');
+        $pdo->prepare('DELETE FROM traffic_visits WHERE id = ?')->execute([$id]);
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
     save_audit((int) $user['id'], 'traffic_visit_deleted', null, ['visit_id' => $id]);
 }
 
@@ -280,23 +445,46 @@ function traffic_set_exit(array $user): void
     if (!$record) {
         throw new RuntimeException('رکورد تردد پیدا نشد.');
     }
+    if (!traffic_can_manage($user)) {
+        throw new RuntimeException('ثبت ساعت خروج فقط برای مدیران کنترل تردد مجاز است.');
+    }
     if (!empty($record['exit_time'])) {
         throw new TrafficInputException('ساعت خروج این تردد قبلاً ثبت شده است.');
     }
     $isToday = (string) $record['visit_date'] === (string) db()->query('SELECT CURDATE()')->fetchColumn();
-    if ($isToday) {
-        db()->prepare('UPDATE traffic_visits SET exit_time = CURTIME() WHERE id = ? AND exit_time IS NULL')->execute([$id]);
-    } else {
+    $exitTime = null;
+    if (!$isToday) {
         // تردد روز قبل: ساعت خروج واقعی باید دستی وارد شود، نه ساعت فعلی
-        $raw = trim((string) ($_POST['exit_time'] ?? ''));
-        if (!preg_match('/^\d{2}:\d{2}$/', $raw)) {
+        $raw = traffic_normalize_time_input($_POST['exit_time'] ?? '');
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $raw)) {
             throw new TrafficInputException('برای ترددهای روزهای قبل، ساعت خروج واقعی را وارد کنید.', 'exit_time');
         }
         $exitTime = $raw . ':00';
         if ($exitTime < (string) $record['entry_time']) {
             throw new TrafficInputException('ساعت خروج نمی‌تواند قبل از ساعت ورود باشد.', 'exit_time');
         }
-        db()->prepare('UPDATE traffic_visits SET exit_time = ? WHERE id = ? AND exit_time IS NULL')->execute([$exitTime, $id]);
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $update = $isToday
+            ? $pdo->prepare('UPDATE traffic_visits SET exit_time = CURTIME() WHERE id = ? AND exit_time IS NULL')
+            : $pdo->prepare('UPDATE traffic_visits SET exit_time = ? WHERE id = ? AND exit_time IS NULL');
+        $update->execute($isToday ? [$id] : [$exitTime, $id]);
+        if ($update->rowCount() !== 1) {
+            throw new TrafficInputException('ثبت ساعت خروج انجام نشد؛ وضعیت تردد را دوباره بررسی کنید.');
+        }
+        $updated = traffic_fetch_record($id);
+        if (!$updated) {
+            throw new RuntimeException('رکورد تردد پس از ثبت خروج پیدا نشد.');
+        }
+        traffic_record_history($record, $updated, $user, 'exit_set');
+        $pdo->commit();
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
     }
     save_audit((int) $user['id'], 'traffic_visit_exit_set', null, ['visit_id' => $id]);
 }
@@ -350,29 +538,63 @@ function traffic_notice_create(array $user): int
 
 function traffic_save_destination(array $user): void
 {
-    if (!traffic_can_manage($user)) {
-        throw new RuntimeException('مدیریت مقصدها فقط برای مدیر سامانه مجاز است.');
+    if (!traffic_can_manage_destinations($user)) {
+        throw new RuntimeException('مدیریت مقصدها فقط برای نقش دارای دسترسی مقاصد تردد مجاز است.');
     }
-    $title = trim((string) ($_POST['title'] ?? ''));
-    if ($title === '') {
-        throw new RuntimeException('عنوان مقصد نمی‌تواند خالی باشد.');
+    $title = mb_substr(trim((string) ($_POST['title'] ?? '')), 0, 190);
+    $approver = mb_substr(trim((string) ($_POST['approver_name'] ?? '')), 0, 190);
+    if ($title === '' || $approver === '') {
+        throw new RuntimeException('عنوان مقصد و نام تأییدکننده را وارد کنید.');
     }
-    db()->prepare('INSERT INTO traffic_destinations (title) VALUES (?)')->execute([$title]);
+    $exists = db()->prepare('SELECT COUNT(*) FROM traffic_destinations WHERE title = ?');
+    $exists->execute([$title]);
+    if ((int) $exists->fetchColumn() > 0) {
+        throw new RuntimeException('این عنوان مقصد قبلاً ثبت شده است.');
+    }
+    db()->prepare('INSERT INTO traffic_destinations (title, approver_name) VALUES (?, ?)')->execute([$title, $approver !== '' ? $approver : null]);
+}
+
+function traffic_update_destination(array $user): void
+{
+    if (!traffic_can_manage_destinations($user)) {
+        throw new RuntimeException('مدیریت مقصدها فقط برای نقش دارای دسترسی مقاصد تردد مجاز است.');
+    }
+    $id = (int) ($_POST['destination_id'] ?? 0);
+    $title = mb_substr(trim((string) ($_POST['title'] ?? '')), 0, 190);
+    $approver = mb_substr(trim((string) ($_POST['approver_name'] ?? '')), 0, 190);
+    if ($id < 1 || $title === '' || $approver === '') {
+        throw new RuntimeException('شناسه، عنوان مقصد و نام تأییدکننده را به‌درستی وارد کنید.');
+    }
+    $exists = db()->prepare('SELECT COUNT(*) FROM traffic_destinations WHERE title = ? AND id <> ?');
+    $exists->execute([$title, $id]);
+    if ((int) $exists->fetchColumn() > 0) {
+        throw new RuntimeException('این عنوان مقصد قبلاً ثبت شده است.');
+    }
+    $update = db()->prepare('UPDATE traffic_destinations SET title = ?, approver_name = ? WHERE id = ?');
+    $update->execute([$title, $approver !== '' ? $approver : null, $id]);
+    if ($update->rowCount() < 1) {
+        $check = db()->prepare('SELECT COUNT(*) FROM traffic_destinations WHERE id = ?');
+        $check->execute([$id]);
+        if ((int) $check->fetchColumn() < 1) {
+            throw new RuntimeException('مقصد برای ویرایش پیدا نشد.');
+        }
+    }
 }
 
 function traffic_delete_destination(array $user): void
 {
-    if (!traffic_can_manage($user)) {
-        throw new RuntimeException('مدیریت مقصدها فقط برای مدیر سامانه مجاز است.');
+    if (!traffic_can_manage_destinations($user)) {
+        throw new RuntimeException('مدیریت مقصدها فقط برای نقش دارای دسترسی مقاصد تردد مجاز است.');
     }
     $id = (int) ($_POST['destination_id'] ?? 0);
-    db()->prepare('UPDATE traffic_destinations SET is_active = 0 WHERE id = ?')->execute([$id]);
+    $update = db()->prepare('UPDATE traffic_destinations SET is_active = 0 WHERE id = ? AND is_active = 1');
+    $update->execute([$id]);
 }
 
 /** مقدارهای فرم ثبت تردد برای پر کردن دوباره پس از خطا. */
 function traffic_form_old_values(): array
 {
-    $keys = ['national_code', 'full_name', 'phone', 'company', 'approved_by', 'description'];
+    $keys = ['national_code', 'full_name', 'phone', 'company', 'approved_by', 'description', 'meeting_with', 'visit_date', 'entry_time', 'exit_time', 'no_visit', 'with_car', 'with_mobile'];
     $old = [];
     foreach ($keys as $key) {
         $old[$key] = mb_substr(trim((string) ($_POST[$key] ?? '')), 0, 500);
@@ -389,8 +611,10 @@ function traffic_remember_form_error(RuntimeException $exception, string $tab): 
         'field' => $field,
         'tab' => $tab,
         'old' => traffic_form_old_values(),
+        'record_id' => (int) ($_POST['record_id'] ?? 0),
     ];
-    redirect('index.php?page=traffic-control&tab=' . $tab);
+    $suffix = $tab === 'edit' ? '&id=' . (int) ($_POST['record_id'] ?? 0) : '';
+    redirect('index.php?page=traffic-control&tab=' . $tab . $suffix);
 }
 
 /** همهٔ ترددهای بدون خروج (امروز و روزهای قبل). */
@@ -429,7 +653,7 @@ function traffic_handle_post(string $action, array $user): void
         try {
             traffic_update_record($user);
         } catch (RuntimeException $exception) {
-            traffic_remember_form_error($exception, 'history');
+            traffic_remember_form_error($exception, 'edit');
         }
         flash('success', 'اطلاعات تردد به‌روزرسانی شد.');
         redirect('index.php?page=traffic-control&tab=history');
@@ -455,6 +679,11 @@ function traffic_handle_post(string $action, array $user): void
         }
         traffic_save_destination($user);
         flash('success', 'مقصد جدید اضافه شد.');
+        redirect('index.php?page=traffic-control&tab=destinations');
+    }
+    if ($action === 'traffic_update_destination') {
+        traffic_update_destination($user);
+        flash('success', 'عنوان مقصد و تأییدکننده به‌روزرسانی شد.');
         redirect('index.php?page=traffic-control&tab=destinations');
     }
     if ($action === 'traffic_delete_destination') {
@@ -522,12 +751,15 @@ function traffic_render_page(array $user): never
     if (function_exists('require_permission')) {
         $user = require_permission('traffic.view');
     }
-    $tab = valid_choice((string) ($_GET['tab'] ?? 'dashboard'), ['dashboard', 'new', 'history', 'destinations', 'import'], 'dashboard');
+    $tab = valid_choice((string) ($_GET['tab'] ?? 'dashboard'), ['dashboard', 'new', 'history', 'destinations', 'import', 'edit', 'changes'], 'dashboard');
     if ($tab === 'import') {
         $user = require_permission('traffic.manage');
         if (isset($_GET['template'])) {
             traffic_import_download_template(valid_choice((string) $_GET['template'], ['xlsx', 'csv'], 'xlsx'));
         }
+    }
+    if (in_array($tab, ['edit', 'changes'], true)) {
+        $user = require_permission('traffic.manage');
     }
     $filters = [
         'search' => trim((string) ($_GET['search'] ?? '')),
@@ -597,8 +829,15 @@ function traffic_render_page(array $user): never
             $statsError = 'آمار داشبورد از پایگاه داده دریافت نشد؛ پیام خطا در گزارش خطای سرور ثبت شده است.';
         }
     }
-    $destinations = in_array($tab, ['new', 'history'], true) ? traffic_destinations() : [];
-    $approvers = $tab === 'new' ? traffic_approvers() : [];
+    $destinations = in_array($tab, ['new', 'history', 'edit'], true) ? traffic_destinations() : [];
+    $approvers = []; // تأییدکننده از تنظیم مقصد خوانده می‌شود؛ ورود دستی وجود ندارد.
+    $editRecord = $tab === 'edit' ? traffic_fetch_record((int) ($_GET['id'] ?? 0)) : null;
+    $changePage = max(1, (int) ($_GET['p'] ?? 1));
+    $changeCount = $tab === 'changes' ? traffic_history_count() : 0;
+    $changePerPage = 50;
+    $changePageCount = max(1, (int) ceil($changeCount / $changePerPage));
+    $changePage = min($changePage, $changePageCount);
+    $changeRows = $tab === 'changes' ? traffic_history_records($changePerPage, ($changePage - 1) * $changePerPage) : [];
     $createdId = (int) ($_GET['created'] ?? 0);
     $lastCreated = $createdId ? traffic_fetch_record($createdId) : null;
 
@@ -613,7 +852,8 @@ function traffic_render_page(array $user): never
             <a class="<?= $tab === 'dashboard' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=dashboard">📊 داشبورد</a>
             <a class="<?= $tab === 'new' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=new">➕ ثبت تردد</a>
             <a class="<?= $tab === 'history' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=history">📋 سوابق</a>
-            <?php if (traffic_can_manage_destinations($user)): ?><a class="<?= $tab === 'destinations' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=destinations">🏷️ مقصدهای ملاقات</a><?php endif; ?>
+            <?php if (traffic_can_manage($user)): ?><a class="<?= $tab === 'changes' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=changes">🕘 تاریخچهٔ ویرایش‌ها</a><?php endif; ?>
+            <?php if (traffic_can_manage_destinations($user)): ?><a class="<?= $tab === 'destinations' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=destinations">🏷️ مقاصد ملاقات و تأییدکنندگان</a><?php endif; ?>
         </nav>
         <?php if ($formError): ?>
         <div class="alert danger" role="alert" tabindex="-1" id="traffic-form-error" data-focus-form="<?= $tab === 'new' ? 'traffic-new-form' : '' ?>" data-focus-field="<?= e((string) $formError['field']) ?>"><?= e((string) $formError['message']) ?></div>
@@ -668,7 +908,7 @@ function traffic_render_page(array $user): never
                     <div class="traffic-open-row" style="display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid #e5e7eb">
                         <span><strong><?= e(((int) ($visit['is_notice'] ?? 0) === 1 ? 'تردد خاص: ' : '') . $visit['full_name']) ?></strong> <?php if (empty($visit['is_notice'])): ?><small>(<?= e($visit['national_code']) ?>)</small><?php endif; ?><br><small>تاریخ <?= e(jalali_date($visit['visit_date'], false)) ?> · شماره برگ <?= e($visit['serial_no']) ?> · ورود <?= e(substr((string) $visit['entry_time'], 0, 5)) ?> · ملاقات با <?= e($visit['meeting_with'] ?? '-') ?></small></span>
                         <?php if (user_can($user, 'traffic.manage')): ?>
-                        <form method="post" class="traffic-open-exit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $visit['id'] ?>"><input type="hidden" name="return_tab" value="dashboard"><?php if ((string) $visit['visit_date'] !== (string) date('Y-m-d')): ?><label style="font-size:12px">ساعت خروج واقعی <input type="time" name="exit_time" required style="margin-inline-start:6px"></label><?php endif; ?><button class="mini-button" type="submit">ثبت خروج</button></form>
+                        <form method="post" class="traffic-open-exit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $visit['id'] ?>"><input type="hidden" name="return_tab" value="dashboard"><?php if ((string) $visit['visit_date'] !== (string) date('Y-m-d')): ?><label style="font-size:12px">ساعت خروج واقعی <input class="traffic-time-24h" type="text" name="exit_time" required inputmode="numeric" maxlength="5" placeholder="مثلاً 09:05" title="ساعت ۲۴ساعته، مانند 14:30" style="margin-inline-start:6px"></label><?php endif; ?><button class="mini-button" type="submit">ثبت خروج</button></form>
                         <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
@@ -694,8 +934,8 @@ function traffic_render_page(array $user): never
                     <div class="traffic-full-only" style="display:contents">
                     <label>تلفن همراه<input name="phone" id="traffic-phone" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off" value="<?= e((string) ($formOld['phone'] ?? '')) ?>"></label>
                     <label>موسسه / شرکت<input name="company" id="traffic-company" value="<?= e((string) ($formOld['company'] ?? '')) ?>"></label>
-                    <label>ملاقات با<select name="meeting_with" id="traffic-meeting-with"><option value="">— انتخاب کنید —</option><?php foreach ($destinations as $d): ?><option value="<?= e($d['title']) ?>"><?= e($d['title']) ?></option><?php endforeach; ?></select></label>
-                    <label>تایید کننده<input name="approved_by" id="traffic-approved-by" list="traffic-approvers-list"><datalist id="traffic-approvers-list"><?php foreach ($approvers as $a): ?><option value="<?= e($a) ?>"><?php endforeach; ?></datalist></label>
+                    <label>ملاقات با<select name="meeting_with" id="traffic-meeting-with"><option value="">— انتخاب کنید —</option><?php foreach ($destinations as $d): ?><option value="<?= e($d['title']) ?>" data-approver="<?= e((string) ($d['approver_name'] ?? '')) ?>"><?= e($d['title']) ?></option><?php endforeach; ?></select></label>
+                    <label>تأییدکننده<input id="traffic-approved-by" readonly aria-readonly="true" placeholder="با انتخاب مقصد نمایش داده می‌شود"><small class="field-help">این مقدار از تنظیم همان مقصد خوانده می‌شود.</small></label>
                     <label class="full">توضیحات / هدف از تردد<textarea name="description" rows="2"><?= e((string) ($formOld['description'] ?? '')) ?></textarea></label>
                     <div class="traffic-checks">
                         <label><input type="checkbox" name="no_visit" value="1"> بدون بازدید</label>
@@ -750,13 +990,64 @@ function traffic_render_page(array $user): never
                     <span><?= e($r['recorder_name'] ?? '-') ?></span>
                     <span class="actions">
                         <?php if (empty($r['is_notice'])): ?><a class="mini-button" href="index.php?page=traffic-control-print&amp;id=<?= (int) $r['id'] ?>" target="_blank">چاپ</a><?php endif; ?>
-                        <?php if (!$r['exit_time']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $r['id'] ?>"><button class="mini-button" type="submit">ثبت خروج</button></form><?php endif; ?>
+                        <?php if (!$r['exit_time'] && traffic_can_manage($user)): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_set_exit"><input type="hidden" name="record_id" value="<?= (int) $r['id'] ?>"><?php if ((string) $r['visit_date'] !== (string) date('Y-m-d')): ?><input class="traffic-time-24h" type="text" name="exit_time" required inputmode="numeric" maxlength="5" placeholder="09:05" aria-label="ساعت خروج واقعی، قالب ۲۴ ساعته" title="ساعت ۲۴ساعته، مانند 14:30"><?php endif; ?><button class="mini-button" type="submit">ثبت خروج</button></form><?php endif; ?>
+                        <?php if (traffic_can_manage($user)): ?><a class="mini-button" href="index.php?page=traffic-control&amp;tab=edit&amp;id=<?= (int) $r['id'] ?>">ویرایش</a><?php endif; ?>
                         <?php if (traffic_can_manage($user)): ?><form method="post" data-confirm="این رکورد حذف شود؟"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_delete"><input type="hidden" name="record_id" value="<?= (int) $r['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form><?php endif; ?>
                     </span>
                 </div>
                 <?php endforeach; ?>
                 <p class="traffic-history-empty" id="traffic-history-empty" hidden>موردی با این جست‌وجو یافت نشد.</p>
             </div>
+        </section>
+        <?php endif; ?>
+
+        <?php if ($tab === 'edit'): ?>
+        <section class="card form-card traffic-form-card traffic-edit-card">
+            <?php if (!$editRecord): ?>
+                <div class="alert danger">رکورد موردنظر پیدا نشد یا حذف شده است. <a href="index.php?page=traffic-control&amp;tab=history">بازگشت به سوابق</a></div>
+            <?php else: ?>
+                <div class="section-title"><div><span class="eyebrow">اصلاح اطلاعات ثبت‌شده</span><h2>ویرایش تردد <?= e((string) $editRecord['serial_no']) ?></h2></div><a class="button secondary" href="index.php?page=traffic-control&amp;tab=history">بازگشت به سوابق</a></div>
+                <p class="traffic-edit-note">تاریخ مراجعه و ساعت‌های ورود و خروج با قالب ۲۴ساعته (مثلاً 09:05) قابل اصلاح هستند؛ تغییرات ذخیره‌شده در «تاریخچهٔ ویرایش‌ها» با مقدار قبلی و جدید ثبت می‌شود.</p>
+                <form method="post" class="traffic-form traffic-edit-form">
+                    <?= csrf_field() ?><input type="hidden" name="action" value="traffic_update"><input type="hidden" name="record_id" value="<?= (int) $editRecord['id'] ?>">
+                    <div class="form-grid">
+                        <?php if (empty($editRecord['is_notice'])): ?><label>کد ملی<input name="national_code" required maxlength="10" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only value="<?= e((string) ($formOld['national_code'] ?? $editRecord['national_code'] ?? '')) ?>"></label><?php else: ?><input type="hidden" name="national_code" value="<?= e((string) ($formOld['national_code'] ?? $editRecord['national_code'] ?? '')) ?>"><?php endif; ?>
+                        <label>نام و نام خانوادگی<input name="full_name" required maxlength="190" value="<?= e((string) ($formOld['full_name'] ?? $editRecord['full_name'])) ?>"></label>
+                        <label>تاریخ مراجعه<input type="date" name="visit_date" required value="<?= e((string) ($formOld['visit_date'] ?? $editRecord['visit_date'])) ?>"></label>
+                        <label>ساعت ورود<input class="traffic-time-24h" type="text" name="entry_time" required inputmode="numeric" maxlength="5" placeholder="09:05" value="<?= e(substr((string) ($formOld['entry_time'] ?? $editRecord['entry_time']), 0, 5)) ?>" title="ساعت ۲۴ساعته، مانند 14:30"></label>
+                        <label>ساعت خروج <small>(خالی یعنی هنوز خارج نشده)</small><input class="traffic-time-24h" type="text" name="exit_time" inputmode="numeric" maxlength="5" placeholder="09:05" value="<?= e(substr((string) ($formOld['exit_time'] ?? $editRecord['exit_time'] ?? ''), 0, 5)) ?>" title="ساعت ۲۴ساعته؛ خالی یعنی هنوز خارج نشده"></label>
+                        <label>تلفن همراه<input name="phone" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only value="<?= e((string) ($formOld['phone'] ?? $editRecord['phone'] ?? '')) ?>"></label>
+                        <label>موسسه / شرکت<input name="company" maxlength="190" value="<?= e((string) ($formOld['company'] ?? $editRecord['company'] ?? '')) ?>"></label>
+                        <label>ملاقات با<?php $currentMeeting = (string) ($formOld['meeting_with'] ?? $editRecord['meeting_with'] ?? ''); $activeMeetings = array_map(static fn (array $destination): string => (string) $destination['title'], $destinations); ?><select name="meeting_with" id="traffic-edit-meeting-with"><option value="">— انتخاب کنید —</option><?php if ($currentMeeting !== '' && !in_array($currentMeeting, $activeMeetings, true)): ?><option value="<?= e($currentMeeting) ?>" data-approver="<?= e((string) ($editRecord['approved_by'] ?? '')) ?>" selected><?= e($currentMeeting) ?> (غیرفعال)</option><?php endif; ?><?php foreach ($destinations as $destination): $selectedMeeting = $currentMeeting === (string) $destination['title']; ?><option value="<?= e($destination['title']) ?>" data-approver="<?= e((string) ($destination['approver_name'] ?? '')) ?>" <?= $selectedMeeting ? 'selected' : '' ?>><?= e($destination['title']) ?></option><?php endforeach; ?></select></label>
+                        <label>تأییدکننده<input id="traffic-edit-approved-by" readonly aria-readonly="true" placeholder="از تنظیم مقصد پر می‌شود" value="<?= e((string) ($formOld['approved_by'] ?? $editRecord['approved_by'] ?? '')) ?>"><small class="field-help">با تغییر مقصد، تأییدکنندهٔ متناظر نمایش داده می‌شود.</small></label>
+                        <label class="full">توضیحات / هدف از تردد<textarea name="description" rows="3"><?= e((string) ($formOld['description'] ?? $editRecord['description'] ?? '')) ?></textarea></label>
+                        <div class="traffic-checks">
+                            <label><input type="checkbox" name="no_visit" value="1" <?= !empty($formOld) ? (!empty($formOld['no_visit']) ? 'checked' : '') : (!empty($editRecord['no_visit']) ? 'checked' : '') ?>> بدون بازدید</label>
+                            <label><input type="checkbox" name="with_car" value="1" <?= !empty($formOld) ? (!empty($formOld['with_car']) ? 'checked' : '') : (!empty($editRecord['with_car']) ? 'checked' : '') ?>> با خودرو</label>
+                            <label><input type="checkbox" name="with_mobile" value="1" <?= !empty($formOld) ? (!empty($formOld['with_mobile']) ? 'checked' : '') : (!empty($editRecord['with_mobile']) ? 'checked' : '') ?>> با تلفن همراه</label>
+                        </div>
+                    </div>
+                    <div class="actions"><button class="button" type="submit">ذخیرهٔ اصلاحات</button><a class="button secondary" href="index.php?page=traffic-control&amp;tab=history">انصراف</a></div>
+                </form>
+            <?php endif; ?>
+        </section>
+        <?php endif; ?>
+
+        <?php if ($tab === 'changes'): ?>
+        <section class="card traffic-change-history-card">
+            <div class="section-title"><div><span class="eyebrow">ردگیری مدیریتی</span><h2>تاریخچهٔ ویرایش‌های کنترل تردد</h2></div><a class="button secondary" href="index.php?page=traffic-control&amp;tab=history">بازگشت به سوابق</a></div>
+            <p class="traffic-edit-note">ویرایش مشخصات، اصلاح تاریخ و ساعت‌ها، ثبت ساعت خروج و حذف رکوردها در این فهرست ثبت می‌شوند. برای دیدن همهٔ رویدادها از صفحه‌بندی پایین استفاده کنید.</p>
+            <?php if (!$changeRows): ?><div class="traffic-change-empty">هنوز تغییری در سوابق تردد ثبت نشده است.</div><?php else: ?>
+            <div class="traffic-change-list">
+                <?php foreach ($changeRows as $change): $changeMap = json_decode((string) ($change['changes_json'] ?? '{}'), true); $changeMap = is_array($changeMap) ? $changeMap : []; $changeLabel = match ((string) $change['action']) { 'deleted' => 'حذف رکورد', 'exit_set' => 'ثبت ساعت خروج', default => 'ویرایش رکورد' }; ?>
+                <article class="traffic-change-item">
+                    <header><div><strong><?= e($changeLabel) ?> · <?= e((string) $change['visitor_name']) ?></strong><small>شماره برگ <?= e((string) $change['serial_no']) ?> · <?= e((string) ($change['editor_name'] ?? 'کاربر حذف‌شده')) ?></small></div><time><?= e(jalali_date((string) $change['changed_at'], true)) ?></time></header>
+                    <details><summary>مشاهدهٔ <?= count($changeMap) ?> مورد تغییر</summary><dl><?php foreach ($changeMap as $field => $values): if (!is_array($values)) continue; ?><div><dt><?= e(traffic_history_field_label((string) $field)) ?></dt><dd><del><?= e(traffic_history_value((string) $field, $values['from'] ?? null)) ?></del><span aria-hidden="true"> ← </span><ins><?= e(traffic_history_value((string) $field, $values['to'] ?? null)) ?></ins></dd></div><?php endforeach; ?></dl></details>
+                </article>
+                <?php endforeach; ?>
+            </div>
+            <?php $changePages = (int) ceil($changeCount / $changePerPage); if ($changePages > 1): ?><nav class="traffic-change-pagination" aria-label="صفحه‌بندی تاریخچه"><?php if ($changePage > 1): ?><a class="button secondary" href="index.php?page=traffic-control&amp;tab=changes&amp;p=<?= $changePage - 1 ?>">صفحهٔ قبلی</a><?php endif; ?><span>صفحهٔ <?= $changePage ?> از <?= $changePages ?> · <?= $changeCount ?> تغییر</span><?php if ($changePage < $changePages): ?><a class="button secondary" href="index.php?page=traffic-control&amp;tab=changes&amp;p=<?= $changePage + 1 ?>">صفحهٔ بعدی</a><?php endif; ?></nav><?php endif; ?>
+            <?php endif; ?>
         </section>
         <?php endif; ?>
 
@@ -809,17 +1100,20 @@ function traffic_render_page(array $user): never
 
         <?php if ($tab === 'destinations' && traffic_can_manage_destinations($user)): ?>
         <section class="card traffic-destinations-card">
-            <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقصدهای ملاقات</h2></div></div>
-            <form method="post" class="inline-form traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><input name="title" placeholder="عنوان مقصد جدید" required><button class="button" type="submit">افزودن</button></form>
-            <div class="category-list traffic-destinations-list">
+            <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقاصد ملاقات و تأییدکنندگان</h2><p class="muted">برای هر مقصد، نام تأییدکننده را ثبت کنید تا هنگام ثبت تردد خودکار نمایش داده شود.</p></div></div>
+            <form method="post" class="traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><label>عنوان مقصد<input name="title" placeholder="مثلاً ملاقات با مدیرعامل" maxlength="190" required></label><label>تأییدکننده<input name="approver_name" placeholder="نام تأییدکننده" maxlength="190" required></label><button class="button" type="submit">افزودن مقصد</button></form>
+            <div class="traffic-destinations-list">
                 <?php foreach (traffic_destinations(false) as $d): ?>
-                <div><span><?= e($d['title']) ?></span><form method="post" data-confirm="این مقصد حذف شود؟"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_delete_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form></div>
+                <div class="traffic-destination-row <?= (int) ($d['is_active'] ?? 1) === 1 ? '' : 'is-inactive' ?>">
+                    <form method="post" class="traffic-destination-edit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_update_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><label>عنوان مقصد<input name="title" value="<?= e($d['title']) ?>" maxlength="190" required></label><label>تأییدکننده<input name="approver_name" value="<?= e((string) ($d['approver_name'] ?? '')) ?>" maxlength="190" required></label><button class="mini-button" type="submit">ذخیره</button></form>
+                    <?php if ((int) ($d['is_active'] ?? 1) === 1): ?><form method="post" data-confirm="این مقصد از فهرست فعال غیرفعال شود؟ سوابق قبلی حفظ می‌شوند."><?= csrf_field() ?><input type="hidden" name="action" value="traffic_delete_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><button class="mini-button danger" type="submit">غیرفعال‌کردن</button></form><?php else: ?><span class="traffic-destination-inactive-label">غیرفعال</span><?php endif; ?>
+                </div>
                 <?php endforeach; ?>
             </div>
         </section>
         <?php endif; ?>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=7"></script>
+    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=9"></script>
     <?php
     render_footer();
     exit;
