@@ -37,3 +37,18 @@ def test_reminder_visual_is_centered_and_alarm_styled():
     assert "place-items: center" in style
     assert "inspection-reminder-pulse" in style
     assert ".traffic-phone-prefix" in style
+
+
+def test_only_primary_admin_can_toggle_reminder_below_auto_close_setting():
+    source = (ROOT / "index.php").read_text()
+    assert "if (user_is_primary_admin($user))" in source
+    assert "settings_section') === 'inspection_alarm'" in source
+    assert "require_primary_admin()" in source
+    assert "inspection_food_absence_alarm_enabled" in source
+    assert "setting('inspection_food_absence_alarm_enabled', '1') !== '0'" in source
+    assert "if ($name === '')" in source and "$user['username']" in source
+    close_box = source.index('id=\"ticket-auto-close\"')
+    alarm_box = source.index('id=\"inspection-alarm-settings\"')
+    general_box = source.index('اطلاعات سامانه', alarm_box)
+    assert close_box < alarm_box < general_box
+    assert "grid-column: 1 / -1" in (ROOT / "assets/style.css").read_text()

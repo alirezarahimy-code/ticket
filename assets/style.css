@@ -1566,3 +1566,7 @@ body.triangle-mesh-background-active > .triangle-mesh-canvas { z-index: 0 !impor
 @keyframes inspection-reminder-enter { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes inspection-reminder-pulse { 0%, 100% { box-shadow: 0 0 0 7px rgba(239, 68, 68, .10), 0 24px 90px rgba(0, 0, 0, .34); } 50% { box-shadow: 0 0 0 13px rgba(239, 68, 68, .2), 0 24px 90px rgba(0, 0, 0, .34); } }
 @keyframes inspection-reminder-icon-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+.settings-panel-grid > .inspection-alarm-settings { grid-column: 1 / -1; }
+.inspection-alarm-status-on { color: #087e4f; }
+.inspection-alarm-status-off { color: #a33a32; }
