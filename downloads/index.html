@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R19</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R20</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,21 +25,21 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جدید · R19 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — بررسی کد پرسنلی و ترمیم نقش مدیران سازمان</h1>
-    <p>R19 جستجوی کد را برای دیدن و انتخاب صریح رکوردهای پرسنل غذا و حساب محلی گسترش می‌دهد و مانع ارتقای مدیران معاونت/اداره به ادمین اصلی سامانه می‌شود.</p>
+    <span class="tag">بستهٔ اصلاحی جدید · R20 · ۲۰۲۶/۱۰/۲۱</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — اصلاح جستجوی کد ۳۳۵</h1>
+    <p>R20 جستجوی کد را برای حساب‌های محلی با نقش کاربر محلی یا بازرسی کامل‌تر می‌کند و اگر رکوردی به‌دلیل نقش غیرمجاز کنار گذاشته شود، اطلاعات همان رکورد را گزارش می‌دهد.</p>
     <ul>
-      <li>نتایج کد در دیتابیس، شامل منبع، شناسه و مشخصات، پیش از هر تغییر نمایش داده می‌شوند؛ مدیر اصلی فقط رکوردهای متعلق به همان کارمند را برای ادغام انتخاب می‌کند.</li>
-      <li>ادغام رکوردهای انتخاب‌شده پس از پشتیبان، در یک تراکنش و با انتقال ارجاع‌هاست؛ موارد انتخاب‌نشده دست‌نخورده می‌مانند و حذف مستقیم حساب وجود ندارد.</li>
-      <li>انتصاب مدیر معاونت/اداره دیگر نقش ادمین اصلی سامانه را اعطا نمی‌کند. ابزار ترمیم مدیر اصلی، نقش کاربران اشتباهاً ارتقایافته را بدون تغییر انتساب سازمانی برمی‌گرداند.</li>
-      <li>رفتار ثبت دستی حضور فقط برای افراد دارای سفارش همان روز از R18 حفظ شده است. کد ۳۳۵ کد پرسنلی است، نه شناسهٔ دیتابیسی.</li>
+      <li>کد در رکورد پرسنل غذا و حساب محلی با کد پرسنلی یا نام کاربری بررسی می‌شود؛ نقش‌های «کاربر محلی» و «بازرسی» پشتیبانی می‌شوند.</li>
+      <li>نتایج واقعی قبل از تغییر نمایش داده می‌شوند و فقط رکوردهای انتخاب‌شده ادغام می‌شوند؛ ادغام پس از پشتیبان‌گیری و در یک تراکنش است.</li>
+      <li>اگر کد در جدول کاربران باشد اما نقش/وضعیت اجازهٔ ادغام امن ندهد، شناسه و نقش رکورد گزارش می‌شود تا علت پنهان نماند.</li>
+      <li>اصلاحات R19 دربارهٔ عدم ارتقای مدیران سازمانی به ادمین اصلی و حفظ ثبت دستیِ مبتنی بر سفارش همچنان همراه بسته است.</li>
       <li>بدون migration؛ هیچ پایگاه داده یا حساب تولیدی بررسی یا تغییر داده نشده است.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip" download="ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip">⬇ دریافت بستهٔ نصب R19</a>
-    <div class="file">ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r19/CHANGE-REPORT-FA.md">جزئیات R19</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R18 و اصلاحات قبلی ساخته شده است.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip" download="ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip">⬇ دریافت بستهٔ نصب R20</a>
+    <div class="file">ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip · تنها بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r20/CHANGE-REPORT-FA.md">جزئیات R20</a></p>
+    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R19 و اصلاحات قبلی ساخته شده است.</div>
   </main>
 </body>
 </html>

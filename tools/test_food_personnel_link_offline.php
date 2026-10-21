@@ -231,11 +231,14 @@ check('حساب محلی دارای کد ۳۳۵ با ارجاع‌هایش در 
 $p3 = new PDO('sqlite::memory:');
 $p3->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $p3->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, full_name TEXT, first_name TEXT, last_name TEXT, employee_number TEXT UNIQUE, national_code TEXT, role TEXT, auth_source TEXT, is_active INTEGER, is_primary_admin INTEGER NOT NULL DEFAULT 0, manager_user_id INTEGER NULL)');
-$p3->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (1,'335','ورود محلی',NULL,'1234567890','local_user','local',1)");
+$p3->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (1,'335','ورود محلی',NULL,'1234567890','guard','local',1)");
 $p3->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (2,'food_335','پرسنل رسمی','علی','نمونه','335','1234567890','user','food',1)");
 $p3->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (3,'domain.335','حساب دامینی','35','1234567890','user','ldap',1)");
-$p3Matches = fpl_food_code_matches($p3->query("SELECT id, username, full_name, employee_number, national_code, role, auth_source, is_primary_admin FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user')")->fetchAll(), '335');
-check('جستجوی دیتابیس کد ۳۳۵ هم رکورد غذا و هم حساب ورود محلی را پیدا می‌کند', count($p3Matches) === 2);
+$p3Rows = $p3->query("SELECT id, username, full_name, employee_number, national_code, role, auth_source, is_primary_admin FROM users WHERE auth_source IN ('food', 'local')")->fetchAll();
+$p3Candidates = fpl_code_candidate_rows($p3Rows, '335');
+$p3Matches = fpl_food_code_matches($p3Rows, '335');
+check('جستجوی دیتابیس کد ۳۳۵ هر دو ردیف غذا و حساب محلیِ بازرسی را پیدا می‌کند', count($p3Candidates) === 2 && count($p3Matches) === 2);
+check('حساب محلی با نقش بازرسی با کد کاربری‌اش قابل تطبیق است', fpl_food_personnel_code($p3Matches[1]) === '335' || fpl_food_personnel_code($p3Matches[0]) === '335');
 $selectedLocal335 = fpl_select_food_matches($p3Matches, [1]);
 check('ادمین می‌تواند فقط رکوردهای واقعاً متعلق به کارمند را انتخاب کند', count($selectedLocal335) === 1 && (int) $selectedLocal335[0]['id'] === 1);
 $invalidChoiceRejected = false;

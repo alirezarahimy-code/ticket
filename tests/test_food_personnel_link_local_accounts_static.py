@@ -14,11 +14,16 @@ class FoodPersonnelLocalLinkStaticTests(unittest.TestCase):
         cls.bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
 
     def test_candidates_include_local_food_staff_not_admins(self) -> None:
-        self.assertIn("auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0", self.link)
+        self.assertIn("auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0", self.link)
+        self.assertIn("function fpl_is_local_food_account(array $account)", self.link)
+        self.assertIn("function fpl_code_candidate_rows(array $rows, string $code)", self.link)
+        self.assertIn("auth_source IN ('food', 'local')", (ROOT / 'index.php').read_text(encoding='utf-8'))
 
     def test_merge_accepts_local_staff_account_and_keeps_backup_guard(self) -> None:
-        self.assertIn("$isLocalFoodAccount = $foodSource === 'local'", self.link)
-        self.assertIn("(int) ($food['is_primary_admin'] ?? 0) !== 1", self.link)
+        self.assertIn("$isLocalFoodAccount = is_array($food) && fpl_is_local_food_account($food);", self.link)
+        self.assertIn("['local_user', 'guard']", self.link)
+        self.assertIn("ردیف‌های پیدا‌شده", (ROOT / 'index.php').read_text(encoding='utf-8'))
+        self.assertIn("(int) ($account['is_primary_admin'] ?? 0) !== 1", self.link)
         self.assertIn("$backup = fpl_backup_users($pdo);", self.link)
         self.assertIn("UPDATE users SET employee_number = NULL, national_code = NULL, username = ? WHERE id = ?", self.link)
 

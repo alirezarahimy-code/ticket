@@ -111,7 +111,7 @@ function fpl_column_exists(PDO $pdo, string $table, string $column): bool
 function fpl_candidates(PDO $pdo): array
 {
     $domainRows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, email, department, is_active, role FROM users WHERE auth_source = 'ldap' AND is_active = 1 ORDER BY full_name, id")->fetchAll();
-    $foodRows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0) ORDER BY id")->fetchAll();
+    $foodRows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0) ORDER BY id")->fetchAll();
 
     $foodByName = [];
     foreach ($foodRows as $food) {
@@ -227,9 +227,7 @@ function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch
         }
         $foodSource = (string) ($food['auth_source'] ?? '');
         $isFoodOnlyRecord = $foodSource === 'food';
-        $isLocalFoodAccount = $foodSource === 'local'
-            && (string) ($food['role'] ?? '') === 'local_user'
-            && (int) ($food['is_primary_admin'] ?? 0) !== 1;
+        $isLocalFoodAccount = is_array($food) && fpl_is_local_food_account($food);
         if (!$food || (!$isFoodOnlyRecord && !$isLocalFoodAccount)) {
             throw new RuntimeException('رکورد پرسنل غذا یا حساب محلی معتبر پیدا نشد.');
         }
@@ -335,6 +333,9 @@ function fpl_codes_equal(string $left, string $right): bool
 {
     $left = fpl_normalize_code($left);
     $right = fpl_normalize_code($right);
+    if ($left === '' || $right === '') {
+        return false;
+    }
     if ($left === $right) {
         return true;
     }
@@ -343,19 +344,23 @@ function fpl_codes_equal(string $left, string $right): bool
     return ($leftLoose === '' ? '0' : $leftLoose) === ($rightLoose === '' ? '0' : $rightLoose);
 }
 
-/** کد مؤثر پرسنل؛ حساب محلی قدیمی ممکن است کد را فقط در username نگه داشته باشد. */
+/** حساب محلی کارکنان/بازرسی که می‌تواند در مسیر اتصال پرسنل وارد شود؛ ادمین اصلی هرگز مبدأ ادغام نیست. */
+function fpl_is_local_food_account(array $account): bool
+{
+    return (string) ($account['auth_source'] ?? '') === 'local'
+        && in_array((string) ($account['role'] ?? ''), ['local_user', 'guard'], true)
+        && (int) ($account['is_primary_admin'] ?? 0) !== 1;
+}
+
 function fpl_food_personnel_code(array $food): string
 {
     $code = fpl_normalize_code((string) ($food['employee_number'] ?? ''));
     if ($code !== '') {
         return $code;
     }
-    if ((string) ($food['auth_source'] ?? '') === 'local'
-        && (string) ($food['role'] ?? '') === 'local_user'
-        && (int) ($food['is_primary_admin'] ?? 0) !== 1) {
-        return fpl_normalize_code((string) ($food['username'] ?? ''));
-    }
-    return '';
+    return fpl_is_local_food_account($food)
+        ? fpl_normalize_code((string) ($food['username'] ?? ''))
+        : '';
 }
 
 /** کد دستی می‌تواند با employee_number یا نام کاربریِ حساب محلی تطبیق بخورد. */
@@ -369,13 +374,33 @@ function fpl_food_matches_code(array $food, string $code): bool
     if ($employeeCode !== '' && fpl_codes_equal($employeeCode, $code)) {
         return true;
     }
-    $isLocalFoodAccount = (string) ($food['auth_source'] ?? '') === 'local'
-        && (string) ($food['role'] ?? '') === 'local_user'
-        && (int) ($food['is_primary_admin'] ?? 0) !== 1;
-    return $isLocalFoodAccount && fpl_codes_equal((string) ($food['username'] ?? ''), $code);
+    return fpl_is_local_food_account($food)
+        && fpl_codes_equal((string) ($food['username'] ?? ''), $code);
 }
 
-/** همهٔ رکوردهای دیتابیسی با کد؛ کد دقیق اولویت دارد، ولی حساب محلی و رکورد غذا هر دو برگردانده می‌شوند. */
+/** ردیف‌های خام food/local که کد در employee_number یا نام کاربری محلی‌شان دیده می‌شود؛ شامل نقش‌های غیرقابل‌ادغام برای تشخیص علت است. */
+function fpl_code_candidate_rows(array $rows, string $code): array
+{
+    $code = fpl_normalize_code($code);
+    if ($code === '') {
+        return [];
+    }
+    $matches = [];
+    foreach ($rows as $row) {
+        $source = (string) ($row['auth_source'] ?? '');
+        if (!in_array($source, ['food', 'local'], true)) {
+            continue;
+        }
+        $employeeMatches = fpl_codes_equal((string) ($row['employee_number'] ?? ''), $code);
+        $usernameMatches = $source === 'local' && fpl_codes_equal((string) ($row['username'] ?? ''), $code);
+        if ($employeeMatches || $usernameMatches) {
+            $matches[] = $row;
+        }
+    }
+    return $matches;
+}
+
+/** همهٔ رکوردهای قابل‌ادغام با کد؛ کد دقیق اولویت دارد، حساب محلی و رکورد غذا هر دو برگردانده می‌شوند. */
 function fpl_food_code_matches(array $foodRows, string $code): array
 {
     $code = fpl_normalize_code($code);
@@ -389,10 +414,7 @@ function fpl_food_code_matches(array $foodRows, string $code): array
             continue;
         }
         $employeeCode = fpl_normalize_code((string) ($row['employee_number'] ?? ''));
-        $isLocalFoodAccount = (string) ($row['auth_source'] ?? '') === 'local'
-            && (string) ($row['role'] ?? '') === 'local_user'
-            && (int) ($row['is_primary_admin'] ?? 0) !== 1;
-        $usernameCode = $isLocalFoodAccount ? fpl_normalize_code((string) ($row['username'] ?? '')) : '';
+        $usernameCode = fpl_is_local_food_account($row) ? fpl_normalize_code((string) ($row['username'] ?? '')) : '';
         if ($employeeCode === $code || $usernameCode === $code) {
             $exact[] = $row;
         } else {
@@ -409,7 +431,7 @@ function fpl_find_food_by_code(PDO $pdo, string $code): ?array
     if ($code === '') {
         return null;
     }
-    $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
+    $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
     $matches = fpl_food_code_matches($rows, $code);
     return count($matches) === 1 ? $matches[0] : null;
 }
@@ -676,7 +698,7 @@ function fpl_backup_tables(PDO $pdo): array
 function fpl_report_rows(PDO $pdo): array
 {
     $domainRows = $pdo->query("SELECT id, username, full_name, employee_number, national_code, is_active FROM users WHERE auth_source = 'ldap' ORDER BY full_name, id")->fetchAll();
-    $currentFood = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
+    $currentFood = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
     $currentFoodCodes = [];
     foreach ($currentFood as $food) {
         $currentFoodCodes[(string) $food['employee_number']] = true;
@@ -685,7 +707,7 @@ function fpl_report_rows(PDO $pdo): array
     // پرسنل/حساب محلی حذف‌شده در ادغام‌ها (از جدول‌های پشتیبان)، کلید: کد پرسنلی
     $merged = [];
     foreach (fpl_backup_tables($pdo) as $table) {
-        $stmt = $pdo->query('SELECT id, full_name, first_name, last_name, employee_number, national_code FROM `' . str_replace('`', '', $table) . "` WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)");
+        $stmt = $pdo->query('SELECT id, full_name, first_name, last_name, employee_number, national_code FROM `' . str_replace('`', '', $table) . "` WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)");
         foreach ($stmt->fetchAll() as $old) {
             $code = (string) $old['employee_number'];
             if ($code !== '' && !isset($currentFoodCodes[$code]) && !isset($merged[$code])) {

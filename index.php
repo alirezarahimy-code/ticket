@@ -2766,10 +2766,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$domain || (string) $domain['auth_source'] !== 'ldap' || (int) $domain['is_active'] !== 1) {
                 throw new RuntimeException('فقط کاربر دامین فعال را می‌توان با این مسیر به پرسنل غذا متصل کرد.');
             }
-            $foodRows = db()->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
+            $foodRows = db()->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source IN ('food', 'local')")->fetchAll();
+            $databaseCodeRows = fpl_code_candidate_rows($foodRows, (string) $authoritativeCode);
             $foodMatches = fpl_food_code_matches($foodRows, (string) $authoritativeCode);
             if ($foodMatches === []) {
-                throw new RuntimeException('هیچ حساب پرسنل غذا یا محلی با کد ' . $authoritativeCode . ' پیدا نشد. کد، حساب محلی و تب کاربران غذا را بررسی کنید.');
+                if ($databaseCodeRows !== []) {
+                    $foundDetails = array_map(static function (array $row): string {
+                        $sourceLabel = (string) ($row['auth_source'] ?? '') === 'food' ? 'پرسنل غذا' : 'حساب محلی';
+                        return $sourceLabel . ' #' . (int) $row['id'] . '، نام=' . (string) ($row['full_name'] ?? '') . '، نام کاربری=' . (string) ($row['username'] ?? '') . '، نقش=' . (string) ($row['role'] ?? '');
+                    }, $databaseCodeRows);
+                    throw new RuntimeException('کد در جدول کاربران پیدا شد، اما نقش/وضعیت هیچ ردیفی اجازهٔ ادغام پرسنلی نمی‌دهد. ردیف‌های پیدا‌شده: ' . implode(' | ', $foundDetails));
+                }
+                throw new RuntimeException('در جدول کاربران هیچ رکورد پرسنل غذا یا حساب محلی با کد ' . $authoritativeCode . ' پیدا نشد؛ جستجو روی کد پرسنلی و نام کاربری حساب محلی انجام شد.');
             }
             foreach ($foodMatches as $foodMatch) {
                 if (!fpl_food_matches_code($foodMatch, (string) $authoritativeCode)) {
@@ -2779,12 +2787,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (post_value('selection_submitted') !== '1') {
                 render_header('بررسی رکوردهای هم‌کد', $user);
                 echo '<section class="card"><h1>بررسی رکوردهای کد ' . e((string) $authoritativeCode) . '</h1><p>حساب مقصد: ' . e((string) ($domain['full_name'] ?? '')) . ' · ' . e((string) ($domain['username'] ?? '')) . ' (#' . $domainId . ')</p><p>پیش از هر تغییری، رکوردهای پیدا‌شده را بررسی کنید. تیک هر رکوردی را که متعلق به همین کارمند است نگه دارید؛ موارد نامرتبط را بردارید. انتخاب رکورد پرسنل غذا، نام رسمی را در حساب مقصد حفظ می‌کند.</p>';
-                echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . $domainId . '"><input type="hidden" name="employee_number" value="' . e((string) $authoritativeCode) . '"><input type="hidden" name="confirm_code_link" value="1"><input type="hidden" name="selection_submitted" value="1"><div class="table-wrap"><table class="data-table"><thead><tr><th>ادغام</th><th>منبع/شناسه</th><th>نام</th><th>نام کاربری</th><th>کد پرسنلی</th><th>کد ملی</th><th>دلیل تطبیق</th></tr></thead><tbody>';
+                echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . $domainId . '"><input type="hidden" name="employee_number" value="' . e((string) $authoritativeCode) . '"><input type="hidden" name="confirm_code_link" value="1"><input type="hidden" name="selection_submitted" value="1"><div class="table-wrap"><table class="data-table"><thead><tr><th>ادغام</th><th>منبع/شناسه</th><th>نقش</th><th>نام</th><th>نام کاربری</th><th>کد پرسنلی</th><th>کد ملی</th><th>دلیل تطبیق</th></tr></thead><tbody>';
                 foreach ($foodMatches as $foodMatch) {
                     $foodId = (int) $foodMatch['id'];
                     $sourceLabel = (string) ($foodMatch['auth_source'] ?? '') === 'food' ? 'پرسنل غذا' : 'حساب محلی';
                     $matchedBy = fpl_codes_equal((string) ($foodMatch['employee_number'] ?? ''), (string) $authoritativeCode) ? 'کد پرسنلی' : 'نام کاربری محلی';
-                    echo '<tr><td><input type="checkbox" name="food_ids[]" value="' . $foodId . '" checked aria-label="ادغام ' . e((string) ($foodMatch['full_name'] ?? '')) . '"></td><td>' . e($sourceLabel) . ' #' . $foodId . '</td><td>' . e((string) ($foodMatch['full_name'] ?? '')) . '</td><td>' . e((string) ($foodMatch['username'] ?? '')) . '</td><td>' . e((string) ($foodMatch['employee_number'] ?? '—')) . '</td><td>' . e((string) ($foodMatch['national_code'] ?? '—')) . '</td><td>' . e($matchedBy) . '</td></tr>';
+                    echo '<tr><td><input type="checkbox" name="food_ids[]" value="' . $foodId . '" checked aria-label="ادغام ' . e((string) ($foodMatch['full_name'] ?? '')) . '"></td><td>' . e($sourceLabel) . ' #' . $foodId . '</td><td>' . e((string) ($foodMatch['role'] ?? '')) . '</td><td>' . e((string) ($foodMatch['full_name'] ?? '')) . '</td><td>' . e((string) ($foodMatch['username'] ?? '')) . '</td><td>' . e((string) ($foodMatch['employee_number'] ?? '—')) . '</td><td>' . e((string) ($foodMatch['national_code'] ?? '—')) . '</td><td>' . e($matchedBy) . '</td></tr>';
                 }
                 echo '</tbody></table></div><button class="button primary" type="submit">تأیید رکوردهای انتخاب‌شده و ادغام امن</button> <a class="button secondary" href="index.php?page=settings#users">انصراف</a></form></section>';
                 render_footer();
@@ -2929,7 +2937,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $owner = $ownerQuery->fetch() ?: null;
                     $ownerSource = (string) ($owner['auth_source'] ?? '');
                     $eligibleFoodOwner = $ownerSource === 'food'
-                        || ($ownerSource === 'local' && (string) ($owner['role'] ?? '') === 'local_user' && (int) ($owner['is_primary_admin'] ?? 0) !== 1);
+                        || (is_array($owner) && fpl_is_local_food_account($owner));
                     if ((string) ($target['auth_source'] ?? '') !== 'ldap' || !$eligibleFoodOwner) {
                         throw new RuntimeException('این کد پرسنلی متعلق به کاربر دیگری است و پرسنل غذا/حساب محلی واجد شرایط برای ادغام نیست.');
                     }
