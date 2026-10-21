@@ -2,15 +2,15 @@
 declare(strict_types=1);
 
 /**
- * اتصال کاربران دامین (LDAP) به رکوردهای پرسنل غذا (auth_source = 'food')
+ * اتصال کاربران دامین (LDAP) به رکورد پرسنل غذا یا حساب محلی کارکنان
  * ============================================================================
  * منطق:
  *   ۱. کاربر دامین و پرسنل غذا با «نام + نام خانوادگی» (پس از نرمال‌سازی) تطبیق داده می‌شوند.
  *   ۲. همنام‌ها در فهرست انتخاب دستی نشان داده می‌شوند (کد پرسنلی و کد ملی کامل).
  *   ۳. فقط با انتخاب مدیر ادغام انجام می‌شود. ادغام:
- *        - کد پرسنلی و کد ملی را از رکورد پرسنل غذا به کاربر دامین منتقل می‌کند،
- *        - همهٔ ارجاعات به رکورد پرسنل غذا را به کاربر دامین منتقل می‌کند،
- *        - رکورد پرسنل غذا را حذف می‌کند،
+ *        - کد پرسنلی و کد ملی را از رکورد غذا/حساب محلی کارکنان به کاربر دامین منتقل می‌کند،
+ *        - همهٔ ارجاعات رکورد قبلی را به کاربر دامین منتقل می‌کند،
+ *        - رکورد قبلی را پس از پشتیبان‌گیری حذف می‌کند،
  *      و هر ادغام در یک تراکنش جدا انجام می‌شود (خطا = بدون تغییر).
  *   ۴. قبل از هر اجرا یک نسخهٔ پشتیبان از جدول users ساخته می‌شود.
  *
@@ -110,7 +110,7 @@ function fpl_column_exists(PDO $pdo, string $table, string $column): bool
 function fpl_candidates(PDO $pdo): array
 {
     $domainRows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, email, department, is_active, role FROM users WHERE auth_source = 'ldap' AND is_active = 1 ORDER BY full_name, id")->fetchAll();
-    $foodRows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active FROM users WHERE auth_source = 'food' ORDER BY id")->fetchAll();
+    $foodRows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0) ORDER BY id")->fetchAll();
 
     $foodByName = [];
     foreach ($foodRows as $food) {
@@ -194,8 +194,13 @@ function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch
         if (!$domain || (string) $domain['auth_source'] !== 'ldap') {
             throw new RuntimeException('کاربر دامین پیدا نشد یا دامین نیست.');
         }
-        if (!$food || (string) $food['auth_source'] !== 'food') {
-            throw new RuntimeException('رکورد پرسنل غذا پیدا نشد.');
+        $foodSource = (string) ($food['auth_source'] ?? '');
+        $isFoodOnlyRecord = $foodSource === 'food';
+        $isLocalFoodAccount = $foodSource === 'local'
+            && (string) ($food['role'] ?? '') === 'local_user'
+            && (int) ($food['is_primary_admin'] ?? 0) !== 1;
+        if (!$food || (!$isFoodOnlyRecord && !$isLocalFoodAccount)) {
+            throw new RuntimeException('رکورد پرسنل غذا یا حساب محلی معتبر پیدا نشد.');
         }
         if (!$allowNameMismatch && fpl_norm_name((string) $domain['full_name']) !== fpl_person_name($food)) {
             throw new RuntimeException('نام دو رکورد دیگر یکی نیست.');
@@ -287,7 +292,7 @@ function fpl_find_food_by_code(PDO $pdo, string $code): ?array
     if ($code === '') {
         return null;
     }
-    $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code, is_active FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND employee_number <> ''")->fetchAll();
+    $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code, is_active FROM users WHERE (auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)) AND employee_number IS NOT NULL AND employee_number <> ''")->fetchAll();
     $exact = null;
     $loose = [];
     foreach ($rows as $row) {
@@ -379,10 +384,10 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
     return $results;
 }
 
-/** فیلد کد پرسنلی دستی برای کاربری که تطبیق نام ندارد. */
+/** فیلد کد پرسنلی دستی برای کاربری که تطبیق نام ندارد یا در AD کدش به‌علت تداخل خالی مانده است. */
 function fpl_manual_input(int $domainId): string
 {
-    return '<div><small>اتصال دستی: کد پرسنلی پرسنل غذا را وارد کنید (مثلاً 150)</small><br>'
+    return '<div><small>اتصال دستی: کد پرسنلی پرسنل غذا/حساب محلی را وارد کنید (مثلاً 335)</small><br>'
         . '<input type="text" name="manual[' . $domainId . ']" value="" placeholder="کد پرسنلی" style="width:160px"></div>';
 }
 
@@ -426,7 +431,7 @@ function fpl_render_request(): never
 
     render_header('اتصال کاربران دامین به پرسنل غذا', $admin);
     echo '<section class="page-heading"><div><span class="eyebrow">تنظیمات کاربران</span><h1>اتصال کاربران دامین به پرسنل غذا</h1>';
-    echo '<p>کاربران دامین با رکوردهای پرسنل غذا بر اساس نام و نام خانوادگی مقایسه می‌شوند. هیچ تغییری بدون تأیید شما انجام نمی‌شود.</p></div>';
+    echo '<p>کاربران دامین با رکوردهای پرسنل غذا و حساب‌های محلی کارکنان بر اساس نام و نام خانوادگی مقایسه می‌شوند. هیچ تغییری بدون تأیید شما انجام نمی‌شود.</p></div>';
     echo '<a class="button secondary" href="index.php?page=settings">بازگشت به تنظیمات</a></section>';
 
     if ($lastResults !== []) {
@@ -538,16 +543,16 @@ function fpl_backup_tables(PDO $pdo): array
 function fpl_report_rows(PDO $pdo): array
 {
     $domainRows = $pdo->query("SELECT id, username, full_name, employee_number, national_code, is_active FROM users WHERE auth_source = 'ldap' ORDER BY full_name, id")->fetchAll();
-    $currentFood = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code FROM users WHERE auth_source = 'food'")->fetchAll();
+    $currentFood = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
     $currentFoodCodes = [];
     foreach ($currentFood as $food) {
         $currentFoodCodes[(string) $food['employee_number']] = true;
     }
 
-    // پرسنل غذای حذف‌شده در ادغام‌ها (از جدول‌های پشتیبان)، کلید: کد پرسنلی
+    // پرسنل/حساب محلی حذف‌شده در ادغام‌ها (از جدول‌های پشتیبان)، کلید: کد پرسنلی
     $merged = [];
     foreach (fpl_backup_tables($pdo) as $table) {
-        $stmt = $pdo->query('SELECT id, full_name, first_name, last_name, employee_number, national_code FROM `' . str_replace('`', '', $table) . "` WHERE auth_source = 'food'");
+        $stmt = $pdo->query('SELECT id, full_name, first_name, last_name, employee_number, national_code FROM `' . str_replace('`', '', $table) . "` WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)");
         foreach ($stmt->fetchAll() as $old) {
             $code = (string) $old['employee_number'];
             if ($code !== '' && !isset($currentFoodCodes[$code]) && !isset($merged[$code])) {

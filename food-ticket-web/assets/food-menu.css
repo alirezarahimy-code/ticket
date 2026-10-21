@@ -61,6 +61,23 @@
 .fm-empty { color:var(--muted); text-align:center; padding:22px; }
 .fm-spinner { color:var(--muted); text-align:center; padding:20px; }
 .fm-manager-data-warning { margin-top:10px; }
+.fm-report-fields { display:flex; align-items:center; flex-wrap:wrap; gap:7px 12px; margin:12px 0 4px; padding:10px; border:1px solid var(--line); border-radius:10px; background:#f8faf9; }
+.fm-report-fields > strong { font-size:12px; color:var(--ink); margin-inline-end:4px; }
+.fm-report-field { display:inline-flex; align-items:center; gap:5px; color:var(--muted); font-size:11px; cursor:pointer; }
+.fm-report-field input { width:15px; height:15px; margin:0; accent-color:var(--teal); }
+.fm-order-report-table.is-compact { table-layout:fixed; min-width:0; }
+.fm-order-report-table.is-compact th,.fm-order-report-table.is-compact td { width:auto; padding:6px 5px; overflow-wrap:anywhere; }
+.fm-order-report-table.is-compact th button { border:0; background:transparent; color:inherit; font:inherit; font-weight:700; cursor:pointer; padding:0; }
+.fm-order-empty-cell { background:#fbfcfd; }
+.fm-group-orders { margin-top:16px; }
+.fm-group-orders select { max-width:280px; }
+.fm-group-report-title { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:10px 4px 0; color:var(--ink); }
+.fm-statistics-days { display:grid; gap:10px; }
+.fm-stat-day { border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; }
+.fm-stat-day h4 { margin:0; padding:10px 13px; color:var(--navy); background:#f0f7f6; font-size:14px; }
+.fm-stat-day ul { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0 14px; margin:0; padding:5px 13px; }
+.fm-stat-day li { display:flex; justify-content:space-between; gap:12px; padding:8px 2px; border-bottom:1px solid #edf1f0; font-size:13px; }
+.fm-stat-day li strong { white-space:nowrap; color:var(--teal); }
 .fm-statistics { margin-top:16px; }
 .fm-statistics-form { display:grid; gap:12px; margin:0 0 14px; }
 .fm-statistics .fm-order-date { margin-bottom:0; }
@@ -79,13 +96,17 @@
 @page fmStatistics { size:landscape; margin:12mm; }
 @media print {
   body.fm-print-statistics,
-  body.fm-print-orders { margin:0 !important; }
+  body.fm-print-orders,
+  body.fm-print-group-orders { margin:0 !important; }
   body.fm-print-statistics > *:not(.fm-print-host),
-  body.fm-print-orders > *:not(.fm-print-host) { display:none !important; }
+  body.fm-print-orders > *:not(.fm-print-host),
+  body.fm-print-group-orders > *:not(.fm-print-host) { display:none !important; }
   body.fm-print-statistics > .fm-print-host,
-  body.fm-print-orders > .fm-print-host { display:block !important; visibility:visible !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; direction:rtl; }
+  body.fm-print-orders > .fm-print-host,
+  body.fm-print-group-orders > .fm-print-host { display:block !important; visibility:visible !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; direction:rtl; }
   body.fm-print-statistics > .fm-print-host *,
-  body.fm-print-orders > .fm-print-host * { visibility:visible !important; }
+  body.fm-print-orders > .fm-print-host *,
+  body.fm-print-group-orders > .fm-print-host * { visibility:visible !important; }
   body.fm-print-statistics > .fm-print-host .fm-statistics { page:fmStatistics; display:block !important; width:100% !important; margin:0 !important; border:0; box-shadow:none; padding:0; }
   body.fm-print-statistics > .fm-print-host .fm-statistics form { display:none !important; }
   body.fm-print-statistics > .fm-print-host .fm-statistics .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
@@ -113,11 +134,19 @@
 @page fmDailyOrders { size: landscape; margin: 12mm; }
 @media print {
   body.fm-print-orders > .fm-print-host .fm-daily-orders { page: fmDailyOrders; display:block !important; width:100% !important; margin:0 !important; border:0; box-shadow:none; padding:0; }
-  body.fm-print-orders > .fm-print-host .fm-daily-orders form { display:none !important; }
+  body.fm-print-orders > .fm-print-host .fm-daily-orders form,
+  body.fm-print-orders > .fm-print-host .fm-report-fields { display:none !important; }
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-table-wrap { overflow:visible !important; }
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows th,
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows td { font-size:8pt; padding:4px 3px; overflow-wrap:anywhere; }
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders { page:fmDailyOrders; display:block !important; width:100% !important; margin:0 !important; border:0; box-shadow:none; padding:0; }
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders form,
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-toolbar button { display:none !important; }
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-table-wrap { overflow:visible !important; }
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-rows th,
+  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-rows td { font-size:8pt; padding:4px 3px; overflow-wrap:anywhere; }
 }
 
 /* تمام جدول‌ها و ردیف‌های فهرستی برنامه در پنل، وسط‌چین باشند. */

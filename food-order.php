@@ -652,6 +652,27 @@ function food_order_manager_orders(string $date, string $mealType = 'lunch'): ar
     return $items;
 }
 
+/** سفارش‌های فعال/لغوشدهٔ اعضای گروه در روز انتخابی (با جابه‌جایی روزانهٔ گروه لحاظ‌شده). */
+function food_order_group_orders(int $groupId, string $date, string $mealType = 'lunch'): array
+{
+    $iso = food_order_iso_date($date);
+    $mealType = food_order_meal_type($mealType);
+    if ($groupId <= 0 || $iso === null || !function_exists('food_ticket_groups_load') || !function_exists('food_ticket_group_members_for_date')) {
+        throw new RuntimeException('گروه یا تاریخ گزارش معتبر نیست.');
+    }
+    $group = null;
+    foreach (food_ticket_groups_load(true) as $candidate) {
+        if ((int) ($candidate['id'] ?? 0) === $groupId) { $group = $candidate; break; }
+    }
+    if ($group === null) {
+        throw new RuntimeException('گروه انتخاب‌شده پیدا نشد.');
+    }
+    $members = food_ticket_group_members_for_date($groupId, $iso);
+    $memberIds = array_fill_keys(array_map(static fn (array $member): int => (int) ($member['id'] ?? 0), $members), true);
+    $orders = array_values(array_filter(food_order_manager_orders($iso, $mealType), static fn (array $order): bool => isset($memberIds[(int) ($order['employee_id'] ?? 0)])));
+    return ['group' => ['id' => $groupId, 'title' => (string) $group['title']], 'date' => $iso, 'meal_type' => $mealType, 'items' => $orders];
+}
+
 function food_order_statistics_range(string $fromDate, string $toDate, string $mode = 'food', string $mealType = 'lunch'): array
 {
     food_order_schema_ensure();
@@ -677,13 +698,13 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
             GROUP BY u.id, u.full_name, u.first_name, u.last_name
             ORDER BY order_count DESC, u.last_name, u.first_name, u.id");
     } else {
-        $stmt = db()->prepare("SELECT f.id AS food_id, f.food_name, COUNT(o.id) AS order_count
+        $stmt = db()->prepare("SELECT o.food_date, f.id AS food_id, f.food_name, COUNT(o.id) AS order_count
             FROM food_orders o
             JOIN food_calendar_items i ON i.id = o.calendar_item_id
             JOIN food_catalog f ON f.id = i.food_id
             WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = ? AND o.status = 'active'
-            GROUP BY f.id, f.food_name
-            ORDER BY order_count DESC, f.food_name, f.id");
+            GROUP BY o.food_date, f.id, f.food_name
+            ORDER BY o.food_date, f.food_name, f.id");
     }
     $stmt->execute([$from, $to, $mealType]);
     $items = [];
@@ -694,14 +715,26 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
                 'count' => (int) $row['order_count'],
             ];
         } else {
-            $items[] = [
+            $date = (string) $row['food_date'];
+            if (!isset($items[$date])) {
+                $weekday = (int) (new DateTimeImmutable($date, new DateTimeZone('UTC')))->format('N');
+                $weekdayIndex = ($weekday + 1) % 7; // Saturday=0 … Friday=6.
+                $weekdays = ['شنبه', 'یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه'];
+                $items[$date] = [
+                    'food_date' => $date,
+                    'food_date_jalali' => food_order_jalali_label($date),
+                    'weekday' => $weekdays[$weekdayIndex],
+                    'foods' => [],
+                ];
+            }
+            $items[$date]['foods'][] = [
                 'food_id' => (int) $row['food_id'],
                 'food_name' => (string) $row['food_name'],
                 'count' => (int) $row['order_count'],
             ];
         }
     }
-    return $items;
+    return $mode === 'food' ? array_values($items) : $items;
 }
 
 function food_order_ensure_orderable_day(PDO $pdo, string $isoDate, string $mealType = 'lunch', bool $allowClosed = false): array
@@ -1654,7 +1687,7 @@ function food_order_export_safe_value(mixed $value): string
     return $text;
 }
 
-function food_order_export_manager_orders(string $date, array $user, string $mealType = 'lunch'): never
+function food_order_export_manager_orders(string $date, array $user, string $mealType = 'lunch', array $selectedFields = []): never
 {
     food_order_require_permission($user, 'food.order_close');
     $iso = food_order_iso_date($date);
@@ -1664,21 +1697,41 @@ function food_order_export_manager_orders(string $date, array $user, string $mea
     $mealType = food_order_meal_type($mealType);
     $items = food_order_manager_orders($iso, $mealType);
     $dateLabel = food_order_jalali_label($iso);
-    $headers = ['ردیف', 'کد ملی', 'کد پرسنلی', 'نام پرسنل', 'نوع غذا', 'تاریخ غذا', 'تاریخ رزرو', 'ساعت رزرو', 'وضعیت', 'نوع ثبت'];
+    $fieldLabels = [
+        'row' => 'ردیف', 'national_code' => 'کد ملی', 'employee_number' => 'کد پرسنلی',
+        'full_name' => 'نام و نام خانوادگی', 'food_name' => 'نوع غذا', 'food_date' => 'تاریخ غذا',
+        'reserve_date' => 'تاریخ رزرو', 'reserve_time' => 'ساعت رزرو', 'status_label' => 'وضعیت سفارش',
+        'record_type' => 'نوع ثبت', 'menu_no' => 'شماره منو', 'meal_type' => 'وعده',
+    ];
+    if ($selectedFields === []) {
+        $selectedFields = array_keys($fieldLabels);
+    }
+    $selectedFields = array_values(array_unique(array_filter(array_map('strval', $selectedFields), static fn (string $field): bool => isset($fieldLabels[$field]))));
+    if ($selectedFields === []) {
+        food_order_send_json(['error' => 'حداقل یک فیلد معتبر برای گزارش انتخاب کنید.'], 400);
+    }
+    $headers = array_map(static fn (string $field): string => $fieldLabels[$field], $selectedFields);
     $data = [];
     foreach ($items as $index => $item) {
-        $data[] = [
-            $index + 1,
-            $item['national_code'] ?? '',
-            $item['employee_number'] ?? '',
-            $item['full_name'] ?? '',
-            $item['food_name'] ?? '',
-            food_order_jalali_label((string) ($item['food_date'] ?? $iso)),
-            food_order_jalali_label((string) ($item['reserve_date'] ?? '')),
-            substr((string) ($item['reserve_time'] ?? ''), 0, 5),
-            (string) ($item['status'] ?? '') === 'active' ? 'فعال' : 'لغوشده',
-            !empty($item['is_proxy']) ? 'نیابتی' : 'شخصی',
-        ];
+        $row = [];
+        foreach ($selectedFields as $field) {
+            $row[] = match ($field) {
+                'row' => $index + 1,
+                'national_code' => $item['national_code'] ?? '',
+                'employee_number' => $item['employee_number'] ?? '',
+                'full_name' => $item['full_name'] ?? '',
+                'food_name' => $item['food_name'] ?? '',
+                'food_date' => food_order_jalali_label((string) ($item['food_date'] ?? $iso)),
+                'reserve_date' => food_order_jalali_label((string) ($item['reserve_date'] ?? '')),
+                'reserve_time' => substr((string) ($item['reserve_time'] ?? ''), 0, 5),
+                'status_label' => (string) ($item['status'] ?? '') === 'active' ? 'فعال' : 'لغوشده',
+                'record_type' => !empty($item['is_proxy']) ? 'نیابتی' : 'شخصی',
+                'menu_no' => (int) ($item['menu_no'] ?? 0) > 0 ? 'منوی ' . (int) $item['menu_no'] : 'بدون منو',
+                'meal_type' => $mealType === 'dinner' ? 'شام' : 'ناهار',
+                default => '',
+            };
+        }
+        $data[] = $row;
     }
     foreach ($data as &$row) {
         foreach ($row as &$value) {
@@ -1690,6 +1743,7 @@ function food_order_export_manager_orders(string $date, array $user, string $mea
     food_order_audit('food_order_daily_orders_export', $user, 'food_orders', 0, null, [
         'food_date' => $iso,
         'meal_type' => $mealType,
+        'fields' => $selectedFields,
         'row_count' => count($data),
     ]);
     $rangeToken = str_replace('-', '', $iso);
@@ -1744,9 +1798,17 @@ function food_order_export_statistics_range(string $fromDate, string $toDate, ar
         ? ['ردیف', 'نام پرسنل', 'تعداد سفارش فعال']
         : ['ردیف', 'نوع غذا', 'تعداد سفارش فعال'];
     $data = [];
-    foreach ($items as $index => $item) {
-        $label = $mode === 'employee' ? $item['full_name'] : $item['food_name'];
-        $data[] = [$index + 1, $label, $item['count']];
+    if ($mode === 'employee') {
+        foreach ($items as $index => $item) {
+            $data[] = [$index + 1, $item['full_name'], $item['count']];
+        }
+    } else {
+        $headers = ['روز هفته', 'تاریخ شمسی', 'نوع غذا', 'تعداد سفارش فعال'];
+        foreach ($items as $day) {
+            foreach ($day['foods'] as $food) {
+                $data[] = [$day['weekday'], $day['food_date_jalali'], $food['food_name'], $food['count']];
+            }
+        }
     }
     foreach ($data as &$row) {
         foreach ($row as &$value) {
@@ -2572,13 +2634,32 @@ function food_order_menu_api_handle(string $route, array $user): never
             }
             food_order_send_json(['date' => $date, 'meal_type' => food_order_meal_type($_GET['meal_type'] ?? 'lunch'), 'items' => food_order_manager_orders($date, food_order_meal_type($_GET['meal_type'] ?? 'lunch'))]);
         }
+        if ($method === 'GET' && $route === 'food-menu/groups') {
+            food_order_require_permission($user, 'food.order_close');
+            if (!function_exists('food_ticket_groups_load')) {
+                throw new RuntimeException('فهرست گروه‌های غذا در دسترس نیست.');
+            }
+            $groups = array_values(array_map(static fn (array $group): array => ['id' => (int) $group['id'], 'title' => (string) $group['title']], array_filter(food_ticket_groups_load(true), static fn (array $group): bool => ($group['status'] ?? '') === 'active')));
+            food_order_send_json(['items' => $groups]);
+        }
+        if ($method === 'GET' && $route === 'food-menu/group-orders') {
+            food_order_require_permission($user, 'food.order_close');
+            $date = food_order_iso_date((string) ($_GET['date'] ?? ''));
+            $groupId = (int) ($_GET['group_id'] ?? 0);
+            if ($date === null || $groupId <= 0) {
+                throw new RuntimeException('گروه و تاریخ روز سفارش معتبر نیست.');
+            }
+            food_order_send_json(food_order_group_orders($groupId, $date, food_order_meal_type($_GET['meal_type'] ?? 'lunch')));
+        }
         if ($method === 'GET' && $route === 'food-menu/orders-export') {
             food_order_require_permission($user, 'food.order_close');
             $date = food_order_iso_date((string) ($_GET['date'] ?? ''));
             if ($date === null) {
                 throw new RuntimeException('تاریخ روز سفارش معتبر نیست.');
             }
-            food_order_export_manager_orders($date, $user, food_order_meal_type($_GET['meal_type'] ?? 'lunch'));
+            $fieldsRaw = trim((string) ($_GET['fields'] ?? ''));
+            $fields = $fieldsRaw === '' ? [] : explode(',', $fieldsRaw);
+            food_order_export_manager_orders($date, $user, food_order_meal_type($_GET['meal_type'] ?? 'lunch'), $fields);
         }
         if ($method === 'GET' && $route === 'food-menu/statistics') {
             food_order_require_permission($user, 'food.order_close');

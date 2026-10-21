@@ -35,7 +35,8 @@ $pdo->exec('CREATE TABLE users (
     is_active INTEGER NOT NULL DEFAULT 1,
     role TEXT NOT NULL DEFAULT "user",
     auth_source TEXT NOT NULL DEFAULT "local",
-    manager_user_id INTEGER NULL
+    manager_user_id INTEGER NULL,
+    is_primary_admin INTEGER NOT NULL DEFAULT 0
 )');
 $pdo->exec('CREATE TABLE food_orders (id INTEGER PRIMARY KEY AUTOINCREMENT, employee_id INTEGER NOT NULL, food_date TEXT NOT NULL, created_by INTEGER NOT NULL, status TEXT NOT NULL DEFAULT "active", UNIQUE (employee_id, food_date))');
 $pdo->exec('CREATE TABLE food_order_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NULL)');
@@ -137,7 +138,7 @@ check('فهرست پشتیبان پیدا شد', count(fpl_backup_tables($pdo)) 
 // ---------- کاربر دامین غیرفعال: نه تطبیق، نه گزارش تطبیق ----------
 $p2 = new PDO('sqlite::memory:');
 $p2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$p2->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, full_name TEXT, first_name TEXT, last_name TEXT, employee_number TEXT, national_code TEXT, email TEXT, department TEXT, role TEXT, is_active INTEGER, auth_source TEXT, manager_user_id INTEGER)');
+$p2->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, full_name TEXT, first_name TEXT, last_name TEXT, employee_number TEXT, national_code TEXT, email TEXT, department TEXT, role TEXT, is_active INTEGER, auth_source TEXT, manager_user_id INTEGER, is_primary_admin INTEGER NOT NULL DEFAULT 0)');
 $p2->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, is_active, auth_source) VALUES (1,'x.off','سعید غیرفعال',NULL,NULL,0,'ldap')");
 $p2->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, is_active, auth_source) VALUES (2,'y.on','سعید فعال',NULL,NULL,1,'ldap')");
 $p2->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, is_active, auth_source) VALUES (10,'food_s1','سعید غیرفعال','سعید','غیرفعال','2001','5555555555',1,'food')");
@@ -180,6 +181,29 @@ check('کاربری که کد پرسنلی دارد، اتصال دستی نمی
 
 $m5 = fpl_apply($pdo, [], ['9' => '77']);
 check('صفرهای ابتدای کد (۷۷ ↔ 0077) تحمل می‌شود', count($m5) === 1 && $m5[0]['ok'] === true);
+
+// ---------- اتصال حساب محلی کارکنان (کد AD به‌دلیل unique بودن خالی مانده) ----------
+$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (22,'335','پریسا سعیدی','پریسا','سعیدی','335','','local_user','local',1)");
+$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (23,'p.saeedi','پریسا سعیدی',NULL,NULL,NULL,NULL,'user','ldap',1)");
+$pdo->exec("INSERT INTO food_orders (employee_id, food_date, created_by) VALUES (22, '2026-10-03', 1)");
+$localCandidates = fpl_candidates($pdo);
+$domainCandidate = null;
+foreach ($localCandidates as $candidate) {
+    if ((int) $candidate['domain']['id'] === 23) $domainCandidate = $candidate;
+}
+check('کاربر دامینی بدون کد با حساب محلی هم‌نام پیشنهاد می‌شود', $domainCandidate !== null && $domainCandidate['status'] === 'single' && (int) $domainCandidate['chosen'] === 22);
+$localMerge = fpl_apply($pdo, [], ['23' => '335']);
+check('اتصال دستی دامینی به حساب محلی با کد ۳۳۵ موفق است', count($localMerge) === 1 && $localMerge[0]['ok'] === true);
+check('کد پرسنلی ۳۳۵ به حساب دامین منتقل شد', (string) $pdo->query('SELECT employee_number FROM users WHERE id = 23')->fetchColumn() === '335');
+check('نام کاربری دامینی حفظ شد', (string) $pdo->query('SELECT username FROM users WHERE id = 23')->fetchColumn() === 'p.saeedi');
+check('حساب محلی تکراری پس از انتقال حذف شد', (int) $pdo->query('SELECT COUNT(*) FROM users WHERE id = 22')->fetchColumn() === 0);
+check('سفارش حساب محلی به کاربر دامین منتقل شد', (int) $pdo->query('SELECT COUNT(*) FROM food_orders WHERE employee_id = 23')->fetchColumn() === 1);
+$linkedReport = fpl_report_rows($pdo);
+$linkedCategory = '';
+foreach ($linkedReport as $reportRow) {
+    if ((string) $reportRow['domain_id'] === '23') $linkedCategory = (string) $reportRow['category'];
+}
+check('گزارش وضعیت، ادغام حساب محلی را به‌عنوان تطبیق‌شده نشان می‌دهد', $linkedCategory === 'تطبیق_شده');
 
 echo "\nنتیجه: {$passes} موفق، {$failures} ناموفق\n";
 exit($failures === 0 ? 0 : 1);
