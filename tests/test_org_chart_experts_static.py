@@ -22,6 +22,21 @@ style = read("assets/style.css")
 guide = read("help-guide.php")
 chatbot = read("chatbot.php")
 
+org_page = index.split("if ($page === 'organization')", 1)[1].split("if ($page === 'settings')", 1)[0]
+check(
+    "employee_number" not in org_page
+    and "national_code" not in org_page
+    and "'code' => (string) ($chartUser" not in org_page,
+    "organization chart does not query or serialize personnel or national codes",
+)
+check(
+    "codeOf" not in org_js
+    and "org-node-code" not in org_js
+    and "normalize(item.code)" not in org_js
+    and "جستجو بر اساس نام یا کد ملی" not in index,
+    "people lists, pickers, and every position card omit personal codes",
+)
+
 check(
     "function org_unit_accepts_experts" in org_php
     and "'department', 'deputy'" in org_php,
