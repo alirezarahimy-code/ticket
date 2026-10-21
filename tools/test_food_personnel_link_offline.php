@@ -183,9 +183,10 @@ $m5 = fpl_apply($pdo, [], ['9' => '77']);
 check('صفرهای ابتدای کد (۷۷ ↔ 0077) تحمل می‌شود', count($m5) === 1 && $m5[0]['ok'] === true);
 
 // ---------- اتصال حساب محلی کارکنان (کد AD به‌دلیل unique بودن خالی مانده) ----------
-$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (22,'335','پریسا سعیدی','پریسا','سعیدی','335','','local_user','local',1)");
+$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (22,'335','پریسا سعیدی','پریسا','سعیدی',NULL,'','local_user','local',1)");
 $pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (23,'p.saeedi','پریسا سعیدی',NULL,NULL,NULL,NULL,'user','ldap',1)");
 $pdo->exec("INSERT INTO food_orders (employee_id, food_date, created_by) VALUES (22, '2026-10-03', 1)");
+check('جستجوی کد محلی ۳۳۵ از username قدیمی پشتیبانی می‌کند', (int) (fpl_find_food_by_code($pdo, '335')['id'] ?? 0) === 22);
 $localCandidates = fpl_candidates($pdo);
 $domainCandidate = null;
 foreach ($localCandidates as $candidate) {
@@ -204,6 +205,19 @@ foreach ($linkedReport as $reportRow) {
     if ((string) $reportRow['domain_id'] === '23') $linkedCategory = (string) $reportRow['category'];
 }
 check('گزارش وضعیت، ادغام حساب محلی را به‌عنوان تطبیق‌شده نشان می‌دهد', $linkedCategory === 'تطبیق_شده');
+// ---------- کد دستی دامین بر نام اولویت دارد و کد هم‌ارز با صفر آغازین ادغام می‌شود ----------
+$pdo->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (24,'old_00336','فرد دیگر','00336','','local_user','local',1)");
+$pdo->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (25,'p.codefirst','نام متفاوت در دامین','336','','user','ldap',1)");
+$codeFirstCandidates = fpl_candidates($pdo);
+$codeFirst = null;
+foreach ($codeFirstCandidates as $candidate) {
+    if ((int) $candidate['domain']['id'] === 25) $codeFirst = $candidate;
+}
+check('کد ثبت‌شدهٔ دامین حتی با نام متفاوت رکورد غذای دقیق را اولویت می‌دهد', $codeFirst !== null && $codeFirst['status'] === 'code_match' && (int) $codeFirst['chosen'] === 24);
+$codeFirstResult = fpl_apply($pdo, ['25' => 24]);
+check('ادغام با کد دستی از طریق مسیر عادی کد دامین موفق است', count($codeFirstResult) === 1 && $codeFirstResult[0]['ok'] === true);
+check('کد واردشدهٔ ۳۳۶ بر صفرهای ابتدایی رکورد محلی مقدم می‌ماند', (string) $pdo->query('SELECT employee_number FROM users WHERE id = 25')->fetchColumn() === '336');
+check('رکورد محلی کد ۰۰۳۳۶ پس از انتقال حذف می‌شود', (int) $pdo->query('SELECT COUNT(*) FROM users WHERE id = 24')->fetchColumn() === 0);
 
 echo "\nنتیجه: {$passes} موفق، {$failures} ناموفق\n";
 exit($failures === 0 ? 0 : 1);

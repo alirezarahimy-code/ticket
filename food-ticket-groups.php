@@ -1770,7 +1770,7 @@ function food_ticket_manual_attendance_today(): string
     return function_exists('food_order_today') ? food_order_today() : date('Y-m-d');
 }
 
-/** فهرست کاربران برای ثبت تردد دستی و ثبت‌های امروز؛ کد ملی هرگز به رابط برگردانده نمی‌شود. */
+/** فهرست سفارش‌دهندگان واجد شرایط ثبت دستی برای امروز؛ کد ملی فقط برای تطبیق داخلی است و به رابط برنمی‌گردد. */
 function food_ticket_api_manual_attendance(string $date = ''): array
 {
     $today = food_ticket_manual_attendance_today();
@@ -1778,6 +1778,15 @@ function food_ticket_api_manual_attendance(string $date = ''): array
     if ($date !== $today) {
         throw new RuntimeException('ثبت دستی فیش فقط برای امروز مجاز است.');
     }
+
+    // از همان نقشهٔ سفارش داخلی/فعال ناهار استفاده می‌شود که صدور فیش بررسی می‌کند.
+    // خطای دریافت سفارش‌ها باید درخواست را متوقف کند؛ فهرست همهٔ کاربران fallback مجاز نیست.
+    $orderMaps = [];
+    $orderMap = food_ticket_group_order_map($orderMaps, $date);
+    if (!is_array($orderMap)) {
+        throw new RuntimeException('دریافت سفارش‌های امروز ناموفق بود؛ فهرست ثبت دستی نمایش داده نمی‌شود.');
+    }
+    $hasEligibleOrder = food_ticket_group_food_lookup($orderMap);
 
     $attendanceByUser = [];
     $attendance = db()->prepare(
@@ -1796,12 +1805,14 @@ function food_ticket_api_manual_attendance(string $date = ''): array
         }
     }
 
-    // حساب‌های غیرفعال هم برای شناسایی دیده می‌شوند، اما رابط آن‌ها را غیرقابل انتخاب
-    // می‌کند و تابع ثبت نیز فعال‌بودن را دوباره سمت سرور بررسی می‌کند.
+    // لیست را از سفارش‌ها محدود می‌کنیم؛ کد ملی برای نگاشت داخلی استفاده می‌شود و حذف می‌شود.
     $people = db()->query(
-        'SELECT id, employee_number, full_name, username, is_active FROM users '
-        . 'ORDER BY is_active DESC, full_name, employee_number, id'
+        'SELECT id, employee_number, national_code, full_name, username, is_active FROM users '
+        . 'WHERE is_active = 1 ORDER BY full_name, employee_number, id'
     )->fetchAll();
+    $people = array_values(array_filter($people ?: [], static function (array $row) use ($hasEligibleOrder): bool {
+        return $hasEligibleOrder($row) !== null;
+    }));
     $employees = array_map(static function (array $row) use ($attendanceByUser): array {
         $id = (int) ($row['id'] ?? 0);
         $employeeNumber = trim((string) ($row['employee_number'] ?? ''));
@@ -1871,6 +1882,17 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     $employeeNumber = trim((string) ($person['employee_number'] ?? ''));
     $fullName = trim((string) ($person['full_name'] ?? '')) ?: ($employeeNumber !== '' ? $employeeNumber : (string) ($person['username'] ?? 'کاربر #' . $userId));
     $person['full_name'] = $fullName;
+
+    // پیش از هر نوع ثبت دستی (با فیش یا بدون فیش)، وجود سفارش فعال ناهار را
+    // با همان نقشه‌ای بررسی می‌کنیم که موتور صدور فیش از آن استفاده می‌کند.
+    $orderMap = food_ticket_group_order_map($orderMaps, $today);
+    if (!is_array($orderMap)) {
+        throw new RuntimeException('دریافت سفارش‌های امروز ناموفق بود؛ ثبت دستی انجام نشد.');
+    }
+    $orderFood = food_ticket_group_food_lookup($orderMap)($person);
+    if (!is_string($orderFood) || trim($orderFood) === '') {
+        throw new RuntimeException('برای این کارمند سفارش فعال ناهار در امروز پیدا نشد؛ ثبت دستی مجاز نیست.');
+    }
 
     $duplicate = db()->prepare(
         'SELECT id, event_type, print_status FROM food_ticket_events '

@@ -74,6 +74,9 @@
         + '<td>' + manualStatus(u) + '</td></tr>';
     }).join('');
     const checkboxHeader = canEdit ? '<th>انتخاب</th>' : '';
+    const emptyMessage = S.manualEmployees.length === 0
+      ? 'امروز هیچ کارمند فعالی با سفارش ناهار واجد شرایط پیدا نشد.'
+      : 'کاربری مطابق جستجو پیدا نشد.';
     const eligibleVisible = filtered.filter(canSelect);
     const chosenCount = S.manualSelected.filter((id) => {
       const u = S.manualEmployees.find((x) => Number(x.id) === Number(id));
@@ -97,7 +100,7 @@
 
     return '<div class="card section-gap" id="manual-attendance-page"><div class="form-section-head"><h2>ثبت دستی فیش امروز</h2>'
       + '<span class="status warn">فقط امروز</span></div>'
-      + '<p class="muted">حساب‌های غیرفعال و کاربران بدون کد پرسنلی هم برای شناسایی در فهرست دیده می‌شوند؛ غیرفعال‌ها قابل ثبت نیستند و بدون کد فقط «بدون فیش» قابل انتخاب است. صدور فیش از چاپ فیزیکی جداست؛ در حالت «بدون فیش» فقط رویداد تردد ثبت می‌شود.</p>'
+      + '<p class="muted">فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ امروز را نشان می‌دهد؛ وضعیت سفارش هنگام ثبت هم دوباره بررسی می‌شود. ثبت فیش از چاپ فیزیکی جداست؛ حالت «بدون فیش» فقط رویداد تردد را ثبت می‌کند.</p>'
       + (S.manualError ? '<p class="manual-error" role="alert">' + esc(S.manualError) + '</p>' : '')
       + (S.manualLoading ? '<p class="muted">در حال بارگذاری فهرست کارکنان و ثبت‌های امروز…</p>' : '')
       + '<div class="manual-attendance-controls"><label class="field">جستجوی زنده<input id="fg-manual-filter" type="search" value="' + esc(S.manualFilter) + '" placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
@@ -111,7 +114,7 @@
         + (S.manualSaving ? 'در حال ثبت…' : 'ثبت تردد برای ' + chosenCount + ' نفر') + '</button><button type="button" class="btn ghost" data-manual-action="manual-reload"' + (S.manualLoading || S.manualSaving ? ' disabled' : '') + '>به‌روزرسانی فهرست</button></div>'
         : '<p class="manual-readonly-note">این فهرست فقط‌خواندنی است؛ برای ثبت دستی، مجوز ویرایش گروه‌های غذا لازم است.</p>') + '</div>'
       + '<div class="manual-attendance-list"><h3>فهرست کارکنان</h3><div class="table-wrap"><table class="table"><thead><tr>' + checkboxHeader + '<th>نام</th><th>کد پرسنلی</th><th>وضعیت امروز</th></tr></thead><tbody>'
-      + (rows || '<tr><td colspan="' + (canEdit ? '4' : '3') + '" class="empty">کاربری مطابق جستجو پیدا نشد.</td></tr>')
+      + (rows || '<tr><td colspan="' + (canEdit ? '4' : '3') + '" class="empty">' + esc(emptyMessage) + '</td></tr>')
       + '</tbody></table></div></div>'
       + (S.manualResults.length ? '<div class="manual-results"><h3>نتیجهٔ هر نفر</h3>' + results + '</div>' : '')
       + '<div class="form-section-head" style="margin-top:18px"><h3>ثبت‌های دستی امروز</h3></div>' + history + '</div>';

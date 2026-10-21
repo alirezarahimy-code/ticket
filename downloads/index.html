@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R16</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R17</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,21 +25,21 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جدید · R16 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — گزارش سفارش‌های غذا و پیوند حساب محلی</h1>
-    <p>گزارش سفارش غذا اکنون فیلدهای انتخابی، گزارش سفارش یک گروه در روز دلخواه و آمار نوع غذا به تفکیک روز را پشتیبانی می‌کند. بسته همچنین مسیر امن پیوند حساب محلی غذا به حساب دامنه برای شمارهٔ پرسنلی ۳۳۵ را شامل می‌شود.</p>
+    <span class="tag">بستهٔ اصلاحی جدید · R17 · ۲۰۲۶/۱۰/۲۱</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — اولویت کد پرسنلی و ثبت سفارش‌دهندگان</h1>
+    <p>R17 بر پایهٔ R16 ساخته شده است. کد پرسنلی واردشده برای کاربر دامین، حتی بدون تطبیق نام، مبنای یافتن و ادغام امن حساب پرسنل غذا می‌شود. فهرست ثبت دستی نیز فقط سفارش‌دهندگان فعال ناهارِ امروز را نشان می‌دهد.</p>
     <ul>
-      <li>انتخاب فیلدهای گزارش با چک‌باکس؛ نمایش چند سفارش در بلوک‌های تکرارشوندهٔ افقی، و خروجی اکسل با همان فیلدهای انتخاب‌شده.</li>
-      <li>گزارش سفارش گروه غذا با انتخاب گروه و روز؛ انتقال موقت افراد به گروه در همان تاریخ لحاظ می‌شود.</li>
-      <li>آمار نوع غذا به تفکیک روزهای دارای سفارش، با روز هفته، تاریخ شمسی و تعداد هر غذا.</li>
-      <li>پیوند حساب محلی واجد شرایط به حساب دامنه با پشتیبان‌گیری پیش از ادغام و انتقال تراکنشی ارجاع‌ها؛ کد ۳۳۵ شمارهٔ پرسنلی است، نه شناسهٔ داخلی کاربر.</li>
-      <li>این بسته فقط کد است؛ هیچ حساب واقعی یا دادهٔ تولیدی تغییر نکرده است. مهاجرت دیتابیس جدیدی لازم نیست.</li>
+      <li>پشتیبان‌گیری پیش از ادغام و انتقال ارجاع‌ها و تغییر کاربر دامین در یک تراکنش؛ بدون حذف دستی حساب محلی.</li>
+      <li>جستجوی کد از حساب محلی قدیمی که کد را فقط در نام کاربری دارد؛ کدهای فارسی و صفرهای ابتدایی نیز پشتیبانی می‌شوند.</li>
+      <li>فهرست ثبت دستی فقط کارکنان فعال دارای سفارش واجد شرایط ناهار در امروز را شامل می‌شود؛ هر دو حالت «با فیش» و «بدون فیش» هنگام ثبت دوباره بررسی می‌شوند.</li>
+      <li>در صورت خطا یا نبود دادهٔ سفارش، سامانه به فهرست همهٔ کاربران برنمی‌گردد و ثبت انجام نمی‌شود.</li>
+      <li>کد ۳۳۵ شمارهٔ پرسنلی Active Directory است، نه شناسهٔ دیتابیسی؛ این بسته هیچ حساب واقعی یا دادهٔ تولیدی را تغییر نداده است. مهاجرت دیتابیس جدیدی لازم نیست.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-order-reports-local-account-linking-r16-20261021.zip" download="ticket-update-1.61.10-food-order-reports-local-account-linking-r16-20261021.zip">⬇ دریافت بستهٔ نصب R16</a>
-    <div class="file">ticket-update-1.61.10-food-order-reports-local-account-linking-r16-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-order-reports-local-account-linking-r16-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r16/CHANGE-REPORT-FA.md">جزئیات R16</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته شامل اصلاحات R14 و R15 نیز هست.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-code-priority-manual-attendance-orders-r17-20261021.zip" download="ticket-update-1.61.10-food-code-priority-manual-attendance-orders-r17-20261021.zip">⬇ دریافت بستهٔ نصب R17</a>
+    <div class="file">ticket-update-1.61.10-food-code-priority-manual-attendance-orders-r17-20261021.zip · تنها بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-code-priority-manual-attendance-orders-r17-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r17/CHANGE-REPORT-FA.md">جزئیات R17</a></p>
+    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته شامل اصلاحات R16 و نسخه‌های پیشین نیز هست.</div>
   </main>
 </body>
 </html>

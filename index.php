@@ -2794,7 +2794,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!in_array($role, ['primary_admin'], true) && $isPrimaryAdmin) {
                 throw new RuntimeException('فقط مدیر سامانه می‌تواند ادمین اصلی باشد.');
             }
-            $targetQuery = db()->prepare('SELECT role, is_primary_admin, is_active, department_id FROM users WHERE id = ? LIMIT 1');
+            $targetQuery = db()->prepare('SELECT role, is_primary_admin, is_active, department_id, auth_source, employee_number, national_code FROM users WHERE id = ? LIMIT 1');
             $targetQuery->execute([$userId]);
             $target = $targetQuery->fetch();
             if (!$target) {
@@ -2817,23 +2817,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             $employeeNumberValue = normalize_employee_number($employeeNumber);
-            if ($employeeNumberValue !== null && employee_number_owner($employeeNumberValue, $userId) > 0) {
+            if ($employeeNumberValue !== null) {
+                require_once __DIR__ . '/food-personnel-link.php';
+            }
+            $mergeFoodId = 0;
+            $mergeFood = null;
+            $usersBackup = '';
+            if ($employeeNumberValue !== null) {
+                $ownerId = employee_number_owner($employeeNumberValue, $userId);
+                if ($ownerId > 0) {
+                    $ownerQuery = db()->prepare('SELECT id, username, employee_number, national_code, role, auth_source, is_primary_admin FROM users WHERE id = ? LIMIT 1');
+                    $ownerQuery->execute([$ownerId]);
+                    $owner = $ownerQuery->fetch() ?: null;
+                    $ownerSource = (string) ($owner['auth_source'] ?? '');
+                    $eligibleFoodOwner = $ownerSource === 'food'
+                        || ($ownerSource === 'local' && (string) ($owner['role'] ?? '') === 'local_user' && (int) ($owner['is_primary_admin'] ?? 0) !== 1);
+                    if ((string) ($target['auth_source'] ?? '') !== 'ldap' || !$eligibleFoodOwner) {
+                        throw new RuntimeException('این کد پرسنلی متعلق به کاربر دیگری است و پرسنل غذا/حساب محلی واجد شرایط برای ادغام نیست.');
+                    }
+                    if (!function_exists('fpl_find_food_by_code')) {
+                        throw new RuntimeException('ماژول جستجوی امن پرسنل غذا بارگذاری نشده است.');
+                    }
+                    $uniqueFoodOwner = fpl_find_food_by_code(db(), (string) $employeeNumberValue);
+                    if ($uniqueFoodOwner === null || (int) ($uniqueFoodOwner['id'] ?? 0) !== $ownerId) {
+                        throw new RuntimeException('برای این کد بیش از یک حساب واجد شرایط پیدا شد یا مالک کد قابل تأیید نیست؛ ادغام انجام نشد.');
+                    }
+                    $mergeFood = $uniqueFoodOwner;
+                } elseif (function_exists('fpl_find_food_by_code')) {
+                    // حساب‌های محلی قدیمی ممکن است کد را فقط در username داشته باشند.
+                    $mergeFood = fpl_find_food_by_code(db(), (string) $employeeNumberValue);
+                }
+                if ($mergeFood !== null) {
+                    if (!function_exists('fpl_food_personnel_code') || !function_exists('fpl_merge') || !function_exists('fpl_backup_users')) {
+                        throw new RuntimeException('ماژول ادغام امن حساب پرسنل غذا بارگذاری نشده است.');
+                    }
+                    $foodCode = normalize_employee_number(fpl_food_personnel_code($mergeFood));
+                    if ($foodCode === null || !fpl_codes_equal($foodCode, $employeeNumberValue)) {
+                        throw new RuntimeException('کد حساب پرسنل غذا با کد واردشده در کاربر دامین یکی نیست؛ ادغام انجام نشد.');
+                    }
+                    $foodId = (int) ($mergeFood['id'] ?? 0);
+                    $foodNational = trim((string) ($mergeFood['national_code'] ?? ''));
+                    if ($nationalCode !== '' && $foodNational !== '' && $nationalCode !== $foodNational) {
+                        throw new RuntimeException('کد ملی واردشده در کاربر دامین با پرسنل غذا متفاوت است؛ ادغام انجام نشد.');
+                    }
+                    if ($nationalCode === '' && $foodNational !== '') {
+                        $nationalCode = $foodNational;
+                    }
+                    $usersBackup = fpl_backup_users(db());
+                    $mergeFoodId = $foodId;
+                }
+            }
+            if ($mergeFoodId === 0 && $employeeNumberValue !== null && employee_number_owner($employeeNumberValue, $userId) > 0) {
                 throw new RuntimeException('این کد پرسنلی قبلاً به کاربر دیگری داده شده است. کد تکراری مجاز نیست.');
             }
-            db()->prepare('UPDATE users SET role = ?, employee_number = ?, national_code = ?, department_id = ?, handling_unit_id = ?, is_it_agent = ?, is_primary_admin = ?, is_active = ? WHERE id = ?')->execute([$role, $employeeNumberValue, $nationalCode !== '' ? $nationalCode : null, $departmentId, $handlingUnitId, $isItAgent, $isPrimaryAdmin, $isActive, $userId]);
-            if ($role === 'manager' && $departmentId) {
-                db()->prepare('UPDATE departments SET manager_user_id = NULL WHERE manager_user_id = ? AND id <> ?')->execute([$userId, $departmentId]);
-                db()->prepare('UPDATE departments SET manager_user_id = ? WHERE id = ?')->execute([$userId, $departmentId]);
-            } else {
-                db()->prepare('UPDATE departments SET manager_user_id = NULL WHERE manager_user_id = ?')->execute([$userId]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                if ($mergeFoodId > 0) {
+                    $mergeResult = fpl_merge($pdo, $userId, $mergeFoodId, true);
+                    if (empty($mergeResult['ok'])) {
+                        throw new RuntimeException((string) ($mergeResult['message'] ?? 'ادغام حساب پرسنل غذا ناموفق بود.'));
+                    }
+                }
+                $pdo->prepare('UPDATE users SET role = ?, employee_number = ?, national_code = ?, department_id = ?, handling_unit_id = ?, is_it_agent = ?, is_primary_admin = ?, is_active = ? WHERE id = ?')->execute([$role, $employeeNumberValue, $nationalCode !== '' ? $nationalCode : null, $departmentId, $handlingUnitId, $isItAgent, $isPrimaryAdmin, $isActive, $userId]);
+                if ($role === 'manager' && $departmentId) {
+                    $pdo->prepare('UPDATE departments SET manager_user_id = NULL WHERE manager_user_id = ? AND id <> ?')->execute([$userId, $departmentId]);
+                    $pdo->prepare('UPDATE departments SET manager_user_id = ? WHERE id = ?')->execute([$userId, $departmentId]);
+                } else {
+                    $pdo->prepare('UPDATE departments SET manager_user_id = NULL WHERE manager_user_id = ?')->execute([$userId]);
+                }
+                if ($role === 'manager' && $handlingUnitId) {
+                    $pdo->prepare('UPDATE handling_units SET manager_user_id = NULL WHERE manager_user_id = ? AND id <> ?')->execute([$userId, $handlingUnitId]);
+                    $pdo->prepare('UPDATE handling_units SET manager_user_id = ? WHERE id = ?')->execute([$userId, $handlingUnitId]);
+                } else {
+                    $pdo->prepare('UPDATE handling_units SET manager_user_id = NULL WHERE manager_user_id = ?')->execute([$userId]);
+                }
+                $pdo->commit();
+            } catch (Throwable $saveError) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                throw $saveError;
             }
-            if ($role === 'manager' && $handlingUnitId) {
-                db()->prepare('UPDATE handling_units SET manager_user_id = NULL WHERE manager_user_id = ? AND id <> ?')->execute([$userId, $handlingUnitId]);
-                db()->prepare('UPDATE handling_units SET manager_user_id = ? WHERE id = ?')->execute([$userId, $handlingUnitId]);
+            if ($mergeFoodId > 0) {
+                system_log('info', 'food_personnel_link', 'پیوند خودکار حساب پرسنل غذا به کاربر دامین با کد پرسنلی دستی', ['domain_id' => $userId, 'food_id' => $mergeFoodId, 'employee_number' => $employeeNumberValue, 'backup' => $usersBackup]);
+                flash('success', 'کد پرسنلی اولویت‌دار ثبت شد و حساب پرسنل غذا #' . $mergeFoodId . ' با کاربر دامین ادغام شد. پشتیبان: ' . $usersBackup);
             } else {
-                db()->prepare('UPDATE handling_units SET manager_user_id = NULL WHERE manager_user_id = ?')->execute([$userId]);
+                flash('success', 'نقش و دسترسی کاربر به‌روزرسانی شد.');
             }
-            flash('success', 'نقش و دسترسی کاربر به‌روزرسانی شد.');
             redirect('index.php?page=' . (post_value('return_page') === 'organization' ? 'organization' : 'settings#users'));
         }
 

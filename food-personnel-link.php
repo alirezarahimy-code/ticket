@@ -97,13 +97,14 @@ function fpl_column_exists(PDO $pdo, string $table, string $column): bool
 }
 
 /**
- * تطبیق کاربران دامین با پرسنل غذا.
+ * تطبیق کاربران دامین با پرسنل غذا؛ کد پرسنلی موجود در دامین نسبت به نام اولویت دارد.
  * وضعیت هر کاربر دامین:
- *   single   : دقیقاً یک تطبیق سازگار
+ *   single   : دقیقاً یک تطبیق سازگار بر اساس نام
  *   multi    : چند تطبیق سازگار (انتخاب دستی)
+ *   code_match / code_multi : تطبیق یکتا/تکراری بر اساس کد دامین
  *   none     : هیچ تطبیقی نیست
  *   conflict : تطبیق هست ولی کد ملی متفاوت است
- *   has_code : کاربر دامین از قبل کد پرسنلی دارد (بدون تغییر)
+ *   has_code : دامین کد دارد ولی رکورد هم‌کد در غذا پیدا نشد
  *
  * @return array<int, array<string, mixed>>
  */
@@ -123,9 +124,36 @@ function fpl_candidates(PDO $pdo): array
     $result = [];
     foreach ($domainRows as $domain) {
         $item = ['domain' => $domain, 'status' => 'none', 'matches' => [], 'chosen' => 0, 'reason' => ''];
-        if (trim((string) ($domain['employee_number'] ?? '')) !== '') {
-            $item['status'] = 'has_code';
-            $item['reason'] = 'این کاربر از قبل کد پرسنلی دارد؛ تغییری لازم نیست.';
+        $domainCode = fpl_normalize_code((string) ($domain['employee_number'] ?? ''));
+        if ($domainCode !== '') {
+            $codeMatches = fpl_food_code_matches($foodRows, $domainCode);
+            if ($codeMatches === []) {
+                $item['status'] = 'has_code';
+                $item['reason'] = 'کد ثبت‌شدهٔ کاربر دامین (' . $domainCode . ') اولویت دارد، اما پرسنل غذا/حساب محلی با همین کد پیدا نشد.';
+            } else {
+                $domainNational = trim((string) ($domain['national_code'] ?? ''));
+                $compatible = [];
+                $incompatible = 0;
+                foreach ($codeMatches as $food) {
+                    $foodNational = trim((string) ($food['national_code'] ?? ''));
+                    $ok = $domainNational === '' || $foodNational === '' || $domainNational === $foodNational;
+                    $food['compatible'] = $ok;
+                    $food['code_match'] = true;
+                    $item['matches'][] = $food;
+                    if ($ok) { $compatible[] = $food; } else { $incompatible++; }
+                }
+                if (count($compatible) === 1) {
+                    $item['status'] = 'code_match';
+                    $item['chosen'] = (int) $compatible[0]['id'];
+                    $item['reason'] = 'کد پرسنلی واردشده در حساب دامین مبنای اتصال است.';
+                } elseif (count($compatible) > 1) {
+                    $item['status'] = 'code_multi';
+                    $item['reason'] = 'چند حساب پرسنل غذا با کد ثبت‌شده در دامین پیدا شد؛ پیش از ادغام رفع تکرار کنید.';
+                } else {
+                    $item['status'] = 'conflict';
+                    $item['reason'] = 'کد ملی حساب دامین با پرسنل غذای دارای همین کد پرسنلی متفاوت است.';
+                }
+            }
             $result[] = $item;
             continue;
         }
@@ -181,8 +209,11 @@ function fpl_pair_is_allowed(array $candidates, int $domainId, int $foodId): boo
 function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch = false): array
 {
     $moved = [];
+    $ownsTransaction = !$pdo->inTransaction();
     try {
-        $pdo->beginTransaction();
+        if ($ownsTransaction) {
+            $pdo->beginTransaction();
+        }
 
         $domainStmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
         $domainStmt->execute([$domainId]);
@@ -205,17 +236,21 @@ function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch
         if (!$allowNameMismatch && fpl_norm_name((string) $domain['full_name']) !== fpl_person_name($food)) {
             throw new RuntimeException('نام دو رکورد دیگر یکی نیست.');
         }
-        if (trim((string) ($domain['employee_number'] ?? '')) !== '') {
-            throw new RuntimeException('کاربر دامین از قبل کد پرسنلی دارد.');
-        }
+        $domainPersonnelCode = fpl_normalize_code((string) ($domain['employee_number'] ?? ''));
         $domainNational = trim((string) ($domain['national_code'] ?? ''));
         $foodNational = trim((string) ($food['national_code'] ?? ''));
         if ($domainNational !== '' && $foodNational !== '' && $domainNational !== $foodNational) {
             throw new RuntimeException('کد ملی دو رکورد متفاوت است.');
         }
-        $personnelCode = trim((string) ($food['employee_number'] ?? ''));
+        $personnelCode = fpl_food_personnel_code($food);
         if ($personnelCode === '') {
             throw new RuntimeException('رکورد پرسنل غذا کد پرسنلی ندارد.');
+        }
+        if ($domainPersonnelCode !== '' && !fpl_codes_equal($domainPersonnelCode, $personnelCode)) {
+            throw new RuntimeException('کد پرسنلی ثبت‌شده در حساب دامین با رکورد پرسنل غذا یکی نیست؛ کد دامین اولویت دارد و ادغام متوقف شد.');
+        }
+        if ($domainPersonnelCode !== '') {
+            $personnelCode = $domainPersonnelCode;
         }
 
         // ۱. کد پرسنلی را از رکورد پرسنل غذا آزاد کن (کد پرسنلی یکتاست) و نام کاربری موقت بده.
@@ -260,11 +295,16 @@ function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch
         // ۵. رکورد پرسنل غذا را حذف کن.
         $pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$foodId]);
 
-        $pdo->commit();
+        if ($ownsTransaction) {
+            $pdo->commit();
+        }
         return ['ok' => true, 'message' => 'ادغام انجام شد.', 'moved' => $moved];
     } catch (Throwable $exception) {
-        if ($pdo->inTransaction()) {
+        if ($ownsTransaction && $pdo->inTransaction()) {
             $pdo->rollBack();
+        }
+        if (!$ownsTransaction) {
+            throw $exception;
         }
         return ['ok' => false, 'message' => $exception->getMessage(), 'moved' => []];
     }
@@ -285,36 +325,72 @@ function fpl_normalize_code(string $value): string
     return trim(strtr(trim($value), $digits));
 }
 
-/** پیدا کردن رکورد پرسنل غذا با کد پرسنلی (با تحمل صفرهای ابتدای کد). */
+function fpl_codes_equal(string $left, string $right): bool
+{
+    $left = fpl_normalize_code($left);
+    $right = fpl_normalize_code($right);
+    if ($left === $right) {
+        return true;
+    }
+    $leftLoose = ltrim($left, '0');
+    $rightLoose = ltrim($right, '0');
+    return ($leftLoose === '' ? '0' : $leftLoose) === ($rightLoose === '' ? '0' : $rightLoose);
+}
+
+/** کد مؤثر پرسنل؛ حساب محلی قدیمی ممکن است کد را فقط در username نگه داشته باشد. */
+function fpl_food_personnel_code(array $food): string
+{
+    $code = fpl_normalize_code((string) ($food['employee_number'] ?? ''));
+    if ($code !== '') {
+        return $code;
+    }
+    if ((string) ($food['auth_source'] ?? '') === 'local'
+        && (string) ($food['role'] ?? '') === 'local_user'
+        && (int) ($food['is_primary_admin'] ?? 0) !== 1) {
+        return fpl_normalize_code((string) ($food['username'] ?? ''));
+    }
+    return '';
+}
+
+/** رکوردهای منطبق با کد؛ کد دقیق اولویت دارد و صفرهای آغازین فقط در نبود تطبیق دقیق نادیده گرفته می‌شوند. */
+function fpl_food_code_matches(array $foodRows, string $code): array
+{
+    $code = fpl_normalize_code($code);
+    if ($code === '') {
+        return [];
+    }
+    $exact = [];
+    $loose = [];
+    foreach ($foodRows as $row) {
+        $rowCode = fpl_food_personnel_code($row);
+        if ($rowCode === '') {
+            continue;
+        }
+        if ($rowCode === $code) {
+            $exact[] = $row;
+        } elseif (ltrim($rowCode, '0') === ltrim($code, '0')) {
+            $loose[] = $row;
+        }
+    }
+    return $exact !== [] ? $exact : $loose;
+}
+
+/** پیدا کردن یکتای پرسنل غذا با کد (با تحمل اعداد فارسی و صفرهای آغازین). */
 function fpl_find_food_by_code(PDO $pdo, string $code): ?array
 {
     $code = fpl_normalize_code($code);
     if ($code === '') {
         return null;
     }
-    $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code, is_active FROM users WHERE (auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)) AND employee_number IS NOT NULL AND employee_number <> ''")->fetchAll();
-    $exact = null;
-    $loose = [];
-    foreach ($rows as $row) {
-        $rowCode = fpl_normalize_code((string) $row['employee_number']);
-        if ($rowCode === $code) {
-            $exact = $row;
-            break;
-        }
-        if (ltrim($rowCode, '0') === ltrim($code, '0')) {
-            $loose[] = $row;
-        }
-    }
-    if ($exact !== null) {
-        return $exact;
-    }
-    return count($loose) === 1 ? $loose[0] : null;
+    $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
+    $matches = fpl_food_code_matches($rows, $code);
+    return count($matches) === 1 ? $matches[0] : null;
 }
 
 /**
  * اجرای درخواست‌ها.
  * $links  : [domainId => foodId] برای تطبیق نام (یک‌به‌یک یا انتخاب همنام)
- * $manual : [domainId => کد پرسنلی پرسنل غذا] برای کاربرانی که تطبیق نام ندارند
+ * $manual : [domainId => کد پرسنلی پرسنل غذا] برای اتصال دستی؛ اگر دامنه کد دارد، همان کد اولویت دارد
  */
 function fpl_apply(PDO $pdo, array $links, array $manual = []): array
 {
@@ -337,9 +413,16 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
             $results[] = ['domain' => $domainId, 'food' => $foodId, 'ok' => false, 'message' => 'این رکورد پرسنل غذا قبلاً برای کاربر دیگری انتخاب شده است.'];
             continue;
         }
+        $allowNameMismatch = false;
+        foreach ($candidates as $candidate) {
+            if ((int) ($candidate['domain']['id'] ?? 0) === $domainId && in_array($candidate['status'], ['code_match', 'code_multi'], true)) {
+                $allowNameMismatch = true;
+                break;
+            }
+        }
         $usedFood[$foodId] = true;
         $usedDomain[$domainId] = true;
-        $pairs[] = [$domainId, $foodId, false];
+        $pairs[] = [$domainId, $foodId, $allowNameMismatch];
     }
     foreach ($manual as $domainId => $code) {
         $domainId = (int) $domainId;
@@ -350,8 +433,13 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
         $domainStmt = $pdo->prepare("SELECT id, employee_number, is_active, auth_source FROM users WHERE id = ?");
         $domainStmt->execute([$domainId]);
         $domain = $domainStmt->fetch();
-        if (!$domain || (string) $domain['auth_source'] !== 'ldap' || (int) $domain['is_active'] !== 1 || trim((string) ($domain['employee_number'] ?? '')) !== '') {
-            $results[] = ['domain' => $domainId, 'food' => 0, 'ok' => false, 'message' => 'کاربر دامین برای اتصال دستی معتبر نیست (غیرفعال، دامین نیست، یا کد پرسنلی دارد).'];
+        $domainCode = fpl_normalize_code((string) ($domain['employee_number'] ?? ''));
+        if (!$domain || (string) $domain['auth_source'] !== 'ldap' || (int) $domain['is_active'] !== 1) {
+            $results[] = ['domain' => $domainId, 'food' => 0, 'ok' => false, 'message' => 'کاربر دامین برای اتصال دستی معتبر نیست (غیرفعال یا دامین نیست).'];
+            continue;
+        }
+        if ($domainCode !== '' && !fpl_codes_equal($domainCode, $code)) {
+            $results[] = ['domain' => $domainId, 'food' => 0, 'ok' => false, 'message' => 'کد ثبت‌شده در حساب دامین (' . $domainCode . ') اولویت دارد؛ کد دستی متفاوت پذیرفته نیست.'];
             continue;
         }
         $food = fpl_find_food_by_code($pdo, $code);
@@ -385,10 +473,10 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
 }
 
 /** فیلد کد پرسنلی دستی برای کاربری که تطبیق نام ندارد یا در AD کدش به‌علت تداخل خالی مانده است. */
-function fpl_manual_input(int $domainId): string
+function fpl_manual_input(int $domainId, string $value = ''): string
 {
-    return '<div><small>اتصال دستی: کد پرسنلی پرسنل غذا/حساب محلی را وارد کنید (مثلاً 335)</small><br>'
-        . '<input type="text" name="manual[' . $domainId . ']" value="" placeholder="کد پرسنلی" style="width:160px"></div>';
+    return '<div><small>اتصال دستی: کد پرسنلی ثبت‌شده در دامین اولویت دارد؛ در صورت نیاز همان کد را بررسی کنید.</small><br>'
+        . '<input type="text" name="manual[' . $domainId . ']" value="' . e($value) . '" placeholder="کد پرسنلی" style="width:160px"></div>';
 }
 
 /** نقطهٔ ورود صفحه (از index.php صدا زده می‌شود). */
@@ -424,7 +512,7 @@ function fpl_render_request(): never
     $lastResults = $_SESSION['fpl_last_results'] ?? [];
     unset($_SESSION['fpl_last_results']);
 
-    $counts = ['single' => 0, 'multi' => 0, 'none' => 0, 'conflict' => 0, 'has_code' => 0];
+    $counts = ['single' => 0, 'multi' => 0, 'none' => 0, 'conflict' => 0, 'has_code' => 0, 'code_match' => 0, 'code_multi' => 0];
     foreach ($candidates as $item) {
         $counts[$item['status']]++;
     }
@@ -461,22 +549,21 @@ function fpl_render_request(): never
     }
     echo '</ul><a class="button secondary" href="index.php?page=food-personnel-link&amp;download=xlsx">دانلود گزارش Excel (XLSX)</a></div>';
 
-    echo '<div class="panel"><p>وضعیت: ' . $counts['single'] . ' تطبیق یک‌به‌یک، ' . $counts['multi'] . ' همنام (انتخاب دستی)، ' . $counts['conflict'] . ' کد ملی متفاوت، ' . $counts['none'] . ' بدون تطبیق، ' . $counts['has_code'] . ' از قبل کد پرسنلی دارد.</p></div>';
+    echo '<div class="panel"><p>وضعیت: ' . $counts['single'] . ' تطبیق یک‌به‌یک، ' . $counts['multi'] . ' همنام (انتخاب دستی)، ' . $counts['code_match'] . ' اتصال با کد ثبت‌شدهٔ دامین، ' . $counts['code_multi'] . ' تکرار کد دامین، ' . $counts['conflict'] . ' کد ملی متفاوت، ' . $counts['none'] . ' بدون تطبیق، ' . $counts['has_code'] . ' از قبل کد پرسنلی دارد.</p></div>';
 
     echo '<form method="post" action="index.php?page=food-personnel-link">' . csrf_field();
     echo '<div class="panel"><table class="data-table"><thead><tr><th>کاربر دامین</th><th>نام کاربری</th><th>وضعیت</th><th>گزینه‌ها (کد پرسنلی / کد ملی کامل)</th></tr></thead><tbody>';
     foreach ($candidates as $item) {
         $domain = $item['domain'];
         if ($item['status'] === 'none' || $item['status'] === 'has_code') {
-            if ($item['status'] === 'has_code') {
-                continue;
-            }
-            echo '<tr><td>' . e((string) $domain['full_name']) . '</td><td>' . e((string) $domain['username']) . '</td><td>' . ($item['status'] === 'none' ? 'بدون تطبیق' : '') . '</td><td>' . fpl_manual_input((int) $domain['id']) . '</td></tr>';
+            $manualCode = (string) ($domain['employee_number'] ?? '');
+            $status = $item['status'] === 'none' ? 'بدون تطبیق' : 'کد دامین ثبت‌شده؛ بدون رکورد هم‌کد در پرسنل غذا';
+            echo '<tr><td>' . e((string) $domain['full_name']) . '</td><td>' . e((string) $domain['username']) . '</td><td>' . e($status) . '<br><small>' . e((string) $item['reason']) . '</small></td><td>' . fpl_manual_input((int) $domain['id'], $manualCode) . '</td></tr>';
             continue;
         }
         $domainId = (int) $domain['id'];
         echo '<tr><td>' . e((string) $domain['full_name']) . '</td><td>' . e((string) $domain['username']) . '</td>';
-        $statusLabel = ['single' => 'یک تطبیق (پیش‌انتخاب)', 'multi' => 'همنام: انتخاب کنید', 'conflict' => 'کد ملی متفاوت'][$item['status']] ?? '';
+        $statusLabel = ['single' => 'یک تطبیق (پیش‌انتخاب)', 'multi' => 'همنام: انتخاب کنید', 'conflict' => 'کد ملی متفاوت', 'code_match' => 'کد پرسنلی دامین (اولویت‌دار)', 'code_multi' => 'کد پرسنلی دامین تکراری'][$item['status']] ?? '';
         echo '<td>' . e($statusLabel) . '</td><td>';
         echo '<label><input type="radio" name="links[' . $domainId . ']" value="0"' . ($item['chosen'] === 0 ? ' checked' : '') . '> جدا بماند</label><br>';
         foreach ($item['matches'] as $match) {
@@ -493,8 +580,8 @@ function fpl_render_request(): never
         if ($item['reason'] !== '') {
             echo '<small>' . e((string) $item['reason']) . '</small>';
         }
-        if ($item['status'] === 'conflict') {
-            echo '<br>' . fpl_manual_input($domainId);
+        if (in_array($item['status'], ['conflict', 'code_multi'], true)) {
+            echo '<br>' . fpl_manual_input($domainId, (string) ($domain['employee_number'] ?? ''));
         }
         echo '</td></tr>';
     }

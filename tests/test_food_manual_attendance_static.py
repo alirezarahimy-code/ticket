@@ -19,6 +19,8 @@ class FoodManualAttendanceStaticTests(unittest.TestCase):
         self.assertIn('src="assets/food-manual-attendance.js?v=1"', index)
         self.assertNotIn("manualAttendance", groups_js)
         self.assertIn("ثبت دستی فیش امروز", manual_js)
+        self.assertIn("فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ امروز را نشان می‌دهد", manual_js)
+        self.assertIn("هیچ کارمند فعالی با سفارش ناهار واجد شرایط پیدا نشد", manual_js)
         self.assertIn("id=\"manual-attendance-root\"", manual_js)
 
     def test_manual_write_requires_group_edit_permission_and_today(self):
@@ -30,14 +32,18 @@ class FoodManualAttendanceStaticTests(unittest.TestCase):
         self.assertIn("food_ticket_api_manual_attendance_save_many($body, $user)", ticket)
         self.assertIn("$manualDate !== food_ticket_manual_attendance_today()", ticket)
 
-    def test_list_includes_account_status_without_returning_national_codes(self):
+    def test_list_contains_only_active_people_with_the_same_eligible_order_map(self):
         groups = read("food-ticket-groups.php")
         start = groups.index("function food_ticket_api_manual_attendance(")
         end = groups.index("/** ثبت دستی یک تردد امروز", start)
         listing = groups[start:end]
-        self.assertIn("SELECT id, employee_number, full_name, username, is_active FROM users", listing)
-        self.assertNotIn("WHERE is_active = 1", listing)
-        self.assertNotIn("national_code", listing)
+        self.assertIn("food_ticket_group_order_map($orderMaps, $date)", listing)
+        self.assertIn("if (!is_array($orderMap))", listing)
+        self.assertIn("$hasEligibleOrder = food_ticket_group_food_lookup($orderMap)", listing)
+        self.assertIn("SELECT id, employee_number, national_code, full_name, username, is_active FROM users", listing)
+        self.assertIn("WHERE is_active = 1", listing)
+        self.assertIn("return $hasEligibleOrder($row) !== null", listing)
+        self.assertNotIn("'national_code' =>", listing)
         self.assertIn("'today_record' => $attendanceByUser[$id] ?? null", listing)
         self.assertIn("'ticket_issued' =>", listing)
 
@@ -51,6 +57,8 @@ class FoodManualAttendanceStaticTests(unittest.TestCase):
         self.assertIn("'event_type' => 'no_food'", save)
         self.assertIn("'with_ticket' => false", save)
         self.assertIn("food_ticket_decide_for_user($person, $today", save)
+        self.assertIn("food_ticket_group_food_lookup($orderMap)($person)", save)
+        self.assertIn("سفارش فعال ناهار در امروز پیدا نشد", save)
         self.assertIn("$payload['print_status'] = 'not_printed'", save)
         self.assertIn("food_ticket_enqueue_print($eventId, $config)", save)
         self.assertIn("'with_ticket' => $withTicket", save)
