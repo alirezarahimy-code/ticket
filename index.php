@@ -5267,7 +5267,7 @@ if ($page === 'inventory') {
     render_header('شناسنامه سیستم', $inventoryUser);
     $canExtractThisAsset = user_can($inventoryUser, 'domain.scan');
     $extractPreflight = $canExtractThisAsset ? domain_scan_preflight() : null;
-    $canExtractLocalThisAsset = PHP_OS_FAMILY === 'Windows' && user_can($inventoryUser, 'asset.extract') && (is_global_ticket_role($inventoryUser['role']) || user_service_group($inventoryUser) === 'it') && inventory_is_local_asset($asset);
+    $canExtractLocalThisAsset = PHP_OS_FAMILY === 'Windows' && user_can($inventoryUser, 'asset.extract') && (is_global_ticket_role($inventoryUser['role']) || user_service_group($inventoryUser) === 'it') && inventory_asset_is_local($asset);
     $assetActions = '';
     if ($canExtractLocalThisAsset) {
         $assetActions .= '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit">استخراج محلی همین سیستم</button></form>';
@@ -5485,7 +5485,7 @@ if ($page === 'asset') {
     $peripherals = json_decode((string) $asset['peripherals_json'], true) ?: [];
     render_header('شناسنامه دارایی', $assetUser);
     $manualPeripherals = is_array($peripherals['manual_entries'] ?? null) ? $peripherals['manual_entries'] : [];
-    $canExtractLocalAsset = PHP_OS_FAMILY === 'Windows' && user_can($assetUser, 'asset.extract') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it') && inventory_is_local_asset($asset);
+    $canExtractLocalAsset = PHP_OS_FAMILY === 'Windows' && user_can($assetUser, 'asset.extract') && (is_global_ticket_role($assetUser['role']) || user_service_group($assetUser) === 'it') && inventory_asset_is_local($asset);
     $localExtractButton = $canExtractLocalAsset
         ? '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit">استخراج محلی همین سیستم</button></form>'
         : '';
