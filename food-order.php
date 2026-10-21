@@ -2363,9 +2363,18 @@ function food_order_bulk_snapshot(string $dateInput, string $mealType, array $ac
         $visits[(int) $row['user_id']] = ['group_id' => $groupId, 'title' => (string) $row['title'], 'locked' => $visitLocks[$groupId]];
     }
     $homeGroups = [];
+    $homeGroupLocks = [];
     $homeStmt = db()->query('SELECT m.user_id, m.group_id, g.title FROM food_ticket_group_members m JOIN food_ticket_groups g ON g.id = m.group_id');
     foreach ($homeStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $homeGroups[(int) $row['user_id']] = ['group_id' => (int) $row['group_id'], 'title' => (string) $row['title']];
+        $homeGroupId = (int) $row['group_id'];
+        if (!array_key_exists($homeGroupId, $homeGroupLocks)) {
+            $homeGroupLocks[$homeGroupId] = food_ticket_group_absence_locked($homeGroupId, $date);
+        }
+        $homeGroups[(int) $row['user_id']] = [
+            'group_id' => $homeGroupId,
+            'title' => (string) $row['title'],
+            'locked' => $homeGroupLocks[$homeGroupId],
+        ];
     }
 
     // Include both domain and local active staff with an employee number. National codes are never returned.

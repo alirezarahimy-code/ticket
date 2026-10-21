@@ -11,6 +11,6 @@
 
 ## وضعیت فعلی
 
-- صفحهٔ جاری: `downloads/index.html`، فقط R12.
-- بسته: `downloads/ticket-update-1.61.10-manual-food-ticket-r12-20261021.zip`.
-- انتشار جاری: `https://github.com/alirezarahimy-code/ticket/releases/tag/v1.61.10-r12`.
+- صفحهٔ جاری: `downloads/index.html`، فقط R13.
+- بسته: `downloads/ticket-update-1.61.10-temporary-canteen-transfer-r13-20261021.zip`.
+- انتشار جاری: `https://github.com/alirezarahimy-code/ticket/releases/tag/v1.61.10-r13`.

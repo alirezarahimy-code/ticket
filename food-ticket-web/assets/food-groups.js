@@ -258,7 +258,7 @@
         + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>')
         + '<span class="fg-person-name" title="' + esc(m.name) + ' (' + esc(m.pc) + ')">' + esc(m.name) + ' <small>(' + esc(m.pc) + ')</small>'
         + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
-        + (m.visitor ? ' <span class="status ok">مهمان امروز</span>' : '')
+        + (m.visitor ? (m.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(m.home_group_title || 'گروه دائمی') + '»</span>' : ' <span class="status ok">مهمان امروز</span>') : '')
         + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span></label>';
     }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
@@ -323,9 +323,10 @@
     const guestItems = guests.length
       ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + guests.map((u) => {
           const btn = S.canCancelVisit
-            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">لغو تغییر سلف</button>'
+            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">' + (u.temporary_transfer ? 'بازگشت به گروه دائمی' : 'لغو تغییر سلف') + '</button>'
             : '';
-          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + btn + '</li>';
+          const transfer = u.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(u.home_group_title || 'گروه دائمی') + '»؛ عضویت دائمی محفوظ است</span>' : ' <span class="status ok">مهمان/تغییر سلف روزانه</span>';
+          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + transfer + btn + '</li>';
         }).join('') + '</ol>'
       : '<p class="muted">برای امروز مهمان یا عضو موقتی ثبت نشده است.</p>';
     return '<div id="fg-members-overlay" class="fg-members-overlay">'
@@ -459,7 +460,10 @@
       const uid = Number(b.dataset.user || 0);
       if (!uid) return;
       const guest = (S.groups.find((x) => x.id === S.membersPopup) || { today_visitors: [] }).today_visitors.find((u) => Number(u.id) === uid);
-      if (!window.confirm('اعلام تغییر سلف «' + ((guest && guest.name) || 'این نفر') + '» برای امروز لغو شود؟')) return;
+      const confirmation = guest && guest.temporary_transfer
+        ? 'انتقال موقت «' + guest.name + '» لغو و او به عضویت دائمی خود برگردانده شود؟'
+        : 'اعلام تغییر سلف «' + ((guest && guest.name) || 'این نفر') + '» برای امروز لغو شود؟';
+      if (!window.confirm(confirmation)) return;
       callApi('/api/food-visit-cancel', { method: 'POST', body: JSON.stringify({ user_id: uid }) })
         .then((x) => { apply(x); say((x && x.message) || 'اعلام لغو شد.'); draw(); })
         .catch((err) => say(err.message || 'لغو اعلام انجام نشد.'));

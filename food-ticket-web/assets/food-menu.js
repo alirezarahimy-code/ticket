@@ -444,7 +444,14 @@
     if (bulk.operation === 'order') return Boolean(bulk.snapshot.has_calendar && (bulk.items || []).length && Number(bulk.target || 0) > 0);
     if (bulk.operation === 'cancel') return Boolean(person.order && person.order.status === 'active');
     var group = (bulk.groups || []).filter(function (item) { return Number(item.id) === Number(bulk.target || 0); })[0];
-    return Boolean(group && !group.locked && !person.home_group && !(person.visit && person.visit.locked));
+    if (!group || group.locked || (person.visit && person.visit.locked)) return false;
+    var targetId = Number(group.id);
+    var homeId = Number((person.home_group && person.home_group.group_id) || 0);
+    var visitId = Number((person.visit && person.visit.group_id) || 0);
+    if (person.visit && visitId === targetId) return false;
+    if (homeId && targetId === homeId) return Boolean(person.visit && visitId !== homeId);
+    if (homeId && person.home_group.locked) return false;
+    return true;
   }
 
   function loadBulkSnapshot(date, mealType) {
@@ -503,12 +510,27 @@
       if (!person.order || person.order.status !== 'active') return '<span class="fm-bulk-state blocked">سفارش فعالی ندارد</span>';
       return '<span class="fm-bulk-state ok">' + (bulk.snapshot && bulk.snapshot.order_status === 'closed' ? 'بسته · لغو مدیر مجاز' : 'قابل لغو') + '</span>';
     }
-    if (person.home_group) return '<span class="fm-bulk-state blocked">عضو دائم «' + esc(person.home_group.title) + '»</span>';
     if (person.visit && person.visit.locked) return '<span class="fm-bulk-state blocked">فیش سلف فعلی چاپ شده</span>';
     var group = (bulk.groups || []).filter(function (item) { return Number(item.id) === Number(bulk.target || 0); })[0];
     if (!group) return '<span class="fm-bulk-state blocked">سلف مقصد را انتخاب کنید</span>';
     if (group.locked) return '<span class="fm-bulk-state blocked">فیش گروه مقصد چاپ شده</span>';
-    return '<span class="fm-bulk-state ok">' + (person.visit ? 'قابل تغییر از «' + esc(person.visit.title) + '»' : 'قابل ثبت') + '</span>';
+    var targetId = Number(group.id);
+    var homeId = Number((person.home_group && person.home_group.group_id) || 0);
+    var visitId = Number((person.visit && person.visit.group_id) || 0);
+    if (person.visit && visitId === targetId) return '<span class="fm-bulk-state blocked">این سلف برای همان روز از قبل ثبت شده است</span>';
+    if (person.home_group && homeId === targetId) {
+      if (person.home_group.locked) return '<span class="fm-bulk-state blocked">فیش گروه دائمی چاپ شده</span>';
+      return person.visit && visitId !== homeId
+        ? '<span class="fm-bulk-state ok">بازگشت موقت به گروه دائمی «' + esc(person.home_group.title) + '»</span>'
+        : '<span class="fm-bulk-state blocked">همین گروه دائمی؛ انتقالی لازم نیست</span>';
+    }
+    if (person.home_group && person.home_group.locked) return '<span class="fm-bulk-state blocked">فیش گروه دائمی مبدأ چاپ شده</span>';
+    if (person.home_group) {
+      var from = person.visit ? person.visit.title : person.home_group.title + ' (دائمی)';
+      return '<span class="fm-bulk-state ok">انتقال موقت از «' + esc(from) + '»؛ عضویت دائمی حفظ می‌شود</span>';
+    }
+    if (person.visit) return '<span class="fm-bulk-state ok">قابل تغییر روزانه از «' + esc(person.visit.title) + '»</span>';
+    return '<span class="fm-bulk-state ok">قابل ثبت برای این روز</span>';
   }
 
   function renderBulkResults() {
@@ -535,7 +557,7 @@
     }).join('');
     var targetBlock = bulk.operation === 'cancel'
       ? '<label class="fm-field">دلیل لغو<textarea name="reason" data-bulk-reason rows="2" maxlength="300" placeholder="مثلاً: درخواست مدیر واحد یا اصلاح ثبت اشتباه">' + esc(bulk.reason || '') + '</textarea><small>دلیل برای سابقهٔ لغو ذخیره می‌شود.</small></label>'
-      : '<label class="fm-field">' + (bulk.operation === 'order' ? 'غذای انتخابی' : 'سلف مقصد') + '<select name="target" data-bulk-target>' + bulkTargetOptions() + '</select><small>' + (bulk.operation === 'order' ? 'برای افراد انتخاب‌شده ثبت می‌شود؛ اگر سفارش قبلی داشته باشند، تغییر می‌کند.' : 'برای افراد واجدشرایط به‌صورت تغییر سلف روزانه ثبت می‌شود.') + '</small></label>';
+      : '<label class="fm-field">' + (bulk.operation === 'order' ? 'غذای انتخابی' : 'سلف مقصد') + '<select name="target" data-bulk-target>' + bulkTargetOptions() + '</select><small>' + (bulk.operation === 'order' ? 'برای افراد انتخاب‌شده ثبت می‌شود؛ اگر سفارش قبلی داشته باشند، تغییر می‌کند.' : 'برای عضو دائم، انتخاب سلف دیگر انتقال موقت همان روز است و عضویت ثابت را تغییر نمی‌دهد؛ انتخاب گروه دائمی، انتقال را برمی‌گرداند.') + '</small></label>';
     var rows = (bulk.people || []).filter(function (person) {
       var query = String(bulk.search || '').trim().toLocaleLowerCase();
       return !query || [person.name, person.employee_number, person.department, person.username].join(' ').toLocaleLowerCase().indexOf(query) >= 0;
@@ -543,7 +565,7 @@
     var peopleRows = rows.map(function (person) {
       var eligible = bulkCanSelect(person);
       var selected = (bulk.selectedIds || []).indexOf(Number(person.id)) >= 0;
-      var current = bulk.operation === 'canteen' ? (person.visit ? person.visit.title : person.home_group ? person.home_group.title + ' (دائم)' : '—') : (person.order ? person.order.food_name + (person.order.status === 'active' ? '' : ' (لغوشده)') : 'بدون سفارش');
+      var current = bulk.operation === 'canteen' ? (person.visit ? person.visit.title + (person.home_group ? ' (انتقال موقت)' : ' (روزانه)') : person.home_group ? person.home_group.title + ' (دائم)' : '—') : (person.order ? person.order.food_name + (person.order.status === 'active' ? '' : ' (لغوشده)') : 'بدون سفارش');
       return '<tr' + (eligible ? '' : ' class="fm-bulk-row-blocked"') + '><td><input type="checkbox" class="fm-bulk-check" data-bulk-person="' + Number(person.id) + '"' + (selected ? ' checked' : '') + (eligible ? '' : ' disabled') + ' aria-label="انتخاب ' + esc(person.name) + '"></td><td><strong>' + esc(person.name) + '</strong><small class="fm-bulk-secondary">' + esc(person.department || 'واحد ثبت نشده') + '</small></td><td>' + esc(faDigits(person.employee_number || '—')) + '</td><td>' + esc(current) + '</td><td>' + bulkPersonStatus(person) + '</td></tr>';
     }).join('') || '<tr><td colspan="5" class="fm-empty">پرسنلی با این جست‌وجو پیدا نشد.</td></tr>';
     var isPast = Boolean(snapshot.is_past);

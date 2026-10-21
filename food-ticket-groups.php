@@ -727,8 +727,11 @@ function food_ticket_day_visit_users(int $groupId, string $date): array
     }
     try {
         $q = db()->prepare(
-            'SELECT u.id, u.full_name, u.employee_number, u.national_code, u.is_active '
+            'SELECT u.id, u.full_name, u.employee_number, u.national_code, u.is_active, '
+            . 'm.group_id AS home_group_id, hg.title AS home_group_title '
             . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
+            . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
+            . 'LEFT JOIN food_ticket_groups hg ON hg.id = m.group_id '
             . 'WHERE v.group_id = ? AND v.visit_date = ? ORDER BY v.id'
         );
         $q->execute([$groupId, $date]);
@@ -739,10 +742,29 @@ function food_ticket_day_visit_users(int $groupId, string $date): array
     }
 }
 
-/** اعضای دائم + خوداظهاران همان تاریخ (بدون تکرار). */
+/** اعضای دائم و موقتِ مقصد برای همان تاریخ؛ انتقال روزانه، عضویت دائمیِ گروه مبدأ را جایگزین می‌کند. */
 function food_ticket_group_members_for_date(int $groupId, string $date, bool $activeOnly = false): array
 {
     $members = food_ticket_group_members($groupId, $activeOnly);
+    if ($groupId <= 0 || !preg_match('/^\\d{4}-\\d{2}-\\d{2}$/', $date)) {
+        return $members;
+    }
+    // اگر عضو دائمی در همان تاریخ به گروه دیگری منتقل شده، نباید در گروه خانه هم فیش بگیرد.
+    try {
+        $visitStmt = db()->prepare('SELECT user_id, group_id FROM food_ticket_day_visits WHERE visit_date = ?');
+        $visitStmt->execute([$date]);
+        $visitGroupByUser = [];
+        foreach ($visitStmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $row) {
+            $visitGroupByUser[(int) $row['user_id']] = (int) $row['group_id'];
+        }
+    } catch (Throwable $e) {
+        app_error_log('[food-visit] dated membership lookup failed: ' . $e->getMessage());
+        throw new RuntimeException('انتقال‌های موقت روزانه در دسترس نیست؛ پردازش گروه برای جلوگیری از فیش تکراری متوقف شد.', 0, $e);
+    }
+    $members = array_values(array_filter($members, static function (array $member) use ($visitGroupByUser, $groupId): bool {
+        $id = (int) ($member['id'] ?? 0);
+        return !isset($visitGroupByUser[$id]) || $visitGroupByUser[$id] === $groupId;
+    }));
     $seen = [];
     foreach ($members as $m) {
         $seen[(int) ($m['id'] ?? 0)] = true;
@@ -949,8 +971,9 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         throw new RuntimeException('کاربر یا گروه معتبر نیست.');
     }
     $homeId = food_ticket_user_group_id($userId);
-    if ($homeId !== null) {
-        throw new RuntimeException('عضو دائم گروه نمی‌تواند محل تحویل را عوض کند؛ تغییر روزانهٔ سلف برای او ممکن نیست.');
+    $existing = food_ticket_day_visit_row($userId, $date);
+    if ($homeId !== null && !$managerOverride) {
+        throw new RuntimeException('عضو دائم گروه نمی‌تواند محل تحویل را عوض کند؛ انتقال موقت را مدیر مجاز انجام می‌دهد.');
     }
     $g = db()->prepare('SELECT id, title, status, visit_change_until FROM food_ticket_groups WHERE id = ? LIMIT 1');
     $g->execute([$groupId]);
@@ -962,13 +985,12 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         food_ticket_visit_change_guard($group['visit_change_until'] ?? '', (string) $group['title']);
     }
     if (food_ticket_group_absence_locked($groupId, $date)) {
-        throw new RuntimeException('فیش این گروه برای امروز چاپ شده است؛ خوداظهاری بسته است.');
+        throw new RuntimeException('فیش گروه مقصد برای این تاریخ چاپ شده است؛ تغییر سلف بسته است.');
     }
-    $existing = food_ticket_day_visit_row($userId, $date);
     if ($existing && food_ticket_group_absence_locked((int) $existing['group_id'], $date)) {
-        throw new RuntimeException('اعلام قبلی قفل شده و قابل تغییر نیست.');
+        throw new RuntimeException('فیش سلف فعلی برای این تاریخ چاپ شده است؛ انتقال یا بازگشت ممکن نیست.');
     }
-    if ($existing) {
+    if ($existing && !$managerOverride) {
         $prevUntil = '';
         try {
             $pq = db()->prepare('SELECT visit_change_until FROM food_ticket_groups WHERE id = ? LIMIT 1');
@@ -977,26 +999,78 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         } catch (Throwable) {
             $prevUntil = '';
         }
-        if (!$managerOverride) {
-            food_ticket_visit_change_guard($prevUntil, (string) $existing['title']);
+        food_ticket_visit_change_guard($prevUntil, (string) $existing['title']);
+    }
+
+    $homeTitle = '';
+    if ($homeId !== null) {
+        $homeStmt = db()->prepare('SELECT title FROM food_ticket_groups WHERE id = ? LIMIT 1');
+        $homeStmt->execute([$homeId]);
+        $homeTitle = (string) ($homeStmt->fetchColumn() ?: 'گروه دائمی');
+        if ($groupId !== $homeId && food_ticket_group_absence_locked($homeId, $date)) {
+            throw new RuntimeException('فیش گروه دائمی مبدأ برای این تاریخ چاپ شده است؛ انتقال موقت دیگر ممکن نیست.');
+        }
+        // انتخاب گروه دائمی، انتقال موقت قبلی را برمی‌گرداند؛ عضویت دائمی هرگز تغییر نمی‌کند.
+        if ($groupId === $homeId) {
+            if (!$existing || (int) $existing['group_id'] === $homeId) {
+                throw new RuntimeException('این کارمند اکنون در گروه دائمی خود است و انتقالی برای بازگرداندن ندارد.');
+            }
+            db()->prepare('DELETE FROM food_ticket_day_visits WHERE user_id = ? AND visit_date = ?')->execute([$userId, $date]);
+            food_ticket_audit('food_day_visit_temporary_transfer_returned', [
+                'target_type' => 'food_group',
+                'target_id' => $homeId,
+                'target_label' => $homeTitle,
+                'user_id' => (int) ($actor['id'] ?? $userId),
+                'old' => (string) $existing['title'],
+                'new' => $homeTitle,
+                'meta' => [
+                    'date' => $date,
+                    'subject_user_id' => $userId,
+                    'home_group_id' => $homeId,
+                    'temporary_group_id' => (int) $existing['group_id'],
+                    'temporary_transfer' => true,
+                ],
+            ]);
+            return food_ticket_day_visit_state($user, $date, $actor) + [
+                'ok' => true,
+                'message' => 'برای ' . food_order_full_name($user) . ' انتقال موقت لغو شد و گروه دائمی «' . $homeTitle . '» برقرار ماند.',
+            ];
         }
     }
+
     if ($existing) {
+        if ((int) $existing['group_id'] === $groupId) {
+            throw new RuntimeException('این فرد از قبل برای همان سلف ثبت شده است.');
+        }
         db()->prepare('UPDATE food_ticket_day_visits SET group_id = ? WHERE user_id = ? AND visit_date = ?')
             ->execute([$groupId, $userId, $date]);
     } else {
         db()->prepare('INSERT INTO food_ticket_day_visits (user_id, visit_date, group_id) VALUES (?, ?, ?)')
             ->execute([$userId, $date, $groupId]);
     }
-    food_ticket_audit($managerOverride ? 'food_day_visit_bulk_set' : 'food_day_visit_set', [
+    $temporaryTransfer = $managerOverride && $homeId !== null;
+    $auditCode = $temporaryTransfer ? 'food_day_visit_temporary_transfer' : ($managerOverride ? 'food_day_visit_bulk_set' : 'food_day_visit_set');
+    $oldTitle = $existing ? (string) $existing['title'] : ($temporaryTransfer ? $homeTitle : '');
+    food_ticket_audit($auditCode, [
         'target_type' => 'food_group',
         'target_id' => $groupId,
         'target_label' => (string) $group['title'],
         'user_id' => (int) ($actor['id'] ?? $userId),
+        'old' => $oldTitle,
         'new' => (string) $group['title'],
-        'meta' => ['date' => $date, 'group_id' => $groupId, 'subject_user_id' => $userId, 'manager_override' => $managerOverride],
+        'meta' => [
+            'date' => $date,
+            'group_id' => $groupId,
+            'subject_user_id' => $userId,
+            'manager_override' => $managerOverride,
+            'home_group_id' => $homeId,
+            'temporary_transfer' => $temporaryTransfer,
+        ],
     ]);
-    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'برای ' . food_order_full_name($user) . '، سلف «' . $group['title'] . '» ثبت شد.'];
+    $message = $temporaryTransfer
+        ? 'انتقال موقت ' . food_order_full_name($user) . ' از گروه دائمی «' . $homeTitle . '» به سلف «' . $group['title'] . '» ثبت شد؛ عضویت دائمی تغییر نکرد.'
+        : 'برای ' . food_order_full_name($user) . '، سلف «' . $group['title'] . '» ثبت شد.';
+    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => $message];
 }
 
 function food_ticket_day_visit_clear(array $user, string $date = '', ?array $actor = null): array
@@ -1012,8 +1086,12 @@ function food_ticket_day_visit_clear(array $user, string $date = '', ?array $act
         return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'اعلامی برای امروز ثبت نشده است.'];
     }
     $groupId = (int) $existing['group_id'];
+    $homeId = food_ticket_user_group_id($userId);
     if (food_ticket_group_absence_locked($groupId, $date)) {
         throw new RuntimeException('فیش این گروه برای امروز چاپ شده است؛ لغو ممکن نیست.');
+    }
+    if ($homeId !== null && $homeId !== $groupId && food_ticket_group_absence_locked($homeId, $date)) {
+        throw new RuntimeException('فیش گروه دائمی مبدأ چاپ شده است؛ بازگشت از انتقال موقت دیگر ممکن نیست.');
     }
     $until = '';
     try {
@@ -1027,15 +1105,33 @@ function food_ticket_day_visit_clear(array $user, string $date = '', ?array $act
         food_ticket_visit_change_guard($until, (string) $existing['title']);
     }
     db()->prepare('DELETE FROM food_ticket_day_visits WHERE user_id = ? AND visit_date = ?')->execute([$userId, $date]);
-    food_ticket_audit('food_day_visit_cleared', [
+    $temporaryTransfer = $homeId !== null && $homeId !== $groupId;
+    $homeTitle = '';
+    if ($temporaryTransfer) {
+        $homeStmt = db()->prepare('SELECT title FROM food_ticket_groups WHERE id = ? LIMIT 1');
+        $homeStmt->execute([$homeId]);
+        $homeTitle = (string) ($homeStmt->fetchColumn() ?: 'گروه دائمی');
+    }
+    food_ticket_audit($temporaryTransfer ? 'food_day_visit_temporary_transfer_returned' : 'food_day_visit_cleared', [
         'target_type' => 'food_group',
         'target_id' => $groupId,
         'target_label' => (string) $existing['title'],
-        'user_id' => $userId,
+        'user_id' => $temporaryTransfer ? (int) ($actor['id'] ?? $userId) : $userId,
         'old' => (string) $existing['title'],
-        'meta' => ['date' => $date, 'group_id' => $groupId, 'cleared_by' => (int) ($actor['id'] ?? 0)],
+        'new' => $temporaryTransfer ? $homeTitle : '',
+        'meta' => [
+            'date' => $date,
+            'group_id' => $groupId,
+            'subject_user_id' => $userId,
+            'cleared_by' => (int) ($actor['id'] ?? 0),
+            'home_group_id' => $homeId,
+            'temporary_transfer' => $temporaryTransfer,
+        ],
     ]);
-    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'اعلام امروز لغو شد.'];
+    $message = $temporaryTransfer
+        ? 'انتقال موقت لغو شد؛ عضویت دائمی این فرد در گروه «' . $homeTitle . '» حفظ شده است.'
+        : 'اعلام امروز لغو شد.';
+    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => $message];
 }
 
 function food_ticket_api_cancel_day_visit(array $actor, int $subjectUserId): array
@@ -1857,14 +1953,19 @@ function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null)
     $visitorsByGroup = [];
     try {
         $vq = db()->prepare(
-            'SELECT v.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.is_active '
+            'SELECT v.group_id, u.id, u.employee_number, u.national_code, u.full_name, u.is_active, '
+            . 'm.group_id AS home_group_id, hg.title AS home_group_title '
             . 'FROM food_ticket_day_visits v JOIN users u ON u.id = v.user_id '
+            . 'LEFT JOIN food_ticket_group_members m ON m.user_id = u.id '
+            . 'LEFT JOIN food_ticket_groups hg ON hg.id = m.group_id '
             . 'WHERE v.visit_date = ? ORDER BY u.full_name'
         );
         $vq->execute([$date]);
         foreach ($vq->fetchAll() ?: [] as $r) {
             $row = $userOut($r);
             $row['visitor'] = true;
+            $row['temporary_transfer'] = !empty($r['home_group_id']) && (int) $r['home_group_id'] !== (int) $r['group_id'];
+            $row['home_group_title'] = (string) ($r['home_group_title'] ?? '');
             $visitorsByGroup[(int) $r['group_id']][] = $row;
         }
     } catch (Throwable $e) {
@@ -2183,38 +2284,35 @@ function food_ticket_api_absence_status(int $groupId, string $date, array $actor
     if (!$group) {
         throw new RuntimeException('گروه پیدا نشد.');
     }
-    $members = food_ticket_group_members($groupId);
+    $visitUsers = food_ticket_day_visit_users($groupId, $date);
+    $visitById = [];
+    foreach ($visitUsers as $visitUser) {
+        $visitById[(int) ($visitUser['id'] ?? 0)] = $visitUser;
+    }
+    $members = food_ticket_group_members_for_date($groupId, $date);
     $absences = food_ticket_absence_load($date, $groupId);
     $locked = food_ticket_group_absence_locked($groupId, $date);
     $canOverride = food_ticket_can_override_absence($actor);
     $membersOut = [];
     foreach ($members as $m) {
         $uid = (int) $m['id'];
+        $visit = $visitById[$uid] ?? null;
+        $homeGroupId = (int) ($visit['home_group_id'] ?? 0);
+        $isVisitor = $visit !== null && ($homeGroupId <= 0 || $homeGroupId !== $groupId);
         $membersOut[] = [
             'id' => $uid,
             'pc' => (string) ($m['employee_number'] ?? ''),
             'name' => (string) ($m['full_name'] ?? ''),
             'national_code' => food_ticket_digits($m['national_code'] ?? ''),
             'active' => (bool) ($m['is_active'] ?? false),
-            'absent' => isset($absences[$uid]),
-            'reason' => (string) ($absences[$uid]['reason'] ?? ''),
-            'visitor' => false,
+            'absent' => !$isVisitor && isset($absences[$uid]),
+            'reason' => !$isVisitor ? (string) ($absences[$uid]['reason'] ?? '') : '',
+            'visitor' => $isVisitor,
+            'temporary_transfer' => $isVisitor && $homeGroupId > 0,
+            'home_group_title' => $isVisitor ? (string) ($visit['home_group_title'] ?? '') : '',
         ];
     }
-    foreach (food_ticket_day_visit_users($groupId, $date) as $m) {
-        $uid = (int) $m['id'];
-        $membersOut[] = [
-            'id' => $uid,
-            'pc' => (string) ($m['employee_number'] ?? ''),
-            'name' => (string) ($m['full_name'] ?? ''),
-            'national_code' => food_ticket_digits($m['national_code'] ?? ''),
-            'active' => (bool) ($m['is_active'] ?? false),
-            'absent' => false,
-            'reason' => '',
-            'visitor' => true,
-        ];
-    }
-    $absentCount = count($absences);
+    $absentCount = count(array_filter($membersOut, static fn (array $member): bool => !empty($member['absent'])));
     return [
         // group_id هم سطح بالا برمی‌گردد؛ بدون آن، پنل در «ذخیرهٔ غیبت» مقدار گروه را از دست می‌داد.
         'group_id' => (int) $group['id'],
