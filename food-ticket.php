@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.15';
+const FOOD_TICKET_PANEL_VERSION = '1.37.16';
 
 function food_ticket_panel_version(): string
 {
@@ -65,7 +65,7 @@ function food_ticket_is_allowed(array $user): bool
 /** کد ویرایش لازم برای مسیرهای نوشتن هر بخش (نگاشت مسیر ← کد ویرایش). */
 function food_ticket_route_edit_permission(string $route): ?string
 {
-    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)) {
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear', 'food-manual-attendance'], true)) {
         return 'food.groups_edit';
     }
     if (in_array($route, ['process', 'delivery', 'cleanup-source_row', 'reprint-errors'], true)) {
@@ -153,6 +153,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'guest-cards' => 'food.guest',
         'guest-cap' => 'food.guest',
         'food-groups' => 'food.groups',
+        'food-manual-attendance' => 'food.groups',
         'food-visit-cancel' => 'food.groups',
         'config' => 'food.db',
         'database-file' => 'food.db',
@@ -4083,6 +4084,24 @@ function food_ticket_api_handle(string $route, array $user): never
                 'inside' => $insideNow,
                 'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
             ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-manual-attendance') {
+            $manualDate = food_ticket_iso_date_input($_GET['date'] ?? '') ?? food_ticket_manual_attendance_today();
+            food_ticket_api_json(food_ticket_api_manual_attendance($manualDate));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-manual-attendance') {
+            $body = food_ticket_api_body();
+            $manualDate = food_ticket_iso_date_input($body['date'] ?? '') ?? '';
+            if ($manualDate !== food_ticket_manual_attendance_today()) {
+                throw new RuntimeException('ثبت دستی فیش فقط برای امروز مجاز است.');
+            }
+            $result = food_ticket_api_manual_attendance_save(
+                (int) ($body['user_id'] ?? 0),
+                !empty($body['physical_print']),
+                (string) ($body['reason'] ?? ''),
+                $user
+            );
+            food_ticket_api_json($result + food_ticket_api_manual_attendance($manualDate));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-groups') {
             $groupsDate = (string) ($_GET['date'] ?? '');
