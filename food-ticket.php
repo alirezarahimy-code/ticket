@@ -57,7 +57,7 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close', 'food.emergency']);
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -113,7 +113,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
             'food-menu/status', 'food-menu/month' => 'food.menu|food.order_close',
             'food-menu/catalog', 'food-menu/day' => 'food.menu',
             'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close',
-            'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel' => 'food.emergency',
+            'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel', 'food-menu/bulk-snapshot', 'food-menu/bulk-apply' => 'food.emergency',
             default => null,
         };
         if ($menuPermission === null || !function_exists('user_can')) {
@@ -4615,7 +4615,7 @@ function food_ticket_render_page(array $user): void
         'dashboard' => $fpCan('food.dashboard'),
         'live' => $fpCan('food.monitor'),
         'employees' => $fpCan('food.employees'),
-        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close'),
+        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close') || $fpCan('food.emergency'),
         'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),
         'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health'),

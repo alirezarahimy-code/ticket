@@ -765,7 +765,7 @@ function food_order_verify_employee_national_code(int $employeeId, string $provi
     return $target;
 }
 
-function food_order_create_or_change(int $employeeId, int $actorId, string $dateInput, int $itemId, array $actor, ?string $proxyNationalCode = null, bool $emergency = false, string $mealType = 'lunch'): array
+function food_order_create_or_change(int $employeeId, int $actorId, string $dateInput, int $itemId, array $actor, ?string $proxyNationalCode = null, bool $emergency = false, string $mealType = 'lunch', bool $managerBulk = false): array
 {
     food_order_schema_ensure();
     $mealType = food_order_meal_type($mealType);
@@ -774,14 +774,19 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
         throw new RuntimeException('تاریخ یا انتخاب غذا معتبر نیست.');
     }
     $isProxy = $employeeId !== $actorId;
+    if ($managerBulk && !$emergency) {
+        throw new RuntimeException('عملیات گروهی فقط از مسیر مدیر مجاز است.');
+    }
     if ($emergency) {
-        // سفارش اضطراری: فقط مدیر پشتیبانی (food.emergency)، همیشه با کد ملی فرد، و فقط برای امروز/آینده.
+        // مسیر مدیران: فقط food.emergency؛ عملیات گروهی از فهرست شناسه‌های معتبر پرسنلی می‌آید.
         if (!food_order_user_can($actor, 'food.emergency')) {
             throw new RuntimeException('دسترسی سفارش اضطراری ندارید.');
         }
-        check_api_rate_limit('food_order_emergency_' . $actorId, 120, 60);
+        if (!$managerBulk) {
+            check_api_rate_limit('food_order_emergency_' . $actorId, 120, 60);
+        }
     }
-    if ($isProxy || $emergency) {
+    if (($isProxy || $emergency) && !$managerBulk) {
         if ($proxyNationalCode === null || trim($proxyNationalCode) === '') {
             throw new RuntimeException('کد ملی فرد انتخاب‌شده را وارد کنید.');
         }
@@ -793,7 +798,14 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
     $pdo->beginTransaction();
     try {
         $day = food_order_ensure_orderable_day($pdo, $iso, $mealType, $emergency);
-        if ($isProxy || $emergency) {
+        if (($isProxy || $emergency) && $managerBulk) {
+            $targetStmt = $pdo->prepare("SELECT id, full_name, first_name, last_name, employee_number, is_active FROM users WHERE id = ? AND is_active = 1 AND employee_number IS NOT NULL AND TRIM(employee_number) <> '' LIMIT 1 FOR UPDATE");
+            $targetStmt->execute([$employeeId]);
+            $target = $targetStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$target) {
+                throw new RuntimeException('پرسنل فعال با شمارهٔ پرسنلی معتبر پیدا نشد.');
+            }
+        } elseif ($isProxy || $emergency) {
             $target = food_order_verify_employee_national_code($employeeId, (string) $proxyNationalCode, true, $pdo);
         } else {
             $selfStmt = $pdo->prepare('SELECT id, full_name, first_name, last_name, employee_number, national_code, is_active FROM users WHERE id = ? LIMIT 1 FOR UPDATE');
@@ -824,13 +836,15 @@ function food_order_create_or_change(int $employeeId, int $actorId, string $date
         $existingStmt->execute([$employeeId, $iso, $mealType]);
         $existing = $existingStmt->fetch(PDO::FETCH_ASSOC);
         $old = $existing ? ['calendar_item_id' => (int) $existing['calendar_item_id'], 'status' => (string) $existing['status']] : null;
-        $action = $isProxy ? 'order_proxy_create' : 'order_create';
+        $action = $managerBulk ? 'order_bulk_create' : ($isProxy ? 'order_proxy_create' : 'order_create');
         if ($existing) {
             if ((string) $existing['status'] === 'active' && (int) $existing['calendar_item_id'] === $itemId) {
                 $pdo->commit();
                 return ['ok' => true, 'order_id' => (int) $existing['id'], 'unchanged' => true, 'message' => 'همین غذا قبلاً برای این روز ثبت شده است.'];
             }
-            $action = (string) $existing['status'] === 'cancelled' ? ($isProxy ? 'order_proxy_create' : 'order_create') : 'order_change';
+            $action = (string) $existing['status'] === 'cancelled'
+                ? ($managerBulk ? 'order_bulk_create' : ($isProxy ? 'order_proxy_create' : 'order_create'))
+                : ($managerBulk ? 'order_bulk_change' : 'order_change');
             $pdo->prepare("UPDATE food_orders SET calendar_item_id = ?, created_by = ?, status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ?")
                 ->execute([$itemId, $actorId, (int) $existing['id']]);
             $orderId = (int) $existing['id'];
@@ -905,13 +919,21 @@ function food_order_cancel(int $orderId, array $user): array
     }
 }
 
-function food_order_cancel_proxy(int $orderId, int $employeeId, string $nationalCode, array $actor, bool $emergency = false): array
+function food_order_cancel_proxy(int $orderId, int $employeeId, string $nationalCode, array $actor, bool $emergency = false, bool $managerBulk = false, string $reason = ''): array
 {
     food_order_schema_ensure();
     if ($orderId < 1 || $employeeId < 1) {
         throw new RuntimeException('سفارش قابل لغو نیست.');
     }
-    check_api_rate_limit('food_order_proxy_cancel_' . (int) ($actor['id'] ?? 0), food_order_user_can($actor, 'food.emergency') ? 120 : 80, 60);
+    if ($managerBulk && !$emergency) {
+        throw new RuntimeException('عملیات گروهی فقط از مسیر مدیر مجاز است.');
+    }
+    if ($emergency && !food_order_user_can($actor, 'food.emergency')) {
+        throw new RuntimeException('دسترسی سفارش اضطراری ندارید.');
+    }
+    if (!$managerBulk) {
+        check_api_rate_limit('food_order_proxy_cancel_' . (int) ($actor['id'] ?? 0), food_order_user_can($actor, 'food.emergency') ? 120 : 80, 60);
+    }
 
     $pdo = db();
     $pdo->beginTransaction();
@@ -929,7 +951,16 @@ function food_order_cancel_proxy(int $orderId, int $employeeId, string $national
         if ((string) $statusStmt->fetchColumn() === 'closed' && !$emergency) {
             throw new RuntimeException('سفارش این روز بسته شده و لغو آن فقط از برنامهٔ غذایی توسط مدیر پشتیبانی ممکن است.');
         }
-        $target = food_order_verify_employee_national_code($employeeId, $nationalCode, true, $pdo);
+        if ($managerBulk) {
+            $targetStmt = $pdo->prepare("SELECT id, full_name, first_name, last_name, employee_number, is_active FROM users WHERE id = ? AND is_active = 1 AND employee_number IS NOT NULL AND TRIM(employee_number) <> '' LIMIT 1 FOR UPDATE");
+            $targetStmt->execute([$employeeId]);
+            $target = $targetStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$target) {
+                throw new RuntimeException('پرسنل فعال با شمارهٔ پرسنلی معتبر پیدا نشد.');
+            }
+        } else {
+            $target = food_order_verify_employee_national_code($employeeId, $nationalCode, true, $pdo);
+        }
         $stmt = $pdo->prepare('SELECT id, employee_id, calendar_item_id, food_date, status FROM food_orders WHERE id = ? AND employee_id = ? FOR UPDATE');
         $stmt->execute([$orderId, $employeeId]);
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -947,9 +978,9 @@ function food_order_cancel_proxy(int $orderId, int $employeeId, string $national
         }
         $old = ['calendar_item_id' => (int) $order['calendar_item_id'], 'status' => 'active', 'employee_id' => $employeeId];
         $new = ['status' => 'cancelled', 'employee_id' => $employeeId];
-        food_order_log($orderId, $day['calendar_id'], 'order_proxy_cancel', (int) $actor['id'], $old, $new);
+        food_order_log($orderId, $day['calendar_id'], $managerBulk ? 'order_bulk_cancel' : 'order_proxy_cancel', (int) $actor['id'], $old, $new, $reason !== '' ? $reason : null);
         $pdo->commit();
-        food_order_audit('order_proxy_cancel', $actor, 'food_order', $orderId, $old, $new);
+        food_order_audit($managerBulk ? 'order_bulk_cancel' : 'order_proxy_cancel', $actor, 'food_order', $orderId, $old, $new, $reason !== '' ? $reason : null);
         return ['ok' => true, 'message' => 'سفارش فرد تأییدشده لغو شد.'];
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
@@ -2278,12 +2309,206 @@ function food_order_emergency_handle(string $route, string $method, array $user)
     }
 }
 
+/** Snapshot and batch actions used by the manager-only bulk food operations tab. */
+function food_order_bulk_snapshot(string $dateInput, string $mealType, array $actor): array
+{
+    food_order_require_permission($actor, 'food.emergency');
+    food_order_schema_ensure();
+    $date = food_order_iso_date($dateInput);
+    $mealType = food_order_meal_type($mealType);
+    if ($date === null) {
+        throw new RuntimeException('تاریخ عملیات گروهی معتبر نیست.');
+    }
+    if (!food_ticket_groups_ensure()) {
+        throw new RuntimeException('جدول گروه‌های غذایی در دسترس نیست.');
+    }
+
+    $calendarStmt = db()->prepare('SELECT id, order_status FROM food_calendar WHERE food_date = ? AND meal_type = ? LIMIT 1');
+    $calendarStmt->execute([$date, $mealType]);
+    $calendar = $calendarStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    $items = [];
+    if ($calendar) {
+        $itemStmt = db()->prepare("SELECT i.id AS item_id, i.food_id, i.sort_order, c.food_name
+            FROM food_calendar_items i JOIN food_catalog c ON c.id = i.food_id
+            WHERE i.calendar_id = ? AND i.active = 1 AND c.active = 1
+            ORDER BY i.sort_order, i.id");
+        $itemStmt->execute([(int) $calendar['id']]);
+        foreach ($itemStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $items[] = ['item_id' => (int) $row['item_id'], 'food_id' => (int) $row['food_id'], 'food_name' => (string) $row['food_name'], 'sort_order' => (int) $row['sort_order']];
+        }
+    }
+
+    $orders = [];
+    $orderStmt = db()->prepare("SELECT o.id, o.employee_id, o.calendar_item_id, o.status, c.food_name
+        FROM food_orders o JOIN food_calendar_items i ON i.id = o.calendar_item_id
+        JOIN food_catalog c ON c.id = i.food_id
+        WHERE o.food_date = ? AND o.meal_type = ? ORDER BY o.id DESC");
+    $orderStmt->execute([$date, $mealType]);
+    foreach ($orderStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $id = (int) $row['employee_id'];
+        if (!isset($orders[$id])) {
+            $orders[$id] = ['order_id' => (int) $row['id'], 'item_id' => (int) $row['calendar_item_id'], 'food_name' => (string) $row['food_name'], 'status' => (string) $row['status']];
+        }
+    }
+
+    $visits = [];
+    $visitLocks = [];
+    $visitStmt = db()->prepare('SELECT v.user_id, v.group_id, g.title FROM food_ticket_day_visits v JOIN food_ticket_groups g ON g.id = v.group_id WHERE v.visit_date = ?');
+    $visitStmt->execute([$date]);
+    foreach ($visitStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $groupId = (int) $row['group_id'];
+        if (!array_key_exists($groupId, $visitLocks)) {
+            $visitLocks[$groupId] = food_ticket_group_absence_locked($groupId, $date);
+        }
+        $visits[(int) $row['user_id']] = ['group_id' => $groupId, 'title' => (string) $row['title'], 'locked' => $visitLocks[$groupId]];
+    }
+    $homeGroups = [];
+    $homeStmt = db()->query('SELECT m.user_id, m.group_id, g.title FROM food_ticket_group_members m JOIN food_ticket_groups g ON g.id = m.group_id');
+    foreach ($homeStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $homeGroups[(int) $row['user_id']] = ['group_id' => (int) $row['group_id'], 'title' => (string) $row['title']];
+    }
+
+    // Include both domain and local active staff with an employee number. National codes are never returned.
+    $peopleStmt = db()->query("SELECT u.id, u.username, u.full_name, u.first_name, u.last_name, u.employee_number,
+            COALESCE(NULLIF(d.name, ''), NULLIF(u.department, ''), '') AS department_name
+        FROM users u LEFT JOIN departments d ON d.id = u.department_id
+        WHERE u.is_active = 1 AND u.employee_number IS NOT NULL AND TRIM(u.employee_number) <> ''
+        ORDER BY u.full_name, u.username LIMIT 3000");
+    $people = [];
+    foreach ($peopleStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $id = (int) $row['id'];
+        $people[] = [
+            'id' => $id,
+            'name' => food_order_full_name($row),
+            'employee_number' => (string) $row['employee_number'],
+            'department' => (string) $row['department_name'],
+            'order' => $orders[$id] ?? null,
+            'visit' => $visits[$id] ?? null,
+            'home_group' => $homeGroups[$id] ?? null,
+        ];
+    }
+    $groupStmt = db()->query("SELECT id, title, visit_change_until FROM food_ticket_groups WHERE status = 'active' ORDER BY title, id");
+    $groups = [];
+    foreach ($groupStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $groupId = (int) $row['id'];
+        $groups[] = ['id' => $groupId, 'title' => (string) $row['title'], 'visit_change_until' => food_ticket_visit_change_hhmm($row['visit_change_until'] ?? ''), 'locked' => food_ticket_group_absence_locked($groupId, $date)];
+    }
+    $today = food_order_today();
+    return [
+        'date' => $date,
+        'meal_type' => $mealType,
+        'today' => $today,
+        'is_past' => $date < $today,
+        'has_calendar' => $calendar !== null,
+        'order_status' => $calendar ? (string) $calendar['order_status'] : '',
+        'items' => $items,
+        'groups' => $groups,
+        'people' => $people,
+    ];
+}
+
+function food_order_bulk_apply(array $body, array $actor): array
+{
+    food_order_require_permission($actor, 'food.emergency');
+    food_order_schema_ensure();
+    check_api_rate_limit('food_order_bulk_' . (int) ($actor['id'] ?? 0), 12, 60);
+    $date = food_order_iso_date((string) ($body['date'] ?? ''));
+    $mealType = food_order_meal_type($body['meal_type'] ?? 'lunch');
+    $operation = strtolower(trim((string) ($body['operation'] ?? '')));
+    $ids = is_array($body['employee_ids'] ?? null) ? array_values(array_unique(array_filter(array_map('intval', $body['employee_ids']), static fn (int $id): bool => $id > 0))) : [];
+    if ($date === null || !in_array($operation, ['order', 'cancel', 'canteen'], true) || $ids === [] || count($ids) > 100) {
+        throw new RuntimeException('تاریخ، نوع عملیات یا فهرست پرسنل معتبر نیست؛ حداکثر ۱۰۰ نفر را در یک نوبت انتخاب کنید.');
+    }
+    if ($date < food_order_today()) {
+        throw new RuntimeException('عملیات گروهی برای تاریخ گذشته مجاز نیست.');
+    }
+    $itemId = max(0, (int) ($body['item_id'] ?? 0));
+    $groupId = max(0, (int) ($body['group_id'] ?? 0));
+    $reason = trim((string) ($body['reason'] ?? ''));
+    $reason = function_exists('mb_substr') ? mb_substr($reason, 0, 300, 'UTF-8') : substr($reason, 0, 300);
+    if ($operation === 'order' && $itemId < 1) {
+        throw new RuntimeException('برای ثبت یا تغییر سفارش، غذا را انتخاب کنید.');
+    }
+    if ($operation === 'canteen' && $groupId < 1) {
+        throw new RuntimeException('سلف مقصد را انتخاب کنید.');
+    }
+    if ($operation === 'cancel' && $reason === '') {
+        throw new RuntimeException('برای لغو گروهی، ثبت دلیل الزامی است.');
+    }
+
+    $results = [];
+    $actorId = (int) ($actor['id'] ?? 0);
+    foreach ($ids as $employeeId) {
+        $name = 'پرسنل #' . $employeeId;
+        try {
+            $personStmt = db()->prepare("SELECT id, username, full_name, first_name, last_name, employee_number, role, is_active
+                FROM users WHERE id = ? AND is_active = 1 AND employee_number IS NOT NULL AND TRIM(employee_number) <> '' LIMIT 1");
+            $personStmt->execute([$employeeId]);
+            $person = $personStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$person) {
+                throw new RuntimeException('کاربر فعال با شمارهٔ پرسنلی معتبر پیدا نشد.');
+            }
+            $name = food_order_full_name($person);
+            if ($operation === 'order') {
+                $result = food_order_create_or_change($employeeId, $actorId, $date, $itemId, $actor, null, true, $mealType, true);
+                $message = (string) ($result['message'] ?? 'سفارش ثبت شد.');
+            } elseif ($operation === 'cancel') {
+                $orderStmt = db()->prepare("SELECT id FROM food_orders WHERE employee_id = ? AND food_date = ? AND meal_type = ? AND status = 'active' ORDER BY id DESC LIMIT 1");
+                $orderStmt->execute([$employeeId, $date, $mealType]);
+                $orderId = (int) ($orderStmt->fetchColumn() ?: 0);
+                if ($orderId < 1) {
+                    throw new RuntimeException('برای این نفر سفارش فعال پیدا نشد.');
+                }
+                $result = food_order_cancel_proxy($orderId, $employeeId, '', $actor, true, true, $reason);
+                $message = (string) ($result['message'] ?? 'سفارش لغو شد.');
+            } else {
+                $result = food_ticket_day_visit_save($person, $groupId, $date, $actor, true);
+                $message = (string) ($result['message'] ?? 'تغییر سلف ثبت شد.');
+            }
+            $results[] = ['employee_id' => $employeeId, 'name' => $name, 'ok' => true, 'message' => $message];
+        } catch (Throwable $e) {
+            $results[] = ['employee_id' => $employeeId, 'name' => $name, 'ok' => false, 'message' => food_order_safe_error($e)];
+        }
+    }
+    $succeeded = count(array_filter($results, static fn (array $item): bool => $item['ok']));
+    return [
+        'ok' => true,
+        'total' => count($results),
+        'succeeded' => $succeeded,
+        'failed' => count($results) - $succeeded,
+        'items' => $results,
+        'message' => $succeeded === count($results)
+            ? 'عملیات برای همهٔ افراد انتخاب‌شده انجام شد.'
+            : ($succeeded > 0 ? 'عملیات کامل شد؛ وضعیت تک‌تک افراد را بررسی کنید.' : 'هیچ عملیاتی انجام نشد؛ علت هر مورد در فهرست مشخص است.'),
+    ];
+}
+
+function food_order_bulk_api_handle(string $route, string $method, array $user): never
+{
+    try {
+        food_order_require_permission($user, 'food.emergency');
+        if ($method === 'GET' && $route === 'food-menu/bulk-snapshot') {
+            food_order_send_json(food_order_bulk_snapshot((string) ($_GET['date'] ?? ''), (string) ($_GET['meal_type'] ?? 'lunch'), $user));
+        }
+        if ($method === 'POST' && $route === 'food-menu/bulk-apply') {
+            food_order_send_json(food_order_bulk_apply(food_order_api_body(), $user));
+        }
+        food_order_send_json(['error' => 'مسیر عملیات گروهی پیدا نشد.'], 404);
+    } catch (Throwable $e) {
+        $status = str_contains($e->getMessage(), 'دسترسی') ? 403 : 400;
+        food_order_send_json(['error' => food_order_safe_error($e)], $status);
+    }
+}
+
 function food_order_menu_api_handle(string $route, array $user): never
 {
     $route = trim(rawurldecode($route), '/');
     $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
     if ($method === 'POST') {
         require_csrf();
+    }
+    if (str_starts_with($route, 'food-menu/bulk-')) {
+        food_order_bulk_api_handle($route, $method, $user);
     }
     if (str_starts_with($route, 'food-menu/emergency/')) {
         food_order_emergency_handle($route, $method, $user);

@@ -855,6 +855,9 @@ function food_ticket_can_cancel_day_visit(array $user): bool
     if ((int) ($user['is_primary_admin'] ?? 0) === 1) {
         return true;
     }
+    if (function_exists('food_ticket_is_support_manager') && food_ticket_is_support_manager($user)) {
+        return true;
+    }
     return (string) ($user['role'] ?? '') === 'support_manager';
 }
 
@@ -926,14 +929,20 @@ function food_ticket_day_visit_state(array $user, string $date = '', ?array $act
     ];
 }
 
-function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''): array
+function food_ticket_day_visit_save(array $user, int $groupId, string $date = '', ?array $actor = null, bool $managerOverride = false): array
 {
     if (!food_ticket_groups_ensure()) {
         throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
     }
+    $actor = $actor ?? $user;
+    if ($managerOverride && (!food_ticket_can_cancel_day_visit($actor)
+        || (function_exists('food_order_user_can') && !food_order_user_can($actor, 'food.emergency') && !food_ticket_is_primary_admin($actor)))) {
+        throw new RuntimeException('دسترسی عملیات گروهی غذا ندارید.');
+    }
     $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
-    if ($date !== date('Y-m-d')) {
-        throw new RuntimeException('خوداظهاری فقط برای امروز مجاز است.');
+    $today = date('Y-m-d');
+    if ((!$managerOverride && $date !== $today) || ($managerOverride && $date < $today)) {
+        throw new RuntimeException($managerOverride ? 'تغییر سلف برای تاریخ گذشته مجاز نیست.' : 'خوداظهاری فقط برای امروز مجاز است.');
     }
     $userId = (int) ($user['id'] ?? 0);
     if ($userId <= 0 || $groupId <= 0) {
@@ -941,7 +950,7 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
     }
     $homeId = food_ticket_user_group_id($userId);
     if ($homeId !== null) {
-        throw new RuntimeException('عضو دائم گروه نمی‌تواند محل تحویل را عوض کند.');
+        throw new RuntimeException('عضو دائم گروه نمی‌تواند محل تحویل را عوض کند؛ تغییر روزانهٔ سلف برای او ممکن نیست.');
     }
     $g = db()->prepare('SELECT id, title, status, visit_change_until FROM food_ticket_groups WHERE id = ? LIMIT 1');
     $g->execute([$groupId]);
@@ -949,7 +958,9 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
     if (!$group || (string) $group['status'] !== 'active') {
         throw new RuntimeException('این گروه فعال نیست.');
     }
-    food_ticket_visit_change_guard($group['visit_change_until'] ?? '', (string) $group['title']);
+    if (!$managerOverride) {
+        food_ticket_visit_change_guard($group['visit_change_until'] ?? '', (string) $group['title']);
+    }
     if (food_ticket_group_absence_locked($groupId, $date)) {
         throw new RuntimeException('فیش این گروه برای امروز چاپ شده است؛ خوداظهاری بسته است.');
     }
@@ -966,7 +977,9 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         } catch (Throwable) {
             $prevUntil = '';
         }
-        food_ticket_visit_change_guard($prevUntil, (string) $existing['title']);
+        if (!$managerOverride) {
+            food_ticket_visit_change_guard($prevUntil, (string) $existing['title']);
+        }
     }
     if ($existing) {
         db()->prepare('UPDATE food_ticket_day_visits SET group_id = ? WHERE user_id = ? AND visit_date = ?')
@@ -975,15 +988,15 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         db()->prepare('INSERT INTO food_ticket_day_visits (user_id, visit_date, group_id) VALUES (?, ?, ?)')
             ->execute([$userId, $date, $groupId]);
     }
-    food_ticket_audit('food_day_visit_set', [
+    food_ticket_audit($managerOverride ? 'food_day_visit_bulk_set' : 'food_day_visit_set', [
         'target_type' => 'food_group',
         'target_id' => $groupId,
         'target_label' => (string) $group['title'],
-        'user_id' => $userId,
+        'user_id' => (int) ($actor['id'] ?? $userId),
         'new' => (string) $group['title'],
-        'meta' => ['date' => $date, 'group_id' => $groupId, 'subject_user_id' => $userId],
+        'meta' => ['date' => $date, 'group_id' => $groupId, 'subject_user_id' => $userId, 'manager_override' => $managerOverride],
     ]);
-    return food_ticket_day_visit_state($user, $date) + ['ok' => true, 'message' => 'برای امروز غذا را از «' . $group['title'] . '» می‌گیرید.'];
+    return food_ticket_day_visit_state($user, $date, $actor) + ['ok' => true, 'message' => 'برای ' . food_order_full_name($user) . '، سلف «' . $group['title'] . '» ثبت شد.'];
 }
 
 function food_ticket_day_visit_clear(array $user, string $date = '', ?array $actor = null): array
