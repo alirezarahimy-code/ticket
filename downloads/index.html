@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R25</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R26</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,21 +25,21 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جاری · R25 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — آمار غذا در یک ردیف افقی</h1>
-    <p>R25 کادرهای روزانهٔ گزارش غذا را حفظ می‌کند، اما نام و تعداد غذاها را افقی و در یک ردیف می‌چیند. در بازهٔ چندروزه، دو کادر روز کنار هم قرار می‌گیرند و همین چیدمان در چاپ هم حفظ می‌شود.</p>
+    <span class="tag">بستهٔ آزمایشی جاری · R26 · ۲۰۲۶/۱۰/۲۲</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — استخراج محلی سخت‌افزار</h1>
+    <p>R26 دکمهٔ استخراج محلی را برای جمع‌آوری مشخصات میزبان اجرای PHP برمی‌گرداند و جلوی ثبت دارایی خالی هنگام شکست جمع‌آوری را می‌گیرد.</p>
     <ul>
-      <li>هر روز در کادر خودش می‌ماند؛ تاریخ در سربرگ و غذاها در یک ردیف افقی نمایش داده می‌شوند.</li>
-      <li>بلوک‌های غذا با جداکنندهٔ عمودی از هم مشخص‌اند؛ بین نام و تعداد هر غذا خط جداکننده نیست.</li>
-      <li>جداکنندهٔ جدول‌های تکراری گزارش سفارش و آمار نفرات حفظ شده و بین فیلدهای داخل بلوک خط اضافه نمی‌شود.</li>
-      <li>در چاپ، روزها دو تا در هر ردیف و فهرست غذاها افقی باقی می‌مانند؛ جهت چاپ از انتخاب پنجرهٔ چاپگر پیروی می‌کند.</li>
-      <li>بدون migration و بدون تغییر دادهٔ تولیدی؛ بسته بر پایهٔ R24 ساخته شده است.</li>
+      <li>دکمه در فهرست دارایی‌ها و صفحهٔ جزئیات دارایی‌های محلی قرار دارد.</li>
+      <li>هدف استخراج، رایانه‌ای است که PHP/وب‌سرور روی آن اجرا می‌شود؛ نه رایانه‌ای که مرورگرش به سرور مرکزی وصل شده است.</li>
+      <li>در شکست یا نبود اطلاعات سخت‌افزاری، دارایی خالی ثبت نمی‌شود و پیام نتیجه به کاربر نمایش داده می‌شود.</li>
+      <li>اعتبارنامهٔ Domain Admin برای اسکن شبکه فقط موقت و رمز‌شده در نشست نگه داشته می‌شود؛ ذخیرهٔ دائمی ندارد و اسکن به HTTPS نیاز دارد.</li>
+      <li>بدون migration و بدون تغییر دادهٔ تولیدی. اجرای واقعی Windows/WMI در این محیط ممکن نبود؛ لطفاً روی میزبان موردنظر آزمایش شود.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-statistics-horizontal-cards-r25-20261021.zip" download="ticket-update-1.61.10-food-statistics-horizontal-cards-r25-20261021.zip">⬇ دریافت بستهٔ نصب R25</a>
-    <div class="file">ticket-update-1.61.10-food-statistics-horizontal-cards-r25-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-statistics-horizontal-cards-r25-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r25/CHANGE-REPORT-FA.md">جزئیات R25</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-local-inventory-button-r26-20261022.zip" download="ticket-update-1.61.10-local-inventory-button-r26-20261022.zip">⬇ دریافت بستهٔ آزمایشی R26</a>
+    <div class="file">ticket-update-1.61.10-local-inventory-button-r26-20261022.zip · بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-local-inventory-button-r26-20261022.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-22-release-161-10-r26/CHANGE-REPORT-FA.md">جزئیات R26</a></p>
+    <div class="hint">پیش از نصب، پشتیبان بگیرید و بسته را از پنل «به‌روزرسانی سامانه» بارگذاری کنید. برای استخراج یک رایانهٔ کاربر، PHP باید روی همان رایانه اجرا شود؛ دکمهٔ محلی در سرور مرکزی، سخت‌افزار مرورگر را نمی‌خواند.</div>
   </main>
 </body>
 </html>

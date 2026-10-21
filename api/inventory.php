@@ -84,6 +84,9 @@ $hostname = inventory_api_text($payload['hostname'] ?? '', 190);
 if ($hostname === '') {
     inventory_api_response(422, ['ok' => false, 'error' => 'نام سیستم الزامی است.']);
 }
+if (inventory_hardware_score($payload) === 0) {
+    inventory_api_response(422, ['ok' => false, 'error' => 'درخواست دریافت شد، اما هیچ ردیف سخت‌افزاری قابل‌استفاده‌ای ندارد؛ روی کلاینت دسترسی WMI/CIM و اجرای اسکریپت را بررسی کنید.']);
+}
 
 $assetTag = inventory_api_asset_tag($payload);
 $domainUsername = inventory_api_text($payload['domain_username'] ?? '', 190);
@@ -169,6 +172,7 @@ try {
     if ($pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    app_error_log('[inventory-api] save failed: ' . $exception->getMessage());
     inventory_api_response(500, ['ok' => false, 'error' => 'ذخیره Inventory انجام نشد.']);
 }
 

@@ -3,6 +3,20 @@ declare(strict_types=1);
 
 function domain_scan_ensure_schema(): void
 {
+    // حذف رمزهای plaintext باقی‌مانده از نسخه‌های قدیمی؛ اعتبارنامهٔ جدید فقط per-run و رمز‌شده در نشست است.
+    static $legacyCredentialsCleared = false;
+    if (!$legacyCredentialsCleared) {
+        $legacyCredentialsCleared = true;
+        try {
+            $clear = db()->prepare("UPDATE settings SET value = '' WHERE `key` IN ('domain_scan_username','domain_scan_password') AND COALESCE(value, '') <> ''");
+            $clear->execute();
+            if ($clear->rowCount() > 0 && function_exists('system_log')) {
+                system_log('info', 'domain_scan', 'اعتبارنامهٔ ذخیره‌شدهٔ قدیمی اسکن دامنه پاک شد');
+            }
+        } catch (Throwable $exception) {
+            app_error_log('[domain-scan] clear legacy scan credentials failed: ' . $exception->getMessage());
+        }
+    }
     // ۱.۳۷.۵ — ستون assets.source در نصب‌های قدیمی مقدار 'domain' را نمی‌پذیرد؛
     // در MySQL سخت‌گیرانه این باعث خطای «Data truncated» و ساخته‌نشدن رکورد کامپیوتر
     // دامنه می‌شد و در حالت معمولی هم مقدار ستون خالی می‌ماند. یک‌بار برای همیشه گسترده می‌شود.
@@ -38,15 +52,108 @@ function domain_scan_timeout_ms(): int
 
 function domain_scan_account_label(): string
 {
-    $user = trim((string) setting('domain_scan_username', ''));
-    $domain = trim((string) setting('domain_scan_domain', ''));
-    if ($user === '') {
-        return 'حساب سرویس ویندوز پنل (بدون رمز ذخیره‌شده)';
+    return 'حسابی که هنگام شروع همین نوبت وارد می‌کنید';
+}
+
+function domain_scan_https_request(): bool
+{
+    return !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+}
+
+function domain_scan_validate_credentials(string $username, string $password): void
+{
+    if (trim($username) === '' || $password === '') {
+        throw new RuntimeException('برای استخراج شبکه‌ای، نام کاربری و رمز حساب مجاز را وارد کنید.');
     }
-    if (strpos($user, '\\') !== false || strpos($user, '@') !== false) {
-        return $user;
+    if (PHP_SAPI !== 'cli' && !domain_scan_https_request()) {
+        throw new RuntimeException('برای ارسال امن رمز حساب استخراج، ابتدا سامانه را با HTTPS باز کنید.');
     }
-    return ($domain !== '' ? $domain . '\\' : '') . $user;
+    domain_scan_credential_key();
+}
+
+function domain_scan_credential_key(): string
+{
+    $appKey = trim((string) cfg('app.key', ''));
+    if ($appKey === '' || !function_exists('openssl_encrypt') || !function_exists('openssl_decrypt')) {
+        throw new RuntimeException('رمزگذاری امن اعتبارنامهٔ اسکن روی سرور پیکربندی نشده است.');
+    }
+    return hash('sha256', 'ticket-domain-scan:' . $appKey, true);
+}
+
+/** اعتبارنامه فقط به‌صورت رمز‌شده و موقت در نشست همان کاربر نگهداری می‌شود، نه در جدول تنظیمات یا صف DB. */
+function domain_scan_store_run_credentials(int $runId, int $userId, string $username, string $password): void
+{
+    $username = trim($username);
+    if ($runId <= 0 || $userId <= 0 || $username === '' || $password === '') {
+        throw new RuntimeException('برای استخراج شبکه‌ای، نام کاربری و رمز حساب مجاز را وارد کنید.');
+    }
+    if (PHP_SAPI !== 'cli' && (empty($_SERVER['HTTPS']) || strtolower((string) $_SERVER['HTTPS']) === 'off')) {
+        throw new RuntimeException('برای ارسال امن رمز حساب استخراج، ابتدا سامانه را با HTTPS باز کنید.');
+    }
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        throw new RuntimeException('نشست امن کاربر برای نگهداری موقت اعتبارنامه در دسترس نیست.');
+    }
+    $key = domain_scan_credential_key();
+    $iv = random_bytes(12);
+    $tag = '';
+    $aad = 'run:' . $runId . '|user:' . $userId . '|v1';
+    $plain = json_encode(['username' => $username, 'password' => $password], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $cipher = is_string($plain) ? openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, $aad) : false;
+    if (!is_string($cipher) || $cipher === '') {
+        throw new RuntimeException('رمزگذاری اعتبارنامهٔ این اسکن انجام نشد.');
+    }
+    $_SESSION['domain_scan_credentials'][$runId] = [
+        'user_id' => $userId,
+        'expires_at' => time() + 7200,
+        'ciphertext' => base64_encode($iv . $tag . $cipher),
+    ];
+}
+
+/** @return array{username:string,password:string}|null */
+function domain_scan_run_credentials(int $runId, int $userId): ?array
+{
+    if (session_status() !== PHP_SESSION_ACTIVE || $runId <= 0 || $userId <= 0) {
+        return null;
+    }
+    $entry = $_SESSION['domain_scan_credentials'][$runId] ?? null;
+    if (!is_array($entry) || (int) ($entry['user_id'] ?? 0) !== $userId || (int) ($entry['expires_at'] ?? 0) < time()) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    $raw = base64_decode((string) ($entry['ciphertext'] ?? ''), true);
+    if (!is_string($raw) || strlen($raw) < 29) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    try {
+        $key = domain_scan_credential_key();
+    } catch (Throwable) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    $aad = 'run:' . $runId . '|user:' . $userId . '|v1';
+    $plain = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', $key, OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16), $aad);
+    $credentials = is_string($plain) ? json_decode($plain, true) : null;
+    if (!is_array($credentials) || trim((string) ($credentials['username'] ?? '')) === '' || (string) ($credentials['password'] ?? '') === '') {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    $_SESSION['domain_scan_credentials'][$runId]['expires_at'] = time() + 7200;
+    return ['username' => trim((string) $credentials['username']), 'password' => (string) $credentials['password']];
+}
+
+function domain_scan_clear_run_credentials(int $runId): void
+{
+    if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        if (empty($_SESSION['domain_scan_credentials'])) {
+            unset($_SESSION['domain_scan_credentials']);
+        }
+        session_write_close();
+    }
 }
 
 function domain_scan_ad_time(string $value): ?string
@@ -582,8 +689,8 @@ function domain_scan_friendly_error(string $raw): string
     }
     $lower = strtolower($raw);
     $map = [
-        'access is denied' => 'دسترسی رد شد؛ حساب اسکن باید «ادمین محلی» همان کامپیوتر باشد (تنظیمات ← اسکن دامنه).',
-        '0x80070005' => 'دسترسی رد شد؛ حساب اسکن باید «ادمین محلی» همان کامپیوتر باشد (تنظیمات ← اسکن دامنه).',
+        'access is denied' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
+        '0x80070005' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
         'rpc server is unavailable' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
         '0x800706ba' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
         'logon failure' => 'نام کاربری یا رمز حساب اسکن نادرست است.',
@@ -622,7 +729,7 @@ function domain_scan_error_catalog(): array
             'remedy' => [
                 'حساب اسکن را به گروه Administrators خودِ هر کلاینت اضافه کنید؛ روش سریع: یک گروه AD بسازید، حساب اسکن را عضو آن کنید و با Group Policy آن گروه را به Administrators محلی ببرید.',
                 'اگر از حساب محلی (غیر دامنه‌ای) استفاده می‌کنید، روی کلاینت مقدار LocalAccountTokenFilterPolicy را در مسیر HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System برابر ۱ بگذارید تا UAC دسترسی از راه دور را محدود نکند.',
-                'حساب را در «تنظیمات ← اسکن دامنه و استخراج از شبکه» درست وارد کنید (دامنهٔ NetBIOS + نام کاربری + رمز) و با ابزار tools/diag_connection.php روی یک سیستم آزمون بگیرید.',
+                'حساب دامنه و رمز درست را در فرم استخراج همان نوبت وارد کنید؛ نام کاربری را به شکل DOMAIN\\user بنویسید و با ابزار tools/diag_connection.php روی یک سیستم آزمون بگیرید.',
                 'مطمئن شوید حساب قفل یا منقضی نشده و محدودیت «Log on to» آن اجازهٔ ورود از شبکه را می‌دهد.',
             ],
         ],
@@ -640,6 +747,14 @@ function domain_scan_error_catalog(): array
                 'نام کامپیوتر یا IP درست را بررسی کنید (ممکن است نام در DNS به سیستمی دیگر اشاره کند).',
                 'دسترسی WMI/DCOM همان نکته‌های خطای RPC را لازم دارد؛ فایروال و سرویس WMI را بررسی کنید.',
                 'سیستم ممکن است به‌تازگی روشن شده و WMI هنوز آماده نباشد؛ چند دقیقه بعد دوباره تلاش کنید.',
+            ],
+        ],
+        'hardware_empty' => [
+            'title' => 'اتصال برقرار شد اما دادهٔ سخت‌افزاری دریافت نشد',
+            'remedy' => [
+                'این نتیجه فقط اتصال/هویت سیستم را تأیید می‌کند و Inventory موفق محسوب نمی‌شود.',
+                'در خروجی self-test سرور، تعداد پردازنده، سیستم‌عامل، RAM و دیسک‌ها را ببینید؛ اگر همه صفرند، حساب سرویس PHP/PowerShell دسترسی WMI لازم را ندارد.',
+                'برای اسکن دامنه، حساب تنظیم‌شده باید عضو Administrators محلی هر کلاینت باشد؛ سپس همان سیستم را دوباره اسکن کنید.',
             ],
         ],
         'empty_output' => [
@@ -728,6 +843,7 @@ function domain_scan_error_code(string $message): string
         'access_denied' => ['دسترسی رد شد'],
         'bad_credentials' => ['نام کاربری یا رمز'],
         'no_computer_info' => ['اطلاعاتی از سیستم مقصد'],
+        'hardware_empty' => ['دادهٔ سخت‌افزاری قابل‌استفاده'],
         'policy_blocked' => ['اجرای اسکریپت PowerShell'],
         'not_windows' => ['استخراج اطلاعات از سیستم‌های دامنه فقط روی سرور'],
         'proc_open_disabled' => ['تابع proc_open'],
@@ -840,6 +956,9 @@ function domain_scan_preflight(): ?string
     if (PHP_OS_FAMILY !== 'Windows') {
         return 'استخراج اطلاعات از سیستم‌های دامنه فقط روی سرور Windows (با PowerShell) کار می‌کند.';
     }
+    if (PHP_SAPI !== 'cli' && !domain_scan_https_request()) {
+        return 'برای واردکردن و ارسال امن رمز حساب استخراج، آدرس سامانه باید با HTTPS باز شود.';
+    }
     if (!function_exists('proc_open')) {
         return 'تابع proc_open در PHP غیرفعال است؛ آن را از disable_functions در php.ini حذف کنید.';
     }
@@ -855,14 +974,17 @@ function domain_scan_preflight(): ?string
  * @param array<int,string> $hosts
  * @return array<string,array{inventory:array<string,mixed>,error:string}> کلید = نام کامپیوتر
  */
-function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4): array
+function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4, array $credentials = []): array
 {
     $answer = [];
     $problem = domain_scan_preflight();
     $jobs = [];
-    $user = trim((string) setting('domain_scan_username', ''));
-    $pass = (string) setting('domain_scan_password', '');
+    $user = trim((string) ($credentials['username'] ?? ''));
+    $pass = (string) ($credentials['password'] ?? '');
     $domain = trim((string) setting('domain_scan_domain', ''));
+    if ($user === '' || $pass === '') {
+        $problem ??= 'برای این نوبت، نام کاربری و رمز حساب مجاز استخراج وارد نشده یا نشست آن منقضی شده است.';
+    }
     if ($user !== '' && strpos($user, '\\') === false && strpos($user, '@') === false && $domain !== '') {
         $user = $domain . '\\' . $user;
     }
@@ -926,16 +1048,21 @@ function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4): 
         $inventory['computer_type'] = 'Windows client';
         $resolved = domain_scan_resolve_ipv4($host);
         $inventory['ip_address'] = $resolved;
-        $answer[$host] = ['inventory' => inventory_apply_powershell_data($inventory, $decoded), 'error' => ''];
+        $inventory = inventory_apply_powershell_data($inventory, $decoded);
+        if (inventory_hardware_score($inventory) === 0) {
+            $answer[$host] = ['inventory' => [], 'error' => 'دادهٔ سخت‌افزاری قابل‌استفاده از سیستم مقصد دریافت نشد؛ پاسخ اتصال به‌تنهایی Inventory موفق نیست.'];
+            continue;
+        }
+        $answer[$host] = ['inventory' => $inventory, 'error' => ''];
     }
     return $answer;
 }
 
-function domain_scan_remote_inventory(string $host): array
+function domain_scan_remote_inventory(string $host, array $credentials = []): array
 {
     $GLOBALS['itsm_inventory_last_error'] = '';
     $host = trim($host);
-    $many = domain_scan_remote_inventory_many([$host], 1);
+    $many = domain_scan_remote_inventory_many([$host], 1, $credentials);
     $row = $many[$host] ?? ['inventory' => [], 'error' => 'نتیجه‌ای دریافت نشد.'];
     if ($row['inventory'] === []) {
         inventory_set_error($host . ': ' . $row['error']);
@@ -976,7 +1103,7 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
     return asset_profile_apply_auto($assetId, asset_profile_auto_values($inventory), $userId);
 }
 
-function domain_scan_process(int $runId, int $limit, int $userId): array
+function domain_scan_process(int $runId, int $limit, int $userId, array $credentials = []): array
 {
     domain_scan_ensure_schema();
     if (function_exists('set_time_limit')) { @set_time_limit(600); }
@@ -1033,7 +1160,7 @@ function domain_scan_process(int $runId, int $limit, int $userId): array
         if ($onlineItems !== []) {
             $remote = [];
             try {
-                $remote = domain_scan_remote_inventory_many(array_map(static fn (array $row): string => (string) $row['hostname'], $onlineItems), 4);
+                $remote = domain_scan_remote_inventory_many(array_map(static fn (array $row): string => (string) $row['hostname'], $onlineItems), 4, $credentials);
             } catch (Throwable $exception) {
                 app_error_log('[domain-scan] remote inventory: ' . $exception->getMessage());
             }

@@ -114,7 +114,9 @@ function inventory_diagnostics(): array
         $checks[] = ['پیام خطا', inventory_last_error() ?: 'خطای ناشناخته'];
         return $checks;
     }
-    $checks[] = ['اجرای جمع‌آوری', 'موفق'];
+    $checks[] = ['اجرای PowerShell', 'موفق'];
+    $normalized = inventory_apply_powershell_data(inventory_base_inventory(), $data);
+    $checks[] = ['امتیاز ردیف‌های سخت‌افزاری', (string) inventory_hardware_score($normalized) . ' از ۸'];
     foreach (['computer' => 'مشخصات رایانه', 'bios' => 'بایوس', 'processor' => 'پردازنده', 'os' => 'سیستم‌عامل', 'memory_modules' => 'ماژول‌های RAM', 'physical_disks' => 'هاردها', 'graphics' => 'کارت گرافیک', 'network' => 'کارت شبکه', 'printers' => 'پرینترها', 'software' => 'نرم‌افزارها'] as $key => $label) {
         $checks[] = ['تعداد ' . $label, (string) count(inventory_rows($data[$key] ?? []))];
     }
@@ -508,14 +510,20 @@ function inventory_collect_client_asset(array $user): ?int
             $existing = db()->prepare('SELECT hardware_json FROM assets WHERE id = ? LIMIT 1');
             $existing->execute([$assetId]);
             $existingHardware = json_decode((string) $existing->fetchColumn(), true);
-            $hasFullHardware = is_array($existingHardware) && ($existingHardware['collection_mode'] ?? '') !== 'client_request_identity' && !empty($existingHardware);
+            $isLoginIdentity = is_array($existingHardware) && ($existingHardware['collection_mode'] ?? '') === 'client_request_identity';
+            $hasFullHardware = is_array($existingHardware) && !$isLoginIdentity && !empty($existingHardware);
             if ($hasFullHardware) {
-                db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, source = "agent", last_inventory_at = NOW() WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $assetId]);
+                // ورود کاربر فقط هویت/نشانی شبکه را تازه می‌کند؛ زمان و منبعِ جمع‌آوری سخت‌افزار حفظ شود.
+                db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $assetId]);
+            } elseif ($isLoginIdentity) {
+                // اصلاح رکوردهای قدیمی که ورود کاربر را اشتباهاً Inventory موفق علامت زده بودند.
+                db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ?, last_inventory_at = NULL WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
             } else {
-                db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ?, source = "agent", last_inventory_at = NOW() WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
+                db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ?, hardware_json = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware, $assetId]);
             }
         } else {
-            db()->prepare('INSERT INTO assets (asset_tag, hostname, computer_type, owner_user_id, department_id, ip_address, domain_username, hardware_json, source, last_inventory_at) VALUES (?, ?, "Windows client", ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, $hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware]);
+            // ثبت هویت ورود، Inventory سخت‌افزاری نیست؛ تاریخ جمع‌آوری عمداً خالی می‌ماند.
+            db()->prepare('INSERT INTO assets (asset_tag, hostname, computer_type, owner_user_id, department_id, ip_address, domain_username, hardware_json, source) VALUES (?, ?, "Windows client", ?, ?, ?, ?, ?, "agent")')->execute([$assetTag, $hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware]);
             $assetId = (int) db()->lastInsertId();
         }
         // شناسنامه هم پر شود: قبلاً فقط جدول assets به‌روز می‌شد و فرم «شناسنامه سیستم»
@@ -529,13 +537,7 @@ function inventory_collect_client_asset(array $user): ?int
                 'connected_network' => 1,
             ], static fn ($v): bool => trim((string) $v) !== ''), (int) ($user['id'] ?? 0), false);
         }
-        if (!$hasFullHardware) {
-            $historyExists = db()->prepare('SELECT 1 FROM asset_inventory_history WHERE asset_id = ? LIMIT 1');
-            $historyExists->execute([$assetId]);
-            if (!$historyExists->fetchColumn()) {
-                db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, $hardware ?: '{}', (int) ($user['id'] ?? 0)]);
-            }
-        }
+        // لاگ هویت ورود در جدول تاریخچهٔ Inventory سخت‌افزاری ثبت نمی‌شود.
         return $assetId > 0 ? $assetId : null;
     } catch (Throwable $exception) {
         app_error_log('ITSM client identity inventory failed: ' . $exception->getMessage());
