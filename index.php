@@ -663,7 +663,7 @@ function render_header(string $title, ?array $user = null): void
         $layoutCss = '';
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.40">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '</head><body class="' . e($bodyPageClass) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.41">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '</head><body class="' . e($bodyPageClass) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -5505,12 +5505,16 @@ if ($page === 'organization') {
         'users' => $orgChartUsers,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     render_header('مدیریت سازمان', $organizationUser);
+    $canRepairOrgAdminRoles = user_is_primary_admin($organizationUser);
+    $repairRoleLink = $canRepairOrgAdminRoles
+        ? '<a class="org-icon-button org-repair-role-link" href="#repair-org-admin-roles" title="رفتن به اصلاح نقش مدیران سازمانی">ترمیم نقش‌ها</a>'
+        : '';
     $orgTemplate = <<<'HTML'
 <div class="organization-workspace" dir="rtl">
   <header class="org-header">
     <div class="org-brand"><div class="org-brand-icon" aria-hidden="true">▥</div><div><div class="org-brand-title">سامانه ساختار سازمانی</div><div class="org-brand-subtitle">راه‌اندازی و مدیریت چارت</div></div></div>
      <div class="org-divider"></div>
-     <div class="org-header-actions"><a class="org-icon-button" href="index.php" title="بازگشت به داشبورد">↩</a><button class="org-icon-button" data-org-tool="undo" disabled title="بازگشت آخرین عملیات">↶ <span>بازگشت</span></button><button class="org-icon-button" data-org-tool="export" title="خروجی JSON">↓ <span>خروجی</span></button><button class="org-icon-button danger" data-org-tool="reset" title="شروع مجدد">↺ <span>ریست</span></button></div>
+     <div class="org-header-actions"><a class="org-icon-button" href="index.php" title="بازگشت به داشبورد">↩</a>__REPAIR_ROLE_LINK__<button class="org-icon-button" data-org-tool="undo" disabled title="بازگشت آخرین عملیات">↶ <span>بازگشت</span></button><button class="org-icon-button" data-org-tool="export" title="خروجی JSON">↓ <span>خروجی</span></button><button class="org-icon-button danger" data-org-tool="reset" title="شروع مجدد">↺ <span>ریست</span></button></div>
   </header>
   <div class="org-main-layout">
     <aside class="org-sidebar" id="org-sidebar"></aside>
@@ -5527,8 +5531,8 @@ if ($page === 'organization') {
   <form method="post" id="org-action-form" class="org-hidden-form">__CSRF__<input type="hidden" name="action" value=""><input type="hidden" name="unit_id" value=""><input type="hidden" name="unit_name" value=""><input type="hidden" name="unit_code" value=""><input type="hidden" name="node_type" value=""><input type="hidden" name="parent_id" value=""><input type="hidden" name="unit_manager_id" value=""><input type="hidden" name="is_primary_admin" value="0"><input type="hidden" name="ceo_user_id" value=""><input type="hidden" name="member_unit_id" value=""><input type="hidden" name="user_id" value=""><input type="hidden" name="manager_user_id" value=""></form>
 </div>
 HTML;
-    echo str_replace(['__CSRF__'], [csrf_field()], $orgTemplate);
-    if (user_is_primary_admin($organizationUser)) {
+    echo str_replace(['__CSRF__', '__REPAIR_ROLE_LINK__'], [csrf_field(), $repairRoleLink], $orgTemplate);
+    if ($canRepairOrgAdminRoles) {
         $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
         $repairCandidates = [];
         foreach ($repairRows as $repairRow) {

@@ -1570,3 +1570,8 @@ body.triangle-mesh-background-active > .triangle-mesh-canvas { z-index: 0 !impor
 .settings-panel-grid > .inspection-alarm-settings { grid-column: 1 / -1; }
 .inspection-alarm-status-on { color: #087e4f; }
 .inspection-alarm-status-off { color: #a33a32; }
+
+/* Keep the organization workspace viewport-sized, but allow its appended admin repair panel to scroll into view. */
+body.page-organization { height: auto; min-height: 100vh; overflow-x: hidden; overflow-y: auto; }
+body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow: visible; }
+.org-repair-role-link { min-width: max-content; width: auto; }

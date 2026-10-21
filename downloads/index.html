@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R20</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R21</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,21 +25,21 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جدید · R20 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — اصلاح جستجوی کد ۳۳۵</h1>
-    <p>R20 جستجوی کد را برای حساب‌های محلی با نقش کاربر محلی یا بازرسی کامل‌تر می‌کند و اگر رکوردی به‌دلیل نقش غیرمجاز کنار گذاشته شود، اطلاعات همان رکورد را گزارش می‌دهد.</p>
+    <span class="tag">بستهٔ اصلاحی جدید · R21 · ۲۰۲۶/۱۰/۲۱</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — نمایش پنل ترمیم نقش مدیران سازمانی</h1>
+    <p>R21 مشکل دیده‌نشدن پنل ترمیم مدیران سازمانی را برطرف می‌کند: پنل از زیر چارت قابل دسترسی است و ادمین اصلی میانبر مستقیم «ترمیم نقش‌ها» دارد. اصلاحات جستجوی کد R20 نیز حفظ شده‌اند.</p>
     <ul>
-      <li>کد در رکورد پرسنل غذا و حساب محلی با کد پرسنلی یا نام کاربری بررسی می‌شود؛ نقش‌های «کاربر محلی» و «بازرسی» پشتیبانی می‌شوند.</li>
-      <li>نتایج واقعی قبل از تغییر نمایش داده می‌شوند و فقط رکوردهای انتخاب‌شده ادغام می‌شوند؛ ادغام پس از پشتیبان‌گیری و در یک تراکنش است.</li>
-      <li>اگر کد در جدول کاربران باشد اما نقش/وضعیت اجازهٔ ادغام امن ندهد، شناسه و نقش رکورد گزارش می‌شود تا علت پنهان نماند.</li>
-      <li>اصلاحات R19 دربارهٔ عدم ارتقای مدیران سازمانی به ادمین اصلی و حفظ ثبت دستیِ مبتنی بر سفارش همچنان همراه بسته است.</li>
+      <li>در صفحهٔ سازمان، اسکرول صفحه فعال شده و ادمین اصلی میانبر «ترمیم نقش‌ها» را در سربرگ چارت می‌بیند؛ پنل دیگر زیر فضای ثابت و بریدهٔ چارت پنهان نمی‌ماند.</li>
+      <li>ترمیم چند مدیر اشتباهاً ارتقایافته را یکجا ممکن می‌کند، بدون انتخاب دوبارهٔ واحد؛ انتساب‌های سازمانی حفظ می‌شوند و دست‌کم یک ادمین اصلی فعال باید باقی بماند.</li>
+      <li>جستجوی کد، حساب‌های محلی با نقش «کاربر محلی» و «بازرسی» را هم می‌یابد؛ اگر ردیفی با نقش غیرمجاز باشد، مشخصاتش برای تشخیص علت گزارش می‌شود.</li>
+      <li>نتایج کد پیش از تغییر قابل بررسی و انتخاب‌اند؛ ادغام پس از پشتیبان‌گیری و در یک تراکنش انجام می‌شود. اصلاح ثبت دستی مبتنی بر سفارش نیز حفظ شده است.</li>
       <li>بدون migration؛ هیچ پایگاه داده یا حساب تولیدی بررسی یا تغییر داده نشده است.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip" download="ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip">⬇ دریافت بستهٔ نصب R20</a>
-    <div class="file">ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-guard-account-diagnostics-r20-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r20/CHANGE-REPORT-FA.md">جزئیات R20</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R19 و اصلاحات قبلی ساخته شده است.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip" download="ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip">⬇ دریافت بستهٔ نصب R21</a>
+    <div class="file">ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip · تنها بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r21/CHANGE-REPORT-FA.md">جزئیات R21</a></p>
+    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R20 و اصلاحات قبلی ساخته شده است.</div>
   </main>
 </body>
 </html>

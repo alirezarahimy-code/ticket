@@ -77,6 +77,14 @@ check(
     and "اصلاح مدیران سازمانی که ادمین اصلی شده‌اند" in org_page,
     "primary admin can safely restore mistakenly promoted org managers without breaking their unit assignments",
 )
+check(
+    "$canRepairOrgAdminRoles = user_is_primary_admin($organizationUser)" in org_page
+    and "__REPAIR_ROLE_LINK__" in org_page
+    and "body.page-organization { height: auto; min-height: 100vh; overflow-x: hidden; overflow-y: auto; }" in style
+    and "body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow: visible; }" in style
+    and "assets/style.css?v=3.4.41" in index,
+    "admin repair panel is reachable by scrolling and has a visible header shortcut",
+)
 
 check(
     "add-department" in org_js
