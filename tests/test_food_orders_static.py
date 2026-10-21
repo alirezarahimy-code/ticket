@@ -194,10 +194,10 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
         panel_html = read("food-ticket-web/index.html")
         self.assertIn('href="assets/food-order.css?v=11"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=25"', panel_html)
+        self.assertIn('href="assets/food-menu.css?v=26"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=22"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=23"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -310,7 +310,9 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("form.id === 'fm-statistics-date'", js)
         self.assertIn("{ from: state.statisticsFrom, to: state.statisticsTo, mode: state.statisticsMode || 'food', meal_type: state.mealType }", js)
         self.assertIn("fm-statistics-results--people", statistics_panel)
-        self.assertEqual(statistics_panel.count('<th>ردیف</th><th>نام پرسنل</th><th>تعداد</th>'), 3)
+        self.assertEqual(statistics_panel.count('<th>ردیف</th><th>نام و نام خانوادگی</th><th>تعداد</th>'), 1)
+        self.assertIn("peopleColumns.push('<section class=\"fm-statistics-people-column\"", statistics_panel)
+        self.assertIn("people.slice(start, start + peoplePerColumn)", statistics_panel)
         self.assertIn("global.ItsmJalali.enhanceAll(root)", js)
 
     def test_day_status_form_drops_reason_but_backend_still_checks_close_permission(self) -> None:

@@ -72,50 +72,55 @@
 .fm-group-orders { margin-top:16px; }
 .fm-group-orders select { max-width:280px; }
 .fm-group-report-title { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:10px 4px 0; color:var(--ink); }
-.fm-statistics-days { display:grid; gap:10px; }
-.fm-stat-day { border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; }
-.fm-stat-day h4 { margin:0; padding:10px 13px; color:var(--navy); background:#f0f7f6; font-size:14px; }
-.fm-stat-day ul { list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:0 14px; margin:0; padding:5px 13px; }
-.fm-stat-day li { display:flex; justify-content:space-between; gap:12px; padding:8px 2px; border-bottom:1px solid #edf1f0; font-size:13px; }
-.fm-stat-day li strong { white-space:nowrap; color:var(--teal); }
+.fm-statistics-days { display:grid; gap:8px; }
+.fm-statistics-days--single { grid-template-columns:minmax(0,1fr); }
+.fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.fm-stat-day { min-width:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; break-inside:avoid; }
+.fm-stat-day h4 { margin:0; padding:7px 10px; color:var(--navy); background:#f0f7f6; font-size:15px; }
+.fm-stat-day ul { display:block; list-style:none; margin:0; padding:3px 10px; }
+.fm-stat-day li { display:flex; justify-content:flex-start; align-items:baseline; gap:8px; padding:4px 2px; border-bottom:1px solid #edf1f0; font-size:14px; }
+.fm-stat-day li:last-child { border-bottom:0; }
+.fm-stat-day li span { min-width:0; }
+.fm-stat-day li strong { white-space:nowrap; color:var(--teal); font-size:14px; }
+.fm-statistics-results--food.fm-statistics-days--single .fm-stat-day ul { display:flex; flex-wrap:nowrap; align-items:center; gap:5px 12px; overflow-x:auto; }
+.fm-statistics-results--food.fm-statistics-days--single .fm-stat-day li { flex:0 0 auto; gap:5px; border:0; white-space:nowrap; }
+.fm-statistics-results--people { width:100%; min-width:0; }
+.fm-statistics-people-columns { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; }
+.fm-statistics-people-column { min-width:0; padding:0 8px; }
+.fm-statistics-people-column:first-child { padding-right:0; }
+.fm-statistics-people-column + .fm-statistics-people-column { border-right:1px solid #9aaeb2; }
+.fm-statistics-people-column:last-child { padding-left:0; }
+.fm-statistics-results--people .fm-rows { width:100%; min-width:0; table-layout:auto; }
+.fm-statistics-results--people .fm-rows th:first-child,
+.fm-statistics-results--people .fm-rows td:first-child { width:1%; min-width:42px; white-space:nowrap; text-align:center; }
+.fm-statistics-results--people .fm-rows th:nth-child(2),
+.fm-statistics-results--people .fm-rows td:nth-child(2) { min-width:82px; white-space:normal; overflow-wrap:anywhere; }
+.fm-statistics-results--people .fm-rows th:last-child,
+.fm-statistics-results--people .fm-rows td:last-child { width:1%; min-width:58px; white-space:nowrap; text-align:center; }
+.fm-statistics-results--people .fm-rows th,
+.fm-statistics-results--people .fm-rows td { padding:5px 5px; }
+.fm-daily-orders .fm-order-report-table,
+.fm-group-orders .fm-order-report-table { width:100%; min-width:0; table-layout:auto; }
+.fm-daily-orders .fm-order-report-table th,
+.fm-daily-orders .fm-order-report-table td,
+.fm-group-orders .fm-order-report-table th,
+.fm-group-orders .fm-order-report-table td { white-space:normal; overflow-wrap:anywhere; }
+.fm-order-report-table th:first-child,
+.fm-order-report-table td:first-child { width:1%; min-width:46px; }
+.fm-group-orders .fm-view-switch { margin-top:10px; }
+.fm-group-orders .fm-group-report-content { min-width:0; }
+.fm-group-result { margin-top:10px; padding-top:7px; border-top:1px solid #c7d3d5; }
+.fm-group-result > h4 { margin:0 0 4px; color:var(--navy); font-size:14px; }
+.fm-group-empty { display:block; padding:8px 4px; }
 .fm-statistics { margin-top:16px; }
 .fm-statistics-form { display:grid; gap:12px; margin:0 0 14px; }
 .fm-statistics .fm-order-date { margin-bottom:0; }
-.fm-statistics .fm-rows { min-width:420px; }
-.fm-statistics-results .fm-rows th:first-child,.fm-statistics-results .fm-rows td:first-child { width:70px; }
-.fm-statistics-results .fm-rows th:last-child,.fm-statistics-results .fm-rows td:last-child { width:120px; }
-.fm-stats-modes { display:flex; flex-wrap:wrap; gap:9px; align-items:center; }
-.fm-stats-mode { display:inline-flex; align-items:center; gap:8px; min-height:40px; padding:8px 12px; border:1px solid var(--line); border-radius:9px; background:#fff; color:var(--ink); font-size:12px; font-weight:700; cursor:pointer; }
-.fm-stats-mode input { width:auto; margin:0; accent-color:var(--teal); }
-.fm-statistics-results--people .fm-rows { min-width:1050px; table-layout:fixed; }
-.fm-statistics-results--people .fm-rows th:nth-child(3n+1),.fm-statistics-results--people .fm-rows td:nth-child(3n+1) { width:46px; text-align:center; }
-.fm-statistics-results--people .fm-rows th:nth-child(3n+2),.fm-statistics-results--people .fm-rows td:nth-child(3n+2) { width:17%; white-space:normal; overflow-wrap:anywhere; }
-.fm-statistics-results--people .fm-rows th:nth-child(3n),.fm-statistics-results--people .fm-rows td:nth-child(3n) { width:68px; text-align:center; }
+.fm-statistics-results .fm-rows { min-width:0; table-layout:auto; }
+.fm-statistics-results--people .fm-statistics-people-columns .fm-rows { font-size:13px; }
+.fm-statistics-results--people .fm-rows th { font-size:12px; }
 .fm-statistics-empty-cell { background:#fbfcfd; }
 .fm-print-host { display:none !important; }
-.fm-statistics-results--people .fm-rows th:nth-child(3n + 1):not(:first-child),
-.fm-statistics-results--people .fm-rows td:nth-child(3n + 1):not(:first-child) { border-right:2px solid #9aaeb2; }
-.fm-statistics-results--people .fm-rows th,
-.fm-statistics-results--people .fm-rows td { border-bottom:1px solid #cbd6d8; }
-.fm-daily-orders .fm-rows td,.fm-group-orders .fm-rows td,.fm-statistics .fm-rows td { font-size:13px; }
-.fm-daily-orders .fm-rows th,.fm-group-orders .fm-rows th,.fm-statistics .fm-rows th { font-size:12px; }
-.fm-statistics-results--food .fm-stat-day ul {
-  display:block;
-  column-count:2;
-  column-gap:0;
-  column-rule:1px solid #aebfc2;
-}
-.fm-statistics-results--food .fm-stat-day li {
-  display:flex;
-  justify-content:flex-start;
-  gap:8px;
-  break-inside:avoid;
-  font-size:14px;
-}
-.fm-statistics-results--food .fm-stat-day li strong { font-size:14px; }
-.fm-statistics-results--food .fm-stat-day h4 { font-size:15px; }
-@page fmStatistics { size:landscape; margin:12mm; }
-@page fmDailyOrders { size:landscape; margin:12mm; }
+@page { margin:12mm; }
 @media print {
   body.fm-print-statistics,
   body.fm-print-orders,
@@ -132,30 +137,38 @@
   body.fm-print-statistics > .fm-print-host .fm-print-list,
   body.fm-print-orders > .fm-print-host .fm-print-list,
   body.fm-print-group-orders > .fm-print-host .fm-print-list {
-    page:fmDailyOrders; display:block !important; visibility:visible !important;
-    width:100% !important; min-width:0 !important; max-width:none !important;
-    margin:0 !important; padding:0 !important; border:0 !important;
-    border-radius:0 !important; box-shadow:none !important; overflow:visible !important;
+    display:block !important; visibility:visible !important; width:100% !important;
+    min-width:0 !important; max-width:none !important; margin:0 !important;
+    padding:0 !important; border:0 !important; border-radius:0 !important;
+    box-shadow:none !important; overflow:visible !important;
   }
-  body.fm-print-statistics > .fm-print-host .fm-print-list { page:fmStatistics; }
   body.fm-print-statistics > .fm-print-host .fm-print-list *,
   body.fm-print-orders > .fm-print-host .fm-print-list *,
   body.fm-print-group-orders > .fm-print-host .fm-print-list * { visibility:visible !important; }
   body.fm-print-statistics > .fm-print-host .fm-rows,
   body.fm-print-orders > .fm-print-host .fm-rows,
-  body.fm-print-group-orders > .fm-print-host .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
+  body.fm-print-group-orders > .fm-print-host .fm-rows { width:100% !important; min-width:0 !important; table-layout:auto !important; }
   body.fm-print-statistics > .fm-print-host .fm-rows th,
   body.fm-print-statistics > .fm-print-host .fm-rows td,
   body.fm-print-orders > .fm-print-host .fm-rows th,
   body.fm-print-orders > .fm-print-host .fm-rows td,
   body.fm-print-group-orders > .fm-print-host .fm-rows th,
   body.fm-print-group-orders > .fm-print-host .fm-rows td { font-size:9pt; padding:4px 3px; overflow-wrap:anywhere; }
-  body.fm-print-statistics > .fm-print-host .fm-statistics-results--people .fm-rows th,
-  body.fm-print-statistics > .fm-print-host .fm-statistics-results--people .fm-rows td { font-size:10pt; }
-  body.fm-print-statistics > .fm-print-host .fm-stat-day ul { column-count:2; column-gap:0; column-rule:1px solid #85989c; }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-people-columns { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-people-column { padding:0 4px; }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-people-column:first-child { padding-right:0; }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-people-column:last-child { padding-left:0; }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-people-column .fm-rows th,
+  body.fm-print-statistics > .fm-print-host .fm-statistics-people-column .fm-rows td { font-size:9pt; }
   body.fm-print-statistics > .fm-print-host .fm-stat-day li { font-size:10pt; }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  body.fm-print-statistics > .fm-print-host .fm-statistics-days--single .fm-stat-day ul { display:flex; flex-wrap:nowrap; overflow:visible; }
 }
-@media(max-width:700px) { .fm-statistics-results--food .fm-stat-day ul { column-count:1; column-rule:0; } }
+@media(max-width:760px) {
+  .fm-statistics-people-columns { grid-template-columns:1fr; }
+  .fm-statistics-people-column { padding:0; }
+  .fm-statistics-people-column + .fm-statistics-people-column { border-right:0; border-top:1px solid #9aaeb2; padding-top:8px; margin-top:8px; }
+}
 @media(max-width:1100px) { .fm-grid { grid-template-columns:1fr; } }
 .fm-status-choice { display:flex; flex-wrap:wrap; gap:8px; border:0; padding:0; margin:0; min-width:0; }
 .fm-status-choice legend { padding:0; margin-bottom:5px; font-size:12px; font-weight:600; color:var(--muted); }
@@ -173,25 +186,6 @@
   .fm-calendar-card .fo-day-meal { font-size:8px; }
 }
 
-
-/* چاپ فهرست سفارش روز: چاپگر فقط گزارش همان روز را دریافت می‌کند. */
-@page fmDailyOrders { size: landscape; margin: 12mm; }
-@media print {
-  body.fm-print-orders > .fm-print-host .fm-daily-orders { page: fmDailyOrders; display:block !important; width:100% !important; margin:0 !important; border:0; box-shadow:none; padding:0; }
-  body.fm-print-orders > .fm-print-host .fm-daily-orders form,
-  body.fm-print-orders > .fm-print-host .fm-report-fields { display:none !important; }
-  body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-table-wrap { overflow:visible !important; }
-  body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
-  body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows th,
-  body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows td { font-size:8pt; padding:4px 3px; overflow-wrap:anywhere; }
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders { page:fmDailyOrders; display:block !important; width:100% !important; margin:0 !important; border:0; box-shadow:none; padding:0; }
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders form,
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-toolbar button { display:none !important; }
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-table-wrap { overflow:visible !important; }
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-rows th,
-  body.fm-print-group-orders > .fm-print-host .fm-group-orders .fm-rows td { font-size:8pt; padding:4px 3px; overflow-wrap:anywhere; }
-}
 
 /* تمام جدول‌ها و ردیف‌های فهرستی برنامه در پنل، وسط‌چین باشند. */
 #food-menu-root table th, #food-menu-root table td,
@@ -294,12 +288,6 @@
   .manual-ticket-mode { align-items: flex-start; flex-direction: column; }
   .manual-physical-print { padding: 0; border: 0; }
 }
-.fm-daily-orders .fm-rows th:not(:last-child),
-.fm-daily-orders .fm-rows td:not(:last-child),
-.fm-group-orders .fm-rows th:not(:last-child),
-.fm-group-orders .fm-rows td:not(:last-child),
-.fm-statistics-results .fm-rows th:not(:last-child),
-.fm-statistics-results .fm-rows td:not(:last-child) { border-left:1px solid #c7d3d5; }
 .fm-group-result { margin-top:12px; padding-top:9px; border-top:1px solid #c7d3d5; }
 .fm-group-result > h4 { margin:0 0 5px; color:var(--navy); font-size:14px; }
 .fm-group-empty { display:block; padding:10px 4px; }

@@ -509,23 +509,24 @@
       result = '<div class="fm-empty">برای مشاهده، بازهٔ موردنظر را انتخاب کنید.</div>';
     } else if (mode === 'employee') {
       var people = state.statistics || [];
-      var peopleRows = [];
-      for (var line = 0; line < Math.ceil(people.length / 3); line++) {
-        var cells = '';
-        for (var group = 0; group < 3; group++) {
-          var person = people[line * 3 + group];
-          if (person) {
-            cells += '<td>' + faDigits(line * 3 + group + 1) + '</td><td>' + esc(person.full_name || '—') + '</td><td>' + faDigits(Number(person.count || 0)) + '</td>';
-          } else {
-            cells += '<td class="fm-statistics-empty-cell"></td><td class="fm-statistics-empty-cell"></td><td class="fm-statistics-empty-cell"></td>';
-          }
-        }
-        peopleRows.push('<tr>' + cells + '</tr>');
+      var peopleColumns = [];
+      var peopleColumnCount = people.length ? Math.min(3, Math.max(1, Math.floor(people.length / 3))) : 0;
+      var peoplePerColumn = peopleColumnCount ? Math.ceil(people.length / peopleColumnCount) : 0;
+      for (var group = 0; group < peopleColumnCount; group++) {
+        var start = group * peoplePerColumn;
+        var columnRows = people.slice(start, start + peoplePerColumn).map(function (person, offset) {
+          return '<tr><td>' + faDigits(start + offset + 1) + '</td><td>' + esc(person.full_name || '—') + '</td><td>' + faDigits(Number(person.count || 0)) + '</td></tr>';
+        }).join('');
+        peopleColumns.push('<section class="fm-statistics-people-column"><table class="fm-rows"><thead><tr><th>ردیف</th><th>نام و نام خانوادگی</th><th>تعداد</th></tr></thead><tbody>' + columnRows + '</tbody></table></section>');
       }
-      result = '<div class="fm-table-wrap fm-statistics-results fm-statistics-results--people"><table class="fm-rows"><thead><tr><th>ردیف</th><th>نام پرسنل</th><th>تعداد</th><th>ردیف</th><th>نام پرسنل</th><th>تعداد</th><th>ردیف</th><th>نام پرسنل</th><th>تعداد</th></tr></thead><tbody>' + (peopleRows.join('') || '<tr><td colspan="9" class="fm-empty">در بازهٔ انتخاب‌شده سفارش فعالی ثبت نشده است.</td></tr>') + '</tbody></table></div>';
+      result = people.length
+        ? '<div class="fm-statistics-results fm-statistics-results--people"><div class="fm-statistics-people-columns">' + peopleColumns.join('') + '</div></div>'
+        : '<div class="fm-statistics-results fm-statistics-results--people fm-empty">در بازهٔ انتخاب‌شده سفارش فعالی ثبت نشده است.</div>';
     } else {
       var days = state.statistics || [];
-      result = days.length ? '<div class="fm-statistics-results fm-statistics-results--food fm-statistics-days">' + days.map(function (day) {
+      var singleDayRange = !!state.statisticsFrom && state.statisticsFrom === state.statisticsTo;
+      var dayLayoutClass = singleDayRange ? 'fm-statistics-days--single' : 'fm-statistics-days--multi';
+      result = days.length ? '<div class="fm-statistics-results fm-statistics-results--food fm-statistics-days ' + dayLayoutClass + '">' + days.map(function (day) {
         var foods = (day.foods || []).map(function (food) {
           return '<li><span>' + esc(food.food_name || '—') + '</span><strong>' + faDigits(Number(food.count || 0)) + ' عدد</strong></li>';
         }).join('');
