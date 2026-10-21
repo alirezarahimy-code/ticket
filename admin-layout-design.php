@@ -122,7 +122,8 @@ function admin_layout_design_validate_styles(mixed $value): array
     foreach (['offset-x', 'offset-y'] as $offsetProperty) {
         if (array_key_exists($offsetProperty, $value)) {
             $offset = filter_var($value[$offsetProperty], FILTER_VALIDATE_INT);
-            if ($offset !== false && $offset >= -500 && $offset <= 500) {
+            // جابه‌جایی طرح محدود به چندصد پیکسل نیست؛ هر عدد صحیح معتبر را ذخیره کن.
+            if ($offset !== false) {
                 $styles[$offsetProperty] = (string) $offset;
             }
         }

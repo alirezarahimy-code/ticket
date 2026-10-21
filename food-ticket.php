@@ -4732,7 +4732,7 @@ function food_ticket_render_page(array $user): void
     $html = preg_replace('/<body\\b/', '<body data-layout-page="food-ticket" data-layout-design-admin="' . $layoutAdminFlag . '"', $html, 1) ?? $html;
     $html = food_ticket_render_safe_replace('</head>', $layoutAssets . '</head>', $html);
     if ($layoutAdminFlag === '1') {
-        $html = food_ticket_render_safe_replace('</body>', '<script src="assets/admin-layout-design.js?v=9"></script></body>', $html);
+        $html = food_ticket_render_safe_replace('</body>', '<script src="assets/admin-layout-design.js?v=10"></script></body>', $html);
     }
     echo $html;
     return;

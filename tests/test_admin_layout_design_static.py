@@ -23,7 +23,7 @@ class AdminLayoutDesignStaticTests(unittest.TestCase):
         self.assertIn("data-layout-design-launch", index)
         self.assertIn("admin_layout_design_api_handle($user)", index)
         self.assertIn("data-layout-page=\"food-ticket\"", food_ticket)
-        self.assertIn("assets/admin-layout-design.js?v=9", food_ticket)
+        self.assertIn("assets/admin-layout-design.js?v=10", food_ticket)
         self.assertIn("grid-template-columns", javascript)
         self.assertIn("white-space", javascript)
         self.assertIn("data-ald-reset", javascript)
@@ -74,6 +74,19 @@ class AdminLayoutDesignStaticTests(unittest.TestCase):
         self.assertIn(".ald-resize-handle", css)
         self.assertIn(".ald-design-mode .ald-panel .ald-head", css)
         self.assertIn("<details class=\"ald-advanced\">", javascript)
+
+    def test_pixel_offsets_are_not_capped_at_five_hundred(self) -> None:
+        javascript = (ROOT / "assets/admin-layout-design.js").read_text(encoding="utf-8")
+        module = (ROOT / "admin-layout-design.php").read_text(encoding="utf-8")
+        index = (ROOT / "index.php").read_text(encoding="utf-8")
+        food_ticket = (ROOT / "food-ticket.php").read_text(encoding="utf-8")
+        self.assertNotIn('min="-500" max="500"', javascript)
+        self.assertNotIn("Math.max(-500", javascript)
+        self.assertIn("Number.isSafeInteger(roundedX)", javascript)
+        self.assertIn("if ($offset !== false)", module)
+        self.assertNotIn("$offset >= -500", module)
+        self.assertIn("assets/admin-layout-design.js?v=10", index)
+        self.assertIn("assets/admin-layout-design.js?v=10", food_ticket)
 
     def test_order_table_has_ninth_action_track_and_keeps_cancel_button_inline(self) -> None:
         css = (ROOT / "assets/food-order.css").read_text(encoding="utf-8")

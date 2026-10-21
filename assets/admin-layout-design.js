@@ -265,16 +265,21 @@
     const offset = selectedOffset();
     const rect = selected.getBoundingClientRect();
     host.innerHTML = '<div class="ald-position-heading"><strong>جابه‌جایی دقیق (پیکسل)</strong><span class="ald-size-readout" data-ald-size-readout>' + Math.round(rect.width) + ' × ' + Math.round(rect.height) + ' px</span><button type="button" data-ald-offset-reset aria-label="صفرکردن جابه‌جایی">بازنشانی</button></div>' +
-      '<div class="ald-axis-row"><span>X افقی</span><button type="button" data-ald-nudge-axis="x" data-ald-nudge-delta="-1" aria-label="یک پیکسل به چپ">−</button><input type="number" min="-500" max="500" step="1" data-ald-offset-axis="x" value="' + offset.x + '" aria-label="جابجایی افقی به پیکسل"><button type="button" data-ald-nudge-axis="x" data-ald-nudge-delta="1" aria-label="یک پیکسل به راست">+</button></div>' +
-      '<div class="ald-axis-row"><span>Y عمودی</span><button type="button" data-ald-nudge-axis="y" data-ald-nudge-delta="-1" aria-label="یک پیکسل به بالا">−</button><input type="number" min="-500" max="500" step="1" data-ald-offset-axis="y" value="' + offset.y + '" aria-label="جابجایی عمودی به پیکسل"><button type="button" data-ald-nudge-axis="y" data-ald-nudge-delta="1" aria-label="یک پیکسل به پایین">+</button></div>' +
+      '<div class="ald-axis-row"><span>X افقی</span><button type="button" data-ald-nudge-axis="x" data-ald-nudge-delta="-1" aria-label="یک پیکسل به چپ">−</button><input type="number" step="1" data-ald-offset-axis="x" value="' + offset.x + '" aria-label="جابجایی افقی به پیکسل"><button type="button" data-ald-nudge-axis="x" data-ald-nudge-delta="1" aria-label="یک پیکسل به راست">+</button></div>' +
+      '<div class="ald-axis-row"><span>Y عمودی</span><button type="button" data-ald-nudge-axis="y" data-ald-nudge-delta="-1" aria-label="یک پیکسل به بالا">−</button><input type="number" step="1" data-ald-offset-axis="y" value="' + offset.y + '" aria-label="جابجایی عمودی به پیکسل"><button type="button" data-ald-nudge-axis="y" data-ald-nudge-delta="1" aria-label="یک پیکسل به پایین">+</button></div>' +
       '<small>دستگیرهٔ ⠿ را برای حرکت و مربع‌های دور جزء را برای تغییر اندازه بکشید. جهت‌ها حرکت ۱px و Shift+جهت حرکت ۱۰px است؛ Ctrl+جهت اندازه را ۱px و Ctrl+Shift+جهت ۱۰px تغییر می‌دهد.</small>';
   }
 
   function setSelectedOffset(x, y) {
     if (!selected || !selectedPath) return;
     const previous = selectedOffset();
-    x = Math.max(-500, Math.min(500, Math.round(Number(x) || 0)));
-    y = Math.max(-500, Math.min(500, Math.round(Number(y) || 0)));
+    const rawX = Number(x);
+    const rawY = Number(y);
+    const roundedX = Math.round(rawX);
+    const roundedY = Math.round(rawY);
+    // Keep offsets as safe integer pixels without imposing a viewport-sized movement cap.
+    x = Number.isFinite(rawX) && Number.isSafeInteger(roundedX) ? roundedX : previous.x;
+    y = Number.isFinite(rawY) && Number.isSafeInteger(roundedY) ? roundedY : previous.y;
     if (previous.x === x && previous.y === y) return;
     let rule = selectedRule(false);
     if (!rule && (x !== 0 || y !== 0)) rule = selectedRule(true);
