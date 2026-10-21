@@ -1113,7 +1113,9 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
     if (inventory_asset_exists($assetId)) {
         db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($inventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $userId > 0 ? $userId : null]);
     }
-    return asset_profile_apply_auto($assetId, asset_profile_auto_values($inventory), $userId);
+    // Refresh only machine-derived fields on every successful scan. The payload comes strictly
+    // from asset_profile_auto_values(), so manually entered organizational/plaque data is untouched.
+    return asset_profile_apply_auto($assetId, asset_profile_auto_values($inventory), $userId, true);
 }
 
 function domain_scan_process(int $runId, int $limit, int $userId, array $credentials = []): array

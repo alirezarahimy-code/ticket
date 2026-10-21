@@ -130,5 +130,26 @@ class InventoryTruthStaticTests(unittest.TestCase):
 
 
 
+    def test_domain_reinventory_refreshes_only_machine_derived_profile_fields(self) -> None:
+        scan = read("domain-scan.php")
+        start = scan.index("function domain_scan_store_inventory(")
+        end = scan.index("function domain_scan_process(", start)
+        store = scan[start:end]
+        self.assertIn("asset_profile_auto_values($inventory), $userId, true", store)
+        self.assertIn("asset_profile_auto_values($inventory)", store)
+        self.assertIn("manually entered organizational/plaque data is untouched", store)
+
+    def test_internet_access_is_not_inferred_from_a_default_gateway(self) -> None:
+        profile = read("asset-profile.php")
+        start = profile.index("function asset_profile_auto_values(")
+        end = profile.index("function asset_profile_apply_auto(", start)
+        auto = profile[start:end]
+        self.assertNotIn("'connected_internet' =>", auto)
+        self.assertNotIn("$gateway !== ''", auto)
+        self.assertIn("'connected_network' => $ip !== '' ? 1 : 0", auto)
+        self.assertIn("($value === 0 && !$overwrite)", profile)
+
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -548,31 +548,22 @@ function asset_profile_auto_values(array $inventory): array
         }
     }
     $ip = '';
-    $gateway = '';
     $serverAddr = (string) ($_SERVER['SERVER_ADDR'] ?? '');
     $candidates = [];
     foreach ($network as $adapter) {
         if (!is_array($adapter)) { continue; }
-        $gatewayValue = '';
-        foreach ((array) inventory_value($adapter, ['DefaultIPGateway', 'gateway'], '') as $candidate) {
-            $candidate = trim((string) $candidate);
-            if ($candidate !== '') { $gatewayValue = $candidate; break; }
-        }
         foreach ((array) inventory_value($adapter, ['IPAddress', 'ip_address'], '') as $candidate) {
             $candidate = trim((string) $candidate);
-            if ($candidate !== '') { $candidates[] = ['ip' => $candidate, 'gateway' => $gatewayValue]; }
+            if ($candidate !== '') { $candidates[] = $candidate; }
         }
     }
-    if ($serverAddr !== '') {
-        foreach ($candidates as $candidate) {
-            if ($candidate['ip'] === $serverAddr) { $ip = $candidate['ip']; $gateway = $candidate['gateway']; break; }
-        }
+    if ($serverAddr !== '' && in_array($serverAddr, $candidates, true)) {
+        $ip = $serverAddr;
     }
     if ($ip === '') {
         foreach ($candidates as $candidate) {
-            if (filter_var($candidate['ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && strncmp($candidate['ip'], '169.254.', 8) !== 0 && $candidate['ip'] !== '127.0.0.1') {
-                $ip = $candidate['ip'];
-                $gateway = $candidate['gateway'];
+            if (filter_var($candidate, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) && strncmp($candidate, '169.254.', 8) !== 0 && $candidate !== '127.0.0.1') {
+                $ip = $candidate;
                 break;
             }
         }
@@ -646,7 +637,6 @@ function asset_profile_auto_values(array $inventory): array
         'mac_address' => $mac,
         'netcard' => $first($network, ['Name', 'name', 'Description']),
         'connected_network' => $ip !== '' ? 1 : 0,
-        'connected_internet' => $gateway !== '' ? 1 : 0,
         'monitor_model' => $first($monitors, ['Name', 'FriendlyName', 'model']),
         'printer_model' => isset($printers[0]) && is_array($printers[0]) ? trim((string) inventory_value($printers[0], ['Name', 'FriendlyName', 'model']) . (asset_profile_printer_kind($printers[0]) === 'network' ? ' (پرینتر شبکه/اشتراکی)' : ' (پرینتر فیزیکی)')) : '',
         'scanner_model' => $first($scanners, ['FriendlyName', 'Name', 'model']),
@@ -667,7 +657,7 @@ function asset_profile_apply_auto(int $assetId, array $values, int $userId, bool
     $current = $overwrite ? [] : asset_profile_fetch($assetId);
     $filtered = [];
     foreach ($values as $key => $value) {
-        if ($value === null || $value === '' || $value === 0) {
+        if ($value === null || $value === '' || ($value === 0 && !$overwrite)) {
             continue;
         }
         if (!array_key_exists($key, $columns)) {
