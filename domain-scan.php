@@ -500,7 +500,7 @@ function domain_scan_icmp_round(array $targets, int $timeoutMs): array
 }
 
 /**
- * بررسی TCP هم‌زمان (پورت‌های SMB/RPC/RDP). فایروال ویندوز اغلب ICMP را می‌بندد ولی سیستم روشن است.
+ * بررسی TCP هم‌زمان (پورت‌های SMB/RPC/RDP/WinRM). فایروال ویندوز اغلب ICMP را می‌بندد ولی سیستم روشن است.
  * @param array<string,string> $targets کلید => IP
  * @param array<int,int> $ports
  * @return array<string,bool>
@@ -574,7 +574,7 @@ function domain_scan_tcp_probe(array $targets, array $ports, int $timeoutMs): ar
 }
 
 /**
- * پینگ هم‌زمان چند سیستم. مراحل: ICMP موازی ← (نام غیرقابل‌حل) IP ثبت‌شده ← بررسی TCP پورت‌های 445/135/3389.
+ * پینگ هم‌زمان چند سیستم. مراحل: ICMP موازی ← DNS/IP ثبت‌شده ← بررسی TCP پورت‌های SMB/RPC/RDP/WinRM.
  * بدون وابستگی به اسکریپت PowerShell؛ ۳۰۰ سیستم در چند ثانیه.
  *
  * @param array<int,string> $hosts
@@ -640,7 +640,7 @@ function domain_scan_ping_hosts(array $hosts, array $fallbackIps = []): array
         }
     }
     if ($tcpTargets !== []) {
-        foreach (domain_scan_tcp_probe($tcpTargets, [445, 135, 3389], min(2500, max(800, $timeout))) as $key => $_up) {
+        foreach (domain_scan_tcp_probe($tcpTargets, [445, 135, 3389, 5985], min(2500, max(800, $timeout))) as $key => $_up) {
             $results[$key] = true;
         }
     }
@@ -691,10 +691,14 @@ function domain_scan_friendly_error(string $raw): string
     $map = [
         'access is denied' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
         '0x80070005' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
-        'rpc server is unavailable' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
-        '0x800706ba' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
         'logon failure' => 'نام کاربری یا رمز حساب اسکن نادرست است.',
         'user name or password is incorrect' => 'نام کاربری یا رمز حساب اسکن نادرست است.',
+        'winrm cannot process the request' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'winrm cannot complete the operation' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'client cannot connect to the destination specified' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'wsmanfault' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'rpc server is unavailable' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
+        '0x800706ba' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
         'no_computer_info' => 'اطلاعاتی از سیستم مقصد دریافت نشد؛ دسترسی WMI/DCOM و فایروال را بررسی کنید.',
         'cannot be loaded because running scripts is disabled' => 'اجرای اسکریپت PowerShell با ExecutionPolicy مسدود است.',
     ];
@@ -718,10 +722,18 @@ function domain_scan_error_catalog(): array
             'title' => 'سرویس RPC/WMI سیستم مقصد جواب نمی‌دهد',
             'remedy' => [
                 'روی خودِ سیستم مقصد، سرویس Windows Management Instrumentation را روشن نگه دارید (سرویس Winmgmt).',
-                'قواعد فایروال ورودی را فعال کنید: Windows Management Instrumentation (WMI-In)، Remote Service Management (RPC) و در صورت نیاز File and Printer Sharing.',
-                'اگر شبکه بین پنل و کلاینت‌ها روی چند VLAN است، پورت‌های TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض 49152-65535) باز باشد.',
-                'برای مسیر جایگزین، روی سرور پنل یک‌بار Enable-PSRemoting -Force اجرا کنید تا مسیر WinRM هم آزموده شود (در تنظیمات اسکن دامنه می‌توانید ترتیب DCOM/WinRM را عوض کنید).',
+                'برای مسیر DCOM، قواعد فایروال WMI-In و Remote Service Management را فعال کنید؛ از سرور اسکن به مقصد TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض ویندوز 49152-65535) باید مجاز باشد.',
+                'اگر DCOM مناسب شبکه نیست، WinRM را روی کلاینت‌های مقصد (نه فقط سرور پنل) با Group Policy فعال کنید؛ مسیر فعلی از TCP 5985 استفاده می‌کند. در تنظیمات «اول WinRM» یا «فقط WinRM» را انتخاب کنید.',
                 'اگر سیستم مقصد خطای دائمی می‌دهد و فایروال قابل تغییر نیست، از client-agent روی همان سیستم استفاده کنید (بخش ۷.۸ راهنما).',
+            ],
+        ],
+        'winrm_unavailable' => [
+            'title' => 'WinRM روی سیستم مقصد آمادهٔ اتصال نیست',
+            'remedy' => [
+                'WinRM باید روی کلاینت‌های مقصد (نه فقط سرور PHP) فعال باشد؛ برای Windows 10/11 آن را با Group Policy یا Enable-PSRemoting -Force روی خود مقصدها آماده کنید.',
+                'قاعدهٔ ورودی Windows Remote Management را در فایروال مقصدها فعال و تا حد امکان به IP سرور اسکن محدود کنید؛ پورت پیش‌فرض این مسیر TCP 5985 است.',
+                'حساب دامنه باید روی مقصد عضو Administrators باشد و نام سیستم ترجیحاً با نام DNS/FQDN خوانا باشد.',
+                'اگر WinRM را در مقصدها فعال نکرده‌اید، از حالت خودکار/اول DCOM استفاده کنید و WMI-In و RPC را در فایروال دامنه مجاز کنید.',
             ],
         ],
         'access_denied' => [
@@ -802,9 +814,9 @@ function domain_scan_error_catalog(): array
         'not_reachable' => [
             'title' => 'سیستم در شبکه پاسخ نداد (آفلاین)',
             'remedy' => [
-                'سیستم خاموش است یا در شبکه نیست؛ بعد از روشن‌شدن با «تلاش دوباره برای ناموفق‌ها» امتحان کنید.',
-                'اگر سیستم روشن است، پاسخ ICMP در فایروال ویندوز بسته است؛ قاعدهٔ File and Printer Sharing (Echo Request - ICMPv4-In) را فعال کنید.',
-                'در تنظیمات، پورت‌های TCP بررسی‌شده برای تشخیص آنلاین‌بودن را هم می‌توانید اضافه کنید (نشانی‌های SMb/WMI).',
+                'سیستم خاموش است یا از سرور اسکن مسیر شبکه‌ای ندارد؛ بعد از روشن‌شدن/اتصال دوباره تلاش کنید.',
+                'پینگ ICMP شرط لازم نیست: برنامه علاوه بر پینگ، SMB/RPC/WinRM را هم می‌سنجد؛ در حالت WinRM پورت TCP 5985 بررسی می‌شود.',
+                'اگر همهٔ آزمون‌ها بسته‌اند، DNS/IP و مسیر/VLAN را بررسی کنید. بازکردن پینگ به‌تنهایی دسترسی WMI یا WinRM را برقرار نمی‌کند.',
             ],
         ],
         'bad_hostname' => [
@@ -839,6 +851,7 @@ function domain_scan_error_code(string $message): string
         return 'unknown';
     }
     $prefixes = [
+        'winrm_unavailable' => ['مسیر WinRM/WSMan'],
         'rpc_unavailable' => ['سرویس RPC/WMI'],
         'access_denied' => ['دسترسی رد شد'],
         'bad_credentials' => ['نام کاربری یا رمز'],

@@ -59,6 +59,34 @@ class InventoryTruthStaticTests(unittest.TestCase):
         action = index[index.index("if ($action === 'collect_inventory')"):index.index("if ($action === 'asset_profile_selftest')")]
         self.assertLess(action.index("if ($hardwareScore === 0)"), action.index("inventory_upsert_server_asset($serverInventory"))
 
+    def test_winrm_only_targets_are_detected_when_icmp_is_blocked(self) -> None:
+        scan = read("domain-scan.php")
+        self.assertIn("domain_scan_tcp_probe($tcpTargets, [445, 135, 3389, 5985]", scan)
+        self.assertIn("'winrm_unavailable'", scan)
+        self.assertIn("پورت پیش‌فرض این مسیر TCP 5985", scan)
+        self.assertIn("WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید", scan)
+
+    def test_one_host_credential_test_does_not_write_inventory(self) -> None:
+        index = read("index.php")
+        start = index.index("if ($action === 'domain_scan_test_selected')")
+        end = index.index("if ($action === 'domain_scan_selected')", start)
+        action = index[start:end]
+        page = read("asset-inventory-page.php")
+        self.assertIn('value="domain_scan_test_selected"', page)
+        self.assertIn('data-max-selection="1"', page)
+        self.assertIn("count($testIds) !== 1", action)
+        self.assertIn("domain_scan_remote_inventory($testHost, $testCredentials)", action)
+        self.assertIn("چیزی در شناسنامه ذخیره نشد", action)
+        self.assertNotIn("domain_scan_store_inventory(", action)
+        self.assertNotIn("domain_scan_start_selected(", action)
+
+    def test_winrm_guidance_configures_targets_not_only_the_web_server(self) -> None:
+        scan = read("domain-scan.php")
+        index = read("index.php")
+        self.assertIn("WinRM باید روی کلاینت‌های مقصد (نه فقط سرور PHP) فعال باشد", scan)
+        self.assertIn("نیازمند فعال‌بودن WinRM روی مقصدها", index)
+        self.assertNotIn("Enable-PSRemoting روی سرور", index)
+
     def test_scan_credentials_are_per_run_encrypted_and_not_read_from_settings(self) -> None:
         scan = read("domain-scan.php")
         index = read("index.php")

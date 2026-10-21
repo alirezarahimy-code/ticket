@@ -7,12 +7,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R27</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R28</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
     body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
-    main { width: min(100%, 720px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
+    main { width: min(100%, 740px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
     .tag { display: inline-block; padding: 7px 12px; border-radius: 999px; color: #075e56; background: #e7f6f1; font-size: 13px; font-weight: 700; }
     h1 { margin: 18px 0 10px; font-size: clamp(25px, 5vw, 34px); line-height: 1.5; }
     p { color: #53677b; line-height: 2; margin: 8px 0; }
@@ -25,19 +25,20 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاح فوری جاری · R27 · ۲۰۲۶/۱۰/۲۲</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — رفع خطای تابع شناسایی دارایی محلی</h1>
-    <p>R27 خطای «Call to undefined function inventory_is_local_asset()» را که پس از نصب R26 در صفحهٔ جزئیات دارایی گزارش شد، رفع می‌کند.</p>
+    <span class="tag">بستهٔ جاری · R28 · ۲۰۲۶/۱۰/۲۲</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — تکمیل اسکن شبکه‌ای</h1>
+    <p>R28 روند استفاده از یک حساب دامنه برای استخراج رایانه‌های شبکه را کامل‌تر می‌کند؛ قبل از اسکن گروهی، دسترسی را روی یک رایانه امتحان کنید.</p>
     <ul>
-      <li>هر دو صفحهٔ جزئیات به تابع موجود و صحیح <code>inventory_asset_is_local()</code> وصل شده‌اند.</li>
-      <li>بسته فقط جایگزین <code>index.php</code> و فایل‌های گزارش/نسخه است؛ نصب روی R26 کافی است.</li>
-      <li>بدون migration و بدون تغییر دادهٔ پایگاه‌داده یا تولیدی.</li>
+      <li>دکمهٔ «آزمون حساب روی یک سیستم» اتصال PowerShell/CIM را بررسی می‌کند، بدون آن‌که اطلاعاتی ذخیره کند.</li>
+      <li>مقصدهای WinRM با TCP 5985 حتی اگر ping بسته باشد شناسایی می‌شوند.</li>
+      <li>راهنمای خطا توضیح می‌دهد WinRM باید روی کلاینت مقصد فعال شود؛ Domain Admin واحد کافی است اگر دسترسی Administrators روی مقصدها داشته باشد.</li>
+      <li>راهنمای کامل اسکن، GPO و فایروال در بسته است. بدون migration و بدون تغییر دادهٔ تولیدی.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-local-asset-helper-fix-r27-20261022.zip" download="ticket-update-1.61.10-local-asset-helper-fix-r27-20261022.zip">⬇ دریافت بستهٔ اصلاح فوری R27</a>
-    <div class="file">ticket-update-1.61.10-local-asset-helper-fix-r27-20261022.zip · بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-local-asset-helper-fix-r27-20261022.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-22-release-161-10-r27/CHANGE-REPORT-FA.md">جزئیات R27</a></p>
-    <div class="hint">پیش از نصب پشتیبان بگیرید و بسته را از پنل «به‌روزرسانی سامانه» بارگذاری کنید. این اصلاح برای نصب R26 آماده شده است.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip" download="ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip">⬇ دریافت بستهٔ اسکن شبکه R28</a>
+    <div class="file">ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip · بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-22-release-161-10-r28/CHANGE-REPORT-FA.md">راهنمای اجرا و جزئیات R28</a></p>
+    <div class="hint">اسکن شبکه‌ای از میزبان اجرای PHP/PowerShell انجام می‌شود؛ روی کلاینت‌ها PHP نصب نمی‌شود. ابتدا روی یک مقصد آزمایش و سپس گروهی را اسکن کنید. فایروال را خاموش نکنید؛ قواعد لازم را ترجیحاً با GPO و با محدودکردن مبدأ به سرور اسکن تنظیم کنید.</div>
   </main>
 </body>
 </html>
