@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R21</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R22</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,21 +25,22 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جدید · R21 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — نمایش پنل ترمیم نقش مدیران سازمانی</h1>
-    <p>R21 مشکل دیده‌نشدن پنل ترمیم مدیران سازمانی را برطرف می‌کند: پنل از زیر چارت قابل دسترسی است و ادمین اصلی میانبر مستقیم «ترمیم نقش‌ها» دارد. اصلاحات جستجوی کد R20 نیز حفظ شده‌اند.</p>
+    <span class="tag">بستهٔ اصلاحی جدید · R22 · ۲۰۲۶/۱۰/۲۱</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — بهبود گزارش‌ها و سفارش‌های گروه غذا</h1>
+    <p>R22 چاپ را به خودِ فهرست گزارش محدود می‌کند، خوانایی گزارش‌های چندستونه را بهتر می‌کند، انتخاب گروه «همه» و نمایش بر اساس منو را می‌افزاید و انتخاب فیلدهای سفارش روز را نگه می‌دارد. تب کاربران نیز به چیدمان قبلی برمی‌گردد و بررسی تغییر کد به پنجرهٔ بازشو منتقل می‌شود.</p>
     <ul>
-      <li>در صفحهٔ سازمان، اسکرول صفحه فعال شده و ادمین اصلی میانبر «ترمیم نقش‌ها» را در سربرگ چارت می‌بیند؛ پنل دیگر زیر فضای ثابت و بریدهٔ چارت پنهان نمی‌ماند.</li>
-      <li>ترمیم چند مدیر اشتباهاً ارتقایافته را یکجا ممکن می‌کند، بدون انتخاب دوبارهٔ واحد؛ انتساب‌های سازمانی حفظ می‌شوند و دست‌کم یک ادمین اصلی فعال باید باقی بماند.</li>
-      <li>جستجوی کد، حساب‌های محلی با نقش «کاربر محلی» و «بازرسی» را هم می‌یابد؛ اگر ردیفی با نقش غیرمجاز باشد، مشخصاتش برای تشخیص علت گزارش می‌شود.</li>
-      <li>نتایج کد پیش از تغییر قابل بررسی و انتخاب‌اند؛ ادغام پس از پشتیبان‌گیری و در یک تراکنش انجام می‌شود. اصلاح ثبت دستی مبتنی بر سفارش نیز حفظ شده است.</li>
-      <li>بدون migration؛ هیچ پایگاه داده یا حساب تولیدی بررسی یا تغییر داده نشده است.</li>
+      <li>چاپ سفارش روز، سفارش گروه‌ها و آمار فقط فهرست نتیجه را چاپ می‌کند؛ فرم‌ها و اجزای دیگر صفحه به چاپ نمی‌روند. گزارش فیش/تردد پنل غذا نیز فقط جدول نتیجه را چاپ می‌کند.</li>
+      <li>بین ستون‌های گزارش‌های دو/سه‌ستونه خط جداکننده اضافه شده و فونت گزارش‌ها یک واحد بزرگ‌تر شده است. در آمار نوع غذا، تعداد کنار نام غذا می‌آید و ستون‌ها جدا می‌شوند.</li>
+      <li>در فهرست سفارش گروه‌ها گزینهٔ «همهٔ گروه‌ها» اضافه شد؛ سفارش‌ها زیر نام هر گروه نمایش داده می‌شوند. «نمایش بر اساس منو» برای همین فهرست نیز فعال است.</li>
+      <li>تیک فیلدهای گزارش سفارش روز بر اساس کاربر در مرورگر ذخیره می‌شود و پس از رفرش یا بستن برنامه باقی می‌ماند.</li>
+      <li>تب کاربران از فرم جستجوی درون‌ردیفی خارج شد. دکمهٔ «بررسی تغییر کد» کنار «ذخیره» پنجرهٔ جستجو/تأیید را باز می‌کند؛ نتیجه‌ها قبل از ادغام نمایش داده می‌شوند و مسیر پشتیبان‌گیری و تراکنش حفظ شده است.</li>
+      <li>اصلاح پنل ترمیم مدیران سازمانی R21 هم همراه بسته است؛ بدون migration و بدون تغییر دادهٔ تولیدی.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip" download="ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip">⬇ دریافت بستهٔ نصب R21</a>
-    <div class="file">ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-org-role-repair-panel-visible-r21-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r21/CHANGE-REPORT-FA.md">جزئیات R21</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R20 و اصلاحات قبلی ساخته شده است.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-reports-group-orders-r22-20261021.zip" download="ticket-update-1.61.10-food-reports-group-orders-r22-20261021.zip">⬇ دریافت بستهٔ نصب R22</a>
+    <div class="file">ticket-update-1.61.10-food-reports-group-orders-r22-20261021.zip · تنها بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-food-reports-group-orders-r22-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r22/CHANGE-REPORT-FA.md">جزئیات R22</a></p>
+    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R21 ساخته شده است.</div>
   </main>
 </body>
 </html>

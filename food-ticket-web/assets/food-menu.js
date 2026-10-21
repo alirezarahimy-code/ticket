@@ -31,6 +31,8 @@
     foodGroups: [],
     foodGroupsLoaded: false,
     groupOrders: [],
+    groupOrdersGroups: [],
+    groupOrdersView: 'list',
     groupOrdersLoaded: false,
     loadingGroupOrders: false,
     groupOrdersDate: '',
@@ -299,6 +301,22 @@
     { key: 'meal_type', label: 'وعده' },
   ];
 
+  var orderFieldsStorageKey = 'itsm-food-order-report-fields-v1:' + String(global.FOOD_TICKET_USER_ID || 'shared');
+  function readSavedOrderReportFields() {
+    try {
+      var saved = global.localStorage && global.localStorage.getItem(orderFieldsStorageKey);
+      var parsed = saved ? JSON.parse(saved) : null;
+      if (!Array.isArray(parsed)) return null;
+      var allowed = ORDER_COLUMNS.map(function (column) { return column.key; });
+      var fields = parsed.filter(function (key, index) { return allowed.indexOf(key) >= 0 && parsed.indexOf(key) === index; });
+      return fields.length ? fields : null;
+    } catch (error) { return null; }
+  }
+  function saveOrderReportFields(fields) {
+    try { if (global.localStorage) global.localStorage.setItem(orderFieldsStorageKey, JSON.stringify(fields)); } catch (error) { /* storage may be disabled */ }
+  }
+  state.orderReportFields = readSavedOrderReportFields() || state.orderReportFields;
+
   function selectedOrderColumns() {
     var selected = Array.isArray(state.orderReportFields) ? state.orderReportFields : [];
     return ORDER_COLUMNS.filter(function (column) { return selected.indexOf(column.key) >= 0; });
@@ -427,14 +445,35 @@
   function renderGroupOrders() {
     var selectedDate = state.groupOrdersDate || state.ordersDate || state.selectedDate || (state.status && state.status.today) || localTodayIso();
     var dateLabel = jalaliFromIso(selectedDate) || '';
-    var groupOptions = '<option value="">انتخاب گروه غذا</option>' + (state.foodGroups || []).map(function (group) {
-      return '<option value="' + Number(group.id) + '"' + (String(group.id) === String(state.groupOrdersGroupId) ? ' selected' : '') + '>' + esc(group.title) + '</option>';
-    }).join('');
+    var groupOptions = '<option value="all"' + (state.groupOrdersGroupId === 'all' ? ' selected' : '') + '>همهٔ گروه‌ها</option>'
+      + '<option value=""' + (!state.groupOrdersGroupId ? ' selected' : '') + '>انتخاب گروه غذا</option>'
+      + (state.foodGroups || []).map(function (group) {
+        return '<option value="' + Number(group.id) + '"' + (String(group.id) === String(state.groupOrdersGroupId) ? ' selected' : '') + '>' + esc(group.title) + '</option>';
+      }).join('');
     var title = state.groupOrdersTitle || ((state.foodGroups || []).filter(function (group) { return String(group.id) === String(state.groupOrdersGroupId); })[0] || {}).title || '';
-    var report = state.loadingGroupOrders ? '<div class="fm-spinner">در حال دریافت سفارش‌های گروه…</div>'
-      : !state.groupOrdersLoaded ? '<div class="fm-empty">گروه و روز را انتخاب کنید و «مشاهده» را بزنید.</div>'
-      : '<div class="fm-group-report-title"><strong>' + esc(title) + '</strong><span>' + esc(faDigits(dateLabel)) + ' — ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + '</span></div><div class="fm-table-wrap fm-manager-data-warning">' + orderTableHtml(state.groupOrders || []) + '</div>';
-    return '<section class="fm-card fm-group-orders"><div class="fm-toolbar"><div><h3>لیست سفارش گروه‌های غذا</h3><span class="fm-small">سفارش اعضای گروه در تاریخ انتخاب‌شده، با جابه‌جایی روزانهٔ اعضا لحاظ‌شده.</span></div>' + (state.groupOrdersLoaded ? '<button class="btn secondary" type="button" data-fm-action="group-orders-print">چاپ</button>' : '') + '</div><form id="fm-group-orders-form" class="fm-order-date"><label class="fm-field">گروه غذا<select name="group_id" required' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>' + groupOptions + '</select></label><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(dateLabel)) + '" required></label><button class="btn primary" type="submit"' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>مشاهده</button></form>' + (!state.foodGroupsLoaded ? '<div class="fm-small">در حال بارگذاری فهرست گروه‌ها…</div>' : (!state.foodGroups.length ? '<div class="fm-empty">گروه فعالی برای انتخاب وجود ندارد.</div>' : '')) + report + '</section>';
+    var tableFor = function (rows) { return state.groupOrdersView === 'menu' ? orderByMenuHtml(rows || []) : orderTableHtml(rows || []); };
+    var report;
+    if (state.loadingGroupOrders) {
+      report = '<div class="fm-spinner">در حال دریافت سفارش‌های گروه…</div>';
+    } else if (!state.groupOrdersLoaded) {
+      report = '<div class="fm-empty">گروه و روز را انتخاب کنید و «مشاهده» را بزنید.</div>';
+    } else if (state.groupOrdersGroupId === 'all') {
+      var allGroups = state.groupOrdersGroups || [];
+      report = '<div class="fm-group-report-title"><strong>همهٔ گروه‌ها</strong><span>' + esc(faDigits(dateLabel)) + ' — ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + '</span></div>' + (allGroups.length ? allGroups.map(function (group) {
+        var groupRows = group.items || [];
+        return '<section class="fm-group-result"><h4>' + esc(group.title || 'گروه غذا') + ' <span class="fm-small">(' + faDigits(groupRows.length) + ' سفارش)</span></h4>'
+          + (groupRows.length ? '<div class="fm-table-wrap fm-manager-data-warning">' + tableFor(groupRows) + '</div>' : '<div class="fm-small fm-group-empty">برای این گروه سفارشی ثبت نشده است.</div>')
+          + '</section>';
+      }).join('') : '<div class="fm-empty">گروه فعالی برای نمایش وجود ندارد.</div>');
+    } else {
+      report = '<div class="fm-group-report-title"><strong>' + esc(title) + '</strong><span>' + esc(faDigits(dateLabel)) + ' — ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + '</span></div>'
+        + '<div class="fm-table-wrap fm-manager-data-warning">' + tableFor(state.groupOrders || []) + '</div>';
+    }
+    var viewBar = state.groupOrdersLoaded
+      ? '<div class="fm-view-switch" aria-label="نحوهٔ نمایش سفارش‌های گروه">'
+        + '<button class="btn ' + (state.groupOrdersView === 'list' ? 'primary' : 'secondary') + '" type="button" data-fm-action="group-orders-view" data-orders-view="list">فهرست یکجا</button>'
+        + '<button class="btn ' + (state.groupOrdersView === 'menu' ? 'primary' : 'secondary') + '" type="button" data-fm-action="group-orders-view" data-orders-view="menu">نمایش بر اساس منو</button></div>' : '';
+    return '<section class="fm-card fm-group-orders"><div class="fm-toolbar"><div><h3>لیست سفارش گروه‌های غذا</h3><span class="fm-small">سفارش اعضای گروه در تاریخ انتخاب‌شده، با جابه‌جایی روزانهٔ اعضا لحاظ‌شده.</span></div>' + (state.groupOrdersLoaded ? '<button class="btn secondary" type="button" data-fm-action="group-orders-print">چاپ</button>' : '') + '</div><form id="fm-group-orders-form" class="fm-order-date"><label class="fm-field">گروه غذا<select name="group_id" required' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>' + groupOptions + '</select></label><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(dateLabel)) + '" required></label><button class="btn primary" type="submit"' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>مشاهده</button></form>' + (!state.foodGroupsLoaded ? '<div class="fm-small">در حال بارگذاری فهرست گروه‌ها…</div>' : (!state.foodGroups.length ? '<div class="fm-empty">گروه فعالی برای انتخاب وجود ندارد.</div>' : '')) + viewBar + '<div class="fm-group-report-content">' + report + '</div></section>';
   }
 
   function renderCancelRequests() {
@@ -486,13 +525,13 @@
       result = '<div class="fm-table-wrap fm-statistics-results fm-statistics-results--people"><table class="fm-rows"><thead><tr><th>ردیف</th><th>نام پرسنل</th><th>تعداد</th><th>ردیف</th><th>نام پرسنل</th><th>تعداد</th><th>ردیف</th><th>نام پرسنل</th><th>تعداد</th></tr></thead><tbody>' + (peopleRows.join('') || '<tr><td colspan="9" class="fm-empty">در بازهٔ انتخاب‌شده سفارش فعالی ثبت نشده است.</td></tr>') + '</tbody></table></div>';
     } else {
       var days = state.statistics || [];
-      result = days.length ? '<div class="fm-statistics-days">' + days.map(function (day) {
+      result = days.length ? '<div class="fm-statistics-results fm-statistics-results--food fm-statistics-days">' + days.map(function (day) {
         var foods = (day.foods || []).map(function (food) {
           return '<li><span>' + esc(food.food_name || '—') + '</span><strong>' + faDigits(Number(food.count || 0)) + ' عدد</strong></li>';
         }).join('');
         return '<section class="fm-stat-day"><h4>' + esc(day.weekday || '') + ' ' + esc(faDigits(day.food_date_jalali || jalaliFromIso(day.food_date) || '')) + '</h4>'
           + (foods ? '<ul>' + foods + '</ul>' : '<div class="fm-empty">برای این روز سفارشی ثبت نشده است.</div>') + '</section>';
-      }).join('') + '</div>' : '<div class="fm-empty">در بازهٔ انتخاب‌شده سفارشی ثبت نشده است.</div>';
+      }).join('') + '</div>' : '<div class="fm-statistics-results fm-statistics-results--food fm-empty">در بازهٔ انتخاب‌شده سفارشی ثبت نشده است.</div>';
     }
     return '<section class="fm-card fm-statistics"><div class="fm-toolbar"><div><h3>' + modeTitle + '</h3><span class="fm-small">بازه: ' + esc(rangeText) + '</span></div></div><form id="fm-statistics-date" class="fm-statistics-form"><div class="fm-stats-modes" role="radiogroup" aria-label="نوع آمار"><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="food"' + (mode === 'food' ? ' checked' : '') + ' required><span>آمار نوع غذا</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="employee"' + (mode === 'employee' ? ' checked' : '') + ' required><span>آمار سفارش نفرات</span></label></div><div class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="statistics-export"' + (actionsEnabled ? '' : ' disabled') + '>خروجی اکسل</button><button class="btn secondary" type="button" data-fm-action="statistics-print"' + (actionsEnabled ? '' : ' disabled') + '>پرینت</button></div></form>' + result + '</section>';
   }
@@ -791,10 +830,12 @@
       var result = await request('food-menu/group-orders', { group_id: selectedGroup, date: selectedDate, meal_type: state.mealType });
       state.groupOrders = Array.isArray(result.items) ? result.items : [];
       state.groupOrdersTitle = result.group && result.group.title ? result.group.title : '';
+      state.groupOrdersGroups = Array.isArray(result.groups) ? result.groups : [];
       state.groupOrdersLoaded = true;
       state.error = '';
     } catch (e) {
       state.groupOrders = [];
+      state.groupOrdersGroups = [];
       state.groupOrdersLoaded = false;
       state.error = e.message || 'سفارش‌های گروه بارگذاری نشد.';
     } finally {
@@ -1005,7 +1046,9 @@
     if (!doc || !doc.body || !target || typeof global.print !== 'function') return;
     var printHost = doc.createElement('div');
     printHost.className = 'fm-print-host';
-    printHost.appendChild(target.cloneNode(true));
+    var printList = target.cloneNode(true);
+    printList.classList.add('fm-print-list');
+    printHost.appendChild(printList);
     doc.body.appendChild(printHost);
     doc.body.classList.add(bodyClass);
     var cleaned = false;
@@ -1030,7 +1073,7 @@
 
   function printOrders() {
     if (!canClose || state.tab !== 'orders' || state.mealType !== 'lunch' || !state.ordersLoaded || state.loadingOrders) return;
-    printScopedReport('.fm-daily-orders', 'fm-print-orders');
+    printScopedReport('.fm-daily-orders .fm-table-wrap', 'fm-print-orders');
   }
 
   function downloadStatistics() {
@@ -1040,7 +1083,7 @@
 
   function printStatistics() {
     if (!state.statisticsLoaded) return;
-    printScopedReport('.fm-statistics', 'fm-print-statistics');
+    printScopedReport('.fm-statistics .fm-statistics-results', 'fm-print-statistics');
   }
 
   function selectDay(iso, currentMonth) {
@@ -1275,9 +1318,10 @@
       if (act === 'confirm-impact') saveDay(true, state.pendingImpactExpected);
       if (act === 'cancel-impact') { state.pendingImpact = null; state.pendingImpactExpected = 0; state.pendingImpactMessage = ''; render(); }
       if (act === 'orders-view') { state.ordersView = action.dataset.ordersView === 'menu' ? 'menu' : 'list'; state.ordersSortTouched = state.ordersSortTouched || state.ordersView === 'menu'; render(); }
+      if (act === 'group-orders-view') { state.groupOrdersView = action.dataset.ordersView === 'menu' ? 'menu' : 'list'; render(); }
       if (act === 'orders-export') downloadOrders();
       if (act === 'orders-print') printOrders();
-      if (act === 'group-orders-print') printScopedReport('.fm-group-orders', 'fm-print-group-orders');
+      if (act === 'group-orders-print') printScopedReport('.fm-group-orders .fm-group-report-content', 'fm-print-group-orders');
       if (act === 'statistics-export') downloadStatistics();
       if (act === 'statistics-print') printStatistics();
       if (act === 'cancel-req-reload') loadCancelRequests();
@@ -1328,6 +1372,7 @@
       var fields = Array.from(root.querySelectorAll('[data-fm-order-field]:checked')).map(function (item) { return item.dataset.fmOrderField; });
       if (!fields.length) { input.checked = true; notify('برای گزارش حداقل یک فیلد باید انتخاب شود.', true); return; }
       state.orderReportFields = fields;
+      saveOrderReportFields(fields);
       render();
       return;
     }

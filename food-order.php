@@ -657,20 +657,65 @@ function food_order_group_orders(int $groupId, string $date, string $mealType = 
 {
     $iso = food_order_iso_date($date);
     $mealType = food_order_meal_type($mealType);
-    if ($groupId <= 0 || $iso === null || !function_exists('food_ticket_groups_load') || !function_exists('food_ticket_group_members_for_date')) {
+    if ($iso === null || !function_exists('food_ticket_groups_load') || !function_exists('food_ticket_group_members_for_date')) {
+        throw new RuntimeException('گروه یا تاریخ گزارش معتبر نیست.');
+    }
+    $groups = array_values(array_filter(
+        food_ticket_groups_load(true),
+        static fn (array $candidate): bool => (string) ($candidate['status'] ?? '') === 'active'
+    ));
+    $orders = food_order_manager_orders($iso, $mealType);
+
+    if ($groupId === 0) {
+        $groupResults = [];
+        $allItems = [];
+        foreach ($groups as $group) {
+            $id = (int) ($group['id'] ?? 0);
+            if ($id <= 0) {
+                continue;
+            }
+            $memberIds = array_fill_keys(array_map(
+                static fn (array $member): int => (int) ($member['id'] ?? 0),
+                food_ticket_group_members_for_date($id, $iso)
+            ), true);
+            $items = array_values(array_filter(
+                $orders,
+                static fn (array $order): bool => isset($memberIds[(int) ($order['employee_id'] ?? 0)])
+            ));
+            $allItems = array_merge($allItems, $items);
+            $groupResults[] = ['id' => $id, 'title' => (string) ($group['title'] ?? ''), 'items' => $items];
+        }
+        return [
+            'group' => ['id' => 0, 'title' => 'همهٔ گروه‌ها'],
+            'date' => $iso,
+            'meal_type' => $mealType,
+            'groups' => $groupResults,
+            'items' => $allItems,
+        ];
+    }
+    if ($groupId < 0) {
         throw new RuntimeException('گروه یا تاریخ گزارش معتبر نیست.');
     }
     $group = null;
-    foreach (food_ticket_groups_load(true) as $candidate) {
-        if ((int) ($candidate['id'] ?? 0) === $groupId) { $group = $candidate; break; }
+    foreach ($groups as $candidate) {
+        if ((int) ($candidate['id'] ?? 0) === $groupId) {
+            $group = $candidate;
+            break;
+        }
     }
     if ($group === null) {
         throw new RuntimeException('گروه انتخاب‌شده پیدا نشد.');
     }
     $members = food_ticket_group_members_for_date($groupId, $iso);
     $memberIds = array_fill_keys(array_map(static fn (array $member): int => (int) ($member['id'] ?? 0), $members), true);
-    $orders = array_values(array_filter(food_order_manager_orders($iso, $mealType), static fn (array $order): bool => isset($memberIds[(int) ($order['employee_id'] ?? 0)])));
-    return ['group' => ['id' => $groupId, 'title' => (string) $group['title']], 'date' => $iso, 'meal_type' => $mealType, 'items' => $orders];
+    $groupOrders = array_values(array_filter($orders, static fn (array $order): bool => isset($memberIds[(int) ($order['employee_id'] ?? 0)])));
+    return [
+        'group' => ['id' => $groupId, 'title' => (string) $group['title']],
+        'date' => $iso,
+        'meal_type' => $mealType,
+        'groups' => [['id' => $groupId, 'title' => (string) $group['title'], 'items' => $groupOrders]],
+        'items' => $groupOrders,
+    ];
 }
 
 function food_order_statistics_range(string $fromDate, string $toDate, string $mode = 'food', string $mealType = 'lunch'): array
@@ -2645,8 +2690,9 @@ function food_order_menu_api_handle(string $route, array $user): never
         if ($method === 'GET' && $route === 'food-menu/group-orders') {
             food_order_require_permission($user, 'food.order_close');
             $date = food_order_iso_date((string) ($_GET['date'] ?? ''));
-            $groupId = (int) ($_GET['group_id'] ?? 0);
-            if ($date === null || $groupId <= 0) {
+            $groupRaw = strtolower(trim((string) ($_GET['group_id'] ?? '')));
+            $groupId = $groupRaw === 'all' ? 0 : (ctype_digit($groupRaw) ? (int) $groupRaw : -1);
+            if ($date === null || ($groupRaw !== 'all' && $groupId <= 0)) {
                 throw new RuntimeException('گروه و تاریخ روز سفارش معتبر نیست.');
             }
             food_order_send_json(food_order_group_orders($groupId, $date, food_order_meal_type($_GET['meal_type'] ?? 'lunch')));

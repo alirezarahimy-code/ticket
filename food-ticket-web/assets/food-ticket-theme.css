@@ -260,7 +260,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--food-teal) !impo
   body.printing-report .notice { display: none !important; }
   body.printing-report .page { max-width: none; padding: 0; }
   body.printing-report .card { box-shadow: none; border: 1px solid #999; }
-  body.printing-report .table th, body.printing-report .table td { font-size: 11pt; padding: 4px 6px; }
+  body.printing-report .table th, body.printing-report .table td { font-size: 12pt; padding: 4px 6px; }
 }
 
 /* Center-align data tables and grid-based list rows throughout the food-ticket panel. */
@@ -304,6 +304,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--food-teal) !impo
     }
     body.printing-report .print-preview-head { display: none !important; }
     body.printing-report .report-preview-table { width: 100% !important; table-layout: auto; }
+    body.printing-report .report-preview-table th, body.printing-report .report-preview-table td { font-size: 12pt !important; }
 }
 
 

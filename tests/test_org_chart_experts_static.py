@@ -82,7 +82,7 @@ check(
     and "__REPAIR_ROLE_LINK__" in org_page
     and "body.page-organization { height: auto; min-height: 100vh; overflow-x: hidden; overflow-y: auto; }" in style
     and "body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow: visible; }" in style
-    and "assets/style.css?v=3.4.41" in index,
+    and "assets/style.css?v=3.4.42" in index,
     "admin repair panel is reachable by scrolling and has a visible header shortcut",
 )
 

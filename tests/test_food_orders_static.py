@@ -194,10 +194,10 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
         panel_html = read("food-ticket-web/index.html")
         self.assertIn('href="assets/food-order.css?v=11"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=24"', panel_html)
+        self.assertIn('href="assets/food-menu.css?v=25"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=21"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=22"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -468,8 +468,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("body.fm-print-statistics > *:not(.fm-print-host)", manager_css)
         self.assertIn("body.fm-print-orders > *:not(.fm-print-host)", manager_css)
         manager_js = read("assets/food-menu.js")
-        self.assertIn("printScopedReport('.fm-statistics'", manager_js)
-        self.assertIn("printScopedReport('.fm-daily-orders'", manager_js)
+        self.assertIn("printScopedReport('.fm-statistics .fm-statistics-results'", manager_js)
+        self.assertIn("printScopedReport('.fm-daily-orders .fm-table-wrap'", manager_js)
         self.assertIn("target.cloneNode(true)", manager_js)
         panel_css = read("food-ticket-web/assets/food-ticket-theme.css")
         self.assertIn("body.printing-report > *:not(.print-preview-layer)", panel_css)

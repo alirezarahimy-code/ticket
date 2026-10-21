@@ -1287,3 +1287,31 @@ window.addEventListener('pageshow', function (event) {
         window.location.reload();
     }
 });
+
+
+document.addEventListener('click', function (event) {
+    var openButton = event.target.closest('[data-domain-code-dialog-open]');
+    if (openButton) {
+        var dialogId = openButton.getAttribute('data-domain-code-dialog-open') || '';
+        var dialog = dialogId ? document.getElementById(dialogId) : null;
+        if (dialog) {
+            event.preventDefault();
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+            var input = dialog.querySelector('input[name="employee_number"]');
+            if (input) input.focus();
+        }
+        return;
+    }
+    var closeButton = event.target.closest('[data-domain-code-dialog-close]');
+    if (closeButton) {
+        var activeDialog = closeButton.closest('dialog');
+        if (activeDialog && typeof activeDialog.close === 'function') activeDialog.close();
+        else if (activeDialog) activeDialog.removeAttribute('open');
+        return;
+    }
+    if (event.target && event.target.matches && event.target.matches('dialog.domain-code-link-dialog')) {
+        var bounds = event.target.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) { if (typeof event.target.close === 'function') event.target.close(); else event.target.removeAttribute('open'); }
+    }
+});
