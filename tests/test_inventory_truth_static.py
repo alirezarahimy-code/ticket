@@ -103,5 +103,32 @@ class InventoryTruthStaticTests(unittest.TestCase):
         self.assertIn("domain_scan_validate_credentials", scan)
 
 
+    def test_full_domain_scan_is_not_limited_to_a_single_host_or_manual_batch(self) -> None:
+        scan = read("domain-scan.php")
+        start = scan[scan.index("function domain_scan_start("):scan.index("function domain_scan_start_selected(")]
+        ldap = scan[scan.index("function ldap_domain_computers("):scan.index("function domain_scan_asset_for(")]
+        self.assertIn("ldap_domain_computers()", start)
+        self.assertIn("foreach ($computers as $pc)", start)
+        self.assertIn("function ldap_domain_computers(int $limit = 0)", ldap)
+        self.assertIn("ldap_control_paged_result($connection, 500", ldap)
+        self.assertIn("$limit > 0 && count($computers) >= $limit", ldap)
+
+    def test_extended_windows_inventory_is_collected_and_persisted_without_command_lines_or_env_values(self) -> None:
+        collector = read("tools/collect_server_inventory.ps1")
+        inventory = read("inventory.php")
+        for key in (
+            "Win32_PnPSignedDriver", "Win32_Service", "Win32_Process", "Win32_StartupCommand",
+            "Win32_Share", "Win32_UserAccount", "Win32_QuickFixEngineering", "MSFT_NetFirewallProfile",
+            "MSFT_StorageReliabilityCounter", "MSStorageDriver_FailurePredictStatus", "WmiMonitorID",
+        ):
+            self.assertIn(key, collector)
+        self.assertIn("pnp_devices = @($allDevices)", collector)
+        self.assertIn("windows_updates = @($updates)", collector)
+        self.assertIn("'extended_inventory' => $extendedInventory", inventory)
+        self.assertNotIn("'Command'", collector)
+        self.assertNotIn("'VariableValue'", collector)
+
+
+
 if __name__ == "__main__":
     unittest.main()

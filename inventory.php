@@ -350,7 +350,33 @@ function inventory_apply_powershell_data(array $inventory, array $data): array
         if ($antivirusName !== '') { $antivirusNames[] = $antivirusName; }
     }
     $inventory['antivirus'] = implode(', ', array_unique($antivirusNames));
-    $inventory['hardware'] = array_merge($inventory['hardware'], ['manufacturer' => $computer['Manufacturer'] ?? '', 'model' => $computer['Model'] ?? '', 'user' => $computer['UserName'] ?? '', 'bios' => $bios, 'processor' => $processor, 'operating_system' => $os, 'motherboard' => $motherboard, 'memory_modules' => $memoryModules, 'physical_disks' => $physicalDisks, 'graphics' => $gpu, 'sound' => $sound, 'optical_drives' => $opticalDrives, 'network_adapters' => $networkAdapters, 'modems' => $modems, 'logical_disks' => $disks]);
+    $extendedInventory = [];
+    foreach ([
+        'system_product', 'enclosure', 'memory_arrays', 'pnp_devices', 'signed_drivers',
+        'services', 'processes', 'startup_items', 'shares', 'user_accounts', 'windows_updates',
+        'environment_names', 'firewall_products', 'antispyware_products', 'firewall_profiles',
+        'storage_devices', 'storage_reliability', 'smart_status', 'monitor_ids',
+    ] as $key) {
+        $extendedInventory[$key] = $rows($key);
+    }
+    $inventory['hardware'] = array_merge($inventory['hardware'], [
+        'manufacturer' => $computer['Manufacturer'] ?? '',
+        'model' => $computer['Model'] ?? '',
+        'user' => $computer['UserName'] ?? '',
+        'bios' => $bios,
+        'processor' => $processor,
+        'operating_system' => $os,
+        'motherboard' => $motherboard,
+        'memory_modules' => $memoryModules,
+        'physical_disks' => $physicalDisks,
+        'graphics' => $gpu,
+        'sound' => $sound,
+        'optical_drives' => $opticalDrives,
+        'network_adapters' => $networkAdapters,
+        'modems' => $modems,
+        'logical_disks' => $disks,
+        'extended_inventory' => $extendedInventory,
+    ]);
     $inventory['os_users'] = $localUsers;
     $inventory['disks'] = $disks;
     $inventory['software'] = $software;

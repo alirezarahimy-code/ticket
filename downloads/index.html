@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R28</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R29</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,20 +25,20 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ جاری · R28 · ۲۰۲۶/۱۰/۲۲</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — تکمیل اسکن شبکه‌ای</h1>
-    <p>R28 روند استفاده از یک حساب دامنه برای استخراج رایانه‌های شبکه را کامل‌تر می‌کند؛ قبل از اسکن گروهی، دسترسی را روی یک رایانه امتحان کنید.</p>
+    <span class="tag">بستهٔ جاری · R29 · ۲۰۲۶/۱۰/۲۲</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — موجودی عمیق کل دامنه</h1>
+    <p>R29 اسکن سراسری Active Directory را برای تمام computer objectهای یافته‌شده صف می‌کند و دسته‌های بیشتری از جزئیات سیستم را با WMI/CIM جمع می‌کند.</p>
     <ul>
-      <li>دکمهٔ «آزمون حساب روی یک سیستم» اتصال PowerShell/CIM را بررسی می‌کند، بدون آن‌که اطلاعاتی ذخیره کند.</li>
-      <li>مقصدهای WinRM با TCP 5985 حتی اگر ping بسته باشد شناسایی می‌شوند.</li>
-      <li>راهنمای خطا توضیح می‌دهد WinRM باید روی کلاینت مقصد فعال شود؛ Domain Admin واحد کافی است اگر دسترسی Administrators روی مقصدها داشته باشد.</li>
-      <li>راهنمای کامل اسکن، GPO و فایروال در بسته است. بدون migration و بدون تغییر دادهٔ تولیدی.</li>
+      <li>جست‌وجوی صفحه‌بندی‌شدهٔ AD بدون سقف ضمنی ۳۰۰۰ سیستم؛ سقف ۹۰۰ فقط برای انتخاب دستی است.</li>
+      <li>درایورها و دستگاه‌های PnP، سرویس‌ها، پردازه‌ها، startup، shareها، حساب‌ها، HotFixها، امنیت و شاخص‌های سلامت ذخیره‌سازی به Inventory افزوده شده‌اند.</li>
+      <li>همان یک حساب Domain Admin را برای مقصدهای مجاز استفاده کنید؛ ساخت حساب محلی برای هر PC لازم نیست.</li>
+      <li>برابری کامل با TNI ادعا نمی‌شود؛ دادهٔ جزئی درایورهای اختصاصی TNI ممکن است در WMI/CIM موجود نباشد. بدون migration و بدون تغییر دادهٔ تولیدی.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip" download="ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip">⬇ دریافت بستهٔ اسکن شبکه R28</a>
-    <div class="file">ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip · بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-network-inventory-workflow-r28-20261022.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-22-release-161-10-r28/CHANGE-REPORT-FA.md">راهنمای اجرا و جزئیات R28</a></p>
-    <div class="hint">اسکن شبکه‌ای از میزبان اجرای PHP/PowerShell انجام می‌شود؛ روی کلاینت‌ها PHP نصب نمی‌شود. ابتدا روی یک مقصد آزمایش و سپس گروهی را اسکن کنید. فایروال را خاموش نکنید؛ قواعد لازم را ترجیحاً با GPO و با محدودکردن مبدأ به سرور اسکن تنظیم کنید.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-domain-inventory-depth-r29-20261022.zip" download="ticket-update-1.61.10-domain-inventory-depth-r29-20261022.zip">⬇ دریافت بستهٔ موجودی دامنه R29</a>
+    <div class="file">ticket-update-1.61.10-domain-inventory-depth-r29-20261022.zip · بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-domain-inventory-depth-r29-20261022.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-22-release-161-10-r29/CHANGE-REPORT-FA.md">راهنمای اجرا و جزئیات R29</a></p>
+    <div class="hint">صف کامل AD شامل همهٔ کامپیوترهای یافته‌شده است؛ اما مقصد خاموش یا غیرقابل‌دسترسی تا زمان روشن‌شدن و دسترسی شبکه‌ای اطلاعات زنده نمی‌دهد. ابتدا یک مقصد و سپس یک گروه کوچک را روی میزبان Windows سامانه آزمایش کنید. فایروال را خاموش نکنید؛ قواعد لازم را ترجیحاً با GPO و محدود به میزبان اسکن تنظیم کنید.</div>
   </main>
 </body>
 </html>

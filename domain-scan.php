@@ -173,7 +173,7 @@ function domain_scan_ad_time(string $value): ?string
     return date('Y-m-d H:i:s', (int) $unix);
 }
 
-function ldap_domain_computers(int $limit = 3000): array
+function ldap_domain_computers(int $limit = 0): array
 {
     if (!function_exists('ldap_connect')) {
         throw new RuntimeException('افزونهٔ LDAP در PHP فعال نیست.');
@@ -228,7 +228,7 @@ function ldap_domain_computers(int $limit = 3000): array
                 'last_logon' => domain_scan_ad_time((string) ($entry['lastlogontimestamp'][0] ?? '')),
                 'enabled' => (((int) ($entry['useraccountcontrol'][0] ?? 0)) & 2) !== 2,
             ];
-            if (count($computers) >= $limit) {
+            if ($limit > 0 && count($computers) >= $limit) {
                 break 2;
             }
         }
