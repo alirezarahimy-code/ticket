@@ -511,12 +511,16 @@
       var people = state.statistics || [];
       var peopleColumns = [];
       var peopleColumnCount = people.length ? Math.min(3, Math.max(1, Math.floor(people.length / 3))) : 0;
-      var peoplePerColumn = peopleColumnCount ? Math.ceil(people.length / peopleColumnCount) : 0;
+      var peoplePerColumn = peopleColumnCount ? Math.floor(people.length / peopleColumnCount) : 0;
+      var extraPeopleRows = peopleColumnCount ? people.length % peopleColumnCount : 0;
+      var peopleOffset = 0;
       for (var group = 0; group < peopleColumnCount; group++) {
-        var start = group * peoplePerColumn;
-        var columnRows = people.slice(start, start + peoplePerColumn).map(function (person, offset) {
+        var start = peopleOffset;
+        var columnSize = peoplePerColumn + (group < extraPeopleRows ? 1 : 0);
+        var columnRows = people.slice(start, start + columnSize).map(function (person, offset) {
           return '<tr><td>' + faDigits(start + offset + 1) + '</td><td>' + esc(person.full_name || '—') + '</td><td>' + faDigits(Number(person.count || 0)) + '</td></tr>';
         }).join('');
+        peopleOffset += columnSize;
         peopleColumns.push('<section class="fm-statistics-people-column"><table class="fm-rows"><thead><tr><th>ردیف</th><th>نام و نام خانوادگی</th><th>تعداد</th></tr></thead><tbody>' + columnRows + '</tbody></table></section>');
       }
       result = people.length

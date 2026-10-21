@@ -312,7 +312,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("fm-statistics-results--people", statistics_panel)
         self.assertEqual(statistics_panel.count('<th>ردیف</th><th>نام و نام خانوادگی</th><th>تعداد</th>'), 1)
         self.assertIn("peopleColumns.push('<section class=\"fm-statistics-people-column\"", statistics_panel)
-        self.assertIn("people.slice(start, start + peoplePerColumn)", statistics_panel)
+        self.assertIn("people.slice(start, start + columnSize)", statistics_panel)
         self.assertIn("global.ItsmJalali.enhanceAll(root)", js)
 
     def test_day_status_form_drops_reason_but_backend_still_checks_close_permission(self) -> None:
