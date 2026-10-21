@@ -77,15 +77,42 @@ check("visit_change_until" in groups
       and "function food_ticket_api_cancel_day_visit" in groups
       and "مهلت تغییر سلف" in admin_js
       and 'id="fg-visit-until"' in admin_js
-      and "data-fg=\"visit-cancel\"" in admin_js
+      and 'id="fg-deadline-box"' in admin_js
+      and "کادر زرد بالای فرم" in admin_js
+      and 'data-fg="visit-cancel"' in admin_js
       and "لغو تغییر سلف" in admin_js,
       "each food group has a visible cafeteria-change deadline and support can cancel visits")
+panel = read("food-ticket-web/index.html")
+check("food-groups.js?v=13" in panel, "food-groups.js cache buster is bumped")
+check("FOOD_TICKET_PANEL_VERSION = '1.37.12'" in ticket
+      and "PANEL_VERSION='1.37.12'" in panel,
+      "food panel version matches host expected version")
+check("function loadDashboardMonitoring" in panel
+      and "function lastDaysIso" in panel
+      and "state.weekEvents" in panel
+      and "function dashboardView" in panel,
+      "dashboard week chart loads seven calendar days from monitoring")
+check("app_session_lifetime" in bootstrap
+      and "session.gc_maxlifetime" in bootstrap
+      and "storage/sessions" in bootstrap
+      and "app_session_refresh_cookie" in bootstrap,
+      "login session is configured without idle timeout")
+check("کادر زرد بالای فرم" in guide
+      and "نشست ورود به‌خاطر بیکاری قطع نمی‌شود" in guide,
+      "Persian guide documents cafeteria deadline location and idle login session")
+chatbot = read("chatbot.php")
+check("login_session_idle" in chatbot
+      and "کادر زرد بالای فرم" in chatbot,
+      "chatbot answers cafeteria-deadline location and idle login session")
 check("visit_change_until TIME NULL" in schema
       and "visit_change_until TIME NULL" in install,
       "fresh-install schemas include cafeteria-change deadline")
 check('data-fg="members"' in admin_js
       and "اعضای دائم گروه" in admin_js
-      and "اعضای مهمان یا موقت امروز" in admin_js,
+      and "اعضای مهمان یا موقت امروز" in admin_js
+      and "fg-members-overlay" in admin_js
+      and "fg-members-dialog" in admin_js
+      and ".fg-members-overlay" in read("food-ticket-web/assets/food-ticket-theme.css"),
       "food groups have a members-list popup next to today's absence")
 
 print("all day-visit checks passed")

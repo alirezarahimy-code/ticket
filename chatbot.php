@@ -267,22 +267,60 @@ function chatbot_answer(string $question, array $user): array
             'label' => 'رفتن به سفارش غذا',
         ]);
     }
+    $mentionsFoodDash = chatbot_has_any($norm, ['داشبورد']) && chatbot_has_any($norm, ['غذا', 'فیش', 'هفت روز']);
+    if ($mentionsFoodDash) {
+        $dashAnswer = 'در سامانه مدیریت غذا ← داشبورد، کارت‌های بالا مربوط به امروز هستند. نمودار «هفت روز اخیر» هر روز را جداگانه از مانیتورینگ می‌خواند، نه فقط امروز.';
+        return chatbot_reply($user, $question, $dashAnswer, true, null, 'food_dashboard_week', 0.0, [
+            'url' => 'index.php?page=food-ticket',
+            'label' => 'رفتن به داشبورد غذا',
+        ]);
+    }
     $mentionsCafeteria = chatbot_has_any($norm, ['سلف', 'تغییر سلف', 'محل تحویل']);
-    $asksCafeteriaDeadline = $mentionsCafeteria && chatbot_has_any($norm, ['مهلت', 'ساعت', 'تا کی', '۹:۳۰', '9:30', 'تا چه موقع']);
+    $asksCafeteriaDeadline = $mentionsCafeteria && chatbot_has_any($norm, ['مهلت', 'ساعت', 'تا کی', '۹:۳۰', '9:30', 'تا چه موقع', 'کجا', 'فیلد', 'تنظیم', 'گروه غذایی', 'گروه غذا']);
     if ($asksCafeteriaDeadline) {
-        $cafeAnswer = 'تغییر سلف امروز فقط برای کسی است که عضو دائم هیچ گروه غذایی نیست. مهلت ساعت در سامانه مدیریت غذا ← گروه‌های غذا ← ویرایش همان گروه، فیلد «مهلت تغییر سلف امروز (ساعت ۲۴ ساعته)» تنظیم می‌شود؛ مثلاً 09:30. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود. مدیر پشتیبانی و مدیر اصلی می‌توانند اعلام را از لیست اعضاء لغو کنند.';
+        $cafeAnswer = 'تغییر سلف امروز فقط برای کسی است که عضو دائم هیچ گروه غذایی نیست. مهلت ساعت در سامانه مدیریت غذا ← گروه‌های غذا ← ویرایش همان گروه، کادر زرد بالای فرم با عنوان «مهلت تغییر سلف امروز» تنظیم می‌شود؛ مثلاً 09:30. خالی یعنی بدون محدودیت ساعت. این فیلد در برنامهٔ غذایی نیست. بعد از چاپ فیش گروه، اعلام قفل می‌شود. مدیر پشتیبانی و مدیر اصلی می‌توانند اعلام را از لیست اعضاء لغو کنند.';
         return chatbot_reply($user, $question, $cafeAnswer, true, null, 'food_cafeteria_deadline', 0.0, [
-            'url' => 'index.php?page=food-order',
-            'label' => 'رفتن به سفارش غذا',
+            'url' => 'index.php?page=food-ticket',
+            'label' => 'رفتن به گروه‌های غذا',
         ]);
     }
     $mentionsOrgChart = chatbot_has_any($norm, ['چارت', 'ساختار سازمان', 'ساختار سازمانی', 'نفرات سازمان']);
     $asksOrgExperts = $mentionsOrgChart && chatbot_has_any($norm, ['کارشناس', 'اداره', 'معاونت', 'محلی', 'دامینی', 'نفرات']);
     if ($mentionsOrgChart || $asksOrgExperts) {
-        $orgAnswer = 'در چارت سازمانی، بعد از معاونت هم اداره می‌توان ساخت و هم کارشناس مستقیم زیر همان معاونت. روی کارت معاونت سمت راست «افزودن اداره» و سمت چپ «افزودن کارشناس» است. کادر کارشناس فقط بعد از انتخاب نفرات زیر معاونت ظاهر می‌شود. فهرست نفرات همهٔ کاربران دامینی و محلی را نشان می‌دهد.';
+        $orgAnswer = 'در چارت سازمانی، بعد از معاونت هم اداره می‌توان ساخت و هم کارشناس مستقیم زیر همان معاونت. روی کارت معاونت سمت راست «افزودن اداره» و سمت چپ «افزودن کارشناس» است. کادر کارشناس فقط بعد از انتخاب نفرات زیر معاونت ظاهر می‌شود. فهرست نفرات همهٔ کاربران دامینی و محلی را نشان می‌دهد. اگر درخت در صفحه جا نشد، از بزرگ‌نمایی بالای نمودار یا دکمهٔ جا شدن در عرض صفحه استفاده کنید و با نوار کنار صفحه جابه‌جا شوید.';
         return chatbot_reply($user, $question, $orgAnswer, true, null, 'org_chart_experts', 0.0, [
             'url' => 'index.php?page=organization',
             'label' => 'رفتن به ساختار سازمانی',
+        ]);
+    }
+
+    $mentionsIdleLogout = chatbot_has_any($norm, ['لاگ اوت', 'لاگاف', 'از حساب خارج', 'نشست', 'سشن', 'لاگین'])
+        && chatbot_has_any($norm, ['بیکار', 'دست نزد', 'کار نکن', 'بدون کار', 'خودکار']);
+    if ($mentionsIdleLogout) {
+        $idleAnswer = 'نشست ورود به‌خاطر بیکاری قطع نمی‌شود. اگر چند ساعت صفحه را باز نگذارید، با بازگشت همچنان وارد هستید. فقط با دکمهٔ «خروج» از حساب خارج شوید.';
+        return chatbot_reply($user, $question, $idleAnswer, true, null, 'login_session_idle', 0.0, [
+            'url' => 'index.php',
+            'label' => 'رفتن به سامانه',
+        ]);
+    }
+
+    $mentionsRolePerms = chatbot_has_any($norm, ['نقش', 'دسترسی', 'تیک دسترسی', 'سطوح دسترسی'])
+        && chatbot_has_any($norm, ['تنظیمات', 'غذا', 'فرم', 'بازرسی', 'پشتیبانی', 'نقش‌ها']);
+    if ($mentionsRolePerms) {
+        $roleAnswer = 'در تنظیمات ← نقش‌ها و سطوح دسترسی، نقش را از راست انتخاب کنید. سمت چپ همهٔ گروه‌های دسترسی همان نقش دیده می‌شود؛ از جمله سامانه مدیریت غذا. هر مورد را تیک بزنید یا بردارید و ذخیره کنید. این فهرست برای همهٔ نقش‌ها کامل است.';
+        return chatbot_reply($user, $question, $roleAnswer, true, null, 'role_permissions_form', 0.0, [
+            'url' => 'index.php?page=settings#roles',
+            'label' => 'رفتن به نقش‌ها و دسترسی‌ها',
+        ]);
+    }
+
+    $mentionsDomainUser = chatbot_has_any($norm, ['کاربر دامین', 'کاربر دامینی', 'ثبت دامین', 'کاربر ۳۳۵', 'حذف کاربر'])
+        || (chatbot_has_any($norm, ['دامین', 'ldap', 'اکتیو']) && chatbot_has_any($norm, ['ثبت', 'معرفی', 'همگام', 'حذف', 'کد پرسنلی']));
+    if ($mentionsDomainUser) {
+        $domainAnswer = 'کاربر دامینی با تنظیمات ← معرفی کاربران دامین همگام می‌شود. اگر کد پرسنلی روی حساب محلی باقی‌مانده باشد، ذخیرهٔ همان کد روی کاربر دامین آن را ادغام می‌کند. ادمین اصلی در تنظیمات ← کاربران دکمهٔ حذف دارد (نه برای خودش و نه برای ادمین اصلی). اگر حذف به‌خاطر ارجاع ممکن نبود، از جدول users همان شماره را پس از آزاد کردن ارجاع حذف کنید.';
+        return chatbot_reply($user, $question, $domainAnswer, true, null, 'domain_user_register', 0.0, [
+            'url' => 'index.php?page=settings#users',
+            'label' => 'رفتن به کاربران',
         ]);
     }
 
@@ -297,7 +335,7 @@ function chatbot_answer(string $question, array $user): array
 
     $asksGroupMembers = chatbot_has_any($norm, ['لیست اعضا', 'لیست اعضاء', 'اعضای گروه', 'عضو گروه غذا', 'مهمان امروز گروه']);
     if ($asksGroupMembers) {
-        $membersAnswer = 'در سامانه مدیریت غذا ← گروه‌های غذا، کنار «غیبت امروز» دکمهٔ «لیست اعضاء» را بزنید. پنجره دو بخش دارد: اعضای دائم گروه، و اعضای مهمان یا موقت امروز.';
+        $membersAnswer = 'در سامانه مدیریت غذا ← گروه‌های غذا، کنار «غیبت امروز» دکمهٔ «لیست اعضاء» را بزنید. پنجره زیر نوار بالای صفحه باز می‌ماند و عنوانش ثابت است؛ فهرست بلند را اسکرول کنید. دو بخش دارد: اعضای دائم گروه، و اعضای مهمان یا موقت امروز.';
         return chatbot_reply($user, $question, $membersAnswer, true, null, 'food_group_members_list', 0.0, [
             'url' => 'index.php?page=food-ticket',
             'label' => 'رفتن به گروه‌های غذا',

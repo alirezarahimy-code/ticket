@@ -269,9 +269,41 @@
             html += '</ul>';
         }
         $('#org-chart-wrap').innerHTML = html + '</li></ul></div>';
-        $('#org-chart-wrap').style.transform = 'scale(' + state.zoom + ')';
-        $('#org-zoom-level').textContent = Math.round(state.zoom * 100) + '٪';
+        applyChartZoom();
         bindDropTargets();
+    };
+
+    var applyChartZoom = function () {
+        var wrap = $('#org-chart-wrap');
+        var stage = $('#org-chart-stage');
+        var level = $('#org-zoom-level');
+        if (!wrap) return;
+        var z = state.zoom;
+        wrap.style.transform = 'none';
+        wrap.style.margin = '0';
+        var w = Math.max(wrap.scrollWidth, wrap.offsetWidth, 1);
+        var h = Math.max(wrap.scrollHeight, wrap.offsetHeight, 1);
+        wrap.style.transformOrigin = 'top center';
+        wrap.style.transform = 'scale(' + z + ')';
+        wrap.style.marginBottom = (h * (z - 1)) + 'px';
+        wrap.style.marginLeft = wrap.style.marginRight = (w * (z - 1) / 2) + 'px';
+        if (stage) {
+            stage.style.minWidth = Math.max(w * z, 1) + 'px';
+            stage.style.minHeight = Math.max(h * z, 1) + 'px';
+        }
+        if (level) level.textContent = Math.round(z * 100) + '٪';
+    };
+
+    var fitChartZoom = function () {
+        var canvas = $('#org-canvas');
+        var wrap = $('#org-chart-wrap');
+        if (!canvas || !wrap) return;
+        wrap.style.transform = 'none';
+        wrap.style.margin = '0';
+        var tree = wrap.querySelector('.org-tree') || wrap;
+        var avail = Math.max(240, canvas.clientWidth - 36);
+        var tw = Math.max(1, tree.scrollWidth);
+        state.zoom = Math.max(0.35, Math.min(1, Math.floor((avail / tw) * 20) / 20));
     };
 
     var openManagerPicker = function (target) {
@@ -485,7 +517,7 @@
     $('#org-modal-confirm').addEventListener('click', function () { if (!state.modal || !state.modal.selected.length) return; var selected = state.modal.selected.map(function (id) { return state.modal.users.find(function (item) { return Number(item.id) === id; }); }).filter(Boolean); var callback = state.modal.onConfirm; closeModal(); if (callback) callback(selected); });
     $('#org-modal-backdrop').addEventListener('click', function (event) { if (event.target.id === 'org-modal-backdrop') closeModal(); });
     $('#org-chart-search').addEventListener('input', function (event) { state.search = event.target.value; renderChart(); });
-    $$('[data-org-zoom]').forEach(function (button) { button.addEventListener('click', function () { var action = button.getAttribute('data-org-zoom'); if (action === 'in') state.zoom = Math.min(1.4, state.zoom + .1); if (action === 'out') state.zoom = Math.max(.6, state.zoom - .1); if (action === 'reset') state.zoom = 1; renderChart(); }); });
+    $$('[data-org-zoom]').forEach(function (button) { button.addEventListener('click', function () { var action = button.getAttribute('data-org-zoom'); if (action === 'in') state.zoom = Math.min(1.6, +(state.zoom + 0.1).toFixed(2)); if (action === 'out') state.zoom = Math.max(0.35, +(state.zoom - 0.1).toFixed(2)); if (action === 'reset') state.zoom = 1; if (action === 'fit') fitChartZoom(); renderChart(); }); });
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal(); closeConfirm(); $$('.org-node-menu').forEach(function (item) { item.remove(); }); } });
 
     var askReset = function () {

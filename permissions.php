@@ -662,10 +662,6 @@ function role_permissions_seed(bool $force = false): void
  */
 function role_permissions_save(string $role, array $codes): void
 {
-    // چاپ فیش فقط برای نقش‌های مجاز است.
-    if (!in_array($role, print_fish_allowed_roles(), true)) {
-        $codes = array_values(array_filter($codes, static fn ($c): bool => !str_starts_with((string) $c, 'food.')));
-    }
     if (!isset(permission_roles()[$role])) {
         return;
     }

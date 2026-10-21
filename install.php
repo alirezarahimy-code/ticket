@@ -1,7 +1,21 @@
 <?php
 declare(strict_types=1);
 
+$installSessionLife = 365 * 24 * 60 * 60;
+@ini_set('session.gc_maxlifetime', (string) $installSessionLife);
+@ini_set('session.cookie_lifetime', (string) $installSessionLife);
+if ((int) ini_get('session.gc_maxlifetime') < $installSessionLife) {
+    @ini_set('session.gc_probability', '0');
+}
+$installSessionDir = __DIR__ . '/storage/sessions';
+if (!is_dir($installSessionDir)) {
+    @mkdir($installSessionDir, 0700, true);
+}
+if (is_dir($installSessionDir) && is_writable($installSessionDir)) {
+    session_save_path($installSessionDir);
+}
 session_set_cookie_params([
+    'lifetime' => $installSessionLife,
     'path' => '/',
     'httponly' => true,
     'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),

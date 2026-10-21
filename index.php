@@ -638,7 +638,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id'], $user) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.30"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.31"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -2729,7 +2729,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!in_array($role, ['primary_admin'], true) && $isPrimaryAdmin) {
                 throw new RuntimeException('فقط مدیر سامانه می‌تواند ادمین اصلی باشد.');
             }
-            $targetQuery = db()->prepare('SELECT role, is_primary_admin, is_active, department_id FROM users WHERE id = ? LIMIT 1');
+            $targetQuery = db()->prepare('SELECT role, is_primary_admin, is_active, department_id, auth_source FROM users WHERE id = ? LIMIT 1');
             $targetQuery->execute([$userId]);
             $target = $targetQuery->fetch();
             if (!$target) {
@@ -2752,8 +2752,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             $employeeNumberValue = normalize_employee_number($employeeNumber);
-            if ($employeeNumberValue !== null && employee_number_owner($employeeNumberValue, $userId) > 0) {
-                throw new RuntimeException('این کد پرسنلی قبلاً به کاربر دیگری داده شده است. کد تکراری مجاز نیست.');
+            if ($employeeNumberValue !== null && ($ownerId = employee_number_owner($employeeNumberValue, $userId)) > 0) {
+                $absorbed = false;
+                $ownerRow = user_row_by_id($ownerId);
+                if ((string) ($target['auth_source'] ?? '') === 'ldap' && $ownerRow && user_load_personnel_link() && fpl_is_personnel_stub($ownerRow)) {
+                    $merge = user_absorb_personnel_stub($userId, $ownerId);
+                    if (empty($merge['ok'])) {
+                        throw new RuntimeException('کد پرسنلی روی کاربر شمارهٔ ' . $ownerId . ' است و به این کاربر دامین وصل نشد: ' . (string) ($merge['message'] ?? ''));
+                    }
+                    $absorbed = true;
+                }
+                if (!$absorbed) {
+                    $ownerName = trim((string) ($ownerRow['full_name'] ?? ''));
+                    throw new RuntimeException('این کد پرسنلی قبلاً به کاربر شمارهٔ ' . $ownerId . ($ownerName !== '' ? ' («' . $ownerName . '»)' : '') . ' داده شده است. ادمین اصلی می‌تواند آن کاربر را از تنظیمات ← کاربران حذف کند.');
+                }
             }
             db()->prepare('UPDATE users SET role = ?, employee_number = ?, national_code = ?, department_id = ?, handling_unit_id = ?, is_it_agent = ?, is_primary_admin = ?, is_active = ? WHERE id = ?')->execute([$role, $employeeNumberValue, $nationalCode !== '' ? $nationalCode : null, $departmentId, $handlingUnitId, $isItAgent, $isPrimaryAdmin, $isActive, $userId]);
             if ($role === 'manager' && $departmentId) {
@@ -2770,6 +2782,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             flash('success', 'نقش و دسترسی کاربر به‌روزرسانی شد.');
             redirect('index.php?page=' . (post_value('return_page') === 'organization' ? 'organization' : 'settings#users'));
+        }
+
+        if ($action === 'delete_user') {
+            $admin = require_primary_admin();
+            $deleteUserId = (int) ($_POST['user_id'] ?? 0);
+            user_admin_delete($deleteUserId, $admin);
+            save_audit((int) $admin['id'], 'user_deleted', null, ['user_id' => $deleteUserId]);
+            flash('success', 'کاربر شمارهٔ ' . $deleteUserId . ' حذف شد.');
+            redirect('index.php?page=settings#users');
         }
 
         if ($action === 'save_department_members') {
@@ -3407,7 +3428,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $settingsAdmin = require_permission('settings.users_edit');
             $syncResult = ldap_sync_all_users();
             save_audit((int) $settingsAdmin['id'], 'ldap_bulk_sync', null, $syncResult);
-            flash('success', 'همگام‌سازی کاربران دامین انجام شد. جدید: ' . $syncResult['created'] . '، به‌روزشده: ' . $syncResult['updated'] . '، غیرفعال: ' . $syncResult['disabled'] . '.');
+            $syncMsg = 'همگام‌سازی کاربران دامین انجام شد. جدید: ' . $syncResult['created'] . '، به‌روزشده: ' . $syncResult['updated'] . '، غیرفعال: ' . $syncResult['disabled'] . '.';
+            if ((int) ($syncResult['code_conflict'] ?? 0) > 0) {
+                $syncMsg .= ' تداخل کد پرسنلی: ' . (int) $syncResult['code_conflict'] . '.';
+            }
+            if (!empty($syncResult['errors'])) {
+                $syncMsg .= ' ساخته‌نشده: ' . implode('؛ ', array_slice($syncResult['errors'], 0, 5));
+            }
+            flash('success', $syncMsg);
             redirect('index.php?page=settings#users');
         }
 
@@ -5236,8 +5264,8 @@ if ($page === 'organization') {
   <div class="org-main-layout">
     <aside class="org-sidebar" id="org-sidebar"></aside>
     <main class="org-canvas" id="org-canvas">
-      <div class="org-canvas-toolbar"><input class="org-search" id="org-chart-search" type="search" placeholder="جستجوی واحد یا کاربر..."><div class="org-zoom-controls"><button type="button" data-org-zoom="out">−</button><span id="org-zoom-level">100٪</span><button type="button" data-org-zoom="in">+</button><button type="button" data-org-zoom="reset">↺</button></div></div>
-      <div class="org-chart-wrap" id="org-chart-wrap"></div>
+      <div class="org-canvas-toolbar"><input class="org-search" id="org-chart-search" type="search" placeholder="جستجوی واحد یا کاربر..."><div class="org-zoom-controls"><button type="button" data-org-zoom="out" title="کوچک‌تر">−</button><span id="org-zoom-level">100٪</span><button type="button" data-org-zoom="in" title="بزرگ‌تر">+</button><button type="button" data-org-zoom="fit" title="جا شدن در عرض صفحه">⤢</button><button type="button" data-org-zoom="reset" title="اندازهٔ اصلی">↺</button></div></div>
+      <div class="org-chart-stage" id="org-chart-stage"><div class="org-chart-wrap" id="org-chart-wrap"></div></div>
     </main>
     <aside class="org-pool-sidebar" id="org-pool-sidebar"></aside>
   </div>
@@ -5249,7 +5277,7 @@ if ($page === 'organization') {
 </div>
 HTML;
     echo str_replace(['__CSRF__'], [csrf_field()], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=4"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=5"></script>';
     render_footer();
     exit;
 }
@@ -5398,9 +5426,9 @@ if ($page === 'settings') {
     }
 
     if ($canSettingsUsers) {
-    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
+    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. اگر کد پرسنلی روی حساب محلی باقی‌مانده باشد، ذخیرهٔ همان کد روی کاربر دامین آن را ادغام می‌کند. ادمین اصلی می‌تواند کاربر را حذف کند.</p><div class="category-list">';
     foreach ($users as $managedUser) {
-        echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
+        echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • #' . (int) $managedUser['id'] . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
         if ($canManageSettingsUsers) {
             $roleOptionsHtml = '';
             foreach (permission_roles() as $roleCode => $roleLabel) {
@@ -5411,6 +5439,9 @@ if ($page === 'settings') {
                 echo '<option value="' . (int) $department['id'] . '" ' . ((int) $managedUser['department_id'] === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
             }
             echo '</select><label class="check-label"><input type="checkbox" name="is_active" value="1" ' . ((int) ($managedUser['is_active'] ?? 0) === 1 ? 'checked' : '') . '> فعال</label><label class="check-label"><input type="checkbox" name="is_primary_admin" value="1" ' . ((int) ($managedUser['is_primary_admin'] ?? 0) === 1 ? 'checked' : '') . '> ادمین اصلی</label><button class="button secondary" type="submit">ذخیره</button></form>';
+            if (user_is_primary_admin($user) && (int) $managedUser['id'] !== (int) $user['id'] && (int) ($managedUser['is_primary_admin'] ?? 0) !== 1 && (string) ($managedUser['role'] ?? '') !== 'primary_admin') {
+                echo '<form method="post" onsubmit="return confirm(\'کاربر شمارهٔ ' . (int) $managedUser['id'] . ' حذف شود؟ این کار برگشت‌پذیر نیست.\');">' . csrf_field() . '<input type="hidden" name="action" value="delete_user"><input type="hidden" name="user_id" value="' . (int) $managedUser['id'] . '"><button class="mini-button danger" type="submit">حذف</button></form>';
+            }
         } else {
             echo '<span class="status admin-readonly">' . (user_is_primary_admin($managedUser) ? 'ادمین اصلی' : e(permission_roles()[$managedUser['role']] ?? $managedUser['role'])) . '</span>';
         }
@@ -5435,7 +5466,7 @@ if ($page === 'settings') {
         $catalog = permission_catalog();
         $totalAll = count($allCodes);
         echo '<div class="card form-card settings-panel roles-shell" id="roles">';
-        echo '<div class="roles-shell-head"><div><h2>نقش‌ها و سطوح دسترسی</h2><p class="muted">یک نقش را انتخاب کنید و منوها/بخش‌هایی که اجازه دارد را تیک بزنید. هر چیزی تیک نخورد، برای آن نقش پنهان می‌ماند.</p><p class="muted">تا وقتی دسترسی‌های یک نقش را <strong>ذخیره نکنید</strong>، پیش‌فرض‌های داخل کد اعمال می‌شود؛ به‌محض ذخیره، همان مقادیر شما اولویت می‌گیرد (حتی اگر چیزی تیک نخورده باشد) و هر وقت خواستید با «بازگردانی به پیش‌فرض کد» نقش دوباره به پیش‌فرض برمی‌گردد.</p></div></div>';
+        echo '<div class="roles-shell-head"><div><h2>نقش‌ها و سطوح دسترسی</h2><p class="muted">یک نقش را از راست انتخاب کنید. سمت چپ، همهٔ گروه‌های دسترسی (داشبورد، درخواست، غذا، CD/DVD، تردد و بقیه) برای همان نقش دیده می‌شود؛ هر مورد را تیک بزنید یا بردارید. هر چیزی تیک نخورد، برای آن نقش پنهان می‌ماند.</p><p class="muted">تا وقتی دسترسی‌های یک نقش را <strong>ذخیره نکنید</strong>، پیش‌فرض‌های داخل کد اعمال می‌شود؛ به‌محض ذخیره، همان مقادیر شما اولویت می‌گیرد (حتی اگر چیزی تیک نخورده باشد) و هر وقت خواستید با «بازگردانی به پیش‌فرض کد» نقش دوباره به پیش‌فرض برمی‌گردد.</p></div></div>';
         echo '<div class="roles-layout"><aside class="roles-sidebar"><div class="roles-sidebar-head"><strong>نقش‌های سامانه</strong><small>برای ویرایش انتخاب کنید</small></div><div class="roles-list">';
         foreach (permission_roles() as $roleCode => $roleLabel) {
             $meta = $roleMeta[$roleCode] ?? ['icon' => 'user', 'desc' => '', 'locked' => false];
@@ -5465,11 +5496,6 @@ if ($page === 'settings') {
                 echo '<div class="perm-search"><input type="search" class="perm-search-input" data-perm-search placeholder="جست‌وجوی دسترسی یا گروه..."></div>';
                 echo '<div class="groups-container">';
                 foreach ($catalog as $group) {
-                    // ماژول چاپ فیش فقط برای نقش‌های مجاز نمایش داده می‌شود.
-                    $groupAllFood = $group['items'] !== [] && array_reduce($group['items'], static fn (bool $carry, array $item): bool => $carry && str_starts_with((string) $item['code'], 'food.'), true);
-                    if ($groupAllFood && !in_array($roleCode, print_fish_allowed_roles(), true)) {
-                        continue;
-                    }
                     $groupCodes = array_map(static fn (array $item): string => $item['code'], $group['items']);
                     $checkedCount = count(array_intersect($groupCodes, $active));
                     $isEmpty = $checkedCount === 0;

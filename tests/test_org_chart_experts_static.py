@@ -82,5 +82,17 @@ check(
     and "سمت چپ «افزودن کارشناس»" in chatbot,
     "chatbot answers org-chart expert questions",
 )
+check(
+    "applyChartZoom" in org_js
+    and 'data-org-zoom="fit"' in index
+    and "org-chart-stage" in index
+    and ".org-chart-stage" in style,
+    "org tree zoom keeps scroll size and can fit the canvas",
+)
+check(
+    "جا شدن در عرض صفحه" in guide
+    and "زیر نوار بالای صفحه" in guide,
+    "guide documents org zoom and food members overlay placement",
+)
 
 print("all org chart expert static checks passed")

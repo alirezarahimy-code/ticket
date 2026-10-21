@@ -104,14 +104,17 @@
         + '<div class="fg-people-box">' + visitors.map((u) => '<div class="fg-person">' + userLabel(u) + '</div>').join('') + '</div>'
       : '';
     return '<div class="card form-card" id="fg-form"><div class="form-section-head"><h2>' + (g.id ? 'ویرایش گروه' : 'گروه جدید') + '</h2></div>'
+      + '<div class="notice warn" id="fg-deadline-box" style="margin:0 0 14px">'
+      + '<strong>مهلت تغییر سلف امروز</strong>'
+      + '<label class="field" style="margin-top:8px">ساعت ۲۴ ساعته این سلف (مثلاً 09:30). خالی یعنی بدون محدودیت ساعت.'
+      + '<input id="fg-visit-until" type="text" inputmode="numeric" dir="ltr" placeholder="09:30" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" maxlength="5" autocomplete="off" style="max-width:160px;font-size:18px;letter-spacing:.08em"></label>'
+      + '<p class="muted" style="margin:8px 0 0">فقط کسانی که عضو دائم هیچ گروهی نیستند تا این ساعت می‌توانند اعلام کنند امروز غذا را از این سلف می‌گیرند. بعد از چاپ فیش گروه، اعلام قفل می‌شود.</p></div>'
       + '<div class="form-grid">'
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
       + '<label class="field">L_UID نمایندهٔ گروه (شناسهٔ اصلی)<input id="fg-uid" value="' + esc(g.l_uid || '') + '" maxlength="80" dir="ltr" placeholder="مثلاً 0100"></label>'
       + '<label class="field"><span>وضعیت</span><select id="fg-active"><option value="1"' + (g.active ? ' selected' : '') + '>فعال</option><option value="0"' + (g.active ? '' : ' selected') + '>غیرفعال</option></select></label>'
-      + '<label class="field full">مهلت تغییر سلف امروز (ساعت ۲۴ ساعته، مثلاً 09:30)<input id="fg-visit-until" type="text" inputmode="numeric" dir="ltr" placeholder="خالی = بدون محدودیت" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" maxlength="5" autocomplete="off"></label>'
       + '<label class="field full">توضیحات<input id="fg-desc" value="' + esc(g.description || '') + '" maxlength="500"></label>'
       + '</div>'
-      + '<p class="muted" style="margin:6px 0">این فیلد ساعت آخرین مهلت اعلام «تغییر سلف امروز» به همین گروه است. فقط کسانی که عضو دائم هیچ گروهی نیستند تا این ساعت می‌توانند اعلام کنند. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود. مدیر پشتیبانی می‌تواند اعلام را از «لیست اعضاء» لغو کند.</p>'
       + '<p class="muted" style="margin:6px 0">شناسایی نماینده فقط و فقط با <b>L_UID</b> انجام می‌شود (L_UID → گروه → اعضا → سفارش → غیبت امروز → واجد شرایط‌ها → فیش). شمارهٔ کارت (C_CARD) در این سامانه هیچ نقشی ندارد و از این فرم حذف شده است؛ گروه‌هایی که L_UID ندارند باید L_UID آن‌ها ثبت شود. تعداد فیش را سامانه محاسبه می‌کند.</p>'
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
@@ -259,23 +262,24 @@
     const guests = g.today_visitors || [];
     const block = (title, rows, empty) => '<h3 style="margin:12px 0 6px;font-size:15px">' + title + '</h3>'
       + (rows.length
-        ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + rows.map((u) => '<li>' + personLine(u) + '</li>').join('') + '</ol>'
+        ? '<ol class="fg-members-ol">' + rows.map((u) => '<li>' + personLine(u) + '</li>').join('') + '</ol>'
         : '<p class="muted">' + empty + '</p>');
     const guestItems = guests.length
-      ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + guests.map((u) => {
+      ? '<ol class="fg-members-ol">' + guests.map((u) => {
           const btn = S.canCancelVisit
             ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">لغو تغییر سلف</button>'
             : '';
           return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + btn + '</li>';
         }).join('') + '</ol>'
       : '<p class="muted">برای امروز مهمان یا عضو موقتی ثبت نشده است.</p>';
-    return '<div id="fg-members-overlay" style="position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px">'
-      + '<div class="card" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" style="max-width:520px;width:100%;max-height:80vh;overflow:auto">'
-      + '<div class="form-section-head"><h2 id="fg-members-title">لیست اعضای «' + esc(g.title) + '»</h2>'
+    return '<div id="fg-members-overlay" class="fg-members-overlay">'
+      + '<div class="card fg-members-dialog" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title">'
+      + '<div class="form-section-head fg-members-head"><h2 id="fg-members-title">لیست اعضای «' + esc(g.title) + '»</h2>'
       + '<button type="button" class="btn ghost" data-fg="members-close">بستن</button></div>'
+      + '<div class="fg-members-body">'
       + block('اعضای دائم گروه', perm, 'عضو دائمی ثبت نشده است.')
       + '<h3 style="margin:12px 0 6px;font-size:15px">اعضای مهمان یا موقت امروز</h3>' + guestItems
-      + '</div></div>';
+      + '</div></div></div>';
   }
 
   function body() {
@@ -288,7 +292,7 @@
   }
 
   function html() {
-    const out = '<section><div class="heading"><div><h2>مدیریت گروه‌های غذا</h2><p>نمایندهٔ هر گروه با <b>L_UID</b> شناسایی می‌شود؛ با تردد نماینده، فیش اعضای واجد شرایط (دارای سفارش امروز، غیرغایب، بدون فیش قبلی) در صف چاپ قرار می‌گیرد. غیبت هر روز مستقل ثبت می‌شود و با نخستین تردد نمایندهٔ همان روز قفل می‌شود.</p></div></div>'
+    const out = '<section><div class="heading"><div><h2>مدیریت گروه‌های غذا</h2><p>نمایندهٔ هر گروه با <b>L_UID</b> شناسایی می‌شود؛ با تردد نماینده، فیش اعضای واجد شرایط (دارای سفارش امروز، غیرغایب، بدون فیش قبلی) در صف چاپ قرار می‌گیرد. غیبت هر روز مستقل ثبت می‌شود و با نخستین تردد نمایندهٔ همان روز قفل می‌شود.</p><p><b>مهلت تغییر سلف امروز</b> را در همین صفحه با «ویرایش» همان گروه، کادر زرد بالای فرم تنظیم کنید؛ مثلاً 09:30. خالی یعنی بدون محدودیت ساعت.</p></div></div>'
       + '<div id="food-groups-root">' + body() + '</div></section>';
     // کاربر فقط «مشاهده» دارد: ظاهر فرم‌ها غیرفعال می‌شود (سرور هم POST را با food.groups می‌بندد).
     if (window.FOOD_TICKET_CAN_GROUPS_EDIT === false) {

@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.10';
+const FOOD_TICKET_PANEL_VERSION = '1.37.12';
 
 function food_ticket_panel_version(): string
 {
@@ -3383,11 +3383,54 @@ function food_ticket_api_save_employee(array $data): void
     }
     $active = array_key_exists('active', $data) ? (!empty($data['active']) ? 1 : 0) : 1;
     $fullName = trim($firstName . ' ' . $lastName);
+    if (is_file(__DIR__ . '/food-personnel-link.php')) {
+        require_once __DIR__ . '/food-personnel-link.php';
+    }
     $existing = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
     $existing->execute([$personnelCode]);
     $existingId = (int) ($existing->fetchColumn() ?: 0);
     if ($id > 0 && $existingId > 0 && $existingId !== $id) {
-        throw new RuntimeException('این کد پرسنلی قبلاً ثبت شده است.');
+        throw new RuntimeException('این کد پرسنلی قبلاً برای کاربر شمارهٔ ' . $existingId . ' ثبت شده است.');
+    }
+    $ldapMatchId = 0;
+    if ($id === 0 && function_exists('fpl_norm_name') && function_exists('fpl_person_name')) {
+        $wantName = fpl_norm_name($fullName);
+        if ($wantName !== '') {
+            foreach (db()->query("SELECT id, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'ldap'")->fetchAll(PDO::FETCH_ASSOC) as $ldapRow) {
+                if (trim((string) ($ldapRow['employee_number'] ?? '')) !== '') {
+                    continue;
+                }
+                $ldapName = fpl_norm_name(fpl_person_name($ldapRow));
+                if ($ldapName === '') {
+                    $ldapName = fpl_norm_name((string) ($ldapRow['full_name'] ?? ''));
+                }
+                if ($ldapName === $wantName) {
+                    $ldapMatchId = (int) $ldapRow['id'];
+                    break;
+                }
+            }
+        }
+    }
+    if ($ldapMatchId > 0) {
+        if ($existingId > 0 && $existingId !== $ldapMatchId) {
+            $stubRow = user_row_by_id($existingId);
+            if (!$stubRow || !function_exists('fpl_is_personnel_stub') || !fpl_is_personnel_stub($stubRow) || !function_exists('user_absorb_personnel_stub')) {
+                throw new RuntimeException('این کد پرسنلی قبلاً برای کاربر شمارهٔ ' . $existingId . ' ثبت شده است. ادمین اصلی می‌تواند آن را از تنظیمات ← کاربران حذف کند.');
+            }
+            $merge = user_absorb_personnel_stub($ldapMatchId, $existingId);
+            if (empty($merge['ok'])) {
+                throw new RuntimeException('اتصال به کاربر دامین انجام نشد: ' . (string) ($merge['message'] ?? ''));
+            }
+        }
+        $natOwner = db()->prepare('SELECT id, full_name, auth_source, role, is_primary_admin FROM users WHERE national_code = ? AND id <> ? LIMIT 1');
+        $natOwner->execute([$nationalCode, $ldapMatchId]);
+        $natRow = $natOwner->fetch() ?: null;
+        if ($natRow && (!function_exists('fpl_is_personnel_stub') || !fpl_is_personnel_stub($natRow))) {
+            throw new RuntimeException('این کد ملی قبلاً برای کارمند «' . (string) $natRow['full_name'] . '» ثبت شده است.');
+        }
+        db()->prepare('UPDATE users SET first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?')
+            ->execute([$firstName, $lastName, $personnelCode, $nationalCode, $active, $ldapMatchId]);
+        return;
     }
     // کد ملی باید یکتا باشد: اگر برای کارمند دیگری ثبت شده، ذخیره نمی‌شود (در ویرایش، خود همین کارمند مستثنا است).
     $ownerStmt = db()->prepare('SELECT id, full_name FROM users WHERE national_code = ? AND id <> ? LIMIT 1');
@@ -3412,8 +3455,15 @@ function food_ticket_api_save_employee(array $data): void
         $currentUser = db()->prepare('SELECT employee_number, auth_source FROM users WHERE id = ? LIMIT 1');
         $currentUser->execute([$id]);
         $current = $currentUser->fetch(PDO::FETCH_ASSOC) ?: null;
-        if ($current === null || trim((string) ($current['employee_number'] ?? '')) === '') {
+        $hasCode = trim((string) ($current['employee_number'] ?? '')) !== '';
+        $src = (string) ($current['auth_source'] ?? '');
+        if ($current === null || (!$hasCode && $src !== 'ldap')) {
             throw new RuntimeException('کارمند پیدا نشد.');
+        }
+        if ($src === 'ldap') {
+            db()->prepare('UPDATE users SET first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?')
+                ->execute([$firstName, $lastName, $personnelCode, $nationalCode, $active, $id]);
+            return;
         }
         $query = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?');
         $query->execute([$fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active, $id]);

@@ -645,6 +645,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("food_cancel_request", bootstrap)
         self.assertIn("notification_visibility_sql(", read("index.php"))
         self.assertIn("food_cafeteria_deadline", chatbot)
+        self.assertIn("food_dashboard_week", chatbot)
         self.assertIn("food_order_list_range", chatbot)
         self.assertIn("food_group_members_list", chatbot)
         index_php = read("index.php")
