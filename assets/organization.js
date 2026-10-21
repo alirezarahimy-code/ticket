@@ -319,7 +319,7 @@
         });
         wrapper.querySelector('[data-inline-cancel]').addEventListener('click', function () { wrapper.remove(); });
     };
-    // ویرایش نام، کد و (برای اداره) معاونت والد. مدیر فعلی و وضعیت مدیر اصلی دست‌نخورده می‌مانند.
+    // ویرایش نام، کد و (برای اداره) معاونت والد. مدیر فعلی و پرچم مدیر اصلیِ واحد دست‌نخورده می‌مانند.
     var showInlineEdit = function (target) {
         if (!target || !data.canManage) return;
         var node = $('.org-node[data-unit="' + target.id + '"]');
@@ -352,7 +352,7 @@
                 parent_id: parentSelect ? parentSelect.value : target.parentId,
                 unit_manager_id: target.managerId || 0
             };
-            // فقط وقتی مدیر اصلی است این فیلد را بفرست؛ ارسال مقدار 0 هم سرور را مجبور به تغییر آن می‌کرد.
+            // فقط وقتی پرچم «مدیر اصلیِ واحد» فعال است بفرست؛ این پرچم به‌هیچ‌وجه نقش ادمین سامانه نیست.
             if (target.primaryAdmin) fields.is_primary_admin = 1;
             submit('save_org_node', fields);
         });

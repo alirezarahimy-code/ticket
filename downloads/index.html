@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R18</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R19</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,21 +25,21 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جدید · R18 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — اتصال قطعی حساب دامین با کد</h1>
-    <p>R18 مسیر مستقلی برای اتصال امن کاربر دامین به حساب پرسنل غذا اضافه می‌کند. مدیر اصلی کد صحیح را وارد می‌کند و این کد بر مقدار قدیمی ثبت‌شده در حساب دامین اولویت دارد؛ نام کاربر مانع اتصال نیست.</p>
+    <span class="tag">بستهٔ اصلاحی جدید · R19 · ۲۰۲۶/۱۰/۲۱</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — بررسی کد پرسنلی و ترمیم نقش مدیران سازمان</h1>
+    <p>R19 جستجوی کد را برای دیدن و انتخاب صریح رکوردهای پرسنل غذا و حساب محلی گسترش می‌دهد و مانع ارتقای مدیران معاونت/اداره به ادمین اصلی سامانه می‌شود.</p>
     <ul>
-      <li>فرم مستقل و فقط برای مدیر اصلی در بخش کاربران تنظیمات؛ بدون وابستگی به ذخیرهٔ نقش یا سایر مشخصات کاربر.</li>
-      <li>جستجو بر اساس کد پرسنلی در فیلد employee_number و نام کاربری حساب محلی قدیمی؛ اگر کد ناموجود یا تکراری باشد، ادغام انجام نمی‌شود و علت نمایش داده می‌شود.</li>
-      <li>پشتیبان پیش از ادغام و انتقال تراکنشی ارجاع‌ها؛ دکمهٔ حذف مستقیم حساب اضافه نشده است.</li>
-      <li>شامل محدودیت R17: ثبت دستی فقط برای کارکنان فعال دارای سفارش واجد شرایط ناهار امروز، بدون fallback به همهٔ کاربران.</li>
-      <li>کد ۳۳۵ شمارهٔ پرسنلی است، نه شناسهٔ دیتابیسی. هیچ حساب یا دادهٔ تولیدی در این کار تغییر نکرده است؛ مهاجرت دیتابیس لازم نیست.</li>
+      <li>نتایج کد در دیتابیس، شامل منبع، شناسه و مشخصات، پیش از هر تغییر نمایش داده می‌شوند؛ مدیر اصلی فقط رکوردهای متعلق به همان کارمند را برای ادغام انتخاب می‌کند.</li>
+      <li>ادغام رکوردهای انتخاب‌شده پس از پشتیبان، در یک تراکنش و با انتقال ارجاع‌هاست؛ موارد انتخاب‌نشده دست‌نخورده می‌مانند و حذف مستقیم حساب وجود ندارد.</li>
+      <li>انتصاب مدیر معاونت/اداره دیگر نقش ادمین اصلی سامانه را اعطا نمی‌کند. ابزار ترمیم مدیر اصلی، نقش کاربران اشتباهاً ارتقایافته را بدون تغییر انتساب سازمانی برمی‌گرداند.</li>
+      <li>رفتار ثبت دستی حضور فقط برای افراد دارای سفارش همان روز از R18 حفظ شده است. کد ۳۳۵ کد پرسنلی است، نه شناسهٔ دیتابیسی.</li>
+      <li>بدون migration؛ هیچ پایگاه داده یا حساب تولیدی بررسی یا تغییر داده نشده است.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-domain-code-merge-order-only-attendance-r18-20261021.zip" download="ticket-update-1.61.10-domain-code-merge-order-only-attendance-r18-20261021.zip">⬇ دریافت بستهٔ نصب R18</a>
-    <div class="file">ticket-update-1.61.10-domain-code-merge-order-only-attendance-r18-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-domain-code-merge-order-only-attendance-r18-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r18/CHANGE-REPORT-FA.md">جزئیات R18</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته شامل اصلاحات R17 و نسخه‌های پیشین نیز هست.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip" download="ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip">⬇ دریافت بستهٔ نصب R19</a>
+    <div class="file">ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip · تنها بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-code-335-org-manager-role-repair-r19-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r19/CHANGE-REPORT-FA.md">جزئیات R19</a></p>
+    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته بر پایهٔ R18 و اصلاحات قبلی ساخته شده است.</div>
   </main>
 </body>
 </html>

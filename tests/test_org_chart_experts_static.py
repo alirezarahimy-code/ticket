@@ -62,6 +62,22 @@ check(
     "remove experts accepts deputy or department",
 )
 
+for action_name in ("save_org_node", "assign_org_manager", "save_org_unit"):
+    action_block = index.split(f"if ($action === '{action_name}')", 1)[1].split("if ($action ===", 1)[0]
+    check(
+        'UPDATE users SET role = "primary_admin"' not in action_block,
+        f"{action_name} cannot turn an organizational manager into a system primary admin",
+    )
+repair_action = index.split("if ($action === 'repair_org_manager_admin_roles')", 1)[1].split("if ($action ===", 1)[0]
+org_page = index.split("if ($page === 'organization')", 1)[1].split("if ($page === 'settings')", 1)[0]
+check(
+    "if ($action === 'repair_org_manager_admin_roles')" in index
+    and "role = \"manager\", is_primary_admin = 0" in repair_action
+    and "org_unit_managers" in repair_action
+    and "اصلاح مدیران سازمانی که ادمین اصلی شده‌اند" in org_page,
+    "primary admin can safely restore mistakenly promoted org managers without breaking their unit assignments",
+)
+
 check(
     "add-department" in org_js
     and 'org-node-add-expert" data-org-action="add-experts"' in org_js

@@ -206,7 +206,7 @@ function fpl_pair_is_allowed(array $candidates, int $domainId, int $foodId): boo
  * ادغام یک جفت. کل عملیات در یک تراکنش است؛ در صورت خطا چیزی تغییر نمی‌کند.
  * @return array{ok:bool, message:string, moved:array<string,int>}
  */
-function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch = false, ?string $authoritativeCode = null): array
+function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch = false, ?string $authoritativeCode = null, bool $sourceCodePrevalidated = false): array
 {
     $moved = [];
     $ownsTransaction = !$pdo->inTransaction();
@@ -243,20 +243,20 @@ function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch
             throw new RuntimeException('کد ملی دو رکورد متفاوت است.');
         }
         $personnelCode = fpl_food_personnel_code($food);
-        if ($personnelCode === '') {
-            throw new RuntimeException('رکورد پرسنل غذا کد پرسنلی ندارد.');
-        }
         $manualCode = fpl_normalize_code((string) ($authoritativeCode ?? ''));
         if ($manualCode !== '') {
-            if (!fpl_codes_equal($manualCode, $personnelCode)) {
-                throw new RuntimeException('کد واردشده با کد این حساب پرسنل غذا یکی نیست؛ ادغام انجام نشد.');
+            if (!fpl_food_matches_code($food, $manualCode) && !$sourceCodePrevalidated) {
+                throw new RuntimeException('کد واردشده با کد پرسنلی یا نام کاربری این حساب یکی نیست؛ ادغام انجام نشد.');
             }
-            // در ادغام دستی، کد واردشده مدیر بر مقدار قدیمی ذخیره‌شده روی حساب دامین مقدم است.
+            // در ادغام دستی، کد واردشده مدیر بر کد قدیمی حساب دامین/محلی مقدم است.
             $personnelCode = $manualCode;
         } elseif ($domainPersonnelCode !== '' && !fpl_codes_equal($domainPersonnelCode, $personnelCode)) {
             throw new RuntimeException('کد پرسنلی ثبت‌شده در حساب دامین با رکورد پرسنل غذا یکی نیست؛ ادغام متوقف شد.');
         } elseif ($domainPersonnelCode !== '') {
             $personnelCode = $domainPersonnelCode;
+        }
+        if ($personnelCode === '') {
+            throw new RuntimeException('رکورد پرسنل غذا کد پرسنلی ندارد.');
         }
 
         // ۱. کد پرسنلی را از رکورد پرسنل غذا آزاد کن (کد پرسنلی یکتاست) و نام کاربری موقت بده.
@@ -358,7 +358,24 @@ function fpl_food_personnel_code(array $food): string
     return '';
 }
 
-/** رکوردهای منطبق با کد؛ کد دقیق اولویت دارد و صفرهای آغازین فقط در نبود تطبیق دقیق نادیده گرفته می‌شوند. */
+/** کد دستی می‌تواند با employee_number یا نام کاربریِ حساب محلی تطبیق بخورد. */
+function fpl_food_matches_code(array $food, string $code): bool
+{
+    $code = fpl_normalize_code($code);
+    if ($code === '') {
+        return false;
+    }
+    $employeeCode = fpl_normalize_code((string) ($food['employee_number'] ?? ''));
+    if ($employeeCode !== '' && fpl_codes_equal($employeeCode, $code)) {
+        return true;
+    }
+    $isLocalFoodAccount = (string) ($food['auth_source'] ?? '') === 'local'
+        && (string) ($food['role'] ?? '') === 'local_user'
+        && (int) ($food['is_primary_admin'] ?? 0) !== 1;
+    return $isLocalFoodAccount && fpl_codes_equal((string) ($food['username'] ?? ''), $code);
+}
+
+/** همهٔ رکوردهای دیتابیسی با کد؛ کد دقیق اولویت دارد، ولی حساب محلی و رکورد غذا هر دو برگردانده می‌شوند. */
 function fpl_food_code_matches(array $foodRows, string $code): array
 {
     $code = fpl_normalize_code($code);
@@ -368,17 +385,21 @@ function fpl_food_code_matches(array $foodRows, string $code): array
     $exact = [];
     $loose = [];
     foreach ($foodRows as $row) {
-        $rowCode = fpl_food_personnel_code($row);
-        if ($rowCode === '') {
+        if (!fpl_food_matches_code($row, $code)) {
             continue;
         }
-        if ($rowCode === $code) {
+        $employeeCode = fpl_normalize_code((string) ($row['employee_number'] ?? ''));
+        $isLocalFoodAccount = (string) ($row['auth_source'] ?? '') === 'local'
+            && (string) ($row['role'] ?? '') === 'local_user'
+            && (int) ($row['is_primary_admin'] ?? 0) !== 1;
+        $usernameCode = $isLocalFoodAccount ? fpl_normalize_code((string) ($row['username'] ?? '')) : '';
+        if ($employeeCode === $code || $usernameCode === $code) {
             $exact[] = $row;
-        } elseif (ltrim($rowCode, '0') === ltrim($code, '0')) {
+        } else {
             $loose[] = $row;
         }
     }
-    return $exact !== [] ? $exact : $loose;
+    return array_merge($exact, $loose);
 }
 
 /** پیدا کردن یکتای پرسنل غذا با کد (با تحمل اعداد فارسی و صفرهای آغازین). */
@@ -391,6 +412,30 @@ function fpl_find_food_by_code(PDO $pdo, string $code): ?array
     $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
     $matches = fpl_food_code_matches($rows, $code);
     return count($matches) === 1 ? $matches[0] : null;
+}
+
+/** Validate an administrator's explicit choice from the code-matched rows. */
+function fpl_select_food_matches(array $matches, array $selectedIds): array
+{
+    if ($selectedIds === []) {
+        throw new RuntimeException('برای اتصال، دست‌کم یک رکورد پرسنل غذا/محلی را انتخاب کنید.');
+    }
+    $byId = [];
+    foreach ($matches as $match) {
+        $id = (int) ($match['id'] ?? 0);
+        if ($id > 0) {
+            $byId[$id] = $match;
+        }
+    }
+    $selected = [];
+    foreach ($selectedIds as $rawId) {
+        $id = (int) $rawId;
+        if ($id <= 0 || !isset($byId[$id]) || isset($selected[$id])) {
+            throw new RuntimeException('انتخاب رکورد نامعتبر یا تکراری است؛ هیچ داده‌ای تغییر نکرد.');
+        }
+        $selected[$id] = $byId[$id];
+    }
+    return array_values($selected);
 }
 
 /**

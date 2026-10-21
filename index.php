@@ -2757,7 +2757,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($domainId <= 0 || $authoritativeCode === null) {
                 throw new RuntimeException('کاربر دامین و کد پرسنلی معتبر را وارد کنید.');
             }
-            $domainQuery = db()->prepare('SELECT id, auth_source, is_active, employee_number FROM users WHERE id = ? LIMIT 1');
+            if (post_value('confirm_code_link') !== '1') {
+                throw new RuntimeException('برای ادغام امن، تأیید کنید که رکوردهای این کد متعلق به همان کارمند هستند.');
+            }
+            $domainQuery = db()->prepare('SELECT id, username, full_name, auth_source, is_active, employee_number FROM users WHERE id = ? LIMIT 1');
             $domainQuery->execute([$domainId]);
             $domain = $domainQuery->fetch();
             if (!$domain || (string) $domain['auth_source'] !== 'ldap' || (int) $domain['is_active'] !== 1) {
@@ -2768,22 +2771,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($foodMatches === []) {
                 throw new RuntimeException('هیچ حساب پرسنل غذا یا محلی با کد ' . $authoritativeCode . ' پیدا نشد. کد، حساب محلی و تب کاربران غذا را بررسی کنید.');
             }
-            if (count($foodMatches) !== 1) {
-                $ids = implode('، ', array_map(static fn (array $row): string => '#' . (int) $row['id'] . ' ' . (string) $row['full_name'], $foodMatches));
-                throw new RuntimeException('کد ' . $authoritativeCode . ' روی چند حساب پیدا شد؛ ادغام متوقف شد تا تکرارها بررسی شوند: ' . $ids);
+            foreach ($foodMatches as $foodMatch) {
+                if (!fpl_food_matches_code($foodMatch, (string) $authoritativeCode)) {
+                    throw new RuntimeException('یکی از رکوردهای یافته‌شده با کد پرسنلی یا نام کاربری منطبق نیست؛ ادغام انجام نشد.');
+                }
             }
-            $food = $foodMatches[0];
-            if (!fpl_codes_equal(fpl_food_personnel_code($food), (string) $authoritativeCode)) {
-                throw new RuntimeException('کد واردشده با کد حساب پرسنل غذا یکی نیست؛ ادغام انجام نشد.');
+            if (post_value('selection_submitted') !== '1') {
+                render_header('بررسی رکوردهای هم‌کد', $user);
+                echo '<section class="card"><h1>بررسی رکوردهای کد ' . e((string) $authoritativeCode) . '</h1><p>حساب مقصد: ' . e((string) ($domain['full_name'] ?? '')) . ' · ' . e((string) ($domain['username'] ?? '')) . ' (#' . $domainId . ')</p><p>پیش از هر تغییری، رکوردهای پیدا‌شده را بررسی کنید. تیک هر رکوردی را که متعلق به همین کارمند است نگه دارید؛ موارد نامرتبط را بردارید. انتخاب رکورد پرسنل غذا، نام رسمی را در حساب مقصد حفظ می‌کند.</p>';
+                echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . $domainId . '"><input type="hidden" name="employee_number" value="' . e((string) $authoritativeCode) . '"><input type="hidden" name="confirm_code_link" value="1"><input type="hidden" name="selection_submitted" value="1"><div class="table-wrap"><table class="data-table"><thead><tr><th>ادغام</th><th>منبع/شناسه</th><th>نام</th><th>نام کاربری</th><th>کد پرسنلی</th><th>کد ملی</th><th>دلیل تطبیق</th></tr></thead><tbody>';
+                foreach ($foodMatches as $foodMatch) {
+                    $foodId = (int) $foodMatch['id'];
+                    $sourceLabel = (string) ($foodMatch['auth_source'] ?? '') === 'food' ? 'پرسنل غذا' : 'حساب محلی';
+                    $matchedBy = fpl_codes_equal((string) ($foodMatch['employee_number'] ?? ''), (string) $authoritativeCode) ? 'کد پرسنلی' : 'نام کاربری محلی';
+                    echo '<tr><td><input type="checkbox" name="food_ids[]" value="' . $foodId . '" checked aria-label="ادغام ' . e((string) ($foodMatch['full_name'] ?? '')) . '"></td><td>' . e($sourceLabel) . ' #' . $foodId . '</td><td>' . e((string) ($foodMatch['full_name'] ?? '')) . '</td><td>' . e((string) ($foodMatch['username'] ?? '')) . '</td><td>' . e((string) ($foodMatch['employee_number'] ?? '—')) . '</td><td>' . e((string) ($foodMatch['national_code'] ?? '—')) . '</td><td>' . e($matchedBy) . '</td></tr>';
+                }
+                echo '</tbody></table></div><button class="button primary" type="submit">تأیید رکوردهای انتخاب‌شده و ادغام امن</button> <a class="button secondary" href="index.php?page=settings#users">انصراف</a></form></section>';
+                render_footer();
+                exit;
             }
-            $foodId = (int) $food['id'];
+            $selectedIds = array_map('intval', (array) ($_POST['food_ids'] ?? []));
+            $foodMatches = fpl_select_food_matches($foodMatches, $selectedIds);
+            // رکورد دارای employee_number اول ادغام می‌شود تا قید یکتایی کد آزاد شود؛
+            // سپس حساب محلی با username همان کد نیز در همان تراکنش به دامنه منتقل می‌شود.
+            usort($foodMatches, static function (array $left, array $right) use ($authoritativeCode): int {
+                $leftRank = fpl_codes_equal((string) ($left['employee_number'] ?? ''), (string) $authoritativeCode) ? 0 : 1;
+                $rightRank = fpl_codes_equal((string) ($right['employee_number'] ?? ''), (string) $authoritativeCode) ? 0 : 1;
+                return $leftRank <=> $rightRank ?: ((int) $left['id'] <=> (int) $right['id']);
+            });
+            $foodIds = array_map(static fn (array $row): int => (int) $row['id'], $foodMatches);
+            $employeeCodeOwner = employee_number_owner((string) $authoritativeCode, $domainId);
+            if ($employeeCodeOwner > 0 && !in_array($employeeCodeOwner, $foodIds, true)) {
+                throw new RuntimeException('این کد قبلاً به حساب دیگری (#' . $employeeCodeOwner . ') اختصاص یافته که رکورد پرسنل غذای قابل‌ادغام نیست؛ هیچ داده‌ای تغییر نکرد.');
+            }
+            $officialFood = null;
+            foreach ($foodMatches as $foodMatch) {
+                if ((string) ($foodMatch['auth_source'] ?? '') === 'food') {
+                    $officialFood = $foodMatch;
+                    break;
+                }
+            }
             $backup = fpl_backup_users(db());
             $pdo = db();
             $pdo->beginTransaction();
             try {
-                $mergeResult = fpl_merge($pdo, $domainId, $foodId, true, (string) $authoritativeCode);
-                if (empty($mergeResult['ok'])) {
-                    throw new RuntimeException((string) ($mergeResult['message'] ?? 'ادغام امن انجام نشد.'));
+                $sourcePlaceholders = implode(',', array_fill(0, count($foodIds), '?'));
+                $pdo->prepare('UPDATE users SET employee_number = NULL WHERE id IN (' . $sourcePlaceholders . ')')->execute($foodIds);
+                foreach ($foodIds as $foodId) {
+                    $mergeResult = fpl_merge($pdo, $domainId, $foodId, true, (string) $authoritativeCode, true);
+                    if (empty($mergeResult['ok'])) {
+                        throw new RuntimeException((string) ($mergeResult['message'] ?? 'ادغام امن حساب #' . $foodId . ' انجام نشد.'));
+                    }
+                }
+                // نام رسمیِ رکورد پرسنل غذا بر نام حساب محلیِ تکراری اولویت دارد.
+                if ($officialFood !== null) {
+                    $officialName = trim((string) ($officialFood['full_name'] ?? ''));
+                    if ($officialName !== '') {
+                        $pdo->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ? WHERE id = ?')->execute([
+                            $officialName,
+                            trim((string) ($officialFood['first_name'] ?? '')) ?: null,
+                            trim((string) ($officialFood['last_name'] ?? '')) ?: null,
+                            $domainId,
+                        ]);
+                    }
                 }
                 $pdo->commit();
             } catch (Throwable $mergeError) {
@@ -2792,8 +2842,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 throw $mergeError;
             }
-            system_log('info', 'food_personnel_link', 'اتصال قطعی کاربر دامین به پرسنل غذا با کد دستی', ['domain_id' => $domainId, 'food_id' => $foodId, 'employee_number' => $authoritativeCode, 'backup' => $backup]);
-            flash('success', 'کد ' . $authoritativeCode . ' به کاربر دامین #' . $domainId . ' متصل شد؛ حساب پرسنل غذا #' . $foodId . ' و ارجاع‌هایش با پشتیبان و در یک تراکنش ادغام شدند. پشتیبان: ' . $backup);
+            system_log('info', 'food_personnel_link', 'اتصال قطعی کاربر دامین به همهٔ رکوردهای محلی/غذای دارای کد دستی', ['domain_id' => $domainId, 'food_ids' => $foodIds, 'employee_number' => $authoritativeCode, 'backup' => $backup]);
+            flash('success', 'کد ' . $authoritativeCode . ' به کاربر دامین #' . $domainId . ' متصل شد؛ ' . count($foodIds) . ' رکورد محلی/پرسنل غذا و ارجاع‌هایشان با پشتیبان و در یک تراکنش ادغام شدند. پشتیبان: ' . $backup);
             redirect('index.php?page=settings#users');
         }
 
@@ -3111,9 +3161,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->prepare('INSERT INTO org_unit_managers (unit_id, user_id, is_primary) VALUES (?, ?, 1)')->execute([$unitId, $managerId]);
                 db()->prepare('UPDATE users SET role = "manager", org_unit_id = ? WHERE id = ? AND role IN ("user", "agent")')->execute([$unitId, $managerId]);
             }
-            if ($isPrimary === 1 && $managerId > 0) {
-                db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$managerId]);
-            }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot);
             save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'manager' => $managerId]);
             flash('success', $nodeType === 'deputy' ? 'معاونت ذخیره شد.' : 'اداره ذخیره شد.');
@@ -3171,9 +3218,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->prepare('UPDATE users SET org_unit_id = NULL, manager_user_id = NULL, role = CASE WHEN role IN ("user", "agent") THEN "manager" ELSE role END WHERE id = ?')->execute([$userId]);
             } else {
                 db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = NULL, role = CASE WHEN role IN ("user", "agent") THEN "manager" ELSE role END WHERE id = ?')->execute([(int) $target['id'], $userId]);
-            }
-            if ((int) ($target['is_primary_admin'] ?? 0) === 1) {
-                db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$userId]);
             }
             db_commit('index.php');
             org_record_undo('انتصاب مدیر سازمان', $orgUndoSnapshot);
@@ -3383,9 +3427,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $insertManager->execute([$unitId, $managerId, $index === 0 ? 1 : 0]);
                 db()->prepare('UPDATE users SET role = "manager", org_unit_id = ? WHERE id = ? AND role IN ("user", "agent")')->execute([$unitId, $managerId]);
             }
-            if ($isPrimary === 1 && $managerIds !== []) {
-                db()->prepare('UPDATE users SET role = "primary_admin", is_primary_admin = 1, is_active = 1 WHERE id = ?')->execute([$managerIds[0]]);
-            }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot);
             save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'managers' => $managerIds]);
             flash('success', 'واحد سازمانی ذخیره شد.');
@@ -3461,6 +3502,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=organization#user-' . $targetUserId);
         }
 
+
+        if ($action === 'repair_org_manager_admin_roles') {
+            $repairAdmin = require_primary_admin();
+            org_ensure_schema();
+            $requestedIds = array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['user_ids'] ?? [])))));
+            if ($requestedIds === []) {
+                throw new RuntimeException('حداقل یک مدیر سازمانی را برای اصلاح انتخاب کنید.');
+            }
+            $eligible = [];
+            $candidateQuery = db()->prepare('SELECT u.id FROM users u WHERE u.id = ? AND u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id))) LIMIT 1');
+            foreach ($requestedIds as $candidateId) {
+                if ($candidateId === (int) $repairAdmin['id']) {
+                    throw new RuntimeException('حساب مدیر اصلیِ واردشده قابل تنزل نیست؛ ابتدا یک مدیر اصلی دیگر را نگه دارید.');
+                }
+                $candidateQuery->execute([$candidateId]);
+                if (!$candidateQuery->fetchColumn()) {
+                    throw new RuntimeException('یکی از کاربران انتخاب‌شده دیگر مدیر سازمانیِ ادمین اصلی نیست؛ فهرست را تازه کنید.');
+                }
+                $eligible[] = $candidateId;
+            }
+            $primaryCount = (int) db()->query('SELECT COUNT(*) FROM users WHERE is_active = 1 AND (role = "primary_admin" OR (role = "admin" AND is_primary_admin = 1))')->fetchColumn();
+            if ($primaryCount - count($eligible) < 1) {
+                throw new RuntimeException('برای حفظ دسترسی سامانه، حداقل یک ادمین اصلی باید باقی بماند. اصلاح را در چند مرحله انجام دهید و دست‌کم یک مدیر اصلی واقعی را نگه دارید.');
+            }
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $placeholders = implode(',', array_fill(0, count($eligible), '?'));
+                $pdo->prepare('UPDATE users SET role = "manager", is_primary_admin = 0 WHERE id IN (' . $placeholders . ')')->execute($eligible);
+                $pdo->commit();
+            } catch (Throwable $repairError) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                throw $repairError;
+            }
+            save_audit((int) $repairAdmin['id'], 'org_manager_primary_admin_repaired', null, ['user_ids' => $eligible]);
+            flash('success', count($eligible) . ' کاربر مدیر سازمانی به نقش «مدیر» برگردانده شدند؛ انتساب معاونت/اداره و عضویت آن‌ها حفظ شد.');
+            redirect('index.php?page=organization');
+        }
 
         if ($action === 'save_key_roles') {
             $rolesAdmin = require_permission('settings.key_roles_edit');
@@ -5439,6 +5520,30 @@ if ($page === 'organization') {
 </div>
 HTML;
     echo str_replace(['__CSRF__'], [csrf_field()], $orgTemplate);
+    if (user_is_primary_admin($organizationUser)) {
+        $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $repairCandidates = [];
+        foreach ($repairRows as $repairRow) {
+            $repairId = (int) $repairRow['id'];
+            if (!isset($repairCandidates[$repairId])) {
+                $repairCandidates[$repairId] = $repairRow;
+                $repairCandidates[$repairId]['unit_names'] = [];
+            }
+            $repairCandidates[$repairId]['unit_names'][] = (string) $repairRow['unit_name'];
+        }
+        echo '<section class="card form-card" id="repair-org-admin-roles"><h2>اصلاح مدیران سازمانی که ادمین اصلی شده‌اند</h2><p class="muted">این فهرست، ادمین‌های اصلیِ منصوب‌شده به معاونت/اداره را نشان می‌دهد. فقط افرادی را تیک بزنید که ادمین اصلی سامانه نیستند و اشتباهاً با انتساب سازمانی ادمین شده‌اند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت و ارجاع‌های سازمانی حفظ می‌شود. دست‌کم یک ادمین اصلی واقعی باید باقی بماند.</p>';
+        if ($repairCandidates === []) {
+            echo '<p class="muted">در حال حاضر مدیر سازمانیِ ادمین اصلی پیدا نشد.</p>';
+        } else {
+            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_admin_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
+            foreach ($repairCandidates as $repairId => $repairCandidate) {
+                $isCurrent = $repairId === (int) $organizationUser['id'];
+                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $repairId . '"' . ($isCurrent ? ' disabled' : '') . ' aria-label="اصلاح ' . e((string) $repairCandidate['full_name']) . '"></td><td>' . e((string) $repairCandidate['full_name']) . ' <small>#' . $repairId . ' · ' . e((string) $repairCandidate['username']) . '</small>' . ($isCurrent ? '<br><small>حساب جاری قابل تنزل نیست</small>' : '') . '</td><td>' . e(implode('، ', array_unique($repairCandidate['unit_names']))) . '</td></tr>';
+            }
+            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+    }
     echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=6"></script>';
     render_footer();
     exit;
@@ -5606,7 +5711,7 @@ if ($page === 'settings') {
             }
             echo '</select><label class="check-label"><input type="checkbox" name="is_active" value="1" ' . ((int) ($managedUser['is_active'] ?? 0) === 1 ? 'checked' : '') . '> فعال</label><label class="check-label"><input type="checkbox" name="is_primary_admin" value="1" ' . ((int) ($managedUser['is_primary_admin'] ?? 0) === 1 ? 'checked' : '') . '> ادمین اصلی</label><button class="button secondary" type="submit">ذخیره</button></form>';
             if (user_is_primary_admin($user) && (string) $managedUser['auth_source'] === 'ldap') {
-                echo '<form method="post" class="role-form domain-code-link-form">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . (int) $managedUser['id'] . '"><label>کد قطعی پرسنل غذا<input name="employee_number" value="" placeholder="کد صحیح؛ مثلاً 335" required></label><small class="muted">کد فعلی روی حساب دامین: ' . e((string) ($managedUser['employee_number'] ?? 'ثبت‌نشده')) . ' — کد این فیلد جای آن را می‌گیرد.</small><button class="button" type="submit">اتصال امن با کد (اولویت با این کد)</button><small class="muted">نام دخیل نیست؛ پیش از ادغام پشتیبان ساخته می‌شود و ارجاع‌ها تراکنشی منتقل می‌شوند.</small></form>';
+                echo '<form method="post" class="role-form domain-code-link-form">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . (int) $managedUser['id'] . '"><label>کد قطعی پرسنل غذا<input name="employee_number" value="" placeholder="کد صحیح؛ مثلاً 335" required></label><small class="muted">کد فعلی روی حساب دامین: ' . e((string) ($managedUser['employee_number'] ?? 'ثبت‌نشده')) . ' — کد این فیلد جای آن را می‌گیرد.</small><label class="check-label"><input type="checkbox" name="confirm_code_link" value="1" required> تأیید می‌کنم رکوردهای محلی/غذاییِ همین کد متعلق به همین کارمند هستند.</label><button class="button" type="submit">جستجو و بررسی رکوردهای غذا و محلی</button><small class="muted">نام دخیل نیست؛ همهٔ رکوردهای هم‌کد بررسی می‌شوند. پیش از ادغام پشتیبان ساخته می‌شود و ارجاع‌ها تراکنشی منتقل می‌شوند.</small></form>';
             }
         } else {
             echo '<span class="status admin-readonly">' . (user_is_primary_admin($managedUser) ? 'ادمین اصلی' : e(permission_roles()[$managedUser['role']] ?? $managedUser['role'])) . '</span>';
