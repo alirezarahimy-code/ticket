@@ -370,9 +370,10 @@
     var total = sorted.length;
     var head = '';
     for (var b = 0; b < blocks; b++) {
-      columns.forEach(function (col) {
+      columns.forEach(function (col, colIndex) {
         var mark = b === 0 && state.ordersSort.key === col.key ? (state.ordersSort.dir === 'desc' ? ' ▼' : ' ▲') : '';
-        head += '<th><button type="button" class="fm-sort-btn" data-fm-sort="' + col.key + '">' + esc(col.label + mark) + '</button></th>';
+        var blockStart = b > 0 && colIndex === 0 ? ' class="fm-order-block-start"' : '';
+        head += '<th' + blockStart + '><button type="button" class="fm-sort-btn" data-fm-sort="' + col.key + '">' + esc(col.label + mark) + '</button></th>';
       });
     }
     var body = [];
@@ -381,13 +382,14 @@
       for (var group = 0; group < blocks; group++) {
         var position = line * blocks + group;
         var row = sorted[position];
-        columns.forEach(function (col) {
-          if (!row) { cells += '<td class="fm-order-empty-cell"></td>'; return; }
+        columns.forEach(function (col, colIndex) {
+          var blockStart = group > 0 && colIndex === 0 ? ' class="fm-order-block-start"' : '';
+          if (!row) { cells += '<td class="fm-order-empty-cell' + (blockStart ? ' fm-order-block-start' : '') + '"></td>'; return; }
           var value = orderFieldValue(row, col.key, position);
           if (col.key === 'status_label') {
-            cells += '<td><span class="fm-order-state ' + (row.status === 'active' ? '' : 'cancelled') + '">' + esc(value) + '</span></td>';
+            cells += '<td' + blockStart + '><span class="fm-order-state ' + (row.status === 'active' ? '' : 'cancelled') + '">' + esc(value) + '</span></td>';
           } else {
-            cells += '<td>' + esc(value) + '</td>';
+            cells += '<td' + blockStart + '>' + esc(value) + '</td>';
           }
         });
       }

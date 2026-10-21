@@ -72,18 +72,20 @@
 .fm-group-orders { margin-top:16px; }
 .fm-group-orders select { max-width:280px; }
 .fm-group-report-title { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:10px 4px 0; color:var(--ink); }
-.fm-statistics-days { display:grid; gap:8px; }
+.fm-statistics-days { display:grid; gap:0; }
 .fm-statistics-days--single { grid-template-columns:minmax(0,1fr); }
 .fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.fm-stat-day { min-width:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; break-inside:avoid; }
-.fm-stat-day h4 { margin:0; padding:7px 10px; color:var(--navy); background:#f0f7f6; font-size:15px; }
-.fm-stat-day ul { display:block; list-style:none; margin:0; padding:3px 10px; }
-.fm-stat-day li { display:flex; justify-content:flex-start; align-items:baseline; gap:8px; padding:4px 2px; border-bottom:1px solid #edf1f0; font-size:14px; }
-.fm-stat-day li:last-child { border-bottom:0; }
+.fm-stat-day { min-width:0; padding:0 8px; break-inside:avoid; }
+.fm-stat-day h4 { margin:0; padding:7px 8px; color:var(--navy); background:#f0f7f6; border-bottom:1px solid #c7d3d5; font-size:15px; }
+.fm-stat-day ul { display:flex; flex-wrap:wrap; align-items:center; list-style:none; margin:0; padding:3px 4px; }
+.fm-stat-day li { display:inline-flex; flex:0 1 auto; align-items:baseline; gap:5px; padding:4px 8px; border:0; font-size:14px; white-space:nowrap; }
+.fm-stat-day li + li { border-right:1px solid #9aaeb2; }
 .fm-stat-day li span { min-width:0; }
 .fm-stat-day li strong { white-space:nowrap; color:var(--teal); font-size:14px; }
-.fm-statistics-results--food.fm-statistics-days--single .fm-stat-day ul { display:flex; flex-wrap:nowrap; align-items:center; gap:5px 12px; overflow-x:auto; }
-.fm-statistics-results--food.fm-statistics-days--single .fm-stat-day li { flex:0 0 auto; gap:5px; border:0; white-space:nowrap; }
+.fm-statistics-results--food.fm-statistics-days--multi .fm-stat-day:nth-child(odd) { padding-right:0; padding-left:10px; }
+.fm-statistics-results--food.fm-statistics-days--multi .fm-stat-day:nth-child(even) { padding-right:10px; padding-left:0; border-right:1px solid #9aaeb2; }
+.fm-statistics-results--food.fm-statistics-days--single .fm-stat-day ul { flex-wrap:nowrap; overflow-x:auto; }
+.fm-statistics-results--food.fm-statistics-days--single .fm-stat-day li { flex:0 0 auto; }
 .fm-statistics-results--people { width:100%; min-width:0; }
 .fm-statistics-people-columns { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; }
 .fm-statistics-people-column { min-width:0; padding:0 8px; }
@@ -107,6 +109,7 @@
 .fm-group-orders .fm-order-report-table td { white-space:normal; overflow-wrap:anywhere; }
 .fm-order-report-table th:first-child,
 .fm-order-report-table td:first-child { width:1%; min-width:46px; }
+.fm-order-report-table .fm-order-block-start { border-right:2px solid #9aaeb2; }
 .fm-group-orders .fm-view-switch { margin-top:10px; }
 .fm-group-orders .fm-group-report-content { min-width:0; }
 .fm-group-result { margin-top:10px; padding-top:7px; border-top:1px solid #c7d3d5; }
@@ -160,6 +163,7 @@
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column:last-child { padding-left:0; }
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column .fm-rows th,
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column .fm-rows td { font-size:9pt; }
+  body.fm-print-statistics > .fm-print-host .fm-stat-day ul { display:flex; flex-wrap:wrap; overflow:visible; }
   body.fm-print-statistics > .fm-print-host .fm-stat-day li { font-size:10pt; }
   body.fm-print-statistics > .fm-print-host .fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }
   body.fm-print-statistics > .fm-print-host .fm-statistics-days--single .fm-stat-day ul { display:flex; flex-wrap:nowrap; overflow:visible; }

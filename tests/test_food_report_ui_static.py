@@ -49,6 +49,10 @@ class FoodReportUiStaticTests(unittest.TestCase):
         self.assertIn(".fm-statistics-days--single", css)
         self.assertIn(".fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }", css)
         self.assertIn(".fm-statistics-results--food.fm-statistics-days--single .fm-stat-day ul", css)
+        self.assertIn(".fm-stat-day ul { display:flex; flex-wrap:wrap;", css)
+        self.assertIn(".fm-stat-day li + li { border-right:1px solid #9aaeb2; }", css)
+        self.assertIn(".fm-statistics-results--food.fm-statistics-days--multi .fm-stat-day:nth-child(even)", css)
+        self.assertIn("body.fm-print-statistics > .fm-print-host .fm-stat-day ul { display:flex; flex-wrap:wrap; overflow:visible; }", css)
         self.assertIn("font-size:13px", css)
         self.assertIn("font-size:13px}", html)
         self.assertIn("font-size: 12pt !important", theme)
@@ -81,6 +85,14 @@ class FoodReportUiStaticTests(unittest.TestCase):
         self.assertIn(".fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }", css)
         self.assertNotIn("size:landscape", css)
         self.assertNotIn("page:fmStatistics", css)
+
+    def test_repeated_report_blocks_keep_only_their_boundary_dividers(self) -> None:
+        ui = read("food-ticket-web/assets/food-menu.js")
+        css = read("food-ticket-web/assets/food-menu.css")
+        self.assertIn("var blockStart = b > 0 && colIndex === 0", ui)
+        self.assertIn("var blockStart = group > 0 && colIndex === 0", ui)
+        self.assertIn(".fm-order-report-table .fm-order-block-start { border-right:2px solid #9aaeb2; }", css)
+        self.assertIn(".fm-statistics-people-column + .fm-statistics-people-column { border-right:1px solid #9aaeb2; }", css)
 
     def test_settings_code_link_is_modal_not_an_inline_second_form(self) -> None:
         index = read("index.php")
