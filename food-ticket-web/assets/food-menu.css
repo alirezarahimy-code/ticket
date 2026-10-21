@@ -72,18 +72,17 @@
 .fm-group-orders { margin-top:16px; }
 .fm-group-orders select { max-width:280px; }
 .fm-group-report-title { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding:10px 4px 0; color:var(--ink); }
-.fm-statistics-days { display:grid; gap:0; }
+.fm-statistics-days { display:grid; gap:8px; }
 .fm-statistics-days--single { grid-template-columns:minmax(0,1fr); }
 .fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }
-.fm-stat-day { min-width:0; padding:0 8px; break-inside:avoid; }
-.fm-stat-day h4 { margin:0; padding:7px 8px; color:var(--navy); background:#f0f7f6; border-bottom:1px solid #c7d3d5; font-size:15px; }
-.fm-stat-day ul { display:flex; flex-wrap:wrap; align-items:center; list-style:none; margin:0; padding:3px 4px; }
-.fm-stat-day li { display:inline-flex; flex:0 1 auto; align-items:baseline; gap:5px; padding:4px 8px; border:0; font-size:14px; white-space:nowrap; }
+.fm-stat-day { min-width:0; border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; break-inside:avoid; }
+.fm-stat-day h4 { margin:0; padding:7px 10px; color:var(--navy); background:#f0f7f6; border-bottom:1px solid #c7d3d5; font-size:15px; }
+.fm-stat-day ul { display:flex; flex-wrap:nowrap; align-items:center; list-style:none; margin:0; padding:3px 4px; overflow-x:auto; }
+.fm-stat-day li { display:inline-flex; flex:0 0 auto; align-items:baseline; gap:5px; padding:4px 6px; border:0; font-size:13px; white-space:nowrap; }
 .fm-stat-day li + li { border-right:1px solid #9aaeb2; }
 .fm-stat-day li span { min-width:0; }
-.fm-stat-day li strong { white-space:nowrap; color:var(--teal); font-size:14px; }
-.fm-statistics-results--food.fm-statistics-days--multi .fm-stat-day:nth-child(odd) { padding-right:0; padding-left:10px; }
-.fm-statistics-results--food.fm-statistics-days--multi .fm-stat-day:nth-child(even) { padding-right:10px; padding-left:0; border-right:1px solid #9aaeb2; }
+.fm-stat-day li strong { white-space:nowrap; color:var(--teal); font-size:13px; }
+.fm-statistics-results--food.fm-statistics-days--multi .fm-stat-day { min-width:0; }
 .fm-statistics-results--food.fm-statistics-days--single .fm-stat-day ul { flex-wrap:nowrap; overflow-x:auto; }
 .fm-statistics-results--food.fm-statistics-days--single .fm-stat-day li { flex:0 0 auto; }
 .fm-statistics-results--people { width:100%; min-width:0; }
@@ -163,8 +162,10 @@
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column:last-child { padding-left:0; }
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column .fm-rows th,
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column .fm-rows td { font-size:9pt; }
-  body.fm-print-statistics > .fm-print-host .fm-stat-day ul { display:flex; flex-wrap:wrap; overflow:visible; }
-  body.fm-print-statistics > .fm-print-host .fm-stat-day li { font-size:10pt; }
+  body.fm-print-statistics > .fm-print-host .fm-stat-day { overflow:visible; }
+  body.fm-print-statistics > .fm-print-host .fm-stat-day ul { display:flex; flex-wrap:nowrap; overflow:visible; }
+  body.fm-print-statistics > .fm-print-host .fm-stat-day li { font-size:9pt; padding:2px 3px; }
+  body.fm-print-statistics > .fm-print-host .fm-stat-day li strong { font-size:9pt; }
   body.fm-print-statistics > .fm-print-host .fm-statistics-days--multi { grid-template-columns:repeat(2,minmax(0,1fr)); }
   body.fm-print-statistics > .fm-print-host .fm-statistics-days--single .fm-stat-day ul { display:flex; flex-wrap:nowrap; overflow:visible; }
 }
