@@ -2749,6 +2749,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=' . valid_choice(post_value('return_page'), ['settings', 'organization'], 'settings'));
         }
 
+        if ($action === 'link_domain_food_by_code') {
+            require_primary_admin();
+            require_once __DIR__ . '/food-personnel-link.php';
+            $domainId = (int) ($_POST['user_id'] ?? 0);
+            $authoritativeCode = normalize_employee_number(post_value('employee_number'));
+            if ($domainId <= 0 || $authoritativeCode === null) {
+                throw new RuntimeException('کاربر دامین و کد پرسنلی معتبر را وارد کنید.');
+            }
+            $domainQuery = db()->prepare('SELECT id, auth_source, is_active, employee_number FROM users WHERE id = ? LIMIT 1');
+            $domainQuery->execute([$domainId]);
+            $domain = $domainQuery->fetch();
+            if (!$domain || (string) $domain['auth_source'] !== 'ldap' || (int) $domain['is_active'] !== 1) {
+                throw new RuntimeException('فقط کاربر دامین فعال را می‌توان با این مسیر به پرسنل غذا متصل کرد.');
+            }
+            $foodRows = db()->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, is_active, role, is_primary_admin, auth_source FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role = 'local_user' AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
+            $foodMatches = fpl_food_code_matches($foodRows, (string) $authoritativeCode);
+            if ($foodMatches === []) {
+                throw new RuntimeException('هیچ حساب پرسنل غذا یا محلی با کد ' . $authoritativeCode . ' پیدا نشد. کد، حساب محلی و تب کاربران غذا را بررسی کنید.');
+            }
+            if (count($foodMatches) !== 1) {
+                $ids = implode('، ', array_map(static fn (array $row): string => '#' . (int) $row['id'] . ' ' . (string) $row['full_name'], $foodMatches));
+                throw new RuntimeException('کد ' . $authoritativeCode . ' روی چند حساب پیدا شد؛ ادغام متوقف شد تا تکرارها بررسی شوند: ' . $ids);
+            }
+            $food = $foodMatches[0];
+            if (!fpl_codes_equal(fpl_food_personnel_code($food), (string) $authoritativeCode)) {
+                throw new RuntimeException('کد واردشده با کد حساب پرسنل غذا یکی نیست؛ ادغام انجام نشد.');
+            }
+            $foodId = (int) $food['id'];
+            $backup = fpl_backup_users(db());
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $mergeResult = fpl_merge($pdo, $domainId, $foodId, true, (string) $authoritativeCode);
+                if (empty($mergeResult['ok'])) {
+                    throw new RuntimeException((string) ($mergeResult['message'] ?? 'ادغام امن انجام نشد.'));
+                }
+                $pdo->commit();
+            } catch (Throwable $mergeError) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                throw $mergeError;
+            }
+            system_log('info', 'food_personnel_link', 'اتصال قطعی کاربر دامین به پرسنل غذا با کد دستی', ['domain_id' => $domainId, 'food_id' => $foodId, 'employee_number' => $authoritativeCode, 'backup' => $backup]);
+            flash('success', 'کد ' . $authoritativeCode . ' به کاربر دامین #' . $domainId . ' متصل شد؛ حساب پرسنل غذا #' . $foodId . ' و ارجاع‌هایش با پشتیبان و در یک تراکنش ادغام شدند. پشتیبان: ' . $backup);
+            redirect('index.php?page=settings#users');
+        }
+
         if ($action === 'update_user_role') {
             $admin = require_primary_admin();
             $userId = (int) ($_POST['user_id'] ?? 0);
@@ -2874,7 +2922,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->beginTransaction();
             try {
                 if ($mergeFoodId > 0) {
-                    $mergeResult = fpl_merge($pdo, $userId, $mergeFoodId, true);
+                    $mergeResult = fpl_merge($pdo, $userId, $mergeFoodId, true, (string) $employeeNumberValue);
                     if (empty($mergeResult['ok'])) {
                         throw new RuntimeException((string) ($mergeResult['message'] ?? 'ادغام حساب پرسنل غذا ناموفق بود.'));
                     }
@@ -5557,6 +5605,9 @@ if ($page === 'settings') {
                 echo '<option value="' . (int) $department['id'] . '" ' . ((int) $managedUser['department_id'] === (int) $department['id'] ? 'selected' : '') . '>' . e($department['name']) . '</option>';
             }
             echo '</select><label class="check-label"><input type="checkbox" name="is_active" value="1" ' . ((int) ($managedUser['is_active'] ?? 0) === 1 ? 'checked' : '') . '> فعال</label><label class="check-label"><input type="checkbox" name="is_primary_admin" value="1" ' . ((int) ($managedUser['is_primary_admin'] ?? 0) === 1 ? 'checked' : '') . '> ادمین اصلی</label><button class="button secondary" type="submit">ذخیره</button></form>';
+            if (user_is_primary_admin($user) && (string) $managedUser['auth_source'] === 'ldap') {
+                echo '<form method="post" class="role-form domain-code-link-form">' . csrf_field() . '<input type="hidden" name="action" value="link_domain_food_by_code"><input type="hidden" name="user_id" value="' . (int) $managedUser['id'] . '"><label>کد قطعی پرسنل غذا<input name="employee_number" value="" placeholder="کد صحیح؛ مثلاً 335" required></label><small class="muted">کد فعلی روی حساب دامین: ' . e((string) ($managedUser['employee_number'] ?? 'ثبت‌نشده')) . ' — کد این فیلد جای آن را می‌گیرد.</small><button class="button" type="submit">اتصال امن با کد (اولویت با این کد)</button><small class="muted">نام دخیل نیست؛ پیش از ادغام پشتیبان ساخته می‌شود و ارجاع‌ها تراکنشی منتقل می‌شوند.</small></form>';
+            }
         } else {
             echo '<span class="status admin-readonly">' . (user_is_primary_admin($managedUser) ? 'ادمین اصلی' : e(permission_roles()[$managedUser['role']] ?? $managedUser['role'])) . '</span>';
         }

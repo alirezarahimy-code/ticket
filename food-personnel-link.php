@@ -206,7 +206,7 @@ function fpl_pair_is_allowed(array $candidates, int $domainId, int $foodId): boo
  * ادغام یک جفت. کل عملیات در یک تراکنش است؛ در صورت خطا چیزی تغییر نمی‌کند.
  * @return array{ok:bool, message:string, moved:array<string,int>}
  */
-function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch = false): array
+function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch = false, ?string $authoritativeCode = null): array
 {
     $moved = [];
     $ownsTransaction = !$pdo->inTransaction();
@@ -246,10 +246,16 @@ function fpl_merge(PDO $pdo, int $domainId, int $foodId, bool $allowNameMismatch
         if ($personnelCode === '') {
             throw new RuntimeException('رکورد پرسنل غذا کد پرسنلی ندارد.');
         }
-        if ($domainPersonnelCode !== '' && !fpl_codes_equal($domainPersonnelCode, $personnelCode)) {
-            throw new RuntimeException('کد پرسنلی ثبت‌شده در حساب دامین با رکورد پرسنل غذا یکی نیست؛ کد دامین اولویت دارد و ادغام متوقف شد.');
-        }
-        if ($domainPersonnelCode !== '') {
+        $manualCode = fpl_normalize_code((string) ($authoritativeCode ?? ''));
+        if ($manualCode !== '') {
+            if (!fpl_codes_equal($manualCode, $personnelCode)) {
+                throw new RuntimeException('کد واردشده با کد این حساب پرسنل غذا یکی نیست؛ ادغام انجام نشد.');
+            }
+            // در ادغام دستی، کد واردشده مدیر بر مقدار قدیمی ذخیره‌شده روی حساب دامین مقدم است.
+            $personnelCode = $manualCode;
+        } elseif ($domainPersonnelCode !== '' && !fpl_codes_equal($domainPersonnelCode, $personnelCode)) {
+            throw new RuntimeException('کد پرسنلی ثبت‌شده در حساب دامین با رکورد پرسنل غذا یکی نیست؛ ادغام متوقف شد.');
+        } elseif ($domainPersonnelCode !== '') {
             $personnelCode = $domainPersonnelCode;
         }
 
@@ -390,7 +396,7 @@ function fpl_find_food_by_code(PDO $pdo, string $code): ?array
 /**
  * اجرای درخواست‌ها.
  * $links  : [domainId => foodId] برای تطبیق نام (یک‌به‌یک یا انتخاب همنام)
- * $manual : [domainId => کد پرسنلی پرسنل غذا] برای اتصال دستی؛ اگر دامنه کد دارد، همان کد اولویت دارد
+ * $manual : [domainId => کد واردشدهٔ مدیر]؛ در این مسیر کد دستی بر کد قبلی دامین اولویت دارد
  */
 function fpl_apply(PDO $pdo, array $links, array $manual = []): array
 {
@@ -422,7 +428,7 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
         }
         $usedFood[$foodId] = true;
         $usedDomain[$domainId] = true;
-        $pairs[] = [$domainId, $foodId, $allowNameMismatch];
+        $pairs[] = [$domainId, $foodId, $allowNameMismatch, null];
     }
     foreach ($manual as $domainId => $code) {
         $domainId = (int) $domainId;
@@ -430,16 +436,11 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
         if ($code === '' || $domainId <= 0 || isset($usedDomain[$domainId])) {
             continue;
         }
-        $domainStmt = $pdo->prepare("SELECT id, employee_number, is_active, auth_source FROM users WHERE id = ?");
+        $domainStmt = $pdo->prepare("SELECT id, is_active, auth_source FROM users WHERE id = ?");
         $domainStmt->execute([$domainId]);
         $domain = $domainStmt->fetch();
-        $domainCode = fpl_normalize_code((string) ($domain['employee_number'] ?? ''));
         if (!$domain || (string) $domain['auth_source'] !== 'ldap' || (int) $domain['is_active'] !== 1) {
             $results[] = ['domain' => $domainId, 'food' => 0, 'ok' => false, 'message' => 'کاربر دامین برای اتصال دستی معتبر نیست (غیرفعال یا دامین نیست).'];
-            continue;
-        }
-        if ($domainCode !== '' && !fpl_codes_equal($domainCode, $code)) {
-            $results[] = ['domain' => $domainId, 'food' => 0, 'ok' => false, 'message' => 'کد ثبت‌شده در حساب دامین (' . $domainCode . ') اولویت دارد؛ کد دستی متفاوت پذیرفته نیست.'];
             continue;
         }
         $food = fpl_find_food_by_code($pdo, $code);
@@ -454,15 +455,15 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
         }
         $usedFood[$foodId] = true;
         $usedDomain[$domainId] = true;
-        $pairs[] = [$domainId, $foodId, true];
+        $pairs[] = [$domainId, $foodId, true, $code];
     }
     if ($pairs === []) {
         return $results;
     }
     $backup = fpl_backup_users($pdo);
-    foreach ($pairs as [$domainId, $foodId, $allowMismatch]) {
+    foreach ($pairs as [$domainId, $foodId, $allowMismatch, $authoritativeCode]) {
         $foodName = (string) $pdo->query('SELECT full_name FROM users WHERE id = ' . (int) $foodId)->fetchColumn();
-        $merge = fpl_merge($pdo, $domainId, $foodId, $allowMismatch);
+        $merge = fpl_merge($pdo, $domainId, $foodId, $allowMismatch, $authoritativeCode);
         $message = $merge['message'];
         if ($allowMismatch) {
             $message .= ' (اتصال دستی با پرسنل غذا: ' . $foodName . ')';
@@ -475,7 +476,7 @@ function fpl_apply(PDO $pdo, array $links, array $manual = []): array
 /** فیلد کد پرسنلی دستی برای کاربری که تطبیق نام ندارد یا در AD کدش به‌علت تداخل خالی مانده است. */
 function fpl_manual_input(int $domainId, string $value = ''): string
 {
-    return '<div><small>اتصال دستی: کد پرسنلی ثبت‌شده در دامین اولویت دارد؛ در صورت نیاز همان کد را بررسی کنید.</small><br>'
+    return '<div><small>کد واردشده در این فیلد بر کد قبلی دامین مقدم است؛ کد پرسنل غذا را وارد کنید (مثلاً 335).</small><br>'
         . '<input type="text" name="manual[' . $domainId . ']" value="' . e($value) . '" placeholder="کد پرسنلی" style="width:160px"></div>';
 }
 

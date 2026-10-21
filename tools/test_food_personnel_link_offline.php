@@ -219,5 +219,13 @@ check('ادغام با کد دستی از طریق مسیر عادی کد دام
 check('کد واردشدهٔ ۳۳۶ بر صفرهای ابتدایی رکورد محلی مقدم می‌ماند', (string) $pdo->query('SELECT employee_number FROM users WHERE id = 25')->fetchColumn() === '336');
 check('رکورد محلی کد ۰۰۳۳۶ پس از انتقال حذف می‌شود', (int) $pdo->query('SELECT COUNT(*) FROM users WHERE id = 24')->fetchColumn() === 0);
 
+// ---------- کد دستی جدید باید مقدار قدیمی و اشتباه دامین را جایگزین کند ----------
+$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (26,'335','پرسنل کد ۳۳۵','پرسنل','کد ۳۳۵','335','','local_user','local',1)");
+$pdo->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (27,'p.oldcode','کاربر دامین','35','','user','ldap',1)");
+$overrideCode = fpl_apply($pdo, [], ['27' => '335']);
+check('اتصال دستی ۳۳۵ کد قدیمی ۳۵ دامین را با اولویت ورودی جایگزین می‌کند', count($overrideCode) === 1 && $overrideCode[0]['ok'] === true);
+check('کاربر دامین پس از اتصال کد پرسنلی ۳۳۵ دارد', (string) $pdo->query('SELECT employee_number FROM users WHERE id = 27')->fetchColumn() === '335');
+check('حساب محلی دارای کد ۳۳۵ با ارجاع‌هایش در ادغام امن منتقل شد', (int) $pdo->query('SELECT COUNT(*) FROM users WHERE id = 26')->fetchColumn() === 0);
+
 echo "\nنتیجه: {$passes} موفق، {$failures} ناموفق\n";
 exit($failures === 0 ? 0 : 1);
