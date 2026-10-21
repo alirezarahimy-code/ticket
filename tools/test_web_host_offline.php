@@ -32,7 +32,7 @@ $check = static function (string $label, bool $cond, string $detail = '') use (&
     echo ($cond ? '[PASS] ' : '[FAIL] ') . $label . ($detail !== '' ? ' — ' . $detail : '') . "\n";
 };
 
-$assets = ['food-brand.js', 'food-designer.js', 'food-groups.js', 'food-ticket-persistence.js', 'food-ticket-theme.css', 'food-order.css', 'food-menu.js', 'food-menu.css', 'food-order-calendar.js', 'jalali-calendar.js'];
+$assets = ['food-brand.js', 'food-designer.js', 'food-groups.js', 'food-manual-attendance.js', 'food-ticket-persistence.js', 'food-ticket-theme.css', 'food-order.css', 'food-menu.js', 'food-menu.css', 'food-order-calendar.js', 'jalali-calendar.js'];
 $bootstrap = food_ticket_web_host_bootstrap(
     'index.php?page=food-ticket&food_api=',
     'CSRF-TOKEN',

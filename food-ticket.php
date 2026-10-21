@@ -3132,7 +3132,8 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
     $query = db()->prepare(
         'SELECT id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
         . 'event_type AS result, print_status' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
-        . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group '
+        . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group, source_uid, '
+        . 'CASE WHEN source_uid = \'manual-attendance\' THEN source_payload ELSE NULL END AS manual_source_payload '
         . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown" ORDER BY id DESC'
     );
     $query->execute([$fromDate, $toDate]);
@@ -3140,6 +3141,14 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
         $rawResult = (string) ($row['result'] ?? '');
         $rawStatus = (string) ($row['print_status'] ?? 'not_printed');
         $resultLabel = food_ticket_label($rawResult);
+        $sourcePayload = json_decode((string) ($row['manual_source_payload'] ?? ''), true);
+        $manualAttendance = is_array($sourcePayload) ? (array) ($sourcePayload['manual_attendance'] ?? []) : [];
+        $isManualAttendance = (string) ($row['source_uid'] ?? '') === 'manual-attendance' && $manualAttendance !== [];
+        if ($isManualAttendance && array_key_exists('with_ticket', $manualAttendance) && !$manualAttendance['with_ticket']) {
+            $resultLabel = 'تردد دستی (بدون فیش)';
+        } elseif ($isManualAttendance && !empty($manualAttendance['with_ticket']) && empty($manualAttendance['physical_print']) && $rawStatus === 'not_printed') {
+            $resultLabel = 'فیش صادر شد؛ چاپ فیزیکی انجام نشد';
+        }
         // event_type در لحظهٔ ثبت «printed» است و بعد از شکست چاپ عوض نمی‌شود؛ برچسب باید از وضعیت واقعی چاپ بیاید.
         if (in_array($rawResult, ['printed', 'guest', 'print'], true) && $rawStatus !== 'printed') {
             if (in_array($rawStatus, ['pending', 'printing'], true)) {
@@ -4095,12 +4104,7 @@ function food_ticket_api_handle(string $route, array $user): never
             if ($manualDate !== food_ticket_manual_attendance_today()) {
                 throw new RuntimeException('ثبت دستی فیش فقط برای امروز مجاز است.');
             }
-            $result = food_ticket_api_manual_attendance_save(
-                (int) ($body['user_id'] ?? 0),
-                !empty($body['physical_print']),
-                (string) ($body['reason'] ?? ''),
-                $user
-            );
+            $result = food_ticket_api_manual_attendance_save_many($body, $user);
             food_ticket_api_json($result + food_ticket_api_manual_attendance($manualDate));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-groups') {
@@ -4637,7 +4641,7 @@ function food_ticket_render_page(array $user): void
         'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close') || $fpCan('food.emergency'),
         'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),
-        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health'),
+        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.groups'),
     ];
     $fpSections = [
         'connections' => $fpCan('food.db'),
@@ -4645,10 +4649,12 @@ function food_ticket_render_page(array $user): void
         'guests' => $fpCan('food.guest'),
         'ticket-design' => $fpCan('food.design'),
         'health' => $fpCan('food.health'),
+        'manual-attendance' => $fpCan('food.groups'),
     ];
     $fpGroupsEdit = $fpCan('food.groups_edit');
     $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections)
         . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE=' . ($fpCan('food.groups_edit') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_CANCEL_VISIT=' . ((food_ticket_is_primary_admin($user) || (string) ($user['role'] ?? '') === 'support_manager') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')

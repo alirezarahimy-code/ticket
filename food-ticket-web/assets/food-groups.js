@@ -16,7 +16,6 @@
     absenceLoading: false,
     membersPopup: 0,
     canCancelVisit: window.FOOD_TICKET_CAN_CANCEL_VISIT === true,
-    manualEmployees: [], manualItems: [], manualFilter: '', manualSelected: 0, manualLoading: false, manualSaving: false, manualError: '',
   };
 
   const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -85,59 +84,6 @@
     }
   }
 
-  function loadManualAttendance() {
-    if (S.manualLoading) return;
-    S.manualLoading = true;
-    S.manualError = '';
-    callApi('/api/food-manual-attendance').then((x) => {
-      S.manualEmployees = (x && x.employees) || [];
-      S.manualItems = (x && x.items) || [];
-      S.manualSelected = S.manualEmployees.some((u) => Number(u.id) === Number(S.manualSelected)) ? Number(S.manualSelected) : 0;
-      S.manualError = '';
-    }).catch((e) => {
-      S.manualError = (e && e.message) || 'دریافت فهرست ثبت دستی ناموفق بود.';
-    }).then(() => {
-      S.manualLoading = false;
-      draw();
-    });
-  }
-
-  const MANUAL_PRINT_STATUS = {
-    not_printed: 'ثبت شد؛ ارسال به چاپگر انجام نشد',
-    pending: 'در صف چاپ', printing: 'در حال چاپ', printed: 'فیش چاپ شد',
-    print_error: 'خطای چاپ', failed: 'چاپ ناموفق', held_absent: 'متوقف‌شده',
-  };
-
-  function manualAttendancePanel() {
-    if (window.FOOD_TICKET_CAN_GROUPS_EDIT === false) return '';
-    const filtered = S.manualEmployees.filter((u) => !S.manualFilter
-      || (String(u.name || '') + ' ' + String(u.pc || '')).toLocaleLowerCase().includes(S.manualFilter.toLocaleLowerCase()));
-    const options = '<option value="">انتخاب کارمند…</option>' + filtered.map((u) =>
-      '<option value="' + Number(u.id) + '"' + (Number(u.id) === Number(S.manualSelected) ? ' selected' : '') + '>'
-      + esc(u.name || '—') + (u.pc ? ' (' + esc(u.pc) + ')' : '') + '</option>').join('');
-    const items = S.manualItems.length
-      ? '<div class="table-wrap"><table class="table"><thead><tr><th>کارمند</th><th>وعده</th><th>ساعت</th><th>وضعیت</th><th>چاپ فیزیکی</th></tr></thead><tbody>'
-        + S.manualItems.map((item) => '<tr><td>' + esc(item.name || '—') + (item.pc ? ' <small>(' + esc(item.pc) + ')</small>' : '') + '</td>'
-          + '<td>' + esc(item.food || '—') + '</td><td dir="ltr">' + esc(item.time || '—') + '</td>'
-          + '<td><span class="status ' + (item.print_status === 'printed' ? 'ok' : (['failed', 'print_error'].includes(item.print_status) ? 'bad' : 'warn')) + '">'
-          + esc(MANUAL_PRINT_STATUS[item.print_status] || item.print_status || '—') + '</span></td>'
-          + '<td>' + (item.physical_print ? 'بله' : 'خیر؛ فقط وضعیت سامانه') + '</td></tr>').join('')
-        + '</tbody></table></div>'
-      : '<p class="muted">امروز هنوز ثبت دستی انجام نشده است.</p>';
-    return '<div class="card section-gap" id="fg-manual-attendance"><div class="form-section-head"><h2>ثبت دستی فیش امروز</h2>'
-      + '<span class="status warn">فقط امروز</span></div>'
-      + '<p class="muted">فقط کارکنان فعال فهرست می‌شوند و ثبت، سفارش امروز و تکراری‌نبودن فیش را کنترل می‌کند. '
-      + 'اگر «چاپ فیزیکی» را بردارید، وضعیت «فیش چاپ شد» در سامانه ثبت می‌شود اما هیچ دستوری به چاپگر نمی‌رود.</p>'
-      + (S.manualError ? '<p style="color:var(--red)">' + esc(S.manualError) + '</p>' : '')
-      + (S.manualLoading ? '<p class="muted">در حال بارگذاری کارکنان و ثبت‌های امروز…</p>' : '')
-      + '<div class="form-grid"><label class="field">جست‌وجوی کارمند<input id="fg-manual-filter" value="' + esc(S.manualFilter) + '" placeholder="نام یا کد پرسنلی"></label>'
-      + '<label class="field">کارمند<select id="fg-manual-user">' + options + '</select></label>'
-      + '<label class="field full">علت ثبت دستی<input id="fg-manual-reason" maxlength="300" placeholder="مثلاً: اثر انگشت ثبت نشد"></label>'
-      + '<label class="field full" style="display:flex;align-items:center;gap:8px"><input id="fg-manual-print" type="checkbox" checked style="width:auto"> چاپ فیزیکی فیش از چاپگر</label></div>'
-      + '<div class="actions"><button type="button" class="btn primary" data-fg="manual-save"' + (S.manualSaving || S.manualLoading ? ' disabled' : '') + '>'
-      + (S.manualSaving ? 'در حال ثبت…' : 'ثبت دستی فیش') + '</button><button type="button" class="btn ghost" data-fg="manual-reload"' + (S.manualLoading ? ' disabled' : '') + '>به‌روزرسانی</button></div>'
-      + '<div class="form-section-head" style="margin-top:14px"><h3>ثبت‌های دستی امروز</h3></div>' + items + '</div>';
-  }
 
   function userLabel(u) {
     const badges = (u.active ? '' : ' <span class="status bad">غیرفعال</span>')
@@ -341,8 +287,7 @@
   function body() {
     if (S.error) return '<div class="card"><p style="color:var(--red)">' + esc(S.error) + '</p><button class="btn ghost" data-fg="reload">تلاش دوباره</button></div>';
     if (!S.loaded) return '<div class="card"><p class="muted">در حال بارگذاری…</p></div>';
-    return manualAttendancePanel()
-      + (S.editing ? form() : '<div class="card"><div class="form-section-head"><h2>گروه‌های تعریف‌شده</h2><button class="btn primary" data-fg="new">＋ گروه جدید</button></div>' + list() + '</div>')
+    return (S.editing ? form() : '<div class="card"><div class="form-section-head"><h2>گروه‌های تعریف‌شده</h2><button class="btn primary" data-fg="new">＋ گروه جدید</button></div>' + list() + '</div>')
       + absencePanel()
       + (S.editing ? '' : runs())
       + membersPopup();
@@ -388,15 +333,6 @@
   }
 
   document.addEventListener('input', (e) => {
-    if (e.target && e.target.id === 'fg-manual-filter') {
-      S.manualFilter = e.target.value || '';
-      const selected = document.getElementById('fg-manual-user');
-      if (selected) S.manualSelected = Number(selected.value || 0);
-      draw();
-      const f = document.getElementById('fg-manual-filter');
-      if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); }
-      return;
-    }
     if (e.target && e.target.id === 'fg-filter' && S.editing) {
       const keep = collect();
       S.editing = Object.assign({}, S.editing, keep, { members: keep.members.concat(((S.editing.members) || []).filter((id) => !document.querySelector('[data-fg-member][value="' + id + '"]'))) });
@@ -409,10 +345,6 @@
   });
 
   document.addEventListener('change', (e) => {
-    if (e.target && e.target.id === 'fg-manual-user') {
-      S.manualSelected = Number(e.target.value || 0);
-      return;
-    }
     if (e.target && e.target.id === 'fg-abs-date' && S.absence) {
       const iso = isoFromJalaliInput(e.target.value);
       if (!iso) {
@@ -470,29 +402,6 @@
       return;
     }
     if (act === 'reload') { S.error = ''; S.loaded = false; draw(); load(); return; }
-    if (act === 'manual-reload') { loadManualAttendance(); return; }
-    if (act === 'manual-save') {
-      const userId = Number((document.getElementById('fg-manual-user') || {}).value || 0);
-      const reason = (document.getElementById('fg-manual-reason') || {}).value || '';
-      const physicalPrint = !!((document.getElementById('fg-manual-print') || {}).checked);
-      if (!userId) { say('یک کارمند را انتخاب کنید.'); return; }
-      if (!reason.trim()) { say('علت ثبت دستی را وارد کنید.'); return; }
-      S.manualSaving = true;
-      draw();
-      callApi('/api/food-manual-attendance', { method: 'POST', body: JSON.stringify({ user_id: userId, date: isoToday(), physical_print: physicalPrint, reason }) })
-        .then((x) => {
-          S.manualEmployees = (x && x.employees) || S.manualEmployees;
-          S.manualItems = (x && x.items) || S.manualItems;
-          S.manualError = '';
-          S.manualSelected = 0;
-          const message = (x && x.message) || 'ثبت دستی انجام شد.';
-          draw();
-          say(message);
-        })
-        .catch((err) => { S.manualError = (err && err.message) || 'ثبت دستی انجام نشد.'; say(S.manualError); })
-        .then(() => { S.manualSaving = false; draw(); });
-      return;
-    }
     if (act === 'new') {
       S.filter = '';
       S.editing = { id: 0, title: '', l_uid: '', description: '', visit_change_until: '', active: true, members: [] };
@@ -591,15 +500,12 @@
     mount() {
       if (!window.FOOD_TICKET_API_BASE) return; // فقط در پنل یکپارچهٔ PHP
       if (!S.loaded && !S.loading) load();
-      if (!S.manualEmployees.length && !S.manualLoading && !S.manualError) loadManualAttendance();
     },
     reload() {
       if (!window.FOOD_TICKET_API_BASE) return;
       S.loaded = false;
       S.error = '';
       load();
-      S.manualError = '';
-      loadManualAttendance();
     },
   };
 })();

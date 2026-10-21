@@ -7,12 +7,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R14</title>
+  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R15</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
     body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
-    main { width: min(100%, 680px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
+    main { width: min(100%, 720px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
     .tag { display: inline-block; padding: 7px 12px; border-radius: 999px; color: #075e56; background: #e7f6f1; font-size: 13px; font-weight: 700; }
     h1 { margin: 18px 0 10px; font-size: clamp(25px, 5vw, 34px); line-height: 1.5; }
     p { color: #53677b; line-height: 2; margin: 8px 0; }
@@ -25,19 +25,21 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ اصلاحی جدید · R14 · ۲۰۲۶/۱۰/۲۱</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — حذف کد ملی و کد پرسنلی از چارت سازمانی</h1>
-    <p>کدهای شخصی در فهرست افراد و درخت سازمان برای تمام سمت‌ها، از جمله مدیرعامل، نمایش داده نمی‌شوند و به مرورگر هم ارسال نمی‌شوند.</p>
+    <span class="tag">بستهٔ اصلاحی جدید · R15 · ۲۰۲۶/۱۰/۲۱</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — ثبت دستی تردد و فیش از تنظیمات</h1>
+    <p>ثبت دستی اکنون از بخش گروه‌های غذا به تنظیمات منتقل شده و از ثبت تکی/گروهی، با فیش یا بدون فیش، با کنترل مستقل چاپ فیزیکی پشتیبانی می‌کند.</p>
     <ul>
-      <li>فهرست افراد، پنجره‌های انتخاب و مدیریت افراد و کارت‌های موقعیت شغلی اصلاح شده‌اند.</li>
-      <li>جست‌وجوی افراد بر اساس نام انجام می‌شود؛ برچسب منبع دامین/محلی حفظ شده است.</li>
-      <li>مجوزها و قابلیت‌های دیگر چارت تغییر نکرده‌اند؛ مهاجرت دیتابیس لازم نیست.</li>
+      <li>فهرست کارکنان با جست‌وجوی زنده؛ حساب غیرفعال قابل ثبت نیست و کاربر بدون کد پرسنلی فقط برای «بدون فیش» قابل انتخاب است.</li>
+      <li>صدور فیش از چاپ فیزیکی مستقل است؛ ثبت بدون چاپ به‌عنوان فیش صادرشده ثبت می‌شود، نه تردد بدون فیش.</li>
+      <li>نتیجه و علت هر نفر جداگانه ثبت می‌شود؛ کنترل‌های مجوز، تکراری‌بودن و ثبت فقط برای امروز سمت سرور حفظ شده‌اند.</li>
+      <li>اصلاح R14 نیز همراه بسته است: کدهای ملی و پرسنلی در هیچ فهرست یا سمتی از چارت سازمانی نمایش/ارسال نمی‌شوند.</li>
+      <li>مهاجرت دیتابیس جدیدی لازم نیست.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-org-chart-no-personal-codes-r14-20261021.zip" download="ticket-update-1.61.10-org-chart-no-personal-codes-r14-20261021.zip">⬇ دریافت بستهٔ نصب R14</a>
-    <div class="file">ticket-update-1.61.10-org-chart-no-personal-codes-r14-20261021.zip · تنها بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-org-chart-no-personal-codes-r14-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r14/CHANGE-REPORT-FA.md">جزئیات R14</a></p>
-    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. نسخه‌های پیشین در آرشیو باقی می‌مانند.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-manual-attendance-settings-r15-20261021.zip" download="ticket-update-1.61.10-manual-attendance-settings-r15-20261021.zip">⬇ دریافت بستهٔ نصب R15</a>
+    <div class="file">ticket-update-1.61.10-manual-attendance-settings-r15-20261021.zip · تنها بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-manual-attendance-settings-r15-20261021.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-21-release-161-10-r15/CHANGE-REPORT-FA.md">جزئیات R15</a></p>
+    <div class="hint">از پنل «به‌روزرسانی سامانه» بارگذاری کنید و پیش از نصب پشتیبان بگیرید. بسته شامل اصلاحات R14 است؛ نسخه‌های قبلی در آرشیو باقی می‌مانند.</div>
   </main>
 </body>
 </html>
