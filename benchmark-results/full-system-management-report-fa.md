@@ -1,8 +1,8 @@
 # گزارش مدیریتی آزمون گستردهٔ سامانه
 
-**وضعیت جاری پس از اصلاحات (۱۴۰۵/۰۷/۳۰):** تست‌های Python پس از هم‌راستاسازی assertionها و رفع اختلاف طرح نصب خالی، **۱۳۸ تست و ۱۸ subtest موفق** شدند؛ هر دو تست Node و بررسی نحوی دو فایل JavaScript نیز موفق‌اند. `git diff --check` موفق است. این بررسی محلی، اجرای PHP/DB یا آزمون runtime/HTTP را تکرار نکرده است؛ بنابراین نتایج CI زیر اجرای پیشین و قبل از این اصلاحات‌اند و برای اثبات رفتار فعلی کافی نیستند. کل دامنهٔ سیستم و وابستگی‌های بیرونی نیز end-to-end پوشش داده نشده‌اند.
+**وضعیت جاری پس از اصلاحات (۱۴۰۵/۰۷/۳۰):** CI شمارهٔ [39866986761](https://github.com/alirezarahimy-code/ticket/actions/runs/39866986761) پس از اصلاحات اجرا شد. Python (۱۳۸ تست + ۱۸ subtest)، هر پنج اسکریپت Node، smoke مسیرها/API (۷۴/۷۴) و workload نوشتنی مصنوعی موفق شدند؛ اما **دروازهٔ CI قرمز است** چون تست‌های آفلاین PHP و ۷ assertion در `tests/smoke.php` شکست دارند. بنابراین کل سوئیت قبول نیست. هیچ production/staging هدف قرار نگرفت و هنوز پوشش end-to-end همهٔ نقش‌ها، عملیات، workerها و وابستگی‌های بیرونی وجود ندارد.
 
-**وضعیت اجرای قبلی:** ناموفق/نیازمند پیگیری — در اجرای CI شمارهٔ `39862237034` تست‌های Python شکست خورده بودند؛ سوابق آن در ادامه برای ردیابی محفوظ است.
+نتایج اجرای پیشین `39862237034` نیز برای ردیابی تاریخی پایین‌تر حفظ شده‌اند؛ آن اجرا پیش از اصلاحات بود.
 
 - شاخه: `arena/8edbdf95-ticket`
 - commit کد آزمون: `5a4910f`؛ نتایج CI ثبت‌شده در `03fe741`
@@ -10,7 +10,7 @@
 - محیط اجرا: runner موقت، PHP 8.2 و MariaDB موقت `ticket_benchmark`؛ فقط حساب‌ها و داده‌های مصنوعی.
 - **هیچ مقصد production یا staging، حساب عملیاتی یا دادهٔ واقعی استفاده نشد.** دیتابیس CI پس از اجرا از بین می‌رود.
 
-## خلاصهٔ نتیجه‌ها
+## خلاصهٔ اجرای پیشین — CI شمارهٔ 39862237034
 
 | بخش | نتیجه | شواهد و دامنه |
 |---|---|---|
@@ -64,21 +64,27 @@
 
 دو مورد اول خطای collection هستند؛ باقی موارد assertionهای ناموفق‌اند. بعضی نشانهٔ تست‌های عقب‌مانده از تغییر نسخه/امضای API هستند و بعضی، از جمله اختلاف CSS و مستندات انتشار، ممکن است ناهماهنگی واقعی باشند. آن‌ها را خودکار به «false positive» تبدیل نکردم و اصلاح کد یا تست را بدون بررسی رفتار مورد انتظار انجام ندادم.
 
-## بررسی محلی پس از اصلاحات — ۲۰۲۶-۱۰-۲۳
+## راستی‌آزمایی پس از اصلاحات — محلی و CI، ۲۰۲۶-۱۰-۲۳
 
-این بخش نتایج تازهٔ محلی را از اجرای قبلی CI جدا می‌کند:
+CI پس از push، روی runner موقت با PHP 8.2 و MariaDB دورریختنی اجرا شد؛ همهٔ داده‌ها و حساب‌ها مصنوعی بودند. خروجی‌های runtime/بار به‌روز در `benchmark-results/full-system-route-smoke.md` و `benchmark-results/benchmark-operations.md` هستند.
 
 | لایه | نتیجهٔ پس از اصلاحات |
 |---|---|
-| تست‌های Python | **۱۳۸ passed، ۱۸ subtests passed، بدون خطای collection یا failure** (`.venv/bin/pytest -q --continue-on-collection-errors tests`) |
-| JavaScript runtime | هر پنج اسکریپت `tests/test_*_node.js` و `tools/test_*_node.js` موفق شدند؛ از جمله ۱۲ بررسی fresh-state، ۴۱ بررسی UI و ۴۶ بررسی پنل چاپگر/کارکنان. |
-| JavaScript syntax | `node --check` برای دو asset غذا و سه اسکریپت Node تغییرکرده موفق شد. |
-| یکپارچگی patch | `git diff --check` موفق شد. |
-| HTTP/API و runtime برنامه | پس از اصلاحات دوباره اجرا نشد؛ نتیجهٔ پیشین ۷۴/۷۴ فقط به commit قبل از اصلاحات مربوط است. |
-| PHP، query/DB و داده | پس از اصلاحات اجرا/تأیید نشد؛ PHP CLI در محیط محلی موجود نیست. تغییر schema مربوط به fresh install فقط با assertionهای ایستا بررسی شده است. |
-| latency/بار | پس از اصلاحات اندازه‌گیری نشد؛ آمار قبلی، benchmark پیشین است و نباید به این تغییرات نسبت داده شود. |
+| Python | **۱۳۸ passed، ۱۸ subtests passed**؛ step در CI موفق شد. اجرای محلی نیز همین نتیجه را داد. |
+| JavaScript runtime | هر پنج اسکریپت `tests/test_*_node.js` و `tools/test_*_node.js` موفق؛ شامل ۱۲ بررسی fresh-state، ۴۱ بررسی UI و ۴۶ بررسی پنل چاپگر/کارکنان. |
+| HTTP/API | **۷۴/۷۴** مسیر/بررسی قبول؛ ۳۷ صفحه، ۲۶ API خواندنی و ۳ رد دسترسی موردانتظار. خطای HTTP غیرمنتظره صفر؛ لاگ route smoke: صفر PHP و صفر DB/SQL. |
+| PHP offline و DB smoke | **ناموفق:** چند تست آفلاین PHP شکست خوردند و `tests/smoke.php` هنوز ۷ assertion ناموفق دارد؛ موارد شناخته‌شده در ادامه‌اند. بنابراین quality gate CI قرمز است. |
+| workload نوشتنی | قبول در دامنهٔ محدود: ۲۵۰ نشست، ۳۲ worker، ۱٬۸۷۰ عملیات در ۳۵٫۹۴ ثانیه، حدود ۵۲٫۰۳ عملیات/ثانیه؛ صفر خطای HTTP/تأیید و صفر هشدار PHP در workload. |
+| latency | در route smoke ترتیبی: میانهٔ ۲۲٫۳۳ ms، بیشینهٔ ۱۷۹٫۸۹ ms؛ معیار بار/ظرفیت نیست. در workload: زمان کل ۳۵٫۹۴ ثانیه؛ آمار workload در گزارش خودش است. |
+| JavaScript syntax و patch | `node --check` برای assetها/اسکریپت‌های تغییرکرده و `git diff --check` موفق شدند. |
 
-اصلاحات پوشش داده‌شده: assertionهای کهنهٔ cache-buster و API غذا با رفتار/قرارداد جاری هم‌راستا شدند؛ تست فهرست سفارش نیابتی اکنون قرارداد واقعیِ POST، تأیید کد ملی، محدودیت کارمند/بازه و payload UI را بررسی می‌کند؛ `install-empty-db.sql` هم‌راستا شد تا fresh install ستون `food_catalog.category` را داشته باشد؛ CSS پنل سفارش غذا با stylesheet مرجع همگام شد و cache-buster تغییر کرد؛ مستندات انتشار به R31 به‌روز شدند. نتایج فوق قبولی کل آزمون‌های runtime یا همهٔ عملیات برنامه را ثابت نمی‌کنند.
+## شکست‌های باقی‌مانده در CI پس از اصلاحات
+
+- `tests/smoke.php`: هفت بررسی ایستا هنوز شکست می‌خورند: «پنل کامل داخل مسیر اصلی»، «تعیین ادمین اصلی از تنظیمات»، «تب‌های تنظیمات اصلی با گروه‌بندی و چیدمان فرم‌ها»، «تشخیص مرحله‌ای ورود LDAP»، «شماره‌گذاری درخواست»، «تنظیم نام سامانه» و «پوشه ذخیره پیوست». بررسی CSRF/CSP پس از اصلاح مسیر منبع پاس شد؛ warning ناشی از درون‌یابی `$groupEventIds` نیز اصلاح شد.
+- تست‌های آفلاین PHP ناموفق در run `39866986761`: `tools/test_fresh_db_offline.php` (۲ assertion)، `tools/test_food_personnel_link_offline.php` (تابع `xlsx_build` تعریف نشده در harness)، `tools/test_food_dupes_offline.php` (۱ assertion)، `tools/test_employees_import_offline.php` (ستون `must_change_password` در fixture نیست)، `tools/test_column_detect_offline.php` و `tests/test_food_ticket_logic.php` (تابع `app_error_log` در harness تعریف نشده)، `tools/test_brand_neutral_offline.php` (جست‌وجو وارد `node_modules` و متن تاریخی مستندات می‌شود)، `tools/test_api_contract_offline.php` (۳ assertion)، `tests/tts_normalize_test.php` (۱ مورد)، و `tests/SecurityTest.php` (انتظار پاک‌شدن ۱۳ جدول باقی‌مانده از rebuild).
+- failureها می‌توانند از fixture/includeهای ناقص، assertionهای عقب‌مانده یا اختلاف واقعی در قرارداد محصول ناشی شوند؛ هنوز برای همه علت قطعی یا اصلاحی اعمال نشده است. CI quality gate در نتیجه شکست دارد؛ تست‌های موفق HTTP/workload این شکست‌ها را نمی‌پوشانند.
+
+اصلاحات پوشش داده‌شده: assertionهای کهنهٔ cache-buster و API غذا با رفتار/قرارداد جاری هم‌راستا شدند؛ تست فهرست سفارش نیابتی اکنون قرارداد واقعیِ POST، تأیید کد ملی، محدودیت کارمند/بازه و payload UI را بررسی می‌کند؛ `install-empty-db.sql` هم‌راستا شد تا fresh install ستون `food_catalog.category` را داشته باشد؛ CSS پنل سفارش غذا با stylesheet مرجع همگام شد و cache-buster تغییر کرد؛ مستندات انتشار به R31 به‌روز شدند؛ assertionهای `tests/smoke.php` برای منبع واقعی CSRF/CSP و literal رویداد گروه اصلاح شدند. نتایج فوق قبولی کل آزمون‌های runtime یا همهٔ عملیات برنامه را ثابت نمی‌کنند.
 
 ## محدودیت‌ها و موارد اجرا‌نشده
 
@@ -90,8 +96,8 @@
 - APIهای نوشتنی همهٔ ماژول‌ها، import/exportها، backup/restore و تمام چرخه‌های Change/Problem/Traffic/Inventory به‌صورت end-to-end اجرا نشده‌اند.
 - `traffic-control-print` عمداً برای پرهیز از ادعای اجرای print preview در smoke گنجانده نشد.
 
-## جمع‌بندی اجرای قبلی و حدود استنباط
+## جمع‌بندی مدیریتی و حدود استنباط
 
-اجرای CI قبلی نسبت به smoke پیشین دامنه را به صفحه‌های عمدهٔ برنامه، APIهای خواندنی منتخب، دو چرخهٔ نوشتنی غذا، مرز مجوز دو نقش و بار واقعی handlerهای تیکت/CD/DVD گسترش داد. در همان commit، نتیجهٔ runtime در دامنهٔ آزموده‌شده قبول بود، اما کل سوئیت به‌علت شکست‌های Python ناموفق ماند. تست‌های Python و Node در اصلاحات بعدی محلی قبول شدند؛ این به‌روزرسانی، PHP/DB و runtime/HTTP را دوباره اجرا نکرده است. به‌دلیل محدودیت‌های بالا، این گزارش ادعای پوشش کامل همهٔ عملیات، نقش‌ها، workerها، سخت‌افزار یا سرویس‌های بیرونی ندارد.
+پس از اصلاحات، CI جدید مسیرهای نماینده و APIهای منتخب را ۷۴/۷۴ و workload نوشتنی محدود را قبول کرد؛ Python و JavaScript نیز پاس شدند. بااین‌حال PHP offline و `tests/smoke.php` شکست دارند، پس نتیجهٔ کل سوئیت **ناموفق/نیازمند پیگیری** است. این آزمون‌ها فقط حساب و دادهٔ مصنوعی در runner/MariaDB دورریختنی به کار بردند؛ production/staging، حساب یا دادهٔ عملیاتی هدف قرار نگرفت. این گزارش ادعای پوشش کامل همهٔ عملیات، نقش‌ها، workerها، سخت‌افزار یا سرویس‌های بیرونی ندارد.
 
 گزارش فنی route smoke: `benchmark-results/full-system-route-smoke.md` و JSON متناظر. گزارش workload: `benchmark-results/benchmark-operations.md` و JSON متناظر. فایل‌های log و JUnit پایتون در artifact همان اجرای GitHub Actions نگهداری می‌شوند.

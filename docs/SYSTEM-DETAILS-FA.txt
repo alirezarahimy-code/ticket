@@ -87,8 +87,8 @@
 
 آزمون‌ها و محدودیت تأیید
 -----------------------
-- گزارش آزمون گسترده در benchmark-results/full-system-management-report-fa.md نتایج CI پیشین را از اصلاحات بعدی جدا می‌کند. پس از اصلاحات محلی، ۱۳۸ تست Python و ۱۸ subtest، هر پنج اسکریپت Node، بررسی نحوی assetها/اسکریپت‌های تغییرکرده و `git diff --check` موفق شدند؛ PHP/DB و HTTP runtime هنوز دوباره اجرا نشده‌اند.
-- runtime-smoke پیشین شامل ۳۷ صفحه، ۲۶ API خواندنی و دو نقش (ادمین اصلی و کاربر عادی) بود؛ این نتیجهٔ قبل از اصلاحات است و همهٔ عملیات نوشتنی، نقش‌ها و workerها را پوشش نمی‌دهد.
+- گزارش آزمون گسترده در benchmark-results/full-system-management-report-fa.md نتایج CI پس از اصلاحات را نیز ثبت می‌کند: Python برابر ۱۳۸ تست و ۱۸ subtest، پنج اسکریپت Node و route/API smoke برابر ۷۴/۷۴ موفق‌اند؛ workload نوشتنی محدود هم موفق شد. بااین‌حال PHP offline و ۷ assertion در `tests/smoke.php` ناموفق‌اند و quality gate قرمز است.
+- route smoke شامل ۳۷ صفحه، ۲۶ API خواندنی و دو نقش (ادمین اصلی و کاربر عادی) است؛ همهٔ عملیات نوشتنی، role matrix، workerها و وابستگی‌های بیرونی را پوشش نمی‌دهد. WMI/Windows، LDAP/AD واقعی، Access/ODBC، چاپگر فیزیکی و production/staging اجرا نشده‌اند.
 - Windows/WMI، LDAP/AD واقعی، Access/ODBC، چاپگر فیزیکی، cron/queue workerها و production اجرا نشده‌اند. هیچ دادهٔ عملیاتی تغییر نکرده است.
 - صحت بستهٔ ZIP و تطابق فایل‌های اصلی آن با workspace بررسی شده است.
 - پیش‌نمایش چاپگر، فونت‌های نصب‌شده و صف واقعی ممکن است با وضعیت محیط نصب تفاوت داشته باشد؛ هنگام مشاهدهٔ نام فونت جایگزین، فونت TTF را در محیط چاپ تأمین کنید.

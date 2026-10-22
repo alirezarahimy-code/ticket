@@ -15,7 +15,7 @@
 - R31 دادهٔ معتبر قبلی Inventory را هنگام خطای WMI/CIM یا نبود پوشش collector حفظ می‌کند و وضعیت منبع/زمان تلاش و پاسخ موفق را برای داده‌های خودکار ثبت می‌کند.
 - شروع پنل مدیریت غذا با موازی‌کردن درخواست‌های مستقل و دسته‌ای‌کردن بررسی برخورد نام کاربری کارکنان بهینه شده است.
 - زمان‌سنجی رندر پنل غذا، APIها و ورود LDAP به لاگ افزوده شده؛ این لاگ به‌تنهایی اجرای واقعی یا اثبات علت کندی نیست.
-- [گزارش مدیریتی آزمون سامانه](../benchmark-results/full-system-management-report-fa.md) نتایج CI پیشین را از راستی‌آزمایی محلی پس از اصلاحات جدا می‌کند: Python برابر ۱۳۸ تست و ۱۸ subtest موفق، هر پنج اسکریپت Node موفق و `node --check`/`git diff --check` موفق‌اند. آزمون HTTP/PHP/DB پس از اصلاحات هنوز تکرار نشده؛ اجرای واقعی WMI/Windows، LDAP/AD، Access/ODBC و production نیز انجام نشده است.
+- [گزارش مدیریتی آزمون سامانه](../benchmark-results/full-system-management-report-fa.md) نتایج CI پس از اصلاحات را ثبت می‌کند: Python (۱۳۸ تست + ۱۸ subtest)، هر پنج اسکریپت Node، route/API smoke (۷۴/۷۴) و workload نوشتنی مصنوعی قبول شدند؛ اما تست‌های PHP offline و ۷ assertion در `tests/smoke.php` شکست دارند و quality gate قرمز است. WMI/Windows، LDAP/AD واقعی، Access/ODBC، چاپگر فیزیکی و production/staging اجرا نشده‌اند.
 
 ## سابقه — انتشار نسخهٔ ۱.۶۱.۹
 
