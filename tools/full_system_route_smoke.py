@@ -56,8 +56,11 @@ class RouteSmoke:
         ok = not error and status in expected and not fatal
         if not ok:
             error = "; ".join(part for part in (error, f"unexpected status {status}" if status not in expected else "", f"PHP marker: {fatal}" if fatal else "") if part)
-        self.results.append({"name": label, "method": method, "path": path, "status": status,
-                             "latency_ms": latency_ms, "ok": ok, "error": error})
+        result = {"name": label, "method": method, "path": path, "status": status,
+                  "latency_ms": latency_ms, "ok": ok, "error": error}
+        if status >= 400 and status in expected:
+            result["expected_rejection"] = True
+        self.results.append(result)
         return status, body, latency_ms
 
     def login(self) -> None:
@@ -124,11 +127,12 @@ class RouteSmoke:
                        "guest-cap", "food-groups", "orders"]
         for route in food_ticket:
             self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route)}")
+        today = date.today().isoformat()
         food_ticket_menu = [
             ("food-menu/status", ""), ("food-menu/month", f"month={month}"),
-            ("food-menu/catalog", ""), ("food-menu/orders", ""),
+            ("food-menu/catalog", ""), ("food-menu/orders", f"date={today}"),
             ("food-menu/cancel-requests", ""), ("food-menu/groups", ""),
-            ("food-menu/statistics", f"month={month}"),
+            ("food-menu/statistics", f"from={today}&to={today}"),
         ]
         for route, query in food_ticket_menu:
             suffix = "&" + query if query else ""
@@ -321,6 +325,7 @@ def main() -> int:
         "role_checks_tested": sum(str(row["name"]).startswith("requester:") for row in smoke.results),
         "expected_authorization_rejections": sum(bool(row.get("expected_rejection")) for row in smoke.results),
         "http_error_responses": sum(int(row["status"]) >= 400 for row in smoke.results),
+        "unexpected_http_error_responses": sum(int(row["status"]) >= 400 and not row.get("expected_rejection") for row in smoke.results),
         "application_error_payloads": sum(bool(row.get("application_error")) for row in smoke.results),
         "food_ticket_group_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("food-ticket synthetic POST create group", "food-ticket absence-status for synthetic group", "food-ticket synthetic POST delete group")),
         "php_runtime_log_error_lines": len(php_runtime_lines),
@@ -345,7 +350,7 @@ def main() -> int:
     lines = ["# Full-system route/API smoke (isolated synthetic data)", "",
              f"- Scope: {report['scope']}", f"- Account: `{args.username}` (synthetic)",
              f"- Pages: {report['pages_tested']}; API reads: {report['api_reads_tested']}; requester permission checks: {report['role_checks_tested']}; total checks: {report['total_checks']}",
-             f"- HTTP error responses: {report['http_error_responses']}; JSON application errors: {report['application_error_payloads']}; PHP runtime log lines: {report['php_runtime_log_error_lines']}; DB/SQL log lines: {report['database_error_log_lines']}",
+             f"- HTTP errors: {report['http_error_responses']} (unexpected: {report['unexpected_http_error_responses']}; expected authorization rejections: {report['expected_authorization_rejections']}); JSON error payloads: {report['application_error_payloads']}; PHP runtime log lines: {report['php_runtime_log_error_lines']}; DB/SQL log lines: {report['database_error_log_lines']}",
              f"- Passed: {report['passed']}; failed: {report['failed']}",
              f"- Food-order create/cancel/read-back: {'passed' if report['food_order_write_lifecycle_tested'] else 'not passed'}; food-ticket group create/status/delete: {'passed' if report['food_ticket_group_write_lifecycle_tested'] else 'not passed'}",
              f"- Expected access rejections: {report['expected_authorization_rejections']}",
