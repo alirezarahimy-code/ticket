@@ -74,6 +74,16 @@ jobs:
       - name: Run 250 isolated virtual users
         run: python3 tools/benchmark_250.py --vus 250 --ramp-up 30 --duration 90 --think-time 1 --php-workers 32 --output-dir benchmark-results
 
+      - name: Publish benchmark summary in Actions
+        if: always()
+        run: |
+          if [ -f benchmark-results/benchmark-250.md ]; then
+            cat benchmark-results/benchmark-250.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Benchmark did not produce a report; PHP server log follows.' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 100 /tmp/ticket-php-benchmark.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
       - name: Capture MariaDB container usage
         if: always()
         run: |

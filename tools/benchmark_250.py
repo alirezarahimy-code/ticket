@@ -263,6 +263,11 @@ def main() -> int:
     ]
     for row in totals:
         lines.append(f"| {row['route']} | {row['count']} | {row['rps']} | {row['p50_ms']} | {row['p95_ms']} | {row['p99_ms']} | {row['max_ms']} | {row['statuses']} |")
+    lines.extend(['', '## نمونهٔ خطاها'])
+    if metrics.failures:
+        lines.extend([f"- {item['route']} — HTTP {item['status']}: {item['error']}" for item in metrics.failures[:30]])
+    else:
+        lines.append('- موردی ثبت نشد.')
     lines.extend(['', '## محدودیت‌ها', *[f'- {item}' for item in report['limitations']], ''])
     md_path.write_text('\n'.join(lines), encoding='utf-8')
     print(md_path.read_text(encoding='utf-8'))
