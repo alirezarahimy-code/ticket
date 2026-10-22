@@ -130,14 +130,14 @@ preg_match_all("#api\(\s*'/api/([A-Za-z0-9_\-/]+)#", $panel, $routes);
 $used = array_unique($routes[1]);
 check('۴: مسیرهای API پنل استخراج شدند', count($used) > 8, (string) count($used));
 
-// مسیرهای عمومی (ورود/نشست) در ابتدای فایل با in_array مجاز می‌شوند، نه در جدول مجوز.
-$publicSection = substr($foodTicket, 0, 4000);
+// مسیرهای ورود عمومی صریحاً پیش از نگاشت مجوز بررسی می‌شوند؛ این منطق دیگر محدود به ابتدای فایل نیست.
+$publicLoginGuard = "if (in_array(\$route, ['login', 'sso-login'], true))";
 $unmapped = [];
 foreach ($used as $route) {
     if (str_contains($foodTicket, "'" . $route . "' => '")) {
         continue;
     }
-    if (str_contains($publicSection, "'" . $route . "'")) {
+    if (in_array($route, ['login', 'sso-login'], true) && str_contains($foodTicket, $publicLoginGuard)) {
         continue;
     }
     $unmapped[] = $route;
@@ -207,13 +207,14 @@ check('۲۲: سوئیچ روش چاپ زنده است (بدون رندر مجد�
     str_contains($panel, 'function togglePrinterModeFields(') && str_contains($panel, "t.name==='mode'"));
 check('۲۳: فرم درخواست با حوزهٔ «خدمات کامپیوتری» باز می‌شود',
     str_contains($indexPhp, "\$ticketDefaultGroup = \$cdDvdRequestRecord ? 'support' : 'it';"));
-check('۲۴: الزام «سیستم مرتبط» در حوزهٔ IT در سرور و پنل اعمال شده است',
-    str_contains($indexPhp, "\$requiresAsset = \$serviceGroup === 'it' ? true :")
-    && str_contains($indexPhp, 'در حوزهٔ خدمات کامپیوتری، انتخاب «سیستم مرتبط» الزامی است')
-    && str_contains($appJs, "var requiresAsset = group === 'it';")
-    && str_contains($appJs, "getGroup() === 'it' && assetSelector.value === ''"));
-check('۲۵: نمایش/مخفای «سیستم مرتبط» بر پایهٔ حوزه است و Enter با یک نتیجه انتخاب می‌کند',
-    str_contains($appJs, 'assetField.hidden = !requiresAsset;')
+check('۲۴: الزام «سیستم مرتبط» در حوزهٔ IT پس از انتخاب خدمت در سرور و پنل اعمال شده است',
+    str_contains($indexPhp, "\$requiresAsset = \$serviceGroup === 'it';")
+    && str_contains($indexPhp, 'برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است')
+    && str_contains($appJs, 'var requiresAsset = isItGroup && hasSelectedService;')
+    && str_contains($appJs, "var requiresAsset = getGroup() === 'it' && !!(submittedService && submittedService.value !== '');")
+    && str_contains($appJs, "if (requiresAsset && assetSelector.value === '')"));
+check('۲۵: نمایش سیستم بر پایهٔ حوزه است و Enter با یک نتیجه انتخاب می‌کند',
+    str_contains($appJs, 'assetField.hidden = !isItGroup;')
     && str_contains($appJs, 'if (assetRows.length === 1) node = assetRows[0];'));
 check('۲۷: ارتفاع خط با ESC 3 قفل می‌شود (عقب‌راندن دقیق، مستقل از تنظیم چاپگر)',
     str_contains($netprint, '$out .= "\\x1b\\x33" . chr($lineDots);'));

@@ -4,7 +4,9 @@ declare(strict_types=1);
 // آزمون آفلاین اتصال کاربران دامین به پرسنل غذا (SQLite درون‌حافظه).
 // تطبیق نام، همنام‌ها، کد ملی متفاوت، ادغام، بازگشت تراکنش، و جلوگیری از انتخاب تکراری.
 
-require __DIR__ . '/../food-personnel-link.php';
+$root = dirname(__DIR__);
+require $root . '/food-personnel-link.php';
+require_once $root . '/xlsx-writer.php';
 
 $failures = 0;
 $passes = 0;
@@ -128,11 +130,23 @@ check('گزارش: ادغام‌شده‌ها «تطبیق_شده» هستند (
 check('گزارش: کد از قبل ثبت‌شده «دارای_کد» است (دامین ۴)', $cat['4'] === 'دارای_کد');
 check('گزارش: کد ملی متفاوت (دامین ۳)', $cat['3'] === 'کد_ملی_متفاوت');
 check('گزارش: بدون تطبیق (دامین ۵)', $cat['5'] === 'بدون_تطبیق');
-$csvLines = [];
-ob_start();
-fpl_report_csv($report);
-$csv = ob_get_clean();
-check('CSV گزارش BOM و سرستون دارد', str_starts_with($csv, "\xEF\xBB\xBF") && str_contains($csv, 'وضعیت'));
+$xlsx = fpl_report_xlsx_bytes($report);
+$tempXlsx = tempnam(sys_get_temp_dir(), 'fpl-report-test-');
+$xlsxValid = false;
+$xlsxHasReportData = false;
+if (is_string($tempXlsx) && $tempXlsx !== '' && class_exists('ZipArchive')) {
+    file_put_contents($tempXlsx, $xlsx);
+    $archive = new ZipArchive();
+    if ($archive->open($tempXlsx) === true) {
+        $sheet = (string) $archive->getFromName('xl/worksheets/sheet1.xml');
+        $xlsxValid = $archive->locateName('[Content_Types].xml') !== false && $sheet !== '';
+        $xlsxHasReportData = str_contains($sheet, 'شناسه دامین') && str_contains($sheet, 'وضعیت') && str_contains($sheet, 'تطبیق_شده');
+        $archive->close();
+    }
+    @unlink($tempXlsx);
+}
+check('گزارش پرسنل یک فایل XLSX معتبر می‌سازد', str_starts_with($xlsx, "PK\x03\x04") && $xlsxValid);
+check('گزارش XLSX سرستون‌ها و ردیف‌های وضعیت را دارد', $xlsxHasReportData);
 check('فهرست پشتیبان پیدا شد', count(fpl_backup_tables($pdo)) >= 1);
 
 // ---------- کاربر دامین غیرفعال: نه تطبیق، نه گزارش تطبیق ----------
@@ -220,11 +234,11 @@ check('کد واردشدهٔ ۳۳۶ بر صفرهای ابتدایی رکورد 
 check('رکورد محلی کد ۰۰۳۳۶ پس از انتقال حذف می‌شود', (int) $pdo->query('SELECT COUNT(*) FROM users WHERE id = 24')->fetchColumn() === 0);
 
 // ---------- کد دستی جدید باید مقدار قدیمی و اشتباه دامین را جایگزین کند ----------
-$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (26,'335','پرسنل کد ۳۳۵','پرسنل','کد ۳۳۵','335','','local_user','local',1)");
+$pdo->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (26,'4335','پرسنل کد ۴۳۳۵','پرسنل','کد ۴۳۳۵','4335','','local_user','local',1)");
 $pdo->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (27,'p.oldcode','کاربر دامین','35','','user','ldap',1)");
-$overrideCode = fpl_apply($pdo, [], ['27' => '335']);
-check('اتصال دستی ۳۳۵ کد قدیمی ۳۵ دامین را با اولویت ورودی جایگزین می‌کند', count($overrideCode) === 1 && $overrideCode[0]['ok'] === true);
-check('کاربر دامین پس از اتصال کد پرسنلی ۳۳۵ دارد', (string) $pdo->query('SELECT employee_number FROM users WHERE id = 27')->fetchColumn() === '335');
+$overrideCode = fpl_apply($pdo, [], ['27' => '4335']);
+check('اتصال دستی ۴۳۳۵ کد قدیمی ۳۵ دامین را با اولویت ورودی جایگزین می‌کند', count($overrideCode) === 1 && $overrideCode[0]['ok'] === true);
+check('کاربر دامین پس از اتصال کد پرسنلی ۴۳۳۵ دارد', (string) $pdo->query('SELECT employee_number FROM users WHERE id = 27')->fetchColumn() === '4335');
 check('حساب محلی دارای کد ۳۳۵ با ارجاع‌هایش در ادغام امن منتقل شد', (int) $pdo->query('SELECT COUNT(*) FROM users WHERE id = 26')->fetchColumn() === 0);
 
 // ---------- هم‌زمانی رکورد واقعی پرسنل غذا و حساب ورود محلی برای کد ۳۳۵ ----------
@@ -234,7 +248,7 @@ $p3->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT UNIQUE, ful
 $p3->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (1,'335','ورود محلی',NULL,'1234567890','guard','local',1)");
 $p3->exec("INSERT INTO users (id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_active) VALUES (2,'food_335','پرسنل رسمی','علی','نمونه','335','1234567890','user','food',1)");
 $p3->exec("INSERT INTO users (id, username, full_name, employee_number, national_code, role, auth_source, is_active) VALUES (3,'domain.335','حساب دامینی','35','1234567890','user','ldap',1)");
-$p3Rows = $p3->query("SELECT id, username, full_name, employee_number, national_code, role, auth_source, is_primary_admin FROM users WHERE auth_source IN ('food', 'local')")->fetchAll();
+$p3Rows = $p3->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_primary_admin FROM users WHERE auth_source IN ('food', 'local')")->fetchAll();
 $p3Candidates = fpl_code_candidate_rows($p3Rows, '335');
 $p3Matches = fpl_food_code_matches($p3Rows, '335');
 check('جستجوی دیتابیس کد ۳۳۵ هر دو ردیف غذا و حساب محلیِ بازرسی را پیدا می‌کند', count($p3Candidates) === 2 && count($p3Matches) === 2);

@@ -698,18 +698,21 @@ function fpl_backup_tables(PDO $pdo): array
 function fpl_report_rows(PDO $pdo): array
 {
     $domainRows = $pdo->query("SELECT id, username, full_name, employee_number, national_code, is_active FROM users WHERE auth_source = 'ldap' ORDER BY full_name, id")->fetchAll();
-    $currentFood = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number, national_code FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
+    $currentFood = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_primary_admin FROM users WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)")->fetchAll();
     $currentFoodCodes = [];
     foreach ($currentFood as $food) {
-        $currentFoodCodes[(string) $food['employee_number']] = true;
+        $code = fpl_normalize_code(fpl_food_personnel_code($food));
+        if ($code !== '') {
+            $currentFoodCodes[$code] = true;
+        }
     }
 
     // پرسنل/حساب محلی حذف‌شده در ادغام‌ها (از جدول‌های پشتیبان)، کلید: کد پرسنلی
     $merged = [];
     foreach (fpl_backup_tables($pdo) as $table) {
-        $stmt = $pdo->query('SELECT id, full_name, first_name, last_name, employee_number, national_code FROM `' . str_replace('`', '', $table) . "` WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)");
+        $stmt = $pdo->query('SELECT id, username, full_name, first_name, last_name, employee_number, national_code, role, auth_source, is_primary_admin FROM `' . str_replace('`', '', $table) . "` WHERE auth_source = 'food' OR (auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0)");
         foreach ($stmt->fetchAll() as $old) {
-            $code = (string) $old['employee_number'];
+            $code = fpl_normalize_code(fpl_food_personnel_code($old));
             if ($code !== '' && !isset($currentFoodCodes[$code]) && !isset($merged[$code])) {
                 $merged[$code] = ['food' => $old, 'backup' => $table];
             }
@@ -725,6 +728,7 @@ function fpl_report_rows(PDO $pdo): array
     foreach ($domainRows as $domain) {
         $domainId = (int) $domain['id'];
         $code = trim((string) ($domain['employee_number'] ?? ''));
+        $codeKey = fpl_normalize_code($code);
         $row = [
             'domain_id' => (string) $domainId,
             'username' => (string) $domain['username'],
@@ -737,10 +741,11 @@ function fpl_report_rows(PDO $pdo): array
         if ((int) ($domain['is_active'] ?? 0) !== 1) {
             $row['category'] = 'غیرفعال_دامین';
             $row['details'] = 'حساب دامین غیرفعال است؛ در اتصال و ایمپورت لحاظ نمی‌شود.';
-        } elseif ($code !== '' && isset($merged[$code])) {
-            $old = $merged[$code]['food'];
+        } elseif ($codeKey !== '' && isset($merged[$codeKey])) {
+            $old = $merged[$codeKey]['food'];
+            $backupName = $merged[$codeKey]['backup'];
             $row['category'] = 'تطبیق_شده';
-            $row['details'] = 'پرسنل غذای قبلی: ' . (string) $old['full_name'] . ' | پشتیبان: ' . $merged[$code]['backup'];
+            $row['details'] = 'حساب/پرسنل قبلی: ' . (string) $old['full_name'] . ' | پشتیبان: ' . $backupName;
         } elseif ($code !== '') {
             $row['category'] = 'دارای_کد';
             $row['details'] = 'کد پرسنلی از قبل ثبت شده است.';
@@ -784,8 +789,8 @@ function fpl_similar_food_names(array $foodRows, string $domainFullName): array
     return $suggestions === [] ? ['پیشنهادی پیدا نشد؛ دستی بررسی شود.'] : array_map(static fn (string $s): string => 'پیشنهاد: ' . $s, $suggestions);
 }
 
-/** خروجی XLSX گزارش (فایل واقعی Excel). */
-function fpl_report_csv(array $report): void
+/** ساخت بایت‌های XLSX گزارش برای ارسال و آزمون مستقل از پاسخ HTTP. */
+function fpl_report_xlsx_bytes(array $report): string
 {
     $headers = ['شناسه دامین', 'نام کاربری', 'نام کامل', 'کد پرسنلی', 'کد ملی', 'وضعیت', 'جزئیات'];
     $keys = ['domain_id', 'username', 'full_name', 'employee_number', 'national_code', 'category', 'details'];
@@ -798,10 +803,15 @@ function fpl_report_csv(array $report): void
         }
         $sheetRows[] = $line;
     }
-    $bytes = xlsx_build([[
+    return xlsx_build([[
         'name' => 'گزارش پرسنل',
         'rows' => $sheetRows,
         'widths' => [16, 22, 24, 16, 16, 18, 40],
     ]]);
-    xlsx_send('fpl-report-' . date('Ymd_His') . '.xlsx', $bytes);
+}
+
+/** نام قدیمی برای سازگاری مسیر دانلود؛ خروجی فعلی فایل XLSX واقعی است. */
+function fpl_report_csv(array $report): void
+{
+    xlsx_send('fpl-report-' . date('Ymd_His') . '.xlsx', fpl_report_xlsx_bytes($report));
 }

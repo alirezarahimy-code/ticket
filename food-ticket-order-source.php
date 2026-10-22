@@ -4,7 +4,7 @@ declare(strict_types=1);
 /**
  * لایهٔ منبع سفارش فیش.
  * در این نسخه سفارش فقط از MySQL داخلی خوانده می‌شود؛ این فایل به ODBC سفارش وصل نمی‌شود.
- * Access منبع تردد TENTER در مسیر اصلی Worker دست‌نخورده باقی می‌ماند.
+ * منبع بیرونی تردد در مسیر اصلی Worker دست‌نخورده باقی می‌ماند.
  */
 
 function food_order_internal_map(string $isoDate): array
