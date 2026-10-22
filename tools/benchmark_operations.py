@@ -351,6 +351,8 @@ def main() -> int:
         invariant_failures.append('database final resolved-ticket count did not equal 250')
     if int(db_report.get('tickets', {}).get('created_for_run', -1)) != expected_tickets:
         invariant_failures.append('database-created ticket count did not equal 250')
+    if int(db_report.get('tickets', {}).get('ticket_numbers_assigned', -1)) != expected_tickets or int(db_report.get('tickets', {}).get('unique_ticket_numbers', -1)) != expected_tickets:
+        invariant_failures.append('ticket numbers were missing or not unique in the final database state')
     if int(db_report.get('cd_dvd', {}).get('records_for_run', -1)) != regular_media_attempts + duplicate_attempts // 2:
         # Conflict requests intentionally permit exactly one save per same-serial pair.
         invariant_failures.append('database CD/DVD record count did not match 250 regular writes plus one winner per 60 pairs')

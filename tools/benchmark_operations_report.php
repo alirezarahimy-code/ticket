@@ -25,6 +25,12 @@ $resolvedTickets = $statusCounts['resolved'] ?? 0;
 $idsStmt = $pdo->prepare('SELECT id FROM tickets WHERE subject LIKE ? ORDER BY id');
 $idsStmt->execute([$ticketPrefix]);
 $ticketIds = array_map('intval', $idsStmt->fetchAll(PDO::FETCH_COLUMN));
+$numberStmt = $pdo->prepare('SELECT ticket_no FROM tickets WHERE subject LIKE ? ORDER BY id');
+$numberStmt->execute([$ticketPrefix]);
+$ticketNumbers = array_values(array_filter(array_map('strval', $numberStmt->fetchAll(PDO::FETCH_COLUMN)), static fn (string $number): bool => $number !== ''));
+$sequenceStmt = $pdo->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? LIMIT 1');
+$sequenceStmt->execute(['IT']);
+$itSequence = (int) ($sequenceStmt->fetchColumn() ?: 0);
 $messageCount = 0;
 $eventCount = 0;
 if ($ticketIds !== []) {
@@ -91,6 +97,8 @@ $result = [
     'tickets' => [
         'created_for_run' => $createdTickets, 'resolved_for_run' => $resolvedTickets,
         'status_counts' => $statusCounts, 'message_rows' => $messageCount, 'event_rows' => $eventCount,
+        'ticket_numbers_assigned' => count($ticketNumbers), 'unique_ticket_numbers' => count(array_unique($ticketNumbers)),
+        'it_sequence_counter' => $itSequence,
         'synthetic_ticket_ids_sample' => array_slice($ticketIds, 0, 20),
     ],
     'cd_dvd' => [

@@ -2027,13 +2027,38 @@ function ticket_number_next(string $prefix): string
 {
     ticket_number_ensure_schema();
     $prefix = strtoupper(substr(trim($prefix) !== '' ? trim($prefix) : 'TK', 0, 12));
-    $statement = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)');
-    $statement->execute([$prefix]);
-    $sequence = (int) db()->query('SELECT LAST_INSERT_ID()')->fetchColumn();
-    if ($sequence <= 0) {
-        $sequence = 1;
+    $ownsTransaction = !db()->inTransaction();
+    if ($ownsTransaction) {
+        db()->beginTransaction();
     }
-    return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    try {
+        // Lock the prefix row explicitly and read its value in this transaction. This
+        // avoids relying on connection-scoped LAST_INSERT_ID() after concurrent upserts.
+        $ensure = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, 0) ON DUPLICATE KEY UPDATE prefix = VALUES(prefix)');
+        $ensure->execute([$prefix]);
+        $read = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? FOR UPDATE');
+        $read->execute([$prefix]);
+        $currentSequence = (int) ($read->fetchColumn() ?: 0);
+
+        // Heal a stale sequence left by legacy/manual ticket numbers before allocating
+        // the next number; the ticket_no index keeps this prefix-scoped lookup bounded.
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+        $maxQuery = db()->prepare('SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED)) FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?');
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existingMaximum = (int) ($maxQuery->fetchColumn() ?: 0);
+        $sequence = max($currentSequence, $existingMaximum) + 1;
+        $write = db()->prepare('UPDATE ticket_number_seq SET seq = ? WHERE prefix = ?');
+        $write->execute([$sequence, $prefix]);
+        if ($ownsTransaction) {
+            db()->commit();
+        }
+        return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    } catch (Throwable $exception) {
+        if ($ownsTransaction && db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $exception;
+    }
 }
 
 function ticket_number_peek(string $prefix): string
