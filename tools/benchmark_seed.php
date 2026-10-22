@@ -28,6 +28,15 @@ $configPath = $root . '/config.php';
 file_put_contents($configPath, "<?php\ndeclare(strict_types=1);\nreturn " . var_export($config, true) . ";\n", LOCK_EX);
 @chmod($configPath, 0600);
 
+// Match the filesystem prerequisite created by install.php in this disposable CI instance.
+$uploadsDir = $root . '/storage/uploads';
+if (!is_dir($uploadsDir) && !@mkdir($uploadsDir, 0755, true) && !is_dir($uploadsDir)) {
+    throw new RuntimeException('Could not prepare the synthetic uploads directory.');
+}
+if (!is_writable($uploadsDir)) {
+    throw new RuntimeException('The synthetic uploads directory is not writable.');
+}
+
 $password = getenv('BENCHMARK_PASSWORD');
 if (!is_string($password) || strlen($password) < 16) {
     throw new RuntimeException('BENCHMARK_PASSWORD must be generated for this isolated run.');
@@ -35,6 +44,7 @@ if (!is_string($password) || strlen($password) < 16) {
 $hash = password_hash($password, PASSWORD_DEFAULT);
 $pdo->beginTransaction();
 try {
+    $pdo->exec("INSERT IGNORE INTO settings (`key`, `value`) VALUES ('app_name', 'Synthetic CI Ticket System')");
     $department = $pdo->prepare('INSERT INTO departments (name, code, is_active) VALUES (?, ?, 1)');
     $department->execute(['Benchmark Synthetic Unit', 'BENCH']);
     $departmentId = (int) $pdo->lastInsertId();
