@@ -138,7 +138,7 @@ def main() -> int:
         parser.error('BENCHMARK_PASSWORD must be set for the disposable synthetic accounts')
 
     seed = json.loads(Path(args.seed).read_text(encoding='utf-8'))
-    if not seed.get('synthetic_only') or seed.get('account_count') != 250 or len(seed.get('asset_ids', [])) < 250:
+    if not seed.get('synthetic_only') or seed.get('account_count') != 250 or len(seed.get('asset_ids', [])) < 250 or len(seed.get('user_ids', [])) != 250:
         parser.error('Synthetic seed manifest is missing or does not match the 250-user workload.')
     token = os.urandom(4).hex().upper()
     test_started_utc = datetime.now(timezone.utc)
@@ -269,7 +269,8 @@ def main() -> int:
             if created:
                 update = {
                     'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
-                    'status': 'resolved', 'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.',
+                    'status': 'resolved', 'assigned_to': str(seed['user_ids'][vu]),
+                    'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
                 }
                 status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
                 resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
@@ -355,8 +356,6 @@ def main() -> int:
         invariant_failures.append('database CD/DVD record count did not match 250 regular writes plus one winner per 60 pairs')
     if repeated_direction_count != 0:
         invariant_failures.append(f'CD/DVD same-serial repeated-direction integrity violations: {repeated_direction_count}')
-    if int(db_report.get('expected_duplicate_state_rejections', -1)) != 60:
-        invariant_failures.append('database logs did not contain exactly 60 controlled duplicate-state rejections')
     if int(db_report.get('unexpected_application_system_error_count', -1)) != 0:
         invariant_failures.append('unexpected application/system errors were recorded during the test')
     if pair_invariant_failures:

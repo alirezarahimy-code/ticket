@@ -99,7 +99,7 @@ $result = [
         'same_direction_violation_samples' => array_slice($repeated, 0, 30),
     ],
     'application_system_errors_since_start' => (int) $systemLogCounts['total'],
-    'expected_duplicate_state_rejections' => (int) $systemLogCounts['expected_rejections'],
+    'expected_duplicate_state_rejection_log_rows' => (int) $systemLogCounts['expected_rejections'],
     'slow_query_warning_count' => (int) $systemLogCounts['slow_queries'],
     'unexpected_application_system_error_count' => $unexpectedSystemErrorCount,
     'application_system_error_samples' => array_slice($systemErrors, 0, 100),

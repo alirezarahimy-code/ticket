@@ -26,7 +26,7 @@ try {
     $serviceInsert->execute(['Synthetic operations stress test', 'BENCH-OPS-IT', 'CI-only synthetic service; no operational data.', $department, $category, $itHandling]);
     $serviceId = (int) $pdo->lastInsertId();
     $assets = $pdo->query("SELECT id FROM assets WHERE asset_tag LIKE 'BENCH-PC-%' ORDER BY id LIMIT 500")->fetchAll(PDO::FETCH_COLUMN);
-    $accounts = $pdo->query("SELECT username FROM users WHERE username LIKE 'loadtest-%' ORDER BY username LIMIT 250")->fetchAll(PDO::FETCH_COLUMN);
+    $accounts = $pdo->query("SELECT id, username FROM users WHERE username LIKE 'loadtest-%' ORDER BY username LIMIT 250")->fetchAll();
     if (count($assets) !== 500 || count($accounts) !== 250) {
         throw new RuntimeException('Synthetic account or asset count does not match the expected 250/500.');
     }
@@ -43,6 +43,7 @@ $out = [
     'service_id' => $serviceId,
     'asset_ids' => array_map('intval', $assets),
     'account_count' => count($accounts),
+    'user_ids' => array_map(static fn (array $row): int => (int) $row['id'], $accounts),
 ];
 $path = $root . '/benchmark-results/operation-seed.json';
 @mkdir(dirname($path), 0755, true);
