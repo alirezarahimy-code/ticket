@@ -1,0 +1,718 @@
+{
+  "started_utc": "2026-10-22T16:11:10.753682+00:00",
+  "environment": "ephemeral GitHub Actions runner; isolated MariaDB; PHP CLI server with configured worker pool",
+  "target": "127.0.0.1 only; no production/staging host was contacted",
+  "virtual_users": 250,
+  "ramp_up_seconds": 30,
+  "steady_state_seconds": 90,
+  "think_time_seconds": 1.0,
+  "php_workers": 32,
+  "elapsed_wall_seconds": 122.41,
+  "requests": 17760,
+  "overall_rps": 145.08,
+  "failed_observations": 3699,
+  "php_cpu_percent_sum_peak": 110.8,
+  "php_rss_mb_sum_peak": 1144.16,
+  "routes": [
+    {
+      "route": "asset-list",
+      "count": 1195,
+      "rps": 9.76,
+      "p50_ms": 707.08,
+      "p95_ms": 1073.53,
+      "p99_ms": 1415.16,
+      "max_ms": 1877.04,
+      "statuses": {
+        "200": 1195
+      }
+    },
+    {
+      "route": "cd-dvd",
+      "count": 1263,
+      "rps": 10.32,
+      "p50_ms": 689.0,
+      "p95_ms": 1061.69,
+      "p99_ms": 1245.63,
+      "max_ms": 1553.27,
+      "statuses": {
+        "200": 1263
+      }
+    },
+    {
+      "route": "dashboard",
+      "count": 1184,
+      "rps": 9.67,
+      "p50_ms": 914.43,
+      "p95_ms": 1240.41,
+      "p99_ms": 1436.57,
+      "max_ms": 1730.37,
+      "statuses": {
+        "200": 1184
+      }
+    },
+    {
+      "route": "food-admin-config-api",
+      "count": 1255,
+      "rps": 10.25,
+      "p50_ms": 645.3,
+      "p95_ms": 1025.05,
+      "p99_ms": 1183.36,
+      "max_ms": 1485.22,
+      "statuses": {
+        "200": 1255
+      }
+    },
+    {
+      "route": "food-admin-page",
+      "count": 1277,
+      "rps": 10.43,
+      "p50_ms": 633.91,
+      "p95_ms": 981.83,
+      "p99_ms": 1141.21,
+      "max_ms": 1326.38,
+      "statuses": {
+        "200": 1277
+      }
+    },
+    {
+      "route": "food-admin-page-validation",
+      "count": 1277,
+      "rps": 10.43,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "p99_ms": 0.0,
+      "max_ms": 0.0,
+      "statuses": {
+        "200": 1277
+      }
+    },
+    {
+      "route": "food-order-month-api",
+      "count": 1211,
+      "rps": 9.89,
+      "p50_ms": 609.71,
+      "p95_ms": 1004.93,
+      "p99_ms": 1183.43,
+      "max_ms": 1534.1,
+      "statuses": {
+        "400": 1211
+      }
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "count": 1211,
+      "rps": 9.89,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "p99_ms": 0.0,
+      "max_ms": 0.0,
+      "statuses": {
+        "400": 1211
+      }
+    },
+    {
+      "route": "food-order-page",
+      "count": 1160,
+      "rps": 9.48,
+      "p50_ms": 673.08,
+      "p95_ms": 1037.51,
+      "p99_ms": 1178.95,
+      "max_ms": 1464.63,
+      "statuses": {
+        "200": 1160
+      }
+    },
+    {
+      "route": "inventory",
+      "count": 1271,
+      "rps": 10.38,
+      "p50_ms": 1324.77,
+      "p95_ms": 1842.48,
+      "p99_ms": 2168.08,
+      "max_ms": 2689.02,
+      "statuses": {
+        "200": 1271
+      }
+    },
+    {
+      "route": "login",
+      "count": 250,
+      "rps": 2.04,
+      "p50_ms": 763.44,
+      "p95_ms": 2498.64,
+      "p99_ms": 2848.88,
+      "max_ms": 3213.16,
+      "statuses": {
+        "200": 250
+      }
+    },
+    {
+      "route": "login-form",
+      "count": 250,
+      "rps": 2.04,
+      "p50_ms": 124.41,
+      "p95_ms": 1045.73,
+      "p99_ms": 1285.13,
+      "max_ms": 1787.04,
+      "statuses": {
+        "200": 250
+      }
+    },
+    {
+      "route": "new-ticket-form",
+      "count": 1307,
+      "rps": 10.68,
+      "p50_ms": 762.47,
+      "p95_ms": 1132.12,
+      "p99_ms": 1374.18,
+      "max_ms": 2029.72,
+      "statuses": {
+        "200": 1307
+      }
+    },
+    {
+      "route": "notification-feed",
+      "count": 1211,
+      "rps": 9.89,
+      "p50_ms": 604.14,
+      "p95_ms": 971.32,
+      "p99_ms": 1141.9,
+      "max_ms": 1498.24,
+      "statuses": {
+        "200": 1211
+      }
+    },
+    {
+      "route": "reports",
+      "count": 1217,
+      "rps": 9.94,
+      "p50_ms": 993.05,
+      "p95_ms": 1380.36,
+      "p99_ms": 1567.05,
+      "max_ms": 1863.62,
+      "statuses": {
+        "200": 1217
+      }
+    },
+    {
+      "route": "traffic-control",
+      "count": 1221,
+      "rps": 9.97,
+      "p50_ms": 654.13,
+      "p95_ms": 1007.89,
+      "p99_ms": 1150.76,
+      "max_ms": 1611.77,
+      "statuses": {
+        "200": 1221
+      }
+    }
+  ],
+  "failures_sample": [
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    },
+    {
+      "route": "food-admin-page-validation",
+      "status": 200,
+      "error": "session unexpectedly returned to the login page"
+    },
+    {
+      "route": "food-order-month-api",
+      "status": 400,
+      "error": "HTTP 400"
+    },
+    {
+      "route": "food-order-month-api-validation",
+      "status": 400,
+      "error": "expected HTTP 200"
+    }
+  ],
+  "limitations": [
+    "LDAP/Active Directory authentication and Windows WMI collectors were not exercised; LDAP is disabled in the isolated config.",
+    "The food management page and MySQL-backed APIs were exercised, but external Microsoft Access/ODBC attendance/order sources and physical printers were not available.",
+    "Results describe this ephemeral CI runner and its PHP/MariaDB setup, not production capacity or production latency.",
+    "All synthetic users and generated records exist only in the disposable CI database; no real operational data was used."
+  ]
+}
