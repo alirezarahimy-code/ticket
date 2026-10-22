@@ -1,4 +1,4 @@
-name: Isolated Ticket and CD-DVD Operations Stress Test
+name: Isolated Full-System Tests and Ticket/CD-DVD Write Stress
 
 on:
   push:
@@ -9,7 +9,11 @@ on:
       - 'tools/benchmark_operations.py'
       - 'tools/benchmark_operations_seed.php'
       - 'tools/benchmark_operations_report.php'
+      - 'tools/full_system_route_smoke.py'
+      - 'tools/test_*_node.js'
       - 'tools/benchmark_seed.php'
+      - 'tests/**'
+      - 'tools/test_*_offline.php'
       - 'index.php'
       - 'cd-dvd.php'
       - 'organization.php'
@@ -23,7 +27,7 @@ permissions:
 
 jobs:
   operations-stress:
-    name: Synthetic authenticated ticket/CD-DVD write stress (no production traffic)
+    name: Full-system suite plus synthetic ticket/CD-DVD writes (no production traffic)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     services:
@@ -44,6 +48,22 @@ jobs:
       - name: Checkout active branch
         uses: actions/checkout@v4
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python test runner
+        run: python -m pip install pytest
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install optional DOM runtime test dependency
+        run: npm install --no-save --no-package-lock jsdom@24
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -54,9 +74,10 @@ jobs:
       - name: Validate benchmark scripts
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/benchmark_operations.py
+          python3 -m py_compile tools/benchmark_operations.py tools/full_system_route_smoke.py
           php -l tools/benchmark_operations_seed.php
           php -l tools/benchmark_operations_report.php
+          php -l tools/benchmark_seed.php
           php -l cd-dvd.php
 
       - name: Initialize disposable database
@@ -81,15 +102,92 @@ jobs:
           echo "BENCHMARK_PASSWORD=$benchmark_password" >> "$GITHUB_ENV"
           DB_HOST="$DB_HOST" DB_PORT="$DB_PORT" DB_NAME="$DB_NAME" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" BENCHMARK_PASSWORD="$benchmark_password" php tools/benchmark_operations_seed.php
 
+      - name: Run all Python static tests
+        id: python_static
+        continue-on-error: true
+        run: |
+          mkdir -p benchmark-results
+          pytest -q tests --junitxml=benchmark-results/full-system-python-tests.xml | tee benchmark-results/full-system-python-tests.log
+
+      - name: Run JavaScript runtime tests
+        id: javascript_tests
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          mkdir -p benchmark-results
+          : > benchmark-results/full-system-javascript-tests.log
+          for test in tests/test_*_node.js tools/test_*_node.js; do
+            echo "=== $test ===" | tee -a benchmark-results/full-system-javascript-tests.log
+            node "$test" 2>&1 | tee -a benchmark-results/full-system-javascript-tests.log
+          done
+
+      - name: Run PHP offline tests and syntax checks
+        id: php_offline
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p benchmark-results
+          report=benchmark-results/full-system-php-offline-tests.log
+          : > "$report"
+          failed=0
+          while IFS= read -r -d '' file; do
+            echo "=== php -l $file ===" | tee -a "$report"
+            php -l "$file" 2>&1 | tee -a "$report"
+            status=${PIPESTATUS[0]}
+            if [ "$status" -ne 0 ]; then failed=$((failed+1)); fi
+          done < <(git ls-files -z -- '*.php')
+          for file in tests/*.php; do
+            [ "$(basename "$file")" = smoke.php ] && continue
+            echo "=== php $file ===" | tee -a "$report"
+            php "$file" 2>&1 | tee -a "$report"
+            status=${PIPESTATUS[0]}
+            if [ "$status" -ne 0 ]; then failed=$((failed+1)); fi
+          done
+          for file in tools/test_*_offline.php; do
+            echo "=== php $file ===" | tee -a "$report"
+            php "$file" 2>&1 | tee -a "$report"
+            status=${PIPESTATUS[0]}
+            if [ "$status" -ne 0 ]; then failed=$((failed+1)); fi
+          done
+          echo "PHP syntax/offline failing commands: $failed" | tee -a "$report"
+          exit "$([ "$failed" -eq 0 ] && echo 0 || echo 1)"
+
+      - name: Run database smoke checks on disposable seed
+        id: database_smoke
+        continue-on-error: true
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: ticket_benchmark
+          DB_USER: root
+          DB_PASSWORD: ci-only-operations-password
+        run: php tests/smoke.php
+
+      - name: Run authenticated full-system route/API smoke
+        id: full_system_routes
+        continue-on-error: true
+        run: python3 tools/full_system_route_smoke.py
+
       - name: Run concurrent authenticated write operations
+        id: operations_stress
         run: python3 tools/benchmark_operations.py --vus 250 --php-workers 32 --output-dir benchmark-results
 
-      - name: Publish operations summary in Actions
+      - name: Publish full-system and operations summary in Actions
         if: always()
         run: |
-          if [ -f benchmark-results/benchmark-operations.md ]; then
-            cat benchmark-results/benchmark-operations.md >> "$GITHUB_STEP_SUMMARY"
-          else
+          for report in benchmark-results/full-system-route-smoke.md benchmark-results/benchmark-operations.md; do
+            if [ -f "$report" ]; then
+              cat "$report" >> "$GITHUB_STEP_SUMMARY"
+              printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          for log in benchmark-results/full-system-python-tests.log benchmark-results/full-system-javascript-tests.log benchmark-results/full-system-php-offline-tests.log; do
+            if [ -f "$log" ]; then
+              echo "## $(basename "$log") (tail)" >> "$GITHUB_STEP_SUMMARY"
+              tail -n 80 "$log" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+          if [ ! -f benchmark-results/benchmark-operations.md ]; then
             echo 'Operations stress test did not produce a report; PHP server log follows.' >> "$GITHUB_STEP_SUMMARY"
             tail -n 120 /tmp/ticket-operations-benchmark.log >> "$GITHUB_STEP_SUMMARY" || true
           fi
@@ -109,6 +207,13 @@ jobs:
             benchmark-results/benchmark-operations.md
             benchmark-results/benchmark-operations.json
             benchmark-results/operations-container-stats.txt
+            benchmark-results/full-system-route-smoke.md
+            benchmark-results/full-system-route-smoke.json
+            benchmark-results/full-system-python-tests.log
+            benchmark-results/full-system-python-tests.xml
+            benchmark-results/full-system-javascript-tests.log
+            benchmark-results/full-system-php-offline-tests.log
+            /tmp/ticket-full-system-routes.log
             /tmp/ticket-operations-benchmark.log
           if-no-files-found: warn
           retention-days: 14
@@ -121,7 +226,25 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add benchmark-results/benchmark-operations.md benchmark-results/benchmark-operations.json benchmark-results/operations-container-stats.txt
+          for file in benchmark-results/full-system-route-smoke.md benchmark-results/full-system-route-smoke.json; do
+            if [ -f "$file" ]; then git add "$file"; fi
+          done
           if ! git diff --cached --quiet; then
-            git commit -m "Record isolated ticket and CD-DVD stress run $GITHUB_RUN_ID"
+            git commit -m "Record isolated full-system test run $GITHUB_RUN_ID"
             git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
+
+      - name: Fail job when any full-system check failed
+        if: always()
+        env:
+          PYTHON_STATIC_OUTCOME: ${{ steps.python_static.outcome }}
+          JAVASCRIPT_OUTCOME: ${{ steps.javascript_tests.outcome }}
+          PHP_OFFLINE_OUTCOME: ${{ steps.php_offline.outcome }}
+          DATABASE_SMOKE_OUTCOME: ${{ steps.database_smoke.outcome }}
+          ROUTE_SMOKE_OUTCOME: ${{ steps.full_system_routes.outcome }}
+          OPERATIONS_STRESS_OUTCOME: ${{ steps.operations_stress.outcome }}
+        run: |
+          printf 'Python=%s JavaScript=%s PHP=%s DB-smoke=%s routes=%s operations=%s\n' "$PYTHON_STATIC_OUTCOME" "$JAVASCRIPT_OUTCOME" "$PHP_OFFLINE_OUTCOME" "$DATABASE_SMOKE_OUTCOME" "$ROUTE_SMOKE_OUTCOME" "$OPERATIONS_STRESS_OUTCOME"
+          if [ "$PYTHON_STATIC_OUTCOME" != success ] || [ "$JAVASCRIPT_OUTCOME" != success ] || [ "$PHP_OFFLINE_OUTCOME" != success ] || [ "$DATABASE_SMOKE_OUTCOME" != success ] || [ "$ROUTE_SMOKE_OUTCOME" != success ] || [ "$OPERATIONS_STRESS_OUTCOME" != success ]; then
+            exit 1
           fi

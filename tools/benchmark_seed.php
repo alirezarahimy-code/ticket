@@ -39,13 +39,15 @@ try {
     $department->execute(['Benchmark Synthetic Unit', 'BENCH']);
     $departmentId = (int) $pdo->lastInsertId();
 
-    $userInsert = $pdo->prepare('INSERT INTO users (username, password_hash, full_name, department, department_id, role, auth_source, is_active, is_primary_admin, must_change_password) VALUES (?, ?, ?, ?, ?, \'primary_admin\', \'local\', 1, 1, 0)');
+    $userInsert = $pdo->prepare('INSERT INTO users (username, password_hash, full_name, department, department_id, employee_number, national_code, role, auth_source, is_active, is_primary_admin, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, \'primary_admin\', \'local\', 1, 1, 0)');
     $userIds = [];
     for ($i = 1; $i <= 250; $i++) {
         $username = sprintf('loadtest-%03d', $i);
-        $userInsert->execute([$username, $hash, sprintf('Load Test User %03d', $i), 'Benchmark Synthetic Unit', $departmentId]);
+        $userInsert->execute([$username, $hash, sprintf('Load Test User %03d', $i), 'Benchmark Synthetic Unit', $departmentId, sprintf('SYN-%03d', $i), sprintf('9%09d', $i)]);
         $userIds[] = (int) $pdo->lastInsertId();
     }
+    $requesterInsert = $pdo->prepare('INSERT INTO users (username, password_hash, full_name, department, department_id, employee_number, national_code, role, auth_source, is_active, is_primary_admin, must_change_password) VALUES (?, ?, ?, ?, ?, ?, ?, \'user\', \'local\', 1, 0, 0)');
+    $requesterInsert->execute(['loadtest-requester', $hash, 'Synthetic Requester', 'Benchmark Synthetic Unit', $departmentId, 'SYN-REQ-001', '8000000001']);
 
     $pdo->exec("INSERT INTO handling_units (code, name, is_active) VALUES ('it', 'Benchmark IT', 1), ('support', 'Benchmark Support', 1)");
     $pdo->exec("INSERT INTO categories (name, code, service_group, is_active) VALUES ('Benchmark Request', 'BENCH-REQ', 'it', 1)");
