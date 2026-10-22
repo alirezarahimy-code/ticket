@@ -384,6 +384,7 @@ def main() -> int:
         'invariant_failures': invariant_failures,
         'limitations': [
             'This run directly exercises the ticket create/update and CD/DVD create handlers through authenticated HTTP POSTs; it is not exhaustive coverage of every module or every route.',
+            'All 250 synthetic accounts use the primary_admin role to exercise the authorized write handlers; this does not replace role-matrix/permission-boundary tests.',
             'Food external Access/ODBC sources, LDAP/Active Directory, physical media, printers, and production/staging capacity were not exercised.',
             'The database and all test accounts/records are disposable synthetic CI fixtures; no production or staging traffic/data was used.',
             'HTTP response, application confirmation, PHP logs, and independently queried final database state are reported separately.',
