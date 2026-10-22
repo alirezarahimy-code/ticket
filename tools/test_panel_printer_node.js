@@ -18,9 +18,12 @@ const fs = require('fs');
 const path = require('path');
 
 let JSDOM = null;
+let VirtualConsole = null;
 for (const candidate of ['jsdom', path.join('/tmp/jstest/node_modules', 'jsdom')]) {
   try {
-    JSDOM = require(candidate).JSDOM;
+    const jsdom = require(candidate);
+    JSDOM = jsdom.JSDOM;
+    VirtualConsole = jsdom.VirtualConsole;
     break;
   } catch (e) { /* مسیر بعدی */ }
 }
@@ -116,7 +119,6 @@ function response(obj) {
   });
 }
 
-const { VirtualConsole } = require('/tmp/jstest/node_modules/jsdom');
 const virtualConsole = new VirtualConsole();
 const pageErrors = [];
 virtualConsole.on('jsdomError', (e) => { pageErrors.push(e.message); });
@@ -130,6 +132,10 @@ const dom = new JSDOM(html, {
   url: 'http://localhost/food-ticket-web/',
   pretendToBeVisual: true,
   beforeParse(window) {
+    // jsdom برخی نسخه‌ها Navigation Timing API را ندارد؛ مرورگر واقعی آن را فراهم می‌کند.
+    if (typeof window.performance.getEntriesByType !== 'function') {
+      window.performance.getEntriesByType = function () { return []; };
+    }
     // پنل در حالت «یکپارچه» از sessionStorage اجازهٔ ورود می‌گیرد؛ همان چیزی که پس از
     // ورود واقعی مدیر در مرورگر وجود دارد.
     try {
@@ -169,7 +175,7 @@ const dom = new JSDOM(html, {
           return response({ ok: true, printer: serverState.printer });
         }
         return response(Object.assign({}, serverState, {
-          panelVersion: window.FOOD_TICKET_PANEL_VERSION_FROM_SERVER || '1.37.6',
+          panelVersion: window.FOOD_TICKET_PANEL_VERSION_FROM_SERVER || '1.37.18',
           attendancePath: '\\\\\\\\server\\\\attendance.mdb',
           ordersPath: '\\\\\\\\server\\\\orders.mdb',
           pollSeconds: 2,
@@ -437,15 +443,15 @@ async function waitFor(predicate, timeout) {
 
   // ۲۴) نشان نسخهٔ پنل + بنر «فایل کش‌شده» (تشخیص علت دیده‌نشدن اصلاحات)
   const pill = doc.querySelector('.top-meta .pill');
-  check('۲۴: نشان نسخهٔ پنل «پنل 1.37.6» در نوار بالا دیده می‌شود',
-    !!pill && pill.textContent.indexOf('1.37.6') !== -1, pill ? pill.textContent.trim() : 'no pill');
+  check('۲۴: نشان نسخهٔ پنل «پنل 1.37.18» در نوار بالا دیده می‌شود',
+    !!pill && pill.textContent.indexOf('1.37.18') !== -1, pill ? pill.textContent.trim() : 'no pill');
   window.__ftPanelExpected = '1.37.3';
   window.render();
   await nextTick(120);
   const banner = doc.querySelector('.version-warning');
   check('۲۴-ب: اگر سرور نسخهٔ قدیمی‌تری بفرستد، بنر هشدار کش با راهنمای Ctrl+F5 نشان داده می‌شود',
     !!banner && banner.textContent.indexOf('Ctrl+F5') !== -1);
-  window.__ftPanelExpected = '1.37.6';
+  window.__ftPanelExpected = '1.37.18';
   window.render();
   await nextTick(120);
   check('۲۴-ج: با تطبیق نسخه‌ها بنر هشدار ناپدید می‌شود', !doc.querySelector('.version-warning'));

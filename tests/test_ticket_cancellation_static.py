@@ -58,8 +58,9 @@ check("'cancelled' => []" in index and "'cancelled' => 'لغوشده به درخ
       "cancelled is a terminal, human-readable ticket status")
 check("$ownerCondition = $serviceGroup === 'it'" in index
       and "AND hu.code = ?" in index
-      and "$fallback->execute([$serviceGroup]);" in index,
-      "automatic fallback stays within the requested IT or support handling unit")
+      and "$fallback->execute([$serviceGroup, $departmentId, $departmentId]);" in index
+      and 'AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))' in index,
+      "automatic fallback stays within the requested handling unit and department")
 check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled')" in schema
       and "cancel_requested_at DATETIME NULL" in schema
       and "cancel_requested_by INT UNSIGNED NULL" in schema
@@ -108,7 +109,8 @@ check("function ticket_is_waiting_status" in bootstrap
       and "SET `status` = 'waiting_user'" in migration_pending
       and "WHERE `status` = 'pending'" in migration_pending,
       "pending is treated as waiting_user for SLA/OLA and normalized by migration")
-check("تیکت" not in index
+index_user_text = "\n".join(line for line in index.splitlines() if not line.lstrip().startswith("//"))
+check("تیکت" not in index_user_text
       and "تیکت" not in bootstrap
       and "تیکت" not in permissions
       and "ثبت درخواست" in index

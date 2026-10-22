@@ -95,7 +95,7 @@ check('۲-ب: کارت‌های مهمان قدیمی نمایش داده نمی
 
 /* ۳) توکن یکسان و دیتابیس پر → کش معتبر بماند */
 const r3 = boot(dirty, 'token-old', false);
-check('۳: توکن یکسان و دیتابیس پر → کش مرورگر حفظ می‌شود', r3.state.employees.length === 1 && r3.state.orders.length === 1, JSON.stringify({ emp: r3.state.employees.length, ord: r3.state.orders.length }));
+check('۳: توکن یکسان → فهرست کارکنان حفظ و سفارش‌های runtime برای بارگذاری تازه خالی می‌ماند', r3.state.employees.length === 1 && r3.state.orders.length === 0, JSON.stringify({ emp: r3.state.employees.length, ord: r3.state.orders.length }));
 
 /* ۴) resetLocalState آرایه‌ها را خالی می‌کند */
 const r4 = boot(dirty, 'token-old', false);
@@ -114,7 +114,7 @@ check('۵-ب: توکن جدید سرور با کش قدیمی → پاکسازی
 
 const r7 = boot(dirty, '', false);
 const changed7 = r7.applyDbIdentity({ token: 'token-old', fresh: false, counts: { tickets: 9 } });
-check('۵-پ: توکن یکسان → هیچ پاکسازی‌ای انجام نمی‌شود', changed7 === false && r7.state.orders.length === 1);
+check('۵-پ: توکن یکسان → تعویض دیتابیس رخ نمی‌دهد و سفارش‌های runtime برای بارگذاری تازه خالی می‌ماند', changed7 === false && r7.state.employees.length === 1 && r7.state.orders.length === 0);
 
 console.log('');
 if (fail === 0) {

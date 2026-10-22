@@ -72,10 +72,19 @@ class FoodOrdersStaticTests(unittest.TestCase):
                 name.lower(): re.sub(r"\s+", " ", body).strip().lower()
                 for name, body in pattern.findall(sql)
             }
+        # food_catalog was extended after 1.38 by the standalone 2026-10-13 migration.
+        # Compare the effective upgraded shape, not the historical base migration by itself.
+        category_migration = read("updates/2026-10-13-food-catalog/migrations/001-food-catalog-category.sql")
+        self.assertIn("ADD COLUMN IF NOT EXISTS category VARCHAR(40) NULL AFTER food_name", category_migration)
+        upgraded_food_catalog = normalized["upgrade-1.38-food-orders.sql"]["food_catalog"].replace(
+            "food_name varchar(190) not null,",
+            "food_name varchar(190) not null, category varchar(40) null,",
+        )
         for table in TABLES:
             with self.subTest(table=table):
-                self.assertEqual(normalized["upgrade-1.38-food-orders.sql"][table], normalized["schema.sql"][table])
-                self.assertEqual(normalized["upgrade-1.38-food-orders.sql"][table], normalized["install-empty-db.sql"][table])
+                baseline = upgraded_food_catalog if table == "food_catalog" else normalized["upgrade-1.38-food-orders.sql"][table]
+                self.assertEqual(baseline, normalized["schema.sql"][table])
+                self.assertEqual(baseline, normalized["install-empty-db.sql"][table])
 
     def test_runtime_schema_helper_is_read_only(self) -> None:
         php = read("food-order.php")
@@ -193,7 +202,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }", employee_css)
 
         panel_html = read("food-ticket-web/index.html")
-        self.assertIn('href="assets/food-order.css?v=11"', panel_html)
+        self.assertIn('href="assets/food-order.css?v=12"', panel_html)
         self.assertIn('href="assets/food-menu.css?v=29"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
@@ -343,7 +352,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         proxy_route = php[route_start:route_end]
         self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", proxy_route)
         self.assertIn("food_order_verify_employee_national_code", proxy_route)
-        self.assertIn("food_order_month_status((string) ($body['month'] ?? ''), $target, false)", proxy_route)
+        self.assertIn("food_order_month_status((string) ($body['month'] ?? ''), $target, false, false, food_order_meal_type($body['meal_type'] ?? 'lunch'))", proxy_route)
         js = read("assets/food-order.js")
         self.assertIn("request('proxy-month'", js)
         self.assertIn("request('cancel-proxy'", js)
@@ -361,46 +370,47 @@ class FoodOrdersStaticTests(unittest.TestCase):
         month_start = php.index("function food_order_month_status(")
         month_end = php.index("\nfunction ", month_start + 10)
         month = php[month_start:month_end]
-        self.assertIn("WHERE o.employee_id = ? AND o.food_date BETWEEN ? AND ? AND o.status = 'active'", month)
+        self.assertIn("WHERE o.employee_id = ? AND o.food_date BETWEEN ? AND ? AND o.meal_type = ? AND o.status = 'active'", month)
 
     def test_proxy_order_list_uses_only_the_verified_recipient_month(self) -> None:
         php = read("food-order.php")
         self.assertNotIn("function food_order_proxy_orders(", php)
-        self.assertNotIn("proxy-orders", php)
-        route_start = php.index("if ($method === 'POST' && $route === 'proxy-month')")
-        route_end = php.index("if ($method === 'GET' && $route === 'my-orders')", route_start)
+        route_start = php.index("if ($method === 'POST' && $route === 'proxy-orders')")
+        route_end = php.index("if ($method === 'GET' && $route === 'search-users')", route_start)
         route = php[route_start:route_end]
-        self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", route)
-        self.assertIn("food_order_verify_employee_national_code", route)
-        self.assertIn("food_order_month_status((string) ($body['month'] ?? ''), $target, false)", route)
+        self.assertIn("food_order_verify_employee_national_code(", route)
+        self.assertIn("food_order_list_range((string) ($body['from'] ?? ''), (string) ($body['to'] ?? ''), (int) $target['id'])", route)
+        self.assertIn("food_order_my_orders((int) $target['id'], 400, $range['from'], $range['to'])", route)
 
-        month_start = php.index("function food_order_month_status(")
-        month_end = php.index("\nfunction ", month_start + 10)
-        month = php[month_start:month_end]
-        self.assertIn("WHERE o.employee_id = ? AND o.food_date BETWEEN ? AND ? AND o.status = 'active'", month)
-        self.assertIn("o.created_at, i.food_id, c.food_name", month)
-        self.assertIn("'reserve_date' => substr((string) $order['created_at'], 0, 10)", month)
-        self.assertIn("'reserve_time' => substr((string) $order['created_at'], 11, 8)", month)
+        list_start = php.index("function food_order_my_orders(")
+        list_end = php.index("\nfunction ", list_start + 10)
+        order_list = php[list_start:list_end]
+        self.assertIn("WHERE o.employee_id = ?{$range}", order_list)
+        self.assertIn("AND o.food_date BETWEEN ? AND ?", order_list)
+        self.assertIn("ORDER BY o.food_date DESC, o.id DESC LIMIT {$limit}", order_list)
 
         js = read("assets/food-order.js")
-        self.assertNotIn("request('proxy-orders'", js)
-        self.assertIn("request('proxy-month'", js)
+        load_start = js.index("async function loadProxyOrders()")
+        load_end = js.index("\n  async function loadEmployeeChoices", load_start)
+        load = js[load_start:load_end]
+        self.assertIn("if (code.length !== 10)", load)
+        self.assertIn("request('proxy-orders'", load)
+        self.assertIn("employee_id: state.targetId, national_code: code", load)
+        self.assertIn("from: state.listFrom, to: state.listTo", load)
         self.assertIn("function renderProxyOrders()", js)
         proxy_start = js.index("function renderProxyOrders()")
         proxy_end = js.index("\n  function currentDay()", proxy_start)
         proxy_view = js[proxy_start:proxy_end]
-        self.assertIn("state.monthData.days", proxy_view)
-        self.assertIn("<th>نام پرسنل</th>", proxy_view)
+        self.assertIn("state.proxyOrders", proxy_view)
         self.assertIn("renderProxyCancelControl(row.id, 'button secondary')", proxy_view)
+        self.assertIn("<th>نام پرسنل</th>", proxy_view)
         self.assertNotIn("national_code", proxy_view)
         self.assertNotIn("employee_number", proxy_view)
-        self.assertIn("var order = day.my_order || null", proxy_view)
+        self.assertIn("state.targetName || '—'", proxy_view)
         self.assertIn("reserve_date: order.reserve_date || ''", proxy_view)
         self.assertIn("reserve_time: order.reserve_time || ''", proxy_view)
-        self.assertIn("<th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th>", proxy_view)
+        self.assertIn("<th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>وعده</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th>", proxy_view)
         self.assertIn("var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed' && row.id > 0", proxy_view)
-        self.assertNotIn("national_code", proxy_view)
-        self.assertNotIn("employee_number", proxy_view)
 
     def test_proxy_cancel_is_server_scoped_and_reverifies_the_recipient(self) -> None:
         php = read("food-order.php")
@@ -411,7 +421,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("food_order_verify_employee_national_code($employeeId, $nationalCode, true, $pdo)", cancel)
         self.assertIn("WHERE id = ? AND employee_id = ? FOR UPDATE", cancel)
         self.assertIn("food_order_lock_cancellable_day($pdo", cancel)
-        self.assertIn("function food_order_lock_cancellable_day(PDO $pdo, string $isoDate)", php)
+        self.assertIn("function food_order_lock_cancellable_day(PDO $pdo, string $isoDate, string $mealType = 'lunch')", php)
         self.assertIn("UPDATE food_orders SET status = 'cancelled'", cancel)
         self.assertIn("AND status = 'active'", cancel)
         self.assertIn("$update->rowCount() !== 1", cancel)
@@ -578,9 +588,9 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("employee_id: isProxy ? state.targetId : selfId", save)
         self.assertIn("body.national_code = normalizedDigits(state.nationalCode)", save)
         self.assertIn("request('order'", save)
-        self.assertIn("var refresh = [loadMonth()]", save)
+        self.assertIn("var refresh = [loadMonth(), loadMyOrders()]", save)
+        self.assertIn("await Promise.all(refresh)", save)
         self.assertNotIn("loadProxyOrders", save)
-        self.assertIn("if (!isProxy) refresh.push(loadMyOrders())", save)
         self.assertIn("state.pageNotice = { message: notice, type: 'success' }", save)
         self.assertIn("state.pageNotice = { message: errorMessage, type: 'danger' }", save)
         self.assertIn("response.order_id", save)
@@ -591,8 +601,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         create = php[create_start:create_end]
         self.assertIn("$isProxy = $employeeId !== $actorId", create)
         self.assertIn("food_order_verify_employee_national_code($employeeId", create)
-        self.assertIn("INSERT INTO food_orders (employee_id, calendar_item_id, food_date, created_by, status)", create)
-        self.assertIn("execute([$employeeId, $itemId, $iso, $actorId])", create)
+        self.assertIn("INSERT INTO food_orders (employee_id, calendar_item_id, food_date, meal_type, created_by, status)", create)
+        self.assertIn("execute([$employeeId, $itemId, $iso, $mealType, $actorId])", create)
 
     def test_proxy_recipient_is_verified_server_side_and_employee_list_has_no_codes(self) -> None:
         php = read("food-order.php")
