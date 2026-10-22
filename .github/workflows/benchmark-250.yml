@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   benchmark:
@@ -100,3 +100,16 @@ jobs:
             /tmp/ticket-php-benchmark.log
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Commit synthetic benchmark report for remote review
+        if: always()
+        run: |
+          set -euo pipefail
+          test -f benchmark-results/benchmark-250.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add benchmark-results/benchmark-250.md benchmark-results/benchmark-250.json benchmark-results/container-stats.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Record isolated 250-VU benchmark run $GITHUB_RUN_ID"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
