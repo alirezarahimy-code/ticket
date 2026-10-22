@@ -124,6 +124,12 @@ jobs:
       - name: Run PHP offline tests and syntax checks
         id: php_offline
         continue-on-error: true
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: ticket_benchmark
+          DB_USER: root
+          DB_PASSWORD: ci-only-operations-password
         run: |
           set +e
           mkdir -p benchmark-results
@@ -153,8 +159,25 @@ jobs:
           done
           for file in tools/test_*_offline.php; do
             echo "=== php $file ===" | tee -a "$report"
-            php "$file" 2>&1 | tee -a "$report"
-            status=${PIPESTATUS[0]}
+            if [ "$file" = "tools/test_org_role_sync_offline.php" ]; then
+              test_config="$(mktemp)"
+              cat > "$test_config" <<'PHP'
+          <?php
+          return ['database' => [
+              'host' => getenv('DB_HOST') ?: '127.0.0.1',
+              'port' => (int) (getenv('DB_PORT') ?: 3306),
+              'name' => getenv('DB_NAME') ?: 'ticket_benchmark',
+              'user' => getenv('DB_USER') ?: 'root',
+              'password' => getenv('DB_PASSWORD') ?: '',
+          ]];
+          PHP
+              php "$file" "$test_config" 2>&1 | tee -a "$report"
+              status=${PIPESTATUS[0]}
+              rm -f "$test_config"
+            else
+              php "$file" 2>&1 | tee -a "$report"
+              status=${PIPESTATUS[0]}
+            fi
             if [ "$status" -ne 0 ]; then
               failed=$((failed+1))
               detail="$(tail -n 6 "$report" | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
