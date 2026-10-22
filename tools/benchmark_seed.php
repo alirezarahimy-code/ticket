@@ -80,13 +80,30 @@ try {
 
     $pdo->exec("INSERT INTO food_catalog (food_name, category, active) VALUES ('Synthetic lunch', 'main', 1)");
     $foodId = (int) $pdo->lastInsertId();
-    $monthStart = new DateTimeImmutable('first day of this month', new DateTimeZone('UTC'));
+    require_once $root . '/bootstrap.php';
+    [$jalaliYear, $jalaliMonth] = gregorian_to_jalali((int) gmdate('Y'), (int) gmdate('n'), (int) gmdate('j'));
+    [$startYear, $startMonth, $startDay] = jalali_to_gregorian($jalaliYear, $jalaliMonth, 1);
+    if ($jalaliMonth === 12) {
+        [$nextYear, $nextMonth, $nextDay] = jalali_to_gregorian($jalaliYear + 1, 1, 1);
+    } else {
+        [$nextYear, $nextMonth, $nextDay] = jalali_to_gregorian($jalaliYear, $jalaliMonth + 1, 1);
+    }
+    $calendarDate = new DateTimeImmutable(sprintf('%04d-%02d-%02d', $startYear, $startMonth, $startDay), new DateTimeZone('UTC'));
+    $nextMonthDate = new DateTimeImmutable(sprintf('%04d-%02d-%02d', $nextYear, $nextMonth, $nextDay), new DateTimeZone('UTC'));
+    $jalaliMonthLabel = sprintf('%04d-%02d', $jalaliYear, $jalaliMonth);
+    $githubEnv = getenv('GITHUB_ENV');
+    if (is_string($githubEnv) && $githubEnv !== '') {
+        file_put_contents($githubEnv, 'BENCHMARK_JALALI_MONTH=' . $jalaliMonthLabel . PHP_EOL, FILE_APPEND | LOCK_EX);
+    }
     $calendar = $pdo->prepare("INSERT INTO food_calendar (food_date, meal_type, order_status, note) VALUES (?, 'lunch', 'open', 'CI-only synthetic calendar')");
     $calendarItem = $pdo->prepare('INSERT INTO food_calendar_items (calendar_id, food_id, sort_order, active) VALUES (?, ?, 1, 1)');
-    $days = (int) $monthStart->format('t');
-    for ($day = 1; $day <= $days; $day++) {
-        $calendar->execute([$monthStart->setDate((int) $monthStart->format('Y'), (int) $monthStart->format('n'), $day)->format('Y-m-d')]);
-        $calendarItem->execute([(int) $pdo->lastInsertId(), $foodId]);
+    $days = 0;
+    while ($calendarDate < $nextMonthDate) {
+        $calendar->execute([$calendarDate->format('Y-m-d')]);
+        $calendarId = (int) $pdo->lastInsertId();
+        $calendarItem->execute([$calendarId, $foodId]);
+        $calendarDate = $calendarDate->modify('+1 day');
+        $days++;
     }
 
     $pdo->commit();
@@ -95,4 +112,4 @@ try {
     throw $exception;
 }
 
-printf("Seeded 250 synthetic accounts, 500 assets, 2500 tickets, 1000 notifications, and %d food calendar days.\n", (int) $monthStart->format('t'));
+printf("Seeded 250 synthetic accounts, 500 assets, 2500 tickets, 1000 notifications, and %d food calendar days (%s Jalali).\n", $days, $jalaliMonthLabel);

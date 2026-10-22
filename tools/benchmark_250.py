@@ -143,7 +143,7 @@ def user_flow(vu: int, args: argparse.Namespace, metrics: Metrics,
             metrics.record(label + '-validation', 0, status, 'expected HTTP 200')
         elif label == 'notification-feed' and not response_body.strip().startswith('{'):
             metrics.record(label + '-validation', 0, status, 'expected JSON response')
-        elif 'name="username"' in response_body or "name='username'" in response_body:
+        elif 'class="auth-layout"' in response_body or 'class="auth-form"' in response_body:
             metrics.record(label + '-validation', 0, status, 'session unexpectedly returned to the login page')
         time.sleep(random.uniform(args.think_time * 0.7, args.think_time * 1.3))
 
@@ -193,7 +193,7 @@ def main() -> int:
     sampler.start()
     test_start = time.monotonic() + 0.5
     test_end = test_start + args.ramp_up + args.duration
-    month = datetime.now(timezone.utc).strftime('%Y-%m')
+    month = os.environ.get('BENCHMARK_JALALI_MONTH', '1405-08')
     wall_started = time.time()
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.vus) as pool:
