@@ -1,0 +1,126 @@
+name: Isolated Ticket and CD-DVD Operations Stress Test
+
+on:
+  push:
+    branches:
+      - arena/8edbdf95-ticket
+    paths:
+      - '.github/workflows/benchmark-operations.yml'
+      - 'tools/benchmark_operations.py'
+      - 'tools/benchmark_operations_seed.php'
+      - 'tools/benchmark_operations_report.php'
+      - 'tools/benchmark_seed.php'
+      - 'index.php'
+      - 'cd-dvd.php'
+      - 'organization.php'
+      - 'permissions.php'
+      - 'bootstrap.php'
+      - 'schema.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  operations-stress:
+    name: Synthetic authenticated ticket/CD-DVD write stress (no production traffic)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-only-operations-password
+          MARIADB_DATABASE: ticket_benchmark
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Checkout active branch
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, ldap, mbstring, xml
+          coverage: none
+
+      - name: Validate benchmark scripts
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tools/benchmark_operations.py
+          php -l tools/benchmark_operations_seed.php
+          php -l tools/benchmark_operations_report.php
+
+      - name: Initialize disposable database
+        env:
+          DB_PASSWORD: ci-only-operations-password
+        run: |
+          set -euo pipefail
+          docker_id="$(docker ps --filter ancestor=mariadb:10.11 --format '{{.ID}}' | head -n1)"
+          test -n "$docker_id"
+          docker exec -i "$docker_id" mariadb -uroot -p"$DB_PASSWORD" ticket_benchmark < schema.sql
+
+      - name: Create disposable synthetic accounts and operation prerequisites
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: ticket_benchmark
+          DB_USER: root
+          DB_PASSWORD: ci-only-operations-password
+        run: |
+          set -euo pipefail
+          benchmark_password="$(python3 -c 'import secrets; print(secrets.token_urlsafe(24))')"
+          echo "BENCHMARK_PASSWORD=$benchmark_password" >> "$GITHUB_ENV"
+          DB_HOST="$DB_HOST" DB_PORT="$DB_PORT" DB_NAME="$DB_NAME" DB_USER="$DB_USER" DB_PASSWORD="$DB_PASSWORD" BENCHMARK_PASSWORD="$benchmark_password" php tools/benchmark_operations_seed.php
+
+      - name: Run concurrent authenticated write operations
+        run: python3 tools/benchmark_operations.py --vus 250 --php-workers 32 --output-dir benchmark-results
+
+      - name: Publish operations summary in Actions
+        if: always()
+        run: |
+          if [ -f benchmark-results/benchmark-operations.md ]; then
+            cat benchmark-results/benchmark-operations.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Operations stress test did not produce a report; PHP server log follows.' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 120 /tmp/ticket-operations-benchmark.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
+      - name: Capture MariaDB container usage
+        if: always()
+        run: |
+          mkdir -p benchmark-results
+          docker stats --no-stream --format '{{.Name}} CPU={{.CPUPerc}} MEM={{.MemUsage}}' > benchmark-results/operations-container-stats.txt || true
+
+      - name: Upload operations report and server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ticket-operations-stress
+          path: |
+            benchmark-results/benchmark-operations.md
+            benchmark-results/benchmark-operations.json
+            benchmark-results/operations-container-stats.txt
+            /tmp/ticket-operations-benchmark.log
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Commit isolated operations report for remote review
+        if: always()
+        run: |
+          set -euo pipefail
+          test -f benchmark-results/benchmark-operations.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add benchmark-results/benchmark-operations.md benchmark-results/benchmark-operations.json benchmark-results/operations-container-stats.txt
+          if ! git diff --cached --quiet; then
+            git commit -m "Record isolated ticket and CD-DVD stress run $GITHUB_RUN_ID"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
