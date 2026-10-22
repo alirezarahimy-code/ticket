@@ -179,7 +179,7 @@ jobs:
           status=$?
           cat /tmp/ticket-php-db-smoke.log
           if [ "$status" -ne 0 ]; then
-            detail="$(tail -n 12 /tmp/ticket-php-db-smoke.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            detail="$(grep -E '^(FAIL:|PHP Warning|PHP Fatal)' /tmp/ticket-php-db-smoke.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
             echo "::error title=Database smoke failure::tests/smoke.php (exit $status): $detail"
           fi
           exit "$status"
