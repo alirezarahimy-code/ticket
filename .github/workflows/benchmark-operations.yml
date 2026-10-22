@@ -134,20 +134,32 @@ jobs:
             echo "=== php -l $file ===" | tee -a "$report"
             php -l "$file" 2>&1 | tee -a "$report"
             status=${PIPESTATUS[0]}
-            if [ "$status" -ne 0 ]; then failed=$((failed+1)); fi
+            if [ "$status" -ne 0 ]; then
+              failed=$((failed+1))
+              detail="$(tail -n 6 "$report" | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+              echo "::error title=PHP syntax failure::$file (exit $status): $detail"
+            fi
           done < <(git ls-files -z -- '*.php')
           for file in tests/*.php; do
             [ "$(basename "$file")" = smoke.php ] && continue
             echo "=== php $file ===" | tee -a "$report"
             php "$file" 2>&1 | tee -a "$report"
             status=${PIPESTATUS[0]}
-            if [ "$status" -ne 0 ]; then failed=$((failed+1)); fi
+            if [ "$status" -ne 0 ]; then
+              failed=$((failed+1))
+              detail="$(tail -n 6 "$report" | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+              echo "::error title=PHP offline test failure::$file (exit $status): $detail"
+            fi
           done
           for file in tools/test_*_offline.php; do
             echo "=== php $file ===" | tee -a "$report"
             php "$file" 2>&1 | tee -a "$report"
             status=${PIPESTATUS[0]}
-            if [ "$status" -ne 0 ]; then failed=$((failed+1)); fi
+            if [ "$status" -ne 0 ]; then
+              failed=$((failed+1))
+              detail="$(tail -n 6 "$report" | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+              echo "::error title=PHP offline test failure::$file (exit $status): $detail"
+            fi
           done
           echo "PHP syntax/offline failing commands: $failed" | tee -a "$report"
           exit "$([ "$failed" -eq 0 ] && echo 0 || echo 1)"
@@ -161,7 +173,16 @@ jobs:
           DB_NAME: ticket_benchmark
           DB_USER: root
           DB_PASSWORD: ci-only-operations-password
-        run: php tests/smoke.php
+        run: |
+          set +e
+          php tests/smoke.php > /tmp/ticket-php-db-smoke.log 2>&1
+          status=$?
+          cat /tmp/ticket-php-db-smoke.log
+          if [ "$status" -ne 0 ]; then
+            detail="$(tail -n 12 /tmp/ticket-php-db-smoke.log | tr '\n' ' ' | sed 's/%/%25/g; s/\r/%0D/g')"
+            echo "::error title=Database smoke failure::tests/smoke.php (exit $status): $detail"
+          fi
+          exit "$status"
 
       - name: Run authenticated full-system route/API smoke
         id: full_system_routes
