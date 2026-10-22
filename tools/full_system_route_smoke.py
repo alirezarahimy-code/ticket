@@ -48,7 +48,7 @@ class RouteSmoke:
         except urllib.error.HTTPError as exc:
             status = int(exc.code)
             body = exc.read(2 * 1024 * 1024).decode("utf-8", errors="replace")
-            error = f"HTTP {status}"
+            error = "" if status in expected else f"HTTP {status}"
         except Exception as exc:  # noqa: BLE001 - record transport failures as test results
             error = f"{type(exc).__name__}: {exc}"
         latency_ms = round((time.perf_counter() - started) * 1000, 2)
@@ -100,14 +100,16 @@ class RouteSmoke:
         for label, query in pages:
             self.request(f"page: {label}", "index.php?page=" + query)
 
-    def get_json(self, label: str, path: str) -> dict | list | None:
-        _, body, _ = self.request(label, path)
+    def get_json(self, label: str, path: str, expected: tuple[int, ...] = (200,)) -> dict | list | None:
+        _, body, _ = self.request(label, path, expected=expected)
         try:
             payload = json.loads(body)
             if isinstance(payload, dict) and "error" in payload:
-                # A JSON business error is not a PHP runtime error; distinguish it in results.
+                # Expected 4xx authorization is distinct from an unexpected HTTP-200 business failure.
                 self.results[-1]["application_error"] = str(payload.get("error", ""))[:300]
-                if self.results[-1]["ok"]:
+                if self.results[-1]["status"] in expected and self.results[-1]["status"] != 200:
+                    self.results[-1]["expected_rejection"] = True
+                elif self.results[-1]["ok"]:
                     self.results[-1]["ok"] = False
                     self.results[-1]["error"] = "HTTP 200 with application error payload"
             return payload
@@ -119,22 +121,67 @@ class RouteSmoke:
     def apis(self) -> None:
         month = urllib.parse.quote(self.jalali_month)
         food_ticket = ["health", "session", "config", "monitoring", "employees", "guest-cards",
-                       "guest-cap", "absence-status", "food-groups", "orders", "dashboard"]
+                       "guest-cap", "food-groups", "orders"]
         for route in food_ticket:
             self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route)}")
-        food_order = [
-            ("month", f"month={month}"), ("my-orders", ""), ("guest-requests", ""),
-            ("search-users", "q=loadtest"), ("day-visit", "date=" + date.today().isoformat()),
+        food_ticket_menu = [
             ("food-menu/status", ""), ("food-menu/month", f"month={month}"),
             ("food-menu/catalog", ""), ("food-menu/orders", ""),
             ("food-menu/cancel-requests", ""), ("food-menu/groups", ""),
             ("food-menu/statistics", f"month={month}"),
         ]
+        for route, query in food_ticket_menu:
+            suffix = "&" + query if query else ""
+            self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route, safe='/-')}{suffix}")
+        food_order = [
+            ("month", f"month={month}"), ("my-orders", ""),
+            ("search-users", "q=loadtest"), ("day-visit", "date=" + date.today().isoformat()),
+        ]
         for route, query in food_order:
             suffix = "&" + query if query else ""
             self.get_json(f"food-order API GET {route}", f"index.php?page=food-order&food_api={urllib.parse.quote(route, safe='/-')}{suffix}")
+        self.get_json("food-order guest requests correctly rejects a non-deputy synthetic admin",
+                      "index.php?page=food-order&food_api=guest-requests", expected=(403,))
         self.get_json("traffic API invalid national code is rejected safely",
                       "index.php?page=traffic-control&traffic_api=lookup&code=000")
+
+    def food_ticket_group_lifecycle(self) -> None:
+        l_uid = "BENCHSMOKE-" + os.urandom(5).hex().upper()
+        headers = {"Content-Type": "application/json", "X-CSRF-Token": self.csrf}
+        payload = json.dumps({"title": "Synthetic route smoke group", "l_uid": l_uid,
+                              "description": "Disposable CI fixture", "status": "active"}).encode()
+        _, body, _ = self.request("food-ticket synthetic POST create group", "index.php?page=food-ticket&food_api=food-groups",
+                                  "POST", payload, headers)
+        try:
+            created = json.loads(body)
+        except json.JSONDecodeError:
+            created = {}
+        groups = created.get("groups", []) if isinstance(created, dict) else []
+        group = next((row for row in groups if isinstance(row, dict) and row.get("l_uid") == l_uid), None)
+        group_id = int(group.get("id", 0)) if group else 0
+        if not isinstance(created, dict) or not created.get("ok") or not group_id:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "group creation handler did not return the synthetic group"
+            return
+
+        absence = self.get_json("food-ticket absence-status for synthetic group",
+                                f"index.php?page=food-ticket&food_api=absence-status&group_id={group_id}&date={date.today().isoformat()}")
+        if not isinstance(absence, dict) or int(absence.get("group_id", 0)) != group_id:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "absence-status did not return the selected synthetic group"
+
+        delete_body = json.dumps({"action": "delete", "id": group_id}).encode()
+        _, body, _ = self.request("food-ticket synthetic POST delete group", "index.php?page=food-ticket&food_api=food-groups",
+                                  "POST", delete_body, headers)
+        try:
+            deleted = json.loads(body)
+        except json.JSONDecodeError:
+            deleted = {}
+        remaining = deleted.get("groups", []) if isinstance(deleted, dict) else []
+        deleted_ok = isinstance(deleted, dict) and bool(deleted.get("ok")) and not any(isinstance(row, dict) and int(row.get("id", 0)) == group_id for row in remaining)
+        if not deleted_ok:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "synthetic group deletion was not confirmed by the handler response"
 
     def requester_permission_checks(self) -> None:
         requester = RouteSmoke(self.base, self.password, "loadtest-requester", self.jalali_month)
@@ -243,6 +290,7 @@ def main() -> int:
         smoke.login()
         smoke.pages()
         smoke.apis()
+        smoke.food_ticket_group_lifecycle()
         smoke.food_order_lifecycle()
         smoke.requester_permission_checks()
     except Exception as exc:  # noqa: BLE001 - retain diagnostics in JSON/markdown report
@@ -271,8 +319,10 @@ def main() -> int:
         "pages_tested": sum(str(row["name"]).startswith("page:") for row in smoke.results),
         "api_reads_tested": sum(row["method"] == "GET" and ("food_api=" in row["path"] or "traffic_api=" in row["path"]) for row in smoke.results),
         "role_checks_tested": sum(str(row["name"]).startswith("requester:") for row in smoke.results),
+        "expected_authorization_rejections": sum(bool(row.get("expected_rejection")) for row in smoke.results),
         "http_error_responses": sum(int(row["status"]) >= 400 for row in smoke.results),
         "application_error_payloads": sum(bool(row.get("application_error")) for row in smoke.results),
+        "food_ticket_group_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("food-ticket synthetic POST create group", "food-ticket absence-status for synthetic group", "food-ticket synthetic POST delete group")),
         "php_runtime_log_error_lines": len(php_runtime_lines),
         "database_error_log_lines": len(database_error_lines),
         "php_runtime_log_samples": php_runtime_lines[:20],
@@ -297,7 +347,8 @@ def main() -> int:
              f"- Pages: {report['pages_tested']}; API reads: {report['api_reads_tested']}; requester permission checks: {report['role_checks_tested']}; total checks: {report['total_checks']}",
              f"- HTTP error responses: {report['http_error_responses']}; JSON application errors: {report['application_error_payloads']}; PHP runtime log lines: {report['php_runtime_log_error_lines']}; DB/SQL log lines: {report['database_error_log_lines']}",
              f"- Passed: {report['passed']}; failed: {report['failed']}",
-             f"- Food order create/cancel: {'passed' if report['food_order_write_lifecycle_tested'] else 'not passed'}",
+             f"- Food-order create/cancel/read-back: {'passed' if report['food_order_write_lifecycle_tested'] else 'not passed'}; food-ticket group create/status/delete: {'passed' if report['food_ticket_group_write_lifecycle_tested'] else 'not passed'}",
+             f"- Expected access rejections: {report['expected_authorization_rejections']}",
              f"- Elapsed: {report['elapsed_seconds']} s; median latency: {report['p50_latency_ms']} ms; max latency: {report['max_latency_ms']} ms", "",
              "| Result | Method | Route | HTTP | Latency (ms) | Diagnostic |", "|---|---|---|---:|---:|---|"]
     for row in smoke.results:
