@@ -1,62 +1,31 @@
 # گزارش آزمون بار ۲۵۰ کاربر هم‌زمان
 
-- زمان UTC: 2026-10-22T16:11:10.753682+00:00
+- زمان UTC: 2026-10-22T16:15:29.455786+00:00
 - محیط: ephemeral GitHub Actions runner; isolated MariaDB; PHP CLI server with configured worker pool
 - مقصد: 127.0.0.1 only; no production/staging host was contacted
 - کاربران مجازی: 250; ramp-up: 30s; پایداری: 90s; think time: 1.0s
-- کل درخواست‌ها: 17760; throughput کل: 145.08 درخواست/ثانیه; مشاهده‌های خطا: 3699
-- اوج مجموع CPU پردازه‌های PHP: 110.8%; اوج مجموع RSS پردازه‌ها: 1144.16 MB
+- کل درخواست‌ها: 10710; throughput کل: 86.84 درخواست/ثانیه; مشاهده‌های خطا: 0
+- اوج مجموع CPU پردازه‌های PHP: 107.7%; اوج مجموع RSS پردازه‌ها: 1144.02 MB
 
 | مسیر | تعداد | RPS | p50 ms | p95 ms | p99 ms | بیشینه ms | کدهای HTTP |
 |---|---:|---:|---:|---:|---:|---:|---|
-| asset-list | 1195 | 9.76 | 707.08 | 1073.53 | 1415.16 | 1877.04 | {'200': 1195} |
-| cd-dvd | 1263 | 10.32 | 689.0 | 1061.69 | 1245.63 | 1553.27 | {'200': 1263} |
-| dashboard | 1184 | 9.67 | 914.43 | 1240.41 | 1436.57 | 1730.37 | {'200': 1184} |
-| food-admin-config-api | 1255 | 10.25 | 645.3 | 1025.05 | 1183.36 | 1485.22 | {'200': 1255} |
-| food-admin-page | 1277 | 10.43 | 633.91 | 981.83 | 1141.21 | 1326.38 | {'200': 1277} |
-| food-admin-page-validation | 1277 | 10.43 | 0.0 | 0.0 | 0.0 | 0.0 | {'200': 1277} |
-| food-order-month-api | 1211 | 9.89 | 609.71 | 1004.93 | 1183.43 | 1534.1 | {'400': 1211} |
-| food-order-month-api-validation | 1211 | 9.89 | 0.0 | 0.0 | 0.0 | 0.0 | {'400': 1211} |
-| food-order-page | 1160 | 9.48 | 673.08 | 1037.51 | 1178.95 | 1464.63 | {'200': 1160} |
-| inventory | 1271 | 10.38 | 1324.77 | 1842.48 | 2168.08 | 2689.02 | {'200': 1271} |
-| login | 250 | 2.04 | 763.44 | 2498.64 | 2848.88 | 3213.16 | {'200': 250} |
-| login-form | 250 | 2.04 | 124.41 | 1045.73 | 1285.13 | 1787.04 | {'200': 250} |
-| new-ticket-form | 1307 | 10.68 | 762.47 | 1132.12 | 1374.18 | 2029.72 | {'200': 1307} |
-| notification-feed | 1211 | 9.89 | 604.14 | 971.32 | 1141.9 | 1498.24 | {'200': 1211} |
-| reports | 1217 | 9.94 | 993.05 | 1380.36 | 1567.05 | 1863.62 | {'200': 1217} |
-| traffic-control | 1221 | 9.97 | 654.13 | 1007.89 | 1150.76 | 1611.77 | {'200': 1221} |
+| asset-list | 865 | 7.01 | 1481.27 | 2005.11 | 2246.92 | 3043.67 | {'200': 865} |
+| cd-dvd | 858 | 6.96 | 1428.69 | 1959.69 | 2204.82 | 2950.72 | {'200': 858} |
+| dashboard | 868 | 7.04 | 1749.18 | 2311.54 | 2572.7 | 3180.18 | {'200': 868} |
+| food-admin-config-api | 868 | 7.04 | 1356.6 | 1887.94 | 2148.35 | 2336.1 | {'200': 868} |
+| food-admin-page | 826 | 6.7 | 1328.38 | 1861.07 | 2124.18 | 2585.1 | {'200': 826} |
+| food-order-month-api | 852 | 6.91 | 1330.31 | 1837.52 | 2068.8 | 2409.08 | {'200': 852} |
+| food-order-page | 828 | 6.71 | 1407.97 | 1922.19 | 2155.48 | 2478.78 | {'200': 828} |
+| inventory | 838 | 6.8 | 2742.8 | 3463.1 | 3922.89 | 4838.75 | {'200': 838} |
+| login | 250 | 2.03 | 1923.77 | 4692.97 | 4976.47 | 5507.04 | {'200': 250} |
+| login-form | 250 | 2.03 | 403.34 | 1957.45 | 2358.46 | 2505.48 | {'200': 250} |
+| new-ticket-form | 860 | 6.97 | 1527.41 | 2050.93 | 2275.84 | 2871.78 | {'200': 860} |
+| notification-feed | 845 | 6.85 | 1294.09 | 1861.74 | 2146.4 | 2336.2 | {'200': 845} |
+| reports | 827 | 6.71 | 1865.76 | 2399.26 | 2658.34 | 2993.28 | {'200': 827} |
+| traffic-control | 875 | 7.1 | 1395.31 | 1899.52 | 2120.88 | 2693.07 | {'200': 875} |
 
 ## نمونهٔ خطاها
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-admin-page-validation — HTTP 200: session unexpectedly returned to the login page
-- food-order-month-api — HTTP 400: HTTP 400
-- food-order-month-api-validation — HTTP 400: expected HTTP 200
-- food-order-month-api — HTTP 400: HTTP 400
+- موردی ثبت نشد.
 
 ## محدودیت‌ها
 - LDAP/Active Directory authentication and Windows WMI collectors were not exercised; LDAP is disabled in the isolated config.
