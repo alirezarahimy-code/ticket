@@ -20,7 +20,7 @@ function inventory_render_assets_content(
         echo '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="import_domain_assets"><button class="button secondary" type="submit">ورود کامپیوترهای دامنه</button></form>';
     }
     if ($canExtractLocalServer) {
-        echo '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button secondary" type="submit" title="فقط میزبانی را می‌خواند که PHP سامانه روی آن اجرا شده است">استخراج محلی همین سیستم</button></form>';
+        echo '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button secondary" type="submit" title="فقط میزبانی را می‌خواند که PHP سامانه روی آن اجرا شده است">استخراج محلی همین سیستم</button><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
     }
     if ($canExtractAssets && $canConfigureNetworkScan) {
         echo '<a class="button secondary" href="index.php?page=settings#domain-scan">حساب استخراج شبکه</a>';
@@ -33,7 +33,7 @@ function inventory_render_assets_content(
     if ($canExtractAssets && !$networkScanEnabled) {
         echo '<div class="alert danger inventory-scan-notice">' . e((string) domain_scan_preflight()) . '</div>';
     }
-    echo '<div class="inventory-selection-bar"><div><strong id="asset-selection-count" data-asset-selection-count>۰ سیستم انتخاب شده</strong><span> برای بررسی حساب، دقیقاً یک سیستم را انتخاب و «آزمون حساب روی یک سیستم» را بزنید؛ آزمون چیزی ذخیره نمی‌کند. سپس برای هر نوبت حداکثر ۹۰۰ سیستم را استخراج کنید.</span></div><div class="inventory-bulk-actions">';
+    echo '<div class="inventory-selection-bar"><div><strong id="asset-selection-count" data-asset-selection-count>۰ سیستم انتخاب شده</strong><span> برای بررسی حساب، دقیقاً یک سیستم را انتخاب و «آزمون حساب روی یک سیستم» را بزنید؛ آزمون چیزی ذخیره نمی‌کند. سپس برای هر نوبت حداکثر ۹۰۰ سیستم را استخراج کنید. اسکن موفق، فیلدهای ماشینی را تازه می‌کند و ممکن است مقدار دستی همان فیلدها را جایگزین کند؛ پلاک، پلمپ و اطلاعات اداری جداگانه حفظ می‌شوند.</span></div><div class="inventory-bulk-actions">';
     if ($canExtractAssets) {
         $scanReady = $networkScanEnabled ? '1' : '0';
         $scanDisabled = $networkScanEnabled ? '' : ' disabled aria-disabled="true" title="' . e((string) domain_scan_preflight()) . '"';

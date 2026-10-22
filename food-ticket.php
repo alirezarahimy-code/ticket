@@ -3264,7 +3264,7 @@ function food_ticket_ensure_employee_local_accounts(): int
     }
     try {
         $pdo = db();
-        $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
         if (!$rows) {
             return 0;
         }
@@ -3289,14 +3289,36 @@ function food_ticket_ensure_employee_local_accounts(): int
                 }
             }
         }
-        $usernameTaken = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
-        $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
-        $hash = null;
-        $converted = 0;
+        $employeeCodes = [];
+        $candidateCodes = [];
         foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
             $pc = function_exists('normalize_employee_number')
                 ? (string) (normalize_employee_number((string) ($row['employee_number'] ?? '')) ?? '')
                 : trim((string) ($row['employee_number'] ?? ''));
+            $employeeCodes[$id] = $pc;
+            if ($id > 0 && $pc !== '') {
+                $candidateCodes[$pc] = true;
+            }
+        }
+        // Batch username collision checks instead of one SELECT per employee on first panel load.
+        $existingUsernameIds = [];
+        foreach (array_chunk(array_keys($candidateCodes), 500) as $codeChunk) {
+            if ($codeChunk === []) { continue; }
+            $marks = implode(',', array_fill(0, count($codeChunk), '?'));
+            $existingNames = $pdo->prepare('SELECT id, username FROM users WHERE username IN (' . $marks . ')');
+            $existingNames->execute($codeChunk);
+            foreach ($existingNames->fetchAll(PDO::FETCH_ASSOC) as $existingName) {
+                $existingUsernameIds[(string) $existingName['username']][] = (int) $existingName['id'];
+            }
+        }
+        $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
+        $hash = null;
+        $converted = 0;
+        $releasedUsernames = [];
+        foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            $pc = (string) ($employeeCodes[$id] ?? '');
             if ($pc === '') {
                 continue;
             }
@@ -3306,14 +3328,24 @@ function food_ticket_ensure_employee_local_accounts(): int
                     continue;
                 }
             }
-            $usernameTaken->execute([$pc, (int) $row['id']]);
-            if ((int) $usernameTaken->fetchColumn() > 0) {
+            $takenByAnother = false;
+            foreach ($existingUsernameIds[$pc] ?? [] as $usernameOwnerId) {
+                if ($usernameOwnerId !== $id && !isset($releasedUsernames[$pc])) {
+                    $takenByAnother = true;
+                    break;
+                }
+            }
+            if ($takenByAnother) {
                 continue;
             }
             if ($hash === null) {
                 $hash = lac_default_hash();
             }
-            $convert->execute([$pc, $hash, (int) $row['id']]);
+            $convert->execute([$pc, $hash, $id]);
+            $oldUsername = (string) ($row['username'] ?? '');
+            if ($oldUsername !== '' && $oldUsername !== $pc) {
+                $releasedUsernames[$oldUsername] = true;
+            }
             $converted++;
         }
         return $converted;
@@ -3998,6 +4030,15 @@ function food_ticket_api_handle(string $route, array $user): never
     if (str_contains($route, '?')) {
         $route = strstr($route, '?', true) ?: $route;
     }
+    $perfRoute = substr((string) preg_replace('/[^a-z0-9_\/-]/i', '', $route), 0, 80);
+    $perfMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    $perfStartedAt = microtime(true);
+    register_shutdown_function(static function () use ($perfRoute, $perfMethod, $perfStartedAt): void {
+        $durationMs = (int) round((microtime(true) - $perfStartedAt) * 1000);
+        if ($durationMs >= 1000) {
+            error_log('ITSM slow food-ticket API: route=' . $perfRoute . '; method=' . $perfMethod . '; duration_ms=' . $durationMs . '; status=' . http_response_code());
+        }
+    });
     if (!food_ticket_route_allowed($user, $route)) {
         food_ticket_api_json(['error' => 'دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست.'], 403);
     }
@@ -4615,6 +4656,13 @@ function food_ticket_render_safe_replace(string $search, string $replace, string
 
 function food_ticket_render_page(array $user): void
 {
+    $renderStartedAt = microtime(true);
+    register_shutdown_function(static function () use ($renderStartedAt): void {
+        $durationMs = (int) round((microtime(true) - $renderStartedAt) * 1000);
+        if ($durationMs >= 1000) {
+            error_log('ITSM slow food-ticket render: duration_ms=' . $durationMs . '; status=' . http_response_code());
+        }
+    });
     require_food_ticket_access();
     $file = APP_ROOT . '/food-ticket-web/index.html';
     $html = is_file($file) ? file_get_contents($file) : false;

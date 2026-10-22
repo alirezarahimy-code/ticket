@@ -137,7 +137,8 @@ class InventoryTruthStaticTests(unittest.TestCase):
         store = scan[start:end]
         self.assertIn("asset_profile_auto_values($inventory), $userId, true", store)
         self.assertIn("asset_profile_auto_values($inventory)", store)
-        self.assertIn("manually entered organizational/plaque data is untouched", store)
+        self.assertIn("replaces hand edits in those auto-mapped fields", store)
+        self.assertIn("plaque/organizational fields are untouched", store)
 
     def test_internet_access_is_not_inferred_from_a_default_gateway(self) -> None:
         profile = read("asset-profile.php")
@@ -147,7 +148,43 @@ class InventoryTruthStaticTests(unittest.TestCase):
         self.assertNotIn("'connected_internet' =>", auto)
         self.assertNotIn("$gateway !== ''", auto)
         self.assertIn("'connected_network' => $ip !== '' ? 1 : 0", auto)
-        self.assertIn("($value === 0 && !$overwrite)", profile)
+        self.assertIn("!$overwrite && ($value === null || $value === '' || $value === 0)", profile)
+
+    def test_successful_empty_categories_clear_but_failed_queries_preserve_known_values(self) -> None:
+        inventory = read("inventory.php")
+        merge = inventory[inventory.index("function inventory_merge_missing_values"):inventory.index("function inventory_saved_asset_snapshot")]
+        self.assertIn("function inventory_collection_status_keys", inventory)
+        self.assertIn("inventory_collection_category_succeeded($status, $childPath)", merge)
+        self.assertIn("'hardware.memory_modules' => ['root/cimv2|Win32_PhysicalMemory']", inventory)
+        self.assertIn("'peripherals.printers' => ['root/cimv2|Win32_Printer']", inventory)
+        self.assertIn("'collection_status' => is_array($hardware['collection_status'] ?? null)", inventory)
+        self.assertIn("function inventory_apply_collection_status_metadata", inventory)
+        self.assertIn("last_attempt_at", inventory)
+        self.assertIn("last_success_at", inventory)
+        self.assertIn("last_success_source", inventory)
+        self.assertIn("['attempted'] = false", inventory)
+        self.assertIn("'not_attempted'", read("asset-profile.php"))
+        collector = read("tools/collect_server_inventory.ps1")
+        agent = read("client-agent/Collect-Inventory.ps1")
+        for source in (collector, agent):
+            self.assertIn("InventoryCollectorStatus", source)
+            self.assertIn("ok = $true; count = $rows.Count", source)
+            self.assertIn("ok = $false; count = 0", source)
+            self.assertIn("collection_status", source)
+        profile = read("asset-profile.php")
+        self.assertIn("function asset_profile_collection_status_summary", profile)
+        self.assertIn("$values['_field_provenance'] = $fieldProvenance", profile)
+        self.assertIn("$profile['_field_provenance'] = $fieldProvenance", profile)
+        self.assertIn("$profile['_field_provenance'][$key]", profile)
+        self.assertIn("مقادیر قبلی این بخش‌ها در صورت وجود حفظ شده‌اند", read("index.php"))
+
+    def test_food_panel_and_ldap_slow_paths_emit_stage_timing_without_identity_secrets(self) -> None:
+        food = read("food-ticket.php")
+        self.assertIn("ITSM slow food-ticket render: duration_ms=", food)
+        self.assertIn("ITSM slow food-ticket API: route=", food)
+        bootstrap = read("bootstrap.php")
+        self.assertIn("ITSM LDAP login timing: duration_ms=", bootstrap)
+        self.assertIn("ldap_authenticate_measured", bootstrap)
 
 
 

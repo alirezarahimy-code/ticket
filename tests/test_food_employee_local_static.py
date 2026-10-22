@@ -29,7 +29,10 @@ check("'local_user', 'local'" in imp, "excel import still creates local accounts
 check("نام کاربری = کد پرسنلی" in guide, "help guide documents local account on manual employee add")
 check("food_employee_local" in chatbot, "chatbot answers local account for new employees")
 check("function food_ticket_ensure_employee_local_accounts" in save, "existing food-only employees are backfilled to local accounts")
-check("food_ticket_ensure_employee_local_accounts()" in read("index.php"), "backfill runs automatically when the app loads")
+check("food_ticket_ensure_employee_local_accounts()" in save[save.find("function food_ticket_api_employees"):], "backfill runs only when the food employee list is requested")
+backfill = save[save.find("function food_ticket_ensure_employee_local_accounts"):save.find("function food_ticket_api_employees")]
+check("SELECT id, username FROM users WHERE username IN (" in backfill and "$existingNames->execute($codeChunk)" in backfill, "employee collision checks are batched instead of one SQL query per employee")
+check("$usernameTaken->execute" not in backfill, "employee backfill avoids N+1 username checks")
 check("با باز شدن سامانه" in guide and "با باز شدن سامانه" in chatbot, "help and chatbot say existing employees get local accounts automatically")
 check("function lac_ensure_schema" in read("local-accounts.php"), "local account schema is ensured before convert")
 check("lac_ensure_schema" in save, "employee backfill waits for local account columns")

@@ -25,12 +25,8 @@ require __DIR__ . '/system-health.php';
 ticket_number_ensure_schema(); // پیش از هر تراکنش: DDL اینجا بی‌خطر است و داخل تراکنش دیگر اجرا نمی‌شود
 ticket_number_autofill();
 role_permissions_seed();
-try {
-    if (function_exists('food_ticket_ensure_employee_local_accounts')) {
-        food_ticket_ensure_employee_local_accounts();
-    }
-} catch (Throwable) {
-}
+// تبدیل رکوردهای قدیمی غذا فقط هنگام بارگذاری فهرست کارکنان پنل غذا انجام می‌شود،
+// نه در هر درخواست و نه قبل از نمایش فرم ورود.
 
 if (isset($_GET['installed'])) {
     flash('success', 'سامانه با موفقیت نصب شد.');
@@ -1131,7 +1127,7 @@ if (($_GET['action'] ?? '') === 'export_assets') {
     $assetRows = $query->fetchAll();
     $profileMap = asset_profile_map(array_column($assetRows, 'id'));
     foreach ($assetRows as $row) {
-        $profile = $profileMap[(int) $row['id']] ?? [];
+        $profile = asset_profile_fill_from_asset($profileMap[(int) $row['id']] ?? [], $row);
         $online = (int) ($profile['ad_online'] ?? 0) === 1;
         $wasScanned = (string) ($profile['ad_scanned_at'] ?? '') !== '';
         $netStatus = $online ? 'آنلاین' : ($wasScanned ? 'آفلاین' : 'پینگ نشده');
@@ -1221,40 +1217,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
     try {
         if ($action === 'login') {
+            $loginPerfStarted = microtime(true);
+            $loginPerfStage = 'login-rate-check';
+            $loginPerfStageStarted = $loginPerfStarted;
+            $loginPerfStages = [];
+            $markLoginPerfStage = static function (string $stage) use (&$loginPerfStage, &$loginPerfStageStarted, &$loginPerfStages): void {
+                $now = microtime(true);
+                $loginPerfStages[$loginPerfStage] = ($loginPerfStages[$loginPerfStage] ?? 0) + (int) round(($now - $loginPerfStageStarted) * 1000);
+                $loginPerfStage = $stage;
+                $loginPerfStageStarted = $now;
+            };
+            register_shutdown_function(static function () use (&$loginPerfStage, &$loginPerfStageStarted, &$loginPerfStages, $loginPerfStarted): void {
+                $elapsedMs = (int) round((microtime(true) - $loginPerfStarted) * 1000);
+                $loginPerfStages[$loginPerfStage] = ($loginPerfStages[$loginPerfStage] ?? 0) + (int) round((microtime(true) - $loginPerfStageStarted) * 1000);
+                if ($elapsedMs >= 2000) {
+                    $stageSummary = [];
+                    foreach ($loginPerfStages as $stage => $durationMs) {
+                        $stageSummary[] = $stage . ':' . $durationMs . 'ms';
+                    }
+                    error_log('ITSM slow login request: ' . $elapsedMs . 'ms; stages=' . implode(',', $stageSummary));
+                }
+            });
             $username = post_value('username');
             $password = (string) ($_POST['password'] ?? '');
             if (!login_rate_allowed($username)) {
                 flash('danger', 'تلاش‌های ورود بیش از حد مجاز است. ۱۵ دقیقه بعد دوباره تلاش کنید.');
                 redirect('index.php?page=login');
             }
+            $markLoginPerfStage('local-user-query');
             $query = db()->prepare('SELECT * FROM users WHERE username = ? AND auth_source = "local" AND is_active = 1 LIMIT 1');
             $query->execute([$username]);
             $local = $query->fetch();
             if ($local && password_verify($password, (string) $local['password_hash'])) {
+                $markLoginPerfStage('local-login-finalize');
                 db()->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$local['id']]);
                 clear_login_failures($username);
                 login_user($local);
+                $markLoginPerfStage('client-identity');
                 $initialAssetId = inventory_collect_client_asset($local);
                 if ($initialAssetId) {
                     record_asset_history($initialAssetId, 'inventory_collected', 'شناسایی خودکار سیستم کلاینت در اولین ورود', (int) $local['id'], null, 'نام سیستم و IP کلاینت از درخواست ورود ثبت شد.');
                 }
-                inventory_auto_extract_server((int) $local['id']);
                 redirect('index.php');
             }
+            $markLoginPerfStage('ldap-authentication');
             $identity = ldap_authenticate($username, $password);
             if ($identity) {
+                $markLoginPerfStage('domain-user-sync');
                 $domainUser = upsert_domain_user($identity);
                 if ((int) ($domainUser['is_active'] ?? 0) !== 1) {
                     throw new RuntimeException('حساب کاربری شبکه غیرفعال است. ادمین اصلی باید آن را از تنظیمات سامانه فعال کند.');
                 }
+                $markLoginPerfStage('domain-login-finalize');
                 db()->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$domainUser['id']]);
                 clear_login_failures($username);
                 login_user($domainUser);
+                $markLoginPerfStage('client-identity');
                 $initialAssetId = inventory_collect_client_asset($domainUser);
                 if ($initialAssetId) {
                     record_asset_history($initialAssetId, 'inventory_collected', 'شناسایی خودکار سیستم کلاینت در اولین ورود', (int) $domainUser['id'], null, 'نام سیستم و IP کلاینت از درخواست ورود ثبت شد.');
                 }
-                inventory_auto_extract_server((int) $domainUser['id']);
                 redirect('index.php');
             }
             record_login_failure($username);
@@ -5312,15 +5334,33 @@ if ($page === 'inventory') {
         render_footer();
         exit;
     }
-    $profile = asset_profile_fetch($inventoryId);
-    if ((string) ($profile['record_number'] ?? '') === '') {
-        $profile['record_number'] = (string) $asset['asset_tag'];
+    $profile = asset_profile_fill_from_asset(asset_profile_fetch($inventoryId), $asset);
+    $inventorySourceLabels = ['agent' => 'Agent کلاینت', 'domain' => 'اسکن شبکه‌ای', 'server_inventory' => 'استخراج محلی'];
+    $lastInventoryLabel = !empty($asset['last_inventory_at'])
+        ? persian_date((string) $asset['last_inventory_at']) . ' — ' . ($inventorySourceLabels[(string) ($asset['source'] ?? '')] ?? 'منبع ثبت‌شده')
+        : 'هنوز برداشت دارای دادهٔ سخت‌افزاری ثبت نشده است؛ اطلاعات دامنه ممکن است فقط شامل مشخصات پایه باشد.';
+    $collectionIssues = asset_profile_collection_status_summary($asset);
+    $collectionFailures = array_values(array_filter($collectionIssues, static fn (array $item): bool => ($item['state'] ?? '') === 'failed'));
+    $collectionEmpty = array_values(array_filter($collectionIssues, static fn (array $item): bool => ($item['state'] ?? '') === 'empty'));
+    $collectionNotAttempted = array_values(array_filter($collectionIssues, static fn (array $item): bool => ($item['state'] ?? '') === 'not_attempted'));
+    $collectionStatusHtml = '';
+    if ($collectionFailures !== []) {
+        $failureNames = array_map(static function (array $item): string {
+            $name = (string) ($item['name'] ?? '');
+            $lastSuccess = trim((string) ($item['last_success_at'] ?? ''));
+            $sourceLabels = ['agent' => 'عامل کلاینت', 'domain' => 'اسکن دامنه', 'server_inventory' => 'استخراج محلی'];
+            $source = $sourceLabels[(string) ($item['last_success_source'] ?? '')] ?? '';
+            $detail = $lastSuccess !== '' ? ' (آخرین پاسخ موفق منبع: ' . persian_date($lastSuccess) . '، ساعت ' . date('H:i', strtotime($lastSuccess)) . ($source !== '' ? '، ' . $source : '') . ')' : ' (زمان دریافت موفق قبلی نامشخص است)';
+            return $name . $detail;
+        }, array_slice($collectionFailures, 0, 5));
+        $extra = count($collectionFailures) > 5 ? ' و ' . (count($collectionFailures) - 5) . ' مورد دیگر' : '';
+        $collectionStatusHtml .= '<small class="muted">در برداشت اخیر ' . count($collectionFailures) . ' منبع داده پاسخ نداد؛ مقادیر قبلی این بخش‌ها در صورت وجود حفظ شده‌اند: ' . e(implode('، ', $failureNames) . $extra) . '.</small>';
     }
-    if ((string) ($profile['registry_date'] ?? '') === '' && !empty($asset['created_at'])) {
-        $profile['registry_date'] = (string) $asset['created_at'];
+    if ($collectionEmpty !== []) {
+        $collectionStatusHtml .= '<small class="muted">در برداشت اخیر ' . count($collectionEmpty) . ' پرس‌وجوی موفق ردیفی برنگرداند؛ این با خطای دسترسی یکی نیست و دستهٔ متناظر به‌روز شده است.</small>';
     }
-    if ((string) ($profile['hostname'] ?? '') === '') {
-        $profile['hostname'] = (string) $asset['hostname'];
+    if ($collectionNotAttempted !== []) {
+        $collectionStatusHtml .= '<small class="muted">' . count($collectionNotAttempted) . ' دسته در روشِ برداشت اخیر اصلاً پرس‌وجو نشدند؛ آخرین دادهٔ شناخته‌شدهٔ آن‌ها جداگانه حفظ شده است.</small>';
     }
     render_header('شناسنامه سیستم', $inventoryUser);
     $canExtractThisAsset = user_can($inventoryUser, 'domain.scan');
@@ -5328,7 +5368,7 @@ if ($page === 'inventory') {
     $canExtractLocalThisAsset = PHP_OS_FAMILY === 'Windows' && user_can($inventoryUser, 'asset.extract') && (is_global_ticket_role($inventoryUser['role']) || user_service_group($inventoryUser) === 'it') && inventory_asset_is_local($asset);
     $assetActions = '';
     if ($canExtractLocalThisAsset) {
-        $assetActions .= '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit">استخراج محلی همین سیستم</button></form>';
+        $assetActions .= '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button" type="submit">استخراج محلی همین سیستم</button><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
     }
     if ($canExtractThisAsset && $extractPreflight === null) {
         $assetActions .= '<a class="button secondary" href="#extract-inventory">استخراج شبکه‌ای</a>';
@@ -5336,12 +5376,12 @@ if ($page === 'inventory') {
             $assetActions .= '<a class="button secondary" href="index.php?page=settings#domain-scan">تنظیمات اسکن شبکه</a>';
         }
     }
-    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1>شناسنامه رایانه ' . e(asset_display_name($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p></div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
+    echo '<section class="page-heading asset-heading"><div><a class="back-link" href="index.php?page=inventory">← بازگشت به سیستم‌ها</a><h1>شناسنامه رایانه ' . e(asset_display_name($asset['hostname'])) . '</h1><p>' . e(asset_name_title($asset['hostname'], $asset['asset_tag']) ?: $asset['asset_tag']) . ' • مالک: ' . e($asset['owner_name'] ?: 'بدون مالک') . '</p><p class="muted">آخرین برداشت سخت‌افزاری: ' . e($lastInventoryLabel) . '</p><small class="muted">ثبت این زمان کامل‌بودن همهٔ فیلدها را تضمین نمی‌کند؛ در برداشت ناقص ممکن است مقدار پیشین باقی بماند. استخراج محلی برای جایگزینی فیلدهای خودکارِ پُر به تأیید «بازنویسی» نیاز دارد.</small>' . $collectionStatusHtml . '</div><div class="actions">' . $assetActions . '<a class="button secondary" href="index.php?page=asset-history&id=' . $inventoryId . '">تاریخچه</a></div></section>';
     if ($canExtractThisAsset) {
         if ($extractPreflight !== null) {
             echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای</h2><p class="alert danger">' . e((string) $extractPreflight) . '</p></section>';
         } else {
-            echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای با حساب مجاز</h2><p class="muted">این حساب باید روی همین کامپیوتر دسترسی Administrators محلی داشته باشد. اعتبارنامه فقط برای این نوبت، رمز‌شده در نشست موقت نگهداری و پس از پایان پاک می‌شود؛ در پایگاه‌داده ذخیره نمی‌شود. استفاده از HTTPS الزامی است.</p><form method="post" class="form-grid">' . csrf_field() . '<input type="hidden" name="asset_ids[]" value="' . $inventoryId . '"><input type="hidden" name="action" value="domain_scan_selected"><label>نام کاربری ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" type="submit">استخراج اطلاعات این سیستم</button></div></form></section>';
+            echo '<section id="extract-inventory" class="card form-card inventory-extract-card"><h2>استخراج شبکه‌ای با حساب مجاز</h2><p class="muted">این حساب باید روی همین کامپیوتر دسترسی Administrators محلی داشته باشد. اعتبارنامه فقط برای این نوبت، رمز‌شده در نشست موقت نگهداری و پس از پایان پاک می‌شود؛ در پایگاه‌داده ذخیره نمی‌شود. استفاده از HTTPS الزامی است. اسکن موفق فیلدهای ماشینی شناسنامه را تازه می‌کند و ممکن است مقدار دستی همان فیلدها را جایگزین کند؛ پلاک، پلمپ و اطلاعات اداری خارج از این نگاشت هستند.</p><form method="post" class="form-grid">' . csrf_field() . '<input type="hidden" name="asset_ids[]" value="' . $inventoryId . '"><input type="hidden" name="action" value="domain_scan_selected"><label>نام کاربری ویندوز (DOMAIN\\user)<input name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز حساب<input type="password" name="scan_password" required autocomplete="new-password"></label><div class="full"><button class="button" type="submit">استخراج اطلاعات این سیستم</button></div></form></section>';
         }
     }
     echo '<form class="inventory-form" method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_inventory_form"><input type="hidden" name="asset_id" value="' . $inventoryId . '">';
@@ -5362,7 +5402,7 @@ if ($page === 'inventory-diagnostics') {
     render_header('تست جمع‌آوری اطلاعات', $diagUser);
     $selfTest = $_SESSION['asset_selftest'] ?? null;
     unset($_SESSION['asset_selftest']);
-    echo '<section class="page-heading"><div><a class="back-link" href="' . ($diagAssetId > 0 ? 'index.php?page=inventory&id=' . $diagAssetId : 'index.php?page=assets') . '">← بازگشت</a><h1>تست جمع‌آوری اطلاعات سیستم</h1><p>نتیجه اجرای دستورهای سیستمی از دید همین سرور. اگر ردیفی «ناموفق/صفر» بود، دکمهٔ استخراج هم چیزی پر نمی‌کند.</p></div><div class="actions"><form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="asset_profile_selftest"><input type="hidden" name="asset_id" value="' . $diagAssetId . '"><button class="button" type="submit">استخراج آزمایشی و نمایش فیلدها</button></form></div></section>';
+    echo '<section class="page-heading"><div><a class="back-link" href="' . ($diagAssetId > 0 ? 'index.php?page=inventory&id=' . $diagAssetId : 'index.php?page=assets') . '">← بازگشت</a><h1>تست جمع‌آوری اطلاعات سیستم</h1><p>نتیجه اجرای دستورهای سیستمی از دید همین سرور. اگر ردیفی «ناموفق/صفر» بود، دکمهٔ استخراج هم چیزی پر نمی‌کند.</p></div><div class="actions"><form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="asset_profile_selftest"><input type="hidden" name="asset_id" value="' . $diagAssetId . '"><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکار موجود</label><button class="button" type="submit">استخراج آزمایشی و نمایش فیلدها</button></form></div></section>';
     if (is_array($selfTest)) {
         echo '<section class="card ticket-table"><div class="table-head"><span>فیلد شناسنامه</span><span>مقدار به‌دست‌آمده</span></div>';
         if ((int) $selfTest['filled'] === 0) {

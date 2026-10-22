@@ -1056,9 +1056,26 @@ function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4, a
             $answer[$host] = ['inventory' => [], 'error' => $detail !== '' ? $detail : 'پاسخ خالی از PowerShell (کد خروج ' . $row['code'] . ').'];
             continue;
         }
+        // Remote targets must never inherit fallback values describing the PHP scanner host.
+        // Start from a neutral record so a missing optional WMI class stays unknown, not a false match.
         $inventory = inventory_base_inventory();
         $inventory['hostname'] = $host;
+        $inventory['serial_number'] = '';
+        $inventory['manufacturer'] = '';
+        $inventory['model'] = '';
         $inventory['computer_type'] = 'Windows client';
+        $inventory['operating_system'] = '';
+        $inventory['os_architecture'] = '';
+        $inventory['os_serial'] = '';
+        $inventory['mac_address'] = '';
+        $inventory['cpu'] = '';
+        $inventory['memory_mb'] = 0;
+        $inventory['domain_username'] = '';
+        $inventory['antivirus'] = '';
+        $inventory['disks'] = [];
+        $inventory['software'] = [];
+        $inventory['peripherals'] = ['printers' => [], 'scanners' => [], 'monitors' => [], 'keyboards' => [], 'mice' => []];
+        $inventory['hardware'] = [];
         $resolved = domain_scan_resolve_ipv4($host);
         $inventory['ip_address'] = $resolved;
         $inventory = inventory_apply_powershell_data($inventory, $decoded);
@@ -1089,6 +1106,20 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
     if ($assetId <= 0) {
         return 0;
     }
+    $receivedInventory = $inventory;
+    $existingQuery = db()->prepare('SELECT serial_number, manufacturer, model, computer_type, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus FROM assets WHERE id = ? LIMIT 1');
+    $existingQuery->execute([$assetId]);
+    $existingAsset = $existingQuery->fetch();
+    $previousStatus = [];
+    if ($existingAsset) {
+        $previous = inventory_saved_asset_snapshot($existingAsset);
+        $previousStatus = $previous['collection_status'] ?? [];
+        $inventory = inventory_merge_missing_values($inventory, $previous);
+        if ((int) ($inventory['memory_mb'] ?? 0) <= 0 && (int) ($previous['memory_mb'] ?? 0) > 0) {
+            $inventory['memory_mb'] = (int) $previous['memory_mb'];
+        }
+    }
+    $inventory = inventory_apply_collection_status_metadata($inventory, $previousStatus, 'domain');
     db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, computer_type = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, antivirus = ?, source = "domain", last_inventory_at = NOW() WHERE id = ?')->execute([
         $host,
         (string) ($inventory['serial_number'] ?? ''),
@@ -1111,10 +1142,11 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
     ]);
     sync_inventory_rows($assetId, $inventory, 'domain');
     if (inventory_asset_exists($assetId)) {
-        db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($inventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $userId > 0 ? $userId : null]);
+        $receivedInventory['received_at'] = date('c');
+        db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($receivedInventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $userId > 0 ? $userId : null]);
     }
-    // Refresh only machine-derived fields on every successful scan. The payload comes strictly
-    // from asset_profile_auto_values(), so manually entered organizational/plaque data is untouched.
+    // Refresh the mapped machine-derived fields on every successful scan. This intentionally
+    // replaces hand edits in those auto-mapped fields; separate plaque/organizational fields are untouched.
     return asset_profile_apply_auto($assetId, asset_profile_auto_values($inventory), $userId, true);
 }
 

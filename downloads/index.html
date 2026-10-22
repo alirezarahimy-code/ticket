@@ -7,12 +7,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود بستهٔ اصلاحی Ticket 1.61.10 — R30</title>
+  <title>دانلود به‌روزرسانی Ticket 1.61.10 — R31</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
     body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
-    main { width: min(100%, 740px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
+    main { width: min(100%, 760px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
     .tag { display: inline-block; padding: 7px 12px; border-radius: 999px; color: #075e56; background: #e7f6f1; font-size: 13px; font-weight: 700; }
     h1 { margin: 18px 0 10px; font-size: clamp(25px, 5vw, 34px); line-height: 1.5; }
     p { color: #53677b; line-height: 2; margin: 8px 0; }
@@ -25,20 +25,20 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ جاری · R30 · ۲۰۲۶/۱۰/۲۲</span>
-    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — تکمیل شناسنامهٔ دامنه</h1>
-    <p>R30 پس از هر اسکن موفق، فیلدهای خودکار شناسنامه را از دادهٔ تازه به‌روز می‌کند و اطلاعات دستی و سازمانی را نگه می‌دارد. عمق موجودی سراسری AD و دسته‌های WMI/CIM افزوده‌شده در R29 نیز همراه بسته است.</p>
+    <span class="tag">بستهٔ جاری · R31 · ۲۰۲۶/۱۰/۲۲</span>
+    <h1>Ticket نسخهٔ ۱.۶۱.۱۰ — کیفیت دادهٔ شناسنامه و ثبت زمان عملکرد</h1>
+    <p>R31 نتیجهٔ ناقص یا ناموفق WMI را از دادهٔ معتبر قبلی جدا می‌کند، وضعیت و منبع پرس‌وجوهای شناسنامه را نمایش می‌دهد و دو مسیر پرهزینهٔ ساختاری در شروع پنل مدیریت غذا را بهینه می‌کند.</p>
     <ul>
-      <li>اسکن دامنه همهٔ computer objectهای یافته‌شده در AD را صف می‌کند؛ بدون سقف ضمنی ۳۰۰۰ سیستم.</li>
-      <li>مقادیر ماشینی مانند سیستم‌عامل، IP/MAC، CPU/RAM، دیسک و تجهیزات جانبی در اسکن دوباره تازه می‌شوند؛ پلاک، کاربر مسئول و فیلدهای دستی حفظ می‌شوند.</li>
-      <li>دستگاه‌ها و درایورها، سرویس‌ها، پردازه‌ها، startup، shareها، حساب‌ها، HotFixها و اطلاعات امنیت/ذخیره‌سازی نیز در Inventory ثبت می‌شوند.</li>
-      <li>این بسته برابری کامل با TNI را ادعا نمی‌کند؛ driver اختصاصی TNI نصب نمی‌شود. بدون migration و بدون تغییر دادهٔ تولیدی.</li>
+      <li>مقدار قبلی هنگام شکست یا اجرا نشدن پرس‌وجو حفظ می‌شود؛ دستهٔ خالی تنها پس از پرس‌وجوی موفق خالی ثبت می‌شود.</li>
+      <li>برای پرس‌وجوهای collector، زمان تلاش، آخرین پاسخ موفق و منبع ثبت می‌شود؛ دادهٔ خام هر اسکن نیز در تاریخچه می‌ماند.</li>
+      <li>بارگذاری کارکنان و چاپگر در پنل مدیریت غذا موازی است و بررسی تداخل نام کاربری کارکنان به query دسته‌ای تبدیل شده است.</li>
+      <li>زمان رندر پنل، APIهای غذا، مراحل LDAP و ورود کند در لاگ فنی ثبت می‌شود تا پس از اجرا علت واقعی قابل اندازه‌گیری باشد.</li>
     </ul>
-    <a class="download" href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-asset-profile-refresh-r30-20261022.zip" download="ticket-update-1.61.10-asset-profile-refresh-r30-20261022.zip">⬇ دریافت بستهٔ تکمیل شناسنامه R30</a>
-    <div class="file">ticket-update-1.61.10-asset-profile-refresh-r30-20261022.zip · بستهٔ جاری</div>
-    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/raw/refs/heads/arena/8edbdf95-ticket/downloads/ticket-update-1.61.10-asset-profile-refresh-r30-20261022.zip.sha256">دریافت فایل checksum (SHA-256)</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-22-release-161-10-r30/CHANGE-REPORT-FA.md">راهنمای اجرا و جزئیات R30</a></p>
-    <div class="hint">مقصد خاموش یا خارج از دسترس تا زمان روشن‌شدن و دسترسی شبکه‌ای اطلاعات زنده نمی‌دهد. ابتدا یک رایانه و سپس گروه کوچک را روی میزبان Windows سامانه آزمایش کنید. فیلدهای اداری، پلاک و اطلاعاتی که Windows نمی‌تواند با اطمینان بخواند باید دستی تکمیل شوند.</div>
+    <a class="download" href="https://github.com/alirezarahimy-code/ticket/releases/download/v1.61.10-r31/ticket-update-1.61.10-asset-quality-performance-r31-20261022.zip" download="ticket-update-1.61.10-asset-quality-performance-r31-20261022.zip">⬇ دریافت به‌روزرسانی R31</a>
+    <div class="file">ticket-update-1.61.10-asset-quality-performance-r31-20261022.zip · بستهٔ جاری</div>
+    <p class="file"><a href="https://github.com/alirezarahimy-code/ticket/releases/download/v1.61.10-r31/ticket-update-1.61.10-asset-quality-performance-r31-20261022.zip.sha256">دریافت SHA-256</a></p>
+    <p>گزارش نصب، آزمون‌ها و محدودیت‌ها: <a href="../updates/2026-10-22-release-161-10-r31/CHANGE-REPORT-FA.md">گزارش R31</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.61.10-r31">انتشار GitHub</a></p>
+    <div class="hint">این محیط اجرای واقعی Windows/WMI، اتصال پایگاه‌داده یا اندازه‌گیری زندهٔ کندی ندارد. پس از نصب، ابتدا روی نسخهٔ پشتیبان و یک مقصد آزمایشی بررسی کنید؛ برای تشخیص قطعی کندی، لاگ‌های زمان‌سنجی سرور لازم است. بدون migration.</div>
   </main>
 </body>
 </html>

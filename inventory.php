@@ -141,6 +141,195 @@ function inventory_rows(mixed $value): array
     return array_is_list($value) ? $value : [$value];
 }
 
+/** Map persisted inventory paths to the collector query that can authoritatively report an empty result. */
+function inventory_collection_status_keys(string $path): array
+{
+    static $map = [
+        'serial_number' => ['root/cimv2|Win32_BIOS'],
+        'manufacturer' => ['root/cimv2|Win32_ComputerSystem'],
+        'model' => ['root/cimv2|Win32_ComputerSystem'],
+        'cpu' => ['root/cimv2|Win32_Processor'],
+        'memory_mb' => ['root/cimv2|Win32_ComputerSystem'],
+        'domain_username' => ['root/cimv2|Win32_ComputerSystem'],
+        'operating_system' => ['root/cimv2|Win32_OperatingSystem'],
+        'os_architecture' => ['root/cimv2|Win32_OperatingSystem'],
+        'os_serial' => ['root/cimv2|Win32_OperatingSystem'],
+        'ip_address' => ['root/cimv2|Win32_NetworkAdapterConfiguration'],
+        'mac_address' => ['root/cimv2|Win32_NetworkAdapterConfiguration'],
+        'antivirus' => ['root/SecurityCenter2|AntiVirusProduct'],
+        'hardware.bios' => ['root/cimv2|Win32_BIOS'],
+        'hardware.computer' => ['root/cimv2|Win32_ComputerSystem'],
+        'hardware.processor' => ['root/cimv2|Win32_Processor'],
+        'hardware.operating_system' => ['root/cimv2|Win32_OperatingSystem'],
+        'hardware.motherboard' => ['root/cimv2|Win32_BaseBoard'],
+        'hardware.memory_modules' => ['root/cimv2|Win32_PhysicalMemory'],
+        'hardware.physical_disks' => ['root/cimv2|Win32_DiskDrive'],
+        'hardware.graphics' => ['root/cimv2|Win32_VideoController'],
+        'hardware.sound' => ['root/cimv2|Win32_SoundDevice'],
+        'hardware.optical_drives' => ['root/cimv2|Win32_CDROMDrive'],
+        'hardware.network_adapters' => ['root/cimv2|Win32_NetworkAdapter'],
+        'hardware.network_configurations' => ['root/cimv2|Win32_NetworkAdapterConfiguration'],
+        'hardware.modems' => ['root/cimv2|Win32_POTSModem'],
+        'hardware.logical_disks' => ['root/cimv2|Win32_LogicalDisk'],
+        'hardware.extended_inventory.system_product' => ['root/cimv2|Win32_ComputerSystemProduct'],
+        'hardware.extended_inventory.enclosure' => ['root/cimv2|Win32_SystemEnclosure'],
+        'hardware.extended_inventory.memory_arrays' => ['root/cimv2|Win32_PhysicalMemoryArray'],
+        'hardware.extended_inventory.pnp_devices' => ['root/cimv2|Win32_PnPEntity'],
+        'hardware.extended_inventory.signed_drivers' => ['root/cimv2|Win32_PnPSignedDriver'],
+        'hardware.extended_inventory.services' => ['root/cimv2|Win32_Service'],
+        'hardware.extended_inventory.processes' => ['root/cimv2|Win32_Process'],
+        'hardware.extended_inventory.startup_items' => ['root/cimv2|Win32_StartupCommand'],
+        'hardware.extended_inventory.shares' => ['root/cimv2|Win32_Share'],
+        'hardware.extended_inventory.user_accounts' => ['root/cimv2|Win32_UserAccount'],
+        'hardware.extended_inventory.windows_updates' => ['root/cimv2|Win32_QuickFixEngineering'],
+        'hardware.extended_inventory.environment_names' => ['root/cimv2|Win32_Environment'],
+        'hardware.extended_inventory.firewall_profiles' => ['root/StandardCimv2|MSFT_NetFirewallProfile'],
+        'hardware.extended_inventory.firewall_products' => ['root/SecurityCenter2|FirewallProduct'],
+        'hardware.extended_inventory.antispyware_products' => ['root/SecurityCenter2|AntiSpywareProduct'],
+        'hardware.extended_inventory.storage_devices' => ['root/Microsoft/Windows/Storage|MSFT_PhysicalDisk'],
+        'hardware.extended_inventory.storage_reliability' => ['root/Microsoft/Windows/Storage|MSFT_StorageReliabilityCounter'],
+        'hardware.extended_inventory.smart_status' => ['root/wmi|MSStorageDriver_FailurePredictStatus'],
+        'hardware.extended_inventory.monitor_ids' => ['root/wmi|WmiMonitorID'],
+        'os_users' => ['root/cimv2|Win32_UserProfile'],
+        'disks' => ['root/cimv2|Win32_LogicalDisk'],
+        'network_configurations' => ['root/cimv2|Win32_NetworkAdapterConfiguration'],
+        'peripherals.printers' => ['root/cimv2|Win32_Printer'],
+        'peripherals.scanners' => ['root/cimv2|Win32_PnPEntity'],
+        'peripherals.keyboards' => ['root/cimv2|Win32_PnPEntity'],
+        'peripherals.mice' => ['root/cimv2|Win32_PnPEntity'],
+        'peripherals.monitors' => ['root/cimv2|Win32_DesktopMonitor', 'root/cimv2|Win32_PnPEntity'],
+    ];
+    return $map[$path] ?? [];
+}
+
+function inventory_collection_category_succeeded(array $status, string $path): bool
+{
+    $keys = inventory_collection_status_keys($path);
+    if ($keys === []) {
+        return false;
+    }
+    foreach ($keys as $key) {
+        if (!is_array($status[$key] ?? null) || ($status[$key]['ok'] ?? false) !== true) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/** Preserve omitted/failed categories; clear an old category only when the collector confirms success. */
+function inventory_merge_missing_values(array $fresh, array $previous, ?array $status = null, string $path = ''): array
+{
+    if ($status === null) {
+        $status = is_array($fresh['collection_status'] ?? null)
+            ? $fresh['collection_status']
+            : (is_array($fresh['hardware']['collection_status'] ?? null) ? $fresh['hardware']['collection_status'] : []);
+    }
+    foreach ($previous as $key => $oldValue) {
+        $childPath = $path === '' ? (string) $key : $path . '.' . $key;
+        if (!array_key_exists($key, $fresh)) {
+            $fresh[$key] = $oldValue;
+            continue;
+        }
+        // Quality metadata describes this scan; never blend in stale status from an earlier scan.
+        if ($key === 'collection_status') {
+            continue;
+        }
+        $newValue = $fresh[$key];
+        $emptyScalar = $newValue === null || $newValue === '' || ($key === 'memory_mb' && (int) $newValue <= 0);
+        if ($emptyScalar && !is_array($newValue) && $oldValue !== null && $oldValue !== '') {
+            // A successful query does not prove an empty scalar property is authoritative; retain the last-known scalar.
+            $fresh[$key] = $oldValue;
+            continue;
+        }
+        if (is_array($newValue) && $newValue === [] && is_array($oldValue) && $oldValue !== []) {
+            if (!inventory_collection_category_succeeded($status, $childPath)) {
+                $fresh[$key] = $oldValue;
+            }
+            continue;
+        }
+        if (is_array($newValue) && is_array($oldValue) && !array_is_list($newValue) && !array_is_list($oldValue)) {
+            $fresh[$key] = inventory_merge_missing_values($newValue, $oldValue, $status, $childPath);
+        }
+    }
+    return $fresh;
+}
+
+function inventory_saved_asset_snapshot(array $asset): array
+{
+    $decode = static function (mixed $json): array {
+        $value = json_decode((string) $json, true);
+        return is_array($value) ? $value : [];
+    };
+    $hardware = $decode($asset['hardware_json'] ?? '');
+    return [
+        'hostname' => (string) ($asset['hostname'] ?? ''),
+        'serial_number' => (string) ($asset['serial_number'] ?? ''),
+        'manufacturer' => (string) ($asset['manufacturer'] ?? ''),
+        'model' => (string) ($asset['model'] ?? ''),
+        'computer_type' => (string) ($asset['computer_type'] ?? ''),
+        'operating_system' => (string) ($asset['operating_system'] ?? ''),
+        'os_architecture' => (string) ($asset['os_architecture'] ?? ''),
+        'os_serial' => (string) ($asset['os_serial'] ?? ''),
+        'ip_address' => (string) ($asset['ip_address'] ?? ''),
+        'mac_address' => (string) ($asset['mac_address'] ?? ''),
+        'cpu' => (string) ($asset['cpu'] ?? ''),
+        'memory_mb' => (int) ($asset['memory_mb'] ?? 0),
+        'disks' => $decode($asset['disks_json'] ?? ''),
+        'software' => $decode($asset['software_json'] ?? ''),
+        'hardware' => $hardware,
+        'collection_status' => is_array($hardware['collection_status'] ?? null) ? $hardware['collection_status'] : [],
+        'peripherals' => $decode($asset['peripherals_json'] ?? ''),
+        'domain_username' => (string) ($asset['domain_username'] ?? ''),
+        'antivirus' => (string) ($asset['antivirus'] ?? ''),
+    ];
+}
+
+function inventory_apply_collection_status_metadata(array $inventory, array $previousStatus, string $source): array
+{
+    $status = is_array($inventory['collection_status'] ?? null)
+        ? $inventory['collection_status']
+        : (is_array($inventory['hardware']['collection_status'] ?? null) ? $inventory['hardware']['collection_status'] : []);
+    $source = in_array($source, ['agent', 'domain', 'server_inventory'], true) ? $source : 'unknown';
+    $attemptedAt = date('c');
+    foreach ($status as $key => $result) {
+        if (!is_array($result)) {
+            continue;
+        }
+        $prior = is_array($previousStatus[$key] ?? null) ? $previousStatus[$key] : [];
+        $result['attempted'] = true;
+        $result['last_attempt_at'] = $attemptedAt;
+        $result['last_attempt_source'] = $source;
+        if (($result['ok'] ?? false) === true) {
+            $result['last_success_at'] = $attemptedAt;
+            $result['last_success_source'] = $source;
+        } else {
+            if (!empty($prior['last_success_at'])) {
+                $result['last_success_at'] = $prior['last_success_at'];
+            }
+            if (!empty($prior['last_success_source'])) {
+                $result['last_success_source'] = $prior['last_success_source'];
+            }
+        }
+        $status[$key] = $result;
+    }
+    foreach ($previousStatus as $key => $prior) {
+        if (isset($status[$key]) || !is_array($prior)) {
+            continue;
+        }
+        // The current method did not query this category (for example, a lighter-weight agent).
+        // Keep its last successful provenance without reporting a false failure.
+        $prior['ok'] = null;
+        $prior['count'] = null;
+        $prior['attempted'] = false;
+        $status[$key] = $prior;
+    }
+    $inventory['collection_status'] = $status;
+    if (is_array($inventory['hardware'] ?? null)) {
+        $inventory['hardware']['collection_status'] = $status;
+    }
+    return $inventory;
+}
+
 function inventory_asset_exists(int $assetId): bool
 {
     if ($assetId <= 0) {
@@ -312,6 +501,8 @@ function inventory_base_inventory(): array
 function inventory_apply_powershell_data(array $inventory, array $data): array
 {
     $rows = static fn (string $key): array => inventory_rows($data[$key] ?? []);
+    $collectionStatus = is_array($data['collection_status'] ?? null) ? $data['collection_status'] : [];
+    $inventory['collection_status'] = $collectionStatus;
     $computer = $rows('computer')[0] ?? [];
     $bios = $rows('bios')[0] ?? [];
     $processor = $rows('processor')[0] ?? [];
@@ -373,15 +564,51 @@ function inventory_apply_powershell_data(array $inventory, array $data): array
         'sound' => $sound,
         'optical_drives' => $opticalDrives,
         'network_adapters' => $networkAdapters,
+        // Win32_NetworkAdapterConfiguration carries IPs/gateways; keep it separately instead of
+        // dropping it after using only the first row for a MAC address.
+        'network_configurations' => $network,
         'modems' => $modems,
         'logical_disks' => $disks,
         'extended_inventory' => $extendedInventory,
+        'collection_status' => $collectionStatus,
     ]);
     $inventory['os_users'] = $localUsers;
     $inventory['disks'] = $disks;
     $inventory['software'] = $software;
     $inventory['peripherals'] = ['printers' => $printers, 'scanners' => $scanners, 'monitors' => $monitors, 'keyboards' => $keyboards, 'mice' => $mice];
-    $inventory['mac_address'] = is_array($network[0] ?? null) ? (string) inventory_value($network[0], ['MACAddress'], '') : '';
+    $inventory['network_configurations'] = $network;
+    $preferredIp = trim((string) ($inventory['ip_address'] ?? ''));
+    $primaryNetwork = null;
+    foreach ($network as $networkRow) {
+        if (!is_array($networkRow)) { continue; }
+        $addresses = array_map('strval', (array) inventory_value($networkRow, ['IPAddress', 'ip_address'], []));
+        if ($preferredIp !== '' && in_array($preferredIp, $addresses, true)) {
+            $primaryNetwork = $networkRow;
+            break;
+        }
+    }
+    if (!is_array($primaryNetwork)) {
+        foreach ($network as $networkRow) {
+            if (!is_array($networkRow)) { continue; }
+            $addresses = (array) inventory_value($networkRow, ['IPAddress', 'ip_address'], []);
+            $gateways = (array) inventory_value($networkRow, ['DefaultIPGateway', 'default_gateway'], []);
+            if ($addresses !== [] && $gateways !== []) {
+                $primaryNetwork = $networkRow;
+                break;
+            }
+        }
+    }
+    if (!is_array($primaryNetwork)) {
+        $primaryNetwork = is_array($network[0] ?? null) ? $network[0] : [];
+    }
+    $primaryIps = array_values(array_filter(array_map('trim', array_map('strval', (array) inventory_value($primaryNetwork, ['IPAddress', 'ip_address'], []))), static fn (string $ip): bool => filter_var($ip, FILTER_VALIDATE_IP) !== false && !in_array(strtolower($ip), ['0.0.0.0', '::', '127.0.0.1', '::1'], true) && strncmp($ip, '169.254.', 8) !== 0 && stripos($ip, 'fe80:') !== 0));
+    if ($preferredIp !== '' && in_array($preferredIp, $primaryIps, true)) {
+        $inventory['ip_address'] = $preferredIp;
+    } elseif ($primaryIps !== []) {
+        $ipv4 = array_values(array_filter($primaryIps, static fn (string $ip): bool => filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false));
+        $inventory['ip_address'] = $ipv4[0] ?? $primaryIps[0];
+    }
+    $inventory['mac_address'] = (string) inventory_value($primaryNetwork, ['MACAddress', 'mac_address'], '');
     return $inventory;
 }
 
@@ -418,10 +645,22 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
         $conditions[] = 'serial_number = ?';
         $params[] = $serial;
     }
-    $assetQuery = db()->prepare('SELECT id FROM assets WHERE (' . implode(' OR ', $conditions) . ') ORDER BY id ASC LIMIT 1');
+    $assetQuery = db()->prepare('SELECT * FROM assets WHERE (' . implode(' OR ', $conditions) . ') ORDER BY id ASC LIMIT 1');
     $assetQuery->execute($params);
-    $assetId = (int) ($assetQuery->fetchColumn() ?: 0);
-    $payload = json_encode($inventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $existingAsset = $assetQuery->fetch();
+    $assetId = (int) ($existingAsset['id'] ?? 0);
+    $receivedInventory = $inventory;
+    $previousStatus = [];
+    if ($existingAsset) {
+        $previous = inventory_saved_asset_snapshot($existingAsset);
+        $previousStatus = $previous['collection_status'] ?? [];
+        $inventory = inventory_merge_missing_values($inventory, $previous);
+        if ((int) ($inventory['memory_mb'] ?? 0) <= 0 && (int) ($previous['memory_mb'] ?? 0) > 0) {
+            $inventory['memory_mb'] = (int) $previous['memory_mb'];
+        }
+    }
+    $inventory = inventory_apply_collection_status_metadata($inventory, $previousStatus, 'server_inventory');
+    $payload = json_encode($receivedInventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     $values = [$inventory['hostname'], $inventory['serial_number'], $inventory['manufacturer'], $inventory['model'], $inventory['operating_system'], $inventory['os_architecture'], $inventory['os_serial'], $inventory['ip_address'], $inventory['mac_address'], $inventory['cpu'], $inventory['memory_mb'], json_encode($inventory['disks'], JSON_UNESCAPED_UNICODE), json_encode($inventory['software'], JSON_UNESCAPED_UNICODE), json_encode($inventory['hardware'], JSON_UNESCAPED_UNICODE), json_encode($inventory['peripherals'], JSON_UNESCAPED_UNICODE), $inventory['domain_username'], $inventory['antivirus']];
     if ($assetId > 0) {
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "server_inventory", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $assetId]);
@@ -517,7 +756,9 @@ function inventory_collect_client_asset(array $user): ?int
         if (in_array($clientIp, ['127.0.0.1', '::1'], true) || ($serverAddr !== '' && $clientIp === $serverAddr)) {
             return null;
         }
-        $hostname = inventory_reverse_name($clientIp, 'CLIENT-' . str_replace(['.', ':'], '-', $clientIp));
+        // ورود فقط هویت IP را ثبت می‌کند؛ reverse DNS در مسیر ورود synchronous نباشد چون
+        // DNS/PTR معیوب می‌تواند هر ورود را ده‌ها ثانیه معطل کند. نام سخت‌افزاری با اسکن صریح پر می‌شود.
+        $hostname = 'CLIENT-' . str_replace(['.', ':'], '-', $clientIp);
         $hostname = substr(trim($hostname), 0, 190);
         $assetTag = 'CLIENT-' . strtoupper(substr(hash('sha256', $clientIp), 0, 16));
         $username = trim((string) ($user['username'] ?? ''));
@@ -533,13 +774,18 @@ function inventory_collect_client_asset(array $user): ?int
         $assetId = (int) ($query->fetchColumn() ?: 0);
         $hasFullHardware = false;
         if ($assetId > 0) {
-            $existing = db()->prepare('SELECT hardware_json FROM assets WHERE id = ? LIMIT 1');
+            $existing = db()->prepare('SELECT hostname, hardware_json FROM assets WHERE id = ? LIMIT 1');
             $existing->execute([$assetId]);
-            $existingHardware = json_decode((string) $existing->fetchColumn(), true);
+            $existingAsset = $existing->fetch(PDO::FETCH_ASSOC) ?: [];
+            $existingHardware = json_decode((string) ($existingAsset['hardware_json'] ?? ''), true);
             $isLoginIdentity = is_array($existingHardware) && ($existingHardware['collection_mode'] ?? '') === 'client_request_identity';
             $hasFullHardware = is_array($existingHardware) && !$isLoginIdentity && !empty($existingHardware);
             if ($hasFullHardware) {
-                // ورود کاربر فقط هویت/نشانی شبکه را تازه می‌کند؛ زمان و منبعِ جمع‌آوری سخت‌افزار حفظ شود.
+                // ورود کاربر فقط هویت/نشانی شبکه را تازه می‌کند؛ نام و زمان جمع‌آوری سخت‌افزار حفظ شود.
+                $storedHostname = trim((string) ($existingAsset['hostname'] ?? ''));
+                if ($storedHostname !== '') {
+                    $hostname = substr($storedHostname, 0, 190);
+                }
                 db()->prepare('UPDATE assets SET hostname = ?, owner_user_id = ?, department_id = COALESCE(?, department_id), ip_address = ?, domain_username = ? WHERE id = ?')->execute([$hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $assetId]);
             } elseif ($isLoginIdentity) {
                 // اصلاح رکوردهای قدیمی که ورود کاربر را اشتباهاً Inventory موفق علامت زده بودند.

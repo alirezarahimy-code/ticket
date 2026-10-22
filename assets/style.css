@@ -581,6 +581,7 @@ fieldset.service-fields[hidden] { display: none; }
 .fact-grid dd { margin: 0; font-weight: 600; word-break: break-word; }
 .profile-grid { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .profile-field { display: flex; flex-direction: column; gap: 5px; font-size: .9rem; font-weight: 600; color: var(--muted); }
+.profile-field-provenance { font-size: .72rem; font-weight: 400; line-height: 1.4; }
 .profile-field.full { grid-column: 1 / -1; }
 .profile-field input, .profile-field select, .profile-field textarea { background: var(--white); border: 1px solid var(--line); border-radius: 11px; padding: 9px 12px; color: var(--ink); font-weight: 400; }
 .profile-field input:focus, .profile-field select:focus, .profile-field textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-light); }

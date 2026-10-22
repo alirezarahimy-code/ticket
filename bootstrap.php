@@ -1671,6 +1671,7 @@ function ldap_sync_all_users(): array
     ldap_set_option($connection, LDAP_OPT_REFERRALS, 0);
     if (defined('LDAP_OPT_NETWORK_TIMEOUT')) { @ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 8); }
     if (defined('LDAP_OPT_TIMELIMIT')) { @ldap_set_option($connection, LDAP_OPT_TIMELIMIT, 8); }
+    $markPhase('service-bind');
     $bindDn = (string) ldap_cfg('bind_dn', '');
     if ($bindDn !== '' && !@ldap_bind($connection, $bindDn, (string) ldap_cfg('bind_password', ''))) {
         throw new RuntimeException('ورود حساب سرویس LDAP ناموفق بود. DN و رمز حساب سرویس را بررسی کنید.');
@@ -2574,6 +2575,36 @@ function is_sla_holiday(DateTimeImmutable $date): bool
 function ldap_authenticate(string $username, string $password): ?array
 {
     if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
+        return ldap_authenticate_measured($username, $password, static function (string $phase): void {});
+    }
+    $startedAt = microtime(true);
+    $phase = 'ldap-connect';
+    $phaseStartedAt = $startedAt;
+    $phaseDurations = [];
+    $markPhase = static function (string $nextPhase) use (&$phase, &$phaseStartedAt, &$phaseDurations): void {
+        $now = microtime(true);
+        $phaseDurations[$phase] = ($phaseDurations[$phase] ?? 0) + (int) round(($now - $phaseStartedAt) * 1000);
+        $phase = $nextPhase;
+        $phaseStartedAt = $now;
+    };
+    try {
+        return ldap_authenticate_measured($username, $password, $markPhase);
+    } finally {
+        $markPhase('finished');
+        $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+        if ($durationMs >= 1000) {
+            $stageSummary = [];
+            foreach ($phaseDurations as $stage => $duration) {
+                $stageSummary[] = $stage . ':' . $duration . 'ms';
+            }
+            error_log('ITSM LDAP login timing: duration_ms=' . $durationMs . '; stages=' . implode(',', $stageSummary));
+        }
+    }
+}
+
+function ldap_authenticate_measured(string $username, string $password, callable $markPhase): ?array
+{
+    if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
         return null;
     }
     $host = (string) ldap_cfg('host', '');
@@ -2596,6 +2627,7 @@ function ldap_authenticate(string $username, string $password): ?array
         ldap_auth_log('service-bind-failed', $username, $connection);
         $serviceBindFailed = true;
     }
+    $markPhase('rootdse-discovery');
     $lookup = preg_replace('/^.*\\\\/', '', $username) ?: $username;
     $lookup = explode('@', $lookup, 2)[0];
     $escapedLookup = ldap_escape($lookup, '', LDAP_ESCAPE_FILTER);
@@ -2628,6 +2660,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     };
     $addDefaultNamingContext();
+    $markPhase('user-search');
     $searchUser = static function ($ldapConnection, array $bases, array $searchFilters, array $searchAttributes): array {
         foreach ($bases as $baseDn) {
             foreach ($searchFilters as $candidate) {
@@ -2674,6 +2707,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     }
     [$search, $entries] = $searchUser($connection, $searchBases, $filters, $attributes);
+    $markPhase('user-bind');
     if (!$search) {
         if (!$tryDirectBind($connection)) {
             ldap_auth_log('direct-bind-failed', $username, $connection);
@@ -2726,6 +2760,7 @@ function ldap_authenticate(string $username, string $password): ?array
             return null;
         }
     }
+    $markPhase('profile-assembly');
     $groups = [];
     for ($groupIndex = 0; $groupIndex < (int) ($entry['memberof']['count'] ?? 0); $groupIndex++) {
         $groups[] = (string) ($entry['memberof'][$groupIndex] ?? '');

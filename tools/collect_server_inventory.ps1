@@ -6,6 +6,7 @@ $ErrorActionPreference = 'Stop'
 $utf8Encoding = New-Object -TypeName System.Text.UTF8Encoding -ArgumentList $false
 [Console]::OutputEncoding = $utf8Encoding
 $script:CimSession = $null
+$script:InventoryCollectorStatus = @{}
 
 function Get-InventoryRows {
     param(
@@ -15,23 +16,31 @@ function Get-InventoryRows {
         [string] $Filter = ''
     )
 
-    $options = @{
-        ClassName = $ClassName
-        Namespace = $Namespace
-        OperationTimeoutSec = 30
-        ErrorAction = 'Stop'
+    $statusKey = $Namespace + '|' + $ClassName
+    try {
+        $options = @{
+            ClassName = $ClassName
+            Namespace = $Namespace
+            OperationTimeoutSec = 30
+            ErrorAction = 'Stop'
+        }
+        if (-not [string]::IsNullOrWhiteSpace($Filter)) {
+            $options.Filter = $Filter
+        }
+        if ($script:CimSession) {
+            $options.CimSession = $script:CimSession
+        }
+        $items = Get-CimInstance @options
+        if ($Properties -and $Properties -notcontains '*') {
+            $items = $items | Select-Object -Property $Properties
+        }
+        $rows = @($items)
+        $script:InventoryCollectorStatus[$statusKey] = @{ ok = $true; count = $rows.Count }
+        return $rows
+    } catch {
+        $script:InventoryCollectorStatus[$statusKey] = @{ ok = $false; count = 0 }
+        throw
     }
-    if (-not [string]::IsNullOrWhiteSpace($Filter)) {
-        $options.Filter = $Filter
-    }
-    if ($script:CimSession) {
-        $options.CimSession = $script:CimSession
-    }
-    $items = Get-CimInstance @options
-    if ($Properties -and $Properties -notcontains '*') {
-        $items = $items | Select-Object -Property $Properties
-    }
-    return @($items)
 }
 
 function Get-OptionalInventoryRows {
@@ -189,6 +198,7 @@ try {
     }
     $result = [ordered]@{
         computer = @($computer)
+        collection_status = $script:InventoryCollectorStatus
         system_product = @($systemProduct)
         enclosure = @($enclosure)
         bios = @($bios)

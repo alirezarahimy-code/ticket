@@ -89,6 +89,25 @@ if (inventory_hardware_score($payload) === 0) {
 }
 
 $assetTag = inventory_api_asset_tag($payload);
+$receivedPayload = $payload;
+$assetQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? LIMIT 1');
+$assetQuery->execute([$assetTag]);
+$existing = $assetQuery->fetch();
+$existingId = 0;
+$existingPeripherals = [];
+$previousStatus = [];
+if ($existing) {
+    $existingId = (int) $existing['id'];
+    $existingPeripherals = json_decode((string) ($existing['peripherals_json'] ?? ''), true) ?: [];
+    $previous = inventory_saved_asset_snapshot($existing);
+    $previousStatus = $previous['collection_status'] ?? [];
+    $payload = inventory_merge_missing_values($payload, $previous);
+    if ((int) ($payload['memory_mb'] ?? 0) <= 0 && (int) ($previous['memory_mb'] ?? 0) > 0) {
+        $payload['memory_mb'] = (int) $previous['memory_mb'];
+    }
+}
+$payload = inventory_apply_collection_status_metadata($payload, $previousStatus, 'agent');
+
 $domainUsername = inventory_api_text($payload['domain_username'] ?? '', 190);
 $ownerId = null;
 $departmentId = null;
@@ -109,18 +128,10 @@ $manufacturer = inventory_api_text($payload['manufacturer'] ?? ($hardware['manuf
 $model = inventory_api_text($payload['model'] ?? ($hardware['model'] ?? ''), 190);
 $osArchitecture = inventory_api_text($payload['os_architecture'] ?? ($operatingSystem['OSArchitecture'] ?? ''), 40);
 $osSerial = inventory_api_text($payload['os_serial'] ?? '', 190);
-$existingId = 0;
-$existingPeripherals = [];
-$assetQuery = db()->prepare('SELECT id, peripherals_json FROM assets WHERE asset_tag = ? LIMIT 1');
-$assetQuery->execute([$assetTag]);
-$existing = $assetQuery->fetch();
-if ($existing) {
-    $existingId = (int) $existing['id'];
-    $existingPeripherals = json_decode((string) $existing['peripherals_json'], true) ?: [];
-}
 $manual = inventory_api_manual_fields($existingPeripherals);
 if ($manual !== []) {
     $peripherals['manual_entries'] = $manual;
+    $payload['peripherals'] = $peripherals;
 }
 
 $values = [
@@ -161,7 +172,7 @@ try {
     }
     sync_inventory_rows($assetId, $payload, 'agent');
     asset_profile_apply_auto($assetId, asset_profile_auto_values($payload), 0, false);
-    $snapshot = $payload;
+    $snapshot = $receivedPayload;
     $snapshot['asset_tag'] = $assetTag;
     $snapshot['received_at'] = date('c');
     db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, NULL)')->execute([$assetId, inventory_api_json($snapshot)]);
