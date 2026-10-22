@@ -372,14 +372,75 @@ function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0): 
     ];
 }
 
+function cd_dvd_acquire_write_lock(string $scope): string
+{
+    $lockName = 'cddvd:' . substr(hash('sha256', $scope), 0, 56);
+    $lock = db()->prepare('SELECT GET_LOCK(?, 20)');
+    $lock->execute([$lockName]);
+    if ((int) $lock->fetchColumn() !== 1) {
+        throw new RuntimeException('ثبت رسانه به‌دلیل هم‌زمانی زیاد قفل نشد؛ چند لحظه بعد دوباره تلاش کنید.');
+    }
+    return $lockName;
+}
+
+function cd_dvd_release_write_lock(string $lockName): void
+{
+    try {
+        $release = db()->prepare('SELECT RELEASE_LOCK(?)');
+        $release->execute([$lockName]);
+    } catch (Throwable $ignored) {
+        // The connection releases any remaining named locks when it closes.
+    }
+}
+
 function cd_dvd_create_record(array $user): int
 {
-    $payload = cd_dvd_validate_payload($_POST, $user);
-    $query = db()->prepare('INSERT INTO cd_dvd_records (media, direction, serial, info_type, info_desc, jy, jm, jd, date_str, sort_key, receiver, receiver_unit, brought_by, brought_by_user_id, exit_sheet, note, department_id, recorder_id, recorder_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $user['id'], $user['full_name']]);
-    $id = (int) db()->lastInsertId();
-    save_audit((int) $user['id'], 'cd_dvd_' . strtolower($payload['direction']), null, ['record_id' => $id, 'serial' => $payload['serial'], 'media' => $payload['media']]);
-    return $id;
+    $media = valid_choice((string) ($_POST['media'] ?? ''), ['CD', 'DVD'], 'CD');
+    $direction = valid_choice((string) ($_POST['direction'] ?? ''), ['IN', 'OUT'], 'OUT');
+    $data = $_POST;
+    $serial = cd_dvd_normalize_serial((string) ($data['serial'] ?? ''));
+    if ($direction === 'IN') {
+        $manualSerial = cd_dvd_normalize_serial((string) ($data['serial_manual'] ?? ''));
+        if ($manualSerial !== '') {
+            $serial = $manualSerial;
+        }
+    }
+
+    $locks = [];
+    try {
+        // Empty outgoing serials are allocated under a media-scoped lock so simultaneous
+        // submissions cannot all select the same next P86 number.
+        if ($direction === 'OUT' && $serial === '') {
+            $locks[] = cd_dvd_acquire_write_lock('next:' . $media);
+            $serial = cd_dvd_next_serial($media) ?? '';
+            $data['serial'] = $serial;
+        }
+        if ($serial !== '') {
+            // Serialize validation plus insert for this (media, serial) pair. A plain
+            // read-before-insert allowed concurrent identical IN/OUT events to both pass.
+            $locks[] = cd_dvd_acquire_write_lock('serial:' . $media . ':' . $serial);
+        }
+
+        db()->beginTransaction();
+        try {
+            $payload = cd_dvd_validate_payload($data, $user);
+            $query = db()->prepare('INSERT INTO cd_dvd_records (media, direction, serial, info_type, info_desc, jy, jm, jd, date_str, sort_key, receiver, receiver_unit, brought_by, brought_by_user_id, exit_sheet, note, department_id, recorder_id, recorder_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $user['id'], $user['full_name']]);
+            $id = (int) db()->lastInsertId();
+            save_audit((int) $user['id'], 'cd_dvd_' . strtolower($payload['direction']), null, ['record_id' => $id, 'serial' => $payload['serial'], 'media' => $payload['media']]);
+            db()->commit();
+            return $id;
+        } catch (Throwable $exception) {
+            if (db()->inTransaction()) {
+                db()->rollBack();
+            }
+            throw $exception;
+        }
+    } finally {
+        foreach (array_reverse($locks) as $lockName) {
+            cd_dvd_release_write_lock($lockName);
+        }
+    }
 }
 
 function cd_dvd_update_record(array $user): void

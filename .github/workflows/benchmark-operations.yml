@@ -57,6 +57,7 @@ jobs:
           python3 -m py_compile tools/benchmark_operations.py
           php -l tools/benchmark_operations_seed.php
           php -l tools/benchmark_operations_report.php
+          php -l cd-dvd.php
 
       - name: Initialize disposable database
         env:
