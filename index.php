@@ -2060,10 +2060,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($subject === '' || $description === '') {
                 throw new RuntimeException('عنوان و شرح مشکل الزامی است.');
             }
+            // Reserve and commit the sequential identifier before opening the ticket
+            // transaction; a later rollback must not make an already observed number reusable.
+            $ticketNo = ticket_number_next(ticket_number_prefix($serviceGroup));
             db()->beginTransaction();
             $agentId = choose_handling_agent($serviceGroup, $departmentId);
             $initialStatus = $agentId ? 'assigned' : 'manager_review';
-            $ticketNo = ticket_number_next(ticket_number_prefix($serviceGroup));
             $query = db()->prepare('INSERT INTO tickets (ticket_no, subject, description, category_id, service_id, requesting_unit_id, ticket_type, parent_ticket_id, custom_fields, service_group, department_id, asset_id, handling_unit_id, support_location, support_equipment, priority, requester_id, assigned_to, assigned_at, status, sla_minutes, due_at, ola_policy_id, ola_response_due_at, ola_due_at, ola_escalation_1_at, ola_escalation_2_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ' . ($agentId ? 'NOW()' : 'NULL') . ', "' . $initialStatus . '", ?, ?, ?, ?, ?, ?, ?)');
             $query->execute([$ticketNo, $subject, $description, $categoryId, $serviceId, $requestingUnitId, $ticketType, $parentTicketId, json_encode($customFields, JSON_UNESCAPED_UNICODE), $serviceGroup, $departmentId, $assetId, $handlingUnitId, $supportLocation ?: null, $supportEquipment ?: null, $priority, $user['id'], $agentId, $slaMinutes, $dueAt, $ola['policy_id'], $ola['response_due_at'], $ola['due_at'], $ola['escalation_1_at'], $ola['escalation_2_at']]);
             $ticketId = (int) db()->lastInsertId();

@@ -74,10 +74,16 @@ foreach ($errorStmt->fetchAll() as $row) {
     $expectedRejection = str_contains($message, 'این شماره از سازمان خارج شده است.')
         || str_contains($message, 'این رسانه در حال حاضر داخل سازمان ثبت شده است.');
     $slowQuery = $context === 'کندی کوئری';
+    $slowPage = $context === 'کندی صفحه';
     $meta = json_decode((string) ($row['meta_json'] ?? ''), true);
+    $slowPageMs = null;
+    if ($slowPage && preg_match('/([0-9]+(?:\\.[0-9]+)?)\\s*ثانیه/u', $message, $slowMatch)) {
+        $slowPageMs = (int) round((float) $slowMatch[1] * 1000);
+    }
     $systemErrors[] = [
         'level' => (string) $row['level'], 'context' => $context,
         'expected_duplicate_state_rejection' => $expectedRejection, 'slow_query_warning' => $slowQuery,
+        'slow_page_warning' => $slowPage, 'slow_page_ms' => $slowPageMs,
         'slow_query_ms' => $slowQuery ? (int) ($meta['ms'] ?? 0) : null,
         'slow_query' => $slowQuery ? mb_substr((string) ($meta['technical'] ?? ''), 0, 300) : null,
         'message' => mb_substr($message, 0, 300),
@@ -86,11 +92,12 @@ foreach ($errorStmt->fetchAll() as $row) {
 }
 $countsStmt = $pdo->prepare("SELECT COUNT(*) AS total,
     SUM(CASE WHEN message LIKE '%این شماره از سازمان خارج شده است.%' OR message LIKE '%این رسانه در حال حاضر داخل سازمان ثبت شده است.%' THEN 1 ELSE 0 END) AS expected_rejections,
-    SUM(CASE WHEN context = 'کندی کوئری' THEN 1 ELSE 0 END) AS slow_queries
+    SUM(CASE WHEN context = 'کندی کوئری' THEN 1 ELSE 0 END) AS slow_queries,
+    SUM(CASE WHEN context = 'کندی صفحه' THEN 1 ELSE 0 END) AS slow_pages
     FROM system_logs WHERE created_at >= ? AND level IN ('error','warning')");
 $countsStmt->execute([$since]);
-$systemLogCounts = $countsStmt->fetch() ?: ['total' => 0, 'expected_rejections' => 0, 'slow_queries' => 0];
-$unexpectedSystemErrorCount = max(0, (int) $systemLogCounts['total'] - (int) $systemLogCounts['expected_rejections'] - (int) $systemLogCounts['slow_queries']);
+$systemLogCounts = $countsStmt->fetch() ?: ['total' => 0, 'expected_rejections' => 0, 'slow_queries' => 0, 'slow_pages' => 0];
+$unexpectedSystemErrorCount = max(0, (int) $systemLogCounts['total'] - (int) $systemLogCounts['expected_rejections'] - (int) $systemLogCounts['slow_queries'] - (int) $systemLogCounts['slow_pages']);
 
 $result = [
     'collection_status' => 'ok',
@@ -109,6 +116,7 @@ $result = [
     'application_system_errors_since_start' => (int) $systemLogCounts['total'],
     'expected_duplicate_state_rejection_log_rows' => (int) $systemLogCounts['expected_rejections'],
     'slow_query_warning_count' => (int) $systemLogCounts['slow_queries'],
+    'slow_page_warning_count' => (int) $systemLogCounts['slow_pages'],
     'unexpected_application_system_error_count' => $unexpectedSystemErrorCount,
     'application_system_error_samples' => array_slice($systemErrors, 0, 100),
 ];
