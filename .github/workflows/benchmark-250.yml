@@ -8,6 +8,7 @@ on:
       - '.github/workflows/benchmark-250.yml'
       - 'tools/benchmark_250.py'
       - 'tools/benchmark_seed.php'
+      - 'tools/benchmark_db_report.php'
       - 'index.php'
       - 'bootstrap.php'
       - 'food-ticket.php'

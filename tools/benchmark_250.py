@@ -143,6 +143,13 @@ def user_flow(vu: int, args: argparse.Namespace, metrics: Metrics,
             metrics.record(label + '-validation', 0, status, 'expected HTTP 200')
         elif label == 'notification-feed' and not response_body.strip().startswith('{'):
             metrics.record(label + '-validation', 0, status, 'expected JSON response')
+        elif label.endswith('-api'):
+            try:
+                payload = json.loads(response_body)
+                if isinstance(payload, dict) and payload.get('error'):
+                    metrics.record(label + '-payload-validation', 0, 500, str(payload.get('error')))
+            except json.JSONDecodeError:
+                metrics.record(label + '-payload-validation', 0, 500, 'invalid JSON response')
         elif 'class="auth-layout"' in response_body or 'class="auth-form"' in response_body:
             metrics.record(label + '-validation', 0, status, 'session unexpectedly returned to the login page')
         time.sleep(random.uniform(args.think_time * 0.7, args.think_time * 1.3))
@@ -215,6 +222,22 @@ def main() -> int:
         server_log.close()
 
     elapsed = max(0.001, time.time() - wall_started)
+    server_log_path = Path('/tmp/ticket-php-benchmark.log')
+    server_log_text = server_log_path.read_text(encoding='utf-8', errors='replace') if server_log_path.exists() else ''
+    food_api_rows: dict[str, list[int]] = defaultdict(list)
+    for route_name, duration in re.findall(r'ITSM slow food-ticket API: route=([^;]+); method=[^;]+; duration_ms=([0-9]+); status=[0-9]+', server_log_text):
+        food_api_rows[route_name].append(int(duration))
+    slow_login_ms = [int(value) for value in re.findall(r'ITSM slow login request: ([0-9]+)ms;', server_log_text)]
+    php_runtime_errors = [line.strip() for line in server_log_text.splitlines() if re.search(r'PHP (?:Fatal error|Parse error|Warning|Notice)', line, re.I)]
+    query_timing = {'collection_status': 'unavailable'}
+    try:
+        db_probe = subprocess.run(['php', str(ROOT / 'tools' / 'benchmark_db_report.php')], cwd=ROOT, capture_output=True, text=True, timeout=30)
+        if db_probe.returncode == 0:
+            query_timing = json.loads(db_probe.stdout)
+        else:
+            query_timing = {'collection_status': 'failed', 'stderr': db_probe.stderr[-2000:]}
+    except Exception as exc:
+        query_timing = {'collection_status': 'failed', 'error': f'{type(exc).__name__}: {exc}'}
     totals = []
     for route, rows in sorted(metrics.rows.items()):
         times = [float(row['elapsed_ms']) for row in rows]
@@ -228,6 +251,13 @@ def main() -> int:
             'statuses': dict(status_counts),
         })
     request_count = sum(len(rows) for rows in metrics.rows.values())
+    food_api_timing = {
+        route: {'count': len(values), 'p50_ms': round(percentile(values, 50), 2), 'p95_ms': round(percentile(values, 95), 2), 'max_ms': max(values)}
+        for route, values in sorted(food_api_rows.items())
+    }
+    internal_error_count = int(query_timing.get('application_error_count', 0)) + sum(
+        1 for line in php_runtime_errors if re.search(r'PHP (?:Fatal error|Parse error)', line, re.I)
+    )
     report = {
         'started_utc': datetime.fromtimestamp(wall_started, timezone.utc).isoformat(),
         'environment': 'ephemeral GitHub Actions runner; isolated MariaDB; PHP CLI server with configured worker pool',
@@ -238,6 +268,12 @@ def main() -> int:
         'overall_rps': round(request_count / elapsed, 2), 'failed_observations': len(metrics.failures),
         'php_cpu_percent_sum_peak': round(metrics.php_cpu_peak, 2),
         'php_rss_mb_sum_peak': round(metrics.php_rss_peak_mb, 2),
+        'php_runtime_warning_notice_count': len(php_runtime_errors),
+        'php_runtime_error_samples': php_runtime_errors[:30],
+        'slow_food_api_server_logs_over_1000ms': food_api_timing,
+        'slow_login_server_logs_over_2000ms': {'count': len(slow_login_ms), 'p50_ms': round(percentile(slow_login_ms, 50), 2), 'p95_ms': round(percentile(slow_login_ms, 95), 2), 'max_ms': max(slow_login_ms, default=0)},
+        'database_query_timing': query_timing,
+        'application_error_count': internal_error_count,
         'routes': totals, 'failures_sample': metrics.failures[:100],
         'limitations': [
             'LDAP/Active Directory authentication and Windows WMI collectors were not exercised; LDAP is disabled in the isolated config.',
@@ -263,6 +299,22 @@ def main() -> int:
     ]
     for row in totals:
         lines.append(f"| {row['route']} | {row['count']} | {row['rps']} | {row['p50_ms']} | {row['p95_ms']} | {row['p99_ms']} | {row['max_ms']} | {row['statuses']} |")
+    db_slow_summary = query_timing.get('slow_query_summary', {})
+    lines.extend([
+        '', '## زمان‌سنجی سمت API و SQL',
+        f"- لاگ‌های API مدیریت غذا با زمان حداقل ۱ ثانیه: {sum(item['count'] for item in food_api_timing.values())}",
+        f"- لاگ‌های ورود با زمان حداقل ۲ ثانیه: {len(slow_login_ms)} (p95 ثبت‌شده: {percentile(slow_login_ms, 95):.0f} ms)",
+        f"- کوئری‌های ثبت‌شده با زمان حداقل ۵۰۰ ms: {db_slow_summary.get('count_at_or_above_threshold', 'نامشخص')} (بیشینه: {db_slow_summary.get('max_ms', 'نامشخص')} ms)",
+        f"- خطاهای ثبت‌شدهٔ برنامه: {internal_error_count}; پیام‌های PHP warning/notice: {len(php_runtime_errors)}",
+        'توجه: لاگ SQL خود برنامه فقط کوئری‌های حداقل ۵۰۰ ms را ثبت می‌کند؛ بنابراین این شمارش، هیستوگرام کاملِ همهٔ کوئری‌ها نیست.',
+    ])
+    for route_name, values in food_api_timing.items():
+        lines.append(f"- food API `{route_name}` (فقط درخواست‌های لاگ‌شدهٔ ≥۱s): n={values['count']}, p95={values['p95_ms']} ms, max={values['max_ms']} ms")
+    slow_rows = query_timing.get('slow_queries', [])
+    for row in slow_rows[:20]:
+        lines.append(f"- SQL {row.get('ms', 0)} ms — {row.get('query', '')}")
+    for row in query_timing.get('application_error_samples', [])[:20]:
+        lines.append(f"- برنامه {row.get('context', '')}: {row.get('message', '')}")
     lines.extend(['', '## نمونهٔ خطاها'])
     if metrics.failures:
         lines.extend([f"- {item['route']} — HTTP {item['status']}: {item['error']}" for item in metrics.failures[:30]])
@@ -273,7 +325,7 @@ def main() -> int:
     print(md_path.read_text(encoding='utf-8'))
     print(f'JSON report: {json_path}')
     print(f'PHP server log: /tmp/ticket-php-benchmark.log')
-    return 1 if metrics.failures else 0
+    return 1 if metrics.failures or internal_error_count else 0
 
 
 if __name__ == '__main__':
