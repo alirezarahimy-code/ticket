@@ -246,5 +246,6 @@ jobs:
         run: |
           printf 'Python=%s JavaScript=%s PHP=%s DB-smoke=%s routes=%s operations=%s\n' "$PYTHON_STATIC_OUTCOME" "$JAVASCRIPT_OUTCOME" "$PHP_OFFLINE_OUTCOME" "$DATABASE_SMOKE_OUTCOME" "$ROUTE_SMOKE_OUTCOME" "$OPERATIONS_STRESS_OUTCOME"
           if [ "$PYTHON_STATIC_OUTCOME" != success ] || [ "$JAVASCRIPT_OUTCOME" != success ] || [ "$PHP_OFFLINE_OUTCOME" != success ] || [ "$DATABASE_SMOKE_OUTCOME" != success ] || [ "$ROUTE_SMOKE_OUTCOME" != success ] || [ "$OPERATIONS_STRESS_OUTCOME" != success ]; then
+            echo "::error title=Full-system quality-gate outcomes::Python=$PYTHON_STATIC_OUTCOME; JavaScript=$JAVASCRIPT_OUTCOME; PHP=$PHP_OFFLINE_OUTCOME; DB-smoke=$DATABASE_SMOKE_OUTCOME; routes=$ROUTE_SMOKE_OUTCOME; operations=$OPERATIONS_STRESS_OUTCOME"
             exit 1
           fi
