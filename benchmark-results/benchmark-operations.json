@@ -1,43 +1,76 @@
 {
-  "started_utc": "2026-10-22T21:16:41.827117+00:00",
+  "started_utc": "2026-10-22T21:19:18.914822+00:00",
   "environment": "ephemeral CI runner; disposable MariaDB; PHP CLI worker pool; synthetic identities/data only",
   "target": "127.0.0.1 only; production and staging were not contacted",
   "scenario": "250 concurrent sessions; each creates and resolves one ticket through application POST handlers and records one CD/DVD event; 60 additional same-serial duplicate races (30 IN, 30 OUT) test serial-state integrity.",
   "virtual_users": 250,
   "php_workers": 32,
-  "elapsed_wall_seconds": 37.05,
-  "logical_operations": 1870,
-  "overall_logical_operations_per_second": 50.47,
-  "php_cpu_percent_sum_peak": 132.9,
-  "php_rss_mb_sum_peak": 1191.3,
+  "elapsed_wall_seconds": 38.09,
+  "logical_operations": 1866,
+  "overall_logical_operations_per_second": 49.0,
+  "php_cpu_percent_sum_peak": 134.4,
+  "php_rss_mb_sum_peak": 1183.85,
   "php_runtime_warning_notice_count": 0,
   "php_runtime_error_samples": [],
-  "http_application_operation_failures": 0,
-  "http_failure_samples": [],
+  "http_application_operation_failures": 4,
+  "http_failure_samples": [
+    {
+      "operation": "ticket-create",
+      "elapsed_ms": 6361.97,
+      "http_status": 200,
+      "ok": false,
+      "expected_rejection": false,
+      "detail": "create handler did not redirect to a ticket"
+    },
+    {
+      "operation": "ticket-create",
+      "elapsed_ms": 6393.08,
+      "http_status": 200,
+      "ok": false,
+      "expected_rejection": false,
+      "detail": "create handler did not redirect to a ticket"
+    },
+    {
+      "operation": "ticket-create",
+      "elapsed_ms": 6605.44,
+      "http_status": 200,
+      "ok": false,
+      "expected_rejection": false,
+      "detail": "create handler did not redirect to a ticket"
+    },
+    {
+      "operation": "ticket-create",
+      "elapsed_ms": 6708.84,
+      "http_status": 200,
+      "ok": false,
+      "expected_rejection": false,
+      "detail": "create handler did not redirect to a ticket"
+    }
+  ],
   "operations": [
     {
       "operation": "cd-dvd-in",
       "attempts": 186,
-      "successes": 157,
+      "successes": 156,
       "http_statuses": {
         "200": 186
       },
-      "p50_ms": 4458.96,
-      "p95_ms": 4963.16,
-      "p99_ms": 5068.66,
-      "max_ms": 5382.13
+      "p50_ms": 4769.44,
+      "p95_ms": 5199.78,
+      "p99_ms": 5378.38,
+      "max_ms": 5589.88
     },
     {
       "operation": "cd-dvd-out",
       "attempts": 184,
-      "successes": 159,
+      "successes": 154,
       "http_statuses": {
         "200": 184
       },
-      "p50_ms": 4476.72,
-      "p95_ms": 4877.15,
-      "p99_ms": 4989.53,
-      "max_ms": 5151.97
+      "p50_ms": 4766.41,
+      "p95_ms": 5183.35,
+      "p99_ms": 5294.5,
+      "max_ms": 5378.07
     },
     {
       "operation": "login-form",
@@ -46,10 +79,10 @@
       "http_statuses": {
         "200": 250
       },
-      "p50_ms": 823.46,
-      "p95_ms": 2533.51,
-      "p99_ms": 3306.62,
-      "max_ms": 6350.41
+      "p50_ms": 1279.95,
+      "p95_ms": 2652.55,
+      "p99_ms": 3416.15,
+      "max_ms": 4506.19
     },
     {
       "operation": "login-post",
@@ -58,10 +91,10 @@
       "http_statuses": {
         "200": 250
       },
-      "p50_ms": 3299.66,
-      "p95_ms": 5445.68,
-      "p99_ms": 6502.72,
-      "max_ms": 7402.69
+      "p50_ms": 3549.03,
+      "p95_ms": 5418.92,
+      "p99_ms": 6197.74,
+      "max_ms": 7079.15
     },
     {
       "operation": "prepare-cd-dvd",
@@ -70,10 +103,10 @@
       "http_statuses": {
         "200": 250
       },
-      "p50_ms": 928.57,
-      "p95_ms": 2277.96,
-      "p99_ms": 2800.91,
-      "max_ms": 2952.35
+      "p50_ms": 1368.47,
+      "p95_ms": 2723.32,
+      "p99_ms": 3437.64,
+      "max_ms": 3638.52
     },
     {
       "operation": "prepare-ticket",
@@ -82,46 +115,46 @@
       "http_statuses": {
         "200": 250
       },
-      "p50_ms": 1151.38,
-      "p95_ms": 3017.42,
-      "p99_ms": 4477.37,
-      "max_ms": 5343.14
+      "p50_ms": 1528.42,
+      "p95_ms": 2633.73,
+      "p99_ms": 3283.49,
+      "max_ms": 4087.73
     },
     {
       "operation": "ticket-create",
       "attempts": 250,
-      "successes": 250,
+      "successes": 246,
       "http_statuses": {
         "200": 250
       },
-      "p50_ms": 5261.32,
-      "p95_ms": 6705.45,
-      "p99_ms": 7421.61,
-      "max_ms": 8037.08
+      "p50_ms": 5185.35,
+      "p95_ms": 6833.5,
+      "p99_ms": 7554.91,
+      "max_ms": 8008.86
     },
     {
       "operation": "ticket-resolve",
-      "attempts": 250,
-      "successes": 250,
+      "attempts": 246,
+      "successes": 246,
       "http_statuses": {
-        "200": 250
+        "200": 246
       },
-      "p50_ms": 4221.06,
-      "p95_ms": 4874.41,
-      "p99_ms": 4997.33,
-      "max_ms": 5065.56
+      "p50_ms": 4352.28,
+      "p95_ms": 5081.6,
+      "p99_ms": 5166.22,
+      "max_ms": 5189.04
     }
   ],
   "database_verification": {
     "collection_status": "ok",
     "tickets": {
-      "created_for_run": 250,
-      "resolved_for_run": 250,
+      "created_for_run": 246,
+      "resolved_for_run": 246,
       "status_counts": {
-        "resolved": 250
+        "resolved": 246
       },
-      "message_rows": 500,
-      "event_rows": 1000,
+      "message_rows": 492,
+      "event_rows": 984,
       "synthetic_ticket_ids_sample": [
         2501,
         2502,
@@ -146,244 +179,179 @@
       ]
     },
     "cd_dvd": {
-      "records_for_run": 316,
-      "all_records_in_disposable_database": 316,
+      "records_for_run": 310,
+      "all_records_in_disposable_database": 310,
       "media_direction_counts": {
         "CD": {
-          "IN": 94,
+          "IN": 93,
           "OUT": 62
         },
         "DVD": {
           "IN": 63,
-          "OUT": 97
+          "OUT": 92
         }
       },
-      "consecutive_same_direction_pairs": 6,
-      "same_direction_violation_samples": [
-        {
-          "media": "CD",
-          "serial": "T15EC19C4P008",
-          "direction": "IN",
-          "first_record_id": 303,
-          "repeat_record_id": 304
-        },
-        {
-          "media": "DVD",
-          "serial": "P86-1706",
-          "direction": "OUT",
-          "first_record_id": 292,
-          "repeat_record_id": 293
-        },
-        {
-          "media": "DVD",
-          "serial": "P86-1707",
-          "direction": "OUT",
-          "first_record_id": 311,
-          "repeat_record_id": 312
-        },
-        {
-          "media": "DVD",
-          "serial": "P86-1708",
-          "direction": "OUT",
-          "first_record_id": 314,
-          "repeat_record_id": 315
-        },
-        {
-          "media": "DVD",
-          "serial": "P86-1723",
-          "direction": "OUT",
-          "first_record_id": 271,
-          "repeat_record_id": 272
-        },
-        {
-          "media": "DVD",
-          "serial": "P86-1727",
-          "direction": "OUT",
-          "first_record_id": 298,
-          "repeat_record_id": 299
-        }
-      ]
+      "consecutive_same_direction_pairs": 0,
+      "same_direction_violation_samples": []
     },
-    "application_system_errors_since_start": 108,
-    "expected_duplicate_state_rejection_log_rows": 108,
-    "slow_query_warning_count": 0,
-    "unexpected_application_system_error_count": 0,
+    "application_system_errors_since_start": 134,
+    "expected_duplicate_state_rejection_log_rows": 120,
+    "slow_query_warning_count": 5,
+    "unexpected_application_system_error_count": 9,
     "application_system_error_samples": [
       {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
+        "level": "warning",
+        "context": "کندی صفحه",
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "message": "صفحهٔ «login» 2.4 ثانیه طول کشید",
+        "request_uri": "/index.php?page=login",
+        "created_at": "2026-10-22 21:19:29"
       },
       {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "level": "warning",
+        "context": "کندی کوئری",
+        "expected_duplicate_state_rejection": false,
+        "slow_query_warning": true,
+        "slow_query_ms": 506,
+        "slow_query": "DELETE FROM login_attempts WHERE attempt_key = ?",
+        "message": "یک کوئری 506 میلی‌ثانیه طول کشید",
+        "request_uri": "/index.php?page=login",
+        "created_at": "2026-10-22 21:19:31"
       },
       {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "level": "warning",
+        "context": "کندی کوئری",
+        "expected_duplicate_state_rejection": false,
+        "slow_query_warning": true,
+        "slow_query_ms": 502,
+        "slow_query": "INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)",
+        "message": "یک کوئری 502 میلی‌ثانیه طول کشید",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "level": "warning",
+        "context": "کندی کوئری",
+        "expected_duplicate_state_rejection": false,
+        "slow_query_warning": true,
+        "slow_query_ms": 518,
+        "slow_query": "INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)",
+        "message": "یک کوئری 518 میلی‌ثانیه طول کشید",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "message": "داده تکراری یا وابستگی ناسازگار",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "message": "داده تکراری یا وابستگی ناسازگار",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "request",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "message": "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'IT-00003' for key 'uq_tickets_no'",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": false,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'IT-00004' for key 'uq_tickets_no'",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
+      },
+      {
+        "level": "warning",
+        "context": "کندی کوئری",
+        "expected_duplicate_state_rejection": false,
+        "slow_query_warning": true,
+        "slow_query_ms": 516,
+        "slow_query": "INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)",
+        "message": "یک کوئری 516 میلی‌ثانیه طول کشید",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "message": "داده تکراری یا وابستگی ناسازگار",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "request",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:12"
+        "message": "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'IT-00009' for key 'uq_tickets_no'",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
+      },
+      {
+        "level": "warning",
+        "context": "کندی کوئری",
+        "expected_duplicate_state_rejection": false,
+        "slow_query_warning": true,
+        "slow_query_ms": 506,
+        "slow_query": "INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)",
+        "message": "یک کوئری 506 میلی‌ثانیه طول کشید",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "message": "داده تکراری یا وابستگی ناسازگار",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
         "context": "request",
-        "expected_duplicate_state_rejection": true,
+        "expected_duplicate_state_rejection": false,
         "slow_query_warning": false,
         "slow_query_ms": null,
         "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "message": "SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry 'IT-00012' for key 'uq_tickets_no'",
+        "request_uri": "/index.php?page=new-ticket",
+        "created_at": "2026-10-22 21:19:43"
       },
       {
         "level": "error",
@@ -394,18 +362,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -416,106 +373,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -526,7 +384,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -537,7 +395,7 @@
         "slow_query": null,
         "message": "این شماره از سازمان خارج شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -548,7 +406,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -559,7 +417,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -570,7 +428,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -581,7 +439,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -592,7 +450,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -603,7 +461,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -614,7 +472,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -625,40 +483,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -669,18 +494,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -691,29 +505,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -724,7 +516,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
       },
       {
         "level": "error",
@@ -735,7 +527,29 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:50"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -746,40 +560,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -790,7 +571,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -801,7 +582,18 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -812,7 +604,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -823,7 +615,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -834,7 +626,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -845,7 +637,7 @@
         "slow_query": null,
         "message": "این شماره از سازمان خارج شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -856,7 +648,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -867,7 +659,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -878,7 +670,18 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -889,7 +692,62 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -900,7 +758,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -911,337 +769,7 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:13"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "خطای برنامه",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
-      },
-      {
-        "level": "error",
-        "context": "request",
-        "expected_duplicate_state_rejection": true,
-        "slow_query_warning": false,
-        "slow_query_ms": null,
-        "slow_query": null,
-        "message": "این شماره از سازمان خارج شده است.",
-        "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -1252,7 +780,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -1263,7 +791,139 @@
         "slow_query": null,
         "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -1274,7 +934,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -1285,7 +945,7 @@
         "slow_query": null,
         "message": "این شماره از سازمان خارج شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -1296,7 +956,7 @@
         "slow_query": null,
         "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
       },
       {
         "level": "error",
@@ -1307,7 +967,337 @@
         "slow_query": null,
         "message": "این شماره از سازمان خارج شده است.",
         "request_uri": "/index.php?page=cd-dvd",
-        "created_at": "2026-10-22 21:17:14"
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این شماره از سازمان خارج شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این شماره از سازمان خارج شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "خطای برنامه",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "خطای ناشناخته: ITSM request failed: این رسانه در حال حاضر داخل سازمان ثبت شده است. | /index.php?page=cd-dvd",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:51"
+      },
+      {
+        "level": "error",
+        "context": "request",
+        "expected_duplicate_state_rejection": true,
+        "slow_query_warning": false,
+        "slow_query_ms": null,
+        "slow_query": null,
+        "message": "این رسانه در حال حاضر داخل سازمان ثبت شده است.",
+        "request_uri": "/index.php?page=cd-dvd",
+        "created_at": "2026-10-22 21:19:52"
       }
     ]
   },
@@ -1319,7 +1309,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P000"
+      "serial": "T931E6A79P000"
     },
     {
       "pair_id": 1,
@@ -1327,7 +1317,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P001"
+      "serial": "T931E6A79P001"
     },
     {
       "pair_id": 2,
@@ -1335,7 +1325,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P002"
+      "serial": "T931E6A79P002"
     },
     {
       "pair_id": 3,
@@ -1343,7 +1333,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P003"
+      "serial": "T931E6A79P003"
     },
     {
       "pair_id": 4,
@@ -1351,7 +1341,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P004"
+      "serial": "T931E6A79P004"
     },
     {
       "pair_id": 5,
@@ -1359,7 +1349,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P005"
+      "serial": "T931E6A79P005"
     },
     {
       "pair_id": 6,
@@ -1367,7 +1357,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P006"
+      "serial": "T931E6A79P006"
     },
     {
       "pair_id": 7,
@@ -1375,15 +1365,15 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P007"
+      "serial": "T931E6A79P007"
     },
     {
       "pair_id": 8,
       "direction": "IN",
       "media": "CD",
       "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "T15EC19C4P008"
+      "successes": 1,
+      "serial": "T931E6A79P008"
     },
     {
       "pair_id": 9,
@@ -1391,7 +1381,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P009"
+      "serial": "T931E6A79P009"
     },
     {
       "pair_id": 10,
@@ -1399,7 +1389,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P010"
+      "serial": "T931E6A79P010"
     },
     {
       "pair_id": 11,
@@ -1407,7 +1397,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P011"
+      "serial": "T931E6A79P011"
     },
     {
       "pair_id": 12,
@@ -1415,7 +1405,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P012"
+      "serial": "T931E6A79P012"
     },
     {
       "pair_id": 13,
@@ -1423,7 +1413,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P013"
+      "serial": "T931E6A79P013"
     },
     {
       "pair_id": 14,
@@ -1431,7 +1421,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P014"
+      "serial": "T931E6A79P014"
     },
     {
       "pair_id": 15,
@@ -1439,7 +1429,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P015"
+      "serial": "T931E6A79P015"
     },
     {
       "pair_id": 16,
@@ -1447,7 +1437,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P016"
+      "serial": "T931E6A79P016"
     },
     {
       "pair_id": 17,
@@ -1455,7 +1445,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P017"
+      "serial": "T931E6A79P017"
     },
     {
       "pair_id": 18,
@@ -1463,7 +1453,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P018"
+      "serial": "T931E6A79P018"
     },
     {
       "pair_id": 19,
@@ -1471,7 +1461,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P019"
+      "serial": "T931E6A79P019"
     },
     {
       "pair_id": 20,
@@ -1479,7 +1469,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P020"
+      "serial": "T931E6A79P020"
     },
     {
       "pair_id": 21,
@@ -1487,7 +1477,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P021"
+      "serial": "T931E6A79P021"
     },
     {
       "pair_id": 22,
@@ -1495,7 +1485,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P022"
+      "serial": "T931E6A79P022"
     },
     {
       "pair_id": 23,
@@ -1503,7 +1493,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P023"
+      "serial": "T931E6A79P023"
     },
     {
       "pair_id": 24,
@@ -1511,7 +1501,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P024"
+      "serial": "T931E6A79P024"
     },
     {
       "pair_id": 25,
@@ -1519,7 +1509,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P025"
+      "serial": "T931E6A79P025"
     },
     {
       "pair_id": 26,
@@ -1527,7 +1517,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P026"
+      "serial": "T931E6A79P026"
     },
     {
       "pair_id": 27,
@@ -1535,7 +1525,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P027"
+      "serial": "T931E6A79P027"
     },
     {
       "pair_id": 28,
@@ -1543,7 +1533,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P028"
+      "serial": "T931E6A79P028"
     },
     {
       "pair_id": 29,
@@ -1551,7 +1541,7 @@
       "media": "CD",
       "attempts_recorded": 2,
       "successes": 1,
-      "serial": "T15EC19C4P029"
+      "serial": "T931E6A79P029"
     },
     {
       "pair_id": 30,
@@ -1598,7 +1588,7 @@
       "direction": "OUT",
       "media": "DVD",
       "attempts_recorded": 2,
-      "successes": 2,
+      "successes": 1,
       "serial": "P86-1706"
     },
     {
@@ -1606,7 +1596,7 @@
       "direction": "OUT",
       "media": "DVD",
       "attempts_recorded": 2,
-      "successes": 2,
+      "successes": 1,
       "serial": "P86-1707"
     },
     {
@@ -1614,7 +1604,7 @@
       "direction": "OUT",
       "media": "DVD",
       "attempts_recorded": 2,
-      "successes": 2,
+      "successes": 1,
       "serial": "P86-1708"
     },
     {
@@ -1734,7 +1724,7 @@
       "direction": "OUT",
       "media": "DVD",
       "attempts_recorded": 2,
-      "successes": 2,
+      "successes": 1,
       "serial": "P86-1723"
     },
     {
@@ -1766,7 +1756,7 @@
       "direction": "OUT",
       "media": "DVD",
       "attempts_recorded": 2,
-      "successes": 2,
+      "successes": 1,
       "serial": "P86-1727"
     },
     {
@@ -1794,168 +1784,13 @@
       "serial": "P86-1730"
     }
   ],
-  "duplicate_race_invariant_failures": [
-    {
-      "pair_id": 8,
-      "direction": "IN",
-      "media": "CD",
-      "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "T15EC19C4P008",
-      "details": [
-        {
-          "vu": 16,
-          "ok": true,
-          "status": 200,
-          "serial": "T15EC19C4P008",
-          "expected_rejection": false,
-          "detail": ""
-        },
-        {
-          "vu": 17,
-          "ok": true,
-          "status": 200,
-          "serial": "T15EC19C4P008",
-          "expected_rejection": false,
-          "detail": ""
-        }
-      ]
-    },
-    {
-      "pair_id": 35,
-      "direction": "OUT",
-      "media": "DVD",
-      "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "P86-1706",
-      "details": [
-        {
-          "vu": 70,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1706",
-          "expected_rejection": false,
-          "detail": ""
-        },
-        {
-          "vu": 71,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1706",
-          "expected_rejection": false,
-          "detail": ""
-        }
-      ]
-    },
-    {
-      "pair_id": 36,
-      "direction": "OUT",
-      "media": "DVD",
-      "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "P86-1707",
-      "details": [
-        {
-          "vu": 72,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1707",
-          "expected_rejection": false,
-          "detail": ""
-        },
-        {
-          "vu": 73,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1707",
-          "expected_rejection": false,
-          "detail": ""
-        }
-      ]
-    },
-    {
-      "pair_id": 37,
-      "direction": "OUT",
-      "media": "DVD",
-      "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "P86-1708",
-      "details": [
-        {
-          "vu": 74,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1708",
-          "expected_rejection": false,
-          "detail": ""
-        },
-        {
-          "vu": 75,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1708",
-          "expected_rejection": false,
-          "detail": ""
-        }
-      ]
-    },
-    {
-      "pair_id": 52,
-      "direction": "OUT",
-      "media": "DVD",
-      "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "P86-1723",
-      "details": [
-        {
-          "vu": 104,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1723",
-          "expected_rejection": false,
-          "detail": ""
-        },
-        {
-          "vu": 105,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1723",
-          "expected_rejection": false,
-          "detail": ""
-        }
-      ]
-    },
-    {
-      "pair_id": 56,
-      "direction": "OUT",
-      "media": "DVD",
-      "attempts_recorded": 2,
-      "successes": 2,
-      "serial": "P86-1727",
-      "details": [
-        {
-          "vu": 112,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1727",
-          "expected_rejection": false,
-          "detail": ""
-        },
-        {
-          "vu": 113,
-          "ok": true,
-          "status": 200,
-          "serial": "P86-1727",
-          "expected_rejection": false,
-          "detail": ""
-        }
-      ]
-    }
-  ],
+  "duplicate_race_invariant_failures": [],
   "invariant_failures": [
-    "database CD/DVD record count did not match 250 regular writes plus one winner per 60 pairs",
-    "CD/DVD same-serial repeated-direction integrity violations: 6",
-    "6 concurrent duplicate pairs did not yield exactly one successful response"
+    "ticket creates confirmed by HTTP: 246/250",
+    "ticket resolutions confirmed by HTTP: 246/250",
+    "database final resolved-ticket count did not equal 250",
+    "database-created ticket count did not equal 250",
+    "unexpected application/system errors were recorded during the test"
   ],
   "limitations": [
     "This run directly exercises the ticket create/update and CD/DVD create handlers through authenticated HTTP POSTs; it is not exhaustive coverage of every module or every route.",
