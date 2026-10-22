@@ -5,9 +5,10 @@
   "pages_tested": 37,
   "api_reads_tested": 26,
   "role_checks_tested": 3,
-  "expected_authorization_rejections": 1,
-  "http_error_responses": 5,
-  "application_error_payloads": 3,
+  "expected_authorization_rejections": 3,
+  "http_error_responses": 3,
+  "unexpected_http_error_responses": 0,
+  "application_error_payloads": 1,
   "food_ticket_group_write_lifecycle_tested": true,
   "php_runtime_log_error_lines": 0,
   "database_error_log_lines": 0,
@@ -15,11 +16,11 @@
   "database_error_log_samples": [],
   "food_order_write_lifecycle_tested": true,
   "total_checks": 74,
-  "passed": 72,
-  "failed": 2,
-  "elapsed_seconds": 2.277,
-  "p50_latency_ms": 22.86,
-  "max_latency_ms": 135.88,
+  "passed": 74,
+  "failed": 0,
+  "elapsed_seconds": 2.027,
+  "p50_latency_ms": 19.43,
+  "max_latency_ms": 129.53,
   "fatal": null,
   "results": [
     {
@@ -27,7 +28,7 @@
       "method": "GET",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 18.17,
+      "latency_ms": 18.71,
       "ok": true,
       "error": ""
     },
@@ -36,7 +37,7 @@
       "method": "POST",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 135.88,
+      "latency_ms": 129.53,
       "ok": true,
       "error": ""
     },
@@ -45,7 +46,7 @@
       "method": "GET",
       "path": "index.php?page=dashboard",
       "status": 200,
-      "latency_ms": 58.21,
+      "latency_ms": 49.62,
       "ok": true,
       "error": ""
     },
@@ -54,7 +55,7 @@
       "method": "GET",
       "path": "index.php?page=profile",
       "status": 200,
-      "latency_ms": 21.27,
+      "latency_ms": 19.36,
       "ok": true,
       "error": ""
     },
@@ -63,7 +64,7 @@
       "method": "GET",
       "path": "index.php?page=queue",
       "status": 200,
-      "latency_ms": 105.2,
+      "latency_ms": 94.09,
       "ok": true,
       "error": ""
     },
@@ -72,7 +73,7 @@
       "method": "GET",
       "path": "index.php?page=ticket&id=1",
       "status": 200,
-      "latency_ms": 26.07,
+      "latency_ms": 22.5,
       "ok": true,
       "error": ""
     },
@@ -81,7 +82,7 @@
       "method": "GET",
       "path": "index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 40.4,
+      "latency_ms": 35.95,
       "ok": true,
       "error": ""
     },
@@ -90,7 +91,7 @@
       "method": "GET",
       "path": "index.php?page=local-accounts",
       "status": 200,
-      "latency_ms": 23.8,
+      "latency_ms": 21.63,
       "ok": true,
       "error": ""
     },
@@ -99,7 +100,7 @@
       "method": "GET",
       "path": "index.php?page=settings",
       "status": 200,
-      "latency_ms": 64.54,
+      "latency_ms": 58.21,
       "ok": true,
       "error": ""
     },
@@ -108,7 +109,7 @@
       "method": "GET",
       "path": "index.php?page=reports",
       "status": 200,
-      "latency_ms": 71.28,
+      "latency_ms": 64.7,
       "ok": true,
       "error": ""
     },
@@ -117,7 +118,7 @@
       "method": "GET",
       "path": "index.php?page=analytics",
       "status": 200,
-      "latency_ms": 27.3,
+      "latency_ms": 23.59,
       "ok": true,
       "error": ""
     },
@@ -126,7 +127,7 @@
       "method": "GET",
       "path": "index.php?page=supervisor",
       "status": 200,
-      "latency_ms": 72.42,
+      "latency_ms": 60.56,
       "ok": true,
       "error": ""
     },
@@ -135,7 +136,7 @@
       "method": "GET",
       "path": "index.php?page=inventory",
       "status": 200,
-      "latency_ms": 46.67,
+      "latency_ms": 43.65,
       "ok": true,
       "error": ""
     },
@@ -144,7 +145,7 @@
       "method": "GET",
       "path": "index.php?page=inventory-diagnostics",
       "status": 200,
-      "latency_ms": 21.9,
+      "latency_ms": 19.16,
       "ok": true,
       "error": ""
     },
@@ -153,7 +154,7 @@
       "method": "GET",
       "path": "index.php?page=domain-scan",
       "status": 200,
-      "latency_ms": 27.75,
+      "latency_ms": 23.98,
       "ok": true,
       "error": ""
     },
@@ -162,7 +163,7 @@
       "method": "GET",
       "path": "index.php?page=assets",
       "status": 200,
-      "latency_ms": 31.82,
+      "latency_ms": 31.76,
       "ok": true,
       "error": ""
     },
@@ -171,7 +172,7 @@
       "method": "GET",
       "path": "index.php?page=asset&id=1",
       "status": 200,
-      "latency_ms": 40.6,
+      "latency_ms": 40.27,
       "ok": true,
       "error": ""
     },
@@ -180,7 +181,7 @@
       "method": "GET",
       "path": "index.php?page=asset-history&id=1",
       "status": 200,
-      "latency_ms": 22.86,
+      "latency_ms": 20.4,
       "ok": true,
       "error": ""
     },
@@ -189,7 +190,7 @@
       "method": "GET",
       "path": "index.php?page=cd-dvd",
       "status": 200,
-      "latency_ms": 30.36,
+      "latency_ms": 25.97,
       "ok": true,
       "error": ""
     },
@@ -198,7 +199,7 @@
       "method": "GET",
       "path": "index.php?page=cd-dvd-history",
       "status": 200,
-      "latency_ms": 23.99,
+      "latency_ms": 21.27,
       "ok": true,
       "error": ""
     },
@@ -207,7 +208,7 @@
       "method": "GET",
       "path": "index.php?page=traffic-control",
       "status": 200,
-      "latency_ms": 26.53,
+      "latency_ms": 21.34,
       "ok": true,
       "error": ""
     },
@@ -216,7 +217,7 @@
       "method": "GET",
       "path": "index.php?page=governance",
       "status": 200,
-      "latency_ms": 134.92,
+      "latency_ms": 109.94,
       "ok": true,
       "error": ""
     },
@@ -225,7 +226,7 @@
       "method": "GET",
       "path": "index.php?page=organization",
       "status": 200,
-      "latency_ms": 24.93,
+      "latency_ms": 22.16,
       "ok": true,
       "error": ""
     },
@@ -234,7 +235,7 @@
       "method": "GET",
       "path": "index.php?page=holidays",
       "status": 200,
-      "latency_ms": 22.07,
+      "latency_ms": 19.14,
       "ok": true,
       "error": ""
     },
@@ -243,7 +244,7 @@
       "method": "GET",
       "path": "index.php?page=knowledge",
       "status": 200,
-      "latency_ms": 24.25,
+      "latency_ms": 19.43,
       "ok": true,
       "error": ""
     },
@@ -252,7 +253,7 @@
       "method": "GET",
       "path": "index.php?page=notifications",
       "status": 200,
-      "latency_ms": 21.3,
+      "latency_ms": 19.3,
       "ok": true,
       "error": ""
     },
@@ -261,7 +262,7 @@
       "method": "GET",
       "path": "index.php?page=search&q=synthetic",
       "status": 200,
-      "latency_ms": 43.98,
+      "latency_ms": 39.48,
       "ok": true,
       "error": ""
     },
@@ -270,7 +271,7 @@
       "method": "GET",
       "path": "index.php?page=backup",
       "status": 200,
-      "latency_ms": 21.9,
+      "latency_ms": 19.24,
       "ok": true,
       "error": ""
     },
@@ -279,7 +280,7 @@
       "method": "GET",
       "path": "index.php?page=chatbot-admin",
       "status": 200,
-      "latency_ms": 39.49,
+      "latency_ms": 37.24,
       "ok": true,
       "error": ""
     },
@@ -288,7 +289,7 @@
       "method": "GET",
       "path": "index.php?page=services",
       "status": 200,
-      "latency_ms": 24.96,
+      "latency_ms": 21.89,
       "ok": true,
       "error": ""
     },
@@ -297,7 +298,7 @@
       "method": "GET",
       "path": "index.php?page=system-health",
       "status": 200,
-      "latency_ms": 27.62,
+      "latency_ms": 24.18,
       "ok": true,
       "error": ""
     },
@@ -306,7 +307,7 @@
       "method": "GET",
       "path": "index.php?page=logs",
       "status": 200,
-      "latency_ms": 38.83,
+      "latency_ms": 33.97,
       "ok": true,
       "error": ""
     },
@@ -315,7 +316,7 @@
       "method": "GET",
       "path": "index.php?page=activity-log",
       "status": 200,
-      "latency_ms": 28.53,
+      "latency_ms": 22.46,
       "ok": true,
       "error": ""
     },
@@ -324,7 +325,7 @@
       "method": "GET",
       "path": "index.php?page=help",
       "status": 200,
-      "latency_ms": 24.83,
+      "latency_ms": 19.21,
       "ok": true,
       "error": ""
     },
@@ -333,7 +334,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket",
       "status": 200,
-      "latency_ms": 22.03,
+      "latency_ms": 19.49,
       "ok": true,
       "error": ""
     },
@@ -342,7 +343,7 @@
       "method": "GET",
       "path": "index.php?page=food-order",
       "status": 200,
-      "latency_ms": 24.85,
+      "latency_ms": 21.88,
       "ok": true,
       "error": ""
     },
@@ -351,7 +352,7 @@
       "method": "GET",
       "path": "index.php?page=food-personnel-link",
       "status": 200,
-      "latency_ms": 28.76,
+      "latency_ms": 24.23,
       "ok": true,
       "error": ""
     },
@@ -360,7 +361,7 @@
       "method": "GET",
       "path": "index.php?page=change-password",
       "status": 200,
-      "latency_ms": 22.73,
+      "latency_ms": 20.36,
       "ok": true,
       "error": ""
     },
@@ -369,7 +370,7 @@
       "method": "GET",
       "path": "index.php?page=audit",
       "status": 200,
-      "latency_ms": 39.16,
+      "latency_ms": 33.86,
       "ok": true,
       "error": ""
     },
@@ -378,7 +379,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=health",
       "status": 200,
-      "latency_ms": 16.2,
+      "latency_ms": 14.46,
       "ok": true,
       "error": ""
     },
@@ -387,7 +388,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=session",
       "status": 200,
-      "latency_ms": 12.97,
+      "latency_ms": 11.73,
       "ok": true,
       "error": ""
     },
@@ -396,7 +397,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=config",
       "status": 200,
-      "latency_ms": 21.54,
+      "latency_ms": 18.4,
       "ok": true,
       "error": ""
     },
@@ -405,7 +406,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=monitoring",
       "status": 200,
-      "latency_ms": 15.14,
+      "latency_ms": 13.41,
       "ok": true,
       "error": ""
     },
@@ -414,7 +415,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=employees",
       "status": 200,
-      "latency_ms": 16.41,
+      "latency_ms": 14.42,
       "ok": true,
       "error": ""
     },
@@ -423,7 +424,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=guest-cards",
       "status": 200,
-      "latency_ms": 25.15,
+      "latency_ms": 16.13,
       "ok": true,
       "error": ""
     },
@@ -432,7 +433,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=guest-cap",
       "status": 200,
-      "latency_ms": 22.92,
+      "latency_ms": 15.33,
       "ok": true,
       "error": ""
     },
@@ -441,7 +442,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 20.46,
+      "latency_ms": 16.63,
       "ok": true,
       "error": ""
     },
@@ -450,7 +451,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=orders",
       "status": 200,
-      "latency_ms": 14.65,
+      "latency_ms": 13.91,
       "ok": true,
       "error": ""
     },
@@ -459,7 +460,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/status",
       "status": 200,
-      "latency_ms": 14.48,
+      "latency_ms": 13.38,
       "ok": true,
       "error": ""
     },
@@ -468,7 +469,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/month&month=1405-07",
       "status": 200,
-      "latency_ms": 16.34,
+      "latency_ms": 15.17,
       "ok": true,
       "error": ""
     },
@@ -477,26 +478,25 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
       "status": 200,
-      "latency_ms": 15.14,
+      "latency_ms": 14.27,
       "ok": true,
       "error": ""
     },
     {
       "name": "food-ticket API GET food-menu/orders",
       "method": "GET",
-      "path": "index.php?page=food-ticket&food_api=food-menu/orders",
-      "status": 400,
-      "latency_ms": 13.41,
-      "ok": false,
-      "error": "HTTP 400; unexpected status 400",
-      "application_error": "تاریخ روز سفارش معتبر نیست."
+      "path": "index.php?page=food-ticket&food_api=food-menu/orders&date=2026-10-22",
+      "status": 200,
+      "latency_ms": 13.48,
+      "ok": true,
+      "error": ""
     },
     {
       "name": "food-ticket API GET food-menu/cancel-requests",
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/cancel-requests",
       "status": 200,
-      "latency_ms": 15.18,
+      "latency_ms": 13.5,
       "ok": true,
       "error": ""
     },
@@ -505,26 +505,25 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/groups",
       "status": 200,
-      "latency_ms": 15.59,
+      "latency_ms": 13.96,
       "ok": true,
       "error": ""
     },
     {
       "name": "food-ticket API GET food-menu/statistics",
       "method": "GET",
-      "path": "index.php?page=food-ticket&food_api=food-menu/statistics&month=1405-07",
-      "status": 400,
-      "latency_ms": 12.78,
-      "ok": false,
-      "error": "HTTP 400; unexpected status 400",
-      "application_error": "بازهٔ تاریخ آمار معتبر نیست."
+      "path": "index.php?page=food-ticket&food_api=food-menu/statistics&from=2026-10-22&to=2026-10-22",
+      "status": 200,
+      "latency_ms": 13.51,
+      "ok": true,
+      "error": ""
     },
     {
       "name": "food-order API GET month",
       "method": "GET",
       "path": "index.php?page=food-order&food_api=month&month=1405-07",
       "status": 200,
-      "latency_ms": 17.62,
+      "latency_ms": 15.05,
       "ok": true,
       "error": ""
     },
@@ -533,7 +532,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.29,
+      "latency_ms": 14.16,
       "ok": true,
       "error": ""
     },
@@ -542,7 +541,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=search-users&q=loadtest",
       "status": 200,
-      "latency_ms": 14.44,
+      "latency_ms": 13.56,
       "ok": true,
       "error": ""
     },
@@ -551,7 +550,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=day-visit&date=2026-10-22",
       "status": 200,
-      "latency_ms": 16.84,
+      "latency_ms": 15.33,
       "ok": true,
       "error": ""
     },
@@ -560,18 +559,18 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=guest-requests",
       "status": 403,
-      "latency_ms": 13.43,
+      "latency_ms": 12.54,
       "ok": true,
       "error": "",
-      "application_error": "این بخش فقط برای مدیران و بالاتر فعال است.",
-      "expected_rejection": true
+      "expected_rejection": true,
+      "application_error": "این بخش فقط برای مدیران و بالاتر فعال است."
     },
     {
       "name": "traffic API invalid national code is rejected safely",
       "method": "GET",
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 12.58,
+      "latency_ms": 13.59,
       "ok": true,
       "error": ""
     },
@@ -580,7 +579,7 @@
       "method": "POST",
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 29.81,
+      "latency_ms": 26.65,
       "ok": true,
       "error": ""
     },
@@ -589,7 +588,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=absence-status&group_id=1&date=2026-10-22",
       "status": 200,
-      "latency_ms": 19.7,
+      "latency_ms": 17.43,
       "ok": true,
       "error": ""
     },
@@ -598,7 +597,7 @@
       "method": "POST",
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 23.74,
+      "latency_ms": 20.64,
       "ok": true,
       "error": ""
     },
@@ -607,7 +606,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=month&month=1405-07",
       "status": 200,
-      "latency_ms": 16.3,
+      "latency_ms": 14.99,
       "ok": true,
       "error": ""
     },
@@ -616,7 +615,7 @@
       "method": "POST",
       "path": "index.php?page=food-order&food_api=order",
       "status": 200,
-      "latency_ms": 18.69,
+      "latency_ms": 16.26,
       "ok": true,
       "error": ""
     },
@@ -625,7 +624,7 @@
       "method": "POST",
       "path": "index.php?page=food-order&food_api=cancel",
       "status": 200,
-      "latency_ms": 18.34,
+      "latency_ms": 15.49,
       "ok": true,
       "error": ""
     },
@@ -634,7 +633,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=my-orders&from=2026-10-22&to=2026-10-22",
       "status": 200,
-      "latency_ms": 16.24,
+      "latency_ms": 14.59,
       "ok": true,
       "error": ""
     },
@@ -652,7 +651,7 @@
       "method": "GET",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 17.56,
+      "latency_ms": 15.51,
       "ok": true,
       "error": ""
     },
@@ -661,7 +660,7 @@
       "method": "POST",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 98.27,
+      "latency_ms": 100.76,
       "ok": true,
       "error": ""
     },
@@ -670,7 +669,7 @@
       "method": "GET",
       "path": "index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 36.78,
+      "latency_ms": 30.56,
       "ok": true,
       "error": ""
     },
@@ -679,18 +678,20 @@
       "method": "GET",
       "path": "index.php?page=settings",
       "status": 403,
-      "latency_ms": 22.43,
+      "latency_ms": 19.5,
       "ok": true,
-      "error": ""
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "requester: food-ticket administration denied",
       "method": "GET",
       "path": "index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 22.57,
+      "latency_ms": 19.05,
       "ok": true,
-      "error": ""
+      "error": "",
+      "expected_rejection": true
     }
   ],
   "limitations": [
