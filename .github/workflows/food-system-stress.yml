@@ -150,9 +150,29 @@ jobs:
         if: steps.food_stress.outcome == 'success'
         run: php tools/food_system_verify.php
 
+      - name: Report verified food stress totals
+        if: always() && steps.food_stress.conclusion == 'success'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          run = json.loads(Path('benchmark-results/food-system-run.json').read_text())
+          verify = json.loads(Path('benchmark-results/food-system-verification.json').read_text())
+          s = run['summary']
+          worst_route, worst = max(run['routes'].items(), key=lambda row: row[1]['latency_ms']['p95'])
+          line = (f"requests={s['http_requests']}; rps={s['throughput_requests_per_second']}; "
+                  f"self_lifecycles={s['self_order_lifecycles_verified']}/250; "
+                  f"bulk={s['bulk_orders_created']}/{s['bulk_orders_cancelled']}; "
+                  f"manager_reads={s['manager_read_responses_validated']}; crud={s['manager_crud_checks_passed']}; "
+                  f"failed_checks={s['failed_checks']}; persisted_orders={verify['food_orders']}; "
+                  f"worst_route_p95={worst_route}:{worst['latency_ms']['p95']}ms")
+          print(f"::notice title=Food stress verified metrics::{line}")
+          print(line)
+          PY
+
       - name: Enforce food-only stress and Python test results
         if: always()
-        run: test "${{ steps.python_static.outcome }}" = success && test "${{ steps.food_stress.outcome }}" = success
+        run: test "${{ steps.python_static.outcome }}" = success && test "${{ steps.food_stress.conclusion }}" = success
 
       - name: Add food stress result to Actions summary
         if: always()
