@@ -73,20 +73,12 @@ jobs:
 
       - name: Run food-only Python static tests
         id: python_static
-        continue-on-error: true
         run: |
-          set +e
-          mkdir -p benchmark-results
+          set -o pipefail
+          mkdir -p benchmark-results updates/2026-10-20-release-161-6
+          # Tests expect an extracted release manifest, ignored by Git; provide only this synthetic food migration fixture.
+          printf '{"migrations":["006-food-meal-type.sql"]}\n' > updates/2026-10-20-release-161-6/manifest.json
           pytest -q tests/test_food*.py --junitxml=benchmark-results/food-system-python-tests.xml 2>&1 | tee benchmark-results/food-system-python-tests.log
-          status=${PIPESTATUS[0]}
-          echo "Food-only Python test exit status: $status" >> "$GITHUB_STEP_SUMMARY"
-          if [ "$status" -ne 0 ]; then
-            while IFS= read -r line; do
-              detail="$(printf '%s' "$line" | sed 's/%/%25/g; s/\r/%0D/g')"
-              echo "::error title=Food Python test failure::$detail"
-            done < <(tail -n 40 benchmark-results/food-system-python-tests.log)
-          fi
-          exit "$status"
 
       - name: Run food-only JavaScript test
         run: node tests/test_food_order_calendar_node.js
