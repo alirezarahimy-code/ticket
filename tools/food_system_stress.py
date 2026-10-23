@@ -10,6 +10,7 @@ import socket
 import subprocess
 import threading
 import time
+import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -411,6 +412,10 @@ def main() -> int:
     env = os.environ.copy()
     env.setdefault("PHP_CLI_SERVER_WORKERS", "32")
     server = subprocess.Popen(["php", "-S", "0.0.0.0:8080", str(ROOT / "tools" / "food_system_router.php")], cwd=ROOT, env=env, stdout=server_log, stderr=subprocess.STDOUT)
+    crud = {"passed": 0}
+    bulk = {"verified": False, "ordered": 0, "cancelled": 0}
+    self_verified = 0
+    manager_reads = {"validated": 0}
     try:
         RUN_STARTED = time.perf_counter()
         parsed = urllib.parse.urlparse(BASE)
@@ -451,6 +456,13 @@ def main() -> int:
         report = write_report(metrics, self_verified, bulk, manager_reads, crud, server)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return 0 if not report["failures"] and self_verified == 250 and bulk.get("verified") and manager_reads.get("validated") == 1000 and crud.get("passed", 0) >= 6 else 1
+    except Exception:
+        detail = traceback.format_exc()
+        metrics.fail("fatal.exception", detail)
+        report = write_report(metrics, self_verified, bulk, manager_reads, crud, server)
+        print("FATAL FOOD-STRESS EXCEPTION\\n" + detail, flush=True)
+        print(json.dumps(report, ensure_ascii=False, indent=2), flush=True)
+        return 1
     finally:
         if server.poll() is None:
             server.terminate()

@@ -130,16 +130,29 @@ jobs:
           ITSM_CONFIG_PATH="$ITSM_CONFIG_PATH" php tools/food_system_seed.php
 
       - name: Run 250 concurrent self-order lifecycles, 250 manager VUs, bulk writes, and food CRUD
+        id: food_stress
+        continue-on-error: true
         env:
           PHP_CLI_SERVER_WORKERS: '32'
-        run: python tools/food_system_stress.py
+        run: |
+          set +e
+          python tools/food_system_stress.py 2>&1 | tee benchmark-results/food-system-stress-run.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              detail="$(printf '%s' "$line" | sed 's/%/%25/g; s/\r/%0D/g')"
+              echo "::error title=Food stress failure::$detail"
+            done < <(tail -n 30 benchmark-results/food-system-stress-run.log)
+          fi
+          exit "$status"
 
       - name: Verify persisted food outcomes and audit rows
+        if: steps.food_stress.outcome == 'success'
         run: php tools/food_system_verify.php
 
-      - name: Enforce food-only Python static test result
+      - name: Enforce food-only stress and Python test results
         if: always()
-        run: test "${{ steps.python_static.outcome }}" = success
+        run: test "${{ steps.python_static.outcome }}" = success && test "${{ steps.food_stress.outcome }}" = success
 
       - name: Add food stress result to Actions summary
         if: always()
@@ -147,7 +160,8 @@ jobs:
           if [ -f benchmark-results/food-system-stress.md ]; then
             cat benchmark-results/food-system-stress.md >> "$GITHUB_STEP_SUMMARY"
           else
-            echo 'Food-only stress run did not produce its report; PHP server log follows.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Food-only stress run did not produce its report; runner output and PHP server log follow.' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 80 benchmark-results/food-system-stress-run.log >> "$GITHUB_STEP_SUMMARY" || true
             tail -n 120 /tmp/food-system-php-server.log >> "$GITHUB_STEP_SUMMARY" || true
           fi
 
@@ -159,6 +173,7 @@ jobs:
           if-no-files-found: warn
           path: |
             benchmark-results/food-system-stress.md
+            benchmark-results/food-system-stress-run.log
             benchmark-results/food-system-run.json
             benchmark-results/food-system-verification.json
             benchmark-results/food-system-python-tests.log
