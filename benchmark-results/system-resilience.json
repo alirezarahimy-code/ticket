@@ -1,0 +1,7 @@
+{
+  "passed": false,
+  "synthetic_only": true,
+  "production_or_staging_contacted": false,
+  "fatal_setup_error": "UnboundLocalError: cannot access local variable 'urllib' where it is not associated with a value",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/ticket/ticket/tools/benchmark_system_resilience.py\", line 329, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/runner/work/ticket/ticket/tools/benchmark_system_resilience.py\", line 118, in main\n    parsed = urllib.parse.urlparse(args.base_url)\n             ^^^^^^\nUnboundLocalError: cannot access local variable 'urllib' where it is not associated with a value\n"
+}
