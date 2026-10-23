@@ -326,6 +326,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add benchmark-results/benchmark-operations.md benchmark-results/benchmark-operations.json benchmark-results/operations-container-stats.txt
+          if [ -f benchmark-results/full-system-cron-tests.log ]; then git add benchmark-results/full-system-cron-tests.log; fi
           for file in benchmark-results/full-system-route-smoke.md benchmark-results/full-system-route-smoke.json benchmark-results/system-resilience.md benchmark-results/system-resilience.json; do
             if [ -f "$file" ]; then git add "$file"; fi
           done
