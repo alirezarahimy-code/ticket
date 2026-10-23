@@ -27,7 +27,7 @@ try {
         $first = 'Food';
         $last = sprintf('Synthetic %03d', $i);
         $employee = sprintf('FS%sU%03d', $stamp, $i);
-        $national = sprintf('9%09d', (int) substr(hash('sha256', $stamp . '-u' . $i), 0, 9));
+        $national = sprintf('9%09d', $i);
         $insertUser->execute([$username, $first . ' ' . $last, $first, $last, $employee, $national, 0, 'user']);
         $employeeIds[] = (int) $pdo->lastInsertId();
     }
@@ -38,7 +38,7 @@ try {
         $first = 'Food Admin';
         $last = sprintf('Synthetic %03d', $i);
         $employee = sprintf('FS%sA%03d', $stamp, $i);
-        $national = sprintf('8%09d', (int) substr(hash('sha256', $stamp . '-a' . $i), 0, 9));
+        $national = sprintf('8%09d', $i);
         $insertUser->execute([$username, $first . ' ' . $last, $first, $last, $employee, $national, 1, 'primary_admin']);
         $adminIds[] = (int) $pdo->lastInsertId();
     }
