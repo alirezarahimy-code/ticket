@@ -40,13 +40,15 @@ class RouteSmoke:
         url = urllib.parse.urljoin(self.base, path)
         request = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
         started = time.perf_counter()
-        status, body, error = 0, "", ""
+        status, body, error, final_url = 0, "", "", url
         try:
             with self.opener.open(request, timeout=30) as response:
                 status = int(response.status)
+                final_url = response.geturl()
                 body = response.read(2 * 1024 * 1024).decode("utf-8", errors="replace")
         except urllib.error.HTTPError as exc:
             status = int(exc.code)
+            final_url = exc.geturl()
             body = exc.read(2 * 1024 * 1024).decode("utf-8", errors="replace")
             error = "" if status in expected else f"HTTP {status}"
         except Exception as exc:  # noqa: BLE001 - record transport failures as test results
@@ -56,7 +58,7 @@ class RouteSmoke:
         ok = not error and status in expected and not fatal
         if not ok:
             error = "; ".join(part for part in (error, f"unexpected status {status}" if status not in expected else "", f"PHP marker: {fatal}" if fatal else "") if part)
-        result = {"name": label, "method": method, "path": path, "status": status,
+        result = {"name": label, "method": method, "path": path, "final_url": final_url, "status": status,
                   "latency_ms": latency_ms, "ok": ok, "error": error}
         if status >= 400 and status in expected:
             result["expected_rejection"] = True
@@ -187,8 +189,8 @@ class RouteSmoke:
             "guard": (None, "loadtest-role-guard"),
         }
         allow = {
-            "food-groups": {"primary_admin", "supervisor", "support_manager", "inspector"},
-            "employees": {"primary_admin", "supervisor", "support_manager"},
+            "food-groups": {"primary_admin", "support_manager", "inspector"},
+            "employees": {"primary_admin", "support_manager"},
             "config": {"primary_admin"},
             "food-menu/catalog": {"primary_admin", "support_manager"},
             "traffic lookup": {"primary_admin", "supervisor", "support_manager", "inspector", "manager", "agent", "guard"},
@@ -205,7 +207,7 @@ class RouteSmoke:
                     self.results.append({"name": f"role-matrix:{role}:login", "method": "POST", "path": "synthetic role account",
                                          "status": 0, "latency_ms": 0, "ok": False, "error": f"{type(exc).__name__}: {exc}"})
                     continue
-            food_access_roles = {"primary_admin", "supervisor", "support_manager", "inspector"}
+            food_access_roles = {"primary_admin", "support_manager", "inspector"}
             probes = [("food-ticket page", "index.php?page=food-ticket", "html")]
             if role in food_access_roles:
                 probes.extend([
@@ -313,6 +315,7 @@ class RouteSmoke:
         }
         status, html, _ = self.request("traffic handler creates synthetic visit", "index.php?page=traffic-control", "POST",
                                        urllib.parse.urlencode(create).encode(), headers)
+        create_result = self.results[-1]
         if status != 200 or 'class="auth-layout"' in html:
             self.results[-1]["ok"] = False
             self.results[-1]["error"] = "traffic create handler did not complete authenticated POST"
@@ -322,7 +325,9 @@ class RouteSmoke:
         visit_id = int(found.get("record_id", 0)) if isinstance(found, dict) else 0
         if not isinstance(found, dict) or not found.get("found") or found.get("full_name") != original_name or visit_id < 1:
             self.results[-1]["ok"] = False
-            self.results[-1]["error"] = "traffic lookup did not return the synthetic row created by the handler"
+            visible = re.sub(r"\s+", " ", re.sub(r"<[^>]*>", " ", html)).strip()
+            self.results[-1]["error"] = ("traffic lookup did not return the synthetic row created by the handler; "
+                                         f"create redirect={create_result.get('final_url', '')}; response={visible[-500:]}")
             return
         _, print_html, _ = self.request("traffic print view renders synthetic visitor (no printer invoked)",
                                         f"index.php?page=traffic-control-print&id={visit_id}")

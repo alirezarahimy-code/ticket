@@ -167,7 +167,7 @@ try {
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, computer_type = ?, manufacturer = ?, model = ?, owner_user_id = COALESCE(?, owner_user_id), department_id = COALESCE(?, department_id), operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "agent", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $existingId]);
         $assetId = $existingId;
     } else {
-        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, ...$values]);
+        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, ...$values]);
         $assetId = (int) db()->lastInsertId();
     }
     sync_inventory_rows($assetId, $payload, 'agent');
