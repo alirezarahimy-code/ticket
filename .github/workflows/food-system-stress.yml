@@ -72,7 +72,15 @@ jobs:
           done
 
       - name: Run food-only Python static tests
-        run: pytest -q tests/test_food*.py
+        id: python_static
+        continue-on-error: true
+        run: |
+          set +e
+          mkdir -p benchmark-results
+          pytest -q tests/test_food*.py --junitxml=benchmark-results/food-system-python-tests.xml 2>&1 | tee benchmark-results/food-system-python-tests.log
+          status=${PIPESTATUS[0]}
+          echo "Food-only Python test exit status: $status" >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
 
       - name: Run food-only JavaScript test
         run: node tests/test_food_order_calendar_node.js
@@ -129,6 +137,10 @@ jobs:
       - name: Verify persisted food outcomes and audit rows
         run: php tools/food_system_verify.php
 
+      - name: Enforce food-only Python static test result
+        if: always()
+        run: test "${{ steps.python_static.outcome }}" = success
+
       - name: Add food stress result to Actions summary
         if: always()
         run: |
@@ -149,4 +161,6 @@ jobs:
             benchmark-results/food-system-stress.md
             benchmark-results/food-system-run.json
             benchmark-results/food-system-verification.json
+            benchmark-results/food-system-python-tests.log
+            benchmark-results/food-system-python-tests.xml
             /tmp/food-system-php-server.log
