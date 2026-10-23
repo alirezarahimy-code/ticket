@@ -16,6 +16,7 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 import urllib.parse
 from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
@@ -324,4 +325,35 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except SystemExit as exc:
+        if exc.code not in (None, 0) and not Path("benchmark-results/system-resilience.json").is_file():
+            output = Path("benchmark-results")
+            output.mkdir(parents=True, exist_ok=True)
+            diagnostic = {"passed": False, "synthetic_only": True, "production_or_staging_contacted": False,
+                          "fatal_setup_error": f"CLI exited before the resilience report was written (exit={exc.code})."}
+            (output / "system-resilience.json").write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+            (output / "system-resilience.md").write_text("# آزمون تاب‌آوری — توقف پیش از تولید گزارش\n\n" + diagnostic["fatal_setup_error"] + "\n", encoding="utf-8")
+        raise
+    except Exception as exc:  # noqa: BLE001 - persist CI setup failures for diagnosis
+        output = Path("benchmark-results")
+        output.mkdir(parents=True, exist_ok=True)
+        diagnostic = {
+            "passed": False,
+            "synthetic_only": True,
+            "production_or_staging_contacted": False,
+            "fatal_setup_error": f"{type(exc).__name__}: {exc}",
+            "traceback": traceback.format_exc(),
+        }
+        (output / "system-resilience.json").write_text(
+            json.dumps(diagnostic, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
+        (output / "system-resilience.md").write_text(
+            "# سامانهٔ آزمون تاب‌آوری مسیرها و APIها — شکست در راه‌اندازی\n\n"
+            f"- خطا: `{diagnostic['fatal_setup_error']}`\n\n"
+            "```text\n" + diagnostic["traceback"] + "```\n",
+            encoding="utf-8",
+        )
+        print(f"System resilience setup failed: {diagnostic['fatal_setup_error']}", file=sys.stderr)
+        raise
