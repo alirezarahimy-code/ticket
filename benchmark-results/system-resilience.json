@@ -1,7 +1,588 @@
 {
-  "passed": false,
+  "started_utc": "2026-10-23T00:26:00.989074+00:00",
+  "target": "127.0.0.1 only; isolated ephemeral MariaDB; synthetic accounts and fixtures",
   "synthetic_only": true,
   "production_or_staging_contacted": false,
-  "fatal_setup_error": "UnboundLocalError: cannot access local variable 'urllib' where it is not associated with a value",
-  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/ticket/ticket/tools/benchmark_system_resilience.py\", line 329, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/runner/work/ticket/ticket/tools/benchmark_system_resilience.py\", line 118, in main\n    parsed = urllib.parse.urlparse(args.base_url)\n             ^^^^^^\nUnboundLocalError: cannot access local variable 'urllib' where it is not associated with a value\n"
+  "virtual_users": 250,
+  "php_workers": 32,
+  "reads_per_user": 12,
+  "read_requests_expected": 3000,
+  "read_requests_completed": 3000,
+  "route_catalog_size": 59,
+  "routes_with_requests": 59,
+  "missing_routes": [],
+  "login_requests": 500,
+  "total_http_requests": 3500,
+  "login_latency_ms": {
+    "p50": 2381.65,
+    "p95": 6022.81,
+    "p99": 6933.16,
+    "max": 7519.43
+  },
+  "http_status_counts": {
+    "200": 3450,
+    "403": 50
+  },
+  "read_http_status_counts": {
+    "200": 2950,
+    "403": 50
+  },
+  "expected_authorization_rejections": 50,
+  "unexpected_http_errors": 0,
+  "api_payload_errors": 0,
+  "php_runtime_warning_notice_fatal_lines": 0,
+  "php_runtime_log_samples": [],
+  "database_sql_error_lines": 0,
+  "database_log_samples": [],
+  "worker_failures": [],
+  "request_failures": [],
+  "elapsed_seconds": 40.997,
+  "throughput_requests_per_second": 73.18,
+  "latency_ms": {
+    "p50": 2223.4,
+    "p95": 4295.84,
+    "p99": 4761.02,
+    "max": 5419.77
+  },
+  "php_cpu_percent_sum_peak": 198.9,
+  "php_rss_mb_sum_peak": 1463.45,
+  "passed": true,
+  "endpoint_metrics": [
+    {
+      "route": "page:dashboard",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2427.68,
+      "p95_ms": 2773.45,
+      "p99_ms": 2923.5,
+      "max_ms": 2923.5
+    },
+    {
+      "route": "page:profile",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2161.48,
+      "p95_ms": 2461.13,
+      "p99_ms": 2509.72,
+      "max_ms": 2509.72
+    },
+    {
+      "route": "page:queue",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2487.35,
+      "p95_ms": 2793.93,
+      "p99_ms": 3002.46,
+      "max_ms": 3002.46
+    },
+    {
+      "route": "page:ticket detail",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2210.01,
+      "p95_ms": 2565.56,
+      "p99_ms": 2894.25,
+      "max_ms": 2894.25
+    },
+    {
+      "route": "page:new ticket",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2309.98,
+      "p95_ms": 2562.61,
+      "p99_ms": 2745.99,
+      "max_ms": 2745.99
+    },
+    {
+      "route": "page:local accounts",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2212.06,
+      "p95_ms": 2469.96,
+      "p99_ms": 2793.1,
+      "max_ms": 2793.1
+    },
+    {
+      "route": "page:settings",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2366.57,
+      "p95_ms": 2628.23,
+      "p99_ms": 2686.08,
+      "max_ms": 2686.08
+    },
+    {
+      "route": "page:reports",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2481.42,
+      "p95_ms": 2891.68,
+      "p99_ms": 2951.0,
+      "max_ms": 2951.0
+    },
+    {
+      "route": "page:analytics",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2215.45,
+      "p95_ms": 2507.63,
+      "p99_ms": 2735.62,
+      "max_ms": 2735.62
+    },
+    {
+      "route": "page:supervisor",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2516.36,
+      "p95_ms": 2842.07,
+      "p99_ms": 2894.05,
+      "max_ms": 2894.05
+    },
+    {
+      "route": "page:inventory form",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 4324.09,
+      "p95_ms": 5002.55,
+      "p99_ms": 5017.58,
+      "max_ms": 5017.58
+    },
+    {
+      "route": "page:inventory diagnostics",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2186.98,
+      "p95_ms": 2487.96,
+      "p99_ms": 2515.55,
+      "max_ms": 2515.55
+    },
+    {
+      "route": "page:domain scan page",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2174.21,
+      "p95_ms": 2599.88,
+      "p99_ms": 2769.22,
+      "max_ms": 2769.22
+    },
+    {
+      "route": "page:asset list",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2261.0,
+      "p95_ms": 2661.26,
+      "p99_ms": 2746.1,
+      "max_ms": 2746.1
+    },
+    {
+      "route": "page:asset detail",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 4328.05,
+      "p95_ms": 4945.27,
+      "p99_ms": 5419.77,
+      "max_ms": 5419.77
+    },
+    {
+      "route": "page:asset history",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2171.67,
+      "p95_ms": 2479.58,
+      "p99_ms": 2605.15,
+      "max_ms": 2605.15
+    },
+    {
+      "route": "page:CD/DVD",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2243.93,
+      "p95_ms": 2501.87,
+      "p99_ms": 2626.93,
+      "max_ms": 2626.93
+    },
+    {
+      "route": "page:CD/DVD history",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2174.97,
+      "p95_ms": 2417.06,
+      "p99_ms": 2487.76,
+      "max_ms": 2487.76
+    },
+    {
+      "route": "page:traffic control",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2184.73,
+      "p95_ms": 2522.91,
+      "p99_ms": 2654.9,
+      "max_ms": 2654.9
+    },
+    {
+      "route": "page:governance",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 4515.56,
+      "p95_ms": 4896.12,
+      "p99_ms": 5032.02,
+      "max_ms": 5032.02
+    },
+    {
+      "route": "page:organization",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2183.25,
+      "p95_ms": 2484.83,
+      "p99_ms": 2614.05,
+      "max_ms": 2614.05
+    },
+    {
+      "route": "page:holidays",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2143.42,
+      "p95_ms": 2568.83,
+      "p99_ms": 2662.88,
+      "max_ms": 2662.88
+    },
+    {
+      "route": "page:knowledge",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2141.09,
+      "p95_ms": 2496.49,
+      "p99_ms": 2654.13,
+      "max_ms": 2654.13
+    },
+    {
+      "route": "page:notifications",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2152.18,
+      "p95_ms": 2405.0,
+      "p99_ms": 2495.38,
+      "max_ms": 2495.38
+    },
+    {
+      "route": "page:search",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2244.33,
+      "p95_ms": 2684.21,
+      "p99_ms": 2721.34,
+      "max_ms": 2721.34
+    },
+    {
+      "route": "page:backup page (read-only)",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2153.9,
+      "p95_ms": 2440.5,
+      "p99_ms": 2596.9,
+      "max_ms": 2596.9
+    },
+    {
+      "route": "page:chatbot administration",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2200.99,
+      "p95_ms": 2626.42,
+      "p99_ms": 2876.17,
+      "max_ms": 2876.17
+    },
+    {
+      "route": "page:services",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2189.8,
+      "p95_ms": 2515.23,
+      "p99_ms": 2637.56,
+      "max_ms": 2637.56
+    },
+    {
+      "route": "page:system health",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2215.52,
+      "p95_ms": 2492.3,
+      "p99_ms": 2576.82,
+      "max_ms": 2576.82
+    },
+    {
+      "route": "page:logs",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 4337.45,
+      "p95_ms": 4855.51,
+      "p99_ms": 5138.55,
+      "max_ms": 5138.55
+    },
+    {
+      "route": "page:activity log",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2196.08,
+      "p95_ms": 2536.12,
+      "p99_ms": 2691.08,
+      "max_ms": 2691.08
+    },
+    {
+      "route": "page:help",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2177.84,
+      "p95_ms": 2536.23,
+      "p99_ms": 2569.65,
+      "max_ms": 2569.65
+    },
+    {
+      "route": "page:food ticket",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2169.23,
+      "p95_ms": 2415.74,
+      "p99_ms": 2593.89,
+      "max_ms": 2593.89
+    },
+    {
+      "route": "page:food order",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2220.97,
+      "p95_ms": 2604.27,
+      "p99_ms": 2716.97,
+      "max_ms": 2716.97
+    },
+    {
+      "route": "page:food personnel link",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2194.38,
+      "p95_ms": 2438.76,
+      "p99_ms": 2487.75,
+      "max_ms": 2487.75
+    },
+    {
+      "route": "page:change password",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2157.58,
+      "p95_ms": 2516.13,
+      "p99_ms": 2549.05,
+      "max_ms": 2549.05
+    },
+    {
+      "route": "page:audit",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 4378.78,
+      "p95_ms": 4862.96,
+      "p99_ms": 4902.75,
+      "max_ms": 4902.75
+    },
+    {
+      "route": "food-ticket:health",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2177.73,
+      "p95_ms": 2440.91,
+      "p99_ms": 2566.78,
+      "max_ms": 2566.78
+    },
+    {
+      "route": "food-ticket:session",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2148.42,
+      "p95_ms": 2611.28,
+      "p99_ms": 2670.55,
+      "max_ms": 2670.55
+    },
+    {
+      "route": "food-ticket:config",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2191.91,
+      "p95_ms": 2491.32,
+      "p99_ms": 2650.6,
+      "max_ms": 2650.6
+    },
+    {
+      "route": "food-ticket:monitoring",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2179.5,
+      "p95_ms": 2572.85,
+      "p99_ms": 2820.36,
+      "max_ms": 2820.36
+    },
+    {
+      "route": "food-ticket:employees",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2125.77,
+      "p95_ms": 2407.59,
+      "p99_ms": 2462.67,
+      "max_ms": 2462.67
+    },
+    {
+      "route": "food-ticket:guest-cards",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2157.93,
+      "p95_ms": 2436.91,
+      "p99_ms": 2555.72,
+      "max_ms": 2555.72
+    },
+    {
+      "route": "food-ticket:guest-cap",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2222.92,
+      "p95_ms": 2552.7,
+      "p99_ms": 2666.48,
+      "max_ms": 2666.48
+    },
+    {
+      "route": "food-ticket:food-groups",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2267.92,
+      "p95_ms": 2506.74,
+      "p99_ms": 2653.01,
+      "max_ms": 2653.01
+    },
+    {
+      "route": "food-ticket:orders",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2215.66,
+      "p95_ms": 2464.77,
+      "p99_ms": 2594.15,
+      "max_ms": 2594.15
+    },
+    {
+      "route": "food-ticket:food-menu/status",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2162.49,
+      "p95_ms": 2569.2,
+      "p99_ms": 2686.28,
+      "max_ms": 2686.28
+    },
+    {
+      "route": "food-ticket:food-menu/month",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2229.87,
+      "p95_ms": 2497.08,
+      "p99_ms": 2555.19,
+      "max_ms": 2555.19
+    },
+    {
+      "route": "food-ticket:food-menu/catalog",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2136.14,
+      "p95_ms": 2541.32,
+      "p99_ms": 2703.68,
+      "max_ms": 2703.68
+    },
+    {
+      "route": "food-ticket:food-menu/orders",
+      "expected_status": 200,
+      "requests": 51,
+      "p50_ms": 2179.13,
+      "p95_ms": 2618.6,
+      "p99_ms": 2734.79,
+      "max_ms": 2734.79
+    },
+    {
+      "route": "food-ticket:food-menu/cancel-requests",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2170.47,
+      "p95_ms": 2533.68,
+      "p99_ms": 2594.1,
+      "max_ms": 2594.1
+    },
+    {
+      "route": "food-ticket:food-menu/groups",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2224.76,
+      "p95_ms": 2556.6,
+      "p99_ms": 2604.64,
+      "max_ms": 2604.64
+    },
+    {
+      "route": "food-ticket:food-menu/statistics",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2172.18,
+      "p95_ms": 2400.02,
+      "p99_ms": 2666.08,
+      "max_ms": 2666.08
+    },
+    {
+      "route": "food-order:month",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2205.63,
+      "p95_ms": 2522.34,
+      "p99_ms": 2627.02,
+      "max_ms": 2627.02
+    },
+    {
+      "route": "food-order:my-orders",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2176.79,
+      "p95_ms": 2509.96,
+      "p99_ms": 2775.45,
+      "max_ms": 2775.45
+    },
+    {
+      "route": "food-order:search-users",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2154.27,
+      "p95_ms": 2421.71,
+      "p99_ms": 2615.9,
+      "max_ms": 2615.9
+    },
+    {
+      "route": "food-order:day-visit",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2185.15,
+      "p95_ms": 2484.66,
+      "p99_ms": 2964.65,
+      "max_ms": 2964.65
+    },
+    {
+      "route": "food-order:guest-requests (expected deny)",
+      "expected_status": 403,
+      "requests": 50,
+      "p50_ms": 2140.84,
+      "p95_ms": 2465.01,
+      "p99_ms": 2558.2,
+      "max_ms": 2558.2
+    },
+    {
+      "route": "traffic:invalid-code lookup",
+      "expected_status": 200,
+      "requests": 50,
+      "p50_ms": 2117.54,
+      "p95_ms": 2435.82,
+      "p99_ms": 2540.94,
+      "max_ms": 2540.94
+    }
+  ],
+  "limitations": [
+    "All 250 VUs are synthetic primary-admin accounts; this is not a complete role/permission matrix.",
+    "The 3,000-request phase is read-only apart from synthetic login sessions; write stress is separately covered by the ticket/CD-DVD and food lifecycle tests.",
+    "LDAP/AD, Access/ODBC, printers, physical media, hardware collection, external providers, and production/staging capacity are not exercised."
+  ]
 }
