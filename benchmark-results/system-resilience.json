@@ -1,5 +1,5 @@
 {
-  "started_utc": "2026-10-23T01:22:05.840467+00:00",
+  "started_utc": "2026-10-23T01:24:56.235664+00:00",
   "target": "127.0.0.1 only; isolated ephemeral MariaDB; synthetic accounts and fixtures",
   "synthetic_only": true,
   "production_or_staging_contacted": false,
@@ -14,10 +14,10 @@
   "login_requests": 500,
   "total_http_requests": 3500,
   "login_latency_ms": {
-    "p50": 1778.23,
-    "p95": 4282.99,
-    "p99": 4622.32,
-    "max": 5034.43
+    "p50": 2610.0,
+    "p95": 6557.64,
+    "p99": 7116.48,
+    "max": 7532.95
   },
   "http_status_counts": {
     "200": 3455,
@@ -36,611 +36,611 @@
   "database_log_samples": [],
   "worker_failures": [],
   "request_failures": [],
-  "elapsed_seconds": 23.964,
-  "throughput_requests_per_second": 125.19,
+  "elapsed_seconds": 41.274,
+  "throughput_requests_per_second": 72.68,
   "latency_ms": {
-    "p50": 1287.73,
-    "p95": 2351.43,
-    "p99": 2862.13,
-    "max": 3307.55
+    "p50": 2230.31,
+    "p95": 4003.1,
+    "p99": 5139.17,
+    "max": 7902.08
   },
-  "php_cpu_percent_sum_peak": 214.5,
-  "php_rss_mb_sum_peak": 1469.9,
+  "php_cpu_percent_sum_peak": 197.6,
+  "php_rss_mb_sum_peak": 1473.46,
   "passed": true,
   "endpoint_metrics": [
     {
       "route": "page:dashboard",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1183.35,
-      "p95_ms": 1510.99,
-      "p99_ms": 1524.04,
-      "max_ms": 1524.04
+      "p50_ms": 2078.77,
+      "p95_ms": 3789.46,
+      "p99_ms": 7660.95,
+      "max_ms": 7660.95
     },
     {
       "route": "page:profile",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1324.34,
-      "p95_ms": 1550.7,
-      "p99_ms": 1557.58,
-      "max_ms": 1557.58
+      "p50_ms": 2253.15,
+      "p95_ms": 2660.32,
+      "p99_ms": 2891.82,
+      "max_ms": 2891.82
     },
     {
       "route": "page:queue",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1496.87,
-      "p95_ms": 1859.64,
-      "p99_ms": 2193.38,
-      "max_ms": 2193.38
+      "p50_ms": 2732.54,
+      "p95_ms": 3338.16,
+      "p99_ms": 3698.33,
+      "max_ms": 3698.33
     },
     {
       "route": "page:ticket detail",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1320.94,
-      "p95_ms": 1590.26,
-      "p99_ms": 1755.11,
-      "max_ms": 1755.11
+      "p50_ms": 2345.28,
+      "p95_ms": 2723.77,
+      "p99_ms": 2919.46,
+      "max_ms": 2919.46
     },
     {
       "route": "page:new ticket",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1328.4,
-      "p95_ms": 1592.44,
-      "p99_ms": 1627.3,
-      "max_ms": 1627.3
+      "p50_ms": 2271.28,
+      "p95_ms": 2748.1,
+      "p99_ms": 2856.43,
+      "max_ms": 2856.43
     },
     {
       "route": "page:local accounts",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1102.71,
-      "p95_ms": 1248.41,
-      "p99_ms": 1314.92,
-      "max_ms": 1314.92
+      "p50_ms": 1932.84,
+      "p95_ms": 2363.35,
+      "p99_ms": 2756.93,
+      "max_ms": 2756.93
     },
     {
       "route": "page:settings",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1242.47,
-      "p95_ms": 1480.67,
-      "p99_ms": 1978.55,
-      "max_ms": 1978.55
+      "p50_ms": 2197.55,
+      "p95_ms": 3470.28,
+      "p99_ms": 5981.38,
+      "max_ms": 5981.38
     },
     {
       "route": "page:reports",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1459.28,
-      "p95_ms": 1627.68,
-      "p99_ms": 1811.25,
-      "max_ms": 1811.25
+      "p50_ms": 2677.79,
+      "p95_ms": 3046.61,
+      "p99_ms": 3143.29,
+      "max_ms": 3143.29
     },
     {
       "route": "page:analytics",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1407.55,
-      "p95_ms": 1683.18,
-      "p99_ms": 1911.73,
-      "max_ms": 1911.73
+      "p50_ms": 2407.77,
+      "p95_ms": 2968.65,
+      "p99_ms": 3110.15,
+      "max_ms": 3110.15
     },
     {
       "route": "page:supervisor",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1437.66,
-      "p95_ms": 1696.08,
-      "p99_ms": 1879.18,
-      "max_ms": 1879.18
+      "p50_ms": 2666.18,
+      "p95_ms": 2908.53,
+      "p99_ms": 3262.15,
+      "max_ms": 3262.15
     },
     {
       "route": "page:inventory form",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 2366.08,
-      "p95_ms": 2576.1,
-      "p99_ms": 2750.91,
-      "max_ms": 2750.91
+      "p50_ms": 3935.98,
+      "p95_ms": 4760.48,
+      "p99_ms": 4796.12,
+      "max_ms": 4796.12
     },
     {
       "route": "page:inventory diagnostics",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1014.6,
-      "p95_ms": 1372.05,
-      "p99_ms": 1511.75,
-      "max_ms": 1511.75
+      "p50_ms": 1558.05,
+      "p95_ms": 2580.72,
+      "p99_ms": 2674.06,
+      "max_ms": 2674.06
     },
     {
       "route": "page:domain scan page",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1265.79,
-      "p95_ms": 1444.39,
-      "p99_ms": 1936.36,
-      "max_ms": 1936.36
+      "p50_ms": 2279.01,
+      "p95_ms": 2856.54,
+      "p99_ms": 4313.93,
+      "max_ms": 4313.93
     },
     {
       "route": "page:asset list",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1501.24,
-      "p95_ms": 1936.83,
-      "p99_ms": 2008.47,
-      "max_ms": 2008.47
+      "p50_ms": 2335.11,
+      "p95_ms": 2839.24,
+      "p99_ms": 3517.6,
+      "max_ms": 3517.6
     },
     {
       "route": "page:asset detail",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 2640.91,
-      "p95_ms": 2873.36,
-      "p99_ms": 2994.08,
-      "max_ms": 2994.08
+      "p50_ms": 4729.43,
+      "p95_ms": 5159.11,
+      "p99_ms": 5329.74,
+      "max_ms": 5329.74
     },
     {
       "route": "page:asset history",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1175.31,
-      "p95_ms": 1292.11,
-      "p99_ms": 1335.74,
-      "max_ms": 1335.74
+      "p50_ms": 1941.14,
+      "p95_ms": 2321.65,
+      "p99_ms": 2360.33,
+      "max_ms": 2360.33
     },
     {
       "route": "page:CD/DVD",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1040.11,
-      "p95_ms": 1257.43,
-      "p99_ms": 1313.7,
-      "max_ms": 1313.7
+      "p50_ms": 1585.29,
+      "p95_ms": 2100.05,
+      "p99_ms": 2324.21,
+      "max_ms": 2324.21
     },
     {
       "route": "page:CD/DVD history",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 679.83,
-      "p95_ms": 1328.86,
-      "p99_ms": 1385.9,
-      "max_ms": 1385.9
+      "p50_ms": 1007.85,
+      "p95_ms": 2255.11,
+      "p99_ms": 2679.8,
+      "max_ms": 2679.8
     },
     {
       "route": "page:traffic control",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1263.01,
-      "p95_ms": 1441.94,
-      "p99_ms": 1506.96,
-      "max_ms": 1506.96
+      "p50_ms": 2101.21,
+      "p95_ms": 2791.52,
+      "p99_ms": 2996.4,
+      "max_ms": 2996.4
     },
     {
       "route": "page:governance",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 2910.34,
-      "p95_ms": 3257.42,
-      "p99_ms": 3307.55,
-      "max_ms": 3307.55
+      "p50_ms": 5082.15,
+      "p95_ms": 5429.84,
+      "p99_ms": 5574.5,
+      "max_ms": 5574.5
     },
     {
       "route": "page:organization",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1343.54,
-      "p95_ms": 1464.13,
-      "p99_ms": 1509.18,
-      "max_ms": 1509.18
+      "p50_ms": 2267.37,
+      "p95_ms": 2767.99,
+      "p99_ms": 2889.12,
+      "max_ms": 2889.12
     },
     {
       "route": "page:holidays",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1185.7,
-      "p95_ms": 1346.09,
-      "p99_ms": 1363.18,
-      "max_ms": 1363.18
+      "p50_ms": 2074.13,
+      "p95_ms": 2326.31,
+      "p99_ms": 2374.39,
+      "max_ms": 2374.39
     },
     {
       "route": "page:knowledge",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1063.77,
-      "p95_ms": 1173.87,
-      "p99_ms": 1226.58,
-      "max_ms": 1226.58
+      "p50_ms": 1750.67,
+      "p95_ms": 1964.67,
+      "p99_ms": 2047.59,
+      "max_ms": 2047.59
     },
     {
       "route": "page:notifications",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 754.38,
-      "p95_ms": 1356.02,
-      "p99_ms": 1366.54,
-      "max_ms": 1366.54
+      "p50_ms": 1203.15,
+      "p95_ms": 2286.35,
+      "p99_ms": 2400.46,
+      "max_ms": 2400.46
     },
     {
       "route": "page:search",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1298.96,
-      "p95_ms": 1503.26,
-      "p99_ms": 2202.52,
-      "max_ms": 2202.52
+      "p50_ms": 2416.8,
+      "p95_ms": 2868.12,
+      "p99_ms": 6623.03,
+      "max_ms": 6623.03
     },
     {
       "route": "page:backup page (read-only)",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1416.08,
-      "p95_ms": 1838.55,
-      "p99_ms": 1961.43,
-      "max_ms": 1961.43
+      "p50_ms": 2214.84,
+      "p95_ms": 2575.11,
+      "p99_ms": 2711.82,
+      "max_ms": 2711.82
     },
     {
       "route": "page:chatbot administration",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1347.88,
-      "p95_ms": 1587.75,
-      "p99_ms": 1766.11,
-      "max_ms": 1766.11
+      "p50_ms": 2484.74,
+      "p95_ms": 3137.48,
+      "p99_ms": 3195.98,
+      "max_ms": 3195.98
     },
     {
       "route": "page:services",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1362.25,
-      "p95_ms": 1505.27,
-      "p99_ms": 1527.48,
-      "max_ms": 1527.48
+      "p50_ms": 2397.65,
+      "p95_ms": 2793.01,
+      "p99_ms": 2852.23,
+      "max_ms": 2852.23
     },
     {
       "route": "page:system health",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1200.98,
-      "p95_ms": 1311.53,
-      "p99_ms": 1452.14,
-      "max_ms": 1452.14
+      "p50_ms": 2044.33,
+      "p95_ms": 2437.97,
+      "p99_ms": 2453.18,
+      "max_ms": 2453.18
     },
     {
       "route": "page:logs",
       "expected_status": 200,
       "requests": 46,
-      "p50_ms": 1644.33,
-      "p95_ms": 2447.43,
-      "p99_ms": 2486.84,
-      "max_ms": 2486.84
+      "p50_ms": 2823.26,
+      "p95_ms": 4385.7,
+      "p99_ms": 4843.82,
+      "max_ms": 4843.82
     },
     {
       "route": "page:activity log",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1243.5,
-      "p95_ms": 1415.49,
-      "p99_ms": 1745.63,
-      "max_ms": 1745.63
+      "p50_ms": 2279.58,
+      "p95_ms": 2784.63,
+      "p99_ms": 3251.83,
+      "max_ms": 3251.83
     },
     {
       "route": "page:help",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1422.72,
-      "p95_ms": 1823.84,
-      "p99_ms": 2175.17,
-      "max_ms": 2175.17
+      "p50_ms": 2241.02,
+      "p95_ms": 2733.83,
+      "p99_ms": 2934.12,
+      "max_ms": 2934.12
     },
     {
       "route": "page:food ticket",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1340.7,
-      "p95_ms": 1669.71,
-      "p99_ms": 1772.43,
-      "max_ms": 1772.43
+      "p50_ms": 2341.09,
+      "p95_ms": 2759.82,
+      "p99_ms": 2982.24,
+      "max_ms": 2982.24
     },
     {
       "route": "page:food order",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1387.51,
-      "p95_ms": 1525.73,
-      "p99_ms": 1547.38,
-      "max_ms": 1547.38
+      "p50_ms": 2470.52,
+      "p95_ms": 2956.41,
+      "p99_ms": 3393.35,
+      "max_ms": 3393.35
     },
     {
       "route": "page:food personnel link",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1191.16,
-      "p95_ms": 1286.4,
-      "p99_ms": 1345.12,
-      "max_ms": 1345.12
+      "p50_ms": 2070.11,
+      "p95_ms": 2302.42,
+      "p99_ms": 2405.37,
+      "max_ms": 2405.37
     },
     {
       "route": "page:change password",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1049.86,
-      "p95_ms": 1220.54,
-      "p99_ms": 1265.71,
-      "max_ms": 1265.71
+      "p50_ms": 1765.99,
+      "p95_ms": 2111.15,
+      "p99_ms": 2221.07,
+      "max_ms": 2221.07
     },
     {
       "route": "page:audit",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 2408.03,
-      "p95_ms": 2800.75,
-      "p99_ms": 2975.84,
-      "max_ms": 2975.84
+      "p50_ms": 3991.02,
+      "p95_ms": 4859.6,
+      "p99_ms": 5258.17,
+      "max_ms": 5258.17
     },
     {
       "route": "food-ticket:health",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1341.21,
-      "p95_ms": 1554.85,
-      "p99_ms": 1932.66,
-      "max_ms": 1932.66
+      "p50_ms": 2406.59,
+      "p95_ms": 2981.19,
+      "p99_ms": 3076.91,
+      "max_ms": 3076.91
     },
     {
       "route": "food-ticket:session",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1383.13,
-      "p95_ms": 1636.92,
-      "p99_ms": 1908.31,
-      "max_ms": 1908.31
+      "p50_ms": 2329.3,
+      "p95_ms": 2734.63,
+      "p99_ms": 2936.92,
+      "max_ms": 2936.92
     },
     {
       "route": "food-ticket:config",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1284.64,
-      "p95_ms": 1471.29,
-      "p99_ms": 1566.47,
-      "max_ms": 1566.47
+      "p50_ms": 2228.43,
+      "p95_ms": 2600.32,
+      "p99_ms": 2686.21,
+      "max_ms": 2686.21
     },
     {
       "route": "food-ticket:monitoring",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1156.26,
-      "p95_ms": 1298.74,
-      "p99_ms": 1392.68,
-      "max_ms": 1392.68
+      "p50_ms": 1968.97,
+      "p95_ms": 2192.23,
+      "p99_ms": 2349.3,
+      "max_ms": 2349.3
     },
     {
       "route": "food-ticket:employees",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1050.23,
-      "p95_ms": 1323.58,
-      "p99_ms": 1421.34,
-      "max_ms": 1421.34
+      "p50_ms": 1882.37,
+      "p95_ms": 2224.33,
+      "p99_ms": 2422.08,
+      "max_ms": 2422.08
     },
     {
       "route": "food-ticket:guest-cards",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1250.08,
-      "p95_ms": 1422.98,
-      "p99_ms": 1574.31,
-      "max_ms": 1574.31
+      "p50_ms": 2114.26,
+      "p95_ms": 3274.86,
+      "p99_ms": 6861.98,
+      "max_ms": 6861.98
     },
     {
       "route": "food-ticket:guest-cap",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1419.89,
-      "p95_ms": 1581.62,
-      "p99_ms": 1873.65,
-      "max_ms": 1873.65
+      "p50_ms": 2274.91,
+      "p95_ms": 2606.71,
+      "p99_ms": 2787.15,
+      "max_ms": 2787.15
     },
     {
       "route": "food-ticket:food-groups",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1384.97,
-      "p95_ms": 1665.27,
-      "p99_ms": 1786.28,
-      "max_ms": 1786.28
+      "p50_ms": 2366.99,
+      "p95_ms": 2973.46,
+      "p99_ms": 3010.15,
+      "max_ms": 3010.15
     },
     {
       "route": "food-ticket:orders",
       "expected_status": 200,
       "requests": 90,
-      "p50_ms": 1329.14,
-      "p95_ms": 1544.65,
-      "p99_ms": 1573.88,
-      "max_ms": 1617.34
+      "p50_ms": 2271.56,
+      "p95_ms": 2791.93,
+      "p99_ms": 3095.22,
+      "max_ms": 3145.04
     },
     {
       "route": "food-ticket:absent",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1208.51,
-      "p95_ms": 1382.2,
-      "p99_ms": 1410.42,
-      "max_ms": 1410.42
+      "p50_ms": 2096.64,
+      "p95_ms": 2286.34,
+      "p99_ms": 2316.42,
+      "max_ms": 2316.42
     },
     {
       "route": "food-ticket:guest-requests-report",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1064.73,
-      "p95_ms": 1215.94,
-      "p99_ms": 1284.93,
-      "max_ms": 1284.93
+      "p50_ms": 1751.17,
+      "p95_ms": 2106.56,
+      "p99_ms": 2480.73,
+      "max_ms": 2480.73
     },
     {
       "route": "food-ticket:food-manual-attendance",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1123.33,
-      "p95_ms": 1417.25,
-      "p99_ms": 1483.22,
-      "max_ms": 1483.22
+      "p50_ms": 1855.74,
+      "p95_ms": 2483.34,
+      "p99_ms": 5320.37,
+      "max_ms": 5320.37
     },
     {
       "route": "food-ticket:orders",
       "expected_status": 200,
       "requests": 90,
-      "p50_ms": 1329.14,
-      "p95_ms": 1544.65,
-      "p99_ms": 1573.88,
-      "max_ms": 1617.34
+      "p50_ms": 2271.56,
+      "p95_ms": 2791.93,
+      "p99_ms": 3095.22,
+      "max_ms": 3145.04
     },
     {
       "route": "food-ticket:food-menu/status",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1350.95,
-      "p95_ms": 1600.11,
-      "p99_ms": 1706.4,
-      "max_ms": 1706.4
+      "p50_ms": 2480.88,
+      "p95_ms": 2908.86,
+      "p99_ms": 2922.78,
+      "max_ms": 2922.78
     },
     {
       "route": "food-ticket:food-menu/month",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1373.68,
-      "p95_ms": 1717.98,
-      "p99_ms": 1898.76,
-      "max_ms": 1898.76
+      "p50_ms": 2355.18,
+      "p95_ms": 2702.87,
+      "p99_ms": 2915.71,
+      "max_ms": 2915.71
     },
     {
       "route": "food-ticket:food-menu/catalog",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1261.0,
-      "p95_ms": 1550.16,
-      "p99_ms": 1692.08,
-      "max_ms": 1692.08
+      "p50_ms": 2306.15,
+      "p95_ms": 2640.27,
+      "p99_ms": 2838.91,
+      "max_ms": 2838.91
     },
     {
       "route": "food-ticket:food-menu/orders",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1138.72,
-      "p95_ms": 1275.68,
-      "p99_ms": 1302.97,
-      "max_ms": 1302.97
+      "p50_ms": 1905.93,
+      "p95_ms": 2189.96,
+      "p99_ms": 2657.29,
+      "max_ms": 2657.29
     },
     {
       "route": "food-ticket:food-menu/cancel-requests",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1070.3,
-      "p95_ms": 1315.49,
-      "p99_ms": 1446.49,
-      "max_ms": 1446.49
+      "p50_ms": 1954.87,
+      "p95_ms": 2534.16,
+      "p99_ms": 7902.08,
+      "max_ms": 7902.08
     },
     {
       "route": "food-ticket:food-menu/groups",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1338.79,
-      "p95_ms": 1551.27,
-      "p99_ms": 1632.98,
-      "max_ms": 1632.98
+      "p50_ms": 2258.3,
+      "p95_ms": 2725.98,
+      "p99_ms": 2942.91,
+      "max_ms": 2942.91
     },
     {
       "route": "food-ticket:food-menu/statistics",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1334.44,
-      "p95_ms": 1566.49,
-      "p99_ms": 1844.89,
-      "max_ms": 1844.89
+      "p50_ms": 2427.71,
+      "p95_ms": 2941.56,
+      "p99_ms": 3263.58,
+      "max_ms": 3263.58
     },
     {
       "route": "food-ticket:food-menu/group-orders",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1421.55,
-      "p95_ms": 1773.01,
-      "p99_ms": 1842.77,
-      "max_ms": 1842.77
+      "p50_ms": 2351.48,
+      "p95_ms": 2698.23,
+      "p99_ms": 3056.83,
+      "max_ms": 3056.83
     },
     {
       "route": "food-ticket:food-menu/bulk-snapshot",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1329.04,
-      "p95_ms": 1530.45,
-      "p99_ms": 1582.39,
-      "max_ms": 1582.39
+      "p50_ms": 2349.09,
+      "p95_ms": 2750.84,
+      "p99_ms": 2925.24,
+      "max_ms": 2925.24
     },
     {
       "route": "food-ticket:food-menu/emergency/people",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1120.0,
-      "p95_ms": 1250.81,
-      "p99_ms": 1339.67,
-      "max_ms": 1339.67
+      "p50_ms": 1905.0,
+      "p95_ms": 2142.34,
+      "p99_ms": 2651.95,
+      "max_ms": 2651.95
     },
     {
       "route": "food-order:month",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1103.84,
-      "p95_ms": 1484.42,
-      "p99_ms": 1650.32,
-      "max_ms": 1650.32
+      "p50_ms": 1950.77,
+      "p95_ms": 2592.48,
+      "p99_ms": 3857.97,
+      "max_ms": 3857.97
     },
     {
       "route": "food-order:my-orders",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1314.72,
-      "p95_ms": 1515.82,
-      "p99_ms": 1537.41,
-      "max_ms": 1537.41
+      "p50_ms": 2184.82,
+      "p95_ms": 2565.95,
+      "p99_ms": 2638.42,
+      "max_ms": 2638.42
     },
     {
       "route": "food-order:search-users",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1347.15,
-      "p95_ms": 1454.45,
-      "p99_ms": 1581.03,
-      "max_ms": 1581.03
+      "p50_ms": 2362.56,
+      "p95_ms": 2698.65,
+      "p99_ms": 2982.98,
+      "max_ms": 2982.98
     },
     {
       "route": "food-order:day-visit",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1404.07,
-      "p95_ms": 1687.86,
-      "p99_ms": 1991.25,
-      "max_ms": 1991.25
+      "p50_ms": 2311.99,
+      "p95_ms": 2757.01,
+      "p99_ms": 2998.1,
+      "max_ms": 2998.1
     },
     {
       "route": "food-order:guest-requests (expected deny)",
       "expected_status": 403,
       "requests": 45,
-      "p50_ms": 1256.63,
-      "p95_ms": 1469.31,
-      "p99_ms": 1536.69,
-      "max_ms": 1536.69
+      "p50_ms": 2178.02,
+      "p95_ms": 2571.99,
+      "p99_ms": 2663.68,
+      "max_ms": 2663.68
     },
     {
       "route": "traffic:invalid-code lookup",
       "expected_status": 200,
       "requests": 45,
-      "p50_ms": 1133.69,
-      "p95_ms": 1226.3,
-      "p99_ms": 1335.08,
-      "max_ms": 1335.08
+      "p50_ms": 1895.39,
+      "p95_ms": 2203.53,
+      "p99_ms": 2267.31,
+      "max_ms": 2267.31
     }
   ],
   "limitations": [
