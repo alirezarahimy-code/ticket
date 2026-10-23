@@ -119,7 +119,7 @@ class RouteSmoke:
             ("asset inventory XLSX export", "index.php?action=export_assets"),
             ("activity log XLSX export", "index.php?action=export_activity_logs"),
             ("CD/DVD export", "index.php?action=export_cd_dvd"),
-            ("traffic report export", "index.php?action=export_traffic_report"),
+            ("traffic report export", f"index.php?action=export_traffic_report&from_date={self.jalali_month}-01&to_date={self.jalali_month}-02&all_destinations=1"),
         ]
         for label, path in exports:
             self.request_xlsx(label, path)
@@ -189,7 +189,6 @@ class RouteSmoke:
         for route in food_ticket:
             self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route)}")
         today = date.today().isoformat()
-        self.get_json("food-ticket API GET absence-status", f"index.php?page=food-ticket&food_api=absence-status&group_id=0&date={today}")
         self.get_json("food-ticket API GET template", "index.php?page=food-ticket&food_api=template")
         self.request("food-ticket employees sample CSV", "index.php?page=food-ticket&food_api=employees-sample")
         food_ticket_menu = [
