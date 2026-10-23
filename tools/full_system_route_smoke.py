@@ -311,7 +311,7 @@ class RouteSmoke:
         create = {
             "csrf": self.csrf, "action": "traffic_create", "full_name": original_name,
             "national_code": national_code, "phone": "09123456789", "company": "Synthetic CI",
-            "meeting_with": "Synthetic unit", "description": "Disposable end-to-end traffic test",
+            "meeting_with": "فاوا", "description": "Disposable end-to-end traffic test",
         }
         status, html, _ = self.request("traffic handler creates synthetic visit", "index.php?page=traffic-control", "POST",
                                        urllib.parse.urlencode(create).encode(), headers)
