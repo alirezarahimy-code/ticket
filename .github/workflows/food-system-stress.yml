@@ -73,12 +73,19 @@ jobs:
 
       - name: Run food-only Python static tests
         id: python_static
+        continue-on-error: true
         run: |
           set +e
           mkdir -p benchmark-results
           pytest -q tests/test_food*.py --junitxml=benchmark-results/food-system-python-tests.xml 2>&1 | tee benchmark-results/food-system-python-tests.log
           status=${PIPESTATUS[0]}
           echo "Food-only Python test exit status: $status" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              detail="$(printf '%s' "$line" | sed 's/%/%25/g; s/\r/%0D/g')"
+              echo "::error title=Food Python test failure::$detail"
+            done < <(tail -n 40 benchmark-results/food-system-python-tests.log)
+          fi
           exit "$status"
 
       - name: Run food-only JavaScript test
@@ -177,6 +184,10 @@ jobs:
             echo 'Food-only stress run did not produce its report; runner output and PHP server log follow.' >> "$GITHUB_STEP_SUMMARY"
             tail -n 80 benchmark-results/food-system-stress-run.log >> "$GITHUB_STEP_SUMMARY" || true
             tail -n 120 /tmp/food-system-php-server.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+          if [ "${{ steps.python_static.outcome }}" != "success" ]; then
+            echo 'Food-only Python static tests did not pass; captured test output follows.' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 60 benchmark-results/food-system-python-tests.log >> "$GITHUB_STEP_SUMMARY" || true
           fi
 
       - name: Upload food-only reports and logs
