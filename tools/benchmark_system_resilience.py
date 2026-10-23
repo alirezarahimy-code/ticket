@@ -18,6 +18,7 @@ import threading
 import time
 import traceback
 import urllib.parse
+import urllib.request
 from collections import Counter, defaultdict
 from datetime import date, datetime, timezone
 from pathlib import Path
@@ -149,7 +150,6 @@ def main() -> int:
             if server.poll() is not None:
                 raise RuntimeError(f"loopback PHP server exited; inspect {server_log_path}")
             try:
-                import urllib.request
                 with urllib.request.urlopen(args.base_url + "index.php?page=login", timeout=2) as response:
                     if response.status == 200:
                         break
