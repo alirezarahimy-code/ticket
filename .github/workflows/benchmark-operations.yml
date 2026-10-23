@@ -1,4 +1,4 @@
-name: Isolated Full-System Tests and Ticket/CD-DVD Write Stress
+name: Isolated Full-System Resilience and Ticket/CD-DVD Write Stress
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
       - 'tools/benchmark_operations_seed.php'
       - 'tools/benchmark_operations_report.php'
       - 'tools/full_system_route_smoke.py'
+      - 'tools/benchmark_system_resilience.py'
       - 'tools/test_*_node.js'
       - 'tools/benchmark_seed.php'
       - 'tests/**'
@@ -74,7 +75,7 @@ jobs:
       - name: Validate benchmark scripts
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/benchmark_operations.py tools/full_system_route_smoke.py
+          python3 -m py_compile tools/benchmark_operations.py tools/full_system_route_smoke.py tools/benchmark_system_resilience.py
           php -l tools/benchmark_operations_seed.php
           php -l tools/benchmark_operations_report.php
           php -l tools/benchmark_seed.php
@@ -212,6 +213,11 @@ jobs:
         continue-on-error: true
         run: python3 tools/full_system_route_smoke.py
 
+      - name: Run system-wide authenticated route/API resilience stress (250 VUs)
+        id: route_resilience
+        continue-on-error: true
+        run: python3 tools/benchmark_system_resilience.py --vus 250 --reads-per-user 12 --php-workers 32 --output-dir benchmark-results
+
       - name: Run concurrent authenticated write operations
         id: operations_stress
         run: python3 tools/benchmark_operations.py --vus 250 --php-workers 32 --output-dir benchmark-results
@@ -219,7 +225,7 @@ jobs:
       - name: Publish full-system and operations summary in Actions
         if: always()
         run: |
-          for report in benchmark-results/full-system-route-smoke.md benchmark-results/benchmark-operations.md; do
+          for report in benchmark-results/full-system-route-smoke.md benchmark-results/system-resilience.md benchmark-results/benchmark-operations.md; do
             if [ -f "$report" ]; then
               cat "$report" >> "$GITHUB_STEP_SUMMARY"
               printf '\n\n' >> "$GITHUB_STEP_SUMMARY"
@@ -253,11 +259,14 @@ jobs:
             benchmark-results/operations-container-stats.txt
             benchmark-results/full-system-route-smoke.md
             benchmark-results/full-system-route-smoke.json
+            benchmark-results/system-resilience.md
+            benchmark-results/system-resilience.json
             benchmark-results/full-system-python-tests.log
             benchmark-results/full-system-python-tests.xml
             benchmark-results/full-system-javascript-tests.log
             benchmark-results/full-system-php-offline-tests.log
             /tmp/ticket-full-system-routes.log
+            /tmp/ticket-system-resilience.log
             /tmp/ticket-operations-benchmark.log
           if-no-files-found: warn
           retention-days: 14
@@ -270,7 +279,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add benchmark-results/benchmark-operations.md benchmark-results/benchmark-operations.json benchmark-results/operations-container-stats.txt
-          for file in benchmark-results/full-system-route-smoke.md benchmark-results/full-system-route-smoke.json; do
+          for file in benchmark-results/full-system-route-smoke.md benchmark-results/full-system-route-smoke.json benchmark-results/system-resilience.md benchmark-results/system-resilience.json; do
             if [ -f "$file" ]; then git add "$file"; fi
           done
           if ! git diff --cached --quiet; then
@@ -286,10 +295,11 @@ jobs:
           PHP_OFFLINE_OUTCOME: ${{ steps.php_offline.outcome }}
           DATABASE_SMOKE_OUTCOME: ${{ steps.database_smoke.outcome }}
           ROUTE_SMOKE_OUTCOME: ${{ steps.full_system_routes.outcome }}
+          ROUTE_RESILIENCE_OUTCOME: ${{ steps.route_resilience.outcome }}
           OPERATIONS_STRESS_OUTCOME: ${{ steps.operations_stress.outcome }}
         run: |
-          printf 'Python=%s JavaScript=%s PHP=%s DB-smoke=%s routes=%s operations=%s\n' "$PYTHON_STATIC_OUTCOME" "$JAVASCRIPT_OUTCOME" "$PHP_OFFLINE_OUTCOME" "$DATABASE_SMOKE_OUTCOME" "$ROUTE_SMOKE_OUTCOME" "$OPERATIONS_STRESS_OUTCOME"
-          if [ "$PYTHON_STATIC_OUTCOME" != success ] || [ "$JAVASCRIPT_OUTCOME" != success ] || [ "$PHP_OFFLINE_OUTCOME" != success ] || [ "$DATABASE_SMOKE_OUTCOME" != success ] || [ "$ROUTE_SMOKE_OUTCOME" != success ] || [ "$OPERATIONS_STRESS_OUTCOME" != success ]; then
-            echo "::error title=Full-system quality-gate outcomes::Python=$PYTHON_STATIC_OUTCOME; JavaScript=$JAVASCRIPT_OUTCOME; PHP=$PHP_OFFLINE_OUTCOME; DB-smoke=$DATABASE_SMOKE_OUTCOME; routes=$ROUTE_SMOKE_OUTCOME; operations=$OPERATIONS_STRESS_OUTCOME"
+          printf 'Python=%s JavaScript=%s PHP=%s DB-smoke=%s routes=%s route-resilience=%s operations=%s\n' "$PYTHON_STATIC_OUTCOME" "$JAVASCRIPT_OUTCOME" "$PHP_OFFLINE_OUTCOME" "$DATABASE_SMOKE_OUTCOME" "$ROUTE_SMOKE_OUTCOME" "$ROUTE_RESILIENCE_OUTCOME" "$OPERATIONS_STRESS_OUTCOME"
+          if [ "$PYTHON_STATIC_OUTCOME" != success ] || [ "$JAVASCRIPT_OUTCOME" != success ] || [ "$PHP_OFFLINE_OUTCOME" != success ] || [ "$DATABASE_SMOKE_OUTCOME" != success ] || [ "$ROUTE_SMOKE_OUTCOME" != success ] || [ "$ROUTE_RESILIENCE_OUTCOME" != success ] || [ "$OPERATIONS_STRESS_OUTCOME" != success ]; then
+            echo "::error title=Full-system quality-gate outcomes::Python=$PYTHON_STATIC_OUTCOME; JavaScript=$JAVASCRIPT_OUTCOME; PHP=$PHP_OFFLINE_OUTCOME; DB-smoke=$DATABASE_SMOKE_OUTCOME; routes=$ROUTE_SMOKE_OUTCOME; route-resilience=$ROUTE_RESILIENCE_OUTCOME; operations=$OPERATIONS_STRESS_OUTCOME"
             exit 1
           fi

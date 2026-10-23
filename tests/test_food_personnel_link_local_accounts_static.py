@@ -58,7 +58,7 @@ class FoodPersonnelLocalLinkStaticTests(unittest.TestCase):
         self.assertIn("UPDATE users SET employee_number = NULL WHERE id IN", index)
         self.assertIn("count($foodIds)", index)
         self.assertIn("value=\"\" placeholder=\"کد صحیح؛ مثلاً 335\"", index)
-        self.assertIn("اتصال دستی ۳۳۵ کد قدیمی ۳۵ دامین را با اولویت ورودی جایگزین می‌کند", self.offline)
+        self.assertIn("اتصال دستی ۴۳۳۵ کد قدیمی ۳۵ دامین را با اولویت ورودی جایگزین می‌کند", self.offline)
         self.assertIn("function fpl_codes_equal(string $left, string $right)", self.link)
         self.assertIn("'status'] = 'code_match'", self.link)
         self.assertIn("کد واردشده در این فیلد بر کد قبلی دامین مقدم است", self.link)
