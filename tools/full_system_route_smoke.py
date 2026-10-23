@@ -60,7 +60,7 @@ class RouteSmoke:
             error = "; ".join(part for part in (error, f"unexpected status {status}" if status not in expected else "", f"PHP marker: {fatal}" if fatal else "") if part)
         result = {"name": label, "method": method, "path": path, "final_url": final_url, "status": status,
                   "latency_ms": latency_ms, "ok": ok, "error": error}
-        if status >= 400 and status in expected:
+        if status in (401, 403) and status in expected:
             result["expected_rejection"] = True
         self.results.append(result)
         return status, body, latency_ms
@@ -105,6 +105,65 @@ class RouteSmoke:
         for label, query in pages:
             self.request(f"page: {label}", "index.php?page=" + query)
 
+    def request_xlsx(self, label: str, path: str, method: str = "GET", data: bytes | None = None,
+                     headers: dict[str, str] | None = None, expected: tuple[int, ...] = (200,)) -> None:
+        status, body, _ = self.request(label, path, method, data, headers, expected)
+        if status == 200 and not body.startswith("PK"):
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "download returned HTTP 200 but did not have a ZIP/XLSX signature"
+
+    def exports_and_cron_boundaries(self) -> None:
+        # Export handlers are read-only apart from synthetic audit rows; no backup or restore is run.
+        exports = [
+            ("report XLSX export", "index.php?action=export_report"),
+            ("asset inventory XLSX export", "index.php?action=export_assets"),
+            ("activity log XLSX export", "index.php?action=export_activity_logs"),
+            ("CD/DVD export", "index.php?action=export_cd_dvd"),
+            ("traffic report export", "index.php?action=export_traffic_report"),
+        ]
+        for label, path in exports:
+            self.request_xlsx(label, path)
+        self.request("missing synthetic backup download is safely rejected", "index.php?action=download_backup&file=missing-ci-backup.sql", expected=(404,))
+
+        invalid = {"headers": ["Synthetic"], "rows": [["not authorized without CSRF"]]}
+        self.request("XLSX POST export rejects missing CSRF", "index.php?action=export_view_xlsx", "POST",
+                     json.dumps(invalid).encode(), {"Content-Type": "application/json"}, expected=(419,))
+        valid = {"title": "Synthetic CI", "filename": "synthetic-ci.xlsx", "headers": ["Synthetic"], "rows": [["ok"]]}
+        self.request_xlsx("XLSX POST export accepts authenticated CSRF payload", "index.php?action=export_view_xlsx", "POST",
+                          json.dumps(valid).encode(), {"Content-Type": "application/json", "X-CSRF-Token": self.csrf})
+
+        _, body, _ = self.request("layout-design API returns synthetic dashboard rules", "index.php?layout_design_api=1&layout_page=dashboard")
+        try:
+            payload = json.loads(body)
+        except json.JSONDecodeError:
+            payload = None
+        if not isinstance(payload, dict) or payload.get("ok") is not True or payload.get("page") != "dashboard":
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "layout-design API did not return the dashboard config contract"
+        invalid_layout = {"action": "unknown", "page": "dashboard"}
+        status, body, _ = self.request("layout-design API rejects unknown mutation safely", "index.php?layout_design_api=1", "POST",
+                                       json.dumps(invalid_layout).encode(),
+                                       {"Content-Type": "application/json", "X-CSRF-Token": self.csrf}, expected=(422,))
+        try:
+            payload = json.loads(body)
+        except json.JSONDecodeError:
+            payload = None
+        if status != 422 or not isinstance(payload, dict) or payload.get("ok") is not False or not payload.get("error"):
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "layout-design API did not return structured 422 validation response"
+
+        # Workers must be CLI-only/not-found over HTTP. These probes never start a worker.
+        worker_boundaries = [
+            ("food-ticket worker HTTP is denied", "cron/food_ticket_worker.php", 403),
+            ("domain-scan worker HTTP is denied", "cron/domain_scan_worker.php", 403),
+            ("LDAP worker HTTP is hidden", "cron/ldap_sync.php", 404),
+            ("activity-prune cron HTTP is hidden", "cron/prune_activity_logs.php", 404),
+            ("SLA cron HTTP is hidden", "cron/sla_maintenance.php", 404),
+            ("auto-close cron HTTP is hidden", "cron/ticket_auto_close.php", 404),
+        ]
+        for label, path, expected_status in worker_boundaries:
+            self.request(label, path, expected=(expected_status,))
+
     def get_json(self, label: str, path: str, expected: tuple[int, ...] = (200,)) -> dict | list | None:
         _, body, _ = self.request(label, path, expected=expected)
         try:
@@ -112,7 +171,7 @@ class RouteSmoke:
             if isinstance(payload, dict) and "error" in payload:
                 # Expected 4xx authorization is distinct from an unexpected HTTP-200 business failure.
                 self.results[-1]["application_error"] = str(payload.get("error", ""))[:300]
-                if self.results[-1]["status"] in expected and self.results[-1]["status"] != 200:
+                if self.results[-1]["status"] in (401, 403) and self.results[-1]["status"] in expected:
                     self.results[-1]["expected_rejection"] = True
                 elif self.results[-1]["ok"]:
                     self.results[-1]["ok"] = False
@@ -130,15 +189,20 @@ class RouteSmoke:
         for route in food_ticket:
             self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route)}")
         today = date.today().isoformat()
+        self.get_json("food-ticket API GET absence-status", f"index.php?page=food-ticket&food_api=absence-status&group_id=0&date={today}")
+        self.get_json("food-ticket API GET template", "index.php?page=food-ticket&food_api=template")
+        self.request("food-ticket employees sample CSV", "index.php?page=food-ticket&food_api=employees-sample")
         food_ticket_menu = [
             ("food-menu/status", ""), ("food-menu/month", f"month={month}"),
-            ("food-menu/catalog", ""), ("food-menu/orders", f"date={today}"),
+            ("food-menu/catalog", ""), ("food-menu/orders", f"date={today}&meal_type=lunch"),
             ("food-menu/cancel-requests", ""), ("food-menu/groups", ""),
             ("food-menu/statistics", f"from={today}&to={today}"),
         ]
         for route, query in food_ticket_menu:
             suffix = "&" + query if query else ""
             self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route, safe='/-')}{suffix}")
+        self.request_xlsx("food-ticket food orders XLSX export", f"index.php?page=food-ticket&food_api=food-menu/orders-export&date={today}&meal_type=lunch")
+        self.request_xlsx("food-ticket food statistics XLSX export", f"index.php?page=food-ticket&food_api=food-menu/export&from={today}&to={today}&mode=food&meal_type=lunch")
         food_order = [
             ("month", f"month={month}"), ("my-orders", ""),
             ("search-users", "q=loadtest"), ("day-visit", "date=" + date.today().isoformat()),
@@ -195,6 +259,7 @@ class RouteSmoke:
             "food-menu/catalog": {"primary_admin", "support_manager"},
             "traffic lookup": {"primary_admin", "supervisor", "support_manager", "inspector", "manager", "agent", "guard"},
             "food-order/my-orders": set(accounts),
+            "layout design API": {"primary_admin"},
             "new-ticket": {"primary_admin", "supervisor", "support_manager", "inspector", "manager", "agent", "user"},
         }
         for role, (existing, username) in accounts.items():
@@ -219,6 +284,7 @@ class RouteSmoke:
             probes.extend([
                 ("traffic lookup", "index.php?page=traffic-control&traffic_api=lookup&code=000", "json"),
                 ("food-order/my-orders", "index.php?page=food-order&food_api=my-orders", "json"),
+                ("layout design API", "index.php?layout_design_api=1&layout_page=dashboard", "primary-admin"),
                 ("new-ticket", "index.php?page=new-ticket", "html"),
             ])
             allow["food-ticket page"] = food_access_roles
@@ -233,6 +299,19 @@ class RouteSmoke:
                     if expected_status == 403 and (not isinstance(payload, dict) or not payload.get("error")):
                         row["ok"] = False
                         row["error"] = "denied role did not receive a JSON authorization error"
+                elif kind == "primary-admin":
+                    if expected_status == 200:
+                        payload = client.get_json(f"role-matrix:{role}:{name}", path)
+                        row = client.results[-1]
+                        if not isinstance(payload, dict) or payload.get("ok") is not True:
+                            row["ok"] = False
+                            row["error"] = "primary-admin layout API did not return its JSON success contract"
+                    else:
+                        _, body, _ = client.request(f"role-matrix:{role}:{name}", path, expected=(403,))
+                        row = client.results[-1]
+                        if "ادمین اصلی" not in body:
+                            row["ok"] = False
+                            row["error"] = "non-primary role did not receive the explicit primary-admin denial"
                 else:
                     _, body, _ = client.request(f"role-matrix:{role}:{name}", path, expected=(expected_status,))
                     row = client.results[-1]
@@ -519,6 +598,7 @@ def main() -> int:
     try:
         smoke.login()
         smoke.pages()
+        smoke.exports_and_cron_boundaries()
         smoke.apis()
         smoke.role_matrix()
         smoke.inventory_api_lifecycle()
@@ -554,7 +634,15 @@ def main() -> int:
         "role_checks_tested": sum(str(row["name"]).startswith(("requester:", "role-matrix:")) for row in smoke.results),
         "expected_authorization_rejections": sum(bool(row.get("expected_rejection")) for row in smoke.results),
         "http_error_responses": sum(int(row["status"]) >= 400 for row in smoke.results),
-        "unexpected_http_error_responses": sum(int(row["status"]) >= 400 and not row.get("expected_rejection") for row in smoke.results),
+        "unexpected_http_error_responses": sum(int(row["status"]) >= 400 and not row["ok"] for row in smoke.results),
+        "export_handlers_smoke_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in (
+            "report XLSX export", "asset inventory XLSX export", "activity log XLSX export", "CD/DVD export",
+            "traffic report export", "XLSX POST export rejects missing CSRF", "XLSX POST export accepts authenticated CSRF payload")),
+        "cron_http_boundaries_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in (
+            "food-ticket worker HTTP is denied", "domain-scan worker HTTP is denied", "LDAP worker HTTP is hidden",
+            "activity-prune cron HTTP is hidden", "SLA cron HTTP is hidden", "auto-close cron HTTP is hidden")),
+        "layout_design_api_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in (
+            "layout-design API returns synthetic dashboard rules", "layout-design API rejects unknown mutation safely")),
         "application_error_payloads": sum(bool(row.get("application_error")) for row in smoke.results),
         "food_ticket_group_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("food-ticket synthetic POST create group", "food-ticket absence-status for synthetic group", "food-ticket synthetic POST delete group")),
         "inventory_api_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("inventory API creates synthetic hardware snapshot", "inventory API updates existing synthetic asset idempotently", "inventory synthetic asset detail read-back")),
@@ -574,7 +662,7 @@ def main() -> int:
         "limitations": ["All nine application roles receive representative permission-boundary requests, not a complete role-by-route/action Cartesian matrix.",
                         "Inventory writes use a synthetic fixture payload; no WMI/CIM collection or real device was contacted.",
                         "Traffic, inventory, food-order, food-group, ticket, and CD/DVD flows are tested selectively; this is not every write handler or complete module workflow.",
-                        "LDAP/AD, Access/ODBC, printers, physical hardware, external providers, cron/queue workers, and production/staging capacity are not exercised.",
+                        "LDAP/AD, Access/ODBC, printers, physical hardware, and external providers are not exercised; selected synthetic cron/queue paths are covered separately, not every schedule and failure mode.",
                         "No production endpoint or operational account was used."],
         "server_log": str(server_log_path),
     }
@@ -587,6 +675,7 @@ def main() -> int:
              f"- Passed: {report['passed']}; failed: {report['failed']}",
              f"- Food-order create/cancel/read-back: {'passed' if report['food_order_write_lifecycle_tested'] else 'not passed'}; food-ticket group create/status/delete: {'passed' if report['food_ticket_group_write_lifecycle_tested'] else 'not passed'}",
              f"- Inventory agent create/update/read-back: {'passed' if report['inventory_api_write_lifecycle_tested'] else 'not passed'}; traffic create/update/exit/delete: {'passed' if report['traffic_control_write_lifecycle_tested'] else 'not passed'}",
+             f"- Export/CSRF smoke: {'passed' if report['export_handlers_smoke_tested'] else 'not passed'}; layout API: {'passed' if report['layout_design_api_tested'] else 'not passed'}; cron HTTP isolation: {'passed' if report['cron_http_boundaries_tested'] else 'not passed'}",
              f"- Expected access rejections: {report['expected_authorization_rejections']}",
              f"- Elapsed: {report['elapsed_seconds']} s; median latency: {report['p50_latency_ms']} ms; max latency: {report['max_latency_ms']} ms", "",
              "| Result | Method | Route | HTTP | Latency (ms) | Diagnostic |", "|---|---|---|---:|---:|---|"]
