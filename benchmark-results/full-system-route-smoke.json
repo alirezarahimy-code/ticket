@@ -3,12 +3,15 @@
   "synthetic_only": true,
   "account": "loadtest-001",
   "pages_tested": 37,
-  "api_reads_tested": 67,
-  "role_checks_tested": 51,
-  "expected_authorization_rejections": 20,
-  "http_error_responses": 20,
-  "unexpected_http_error_responses": 0,
-  "application_error_payloads": 7,
+  "api_reads_tested": 72,
+  "role_checks_tested": 60,
+  "expected_authorization_rejections": 28,
+  "http_error_responses": 39,
+  "unexpected_http_error_responses": 2,
+  "export_handlers_smoke_tested": false,
+  "cron_http_boundaries_tested": true,
+  "layout_design_api_tested": true,
+  "application_error_payloads": 8,
   "food_ticket_group_write_lifecycle_tested": true,
   "inventory_api_write_lifecycle_tested": true,
   "traffic_control_write_lifecycle_tested": true,
@@ -17,12 +20,12 @@
   "php_runtime_log_samples": [],
   "database_error_log_samples": [],
   "food_order_write_lifecycle_tested": true,
-  "total_checks": 160,
-  "passed": 160,
-  "failed": 0,
-  "elapsed_seconds": 4.654,
-  "p50_latency_ms": 18.19,
-  "max_latency_ms": 138.89,
+  "total_checks": 190,
+  "passed": 188,
+  "failed": 2,
+  "elapsed_seconds": 5.853,
+  "p50_latency_ms": 16.14,
+  "max_latency_ms": 1112.29,
   "fatal": null,
   "results": [
     {
@@ -31,7 +34,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 18.19,
+      "latency_ms": 17.81,
       "ok": true,
       "error": ""
     },
@@ -41,7 +44,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 128.56,
+      "latency_ms": 125.83,
       "ok": true,
       "error": ""
     },
@@ -51,7 +54,7 @@
       "path": "index.php?page=dashboard",
       "final_url": "http://127.0.0.1:8081/index.php?page=dashboard",
       "status": 200,
-      "latency_ms": 55.37,
+      "latency_ms": 51.91,
       "ok": true,
       "error": ""
     },
@@ -61,7 +64,7 @@
       "path": "index.php?page=profile",
       "final_url": "http://127.0.0.1:8081/index.php?page=profile",
       "status": 200,
-      "latency_ms": 21.75,
+      "latency_ms": 19.51,
       "ok": true,
       "error": ""
     },
@@ -71,7 +74,7 @@
       "path": "index.php?page=queue",
       "final_url": "http://127.0.0.1:8081/index.php?page=queue",
       "status": 200,
-      "latency_ms": 101.77,
+      "latency_ms": 95.72,
       "ok": true,
       "error": ""
     },
@@ -81,7 +84,7 @@
       "path": "index.php?page=ticket&id=1",
       "final_url": "http://127.0.0.1:8081/index.php?page=ticket&id=1",
       "status": 200,
-      "latency_ms": 25.33,
+      "latency_ms": 26.34,
       "ok": true,
       "error": ""
     },
@@ -91,7 +94,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 45.52,
+      "latency_ms": 37.95,
       "ok": true,
       "error": ""
     },
@@ -101,7 +104,7 @@
       "path": "index.php?page=local-accounts",
       "final_url": "http://127.0.0.1:8081/index.php?page=local-accounts",
       "status": 200,
-      "latency_ms": 23.83,
+      "latency_ms": 24.27,
       "ok": true,
       "error": ""
     },
@@ -111,7 +114,7 @@
       "path": "index.php?page=settings",
       "final_url": "http://127.0.0.1:8081/index.php?page=settings",
       "status": 200,
-      "latency_ms": 66.22,
+      "latency_ms": 64.02,
       "ok": true,
       "error": ""
     },
@@ -121,7 +124,7 @@
       "path": "index.php?page=reports",
       "final_url": "http://127.0.0.1:8081/index.php?page=reports",
       "status": 200,
-      "latency_ms": 76.73,
+      "latency_ms": 68.91,
       "ok": true,
       "error": ""
     },
@@ -131,7 +134,7 @@
       "path": "index.php?page=analytics",
       "final_url": "http://127.0.0.1:8081/index.php?page=analytics",
       "status": 200,
-      "latency_ms": 27.17,
+      "latency_ms": 25.61,
       "ok": true,
       "error": ""
     },
@@ -141,7 +144,7 @@
       "path": "index.php?page=supervisor",
       "final_url": "http://127.0.0.1:8081/index.php?page=supervisor",
       "status": 200,
-      "latency_ms": 72.8,
+      "latency_ms": 67.85,
       "ok": true,
       "error": ""
     },
@@ -151,7 +154,7 @@
       "path": "index.php?page=inventory",
       "final_url": "http://127.0.0.1:8081/index.php?page=assets",
       "status": 200,
-      "latency_ms": 50.15,
+      "latency_ms": 42.17,
       "ok": true,
       "error": ""
     },
@@ -161,7 +164,7 @@
       "path": "index.php?page=inventory-diagnostics",
       "final_url": "http://127.0.0.1:8081/index.php?page=inventory-diagnostics",
       "status": 200,
-      "latency_ms": 22.03,
+      "latency_ms": 20.35,
       "ok": true,
       "error": ""
     },
@@ -171,7 +174,7 @@
       "path": "index.php?page=domain-scan",
       "final_url": "http://127.0.0.1:8081/index.php?page=domain-scan",
       "status": 200,
-      "latency_ms": 27.49,
+      "latency_ms": 25.22,
       "ok": true,
       "error": ""
     },
@@ -181,7 +184,7 @@
       "path": "index.php?page=assets",
       "final_url": "http://127.0.0.1:8081/index.php?page=assets",
       "status": 200,
-      "latency_ms": 31.42,
+      "latency_ms": 28.89,
       "ok": true,
       "error": ""
     },
@@ -191,7 +194,7 @@
       "path": "index.php?page=asset&id=1",
       "final_url": "http://127.0.0.1:8081/index.php?page=inventory&id=1",
       "status": 200,
-      "latency_ms": 41.81,
+      "latency_ms": 39.45,
       "ok": true,
       "error": ""
     },
@@ -201,7 +204,7 @@
       "path": "index.php?page=asset-history&id=1",
       "final_url": "http://127.0.0.1:8081/index.php?page=asset-history&id=1",
       "status": 200,
-      "latency_ms": 23.27,
+      "latency_ms": 21.28,
       "ok": true,
       "error": ""
     },
@@ -211,7 +214,7 @@
       "path": "index.php?page=cd-dvd",
       "final_url": "http://127.0.0.1:8081/index.php?page=cd-dvd",
       "status": 200,
-      "latency_ms": 29.83,
+      "latency_ms": 28.64,
       "ok": true,
       "error": ""
     },
@@ -221,7 +224,7 @@
       "path": "index.php?page=cd-dvd-history",
       "final_url": "http://127.0.0.1:8081/index.php?page=cd-dvd-history",
       "status": 200,
-      "latency_ms": 21.88,
+      "latency_ms": 21.09,
       "ok": true,
       "error": ""
     },
@@ -231,7 +234,7 @@
       "path": "index.php?page=traffic-control",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control",
       "status": 200,
-      "latency_ms": 24.51,
+      "latency_ms": 22.93,
       "ok": true,
       "error": ""
     },
@@ -241,7 +244,7 @@
       "path": "index.php?page=governance",
       "final_url": "http://127.0.0.1:8081/governance.php",
       "status": 200,
-      "latency_ms": 138.89,
+      "latency_ms": 127.69,
       "ok": true,
       "error": ""
     },
@@ -251,7 +254,7 @@
       "path": "index.php?page=organization",
       "final_url": "http://127.0.0.1:8081/index.php?page=organization",
       "status": 200,
-      "latency_ms": 23.91,
+      "latency_ms": 21.85,
       "ok": true,
       "error": ""
     },
@@ -261,7 +264,7 @@
       "path": "index.php?page=holidays",
       "final_url": "http://127.0.0.1:8081/index.php?page=holidays",
       "status": 200,
-      "latency_ms": 22.31,
+      "latency_ms": 20.63,
       "ok": true,
       "error": ""
     },
@@ -271,7 +274,7 @@
       "path": "index.php?page=knowledge",
       "final_url": "http://127.0.0.1:8081/index.php?page=knowledge",
       "status": 200,
-      "latency_ms": 22.46,
+      "latency_ms": 22.13,
       "ok": true,
       "error": ""
     },
@@ -281,7 +284,7 @@
       "path": "index.php?page=notifications",
       "final_url": "http://127.0.0.1:8081/index.php?page=notifications",
       "status": 200,
-      "latency_ms": 22.48,
+      "latency_ms": 20.8,
       "ok": true,
       "error": ""
     },
@@ -291,7 +294,7 @@
       "path": "index.php?page=search&q=synthetic",
       "final_url": "http://127.0.0.1:8081/index.php?page=search&q=synthetic",
       "status": 200,
-      "latency_ms": 62.67,
+      "latency_ms": 41.1,
       "ok": true,
       "error": ""
     },
@@ -301,7 +304,7 @@
       "path": "index.php?page=backup",
       "final_url": "http://127.0.0.1:8081/index.php?page=backup",
       "status": 200,
-      "latency_ms": 21.37,
+      "latency_ms": 20.46,
       "ok": true,
       "error": ""
     },
@@ -311,7 +314,7 @@
       "path": "index.php?page=chatbot-admin",
       "final_url": "http://127.0.0.1:8081/index.php?page=chatbot-admin",
       "status": 200,
-      "latency_ms": 37.89,
+      "latency_ms": 35.61,
       "ok": true,
       "error": ""
     },
@@ -321,7 +324,7 @@
       "path": "index.php?page=services",
       "final_url": "http://127.0.0.1:8081/index.php?page=services",
       "status": 200,
-      "latency_ms": 23.52,
+      "latency_ms": 22.11,
       "ok": true,
       "error": ""
     },
@@ -331,7 +334,7 @@
       "path": "index.php?page=system-health",
       "final_url": "http://127.0.0.1:8081/index.php?page=system-health",
       "status": 200,
-      "latency_ms": 25.98,
+      "latency_ms": 23.67,
       "ok": true,
       "error": ""
     },
@@ -341,7 +344,7 @@
       "path": "index.php?page=logs",
       "final_url": "http://127.0.0.1:8081/index.php?page=system-health",
       "status": 200,
-      "latency_ms": 40.24,
+      "latency_ms": 34.6,
       "ok": true,
       "error": ""
     },
@@ -351,7 +354,7 @@
       "path": "index.php?page=activity-log",
       "final_url": "http://127.0.0.1:8081/index.php?page=activity-log",
       "status": 200,
-      "latency_ms": 26.66,
+      "latency_ms": 24.39,
       "ok": true,
       "error": ""
     },
@@ -361,7 +364,7 @@
       "path": "index.php?page=help",
       "final_url": "http://127.0.0.1:8081/index.php?page=help",
       "status": 200,
-      "latency_ms": 22.33,
+      "latency_ms": 19.73,
       "ok": true,
       "error": ""
     },
@@ -371,7 +374,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 200,
-      "latency_ms": 21.21,
+      "latency_ms": 19.73,
       "ok": true,
       "error": ""
     },
@@ -381,7 +384,7 @@
       "path": "index.php?page=food-order",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order",
       "status": 200,
-      "latency_ms": 25.02,
+      "latency_ms": 22.87,
       "ok": true,
       "error": ""
     },
@@ -391,7 +394,7 @@
       "path": "index.php?page=food-personnel-link",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-personnel-link",
       "status": 200,
-      "latency_ms": 27.84,
+      "latency_ms": 25.93,
       "ok": true,
       "error": ""
     },
@@ -401,7 +404,7 @@
       "path": "index.php?page=change-password",
       "final_url": "http://127.0.0.1:8081/index.php?page=change-password",
       "status": 200,
-      "latency_ms": 21.89,
+      "latency_ms": 20.15,
       "ok": true,
       "error": ""
     },
@@ -411,7 +414,169 @@
       "path": "index.php?page=audit",
       "final_url": "http://127.0.0.1:8081/index.php?page=activity-log",
       "status": 200,
-      "latency_ms": 40.64,
+      "latency_ms": 35.41,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "report XLSX export",
+      "method": "GET",
+      "path": "index.php?action=export_report",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_report",
+      "status": 200,
+      "latency_ms": 1112.29,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "asset inventory XLSX export",
+      "method": "GET",
+      "path": "index.php?action=export_assets",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_assets",
+      "status": 200,
+      "latency_ms": 142.15,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "activity log XLSX export",
+      "method": "GET",
+      "path": "index.php?action=export_activity_logs",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_activity_logs",
+      "status": 200,
+      "latency_ms": 14.2,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "CD/DVD export",
+      "method": "GET",
+      "path": "index.php?action=export_cd_dvd",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_cd_dvd",
+      "status": 200,
+      "latency_ms": 12.51,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "traffic report export",
+      "method": "GET",
+      "path": "index.php?action=export_traffic_report",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_traffic_report",
+      "status": 422,
+      "latency_ms": 11.11,
+      "ok": false,
+      "error": "HTTP 422; unexpected status 422"
+    },
+    {
+      "name": "missing synthetic backup download is safely rejected",
+      "method": "GET",
+      "path": "index.php?action=download_backup&file=missing-ci-backup.sql",
+      "final_url": "http://127.0.0.1:8081/index.php?action=download_backup&file=missing-ci-backup.sql",
+      "status": 404,
+      "latency_ms": 10.71,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "XLSX POST export rejects missing CSRF",
+      "method": "POST",
+      "path": "index.php?action=export_view_xlsx",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_view_xlsx",
+      "status": 419,
+      "latency_ms": 10.65,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "XLSX POST export accepts authenticated CSRF payload",
+      "method": "POST",
+      "path": "index.php?action=export_view_xlsx",
+      "final_url": "http://127.0.0.1:8081/index.php?action=export_view_xlsx",
+      "status": 200,
+      "latency_ms": 12.34,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "layout-design API returns synthetic dashboard rules",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 200,
+      "latency_ms": 12.88,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "layout-design API rejects unknown mutation safely",
+      "method": "POST",
+      "path": "index.php?layout_design_api=1",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1",
+      "status": 422,
+      "latency_ms": 11.69,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket worker HTTP is denied",
+      "method": "GET",
+      "path": "cron/food_ticket_worker.php",
+      "final_url": "http://127.0.0.1:8081/cron/food_ticket_worker.php",
+      "status": 403,
+      "latency_ms": 1.05,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "domain-scan worker HTTP is denied",
+      "method": "GET",
+      "path": "cron/domain_scan_worker.php",
+      "final_url": "http://127.0.0.1:8081/cron/domain_scan_worker.php",
+      "status": 403,
+      "latency_ms": 0.79,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "LDAP worker HTTP is hidden",
+      "method": "GET",
+      "path": "cron/ldap_sync.php",
+      "final_url": "http://127.0.0.1:8081/cron/ldap_sync.php",
+      "status": 404,
+      "latency_ms": 0.78,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "activity-prune cron HTTP is hidden",
+      "method": "GET",
+      "path": "cron/prune_activity_logs.php",
+      "final_url": "http://127.0.0.1:8081/cron/prune_activity_logs.php",
+      "status": 404,
+      "latency_ms": 0.96,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "SLA cron HTTP is hidden",
+      "method": "GET",
+      "path": "cron/sla_maintenance.php",
+      "final_url": "http://127.0.0.1:8081/cron/sla_maintenance.php",
+      "status": 404,
+      "latency_ms": 6.75,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "auto-close cron HTTP is hidden",
+      "method": "GET",
+      "path": "cron/ticket_auto_close.php",
+      "final_url": "http://127.0.0.1:8081/cron/ticket_auto_close.php",
+      "status": 404,
+      "latency_ms": 5.54,
       "ok": true,
       "error": ""
     },
@@ -421,7 +586,7 @@
       "path": "index.php?page=food-ticket&food_api=health",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=health",
       "status": 200,
-      "latency_ms": 16.2,
+      "latency_ms": 14.67,
       "ok": true,
       "error": ""
     },
@@ -431,7 +596,7 @@
       "path": "index.php?page=food-ticket&food_api=session",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=session",
       "status": 200,
-      "latency_ms": 13.21,
+      "latency_ms": 11.69,
       "ok": true,
       "error": ""
     },
@@ -441,7 +606,7 @@
       "path": "index.php?page=food-ticket&food_api=config",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=config",
       "status": 200,
-      "latency_ms": 21.39,
+      "latency_ms": 19.48,
       "ok": true,
       "error": ""
     },
@@ -451,7 +616,7 @@
       "path": "index.php?page=food-ticket&food_api=monitoring",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=monitoring",
       "status": 200,
-      "latency_ms": 14.66,
+      "latency_ms": 13.89,
       "ok": true,
       "error": ""
     },
@@ -461,7 +626,7 @@
       "path": "index.php?page=food-ticket&food_api=employees",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=employees",
       "status": 200,
-      "latency_ms": 13.99,
+      "latency_ms": 13.29,
       "ok": true,
       "error": ""
     },
@@ -471,7 +636,7 @@
       "path": "index.php?page=food-ticket&food_api=guest-cards",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=guest-cards",
       "status": 200,
-      "latency_ms": 17.03,
+      "latency_ms": 16.46,
       "ok": true,
       "error": ""
     },
@@ -481,7 +646,7 @@
       "path": "index.php?page=food-ticket&food_api=guest-cap",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=guest-cap",
       "status": 200,
-      "latency_ms": 17.01,
+      "latency_ms": 15.98,
       "ok": true,
       "error": ""
     },
@@ -491,7 +656,7 @@
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 18.95,
+      "latency_ms": 16.87,
       "ok": true,
       "error": ""
     },
@@ -501,7 +666,38 @@
       "path": "index.php?page=food-ticket&food_api=orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=orders",
       "status": 200,
-      "latency_ms": 15.03,
+      "latency_ms": 13.48,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket API GET absence-status",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=absence-status&group_id=0&date=2026-10-23",
+      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=absence-status&group_id=0&date=2026-10-23",
+      "status": 400,
+      "latency_ms": 15.98,
+      "ok": false,
+      "error": "HTTP 400; unexpected status 400",
+      "application_error": "گروه معتبر نیست."
+    },
+    {
+      "name": "food-ticket API GET template",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=template",
+      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=template",
+      "status": 200,
+      "latency_ms": 11.87,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket employees sample CSV",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=employees-sample",
+      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=employees-sample",
+      "status": 200,
+      "latency_ms": 12.22,
       "ok": true,
       "error": ""
     },
@@ -511,7 +707,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/status",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/status",
       "status": 200,
-      "latency_ms": 14.62,
+      "latency_ms": 13.22,
       "ok": true,
       "error": ""
     },
@@ -521,7 +717,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/month&month=1405-08",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/month&month=1405-08",
       "status": 200,
-      "latency_ms": 16.6,
+      "latency_ms": 15.61,
       "ok": true,
       "error": ""
     },
@@ -531,17 +727,17 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/catalog",
       "status": 200,
-      "latency_ms": 14.89,
+      "latency_ms": 14.22,
       "ok": true,
       "error": ""
     },
     {
       "name": "food-ticket API GET food-menu/orders",
       "method": "GET",
-      "path": "index.php?page=food-ticket&food_api=food-menu/orders&date=2026-10-23",
-      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/orders&date=2026-10-23",
+      "path": "index.php?page=food-ticket&food_api=food-menu/orders&date=2026-10-23&meal_type=lunch",
+      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/orders&date=2026-10-23&meal_type=lunch",
       "status": 200,
-      "latency_ms": 14.92,
+      "latency_ms": 13.3,
       "ok": true,
       "error": ""
     },
@@ -551,7 +747,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/cancel-requests",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/cancel-requests",
       "status": 200,
-      "latency_ms": 14.97,
+      "latency_ms": 12.95,
       "ok": true,
       "error": ""
     },
@@ -561,7 +757,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/groups",
       "status": 200,
-      "latency_ms": 15.47,
+      "latency_ms": 14.53,
       "ok": true,
       "error": ""
     },
@@ -571,7 +767,27 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/statistics&from=2026-10-23&to=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/statistics&from=2026-10-23&to=2026-10-23",
       "status": 200,
-      "latency_ms": 14.97,
+      "latency_ms": 14.23,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket food orders XLSX export",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/orders-export&date=2026-10-23&meal_type=lunch",
+      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/orders-export&date=2026-10-23&meal_type=lunch",
+      "status": 200,
+      "latency_ms": 16.09,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket food statistics XLSX export",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/export&from=2026-10-23&to=2026-10-23&mode=food&meal_type=lunch",
+      "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/export&from=2026-10-23&to=2026-10-23&mode=food&meal_type=lunch",
+      "status": 200,
+      "latency_ms": 15.53,
       "ok": true,
       "error": ""
     },
@@ -581,7 +797,7 @@
       "path": "index.php?page=food-order&food_api=month&month=1405-08",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=month&month=1405-08",
       "status": 200,
-      "latency_ms": 15.59,
+      "latency_ms": 14.89,
       "ok": true,
       "error": ""
     },
@@ -591,7 +807,7 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.3,
+      "latency_ms": 13.87,
       "ok": true,
       "error": ""
     },
@@ -601,7 +817,7 @@
       "path": "index.php?page=food-order&food_api=search-users&q=loadtest",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=search-users&q=loadtest",
       "status": 200,
-      "latency_ms": 13.99,
+      "latency_ms": 13.62,
       "ok": true,
       "error": ""
     },
@@ -611,7 +827,7 @@
       "path": "index.php?page=food-order&food_api=day-visit&date=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=day-visit&date=2026-10-23",
       "status": 200,
-      "latency_ms": 16.12,
+      "latency_ms": 15.72,
       "ok": true,
       "error": ""
     },
@@ -621,7 +837,7 @@
       "path": "index.php?page=food-order&food_api=guest-requests",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=guest-requests",
       "status": 403,
-      "latency_ms": 15.32,
+      "latency_ms": 12.49,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -633,7 +849,7 @@
       "path": "index.php?page=food-ticket&food_api=absent&from=2026-10-23&to=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=absent&from=2026-10-23&to=2026-10-23",
       "status": 200,
-      "latency_ms": 15.38,
+      "latency_ms": 14.77,
       "ok": true,
       "error": ""
     },
@@ -643,7 +859,7 @@
       "path": "index.php?page=food-ticket&food_api=guest-requests-report&from=2026-10-23&to=2026-10-23&deputy_id=all",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=guest-requests-report&from=2026-10-23&to=2026-10-23&deputy_id=all",
       "status": 200,
-      "latency_ms": 13.51,
+      "latency_ms": 12.74,
       "ok": true,
       "error": ""
     },
@@ -653,7 +869,7 @@
       "path": "index.php?page=food-ticket&food_api=food-manual-attendance&date=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-manual-attendance&date=2026-10-23",
       "status": 200,
-      "latency_ms": 17.66,
+      "latency_ms": 16.25,
       "ok": true,
       "error": ""
     },
@@ -663,7 +879,7 @@
       "path": "index.php?page=food-ticket&food_api=orders&date=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=orders&date=2026-10-23",
       "status": 200,
-      "latency_ms": 14.8,
+      "latency_ms": 14.02,
       "ok": true,
       "error": ""
     },
@@ -673,7 +889,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/group-orders&date=2026-10-23&group_id=all",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/group-orders&date=2026-10-23&group_id=all",
       "status": 200,
-      "latency_ms": 16.93,
+      "latency_ms": 16.46,
       "ok": true,
       "error": ""
     },
@@ -683,7 +899,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/bulk-snapshot&date=2026-10-23&meal_type=lunch",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/bulk-snapshot&date=2026-10-23&meal_type=lunch",
       "status": 200,
-      "latency_ms": 20.75,
+      "latency_ms": 20.13,
       "ok": true,
       "error": ""
     },
@@ -693,7 +909,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/emergency/people",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/emergency/people",
       "status": 200,
-      "latency_ms": 14.44,
+      "latency_ms": 12.87,
       "ok": true,
       "error": ""
     },
@@ -703,7 +919,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 12.81,
+      "latency_ms": 12.0,
       "ok": true,
       "error": ""
     },
@@ -713,10 +929,9 @@
       "path": "index.php?page=chatbot-api",
       "final_url": "http://127.0.0.1:8081/index.php?page=chatbot-api",
       "status": 400,
-      "latency_ms": 18.28,
+      "latency_ms": 18.45,
       "ok": true,
-      "error": "",
-      "expected_rejection": true
+      "error": ""
     },
     {
       "name": "role-matrix:primary_admin:food-ticket page",
@@ -724,7 +939,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 200,
-      "latency_ms": 20.02,
+      "latency_ms": 18.79,
       "ok": true,
       "error": ""
     },
@@ -734,7 +949,7 @@
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 18.09,
+      "latency_ms": 16.94,
       "ok": true,
       "error": ""
     },
@@ -744,7 +959,7 @@
       "path": "index.php?page=food-ticket&food_api=employees",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=employees",
       "status": 200,
-      "latency_ms": 14.25,
+      "latency_ms": 13.49,
       "ok": true,
       "error": ""
     },
@@ -754,7 +969,7 @@
       "path": "index.php?page=food-ticket&food_api=config",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=config",
       "status": 200,
-      "latency_ms": 21.1,
+      "latency_ms": 19.0,
       "ok": true,
       "error": ""
     },
@@ -764,7 +979,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/catalog",
       "status": 200,
-      "latency_ms": 15.38,
+      "latency_ms": 14.51,
       "ok": true,
       "error": ""
     },
@@ -774,7 +989,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 13.17,
+      "latency_ms": 12.08,
       "ok": true,
       "error": ""
     },
@@ -784,7 +999,17 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.3,
+      "latency_ms": 14.1,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 200,
+      "latency_ms": 11.28,
       "ok": true,
       "error": ""
     },
@@ -794,7 +1019,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 38.25,
+      "latency_ms": 36.77,
       "ok": true,
       "error": ""
     },
@@ -804,7 +1029,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.98,
+      "latency_ms": 16.14,
       "ok": true,
       "error": ""
     },
@@ -814,7 +1039,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 126.02,
+      "latency_ms": 122.62,
       "ok": true,
       "error": ""
     },
@@ -824,7 +1049,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 21.68,
+      "latency_ms": 20.83,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -835,7 +1060,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 13.68,
+      "latency_ms": 13.12,
       "ok": true,
       "error": ""
     },
@@ -845,9 +1070,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.43,
+      "latency_ms": 13.9,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:supervisor:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 10.95,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:supervisor:new-ticket",
@@ -855,7 +1091,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 37.76,
+      "latency_ms": 34.98,
       "ok": true,
       "error": ""
     },
@@ -865,7 +1101,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.08,
+      "latency_ms": 16.17,
       "ok": true,
       "error": ""
     },
@@ -875,7 +1111,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 100.13,
+      "latency_ms": 96.45,
       "ok": true,
       "error": ""
     },
@@ -885,7 +1121,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 200,
-      "latency_ms": 20.69,
+      "latency_ms": 19.53,
       "ok": true,
       "error": ""
     },
@@ -895,7 +1131,7 @@
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 19.68,
+      "latency_ms": 17.21,
       "ok": true,
       "error": ""
     },
@@ -905,7 +1141,7 @@
       "path": "index.php?page=food-ticket&food_api=employees",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=employees",
       "status": 200,
-      "latency_ms": 15.87,
+      "latency_ms": 14.35,
       "ok": true,
       "error": ""
     },
@@ -915,7 +1151,7 @@
       "path": "index.php?page=food-ticket&food_api=config",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=config",
       "status": 403,
-      "latency_ms": 13.88,
+      "latency_ms": 12.97,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -927,7 +1163,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/catalog",
       "status": 200,
-      "latency_ms": 16.77,
+      "latency_ms": 15.13,
       "ok": true,
       "error": ""
     },
@@ -937,7 +1173,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 13.87,
+      "latency_ms": 12.69,
       "ok": true,
       "error": ""
     },
@@ -947,9 +1183,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 17.45,
+      "latency_ms": 14.35,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 10.71,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:support_manager:new-ticket",
@@ -957,7 +1204,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 37.3,
+      "latency_ms": 35.51,
       "ok": true,
       "error": ""
     },
@@ -967,7 +1214,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.9,
+      "latency_ms": 16.19,
       "ok": true,
       "error": ""
     },
@@ -977,7 +1224,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 125.53,
+      "latency_ms": 121.11,
       "ok": true,
       "error": ""
     },
@@ -987,7 +1234,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 200,
-      "latency_ms": 21.17,
+      "latency_ms": 18.08,
       "ok": true,
       "error": ""
     },
@@ -997,7 +1244,7 @@
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 19.96,
+      "latency_ms": 17.83,
       "ok": true,
       "error": ""
     },
@@ -1007,7 +1254,7 @@
       "path": "index.php?page=food-ticket&food_api=employees",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=employees",
       "status": 403,
-      "latency_ms": 13.98,
+      "latency_ms": 12.54,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -1019,7 +1266,7 @@
       "path": "index.php?page=food-ticket&food_api=config",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=config",
       "status": 403,
-      "latency_ms": 13.48,
+      "latency_ms": 12.71,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -1031,7 +1278,7 @@
       "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-menu/catalog",
       "status": 403,
-      "latency_ms": 14.61,
+      "latency_ms": 12.41,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -1043,7 +1290,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 13.92,
+      "latency_ms": 12.83,
       "ok": true,
       "error": ""
     },
@@ -1053,9 +1300,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.69,
+      "latency_ms": 14.16,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:inspector:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 11.02,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:inspector:new-ticket",
@@ -1063,7 +1321,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 38.23,
+      "latency_ms": 36.93,
       "ok": true,
       "error": ""
     },
@@ -1073,7 +1331,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.54,
+      "latency_ms": 15.49,
       "ok": true,
       "error": ""
     },
@@ -1083,7 +1341,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 98.37,
+      "latency_ms": 93.74,
       "ok": true,
       "error": ""
     },
@@ -1093,7 +1351,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 22.43,
+      "latency_ms": 20.99,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1104,7 +1362,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 14.04,
+      "latency_ms": 12.53,
       "ok": true,
       "error": ""
     },
@@ -1114,9 +1372,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.14,
+      "latency_ms": 14.04,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:manager:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 11.0,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:manager:new-ticket",
@@ -1124,7 +1393,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 36.6,
+      "latency_ms": 34.53,
       "ok": true,
       "error": ""
     },
@@ -1134,7 +1403,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.54,
+      "latency_ms": 16.27,
       "ok": true,
       "error": ""
     },
@@ -1144,7 +1413,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 128.21,
+      "latency_ms": 122.57,
       "ok": true,
       "error": ""
     },
@@ -1154,7 +1423,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 22.31,
+      "latency_ms": 20.88,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1165,7 +1434,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 14.25,
+      "latency_ms": 13.0,
       "ok": true,
       "error": ""
     },
@@ -1175,9 +1444,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.79,
+      "latency_ms": 14.22,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:agent:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 11.22,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:agent:new-ticket",
@@ -1185,7 +1465,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 39.03,
+      "latency_ms": 36.96,
       "ok": true,
       "error": ""
     },
@@ -1195,7 +1475,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 18.19,
+      "latency_ms": 16.17,
       "ok": true,
       "error": ""
     },
@@ -1205,7 +1485,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 98.1,
+      "latency_ms": 93.4,
       "ok": true,
       "error": ""
     },
@@ -1215,7 +1495,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 22.83,
+      "latency_ms": 20.58,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1226,7 +1506,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 403,
-      "latency_ms": 14.05,
+      "latency_ms": 12.98,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -1238,9 +1518,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.48,
+      "latency_ms": 14.5,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:user:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 11.29,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:user:new-ticket",
@@ -1248,7 +1539,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 36.46,
+      "latency_ms": 35.31,
       "ok": true,
       "error": ""
     },
@@ -1258,7 +1549,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.9,
+      "latency_ms": 16.29,
       "ok": true,
       "error": ""
     },
@@ -1268,7 +1559,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 92.48,
+      "latency_ms": 88.31,
       "ok": true,
       "error": ""
     },
@@ -1278,7 +1569,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 16.3,
+      "latency_ms": 15.41,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1289,7 +1580,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 403,
-      "latency_ms": 14.03,
+      "latency_ms": 13.17,
       "ok": true,
       "error": "",
       "expected_rejection": true,
@@ -1301,9 +1592,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.48,
+      "latency_ms": 14.23,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:local_user:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 11.21,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:local_user:new-ticket",
@@ -1311,7 +1613,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 403,
-      "latency_ms": 16.89,
+      "latency_ms": 15.25,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1322,7 +1624,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.73,
+      "latency_ms": 16.22,
       "ok": true,
       "error": ""
     },
@@ -1332,7 +1634,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 92.31,
+      "latency_ms": 88.09,
       "ok": true,
       "error": ""
     },
@@ -1342,7 +1644,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 16.52,
+      "latency_ms": 14.22,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1353,7 +1655,7 @@
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=000",
       "status": 200,
-      "latency_ms": 14.26,
+      "latency_ms": 12.83,
       "ok": true,
       "error": ""
     },
@@ -1363,9 +1665,20 @@
       "path": "index.php?page=food-order&food_api=my-orders",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 15.64,
+      "latency_ms": 13.82,
       "ok": true,
       "error": ""
+    },
+    {
+      "name": "role-matrix:guard:layout design API",
+      "method": "GET",
+      "path": "index.php?layout_design_api=1&layout_page=dashboard",
+      "final_url": "http://127.0.0.1:8081/index.php?layout_design_api=1&layout_page=dashboard",
+      "status": 403,
+      "latency_ms": 11.19,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
     },
     {
       "name": "role-matrix:guard:new-ticket",
@@ -1373,7 +1686,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 403,
-      "latency_ms": 16.05,
+      "latency_ms": 14.4,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1384,7 +1697,7 @@
       "path": "api/inventory.php",
       "final_url": "http://127.0.0.1:8081/api/inventory.php",
       "status": 401,
-      "latency_ms": 1.96,
+      "latency_ms": 1.56,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1395,10 +1708,9 @@
       "path": "api/inventory.php",
       "final_url": "http://127.0.0.1:8081/api/inventory.php",
       "status": 422,
-      "latency_ms": 0.91,
+      "latency_ms": 0.77,
       "ok": true,
-      "error": "",
-      "expected_rejection": true
+      "error": ""
     },
     {
       "name": "inventory API creates synthetic hardware snapshot",
@@ -1406,7 +1718,7 @@
       "path": "api/inventory.php",
       "final_url": "http://127.0.0.1:8081/api/inventory.php",
       "status": 200,
-      "latency_ms": 12.78,
+      "latency_ms": 10.93,
       "ok": true,
       "error": ""
     },
@@ -1416,7 +1728,7 @@
       "path": "api/inventory.php",
       "final_url": "http://127.0.0.1:8081/api/inventory.php",
       "status": 200,
-      "latency_ms": 12.91,
+      "latency_ms": 10.54,
       "ok": true,
       "error": ""
     },
@@ -1426,7 +1738,7 @@
       "path": "index.php?page=asset&id=501",
       "final_url": "http://127.0.0.1:8081/index.php?page=inventory&id=501",
       "status": 200,
-      "latency_ms": 36.21,
+      "latency_ms": 34.41,
       "ok": true,
       "error": ""
     },
@@ -1436,17 +1748,17 @@
       "path": "index.php?page=traffic-control",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&tab=new&created=1",
       "status": 200,
-      "latency_ms": 36.7,
+      "latency_ms": 33.46,
       "ok": true,
       "error": ""
     },
     {
       "name": "traffic API reads back synthetic visit",
       "method": "GET",
-      "path": "index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
-      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
+      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
       "status": 200,
-      "latency_ms": 13.37,
+      "latency_ms": 12.3,
       "ok": true,
       "error": ""
     },
@@ -1456,7 +1768,7 @@
       "path": "index.php?page=traffic-control-print&id=1",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control-print&id=1",
       "status": 200,
-      "latency_ms": 12.29,
+      "latency_ms": 11.43,
       "ok": true,
       "error": ""
     },
@@ -1466,17 +1778,17 @@
       "path": "index.php?page=traffic-control",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&tab=history",
       "status": 200,
-      "latency_ms": 39.43,
+      "latency_ms": 34.39,
       "ok": true,
       "error": ""
     },
     {
       "name": "traffic API verifies synthetic visit update",
       "method": "GET",
-      "path": "index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
-      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
+      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
       "status": 200,
-      "latency_ms": 13.67,
+      "latency_ms": 12.26,
       "ok": true,
       "error": ""
     },
@@ -1486,17 +1798,17 @@
       "path": "index.php?page=traffic-control",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&tab=history",
       "status": 200,
-      "latency_ms": 42.24,
+      "latency_ms": 36.28,
       "ok": true,
       "error": ""
     },
     {
       "name": "traffic API confirms synthetic exit",
       "method": "GET",
-      "path": "index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
-      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
+      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
       "status": 200,
-      "latency_ms": 13.6,
+      "latency_ms": 12.13,
       "ok": true,
       "error": ""
     },
@@ -1506,17 +1818,17 @@
       "path": "index.php?page=traffic-control",
       "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&tab=history",
       "status": 200,
-      "latency_ms": 37.07,
+      "latency_ms": 34.41,
       "ok": true,
       "error": ""
     },
     {
       "name": "traffic API confirms synthetic visit deletion",
       "method": "GET",
-      "path": "index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
-      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=7537800200",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
+      "final_url": "http://127.0.0.1:8081/index.php?page=traffic-control&traffic_api=lookup&code=2881423787",
       "status": 200,
-      "latency_ms": 14.13,
+      "latency_ms": 12.42,
       "ok": true,
       "error": ""
     },
@@ -1526,7 +1838,7 @@
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 28.98,
+      "latency_ms": 26.83,
       "ok": true,
       "error": ""
     },
@@ -1536,7 +1848,7 @@
       "path": "index.php?page=food-ticket&food_api=absence-status&group_id=1&date=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=absence-status&group_id=1&date=2026-10-23",
       "status": 200,
-      "latency_ms": 20.1,
+      "latency_ms": 18.46,
       "ok": true,
       "error": ""
     },
@@ -1546,7 +1858,7 @@
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 22.2,
+      "latency_ms": 20.69,
       "ok": true,
       "error": ""
     },
@@ -1556,7 +1868,7 @@
       "path": "index.php?page=food-order&food_api=month&month=1405-08",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=month&month=1405-08",
       "status": 200,
-      "latency_ms": 16.0,
+      "latency_ms": 15.05,
       "ok": true,
       "error": ""
     },
@@ -1566,7 +1878,7 @@
       "path": "index.php?page=food-order&food_api=order",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=order",
       "status": 200,
-      "latency_ms": 18.15,
+      "latency_ms": 16.18,
       "ok": true,
       "error": ""
     },
@@ -1576,7 +1888,7 @@
       "path": "index.php?page=food-order&food_api=cancel",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=cancel",
       "status": 200,
-      "latency_ms": 17.98,
+      "latency_ms": 17.2,
       "ok": true,
       "error": ""
     },
@@ -1586,7 +1898,7 @@
       "path": "index.php?page=food-order&food_api=my-orders&from=2026-10-23&to=2026-10-23",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-order&food_api=my-orders&from=2026-10-23&to=2026-10-23",
       "status": 200,
-      "latency_ms": 16.48,
+      "latency_ms": 14.52,
       "ok": true,
       "error": ""
     },
@@ -1605,7 +1917,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php?page=login",
       "status": 200,
-      "latency_ms": 17.18,
+      "latency_ms": 15.6,
       "ok": true,
       "error": ""
     },
@@ -1615,7 +1927,7 @@
       "path": "index.php?page=login",
       "final_url": "http://127.0.0.1:8081/index.php",
       "status": 200,
-      "latency_ms": 98.42,
+      "latency_ms": 93.54,
       "ok": true,
       "error": ""
     },
@@ -1625,7 +1937,7 @@
       "path": "index.php?page=new-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 37.92,
+      "latency_ms": 34.56,
       "ok": true,
       "error": ""
     },
@@ -1635,7 +1947,7 @@
       "path": "index.php?page=settings",
       "final_url": "http://127.0.0.1:8081/index.php?page=settings",
       "status": 403,
-      "latency_ms": 21.87,
+      "latency_ms": 19.86,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1646,7 +1958,7 @@
       "path": "index.php?page=food-ticket",
       "final_url": "http://127.0.0.1:8081/index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 21.98,
+      "latency_ms": 20.77,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -1656,7 +1968,7 @@
     "All nine application roles receive representative permission-boundary requests, not a complete role-by-route/action Cartesian matrix.",
     "Inventory writes use a synthetic fixture payload; no WMI/CIM collection or real device was contacted.",
     "Traffic, inventory, food-order, food-group, ticket, and CD/DVD flows are tested selectively; this is not every write handler or complete module workflow.",
-    "LDAP/AD, Access/ODBC, printers, physical hardware, external providers, cron/queue workers, and production/staging capacity are not exercised.",
+    "LDAP/AD, Access/ODBC, printers, physical hardware, and external providers are not exercised; selected synthetic cron/queue paths are covered separately, not every schedule and failure mode.",
     "No production endpoint or operational account was used."
   ],
   "server_log": "/tmp/ticket-full-system-routes.log"
