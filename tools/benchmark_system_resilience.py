@@ -55,11 +55,19 @@ def api_routes(jalali_month: str) -> list[tuple[str, str, int]]:
     for route in ("health", "session", "config", "monitoring", "employees", "guest-cards",
                   "guest-cap", "food-groups", "orders"):
         routes.append((f"food-ticket:{route}", f"index.php?page=food-ticket&food_api={urllib.parse.quote(route)}", 200))
+    for route, query in (("absent", f"from={today}&to={today}"),
+                         ("guest-requests-report", f"from={today}&to={today}&deputy_id=all"),
+                         ("food-manual-attendance", f"date={today}"),
+                         ("orders", f"date={today}")):
+        routes.append((f"food-ticket:{route}", f"index.php?page=food-ticket&food_api={route}&{query}", 200))
     menu = [
         ("food-menu/status", ""), ("food-menu/month", "month=" + urllib.parse.quote(jalali_month)),
         ("food-menu/catalog", ""), ("food-menu/orders", "date=" + today),
         ("food-menu/cancel-requests", ""), ("food-menu/groups", ""),
         ("food-menu/statistics", f"from={today}&to={today}"),
+        ("food-menu/group-orders", f"date={today}&group_id=all"),
+        ("food-menu/bulk-snapshot", f"date={today}&meal_type=lunch"),
+        ("food-menu/emergency/people", ""),
     ]
     for route, query in menu:
         suffix = "&" + query if query else ""

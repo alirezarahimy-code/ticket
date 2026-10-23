@@ -75,11 +75,16 @@ jobs:
       - name: Validate benchmark scripts
         run: |
           set -euo pipefail
-          python3 -m py_compile tools/benchmark_operations.py tools/full_system_route_smoke.py tools/benchmark_system_resilience.py
+          python3 -m compileall -q tools tests
           php -l tools/benchmark_operations_seed.php
+          php -l tools/benchmark_seed.php
           php -l tools/benchmark_operations_report.php
           php -l tools/benchmark_seed.php
           php -l cd-dvd.php
+          for script in assets/*.js food-ticket-web/*.js; do
+            [ -f "$script" ] || continue
+            node --check "$script"
+          done
 
       - name: Initialize disposable database
         env:

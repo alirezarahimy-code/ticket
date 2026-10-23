@@ -146,8 +146,229 @@ class RouteSmoke:
             self.get_json(f"food-order API GET {route}", f"index.php?page=food-order&food_api={urllib.parse.quote(route, safe='/-')}{suffix}")
         self.get_json("food-order guest requests correctly rejects a non-deputy synthetic admin",
                       "index.php?page=food-order&food_api=guest-requests", expected=(403,))
+        for route, query in [
+            ("absent", f"from={today}&to={today}"),
+            ("guest-requests-report", f"from={today}&to={today}&deputy_id=all"),
+            ("food-manual-attendance", f"date={today}"),
+            ("orders", f"date={today}"),
+        ]:
+            self.get_json(f"food-ticket API GET {route}", f"index.php?page=food-ticket&food_api={route}&{query}")
+        for route, query in [
+            ("food-menu/group-orders", f"date={today}&group_id=all"),
+            ("food-menu/bulk-snapshot", f"date={today}&meal_type=lunch"),
+            ("food-menu/emergency/people", ""),
+        ]:
+            encoded = urllib.parse.quote(route, safe="/-")
+            self.get_json(f"food-order menu API GET {route}", f"index.php?page=food-ticket&food_api={encoded}" + ("&" + query if query else ""))
         self.get_json("traffic API invalid national code is rejected safely",
                       "index.php?page=traffic-control&traffic_api=lookup&code=000")
+        _, body, _ = self.request("chatbot API validates empty synthetic question before provider use", "index.php?page=chatbot-api",
+                                  "POST", urllib.parse.urlencode({"csrf": self.csrf, "question": ""}).encode(),
+                                  {"Content-Type": "application/x-www-form-urlencoded"}, expected=(400,))
+        try:
+            payload = json.loads(body)
+        except json.JSONDecodeError:
+            payload = None
+        if not isinstance(payload, dict) or payload.get("ok") is not False or not payload.get("error"):
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "chatbot input validation did not return a structured 400 JSON error"
+
+    def role_matrix(self) -> None:
+        """Exercise representative allowed/denied boundaries for every application role."""
+        accounts = {
+            "primary_admin": (self, "loadtest-001"),
+            "supervisor": (None, "loadtest-role-supervisor"),
+            "support_manager": (None, "loadtest-role-support_manager"),
+            "inspector": (None, "loadtest-role-inspector"),
+            "manager": (None, "loadtest-role-manager"),
+            "agent": (None, "loadtest-role-agent"),
+            "user": (None, "loadtest-requester"),
+            "local_user": (None, "loadtest-role-local_user"),
+            "guard": (None, "loadtest-role-guard"),
+        }
+        allow = {
+            "food-groups": {"primary_admin", "supervisor", "support_manager", "inspector"},
+            "employees": {"primary_admin", "supervisor", "support_manager"},
+            "config": {"primary_admin"},
+            "food-menu/catalog": {"primary_admin", "support_manager"},
+            "traffic lookup": {"primary_admin", "supervisor", "support_manager", "inspector", "manager", "agent", "guard"},
+            "food-order/my-orders": set(accounts),
+            "new-ticket": {"primary_admin", "supervisor", "support_manager", "inspector", "manager", "agent", "user"},
+        }
+        for role, (existing, username) in accounts.items():
+            client = existing or RouteSmoke(self.base, self.password, username, self.jalali_month)
+            if existing is None:
+                try:
+                    client.login()
+                except Exception as exc:  # preserve each role's authentication failure in the report
+                    self.results.extend(client.results)
+                    self.results.append({"name": f"role-matrix:{role}:login", "method": "POST", "path": "synthetic role account",
+                                         "status": 0, "latency_ms": 0, "ok": False, "error": f"{type(exc).__name__}: {exc}"})
+                    continue
+            food_access_roles = {"primary_admin", "supervisor", "support_manager", "inspector"}
+            probes = [("food-ticket page", "index.php?page=food-ticket", "html")]
+            if role in food_access_roles:
+                probes.extend([
+                    ("food-groups", "index.php?page=food-ticket&food_api=food-groups", "json"),
+                    ("employees", "index.php?page=food-ticket&food_api=employees", "json"),
+                    ("config", "index.php?page=food-ticket&food_api=config", "json"),
+                    ("food-menu/catalog", "index.php?page=food-ticket&food_api=food-menu/catalog", "json"),
+                ])
+            probes.extend([
+                ("traffic lookup", "index.php?page=traffic-control&traffic_api=lookup&code=000", "json"),
+                ("food-order/my-orders", "index.php?page=food-order&food_api=my-orders", "json"),
+                ("new-ticket", "index.php?page=new-ticket", "html"),
+            ])
+            allow["food-ticket page"] = food_access_roles
+            for name, path, kind in probes:
+                expected_status = 200 if role in allow[name] else 403
+                if kind == "json":
+                    payload = client.get_json(f"role-matrix:{role}:{name}", path, expected=(expected_status,))
+                    row = client.results[-1]
+                    if expected_status == 200 and (not isinstance(payload, (dict, list)) or row["status"] != 200):
+                        row["ok"] = False
+                        row["error"] = row.get("error") or "permitted role did not receive a JSON success response"
+                    if expected_status == 403 and (not isinstance(payload, dict) or not payload.get("error")):
+                        row["ok"] = False
+                        row["error"] = "denied role did not receive a JSON authorization error"
+                else:
+                    _, body, _ = client.request(f"role-matrix:{role}:{name}", path, expected=(expected_status,))
+                    row = client.results[-1]
+                    if expected_status == 200 and ('class="auth-layout"' in body or 'class="auth-form"' in body):
+                        row["ok"] = False
+                        row["error"] = "permitted role unexpectedly received the login page"
+            if existing is None:
+                self.results.extend(client.results)
+
+    def inventory_api_lifecycle(self) -> None:
+        token = os.environ.get("BENCHMARK_INVENTORY_TOKEN", "")
+        payload = {
+            "asset_tag": "CI-INVENTORY-" + os.urandom(5).hex().upper(),
+            "hostname": "CI-INVENTORY-SYNTHETIC",
+            "serial_number": "SYNTHETIC-" + os.urandom(4).hex().upper(),
+            "computer_type": "Desktop", "manufacturer": "Synthetic", "model": "CI model",
+            "operating_system": "Synthetic OS", "cpu": "Synthetic CPU", "memory_mb": 8192,
+            "ip_address": "192.0.2.10", "mac_address": "02:00:00:00:00:01",
+            "disks": [], "software": [],
+            "hardware": {
+                "processor": [{"Name": "Synthetic CPU", "NumberOfCores": 4}],
+                "operating_system": [{"Caption": "Synthetic OS", "OSArchitecture": "64-bit"}],
+                "bios": [{"SerialNumber": "SYNTHETIC-BIOS"}],
+                "physical_disks": [{"Model": "Synthetic disk", "Size": 1024}],
+                "memory_modules": [{"Capacity": 8589934592, "Speed": 3200}],
+                "graphics": [{"Name": "Synthetic graphics", "AdapterRAM": 1073741824}],
+                "network_adapters": [{"Name": "Synthetic adapter", "MACAddress": "02:00:00:00:00:01"}],
+            },
+        }
+        body = json.dumps(payload).encode()
+        headers = {"Content-Type": "application/json"}
+        self.request("inventory API rejects missing device token", "api/inventory.php", "POST", body, headers, expected=(401,))
+        if len(token) < 32:
+            self.results.append({"name": "inventory API synthetic token fixture", "method": "SETUP", "path": "CI fixture",
+                                 "status": 0, "latency_ms": 0, "ok": False, "error": "BENCHMARK_INVENTORY_TOKEN missing"})
+            return
+        invalid_headers = {**headers, "X-Inventory-Token": token}
+        self.request("inventory API validates empty hardware payload", "api/inventory.php", "POST", b"{}", invalid_headers, expected=(422,))
+        _, response, _ = self.request("inventory API creates synthetic hardware snapshot", "api/inventory.php", "POST", body, invalid_headers)
+        try:
+            created = json.loads(response)
+        except json.JSONDecodeError:
+            created = {}
+        asset_id = int(created.get("asset_id", 0)) if isinstance(created, dict) else 0
+        if not isinstance(created, dict) or not created.get("ok") or not asset_id:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "valid synthetic inventory payload was not stored"
+            return
+        payload["hostname"] = "CI-INVENTORY-SYNTHETIC-UPDATED"
+        _, response, _ = self.request("inventory API updates existing synthetic asset idempotently", "api/inventory.php", "POST",
+                                      json.dumps(payload).encode(), invalid_headers)
+        try:
+            updated = json.loads(response)
+        except json.JSONDecodeError:
+            updated = {}
+        if not isinstance(updated, dict) or not updated.get("ok") or int(updated.get("asset_id", 0)) != asset_id:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "repeat inventory collection created a different asset or failed"
+            return
+        _, html, _ = self.request("inventory synthetic asset detail read-back", f"index.php?page=asset&id={asset_id}")
+        if "CI-INVENTORY-SYNTHETIC-UPDATED" not in html:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "updated synthetic hostname was not visible in asset detail"
+
+    @staticmethod
+    def _synthetic_iranian_national_code() -> str:
+        prefix = str(100000001 + int.from_bytes(os.urandom(4), "big") % 899999999)
+        checksum = sum(int(prefix[i]) * (10 - i) for i in range(9)) % 11
+        check_digit = checksum if checksum < 2 else 11 - checksum
+        return prefix + str(check_digit)
+
+    def traffic_control_lifecycle(self) -> None:
+        national_code = self._synthetic_iranian_national_code()
+        original_name = "Synthetic Traffic Visitor " + os.urandom(3).hex().upper()
+        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        create = {
+            "csrf": self.csrf, "action": "traffic_create", "full_name": original_name,
+            "national_code": national_code, "phone": "09123456789", "company": "Synthetic CI",
+            "meeting_with": "Synthetic unit", "description": "Disposable end-to-end traffic test",
+        }
+        status, html, _ = self.request("traffic handler creates synthetic visit", "index.php?page=traffic-control", "POST",
+                                       urllib.parse.urlencode(create).encode(), headers)
+        if status != 200 or 'class="auth-layout"' in html:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic create handler did not complete authenticated POST"
+            return
+        lookup_path = "index.php?page=traffic-control&traffic_api=lookup&code=" + national_code
+        found = self.get_json("traffic API reads back synthetic visit", lookup_path)
+        visit_id = int(found.get("record_id", 0)) if isinstance(found, dict) else 0
+        if not isinstance(found, dict) or not found.get("found") or found.get("full_name") != original_name or visit_id < 1:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic lookup did not return the synthetic row created by the handler"
+            return
+        _, print_html, _ = self.request("traffic print view renders synthetic visitor (no printer invoked)",
+                                        f"index.php?page=traffic-control-print&id={visit_id}")
+        if "برگ ملاقات مراجعین" not in print_html or original_name not in print_html:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "synthetic print-view HTML did not render expected visitor data"
+
+        updated_name = original_name + " updated"
+        update = {**create, "action": "traffic_update", "record_id": str(visit_id), "full_name": updated_name,
+                  "visit_date": date.today().isoformat(), "entry_time": "08:00", "exit_time": ""}
+        status, html, _ = self.request("traffic handler updates synthetic visit and history", "index.php?page=traffic-control", "POST",
+                                       urllib.parse.urlencode(update).encode(), headers)
+        if status != 200 or 'class="auth-layout"' in html:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic update handler did not complete authenticated POST"
+            return
+        updated = self.get_json("traffic API verifies synthetic visit update", lookup_path)
+        if not isinstance(updated, dict) or updated.get("full_name") != updated_name:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic update was not reflected by API read-back"
+            return
+
+        exit_payload = {"csrf": self.csrf, "action": "traffic_set_exit", "record_id": str(visit_id), "return_tab": "history"}
+        status, html, _ = self.request("traffic handler registers synthetic exit", "index.php?page=traffic-control", "POST",
+                                       urllib.parse.urlencode(exit_payload).encode(), headers)
+        if status != 200 or 'class="auth-layout"' in html:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic exit handler did not complete authenticated POST"
+            return
+        exited = self.get_json("traffic API confirms synthetic exit", lookup_path)
+        if not isinstance(exited, dict) or exited.get("needs_exit_only"):
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic API still reports the synthetic visitor as inside"
+            return
+
+        delete_payload = {"csrf": self.csrf, "action": "traffic_delete", "record_id": str(visit_id)}
+        status, html, _ = self.request("traffic handler removes synthetic visit", "index.php?page=traffic-control", "POST",
+                                       urllib.parse.urlencode(delete_payload).encode(), headers)
+        if status != 200 or 'class="auth-layout"' in html:
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "traffic delete handler did not complete authenticated POST"
+            return
+        deleted = self.get_json("traffic API confirms synthetic visit deletion", lookup_path)
+        if not isinstance(deleted, dict) or deleted.get("found"):
+            self.results[-1]["ok"] = False
+            self.results[-1]["error"] = "deleted synthetic traffic row remained visible"
 
     def food_ticket_group_lifecycle(self) -> None:
         l_uid = "BENCHSMOKE-" + os.urandom(5).hex().upper()
@@ -294,6 +515,9 @@ def main() -> int:
         smoke.login()
         smoke.pages()
         smoke.apis()
+        smoke.role_matrix()
+        smoke.inventory_api_lifecycle()
+        smoke.traffic_control_lifecycle()
         smoke.food_ticket_group_lifecycle()
         smoke.food_order_lifecycle()
         smoke.requester_permission_checks()
@@ -317,17 +541,20 @@ def main() -> int:
                               "status": 0, "latency_ms": 0, "ok": False, "error": line[:500]})
     failed = [row for row in smoke.results if not row["ok"]]
     report = {
-        "scope": "authenticated representative route/API smoke on disposable synthetic MariaDB only",
+        "scope": "authenticated app-wide page/API/selected role and write-lifecycle smoke on disposable synthetic MariaDB only",
         "synthetic_only": True,
         "account": args.username,
         "pages_tested": sum(str(row["name"]).startswith("page:") for row in smoke.results),
         "api_reads_tested": sum(row["method"] == "GET" and ("food_api=" in row["path"] or "traffic_api=" in row["path"]) for row in smoke.results),
-        "role_checks_tested": sum(str(row["name"]).startswith("requester:") for row in smoke.results),
+        "role_checks_tested": sum(str(row["name"]).startswith(("requester:", "role-matrix:")) for row in smoke.results),
         "expected_authorization_rejections": sum(bool(row.get("expected_rejection")) for row in smoke.results),
         "http_error_responses": sum(int(row["status"]) >= 400 for row in smoke.results),
         "unexpected_http_error_responses": sum(int(row["status"]) >= 400 and not row.get("expected_rejection") for row in smoke.results),
         "application_error_payloads": sum(bool(row.get("application_error")) for row in smoke.results),
         "food_ticket_group_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("food-ticket synthetic POST create group", "food-ticket absence-status for synthetic group", "food-ticket synthetic POST delete group")),
+        "inventory_api_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("inventory API creates synthetic hardware snapshot", "inventory API updates existing synthetic asset idempotently", "inventory synthetic asset detail read-back")),
+        "traffic_control_write_lifecycle_tested": all(any(row["name"] == name and row["ok"] for row in smoke.results) for name in ("traffic handler creates synthetic visit", "traffic API reads back synthetic visit", "traffic print view renders synthetic visitor (no printer invoked)", "traffic handler updates synthetic visit and history", "traffic handler registers synthetic exit", "traffic handler removes synthetic visit")),
+
         "php_runtime_log_error_lines": len(php_runtime_lines),
         "database_error_log_lines": len(database_error_lines),
         "php_runtime_log_samples": php_runtime_lines[:20],
@@ -339,9 +566,10 @@ def main() -> int:
         "p50_latency_ms": sorted(row["latency_ms"] for row in smoke.results)[len(smoke.results) // 2] if smoke.results else None,
         "max_latency_ms": max((row["latency_ms"] for row in smoke.results), default=None),
         "fatal": fatal, "results": smoke.results,
-        "limitations": ["No real LDAP/domain, Access/ODBC, printer, hardware inventory, email/SMS, or external AI provider was exercised.",
-                        "Only primary-admin and generic requester permissions are runtime-smoked; this is not a complete role matrix or exhaustive write-action test.",
-                        "Cron/queue worker execution, printable output, and full inventory collection are not exercised by this route smoke.",
+        "limitations": ["All nine application roles receive representative permission-boundary requests, not a complete role-by-route/action Cartesian matrix.",
+                        "Inventory writes use a synthetic fixture payload; no WMI/CIM collection or real device was contacted.",
+                        "Traffic, inventory, food-order, food-group, ticket, and CD/DVD flows are tested selectively; this is not every write handler or complete module workflow.",
+                        "LDAP/AD, Access/ODBC, printers, physical hardware, external providers, cron/queue workers, and production/staging capacity are not exercised.",
                         "No production endpoint or operational account was used."],
         "server_log": str(server_log_path),
     }
@@ -353,6 +581,7 @@ def main() -> int:
              f"- HTTP errors: {report['http_error_responses']} (unexpected: {report['unexpected_http_error_responses']}; expected authorization rejections: {report['expected_authorization_rejections']}); JSON error payloads: {report['application_error_payloads']}; PHP runtime log lines: {report['php_runtime_log_error_lines']}; DB/SQL log lines: {report['database_error_log_lines']}",
              f"- Passed: {report['passed']}; failed: {report['failed']}",
              f"- Food-order create/cancel/read-back: {'passed' if report['food_order_write_lifecycle_tested'] else 'not passed'}; food-ticket group create/status/delete: {'passed' if report['food_ticket_group_write_lifecycle_tested'] else 'not passed'}",
+             f"- Inventory agent create/update/read-back: {'passed' if report['inventory_api_write_lifecycle_tested'] else 'not passed'}; traffic create/update/exit/delete: {'passed' if report['traffic_control_write_lifecycle_tested'] else 'not passed'}",
              f"- Expected access rejections: {report['expected_authorization_rejections']}",
              f"- Elapsed: {report['elapsed_seconds']} s; median latency: {report['p50_latency_ms']} ms; max latency: {report['max_latency_ms']} ms", "",
              "| Result | Method | Route | HTTP | Latency (ms) | Diagnostic |", "|---|---|---|---:|---:|---|"]

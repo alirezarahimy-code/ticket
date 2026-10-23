@@ -23,10 +23,15 @@ $config['app']['timezone'] = 'UTC';
 $config['database'] = $database;
 $config['ldap']['enabled'] = false;
 $config['food_ticket']['attendance_path'] = '';
-$config['security']['inventory_token'] = bin2hex(random_bytes(32));
+$inventoryToken = bin2hex(random_bytes(32));
+$config['security']['inventory_token'] = $inventoryToken;
 $configPath = $root . '/config.php';
 file_put_contents($configPath, "<?php\ndeclare(strict_types=1);\nreturn " . var_export($config, true) . ";\n", LOCK_EX);
 @chmod($configPath, 0600);
+$githubEnv = getenv('GITHUB_ENV');
+if (is_string($githubEnv) && $githubEnv !== '') {
+    file_put_contents($githubEnv, 'BENCHMARK_INVENTORY_TOKEN=' . $inventoryToken . PHP_EOL, FILE_APPEND | LOCK_EX);
+}
 
 // Match the filesystem prerequisite created by install.php in this disposable CI instance.
 $uploadsDir = $root . '/storage/uploads';
@@ -60,6 +65,13 @@ try {
     $requesterInsert->execute(['loadtest-requester', $hash, 'Synthetic Requester', 'Benchmark Synthetic Unit', $departmentId, 'SYN-REQ-001', '8000000001']);
 
     $pdo->exec("INSERT INTO handling_units (code, name, is_active) VALUES ('it', 'Benchmark IT', 1), ('support', 'Benchmark Support', 1)");
+    $supportHandlingId = (int) $pdo->query("SELECT id FROM handling_units WHERE code = 'support'")->fetchColumn();
+    $roleInsert = $pdo->prepare('INSERT INTO users (username, password_hash, full_name, department, department_id, employee_number, national_code, role, auth_source, is_active, is_primary_admin, must_change_password, handling_unit_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, \'local\', 1, 0, 0, ?)');
+    foreach (['supervisor', 'support_manager', 'inspector', 'manager', 'agent', 'local_user', 'guard'] as $role) {
+        $handlingId = in_array($role, ['support_manager', 'manager'], true) ? $supportHandlingId : null;
+        $roleInsert->execute(['loadtest-role-' . $role, $hash, 'Synthetic ' . $role, 'Benchmark Synthetic Unit', $departmentId,
+                              'SYN-ROLE-' . $role, '7000000000', $role, $handlingId]);
+    }
     $pdo->exec("INSERT INTO categories (name, code, service_group, is_active) VALUES ('Benchmark Request', 'BENCH-REQ', 'it', 1)");
     $categoryId = (int) $pdo->lastInsertId();
 
@@ -124,4 +136,4 @@ try {
     throw $exception;
 }
 
-printf("Seeded 250 synthetic accounts, 500 assets, 2500 tickets, 1000 notifications, and %d food calendar days (%s Jalali).\n", $days, $jalaliMonthLabel);
+printf("Seeded 250 synthetic load accounts plus 8 requester/role fixtures, 500 assets, 2500 tickets, 1000 notifications, and %d food calendar days (%s Jalali).\n", $days, $jalaliMonthLabel);
