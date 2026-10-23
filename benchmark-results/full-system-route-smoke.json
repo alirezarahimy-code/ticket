@@ -1,26 +1,30 @@
 {
-  "scope": "authenticated representative route/API smoke on disposable synthetic MariaDB only",
+  "scope": "authenticated app-wide page/API/selected role and write-lifecycle smoke on disposable synthetic MariaDB only",
   "synthetic_only": true,
   "account": "loadtest-001",
   "pages_tested": 37,
-  "api_reads_tested": 26,
-  "role_checks_tested": 3,
-  "expected_authorization_rejections": 3,
-  "http_error_responses": 3,
-  "unexpected_http_error_responses": 0,
-  "application_error_payloads": 1,
+  "api_reads_tested": 68,
+  "role_checks_tested": 55,
+  "expected_authorization_rejections": 21,
+  "http_error_responses": 25,
+  "unexpected_http_error_responses": 4,
+  "application_error_payloads": 7,
   "food_ticket_group_write_lifecycle_tested": true,
+  "inventory_api_write_lifecycle_tested": false,
+  "traffic_control_write_lifecycle_tested": false,
   "php_runtime_log_error_lines": 0,
-  "database_error_log_lines": 0,
+  "database_error_log_lines": 1,
   "php_runtime_log_samples": [],
-  "database_error_log_samples": [],
+  "database_error_log_samples": [
+    "[4060] [Fri Oct 23 01:18:25 2026] [inventory-api] save failed: SQLSTATE[21S01]: Insert value list does not match column list: 1136 Column count doesn't match value count at row 1"
+  ],
   "food_order_write_lifecycle_tested": true,
-  "total_checks": 74,
-  "passed": 74,
-  "failed": 0,
-  "elapsed_seconds": 2.151,
-  "p50_latency_ms": 21.07,
-  "max_latency_ms": 131.63,
+  "total_checks": 155,
+  "passed": 148,
+  "failed": 7,
+  "elapsed_seconds": 2.462,
+  "p50_latency_ms": 10.19,
+  "max_latency_ms": 76.87,
   "fatal": null,
   "results": [
     {
@@ -28,7 +32,7 @@
       "method": "GET",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 17.45,
+      "latency_ms": 8.95,
       "ok": true,
       "error": ""
     },
@@ -37,7 +41,7 @@
       "method": "POST",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 127.24,
+      "latency_ms": 76.15,
       "ok": true,
       "error": ""
     },
@@ -46,7 +50,7 @@
       "method": "GET",
       "path": "index.php?page=dashboard",
       "status": 200,
-      "latency_ms": 54.59,
+      "latency_ms": 25.81,
       "ok": true,
       "error": ""
     },
@@ -55,7 +59,7 @@
       "method": "GET",
       "path": "index.php?page=profile",
       "status": 200,
-      "latency_ms": 21.07,
+      "latency_ms": 10.19,
       "ok": true,
       "error": ""
     },
@@ -64,7 +68,7 @@
       "method": "GET",
       "path": "index.php?page=queue",
       "status": 200,
-      "latency_ms": 100.65,
+      "latency_ms": 50.7,
       "ok": true,
       "error": ""
     },
@@ -73,7 +77,7 @@
       "method": "GET",
       "path": "index.php?page=ticket&id=1",
       "status": 200,
-      "latency_ms": 24.81,
+      "latency_ms": 12.77,
       "ok": true,
       "error": ""
     },
@@ -82,7 +86,7 @@
       "method": "GET",
       "path": "index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 39.19,
+      "latency_ms": 21.05,
       "ok": true,
       "error": ""
     },
@@ -91,7 +95,7 @@
       "method": "GET",
       "path": "index.php?page=local-accounts",
       "status": 200,
-      "latency_ms": 21.54,
+      "latency_ms": 12.06,
       "ok": true,
       "error": ""
     },
@@ -100,7 +104,7 @@
       "method": "GET",
       "path": "index.php?page=settings",
       "status": 200,
-      "latency_ms": 62.9,
+      "latency_ms": 33.07,
       "ok": true,
       "error": ""
     },
@@ -109,7 +113,7 @@
       "method": "GET",
       "path": "index.php?page=reports",
       "status": 200,
-      "latency_ms": 72.55,
+      "latency_ms": 33.51,
       "ok": true,
       "error": ""
     },
@@ -118,7 +122,7 @@
       "method": "GET",
       "path": "index.php?page=analytics",
       "status": 200,
-      "latency_ms": 25.79,
+      "latency_ms": 15.01,
       "ok": true,
       "error": ""
     },
@@ -127,7 +131,7 @@
       "method": "GET",
       "path": "index.php?page=supervisor",
       "status": 200,
-      "latency_ms": 69.47,
+      "latency_ms": 33.05,
       "ok": true,
       "error": ""
     },
@@ -136,7 +140,7 @@
       "method": "GET",
       "path": "index.php?page=inventory",
       "status": 200,
-      "latency_ms": 44.33,
+      "latency_ms": 25.61,
       "ok": true,
       "error": ""
     },
@@ -145,7 +149,7 @@
       "method": "GET",
       "path": "index.php?page=inventory-diagnostics",
       "status": 200,
-      "latency_ms": 20.57,
+      "latency_ms": 10.4,
       "ok": true,
       "error": ""
     },
@@ -154,7 +158,7 @@
       "method": "GET",
       "path": "index.php?page=domain-scan",
       "status": 200,
-      "latency_ms": 25.52,
+      "latency_ms": 15.72,
       "ok": true,
       "error": ""
     },
@@ -163,7 +167,7 @@
       "method": "GET",
       "path": "index.php?page=assets",
       "status": 200,
-      "latency_ms": 33.9,
+      "latency_ms": 16.64,
       "ok": true,
       "error": ""
     },
@@ -172,7 +176,7 @@
       "method": "GET",
       "path": "index.php?page=asset&id=1",
       "status": 200,
-      "latency_ms": 41.43,
+      "latency_ms": 23.56,
       "ok": true,
       "error": ""
     },
@@ -181,7 +185,7 @@
       "method": "GET",
       "path": "index.php?page=asset-history&id=1",
       "status": 200,
-      "latency_ms": 21.46,
+      "latency_ms": 11.22,
       "ok": true,
       "error": ""
     },
@@ -190,7 +194,7 @@
       "method": "GET",
       "path": "index.php?page=cd-dvd",
       "status": 200,
-      "latency_ms": 28.14,
+      "latency_ms": 14.85,
       "ok": true,
       "error": ""
     },
@@ -199,7 +203,7 @@
       "method": "GET",
       "path": "index.php?page=cd-dvd-history",
       "status": 200,
-      "latency_ms": 20.19,
+      "latency_ms": 10.61,
       "ok": true,
       "error": ""
     },
@@ -208,7 +212,7 @@
       "method": "GET",
       "path": "index.php?page=traffic-control",
       "status": 200,
-      "latency_ms": 25.84,
+      "latency_ms": 13.45,
       "ok": true,
       "error": ""
     },
@@ -217,7 +221,7 @@
       "method": "GET",
       "path": "index.php?page=governance",
       "status": 200,
-      "latency_ms": 131.63,
+      "latency_ms": 57.23,
       "ok": true,
       "error": ""
     },
@@ -226,7 +230,7 @@
       "method": "GET",
       "path": "index.php?page=organization",
       "status": 200,
-      "latency_ms": 24.08,
+      "latency_ms": 14.78,
       "ok": true,
       "error": ""
     },
@@ -235,7 +239,7 @@
       "method": "GET",
       "path": "index.php?page=holidays",
       "status": 200,
-      "latency_ms": 21.43,
+      "latency_ms": 10.91,
       "ok": true,
       "error": ""
     },
@@ -244,7 +248,7 @@
       "method": "GET",
       "path": "index.php?page=knowledge",
       "status": 200,
-      "latency_ms": 20.96,
+      "latency_ms": 11.13,
       "ok": true,
       "error": ""
     },
@@ -253,7 +257,7 @@
       "method": "GET",
       "path": "index.php?page=notifications",
       "status": 200,
-      "latency_ms": 20.65,
+      "latency_ms": 11.32,
       "ok": true,
       "error": ""
     },
@@ -262,7 +266,7 @@
       "method": "GET",
       "path": "index.php?page=search&q=synthetic",
       "status": 200,
-      "latency_ms": 44.94,
+      "latency_ms": 22.77,
       "ok": true,
       "error": ""
     },
@@ -271,7 +275,7 @@
       "method": "GET",
       "path": "index.php?page=backup",
       "status": 200,
-      "latency_ms": 20.79,
+      "latency_ms": 10.99,
       "ok": true,
       "error": ""
     },
@@ -280,7 +284,7 @@
       "method": "GET",
       "path": "index.php?page=chatbot-admin",
       "status": 200,
-      "latency_ms": 38.57,
+      "latency_ms": 19.1,
       "ok": true,
       "error": ""
     },
@@ -289,7 +293,7 @@
       "method": "GET",
       "path": "index.php?page=services",
       "status": 200,
-      "latency_ms": 23.07,
+      "latency_ms": 12.44,
       "ok": true,
       "error": ""
     },
@@ -298,7 +302,7 @@
       "method": "GET",
       "path": "index.php?page=system-health",
       "status": 200,
-      "latency_ms": 25.03,
+      "latency_ms": 13.66,
       "ok": true,
       "error": ""
     },
@@ -307,7 +311,7 @@
       "method": "GET",
       "path": "index.php?page=logs",
       "status": 200,
-      "latency_ms": 36.5,
+      "latency_ms": 19.83,
       "ok": true,
       "error": ""
     },
@@ -316,7 +320,7 @@
       "method": "GET",
       "path": "index.php?page=activity-log",
       "status": 200,
-      "latency_ms": 23.79,
+      "latency_ms": 12.81,
       "ok": true,
       "error": ""
     },
@@ -325,7 +329,7 @@
       "method": "GET",
       "path": "index.php?page=help",
       "status": 200,
-      "latency_ms": 21.08,
+      "latency_ms": 11.23,
       "ok": true,
       "error": ""
     },
@@ -334,7 +338,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket",
       "status": 200,
-      "latency_ms": 22.32,
+      "latency_ms": 11.45,
       "ok": true,
       "error": ""
     },
@@ -343,7 +347,7 @@
       "method": "GET",
       "path": "index.php?page=food-order",
       "status": 200,
-      "latency_ms": 23.62,
+      "latency_ms": 12.62,
       "ok": true,
       "error": ""
     },
@@ -352,7 +356,7 @@
       "method": "GET",
       "path": "index.php?page=food-personnel-link",
       "status": 200,
-      "latency_ms": 27.19,
+      "latency_ms": 14.92,
       "ok": true,
       "error": ""
     },
@@ -361,7 +365,7 @@
       "method": "GET",
       "path": "index.php?page=change-password",
       "status": 200,
-      "latency_ms": 20.43,
+      "latency_ms": 10.73,
       "ok": true,
       "error": ""
     },
@@ -370,7 +374,7 @@
       "method": "GET",
       "path": "index.php?page=audit",
       "status": 200,
-      "latency_ms": 36.9,
+      "latency_ms": 21.68,
       "ok": true,
       "error": ""
     },
@@ -379,7 +383,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=health",
       "status": 200,
-      "latency_ms": 16.68,
+      "latency_ms": 8.43,
       "ok": true,
       "error": ""
     },
@@ -388,7 +392,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=session",
       "status": 200,
-      "latency_ms": 11.8,
+      "latency_ms": 7.25,
       "ok": true,
       "error": ""
     },
@@ -397,7 +401,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=config",
       "status": 200,
-      "latency_ms": 20.2,
+      "latency_ms": 10.5,
       "ok": true,
       "error": ""
     },
@@ -406,7 +410,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=monitoring",
       "status": 200,
-      "latency_ms": 14.47,
+      "latency_ms": 8.63,
       "ok": true,
       "error": ""
     },
@@ -415,7 +419,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=employees",
       "status": 200,
-      "latency_ms": 14.04,
+      "latency_ms": 8.61,
       "ok": true,
       "error": ""
     },
@@ -424,7 +428,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=guest-cards",
       "status": 200,
-      "latency_ms": 15.99,
+      "latency_ms": 9.19,
       "ok": true,
       "error": ""
     },
@@ -433,7 +437,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=guest-cap",
       "status": 200,
-      "latency_ms": 15.88,
+      "latency_ms": 9.42,
       "ok": true,
       "error": ""
     },
@@ -442,7 +446,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 16.78,
+      "latency_ms": 9.98,
       "ok": true,
       "error": ""
     },
@@ -451,7 +455,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=orders",
       "status": 200,
-      "latency_ms": 13.62,
+      "latency_ms": 9.0,
       "ok": true,
       "error": ""
     },
@@ -460,7 +464,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/status",
       "status": 200,
-      "latency_ms": 13.65,
+      "latency_ms": 8.43,
       "ok": true,
       "error": ""
     },
@@ -469,7 +473,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/month&month=1405-08",
       "status": 200,
-      "latency_ms": 16.08,
+      "latency_ms": 9.23,
       "ok": true,
       "error": ""
     },
@@ -478,7 +482,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
       "status": 200,
-      "latency_ms": 14.37,
+      "latency_ms": 8.62,
       "ok": true,
       "error": ""
     },
@@ -487,7 +491,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/orders&date=2026-10-23",
       "status": 200,
-      "latency_ms": 14.13,
+      "latency_ms": 7.97,
       "ok": true,
       "error": ""
     },
@@ -496,7 +500,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/cancel-requests",
       "status": 200,
-      "latency_ms": 13.84,
+      "latency_ms": 8.34,
       "ok": true,
       "error": ""
     },
@@ -505,7 +509,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/groups",
       "status": 200,
-      "latency_ms": 14.99,
+      "latency_ms": 8.33,
       "ok": true,
       "error": ""
     },
@@ -514,7 +518,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=food-menu/statistics&from=2026-10-23&to=2026-10-23",
       "status": 200,
-      "latency_ms": 14.07,
+      "latency_ms": 8.23,
       "ok": true,
       "error": ""
     },
@@ -523,7 +527,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=month&month=1405-08",
       "status": 200,
-      "latency_ms": 15.3,
+      "latency_ms": 8.68,
       "ok": true,
       "error": ""
     },
@@ -532,7 +536,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=my-orders",
       "status": 200,
-      "latency_ms": 14.27,
+      "latency_ms": 13.94,
       "ok": true,
       "error": ""
     },
@@ -541,7 +545,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=search-users&q=loadtest",
       "status": 200,
-      "latency_ms": 13.83,
+      "latency_ms": 7.75,
       "ok": true,
       "error": ""
     },
@@ -550,7 +554,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=day-visit&date=2026-10-23",
       "status": 200,
-      "latency_ms": 15.72,
+      "latency_ms": 8.97,
       "ok": true,
       "error": ""
     },
@@ -559,27 +563,780 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=guest-requests",
       "status": 403,
-      "latency_ms": 12.11,
+      "latency_ms": 7.49,
       "ok": true,
       "error": "",
       "expected_rejection": true,
       "application_error": "این بخش فقط برای مدیران و بالاتر فعال است."
     },
     {
+      "name": "food-ticket API GET absent",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=absent&from=2026-10-23&to=2026-10-23",
+      "status": 200,
+      "latency_ms": 8.79,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket API GET guest-requests-report",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=guest-requests-report&from=2026-10-23&to=2026-10-23&deputy_id=all",
+      "status": 200,
+      "latency_ms": 7.69,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket API GET food-manual-attendance",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-manual-attendance&date=2026-10-23",
+      "status": 200,
+      "latency_ms": 10.28,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-ticket API GET orders",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=orders&date=2026-10-23",
+      "status": 200,
+      "latency_ms": 9.27,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-order menu API GET food-menu/group-orders",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/group-orders&date=2026-10-23&group_id=all",
+      "status": 200,
+      "latency_ms": 9.72,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-order menu API GET food-menu/bulk-snapshot",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/bulk-snapshot&date=2026-10-23&meal_type=lunch",
+      "status": 200,
+      "latency_ms": 11.66,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "food-order menu API GET food-menu/emergency/people",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/emergency/people",
+      "status": 200,
+      "latency_ms": 7.81,
+      "ok": true,
+      "error": ""
+    },
+    {
       "name": "traffic API invalid national code is rejected safely",
       "method": "GET",
       "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.41,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "chatbot API validates empty synthetic question before provider use",
+      "method": "POST",
+      "path": "index.php?page=chatbot-api",
+      "status": 400,
+      "latency_ms": 13.25,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:primary_admin:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 200,
+      "latency_ms": 13.13,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:food-groups",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
       "latency_ms": 11.8,
       "ok": true,
       "error": ""
     },
     {
+      "name": "role-matrix:primary_admin:employees",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=employees",
+      "status": 200,
+      "latency_ms": 8.07,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:config",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=config",
+      "status": 200,
+      "latency_ms": 10.55,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:food-menu/catalog",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
+      "status": 200,
+      "latency_ms": 10.41,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.32,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 8.82,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:primary_admin:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 18.35,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 10.16,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 76.4,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:supervisor:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 403,
+      "latency_ms": 11.66,
+      "ok": false,
+      "error": "HTTP 403; unexpected status 403"
+    },
+    {
+      "name": "role-matrix:supervisor:food-groups",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-groups",
+      "status": 403,
+      "latency_ms": 7.82,
+      "ok": false,
+      "error": "HTTP 403; unexpected status 403; non-JSON response"
+    },
+    {
+      "name": "role-matrix:supervisor:employees",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=employees",
+      "status": 403,
+      "latency_ms": 7.83,
+      "ok": false,
+      "error": "HTTP 403; unexpected status 403; non-JSON response"
+    },
+    {
+      "name": "role-matrix:supervisor:config",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=config",
+      "status": 403,
+      "latency_ms": 7.67,
+      "ok": false,
+      "error": "denied role did not receive a JSON authorization error",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:supervisor:food-menu/catalog",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
+      "status": 403,
+      "latency_ms": 7.51,
+      "ok": false,
+      "error": "denied role did not receive a JSON authorization error",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:supervisor:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.57,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:supervisor:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 8.64,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:supervisor:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 18.94,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 9.15,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 63.43,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 200,
+      "latency_ms": 11.35,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:food-groups",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-groups",
+      "status": 200,
+      "latency_ms": 10.85,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:employees",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=employees",
+      "status": 200,
+      "latency_ms": 8.82,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:config",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=config",
+      "status": 403,
+      "latency_ms": 7.94,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true,
+      "application_error": "دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست."
+    },
+    {
+      "name": "role-matrix:support_manager:food-menu/catalog",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
+      "status": 200,
+      "latency_ms": 8.71,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.38,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 9.35,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:support_manager:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 18.22,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 9.68,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 76.87,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:inspector:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 200,
+      "latency_ms": 14.3,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:inspector:food-groups",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-groups",
+      "status": 200,
+      "latency_ms": 11.64,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:inspector:employees",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=employees",
+      "status": 403,
+      "latency_ms": 8.42,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true,
+      "application_error": "دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست."
+    },
+    {
+      "name": "role-matrix:inspector:config",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=config",
+      "status": 403,
+      "latency_ms": 8.15,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true,
+      "application_error": "دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست."
+    },
+    {
+      "name": "role-matrix:inspector:food-menu/catalog",
+      "method": "GET",
+      "path": "index.php?page=food-ticket&food_api=food-menu/catalog",
+      "status": 403,
+      "latency_ms": 7.94,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true,
+      "application_error": "دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست."
+    },
+    {
+      "name": "role-matrix:inspector:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.78,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:inspector:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 8.81,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:inspector:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 19.06,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 9.79,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 62.96,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:manager:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 403,
+      "latency_ms": 10.83,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:manager:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.71,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:manager:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 8.32,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:manager:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 16.43,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 8.78,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 76.41,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:agent:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 403,
+      "latency_ms": 11.16,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:agent:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 8.1,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:agent:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 8.62,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:agent:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 18.43,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 9.08,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 62.99,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:user:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 403,
+      "latency_ms": 11.68,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:user:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 403,
+      "latency_ms": 8.77,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true,
+      "application_error": "دسترسی مجاز نیست"
+    },
+    {
+      "name": "role-matrix:user:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 9.24,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:user:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 200,
+      "latency_ms": 17.46,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 9.49,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 60.11,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:local_user:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 403,
+      "latency_ms": 8.28,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:local_user:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 403,
+      "latency_ms": 7.03,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true,
+      "application_error": "دسترسی مجاز نیست"
+    },
+    {
+      "name": "role-matrix:local_user:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 7.78,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:local_user:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 403,
+      "latency_ms": 8.14,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "login form / CSRF",
+      "method": "GET",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 8.31,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "synthetic account login",
+      "method": "POST",
+      "path": "index.php?page=login",
+      "status": 200,
+      "latency_ms": 65.37,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:guard:food-ticket page",
+      "method": "GET",
+      "path": "index.php?page=food-ticket",
+      "status": 403,
+      "latency_ms": 8.29,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "role-matrix:guard:traffic lookup",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=000",
+      "status": 200,
+      "latency_ms": 7.32,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:guard:food-order/my-orders",
+      "method": "GET",
+      "path": "index.php?page=food-order&food_api=my-orders",
+      "status": 200,
+      "latency_ms": 8.97,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "role-matrix:guard:new-ticket",
+      "method": "GET",
+      "path": "index.php?page=new-ticket",
+      "status": 403,
+      "latency_ms": 8.11,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "inventory API rejects missing device token",
+      "method": "POST",
+      "path": "api/inventory.php",
+      "status": 401,
+      "latency_ms": 1.22,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "inventory API validates empty hardware payload",
+      "method": "POST",
+      "path": "api/inventory.php",
+      "status": 422,
+      "latency_ms": 0.57,
+      "ok": true,
+      "error": "",
+      "expected_rejection": true
+    },
+    {
+      "name": "inventory API creates synthetic hardware snapshot",
+      "method": "POST",
+      "path": "api/inventory.php",
+      "status": 500,
+      "latency_ms": 3.13,
+      "ok": false,
+      "error": "valid synthetic inventory payload was not stored"
+    },
+    {
+      "name": "traffic handler creates synthetic visit",
+      "method": "POST",
+      "path": "index.php?page=traffic-control",
+      "status": 200,
+      "latency_ms": 18.31,
+      "ok": true,
+      "error": ""
+    },
+    {
+      "name": "traffic API reads back synthetic visit",
+      "method": "GET",
+      "path": "index.php?page=traffic-control&traffic_api=lookup&code=6017655736",
+      "status": 200,
+      "latency_ms": 7.89,
+      "ok": false,
+      "error": "traffic lookup did not return the synthetic row created by the handler"
+    },
+    {
       "name": "food-ticket synthetic POST create group",
       "method": "POST",
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 27.52,
+      "latency_ms": 15.52,
       "ok": true,
       "error": ""
     },
@@ -588,7 +1345,7 @@
       "method": "GET",
       "path": "index.php?page=food-ticket&food_api=absence-status&group_id=1&date=2026-10-23",
       "status": 200,
-      "latency_ms": 18.09,
+      "latency_ms": 10.82,
       "ok": true,
       "error": ""
     },
@@ -597,7 +1354,7 @@
       "method": "POST",
       "path": "index.php?page=food-ticket&food_api=food-groups",
       "status": 200,
-      "latency_ms": 22.27,
+      "latency_ms": 12.15,
       "ok": true,
       "error": ""
     },
@@ -606,7 +1363,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=month&month=1405-08",
       "status": 200,
-      "latency_ms": 14.46,
+      "latency_ms": 8.96,
       "ok": true,
       "error": ""
     },
@@ -615,7 +1372,7 @@
       "method": "POST",
       "path": "index.php?page=food-order&food_api=order",
       "status": 200,
-      "latency_ms": 17.39,
+      "latency_ms": 9.9,
       "ok": true,
       "error": ""
     },
@@ -624,7 +1381,7 @@
       "method": "POST",
       "path": "index.php?page=food-order&food_api=cancel",
       "status": 200,
-      "latency_ms": 16.21,
+      "latency_ms": 9.47,
       "ok": true,
       "error": ""
     },
@@ -633,7 +1390,7 @@
       "method": "GET",
       "path": "index.php?page=food-order&food_api=my-orders&from=2026-10-23&to=2026-10-23",
       "status": 200,
-      "latency_ms": 15.07,
+      "latency_ms": 9.33,
       "ok": true,
       "error": ""
     },
@@ -651,7 +1408,7 @@
       "method": "GET",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 16.17,
+      "latency_ms": 9.07,
       "ok": true,
       "error": ""
     },
@@ -660,7 +1417,7 @@
       "method": "POST",
       "path": "index.php?page=login",
       "status": 200,
-      "latency_ms": 96.43,
+      "latency_ms": 72.43,
       "ok": true,
       "error": ""
     },
@@ -669,7 +1426,7 @@
       "method": "GET",
       "path": "index.php?page=new-ticket",
       "status": 200,
-      "latency_ms": 36.32,
+      "latency_ms": 17.54,
       "ok": true,
       "error": ""
     },
@@ -678,7 +1435,7 @@
       "method": "GET",
       "path": "index.php?page=settings",
       "status": 403,
-      "latency_ms": 20.73,
+      "latency_ms": 11.63,
       "ok": true,
       "error": "",
       "expected_rejection": true
@@ -688,16 +1445,17 @@
       "method": "GET",
       "path": "index.php?page=food-ticket",
       "status": 403,
-      "latency_ms": 21.58,
+      "latency_ms": 11.25,
       "ok": true,
       "error": "",
       "expected_rejection": true
     }
   ],
   "limitations": [
-    "No real LDAP/domain, Access/ODBC, printer, hardware inventory, email/SMS, or external AI provider was exercised.",
-    "Only primary-admin and generic requester permissions are runtime-smoked; this is not a complete role matrix or exhaustive write-action test.",
-    "Cron/queue worker execution, printable output, and full inventory collection are not exercised by this route smoke.",
+    "All nine application roles receive representative permission-boundary requests, not a complete role-by-route/action Cartesian matrix.",
+    "Inventory writes use a synthetic fixture payload; no WMI/CIM collection or real device was contacted.",
+    "Traffic, inventory, food-order, food-group, ticket, and CD/DVD flows are tested selectively; this is not every write handler or complete module workflow.",
+    "LDAP/AD, Access/ODBC, printers, physical hardware, external providers, cron/queue workers, and production/staging capacity are not exercised.",
     "No production endpoint or operational account was used."
   ],
   "server_log": "/tmp/ticket-full-system-routes.log"
