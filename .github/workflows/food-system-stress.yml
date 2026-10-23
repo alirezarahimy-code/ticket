@@ -73,7 +73,6 @@ jobs:
 
       - name: Run food-only Python static tests
         id: python_static
-        continue-on-error: true
         run: |
           set +e
           mkdir -p benchmark-results
@@ -131,7 +130,6 @@ jobs:
 
       - name: Run 250 concurrent self-order lifecycles, 250 manager VUs, bulk writes, and food CRUD
         id: food_stress
-        continue-on-error: true
         env:
           PHP_CLI_SERVER_WORKERS: '32'
         run: |
@@ -169,10 +167,6 @@ jobs:
           print(f"::notice title=Food stress verified metrics::{line}")
           print(line)
           PY
-
-      - name: Enforce food-only stress and Python test results
-        if: always()
-        run: test "${{ steps.python_static.outcome }}" = success && test "${{ steps.food_stress.conclusion }}" = success
 
       - name: Add food stress result to Actions summary
         if: always()
