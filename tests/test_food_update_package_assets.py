@@ -4,7 +4,7 @@ from zipfile import ZipFile
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = ROOT / "downloads/ticket-update-1.61.10-food-runtime-recovery-r33-20261024.zip"
+PACKAGE = ROOT / "downloads/ticket-update-1.61.10-food-runtime-recovery-r33.1-20261024.zip"
 
 
 REQUIRED_FILES = [
@@ -35,6 +35,7 @@ REQUIRED_FILES = [
     "files/food-ticket-web/assets/jalali-calendar.js",
     "files/food-ticket-web/assets/list-sort.js",
     "files/migrations/006-food-meal-type.sql",
+    "migrations/006-food-meal-type.sql",
 ]
 
 
