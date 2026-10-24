@@ -22,7 +22,7 @@ class FoodCancelRequestTimestampTests(unittest.TestCase):
         self.assertIn("class=\"food-cancel-request-time\">زمان ثبت درخواست:", source)
         self.assertIn("زمان ثبت درخواست</th>", manager)
         self.assertIn("row.requested_at_label", manager)
-        self.assertIn("assets/food-menu.js?v=24", read("food-ticket-web/index.html"))
+        self.assertIn("assets/food-menu.js?v=25", read("food-ticket-web/index.html"))
         user_js = read("assets/food-order.js")
         self.assertIn("زمان ثبت درخواست:", user_js)
         self.assertIn("SELECT id, order_id, status, created_at FROM food_order_cancel_requests", source)

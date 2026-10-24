@@ -10,6 +10,9 @@ on:
       - 'tools/food_system_seed.php'
       - 'tools/food_system_verify.php'
       - 'tools/food_system_router.php'
+      - 'tests/test_food*.py'
+      - 'tests/test_food_order_calendar_node.js'
+      - 'tests/js/food-menu-by-menu.test.js'
   workflow_dispatch:
 
 permissions:
@@ -83,8 +86,7 @@ jobs:
       - name: Run food-only JavaScript test
         run: node tests/test_food_order_calendar_node.js
 
-      - name: Record legacy food-menu view test status (diagnostic only)
-        continue-on-error: true
+      - name: Run food-menu grouping JavaScript test
         run: node tests/js/food-menu-by-menu.test.js
 
       - name: Run food-only PHP logic tests (offline; no physical printer)
