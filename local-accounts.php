@@ -7,7 +7,7 @@ declare(strict_types=1);
  * - هر پرسنل غذایی که در دامین نیست، حساب محلی دارد: نام کاربری = کد پرسنلی.
  * - رمز اولیه ثابت است و در اولین ورود باید تغییر کند (must_change_password = 1).
  * - تغییر رمز: کاربر خودش (با رمز فعلی). ریست رمز: فقط ادمین اصلی.
- * - انتخاب نگهبان: فقط ادمین اصلی، در زیر فرم «کاربران محلی» با تیک زدن.
+ * - انتخاب بازرسی: فقط ادمین اصلی، در زیر فرم «کاربران محلی» با تیک زدن.
  */
 
 if (!defined('LAC_DEFAULT_PASSWORD')) {
@@ -20,7 +20,57 @@ function lac_default_hash(): string
     return password_hash(LAC_DEFAULT_PASSWORD, PASSWORD_DEFAULT);
 }
 
-/** آیا این کاربر باید به سفارش غذا هدایت شود (کاربر محلی یا نگهبان)؟ */
+/**
+ * ستون must_change_password و نقش‌های local_user/guard را در صورت نبودن اضافه می‌کند.
+ * خطا نباید صفحهٔ دیگری (مثل صف کاری) را بخواباند.
+ */
+function lac_ensure_schema(): bool
+{
+    static $ready = false;
+    if ($ready) {
+        return true;
+    }
+    if (!function_exists('db')) {
+        return false;
+    }
+    try {
+        $pdo = db();
+        $dbName = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
+        $stmt = $pdo->prepare("SELECT COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'users' AND COLUMN_NAME IN ('role', 'must_change_password')");
+        $stmt->execute([$dbName !== '' ? $dbName : null]);
+        $types = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $types[strtolower((string) ($row['COLUMN_NAME'] ?? ''))] = (string) ($row['COLUMN_TYPE'] ?? '');
+        }
+        if (!isset($types['must_change_password'])) {
+            $pdo->exec('ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 0');
+        }
+        $roleType = $types['role'] ?? '';
+        if ($roleType !== '' && (!str_contains($roleType, "'local_user'") || !str_contains($roleType, "'guard'"))) {
+            preg_match('/^enum\\((.*)\\)$/i', $roleType, $match);
+            $values = [];
+            if (isset($match[1])) {
+                preg_match_all("/'((?:[^'\\\\]|\\\\.)*)'/", $match[1], $parts);
+                $values = $parts[1] ?? [];
+            }
+            foreach (['local_user', 'guard'] as $need) {
+                if (!in_array($need, $values, true)) {
+                    $values[] = $need;
+                }
+            }
+            if ($values !== []) {
+                $list = implode(',', array_map(static fn (string $value): string => "'" . str_replace("'", "\\'", $value) . "'", $values));
+                $pdo->exec('ALTER TABLE users MODIFY COLUMN role ENUM(' . $list . ') NOT NULL DEFAULT \'user\'');
+            }
+        }
+        $ready = true;
+        return true;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/** آیا این کاربر باید به سفارش غذا هدایت شود (کاربر محلی یا بازرسی)؟ */
 function lac_is_local_role(?array $user): bool
 {
     return $user !== null && in_array((string) ($user['role'] ?? ''), ['local_user', 'guard'], true);
@@ -71,7 +121,7 @@ function lac_change_password_request(): never
     exit;
 }
 
-/** زیر فرم «کاربران محلی» (فقط ادمین اصلی): جدا از کاربران دامین؛ انتخاب نگهبان با تیک و ریست رمز. */
+/** زیر فرم «کاربران محلی» (فقط ادمین اصلی): جدا از کاربران دامین؛ انتخاب بازرسی با تیک و ریست رمز. */
 function lac_admin_request(): never
 {
     $admin = require_primary_admin();
@@ -94,7 +144,7 @@ function lac_admin_request(): never
             if (function_exists('save_audit')) {
                 save_audit((int) ($admin['id'] ?? 0), 'local_guard_roles_saved', null, ['changed' => $changed]);
             }
-            flash('success', 'نقش‌های نگهبان ذخیره شد. تعداد حساب‌های تغییریافته: ' . $changed . '.');
+            flash('success', 'نقش‌های بازرسی ذخیره شد. تعداد حساب‌های تغییریافته: ' . $changed . '.');
         } elseif ($action === 'reset') {
             $targetId = (int) ($_POST['user_id'] ?? 0);
             $check = db()->prepare("SELECT id FROM users WHERE id = ? AND auth_source = 'local' AND is_primary_admin = 0 LIMIT 1");
@@ -113,6 +163,7 @@ function lac_admin_request(): never
         redirect('index.php?page=local-accounts');
     }
 
+    lac_ensure_schema();
     $rows = db()->query("SELECT id, username, full_name, national_code, role, is_active, must_change_password, is_primary_admin FROM users WHERE auth_source = 'local' ORDER BY role = 'guard' DESC, username, id")->fetchAll();
     $roles = permission_roles();
     $guardCount = 0;
@@ -124,13 +175,13 @@ function lac_admin_request(): never
     render_header('کاربران محلی', $admin);
     echo '<section class="page-heading"><div><span class="eyebrow">تنظیمات کاربران</span><h1>کاربران محلی</h1>';
     echo '<p>این فهرست کاملاً جدا از کاربران دامین است. نام کاربری هر حساب کد پرسنلی است. ';
-    echo 'کاربری که تیک «نگهبان» بخورد دسترسی نگهبان می‌گیرد؛ بقیه کاربر محلی می‌مانند.</p></div></section>';
+    echo 'کاربری که تیک «بازرسی» بخورد دسترسی بازرسی می‌گیرد؛ بقیه کاربر محلی می‌مانند.</p></div></section>';
     echo '<div class="panel">';
-    echo '<p>تعداد کل حساب‌های محلی: ' . count($rows) . ' — نگهبان‌ها: ' . $guardCount . '</p>';
+    echo '<p>تعداد کل حساب‌های محلی: ' . count($rows) . ' — بازرسی‌ها: ' . $guardCount . '</p>';
     echo '<p><label>جستجو (نام، نام کاربری یا کد ملی): <input type="search" id="lacFilter" data-lac-filter autocomplete="off" placeholder="نام، نام کاربری یا کد ملی"></label> <small data-lac-count aria-live="polite"></small></p>';
 
     echo '<form method="post" action="index.php?page=local-accounts">' . csrf_field() . '<input type="hidden" name="action" value="save_roles">';
-    echo '<table class="data-table"><thead><tr><th>نگهبان</th><th>نام کاربری (کد پرسنلی)</th><th>نام کامل</th><th>کد ملی</th><th>نقش</th><th>فعال</th><th>تغییر رمز اجباری</th><th>ریست رمز</th></tr></thead><tbody>';
+    echo '<table class="data-table"><thead><tr><th>بازرسی</th><th>نام کاربری (کد پرسنلی)</th><th>نام کامل</th><th>کد ملی</th><th>نقش</th><th>فعال</th><th>تغییر رمز اجباری</th><th>ریست رمز</th></tr></thead><tbody>';
     foreach ($rows as $row) {
         $id = (int) $row['id'];
         $editable = (int) $row['is_primary_admin'] !== 1 && in_array((string) $row['role'], ['local_user', 'guard'], true);
@@ -150,7 +201,7 @@ function lac_admin_request(): never
         echo '</td></tr>';
     }
     echo '</tbody></table>';
-    echo '<p><button type="submit" class="button primary">ذخیرهٔ نگهبان‌ها</button></p></form>';
+    echo '<p><button type="submit" class="button primary">ذخیرهٔ بازرسی‌ها</button></p></form>';
     // فرم‌های ریست رمز جدا هستند (داخل فرم اصلی نیستند)
     foreach ($rows as $row) {
         if ((int) $row['is_primary_admin'] === 1 || !in_array((string) $row['role'], ['local_user', 'guard'], true)) {

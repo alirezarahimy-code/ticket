@@ -11,6 +11,9 @@
   var state = {
     items: [],
     myDeputy: null,
+    todayJalali: '',
+    sameDayCutoff: '09:30',
+    sameDayOpen: null,
     loadError: '',
     formError: '',
     saving: false,
@@ -91,7 +94,12 @@
       ? '<div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr>'
         + '<th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>وضعیت</th><th></th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
-      : '<p class="muted">درخواست فعالی برای روزهای آینده ثبت نشده است.</p>';
+      : '<p class="muted">درخواست فعالی برای امروز یا روزهای آینده ثبت نشده است.</p>';
+    var deadlineNotice = state.sameDayOpen === null
+      ? '<div class="alert info" role="status">در حال بررسی مهلت ثبت درخواست مهمان برای امروز…</div>'
+      : state.sameDayOpen
+        ? '<div class="alert info" role="status">درخواست غذای مهمان برای امروز تا پایان دقیقهٔ <b>' + esc(faDigits(state.sameDayCutoff || '09:30')) + '</b> پذیرفته می‌شود؛ پس از آن فقط برای روزهای آینده می‌توان درخواست ثبت کرد.</div>'
+        : '<div class="alert warning" role="status">مهلت ثبت درخواست مهمان برای امروز گذشته است (تا پایان دقیقهٔ <b>' + esc(faDigits(state.sameDayCutoff || '09:30')) + '</b>). از فردا به بعد همچنان می‌توانید درخواست ثبت کنید.</div>';
     dialog.innerHTML = ''
       + '<div class="fo-modal-inner">'
       + '<div class="fo-modal-head"><div><h2 id="fg-title">سفارش غذای مهمان</h2>'
@@ -99,6 +107,7 @@
       + '<button type="button" class="button secondary" data-fg-action="close">بستن</button></div>'
       + (state.loadError ? '<div class="alert danger" role="alert">' + esc(state.loadError) + '</div>' : '')
       + deputyBox
+      + deadlineNotice
       + (state.formError ? '<div class="alert danger" role="alert">' + esc(state.formError) + '</div>' : '')
       + '<form id="fg-form" class="form-grid" novalidate>'
       + '<label>تاریخ مورد نیاز (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali name="request_date" value="' + esc(f.request_date) + '" required></label>'
@@ -143,10 +152,14 @@
       var data = await request('guest-requests');
       state.items = data.items || [];
       state.myDeputy = data.my_deputy || null;
+      state.todayJalali = data.today_jalali || state.todayJalali;
+      state.sameDayCutoff = data.same_day_cutoff || '09:30';
+      state.sameDayOpen = data.same_day_open !== false;
     } catch (e) {
       state.loadError = e.message;
     }
     readForm();
+    if (!state.form.request_date && state.todayJalali && state.sameDayOpen) state.form.request_date = state.todayJalali;
     render();
   }
 

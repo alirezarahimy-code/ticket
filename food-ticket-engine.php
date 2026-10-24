@@ -849,7 +849,7 @@ function food_ticket_process_batch_v2(?int $requestedLimit = null): array
             throw new RuntimeException('منبع سفارش داخلی آماده نیست؛ Worker حق اتصال به Access سفارش را ندارد.');
         }
         if ($attendancePath === '') {
-            $summary['message'] = 'مسیر منبع تردد TENTER تنظیم نشده است.';
+            $summary['message'] = 'مسیر فایل منبع تردد تنظیم نشده است.';
             $summary['errors'] = 1;
             return $summary;
         }

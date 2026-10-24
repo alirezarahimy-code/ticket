@@ -4,7 +4,7 @@ declare(strict_types=1);
 /**
  * جست‌وجوی سراسری — فهرست بخش‌ها و صفحه‌های سامانه (۱.۳۷.۷)
  *
- * چرا این فایل؟ پیش‌تر جست‌وجوی سراسری فقط در «تیکت، دارایی و دانش‌نامه» می‌گشت؛
+ * چرا این فایل؟ پیش‌تر جست‌وجوی سراسری فقط در «درخواست، دارایی و دانش‌نامه» می‌گشت؛
  * اگر کاربر «تردد» را می‌نوشت، صفحهٔ تردد — که با همین کلمه در منو دیده می‌شود — پیدا نمی‌شد.
  * اکنون هر صفحه/بخش سامانه با عنوان و «کلمات کلیدی فارسی» فهرست شده است و جست‌وجو
  * بر پایهٔ همین فهرست، صفحه‌های مرتبط را نشان می‌دهد (فقط صفحه‌هایی که کاربر اجازهٔ دیدنشان را دارد).
@@ -41,14 +41,14 @@ function global_search_catalog(): array
 {
     return [
         ['key' => 'dashboard', 'title' => 'داشبورد', 'url' => 'index.php', 'keywords' => ['خانه', 'صفحه اصلی', 'خلاصه وضعیت', 'کارتابل من', 'home', 'داشبورد']],
-        ['key' => 'new-ticket', 'title' => 'ثبت تیکت جدید', 'url' => 'index.php?page=new-ticket', 'keywords' => ['تیکت جدید', 'درخواست جدید', 'ثبت درخواست', 'پشتیبانی', 'خدمات کامپیوتری', 'تیکت']],
-        ['key' => 'queue', 'title' => 'صف کاری (کارتابل تیکت‌ها)', 'url' => 'index.php?page=queue', 'keywords' => ['تیکت', 'کارتابل', 'صف', 'وظایف من', 'رسیدگی'], 'perm' => 'queue.view'],
+        ['key' => 'new-ticket', 'title' => 'ثبت درخواست جدید', 'url' => 'index.php?page=new-ticket', 'keywords' => ['درخواست جدید', 'ثبت درخواست', 'پشتیبانی', 'خدمات کامپیوتری', 'درخواست', 'تیکت', 'تیکت جدید', 'ثبت تیکت']],
+        ['key' => 'queue', 'title' => 'صف کاری (کارتابل درخواست‌ها)', 'url' => 'index.php?page=queue', 'keywords' => ['درخواست', 'کارتابل', 'صف', 'وظایف من', 'رسیدگی'], 'perm' => 'queue.view'],
         ['key' => 'notifications', 'title' => 'اعلان‌ها', 'url' => 'index.php?page=notifications', 'keywords' => ['اعلان', 'پیام', 'اطلاعیه', 'زنگوله']],
         ['key' => 'profile', 'title' => 'پروفایل من', 'url' => 'index.php?page=profile', 'keywords' => ['حساب کاربری', 'مشخصات من', 'عکس پروفایل', 'کد ملی']],
         ['key' => 'search', 'title' => 'جست‌وجوی سراسری', 'url' => 'index.php?page=search', 'keywords' => ['جستجو', 'جست‌وجو', 'search', 'پیدا کردن']],
-        ['key' => 'reports', 'title' => 'گزارش تیکت‌ها', 'url' => 'index.php?page=reports', 'keywords' => ['گزارش', 'آمار تیکت', 'خروجی اکسل', 'عملکرد'], 'perm' => 'reports.view'],
+        ['key' => 'reports', 'title' => 'گزارش درخواست‌ها', 'url' => 'index.php?page=reports', 'keywords' => ['گزارش', 'آمار درخواست', 'خروجی اکسل', 'عملکرد'], 'perm' => 'reports.view'],
         ['key' => 'analytics', 'title' => 'چارت‌ها و نمودارها', 'url' => 'index.php?page=analytics', 'keywords' => ['نمودار', 'چارت', 'آمار', 'تحلیل'], 'perm' => 'analytics.view'],
-        ['key' => 'supervisor', 'title' => 'پنل سوپروایزر', 'url' => 'index.php?page=supervisor', 'keywords' => ['تأیید نهایی', 'بستن تیکت', 'سوپروایزر', 'بازگشایی', 'SLA', 'نظارت'], 'perm' => 'supervisor.panel'],
+        ['key' => 'supervisor', 'title' => 'پنل سوپروایزر', 'url' => 'index.php?page=supervisor', 'keywords' => ['تأیید نهایی', 'بستن درخواست', 'سوپروایزر', 'بازگشایی', 'SLA', 'نظارت'], 'perm' => 'supervisor.panel'],
         ['key' => 'services', 'title' => 'خدمات و دسته‌بندی خدمات', 'url' => 'index.php?page=services', 'keywords' => ['کاتالوگ خدمات', 'دسته خدمات', 'فیلدهای خدمت', 'فرم خدمت'], 'perm' => 'services.view'],
         ['key' => 'knowledge', 'title' => 'دانش‌نامه', 'url' => 'index.php?page=knowledge', 'keywords' => ['راهنما', 'مقالات', 'حل مشکل', 'آموزش', 'FAQ', 'پرسش‌های متداول'], 'perm' => 'knowledge.view'],
         ['key' => 'assets', 'title' => 'شناسنامه‌های فنی (کامپیوترها)', 'url' => 'index.php?page=assets', 'keywords' => ['شناسنامه', 'کامپیوتر', 'سیستم', 'دارایی', 'تجهیزات', 'سخت‌افزار', 'asset'], 'perm' => 'assets.view'],

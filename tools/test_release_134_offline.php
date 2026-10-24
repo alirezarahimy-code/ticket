@@ -72,9 +72,9 @@ foreach ($cards as [$label, $query]) {
     $needle = 'index.php?page=reports&amp;' . $query;
     check('۱-' . $label . ': کارت به گزارش فیلترشده لینک شده', strpos($index, $needle) !== false, $needle);
 }
-check('۱-ب: فیلتر «در حال پیگیری» همهٔ وضعیت‌های باز را می‌گیرد', strpos($index, 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user")') !== false);
-check('۱-پ: فیلتر «حل‌شده» تیکت‌های بسته‌شده را هم شامل می‌شود', strpos($index, 't.status IN ("resolved", "closed")') !== false);
-check('۱-ت: مقادیر active/all در فهرست مجاز فیلتر گزارش‌ها هستند', strpos($index, "'resolved', 'closed', 'active', 'all'") !== false);
+check('۱-ب: فیلتر «در حال پیگیری» همهٔ وضعیت‌های باز و قدیمی pending را می‌گیرد', strpos($index, 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")') !== false);
+check('۱-پ: فیلتر «حل‌شده» درخواست‌های بسته‌شده را هم شامل می‌شود', strpos($index, 't.status IN ("resolved", "closed")') !== false);
+check('۱-ت: مقادیر active/all و cancelled در فهرست مجاز فیلتر گزارش‌ها هستند', strpos($index, "'resolved', 'closed', 'cancelled', 'active', 'all'") !== false);
 check('۱-ث: CSS کارتِ لینک‌شده (حالت hover/focus) اضافه شده', strpos((string) file_get_contents($root . '/assets/style.css'), 'a.stat-card') !== false);
 
 /* ───────── ۲) حذف شمارهٔ کارت از فرم گروه غذا ───────── */
@@ -82,7 +82,7 @@ echo "\n-- حذف C_CARD از فرم گروه --\n";
 check('۲: فیلد fg-card از فرم حذف شد', strpos($groupsJs, 'fg-card') === false);
 check('۲-ب: فهرست گروه‌ها دیگر ستون کارت ندارد', strpos($groupsJs, '<th>کارت (قدیمی)</th>') === false);
 check('۲-پ: collect() دیگر card نمی‌فرستد', preg_match('/\bcard:\s*\(document\.getElementById/ ', $groupsJs) !== 1 && strpos($groupsJs, "'fg-card'") === false);
-check('۲-ت: ستون rfid_card در مسیر ذخیره دست‌کاری نمی‌شود (نه UPDATE نه INSERT)', strpos($groups, 'SET title = ?, l_uid = ?, description = ?, status = ?') !== false && strpos($groups, 'VALUES (?, ?, NULL, ?, ?, ?)') !== false);
+check('۲-ت: ستون rfid_card در مسیر ذخیره دست‌کاری نمی‌شود (نه UPDATE نه INSERT)', strpos($groups, 'SET title = ?, l_uid = ?, description = ?, visit_change_until = ?, status = ?') !== false && strpos($groups, 'VALUES (?, ?, NULL, ?, ?, ?, ?)') !== false);
 check('۲-ث: ورودی کارت در بک‌اند نادیده گرفته می‌شود', strpos($groups, "\$card = '';") !== false);
 
 // آزمون واقعی food_ticket_group_resolve: ردیفی که فقط کارت دارد، گروهی را ماشه نمی‌کند
@@ -163,7 +163,7 @@ check('۴-چ: شناسایی کلاینت، شناسنامه را هم پر می
 /* ───────── ۵) شناسنامه: پر شدن نام کاربری ───────── */
 echo "\n-- شناسنامهٔ سیستم --\n";
 $profile = (string) file_get_contents($root . '/asset-profile.php');
-check('۵: فیلد user_login در استخراج خودکار پر می‌شود', strpos($profile, "'user_login' => (function () use (\$inventory, \$hardware, \$os, \$localUsers): string {") !== false);
+check('۵: فیلد user_login از نام کاربر فعلی سیستم و fallback inventory پر می‌شود', strpos($profile, "'user_login' => (function () use (\$inventory, \$hardware): string {") !== false && strpos($profile, "inventory_value(\$hardware, ['user', 'domain_username'], '')") !== false && strpos($profile, "(string) (\$inventory['domain_username'] ?? '')") !== false);
 check('۵-ب: صفحهٔ «تست جمع‌آوری» دکمهٔ استخراج آزمایشی دارد', strpos($index, "value=\"asset_profile_selftest\"") !== false);
 check('۵-پ: اکشن استخراج آزمایشی با مجوز inventory.diagnostics محافظت می‌شود', preg_match('/\$action === \'asset_profile_selftest\'[\s\S]{0,200}inventory\.diagnostics/', $index) === 1);
 check('۵-ت: ابزارهای تشخیص چاپ/شناسنامه ساخته شده‌اند', is_file($root . '/tools/diag_print_margin.php') && is_file($root . '/tools/diag_asset_profile.php'));

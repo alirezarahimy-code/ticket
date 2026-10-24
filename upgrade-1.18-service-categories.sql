@@ -1,4 +1,4 @@
--- Upgrade 1.18: دسته‌بندی دقیق‌تر خدمات و اتصال خدمت به دسته (فرم تیکت آبشاری)
+-- Upgrade 1.18: دسته‌بندی دقیق‌تر خدمات و اتصال خدمت به دسته (فرم درخواست آبشاری)
 -- اجرای این فایل اختیاری است؛ نصب تازه از install.php پر می‌شود.
 
 ALTER TABLE categories ADD COLUMN IF NOT EXISTS code VARCHAR(60) NULL UNIQUE;

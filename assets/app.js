@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var toast = document.createElement('article');
             toast.className = 'notification-toast';
             var link = document.createElement('a');
-            link.href = item.ticket_id ? 'index.php?page=ticket&id=' + encodeURIComponent(item.ticket_id) : 'index.php?page=notifications';
+            link.href = item.href || (item.ticket_id ? 'index.php?page=ticket&id=' + encodeURIComponent(item.ticket_id) : 'index.php?page=notifications');
             var title = document.createElement('strong');
             title.textContent = item.title;
             var body = document.createElement('span');
@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var definitions = [
             ['general', 'عمومی'],
             ['domain', 'اتصال دامین'],
+            ['triangle', 'افکت نمایشی'],
             ['users', 'کاربران'],
             ['roles', 'نقش‌ها و دسترسی‌ها']
         ];
@@ -556,11 +557,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (categorySelector && categorySelector.tagName === 'INPUT') {
             categorySelector.value = (selectedService && selectedService.value !== '' ? (selectedService.getAttribute('data-category-id') || '') : '');
         }
-        // ۱.۳۷.۲ (درخواست کاربر): نمایش و الزامِ «سیستم مرتبط» بر پایهٔ «حوزه خدمت» است:
-        //   خدمات کامپیوتری ⇒ فیلد پیدا است و پرکردنش الزامی است.
-        //   خدمات پشتیبانی ⇒ فیلد کاملاً پنهان می‌شود و مقدارش هم پاک می‌گردد.
-        var requiresAsset = group === 'it';
-        if (assetField) assetField.hidden = !requiresAsset;
+        // طبق سیاست درخواست، برای هر خدمت IT انتخاب سیستم از شناسنامهٔ فنی الزامی است.
+        var isItGroup = group === 'it';
+        var hasSelectedService = !!(selectedService && selectedService.value !== '');
+        var requiresAsset = isItGroup && hasSelectedService;
+        if (assetField) assetField.hidden = !isItGroup;
+        var assetLabel = document.querySelector('[data-asset-label]');
+        if (assetLabel) {
+            assetLabel.textContent = !isItGroup ? 'فقط برای خدمات IT' : (!hasSelectedService ? 'پس از انتخاب خدمت مشخص می‌شود' : (requiresAsset ? 'برای خدمات IT الزامی' : 'اختیاری'));
+        }
         var assetErrorNode = document.querySelector('[data-asset-error]');
         if (assetErrorNode) {
             assetErrorNode.hidden = true;
@@ -574,10 +579,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (assetSelector) {
             assetSelector.required = false;
-            if (!requiresAsset) {
+            if (!isItGroup) {
                 assetSelector.value = '';
-                // ۱.۳۷: وقتی خدمت انتخاب‌شده به سیستم نیاز ندارد، متن نمایش‌داده‌شده در
-                // کمبوی «سیستم مرتبط» هم پاک می‌شود تا چیزی برخلاف مقدار ثبت‌شده نماند.
                 if (assetSearch) {
                     assetSearch.value = '';
                     assetSearch.removeAttribute('data-picked');
@@ -769,12 +772,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var ticketForm = assetSearch.closest('form');
         if (ticketForm) {
             ticketForm.addEventListener('submit', function (event) {
-                // ۱.۳۷.۲: در حوزهٔ خدمات کامپیوتری انتخاب «سیستم مرتبط» الزامی است.
-                if (getGroup() === 'it' && assetSelector.value === '') {
+                var submittedService = serviceSelector ? serviceSelector.options[serviceSelector.selectedIndex] : null;
+                var requiresAsset = getGroup() === 'it' && !!(submittedService && submittedService.value !== '');
+                if (requiresAsset && assetSelector.value === '') {
                     event.preventDefault();
                     var errNode = document.querySelector('[data-asset-error]');
                     if (errNode) {
-                        errNode.textContent = 'برای ثبت تیکت در حوزهٔ خدمات کامپیوتری، انتخاب «سیستم مرتبط» الزامی است؛ از فهرست زیر انتخاب کنید.';
+                        errNode.textContent = 'برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است؛ یک مورد را از فهرست انتخاب کنید.';
                         errNode.hidden = false;
                     }
                     if (assetField) assetField.classList.add('field-invalid');
@@ -1254,4 +1258,60 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    // ۱.۵۷ — چرخش پیام‌های متحرک صفحه ورود؛ هر پیام یک دور کامل می‌چرخد بعد پیام بعدی می‌آید.
+    var annBox = document.querySelector('[data-announcements]');
+    if (!annBox) { return; }
+    var textEl = annBox.querySelector('[data-announcement-text]');
+    if (!textEl) { return; }
+    var messages = [];
+    try { messages = JSON.parse(annBox.getAttribute('data-announcements') || '[]'); } catch (err) { messages = []; }
+    if (!Array.isArray(messages) || messages.length < 2) { return; }
+    var speed = parseInt(annBox.getAttribute('data-announcement-speed') || '18', 10);
+    if (isNaN(speed)) { speed = 18; }
+    speed = Math.max(5, Math.min(60, speed));
+    var index = 0;
+    window.setInterval(function () {
+        index = (index + 1) % messages.length;
+        textEl.textContent = messages[index];
+        textEl.style.animation = 'none';
+        void textEl.offsetWidth;
+        textEl.style.animation = '';
+    }, speed * 1000);
+});
+
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+
+document.addEventListener('click', function (event) {
+    var openButton = event.target.closest('[data-domain-code-dialog-open]');
+    if (openButton) {
+        var dialogId = openButton.getAttribute('data-domain-code-dialog-open') || '';
+        var dialog = dialogId ? document.getElementById(dialogId) : null;
+        if (dialog) {
+            event.preventDefault();
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+            var input = dialog.querySelector('input[name="employee_number"]');
+            if (input) input.focus();
+        }
+        return;
+    }
+    var closeButton = event.target.closest('[data-domain-code-dialog-close]');
+    if (closeButton) {
+        var activeDialog = closeButton.closest('dialog');
+        if (activeDialog && typeof activeDialog.close === 'function') activeDialog.close();
+        else if (activeDialog) activeDialog.removeAttribute('open');
+        return;
+    }
+    if (event.target && event.target.matches && event.target.matches('dialog.domain-code-link-dialog')) {
+        var bounds = event.target.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) { if (typeof event.target.close === 'function') event.target.close(); else event.target.removeAttribute('open'); }
+    }
 });

@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — food runtime dependency recovery (R33)",
+  "date": "2026-10-24",
+  "migrations": ["006-food-meal-type.sql"],
+  "notes": "Recovery hotfix for mixed-version food installations after R31/R32. Ships all required food-only PHP runtime dependencies, the complete food web asset set, the matching panel page, and the meal-type migration. No ticket, CD/DVD, inventory, or unrelated modules. Apply the migration once on a backed-up database if it has not already been applied."
+}

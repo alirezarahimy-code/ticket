@@ -8,7 +8,7 @@ include __DIR__ . '/../layout/header.php';
 ?>
 
 <div class="ticket-reply">
-    <h1>پاسخ به تیکت #<?= htmlspecialchars($ticket['id']) ?></h1>
+    <h1>پاسخ به درخواست #<?= htmlspecialchars($ticket['id']) ?></h1>
     
     <div class="ticket-info">
         <h2><?= htmlspecialchars($ticket['subject']) ?></h2>

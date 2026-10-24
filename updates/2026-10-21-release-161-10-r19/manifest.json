@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — انتخاب رکوردهای کد پرسنلی و ترمیم نقش مدیران سازمان (R19)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "Builds on R18. The primary-admin code-link workflow now displays all eligible matching food/local database rows and lets the administrator explicitly select which belong to the domain account before merging. Selected rows are backed up and merged in one transaction; unselected rows remain untouched. Organizational deputy/department manager assignment no longer promotes users to system primary admins, and a primary-admin-only repair workflow restores mistakenly promoted org managers while preserving organizational assignments and at least one active primary admin. R18 order-only manual attendance behavior remains. No production data was accessed or changed; no database migration is required."
+}

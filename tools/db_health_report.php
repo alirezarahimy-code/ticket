@@ -86,7 +86,7 @@ $queries = [
         "SELECT COUNT(*) FROM traffic_visits WHERE serial_no LIKE '14050101-%'",
     'اعلان‌های خوانده‌نشدهٔ کاربر' =>
         'SELECT COUNT(*) FROM notifications WHERE user_id = 1 AND is_read = 0',
-    'فهرست تیکت‌های یک وضعیت' =>
+    'فهرست درخواست‌های یک وضعیت' =>
         "SELECT id, subject FROM tickets WHERE status = 'open' ORDER BY created_at DESC LIMIT 50",
     'جستجوی دارایی بر اساس نام سرور' =>
         "SELECT id FROM assets WHERE hostname = 'PC-TEST' LIMIT 1",

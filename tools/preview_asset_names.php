@@ -103,7 +103,7 @@ foreach ($rows as $row) {
 }
 $html .= '</div>';
 
-$html .= '<h2>۳) کمبوی «سیستم مرتبط» در فرم تیکت</h2><div class="card"><select style="width:100%;padding:8px">';
+$html .= '<h2>۳) کمبوی «سیستم مرتبط» در فرم درخواست</h2><div class="card"><select style="width:100%;padding:8px">';
 foreach ($rows as $row) {
     $tagText = asset_is_auto_domain_tag($row['asset_tag']) ? '' : asset_tag_label($row['asset_tag'], $row['hostname']);
     $html .= '<option>' . e(asset_display_name($row['hostname']) . ($tagText !== '' ? ' - ' . $tagText : '')) . '</option>';

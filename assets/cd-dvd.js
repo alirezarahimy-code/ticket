@@ -28,9 +28,14 @@ document.addEventListener('click', function (event) {
     const serialOutWrap = document.querySelector('.cd-dvd-serial-out');
     const serialHelp = document.getElementById('cd-dvd-serial-help');
     const exitSheetField = document.querySelector('.cd-dvd-exit-sheet-field');
+    const outgoingFields = document.querySelectorAll('.cd-dvd-outgoing-field');
     const incomingField = document.querySelector('.cd-dvd-incoming-field');
     const broughtBy = document.getElementById('cd-dvd-brought-by');
     const broughtById = document.getElementById('cd-dvd-brought-by-id');
+    const broughtByExternal = document.getElementById('cd-dvd-brought-by-external');
+    const broughtByKind = document.querySelectorAll('input[name="brought_by_type"]');
+    const broughtByInternalWrap = document.querySelector('.cd-dvd-brought-internal');
+    const broughtByExternalWrap = document.querySelector('.cd-dvd-brought-external');
     const userPicker = document.querySelector('[data-user-picker]');
     const userOptions = userPicker ? userPicker.querySelector('.cd-dvd-user-options') : null;
     const nextSerial = window.CD_DVD_NEXT || {};
@@ -124,8 +129,23 @@ document.addEventListener('click', function (event) {
         if (incomingField) {
             incomingField.hidden = !isIncoming;
         }
+        outgoingFields.forEach(function (field) {
+            field.hidden = isIncoming;
+            field.querySelectorAll('input, select, textarea').forEach(function (control) { control.disabled = isIncoming; });
+        });
+        const externalBroughtBy = Array.from(broughtByKind).some(function (radio) { return radio.checked && radio.value === 'external'; });
+        if (broughtByInternalWrap) broughtByInternalWrap.hidden = externalBroughtBy;
+        if (broughtByExternalWrap) broughtByExternalWrap.hidden = !externalBroughtBy;
         if (broughtBy) {
-            broughtBy.required = isIncoming;
+            broughtBy.required = isIncoming && !externalBroughtBy;
+            if (broughtBy.tagName === 'SELECT') broughtBy.disabled = !isIncoming || externalBroughtBy;
+        }
+        if (broughtByExternal) {
+            broughtByExternal.required = isIncoming && externalBroughtBy;
+            broughtByExternal.disabled = !isIncoming || !externalBroughtBy;
+        }
+        if (broughtById && isIncoming) {
+            broughtById.value = externalBroughtBy ? '-1' : (broughtBy && broughtBy.tagName === 'SELECT' ? (broughtBy.value || '0') : (broughtById.value || '0'));
         }
         if (exitSheetField) {
             exitSheetField.hidden = isIncoming;
@@ -214,6 +234,9 @@ document.addEventListener('click', function (event) {
     if (direction) {
         direction.addEventListener('change', updateForm);
     }
+    broughtByKind.forEach(function (radio) {
+        radio.addEventListener('change', updateForm);
+    });
     if (broughtBy && broughtBy.tagName === 'SELECT' && broughtById) {
         broughtBy.addEventListener('change', function () {
             broughtById.value = broughtBy.value || '0';

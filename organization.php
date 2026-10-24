@@ -8,6 +8,7 @@ function org_ensure_schema(): void
         return;
     }
     $done = true;
+    try {
     db()->exec(
         'CREATE TABLE IF NOT EXISTS org_units (
             id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -48,10 +49,16 @@ function org_ensure_schema(): void
         db()->prepare('INSERT INTO org_units (name, code, parent_id, unit_type, is_active) VALUES (?, ?, NULL, "ceo", 1)')
             ->execute(['مدیرعامل', 'CEO']);
     }
+    } catch (Throwable $exception) {
+        if (function_exists('system_log')) {
+            system_log('error', 'org_schema', $exception->getMessage());
+        }
+    }
 }
 
+
 /**
- * ستون مستقل «معاونت درخواست‌کننده» روی تیکت‌ها (جدا از department_id که مسیر رسیدگی است).
+ * ستون مستقل «معاونت درخواست‌کننده» روی درخواست‌ها (جدا از department_id که مسیر رسیدگی است).
  */
 function org_ticket_schema_ensure(): void
 {
@@ -84,8 +91,8 @@ function org_units_all(bool $activeOnly = true): array
 }
 
 /**
- * معاونت‌های فعال چارت سازمانی برای فهرست «معاونت درخواست‌کننده» در فرم تیکت.
- * همهٔ نقش‌ها این فهرست را می‌بینند تا تیکت به همان معاونت مسیردهی شود.
+ * معاونت‌های فعال چارت سازمانی برای فهرست «معاونت درخواست‌کننده» در فرم درخواست.
+ * همهٔ نقش‌ها این فهرست را می‌بینند تا درخواست به همان معاونت مسیردهی شود.
  */
 function org_deputy_units(): array
 {
@@ -147,6 +154,16 @@ function org_ceo_unit_id(): int
     }
     db()->prepare('INSERT INTO org_units (name, code, parent_id, unit_type, is_active) VALUES (?, ?, NULL, "ceo", 1)')->execute(['مدیرعامل', 'CEO']);
     return (int) db()->lastInsertId();
+}
+
+/** واحدهایی که می‌توان کارشناس مستقیم به آن‌ها وصل کرد: اداره یا معاونت. */
+function org_unit_accepts_experts(?array $unit): bool
+{
+    if ($unit === null) {
+        return false;
+    }
+    $type = (string) ($unit['unit_type'] ?? '');
+    return in_array($type, ['department', 'deputy'], true) && (int) ($unit['is_active'] ?? 0) === 1;
 }
 
 function org_unit_by_id(int $id): ?array

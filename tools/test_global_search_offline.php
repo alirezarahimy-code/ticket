@@ -77,9 +77,9 @@ check('بدون اجازه، هیچ صفحه‌ای نشان داده نمی‌�
 $userOnly = static fn (array $section): bool => !isset($section['perm']) && !isset($section['perms']) && !isset($section['special']);
 $visible = $titlesOf(global_search_sections($catalog, 'تردد', $userOnly));
 check('کاربر عادی صفحهٔ تردد را نمی‌بیند (بدون traffic.view)', $visible === [], implode(' | ', $visible));
-check('کاربر عادی «تیکت جدید» را می‌بیند', in_array('ثبت تیکت جدید', $titlesOf(global_search_sections($catalog, 'تیکت جدید', $userOnly)), true));
+check('کاربر عادی «درخواست جدید» را می‌بیند', in_array('ثبت درخواست جدید', $titlesOf(global_search_sections($catalog, 'درخواست جدید', $userOnly)), true));
 $queueOnly = static fn (array $section): bool => !isset($section['special']) && (!isset($section['perm']) || $section['perm'] === 'queue.view');
-check('اجازهٔ بخش‌به‌بخش رعایت می‌شود', in_array('صف کاری (کارتابل تیکت‌ها)', $titlesOf(global_search_sections($catalog, 'صف', $queueOnly)), true));
+check('اجازهٔ بخش‌به‌بخش رعایت می‌شود', in_array('صف کاری (کارتابل درخواست‌ها)', $titlesOf(global_search_sections($catalog, 'صف', $queueOnly)), true));
 check('بخش بدون اجازه در همان جست‌وجو نمی‌آید', !in_array('پشتیبان‌گیری و بازیابی', $titlesOf(global_search_sections($catalog, 'پشتیبان', $queueOnly)), true));
 
 $lines[] = '';

@@ -1,6 +1,6 @@
 -- Upgrade 1.23: گزارش فعالیت کاربران (Activity Log)
 -- یک جدول واحد برای همهٔ عملیات کاربران؛ جایگزین audit_logs.
--- سامانه تیکتینگ پارسی
+-- سامانه درخواست پارسی
 
 CREATE TABLE IF NOT EXISTS activity_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

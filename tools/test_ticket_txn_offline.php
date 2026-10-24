@@ -2,15 +2,15 @@
 declare(strict_types=1);
 
 /**
- * آزمون آفلاین «تراکنش ثبت تیکت» — رفع خطای «There is no active transaction» (۱.۳۴)
+ * آزمون آفلاین «تراکنش ثبت درخواست» — رفع خطای «There is no active transaction» (۱.۳۴)
  * ============================================================================
  *   php tools/test_ticket_txn_offline.php
  *
  * ریشهٔ خطا: در MySQL هر DDL (مثل CREATE TABLE IF NOT EXISTS) یک COMMIT ضمنی می‌زند.
- * تابع ticket_number_next() داخل تراکنش ثبت تیکت صدا زده می‌شود و تابع
+ * تابع ticket_number_next() داخل تراکنش ثبت درخواست صدا زده می‌شود و تابع
  * ticket_number_ensure_schema() در هر فراخوانی یک CREATE TABLE IF NOT EXISTS اجرا می‌کرد
  * → تراکنش همان‌جا بسته می‌شد → db()->commit() پایان کار با
- * «There is no active transaction» می‌شکست، در حالی که تیکت ثبت شده بود.
+ * «There is no active transaction» می‌شکست، در حالی که درخواست ثبت شده بود.
  *
  * این آزمون با یک PDO جعلی بررسی می‌کند:
  *   ۱) وقتی تراکنش باز است، هیچ DDL اجرا نمی‌شود (به shutdown موکول می‌شود)
@@ -156,7 +156,7 @@ $ensureRun = str_replace('register_shutdown_function(', '__test_register_shutdow
 eval($ensureRun);
 eval(grabFunction($bootstrap, 'ticket_number_ensure_schema'));
 
-echo "=== آزمون تراکنش تیکت (۱.۳۴) ===\n\n";
+echo "=== آزمون تراکنش درخواست (۱.۳۴) ===\n\n";
 
 /* ───────── ۱) داخل تراکنش: هیچ DDL ───────── */
 $GLOBALS['fakeDb'] = new FakeDb();
@@ -221,11 +221,11 @@ check('۷-ب: create_ticket از db_commit استفاده می‌کند', strpos
 check('۷-پ: یک‌بار متغیر $ticketNo ساخته می‌شود و داخل تراکنش پیام خطا نمی‌دهد', substr_count($body, 'ticket_number_next(') === 1, (string) substr_count($body, 'ticket_number_next('));
 
 $bootstrapSrc = (string) file_get_contents($bootstrap);
-check('۷-ت: شماره‌گذاری تیکت، DDL خود را با SELECT بررسی می‌کند', strpos($bootstrapSrc, "SELECT 1 FROM ticket_number_seq LIMIT 1") !== false);
+check('۷-ت: شماره‌گذاری درخواست، DDL خود را با SELECT بررسی می‌کند', strpos($bootstrapSrc, "SELECT 1 FROM ticket_number_seq LIMIT 1") !== false);
 check('۷-ث: اسکیمای شماره‌گذاری قبل از هر تراکنش در ابتدای درخواست آماده می‌شود', strpos($index, 'ticket_number_ensure_schema();') !== false);
 
 echo "\n";
 echo $fail === 0
-    ? 'همهٔ بررسی‌های تراکنش/تیکت موفق بودند (' . $pass . " مورد).\n"
+    ? 'همهٔ بررسی‌های تراکنش/درخواست موفق بودند (' . $pass . " مورد).\n"
     : $fail . ' مورد ناموفق از ' . ($pass + $fail) . " مورد.\n";
 exit($fail === 0 ? 0 : 1);

@@ -4,16 +4,8 @@ declare(strict_types=1);
 const APP_ROOT = __DIR__;
 
 require_once __DIR__ . '/permissions.php';
-
-if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
-    session_set_cookie_params([
-        'path' => '/',
-        'httponly' => true,
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-        'samesite' => 'Lax',
-    ]);
-    session_start();
-}
+require_once __DIR__ . '/session_bootstrap.php';
+app_session_start();
 
 $configFile = (string) (getenv('ITSM_CONFIG_PATH') ?: APP_ROOT . '/config.php');
 if (!is_file($configFile)) {
@@ -207,9 +199,12 @@ function db_table_exists(string $table): bool
     }
 }
 
-function db_table_columns(string $table): array
+function db_table_columns(string $table, bool $refresh = false): array
 {
     static $cache = [];
+    if ($refresh) {
+        unset($cache[$table]);
+    }
     if (array_key_exists($table, $cache)) {
         return $cache[$table];
     }
@@ -229,6 +224,78 @@ function db_missing_columns(string $table, array $required): array
 {
     $columns = db_table_columns($table);
     return array_values(array_filter($required, static fn (string $column): bool => !isset($columns[$column])));
+}
+
+function db_column_present(string $table, string $column): bool
+{
+    foreach (array_keys(db_table_columns($table)) as $name) {
+        if (strcasecmp((string) $name, $column) === 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/** ستون جاافتاده را اضافه می‌کند؛ خطا صفحه را نمی‌خواباند. */
+function db_add_missing_column(string $table, string $column, string $ddl): bool
+{
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $table) || !preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+        return false;
+    }
+    try {
+        if (db_column_present($table, $column)) {
+            return true;
+        }
+        db()->exec($ddl);
+        db_table_columns($table, true);
+        return true;
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/** مقدارهای جاافتادهٔ ENUM را بدون حذف مقدارهای فعلی اضافه می‌کند. */
+function db_ensure_enum_values(string $table, string $column, array $needed, string $notNullDefault = ''): void
+{
+    if ($needed === [] || !preg_match('/^[A-Za-z0-9_]+$/', $table) || !preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+        return;
+    }
+    try {
+        $stmt = db()->prepare("SELECT COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+        $stmt->execute([$table, $column]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return;
+        }
+        $type = (string) ($row['COLUMN_TYPE'] ?? '');
+        if (!preg_match('/^enum\\((.*)\\)$/i', $type, $match)) {
+            return;
+        }
+        preg_match_all("/'((?:[^'\\\\]|\\\\.)*)'/", $match[1], $parts);
+        $values = $parts[1] ?? [];
+        $missing = [];
+        foreach ($needed as $need) {
+            $need = (string) $need;
+            if ($need !== '' && !in_array($need, $values, true)) {
+                $values[] = $need;
+                $missing[] = $need;
+            }
+        }
+        if ($missing === [] || $values === []) {
+            return;
+        }
+        $list = implode(',', array_map(static fn (string $value): string => "'" . str_replace("'", "\\'", $value) . "'", $values));
+        $nullSql = strtoupper((string) ($row['IS_NULLABLE'] ?? 'YES')) === 'NO' ? ' NOT NULL' : ' NULL';
+        $defaultSql = '';
+        if ($notNullDefault !== '') {
+            $defaultSql = " DEFAULT '" . str_replace("'", "\\'", $notNullDefault) . "'";
+        } elseif (($row['COLUMN_DEFAULT'] ?? null) !== null) {
+            $defaultSql = " DEFAULT '" . str_replace("'", "\\'", (string) $row['COLUMN_DEFAULT']) . "'";
+        }
+        db()->exec('ALTER TABLE `' . $table . '` MODIFY COLUMN `' . $column . '` ENUM(' . $list . ')' . $nullSql . $defaultSql);
+        db_table_columns($table, true);
+    } catch (Throwable) {
+    }
 }
 
 function client_ip(): string
@@ -987,6 +1054,10 @@ function ticket_scope(array $user, string $alias = 't'): array
     if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) {
         return ['', []];
     }
+    if (($user['role'] ?? '') === 'support_manager') {
+        // مدیر پشتیبانی فقط حوزه پشتیبانی را می‌بیند؛ بدون فیلتر معاونت و بدون دسترسی به IT.
+        return ["WHERE {$alias}.service_group = ?", ['support']];
+    }
     if (in_array($user['role'], ['agent', 'manager'], true)) {
         $group = user_service_group($user);
         $departmentId = (int) ($user['department_id'] ?? 0);
@@ -996,6 +1067,12 @@ function ticket_scope(array $user, string $alias = 't'): array
         return $departmentId > 0 ? ["WHERE {$alias}.service_group = ? AND {$alias}.department_id = ?", [$group, $departmentId]] : ["WHERE {$alias}.service_group = ?", [$group]];
     }
     return ["WHERE {$alias}.requester_id = ?", [(int) $user['id']]];
+}
+
+function ticket_is_waiting_status(string $status): bool
+{
+    // مقدار قدیمی pending هم از نظر مکث SLA/OLA و پاسخ کاربر مثل waiting_user رفتار می‌کند.
+    return $status === 'waiting_user' || $status === 'pending';
 }
 
 function user_service_group(array $user): string
@@ -1075,6 +1152,324 @@ function save_setting(string $key, string $value): void
     $query->execute([$key, $value]);
     if (isset($GLOBALS['__settings_cache']) && is_array($GLOBALS['__settings_cache'])) {
         $GLOBALS['__settings_cache'][$key] = (string) $value;
+    }
+}
+
+/**
+ * فهرست صفحه‌های قابل انتخاب برای افکت نمایشی.
+ * کلیدهای صفحه باید با ?page= در index.php و نام فایل برای صفحات مستقل یکی باشند.
+ * صفحات چاپ مستقل عمداً کنار گذاشته شده‌اند تا پس‌زمینه روی خروجی چاپ اثر نگذارد.
+ */
+function triangle_effect_page_catalog(): array
+{
+    return [
+        'عمومی' => [
+            'login' => 'ورود به سامانه',
+            'dashboard' => 'داشبورد',
+            'help' => 'راهنما',
+            'notifications' => 'اعلان‌ها',
+            'search' => 'جست‌وجو',
+            'profile' => 'پروفایل کاربر',
+            'change-password' => 'تغییر رمز عبور',
+        ],
+        'پشتیبانی و دارایی' => [
+            'new-ticket' => 'ثبت درخواست جدید',
+            'ticket' => 'جزئیات درخواست',
+            'queue' => 'صف کاری',
+            'services' => 'خدمات',
+            'knowledge' => 'دانش‌نامه',
+            'assets' => 'شناسنامه‌های فنی',
+            'asset' => 'جزئیات شناسنامه فنی',
+            'asset-history' => 'تاریخچه دارایی',
+            'inventory' => 'موجودی (Inventory)',
+            'inventory-diagnostics' => 'عیب‌یابی موجودی',
+            'domain-scan' => 'اسکن دامنه',
+            'supervisor' => 'پنل سوپروایزر',
+            'governance' => 'تغییر و مشکل',
+            'ola' => 'OLA',
+            'holidays' => 'تعطیلات',
+        ],
+        'کنترل و غذا' => [
+            'cd-dvd' => 'کنترل CD/DVD',
+            'cd-dvd-history' => 'تاریخچه CD/DVD',
+            'traffic-control' => 'کنترل تردد',
+            'food-order' => 'سفارش غذا',
+        ],
+        'گزارش‌ها' => [
+            'reports' => 'گزارش درخواست‌ها',
+            'analytics' => 'چارت‌ها',
+            'activity-log' => 'لاگ سامانه',
+            'logs' => 'گزارش خطا',
+            'audit' => 'ممیزی',
+            'system-health' => 'سلامت سامانه',
+        ],
+        'مدیریت' => [
+            'organization' => 'سازمان',
+            'settings' => 'تنظیمات',
+            'backup' => 'به‌روزرسانی و پشتیبان‌گیری',
+            'chatbot-admin' => 'بات پاسخ‌گو',
+            'local-accounts' => 'کاربران محلی',
+        ],
+    ];
+}
+
+function triangle_effect_valid_keys(): array
+{
+    $keys = [];
+    foreach (triangle_effect_page_catalog() as $group) {
+        foreach ($group as $key => $_label) {
+            $keys[] = (string) $key;
+        }
+    }
+    return $keys;
+}
+
+/** [حداقل، حداکثر، پیش‌فرض، تعداد رقم اعشار] */
+function triangle_effect_config_spec(): array
+{
+    return [
+        'cellSize' => [28, 70, 46, 0],
+        'mouseRadiusMult' => [1, 12, 5.0, 1],
+        'repulsionMult' => [0, 4, 1.35, 2],
+        'springK' => [0.01, 0.3, 0.085, 3],
+        'damping' => [0.5, 0.98, 0.80, 2],
+        'waveSpeed' => [100, 1500, 620, 0],
+        'waveDuration' => [0.3, 4, 1.6, 1],
+        'waveWidth' => [20, 200, 70, 0],
+        'waveAmpMult' => [0, 1.5, 0.32, 2],
+        'idleAmp' => [0, 6, 1.6, 1],
+        'opacity' => [0.1, 1, 1, 2],
+    ];
+}
+
+function triangle_effect_sanitize_config(array $input): array
+{
+    $out = [];
+    foreach (triangle_effect_config_spec() as $key => [$min, $max, $default, $decimals]) {
+        $raw = $input[$key] ?? $default;
+        $value = is_numeric($raw) ? (float) $raw : (float) $default;
+        if (!is_finite($value)) {
+            $value = (float) $default;
+        }
+        $value = max((float) $min, min((float) $max, $value));
+        $out[$key] = $decimals > 0 ? round($value, $decimals) : (int) round($value);
+    }
+    foreach (['meshColor' => '#475569', 'dotColor' => '#334155'] as $key => $default) {
+        $raw = $input[$key] ?? $default;
+        $raw = is_string($raw) ? $raw : $default;
+        $out[$key] = preg_match('/^#[0-9a-fA-F]{6}$/', $raw) === 1 ? strtolower($raw) : $default;
+    }
+    foreach (['showDots', 'maskVignette'] as $key) {
+        $raw = $input[$key] ?? true;
+        if (is_bool($raw)) {
+            $out[$key] = $raw;
+        } elseif (is_int($raw) || is_float($raw)) {
+            $out[$key] = (float) $raw !== 0.0;
+        } elseif (is_string($raw)) {
+            $parsed = filter_var($raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $out[$key] = is_bool($parsed) ? $parsed : true;
+        } else {
+            $out[$key] = true;
+        }
+    }
+    return $out;
+}
+
+function display_effect_type(): string
+{
+    $effect = setting('display_effect_type', 'triangle');
+    return in_array($effect, ['triangle', 'particles'], true) ? $effect : 'triangle';
+}
+
+/** [حداقل، حداکثر، پیش‌فرض، تعداد رقم اعشار] */
+function particle_effect_config_spec(): array
+{
+    return [
+        'density' => [1800, 9000, 4500, 0],
+        'maxParticles' => [40, 450, 320, 0],
+        'speed' => [0, 1, 0.25, 2],
+        'linkDistance' => [50, 240, 130, 0],
+        'mouseRadius' => [60, 320, 180, 0],
+        'mouseStrength' => [0, 2, 1, 1],
+        'opacity' => [0.1, 1, 1, 2],
+        'dotScale' => [0.5, 2.5, 1, 1],
+    ];
+}
+
+function particle_effect_sanitize_config(array $input): array
+{
+    $out = [];
+    foreach (particle_effect_config_spec() as $key => [$min, $max, $default, $decimals]) {
+        $raw = $input[$key] ?? $default;
+        $value = is_numeric($raw) ? (float) $raw : (float) $default;
+        if (!is_finite($value)) {
+            $value = (float) $default;
+        }
+        $value = max((float) $min, min((float) $max, $value));
+        $out[$key] = $decimals > 0 ? round($value, $decimals) : (int) round($value);
+    }
+    $rawColor = $input['color'] ?? '#172b36';
+    $rawColor = is_string($rawColor) ? $rawColor : '#172b36';
+    $out['color'] = preg_match('/^#[0-9a-fA-F]{6}$/', $rawColor) === 1 ? strtolower($rawColor) : '#172b36';
+    foreach (['showDots', 'showLinks', 'connectCursor', 'autoMove'] as $key) {
+        $raw = $input[$key] ?? true;
+        if (is_bool($raw)) {
+            $out[$key] = $raw;
+        } elseif (is_int($raw) || is_float($raw)) {
+            $out[$key] = (float) $raw !== 0.0;
+        } elseif (is_string($raw)) {
+            $parsed = filter_var($raw, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            $out[$key] = is_bool($parsed) ? $parsed : true;
+        } else {
+            $out[$key] = true;
+        }
+    }
+    return $out;
+}
+
+function particle_effect_default_config(): array
+{
+    return particle_effect_sanitize_config([]);
+}
+
+function particle_effect_config(): array
+{
+    $raw = (string) setting('particle_effect_config', '');
+    $decoded = $raw !== '' ? json_decode($raw, true) : null;
+    return particle_effect_sanitize_config(is_array($decoded) ? $decoded : []);
+}
+
+function particle_effect_enabled_for_current_page(): bool
+{
+    try {
+        return display_effect_type() === 'particles'
+            && in_array(triangle_effect_current_page_key(), triangle_effect_enabled_pages(), true);
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+function triangle_effect_default_config(): array
+{
+    return triangle_effect_sanitize_config([]);
+}
+
+function triangle_effect_config(): array
+{
+    $raw = (string) setting('triangle_effect_config', '');
+    $decoded = $raw !== '' ? json_decode($raw, true) : null;
+    return triangle_effect_sanitize_config(is_array($decoded) ? $decoded : []);
+}
+
+function triangle_effect_enabled_pages(): array
+{
+    $raw = (string) setting('triangle_effect_pages', '');
+    $decoded = $raw !== '' ? json_decode($raw, true) : null;
+    if (!is_array($decoded)) {
+        return [];
+    }
+    $allowed = array_fill_keys(triangle_effect_valid_keys(), true);
+    $selected = [];
+    foreach ($decoded as $pageKey) {
+        if (!is_string($pageKey)) {
+            continue;
+        }
+        $pageKey = trim($pageKey);
+        if ($pageKey !== '' && isset($allowed[$pageKey])) {
+            $selected[$pageKey] = true;
+        }
+    }
+    return array_values(array_filter(
+        triangle_effect_valid_keys(),
+        static fn(string $pageKey): bool => isset($selected[$pageKey])
+    ));
+}
+
+function triangle_effect_current_page_key(): string
+{
+    $script = strtolower(pathinfo((string) ($_SERVER['SCRIPT_NAME'] ?? 'index.php'), PATHINFO_FILENAME));
+    if ($script !== 'index') {
+        return $script;
+    }
+    if (!current_user()) {
+        return 'login';
+    }
+    $page = $_GET['page'] ?? '';
+    $page = is_string($page) || is_int($page) ? strtolower(trim((string) $page)) : '';
+    return $page !== '' ? $page : 'dashboard';
+}
+
+function triangle_effect_enabled_for_current_page(): bool
+{
+    try {
+        return display_effect_type() === 'triangle'
+            && in_array(triangle_effect_current_page_key(), triangle_effect_enabled_pages(), true);
+    } catch (Throwable) {
+        return false;
+    }
+}
+
+/** اسکریپت موتور، و در صفحهٔ تنظیمات پیش‌نمایش زنده را فقط یک‌بار بارگذاری می‌کند. */
+function triangle_effect_script_tag(): string
+{
+    try {
+        $pageKey = triangle_effect_current_page_key();
+        $enabled = display_effect_type() === 'triangle' && in_array($pageKey, triangle_effect_enabled_pages(), true);
+        $user = current_user();
+        $canPreview = $pageKey === 'settings' && $user !== null && user_can($user, 'settings.general');
+        if (!$enabled && !$canPreview) {
+            return '';
+        }
+        $tag = '<script src="assets/triangle-mesh.js?v=1.56" defer';
+        if ($enabled) {
+            $json = json_encode(
+                triangle_effect_config(),
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+            );
+            if (!is_string($json)) {
+                return '';
+            }
+            $tag .= ' data-config="' . htmlspecialchars($json, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+        }
+        $tag .= '></script>';
+        if ($canPreview) {
+            $tag .= '<script src="assets/triangle-settings.js?v=1.56.1" defer></script>';
+        }
+        return $tag;
+    } catch (Throwable) {
+        return '';
+    }
+}
+
+/** موتور ذرات فقط برای نوع افکت انتخاب‌شده و صفحه‌های ذخیره‌شده بارگذاری می‌شود. */
+function particle_effect_script_tag(): string
+{
+    try {
+        $pageKey = triangle_effect_current_page_key();
+        $enabled = particle_effect_enabled_for_current_page();
+        $user = current_user();
+        $canPreview = $pageKey === 'settings' && $user !== null && user_can($user, 'settings.general');
+        if (!$enabled && !$canPreview) {
+            return '';
+        }
+        $tag = '<script src="assets/particle-network.js?v=1.56.1" defer';
+        if ($enabled) {
+            $json = json_encode(
+                particle_effect_config(),
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+            );
+            if (!is_string($json)) {
+                return '';
+            }
+            $tag .= ' data-config="' . htmlspecialchars($json, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '"';
+        }
+        $tag .= '></script>';
+        if ($canPreview) {
+            $tag .= '<script src="assets/particle-settings.js?v=1.56.1" defer></script>';
+        }
+        return $tag;
+    } catch (Throwable) {
+        return '';
     }
 }
 
@@ -1276,6 +1671,7 @@ function ldap_sync_all_users(): array
     ldap_set_option($connection, LDAP_OPT_REFERRALS, 0);
     if (defined('LDAP_OPT_NETWORK_TIMEOUT')) { @ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 8); }
     if (defined('LDAP_OPT_TIMELIMIT')) { @ldap_set_option($connection, LDAP_OPT_TIMELIMIT, 8); }
+    $markPhase('service-bind');
     $bindDn = (string) ldap_cfg('bind_dn', '');
     if ($bindDn !== '' && !@ldap_bind($connection, $bindDn, (string) ldap_cfg('bind_password', ''))) {
         throw new RuntimeException('ورود حساب سرویس LDAP ناموفق بود. DN و رمز حساب سرویس را بررسی کنید.');
@@ -1470,13 +1866,13 @@ function ticket_number_prefix(string $serviceGroup): string
 }
 
 /**
- * آماده‌سازی جدول شماره‌گذاری تیکت — بدون DDL غیرضروری.
+ * آماده‌سازی جدول شماره‌گذاری درخواست — بدون DDL غیرضروری.
  *
  * ⚠️ درس گرفته‌شده (خطای «There is no active transaction»):
  * هر دستور DDL در MySQL یک COMMIT ضمنی می‌زند. قبلاً این تابع در هر بار «شماره‌گذاری»
  * یک CREATE TABLE IF NOT EXISTS اجرا می‌کرد و چون ticket_number_next() داخل تراکنش
- * ثبت تیکت صدا زده می‌شود، تراکنش همان‌جا بسته می‌شد؛ در پایان، db()->commit()
- * با خطای «There is no active transaction» سر می‌خورد — هرچند تیکت ثبت شده بود.
+ * ثبت درخواست صدا زده می‌شود، تراکنش همان‌جا بسته می‌شد؛ در پایان، db()->commit()
+ * با خطای «There is no active transaction» سر می‌خورد — هرچند درخواست ثبت شده بود.
  *
  * حالا: اول با SELECT وجود جدول/ستون بررسی می‌شود (بدون COMMIT ضمنی) و DDL فقط اگر
  * واقعاً لازم باشد و «تراکنشی باز نباشد» اجرا می‌شود.
@@ -1488,7 +1884,87 @@ function ticket_number_ensure_schema(): void
         return;
     }
     ticket_number_ensure_schema_run();
+    ticket_hot_schema_ensure();
     $ready = true;
+}
+
+/**
+ * ستون‌ها و مقدارهای ENUM که صفحات پرترافیک (صف کاری، داشبورد، جزئیات درخواست، ورود) به آن‌ها وابسته‌اند.
+ * مهاجرت جاافتاده صفحه را نمی‌خواباند؛ هر ALTER جدا و بی‌صدا است.
+ */
+function ticket_hot_schema_ensure(): void
+{
+    static $ready = false;
+    if ($ready) {
+        return;
+    }
+    $ready = true;
+    try {
+        $ticketAdds = [
+            'ticket_no' => 'ALTER TABLE tickets ADD COLUMN ticket_no VARCHAR(40) NULL',
+            'cancel_requested_at' => 'ALTER TABLE tickets ADD COLUMN cancel_requested_at DATETIME NULL',
+            'cancel_requested_by' => 'ALTER TABLE tickets ADD COLUMN cancel_requested_by INT UNSIGNED NULL',
+            'cancel_request_reason' => 'ALTER TABLE tickets ADD COLUMN cancel_request_reason TEXT NULL',
+            'requesting_unit_id' => 'ALTER TABLE tickets ADD COLUMN requesting_unit_id INT UNSIGNED NULL',
+            'sla_paused_at' => 'ALTER TABLE tickets ADD COLUMN sla_paused_at DATETIME NULL',
+            'sla_pause_minutes' => 'ALTER TABLE tickets ADD COLUMN sla_pause_minutes INT UNSIGNED NOT NULL DEFAULT 0',
+            'ola_policy_id' => 'ALTER TABLE tickets ADD COLUMN ola_policy_id INT UNSIGNED NULL',
+            'ola_response_due_at' => 'ALTER TABLE tickets ADD COLUMN ola_response_due_at DATETIME NULL',
+            'ola_due_at' => 'ALTER TABLE tickets ADD COLUMN ola_due_at DATETIME NULL',
+            'ola_escalation_1_at' => 'ALTER TABLE tickets ADD COLUMN ola_escalation_1_at DATETIME NULL',
+            'ola_escalation_2_at' => 'ALTER TABLE tickets ADD COLUMN ola_escalation_2_at DATETIME NULL',
+            'first_response_at' => 'ALTER TABLE tickets ADD COLUMN first_response_at DATETIME NULL',
+            'resolved_at' => 'ALTER TABLE tickets ADD COLUMN resolved_at DATETIME NULL',
+            'closed_at' => 'ALTER TABLE tickets ADD COLUMN closed_at DATETIME NULL',
+            'assigned_at' => 'ALTER TABLE tickets ADD COLUMN assigned_at DATETIME NULL',
+            'supervisor_id' => 'ALTER TABLE tickets ADD COLUMN supervisor_id INT UNSIGNED NULL',
+            'supervisor_approved_at' => 'ALTER TABLE tickets ADD COLUMN supervisor_approved_at DATETIME NULL',
+            'supervisor_note' => 'ALTER TABLE tickets ADD COLUMN supervisor_note TEXT NULL',
+            'support_location' => 'ALTER TABLE tickets ADD COLUMN support_location VARCHAR(255) NULL',
+            'support_equipment' => 'ALTER TABLE tickets ADD COLUMN support_equipment TEXT NULL',
+            'handling_unit_id' => 'ALTER TABLE tickets ADD COLUMN handling_unit_id INT UNSIGNED NULL',
+            'service_id' => 'ALTER TABLE tickets ADD COLUMN service_id INT UNSIGNED NULL',
+        ];
+        foreach ($ticketAdds as $column => $ddl) {
+            db_add_missing_column('tickets', $column, $ddl);
+        }
+        db_ensure_enum_values('tickets', 'status', ['cancelled'], 'manager_review');
+        $userAdds = [
+            'must_change_password' => 'ALTER TABLE users ADD COLUMN must_change_password TINYINT(1) NOT NULL DEFAULT 0',
+            'first_name' => 'ALTER TABLE users ADD COLUMN first_name VARCHAR(100) NULL',
+            'last_name' => 'ALTER TABLE users ADD COLUMN last_name VARCHAR(100) NULL',
+            'employee_number' => 'ALTER TABLE users ADD COLUMN employee_number VARCHAR(100) NULL',
+            'national_code' => 'ALTER TABLE users ADD COLUMN national_code VARCHAR(30) NULL',
+            'is_primary_admin' => 'ALTER TABLE users ADD COLUMN is_primary_admin TINYINT(1) NOT NULL DEFAULT 0',
+            'is_it_agent' => 'ALTER TABLE users ADD COLUMN is_it_agent TINYINT(1) NOT NULL DEFAULT 0',
+            'handling_unit_id' => 'ALTER TABLE users ADD COLUMN handling_unit_id INT UNSIGNED NULL',
+            'org_unit_id' => 'ALTER TABLE users ADD COLUMN org_unit_id INT UNSIGNED NULL',
+            'manager_user_id' => 'ALTER TABLE users ADD COLUMN manager_user_id INT UNSIGNED NULL',
+            'requesting_unit_id' => 'ALTER TABLE users ADD COLUMN requesting_unit_id INT UNSIGNED NULL',
+            'auth_source' => "ALTER TABLE users ADD COLUMN auth_source ENUM('local','ldap','food') NOT NULL DEFAULT 'local'",
+        ];
+        foreach ($userAdds as $column => $ddl) {
+            db_add_missing_column('users', $column, $ddl);
+        }
+        db_ensure_enum_values('users', 'role', ['local_user', 'guard', 'primary_admin', 'support_manager'], 'user');
+        db_ensure_enum_values('users', 'auth_source', ['food'], 'local');
+        if (function_exists('org_ensure_schema')) {
+            org_ensure_schema();
+        }
+        if (function_exists('org_ticket_schema_ensure')) {
+            org_ticket_schema_ensure();
+        }
+        if (function_exists('lac_ensure_schema')) {
+            lac_ensure_schema();
+        }
+    } catch (Throwable) {
+    }
+}
+
+/** نام قبلی؛ صفحه‌هایی که هنوز این را صدا می‌زنند همان ترمیم کامل را می‌گیرند. */
+function ticket_cancel_ensure_schema(): void
+{
+    ticket_hot_schema_ensure();
 }
 
 function ticket_number_ensure_schema_run(): void
@@ -1551,13 +2027,38 @@ function ticket_number_next(string $prefix): string
 {
     ticket_number_ensure_schema();
     $prefix = strtoupper(substr(trim($prefix) !== '' ? trim($prefix) : 'TK', 0, 12));
-    $statement = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)');
-    $statement->execute([$prefix]);
-    $sequence = (int) db()->query('SELECT LAST_INSERT_ID()')->fetchColumn();
-    if ($sequence <= 0) {
-        $sequence = 1;
+    $ownsTransaction = !db()->inTransaction();
+    if ($ownsTransaction) {
+        db()->beginTransaction();
     }
-    return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    try {
+        // Lock the prefix row explicitly and read its value in this transaction. This
+        // avoids relying on connection-scoped LAST_INSERT_ID() after concurrent upserts.
+        $ensure = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, 0) ON DUPLICATE KEY UPDATE prefix = VALUES(prefix)');
+        $ensure->execute([$prefix]);
+        $read = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? FOR UPDATE');
+        $read->execute([$prefix]);
+        $currentSequence = (int) ($read->fetchColumn() ?: 0);
+
+        // Heal a stale sequence left by legacy/manual ticket numbers before allocating
+        // the next number; the ticket_no index keeps this prefix-scoped lookup bounded.
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+        $maxQuery = db()->prepare('SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED)) FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?');
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existingMaximum = (int) ($maxQuery->fetchColumn() ?: 0);
+        $sequence = max($currentSequence, $existingMaximum) + 1;
+        $write = db()->prepare('UPDATE ticket_number_seq SET seq = ? WHERE prefix = ?');
+        $write->execute([$sequence, $prefix]);
+        if ($ownsTransaction) {
+            db()->commit();
+        }
+        return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    } catch (Throwable $exception) {
+        if ($ownsTransaction && db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $exception;
+    }
 }
 
 function ticket_number_peek(string $prefix): string
@@ -1575,12 +2076,12 @@ function ticket_number_peek(string $prefix): string
 }
 
 /**
- * پرکردن شمارهٔ تیکت‌های قدیمی که ticket_no ندارند.
+ * پرکردن شمارهٔ درخواست‌های قدیمی که ticket_no ندارند.
  *
  * ⚠️ این تابع در ابتدای هر درخواست صدا زده می‌شد و هر بار یک SELECT روی کل جدول
  * tickets + یک DDL (CREATE TABLE IF NOT EXISTS) اجرا می‌کرد؛ روی سرور پرتردد
  * یکی از دلایل کندی بارگذاری صفحات بود. حالا نتیجهٔ «چیزی برای اصلاح نیست» در
- * تنظیمات ثبت می‌شود و تا وقتی تیکتی بدون شماره ساخته نشود، دوباره اسکن نمی‌شود.
+ * تنظیمات ثبت می‌شود و تا وقتی درخواستی بدون شماره ساخته نشود، دوباره اسکن نمی‌شود.
  *
  * @param bool $force true = اسکن دوباره حتی اگر نشانگر ثبت شده باشد (برای ابزار تعمیر)
  */
@@ -1864,16 +2365,64 @@ function ticket_sla_transition(array $ticket, string $newStatus, string $priorit
     $pauseMinutes = (int) ($ticket['sla_pause_minutes'] ?? 0);
     $pauseAt = !empty($ticket['sla_paused_at']) ? new DateTimeImmutable((string) $ticket['sla_paused_at'], $zone) : null;
     $oldStatus = (string) ($ticket['status'] ?? 'new');
-    if ($oldStatus === 'waiting_user' && $newStatus !== 'waiting_user' && $pauseAt) {
+    $wasWaiting = ticket_is_waiting_status($oldStatus);
+    $isWaiting = ticket_is_waiting_status($newStatus);
+    if ($wasWaiting && !$isWaiting && $pauseAt) {
         $pauseMinutes += business_elapsed_minutes($pauseAt, new DateTimeImmutable('now', $zone));
         $pauseAt = null;
-    } elseif ($oldStatus !== 'waiting_user' && $newStatus === 'waiting_user') {
+    } elseif (!$wasWaiting && $isWaiting) {
         $pauseAt = new DateTimeImmutable('now', $zone);
     }
     $createdAt = new DateTimeImmutable((string) $ticket['created_at'], $zone);
     $baseDue = business_due_at(priority_sla_minutes($priority), $createdAt);
     $dueAt = $pauseMinutes > 0 ? business_due_at($pauseMinutes, $baseDue) : $baseDue;
     return [$dueAt->format('Y-m-d H:i:s'), $pauseAt?->format('Y-m-d H:i:s'), $pauseMinutes];
+}
+
+/**
+ * بازتنظیم/تمدید OLA هنگام تغییر اولویت یا خروج از waiting_user.
+ * مهلت‌ها هنگام انتظار کاربر در cron متوقف می‌شوند و پس از پاسخ، زمان مکث به موعدها افزوده می‌شود.
+ */
+function ticket_ola_transition(array $ticket, string $newStatus, string $priority): array
+{
+    $zone = new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'));
+    $oldStatus = (string) ($ticket['status'] ?? 'new');
+    $departmentId = (int) ($ticket['department_id'] ?? 0) ?: null;
+    $oldPriority = (string) ($ticket['priority'] ?? 'normal');
+    $recalculate = $priority !== $oldPriority
+        || empty($ticket['ola_policy_id'])
+        || (!array_key_exists('ola_due_at', $ticket));
+
+    if ($recalculate) {
+        $deadlines = ola_deadlines($departmentId, $priority, (string) $ticket['created_at']);
+    } else {
+        $deadlines = [
+            'policy_id' => (int) $ticket['ola_policy_id'],
+            'response_due_at' => $ticket['ola_response_due_at'] ?? null,
+            'due_at' => $ticket['ola_due_at'] ?? null,
+            'escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+            'escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
+        ];
+    }
+
+    $pauseMinutes = 0;
+    if (ticket_is_waiting_status($oldStatus) && !ticket_is_waiting_status($newStatus) && !empty($ticket['sla_paused_at'])) {
+        $pauseAt = new DateTimeImmutable((string) $ticket['sla_paused_at'], $zone);
+        $pauseMinutes = business_elapsed_minutes($pauseAt, new DateTimeImmutable('now', $zone));
+    }
+    if ($recalculate) {
+        $pauseMinutes += (int) ($ticket['sla_pause_minutes'] ?? 0);
+    }
+    if ($pauseMinutes > 0) {
+        foreach (['response_due_at', 'due_at', 'escalation_1_at', 'escalation_2_at'] as $key) {
+            if (empty($deadlines[$key])) {
+                continue;
+            }
+            $deadline = new DateTimeImmutable((string) $deadlines[$key], $zone);
+            $deadlines[$key] = business_due_at($pauseMinutes, $deadline)->format('Y-m-d H:i:s');
+        }
+    }
+    return $deadlines;
 }
 
 function record_asset_history(int $assetId, string $eventType, string $title, ?int $userId = null, ?int $ticketId = null, string $details = '', array $before = [], array $after = []): void
@@ -1887,7 +2436,7 @@ function record_asset_history(int $assetId, string $eventType, string $title, ?i
 
 function status_label(string $status): string
 {
-    return ['new' => 'جدید', 'manager_review' => 'در انتظار بررسی مدیر واحد', 'assigned' => 'ارجاع‌شده به کارشناس', 'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر', 'open' => 'در حال بررسی', 'pending' => 'در انتظار پاسخ', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده'][$status] ?? $status;
+    return ['new' => 'جدید', 'manager_review' => 'در انتظار بررسی مدیر واحد', 'assigned' => 'ارجاع‌شده به کارشناس', 'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر', 'open' => 'در حال بررسی', 'pending' => 'در انتظار پاسخ', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده', 'cancelled' => 'لغوشده به درخواست ثبت‌کننده'][$status] ?? $status;
 }
 
 function priority_label(string $priority): string
@@ -1906,6 +2455,20 @@ function notify_user(int $userId, string $type, string $title, string $body, ?in
         return;
     }
     db()->prepare('INSERT INTO notifications (user_id, ticket_id, notification_type, title, body) VALUES (?, ?, ?, ?, ?)')->execute([$userId, $ticketId, $type, $title, $body]);
+}
+
+function notification_target_url(array $notification): string
+{
+    $type = (string) ($notification['notification_type'] ?? $notification['type'] ?? '');
+    if ($type === 'food_cancel_request' || $type === 'food_cancel_decision') {
+        return function_exists('food_order_cancel_inbox_url')
+            ? food_order_cancel_inbox_url()
+            : 'index.php?page=dashboard#food-cancel-requests';
+    }
+    if (!empty($notification['ticket_id'])) {
+        return 'index.php?page=ticket&id=' . (int) $notification['ticket_id'];
+    }
+    return 'index.php?page=notifications';
 }
 
 function notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
@@ -1955,9 +2518,45 @@ function notify_ticket_staff(int $ticketId, string $type, string $title, string 
     }
 }
 
+/** اعلان درخواست لغو غذا فقط برای مدیر پشتیبانی و مدیر اصلی است؛ کاربر عادی نباید در زنگوله ببیند. */
+function notification_user_sees_food_cancel(int $userId, ?array $user = null): bool
+{
+    static $cache = [];
+    if (array_key_exists($userId, $cache)) {
+        return $cache[$userId];
+    }
+    $row = $user;
+    if (!$row || (int) ($row['id'] ?? 0) !== $userId) {
+        try {
+            $stmt = db()->prepare('SELECT id, role, is_primary_admin FROM users WHERE id = ? LIMIT 1');
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable) {
+            $row = [];
+        }
+    }
+    if (function_exists('food_order_user_is_cancel_reviewer')) {
+        return $cache[$userId] = food_order_user_is_cancel_reviewer($row);
+    }
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($row)) {
+        return $cache[$userId] = true;
+    }
+    $role = (string) ($row['role'] ?? '');
+    return $cache[$userId] = ($role === 'primary_admin' || $role === 'support_manager' || (int) ($row['is_primary_admin'] ?? 0) === 1);
+}
+
+function notification_visibility_sql(int $userId, ?array $user = null, string $alias = ''): string
+{
+    if (notification_user_sees_food_cancel($userId, $user)) {
+        return '';
+    }
+    $col = ($alias !== '' ? $alias . '.' : '') . 'notification_type';
+    return " AND {$col} <> 'food_cancel_request'";
+}
+
 function unread_notification_count(int $userId): int
 {
-    $query = db()->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0');
+    $query = db()->prepare('SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0' . notification_visibility_sql($userId));
     $query->execute([$userId]);
     return (int) $query->fetchColumn();
 }
@@ -1965,14 +2564,14 @@ function unread_notification_count(int $userId): int
 /**
  * شمارش اعلان‌های نخوانده + آخرین شناسه با یک کوئری (برای کارایی؛ در هدر استفاده می‌شود).
  */
-function notification_header_summary(int $userId): array
+function notification_header_summary(int $userId, ?array $user = null): array
 {
     static $cache = [];
     if (array_key_exists($userId, $cache)) {
         return $cache[$userId];
     }
     try {
-        $query = db()->prepare('SELECT COALESCE(SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END), 0) AS unread, COALESCE(MAX(id), 0) AS latest FROM notifications WHERE user_id = ?');
+        $query = db()->prepare('SELECT COALESCE(SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END), 0) AS unread, COALESCE(MAX(id), 0) AS latest FROM notifications WHERE user_id = ?' . notification_visibility_sql($userId, $user));
         $query->execute([$userId]);
         $row = $query->fetch() ?: [];
         return $cache[$userId] = [
@@ -1986,7 +2585,7 @@ function notification_header_summary(int $userId): array
 
 function latest_notification_id(int $userId): int
 {
-    $query = db()->prepare('SELECT COALESCE(MAX(id), 0) FROM notifications WHERE user_id = ?');
+    $query = db()->prepare('SELECT COALESCE(MAX(id), 0) FROM notifications WHERE user_id = ?' . notification_visibility_sql($userId));
     $query->execute([$userId]);
     return (int) $query->fetchColumn();
 }
@@ -1999,6 +2598,36 @@ function is_sla_holiday(DateTimeImmutable $date): bool
 }
 
 function ldap_authenticate(string $username, string $password): ?array
+{
+    if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
+        return ldap_authenticate_measured($username, $password, static function (string $phase): void {});
+    }
+    $startedAt = microtime(true);
+    $phase = 'ldap-connect';
+    $phaseStartedAt = $startedAt;
+    $phaseDurations = [];
+    $markPhase = static function (string $nextPhase) use (&$phase, &$phaseStartedAt, &$phaseDurations): void {
+        $now = microtime(true);
+        $phaseDurations[$phase] = ($phaseDurations[$phase] ?? 0) + (int) round(($now - $phaseStartedAt) * 1000);
+        $phase = $nextPhase;
+        $phaseStartedAt = $now;
+    };
+    try {
+        return ldap_authenticate_measured($username, $password, $markPhase);
+    } finally {
+        $markPhase('finished');
+        $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+        if ($durationMs >= 1000) {
+            $stageSummary = [];
+            foreach ($phaseDurations as $stage => $duration) {
+                $stageSummary[] = $stage . ':' . $duration . 'ms';
+            }
+            error_log('ITSM LDAP login timing: duration_ms=' . $durationMs . '; stages=' . implode(',', $stageSummary));
+        }
+    }
+}
+
+function ldap_authenticate_measured(string $username, string $password, callable $markPhase): ?array
 {
     if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
         return null;
@@ -2023,6 +2652,7 @@ function ldap_authenticate(string $username, string $password): ?array
         ldap_auth_log('service-bind-failed', $username, $connection);
         $serviceBindFailed = true;
     }
+    $markPhase('rootdse-discovery');
     $lookup = preg_replace('/^.*\\\\/', '', $username) ?: $username;
     $lookup = explode('@', $lookup, 2)[0];
     $escapedLookup = ldap_escape($lookup, '', LDAP_ESCAPE_FILTER);
@@ -2055,6 +2685,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     };
     $addDefaultNamingContext();
+    $markPhase('user-search');
     $searchUser = static function ($ldapConnection, array $bases, array $searchFilters, array $searchAttributes): array {
         foreach ($bases as $baseDn) {
             foreach ($searchFilters as $candidate) {
@@ -2101,6 +2732,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     }
     [$search, $entries] = $searchUser($connection, $searchBases, $filters, $attributes);
+    $markPhase('user-bind');
     if (!$search) {
         if (!$tryDirectBind($connection)) {
             ldap_auth_log('direct-bind-failed', $username, $connection);
@@ -2153,6 +2785,7 @@ function ldap_authenticate(string $username, string $password): ?array
             return null;
         }
     }
+    $markPhase('profile-assembly');
     $groups = [];
     for ($groupIndex = 0; $groupIndex < (int) ($entry['memberof']['count'] ?? 0); $groupIndex++) {
         $groups[] = (string) ($entry['memberof'][$groupIndex] ?? '');
@@ -2361,16 +2994,20 @@ function activity_action_label(string $code): string
         'page_view' => 'مشاهدهٔ صفحه',
         'profile_updated' => 'به‌روزرسانی پروفایل',
         'user_theme_changed' => 'تغییر تم شخصی',
-        'ticket_created' => 'ثبت تیکت جدید',
-        'ticket_replied' => 'پاسخ در تیکت',
-        'ticket_updated' => 'به‌روزرسانی تیکت',
-        'ticket_rated' => 'امتیازدهی به تیکت',
-        'ticket_reopened' => 'بازگشایی تیکت',
-        'ticket_reopened_by_user' => 'بازگشایی تیکت توسط کاربر (مشکل حل نشده)',
-        'ticket_claimed' => 'برداشتن تیکت توسط کارشناس',
+        'ticket_created' => 'ثبت درخواست جدید',
+        'ticket_replied' => 'پاسخ در درخواست',
+        'ticket_updated' => 'به‌روزرسانی درخواست',
+        'ticket_rated' => 'امتیازدهی به درخواست',
+        'ticket_reopened' => 'بازگشایی درخواست',
+        'ticket_reopened_by_user' => 'بازگشایی درخواست توسط کاربر (مشکل حل نشده)',
+        'ticket_cancelled_by_requester' => 'لغو درخواست توسط ثبت‌کننده',
+        'ticket_cancellation_requested' => 'درخواست لغو درخواست',
+        'ticket_cancellation_approved' => 'تأیید درخواست لغو درخواست',
+        'ticket_cancellation_rejected' => 'رد درخواست لغو درخواست',
+        'ticket_claimed' => 'برداشتن درخواست توسط کارشناس',
         'supervisor_approved' => 'تأیید سوپروایزر',
-        'supervisor_rework' => 'برگشت تیکت برای اصلاح',
-        'supervisor_reopened' => 'بازگشایی تیکت توسط سوپروایزر',
+        'supervisor_rework' => 'برگشت درخواست برای اصلاح',
+        'supervisor_reopened' => 'بازگشایی درخواست توسط سوپروایزر',
         'cd_dvd_in' => 'ثبت ورود رسانه (CD/DVD)',
         'cd_dvd_out' => 'ثبت خروج رسانه (CD/DVD)',
         'cd_dvd_updated' => 'ویرایش ثبت CD/DVD',
@@ -2393,6 +3030,11 @@ function activity_action_label(string $code): string
         'food_group_uid_changed' => 'تغییر L_UID نمایندهٔ گروه',
         'food_group_member_added' => 'افزودن عضو به گروه غذا',
         'food_group_member_removed' => 'حذف عضو از گروه غذا',
+        'food_day_visit_set' => 'خوداظهاری محل تحویل غذا برای امروز',
+        'food_day_visit_cleared' => 'لغو خوداظهاری محل تحویل غذا',
+        'order_cancel_request' => 'درخواست لغو سفارش غذا در روز بسته',
+        'order_cancel_request_approved' => 'تأیید لغو سفارش غذا توسط پشتیبانی',
+        'order_cancel_request_rejected' => 'رد درخواست لغو سفارش غذا',
         'food_absence_set' => 'ثبت غیبت روزانه',
         'food_absence_cleared' => 'حذف غیبت روزانه',
         'food_absence_override' => 'اصلاح غیبت بعد از قفل',
@@ -2430,13 +3072,14 @@ function activity_action_label(string $code): string
         'reset_org_structure' => 'بازنشانی ساختار سازمان',
         'delete_org_unit' => 'حذف واحد سازمانی',
         'undo_org_action' => 'بازگردانی آخرین تغییر سازمان',
-        'bulk_update_tickets' => 'عملیات گروهی روی تیکت‌ها',
-        'create_ticket' => 'ثبت تیکت جدید',
-        'update_ticket' => 'به‌روزرسانی تیکت',
-        'reply' => 'پاسخ در تیکت',
-        'rate_ticket' => 'امتیازدهی به تیکت',
+        'bulk_update_tickets' => 'عملیات گروهی روی درخواست‌ها',
+        'create_ticket' => 'ثبت درخواست جدید',
+        'update_ticket' => 'به‌روزرسانی درخواست',
+        'reply' => 'پاسخ در درخواست',
+        'rate_ticket' => 'امتیازدهی به درخواست',
         'mark_notification' => 'خواندن اعلان',
         'mark_all_notifications' => 'خواندن همهٔ اعلان‌ها',
+        'food_order_cancel_decide' => 'رسیدگی به درخواست لغو غذا',
         'cd_dvd_create' => 'ثبت رکورد CD/DVD',
         'cd_dvd_update' => 'ویرایش رکورد CD/DVD',
         'cd_dvd_delete' => 'حذف رکورد CD/DVD',
@@ -2451,6 +3094,7 @@ function activity_action_label(string $code): string
         'traffic_visit_updated' => 'ویرایش تردد مراجع',
         'traffic_visit_deleted' => 'حذف تردد مراجع',
         'traffic_visit_exit_set' => 'ثبت ساعت خروج مراجع',
+        'traffic_records_imported' => 'ورود گروهی سوابق تردد از Excel',
         'save_inventory_form' => 'ذخیرهٔ شناسنامهٔ فنی',
         'collect_inventory' => 'استخراج اطلاعات سیستم',
         'create_backup' => 'ایجاد پشتیبان',

@@ -34,6 +34,7 @@ function food_ticket_tpl_catalog(): array
         ['key' => 'logo', 'label' => 'لوگو', 'type' => 'image', 'label_text' => '', 'sample' => ''],
         ['key' => 'system_name', 'label' => 'نام سامانه', 'type' => 'text', 'label_text' => '', 'sample' => 'سامانه مدیریت غذا'],
         ['key' => 'title', 'label' => 'عنوان فیش', 'type' => 'free', 'label_text' => '', 'sample' => 'فیش غذای پرسنل'],
+        ['key' => 'group_title', 'label' => 'عنوان گروه', 'type' => 'text', 'label_text' => '', 'sample' => 'گروه نمونهٔ کارکنان'],
         ['key' => 'employee_name', 'label' => 'نام کارمند', 'type' => 'text', 'label_text' => 'نام و نام خانوادگی', 'sample' => 'علی رضایی'],
         ['key' => 'personnel_code', 'label' => 'کد پرسنلی', 'type' => 'text', 'label_text' => 'کد پرسنلی', 'sample' => '۱۲۳۴'],
         ['key' => 'national_code', 'label' => 'کد ملی', 'type' => 'text', 'label_text' => 'کد ملی', 'sample' => '۰۰۱۲۳۴۵۶۷۸'],
@@ -615,6 +616,7 @@ function food_ticket_tpl_values(array $event, array $tpl): array
         : food_ticket_tpl_system_name();
     $v = [
         'system_name' => $system,
+        'group_title' => trim((string) ($event['group_title'] ?? '')),
         'employee_name' => trim((string) ($event['full_name'] ?? '')),
         'personnel_code' => trim((string) ($event['personnel_code'] ?? '')),
         'national_code' => trim((string) ($event['national_code'] ?? '')),
@@ -1019,15 +1021,49 @@ function food_ticket_tpl_text_height_mm(array $it): float
  */
 function food_ticket_tpl_model(array $event, ?array $row = null): array
 {
-    $row = $row ?? food_ticket_tpl_active();
+    $row = $row ?? ((!empty($event['group_ticket']) && function_exists('food_ticket_tpl_group_template')) ? food_ticket_tpl_group_template() : food_ticket_tpl_active());
     $tpl = $row['template'];
     $values = food_ticket_tpl_values($event, $tpl);
     $items = [];
+    $isGroupTicket = !empty($event['group_ticket']) && is_array($event['group_ticket_rows'] ?? null);
+    $paperW = (float) $row['paper_width'];
+    $groupTitleIncluded = false;
+    $groupDateIncluded = false;
+    $groupTimeIncluded = false;
+    $groupFooterElements = [];
+    $groupMenuStyle = null;
+    $groupMemberStyle = null;
+    $groupBodyAnchor = null;
+    if ($isGroupTicket) {
+        foreach ((array) $tpl['elements'] as $styleEl) {
+            if (empty($styleEl['enabled'])) {
+                continue;
+            }
+            if (($styleEl['field'] ?? '') === 'food_name' && $groupMenuStyle === null) {
+                $groupMenuStyle = $styleEl;
+                $groupBodyAnchor = $styleEl;
+            } elseif (($styleEl['field'] ?? '') === 'employee_name') {
+                $groupMemberStyle ??= $styleEl;
+            }
+        }
+        if ($groupBodyAnchor === null) {
+            $groupBodyAnchor = $groupMemberStyle;
+        }
+    }
     foreach ((array) $tpl['elements'] as $el) {
         if (empty($el['enabled'])) {
             continue;
         }
         $field = (string) $el['field'];
+        if ($isGroupTicket) {
+            if ($field === 'free_text') {
+                $groupFooterElements[] = $el;
+                continue;
+            }
+            if (in_array($field, ['food_name', 'employee_name', 'personnel_code', 'national_code', 'department', 'meal', 'ticket_number', 'qrcode'], true)) {
+                continue;
+            }
+        }
         $x = (float) $el['x'];
         $y = (float) $el['y'];
         $w = (float) $el['width'];
@@ -1079,14 +1115,111 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
         if (trim($text) === '') {
             continue;
         }
+        if ($isGroupTicket && $field === 'group_title') {
+            $groupTitleIncluded = true;
+        }
+        if ($isGroupTicket && in_array($field, ['date', 'food_date'], true)) {
+            $groupDateIncluded = true;
+        }
+        if ($isGroupTicket && in_array($field, ['punch_time', 'attendance_time'], true)) {
+            $groupTimeIncluded = true;
+        }
         $items[] = [
             'type' => 'text', 'x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'text' => $text,
             'font' => (string) $el['font_family'], 'pt' => (float) $el['font_size'], 'bold' => !empty($el['bold']),
             'align' => (string) $el['align'], 'lh' => (float) $el['line_height'], 'border' => $border,
         ];
     }
-    $paperW = (float) $row['paper_width'];
-    $paperH = (float) $row['paper_height'];
+    if ($isGroupTicket) {
+        $date = trim((string) ($event['punch_date'] ?? $event['food_date'] ?? ''));
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $date, $dm) && function_exists('gregorian_to_jalali')) {
+            [$jy, $jm, $jd] = gregorian_to_jalali((int) $dm[1], (int) $dm[2], (int) $dm[3]);
+            $date = sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
+        }
+        $time = trim((string) ($event['punch_time'] ?? $event['attendance_time'] ?? ''));
+        if (preg_match('/^(\d{1,2}):(\d{2})/', $time, $tm)) {
+            $time = sprintf('%02d:%02d', (int) $tm[1], (int) $tm[2]);
+        }
+        $groupLines = [];
+        if (!$groupTitleIncluded && trim((string) ($event['group_title'] ?? '')) !== '') {
+            $groupLines[] = ['kind' => 'meta', 'text' => 'گروه: ' . (string) $event['group_title']];
+        }
+        if (!$groupDateIncluded) {
+            $groupLines[] = ['kind' => 'meta', 'text' => 'تاریخ: ' . $date];
+        }
+        if (!$groupTimeIncluded) {
+            $groupLines[] = ['kind' => 'meta', 'text' => 'ساعت: ' . $time];
+        }
+        if ($groupLines !== [] && !empty($event['group_ticket_rows'])) {
+            $groupLines[] = ['kind' => 'meta', 'text' => '------------------------------'];
+        }
+        foreach ($event['group_ticket_rows'] as $groupRow) {
+            $food = trim((string) ($groupRow['food'] ?? ''));
+            $names = array_values(array_filter(array_map('strval', (array) ($groupRow['members'] ?? [])), static fn (string $name): bool => trim($name) !== ''));
+            if ($food === '' || !$names) {
+                continue;
+            }
+            $count = max(0, (int) ($groupRow['count'] ?? count($names)));
+            $groupLines[] = ['kind' => 'menu', 'text' => (string) ($groupRow['label'] ?? 'منو') . ' — ' . $food . ' — ' . $count . ' عدد'];
+            foreach ($names as $name) {
+                $groupLines[] = ['kind' => 'member', 'text' => 'نام و نام خانوادگی: ' . $name];
+            }
+        }
+        if ($groupLines !== []) {
+            $bottom = 0.0;
+            foreach ($items as $it) {
+                $itemBottom = (float) $it['y'] + ($it['type'] === 'text' ? food_ticket_tpl_text_height_mm($it) : (float) $it['h']);
+                $bottom = max($bottom, $itemBottom);
+            }
+            $anchor = is_array($groupBodyAnchor) ? $groupBodyAnchor : [];
+            $menuStyle = is_array($groupMenuStyle) ? $groupMenuStyle : [];
+            $memberStyle = is_array($groupMemberStyle) ? $groupMemberStyle : $menuStyle;
+            if ($menuStyle === []) {
+                $menuStyle = $memberStyle;
+            }
+            $bodyX = max(0.0, min(max(0.0, $paperW - 10.0), (float) ($anchor['x'] ?? 6.0)));
+            $bodyW = max(10.0, min(max(10.0, $paperW - $bodyX), (float) ($anchor['width'] ?? ($paperW - 12.0))));
+            $bodyY = max($bottom + 1.5, (float) ($anchor['y'] ?? 0.0));
+            $lineY = $bodyY;
+            foreach ($groupLines as $groupLine) {
+                $style = ($groupLine['kind'] ?? '') === 'menu' ? $menuStyle : $memberStyle;
+                $line = [
+                    'type' => 'text', 'x' => $bodyX, 'y' => $lineY, 'w' => $bodyW, 'h' => 0.5,
+                    'text' => food_ticket_tpl_fa((string) $groupLine['text']),
+                    'font' => (string) ($style['font_family'] ?? 'Tahoma'),
+                    'pt' => (float) ($style['font_size'] ?? 11), 'bold' => !empty($style['bold']),
+                    'align' => (string) ($anchor['align'] ?? 'right'),
+                    'lh' => (float) ($style['line_height'] ?? 1.2), 'border' => false,
+                ];
+                $items[] = $line;
+                $lineY += food_ticket_tpl_text_height_mm($line);
+                if (($groupLine['kind'] ?? '') === 'menu') {
+                    $lineY += 1.5; // فاصلهٔ بیشتر میان عنوان غذا و نخستین نام
+                }
+            }
+            $bodyH = max(0.5, $lineY - $bodyY + 1.0);
+            if (!empty($anchor['border'])) {
+                $items[] = ['type' => 'rect', 'x' => $bodyX, 'y' => $bodyY, 'w' => $bodyW, 'h' => $bodyH];
+            }
+            $footerY = $bodyY + $bodyH + 1.0;
+            foreach ($groupFooterElements as $footerEl) {
+                $footerText = food_ticket_tpl_fa((string) ($footerEl['text'] ?? ''));
+                if (trim($footerText) === '') {
+                    continue;
+                }
+                $footer = [
+                    'type' => 'text', 'x' => (float) $footerEl['x'], 'y' => $footerY,
+                    'w' => (float) $footerEl['width'], 'h' => (float) $footerEl['height'], 'text' => $footerText,
+                    'font' => (string) $footerEl['font_family'], 'pt' => (float) $footerEl['font_size'],
+                    'bold' => !empty($footerEl['bold']), 'align' => (string) $footerEl['align'],
+                    'lh' => (float) $footerEl['line_height'], 'border' => !empty($footerEl['border']),
+                ];
+                $items[] = $footer;
+                $footerY += food_ticket_tpl_text_height_mm($footer) + 1.0;
+            }
+        }
+    }
+    $paperH = $isGroupTicket ? 0.0 : (float) $row['paper_height'];
     $variable = $paperH <= 0;
     if ($variable) {
         $bottom = 0.0;
@@ -1452,6 +1585,9 @@ function food_ticket_tpl_render_gd(array $model, array $cfg): array
                 imagesetthickness($im, $thin);
                 imagerectangle($im, $left, $top0, $left + $mm((float) $it['w']), $top0 + $mm((float) $it['h']), $black);
             }
+        } elseif ($type === 'rect') {
+            imagesetthickness($im, $thin);
+            imagerectangle($im, $mm((float) $it['x']), $mm((float) $it['y']), $mm((float) $it['x'] + (float) $it['w']), $mm((float) $it['y'] + (float) $it['h']), $black);
         } elseif ($type === 'line') {
             $ly = $mm((float) $it['y']);
             $x1 = $mm((float) $it['x']);
@@ -1735,6 +1871,9 @@ function Draw-Model($g, [double]$ox, [double]$oy) {
       }
       if ($it.border) { $g.DrawRectangle($pen, [single]$it.x, [single]$it.y, [single]$it.w, [single]$it.h) }
     }
+    elseif ($t -eq 'rect') {
+      $g.DrawRectangle($pen, [single]$it.x, [single]$it.y, [single]$it.w, [single]$it.h)
+    }
     elseif ($t -eq 'line') {
       $g.DrawLine($penDash, [single]$it.x, [single]$it.y, [single]([double]$it.x + [double]$it.w), [single]$it.y)
     }
@@ -1923,6 +2062,97 @@ function food_ticket_tpl_brand_payload(): array
     ];
 }
 
+/** Ensure legacy group designs expose the group name as its own movable/aligned field. */
+function food_ticket_tpl_group_ensure_title(array $row): array
+{
+    $template = food_ticket_tpl_normalize(is_array($row['template'] ?? null) ? $row['template'] : []);
+    foreach ($template['elements'] as $element) {
+        if (($element['field'] ?? '') === 'group_title') {
+            $row['template'] = $template;
+            return $row;
+        }
+    }
+    if (count($template['elements']) >= 40) {
+        $row['template'] = $template;
+        return $row;
+    }
+
+    $paperW = (float) ($row['paper_width'] ?? 80.0);
+    $titleIndex = null;
+    $reference = null;
+    $nameStyle = null;
+    foreach ($template['elements'] as $index => $element) {
+        if (($element['field'] ?? '') === 'title' && $titleIndex === null) {
+            $titleIndex = $index;
+            $reference = $element;
+        }
+        if (($element['field'] ?? '') === 'employee_name' && $nameStyle === null) {
+            $nameStyle = $element;
+        }
+    }
+    if ($reference === null) {
+        foreach ($template['elements'] as $element) {
+            if (($element['field'] ?? '') === 'system_name') {
+                $reference = $element;
+                break;
+            }
+        }
+    }
+    $reference ??= ['x' => 6.0, 'y' => 6.0, 'height' => 6.0, 'font_family' => 'Tahoma', 'font_size' => 11.0, 'line_height' => 1.2];
+    $nameStyle ??= $reference;
+    $id = 'group_title_auto';
+    $used = array_column($template['elements'], 'id');
+    for ($suffix = 2; in_array($id, $used, true); $suffix++) {
+        $id = 'group_title_auto' . $suffix;
+    }
+    $element = [
+        'id' => $id,
+        'field' => 'group_title',
+        'enabled' => true,
+        'x' => food_ticket_tpl_num($reference['x'] ?? 6, 0, max(1, $paperW), 6.0),
+        'y' => food_ticket_tpl_num((float) ($reference['y'] ?? 6) + (float) ($reference['height'] ?? 6) + 2.0, 0, 1000, 14.0),
+        'width' => food_ticket_tpl_num($reference['width'] ?? ($paperW - 12), 1, 200, max(10, $paperW - 12)),
+        'height' => 6.0,
+        'font_family' => (string) ($nameStyle['font_family'] ?? 'Tahoma'),
+        'font_size' => food_ticket_tpl_num($nameStyle['font_size'] ?? 10, 4, 72, 10.0),
+        'bold' => false,
+        'align' => 'center',
+        'line_height' => food_ticket_tpl_num($nameStyle['line_height'] ?? 1.2, 0.8, 3, 1.2),
+        'show_label' => false,
+        'label' => '',
+        'text' => '',
+        'border' => false,
+    ];
+    $insertAt = $titleIndex !== null ? $titleIndex + 1 : count($template['elements']);
+    array_splice($template['elements'], $insertAt, 0, [$element]);
+    $row['template'] = food_ticket_tpl_normalize($template);
+    return $row;
+}
+
+/** قالب مستقل گروهی؛ در نبود تنظیم ذخیره‌شده، قالب انفرادی فعال فقط به‌عنوان نقطهٔ شروع برگردانده می‌شود. */
+function food_ticket_tpl_group_template(): array
+{
+    $raw = function_exists('food_ticket_tpl_setting') ? food_ticket_tpl_setting('food_ticket_group_template', '') : '';
+    $saved = $raw !== '' ? json_decode($raw, true) : null;
+    if (is_array($saved) && is_array($saved['template'] ?? null)) {
+        return food_ticket_tpl_group_ensure_title([
+            'id' => 0,
+            'name' => trim((string) ($saved['name'] ?? '')) ?: 'قالب گروهی',
+            'paper_width' => food_ticket_tpl_num($saved['paper_width'] ?? 80, 20, 120, 80.0),
+            'paper_height' => (float) ($saved['paper_height'] ?? 0) <= 0 ? 0.0 : food_ticket_tpl_num($saved['paper_height'], 15, 600, 50.0),
+            'is_active' => true,
+            'template' => food_ticket_tpl_normalize($saved['template']),
+            'updated_at' => (string) ($saved['updated_at'] ?? ''),
+        ]);
+    }
+    $row = food_ticket_tpl_active();
+    $row['id'] = 0;
+    $row['name'] = 'قالب گروهی (کپی اولیه از قالب انفرادی)';
+    $row['is_active'] = true;
+    $row['updated_at'] = '';
+    return food_ticket_tpl_group_ensure_title($row);
+}
+
 /** @return array<string,mixed> */
 function food_ticket_tpl_list_payload(): array
 {
@@ -1931,10 +2161,41 @@ function food_ticket_tpl_list_payload(): array
     return [
         'max' => FOOD_TICKET_TPL_MAX,
         'templates' => food_ticket_tpl_list(),
+        'group_template' => food_ticket_tpl_group_template(),
         'catalog' => food_ticket_tpl_catalog(),
         'fonts' => array_keys(food_ticket_tpl_font_files()),
         'brand' => food_ticket_tpl_brand_payload(),
+        'group_print_mode' => food_ticket_group_print_mode(),
         'net' => ['dots_per_mm' => (float) $cfg['dots_per_mm'], 'head_dots_80' => food_ticket_tpl_head_dots(80.0, $cfg), 'head_dots_58' => food_ticket_tpl_head_dots(58.0, $cfg)],
+    ];
+}
+
+/** حالت چاپ گروه: group = یک فیش مشترک؛ individual = بازگشت به فیش‌های عضو‌به‌عضو. */
+function food_ticket_group_print_mode(): string
+{
+    $mode = function_exists('food_ticket_tpl_setting')
+        ? food_ticket_tpl_setting('food_ticket_group_print_mode', 'group')
+        : (function_exists('setting') ? (string) setting('food_ticket_group_print_mode', 'group') : 'group');
+    return in_array($mode, ['group', 'individual'], true) ? $mode : 'group';
+}
+
+/** رویداد نمونه برای پیش‌نمایش گروهی طراح. @return array<string,mixed> */
+function food_ticket_tpl_sample_group_event(): array
+{
+    return [
+        'id' => 1025,
+        'full_name' => 'نمونهٔ گروه',
+        'group_title' => 'گروه نمونهٔ کارکنان',
+        'group_ticket' => 1,
+        'group_ticket_rows' => [
+            ['label' => 'منو۱', 'food' => 'چلوکباب', 'members' => ['علی رضایی', 'سارا محمدی', 'رضا کریمی', 'مریم احمدی', 'حسین رضایی', 'نرگس موسوی']],
+            ['label' => 'منو۲', 'food' => 'زرشک‌پلو با مرغ', 'members' => ['فاطمه حسینی', 'محمد کاظمی', 'ناهید جعفری', 'امیر رحیمی', 'لیلا صادقی', 'پیمان مرادی']],
+            ['label' => 'منو۳', 'food' => 'قیمه', 'members' => ['آزاده کریمی', 'جواد احمدی', 'مهدی نوری', 'الهام رستمی', 'فرهاد یوسفی', 'سمانه حیدری']],
+        ],
+        'punch_date' => date('Y-m-d'),
+        'punch_time' => date('H:i:s'),
+        'ticket_key' => 'group-sample:' . date('Ymd'),
+        'event_type' => 'printed',
     ];
 }
 
@@ -2015,6 +2276,31 @@ function food_ticket_templates_api(string $route, array $user): never
         food_ticket_api_json(['ok' => true, 'brand' => $brand]);
     }
     $body = food_ticket_api_body();
+    if ($route === 'templates/group-design') {
+        $name = trim((string) ($body['name'] ?? 'قالب گروهی'));
+        $groupTemplate = [
+            'name' => mb_substr($name !== '' ? $name : 'قالب گروهی', 0, 120, 'UTF-8'),
+            'paper_width' => food_ticket_tpl_num($body['paper_width'] ?? 80, 20, 120, 80.0),
+            'paper_height' => ((float) ($body['paper_height'] ?? 0)) <= 0 ? 0.0 : food_ticket_tpl_num($body['paper_height'], 15, 600, 50.0),
+            'template' => food_ticket_tpl_normalize(is_array($body['template'] ?? null) ? $body['template'] : []),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+        $encoded = json_encode($groupTemplate, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+        if (!is_string($encoded)) {
+            food_ticket_api_json(['error' => 'ذخیرهٔ طراحی فیش گروهی انجام نشد.'], 500);
+        }
+        save_setting('food_ticket_group_template', $encoded);
+        food_ticket_print_log(null, null, null, null, null, 'group_template_saved', 0, 'group template by user ' . $uid);
+        food_ticket_api_json(['ok' => true] + food_ticket_tpl_list_payload());
+    }
+    if ($route === 'templates/group-mode') {
+        $mode = (string) ($body['mode'] ?? '');
+        if (!in_array($mode, ['group', 'individual'], true)) {
+            food_ticket_api_json(['error' => 'حالت چاپ گروهی معتبر نیست.'], 422);
+        }
+        save_setting('food_ticket_group_print_mode', $mode);
+        food_ticket_api_json(['ok' => true] + food_ticket_tpl_list_payload());
+    }
     if ($route === 'templates') {
         $id = (int) ($body['id'] ?? 0);
         $savedId = food_ticket_tpl_save(
@@ -2048,8 +2334,10 @@ function food_ticket_templates_api(string $route, array $user): never
             'template' => food_ticket_tpl_normalize(is_array($body['template'] ?? null) ? $body['template'] : []),
             'updated_at' => '',
         ];
+        $sampleType = (string) ($body['sample_type'] ?? 'individual');
+        $sampleEvent = $sampleType === 'group' ? food_ticket_tpl_sample_group_event() : food_ticket_tpl_sample_event();
         try {
-            $preview = food_ticket_tpl_preview(food_ticket_tpl_sample_event(), $row);
+            $preview = food_ticket_tpl_preview($sampleEvent, $row);
         } catch (Throwable $e) {
             app_error_log('[food-template-preview] ' . $e->getMessage() . ' @' . basename($e->getFile()) . ':' . $e->getLine());
             food_ticket_api_json(['error' => 'پیش‌نمایش قالب ساخته نشد: ' . $e->getMessage()], 500);

@@ -14,7 +14,7 @@
 --   mysql -u root -p -e "CREATE DATABASE persian_ticketing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 --   mysql -u root -p persian_ticketing < install-empty-db.sql
 --
--- ⚠️ هیچ دادهٔ کاربری، تیکت، دارایی، گروه غذا یا فایل پیوستی در این فایل نیست.
+-- ⚠️ هیچ دادهٔ کاربری، درخواست، دارایی، گروه غذا یا فایل پیوستی در این فایل نیست.
 -- ⚠️ پس از اجرا، «توکن نصب» ساخته می‌شود؛ مرورگر کاربران با دیدن توکن متفاوت،
 --    کش محلی خود (localStorage پنل غذا) را که به نصب قبلی تعلق دارد دور می‌ریزد.
 -- ============================================================================
@@ -149,6 +149,7 @@ CREATE TABLE IF NOT EXISTS cd_dvd_records (
 CREATE TABLE IF NOT EXISTS traffic_destinations (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(190) NOT NULL,
+    approver_name VARCHAR(190) NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_traffic_destination (title)
@@ -179,6 +180,23 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     KEY idx_traffic_serial (serial_no),
     KEY idx_traffic_created_by (created_by),
     CONSTRAINT fk_traffic_visits_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS traffic_visit_history (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    visit_id INT UNSIGNED NOT NULL,
+    serial_no VARCHAR(30) NOT NULL,
+    visitor_name VARCHAR(190) NOT NULL DEFAULT '',
+    action VARCHAR(24) NOT NULL DEFAULT 'updated',
+    changed_by INT UNSIGNED NULL,
+    changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    before_json LONGTEXT NULL,
+    after_json LONGTEXT NULL,
+    changes_json LONGTEXT NOT NULL,
+    INDEX idx_traffic_history_visit (visit_id, changed_at),
+    INDEX idx_traffic_history_changed_at (changed_at),
+    INDEX idx_traffic_history_user (changed_by),
+    CONSTRAINT fk_traffic_history_user FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO traffic_destinations (title)
@@ -257,13 +275,16 @@ CREATE TABLE IF NOT EXISTS tickets (
     support_location VARCHAR(255) NULL,
     support_equipment TEXT NULL,
     priority ENUM('normal','urgent','critical') NOT NULL DEFAULT 'normal',
-    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed') NOT NULL DEFAULT 'manager_review',
+    status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review',
     requester_id INT UNSIGNED NOT NULL,
     assigned_to INT UNSIGNED NULL,
     assigned_at DATETIME NULL,
     first_response_at DATETIME NULL,
     resolved_at DATETIME NULL,
     closed_at DATETIME NULL,
+    cancel_requested_at DATETIME NULL,
+    cancel_requested_by INT UNSIGNED NULL,
+    cancel_request_reason TEXT NULL,
     due_at DATETIME NULL,
     sla_minutes INT UNSIGNED NULL,
     ola_policy_id INT UNSIGNED NULL,
@@ -899,6 +920,8 @@ CREATE TABLE IF NOT EXISTS food_ticket_groups (
     -- کارت RFID فقط برای سازگاری با گروه‌های قدیمی؛ مبنای شناسایی نماینده نیست
     rfid_card VARCHAR(120) NULL,
     description VARCHAR(500) NULL,
+    -- مهلت اعلام تغییر سلف امروز به این گروه (خالی = بدون محدودیت ساعت)
+    visit_change_until TIME NULL,
     status ENUM('active','inactive') NOT NULL DEFAULT 'active',
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -960,6 +983,19 @@ CREATE TABLE IF NOT EXISTS food_ticket_daily_absence (
     INDEX idx_food_absence_group_day (group_id, absence_date),
     CONSTRAINT fk_food_absence_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_food_absence_group FOREIGN KEY (group_id) REFERENCES food_ticket_groups(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- خوداظهاری یک‌روزه: کاربرِ بدون گروه دائم اعلام می‌کند امروز غذا را از کدام گروه می‌گیرد.
+CREATE TABLE IF NOT EXISTS food_ticket_day_visits (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    visit_date DATE NOT NULL,
+    group_id INT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_food_day_visit_user_date (user_id, visit_date),
+    INDEX idx_food_day_visit_group_date (group_id, visit_date),
+    CONSTRAINT fk_food_day_visit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_food_day_visit_group FOREIGN KEY (group_id) REFERENCES food_ticket_groups(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- تاریخچهٔ L_UID نماینده‌ها (تشخیص تردد با شناسهٔ ناشناخته + Audit)
@@ -1120,6 +1156,7 @@ ON DUPLICATE KEY UPDATE value = VALUES(value);
 CREATE TABLE IF NOT EXISTS food_catalog (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     food_name VARCHAR(190) NOT NULL,
+    category VARCHAR(40) NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1131,6 +1168,7 @@ CREATE TABLE IF NOT EXISTS food_catalog (
 CREATE TABLE IF NOT EXISTS food_calendar (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     order_status ENUM('open','closed') NOT NULL DEFAULT 'open',
     note VARCHAR(255) NULL,
     closed_by INT UNSIGNED NULL,
@@ -1138,7 +1176,7 @@ CREATE TABLE IF NOT EXISTS food_calendar (
     created_by INT UNSIGNED NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_food_calendar_date (food_date),
+    UNIQUE KEY uq_food_calendar_date_meal (food_date, meal_type),
     INDEX idx_food_calendar_status_date (order_status, food_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -1162,11 +1200,12 @@ CREATE TABLE IF NOT EXISTS food_orders (
     employee_id INT UNSIGNED NOT NULL,
     calendar_item_id INT UNSIGNED NOT NULL,
     food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     created_by INT UNSIGNED NOT NULL,
     status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_food_order_employee_date (employee_id, food_date),
+    UNIQUE KEY uq_food_order_employee_date_meal (employee_id, food_date, meal_type),
     INDEX idx_food_orders_date_status (food_date, status),
     INDEX idx_food_orders_item_status (calendar_item_id, status),
     CONSTRAINT fk_food_order_calendar_item FOREIGN KEY (calendar_item_id) REFERENCES food_calendar_items(id) ON DELETE RESTRICT
@@ -1187,4 +1226,23 @@ CREATE TABLE IF NOT EXISTS food_order_logs (
     INDEX idx_food_order_logs_created (created_at),
     CONSTRAINT fk_food_order_log_order FOREIGN KEY (order_id) REFERENCES food_orders(id) ON DELETE SET NULL,
     CONSTRAINT fk_food_order_log_calendar FOREIGN KEY (calendar_id) REFERENCES food_calendar(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- درخواست لغو سفارش در روز بسته‌شده؛ تأیید با مدیر پشتیبانی
+CREATE TABLE IF NOT EXISTS food_order_cancel_requests (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT UNSIGNED NOT NULL,
+    employee_id INT UNSIGNED NOT NULL,
+    requested_by INT UNSIGNED NOT NULL,
+    food_date DATE NOT NULL,
+    note VARCHAR(300) NULL,
+    status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+    decided_by INT UNSIGNED NULL,
+    decided_at DATETIME NULL,
+    decision_note VARCHAR(300) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_food_cancel_req_status (status, created_at),
+    INDEX idx_food_cancel_req_order (order_id),
+    INDEX idx_food_cancel_req_employee (employee_id, food_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

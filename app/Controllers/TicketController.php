@@ -16,7 +16,7 @@ class TicketController extends Controller
 
         $data = [
             'user' => $user,
-            'title' => 'تیکت‌ها',
+            'title' => 'درخواست‌ها',
         ];
 
         $this->view('ticket/index', $data);
@@ -31,7 +31,7 @@ class TicketController extends Controller
 
         $data = [
             'user' => $user,
-            'title' => 'ثبت تیکت جدید',
+            'title' => 'ثبت درخواست جدید',
         ];
 
         $this->view('ticket/create', $data);
@@ -47,14 +47,14 @@ class TicketController extends Controller
         $ticket = fetch_ticket($id);
         if (!$ticket) {
             http_response_code(404);
-            echo 'تیکت یافت نشد';
+            echo 'درخواست یافت نشد';
             return;
         }
 
         $data = [
             'user' => $user,
             'ticket' => $ticket,
-            'title' => 'تیکت #' . $ticket['id'],
+            'title' => 'درخواست #' . $ticket['id'],
         ];
 
         $this->view('ticket/show', $data);
@@ -70,14 +70,14 @@ class TicketController extends Controller
         $ticket = fetch_ticket($id);
         if (!$ticket) {
             http_response_code(404);
-            echo 'تیکت یافت نشد';
+            echo 'درخواست یافت نشد';
             return;
         }
 
         $data = [
             'user' => $user,
             'ticket' => $ticket,
-            'title' => 'پاسخ به تیکت #' . $ticket['id'],
+            'title' => 'پاسخ به درخواست #' . $ticket['id'],
         ];
 
         $this->view('ticket/reply', $data);

@@ -1,11 +1,11 @@
 [راهنمای تاریخی — برای اصلاحیهٔ سفارش داخلی Patch 3 استفاده نشود]
 این دستورها مربوط به بستهٔ قدیمی دیگری هستند. برای برنامهٔ غذایی/سفارش داخلی 1.38 و Patch 3 فقط از FOOD-ORDERS-1.38-OPERATIONS-fa.md و FOOD-ORDERS-1.38-PATCH-3-NOTES-fa.md استفاده کنید؛ پیش از deploy حتماً baseline را تطبیق و در staging آزمون کنید.
 
-پچ یکپارچهٔ تیکتینگ + فیش غذا
+پچ یکپارچهٔ درخواست + فیش غذا
 ==============================
 
 این پچ همهٔ تغییرات را یک‌جا دارد:
-  1) پچ گردش تیکت (index.php، bootstrap.php، cron/ticket_auto_close.php)
+  1) پچ گردش درخواست (index.php، bootstrap.php، cron/ticket_auto_close.php)
   2) اصلاحات فیش غذا / Worker / پایش (food-ticket*.php، cron/food_ticket_worker.php، پنل، اسکریپت‌های نصب)
 فایل‌هایی که در هر دو بخش مشترک بودند (index.php و bootstrap.php) به‌صورت یکپارچه در همین پچ هستند.
 
@@ -21,12 +21,12 @@
    اگر برای بار اول است یا تسک با لاگین Interactive ثبت شده:
      install-food-worker-SERVICE.bat   (رمز ویندوز حساب پرسیده می‌شود)
 5) صفحه را با Ctrl+F5 تازه کنید.
-6) (اختیاری) بستن خودکار تیکت‌های بدون امتیاز، روزی یک‌بار در Task Scheduler:
+6) (اختیاری) بستن خودکار درخواست‌های بدون امتیاز، روزی یک‌بار در Task Scheduler:
      C:\xampp\php\php.exe C:\xampp\htdocs\ticket\cron\ticket_auto_close.php
 
 شرح تغییرات
 -----------
-  00_CHANGELOG_TICKET_WORKFLOW_FA.txt   گردش تیکت
+  00_CHANGELOG_TICKET_WORKFLOW_FA.txt   گردش درخواست
   00_CHANGELOG_WORKER_ALWAYS_ON_FA.txt  Worker همیشه‌روشن، پایش، سفارش‌ها، کارت RFID، سرعت، ساعت وعده
 
 بررسی بعد از نصب
