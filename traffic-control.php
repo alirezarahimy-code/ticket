@@ -327,16 +327,20 @@ function traffic_record_history(array $before, ?array $after, array $user, strin
     ]);
 }
 
+/**
+ * فقط ویرایش‌های واقعی (دکمهٔ «ویرایش» + تغییر مقدار) در تاریخچهٔ ویرایش‌ها نمایش داده می‌شوند.
+ * رویدادهای «ثبت خروج» و «حذف» همچنان برای ممیزی در جدول ذخیره می‌شوند ولی در این فهرست نمی‌آیند.
+ */
 function traffic_history_records(int $limit = 50, int $offset = 0): array
 {
     $limit = max(1, min(200, $limit));
     $offset = max(0, $offset);
-    return db()->query('SELECT h.*, u.full_name AS editor_name FROM traffic_visit_history h LEFT JOIN users u ON u.id = h.changed_by ORDER BY h.changed_at DESC, h.id DESC LIMIT ' . $limit . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
+    return db()->query("SELECT h.*, u.full_name AS editor_name FROM traffic_visit_history h LEFT JOIN users u ON u.id = h.changed_by WHERE h.action = 'updated' ORDER BY h.changed_at DESC, h.id DESC LIMIT " . $limit . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function traffic_history_count(): int
 {
-    return (int) db()->query('SELECT COUNT(*) FROM traffic_visit_history')->fetchColumn();
+    return (int) db()->query("SELECT COUNT(*) FROM traffic_visit_history WHERE action = 'updated'")->fetchColumn();
 }
 
 function traffic_history_field_label(string $field): string
@@ -1073,8 +1077,8 @@ function traffic_render_page(array $user): never
         <?php if ($tab === 'changes'): ?>
         <section class="card traffic-change-history-card">
             <div class="section-title"><div><span class="eyebrow">ردگیری مدیریتی</span><h2>تاریخچهٔ ویرایش‌های کنترل تردد</h2></div><a class="button secondary" href="index.php?page=traffic-control&amp;tab=history">بازگشت به سوابق</a></div>
-            <p class="traffic-edit-note">ویرایش مشخصات، اصلاح تاریخ و ساعت‌ها، ثبت ساعت خروج و حذف رکوردها در این فهرست ثبت می‌شوند. برای دیدن همهٔ رویدادها از صفحه‌بندی پایین استفاده کنید.</p>
-            <?php if (!$changeRows): ?><div class="traffic-change-empty">هنوز تغییری در سوابق تردد ثبت نشده است.</div><?php else: ?>
+            <p class="traffic-edit-note">فقط رکوردهایی اینجا دیده می‌شوند که با دکمهٔ «ویرایش» باز شده و دست‌کم یک مقدار آن‌ها واقعاً تغییر کرده باشد. ثبت سادهٔ ساعت خروج یا حذف رکورد، ویرایش حساب نمی‌شود و در این فهرست نمی‌آید.</p>
+            <?php if (!$changeRows): ?><div class="traffic-change-empty">هنوز ویرایشی روی سوابق تردد ثبت نشده است.</div><?php else: ?>
             <div class="traffic-change-list">
                 <?php foreach ($changeRows as $change): $changeMap = json_decode((string) ($change['changes_json'] ?? '{}'), true); $changeMap = is_array($changeMap) ? $changeMap : []; $changeLabel = match ((string) $change['action']) { 'deleted' => 'حذف رکورد', 'exit_set' => 'ثبت ساعت خروج', default => 'ویرایش رکورد' }; ?>
                 <article class="traffic-change-item">

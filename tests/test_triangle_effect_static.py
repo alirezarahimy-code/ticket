@@ -91,7 +91,7 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         self.assertEqual(manifest["version"], "1.56")
         self.assertEqual(manifest["migrations"], [])
         current_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        current_manifest = json.loads((ROOT / "updates/2026-10-22-release-161-10-r31/manifest.json").read_text(encoding="utf-8"))
+        current_manifest = json.loads((ROOT / "updates/2026-10-25-release-162-4-food-theme-traffic-history-fixes/manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(current_version, current_manifest["version"])
         self.assertEqual(current_manifest["migrations"], [])
 

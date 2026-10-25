@@ -12,7 +12,7 @@ declare(strict_types=1);
     <title><?= htmlspecialchars($title ?? 'سامانه درخواست پشتیبانی') ?> | سامانه درخواست پشتیبانی</title>
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/custom.css">
-    <link rel="stylesheet" href="assets/theme-mode.css?v=2">
+    <link rel="stylesheet" href="assets/theme-mode.css?v=3">
 </head>
 <body data-theme-mode="<?= htmlspecialchars(function_exists('app_theme_mode') ? app_theme_mode() : 'light', ENT_QUOTES, 'UTF-8') ?>">
     <div class="app-shell">

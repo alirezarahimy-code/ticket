@@ -162,7 +162,18 @@ body::before {
     z-index: 1;
     width: min(1480px, 100%) !important;
     min-width: 0 !important;
+    margin-inline: auto !important;
     padding: 34px 28px 60px !important;
+}
+/* داشبورد تمام‌عرض است؛ بدون این override، سقف عرض ۱۴۸۰ به‌همراه margin:0 باعث می‌شد
+   داشبورد در مانیتورهای عریض به سمت راست صفحه بچسبد. */
+#screen.food-dashboard-host,
+.page.food-dashboard-host {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 .heading { margin-bottom: 17px; }
 .heading h2 { color: var(--food-navy); font-size: 20px; }

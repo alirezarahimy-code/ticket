@@ -16,7 +16,7 @@ class FoodManualAttendanceStaticTests(unittest.TestCase):
         self.assertIn("['manual-attendance','ثبت دستی فیش','sub']", index)
         self.assertIn("'manual-attendance':()=>window.FoodManualAttendanceUI?window.FoodManualAttendanceUI.html()", index)
         self.assertIn("FoodManualAttendanceUI.mount()", index)
-        self.assertIn('src="assets/food-manual-attendance.js?v=2"', index)
+        self.assertIn('src="assets/food-manual-attendance.js?v=3"', index)
         self.assertNotIn("manualAttendance", groups_js)
         self.assertIn("ثبت دستی فیش امروز", manual_js)
         self.assertIn("فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ امروز را نشان می‌دهد", manual_js)

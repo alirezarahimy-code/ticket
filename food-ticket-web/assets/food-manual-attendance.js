@@ -73,11 +73,15 @@
         + '<td>' + esc(u.name || '—') + '</td><td>' + (u.pc ? esc(u.pc) : '<span class="muted">—</span>') + '</td>'
         + '<td>' + manualStatus(u) + '</td></tr>';
     }).join('');
-    const checkboxHeader = canEdit ? '<th>انتخاب</th>' : '';
     const emptyMessage = S.manualEmployees.length === 0
       ? 'امروز هیچ کارمند فعالی با سفارش ناهار واجد شرایط پیدا نشد.'
       : 'کاربری مطابق جستجو پیدا نشد.';
     const eligibleVisible = filtered.filter(canSelect);
+    // تیک کنار «انتخاب»: با زدنش همهٔ افراد قابل‌انتخاب تیک می‌خورند و با برداشتنش همه بدون تیک می‌شوند.
+    const allEligibleSelected = eligibleVisible.length > 0 && eligibleVisible.every((u) => selected.has(Number(u.id)));
+    const checkboxHeader = canEdit
+      ? '<th class="manual-select-all-head"><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap"><input type="checkbox" data-manual-select-all' + (allEligibleSelected ? ' checked' : '') + (eligibleVisible.length ? '' : ' disabled') + ' aria-label="انتخاب یا لغو انتخاب همهٔ افراد قابل‌انتخاب"> انتخاب</label></th>'
+      : '';
     const chosenCount = S.manualSelected.filter((id) => {
       const u = S.manualEmployees.find((x) => Number(x.id) === Number(id));
       return u && canSelect(u);
@@ -156,6 +160,20 @@
     }
     if (e.target && e.target.id === 'fg-manual-print') {
       S.manualPhysicalPrint = !!e.target.checked;
+      return;
+    }
+    if (e.target && e.target.matches && e.target.matches('[data-manual-select-all]')) {
+      if (e.target.checked) {
+        const q = String(S.manualFilter || '').trim().toLocaleLowerCase();
+        const visible = S.manualEmployees.filter((u) => {
+          const matches = !q || (String(u.name || '') + ' ' + String(u.pc || '')).toLocaleLowerCase().includes(q);
+          return matches && !!u.active && !u.today_record && (!S.manualWithTicket || !!u.pc);
+        });
+        S.manualSelected = Array.from(new Set(S.manualSelected.map(Number).concat(visible.map((u) => Number(u.id)))));
+      } else {
+        S.manualSelected = [];
+      }
+      drawManualAttendance();
       return;
     }
     if (e.target && e.target.matches && e.target.matches('[data-manual-person]')) {

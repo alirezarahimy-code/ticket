@@ -1,0 +1,9 @@
+{
+  "version": "1.62.4",
+  "release": "1.62.4",
+  "title": "Ticket 1.62.4 — food page dark mode, traffic edit history filter, centered dashboard, manual ticket select-all",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.4-food-theme-traffic-history-20261025.zip",
+  "migrations": [],
+  "notes": "Cumulative offline update, no database migration. Dark mode now fully covers the food menu/planning page surfaces (forms, person lists, bulk tools, recipient banner) in both the host stylesheet and the standalone panel stylesheet. The traffic-control edit history tab lists only records whose values were actually edited (action='updated'); exit registrations and deletions are still audited but no longer shown there. The food management dashboard host is full-bleed while regular panel pages are centered with margin-inline auto. The manual ticket registration list opens with no pre-checked names and gains a select-all checkbox in the «انتخاب» header column that toggles all eligible visible employees. CSS/theme fixes are statically verified only — no browser or production validation was possible in this environment."
+}

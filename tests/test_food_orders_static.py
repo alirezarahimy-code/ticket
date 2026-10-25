@@ -270,7 +270,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("document.documentElement.setAttribute('data-theme-mode',next)", panel)
         self.assertIn("document.body.setAttribute('data-theme-mode',next)", panel)
         self.assertIn("if(act==='toggle-dashboard-theme')", panel)
-        self.assertIn('food-ticket-global-theme-r42.css?v=44', panel)
+        self.assertIn('food-ticket-global-theme-r42.css?v=45', panel)
 
 
     def test_selected_staff_report_loads_a_checklist_and_places_dates_before_it(self) -> None:

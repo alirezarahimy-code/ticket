@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.24';
+const FOOD_TICKET_PANEL_VERSION = '1.37.25';
 
 function food_ticket_panel_version(): string
 {
@@ -4771,7 +4771,7 @@ function food_ticket_render_page(array $user): void
                 'jalali_boot' => $jalaliBoot,
                 'assets' => $assetNames,
                 'theme_href' => 'assets/style.css?v=3.4.34',
-                'theme_mode_href' => 'assets/theme-mode.css?v=2',
+                'theme_mode_href' => 'assets/theme-mode.css?v=3',
                 'theme_mode' => app_theme_mode(),
             ]);
             if (is_array($hosted) && is_string($hosted['html'] ?? null)) {

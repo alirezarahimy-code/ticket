@@ -125,3 +125,44 @@ html[data-theme-mode="dark"] :is(.fo-day-status.is-closed,.fo-day-status.is-holi
 html[data-theme-mode="dark"] .fo-day-order-marker { background:#4b4018 !important; color:#f2d98e !important; border-color:#927728 !important; }
 html[data-theme-mode="dark"] .fo-legend { color:#a9bbb0 !important; }
 html[data-theme-mode="dark"] .fo-modal::backdrop { background:rgba(0,0,0,.72) !important; }
+
+/* ── v1.62.4: پوشش کامل حالت شب برای فرم‌های برنامه غذایی، گروه‌های غذا، بانک غذا و عملیات گروهی ── */
+html[data-theme-mode="dark"] :is(.fm-radio, .fm-food-picker, .fg-people-box, .fm-bank-item, .fm-cat-group, .fm-bulk-results, .fm-statistics-form > .fm-order-date) {
+    background:#18231e !important; color:#e5eee8 !important; border-color:#354940 !important;
+}
+html[data-theme-mode="dark"] :is(.fg-person, .fm-bulk-row-blocked, .fm-bank-item:nth-child(6n+4), .fm-bank-item:nth-child(6n+5), .fm-bank-item:nth-child(6n+6)) {
+    background:#1d2a24 !important; color:#e5eee8 !important; border-color:#2b3d34 !important;
+}
+html[data-theme-mode="dark"] :is(.fg-person:nth-child(8n+5), .fg-person:nth-child(8n+6), .fg-person:nth-child(8n+7), .fg-person:nth-child(8n+8)) { background:#203028 !important; }
+html[data-theme-mode="dark"] .fg-person:hover { background:#24362d !important; }
+html[data-theme-mode="dark"] :is(.fm-cat-toggle, .fm-bulk-controls) { background:#202d26 !important; color:#dbe9e0 !important; border-color:#354940 !important; }
+html[data-theme-mode="dark"] :is(.fm-cat-toggle:hover, .fm-food-group-toggle:hover) { background:#24362d !important; }
+html[data-theme-mode="dark"] :is(.fm-bank-field input, .fm-bank-field select, .fm-bulk-controls input, .fm-bulk-controls select, .fm-bulk-controls textarea, .fm-bulk-tools input) {
+    background:#111c17 !important; color:#e5eee8 !important; border-color:#40564a !important; color-scheme:dark;
+}
+html[data-theme-mode="dark"] .fm-bulk-mode { background:#24362d !important; color:#dbe9e0 !important; border-color:#40564a !important; }
+html[data-theme-mode="dark"] .fm-bulk-mode.active { background:#287957 !important; color:#fff !important; border-color:#2f8a63 !important; }
+html[data-theme-mode="dark"] .fm-bulk-admin-tag { background:#163a2b !important; color:#9ce2ba !important; border-color:#286044 !important; }
+html[data-theme-mode="dark"] .fm-bulk-footer { color:#a9bbb0 !important; border-color:#2b3d34 !important; }
+html[data-theme-mode="dark"] .fm-bulk-footer b { color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fm-bulk-modal header, .fm-bulk-modal footer) { border-color:#2b3d34 !important; }
+html[data-theme-mode="dark"] :is(.fm-bulk-modal-body, .fm-bulk-modal header p, .fm-bulk-summary small, .fm-bulk-secondary, .fm-bulk-controls .fm-field small, .fm-bulk-people-head small, .fm-bulk-row-blocked td) { color:#a9bbb0 !important; }
+html[data-theme-mode="dark"] .fm-bulk-summary > div { background:#202e27 !important; border-color:#354940 !important; }
+html[data-theme-mode="dark"] .fm-bulk-summary b { color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .fm-bulk-state.ok { background:#163a2b !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .fm-bulk-state.blocked { background:#3b2322 !important; color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .fm-bulk-state.override { background:#382f1b !important; color:#f2d98e !important; }
+html[data-theme-mode="dark"] .fm-confirm-box { background:#382f1b !important; color:#f2d98e !important; border-color:#655126 !important; }
+html[data-theme-mode="dark"] .fm-order-state { background:#163a2b !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .fm-order-state.cancelled { background:#3b2322 !important; color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .fm-selected-employee-tag button { background:rgba(255,255,255,.14) !important; color:#ffb4ab !important; }
+
+/* ── v1.62.4: سفارش غذا — سطح‌هایی که رنگ روشن ثابت یا گرادیان داشتند ── */
+html[data-theme-mode="dark"] .fo-recipient-banner { background:#18231e !important; border-color:#354940 !important; box-shadow:0 6px 18px rgba(0,0,0,.3) !important; }
+html[data-theme-mode="dark"] :is(.fo-recipient-avatar, .fo-choice-icon) { background:#1b3b2f !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fo-day-meal, .fo-visit-current, .fo-recipient-details strong, .fo-loading-panel strong, .fo-visit-card h2, .fo-month-label) { color:#e5eee8 !important; }
+html[data-theme-mode="dark"] .fo-day-my-order { color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fo-day-count, .fo-recipient-details span, .fo-recipient-details small, .fo-person-choice small, .fo-combo-message, .fo-weekday) { color:#a9bbb0 !important; }
+html[data-theme-mode="dark"] :is(.fo-person-choice:hover, .fo-person-choice:focus-visible, .fo-search-result:hover, .fo-search-result:focus-visible, .fo-search-result.is-highlighted, .fo-search-result[aria-selected="true"]) { background:#1b3b2f !important; border-color:#59bd8c !important; }
+html[data-theme-mode="dark"] .fo-meal-option:has(input:checked) { background:#1b3b2f !important; border-color:#59bd8c !important; box-shadow:0 0 0 2px rgba(89,189,140,.25) !important; }
+html[data-theme-mode="dark"] .fo-combobox .fo-search-results { background:#18231e !important; border-color:#354940 !important; }

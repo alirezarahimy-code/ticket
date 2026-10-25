@@ -13,7 +13,7 @@ def test_global_theme_is_attached_to_all_main_shells():
     assert "ticket_theme_mode" in bootstrap
     assert "data-theme-mode=\"' . e($themeMode)" in index
     assert "app_theme_toggle_markup()" in index
-    assert "assets/theme-mode.css?v=2" in index
+    assert "assets/theme-mode.css?v=3" in index
     assert "data-theme-toggle" in bootstrap
     assert "themeRoot.setAttribute('data-theme-mode', mode)" in app
     assert "document.cookie = 'ticket_theme_mode=' + mode" in app
@@ -33,7 +33,7 @@ def test_food_panel_and_standalone_modules_follow_the_global_mode():
     food_css = (ROOT / "food-ticket-web/assets/food-ticket-global-theme-r42.css").read_text(encoding="utf-8")
 
     assert "'theme_mode' => app_theme_mode()" in food
-    assert "'theme_mode_href' => 'assets/theme-mode.css?v=2'" in food
+    assert "'theme_mode_href' => 'assets/theme-mode.css?v=3'" in food
     assert "array_key_exists('theme_mode', $opts)" in host
     assert "$themeModeHref !== ''" in host
     assert "food-capitalio-dashboard-r42.js?v=1.62.2-dashboard-fix" in page
@@ -49,7 +49,7 @@ def test_independent_php_renderers_use_shared_mode():
         source = (ROOT / path).read_text(encoding="utf-8")
         assert "app_theme_mode()" in source
         assert "app_theme_toggle_markup()" in source
-        assert "assets/theme-mode.css?v=2" in source
+        assert "assets/theme-mode.css?v=3" in source
     fallback = (ROOT / "app/Views/layout/header.php").read_text(encoding="utf-8")
     assert "app_theme_mode()" in fallback
     assert "app_theme_toggle_markup()" in fallback
