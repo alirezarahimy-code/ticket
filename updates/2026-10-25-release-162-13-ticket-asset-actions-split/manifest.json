@@ -1,0 +1,42 @@
+{
+  "name": "release-162-13-ticket-asset-actions-split",
+  "version": "1.62.13",
+  "date": "2026-10-25",
+  "title": "فاز ۲ بازسازی — برش‌های ۲ و ۳: جداسازی اکشن‌های درخواست‌ها و اموال/اسکن دامین از index.php (بدون تغییر رفتاری)",
+  "requires_version": "1.61.9",
+  "migrations": [
+    "009-traffic-destination-multi-approver.sql",
+    "010-org-liaison-units.sql"
+  ],
+  "files": [
+    "VERSION",
+    "actions/asset-actions.php",
+    "actions/org-actions.php",
+    "actions/ticket-actions.php",
+    "app/Views/layout/footer.php",
+    "app/Views/layout/header.php",
+    "assets/app.js",
+    "assets/organization.js",
+    "assets/style.css",
+    "assets/theme-mode.css",
+    "assets/traffic-control.js",
+    "bootstrap.php",
+    "food-ticket-groups.php",
+    "food-ticket-web/assets/food-manual-attendance.js",
+    "food-ticket-web/assets/food-ticket-global-theme-r42.css",
+    "food-ticket-web/assets/food-ticket-theme.css",
+    "food-ticket-web/index.html",
+    "food-ticket.php",
+    "governance.php",
+    "help-guide.php",
+    "index.php",
+    "install-empty-db.sql",
+    "migrations/009-traffic-destination-multi-approver.sql",
+    "migrations/010-org-liaison-units.sql",
+    "ola.php",
+    "organization.php",
+    "schema.sql",
+    "traffic-control.php"
+  ],
+  "notes": "ادامهٔ فاز ۲ با همان روال اثبات‌دار برش ۱: (برش ۲) ۷ اکشن چرخهٔ درخواست‌ها (create_ticket، cancel_ticket، decide_ticket_cancellation، claim_ticket، reopen_ticket، reply، update_ticket) به actions/ticket-actions.php و (برش ۳) ۱۰ اکشن اموال/اسکن دامین (collect_inventory تا save_inventory_form) به actions/asset-actions.php منتقل شدند — هر دو بایت‌به‌بایت و require در همان نقطهٔ قبلی با همان حوزهٔ متغیرها. اسکن دام‌های include پیش از انتقال: بلوک درخواست‌ها کاملاً پاک؛ در بلوک اموال فقط یک کلوژر بی‌نام و یک continue داخل حلقه وجود دارد که برای include بی‌خطرند. اثبات ماشینی: جایگذاری متن دو فایل به‌جای دو خط require، index.php قبلی را بایت‌به‌بایت بازسازی می‌کند. سرآیند هر فایل شرح فارسی تک‌تک اکشن‌ها را دارد و هر دو محافظ دسترسی مستقیم (404 بدون APP_ROOT) دارند. index.php از ~۶۲۰۰ خط (ابتدای فاز) به ~۴۷۰۰ خط رسید. مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم)؛ بستهٔ کاملاً تجمعی 1.62.4 تا 1.62.13؛ هیچ داده‌ای تغییر نمی‌کند. اسنپشات تازه پیش از این نسخه: tag snapshot-1.62.12-20261025."
+}

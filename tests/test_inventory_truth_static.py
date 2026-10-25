@@ -45,7 +45,8 @@ class InventoryTruthStaticTests(unittest.TestCase):
         self.assertIn("عضو Administrators محلی هر کلاینت باشد", scan)
 
     def test_local_extraction_button_uses_php_host_and_only_targets_its_own_asset(self) -> None:
-        index = read("index.php")
+        # اکشن‌های اموال/اسکن از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۳ فاز ۲).
+        index = read("index.php") + "\n" + read("actions/asset-actions.php")
         self.assertIn("$action === 'collect_inventory'", index)
         self.assertIn("inventory_collect_server_reliable()", index)
         self.assertIn("inventory_upsert_server_asset($serverInventory", index)
@@ -67,7 +68,8 @@ class InventoryTruthStaticTests(unittest.TestCase):
         self.assertIn("WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید", scan)
 
     def test_one_host_credential_test_does_not_write_inventory(self) -> None:
-        index = read("index.php")
+        # اکشن‌های اموال/اسکن از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۳ فاز ۲).
+        index = read("index.php") + "\n" + read("actions/asset-actions.php")
         start = index.index("if ($action === 'domain_scan_test_selected')")
         end = index.index("if ($action === 'domain_scan_selected')", start)
         action = index[start:end]
@@ -82,14 +84,16 @@ class InventoryTruthStaticTests(unittest.TestCase):
 
     def test_winrm_guidance_configures_targets_not_only_the_web_server(self) -> None:
         scan = read("domain-scan.php")
-        index = read("index.php")
+        # اکشن‌های اموال/اسکن از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۳ فاز ۲).
+        index = read("index.php") + "\n" + read("actions/asset-actions.php")
         self.assertIn("WinRM باید روی کلاینت‌های مقصد (نه فقط سرور PHP) فعال باشد", scan)
         self.assertIn("نیازمند فعال‌بودن WinRM روی مقصدها", index)
         self.assertNotIn("Enable-PSRemoting روی سرور", index)
 
     def test_scan_credentials_are_per_run_encrypted_and_not_read_from_settings(self) -> None:
         scan = read("domain-scan.php")
-        index = read("index.php")
+        # اکشن‌های اموال/اسکن از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۳ فاز ۲).
+        index = read("index.php") + "\n" + read("actions/asset-actions.php")
         self.assertIn("function domain_scan_store_run_credentials", scan)
         self.assertIn("aes-256-gcm", scan)
         self.assertIn("domain_scan_run_credentials($runId", index)

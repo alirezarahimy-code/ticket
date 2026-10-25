@@ -8,13 +8,15 @@
 
 ---
 
-## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۱۲ (۲۰۲۶/۱۰/۲۵)
+## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۱۳ (۲۰۲۶/۱۰/۲۵)
 
-> **🧷 اسنپشات امن قبل از بازسازی کدها:** tag `snapshot-pre-refactor-20261025` روی کامیت `7c6f4ff` (برابر v1.62.10) ساخته و push شده است. اگر در جریان بازسازی چیزی خراب شد، بازگشت کامل:
+> **🧷 اسنپشات‌های امن:** جدیدترین: tag `snapshot-1.62.12-20261025` (کامیت `ee1addc` = v1.62.12)؛ قدیمی‌تر: `snapshot-pre-refactor-20261025` (= v1.62.10). هر دو push و از راه دور تأیید شده‌اند. اگر در جریان بازسازی چیزی خراب شد، بازگشت کامل:
 > `git fetch origin --tags && git reset --hard snapshot-pre-refactor-20261025`
 > (بستهٔ نصب همان `ticket-update-1.62.10-org-liaison-units-20261025.zip` است؛ دیتابیس دست نمی‌خورد.)
 
-- بستهٔ جاری: `downloads/ticket-update-1.62.12-org-actions-split-20261025.zip` (SHA-256: `3ce12854be16066a5b30a09f601d16d1fc09bf99e0bdfe2a90d75f4c58bbd0d9`)؛ گزارش: `updates/2026-10-25-release-162-12-org-actions-split/CHANGE-REPORT-FA.md`؛ کاملاً تجمعی 1.62.4 تا 1.62.12 (۲۶ فایل + مهاجرت‌های 009 و 010 برای ارتقای مستقیم).
+- بستهٔ جاری: `downloads/ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip` (SHA-256: `294f11154c3147abff7728ef7fe704d8e1697efedf58928d4741710c996313c1`)؛ گزارش: `updates/2026-10-25-release-162-13-ticket-asset-actions-split/CHANGE-REPORT-FA.md`؛ کاملاً تجمعی 1.62.4 تا 1.62.13 (۲۸ فایل + مهاجرت‌های 009 و 010 برای ارتقای مستقیم).
+- ۱.۶۲.۱۳ = فاز ۲ برش‌های ۲ و ۳: ۷ اکشن درخواست‌ها → `actions/ticket-actions.php` و ۱۰ اکشن اموال/اسکن دامین → `actions/asset-actions.php` (بایت‌به‌بایت، اثبات ماشینی در مخزن و داخل ZIP، محافظ APP_ROOT/404، شرح فارسی بخش‌ها در سرآیند هر فایل — خواستهٔ کاربر). دام‌های بی‌خطر شناخته‌شده در بلوک اموال: یک کلوژر بی‌نام و یک continue داخل حلقه. تست‌های پین‌شده (inventory_truth ×۴، ticket_cancellation، ticket_auto_assignment ×۲) به مسیر جدید به‌روز شدند.
+- بستهٔ قبلی ۱.۶۲.۱۲: `downloads/ticket-update-1.62.12-org-actions-split-20261025.zip` (SHA-256: `3ce12854be16066a5b30a09f601d16d1fc09bf99e0bdfe2a90d75f4c58bbd0d9`)؛ گزارش: `updates/2026-10-25-release-162-12-org-actions-split/CHANGE-REPORT-FA.md`؛ کاملاً تجمعی 1.62.4 تا 1.62.12 (۲۶ فایل + مهاجرت‌های 009 و 010 برای ارتقای مستقیم).
 - ۱.۶۲.۱۲ = فاز ۲ برش ۱: ۱۳ اکشن چارت سازمانی بایت‌به‌بایت از index.php به `actions/org-actions.php` منتقل شد (require در همان نقطه؛ بدون دام include — اسکن شد؛ محافظ APP_ROOT/404؛ اثبات ماشینی بازسازی). تست‌های پین‌شده (org_chart_experts، release_1_62_6، release_1_62_10) به مسیر جدید به‌روز شدند. قاعدهٔ برش‌ها در ARCHITECTURE-FA.md بند ۹.
 - بستهٔ قبلی ۱.۶۲.۱۱: `downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip` (SHA-256: `f4e13e87b65fb338daafc22191bfe72c50a06045cea5ebfd797a61ab8ac8f989`)؛ گزارش: `updates/2026-10-25-release-162-11-code-navigation-phase1/CHANGE-REPORT-FA.md`؛ بدون مهاجرت جدید (009 و 010 برای ارتقای مستقیم همراه بسته)؛ **کاملاً تجمعی** — اجتماع فایل‌های 1.62.4 تا 1.62.11 (بستهٔ 1.62.10 چند فایل 1.62.4–1.62.6 مثل assets/app.js را نداشت؛ اصلاح شد).
 - ۱.۶۲.۱۱ = فاز ۱ بهینه‌سازی کدها (صفر تغییر رفتاری): بانرهای ناوبری index.php (۳ ناحیه + ۱۹ گروه اکشن)، TOC خانواده‌های توابع bootstrap.php، سندهای جدید `docs/ARCHITECTURE-FA.md` و `docs/CODE-AUDIT-FA.md` (۸ تابع مرده با اثبات + ۷۵ کلاس CSS کاندید — حذف نشده؛ فاز ۲ با تأیید کاربر: تفکیک index/bootstrap، سرور آزمایشی موجود، هر فاز یک نسخه).
