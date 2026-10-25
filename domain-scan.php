@@ -3,6 +3,20 @@ declare(strict_types=1);
 
 function domain_scan_ensure_schema(): void
 {
+    // حذف رمزهای plaintext باقی‌مانده از نسخه‌های قدیمی؛ اعتبارنامهٔ جدید فقط per-run و رمز‌شده در نشست است.
+    static $legacyCredentialsCleared = false;
+    if (!$legacyCredentialsCleared) {
+        $legacyCredentialsCleared = true;
+        try {
+            $clear = db()->prepare("UPDATE settings SET value = '' WHERE `key` IN ('domain_scan_username','domain_scan_password') AND COALESCE(value, '') <> ''");
+            $clear->execute();
+            if ($clear->rowCount() > 0 && function_exists('system_log')) {
+                system_log('info', 'domain_scan', 'اعتبارنامهٔ ذخیره‌شدهٔ قدیمی اسکن دامنه پاک شد');
+            }
+        } catch (Throwable $exception) {
+            app_error_log('[domain-scan] clear legacy scan credentials failed: ' . $exception->getMessage());
+        }
+    }
     // ۱.۳۷.۵ — ستون assets.source در نصب‌های قدیمی مقدار 'domain' را نمی‌پذیرد؛
     // در MySQL سخت‌گیرانه این باعث خطای «Data truncated» و ساخته‌نشدن رکورد کامپیوتر
     // دامنه می‌شد و در حالت معمولی هم مقدار ستون خالی می‌ماند. یک‌بار برای همیشه گسترده می‌شود.
@@ -38,15 +52,108 @@ function domain_scan_timeout_ms(): int
 
 function domain_scan_account_label(): string
 {
-    $user = trim((string) setting('domain_scan_username', ''));
-    $domain = trim((string) setting('domain_scan_domain', ''));
-    if ($user === '') {
-        return 'حساب سرویس ویندوز پنل (بدون رمز ذخیره‌شده)';
+    return 'حسابی که هنگام شروع همین نوبت وارد می‌کنید';
+}
+
+function domain_scan_https_request(): bool
+{
+    return !empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off';
+}
+
+function domain_scan_validate_credentials(string $username, string $password): void
+{
+    if (trim($username) === '' || $password === '') {
+        throw new RuntimeException('برای استخراج شبکه‌ای، نام کاربری و رمز حساب مجاز را وارد کنید.');
     }
-    if (strpos($user, '\\') !== false || strpos($user, '@') !== false) {
-        return $user;
+    if (PHP_SAPI !== 'cli' && !domain_scan_https_request()) {
+        throw new RuntimeException('برای ارسال امن رمز حساب استخراج، ابتدا سامانه را با HTTPS باز کنید.');
     }
-    return ($domain !== '' ? $domain . '\\' : '') . $user;
+    domain_scan_credential_key();
+}
+
+function domain_scan_credential_key(): string
+{
+    $appKey = trim((string) cfg('app.key', ''));
+    if ($appKey === '' || !function_exists('openssl_encrypt') || !function_exists('openssl_decrypt')) {
+        throw new RuntimeException('رمزگذاری امن اعتبارنامهٔ اسکن روی سرور پیکربندی نشده است.');
+    }
+    return hash('sha256', 'ticket-domain-scan:' . $appKey, true);
+}
+
+/** اعتبارنامه فقط به‌صورت رمز‌شده و موقت در نشست همان کاربر نگهداری می‌شود، نه در جدول تنظیمات یا صف DB. */
+function domain_scan_store_run_credentials(int $runId, int $userId, string $username, string $password): void
+{
+    $username = trim($username);
+    if ($runId <= 0 || $userId <= 0 || $username === '' || $password === '') {
+        throw new RuntimeException('برای استخراج شبکه‌ای، نام کاربری و رمز حساب مجاز را وارد کنید.');
+    }
+    if (PHP_SAPI !== 'cli' && (empty($_SERVER['HTTPS']) || strtolower((string) $_SERVER['HTTPS']) === 'off')) {
+        throw new RuntimeException('برای ارسال امن رمز حساب استخراج، ابتدا سامانه را با HTTPS باز کنید.');
+    }
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        throw new RuntimeException('نشست امن کاربر برای نگهداری موقت اعتبارنامه در دسترس نیست.');
+    }
+    $key = domain_scan_credential_key();
+    $iv = random_bytes(12);
+    $tag = '';
+    $aad = 'run:' . $runId . '|user:' . $userId . '|v1';
+    $plain = json_encode(['username' => $username, 'password' => $password], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $cipher = is_string($plain) ? openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, $aad) : false;
+    if (!is_string($cipher) || $cipher === '') {
+        throw new RuntimeException('رمزگذاری اعتبارنامهٔ این اسکن انجام نشد.');
+    }
+    $_SESSION['domain_scan_credentials'][$runId] = [
+        'user_id' => $userId,
+        'expires_at' => time() + 7200,
+        'ciphertext' => base64_encode($iv . $tag . $cipher),
+    ];
+}
+
+/** @return array{username:string,password:string}|null */
+function domain_scan_run_credentials(int $runId, int $userId): ?array
+{
+    if (session_status() !== PHP_SESSION_ACTIVE || $runId <= 0 || $userId <= 0) {
+        return null;
+    }
+    $entry = $_SESSION['domain_scan_credentials'][$runId] ?? null;
+    if (!is_array($entry) || (int) ($entry['user_id'] ?? 0) !== $userId || (int) ($entry['expires_at'] ?? 0) < time()) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    $raw = base64_decode((string) ($entry['ciphertext'] ?? ''), true);
+    if (!is_string($raw) || strlen($raw) < 29) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    try {
+        $key = domain_scan_credential_key();
+    } catch (Throwable) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    $aad = 'run:' . $runId . '|user:' . $userId . '|v1';
+    $plain = openssl_decrypt(substr($raw, 28), 'aes-256-gcm', $key, OPENSSL_RAW_DATA, substr($raw, 0, 12), substr($raw, 12, 16), $aad);
+    $credentials = is_string($plain) ? json_decode($plain, true) : null;
+    if (!is_array($credentials) || trim((string) ($credentials['username'] ?? '')) === '' || (string) ($credentials['password'] ?? '') === '') {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        return null;
+    }
+    $_SESSION['domain_scan_credentials'][$runId]['expires_at'] = time() + 7200;
+    return ['username' => trim((string) $credentials['username']), 'password' => (string) $credentials['password']];
+}
+
+function domain_scan_clear_run_credentials(int $runId): void
+{
+    if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
+        session_start();
+    }
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        unset($_SESSION['domain_scan_credentials'][$runId]);
+        if (empty($_SESSION['domain_scan_credentials'])) {
+            unset($_SESSION['domain_scan_credentials']);
+        }
+        session_write_close();
+    }
 }
 
 function domain_scan_ad_time(string $value): ?string
@@ -66,7 +173,7 @@ function domain_scan_ad_time(string $value): ?string
     return date('Y-m-d H:i:s', (int) $unix);
 }
 
-function ldap_domain_computers(int $limit = 3000): array
+function ldap_domain_computers(int $limit = 0): array
 {
     if (!function_exists('ldap_connect')) {
         throw new RuntimeException('افزونهٔ LDAP در PHP فعال نیست.');
@@ -121,7 +228,7 @@ function ldap_domain_computers(int $limit = 3000): array
                 'last_logon' => domain_scan_ad_time((string) ($entry['lastlogontimestamp'][0] ?? '')),
                 'enabled' => (((int) ($entry['useraccountcontrol'][0] ?? 0)) & 2) !== 2,
             ];
-            if (count($computers) >= $limit) {
+            if ($limit > 0 && count($computers) >= $limit) {
                 break 2;
             }
         }
@@ -393,7 +500,7 @@ function domain_scan_icmp_round(array $targets, int $timeoutMs): array
 }
 
 /**
- * بررسی TCP هم‌زمان (پورت‌های SMB/RPC/RDP). فایروال ویندوز اغلب ICMP را می‌بندد ولی سیستم روشن است.
+ * بررسی TCP هم‌زمان (پورت‌های SMB/RPC/RDP/WinRM). فایروال ویندوز اغلب ICMP را می‌بندد ولی سیستم روشن است.
  * @param array<string,string> $targets کلید => IP
  * @param array<int,int> $ports
  * @return array<string,bool>
@@ -467,7 +574,7 @@ function domain_scan_tcp_probe(array $targets, array $ports, int $timeoutMs): ar
 }
 
 /**
- * پینگ هم‌زمان چند سیستم. مراحل: ICMP موازی ← (نام غیرقابل‌حل) IP ثبت‌شده ← بررسی TCP پورت‌های 445/135/3389.
+ * پینگ هم‌زمان چند سیستم. مراحل: ICMP موازی ← DNS/IP ثبت‌شده ← بررسی TCP پورت‌های SMB/RPC/RDP/WinRM.
  * بدون وابستگی به اسکریپت PowerShell؛ ۳۰۰ سیستم در چند ثانیه.
  *
  * @param array<int,string> $hosts
@@ -533,7 +640,7 @@ function domain_scan_ping_hosts(array $hosts, array $fallbackIps = []): array
         }
     }
     if ($tcpTargets !== []) {
-        foreach (domain_scan_tcp_probe($tcpTargets, [445, 135, 3389], min(2500, max(800, $timeout))) as $key => $_up) {
+        foreach (domain_scan_tcp_probe($tcpTargets, [445, 135, 3389, 5985], min(2500, max(800, $timeout))) as $key => $_up) {
             $results[$key] = true;
         }
     }
@@ -582,12 +689,16 @@ function domain_scan_friendly_error(string $raw): string
     }
     $lower = strtolower($raw);
     $map = [
-        'access is denied' => 'دسترسی رد شد؛ حساب اسکن باید «ادمین محلی» همان کامپیوتر باشد (تنظیمات ← اسکن دامنه).',
-        '0x80070005' => 'دسترسی رد شد؛ حساب اسکن باید «ادمین محلی» همان کامپیوتر باشد (تنظیمات ← اسکن دامنه).',
-        'rpc server is unavailable' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
-        '0x800706ba' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
+        'access is denied' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
+        '0x80070005' => 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.',
         'logon failure' => 'نام کاربری یا رمز حساب اسکن نادرست است.',
         'user name or password is incorrect' => 'نام کاربری یا رمز حساب اسکن نادرست است.',
+        'winrm cannot process the request' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'winrm cannot complete the operation' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'client cannot connect to the destination specified' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'wsmanfault' => 'مسیر WinRM/WSMan به سیستم مقصد آماده نیست؛ WinRM و قاعدهٔ فایروال را روی کلاینت مقصد بررسی کنید.',
+        'rpc server is unavailable' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
+        '0x800706ba' => 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست (فایروال ویندوز یا سرویس WMI را بررسی کنید).',
         'no_computer_info' => 'اطلاعاتی از سیستم مقصد دریافت نشد؛ دسترسی WMI/DCOM و فایروال را بررسی کنید.',
         'cannot be loaded because running scripts is disabled' => 'اجرای اسکریپت PowerShell با ExecutionPolicy مسدود است.',
     ];
@@ -611,10 +722,18 @@ function domain_scan_error_catalog(): array
             'title' => 'سرویس RPC/WMI سیستم مقصد جواب نمی‌دهد',
             'remedy' => [
                 'روی خودِ سیستم مقصد، سرویس Windows Management Instrumentation را روشن نگه دارید (سرویس Winmgmt).',
-                'قواعد فایروال ورودی را فعال کنید: Windows Management Instrumentation (WMI-In)، Remote Service Management (RPC) و در صورت نیاز File and Printer Sharing.',
-                'اگر شبکه بین پنل و کلاینت‌ها روی چند VLAN است، پورت‌های TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض 49152-65535) باز باشد.',
-                'برای مسیر جایگزین، روی سرور پنل یک‌بار Enable-PSRemoting -Force اجرا کنید تا مسیر WinRM هم آزموده شود (در تنظیمات اسکن دامنه می‌توانید ترتیب DCOM/WinRM را عوض کنید).',
+                'برای مسیر DCOM، قواعد فایروال WMI-In و Remote Service Management را فعال کنید؛ از سرور اسکن به مقصد TCP 135 و محدودهٔ Dynamic RPC (پیش‌فرض ویندوز 49152-65535) باید مجاز باشد.',
+                'اگر DCOM مناسب شبکه نیست، WinRM را روی کلاینت‌های مقصد (نه فقط سرور پنل) با Group Policy فعال کنید؛ مسیر فعلی از TCP 5985 استفاده می‌کند. در تنظیمات «اول WinRM» یا «فقط WinRM» را انتخاب کنید.',
                 'اگر سیستم مقصد خطای دائمی می‌دهد و فایروال قابل تغییر نیست، از client-agent روی همان سیستم استفاده کنید (بخش ۷.۸ راهنما).',
+            ],
+        ],
+        'winrm_unavailable' => [
+            'title' => 'WinRM روی سیستم مقصد آمادهٔ اتصال نیست',
+            'remedy' => [
+                'WinRM باید روی کلاینت‌های مقصد (نه فقط سرور PHP) فعال باشد؛ برای Windows 10/11 آن را با Group Policy یا Enable-PSRemoting -Force روی خود مقصدها آماده کنید.',
+                'قاعدهٔ ورودی Windows Remote Management را در فایروال مقصدها فعال و تا حد امکان به IP سرور اسکن محدود کنید؛ پورت پیش‌فرض این مسیر TCP 5985 است.',
+                'حساب دامنه باید روی مقصد عضو Administrators باشد و نام سیستم ترجیحاً با نام DNS/FQDN خوانا باشد.',
+                'اگر WinRM را در مقصدها فعال نکرده‌اید، از حالت خودکار/اول DCOM استفاده کنید و WMI-In و RPC را در فایروال دامنه مجاز کنید.',
             ],
         ],
         'access_denied' => [
@@ -622,7 +741,7 @@ function domain_scan_error_catalog(): array
             'remedy' => [
                 'حساب اسکن را به گروه Administrators خودِ هر کلاینت اضافه کنید؛ روش سریع: یک گروه AD بسازید، حساب اسکن را عضو آن کنید و با Group Policy آن گروه را به Administrators محلی ببرید.',
                 'اگر از حساب محلی (غیر دامنه‌ای) استفاده می‌کنید، روی کلاینت مقدار LocalAccountTokenFilterPolicy را در مسیر HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System برابر ۱ بگذارید تا UAC دسترسی از راه دور را محدود نکند.',
-                'حساب را در «تنظیمات ← اسکن دامنه و استخراج از شبکه» درست وارد کنید (دامنهٔ NetBIOS + نام کاربری + رمز) و با ابزار tools/diag_connection.php روی یک سیستم آزمون بگیرید.',
+                'حساب دامنه و رمز درست را در فرم استخراج همان نوبت وارد کنید؛ نام کاربری را به شکل DOMAIN\\user بنویسید و با ابزار tools/diag_connection.php روی یک سیستم آزمون بگیرید.',
                 'مطمئن شوید حساب قفل یا منقضی نشده و محدودیت «Log on to» آن اجازهٔ ورود از شبکه را می‌دهد.',
             ],
         ],
@@ -640,6 +759,14 @@ function domain_scan_error_catalog(): array
                 'نام کامپیوتر یا IP درست را بررسی کنید (ممکن است نام در DNS به سیستمی دیگر اشاره کند).',
                 'دسترسی WMI/DCOM همان نکته‌های خطای RPC را لازم دارد؛ فایروال و سرویس WMI را بررسی کنید.',
                 'سیستم ممکن است به‌تازگی روشن شده و WMI هنوز آماده نباشد؛ چند دقیقه بعد دوباره تلاش کنید.',
+            ],
+        ],
+        'hardware_empty' => [
+            'title' => 'اتصال برقرار شد اما دادهٔ سخت‌افزاری دریافت نشد',
+            'remedy' => [
+                'این نتیجه فقط اتصال/هویت سیستم را تأیید می‌کند و Inventory موفق محسوب نمی‌شود.',
+                'در خروجی self-test سرور، تعداد پردازنده، سیستم‌عامل، RAM و دیسک‌ها را ببینید؛ اگر همه صفرند، حساب سرویس PHP/PowerShell دسترسی WMI لازم را ندارد.',
+                'برای اسکن دامنه، حساب تنظیم‌شده باید عضو Administrators محلی هر کلاینت باشد؛ سپس همان سیستم را دوباره اسکن کنید.',
             ],
         ],
         'empty_output' => [
@@ -687,9 +814,9 @@ function domain_scan_error_catalog(): array
         'not_reachable' => [
             'title' => 'سیستم در شبکه پاسخ نداد (آفلاین)',
             'remedy' => [
-                'سیستم خاموش است یا در شبکه نیست؛ بعد از روشن‌شدن با «تلاش دوباره برای ناموفق‌ها» امتحان کنید.',
-                'اگر سیستم روشن است، پاسخ ICMP در فایروال ویندوز بسته است؛ قاعدهٔ File and Printer Sharing (Echo Request - ICMPv4-In) را فعال کنید.',
-                'در تنظیمات، پورت‌های TCP بررسی‌شده برای تشخیص آنلاین‌بودن را هم می‌توانید اضافه کنید (نشانی‌های SMb/WMI).',
+                'سیستم خاموش است یا از سرور اسکن مسیر شبکه‌ای ندارد؛ بعد از روشن‌شدن/اتصال دوباره تلاش کنید.',
+                'پینگ ICMP شرط لازم نیست: برنامه علاوه بر پینگ، SMB/RPC/WinRM را هم می‌سنجد؛ در حالت WinRM پورت TCP 5985 بررسی می‌شود.',
+                'اگر همهٔ آزمون‌ها بسته‌اند، DNS/IP و مسیر/VLAN را بررسی کنید. بازکردن پینگ به‌تنهایی دسترسی WMI یا WinRM را برقرار نمی‌کند.',
             ],
         ],
         'bad_hostname' => [
@@ -724,10 +851,12 @@ function domain_scan_error_code(string $message): string
         return 'unknown';
     }
     $prefixes = [
+        'winrm_unavailable' => ['مسیر WinRM/WSMan'],
         'rpc_unavailable' => ['سرویس RPC/WMI'],
         'access_denied' => ['دسترسی رد شد'],
         'bad_credentials' => ['نام کاربری یا رمز'],
         'no_computer_info' => ['اطلاعاتی از سیستم مقصد'],
+        'hardware_empty' => ['دادهٔ سخت‌افزاری قابل‌استفاده'],
         'policy_blocked' => ['اجرای اسکریپت PowerShell'],
         'not_windows' => ['استخراج اطلاعات از سیستم‌های دامنه فقط روی سرور'],
         'proc_open_disabled' => ['تابع proc_open'],
@@ -840,6 +969,9 @@ function domain_scan_preflight(): ?string
     if (PHP_OS_FAMILY !== 'Windows') {
         return 'استخراج اطلاعات از سیستم‌های دامنه فقط روی سرور Windows (با PowerShell) کار می‌کند.';
     }
+    if (PHP_SAPI !== 'cli' && !domain_scan_https_request()) {
+        return 'برای واردکردن و ارسال امن رمز حساب استخراج، آدرس سامانه باید با HTTPS باز شود.';
+    }
     if (!function_exists('proc_open')) {
         return 'تابع proc_open در PHP غیرفعال است؛ آن را از disable_functions در php.ini حذف کنید.';
     }
@@ -855,14 +987,17 @@ function domain_scan_preflight(): ?string
  * @param array<int,string> $hosts
  * @return array<string,array{inventory:array<string,mixed>,error:string}> کلید = نام کامپیوتر
  */
-function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4): array
+function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4, array $credentials = []): array
 {
     $answer = [];
     $problem = domain_scan_preflight();
     $jobs = [];
-    $user = trim((string) setting('domain_scan_username', ''));
-    $pass = (string) setting('domain_scan_password', '');
+    $user = trim((string) ($credentials['username'] ?? ''));
+    $pass = (string) ($credentials['password'] ?? '');
     $domain = trim((string) setting('domain_scan_domain', ''));
+    if ($user === '' || $pass === '') {
+        $problem ??= 'برای این نوبت، نام کاربری و رمز حساب مجاز استخراج وارد نشده یا نشست آن منقضی شده است.';
+    }
     if ($user !== '' && strpos($user, '\\') === false && strpos($user, '@') === false && $domain !== '') {
         $user = $domain . '\\' . $user;
     }
@@ -921,21 +1056,43 @@ function domain_scan_remote_inventory_many(array $hosts, int $concurrency = 4): 
             $answer[$host] = ['inventory' => [], 'error' => $detail !== '' ? $detail : 'پاسخ خالی از PowerShell (کد خروج ' . $row['code'] . ').'];
             continue;
         }
+        // Remote targets must never inherit fallback values describing the PHP scanner host.
+        // Start from a neutral record so a missing optional WMI class stays unknown, not a false match.
         $inventory = inventory_base_inventory();
         $inventory['hostname'] = $host;
+        $inventory['serial_number'] = '';
+        $inventory['manufacturer'] = '';
+        $inventory['model'] = '';
         $inventory['computer_type'] = 'Windows client';
+        $inventory['operating_system'] = '';
+        $inventory['os_architecture'] = '';
+        $inventory['os_serial'] = '';
+        $inventory['mac_address'] = '';
+        $inventory['cpu'] = '';
+        $inventory['memory_mb'] = 0;
+        $inventory['domain_username'] = '';
+        $inventory['antivirus'] = '';
+        $inventory['disks'] = [];
+        $inventory['software'] = [];
+        $inventory['peripherals'] = ['printers' => [], 'scanners' => [], 'monitors' => [], 'keyboards' => [], 'mice' => []];
+        $inventory['hardware'] = [];
         $resolved = domain_scan_resolve_ipv4($host);
         $inventory['ip_address'] = $resolved;
-        $answer[$host] = ['inventory' => inventory_apply_powershell_data($inventory, $decoded), 'error' => ''];
+        $inventory = inventory_apply_powershell_data($inventory, $decoded);
+        if (inventory_hardware_score($inventory) === 0) {
+            $answer[$host] = ['inventory' => [], 'error' => 'دادهٔ سخت‌افزاری قابل‌استفاده از سیستم مقصد دریافت نشد؛ پاسخ اتصال به‌تنهایی Inventory موفق نیست.'];
+            continue;
+        }
+        $answer[$host] = ['inventory' => $inventory, 'error' => ''];
     }
     return $answer;
 }
 
-function domain_scan_remote_inventory(string $host): array
+function domain_scan_remote_inventory(string $host, array $credentials = []): array
 {
     $GLOBALS['itsm_inventory_last_error'] = '';
     $host = trim($host);
-    $many = domain_scan_remote_inventory_many([$host], 1);
+    $many = domain_scan_remote_inventory_many([$host], 1, $credentials);
     $row = $many[$host] ?? ['inventory' => [], 'error' => 'نتیجه‌ای دریافت نشد.'];
     if ($row['inventory'] === []) {
         inventory_set_error($host . ': ' . $row['error']);
@@ -949,6 +1106,20 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
     if ($assetId <= 0) {
         return 0;
     }
+    $receivedInventory = $inventory;
+    $existingQuery = db()->prepare('SELECT serial_number, manufacturer, model, computer_type, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus FROM assets WHERE id = ? LIMIT 1');
+    $existingQuery->execute([$assetId]);
+    $existingAsset = $existingQuery->fetch();
+    $previousStatus = [];
+    if ($existingAsset) {
+        $previous = inventory_saved_asset_snapshot($existingAsset);
+        $previousStatus = $previous['collection_status'] ?? [];
+        $inventory = inventory_merge_missing_values($inventory, $previous);
+        if ((int) ($inventory['memory_mb'] ?? 0) <= 0 && (int) ($previous['memory_mb'] ?? 0) > 0) {
+            $inventory['memory_mb'] = (int) $previous['memory_mb'];
+        }
+    }
+    $inventory = inventory_apply_collection_status_metadata($inventory, $previousStatus, 'domain');
     db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, manufacturer = ?, model = ?, computer_type = ?, operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, antivirus = ?, source = "domain", last_inventory_at = NOW() WHERE id = ?')->execute([
         $host,
         (string) ($inventory['serial_number'] ?? ''),
@@ -971,12 +1142,15 @@ function domain_scan_store_inventory(int $assetId, string $host, array $inventor
     ]);
     sync_inventory_rows($assetId, $inventory, 'domain');
     if (inventory_asset_exists($assetId)) {
-        db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($inventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $userId > 0 ? $userId : null]);
+        $receivedInventory['received_at'] = date('c');
+        db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, json_encode($receivedInventory, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $userId > 0 ? $userId : null]);
     }
-    return asset_profile_apply_auto($assetId, asset_profile_auto_values($inventory), $userId);
+    // Refresh the mapped machine-derived fields on every successful scan. This intentionally
+    // replaces hand edits in those auto-mapped fields; separate plaque/organizational fields are untouched.
+    return asset_profile_apply_auto($assetId, asset_profile_auto_values($inventory), $userId, true);
 }
 
-function domain_scan_process(int $runId, int $limit, int $userId): array
+function domain_scan_process(int $runId, int $limit, int $userId, array $credentials = []): array
 {
     domain_scan_ensure_schema();
     if (function_exists('set_time_limit')) { @set_time_limit(600); }
@@ -1033,7 +1207,7 @@ function domain_scan_process(int $runId, int $limit, int $userId): array
         if ($onlineItems !== []) {
             $remote = [];
             try {
-                $remote = domain_scan_remote_inventory_many(array_map(static fn (array $row): string => (string) $row['hostname'], $onlineItems), 4);
+                $remote = domain_scan_remote_inventory_many(array_map(static fn (array $row): string => (string) $row['hostname'], $onlineItems), 4, $credentials);
             } catch (Throwable $exception) {
                 app_error_log('[domain-scan] remote inventory: ' . $exception->getMessage());
             }

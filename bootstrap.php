@@ -4,16 +4,8 @@ declare(strict_types=1);
 const APP_ROOT = __DIR__;
 
 require_once __DIR__ . '/permissions.php';
-
-if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
-    session_set_cookie_params([
-        'path' => '/',
-        'httponly' => true,
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-        'samesite' => 'Lax',
-    ]);
-    session_start();
-}
+require_once __DIR__ . '/session_bootstrap.php';
+app_session_start();
 
 $configFile = (string) (getenv('ITSM_CONFIG_PATH') ?: APP_ROOT . '/config.php');
 if (!is_file($configFile)) {
@@ -436,6 +428,21 @@ function app_version(): string
 function e(mixed $value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+/** حالت روز/شب سراسری رابط؛ مقدار cookie بین همهٔ مسیرهای سامانه مشترک است. */
+function app_theme_mode(): string
+{
+    $mode = (string) ($_COOKIE['ticket_theme_mode'] ?? 'light');
+    return in_array($mode, ['light', 'dark'], true) ? $mode : 'light';
+}
+
+function app_theme_toggle_markup(): string
+{
+    $dark = app_theme_mode() === 'dark';
+    $label = $dark ? 'حالت روز' : 'حالت شب';
+    $icon = $dark ? '☀️' : '🌙';
+    return '<button type="button" class="theme-mode-toggle" data-theme-toggle aria-pressed="' . ($dark ? 'true' : 'false') . '" aria-label="تغییر به ' . $label . '"><span class="theme-mode-icon" data-theme-icon aria-hidden="true">' . $icon . '</span><span data-theme-label>' . $label . '</span></button>';
 }
 
 function redirect(string $url): never
@@ -1059,12 +1066,13 @@ function require_supervisor(): array
 
 function ticket_scope(array $user, string $alias = 't'): array
 {
+    // این قید پیش از هر مجوز «مشاهده همه» اجرا می‌شود تا مدیر پشتیبانی هرگز
+    // با مجوز سفارشی/قدیمی ticket.view_all به حوزهٔ IT دسترسی نگیرد.
+    if (($user['role'] ?? '') === 'support_manager') {
+        return ["WHERE {$alias}.service_group = ?", ['support']];
+    }
     if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) {
         return ['', []];
-    }
-    if (($user['role'] ?? '') === 'support_manager') {
-        // مدیر پشتیبانی فقط حوزه پشتیبانی را می‌بیند؛ بدون فیلتر معاونت و بدون دسترسی به IT.
-        return ["WHERE {$alias}.service_group = ?", ['support']];
     }
     if (in_array($user['role'], ['agent', 'manager'], true)) {
         $group = user_service_group($user);
@@ -1679,6 +1687,7 @@ function ldap_sync_all_users(): array
     ldap_set_option($connection, LDAP_OPT_REFERRALS, 0);
     if (defined('LDAP_OPT_NETWORK_TIMEOUT')) { @ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 8); }
     if (defined('LDAP_OPT_TIMELIMIT')) { @ldap_set_option($connection, LDAP_OPT_TIMELIMIT, 8); }
+    $markPhase('service-bind');
     $bindDn = (string) ldap_cfg('bind_dn', '');
     if ($bindDn !== '' && !@ldap_bind($connection, $bindDn, (string) ldap_cfg('bind_password', ''))) {
         throw new RuntimeException('ورود حساب سرویس LDAP ناموفق بود. DN و رمز حساب سرویس را بررسی کنید.');
@@ -2034,13 +2043,38 @@ function ticket_number_next(string $prefix): string
 {
     ticket_number_ensure_schema();
     $prefix = strtoupper(substr(trim($prefix) !== '' ? trim($prefix) : 'TK', 0, 12));
-    $statement = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)');
-    $statement->execute([$prefix]);
-    $sequence = (int) db()->query('SELECT LAST_INSERT_ID()')->fetchColumn();
-    if ($sequence <= 0) {
-        $sequence = 1;
+    $ownsTransaction = !db()->inTransaction();
+    if ($ownsTransaction) {
+        db()->beginTransaction();
     }
-    return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    try {
+        // Lock the prefix row explicitly and read its value in this transaction. This
+        // avoids relying on connection-scoped LAST_INSERT_ID() after concurrent upserts.
+        $ensure = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, 0) ON DUPLICATE KEY UPDATE prefix = VALUES(prefix)');
+        $ensure->execute([$prefix]);
+        $read = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? FOR UPDATE');
+        $read->execute([$prefix]);
+        $currentSequence = (int) ($read->fetchColumn() ?: 0);
+
+        // Heal a stale sequence left by legacy/manual ticket numbers before allocating
+        // the next number; the ticket_no index keeps this prefix-scoped lookup bounded.
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+        $maxQuery = db()->prepare('SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED)) FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?');
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existingMaximum = (int) ($maxQuery->fetchColumn() ?: 0);
+        $sequence = max($currentSequence, $existingMaximum) + 1;
+        $write = db()->prepare('UPDATE ticket_number_seq SET seq = ? WHERE prefix = ?');
+        $write->execute([$sequence, $prefix]);
+        if ($ownsTransaction) {
+            db()->commit();
+        }
+        return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    } catch (Throwable $exception) {
+        if ($ownsTransaction && db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $exception;
+    }
 }
 
 function ticket_number_peek(string $prefix): string
@@ -2582,6 +2616,36 @@ function is_sla_holiday(DateTimeImmutable $date): bool
 function ldap_authenticate(string $username, string $password): ?array
 {
     if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
+        return ldap_authenticate_measured($username, $password, static function (string $phase): void {});
+    }
+    $startedAt = microtime(true);
+    $phase = 'ldap-connect';
+    $phaseStartedAt = $startedAt;
+    $phaseDurations = [];
+    $markPhase = static function (string $nextPhase) use (&$phase, &$phaseStartedAt, &$phaseDurations): void {
+        $now = microtime(true);
+        $phaseDurations[$phase] = ($phaseDurations[$phase] ?? 0) + (int) round(($now - $phaseStartedAt) * 1000);
+        $phase = $nextPhase;
+        $phaseStartedAt = $now;
+    };
+    try {
+        return ldap_authenticate_measured($username, $password, $markPhase);
+    } finally {
+        $markPhase('finished');
+        $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+        if ($durationMs >= 1000) {
+            $stageSummary = [];
+            foreach ($phaseDurations as $stage => $duration) {
+                $stageSummary[] = $stage . ':' . $duration . 'ms';
+            }
+            error_log('ITSM LDAP login timing: duration_ms=' . $durationMs . '; stages=' . implode(',', $stageSummary));
+        }
+    }
+}
+
+function ldap_authenticate_measured(string $username, string $password, callable $markPhase): ?array
+{
+    if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
         return null;
     }
     $host = (string) ldap_cfg('host', '');
@@ -2604,6 +2668,7 @@ function ldap_authenticate(string $username, string $password): ?array
         ldap_auth_log('service-bind-failed', $username, $connection);
         $serviceBindFailed = true;
     }
+    $markPhase('rootdse-discovery');
     $lookup = preg_replace('/^.*\\\\/', '', $username) ?: $username;
     $lookup = explode('@', $lookup, 2)[0];
     $escapedLookup = ldap_escape($lookup, '', LDAP_ESCAPE_FILTER);
@@ -2636,6 +2701,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     };
     $addDefaultNamingContext();
+    $markPhase('user-search');
     $searchUser = static function ($ldapConnection, array $bases, array $searchFilters, array $searchAttributes): array {
         foreach ($bases as $baseDn) {
             foreach ($searchFilters as $candidate) {
@@ -2682,6 +2748,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     }
     [$search, $entries] = $searchUser($connection, $searchBases, $filters, $attributes);
+    $markPhase('user-bind');
     if (!$search) {
         if (!$tryDirectBind($connection)) {
             ldap_auth_log('direct-bind-failed', $username, $connection);
@@ -2734,6 +2801,7 @@ function ldap_authenticate(string $username, string $password): ?array
             return null;
         }
     }
+    $markPhase('profile-assembly');
     $groups = [];
     for ($groupIndex = 0; $groupIndex < (int) ($entry['memberof']['count'] ?? 0); $groupIndex++) {
         $groups[] = (string) ($entry['memberof'][$groupIndex] ?? '');

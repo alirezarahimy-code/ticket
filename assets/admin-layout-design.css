@@ -1,0 +1,78 @@
+.layout-design-launch{display:inline-flex!important;align-items:center;gap:6px;padding:7px 10px;border:1px solid #91d5c6;border-radius:9px;background:#ecfdf6;color:#075e56;cursor:pointer;font:inherit;font-size:12px;font-weight:800}.layout-design-launch:hover,.layout-design-launch[aria-pressed="true"],.ald-floating-launch:hover{background:#087f72;color:#fff;border-color:#087f72}.ald-floating-launch{position:fixed;top:12px;left:12px;z-index:10040;padding:9px 12px;border:1px solid #91d5c6;border-radius:10px;background:#ecfdf6;color:#075e56;box-shadow:0 4px 18px #102a4320;font:700 12px Tahoma,Arial,sans-serif;cursor:pointer}.ald-panel{position:fixed;z-index:10050;inset:14px 14px 14px auto;width:min(380px,calc(100vw - 28px));display:flex;flex-direction:column;gap:11px;padding:16px;border:1px solid #cbd8df;border-radius:16px;background:#fff;color:#17324d;box-shadow:0 20px 60px #102a4340;font-family:Tahoma,Arial,sans-serif;overflow:auto}.ald-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid #e7edf1}.ald-head strong,.ald-head small{display:block}.ald-head strong{font-size:16px}.ald-head small{margin-top:4px;color:#64748b}.ald-close{width:34px;height:34px;border:1px solid #d9e2e8;border-radius:9px;background:#f8fafc;color:#334155;font-size:21px;cursor:pointer}.ald-instructions,.ald-help,.ald-footnote{color:#596f82;font-size:12px;line-height:1.9}.ald-instructions{padding:9px 11px;border-radius:9px;background:#eff8ff;color:#175cd3}.ald-selection{min-height:34px;padding:8px 10px;border:1px dashed #a8bac7;border-radius:9px;color:#0f766e;font-size:12px;direction:ltr;text-align:left;overflow-wrap:anywhere}.ald-controls{display:grid;gap:8px}.ald-control{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(0,1.2fr);align-items:center;gap:8px;color:#40566b;font-size:12px}.ald-control input,.ald-control select{width:100%;min-width:0;padding:7px 8px;border:1px solid #cbd8df;border-radius:8px;background:#fff;color:#152d40;font:inherit;font-size:12px;direction:ltr;text-align:left}.ald-control input:focus,.ald-control select:focus{outline:2px solid #80cbc0;border-color:#0f766e}.ald-empty{margin:0;padding:12px;border-radius:9px;background:#f6f8fa;color:#68798a;font-size:12px;line-height:1.9}.ald-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid #e7edf1}.ald-actions button{min-height:40px;padding:8px;border:0;border-radius:9px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}.ald-save{background:#087f72;color:#fff}.ald-reset{background:#fef3f2;color:#a12c24}.ald-actions button:disabled{opacity:.5;cursor:not-allowed}.ald-footnote{margin:0;font-size:11px}.ald-hover{outline:2px dashed #f59e0b!important;outline-offset:2px!important;cursor:crosshair!important}.ald-selected{outline:3px solid #087f72!important;outline-offset:2px!important;cursor:crosshair!important}.ald-design-mode{cursor:crosshair}.ald-design-mode .ald-panel,.ald-design-mode .ald-panel *{cursor:auto}.ald-design-mode .ald-panel button,.ald-design-mode .ald-panel select,.ald-design-mode .ald-panel input{cursor:pointer}@media(max-width:560px){.ald-panel{inset:auto 8px 8px;width:calc(100vw - 16px);max-height:min(82vh,680px);border-radius:14px;padding:13px}.layout-design-launch{font-size:11px;padding:6px 8px}}
+/* Streamlined form layout editor: common controls stay visible, advanced controls are collapsible. */
+.ald-basic-controls,.ald-advanced-controls{display:grid;gap:8px}
+.ald-advanced{border:1px solid #e2e8f0;border-radius:10px;background:#fbfdff;overflow:hidden}
+.ald-advanced>summary{padding:10px 12px;color:#334e68;font-size:12px;font-weight:800;cursor:pointer;list-style:none}
+.ald-advanced>summary::-webkit-details-marker{display:none}
+.ald-advanced>summary::after{content:'＋';float:left;color:#087f72}
+.ald-advanced[open]>summary::after{content:'−'}
+.ald-advanced-controls{padding:8px 10px;border-top:1px solid #e7edf1}
+.ald-advanced .ald-help{margin:8px 10px}
+.ald-order{padding:10px;border:1px solid #dce8e5;border-radius:11px;background:#f8fcfb}
+.ald-order-heading{display:grid;gap:4px;margin-bottom:8px}
+.ald-order-heading strong{font-size:12px;color:#164e45}
+.ald-order-heading small,.ald-order-note{font-size:11px;line-height:1.7;color:#62768a}
+.ald-order-list{display:grid;gap:5px;max-height:190px;overflow:auto;margin:0;padding:0;list-style:none}
+.ald-order-item{display:grid;grid-template-columns:18px minmax(0,1fr) auto;align-items:center;gap:6px;min-height:36px;padding:4px 6px;border:1px solid #dbe5e7;border-radius:8px;background:#fff;color:#334e65;cursor:grab;user-select:none}
+.ald-order-item:active{cursor:grabbing}
+.ald-order-item.is-selected{border-color:#0f766e;background:#eaf8f5;box-shadow:inset 3px 0 #0f766e}
+.ald-order-item.ald-dragging{opacity:.45}
+.ald-order-item:focus{outline:2px solid #0f766e;outline-offset:1px}
+.ald-order-grip{color:#7b8da0;font-size:17px;line-height:1}
+.ald-order-caption{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.ald-order-buttons{display:flex;gap:3px}
+.ald-order-buttons button{width:27px;height:26px;border:1px solid #cbd8df;border-radius:6px;background:#f8fafc;color:#29485e;font-size:15px;line-height:1;cursor:pointer}
+.ald-order-buttons button:disabled{opacity:.35;cursor:not-allowed}
+.ald-order-note{display:block;margin-top:7px}
+.ald-order-empty{padding:9px;border-radius:8px;background:#f1f5f9;color:#64748b;font-size:11px;line-height:1.8}
+@media(max-width:560px){.ald-order-list{max-height:140px}.ald-order{padding:8px}}
+
+/* Access-like visual design surface with a floating drag grip and clear drop target. */
+body.ald-design-mode::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.2;background-image:radial-gradient(#7890a7 .65px,transparent .65px);background-size:16px 16px}
+body.ald-design-mode>.app-shell{position:relative;z-index:1}
+.ald-drag-handle{position:fixed;z-index:10060;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:28px;padding:4px 9px;border:1px solid #0f766e;border-radius:8px;background:#0f766e;color:#fff;box-shadow:0 4px 12px #102a4330;font:700 11px Tahoma,Arial,sans-serif;cursor:grab;touch-action:none;user-select:none}
+.ald-drag-handle:active{cursor:grabbing;background:#115e59}
+.ald-drag-handle[hidden]{display:none!important}
+.ald-drop-target{outline:3px dashed #7c3aed!important;outline-offset:3px!important;background-color:#f5f3ff!important}
+.ald-drag-source{opacity:.45!important}
+.ald-selected{outline-color:#0f766e!important;box-shadow:0 0 0 4px #0f766e22!important}
+
+
+/* Pixel-position controls for Access-style visual form editing. */
+.ald-position{padding:10px;border:1px solid #b8cbd9;border-radius:11px;background:#f4f8fb}
+.ald-position-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.ald-position-heading strong{font-size:12px;color:#17324d}
+.ald-position-heading button{padding:5px 8px;border:1px solid #cbd8df;border-radius:7px;background:#fff;color:#53677b;font:inherit;font-size:10px;cursor:pointer}
+.ald-axis-row{display:grid;grid-template-columns:48px 30px minmax(0,1fr) 30px;align-items:center;gap:6px;margin-top:6px;color:#475d70;font-size:11px}
+.ald-axis-row input{width:100%;min-width:0;padding:6px;border:1px solid #cbd8df;border-radius:7px;background:#fff;color:#17324d;font:inherit;font-size:12px;text-align:center;direction:ltr}
+.ald-axis-row button{height:28px;border:1px solid #b7c7d0;border-radius:7px;background:#fff;color:#087f72;font-size:16px;font-weight:700;cursor:pointer}
+.ald-axis-row button:hover{background:#e7f6f1;border-color:#0f766e}
+.ald-position>small{display:block;margin-top:8px;color:#657b8d;font-size:10px;line-height:1.8}
+.ald-position-empty{color:#64748b;font-size:11px;line-height:1.8}
+.ald-drag-handle{cursor:grab}
+.ald-drag-handle.is-dragging{cursor:grabbing;box-shadow:0 0 0 4px #0f766e38,0 8px 22px #102a4345}
+
+/* Eight Access-style resize grips around the selected control. */
+.ald-resize-handle{position:fixed;z-index:10061;display:block;width:11px;height:11px;min-width:0;min-height:0;padding:0;border:2px solid #0f766e;border-radius:3px;background:#fff;box-shadow:0 1px 4px #102a4338;touch-action:none;user-select:none}
+.ald-resize-handle[hidden]{display:none!important}
+.ald-resize-handle:hover,.ald-resize-handle.is-resizing{background:#99f6e4;box-shadow:0 0 0 3px #0f766e30,0 2px 8px #102a4340}
+.ald-resize-n,.ald-resize-s{cursor:ns-resize!important}
+.ald-resize-e,.ald-resize-w{cursor:ew-resize!important}
+.ald-resize-nw,.ald-resize-se{cursor:nwse-resize!important}
+.ald-resize-ne,.ald-resize-sw{cursor:nesw-resize!important}
+.ald-size-readout{direction:ltr;color:#64748b;font-size:10px;font-variant-numeric:tabular-nums}
+
+/* The side design panel, not its launcher button, is draggable and keyboard-movable. */
+.ald-design-mode .ald-panel .ald-head{cursor:grab;touch-action:none;user-select:none}
+.ald-panel.is-dragging{box-shadow:0 24px 70px #102a4360;opacity:.97}
+.ald-panel .ald-head:focus-visible{outline:2px solid #7c3aed;outline-offset:2px;border-radius:8px}
+.ald-panel-grip-mark{display:inline-block;margin-inline-start:4px;color:#0f766e;font-size:.9em;cursor:grab}
+.ald-design-mode .ald-panel .ald-head,
+.ald-design-mode .ald-panel .ald-head>div,
+.ald-design-mode .ald-panel .ald-head strong,
+.ald-design-mode .ald-panel .ald-head small,
+.ald-design-mode .ald-panel .ald-head .ald-panel-grip-mark{cursor:grab!important}
+.ald-design-mode .ald-panel.is-dragging .ald-head,
+.ald-design-mode .ald-panel.is-dragging .ald-head>div,
+.ald-design-mode .ald-panel.is-dragging .ald-head strong,
+.ald-design-mode .ald-panel.is-dragging .ald-head small{cursor:grabbing!important}

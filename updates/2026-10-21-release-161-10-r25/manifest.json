@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — افقی‌سازی فهرست غذا در کادرهای آمار R25",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R25 preserves the day-card design and renders each card's food name/count blocks on one horizontal row; multi-day ranges remain two days per row in print and on screen. Repeated-block separators remain visible without adding dividers between fields within a block. Printer orientation is still controlled by the print dialog. No production data changed."
+}

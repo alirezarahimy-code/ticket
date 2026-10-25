@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "release": "R39",
+  "title": "Ticket 1.61.10 — R39 Final Food Dashboard update",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-food-dashboard-r39-final-20261025.zip",
+  "migrations": [],
+  "notes": "Retains the R38 browser runtime hotfix. Aligns processing chart colors with the approved palette, sets the area fill opacity to 0.16, keeps the four-category today-status donut visible with zero counts, and prevents the dashboard toolbar from overflowing a narrowed sidebar layout. Live values remain sourced from local food monitoring; no demo records, online dependency, or migration is added."
+}

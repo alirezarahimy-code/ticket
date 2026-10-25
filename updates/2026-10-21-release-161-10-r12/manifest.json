@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — ثبت دستی فیش غذا (R12)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R12 adds an audited, permission-checked same-day manual food-ticket registration for active employees with a valid food order. The operator can either queue a physical print or record printed status only without sending anything to a printer. Duplicate daily tickets remain blocked. No database migration is required."
+}

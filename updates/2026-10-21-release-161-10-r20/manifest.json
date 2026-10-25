@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — شناسایی حساب محلی با نقش بازرسی برای کد ۳۳۵ (R20)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "Builds on R19. Food-code lookup recognizes local employee accounts with either local_user or guard role, including a code stored only as the account username. The explicit admin workflow searches all local and food rows, lists the matching role and source, and reports the matching row details if its role is not eligible for safe merge instead of claiming no record exists. Selected eligible rows remain explicitly selectable and are merged only after backup in one transaction. No production data was accessed or changed; no database migration is required."
+}

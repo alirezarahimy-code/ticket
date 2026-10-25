@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — انتقال موقت بین گروه‌های سلف (R13)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R13 lets authorized managers temporarily transfer a permanent canteen-group member for a selected non-past date using the existing day-visit table. Permanent membership is unchanged, the person is excluded from the home group's dated ticket run and included only in the destination, return-to-home is supported, and source/destination print locks are enforced. No migration is required."
+}

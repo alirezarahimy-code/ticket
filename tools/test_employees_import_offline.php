@@ -38,6 +38,14 @@ function check(string $label, bool $ok, string $detail = ''): void
 
 $root = dirname(__DIR__);
 
+// تابع bootstrap که ایمپورت برای نرمال‌سازی کد پرسنلی مصرف می‌کند.
+function normalize_employee_number(mixed $value): ?string
+{
+    $digits = ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'];
+    $code = trim(strtr(trim((string) $value), $digits));
+    return $code === '' ? null : $code;
+}
+
 /* ─────────────── دیتابیس آزمون (PDO/SQLite در حافظه) ─────────────── */
 $GLOBALS['FT_DB'] = null;
 function db(): PDO
@@ -56,7 +64,8 @@ function db(): PDO
             national_code TEXT,
             role TEXT,
             auth_source TEXT,
-            is_active INTEGER
+            is_active INTEGER,
+            must_change_password INTEGER NOT NULL DEFAULT 0
         )');
         $GLOBALS['FT_DB'] = $pdo;
     }

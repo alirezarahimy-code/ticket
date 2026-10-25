@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — refresh automatic asset profile fields on every domain scan (R30)",
+  "date": "2026-10-22",
+  "migrations": [],
+  "notes": "After each successful remote inventory, refresh only automatically collected asset-profile fields while preserving manual organizational and physical inventory fields. Permit an explicit false/zero value to clear a previously true status. Stop inferring Internet access from the presence of a default gateway. No database migration or production data change."
+}

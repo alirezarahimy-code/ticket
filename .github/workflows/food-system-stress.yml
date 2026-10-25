@@ -1,0 +1,200 @@
+name: Isolated Food Management and Orders Stress
+
+on:
+  push:
+    branches:
+      - arena/8edbdf95-ticket
+    paths:
+      - '.github/workflows/food-system-stress.yml'
+      - 'tools/food_system_stress.py'
+      - 'tools/food_system_seed.php'
+      - 'tools/food_system_verify.php'
+      - 'tools/food_system_router.php'
+      - 'tests/test_food*.py'
+      - 'tests/test_food_order_calendar_node.js'
+      - 'tests/js/food-menu-by-menu.test.js'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  food-system-stress:
+    name: Food-only APIs with synthetic data and disposable MariaDB
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-only-food-system-password
+          MARIADB_DATABASE: food_system_stress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Checkout active branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install food-only test dependencies
+        run: |
+          python -m pip install pytest
+          npm install --no-save --no-package-lock jsdom@24
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, pdo_sqlite, ldap, mbstring, xml, zip
+          coverage: none
+
+      - name: Validate only food test harness and food modules
+        run: |
+          set -euo pipefail
+          python -m py_compile tools/food_system_stress.py
+          for file in tools/food_system_seed.php tools/food_system_verify.php tools/food_system_router.php food-order.php food-ticket.php food-ticket-groups.php food-ticket-engine.php food-ticket-runtime.php food-ticket-env.php food-ticket-netprint.php food-ticket-templates.php food-order-import.php food-ticket-import.php food-personnel-link.php; do
+            [ ! -f "$file" ] || php -l "$file"
+          done
+          for file in assets/food-order*.js food-ticket-web/*.js; do
+            [ ! -f "$file" ] || node --check "$file"
+          done
+
+      - name: Run food-only Python static tests
+        id: python_static
+        run: |
+          set -o pipefail
+          mkdir -p benchmark-results updates/2026-10-20-release-161-6
+          # Tests expect an extracted release manifest, ignored by Git; provide only this synthetic food migration fixture.
+          printf '{"migrations":["006-food-meal-type.sql"]}\n' > updates/2026-10-20-release-161-6/manifest.json
+          pytest -q tests/test_food*.py --junitxml=benchmark-results/food-system-python-tests.xml 2>&1 | tee benchmark-results/food-system-python-tests.log
+
+      - name: Run food-only JavaScript test
+        run: node tests/test_food_order_calendar_node.js
+
+      - name: Run food-menu grouping JavaScript test
+        run: node tests/js/food-menu-by-menu.test.js
+
+      - name: Run food-only PHP logic tests (offline; no physical printer)
+        run: |
+          set -euo pipefail
+          php tests/test_food_ticket_logic.php
+          php tests/test_food_ticket_config_paths.php
+          php tools/test_food_group_logic_offline.php
+          php tools/test_food_guest_request_deadline_offline.php
+          php tools/test_food_order_range_offline.php
+          php tools/test_food_personnel_link_offline.php
+          php tools/test_food_dupes_offline.php
+
+      - name: Initialize a disposable database
+        env:
+          DB_PASSWORD: ci-only-food-system-password
+        run: |
+          set -euo pipefail
+          docker_id="$(docker ps --filter ancestor=mariadb:10.11 --format '{{.ID}}' | head -n1)"
+          test -n "$docker_id"
+          docker exec -i "$docker_id" mariadb -uroot -p"$DB_PASSWORD" food_system_stress < schema.sql
+
+      - name: Create an isolated app config and synthetic food fixtures
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: '3306'
+          DB_NAME: food_system_stress
+          DB_USER: root
+          DB_PASSWORD: ci-only-food-system-password
+          ITSM_CONFIG_PATH: ${{ runner.temp }}/food-system-config.php
+        run: |
+          set -euo pipefail
+          mkdir -p benchmark-results
+          php -r '$config = ["database" => ["host" => getenv("DB_HOST"), "port" => (int) getenv("DB_PORT"), "name" => getenv("DB_NAME"), "user" => getenv("DB_USER"), "password" => getenv("DB_PASSWORD")], "app" => ["key" => bin2hex(random_bytes(32))]]; file_put_contents(getenv("ITSM_CONFIG_PATH"), "<?php return " . var_export($config, true) . ";\n");'
+          echo "ITSM_CONFIG_PATH=$ITSM_CONFIG_PATH" >> "$GITHUB_ENV"
+          echo "DB_HOST=$DB_HOST" >> "$GITHUB_ENV"
+          echo "DB_PORT=$DB_PORT" >> "$GITHUB_ENV"
+          echo "DB_NAME=$DB_NAME" >> "$GITHUB_ENV"
+          echo "DB_USER=$DB_USER" >> "$GITHUB_ENV"
+          echo "DB_PASSWORD=$DB_PASSWORD" >> "$GITHUB_ENV"
+          ITSM_CONFIG_PATH="$ITSM_CONFIG_PATH" php tools/food_system_seed.php
+
+      - name: Run 250 concurrent self-order lifecycles, 250 manager VUs, bulk writes, and food CRUD
+        id: food_stress
+        env:
+          PHP_CLI_SERVER_WORKERS: '32'
+        run: |
+          set +e
+          python tools/food_system_stress.py 2>&1 | tee benchmark-results/food-system-stress-run.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            while IFS= read -r line; do
+              detail="$(printf '%s' "$line" | sed 's/%/%25/g; s/\r/%0D/g')"
+              echo "::error title=Food stress failure::$detail"
+            done < <(tail -n 30 benchmark-results/food-system-stress-run.log)
+          fi
+          exit "$status"
+
+      - name: Verify persisted food outcomes and audit rows
+        if: steps.food_stress.outcome == 'success'
+        run: php tools/food_system_verify.php
+
+      - name: Report verified food stress totals
+        if: always() && steps.food_stress.conclusion == 'success'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          run = json.loads(Path('benchmark-results/food-system-run.json').read_text())
+          verify = json.loads(Path('benchmark-results/food-system-verification.json').read_text())
+          s = run['summary']
+          worst_route, worst = max(run['routes'].items(), key=lambda row: row[1]['latency_ms']['p95'])
+          line = (f"requests={s['http_requests']}; rps={s['throughput_requests_per_second']}; "
+                  f"self_lifecycles={s['self_order_lifecycles_verified']}/250; "
+                  f"bulk={s['bulk_orders_created']}/{s['bulk_orders_cancelled']}; "
+                  f"manager_reads={s['manager_read_responses_validated']}; crud={s['manager_crud_checks_passed']}; "
+                  f"failed_checks={s['failed_checks']}; persisted_orders={verify['food_orders']}; "
+                  f"worst_route_p95={worst_route}:{worst['latency_ms']['p95']}ms")
+          print(f"::notice title=Food stress verified metrics::{line}")
+          print(line)
+          PY
+
+      - name: Add food stress result to Actions summary
+        if: always()
+        run: |
+          if [ -f benchmark-results/food-system-stress.md ]; then
+            cat benchmark-results/food-system-stress.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Food-only stress run did not produce its report; runner output and PHP server log follow.' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 80 benchmark-results/food-system-stress-run.log >> "$GITHUB_STEP_SUMMARY" || true
+            tail -n 120 /tmp/food-system-php-server.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+          if [ "${{ steps.python_static.outcome }}" != "success" ]; then
+            echo 'Food-only Python static tests did not pass; captured test output follows.' >> "$GITHUB_STEP_SUMMARY"
+            tail -n 60 benchmark-results/food-system-python-tests.log >> "$GITHUB_STEP_SUMMARY" || true
+          fi
+
+      - name: Upload food-only reports and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: food-system-isolated-stress
+          if-no-files-found: warn
+          path: |
+            benchmark-results/food-system-stress.md
+            benchmark-results/food-system-stress-run.log
+            benchmark-results/food-system-run.json
+            benchmark-results/food-system-verification.json
+            benchmark-results/food-system-python-tests.log
+            benchmark-results/food-system-python-tests.xml
+            /tmp/food-system-php-server.log

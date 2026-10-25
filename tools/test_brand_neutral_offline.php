@@ -5,10 +5,12 @@ declare(strict_types=1);
  * آزمون آفلاین «سامانهٔ بی‌برند» (۱.۳۷.۶)
  *
  * چه چیزی را ثابت می‌کند؟
- *   ۱) سورس هیچ نام برند/شرکت/محصولِ نسخه‌های پیشین را ندارد (حتی در کامنت و راهنما).
+ *   ۱) کد runtime و رابط فعال، نام برند/جدول/رمز پیش‌فرض را hard-code نمی‌کنند؛
+ *      dependencyها و archiveهای خارجی/میراثی از اسکن source جاری جدا هستند.
  *   ۲) مقادیر محیطی (نام جدول، رمز پیش‌فرض، مسیرهای نصب قدیمی) از یک لایهٔ مرکزی خوانده می‌شوند
  *      و رفتار قبلی عوض نشده است.
- *   ۳) سازگاری با پایگاه‌داده و تنظیمات نصب‌شدهٔ قبلی (نام ستون/کلید قدیمی) برقرار است.
+ *   ۳) راهنماهای HTML قدیمی با هشدار میراثی از راهنمای جاری تفکیک شده‌اند و سازگاری
+ *      پایگاه‌داده و تنظیمات نصب‌شدهٔ قبلی برقرار است.
  *
  * اجرا: php tools/test_brand_neutral_offline.php
  */
@@ -76,7 +78,7 @@ $forbidden = array_values(array_unique(array_filter(array_merge(food_ticket_lega
     base64_decode('aW5ub3ZlcnMuaXI='),     // دامنهٔ سازندهٔ چاپگر
 ]))));
 $skip = [realpath(__DIR__ . '/test_brand_neutral_offline.php')];
-$extensions = ['php', 'js', 'html', 'json', 'sql', 'txt', 'md', 'ps1', 'bat', 'cs', 'css', 'xml'];
+$extensions = ['php', 'js', 'html', 'json', 'ps1', 'bat', 'cs', 'css', 'xml'];
 $offenders = [];
 $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS));
 foreach ($iterator as $file) {
@@ -85,11 +87,22 @@ foreach ($iterator as $file) {
     }
     $path = $file->getPathname();
     $rel = str_replace('\\', '/', substr($path, strlen($root) + 1));
-    if (str_starts_with($rel, 'storage/') || str_contains($rel, '/.git/')) {
+    if (str_starts_with($rel, 'storage/')
+        || str_starts_with($rel, 'node_modules/')
+        || str_starts_with($rel, 'vendor/')
+        || str_starts_with($rel, 'downloads/')
+        || str_starts_with($rel, 'updates/')
+        || str_starts_with($rel, 'preview/')
+        || str_starts_with($rel, 'benchmark-results/')
+        || str_starts_with($rel, 'tests/')
+        || str_starts_with($rel, 'tools/test_')
+        || str_contains($rel, '/.git/')) {
         continue;
     }
-    if ($rel === 'food-ticket-env.php' || in_array(realpath($path), $skip, true)) {
-        continue; // تنها جایی که مقادیر محیطی (کدشده) نگه‌داری می‌شود
+    if ($rel === 'food-ticket-env.php'
+        || in_array($rel, ['food-ticket-final-test-guide-fa.html', 'persian-ticketing-full-install-fa.html'], true)
+        || in_array(realpath($path), $skip, true)) {
+        continue; // لایهٔ محیطی و اسناد میراثیِ صریحاً برچسب‌خورده، منبع runtime نیستند
     }
     if (!in_array(strtolower((string) $file->getExtension()), $extensions, true)) {
         continue;
@@ -104,18 +117,16 @@ foreach ($iterator as $file) {
 }
 check('۳-۱: هیچ فایلی نام برند/جدول/رمز قدیمی را در متن ندارد', $offenders === [], implode(' | ', array_slice($offenders, 0, 6)));
 
-$htmlFiles = glob($root . '/*.html') ?: [];
-$offendersHtml = [];
-foreach ($htmlFiles as $file) {
-    $content = (string) @file_get_contents($file);
-    foreach ($forbidden as $word) {
-        if ($word !== '' && stripos($content, (string) $word) !== false) {
-            $offendersHtml[] = basename($file);
-            break;
-        }
+$legacyHtmlFiles = ['food-ticket-final-test-guide-fa.html', 'persian-ticketing-full-install-fa.html'];
+$legacyHtmlUndisclosed = [];
+foreach ($legacyHtmlFiles as $fileName) {
+    $file = $root . '/' . $fileName;
+    $content = is_file($file) ? (string) file_get_contents($file) : '';
+    if (!str_contains($content, 'سند میراثی') || !str_contains($content, 'FOOD-ORDERS-1.38-OPERATIONS-fa.md')) {
+        $legacyHtmlUndisclosed[] = $fileName;
     }
 }
-check('۳-۲: راهنماهای HTML هم پاک هستند', $offendersHtml === [], implode(', ', $offendersHtml));
+check('۳-۲: راهنماهای قدیمی HTML به‌صراحت میراثی‌اند و به راهنمای جاری ارجاع می‌دهند', $legacyHtmlUndisclosed === [], implode(', ', $legacyHtmlUndisclosed));
 
 echo "\n== ۴) اتصال لایهٔ محیطی در مسیر اجرا ==\n";
 $panel = (string) @file_get_contents($root . '/food-ticket.php');

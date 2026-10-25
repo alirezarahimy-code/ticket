@@ -13,8 +13,11 @@
   const S = {
     loaded: false, loading: false, error: '', busy: false,
     templates: [], catalog: [], fonts: ['Tahoma'], brand: {}, net: {},
+    groupPrintMode: 'group', previewKind: 'individual', designTab: 'individual',
+    groupTemplate: null, individualWork: null, groupWork: null,
+    individualDirty: false, groupDirty: false,
     currentId: null,          // شناسهٔ قالب در حال ویرایش (0 = قالب جدید ذخیره‌نشده)
-    work: null,               // نسخهٔ در حال ویرایش {id,name,paper_width,paper_height,template}
+    work: null,               // نسخهٔ فعلی؛ با تب‌ها بین طراحی انفرادی و گروهی عوض می‌شود
     dirty: false,
     sel: '',                  // شناسهٔ المان انتخاب‌شده
     scale: 4,                 // px per mm
@@ -120,12 +123,19 @@
     w.template.elements.forEach((e) => { if (e.enabled) b = Math.max(b, e.y + e.height); });
     return Math.max(20, r1(b + num(w.template.margin_bottom, 3)));
   }
+  function workFrom(row) {
+    if (!row) return null;
+    return clone({ id: row.id || 0, name: row.name || '', paper_width: row.paper_width, paper_height: row.paper_height, template: row.template });
+  }
   function setWork(row) {
-    S.work = clone({ id: row.id || 0, name: row.name || '', paper_width: row.paper_width, paper_height: row.paper_height, template: row.template });
+    S.work = workFrom(row);
+    if (!S.work) return;
     S.currentId = S.work.id;
-    S.dirty = false;
+    S.dirty = S.designTab === 'group' ? S.groupDirty : S.individualDirty;
     S.sel = (S.work.template.elements.find((e) => e.enabled) || S.work.template.elements[0] || {}).id || '';
     S.preview = null;
+    if (S.designTab === 'group') S.groupWork = workFrom(S.work);
+    else S.individualWork = workFrom(S.work);
   }
   function activeRow() { return S.templates.find((t) => t.is_active) || null; }
 
@@ -136,9 +146,19 @@
     S.fonts = x.fonts || S.fonts;
     S.brand = x.brand || S.brand;
     S.net = x.net || S.net;
+    S.groupPrintMode = x.group_print_mode === 'individual' ? 'individual' : 'group';
+    const individual = activeRow() || S.templates[0];
+    if (individual && (!S.individualWork || !keepSelection)) S.individualWork = workFrom(individual);
+    if (x.group_template) S.groupTemplate = x.group_template;
+    if (S.groupTemplate && (!S.groupWork || !keepSelection)) S.groupWork = workFrom(S.groupTemplate);
+    if (!S.groupWork && individual) {
+      S.groupWork = workFrom(individual);
+      S.groupWork.id = 0;
+      S.groupWork.name = 'قالب گروهی مستقل';
+    }
     if (!keepSelection || !S.work) {
-      const row = activeRow() || S.templates[0];
-      if (row) setWork(row);
+      const next = S.designTab === 'group' ? (S.groupWork || S.groupTemplate) : S.individualWork;
+      if (next) setWork(next);
     }
   }
   function load() {
@@ -211,6 +231,85 @@
     return '<div class="fd-el' + selCls + offCls + '" data-fd-el="' + esc(e.id) + '" style="' + style + imgAlign + '">' + inner + (e.id === S.sel && e.field !== 'line' ? '<span class="fd-h" data-fd-resize="1"></span>' : '') + '</div>';
   }
 
+  function groupPreviewLines() {
+    const elements = S.work.template.elements.filter((e) => e.enabled);
+    const hasGroupTitle = elements.some((e) => e.field === 'group_title');
+    const hasDate = elements.some((e) => ['date', 'food_date'].includes(e.field));
+    const hasTime = elements.some((e) => ['punch_time', 'attendance_time'].includes(e.field));
+    const lines = [];
+    if (!hasGroupTitle) lines.push({ kind: 'meta', text: 'گروه: گروه نمونهٔ کارکنان' });
+    if (!hasDate) lines.push({ kind: 'meta', text: 'تاریخ: ۱۴۰۵/۰۷/۱۳' });
+    if (!hasTime) lines.push({ kind: 'meta', text: 'ساعت: ۱۲:۴۱' });
+    if (lines.length) lines.push({ kind: 'meta', text: '------------------------------' });
+    const sampleRows = [
+      ['منو۱', 'چلوکباب', ['علی رضایی', 'سارا محمدی', 'رضا کریمی', 'مریم احمدی', 'حسین رضایی', 'نرگس موسوی']],
+      ['منو۲', 'زرشک‌پلو با مرغ', ['فاطمه حسینی', 'محمد کاظمی', 'ناهید جعفری', 'امیر رحیمی', 'لیلا صادقی', 'پیمان مرادی']],
+      ['منو۳', 'قیمه', ['آزاده کریمی', 'جواد احمدی', 'مهدی نوری', 'الهام رستمی', 'فرهاد یوسفی', 'سمانه حیدری']],
+    ];
+    sampleRows.forEach(([label, food, names]) => {
+      lines.push({ kind: 'menu', text: label + ' — ' + food + ' — ' + names.length + ' عدد' });
+      names.forEach((name) => lines.push({ kind: 'member', text: 'نام و نام خانوادگی: ' + name }));
+    });
+    return lines;
+  }
+
+  function groupTextHeight(text, style, width) {
+    const pt = num(style && style.font_size, 11);
+    const lineHeight = pt * 25.4 / 72 * num(style && style.line_height, 1.2);
+    const perLine = Math.max(1, Math.floor(Math.max(1, width) / Math.max(0.5, pt * 25.4 / 72 * 0.52)));
+    let count = 0;
+    String(text).split('\n').forEach((line) => { count += Math.max(1, Math.ceil(Array.from(line).length / perLine)); });
+    return Math.max(num(style && style.height, 0.5), count * lineHeight);
+  }
+
+  function groupCanvasHtml() {
+    const w = S.work, t = w.template, sc = S.scale, paperW = Number(w.paper_width) || 80;
+    const ignored = ['food_name', 'employee_name', 'personnel_code', 'national_code', 'department', 'meal', 'ticket_number', 'qrcode', 'free_text'];
+    const staticElements = t.elements.filter((e) => e.enabled && !ignored.includes(e.field));
+    const footers = t.elements.filter((e) => e.enabled && e.field === 'free_text');
+    const anchor = t.elements.find((e) => e.enabled && e.field === 'food_name') || t.elements.find((e) => e.enabled && e.field === 'employee_name') || null;
+    const menuStyle = t.elements.find((e) => e.enabled && e.field === 'food_name') || anchor || {};
+    const memberStyle = t.elements.find((e) => e.enabled && e.field === 'employee_name') || menuStyle;
+    const lines = groupPreviewLines();
+    let staticBottom = 0;
+    staticElements.forEach((e) => {
+      const h = e.field === 'line' ? 0 : (e.field === 'logo' || e.field === 'qrcode' ? Number(e.height) : groupTextHeight(sampleText(e), e, Number(e.width)));
+      staticBottom = Math.max(staticBottom, Number(e.y) + h);
+    });
+    const bodyX = anchor ? Number(anchor.x) : 6;
+    const bodyY = Math.max(staticBottom + 1.5, anchor ? Number(anchor.y) : 0);
+    const bodyW = Math.max(10, Math.min(paperW - Math.max(0, bodyX), anchor ? Number(anchor.width) : paperW - 12));
+    let lineTop = 0;
+    const linesHtml = lines.map((line) => {
+      const style = line.kind === 'menu' ? menuStyle : memberStyle;
+      const styleElement = line.kind === 'menu' ? menuStyle : memberStyle;
+      const lineHeight = num(style.font_size, 11) * 25.4 / 72 * sc * num(style.line_height, 1.2);
+      const lineBoxH = groupTextHeight(line.text, Object.assign({}, style, { height: 0.5 }), bodyW);
+      const gapAfter = line.kind === 'menu' ? 1.5 : 0;
+      const out = '<div data-fd-group-style-pick="1" data-fd-pick="' + esc(styleElement.id || '') + '" style="height:' + lineBoxH * sc + 'px;margin-bottom:' + gapAfter * sc + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + (num(style.font_size, 11) * 25.4 / 72 * sc) + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + lineHeight + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
+      lineTop += lineBoxH + gapAfter;
+      return out;
+    }).join('');
+    const bodyH = Math.max(0.5, lineTop + 1.0);
+    const bodySelected = anchor && (anchor.id === S.sel || memberStyle.id === S.sel);
+    const body = anchor ? '<div class="fd-el' + (bodySelected ? ' fd-sel' : '') + '" data-fd-el="' + esc(anchor.id) + '" style="left:' + bodyX * sc + 'px;top:' + bodyY * sc + 'px;width:' + bodyW * sc + 'px;height:' + bodyH * sc + 'px;' + (anchor.border ? 'outline:1px solid #000;' : '') + '">' + linesHtml + '</div>' : '<div class="fd-help">برای طراحی بخش منوها و اعضا، فیلد «نام غذا» یا «نام کارمند» را فعال کنید.</div>';
+    let bottom = Math.max(staticBottom, bodyY + bodyH);
+    const footerHtml = footers.map((e) => {
+      const moved = Object.assign({}, e, { y: bottom + 1 });
+      bottom = moved.y + groupTextHeight(moved.text, moved, moved.width) + 1;
+      return elementHtml(moved);
+    }).join('');
+    const H = Math.max(20, Math.ceil((bottom + num(t.margin_bottom, 3)) * 10) / 10);
+    const W = paperW * sc;
+    const inset = t.border ? '<div class="fd-border" style="inset:' + t.border_inset * sc + 'px"></div>' : '';
+    const ruler = [];
+    for (let m = 0; m <= paperW; m += 10) ruler.push('<i style="left:' + m * sc + 'px">' + m + '</i>');
+    return '<div class="fd-canvas-wrap"><h3 class="fd-group-canvas-title">چیدمان قابل ویرایش فیش گروهی</h3><p class="fd-help">نمونهٔ بوم شامل ۳ منو و ۱۸ عضو است. فیلد «نام غذا» جایگاه، عرض، تراز و فونت عنوان منوها را کنترل می‌کند؛ فیلد «نام کارمند» را از لایه‌ها یا با کلیک روی یکی از نام‌ها انتخاب کنید تا فونت و فاصلهٔ خطوط اسامی را تنظیم کنید. پیش‌نمایش چاپ پس از هر تغییر به‌روزرسانی می‌شود.</p>' +
+      '<div class="fd-ruler-x" style="width:' + W + 'px">' + ruler.join('') + '</div>' +
+      '<div class="fd-canvas" id="fd-canvas" style="width:' + W + 'px;height:' + H * sc + 'px">' + inset + staticElements.map(elementHtml).join('') + body + footerHtml + '</div>' +
+      '<div class="fd-dim">' + paperW + ' × متغیر (بر اساس تعداد اعضا) میلی‌متر — ارتفاع بلوک با محتوا و فونت‌ها محاسبه می‌شود.</div></div>';
+  }
+
   function canvasHtml() {
     const w = S.work;
     const t = w.template;
@@ -225,7 +324,12 @@
       '<div class="fd-dim">' + r1(w.paper_width) + ' × ' + (Number(w.paper_height) > 0 ? r1(w.paper_height) : 'متغیر (≈' + r1(paperH()) + ')') + ' میلی‌متر — مقیاس ' + sc + ' پیکسل بر میلی‌متر</div></div>';
   }
 
+  function designTabsHtml() {
+    return '<div class="fd-design-tabs"><button type="button" class="fd-design-tab ' + (S.designTab === 'individual' ? 'on' : '') + '" data-fd-design-tab="individual">۱ ـ چاپ انفرادی</button><button type="button" class="fd-design-tab ' + (S.designTab === 'group' ? 'on' : '') + '" data-fd-design-tab="group">۲ ـ چاپ گروهی</button></div>';
+  }
+
   function tabsHtml() {
+    if (S.designTab === 'group') return '<div class="fd-tabs"><span class="fd-tab on">قالب مستقل چاپ گروهی</span></div>';
     const items = S.templates.map((t) => '<button type="button" class="fd-tab' + (t.id === S.currentId ? ' on' : '') + '" data-fd-open="' + t.id + '">' + esc(t.name) + (t.is_active ? ' <b class="fd-act">فعال</b>' : '') + '</button>').join('');
     const unsaved = S.currentId === 0 ? '<button type="button" class="fd-tab on">' + esc(S.work.name || 'قالب جدید') + ' <em>(ذخیره‌نشده)</em></button>' : '';
     const canAdd = S.templates.length < MAX_TEMPLATES && S.currentId !== 0;
@@ -254,9 +358,27 @@
     return '<div class="fd-card"><h3>ترتیب چاپ (لایه‌ها)</h3><div class="fd-layers">' + (rows || '<p class="fd-help">فیلدی روی فیش نیست.</p>') + '</div></div>';
   }
 
+  function groupTypographyPropsHtml(e) {
+    const isMenu = e.field === 'food_name';
+    const fonts = S.fonts.map((f) => '<option ' + (f === e.font_family ? 'selected' : '') + '>' + esc(f) + '</option>').join('');
+    const inp = (k, label, step, extra) => '<label class="fd-f">' + label + '<input type="number" step="' + (step || 0.5) + '" data-fd-prop="' + k + '" value="' + esc(e[k]) + '" ' + (extra || '') + '></label>';
+    const layout = isMenu ? inp('x', 'فاصله از چپ (mm)', 0.5, 'min="0"') + inp('y', 'فاصله از بالا (mm)', 0.5, 'min="0"') + inp('width', 'عرض بلوک (mm)', 0.5, 'min="10"') : '';
+    const align = isMenu ? '<label class="fd-f">تراز کل بلوک<select data-fd-prop="align"><option value="right" ' + (e.align === 'right' ? 'selected' : '') + '>راست</option><option value="center" ' + (e.align === 'center' ? 'selected' : '') + '>وسط</option><option value="left" ' + (e.align === 'left' ? 'selected' : '') + '>چپ</option></select></label>' : '';
+    const border = isMenu ? '<label class="fd-f chk"><input type="checkbox" data-fd-prop="border" ' + (e.border ? 'checked' : '') + '> کادر دور بلوک منوها و اعضا</label>' : '';
+    return '<div class="fd-card"><h3>مشخصات: ' + (isMenu ? 'عنوان منوها' : 'اسامی اعضا') + '</h3><div class="fd-grid">' +
+      '<label class="fd-f chk full"><input type="checkbox" data-fd-prop="enabled" ' + (e.enabled ? 'checked' : '') + '> فعال به‌عنوان سبک فیش گروهی</label>' + layout +
+      '<label class="fd-f">فونت<select data-fd-prop="font_family">' + fonts + '</select></label>' +
+      inp('font_size', 'اندازهٔ فونت (pt)', 0.5, 'min="4" max="72"') +
+      inp('line_height', 'فاصلهٔ خطوط (ضریب)', 0.05, 'min="0.8" max="3"') + align +
+      '<label class="fd-f chk"><input type="checkbox" data-fd-prop="bold" ' + (e.bold ? 'checked' : '') + '> ضخیم (Bold)</label>' + border +
+      (isMenu ? '<p class="fd-help" style="grid-column:1/-1">این فونت برای سطرهای «منو۱ — نام غذا» است. جایگاه و تراز این فیلد روی همهٔ سطرهای پویای گروه اعمال می‌شود.</p>' : '<p class="fd-help" style="grid-column:1/-1">این فونت فقط برای سطرهای اسامی اعضا است؛ جایگاه و تراز کل بلوک از فیلد «نام غذا» گرفته می‌شود.</p>') +
+      '</div></div>';
+  }
+
   function propsHtml() {
     const e = selected();
     if (!e) return '<div class="fd-card"><h3>مشخصات فیلد</h3><p class="fd-help">یک فیلد را روی بوم انتخاب کنید.</p></div>';
+    if (S.designTab === 'group' && (e.field === 'food_name' || e.field === 'employee_name')) return groupTypographyPropsHtml(e);
     const cat = FIELD_BY_KEY()[e.field] || {};
     const isText = !['line', 'logo', 'qrcode'].includes(e.field);
     const hasText = e.field === 'title' || e.field === 'free_text';
@@ -308,10 +430,84 @@
       '</div></div>';
   }
 
+  function groupModeHtml() {
+    const isGroup = S.groupPrintMode !== 'individual';
+    return '<div class="fd-card fd-group-mode"><h3>حالت چاپ گروه‌های غذایی</h3>' +
+      '<p class="fd-help">این گزینه فقط برای گروه‌های غذایی است؛ مسیرهای چاپ فیش انفرادی و سایر چاپ‌ها بدون تغییر می‌مانند.</p>' +
+      '<div class="fd-actions"><button type="button" class="fd-btn ' + (isGroup ? 'primary' : '') + '" data-fd-group-mode="group">چاپ یک فیش مشترک برای گروه</button>' +
+      '<button type="button" class="fd-btn ' + (!isGroup ? 'primary' : '') + '" data-fd-group-mode="individual">بازگشت به چاپ انفرادی اعضا</button></div>' +
+      '<p class="fd-help">وضعیت فعلی: <b>' + (isGroup ? 'فیش مشترک برای هر گروه' : 'فیش جداگانه برای هر عضو') + '</b></p></div>';
+  }
+
+  function groupLivePreviewHtml() {
+    const w = S.work, t = w.template, scale = 3, paperW = Number(w.paper_width) || 80;
+    const ignored = ['food_name', 'employee_name', 'personnel_code', 'national_code', 'department', 'meal', 'ticket_number', 'qrcode', 'free_text'];
+    const staticElements = t.elements.filter((e) => e.enabled && !ignored.includes(e.field));
+    const footers = t.elements.filter((e) => e.enabled && e.field === 'free_text');
+    const anchor = t.elements.find((e) => e.enabled && e.field === 'food_name') || t.elements.find((e) => e.enabled && e.field === 'employee_name') || null;
+    const menuStyle = t.elements.find((e) => e.enabled && e.field === 'food_name') || anchor || {};
+    const memberStyle = t.elements.find((e) => e.enabled && e.field === 'employee_name') || menuStyle;
+    const lines = groupPreviewLines();
+    let staticBottom = 0;
+    const staticHtml = staticElements.map((e) => {
+      const h = e.field === 'line' ? 0 : (e.field === 'logo' || e.field === 'qrcode' ? Number(e.height) : groupTextHeight(sampleText(e), e, Number(e.width)));
+      staticBottom = Math.max(staticBottom, Number(e.y) + h);
+      const style = 'position:absolute;left:' + e.x * scale + 'px;top:' + e.y * scale + 'px;width:' + e.width * scale + 'px;height:' + Math.max(e.height, h) * scale + 'px;box-sizing:border-box;';
+      if (e.field === 'line') return '<div style="' + style + 'border-top:1px dashed #333"></div>';
+      if (e.field === 'logo') {
+        const logo = logoUrl();
+        return logo ? '<img alt="" src="' + esc(logo) + '" style="' + style + 'object-fit:contain">' : '';
+      }
+      if (e.field === 'qrcode') return '<div style="' + style + 'background:repeating-conic-gradient(#000 0 25%,#fff 0 50%) 0 0/20% 20%"></div>';
+      const pt = num(e.font_size, 11) * 25.4 / 72 * scale;
+      return '<div style="' + style + 'font-family:\'' + esc(e.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (e.bold ? 700 : 400) + ';line-height:' + pt * num(e.line_height, 1.2) + 'px;text-align:' + (e.align || 'right') + ';white-space:pre-wrap;' + (e.border ? 'outline:1px solid #000;' : '') + '">' + esc(sampleText(e)).replace(/\n/g, '<br>') + '</div>';
+    }).join('');
+    const bodyX = anchor ? Number(anchor.x) : 6;
+    const bodyY = Math.max(staticBottom + 1.5, anchor ? Number(anchor.y) : 0);
+    const bodyW = Math.max(10, Math.min(paperW - Math.max(0, bodyX), anchor ? Number(anchor.width) : paperW - 12));
+    let usedH = 0;
+    const linesHtml = lines.map((line) => {
+      const style = line.kind === 'menu' ? menuStyle : memberStyle;
+      const lineBoxH = groupTextHeight(line.text, Object.assign({}, style, { height: 0.5 }), bodyW);
+      const gapAfter = line.kind === 'menu' ? 1.5 : 0;
+      usedH += lineBoxH + gapAfter;
+      const pt = num(style.font_size, 11) * 25.4 / 72 * scale;
+      return '<div style="height:' + lineBoxH * scale + 'px;margin-bottom:' + gapAfter * scale + 'px;box-sizing:border-box;font-family:\'' + esc(style.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (style.bold ? 700 : 400) + ';line-height:' + pt * num(style.line_height, 1.2) + 'px;text-align:' + (anchor ? anchor.align : 'right') + ';white-space:pre-wrap;overflow-wrap:anywhere">' + esc(line.text) + '</div>';
+    }).join('');
+    const bodyH = Math.max(0.5, usedH + 1.0);
+    let bottom = Math.max(staticBottom, bodyY + bodyH);
+    const footerHtml = footers.map((e) => {
+      const y = bottom + 1;
+      const h = groupTextHeight(e.text, e, e.width);
+      bottom = y + h + 1;
+      const pt = num(e.font_size, 11) * 25.4 / 72 * scale;
+      return '<div style="position:absolute;left:' + e.x * scale + 'px;top:' + y * scale + 'px;width:' + e.width * scale + 'px;height:' + h * scale + 'px;font-family:\'' + esc(e.font_family || 'Tahoma') + '\',Tahoma,sans-serif;font-size:' + pt + 'px;font-weight:' + (e.bold ? 700 : 400) + ';line-height:' + pt * num(e.line_height, 1.2) + 'px;text-align:' + (e.align || 'right') + ';white-space:pre-wrap">' + esc(e.text).replace(/\n/g, '<br>') + '</div>';
+    }).join('');
+    const height = Math.max(20, bottom + num(t.margin_bottom, 3));
+    const paperBorder = t.border ? '<div style="position:absolute;inset:' + num(t.border_inset, 3) * scale + 'px;border:1px solid #000;pointer-events:none"></div>' : '';
+    const bodyHtml = '<div style="position:absolute;left:' + bodyX * scale + 'px;top:' + bodyY * scale + 'px;width:' + bodyW * scale + 'px;height:' + bodyH * scale + 'px;box-sizing:border-box;' + (anchor && anchor.border ? 'outline:1px solid #000;' : '') + '">' + linesHtml + '</div>';
+    return '<div class="fd-group-live-preview"><div style="position:relative;background:#fff;margin:0 auto;width:' + paperW * scale + 'px;height:' + height * scale + 'px;direction:rtl;overflow:hidden;box-shadow:0 2px 10px #0002">' + paperBorder + staticHtml + bodyHtml + footerHtml + '</div></div>';
+  }
+
   function previewHtml() {
     const p = S.preview;
+    const isGroup = S.designTab === 'group';
     let inner;
-    if (S.previewBusy && !p) inner = '<p class="fd-help">در حال ساخت پیش‌نمایش…</p>';
+    if (isGroup) {
+      let actual;
+      if (S.previewBusy && !p) actual = '<p class="fd-help">در حال ساخت تصویر دقیق چاپ از سرور…</p>';
+      else if (!p) actual = '<p class="fd-help">تصویر دقیق چاپ پس از بارگذاری ساخته می‌شود.</p>';
+      else if (p.error) actual = '<p class="fd-warn">' + esc(p.error) + '</p>';
+      else {
+        const w = p.paper_mm.w * S.scale;
+        const fonts = Object.keys(p.fonts || {}).map((k) => esc(k) + (p.fonts[k] !== k ? ' ← ' + esc(p.fonts[k]) : '')).join('، ');
+        actual = '<div class="fd-pv-paper"><img src="' + p.image + '" alt="خروجی دقیق چاپ" style="width:' + w + 'px;image-rendering:pixelated"></div>' +
+          '<p class="fd-help">تصویر واقعی رندرشده در سرور؛ ' + p.width_px + '×' + p.height_px + ' نقطه.' + (fonts ? ' فونت‌های استفاده‌شده: ' + fonts : '') + '</p>' +
+          (p.warnings || []).map((x) => '<p class="fd-warn">' + esc(x) + '</p>').join('');
+      }
+      inner = '<h4 class="fd-live-title">پیش‌نمایش زندهٔ طراحی</h4>' + groupLivePreviewHtml() +
+        '<div class="fd-group-server-preview"><h4>خروجی دقیق چاپ</h4>' + actual + '</div>';
+    } else if (S.previewBusy && !p) inner = '<p class="fd-help">در حال ساخت پیش‌نمایش…</p>';
     else if (!p) inner = '<p class="fd-help">برای دیدن خروجی دقیق، «به‌روزرسانی پیش‌نمایش» را بزنید.</p>';
     else if (p.error) inner = '<p class="fd-warn">' + esc(p.error) + '</p>';
     else {
@@ -321,7 +517,8 @@
         '<p class="fd-help">اندازهٔ تصویر ' + p.width_px + '×' + p.height_px + ' نقطه (چاپگر ' + p.dots_per_mm + ' نقطه بر میلی‌متر). این همان تصویر ارسالی به چاپگر شبکه است.' + (fonts ? ' فونت: ' + fonts : '') + '</p>' +
         (p.warnings || []).map((x) => '<p class="fd-warn">' + esc(x) + '</p>').join('');
     }
-    return '<div class="fd-card"><h3>پیش‌نمایش واقعی چاپ</h3>' + inner + '<div class="fd-actions"><button type="button" class="fd-btn" data-fd-preview="1">' + (S.previewBusy ? '…' : 'به‌روزرسانی پیش‌نمایش') + '</button></div></div>';
+    const previewTitle = isGroup ? 'پیش‌نمایش چاپ گروهی' : 'پیش‌نمایش واقعی چاپ انفرادی';
+    return '<div class="fd-card fd-preview"><h3>' + previewTitle + '</h3>' + inner + '<div class="fd-actions"><button type="button" class="fd-btn" data-fd-preview="1">' + (S.previewBusy ? 'در حال به‌روزرسانی…' : 'به‌روزرسانی پیش‌نمایش') + '</button></div></div>';
   }
 
   function body() {
@@ -330,25 +527,28 @@
     if (!S.work) return '<div class="fd-card"><p>قالبی پیدا نشد.</p></div>';
     const w = S.work;
     const isActive = (S.templates.find((t) => t.id === w.id) || {}).is_active;
-    return '<style>' + css() + '</style>' +
-      '<div class="fd-head"><div><h2>طراحی فیش غذا</h2><p class="fd-help">چیدمان، اندازهٔ کاغذ و فونت‌ها در دیتابیس ذخیره می‌شوند و Worker برای هر فیش، قالب «فعال» را می‌خواند؛ هم در چاپ شبکه (IP) و هم در صف چاپگر ویندوز.</p></div>' +
-      '<div class="fd-actions top">' +
+    const groupDesign = S.designTab === 'group';
+    const actions = groupDesign ?
+      '<button type="button" class="fd-btn primary" data-fd-save-group="1" ' + (S.busy ? 'disabled' : '') + '>ذخیرهٔ طراحی گروهی</button>' :
       '<button type="button" class="fd-btn primary" data-fd-save="0" ' + (S.busy ? 'disabled' : '') + '>ذخیره</button>' +
       '<button type="button" class="fd-btn" data-fd-save="1" ' + (S.busy ? 'disabled' : '') + '>ذخیره و فعال‌سازی</button>' +
       (w.id && !isActive ? '<button type="button" class="fd-btn" data-fd-activate="' + w.id + '">انتخاب به‌عنوان قالب فعال</button>' : '') +
       '<button type="button" class="fd-btn" data-fd-testprint="1" ' + (w.id ? '' : 'disabled title="ابتدا قالب را ذخیره کنید"') + '>چاپ آزمایشی این قالب</button>' +
-      (w.id ? '<button type="button" class="fd-btn danger" data-fd-deltpl="' + w.id + '">حذف قالب</button>' : '') +
-      '</div></div>' + tabsHtml() +
-      (S.dirty ? '<div class="fd-dirty">تغییرات ذخیره نشده است. تا «ذخیره» نزنید روی چاپ اثری ندارد.</div>' : '') +
+      (w.id ? '<button type="button" class="fd-btn danger" data-fd-deltpl="' + w.id + '">حذف قالب</button>' : '');
+    return '<style>' + css() + '</style>' +
+      '<div class="fd-head"><div><h2>طراحی فیش غذا</h2><p class="fd-help">طراحی انفرادی و گروهی مستقل ذخیره می‌شوند. قالب انفرادی فعال، رفتار چاپ فعلی را حفظ می‌کند.</p></div>' +
+      '<div class="fd-actions top">' + actions + '</div></div>' + designTabsHtml() +
+      (groupDesign ? groupModeHtml() : '') + tabsHtml() +
+      (S.dirty ? '<div class="fd-dirty">تغییرات این طراحی ذخیره نشده است. تا «ذخیره» نزنید روی چاپ اثری ندارد.</div>' : '') +
       '<div class="fd-layout"><div class="fd-side">' + paperHtml() + fieldListHtml() + '</div>' +
-      '<div class="fd-main">' + canvasHtml() + '<div class="fd-zoom">بزرگ‌نمایی: <button type="button" data-fd-zoom="-1">−</button> <button type="button" data-fd-zoom="1">+</button></div>' + previewHtml() + '</div>' +
+      '<div class="fd-main">' + (groupDesign ? groupCanvasHtml() : canvasHtml()) + '<div class="fd-zoom">بزرگ‌نمایی: <button type="button" data-fd-zoom="-1">−</button> <button type="button" data-fd-zoom="1">+</button></div>' + previewHtml() + '</div>' +
       '<div class="fd-side">' + propsHtml() + layersHtml() + '</div></div>';
   }
 
   function css() {
     return '.fd-root{direction:rtl;font-family:inherit}.fd-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px}.fd-head h2{margin:0 0 4px}' +
       '.fd-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.fd-actions.top{margin:0}.fd-btn{border:1px solid #cbd8df;background:#fff;border-radius:9px;padding:7px 12px;cursor:pointer;font:inherit;color:#0f766e}.fd-btn.primary{background:#0f766e;color:#fff;border-color:#0f766e}.fd-btn.danger{color:#dc2626;border-color:#f3c0c0}.fd-btn[disabled]{opacity:.5;cursor:not-allowed}' +
-      '.fd-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.fd-tab{border:1px solid #cbd8df;background:#fff;border-radius:10px 10px 0 0;padding:7px 12px;cursor:pointer;font:inherit}.fd-tab.on{background:#0f766e;color:#fff;border-color:#0f766e}.fd-tab.add{border-style:dashed}.fd-tab[disabled]{opacity:.45;cursor:not-allowed}.fd-act{background:#fff;color:#0f766e;border-radius:6px;padding:0 6px;font-size:11px}' +
+      '.fd-design-tabs{display:flex;gap:8px;margin:12px 0 8px;border-bottom:1px solid #dce5eb}.fd-design-tab{border:1px solid #cbd8df;background:#f7fafb;border-radius:10px 10px 0 0;padding:9px 16px;cursor:pointer;font:inherit;font-weight:600;color:#334155}.fd-design-tab.on{background:#0f766e;color:#fff;border-color:#0f766e}.fd-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.fd-tab{border:1px solid #cbd8df;background:#fff;border-radius:10px 10px 0 0;padding:7px 12px;cursor:pointer;font:inherit}.fd-tab.on{background:#0f766e;color:#fff;border-color:#0f766e}.fd-tab.add{border-style:dashed}.fd-tab[disabled]{opacity:.45;cursor:not-allowed}.fd-act{background:#fff;color:#0f766e;border-radius:6px;padding:0 6px;font-size:11px}' +
       '.fd-dirty{background:#fff7e6;border:1px solid #f2c97d;color:#8a5a00;border-radius:9px;padding:7px 12px;margin-bottom:8px}.fd-layout{display:grid;grid-template-columns:300px minmax(340px,1fr) 300px;gap:14px;align-items:start}@media(max-width:1200px){.fd-layout{grid-template-columns:1fr}}' +
       '.fd-card{background:#fff;border:1px solid #dce5eb;border-radius:12px;padding:12px;margin-bottom:12px}.fd-card h3{margin:0 0 8px;font-size:15px}.fd-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fd-f{display:flex;flex-direction:column;gap:3px;font-size:12px}.fd-f.full{grid-column:1/-1}.fd-f.chk{flex-direction:row;align-items:center;gap:6px}.fd-f input[type=number],.fd-f input[type=text],.fd-f select,.fd-f textarea,.fd-card input[type=text]{border:1px solid #cbd8df;border-radius:8px;padding:6px;font:inherit;width:100%;box-sizing:border-box}' +
       '.fd-help{color:#6d7c89;font-size:12px;margin:6px 0 0}.fd-warn{color:#b45309;background:#fff7e6;border-radius:8px;padding:6px 8px;font-size:12px}.fd-fields{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center}.fd-fr{display:flex;gap:6px;align-items:center;font-size:13px}.fd-mini{border:1px dashed #0f766e;background:#fff;color:#0f766e;border-radius:7px;font-size:11px;padding:2px 6px;cursor:pointer}' +
@@ -357,26 +557,35 @@
       '.fd-border{position:absolute;border:1px solid #000;pointer-events:none}.fd-el{position:absolute;cursor:move;box-sizing:border-box;outline:1px dashed #9db4c0;direction:rtl}.fd-el.fd-sel{outline:2px solid #0f766e;z-index:5}.fd-el.fd-off{opacity:.3}.fd-text{width:100%;height:100%;overflow:visible;white-space:pre-wrap;color:#000}.fd-line{border-top:1px dashed #000;margin-top:3px}.fd-el img{max-width:100%;max-height:100%;object-fit:contain;pointer-events:none}.fd-ph{font-size:11px;color:#9aa8b2}.fd-qr{background:repeating-conic-gradient(#000 0 25%,#fff 0 50%) 0 0/20% 20%;color:transparent}' +
       '.fd-h{position:absolute;right:-5px;bottom:-5px;width:11px;height:11px;background:#0f766e;border:2px solid #fff;border-radius:3px;cursor:nwse-resize}.fd-dim{font-size:11px;color:#6d7c89;margin-top:6px}.fd-zoom{font-size:12px;margin:6px 0}.fd-zoom button{border:1px solid #cbd8df;background:#fff;border-radius:6px;width:28px;cursor:pointer}' +
       '.fd-layers{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow:auto}.fd-layer{display:flex;justify-content:space-between;align-items:center;border:1px solid #e3ebf0;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer}.fd-layer.on{border-color:#0f766e;background:#e9f7f5}.fd-layer.off{opacity:.55}.fd-lbtn button{border:0;background:transparent;cursor:pointer;color:#0f766e}' +
-      '.fd-pv-paper{background:#eef2f4;padding:10px;text-align:center;border-radius:10px;overflow:auto}.fd-pv-paper img{background:#fff;box-shadow:0 2px 10px #0003}';
+      '.fd-pv-paper{background:#eef2f4;padding:10px;text-align:center;border-radius:10px;overflow:auto}.fd-pv-paper img{background:#fff;box-shadow:0 2px 10px #0003}.fd-group-mode{border-right:4px solid #0f766e}.fd-live-title,.fd-group-server-preview h4{margin:10px 0 6px;font-size:13px}.fd-group-live-preview{background:#eef2f4;padding:10px;border-radius:10px;overflow:auto}.fd-group-server-preview{margin-top:14px;padding-top:8px;border-top:1px solid #dce5eb}.fd-real-preview-title{margin:0 0 8px;font-size:15px}.fd-sample-toggle{margin:0 0 8px}.fd-sample-toggle .fd-btn{font-size:12px}';
   }
 
   // ───────────────────────── تغییر داده و پیش‌نمایش ─────────────────────────
   function touch(redraw) {
     S.dirty = true;
+    if (S.designTab === 'group') { S.groupDirty = true; S.groupWork = workFrom(S.work); }
+    else { S.individualDirty = true; S.individualWork = workFrom(S.work); }
     if (redraw !== false) draw();
-    schedulePreview(700);
+    schedulePreview(180);
   }
   function schedulePreview(ms) {
     clearTimeout(S.previewTimer);
-    if (!S.work) return;
-    S.previewTimer = setTimeout(runPreview, ms);
-  }
-  function runPreview() {
-    if (!S.work || !root()) return;
     const seq = ++S.previewSeq;
+    if (!S.work) return;
+    S.previewTimer = setTimeout(() => runPreview(seq), ms);
+  }
+  function runPreview(seq) {
+    if (seq === undefined) {
+      clearTimeout(S.previewTimer);
+      seq = ++S.previewSeq;
+    }
+    if (!S.work || !root() || seq !== S.previewSeq) return;
     S.previewBusy = true;
-    const w = S.work;
-    callApi('/api/templates/preview', { method: 'POST', body: JSON.stringify({ id: w.id, name: w.name, paper_width: w.paper_width, paper_height: w.paper_height, template: w.template }) })
+    S.preview = null;
+    const w = workFrom(S.work);
+    const sampleType = S.designTab === 'group' ? 'group' : S.previewKind;
+    draw();
+    callApi('/api/templates/preview', { method: 'POST', cache: 'no-store', body: JSON.stringify({ id: w.id, name: w.name, paper_width: w.paper_width, paper_height: w.paper_height, template: w.template, sample_type: sampleType }) })
       .then((x) => { if (seq === S.previewSeq) S.preview = x; })
       .catch((e) => { if (seq === S.previewSeq) S.preview = { error: (e && e.message) || 'پیش‌نمایش ساخته نشد' }; })
       .then(() => { if (seq === S.previewSeq) { S.previewBusy = false; draw(); } });
@@ -384,6 +593,19 @@
 
   function guardDirty() {
     return !S.dirty || window.confirm('تغییرات ذخیره‌نشده از بین می‌رود. ادامه می‌دهید؟');
+  }
+
+  function switchDesignTab(tab) {
+    if (!['individual', 'group'].includes(tab) || tab === S.designTab) return;
+    if (S.designTab === 'group') S.groupWork = workFrom(S.work);
+    else S.individualWork = workFrom(S.work);
+    S.designTab = tab;
+    S.previewKind = tab === 'group' ? 'group' : 'individual';
+    const next = tab === 'group' ? S.groupWork : S.individualWork;
+    if (next) setWork(next);
+    S.preview = null;
+    draw();
+    schedulePreview(0);
   }
 
   function addElement(field) {
@@ -403,7 +625,27 @@
     return e;
   }
 
+  async function saveGroup() {
+    if (S.busy || !S.work) return;
+    S.busy = true; draw();
+    const w = S.work;
+    try {
+      const x = await callApi('/api/templates/group-design', { method: 'POST', body: JSON.stringify({ name: w.name || 'قالب گروهی', paper_width: w.paper_width, paper_height: w.paper_height, template: w.template }) });
+      S.groupTemplate = x.group_template || { id: 0, name: w.name, paper_width: w.paper_width, paper_height: w.paper_height, template: w.template };
+      S.groupWork = workFrom(S.groupTemplate);
+      S.groupDirty = false;
+      S.work = workFrom(S.groupWork);
+      S.currentId = 0;
+      S.dirty = false;
+      S.preview = null;
+      say('طراحی مستقل چاپ گروهی ذخیره شد.');
+      schedulePreview(0);
+    } catch (e) { say((e && e.message) || 'ذخیرهٔ طراحی گروهی انجام نشد'); }
+    S.busy = false; draw();
+  }
+
   async function save(activate) {
+    if (S.designTab === 'group') return saveGroup();
     if (S.busy || !S.work) return;
     S.busy = true; draw();
     const w = S.work;
@@ -412,7 +654,7 @@
       const keepSel = S.sel;
       applyList(x, true);
       const row = S.templates.find((t) => t.id === x.saved_id);
-      if (row) { setWork(row); if (row.template.elements.some((e) => e.id === keepSel)) S.sel = keepSel; }
+      if (row) { S.individualDirty = false; setWork(row); if (row.template.elements.some((e) => e.id === keepSel)) S.sel = keepSel; }
       say(activate ? 'قالب ذخیره و فعال شد؛ فیش بعدی با همین قالب چاپ می‌شود.' : 'قالب ذخیره شد.');
       schedulePreview(0);
     } catch (e) { say((e && e.message) || 'ذخیرهٔ قالب انجام نشد'); }
@@ -438,7 +680,7 @@
       let j = null; try { j = JSON.parse(t); } catch (e) { /* ignore */ }
       if (!r.ok || !j || j.error) throw new Error((j && j.error) || 'آپلود ناموفق بود');
       S.brand = j.brand || S.brand;
-      if (S.work) { S.work.template.logo_source = 'ticket'; S.dirty = true; }
+      if (S.work) { S.work.template.logo_source = 'ticket'; touch(false); }
       say('لوگوی فیش ذخیره شد؛ برای اعمال در چاپ، قالب را ذخیره کنید.');
       schedulePreview(200);
     } catch (e) { say((e && e.message) || 'آپلود ناموفق بود'); }
@@ -453,13 +695,28 @@
     const t = ev.target.closest('button,[data-fd-pick],[data-fd-el]');
     if (!t || !S.work) return;
     const ds = t.dataset;
+    if (ds.fdDesignTab) { switchDesignTab(ds.fdDesignTab); return; }
     if (ds.fdReload) { S.loading = false; S.error = ''; load(); return; }
+    if (ds.fdGroupMode) {
+      const mode = ds.fdGroupMode === 'individual' ? 'individual' : 'group';
+      if (mode === S.groupPrintMode) return;
+      if (mode === 'individual' && !window.confirm('از این پس اعضای هر گروه به‌صورت فیش‌های جداگانه چاپ می‌شوند. ادامه می‌دهید؟')) return;
+      callApi('/api/templates/group-mode', { method: 'POST', body: JSON.stringify({ mode }) }).then((x) => {
+        S.groupPrintMode = x.group_print_mode === 'individual' ? 'individual' : mode;
+        S.templates = x.templates || S.templates;
+        switchDesignTab(mode === 'individual' ? 'individual' : 'group');
+        draw();
+        say(S.groupPrintMode === 'individual' ? 'حالت چاپ انفرادی گروه‌ها فعال شد.' : 'چاپ تجمیعی گروه‌ها فعال شد.');
+      }).catch((e) => say((e && e.message) || 'ذخیرهٔ حالت چاپ گروهی انجام نشد'));
+      return;
+    }
     if (ds.fdOpen !== undefined) {
       const row = S.templates.find((x) => x.id === Number(ds.fdOpen));
-      if (row && row.id !== S.currentId && guardDirty()) { setWork(row); draw(); schedulePreview(0); }
+      if (row && row.id !== S.currentId && guardDirty()) { S.individualDirty = false; setWork(row); draw(); schedulePreview(0); }
       return;
     }
     if (ds.fdNew !== undefined) { if (t.disabled) return; return openNewDialog(); }
+    if (ds.fdSaveGroup !== undefined) { saveGroup(); return; }
     if (ds.fdSave !== undefined) { save(ds.fdSave === '1'); return; }
     if (ds.fdActivate !== undefined) { if (guardDirty()) postAction('/api/templates/activate', { id: Number(ds.fdActivate) }, 'قالب فعال شد؛ فیش بعدی با همین قالب چاپ می‌شود.'); return; }
     if (ds.fdDeltpl !== undefined) {
@@ -545,6 +802,7 @@
   // drag & resize (مختصات به میلی‌متر، گام ۰٫۵)
   document.addEventListener('pointerdown', (ev) => {
     if (!within(ev.target) || !S.work) return;
+    if (ev.target.closest('[data-fd-group-style-pick]')) return;
     const handle = ev.target.closest('[data-fd-resize]');
     const node = ev.target.closest('[data-fd-el]');
     if (!node) return;
@@ -613,7 +871,7 @@
       const name = layer.querySelector('#fd-new-name').value.trim() || ('قالب ' + (S.templates.length + 1));
       layer.remove();
       S.work = { id: 0, name, paper_width: p.w, paper_height: p.h, template: p.build() };
-      S.currentId = 0; S.dirty = true; S.preview = null;
+      S.currentId = 0; S.dirty = true; S.individualDirty = true; S.individualWork = workFrom(S.work); S.preview = null;
       S.sel = (S.work.template.elements.find((e) => e.enabled) || {}).id || '';
       draw(); schedulePreview(0);
     };

@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — گزارش‌های غذایی، فهرست همهٔ گروه‌ها و پنجرهٔ بررسی کد (R22)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R22 prints only report result lists, improves visual separation and type size in multi-column food reports, adds all-groups and by-menu group-order views, persists daily-order report field selections per user in localStorage, and moves domain-code linking/search controls into an on-demand modal beside Save. R21 organization repair-panel visibility fix remains included. No production data changed."
+}

@@ -155,7 +155,12 @@ function cd_dvd_scope(array $user, string $alias = 'r'): array
 
 function cd_dvd_can_manage_record(array $record, array $user): bool
 {
-    return cd_dvd_can_edit_records($user);
+    if (!cd_dvd_can_edit_records($user)) {
+        return false;
+    }
+    return (string) ($record['direction'] ?? '') === 'IN'
+        ? cd_dvd_can_register_in($user)
+        : cd_dvd_can_submit_out($user);
 }
 
 function cd_dvd_types(): array
@@ -165,7 +170,7 @@ function cd_dvd_types(): array
 
 function cd_dvd_active_users(): array
 {
-    return db()->query('SELECT u.id, u.username, u.full_name, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.is_active = 1 ORDER BY u.full_name, u.username')->fetchAll();
+    return db()->query("SELECT u.id, u.username, u.full_name, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.is_active = 1 AND u.auth_source <> 'food' ORDER BY u.full_name, u.username")->fetchAll();
 }
 
 /** معاونت‌های فعال چارت سازمانی؛ فهرست قدیمی departments منبع این فیلد نیست. */
@@ -306,17 +311,28 @@ function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0): 
     }
     $broughtBy = trim((string) ($data['brought_by'] ?? ''));
     $broughtByUserId = (int) ($data['brought_by_user_id'] ?? 0);
+    $broughtByType = valid_choice((string) ($data['brought_by_type'] ?? ($broughtByUserId === -1 ? 'external' : 'internal')), ['internal', 'external'], 'internal');
     if ($direction === 'IN') {
-        if ($broughtByUserId > 0) {
-            $broughtUserQuery = db()->prepare('SELECT id, full_name FROM users WHERE id = ? AND is_active = 1 LIMIT 1');
-            $broughtUserQuery->execute([$broughtByUserId]);
-            $broughtUser = $broughtUserQuery->fetch();
-            if (!$broughtUser) {
-                throw new RuntimeException('کاربر واردکننده انتخاب‌شده فعال یا معتبر نیست.');
+        if ($broughtByType === 'external') {
+            $broughtByUserId = -1;
+            if ($broughtBy === '') {
+                throw new RuntimeException('نام شخص واردکننده از بیرون سازمان را وارد کنید.');
             }
-            $broughtBy = (string) $broughtUser['full_name'];
-        } elseif ($broughtByUserId !== -1 || $broughtBy === '') {
-            throw new RuntimeException('فیلد «شخص واردکننده» خالی است و باید پر شود؛ شخص را از فهرست انتخاب کنید.');
+            if (mb_strlen($broughtBy, 'UTF-8') > 190) {
+                throw new RuntimeException('نام شخص واردکننده نباید بیشتر از ۱۹۰ نویسه باشد.');
+            }
+        } else {
+            if ($broughtByUserId > 0) {
+                $broughtUserQuery = db()->prepare('SELECT id, full_name FROM users WHERE id = ? AND is_active = 1 LIMIT 1');
+                $broughtUserQuery->execute([$broughtByUserId]);
+                $broughtUser = $broughtUserQuery->fetch();
+                if (!$broughtUser) {
+                    throw new RuntimeException('کاربر واردکننده انتخاب‌شده فعال یا معتبر نیست.');
+                }
+                $broughtBy = (string) $broughtUser['full_name'];
+            } else {
+                throw new RuntimeException('فیلد «کاربر داخلی واردکننده» خالی است؛ یک کاربر را از فهرست انتخاب کنید.');
+            }
         }
     } else {
         $broughtBy = '';
@@ -350,20 +366,81 @@ function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0): 
         'info_type' => $infoType, 'info_desc' => $description,
         'jy' => $jy, 'jm' => $jm, 'jd' => $jd, 'date_str' => sprintf('%04d/%02d/%02d', $jy, $jm, $jd),
         'sort_key' => $jy * 10000 + $jm * 100 + $jd, 'event_date' => $date,
-        'receiver' => trim((string) ($data['receiver'] ?? '')), 'receiver_unit' => trim((string) ($data['receiver_unit'] ?? '')),
+        'receiver' => $direction === 'OUT' ? trim((string) ($data['receiver'] ?? '')) : '', 'receiver_unit' => $direction === 'OUT' ? trim((string) ($data['receiver_unit'] ?? '')) : '',
         'brought_by' => $direction === 'IN' ? $broughtBy : '', 'brought_by_user_id' => $direction === 'IN' && $broughtByUserId > 0 ? $broughtByUserId : null, 'exit_sheet' => $exitSheet,
         'note' => trim((string) ($data['note'] ?? '')), 'department_id' => $departmentId > 0 ? $departmentId : null,
     ];
 }
 
+function cd_dvd_acquire_write_lock(string $scope): string
+{
+    $lockName = 'cddvd:' . substr(hash('sha256', $scope), 0, 56);
+    $lock = db()->prepare('SELECT GET_LOCK(?, 20)');
+    $lock->execute([$lockName]);
+    if ((int) $lock->fetchColumn() !== 1) {
+        throw new RuntimeException('ثبت رسانه به‌دلیل هم‌زمانی زیاد قفل نشد؛ چند لحظه بعد دوباره تلاش کنید.');
+    }
+    return $lockName;
+}
+
+function cd_dvd_release_write_lock(string $lockName): void
+{
+    try {
+        $release = db()->prepare('SELECT RELEASE_LOCK(?)');
+        $release->execute([$lockName]);
+    } catch (Throwable $ignored) {
+        // The connection releases any remaining named locks when it closes.
+    }
+}
+
 function cd_dvd_create_record(array $user): int
 {
-    $payload = cd_dvd_validate_payload($_POST, $user);
-    $query = db()->prepare('INSERT INTO cd_dvd_records (media, direction, serial, info_type, info_desc, jy, jm, jd, date_str, sort_key, receiver, receiver_unit, brought_by, brought_by_user_id, exit_sheet, note, department_id, recorder_id, recorder_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $user['id'], $user['full_name']]);
-    $id = (int) db()->lastInsertId();
-    save_audit((int) $user['id'], 'cd_dvd_' . strtolower($payload['direction']), null, ['record_id' => $id, 'serial' => $payload['serial'], 'media' => $payload['media']]);
-    return $id;
+    $media = valid_choice((string) ($_POST['media'] ?? ''), ['CD', 'DVD'], 'CD');
+    $direction = valid_choice((string) ($_POST['direction'] ?? ''), ['IN', 'OUT'], 'OUT');
+    $data = $_POST;
+    $serial = cd_dvd_normalize_serial((string) ($data['serial'] ?? ''));
+    if ($direction === 'IN') {
+        $manualSerial = cd_dvd_normalize_serial((string) ($data['serial_manual'] ?? ''));
+        if ($manualSerial !== '') {
+            $serial = $manualSerial;
+        }
+    }
+
+    $locks = [];
+    try {
+        // Empty outgoing serials are allocated under a media-scoped lock so simultaneous
+        // submissions cannot all select the same next P86 number.
+        if ($direction === 'OUT' && $serial === '') {
+            $locks[] = cd_dvd_acquire_write_lock('next:' . $media);
+            $serial = cd_dvd_next_serial($media) ?? '';
+            $data['serial'] = $serial;
+        }
+        if ($serial !== '') {
+            // Serialize validation plus insert for this (media, serial) pair. A plain
+            // read-before-insert allowed concurrent identical IN/OUT events to both pass.
+            $locks[] = cd_dvd_acquire_write_lock('serial:' . $media . ':' . $serial);
+        }
+
+        db()->beginTransaction();
+        try {
+            $payload = cd_dvd_validate_payload($data, $user);
+            $query = db()->prepare('INSERT INTO cd_dvd_records (media, direction, serial, info_type, info_desc, jy, jm, jd, date_str, sort_key, receiver, receiver_unit, brought_by, brought_by_user_id, exit_sheet, note, department_id, recorder_id, recorder_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $user['id'], $user['full_name']]);
+            $id = (int) db()->lastInsertId();
+            save_audit((int) $user['id'], 'cd_dvd_' . strtolower($payload['direction']), null, ['record_id' => $id, 'serial' => $payload['serial'], 'media' => $payload['media']]);
+            db()->commit();
+            return $id;
+        } catch (Throwable $exception) {
+            if (db()->inTransaction()) {
+                db()->rollBack();
+            }
+            throw $exception;
+        }
+    } finally {
+        foreach (array_reverse($locks) as $lockName) {
+            cd_dvd_release_write_lock($lockName);
+        }
+    }
 }
 
 function cd_dvd_update_record(array $user): void
@@ -524,7 +601,10 @@ function cd_dvd_render_surface(array $user, string $baseUrl): string
     }
     $filtersHtml = '<nav class="cd-dvd-surface-filters" aria-label="فیلتر رسانه"><a data-cd-dvd-filter-link class="' . ($quick === 'all' ? 'active' : '') . '" href="' . e($filterUrl('all')) . '"><strong>' . (int) $stats['total'] . '</strong><span>کل رسانه‌های ثبت‌شده</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'CD' ? 'active' : '') . '" href="' . e($filterUrl('CD')) . '"><strong>' . (int) $stats['cd'] . '</strong><span>CD</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'DVD' ? 'active' : '') . '" href="' . e($filterUrl('DVD')) . '"><strong>' . (int) $stats['dvd'] . '</strong><span>DVD</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'IN' ? 'active' : '') . '" href="' . e($filterUrl('IN')) . '"><strong>' . (int) $stats['incoming'] . '</strong><span>ورودی</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'OUT' ? 'active' : '') . '" href="' . e($filterUrl('OUT')) . '"><strong>' . (int) $stats['outgoing'] . '</strong><span>خروجی</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'outside' ? 'active' : '') . '" href="' . e($filterUrl('outside')) . '"><strong>' . (int) $stats['outside'] . '</strong><span>رسانه‌های خارج از سازمان</span></a></nav>';
     $searchUrl = $baseUrl . (str_contains($baseUrl, '?') ? '&' : '?') . 'cd_filter=' . rawurlencode($quick);
-    return '<section class="card cd-dvd-surface" data-cd-dvd-surface><div class="cd-dvd-surface-heading"><div><span class="eyebrow">کنترل اموال سازمان</span><h2>سوابق CD/DVD</h2><p>با انتخاب هر گزینه، فهرست سوابق همان گروه نمایش داده می‌شود.</p></div><a class="button" href="index.php?page=cd-dvd&tab=new">ثبت رسانه جدید</a></div>' . $filtersHtml . '<form class="cd-dvd-surface-search" method="get" action="' . e($baseUrl) . '" data-cd-dvd-filter-form><input type="hidden" name="cd_filter" value="' . e($quick) . '"><label>جست‌وجوی سریع<input name="cd_search" value="' . e($search) . '" placeholder="شماره، نوع اطلاعات یا ثبت‌کننده را بنویسید" autocomplete="off"></label></form><div class="cd-dvd-surface-table"><div class="cd-dvd-surface-head"><span>جهت</span><span>رسانه</span><span>شماره</span><span>نوع رسانه</span><span>تاریخ</span><span>ثبت‌کننده</span></div>' . ($items !== '' ? $items : '<div class="empty-state compact-empty"><strong>رکوردی برای این فیلتر پیدا نشد.</strong></div>') . '</div></section>';
+    $registerLink = cd_dvd_can_submit_out($user) || cd_dvd_can_register_in($user)
+        ? '<a class="button" href="index.php?page=cd-dvd&tab=new">ثبت رسانه جدید</a>'
+        : '';
+    return '<section class="card cd-dvd-surface" data-cd-dvd-surface><div class="cd-dvd-surface-heading"><div><span class="eyebrow">کنترل اموال سازمان</span><h2>سوابق CD/DVD</h2><p>با انتخاب هر گزینه، فهرست سوابق همان گروه نمایش داده می‌شود.</p></div>' . $registerLink . '</div>' . $filtersHtml . '<form class="cd-dvd-surface-search" method="get" action="' . e($baseUrl) . '" data-cd-dvd-filter-form><input type="hidden" name="cd_filter" value="' . e($quick) . '"><label>جست‌وجوی سریع<input name="cd_search" value="' . e($search) . '" placeholder="شماره، نوع اطلاعات یا ثبت‌کننده را بنویسید" autocomplete="off"></label></form><div class="cd-dvd-surface-table"><div class="cd-dvd-surface-head"><span>جهت</span><span>رسانه</span><span>شماره</span><span>نوع رسانه</span><span>تاریخ</span><span>ثبت‌کننده</span></div>' . ($items !== '' ? $items : '<div class="empty-state compact-empty"><strong>رکوردی برای این فیلتر پیدا نشد.</strong></div>') . '</div></section>';
 }
 
 function cd_dvd_render_page_legacy(array $user): never
@@ -638,7 +718,7 @@ function cd_dvd_render_page_legacy(array $user): never
     <section class="card ticket-table cd-dvd-table"><div class="table-head"><span>رسانه و شماره</span><span>جهت</span><span>تاریخ</span><span>ثبت‌کننده</span><span>عملیات</span></div>
   <?php foreach ($records as $record): ?><div class="table-row"><span class="ticket-title"><b><?= e($record['media']) ?> • <?= e($record['department_name'] ?: 'بدون معاونت') ?></b><strong><?= e($record['serial']) ?></strong><small><?= e($record['info_desc']) ?></small></span><span><em class="status <?= $record['direction'] === 'IN' ? 'in_progress' : 'waiting_user' ?>"><?= $record['direction'] === 'IN' ? 'ورود' : 'خروج' ?></em></span><span class="date-cell"><?= e($record['date_str']) ?></span><span><?= e($record['recorder_display_name'] ?: $record['recorder_name']) ?><?php if ($record['direction'] === 'IN' && ($record['brought_by_user_name'] || $record['brought_by'])): ?><small class="muted block">واردکننده: <?= e($record['brought_by_user_name'] ?: $record['brought_by']) ?><?= $record['brought_by_user_username'] ? ' • ' . e($record['brought_by_user_username']) : '' ?></small><?php endif; ?></span><span class="actions"><a class="mini-button" href="index.php?page=cd-dvd-history&serial=<?= rawurlencode($record['serial']) ?>&media=<?= rawurlencode($record['media']) ?>">تاریخچه</a><?php if (cd_dvd_can_manage_record($record, $user)): ?><a class="mini-button" href="index.php?page=cd-dvd&edit=<?= (int) $record['id'] ?>">ویرایش</a><form method="post" data-confirm="این ثبت حذف شود؟"><input type="hidden" name="action" value="cd_dvd_delete"><?= csrf_field() ?><input type="hidden" name="record_id" value="<?= (int) $record['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form><?php else: ?><a class="mini-button" href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $record['id'] ?>">درخواست اصلاح</a><?php endif; ?></span></div><?php endforeach; ?>
     <?php if (!$records): ?><div class="empty-state"><h3>ثبت رسانه‌ای پیدا نشد.</h3><p>با فیلتر دیگری جست‌وجو کنید یا یک گردش جدید ثبت کنید.</p></div><?php endif; ?></section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.8"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.9"></script>
     <?php
     render_footer();
     exit;
@@ -657,6 +737,8 @@ function cd_dvd_render_page(array $user): never
     $stats = cd_dvd_stats($user);
     $types = cd_dvd_types();
     $broughtUsers = cd_dvd_active_users();
+    $canIn = cd_dvd_can_register_in($user);
+    $canOut = cd_dvd_can_submit_out($user);
     if (function_exists('org_ensure_schema')) {
         org_ensure_schema();
     }
@@ -675,12 +757,15 @@ function cd_dvd_render_page(array $user): never
             $tab = 'history';
         }
     }
+    if ($tab === 'new' && !$canOut && !$canIn && !$editRecord) {
+        $tab = 'dashboard';
+    }
     $form = [
-        'id' => $editRecord['id'] ?? '', 'media' => $editRecord['media'] ?? 'CD', 'direction' => $editRecord['direction'] ?? 'OUT',
+        'id' => $editRecord['id'] ?? '', 'media' => $editRecord['media'] ?? 'CD', 'direction' => $editRecord['direction'] ?? ($canOut ? 'OUT' : ($canIn ? 'IN' : 'OUT')),
         'serial' => $editRecord['serial'] ?? (cd_dvd_next_serial('CD') ?? ''), 'info_type' => $editRecord['info_type'] ?? ($types[0] ?? ''),
         'event_date' => $editRecord['date_str'] ?? cd_dvd_default_date(), 'info_desc' => $editRecord['info_desc'] ?? '',
         'receiver' => $editRecord['receiver'] ?? '', 'receiver_unit' => $editRecord['receiver_unit'] ?? '',
-        'brought_by_user_id' => $editRecord['brought_by_user_id'] ?? 0, 'exit_sheet' => $editRecord['exit_sheet'] ?? '',
+        'brought_by' => $editRecord['brought_by'] ?? '', 'brought_by_user_id' => $editRecord['brought_by_user_id'] ?? 0, 'exit_sheet' => $editRecord['exit_sheet'] ?? '',
         'note' => $editRecord['note'] ?? '', 'department_id' => 0,
     ];
     if ($editRecord && (int) ($editRecord['department_id'] ?? 0) > 0) {
@@ -710,8 +795,11 @@ function cd_dvd_render_page(array $user): never
         }
     }
     $broughtByDisplay = $selectedBroughtUser ? $selectedBroughtUser['full_name'] . ' - ' . $selectedBroughtUser['username'] : '';
+    $broughtByExternal = $editRecord && (int) ($form['brought_by_user_id'] ?? 0) <= 0 && trim((string) ($form['brought_by'] ?? '')) !== '';
+    if ($broughtByExternal) {
+        $form['brought_by_user_id'] = -1;
+    }
     $formAction = $editRecord ? 'cd_dvd_update' : 'cd_dvd_create';
-    $canIn = cd_dvd_can_register_in($user);
     $tabUrl = static function (string $name, array $extra = []): string {
         return 'index.php?' . http_build_query(array_merge(['page' => 'cd-dvd', 'tab' => $name], $extra));
     };
@@ -740,7 +828,7 @@ function cd_dvd_render_page(array $user): never
                 <form method="post" class="cd-dvd-form" novalidate>
                     <?= csrf_field() ?><input type="hidden" name="action" value="<?= e($formAction) ?>"><input type="hidden" name="record_id" value="<?= (int) $form['id'] ?>">
                     <div class="cd-dvd-form-grid">
-                        <label>جهت تردد<select name="direction" id="cd-dvd-direction"><option value="OUT" <?= $form['direction'] === 'OUT' ? 'selected' : '' ?>>خروج</option><?php if ($canIn || ($editRecord && $form['direction'] === 'IN')): ?><option value="IN" <?= $form['direction'] === 'IN' ? 'selected' : '' ?>>ورود</option><?php endif; ?></select></label>
+                        <label>جهت تردد<select name="direction" id="cd-dvd-direction"><?php if ($canOut): ?><option value="OUT" <?= $form['direction'] === 'OUT' ? 'selected' : '' ?>>خروج</option><?php endif; ?><?php if ($canIn): ?><option value="IN" <?= $form['direction'] === 'IN' ? 'selected' : '' ?>>ورود</option><?php endif; ?></select></label>
                         <label>نوع رسانه<div class="media-choice"><label><input type="radio" name="media" value="CD" <?= $form['media'] === 'CD' ? 'checked' : '' ?>><span>CD</span></label><label><input type="radio" name="media" value="DVD" <?= $form['media'] === 'DVD' ? 'checked' : '' ?>><span>DVD</span></label></div></label>
                         <label>نوع اطلاعات<select name="info_type" required data-required-label="نوع اطلاعات"><?php foreach ($types as $type): ?><option value="<?= e($type) ?>" <?= $form['info_type'] === $type ? 'selected' : '' ?>><?= e($type) ?></option><?php endforeach; ?></select></label>
                         <label>تاریخ<div class="jalali-picker" data-jalali-picker><input data-jalali-input name="event_date" value="<?= e($form['event_date']) ?>" placeholder="۱۴۰۵/۰۱/۰۱" required data-required-label="تاریخ" autocomplete="off"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div></label>
@@ -750,8 +838,8 @@ function cd_dvd_render_page(array $user): never
                             <small id="cd-dvd-serial-help"><?= $form['direction'] === 'IN' ? 'برای رسانه ورودی از بیرون سازمان، شماره را همان‌طور که روی رسانه درج شده دستی وارد کنید.' : 'CD: P86-0001 تا P86-1000' ?></small>
                         </label>
                         <?php if ($departments): ?><label>معاونت مربوط<select name="department_id" required data-required-label="معاونت مربوط"><option value="">انتخاب معاونت</option><?php foreach ($departments as $department): ?><option value="<?= (int) $department['id'] ?>" <?= (int) $form['department_id'] === (int) $department['id'] ? 'selected' : '' ?>><?= e($department['name']) ?></option><?php endforeach; ?></select><small class="field-help">فهرست مستقیماً از معاونت‌های فعالِ بخش سازمان بارگذاری می‌شود.</small></label><?php else: ?><label>معاونت مربوط<select name="department_id" required data-required-label="معاونت مربوط" disabled><option value="">ابتدا در بخش سازمان یک معاونت فعال ثبت کنید</option></select><small class="field-help">فهرست پیش‌فرض استفاده نمی‌شود؛ تا ثبت معاونت در بخش سازمان، امکان ذخیره وجود ندارد.</small></label><?php endif; ?>
-                        <label>تحویل‌گیرنده<input name="receiver" value="<?= e($form['receiver']) ?>" placeholder="نام تحویل‌گیرنده"></label><label>واحد مقصد<input name="receiver_unit" value="<?= e($form['receiver_unit']) ?>" placeholder="واحد سازمانی"></label><label class="cd-dvd-exit-sheet-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>شماره برگه خروج<input name="exit_sheet" value="<?= e($form['exit_sheet']) ?>" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off"></label>
-                        <?php if ($canIn): ?><label class="cd-dvd-incoming-field" <?= $form['direction'] === 'IN' ? '' : 'hidden' ?>>شخص واردکننده<div class="cd-dvd-user-picker"><input type="hidden" name="brought_by_user_id" id="cd-dvd-brought-by-id" value="<?= (int) $form['brought_by_user_id'] ?>"><select name="brought_by" id="cd-dvd-brought-by" data-required-label="شخص واردکننده"><option value="">انتخاب کاربر منتسب به بازرسی</option><?php foreach ($broughtUsers as $broughtUser): ?><option value="<?= (int) $broughtUser['id'] ?>" <?= (int) $form['brought_by_user_id'] === (int) $broughtUser['id'] ? 'selected' : '' ?>><?= e($broughtUser['full_name'] . ' - ' . $broughtUser['username']) ?></option><?php endforeach; ?></select></div></label><?php endif; ?>
+                        <label class="cd-dvd-outgoing-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>تحویل‌گیرنده<input name="receiver" value="<?= e($form['receiver']) ?>" placeholder="نام تحویل‌گیرنده"></label><label class="cd-dvd-outgoing-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>واحد مقصد<input name="receiver_unit" value="<?= e($form['receiver_unit']) ?>" placeholder="واحد سازمانی"></label><label class="cd-dvd-exit-sheet-field" <?= $form['direction'] === 'IN' ? 'hidden' : '' ?>>شماره برگه خروج<input name="exit_sheet" value="<?= e($form['exit_sheet']) ?>" inputmode="numeric" pattern="[0-9۰-۹]*" data-digits-only autocomplete="off"></label>
+                        <?php if ($canIn): ?><fieldset class="cd-dvd-incoming-field" <?= $form['direction'] === 'IN' ? '' : 'hidden' ?>><legend>شخص واردکننده</legend><div class="cd-dvd-brought-by-kind"><label><input type="radio" name="brought_by_type" value="internal" <?= !$broughtByExternal ? 'checked' : '' ?>> داخلی</label><label><input type="radio" name="brought_by_type" value="external" <?= $broughtByExternal ? 'checked' : '' ?>> خارجی</label></div><input type="hidden" name="brought_by_user_id" id="cd-dvd-brought-by-id" value="<?= (int) $form['brought_by_user_id'] ?>"><div class="cd-dvd-brought-internal"><label for="cd-dvd-brought-by">کاربر داخل ساختمان<select id="cd-dvd-brought-by" data-required-label="کاربر داخل ساختمان"><option value="">انتخاب کاربر داخلی</option><?php foreach ($broughtUsers as $broughtUser): ?><option value="<?= (int) $broughtUser['id'] ?>" <?= (int) $form['brought_by_user_id'] === (int) $broughtUser['id'] ? 'selected' : '' ?>><?= e($broughtUser['full_name'] . ' - ' . $broughtUser['username']) ?></option><?php endforeach; ?></select><small>فهرست شامل کاربران دامینی و محلیِ فعال است.</small></label></div><div class="cd-dvd-brought-external" <?= $broughtByExternal ? '' : 'hidden' ?>><label for="cd-dvd-brought-by-external">نام شخص واردکننده از بیرون<input id="cd-dvd-brought-by-external" name="brought_by" value="<?= e($broughtByExternal ? (string) $form['brought_by'] : '') ?>" maxlength="190" autocomplete="off" placeholder="نام شخص خارجی را بنویسید" <?= $broughtByExternal ? '' : 'disabled' ?> data-required-label="نام شخص خارجی"></label></div></fieldset><?php endif; ?>
                         <label class="wide-half">اطلاعات ارسالی<textarea name="info_desc" rows="3" required data-required-label="اطلاعات ارسالی" placeholder="توضیح مختصر محتویات رسانه..."><?= e($form['info_desc']) ?></textarea></label><label class="wide-half">یادداشت / تذکر<textarea name="note" rows="3" placeholder="مثلاً رمزگذاری شده یا پیوست دارد..."><?= e($form['note']) ?></textarea></label>
                         <label class="full recorder-display">🔒 ثبت‌کننده: <strong><?= e($user['full_name']) ?></strong><small>این مقدار به‌صورت خودکار در رکورد ذخیره می‌شود.</small></label>
                     </div>
@@ -767,7 +855,7 @@ function cd_dvd_render_page(array $user): never
                 <?php if (!$records): ?><div class="empty-state"><h3>رکوردی پیدا نشد.</h3><p>فیلتر دیگری انتخاب کنید یا ثبت جدید را بزنید.</p></div><?php endif; ?></div>
             </section>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.8"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.9"></script>
     <?php
     render_footer();
     exit;

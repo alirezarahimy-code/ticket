@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$script:InventoryCollectorStatus = @{}
 if ($Endpoint.Scheme -ne 'https' -and -not $AllowInsecureHttp) {
     throw 'برای ارسال امن از HTTPS استفاده کنید؛ HTTP فقط با AllowInsecureHttp مجاز است.'
 }
@@ -15,11 +16,15 @@ function Get-InventoryRows {
         [string] $Namespace = 'root/cimv2',
         [string] $Filter = ''
     )
+    $statusKey = $Namespace + '|' + $ClassName
     try {
         $options = @{ ClassName = $ClassName; Namespace = $Namespace; ErrorAction = 'Stop' }
         if ($Filter) { $options.Filter = $Filter }
-        return @(Get-CimInstance @options)
+        $rows = @(Get-CimInstance @options)
+        $script:InventoryCollectorStatus[$statusKey] = @{ ok = $true; count = $rows.Count }
+        return $rows
     } catch {
+        $script:InventoryCollectorStatus[$statusKey] = @{ ok = $false; count = 0 }
         return @()
     }
 }
@@ -90,7 +95,9 @@ $payload = [ordered]@{
         keyboards = @($pnp | Where-Object { $_.PNPClass -eq 'Keyboard' } | Select-Object Name, Manufacturer, PNPClass, DeviceID, Status)
         mice = @($pnp | Where-Object { $_.PNPClass -eq 'Mouse' } | Select-Object Name, Manufacturer, PNPClass, DeviceID, Status)
     }
+    collection_status = $script:InventoryCollectorStatus
     hardware = @{
+        collection_status = $script:InventoryCollectorStatus
         manufacturer = [string] $computer.Manufacturer
         model = [string] $computer.Model
         user = [string] $computer.UserName

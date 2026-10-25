@@ -59,7 +59,6 @@
         }
         return 'آزاد';
     };
-    var codeOf = function (item) { return item.code || item.username || ''; };
     var sourceLabel = function (item) {
         if (!item || !item.source) return '';
         return item.source === 'ldap' ? 'دامینی' : 'محلی';
@@ -75,7 +74,7 @@
     var normalize = function (value) { return String(value || '').toLocaleLowerCase('fa').replace(/\s+/g, ' ').trim(); };
     var match = function (item) {
         var query = normalize(state.search);
-        return !!query && (normalize(item.name).indexOf(query) !== -1 || normalize(item.code).indexOf(query) !== -1);
+        return !!query && normalize(item.name).indexOf(query) !== -1;
     };
     var toast = function (message, icon) {
         var rootEl = $('#org-toast');
@@ -142,7 +141,7 @@
     var renderModal = function () {
         if (!state.modal) return;
         var query = normalize(state.modal.search);
-        var list = state.modal.users.filter(function (item) { return !query || normalize(item.name).indexOf(query) !== -1 || normalize(codeOf(item)).indexOf(query) !== -1; }).slice(0, 200);
+        var list = state.modal.users.filter(function (item) { return !query || normalize(item.name).indexOf(query) !== -1; }).slice(0, 200);
         var body = $('#org-modal-body');
         if (!list.length) {
             body.innerHTML = '<div class="org-modal-empty">?<br>موردی یافت نشد</div>';
@@ -150,8 +149,7 @@
             body.innerHTML = list.map(function (item) {
                 var selected = state.modal.selected.indexOf(Number(item.id)) !== -1;
                 var tag = state.modal.custom ? '' : '<span class="org-position-tag ' + (roleOf(item) === 'pool' ? 'pool' : '') + '">' + esc(positionOf(item)) + '</span>';
-                var meta = esc(codeOf(item));
-                if (!state.modal.custom && sourceLabel(item)) meta += ' • ' + esc(sourceLabel(item));
+                var meta = !state.modal.custom ? esc(sourceLabel(item)) : '';
                 return '<div class="org-user-item ' + (selected ? 'selected' : '') + '" data-org-modal-user="' + Number(item.id) + '">' + (state.modal.multi ? '<span class="org-user-check" role="checkbox" aria-checked="' + (selected ? 'true' : 'false') + '">' + (selected ? '✓' : '') + '</span>' : '') + '<span class="org-user-avatar">' + esc(initial(item.name)) + '</span><span class="org-user-info"><b>' + esc(item.name) + '</b><small>' + meta + '</small></span>' + tag + (state.modal.multi ? '' : '<span class="org-pick-arrow">‹</span>') + '</div>';
             }).join('');
         }
@@ -199,8 +197,8 @@
         else if (state.filterStat === 'expert') { list = users.filter(function (item) { return roleOf(item) === 'expert'; }); title = 'کارشناسان'; }
         else list = poolUsers();
         list = list.filter(Boolean);
-        var filtered = list.filter(function (item) { return !state.poolSearch || normalize(item.name).indexOf(normalize(state.poolSearch)) !== -1 || normalize(codeOf(item)).indexOf(normalize(state.poolSearch)) !== -1; });
-         $('#org-pool-sidebar').innerHTML = '<div class="org-pool-header"><div><b>' + title + '</b><span>' + list.length + '</span></div><small>' + (state.filterStat ? 'برای بازگشت، دوباره روی آمار کلیک کنید' : 'دامینی و محلی — افراد را بکشید و روی موقعیت رها کنید') + '</small>' + (state.filterStat ? '<button class="org-clear-filter" data-org-filter="clear">حذف فیلتر</button>' : '') + '</div><div class="org-pool-search"><input id="org-pool-search" type="search" value="' + esc(state.poolSearch) + '" placeholder="جستجوی کاربر..."></div><div class="org-pool-list" id="org-pool-list">' + (filtered.length ? filtered.map(function (item) { return '<div class="org-pool-user" draggable="true" data-pool-user="' + item.id + '"><span class="org-pool-avatar">' + esc(initial(item.name)) + '</span><span><b>' + esc(item.name) + '</b><small>' + esc(codeOf(item) + (sourceLabel(item) ? ' • ' + sourceLabel(item) : '')) + '</small></span></div>'; }).join('') : '<div class="org-pool-empty">—<br>' + (state.filterStat ? 'موردی نیست' : 'همه تخصیص یافتند') + '</div>') + '</div>';
+        var filtered = list.filter(function (item) { return !state.poolSearch || normalize(item.name).indexOf(normalize(state.poolSearch)) !== -1; });
+         $('#org-pool-sidebar').innerHTML = '<div class="org-pool-header"><div><b>' + title + '</b><span>' + list.length + '</span></div><small>' + (state.filterStat ? 'برای بازگشت، دوباره روی آمار کلیک کنید' : 'دامینی و محلی — افراد را بکشید و روی موقعیت رها کنید') + '</small>' + (state.filterStat ? '<button class="org-clear-filter" data-org-filter="clear">حذف فیلتر</button>' : '') + '</div><div class="org-pool-search"><input id="org-pool-search" type="search" value="' + esc(state.poolSearch) + '" placeholder="جستجوی کاربر..."></div><div class="org-pool-list" id="org-pool-list">' + (filtered.length ? filtered.map(function (item) { return '<div class="org-pool-user" draggable="true" data-pool-user="' + item.id + '"><span class="org-pool-avatar">' + esc(initial(item.name)) + '</span><span><b>' + esc(item.name) + '</b><small>' + esc(sourceLabel(item)) + '</small></span></div>'; }).join('') : '<div class="org-pool-empty">—<br>' + (state.filterStat ? 'موردی نیست' : 'همه تخصیص یافتند') + '</div>') + '</div>';
         var search = $('#org-pool-search');
         if (search) search.addEventListener('input', function (event) { state.poolSearch = event.target.value; renderPoolSidebar(); });
         $$('#org-pool-list [data-pool-user]').forEach(function (item) {
@@ -215,7 +213,7 @@
         var ceo = root();
         var manager = ceo && person(ceo.managerId);
         if (!manager) return '<div class="org-node org-empty-slot org-ceo-slot" data-unit="' + ceo.id + '" data-drop="ceo" data-org-action="pick-ceo"><span class="org-empty-icon">' + iconFor('ceo') + '</span><b>تعیین مدیرعامل</b><small>کلیک یا کشیدن کاربر</small>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-deputy">+ افزودن معاونت</button>' : '') + '</div>';
-        return '<div class="org-node org-ceo' + nodeMatch(manager) + '" data-unit="' + ceo.id + '" data-drop="ceo"><div class="org-node-menu-wrap">' + nodeMenuButton(ceo.id) + '</div><div class="org-avatar">' + esc(initial(manager.name)) + '</div><div class="org-node-name">' + esc(manager.name) + '</div><div class="org-node-title"><span class="org-title-icon">' + iconFor('manager') + '</span> مدیرعامل سازمان</div><div class="org-node-code">' + esc(codeOf(manager)) + '</div><div class="org-node-count">' + iconFor('deputy') + ' ' + children(ceo.id, 'deputy').length + ' معاونت</div>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-deputy">+ افزودن معاونت</button>' : '') + '</div>';
+        return '<div class="org-node org-ceo' + nodeMatch(manager) + '" data-unit="' + ceo.id + '" data-drop="ceo"><div class="org-node-menu-wrap">' + nodeMenuButton(ceo.id) + '</div><div class="org-avatar">' + esc(initial(manager.name)) + '</div><div class="org-node-name">' + esc(manager.name) + '</div><div class="org-node-title"><span class="org-title-icon">' + iconFor('manager') + '</span> مدیرعامل سازمان</div><div class="org-node-count">' + iconFor('deputy') + ' ' + children(ceo.id, 'deputy').length + ' معاونت</div>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-deputy">+ افزودن معاونت</button>' : '') + '</div>';
     };
     var renderDeputy = function (item) {
         var manager = person(item.managerId);
@@ -226,14 +224,14 @@
         var addButtons = data.canManage
             ? '<div class="org-node-add-row"><button class="org-node-add" data-org-action="add-department" data-unit-id="' + item.id + '">+ افزودن اداره</button><button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button></div>'
             : '';
-        return '<div class="org-node org-deputy' + nodeMatch(item) + '" data-unit="' + item.id + '" data-drop="deputy"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('deputy')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div>' + (manager ? '<div class="org-node-code">' + esc(codeOf(manager)) + '</div>' : '') + '<div class="org-node-count">' + iconFor('department') + ' ' + deptCount + ' اداره • ' + iconFor('expert') + ' ' + expertCount + ' کارشناس</div>' + extra + addButtons + '</div>';
+        return '<div class="org-node org-deputy' + nodeMatch(item) + '" data-unit="' + item.id + '" data-drop="deputy"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('deputy')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">' + iconFor('department') + ' ' + deptCount + ' اداره • ' + iconFor('expert') + ' ' + expertCount + ' کارشناس</div>' + extra + addButtons + '</div>';
     };
     var renderDepartment = function (item) {
         var manager = person(item.managerId);
         var experts = expertsIn(item.id);
         var extra = !manager && data.canManage ? '<button class="org-node-add" data-org-action="pick-manager" data-unit-id="' + item.id + '">' + iconFor('manager') + ' تعیین رئیس</button>' : '';
         var title = manager ? iconFor('manager') + ' رئیس ' + esc(item.name) : iconFor('department') + ' بدون رئیس';
-        return '<div class="org-node org-department' + nodeMatch(item) + '" data-unit="' + item.id + '" data-drop="department"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('department')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div>' + (manager ? '<div class="org-node-code">' + esc(codeOf(manager)) + '</div>' : '') + '<div class="org-node-count">' + iconFor('expert') + ' ' + experts.length + ' کارشناس</div>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button>' : '') + extra + '</div>';
+        return '<div class="org-node org-department' + nodeMatch(item) + '" data-unit="' + item.id + '" data-drop="department"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('department')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">' + iconFor('expert') + ' ' + experts.length + ' کارشناس</div>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button>' : '') + extra + '</div>';
     };
     var expertNode = function (item) {
         var experts = expertsIn(item.id);
@@ -321,7 +319,7 @@
         });
         wrapper.querySelector('[data-inline-cancel]').addEventListener('click', function () { wrapper.remove(); });
     };
-    // ویرایش نام، کد و (برای اداره) معاونت والد. مدیر فعلی و وضعیت مدیر اصلی دست‌نخورده می‌مانند.
+    // ویرایش نام، کد و (برای اداره) معاونت والد. مدیر فعلی و پرچم مدیر اصلیِ واحد دست‌نخورده می‌مانند.
     var showInlineEdit = function (target) {
         if (!target || !data.canManage) return;
         var node = $('.org-node[data-unit="' + target.id + '"]');
@@ -354,7 +352,7 @@
                 parent_id: parentSelect ? parentSelect.value : target.parentId,
                 unit_manager_id: target.managerId || 0
             };
-            // فقط وقتی مدیر اصلی است این فیلد را بفرست؛ ارسال مقدار 0 هم سرور را مجبور به تغییر آن می‌کرد.
+            // فقط وقتی پرچم «مدیر اصلیِ واحد» فعال است بفرست؛ این پرچم به‌هیچ‌وجه نقش ادمین سامانه نیست.
             if (target.primaryAdmin) fields.is_primary_admin = 1;
             submit('save_org_node', fields);
         });
@@ -369,7 +367,7 @@
         var experts = expertsIn(unitId);
         var backdrop = document.createElement('div');
         backdrop.className = 'org-modal-backdrop show';
-        backdrop.innerHTML = '<section class="org-modal org-expert-manager"><header><div class="org-modal-icon org-expert-avatar">' + iconFor('expert') + '</div><div><h2>مدیریت کارشناسان «' + esc(target.name) + '»</h2><p>' + experts.length + ' نفر</p></div><button class="org-modal-close" type="button">×</button></header><div class="org-manage-list">' + (experts.length ? experts.map(function (item) { return '<div class="org-manage-row"><span class="org-user-avatar">' + esc(initial(item.name)) + '</span><span class="org-user-info"><b>' + esc(item.name) + '</b><small>' + esc(codeOf(item) + (sourceLabel(item) ? ' • ' + sourceLabel(item) : '')) + '</small></span><button class="org-btn org-btn-ghost org-remove-user" data-remove-user="' + item.id + '">' + iconFor('remove') + ' عزل</button></div>'; }).join('') : '<div class="org-modal-empty">کارشناسی در این واحد نیست.</div>') + '</div><footer><button class="org-btn org-btn-success" data-add-more>+ افزودن کارشناس</button></footer></section>';
+        backdrop.innerHTML = '<section class="org-modal org-expert-manager"><header><div class="org-modal-icon org-expert-avatar">' + iconFor('expert') + '</div><div><h2>مدیریت کارشناسان «' + esc(target.name) + '»</h2><p>' + experts.length + ' نفر</p></div><button class="org-modal-close" type="button">×</button></header><div class="org-manage-list">' + (experts.length ? experts.map(function (item) { return '<div class="org-manage-row"><span class="org-user-avatar">' + esc(initial(item.name)) + '</span><span class="org-user-info"><b>' + esc(item.name) + '</b><small>' + esc(sourceLabel(item)) + '</small></span><button class="org-btn org-btn-ghost org-remove-user" data-remove-user="' + item.id + '">' + iconFor('remove') + ' عزل</button></div>'; }).join('') : '<div class="org-modal-empty">کارشناسی در این واحد نیست.</div>') + '</div><footer><button class="org-btn org-btn-success" data-add-more>+ افزودن کارشناس</button></footer></section>';
         document.body.appendChild(backdrop);
         var close = function () { backdrop.remove(); };
         backdrop.addEventListener('click', function (event) { if (event.target === backdrop || event.target.closest('.org-modal-close')) close(); });
@@ -485,7 +483,9 @@
     $('#org-modal-confirm').addEventListener('click', function () { if (!state.modal || !state.modal.selected.length) return; var selected = state.modal.selected.map(function (id) { return state.modal.users.find(function (item) { return Number(item.id) === id; }); }).filter(Boolean); var callback = state.modal.onConfirm; closeModal(); if (callback) callback(selected); });
     $('#org-modal-backdrop').addEventListener('click', function (event) { if (event.target.id === 'org-modal-backdrop') closeModal(); });
     $('#org-chart-search').addEventListener('input', function (event) { state.search = event.target.value; renderChart(); });
-    $$('[data-org-zoom]').forEach(function (button) { button.addEventListener('click', function () { var action = button.getAttribute('data-org-zoom'); if (action === 'in') state.zoom = Math.min(1.4, state.zoom + .1); if (action === 'out') state.zoom = Math.max(.6, state.zoom - .1); if (action === 'reset') state.zoom = 1; renderChart(); }); });
+    $$('[data-org-zoom]').forEach(function (button) { button.addEventListener('click', function () { var action = button.getAttribute('data-org-zoom'); if (action === 'in') state.zoom = Math.min(1.4, state.zoom + .1); if (action === 'out') state.zoom = Math.max(.6, state.zoom - .1); if (action === 'reset') state.zoom = 1; if (action === 'fit') { var wrap = $('#org-chart-wrap'), canvas = $('#org-canvas'), toolbar = $('.org-canvas-toolbar'); if (wrap && canvas) { wrap.style.transform = 'none'; var width = Math.max(1, wrap.scrollWidth), height = Math.max(1, wrap.scrollHeight); var availableWidth = Math.max(1, canvas.clientWidth - 48); var availableHeight = Math.max(1, canvas.clientHeight - (toolbar ? toolbar.offsetHeight : 0) - 64); state.zoom = Math.max(.35, Math.min(1, availableWidth / width, availableHeight / height)); } } renderChart(); }); });
+    var focusToggle = $('[data-org-view="focus"]');
+    if (focusToggle) focusToggle.addEventListener('click', function () { var workspace = $('.organization-workspace'), active = !workspace.classList.contains('org-focus-mode'); workspace.classList.toggle('org-focus-mode', active); focusToggle.setAttribute('aria-pressed', active ? 'true' : 'false'); var label = focusToggle.querySelector('span'); if (label) label.textContent = active ? 'نمایش پنل‌ها' : 'تمرکز روی نمودار'; });
     document.addEventListener('keydown', function (event) { if (event.key === 'Escape') { closeModal(); closeConfirm(); $$('.org-node-menu').forEach(function (item) { item.remove(); }); } });
 
     var askReset = function () {

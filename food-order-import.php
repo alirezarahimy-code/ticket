@@ -199,7 +199,7 @@ function food_order_import_plan(array $rows): array
             FROM food_calendar c
             JOIN food_calendar_items i ON i.calendar_id = c.id AND i.active = 1
             JOIN food_catalog f ON f.id = i.food_id AND f.active = 1
-            WHERE c.food_date IN ({$in})");
+            WHERE c.food_date IN ({$in}) AND c.meal_type = 'lunch'");
         $stmt->execute($dates);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $iso = (string) $r['food_date'];
@@ -213,7 +213,7 @@ function food_order_import_plan(array $rows): array
             FROM food_orders o
             JOIN food_calendar_items i ON i.id = o.calendar_item_id
             JOIN food_catalog f ON f.id = i.food_id
-            WHERE o.food_date IN ({$in})");
+            WHERE o.food_date IN ({$in}) AND o.meal_type = 'lunch'");
         $stmt->execute($dates);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
             $existing[(int) $r['employee_id'] . '|' . $r['food_date']] = [
@@ -335,7 +335,7 @@ function food_order_import_apply(array $plan, int $actorId): array
                 $orderId = (int) $pdo->lastInsertId();
                 $result['created']++;
             } else {
-                $lock = $pdo->prepare('SELECT id FROM food_orders WHERE employee_id = ? AND food_date = ? FOR UPDATE');
+                $lock = $pdo->prepare("SELECT id FROM food_orders WHERE employee_id = ? AND food_date = ? AND meal_type = 'lunch' FOR UPDATE");
                 $lock->execute([$employeeId, $iso]);
                 $orderId = (int) $lock->fetchColumn();
                 $pdo->prepare("UPDATE food_orders SET calendar_item_id = ?, created_by = ?, status = 'active', updated_at = CURRENT_TIMESTAMP WHERE id = ?")

@@ -38,8 +38,9 @@ check("عضو دائم گروه نمی‌تواند محل تحویل را عو�
       and "خوداظهاری فقط برای امروز مجاز است" in groups,
       "ungrouped-only and lock-after-print rules are in the save path")
 check("food_ticket_group_members_for_date($groupId, $date)" in groups, "group print includes today's visitors")
-check("'visitor' => true" in groups and "مهمان امروز" in admin_js
-      and "today_visitors" in groups and "today_visitors" in admin_js,
+check("'visitor' => $isVisitor" in groups and "مهمان امروز" in admin_js
+      and "today_visitors" in groups and "today_visitors" in admin_js
+      and "temporary_transfer" in admin_js,
       "kitchen group list shows today's visitors separately from permanent members")
 css = (ROOT / "food-ticket-web/assets/food-menu.css").read_text(encoding="utf-8")
 check("grid-template-columns:repeat(4,minmax(0,1fr))" in css

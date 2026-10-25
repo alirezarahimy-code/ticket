@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "release": "R41",
+  "title": "Ticket 1.61.10 — R41 Food Dashboard month, guests and theme reveal",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-food-dashboard-r41-month-guests-theme-20261025.zip",
+  "migrations": [],
+  "notes": "Keeps visible quick actions for both 7 days and the 30-day/month period (backed by the existing 30-day local API range), replaces active employees with today's guest count from local monitoring, and animates light/dark theme changes using a viewport-centred circular View Transition. Retains R40 grid isolation. No demo data, cloud dependency, migration, or unrelated module changes."
+}

@@ -32,7 +32,12 @@
   function draw() {
     const el = box();
     if (!el) return;
+    const previousDialog = document.getElementById('fg-members-overlay');
+    if (previousDialog) previousDialog.remove();
     el.innerHTML = body();
+    // مودال را به body منتقل می‌کنیم تا از stacking context و هدر sticky صفحه بیرون بیاید.
+    const membersDialog = el.querySelector('#fg-members-overlay');
+    if (membersDialog) document.body.appendChild(membersDialog);
     // تقویم شمسی مشترک سامانه (assets/jalali-calendar.js) روی فیلد تاریخ غیبت فعال می‌شود
     try {
       if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') {
@@ -79,6 +84,7 @@
     }
   }
 
+
   function userLabel(u) {
     const badges = (u.active ? '' : ' <span class="status bad">غیرفعال</span>')
       + (u.nat ? '' : ' <span class="status warn" title="بدون کد ملی، سفارش تطبیق داده نمی‌شود">بدون کد ملی</span>');
@@ -104,14 +110,13 @@
         + '<div class="fg-people-box">' + visitors.map((u) => '<div class="fg-person">' + userLabel(u) + '</div>').join('') + '</div>'
       : '';
     return '<div class="card form-card" id="fg-form"><div class="form-section-head"><h2>' + (g.id ? 'ویرایش گروه' : 'گروه جدید') + '</h2></div>'
+      + '<div id="fg-deadline-box" class="fg-deadline-box"><label class="field">مهلت تغییر سلف امروز (ساعت ۲۴ ساعته، مثلاً 09:30)<input id="fg-visit-until" type="text" inputmode="numeric" dir="ltr" placeholder="خالی = بدون محدودیت" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" maxlength="5" autocomplete="off"></label><p>این مهلت برای اعلام تغییر سلف امروز به همین گروه است؛ فقط افراد خارج از عضویت دائمی می‌توانند تا این ساعت اعلام کنند. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود.</p></div>'
       + '<div class="form-grid">'
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
       + '<label class="field">L_UID نمایندهٔ گروه (شناسهٔ اصلی)<input id="fg-uid" value="' + esc(g.l_uid || '') + '" maxlength="80" dir="ltr" placeholder="مثلاً 0100"></label>'
       + '<label class="field"><span>وضعیت</span><select id="fg-active"><option value="1"' + (g.active ? ' selected' : '') + '>فعال</option><option value="0"' + (g.active ? '' : ' selected') + '>غیرفعال</option></select></label>'
-      + '<label class="field full">مهلت تغییر سلف امروز (ساعت ۲۴ ساعته، مثلاً 09:30)<input id="fg-visit-until" type="text" inputmode="numeric" dir="ltr" placeholder="خالی = بدون محدودیت" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" maxlength="5" autocomplete="off"></label>'
       + '<label class="field full">توضیحات<input id="fg-desc" value="' + esc(g.description || '') + '" maxlength="500"></label>'
       + '</div>'
-      + '<p class="muted" style="margin:6px 0">این فیلد ساعت آخرین مهلت اعلام «تغییر سلف امروز» به همین گروه است. فقط کسانی که عضو دائم هیچ گروهی نیستند تا این ساعت می‌توانند اعلام کنند. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود. مدیر پشتیبانی می‌تواند اعلام را از «لیست اعضاء» لغو کند.</p>'
       + '<p class="muted" style="margin:6px 0">شناسایی نماینده فقط و فقط با <b>L_UID</b> انجام می‌شود (L_UID → گروه → اعضا → سفارش → غیبت امروز → واجد شرایط‌ها → فیش). شمارهٔ کارت (C_CARD) در این سامانه هیچ نقشی ندارد و از این فرم حذف شده است؛ گروه‌هایی که L_UID ندارند باید L_UID آن‌ها ثبت شود. تعداد فیش را سامانه محاسبه می‌کند.</p>'
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
@@ -199,7 +204,7 @@
         + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>')
         + '<span class="fg-person-name" title="' + esc(m.name) + ' (' + esc(m.pc) + ')">' + esc(m.name) + ' <small>(' + esc(m.pc) + ')</small>'
         + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
-        + (m.visitor ? ' <span class="status ok">مهمان امروز</span>' : '')
+        + (m.visitor ? (m.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(m.home_group_title || 'گروه دائمی') + '»</span>' : ' <span class="status ok">مهمان امروز</span>') : '')
         + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span></label>';
     }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
@@ -264,13 +269,14 @@
     const guestItems = guests.length
       ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + guests.map((u) => {
           const btn = S.canCancelVisit
-            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">لغو تغییر سلف</button>'
+            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">' + (u.temporary_transfer ? 'بازگشت به گروه دائمی' : 'لغو تغییر سلف') + '</button>'
             : '';
-          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + btn + '</li>';
+          const transfer = u.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(u.home_group_title || 'گروه دائمی') + '»؛ عضویت دائمی محفوظ است</span>' : ' <span class="status ok">مهمان/تغییر سلف روزانه</span>';
+          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + transfer + btn + '</li>';
         }).join('') + '</ol>'
       : '<p class="muted">برای امروز مهمان یا عضو موقتی ثبت نشده است.</p>';
-    return '<div id="fg-members-overlay" style="position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px">'
-      + '<div class="card" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" style="max-width:520px;width:100%;max-height:80vh;overflow:auto">'
+    return '<div id="fg-members-overlay" class="fg-members-overlay">'
+      + '<div class="card fg-members-dialog" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" tabindex="-1">'
       + '<div class="form-section-head"><h2 id="fg-members-title">لیست اعضای «' + esc(g.title) + '»</h2>'
       + '<button type="button" class="btn ghost" data-fg="members-close">بستن</button></div>'
       + block('اعضای دائم گروه', perm, 'عضو دائمی ثبت نشده است.')
@@ -362,6 +368,13 @@
     }, 0);
   }, true);
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('fg-members-overlay')) {
+      S.membersPopup = 0;
+      draw();
+    }
+  });
+
   document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'fg-members-overlay') {
       S.membersPopup = 0;
@@ -379,7 +392,10 @@
       const uid = Number(b.dataset.user || 0);
       if (!uid) return;
       const guest = (S.groups.find((x) => x.id === S.membersPopup) || { today_visitors: [] }).today_visitors.find((u) => Number(u.id) === uid);
-      if (!window.confirm('اعلام تغییر سلف «' + ((guest && guest.name) || 'این نفر') + '» برای امروز لغو شود؟')) return;
+      const confirmation = guest && guest.temporary_transfer
+        ? 'انتقال موقت «' + guest.name + '» لغو و او به عضویت دائمی خود برگردانده شود؟'
+        : 'اعلام تغییر سلف «' + ((guest && guest.name) || 'این نفر') + '» برای امروز لغو شود؟';
+      if (!window.confirm(confirmation)) return;
       callApi('/api/food-visit-cancel', { method: 'POST', body: JSON.stringify({ user_id: uid }) })
         .then((x) => { apply(x); say((x && x.message) || 'اعلام لغو شد.'); draw(); })
         .catch((err) => say(err.message || 'لغو اعلام انجام نشد.'));

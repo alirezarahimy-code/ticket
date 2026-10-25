@@ -17,6 +17,9 @@ __pycache__/
 # Runtime data and user uploads must never be committed
 /storage/*
 !/storage/.htaccess
+!/storage/sessions/
+/storage/sessions/*
+!/storage/sessions/.htaccess
 /uploads/
 
 # Tool/dependency build output

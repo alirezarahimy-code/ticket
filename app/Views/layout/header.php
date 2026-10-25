@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** @var array $user */
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme-mode="<?= htmlspecialchars(function_exists('app_theme_mode') ? app_theme_mode() : 'light', ENT_QUOTES, 'UTF-8') ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,8 +12,9 @@ declare(strict_types=1);
     <title><?= htmlspecialchars($title ?? 'سامانه درخواست پشتیبانی') ?> | سامانه درخواست پشتیبانی</title>
     <link rel="stylesheet" href="assets/style.css">
     <link rel="stylesheet" href="assets/custom.css">
+    <link rel="stylesheet" href="assets/theme-mode.css?v=2">
 </head>
-<body>
+<body data-theme-mode="<?= htmlspecialchars(function_exists('app_theme_mode') ? app_theme_mode() : 'light', ENT_QUOTES, 'UTF-8') ?>">
     <div class="app-shell">
         <header class="topbar">
             <div class="topbar-inner">
@@ -26,6 +27,7 @@ declare(strict_types=1);
                 </a>
                 <?php if (!empty($user)): ?>
                 <div class="header-tools">
+                    <?= function_exists('app_theme_toggle_markup') ? app_theme_toggle_markup() : '' ?>
                     <form class="global-search header-search" method="get" action="index.php">
                         <input type="hidden" name="page" value="search">
                         <input name="q" placeholder="جست‌وجوی درخواست، دارایی یا دانش‌نامه">
@@ -33,6 +35,10 @@ declare(strict_types=1);
                     <a class="profile-shortcut" href="index.php?page=profile">
                         پروفایل: <?= htmlspecialchars($user['username']) ?>
                     </a>
+                </div>
+                <?php else: ?>
+                <div class="header-tools">
+                    <?= function_exists('app_theme_toggle_markup') ? app_theme_toggle_markup() : '' ?>
                 </div>
                 <?php endif; ?>
             </div>

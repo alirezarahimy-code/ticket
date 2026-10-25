@@ -1,0 +1,11 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — رفع محدودیت جابه‌جایی اجزای طراحی (R11)",
+  "date": "2026-10-21",
+  "migrations": [
+    "006-food-meal-type.sql",
+    "007-traffic-visit-history.sql",
+    "008-traffic-destination-approver.sql"
+  ],
+  "notes": "R11 removes the ±500-pixel cap for layout element offsets on both X and Y axes in the editor and server validator. Offsets remain safe integer pixels. The design side panel's own viewport positioning is unchanged. No new database migration is required."
+}
