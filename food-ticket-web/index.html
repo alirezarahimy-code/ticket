@@ -501,7 +501,7 @@ if(employeeResult.error){state.dashboardEmployeesLoaded=false;console.warn('empl
 <script src="assets/food-designer.js?v=10"></script>
 <script src="assets/jalali-calendar.js?v=2"></script>
 <script src="assets/food-order-calendar.js?v=1"></script>
-<script src="assets/list-sort.js?v=2"></script><script src="assets/food-menu.js?v=30"></script><script>
+<script src="assets/list-sort.js?v=2"></script><script src="assets/food-menu.js?v=31"></script><script>
 document.addEventListener('change',function(e){if(!e.target||e.target.name!=='guest-cap-mode')return;var box=document.getElementById('guest-cap-live');if(!box)return;box.style.display='flex';if(typeof loadGuestCap==='function')loadGuestCap();});
 setInterval(function(){var box=document.getElementById('guest-cap-live');if(box&&box.style.display!=='none'&&typeof loadGuestCap==='function')loadGuestCap();},60000);
 </script>

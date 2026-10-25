@@ -20,8 +20,8 @@
 
 ## بستهٔ دانلود
 
-- فایل: `downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix1-20261025.zip` (تجمعی، شامل ۱.۶۲.۴ تا ۱.۶۲.۸)
-- SHA-256: `b333924ce285dab0a78c424f375cef247e56d16adceecafdb23f2c27bdd67d56`
+- فایل: `downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip` (تجمعی، شامل ۱.۶۲.۴ تا ۱.۶۲.۸)
+- SHA-256: `da5ac7feae9ed31a9bda94380cbd5260c1b50085a30d2d03af62032dd6dc3b2d`
 - صفحهٔ دانلود: `downloads/index.html` (فقط همین بسته؛ نسخه‌های پیشین در این صفحه نمایش داده نمی‌شوند)
 - انتشار GitHub: tag `v1.62.8` (Latest)
 - گزارش تغییرات: `updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/CHANGE-REPORT-FA.md`
@@ -42,3 +42,7 @@
 ## اصلاحیهٔ بسته (همان نسخهٔ ۱.۶۲.۸ — fix1)
 
 بستهٔ اول ۱.۶۲.۸ هنگام نصب خطای «مهاجرت نامعتبر یا فایل آن در پک نیست» می‌داد: `system-update.php` فایل مهاجرت را در ریشهٔ ZIP (`migrations/009-....sql`) اجرا می‌کند ولی بستهٔ اول آن را فقط زیر `files/migrations/` داشت. بستهٔ `...-fix1-...` همان محتوا + فایل مهاجرت در ریشه است؛ کد سامانه هیچ تغییری نکرده و شمارهٔ نسخه همان ۱.۶۲.۸ ماند. تست محافظ `test_current_package_passes_system_update_rules` اضافه شد تا این اشتباه تکرار نشود.
+
+## اصلاحیهٔ دوم بسته (همان نسخهٔ ۱.۶۲.۸ — fix2، به درخواست کاربر)
+
+در «مدیریت غذا ← برنامهٔ غذایی ← عملیات گروهی»، دکمهٔ «پیش‌نمایش و بررسی» از فوتر فهرست به نوار بالای فهرست پرسنل کنار «پاک‌کردن انتخاب» منتقل شد (شرط فعال/غیرفعال سابق حفظ شد). فایل‌ها: `assets/food-menu.js` + کپی پنل + `food-ticket-web/index.html` (کش v=31). پین `test_food_orders_static` و تست جدید `test_bulk_preview_button_moved_next_to_clear_selection` به‌روز/اضافه شد. بستهٔ جاری: `...fix2...zip` با SHA-256 `da5ac7feae9ed31a9bda94380cbd5260c1b50085a30d2d03af62032dd6dc3b2d`.

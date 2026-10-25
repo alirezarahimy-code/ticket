@@ -82,6 +82,18 @@ def test_forms_render_approver_select_with_data_approvers():
     assert "traffic-edit-approved-by" in script
 
 
+def test_bulk_preview_button_moved_next_to_clear_selection():
+    """fix2: دکمهٔ «پیش‌نمایش و بررسی» در نوار بالای فهرست کنار «پاک‌کردن انتخاب» است، نه در فوتر."""
+    for path in ("assets/food-menu.js", "food-ticket-web/assets/food-menu.js"):
+        script = read(path)
+        tools = script.split('fm-bulk-tools', 1)[1].split('</div></div>', 1)[0]
+        assert "پاک‌کردن انتخاب" in tools and "پیش‌نمایش و بررسی" in tools, path
+        footer = script.split('fm-bulk-footer', 1)[1].split("'", 1)[0] + script.split('fm-bulk-footer', 1)[1]
+        assert "پیش‌نمایش و بررسی" not in script.split('fm-bulk-footer', 1)[1].split('</div>', 1)[0], path
+        assert "var previewDisabled" in script, path
+    assert 'food-menu.js?v=31' in read("food-ticket-web/index.html")
+
+
 def test_help_guide_documents_both_features():
     guide = read("help-guide.php")
     assert "۱ تا ۳ تأییدکننده" in guide
@@ -99,7 +111,7 @@ def test_current_package_passes_system_update_rules():
     نبود آن باعث خطای «مهاجرت نامعتبر یا فایل آن در پک نیست» می‌شود (اشکال بستهٔ اول 1.62.8)."""
     import re
     import zipfile
-    package = ROOT / "downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix1-20261025.zip"
+    package = ROOT / "downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip"
     assert package.is_file()
     zf = zipfile.ZipFile(package)
     names = zf.namelist()
