@@ -331,16 +331,17 @@ function traffic_record_history(array $before, ?array $after, array $user, strin
  * فقط ویرایش‌های واقعی (دکمهٔ «ویرایش» + تغییر مقدار) در تاریخچهٔ ویرایش‌ها نمایش داده می‌شوند.
  * رویدادهای «ثبت خروج» و «حذف» همچنان برای ممیزی در جدول ذخیره می‌شوند ولی در این فهرست نمی‌آیند.
  */
-function traffic_history_records(int $limit = 50, int $offset = 0): array
+function traffic_history_records(int $limit = 50, int $offset = 0, bool $includeAllEvents = false): array
 {
     $limit = max(1, min(200, $limit));
     $offset = max(0, $offset);
-    return db()->query("SELECT h.*, u.full_name AS editor_name FROM traffic_visit_history h LEFT JOIN users u ON u.id = h.changed_by WHERE h.action = 'updated' ORDER BY h.changed_at DESC, h.id DESC LIMIT " . $limit . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
+    $filter = $includeAllEvents ? '' : "WHERE h.action = 'updated' ";
+    return db()->query('SELECT h.*, u.full_name AS editor_name FROM traffic_visit_history h LEFT JOIN users u ON u.id = h.changed_by ' . $filter . 'ORDER BY h.changed_at DESC, h.id DESC LIMIT ' . $limit . ' OFFSET ' . $offset)->fetchAll(PDO::FETCH_ASSOC);
 }
 
-function traffic_history_count(): int
+function traffic_history_count(bool $includeAllEvents = false): int
 {
-    return (int) db()->query("SELECT COUNT(*) FROM traffic_visit_history WHERE action = 'updated'")->fetchColumn();
+    return (int) db()->query($includeAllEvents ? 'SELECT COUNT(*) FROM traffic_visit_history' : "SELECT COUNT(*) FROM traffic_visit_history WHERE action = 'updated'")->fetchColumn();
 }
 
 function traffic_history_field_label(string $field): string
@@ -873,11 +874,12 @@ function traffic_render_page(array $user): never
     $approvers = []; // تأییدکننده از تنظیم مقصد خوانده می‌شود؛ ورود دستی وجود ندارد.
     $editRecord = $tab === 'edit' ? traffic_fetch_record((int) ($_GET['id'] ?? 0)) : null;
     $changePage = max(1, (int) ($_GET['p'] ?? 1));
-    $changeCount = $tab === 'changes' ? traffic_history_count() : 0;
+    $changeShowAll = (string) ($_GET['events'] ?? '') === 'all';
+    $changeCount = $tab === 'changes' ? traffic_history_count($changeShowAll) : 0;
     $changePerPage = 50;
     $changePageCount = max(1, (int) ceil($changeCount / $changePerPage));
     $changePage = min($changePage, $changePageCount);
-    $changeRows = $tab === 'changes' ? traffic_history_records($changePerPage, ($changePage - 1) * $changePerPage) : [];
+    $changeRows = $tab === 'changes' ? traffic_history_records($changePerPage, ($changePage - 1) * $changePerPage, $changeShowAll) : [];
     $createdId = (int) ($_GET['created'] ?? 0);
     $lastCreated = $createdId ? traffic_fetch_record($createdId) : null;
 
@@ -1077,8 +1079,16 @@ function traffic_render_page(array $user): never
         <?php if ($tab === 'changes'): ?>
         <section class="card traffic-change-history-card">
             <div class="section-title"><div><span class="eyebrow">ردگیری مدیریتی</span><h2>تاریخچهٔ ویرایش‌های کنترل تردد</h2></div><a class="button secondary" href="index.php?page=traffic-control&amp;tab=history">بازگشت به سوابق</a></div>
-            <p class="traffic-edit-note">فقط رکوردهایی اینجا دیده می‌شوند که با دکمهٔ «ویرایش» باز شده و دست‌کم یک مقدار آن‌ها واقعاً تغییر کرده باشد. ثبت سادهٔ ساعت خروج یا حذف رکورد، ویرایش حساب نمی‌شود و در این فهرست نمی‌آید.</p>
-            <?php if (!$changeRows): ?><div class="traffic-change-empty">هنوز ویرایشی روی سوابق تردد ثبت نشده است.</div><?php else: ?>
+            <?php if ($changeShowAll): ?>
+            <p class="traffic-edit-note">در این نما <b>همهٔ رویدادهای ثبت‌شده</b> نمایش داده می‌شود: ویرایش‌های واقعی، ثبت ساعت خروج و حذف رکورد. هیچ‌کدام از این رویدادها هرگز از پایگاه داده پاک نمی‌شوند.</p>
+            <?php else: ?>
+            <p class="traffic-edit-note">فقط رکوردهایی اینجا دیده می‌شوند که با دکمهٔ «ویرایش» باز شده و دست‌کم یک مقدار آن‌ها واقعاً تغییر کرده باشد. رویدادهای «ثبت ساعت خروج» و «حذف رکورد» هم در پایگاه داده نگه‌داری می‌شوند و با دکمهٔ «نمایش همهٔ رویدادها» قابل مشاهده‌اند.</p>
+            <?php endif; ?>
+            <nav class="traffic-change-filter" aria-label="فیلتر رویدادهای تاریخچه">
+                <a class="button <?= $changeShowAll ? 'secondary' : '' ?>" href="index.php?page=traffic-control&amp;tab=changes">فقط ویرایش‌های واقعی</a>
+                <a class="button <?= $changeShowAll ? '' : 'secondary' ?>" href="index.php?page=traffic-control&amp;tab=changes&amp;events=all">نمایش همهٔ رویدادها (ویرایش، ثبت خروج، حذف)</a>
+            </nav>
+            <?php if (!$changeRows): ?><div class="traffic-change-empty"><?= $changeShowAll ? 'هنوز هیچ رویدادی (ویرایش، ثبت خروج یا حذف) ثبت نشده است.' : 'هنوز ویرایشی روی سوابق تردد ثبت نشده است.' ?></div><?php else: ?>
             <div class="traffic-change-list">
                 <?php foreach ($changeRows as $change): $changeMap = json_decode((string) ($change['changes_json'] ?? '{}'), true); $changeMap = is_array($changeMap) ? $changeMap : []; $changeLabel = match ((string) $change['action']) { 'deleted' => 'حذف رکورد', 'exit_set' => 'ثبت ساعت خروج', default => 'ویرایش رکورد' }; ?>
                 <article class="traffic-change-item">
@@ -1087,7 +1097,7 @@ function traffic_render_page(array $user): never
                 </article>
                 <?php endforeach; ?>
             </div>
-            <?php $changePages = (int) ceil($changeCount / $changePerPage); if ($changePages > 1): ?><nav class="traffic-change-pagination" aria-label="صفحه‌بندی تاریخچه"><?php if ($changePage > 1): ?><a class="button secondary" href="index.php?page=traffic-control&amp;tab=changes&amp;p=<?= $changePage - 1 ?>">صفحهٔ قبلی</a><?php endif; ?><span>صفحهٔ <?= $changePage ?> از <?= $changePages ?> · <?= $changeCount ?> تغییر</span><?php if ($changePage < $changePages): ?><a class="button secondary" href="index.php?page=traffic-control&amp;tab=changes&amp;p=<?= $changePage + 1 ?>">صفحهٔ بعدی</a><?php endif; ?></nav><?php endif; ?>
+            <?php $changePages = (int) ceil($changeCount / $changePerPage); $changeEventsParam = $changeShowAll ? '&amp;events=all' : ''; if ($changePages > 1): ?><nav class="traffic-change-pagination" aria-label="صفحه‌بندی تاریخچه"><?php if ($changePage > 1): ?><a class="button secondary" href="index.php?page=traffic-control&amp;tab=changes<?= $changeEventsParam ?>&amp;p=<?= $changePage - 1 ?>">صفحهٔ قبلی</a><?php endif; ?><span>صفحهٔ <?= $changePage ?> از <?= $changePages ?> · <?= $changeCount ?> <?= $changeShowAll ? 'رویداد' : 'تغییر' ?></span><?php if ($changePage < $changePages): ?><a class="button secondary" href="index.php?page=traffic-control&amp;tab=changes<?= $changeEventsParam ?>&amp;p=<?= $changePage + 1 ?>">صفحهٔ بعدی</a><?php endif; ?></nav><?php endif; ?>
             <?php endif; ?>
         </section>
         <?php endif; ?>

@@ -1521,6 +1521,8 @@ body.triangle-mesh-background-active > .triangle-mesh-canvas { z-index: 0 !impor
 .traffic-change-item del { color: #a14b42; }
 .traffic-change-item ins { color: #28734f; text-decoration: none; font-weight: 700; }
 .traffic-change-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; color: #69766e; font-size: 12px; }
+.traffic-change-filter { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 16px; }
+.traffic-change-filter .button { font-size: 12px; }
 .traffic-change-empty { padding: 30px 16px; border-radius: 12px; background: #f8faf8; color: #758078; text-align: center; }
 @media (max-width: 650px) {
     .traffic-edit-card .section-title, .traffic-change-history-card .section-title { align-items: stretch; flex-direction: column; }
