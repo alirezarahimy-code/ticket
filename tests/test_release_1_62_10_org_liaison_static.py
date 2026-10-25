@@ -43,7 +43,7 @@ def test_index_php_supports_liaison_node():
     assert "'chartSide' => (string) ($unit['chart_side'] ?? '')" in src
     # نسخهٔ کش دارایی‌ها
     assert "assets/organization.js?v=7" in src
-    assert "assets/style.css?v=3.4.45" in src
+    assert "assets/style.css?v=3.4.46" in src
 
 
 def test_organization_js_renders_liaison_band():
@@ -114,6 +114,6 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۱ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.14-service-actions-split-20261025.zip" in page
+    assert "ticket-update-1.62.15-service-modal-fix-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" not in page

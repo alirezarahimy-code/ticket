@@ -1191,7 +1191,8 @@ document.addEventListener('DOMContentLoaded', function () {
             button.addEventListener('click', closeModal);
         });
         modalLayer.addEventListener('click', function (event) {
-            if (event.target === modalLayer) closeModal();
+            // بستن با کلیک روی پس‌زمینه، مثل بقیهٔ پاپ‌آپ‌های سامانه (هر .service-modal کل لایه را می‌پوشاند؛ کلیک بیرون کارت یعنی روی خود .service-modal)
+            if (event.target === modalLayer || (event.target.classList && event.target.classList.contains('service-modal'))) closeModal();
         });
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && !modalLayer.hidden) closeModal();
