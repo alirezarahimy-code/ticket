@@ -8,6 +8,8 @@ index += "\n" + (ROOT / "actions/ticket-actions.php").read_text(encoding="utf-8"
 index += "\n" + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")
 # از ۱.۶۲.۱۷ اکشن‌های سرپرستی (supervisor_decision/reopen و مسیرهای فریز لغو) در فایل برش ۶ هستند:
 index += "\n" + (ROOT / "actions/supervisor-actions.php").read_text(encoding="utf-8")
+# از ۱.۶۲.۱۹ عملیات گروهی (bulk_update_tickets با یادداشت مشترک) در فایل برش ۸ است:
+index += "\n" + (ROOT / "actions/bulk-actions.php").read_text(encoding="utf-8")
 bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
 permissions = (ROOT / "permissions.php").read_text(encoding="utf-8")
 cron = (ROOT / "cron/sla_maintenance.php").read_text(encoding="utf-8")

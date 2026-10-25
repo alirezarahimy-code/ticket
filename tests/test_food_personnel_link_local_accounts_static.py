@@ -17,12 +17,12 @@ class FoodPersonnelLocalLinkStaticTests(unittest.TestCase):
         self.assertIn("auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0", self.link)
         self.assertIn("function fpl_is_local_food_account(array $account)", self.link)
         self.assertIn("function fpl_code_candidate_rows(array $rows, string $code)", self.link)
-        self.assertIn("auth_source IN ('food', 'local')", (ROOT / 'index.php').read_text(encoding='utf-8'))
+        self.assertIn("auth_source IN ('food', 'local')", (ROOT / 'index.php').read_text(encoding='utf-8') + (ROOT / 'actions/user-structure-actions.php').read_text(encoding='utf-8'))  # از ۱.۶۲.۱۹: برش ۸
 
     def test_merge_accepts_local_staff_account_and_keeps_backup_guard(self) -> None:
         self.assertIn("$isLocalFoodAccount = is_array($food) && fpl_is_local_food_account($food);", self.link)
         self.assertIn("['local_user', 'guard']", self.link)
-        self.assertIn("ردیف‌های پیدا‌شده", (ROOT / 'index.php').read_text(encoding='utf-8'))
+        self.assertIn("ردیف‌های پیدا‌شده", (ROOT / 'index.php').read_text(encoding='utf-8') + (ROOT / 'actions/user-structure-actions.php').read_text(encoding='utf-8'))
         self.assertIn("(int) ($account['is_primary_admin'] ?? 0) !== 1", self.link)
         self.assertIn("$backup = fpl_backup_users($pdo);", self.link)
         self.assertIn("UPDATE users SET employee_number = NULL, national_code = NULL, username = ? WHERE id = ?", self.link)
@@ -37,7 +37,8 @@ class FoodPersonnelLocalLinkStaticTests(unittest.TestCase):
         self.assertIn("if ($codeConflict) {\n        $newCode = null;", self.bootstrap)
 
     def test_domain_entered_employee_code_is_authoritative_and_transactionally_merges_owner(self) -> None:
-        index = (ROOT / "index.php").read_text(encoding="utf-8")
+        # از ۱.۶۲.۱۹ اکشن‌های کاربران (link_domain_food_by_code و update_user_role) در actions/user-structure-actions.php هستند (برش ۸)
+        index = (ROOT / "index.php").read_text(encoding="utf-8") + (ROOT / "actions/user-structure-actions.php").read_text(encoding="utf-8")
         self.assertIn("require_once __DIR__ . '/food-personnel-link.php'", index)
         self.assertIn("$ownerId = employee_number_owner($employeeNumberValue, $userId)", index)
         self.assertIn("fpl_find_food_by_code(db(), (string) $employeeNumberValue)", index)

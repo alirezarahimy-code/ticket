@@ -20,8 +20,9 @@ def test_index_has_navigation_banners():
     assert src.count("═══ ناحیهٔ") >= 3
     # از ۱.۶۲.۱۶ (برش ۵): سه گروه در دو بنر require ادغام شدند → ۱۸
     # از ۱.۶۲.۱۷ (برش ۶): سه گروه در دو بنر require ادغام شدند → ۱۷
-    # از ۱.۶۲.۱۸ (برش ۷): پنج گروه (ورود، پروفایل، برند، CD/DVD، اعلان‌ها) در چهار بنر require ادغام شدند → ۱۶
-    assert src.count("گروه اکشن:") == 16
+    # از ۱.۶۲.۱۸ (برش ۷): پنج گروه در چهار بنر require ادغام شدند → ۱۶
+    # از ۱.۶۲.۱۹ (برش ۸): سه گروه (ارتباط دارایی، ساختار پایه، کاربران) در دو بنر require ادغام شدند → ۱۵
+    assert src.count("گروه اکشن:") == 15
     # از ۱.۶۲.۱۸ بنر ورود به «احراز هویت، پروفایل و تم» تغییر نام داد (برش ۷)
     for banner in ("احراز هویت، پروفایل و تم", "ساختار سازمانی (چارت)", "چرخهٔ کامل درخواست‌ها"):
         assert banner in src, banner
@@ -87,7 +88,7 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۲ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" in page
+    assert "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.10-org-liaison-units-20261025.zip" not in page
     assert "بدون تغییر رفتاری" in page

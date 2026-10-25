@@ -42,7 +42,8 @@ def test_index_requires_both_files_in_original_order():
     a = src.index("require __DIR__ . '/actions/asset-actions.php';")
     t = src.index("require __DIR__ . '/actions/ticket-actions.php';")
     s = src.index("require __DIR__ . '/actions/service-actions.php';")
-    assert src.index(sup) < a < t < s < src.index(hol) < src.index("if ($action === 'add_asset_relation')")
+    # (از ۱.۶۲.۱۹ گروه ارتباط دارایی هم به actions/bulk-actions.php منتقل شد)
+    assert src.index(sup) < a < t < s < src.index(hol) < src.index("require __DIR__ . '/actions/bulk-actions.php';")
     for action in SUPERVISOR_ACTIONS + HOLIDAY_ACTIONS:
         assert f"if ($action === '{action}')" not in src, action
 
@@ -110,7 +111,7 @@ def test_panel_asset_refs_are_all_packaged():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۸ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" in page
+    assert "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.16-role-settings-actions-split-20261025.zip" not in page
     assert "ticket-update-1.62.15-service-modal-fix-20261025.zip" not in page

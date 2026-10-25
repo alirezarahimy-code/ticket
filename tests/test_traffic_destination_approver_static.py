@@ -45,7 +45,7 @@ def test_release_manifest_and_download_page_list_new_destination_migration():
     manifest = (ROOT / "updates/2026-10-21-release-161-10-r9/manifest.json").read_text()
     assert '"008-traffic-destination-approver.sql"' in manifest
     page = (ROOT / "downloads/index.html").read_text()
-    package = "ticket-update-1.62.18-account-misc-actions-split-20261025.zip"
+    package = "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip"
     assert package in page and "CHANGE-REPORT-FA.md" in page
     assert "traffic-destination-approver-r7-20261021.zip" not in page
     report = (ROOT / "docs/REPORT-FA.md").read_text()
