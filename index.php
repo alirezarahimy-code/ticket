@@ -1259,153 +1259,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
     try {
 
-        // ───── گروه اکشن: احراز هویت و ورود ─────
-        if ($action === 'login') {
-            $loginPerfStarted = microtime(true);
-            $loginPerfStage = 'login-rate-check';
-            $loginPerfStageStarted = $loginPerfStarted;
-            $loginPerfStages = [];
-            $markLoginPerfStage = static function (string $stage) use (&$loginPerfStage, &$loginPerfStageStarted, &$loginPerfStages): void {
-                $now = microtime(true);
-                $loginPerfStages[$loginPerfStage] = ($loginPerfStages[$loginPerfStage] ?? 0) + (int) round(($now - $loginPerfStageStarted) * 1000);
-                $loginPerfStage = $stage;
-                $loginPerfStageStarted = $now;
-            };
-            register_shutdown_function(static function () use (&$loginPerfStage, &$loginPerfStageStarted, &$loginPerfStages, $loginPerfStarted): void {
-                $elapsedMs = (int) round((microtime(true) - $loginPerfStarted) * 1000);
-                $loginPerfStages[$loginPerfStage] = ($loginPerfStages[$loginPerfStage] ?? 0) + (int) round((microtime(true) - $loginPerfStageStarted) * 1000);
-                if ($elapsedMs >= 2000) {
-                    $stageSummary = [];
-                    foreach ($loginPerfStages as $stage => $durationMs) {
-                        $stageSummary[] = $stage . ':' . $durationMs . 'ms';
-                    }
-                    error_log('ITSM slow login request: ' . $elapsedMs . 'ms; stages=' . implode(',', $stageSummary));
-                }
-            });
-            $username = post_value('username');
-            $password = (string) ($_POST['password'] ?? '');
-            if (!login_rate_allowed($username)) {
-                flash('danger', 'تلاش‌های ورود بیش از حد مجاز است. ۱۵ دقیقه بعد دوباره تلاش کنید.');
-                redirect('index.php?page=login');
-            }
-            $markLoginPerfStage('local-user-query');
-            $query = db()->prepare('SELECT * FROM users WHERE username = ? AND auth_source = "local" AND is_active = 1 LIMIT 1');
-            $query->execute([$username]);
-            $local = $query->fetch();
-            if ($local && password_verify($password, (string) $local['password_hash'])) {
-                $markLoginPerfStage('local-login-finalize');
-                db()->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$local['id']]);
-                clear_login_failures($username);
-                login_user($local);
-                $markLoginPerfStage('client-identity');
-                $initialAssetId = inventory_collect_client_asset($local);
-                if ($initialAssetId) {
-                    record_asset_history($initialAssetId, 'inventory_collected', 'شناسایی خودکار سیستم کلاینت در اولین ورود', (int) $local['id'], null, 'نام سیستم و IP کلاینت از درخواست ورود ثبت شد.');
-                }
-                redirect('index.php');
-            }
-            $markLoginPerfStage('ldap-authentication');
-            $identity = ldap_authenticate($username, $password);
-            if ($identity) {
-                $markLoginPerfStage('domain-user-sync');
-                $domainUser = upsert_domain_user($identity);
-                if ((int) ($domainUser['is_active'] ?? 0) !== 1) {
-                    throw new RuntimeException('حساب کاربری شبکه غیرفعال است. ادمین اصلی باید آن را از تنظیمات سامانه فعال کند.');
-                }
-                $markLoginPerfStage('domain-login-finalize');
-                db()->prepare('UPDATE users SET last_login_at = NOW() WHERE id = ?')->execute([$domainUser['id']]);
-                clear_login_failures($username);
-                login_user($domainUser);
-                $markLoginPerfStage('client-identity');
-                $initialAssetId = inventory_collect_client_asset($domainUser);
-                if ($initialAssetId) {
-                    record_asset_history($initialAssetId, 'inventory_collected', 'شناسایی خودکار سیستم کلاینت در اولین ورود', (int) $domainUser['id'], null, 'نام سیستم و IP کلاینت از درخواست ورود ثبت شد.');
-                }
-                redirect('index.php');
-            }
-            record_login_failure($username);
-            flash('danger', 'نام کاربری یا رمز عبور صحیح نیست.');
-            redirect('index.php?page=login');
-        }
+        // ───── گروه اکشن: احراز هویت، پروفایل و تم — ۳ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/account-actions.php';
 
-        $user = require_login();
-
-        // ───── گروه اکشن: پروفایل، تم و ظاهر ─────
-        if ($action === 'save_theme') {
-            $themeChoice = valid_choice(post_value('theme'), ['current', 'ruby', 'indigo', 'copper'], 'current');
-            save_setting('theme_user_' . (int) $user['id'], $themeChoice);
-            $GLOBALS['activity_audited'] = true;
-            activity_log(['action_code' => 'user_theme_changed', 'action_label' => 'تغییر تم شخصی', 'module' => 'profile', 'meta' => ['theme' => ['current'=>'تم فعلی سبز و کرم','ruby'=>'یاقوتی رسمی','indigo'=>'لاجوردی مدیریتی','copper'=>'آجری روشن و کرم'][$themeChoice]]]);
-            flash('success', 'تم انتخابی شما ذخیره و اعمال شد.');
-            redirect('index.php?page=profile#appearance');
-        }
-        if ($action === 'save_profile') {
-            $firstName = post_value('first_name');
-            $lastName = post_value('last_name');
-            $nationalCode = strtr(post_value('national_code'), ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9', '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9']);
-            if ($firstName === '' || $lastName === '') {
-                throw new RuntimeException('نام و نام خانوادگی را وارد کنید.');
-            }
-            if ($nationalCode !== '' && !valid_iranian_national_code($nationalCode)) {
-                throw new RuntimeException('کد ملی معتبر نیست. کد ملی باید ۱۰ رقم و دارای رقم کنترل صحیح باشد.');
-            }
-            $photo = store_profile_photo((array) ($_FILES['profile_photo'] ?? []));
-            $query = db()->prepare('UPDATE users SET first_name = ?, last_name = ?, full_name = ?, national_code = ?' . ($photo !== '' ? ', profile_photo = ?' : '') . ' WHERE id = ?');
-            $values = [$firstName, $lastName, trim($firstName . ' ' . $lastName), $nationalCode !== '' ? $nationalCode : null];
-            if ($photo !== '') {
-                $values[] = $photo;
-            }
-            $values[] = (int) $user['id'];
-            $query->execute($values);
-            save_audit((int) $user['id'], 'profile_updated');
-            flash('success', 'پروفایل کاربری شما ذخیره شد.');
-            redirect('index.php?page=profile');
-        }
-
-        // ───── گروه اکشن: برند فیش غذا ─────
-        if ($action === 'save_food_ticket_brand') {
-            $settingsAdmin = require_permission('settings.users_edit');
-            $brandName = post_value('food_ticket_brand_name');
-            if ($brandName === '') {
-                throw new RuntimeException('نام سامانه چاپ فیش نمی‌تواند خالی باشد.');
-            }
-            save_setting('food_ticket_brand_name', $brandName);
-            if (!empty($_FILES['food_ticket_logo']['tmp_name']) && is_uploaded_file($_FILES['food_ticket_logo']['tmp_name'])) {
-                $mime = mime_content_type($_FILES['food_ticket_logo']['tmp_name']) ?: '';
-                $allowed = ['image/png' => 'png', 'image/jpeg' => 'jpg'];
-                if (!isset($allowed[$mime]) || (int) $_FILES['food_ticket_logo']['size'] > 2 * 1024 * 1024) {
-                    throw new RuntimeException('لوگوی پنل فیش باید PNG یا JPG و حداکثر ۲ مگابایت باشد.');
-                }
-                @mkdir(APP_ROOT . '/assets/uploads', 0755, true);
-                $filename = 'food-ticket-logo-' . bin2hex(random_bytes(8)) . '.' . $allowed[$mime];
-                if (!move_uploaded_file($_FILES['food_ticket_logo']['tmp_name'], APP_ROOT . '/assets/uploads/' . $filename)) {
-                    throw new RuntimeException('ذخیره لوگوی پنل فیش انجام نشد.');
-                }
-                save_setting('food_ticket_brand_logo', 'assets/uploads/' . $filename);
-            }
-            save_audit((int) $settingsAdmin['id'], 'food_ticket_brand_updated');
-            flash('success', 'هویت بصری پنل چاپ فیش ذخیره شد.');
-            redirect('index.php?page=settings#food-ticket-brand');
-        }
+        // ───── گروه اکشن: برند فیش غذا — ۱ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/food-brand-actions.php';
         food_ticket_handle_post($action, $user);
         traffic_handle_post($action, $user);
 
-        // ───── گروه اکشن: آرشیو CD/DVD ─────
-        if ($action === 'cd_dvd_create') {
-            $id = cd_dvd_create_record($user);
-            flash('success', 'گردش رسانه با شماره ثبت ' . $id . ' ذخیره شد.');
-            redirect('index.php?page=cd-dvd');
-        }
-        if ($action === 'cd_dvd_update') {
-            cd_dvd_update_record($user);
-            flash('success', 'ثبت رسانه به‌روزرسانی شد.');
-            redirect('index.php?page=cd-dvd');
-        }
-        if ($action === 'cd_dvd_delete') {
-            cd_dvd_delete_record($user);
-            flash('success', 'ثبت رسانه حذف شد.');
-            redirect('index.php?page=cd-dvd');
-        }
+        // ───── گروه اکشن: آرشیو CD/DVD — ۳ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/cd-dvd-actions.php';
 
         // ───── گروه اکشن: پشتیبان‌گیری و به‌روزرسانی سامانه ─────
         if ($action === 'create_backup') {
@@ -1444,17 +1307,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=backup');
         }
 
-        // ───── گروه اکشن: اعلان‌ها ─────
-        if ($action === 'mark_all_notifications') {
-            db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0')->execute([(int) $user['id']]);
-            flash('success', 'همه اعلان‌ها خوانده‌شده علامت‌گذاری شدند.');
-            redirect('index.php?page=notifications');
-        }
-        if ($action === 'mark_notification') {
-            $notificationId = (int) ($_POST['notification_id'] ?? 0);
-            db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?')->execute([$notificationId, (int) $user['id']]);
-            redirect('index.php?page=notifications');
-        }
+        // ───── گروه اکشن: اعلان‌ها — ۲ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        require __DIR__ . '/actions/notification-actions.php';
 
         // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن از ۱.۶۲.۱۷ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/supervisor-actions.php';

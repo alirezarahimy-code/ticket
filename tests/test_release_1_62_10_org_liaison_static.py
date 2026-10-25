@@ -114,6 +114,6 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۱ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip" in page
+    assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" not in page

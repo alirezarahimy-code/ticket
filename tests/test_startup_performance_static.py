@@ -18,7 +18,9 @@ employees_endpoint = employees[employees.index("function food_ticket_api_employe
 assert "food_ticket_ensure_employee_local_accounts()" in employees_endpoint
 
 # Slow inventory extraction remains available by explicit/manual action, but not inline with login.
-login = index[index.index("if ($action === 'login')"):index.index("$user = require_login();", index.index("if ($action === 'login')"))]
+# از ۱.۶۲.۱۸ بلوک login در actions/account-actions.php است (برش ۷ فاز ۲)؛ برش تا ابتدای گروه پروفایل/تم.
+account = read("actions/account-actions.php")
+login = account[account.index("if ($action === 'login')"):account.index("if ($action === 'save_theme')")]
 assert "inventory_auto_extract_server(" not in login
 assert "ITSM slow login request:" in login
 assert "stages=' . implode(',', $stageSummary)" in login
