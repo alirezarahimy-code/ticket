@@ -886,6 +886,8 @@ if (($_GET['action'] ?? '') === 'logout') {
     redirect('index.php');
 }
 
+
+// ═══ ناحیهٔ ۱: خروج از حساب (قبل از هر چیز) ═══
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logout') {
     require_csrf();
     if (function_exists('activity_log')) {
@@ -904,6 +906,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'logou
 }
 
 $user = current_user();
+
+// ═══ ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن ═══
 $page = (string) ($_GET['page'] ?? ($user ? 'dashboard' : 'login'));
 // ۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌فرض باید در اولین ورود عوض شود.
 if ($user && !isset($_GET['page'])) {
@@ -1226,6 +1230,8 @@ if ($page === 'food-personnel-link') {
     fpl_render_request();
 }
 
+
+// ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با بانر) ═══
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
     $action = (string) ($_POST['action'] ?? '');
@@ -1252,6 +1258,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
     });
     try {
+
+        // ───── گروه اکشن: احراز هویت و ورود ─────
         if ($action === 'login') {
             $loginPerfStarted = microtime(true);
             $loginPerfStage = 'login-rate-check';
@@ -1321,6 +1329,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $user = require_login();
+
+        // ───── گروه اکشن: پروفایل، تم و ظاهر ─────
         if ($action === 'save_theme') {
             $themeChoice = valid_choice(post_value('theme'), ['current', 'ruby', 'indigo', 'copper'], 'current');
             save_setting('theme_user_' . (int) $user['id'], $themeChoice);
@@ -1351,6 +1361,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('success', 'پروفایل کاربری شما ذخیره شد.');
             redirect('index.php?page=profile');
         }
+
+        // ───── گروه اکشن: برند فیش غذا ─────
         if ($action === 'save_food_ticket_brand') {
             $settingsAdmin = require_permission('settings.users_edit');
             $brandName = post_value('food_ticket_brand_name');
@@ -1377,6 +1389,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         food_ticket_handle_post($action, $user);
         traffic_handle_post($action, $user);
+
+        // ───── گروه اکشن: آرشیو CD/DVD ─────
         if ($action === 'cd_dvd_create') {
             $id = cd_dvd_create_record($user);
             flash('success', 'گردش رسانه با شماره ثبت ' . $id . ' ذخیره شد.');
@@ -1392,6 +1406,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('success', 'ثبت رسانه حذف شد.');
             redirect('index.php?page=cd-dvd');
         }
+
+        // ───── گروه اکشن: پشتیبان‌گیری و به‌روزرسانی سامانه ─────
         if ($action === 'create_backup') {
             $backupAdmin = require_permission('backup.manage');
             $bundle = create_backup_bundle();
@@ -1427,6 +1443,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             flash('success', $modeLabel . ' به نسخهٔ ' . $updateResult['version'] . ' انجام شد. بکاپ: ' . $updateResult['backup'] . '، مهاجرت‌های اجراشده: ' . count($updateResult['migrations']) . '، فایل‌های کپی‌شده: ' . $updateResult['files'] . '.');
             redirect('index.php?page=backup');
         }
+
+        // ───── گروه اکشن: اعلان‌ها ─────
         if ($action === 'mark_all_notifications') {
             db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0')->execute([(int) $user['id']]);
             flash('success', 'همه اعلان‌ها خوانده‌شده علامت‌گذاری شدند.');
@@ -1437,6 +1455,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?')->execute([$notificationId, (int) $user['id']]);
             redirect('index.php?page=notifications');
         }
+
+        // ───── گروه اکشن: تصمیم‌های سرپرست (غذا و درخواست‌ها) ─────
         if ($action === 'food_order_cancel_decide') {
             $reviewer = require_login();
             if (!function_exists('food_order_cancel_request_decide')) {
@@ -1533,6 +1553,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=supervisor');
         }
 
+
+        // ───── گروه اکشن: امتیازدهی درخواست ─────
         if ($action === 'rate_ticket') {
             if (!user_can($user, 'ticket.rate')) {
                 throw new RuntimeException('دسترسی امتیازدهی به درخواست برای نقش شما مجاز نیست.');
@@ -1565,6 +1587,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=ticket&id=' . $ticketId);
         }
 
+
+         // ───── گروه اکشن: اموال، دارایی‌ها و اسکن دامین ─────
          if ($action === 'collect_inventory') {
               $collectUser = require_permission('asset.extract');
               if (!is_global_ticket_role($collectUser['role']) && user_service_group($collectUser) !== 'it') {
@@ -1952,6 +1976,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
              redirect('index.php?page=inventory&id=' . $assetId);
          }
 
+
+        // ───── گروه اکشن: چرخهٔ کامل درخواست‌ها (ثبت/پاسخ/ارجاع/بستن) ─────
         if ($action === 'create_ticket') {
             // مجوز باید در handler سمت سرور هم کنترل شود؛ پنهان‌کردن فرم کافی نیست.
             $user = require_permission('ticket.create');
@@ -2570,6 +2596,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=ticket&id=' . $ticketId);
         }
 
+
+        // ───── گروه اکشن: خدمات، دسته‌ها و پایگاه دانش ─────
         if ($action === 'add_service') {
             $serviceAdmin = require_permission('services.manage');
             $name = post_value('service_name');
@@ -2709,6 +2737,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         
+
+        // ───── گروه اکشن: تقویم و تعطیلات ─────
         if ($action === 'toggle_holiday') {
             $holidayAdmin = require_permission('holidays.manage');
             $holidayDate = jalali_input_to_gregorian(post_value('holiday_date'));
@@ -2778,6 +2808,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=holidays');
         }
 
+
+        // ───── گروه اکشن: ارتباط دارایی و عملیات گروهی درخواست‌ها ─────
         if ($action === 'add_asset_relation') {
             $relationUser = require_permission('ticket.attach_asset');
             $sourceId = (int) ($_POST['source_asset_id'] ?? 0);
@@ -2874,6 +2906,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=queue');
         }
 
+
+        // ───── گروه اکشن: ساختارهای پایه (دسته/واحد) ─────
         if ($action === 'add_category') {
             require_permission('service_cat.manage');
             $name = post_value('category_name');
@@ -2897,6 +2931,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=' . valid_choice(post_value('return_page'), ['settings', 'organization'], 'settings'));
         }
 
+
+        // ───── گروه اکشن: اتصال کاربر دامین به غذا و نقش کاربران ─────
         if ($action === 'link_domain_food_by_code') {
             require_primary_admin();
             require_once __DIR__ . '/food-personnel-link.php';
@@ -3212,6 +3248,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=settings#cd-dvd-settings');
         }
 
+
+        // ───── گروه اکشن: ساختار سازمانی (چارت) ─────
         if ($action === 'save_org_node') {
             $orgAdmin = require_permission('org.manage');
             if (!user_can_manage_organization($orgAdmin)) {
@@ -3755,6 +3793,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=organization');
         }
 
+
+        // ───── گروه اکشن: نقش‌های کلیدی و دسترسی‌ها ─────
         if ($action === 'save_key_roles') {
             $rolesAdmin = require_permission('settings.key_roles_edit');
             $collectRoleIds = static function (string $field): array {
@@ -3866,6 +3906,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=settings#roles');
         }
 
+
+        // ───── گروه اکشن: نگهداری لاگ‌ها و LDAP ─────
         if ($action === 'prune_activity_logs') {
             $pruneAdmin = require_primary_admin();
             $days = (int) post_value('retention_days', (string) activity_log_retention_days());
@@ -3900,6 +3942,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=settings#ldap-sync');
         }
 
+
+        // ───── گروه اکشن: تنظیمات عمومی و افکت نمایشی ─────
         if ($action === 'save_triangle_effect') {
             $effectUser = require_permission('settings.general_edit');
             $postedPages = $_POST['triangle_pages'] ?? [];

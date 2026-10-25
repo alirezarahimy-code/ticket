@@ -1,6 +1,25 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * bootstrap.php — هستهٔ مشترک سامانه (۱۴۶ تابع کمکی).
+ *
+ * نقشهٔ خانواده‌های توابع (برای یافتن سریع با جستجوی «function نام‌خانواده_»):
+ *   db_*            اتصال و ابزارهای پایگاه داده (PDO، تراکنش، ترمیم اسکیما)
+ *   ticket_*        منطق درخواست‌ها (ارجاع خودکار، وضعیت‌ها، لغو)
+ *   ldap_* login_*  احراز هویت دامین و ورود
+ *   activity_*      ثبت فعالیت و لاگ عملیات
+ *   notification_* notify_*  اعلان‌ها
+ *   triangle_* particle_*    افکت‌های نمایشی (تنظیمات + فعال‌سازی صفحه‌ای)
+ *   system_* app_*  تنظیمات عمومی، نسخه و محیط
+ *   jalali_*        تاریخ شمسی
+ *   asset_*         چرخهٔ عمر دارایی‌ها
+ *   render_*        هدر/فوتر و اجزای مشترک HTML
+ *   سایر توابع تکی: valid_choice، post_value، flash، redirect، save_audit، ...
+ *
+ * نقشهٔ کامل معماری: docs/ARCHITECTURE-FA.md
+ */
+
 const APP_ROOT = __DIR__;
 
 require_once __DIR__ . '/permissions.php';

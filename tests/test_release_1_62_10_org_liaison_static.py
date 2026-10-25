@@ -81,7 +81,7 @@ def test_help_guide_covers_liaison_units():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.10"
+    # پین VERSION از ۱.۶۲.۱۱ به تست نسخهٔ جدید منتقل شد.
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.10"
     assert manifest["migrations"] == ["010-org-liaison-units.sql"]
@@ -108,11 +108,11 @@ def test_version_manifest_and_package():
     import hashlib
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
 
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # از ۱.۶۲.۱۱ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
+    assert "ticket-update-1.62.11-code-navigation-phase1-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" not in page
-    assert "هیچ خط اتصالی" in page or "بدون هیچ خط اتصالی" in page
