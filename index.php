@@ -464,18 +464,43 @@ function can_view_ticket(array $ticket, array $user): bool
     return false;
 }
 
+/**
+ * ۱.۶۲.۶ — آیا زیرساخت چارت سازمانی برای تشخیص «مدیر سازمانی» در دسترس است؟
+ * نتیجه کش می‌شود تا ثبت درخواست روی نصب‌های قدیمیِ بدون این جدول‌ها خطا نگیرد.
+ */
+function ticket_org_manager_rank_sql(): string
+{
+    static $ready = null;
+    if ($ready === null) {
+        try {
+            db()->query('SELECT 1 FROM org_units LIMIT 1');
+            db()->query('SELECT 1 FROM org_unit_managers LIMIT 1');
+            $ready = true;
+        } catch (Throwable) {
+            $ready = false;
+        }
+    }
+    return $ready
+        ? 'CASE WHEN EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id))) THEN 1 ELSE 0 END, '
+        : '';
+}
+
 function choose_handling_agent(string $serviceGroup, ?int $departmentId = null): ?int
 {
     $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
     $departmentId = (int) ($departmentId ?? 0);
     $loadJoin = ' LEFT JOIN tickets t ON t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled")';
+    // ۱.۶۲.۶ — مدیران چارت سازمانی (معاون/مدیر اداره) آخرِ صف ارجاع خودکار می‌روند تا اگر
+    // نقش/پرچم اشتباهی (مثل «ادمین اصلی» شدن ناخواسته) داشته باشند، تا وقتی کاندیدای
+    // واقعی فعال هست انتخاب نشوند. برای اصلاح ریشه‌ای، نقش‌ها از صفحهٔ سازمان ترمیم شوند.
+    $orgManagerRank = ticket_org_manager_rank_sql();
 
     // مالک اصلی هر حوزه اولویت دارد: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
     // اگر برای یک حوزه چند مالک فعال تعریف شده باشد، کمترین بارِ باز ملاک می‌شود.
     $ownerCondition = $serviceGroup === 'it'
         ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
         : 'u.role = "support_manager"';
-    $ownerQuery = db()->query('SELECT u.id FROM users u' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id ORDER BY COUNT(t.id), u.id LIMIT 1');
+    $ownerQuery = db()->query('SELECT u.id FROM users u' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1');
     $id = $ownerQuery->fetchColumn();
     if ($id !== false) {
         return (int) $id;
@@ -488,9 +513,9 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null):
         . 'LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
         . $loadJoin
         . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager", "support_manager", "primary_admin") AND hu.code = ?'
-        // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی تیکت است؛ از معاونت دیگری انتخاب نشود.
+        // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
-        . ' GROUP BY u.id ORDER BY COUNT(t.id), u.id LIMIT 1'
+        . ' GROUP BY u.id ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1'
     );
     $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
     $id = $fallback->fetchColumn();
@@ -3674,6 +3699,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirect('index.php?page=organization');
         }
 
+        if ($action === 'repair_org_manager_support_roles') {
+            // ۱.۶۲.۶ — همتای ترمیم ادمین اصلی برای حوزهٔ پشتیبانی: مدیر سازمانی نباید «مدیر پشتیبانی» بماند،
+            // وگرنه درخواست‌های پشتیبانی به‌صورت خودکار به او ارجاع می‌شوند.
+            $repairAdmin = require_primary_admin();
+            org_ensure_schema();
+            $requestedIds = array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['user_ids'] ?? [])))));
+            if ($requestedIds === []) {
+                throw new RuntimeException('حداقل یک مدیر سازمانی را برای اصلاح انتخاب کنید.');
+            }
+            $eligible = [];
+            $candidateQuery = db()->prepare('SELECT u.id FROM users u WHERE u.id = ? AND u.is_active = 1 AND u.role = "support_manager" AND EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id))) LIMIT 1');
+            foreach ($requestedIds as $candidateId) {
+                $candidateQuery->execute([$candidateId]);
+                if (!$candidateQuery->fetchColumn()) {
+                    throw new RuntimeException('یکی از کاربران انتخاب‌شده دیگر مدیر سازمانیِ دارای نقش «مدیر پشتیبانی» نیست؛ فهرست را تازه کنید.');
+                }
+                $eligible[] = $candidateId;
+            }
+            $supportManagerCount = (int) db()->query('SELECT COUNT(*) FROM users WHERE is_active = 1 AND role = "support_manager"')->fetchColumn();
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $placeholders = implode(',', array_fill(0, count($eligible), '?'));
+                $pdo->prepare('UPDATE users SET role = "manager", is_primary_admin = 0 WHERE id IN (' . $placeholders . ')')->execute($eligible);
+                $pdo->commit();
+            } catch (Throwable $repairError) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                throw $repairError;
+            }
+            save_audit((int) $repairAdmin['id'], 'org_manager_support_role_repaired', null, ['user_ids' => $eligible]);
+            $remaining = $supportManagerCount - count($eligible);
+            flash('success', count($eligible) . ' مدیر سازمانی از نقش «مدیر پشتیبانی» به «مدیر» برگردانده شدند؛ چارت سازمانی حفظ شد.'
+                . ($remaining < 1 ? ' توجه: دیگر مدیر پشتیبانی فعالی باقی نمانده؛ درخواست‌های پشتیبانی تا تعیین مدیر پشتیبانی واقعی بدون مسئول در «بررسی مدیر» می‌مانند.' : ''));
+            redirect('index.php?page=organization');
+        }
+
         if ($action === 'save_key_roles') {
             $rolesAdmin = require_permission('settings.key_roles_edit');
             $collectRoleIds = static function (string $field): array {
@@ -5720,6 +5783,67 @@ HTML;
                 echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $repairId . '"' . ($isCurrent ? ' disabled' : '') . ' aria-label="اصلاح ' . e((string) $repairCandidate['full_name']) . '"></td><td>' . e((string) $repairCandidate['full_name']) . ' <small>#' . $repairId . ' · ' . e((string) $repairCandidate['username']) . '</small>' . ($isCurrent ? '<br><small>حساب جاری قابل تنزل نیست</small>' : '') . '</td><td>' . e(implode('، ', array_unique($repairCandidate['unit_names']))) . '</td></tr>';
             }
             echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+
+        // ۱.۶۲.۶ — ترمیم مدیران سازمانی که نقش «مدیر پشتیبانی» دارند (مقصد اشتباه ارجاع خودکار پشتیبانی).
+        $supportRepairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND u.role = "support_manager" AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $supportRepairCandidates = [];
+        foreach ($supportRepairRows as $supportRepairRow) {
+            $supportRepairId = (int) $supportRepairRow['id'];
+            if (!isset($supportRepairCandidates[$supportRepairId])) {
+                $supportRepairCandidates[$supportRepairId] = $supportRepairRow;
+                $supportRepairCandidates[$supportRepairId]['unit_names'] = [];
+            }
+            $supportRepairCandidates[$supportRepairId]['unit_names'][] = (string) $supportRepairRow['unit_name'];
+        }
+        echo '<section class="card form-card" id="repair-org-support-roles"><h2>اصلاح مدیران سازمانی که «مدیر پشتیبانی» شده‌اند</h2><p class="muted">درخواست‌های پشتیبانی به‌صورت خودکار به «مدیر پشتیبانی» ارجاع می‌شوند. اگر معاون یا مدیر اداره‌ای به‌اشتباه این نقش را داشته باشد، مسئول درخواست‌های پشتیبانی می‌شود. فقط افرادی را تیک بزنید که واقعاً مدیر واحد پشتیبانی نیستند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت سازمانی حفظ می‌شود.</p>';
+        if ($supportRepairCandidates === []) {
+            echo '<p class="muted">در حال حاضر مدیر سازمانیِ دارای نقش «مدیر پشتیبانی» پیدا نشد.</p>';
+        } else {
+            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_support_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
+            foreach ($supportRepairCandidates as $supportRepairId => $supportRepairCandidate) {
+                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $supportRepairId . '" aria-label="اصلاح ' . e((string) $supportRepairCandidate['full_name']) . '"></td><td>' . e((string) $supportRepairCandidate['full_name']) . ' <small>#' . $supportRepairId . ' · ' . e((string) $supportRepairCandidate['username']) . '</small></td><td>' . e(implode('، ', array_unique($supportRepairCandidate['unit_names']))) . '</td></tr>';
+            }
+            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+
+        // ۱.۶۲.۶ — تشخیص ارجاع خودکار: چه کسی الان مسئول درخواست جدید می‌شود و چرا.
+        $diagOpenLoadSql = '(SELECT COUNT(*) FROM tickets t WHERE t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled"))';
+        $diagOrgManagerSql = 'EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)))';
+        $diagRows = db()->query('SELECT u.id, u.full_name, u.username, u.role, u.is_primary_admin, hu.code AS hu_code, ' . $diagOpenLoadSql . ' AS open_load, ' . $diagOrgManagerSql . ' AS is_org_manager FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1) OR u.role = "support_manager" OR (u.role IN ("agent", "manager") AND hu.code IN ("it", "support"))) ORDER BY u.full_name')->fetchAll();
+        $diagPick = ['it' => choose_handling_agent('it'), 'support' => choose_handling_agent('support')];
+        $diagRoleLabel = static fn (array $diagRow): string => ([
+            'primary_admin' => 'ادمین اصلی',
+            'admin' => ((int) $diagRow['is_primary_admin'] === 1 ? 'ادمین (پرچم ادمین اصلی)' : 'ادمین'),
+            'support_manager' => 'مدیر پشتیبانی',
+            'manager' => 'مدیر',
+            'agent' => 'کارشناس',
+        ][(string) $diagRow['role']] ?? (string) $diagRow['role']);
+        echo '<section class="card form-card" id="ticket-auto-assign-diagnostics"><h2>تشخیص ارجاع خودکار درخواست‌ها</h2><p class="muted">مسئول درخواست جدید به‌صورت خودکار تعیین می‌شود: درخواست IT به «ادمین اصلی» و درخواست پشتیبانی به «مدیر پشتیبانی» می‌رسد (در صورت تعدد، کمترین درخواست باز؛ مدیران سازمانی آخرِ صف). اگر نام بی‌ربطی در این فهرست است، نقش او را از «مدیریت کاربران» یا فرم‌های ترمیم بالا اصلاح کنید.</p>';
+        foreach (['it' => 'حوزهٔ IT', 'support' => 'حوزهٔ پشتیبانی'] as $diagGroup => $diagGroupLabel) {
+            $diagCandidates = array_values(array_filter($diagRows, static fn (array $diagRow): bool => $diagGroup === 'it'
+                ? ((string) $diagRow['role'] === 'primary_admin' || ((string) $diagRow['role'] === 'admin' && (int) $diagRow['is_primary_admin'] === 1) || ((string) ($diagRow['hu_code'] ?? '') === 'it' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))
+                : ((string) $diagRow['role'] === 'support_manager' || ((string) ($diagRow['hu_code'] ?? '') === 'support' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))));
+            $diagPickId = (int) ($diagPick[$diagGroup] ?? 0);
+            $diagPickName = 'هیچ‌کس (درخواست بدون مسئول در «بررسی مدیر» می‌ماند)';
+            foreach ($diagCandidates as $diagRow) {
+                if ((int) $diagRow['id'] === $diagPickId) {
+                    $diagPickName = (string) $diagRow['full_name'];
+                }
+            }
+            echo '<h3 style="margin:14px 0 6px">' . $diagGroupLabel . '</h3><p class="muted">مقصد فعلی ارجاع خودکار: <b>' . e($diagPickName) . '</b></p>';
+            if ($diagCandidates === []) {
+                echo '<p class="muted">هیچ کاندیدایی برای این حوزه پیدا نشد.</p>';
+                continue;
+            }
+            echo '<div class="table-wrap"><table class="data-table"><thead><tr><th>کاربر</th><th>نقش</th><th>واحد رسیدگی</th><th>درخواست‌های باز</th><th>مدیر سازمانی؟</th></tr></thead><tbody>';
+            foreach ($diagCandidates as $diagRow) {
+                $diagIsPick = (int) $diagRow['id'] === $diagPickId;
+                echo '<tr' . ($diagIsPick ? ' style="font-weight:700"' : '') . '><td>' . e((string) $diagRow['full_name']) . ' <small>#' . (int) $diagRow['id'] . ' · ' . e((string) $diagRow['username']) . '</small>' . ($diagIsPick ? ' <span class="status ok">مقصد فعلی</span>' : '') . '</td><td>' . e($diagRoleLabel($diagRow)) . '</td><td>' . e((string) ($diagRow['hu_code'] === 'it' ? 'IT' : ($diagRow['hu_code'] === 'support' ? 'پشتیبانی' : '—'))) . '</td><td>' . (int) $diagRow['open_load'] . '</td><td>' . ((int) $diagRow['is_org_manager'] === 1 ? '<span class="status warn">بله — آخرِ صف ارجاع خودکار</span>' : 'خیر') . '</td></tr>';
+            }
+            echo '</tbody></table></div>';
         }
         echo '</section>';
     }
