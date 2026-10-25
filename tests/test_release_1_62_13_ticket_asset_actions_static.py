@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_NAME = "ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip"
+PACKAGE_NAME = "ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip"
 UPDATE_DIR = "updates/2026-10-25-release-162-13-ticket-asset-actions-split"
 TICKET_ACTIONS = (
     "create_ticket", "cancel_ticket", "decide_ticket_cancellation",
@@ -112,3 +112,19 @@ def test_download_page_lists_only_latest_package():
     assert PACKAGE_NAME in page
     assert "ticket-update-1.62.12-org-actions-split-20261025.zip" not in page
     assert "actions/ticket-actions.php" in page and "actions/asset-actions.php" in page
+
+
+def test_fix1_dashboard_files_and_all_panel_asset_refs_are_packaged():
+    """fix1: بستهٔ تجمعی باید فایل‌های داشبورد 1.62.2 و همهٔ assetهای ارجاع‌شدهٔ پنل غذا را حمل کند."""
+    manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
+    for name in (
+        "food-ticket-web/assets/food-capitalio-dashboard-r42.js",
+        "food-ticket-web/assets/food-capitalio-dashboard-r42.css",
+        "permissions.php", "chatbot.php", "food-order.php", "food-ticket-web-host.php",
+    ):
+        assert name in manifest["files"], name
+    zf = zipfile.ZipFile(ROOT / "downloads" / PACKAGE_NAME)
+    names = set(zf.namelist())
+    html = zf.read("files/food-ticket-web/index.html").decode("utf-8")
+    for ref in sorted(set(re.findall(r'(?:src|href)="(assets/[^"?]+)', html))):
+        assert f"files/food-ticket-web/{ref}" in names, f"ارجاع بدون فایل در بسته: {ref}"

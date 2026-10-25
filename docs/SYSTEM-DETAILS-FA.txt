@@ -13,7 +13,7 @@
 --------------------
 ۱) برای همین متن: در مخزن alirezarahimy-code/ticket شاخهٔ arena/8edbdf95-ticket فایل docs/SYSTEM-DETAILS-FA.txt را باز کنید و Raw را بزنید؛ از صفحهٔ Raw می‌توان فایل را ذخیره کرد.
 ۲) برای کل کد و مستندات: در GitHub شاخهٔ همین نشست را باز کنید، از منوی Code گزینهٔ Download ZIP را انتخاب کنید.
-۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ جاری 1.62.13 در downloads/ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-25-release-162-13-ticket-asset-actions-split/CHANGE-REPORT-FA.md قرار دارد.
+۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ جاری 1.62.13 در downloads/ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-25-release-162-13-ticket-asset-actions-split/CHANGE-REPORT-FA.md قرار دارد.
 ۴) شاخهٔ نشست ممکن است هنوز با main ادغام نشده باشد؛ هنگام دریافت آخرین اصلاحات، شاخهٔ arena/8edbdf95-ticket را انتخاب کنید، نه main یا یک release قدیمی.
 
 معماری در یک نگاه
@@ -80,7 +80,7 @@
 نسخه و انتشار جاری
 ------------------
 - نسخه: 1.62.13.
-- بستهٔ فعلی: downloads/ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip؛ تغییرات اصلی: فاز ۲ برش‌های ۲ و ۳ — اکشن‌های درخواست‌ها و اموال/اسکن دامین بایت‌به‌بایت به actions/ticket-actions.php و actions/asset-actions.php منتقل شدند (صفر تغییر رفتاری، اثبات ماشینی، شرح فارسی بخش‌ها در سرآیند فایل‌ها) + اجتماع کامل فایل‌های 1.62.4 تا 1.62.13.
+- بستهٔ فعلی: downloads/ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip؛ تغییرات اصلی: فاز ۲ برش‌های ۲ و ۳ — اکشن‌های درخواست‌ها و اموال/اسکن دامین بایت‌به‌بایت به actions/ticket-actions.php و actions/asset-actions.php منتقل شدند (صفر تغییر رفتاری، اثبات ماشینی، شرح فارسی بخش‌ها در سرآیند فایل‌ها) + اجتماع کامل فایل‌های 1.62.4 تا 1.62.13.
 - صفحهٔ دانلود: downloads/index.html؛ گزارش: updates/2026-10-25-release-162-9-manual-ticket-date-guest/CHANGE-REPORT-FA.md؛ migration جدید ندارد.
 - پیش از نصب در سامانهٔ واقعی از پایگاه داده و پوشهٔ برنامه پشتیبان بگیرید؛ روی چاپگر و داده‌های عملیاتی ابتدا آزمایش کنید.
 - بستهٔ به‌روزرسانی را با بستهٔ کامل سامانه اشتباه نگیرید. config.php، .env، اطلاعات اتصال، storage زنده و uploads محرمانه‌اند و از بسته حذف می‌شوند.

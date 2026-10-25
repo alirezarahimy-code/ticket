@@ -27,8 +27,9 @@
   <main>
     <span class="tag">بستهٔ جاری · 1.62.13 · ۲۰۲۶/۱۰/۲۵</span>
     <h1>Ticket نسخهٔ ۱.۶۲.۱۳ — فاز ۲ بازسازی کدها، برش‌های ۲ و ۳ (بدون تغییر رفتاری)</h1>
-    <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.12 است و اجتماع کامل فایل‌های 1.62.4 تا 1.62.13 را حمل می‌کند:</p>
+    <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.12 است و (از fix1) اجتماع کامل فایل‌های <b>1.62.0 تا 1.62.13</b> را حمل می‌کند:</p>
     <ul>
+      <li><b>fix1 (مهم):</b> رفع پیام «نمای کامل داشبورد بارگذاری نشد… فایل‌های داشبورد را از بستهٔ 1.62.2 نصب کنید» — فایل‌های داشبورد غذا (<code>food-capitalio-dashboard-r42.js/.css</code>) و همهٔ فایل‌های بسته‌های 1.62.0 تا 1.62.3 + تمام assetهای ارجاع‌شدهٔ پنل غذا به بسته اضافه شدند (۴۶ فایل). هیچ تغییر کدی ندارد؛ فقط فایل‌های جاافتاده.</li>
       <li><b>جدید (1.62.13):</b> ۷ اکشن چرخهٔ درخواست‌ها به <code>actions/ticket-actions.php</code> و ۱۰ اکشن اموال/اسکن دامین به <code>actions/asset-actions.php</code> منتقل شدند — بایت‌به‌بایت با اثبات ماشینی، <b>صفر تغییر رفتاری</b>؛ شرح فارسی تک‌تک بخش‌ها در سرآیند همان فایل‌ها. index.php از ~۶۲۰۰ به ~۴۷۰۰ خط رسید.</li>
       <li><b>جدید (1.62.12):</b> ۱۳ اکشن چارت سازمانی بدون هیچ تغییری (بایت‌به‌بایت، با اثبات ماشینی) از <code>index.php</code> به فایل جدید <code>actions/org-actions.php</code> منتقل شد؛ <b>صفر تغییر رفتاری</b>. فایل جدید در برابر دسترسی مستقیم محافظ 404 دارد.</li>
       <li><b>جدید (1.62.11):</b> فاز ۱ بهینه‌سازی و خوانایی کدها — فقط کامنت‌های ناوبری در <code>index.php</code> و <code>bootstrap.php</code> و دو سند معماری/ممیزی در مخزن؛ <b>صفر تغییر رفتاری</b> (با مقایسهٔ ماشینی اثبات شد). اسنپشات امن: tag <code>snapshot-pre-refactor-20261025</code>.</li>
@@ -49,9 +50,9 @@
       <li>صفحه‌های پنل مدیریت غذا وسط‌چین شدند؛ داشبورد دیگر به سمت راست نمی‌چسبد.</li>
       <li>ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب».</li>
     </ul>
-    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip" download="ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip">⬇ دریافت بستهٔ 1.62.13</a>
-    <div class="file">ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip · SHA-256: 294f11154c3147abff7728ef7fe704d8e1697efedf58928d4741710c996313c1</div>
-    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
+    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip" download="ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip">⬇ دریافت بستهٔ 1.62.13</a>
+    <div class="file">ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip · SHA-256: 6414461bae685d55d6227f76bc163c7d968939aff950636cff2d0f9b62da2a8e</div>
+    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
     <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-13-ticket-asset-actions-split/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.13">انتشار GitHub v1.62.13</a></p>
     <div class="hint">این بسته رفتار سامانه را تغییر نمی‌دهد (فاز ۱ فقط کامنت و سند است). پس از نصب کافی است یک بار سامانه را باز کنید و کارکرد عادی را ببینید. اگر واحد مستقل (نمایندگی) نسخهٔ ۱.۶۲.۱۰ را هنوز امتحان نکرده‌اید: صفحهٔ «سازمان» را با Ctrl+F5 باز کنید؛ مدیر چارت دو کادر خط‌چین در دو سمت کادر مدیرعامل می‌بیند. در صورت بروز هر مشکل، بازگشت کامل: tag <code>snapshot-1.62.12-20261025</code> (یا اسنپشات قدیمی‌تر snapshot-pre-refactor-20261025). آزمون پیشنهادی روی سرور تست: چرخهٔ کامل یک درخواست (ثبت با پیوست، پاسخ، به‌عهده‌گرفتن، بازگشایی، لغو)، عملیات اموال/اسکن دامین، و عملیات صفحهٔ «سازمان».</div>
   </main>
