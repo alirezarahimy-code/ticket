@@ -36,7 +36,8 @@ def test_index_requires_both_files_in_place_and_in_order():
     a = "require __DIR__ . '/actions/asset-actions.php';"
     assert t in src and a in src
     # ترتیب اجرای قبلی حفظ شده: اموال قبل از درخواست‌ها، هر دو قبل از گروه خدمات
-    assert src.index(a) < src.index(t) < src.index("if ($action === 'add_service')")
+    # (از ۱.۶۲.۱۴ گروه خدمات هم به actions/service-actions.php منتقل شد)
+    assert src.index(a) < src.index(t) < src.index("require __DIR__ . '/actions/service-actions.php';")
     for action in TICKET_ACTIONS + ASSET_ACTIONS:
         assert f"if ($action === '{action}')" not in src, action
 
@@ -75,7 +76,7 @@ def test_asset_actions_file_sections_and_persian_descriptions():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.13"
+    # VERSION از ۱.۶۲.۱۴ جلوتر رفته؛ پین نسخهٔ جاری در تست ریلیز ۱.۶۲.۱۴ است.
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.13"
     assert manifest["migrations"] == [
@@ -104,12 +105,14 @@ def test_version_manifest_and_package():
     import hashlib
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
+    # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۴ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۴ است.
 
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # از ۱.۶۲.۱۴ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد؛ بسته‌های قبلی نباید در صفحه باشند.
+    assert "ticket-update-1.62.14-service-actions-split-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.12-org-actions-split-20261025.zip" not in page
     assert "actions/ticket-actions.php" in page and "actions/asset-actions.php" in page
 
