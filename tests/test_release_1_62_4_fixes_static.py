@@ -28,7 +28,7 @@ def test_theme_css_cache_versions_are_bumped():
     panel = read("food-ticket-web/index.html")
     assert "food-ticket-global-theme-r42.css?v=45" in panel
     assert "food-ticket-theme.css?v=10" in panel
-    assert "food-manual-attendance.js?v=3" in panel
+    assert "food-manual-attendance.js?v=4" in panel
     assert "const PANEL_VERSION='1.37.25'" in panel
     assert "const FOOD_TICKET_PANEL_VERSION = '1.37.25';" in read("food-ticket.php")
 

@@ -1770,21 +1770,50 @@ function food_ticket_manual_attendance_today(): string
     return function_exists('food_order_today') ? food_order_today() : date('Y-m-d');
 }
 
-/** فهرست سفارش‌دهندگان واجد شرایط ثبت دستی برای امروز؛ کد ملی فقط برای تطبیق داخلی است و به رابط برنمی‌گردد. */
-function food_ticket_api_manual_attendance(string $date = ''): array
+/**
+ * ۱.۶۲.۹: ثبت دستی دیگر فقط برای امروز نیست؛ هر تاریخ گذشته (تا امروز) پذیرفته می‌شود.
+ * تاریخ آینده مجاز نیست؛ ورودی نامعتبر به امروز برمی‌گردد.
+ */
+function food_ticket_manual_attendance_date(string $date): string
 {
     $today = food_ticket_manual_attendance_today();
-    $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : $today;
-    if ($date !== $today) {
-        throw new RuntimeException('ثبت دستی فیش فقط برای امروز مجاز است.');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+        return $today;
     }
+    [$y, $m, $d] = array_map('intval', explode('-', $date));
+    if (!checkdate($m, $d, $y)) {
+        throw new RuntimeException('تاریخ انتخاب‌شده معتبر نیست.');
+    }
+    if ($date > $today) {
+        throw new RuntimeException('ثبت دستی فیش برای تاریخ آینده مجاز نیست؛ امروز یا روزهای قبل را انتخاب کنید.');
+    }
+    return $date;
+}
+
+/** ردیف مجازی «مهمان» که همیشه اول فهرست ثبت دستی می‌آید؛ چندبار در روز قابل ثبت است. */
+function food_ticket_manual_attendance_guest_row(): array
+{
+    return [
+        'id' => 0,
+        'pc' => '',
+        'name' => 'مهمان',
+        'active' => true,
+        'today_record' => null,
+        'guest' => true,
+    ];
+}
+
+/** فهرست سفارش‌دهندگان واجد شرایط ثبت دستی برای روز انتخاب‌شده؛ کد ملی فقط برای تطبیق داخلی است و به رابط برنمی‌گردد. */
+function food_ticket_api_manual_attendance(string $date = ''): array
+{
+    $date = food_ticket_manual_attendance_date($date);
 
     // از همان نقشهٔ سفارش داخلی/فعال ناهار استفاده می‌شود که صدور فیش بررسی می‌کند.
     // خطای دریافت سفارش‌ها باید درخواست را متوقف کند؛ فهرست همهٔ کاربران fallback مجاز نیست.
     $orderMaps = [];
     $orderMap = food_ticket_group_order_map($orderMaps, $date);
     if (!is_array($orderMap)) {
-        throw new RuntimeException('دریافت سفارش‌های امروز ناموفق بود؛ فهرست ثبت دستی نمایش داده نمی‌شود.');
+        throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ فهرست ثبت دستی نمایش داده نمی‌شود.');
     }
     $hasEligibleOrder = food_ticket_group_food_lookup($orderMap);
 
@@ -1828,6 +1857,8 @@ function food_ticket_api_manual_attendance(string $date = ''): array
             'today_record' => $attendanceByUser[$id] ?? null,
         ];
     }, $people ?: []);
+    // ۱.۶۲.۹: «مهمان» همیشه اولین ردیف فهرست است و محدودیت سفارش/تکرار ندارد.
+    array_unshift($employees, food_ticket_manual_attendance_guest_row());
 
     $q = db()->prepare(
         'SELECT id, user_id, personnel_code, full_name, food_type, punch_time, event_type, print_status, source_payload, created_at '
@@ -1856,12 +1887,12 @@ function food_ticket_api_manual_attendance(string $date = ''): array
     return ['date' => $date, 'employees' => $employees, 'items' => $items];
 }
 
-/** ثبت دستی یک تردد امروز؛ صدور فیش و چاپ فیزیکی دو انتخاب مستقل هستند. */
-function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, bool $physicalPrint, string $reason, array $actor, array &$orderMaps): array
+/** ثبت دستی یک تردد برای روز انتخاب‌شده (امروز یا روزهای قبل)؛ صدور فیش و چاپ فیزیکی دو انتخاب مستقل هستند. */
+function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, bool $physicalPrint, string $reason, array $actor, array &$orderMaps, string $date = ''): array
 {
-    $today = food_ticket_manual_attendance_today();
+    $targetDate = food_ticket_manual_attendance_date($date);
     $reason = trim($reason);
-    if ($userId <= 0) {
+    if ($userId < 0) {
         throw new RuntimeException('یک کارمند را انتخاب کنید.');
     }
     if ($reason === '' || (function_exists('mb_strlen') ? mb_strlen($reason, 'UTF-8') : strlen($reason)) > 300) {
@@ -1869,6 +1900,10 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     }
     if (!$withTicket) {
         $physicalPrint = false;
+    }
+    // ۱.۶۲.۹: شناسهٔ صفر یعنی «مهمان»؛ مسیر جداگانه بدون شرط سفارش/تکرار.
+    if ($userId === 0) {
+        return food_ticket_api_manual_attendance_save_guest($withTicket, $physicalPrint, $reason, $actor, $targetDate);
     }
 
     $q = db()->prepare(
@@ -1885,22 +1920,22 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
 
     // پیش از هر نوع ثبت دستی (با فیش یا بدون فیش)، وجود سفارش فعال ناهار را
     // با همان نقشه‌ای بررسی می‌کنیم که موتور صدور فیش از آن استفاده می‌کند.
-    $orderMap = food_ticket_group_order_map($orderMaps, $today);
+    $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
     if (!is_array($orderMap)) {
-        throw new RuntimeException('دریافت سفارش‌های امروز ناموفق بود؛ ثبت دستی انجام نشد.');
+        throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
     }
     $orderFood = food_ticket_group_food_lookup($orderMap)($person);
     if (!is_string($orderFood) || trim($orderFood) === '') {
-        throw new RuntimeException('برای این کارمند سفارش فعال ناهار در امروز پیدا نشد؛ ثبت دستی مجاز نیست.');
+        throw new RuntimeException('برای این کارمند سفارش فعال ناهار در روز انتخاب‌شده پیدا نشد؛ ثبت دستی مجاز نیست.');
     }
 
     $duplicate = db()->prepare(
         'SELECT id, event_type, print_status FROM food_ticket_events '
         . 'WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" ORDER BY id DESC LIMIT 1'
     );
-    $duplicate->execute([$userId, $today]);
+    $duplicate->execute([$userId, $targetDate]);
     if ($existingToday = $duplicate->fetch()) {
-        throw new RuntimeException('برای این کارمند امروز تردد ثبت شده است؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingToday['event_type'] ?? 'نامشخص') . '.');
+        throw new RuntimeException('برای این کارمند در این روز تردد ثبت شده است؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingToday['event_type'] ?? 'نامشخص') . '.');
     }
 
     $now = function_exists('food_order_now') ? food_order_now()->format('H:i:s') : date('H:i:s');
@@ -1908,12 +1943,12 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     $config = [];
 
     if (!$withTicket) {
-        $sourceKey = hash('sha256', 'manual-attendance-no-ticket|' . $today . '|' . $userId);
+        $sourceKey = hash('sha256', 'manual-attendance-no-ticket|' . $targetDate . '|' . $userId);
         $payload = [
             'source_key' => $sourceKey,
             'source_uid' => 'manual-attendance',
             'source_card' => null,
-            'punch_date' => $today,
+            'punch_date' => $targetDate,
             'punch_time' => $now,
             'personnel_code' => $employeeNumber !== '' ? food_ticket_code($employeeNumber) : null,
             'user_id' => $userId,
@@ -1939,31 +1974,31 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         if ($employeeNumber === '') {
             throw new RuntimeException('برای این کارمند کد پرسنلی ثبت نشده است؛ صدور فیش ممکن نیست.');
         }
-        $ticketKey = 'food:' . $today . ':' . food_ticket_digits($person['national_code'] ?? '');
+        $ticketKey = 'food:' . $targetDate . ':' . food_ticket_digits($person['national_code'] ?? '');
         if (food_ticket_digits($person['national_code'] ?? '') !== '' && ($existingTicket = food_ticket_existing_ticket($ticketKey))) {
-            throw new RuntimeException('برای این کارمند امروز فیش وجود دارد؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingTicket['print_status'] ?? 'نامشخص') . '.');
+            throw new RuntimeException('برای این کارمند در این روز فیش وجود دارد؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingTicket['print_status'] ?? 'نامشخص') . '.');
         }
 
-        $orderMap = food_ticket_group_order_map($orderMaps, $today);
+        $orderMap = food_ticket_group_order_map($orderMaps, $targetDate);
         if (!is_array($orderMap)) {
-            throw new RuntimeException('دریافت سفارش‌های امروز ناموفق بود؛ ثبت دستی انجام نشد.');
+            throw new RuntimeException('دریافت سفارش‌های روز انتخاب‌شده ناموفق بود؛ ثبت دستی انجام نشد.');
         }
         $base = [
-            'source_key' => hash('sha256', 'manual-food-ticket|' . $today . '|' . $userId),
+            'source_key' => hash('sha256', 'manual-food-ticket|' . $targetDate . '|' . $userId),
             'source_uid' => 'manual-attendance',
             'source_card' => null,
-            'punch_date' => $today,
+            'punch_date' => $targetDate,
             'punch_time' => $now,
             'personnel_code' => food_ticket_code($employeeNumber),
             'source_payload' => '',
         ];
-        $decision = food_ticket_decide_for_user($person, $today, $base, $config, $orderMaps);
+        $decision = food_ticket_decide_for_user($person, $targetDate, $base, $config, $orderMaps);
         if (empty($decision['print'])) {
             $message = match ((string) ($decision['event_type'] ?? '')) {
-                'no_food' => 'برای این کارمند سفارش غذا یا کد ملی معتبر برای امروز پیدا نشد؛ فیش صادر نشد.',
-                'repeat' => 'برای این کارمند امروز رویداد فیش وجود دارد؛ ثبت تکراری مجاز نیست.',
+                'no_food' => 'برای این کارمند سفارش غذا یا کد ملی معتبر برای این روز پیدا نشد؛ فیش صادر نشد.',
+                'repeat' => 'برای این کارمند در این روز رویداد فیش وجود دارد؛ ثبت تکراری مجاز نیست.',
                 'inactive' => 'حساب کارمند غیرفعال است؛ فیش صادر نشد.',
-                default => 'کارمند برای دریافت فیش امروز واجد شرایط نیست؛ فیش صادر نشد.',
+                default => 'کارمند برای دریافت فیش در این روز واجد شرایط نیست؛ فیش صادر نشد.',
             };
             throw new RuntimeException($message);
         }
@@ -2016,7 +2051,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         'user_id' => (int) ($actor['id'] ?? 0),
         'meta' => [
             'subject_user_id' => $userId,
-            'date' => $today,
+            'date' => $targetDate,
             'with_ticket' => $withTicket,
             'physical_print' => $physicalPrint,
             'ticket_key' => (string) ($payload['ticket_key'] ?? ''),
@@ -2036,6 +2071,96 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     ];
 }
 
+/**
+ * ۱.۶۲.۹: ثبت دستی فیش «مهمان» — بدون شرط سفارش، کد پرسنلی یا منع تکرار؛ هر ثبت یک فیش جدید است.
+ * رویداد با user_id خالی، نام «مهمان» و نوع غذای «مهمان» ذخیره می‌شود تا در گزارش‌ها
+ * کنار فیش‌های مهمانِ کارت‌خوان (event_type = guest) شمرده شود.
+ */
+function food_ticket_api_manual_attendance_save_guest(bool $withTicket, bool $physicalPrint, string $reason, array $actor, string $date): array
+{
+    if (!$withTicket) {
+        $physicalPrint = false;
+    }
+    $now = function_exists('food_order_now') ? food_order_now()->format('H:i:s') : date('H:i:s');
+    $recordedAt = function_exists('food_order_now') ? food_order_now()->format('Y-m-d H:i:s') : date('Y-m-d H:i:s');
+    $config = $withTicket ? food_ticket_config(true) : [];
+    // هر ثبت مهمان کلید یکتای خودش را دارد تا چند مهمان در یک روز قابل ثبت باشند.
+    $sourceKey = hash('sha256', 'manual-guest|' . $date . '|' . bin2hex(random_bytes(16)));
+    $sourcePayload = json_encode([
+        'manual_attendance' => [
+            'actor_id' => (int) ($actor['id'] ?? 0),
+            'reason' => $reason,
+            'with_ticket' => $withTicket,
+            'physical_print' => $physicalPrint,
+            'guest' => true,
+            'recorded_at' => $recordedAt,
+        ],
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $payload = [
+        'source_key' => $sourceKey,
+        'source_uid' => 'manual-attendance',
+        'source_card' => null,
+        'punch_date' => $date,
+        'punch_time' => $now,
+        'personnel_code' => null,
+        'user_id' => null,
+        'national_code' => null,
+        'full_name' => 'مهمان',
+        'food_type' => $withTicket ? 'مهمان' : null,
+        'ticket_key' => null,
+        'event_type' => $withTicket ? 'guest' : 'no_food',
+        'print_status' => 'not_printed',
+        'last_error' => $withTicket ? null : ('ثبت دستی تردد مهمان بدون صدور فیش؛ علت: ' . $reason),
+        'source_payload' => $sourcePayload,
+    ];
+
+    $eventId = food_ticket_add_event($payload);
+    if ($eventId <= 0) {
+        throw new RuntimeException('ثبت فیش مهمان انجام نشد.');
+    }
+
+    if ($withTicket && $physicalPrint) {
+        food_ticket_enqueue_print($eventId, $config);
+        $message = 'فیش مهمان صادر شد و برای چاپ فیزیکی در صف قرار گرفت.';
+        $printStatus = 'pending';
+    } elseif ($withTicket) {
+        if (function_exists('food_ticket_print_log')) {
+            food_ticket_print_log($eventId, '', $sourceKey, '', 'ثبت دستی', 'manual_issued', 0, 'فیش مهمان صادر شد؛ چاپ فیزیکی انتخاب نشده است.');
+        }
+        $message = 'فیش مهمان صادر شد؛ چاپ فیزیکی انجام نشد.';
+        $printStatus = 'not_printed';
+    } else {
+        $message = 'تردد مهمان ثبت شد؛ فیش صادر نشد.';
+        $printStatus = 'not_printed';
+    }
+
+    food_ticket_audit('food_ticket_manual_attendance', [
+        'target_type' => 'food_ticket_event',
+        'target_id' => $eventId,
+        'target_label' => 'مهمان',
+        'user_id' => (int) ($actor['id'] ?? 0),
+        'meta' => [
+            'subject_user_id' => 0,
+            'guest' => true,
+            'date' => $date,
+            'with_ticket' => $withTicket,
+            'physical_print' => $physicalPrint,
+            'reason' => $reason,
+        ],
+    ]);
+    return [
+        'ok' => true,
+        'event_id' => $eventId,
+        'user_id' => 0,
+        'name' => 'مهمان',
+        'pc' => '',
+        'with_ticket' => $withTicket,
+        'physical_print' => $physicalPrint,
+        'print_status' => $printStatus,
+        'message' => $message,
+    ];
+}
+
 /** هر نفر جداگانه ثبت می‌شود؛ خطای یک نفر مانع پردازش بقیه نیست. */
 function food_ticket_api_manual_attendance_save_many(array $body, array $actor): array
 {
@@ -2046,7 +2171,8 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     $userIds = [];
     foreach ($rawIds as $rawId) {
         $userId = filter_var($rawId, FILTER_VALIDATE_INT);
-        if ($userId === false || (int) $userId <= 0) {
+        // ۱.۶۲.۹: شناسهٔ صفر «مهمان» است و معتبر محسوب می‌شود.
+        if ($userId === false || (int) $userId < 0) {
             continue;
         }
         $userIds[(int) $userId] = (int) $userId;
@@ -2058,15 +2184,22 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     if (count($userIds) > 100) {
         throw new RuntimeException('در هر نوبت حداکثر ۱۰۰ کارمند را انتخاب کنید.');
     }
+    // ۱.۶۲.۹: تاریخ انتخابی (امروز یا روزهای قبل) برای همهٔ ثبت‌های این نوبت اعمال می‌شود.
+    $date = food_ticket_manual_attendance_date((string) ($body['date'] ?? ''));
     $withTicket = array_key_exists('with_ticket', $body) ? filter_var($body['with_ticket'], FILTER_VALIDATE_BOOLEAN) : true;
     $physicalPrint = $withTicket && !empty($body['physical_print']);
     $reason = (string) ($body['reason'] ?? '');
-    $labels = [];
+    $labels = [0 => ['name' => 'مهمان', 'pc' => '']];
+    $lookupIds = array_values(array_filter($userIds, static fn (int $id): bool => $id > 0));
     try {
-        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-        $labelQuery = db()->prepare('SELECT id, employee_number, full_name, username FROM users WHERE id IN (' . $placeholders . ')');
-        $labelQuery->execute($userIds);
-        foreach ($labelQuery->fetchAll() ?: [] as $person) {
+        $placeholders = $lookupIds ? implode(',', array_fill(0, count($lookupIds), '?')) : '';
+        $labelQuery = $placeholders !== '' ? db()->prepare('SELECT id, employee_number, full_name, username FROM users WHERE id IN (' . $placeholders . ')') : null;
+        $labelRows = [];
+        if ($labelQuery !== null) {
+            $labelQuery->execute($lookupIds);
+            $labelRows = $labelQuery->fetchAll() ?: [];
+        }
+        foreach ($labelRows as $person) {
             $id = (int) ($person['id'] ?? 0);
             $pc = trim((string) ($person['employee_number'] ?? ''));
             $name = trim((string) ($person['full_name'] ?? '')) ?: ($pc !== '' ? $pc : (string) ($person['username'] ?? ''));
@@ -2079,7 +2212,7 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     $orderMaps = [];
     foreach ($userIds as $userId) {
         try {
-            $results[] = food_ticket_api_manual_attendance_save($userId, $withTicket, $physicalPrint, $reason, $actor, $orderMaps);
+            $results[] = food_ticket_api_manual_attendance_save($userId, $withTicket, $physicalPrint, $reason, $actor, $orderMaps, $date);
         } catch (Throwable $exception) {
             $results[] = [
                 'ok' => false,

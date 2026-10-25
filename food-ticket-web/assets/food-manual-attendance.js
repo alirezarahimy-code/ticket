@@ -7,6 +7,7 @@
     manualEmployees: [], manualItems: [], manualFilter: '', manualSelected: [],
     manualLoading: false, manualSaving: false, manualError: '', manualLoaded: false,
     manualResults: [], manualWithTicket: true, manualPhysicalPrint: false, manualReason: '',
+    manualDate: '',
   };
   const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   const say = (m) => { try { if (typeof toast === 'function') toast(m); } catch (e) { /* ignore */ } };
@@ -16,18 +17,37 @@
       return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
     } catch (e) { return new Date().toISOString().slice(0, 10); }
   };
+  // ۱.۶۲.۹: ردیف «مهمان» با شناسهٔ صفر همیشه اول فهرست است و همیشه قابل انتخاب می‌ماند.
+  const isGuestRow = (u) => Number(u && u.id) === 0;
+  const selectableRow = (u) => !!u && (isGuestRow(u) || (!!u.active && !u.today_record && (!S.manualWithTicket || !!u.pc)));
+  const manualDateIso = () => S.manualDate || isoToday();
+  const jalaliFromIso = (iso) => {
+    try {
+      const d = new Date(String(iso) + 'T12:00:00Z');
+      return new Intl.DateTimeFormat('en-US-u-ca-persian', { timeZone: 'Asia/Tehran', year: 'numeric', month: '2-digit', day: '2-digit' })
+        .format(d).replace(/[^0-9/]/g, '').replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3/$1/$2');
+    } catch (e) { return String(iso || ''); }
+  };
+  const isoFromDateInput = (value) => {
+    try { if (typeof isoDateFor === 'function') return isoDateFor(value) || ''; } catch (e) { /* ignore */ }
+    const digits = String(value || '').replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '');
+    if (digits.length !== 8 || Number(digits.slice(0, 4)) < 1700) return '';
+    return digits.slice(0, 4) + '-' + digits.slice(4, 6) + '-' + digits.slice(6, 8);
+  };
 
   function loadManualAttendance() {
     if (S.manualLoading) return;
+    if (!S.manualDate) S.manualDate = isoToday();
     S.manualLoading = true;
     S.manualError = '';
     drawManualAttendance();
-    callApi('/api/food-manual-attendance').then((x) => {
+    callApi('/api/food-manual-attendance?date=' + encodeURIComponent(manualDateIso())).then((x) => {
       S.manualEmployees = (x && x.employees) || [];
       S.manualItems = (x && x.items) || [];
+      if (x && x.date) S.manualDate = x.date;
       S.manualSelected = S.manualSelected.filter((id) => {
         const u = S.manualEmployees.find((person) => Number(person.id) === Number(id));
-        return u && u.active && !u.today_record && (!S.manualWithTicket || !!u.pc);
+        return selectableRow(u);
       });
       S.manualError = '';
       S.manualLoaded = true;
@@ -46,14 +66,15 @@
   };
 
   function manualStatus(u) {
+    if (isGuestRow(u)) return '<span class="status ok">مهمان — چند بار قابل ثبت</span>';
     if (!u.active) return '<span class="status bad">حساب غیرفعال</span>';
     const record = u.today_record;
     if (!record && !u.pc) return '<span class="status warn">بدون کد پرسنلی</span>';
-    if (!record) return '<span class="status ok">تردد امروز ثبت نشده</span>';
-    if (record.source_uid === 'manual-attendance') return '<span class="status warn">ثبت دستی امروز</span>';
-    if (record.event_type === 'printed') return '<span class="status ok">دارای فیش امروز</span>';
-    if (record.event_type === 'no_food') return '<span class="status warn">تردد/بدون فیش امروز</span>';
-    return '<span class="status warn">تردد امروز ثبت شده</span>';
+    if (!record) return '<span class="status ok">تردد این روز ثبت نشده</span>';
+    if (record.source_uid === 'manual-attendance') return '<span class="status warn">ثبت دستی این روز</span>';
+    if (record.event_type === 'printed') return '<span class="status ok">دارای فیش این روز</span>';
+    if (record.event_type === 'no_food') return '<span class="status warn">تردد/بدون فیش این روز</span>';
+    return '<span class="status warn">تردد این روز ثبت شده</span>';
   }
 
   function manualAttendancePanel() {
@@ -62,7 +83,7 @@
     const filtered = S.manualEmployees.filter((u) => !query
       || (String(u.name || '') + ' ' + String(u.pc || '')).toLocaleLowerCase().includes(query));
     const selected = new Set(S.manualSelected.map(Number));
-    const canSelect = (u) => canEdit && !!u.active && !u.today_record && (!S.manualWithTicket || !!u.pc);
+    const canSelect = (u) => canEdit && selectableRow(u);
     const rows = filtered.map((u) => {
       const id = Number(u.id);
       const disabled = !canSelect(u);
@@ -74,7 +95,7 @@
         + '<td>' + manualStatus(u) + '</td></tr>';
     }).join('');
     const emptyMessage = S.manualEmployees.length === 0
-      ? 'امروز هیچ کارمند فعالی با سفارش ناهار واجد شرایط پیدا نشد.'
+      ? 'در این روز هیچ کارمند فعالی با سفارش ناهار واجد شرایط پیدا نشد.'
       : 'کاربری مطابق جستجو پیدا نشد.';
     const eligibleVisible = filtered.filter(canSelect);
     // تیک کنار «انتخاب»: با زدنش همهٔ افراد قابل‌انتخاب تیک می‌خورند و با برداشتنش همه بدون تیک می‌شوند.
@@ -100,14 +121,20 @@
           + '<td><span class="status ' + (item.print_status === 'printed' ? 'ok' : (['failed', 'print_error'].includes(item.print_status) ? 'bad' : 'warn')) + '">'
           + esc(item.ticket_issued ? (MANUAL_PRINT_STATUS[item.print_status] || item.print_status || '—') : 'تردد دستی؛ بدون فیش') + '</span></td></tr>').join('')
         + '</tbody></table></div>'
-      : '<p class="muted">امروز هنوز ثبت دستی انجام نشده است.</p>';
+      : '<p class="muted">در این روز هنوز ثبت دستی انجام نشده است.</p>';
 
-    return '<div class="card section-gap" id="manual-attendance-page"><div class="form-section-head"><h2>ثبت دستی فیش امروز</h2>'
-      + '<span class="status warn">فقط امروز</span></div>'
-      + '<p class="muted">فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ امروز را نشان می‌دهد؛ وضعیت سفارش هنگام ثبت هم دوباره بررسی می‌شود. ثبت فیش از چاپ فیزیکی جداست؛ حالت «بدون فیش» فقط رویداد تردد را ثبت می‌کند.</p>'
+    const isPastDay = manualDateIso() !== isoToday();
+    const dateBadge = isPastDay
+      ? '<span class="status warn">ثبت برای روز گذشته: ' + esc(jalaliFromIso(manualDateIso())) + '</span>'
+      : '<span class="status ok">امروز</span>';
+    return '<div class="card section-gap" id="manual-attendance-page"><div class="form-section-head"><h2>ثبت دستی فیش</h2>'
+      + dateBadge + '</div>'
+      + '<p class="muted">فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ روز انتخاب‌شده را نشان می‌دهد؛ وضعیت سفارش هنگام ثبت هم دوباره بررسی می‌شود. ردیف «مهمان» همیشه اول فهرست است و بدون نیاز به سفارش، چند بار در روز قابل ثبت است. ثبت فیش از چاپ فیزیکی جداست؛ حالت «بدون فیش» فقط رویداد تردد را ثبت می‌کند. تاریخ آینده مجاز نیست.</p>'
       + (S.manualError ? '<p class="manual-error" role="alert">' + esc(S.manualError) + '</p>' : '')
-      + (S.manualLoading ? '<p class="muted">در حال بارگذاری فهرست کارکنان و ثبت‌های امروز…</p>' : '')
-      + '<div class="manual-attendance-controls"><label class="field">جستجوی زنده<input id="fg-manual-filter" type="search" value="' + esc(S.manualFilter) + '" placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
+      + (S.manualLoading ? '<p class="muted">در حال بارگذاری فهرست کارکنان و ثبت‌های این روز…</p>' : '')
+      + '<div class="manual-attendance-controls">'
+      + '<label class="field">تاریخ ثبت (شمسی)<input id="fg-manual-date" type="text" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(jalaliFromIso(manualDateIso())) + '"' + (S.manualLoading || S.manualSaving ? ' disabled' : '') + '></label>'
+      + '<label class="field">جستجوی زنده<input id="fg-manual-filter" type="search" value="' + esc(S.manualFilter) + '" placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
       + (canEdit ? '<div class="manual-select-actions"><button type="button" class="btn ghost" data-manual-action="manual-select-visible"' + (eligibleVisible.length ? '' : ' disabled') + '>انتخاب افرادِ قابل‌انتخابِ نتیجه</button>'
         + '<button type="button" class="btn ghost" data-manual-action="manual-clear-selection"' + (chosenCount ? '' : ' disabled') + '>پاک‌کردن انتخاب</button><span class="muted">انتخاب‌شده: ' + chosenCount + ' نفر</span></div>'
         + '<fieldset class="manual-ticket-mode"><legend>نوع ثبت</legend><label><input type="radio" name="fg-manual-with-ticket" value="yes"' + (S.manualWithTicket ? ' checked' : '') + '> ثبت تردد با صدور فیش</label>'
@@ -121,7 +148,7 @@
       + (rows || '<tr><td colspan="' + (canEdit ? '4' : '3') + '" class="empty">' + esc(emptyMessage) + '</td></tr>')
       + '</tbody></table></div></div>'
       + (S.manualResults.length ? '<div class="manual-results"><h3>نتیجهٔ هر نفر</h3>' + results + '</div>' : '')
-      + '<div class="form-section-head" style="margin-top:18px"><h3>ثبت‌های دستی امروز</h3></div>' + history + '</div>';
+      + '<div class="form-section-head" style="margin-top:18px"><h3>ثبت‌های دستی این روز</h3></div>' + history + '</div>';
   }
 
   function manualAttendanceHtml() {
@@ -130,11 +157,30 @@
 
   function drawManualAttendance() {
     const root = document.getElementById('manual-attendance-root');
-    if (root) root.innerHTML = manualAttendancePanel();
+    if (!root) return;
+    root.innerHTML = manualAttendancePanel();
+    // تقویم شمسی مشترک سامانه روی فیلد تاریخ سوار می‌شود (مثل برنامهٔ غذایی).
+    try { if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(root); } catch (e) { /* ignore */ }
+  }
+
+  function applyManualDateInput(value) {
+    const iso = isoFromDateInput(value);
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return;
+    if (iso > isoToday()) { say('ثبت دستی فیش برای تاریخ آینده مجاز نیست.'); return; }
+    if (iso === manualDateIso()) return;
+    S.manualDate = iso;
+    S.manualSelected = [];
+    S.manualResults = [];
+    S.manualLoaded = false;
+    loadManualAttendance();
   }
 
 
   document.addEventListener('input', (e) => {
+    if (e.target && e.target.id === 'fg-manual-date') {
+      applyManualDateInput(e.target.value || '');
+      return;
+    }
     if (e.target && e.target.id === 'fg-manual-filter') {
       S.manualFilter = e.target.value || '';
       drawManualAttendance();
@@ -148,12 +194,16 @@
   });
 
   document.addEventListener('change', (e) => {
+    if (e.target && e.target.id === 'fg-manual-date') {
+      applyManualDateInput(e.target.value || '');
+      return;
+    }
     if (e.target && e.target.name === 'fg-manual-with-ticket') {
       S.manualWithTicket = e.target.value === 'yes';
       if (!S.manualWithTicket) S.manualPhysicalPrint = false;
       S.manualSelected = S.manualSelected.filter((id) => {
         const u = S.manualEmployees.find((x) => Number(x.id) === Number(id));
-        return u && u.active && !u.today_record && (!S.manualWithTicket || !!u.pc);
+        return selectableRow(u);
       });
       drawManualAttendance();
       return;
@@ -167,7 +217,7 @@
         const q = String(S.manualFilter || '').trim().toLocaleLowerCase();
         const visible = S.manualEmployees.filter((u) => {
           const matches = !q || (String(u.name || '') + ' ' + String(u.pc || '')).toLocaleLowerCase().includes(q);
-          return matches && !!u.active && !u.today_record && (!S.manualWithTicket || !!u.pc);
+          return matches && selectableRow(u);
         });
         S.manualSelected = Array.from(new Set(S.manualSelected.map(Number).concat(visible.map((u) => Number(u.id)))));
       } else {
@@ -195,7 +245,7 @@
       const visible = S.manualEmployees.filter((u) => {
         const q = String(S.manualFilter || '').trim().toLocaleLowerCase();
         const matches = !q || (String(u.name || '') + ' ' + String(u.pc || '')).toLocaleLowerCase().includes(q);
-        return matches && !!u.active && !u.today_record && (!S.manualWithTicket || !!u.pc);
+        return matches && selectableRow(u);
       });
       S.manualSelected = Array.from(new Set(S.manualSelected.map(Number).concat(visible.map((u) => Number(u.id)))));
       drawManualAttendance();
@@ -203,7 +253,8 @@
     }
     if (act === 'manual-clear-selection') { S.manualSelected = []; drawManualAttendance(); return; }
     if (act === 'manual-save') {
-      const userIds = S.manualSelected.map(Number).filter((id) => id > 0);
+      // شناسهٔ صفر «مهمان» است و باید ارسال شود.
+      const userIds = S.manualSelected.map(Number).filter((id) => Number.isInteger(id) && id >= 0);
       const reason = (document.getElementById('fg-manual-reason') || {}).value || S.manualReason || '';
       const physicalPrint = S.manualWithTicket && !!S.manualPhysicalPrint;
       if (!userIds.length) { say('حداقل یک کارمندِ قابل‌انتخاب را انتخاب کنید.'); return; }
@@ -218,7 +269,7 @@
         for (let offset = 0; offset < userIds.length; offset += 100) {
           const batch = userIds.slice(offset, offset + 100);
           try {
-            latest = await callApi('/api/food-manual-attendance', { method: 'POST', body: JSON.stringify({ user_ids: batch, date: isoToday(), with_ticket: S.manualWithTicket, physical_print: physicalPrint, reason }) });
+            latest = await callApi('/api/food-manual-attendance', { method: 'POST', body: JSON.stringify({ user_ids: batch, date: manualDateIso(), with_ticket: S.manualWithTicket, physical_print: physicalPrint, reason }) });
             results.push(...((latest && latest.results) || []));
           } catch (err) {
             const message = (err && err.message) || 'ارتباط با سرور برقرار نشد.';

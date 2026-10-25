@@ -13,7 +13,10 @@ def read(path: str) -> str:
 
 
 def test_version_is_1_62_8():
-    assert read("VERSION").strip() == "1.62.8"
+    # نسخهٔ جاری جلوتر رفته است؛ manifest همان انتشار ۱.۶۲.۸ باید پین بماند.
+    import json
+    manifest = json.loads(read("updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/manifest.json"))
+    assert manifest["version"] == "1.62.8"
 
 
 # ---------- بخش ۱: تکمیل خودکار با کد ملی / نام / تلفن ----------

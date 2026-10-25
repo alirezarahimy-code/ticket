@@ -1538,12 +1538,17 @@ body.triangle-mesh-background-active > .triangle-mesh-canvas { z-index: 0 !impor
 /* تاریخچهٔ تغییرات در نمایشگرهای رومیزی دو ستونه و در تلفن تک‌ستونه است. */
 .traffic-change-list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 .traffic-destinations-card { width: min(100%, 1040px); }
-.traffic-destination-add-form { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; max-width: 100%; }
+/* ۱.۶۲.۹: چهار فیلد (عنوان + ۳ تأییدکننده) در یک خط؛ فیلدها فشرده‌تر شدند. */
+.traffic-destination-add-form { grid-template-columns: repeat(4, minmax(0, 1fr)) auto; max-width: 100%; gap: 8px; }
 .traffic-destination-add-form label,
-.traffic-destination-edit-form label { display: grid; min-width: 0; gap: 5px; color: #445f52; font-size: 11px; font-weight: 700; }
-.traffic-destination-edit-form { display: grid; flex: 1 1 auto; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; align-items: end; gap: 9px; min-width: 0; }
+.traffic-destination-edit-form label { display: grid; min-width: 0; gap: 4px; color: #445f52; font-size: 10px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.traffic-destination-edit-form { display: grid; flex: 1 1 auto; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; align-items: end; gap: 8px; min-width: 0; }
 .traffic-destination-edit-form input,
-.traffic-destination-add-form input { box-sizing: border-box; width: 100%; min-width: 0; }
+.traffic-destination-add-form input { box-sizing: border-box; width: 100%; min-width: 0; padding: 8px 9px; font-size: 11px; }
+@media (max-width: 1100px) {
+    .traffic-destination-add-form,
+    .traffic-destination-edit-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .traffic-destinations-list { max-width: 100%; }
 .traffic-destinations-list > .traffic-destination-row { display: flex; align-items: center; gap: 12px; padding: 11px 8px; border-bottom: 1px solid #e6ece6; }
 .traffic-destination-row.is-inactive { opacity: .68; }

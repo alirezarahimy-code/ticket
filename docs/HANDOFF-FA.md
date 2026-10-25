@@ -1,6 +1,6 @@
 # سند ادامهٔ کار (Handoff) — سامانه ticket
 
-آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۸** (شاخهٔ نشست `arena/dba0774e-ticket`)
+آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۹** (شاخهٔ نشست `arena/dba0774e-ticket`)
 
 این سند برای ادامهٔ کار در گفتگوی جدید نوشته شده. هر چیزی که در گفتگوی قبلی تصمیم گرفته یا انجام شده، اینجا ثبت است.
 
@@ -8,7 +8,17 @@
 
 ---
 
-## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۸ (۲۰۲۶/۱۰/۲۵)
+## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۹ (۲۰۲۶/۱۰/۲۵)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip` (SHA-256: `a350dda2db0d02b618a6f64350c483f104aef1dbf47d0d8c3b002822e03819fe`)؛ گزارش: `updates/2026-10-25-release-162-9-manual-ticket-date-guest/CHANGE-REPORT-FA.md`؛ بدون مهاجرت جدید (009 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته است)؛ تجمعی (شامل 1.62.4 تا 1.62.8 + fix2).
+- ثبت دستی فیش برای روزهای قبل: `food_ticket_manual_attendance_date()` تاریخ گذشته (تا امروز) را می‌پذیرد و آینده را با خطا رد می‌کند؛ `food_ticket_api_manual_attendance[_save[_many]]` تاریخ پارامتری دارند (`$targetDate`)؛ مسیر POST در `food-ticket.php` دیگر «فقط امروز» را تحمیل نمی‌کند. UI: `food-manual-attendance.js?v=4` با فیلد `fg-manual-date` (`data-jalali` + `ItsmJalali.enhanceAll`؛ تبدیل با `isoDateFor` سراسری پنل) و ارسال `date` انتخابی در POST.
+- فیش مهمان دستی: ردیف «مهمان» (شناسهٔ ۰) همیشه اول فهرست (`food_ticket_manual_attendance_guest_row` + `array_unshift`)؛ `food_ticket_api_manual_attendance_save_guest`: user_id خالی، full_name/food_type «مهمان»، event_type=guest (یا no_food)، ticket_key خالی، source_key تصادفی (random_bytes) → چندبار در روز قابل ثبت؛ بدون شرط سفارش/کد پرسنلی/تکرار؛ چاپ فیزیکی اختیاری با `food_ticket_enqueue_print`. `save_many` شناسهٔ ۰ را می‌پذیرد (`< 0` فیلتر می‌شود).
+- فرم مقصدهای ملاقات: `assets/style.css` — هر دو فرم افزودن/ویرایش `repeat(4, minmax(0, 1fr)) auto` تا چهار فیلد در یک خط بنشینند؛ زیر ۱۱۰۰px دو ستونه، موبایل تک‌ستونه؛ `style.css?v=3.4.44` در `index.php`.
+- راهنما/چت‌بات: بخش ۶.۱۰ `help-guide.php` به‌روز شد (چت‌بات از همین فایل ایندکس می‌گیرد)؛ مجوز جدیدی لازم نشد (همان `food.groups`).
+- آزمون‌ها: `tests/test_release_1_62_9_manual_ticket_date_guest_static.py` جدید + jsdom رفتاری؛ پین‌های `test_food_manual_attendance_static.py`، `test_release_1_62_4_fixes_static.py` (v4) و `test_traffic_destination_approver_static.py` (نام بسته) به‌روز شد. اعتبارسنجی فقط ایستا.
+- پاسخ به پرسش کاربر (پنجشنبه/جمعهٔ تعطیل): راه‌حل همین ثبت دستی با تاریخ گذشته است؛ شنبه مسئول سلف فیش روز تعطیل را ثبت می‌کند.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۸ (۲۰۲۶/۱۰/۲۵)
 
 - بستهٔ جاری: `downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/CHANGE-REPORT-FA.md`؛ مهاجرت: `009-traffic-destination-multi-approver.sql` (دو ستون اختیاری approver_name2/3 روی traffic_destinations، idempotent)؛ تجمعی (شامل 1.62.4 تا 1.62.7).
 - تکمیل خودکار فرم ثبت تردد: API `traffic_api=lookup` علاوه بر `code` پارامترهای `phone` (۱۱ رقم 09xxxxxxxxx) و `name` (تطبیق دقیق full_name، حداقل ۳ حرف) را می‌پذیرد و `national_code` را هم برمی‌گرداند؛ `traffic_find_last_visit_by()` با whitelist ستون و شرط `COALESCE(is_notice,0)=0`. JS: جست‌وجوی تلفن با کامل شدن ۹ رقم پایانی و جست‌وجوی نام در blur، هر دو بی‌سروصدا (quiet)؛ فقط فیلدهای خالی پر می‌شوند؛ `traffic-control.js?v=12`.

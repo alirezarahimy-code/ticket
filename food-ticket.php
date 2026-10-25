@@ -4146,10 +4146,9 @@ function food_ticket_api_handle(string $route, array $user): never
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-manual-attendance') {
             $body = food_ticket_api_body();
-            $manualDate = food_ticket_iso_date_input($body['date'] ?? '') ?? '';
-            if ($manualDate !== food_ticket_manual_attendance_today()) {
-                throw new RuntimeException('ثبت دستی فیش فقط برای امروز مجاز است.');
-            }
+            // ۱.۶۲.۹: ثبت دستی برای امروز یا روزهای قبل مجاز است؛ تاریخ آینده را خود تابع رد می‌کند.
+            $manualDate = food_ticket_iso_date_input($body['date'] ?? '') ?? food_ticket_manual_attendance_today();
+            $body['date'] = $manualDate;
             $result = food_ticket_api_manual_attendance_save_many($body, $user);
             food_ticket_api_json($result + food_ticket_api_manual_attendance($manualDate));
         }

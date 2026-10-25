@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود به‌روزرسانی Ticket 1.62.8 — تکمیل خودکار تردد با نام/تلفن و چند تأییدکننده + اصلاح‌های 1.62.4 تا 1.62.7</title>
+  <title>دانلود به‌روزرسانی Ticket 1.62.9 — ثبت دستی فیش برای روزهای قبل و فیش مهمان + اصلاح‌های 1.62.4 تا 1.62.8</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,11 +25,14 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ جاری · 1.62.8 · ۲۰۲۶/۱۰/۲۵</span>
-    <h1>Ticket نسخهٔ ۱.۶۲.۸ — تکمیل خودکار تردد و چند تأییدکنندهٔ مقصد</h1>
-    <p>بستهٔ تجمعی و آفلاین با یک مهاجرت امن (ستون‌های اختیاری تأییدکنندهٔ ۲ و ۳). این بسته جایگزین 1.62.7 است و همهٔ اصلاح‌های 1.62.4 تا 1.62.7 را هم دربردارد:</p>
+    <span class="tag">بستهٔ جاری · 1.62.9 · ۲۰۲۶/۱۰/۲۵</span>
+    <h1>Ticket نسخهٔ ۱.۶۲.۹ — ثبت دستی فیش برای روزهای قبل و فیش مهمان</h1>
+    <p>بستهٔ تجمعی و آفلاین؛ مهاجرت جدید ندارد (مهاجرت 009 نسخهٔ قبل فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته است و دوباره اجرا نمی‌شود). این بسته جایگزین 1.62.8 است و همهٔ اصلاح‌های 1.62.4 تا 1.62.8 را هم دربردارد:</p>
     <ul>
-      <li><b>fix2:</b> در «برنامهٔ غذایی ← عملیات گروهی»، دکمهٔ «پیش‌نمایش و بررسی» به بالای فهرست، کنار «پاک‌کردن انتخاب» منتقل شد.</li>
+      <li><b>جدید:</b> «ثبت دستی فیش» یک <b>فیلد تاریخ شمسی با تقویم</b> دارد؛ فیش برای هر روز گذشته (تا امروز) قابل ثبت است — مناسب پنجشنبه/جمعه‌های تعطیل که سلف بسته بوده. تاریخ آینده رد می‌شود.</li>
+      <li><b>جدید:</b> ردیف <b>«مهمان»</b> همیشه اول فهرست ثبت دستی است؛ بدون سفارش و کد پرسنلی، چند بار در روز قابل ثبت (رویداد «فیش مهمان» با غذای «مهمان»).</li>
+      <li><b>جدید:</b> چهار فیلد فرم «مقاصد ملاقات و تأییدکنندگان» (عنوان + ۳ تأییدکننده) حالا در یک خط جا می‌گیرند.</li>
+      <li>در «برنامهٔ غذایی ← عملیات گروهی»، دکمهٔ «پیش‌نمایش و بررسی» به بالای فهرست، کنار «پاک‌کردن انتخاب» منتقل شد (1.62.8 fix2).</li>
       <li><b>جدید:</b> تکمیل خودکار فرم ثبت تردد علاوه بر کد ملی با <b>نام و نام خانوادگی</b> و <b>تلفن همراه</b> هم کار می‌کند؛ فقط فیلدهای خالی پر می‌شوند.</li>
       <li><b>جدید:</b> هر مقصد ملاقات می‌تواند <b>۱ تا ۳ تأییدکننده</b> داشته باشد؛ در مقصد چندتأییدکننده، ثبت‌کننده یکی را از فهرست همان مقصد انتخاب می‌کند (نام آزاد پذیرفته نمی‌شود).</li>
       <li>کلید «نمایش همهٔ رویدادها» به زبانهٔ «تاریخچهٔ ویرایش‌ها»ی کنترل تردد اضافه شد؛ رکوردهای ثبت خروج و حذف — که از 1.62.4 فقط از نمایش فیلتر شده بودند و هرگز حذف نشده‌اند — دوباره قابل مشاهده‌اند.</li>
@@ -40,10 +43,10 @@
       <li>صفحه‌های پنل مدیریت غذا وسط‌چین شدند؛ داشبورد دیگر به سمت راست نمی‌چسبد.</li>
       <li>ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب».</li>
     </ul>
-    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip" download="ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip">⬇ دریافت بستهٔ 1.62.8</a>
-    <div class="file">ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip · SHA-256: da5ac7feae9ed31a9bda94380cbd5260c1b50085a30d2d03af62032dd6dc3b2d</div>
-    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.8">انتشار GitHub v1.62.8</a></p>
+    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" download="ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip">⬇ دریافت بستهٔ 1.62.9</a>
+    <div class="file">ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip · SHA-256: a350dda2db0d02b618a6f64350c483f104aef1dbf47d0d8c3b002822e03819fe</div>
+    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-9-manual-ticket-date-guest/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.9">انتشار GitHub v1.62.9</a></p>
     <div class="hint">پس از نصب، صفحهٔ «سازمان» ← کارت «تشخیص ارجاع خودکار درخواست‌ها» را باز کنید و اگر معاون/مدیر اداره‌ای نقش ادمین اصلی یا مدیر پشتیبانی دارد، با فرم‌های ترمیم همان صفحه اصلاح کنید. رفتار SQL جدید فقط به‌صورت ایستا تأیید شده است؛ با یک درخواست آزمایشی مقصد ارجاع را چشمی بررسی کنید. Ctrl+F5 فراموش نشود.</div>
   </main>
 </body>
