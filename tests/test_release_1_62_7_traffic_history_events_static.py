@@ -12,8 +12,10 @@ def read(path: str) -> str:
     return (ROOT / path).read_text(encoding="utf-8")
 
 
-def test_version_is_1_62_7():
-    assert read("VERSION").strip() == "1.62.7"
+def test_release_1_62_7_manifest_version():
+    import json
+    manifest = json.loads(read("updates/2026-10-25-release-162-7-traffic-history-all-events/manifest.json"))
+    assert manifest["version"] == "1.62.7"
 
 
 def test_history_helpers_accept_all_events_flag():

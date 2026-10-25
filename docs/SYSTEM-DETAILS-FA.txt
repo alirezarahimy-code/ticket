@@ -13,7 +13,7 @@
 --------------------
 ۱) برای همین متن: در مخزن alirezarahimy-code/ticket شاخهٔ arena/8edbdf95-ticket فایل docs/SYSTEM-DETAILS-FA.txt را باز کنید و Raw را بزنید؛ از صفحهٔ Raw می‌توان فایل را ذخیره کرد.
 ۲) برای کل کد و مستندات: در GitHub شاخهٔ همین نشست را باز کنید، از منوی Code گزینهٔ Download ZIP را انتخاب کنید.
-۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ جاری 1.62.7 در downloads/ticket-update-1.62.7-traffic-history-all-events-20261025.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-25-release-162-7-traffic-history-all-events/CHANGE-REPORT-FA.md قرار دارد.
+۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ جاری 1.62.8 در downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-20261025.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/CHANGE-REPORT-FA.md قرار دارد.
 ۴) شاخهٔ نشست ممکن است هنوز با main ادغام نشده باشد؛ هنگام دریافت آخرین اصلاحات، شاخهٔ arena/8edbdf95-ticket را انتخاب کنید، نه main یا یک release قدیمی.
 
 معماری در یک نگاه
@@ -80,7 +80,7 @@
 نسخه و انتشار جاری
 ------------------
 - نسخه: 1.61.10، بستهٔ اصلاحی R31.
-- بستهٔ فعلی: downloads/ticket-update-1.62.7-traffic-history-all-events-20261025.zip؛ تغییر اصلی آن کلید «نمایش همهٔ رویدادها» در تاریخچهٔ ویرایش‌های تردد است (هیچ داده‌ای حذف نشده بود؛ ثبت خروج/حذف از 1.62.4 فقط از نمایش فیلتر شده بود) + همهٔ اصلاح‌های 1.62.4 تا 1.62.6.
+- بستهٔ فعلی: downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-20261025.zip؛ تغییرات اصلی: تکمیل خودکار فرم تردد با نام/تلفن (علاوه بر کد ملی) و ۱ تا ۳ تأییدکننده برای هر مقصد ملاقات (مهاجرت 009) + همهٔ اصلاح‌های 1.62.4 تا 1.62.7.
 - صفحهٔ دانلود: downloads/index.html؛ گزارش: updates/2026-10-22-release-161-10-r31/CHANGE-REPORT-FA.md؛ migration جدید ندارد.
 - پیش از نصب در سامانهٔ واقعی از پایگاه داده و پوشهٔ برنامه پشتیبان بگیرید؛ روی چاپگر و داده‌های عملیاتی ابتدا آزمایش کنید.
 - بستهٔ به‌روزرسانی را با بستهٔ کامل سامانه اشتباه نگیرید. config.php، .env، اطلاعات اتصال، storage زنده و uploads محرمانه‌اند و از بسته حذف می‌شوند.

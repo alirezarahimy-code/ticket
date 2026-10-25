@@ -18,7 +18,7 @@ function traffic_can_manage_destinations(array $user): bool
 
 function traffic_destinations(bool $activeOnly = true): array
 {
-    $sql = 'SELECT id, title, approver_name, is_active FROM traffic_destinations' . ($activeOnly ? ' WHERE is_active = 1' : '') . ' ORDER BY title';
+    $sql = 'SELECT id, title, approver_name, approver_name2, approver_name3, is_active FROM traffic_destinations' . ($activeOnly ? ' WHERE is_active = 1' : '') . ' ORDER BY title';
     return db()->query($sql)->fetchAll();
 }
 
@@ -27,23 +27,61 @@ function traffic_approvers(): array
     return db()->query("SELECT DISTINCT approved_by FROM traffic_visits WHERE approved_by IS NOT NULL AND approved_by <> '' ORDER BY approved_by")->fetchAll(PDO::FETCH_COLUMN);
 }
 
-/** تأییدکنندهٔ تردد از مقصد فعال خوانده می‌شود؛ ورودی POST منبع معتبر نیست. */
-function traffic_destination_approver(string $title, ?array $existingRecord = null): ?string
+/** فهرست ۱ تا ۳ تأییدکنندهٔ ثبت‌شده برای یک ردیف مقصد (خالی‌ها و تکراری‌ها حذف می‌شوند). */
+function traffic_destination_row_approvers(array $destination): array
+{
+    $approvers = [];
+    foreach (['approver_name', 'approver_name2', 'approver_name3'] as $column) {
+        $value = trim((string) ($destination[$column] ?? ''));
+        if ($value !== '' && !in_array($value, $approvers, true)) {
+            $approvers[] = $value;
+        }
+    }
+    return $approvers;
+}
+
+/** تأییدکننده‌های مجاز یک مقصد فعال؛ برای رکورد موجود، تأییدکنندهٔ قبلی همان مقصد هم مجاز می‌ماند. */
+function traffic_destination_approvers(string $title, ?array $existingRecord = null): array
 {
     $title = trim($title);
     if ($title === '') {
-        return null;
+        return [];
     }
-    $query = db()->prepare('SELECT approver_name FROM traffic_destinations WHERE title = ? AND is_active = 1 LIMIT 1');
+    $query = db()->prepare('SELECT approver_name, approver_name2, approver_name3 FROM traffic_destinations WHERE title = ? AND is_active = 1 LIMIT 1');
     $query->execute([$title]);
-    $approver = $query->fetchColumn();
-    if ($approver !== false) {
-        return trim((string) $approver) !== '' ? trim((string) $approver) : null;
+    $row = $query->fetch(PDO::FETCH_ASSOC);
+    if (is_array($row)) {
+        $approvers = traffic_destination_row_approvers($row);
+        if ($existingRecord !== null && $title === (string) ($existingRecord['meeting_with'] ?? '')) {
+            $previous = trim((string) ($existingRecord['approved_by'] ?? ''));
+            if ($previous !== '' && !in_array($previous, $approvers, true)) {
+                $approvers[] = $previous; // رکورد قدیمی یا واردشده از Excel با تأییدکنندهٔ متفاوت
+            }
+        }
+        return $approvers;
     }
     if ($existingRecord !== null && $title === (string) ($existingRecord['meeting_with'] ?? '')) {
-        return trim((string) ($existingRecord['approved_by'] ?? '')) !== '' ? trim((string) $existingRecord['approved_by']) : null;
+        $previous = trim((string) ($existingRecord['approved_by'] ?? ''));
+        return $previous !== '' ? [$previous] : [];
     }
     throw new TrafficInputException('مقصد انتخاب‌شده معتبر یا فعال نیست.', 'meeting_with');
+}
+
+/** تأییدکنندهٔ نهایی فقط از فهرست تأییدکننده‌های همان مقصد انتخاب می‌شود؛ ورودی POST آزاد معتبر نیست. */
+function traffic_destination_approver(string $title, ?array $existingRecord = null, string $requested = ''): ?string
+{
+    $approvers = traffic_destination_approvers($title, $existingRecord);
+    if ($approvers === []) {
+        return null;
+    }
+    $requested = trim($requested);
+    if ($requested !== '' && in_array($requested, $approvers, true)) {
+        return $requested;
+    }
+    if (count($approvers) === 1 || $requested === '') {
+        return $approvers[0];
+    }
+    throw new TrafficInputException('تأییدکننده باید یکی از تأییدکنندگان تعریف‌شدهٔ همان مقصد باشد.', 'approved_by');
 }
 
 // شماره برگ به‌صورت تاریخ‌شمسی+شماره‌ترتیبی روزانه، مثل ۱۴۰۴۰۷۱۵-۰۰۰۱
@@ -59,8 +97,17 @@ function traffic_next_serial(): string
 
 function traffic_find_last_visit(string $nationalCode, int $excludeId = 0): ?array
 {
-    $query = db()->prepare('SELECT * FROM traffic_visits WHERE national_code = ? AND id <> ? ORDER BY visit_date DESC, id DESC LIMIT 1');
-    $query->execute([$nationalCode, $excludeId]);
+    return traffic_find_last_visit_by('national_code', $nationalCode, $excludeId);
+}
+
+/** آخرین تردد با تطبیق دقیق یکی از ستون‌های مجاز؛ ردیف‌های «تردد خاص» در جست‌وجوی نام/تلفن نمی‌آیند. */
+function traffic_find_last_visit_by(string $column, string $value, int $excludeId = 0): ?array
+{
+    if (!in_array($column, ['national_code', 'phone', 'full_name'], true) || trim($value) === '') {
+        return null;
+    }
+    $query = db()->prepare('SELECT * FROM traffic_visits WHERE ' . $column . ' = ? AND id <> ? AND COALESCE(is_notice, 0) = 0 ORDER BY visit_date DESC, id DESC LIMIT 1');
+    $query->execute([trim($value), $excludeId]);
     $row = $query->fetch();
     return $row ?: null;
 }
@@ -389,7 +436,7 @@ function traffic_history_value(string $field, mixed $value): string
 function traffic_create_record(array $user): int
 {
     $payload = traffic_validate_payload($_POST);
-    $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with']);
+    $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with'], null, (string) ($_POST['approved_by'] ?? ''));
     $serial = traffic_next_serial();
     $stmt = db()->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, phone, company, entry_time, exit_time, no_visit, with_car, with_mobile, meeting_with, approved_by, description, created_by) VALUES (?, CURDATE(), ?, ?, ?, ?, CURTIME(), NULL, ?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([$serial, $payload['full_name'], $payload['national_code'], $payload['phone'], $payload['company'], $payload['no_visit'], $payload['with_car'], $payload['with_mobile'], $payload['meeting_with'], $payload['approved_by'], $payload['description'], (int) $user['id']]);
@@ -410,7 +457,7 @@ function traffic_update_record(array $user): void
     }
     $isNoticeRecord = (int) ($record['is_notice'] ?? 0) === 1;
     $payload = traffic_validate_payload($_POST, $isNoticeRecord, $isNoticeRecord);
-    $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with'], $record);
+    $payload['approved_by'] = traffic_destination_approver((string) $payload['meeting_with'], $record, (string) ($_POST['approved_by'] ?? ''));
     $visitDate = trim((string) ($_POST['visit_date'] ?? ''));
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $visitDate)) {
         throw new TrafficInputException('تاریخ مراجعه معتبر نیست.', 'visit_date');
@@ -577,13 +624,27 @@ function traffic_notice_create(array $user): int
     return $id;
 }
 
+/** تأییدکننده‌های POST فرم مقصد: اولی اجباری، دومی و سومی اختیاری؛ تکراری‌ها حذف و فاصله‌ها فشرده می‌شوند. */
+function traffic_destination_posted_approvers(): array
+{
+    $approvers = [];
+    foreach (['approver_name', 'approver_name2', 'approver_name3'] as $field) {
+        $value = mb_substr(trim((string) ($_POST[$field] ?? '')), 0, 190);
+        if ($value !== '' && !in_array($value, $approvers, true)) {
+            $approvers[] = $value;
+        }
+    }
+    return $approvers;
+}
+
 function traffic_save_destination(array $user): void
 {
     if (!traffic_can_manage_destinations($user)) {
         throw new RuntimeException('مدیریت مقصدها فقط برای نقش دارای دسترسی مقاصد تردد مجاز است.');
     }
     $title = mb_substr(trim((string) ($_POST['title'] ?? '')), 0, 190);
-    $approver = mb_substr(trim((string) ($_POST['approver_name'] ?? '')), 0, 190);
+    $approvers = traffic_destination_posted_approvers();
+    $approver = $approvers[0] ?? '';
     if ($title === '' || $approver === '') {
         throw new RuntimeException('عنوان مقصد و نام تأییدکننده را وارد کنید.');
     }
@@ -592,7 +653,8 @@ function traffic_save_destination(array $user): void
     if ((int) $exists->fetchColumn() > 0) {
         throw new RuntimeException('این عنوان مقصد قبلاً ثبت شده است.');
     }
-    db()->prepare('INSERT INTO traffic_destinations (title, approver_name) VALUES (?, ?)')->execute([$title, $approver !== '' ? $approver : null]);
+    db()->prepare('INSERT INTO traffic_destinations (title, approver_name, approver_name2, approver_name3) VALUES (?, ?, ?, ?)')
+        ->execute([$title, $approver, $approvers[1] ?? null, $approvers[2] ?? null]);
 }
 
 function traffic_update_destination(array $user): void
@@ -602,7 +664,8 @@ function traffic_update_destination(array $user): void
     }
     $id = (int) ($_POST['destination_id'] ?? 0);
     $title = mb_substr(trim((string) ($_POST['title'] ?? '')), 0, 190);
-    $approver = mb_substr(trim((string) ($_POST['approver_name'] ?? '')), 0, 190);
+    $approvers = traffic_destination_posted_approvers();
+    $approver = $approvers[0] ?? '';
     if ($id < 1 || $title === '' || $approver === '') {
         throw new RuntimeException('شناسه، عنوان مقصد و نام تأییدکننده را به‌درستی وارد کنید.');
     }
@@ -611,8 +674,8 @@ function traffic_update_destination(array $user): void
     if ((int) $exists->fetchColumn() > 0) {
         throw new RuntimeException('این عنوان مقصد قبلاً ثبت شده است.');
     }
-    $update = db()->prepare('UPDATE traffic_destinations SET title = ?, approver_name = ? WHERE id = ?');
-    $update->execute([$title, $approver !== '' ? $approver : null, $id]);
+    $update = db()->prepare('UPDATE traffic_destinations SET title = ?, approver_name = ?, approver_name2 = ?, approver_name3 = ? WHERE id = ?');
+    $update->execute([$title, $approver, $approvers[1] ?? null, $approvers[2] ?? null, $id]);
     if ($update->rowCount() < 1) {
         $check = db()->prepare('SELECT COUNT(*) FROM traffic_destinations WHERE id = ?');
         $check->execute([$id]);
@@ -754,12 +817,32 @@ function traffic_api_handle(string $mode, array $user): never
         exit;
     }
     if ($mode === 'lookup') {
-        $code = preg_replace('/\D/', '', (string) ($_GET['code'] ?? ''));
-        if (!valid_iranian_national_code((string) $code)) {
+        $toAscii = static fn (string $value): string => strtr($value, ['۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9']);
+        $code = preg_replace('/\D/', '', $toAscii((string) ($_GET['code'] ?? '')));
+        $phone = preg_replace('/\D/', '', $toAscii((string) ($_GET['phone'] ?? '')));
+        $name = trim((string) ($_GET['name'] ?? ''));
+        if ($code !== '') {
+            if (!valid_iranian_national_code((string) $code)) {
+                echo json_encode(['valid' => false], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            $last = traffic_find_last_visit((string) $code);
+        } elseif ($phone !== '') {
+            if (preg_match('/^09\d{9}$/', (string) $phone) !== 1) {
+                echo json_encode(['valid' => false], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            $last = traffic_find_last_visit_by('phone', (string) $phone);
+        } elseif ($name !== '') {
+            if (mb_strlen($name) < 3 || mb_strlen($name) > 190) {
+                echo json_encode(['valid' => false], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            $last = traffic_find_last_visit_by('full_name', $name);
+        } else {
             echo json_encode(['valid' => false], JSON_UNESCAPED_UNICODE);
             exit;
         }
-        $last = traffic_find_last_visit((string) $code);
         if (!$last) {
             echo json_encode(['valid' => true, 'found' => false], JSON_UNESCAPED_UNICODE);
             exit;
@@ -772,6 +855,7 @@ function traffic_api_handle(string $mode, array $user): never
             'needs_exit_only' => $needsExit,
             'record_id' => (int) $last['id'],
             'full_name' => $last['full_name'],
+            'national_code' => $last['national_code'],
             'phone' => $last['phone'],
             'company' => $last['company'],
             'meeting_with' => $last['meeting_with'],
@@ -976,8 +1060,8 @@ function traffic_render_page(array $user): never
                     <div class="traffic-full-only" style="display:contents">
                     <label>تلفن همراه<span class="traffic-phone-entry"><span class="traffic-phone-prefix" aria-label="پیش‌شمارهٔ ثابت">09</span><input type="text" id="traffic-phone-tail" data-phone-tail-for="traffic-phone" inputmode="numeric" pattern="[0-9۰-۹٠-٩]{9}" minlength="9" maxlength="9" required autocomplete="off" placeholder="۱۲۶۵۸۸۷۵۹" value="<?= e(traffic_phone_tail($formOld['phone'] ?? '')) ?>" aria-label="۹ رقم باقی‌ماندهٔ تلفن همراه"></span><input type="hidden" name="phone" id="traffic-phone" value="09<?= e(traffic_phone_tail($formOld['phone'] ?? '')) ?>"><small class="field-help">پیش‌شمارهٔ ۰۹ ثابت است؛ فقط ۹ رقم باقی‌مانده را وارد کنید (مجموعاً ۱۱ رقم).</small></label>
                     <label>موسسه / شرکت<input name="company" id="traffic-company" value="<?= e((string) ($formOld['company'] ?? '')) ?>"></label>
-                    <label>ملاقات با<select name="meeting_with" id="traffic-meeting-with"><option value="">— انتخاب کنید —</option><?php foreach ($destinations as $d): ?><option value="<?= e($d['title']) ?>" data-approver="<?= e((string) ($d['approver_name'] ?? '')) ?>"><?= e($d['title']) ?></option><?php endforeach; ?></select></label>
-                    <label>تأییدکننده<input id="traffic-approved-by" readonly aria-readonly="true" placeholder="با انتخاب مقصد نمایش داده می‌شود"><small class="field-help">این مقدار از تنظیم همان مقصد خوانده می‌شود.</small></label>
+                    <label>ملاقات با<select name="meeting_with" id="traffic-meeting-with"><option value="">— انتخاب کنید —</option><?php foreach ($destinations as $d): $dApprovers = traffic_destination_row_approvers($d); ?><option value="<?= e($d['title']) ?>" data-approver="<?= e((string) ($d['approver_name'] ?? '')) ?>" data-approvers="<?= e(json_encode($dApprovers, JSON_UNESCAPED_UNICODE)) ?>"><?= e($d['title']) ?></option><?php endforeach; ?></select></label>
+                    <label>تأییدکننده<select name="approved_by" id="traffic-approved-by" data-empty-label="با انتخاب مقصد نمایش داده می‌شود" data-current="<?= e((string) ($formOld['approved_by'] ?? '')) ?>"><option value="">با انتخاب مقصد نمایش داده می‌شود</option></select><small class="field-help">از تنظیم همان مقصد خوانده می‌شود؛ اگر مقصد چند تأییدکننده داشته باشد، یکی را انتخاب کنید.</small></label>
                     <label class="full">توضیحات / هدف از تردد<textarea name="description" rows="2"><?= e((string) ($formOld['description'] ?? '')) ?></textarea></label>
                     <div class="traffic-checks">
                         <label><input type="checkbox" name="no_visit" value="1"> بدون بازدید</label>
@@ -1061,8 +1145,8 @@ function traffic_render_page(array $user): never
                         <?php $editPhoneValue = (string) ($formOld['phone'] ?? $editRecord['phone'] ?? ''); $editPhoneTail = traffic_phone_tail($editPhoneValue); $isNoticeEdit = !empty($editRecord['is_notice']); ?>
                         <label>تلفن همراه<span class="traffic-phone-entry"><span class="traffic-phone-prefix" aria-label="پیش‌شمارهٔ ثابت">09</span><input type="text" id="traffic-edit-phone-tail" data-phone-tail-for="traffic-edit-phone" inputmode="numeric" pattern="[0-9۰-۹٠-٩]{9}" minlength="<?= $isNoticeEdit ? '0' : '9' ?>" maxlength="9" <?= $isNoticeEdit ? '' : 'required' ?> autocomplete="off" placeholder="۱۲۶۵۸۸۷۵۹" value="<?= e($editPhoneTail) ?>" aria-label="۹ رقم باقی‌ماندهٔ تلفن همراه"></span><input type="hidden" name="phone" id="traffic-edit-phone" value="<?= $editPhoneValue !== '' ? '09' . e($editPhoneTail) : ($isNoticeEdit ? '' : '09') ?>"><small class="field-help">پیش‌شمارهٔ ۰۹ ثابت است؛ فقط ۹ رقم باقی‌مانده را وارد کنید (مجموعاً ۱۱ رقم).</small></label>
                         <label>موسسه / شرکت<input name="company" maxlength="190" value="<?= e((string) ($formOld['company'] ?? $editRecord['company'] ?? '')) ?>"></label>
-                        <label>ملاقات با<?php $currentMeeting = (string) ($formOld['meeting_with'] ?? $editRecord['meeting_with'] ?? ''); $activeMeetings = array_map(static fn (array $destination): string => (string) $destination['title'], $destinations); ?><select name="meeting_with" id="traffic-edit-meeting-with"><option value="">— انتخاب کنید —</option><?php if ($currentMeeting !== '' && !in_array($currentMeeting, $activeMeetings, true)): ?><option value="<?= e($currentMeeting) ?>" data-approver="<?= e((string) ($editRecord['approved_by'] ?? '')) ?>" selected><?= e($currentMeeting) ?> (غیرفعال)</option><?php endif; ?><?php foreach ($destinations as $destination): $selectedMeeting = $currentMeeting === (string) $destination['title']; ?><option value="<?= e($destination['title']) ?>" data-approver="<?= e((string) ($destination['approver_name'] ?? '')) ?>" <?= $selectedMeeting ? 'selected' : '' ?>><?= e($destination['title']) ?></option><?php endforeach; ?></select></label>
-                        <label>تأییدکننده<input id="traffic-edit-approved-by" readonly aria-readonly="true" placeholder="از تنظیم مقصد پر می‌شود" value="<?= e((string) ($formOld['approved_by'] ?? $editRecord['approved_by'] ?? '')) ?>"><small class="field-help">با تغییر مقصد، تأییدکنندهٔ متناظر نمایش داده می‌شود.</small></label>
+                        <label>ملاقات با<?php $currentMeeting = (string) ($formOld['meeting_with'] ?? $editRecord['meeting_with'] ?? ''); $currentApprover = (string) ($formOld['approved_by'] ?? $editRecord['approved_by'] ?? ''); $activeMeetings = array_map(static fn (array $destination): string => (string) $destination['title'], $destinations); ?><select name="meeting_with" id="traffic-edit-meeting-with"><option value="">— انتخاب کنید —</option><?php if ($currentMeeting !== '' && !in_array($currentMeeting, $activeMeetings, true)): ?><option value="<?= e($currentMeeting) ?>" data-approver="<?= e((string) ($editRecord['approved_by'] ?? '')) ?>" data-approvers="<?= e(json_encode(array_values(array_filter([trim((string) ($editRecord['approved_by'] ?? ''))], static fn (string $v): bool => $v !== '')), JSON_UNESCAPED_UNICODE)) ?>" selected><?= e($currentMeeting) ?> (غیرفعال)</option><?php endif; ?><?php foreach ($destinations as $destination): $selectedMeeting = $currentMeeting === (string) $destination['title']; $dApprovers = traffic_destination_row_approvers($destination); if ($selectedMeeting && $currentApprover !== '' && !in_array($currentApprover, $dApprovers, true)) { $dApprovers[] = $currentApprover; } ?><option value="<?= e($destination['title']) ?>" data-approver="<?= e((string) ($destination['approver_name'] ?? '')) ?>" data-approvers="<?= e(json_encode($dApprovers, JSON_UNESCAPED_UNICODE)) ?>" <?= $selectedMeeting ? 'selected' : '' ?>><?= e($destination['title']) ?></option><?php endforeach; ?></select></label>
+                        <label>تأییدکننده<select name="approved_by" id="traffic-edit-approved-by" data-empty-label="از تنظیم مقصد پر می‌شود" data-current="<?= e($currentApprover) ?>"><?php if ($currentApprover !== ''): ?><option value="<?= e($currentApprover) ?>" selected><?= e($currentApprover) ?></option><?php else: ?><option value="">از تنظیم مقصد پر می‌شود</option><?php endif; ?></select><small class="field-help">با تغییر مقصد، تأییدکننده(های) متناظر نمایش داده می‌شود؛ در مقصدهای چندتأییدکننده یکی را انتخاب کنید.</small></label>
                         <label class="full">توضیحات / هدف از تردد<textarea name="description" rows="3"><?= e((string) ($formOld['description'] ?? $editRecord['description'] ?? '')) ?></textarea></label>
                         <div class="traffic-checks">
                             <label><input type="checkbox" name="no_visit" value="1" <?= !empty($formOld) ? (!empty($formOld['no_visit']) ? 'checked' : '') : (!empty($editRecord['no_visit']) ? 'checked' : '') ?>> بدون بازدید</label>
@@ -1151,12 +1235,12 @@ function traffic_render_page(array $user): never
 
         <?php if ($tab === 'destinations' && traffic_can_manage_destinations($user)): ?>
         <section class="card traffic-destinations-card">
-            <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقاصد ملاقات و تأییدکنندگان</h2><p class="muted">برای هر مقصد، نام تأییدکننده را ثبت کنید تا هنگام ثبت تردد خودکار نمایش داده شود.</p></div></div>
-            <form method="post" class="traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><label>عنوان مقصد<input name="title" placeholder="مثلاً ملاقات با مدیرعامل" maxlength="190" required></label><label>تأییدکننده<input name="approver_name" placeholder="نام تأییدکننده" maxlength="190" required></label><button class="button" type="submit">افزودن مقصد</button></form>
+            <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقاصد ملاقات و تأییدکنندگان</h2><p class="muted">برای هر مقصد ۱ تا ۳ تأییدکننده ثبت کنید؛ هنگام ثبت تردد، تأییدکنندهٔ همان مقصد خودکار نمایش داده می‌شود و اگر بیش از یکی باشد قابل انتخاب است.</p></div></div>
+            <form method="post" class="traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><label>عنوان مقصد<input name="title" placeholder="مثلاً ملاقات با مدیرعامل" maxlength="190" required></label><label>تأییدکنندهٔ ۱ (اصلی)<input name="approver_name" placeholder="نام تأییدکننده" maxlength="190" required></label><label>تأییدکنندهٔ ۲ (اختیاری)<input name="approver_name2" placeholder="در صورت نیاز" maxlength="190"></label><label>تأییدکنندهٔ ۳ (اختیاری)<input name="approver_name3" placeholder="در صورت نیاز" maxlength="190"></label><button class="button" type="submit">افزودن مقصد</button></form>
             <div class="traffic-destinations-list">
                 <?php foreach (traffic_destinations(false) as $d): ?>
                 <div class="traffic-destination-row <?= (int) ($d['is_active'] ?? 1) === 1 ? '' : 'is-inactive' ?>">
-                    <form method="post" class="traffic-destination-edit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_update_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><label>عنوان مقصد<input name="title" value="<?= e($d['title']) ?>" maxlength="190" required></label><label>تأییدکننده<input name="approver_name" value="<?= e((string) ($d['approver_name'] ?? '')) ?>" maxlength="190" required></label><button class="mini-button" type="submit">ذخیره</button></form>
+                    <form method="post" class="traffic-destination-edit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_update_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><label>عنوان مقصد<input name="title" value="<?= e($d['title']) ?>" maxlength="190" required></label><label>تأییدکنندهٔ ۱ (اصلی)<input name="approver_name" value="<?= e((string) ($d['approver_name'] ?? '')) ?>" maxlength="190" required></label><label>تأییدکنندهٔ ۲ (اختیاری)<input name="approver_name2" value="<?= e((string) ($d['approver_name2'] ?? '')) ?>" maxlength="190"></label><label>تأییدکنندهٔ ۳ (اختیاری)<input name="approver_name3" value="<?= e((string) ($d['approver_name3'] ?? '')) ?>" maxlength="190"></label><button class="mini-button" type="submit">ذخیره</button></form>
                     <?php if ((int) ($d['is_active'] ?? 1) === 1): ?><form method="post" data-confirm="این مقصد از فهرست فعال غیرفعال شود؟ سوابق قبلی حفظ می‌شوند."><?= csrf_field() ?><input type="hidden" name="action" value="traffic_delete_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><button class="mini-button danger" type="submit">غیرفعال‌کردن</button></form><?php else: ?><span class="traffic-destination-inactive-label">غیرفعال</span><?php endif; ?>
                 </div>
                 <?php endforeach; ?>
@@ -1164,7 +1248,7 @@ function traffic_render_page(array $user): never
         </section>
         <?php endif; ?>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=11"></script>
+    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=12"></script>
     <?php
     render_footer();
     exit;

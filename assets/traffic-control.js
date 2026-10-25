@@ -18,14 +18,15 @@
         approved_by: document.getElementById('traffic-approved-by'),
     };
 
-    function syncNewDestinationApprover() {
-        if (!fields.meeting_with || !fields.approved_by) return;
-        var selected = fields.meeting_with.options[fields.meeting_with.selectedIndex];
-        fields.approved_by.value = selected ? (selected.getAttribute('data-approver') || '') : '';
+    function fireChange(element) {
+        try {
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch (ignore) {
+            var event = document.createEvent('Event');
+            event.initEvent('change', true, false);
+            element.dispatchEvent(event);
+        }
     }
-
-    if (fields.meeting_with) fields.meeting_with.addEventListener('change', syncNewDestinationApprover);
-    syncNewDestinationApprover();
 
     function setHint(html, kind) {
         hint.className = 'alert ' + (kind || 'info');
@@ -38,24 +39,27 @@
         hint.innerHTML = '';
     }
 
-    function lookup() {
-        var code = codeField.value.replace(/[^0-9]/g, '');
-        if (code.length !== 10) {
-            clearHint();
-            return;
-        }
-        fetch('index.php?page=traffic-control&traffic_api=lookup&code=' + encodeURIComponent(code), {
+    function asciiDigitsOnly(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)); })
+            .replace(/\D/g, '');
+    }
+
+    // جست‌وجوی سابقهٔ قبلی با کد ملی، تلفن همراه یا نام؛ فقط فیلدهای خالی پر می‌شوند.
+    function lookupBy(query, quiet) {
+        fetch('index.php?page=traffic-control&traffic_api=lookup&' + query, {
             headers: { Accept: 'application/json' },
             credentials: 'same-origin',
         })
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 if (!data.valid) {
-                    setHint('کد ملی وارد شده معتبر نیست.', 'danger');
+                    if (!quiet) setHint('کد ملی وارد شده معتبر نیست.', 'danger');
                     return;
                 }
                 if (!data.found) {
-                    setHint('مهمان جدید — لطفاً بقیه‌ی اطلاعات را کامل وارد کنید.', 'info');
+                    if (!quiet) setHint('مهمان جدید — لطفاً بقیه‌ی اطلاعات را کامل وارد کنید.', 'info');
                     return;
                 }
                 if (data.needs_exit_only) {
@@ -76,25 +80,108 @@
                     setHint('آخرین تردد: ' + data.last_visit_label + '. اطلاعات پیشنهادی پر شد؛ در صورت نیاز اصلاح کنید.', 'success');
                 }
                 if (fields.full_name && !fields.full_name.value) fields.full_name.value = data.full_name || '';
+                if (codeField && !codeField.value.trim() && data.national_code) codeField.value = asciiDigitsOnly(data.national_code);
                 if (fields.phone && fields.phoneTail && !fields.phoneTail.value && data.phone) {
-                    var previousPhone = String(data.phone).replace(/[۰-۹]/g, function (digit) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)); }).replace(/[٠-٩]/g, function (digit) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)); }).replace(/\D/g, '');
+                    var previousPhone = asciiDigitsOnly(data.phone);
                     if (/^09\d{9}$/.test(previousPhone)) {
                         fields.phoneTail.value = previousPhone.slice(2);
                         fields.phone.value = previousPhone;
                     }
                 }
                 if (fields.company && !fields.company.value) fields.company.value = data.company || '';
-                if (fields.meeting_with && data.meeting_with) fields.meeting_with.value = data.meeting_with;
-                syncNewDestinationApprover();
+                if (fields.meeting_with && data.meeting_with && !fields.meeting_with.value) {
+                    fields.meeting_with.value = data.meeting_with;
+                    fireChange(fields.meeting_with);
+                }
             })
-            .catch(function () { clearHint(); });
+            .catch(function () { if (!quiet) clearHint(); });
+    }
+
+    function lookup() {
+        var code = asciiDigitsOnly(codeField.value);
+        if (code.length !== 10) {
+            clearHint();
+            return;
+        }
+        lookupBy('code=' + encodeURIComponent(code), false);
     }
 
     codeField.addEventListener('blur', lookup);
     codeField.addEventListener('input', function () {
-        if (codeField.value.replace(/[^0-9]/g, '').length === 10) {
+        if (asciiDigitsOnly(codeField.value).length === 10) {
             lookup();
         }
+    });
+
+    // همان جست‌وجو با تلفن همراه: به‌محض کامل شدن ۹ رقم پایانی.
+    function lookupByPhone() {
+        var tail = fields.phoneTail ? asciiDigitsOnly(fields.phoneTail.value) : '';
+        if (tail.length !== 9) return;
+        lookupBy('phone=' + encodeURIComponent('09' + tail), true);
+    }
+    if (fields.phoneTail) {
+        fields.phoneTail.addEventListener('input', lookupByPhone);
+        fields.phoneTail.addEventListener('blur', lookupByPhone);
+    }
+
+    // همان جست‌وجو با نام و نام خانوادگی (تطبیق دقیق)، هنگام خروج از فیلد نام.
+    if (fields.full_name) {
+        fields.full_name.addEventListener('blur', function () {
+            var name = fields.full_name.value.trim();
+            if (name.length < 3) return;
+            if (asciiDigitsOnly(codeField.value).length === 10) return; // کد ملی خودش جست‌وجو را انجام داده است
+            lookupBy('name=' + encodeURIComponent(name), true);
+        });
+    }
+}());
+
+// تأییدکننده(ها) فقط از تنظیم مقصد خوانده می‌شوند؛ مقصد چندتأییدکننده قابل انتخاب می‌شود.
+(function () {
+    'use strict';
+
+    function parseApprovers(option) {
+        if (!option) return [];
+        var json = option.getAttribute('data-approvers');
+        if (json) {
+            try {
+                var list = JSON.parse(json);
+                if (Object.prototype.toString.call(list) === '[object Array]') {
+                    return list.filter(function (item) { return typeof item === 'string' && item.trim() !== ''; });
+                }
+            } catch (ignore) {}
+        }
+        var single = option.getAttribute('data-approver');
+        return single ? [single] : [];
+    }
+
+    function populate(destSelect, approverSelect, preferred) {
+        var option = destSelect.options[destSelect.selectedIndex];
+        var approvers = parseApprovers(option);
+        while (approverSelect.firstChild) approverSelect.removeChild(approverSelect.firstChild);
+        if (!approvers.length) {
+            var placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = approverSelect.getAttribute('data-empty-label') || '—';
+            approverSelect.appendChild(placeholder);
+            return;
+        }
+        approvers.forEach(function (name) {
+            var item = document.createElement('option');
+            item.value = name;
+            item.textContent = name;
+            approverSelect.appendChild(item);
+        });
+        if (preferred && approvers.indexOf(preferred) !== -1) approverSelect.value = preferred;
+    }
+
+    [['traffic-meeting-with', 'traffic-approved-by'], ['traffic-edit-meeting-with', 'traffic-edit-approved-by']].forEach(function (pair) {
+        var destSelect = document.getElementById(pair[0]);
+        var approverSelect = document.getElementById(pair[1]);
+        if (!destSelect || !approverSelect) return;
+        destSelect.addEventListener('change', function () {
+            populate(destSelect, approverSelect, approverSelect.value);
+        });
+        populate(destSelect, approverSelect, approverSelect.getAttribute('data-current') || '');
     });
 }());
 
@@ -282,16 +369,4 @@
     });
 }());
 
-// تأییدکننده در فرم ویرایش نیز فقط از مقصد انتخاب‌شده خوانده می‌شود.
-(function () {
-    'use strict';
-    var destination = document.getElementById('traffic-edit-meeting-with');
-    var approver = document.getElementById('traffic-edit-approved-by');
-    if (!destination || !approver) return;
-    function sync() {
-        var option = destination.options[destination.selectedIndex];
-        approver.value = option ? (option.getAttribute('data-approver') || '') : '';
-    }
-    destination.addEventListener('change', sync);
-    sync();
-}());
+

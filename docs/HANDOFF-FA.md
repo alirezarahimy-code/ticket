@@ -1,6 +1,6 @@
 # سند ادامهٔ کار (Handoff) — سامانه ticket
 
-آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۷** (شاخهٔ نشست `arena/dba0774e-ticket`)
+آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۸** (شاخهٔ نشست `arena/dba0774e-ticket`)
 
 این سند برای ادامهٔ کار در گفتگوی جدید نوشته شده. هر چیزی که در گفتگوی قبلی تصمیم گرفته یا انجام شده، اینجا ثبت است.
 
@@ -8,7 +8,14 @@
 
 ---
 
-## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۷ (۲۰۲۶/۱۰/۲۵)
+## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۸ (۲۰۲۶/۱۰/۲۵)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/CHANGE-REPORT-FA.md`؛ مهاجرت: `009-traffic-destination-multi-approver.sql` (دو ستون اختیاری approver_name2/3 روی traffic_destinations، idempotent)؛ تجمعی (شامل 1.62.4 تا 1.62.7).
+- تکمیل خودکار فرم ثبت تردد: API `traffic_api=lookup` علاوه بر `code` پارامترهای `phone` (۱۱ رقم 09xxxxxxxxx) و `name` (تطبیق دقیق full_name، حداقل ۳ حرف) را می‌پذیرد و `national_code` را هم برمی‌گرداند؛ `traffic_find_last_visit_by()` با whitelist ستون و شرط `COALESCE(is_notice,0)=0`. JS: جست‌وجوی تلفن با کامل شدن ۹ رقم پایانی و جست‌وجوی نام در blur، هر دو بی‌سروصدا (quiet)؛ فقط فیلدهای خالی پر می‌شوند؛ `traffic-control.js?v=12`.
+- چند تأییدکننده: هر مقصد ۱ تا ۳ تأییدکننده (`approver_name`, `approver_name2`, `approver_name3`)؛ فرم‌های افزودن/ویرایش مقصد سه فیلد دارند (اولی اجباری)؛ فیلد تأییدکنندهٔ فرم ثبت/ویرایش تردد `select name="approved_by"` شد که JS از `data-approvers` (JSON روی optionهای مقصد) پر می‌کند؛ سرور با `traffic_destination_approver($title, $record, $requested)` فقط نام داخل فهرست همان مقصد را می‌پذیرد (تک‌تأییدکننده/درخواست خالی → خودکار؛ نام خارج فهرست → TrafficInputException). تأییدکنندهٔ قبلی رکورد موجود برای همان مقصد مجاز می‌ماند.
+- آزمون‌ها: `tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py` جدید؛ پین‌های `test_traffic_destination_approver_static.py` به طراحی جدید به‌روز شد. اعتبارسنجی فقط ایستا.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۷ (۲۰۲۶/۱۰/۲۵)
 
 - بستهٔ جاری: `downloads/ticket-update-1.62.7-traffic-history-all-events-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-7-traffic-history-all-events/CHANGE-REPORT-FA.md`؛ بدون migration؛ تجمعی (شامل 1.62.4 تا 1.62.6).
 - موضوع: کاربر گمان می‌کرد رکوردهای تاریخچهٔ ویرایش تردد حذف شده‌اند. بررسی نشان داد هیچ داده‌ای حذف نشده: تا 1.61.10 فهرست همهٔ رویدادها (ویرایش/ثبت خروج/حذف) را نشان می‌داد و از 1.62.4 نمایش به «فقط ویرایش‌های واقعی» محدود شد؛ ردیف‌های خروج/حذف فقط از نمایش فیلتر شده بودند و در `traffic_visit_history` سالم‌اند.

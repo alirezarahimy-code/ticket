@@ -130,6 +130,8 @@ CREATE TABLE IF NOT EXISTS traffic_destinations (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(190) NOT NULL,
     approver_name VARCHAR(190) NULL,
+    approver_name2 VARCHAR(190) NULL,
+    approver_name3 VARCHAR(190) NULL,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_traffic_destination (title)
