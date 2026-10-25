@@ -64,7 +64,7 @@ def test_action_files_structure_and_persian_descriptions():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.16"
+    # VERSION از ۱.۶۲.۱۷ جلوتر رفته؛ پین نسخهٔ جاری در تست ریلیز ۱.۶۲.۱۷ است.
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.16"
     assert manifest["requires_version"] == "1.61.9"
@@ -89,11 +89,12 @@ def test_version_manifest_and_package():
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in names and f"files/migrations/{mig}" in names, mig
     assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.16"
-    for rel in ("index.php", "actions/role-actions.php", "actions/settings-actions.php"):
+    # index.php در ۱.۶۲.۱۷ (برش ۶) تغییر کرد؛ برابری بایت‌به‌بایت با مخزن برای فایل‌های همین برش:
+    for rel in ("actions/role-actions.php", "actions/settings-actions.php"):
         assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
+    # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۷ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۷ است.
 
 
 def test_panel_asset_refs_are_all_packaged():
@@ -107,7 +108,9 @@ def test_panel_asset_refs_are_all_packaged():
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # از ۱.۶۲.۱۷ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
+    assert "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.15-service-modal-fix-20261025.zip" not in page
     assert "ticket-update-1.62.14-service-actions-split-20261025.zip" not in page
     assert "actions/role-actions.php" in page and "actions/settings-actions.php" in page
