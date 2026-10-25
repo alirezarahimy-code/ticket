@@ -18,6 +18,7 @@
   var state = {
     year: current ? Number(current[1]) : 1405,
     month: current ? Number(current[2]) : 1,
+    mealType: 'lunch',
     monthData: null,
     orders: [],
     error: '',
@@ -248,9 +249,9 @@
     try {
       if (state.targetMode === 'proxy') {
         if (!state.targetId || normalizedDigits(state.nationalCode).length !== 10) throw new Error('برای مشاهدهٔ سفارش این شخص، ابتدا هویت او را دوباره تأیید کنید.');
-        state.monthData = await request('proxy-month', null, { method: 'POST', body: JSON.stringify({ month: monthKey(), employee_id: state.targetId, national_code: normalizedDigits(state.nationalCode) }) });
+        state.monthData = await request('proxy-month', null, { method: 'POST', body: JSON.stringify({ month: monthKey(), meal_type: state.mealType, employee_id: state.targetId, national_code: normalizedDigits(state.nationalCode) }) });
       } else {
-        state.monthData = await request('month', { month: monthKey() });
+        state.monthData = await request('month', { month: monthKey(), meal_type: state.mealType });
       }
     } catch (e) {
       state.error = e.message || 'تقویم بارگذاری نشد.';
@@ -332,8 +333,10 @@
   }
 
   function dayStatus(day, holiday, cell) {
-    if (holiday) return 'تعطیل رسمی';
+    if (holiday && !(day && day.late_order_window_open)) return 'تعطیل رسمی';
     if (!day || !day.calendar_id || !Array.isArray(day.items) || day.items.length === 0) return 'بدون برنامه';
+    if (day.late_order_window_open) return 'مهلت اضطراری ثبت سفارش';
+    if (holiday) return 'تعطیل رسمی';
     if (day.order_status === 'closed') return 'سفارش بسته';
     if (day.order_status === 'open') return 'سفارش باز';
     return 'دارای غذا';
@@ -362,31 +365,32 @@
       if (cell.isWeekend) classes.push('is-weekend');
       if (holiday) classes.push('is-holiday');
       if (todayFlag) classes.push('is-today');
-      if (day && day.order_status === 'closed') classes.push('is-closed');
+      if (day && day.order_status === 'closed' && !day.late_order_window_open) classes.push('is-closed');
       var selectedOrder = day && day.my_order ? day.my_order : null;
       var orderOwnerLabel = state.targetMode === 'proxy' ? ('سفارش برای ' + state.targetName) : 'سفارش شما';
       if (selectedOrder) classes.push('has-order');
       var tip = [cell.jalali, status, holiday ? holiday : '', items.map(function (x) { return x.food_name; }).join('، '), selectedOrder ? (orderOwnerLabel + ': ' + selectedOrder.food_name) : ''].filter(Boolean).join(' • ');
-      var badges = '<span class="fo-day-status ' + (day && day.order_status === 'open' ? 'is-open' : day && day.order_status === 'closed' ? 'is-closed' : '') + '">' + esc(status) + '</span>';
+      var badges = '<span class="fo-day-status ' + (day && (day.order_status === 'open' || day.late_order_window_open) ? 'is-open' : day && day.order_status === 'closed' ? 'is-closed' : '') + '">' + esc(status) + '</span>';
       if (todayFlag) badges += '<span class="fo-day-status">امروز</span>';
       var orderMarker = selectedOrder ? '<span class="fo-day-order-marker" title="' + esc(orderOwnerLabel + ': ' + selectedOrder.food_name) + '">✓ سفارش</span>' : '';
       var meals = items.map(function (item) { return '<span class="fo-day-meal">' + esc(item.food_name) + '</span>'; }).join('');
       if (selectedOrder) meals += '<span class="fo-day-my-order">✓ ' + esc(orderOwnerLabel) + ': ' + esc(selectedOrder.food_name) + '</span>';
       return '<button type="button" class="' + classes.join(' ') + '" data-fo-day="' + esc(cell.iso) + '" data-current-month="' + (cell.isCurrentMonth ? '1' : '0') + '" data-has-food="' + (items.length ? '1' : '0') + '" data-has-order="' + (selectedOrder ? '1' : '0') + '" data-tooltip="' + esc(tip) + '" aria-label="' + esc(cell.jalali + '، ' + status + (holiday ? '، ' + holiday : '') + (items.length ? '، ' + items.map(function (x) { return x.food_name; }).join('، ') : '') + (selectedOrder ? '، ' + orderOwnerLabel + ': ' + selectedOrder.food_name : '')) + '"' + adjacentAttrs + '><span class="fo-day-number-row"><span class="fo-day-number">' + faDigits(cell.day) + '</span>' + (holiday ? '<span class="fo-day-status is-holiday">تعطیل</span>' : '') + '</span>' + badges + orderMarker + '<span class="fo-day-meals">' + meals + '</span></button>';
     }).join('');
-    return '<div class="card fo-calendar-card"><div class="fo-calendar-toolbar"><h2>تقویم شمسی</h2><div class="fo-month-label">' + esc(monthLabel()) + '</div><div class="fo-calendar-actions">' + guestOrderButton() + '<button type="button" class="button secondary" data-fo-action="prev">ماه قبل</button><button type="button" class="button secondary" data-fo-action="today">امروز</button><button type="button" class="button secondary" data-fo-action="next">ماه بعد</button></div></div>' + (state.error ? '<div class="alert danger" role="alert">' + esc(state.error) + '</div>' : '') + (state.loading ? '<div class="fo-modal-notice">در حال بارگذاری ماه…</div>' : '') + '<div class="fo-calendar-grid" role="grid" aria-label="تقویم سفارش غذا">' + headings + content + '</div><div class="fo-legend"><span><i class="legend-open"></i> سفارش باز</span><span><i class="legend-closed"></i> سفارش بسته</span><span><i class="legend-holiday"></i> تعطیل رسمی / پنجشنبه و جمعه</span><span><i class="legend-today"></i> امروز</span><span><i class="legend-order"></i> سفارش ثبت‌شده</span></div></div>';
+    var mealSwitch = '<div class="fo-meal-switch" role="group" aria-label="وعدهٔ غذایی"><button type="button" class="button ' + (state.mealType === 'lunch' ? '' : 'secondary') + '" data-fo-action="meal-type" data-meal-type="lunch">ناهار</button><button type="button" class="button ' + (state.mealType === 'dinner' ? '' : 'secondary') + '" data-fo-action="meal-type" data-meal-type="dinner">شام</button></div>';
+    return '<div class="card fo-calendar-card">' + mealSwitch + '<div class="fo-calendar-toolbar"><h2>تقویم شمسی</h2><div class="fo-month-label">' + esc(monthLabel()) + '</div><div class="fo-calendar-actions">' + guestOrderButton() + '<button type="button" class="button secondary" data-fo-action="prev">ماه قبل</button><button type="button" class="button secondary" data-fo-action="today">امروز</button><button type="button" class="button secondary" data-fo-action="next">ماه بعد</button></div></div>' + (state.error ? '<div class="alert danger" role="alert">' + esc(state.error) + '</div>' : '') + (state.loading ? '<div class="fo-modal-notice">در حال بارگذاری ماه…</div>' : '') + '<div class="fo-calendar-grid" role="grid" aria-label="تقویم سفارش غذا">' + headings + content + '</div><div class="fo-legend"><span><i class="legend-open"></i> سفارش باز</span><span><i class="legend-closed"></i> سفارش بسته</span><span><i class="legend-holiday"></i> تعطیل رسمی / پنجشنبه و جمعه</span><span><i class="legend-today"></i> امروز</span><span><i class="legend-order"></i> سفارش ثبت‌شده</span></div></div>';
   }
 
   function renderOrders() {
     var rows = state.orders || [];
     if (!rows.length) return '<div class="card fo-empty">هنوز سفارشی برای حساب شما ثبت نشده است.</div>';
-    return '<div class="card fo-my-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام و نام خانوادگی</th><th>نوع غذا</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
+    return '<div class="card fo-my-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام و نام خانوادگی</th><th>نوع غذا</th><th>وعده</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
       var active = row.status === 'active';
       var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed';
       var action = canCancel
         ? '<button class="button secondary" type="button" data-fo-action="cancel" data-order-id="' + Number(row.id) + '">لغو سفارش</button>'
         : renderCancelRequestControl(row, false);
-      return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(row.full_name || selfName) + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(faDigits(isoToJalali(row.reserve_date))) + '</td><td>' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + action + '</td></tr>';
+      return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(row.full_name || selfName) + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(faDigits(isoToJalali(row.reserve_date))) + '</td><td>' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + action + '</td></tr>';
     }).join('') + '</tbody></table></div></div>';
   }
 
@@ -395,7 +399,8 @@
     var closed = (row.day_status || (currentDay() && currentDay().order_status) || '') === 'closed';
     if (!active || isPast(row.food_date || state.modalDate) || !closed || !row.id) return '—';
     if (row.cancel_request && row.cancel_request.status === 'pending') {
-      return '<span class="fo-order-state">در انتظار تأیید لغو</span>';
+      var requestedAt = row.cancel_request.requested_at_label || row.cancel_request.created_at || '';
+      return '<span class="fo-order-state">در انتظار تأیید لغو</span>' + (requestedAt ? '<small class="fo-cancel-request-time">زمان ثبت درخواست: ' + esc(faDigits(requestedAt)) + '</small>' : '');
     }
     var id = Number(row.id);
     var busy = Number(state.cancelRequestBusyId) === id;
@@ -426,6 +431,7 @@
       return {
         id: Number(order.id || 0),
         food_date: order.food_date || '',
+        meal_type: order.meal_type || 'lunch',
         food_name: order.food_name || '',
         reserve_date: order.reserve_date || '',
         reserve_time: order.reserve_time || '',
@@ -441,13 +447,13 @@
     } else if (!rows.length) {
       content = '<div class="card fo-empty">در این بازه برای این شخص سفارشی ثبت نشده است.</div>';
     } else {
-      content = '<div class="card fo-my-orders fo-proxy-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
+      content = '<div class="card fo-my-orders fo-proxy-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>وعده</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
         var reserveDate = row.reserve_date ? faDigits(isoToJalali(row.reserve_date)) : '—';
         var reserveTime = row.reserve_time ? faDigits(row.reserve_time.slice(0, 5)) : '—';
         var active = row.status === 'active';
         var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed' && row.id > 0;
         var cancelButton = canCancel ? renderProxyCancelControl(row.id, 'button secondary') : renderCancelRequestControl(row, true);
-        return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(state.targetName || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(reserveDate) + '</td><td>' + esc(reserveTime) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + cancelButton + '</td></tr>';
+        return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(state.targetName || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(reserveDate) + '</td><td>' + esc(reserveTime) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + cancelButton + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
     }
     return '<div class="fo-section-title"><div><h2>سفارش‌های این ماه</h2></div></div>' + content;
@@ -458,9 +464,10 @@
   }
 
   function modalReadOnlyMessage(day, holiday) {
+    if (!day || !day.calendar_id || !day.items || !day.items.length) return 'برای این تاریخ هنوز برنامهٔ غذایی ثبت نشده است.';
+    if (day.late_order_window_open) return '';
     if (isPast(state.modalDate)) return 'تاریخ گذشته است و فقط می‌توانید سفارش قبلی خود را ببینید.';
     if (holiday) return 'این روز تعطیل رسمی است؛ تعطیلی مانع سفارش نیست.';
-    if (!day || !day.calendar_id || !day.items || !day.items.length) return 'برای این تاریخ هنوز برنامهٔ غذایی ثبت نشده است.';
     if (day.order_status === 'closed') return 'سفارش‌گیری این روز بسته شده است. اگر سفارش فعال دارید، می‌توانید درخواست لغو بفرستید تا مدیر پشتیبانی بررسی کند.';
     if (day.order_status !== 'open') return 'وضعیت سفارش این روز مشخص نیست.';
     return '';
@@ -520,7 +527,7 @@
     var dateLabel = isoToJalali(state.modalDate);
     var readOnly = modalReadOnlyMessage(day, holiday);
     var items = day && Array.isArray(day.items) ? day.items : [];
-    var canOrderDay = !readOnly && day && day.order_status === 'open' && !isPast(state.modalDate);
+    var canOrderDay = Boolean(!readOnly && day && (day.late_order_window_open || (day.order_status === 'open' && !isPast(state.modalDate))));
     var existingOrder = day && day.my_order ? day.my_order : null;
     var selfOrder = state.targetMode === 'self' ? existingOrder : null;
     var showMeals = state.targetMode === 'self' ? hasNational : (state.targetId > 0 && normalizedDigits(state.nationalCode).length === 10);
@@ -534,7 +541,10 @@
       ? '<div class="fo-modal-notice">سفارش فعال شما: <strong>' + esc(selfOrder.food_name) + '</strong></div>'
       : (state.targetMode === 'proxy' && existingOrder ? '<div class="fo-modal-notice">سفارش فعال این شخص: <strong>' + esc(existingOrder.food_name) + '</strong></div>' : '');
     var message = '';
-    if (readOnly) message = '<div class="fo-modal-notice ' + (isPast(state.modalDate) || (day && day.order_status === 'closed') ? 'warn' : '') + '">' + esc(readOnly) + '</div>';
+    if (readOnly) message = '<div class="fo-modal-notice ' + (isPast(state.modalDate) || (day && day.order_status === 'closed') ? 'warn' : '') + '\">' + esc(readOnly) + '</div>';
+    var lateWindowNotice = day && day.late_order_window_open
+      ? '<div class="fo-modal-notice warn">مهلت اضطراری ثبت سفارش برای همین روز و وعده، با تأیید مدیر و برای مدت محدود فعال شده است.</div>'
+      : '';
     if (state.targetMode === 'self' && !hasNational) message = '<div class="fo-modal-notice error">کد ملی شما در سامانه ثبت نیست؛ ثبت سفارش برای خودتان غیرفعال است.</div>';
     var saveAllowed = Boolean(state.recipientReady && canOrderDay && showMeals && items.length);
     var cancelHtml = '';
@@ -547,7 +557,7 @@
     } else if (state.targetMode === 'proxy' && existingOrder && Number(existingOrder.id || 0) > 0 && day && day.order_status === 'closed') {
       cancelHtml = renderCancelRequestControl({ id: existingOrder.id, status: 'active', food_date: state.modalDate, day_status: 'closed', cancel_request: existingOrder.cancel_request }, true);
     }
-    return '<dialog class="fo-modal" id="fo-order-dialog" aria-labelledby="fo-modal-title"><div class="fo-modal-inner"><div class="fo-modal-head"><div><h2 id="fo-modal-title">انتخاب غذای روز</h2><p>' + esc(faDigits(dateLabel)) + (holiday ? ' • ' + esc(holiday) : '') + '</p></div><button class="fo-modal-close" type="button" data-fo-action="close" aria-label="بستن">×</button></div>' + recipientInfo + message + ownOrderHtml + (canOrderDay && items.length ? '<div class="fo-section-title"><div><h2>غذای موردنظر را انتخاب کنید</h2><p>برای هر شخص در هر روز فقط یک سفارش ثبت می‌شود.</p></div></div><div class="fo-meal-options">' + radios + '</div>' : '') + '<div class="fo-status-msg" id="fo-modal-error" aria-live="polite"></div><div class="fo-modal-actions">' + (saveAllowed ? '<button type="button" class="button" data-fo-action="save-order">' + (selfOrder ? 'ثبت تغییر سفارش' : 'ثبت سفارش') + '</button>' : '') + cancelHtml + '<button type="button" class="button secondary" data-fo-action="close">بستن</button></div></div></dialog>';
+    return '<dialog class="fo-modal" id="fo-order-dialog" aria-labelledby="fo-modal-title"><div class="fo-modal-inner"><div class="fo-modal-head"><div><h2 id="fo-modal-title">انتخاب غذای ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + '</h2><p>' + esc(faDigits(dateLabel)) + (holiday ? ' • ' + esc(holiday) : '') + '</p></div><button class="fo-modal-close" type="button" data-fo-action="close" aria-label="بستن">×</button></div>' + recipientInfo + message + lateWindowNotice + ownOrderHtml + (canOrderDay && items.length ? '<div class="fo-section-title"><div><h2>غذای موردنظر را انتخاب کنید</h2><p>برای هر شخص در هر وعدهٔ روز فقط یک سفارش ثبت می‌شود.</p></div></div><div class="fo-meal-options">' + radios + '</div>' : '') + '<div class="fo-status-msg" id="fo-modal-error" aria-live="polite"></div><div class="fo-modal-actions">' + (saveAllowed ? '<button type="button" class="button" data-fo-action="save-order">' + (selfOrder ? 'ثبت تغییر سفارش' : 'ثبت سفارش') + '</button>' : '') + cancelHtml + '<button type="button" class="button secondary" data-fo-action="close">بستن</button></div></div></dialog>';
   }
 
   function render() {
@@ -794,7 +804,7 @@
     var recipientName = state.targetName;
     var selectedOption = selected.closest ? selected.closest('.fo-meal-option') : null;
     var selectedFoodName = selectedOption ? selectedOption.textContent.trim() : 'غذای انتخاب‌شده';
-    var body = { employee_id: isProxy ? state.targetId : selfId, food_date: state.modalDate, calendar_item_id: Number(selected.value) };
+    var body = { employee_id: isProxy ? state.targetId : selfId, food_date: state.modalDate, calendar_item_id: Number(selected.value), meal_type: state.mealType };
     if (isProxy) {
       body.national_code = normalizedDigits(state.nationalCode);
       if (!body.employee_id) { setModalError('پرسنل سفارش‌گیرنده انتخاب نشده است.'); toast('پرسنل سفارش‌گیرنده انتخاب نشده است.', true); return; }
@@ -983,6 +993,10 @@
     if (action) {
       var act = action.dataset.foAction;
       if (act === 'guest-order') { if (window.FoodGuest) window.FoodGuest.open(); return; }
+      if (act === 'meal-type') {
+        var nextMeal = action.dataset.mealType === 'dinner' ? 'dinner' : 'lunch';
+        if (nextMeal !== state.mealType) { state.mealType = nextMeal; state.modalDate = ''; state.monthData = null; loadMonth(); }
+      }
       if (act === 'prev') { var p = Cal.shiftMonth(state.year, state.month, -1); setMonth(p[0], p[1]); }
       if (act === 'next') { var n = Cal.shiftMonth(state.year, state.month, 1); setMonth(n[0], n[1]); }
       if (act === 'today') {

@@ -158,7 +158,7 @@ function permission_catalog(): array
                 ['code' => 'food.health_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.menu', 'label' => 'برنامه غذایی و بانک غذا'],
                 ['code' => 'food.menu_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز، مشاهدهٔ همهٔ سفارش‌ها و رسیدگی به درخواست لغو'],
+                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز، مشاهدهٔ سفارش‌ها و اعطای مهلت اضطراری محدود'],
             ],
         ],
         [
@@ -481,23 +481,10 @@ function role_permissions_migrate_once(): void
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
     }
-    if (setting('print_fish_roles_v1') !== '1') {
-        // چاپ فیش فقط برای نقش‌های مجاز. نقش‌های دست‌نخورده از پیش‌فرض تازه می‌گیرند؛
-        // نقش‌های ویرایش‌شده فقط کدهای food.* غیرمجاز را از دست می‌دهند.
+    if (setting('print_fish_roles_v2') !== '1') {
+        // دسترسی‌های سامانهٔ غذا برای همهٔ نقش‌ها قابل مدیریت است؛ این آشتی فقط نشانگر تازه را ثبت می‌کند و مجوزی را حذف نمی‌کند.
         try {
-            db()->exec("DELETE FROM role_permissions WHERE permission IN ('food.orders', 'food.orders_edit')");
-            foreach (array_keys(permission_roles()) as $role) {
-                if ($role === 'primary_admin') {
-                    continue;
-                }
-                $allowed = in_array($role, print_fish_allowed_roles(), true);
-                if (!role_permissions_custom($role)) {
-                    db()->prepare('DELETE FROM role_permissions WHERE role = ?')->execute([$role]);
-                } elseif (!$allowed) {
-                    db()->prepare("DELETE FROM role_permissions WHERE role = ? AND permission LIKE 'food.%'")->execute([$role]);
-                }
-            }
-            save_setting('print_fish_roles_v1', '1');
+            save_setting('print_fish_roles_v2', '1');
             role_permissions_flush_cache();
         } catch (Throwable $exception) {
             // دفعهٔ بعد دوباره تلاش می‌شود.

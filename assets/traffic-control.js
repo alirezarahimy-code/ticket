@@ -12,10 +12,20 @@
     var fields = {
         full_name: document.getElementById('traffic-full-name'),
         phone: document.getElementById('traffic-phone'),
+        phoneTail: document.getElementById('traffic-phone-tail'),
         company: document.getElementById('traffic-company'),
         meeting_with: document.getElementById('traffic-meeting-with'),
         approved_by: document.getElementById('traffic-approved-by'),
     };
+
+    function syncNewDestinationApprover() {
+        if (!fields.meeting_with || !fields.approved_by) return;
+        var selected = fields.meeting_with.options[fields.meeting_with.selectedIndex];
+        fields.approved_by.value = selected ? (selected.getAttribute('data-approver') || '') : '';
+    }
+
+    if (fields.meeting_with) fields.meeting_with.addEventListener('change', syncNewDestinationApprover);
+    syncNewDestinationApprover();
 
     function setHint(html, kind) {
         hint.className = 'alert ' + (kind || 'info');
@@ -66,10 +76,16 @@
                     setHint('آخرین تردد: ' + data.last_visit_label + '. اطلاعات پیشنهادی پر شد؛ در صورت نیاز اصلاح کنید.', 'success');
                 }
                 if (fields.full_name && !fields.full_name.value) fields.full_name.value = data.full_name || '';
-                if (fields.phone && !fields.phone.value) fields.phone.value = data.phone || '';
+                if (fields.phone && fields.phoneTail && !fields.phoneTail.value && data.phone) {
+                    var previousPhone = String(data.phone).replace(/[۰-۹]/g, function (digit) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)); }).replace(/[٠-٩]/g, function (digit) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)); }).replace(/\D/g, '');
+                    if (/^09\d{9}$/.test(previousPhone)) {
+                        fields.phoneTail.value = previousPhone.slice(2);
+                        fields.phone.value = previousPhone;
+                    }
+                }
                 if (fields.company && !fields.company.value) fields.company.value = data.company || '';
                 if (fields.meeting_with && data.meeting_with) fields.meeting_with.value = data.meeting_with;
-                if (fields.approved_by && !fields.approved_by.value) fields.approved_by.value = data.approved_by || '';
+                syncNewDestinationApprover();
             })
             .catch(function () { clearHint(); });
     }
@@ -149,6 +165,7 @@
     var name = alertBox.getAttribute('data-focus-field');
     var form = formId ? document.getElementById(formId) : null;
     var field = form && name ? form.querySelector('[name="' + name + '"]') : null;
+    if (form && name === 'phone') field = form.querySelector('[data-phone-tail-for]') || field;
     if (alertBox.scrollIntoView) {
         alertBox.scrollIntoView({ block: 'center' });
     }
@@ -191,3 +208,90 @@
     });
     apply();
 })();
+
+// ورودی ساعت ثابت و صریح ۲۴ساعته؛ ورود چهار رقم مثل 1430 به 14:30 تبدیل می‌شود.
+(function () {
+    'use strict';
+    var fields = document.querySelectorAll('.traffic-time-24h');
+    if (!fields.length) return;
+    var persian = '۰۱۲۳۴۵۶۷۸۹';
+    var arabic = '٠١٢٣٤٥٦٧٨٩';
+    function asciiDigits(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String(persian.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String(arabic.indexOf(digit)); })
+            .replace(/：/g, ':');
+    }
+    fields.forEach(function (field) {
+        field.addEventListener('input', function () {
+            var current = asciiDigits(field.value);
+            if (current.indexOf(':') !== -1) {
+                if (current !== field.value) field.value = current;
+                return;
+            }
+            var digits = current.replace(/\D/g, '').slice(0, 4);
+            if (digits.length > 2) {
+                var caret = field.selectionStart || current.length;
+                field.value = digits.slice(0, 2) + ':' + digits.slice(2);
+                var nextCaret = caret > 2 ? caret + 1 : caret;
+                try { field.setSelectionRange(nextCaret, nextCaret); } catch (ignore) {}
+            } else if (current !== field.value) {
+                field.value = digits;
+            }
+        });
+        field.addEventListener('blur', function () {
+            var value = asciiDigits(field.value).trim();
+            var match = value.match(/^(\d{1,2}):(\d{1,2})$/);
+            if (match) field.value = match[1].padStart(2, '0') + ':' + match[2].padStart(2, '0');
+        });
+    });
+}());
+
+
+// پیش‌شمارهٔ ۰۹ ثابت است؛ فیلد قابل‌ویرایش فقط ۹ رقم پایانی را می‌پذیرد.
+(function () {
+    'use strict';
+    var tails = document.querySelectorAll('[data-phone-tail-for]');
+    var persian = '۰۱۲۳۴۵۶۷۸۹';
+    var arabic = '٠١٢٣٤٥٦٧٨٩';
+    function asciiDigits(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String(persian.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String(arabic.indexOf(digit)); });
+    }
+    tails.forEach(function (field) {
+        var fullNumber = document.getElementById(field.getAttribute('data-phone-tail-for'));
+        if (!fullNumber) return;
+        function sync() {
+            var digits = asciiDigits(field.value).replace(/\D/g, '');
+            if (digits.length === 11 && digits.indexOf('09') === 0) digits = digits.slice(2);
+            field.value = digits.slice(0, 9);
+            fullNumber.value = field.value ? '09' + field.value : (field.required ? '09' : '');
+        }
+        field.addEventListener('input', sync);
+        field.addEventListener('paste', function (event) {
+            var text = event.clipboardData && event.clipboardData.getData('text');
+            if (typeof text !== 'string') return;
+            var digits = asciiDigits(text).replace(/\D/g, '');
+            if (digits.length === 11 && digits.indexOf('09') === 0) digits = digits.slice(2);
+            event.preventDefault();
+            field.value = digits.slice(0, 9);
+            sync();
+        });
+        sync();
+    });
+}());
+
+// تأییدکننده در فرم ویرایش نیز فقط از مقصد انتخاب‌شده خوانده می‌شود.
+(function () {
+    'use strict';
+    var destination = document.getElementById('traffic-edit-meeting-with');
+    var approver = document.getElementById('traffic-edit-approved-by');
+    if (!destination || !approver) return;
+    function sync() {
+        var option = destination.options[destination.selectedIndex];
+        approver.value = option ? (option.getAttribute('data-approver') || '') : '';
+    }
+    destination.addEventListener('change', sync);
+    sync();
+}());

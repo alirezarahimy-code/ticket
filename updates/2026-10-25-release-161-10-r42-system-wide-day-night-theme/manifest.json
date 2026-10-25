@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "release": "R42",
+  "title": "Ticket 1.61.10 — R42 system-wide day/night mode",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-global-day-night-theme-r42-20261025.zip",
+  "migrations": [],
+  "notes": "Adds a persistent, browser-wide day/night preference shared by the main system and the food management panel. The global toggle changes the full page surface, including header/navigation, content, cards, tables, forms, modals, organization view, and footer. It retains the separate user accent-color setting and supports reduced-motion fallback. No cloud dependency or sample data is added to the product."
+}

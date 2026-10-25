@@ -8,15 +8,19 @@ function inventory_render_assets_content(
     bool $canImportAssets,
     bool $canPingAssets,
     bool $canExtractAssets,
+    bool $canExtractLocalServer,
     bool $canConfigureNetworkScan,
     bool $networkScanEnabled,
     bool $canSelectAssets,
     int $onlineCount,
     int $collectedCount
 ): void {
-    echo '<section class="page-heading inventory-page-heading"><div><span class="eyebrow">Technical Inventory</span><h1>شناسنامه‌های فنی سیستم</h1><p>کامپیوترها را از دامنه وارد کنید، سیستم‌های انتخابیِ در دسترس شبکه را استخراج کنید و اطلاعات تکمیلی هر شناسنامه را جداگانه ویرایش کنید.</p></div><div class="inventory-top-actions">';
+    echo '<section class="page-heading inventory-page-heading"><div><span class="eyebrow">Technical Inventory</span><h1>شناسنامه‌های فنی سیستم</h1><p>کامپیوترها را از دامنه وارد کنید، سیستم‌های انتخابیِ در دسترس شبکه را استخراج کنید و اطلاعات تکمیلی هر شناسنامه را جداگانه ویرایش کنید. استخراج محلی فقط میزبانی را می‌خواند که PHP سامانه روی آن اجرا شده است؛ اگر سامانه روی خود کامپیوتر اجرا شود، همان کامپیوتر خوانده می‌شود.</p></div><div class="inventory-top-actions">';
     if ($canImportAssets) {
         echo '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="import_domain_assets"><button class="button secondary" type="submit">ورود کامپیوترهای دامنه</button></form>';
+    }
+    if ($canExtractLocalServer) {
+        echo '<form method="post" class="inline-action inventory-local-extract-form">' . csrf_field() . '<input type="hidden" name="action" value="collect_inventory"><button class="button secondary" type="submit" title="فقط میزبانی را می‌خواند که PHP سامانه روی آن اجرا شده است">استخراج محلی همین سیستم</button><label class="muted"><input type="checkbox" name="overwrite" value="1"> بازنویسی فیلدهای خودکارِ پُر</label></form>';
     }
     if ($canExtractAssets && $canConfigureNetworkScan) {
         echo '<a class="button secondary" href="index.php?page=settings#domain-scan">حساب استخراج شبکه</a>';
@@ -29,14 +33,17 @@ function inventory_render_assets_content(
     if ($canExtractAssets && !$networkScanEnabled) {
         echo '<div class="alert danger inventory-scan-notice">' . e((string) domain_scan_preflight()) . '</div>';
     }
-    echo '<div class="inventory-selection-bar"><div><strong id="asset-selection-count" data-asset-selection-count>۰ سیستم انتخاب شده</strong><span> برای هر نوبت حداکثر ۹۰۰ سیستم انتخاب کنید؛ برای ویرایش دستی، دکمهٔ هر ردیف را باز کنید.</span></div><div class="inventory-bulk-actions">';
+    echo '<div class="inventory-selection-bar"><div><strong id="asset-selection-count" data-asset-selection-count>۰ سیستم انتخاب شده</strong><span> برای بررسی حساب، دقیقاً یک سیستم را انتخاب و «آزمون حساب روی یک سیستم» را بزنید؛ آزمون چیزی ذخیره نمی‌کند. سپس برای هر نوبت حداکثر ۹۰۰ سیستم را استخراج کنید. اسکن موفق، فیلدهای ماشینی را تازه می‌کند و ممکن است مقدار دستی همان فیلدها را جایگزین کند؛ پلاک، پلمپ و اطلاعات اداری جداگانه حفظ می‌شوند.</span></div><div class="inventory-bulk-actions">';
     if ($canExtractAssets) {
         $scanReady = $networkScanEnabled ? '1' : '0';
         $scanDisabled = $networkScanEnabled ? '' : ' disabled aria-disabled="true" title="' . e((string) domain_scan_preflight()) . '"';
-        echo '<button class="button" type="submit" form="assetSelectionForm" name="action" value="domain_scan_selected" data-asset-selection-action data-max-selection="900" data-scan-configured="' . $scanReady . '"' . $scanDisabled . '>استخراج اطلاعات سیستم‌های انتخاب‌شده</button>';
+        echo '<button class="button secondary" type="submit" form="assetSelectionForm" name="action" value="domain_scan_test_selected" data-asset-selection-action data-max-selection="1" data-scan-configured="' . $scanReady . '"' . $scanDisabled . '>آزمون حساب روی یک سیستم</button><button class="button" type="submit" form="assetSelectionForm" name="action" value="domain_scan_selected" data-asset-selection-action data-max-selection="900" data-scan-configured="' . $scanReady . '"' . $scanDisabled . '>استخراج اطلاعات سیستم‌های انتخاب‌شده</button>';
     }
     if ($canPingAssets) {
-        echo '<button class="button secondary" type="submit" form="assetSelectionForm" name="action" value="ping_assets" data-asset-selection-action data-max-selection="5000" data-ping-chunk="40">فقط پینگ انتخاب‌شده‌ها</button><span class="muted" data-ping-progress hidden></span>';
+        echo '<button class="button secondary" type="submit" form="assetSelectionForm" formnovalidate name="action" value="ping_assets" data-asset-selection-action data-max-selection="5000" data-ping-chunk="40">فقط پینگ انتخاب‌شده‌ها</button><span class="muted" data-ping-progress hidden></span>';
+    }
+    if ($canExtractAssets && $networkScanEnabled) {
+        echo '<div class="inventory-scan-credentials"><label>حساب مجاز ویندوز (DOMAIN\\user)<input form="assetSelectionForm" name="scan_username" required autocomplete="off" placeholder="COMPANY\\inventory-scan"></label><label>رمز حساب<input form="assetSelectionForm" type="password" name="scan_password" required autocomplete="new-password"></label><small>یک حساب دامنهٔ دارای دسترسی Administrators روی مقصدها کافی است؛ لازم نیست برای هر رایانه حساب محلی بسازید. اعتبارنامه برای همین نوبت است، در پایگاه‌داده ذخیره نمی‌شود و فقط با HTTPS ارسال می‌شود.</small></div>';
     }
     echo '</div></div><form id="assetSelectionForm" method="post">' . csrf_field();
     echo '<section class="card ticket-table asset-table"><div class="asset-table-scroll"><div class="table-head"><span>' . ($canSelectAssets ? '<input type="checkbox" data-select-all="asset_ids[]" title="انتخاب همهٔ سیستم‌های فهرست‌شده">' : '') . '</span><span>سیستم</span><span>معاونت</span><span>IP</span><span>شبکه</span><span>وضعیت استخراج</span><span>آخرین استخراج</span><span>شناسنامه</span></div>';

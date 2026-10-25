@@ -1,4 +1,65 @@
 document.addEventListener('DOMContentLoaded', function () {
+    var themeRoot = document.documentElement;
+    var themeMode = themeRoot.getAttribute('data-theme-mode') === 'dark' ? 'dark' : 'light';
+    var themeCookie = function (mode) {
+        try { document.cookie = 'ticket_theme_mode=' + mode + '; Path=/; Max-Age=31536000; SameSite=Lax'; } catch (_) {}
+    };
+    var updateThemeButtons = function (mode) {
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+            var dark = mode === 'dark';
+            button.setAttribute('aria-pressed', dark ? 'true' : 'false');
+            button.setAttribute('aria-label', dark ? 'تغییر به حالت روز' : 'تغییر به حالت شب');
+            var label = button.querySelector('[data-theme-label]');
+            var icon = button.querySelector('[data-theme-icon]');
+            if (label) label.textContent = dark ? 'حالت روز' : 'حالت شب';
+            if (icon) icon.textContent = dark ? '☀️' : '🌙';
+        });
+    };
+    var applyThemeMode = function (mode, persist) {
+        mode = mode === 'dark' ? 'dark' : 'light';
+        themeRoot.setAttribute('data-theme-mode', mode);
+        if (document.body) document.body.setAttribute('data-theme-mode', mode);
+        themeMode = mode;
+        if (persist !== false) {
+            themeCookie(mode);
+            try { window.localStorage.setItem('ticket-theme-mode', mode); } catch (_) {}
+        }
+        var themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.setAttribute('content', mode === 'dark' ? '#101915' : '#174f43');
+        updateThemeButtons(mode);
+        document.querySelectorAll('.food-capitalio-dashboard-widget').forEach(function (widget) {
+            widget.classList.toggle('dark', mode === 'dark');
+        });
+        window.dispatchEvent(new CustomEvent('ticket-theme-change', { detail: { mode: mode } }));
+        document.querySelectorAll('iframe').forEach(function (frame) {
+            try { if (frame.contentWindow) frame.contentWindow.postMessage({ type: 'ticket-theme-change', mode: mode }, window.location.origin); } catch (_) {}
+        });
+    };
+    var setThemeMode = function (mode) {
+        mode = mode === 'dark' ? 'dark' : 'light';
+        if (mode === themeMode) return;
+        var update = function () { applyThemeMode(mode, true); };
+        if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            var x = window.innerWidth / 2;
+            var y = window.innerHeight / 2;
+            themeRoot.style.setProperty('--theme-transition-x', x + 'px');
+            themeRoot.style.setProperty('--theme-transition-y', y + 'px');
+            themeRoot.style.setProperty('--theme-transition-radius', Math.ceil(Math.hypot(x, y)) + 'px');
+            themeRoot.classList.add('theme-mode-transition');
+            try {
+                var transition = document.startViewTransition(update);
+                transition.finished.then(function () { themeRoot.classList.remove('theme-mode-transition'); }, function () { themeRoot.classList.remove('theme-mode-transition'); });
+            } catch (_) {
+                themeRoot.classList.remove('theme-mode-transition');
+                update();
+            }
+        } else update();
+    };
+    window.ITSMThemeMode = { get: function () { return themeMode; }, set: setThemeMode };
+    updateThemeButtons(themeMode);
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () { setThemeMode(themeMode === 'dark' ? 'light' : 'dark'); });
+    });
     document.querySelectorAll('.alert').forEach(function (item) {
         window.setTimeout(function () { item.style.opacity = '0'; item.style.transition = 'opacity .4s'; window.setTimeout(function () { item.remove(); }, 450); }, 5500);
     });
@@ -1285,5 +1346,33 @@ document.addEventListener('DOMContentLoaded', function () {
 window.addEventListener('pageshow', function (event) {
     if (event.persisted) {
         window.location.reload();
+    }
+});
+
+
+document.addEventListener('click', function (event) {
+    var openButton = event.target.closest('[data-domain-code-dialog-open]');
+    if (openButton) {
+        var dialogId = openButton.getAttribute('data-domain-code-dialog-open') || '';
+        var dialog = dialogId ? document.getElementById(dialogId) : null;
+        if (dialog) {
+            event.preventDefault();
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+            var input = dialog.querySelector('input[name="employee_number"]');
+            if (input) input.focus();
+        }
+        return;
+    }
+    var closeButton = event.target.closest('[data-domain-code-dialog-close]');
+    if (closeButton) {
+        var activeDialog = closeButton.closest('dialog');
+        if (activeDialog && typeof activeDialog.close === 'function') activeDialog.close();
+        else if (activeDialog) activeDialog.removeAttribute('open');
+        return;
+    }
+    if (event.target && event.target.matches && event.target.matches('dialog.domain-code-link-dialog')) {
+        var bounds = event.target.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) { if (typeof event.target.close === 'function') event.target.close(); else event.target.removeAttribute('open'); }
     }
 });

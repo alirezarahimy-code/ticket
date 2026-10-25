@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — inventory provenance and safe partial refresh (R31)",
+  "date": "2026-10-22",
+  "migrations": [],
+  "notes": "Preserve last-known inventory values when collectors fail or omit categories; clear categorized inventory only after a successful empty query. Store and display per-collector attempt and last-success provenance for automatically mapped profile fields. Reduce food-admin startup wait by parallelizing independent hydration requests and batch employee username-collision checks. Add server-side timing logs for food panel/API and LDAP login. Runtime Windows/WMI and production latency verification remain required; no production data change."
+}

@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — بازگردانی استخراج محلی سخت‌افزار (R26)",
+  "date": "2026-10-22",
+  "migrations": [],
+  "notes": "R26 restores local hardware extraction for the PHP host, prevents empty failed collections from being upserted, restores result/error messages, and keeps per-run network scan credentials encrypted temporarily in the user session with HTTPS required. No permanent credential storage, database migration, or production data change."
+}

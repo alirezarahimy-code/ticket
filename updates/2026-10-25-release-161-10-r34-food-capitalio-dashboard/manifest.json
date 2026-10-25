@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — R34 integrated food dashboard",
+  "date": "2026-10-25",
+  "migrations": [],
+  "notes": "Integrates the food dashboard directly into the existing module and uses local food-order, monitoring, and employee APIs. No preview bundle, iframe, synthetic dashboard values, or database migration."
+}

@@ -19,19 +19,28 @@ function roleOf(int $id): string { return (string) db()->query("SELECT role FROM
 
 org_ensure_schema();
 org_ensure_role_sync_columns();
-db()->exec('DELETE FROM org_unit_managers');
-db()->exec("DELETE FROM org_units WHERE unit_type IN ('deputy','department')");
-db()->exec("DELETE FROM users WHERE username LIKE 'orgtest_%'");
+$testSuffix = bin2hex(random_bytes(6));
+$userPrefix = 'orgtest_' . $testSuffix . '_';
+$unitCodes = ['ORGTEST_DEP_' . $testSuffix, 'ORGTEST_DEPT_' . $testSuffix];
+$cleanupTestData = static function () use ($userPrefix, $unitCodes): void {
+    $deleteManagers = db()->prepare('DELETE FROM org_unit_managers WHERE unit_id IN (SELECT id FROM org_units WHERE code IN (?, ?))');
+    $deleteManagers->execute($unitCodes);
+    $deleteUnits = db()->prepare('DELETE FROM org_units WHERE code IN (?, ?)');
+    $deleteUnits->execute($unitCodes);
+    $deleteUsers = db()->prepare('DELETE FROM users WHERE username LIKE ?');
+    $deleteUsers->execute([$userPrefix . '%']);
+};
+$cleanupTestData();
 $ids = [];
 foreach (['user', 'agent', 'inspector', 'supervisor', 'user', 'user'] as $i => $role) {
     db()->prepare("INSERT INTO users (username, full_name, role, is_active, auth_source) VALUES (?, ?, ?, 1, 'local')")
-        ->execute(["orgtest_$i", "تست $i", $role]);
+        ->execute([$userPrefix . $i, "تست $i", $role]);
     $ids[$i] = (int) db()->lastInsertId();
 }
 [$uUser, $uAgent, $uInsp, $uSup, $uDeptMgr, $uMulti] = $ids;
 
 // ۱) کاربر «کاربر» معاون می‌شود → مدیر
-db()->prepare("INSERT INTO org_units (name, code, parent_id, unit_type, manager_user_id, is_active) VALUES ('معاونت تست','T1',NULL,'deputy',?,1)")->execute([$uUser]);
+db()->prepare("INSERT INTO org_units (name, code, parent_id, unit_type, manager_user_id, is_active) VALUES (?, ?, NULL, 'deputy', ?, 1)")->execute(['معاونت تست', $unitCodes[0], $uUser]);
 $deputyId = (int) db()->lastInsertId();
 org_sync_position_roles();
 check('کاربر با سمت معاونت به مدیر تبدیل می‌شود', roleOf($uUser) === 'manager');
@@ -47,7 +56,7 @@ org_sync_position_roles();
 check('بعد از برداشتن سمت، کارشناس به نقش قبلی برمی‌گردد', roleOf($uAgent) === 'agent');
 
 // ۴) بازرس و سوپروایزر با سمت مدیریتی تغییر نمی‌کنند
-db()->prepare("INSERT INTO org_units (name, code, parent_id, unit_type, manager_user_id, is_active) VALUES ('مدیریت تست','T2',NULL,'department',?,1)")->execute([$uInsp]);
+db()->prepare("INSERT INTO org_units (name, code, parent_id, unit_type, manager_user_id, is_active) VALUES (?, ?, NULL, 'department', ?, 1)")->execute(['مدیریت تست', $unitCodes[1], $uInsp]);
 $deptId = (int) db()->lastInsertId();
 db()->prepare('UPDATE org_units SET manager_user_id = ? WHERE id = ?')->execute([$uSup, $deptId]);
 org_sync_position_roles();
@@ -59,7 +68,7 @@ db()->prepare('UPDATE org_units SET manager_user_id = NULL WHERE id = ?')->execu
 db()->prepare('INSERT INTO org_unit_managers (unit_id, user_id, is_primary) VALUES (?, ?, 0)')->execute([$deptId, $uMulti]);
 org_sync_position_roles();
 check('عضو مدیریت از جدول چند مدیر، مدیر می‌شود', roleOf($uMulti) === 'manager');
-db()->exec('DELETE FROM org_unit_managers');
+db()->prepare('DELETE FROM org_unit_managers WHERE unit_id = ? AND user_id = ?')->execute([$deptId, $uMulti]);
 org_sync_position_roles();
 check('حذف از جدول چند مدیر، نقش را برمی‌گرداند', roleOf($uMulti) === 'user');
 
@@ -68,9 +77,7 @@ db()->prepare("UPDATE users SET role = 'manager', org_auto_role = 0 WHERE id = ?
 org_sync_position_roles();
 check('مدیر دستی بدون سمت حذف نمی‌شود', roleOf($uDeptMgr) === 'manager');
 
-// پاکسازی
-db()->exec("DELETE FROM org_unit_managers WHERE unit_id IN (SELECT id FROM org_units WHERE code IN ('T1','T2'))");
-db()->exec("DELETE FROM org_units WHERE code IN ('T1','T2')");
-db()->exec("DELETE FROM users WHERE username LIKE 'orgtest_%'");
+// پاکسازی فقط داده‌های همین اجرای مصنوعی؛ سایر واحدها و مدیران دست‌نخورده می‌مانند.
+$cleanupTestData();
 echo "\nPASS: $pass  FAIL: $fail\n";
 exit($fail ? 1 : 0);

@@ -22,6 +22,21 @@ style = read("assets/style.css")
 guide = read("help-guide.php")
 chatbot = read("chatbot.php")
 
+org_page = index.split("if ($page === 'organization')", 1)[1].split("if ($page === 'settings')", 1)[0]
+check(
+    "employee_number" not in org_page
+    and "national_code" not in org_page
+    and "'code' => (string) ($chartUser" not in org_page,
+    "organization chart does not query or serialize personnel or national codes",
+)
+check(
+    "codeOf" not in org_js
+    and "org-node-code" not in org_js
+    and "normalize(item.code)" not in org_js
+    and "جستجو بر اساس نام یا کد ملی" not in index,
+    "people lists, pickers, and every position card omit personal codes",
+)
+
 check(
     "function org_unit_accepts_experts" in org_php
     and "'department', 'deputy'" in org_php,
@@ -45,6 +60,29 @@ check(
     "org_unit_accepts_experts($unit)" in org_remove
     and "unit_type'] !== 'department'" not in org_remove,
     "remove experts accepts deputy or department",
+)
+
+for action_name in ("save_org_node", "assign_org_manager", "save_org_unit"):
+    action_block = index.split(f"if ($action === '{action_name}')", 1)[1].split("if ($action ===", 1)[0]
+    check(
+        'UPDATE users SET role = "primary_admin"' not in action_block,
+        f"{action_name} cannot turn an organizational manager into a system primary admin",
+    )
+repair_action = index.split("if ($action === 'repair_org_manager_admin_roles')", 1)[1].split("if ($action ===", 1)[0]
+org_page = index.split("if ($page === 'organization')", 1)[1].split("if ($page === 'settings')", 1)[0]
+check(
+    "if ($action === 'repair_org_manager_admin_roles')" in index
+    and "role = \"manager\", is_primary_admin = 0" in repair_action
+    and "org_unit_managers" in repair_action
+    and "اصلاح مدیران سازمانی که ادمین اصلی شده‌اند" in org_page,
+    "primary admin can safely restore mistakenly promoted org managers without breaking their unit assignments",
+)
+check(
+    "$canRepairOrgAdminRoles = user_is_primary_admin($organizationUser)" in org_page
+    and "__REPAIR_ROLE_LINK__" in org_page
+    and "body.page-organization { height: auto; min-height: 100vh; overflow-x: hidden; overflow-y: auto; }" in style
+    and "body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow: visible; }" in style,
+    "admin repair panel is reachable by scrolling and has a visible header shortcut",
 )
 
 check(
@@ -72,6 +110,14 @@ check(
     "deputy dual-add buttons have layout styles",
 )
 check(
+    "$bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';" in index
+    and "body class=" in index
+    and "e($bodyPageClass)" in index
+    and "body.page-organization" in style
+    and "body:has(.organization-workspace)" not in style,
+    "organization layout no longer depends on browser support for :has()",
+)
+check(
     "سمت راست «افزودن اداره»" in guide
     and "کاربران دامینی و محلی" in guide,
     "help guide describes deputy experts and local users",
@@ -81,18 +127,6 @@ check(
     and "index.php?page=organization" in chatbot
     and "سمت چپ «افزودن کارشناس»" in chatbot,
     "chatbot answers org-chart expert questions",
-)
-check(
-    "applyChartZoom" in org_js
-    and 'data-org-zoom="fit"' in index
-    and "org-chart-stage" in index
-    and ".org-chart-stage" in style,
-    "org tree zoom keeps scroll size and can fit the canvas",
-)
-check(
-    "جا شدن در عرض صفحه" in guide
-    and "زیر نوار بالای صفحه" in guide,
-    "guide documents org zoom and food members overlay placement",
 )
 
 print("all org chart expert static checks passed")

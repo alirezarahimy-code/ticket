@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "release": "R40",
+  "title": "Ticket 1.61.10 — R40 Food Dashboard grid cascade correction",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-food-dashboard-r40-layout-fix-20261025.zip",
+  "migrations": [],
+  "notes": "Fixes dashboard sizing by reverting the host page's unlayered global .grid rule inside the isolated dashboard widget. Restores the intended four KPI columns and 2:1 chart/status layout with no empty track; no dashboard data, calculations, APIs, or other modules changed."
+}

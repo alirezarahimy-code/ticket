@@ -4,62 +4,8 @@ declare(strict_types=1);
 const APP_ROOT = __DIR__;
 
 require_once __DIR__ . '/permissions.php';
-
-/** نشست کاربر به‌خاطر بی‌استفاده بودن قطع نشود (حدود یک سال). */
-function app_session_lifetime(): int
-{
-    return 365 * 24 * 60 * 60;
-}
-
-function app_session_boot(): void
-{
-    if (PHP_SAPI === 'cli' || session_status() === PHP_SESSION_ACTIVE) {
-        return;
-    }
-    $life = app_session_lifetime();
-    @ini_set('session.gc_maxlifetime', (string) $life);
-    @ini_set('session.cookie_lifetime', (string) $life);
-    if ((int) ini_get('session.gc_maxlifetime') < $life) {
-        @ini_set('session.gc_probability', '0');
-    }
-    $sessionDir = APP_ROOT . '/storage/sessions';
-    if (!is_dir($sessionDir)) {
-        @mkdir($sessionDir, 0700, true);
-    }
-    if (is_dir($sessionDir) && is_writable($sessionDir)) {
-        session_save_path($sessionDir);
-    }
-    session_set_cookie_params([
-        'lifetime' => $life,
-        'path' => '/',
-        'httponly' => true,
-        'secure' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'),
-        'samesite' => 'Lax',
-    ]);
-    session_start();
-    app_session_refresh_cookie();
-}
-
-function app_session_refresh_cookie(): void
-{
-    if (PHP_SAPI === 'cli' || headers_sent() || session_status() !== PHP_SESSION_ACTIVE) {
-        return;
-    }
-    $life = app_session_lifetime();
-    $params = session_get_cookie_params();
-    setcookie(session_name(), session_id(), [
-        'expires' => time() + $life,
-        'path' => (string) ($params['path'] ?? '/'),
-        'domain' => (string) ($params['domain'] ?? ''),
-        'secure' => !empty($params['secure']),
-        'httponly' => true,
-        'samesite' => (string) ($params['samesite'] ?? 'Lax'),
-    ]);
-}
-
-if (PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE) {
-    app_session_boot();
-}
+require_once __DIR__ . '/session_bootstrap.php';
+app_session_start();
 
 $configFile = (string) (getenv('ITSM_CONFIG_PATH') ?: APP_ROOT . '/config.php');
 if (!is_file($configFile)) {
@@ -482,6 +428,21 @@ function app_version(): string
 function e(mixed $value): string
 {
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+/** حالت روز/شب سراسری رابط؛ مقدار cookie بین همهٔ مسیرهای سامانه مشترک است. */
+function app_theme_mode(): string
+{
+    $mode = (string) ($_COOKIE['ticket_theme_mode'] ?? 'light');
+    return in_array($mode, ['light', 'dark'], true) ? $mode : 'light';
+}
+
+function app_theme_toggle_markup(): string
+{
+    $dark = app_theme_mode() === 'dark';
+    $label = $dark ? 'حالت روز' : 'حالت شب';
+    $icon = $dark ? '☀️' : '🌙';
+    return '<button type="button" class="theme-mode-toggle" data-theme-toggle aria-pressed="' . ($dark ? 'true' : 'false') . '" aria-label="تغییر به ' . $label . '"><span class="theme-mode-icon" data-theme-icon aria-hidden="true">' . $icon . '</span><span data-theme-label>' . $label . '</span></button>';
 }
 
 function redirect(string $url): never
@@ -1038,7 +999,6 @@ function current_user(): ?array
 function login_user(array $user): void
 {
     session_regenerate_id(true);
-    app_session_refresh_cookie();
     $_SESSION['user_id'] = (int) $user['id'];
     if (function_exists('activity_log')) {
         activity_log([
@@ -1106,12 +1066,13 @@ function require_supervisor(): array
 
 function ticket_scope(array $user, string $alias = 't'): array
 {
+    // این قید پیش از هر مجوز «مشاهده همه» اجرا می‌شود تا مدیر پشتیبانی هرگز
+    // با مجوز سفارشی/قدیمی ticket.view_all به حوزهٔ IT دسترسی نگیرد.
+    if (($user['role'] ?? '') === 'support_manager') {
+        return ["WHERE {$alias}.service_group = ?", ['support']];
+    }
     if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) {
         return ['', []];
-    }
-    if (($user['role'] ?? '') === 'support_manager') {
-        // مدیر پشتیبانی فقط حوزه پشتیبانی را می‌بیند؛ بدون فیلتر معاونت و بدون دسترسی به IT.
-        return ["WHERE {$alias}.service_group = ?", ['support']];
     }
     if (in_array($user['role'], ['agent', 'manager'], true)) {
         $group = user_service_group($user);
@@ -1726,6 +1687,7 @@ function ldap_sync_all_users(): array
     ldap_set_option($connection, LDAP_OPT_REFERRALS, 0);
     if (defined('LDAP_OPT_NETWORK_TIMEOUT')) { @ldap_set_option($connection, LDAP_OPT_NETWORK_TIMEOUT, 8); }
     if (defined('LDAP_OPT_TIMELIMIT')) { @ldap_set_option($connection, LDAP_OPT_TIMELIMIT, 8); }
+    $markPhase('service-bind');
     $bindDn = (string) ldap_cfg('bind_dn', '');
     if ($bindDn !== '' && !@ldap_bind($connection, $bindDn, (string) ldap_cfg('bind_password', ''))) {
         throw new RuntimeException('ورود حساب سرویس LDAP ناموفق بود. DN و رمز حساب سرویس را بررسی کنید.');
@@ -2081,13 +2043,38 @@ function ticket_number_next(string $prefix): string
 {
     ticket_number_ensure_schema();
     $prefix = strtoupper(substr(trim($prefix) !== '' ? trim($prefix) : 'TK', 0, 12));
-    $statement = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, LAST_INSERT_ID(1)) ON DUPLICATE KEY UPDATE seq = LAST_INSERT_ID(seq + 1)');
-    $statement->execute([$prefix]);
-    $sequence = (int) db()->query('SELECT LAST_INSERT_ID()')->fetchColumn();
-    if ($sequence <= 0) {
-        $sequence = 1;
+    $ownsTransaction = !db()->inTransaction();
+    if ($ownsTransaction) {
+        db()->beginTransaction();
     }
-    return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    try {
+        // Lock the prefix row explicitly and read its value in this transaction. This
+        // avoids relying on connection-scoped LAST_INSERT_ID() after concurrent upserts.
+        $ensure = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, 0) ON DUPLICATE KEY UPDATE prefix = VALUES(prefix)');
+        $ensure->execute([$prefix]);
+        $read = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? FOR UPDATE');
+        $read->execute([$prefix]);
+        $currentSequence = (int) ($read->fetchColumn() ?: 0);
+
+        // Heal a stale sequence left by legacy/manual ticket numbers before allocating
+        // the next number; the ticket_no index keeps this prefix-scoped lookup bounded.
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+        $maxQuery = db()->prepare('SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED)) FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?');
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existingMaximum = (int) ($maxQuery->fetchColumn() ?: 0);
+        $sequence = max($currentSequence, $existingMaximum) + 1;
+        $write = db()->prepare('UPDATE ticket_number_seq SET seq = ? WHERE prefix = ?');
+        $write->execute([$sequence, $prefix]);
+        if ($ownsTransaction) {
+            db()->commit();
+        }
+        return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    } catch (Throwable $exception) {
+        if ($ownsTransaction && db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $exception;
+    }
 }
 
 function ticket_number_peek(string $prefix): string
@@ -2629,6 +2616,36 @@ function is_sla_holiday(DateTimeImmutable $date): bool
 function ldap_authenticate(string $username, string $password): ?array
 {
     if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
+        return ldap_authenticate_measured($username, $password, static function (string $phase): void {});
+    }
+    $startedAt = microtime(true);
+    $phase = 'ldap-connect';
+    $phaseStartedAt = $startedAt;
+    $phaseDurations = [];
+    $markPhase = static function (string $nextPhase) use (&$phase, &$phaseStartedAt, &$phaseDurations): void {
+        $now = microtime(true);
+        $phaseDurations[$phase] = ($phaseDurations[$phase] ?? 0) + (int) round(($now - $phaseStartedAt) * 1000);
+        $phase = $nextPhase;
+        $phaseStartedAt = $now;
+    };
+    try {
+        return ldap_authenticate_measured($username, $password, $markPhase);
+    } finally {
+        $markPhase('finished');
+        $durationMs = (int) round((microtime(true) - $startedAt) * 1000);
+        if ($durationMs >= 1000) {
+            $stageSummary = [];
+            foreach ($phaseDurations as $stage => $duration) {
+                $stageSummary[] = $stage . ':' . $duration . 'ms';
+            }
+            error_log('ITSM LDAP login timing: duration_ms=' . $durationMs . '; stages=' . implode(',', $stageSummary));
+        }
+    }
+}
+
+function ldap_authenticate_measured(string $username, string $password, callable $markPhase): ?array
+{
+    if (!ldap_cfg('enabled', false) || !function_exists('ldap_connect') || $password === '') {
         return null;
     }
     $host = (string) ldap_cfg('host', '');
@@ -2651,6 +2668,7 @@ function ldap_authenticate(string $username, string $password): ?array
         ldap_auth_log('service-bind-failed', $username, $connection);
         $serviceBindFailed = true;
     }
+    $markPhase('rootdse-discovery');
     $lookup = preg_replace('/^.*\\\\/', '', $username) ?: $username;
     $lookup = explode('@', $lookup, 2)[0];
     $escapedLookup = ldap_escape($lookup, '', LDAP_ESCAPE_FILTER);
@@ -2683,6 +2701,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     };
     $addDefaultNamingContext();
+    $markPhase('user-search');
     $searchUser = static function ($ldapConnection, array $bases, array $searchFilters, array $searchAttributes): array {
         foreach ($bases as $baseDn) {
             foreach ($searchFilters as $candidate) {
@@ -2729,6 +2748,7 @@ function ldap_authenticate(string $username, string $password): ?array
         }
     }
     [$search, $entries] = $searchUser($connection, $searchBases, $filters, $attributes);
+    $markPhase('user-bind');
     if (!$search) {
         if (!$tryDirectBind($connection)) {
             ldap_auth_log('direct-bind-failed', $username, $connection);
@@ -2781,6 +2801,7 @@ function ldap_authenticate(string $username, string $password): ?array
             return null;
         }
     }
+    $markPhase('profile-assembly');
     $groups = [];
     for ($groupIndex = 0; $groupIndex < (int) ($entry['memberof']['count'] ?? 0); $groupIndex++) {
         $groups[] = (string) ($entry['memberof'][$groupIndex] ?? '');
@@ -2814,91 +2835,6 @@ function employee_number_owner(?string $code, int $exceptUserId = 0): int
     return (int) ($query->fetchColumn() ?: 0);
 }
 
-function user_load_personnel_link(): bool
-{
-    static $loaded = null;
-    if ($loaded !== null) {
-        return $loaded;
-    }
-    $path = __DIR__ . '/food-personnel-link.php';
-    if (!is_file($path)) {
-        $loaded = false;
-        return false;
-    }
-    require_once $path;
-    $loaded = function_exists('fpl_is_personnel_stub') && function_exists('fpl_merge');
-    return $loaded;
-}
-
-function user_row_by_id(int $id): ?array
-{
-    if ($id <= 0) {
-        return null;
-    }
-    $query = db()->prepare('SELECT * FROM users WHERE id = ? LIMIT 1');
-    $query->execute([$id]);
-    $row = $query->fetch();
-    return $row ?: null;
-}
-
-function user_absorb_personnel_stub(int $domainId, int $stubId): array
-{
-    if (!user_load_personnel_link()) {
-        return ['ok' => false, 'message' => 'ماژول اتصال پرسنل در دسترس نیست.', 'moved' => []];
-    }
-    return fpl_merge(db(), $domainId, $stubId, true);
-}
-
-function user_admin_delete(int $userId, array $actor): void
-{
-    if (!function_exists('user_is_primary_admin') || !user_is_primary_admin($actor)) {
-        throw new RuntimeException('فقط ادمین اصلی می‌تواند کاربر را حذف کند.');
-    }
-    if ($userId === (int) ($actor['id'] ?? 0)) {
-        throw new RuntimeException('نمی‌توانید حساب خودتان را حذف کنید.');
-    }
-    $target = user_row_by_id($userId);
-    if ($target === null) {
-        throw new RuntimeException('کاربر پیدا نشد.');
-    }
-    if ((int) ($target['is_primary_admin'] ?? 0) === 1 || (string) ($target['role'] ?? '') === 'primary_admin') {
-        throw new RuntimeException('ادمین اصلی را نمی‌توان حذف کرد.');
-    }
-    user_load_personnel_link();
-    $pdo = db();
-    $pdo->beginTransaction();
-    try {
-        $refs = function_exists('fpl_reference_columns') ? fpl_reference_columns($pdo) : [];
-        foreach ($refs as [$table, $column]) {
-            if ($table === '' || $column === '' || ($table === 'users' && $column === 'id')) {
-                continue;
-            }
-            if (function_exists('fpl_column_exists') && !fpl_column_exists($pdo, $table, $column)) {
-                continue;
-            }
-            try {
-                $pdo->prepare('UPDATE `' . $table . '` SET `' . $column . '` = NULL WHERE `' . $column . '` = ?')->execute([$userId]);
-            } catch (Throwable $ignored) {
-                $check = $pdo->prepare('SELECT COUNT(*) FROM `' . $table . '` WHERE `' . $column . '` = ?');
-                $check->execute([$userId]);
-                if ((int) $check->fetchColumn() > 0) {
-                    throw new RuntimeException('این کاربر در ' . $table . '.' . $column . ' ارجاع دارد و حذف نشد. ارجاع را آزاد کنید یا از جدول users رکورد شمارهٔ ' . $userId . ' را حذف کنید.');
-                }
-            }
-        }
-        $pdo->prepare('DELETE FROM users WHERE id = ?')->execute([$userId]);
-        $pdo->commit();
-    } catch (Throwable $exception) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-        if ($exception instanceof RuntimeException) {
-            throw $exception;
-        }
-        throw new RuntimeException('حذف کاربر انجام نشد: ' . $exception->getMessage());
-    }
-}
-
 function upsert_domain_user(array $identity): array
 {
     $username = trim((string) ($identity['username'] ?? ''));
@@ -2909,11 +2845,10 @@ function upsert_domain_user(array $identity): array
     $query->execute([$username]);
     $user = $query->fetch();
     if (!$user) {
-        $localQuery = db()->prepare('SELECT * FROM users WHERE username = ? AND auth_source = "local" LIMIT 1');
+        $localQuery = db()->prepare('SELECT id FROM users WHERE username = ? AND auth_source = "local" LIMIT 1');
         $localQuery->execute([$username]);
-        $localRow = $localQuery->fetch() ?: null;
-        if ($localRow) {
-            throw new RuntimeException('این نام کاربری قبلاً به حساب محلی شمارهٔ ' . (int) $localRow['id'] . ' («' . (string) ($localRow['full_name'] ?? '') . '») اختصاص دارد. ادمین اصلی می‌تواند آن را از تنظیمات ← کاربران حذف کند.');
+        if ($localQuery->fetchColumn() !== false) {
+            throw new RuntimeException('این نام کاربری قبلاً به یک حساب محلی اختصاص دارد؛ برای جلوگیری از انتقال نقش، حساب LDAP ساخته نشد.');
         }
     }
     $departmentId = find_or_create_department($identity['department'] ?? null);
@@ -2926,24 +2861,10 @@ function upsert_domain_user(array $identity): array
             $empNo = normalize_employee_number($user['employee_number'] ?? ''); // اگر AD خالی است کد پرسنلی سامانه حفظ شود
         }
         $codeConflict = false;
-        $ownerId = $empNo !== null ? employee_number_owner($empNo, (int) $user['id']) : 0;
-        if ($ownerId > 0) {
-            $ownerRow = user_row_by_id($ownerId);
-            if (trim((string) ($user['employee_number'] ?? '')) === '' && user_load_personnel_link() && $ownerRow && fpl_is_personnel_stub($ownerRow)) {
-                $merge = user_absorb_personnel_stub((int) $user['id'], $ownerId);
-                if (!empty($merge['ok'])) {
-                    $fresh = user_row_by_id((int) $user['id']);
-                    if ($fresh) {
-                        $user = $fresh;
-                    }
-                    $empNo = normalize_employee_number($user['employee_number'] ?? '') ?? $empNo;
-                    $ownerId = 0;
-                }
-            }
-            if ($ownerId > 0) {
-                $codeConflict = true;
-                $empNo = normalize_employee_number($user['employee_number'] ?? '');
-            }
+        if ($empNo !== null && employee_number_owner($empNo, (int) $user['id']) > 0) {
+            // کد AD قبلاً به کاربر دیگری داده شده: کد این کاربر تغییر نمی‌کند و تداخل گزارش می‌شود.
+            $codeConflict = true;
+            $empNo = normalize_employee_number($user['employee_number'] ?? '');
         }
         // ۱.۵۰: کاربری که از قبل کد پرسنلی دارد، نامش از فهرست رسمی پرسنل غذا می‌آید و از AD بازنویسی نمی‌شود.
         $hasCode = trim((string) ($user['employee_number'] ?? '')) !== '';
@@ -2963,35 +2884,13 @@ function upsert_domain_user(array $identity): array
         $handlingUnitId = (int) ($handlingUnitQuery->fetchColumn() ?: 0) ?: null;
     }
     $newCode = normalize_employee_number($identity['employee_number'] ?? '');
-    $codeConflict = false;
-    $pendingStubId = 0;
-    if ($newCode !== null) {
-        $ownerId = employee_number_owner($newCode);
-        if ($ownerId > 0) {
-            $ownerRow = user_row_by_id($ownerId);
-            if (user_load_personnel_link() && $ownerRow && fpl_is_personnel_stub($ownerRow)) {
-                $pendingStubId = $ownerId;
-                $newCode = null;
-            } else {
-                $codeConflict = true;
-                $newCode = null;
-            }
-        }
+    $codeConflict = $newCode !== null && employee_number_owner($newCode) > 0;
+    if ($codeConflict) {
+        $newCode = null; // کد تکراری ثبت نمی‌شود؛ ردیف بدون کد ساخته می‌شود
     }
     $insert = db()->prepare('INSERT INTO users (username, full_name, email, employee_number, phone, department, department_id, handling_unit_id, role, is_it_agent, auth_source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "ldap")');
     $insert->execute([$username, $identity['full_name'], $identity['email'], $newCode, $identity['phone'] ?? '', $identity['department'], $departmentId, $handlingUnitId, $role, $role === 'agent' ? 1 : 0]);
     $identity['id'] = (int) db()->lastInsertId();
-    if ($pendingStubId > 0) {
-        $merge = user_absorb_personnel_stub((int) $identity['id'], $pendingStubId);
-        if (!empty($merge['ok'])) {
-            $fresh = user_row_by_id((int) $identity['id']);
-            if ($fresh) {
-                $newCode = normalize_employee_number($fresh['employee_number'] ?? '') ?? $newCode;
-            }
-        } else {
-            $codeConflict = true;
-        }
-    }
     $identity['employee_number'] = $newCode;
     $identity['code_conflict'] = $codeConflict;
     $identity['role'] = $role;
@@ -3228,7 +3127,6 @@ function activity_action_label(string $code): string
         'save_department_members' => 'ذخیرهٔ اعضای واحد',
         'update_user_role' => 'تغییر نقش کاربر',
         'sync_ldap_users' => 'همگام‌سازی کاربران دامین',
-        'user_deleted' => 'حذف کاربر',
         'save_service_category' => 'ذخیرهٔ دسته‌بندی خدمات',
         'delete_service' => 'حذف خدمت',
         'delete_service_category' => 'حذف دسته‌بندی خدمات',

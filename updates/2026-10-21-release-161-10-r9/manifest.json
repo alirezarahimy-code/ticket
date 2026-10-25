@@ -1,0 +1,11 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — کنترل یادآور بازرسی (R9)",
+  "date": "2026-10-21",
+  "migrations": [
+    "006-food-meal-type.sql",
+    "007-traffic-visit-history.sql",
+    "008-traffic-destination-approver.sql"
+  ],
+  "notes": "R9 adds a primary-admin-only enable/disable control for the daily 11:00 inspection reminder directly below the resolved-ticket auto-close setting. The reminder remains limited to inspection users; the R8 fixed 09 phone and exact 11-digit validation are retained."
+}

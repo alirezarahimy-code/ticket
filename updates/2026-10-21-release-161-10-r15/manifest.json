@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — ثبت دستی فیش از تنظیمات سیستم (R15)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R15 moves manual attendance registration to a Settings > System Health submenu and supports single or bulk registration, with or without ticket issuance, and independently controlled physical printing. Each person receives an independent result and audit entry. Server-side permission, active-account, duplicate, and today-only checks remain enforced. R14 organization-chart personal-code privacy changes are retained. No database migration is required."
+}

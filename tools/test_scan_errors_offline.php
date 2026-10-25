@@ -60,7 +60,7 @@ check('۳: هر پیام خام ویندوز به کد خطای درست نگا�
 $rpcMessage = domain_scan_friendly_error('The RPC server is unavailable. (0x800706BA)');
 $deniedMessage = domain_scan_friendly_error('Access is denied. (0x80070005)');
 check('۴: پیام «RPC/WMI» همان جملهٔ آشنای کاربر است', str_contains($rpcMessage, 'سرویس RPC/WMI روی سیستم مقصد در دسترس نیست'), $rpcMessage);
-check('۵: پیام «دسترسی رد شد» همان جملهٔ آشنای کاربر است', str_contains($deniedMessage, 'دسترسی رد شد؛ حساب اسکن باید «ادمین محلی» همان کامپیوتر باشد'), $deniedMessage);
+check('۵: پیام «دسترسی رد شد» نقش حساب همین نوبت اسکن را دقیق مشخص می‌کند', str_contains($deniedMessage, 'دسترسی رد شد؛ حسابی که در فرم همین نوبت وارد کرده‌اید باید عضو «Administrators محلی» همان کامپیوتر باشد.'), $deniedMessage);
 
 /* ── ۳) گروه‌بندی شکست‌های یک نوبت ─────────────────────────────────────────── */
 $rows = [

@@ -8,3 +8,17 @@ DirectoryIndex index.php
 <FilesMatch "\.(bak|log|sql|ini)$">
     Require all denied
 </FilesMatch>
+
+# Never serve deployment secrets or private key material.
+<FilesMatch "^(?:\.env(?:\..*)?|\.htaccess|\.htpasswd|.*\.(?:pem|key|p12|pfx))$">
+    Require all denied
+</FilesMatch>
+
+# Defense in depth for checkouts accidentally placed under the web root.
+# Keep .git/.github and benchmark reports out of HTTP access; do not rely on obscurity.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule (^|/)\.(?:git|github)(?:/|$) - [F,L,NC]
+    RewriteRule (^|/)\.env(?:\..*)?$ - [F,L,NC]
+    RewriteRule ^benchmark-results(?:/|$) - [F,L,NC]
+</IfModule>

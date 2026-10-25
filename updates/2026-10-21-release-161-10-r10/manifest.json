@@ -1,0 +1,11 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — عملیات گروهی برنامهٔ غذایی (R10)",
+  "date": "2026-10-21",
+  "migrations": [
+    "006-food-meal-type.sql",
+    "007-traffic-visit-history.sql",
+    "008-traffic-destination-approver.sql"
+  ],
+  "notes": "R10 adds a manager-only bulk food operations tab for ordering/changing/cancelling meals and changing daily canteens. Closed order days are allowed; past dates and printed-group locks remain protected. Active local and domain staff with employee numbers are selectable without retrieving or sending national codes. No new database migration is required."
+}

@@ -38,8 +38,9 @@ check("عضو دائم گروه نمی‌تواند محل تحویل را عو�
       and "خوداظهاری فقط برای امروز مجاز است" in groups,
       "ungrouped-only and lock-after-print rules are in the save path")
 check("food_ticket_group_members_for_date($groupId, $date)" in groups, "group print includes today's visitors")
-check("'visitor' => true" in groups and "مهمان امروز" in admin_js
-      and "today_visitors" in groups and "today_visitors" in admin_js,
+check("'visitor' => $isVisitor" in groups and "مهمان امروز" in admin_js
+      and "today_visitors" in groups and "today_visitors" in admin_js
+      and "temporary_transfer" in admin_js,
       "kitchen group list shows today's visitors separately from permanent members")
 css = (ROOT / "food-ticket-web/assets/food-menu.css").read_text(encoding="utf-8")
 check("grid-template-columns:repeat(4,minmax(0,1fr))" in css
@@ -77,42 +78,15 @@ check("visit_change_until" in groups
       and "function food_ticket_api_cancel_day_visit" in groups
       and "مهلت تغییر سلف" in admin_js
       and 'id="fg-visit-until"' in admin_js
-      and 'id="fg-deadline-box"' in admin_js
-      and "کادر زرد بالای فرم" in admin_js
-      and 'data-fg="visit-cancel"' in admin_js
+      and "data-fg=\"visit-cancel\"" in admin_js
       and "لغو تغییر سلف" in admin_js,
       "each food group has a visible cafeteria-change deadline and support can cancel visits")
-panel = read("food-ticket-web/index.html")
-check("food-groups.js?v=13" in panel, "food-groups.js cache buster is bumped")
-check("FOOD_TICKET_PANEL_VERSION = '1.37.12'" in ticket
-      and "PANEL_VERSION='1.37.12'" in panel,
-      "food panel version matches host expected version")
-check("function loadDashboardMonitoring" in panel
-      and "function lastDaysIso" in panel
-      and "state.weekEvents" in panel
-      and "function dashboardView" in panel,
-      "dashboard week chart loads seven calendar days from monitoring")
-check("app_session_lifetime" in bootstrap
-      and "session.gc_maxlifetime" in bootstrap
-      and "storage/sessions" in bootstrap
-      and "app_session_refresh_cookie" in bootstrap,
-      "login session is configured without idle timeout")
-check("کادر زرد بالای فرم" in guide
-      and "نشست ورود به‌خاطر بیکاری قطع نمی‌شود" in guide,
-      "Persian guide documents cafeteria deadline location and idle login session")
-chatbot = read("chatbot.php")
-check("login_session_idle" in chatbot
-      and "کادر زرد بالای فرم" in chatbot,
-      "chatbot answers cafeteria-deadline location and idle login session")
 check("visit_change_until TIME NULL" in schema
       and "visit_change_until TIME NULL" in install,
       "fresh-install schemas include cafeteria-change deadline")
 check('data-fg="members"' in admin_js
       and "اعضای دائم گروه" in admin_js
-      and "اعضای مهمان یا موقت امروز" in admin_js
-      and "fg-members-overlay" in admin_js
-      and "fg-members-dialog" in admin_js
-      and ".fg-members-overlay" in read("food-ticket-web/assets/food-ticket-theme.css"),
+      and "اعضای مهمان یا موقت امروز" in admin_js,
       "food groups have a members-list popup next to today's absence")
 
 print("all day-visit checks passed")

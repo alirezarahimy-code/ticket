@@ -1,0 +1,9 @@
+{
+  "version": "1.62.0",
+  "release": "1.62",
+  "title": "Ticket 1.62 — selected staff food-order report and ticket-domain separation",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.0-food-report-ticket-scope-20261025.zip",
+  "migrations": [],
+  "notes": "Adds a manager-only, employee-selectable Excel report of active food orders for a Jalali date range and meal. Enforces support_manager/support staff IT-vs-support ticket scoping in SQL lists and ticket detail/action authorization. No schema migration or online dependency. Emergency order window is located in Food Management > Food Program > select a calendar date and meal > ‘مهلت استثنایی ثبت سفارش’ below the day schedule."
+}

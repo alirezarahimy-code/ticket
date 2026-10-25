@@ -21,6 +21,13 @@ if (PHP_SAPI !== 'cli') {
     exit("CLI only\n");
 }
 
+if (!function_exists('app_error_log')) {
+    function app_error_log(string $message): bool
+    {
+        return true;
+    }
+}
+
 /* ───────── واکشی توابع خالص از فایل اصلی (بدون لود کل سامانه) ───────── */
 
 /** بدنهٔ یک تابع را با تطبیق آکولاد از متن PHP بیرون می‌کشد. */
@@ -66,9 +73,11 @@ $source = (string) file_get_contents(dirname(__DIR__) . '/food-ticket.php');
 foreach ([
     'food_ticket_ident',
     'food_ticket_normalize_digits',
+    'food_ticket_source_type_kind',
     'food_ticket_source_is_temporal',
     'food_ticket_source_time_literal',
     'food_ticket_source_sql_literal',
+    'food_ticket_source_column_sql_literal',
     'food_ticket_source_primary_key',
     'food_ticket_source_delete_where',
     'food_ticket_source_minimal_where',

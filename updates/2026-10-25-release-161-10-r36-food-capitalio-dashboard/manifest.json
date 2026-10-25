@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — R36 food dashboard from the approved 4179 React preview",
+  "date": "2026-10-25",
+  "migrations": [],
+  "notes": "Uses the actual dashboard React components and visual system from Food Dashboard Preview:4179, adapted to render only local product API data. Preserves the native food-module navigation, scopes dashboard CSS, ships all runtime assets locally, and includes no preview fixtures, external services, iframe, or database migration."
+}

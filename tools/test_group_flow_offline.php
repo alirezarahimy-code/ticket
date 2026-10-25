@@ -189,6 +189,7 @@ final class OfflinePdo
 /* ───────────── محیط شبیه‌سازی‌شده ───────────── */
 
 define('APP_ROOT', dirname(__DIR__));
+$GLOBALS['FT_OFFLINE_DB_PATH'] = sys_get_temp_dir() . '/ft_offline_' . bin2hex(random_bytes(6)) . '.sqlite';
 $GLOBALS['FT_DB'] = null;
 $GLOBALS['FT_AUDIT'] = [];
 $GLOBALS['FT_ORDERS'] = [];
@@ -197,7 +198,7 @@ $GLOBALS['FT_PRINT_QUEUE'] = [];
 function db(): OfflinePdo
 {
     if ($GLOBALS['FT_DB'] === null) {
-        $GLOBALS['FT_DB'] = new OfflinePdo('/tmp/ft_offline_' . getmypid() . '.sqlite');
+        $GLOBALS['FT_DB'] = new OfflinePdo($GLOBALS['FT_OFFLINE_DB_PATH']);
     }
     return $GLOBALS['FT_DB'];
 }
@@ -357,7 +358,7 @@ function food_ticket_process_print_queue_locked(array $config, int $limit = 30):
 {
     return ['printed' => 0, 'failed' => 0, 'claimed' => 0, 'skipped' => 0];
 }
-function food_ticket_decide_for_user(array $user, string $date, array $base, array $config, array &$orderMaps, $ordersConnection): array
+function food_ticket_decide_for_user(array $user, string $date, array $base, array $config, array &$orderMaps): array
 {
     $nat = food_ticket_digits($user['national_code'] ?? '');
     $food = $orderMaps[$date][$nat] ?? null;
@@ -392,15 +393,23 @@ function user_can(array $user, string $permission): bool
     return false;
 }
 
+if (!function_exists('app_error_log')) {
+    function app_error_log(string $message): bool
+    {
+        return true;
+    }
+}
+
 require dirname(__DIR__) . '/food-ticket-groups.php';
 
 /* ───────────── ساخت جدول‌های معادل ───────────── */
 $schema = [
     'CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, full_name TEXT, employee_number TEXT, national_code TEXT, is_active INTEGER DEFAULT 1)',
-    'CREATE TABLE food_ticket_groups (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, l_uid TEXT, rfid_card TEXT, description TEXT, status TEXT DEFAULT "active", created_by INTEGER, created_at TEXT, updated_at TEXT, UNIQUE(l_uid), UNIQUE(rfid_card))',
+    'CREATE TABLE food_ticket_groups (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, l_uid TEXT, rfid_card TEXT, description TEXT, visit_change_until TEXT, status TEXT DEFAULT "active", created_by INTEGER, created_at TEXT, updated_at TEXT, UNIQUE(l_uid), UNIQUE(rfid_card))',
     'CREATE TABLE food_ticket_group_members (id INTEGER PRIMARY KEY AUTOINCREMENT, group_id INTEGER, user_id INTEGER, created_at TEXT, UNIQUE(user_id))',
     'CREATE TABLE food_ticket_group_runs (id INTEGER PRIMARY KEY AUTOINCREMENT, group_id INTEGER, group_title TEXT, rfid_card TEXT DEFAULT "", trigger_kind TEXT, trigger_uid TEXT, source_key TEXT UNIQUE, punch_date TEXT, punch_time TEXT, run_kind TEXT, status TEXT, members_total INTEGER DEFAULT 0, printed_count INTEGER DEFAULT 0, repeat_count INTEGER DEFAULT 0, no_food_count INTEGER DEFAULT 0, absent_count INTEGER DEFAULT 0, skipped_count INTEGER DEFAULT 0, error_count INTEGER DEFAULT 0, created_at TEXT, updated_at TEXT)',
     'CREATE TABLE food_ticket_daily_absence (id INTEGER PRIMARY KEY AUTOINCREMENT, absence_date TEXT, group_id INTEGER, user_id INTEGER, reason TEXT, created_by INTEGER, created_at TEXT, updated_at TEXT, UNIQUE(absence_date, user_id))',
+    'CREATE TABLE food_ticket_day_visits (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, visit_date TEXT, group_id INTEGER, created_at TEXT, UNIQUE(user_id, visit_date))',
     'CREATE TABLE food_ticket_group_uid_history (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT, group_id INTEGER, action TEXT, actor_id INTEGER, created_at TEXT)',
     'CREATE TABLE food_ticket_events (id INTEGER PRIMARY KEY AUTOINCREMENT, source_key TEXT, source_uid TEXT, source_card TEXT, punch_date TEXT, punch_time TEXT, personnel_code TEXT, user_id INTEGER, national_code TEXT, full_name TEXT, food_type TEXT, ticket_key TEXT UNIQUE, event_type TEXT, print_status TEXT, delivery_status TEXT DEFAULT "pending", delivered_at TEXT, delivered_by INTEGER, print_job_id TEXT, printer_name TEXT, print_attempts INTEGER DEFAULT 0, retry_count INTEGER DEFAULT 0, last_error TEXT, next_retry_at TEXT, source_payload TEXT, processed_at TEXT, updated_at TEXT)',
     'CREATE TABLE food_ticket_guest_cards (id INTEGER PRIMARY KEY AUTOINCREMENT, card_uid TEXT, guest_name TEXT)',
@@ -408,10 +417,10 @@ $schema = [
 ];
 foreach ($schema as $ddl) {
     try {
-        $GLOBALS['FT_DB'] = new OfflinePdo('/tmp/ft_offline_' . getmypid() . '.sqlite');
+        $GLOBALS['FT_DB'] = new OfflinePdo($GLOBALS['FT_OFFLINE_DB_PATH']);
         db()->exec('PRAGMA foreign_keys = ON');
         // exec() در این شبیه‌ساز DDL را رد می‌کند؛ برای ساخت جدول از SQLite3 مستقیم استفاده می‌کنیم.
-        $raw = new SQLite3('/tmp/ft_offline_' . getmypid() . '.sqlite');
+        $raw = new SQLite3($GLOBALS['FT_OFFLINE_DB_PATH']);
         $raw->exec($ddl);
         $raw->close();
     } catch (Throwable $e) {
@@ -505,10 +514,10 @@ $config['_group_skip_print'] = true;
 $maps = [$today => $GLOBALS['FT_ORDERS'][$today]];
 $summary = ['processed' => 0, 'queued' => 0, 'errors' => 0];
 $item = ['uid' => '000908', 'card' => '', 'date_raw' => $now->setTime(11, 30), 'time_raw' => $now->setTime(11, 30), 'row' => ['L_UID' => '908', 'n' => 1]];
-$res = food_ticket_group_try_process($item, $config, $maps, null, $summary);
+$res = food_ticket_group_try_process($item, $config, $maps, $summary);
 $groupEventIds = array_values(array_unique(array_map('intval', $res['event_ids'] ?? [])));
 $check('تردد گروهی شناسهٔ همهٔ رویدادهای اعضا را برمی‌گرداند', count($groupEventIds) === 3);
-$doneAgain = food_ticket_group_try_process($item, $config, $maps, null, $summary);
+$doneAgain = food_ticket_group_try_process($item, $config, $maps, $summary);
 $doneEventIds = array_values(array_unique(array_map('intval', $doneAgain['event_ids'] ?? [])));
 $check('اجرای تکراری همان ردیف نیز شناسه‌های قبلی را برای اصلاح وضعیت برمی‌گرداند', count($doneEventIds) === 3);
 $check('۷-الف: اجرای اول انجام شد', ($res['kind'] ?? '') === 'first', json_encode($res, JSON_UNESCAPED_UNICODE));
@@ -553,7 +562,7 @@ $check('۸-ت: Audit قفل + اصلاح ثبت شد', in_array('food_group_abse
 // ۹) تردد مجدد همان نماینده → تکرار، بدون فیش جدید
 $summary = ['processed' => 0];
 $item2 = ['uid' => '908', 'card' => '', 'date_raw' => $now->setTime(12, 10), 'time_raw' => $now->setTime(12, 10), 'row' => ['L_UID' => '908', 'n' => 2]];
-$res2 = food_ticket_group_try_process($item2, $config, $maps, null, $summary);
+$res2 = food_ticket_group_try_process($item2, $config, $maps, $summary);
 $q = db()->prepare('SELECT COUNT(*) c FROM food_ticket_events WHERE punch_date = ? AND event_type = "printed"');
 $q->execute([$today]);
 $printedAfterRepeat = (int) $q->fetchColumn();
@@ -566,7 +575,7 @@ $check('۹-پ: خلاصهٔ تکرار هم ثبت شد (۲ رکورد اجرا)
 // ۱۰) کشیدن دوبارهٔ همان ردیف (≤۴ ثانیه) → نادیده
 $dupItem = ['uid' => '908', 'card' => '', 'date_raw' => $now->setTime(12, 10, 2), 'time_raw' => $now->setTime(12, 10, 2), 'row' => ['L_UID' => '908', 'n' => 77]];
 $summary = [];
-$res3 = food_ticket_group_try_process($dupItem, $config, $maps, null, $summary);
+$res3 = food_ticket_group_try_process($dupItem, $config, $maps, $summary);
 $check('۱۰: ردیف تکراری SOURCE_TABLE نادیده گرفته شد', ($res3['kind'] ?? '') === 'duplicate', json_encode($res3, JSON_UNESCAPED_UNICODE));
 
 // ۱۱) استقلال تاریخ‌ها: فردا غیبتی ندارد
@@ -595,7 +604,7 @@ $check('۱۴: «همه حاضر» کار کرد', (int) $cleared['summary']['abs
 food_ticket_group_uid_history_record('955123', $gid, 'removed', 0);
 $summary = [];
 $itemUnknown = ['uid' => '955123', 'card' => '', 'date_raw' => $now->setTime(13, 0), 'time_raw' => $now->setTime(13, 0), 'row' => ['L_UID' => '955123', 'n' => 9]];
-$resUnknown = food_ticket_group_try_process($itemUnknown, $config, $maps, null, $summary);
+$resUnknown = food_ticket_group_try_process($itemUnknown, $config, $maps, $summary);
 $check('۱۵-الف: تردد با L_UID ناشناخته شناسایی شد', ($resUnknown['kind'] ?? '') === 'unknown_uid', json_encode($resUnknown, JSON_UNESCAPED_UNICODE));
 $q = db()->prepare('SELECT event_type, print_status FROM food_ticket_events WHERE ticket_key = ?');
 $q->execute(['unknown:' . $today . ':' . '955123']);
@@ -656,7 +665,7 @@ $check('۱۵-۵-د: فیش چاپ‌شده با اعلام غیبت دست‌ن�
 $gid2 = food_ticket_api_save_group(['title' => 'گروه غیرفعال', 'l_uid' => '911', 'active' => false, 'members' => []], 0);
 $summary = [];
 $item3 = ['uid' => '911', 'card' => '', 'date_raw' => $now->setTime(13, 30), 'time_raw' => $now->setTime(13, 30), 'row' => ['L_UID' => '911', 'n' => 3]];
-$resInactive = food_ticket_group_try_process($item3, $config, $maps, null, $summary);
+$resInactive = food_ticket_group_try_process($item3, $config, $maps, $summary);
 $check('۱۶: گروه غیرفعال → فقط خلاصه، بدون فیش', ($resInactive['kind'] ?? '') === 'inactive' && (int) ($summary['queued'] ?? 0) === 0);
 
 // ۱۷) کسی که امروز از مسیر عادی فیش گرفته، از مسیر گروهی فیش دوم نمی‌گیرد
@@ -674,7 +683,7 @@ $gid3 = food_ticket_api_save_group(['title' => 'گروه سوم', 'l_uid' => '91
 $summary = ['processed' => 0, 'repeat' => 0];
 $item4 = ['uid' => '912', 'card' => '', 'date_raw' => $now->setTime(14, 0), 'time_raw' => $now->setTime(14, 0), 'row' => ['L_UID' => '912', 'n' => 4]];
 $maps17 = [$today => $GLOBALS['FT_ORDERS'][$today]];
-$res4 = food_ticket_group_try_process($item4, $config, $maps17, null, $summary);
+$res4 = food_ticket_group_try_process($item4, $config, $maps17, $summary);
 $q = db()->prepare('SELECT COUNT(*) c FROM food_ticket_events WHERE user_id = ? AND event_type = "printed"');
 $q->execute([$minaId]);
 $minaPrinted = (int) $q->fetchColumn();
@@ -691,5 +700,5 @@ $check('۱۸: خروجی مدیریت گروه‌ها شامل L_UID و وضعی
     'groups=' . count($list['groups']) . ' runs=' . count($list['runs']));
 
 echo "\n" . ($fail === 0 ? "همهٔ بررسی‌ها موفق بودند (آفلاین/SQLite).\n" : ($fail . " بررسی ناموفق بود.\n"));
-@unlink('/tmp/ft_offline_' . getmypid() . '.sqlite');
+@unlink($GLOBALS['FT_OFFLINE_DB_PATH']);
 exit($fail === 0 ? 0 : 1);

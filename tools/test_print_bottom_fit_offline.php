@@ -22,6 +22,13 @@ if (PHP_SAPI !== 'cli') {
     exit("CLI only\n");
 }
 
+if (!function_exists('app_error_log')) {
+    function app_error_log(string $message): bool
+    {
+        return error_log($message);
+    }
+}
+
 $pass = 0;
 $fail = 0;
 function check(string $label, bool $ok, string $detail = ''): void

@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — R33.1 food updater package structure correction",
+  "date": "2026-10-24",
+  "migrations": ["006-food-meal-type.sql"],
+  "notes": "Corrects the R33 ZIP layout: the updater requires migrations at the archive root as well as the deployable copy under files/migrations. Re-download this package; do not retry the original R33 ZIP."
+}

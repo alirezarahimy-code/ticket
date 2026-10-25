@@ -1,0 +1,217 @@
+{
+  "started_utc": "2026-10-25T07:25:30.726658+00:00",
+  "environment": "ephemeral GitHub Actions runner; isolated MariaDB; PHP CLI server with configured worker pool",
+  "target": "127.0.0.1 only; no production/staging host was contacted",
+  "virtual_users": 250,
+  "ramp_up_seconds": 30,
+  "steady_state_seconds": 90,
+  "think_time_seconds": 1.0,
+  "php_workers": 32,
+  "elapsed_wall_seconds": 122.19,
+  "requests": 18306,
+  "overall_rps": 149.81,
+  "failed_observations": 0,
+  "php_cpu_percent_sum_peak": 88.0,
+  "php_rss_mb_sum_peak": 1158.44,
+  "php_runtime_warning_notice_count": 0,
+  "php_runtime_error_samples": [],
+  "slow_food_api_server_logs_over_1000ms": {},
+  "slow_login_server_logs_over_2000ms": {
+    "count": 0,
+    "p50_ms": 0.0,
+    "p95_ms": 0.0,
+    "max_ms": 0
+  },
+  "database_query_timing": {
+    "source": "system_logs records emitted by AppPDO/AppSlowStatement",
+    "coverage": "Only queries whose execute()/query() call took at least 500 ms are logged by the application; this is not a full per-query histogram.",
+    "slow_query_threshold_ms": 500,
+    "slow_queries": [],
+    "application_error_count": 0,
+    "application_error_samples": [],
+    "slow_query_summary": {
+      "count_at_or_above_threshold": 0,
+      "max_ms": 0,
+      "p50_ms_of_logged_slow_queries": 0,
+      "p95_ms_of_logged_slow_queries": 0
+    }
+  },
+  "application_error_count": 0,
+  "routes": [
+    {
+      "route": "asset-list",
+      "count": 1488,
+      "rps": 12.18,
+      "p50_ms": 469.03,
+      "p95_ms": 690.31,
+      "p99_ms": 844.67,
+      "max_ms": 1241.38,
+      "statuses": {
+        "200": 1488
+      }
+    },
+    {
+      "route": "cd-dvd",
+      "count": 1386,
+      "rps": 11.34,
+      "p50_ms": 445.32,
+      "p95_ms": 676.16,
+      "p99_ms": 799.57,
+      "max_ms": 1109.37,
+      "statuses": {
+        "200": 1386
+      }
+    },
+    {
+      "route": "dashboard",
+      "count": 1453,
+      "rps": 11.89,
+      "p50_ms": 531.7,
+      "p95_ms": 743.45,
+      "p99_ms": 868.72,
+      "max_ms": 1420.75,
+      "statuses": {
+        "200": 1453
+      }
+    },
+    {
+      "route": "food-admin-config-api",
+      "count": 1559,
+      "rps": 12.76,
+      "p50_ms": 428.85,
+      "p95_ms": 644.67,
+      "p99_ms": 811.35,
+      "max_ms": 1345.5,
+      "statuses": {
+        "200": 1559
+      }
+    },
+    {
+      "route": "food-admin-page",
+      "count": 1419,
+      "rps": 11.61,
+      "p50_ms": 419.97,
+      "p95_ms": 636.35,
+      "p99_ms": 831.14,
+      "max_ms": 1089.33,
+      "statuses": {
+        "200": 1419
+      }
+    },
+    {
+      "route": "food-order-month-api",
+      "count": 1493,
+      "rps": 12.22,
+      "p50_ms": 418.06,
+      "p95_ms": 636.94,
+      "p99_ms": 741.66,
+      "max_ms": 951.89,
+      "statuses": {
+        "200": 1493
+      }
+    },
+    {
+      "route": "food-order-page",
+      "count": 1483,
+      "rps": 12.14,
+      "p50_ms": 437.82,
+      "p95_ms": 652.21,
+      "p99_ms": 767.64,
+      "max_ms": 1107.04,
+      "statuses": {
+        "200": 1483
+      }
+    },
+    {
+      "route": "inventory",
+      "count": 1556,
+      "rps": 12.73,
+      "p50_ms": 874.56,
+      "p95_ms": 1219.56,
+      "p99_ms": 1427.54,
+      "max_ms": 1706.87,
+      "statuses": {
+        "200": 1556
+      }
+    },
+    {
+      "route": "login",
+      "count": 250,
+      "rps": 2.05,
+      "p50_ms": 182.66,
+      "p95_ms": 1505.18,
+      "p99_ms": 1763.64,
+      "max_ms": 1944.61,
+      "statuses": {
+        "200": 250
+      }
+    },
+    {
+      "route": "login-form",
+      "count": 250,
+      "rps": 2.05,
+      "p50_ms": 32.71,
+      "p95_ms": 681.69,
+      "p99_ms": 811.7,
+      "max_ms": 829.46,
+      "statuses": {
+        "200": 250
+      }
+    },
+    {
+      "route": "new-ticket-form",
+      "count": 1421,
+      "rps": 11.63,
+      "p50_ms": 484.18,
+      "p95_ms": 698.45,
+      "p99_ms": 816.65,
+      "max_ms": 1117.32,
+      "statuses": {
+        "200": 1421
+      }
+    },
+    {
+      "route": "notification-feed",
+      "count": 1471,
+      "rps": 12.04,
+      "p50_ms": 401.52,
+      "p95_ms": 608.42,
+      "p99_ms": 730.12,
+      "max_ms": 1122.81,
+      "statuses": {
+        "200": 1471
+      }
+    },
+    {
+      "route": "reports",
+      "count": 1508,
+      "rps": 12.34,
+      "p50_ms": 565.2,
+      "p95_ms": 781.4,
+      "p99_ms": 904.19,
+      "max_ms": 1108.79,
+      "statuses": {
+        "200": 1508
+      }
+    },
+    {
+      "route": "traffic-control",
+      "count": 1569,
+      "rps": 12.84,
+      "p50_ms": 426.76,
+      "p95_ms": 635.47,
+      "p99_ms": 761.75,
+      "max_ms": 925.43,
+      "statuses": {
+        "200": 1569
+      }
+    }
+  ],
+  "failures_sample": [],
+  "limitations": [
+    "LDAP/Active Directory authentication and Windows WMI collectors were not exercised; LDAP is disabled in the isolated config.",
+    "The food management page and MySQL-backed APIs were exercised, but external Microsoft Access/ODBC attendance/order sources and physical printers were not available.",
+    "Results describe this ephemeral CI runner and its PHP/MariaDB setup, not production capacity or production latency.",
+    "All synthetic users and generated records exist only in the disposable CI database; no real operational data was used."
+  ]
+}

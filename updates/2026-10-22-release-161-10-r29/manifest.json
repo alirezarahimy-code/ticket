@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — inventory depth across the full AD domain (R29)",
+  "date": "2026-10-22",
+  "migrations": [],
+  "notes": "Expands remote Windows CIM/WMI collection with signed drivers, PnP devices, services, processes (without command lines), startup entries, shares, accounts, Windows hotfixes, firewall/anti-malware inventory, storage health providers, monitor identifiers, and fuller SMBIOS/memory details. Removes the implicit 3,000-computer ceiling from paged AD discovery. No database migration, persistent scan credential, or production change. TNI-specific low-level driver parity is not claimed."
+}

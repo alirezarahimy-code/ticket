@@ -4,6 +4,7 @@ const APP_ROOT = __DIR__ . '/..';
 function db() { throw new RuntimeException('no db'); }
 function db_table_exists($t) { return false; }
 function cfg($k, $d = null) { return $d; }
+function app_error_log(string $message): bool { return true; }
 
 require APP_ROOT . '/food-ticket.php';
 require_once APP_ROOT . '/food-ticket-runtime.php';
@@ -20,11 +21,11 @@ expect('date_int', food_ticket_parse_date(20260501) === '2026-05-01');
 expect('date_str', food_ticket_parse_date('20260501') === '2026-05-01');
 expect('time_130523', food_ticket_parse_time(130523) === '13:05:23');
 expect('time_83000', food_ticket_parse_time(83000) === '08:30:00');
-expect('norm_personnel_preserves_zeroes', food_ticket_norm_personnel('00377') === '00377');
-expect('norm_personnel_persian_digits', food_ticket_norm_personnel('۰۰۳۷۷') === '00377');
-expect('norm_personnel_decimal_preserves_zeroes', food_ticket_norm_personnel('00377.0') === '00377');
+expect('norm_personnel_strips_leading_zeroes', food_ticket_norm_personnel('00377') === '377');
+expect('norm_personnel_persian_digits_and_zeroes', food_ticket_norm_personnel('۰۰۳۷۷') === '377');
+expect('norm_personnel_decimal_and_zeroes', food_ticket_norm_personnel('00377.0') === '377');
 expect('norm_float', food_ticket_norm_personnel('377.0') === '377');
-expect('code_decimal_preserves_zeroes', food_ticket_code('00377.0') === '00377');
+expect('code_decimal_strips_leading_zeroes', food_ticket_code('00377.0') === '377');
 expect('engine_loaded', function_exists('food_ticket_process_batch_v2'));
 expect('decide_loaded', function_exists('food_ticket_decide_punch'));
 $where = food_ticket_source_delete_where([

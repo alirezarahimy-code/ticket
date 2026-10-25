@@ -62,7 +62,7 @@ $e = tryValidate(['full_name' => '  ', 'national_code' => '1111111111']);
 check('نام خالی ⇒ فیلد full_name', $e !== null && $e->field === 'full_name');
 
 // ورودی درست ⇒ بدون خطا (با کد ملی موردقبول stub)
-$e = tryValidate(['full_name' => 'علی', 'national_code' => '0012345679']);
+$e = tryValidate(['full_name' => 'علی', 'national_code' => '0012345679', 'phone' => '09123456789']);
 check('ورودی درست بدون خطا', $e === null);
 
 // خطای عمومی (بدون فیلد) ⇒ TrafficInputException با فیلد خالی
