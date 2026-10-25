@@ -92,3 +92,20 @@ def test_update_manifest_lists_migration():
     manifest = json.loads(read("updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/manifest.json"))
     assert manifest["version"] == "1.62.8"
     assert "009-traffic-destination-multi-approver.sql" in manifest["migrations"]
+
+
+def test_current_package_passes_system_update_rules():
+    """system-update.php مهاجرت را در ریشهٔ ZIP (migrations/NNN.sql) می‌خواهد؛
+    نبود آن باعث خطای «مهاجرت نامعتبر یا فایل آن در پک نیست» می‌شود (اشکال بستهٔ اول 1.62.8)."""
+    import re
+    import zipfile
+    package = ROOT / "downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix1-20261025.zip"
+    assert package.is_file()
+    zf = zipfile.ZipFile(package)
+    names = zf.namelist()
+    manifest = json.loads(zf.read("manifest.json"))
+    for migration in manifest["migrations"]:
+        assert re.match(r"^\d{3}-[a-z0-9-]+\.sql$", migration), migration
+        assert f"migrations/{migration}" in names, f"root migration missing: {migration}"
+    for name in names:
+        assert name.endswith("/") or re.match(r"^(manifest\.json|migrations/[^/]+\.sql|files/.+)$", name), name
