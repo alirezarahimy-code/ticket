@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود به‌روزرسانی Ticket 1.62.11 — فاز ۱ بهینه‌سازی کدها (بدون تغییر رفتاری) + همهٔ اصلاح‌های 1.62.4 تا 1.62.10</title>
+  <title>دانلود به‌روزرسانی Ticket 1.62.12 — برش ۱ فاز ۲ بازسازی کدها (بدون تغییر رفتاری) + همهٔ اصلاح‌های 1.62.4 تا 1.62.11</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,10 +25,11 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ جاری · 1.62.11 · ۲۰۲۶/۱۰/۲۵</span>
-    <h1>Ticket نسخهٔ ۱.۶۲.۱۱ — فاز ۱ بهینه‌سازی کدها (بدون تغییر رفتاری)</h1>
-    <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.10 است و اجتماع کامل فایل‌های 1.62.4 تا 1.62.11 را حمل می‌کند (کامل‌تر از بستهٔ قبلی):</p>
+    <span class="tag">بستهٔ جاری · 1.62.12 · ۲۰۲۶/۱۰/۲۵</span>
+    <h1>Ticket نسخهٔ ۱.۶۲.۱۲ — فاز ۲ بازسازی کدها، برش ۱ (بدون تغییر رفتاری)</h1>
+    <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.11 است و اجتماع کامل فایل‌های 1.62.4 تا 1.62.12 را حمل می‌کند:</p>
     <ul>
+      <li><b>جدید (1.62.12):</b> ۱۳ اکشن چارت سازمانی بدون هیچ تغییری (بایت‌به‌بایت، با اثبات ماشینی) از <code>index.php</code> به فایل جدید <code>actions/org-actions.php</code> منتقل شد؛ <b>صفر تغییر رفتاری</b>. فایل جدید در برابر دسترسی مستقیم محافظ 404 دارد.</li>
       <li><b>جدید (1.62.11):</b> فاز ۱ بهینه‌سازی و خوانایی کدها — فقط کامنت‌های ناوبری در <code>index.php</code> و <code>bootstrap.php</code> و دو سند معماری/ممیزی در مخزن؛ <b>صفر تغییر رفتاری</b> (با مقایسهٔ ماشینی اثبات شد). اسنپشات امن: tag <code>snapshot-pre-refactor-20261025</code>.</li>
       <li><b>اصلاح بسته‌بندی:</b> بستهٔ قبلی چند فایل نسخه‌های 1.62.4 تا 1.62.6 (مثل <code>assets/app.js</code>) را نداشت؛ این بسته کامل است.</li>
       <li><b>جدید:</b> در چارت سازمانی می‌توان در <b>دو سمت راست و چپ کادر مدیرعامل</b> (هر سمت حداکثر یک واحد) «واحد مستقل (نمایندگی)» ساخت؛ کارت آن کمی پایین‌تر از مدیرعامل و <b>بدون هیچ خط اتصالی</b> نمایش داده می‌شود — هیچ نشانه‌ای از زیرمجموعهٔ مدیرعامل بودن ندارد.</li>
@@ -47,11 +48,11 @@
       <li>صفحه‌های پنل مدیریت غذا وسط‌چین شدند؛ داشبورد دیگر به سمت راست نمی‌چسبد.</li>
       <li>ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب».</li>
     </ul>
-    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip" download="ticket-update-1.62.11-code-navigation-phase1-20261025.zip">⬇ دریافت بستهٔ 1.62.11</a>
-    <div class="file">ticket-update-1.62.11-code-navigation-phase1-20261025.zip · SHA-256: f4e13e87b65fb338daafc22191bfe72c50a06045cea5ebfd797a61ab8ac8f989</div>
-    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.11-code-navigation-phase1-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-11-code-navigation-phase1/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.11">انتشار GitHub v1.62.11</a></p>
-    <div class="hint">این بسته رفتار سامانه را تغییر نمی‌دهد (فاز ۱ فقط کامنت و سند است). پس از نصب کافی است یک بار سامانه را باز کنید و کارکرد عادی را ببینید. اگر واحد مستقل (نمایندگی) نسخهٔ ۱.۶۲.۱۰ را هنوز امتحان نکرده‌اید: صفحهٔ «سازمان» را با Ctrl+F5 باز کنید؛ مدیر چارت دو کادر خط‌چین در دو سمت کادر مدیرعامل می‌بیند. در صورت بروز هر مشکل، بازگشت کامل: tag <code>snapshot-pre-refactor-20261025</code> یا نصب بستهٔ 1.62.10.</div>
+    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.12-org-actions-split-20261025.zip" download="ticket-update-1.62.12-org-actions-split-20261025.zip">⬇ دریافت بستهٔ 1.62.12</a>
+    <div class="file">ticket-update-1.62.12-org-actions-split-20261025.zip · SHA-256: 3ce12854be16066a5b30a09f601d16d1fc09bf99e0bdfe2a90d75f4c58bbd0d9</div>
+    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.12-org-actions-split-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.12-org-actions-split-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-12-org-actions-split/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.12">انتشار GitHub v1.62.12</a></p>
+    <div class="hint">این بسته رفتار سامانه را تغییر نمی‌دهد (فاز ۱ فقط کامنت و سند است). پس از نصب کافی است یک بار سامانه را باز کنید و کارکرد عادی را ببینید. اگر واحد مستقل (نمایندگی) نسخهٔ ۱.۶۲.۱۰ را هنوز امتحان نکرده‌اید: صفحهٔ «سازمان» را با Ctrl+F5 باز کنید؛ مدیر چارت دو کادر خط‌چین در دو سمت کادر مدیرعامل می‌بیند. در صورت بروز هر مشکل، بازگشت کامل: tag <code>snapshot-pre-refactor-20261025</code> یا نصب بستهٔ 1.62.11. آزمون پیشنهادی پس از نصب روی سرور تست: همهٔ عملیات صفحهٔ «سازمان» (ساخت/ویرایش/حذف واحد، تعیین مدیر، واحد مستقل، undo).</div>
   </main>
 </body>
 </html>

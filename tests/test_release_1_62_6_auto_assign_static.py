@@ -5,6 +5,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX = (ROOT / "index.php").read_text(encoding="utf-8")
+# از ۱.۶۲.۱۲ اکشن‌های سازمان (از جمله فرم‌های ترمیم نقش) در فایل جدا هستند.
+INDEX += "\n" + (ROOT / "actions/org-actions.php").read_text(encoding="utf-8")
 
 
 def test_org_managers_are_deprioritized_in_auto_assignment():

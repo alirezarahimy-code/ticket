@@ -29,7 +29,8 @@ def test_migration_adds_chart_side_idempotently():
 
 
 def test_index_php_supports_liaison_node():
-    src = read("index.php")
+    # از ۱.۶۲.۱۲ اکشن‌های سازمان در actions/org-actions.php هستند (برش ۱ فاز ۲).
+    src = read("index.php") + "\n" + read("actions/org-actions.php")
     # save_org_node نوع liaison را می‌پذیرد
     assert "'ceo', 'deputy', 'department', 'member', 'liaison'" in src
     # هر سمت فقط یک واحد فعال
@@ -113,6 +114,6 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۱ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.11-code-navigation-phase1-20261025.zip" in page
+    assert "ticket-update-1.62.12-org-actions-split-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" not in page

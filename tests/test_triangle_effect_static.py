@@ -91,9 +91,9 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         self.assertEqual(manifest["version"], "1.56")
         self.assertEqual(manifest["migrations"], [])
         current_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        current_manifest = json.loads((ROOT / "updates/2026-10-25-release-162-11-code-navigation-phase1/manifest.json").read_text(encoding="utf-8"))
+        current_manifest = json.loads((ROOT / "updates/2026-10-25-release-162-12-org-actions-split/manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(current_version, current_manifest["version"])
-        # ۱.۶۲.۱۱ مهاجرت جدید ندارد؛ 009 و 010 فقط برای ارتقای مستقیم همراه بسته‌اند.
+        # ۱.۶۲.۱۲ مهاجرت جدید ندارد؛ 009 و 010 فقط برای ارتقای مستقیم همراه بسته‌اند.
         self.assertEqual(current_manifest["migrations"],
                          ["009-traffic-destination-multi-approver.sql", "010-org-liaison-units.sql"])
 

@@ -13,7 +13,7 @@
 --------------------
 ۱) برای همین متن: در مخزن alirezarahimy-code/ticket شاخهٔ arena/8edbdf95-ticket فایل docs/SYSTEM-DETAILS-FA.txt را باز کنید و Raw را بزنید؛ از صفحهٔ Raw می‌توان فایل را ذخیره کرد.
 ۲) برای کل کد و مستندات: در GitHub شاخهٔ همین نشست را باز کنید، از منوی Code گزینهٔ Download ZIP را انتخاب کنید.
-۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ جاری 1.62.11 در downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-25-release-162-11-code-navigation-phase1/CHANGE-REPORT-FA.md قرار دارد.
+۳) برای نصب نسخهٔ نرم‌افزار: بستهٔ جاری 1.62.12 در downloads/ticket-update-1.62.12-org-actions-split-20261025.zip است. صفحهٔ دانلود در downloads/index.html و گزارش در updates/2026-10-25-release-162-12-org-actions-split/CHANGE-REPORT-FA.md قرار دارد.
 ۴) شاخهٔ نشست ممکن است هنوز با main ادغام نشده باشد؛ هنگام دریافت آخرین اصلاحات، شاخهٔ arena/8edbdf95-ticket را انتخاب کنید، نه main یا یک release قدیمی.
 
 معماری در یک نگاه
@@ -79,8 +79,8 @@
 
 نسخه و انتشار جاری
 ------------------
-- نسخه: 1.62.11.
-- بستهٔ فعلی: downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip؛ تغییرات اصلی: فاز ۱ بهینه‌سازی کدها (کامنت‌های ناوبری + سندهای معماری/ممیزی؛ صفر تغییر رفتاری) + اصلاح بسته‌بندی (اجتماع کامل فایل‌های 1.62.4 تا 1.62.11).
+- نسخه: 1.62.12.
+- بستهٔ فعلی: downloads/ticket-update-1.62.12-org-actions-split-20261025.zip؛ تغییرات اصلی: فاز ۲ برش ۱ بازسازی — ۱۳ اکشن چارت سازمانی بایت‌به‌بایت به actions/org-actions.php منتقل شد (صفر تغییر رفتاری، اثبات ماشینی) + اجتماع کامل فایل‌های 1.62.4 تا 1.62.12.
 - صفحهٔ دانلود: downloads/index.html؛ گزارش: updates/2026-10-25-release-162-9-manual-ticket-date-guest/CHANGE-REPORT-FA.md؛ migration جدید ندارد.
 - پیش از نصب در سامانهٔ واقعی از پایگاه داده و پوشهٔ برنامه پشتیبان بگیرید؛ روی چاپگر و داده‌های عملیاتی ابتدا آزمایش کنید.
 - بستهٔ به‌روزرسانی را با بستهٔ کامل سامانه اشتباه نگیرید. config.php، .env، اطلاعات اتصال، storage زنده و uploads محرمانه‌اند و از بسته حذف می‌شوند.

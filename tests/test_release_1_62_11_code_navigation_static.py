@@ -45,7 +45,7 @@ def test_safety_snapshot_documented_in_handoff():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.11"
+    # پین VERSION از ۱.۶۲.۱۲ به تست نسخهٔ جدید منتقل شد.
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.11"
     # مهاجرت جدید ندارد؛ 009 و 010 برای ارتقای مستقیم همراه بسته‌اند.
@@ -78,11 +78,12 @@ def test_version_manifest_and_package():
     import hashlib
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
 
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # از ۱.۶۲.۱۲ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
+    assert "ticket-update-1.62.12-org-actions-split-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.10-org-liaison-units-20261025.zip" not in page
     assert "بدون تغییر رفتاری" in page

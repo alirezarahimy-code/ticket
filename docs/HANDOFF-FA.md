@@ -8,13 +8,15 @@
 
 ---
 
-## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۱۱ (۲۰۲۶/۱۰/۲۵)
+## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۱۲ (۲۰۲۶/۱۰/۲۵)
 
 > **🧷 اسنپشات امن قبل از بازسازی کدها:** tag `snapshot-pre-refactor-20261025` روی کامیت `7c6f4ff` (برابر v1.62.10) ساخته و push شده است. اگر در جریان بازسازی چیزی خراب شد، بازگشت کامل:
 > `git fetch origin --tags && git reset --hard snapshot-pre-refactor-20261025`
 > (بستهٔ نصب همان `ticket-update-1.62.10-org-liaison-units-20261025.zip` است؛ دیتابیس دست نمی‌خورد.)
 
-- بستهٔ جاری: `downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip` (SHA-256: `f4e13e87b65fb338daafc22191bfe72c50a06045cea5ebfd797a61ab8ac8f989`)؛ گزارش: `updates/2026-10-25-release-162-11-code-navigation-phase1/CHANGE-REPORT-FA.md`؛ بدون مهاجرت جدید (009 و 010 برای ارتقای مستقیم همراه بسته)؛ **کاملاً تجمعی** — اجتماع فایل‌های 1.62.4 تا 1.62.11 (بستهٔ 1.62.10 چند فایل 1.62.4–1.62.6 مثل assets/app.js را نداشت؛ اصلاح شد).
+- بستهٔ جاری: `downloads/ticket-update-1.62.12-org-actions-split-20261025.zip` (SHA-256: `3ce12854be16066a5b30a09f601d16d1fc09bf99e0bdfe2a90d75f4c58bbd0d9`)؛ گزارش: `updates/2026-10-25-release-162-12-org-actions-split/CHANGE-REPORT-FA.md`؛ کاملاً تجمعی 1.62.4 تا 1.62.12 (۲۶ فایل + مهاجرت‌های 009 و 010 برای ارتقای مستقیم).
+- ۱.۶۲.۱۲ = فاز ۲ برش ۱: ۱۳ اکشن چارت سازمانی بایت‌به‌بایت از index.php به `actions/org-actions.php` منتقل شد (require در همان نقطه؛ بدون دام include — اسکن شد؛ محافظ APP_ROOT/404؛ اثبات ماشینی بازسازی). تست‌های پین‌شده (org_chart_experts، release_1_62_6، release_1_62_10) به مسیر جدید به‌روز شدند. قاعدهٔ برش‌ها در ARCHITECTURE-FA.md بند ۹.
+- بستهٔ قبلی ۱.۶۲.۱۱: `downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip` (SHA-256: `f4e13e87b65fb338daafc22191bfe72c50a06045cea5ebfd797a61ab8ac8f989`)؛ گزارش: `updates/2026-10-25-release-162-11-code-navigation-phase1/CHANGE-REPORT-FA.md`؛ بدون مهاجرت جدید (009 و 010 برای ارتقای مستقیم همراه بسته)؛ **کاملاً تجمعی** — اجتماع فایل‌های 1.62.4 تا 1.62.11 (بستهٔ 1.62.10 چند فایل 1.62.4–1.62.6 مثل assets/app.js را نداشت؛ اصلاح شد).
 - ۱.۶۲.۱۱ = فاز ۱ بهینه‌سازی کدها (صفر تغییر رفتاری): بانرهای ناوبری index.php (۳ ناحیه + ۱۹ گروه اکشن)، TOC خانواده‌های توابع bootstrap.php، سندهای جدید `docs/ARCHITECTURE-FA.md` و `docs/CODE-AUDIT-FA.md` (۸ تابع مرده با اثبات + ۷۵ کلاس CSS کاندید — حذف نشده؛ فاز ۲ با تأیید کاربر: تفکیک index/bootstrap، سرور آزمایشی موجود، هر فاز یک نسخه).
 - بستهٔ قبلی: `downloads/ticket-update-1.62.10-org-liaison-units-20261025.zip` (SHA-256: `1fd128fba81308ced492b682dd7c6132edad470713992a046db85c9cf010ffc0`)؛ مهاجرت 010 (ستون `chart_side`).
 - ۱.۶۲.۱۰: «واحد مستقل (نمایندگی)» در دو سمت راست/چپ کادر مدیرعامل (هر سمت حداکثر یکی)، کمی پایین‌تر و بدون هیچ خط اتصال؛ نمایندهٔ واحد بدون تغییر نقش کاربری؛ خارج از «معاونت درخواست‌کننده» و ارجاع خودکار. بستهٔ قبلی: `downloads/ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip` (SHA-256: `a350dda2db0d02b618a6f64350c483f104aef1dbf47d0d8c3b002822e03819fe`).

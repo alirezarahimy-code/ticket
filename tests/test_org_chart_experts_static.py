@@ -17,7 +17,7 @@ def check(condition: bool, message: str) -> None:
 
 org_js = read("assets/organization.js")
 org_php = read("organization.php")
-index = read("index.php")
+index = read("index.php") + "\n" + read("actions/org-actions.php")  # اکشن‌های سازمان از ۱.۶۲.۱۲ در فایل جدا
 style = read("assets/style.css")
 guide = read("help-guide.php")
 chatbot = read("chatbot.php")
