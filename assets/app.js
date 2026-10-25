@@ -1,4 +1,6 @@
-document.addEventListener('DOMContentLoaded', function () {
+(function () {
+    // ۱.۶۲.۵: راه‌اندازی سراسری؛ حتی اگر فایل بعد از DOMContentLoaded بارگذاری شود هم اجرا می‌شود.
+    var __itsmBootstrapInit = function () {
     var themeRoot = document.documentElement;
     var themeMode = themeRoot.getAttribute('data-theme-mode') === 'dark' ? 'dark' : 'light';
     var themeCookie = function (mode) {
@@ -57,8 +59,10 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     window.ITSMThemeMode = { get: function () { return themeMode; }, set: setThemeMode };
     updateThemeButtons(themeMode);
-    document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
-        button.addEventListener('click', function () { setThemeMode(themeMode === 'dark' ? 'light' : 'dark'); });
+    // ۱.۶۲.۵: به‌جای اتصال به تک‌تک دکمه‌ها، از delegation استفاده می‌شود تا دکمه‌هایی که بعداً رندر می‌شوند هم کار کنند.
+    document.addEventListener('click', function (event) {
+        var toggle = event.target && event.target.closest ? event.target.closest('[data-theme-toggle]') : null;
+        if (toggle) setThemeMode(themeMode === 'dark' ? 'light' : 'dark');
     });
     document.querySelectorAll('.alert').forEach(function (item) {
         window.setTimeout(function () { item.style.opacity = '0'; item.style.transition = 'opacity .4s'; window.setTimeout(function () { item.remove(); }, 450); }, 5500);
@@ -949,7 +953,10 @@ document.addEventListener('DOMContentLoaded', function () {
         jalaliInput.addEventListener('focus', function () { renderCalendar(); jalaliCalendar.hidden = false; });
         document.addEventListener('click', function (event) { if (!jalaliPicker.contains(event.target)) jalaliCalendar.hidden = true; });
     }
-});
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __itsmBootstrapInit);
+    else __itsmBootstrapInit();
+})();
 
 document.addEventListener('DOMContentLoaded', function () {
     var panelsRoot = document.querySelector('.profile-panels');

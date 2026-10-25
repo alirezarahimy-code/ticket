@@ -850,7 +850,7 @@ function render_footer(): void
         echo "[]";
     }
     $inspectionReminder = inspection_food_reminder_markup($layoutUser);
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.25&theme-mode=1"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.26&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
     if ($inspectionReminder !== '') {
         echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
     }

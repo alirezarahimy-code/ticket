@@ -1,6 +1,6 @@
 # سند ادامهٔ کار (Handoff) — سامانه ticket
 
-آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۴** (شاخهٔ نشست `arena/dba0774e-ticket`)
+آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۵** (شاخهٔ نشست `arena/dba0774e-ticket`)
 
 این سند برای ادامهٔ کار در گفتگوی جدید نوشته شده. هر چیزی که در گفتگوی قبلی تصمیم گرفته یا انجام شده، اینجا ثبت است.
 
@@ -8,9 +8,15 @@
 
 ---
 
-## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۴ (۲۰۲۶/۱۰/۲۵)
+## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۵ (۲۰۲۶/۱۰/۲۵)
 
-- بسته: `downloads/ticket-update-1.62.4-food-theme-traffic-history-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-4-food-theme-traffic-history-fixes/CHANGE-REPORT-FA.md`؛ بدون migration.
+- بستهٔ جاری: `downloads/ticket-update-1.62.5-host-theme-toggle-appjs-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-5-host-theme-toggle-appjs/CHANGE-REPORT-FA.md`؛ بدون migration؛ تجمعی (شامل همهٔ اصلاح‌های 1.62.4).
+- رفع اصلی: منطق دکمهٔ شب/روز صفحات میزبان در `assets/app.js` است که در هیچ بستهٔ 1.62.x نبود؛ این بسته آن را حمل می‌کند. راه‌اندازی app.js در برابر بارگذاری بعد از DOMContentLoaded مقاوم شد و کلیک دکمهٔ تم delegation شد. ارجاع‌ها در index.php، governance.php، ola.php و footer.php به `app.js?v=3.4.26&theme-mode=2` به‌روز شدند.
+- رفتار دکمه با jsdom (سه سناریو) تأیید شد؛ آزمون ایستای جدید: `tests/test_release_1_62_5_theme_toggle_static.py`. مرورگر واقعی در دسترس نبود.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۴ (۲۰۲۶/۱۰/۲۵)
+
+- بسته: `downloads/ticket-update-1.62.5-host-theme-toggle-appjs-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-5-host-theme-toggle-appjs/CHANGE-REPORT-FA.md`؛ بدون migration.
 - چهار اصلاح: (۱) پوشش کامل حالت شب در برگهٔ برنامهٔ غذایی در هر دو فایل تم میزبان و پنل (`theme-mode.css?v=3`، `food-ticket-global-theme-r42.css?v=45`)، (۲) «تاریخچهٔ ویرایش‌ها»ی کنترل تردد فقط `action='updated'` را فهرست می‌کند (ثبت خروج/حذف همچنان برای ممیزی ذخیره می‌شود)، (۳) صفحه‌های پنل غذا با `margin-inline:auto` وسط‌چین و میزبان داشبورد تمام‌عرض (`food-ticket-theme.css?v=10`)، (۴) ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب» (`food-manual-attendance.js?v=3`؛ PANEL_VERSION=1.37.25).
 - راهنمای فارسی دو بخش جدید گرفت (تاریخچهٔ ویرایش تردد و ثبت دستی فیش)؛ چت‌بات از همان راهنما ایندکس می‌سازد. مجوز جدیدی لازم نشد.
 - اعتبارسنجی: lint نحوی PHP با php-wasm 8.3، node --check، آزمون‌های ایستای مخزن (۱۵۹ قبولی؛ ۷ خطای باقی‌مانده پیش از این تغییرات هم روی درخت تمیز بودند)، آزمون جدید `tests/test_release_1_62_4_fixes_static.py`. اصلاح‌های ظاهری در مرورگر واقعی دیده نشده‌اند.
