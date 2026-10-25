@@ -49,7 +49,7 @@ def test_cache_bust_versions_bumped():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.15"
+    # VERSION از ۱.۶۲.۱۶ جلوتر رفته؛ پین نسخهٔ جاری در تست ریلیز ۱.۶۲.۱۶ است.
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.15"
     assert manifest["requires_version"] == "1.61.9"
@@ -76,11 +76,12 @@ def test_version_manifest_and_package():
     # خود اصلاح داخل بسته هم هست
     assert ".content-wrap > .service-modal-layer { position: fixed; z-index: 1300; }" in zf.read("files/assets/style.css").decode("utf-8")
     assert "event.target.classList.contains('service-modal')" in zf.read("files/assets/app.js").decode("utf-8")
-    for rel in ("index.php", "assets/style.css", "assets/app.js"):
+    # index.php در ۱.۶۲.۱۶ (برش ۵) تغییر کرد؛ برابری بایت‌به‌بایت با مخزن برای فایل‌های همین اصلاح:
+    for rel in ("assets/style.css", "assets/app.js"):
         assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
+    # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۶ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۶ است.
 
 
 def test_panel_asset_refs_are_all_packaged():
@@ -94,6 +95,8 @@ def test_panel_asset_refs_are_all_packaged():
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # از ۱.۶۲.۱۶ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
+    assert "ticket-update-1.62.16-role-settings-actions-split-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.14-service-actions-split-20261025.zip" not in page
     assert "ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip" not in page

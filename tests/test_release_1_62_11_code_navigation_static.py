@@ -18,7 +18,8 @@ def test_index_has_navigation_banners():
     src = read("index.php")
     # ۳ بانر ناحیه + ۱۹ بانر گروه اکشن
     assert src.count("═══ ناحیهٔ") >= 3
-    assert src.count("گروه اکشن:") == 19
+    # از ۱.۶۲.۱۶ (برش ۵): سه گروه (نقش‌ها، لاگ/LDAP، تنظیمات) در دو بنر require ادغام شدند → ۱۸
+    assert src.count("گروه اکشن:") == 18
     for banner in ("احراز هویت و ورود", "ساختار سازمانی (چارت)", "چرخهٔ کامل درخواست‌ها"):
         assert banner in src, banner
 
@@ -83,7 +84,7 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۲ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.15-service-modal-fix-20261025.zip" in page
+    assert "ticket-update-1.62.16-role-settings-actions-split-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.10-org-liaison-units-20261025.zip" not in page
     assert "بدون تغییر رفتاری" in page

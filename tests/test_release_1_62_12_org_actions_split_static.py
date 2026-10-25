@@ -31,7 +31,8 @@ def test_index_requires_org_actions_file_in_place():
     for action in ORG_ACTIONS:
         assert f"if ($action === '{action}')" not in src, action
     # خط require داخل بلوک POST (ناحیهٔ ۴) است، قبل از گروه نقش‌های کلیدی
-    assert src.index("require __DIR__ . '/actions/org-actions.php';") < src.index("if ($action === 'save_key_roles')")
+    # (از ۱.۶۲.۱۶ گروه نقش‌ها هم به actions/role-actions.php منتقل شد)
+    assert src.index("require __DIR__ . '/actions/org-actions.php';") < src.index("require __DIR__ . '/actions/role-actions.php';")
 
 
 def test_org_actions_file_contains_all_thirteen_actions_verbatim():
@@ -97,7 +98,7 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۳ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.15-service-modal-fix-20261025.zip" in page
+    assert "ticket-update-1.62.16-role-settings-actions-split-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.11-code-navigation-phase1-20261025.zip" not in page
     assert "actions/org-actions.php" in page

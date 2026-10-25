@@ -10,7 +10,7 @@ class ParticleEffectReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
-        cls.index = (ROOT / "index.php").read_text(encoding="utf-8")
+        cls.index = (ROOT / "index.php").read_text(encoding="utf-8") + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")  # از ۱.۶۲.۱۶: برش ۵
         cls.particle_engine = (ROOT / "assets/particle-network.js").read_text(encoding="utf-8")
         cls.particle_settings = (ROOT / "assets/particle-settings.js").read_text(encoding="utf-8")
 

@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود به‌روزرسانی Ticket 1.62.15 — اصلاح پاپ‌آپ‌های فرم خدماتها (بدون تغییر رفتاری) + همهٔ اصلاح‌های 1.62.4 تا 1.62.12</title>
+  <title>دانلود به‌روزرسانی Ticket 1.62.16 — برش ۵ فاز ۲ بازسازی کدها (بدون تغییر رفتاری) + همهٔ اصلاح‌های 1.62.4 تا 1.62.12</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,10 +25,11 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ جاری · 1.62.15 · ۲۰۲۶/۱۰/۲۵</span>
-    <h1>Ticket نسخهٔ ۱.۶۲.۱۵ — اصلاح پاپ‌آپ‌های فرم خدمات + برش ۴ فاز ۲</h1>
+    <span class="tag">بستهٔ جاری · 1.62.16 · ۲۰۲۶/۱۰/۲۵</span>
+    <h1>Ticket نسخهٔ ۱.۶۲.۱۶ — فاز ۲ بازسازی کدها، برش ۵ (بدون تغییر رفتاری)</h1>
     <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.12 است و (از fix1) اجتماع کامل فایل‌های <b>1.62.0 تا 1.62.13</b> را حمل می‌کند:</p>
     <ul>
+      <li><b>جدید (1.62.16):</b> ۴ اکشن «نقش‌ها و دسترسی‌ها» به <code>actions/role-actions.php</code> و ۵ اکشن «نگهداری/LDAP و تنظیمات» به <code>actions/settings-actions.php</code> بدون هیچ تغییری (بایت‌به‌بایت، اثبات ماشینی داخل بسته) منتقل شد. بسته اجتماع کامل 1.62.0 تا 1.62.16 (۴۹ فایل) است.</li>
       <li><b>جدید (1.62.15):</b> پاپ‌آپ‌های صفحهٔ «خدمات» دیگر زیر هدر نمی‌روند و مثل بقیهٔ پاپ‌آپ‌های سامانه با <b>کلیک روی پس‌زمینه یا Esc</b> هم بسته می‌شوند (علاوه بر دکمه). <code>style.css?v=3.4.46</code> و <code>app.js?v=3.4.27</code>.</li>
       <li><b>جدید (1.62.14):</b> ۷ اکشن «خدمات، دسته‌ها و پایگاه دانش» بدون هیچ تغییری (بایت‌به‌بایت، با اثبات ماشینی داخل بسته) به <code>actions/service-actions.php</code> منتقل شد؛ شرح فارسی هر اکشن در سرآیند فایل. بسته اجتماع کامل 1.62.0 تا 1.62.14 (۴۷ فایل) است.</li>
       <li><b>fix1 (مهم):</b> رفع پیام «نمای کامل داشبورد بارگذاری نشد… فایل‌های داشبورد را از بستهٔ 1.62.2 نصب کنید» — فایل‌های داشبورد غذا (<code>food-capitalio-dashboard-r42.js/.css</code>) و همهٔ فایل‌های بسته‌های 1.62.0 تا 1.62.3 + تمام assetهای ارجاع‌شدهٔ پنل غذا به بسته اضافه شدند (۴۶ فایل). هیچ تغییر کدی ندارد؛ فقط فایل‌های جاافتاده.</li>
@@ -52,10 +53,10 @@
       <li>صفحه‌های پنل مدیریت غذا وسط‌چین شدند؛ داشبورد دیگر به سمت راست نمی‌چسبد.</li>
       <li>ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب».</li>
     </ul>
-    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.15-service-modal-fix-20261025.zip" download="ticket-update-1.62.15-service-modal-fix-20261025.zip">⬇ دریافت بستهٔ 1.62.13</a>
-    <div class="file">ticket-update-1.62.15-service-modal-fix-20261025.zip · SHA-256: 11e659042a261cf21a6c996c2a9cbf71a87158a4aa39b92e07daf9c7ab67c67b</div>
-    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.15-service-modal-fix-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.15-service-modal-fix-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-15-service-modal-fix/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.13">انتشار GitHub v1.62.13</a></p>
+    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.16-role-settings-actions-split-20261025.zip" download="ticket-update-1.62.16-role-settings-actions-split-20261025.zip">⬇ دریافت بستهٔ 1.62.13</a>
+    <div class="file">ticket-update-1.62.16-role-settings-actions-split-20261025.zip · SHA-256: ecc4da255521764ed4eeaeb89d741f4da8d67752c2c0f7b9e35a94ce4c9cec0d</div>
+    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.16-role-settings-actions-split-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.16-role-settings-actions-split-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
+    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-16-role-settings-actions-split/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.13">انتشار GitHub v1.62.13</a></p>
     <div class="hint">این بسته رفتار سامانه را تغییر نمی‌دهد (فاز ۱ فقط کامنت و سند است). پس از نصب کافی است یک بار سامانه را باز کنید و کارکرد عادی را ببینید. اگر واحد مستقل (نمایندگی) نسخهٔ ۱.۶۲.۱۰ را هنوز امتحان نکرده‌اید: صفحهٔ «سازمان» را با Ctrl+F5 باز کنید؛ مدیر چارت دو کادر خط‌چین در دو سمت کادر مدیرعامل می‌بیند. در صورت بروز هر مشکل، بازگشت کامل: tag <code>snapshot-1.62.12-20261025</code> (یا اسنپشات قدیمی‌تر snapshot-pre-refactor-20261025). آزمون پیشنهادی روی سرور تست: چرخهٔ کامل یک درخواست (ثبت با پیوست، پاسخ، به‌عهده‌گرفتن، بازگشایی، لغو)، عملیات اموال/اسکن دامین، و عملیات صفحهٔ «سازمان».</div>
   </main>
 </body>

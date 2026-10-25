@@ -19,7 +19,7 @@ def test_traffic_phone_has_fixed_09_and_requires_exactly_nine_user_entered_digit
 
 
 def test_inspection_only_reminder_is_scheduled_daily_at_eleven_and_names_current_user():
-    source = (ROOT / "index.php").read_text()
+    source = (ROOT / "index.php").read_text() + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")  # از ۱.۶۲.۱۶: برش ۵
     script = (ROOT / "assets/inspection-food-reminder.js").read_text()
     assert "in_array($role, ['inspector', 'guard'], true)" in source
     assert "user_is_key_role($user, 'inspection')" in source
@@ -40,7 +40,7 @@ def test_reminder_visual_is_centered_and_alarm_styled():
 
 
 def test_only_primary_admin_can_toggle_reminder_below_auto_close_setting():
-    source = (ROOT / "index.php").read_text()
+    source = (ROOT / "index.php").read_text() + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")  # از ۱.۶۲.۱۶: برش ۵
     assert "if (user_is_primary_admin($user))" in source
     assert "settings_section') === 'inspection_alarm'" in source
     assert "require_primary_admin()" in source

@@ -4,6 +4,8 @@ ROOT = Path(__file__).resolve().parents[1]
 index = (ROOT / "index.php").read_text(encoding="utf-8")
 # اکشن‌های چرخهٔ درخواست‌ها از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۲ فاز ۲).
 index += "\n" + (ROOT / "actions/ticket-actions.php").read_text(encoding="utf-8")
+# از ۱.۶۲.۱۶ اکشن‌های تنظیمات (از جمله login_announcements در save_settings) در فایل برش ۵ هستند:
+index += "\n" + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")
 bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
 permissions = (ROOT / "permissions.php").read_text(encoding="utf-8")
 cron = (ROOT / "cron/sla_maintenance.php").read_text(encoding="utf-8")
