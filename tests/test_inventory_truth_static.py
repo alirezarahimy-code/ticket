@@ -186,7 +186,7 @@ class InventoryTruthStaticTests(unittest.TestCase):
         food = read("food-ticket.php")
         self.assertIn("ITSM slow food-ticket render: duration_ms=", food)
         self.assertIn("ITSM slow food-ticket API: route=", food)
-        bootstrap = read("bootstrap.php")
+        bootstrap = (read("bootstrap.php") + read("lib/db-core.php") + read("lib/logging-csrf.php") + read("lib/auth-scope.php") + read("lib/settings-effects.php") + read("lib/ldap.php") + read("lib/tickets-sla.php") + read("lib/notify-users.php") + read("lib/activity-audit.php"))  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
         self.assertIn("ITSM LDAP login timing: duration_ms=", bootstrap)
         self.assertIn("ldap_authenticate_measured", bootstrap)
 

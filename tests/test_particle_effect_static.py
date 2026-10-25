@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class ParticleEffectReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
+        cls.bootstrap = "".join((ROOT / n).read_text(encoding="utf-8") for n in ["bootstrap.php"] + ['lib/db-core.php', 'lib/logging-csrf.php', 'lib/auth-scope.php', 'lib/settings-effects.php', 'lib/ldap.php', 'lib/tickets-sla.php', 'lib/notify-users.php', 'lib/activity-audit.php'])  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
         cls.index = (ROOT / "index.php").read_text(encoding="utf-8") + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")  # از ۱.۶۲.۱۶: برش ۵
         cls.particle_engine = (ROOT / "assets/particle-network.js").read_text(encoding="utf-8")
         cls.particle_settings = (ROOT / "assets/particle-settings.js").read_text(encoding="utf-8")

@@ -42,7 +42,7 @@ assert "document-download" in food_page
 assert "shell-render" in food_page
 assert "ITSM slow food-ticket render: duration_ms=" in read("food-ticket.php")
 assert "ITSM slow food-ticket API: route=" in read("food-ticket.php")
-assert "ITSM LDAP login timing: duration_ms=" in read("bootstrap.php")
+assert "ITSM LDAP login timing: duration_ms=" in read("lib/notify-users.php")  # از ۱.۶۲.۲۰ در lib
 assert start_panel.rstrip().endswith("}")
 
 print("all startup performance static checks passed")

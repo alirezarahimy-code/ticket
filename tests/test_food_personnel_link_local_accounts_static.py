@@ -11,7 +11,7 @@ class FoodPersonnelLocalLinkStaticTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.link = (ROOT / "food-personnel-link.php").read_text(encoding="utf-8")
         cls.offline = (ROOT / "tools/test_food_personnel_link_offline.php").read_text(encoding="utf-8")
-        cls.bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
+        cls.bootstrap = "".join((ROOT / n).read_text(encoding="utf-8") for n in ["bootstrap.php"] + ['lib/db-core.php', 'lib/logging-csrf.php', 'lib/auth-scope.php', 'lib/settings-effects.php', 'lib/ldap.php', 'lib/tickets-sla.php', 'lib/notify-users.php', 'lib/activity-audit.php'])  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
 
     def test_candidates_include_local_food_staff_not_admins(self) -> None:
         self.assertIn("auth_source = 'local' AND role IN ('local_user', 'guard') AND COALESCE(is_primary_admin, 0) = 0", self.link)

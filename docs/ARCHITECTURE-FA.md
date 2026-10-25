@@ -1,6 +1,6 @@
 # نقشهٔ معماری سامانه — برای توسعه‌دهنده
 
-تاریخ تهیه: ۱۴۰۵/۰۸/۰۳ (2026-10-25) · نسخهٔ مبنا: 1.62.19
+تاریخ تهیه: ۱۴۰۵/۰۸/۰۳ (2026-10-25) · نسخهٔ مبنا: 1.62.20
 
 این سند «نقشهٔ راهِ کد» است: هر چیزی کجاست و یک درخواست چه مسیری را طی می‌کند. قبل از هر تغییری اول این سند، بعد `docs/HANDOFF-FA.md` (قواعد ثابت) را بخوانید.
 
@@ -31,7 +31,7 @@
 
 | فایل | خط | نقش |
 |---|---|---|
-| `index.php` | ~4700 | روتر اصلی: اکشن‌های POST باقی‌مانده + ۳۸ صفحه (بانرگذاری‌شده) |
+| `index.php` | ~3443 | روتر اصلی: ۳۸ صفحه + رسیدگی POST (از ۱.۶۲.۲۰ هیچ اکشن درون‌خطی ندارد؛ همه در actions/) |
 | `actions/org-actions.php` | ~560 | ۱۳ اکشن چارت سازمانی (برش ۱) — شرح فارسی در سرآیند |
 | `actions/ticket-actions.php` | ~640 | ۷ اکشن چرخهٔ درخواست‌ها (برش ۲) — شرح فارسی در سرآیند |
 | `actions/asset-actions.php` | ~420 | ۱۰ اکشن اموال/اسکن دامین (برش ۳) — شرح فارسی در سرآیند |
@@ -46,7 +46,16 @@
 | `actions/notification-actions.php` | ~32 | ۲ اکشن اعلان‌ها (برش ۷) — شرح فارسی در سرآیند |
 | `actions/bulk-actions.php` | ~118 | ۲ اکشن ارتباط دارایی/عملیات گروهی (برش ۸) — شرح فارسی در سرآیند |
 | `actions/user-structure-actions.php` | ~367 | ۶ اکشن ساختار پایه و کاربران (برش ۸) — شرح فارسی در سرآیند |
-| `bootstrap.php` | ~3300 | هستهٔ مشترک: DB، سشن، احراز هویت، رندر، ابزارها (TOC در ابتدای فایل) |
+| `actions/backup-actions.php` | ~55 | ۳ اکشن پشتیبان‌گیری/به‌روزرسانی سامانه (برش ۹، ۱.۶۲.۲۰) — شرح فارسی در سرآیند |
+| `bootstrap.php` | ~64 | بارکنندهٔ هسته (از ۱.۶۲.۲۰): سر فایل (APP_ROOT، سشن، config) + require هشت ماژول lib/ به ترتیب قدیمی |
+| `lib/db-core.php` | ~565 | هسته، پیکربندی (cfg)، AppPDO، db_*، نرخ ورود/API، نسخه، تم، redirect |
+| `lib/logging-csrf.php` | ~400 | flash، لاگ سیستمی و ثبت خطای فارسی، CSRF |
+| `lib/auth-scope.php` | ~140 | current_user، require_*، دامنهٔ دید ticket_scope/asset_scope |
+| `lib/settings-effects.php` | ~375 | setting، افکت‌های نمایشی، نقش‌های کلیدی |
+| `lib/ldap.php` | ~315 | پیکربندی، تشخیص و همگام‌سازی دامین (LDAP) |
+| `lib/tickets-sla.php` | ~620 | شمارهٔ درخواست، تقویم شمسی، SLA/OLA، تاریخچهٔ دارایی |
+| `lib/notify-users.php` | ~435 | اعلان‌ها، ورود دامین (ldap_authenticate)، upsert کاربران |
+| `lib/activity-audit.php` | ~390 | ثبت فعالیت، حسابرسی save_audit، رویداد درخواست‌ها |
 | `permissions.php` | — | تعریف دسترسی‌ها + نقش‌های پیش‌فرض (هر قابلیت جدید باید اینجا هم ثبت شود) |
 | `session_bootstrap.php` | — | شروع امن سشن (مشترک بین index و install) |
 | `organization.php` | — | چارت سازمانی: org_units/org_unit_managers، واحد مستقل (liaison)، همگام‌سازی نقش‌ها |
@@ -67,7 +76,7 @@
 
 به ترتیب فایل — هر گروه در کد بانر دارد:
 
-۱–۲. ورود + پروفایل/تم: ۳ اکشن — **در `actions/account-actions.php`** ۳. برند فیش غذا — **در `actions/food-brand-actions.php`** ۴. CD/DVD: ۳ اکشن — **در `actions/cd-dvd-actions.php`** ۵. پشتیبان‌گیری/به‌روزرسانی (۳ — عمداً در index) ۶. اعلان‌ها: ۲ اکشن — **در `actions/notification-actions.php`** ۷–۸. تصمیم‌های سرپرست + امتیازدهی: ۴ اکشن — **در `actions/supervisor-actions.php`** ۹. اموال و اسکن دامین: ۱۰ اکشن — **در `actions/asset-actions.php`** ۱۰. چرخهٔ درخواست‌ها: ۷ اکشن — **در `actions/ticket-actions.php`** ۱۱. خدمات/دسته/دانش: ۷ اکشن — **در `actions/service-actions.php`** ۱۲. تعطیلات: ۴ اکشن — **در `actions/holiday-actions.php`** ۱۳. ارتباط دارایی + عملیات گروهی: ۲ اکشن — **در `actions/bulk-actions.php`** ۱۴–۱۵. ساختار پایه + کاربران: ۶ اکشن — **در `actions/user-structure-actions.php`** ۱۶. سازمان: ۱۳ اکشن — **در فایل جدای `actions/org-actions.php`** (save_org_node شامل liaison، undo، assign/remove manager، experts، assign_users، reset، ceo، unit، delete_unit، user_org، دو فرم ترمیم نقش) ۱۷. نقش‌ها و دسترسی‌ها: ۴ اکشن — **در `actions/role-actions.php`** ۱۸–۱۹. لاگ/LDAP + افکت/تنظیمات: ۵ اکشن — **در `actions/settings-actions.php`**
+۱–۲. ورود + پروفایل/تم: ۳ اکشن — **در `actions/account-actions.php`** ۳. برند فیش غذا — **در `actions/food-brand-actions.php`** ۴. CD/DVD: ۳ اکشن — **در `actions/cd-dvd-actions.php`** ۵. پشتیبان‌گیری/به‌روزرسانی: ۳ اکشن — **در `actions/backup-actions.php`** (برش ۹) ۶. اعلان‌ها: ۲ اکشن — **در `actions/notification-actions.php`** ۷–۸. تصمیم‌های سرپرست + امتیازدهی: ۴ اکشن — **در `actions/supervisor-actions.php`** ۹. اموال و اسکن دامین: ۱۰ اکشن — **در `actions/asset-actions.php`** ۱۰. چرخهٔ درخواست‌ها: ۷ اکشن — **در `actions/ticket-actions.php`** ۱۱. خدمات/دسته/دانش: ۷ اکشن — **در `actions/service-actions.php`** ۱۲. تعطیلات: ۴ اکشن — **در `actions/holiday-actions.php`** ۱۳. ارتباط دارایی + عملیات گروهی: ۲ اکشن — **در `actions/bulk-actions.php`** ۱۴–۱۵. ساختار پایه + کاربران: ۶ اکشن — **در `actions/user-structure-actions.php`** ۱۶. سازمان: ۱۳ اکشن — **در فایل جدای `actions/org-actions.php`** (save_org_node شامل liaison، undo، assign/remove manager، experts، assign_users، reset، ceo، unit، delete_unit، user_org، دو فرم ترمیم نقش) ۱۷. نقش‌ها و دسترسی‌ها: ۴ اکشن — **در `actions/role-actions.php`** ۱۸–۱۹. لاگ/LDAP + افکت/تنظیمات: ۵ اکشن — **در `actions/settings-actions.php`**
 
 ## ۴. صفحه‌ها (۳۸ مقدار `?page=`)
 

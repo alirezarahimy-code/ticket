@@ -789,7 +789,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         chatbot = read("chatbot.php")
         self.assertIn("food_order_closed_cancel", chatbot)
         self.assertIn("کاربر عادی این اعلان را در زنگوله نمی‌بیند", chatbot)
-        bootstrap = read("bootstrap.php")
+        bootstrap = (read("bootstrap.php") + read("lib/db-core.php") + read("lib/logging-csrf.php") + read("lib/auth-scope.php") + read("lib/settings-effects.php") + read("lib/ldap.php") + read("lib/tickets-sla.php") + read("lib/notify-users.php") + read("lib/activity-audit.php"))  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
         self.assertIn("function notification_visibility_sql(", bootstrap)
         self.assertIn("food_cancel_request", bootstrap)
         self.assertIn("notification_visibility_sql(", read("index.php"))

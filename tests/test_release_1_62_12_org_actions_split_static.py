@@ -98,7 +98,7 @@ def test_version_manifest_and_package():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۳ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip" in page
+    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.11-code-navigation-phase1-20261025.zip" not in page
     assert "actions/org-actions.php" in page

@@ -37,6 +37,6 @@ check("با باز شدن سامانه" in guide and "با باز شدن سام�
 check("function lac_ensure_schema" in read("local-accounts.php"), "local account schema is ensured before convert")
 check("lac_ensure_schema" in save, "employee backfill waits for local account columns")
 check("catch (Throwable $exception)" in save[save.find("function food_ticket_ensure_employee_local_accounts"):save.find("function food_ticket_api_employees")], "backfill never crashes other pages")
-check("function ticket_cancel_ensure_schema" in read("bootstrap.php"), "queue cancel columns are auto-added if missing")
+check("cancel_requested_at" in read("lib/tickets-sla.php") and "function ticket_hot_schema_ensure" in read("lib/tickets-sla.php"), "queue cancel columns are auto-added if missing")  # از ۱.۶۲.۲۰: alias مردهٔ ticket_cancel_ensure_schema حذف شد؛ ترمیم واقعی در ticket_hot_schema_ensure است
 
 print("all food employee local static checks passed")

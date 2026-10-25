@@ -4,7 +4,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_global_theme_is_attached_to_all_main_shells():
-    bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
+    bootstrap = "".join((ROOT / n).read_text(encoding="utf-8") for n in ["bootstrap.php"] + ['lib/db-core.php', 'lib/logging-csrf.php', 'lib/auth-scope.php', 'lib/settings-effects.php', 'lib/ldap.php', 'lib/tickets-sla.php', 'lib/notify-users.php', 'lib/activity-audit.php'])  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
     index = (ROOT / "index.php").read_text(encoding="utf-8")
     css = (ROOT / "assets/theme-mode.css").read_text(encoding="utf-8")
     app = (ROOT / "assets/app.js").read_text(encoding="utf-8")

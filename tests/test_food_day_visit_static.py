@@ -20,7 +20,7 @@ guide = read("help-guide.php")
 schema = read("schema.sql")
 install = read("install-empty-db.sql")
 perms = read("permissions.php")
-bootstrap = read("bootstrap.php")
+bootstrap = (read("bootstrap.php") + read("lib/db-core.php") + read("lib/logging-csrf.php") + read("lib/auth-scope.php") + read("lib/settings-effects.php") + read("lib/ldap.php") + read("lib/tickets-sla.php") + read("lib/notify-users.php") + read("lib/activity-audit.php"))  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
 admin_js = read("food-ticket-web/assets/food-groups.js")
 
 check("CREATE TABLE IF NOT EXISTS food_ticket_day_visits" in groups

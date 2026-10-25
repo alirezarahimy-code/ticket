@@ -13,7 +13,7 @@ def check(condition: bool, message: str) -> None:
     print(f"ok - {message}")
 
 
-boot = read("bootstrap.php")
+boot = (read("bootstrap.php") + read("lib/db-core.php") + read("lib/logging-csrf.php") + read("lib/auth-scope.php") + read("lib/settings-effects.php") + read("lib/ldap.php") + read("lib/tickets-sla.php") + read("lib/notify-users.php") + read("lib/activity-audit.php"))  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
 index = read("index.php")
 org = read("organization.php")
 food = read("food-ticket.php")
@@ -22,7 +22,7 @@ local = read("local-accounts.php")
 check("function ticket_hot_schema_ensure" in boot, "hot-path schema heal exists")
 check("function db_add_missing_column" in boot, "missing columns are added without crashing")
 check("function db_ensure_enum_values" in boot, "enum values can be extended in place")
-check("cancel_requested_at" in boot[boot.find("function ticket_hot_schema_ensure"):boot.find("function ticket_cancel_ensure_schema")], "queue cancel columns are healed")
+check("cancel_requested_at" in boot[boot.find("function ticket_hot_schema_ensure"):boot.find("function ticket_number_ensure_schema_run")], "queue cancel columns are healed")
 check("ola_response_due_at" in boot, "queue OLA columns are healed")
 check("sla_paused_at" in boot, "queue SLA pause column is healed")
 check("must_change_password" in boot[boot.find("function ticket_hot_schema_ensure"):], "local-account password column is healed at startup")

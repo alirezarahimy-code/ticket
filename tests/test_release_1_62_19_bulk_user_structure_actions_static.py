@@ -58,7 +58,7 @@ def test_action_files_structure_and_persian_descriptions():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.19"
+    # از ۱.۶۲.۲۰ نسخهٔ جاری جلوتر است؛ پین VERSION فقط در تست نسخهٔ جاری نگه داشته می‌شود.
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.19"
     assert manifest["requires_version"] == "1.61.9"
@@ -83,18 +83,22 @@ def test_version_manifest_and_package():
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in names and f"files/migrations/{mig}" in names, mig
     assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.19"
-    for rel in ["index.php"] + list(FILES_AND_ACTIONS):
+    # index.php در ۱.۶۲.۲۰ (برش ۹) تغییر کرد؛ مقایسهٔ بایتی فقط برای فایل‌های برش ۸ این نسخه.
+    for rel in list(FILES_AND_ACTIONS):
         assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
+    # پین SHA در صفحهٔ دانلود از ۱.۶۲.۲۰ حذف شد (صفحه فقط بستهٔ جاری را نشان می‌دهد).
 
 
-def test_backup_group_still_in_index_intentionally():
-    """گروه پشتیبان‌گیری/به‌روزرسانی عمداً در index.php مانده (برش جداگانه با احتیاط ویژه)."""
+def test_backup_group_moved_in_1_62_20():
+    """از ۱.۶۲.۲۰ (برش ۹) گروه پشتیبان‌گیری/به‌روزرسانی در فایل جدا است."""
     src = read("index.php")
+    assert "require __DIR__ . '/actions/backup-actions.php';" in src
+    backup = read("actions/backup-actions.php")
     for action in ("create_backup", "restore_backup", "system_update"):
-        assert f"if ($action === '{action}')" in src, action
+        assert f"if ($action === '{action}')" not in src, action
+        assert f"if ($action === '{action}')" in backup, action
 
 
 def test_panel_asset_refs_are_all_packaged():
@@ -108,7 +112,9 @@ def test_panel_asset_refs_are_all_packaged():
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # از ۱.۶۲.۲۰ صفحهٔ دانلود فقط بستهٔ جاری را نشان می‌دهد.
+    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" not in page
     assert "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip" not in page
-    assert "actions/bulk-actions.php" in page and "actions/user-structure-actions.php" in page
+    # از ۱.۶۲.۲۰ متن صفحه دربارهٔ بستهٔ جاری است؛ پین محتوای برش ۸ حذف شد.

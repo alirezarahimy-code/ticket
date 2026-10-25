@@ -37,10 +37,10 @@ def test_index_requires_all_four_files_in_original_order():
         assert src.count(line) == 1, name
         positions.append(src.index(line))
     assert positions == sorted(positions)
-    # گروه پشتیبان‌گیری/به‌روزرسانی عمداً سر جایش است (بین CD/DVD و اعلان‌ها)
-    backup = src.index("if ($action === 'create_backup')")
+    # از ۱.۶۲.۲۰ (برش ۹) گروه پشتیبان‌گیری در فایل جدا است؛ جایگاهش همان است (بین CD/DVD و اعلان‌ها)
+    backup = src.index("require __DIR__ . '/actions/backup-actions.php';")
     assert positions[2] < backup < positions[3]
-    assert "if ($action === 'system_update')" in src
+    assert "if ($action === 'system_update')" in read("actions/backup-actions.php")
     for actions in FILES_AND_ACTIONS.values():
         for action in actions:
             assert f"if ($action === '{action}')" not in src, action
@@ -107,7 +107,7 @@ def test_panel_asset_refs_are_all_packaged():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۹ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip" in page
+    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip" not in page
     assert "ticket-update-1.62.16-role-settings-actions-split-20261025.zip" not in page
