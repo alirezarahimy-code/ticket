@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS org_units (
     code VARCHAR(60) NULL,
     parent_id INT UNSIGNED NULL,
     unit_type VARCHAR(20) NOT NULL DEFAULT 'department',
+    chart_side VARCHAR(10) NULL,
     manager_user_id INT UNSIGNED NULL,
     is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
     is_active TINYINT(1) NOT NULL DEFAULT 1,

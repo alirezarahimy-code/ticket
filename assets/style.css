@@ -926,6 +926,16 @@ body.page-organization .notification-toasts { display: none; }
 .org-ceo .org-node-name { color: #fff; }.org-ceo .org-node-title { color: rgba(255,255,255,.85); }.org-ceo .org-avatar { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.3); }.org-ceo .org-node-count { background: rgba(255,255,255,.15); color: #fff; }
 .org-deputy { border-color: #93b4d4; border-top: 3px solid #2c5282; }.org-department { min-width: 180px; border-color: #a5d8e0; border-top: 3px solid #0891b2; }
 .org-experts-group { min-width: 200px; border: 1.5px dashed #94a3b8; background: #f8fafc; cursor: pointer; }.org-experts-group:hover { border-color: #059669; background: #f0fdf4; }
+/* ۱.۶۲.۱۰ — واحدهای مستقل (نمایندگی) کنار مدیرعامل: جایگاه مطلق، کمی پایین‌تر از کادر مدیرعامل،
+   بدون هیچ خط اتصالی به درخت تا اثری از زیرمجموعه بودن دیده نشود. */
+.org-liaison-band { position: absolute; top: 0; right: 0; left: 0; height: 0; z-index: 2; pointer-events: none; }
+.org-liaison-pos { position: absolute; top: 46px; direction: rtl; pointer-events: auto; }
+.org-liaison-side-right { left: calc(50% + 160px); }
+.org-liaison-side-left { right: calc(50% + 160px); }
+.org-liaison-node { min-width: 200px; max-width: 220px; border-color: #c9b47e; border-top: 3px solid #a8842c; background: #fffdf6; }
+.org-liaison-node .org-node-count { background: #f6eed7; color: #8b631d; }
+.org-liaison-slot { min-width: 190px; border-color: #d9c99f; background: #fffdf8; }
+.org-liaison-slot:hover { border-color: #a8842c; background: #fdf6e3; color: #8b631d; }
 .org-empty-slot { display: inline-flex; min-height: 70px; align-items: center; justify-content: center; flex-direction: column; gap: 4px; border: 2px dashed #cbd5e1; background: #f8fafc; color: #94a3b8; cursor: pointer; font-size: 12px; }.org-empty-slot:hover { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }.org-empty-slot > span { font-size: 20px; line-height: 1; }.org-empty-small { min-width: 180px; }
 .org-avatar { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 8px; border: 2px solid #fff; border-radius: 50%; background: #e0e7ef; color: #334155; box-shadow: 0 0 0 1px #d5dae1; font-size: 17px; font-weight: 700; }
 .org-node-name { margin-bottom: 3px; overflow: hidden; color: #1e293b; font-size: 13px; font-weight: 700; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }.org-node-title { margin-bottom: 6px; color: #64748b; font-size: 11px; }

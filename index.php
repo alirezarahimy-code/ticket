@@ -695,7 +695,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.44">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.45">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -3219,7 +3219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             org_ensure_schema();
             $orgUndoSnapshot = org_snapshot();
-            $nodeType = valid_choice(post_value('node_type'), ['ceo', 'deputy', 'department', 'member'], 'department');
+            $nodeType = valid_choice(post_value('node_type'), ['ceo', 'deputy', 'department', 'member', 'liaison'], 'department');
             $ceoId = org_ceo_unit_id();
 
             if ($nodeType === 'ceo') {
@@ -3276,8 +3276,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($name === '') {
                 throw new RuntimeException('نام واحد الزامی است.');
             }
+            $chartSide = null;
             if ($nodeType === 'deputy') {
                 $parentId = $ceoId;
+            } elseif ($nodeType === 'liaison') {
+                // ۱.۶۲.۱۰: واحد مستقل (نمایندگی) کنار مدیرعامل؛ والد ندارد و زیرمجموعهٔ مدیرعامل نیست.
+                $parentId = 0;
+                $chartSide = valid_choice(post_value('chart_side'), ['right', 'left'], 'right');
+                $sideTaken = db()->prepare('SELECT id FROM org_units WHERE unit_type = "liaison" AND chart_side = ? AND is_active = 1 AND id <> ? LIMIT 1');
+                $sideTaken->execute([$chartSide, $unitId]);
+                if ($sideTaken->fetchColumn()) {
+                    throw new RuntimeException('در این سمت مدیرعامل قبلاً یک واحد مستقل تعریف شده است؛ ابتدا آن را ویرایش یا حذف کنید.');
+                }
             } else {
                 $parentId = max(0, (int) post_value('parent_id', '0'));
                 $parentUnit = $parentId > 0 ? org_unit_by_id($parentId) : null;
@@ -3305,21 +3315,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($parentId === $unitId) {
                     throw new RuntimeException('واحد نمی‌تواند والد خودش باشد.');
                 }
-                db()->prepare('UPDATE org_units SET name = ?, code = ?, parent_id = ?, unit_type = ?, manager_user_id = ?, is_primary_admin = ? WHERE id = ?')
-                    ->execute([$name, $code !== '' ? $code : null, $parentId > 0 ? $parentId : null, $nodeType, $managerId > 0 ? $managerId : null, $isPrimary, $unitId]);
+                db()->prepare('UPDATE org_units SET name = ?, code = ?, parent_id = ?, unit_type = ?, chart_side = ?, manager_user_id = ?, is_primary_admin = ? WHERE id = ?')
+                    ->execute([$name, $code !== '' ? $code : null, $parentId > 0 ? $parentId : null, $nodeType, $chartSide, $managerId > 0 ? $managerId : null, $isPrimary, $unitId]);
             } else {
-                db()->prepare('INSERT INTO org_units (name, code, parent_id, unit_type, manager_user_id, is_primary_admin, is_active) VALUES (?, ?, ?, ?, ?, ?, 1)')
-                    ->execute([$name, $code !== '' ? $code : null, $parentId > 0 ? $parentId : null, $nodeType, $managerId > 0 ? $managerId : null, $isPrimary]);
+                db()->prepare('INSERT INTO org_units (name, code, parent_id, unit_type, chart_side, manager_user_id, is_primary_admin, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, 1)')
+                    ->execute([$name, $code !== '' ? $code : null, $parentId > 0 ? $parentId : null, $nodeType, $chartSide, $managerId > 0 ? $managerId : null, $isPrimary]);
                 $unitId = (int) db()->lastInsertId();
             }
             db()->prepare('DELETE FROM org_unit_managers WHERE unit_id = ?')->execute([$unitId]);
             if ($managerId > 0) {
                 db()->prepare('INSERT INTO org_unit_managers (unit_id, user_id, is_primary) VALUES (?, ?, 1)')->execute([$unitId, $managerId]);
-                db()->prepare('UPDATE users SET role = "manager", org_unit_id = ? WHERE id = ? AND role IN ("user", "agent")')->execute([$unitId, $managerId]);
+                if ($nodeType !== 'liaison') {
+                    db()->prepare('UPDATE users SET role = "manager", org_unit_id = ? WHERE id = ? AND role IN ("user", "agent")')->execute([$unitId, $managerId]);
+                } else {
+                    // نمایندهٔ واحد مستقل فقط به واحد وصل می‌شود؛ نقش او تغییر نمی‌کند.
+                    db()->prepare('UPDATE users SET org_unit_id = ? WHERE id = ?')->execute([$unitId, $managerId]);
+                }
             }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot);
-            save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'manager' => $managerId]);
-            flash('success', $nodeType === 'deputy' ? 'معاونت ذخیره شد.' : 'اداره ذخیره شد.');
+            save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'chart_side' => $chartSide, 'manager' => $managerId]);
+            flash('success', $nodeType === 'deputy' ? 'معاونت ذخیره شد.' : ($nodeType === 'liaison' ? 'واحد مستقل (نمایندگی) ذخیره شد.' : 'اداره ذخیره شد.'));
             redirect('index.php?page=organization#unit-' . $unitId);
         }
 
@@ -3347,7 +3362,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             org_ensure_schema();
             $orgUndoSnapshot = org_snapshot();
-            $targetType = valid_choice(post_value('target_type'), ['ceo', 'deputy', 'department'], 'department');
+            $targetType = valid_choice(post_value('target_type'), ['ceo', 'deputy', 'department', 'liaison'], 'department');
             $targetId = max(0, (int) post_value('unit_id', '0'));
             $target = $targetType === 'ceo' ? org_unit_by_id(org_ceo_unit_id()) : org_unit_by_id($targetId);
             if ($target === null || (int) $target['is_active'] !== 1 || (string) $target['unit_type'] !== $targetType) {
@@ -3372,6 +3387,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare('INSERT INTO org_unit_managers (unit_id, user_id, is_primary) VALUES (?, ?, 1)')->execute([(int) $target['id'], $userId]);
             if ($targetType === 'ceo') {
                 db()->prepare('UPDATE users SET org_unit_id = NULL, manager_user_id = NULL, role = CASE WHEN role IN ("user", "agent") THEN "manager" ELSE role END WHERE id = ?')->execute([$userId]);
+            } elseif ($targetType === 'liaison') {
+                // نمایندهٔ واحد مستقل: فقط اتصال به واحد؛ نقش کاربر دست‌نخورده می‌ماند.
+                db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = NULL WHERE id = ?')->execute([(int) $target['id'], $userId]);
             } else {
                 db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = NULL, role = CASE WHEN role IN ("user", "agent") THEN "manager" ELSE role END WHERE id = ?')->execute([(int) $target['id'], $userId]);
             }
@@ -3389,7 +3407,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             org_ensure_schema();
             $orgUndoSnapshot = org_snapshot();
-            $targetType = valid_choice(post_value('target_type'), ['ceo', 'deputy', 'department'], 'department');
+            $targetType = valid_choice(post_value('target_type'), ['ceo', 'deputy', 'department', 'liaison'], 'department');
             $targetId = max(0, (int) post_value('unit_id', '0'));
             $target = $targetType === 'ceo' ? org_unit_by_id(org_ceo_unit_id()) : org_unit_by_id($targetId);
             if ($target === null || (int) $target['is_active'] !== 1 || (string) $target['unit_type'] !== $targetType) {
@@ -5691,6 +5709,8 @@ if ($page === 'organization') {
             $ceoUnit = $unit;
         } elseif ((string) $unit['unit_type'] === 'deputy') {
             $deputies[] = $unit;
+        } elseif ((string) $unit['unit_type'] === 'liaison') {
+            // واحدهای مستقل (نمایندگی) کنار مدیرعامل؛ زیرمجموعهٔ هیچ واحدی نیستند.
         } else {
             $departmentsByParent[(int) ($unit['parent_id'] ?? 0)][] = $unit;
         }
@@ -5709,6 +5729,7 @@ if ($page === 'organization') {
             'code' => (string) ($unit['code'] ?? ''),
             'parentId' => (int) ($unit['parent_id'] ?? 0),
             'type' => (string) $unit['unit_type'],
+            'chartSide' => (string) ($unit['chart_side'] ?? ''),
             'managerId' => (int) ($unit['manager_user_id'] ?? 0),
             'managerName' => (string) ($unit['manager_name'] ?? ''),
             'primaryAdmin' => (int) ($unit['is_primary_admin'] ?? 0) === 1,
@@ -5847,7 +5868,7 @@ HTML;
         }
         echo '</section>';
     }
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=6"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=7"></script>';
     render_footer();
     exit;
 }

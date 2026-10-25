@@ -5,6 +5,7 @@
 ۲) فیش مهمان دستی — ردیف «مهمان» همیشه اول فهرست، چندبار در روز قابل ثبت
 ۳) چهار فیلد فرم «مقاصد ملاقات و تأییدکنندگان» در یک خط
 """
+import re
 import json
 import zipfile
 from pathlib import Path
@@ -104,7 +105,7 @@ def test_guest_event_schema_support_already_exists():
 def test_destination_forms_fit_four_fields_on_one_line():
     style = read("assets/style.css")
     assert style.count("grid-template-columns: repeat(4, minmax(0, 1fr)) auto") >= 2
-    assert "assets/style.css?v=3.4.44" in read("index.php")
+    assert re.search(r"assets/style\.css\?v=3\.4\.\d+", read("index.php"))  # از ۱.۶۲.۱۰ نسخهٔ CSS جلوتر می‌رود
     # موبایل همچنان تک‌ستونه می‌ماند
     assert "@media (max-width: 760px)" in style
 
@@ -119,7 +120,7 @@ def test_help_guide_documents_new_manual_ticket_features():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.9"
+    # نسخهٔ جاری مخزن از ۱.۶۲.۱۰ به بعد جلوتر است؛ پین VERSION به تست نسخهٔ جدید منتقل شد.
     manifest = json.loads(read("updates/2026-10-25-release-162-9-manual-ticket-date-guest/manifest.json"))
     assert manifest["version"] == "1.62.9"
     # این نسخه مهاجرت جدید ندارد؛ 009 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته است.
@@ -163,5 +164,7 @@ def test_version_manifest_and_package():
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
+    # صفحهٔ دانلود فقط آخرین بسته را نشان می‌دهد؛ از ۱.۶۲.۱۰ بستهٔ جدید جایگزین شد.
+    assert "ticket-update-1.62.10-org-liaison-units-20261025.zip" in page
+    assert PACKAGE_NAME not in page
     assert "fix2-20261025.zip" not in page
