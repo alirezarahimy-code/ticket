@@ -4066,6 +4066,7 @@ if ($page === 'activity-log') {
         $systemConditions = [];
         $systemLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'warning', 'error'], '');
         if ($systemLevel !== '') { $systemConditions[] = 's.level = ?'; $systemParams[] = $systemLevel; }
+        else { $systemConditions[] = "s.level IN ('error', 'warning')"; }
         $systemSearch = trim((string) ($_GET['q'] ?? ''));
         if ($systemSearch !== '') {
             $systemConditions[] = '(s.context LIKE ? OR s.message LIKE ? OR s.meta_json LIKE ? OR s.request_uri LIKE ?)';
@@ -4110,13 +4111,14 @@ if ($page === 'activity-log') {
     $exportArgs = $queryArgs; unset($exportArgs['page']);
     $tabNames = ['all'=>'همه رویدادها','auth'=>'ورود و خروج','admin'=>'مدیریتی و تنظیمات','errors'=>'خطاها و تلاش‌های ناموفق'];
     render_header('لاگ سامانه', $logUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">ردیابی و ممیزی یکپارچه</span><h1>لاگ سامانه</h1><p>یک گزارش واحد از ورود و خروج، فعالیت کاربران، تغییرات مدیریتی و خطاها؛ ' . number_format($filteredTotal) . ' رکورد در این نما؛ ' . number_format($activityTotal + $systemTotal) . ' رویداد و خطای ثبت‌شده در مجموع.</p></div><div class="actions">' . ($activityExported ? '<a class="button secondary" href="index.php?action=export_activity_logs' . ($exportArgs ? '&' . e(http_build_query($exportArgs)) : '') . '">خروجی فعالیت کاربران (Excel)</a>' : '') . '<a class="button secondary" href="index.php?page=settings#activity-log-settings">تنظیم نگهداری</a></div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">لاگ و گزارش فنی</span><h1>لاگ سامانه</h1><p>این صفحه هم رخدادهای فنی و هم فعالیت کاربران را نشان می‌دهد. خروجی «گزارش خوانا و امن» برای پشتیبانی پالایش شده است؛ خروجی فعالیت کاربران برای ممیزی است و ممکن است نام و نشانی کاربر داشته باشد.</p></div><div class="actions">' . ($activityExported ? '<a class="button secondary" href="index.php?action=export_activity_logs' . ($exportArgs ? '&' . e(http_build_query($exportArgs)) : '') . '">خروجی فعالیت کاربران (ممیزی)</a>' : '') . (user_can($logUser, 'system.health') ? '<a class="button" href="index.php?page=system-health&amp;export=safe">دانلود گزارش خوانا و امن (Excel)</a>' : '') . '<a class="button secondary" href="index.php?page=settings#activity-log-settings">تنظیم نگهداری</a></div></section>';
+
     echo '<nav class="log-tabs" aria-label="دسته‌بندی لاگ‌ها">';
     foreach($tabNames as $tab=>$label){ echo '<a class="' . ($category===$tab?'active':'') . '" href="index.php?page=activity-log&category=' . e($tab) . '">' . e($label) . '</a>'; }
     echo '</nav><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="activity-log"><input type="hidden" name="category" value="' . e($category) . '"><div class="filter-grid">';
     if ($canViewSystemLogs && in_array($category, ['all', 'errors'], true)) {
         $selectedLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'warning', 'error'], '');
-        echo '<label>شدت خطا<select name="level"><option value="">همه سطح‌ها</option><option value="error"' . ($selectedLevel === 'error' ? ' selected' : '') . '>خطا</option><option value="warning"' . ($selectedLevel === 'warning' ? ' selected' : '') . '>هشدار</option><option value="info"' . ($selectedLevel === 'info' ? ' selected' : '') . '>اطلاعات</option><option value="debug"' . ($selectedLevel === 'debug' ? ' selected' : '') . '>اشکال‌زدایی</option></select></label>';
+        echo '<label>نوع رخداد<select name="level"><option value="">خطاها و هشدارها (پیشنهادی)</option><option value="error"' . ($selectedLevel === 'error' ? ' selected' : '') . '>خطا</option><option value="warning"' . ($selectedLevel === 'warning' ? ' selected' : '') . '>هشدار</option><option value="info"' . ($selectedLevel === 'info' ? ' selected' : '') . '>اطلاع‌رسانی</option><option value="debug"' . ($selectedLevel === 'debug' ? ' selected' : '') . '>جزئیات تخصصی</option></select></label>';
     }
     if ($canViewActivityLogs) {
         echo '<label>کاربر<select name="user_id"><option value="">همه کاربران</option>';
@@ -4129,11 +4131,20 @@ if ($page === 'activity-log') {
     }
     echo '<label>از تاریخ<input name="from" placeholder="۱۴۰۵/۰۷/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ<input name="to" placeholder="۱۴۰۵/۰۷/۳۰" value="' . e($_GET['to'] ?? '') . '"></label>' . ($canViewActivityLogs ? '<label>آی‌پی<input name="ip" placeholder="مثلاً 192.168.1." value="' . e($_GET['ip'] ?? '') . '"></label>' : '') . '<label class="full">جست‌وجوی متن<input type="search" name="q" placeholder="کاربر، عملیات، نام رایانه یا جزئیات" value="' . e($_GET['q'] ?? '') . '"></label></div><div class="actions"><button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="index.php?page=activity-log&category=' . e($category) . '">پاک‌کردن فیلترها</a></div></form></section>';
     if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
-        echo '<section class="card ticket-table audit-table unified-log-table system-error-table"><div class="log-section-heading"><h2>خطاها و هشدارهای فنی</h2><span class="muted">' . number_format($systemFilteredTotal) . ' مورد</span></div>' . log_sort_header_row([['time','زمان'],['user','کاربر'],['level','شدت و بخش'],['request','درخواست'],['message','پیام'],['meta','جزئیات']], 'sort_s', 'dir_s', $queryArgs, $logSortS, $logDirS) . '';
+        echo '<section class="card ticket-table audit-table unified-log-table system-error-table"><div class="log-section-heading"><h2>خطاها و هشدارهای فنی</h2><span class="muted">' . number_format($systemFilteredTotal) . ' مورد</span></div>' . log_sort_header_row([['time','زمان'],['user','مرتبط با'],['level','اهمیت و بخش'],['request','صفحه'],['message','شرح رخداد'],['meta','جزئیات تخصصی']], 'sort_s', 'dir_s', $queryArgs, $logSortS, $logDirS) . '';
         if ($systemRows) { foreach ($systemRows as $systemRow) {
-            $systemMeta = activity_log_meta_lines(isset($systemRow['meta_json']) ? (string) $systemRow['meta_json'] : null);
-            $systemDetails = $systemMeta ? '<details class="log-details"><summary>جزئیات فنی (' . count($systemMeta) . ')</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $systemMeta)) . '</dl></details>' : '<span class="muted">—</span>';
-            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($systemRow['created_at'])) . '</span><span>' . e($systemRow['full_name'] ?: $systemRow['username'] ?: 'کاربر ناشناس') . '</span><span><em class="log-level ' . e($systemRow['level']) . '">' . e(strtoupper((string) $systemRow['level'])) . '</em><br><small>' . e($systemRow['context'] ?: 'سامانه') . '</small></span><span class="muted">' . e($systemRow['request_uri'] ?: '—') . '</span><span>' . e($systemRow['message'] ?: '—') . '</span><span>' . $systemDetails . '</span></div>';
+            $systemMeta = json_decode((string) ($systemRow['meta_json'] ?? ''), true);
+            $systemMeta = is_array($systemMeta) ? $systemMeta : [];
+            $humanEvent = system_health_humanize_event(['context' => (string) ($systemRow['context'] ?? ''), 'title' => (string) ($systemRow['message'] ?? ''), 'technical' => (string) ($systemMeta['technical'] ?? '')]);
+            $humanLevel = system_health_human_level((string) $systemRow['level']);
+            $systemTitle = in_array((string) $systemRow['level'], ['error', 'warning'], true) ? $humanEvent['title'] : 'رویداد اطلاع‌رسانی سامانه';
+            $systemActor = !empty($systemRow['user_id']) ? 'مرتبط با یک حساب کاربری' : 'خود سامانه';
+            $systemDetails = activity_log_meta_lines(isset($systemRow['meta_json']) ? (string) $systemRow['meta_json'] : null);
+            $systemDetailsHtml = $systemDetails ? '<details class="log-details"><summary>جزئیات تخصصی (ممکن است شامل دادهٔ حساس باشد)</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $systemDetails)) . '</dl></details>' : '<span class="muted">جزئیات افزوده‌ای ثبت نشده</span>';
+            $humanExplanation = in_array((string) $systemRow['level'], ['error', 'warning'], true)
+                ? '<strong>' . e($systemTitle) . '</strong><br><small><b>معنی:</b> ' . e($humanEvent['cause']) . '</small><br><small><b>پیشنهاد:</b> ' . e($humanEvent['action']) . '</small>'
+                : '<strong>رویداد اطلاع‌رسانی سامانه</strong>';
+            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($systemRow['created_at'])) . '</span><span>' . e($systemActor) . '</span><span><em class="log-level ' . e($systemRow['level']) . '">' . e($humanLevel) . '</em><br><small>' . e($humanEvent['module']) . '</small></span><span>' . e(system_health_request_label((string) ($systemRow['request_uri'] ?? ''))) . '</span><span>' . $humanExplanation . '</span><span>' . $systemDetailsHtml . '</span></div>';
         }} else { echo '<div class="empty-state"><p>خطای فنی با فیلترهای انتخاب‌شده پیدا نشد.</p></div>'; }
         echo '</section>';
     }
@@ -5555,12 +5566,16 @@ if ($page === 'logs') {
     $levelFilter = valid_choice((string) ($_GET['level'] ?? ''), ['', 'error', 'warning', 'info', 'debug'], '');
     $logRows = system_logs_recent(200, $levelFilter);
     render_header('گزارش خطا', $logUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">System Logs</span><h1>گزارش خطا و رویدادهای سامانه</h1><p>خطاهای برنامه، استخراج شناسنامه و رویدادهای مهم اینجا ثبت می‌شوند. فایل خام: storage/logs/app.log</p></div><div class="actions">' . (user_can($logUser, 'system.health') ? '<a class="button secondary" href="index.php?page=system-health&amp;export=safe">دانلود گزارش فنی پالایش‌شده برای پشتیبانی</a>' : '') . '<a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=info">اطلاعات</a></div></section>';
-    echo '<section class="card ticket-table audit-table"><div class="table-head"><span>زمان</span><span>سطح</span><span>بخش</span><span>پیام</span><span>آدرس</span></div>';
+    echo '<section class="page-heading"><div><span class="eyebrow">گزارش فنی</span><h1>لاگ سامانه</h1><p>این صفحه رخدادهای فنی را نشان می‌دهد. متن‌ها به زبان ساده شده‌اند؛ برای ارسال، از فایل خوانا و پالایش‌شده استفاده کنید.</p></div><div class="actions">' . (user_can($logUser, 'system.health') ? '<a class="button" href="index.php?page=system-health&amp;export=safe">دانلود گزارش خوانا و امن (Excel)</a>' : '') . '<a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=warning">فقط هشدارها</a></div></section>';
+    echo '<section class="card ticket-table audit-table"><div class="table-head"><span>زمان</span><span>اهمیت</span><span>بخش</span><span>صفحه</span><span>چه اتفاقی افتاده؟</span></div>';
     if ($logRows) {
         foreach ($logRows as $logRow) {
             $levelClass = $logRow['level'] === 'error' ? 'critical' : ($logRow['level'] === 'warning' ? 'urgent' : 'normal');
-            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e($logRow['level']) . '</em></span><span>' . e($logRow['context']) . '</span><span class="muted">' . e($logRow['message']) . system_log_meta_html((string) ($logRow['meta_json'] ?? '')) . '</span><span class="muted">' . e($logRow['request_uri']) . '</span></div>';
+            $meta = json_decode((string) ($logRow['meta_json'] ?? ''), true);
+            $meta = is_array($meta) ? $meta : [];
+            $friendly = system_health_humanize_event(['context' => (string) $logRow['context'], 'title' => (string) $logRow['message'], 'technical' => (string) ($meta['technical'] ?? '')]);
+            $message = in_array((string) $logRow['level'], ['error', 'warning'], true) ? $friendly['title'] : 'رویداد اطلاع‌رسانی سامانه';
+            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e(system_health_human_level((string) $logRow['level'])) . '</em></span><span>' . e($friendly['module']) . '</span><span>' . e(system_health_request_label((string) $logRow['request_uri'])) . '</span><span class="muted"><b>' . e($message) . '</b><br><small>' . e($friendly['action']) . '</small>' . system_log_meta_html((string) ($logRow['meta_json'] ?? '')) . '</span></div>';
         }
     } else {
         echo '<div class="table-row"><span class="muted">گزارشی ثبت نشده است.</span></div>';
