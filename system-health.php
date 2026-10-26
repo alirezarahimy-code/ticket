@@ -301,8 +301,26 @@ function system_health_handle_post(array $user): void
     redirect('index.php?page=system-health');
 }
 
-/** خروجی CSV سلامت سامانه با BOM (باز شدن درست فارسی در Excel). */
-function system_health_export_csv(array $user): never
+/** متنِ قابل‌صدور را برای اشتراک امن با پشتیبانی پالایش می‌کند. */
+function system_health_export_safe_text(string $value, array $knownUserLabels = []): string
+{
+    foreach ($knownUserLabels as $label) {
+        $label = trim((string) $label);
+        if (mb_strlen($label) >= 2) {
+            $value = str_ireplace($label, '[کاربر]', $value);
+        }
+    }
+    $value = (string) preg_replace('/\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b/u', '[ایمیل]', $value);
+    $value = (string) preg_replace('/(?<![0-9۰-۹٠-٩])[0-9۰-۹٠-٩]{10}(?![0-9۰-۹٠-٩])/u', '[شناسه]', $value);
+    $value = (string) preg_replace('/(?<![0-9۰-۹٠-٩])(?:\\+?98|0098|0)?[9۹٩][0-9۰-۹٠-٩]{9}(?![0-9۰-۹٠-٩])/u', '[شماره تماس]', $value);
+    $value = (string) preg_replace('/\b(?:\d{1,3}\.){3}\d{1,3}\b/u', '[IP]', $value);
+    $value = (string) preg_replace('~https?://[^[:space:]]+~iu', '[نشانی وب]', $value);
+    $value = (string) preg_replace('/(?i)(password|pass|pwd|token|secret|authorization|cookie|csrf|api[_-]?key|session|national_code|user_id|employee_id|staff_id)\s*"?\s*[:=]\s*"?[^",\s;}]+/u', '$1=[مخفی]', $value);
+    return mb_substr($value, 0, 1200);
+}
+
+/** خروجی امن Excel برای پشتیبانی: بدون شناسه‌های کاربری، نشانی درخواست، جزئیات خام و یادداشت‌ها. */
+function system_health_export_safe_xlsx(array $user): never
 {
     if (!user_can($user, 'system.health')) {
         http_response_code(403);
@@ -310,23 +328,51 @@ function system_health_export_csv(array $user): never
     }
     $days = max(1, min(90, (int) ($_GET['days'] ?? 7)));
     $rows = system_health_groups($days);
-    $headers = ['آخرین زمان', 'اولین زمان', 'تعداد', 'سطح', 'بخش', 'عنوان خطا', 'علت احتمالی', 'اقدام پیشنهادی', 'جزئیات فنی', 'مکان در کد', 'صفحه', 'وضعیت پیگیری', 'یادداشت'];
-    $fieldKeys = ['last_at', 'first_at', 'count', 'level', 'context', 'title', 'cause', 'action', 'technical', 'location', 'request_uri', 'status', 'note'];
+    $knownUserLabels = [];
+    try {
+        $knownUserLabels = db()->query("SELECT full_name FROM users WHERE full_name IS NOT NULL AND full_name <> '' UNION SELECT username FROM users WHERE username IS NOT NULL AND username <> ''")->fetchAll(PDO::FETCH_COLUMN);
+        usort($knownUserLabels, static fn ($a, $b): int => mb_strlen((string) $b) <=> mb_strlen((string) $a));
+    } catch (Throwable) {
+        // اگر فهرست کاربران در دسترس نبود، بقیهٔ الگوهای حساس همچنان ماسک می‌شوند.
+    }
+    $headers = ['آخرین زمان', 'اولین زمان', 'تعداد', 'سطح', 'بخش', 'دستهٔ فنی (بدون متن خام)', 'فایل و خط کد', 'وضعیت پیگیری'];
     $sheetRows = [array_map(static fn (string $h): array => ['v' => $h, 's' => 'header'], $headers)];
     foreach ($rows as $r) {
-        $line = [];
-        foreach ($fieldKeys as $key) {
-            $value = $r[$key] ?? '';
-            $line[] = ['v' => is_scalar($value) ? (string) $value : '', 's' => 'body'];
+        if (!in_array((string) ($r['level'] ?? ''), ['error', 'warning'], true)) {
+            continue;
         }
-        $sheetRows[] = $line;
+        $location = str_replace('\\', '/', (string) ($r['location'] ?? ''));
+        $location = preg_replace('~^.*/~', '', $location) ?? $location;
+        $rawTitle = (string) ($r['title'] ?? '');
+        $context = (string) ($r['context'] ?? '');
+        if ($context === 'کندی صفحه') {
+            $title = 'کندی صفحه (جزئیات درخواست حذف شد)';
+        } elseif ($context === 'کندی کوئری') {
+            $title = 'کندی کوئری (متن کوئری حذف شد)';
+        } else {
+            $classification = system_error_explain($rawTitle);
+            $title = $classification['title'] === 'خطای نامشخص سامانه'
+                ? 'رخداد فنی؛ متن خام برای حفظ حریم خصوصی حذف شد'
+                : (string) $classification['title'];
+        }
+        $values = [
+            (string) ($r['last_at'] ?? ''),
+            (string) ($r['first_at'] ?? ''),
+            (string) ($r['count'] ?? ''),
+            (string) ($r['level'] ?? ''),
+            system_health_export_safe_text($context, $knownUserLabels),
+            system_health_export_safe_text($title, $knownUserLabels),
+            system_health_export_safe_text($location, $knownUserLabels),
+            (string) ($r['status'] ?? ''),
+        ];
+        $sheetRows[] = array_map(static fn (string $value): array => ['v' => $value, 's' => 'body'], $values);
     }
     $bytes = xlsx_build([[
         'name' => 'سلامت سامانه',
         'rows' => $sheetRows,
-        'widths' => [18, 18, 10, 12, 16, 36, 36, 36, 40, 24, 30, 14, 30],
+        'widths' => [18, 18, 10, 12, 20, 42, 24, 14],
     ]]);
-    xlsx_send('system-health-' . date('Y-m-d') . '.xlsx', $bytes);
+    xlsx_send('system-health-safe-' . date('Y-m-d') . '.xlsx', $bytes);
 }
 
 function system_health_render(array $user): never
@@ -335,8 +381,8 @@ function system_health_render(array $user): never
         http_response_code(403);
         exit('دسترسی به سلامت سامانه مجاز نیست.');
     }
-    if (($_GET['export'] ?? '') === 'csv') {
-        system_health_export_csv($user);
+    if (in_array((string) ($_GET['export'] ?? ''), ['safe', 'csv'], true)) {
+        system_health_export_safe_xlsx($user);
     }
     if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         system_health_handle_post($user);
@@ -350,7 +396,7 @@ function system_health_render(array $user): never
     $checkLabel = ['ok' => 'سالم', 'warn' => 'هشدار', 'fail' => 'خطا'];
 
     render_header('سلامت سامانه', $user);
-    echo '<section class="page-heading"><div><span class="eyebrow">System Health</span><h1>سلامت سامانه</h1><p><a class="btn secondary" href="index.php?page=system-health&amp;export=csv">خروجی CSV (برای ارسال به پشتیبانی)</a></p><p>خطاها و کندی‌های فنی به زبان ساده، با علت احتمالی و اقدام پیشنهادی. این بخش جدا از لاگ کاربران است.</p></div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">System Health</span><h1>سلامت سامانه</h1><p><a class="btn secondary" href="index.php?page=system-health&amp;export=safe">دانلود گزارش فنی پالایش‌شده برای پشتیبانی</a></p><p>گزارش فقط خطاها و هشدارها را می‌دهد؛ شناسهٔ کاربر، نشانی درخواست، یادداشت، متن خام خطا/کوئری، علت/اقدامِ آزاد و رویدادهای کاربران داخل فایل نیست. عنوان‌ها به دستهٔ فنی تبدیل می‌شوند و نام‌های ثبت‌شده، کد ملی، تلفن، ایمیل، IP و مقادیر محرمانهٔ متداول هم ماسک می‌شوند.</p><p>هشدار یعنی در ۲۴ ساعت اخیر دست‌کم یک خطا یا کندی ثبت شده؛ به‌تنهایی به معنی ازکارافتادن یا خراب‌شدن سامانه نیست. جزئیات شمارش و بررسی‌ها پایین صفحه است.</p></div></section>';
 
     echo '<section class="card form-card"><h2>وضعیت کلی: <span class="status ' . $stateClass . '">' . e($summary['state_label']) . '</span></h2>';
     echo '<p class="muted">۲۴ ساعت گذشته: ' . $summary['errors_24h'] . ' خطا، ' . $summary['warnings_24h'] . ' هشدار، ' . $summary['slow_pages_24h'] . ' صفحهٔ کند، ' . $summary['slow_queries_24h'] . ' کوئری کند، ' . $summary['fatal_1h'] . ' خطای قاتل در یک ساعت گذشته.</p>';

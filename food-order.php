@@ -680,6 +680,123 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
     return $items;
 }
 
+/** فهرست رویدادهای غذای واقعاً چاپ‌شده و تحویل‌شده، به‌علاوه فیش‌های چاپ‌شدهٔ مهمان. */
+function food_order_printed_delivery_report(string $fromDate, string $toDate): array
+{
+    food_order_schema_ensure();
+    if (function_exists('food_ticket_events_ensure_delivery') && !food_ticket_events_ensure_delivery()) {
+        throw new RuntimeException('ستون‌های وضعیت تحویل غذا در پایگاه‌داده در دسترس نیستند.');
+    }
+    $from = food_order_iso_date($fromDate);
+    $to = food_order_iso_date($toDate);
+    if ($from === null || $to === null || $from > $to) {
+        throw new RuntimeException('بازهٔ تاریخ گزارش فیش‌های تحویل‌شده معتبر نیست.');
+    }
+    $span = (new DateTimeImmutable($from, new DateTimeZone('UTC')))->diff(new DateTimeImmutable($to, new DateTimeZone('UTC')))->days;
+    if ($span > 366) {
+        throw new RuntimeException('بازهٔ گزارش حداکثر یک سال است.');
+    }
+
+    $stmt = db()->prepare("SELECT e.id, e.user_id, e.punch_date AS food_date, e.punch_time,
+            COALESCE(NULLIF(e.personnel_code, ''), u.employee_number, '') AS employee_number,
+            COALESCE(NULLIF(e.national_code, ''), u.national_code, '') AS national_code,
+            COALESCE(NULLIF(e.full_name, ''), u.full_name, 'مهمان') AS full_name,
+            COALESCE(NULLIF(e.food_type, ''), IF(e.event_type = 'guest', 'مهمان', '')) AS food_name,
+            e.event_type, e.print_status, e.delivery_status, e.delivered_at, e.ticket_key,
+            CASE WHEN e.event_type = 'guest' THEN 0 ELSE COALESCE(i.sort_order, 0) END AS menu_no
+        FROM food_ticket_events e
+        LEFT JOIN users u ON u.id = e.user_id
+        LEFT JOIN food_orders o ON o.employee_id = e.user_id AND o.food_date = e.punch_date
+        LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id
+        WHERE e.punch_date BETWEEN ? AND ?
+          AND e.print_status = 'printed'
+          AND ((e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
+               OR e.event_type = 'guest')
+        ORDER BY menu_no, e.food_type, e.full_name, e.id");
+    $stmt->execute([$from, $to]);
+    $items = [];
+    $employeeIds = [];
+    $guestCount = 0;
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $item = [
+            'id' => (int) ($row['id'] ?? 0),
+            'user_id' => (int) ($row['user_id'] ?? 0),
+            'food_date' => (string) ($row['food_date'] ?? ''),
+            'punch_time' => (string) ($row['punch_time'] ?? ''),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'national_code' => food_order_digits($row['national_code'] ?? ''),
+            'full_name' => (string) ($row['full_name'] ?? ''),
+            'food_name' => (string) ($row['food_name'] ?? ''),
+            'event_type' => (string) ($row['event_type'] ?? ''),
+            'menu_no' => (int) ($row['menu_no'] ?? 0),
+            'delivered_at' => (string) ($row['delivered_at'] ?? ''),
+            'ticket_key' => (string) ($row['ticket_key'] ?? ''),
+        ];
+        if ($item['event_type'] === 'guest') {
+            $guestCount++;
+        } else {
+            $employeeIds[$item['user_id']] = true;
+        }
+        $items[] = $item;
+    }
+    return ['items' => $items, 'employee_count' => count($employeeIds), 'guest_count' => $guestCount];
+}
+
+/**
+ * خروجی XLSX گزارش فیش‌های تحویل‌شده؛ فقط ستون‌های مجاز گزارش پذیرفته می‌شوند.
+ */
+function food_order_export_printed_delivery_report(string $fromDate, string $toDate, array $user, array $requestedFields, string $view = 'list'): never
+{
+    food_order_require_permission($user, 'food.order_close');
+    $report = food_order_printed_delivery_report($fromDate, $toDate);
+    $fieldLabels = [
+        'row' => 'ردیف', 'national_code' => 'کد ملی', 'employee_number' => 'کد پرسنلی',
+        'full_name' => 'نام و نام خانوادگی', 'food_name' => 'نوع غذا', 'food_date' => 'تاریخ غذا',
+        'punch_time' => 'ساعت تردد', 'record_type' => 'نوع فیش', 'menu_no' => 'شماره منو',
+        'delivered_at' => 'زمان تحویل', 'ticket_key' => 'شناسه فیش',
+    ];
+    $fields = array_values(array_unique(array_filter($requestedFields, static fn ($key): bool => is_string($key) && isset($fieldLabels[$key]))));
+    if ($fields === []) {
+        $fields = ['row', 'full_name', 'employee_number', 'food_name', 'food_date', 'punch_time', 'record_type', 'menu_no'];
+    }
+    $items = $report['items'];
+    if ($view === 'menu') {
+        usort($items, static function (array $a, array $b): int {
+            return ((int) $a['menu_no'] <=> (int) $b['menu_no'])
+                ?: strcmp((string) $a['food_name'], (string) $b['food_name'])
+                ?: strcmp((string) $a['full_name'], (string) $b['full_name']);
+        });
+    }
+    $headers = array_map(static fn (string $field): string => $fieldLabels[$field], $fields);
+    $rows = [];
+    foreach ($items as $index => $item) {
+        $row = [];
+        foreach ($fields as $field) {
+            $value = match ($field) {
+                'row' => $index + 1,
+                'national_code' => food_order_digits($item['national_code'] ?? ''),
+                'employee_number' => (string) ($item['employee_number'] ?? ''),
+                'full_name', 'food_name', 'ticket_key' => (string) ($item[$field] ?? ''),
+                'food_date' => food_order_jalali_label((string) ($item['food_date'] ?? '')),
+                'punch_time' => substr((string) ($item['punch_time'] ?? ''), 0, 5),
+                'record_type' => $item['event_type'] === 'guest' ? 'مهمان' : 'پرسنل',
+                'menu_no' => (int) ($item['menu_no'] ?? 0) > 0 ? 'منوی ' . food_order_digits($item['menu_no']) : ($item['event_type'] === 'guest' ? 'مهمان' : 'بدون منو'),
+                'delivered_at' => (string) ($item['delivered_at'] ?? ''),
+                default => '',
+            };
+            $row[] = food_order_export_safe_value($value);
+        }
+        $rows[] = $row;
+    }
+    food_order_audit('food_ticket_printed_delivery_export', $user, 'food_ticket_events', 0, null, [
+        'from_date' => $fromDate, 'to_date' => $toDate, 'row_count' => count($rows), 'view' => $view,
+    ]);
+    $from = food_order_iso_date($fromDate) ?? $fromDate;
+    $to = food_order_iso_date($toDate) ?? $toDate;
+    $range = food_order_jalali_label($from) . ($from === $to ? '' : ' تا ' . food_order_jalali_label($to));
+    food_order_send_xlsx('فیش‌های-تحویل‌شده-' . str_replace('-', '', $from) . '-' . str_replace('-', '', $to) . '.xlsx', 'فیش‌های چاپ‌شده و تحویل‌شده', $headers, $rows, $range);
+}
+
 function food_order_ensure_orderable_day(PDO $pdo, string $isoDate, bool $allowClosed = false): array
 {
     $stmt = $pdo->prepare('SELECT id, order_status FROM food_calendar WHERE food_date = ? FOR UPDATE');
@@ -2281,6 +2398,23 @@ function food_order_menu_api_handle(string $route, array $user): never
                 throw new RuntimeException('تاریخ روز سفارش معتبر نیست.');
             }
             food_order_export_manager_orders($date, $user);
+        }
+        if ($method === 'GET' && $route === 'food-menu/printed-delivery') {
+            food_order_require_permission($user, 'food.order_close');
+            $from = (string) ($_GET['from'] ?? '');
+            $to = (string) ($_GET['to'] ?? '');
+            food_order_send_json(food_order_printed_delivery_report($from, $to));
+        }
+        if ($method === 'GET' && $route === 'food-menu/printed-delivery-export') {
+            food_order_require_permission($user, 'food.order_close');
+            $fields = array_values(array_filter(explode(',', (string) ($_GET['fields'] ?? '')), static fn (string $field): bool => $field !== ''));
+            food_order_export_printed_delivery_report(
+                (string) ($_GET['from'] ?? ''),
+                (string) ($_GET['to'] ?? ''),
+                $user,
+                $fields,
+                (string) ($_GET['view'] ?? 'list')
+            );
         }
         if ($method === 'GET' && $route === 'food-menu/statistics') {
             food_order_require_permission($user, 'food.order_close');

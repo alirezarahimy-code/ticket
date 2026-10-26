@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>گزارش فنی امن سامانه</title>
+  <style>
+    :root{color-scheme:light;--ink:#132b3a;--muted:#5c7180;--line:#d9e4e8;--teal:#087f78;--bg:#edf4f5}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#e7f4f2,#f4f7fa 60%,#e8eff4);color:var(--ink);font:16px/1.8 Tahoma,"Segoe UI",sans-serif}
+    main{width:min(100%,720px);padding:32px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px #173d4a18}
+    .eyebrow{color:var(--teal);font-size:13px;font-weight:700}h1{margin:4px 0 8px;font-size:26px}p{margin:8px 0 16px;color:var(--muted)}
+    .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:20px 0}.meta div{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#f8fbfc}.meta small{display:block;color:var(--muted)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:9px 18px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:var(--teal);color:#fff}.secondary{border:1px solid var(--line);color:var(--ink);background:#fff}
+    ol{padding-right:22px;color:var(--ink)}li{margin:7px 0}.note{margin-top:20px;padding:13px 15px;border-right:4px solid #e4a33a;border-radius:8px;background:#fff9ec;color:#6c552a;font-size:13px}.safe{margin-top:14px;padding:13px 15px;border-right:4px solid var(--teal);border-radius:8px;background:#effaf8;color:#285951;font-size:14px}code{direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;font:12px/1.7 ui-monospace,monospace}
+    @media(max-width:520px){main{padding:22px}h1{font-size:22px}.actions a{width:100%}}
+  </style>
+</head>
+<body>
+  <main>
+    <span class="eyebrow">اصلاح افزایشی · برای نصب روی نسخهٔ ۱.۶۲.۲۱</span>
+    <h1>خروجی پالایش‌شدهٔ لاگ سلامت سامانه — نسخهٔ ۱.۶۲.۲۲</h1>
+    <p>این اصلاح یک دکمهٔ دانلود امن به صفحهٔ «سلامت سامانه» اضافه می‌کند تا گزارش خطاها و هشدارها را برای بررسی فنی استخراج کنید.</p>
+    <section class="meta" aria-label="مشخصات بسته">
+      <div><small>فایل</small><strong>ticket-update-1.62.22-safe-system-health-export-20261026.zip</strong></div>
+      <div><small>نسخهٔ لازم</small><strong>۱.۶۲.۲۱</strong></div>
+      <div><small>مهاجرت دیتابیس</small><strong>ندارد</strong></div>
+    </section>
+    <div class="actions">
+      <a class="button primary" href="ticket-update-1.62.22-safe-system-health-export-20261026.zip" download>دانلود اصلاح لاگ امن</a>
+      <a class="button secondary" href="ticket-update-1.62.22-safe-system-health-export-20261026.zip.sha256" download>دانلود SHA-256</a>
+    </div>
+    <ol>
+      <li>در سامانه از بخش به‌روزرسانی، همین ZIP را نصب کنید؛ قبل از نصب نسخهٔ پشتیبان بگیرید.</li>
+      <li>به «سلامت سامانه» برگردید و «دانلود گزارش فنی پالایش‌شده برای پشتیبانی» را بزنید.</li>
+      <li>گزارش دانلودشده را برای بررسی خطای صفحهٔ شناسنامه‌های فنی ارسال کنید.</li>
+    </ol>
+    <div class="safe">فایل خروجی فقط خطاها و هشدارها را دارد؛ شناسهٔ کاربر، نشانی درخواست، یادداشت‌ها و متن خام خطا/کوئری را صادر نمی‌کند. عنوان رخداد به دستهٔ فنی تبدیل می‌شود و اطلاعات متداول مثل نام‌های ثبت‌شده، کد ملی، تلفن، ایمیل و IP پالایش می‌شوند.</div>
+    <div class="note">«هشدار» در سلامت سامانه یعنی در ۲۴ ساعت گذشته دست‌کم یک خطا یا کندی ثبت شده؛ به‌تنهایی نشانهٔ ازکارافتادن سامانه نیست. این اصلاح فقط خروجی امن لاگ را اضافه می‌کند و خودش صفحهٔ شناسنامه‌های فنی یا هشدارهای قبلی را رفع نمی‌کند. لطفاً پیش از ارسال فایل، آن را یک‌بار مرور کنید.</div>
+  </main>
+</body>
+</html>

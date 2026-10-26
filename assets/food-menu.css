@@ -61,6 +61,18 @@
 .fm-empty { color:var(--muted); text-align:center; padding:22px; }
 .fm-spinner { color:var(--muted); text-align:center; padding:20px; }
 .fm-manager-data-warning { margin-top:10px; }
+.fm-report-fields { display:flex; flex-wrap:wrap; align-items:center; gap:7px 12px; margin:10px 0; padding:9px 10px; border:1px solid var(--line); border-radius:9px; background:#fbfdfc; }
+.fm-report-fields > strong { color:var(--ink); font-size:12px; }
+.fm-report-field { display:inline-flex; align-items:center; gap:6px; color:var(--muted); font-size:11px; cursor:pointer; }
+.fm-report-field input { width:15px; height:15px; margin:0; accent-color:var(--teal); }
+.fm-delivery-counts { display:flex; flex-wrap:wrap; gap:9px; margin:8px 0; }
+.fm-delivery-counts > div { display:flex; align-items:center; gap:10px; padding:7px 12px; border:1px solid var(--line); border-radius:9px; background:#f8fbfa; color:var(--muted); font-size:12px; }
+.fm-delivery-counts strong { color:var(--navy); font-size:16px; }
+.fm-printed-delivery-report .fm-order-date { margin-bottom:0; }
+.fm-printed-delivery-report .fm-table-wrap { margin-top:8px; }
+.fm-order-report-table { width:100%; min-width:0; table-layout:auto; }
+.fm-order-report-table th,.fm-order-report-table td { white-space:normal; overflow-wrap:anywhere; }
+.fm-order-report-table .fm-order-block-start { border-right:2px solid #9aaeb2; }
 .fm-statistics { margin-top:16px; }
 .fm-statistics-form { display:grid; gap:12px; margin:0 0 14px; }
 .fm-statistics .fm-order-date { margin-bottom:0; }
@@ -118,6 +130,17 @@
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows { width:100% !important; min-width:0 !important; table-layout:fixed; }
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows th,
   body.fm-print-orders > .fm-print-host .fm-daily-orders .fm-rows td { font-size:8pt; padding:4px 3px; overflow-wrap:anywhere; }
+}
+@page fmDeliveredReport { size:landscape; margin:12mm; }
+@media print {
+  body.fm-print-delivered-report { margin:0 !important; }
+  body.fm-print-delivered-report > *:not(.fm-print-host) { display:none !important; }
+  body.fm-print-delivered-report > .fm-print-host { display:block !important; visibility:visible !important; width:100% !important; max-width:none !important; margin:0 !important; padding:0 !important; direction:rtl; }
+  body.fm-print-delivered-report > .fm-print-host * { visibility:visible !important; }
+  body.fm-print-delivered-report > .fm-print-host .fm-table-wrap { display:block !important; width:100% !important; min-width:0 !important; overflow:visible !important; }
+  body.fm-print-delivered-report > .fm-print-host .fm-order-report-table { width:100% !important; min-width:0 !important; table-layout:fixed !important; }
+  body.fm-print-delivered-report > .fm-print-host .fm-order-report-table th,
+  body.fm-print-delivered-report > .fm-print-host .fm-order-report-table td { font-size:8pt !important; padding:4px 3px !important; overflow-wrap:anywhere; }
 }
 
 /* تمام جدول‌ها و ردیف‌های فهرستی برنامه در پنل، وسط‌چین باشند. */
