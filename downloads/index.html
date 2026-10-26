@@ -7,7 +7,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>دانلود به‌روزرسانی Ticket 1.62.21 — تب جدید «تحویل‌شده‌ها» در برنامهٔ غذایی (هم‌شکل سفارش‌های روز) + همهٔ اصلاح‌های 1.62.x</title>
+  <title>دانلود به‌روزرسانی Ticket 1.62.20 — پایان بخش اصلی فاز ۲ بازسازی کدها (بدون تغییر رفتاری) + همهٔ اصلاح‌های 1.62.4 تا 1.62.12</title>
   <style>
     :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
     * { box-sizing: border-box; }
@@ -25,12 +25,11 @@
 </head>
 <body>
   <main>
-    <span class="tag">بستهٔ جاری · 1.62.21 · ۲۰۲۶/۱۰/۲۶</span>
+    <span class="tag">بستهٔ جاری · 1.62.20 · ۲۰۲۶/۱۰/۲۵</span>
     <h1>Ticket نسخهٔ ۱.۶۲.۱۹ — فاز ۲ بازسازی کدها، برش ۸ (بدون تغییر رفتاری)</h1>
     <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.12 است و (از fix1) اجتماع کامل فایل‌های <b>1.62.0 تا 1.62.13</b> را حمل می‌کند:</p>
     <ul>
-      <li><b>جدید (1.62.21):</b> تب تازهٔ «تحویل‌شده‌ها» در «برنامه غذایی» کنار «سفارش‌های روز» — دقیقاً هم‌شکل گزارش سفارش‌های روز (فیلدهای انتخابی با چک‌باکس، «فهرست یکجا» / «نمایش بر اساس منو»، تاریخ شمسی + امروز، استخراج Excel و چاپ) ولی فقط فیش‌های پرسنلیِ چاپ‌شدهٔ تحویل‌شده + فیش‌های مهمان چاپ‌شده؛ با سه شمارندهٔ خلاصه. نسخهٔ پنل غذا ۱.۳۷.۲۶ (بعد از نصب Ctrl+F5).</li>
-      <li><b>1.62.20:</b> برش ۹: اکشن‌های پشتیبان‌گیری/به‌روزرسانی به <code>actions/backup-actions.php</code> (بایت‌به‌بایت)؛ تفکیک <code>bootstrap.php</code> به ۸ ماژول <code>lib/</code> با حفظ عینی ترتیب؛ حذف ۸ تابع بدون استفاده با اثبات ماشینی. هیچ تغییر رفتاری ندارد. بسته اجتماع کامل 1.62.0 تا 1.62.20 (۶۶ فایل) است.</li>
+      <li><b>جدید (1.62.20):</b> برش ۹: اکشن‌های پشتیبان‌گیری/به‌روزرسانی به <code>actions/backup-actions.php</code> (بایت‌به‌بایت)؛ تفکیک <code>bootstrap.php</code> به ۸ ماژول <code>lib/</code> با حفظ عینی ترتیب؛ حذف ۸ تابع بدون استفاده با اثبات ماشینی. هیچ تغییر رفتاری ندارد. بسته اجتماع کامل 1.62.0 تا 1.62.20 (۶۶ فایل) است.</li>
       <li><b>1.62.19:</b> انتقال اکشن‌های «عملیات گروهی» و «ساختارهای پایه و کاربران» به فایل‌های موضوعی (بدون تغییر رفتاری).</li>
       <li><b>جدید (1.62.18):</b> ۹ اکشن در ۴ فایل موضوعی جدا شد — ورود/پروفایل/تم (<code>actions/account-actions.php</code>)، برند فیش غذا، آرشیو CD/DVD و اعلان‌ها — بدون هیچ تغییری (بایت‌به‌بایت، اثبات ماشینی داخل بسته). گروه پشتیبان‌گیری/به‌روزرسانی عمداً دست نخورد. بسته اجتماع کامل 1.62.0 تا 1.62.18 (۵۵ فایل) است.</li>
       <li><b>جدید (1.62.17):</b> ۴ اکشن «تصمیم‌های سرپرست و امتیازدهی» به <code>actions/supervisor-actions.php</code> و ۴ اکشن «تقویم و تعطیلات» به <code>actions/holiday-actions.php</code> بدون هیچ تغییری (بایت‌به‌بایت، اثبات ماشینی داخل بسته) منتقل شد. بسته اجتماع کامل 1.62.0 تا 1.62.17 (۵۱ فایل) است.</li>
@@ -58,9 +57,9 @@
       <li>صفحه‌های پنل مدیریت غذا وسط‌چین شدند؛ داشبورد دیگر به سمت راست نمی‌چسبد.</li>
       <li>ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب».</li>
     </ul>
-    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.21-food-delivered-report-20261026.zip" download="ticket-update-1.62.21-food-delivered-report-20261026.zip">⬇ دریافت بستهٔ 1.62.21</a>
-    <div class="file">ticket-update-1.62.21-food-delivered-report-20261026.zip · SHA-256: 89c528ec26fd7102a5a7f02a2065780032ce4cf750f3c9428ba4d65533abd565</div>
-    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.21-food-delivered-report-20261026.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.21-food-delivered-report-20261026.zip" download>دانلود مستقیم از همین صفحه</a></p>
+    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" download="ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip">⬇ دریافت بستهٔ 1.62.20</a>
+    <div class="file">ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip · SHA-256: c169b7c188c6cc39396656b1417a8267d84aba7c356a6d89a2410387421625b2</div>
+    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
     <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-19-bulk-user-structure-actions-split/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.13">انتشار GitHub v1.62.13</a></p>
     <div class="hint">این بسته رفتار سامانه را تغییر نمی‌دهد (فاز ۱ فقط کامنت و سند است). پس از نصب کافی است یک بار سامانه را باز کنید و کارکرد عادی را ببینید. اگر واحد مستقل (نمایندگی) نسخهٔ ۱.۶۲.۱۰ را هنوز امتحان نکرده‌اید: صفحهٔ «سازمان» را با Ctrl+F5 باز کنید؛ مدیر چارت دو کادر خط‌چین در دو سمت کادر مدیرعامل می‌بیند. در صورت بروز هر مشکل، بازگشت کامل: tag <code>snapshot-1.62.12-20261025</code> (یا اسنپشات قدیمی‌تر snapshot-pre-refactor-20261025). آزمون پیشنهادی روی سرور تست: چرخهٔ کامل یک درخواست (ثبت با پیوست، پاسخ، به‌عهده‌گرفتن، بازگشایی، لغو)، عملیات اموال/اسکن دامین، و عملیات صفحهٔ «سازمان».</div>
   </main>

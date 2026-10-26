@@ -130,7 +130,7 @@ def test_dead_functions_are_fully_removed():
 
 
 def test_version_manifest_and_package():
-    # از ۱.۶۲.۲۱ نسخهٔ جاری جلوتر است؛ پین VERSION فقط در تست نسخهٔ جاری است.
+    assert read("VERSION").strip() == "1.62.20"
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.20"
     assert manifest["requires_version"] == "1.61.9"
@@ -155,12 +155,12 @@ def test_version_manifest_and_package():
             assert pattern.match(name), name
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in nameset and f"files/migrations/{mig}" in nameset, mig
-    assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.20"  # داخل بستهٔ خودش
+    assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.20"
     for rel in ["index.php", "bootstrap.php", "actions/backup-actions.php"] + LIB_FILES:
         assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    # پین SHA در صفحهٔ دانلود از ۱.۶۲.۲۱ حذف شد (صفحه فقط بستهٔ جاری را نشان می‌دهد).
+    assert digest in read("downloads/index.html")
 
 
 def test_panel_asset_refs_are_all_packaged():
@@ -174,9 +174,7 @@ def test_panel_asset_refs_are_all_packaged():
 
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
-    # از ۱.۶۲.۲۱ صفحه فقط بستهٔ جاری را نشان می‌دهد.
-    assert "ticket-update-1.62.21-food-delivered-report-20261026.zip" in page
-    assert PACKAGE_NAME not in page
+    assert PACKAGE_NAME in page
     assert "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip" not in page
     assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" not in page
     assert "lib/" in page and "actions/backup-actions.php" in page

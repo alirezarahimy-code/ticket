@@ -107,7 +107,7 @@ def test_panel_asset_refs_are_all_packaged():
 def test_download_page_lists_only_latest_package():
     page = read("downloads/index.html")
     # از ۱.۶۲.۱۹ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.21-food-delivered-report-20261026.zip" in page
+    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
     assert PACKAGE_NAME not in page
     assert "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip" not in page
     assert "ticket-update-1.62.16-role-settings-actions-split-20261025.zip" not in page
