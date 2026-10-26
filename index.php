@@ -5555,7 +5555,7 @@ if ($page === 'logs') {
     $levelFilter = valid_choice((string) ($_GET['level'] ?? ''), ['', 'error', 'warning', 'info', 'debug'], '');
     $logRows = system_logs_recent(200, $levelFilter);
     render_header('گزارش خطا', $logUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">System Logs</span><h1>گزارش خطا و رویدادهای سامانه</h1><p>خطاهای برنامه، استخراج شناسنامه و رویدادهای مهم اینجا ثبت می‌شوند. فایل خام: storage/logs/app.log</p></div><div class="actions"><a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=info">اطلاعات</a></div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">System Logs</span><h1>گزارش خطا و رویدادهای سامانه</h1><p>خطاهای برنامه، استخراج شناسنامه و رویدادهای مهم اینجا ثبت می‌شوند. فایل خام: storage/logs/app.log</p></div><div class="actions">' . (user_can($logUser, 'system.health') ? '<a class="button secondary" href="index.php?page=system-health&amp;export=safe">دانلود گزارش فنی پالایش‌شده برای پشتیبانی</a>' : '') . '<a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=info">اطلاعات</a></div></section>';
     echo '<section class="card ticket-table audit-table"><div class="table-head"><span>زمان</span><span>سطح</span><span>بخش</span><span>پیام</span><span>آدرس</span></div>';
     if ($logRows) {
         foreach ($logRows as $logRow) {
