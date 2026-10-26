@@ -696,6 +696,82 @@ function food_order_manager_orders(string $date, string $mealType = 'lunch'): ar
     return $items;
 }
 
+/**
+ * گزارش «تحویل‌شده‌ها + مهمان» (۱.۶۲.۲۱): فقط فیش‌های پرسنلیِ چاپ‌شده که غذایشان تحویل داده شده
+ * (delivery_status = delivered) + فیش‌های مهمانِ چاپ‌شدهٔ همان روز (بدون شرط تحویل).
+ * شمارهٔ منو با تطبیق نام غذا با برنامهٔ همان روز پیدا می‌شود تا «نمایش بر اساس منو» مثل سفارش‌های روز کار کند.
+ */
+function food_order_delivered_report(string $date): array
+{
+    $iso = food_order_iso_date($date);
+    if ($iso === null) {
+        throw new RuntimeException('تاریخ روز گزارش معتبر نیست.');
+    }
+    if (!db_table_exists('food_ticket_events')) {
+        return ['items' => [], 'summary' => ['people' => 0, 'personnel' => 0, 'guests' => 0]];
+    }
+    $menuMap = [];
+    try {
+        $m = db()->prepare("SELECT c.food_name, i.sort_order FROM food_calendar cal
+            JOIN food_calendar_items i ON i.calendar_id = cal.id
+            JOIN food_catalog c ON c.id = i.food_id
+            WHERE cal.food_date = ?
+            ORDER BY cal.meal_type = 'lunch' DESC, i.sort_order");
+        $m->execute([$iso]);
+        foreach ($m->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $name = trim((string) $row['food_name']);
+            if ($name !== '' && !isset($menuMap[$name])) {
+                $menuMap[$name] = (int) $row['sort_order'];
+            }
+        }
+    } catch (Throwable $menuError) {
+        $menuMap = []; // بدون نگاشت منو هم گزارش کار می‌کند؛ همه «بدون منو» می‌شوند.
+    }
+    $stmt = db()->prepare("SELECT id, punch_time, personnel_code, national_code, full_name, food_type, event_type, delivered_at
+        FROM food_ticket_events
+        WHERE punch_date = ?
+          AND print_status = 'printed'
+          AND ((event_type = 'guest') OR (event_type <> 'guest' AND delivery_status = 'delivered'))
+        ORDER BY (event_type = 'guest'), full_name, id");
+    $stmt->execute([$iso]);
+    $items = [];
+    $people = [];
+    $personnel = 0;
+    $guests = 0;
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $isGuest = (string) $row['event_type'] === 'guest';
+        $food = trim((string) ($row['food_type'] ?? ''));
+        $deliveredAt = (string) ($row['delivered_at'] ?? '');
+        if ($isGuest) {
+            $guests++;
+        } else {
+            $personnel++;
+            $personKey = trim((string) ($row['personnel_code'] ?? ''));
+            if ($personKey === '') {
+                $personKey = trim((string) ($row['national_code'] ?? ''));
+            }
+            if ($personKey === '') {
+                $personKey = 'name:' . trim((string) ($row['full_name'] ?? ''));
+            }
+            $people[$personKey] = true;
+        }
+        $fullName = trim((string) ($row['full_name'] ?? ''));
+        $items[] = [
+            'id' => (int) $row['id'],
+            'menu_no' => $menuMap[$food] ?? 0,
+            'national_code' => food_order_digits($row['national_code'] ?? ''),
+            'employee_number' => (string) ($row['personnel_code'] ?? ''),
+            'full_name' => $fullName !== '' ? $fullName : ($isGuest ? 'مهمان' : '—'),
+            'food_name' => $food,
+            'food_date' => $iso,
+            'print_time' => substr((string) ($row['punch_time'] ?? ''), 0, 8),
+            'deliver_time' => $deliveredAt !== '' ? substr($deliveredAt, 11, 8) : '',
+            'record_type' => $isGuest ? 'guest' : 'personnel',
+        ];
+    }
+    return ['items' => $items, 'summary' => ['people' => count($people), 'personnel' => $personnel, 'guests' => $guests]];
+}
+
 /** سفارش‌های فعال/لغوشدهٔ اعضای گروه در روز انتخابی (با جابه‌جایی روزانهٔ گروه لحاظ‌شده). */
 function food_order_group_orders(int $groupId, string $date, string $mealType = 'lunch'): array
 {
@@ -3008,6 +3084,16 @@ function food_order_menu_api_handle(string $route, array $user): never
                 throw new RuntimeException('تاریخ روز سفارش معتبر نیست.');
             }
             food_order_send_json(['date' => $date, 'meal_type' => food_order_meal_type($_GET['meal_type'] ?? 'lunch'), 'items' => food_order_manager_orders($date, food_order_meal_type($_GET['meal_type'] ?? 'lunch'))]);
+        }
+        if ($method === 'GET' && $route === 'food-menu/delivered') {
+            // گزارش «تحویل‌شده‌ها + مهمان» — همان دسترسی گزارش سفارش‌های روز (۱.۶۲.۲۱)
+            food_order_require_permission($user, 'food.order_close');
+            $deliveredDate = food_order_iso_date((string) ($_GET['date'] ?? ''));
+            if ($deliveredDate === null) {
+                throw new RuntimeException('تاریخ روز گزارش معتبر نیست.');
+            }
+            $deliveredReport = food_order_delivered_report($deliveredDate);
+            food_order_send_json(['date' => $deliveredDate, 'items' => $deliveredReport['items'], 'summary' => $deliveredReport['summary']]);
         }
         if ($method === 'GET' && $route === 'food-menu/employee-search') {
             food_order_require_permission($user, 'food.order_close');
