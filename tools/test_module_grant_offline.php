@@ -66,7 +66,7 @@ foreach (['food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'gove
     check("پیش‌فرض user بدون {$removed}", !in_array($removed, $userDefaults, true));
 }
 check('پیش‌فرض user شامل سفارش غذای خود است', in_array('foodorder.self', $userDefaults, true));
-check('پیش‌فرض user شامل ثبت تیکت است', in_array('ticket.create', $userDefaults, true));
+check('پیش‌فرض user شامل ثبت درخواست است', in_array('ticket.create', $userDefaults, true));
 
 // چاپ فیش فقط برای ادمین اصلی، مدیر پشتیبانی (محدود) و بازرس (داشبورد و گروه‌ها).
 $allDefaults = permission_defaults();

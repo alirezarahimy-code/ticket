@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — food management UI asset hotfix (R32)",
+  "date": "2026-10-24",
+  "migrations": [],
+  "notes": "Hotfix for R31 installations: the R31 archive included the food web entry page and PHP handler but omitted food-ticket-web/assets, even though the page referenced updated/manual-attendance and group/menu scripts. This package supplies the matching food UI scripts/styles, bumps cache keys, and includes the matching food handler. No non-food modules or database migrations."
+}

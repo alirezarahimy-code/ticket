@@ -7,7 +7,7 @@
  *   الف) «شناسنامه‌های فنی سیستم»: جست‌وجوی زنده بدون دکمهٔ «اعمال فیلتر»
  *        — با هر نویسه‌ای که تایپ شود فهرست همان لحظه فیلتر می‌شود، شمارنده به‌روز
  *          می‌شود، «انتخاب همه» فقط ردیف‌های دیده‌شده را انتخاب می‌کند.
- *   ب) فرم تیکت: کمبوی زندهٔ «سیستم مرتبط»
+ *   ب) فرم درخواست: کمبوی زندهٔ «سیستم مرتبط»
  *        — با تایپ، فهرست نتایج زیر فیلد باز می‌شود، با ↑/↓ و Enter یا کلیک یکی
  *          انتخاب می‌شود و مقدار select مخفی همان انتخاب را به فرم می‌دهد.
  *
@@ -306,7 +306,13 @@ check('ب-۲۶: در حوزهٔ پشتیبانی انتخاب سیستم پاک 
   hiddenSelect.value + ' / ' + search.getAttribute('aria-required'));
 groupRadios[0].checked = true;
 groupRadios[0].dispatchEvent(new ticketWindow.Event('change', { bubbles: true }));
-check('ب-۲۷: بازگشت به حوزهٔ IT فیلد را دوباره پیدا و الزامی می‌کند',
+serviceSelector.value = '';
+serviceSelector.dispatchEvent(new ticketWindow.Event('change', { bubbles: true }));
+check('ب-۲۷: بازگشت به حوزهٔ IT فیلد را نشان می‌دهد ولی تا انتخاب خدمت الزام ایجاد نمی‌کند',
+  assetLabel.hidden === false && search.getAttribute('aria-required') === 'false');
+serviceSelector.value = '6';
+serviceSelector.dispatchEvent(new ticketWindow.Event('change', { bubbles: true }));
+check('ب-۲۸: پس از انتخاب خدمت IT، فیلد سیستم دوباره الزامی می‌شود',
   assetLabel.hidden === false && search.getAttribute('aria-required') === 'true');
 
 console.log('\n' + (fail === 0

@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — چیدمان افقی آمار غذا و جداکننده‌های گزارش R24",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R24 renders each day's food statistics as horizontal name/count blocks, keeps two day reports side-by-side per row for multi-day ranges in screen and print, and restores vertical dividers only at repeated content-block boundaries. Print orientation remains controlled by the printer dialog. No production data changed."
+}

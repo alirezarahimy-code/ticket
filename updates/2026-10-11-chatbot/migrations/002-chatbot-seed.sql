@@ -35,3 +35,7 @@ WHERE NOT EXISTS (SELECT 1 FROM chatbot_faq WHERE question = 'بخشی را نم
 INSERT INTO chatbot_faq (question, answer, keywords, is_active, created_by, created_at, updated_at)
 SELECT 'راهنمای کامل سامانه کجاست؟', 'کامل‌ترین راهنما در بخش «راهنما» در منوی سامانه است. هر بخش مراحل خودش را توضیح داده است.', 'راهنما, کمک, آموزش, راهنمای سامانه, چطور کار کنم, مراحل', 1, NULL, NOW(), NOW() FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM chatbot_faq WHERE question = 'راهنمای کامل سامانه کجاست؟');
+
+INSERT INTO chatbot_faq (question, answer, keywords, is_active, created_by, created_at, updated_at)
+SELECT 'چطور تیکتم را لغو کنم؟', 'پیش از ارجاع، ثبت‌کنندهٔ مجاز می‌تواند تیکت را با ذکر دلیل لغو کند. پس از ارجاع، درخواست لغو برای تصمیم مسئول همان حوزه ثبت می‌شود و رسیدگی تا تصمیم او ادامه دارد. لغو، حذف فیزیکی نیست و تاریخچه حفظ می‌شود.', 'لغو تیکت, درخواست لغو, کنسل تیکت, حذف تیکت, منصرف شدم, لغو درخواست', 1, NULL, NOW(), NOW() FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM chatbot_faq WHERE question = 'چطور تیکتم را لغو کنم؟');

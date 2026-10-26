@@ -14,6 +14,8 @@
     absenceError: '',
     absence: null,   // {group_id, date, locked, editable, can_override, members:[], summary:{}}
     absenceLoading: false,
+    membersPopup: 0,
+    canCancelVisit: window.FOOD_TICKET_CAN_CANCEL_VISIT === true,
   };
 
   const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
@@ -30,7 +32,12 @@
   function draw() {
     const el = box();
     if (!el) return;
+    const previousDialog = document.getElementById('fg-members-overlay');
+    if (previousDialog) previousDialog.remove();
     el.innerHTML = body();
+    // مودال را به body منتقل می‌کنیم تا از stacking context و هدر sticky صفحه بیرون بیاید.
+    const membersDialog = el.querySelector('#fg-members-overlay');
+    if (membersDialog) document.body.appendChild(membersDialog);
     // تقویم شمسی مشترک سامانه (assets/jalali-calendar.js) روی فیلد تاریخ غیبت فعال می‌شود
     try {
       if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') {
@@ -39,8 +46,11 @@
     } catch (e) { /* تقویم اختیاری است؛ ورودی دستی «۱۴۰۵/۰۷/۱۴» هم کار می‌کند */ }
   }
 
-  function load() {
-    if (S.loading) return;
+  function load(after) {
+    if (S.loading) {
+      if (typeof after === 'function') S._afterLoad = after;
+      return;
+    }
     S.loading = true;
     callApi('/api/food-groups').then((x) => {
       apply(x);
@@ -48,20 +58,38 @@
       S.error = '';
     }).catch((e) => {
       S.error = (e && e.message) || 'خطا در دریافت گروه‌ها';
-    }).then(() => { S.loading = false; draw(); });
+    }).then(() => {
+      S.loading = false;
+      if (S.editing && document.getElementById('fg-form')) {
+        try {
+          const keep = collect();
+          S.editing = Object.assign({}, S.editing, keep);
+        } catch (e) { /* فرم هنوز کامل نیست */ }
+      }
+      draw();
+      const next = S._afterLoad || after;
+      S._afterLoad = null;
+      if (typeof next === 'function') next();
+    });
   }
 
   function apply(x) {
     S.groups = (x && x.groups) || [];
     S.free = (x && x.free_users) || [];
     S.runs = (x && x.runs) || [];
+    if (x && typeof x.can_cancel_visit !== 'undefined') {
+      S.canCancelVisit = !!x.can_cancel_visit;
+    } else if (typeof window.FOOD_TICKET_CAN_CANCEL_VISIT !== 'undefined') {
+      S.canCancelVisit = window.FOOD_TICKET_CAN_CANCEL_VISIT === true;
+    }
   }
+
 
   function userLabel(u) {
     const badges = (u.active ? '' : ' <span class="status bad">غیرفعال</span>')
       + (u.nat ? '' : ' <span class="status warn" title="بدون کد ملی، سفارش تطبیق داده نمی‌شود">بدون کد ملی</span>');
-    return '<span title="' + esc((u.name || '—') + ' (' + (u.pc || '') + ')') + '" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">'
-      + esc(u.name || '—') + (u.pc ? ' <small style="color:var(--muted)">(' + esc(u.pc) + ')</small>' : '') + badges + '</span>';
+    return '<span class="fg-person-name" title="' + esc((u.name || '—') + ' (' + (u.pc || '') + ')') + '">'
+      + esc(u.name || '—') + (u.pc ? ' <small>(' + esc(u.pc) + ')</small>' : '') + badges + '</span>';
   }
 
   function form() {
@@ -74,9 +102,15 @@
     const pool = [...mine, ...S.free].filter((u, i, a) => a.findIndex((v) => v.id === u.id) === i)
       .filter((u) => !q || (u.name + ' ' + u.pc + ' ' + u.nat).indexOf(q) >= 0);
     const rows = pool.map((u) => '<label class="fg-person">'
-      + '<span class="fg-person-name">' + userLabel(u) + '</span><input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '></label>').join('')
+      + '<input type="checkbox" data-fg-member value="' + u.id + '"' + (sel.has(u.id) ? ' checked' : '') + '>' + userLabel(u) + '</label>').join('')
       || '<p class="muted">کاربر آزادی برای انتخاب وجود ندارد.</p>';
+    const visitors = ((S.groups.find((x) => x.id === g.id) || {}).today_visitors) || [];
+    const visitorsBlock = visitors.length
+      ? '<div class="form-section-head" style="margin-top:14px"><h2>مهمانان امروز</h2><span class="muted">فقط امروز در چاپ فیش این گروه هستند؛ عضو دائم نیستند</span></div>'
+        + '<div class="fg-people-box">' + visitors.map((u) => '<div class="fg-person">' + userLabel(u) + '</div>').join('') + '</div>'
+      : '';
     return '<div class="card form-card" id="fg-form"><div class="form-section-head"><h2>' + (g.id ? 'ویرایش گروه' : 'گروه جدید') + '</h2></div>'
+      + '<div id="fg-deadline-box" class="fg-deadline-box"><label class="field">مهلت تغییر سلف امروز (ساعت ۲۴ ساعته، مثلاً 09:30)<input id="fg-visit-until" type="text" inputmode="numeric" dir="ltr" placeholder="خالی = بدون محدودیت" value="' + esc((g.visit_change_until || '').slice(0, 5)) + '" maxlength="5" autocomplete="off"></label><p>این مهلت برای اعلام تغییر سلف امروز به همین گروه است؛ فقط افراد خارج از عضویت دائمی می‌توانند تا این ساعت اعلام کنند. خالی یعنی بدون محدودیت ساعت. بعد از چاپ فیش گروه، اعلام قفل می‌شود.</p></div>'
       + '<div class="form-grid">'
       + '<label class="field">نام گروه<input id="fg-title" value="' + esc(g.title) + '" maxlength="190"></label>'
       + '<label class="field">L_UID نمایندهٔ گروه (شناسهٔ اصلی)<input id="fg-uid" value="' + esc(g.l_uid || '') + '" maxlength="80" dir="ltr" placeholder="مثلاً 0100"></label>'
@@ -87,18 +121,21 @@
       + '<div class="form-section-head" style="margin-top:14px"><h2>اعضای گروه</h2><span class="muted">فقط کاربران آزاد؛ هر کاربر فقط در یک گروه</span></div>'
       + '<input id="fg-filter" placeholder="جست‌وجو (نام، کد پرسنلی، کد ملی)" value="' + esc(S.filter) + '" style="margin:6px 0;width:100%">'
       + '<div id="fg-members" class="fg-people-box">' + rows + '</div>'
+      + visitorsBlock
       + '<div class="actions" style="margin-top:12px"><button class="btn primary" data-fg="save">ذخیره گروه</button><button class="btn ghost" data-fg="cancel">انصراف</button></div></div>';
   }
 
   function list() {
     if (!S.groups.length) return '<p class="muted">هنوز گروهی تعریف نشده است.</p>';
-    return '<div class="table-wrap"><table class="table"><thead><tr><th>نام گروه</th><th>L_UID نماینده</th><th>اعضا</th><th>غایب امروز</th><th>وضعیت</th><th></th></tr></thead><tbody>'
+    return '<div class="table-wrap"><table class="table"><thead><tr><th>نام گروه</th><th>L_UID نماینده</th><th>مهلت تغییر سلف</th><th>اعضا</th><th>غایب امروز</th><th>وضعیت</th><th></th></tr></thead><tbody>'
       + S.groups.map((g) => '<tr><td>' + esc(g.title) + (g.description ? '<small style="display:block;color:var(--muted)">' + esc(g.description) + '</small>' : '') + '</td>'
         + '<td dir="ltr">' + (g.l_uid ? esc(g.l_uid) : '<span class="status bad">تعریف نشده</span>') + '</td>'
-        + '<td>' + g.members.length + ' نفر</td>'
+        + '<td>' + (g.visit_change_until ? ('تا ' + esc(g.visit_change_until)) : 'بدون محدودیت') + '</td>'
+        + '<td>' + g.members.length + ' نفر' + ((g.today_visitors && g.today_visitors.length) ? ' <small style="color:var(--muted)">+ ' + g.today_visitors.length + ' مهمان امروز</small>' : '') + '</td>'
         + '<td>' + ((g.today && g.today.absent) || 0) + ' نفر' + (g.today && g.today.locked ? ' <span class="status warn" title="لیست غیبت امروز قفل شده است">🔒</span>' : '') + '</td>'
         + '<td><span class="status ' + (g.active ? 'ok' : 'bad') + '">' + (g.active ? 'فعال' : 'غیرفعال') + '</span></td>'
         + '<td><button class="btn primary" data-fg="absence" data-id="' + g.id + '">غیبت امروز</button> '
+        + '<button class="btn ghost" data-fg="members" data-id="' + g.id + '">لیست اعضاء</button> '
         + '<button class="btn ghost" data-fg="edit" data-id="' + g.id + '">ویرایش</button> '
         + '<button class="btn orange" data-fg="delete" data-id="' + g.id + '">حذف</button></td></tr>').join('')
       + '</tbody></table></div>';
@@ -164,9 +201,11 @@
     const rows = (a.members || []).map((m) => {
       const disabled = (!editable || locked && !a.can_override) ? ' disabled' : '';
       return '<label class="fg-person">'
-        + '<span title="' + esc(m.name) + ' (' + esc(m.pc) + ')" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block;">' + esc(m.name) + ' <small style="color:var(--muted)">(' + esc(m.pc) + ')</small>'
+        + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>')
+        + '<span class="fg-person-name" title="' + esc(m.name) + ' (' + esc(m.pc) + ')">' + esc(m.name) + ' <small>(' + esc(m.pc) + ')</small>'
         + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
-        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span><input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '></label>';
+        + (m.visitor ? (m.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(m.home_group_title || 'گروه دائمی') + '»</span>' : ' <span class="status ok">مهمان امروز</span>') : '')
+        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span></label>';
     }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
       + '<h2>غیبت روزانه — ' + esc(a.group ? a.group.title : '') + (dateJalali ? ' <small style="color:var(--muted)">(' + esc(dateJalali) + ')</small>' : '') + '</h2>'
@@ -211,12 +250,47 @@
       + '</tbody></table></div></div>';
   }
 
+  function personLine(u) {
+    return esc(u.name || '—') + (u.pc ? ' <small>(' + esc(u.pc) + ')</small>' : '')
+      + (u.active ? '' : ' <span class="status bad">غیرفعال</span>');
+  }
+
+  function membersPopup() {
+    const gid = Number(S.membersPopup || 0);
+    if (!gid) return '';
+    const g = S.groups.find((x) => x.id === gid);
+    if (!g) return '';
+    const perm = g.members || [];
+    const guests = g.today_visitors || [];
+    const block = (title, rows, empty) => '<h3 style="margin:12px 0 6px;font-size:15px">' + title + '</h3>'
+      + (rows.length
+        ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + rows.map((u) => '<li>' + personLine(u) + '</li>').join('') + '</ol>'
+        : '<p class="muted">' + empty + '</p>');
+    const guestItems = guests.length
+      ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + guests.map((u) => {
+          const btn = S.canCancelVisit
+            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">' + (u.temporary_transfer ? 'بازگشت به گروه دائمی' : 'لغو تغییر سلف') + '</button>'
+            : '';
+          const transfer = u.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(u.home_group_title || 'گروه دائمی') + '»؛ عضویت دائمی محفوظ است</span>' : ' <span class="status ok">مهمان/تغییر سلف روزانه</span>';
+          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + transfer + btn + '</li>';
+        }).join('') + '</ol>'
+      : '<p class="muted">برای امروز مهمان یا عضو موقتی ثبت نشده است.</p>';
+    return '<div id="fg-members-overlay" class="fg-members-overlay">'
+      + '<div class="card fg-members-dialog" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" tabindex="-1">'
+      + '<div class="form-section-head"><h2 id="fg-members-title">لیست اعضای «' + esc(g.title) + '»</h2>'
+      + '<button type="button" class="btn ghost" data-fg="members-close">بستن</button></div>'
+      + block('اعضای دائم گروه', perm, 'عضو دائمی ثبت نشده است.')
+      + '<h3 style="margin:12px 0 6px;font-size:15px">اعضای مهمان یا موقت امروز</h3>' + guestItems
+      + '</div></div>';
+  }
+
   function body() {
     if (S.error) return '<div class="card"><p style="color:var(--red)">' + esc(S.error) + '</p><button class="btn ghost" data-fg="reload">تلاش دوباره</button></div>';
     if (!S.loaded) return '<div class="card"><p class="muted">در حال بارگذاری…</p></div>';
     return (S.editing ? form() : '<div class="card"><div class="form-section-head"><h2>گروه‌های تعریف‌شده</h2><button class="btn primary" data-fg="new">＋ گروه جدید</button></div>' + list() + '</div>')
       + absencePanel()
-      + (S.editing ? '' : runs());
+      + (S.editing ? '' : runs())
+      + membersPopup();
   }
 
   function html() {
@@ -224,7 +298,7 @@
       + '<div id="food-groups-root">' + body() + '</div></section>';
     // کاربر فقط «مشاهده» دارد: ظاهر فرم‌ها غیرفعال می‌شود (سرور هم POST را با food.groups می‌بندد).
     if (window.FOOD_TICKET_CAN_GROUPS_EDIT === false) {
-      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}</style>' + out.slice('<section>'.length);
+      return '<section class="fg-readonly"><style>.fg-readonly button,.fg-readonly input:not([type=search]),.fg-readonly select,.fg-readonly textarea{pointer-events:none;opacity:.6}.fg-readonly button[data-fg="members"],.fg-readonly button[data-fg="members-close"],.fg-readonly button[data-fg="visit-cancel"]{pointer-events:auto;opacity:1}</style>' + out.slice('<section>'.length);
     }
     return out;
   }
@@ -235,6 +309,7 @@
       title: (document.getElementById('fg-title') || {}).value || '',
       l_uid: (document.getElementById('fg-uid') || {}).value || '',
       description: (document.getElementById('fg-desc') || {}).value || '',
+      visit_change_until: (document.getElementById('fg-visit-until') || {}).value || '',
       active: ((document.getElementById('fg-active') || {}).value || '1') === '1',
       members: Array.from(document.querySelectorAll('[data-fg-member]:checked')).map((c) => Number(c.value)),
     };
@@ -293,17 +368,55 @@
     }, 0);
   }, true);
 
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('fg-members-overlay')) {
+      S.membersPopup = 0;
+      draw();
+    }
+  });
+
   document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'fg-members-overlay') {
+      S.membersPopup = 0;
+      draw();
+      return;
+    }
     const b = e.target.closest('[data-fg]');
     if (!b) return;
     e.preventDefault();
     const act = b.dataset.fg;
     const id = Number(b.dataset.id || 0);
+    if (act === 'members') { S.membersPopup = id; draw(); return; }
+    if (act === 'members-close') { S.membersPopup = 0; draw(); return; }
+    if (act === 'visit-cancel') {
+      const uid = Number(b.dataset.user || 0);
+      if (!uid) return;
+      const guest = (S.groups.find((x) => x.id === S.membersPopup) || { today_visitors: [] }).today_visitors.find((u) => Number(u.id) === uid);
+      const confirmation = guest && guest.temporary_transfer
+        ? 'انتقال موقت «' + guest.name + '» لغو و او به عضویت دائمی خود برگردانده شود؟'
+        : 'اعلام تغییر سلف «' + ((guest && guest.name) || 'این نفر') + '» برای امروز لغو شود؟';
+      if (!window.confirm(confirmation)) return;
+      callApi('/api/food-visit-cancel', { method: 'POST', body: JSON.stringify({ user_id: uid }) })
+        .then((x) => { apply(x); say((x && x.message) || 'اعلام لغو شد.'); draw(); })
+        .catch((err) => say(err.message || 'لغو اعلام انجام نشد.'));
+      return;
+    }
     if (act === 'reload') { S.error = ''; S.loaded = false; draw(); load(); return; }
-    if (act === 'new') { S.filter = ''; S.editing = { id: 0, title: '', l_uid: '', description: '', active: true, members: [] }; draw(); return; }
+    if (act === 'new') {
+      S.filter = '';
+      S.editing = { id: 0, title: '', l_uid: '', description: '', visit_change_until: '', active: true, members: [] };
+      draw();
+      load(function () {
+        if (S.editing && !S.editing.id) draw();
+      });
+      return;
+    }
     if (act === 'edit') {
-      const g = S.groups.find((x) => x.id === id);
-      if (g) { S.filter = ''; S.editing = { id: g.id, title: g.title, l_uid: g.l_uid, description: g.description, active: g.active, members: g.members.map((m) => m.id) }; S.absence = null; draw(); }
+      const openEdit = function () {
+        const g = S.groups.find((x) => x.id === id);
+        if (g) { S.filter = ''; S.editing = { id: g.id, title: g.title, l_uid: g.l_uid, description: g.description, visit_change_until: g.visit_change_until || '', active: g.active, members: g.members.map((m) => m.id) }; S.absence = null; draw(); }
+      };
+      load(openEdit);
       return;
     }
     if (act === 'cancel') { S.editing = null; draw(); return; }
@@ -387,6 +500,12 @@
     mount() {
       if (!window.FOOD_TICKET_API_BASE) return; // فقط در پنل یکپارچهٔ PHP
       if (!S.loaded && !S.loading) load();
+    },
+    reload() {
+      if (!window.FOOD_TICKET_API_BASE) return;
+      S.loaded = false;
+      S.error = '';
+      load();
     },
   };
 })();

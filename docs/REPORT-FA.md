@@ -1,111 +1,43 @@
-# گزارش خروجی: حذف وابستگی سفارش غذا به اکسس
+# گزارش نسخهٔ ۱.۶۲.۲۰ — پایان بخش اصلی فاز ۲ بازسازی (برش ۹ + تفکیک bootstrap + حذف توابع مرده)
 
-- شاخه: `arena-updates`
-- آخرین commit: `8c0b448`
-- مبنای مقایسه: `fee7655` (Initial commit)
-- فایل‌های این خروجی:
-  - `ticket-arena-updates-8c0b448.zip`: کل کد شاخه (بدون `.git`)
-  - `CHANGES-from-original.patch`: کل تغییرات نسبت به `fee7655` (قابل اعمال با `git apply`)
-  - `REPORT-FA.md`: همین گزارش
+تاریخ: ۱۴۰۵/۰۸/۰۳ (2026-10-25) · اسنپ‌شات بازگشت: `snapshot-1.62.19-20261025` (= v1.62.19، کامیت `2016695`)
 
-## ۱. هدف
+## خلاصه
+این نسخه **هیچ تغییر رفتاری ندارد** و سه کار باقی‌ماندهٔ ساختاری را یکجا تمام می‌کند:
 
-- سفارش غذا فقط از جدول داخلی `food_orders` (MySQL) خوانده شود.
-- وابستگی به فایل Access سفارش (`food_fish`، `orders_path`، `orders_table`) کامل حذف شود.
-- تنها منبع خارجی باقی‌مانده: فایل Access تردد **TENTER** (`SOURCE_TABLE`).
+### ۱) برش ۹ — آخرین گروه اکشن (حساس‌ترین برش)
+سه اکشن «پشتیبان‌گیری و به‌روزرسانی سامانه» (`create_backup`، `restore_backup`، `system_update`) از `index.php` به `actions/backup-actions.php` منتقل شد:
+- پیش از انتقال اسکن تله انجام شد: هیچ تابع نام‌دار، `__DIR__`/`__FILE__` یا `continue` سطح‌بالا در بلوک نبود.
+- اثبات ماشینی بایت‌به‌بایت در مخزن **و** داخل خود ZIP (بازگرداندن require به بدنه == index قبل از برش).
+- اکنون **همهٔ ۷۴ اکشن در ۱۵ فایل موضوعی** هستند و `index.php` (۳۴۴۳ خط) صفر اکشن درون‌خطی دارد.
 
-## ۲. جریان نهایی
+### ۲) تفکیک bootstrap.php به lib/
+هستهٔ ۳٬۳۲۶ خطی (۱۴۶ تابع + ۲ کلاس PDO) به ۸ ماژول تفکیک شد؛ `bootstrap.php` فقط بارکننده است (۶۴ خط):
+`lib/db-core.php`، `lib/logging-csrf.php`، `lib/auth-scope.php`، `lib/settings-effects.php`، `lib/ldap.php`، `lib/tickets-sla.php`، `lib/notify-users.php`، `lib/activity-audit.php`
+- ترتیب تعریف‌ها و کدهای سطح‌بالا **عیناً** حفظ شد — دو اثبات ماشینی (برش و بازسازی بایت‌به‌بایت).
+- هر ماژول `declare(strict_types=1)` دارد (حفظ دقیق رفتار strict قبلی)، گارد APP_ROOT و سرآیند فارسی.
+- `__DIR__` فقط در سر bootstrap بود که سر جای خود ماند؛ هیچ مسیر نسبی جابه‌جا نشد.
 
-```
-TENTER (Access، تردد) → Worker (food-ticket-engine.php)
-  → تطبیق کد ملی با food_orders (MySQL، وضعیت active، همان روز)
-  → رویداد در food_ticket_events → صف چاپ
-  → پرینتر شبکه (TCP 9100) یا ویندوز
-  → حذف ردیف از TENTER بعد از ثبت موفق
-```
+### ۳) حذف ۸ تابع مرده (مصوب ممیزی `docs/CODE-AUDIT-FA.md`)
+`asset_lifecycle_status_label`، `asset_lifecycle_transition_allowed`، `particle_effect_default_config`، `triangle_effect_default_config`، `triangle_effect_enabled_for_current_page`، `ticket_cancel_ensure_schema`، `unread_notification_count`، `latest_notification_id`
+- اثبات قبل از حذف: جستجوی ماشینی کل مخزن (php/js/html) = فقط خودِ تعریف. اثبات بعد از حذف: صفر ارجاع.
+- `ticket_cancel_ensure_schema` فقط نام قدیمی `ticket_hot_schema_ensure` بود؛ ترمیم ستون‌های لغو دست نخورده است.
 
-## ۳. تغییرات (خلاصه)
+## خارج از دامنهٔ این نسخه (عمداً)
+فاز ۳ آرایشی (حذف ۷۵ کلاس CSS مرده، شکستن خطوط بلند، helperهای ضدتکرار) انجام **نشد** — کلاس‌های CSS ساخته‌شدهٔ پویا در JS ریسک دارند و فقط با تأیید جداگانهٔ کاربر انجام می‌شود.
 
-| commit | شرح |
-|---|---|
-| `40b58e8` | افزودن `ARCHITECTURE.md` (نقشه سامانه با تگ‌ها) |
-| `9f7130f` | حذف سرویس .NET (`Program.cs`، `FoodTicketServer.csproj`، `config.example.json`، `install_prerequisites.bat`، `start_food_ticket.bat`، `README-prerequisites-fa.md`)؛ حذف `food_ticket_orders()`؛ حذف `orders_path`/`orders_table` از ذخیره تنظیمات، API و `schema.sql`/`install-empty-db.sql`؛ به‌روزرسانی تست‌ها و چک‌لیست؛ افزودن `00_CHANGELOG_INTERNAL_ORDERS_ONLY_FA.txt` |
-| `67da1e9` | **اصلاح باگ:** در `INSERT` تنظیمات، ۱۴ placeholder برای ۱۳ مقدار بود و ذخیره‌ی تنظیمات fail می‌کرد. اصلاح شد. |
-| `ef01cff` | حذف readerهای مرده‌ی اکسس سفارش: `food_ticket_order_map`، `food_ticket_orders_rows_for_keys`، `food_ticket_date_text_variants`، `food_ticket_row_column`؛ حذف route قدیمی `test-orders`؛ ساده‌سازی نمای سفارش‌ها در پنل (حذف انتخاب‌گر «منبع») |
-| `8c0b448` | حذف کش pytest که اشتباهی commit شده بود؛ افزودن `.gitignore` |
+## تأییدهای ماشینی
+- lint هر ۲۴ فایل PHP تغییریافته/جدید ✓
+- تست‌ها: **۲۶۵ قبولی + ۱۸ زیرتست** (همان ۵ خطای قدیمی بی‌ربط به این نسخه)
+- تست دائمی جدید: `tests/test_release_1_62_20_backup_split_bootstrap_lib_static.py`
+- ~۱۱ تستِ خوانندهٔ bootstrap به «الحاق bootstrap + lib» به‌روز شدند؛ پین‌های نام توابع حذف‌شده اصلاح شد.
 
-آمار کلی نسبت به `fee7655`: ۱۷ فایل تغییر کرده، ۲۷۷ خط اضافه و ۱۸۹۱ خط حذف.
+## بسته
+- `downloads/ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip` — ۱٬۰۷۶٬۲۱۱ بایت
+- SHA-256: `c169b7c188c6cc39396656b1417a8267d84aba7c356a6d89a2410387421625b2`
+- کاملاً تجمعی 1.62.0 تا 1.62.20 (۶۶ فایل)؛ مهاجرت جدید ندارد؛ پیش‌نیاز 1.61.9+
+- صفحهٔ دانلود فقط همین بستهٔ جاری را نشان می‌دهد؛ نسخه‌های پیشین در این صفحه نمایش داده نمی‌شوند.
+- گزارش تغییر: `updates/2026-10-25-release-162-20-backup-split-bootstrap-lib/CHANGE-REPORT-FA.md`
 
-## ۴. بررسی‌های انجام‌شده
-
-- **Lint:** `php -l` روی همه‌ی ۱۰۶ فایل PHP مخزن: بدون خطای syntax (PHP 8.4).
-- **تست واقعی دیتابیس (MariaDB 11.8):** کوئری ذخیره‌ی تنظیمات:
-  - نسخه‌ی `9f7130f`: خطا (`Column count doesn't match value count`)
-  - نسخه‌ی `8c0b448`: موفق
-- **تست‌های PHP:** خروجی `SecurityTest.php`، `ArchitectureTest.php`، `test_food_ticket_logic.php` با نسخه‌ی قبل از تغییرات **کاملاً یکسان** است. این fail ها از قبل در مخزن بوده‌اند (مثلاً `Rebuild leaves schema tables behind`، `Directory storage not found`، و ۴ مورد `norm_personnel_*` و `code_decimal_preserves_zeroes`).
-- **`test_food_ticket_config_paths.php`:** موفق.
-- **pytest `tests/test_food_orders_static.py`:** ۲۸ تست موفق.
-- **Node:** `test_food_order_calendar_node.js` موفق؛ بخش inline JS پنل (`index.html`) و `food-menu.js` و `food-order-calendar.js` syntax درست دارند.
-- **Routeهای پنل:** همه‌ی routeهایی که پنل صدا می‌زند در PHP پیاده‌سازی شده‌اند؛ هیچ route‌ای که فقط سرویس .NET داشته باشد گم نشده.
-
-## ۵. آنچه تأیید نشده (نیاز به تست روی سرور)
-
-- اجرای واقعی Worker روی فایل TENTER (Access) و حذف ردیف‌ها.
-- چاپ واقعی روی پرینتر شبکه/ویندوز.
-- رفتار پنل در مرورگر (نمای سفارش‌ها، ذخیره‌ی تنظیمات از UI).
-- این محیط Access و پرینتر ندارد، پس این موارد با تست دستی روی سرور تست تأیید شوند.
-
-## ۶. باقی‌مانده (عمداً دست نخورده)
-
-- ستون‌های `orders_path`/`orders_table` در نصب‌های قدیمی (و در `upgrade-1.9-food-ticket.sql`) هنوز وجود دارند. کد به آن‌ها دست نمی‌زند و مقدار پیش‌فرض خالی دارند. اگر حذف کامل بخواهی، یک migration جدا لازم است.
-- فایل‌های fixture در `tools/` (مثل `food_fish` در `test_group_flow_offline.php`) فقط داده‌ی تستی هستند و روی اجرای عادی اثری ندارند.
-- `food_order_mode()` هنوز مقادیر قدیمی `ACCESS`/`TEST` را می‌پذیرد و همه را به `INTERNAL-DB` تبدیل می‌کند؛ هیچ اتصال Access سفارش باز نمی‌شود.
-- تست‌های fail شده‌ی بالا (از قبل وجود داشتند) برای رفع جدا لازم‌اند.
-
-## ۷. مشکلات شناخته‌شده‌ای که هنوز بررسی نشده‌اند
-
-- صف چاپ (`food_ticket_process_print_queue`) در این تغییرات دست نخورده، ولی باگ‌های احتمالی آن (مثلاً قفل و تلاش مجدد) هنوز اصلاح نشده‌اند.
-- گزارش «شکایت» کاربر درباره‌ی صف چاپ: بعد از اصلاح باگ `67da1e9` هنوز تأیید نشده است. لاگ Worker و `food_ticket_print_log` لازم است تا علت دقیق مشخص شود.
-
-## ۸. به‌روزرسانی: حذف فرم «سفارش‌های غذا» از پنل چاپ فیش
-
-- commit: `818b3b2` (شاخه `arena-updates`)
-- حذف شد:
-  - آیتم منوی «سفارش‌های غذا» و ورودی آن در لیست نقش‌های مدیر.
-  - توابع `orders()`، `ordersForm()`، `ordersView()`، `ordersReadonly()` و اورایدهای `removeOrderPersonnelCodeColumn`.
-- باقی ماند (کاربرد دارد): کارت «سفارش امروز» داشبورد، `/api/orders`، و گزارش «سفارش غذا».
-- بررسی: `node`/`acorn` syntax اسکریپت داخلی پنل بدون خطا؛ هیچ ارجاع معلق به توابع حذف‌شده نیست؛ `pytest` (۲۸ تست) و تست گاهی `test_food_order_calendar_node.js` موفق.
-- هنوز باقی‌مانده (کد مرده، بی‌ضرر): هندلرهای `refresh-orders`/`today-orders`/`#order-filter` داخل listenerهای عمومی که دیگر المانی ندارند. حذف امن آنها نیاز به بازنویسی listenerهای مشترک دارد؛ در صورت نیاز جدا انجام می‌شود.
-- تأیید نشده: رندر واقعی پنل در مرورگر (در این محیط مرورگر/jsdom در دسترس نیست).
-
-فایل‌های به‌روز: `ticket-arena-updates-818b3b2.zip` و `CHANGES-from-original.patch`.
-
-## ۹. به‌روزرسانی: پاک‌سازی باقی‌مانده‌ها، ایمپورت سفارش‌های قبلی
-
-کامیت‌های `arena-updates` از `818b3b2` تا `fa8adcb`:
-
-| کامیت | موضوع |
-|---|---|
-| `8ba9db7` | داشبورد و گزارش «سفارش غذا» از `food_orders` داخلی؛ `/api/orders` پارامتر `to` گرفت |
-| `20ec5b8` | رفع گیر کردن پنل روی «در حال آماده‌سازی» بعد از اولین ذخیره (`state.orders` بعد از بارگذاری تعریف نمی‌شد) |
-| `c5c24db` | حذف پارامتر بلااستفادهٔ `$ordersConnection`؛ به‌روزرسانی README و راهنمای تست |
-| `5cf7dfa` | فایل migration برای حذف ستون‌های `orders_path` / `orders_table` از `food_ticket_config` (اختیاری) |
-| `5864d97` | ایمپورت سفارش‌های قبلی (`food-order-import.php`) |
-| `fa8adcb` | ایمپورت با همهٔ فیلدها (کد ملی، نام، نام خانوادگی، نهار، تاریخ انتخابی، تاریخ و ساعت رزرو) و ورودی منوی اصلی |
-
-**وضعیت بررسی‌ها:**
-- `php -l` روی همهٔ فایل‌های PHP بدون خطا.
-- `pytest tests/test_food_orders_static.py`: ۲۸ مورد پاس.
-- `tests/test_food_ticket_logic.php`: ۴ مورد شکست که از قبل وجود داشت (norm_personnel، code_decimal) و تغییر نکرده‌اند.
-- پنل با jsdom (ورود ساختگی و پاسخ‌های ساختگی API): بوت شد، همهٔ بخش‌های منو بدون خطا باز شدند، و گزارش سفارش داده را نشان داد.
-- ایمپورت روی MariaDB آزمایشی: تطبیق، تعارض، تکراری در فایل، بازیابی سفارش لغوشده، ثبت، و اجرای مجدد (idempotent) درست بودند.
-
-**آنچه هنوز تأیید نشده (نیاز به تست روی سرور):**
-- صف چاپ فیش روی سرور واقعی با یک تردد و چاپ واقعی.
-- ایمپورت از داخل پنل زنده روی داده‌های واقعی (ابتدا با یک فایل کوچک).
-- اجرای `upgrade-food-drop-legacy-orders-columns.sql` روی نصب‌های قدیمی (اختیاری).
-
-**باقی‌مانده (عمداً دست نخورده):**
-- `ARCHITECTURE.md` و فایل‌های changelog قدیمی به نام `food_fish` ارجاع دارند؛ به‌عنوان تاریخچه نگه داشته شده‌اند.
-- فایل‌های `tools/` برای تست‌های آفلاین هنوز نام‌های قدیمی دارند؛ در مسیر اجرای سامانه نیستند.
-- ۴ تست قدیمی `test_food_ticket_logic.php` که از قبل شکست می‌خوردند.
+## آزمون دود (اول سرور تست)
+۱) ورود دامین + ورود محلی ۲) ساخت نسخهٔ پشتیبان ۳) **نصب همین بسته از صفحهٔ به‌روزرسانی** (خودِ سازوکار به‌روزرسانی جابه‌جا شده) ۴) ثبت درخواست و شمارهٔ آن ۵) زنگولهٔ اعلان‌ها ۶) یک خروجی XLSX ۷) صفحهٔ سلامت سامانه و لاگ‌ها.

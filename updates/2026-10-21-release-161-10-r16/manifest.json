@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — گزارش سفارش‌های غذا و پیوند امن حساب محلی (R16)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "Adds selectable daily food-order report fields with compact repeated record blocks, dated food-group order reporting, and daily Jalali weekday/food statistics. Includes the safe local-food-account to domain-account linking path for employee number 335 with pre-merge backup and transactional reference transfer. This package changes code only: it does not modify production accounts or the live database. No database migration is required."
+}

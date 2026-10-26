@@ -1,0 +1,9 @@
+{
+  "version": "1.62.5",
+  "release": "1.62.5",
+  "title": "Ticket 1.62.5 — ship assets/app.js so the day/night toggle works outside the food panel",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.5-host-theme-toggle-appjs-20261025.zip",
+  "migrations": [],
+  "notes": "Cumulative offline update, no database migration. Root cause fix: the global day/night toggle handler for host pages lives in assets/app.js, but no 1.62.x package ever shipped that file, so installs updated from older versions rendered the toggle button without any click behaviour (the food panel kept working because its toggle logic is inline in food-ticket-web/index.html). This package ships assets/app.js, makes its bootstrap run even when the script loads after DOMContentLoaded, switches the toggle to click delegation so late-rendered buttons work, and cache-busts the script reference (v=3.4.26&theme-mode=2) in index.php, governance.php, ola.php and the fallback footer layout. Includes the full 1.62.4 fix set (food page dark mode, traffic edit-history filter, centered food panel pages, manual ticket select-all). Verified with jsdom simulations (normal load, late load, dynamically added button) and static tests; no real browser or production validation."
+}

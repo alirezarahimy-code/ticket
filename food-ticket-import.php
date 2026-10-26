@@ -97,9 +97,10 @@ function food_ticket_import_shared_strings(ZipArchive $zip): array
 
 /**
  * خواندن ردیف‌های اولین شیت xlsx به‌صورت آرایهٔ رشته‌ها.
+ * $maxColumns و $maxRows فقط برای callerهایی است که سقف خواندن محدود دارند؛ صفر یعنی بدون سقف.
  * @return array{rows:list<list<string>>,error:string}
  */
-function food_ticket_import_read_xlsx(string $path): array
+function food_ticket_import_read_xlsx(string $path, int $maxColumns = 0, int $maxRows = 0): array
 {
     if (!class_exists('ZipArchive')) {
         return ['rows' => [], 'error' => 'افزونهٔ zip در PHP فعال نیست؛ فایل xlsx خوانده نمی‌شود. آن را با فرمت CSV ذخیره و بارگذاری کنید.'];
@@ -129,12 +130,18 @@ function food_ticket_import_read_xlsx(string $path): array
     }
     $rows = [];
     foreach ($doc->sheetData->row as $row) {
+        if ($maxRows > 0 && count($rows) >= $maxRows) {
+            return ['rows' => [], 'error' => 'فایل اکسل از سقف ردیف‌های مجاز بیشتر است.'];
+        }
         $cells = [];
         $max = -1;
         foreach ($row->c as $cell) {
             $attributes = $cell->attributes();
             $ref = (string) ($attributes['r'] ?? '');
             $index = food_ticket_import_column_index($ref);
+            if ($maxColumns > 0 && $index >= $maxColumns) {
+                return ['rows' => [], 'error' => 'فایل اکسل بیش از ' . $maxColumns . ' ستون دارد.'];
+            }
             $type = (string) ($attributes['t'] ?? '');
             $value = '';
             if ($type === 's') {
@@ -163,6 +170,39 @@ function food_ticket_import_read_xlsx(string $path): array
     return ['rows' => $rows, 'error' => ''];
 }
 
+/** شمارش جداکننده‌های واقعی؛ علامت‌های داخل فیلد نقل‌قول‌شده حساب نمی‌شوند. */
+function food_ticket_import_csv_delimiter_counts(string $sample): array
+{
+    $counts = [',' => 0, ';' => 0, "\t" => 0, '|' => 0];
+    $inQuotes = false;
+    $fieldStart = true;
+    $length = strlen($sample);
+    for ($index = 0; $index < $length; $index++) {
+        $char = $sample[$index];
+        if ($inQuotes) {
+            if ($char === '"') {
+                if (($sample[$index + 1] ?? '') === '"') {
+                    $index++;
+                } else {
+                    $inQuotes = false;
+                }
+            }
+            continue;
+        }
+        if ($char === '"' && $fieldStart) {
+            $inQuotes = true;
+        } elseif (array_key_exists($char, $counts)) {
+            $counts[$char]++;
+            $fieldStart = true;
+        } elseif ($char === "\n" || $char === "\r") {
+            $fieldStart = true;
+        } else {
+            $fieldStart = false;
+        }
+    }
+    return $counts;
+}
+
 /** خواندن CSV با تشخیص کدگذاری و جداکننده. */
 function food_ticket_import_read_csv(string $path): array
 {
@@ -181,7 +221,7 @@ function food_ticket_import_read_csv(string $path): array
         }
     }
     $sample = substr($raw, 0, 4000);
-    $delimiters = [',' => substr_count($sample, ','), ';' => substr_count($sample, ';'), "\t" => substr_count($sample, "\t"), '|' => substr_count($sample, '|')];
+    $delimiters = food_ticket_import_csv_delimiter_counts($sample);
     arsort($delimiters);
     $delimiter = (string) array_key_first($delimiters);
     if (($delimiters[$delimiter] ?? 0) === 0) {

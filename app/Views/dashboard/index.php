@@ -13,7 +13,7 @@ include __DIR__ . '/../layout/header.php';
     
     <div class="dashboard-grid">
         <div class="card">
-            <h3>تیکت‌های من</h3>
+            <h3>درخواست‌های من</h3>
             <p class="count">۰</p>
             <a href="index.php?page=tickets" class="btn">مشاهده</a>
         </div>

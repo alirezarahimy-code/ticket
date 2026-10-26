@@ -1,0 +1,21 @@
+{
+  "name": "release-162-8-traffic-autofill-multi-approver",
+  "version": "1.62.8",
+  "date": "2026-10-25",
+  "title": "تکمیل خودکار فرم تردد با نام و تلفن + ۱ تا ۳ تأییدکننده برای هر مقصد ملاقات",
+  "requires_version": "1.61.9",
+  "migrations": [
+    "009-traffic-destination-multi-approver.sql"
+  ],
+  "files": [
+    "traffic-control.php",
+    "help-guide.php",
+    "assets/traffic-control.js",
+    "assets/style.css",
+    "schema.sql",
+    "install-empty-db.sql",
+    "migrations/009-traffic-destination-multi-approver.sql",
+    "VERSION"
+  ],
+  "notes": "۱) تکمیل خودکار فرم ثبت تردد که قبلاً فقط با کد ملی کار می‌کرد، حالا با نام و نام خانوادگی (تطبیق دقیق) و تلفن همراه هم کار می‌کند و فقط فیلدهای خالی را پر می‌کند. ۲) هر مقصد ملاقات می‌تواند ۱ تا ۳ تأییدکننده داشته باشد؛ در مقصد چندتأییدکننده، ثبت‌کننده یکی را از فهرست همان مقصد انتخاب می‌کند و سرور نام خارج از فهرست را نمی‌پذیرد. مهاجرت 009 دو ستون اختیاری approver_name2/3 به traffic_destinations اضافه می‌کند (idempotent، بدون حذف داده)."
+}

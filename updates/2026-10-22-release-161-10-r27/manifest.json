@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — رفع تابع تعریف‌نشدهٔ تشخیص دارایی محلی (R27)",
+  "date": "2026-10-22",
+  "migrations": [],
+  "notes": "R27 fixes both local-asset detail routes to call the existing inventory_asset_is_local() helper, preventing the undefined-function fatal error reported after R26. No database migration or production data change."
+}

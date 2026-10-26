@@ -28,6 +28,12 @@ $pass = 0;
 $fail = 0;
 $notes = [];
 
+// Isolated functions log expected ALTER failures through the application logger.
+function app_error_log(string $message): bool
+{
+    return true;
+}
+
 function check(string $label, bool $ok, string $detail = ''): void
 {
     global $pass, $fail, $notes;

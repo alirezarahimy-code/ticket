@@ -28,7 +28,7 @@ include __DIR__ . '/../layout/header.php';
     </div>
     
     <div class="ticket-actions">
-        <a href="index.php?page=tickets/<?= htmlspecialchars($ticket['id']) ?>/reply" class="btn btn-primary">پاسخ به تیکت</a>
+        <a href="index.php?page=tickets/<?= htmlspecialchars($ticket['id']) ?>/reply" class="btn btn-primary">پاسخ به درخواست</a>
     </div>
 </div>
 

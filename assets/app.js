@@ -1,4 +1,69 @@
-document.addEventListener('DOMContentLoaded', function () {
+(function () {
+    // ۱.۶۲.۵: راه‌اندازی سراسری؛ حتی اگر فایل بعد از DOMContentLoaded بارگذاری شود هم اجرا می‌شود.
+    var __itsmBootstrapInit = function () {
+    var themeRoot = document.documentElement;
+    var themeMode = themeRoot.getAttribute('data-theme-mode') === 'dark' ? 'dark' : 'light';
+    var themeCookie = function (mode) {
+        try { document.cookie = 'ticket_theme_mode=' + mode + '; Path=/; Max-Age=31536000; SameSite=Lax'; } catch (_) {}
+    };
+    var updateThemeButtons = function (mode) {
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+            var dark = mode === 'dark';
+            button.setAttribute('aria-pressed', dark ? 'true' : 'false');
+            button.setAttribute('aria-label', dark ? 'تغییر به حالت روز' : 'تغییر به حالت شب');
+            var label = button.querySelector('[data-theme-label]');
+            var icon = button.querySelector('[data-theme-icon]');
+            if (label) label.textContent = dark ? 'حالت روز' : 'حالت شب';
+            if (icon) icon.textContent = dark ? '☀️' : '🌙';
+        });
+    };
+    var applyThemeMode = function (mode, persist) {
+        mode = mode === 'dark' ? 'dark' : 'light';
+        themeRoot.setAttribute('data-theme-mode', mode);
+        if (document.body) document.body.setAttribute('data-theme-mode', mode);
+        themeMode = mode;
+        if (persist !== false) {
+            themeCookie(mode);
+            try { window.localStorage.setItem('ticket-theme-mode', mode); } catch (_) {}
+        }
+        var themeColor = document.querySelector('meta[name="theme-color"]');
+        if (themeColor) themeColor.setAttribute('content', mode === 'dark' ? '#101915' : '#174f43');
+        updateThemeButtons(mode);
+        document.querySelectorAll('.food-capitalio-dashboard-widget').forEach(function (widget) {
+            widget.classList.toggle('dark', mode === 'dark');
+        });
+        window.dispatchEvent(new CustomEvent('ticket-theme-change', { detail: { mode: mode } }));
+        document.querySelectorAll('iframe').forEach(function (frame) {
+            try { if (frame.contentWindow) frame.contentWindow.postMessage({ type: 'ticket-theme-change', mode: mode }, window.location.origin); } catch (_) {}
+        });
+    };
+    var setThemeMode = function (mode) {
+        mode = mode === 'dark' ? 'dark' : 'light';
+        if (mode === themeMode) return;
+        var update = function () { applyThemeMode(mode, true); };
+        if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            var x = window.innerWidth / 2;
+            var y = window.innerHeight / 2;
+            themeRoot.style.setProperty('--theme-transition-x', x + 'px');
+            themeRoot.style.setProperty('--theme-transition-y', y + 'px');
+            themeRoot.style.setProperty('--theme-transition-radius', Math.ceil(Math.hypot(x, y)) + 'px');
+            themeRoot.classList.add('theme-mode-transition');
+            try {
+                var transition = document.startViewTransition(update);
+                transition.finished.then(function () { themeRoot.classList.remove('theme-mode-transition'); }, function () { themeRoot.classList.remove('theme-mode-transition'); });
+            } catch (_) {
+                themeRoot.classList.remove('theme-mode-transition');
+                update();
+            }
+        } else update();
+    };
+    window.ITSMThemeMode = { get: function () { return themeMode; }, set: setThemeMode };
+    updateThemeButtons(themeMode);
+    // ۱.۶۲.۵: به‌جای اتصال به تک‌تک دکمه‌ها، از delegation استفاده می‌شود تا دکمه‌هایی که بعداً رندر می‌شوند هم کار کنند.
+    document.addEventListener('click', function (event) {
+        var toggle = event.target && event.target.closest ? event.target.closest('[data-theme-toggle]') : null;
+        if (toggle) setThemeMode(themeMode === 'dark' ? 'light' : 'dark');
+    });
     document.querySelectorAll('.alert').forEach(function (item) {
         window.setTimeout(function () { item.style.opacity = '0'; item.style.transition = 'opacity .4s'; window.setTimeout(function () { item.remove(); }, 450); }, 5500);
     });
@@ -20,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var toast = document.createElement('article');
             toast.className = 'notification-toast';
             var link = document.createElement('a');
-            link.href = item.ticket_id ? 'index.php?page=ticket&id=' + encodeURIComponent(item.ticket_id) : 'index.php?page=notifications';
+            link.href = item.href || (item.ticket_id ? 'index.php?page=ticket&id=' + encodeURIComponent(item.ticket_id) : 'index.php?page=notifications');
             var title = document.createElement('strong');
             title.textContent = item.title;
             var body = document.createElement('span');
@@ -147,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var definitions = [
             ['general', 'عمومی'],
             ['domain', 'اتصال دامین'],
+            ['triangle', 'افکت نمایشی'],
             ['users', 'کاربران'],
             ['roles', 'نقش‌ها و دسترسی‌ها']
         ];
@@ -556,11 +622,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (categorySelector && categorySelector.tagName === 'INPUT') {
             categorySelector.value = (selectedService && selectedService.value !== '' ? (selectedService.getAttribute('data-category-id') || '') : '');
         }
-        // ۱.۳۷.۲ (درخواست کاربر): نمایش و الزامِ «سیستم مرتبط» بر پایهٔ «حوزه خدمت» است:
-        //   خدمات کامپیوتری ⇒ فیلد پیدا است و پرکردنش الزامی است.
-        //   خدمات پشتیبانی ⇒ فیلد کاملاً پنهان می‌شود و مقدارش هم پاک می‌گردد.
-        var requiresAsset = group === 'it';
-        if (assetField) assetField.hidden = !requiresAsset;
+        // طبق سیاست درخواست، برای هر خدمت IT انتخاب سیستم از شناسنامهٔ فنی الزامی است.
+        var isItGroup = group === 'it';
+        var hasSelectedService = !!(selectedService && selectedService.value !== '');
+        var requiresAsset = isItGroup && hasSelectedService;
+        if (assetField) assetField.hidden = !isItGroup;
+        var assetLabel = document.querySelector('[data-asset-label]');
+        if (assetLabel) {
+            assetLabel.textContent = !isItGroup ? 'فقط برای خدمات IT' : (!hasSelectedService ? 'پس از انتخاب خدمت مشخص می‌شود' : (requiresAsset ? 'برای خدمات IT الزامی' : 'اختیاری'));
+        }
         var assetErrorNode = document.querySelector('[data-asset-error]');
         if (assetErrorNode) {
             assetErrorNode.hidden = true;
@@ -574,10 +644,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (assetSelector) {
             assetSelector.required = false;
-            if (!requiresAsset) {
+            if (!isItGroup) {
                 assetSelector.value = '';
-                // ۱.۳۷: وقتی خدمت انتخاب‌شده به سیستم نیاز ندارد، متن نمایش‌داده‌شده در
-                // کمبوی «سیستم مرتبط» هم پاک می‌شود تا چیزی برخلاف مقدار ثبت‌شده نماند.
                 if (assetSearch) {
                     assetSearch.value = '';
                     assetSearch.removeAttribute('data-picked');
@@ -769,12 +837,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var ticketForm = assetSearch.closest('form');
         if (ticketForm) {
             ticketForm.addEventListener('submit', function (event) {
-                // ۱.۳۷.۲: در حوزهٔ خدمات کامپیوتری انتخاب «سیستم مرتبط» الزامی است.
-                if (getGroup() === 'it' && assetSelector.value === '') {
+                var submittedService = serviceSelector ? serviceSelector.options[serviceSelector.selectedIndex] : null;
+                var requiresAsset = getGroup() === 'it' && !!(submittedService && submittedService.value !== '');
+                if (requiresAsset && assetSelector.value === '') {
                     event.preventDefault();
                     var errNode = document.querySelector('[data-asset-error]');
                     if (errNode) {
-                        errNode.textContent = 'برای ثبت تیکت در حوزهٔ خدمات کامپیوتری، انتخاب «سیستم مرتبط» الزامی است؛ از فهرست زیر انتخاب کنید.';
+                        errNode.textContent = 'برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است؛ یک مورد را از فهرست انتخاب کنید.';
                         errNode.hidden = false;
                     }
                     if (assetField) assetField.classList.add('field-invalid');
@@ -884,7 +953,10 @@ document.addEventListener('DOMContentLoaded', function () {
         jalaliInput.addEventListener('focus', function () { renderCalendar(); jalaliCalendar.hidden = false; });
         document.addEventListener('click', function (event) { if (!jalaliPicker.contains(event.target)) jalaliCalendar.hidden = true; });
     }
-});
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', __itsmBootstrapInit);
+    else __itsmBootstrapInit();
+})();
 
 document.addEventListener('DOMContentLoaded', function () {
     var panelsRoot = document.querySelector('.profile-panels');
@@ -1119,7 +1191,8 @@ document.addEventListener('DOMContentLoaded', function () {
             button.addEventListener('click', closeModal);
         });
         modalLayer.addEventListener('click', function (event) {
-            if (event.target === modalLayer) closeModal();
+            // بستن با کلیک روی پس‌زمینه، مثل بقیهٔ پاپ‌آپ‌های سامانه (هر .service-modal کل لایه را می‌پوشاند؛ کلیک بیرون کارت یعنی روی خود .service-modal)
+            if (event.target === modalLayer || (event.target.classList && event.target.classList.contains('service-modal'))) closeModal();
         });
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && !modalLayer.hidden) closeModal();
@@ -1254,4 +1327,60 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    // ۱.۵۷ — چرخش پیام‌های متحرک صفحه ورود؛ هر پیام یک دور کامل می‌چرخد بعد پیام بعدی می‌آید.
+    var annBox = document.querySelector('[data-announcements]');
+    if (!annBox) { return; }
+    var textEl = annBox.querySelector('[data-announcement-text]');
+    if (!textEl) { return; }
+    var messages = [];
+    try { messages = JSON.parse(annBox.getAttribute('data-announcements') || '[]'); } catch (err) { messages = []; }
+    if (!Array.isArray(messages) || messages.length < 2) { return; }
+    var speed = parseInt(annBox.getAttribute('data-announcement-speed') || '18', 10);
+    if (isNaN(speed)) { speed = 18; }
+    speed = Math.max(5, Math.min(60, speed));
+    var index = 0;
+    window.setInterval(function () {
+        index = (index + 1) % messages.length;
+        textEl.textContent = messages[index];
+        textEl.style.animation = 'none';
+        void textEl.offsetWidth;
+        textEl.style.animation = '';
+    }, speed * 1000);
+});
+
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+
+document.addEventListener('click', function (event) {
+    var openButton = event.target.closest('[data-domain-code-dialog-open]');
+    if (openButton) {
+        var dialogId = openButton.getAttribute('data-domain-code-dialog-open') || '';
+        var dialog = dialogId ? document.getElementById(dialogId) : null;
+        if (dialog) {
+            event.preventDefault();
+            if (typeof dialog.showModal === 'function') dialog.showModal();
+            else dialog.setAttribute('open', '');
+            var input = dialog.querySelector('input[name="employee_number"]');
+            if (input) input.focus();
+        }
+        return;
+    }
+    var closeButton = event.target.closest('[data-domain-code-dialog-close]');
+    if (closeButton) {
+        var activeDialog = closeButton.closest('dialog');
+        if (activeDialog && typeof activeDialog.close === 'function') activeDialog.close();
+        else if (activeDialog) activeDialog.removeAttribute('open');
+        return;
+    }
+    if (event.target && event.target.matches && event.target.matches('dialog.domain-code-link-dialog')) {
+        var bounds = event.target.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) { if (typeof event.target.close === 'function') event.target.close(); else event.target.removeAttribute('open'); }
+    }
 });

@@ -1,5 +1,11 @@
 /* سفارش غذا — از همان رنگ‌ها، کارت‌ها و فرم‌های assets/style.css سامانه استفاده می‌کند. */
 .food-order-page { color: var(--ink); }
+.fo-visit-card { padding:18px 20px; margin-bottom:18px; }
+.fo-visit-card h2 { margin:0 0 6px; font-size:18px; color:var(--navy); }
+.fo-visit-card p { margin:0 0 12px; color:var(--muted); }
+.fo-visit-row { display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+.fo-visit-row .field { flex:1; min-width:220px; margin:0; }
+.fo-visit-current { font-weight:700; color:var(--navy); }
 .food-order-loading { padding:22px; text-align:center; color:var(--muted); }
 .fo-calendar-card { padding:clamp(14px,2.5vw,26px); margin-bottom:22px; }
 .fo-calendar-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
@@ -43,14 +49,16 @@
 .fo-section-title p { margin:2px 0 0; color:var(--muted); font-size:12px; }
 .fo-my-orders { margin-top:20px; overflow:hidden; }
 .fo-my-orders .table-wrap { overflow-x:auto; overflow-y:hidden; }
-.fo-my-orders .ticket-table { width:100%; min-width:900px; table-layout:fixed; }
-.fo-my-orders .table-head,.fo-my-orders .table-row { grid-template-columns:42px minmax(140px,1.35fr) minmax(110px,1fr) minmax(105px,1fr) minmax(105px,1fr) minmax(82px,.85fr) minmax(72px,.7fr) minmax(100px,.9fr); gap:8px; padding:10px 12px; white-space:nowrap; }
+.fo-my-orders .ticket-table { width:100%; min-width:980px; table-layout:fixed; }
+.fo-my-orders .table-head,.fo-my-orders .table-row { grid-template-columns:42px minmax(140px,1.35fr) minmax(110px,1fr) minmax(105px,1fr) minmax(105px,1fr) minmax(82px,.85fr) minmax(72px,.7fr) minmax(100px,.9fr) minmax(120px,1fr); gap:8px; padding:10px 12px; white-space:nowrap; }
 .fo-my-orders .table-row { min-height:54px; }
 .fo-my-orders .table-head > th,.fo-my-orders .table-row > td { min-width:0; padding:0; border:0; white-space:nowrap; }
-.fo-proxy-orders .ticket-table { min-width:900px; }
-.fo-proxy-orders .table-head,.fo-proxy-orders .table-row { grid-template-columns:42px minmax(140px,1.35fr) minmax(110px,1fr) minmax(105px,1fr) minmax(105px,1fr) minmax(82px,.85fr) minmax(72px,.7fr) minmax(100px,.9fr); gap:8px; padding:10px 12px; white-space:nowrap; }
+.fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }
+.fo-proxy-orders .ticket-table { min-width:980px; }
+.fo-proxy-orders .table-head,.fo-proxy-orders .table-row { grid-template-columns:42px minmax(140px,1.35fr) minmax(110px,1fr) minmax(105px,1fr) minmax(105px,1fr) minmax(82px,.85fr) minmax(72px,.7fr) minmax(100px,.9fr) minmax(120px,1fr); gap:8px; padding:10px 12px; white-space:nowrap; }
 .fo-order-state { display:inline-block; padding:3px 8px; border-radius:999px; background:#ecfdf3; color:#027a48; font-size:11px; font-weight:700; }
 .fo-order-state.cancelled { background:#fef3f2; color:#b42318; }
+.fo-cancel-request-time { display:block; margin-top:4px; color:var(--muted); font-size:10px; line-height:1.5; }
 .fo-proxy-cancel-confirm { display:inline-flex; align-items:center; gap:5px; flex-wrap:wrap; }
 .fo-proxy-cancel-confirm .button { padding:6px 8px; font-size:12px; white-space:nowrap; }
 .fo-modal { border:0; width:min(620px,calc(100vw - 24px)); max-height:min(88vh,820px); overflow:auto; padding:0; border-radius:18px; color:var(--ink); background:var(--white); box-shadow:0 24px 70px rgba(16,42,67,.3); }
@@ -117,6 +125,7 @@
 .fo-recipient-details { display:grid; flex:1; gap:2px; min-width:0; }
 .fo-recipient-details span,.fo-recipient-details small { color:var(--muted); font-size:11px; }
 .fo-recipient-details strong { color:var(--navy); font-size:15px; overflow-wrap:anywhere; }
+.fo-recipient-actions { display:flex; gap:8px; flex-wrap:wrap; flex:0 0 auto; }
 .fo-recipient-change { flex:0 0 auto; }
 .fo-recipient-dialog { width:min(540px,calc(100vw - 24px)); }
 .fo-person-choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:18px 0; }
@@ -141,6 +150,12 @@
 .fo-search-result.is-highlighted,.fo-search-result[aria-selected="true"] { border-color:var(--teal); background:var(--teal-light); }
 .fo-combo-message { padding:11px 9px; color:var(--muted); font-size:12px; line-height:1.8; }
 .fo-proxy-code { margin-top:10px; }
+.fo-national-secret {
+  -webkit-text-security: disc;
+  text-security: disc;
+  letter-spacing: .35em;
+  font-family: ui-monospace, monospace;
+}
 .fo-day.is-adjacent,.fo-day:disabled { cursor:not-allowed; opacity:.38; filter:saturate(.65); }
 .fo-day.is-adjacent:hover,.fo-day.is-adjacent:focus-visible,.fo-day:disabled:hover { transform:none; box-shadow:none; border-color:var(--line); z-index:auto; outline:none; }
 .fo-day.is-adjacent::after,.fo-day:disabled::after { display:none; }
@@ -148,7 +163,7 @@
   .fo-person-choices { grid-template-columns:1fr; }
   .fo-person-choice { min-height:92px; }
   .fo-recipient-banner { align-items:flex-start; flex-wrap:wrap; }
-  .fo-recipient-change { margin-right:auto; }
+  .fo-recipient-actions { margin-right:auto; }
 }
 
 /* نام غذا در سلول تقویم در یک خط نمایش داده می‌شود؛ اگر جا نشد با «…» کوتاه می‌شود. */
@@ -156,3 +171,6 @@
 .fo-day-meal,
 .fo-day-my-order { display:block; width:100%; min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.5; }
 .fo-day-my-order { font-size:10px; }
+
+/* Separate lunch and dinner without changing the existing calendar or form layout. */
+.fo-meal-switch{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}

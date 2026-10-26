@@ -32,7 +32,8 @@ $check = static function (string $label, bool $cond, string $detail = '') use (&
     echo ($cond ? '[PASS] ' : '[FAIL] ') . $label . ($detail !== '' ? ' — ' . $detail : '') . "\n";
 };
 
-$assets = ['food-brand.js', 'food-designer.js', 'food-groups.js', 'food-ticket-persistence.js', 'food-ticket-theme.css', 'food-order.css', 'food-menu.js', 'food-menu.css', 'food-order-calendar.js', 'jalali-calendar.js'];
+$assetPaths = glob(dirname(__DIR__) . '/food-ticket-web/assets/*') ?: [];
+$assets = array_values(array_map('basename', $assetPaths));
 $bootstrap = food_ticket_web_host_bootstrap(
     'index.php?page=food-ticket&food_api=',
     'CSRF-TOKEN',
@@ -62,11 +63,20 @@ $h1 = $r1['html'];
 $check('۱-الف: بوت‌استرپ یک‌بار تزریق شد', $count($h1, 'FOOD_TICKET_HOST_BOOT') === 1, 'count=' . $count($h1, 'FOOD_TICKET_HOST_BOOT'));
 $check('۱-الف۲: انتساب window.FOOD_TICKET_API_BASE= یک‌بار', $count($h1, 'window.FOOD_TICKET_API_BASE=') === 1, 'count=' . $count($h1, 'window.FOOD_TICKET_API_BASE='));
 $check('۱-ب: مسیر از لنگر food-brand.js انجام شد', in_array('bootstrap:brand', $r1['notes'], true), implode(',', $r1['notes']));
-$check('۱-پ: food-designer.js به پوشهٔ پنل اشاره می‌کند', strpos($h1, 'src="food-ticket-web/assets/food-designer.js?v=1"') !== false);
+$check('۱-پ: food-designer.js به پوشهٔ پنل اشاره می‌کند', strpos($h1, 'src="food-ticket-web/assets/food-designer.js?v=9"') !== false);
 $check('۱-ت: مسیر قدیمی assets/food-designer.js باقی نمانده', strpos($h1, 'src="assets/food-designer.js') === false);
-$check('۱-ث: دارایی‌های برنامه غذایی هم به پوشهٔ پنل بازنویسی شدند', strpos($h1, 'href="food-ticket-web/assets/food-menu.css?v=8"') !== false && strpos($h1, 'src="food-ticket-web/assets/food-menu.js?v=10"') !== false, implode(',', $r1['notes']));
+$check('۱-ث: دارایی‌های برنامه غذایی هم به پوشهٔ پنل بازنویسی شدند', strpos($h1, 'href="food-ticket-web/assets/food-menu.css?v=29"') !== false && strpos($h1, 'src="food-ticket-web/assets/food-menu.js?v=24"') !== false, implode(',', $r1['notes']));
 $check('۱-ج: استایل سامانه (style.css) پیش از استایل پنل', ($p1 = strpos($h1, 'assets/style.css?v=3')) !== false && ($p2 = strpos($h1, 'food-ticket-web/assets/food-ticket-theme.css')) !== false && $p1 < $p2);
-$check('۱-چ: nonce روی اسکریپت inline', in_array('nonce:1', $r1['notes'], true) && strpos($h1, '<script nonce="NONCE123">') !== false, implode(',', $r1['notes']));
+preg_match_all('/<script\\b([^>]*)>/i', $h1, $scriptTags);
+$inlineScriptTags = array_values(array_filter($scriptTags[1] ?? [], static fn (string $attrs): bool => preg_match('/\\bsrc\\s*=/i', $attrs) !== 1));
+$allInlineHaveNonce = $inlineScriptTags !== [];
+foreach ($inlineScriptTags as $attrs) {
+    if (!str_contains($attrs, 'nonce="NONCE123"') && !str_contains($attrs, "nonce='NONCE123'")) {
+        $allInlineHaveNonce = false;
+        break;
+    }
+}
+$check('۱-چ: nonce روی همهٔ اسکریپت‌های inline', $allInlineHaveNonce && count(array_filter($r1['notes'], static fn (string $note): bool => str_starts_with($note, 'nonce:'))) === 1, implode(',', $r1['notes']));
 $check('۱-ح: انتساب تعطیلات سامانه یک‌بار تزریق شد (پنل خودش هم به ITSM_HOLIDAYS اشاره دارد)', $count($h1, 'window.ITSM_HOLIDAYS=') === 1, 'count=' . $count($h1, 'window.ITSM_HOLIDAYS='));
 $check('۱-خ: اسکریپت تقویم محلی پنل فقط یک‌بار بارگذاری شد', $count($h1, 'src="food-ticket-web/assets/jalali-calendar.js?v=2"') === 1 && $count($h1, 'src="assets/jalali-calendar.js?v=2"') === 0, 'panel=' . $count($h1, 'src="food-ticket-web/assets/jalali-calendar.js?v=2"') . ' root=' . $count($h1, 'src="assets/jalali-calendar.js?v=2"'));
 $check('۱-د: پل قالب (template-bridge) در بوت‌استرپ هست', $count($h1, 'food-ticket-web/template-bridge.js') === 1);

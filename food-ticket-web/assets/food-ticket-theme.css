@@ -162,7 +162,18 @@ body::before {
     z-index: 1;
     width: min(1480px, 100%) !important;
     min-width: 0 !important;
+    margin-inline: auto !important;
     padding: 34px 28px 60px !important;
+}
+/* داشبورد تمام‌عرض است؛ بدون این override، سقف عرض ۱۴۸۰ به‌همراه margin:0 باعث می‌شد
+   داشبورد در مانیتورهای عریض به سمت راست صفحه بچسبد. */
+#screen.food-dashboard-host,
+.page.food-dashboard-host {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 .heading { margin-bottom: 17px; }
 .heading h2 { color: var(--food-navy); font-size: 20px; }
@@ -260,7 +271,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--food-teal) !impo
   body.printing-report .notice { display: none !important; }
   body.printing-report .page { max-width: none; padding: 0; }
   body.printing-report .card { box-shadow: none; border: 1px solid #999; }
-  body.printing-report .table th, body.printing-report .table td { font-size: 11pt; padding: 4px 6px; }
+  body.printing-report .table th, body.printing-report .table td { font-size: 12pt; padding: 4px 6px; }
 }
 
 /* Center-align data tables and grid-based list rows throughout the food-ticket panel. */
@@ -304,4 +315,106 @@ input:focus, select:focus, textarea:focus { border-color: var(--food-teal) !impo
     }
     body.printing-report .print-preview-head { display: none !important; }
     body.printing-report .report-preview-table { width: 100% !important; table-layout: auto; }
+    body.printing-report .report-preview-table th, body.printing-report .report-preview-table td { font-size: 12pt !important; }
+}
+
+
+/* گروه‌های غذا: مهلت تغییر سلف جدا و برجسته از سایر فیلدهاست. */
+.fg-deadline-box {
+    margin: 4px 0 16px;
+    padding: 14px 16px;
+    border: 1px solid #e8c96f;
+    border-right: 4px solid #d6a52d;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fff9e8, #fff4d2);
+}
+.fg-deadline-box .field { max-width: 420px; color: #725516; }
+.fg-deadline-box .field input { background: #fffefa; }
+.fg-deadline-box p { margin: 8px 0 0; color: #796a46; font-size: 12px; line-height: 1.8; }
+
+/* مودال لیست اعضا به body منتقل می‌شود تا همیشه بالاتر از هدرهای sticky باشد. */
+.fg-members-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    background: rgba(15, 23, 42, .48);
+    backdrop-filter: blur(2px);
+}
+.fg-members-dialog {
+    display: flex;
+    flex-direction: column;
+    width: min(560px, 100%);
+    max-height: min(88dvh, 860px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    box-shadow: 0 24px 72px rgba(16, 42, 67, .32) !important;
+}
+.fg-members-dialog > .form-section-head { position: sticky; top: -1px; z-index: 1; padding: 4px 0 10px; background: var(--white); }
+@media (max-width: 560px) {
+    .fg-members-overlay { padding: 10px; }
+    .fg-members-dialog { max-height: calc(100dvh - 20px); padding: 15px !important; }
+}
+
+/* داشبورد مدیریت غذا؛ چیدمان الهام‌گرفته از نمونهٔ تأییدشده */
+.ft-dashboard .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ft-dashboard .grid .stat { min-height: 106px; position: relative; border-radius: 13px; padding: 16px 18px; }
+.ft-dashboard .grid .stat .label { color: var(--muted); font-size: 12px; }
+.ft-dashboard .grid .stat strong { margin-top: 9px; color: var(--navy); font-size: 25px; }
+.ft-dashboard .grid .stat .delta { color: var(--muted); font-size: 10px; }
+.ft-dashboard-grid { display: grid; grid-template-columns: minmax(270px, .82fr) minmax(0, 1.8fr); gap: 14px; margin-top: 14px; direction: rtl; align-items: stretch; }
+.ft-dashboard-aside, .ft-dashboard-main { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.ft-dashboard-panel { min-width: 0; padding: 16px; border-radius: 14px; }
+.ft-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.ft-panel-heading h3 { margin: 0; color: var(--navy); font-size: 15px; }
+.ft-panel-heading p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+.ft-live-dot { flex: 0 0 auto; color: var(--teal); font-size: 10px; font-weight: 700; }
+.ft-service-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 41px; border-bottom: 1px solid #edf0e8; color: var(--ink); font-size: 11px; }
+.ft-service-row:last-child { border-bottom: 0; }
+.ft-service-row .status { font-size: 10px; }
+.ft-service-value { color: var(--navy); font-size: 14px; }
+.ft-range-badge { flex: 0 0 auto; padding: 6px 9px; border: 1px solid #e6ebdf; border-radius: 8px; background: #f7f8f1; color: var(--navy); font-size: 10px; font-weight: 700; }
+.ft-week-chart { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); align-items: end; gap: clamp(5px, 1vw, 14px); height: 280px; margin-top: 8px; padding: 20px 8px 30px; border-bottom: 1px solid var(--line); background: repeating-linear-gradient(to top, transparent 0, transparent 54px, #edf1ed 55px, #edf1ed 56px); }
+.ft-week-day { position: relative; height: 100%; display: flex; align-items: end; justify-content: center; gap: clamp(2px, .3vw, 5px); min-width: 0; }
+.ft-metric-bar { position: relative; display: block; flex: 0 1 15px; width: 15px; min-width: 5px; max-height: 100%; border-radius: 5px 5px 2px 2px; }
+.ft-metric-bar b { position: absolute; top: -17px; right: 50%; transform: translateX(50%); color: var(--ink); font-size: 9px; font-weight: 600; white-space: nowrap; }
+.ft-metric-bar.metric-printed, .ft-chart-legend .metric-printed { background: #24956b; }
+.ft-metric-bar.metric-repeat, .ft-chart-legend .metric-repeat { background: #8068bd; }
+.ft-metric-bar.metric-guest, .ft-chart-legend .metric-guest { background: #d28b31; }
+.ft-metric-bar.metric-nofood, .ft-chart-legend .metric-nofood { background: #bd5148; }
+.ft-week-day label { position: absolute; bottom: -24px; color: var(--muted); font-size: 9px; white-space: nowrap; }
+.ft-chart-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 13px; color: var(--muted); font-size: 10px; }
+.ft-chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.ft-chart-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; }
+.ft-event-row { display: flex; align-items: center; justify-content: space-between; gap: 9px; min-height: 53px; border-bottom: 1px solid #edf0e8; }
+.ft-event-row:last-child { border-bottom: 0; }
+.ft-event-main { min-width: 0; }
+.ft-event-main b, .ft-event-main small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ft-event-main b { color: var(--ink); font-size: 11px; }
+.ft-event-main small { margin-top: 4px; color: var(--muted); font-size: 9px; }
+.ft-event-row .status { flex: 0 0 auto; max-width: 130px; overflow: hidden; text-overflow: ellipsis; font-size: 9px; }
+.ft-empty, .ft-dashboard-message { display: grid; place-items: center; min-height: 180px; color: var(--muted); font-size: 12px; text-align: center; }
+.ft-dashboard-message.error { color: #a3413b; }
+.ft-latest-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; padding-block: 12px; color: var(--muted); font-size: 10px; }
+.ft-latest-strip > div { margin-left: auto; }
+.ft-latest-strip b { color: var(--navy); }
+.ft-latest-strip small { display: block; margin-top: 4px; color: var(--muted); }
+@media (max-width: 900px) {
+  .ft-dashboard-grid { grid-template-columns: 1fr; }
+  .ft-dashboard-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .ft-dashboard .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .ft-dashboard .grid .stat { min-height: 92px; padding: 12px; }
+  .ft-dashboard .grid .stat strong { font-size: 21px; }
+  .ft-dashboard-aside { grid-template-columns: 1fr; }
+  .ft-dashboard-panel { padding: 13px; }
+  .ft-week-chart { height: 230px; padding-inline: 3px; gap: 2px; }
+  .ft-week-day { gap: 2px; }
+  .ft-metric-bar { min-width: 4px; }
+  .ft-metric-bar b { font-size: 8px; }
+  .ft-week-day label { font-size: 8px; }
+  .ft-latest-strip { align-items: flex-start; }
 }

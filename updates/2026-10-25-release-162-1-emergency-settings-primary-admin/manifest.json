@@ -1,0 +1,9 @@
+{
+  "version": "1.62.1",
+  "release": "1.62.1",
+  "title": "Ticket 1.62.1 — move emergency food ordering into primary-admin system settings",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.1-food-emergency-settings-primary-admin-20261025.zip",
+  "migrations": [],
+  "notes": "Moves emergency-order-window controls from the food calendar to System Settings, directly below Manual Receipt Registration, as a nested form. The control and state endpoint are primary-admin-only in both UI and server authorization; support managers cannot view, grant, inspect, or revoke the window. Includes the 1.62 selected-employee food report and ticket service-group access separation. No schema migration or online dependency."
+}

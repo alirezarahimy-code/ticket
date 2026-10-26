@@ -7,11 +7,11 @@ include __DIR__ . '/../layout/header.php';
 ?>
 
 <div class="create-ticket">
-    <h1>ثبت تیکت جدید</h1>
+    <h1>ثبت درخواست جدید</h1>
     
     <form method="post" action="index.php?page=tickets/create" class="form">
         <div class="form-group">
-            <label for="subject">عنوان تیکت</label>
+            <label for="subject">عنوان درخواست</label>
             <input type="text" id="subject" name="subject" required class="form-control">
         </div>
         
@@ -37,7 +37,7 @@ include __DIR__ . '/../layout/header.php';
         </div>
         
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">ثبت تیکت</button>
+            <button type="submit" class="btn btn-primary">ثبت درخواست</button>
             <a href="index.php?page=tickets" class="btn">انصراف</a>
         </div>
     </form>

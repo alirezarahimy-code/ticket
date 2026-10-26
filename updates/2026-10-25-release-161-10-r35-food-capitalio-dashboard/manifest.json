@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — R35 Capitalio-inspired food dashboard integration",
+  "date": "2026-10-25",
+  "migrations": [],
+  "notes": "Integrates the reviewed Capitalio dashboard structure into the native food module, removes its duplicate sidebar, preserves the existing product navigation, and reads live data only from local food APIs. No preview fixtures, iframe, external runtime, or database migration."
+}

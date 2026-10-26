@@ -31,7 +31,7 @@ class ReportController extends Controller
 
         $data = [
             'user' => $user,
-            'title' => 'گزارش تیکت‌ها',
+            'title' => 'گزارش درخواست‌ها',
         ];
 
         $this->view('report/tickets', $data);

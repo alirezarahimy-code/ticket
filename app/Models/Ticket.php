@@ -36,14 +36,14 @@ class Ticket extends Model
 
     public function findOpen(): array
     {
-        $query = db()->prepare("SELECT * FROM {$this->table} WHERE status NOT IN ('closed', 'resolved') ORDER BY created_at DESC");
+        $query = db()->prepare("SELECT * FROM {$this->table} WHERE status NOT IN ('closed', 'resolved', 'cancelled') ORDER BY created_at DESC");
         $query->execute();
         return $query->fetchAll();
     }
 
     public function findOverdue(): array
     {
-        $query = db()->prepare("SELECT * FROM {$this->table} WHERE due_at < NOW() AND status NOT IN ('closed', 'resolved') ORDER BY due_at ASC");
+        $query = db()->prepare("SELECT * FROM {$this->table} WHERE due_at < NOW() AND sla_paused_at IS NULL AND status NOT IN ('closed', 'resolved', 'cancelled') ORDER BY due_at ASC");
         $query->execute();
         return $query->fetchAll();
     }

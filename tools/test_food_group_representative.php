@@ -364,18 +364,18 @@ try {
     }
     $check('۱۰-ب: افزودن عضوِ گروه دیگر به این گروه هم رد می‌شود', $dupInGroup);
 
-    // ══════════ آزمون ۱۰-۵: آمار نگهبانی → توقف خودکار فیش چاپ‌نشده ══════════
-    echo "\n— آزمون ۱۰-۵: غایب‌کردن بعد از صدور فیش (آمار نگهبانی) —\n";
+    // ══════════ آزمون ۱۰-۵: آمار بازرسی → توقف خودکار فیش چاپ‌نشده ══════════
+    echo "\n— آزمون ۱۰-۵: غایب‌کردن بعد از صدور فیش (آمار بازرسی) —\n";
     $heldMember = $g1users[0];                      // عضوی که فیش امروزش صادر شده
     $hq = db()->prepare('SELECT id, ticket_key, print_status FROM food_ticket_events WHERE user_id = ? AND punch_date = ? ORDER BY id LIMIT 1');
     $hq->execute([$heldMember['id'], $today]);
     $heldRow = $hq->fetch() ?: null;
     if ($heldRow) {
         db()->prepare('UPDATE food_ticket_events SET print_status = "pending", next_retry_at = NULL WHERE id = ?')->execute([(int) $heldRow['id']]);
-        // ثبت غیبت از همان مسیر API پنل (همان کاری که مدیر بعد از تماس با نگهبانی می‌کند)
+        // ثبت غیبت از همان مسیر API پنل (همان کاری که مدیر بعد از تماس با بازرسی می‌کند)
         $apiHold = food_ticket_api_absence_save([
             'group_id' => $g1, 'date' => $today,
-            'absent' => [$heldMember['id']], 'present' => [], 'reason' => 'آمار نگهبانی: امروز نیامده',
+            'absent' => [$heldMember['id']], 'present' => [], 'reason' => 'آمار بازرسی: امروز نیامده',
         ], $admin);
         $hq->execute([$heldMember['id'], $today]);
         $afterHold = (string) $hq->fetchColumn();
@@ -393,7 +393,7 @@ try {
         // حاضر شدن دوباره → برگشت خودکار به صف چاپ
         $apiRel = food_ticket_api_absence_save([
             'group_id' => $g1, 'date' => $today,
-            'absent' => [], 'present' => [$heldMember['id']], 'reason' => 'اصلاح آمار نگهبانی',
+            'absent' => [], 'present' => [$heldMember['id']], 'reason' => 'اصلاح آمار بازرسی',
         ], $admin);
         $hq->execute([$heldMember['id'], $today]);
         $afterRelease = (string) $hq->fetchColumn();

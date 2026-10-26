@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — حذف شناسه‌های شخصی از چارت سازمانی (R14)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R14 removes national and personnel codes from all organization-chart people lists, pickers, management lists and position cards, including the CEO. The chart no longer queries or serializes those identifiers. Search remains name-based. No database migration is required."
+}

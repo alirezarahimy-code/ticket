@@ -81,7 +81,15 @@ $createdIds[] = $r2['id'];
 check('جمع درخواست‌های فعال همان روز = 3+3+5 = 11', food_guest_requested_total($tomorrow) === 11);
 
 check('بدون جایگاه در چارت ثبت نمی‌شود', str_contains(expect_error(fn () => food_guest_request_create($orphanManager, $base)), 'چارت سازمانی'));
-check('امروز قابل ثبت نیست', str_contains(expect_error(fn () => food_guest_request_create($manager, array_merge($base, ['request_date' => food_order_today()]))), 'آینده'));
+$today = food_order_today();
+$zone = food_order_timezone();
+$cutoff = food_guest_request_same_day_cutoff();
+$cutoffMinuteEnd = new DateTimeImmutable($today . ' ' . $cutoff . ':59', $zone);
+$afterCutoff = $cutoffMinuteEnd->modify('+1 second');
+check('امروز تا پایان دقیقهٔ مهلت قابل ثبت است', food_guest_request_date_error($today, $cutoffMinuteEnd) === null);
+check('امروز پس از پایان مهلت رد می‌شود', food_guest_request_date_error($today, $afterCutoff) !== null);
+check('روزهای گذشته قابل ثبت نیستند', food_guest_request_date_error((new DateTimeImmutable($today, $zone))->modify('-1 day')->format('Y-m-d'), $cutoffMinuteEnd) !== null);
+check('روزهای آینده بعد از مهلت امروز همچنان قابل ثبت هستند', food_guest_request_date_error($tomorrow, $afterCutoff) === null);
 check('تعداد صفر رد می‌شود', str_contains(expect_error(fn () => food_guest_request_create($manager, array_merge($base, ['guest_count' => '0']))), 'تعداد'));
 check('تعداد بیشتر از ۵۰۰ رد می‌شود', str_contains(expect_error(fn () => food_guest_request_create($manager, array_merge($base, ['guest_count' => '501']))), 'تعداد'));
 check('سازمان خالی رد می‌شود', str_contains(expect_error(fn () => food_guest_request_create($manager, array_merge($base, ['organization' => ' ']))), 'سازمان'));

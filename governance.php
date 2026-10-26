@@ -122,7 +122,7 @@ function gov_ticket_options(array $user, int $selected = 0): string
     [$where, $params] = ticket_scope($user);
     $query = db()->prepare('SELECT t.id, t.subject, t.ticket_type FROM tickets t ' . ($where ?: 'WHERE 1 = 1') . ' ORDER BY t.created_at DESC LIMIT 300');
     $query->execute($params);
-    $html = '<option value="">بدون تیکت مرجع</option>';
+    $html = '<option value="">بدون درخواست مرجع</option>';
     foreach ($query->fetchAll() as $ticket) {
         $label = ticket_number((int) $ticket['id']) . ' • ' . $ticket['subject'] . ' • ' . ticket_type_label((string) $ticket['ticket_type']);
         $html .= '<option value="' . (int) $ticket['id'] . '" ' . ((int) $ticket['id'] === $selected ? 'selected' : '') . '>' . e($label) . '</option>';
@@ -144,8 +144,9 @@ function gov_notify_linked_tickets(string $table, string $column, int $recordId,
 
 function gov_header(string $title, array $user): void
 {
-    $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
+    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
+    $themeMode = app_theme_mode();
     $__notif = notification_header_summary((int) $user['id']);
     $notificationCount = $__notif['unread'];
     $staffLinks = '<a href="index.php?page=queue">صف کاری</a><a href="index.php?page=reports">گزارش‌ها</a><a href="index.php?page=assets">شناسنامه‌های فنی</a><a href="governance.php">تغییر و مشکل</a>';
@@ -155,7 +156,7 @@ function gov_header(string $title, array $user): void
     if (in_array((string) $user['role'], ['primary_admin'], true)) {
         $staffLinks .= '<a href="index.php?page=organization">سازمان</a><a href="index.php?page=settings">تنظیمات</a><a href="ola.php">OLA</a>';
     }
-    echo '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a><nav class="topnav"><a href="index.php">داشبورد</a><a href="index.php?page=new-ticket">ثبت تیکت</a><a href="index.php?page=knowledge">دانش‌نامه</a>' . $staffLinks . '<a class="notification-link" href="index.php?page=notifications">اعلان‌ها' . ($notificationCount > 0 ? '<b>' . $notificationCount . '</b>' : '') . '</a><span class="user-chip">' . e($user['full_name']) . '</span><form class="logout-form" method="post" action="index.php">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">خروج</button></form></nav></div></header><div class="content-wrap"><div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $__notif['latest'] . '" aria-live="polite"></div>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.46"><link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body data-theme-mode="' . e($themeMode) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a><nav class="topnav">' . app_theme_toggle_markup() . '<a href="index.php">داشبورد</a><a href="index.php?page=new-ticket">ثبت درخواست</a><a href="index.php?page=knowledge">دانش‌نامه</a>' . $staffLinks . '<a class="notification-link" href="index.php?page=notifications">اعلان‌ها' . ($notificationCount > 0 ? '<b>' . $notificationCount . '</b>' : '') . '</a><span class="user-chip">' . e($user['full_name']) . '</span><form class="logout-form" method="post" action="index.php">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">خروج</button></form></nav></div></header><div class="content-wrap"><div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $__notif['latest'] . '" aria-live="polite"></div>';
     foreach (take_flash() as $flash) {
         echo '<div class="alert ' . e($flash['type']) . '">' . e($flash['message']) . '</div>';
     }
@@ -163,8 +164,8 @@ function gov_header(string $title, array $user): void
 
 function gov_footer(): void
 {
-    $appName = setting('app_name', (string) cfg('app.name', 'سامانه پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js"></script></body></html>';
+    $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js?v=3.4.27&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . '</body></html>';
 }
 
 $user = require_staff();
@@ -189,7 +190,7 @@ foreach ($governanceTables as $governanceTable) {
 $governanceTicketColumns = db_missing_columns('tickets', ['subject', 'requester_id', 'department_id', 'ticket_type', 'service_group', 'created_at']);
 if ($governanceTicketColumns) {
     gov_header('مدیریت تغییر و مشکل', $user);
-    echo '<section class="card empty-state"><h2>ساختار تیکت برای این ماژول کامل نیست.</h2><p>ابتدا Migrationهای تیکت و مسیر‌دهی را اجرا کنید، سپس صفحه را تازه‌سازی کنید.</p><p><code>upgrade-1.2-itsm.sql</code> و <code>upgrade-1.8-routing.sql</code></p><p class="muted">ستون‌های ناقص: ' . e(implode(', ', $governanceTicketColumns)) . '</p><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
+    echo '<section class="card empty-state"><h2>ساختار درخواست برای این ماژول کامل نیست.</h2><p>ابتدا Migrationهای درخواست و مسیر‌دهی را اجرا کنید، سپس صفحه را تازه‌سازی کنید.</p><p><code>upgrade-1.2-itsm.sql</code> و <code>upgrade-1.8-routing.sql</code></p><p class="muted">ستون‌های ناقص: ' . e(implode(', ', $governanceTicketColumns)) . '</p><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
     gov_footer();
     exit;
 }
@@ -212,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('عنوان و شرح تغییر الزامی است.');
             }
             if ($ticketId > 0 && (!$ticket || !gov_can_view_ticket($ticket, $user))) {
-                throw new RuntimeException('تیکت مرجع پیدا نشد یا دسترسی ندارید.');
+                throw new RuntimeException('درخواست مرجع پیدا نشد یا دسترسی ندارید.');
             }
             $departmentId = $ticket ? (int) ($ticket['department_id'] ?: 0) : (int) ($user['department_id'] ?? 0);
             if (in_array((string) $user['role'], ['manager', 'support_manager'], true)) {
@@ -338,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('عنوان و شرح مشکل الزامی است.');
             }
             if ($ticketId > 0 && (!$ticket || !gov_can_view_ticket($ticket, $user))) {
-                throw new RuntimeException('تیکت مرجع پیدا نشد یا دسترسی ندارید.');
+                throw new RuntimeException('درخواست مرجع پیدا نشد یا دسترسی ندارید.');
             }
             $departmentId = $ticket ? (int) ($ticket['department_id'] ?: 0) : (int) ($user['department_id'] ?? 0);
             if (in_array((string) $user['role'], ['manager', 'support_manager'], true)) {
@@ -389,13 +390,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $record = $kind === 'change' ? gov_fetch_change($recordId) : gov_fetch_problem($recordId);
             $ticket = gov_fetch_ticket($ticketId);
             if (!$record || !$ticket || !gov_can_view_record($record, $user) || !gov_can_view_ticket($ticket, $user)) {
-                throw new RuntimeException('رکورد یا تیکت برای اتصال معتبر نیست.');
+                throw new RuntimeException('رکورد یا درخواست برای اتصال معتبر نیست.');
             }
             $table = $kind === 'change' ? 'change_ticket_links' : 'problem_ticket_links';
             $column = $kind === 'change' ? 'change_id' : 'problem_id';
             db()->prepare('INSERT IGNORE INTO ' . $table . ' (' . $column . ', ticket_id, created_by) VALUES (?, ?, ?)')->execute([$recordId, $ticketId, $user['id']]);
             save_audit((int) $user['id'], $kind . '_ticket_linked', $ticketId, [$column => $recordId, 'ticket_id' => $ticketId]);
-            flash('success', 'تیکت به رکورد مدیریتی متصل شد.');
+            flash('success', 'درخواست به رکورد مدیریتی متصل شد.');
             redirect('governance.php?' . ($kind === 'change' ? 'change_id' : 'problem_id') . '=' . $recordId);
         }
     } catch (Throwable $exception) {
@@ -428,9 +429,9 @@ $problems = $problemQuery->fetchAll();
 $preselectedTicket = (int) ($_GET['ticket_id'] ?? 0);
 
 gov_header('مدیریت تغییر و مشکل', $user);
-echo '<section class="page-heading"><div><span class="eyebrow">ITSM Governance</span><h1>مدیریت تغییر و مشکل</h1><p>درخواست‌های تغییر با تأیید CAB و مشکلات ریشه‌ای با Known Error و راه‌حل موقت ثبت و پیگیری می‌شوند.</p></div><a class="button secondary" href="index.php?page=reports">گزارش تیکت‌ها</a></section>';
-echo '<section class="settings-grid"><div class="card form-card"><h2>ثبت درخواست تغییر</h2><p class="muted">تغییر پس از ارسال برای تصمیم سوپروایزر/CAB آماده می‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_change"><div class="form-grid"><label class="full">عنوان تغییر<input name="title" required maxlength="255" placeholder="مثلاً ارتقای سرور مالی"></label><label>ریسک<select name="risk_level"><option value="low">کم</option><option value="medium" selected>متوسط</option><option value="high">بالا</option><option value="critical">بحرانی</option></select></label><label>تیکت مرجع<select name="ticket_id">' . gov_ticket_options($user, $preselectedTicket) . '</select></label><label>شروع برنامه<input type="datetime-local" name="planned_start"></label><label>پایان برنامه<input type="datetime-local" name="planned_end"></label><label class="full">شرح فنی<textarea name="description" required rows="4"></textarea></label><label class="full">دلیل و منفعت<textarea name="justification" rows="3"></textarea></label><label class="full">اثر و سامانه‌های متاثر<textarea name="impact" rows="3"></textarea></label></div><button class="button" type="submit">ساخت پیش‌نویس تغییر</button></form></div>';
-echo '<div class="card form-card"><h2>ثبت مشکل ریشه‌ای</h2><p class="muted">چند رخداد مرتبط را می‌توان بعداً به یک Problem متصل کرد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_problem"><div class="form-grid"><label class="full">عنوان مشکل<input name="title" required maxlength="255" placeholder="مثلاً قطعی تکرارشونده چاپ در واحد مالی"></label><label>اولویت<select name="priority"><option value="normal">عادی</option><option value="urgent">فوری</option><option value="critical">حیاتی</option></select></label><label>تیکت مرجع<select name="ticket_id">' . gov_ticket_options($user, $preselectedTicket) . '</select></label><label class="full">شرح نشانه‌ها و دامنه اثر<textarea name="description" required rows="4"></textarea></label><label class="full">علت ریشه‌ای، در صورت مشخص‌بودن<textarea name="root_cause" rows="3"></textarea></label><label class="full">راه‌حل موقت / Workaround<textarea name="workaround" rows="3"></textarea></label><label class="check-label"><input type="checkbox" name="known_error" value="1"> خطای شناخته‌شده است</label></div><button class="button" type="submit">ساخت رکورد مشکل</button></form></div></section>';
+echo '<section class="page-heading"><div><span class="eyebrow">ITSM Governance</span><h1>مدیریت تغییر و مشکل</h1><p>درخواست‌های تغییر با تأیید CAB و مشکلات ریشه‌ای با Known Error و راه‌حل موقت ثبت و پیگیری می‌شوند.</p></div><a class="button secondary" href="index.php?page=reports">گزارش درخواست‌ها</a></section>';
+echo '<section class="settings-grid"><div class="card form-card"><h2>ثبت درخواست تغییر</h2><p class="muted">تغییر پس از ارسال برای تصمیم سوپروایزر/CAB آماده می‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_change"><div class="form-grid"><label class="full">عنوان تغییر<input name="title" required maxlength="255" placeholder="مثلاً ارتقای سرور مالی"></label><label>ریسک<select name="risk_level"><option value="low">کم</option><option value="medium" selected>متوسط</option><option value="high">بالا</option><option value="critical">بحرانی</option></select></label><label>درخواست مرجع<select name="ticket_id">' . gov_ticket_options($user, $preselectedTicket) . '</select></label><label>شروع برنامه<input type="datetime-local" name="planned_start"></label><label>پایان برنامه<input type="datetime-local" name="planned_end"></label><label class="full">شرح فنی<textarea name="description" required rows="4"></textarea></label><label class="full">دلیل و منفعت<textarea name="justification" rows="3"></textarea></label><label class="full">اثر و سامانه‌های متاثر<textarea name="impact" rows="3"></textarea></label></div><button class="button" type="submit">ساخت پیش‌نویس تغییر</button></form></div>';
+echo '<div class="card form-card"><h2>ثبت مشکل ریشه‌ای</h2><p class="muted">چند رخداد مرتبط را می‌توان بعداً به یک Problem متصل کرد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_problem"><div class="form-grid"><label class="full">عنوان مشکل<input name="title" required maxlength="255" placeholder="مثلاً قطعی تکرارشونده چاپ در واحد مالی"></label><label>اولویت<select name="priority"><option value="normal">عادی</option><option value="urgent">فوری</option><option value="critical">حیاتی</option></select></label><label>درخواست مرجع<select name="ticket_id">' . gov_ticket_options($user, $preselectedTicket) . '</select></label><label class="full">شرح نشانه‌ها و دامنه اثر<textarea name="description" required rows="4"></textarea></label><label class="full">علت ریشه‌ای، در صورت مشخص‌بودن<textarea name="root_cause" rows="3"></textarea></label><label class="full">راه‌حل موقت / Workaround<textarea name="workaround" rows="3"></textarea></label><label class="check-label"><input type="checkbox" name="known_error" value="1"> خطای شناخته‌شده است</label></div><button class="button" type="submit">ساخت رکورد مشکل</button></form></div></section>';
 
 echo '<section class="organization-grid"><section class="card form-card"><h2>درخواست‌های تغییر</h2><div class="category-list">';
 foreach ($changes as $change) {
@@ -484,11 +485,11 @@ if ($selectedChange) {
     if (!in_array($selectedChange['status'], ['draft', 'rejected'], true)) {
         echo '</div>';
     }
-    echo '<h3>تیکت‌های مرتبط</h3><div class="category-list">';
+    echo '<h3>درخواست‌های مرتبط</h3><div class="category-list">';
     foreach ($linkedTickets as $linkedTicket) {
         echo '<div><span><a href="index.php?page=ticket&id=' . (int) $linkedTicket['ticket_id'] . '"><strong>' . e(ticket_number((int) $linkedTicket['ticket_id'])) . ' • ' . e($linkedTicket['subject']) . '</strong></a><small>' . e(ticket_type_label($linkedTicket['ticket_type'])) . '</small></span></div>';
     }
-    echo '</div><form method="post" class="inline-form">' . csrf_field() . '<input type="hidden" name="action" value="link_governance_ticket"><input type="hidden" name="kind" value="change"><input type="hidden" name="record_id" value="' . (int) $selectedChange['id'] . '"><label>اتصال تیکت<select name="ticket_id" required>' . gov_ticket_options($user) . '</select></label><button class="button secondary" type="submit">اتصال</button></form><h3>تاریخچه CAB و اجرا</h3><div class="event-list">';
+    echo '</div><form method="post" class="inline-form">' . csrf_field() . '<input type="hidden" name="action" value="link_governance_ticket"><input type="hidden" name="kind" value="change"><input type="hidden" name="record_id" value="' . (int) $selectedChange['id'] . '"><label>اتصال درخواست<select name="ticket_id" required>' . gov_ticket_options($user) . '</select></label><button class="button secondary" type="submit">اتصال</button></form><h3>تاریخچه CAB و اجرا</h3><div class="event-list">';
     foreach ($approvalQuery->fetchAll() as $approval) {
         echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e(gov_change_status_label($approval['decision'])) . '</strong><small>' . e($approval['full_name'] ?: 'سامانه') . ' • ' . e(jalali_date($approval['created_at'])) . '</small></div><em>' . e($approval['note'] ?: '') . '</em></div>';
     }
@@ -510,11 +511,11 @@ if ($selectedProblem) {
     foreach (['normal', 'urgent', 'critical'] as $priority) {
         echo '<option value="' . $priority . '" ' . ($selectedProblem['priority'] === $priority ? 'selected' : '') . '>' . e(priority_label($priority)) . '</option>';
     }
-    echo '</select></label><label class="full">علت ریشه‌ای<textarea name="root_cause" rows="4">' . e($selectedProblem['root_cause'] ?: '') . '</textarea></label><label class="full">راه‌حل موقت / Workaround<textarea name="workaround" rows="4">' . e($selectedProblem['workaround'] ?: '') . '</textarea></label><label class="check-label"><input type="checkbox" name="known_error" value="1" ' . ((int) $selectedProblem['known_error'] === 1 ? 'checked' : '') . '> خطای شناخته‌شده</label></div><button class="button" type="submit">ذخیره تحلیل مشکل</button></form><h3>تیکت‌های مرتبط</h3><div class="category-list">';
+    echo '</select></label><label class="full">علت ریشه‌ای<textarea name="root_cause" rows="4">' . e($selectedProblem['root_cause'] ?: '') . '</textarea></label><label class="full">راه‌حل موقت / Workaround<textarea name="workaround" rows="4">' . e($selectedProblem['workaround'] ?: '') . '</textarea></label><label class="check-label"><input type="checkbox" name="known_error" value="1" ' . ((int) $selectedProblem['known_error'] === 1 ? 'checked' : '') . '> خطای شناخته‌شده</label></div><button class="button" type="submit">ذخیره تحلیل مشکل</button></form><h3>درخواست‌های مرتبط</h3><div class="category-list">';
     foreach ($linkQuery->fetchAll() as $linkedTicket) {
         echo '<div><span><a href="index.php?page=ticket&id=' . (int) $linkedTicket['ticket_id'] . '"><strong>' . e(ticket_number((int) $linkedTicket['ticket_id'])) . ' • ' . e($linkedTicket['subject']) . '</strong></a><small>' . e(ticket_type_label($linkedTicket['ticket_type'])) . '</small></span></div>';
     }
-    echo '</div><form method="post" class="inline-form">' . csrf_field() . '<input type="hidden" name="action" value="link_governance_ticket"><input type="hidden" name="kind" value="problem"><input type="hidden" name="record_id" value="' . (int) $selectedProblem['id'] . '"><label>اتصال تیکت<select name="ticket_id" required>' . gov_ticket_options($user) . '</select></label><button class="button secondary" type="submit">اتصال</button></form></section>';
+    echo '</div><form method="post" class="inline-form">' . csrf_field() . '<input type="hidden" name="action" value="link_governance_ticket"><input type="hidden" name="kind" value="problem"><input type="hidden" name="record_id" value="' . (int) $selectedProblem['id'] . '"><label>اتصال درخواست<select name="ticket_id" required>' . gov_ticket_options($user) . '</select></label><button class="button secondary" type="submit">اتصال</button></form></section>';
 }
 
 gov_footer();

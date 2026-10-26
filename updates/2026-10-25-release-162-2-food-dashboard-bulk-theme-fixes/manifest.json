@@ -1,0 +1,9 @@
+{
+  "version": "1.62.2",
+  "release": "1.62.2",
+  "title": "Ticket 1.62.2 — food dashboard, theme, and emergency bulk-operation fixes",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.2-food-dashboard-bulk-theme-fixes-20261025.zip",
+  "migrations": [],
+  "notes": "Cumulative offline food-module update: includes the runtime files from 1.62.1 plus required local R42 dashboard/theme assets. Removes duplicate printed-event counting, provides a visible dashboard summary if the dashboard bundle fails to load, applies day/night mode to the full food panel shell, and permits past-date bulk order/cancellation only while the primary-admin-granted emergency window for that exact date and meal remains active. Bulk canteen changes remain unavailable for past dates. No schema migration, cloud service, or online dependency."
+}

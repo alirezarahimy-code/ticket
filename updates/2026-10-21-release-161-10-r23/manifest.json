@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — گزارش‌های فشرده و چیدمان چاپ R23",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "R23 arranges food statistics as one row for a single day and two days per row for longer ranges, keeps employee numbering vertical, sizes report columns to their content with sensible minimums, separates only repeated blocks, and removes forced landscape page rules so the printer dialog orientation applies throughout. Builds on R22; no production data changed."
+}

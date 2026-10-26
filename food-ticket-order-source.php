@@ -4,7 +4,7 @@ declare(strict_types=1);
 /**
  * لایهٔ منبع سفارش فیش.
  * در این نسخه سفارش فقط از MySQL داخلی خوانده می‌شود؛ این فایل به ODBC سفارش وصل نمی‌شود.
- * Access منبع تردد TENTER در مسیر اصلی Worker دست‌نخورده باقی می‌ماند.
+ * منبع بیرونی تردد در مسیر اصلی Worker دست‌نخورده باقی می‌ماند.
  */
 
 function food_order_internal_map(string $isoDate): array
@@ -20,7 +20,7 @@ function food_order_internal_map(string $isoDate): array
         JOIN users u ON u.id = o.employee_id
         JOIN food_calendar_items i ON i.id = o.calendar_item_id AND i.active = 1
         JOIN food_catalog c ON c.id = i.food_id AND c.active = 1
-        WHERE o.food_date = ? AND o.status = 'active'
+        WHERE o.food_date = ? AND o.meal_type = 'lunch' AND o.status = 'active'
         ORDER BY o.id");
     $stmt->execute([$date]);
     $map = [];
@@ -66,7 +66,7 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
         JOIN users u ON u.id = o.employee_id
         JOIN food_calendar_items i ON i.id = o.calendar_item_id
         JOIN food_catalog c ON c.id = i.food_id
-        WHERE o.food_date BETWEEN ? AND ? AND o.status = 'active'
+        WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'
         ORDER BY o.food_date, u.full_name, o.id");
     $stmt->execute([$from, $to]);
     $items = [];
