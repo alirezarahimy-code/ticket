@@ -1,0 +1,27 @@
+{
+  "name": "release-162-34-attendance-delivery-reconciliation",
+  "version": "1.62.34",
+  "date": "2026-10-27",
+  "title": "همگام‌سازی فیش/تحویل غذا، وضعیت غیبت و شناسنامهٔ سیستم",
+  "requires_version": "1.62.25",
+  "migrations": [
+    "011-manual-attendance-delivery.sql",
+    "012-manual-attendance-clears-absences.sql"
+  ],
+  "files": [
+    "VERSION",
+    "food-order.php",
+    "food-ticket.php",
+    "food-ticket-groups.php",
+    "food-ticket-web/assets/food-manual-attendance.js",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "permissions.php",
+    "index.php",
+    "actions/settings-actions.php",
+    "assets/style.css",
+    "asset-profile.php",
+    "asset-inventory-page.php"
+  ],
+  "notes": "بستهٔ تجمعی شامل فرم کامل شناسنامهٔ فنی است. فیش‌های دستی چاپ‌شدهٔ قبلی به delivered تبدیل می‌شوند؛ ثبت‌های دستی تردد قبلی (با فیش یا بدون فیش) از رکورد غیبت همان روز پاک می‌شوند. از این پس ثبت دستی حضور هم وضعیت تحویل فیش را ثبت می‌کند و هم غیبت متناقض را با Audit حذف می‌کند. رویدادهای هنوز در صف چاپ فیزیکی تا چاپ موفق delivered نمی‌شوند. خطای schema شناسنامه نیز با پیام قابل اقدام نمایش داده می‌شود."
+}

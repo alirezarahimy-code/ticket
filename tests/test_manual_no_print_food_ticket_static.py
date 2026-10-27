@@ -6,7 +6,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = "ticket-update-1.62.33-manual-delivery-and-technical-profile-20261027.zip"
+NAME = "ticket-update-1.62.34-attendance-delivery-and-system-profile-20261027.zip"
 PACKAGE = ROOT / "downloads" / NAME
 
 
@@ -27,6 +27,7 @@ def test_existing_settings_manual_attendance_bug_fix_package():
     assert not (ROOT / "downloads/ticket-update-1.62.30-admin-settings-manual-ticket-20261027.zip").exists()
     assert not (ROOT / "downloads/ticket-update-1.62.31-manual-attendance-existing-no-food-conversion-20261027.zip").exists()
     assert not (ROOT / "downloads/ticket-update-1.62.32-manual-ticket-counts-as-delivered-20261027.zip").exists()
+    assert not (ROOT / "downloads/ticket-update-1.62.33-manual-delivery-and-technical-profile-20261027.zip").exists()
     expected = {
         "VERSION",
         "food-order.php",
@@ -45,17 +46,21 @@ def test_existing_settings_manual_attendance_bug_fix_package():
     with ZipFile(PACKAGE) as archive:
         assert archive.testzip() is None
         manifest = json.loads(archive.read("manifest.json"))
-        assert manifest["version"] == "1.62.33"
+        assert manifest["version"] == "1.62.34"
         assert manifest["requires_version"] == "1.62.25"
         assert len(manifest["files"]) == len(set(manifest["files"]))
-        assert manifest["migrations"] == ["011-manual-attendance-delivery.sql"]
+        assert manifest["migrations"] == ["011-manual-attendance-delivery.sql", "012-manual-attendance-clears-absences.sql"]
         migration = archive.read("migrations/011-manual-attendance-delivery.sql").decode("utf-8")
         assert "source_uid = 'manual-attendance'" in migration
         assert "event_type = 'printed'" in migration and "print_status = 'printed'" in migration
         assert "delivery_status = 'delivered'" in migration
+        absence_migration = archive.read("migrations/012-manual-attendance-clears-absences.sql").decode("utf-8")
+        assert "food_ticket_daily_absence" in absence_migration
+        assert "event.source_uid = 'manual-attendance'" in absence_migration
+        assert "event.event_type IN ('printed', 'no_food')" in absence_migration
         assert set(manifest["files"]) == expected
         assert {n[6:] for n in archive.namelist() if n.startswith("files/")} == expected
-        assert archive.read("files/VERSION").decode().strip() == "1.62.33"
+        assert archive.read("files/VERSION").decode().strip() == "1.62.34"
 
         groups = archive.read("files/food-ticket-groups.php").decode("utf-8")
         panel = archive.read("files/food-ticket-web/assets/food-manual-attendance.js").decode("utf-8")
@@ -97,6 +102,8 @@ def test_existing_settings_manual_attendance_bug_fix_package():
         assert "if ($withTicket && !$physicalPrint && function_exists('food_ticket_mark_delivered_on_print'))" in save
         assert "'delivery_status' => ($withTicket && !$physicalPrint) ? 'delivered' : 'pending'" in save
         assert "food_ticket_mark_delivered_on_print($id)" in (ROOT / "food-ticket-runtime.php").read_text(encoding="utf-8")
+        assert "food_ticket_manual_attendance_clear_absence($userId, $targetDate, $actor, $reason)" in save
+        assert "'absence_cleared' => $absenceCleared" in save
         assert "در سامانه چاپ‌شده؛ چاپ فیزیکی انجام نشد" in panel
         assert "1.37.27" in host and "PANEL_VERSION='1.37.27'" in panel_index
 
@@ -109,4 +116,4 @@ def test_existing_settings_manual_attendance_bug_fix_package():
     assert digest in (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
     assert NAME in page and f"{NAME}.sha256" in page
-    assert "۱.۶۲.۲۹" in page and "۱.۶۲.۳۰" in page and "۱.۶۲.۳۲" in page and "۱.۶۲.۳۳" in page
+    assert "۱.۶۲.۲۹" in page and "۱.۶۲.۳۰" in page and "۱.۶۲.۳۳" in page and "۱.۶۲.۳۴" in page
