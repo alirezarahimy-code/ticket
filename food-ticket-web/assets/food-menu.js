@@ -39,6 +39,7 @@
     deliveredReportEmployeeCount: 0,
     deliveredReportGuestCount: 0,
     deliveredReportView: 'list',
+    deliveredReportDate: '',
     deliveredReportSort: { key: 'row', dir: 'asc' },
     deliveredReportFields: ['row', 'national_code', 'employee_number', 'full_name', 'food_name', 'food_date', 'punch_time', 'record_type', 'menu_no', 'delivered_at'],
     monthData: null,
@@ -578,21 +579,29 @@
       return a - b;
     }).reduce(function (all, key) { return all.concat(sortDeliveredReportRows(groups[key])); }, []);
   }
+  /** تاریخ تکروز گزارش غذای تحویلی — مستقل از بازهٔ آمار سفارشها. */
+  function deliveryDateForReport() {
+    return state.deliveredReportDate || state.statisticsFrom || state.selectedDate || (state.status && state.status.today) || localTodayIso();
+  }
+
   function renderPrintedDeliveryReport() {
     var fields = DELIVERED_REPORT_COLUMNS.map(function (column) {
       var checked = state.deliveredReportFields.indexOf(column.key) >= 0 ? ' checked' : '';
       return '<label class="fm-report-field"><input type="checkbox" data-fm-delivery-field="' + column.key + '"' + checked + '><span>' + esc(column.label) + '</span></label>';
     }).join('');
     var viewBar = '<div class="fm-view-switch"><button class="btn ' + (state.deliveredReportView === 'list' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="list">فهرست یکجا</button><button class="btn ' + (state.deliveredReportView === 'menu' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-delivery-view="menu">نمایش بر اساس منو</button></div>';
-    var dateRange = jalaliFromIso(state.statisticsFrom || '') + (state.statisticsFrom === state.statisticsTo ? '' : ' تا ' + jalaliFromIso(state.statisticsTo || ''));
+    var singleDate = state.deliveredReportDate || state.statisticsFrom || state.selectedDate || (state.status && state.status.today) || localTodayIso();
+    var singleDateLabel = jalaliFromIso(singleDate) || '';
+    var dateForm = '<form id="fm-delivery-date" class="fm-order-date"><label class="fm-field">تاریخ گزارش<input type="text" name="date" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(singleDateLabel)) + '" required></label><button class="btn primary" type="submit">نمایش گزارش</button><button class="btn secondary" type="button" data-fm-action="delivery-today">امروز</button></form>';
     var results = state.deliveredReportLoading
       ? '<div class="fm-spinner">در حال دریافت فهرست فیش‌های تحویل‌شده…</div>'
       : '<div class="fm-delivery-counts"><div><span>پرسنل</span><strong>' + faDigits(state.deliveredReportEmployeeCount) + '</strong></div><div><span>فیش مهمان چاپ‌شده</span><strong>' + faDigits(state.deliveredReportGuestCount) + '</strong></div></div>'
         + viewBar + '<div class="fm-table-wrap fm-delivery-report-results">' + (state.deliveredReportView === 'menu' ? deliveredReportByMenuHtml(state.deliveredReport) : deliveredReportTableHtml(state.deliveredReport)) + '</div>';
     var actionsEnabled = state.deliveredReportLoaded && !state.deliveredReportLoading;
-    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">بازه: ' + esc(faDigits(dateRange || '—')) + ' — پرسنل فقط با فیش چاپ‌شده و وضعیت تحویل‌شده؛ مهمان با فیش چاپ‌شده. وضعیت تحویل در سامانه از ثبت چاپ می‌آید و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
+    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">تاریخ: ' + esc(faDigits(singleDateLabel || '—')) + ' — پرسنل فقط با فیش چاپ‌شده و وضعیت تحویل‌شده؛ مهمان با فیش چاپ‌شده. وضعیت تحویل در سامانه از ثبت چاپ می‌آید و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
+      + dateForm
       + '<div class="fm-report-fields"><strong>فیلدهای گزارش</strong>' + fields + '</div>'
-      + (state.deliveredReportLoaded || state.deliveredReportLoading ? results : '<div class="fm-empty">برای نمایش گزارش، بازهٔ تاریخ آمار سفارش‌ها را انتخاب کنید.</div>')
+      + (state.deliveredReportLoaded || state.deliveredReportLoading ? results : '<div class="fm-empty">تاریخ موردنظر را انتخاب کنید و «نمایش گزارش» بزنید.</div>')
       + '</section>';
   }
   async function loadPrintedDeliveryReport(fromDate, toDate) {
@@ -636,11 +645,11 @@
     });
     var exportApi = global.ITSM_LIST_SORT;
     if (exportApi && typeof exportApi.exportXlsx === 'function') {
-      exportApi.exportXlsx('فیش‌های چاپ‌شده و تحویل‌شده ' + faDigits(jalaliFromIso(state.statisticsFrom) || ''), columns.map(function (column) { return column.label; }), rows, 'food-delivered-' + state.statisticsFrom + '-' + state.statisticsTo, null);
+      exportApi.exportXlsx('فیش‌های چاپ‌شده و تحویل‌شده ' + faDigits(jalaliFromIso(deliveryDateForReport()) || ''), columns.map(function (column) { return column.label; }), rows, 'food-delivered-' + deliveryDateForReport(), null);
       return;
     }
     global.location.href = buildUrl('food-menu/printed-delivery-export', {
-      from: state.statisticsFrom, to: state.statisticsTo,
+      from: deliveryDateForReport(), to: deliveryDateForReport(),
       fields: columns.map(function (column) { return column.key; }).join(','), view: state.deliveredReportView,
     });
   }
@@ -1017,7 +1026,7 @@
     var from = state.statisticsFrom || state.selectedDate;
     var to = state.statisticsTo || state.selectedDate;
     if (state.embeddedMode === 'todayorders') return loadOrders(state.ordersDate || state.selectedDate);
-    if (state.embeddedMode === 'delivered') return loadPrintedDeliveryReport(from, to);
+    if (state.embeddedMode === 'delivered') { var d = deliveryDateForReport(); return loadPrintedDeliveryReport(d, d); }
     return loadStatistics(from, to, state.statisticsMode || 'food');
   }
 
@@ -1164,7 +1173,7 @@
     var to = normalizeIsoDate(toDate || state.statisticsTo || from);
     var selectedMode = String(mode || state.statisticsMode || 'food');
     if (!from || !to || from > to || !['food', 'employee', 'selected'].includes(selectedMode)) return;
-    loadPrintedDeliveryReport(from, to);
+    loadPrintedDeliveryReport(deliveryDateForReport(), deliveryDateForReport());
     var selectedIds = (state.reportSelectedEmployees || []).map(function (person) { return Number(person.id); }).filter(function (id) { return id > 0; });
     if (selectedMode === 'selected' && !selectedIds.length) {
       state.statisticsFrom = from; state.statisticsTo = to; state.statisticsMode = selectedMode;
@@ -1688,6 +1697,11 @@
       if (act === 'group-orders-print') printScopedReport('.fm-group-orders .fm-group-report-content', 'fm-print-group-orders');
       if (act === 'statistics-export') downloadStatistics();
       if (act === 'statistics-print') printStatistics();
+      if (act === 'delivery-today') {
+        state.deliveredReportDate = (state.status && state.status.today) || localTodayIso();
+        state.deliveredReportRange = '';
+        loadPrintedDeliveryReport(state.deliveredReportDate, state.deliveredReportDate);
+      }
       if (act === 'delivered-report-view') { state.deliveredReportView = action.dataset.deliveryView === 'menu' ? 'menu' : 'list'; render(); }
       if (act === 'delivered-report-export') exportPrintedDeliveryReport();
       if (act === 'delivered-report-print') printPrintedDeliveryReport();
@@ -1808,6 +1822,16 @@
     }
     if (form.matches('[data-fm-catalog-edit]')) {
       event.preventDefault(); saveCatalog(form); return;
+    }
+    if (form.id === 'fm-delivery-date') {
+      event.preventDefault();
+      var picked = normalizeIsoDate(new FormData(form).get('date'));
+      if (!picked) { state.error = 'تاریخ معتبری انتخاب کنید.'; render(); return; }
+      state.deliveredReportDate = picked;
+      state.deliveredReportRange = '';
+      state.error = '';
+      loadPrintedDeliveryReport(picked, picked);
+      return;
     }
     if (form.id === 'fm-orders-date') {
       event.preventDefault();

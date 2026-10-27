@@ -141,7 +141,7 @@ assets/chatbot-drag.js	assets	173	7358
 assets/custom.css	assets	217	3678
 assets/fonts/README.md	assets	10	767
 assets/food-menu.css	assets	345	32211
-assets/food-menu.js	assets	1875	134917
+assets/food-menu.js	assets	1899	136523
 assets/food-order-calendar.js	assets	102	4186
 assets/food-order-guest.js	assets	222	11678
 assets/food-order.css	assets	176	16575
@@ -241,7 +241,7 @@ food-ticket-web/assets/food-designer.js	food-web	881	69298
 food-ticket-web/assets/food-groups.js	food-web	511	34668
 food-ticket-web/assets/food-manual-attendance.js	food-web	332	21972
 food-ticket-web/assets/food-menu.css	food-web	345	32211
-food-ticket-web/assets/food-menu.js	food-web	1875	134917
+food-ticket-web/assets/food-menu.js	food-web	1899	136523
 food-ticket-web/assets/food-order-calendar.js	food-web	102	4186
 food-ticket-web/assets/food-order.css	food-web	176	16575
 food-ticket-web/assets/food-ticket-global-theme-r42.css	food-web	168	14815
@@ -419,6 +419,7 @@ tools/benchmark_system_resilience.py	tools	367	22411
 tools/build_system_map.py	tools	474	27127
 tools/collect_server_inventory.ps1	tools	252	16147
 tools/db_health_report.php	tools	128	5847
+tools/diag_asset_duplicates.php	tools	78	4896
 tools/diag_asset_profile.php	tools	162	7914
 tools/diag_connection.php	tools	257	18800
 tools/diag_food_duplicates.php	tools	30	1627
