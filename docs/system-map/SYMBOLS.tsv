@@ -2495,6 +2495,8 @@ read	def	tests/test_role_permissions_ui_static.py	4	tests
 check	def	tests/test_role_permissions_ui_static.py	8	tests
 read	def	tests/test_schema_heal_static.py	6	tests
 check	def	tests/test_schema_heal_static.py	10	tests
+main	def	tests/test_session_boot_static.py	47	tests
+check	def	tests/test_session_boot_static.py	52	tests
 sections	def	tests/test_skill_manifest_static.py	50	tests
 foreign_characters	def	tests/test_skill_manifest_static.py	66	tests
 main	def	tests/test_skill_manifest_static.py	78	tests
@@ -2666,6 +2668,18 @@ Invoke-Php	invoke-php	tools/install_food_ticket_worker.ps1	25	tools
 grabFunction	function	tools/preview_asset_names.php	21	tools
 setting	function	tools/preview_asset_names.php	45	tools
 e	function	tools/preview_asset_names.php	49	tools
+read	def	tools/session-boot.py	47	tools
+run	def	tools/session-boot.py	54	tools
+git_info	def	tools/session-boot.py	64	tools
+q	def	tools/session-boot.py	67	tools
+extract_section	def	tools/session-boot.py	85	tools
+skill_rows	def	tools/session-boot.py	103	tools
+bullets	def	tools/session-boot.py	113	tools
+refresh_map_if_stale	def	tools/session-boot.py	118	tools
+run_guard_tests	def	tools/session-boot.py	135	tools
+build_context	def	tools/session-boot.py	147	tools
+print_briefing	def	tools/session-boot.py	202	tools
+main	def	tools/session-boot.py	280	tools
 APP_ROOT	const	tools/set_print_gap.php	16	tools
 APP_ROOT	const	tools/test_access_coverage_offline.php	19	tools
 db	function	tools/test_access_coverage_offline.php	23	tools
