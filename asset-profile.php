@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/asset-names.php';
+if (function_exists('asset_profile_column_sql')) { return; }
 
 function asset_profile_column_sql(): array
 {
@@ -340,59 +341,6 @@ function asset_profile_fill_from_asset(array $profile, array $asset): array
     $profile['_field_provenance'] = $fieldProvenance;
     return $profile;
 }
-
-/** Summarize current collector status separately from values retained from older scans. */
-function asset_profile_collection_status_summary(array $asset): array
-{
-    $hardware = json_decode((string) ($asset['hardware_json'] ?? ''), true);
-    $hardware = is_array($hardware) ? $hardware : [];
-    $status = is_array($hardware['collection_status'] ?? null)
-        ? $hardware['collection_status']
-        : (is_array($asset['collection_status'] ?? null) ? $asset['collection_status'] : []);
-    $labels = [
-        'root/cimv2|Win32_ComputerSystem' => 'مشخصات پایهٔ رایانه',
-        'root/cimv2|Win32_BIOS' => 'BIOS و سریال دستگاه',
-        'root/cimv2|Win32_Processor' => 'پردازنده',
-        'root/cimv2|Win32_OperatingSystem' => 'سیستم‌عامل',
-        'root/cimv2|Win32_PhysicalMemory' => 'ماژول‌های RAM',
-        'root/cimv2|Win32_DiskDrive' => 'دیسک‌های فیزیکی',
-        'root/cimv2|Win32_VideoController' => 'کارت گرافیک',
-        'root/cimv2|Win32_NetworkAdapterConfiguration' => 'پیکربندی شبکه',
-        'root/cimv2|Win32_Printer' => 'چاپگرها',
-        'root/cimv2|Win32_PnPEntity' => 'تجهیزات Plug and Play',
-        'root/wmi|WmiMonitorID' => 'شناسهٔ مانیتورها',
-        'root/Microsoft/Windows/Storage|MSFT_PhysicalDisk' => 'اطلاعات ذخیره‌سازهای پیشرفته',
-        'root/Microsoft/Windows/Storage|MSFT_StorageReliabilityCounter' => 'شاخص‌های سلامت ذخیره‌ساز',
-        'root/wmi|MSStorageDriver_FailurePredictStatus' => 'وضعیت SMART',
-    ];
-    $issues = [];
-    foreach ($status as $key => $result) {
-        if (!is_array($result)) {
-            continue;
-        }
-        $ok = ($result['ok'] ?? false) === true;
-        $count = max(0, (int) ($result['count'] ?? 0));
-        if (($result['attempted'] ?? true) === false || !array_key_exists('ok', $result) || $result['ok'] === null) {
-            $issues[] = ['name' => $labels[$key] ?? (string) $key, 'state' => 'not_attempted'];
-        } elseif ($ok === false) {
-            $issues[] = [
-                'name' => $labels[$key] ?? (string) $key,
-                'state' => 'failed',
-                'last_success_at' => (string) ($result['last_success_at'] ?? ''),
-                'last_success_source' => (string) ($result['last_success_source'] ?? ''),
-            ];
-        } elseif ($ok === true && $count === 0) {
-            $issues[] = ['name' => $labels[$key] ?? (string) $key, 'state' => 'empty'];
-        }
-    }
-    return $issues;
-}
-
-/**
- * واکشی گروهی شناسنامه‌ها با یک کوئری (جلوگیری از N+1 در لیست/خروجی).
- * @param int[] $assetIds
- * @return array<int, array>
- */
 
 /** Summarize current collector status separately from values retained from older scans. */
 function asset_profile_collection_status_summary(array $asset): array

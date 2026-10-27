@@ -103,7 +103,7 @@ actions/supervisor-actions.php	actions	154	13444
 actions/ticket-actions.php	actions	646	55042
 actions/user-structure-actions.php	actions	367	28765
 admin-layout-design.php	core	361	15733
-api/inventory.php	api	205	9604
+api/inventory.php	api	205	9609
 app/Controllers/DashboardController.php	app-mvc	24	446
 app/Controllers/ReportController.php	app-mvc	39	774
 app/Controllers/SettingsController.php	app-mvc	39	770
@@ -132,7 +132,7 @@ app/Views/ticket/reply.php	app-mvc	31	1092
 app/Views/ticket/show.php	app-mvc	35	1138
 asset-inventory-page.php	core	89	11576
 asset-names.php	core	198	9128
-asset-profile.php	core	1086	58881
+asset-profile.php	core	1034	56159
 assets/admin-layout-design.css	assets	78	9731
 assets/admin-layout-design.js	assets	897	46367
 assets/app.js	assets	1386	79573
@@ -259,7 +259,7 @@ food-ticket.php	core	5041	243803
 global-search.php	core	121	12295
 governance.php	core	521	47339
 help-guide.php	core	658	120336
-index.php	core	3454	338664
+index.php	core	3454	338679
 install-empty-db.sql	sql-root	1310	65606
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
