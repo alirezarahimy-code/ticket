@@ -9,7 +9,7 @@ const html = fs.readFileSync(path.join(root, 'food-ticket-web/index.html'), 'utf
 const start = html.indexOf('const AGG_FIELDS_KEY=');
 const fnEnd = html.indexOf('function reportClassicView(){', start);
 assert(start > 0 && fnEnd > start, 'بلوک توابع گزارش تجمیعی در index.html پیدا نشد');
-const hStart = html.indexOf("document.addEventListener('click',e=>{\n const tab=e.target.closest&&e.target.closest('[data-report-tab]')", fnEnd);
+const hStart = html.indexOf("document.addEventListener('click',e=>{\n const sortBtn=", fnEnd);
 const hEndMarker = "document.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a?.dataset.action==='today-orders'){e.preventDefault();";
 const hEnd = html.indexOf(hEndMarker, hStart);
 assert(hStart > 0 && hEnd > hStart, 'بلوک هندلرهای گزارش تجمیعی پیدا نشد');
@@ -65,7 +65,7 @@ const env = {
 const names = Object.keys(env);
 const fn = new Function(...names, `${block}; return {
   reportView, reportAggregateView, aggFields, aggSaveFields, aggRange, aggDateLabel,
-  aggCell, aggTable, aggSelectedCols, aggSorted, aggLastName, loadAggregate, aggDownloadUrl, showAggregatePreview,
+  aggCell, aggTable, aggSelectedCols, aggSorted, aggLastName, aggSortValue, loadAggregate, aggDownloadUrl, showAggregatePreview,
   AGG_ALL_FIELDS, AGG_DEFAULT_FIELDS
 };`);
 const m = fn(...names.map((n) => env[n]));
@@ -120,8 +120,8 @@ m.aggSaveFields(['pc', 'name']);
 assert.deepStrictEqual(m.aggFields(), ['pc', 'name'], 'ذخیره/بازیابی فیلدها کار نمیکند');
 assert.strictEqual(m.aggSelectedCols().length, 2, 'تعداد ستونهای انتخابشده نادرست است');
 out = m.aggTable([{ pc: '1', name: 'الف' }], 'خالی');
-assert(out.includes('<th>کد پرسنلی</th>') && out.includes('<th>نام و نام خانوادگی</th>'), 'سرستونها ناقصاند');
-assert(!out.includes('<th>نوع غذا</th>'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
+assert(out.includes('data-agg-sort="pc"') && out.includes('data-agg-sort="name"'), 'سرستونها ناقصاند');
+assert(!out.includes('data-agg-sort="food"'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
 assert(out.includes('agg-block-start'), 'بلوکبندی ۳تایی برای ۲ فیلد اعمال نشد');
 storage.clear();
 
@@ -130,6 +130,15 @@ m.aggSaveFields(['name']);
 const sorted = m.aggSorted([{name:'علی رضایی'},{name:'مهدی احمدی'},{name:'رضا باقری'}]);
 assert.deepStrictEqual(sorted.map(x=>x.name), ['مهدی احمدی','رضا باقری','علی رضایی'], 'سورت نام خانوادگی نادرست است');
 storage.clear();
+
+// ۵ج) سورت کلیکی سرستونها
+env.state.aggSort={key:'pc',dir:'asc'};
+assert.deepStrictEqual(m.aggSorted([{pc:'2',name:'الف ب'},{pc:'1',name:'ج د'}]).map(x=>x.pc),['1','2'],'سورت بر اساس کد پرسنلی کار نکرد');
+env.state.aggSort={key:'name',dir:'desc'};
+assert(m.aggSorted([{name:'علی احمدی'},{name:'رضا باقری'}]).map(x=>x.name).join()==='رضا باقری,علی احمدی','سورت نزولی نام خانوادگی کار نکرد');
+out=m.aggTable([{name:'علی احمدی'},{name:'رضا باقری'}],'خالی');
+assert(out.includes('data-agg-sort="name"') && out.includes('agg-sort-btn'),'سرستون قابل کلیک نیست');
+delete env.state.aggSort;
 
 // ۶) کلیک تب → تغییر state و رندر
 const before = renderCount;
