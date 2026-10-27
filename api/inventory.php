@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__) . '/lib/asset-identity.php';
+require_once dirname(__DIR__) . '/asset-names.php';
 
 require dirname(__DIR__) . '/bootstrap.php';
 require dirname(__DIR__) . '/inventory.php';

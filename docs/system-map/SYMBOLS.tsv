@@ -193,6 +193,9 @@ asset_is_auto_domain_tag	function	asset-names.php	86	core
 asset_name_title	function	asset-names.php	96	core
 asset_name_attr	function	asset-names.php	111	core
 asset_tag_label	function	asset-names.php	118	core
+asset_identity_key	function	asset-names.php	138	core
+asset_resolve_id	function	asset-names.php	157	core
+asset_sync_identity_key	function	asset-names.php	187	core
 asset_profile_column_sql	function	asset-profile.php	4	core
 asset_profile_ensure_schema	function	asset-profile.php	24	core
 asset_profile_sections	function	asset-profile.php	63	core
@@ -1868,9 +1871,6 @@ ops_low_value_tables_prune	function	lib/activity-audit.php	356	lib
 activity_log_retention_days	function	lib/activity-audit.php	380	lib
 save_audit	function	lib/activity-audit.php	386	lib
 log_ticket_event	function	lib/activity-audit.php	398	lib
-asset_identity_key	function	lib/asset-identity.php	16	lib
-asset_resolve_id	function	lib/asset-identity.php	35	lib
-asset_sync_identity_key	function	lib/asset-identity.php	65	lib
 current_user	function	lib/auth-scope.php	13	lib
 login_user	function	lib/auth-scope.php	29	lib
 require_login	function	lib/auth-scope.php	45	lib

@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/lib/asset-identity.php';
+require_once __DIR__ . '/asset-names.php';
 
 function domain_scan_ensure_schema(): void
 {

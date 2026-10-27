@@ -18,7 +18,7 @@ if (PHP_SAPI === 'cli' && !is_file($root . '/config.php')) {
 }
 if (is_file($root . '/config.php')) { require_once $root . '/config.php'; }
 if (!function_exists('db')) { fwrite(STDERR, "تابع db() در دسترس نیست.\n"); exit(1); }
-require_once $root . '/lib/asset-identity.php';
+require_once $root . '/asset-names.php';
 
 $apply    = in_array('--apply', $argv, true);
 $enforce  = in_array('--enforce', $argv, true);
