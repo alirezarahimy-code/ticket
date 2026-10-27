@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.33';
+const FOOD_TICKET_PANEL_VERSION = '1.37.34';
 
 function food_ticket_panel_version(): string
 {
@@ -4921,7 +4921,7 @@ function food_ticket_render_page(array $user): void
         'guests' => $fpCan('food.guest'),
         'ticket-design' => $fpCan('food.design'),
         'health' => $fpCan('food.health'),
-        'manual-attendance' => $fpCan('food.groups'),
+        'manual-attendance' => $fpCan('food.manual_ticket'),
         'emergency-window' => food_ticket_is_primary_admin($user),
     ];
     $fpGroupsEdit = $fpCan('food.groups_edit');

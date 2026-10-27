@@ -46,7 +46,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
         self.assertIn("+ renderPrintedDeliveryReport()", stats)
         self.assertIn("data-fm-delivery-field", ui)
         self.assertIn("itsm-food-printed-delivery-report-fields-v1", ui)
-        self.assertIn("data-view=\"menu\"", ui)
+        self.assertIn("data-delivery-view=\"menu\"", ui)
         self.assertIn("fm-order-block-start", ui)
         self.assertIn("تأیید مستقل دریافت غذا نیست", ui)
         self.assertIn("food-menu/printed-delivery", ui)
@@ -55,7 +55,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
 
     def test_mirrored_assets_and_cache_versions_are_updated(self) -> None:
         panel = read("food-ticket-web/index.html")
-        self.assertIn('assets/food-menu.css?v=33', panel)
+        self.assertIn('assets/food-menu.css?v=34', panel)
         self.assertIn('assets/food-menu.js?v=33', panel)
         self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
         self.assertEqual(read("assets/food-menu.css"), read("food-ticket-web/assets/food-menu.css"))

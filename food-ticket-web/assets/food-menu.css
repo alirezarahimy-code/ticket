@@ -67,6 +67,9 @@
 .fm-report-field input { width:15px; height:15px; margin:0; accent-color:var(--teal); }
 .fm-order-report-table.is-compact { table-layout:fixed; min-width:0; }
 .fm-order-report-table.is-compact th,.fm-order-report-table.is-compact td { width:auto; padding:6px 5px; overflow-wrap:anywhere; }
+/* ستون ردیف همیشه یکخطی بماند — حتی اعداد سه رقمی */
+.fm-order-report-table th:first-child,.fm-order-report-table td:first-child{white-space:nowrap;overflow-wrap:normal;min-width:52px;width:1%;text-align:center}
+.fm-order-report-table.is-compact th:first-child,.fm-order-report-table.is-compact td:first-child{white-space:nowrap;overflow-wrap:normal;width:1%;min-width:52px}
 .fm-order-report-table.is-compact th button { border:0; background:transparent; color:inherit; font:inherit; font-weight:700; cursor:pointer; padding:0; }
 .fm-order-empty-cell { background:#fbfcfd; }
 .fm-group-orders { margin-top:16px; }

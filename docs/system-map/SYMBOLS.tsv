@@ -2137,6 +2137,7 @@ canSelect	function	tests/js/food-bulk-past-window.test.js	9	tests
 isoDateFor	function	tests/js/food-dashboard-count.test.js	21	tests
 esc	function	tests/js/food-menu-by-menu.test.js	14	tests
 faDigits	function	tests/js/food-menu-by-menu.test.js	15	tests
+R	function	tests/js/food-report-fixes.test.js	4	tests
 ITSM_CSRF	namespace	tests/js/list-sort-export.test.js	10	tests
 fetch	namespace	tests/js/list-sort-export.test.js	26	tests
 click	function	tests/js/list-sort-export.test.js	31	tests

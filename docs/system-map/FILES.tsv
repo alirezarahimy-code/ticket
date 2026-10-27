@@ -140,8 +140,8 @@ assets/cd-dvd.js	assets	349	15469
 assets/chatbot-drag.js	assets	173	7358
 assets/custom.css	assets	217	3678
 assets/fonts/README.md	assets	10	767
-assets/food-menu.css	assets	342	31796
-assets/food-menu.js	assets	1875	134891
+assets/food-menu.css	assets	345	32211
+assets/food-menu.js	assets	1875	134917
 assets/food-order-calendar.js	assets	102	4186
 assets/food-order-guest.js	assets	222	11678
 assets/food-order.css	assets	176	16575
@@ -240,8 +240,8 @@ food-ticket-web/assets/food-capitalio-dashboard.css	food-web	335	25896
 food-ticket-web/assets/food-designer.js	food-web	881	69298
 food-ticket-web/assets/food-groups.js	food-web	511	34668
 food-ticket-web/assets/food-manual-attendance.js	food-web	332	21972
-food-ticket-web/assets/food-menu.css	food-web	342	31796
-food-ticket-web/assets/food-menu.js	food-web	1875	134891
+food-ticket-web/assets/food-menu.css	food-web	345	32211
+food-ticket-web/assets/food-menu.js	food-web	1875	134917
 food-ticket-web/assets/food-order-calendar.js	food-web	102	4186
 food-ticket-web/assets/food-order.css	food-web	176	16575
 food-ticket-web/assets/food-ticket-global-theme-r42.css	food-web	168	14815
@@ -249,12 +249,12 @@ food-ticket-web/assets/food-ticket-persistence.js	food-web	23	1137
 food-ticket-web/assets/food-ticket-theme.css	food-web	420	19438
 food-ticket-web/assets/jalali-calendar.js	food-web	334	13294
 food-ticket-web/assets/list-sort.js	food-web	322	15241
-food-ticket-web/index.html	food-web	590	205442
+food-ticket-web/index.html	food-web	590	205585
 food-ticket-web/integration-contract-fa.md	food-web	24	1961
 food-ticket-web/samples/employees-sample.csv	food-web	1	61
 food-ticket-web/template-bridge.js	food-web	26	1069
 food-ticket-worker-install-fa.html	root-misc	176	23682
-food-ticket.php	core	5041	243796
+food-ticket.php	core	5041	243803
 global-search.php	core	121	12295
 governance.php	core	521	47339
 help-guide.php	core	658	120336
@@ -318,6 +318,7 @@ tests/js/food-bulk-past-window.test.js	tests	32	1683
 tests/js/food-dashboard-count.test.js	tests	26	1494
 tests/js/food-menu-by-menu.test.js	tests	43	2828
 tests/js/food-order-name-sort.test.js	tests	32	1446
+tests/js/food-report-fixes.test.js	tests	31	2120
 tests/js/food-report-relocation.test.js	tests	35	2736
 tests/js/list-sort-export.test.js	tests	62	3238
 tests/js/list-sort-rowclasses.test.js	tests	38	2145
@@ -349,7 +350,7 @@ tests/test_food_order_calendar_node.js	tests	27	1245
 tests/test_food_orders_static.py	tests	843	51431
 tests/test_food_permissions_all_roles_static.py	tests	47	2297
 tests/test_food_personnel_link_local_accounts_static.py	tests	74	5763
-tests/test_food_printed_delivery_report_static.py	tests	65	3651
+tests/test_food_printed_delivery_report_static.py	tests	65	3660
 tests/test_food_report_ui_static.py	tests	113	6594
 tests/test_food_temporary_group_transfer_static.py	tests	70	3696
 tests/test_food_ticket_config_paths.php	tests	38	1392
