@@ -6,12 +6,16 @@
   var canMenu = global.FOOD_TICKET_CAN_MENU_EDIT === true;
   var canClose = global.FOOD_TICKET_CAN_ORDER_CLOSE === true;
   var isPrimary = global.FOOD_TICKET_IS_PRIMARY_ADMIN === true;
+  var requestedReportView = '';
+  try { requestedReportView = new URLSearchParams(global.location && global.location.search || '').get('report_view') || ''; } catch (e) {}
+  var reportTabMap = { orders: 'orders', statistics: 'statistics', delivered: 'delivered', aggregate: 'aggregate' };
+  var embeddedReportMode = Object.prototype.hasOwnProperty.call(reportTabMap, requestedReportView);
   var apiBase = String(global.FOOD_TICKET_API_BASE || '');
   var csrf = String(global.FOOD_TICKET_CSRF || '');
   var root = null;
   var state = {
     mounted: false,
-    tab: canMenu ? 'calendar' : 'orders',
+    tab: embeddedReportMode ? reportTabMap[requestedReportView] : (canMenu ? 'calendar' : 'orders'),
     year: 1405,
     month: 1,
     selectedDate: '',
@@ -22,6 +26,14 @@
     statistics: [],
     statisticsLoaded: false,
     statisticsRequestId: 0,
+    deliveredFrom: '',
+    deliveredTo: '',
+    aggregateRows: [],
+    aggregateLoaded: false,
+    aggregateLoading: false,
+    aggregateFrom: '',
+    aggregateTo: '',
+    aggregateRequestId: 0,
     deliveredReport: [],
     deliveredReportLoaded: false,
     deliveredReportRange: '',
@@ -30,14 +42,14 @@
     deliveredReportEmployeeCount: 0,
     deliveredReportGuestCount: 0,
     deliveredReportView: 'list',
-    deliveredReportSort: { key: 'row', dir: 'asc' },
+    deliveredReportSort: { key: 'full_name', dir: 'asc' },
     deliveredReportFields: ['row', 'national_code', 'employee_number', 'full_name', 'food_name', 'food_date', 'punch_time', 'record_type', 'menu_no', 'delivered_at'],
 
     monthData: null,
     catalog: [],
     orders: [],
     ordersLoaded: false,
-    ordersSort: { key: 'row', dir: 'asc' },
+    ordersSort: { key: 'full_name', dir: 'asc' },
     ordersView: 'list',
     status: null,
     loading: false,
@@ -146,14 +158,16 @@
   function navTabs() {
     var tabs = [];
     if (canMenu) tabs.push(['calendar', 'برنامهٔ روزانه'], ['catalog', 'بانک غذا']);
+    var reportsLink = '';
     if (canClose) {
       var cancelCount = (state.cancelRequests || []).length;
       var cancelLabel = 'درخواست‌های لغو' + (cancelCount ? (' (' + faDigits(cancelCount) + ')') : '');
-      tabs.push(['orders', 'سفارش‌های روز'], ['cancel-requests', cancelLabel], ['statistics', 'آمار سفارش‌ها']);
+      tabs.push(['cancel-requests', cancelLabel]);
+      reportsLink = '<a class="fm-tab fm-tab-link" href="index.php?page=reports">همهٔ گزارش‌ها</a>';
     }
     return '<div class="fm-tabs" role="tablist">' + tabs.map(function (tab) {
       return '<button class="fm-tab ' + (state.tab === tab[0] ? 'active' : '') + '" type="button" role="tab" aria-selected="' + (state.tab === tab[0] ? 'true' : 'false') + '" data-fm-tab="' + tab[0] + '">' + tab[1] + '</button>';
-    }).join('') + '</div>';
+    }).join('') + reportsLink + '</div>';
   }
 
   function renderCalendar() {
@@ -287,7 +301,7 @@
     { key: 'row', label: 'ردیف' },
     { key: 'national_code', label: 'کد ملی' },
     { key: 'employee_number', label: 'کد پرسنلی' },
-    { key: 'full_name', label: 'نام' },
+    { key: 'full_name', label: 'نام و نام خانوادگی' },
     { key: 'food_name', label: 'غذا' },
     { key: 'food_date', label: 'تاریخ غذا' },
     { key: 'reserve_at', label: 'ثبت رزرو' },
@@ -300,6 +314,7 @@
     if (key === 'reserve_at') return (row.reserve_date || '') + ' ' + (row.reserve_time || '');
     if (key === 'status_label') return row.status === 'active' ? 0 : 1;
     if (key === 'record_type') return row.is_proxy ? 1 : 0;
+    if (key === 'full_name') return String(row.last_name || '').trim() || String(row.full_name || '');
     return row[key] == null ? '' : row[key];
   }
 
@@ -409,7 +424,8 @@
     var key = state.deliveredReportSort.key;
     var direction = state.deliveredReportSort.dir === 'desc' ? -1 : 1;
     return rows.map(function (row, index) {
-      var value = key === 'row' ? index : key === 'menu_no' ? Number(row.menu_no || 0) : (row[key] || '');
+      var value = key === 'row' ? index : key === 'menu_no' ? Number(row.menu_no || 0) : key === 'full_name' ? (row.last_name || row.full_name || '') : (row[key] || '');
+      if (key === 'full_name') value = String(row.last_name || '').trim() || String(row.full_name || '');
       if (key === 'record_type') value = row.event_type === 'guest' ? 1 : 0;
       return { row: row, index: index, value: value };
     }).sort(function (a, b) {
@@ -490,21 +506,26 @@
       return '<label class="fm-report-field"><input type="checkbox" data-fm-delivery-field="' + column.key + '"' + checked + '><span>' + esc(column.label) + '</span></label>';
     }).join('');
     var viewBar = '<div class="fm-view-switch"><button class="btn ' + (state.deliveredReportView === 'list' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-view="list">فهرست یکجا</button><button class="btn ' + (state.deliveredReportView === 'menu' ? 'primary' : 'secondary') + '" type="button" data-fm-action="delivered-report-view" data-view="menu">نمایش بر اساس منو</button></div>';
-    var dateRange = jalaliFromIso(state.statisticsFrom || '') + (state.statisticsFrom === state.statisticsTo ? '' : ' تا ' + jalaliFromIso(state.statisticsTo || ''));
+    var fallback = state.selectedDate || (state.status && state.status.today) || localTodayIso();
+    var deliveredFrom = jalaliFromIso(state.deliveredFrom || fallback) || '';
+    var deliveredTo = jalaliFromIso(state.deliveredTo || fallback) || '';
+    var dateRange = deliveredFrom + (deliveredFrom === deliveredTo ? '' : ' تا ' + deliveredTo);
     var results = state.deliveredReportLoading
       ? '<div class="fm-spinner">در حال دریافت فهرست فیش‌های تحویل‌شده…</div>'
       : '<div class="fm-delivery-counts"><div><span>پرسنل</span><strong>' + faDigits(state.deliveredReportEmployeeCount) + '</strong></div><div><span>فیش مهمان چاپ‌شده</span><strong>' + faDigits(state.deliveredReportGuestCount) + '</strong></div></div>'
         + viewBar + '<div class="fm-table-wrap fm-delivery-report-results">' + (state.deliveredReportView === 'menu' ? deliveredReportByMenuHtml(state.deliveredReport) : deliveredReportTableHtml(state.deliveredReport)) + '</div>';
     var actionsEnabled = state.deliveredReportLoaded && !state.deliveredReportLoading;
-    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">بازه: ' + esc(faDigits(dateRange || '—')) + ' — پرسنل فقط با فیش چاپ‌شده و وضعیت تحویل‌شده؛ مهمان با فیش چاپ‌شده. وضعیت تحویل در سامانه از ثبت چاپ می‌آید و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
+    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">بازه: ' + esc(faDigits(dateRange || '—')) + ' — پرسنل فقط با فیش چاپ‌شده و وضعیت تحویل‌شده؛ مهمان با فیش چاپ‌شده. وضعیت تحویل در سامانه از ثبت چاپ می‌آید و تأیید مستقل دریافت غذا نیست.</span></div></div>'
+      + '<form id="fm-delivered-date" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" value="' + esc(faDigits(deliveredFrom)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" value="' + esc(faDigits(deliveredTo)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></form>'
       + '<div class="fm-report-fields"><strong>فیلدهای گزارش</strong>' + fields + '</div>'
-      + (state.deliveredReportLoaded || state.deliveredReportLoading ? results : '<div class="fm-empty">برای نمایش گزارش، بازهٔ تاریخ آمار سفارش‌ها را انتخاب کنید.</div>')
+      + (state.deliveredReportLoaded || state.deliveredReportLoading ? results : '<div class="fm-empty">برای نمایش گزارش، بازهٔ تاریخ را انتخاب کنید.</div>')
       + '</section>';
   }
   async function loadPrintedDeliveryReport(fromDate, toDate) {
     var from = normalizeIsoDate(fromDate || '');
     var to = normalizeIsoDate(toDate || '');
     if (!from || !to || from > to) return;
+    state.deliveredFrom = from; state.deliveredTo = to;
     var key = from + '|' + to;
     if (state.deliveredReportRange === key && (state.deliveredReportLoaded || state.deliveredReportLoading)) return;
     state.deliveredReportRange = key;
@@ -542,17 +563,69 @@
     });
     var exportApi = global.ITSM_LIST_SORT;
     if (exportApi && typeof exportApi.exportXlsx === 'function') {
-      exportApi.exportXlsx('فیش‌های چاپ‌شده و تحویل‌شده ' + faDigits(jalaliFromIso(state.statisticsFrom) || ''), columns.map(function (column) { return column.label; }), rows, 'food-delivered-' + state.statisticsFrom + '-' + state.statisticsTo, null);
+      exportApi.exportXlsx('فیش‌های چاپ‌شده و تحویل‌شده ' + faDigits(jalaliFromIso(state.deliveredFrom) || ''), columns.map(function (column) { return column.label; }), rows, 'food-delivered-' + state.deliveredFrom + '-' + state.deliveredTo, null);
       return;
     }
     global.location.href = buildUrl('food-menu/printed-delivery-export', {
-      from: state.statisticsFrom, to: state.statisticsTo,
+      from: state.deliveredFrom, to: state.deliveredTo,
       fields: columns.map(function (column) { return column.key; }).join(','), view: state.deliveredReportView,
     });
   }
   function printPrintedDeliveryReport() {
     if (!state.deliveredReportLoaded || state.deliveredReportLoading) return;
     printScopedReport('.fm-printed-delivery-report .fm-delivery-report-results', 'fm-print-delivered-report');
+  }
+
+  function renderDailyAggregateReport() {
+    var fallback = state.selectedDate || (state.status && state.status.today) || localTodayIso();
+    var from = jalaliFromIso(state.aggregateFrom || fallback) || '';
+    var to = jalaliFromIso(state.aggregateTo || fallback) || '';
+    var rows = state.aggregateRows || [];
+    var totalOrders = rows.reduce(function (n, row) { return n + Number(row.total_order_count || 0); }, 0);
+    var guests = rows.reduce(function (n, row) { return n + Number(row.guest_ticket_count || 0); }, 0);
+    var printed = rows.reduce(function (n, row) { return n + Number(row.confirmed_printed_ticket_count || 0); }, 0);
+    var absent = rows.reduce(function (n, row) { return n + Number(row.absentee_count || 0); }, 0);
+    var hasMismatch = rows.some(function (row) { return Number(row.total_order_count || 0) - (Number(row.guest_ticket_count || 0) + Number(row.confirmed_printed_ticket_count || 0)) !== Number(row.absentee_count || 0); });
+    var body = rows.map(function (row) {
+      var calculated = Number(row.total_order_count || 0) - (Number(row.guest_ticket_count || 0) + Number(row.confirmed_printed_ticket_count || 0));
+      var matches = calculated === Number(row.absentee_count || 0);
+      return '<tr><td>' + esc(faDigits(jalaliFromIso(row.food_date) || row.food_date || '')) + '</td>'
+        + '<td>' + faDigits(Number(row.total_order_count || 0)) + '</td>'
+        + '<td>' + faDigits(Number(row.guest_ticket_count || 0)) + '</td>'
+        + '<td>' + faDigits(Number(row.confirmed_printed_ticket_count || 0)) + '</td>'
+        + '<td>' + faDigits(Number(row.absentee_count || 0)) + '</td>'
+        + '<td>' + faDigits(calculated) + '</td>'
+        + '<td><span class="fm-order-state' + (matches ? '' : ' cancelled') + '">' + (matches ? 'برابر' : 'مغایر') + '</span></td></tr>';
+    }).join('');
+    var content = state.aggregateLoading ? '<div class="fm-spinner">در حال محاسبهٔ گزارش تجمعی…</div>'
+      : !state.aggregateLoaded ? '<div class="fm-empty">بازهٔ تاریخ را انتخاب و «مشاهده» را بزنید.</div>'
+        : '<div class="fm-delivery-counts fm-aggregate-counts"><div><span>کل سفارش‌ها</span><strong>' + faDigits(totalOrders) + '</strong></div><div><span>فیش مهمان</span><strong>' + faDigits(guests) + '</strong></div><div><span>فیش قطعی چاپ‌شده</span><strong>' + faDigits(printed) + '</strong></div><div><span>غایبین</span><strong>' + faDigits(absent) + '</strong></div></div>'
+          + '<div class="fm-alert ' + (hasMismatch ? 'error' : 'good') + ' fm-aggregate-equation">' + (hasMismatch ? 'هشدار: برای دست‌کم یک روز، معادله با شمارش واقعی غایبین برابر نیست؛ اختلاف در جدول مشخص شده و پنهان نشده است.' : 'کل سفارش‌ها − (فیش مهمان + فیش قطعی چاپ‌شده) = غایبین؛ معادله برای همهٔ روزهای نمایش‌داده‌شده برابر است.') + ' مقادیر عددی در جدول آمده است.</div>'
+          + '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ غذا</th><th>کل سفارش‌ها</th><th>فیش مهمان صادرشده</th><th>فیش قطعی چاپ‌شده</th><th>غایبین</th><th>محاسبهٔ فرمول</th><th>نتیجه</th></tr></thead><tbody>'
+          + (body || '<tr><td colspan="7" class="fm-empty">در این بازه روزی برای گزارش وجود ندارد.</td></tr>') + '</tbody></table></div>';
+    return '<section class="fm-card fm-statistics fm-daily-aggregate"><div class="fm-toolbar"><div><h3>گزارش تجمعی غذا</h3><span class="fm-small">کل سفارش‌ها شامل سفارش‌های فعال پرسنل و فیش‌های مهمان صادرشده است؛ فیش قطعی یعنی فیش پرسنلی با وضعیت چاپ «چاپ‌شده».</span></div></div>'
+      + '<form id="fm-aggregate-date" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button></form>' + content + '</section>';
+  }
+
+  async function loadDailyAggregateReport(fromDate, toDate) {
+    var from = normalizeIsoDate(fromDate || '');
+    var to = normalizeIsoDate(toDate || '');
+    if (!from || !to || from > to) return;
+    state.aggregateFrom = from; state.aggregateTo = to;
+    state.aggregateRows = []; state.aggregateLoaded = false; state.aggregateLoading = true;
+    var requestId = ++state.aggregateRequestId;
+    render();
+    try {
+      var result = await request('food-menu/daily-reconciliation', { from: from, to: to });
+      if (requestId !== state.aggregateRequestId) return;
+      state.aggregateRows = Array.isArray(result.items) ? result.items : [];
+      state.aggregateLoaded = true; state.error = '';
+    } catch (error) {
+      if (requestId !== state.aggregateRequestId) return;
+      state.aggregateRows = []; state.aggregateLoaded = false; state.error = error.message || 'گزارش تجمعی بارگذاری نشد.';
+    } finally {
+      if (requestId === state.aggregateRequestId) { state.aggregateLoading = false; render(); }
+    }
   }
 
   function renderOrders() {
@@ -625,7 +698,7 @@
       }).join('');
       result = '<div class="fm-table-wrap fm-statistics-results"><table class="fm-rows"><thead><tr><th>ردیف</th><th>نوع غذا</th><th>تعداد</th></tr></thead><tbody>' + (foodRows || '<tr><td colspan="3" class="fm-empty">در بازهٔ انتخاب‌شده سفارشی ثبت نشده است.</td></tr>') + '</tbody></table></div>';
     }
-    return '<section class="fm-card fm-statistics"><div class="fm-toolbar"><div><h3>' + modeTitle + '</h3><span class="fm-small">بازه: ' + esc(rangeText) + '</span></div></div><form id="fm-statistics-date" class="fm-statistics-form"><div class="fm-stats-modes" role="radiogroup" aria-label="نوع آمار"><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="food"' + (mode === 'food' ? ' checked' : '') + ' required><span>آمار نوع غذا</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="employee"' + (mode === 'employee' ? ' checked' : '') + ' required><span>آمار سفارش نفرات</span></label></div><div class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="statistics-export"' + (actionsEnabled ? '' : ' disabled') + '>خروجی اکسل</button><button class="btn secondary" type="button" data-fm-action="statistics-print"' + (actionsEnabled ? '' : ' disabled') + '>پرینت</button></div></form>' + result + '</section>' + renderPrintedDeliveryReport();
+    return '<section class="fm-card fm-statistics"><div class="fm-toolbar"><div><h3>' + modeTitle + '</h3><span class="fm-small">بازه: ' + esc(rangeText) + '</span></div></div><form id="fm-statistics-date" class="fm-statistics-form"><div class="fm-stats-modes" role="radiogroup" aria-label="نوع آمار"><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="food"' + (mode === 'food' ? ' checked' : '') + ' required><span>آمار نوع غذا</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="employee"' + (mode === 'employee' ? ' checked' : '') + ' required><span>آمار سفارش نفرات</span></label></div><div class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="statistics-export"' + (actionsEnabled ? '' : ' disabled') + '>خروجی اکسل</button><button class="btn secondary" type="button" data-fm-action="statistics-print"' + (actionsEnabled ? '' : ' disabled') + '>پرینت</button></div></form>' + result + '</section>';
   }
 
   function render() {
@@ -639,9 +712,9 @@
       root.innerHTML = '<div class="fm-alert error">تقویم شمسی سامانه بارگذاری نشد. صفحه را تازه‌سازی کنید.</div>';
       return;
     }
-    var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
+    var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : state.tab === 'delivered' && canClose ? renderPrintedDeliveryReport() : state.tab === 'aggregate' && canClose ? renderDailyAggregateReport() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
-    root.innerHTML = '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
+    root.innerHTML = embeddedReportMode ? notices + panel : '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
   }
 
@@ -735,7 +808,6 @@
     state.statisticsLoaded = false;
     state.loadingStatistics = true;
     var requestId = ++state.statisticsRequestId;
-    loadPrintedDeliveryReport(from, to);
     render();
     try {
       var result = await request('food-menu/statistics', { from: from, to: to, mode: selectedMode });
@@ -761,12 +833,19 @@
     if (!state.ordersDate) state.ordersDate = state.selectedDate;
     if (!state.statisticsFrom) state.statisticsFrom = state.selectedDate;
     if (!state.statisticsTo) state.statisticsTo = state.selectedDate;
+    if (!state.deliveredFrom) state.deliveredFrom = state.selectedDate;
+    if (!state.deliveredTo) state.deliveredTo = state.selectedDate;
+    if (!state.aggregateFrom) state.aggregateFrom = state.selectedDate;
+    if (!state.aggregateTo) state.aggregateTo = state.selectedDate;
     var initialMonth = jalaliMonthFromIso(state.selectedDate);
     if (initialMonth && !state.monthData) { state.year = initialMonth[0]; state.month = initialMonth[1]; }
     var jobs = [];
     if (canMenu) { jobs.push(loadCatalog()); jobs.push(loadMonth()); }
     if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
-    if (canClose) jobs.push(loadCancelRequests());
+    if (canClose && state.tab === 'statistics') jobs.push(loadStatistics(state.statisticsFrom || state.selectedDate, state.statisticsTo || state.selectedDate, state.statisticsMode || 'food'));
+    if (canClose && state.tab === 'delivered') jobs.push(loadPrintedDeliveryReport(state.deliveredFrom || state.selectedDate, state.deliveredTo || state.selectedDate));
+    if (canClose && state.tab === 'aggregate') jobs.push(loadDailyAggregateReport(state.aggregateFrom || state.selectedDate, state.aggregateTo || state.selectedDate));
+    if (canClose && !embeddedReportMode) jobs.push(loadCancelRequests());
     await Promise.all(jobs);
     render();
   }
@@ -952,7 +1031,7 @@
   }
   function switchTab(tab) {
     if ((tab === 'calendar' || tab === 'catalog') && !canMenu) return;
-    if ((tab === 'orders' || tab === 'statistics' || tab === 'cancel-requests') && !canClose) return;
+    if ((tab === 'orders' || tab === 'statistics' || tab === 'delivered' || tab === 'aggregate' || tab === 'cancel-requests') && !canClose) return;
     state.tab = tab; state.error = ''; state.notice = ''; render();
     if (tab === 'cancel-requests') {
       loadCancelRequests();
@@ -1244,6 +1323,26 @@
       var orderDate = normalizeIsoDate(new FormData(form).get('date'));
       if (!orderDate) { state.error = 'تاریخ روز را به‌درستی انتخاب کنید.'; render(); return; }
       state.error = ''; state.selectedDate = orderDate; state.ordersDate = orderDate; loadOrders(orderDate); return;
+    }
+    if (form.id === 'fm-delivered-date') {
+      event.preventDefault();
+      var deliveredForm = new FormData(form);
+      var deliveredFrom = normalizeIsoDate(deliveredForm.get('from'));
+      var deliveredTo = normalizeIsoDate(deliveredForm.get('to'));
+      if (!deliveredFrom || !deliveredTo || deliveredFrom > deliveredTo) { state.error = 'بازهٔ تاریخ را به‌درستی انتخاب کنید.'; render(); return; }
+      var deliveredSpan = (Date.parse(deliveredTo + 'T00:00:00Z') - Date.parse(deliveredFrom + 'T00:00:00Z')) / 86400000;
+      if (deliveredSpan > 366) { state.error = 'بازهٔ گزارش حداکثر یک سال است.'; render(); return; }
+      state.error = ''; loadPrintedDeliveryReport(deliveredFrom, deliveredTo); return;
+    }
+    if (form.id === 'fm-aggregate-date') {
+      event.preventDefault();
+      var aggregateForm = new FormData(form);
+      var aggregateFrom = normalizeIsoDate(aggregateForm.get('from'));
+      var aggregateTo = normalizeIsoDate(aggregateForm.get('to'));
+      if (!aggregateFrom || !aggregateTo || aggregateFrom > aggregateTo) { state.error = 'بازهٔ تاریخ را به‌درستی انتخاب کنید.'; render(); return; }
+      var aggregateSpan = (Date.parse(aggregateTo + 'T00:00:00Z') - Date.parse(aggregateFrom + 'T00:00:00Z')) / 86400000;
+      if (aggregateSpan > 366) { state.error = 'بازهٔ گزارش حداکثر یک سال است.'; render(); return; }
+      state.error = ''; loadDailyAggregateReport(aggregateFrom, aggregateTo); return;
     }
     if (form.id === 'fm-statistics-date') {
       event.preventDefault();

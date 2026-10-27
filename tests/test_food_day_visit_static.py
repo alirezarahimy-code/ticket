@@ -84,8 +84,8 @@ check("visit_change_until" in groups
       "each food group has a visible cafeteria-change deadline and support can cancel visits")
 panel = read("food-ticket-web/index.html")
 check("food-groups.js?v=13" in panel, "food-groups.js cache buster is bumped")
-check("FOOD_TICKET_PANEL_VERSION = '1.37.15'" in ticket
-      and "PANEL_VERSION='1.37.15'" in panel,
+check("FOOD_TICKET_PANEL_VERSION = '1.37.16'" in ticket
+      and "PANEL_VERSION='1.37.16'" in panel,
       "food panel version matches host expected version")
 check("function loadDashboardMonitoring" in panel
       and "function lastDaysIso" in panel
