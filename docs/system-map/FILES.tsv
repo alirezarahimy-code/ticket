@@ -131,8 +131,8 @@ app/Views/ticket/index.php	app-mvc	39	1379
 app/Views/ticket/reply.php	app-mvc	31	1092
 app/Views/ticket/show.php	app-mvc	35	1138
 asset-inventory-page.php	core	89	11576
-asset-names.php	core	196	9080
-asset-profile.php	core	1149	62082
+asset-names.php	core	198	9128
+asset-profile.php	core	1086	58881
 assets/admin-layout-design.css	assets	78	9731
 assets/admin-layout-design.js	assets	897	46367
 assets/app.js	assets	1386	79573
@@ -205,6 +205,7 @@ docs/aggregate-report-preview.html	docs	85	7297
 domain-scan.php	core	1278	68420
 download-r34/index.html	other	21	1739
 downloads/README-AGGREGATE-UPDATE.md	history-downloads	15	609
+downloads/URGENT-FIX-1.62.38-FA.md	history-downloads	51	3340
 downloads/index.html	history-downloads	54	6825
 downloads/ticket-repair-1.62.36-full-source-restore-20261027.html	history-downloads	21	5176
 food-order-import.php	core	476	26389

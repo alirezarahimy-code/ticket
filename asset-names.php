@@ -131,6 +131,7 @@ function asset_tag_label(?string $tag, ?string $hostname = null): string
 }
 
 /* ════ ۱.۶۲.۳۸ — هاتفیکس: توابع هویت اینجا تعریف میشوند (بدون وابستگی به فایل جدید) ════ */
+if (!function_exists('asset_identity_key')) {
 /**
  * ۱.۶۲.۳۷ — کلید هویت یکتای سیستم.
  * نام دامینهای، پیشوند DOMAIN-، پسوند $ و حالت حروف یکسان درنظر گرفته میشوند.
@@ -193,4 +194,5 @@ function asset_sync_identity_key(int $assetId): void
     if (!$asset) { return; }
     $key = asset_identity_key($asset['hostname'] ?? null, $asset['asset_tag'] ?? null);
     db()->prepare('UPDATE assets SET hostname_key = ? WHERE id = ?')->execute([$key !== '' ? $key : null, $assetId]);
+}
 }

@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/build_system_map.py",
-  "total_files_indexed": 850,
-  "total_lines_indexed": 171352,
+  "total_files_indexed": 851,
+  "total_lines_indexed": 171342,
   "categories": {
     "actions": 15,
     "api": 1,
@@ -14,7 +14,7 @@
     "cron": 7,
     "docs": 16,
     "food-web": 33,
-    "history-downloads": 3,
+    "history-downloads": 4,
     "history-updates": 310,
     "lib": 9,
     "migrations": 15,
@@ -27,7 +27,7 @@
     "tools": 84,
     "workflows": 5
   },
-  "symbols": 4373,
+  "symbols": 4372,
   "routes": 371,
   "table_definitions": 413,
   "unique_tables": 70,

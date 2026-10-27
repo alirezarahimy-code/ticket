@@ -393,69 +393,6 @@ function asset_profile_collection_status_summary(array $asset): array
  * @param int[] $assetIds
  * @return array<int, array>
  */
-/**
- * Fill legacy/mirrored profile fields from the canonical asset row without overwriting
- * values stored specifically in asset_profiles. This keeps older records visible.
- */
-function asset_profile_fill_from_asset(array $profile, array $asset): array
-{
-    $hardware = json_decode((string) ($asset['hardware_json'] ?? ''), true);
-    $peripherals = json_decode((string) ($asset['peripherals_json'] ?? ''), true);
-    $hardware = is_array($hardware) ? $hardware : [];
-    $peripherals = is_array($peripherals) ? $peripherals : [];
-    $derived = asset_profile_auto_values([
-        'hostname' => $asset['hostname'] ?? '',
-        'computer_type' => $asset['computer_type'] ?? '',
-        'operating_system' => $asset['operating_system'] ?? '',
-        'os_serial' => $asset['os_serial'] ?? '',
-        'ip_address' => $asset['ip_address'] ?? '',
-        'mac_address' => $asset['mac_address'] ?? '',
-        'cpu' => $asset['cpu'] ?? '',
-        'memory_mb' => $asset['memory_mb'] ?? 0,
-        'domain_username' => $asset['domain_username'] ?? '',
-        'antivirus' => $asset['antivirus'] ?? '',
-        'hardware' => $hardware,
-        'peripherals' => $peripherals,
-    ]);
-    $fieldProvenance = is_array($derived['_field_provenance'] ?? null) ? $derived['_field_provenance'] : [];
-    unset($derived['_field_provenance'], $derived['_clear_fields']);
-    $assetFallbacks = [
-        'record_number' => trim((string) ($asset['record_number'] ?? '')) !== '' ? $asset['record_number'] : ($asset['asset_tag'] ?? null),
-        'registry_date' => $asset['created_at'] ?? null,
-        'unit_name' => $asset['department_name'] ?? null,
-        'computer_type' => $asset['computer_type'] ?? null,
-        'user_login' => $asset['domain_username'] ?? null,
-        'owner_full_name' => $asset['owner_name'] ?? null,
-        'phone' => $asset['phone'] ?? null,
-        'personnel_number' => trim((string) ($asset['person_number'] ?? '')) !== '' ? $asset['person_number'] : ($asset['employee_number'] ?? null),
-        'plaque_number' => $asset['plaque_number'] ?? null,
-        'os_name' => $asset['operating_system'] ?? null,
-        'hostname' => $asset['hostname'] ?? null,
-        'windows_serial' => $asset['os_serial'] ?? null,
-        'os_install_date' => $asset['os_install_date'] ?? null,
-        'user_count' => $asset['registered_users'] ?? null,
-        'cpu_model' => $asset['cpu'] ?? null,
-        'ram_total' => !empty($asset['memory_mb']) ? ((int) $asset['memory_mb'] . ' MB') : null,
-        'ip_address' => $asset['ip_address'] ?? null,
-        'mac_address' => $asset['mac_address'] ?? null,
-        'netcard' => $asset['network_card'] ?? null,
-        'audio' => $asset['sound_card'] ?? null,
-        'antivirus' => $asset['antivirus'] ?? null,
-    ];
-    $fallbacks = $derived;
-    foreach ($assetFallbacks as $key => $value) {
-        if ($value !== null && $value !== '') {
-            $fallbacks[$key] = $value;
-        }
-    }
-    foreach ($fallbacks as $key => $value) {
-        if (($profile[$key] ?? null) === null || $profile[$key] === '') {
-            $profile[$key] = $value;
-        }
-    }
-    $profile['_field_provenance'] = $fieldProvenance;
-    return $profile;
-}
 
 /** Summarize current collector status separately from values retained from older scans. */
 function asset_profile_collection_status_summary(array $asset): array
