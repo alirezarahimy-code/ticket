@@ -122,7 +122,7 @@ assert.strictEqual(m.aggSelectedCols().length, 2, 'تعداد ستونهای ا�
 out = m.aggTable([{ pc: '1', name: 'الف' }], 'خالی');
 assert(out.includes('data-agg-sort="pc"') && out.includes('data-agg-sort="name"'), 'سرستونها ناقصاند');
 assert(!out.includes('data-agg-sort="food"'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
-assert(out.includes('agg-block-start'), 'بلوکبندی ۳تایی برای ۲ فیلد اعمال نشد');
+assert(out.includes('fm-order-block-start') && out.includes('data-no-sort') && out.includes('fm-order-report-table'), 'بلوکبندی مثل گزارش فیشهای چاپشده اعمال نشد');
 storage.clear();
 
 // ۵ب) سورت بر اساس نام خانوادگی
@@ -137,7 +137,7 @@ assert.deepStrictEqual(m.aggSorted([{pc:'2',name:'الف ب'},{pc:'1',name:'ج �
 env.state.aggSort={key:'name',dir:'desc'};
 assert(m.aggSorted([{name:'علی احمدی'},{name:'رضا باقری'}]).map(x=>x.name).join()==='رضا باقری,علی احمدی','سورت نزولی نام خانوادگی کار نکرد');
 out=m.aggTable([{name:'علی احمدی'},{name:'رضا باقری'}],'خالی');
-assert(out.includes('data-agg-sort="name"') && out.includes('agg-sort-btn'),'سرستون قابل کلیک نیست');
+assert(out.includes('data-agg-sort="name"') && out.includes('fm-sort-btn'),'سرستون قابل کلیک نیست');
 delete env.state.aggSort;
 
 // ۶) کلیک تب → تغییر state و رندر
