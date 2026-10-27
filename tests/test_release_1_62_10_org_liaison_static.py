@@ -43,7 +43,7 @@ def test_index_php_supports_liaison_node():
     assert "'chartSide' => (string) ($unit['chart_side'] ?? '')" in src
     # نسخهٔ کش دارایی‌ها
     assert "assets/organization.js?v=7" in src
-    assert "assets/style.css?v=3.4.46" in src
+    assert "assets/style.css?v=3.4.47" in src
 
 
 def test_organization_js_renders_liaison_band():

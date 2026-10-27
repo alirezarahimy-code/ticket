@@ -23,7 +23,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
         self.assertIn("e.print_status = 'printed'", report)
         self.assertIn("e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered'", report)
         self.assertIn("OR e.event_type = 'guest'", report)
-        self.assertIn("LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id", report)
+        self.assertIn("JOIN food_calendar_items i ON i.calendar_id = cal.id", report)
         self.assertIn("'employee_count' => count($employeeIds)", report)
         self.assertIn("'guest_count' => $guestCount", report)
         export_start = backend.index("function food_order_export_printed_delivery_report(")
@@ -55,8 +55,8 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
 
     def test_mirrored_assets_and_cache_versions_are_updated(self) -> None:
         panel = read("food-ticket-web/index.html")
-        self.assertIn('assets/food-menu.css?v=23', panel)
-        self.assertIn('assets/food-menu.js?v=20', panel)
+        self.assertIn('assets/food-menu.css?v=33', panel)
+        self.assertIn('assets/food-menu.js?v=32', panel)
         self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
         self.assertEqual(read("assets/food-menu.css"), read("food-ticket-web/assets/food-menu.css"))
 

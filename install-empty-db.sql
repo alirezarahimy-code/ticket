@@ -1249,3 +1249,62 @@ CREATE TABLE IF NOT EXISTS food_order_cancel_requests (
     INDEX idx_food_cancel_req_order (order_id),
     INDEX idx_food_cancel_req_employee (employee_id, food_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================================
+-- همگامسازی با schema.sql (نسخهٔ ۱.۶۲.۳۶): چهار جدولی که فقط در schema.sql
+-- تعریف شده بودند. فقط ایجاد میشوند (IF NOT EXISTS)؛ هیچ داده یا جدولی حذف نمیشود.
+-- ترتیب: بعد از food_catalog است تا کلید خارجی food_guest_requests برقرار باشد.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS chatbot_faq (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    question VARCHAR(255) NOT NULL,
+    answer TEXT NOT NULL,
+    keywords VARCHAR(500) NULL,
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NULL,
+    INDEX idx_chatbot_faq_active (is_active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS chatbot_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NULL,
+    question VARCHAR(500) NOT NULL,
+    faq_id INT UNSIGNED NULL,
+    intent VARCHAR(80) NULL,
+    score DECIMAL(6,3) NOT NULL DEFAULT 0,
+    helpful TINYINT(1) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_chatbot_logs_created (created_at),
+    INDEX idx_chatbot_logs_faq (faq_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS system_incidents (
+    fingerprint CHAR(40) NOT NULL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    status ENUM('open','investigating','resolved') NOT NULL DEFAULT 'open',
+    note TEXT NULL,
+    updated_by INT UNSIGNED NULL,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS food_guest_requests (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    request_date DATE NOT NULL,
+    organization VARCHAR(190) NOT NULL,
+    guest_count SMALLINT UNSIGNED NOT NULL,
+    food_id INT UNSIGNED NULL,
+    requester_name VARCHAR(150) NOT NULL,
+    deputy_unit_id INT UNSIGNED NULL,
+    note VARCHAR(500) NULL,
+    status ENUM('active','cancelled') NOT NULL DEFAULT 'active',
+    created_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    cancelled_by INT UNSIGNED NULL,
+    cancelled_at DATETIME NULL,
+    KEY idx_food_guest_requests_date_status (request_date, status),
+    KEY idx_food_guest_requests_deputy (deputy_unit_id, request_date),
+    CONSTRAINT fk_food_guest_requests_food FOREIGN KEY (food_id) REFERENCES food_catalog (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

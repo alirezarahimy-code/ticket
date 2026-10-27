@@ -202,11 +202,11 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }", employee_css)
 
         panel_html = read("food-ticket-web/index.html")
-        self.assertIn('href="assets/food-order.css?v=11"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=23"', panel_html)
+        self.assertIn('href="assets/food-order.css?v=13"', panel_html)
+        self.assertIn('href="assets/food-menu.css?v=33"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=20"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=32"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
