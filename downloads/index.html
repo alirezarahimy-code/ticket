@@ -3,46 +3,47 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>به‌روزرسانی ۱.۶۲.۳۰ — ثبت دستی فیش فقط برای ادمین اصلی</title>
+  <title>به‌روزرسانی ۱.۶۲.۳۱ — اصلاح ثبت دستی فیش موجود</title>
   <style>
-    :root{color-scheme:light;--ink:#132b3a;--muted:#5c7180;--line:#d9e4e8;--teal:#087f78;--amber:#8a5b12;--red:#a32e2e}
+    :root{color-scheme:light;--ink:#132b3a;--muted:#5c7180;--line:#d9e4e8;--teal:#087f78;--red:#a32e2e}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#e7f4f2,#f4f7fa 60%,#e8eff4);color:var(--ink);font:16px/1.9 Tahoma,"Segoe UI",sans-serif}
     main{width:min(100%,820px);padding:32px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px #173d4a18}.eyebrow{color:var(--teal);font-size:13px;font-weight:700}h1{margin:4px 0 8px;font-size:26px}h2{margin:24px 0 6px;font-size:18px}p{margin:8px 0 16px;color:var(--muted)}
     .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:20px 0}.meta div{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#f8fbfc}.meta small{display:block;color:var(--muted)}
     .actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:9px 18px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:var(--teal);color:#fff}.secondary{border:1px solid var(--line);color:var(--ink);background:#fff}
-    ol,ul{padding-right:24px;color:var(--ink)}li{margin:7px 0}.safe,.note,.revoked{margin-top:16px;padding:13px 15px;border-right:4px solid var(--teal);border-radius:8px;background:#effaf8;color:#285951;font-size:14px}.note{border-color:#e4a33a;background:#fff9ec;color:#6c552a;font-size:13px}.revoked{border-color:var(--red);background:#fff1f1;color:#7d2929;font-weight:700}.filename{direction:ltr;text-align:left;overflow-wrap:anywhere;font:13px/1.7 monospace}
+    ol,ul{padding-right:24px;color:var(--ink)}li{margin:7px 0}.safe,.revoked{margin-top:16px;padding:13px 15px;border-right:4px solid var(--teal);border-radius:8px;background:#effaf8;color:#285951;font-size:14px}.revoked{border-color:var(--red);background:#fff1f1;color:#7d2929;font-weight:700}.filename{direction:ltr;text-align:left;overflow-wrap:anywhere;font:13px/1.7 monospace}
     @media(max-width:520px){main{padding:22px}h1{font-size:22px}.actions a{width:100%}}
   </style>
 </head>
 <body><main>
-  <span class="eyebrow">اصلاح دسترسی · حداقل نسخهٔ پایه: ۱.۶۲.۲۵</span>
-  <h1>۱.۶۲.۳۰ — ثبت دستی فیش فقط در تنظیمات، فقط برای ادمین اصلی</h1>
-  <p>ثبت دستی فیش از پنل سفارش اضطراری برداشته شده و فقط در «تنظیمات سامانه» برای ادمین اصلی قرار دارد. برای ثبت، سفارش فعال همان کارمند و تاریخ، تطبیق کد ملی و نوشتن علت الزامی است.</p>
-  <div class="revoked">نسخهٔ ۱.۶۲.۲۹ لغو شده است: امکان ثبت دستی را در جای نادرست و در دسترس دارندگان مجوز سفارش اضطراری قرار می‌داد. آن بسته را نصب نکنید؛ اگر نصب شده، این نسخه را برای اصلاح دسترسی‌ها نصب کنید.</div>
+  <span class="eyebrow">اصلاح فرم موجود · حداقل نسخهٔ پایه: ۱.۶۲.۲۸</span>
+  <h1>۱.۶۲.۳۱ — اصلاح «ثبت دستی فیش» موجود در تنظیمات پنل غذا</h1>
+  <p>این نسخه فرم تازه‌ای نمی‌سازد. همان مسیر «سامانه مدیریت غذا ← تنظیمات ← ثبت دستی فیش» را اصلاح می‌کند تا رویداد «تردد/بدون فیش» برای کارمند دارای سفارش روزانه، در حالت صدور فیش قابل انتخاب شود.</p>
+  <div class="revoked">نسخه‌های ۱.۶۲.۲۹ و ۱.۶۲.۳۰ لغو شده‌اند. آن‌ها مسیر/فرم جداگانه ساختند و فایل‌های ماژولار را به‌درستی حفظ نکردند. نصب نکنید؛ این نسخهٔ ۱.۶۲.۳۱ جایگزین اصلاح‌شده است.</div>
   <section class="meta" aria-label="مشخصات بسته">
-    <div><small>فایل دانلود</small><strong class="filename">ticket-update-1.62.30-admin-settings-manual-ticket-20261027.zip</strong></div>
-    <div><small>نسخهٔ پایهٔ حداقل</small><strong>۱.۶۲.۲۵</strong></div>
-    <div><small>نسخهٔ نهایی</small><strong>۱.۶۲.۳۰</strong></div>
-    <div><small>محدودیت</small><strong>فقط ادمین اصلی</strong></div>
+    <div><small>فایل دانلود</small><strong class="filename">ticket-update-1.62.31-manual-attendance-existing-no-food-conversion-20261027.zip</strong></div>
+    <div><small>نسخهٔ پایهٔ حداقل</small><strong>۱.۶۲.۲۴</strong></div>
+    <div><small>نسخهٔ نهایی</small><strong>۱.۶۲.۳۱</strong></div>
+    <div><small>مجوز صدور فیش دستی</small><strong>ادمین اصلی</strong></div>
   </section>
   <div class="actions">
-    <a class="button primary" href="ticket-update-1.62.30-admin-settings-manual-ticket-20261027.zip" download>دانلود hotfix اصلاح‌شده</a>
-    <a class="button secondary" href="ticket-update-1.62.30-admin-settings-manual-ticket-20261027.zip.sha256" download>دانلود SHA-256</a>
+    <a class="button primary" href="ticket-update-1.62.31-manual-attendance-existing-no-food-conversion-20261027.zip" download>دانلود بستهٔ اصلاح</a>
+    <a class="button secondary" href="ticket-update-1.62.31-manual-attendance-existing-no-food-conversion-20261027.zip.sha256" download>دانلود SHA-256</a>
   </div>
-  <h2>رفتار ثبت دستی</h2>
+  <h2>رفتار اصلاح‌شده</h2>
   <ul>
-    <li>بخش «ثبت دستی فیش» فقط در تنظیمات سیستم و فقط برای ادمین اصلی نمایش داده می‌شود؛ از پنل مدیر غذا یا سفارش اضطراری قابل اجرا نیست.</li>
-    <li>مجوز `food.manual_ticket` به «نقش‌ها و دسترسی‌ها» اضافه شده؛ نقش‌های غیرادمین نمی‌توانند آن را دریافت کنند.</li>
-    <li>فیش با وضعیت «چاپ‌شده» در جدول رویدادها ثبت می‌شود، اما چاپ فیزیکی انجام نمی‌شود. علت، شناسهٔ ادمین و سفارش برای ممیزی ثبت می‌شوند.</li>
-    <li>وضعیت تحویل غذا تغییر نمی‌کند؛ ثبت دستی به معنی تحویل غذا نیست.</li>
+    <li>کارمندِ فعال با سفارش همان روز و رویداد `no_food` در حالت «ثبت تردد با صدور فیش» برای ادمین اصلی قابل انتخاب است.</li>
+    <li>همان رویداد روز به `event_type=printed` و `print_status=printed` تبدیل می‌شود؛ رویداد تکراری ساخته نمی‌شود.</li>
+    <li>چاپ فیزیکی خاموش، چاپگر را فراخوانی نمی‌کند. در همان گزارش ثبت دستی مشخص می‌شود «در سامانه چاپ‌شده؛ چاپ فیزیکی انجام نشد».</li>
+    <li>صدور دستی فیش در سمت سرور به ادمین اصلی و مجوز مستقل `food.manual_ticket` محدود است. برای سایر کاربران، ثبت ترددِ بدون فیشِ موجود طبق مجوزهای قبلی باقی می‌ماند.</li>
+    <li>وضعیت تحویل غذا تغییر نمی‌کند؛ ثبت چاپ‌شده به‌تنهایی به معنی تحویل غذا نیست.</li>
   </ul>
   <h2>نصب و بررسی</h2>
   <ol>
-    <li>قابل نصب روی نسخه‌های ۱.۶۲.۲۵ تا ۱.۶۲.۲۹ است؛ روی نسخهٔ بالاتر از ۱.۶۲.۳۰ downgrade نکنید.</li>
-    <li>پیش از نصب از فایل‌ها و پایگاه‌داده بکاپ مستقل بگیرید.</li>
+    <li>قابل نصب از نسخه‌های ۱.۶۲.۲۸ تا ۱.۶۲.۳۰ است؛ روی نسخهٔ بالاتر از ۱.۶۲.۳۱ downgrade نکنید.</li>
+    <li>پیش از نصب از پایگاه‌داده و فایل‌ها بکاپ مستقل بگیرید.</li>
     <li>ZIP را از بخش به‌روزرسانی داخل سامانه بارگذاری کنید؛ دستی extract نکنید.</li>
-    <li>با مدیر پشتیبانی بررسی کنید که در سفارش اضطراری دیگر گزینهٔ ثبت فیش دستی وجود ندارد. سپس با ادمین اصلی، بخش «تنظیمات ← ثبت دستی فیش» را بررسی کنید.</li>
+    <li>در تنظیمات پنل غذا، کارمند دارای سفارش فعال و وضعیت «تردد/بدون فیش» را با ادمین اصلی انتخاب کنید، صدور فیش را فعال و چاپ فیزیکی را خاموش بگذارید؛ سپس رویداد فیش را در گزارش روز بررسی کنید.</li>
+    <li>با مدیر پشتیبانی تلاش برای صدور فیش باید رد شود. اگر نصب قبلی خراب شد، فایل‌های قبلی را از بکاپ بازگردانید.</li>
   </ol>
-  <div class="safe">بسته کد و مسیرهای دسترسی را ایستا بررسی می‌کند، اما روی سرور واقعی نصب نشده است. PHP lint نیز در محیط توسعه موجود نبود. اگر مشکلی دیدید، از بکاپ فایل‌های قبلی را بازگردانید.</div>
-  <div class="note">تنها برای فیش واقعیِ تأییدشده استفاده شود. این عملیات فیزیکی چاپ نمی‌کند و سفارش فعال، کد ملی و علت ثبت را کنترل/ممیزی می‌کند.</div>
+  <div class="safe">ZIP، مسیرهای نقش/دسترسی و منطق ایستای تبدیل رویداد بررسی شده‌اند. نصب روی سرور واقعی انجام نشده و PHP lint در محیط توسعه موجود نیست.</div>
 </main></body></html>
