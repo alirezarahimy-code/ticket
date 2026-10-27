@@ -73,5 +73,17 @@ def test_runtime_reconciliation_updates_stored_rows_when_absences_are_read():
 def test_download_page_points_to_16236():
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
     assert NAME in page and f"{NAME}.sha256" in page
+    assert f'href="{NAME}" download' in page
     assert "۱.۶۲.۳۶" in page
     assert "پایگاه‌دادهٔ شما" in page
+
+
+def test_system_updater_executes_manifest_migrations_from_the_zip():
+    updater = (ROOT / "system-update.php").read_text(encoding="utf-8")
+    assert "locateName('migrations/' . $migration)" in updater
+    assert "$stage . '/migrations/' . $migration" in updater
+    assert "foreach ($package['migrations'] as $migration)" in updater
+    with ZipFile(PACKAGE) as z:
+        manifest = json.loads(z.read("manifest.json"))
+        for migration in manifest["migrations"]:
+            assert f"migrations/{migration}" in z.namelist()
