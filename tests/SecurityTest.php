@@ -140,12 +140,12 @@ class SecurityTest
     {
         echo "Testing CSRF protection...\n";
         
-        $bootstrap = file_get_contents(__DIR__ . '/../bootstrap.php');
-        if (!is_string($bootstrap) || !str_contains($bootstrap, 'function csrf_token(')) {
+        $csrfModule = file_get_contents(__DIR__ . '/../lib/logging-csrf.php');
+        if (!is_string($csrfModule) || !str_contains($csrfModule, 'function csrf_token(')) {
             $this->fail('csrf_token function not found');
             return;
         }
-        if (!str_contains($bootstrap, 'function require_csrf(')) {
+        if (!str_contains($csrfModule, 'function require_csrf(')) {
             $this->fail('require_csrf function not found');
             return;
         }
@@ -157,12 +157,12 @@ class SecurityTest
     {
         echo "Testing rate limiting...\n";
         
-        $bootstrap = file_get_contents(__DIR__ . '/../bootstrap.php');
-        if (!is_string($bootstrap) || !str_contains($bootstrap, 'function api_rate_limit(')) {
+        $dbCore = file_get_contents(__DIR__ . '/../lib/db-core.php');
+        if (!is_string($dbCore) || !str_contains($dbCore, 'function api_rate_limit(')) {
             $this->fail('api_rate_limit function not found');
             return;
         }
-        if (!str_contains($bootstrap, 'function check_api_rate_limit(')) {
+        if (!str_contains($dbCore, 'function check_api_rate_limit(')) {
             $this->fail('check_api_rate_limit function not found');
             return;
         }
@@ -214,15 +214,15 @@ class SecurityTest
     {
         echo "Testing SQL injection prevention...\n";
         
-        // Test that PDO is used (check bootstrap for PDO usage)
-        $bootstrap = file_get_contents(__DIR__ . '/../bootstrap.php');
+        // PDO configuration lives in the database core module.
+        $dbCore = file_get_contents(__DIR__ . '/../lib/db-core.php');
         
-        if (strpos($bootstrap, 'PDO::ATTR_EMULATE_PREPARES') === false) {
+        if (strpos($dbCore, 'PDO::ATTR_EMULATE_PREPARES') === false) {
             $this->fail('PDO emulation not disabled');
             return;
         }
         
-        if (strpos($bootstrap, 'PDO::ERRMODE_EXCEPTION') === false) {
+        if (strpos($dbCore, 'PDO::ERRMODE_EXCEPTION') === false) {
             $this->fail('PDO error mode not set to exception');
             return;
         }
