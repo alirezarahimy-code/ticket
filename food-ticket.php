@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.16';
+const FOOD_TICKET_PANEL_VERSION = '1.37.15';
 
 function food_ticket_panel_version(): string
 {
@@ -112,7 +112,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         $menuPermission = match ($route) {
             'food-menu/status', 'food-menu/month' => 'food.menu|food.order_close',
             'food-menu/catalog', 'food-menu/day' => 'food.menu',
-            'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/daily-reconciliation', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close',
+            'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close',
             'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel' => 'food.emergency',
             default => null,
         };
@@ -2967,18 +2967,17 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
         );
     }
     $sql = "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.deputy_unit_id,
-                   ou.name AS deputy_name, c.food_name, u.first_name AS requester_first_name, u.last_name AS requester_last_name
+                   ou.name AS deputy_name, c.food_name
               FROM food_guest_requests r
               LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
               LEFT JOIN food_catalog c ON c.id = r.food_id
-              LEFT JOIN users u ON u.id = r.created_by
              WHERE r.status = 'active' AND r.request_date BETWEEN ? AND ?";
     $params = [$from, $to];
     if ($deputy !== 'all') {
         $sql .= ' AND r.deputy_unit_id = ?';
         $params[] = (int) $deputy;
     }
-    $sql .= " ORDER BY COALESCE(NULLIF(u.last_name, ''), SUBSTRING_INDEX(TRIM(r.requester_name), ' ', -1)), COALESCE(NULLIF(u.first_name, ''), SUBSTRING_INDEX(TRIM(r.requester_name), ' ', 1)), r.request_date, r.id";
+    $sql .= ' ORDER BY ou.name, r.request_date, r.id';
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
     $items = [];
@@ -2990,8 +2989,6 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
             'guest_count' => (int) $r['guest_count'],
             'food_name' => (string) ($r['food_name'] ?? ''),
             'requester_name' => (string) $r['requester_name'],
-            'first_name' => (string) ($r['requester_first_name'] ?? ''),
-            'last_name' => (string) ($r['requester_last_name'] ?? ''),
             'deputy_unit_id' => $r['deputy_unit_id'] === null ? null : (int) $r['deputy_unit_id'],
             'deputy_name' => (string) ($r['deputy_name'] ?? ''),
         ];
@@ -3130,12 +3127,10 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
         $fromDate = $toDate = $today;
     }
     $query = db()->prepare(
-        'SELECT e.id, e.punch_date AS attendance_date, e.punch_time AS attendance_time, e.personnel_code AS pc_code, COALESCE(NULLIF(e.full_name, \'\'), u.full_name, \'\') AS full_name, '
-        . 'COALESCE(NULLIF(u.last_name, \'\'), SUBSTRING_INDEX(TRIM(COALESCE(NULLIF(e.full_name, \'\'), u.full_name, \'\')), \' \', -1), \'\') AS user_last_name, '
-        . 'COALESCE(NULLIF(u.first_name, \'\'), SUBSTRING_INDEX(TRIM(COALESCE(NULLIF(e.full_name, \'\'), u.full_name, \'\')), \' \', 1), \'\') AS user_first_name, '
-        . 'e.food_type, e.event_type AS result, e.print_status' . $deliveryCols . $sourceDeleteCols . ', e.ticket_key, e.last_error, '
-        . 'CASE WHEN e.source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group '
-        . 'FROM food_ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE e.punch_date BETWEEN ? AND ? AND e.event_type <> "unknown" ORDER BY user_last_name, user_first_name, e.id DESC'
+        'SELECT id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
+        . 'event_type AS result, print_status' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
+        . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group '
+        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown" ORDER BY id DESC'
     );
     $query->execute([$fromDate, $toDate]);
     return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete): array {
@@ -3166,8 +3161,6 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
             'attendance_time' => (string) ($row['attendance_time'] ?? ''),
             'pc_code' => (string) ($row['pc_code'] ?? ''),
             'full_name' => (string) ($row['full_name'] ?? ''),
-            'last_name' => (string) ($row['user_last_name'] ?? ''),
-            'first_name' => (string) ($row['user_first_name'] ?? ''),
             'food_type' => (string) ($row['food_type'] ?? ''),
             'result' => $resultLabel,
             'print_status' => $rawStatus,
@@ -4713,7 +4706,7 @@ function food_ticket_render_page(array $user): void
             'bootstrap' => $bootstrap,
             'jalali_boot' => $jalaliBoot,
             'assets' => $assetNames,
-            'theme_href' => 'assets/style.css?v=3.4.32',
+            'theme_href' => 'assets/style.css?v=3',
         ]);
         $html = (string) ($hosted['html'] ?? $html);
         $notes = (array) ($hosted['notes'] ?? []);

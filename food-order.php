@@ -601,23 +601,12 @@ function food_order_manager_orders(string $date): array
         JOIN food_calendar_items i ON i.id = o.calendar_item_id
         JOIN food_catalog c ON c.id = i.food_id
         WHERE o.food_date = ?
-        ORDER BY COALESCE(NULLIF(u.last_name, ''), SUBSTRING_INDEX(TRIM(u.full_name), ' ', -1)), COALESCE(NULLIF(u.first_name, ''), SUBSTRING_INDEX(TRIM(u.full_name), ' ', 1)), u.id, o.id");
+        ORDER BY CASE WHEN o.status = 'active' THEN 0 ELSE 1 END, u.full_name, o.id");
     $stmt->execute([$iso]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $created = (string) $row['created_at'];
         $employeeId = (int) $row['employee_id'];
-        $firstName = trim((string) ($row['first_name'] ?? ''));
-        $lastName = trim((string) ($row['last_name'] ?? ''));
-        if ($firstName === '' || $lastName === '') {
-            $nameParts = preg_split('/\\s+/u', trim((string) ($row['full_name'] ?? ''))) ?: [];
-            if ($firstName === '') {
-                $firstName = (string) ($nameParts[0] ?? '');
-            }
-            if ($lastName === '') {
-                $lastName = (string) (end($nameParts) ?: '');
-            }
-        }
         $items[] = [
             'id' => (int) $row['id'],
             'employee_id' => $employeeId,
@@ -626,8 +615,8 @@ function food_order_manager_orders(string $date): array
             'menu_no' => (int) ($row['menu_no'] ?? 0),
             'national_code' => food_order_digits($row['national_code'] ?? ''),
             'employee_number' => (string) ($row['employee_number'] ?? ''),
-            'first_name' => $firstName,
-            'last_name' => $lastName,
+            'first_name' => trim((string) ($row['first_name'] ?? '')),
+            'last_name' => trim((string) ($row['last_name'] ?? '')),
             'full_name' => food_order_full_name($row),
             'food_name' => (string) $row['food_name'],
             'food_date' => (string) $row['food_date'],
@@ -662,7 +651,7 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
             JOIN users u ON u.id = o.employee_id
             WHERE o.food_date BETWEEN ? AND ? AND o.status = 'active'
             GROUP BY u.id, u.full_name, u.first_name, u.last_name
-            ORDER BY COALESCE(NULLIF(u.last_name, ''), SUBSTRING_INDEX(TRIM(u.full_name), ' ', -1)), COALESCE(NULLIF(u.first_name, ''), SUBSTRING_INDEX(TRIM(u.full_name), ' ', 1)), u.id");
+            ORDER BY order_count DESC, u.last_name, u.first_name, u.id");
     } else {
         $stmt = db()->prepare("SELECT f.id AS food_id, f.food_name, COUNT(o.id) AS order_count
             FROM food_orders o
@@ -691,109 +680,6 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
     return $items;
 }
 
-/** گزارش روزانهٔ تجمیعی؛ تعداد افراد با سفارش فعال در کنار فیش‌های مهمان و چاپ قطعی. */
-function food_order_daily_reconciliation_report(string $fromDate, string $toDate): array
-{
-    food_order_schema_ensure();
-    $from = food_order_iso_date($fromDate);
-    $to = food_order_iso_date($toDate);
-    if ($from === null || $to === null || $from > $to) {
-        throw new RuntimeException('بازهٔ گزارش تجمعی معتبر نیست.');
-    }
-    $span = (new DateTimeImmutable($from, new DateTimeZone('UTC')))->diff(new DateTimeImmutable($to, new DateTimeZone('UTC')))->days;
-    if ($span > 366) {
-        throw new RuntimeException('بازهٔ گزارش تجمعی حداکثر یک سال است.');
-    }
-
-    $ordersStmt = db()->prepare("SELECT DISTINCT o.food_date, u.id AS user_id, u.national_code, u.employee_number
-        FROM food_orders o JOIN users u ON u.id = o.employee_id
-        WHERE o.food_date BETWEEN ? AND ? AND o.status = 'active'");
-    $ordersStmt->execute([$from, $to]);
-    $ordersByDate = [];
-    foreach ($ordersStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $date = (string) $row['food_date'];
-        $userId = (int) $row['user_id'];
-        $ordersByDate[$date][$userId] = [
-            'user_id' => $userId,
-            'national_code' => food_order_digits($row['national_code'] ?? ''),
-            'employee_number' => trim((string) ($row['employee_number'] ?? '')),
-        ];
-    }
-
-    $absentByDate = [];
-    if (!function_exists('food_ticket_api_absent')) {
-        throw new RuntimeException('منطق اصلی گزارش غایبین در دسترس نیست؛ گزارش تجمعی متوقف شد تا اختلاف پنهان نشود.');
-    }
-    foreach (food_ticket_api_absent($from, $to) as $absentRow) {
-        $absenceDate = (string) ($absentRow['foodDate'] ?? '');
-        if ($absenceDate !== '') {
-            $absentByDate[$absenceDate] = (int) ($absentByDate[$absenceDate] ?? 0) + 1;
-        }
-    }
-
-    $printedStmt = db()->prepare("SELECT punch_date, national_code, personnel_code
-        FROM food_ticket_events
-        WHERE punch_date BETWEEN ? AND ? AND event_type IN ('printed', 'print') AND print_status = 'printed'");
-    $printedStmt->execute([$from, $to]);
-    $printedByDate = [];
-    foreach ($printedStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $date = (string) $row['punch_date'];
-        $nationalCode = food_order_digits($row['national_code'] ?? '');
-        if ($nationalCode !== '') {
-            $printedByDate[$date]['nat:' . $nationalCode] = true;
-        }
-        $employeeNumber = trim((string) ($row['personnel_code'] ?? ''));
-        if ($employeeNumber !== '') {
-            $printedByDate[$date]['pc:' . $employeeNumber] = true;
-        }
-    }
-
-    $guestStmt = db()->prepare("SELECT punch_date, COUNT(*) AS ticket_count
-        FROM food_ticket_events
-        WHERE punch_date BETWEEN ? AND ? AND event_type = 'guest' AND print_status = 'printed'
-        GROUP BY punch_date");
-    $guestStmt->execute([$from, $to]);
-    $guestByDate = [];
-    foreach ($guestStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $guestByDate[(string) $row['punch_date']] = (int) $row['ticket_count'];
-    }
-
-    $rows = [];
-    $day = new DateTimeImmutable($from, new DateTimeZone('UTC'));
-    $lastDay = new DateTimeImmutable($to, new DateTimeZone('UTC'));
-    while ($day <= $lastDay) {
-        $date = $day->format('Y-m-d');
-        $personnel = array_values($ordersByDate[$date] ?? []);
-        $printedPeople = 0;
-        foreach ($personnel as $person) {
-            $userId = (int) $person['user_id'];
-            $nationalCode = (string) $person['national_code'];
-            $employeeNumber = (string) $person['employee_number'];
-            if (($nationalCode !== '' && isset($printedByDate[$date]['nat:' . $nationalCode]))
-                || ($employeeNumber !== '' && isset($printedByDate[$date]['pc:' . $employeeNumber]))) {
-                $printedPeople++;
-            }
-        }
-        $guestTickets = (int) ($guestByDate[$date] ?? 0);
-        $personnelOrders = count($personnel);
-        $totalOrders = $personnelOrders + $guestTickets;
-        $absentees = (int) ($absentByDate[$date] ?? 0);
-        $calculatedAbsentees = $totalOrders - ($guestTickets + $printedPeople);
-        $rows[] = [
-            'food_date' => $date,
-            'personnel_order_count' => $personnelOrders,
-            'guest_ticket_count' => $guestTickets,
-            'total_order_count' => $totalOrders,
-            'confirmed_printed_ticket_count' => $printedPeople,
-            'absentee_count' => $absentees,
-            'calculated_absentee_count' => $calculatedAbsentees,
-            'equation_matches' => $absentees === $calculatedAbsentees,
-        ];
-        $day = $day->modify('+1 day');
-    }
-    return ['from' => $from, 'to' => $to, 'items' => $rows];
-}
-
 /** فهرست رویدادهای غذای واقعاً چاپ‌شده و تحویل‌شده، به‌علاوه فیش‌های چاپ‌شدهٔ مهمان. */
 function food_order_printed_delivery_report(string $fromDate, string $toDate): array
 {
@@ -818,8 +704,6 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
             COALESCE(NULLIF(e.personnel_code, ''), u.employee_number, '') AS employee_number,
             COALESCE(NULLIF(e.national_code, ''), u.national_code, '') AS national_code,
             COALESCE(NULLIF(e.full_name, ''), u.full_name, 'مهمان') AS full_name,
-            COALESCE(NULLIF(u.last_name, ''), SUBSTRING_INDEX(TRIM(COALESCE(NULLIF(e.full_name, ''), u.full_name, '')), ' ', -1), '') AS last_name,
-            COALESCE(NULLIF(u.first_name, ''), SUBSTRING_INDEX(TRIM(COALESCE(NULLIF(e.full_name, ''), u.full_name, '')), ' ', 1), '') AS first_name,
             COALESCE(NULLIF(e.food_type, ''), IF(e.event_type = 'guest', 'مهمان', '')) AS food_name,
             e.event_type, e.print_status, e.delivery_status, e.delivered_at, e.ticket_key,
             CASE WHEN e.event_type = 'guest' THEN 0 ELSE COALESCE(i.sort_order, 0) END AS menu_no
@@ -831,7 +715,7 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
           AND (e.print_status = 'printed' OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'))
           AND ((e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
                OR e.event_type = 'guest')
-        ORDER BY last_name, first_name, e.id");
+        ORDER BY menu_no, e.food_type, e.full_name, e.id");
     $stmt->execute([$from, $to]);
     $items = [];
     $employeeIds = [];
@@ -845,8 +729,6 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
             'employee_number' => (string) ($row['employee_number'] ?? ''),
             'national_code' => food_order_digits($row['national_code'] ?? ''),
             'full_name' => (string) ($row['full_name'] ?? ''),
-            'last_name' => (string) ($row['last_name'] ?? ''),
-            'first_name' => (string) ($row['first_name'] ?? ''),
             'food_name' => (string) ($row['food_name'] ?? ''),
             'event_type' => (string) ($row['event_type'] ?? ''),
             'menu_no' => (int) ($row['menu_no'] ?? 0),
@@ -884,8 +766,7 @@ function food_order_export_printed_delivery_report(string $fromDate, string $toD
     if ($view === 'menu') {
         usort($items, static function (array $a, array $b): int {
             return ((int) $a['menu_no'] <=> (int) $b['menu_no'])
-                ?: strcmp((string) ($a['last_name'] ?? ''), (string) ($b['last_name'] ?? ''))
-                ?: strcmp((string) ($a['first_name'] ?? ''), (string) ($b['first_name'] ?? ''))
+                ?: strcmp((string) $a['food_name'], (string) $b['food_name'])
                 ?: strcmp((string) $a['full_name'], (string) $b['full_name']);
         });
     }
@@ -2526,13 +2407,6 @@ function food_order_menu_api_handle(string $route, array $user): never
             $from = (string) ($_GET['from'] ?? '');
             $to = (string) ($_GET['to'] ?? '');
             food_order_send_json(food_order_printed_delivery_report($from, $to));
-        }
-        if ($method === 'GET' && $route === 'food-menu/daily-reconciliation') {
-            food_order_require_permission($user, 'food.order_close');
-            food_order_send_json(food_order_daily_reconciliation_report(
-                (string) ($_GET['from'] ?? ''),
-                (string) ($_GET['to'] ?? '')
-            ));
         }
         if ($method === 'GET' && $route === 'food-menu/printed-delivery-export') {
             food_order_require_permission($user, 'food.order_close');

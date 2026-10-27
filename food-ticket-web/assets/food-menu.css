@@ -219,7 +219,3 @@
 .fm-view-switch { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .fm-menu-group { margin-bottom: 18px; }
 .fm-menu-group h4 { margin: 10px 0 6px; }
-.fm-aggregate-counts{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));}
-.fm-aggregate-counts>div{justify-content:space-between;min-height:58px;}
-.fm-aggregate-equation{margin:10px 0;}
-@media(max-width:720px){.fm-aggregate-counts{grid-template-columns:repeat(2,minmax(125px,1fr));}}

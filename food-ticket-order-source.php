@@ -67,20 +67,16 @@ function food_order_internal_items(string $fromDate, ?string $toDate = null): ar
         JOIN food_calendar_items i ON i.id = o.calendar_item_id
         JOIN food_catalog c ON c.id = i.food_id
         WHERE o.food_date BETWEEN ? AND ? AND o.status = 'active'
-        ORDER BY o.food_date, COALESCE(NULLIF(u.last_name, ''), SUBSTRING_INDEX(TRIM(u.full_name), ' ', -1)), COALESCE(NULLIF(u.first_name, ''), SUBSTRING_INDEX(TRIM(u.full_name), ' ', 1)), u.id, o.id");
+        ORDER BY o.food_date, u.full_name, o.id");
     $stmt->execute([$from, $to]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $first = trim((string) ($row['first_name'] ?? ''));
         $last = trim((string) ($row['last_name'] ?? ''));
-        if ($first === '' || $last === '') {
-            $parts = preg_split('/\s+/u', trim((string) ($row['full_name'] ?? ''))) ?: [];
-            if ($first === '') {
-                $first = count($parts) > 1 ? implode(' ', array_slice($parts, 0, -1)) : (string) ($parts[0] ?? '');
-            }
-            if ($last === '') {
-                $last = (string) (end($parts) ?: '');
-            }
+        if ($first === '' && $last === '') {
+            $parts = preg_split('/\s+/u', trim((string) ($row['full_name'] ?? '')), 2) ?: [];
+            $first = (string) ($parts[0] ?? '');
+            $last = (string) ($parts[1] ?? '');
         }
         $created = (string) ($row['created_at'] ?? '');
         $isoDate = (string) $row['food_date'];

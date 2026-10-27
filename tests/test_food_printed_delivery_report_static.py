@@ -34,18 +34,16 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
     def test_report_api_is_restricted_to_food_order_close(self) -> None:
         ticket = read("food-ticket.php")
         order = read("food-order.php")
-        self.assertIn("'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/daily-reconciliation', 'food-menu/cancel-requests'", ticket)
+        self.assertIn("'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests'", ticket)
         self.assertIn("=> 'food.order_close'", ticket)
         self.assertIn("$route === 'food-menu/printed-delivery'", order)
         self.assertIn("$route === 'food-menu/printed-delivery-export'", order)
         self.assertIn("food_order_require_permission($user, 'food.order_close');", order)
 
-    def test_delivery_report_is_a_standalone_view_not_nested_in_statistics(self) -> None:
+    def test_report_is_appended_after_statistics_and_matches_daily_order_controls(self) -> None:
         ui = read("food-ticket-web/assets/food-menu.js")
         stats = ui[ui.index("function renderStatistics()") : ui.index("function render()", ui.index("function renderStatistics()"))]
-        self.assertNotIn("renderPrintedDeliveryReport()", stats)
-        self.assertIn("state.tab === 'delivered' && canClose ? renderPrintedDeliveryReport()", ui)
-        self.assertIn("id=\"fm-delivered-date\"", ui)
+        self.assertIn("+ renderPrintedDeliveryReport()", stats)
         self.assertIn("data-fm-delivery-field", ui)
         self.assertIn("itsm-food-printed-delivery-report-fields-v1", ui)
         self.assertIn("data-view=\"menu\"", ui)
@@ -57,8 +55,8 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
 
     def test_mirrored_assets_and_cache_versions_are_updated(self) -> None:
         panel = read("food-ticket-web/index.html")
-        self.assertIn('assets/food-menu.css?v=24', panel)
-        self.assertIn('assets/food-menu.js?v=21', panel)
+        self.assertIn('assets/food-menu.css?v=23', panel)
+        self.assertIn('assets/food-menu.js?v=20', panel)
         self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
         self.assertEqual(read("assets/food-menu.css"), read("food-ticket-web/assets/food-menu.css"))
 
