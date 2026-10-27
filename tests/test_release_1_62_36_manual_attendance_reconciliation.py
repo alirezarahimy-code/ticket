@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 NAME = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
 PACKAGE = ROOT / "downloads" / NAME
 MIGRATION = "013-manual-attendance-record-backfill.sql"
+MIGRATIONS = [
+    "011-manual-attendance-delivery.sql",
+    "012-manual-attendance-clears-absences.sql",
+    MIGRATION,
+]
 
 
 def test_16236_package_and_checksum_are_integral():
@@ -20,7 +25,9 @@ def test_16236_package_and_checksum_are_integral():
         manifest = json.loads(z.read("manifest.json"))
         assert manifest["version"] == "1.62.36"
         assert manifest["requires_version"] == "1.62.35"
-        assert manifest["migrations"] == [MIGRATION]
+        assert manifest["migrations"] == MIGRATIONS
+        for migration in MIGRATIONS:
+            assert f"migrations/{migration}" in names
         assert set(manifest["files"]) == {n[6:] for n in names if n.startswith("files/")}
         assert z.read("files/VERSION").decode().strip() == "1.62.36"
         assert f"migrations/{MIGRATION}" in names

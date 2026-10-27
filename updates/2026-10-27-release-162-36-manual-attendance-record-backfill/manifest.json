@@ -5,6 +5,8 @@
   "title": "اصلاح واقعی وضعیت فیش و غیبت ثبت‌های دستی قبلی",
   "requires_version": "1.62.35",
   "migrations": [
+    "011-manual-attendance-delivery.sql",
+    "012-manual-attendance-clears-absences.sql",
     "013-manual-attendance-record-backfill.sql"
   ],
   "files": [
