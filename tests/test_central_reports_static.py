@@ -11,33 +11,29 @@ def read(path: str) -> str:
 
 
 class CentralReportsStaticTests(unittest.TestCase):
-    def test_food_reports_live_as_tabs_inside_food_management_reports_view(self) -> None:
-        panel = read("food-ticket-web/index.html")
+    def test_report_hub_keeps_request_report_and_exposes_food_reports_as_tabs(self) -> None:
+        index = read("index.php")
         for label in [
-            "گزارش‌گیری",
+            "گزارش درخواست‌ها",
+            "گزارش‌گیری غذا",
             "آمار سفارش‌ها",
             "سفارش‌های روز",
             "فیش‌های چاپ‌شده و غذای تحویل‌شده",
             "گزارش تجمعی",
         ]:
-            self.assertIn(label, panel)
-        self.assertIn("data-report-section", panel)
-        self.assertIn("report-module-tabs", panel)
-        self.assertIn("if(view==='reports'&&reportSection!=='attendance'", panel)
-        self.assertIn("window.FOOD_TICKET_REPORT_TAB=reportSection", panel)
-        self.assertIn("food-menu-root", panel)
+            self.assertIn(label, index)
+        self.assertIn("report-hub-frame", index)
+        self.assertIn("report_tab", index)
+        self.assertIn("SUBSTRING_INDEX(TRIM(r.full_name)", index)
+        self.assertIn("r.id, t.id DESC", index)
+        self.assertIn("report_view' => 'food-attendance'", index)
 
-    def test_food_report_navigation_stays_in_the_management_panel_without_iframes(self) -> None:
-        index = read("index.php")
-        module = read("assets/food-menu.js")
+    def test_legacy_food_report_view_query_preempts_saved_view_and_hides_inner_tabs(self) -> None:
         panel = read("food-ticket-web/index.html")
-        self.assertNotIn("report-hub-frame", index)
-        self.assertNotIn("reportTabFrames", index)
-        self.assertNotIn("report_view", panel)
-        self.assertNotIn("page=reports", module)
-        self.assertIn("data-report-section", panel)
-        tab_code = panel[panel.index("const reportTabs="):panel.index("if(reportSection!=='attendance')", panel.index("const reportTabs="))]
-        self.assertNotIn("href=", tab_code)
+        self.assertIn("const embeddedFoodViews={'food-attendance':'reports',orders:'food-menu',statistics:'food-menu',delivered:'food-menu',aggregate:'food-menu'}", panel)
+        self.assertIn("embeddedReportMode?embeddedFoodViews[requestedReportView]", panel)
+        self.assertIn("embeddedReportMode?'':'<nav class=\"tabs\"", panel)
+        self.assertIn("html.food-report-embed .topbar{display:none}", panel)
 
     def test_daily_reconciliation_uses_real_absence_report_and_surfaces_difference(self) -> None:
         order = read("food-order.php")

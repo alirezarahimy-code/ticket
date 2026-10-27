@@ -638,7 +638,7 @@ function render_header(string $title, ?array $user = null): void
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
     $notificationSummary = $user ? notification_header_summary((int) $user['id'], $user) : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.31"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102a43"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.32"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>';
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -4836,9 +4836,48 @@ if ($page === 'analytics') {
 
 if ($page === 'reports') {
     $reportUser = require_permission('reports.view');
+    $canSeeFoodOrderReports = (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($reportUser))
+        || (function_exists('user_can') && user_can($reportUser, 'food.order_close'));
+    $canSeeFoodAttendanceReports = (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($reportUser))
+        || (function_exists('user_can') && user_can($reportUser, 'food.reports'));
+    $requestedReportTab = (string) ($_GET['report_tab'] ?? 'tickets');
+    $reportTabItems = ['tickets' => 'گزارش درخواست‌ها'];
+    if ($canSeeFoodAttendanceReports) {
+        $reportTabItems['food-attendance'] = 'گزارش‌گیری غذا';
+    }
+    if ($canSeeFoodOrderReports) {
+        $reportTabItems += [
+            'food-statistics' => 'آمار سفارش‌ها',
+            'food-orders' => 'سفارش‌های روز',
+            'food-delivered' => 'فیش‌های چاپ‌شده و غذای تحویل‌شده',
+            'food-aggregate' => 'گزارش تجمعی',
+        ];
+    }
+    $reportTab = isset($reportTabItems[$requestedReportTab]) ? $requestedReportTab : 'tickets';
+    $reportTabFrames = [
+        'food-attendance' => ['report_view' => 'food-attendance', 'title' => 'گزارش‌گیری غذا'],
+        'food-statistics' => ['report_view' => 'statistics', 'title' => 'آمار سفارش‌ها'],
+        'food-orders' => ['report_view' => 'orders', 'title' => 'سفارش‌های روز'],
+        'food-delivered' => ['report_view' => 'delivered', 'title' => 'فیش‌های چاپ‌شده و غذای تحویل‌شده'],
+        'food-aggregate' => ['report_view' => 'aggregate', 'title' => 'گزارش تجمعی'],
+    ];
+    $reportTabsHtml = '<nav class="log-tabs report-hub-tabs" aria-label="تب‌های گزارش‌ها">';
+    foreach ($reportTabItems as $tabKey => $tabLabel) {
+        $reportTabsHtml .= '<a class="' . ($reportTab === $tabKey ? 'active' : '') . '" href="index.php?page=reports&amp;report_tab=' . e($tabKey) . '">' . e($tabLabel) . '</a>';
+    }
+    $reportTabsHtml .= '</nav>';
+    if (isset($reportTabFrames[$reportTab])) {
+        $frame = $reportTabFrames[$reportTab];
+        render_header('مرکز گزارش‌ها', $reportUser);
+        echo '<section class="page-heading"><div><span class="eyebrow">مرکز یکپارچهٔ گزارش‌ها</span><h1>گزارش‌ها</h1><p>گزارش‌ها بر اساس دسترسی حساب شما در تب‌های جداگانه گردآوری شده‌اند.</p></div></section>' . $reportTabsHtml
+            . '<iframe class="report-hub-frame" title="' . e($frame['title']) . '" src="index.php?page=food-ticket&amp;report_view=' . e($frame['report_view']) . '" loading="lazy"></iframe>';
+        render_footer();
+        exit;
+    }
     $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'due_at', 'sla_minutes']);
     if ($reportMissingColumns) {
-        render_header('گزارش‌ها', $reportUser);
+        render_header('مرکز گزارش‌ها', $reportUser);
+        echo '<section class="page-heading"><div><span class="eyebrow">مرکز یکپارچهٔ گزارش‌ها</span><h1>گزارش‌ها</h1></div></section>' . $reportTabsHtml;
         echo '<section class="card empty-state"><h2>ساختار گزارش‌ها کامل نیست.</h2><p>این نسخه به ستون‌های جدید درخواست نیاز دارد. فایل‌های Migration را به‌ترتیب روی همان دیتابیس اجرا کنید، سپس صفحه را تازه‌سازی کنید.</p><p><code>upgrade-1.2-itsm.sql</code> و در صورت نیاز <code>upgrade-1.8-routing.sql</code></p><p class="muted">ستون‌های ناقص: ' . e(implode(', ', $reportMissingColumns)) . '</p><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
         render_footer();
         exit;
@@ -4857,8 +4896,9 @@ if ($page === 'reports') {
     $reportRows = $rowsQuery->fetchAll();
     $departments = is_global_ticket_role($reportUser['role']) ? db()->query('SELECT id, name FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll() : [];
     $queryString = http_build_query(array_filter($_GET, static fn ($value, $key): bool => $key !== 'page' && $key !== 'action' && $value !== '', ARRAY_FILTER_USE_BOTH));
-    render_header('گزارش‌ها', $reportUser);
-     echo '<section class="page-heading"><div><span class="eyebrow">کنترل عملکرد پشتیبانی</span><h1>گزارش و پیگیری</h1><p>گزارش‌ها را فیلتر کنید و خروجی قابل استفاده در Excel بگیرید.</p></div><a class="button secondary" href="index.php?action=export_report' . ($queryString ? '&' . e($queryString) : '') . '">خروجی Excel</a></section><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="reports"><div class="filter-grid"><label>از تاریخ جلالی<input type="text" name="from" placeholder="۱۴۰۵/۰۱/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ جلالی<input type="text" name="to" placeholder="۱۴۰۵/۰۱/۳۱" value="' . e($_GET['to'] ?? '') . '"></label><label>وضعیت<select name="status"><option value="">همه وضعیت‌ها</option>';
+    render_header('مرکز گزارش‌ها', $reportUser);
+    echo '<section class="page-heading"><div><span class="eyebrow">مرکز یکپارچهٔ گزارش‌ها</span><h1>گزارش‌ها</h1><p>همهٔ گزارش‌های پشتیبانی و غذا در همین منو و تب‌های جداگانه قرار دارند.</p></div></section>' . $reportTabsHtml;
+     echo '<section class="page-heading"><div><span class="eyebrow">گزارش درخواست‌ها</span><h1>گزارش‌گیری درخواست‌ها</h1><p>گزارش‌ها را فیلتر کنید و خروجی قابل استفاده در Excel بگیرید.</p></div><a class="button secondary" href="index.php?action=export_report' . ($queryString ? '&' . e($queryString) : '') . '">خروجی Excel</a></section><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="reports"><input type="hidden" name="report_tab" value="tickets"><div class="filter-grid"><label>از تاریخ جلالی<input type="text" name="from" placeholder="۱۴۰۵/۰۱/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ جلالی<input type="text" name="to" placeholder="۱۴۰۵/۰۱/۳۱" value="' . e($_GET['to'] ?? '') . '"></label><label>وضعیت<select name="status"><option value="">همه وضعیت‌ها</option>';
     // گزینه‌های گروهی هم اضافه شدند تا کارت‌های داشبورد (?status=active/resolved/all) در فرم دیده شوند
     foreach (['all' => 'همهٔ درخواست‌ها', 'active' => 'باز و در حال پیگیری', 'new' => 'جدید', 'manager_review' => null, 'assigned' => null, 'in_progress' => null, 'waiting_user' => null, 'pending' => null, 'resolved' => null, 'closed' => null, 'cancelled' => null] as $status => $customLabel) {
         echo '<option value="' . $status . '" ' . ((string) ($_GET['status'] ?? '') === $status ? 'selected' : '') . '>' . e($customLabel ?? status_label($status)) . '</option>';

@@ -6,14 +6,16 @@
   var canMenu = global.FOOD_TICKET_CAN_MENU_EDIT === true;
   var canClose = global.FOOD_TICKET_CAN_ORDER_CLOSE === true;
   var isPrimary = global.FOOD_TICKET_IS_PRIMARY_ADMIN === true;
+  var requestedReportView = '';
+  try { requestedReportView = new URLSearchParams(global.location && global.location.search || '').get('report_view') || ''; } catch (e) {}
   var reportTabMap = { orders: 'orders', statistics: 'statistics', delivered: 'delivered', aggregate: 'aggregate' };
-  function isEmbeddedReport() { return global.FOOD_TICKET_REPORT_EMBED === true; }
+  var embeddedReportMode = Object.prototype.hasOwnProperty.call(reportTabMap, requestedReportView);
   var apiBase = String(global.FOOD_TICKET_API_BASE || '');
   var csrf = String(global.FOOD_TICKET_CSRF || '');
   var root = null;
   var state = {
     mounted: false,
-    tab: canMenu ? 'calendar' : 'orders',
+    tab: embeddedReportMode ? reportTabMap[requestedReportView] : (canMenu ? 'calendar' : 'orders'),
     year: 1405,
     month: 1,
     selectedDate: '',
@@ -156,14 +158,16 @@
   function navTabs() {
     var tabs = [];
     if (canMenu) tabs.push(['calendar', 'برنامهٔ روزانه'], ['catalog', 'بانک غذا']);
+    var reportsLink = '';
     if (canClose) {
       var cancelCount = (state.cancelRequests || []).length;
       var cancelLabel = 'درخواست‌های لغو' + (cancelCount ? (' (' + faDigits(cancelCount) + ')') : '');
       tabs.push(['cancel-requests', cancelLabel]);
+      reportsLink = '<a class="fm-tab fm-tab-link" href="index.php?page=reports">همهٔ گزارش‌ها</a>';
     }
     return '<div class="fm-tabs" role="tablist">' + tabs.map(function (tab) {
       return '<button class="fm-tab ' + (state.tab === tab[0] ? 'active' : '') + '" type="button" role="tab" aria-selected="' + (state.tab === tab[0] ? 'true' : 'false') + '" data-fm-tab="' + tab[0] + '">' + tab[1] + '</button>';
-    }).join('') + '</div>';
+    }).join('') + reportsLink + '</div>';
   }
 
   function renderCalendar() {
@@ -710,7 +714,7 @@
     }
     var panel = state.tab === 'calendar' && canMenu ? renderCalendar() + emergencyPanel() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : state.tab === 'delivered' && canClose ? renderPrintedDeliveryReport() : state.tab === 'aggregate' && canClose ? renderDailyAggregateReport() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
-    root.innerHTML = isEmbeddedReport() ? notices + panel : '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
+    root.innerHTML = embeddedReportMode ? notices + panel : '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + panel;
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
   }
 
@@ -836,21 +840,12 @@
     var initialMonth = jalaliMonthFromIso(state.selectedDate);
     if (initialMonth && !state.monthData) { state.year = initialMonth[0]; state.month = initialMonth[1]; }
     var jobs = [];
-    if (isEmbeddedReport()) {
-      if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
-      if (canClose && state.tab === 'statistics') jobs.push(loadStatistics(state.statisticsFrom || state.selectedDate, state.statisticsTo || state.selectedDate, state.statisticsMode || 'food'));
-      if (canClose && state.tab === 'delivered') jobs.push(loadPrintedDeliveryReport(state.deliveredFrom || state.selectedDate, state.deliveredTo || state.selectedDate));
-      if (canClose && state.tab === 'aggregate') jobs.push(loadDailyAggregateReport(state.aggregateFrom || state.selectedDate, state.aggregateTo || state.selectedDate));
-      await Promise.all(jobs);
-      render();
-      return;
-    }
     if (canMenu) { jobs.push(loadCatalog()); jobs.push(loadMonth()); }
     if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
     if (canClose && state.tab === 'statistics') jobs.push(loadStatistics(state.statisticsFrom || state.selectedDate, state.statisticsTo || state.selectedDate, state.statisticsMode || 'food'));
     if (canClose && state.tab === 'delivered') jobs.push(loadPrintedDeliveryReport(state.deliveredFrom || state.selectedDate, state.deliveredTo || state.selectedDate));
     if (canClose && state.tab === 'aggregate') jobs.push(loadDailyAggregateReport(state.aggregateFrom || state.selectedDate, state.aggregateTo || state.selectedDate));
-    if (canClose && !isEmbeddedReport()) jobs.push(loadCancelRequests());
+    if (canClose && !embeddedReportMode) jobs.push(loadCancelRequests());
     await Promise.all(jobs);
     render();
   }
@@ -1368,13 +1363,6 @@
     root = document.getElementById('food-menu-root');
     if (!root || root.dataset.fmMounted === '1') return;
     root.dataset.fmMounted = '1';
-    if (isEmbeddedReport()) {
-      var requestedTab = String(global.FOOD_TICKET_REPORT_TAB || '');
-      if (Object.prototype.hasOwnProperty.call(reportTabMap, requestedTab)) state.tab = reportTabMap[requestedTab];
-    } else if (state.wasEmbeddedReport) {
-      state.tab = canMenu ? 'calendar' : 'orders';
-    }
-    state.wasEmbeddedReport = isEmbeddedReport();
     root.addEventListener('click', emergencyClick);
     root.addEventListener('click', eventClick);
     root.addEventListener('change', eventChange);

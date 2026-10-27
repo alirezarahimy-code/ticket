@@ -58,7 +58,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
     def test_mirrored_assets_and_cache_versions_are_updated(self) -> None:
         panel = read("food-ticket-web/index.html")
         self.assertIn('assets/food-menu.css?v=24', panel)
-        self.assertIn('assets/food-menu.js?v=22', panel)
+        self.assertIn('assets/food-menu.js?v=21', panel)
         self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
         self.assertEqual(read("assets/food-menu.css"), read("food-ticket-web/assets/food-menu.css"))
 
