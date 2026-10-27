@@ -65,7 +65,7 @@ const env = {
 const names = Object.keys(env);
 const fn = new Function(...names, `${block}; return {
   reportView, reportAggregateView, aggFields, aggSaveFields, aggRange, aggDateLabel,
-  aggCell, aggTable, aggSelectedCols, loadAggregate, aggDownloadUrl, showAggregatePreview,
+  aggCell, aggTable, aggSelectedCols, aggSorted, aggLastName, loadAggregate, aggDownloadUrl, showAggregatePreview,
   AGG_ALL_FIELDS, AGG_DEFAULT_FIELDS
 };`);
 const m = fn(...names.map((n) => env[n]));
@@ -96,7 +96,7 @@ env.state.aggregate = {
   source_notes: [],
 };
 out = m.reportAggregateView();
-for (const label of ['تعداد کل سفارشها', 'فیش مهمان چاپشده', 'فیش چاپشده قطعی', 'تعداد غایبین', 'مغایرت']) {
+for (const label of ['تعداد کل سفارشها', 'فیش مهمان چاپ شده', 'فیش چاپشده قطعی', 'تعداد غایبین', 'مغایرت']) {
   assert(out.includes(label), `شمارنده «${label}» در خروجی نیست`);
 }
 assert(out.includes('۱۲۰') && out.includes('۱۰۲') && out.includes('۱۰'), 'اعداد فارسی نشان داده نشدند');
@@ -110,7 +110,7 @@ assert(out.includes('data-agg-field="name"'), 'انتخاب فیلد وجود ن
 // ۴) حالت مغایرtdارد
 env.state.aggregate.counts = { total_orders: 120, guest_printed: 8, printed_final: 100, absent: 10, has_mismatch: true, difference: 2 };
 out = m.reportAggregateView();
-assert(out.includes('دارد') && out.includes('اختلاف ۲ نفر'), 'مغایرت و اختلاف نشان داده نشد');
+assert(out.includes('>دارد</b>') && out.includes('agg-mismatch-text'), 'وضعیت «مغایرت دارد» نشان داده نشد');
 assert(out.includes('agg-mismatch'), 'استایل هشدار مغایرت اعمال نشد');
 
 // ۵) انتخاب فیلدها — فقط ستونهای انتخابشده بیایند
@@ -120,8 +120,15 @@ m.aggSaveFields(['pc', 'name']);
 assert.deepStrictEqual(m.aggFields(), ['pc', 'name'], 'ذخیره/بازیابی فیلدها کار نمیکند');
 assert.strictEqual(m.aggSelectedCols().length, 2, 'تعداد ستونهای انتخابشده نادرست است');
 out = m.aggTable([{ pc: '1', name: 'الف' }], 'خالی');
-assert(out.includes('<th>کد پرسنلی</th>') && out.includes('<th>نام و نام خانوادگی</th>'), 'سرستونها ناقصاند');
-assert(!out.includes('<th>نوع غذا</th>'), 'ستون انتخابنشده همچنان نمایش داده میشود');
+assert(out.includes('<span>کد پرسنلی</span>') && out.includes('<span>نام و نام خانوادگی</span>'), 'برچسب فیلدها ناقصاند');
+assert(!out.includes('<span>نوع غذا</span>'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
+assert(out.includes('agg-grid-3'), 'چیدمان ۳ ستونهای برای ۲ فیلد اعمال نشد');
+storage.clear();
+
+// ۵ب) سورت بر اساس نام خانوادگی
+m.aggSaveFields(['name']);
+const sorted = m.aggSorted([{name:'علی رضایی'},{name:'مهدی احمدی'},{name:'رضا باقری'}]);
+assert.deepStrictEqual(sorted.map(x=>x.name), ['مهدی احمدی','رضا باقری','علی رضایی'], 'سورت نام خانوادگی نادرست است');
 storage.clear();
 
 // ۶) کلیک تب → تغییر state و رندر

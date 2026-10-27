@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.28';
+const FOOD_TICKET_PANEL_VERSION = '1.37.29';
 
 function food_ticket_panel_version(): string
 {
@@ -3011,6 +3011,24 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
  * غایبین و بررسی مغایرت، بههمراه فهرست اسامی برای نمایش/استخراج/چاپ.
  * فقط خواندنی است و هیچ جدولی را تغییر نمیدهد.
  */
+/** نام خانوادگی برای مرتبسازی فهرست اشخاص (آخرین واژهٔ نام). */
+function food_ticket_aggregate_last_name($person): string
+{
+    $name = trim((string) preg_replace('/\s+/u', ' ', (string) ($person['name'] ?? '')));
+    if ($name === '') { return ''; }
+    $words = preg_split('/ /u', $name) ?: [];
+    return (string) end($words);
+}
+/** فهرست اشخاص را بر اساس نام خانوادگی، سپس نام کامل مرتب میکند. */
+function food_ticket_aggregate_sort_people(array &$people): void
+{
+    usort($people, static function ($a, $b): int {
+        $x = food_ticket_aggregate_last_name(is_array($a) ? $a : []);
+        $y = food_ticket_aggregate_last_name(is_array($b) ? $b : []);
+        $cmp = strcmp($x, $y);
+        return $cmp !== 0 ? $cmp : strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
+    });
+}
 function food_ticket_api_aggregate_report(string $fromDate, string $toDate): array
 {
     $from = food_ticket_parse_date($fromDate);
@@ -3094,6 +3112,8 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     $counts['has_mismatch'] = ($expected !== $counts['absent']);
     $counts['difference'] = $expected - $counts['absent'];
 
+    food_ticket_aggregate_sort_people($printedPeople);
+    food_ticket_aggregate_sort_people($absentPeople);
     return [
         'from' => $from,
         'to' => $to,

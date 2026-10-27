@@ -110,7 +110,7 @@ def test_existing_settings_manual_attendance_bug_fix_package():
         assert "food_ticket_manual_attendance_clear_absence($userId, $targetDate, $actor, $reason)" in save
         assert "'absence_cleared' => $absenceCleared" in save
         assert "در سامانه چاپ‌شده؛ چاپ فیزیکی انجام نشد" in panel
-        assert "1.37.28" in host and "PANEL_VERSION='1.37.28'" in panel_index
+        assert "1.37.29" in host and "PANEL_VERSION='1.37.29'" in panel_index
 
         for name in expected:
             if name.endswith(".php") or name.endswith(".js"):
