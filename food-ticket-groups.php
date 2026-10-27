@@ -249,6 +249,70 @@ function food_ticket_absence_ensure(): bool
 }
 
 /**
+ * Reconcile stored manual attendance records over an inclusive date range.
+ * @return array{delivered:int,absences_cleared:int}
+ */
+function food_ticket_manual_attendance_reconcile_range(string $fromDate, string $toDate): array
+{
+    static $done = [];
+    foreach ([$fromDate, $toDate] as $date) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            throw new RuntimeException('تاریخ آشتی‌دادن حضور و فیش معتبر نیست.');
+        }
+    }
+    if ($fromDate > $toDate) {
+        throw new RuntimeException('بازهٔ آشتی‌دادن حضور و فیش معتبر نیست.');
+    }
+    $cacheKey = $fromDate . '|' . $toDate;
+    if (isset($done[$cacheKey])) {
+        return $done[$cacheKey];
+    }
+    if (!function_exists('food_ticket_events_ensure_delivery') || !food_ticket_events_ensure_delivery()) {
+        throw new RuntimeException('ستون‌های وضعیت تحویل غذا در دسترس نیستند؛ ثبت حضور و تحویل قابل همگام‌سازی نیست.');
+    }
+    if (!food_ticket_absence_ensure()) {
+        throw new RuntimeException('جدول غیبت روزانه در دسترس نیست؛ ثبت حضور دستی قابل همگام‌سازی نیست.');
+    }
+    try {
+        $tickets = db()->prepare(
+            'UPDATE food_ticket_events SET '
+            . 'print_status = CASE WHEN source_uid = "manual-attendance" AND event_type = "printed" '
+            . 'AND COALESCE(print_status, "") NOT IN ("pending", "printing") THEN "printed" ELSE print_status END, '
+            . 'delivered_by = CASE WHEN delivery_status IS NULL OR delivery_status <> "delivered" THEN NULL ELSE delivered_by END, '
+            . 'delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()) '
+            . 'WHERE punch_date BETWEEN ? AND ? AND user_id IS NOT NULL AND '
+            . '((source_uid = "manual-attendance" AND event_type = "printed") '
+            . 'OR (event_type = "printed" AND print_status = "printed")) '
+            . 'AND (delivery_status IS NULL OR delivery_status <> "delivered" '
+            . 'OR (source_uid = "manual-attendance" AND event_type = "printed" '
+            . 'AND COALESCE(print_status, "") NOT IN ("printed", "pending", "printing")))'
+        );
+        $tickets->execute([$fromDate, $toDate]);
+        $delivered = $tickets->rowCount();
+
+        $absences = db()->prepare(
+            'DELETE a FROM food_ticket_daily_absence AS a '
+            . 'INNER JOIN food_ticket_events AS e ON e.user_id = a.user_id AND e.punch_date = a.absence_date '
+            . 'WHERE a.absence_date BETWEEN ? AND ? AND e.user_id IS NOT NULL AND '
+            . '((e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")) '
+            . 'OR (e.event_type = "printed" AND e.print_status = "printed"))'
+        );
+        $absences->execute([$fromDate, $toDate]);
+        $result = ['delivered' => $delivered, 'absences_cleared' => $absences->rowCount()];
+        $done[$cacheKey] = $result;
+        return $result;
+    } catch (Throwable $exception) {
+        app_error_log('[food-manual-attendance] historical reconciliation failed: ' . $exception->getMessage());
+        throw new RuntimeException('همگام‌سازی فیش‌های قبلی و فهرست غیبت انجام نشد؛ جزئیات در لاگ سامانه ثبت شد.', 0, $exception);
+    }
+}
+
+function food_ticket_manual_attendance_reconcile_date(string $date): array
+{
+    return food_ticket_manual_attendance_reconcile_range($date, $date);
+}
+
+/**
  * رکوردهای غیبت یک تاریخ (اختیاری: محدود به یک گروه).
  * @return array<int,array<string,mixed>> کلید = user_id
  */
@@ -257,6 +321,7 @@ function food_ticket_absence_load(string $date, ?int $groupId = null): array
     if (!food_ticket_absence_ensure()) {
         return [];
     }
+    food_ticket_manual_attendance_reconcile_date($date);
     try {
         if ($groupId !== null) {
             $q = db()->prepare('SELECT * FROM food_ticket_daily_absence WHERE absence_date = ? AND (group_id = ? OR group_id IS NULL)');

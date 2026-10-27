@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>به‌روزرسانی ۱.۶۲.۳۵ — اصلاح خطای شناسنامه و تردد</title>
+  <title>به‌روزرسانی ۱.۶۲.۳۶ — آشتی‌دادن فیش‌های دستی و غیبت</title>
   <style>
     :root{color-scheme:light;--ink:#132b3a;--muted:#5c7180;--line:#d9e4e8;--teal:#087f78;--red:#a32e2e}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#e7f4f2,#f4f7fa 60%,#e8eff4);color:var(--ink);font:16px/1.9 Tahoma,"Segoe UI",sans-serif}
@@ -15,38 +15,34 @@
   </style>
 </head>
 <body><main>
-  <span class="eyebrow">بستهٔ اصلاح‌شده بر اساس لاگ واقعی · حداقل نسخهٔ پایه: ۱.۶۲.۲۵</span>
-  <h1>۱.۶۲.۳۵ — اصلاح خطای صفحهٔ شناسنامه و وضعیت تردد</h1>
-  <p>لاگ ارسالی نشان داد نسخهٔ قبلی فایل صفحهٔ شناسنامه را با ماژولِ فاقد توابع لازم ترکیب کرده بود. این نسخه توابع جاافتاده را اضافه و امضای فراخوانی فهرست را با فایل قدیمی و جدید سازگار می‌کند؛ اصلاح تحویل/غیبت نیز حفظ شده است.</p>
-  <div class="revoked">۱.۶۲.۳۴ را نصب نکنید؛ در آن خطای توابع شناسنامه و TypeError گزارش‌شده هنوز رفع نشده بود. بستهٔ ۱.۶۲.۳۵ جایگزین است. نسخه‌های ۱.۶۲.۲۹ و ۱.۶۲.۳۰ نیز لغو شده‌اند.</div>
+  <span class="eyebrow">مهاجرت دادهٔ تکرارپذیر + اصلاح خودکار هنگام مشاهدهٔ فهرست</span>
+  <h1>۱.۶۲.۳۶ — همگام‌سازی فیش دستی قبلی و فهرست غیبت</h1>
+  <p>این نسخه روی رکوردهای ذخیره‌شده کار می‌کند: فیش دستی صادرشده را در وضعیت تحویل ثبت می‌کند و غیبت همان شخص/تاریخ را پاک می‌کند. تنها تغییر این بسته به گردش فیش/غیبت مربوط است.</p>
+  <div class="revoked">۱.۶۲.۳۴ نصب نشود. بستهٔ ۱.۶۲.۳۵ به‌تنهایی نیز مدرک اصلاح رکوردهای زنده نیست. این ۱.۶۲.۳۶ یک migration تازه و reconciliation هنگام خواندن فهرست‌ها دارد.</div>
   <section class="meta" aria-label="مشخصات بسته">
-    <div><small>فایل دانلود</small><strong class="filename">ticket-update-1.62.35-profile-and-attendance-reconciliation-20261027.zip</strong></div>
-    <div><small>حداقل نسخهٔ پایه</small><strong>۱.۶۲.۲۵</strong></div>
-    <div><small>نسخهٔ بسته</small><strong>۱.۶۲.۳۵</strong></div>
-    <div><small>مهاجرت</small><strong>تحویل فیش + حضور/غیبت</strong></div>
+    <div><small>فایل دانلود</small><strong class="filename">ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip</strong></div>
+    <div><small>حداقل نسخهٔ پایه</small><strong>۱.۶۲.۳۵</strong></div>
+    <div><small>نسخهٔ بسته</small><strong>۱.۶۲.۳۶</strong></div>
+    <div><small>مهاجرت</small><strong>013 — فیش / تحویل / غیبت</strong></div>
   </section>
   <div class="actions">
-    <a class="button primary" href="ticket-update-1.62.35-profile-and-attendance-reconciliation-20261027.zip" download>دانلود بستهٔ ۱.۶۲.۳۵</a>
-    <a class="button secondary" href="ticket-update-1.62.35-profile-and-attendance-reconciliation-20261027.zip.sha256" download>دانلود SHA-256</a>
+    <a class="button primary" href="ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip" download>دانلود بستهٔ ۱.۶۲.۳۶</a>
+    <a class="button secondary" href="ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip.sha256" download>دانلود SHA-256</a>
   </div>
-  <h2>اصلاح خطای شناسنامه بر اساس لاگ</h2>
+  <h2>اصلاح چه می‌کند؟</h2>
   <ul>
-    <li>تابع‌های `asset_profile_fill_from_asset()` و `asset_profile_collection_status_summary()` که صفحهٔ جدید فراخوانی می‌کرد، اکنون داخل ماژول شناسنامه هستند.</li>
-    <li>فهرست شناسنامه با ۱۱ آرگومان استاندارد فراخوانی می‌شود تا TypeError فایل جزء قدیمی نیز رفع شود.</li>
-    <li>بسته، فایل‌های فرم ۷۴ فیلدی، renderer و CSS را همراه دارد. مسیر: «شناسنامه‌های فنی ← انتخاب سیستم ← تکمیل دستی».</li>
+    <li>هر فیش دستی صادرشده با `source_uid=manual-attendance` و `event_type=printed`، مستقل از وضعیت چاپ، `delivery_status=delivered` می‌گیرد؛ اگر چاپ هنوز در صف است، وضعیت صف چاپ دست‌نخورده می‌ماند.</li>
+    <li>رویداد فیش چاپ‌شدهٔ کارکنان نیز در وضعیت تحویل همگام می‌شود.</li>
+    <li>رکورد غیبت همان شخص و همان روز برای فیش دستی یا حضور دستی بدون فیش حذف می‌شود.</li>
+    <li>Migration قابل اجرای مجدد است؛ علاوه بر آن، هنگام بازکردن فهرست تردد دستی/غیبت یا گزارش تحویل، reconciliation روی دادهٔ ذخیره‌شده اجرا می‌شود.</li>
+    <li>وضعیت صف چاپ فیزیکی حفظ می‌شود؛ ثبت تحویل به چاپگر وابسته نیست.</li>
   </ul>
-  <h2>تحویل فیش و فهرست غایبین</h2>
-  <ul>
-    <li>فیش‌های دستی چاپ‌شدهٔ قبلی به `delivery_status=delivered` تبدیل می‌شوند.</li>
-    <li>ترددهای دستی قبلی، با فیش یا بدون فیش، از رکورد غیبت همان روز خارج می‌شوند؛ ثبت جدید هم وضعیت را با Audit هماهنگ می‌کند.</li>
-    <li>فیش دستی بدون چاپ فیزیکی تحویل‌شده است؛ چاپ فیزیکی پس از چاپ موفق Worker تحویل می‌شود.</li>
-  </ul>
-  <h2>نصب و راستی‌آزمایی</h2>
+  <h2>نصب و بررسی نتیجه</h2>
   <ol>
-    <li>قابل نصب از نسخهٔ ۱.۶۲.۲۵ تا ۱.۶۲.۳۴ است؛ روی نسخهٔ بالاتر از ۱.۶۲.۳۵ downgrade نکنید.</li>
-    <li>پیش از نصب بکاپ بگیرید و ZIP را از updater داخل سامانه نصب کنید.</li>
-    <li>بعد از نصب، نسخهٔ نمایش‌داده‌شده باید ۱.۶۲.۳۵ باشد؛ سپس فهرست و فرم شناسنامه و وضعیت چند ثبت دستی قبلی را بررسی کنید.</li>
-    <li>اگر نسخه تغییر نکرد یا فایل‌ها همچنان ناهماهنگ‌اند، به‌روزرسانی اعمال نشده است؛ لاگ عملیات updater لازم است.</li>
+    <li>این بسته افزایشی است و فقط از نسخهٔ ۱.۶۲.۳۵ نصب شود. اگر نسخه پایین‌تر است، آن را نصب نکنید؛ ابتدا باید وضعیت نصب/updater مشخص شود. پیش از نصب از فایل‌ها و پایگاه‌داده پشتیبان بگیرید.</li>
+    <li>نسخهٔ نمایش‌داده‌شده باید ۱.۶۲.۳۶ باشد. سپس همان تاریخ را در فهرست غیبت/تردد دستی باز کنید تا reconciliation اجرا شود.</li>
+    <li>گزارش تحویل و فهرست غیبت را دوباره بخوانید؛ در فهرست غیبت نباید بماند کاربری که آن روز فیش دستی صادرشده دارد.</li>
+    <li>اگر نسخه بالا نرفت یا داده‌ها همچنان تغییر نکردند، updater/migration روی سرور اعمال نشده است و باید نتیجهٔ اجرای updater و دسترسی نوشتن DB بررسی شود.</li>
   </ol>
-  <div class="safe">خطاهای لاگ پیوست بررسی و با آزمون ایستای هم‌خوانی فایل‌ها مقابله شدند. نصب زنده روی سرور انجام نشده است.</div>
+  <div class="safe">این تغییر کد و migration را آماده می‌کند، نه اتصال به سرور زنده. من به پایگاه‌دادهٔ شما دسترسی ندارم؛ بنابراین نمی‌گویم رکوردهای تولید از این‌جا اصلاح شده‌اند.</div>
 </main></body></html>

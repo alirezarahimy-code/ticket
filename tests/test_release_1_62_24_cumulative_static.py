@@ -112,8 +112,8 @@ def test_update_manifest_paths_are_safe_for_the_app_updater():
 
 def test_download_page_points_to_log_based_profile_and_attendance_fix():
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.35-profile-and-attendance-reconciliation-20261027.zip"
+    current = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
     assert current in page
     assert f"{current}.sha256" in page
-    assert "۱.۶۲.۲۵" in page and "۱.۶۲.۳۵" in page
-    assert "۱.۶۲.۲۹ و ۱.۶۲.۳۰ نیز لغو" in page and "۱.۶۲.۳۴" in page
+    assert "۱.۶۲.۳۵" in page and "۱.۶۲.۳۶" in page
+    assert "۱.۶۲.۳۴" in page and "۱.۶۲.۳۵" in page

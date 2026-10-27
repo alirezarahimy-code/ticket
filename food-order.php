@@ -696,6 +696,9 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
     if ($span > 366) {
         throw new RuntimeException('بازهٔ گزارش حداکثر یک سال است.');
     }
+    if (function_exists('food_ticket_manual_attendance_reconcile_range')) {
+        food_ticket_manual_attendance_reconcile_range($from, $to);
+    }
 
     $stmt = db()->prepare("SELECT e.id, e.user_id, e.punch_date AS food_date, e.punch_time,
             COALESCE(NULLIF(e.personnel_code, ''), u.employee_number, '') AS employee_number,
@@ -709,7 +712,7 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
         LEFT JOIN food_orders o ON o.employee_id = e.user_id AND o.food_date = e.punch_date
         LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id
         WHERE e.punch_date BETWEEN ? AND ?
-          AND e.print_status = 'printed'
+          AND (e.print_status = 'printed' OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'))
           AND ((e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
                OR e.event_type = 'guest')
         ORDER BY menu_no, e.food_type, e.full_name, e.id");

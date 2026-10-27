@@ -17,6 +17,8 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
         end = backend.index("function food_order_export_printed_delivery_report(", start)
         report = backend[start:end]
         self.assertIn("FROM food_ticket_events e", report)
+        self.assertIn("food_ticket_manual_attendance_reconcile_range($from, $to)", report)
+        self.assertIn("e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'", report)
         self.assertIn("e.punch_date BETWEEN ? AND ?", report)
         self.assertIn("e.print_status = 'printed'", report)
         self.assertIn("e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered'", report)

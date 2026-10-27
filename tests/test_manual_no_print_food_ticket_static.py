@@ -120,5 +120,7 @@ def test_existing_settings_manual_attendance_bug_fix_package():
     digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
     assert digest in (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    assert NAME in page and f"{NAME}.sha256" in page
-    assert "۱.۶۲.۲۹" in page and "۱.۶۲.۳۰" in page and "۱.۶۲.۳۴" in page and "۱.۶۲.۳۵" in page
+    current = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
+    assert current in page and f"{current}.sha256" in page
+    assert "۱.۶۲.۳۴" in page and "۱.۶۲.۳۵" in page and "۱.۶۲.۳۶" in page
+    assert "۱.۶۲.۳۵ به‌تنهایی نیز مدرک اصلاح رکوردهای زنده نیست" in page
