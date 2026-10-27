@@ -428,7 +428,7 @@
       }
       body.push('<tr>' + cells + '</tr>');
     }
-    return '<table class="fm-rows fm-order-report-table' + (blocks > 1 ? ' is-compact' : '') + '" data-no-sort><thead><tr>' + head + '</tr></thead><tbody>'
+    return '<table class="fm-rows fm-order-report-table' + (blocks > 1 ? ' is-compact agg-blocks-' + blocks : '') + '" data-no-sort><thead><tr>' + head + '</tr></thead><tbody>'
       + (body.join('') || '<tr><td colspan="' + (columns.length * blocks) + '" class="fm-empty">برای این روز سفارشی پیدا نشد.</td></tr>')
       + '</tbody></table>';
   }
@@ -540,7 +540,7 @@
       }
       body.push('<tr>' + cells + '</tr>');
     }
-    return '<table class="fm-rows fm-order-report-table' + (blocks > 1 ? ' is-compact' : '') + '" data-no-sort><thead><tr>' + head + '</tr></thead><tbody>'
+    return '<table class="fm-rows fm-order-report-table' + (blocks > 1 ? ' is-compact agg-blocks-' + blocks : '') + '" data-no-sort><thead><tr>' + head + '</tr></thead><tbody>'
       + (body.join('') || '<tr><td colspan="' + (columns.length * blocks) + '" class="fm-empty">در این بازه فیش چاپ‌شده و تحویل‌شده‌ای ثبت نشده است.</td></tr>')
       + '</tbody></table>';
   }
@@ -1369,13 +1369,13 @@
   }
 
   function downloadOrders() {
-    if (!canClose || state.tab !== 'orders' || !state.ordersLoaded || state.loadingOrders || !state.ordersDate) return;
+    if (!canClose || (state.tab !== 'orders' && state.embeddedMode !== 'todayorders') || !state.ordersLoaded || state.loadingOrders || !state.ordersDate) return;
     downloadOrdersCsv();
   }
 
   function printScopedReport(selector, bodyClass) {
     var doc = global.document;
-    var target = root && root.querySelector(selector);
+    var target = (root && root.querySelector(selector)) || (doc && doc.querySelector(selector));
     if (!doc || !doc.body || !target || typeof global.print !== 'function') return;
     var printHost = doc.createElement('div');
     printHost.className = 'fm-print-host';
@@ -1405,7 +1405,7 @@
   }
 
   function printOrders() {
-    if (!canClose || state.tab !== 'orders' || state.mealType !== 'lunch' || !state.ordersLoaded || state.loadingOrders) return;
+    if (!canClose || (state.tab !== 'orders' && state.embeddedMode !== 'todayorders') || state.mealType !== 'lunch' || !state.ordersLoaded || state.loadingOrders) return;
     printScopedReport('.fm-daily-orders .fm-table-wrap', 'fm-print-orders');
   }
 

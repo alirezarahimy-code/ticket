@@ -9,7 +9,7 @@ if (is_file(__DIR__ . '/admin-layout-design.php')) {
 require __DIR__ . '/inventory.php';
 require __DIR__ . '/asset-profile.php';
 require __DIR__ . '/domain-scan.php';
-require __DIR__ . '/asset-names.php';
+require_once __DIR__ . '/lib/asset-identity.php';
 require __DIR__ . '/asset-inventory-page.php';
 require __DIR__ . '/organization.php';
 require __DIR__ . '/global-search.php';

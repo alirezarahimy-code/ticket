@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/lib/asset-identity.php';
 
 function inventory_command(string $command): string
 {
@@ -345,7 +346,7 @@ function sync_inventory_rows(int $assetId, array $inventory, string $source = 'a
     if ($assetId <= 0) {
         return;
     }
-    $source = in_array($source, ['agent', 'server_inventory'], true) ? $source : 'agent';
+    $source = in_array($source, ['agent', 'server_inventory', 'domain'], true) ? $source : 'agent';
     $hardware = is_array($inventory['hardware'] ?? null) ? $inventory['hardware'] : [];
     db()->prepare('DELETE FROM asset_memory_modules WHERE asset_id = ?')->execute([$assetId]);
     foreach (inventory_rows($hardware['memory_modules'] ?? []) as $slot => $row) {
@@ -649,6 +650,12 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
     $assetQuery->execute($params);
     $existingAsset = $assetQuery->fetch();
     $assetId = (int) ($existingAsset['id'] ?? 0);
+    if ($assetId <= 0) { $assetId = asset_resolve_id($inventory['hostname'] ?? null, null, $inventory['serial_number'] ?? null); }
+    if ($assetId > 0 && !$existingAsset) {
+        $refetch = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
+        $refetch->execute([$assetId]);
+        $existingAsset = $refetch->fetch();
+    }
     $receivedInventory = $inventory;
     $previousStatus = [];
     if ($existingAsset) {
@@ -668,6 +675,7 @@ function inventory_upsert_server_asset(array $inventory, int $userId): int
         db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, manufacturer, model, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "server_inventory", NOW())')->execute([$assetTag, ...$values]);
         $assetId = (int) db()->lastInsertId();
     }
+    if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     sync_inventory_rows($assetId, $inventory, 'server_inventory');
     if (inventory_asset_exists($assetId)) {
         db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, ?)')->execute([$assetId, $payload, $userId > 0 ? $userId : null]);
@@ -798,6 +806,7 @@ function inventory_collect_client_asset(array $user): ?int
             db()->prepare('INSERT INTO assets (asset_tag, hostname, computer_type, owner_user_id, department_id, ip_address, domain_username, hardware_json, source) VALUES (?, ?, "Windows client", ?, ?, ?, ?, ?, "agent")')->execute([$assetTag, $hostname, (int) ($user['id'] ?? 0), $departmentId, $clientIp, $username, $hardware]);
             $assetId = (int) db()->lastInsertId();
         }
+        if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
         // شناسنامه هم پر شود: قبلاً فقط جدول assets به‌روز می‌شد و فرم «شناسنامه سیستم»
         // برای سیستم کاربران خالی می‌ماند (شکایت «هیچ اطلاعاتی استخراج نمی‌شود»).
         if (function_exists('asset_profile_apply_auto')) {

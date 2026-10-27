@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/lib/asset-identity.php';
 
 function asset_profile_column_sql(): array
 {
@@ -1120,6 +1121,7 @@ function asset_profile_apply_auto(int $assetId, array $values, int $userId, bool
     }
     if (!empty($filtered['hostname'])) {
         db()->prepare('UPDATE assets SET hostname = ? WHERE id = ?')->execute([$filtered['hostname'], $assetId]);
+        if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     }
     if (!empty($filtered['computer_type'])) {
         db()->prepare('UPDATE assets SET computer_type = ? WHERE id = ?')->execute([$filtered['computer_type'], $assetId]);

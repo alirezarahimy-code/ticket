@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/lib/asset-identity.php';
 
 require dirname(__DIR__) . '/bootstrap.php';
 require dirname(__DIR__) . '/inventory.php';
@@ -93,6 +94,14 @@ $receivedPayload = $payload;
 $assetQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? LIMIT 1');
 $assetQuery->execute([$assetTag]);
 $existing = $assetQuery->fetch();
+if (!$existing) {
+    $resolved = asset_resolve_id($hostname, null, $payload['serial_number'] ?? null);
+    if ($resolved > 0) {
+        $refetch = db()->prepare('SELECT * FROM assets WHERE id = ? LIMIT 1');
+        $refetch->execute([$resolved]);
+        $existing = $refetch->fetch();
+    }
+}
 $existingId = 0;
 $existingPeripherals = [];
 $previousStatus = [];
@@ -170,6 +179,7 @@ try {
         db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, ...$values]);
         $assetId = (int) db()->lastInsertId();
     }
+    if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     sync_inventory_rows($assetId, $payload, 'agent');
     asset_profile_apply_auto($assetId, asset_profile_auto_values($payload), 0, false);
     $snapshot = $receivedPayload;

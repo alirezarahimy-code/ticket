@@ -103,7 +103,7 @@ actions/supervisor-actions.php	actions	154	13444
 actions/ticket-actions.php	actions	646	55042
 actions/user-structure-actions.php	actions	367	28765
 admin-layout-design.php	core	361	15733
-api/inventory.php	api	195	9166
+api/inventory.php	api	205	9611
 app/Controllers/DashboardController.php	app-mvc	24	446
 app/Controllers/ReportController.php	app-mvc	39	774
 app/Controllers/SettingsController.php	app-mvc	39	770
@@ -132,7 +132,7 @@ app/Views/ticket/reply.php	app-mvc	31	1092
 app/Views/ticket/show.php	app-mvc	35	1138
 asset-inventory-page.php	core	89	11576
 asset-names.php	core	131	5868
-asset-profile.php	core	1147	61944
+asset-profile.php	core	1149	62089
 assets/admin-layout-design.css	assets	78	9731
 assets/admin-layout-design.js	assets	897	46367
 assets/app.js	assets	1386	79573
@@ -140,8 +140,8 @@ assets/cd-dvd.js	assets	349	15469
 assets/chatbot-drag.js	assets	173	7358
 assets/custom.css	assets	217	3678
 assets/fonts/README.md	assets	10	767
-assets/food-menu.css	assets	345	32211
-assets/food-menu.js	assets	1899	136523
+assets/food-menu.css	assets	353	32930
+assets/food-menu.js	assets	1899	136691
 assets/food-order-calendar.js	assets	102	4186
 assets/food-order-guest.js	assets	222	11678
 assets/food-order.css	assets	176	16575
@@ -202,7 +202,7 @@ docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
 docs/SYSTEM-MAP-FA.md	docs	523	36251
 docs/TEST_COVERAGE_MATRIX_FA.md	docs	50	8233
 docs/aggregate-report-preview.html	docs	85	7297
-domain-scan.php	core	1276	68318
+domain-scan.php	core	1278	68427
 download-r34/index.html	other	21	1739
 downloads/README-AGGREGATE-UPDATE.md	history-downloads	15	609
 downloads/index.html	history-downloads	54	6825
@@ -240,8 +240,8 @@ food-ticket-web/assets/food-capitalio-dashboard.css	food-web	335	25896
 food-ticket-web/assets/food-designer.js	food-web	881	69298
 food-ticket-web/assets/food-groups.js	food-web	511	34668
 food-ticket-web/assets/food-manual-attendance.js	food-web	332	21972
-food-ticket-web/assets/food-menu.css	food-web	345	32211
-food-ticket-web/assets/food-menu.js	food-web	1899	136523
+food-ticket-web/assets/food-menu.css	food-web	353	32930
+food-ticket-web/assets/food-menu.js	food-web	1899	136691
 food-ticket-web/assets/food-order-calendar.js	food-web	102	4186
 food-ticket-web/assets/food-order.css	food-web	176	16575
 food-ticket-web/assets/food-ticket-global-theme-r42.css	food-web	168	14815
@@ -249,7 +249,7 @@ food-ticket-web/assets/food-ticket-persistence.js	food-web	23	1137
 food-ticket-web/assets/food-ticket-theme.css	food-web	420	19438
 food-ticket-web/assets/jalali-calendar.js	food-web	334	13294
 food-ticket-web/assets/list-sort.js	food-web	322	15241
-food-ticket-web/index.html	food-web	590	205585
+food-ticket-web/index.html	food-web	590	205604
 food-ticket-web/integration-contract-fa.md	food-web	24	1961
 food-ticket-web/samples/employees-sample.csv	food-web	1	61
 food-ticket-web/template-bridge.js	food-web	26	1069
@@ -258,13 +258,14 @@ food-ticket.php	core	5041	243803
 global-search.php	core	121	12295
 governance.php	core	521	47339
 help-guide.php	core	658	120336
-index.php	core	3454	338659
+index.php	core	3454	338671
 install-empty-db.sql	sql-root	1310	65606
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
 install.php	core	367	33296
-inventory.php	core	824	43108
+inventory.php	core	833	43696
 lib/activity-audit.php	lib	403	20910
+lib/asset-identity.php	lib	74	3442
 lib/auth-scope.php	lib	143	5649
 lib/db-core.php	lib	578	24276
 lib/ldap.php	lib	329	16564
@@ -286,6 +287,7 @@ migrations/010-org-liaison-units.sql	migrations	5	405
 migrations/011-manual-attendance-delivery.sql	migrations	10	684
 migrations/012-manual-attendance-clears-absences.sql	migrations	24	1320
 migrations/013-manual-attendance-record-backfill.sql	migrations	59	2556
+migrations/014-asset-identity-dedupe.sql	migrations	53	3463
 ola.php	core	111	11927
 organization.php	core	467	18244
 permissions.php	core	843	44938
@@ -300,7 +302,7 @@ restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
 run-food-worker-service.cmd	root-misc	21	999
-schema.sql	sql-root	1262	62095
+schema.sql	sql-root	1262	62113
 session_bootstrap.php	core	57	2317
 status-food-worker-SERVICE.bat	root-misc	9	214
 status-food-worker-SERVICE.ps1	root-misc	107	4918
@@ -408,6 +410,7 @@ tests/tts_listen_checklist_fa.md	tests	34	1616
 tests/tts_normalize_test.php	tests	188	7738
 tools/.htaccess	tools	1	19
 tools/README.md	tools	19	3057
+tools/asset_dedupe.php	tools	229	12628
 tools/backup.ps1	tools	103	4684
 tools/benchmark_250.py	tools	332	18142
 tools/benchmark_db_report.php	tools	52	2634
