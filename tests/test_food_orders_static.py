@@ -193,7 +193,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn('href="assets/food-menu.css?v=24"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=21"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=22"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -265,7 +265,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn('name="statistics_mode" value="employee"', statistics_panel)
         self.assertNotIn("['statistics', 'آمار سفارش‌ها']", js)
         self.assertIn("state.tab === 'statistics' && canClose ? renderStatistics()", js)
-        self.assertIn("href=\"index.php?page=reports\">همهٔ گزارش‌ها", js)
+        self.assertNotIn("href=\"index.php?page=reports\">همهٔ گزارش‌ها", js)
+        self.assertIn("function isEmbeddedReport()", js)
         self.assertIn("async function loadOrders(date)", js)
         self.assertIn("request('food-menu/orders', { date: selected })", js)
         self.assertIn("data-fm-action=\"orders-export\"", daily_panel)

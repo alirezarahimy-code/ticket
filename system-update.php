@@ -71,6 +71,18 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
             throw new RuntimeException('شمارهٔ نسخهٔ پک معتبر نیست.');
         }
         $current = system_update_current_version();
+        $requiredVersion = trim((string) ($manifest['requires_version'] ?? ''));
+        if ($requiredVersion !== '') {
+            if (!preg_match('/^\d+(\.\d+)*$/', $requiredVersion)) {
+                throw new RuntimeException('نسخهٔ پایهٔ لازم در manifest معتبر نیست.');
+            }
+            if (version_compare($version, $requiredVersion) < 0) {
+                throw new RuntimeException('نسخهٔ لازم از نسخهٔ خود بسته بالاتر است.');
+            }
+            if (version_compare($current, $requiredVersion) < 0) {
+                throw new RuntimeException('این بسته نیازمند نسخهٔ پایهٔ ' . $requiredVersion . ' است؛ نسخهٔ نصب‌شده ' . $current . ' است.');
+            }
+        }
         $cmp = version_compare($version, $current);
         if ($cmp > 0) {
             $mode = 'upgrade';

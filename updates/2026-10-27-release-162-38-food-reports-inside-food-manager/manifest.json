@@ -1,0 +1,23 @@
+{
+  "name": "release-162-38-food-reports-inside-food-manager-recovery",
+  "version": "1.62.38",
+  "date": "2026-10-27",
+  "title": "بازگردانی داشبورد از خط مبنای ۱.۶۲.۳۶ و تب‌های گزارش داخل مدیریت غذا",
+  "requires_version": "1.62.36",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "assets/food-menu.css",
+    "assets/food-menu.js",
+    "assets/style.css",
+    "food-order.php",
+    "food-ticket-order-source.php",
+    "food-ticket.php",
+    "food-ticket-web/assets/food-menu.css",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "index.php",
+    "system-update.php"
+  ],
+  "notes": "بستهٔ بازیابی پس از انتشار معیوب ۱.۶۲.۳۷. index.php به snapshot شاخهٔ پیش از تغییر گزارش مرکزی (b90b2e9) بازگشته و فقط مرتب‌سازی گزارش درخواست‌ها بر اساس نام خانوادگی نگه داشته شده است؛ تب‌های گزارش غذا در خود صفحهٔ «گزارش‌ها»ی پنل مدیریت غذا قرار دارند و iframe/صفحهٔ سراسری گزارش غذا ندارند. فایل‌های فهرست‌شده به‌صورت کامل جایگزین می‌شوند، نه patch خط‌به‌خط؛ قبل از نصب بکاپ بگیرید و تغییرات اختصاصی سرور را با این فایل‌ها تطبیق دهید. هیچ migration، تغییر schema یا اصلاح دادهٔ زنده در این بسته نیست. نسخهٔ بسته ۱.۶۲.۳۸ است تا پس از نصب ۱.۶۲.۳۷ قابل اعمال باشد؛ محتوای پایهٔ سامانه از snapshot پیش از گزارش مرکزی بازسازی شده است."
+}

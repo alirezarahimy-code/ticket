@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.16';
+const FOOD_TICKET_PANEL_VERSION = '1.37.17';
 
 function food_ticket_panel_version(): string
 {
@@ -4651,7 +4651,7 @@ function food_ticket_render_page(array $user): void
         'employees' => $fpCan('food.employees'),
         'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close'),
         'food-groups' => $fpCan('food.groups'),
-        'reports' => $fpCan('food.reports'),
+        'reports' => $fpCan('food.reports') || $fpCan('food.order_close'),
         'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health'),
     ];
     $fpSections = [
@@ -4668,6 +4668,7 @@ function food_ticket_render_page(array $user): void
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_REPORTS=' . ($fpCan('food.reports') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ((food_ticket_is_primary_admin($user) || (function_exists('user_can') && user_can($user, 'food.emergency'))) ? 'true' : 'false')
         . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false') . ';</script>';
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
