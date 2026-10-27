@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.15';
+const FOOD_TICKET_PANEL_VERSION = '1.37.27';
 
 function food_ticket_panel_version(): string
 {
@@ -57,7 +57,7 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close', 'food.emergency']);
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -65,7 +65,7 @@ function food_ticket_is_allowed(array $user): bool
 /** کد ویرایش لازم برای مسیرهای نوشتن هر بخش (نگاشت مسیر ← کد ویرایش). */
 function food_ticket_route_edit_permission(string $route): ?string
 {
-    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)) {
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear', 'food-manual-attendance'], true)) {
         return 'food.groups_edit';
     }
     if (in_array($route, ['process', 'delivery', 'cleanup-source_row', 'reprint-errors'], true)) {
@@ -109,11 +109,16 @@ function food_ticket_route_allowed(array $user, string $route): bool
         if (food_ticket_is_primary_admin($user)) {
             return true;
         }
+        if (in_array($route, ['food-menu/emergency-window', 'food-menu/emergency-window-state'], true)) {
+            return false;
+        }
         $menuPermission = match ($route) {
             'food-menu/status', 'food-menu/month' => 'food.menu|food.order_close',
             'food-menu/catalog', 'food-menu/day' => 'food.menu',
             'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close',
-            'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel' => 'food.emergency',
+            'food-menu/employee-search' => 'food.order_close',
+            'food-menu/group-orders', 'food-menu/groups' => 'food.order_close',
+            'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel', 'food-menu/bulk-snapshot', 'food-menu/bulk-apply' => 'food.emergency',
             default => null,
         };
         if ($menuPermission === null || !function_exists('user_can')) {
@@ -153,6 +158,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'guest-cards' => 'food.guest',
         'guest-cap' => 'food.guest',
         'food-groups' => 'food.groups',
+        'food-manual-attendance' => 'food.groups',
         'food-visit-cancel' => 'food.groups',
         'config' => 'food.db',
         'database-file' => 'food.db',
@@ -169,6 +175,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'templates/delete' => 'food.design',
         'templates/activate' => 'food.design',
         'templates/logo' => 'food.design',
+        'templates/group-mode' => 'food.design',
+        'templates/group-design' => 'food.design',
         'health' => 'food.health',
         'self-test' => 'food.health',
         'process' => 'food.monitor',
@@ -3129,7 +3137,8 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
     $query = db()->prepare(
         'SELECT id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
         . 'event_type AS result, print_status' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
-        . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group '
+        . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group, source_uid, '
+        . 'CASE WHEN source_uid = \'manual-attendance\' THEN source_payload ELSE NULL END AS manual_source_payload '
         . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown" ORDER BY id DESC'
     );
     $query->execute([$fromDate, $toDate]);
@@ -3137,6 +3146,14 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
         $rawResult = (string) ($row['result'] ?? '');
         $rawStatus = (string) ($row['print_status'] ?? 'not_printed');
         $resultLabel = food_ticket_label($rawResult);
+        $sourcePayload = json_decode((string) ($row['manual_source_payload'] ?? ''), true);
+        $manualAttendance = is_array($sourcePayload) ? (array) ($sourcePayload['manual_attendance'] ?? []) : [];
+        $isManualAttendance = (string) ($row['source_uid'] ?? '') === 'manual-attendance' && $manualAttendance !== [];
+        if ($isManualAttendance && array_key_exists('with_ticket', $manualAttendance) && !$manualAttendance['with_ticket']) {
+            $resultLabel = 'تردد دستی (بدون فیش)';
+        } elseif ($isManualAttendance && !empty($manualAttendance['with_ticket']) && empty($manualAttendance['physical_print']) && $rawStatus === 'not_printed') {
+            $resultLabel = 'فیش صادر شد؛ چاپ فیزیکی انجام نشد';
+        }
         // event_type در لحظهٔ ثبت «printed» است و بعد از شکست چاپ عوض نمی‌شود؛ برچسب باید از وضعیت واقعی چاپ بیاید.
         if (in_array($rawResult, ['printed', 'guest', 'print'], true) && $rawStatus !== 'printed') {
             if (in_array($rawStatus, ['pending', 'printing'], true)) {
@@ -3251,7 +3268,7 @@ function food_ticket_ensure_employee_local_accounts(): int
     }
     try {
         $pdo = db();
-        $rows = $pdo->query("SELECT id, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $pdo->query("SELECT id, username, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'food' AND employee_number IS NOT NULL AND TRIM(employee_number) <> ''")->fetchAll(PDO::FETCH_ASSOC);
         if (!$rows) {
             return 0;
         }
@@ -3276,14 +3293,36 @@ function food_ticket_ensure_employee_local_accounts(): int
                 }
             }
         }
-        $usernameTaken = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ? AND id <> ?');
-        $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
-        $hash = null;
-        $converted = 0;
+        $employeeCodes = [];
+        $candidateCodes = [];
         foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
             $pc = function_exists('normalize_employee_number')
                 ? (string) (normalize_employee_number((string) ($row['employee_number'] ?? '')) ?? '')
                 : trim((string) ($row['employee_number'] ?? ''));
+            $employeeCodes[$id] = $pc;
+            if ($id > 0 && $pc !== '') {
+                $candidateCodes[$pc] = true;
+            }
+        }
+        // Batch username collision checks instead of one SELECT per employee on first panel load.
+        $existingUsernameIds = [];
+        foreach (array_chunk(array_keys($candidateCodes), 500) as $codeChunk) {
+            if ($codeChunk === []) { continue; }
+            $marks = implode(',', array_fill(0, count($codeChunk), '?'));
+            $existingNames = $pdo->prepare('SELECT id, username FROM users WHERE username IN (' . $marks . ')');
+            $existingNames->execute($codeChunk);
+            foreach ($existingNames->fetchAll(PDO::FETCH_ASSOC) as $existingName) {
+                $existingUsernameIds[(string) $existingName['username']][] = (int) $existingName['id'];
+            }
+        }
+        $convert = $pdo->prepare("UPDATE users SET username = ?, password_hash = ?, auth_source = 'local', role = 'local_user', must_change_password = 1 WHERE id = ?");
+        $hash = null;
+        $converted = 0;
+        $releasedUsernames = [];
+        foreach ($rows as $row) {
+            $id = (int) ($row['id'] ?? 0);
+            $pc = (string) ($employeeCodes[$id] ?? '');
             if ($pc === '') {
                 continue;
             }
@@ -3293,14 +3332,24 @@ function food_ticket_ensure_employee_local_accounts(): int
                     continue;
                 }
             }
-            $usernameTaken->execute([$pc, (int) $row['id']]);
-            if ((int) $usernameTaken->fetchColumn() > 0) {
+            $takenByAnother = false;
+            foreach ($existingUsernameIds[$pc] ?? [] as $usernameOwnerId) {
+                if ($usernameOwnerId !== $id && !isset($releasedUsernames[$pc])) {
+                    $takenByAnother = true;
+                    break;
+                }
+            }
+            if ($takenByAnother) {
                 continue;
             }
             if ($hash === null) {
                 $hash = lac_default_hash();
             }
-            $convert->execute([$pc, $hash, (int) $row['id']]);
+            $convert->execute([$pc, $hash, $id]);
+            $oldUsername = (string) ($row['username'] ?? '');
+            if ($oldUsername !== '' && $oldUsername !== $pc) {
+                $releasedUsernames[$oldUsername] = true;
+            }
             $converted++;
         }
         return $converted;
@@ -3383,54 +3432,11 @@ function food_ticket_api_save_employee(array $data): void
     }
     $active = array_key_exists('active', $data) ? (!empty($data['active']) ? 1 : 0) : 1;
     $fullName = trim($firstName . ' ' . $lastName);
-    if (is_file(__DIR__ . '/food-personnel-link.php')) {
-        require_once __DIR__ . '/food-personnel-link.php';
-    }
     $existing = db()->prepare('SELECT id FROM users WHERE employee_number = ? LIMIT 1');
     $existing->execute([$personnelCode]);
     $existingId = (int) ($existing->fetchColumn() ?: 0);
     if ($id > 0 && $existingId > 0 && $existingId !== $id) {
-        throw new RuntimeException('این کد پرسنلی قبلاً برای کاربر شمارهٔ ' . $existingId . ' ثبت شده است.');
-    }
-    $ldapMatchId = 0;
-    if ($id === 0 && function_exists('fpl_norm_name') && function_exists('fpl_person_name')) {
-        $wantName = fpl_norm_name($fullName);
-        if ($wantName !== '') {
-            foreach (db()->query("SELECT id, full_name, first_name, last_name, employee_number FROM users WHERE auth_source = 'ldap'")->fetchAll(PDO::FETCH_ASSOC) as $ldapRow) {
-                if (trim((string) ($ldapRow['employee_number'] ?? '')) !== '') {
-                    continue;
-                }
-                $ldapName = fpl_norm_name(fpl_person_name($ldapRow));
-                if ($ldapName === '') {
-                    $ldapName = fpl_norm_name((string) ($ldapRow['full_name'] ?? ''));
-                }
-                if ($ldapName === $wantName) {
-                    $ldapMatchId = (int) $ldapRow['id'];
-                    break;
-                }
-            }
-        }
-    }
-    if ($ldapMatchId > 0) {
-        if ($existingId > 0 && $existingId !== $ldapMatchId) {
-            $stubRow = user_row_by_id($existingId);
-            if (!$stubRow || !function_exists('fpl_is_personnel_stub') || !fpl_is_personnel_stub($stubRow) || !function_exists('user_absorb_personnel_stub')) {
-                throw new RuntimeException('این کد پرسنلی قبلاً برای کاربر شمارهٔ ' . $existingId . ' ثبت شده است. ادمین اصلی می‌تواند آن را از تنظیمات ← کاربران حذف کند.');
-            }
-            $merge = user_absorb_personnel_stub($ldapMatchId, $existingId);
-            if (empty($merge['ok'])) {
-                throw new RuntimeException('اتصال به کاربر دامین انجام نشد: ' . (string) ($merge['message'] ?? ''));
-            }
-        }
-        $natOwner = db()->prepare('SELECT id, full_name, auth_source, role, is_primary_admin FROM users WHERE national_code = ? AND id <> ? LIMIT 1');
-        $natOwner->execute([$nationalCode, $ldapMatchId]);
-        $natRow = $natOwner->fetch() ?: null;
-        if ($natRow && (!function_exists('fpl_is_personnel_stub') || !fpl_is_personnel_stub($natRow))) {
-            throw new RuntimeException('این کد ملی قبلاً برای کارمند «' . (string) $natRow['full_name'] . '» ثبت شده است.');
-        }
-        db()->prepare('UPDATE users SET first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?')
-            ->execute([$firstName, $lastName, $personnelCode, $nationalCode, $active, $ldapMatchId]);
-        return;
+        throw new RuntimeException('این کد پرسنلی قبلاً ثبت شده است.');
     }
     // کد ملی باید یکتا باشد: اگر برای کارمند دیگری ثبت شده، ذخیره نمی‌شود (در ویرایش، خود همین کارمند مستثنا است).
     $ownerStmt = db()->prepare('SELECT id, full_name FROM users WHERE national_code = ? AND id <> ? LIMIT 1');
@@ -3455,15 +3461,8 @@ function food_ticket_api_save_employee(array $data): void
         $currentUser = db()->prepare('SELECT employee_number, auth_source FROM users WHERE id = ? LIMIT 1');
         $currentUser->execute([$id]);
         $current = $currentUser->fetch(PDO::FETCH_ASSOC) ?: null;
-        $hasCode = trim((string) ($current['employee_number'] ?? '')) !== '';
-        $src = (string) ($current['auth_source'] ?? '');
-        if ($current === null || (!$hasCode && $src !== 'ldap')) {
+        if ($current === null || trim((string) ($current['employee_number'] ?? '')) === '') {
             throw new RuntimeException('کارمند پیدا نشد.');
-        }
-        if ($src === 'ldap') {
-            db()->prepare('UPDATE users SET first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?')
-                ->execute([$firstName, $lastName, $personnelCode, $nationalCode, $active, $id]);
-            return;
         }
         $query = db()->prepare('UPDATE users SET full_name = ?, first_name = ?, last_name = ?, employee_number = ?, national_code = ?, is_active = ? WHERE id = ?');
         $query->execute([$fullName, $firstName, $lastName, $personnelCode, $nationalCode, $active, $id]);
@@ -4035,6 +4034,15 @@ function food_ticket_api_handle(string $route, array $user): never
     if (str_contains($route, '?')) {
         $route = strstr($route, '?', true) ?: $route;
     }
+    $perfRoute = substr((string) preg_replace('/[^a-z0-9_\/-]/i', '', $route), 0, 80);
+    $perfMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+    $perfStartedAt = microtime(true);
+    register_shutdown_function(static function () use ($perfRoute, $perfMethod, $perfStartedAt): void {
+        $durationMs = (int) round((microtime(true) - $perfStartedAt) * 1000);
+        if ($durationMs >= 1000) {
+            error_log('ITSM slow food-ticket API: route=' . $perfRoute . '; method=' . $perfMethod . '; duration_ms=' . $durationMs . '; status=' . http_response_code());
+        }
+    });
     if (!food_ticket_route_allowed($user, $route)) {
         food_ticket_api_json(['error' => 'دسترسی شما به این بخش از پنل چاپ فیش مجاز نیست.'], 403);
     }
@@ -4131,6 +4139,18 @@ function food_ticket_api_handle(string $route, array $user): never
                 'inside' => $insideNow,
                 'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
             ]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-manual-attendance') {
+            $manualDate = food_ticket_iso_date_input($_GET['date'] ?? '') ?? food_ticket_manual_attendance_today();
+            food_ticket_api_json(food_ticket_api_manual_attendance($manualDate));
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-manual-attendance') {
+            $body = food_ticket_api_body();
+            // ۱.۶۲.۹: ثبت دستی برای امروز یا روزهای قبل مجاز است؛ تاریخ آینده را خود تابع رد می‌کند.
+            $manualDate = food_ticket_iso_date_input($body['date'] ?? '') ?? food_ticket_manual_attendance_today();
+            $body['date'] = $manualDate;
+            $result = food_ticket_api_manual_attendance_save_many($body, $user);
+            food_ticket_api_json($result + food_ticket_api_manual_attendance($manualDate));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'food-groups') {
             $groupsDate = (string) ($_GET['date'] ?? '');
@@ -4612,12 +4632,40 @@ function food_ticket_api_handle(string $route, array $user): never
 
         food_ticket_api_json(['error' => 'مسیر API چاپ فیش پیدا نشد.'], 404);
     } catch (Throwable $exception) {
+        $location = basename($exception->getFile()) . ':' . $exception->getLine();
+        app_error_log('[food-ticket-api] route=' . $route . ' failed at ' . $location . ': ' . $exception->getMessage());
+        if (function_exists('system_log')) {
+            system_log('error', 'food-ticket-api', $exception->getMessage(), ['route' => $route, 'location' => $location]);
+        }
         food_ticket_api_json(['error' => $exception->getMessage()], 400);
+    }
+}
+
+function food_ticket_render_safe_replace(string $search, string $replace, string $subject): string
+{
+    // PHP 8 throws ValueError for an empty search string. A stale/invalid label
+    // map must not make the food panel fail to render.
+    if ($search === '' || $subject === '') {
+        return $subject;
+    }
+    try {
+        $result = str_replace($search, $replace, $subject);
+        return is_string($result) ? $result : $subject;
+    } catch (Throwable $exception) {
+        app_error_log('food-ticket: optional HTML replacement skipped: ' . $exception->getMessage());
+        return $subject;
     }
 }
 
 function food_ticket_render_page(array $user): void
 {
+    $renderStartedAt = microtime(true);
+    register_shutdown_function(static function () use ($renderStartedAt): void {
+        $durationMs = (int) round((microtime(true) - $renderStartedAt) * 1000);
+        if ($durationMs >= 1000) {
+            error_log('ITSM slow food-ticket render: duration_ms=' . $durationMs . '; status=' . http_response_code());
+        }
+    });
     require_food_ticket_access();
     $file = APP_ROOT . '/food-ticket-web/index.html';
     $html = is_file($file) ? file_get_contents($file) : false;
@@ -4642,10 +4690,10 @@ function food_ticket_render_page(array $user): void
         'dashboard' => $fpCan('food.dashboard'),
         'live' => $fpCan('food.monitor'),
         'employees' => $fpCan('food.employees'),
-        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close'),
+        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close') || $fpCan('food.emergency'),
         'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),
-        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health'),
+        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.groups'),
     ];
     $fpSections = [
         'connections' => $fpCan('food.db'),
@@ -4653,21 +4701,36 @@ function food_ticket_render_page(array $user): void
         'guests' => $fpCan('food.guest'),
         'ticket-design' => $fpCan('food.design'),
         'health' => $fpCan('food.health'),
+        'manual-attendance' => $fpCan('food.groups'),
+        'emergency-window' => food_ticket_is_primary_admin($user),
     ];
     $fpGroupsEdit = $fpCan('food.groups_edit');
     $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections)
         . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE=' . ($fpCan('food.groups_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_TICKET=' . ($fpIsPrimary && $fpCan('food.manual_ticket') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_CANCEL_VISIT=' . ((food_ticket_is_primary_admin($user) || (string) ($user['role'] ?? '') === 'support_manager') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ((food_ticket_is_primary_admin($user) || (function_exists('user_can') && user_can($user, 'food.emergency'))) ? 'true' : 'false')
-        . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false') . ';</script>';
+        . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false')
+        . ';window.FOOD_TICKET_USER_ID=' . (int) ($user['id'] ?? 0) . ';</script>';
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
     // نگاشت از لایهٔ محیطی می‌آید تا سورس سامانه هیچ نام برندی نداشته باشد.
     $legacyLabels = function_exists('food_ticket_legacy_display_map') ? food_ticket_legacy_display_map() : [];
+    if (!is_array($legacyLabels)) {
+        $legacyLabels = [];
+    }
     foreach ($legacyLabels as $legacy => $replacement) {
-        $html = str_replace((string) $legacy, (string) $replacement, $html);
+        if (!is_scalar($legacy) || !is_scalar($replacement)) {
+            continue;
+        }
+        $legacy = (string) $legacy;
+        if ($legacy === '') {
+            continue;
+        }
+        $html = food_ticket_render_safe_replace($legacy, (string) $replacement, $html);
     }
     $holidayJson = '[]';
     try {
@@ -4701,21 +4764,57 @@ function food_ticket_render_page(array $user): void
         }
     }
     if (function_exists('food_ticket_web_host_html')) {
-        $hosted = food_ticket_web_host_html($html, [
-            'nonce' => $nonce,
-            'bootstrap' => $bootstrap,
-            'jalali_boot' => $jalaliBoot,
-            'assets' => $assetNames,
-            'theme_href' => 'assets/style.css?v=3',
-        ]);
-        $html = (string) ($hosted['html'] ?? $html);
-        $notes = (array) ($hosted['notes'] ?? []);
-        if (!in_array('bootstrap:brand', $notes, true) && !in_array('bootstrap:already', $notes, true)) {
-            app_error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
+        try {
+            $hosted = food_ticket_web_host_html($html, [
+                'nonce' => $nonce,
+                'bootstrap' => $bootstrap,
+                'jalali_boot' => $jalaliBoot,
+                'assets' => $assetNames,
+                'theme_href' => 'assets/style.css?v=3.4.34',
+                'theme_mode_href' => 'assets/theme-mode.css?v=3',
+                'theme_mode' => app_theme_mode(),
+            ]);
+            if (is_array($hosted) && is_string($hosted['html'] ?? null)) {
+                $html = $hosted['html'];
+            }
+            $notes = (array) ($hosted['notes'] ?? []);
+            if (!in_array('bootstrap:brand', $notes, true) && !in_array('bootstrap:already', $notes, true)) {
+                app_error_log('food-ticket: لنگرهای index.html تغییر کرده‌اند؛ بوت‌استرپ از مسیر جایگزین تزریق شد (' . implode(',', $notes) . ')');
+            }
+        } catch (Throwable $exception) {
+            app_error_log('food-ticket: HTML host transformation skipped (' . basename($exception->getFile()) . ':' . $exception->getLine() . '): ' . $exception->getMessage());
         }
         if (!$assetNames) {
             app_error_log('food-ticket: پوشهٔ food-ticket-web/assets خالی یا ناموجود است؛ دارایی‌های پنل ناقص کپی شده‌اند.');
         }
+    }
+    // Page layout design is an optional enhancement: a missing helper or a stale
+    // saved layout must never prevent the print panel itself from opening.
+    $layoutCss = '';
+    $layoutAssets = '';
+    $layoutAdminFlag = '0';
+    try {
+        if (function_exists('admin_layout_design_css_for_page') && function_exists('admin_layout_design_is_admin')) {
+            $layoutCss = admin_layout_design_css_for_page('food-ticket');
+            $isLayoutAdmin = admin_layout_design_is_admin($user);
+            $layoutAdminFlag = $isLayoutAdmin ? '1' : '0';
+            if ($isLayoutAdmin) {
+                $layoutAssets = '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">';
+            }
+            if ($layoutCss !== '') {
+                $layoutAssets .= '<style id="admin-page-layout-rules">' . $layoutCss . '</style>';
+            }
+        }
+    } catch (Throwable $exception) {
+        app_error_log('food-ticket: page layout enhancement skipped: ' . $exception->getMessage());
+        $layoutCss = '';
+        $layoutAssets = '';
+        $layoutAdminFlag = '0';
+    }
+    $html = preg_replace('/<body\\b/', '<body data-layout-page="food-ticket" data-layout-design-admin="' . $layoutAdminFlag . '"', $html, 1) ?? $html;
+    $html = food_ticket_render_safe_replace('</head>', $layoutAssets . '</head>', $html);
+    if ($layoutAdminFlag === '1') {
+        $html = food_ticket_render_safe_replace('</body>', '<script src="assets/admin-layout-design.js?v=10"></script></body>', $html);
     }
     echo $html;
     return;

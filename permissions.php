@@ -148,7 +148,7 @@ function permission_catalog(): array
                 ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
                 ['code' => 'food.emergency', 'label' => 'سفارش اضطراری غذا (ثبت و لغو برای هر فرد در روز بسته)'],
-                ['code' => 'food.manual_ticket', 'label' => 'ثبت دستی فیش بدون چاپ فیزیکی (فقط ادمین اصلی)'],
+                ['code' => 'food.manual_ticket', 'label' => 'صدور دستی فیش بدون چاپ فیزیکی (ادمین اصلی)'],
                 ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
                 ['code' => 'food.db_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
@@ -159,7 +159,7 @@ function permission_catalog(): array
                 ['code' => 'food.health_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.menu', 'label' => 'برنامه غذایی و بانک غذا'],
                 ['code' => 'food.menu_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز، مشاهدهٔ همهٔ سفارش‌ها و رسیدگی به درخواست لغو'],
+                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز، مشاهدهٔ سفارش‌ها و اعطای مهلت اضطراری محدود'],
             ],
         ],
         [
@@ -328,7 +328,6 @@ function print_fish_role_codes(string $role, array $codes): array
     if ($role === 'primary_admin') {
         return $codes;
     }
-    // ثبت فیش دستی، برخلاف سفارش اضطراری، هرگز به نقش غیرادمین اعطا نمی‌شود.
     $codes = array_values(array_filter($codes, static fn ($c): bool => (string) $c !== 'food.manual_ticket'));
     $kept = array_values(array_filter($codes, static fn ($c): bool => !str_starts_with((string) $c, 'food.')));
     $targets = print_fish_role_targets();
@@ -443,7 +442,7 @@ function role_permissions_normalize_codes(array $codes): array
 function role_permission_effective_codes(string $role, array $storedCodes, bool $custom): array
 {
     if ($custom) {
-        // ثبت فیش دستی فقط برای primary_admin است؛ حتی دادهٔ قدیمی/دستیِ نقش دیگر نیز مؤثر نمی‌شود.
+        // مجوز صدور فیش دستی از داده‌های سفارشی قدیمی/دستی به نقش غیرادمین نشت نمی‌کند.
         if ($role !== 'primary_admin') {
             $storedCodes = array_values(array_filter($storedCodes, static fn ($code): bool => (string) $code !== 'food.manual_ticket'));
         }
@@ -488,23 +487,10 @@ function role_permissions_migrate_once(): void
     if (!permission_table_ready() || !function_exists('setting') || !function_exists('save_setting')) {
         return;
     }
-    if (setting('print_fish_roles_v1') !== '1') {
-        // چاپ فیش فقط برای نقش‌های مجاز. نقش‌های دست‌نخورده از پیش‌فرض تازه می‌گیرند؛
-        // نقش‌های ویرایش‌شده فقط کدهای food.* غیرمجاز را از دست می‌دهند.
+    if (setting('print_fish_roles_v2') !== '1') {
+        // دسترسی‌های سامانهٔ غذا برای همهٔ نقش‌ها قابل مدیریت است؛ این آشتی فقط نشانگر تازه را ثبت می‌کند و مجوزی را حذف نمی‌کند.
         try {
-            db()->exec("DELETE FROM role_permissions WHERE permission IN ('food.orders', 'food.orders_edit')");
-            foreach (array_keys(permission_roles()) as $role) {
-                if ($role === 'primary_admin') {
-                    continue;
-                }
-                $allowed = in_array($role, print_fish_allowed_roles(), true);
-                if (!role_permissions_custom($role)) {
-                    db()->prepare('DELETE FROM role_permissions WHERE role = ?')->execute([$role]);
-                } elseif (!$allowed) {
-                    db()->prepare("DELETE FROM role_permissions WHERE role = ? AND permission LIKE 'food.%'")->execute([$role]);
-                }
-            }
-            save_setting('print_fish_roles_v1', '1');
+            save_setting('print_fish_roles_v2', '1');
             role_permissions_flush_cache();
         } catch (Throwable $exception) {
             // دفعهٔ بعد دوباره تلاش می‌شود.

@@ -9,8 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 class TriangleEffectReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bootstrap = (ROOT / "bootstrap.php").read_text(encoding="utf-8")
-        cls.index = (ROOT / "index.php").read_text(encoding="utf-8")
+        cls.bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
+            "bootstrap.php", "lib/settings-effects.php"
+        ))
+        cls.index = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
+            "index.php", "actions/settings-actions.php"
+        ))
         cls.engine = (ROOT / "assets/triangle-mesh.js").read_text(encoding="utf-8")
         cls.settings = (ROOT / "assets/triangle-settings.js").read_text(encoding="utf-8")
 
@@ -50,7 +54,7 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         self.assertIn("require_permission('settings.general_edit')", self.index)
         self.assertIn("save_setting('triangle_effect_pages'", self.index)
         self.assertIn("save_setting('triangle_effect_config'", self.index)
-        self.assertIn("triangle_effect_enabled_for_current_page()", self.bootstrap)
+        self.assertIn("triangle_effect_enabled_pages()", self.bootstrap)
         self.assertIn("data-config", self.bootstrap)
 
     def test_engine_respects_reduced_motion_and_has_explicit_lifecycle(self):
@@ -90,7 +94,7 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["version"], "1.56")
         self.assertEqual(manifest["migrations"], [])
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "1.59.4")
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "1.62.36")
 
 
 if __name__ == "__main__":

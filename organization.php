@@ -44,6 +44,15 @@ function org_ensure_schema(): void
             }
         }
     }
+    // ۱.۶۲.۱۰: جایگاه نمایش واحدهای مستقل (نمایندگی) کنار مدیرعامل — right یا left.
+    try {
+        db()->exec('ALTER TABLE org_units ADD COLUMN IF NOT EXISTS chart_side VARCHAR(10) NULL');
+    } catch (Throwable $ignored) {
+        try {
+            db()->exec('ALTER TABLE org_units ADD COLUMN chart_side VARCHAR(10) NULL');
+        } catch (Throwable $alsoIgnored) {
+        }
+    }
     $hasCeo = (int) db()->query('SELECT COUNT(*) FROM org_units WHERE unit_type = "ceo"')->fetchColumn();
     if ($hasCeo === 0) {
         db()->prepare('INSERT INTO org_units (name, code, parent_id, unit_type, is_active) VALUES (?, ?, NULL, "ceo", 1)')
@@ -109,6 +118,33 @@ function org_deputy_units(): array
          ORDER BY ou.name'
     );
     return $cache = $query->fetchAll();
+}
+
+/**
+ * ۱.۶۲.۱۰ — واحدهای مستقل (نمایندگی) کنار مدیرعامل: unit_type = 'liaison'، بدون والد
+ * و بدون هیچ اتصالی به زیرمجموعه‌های مدیرعامل. هر سمت (right/left) حداکثر یک واحد فعال دارد.
+ *
+ * @return array<string,array> کلید = سمت ('right'|'left')
+ */
+function org_liaison_units(): array
+{
+    org_ensure_schema();
+    $result = [];
+    try {
+        $rows = db()->query(
+            'SELECT ou.*, m.full_name AS manager_name FROM org_units ou
+             LEFT JOIN users m ON m.id = ou.manager_user_id
+             WHERE ou.is_active = 1 AND ou.unit_type = "liaison" ORDER BY ou.id'
+        )->fetchAll();
+        foreach ($rows as $row) {
+            $side = (string) ($row['chart_side'] ?? '');
+            if (in_array($side, ['right', 'left'], true) && !isset($result[$side])) {
+                $result[$side] = $row;
+            }
+        }
+    } catch (Throwable $ignored) {
+    }
+    return $result;
 }
 
 /**

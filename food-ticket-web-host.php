@@ -62,7 +62,37 @@ function food_ticket_web_host_html(string $html, array $opts = []): array
     $jalaliBoot = (string) ($opts['jalali_boot'] ?? '');
     $assets = array_values(array_filter(array_map('strval', (array) ($opts['assets'] ?? [])), static fn (string $x): bool => $x !== ''));
     $themeHref = (string) ($opts['theme_href'] ?? 'assets/style.css?v=3');
+    $themeModeHref = (string) ($opts['theme_mode_href'] ?? '');
     $notes = [];
+
+    if (array_key_exists('theme_mode', $opts)) {
+        $themeMode = in_array((string) $opts['theme_mode'], ['light', 'dark'], true) ? (string) $opts['theme_mode'] : 'light';
+        $html = (string) preg_replace_callback(
+            '#<html\b([^>]*)>#i',
+            static function (array $match) use ($themeMode): string {
+                $tag = $match[0];
+                if (preg_match('/\bdata-theme-mode="/i', $tag)) {
+                    return (string) preg_replace('/\bdata-theme-mode="[^"]*"/i', 'data-theme-mode="' . $themeMode . '"', $tag, 1);
+                }
+                return substr($tag, 0, -1) . ' data-theme-mode="' . $themeMode . '">';
+            },
+            $html,
+            1
+        );
+        $html = (string) preg_replace_callback(
+            '#<body\b([^>]*)>#i',
+            static function (array $match) use ($themeMode): string {
+                $tag = $match[0];
+                if (preg_match('/\bdata-theme-mode="/i', $tag)) {
+                    return (string) preg_replace('/\bdata-theme-mode="[^"]*"/i', 'data-theme-mode="' . $themeMode . '"', $tag, 1);
+                }
+                return substr($tag, 0, -1) . ' data-theme-mode="' . $themeMode . '">';
+            },
+            $html,
+            1
+        );
+        $notes[] = 'theme-mode:' . $themeMode;
+    }
 
     // ۱) nonce روی اسکریپت‌های inline (بدون src و بدون nonce) — سازگار با هر تعداد/ترتیب.
     $count = 0;
@@ -121,6 +151,15 @@ function food_ticket_web_host_html(string $html, array $opts = []): array
         } elseif (($headPos = stripos($html, '</head>')) !== false) {
             $html = substr($html, 0, $headPos) . $link . substr($html, $headPos);
             $notes[] = 'style:head';
+        }
+    }
+
+    // استایل حالت روز/شب باید بعد از استایل‌های پنل باشد تا تمام سطوح را پوشش دهد.
+    if ($themeModeHref !== '' && stripos($html, 'href="' . $themeModeHref . '"') === false) {
+        $modeLink = '<link rel="stylesheet" href="' . htmlspecialchars($themeModeHref, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '">';
+        if (($headPos = stripos($html, '</head>')) !== false) {
+            $html = substr($html, 0, $headPos) . $modeLink . substr($html, $headPos);
+            $notes[] = 'theme-mode-css:linked';
         }
     }
 

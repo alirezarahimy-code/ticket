@@ -159,7 +159,83 @@
         }
     }
 
+    function readThemeMode() {
+        const attr = document.documentElement.getAttribute('data-theme-mode');
+        if (attr === 'light' || attr === 'dark') return attr;
+        const cookie = document.cookie.match(/(?:^|;\\s*)ticket_theme_mode=(light|dark)(?:;|$)/);
+        if (cookie) return cookie[1];
+        try { return window.localStorage.getItem('food-ticket-dashboard-theme') === 'dark' ? 'dark' : 'light'; } catch (_) { return 'light'; }
+    }
+
+    function syncThemeMode(mode, persist) {
+        mode = mode === 'dark' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme-mode', mode);
+        if (document.body) document.body.setAttribute('data-theme-mode', mode);
+        const dark = mode === 'dark';
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+            button.setAttribute('aria-pressed', dark ? 'true' : 'false');
+            button.setAttribute('aria-label', dark ? 'تغییر به حالت روز' : 'تغییر به حالت شب');
+            const label = button.querySelector('[data-theme-label]');
+            const icon = button.querySelector('[data-theme-icon]');
+            if (label) label.textContent = dark ? 'حالت روز' : 'حالت شب';
+            if (icon) icon.textContent = dark ? '☀️' : '🌙';
+        });
+        document.querySelectorAll('.food-capitalio-dashboard-widget').forEach(function (widget) { widget.classList.toggle('dark', dark); });
+        if (persist !== false) {
+            try {
+                window.localStorage.setItem('food-ticket-dashboard-theme', mode);
+                document.cookie = 'ticket_theme_mode=' + mode + '; Path=/; Max-Age=31536000; SameSite=Lax';
+            } catch (_) {}
+        }
+    }
+
+    function changeThemeMode(mode) {
+        mode = mode === 'dark' ? 'dark' : 'light';
+        if (window.ITSMThemeMode && typeof window.ITSMThemeMode.set === 'function') {
+            window.ITSMThemeMode.set(mode);
+            return;
+        }
+        const update = function () {
+            syncThemeMode(mode, true);
+            window.dispatchEvent(new CustomEvent('ticket-theme-change', { detail: { mode: mode } }));
+        };
+        if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            const x = window.innerWidth / 2;
+            const y = window.innerHeight / 2;
+            document.documentElement.style.setProperty('--theme-transition-x', x + 'px');
+            document.documentElement.style.setProperty('--theme-transition-y', y + 'px');
+            document.documentElement.style.setProperty('--theme-transition-radius', Math.ceil(Math.hypot(x, y)) + 'px');
+            document.documentElement.classList.add('theme-mode-transition');
+            try {
+                const transition = document.startViewTransition(update);
+                transition.finished.then(function () { document.documentElement.classList.remove('theme-mode-transition'); }, function () { document.documentElement.classList.remove('theme-mode-transition'); });
+            } catch (_) {
+                document.documentElement.classList.remove('theme-mode-transition');
+                update();
+            }
+        } else update();
+    }
+
+    window.addEventListener('ticket-theme-change', function (event) {
+        const mode = event.detail && event.detail.mode;
+        if (mode === 'light' || mode === 'dark') syncThemeMode(mode, true);
+    });
+    window.addEventListener('message', function (event) {
+        if (event.origin !== window.location.origin || !event.data || event.data.type !== 'ticket-theme-change') return;
+        if (event.data.mode !== 'light' && event.data.mode !== 'dark') return;
+        syncThemeMode(event.data.mode, true);
+        window.dispatchEvent(new CustomEvent('ticket-theme-change', { detail: { mode: event.data.mode } }));
+    });
+    document.addEventListener('click', function (event) {
+        const button = event.target && event.target.closest && event.target.closest('[data-theme-toggle]');
+        if (!button) return;
+        event.preventDefault();
+        const current = document.documentElement.getAttribute('data-theme-mode') === 'dark' ? 'dark' : 'light';
+        changeThemeMode(current === 'dark' ? 'light' : 'dark');
+    });
+
     function boot() {
+        syncThemeMode(readThemeMode(), false);
         apply();
         loadServiceBrand();
     }

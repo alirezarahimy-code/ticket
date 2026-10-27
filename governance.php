@@ -146,6 +146,7 @@ function gov_header(string $title, array $user): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
+    $themeMode = app_theme_mode();
     $__notif = notification_header_summary((int) $user['id']);
     $notificationCount = $__notif['unread'];
     $staffLinks = '<a href="index.php?page=queue">صف کاری</a><a href="index.php?page=reports">گزارش‌ها</a><a href="index.php?page=assets">شناسنامه‌های فنی</a><a href="governance.php">تغییر و مشکل</a>';
@@ -155,7 +156,7 @@ function gov_header(string $title, array $user): void
     if (in_array((string) $user['role'], ['primary_admin'], true)) {
         $staffLinks .= '<a href="index.php?page=organization">سازمان</a><a href="index.php?page=settings">تنظیمات</a><a href="ola.php">OLA</a>';
     }
-    echo '<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.28"></head><body><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a><nav class="topnav"><a href="index.php">داشبورد</a><a href="index.php?page=new-ticket">ثبت درخواست</a><a href="index.php?page=knowledge">دانش‌نامه</a>' . $staffLinks . '<a class="notification-link" href="index.php?page=notifications">اعلان‌ها' . ($notificationCount > 0 ? '<b>' . $notificationCount . '</b>' : '') . '</a><span class="user-chip">' . e($user['full_name']) . '</span><form class="logout-form" method="post" action="index.php">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">خروج</button></form></nav></div></header><div class="content-wrap"><div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $__notif['latest'] . '" aria-live="polite"></div>';
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.46"><link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body data-theme-mode="' . e($themeMode) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a><nav class="topnav">' . app_theme_toggle_markup() . '<a href="index.php">داشبورد</a><a href="index.php?page=new-ticket">ثبت درخواست</a><a href="index.php?page=knowledge">دانش‌نامه</a>' . $staffLinks . '<a class="notification-link" href="index.php?page=notifications">اعلان‌ها' . ($notificationCount > 0 ? '<b>' . $notificationCount . '</b>' : '') . '</a><span class="user-chip">' . e($user['full_name']) . '</span><form class="logout-form" method="post" action="index.php">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">خروج</button></form></nav></div></header><div class="content-wrap"><div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $__notif['latest'] . '" aria-live="polite"></div>';
     foreach (take_flash() as $flash) {
         echo '<div class="alert ' . e($flash['type']) . '">' . e($flash['message']) . '</div>';
     }
@@ -164,7 +165,7 @@ function gov_header(string $title, array $user): void
 function gov_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js?v=3.4.23"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . '</body></html>';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js?v=3.4.27&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . '</body></html>';
 }
 
 $user = require_staff();

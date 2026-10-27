@@ -12,10 +12,21 @@
     var fields = {
         full_name: document.getElementById('traffic-full-name'),
         phone: document.getElementById('traffic-phone'),
+        phoneTail: document.getElementById('traffic-phone-tail'),
         company: document.getElementById('traffic-company'),
         meeting_with: document.getElementById('traffic-meeting-with'),
         approved_by: document.getElementById('traffic-approved-by'),
     };
+
+    function fireChange(element) {
+        try {
+            element.dispatchEvent(new Event('change', { bubbles: true }));
+        } catch (ignore) {
+            var event = document.createEvent('Event');
+            event.initEvent('change', true, false);
+            element.dispatchEvent(event);
+        }
+    }
 
     function setHint(html, kind) {
         hint.className = 'alert ' + (kind || 'info');
@@ -28,24 +39,27 @@
         hint.innerHTML = '';
     }
 
-    function lookup() {
-        var code = codeField.value.replace(/[^0-9]/g, '');
-        if (code.length !== 10) {
-            clearHint();
-            return;
-        }
-        fetch('index.php?page=traffic-control&traffic_api=lookup&code=' + encodeURIComponent(code), {
+    function asciiDigitsOnly(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)); })
+            .replace(/\D/g, '');
+    }
+
+    // جست‌وجوی سابقهٔ قبلی با کد ملی، تلفن همراه یا نام؛ فقط فیلدهای خالی پر می‌شوند.
+    function lookupBy(query, quiet) {
+        fetch('index.php?page=traffic-control&traffic_api=lookup&' + query, {
             headers: { Accept: 'application/json' },
             credentials: 'same-origin',
         })
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 if (!data.valid) {
-                    setHint('کد ملی وارد شده معتبر نیست.', 'danger');
+                    if (!quiet) setHint('کد ملی وارد شده معتبر نیست.', 'danger');
                     return;
                 }
                 if (!data.found) {
-                    setHint('مهمان جدید — لطفاً بقیه‌ی اطلاعات را کامل وارد کنید.', 'info');
+                    if (!quiet) setHint('مهمان جدید — لطفاً بقیه‌ی اطلاعات را کامل وارد کنید.', 'info');
                     return;
                 }
                 if (data.needs_exit_only) {
@@ -66,19 +80,108 @@
                     setHint('آخرین تردد: ' + data.last_visit_label + '. اطلاعات پیشنهادی پر شد؛ در صورت نیاز اصلاح کنید.', 'success');
                 }
                 if (fields.full_name && !fields.full_name.value) fields.full_name.value = data.full_name || '';
-                if (fields.phone && !fields.phone.value) fields.phone.value = data.phone || '';
+                if (codeField && !codeField.value.trim() && data.national_code) codeField.value = asciiDigitsOnly(data.national_code);
+                if (fields.phone && fields.phoneTail && !fields.phoneTail.value && data.phone) {
+                    var previousPhone = asciiDigitsOnly(data.phone);
+                    if (/^09\d{9}$/.test(previousPhone)) {
+                        fields.phoneTail.value = previousPhone.slice(2);
+                        fields.phone.value = previousPhone;
+                    }
+                }
                 if (fields.company && !fields.company.value) fields.company.value = data.company || '';
-                if (fields.meeting_with && data.meeting_with) fields.meeting_with.value = data.meeting_with;
-                if (fields.approved_by && !fields.approved_by.value) fields.approved_by.value = data.approved_by || '';
+                if (fields.meeting_with && data.meeting_with && !fields.meeting_with.value) {
+                    fields.meeting_with.value = data.meeting_with;
+                    fireChange(fields.meeting_with);
+                }
             })
-            .catch(function () { clearHint(); });
+            .catch(function () { if (!quiet) clearHint(); });
+    }
+
+    function lookup() {
+        var code = asciiDigitsOnly(codeField.value);
+        if (code.length !== 10) {
+            clearHint();
+            return;
+        }
+        lookupBy('code=' + encodeURIComponent(code), false);
     }
 
     codeField.addEventListener('blur', lookup);
     codeField.addEventListener('input', function () {
-        if (codeField.value.replace(/[^0-9]/g, '').length === 10) {
+        if (asciiDigitsOnly(codeField.value).length === 10) {
             lookup();
         }
+    });
+
+    // همان جست‌وجو با تلفن همراه: به‌محض کامل شدن ۹ رقم پایانی.
+    function lookupByPhone() {
+        var tail = fields.phoneTail ? asciiDigitsOnly(fields.phoneTail.value) : '';
+        if (tail.length !== 9) return;
+        lookupBy('phone=' + encodeURIComponent('09' + tail), true);
+    }
+    if (fields.phoneTail) {
+        fields.phoneTail.addEventListener('input', lookupByPhone);
+        fields.phoneTail.addEventListener('blur', lookupByPhone);
+    }
+
+    // همان جست‌وجو با نام و نام خانوادگی (تطبیق دقیق)، هنگام خروج از فیلد نام.
+    if (fields.full_name) {
+        fields.full_name.addEventListener('blur', function () {
+            var name = fields.full_name.value.trim();
+            if (name.length < 3) return;
+            if (asciiDigitsOnly(codeField.value).length === 10) return; // کد ملی خودش جست‌وجو را انجام داده است
+            lookupBy('name=' + encodeURIComponent(name), true);
+        });
+    }
+}());
+
+// تأییدکننده(ها) فقط از تنظیم مقصد خوانده می‌شوند؛ مقصد چندتأییدکننده قابل انتخاب می‌شود.
+(function () {
+    'use strict';
+
+    function parseApprovers(option) {
+        if (!option) return [];
+        var json = option.getAttribute('data-approvers');
+        if (json) {
+            try {
+                var list = JSON.parse(json);
+                if (Object.prototype.toString.call(list) === '[object Array]') {
+                    return list.filter(function (item) { return typeof item === 'string' && item.trim() !== ''; });
+                }
+            } catch (ignore) {}
+        }
+        var single = option.getAttribute('data-approver');
+        return single ? [single] : [];
+    }
+
+    function populate(destSelect, approverSelect, preferred) {
+        var option = destSelect.options[destSelect.selectedIndex];
+        var approvers = parseApprovers(option);
+        while (approverSelect.firstChild) approverSelect.removeChild(approverSelect.firstChild);
+        if (!approvers.length) {
+            var placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = approverSelect.getAttribute('data-empty-label') || '—';
+            approverSelect.appendChild(placeholder);
+            return;
+        }
+        approvers.forEach(function (name) {
+            var item = document.createElement('option');
+            item.value = name;
+            item.textContent = name;
+            approverSelect.appendChild(item);
+        });
+        if (preferred && approvers.indexOf(preferred) !== -1) approverSelect.value = preferred;
+    }
+
+    [['traffic-meeting-with', 'traffic-approved-by'], ['traffic-edit-meeting-with', 'traffic-edit-approved-by']].forEach(function (pair) {
+        var destSelect = document.getElementById(pair[0]);
+        var approverSelect = document.getElementById(pair[1]);
+        if (!destSelect || !approverSelect) return;
+        destSelect.addEventListener('change', function () {
+            populate(destSelect, approverSelect, approverSelect.value);
+        });
+        populate(destSelect, approverSelect, approverSelect.getAttribute('data-current') || '');
     });
 }());
 
@@ -149,6 +252,7 @@
     var name = alertBox.getAttribute('data-focus-field');
     var form = formId ? document.getElementById(formId) : null;
     var field = form && name ? form.querySelector('[name="' + name + '"]') : null;
+    if (form && name === 'phone') field = form.querySelector('[data-phone-tail-for]') || field;
     if (alertBox.scrollIntoView) {
         alertBox.scrollIntoView({ block: 'center' });
     }
@@ -191,3 +295,78 @@
     });
     apply();
 })();
+
+// ورودی ساعت ثابت و صریح ۲۴ساعته؛ ورود چهار رقم مثل 1430 به 14:30 تبدیل می‌شود.
+(function () {
+    'use strict';
+    var fields = document.querySelectorAll('.traffic-time-24h');
+    if (!fields.length) return;
+    var persian = '۰۱۲۳۴۵۶۷۸۹';
+    var arabic = '٠١٢٣٤٥٦٧٨٩';
+    function asciiDigits(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String(persian.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String(arabic.indexOf(digit)); })
+            .replace(/：/g, ':');
+    }
+    fields.forEach(function (field) {
+        field.addEventListener('input', function () {
+            var current = asciiDigits(field.value);
+            if (current.indexOf(':') !== -1) {
+                if (current !== field.value) field.value = current;
+                return;
+            }
+            var digits = current.replace(/\D/g, '').slice(0, 4);
+            if (digits.length > 2) {
+                var caret = field.selectionStart || current.length;
+                field.value = digits.slice(0, 2) + ':' + digits.slice(2);
+                var nextCaret = caret > 2 ? caret + 1 : caret;
+                try { field.setSelectionRange(nextCaret, nextCaret); } catch (ignore) {}
+            } else if (current !== field.value) {
+                field.value = digits;
+            }
+        });
+        field.addEventListener('blur', function () {
+            var value = asciiDigits(field.value).trim();
+            var match = value.match(/^(\d{1,2}):(\d{1,2})$/);
+            if (match) field.value = match[1].padStart(2, '0') + ':' + match[2].padStart(2, '0');
+        });
+    });
+}());
+
+
+// پیش‌شمارهٔ ۰۹ ثابت است؛ فیلد قابل‌ویرایش فقط ۹ رقم پایانی را می‌پذیرد.
+(function () {
+    'use strict';
+    var tails = document.querySelectorAll('[data-phone-tail-for]');
+    var persian = '۰۱۲۳۴۵۶۷۸۹';
+    var arabic = '٠١٢٣٤٥٦٧٨٩';
+    function asciiDigits(value) {
+        return String(value || '')
+            .replace(/[۰-۹]/g, function (digit) { return String(persian.indexOf(digit)); })
+            .replace(/[٠-٩]/g, function (digit) { return String(arabic.indexOf(digit)); });
+    }
+    tails.forEach(function (field) {
+        var fullNumber = document.getElementById(field.getAttribute('data-phone-tail-for'));
+        if (!fullNumber) return;
+        function sync() {
+            var digits = asciiDigits(field.value).replace(/\D/g, '');
+            if (digits.length === 11 && digits.indexOf('09') === 0) digits = digits.slice(2);
+            field.value = digits.slice(0, 9);
+            fullNumber.value = field.value ? '09' + field.value : (field.required ? '09' : '');
+        }
+        field.addEventListener('input', sync);
+        field.addEventListener('paste', function (event) {
+            var text = event.clipboardData && event.clipboardData.getData('text');
+            if (typeof text !== 'string') return;
+            var digits = asciiDigits(text).replace(/\D/g, '');
+            if (digits.length === 11 && digits.indexOf('09') === 0) digits = digits.slice(2);
+            event.preventDefault();
+            field.value = digits.slice(0, 9);
+            sync();
+        });
+        sync();
+    });
+}());
+
+

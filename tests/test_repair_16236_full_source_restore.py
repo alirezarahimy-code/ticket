@@ -124,6 +124,19 @@ def test_download_pages_point_to_corrected_package_and_avoid_false_no_migration_
     assert "فقط چند فایل مربوط به ثبت دستی و گزارش داده را داشت" not in direct_page
 
 
+def test_repo_snapshot_matches_the_reconstructed_16236_payload():
+    expected_files = reconstructed_release_files()
+    assert (ROOT / "VERSION").read_text().strip() == "1.62.36"
+    for name, expected in expected_files.items():
+        assert (ROOT / name).read_bytes() == expected, name
+    expected_migrations = reconstructed_migrations()
+    for name, expected in expected_migrations.items():
+        assert (ROOT / "migrations" / name).read_bytes() == expected, name
+    report = (ROOT / "docs/RELEASE-1.62.36-FA.md").read_text(encoding="utf-8")
+    assert "گزارش رسمی محتویات نسخهٔ ۱.۶۲.۳۶" in report
+    assert "فهرست دقیق ۷۱ مسیر" in report
+
+
 def test_restore_package_checksum_matches():
     expected = (ROOT / "downloads/ticket-repair-1.62.36-full-source-restore-20261027.zip.sha256").read_text().split()[0]
     actual = hashlib.sha256(ZIP_PATH.read_bytes()).hexdigest()
