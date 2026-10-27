@@ -826,6 +826,145 @@ function food_order_statistics_range(string $fromDate, string $toDate, string $m
     return $mode === 'food' ? array_values($items) : $items;
 }
 
+/** گزارش ردیفی فیش‌های چاپ‌شده و وضعیت تحویل، به‌علاوهٔ فیش‌های چاپ‌شدهٔ مهمان. */
+function food_order_printed_delivery_report(string $fromDate, string $toDate): array
+{
+    food_order_schema_ensure();
+    $from = food_order_iso_date($fromDate);
+    $to = food_order_iso_date($toDate);
+    if ($from === null || $to === null || $from > $to) {
+        throw new RuntimeException('بازهٔ تاریخ گزارش فیش‌ها معتبر نیست.');
+    }
+    $span = (new DateTimeImmutable($from, new DateTimeZone('UTC')))->diff(new DateTimeImmutable($to, new DateTimeZone('UTC')))->days;
+    if ($span > 366) {
+        throw new RuntimeException('بازهٔ گزارش حداکثر یک سال است.');
+    }
+    if (function_exists('db_table_exists') && !db_table_exists('food_ticket_events')) {
+        return ['items' => [], 'employee_count' => 0, 'guest_count' => 0];
+    }
+    if (function_exists('food_ticket_events_ensure_delivery') && !food_ticket_events_ensure_delivery()) {
+        throw new RuntimeException('ستون‌های وضعیت تحویل غذا در پایگاه‌داده در دسترس نیستند.');
+    }
+    if (function_exists('food_ticket_manual_attendance_reconcile_range')) {
+        food_ticket_manual_attendance_reconcile_range($from, $to);
+    }
+
+    // رویداد فیش منبع ردیف‌هاست؛ منو فقط به‌عنوان مشخصه از برنامهٔ همان روز خوانده می‌شود.
+    $menuMap = [];
+    try {
+        $menuStmt = db()->prepare("SELECT cal.food_date, c.food_name, i.sort_order
+            FROM food_calendar cal
+            JOIN food_calendar_items i ON i.calendar_id = cal.id
+            JOIN food_catalog c ON c.id = i.food_id
+            WHERE cal.food_date BETWEEN ? AND ?
+            ORDER BY cal.food_date, (cal.meal_type = 'lunch') DESC, i.sort_order");
+        $menuStmt->execute([$from, $to]);
+        foreach ($menuStmt->fetchAll(PDO::FETCH_ASSOC) as $menuRow) {
+            $food = trim((string) ($menuRow['food_name'] ?? ''));
+            $date = (string) ($menuRow['food_date'] ?? '');
+            $key = $date . "\0" . $food;
+            if ($food !== '' && !isset($menuMap[$key])) {
+                $menuMap[$key] = (int) ($menuRow['sort_order'] ?? 0);
+            }
+        }
+    } catch (Throwable $menuError) {
+        $menuMap = []; // اگر برنامهٔ روز در دسترس نباشد، ردیف‌های فیش همچنان گزارش می‌شوند.
+    }
+
+    $stmt = db()->prepare("SELECT e.id, e.user_id, e.punch_date AS food_date, e.punch_time,
+            COALESCE(NULLIF(e.personnel_code, ''), u.employee_number, '') AS employee_number,
+            COALESCE(NULLIF(e.national_code, ''), u.national_code, '') AS national_code,
+            COALESCE(NULLIF(e.full_name, ''), u.full_name, 'مهمان') AS full_name,
+            COALESCE(NULLIF(e.food_type, ''), IF(e.event_type = 'guest', 'مهمان', '')) AS food_name,
+            e.event_type, e.print_status, e.delivery_status, e.delivered_at
+        FROM food_ticket_events e
+        LEFT JOIN users u ON u.id = e.user_id
+        WHERE e.punch_date BETWEEN ? AND ?
+          AND (e.print_status = 'printed' OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'))
+          AND ((e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
+               OR e.event_type = 'guest')
+        ORDER BY e.punch_date, e.food_type, e.full_name, e.id");
+    $stmt->execute([$from, $to]);
+    $items = [];
+    $employeeIds = [];
+    $guestCount = 0;
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $date = (string) ($row['food_date'] ?? '');
+        $food = trim((string) ($row['food_name'] ?? ''));
+        $eventType = (string) ($row['event_type'] ?? '');
+        $userId = (int) ($row['user_id'] ?? 0);
+        if ($eventType === 'guest') {
+            $guestCount++;
+        } else {
+            $employeeIds[$userId] = true;
+        }
+        $items[] = [
+            'id' => (int) ($row['id'] ?? 0),
+            'user_id' => $userId,
+            'food_date' => $date,
+            'punch_time' => (string) ($row['punch_time'] ?? ''),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'national_code' => food_order_digits($row['national_code'] ?? ''),
+            'full_name' => (string) ($row['full_name'] ?? ''),
+            'food_name' => $food,
+            'event_type' => $eventType,
+            'menu_no' => (int) ($menuMap[$date . "\0" . $food] ?? 0),
+            'delivered_at' => (string) ($row['delivered_at'] ?? ''),
+        ];
+    }
+    return ['items' => $items, 'employee_count' => count($employeeIds), 'guest_count' => $guestCount];
+}
+
+function food_order_export_printed_delivery_report(string $fromDate, string $toDate, array $user, array $requestedFields, string $view = 'list'): never
+{
+    food_order_require_permission($user, 'food.order_close');
+    $report = food_order_printed_delivery_report($fromDate, $toDate);
+    $labels = [
+        'row' => 'ردیف', 'national_code' => 'کد ملی', 'employee_number' => 'کد پرسنلی',
+        'full_name' => 'نام و نام خانوادگی', 'food_name' => 'نوع غذا', 'food_date' => 'تاریخ غذا',
+        'punch_time' => 'ساعت تردد', 'record_type' => 'نوع فیش', 'menu_no' => 'شماره منو',
+        'delivered_at' => 'زمان ثبت تحویل',
+    ];
+    $fields = array_values(array_unique(array_filter($requestedFields, static fn ($field): bool => is_string($field) && isset($labels[$field]))));
+    if (!$fields) {
+        $fields = ['row', 'employee_number', 'full_name', 'food_name', 'food_date', 'punch_time', 'record_type', 'menu_no'];
+    }
+    $items = $report['items'];
+    if ($view === 'menu') {
+        usort($items, static fn (array $a, array $b): int => ((int) $a['menu_no'] <=> (int) $b['menu_no'])
+            ?: strcmp((string) $a['food_name'], (string) $b['food_name'])
+            ?: strcmp((string) $a['full_name'], (string) $b['full_name']));
+    }
+    $headers = array_map(static fn (string $field): string => $labels[$field], $fields);
+    $rows = [];
+    foreach ($items as $index => $item) {
+        $row = [];
+        foreach ($fields as $field) {
+            $value = match ($field) {
+                'row' => $index + 1,
+                'national_code' => food_order_digits($item['national_code'] ?? ''),
+                'employee_number' => (string) ($item['employee_number'] ?? ''),
+                'full_name', 'food_name' => (string) ($item[$field] ?? ''),
+                'food_date' => food_order_jalali_label((string) ($item['food_date'] ?? '')),
+                'punch_time' => substr((string) ($item['punch_time'] ?? ''), 0, 5),
+                'record_type' => ($item['event_type'] ?? '') === 'guest' ? 'مهمان' : 'پرسنل',
+                'menu_no' => (int) ($item['menu_no'] ?? 0) > 0 ? 'منوی ' . food_order_digits($item['menu_no']) : (($item['event_type'] ?? '') === 'guest' ? 'مهمان' : 'بدون منو'),
+                'delivered_at' => (string) ($item['delivered_at'] ?? ''),
+                default => '',
+            };
+            $row[] = food_order_export_safe_value($value);
+        }
+        $rows[] = $row;
+    }
+    food_order_audit('food_ticket_printed_delivery_export', $user, 'food_ticket_events', 0, null, [
+        'from_date' => $fromDate, 'to_date' => $toDate, 'row_count' => count($rows), 'view' => $view,
+    ]);
+    $from = food_order_iso_date($fromDate) ?? $fromDate;
+    $to = food_order_iso_date($toDate) ?? $toDate;
+    $range = food_order_jalali_label($from) . ($from === $to ? '' : ' تا ' . food_order_jalali_label($to));
+    food_order_send_xlsx('فیش‌های-تحویل‌شده-' . str_replace('-', '', $from) . '-' . str_replace('-', '', $to) . '.xlsx', 'فهرست فیش‌های چاپ‌شده و تحویل‌شده', $headers, $rows, $range);
+}
+
 /** جزئیات سفارش‌های فعالِ کارکنان انتخاب‌شده در یک بازهٔ محدود و قابل ممیزی. */
 function food_order_selected_orders_range(string $fromDate, string $toDate, array $employeeIds, string $mealType = 'lunch'): array
 {
@@ -3045,6 +3184,18 @@ function food_order_menu_api_handle(string $route, array $user): never
             $fieldsRaw = trim((string) ($_GET['fields'] ?? ''));
             $fields = $fieldsRaw === '' ? [] : explode(',', $fieldsRaw);
             food_order_export_manager_orders($date, $user, food_order_meal_type($_GET['meal_type'] ?? 'lunch'), $fields);
+        }
+        if ($method === 'GET' && $route === 'food-menu/printed-delivery') {
+            food_order_require_permission($user, 'food.order_close');
+            food_order_send_json(food_order_printed_delivery_report((string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? '')));
+        }
+        if ($method === 'GET' && $route === 'food-menu/printed-delivery-export') {
+            food_order_require_permission($user, 'food.order_close');
+            $rawFields = trim((string) ($_GET['fields'] ?? ''));
+            $fields = $rawFields === '' ? [] : explode(',', $rawFields);
+            food_order_export_printed_delivery_report(
+                (string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? ''), $user, $fields, (string) ($_GET['view'] ?? 'list')
+            );
         }
         if ($method === 'GET' && $route === 'food-menu/statistics') {
             food_order_require_permission($user, 'food.order_close');

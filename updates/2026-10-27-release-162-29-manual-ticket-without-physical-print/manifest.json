@@ -1,0 +1,16 @@
+{
+  "name": "release-162-29-manual-food-ticket-without-physical-print",
+  "version": "1.62.29",
+  "date": "2026-10-27",
+  "title": "ثبت دستی فیش بدون چاپ فیزیکی در سامانه",
+  "requires_version": "1.62.25",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "food-order.php",
+    "food-ticket.php",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html"
+  ],
+  "notes": "در بخش سفارش اضطراری، برای سفارش فعالِ کارمند و تاریخ انتخاب‌شده، دکمهٔ صریح ثبت فیش دستی رویداد food_ticket_events را با event_type و print_status برابر printed ایجاد یا تکمیل می‌کند؛ idempotent است، چاپگر را صدا نمی‌زند و delivery_status را به‌عنوان تحویل واقعی تغییر نمی‌دهد. actor/order و پرچم بدون چاپ فیزیکی در source_payload و audit ثبت می‌شود."
+}

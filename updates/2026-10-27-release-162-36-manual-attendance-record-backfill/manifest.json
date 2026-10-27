@@ -1,0 +1,18 @@
+{
+  "name": "release-162-36-manual-attendance-record-reconciliation",
+  "version": "1.62.36",
+  "date": "2026-10-27",
+  "title": "اصلاح واقعی وضعیت فیش و غیبت ثبت‌های دستی قبلی",
+  "requires_version": "1.62.35",
+  "migrations": [
+    "011-manual-attendance-delivery.sql",
+    "012-manual-attendance-clears-absences.sql",
+    "013-manual-attendance-record-backfill.sql"
+  ],
+  "files": [
+    "VERSION",
+    "food-ticket-groups.php",
+    "food-order.php"
+  ],
+  "notes": "این بسته مسیر غذا/غیبت را اصلاح می‌کند. Migration idempotent هر فیش دستی صادرشده را delivered می‌کند، حتی اگر چاپ فیزیکی هنوز در صف باشد (وضعیت صف چاپ حفظ می‌شود)، غیبت متناقض همان روز را حذف می‌کند و فیش چاپ‌شدهٔ کارکنان را با قاعدهٔ تحویل هماهنگ می‌کند. Reconciliation هنگام خواندن فهرست غیبت/ثبت دستی و نیز گزارش تحویل، دادهٔ ذخیره‌شده را اصلاح می‌کند؛ گزارش، فیش‌های دستی تحویل‌شده را حتی با وضعیت چاپ غیرنهایی نیز می‌شمارد."
+}

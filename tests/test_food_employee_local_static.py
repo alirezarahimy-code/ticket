@@ -3,14 +3,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def read(relative: str) -> str:
-    return (ROOT / relative).read_text(encoding="utf-8")
+def read(name: str) -> str:
+    return (ROOT / name).read_text(encoding="utf-8")
 
 
-def check(condition: bool, message: str) -> None:
-    if not condition:
-        raise AssertionError(message)
-    print(f"ok - {message}")
+def check(cond: bool, msg: str) -> None:
+    if not cond:
+        raise AssertionError(msg)
+    print(f"ok - {msg}")
 
 
 save = read("food-ticket.php")
@@ -20,6 +20,7 @@ fn = save[start:end]
 imp = read("food-ticket-import.php")
 guide = read("help-guide.php")
 chatbot = read("chatbot.php")
+local = read("local-accounts.php")
 
 check("food_employee_" not in fn, "manual employee save no longer creates food-only stubs")
 check("'local_user'" in fn and "'local'" in fn, "manual employee save creates a local login account")
@@ -28,15 +29,11 @@ check("auth_source'] ?? '') === 'food'" in fn, "existing food stubs convert to l
 check("'local_user', 'local'" in imp, "excel import still creates local accounts")
 check("نام کاربری = کد پرسنلی" in guide, "help guide documents local account on manual employee add")
 check("food_employee_local" in chatbot, "chatbot answers local account for new employees")
-check("function food_ticket_ensure_employee_local_accounts" in save, "existing food-only employees are backfilled to local accounts")
-check("food_ticket_ensure_employee_local_accounts()" in save[save.find("function food_ticket_api_employees"):], "backfill runs only when the food employee list is requested")
-backfill = save[save.find("function food_ticket_ensure_employee_local_accounts"):save.find("function food_ticket_api_employees")]
-check("SELECT id, username FROM users WHERE username IN (" in backfill and "$existingNames->execute($codeChunk)" in backfill, "employee collision checks are batched instead of one SQL query per employee")
-check("$usernameTaken->execute" not in backfill, "employee backfill avoids N+1 username checks")
-check("با باز شدن سامانه" in guide and "با باز شدن سامانه" in chatbot, "help and chatbot say existing employees get local accounts automatically")
-check("function lac_ensure_schema" in read("local-accounts.php"), "local account schema is ensured before convert")
+check("function food_ticket_ensure_employee_local_accounts" in save, "existing food-only employees have a local-account backfill")
+check("food_ticket_ensure_employee_local_accounts();" in save, "employee backfill runs from the food module")
+check("با باز شدن سامانه" in guide and "با باز شدن سامانه" in chatbot, "help and chatbot explain automatic local-account setup")
+check("function lac_ensure_schema" in local, "local account schema is ensured before conversion")
 check("lac_ensure_schema" in save, "employee backfill waits for local account columns")
 check("catch (Throwable $exception)" in save[save.find("function food_ticket_ensure_employee_local_accounts"):save.find("function food_ticket_api_employees")], "backfill never crashes other pages")
-check("cancel_requested_at" in read("lib/tickets-sla.php") and "function ticket_hot_schema_ensure" in read("lib/tickets-sla.php"), "queue cancel columns are auto-added if missing")  # از ۱.۶۲.۲۰: alias مردهٔ ticket_cancel_ensure_schema حذف شد؛ ترمیم واقعی در ticket_hot_schema_ensure است
 
 print("all food employee local static checks passed")

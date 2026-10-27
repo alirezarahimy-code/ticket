@@ -513,8 +513,8 @@ function food_ticket_np_trim_edges(GdImage $im, array $cfg): array
         'tail_mm' => $cutBottom / $dpm,
         'last_ink_dots' => $lastInk,
     ]);
-    if (function_exists('error_log')) {
-        app_error_log(sprintf(
+    if (function_exists('system_log')) {
+        system_log('debug', 'food_print', sprintf(
             '[food-print] کوتاه‌سازی فیش: بالا %d نقطه (%.1fmm) ، پایین %d نقطه (%.1fmm) | جوهر: %d..%d از %d',
             $cutTop, $cutTop / $dpm, $cutBottom, $cutBottom / $dpm, $firstInk, $lastInk, $h
         ));
@@ -813,20 +813,22 @@ function food_ticket_np_escpos(GdImage $im, array $cfg): string
     // ۱.۳۷ — پروفایلِ کاملِ بایت‌های تراز در یک خط لاگ: با این خط می‌توان بدون حضور روی
     // سرور فهمید کاغذ عقب می‌رود یا نه (reverse_hex خالی = فرمان عقب‌راندن فرستاده نشده).
     if (!empty($cfg['log_align'])) {
-        app_error_log(sprintf(
-            '[food-print-align] edge_align=%s head_offset=%.1fmm dpm=%.1f line_dots=%d reverse_cmd=%s reverse_hex=%s cut_hex=%s cut_feed_dots=%d img=%dx%d total_bytes=%d',
-            $edgeAlign ? 'on' : 'off',
-            $headOffsetMm,
-            $dpm,
-            $lineDots,
-            (string) ($cfg['reverse_feed_cmd'] ?? 'esc_e'),
-            ($edgeAlign && isset($reverse) && $reverse !== '') ? bin2hex($reverse) : '-',
-            bin2hex(substr($out, -4)),
-            isset($feedDots) ? (int) $feedDots : -1,
-            $W,
-            $H,
-            strlen($out)
-        ));
+        if (function_exists('system_log')) {
+            system_log('debug', 'food_print_align', sprintf(
+                '[food-print-align] edge_align=%s head_offset=%.1fmm dpm=%.1f line_dots=%d reverse_cmd=%s reverse_hex=%s cut_hex=%s cut_feed_dots=%d img=%dx%d total_bytes=%d',
+                $edgeAlign ? 'on' : 'off',
+                $headOffsetMm,
+                $dpm,
+                $lineDots,
+                (string) ($cfg['reverse_feed_cmd'] ?? 'esc_e'),
+                ($edgeAlign && isset($reverse) && $reverse !== '') ? bin2hex($reverse) : '-',
+                bin2hex(substr($out, -4)),
+                isset($feedDots) ? (int) $feedDots : -1,
+                $W,
+                $H,
+                strlen($out)
+            ));
+        }
     }
     return $out;
 }

@@ -17,7 +17,7 @@ def check(condition: bool, message: str) -> None:
 
 org_js = read("assets/organization.js")
 org_php = read("organization.php")
-index = read("index.php") + "\n" + read("actions/org-actions.php")  # اکشن‌های سازمان از ۱.۶۲.۱۲ در فایل جدا
+index = read("index.php") + "\n" + read("actions/org-actions.php")
 style = read("assets/style.css")
 guide = read("help-guide.php")
 chatbot = read("chatbot.php")
@@ -127,6 +127,17 @@ check(
     and "index.php?page=organization" in chatbot
     and "سمت چپ «افزودن کارشناس»" in chatbot,
     "chatbot answers org-chart expert questions",
+)
+check(
+    "data-org-zoom" in org_js
+    and 'data-org-zoom="fit"' in index
+    and "org-chart-wrap" in index
+    and ".org-chart-wrap" in style,
+    "org tree zoom keeps scroll size and can fit the canvas",
+)
+check(
+    "نمودار" in guide and "کارشناس بعد از ساخت حداقل یک معاونت" in guide,
+    "guide documents the current organization-chart workflow",
 )
 
 print("all org chart expert static checks passed")

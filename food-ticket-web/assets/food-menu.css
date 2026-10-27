@@ -126,19 +126,23 @@
 @media print {
   body.fm-print-statistics,
   body.fm-print-orders,
-  body.fm-print-group-orders { margin:0 !important; }
+  body.fm-print-group-orders,
+  body.fm-print-delivered-report { margin:0 !important; }
   body.fm-print-statistics > *:not(.fm-print-host),
   body.fm-print-orders > *:not(.fm-print-host),
-  body.fm-print-group-orders > *:not(.fm-print-host) { display:none !important; }
+  body.fm-print-group-orders > *:not(.fm-print-host),
+  body.fm-print-delivered-report > *:not(.fm-print-host) { display:none !important; }
   body.fm-print-statistics > .fm-print-host,
   body.fm-print-orders > .fm-print-host,
-  body.fm-print-group-orders > .fm-print-host {
+  body.fm-print-group-orders > .fm-print-host,
+  body.fm-print-delivered-report > .fm-print-host {
     display:block !important; visibility:visible !important; width:100% !important;
     max-width:none !important; margin:0 !important; padding:0 !important; direction:rtl;
   }
   body.fm-print-statistics > .fm-print-host .fm-print-list,
   body.fm-print-orders > .fm-print-host .fm-print-list,
-  body.fm-print-group-orders > .fm-print-host .fm-print-list {
+  body.fm-print-group-orders > .fm-print-host .fm-print-list,
+  body.fm-print-delivered-report > .fm-print-host .fm-print-list {
     display:block !important; visibility:visible !important; width:100% !important;
     min-width:0 !important; max-width:none !important; margin:0 !important;
     padding:0 !important; border:0 !important; border-radius:0 !important;
@@ -146,16 +150,20 @@
   }
   body.fm-print-statistics > .fm-print-host .fm-print-list *,
   body.fm-print-orders > .fm-print-host .fm-print-list *,
-  body.fm-print-group-orders > .fm-print-host .fm-print-list * { visibility:visible !important; }
+  body.fm-print-group-orders > .fm-print-host .fm-print-list *,
+  body.fm-print-delivered-report > .fm-print-host .fm-print-list * { visibility:visible !important; }
   body.fm-print-statistics > .fm-print-host .fm-rows,
   body.fm-print-orders > .fm-print-host .fm-rows,
-  body.fm-print-group-orders > .fm-print-host .fm-rows { width:100% !important; min-width:0 !important; table-layout:auto !important; }
+  body.fm-print-group-orders > .fm-print-host .fm-rows,
+  body.fm-print-delivered-report > .fm-print-host .fm-rows { width:100% !important; min-width:0 !important; table-layout:auto !important; }
   body.fm-print-statistics > .fm-print-host .fm-rows th,
   body.fm-print-statistics > .fm-print-host .fm-rows td,
   body.fm-print-orders > .fm-print-host .fm-rows th,
   body.fm-print-orders > .fm-print-host .fm-rows td,
   body.fm-print-group-orders > .fm-print-host .fm-rows th,
-  body.fm-print-group-orders > .fm-print-host .fm-rows td { font-size:9pt; padding:4px 3px; overflow-wrap:anywhere; }
+  body.fm-print-group-orders > .fm-print-host .fm-rows td,
+  body.fm-print-delivered-report > .fm-print-host .fm-rows th,
+  body.fm-print-delivered-report > .fm-print-host .fm-rows td { font-size:9pt; padding:4px 3px; overflow-wrap:anywhere; }
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-columns { grid-template-columns:repeat(3,minmax(0,1fr)); }
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column { padding:0 4px; }
   body.fm-print-statistics > .fm-print-host .fm-statistics-people-column:first-child { padding-right:0; }
@@ -325,3 +333,10 @@
 .fm-statistics-form > .fm-order-date { order:1; padding:12px; border:1px solid var(--line); border-radius:11px; background:rgba(248,250,249,.75); }
 .fm-statistics-form > .fm-selected-employee-picker { order:2; }
 @media(max-width:640px) { .fm-selected-employee-option { grid-template-columns:20px minmax(0,1fr); } .fm-selected-employee-option > small { grid-column:2; } }
+
+
+.fm-delivery-counts { display:flex; flex-wrap:wrap; gap:9px; margin:8px 0; }
+.fm-delivery-counts > div { display:flex; align-items:center; gap:10px; padding:7px 12px; border:1px solid var(--line); border-radius:9px; background:#f8fbfa; color:var(--muted); font-size:12px; }
+.fm-delivery-counts strong { color:var(--navy); font-size:16px; }
+.fm-printed-delivery-report .fm-order-date { margin-bottom:0; }
+.fm-printed-delivery-report .fm-table-wrap { margin-top:8px; }

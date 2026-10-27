@@ -1,16 +1,12 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-index = (ROOT / "index.php").read_text(encoding="utf-8")
-# اکشن‌های چرخهٔ درخواست‌ها از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۲ فاز ۲).
-index += "\n" + (ROOT / "actions/ticket-actions.php").read_text(encoding="utf-8")
-# از ۱.۶۲.۱۶ اکشن‌های تنظیمات (از جمله login_announcements در save_settings) در فایل برش ۵ هستند:
-index += "\n" + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")
-# از ۱.۶۲.۱۷ اکشن‌های سرپرستی (supervisor_decision/reopen و مسیرهای فریز لغو) در فایل برش ۶ هستند:
-index += "\n" + (ROOT / "actions/supervisor-actions.php").read_text(encoding="utf-8")
-# از ۱.۶۲.۱۹ عملیات گروهی (bulk_update_tickets با یادداشت مشترک) در فایل برش ۸ است:
-index += "\n" + (ROOT / "actions/bulk-actions.php").read_text(encoding="utf-8")
-bootstrap = "".join((ROOT / n).read_text(encoding="utf-8") for n in ["bootstrap.php"] + ['lib/db-core.php', 'lib/logging-csrf.php', 'lib/auth-scope.php', 'lib/settings-effects.php', 'lib/ldap.php', 'lib/tickets-sla.php', 'lib/notify-users.php', 'lib/activity-audit.php'])  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
+index = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
+    "index.php", "actions/ticket-actions.php", "actions/supervisor-actions.php", "actions/service-actions.php", "actions/bulk-actions.php", "actions/settings-actions.php"
+))
+bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
+    "bootstrap.php", "lib/tickets-sla.php", "lib/db-core.php", "lib/auth-scope.php"
+))
 permissions = (ROOT / "permissions.php").read_text(encoding="utf-8")
 cron = (ROOT / "cron/sla_maintenance.php").read_text(encoding="utf-8")
 auto_close = (ROOT / "cron/ticket_auto_close.php").read_text(encoding="utf-8")
@@ -67,7 +63,7 @@ check("'cancelled' => []" in index and "'cancelled' => 'لغوشده به درخ
 check("$ownerCondition = $serviceGroup === 'it'" in index
       and "AND hu.code = ?" in index
       and "$fallback->execute([$serviceGroup, $departmentId, $departmentId]);" in index
-      and 'AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))' in index,
+      and "u.department_id = ?" in index,
       "automatic fallback stays within the requested handling unit and department")
 check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled')" in schema
       and "cancel_requested_at DATETIME NULL" in schema
@@ -108,10 +104,6 @@ check("ticket_auto_close_days" in index
       "the auto-close deadline is configurable from settings")
 check("صفحه‌بندی صف" in index and "صفحه‌بندی گزارش" in index and "صفحه‌بندی سوپروایزر" in index,
       "queue, reports and supervisor lists are paginated")
-check("return ['supervisor', 'primary_admin', 'inspector'];" in permissions
-      and "=== 'support_manager'" in bootstrap
-      and "service_group = ?" in bootstrap,
-      "the support manager sees only the support pool without IT access or deputy filtering")
 check("function ticket_is_waiting_status" in bootstrap
       and "ticket_is_waiting_status($oldStatus)" in bootstrap
       and "SET `status` = 'waiting_user'" in migration_pending

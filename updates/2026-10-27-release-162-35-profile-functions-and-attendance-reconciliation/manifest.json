@@ -1,0 +1,27 @@
+{
+  "name": "release-162-35-profile-functions-and-attendance-delivery-reconciliation",
+  "version": "1.62.35",
+  "date": "2026-10-27",
+  "title": "همسان‌سازی فایل‌های شناسنامه و اصلاح تردد/تحویل",
+  "requires_version": "1.62.25",
+  "migrations": [
+    "011-manual-attendance-delivery.sql",
+    "012-manual-attendance-clears-absences.sql"
+  ],
+  "files": [
+    "VERSION",
+    "food-order.php",
+    "food-ticket.php",
+    "food-ticket-groups.php",
+    "food-ticket-web/assets/food-manual-attendance.js",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "permissions.php",
+    "index.php",
+    "actions/settings-actions.php",
+    "assets/style.css",
+    "asset-profile.php",
+    "asset-inventory-page.php"
+  ],
+  "notes": "رفع خطای صفحه بر اساس لاگ: توابع asset_profile_fill_from_asset و asset_profile_collection_status_summary اکنون در ماژول asset-profile.php موجودند؛ فراخوانی فهرست سیستم نیز با امضای قدیمی و جدید سازگار است. بسته فرم شناسنامهٔ کامل، backfill تحویل فیش‌های دستی قبلی و پاک‌سازی ثبت‌های دستی تردد از فهرست غیبت همان روز را در بر می‌گیرد. Migrationها دادهٔ دستی را آشتی می‌دهند؛ ثبت‌های دستی جدید نیز حضور/تحویل را با هم ثبت می‌کنند."
+}

@@ -19,7 +19,14 @@
   };
   // ۱.۶۲.۹: ردیف «مهمان» با شناسهٔ صفر همیشه اول فهرست است و همیشه قابل انتخاب می‌ماند.
   const isGuestRow = (u) => Number(u && u.id) === 0;
-  const selectableRow = (u) => !!u && (isGuestRow(u) || (!!u.active && !u.today_record && (!S.manualWithTicket || !!u.pc)));
+  const canIssueManualTicket = () => window.FOOD_TICKET_CAN_MANUAL_TICKET === true;
+  const isReplaceableNoTicket = (u) => !!u && !!u.today_record
+    && u.today_record.event_type === 'no_food'
+    && u.today_record.print_status !== 'printed'
+    && S.manualWithTicket && canIssueManualTicket();
+  const selectableRow = (u) => !!u && (isGuestRow(u) || (!!u.active
+    && (!u.today_record || isReplaceableNoTicket(u))
+    && (!S.manualWithTicket || !!u.pc)));
   const manualDateIso = () => S.manualDate || isoToday();
   const jalaliFromIso = (iso) => {
     try {
@@ -71,14 +78,16 @@
     const record = u.today_record;
     if (!record && !u.pc) return '<span class="status warn">بدون کد پرسنلی</span>';
     if (!record) return '<span class="status ok">تردد این روز ثبت نشده</span>';
-    if (record.source_uid === 'manual-attendance') return '<span class="status warn">ثبت دستی این روز</span>';
     if (record.event_type === 'printed') return '<span class="status ok">دارای فیش این روز</span>';
+    if (record.source_uid === 'manual-attendance') return '<span class="status warn">ثبت دستی این روز</span>';
     if (record.event_type === 'no_food') return '<span class="status warn">تردد/بدون فیش این روز</span>';
     return '<span class="status warn">تردد این روز ثبت شده</span>';
   }
 
   function manualAttendancePanel() {
     const canEdit = window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE !== false;
+    const canIssueTicket = canIssueManualTicket();
+    if (!canIssueTicket) { S.manualWithTicket = false; S.manualPhysicalPrint = false; }
     const query = String(S.manualFilter || '').trim().toLocaleLowerCase();
     const filtered = S.manualEmployees.filter((u) => !query
       || (String(u.name || '') + ' ' + String(u.pc || '')).toLocaleLowerCase().includes(query));
@@ -115,11 +124,16 @@
         + '</tbody></table></div>' : '';
     const history = S.manualItems.length
       ? '<div class="table-wrap"><table class="table"><thead><tr><th>کارمند</th><th>وعده</th><th>ساعت</th><th>صدور فیش</th><th>چاپ فیزیکی</th><th>وضعیت چاپ</th></tr></thead><tbody>'
-        + S.manualItems.map((item) => '<tr><td>' + esc(item.name || '—') + (item.pc ? ' <small>(' + esc(item.pc) + ')</small>' : '') + '</td>'
-          + '<td>' + esc(item.food || (item.ticket_issued ? '—' : 'بدون فیش')) + '</td><td dir="ltr">' + esc(item.time || '—') + '</td>'
-          + '<td>' + (item.ticket_issued ? 'صادر شد' : 'صادر نشد') + '</td><td>' + (item.physical_print ? 'بله' : 'خیر') + '</td>'
-          + '<td><span class="status ' + (item.print_status === 'printed' ? 'ok' : (['failed', 'print_error'].includes(item.print_status) ? 'bad' : 'warn')) + '">'
-          + esc(item.ticket_issued ? (MANUAL_PRINT_STATUS[item.print_status] || item.print_status || '—') : 'تردد دستی؛ بدون فیش') + '</span></td></tr>').join('')
+        + S.manualItems.map((item) => {
+          const statusText = item.ticket_issued && item.print_status === 'printed' && !item.physical_print
+            ? 'در سامانه چاپ‌شده؛ چاپ فیزیکی انجام نشد'
+            : (item.ticket_issued ? (MANUAL_PRINT_STATUS[item.print_status] || item.print_status || '—') : 'تردد دستی؛ بدون فیش');
+          return '<tr><td>' + esc(item.name || '—') + (item.pc ? ' <small>(' + esc(item.pc) + ')</small>' : '') + '</td>'
+            + '<td>' + esc(item.food || (item.ticket_issued ? '—' : 'بدون فیش')) + '</td><td dir="ltr">' + esc(item.time || '—') + '</td>'
+            + '<td>' + (item.ticket_issued ? 'صادر شد' : 'صادر نشد') + '</td><td>' + (item.physical_print ? 'بله' : 'خیر') + '</td>'
+            + '<td><span class="status ' + (item.print_status === 'printed' ? 'ok' : (['failed', 'print_error'].includes(item.print_status) ? 'bad' : 'warn')) + '">'
+            + esc(statusText) + '</span></td></tr>';
+        }).join('')
         + '</tbody></table></div>'
       : '<p class="muted">در این روز هنوز ثبت دستی انجام نشده است.</p>';
 
@@ -129,7 +143,7 @@
       : '<span class="status ok">امروز</span>';
     return '<div class="card section-gap" id="manual-attendance-page"><div class="form-section-head"><h2>ثبت دستی فیش</h2>'
       + dateBadge + '</div>'
-      + '<p class="muted">فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ روز انتخاب‌شده را نشان می‌دهد؛ وضعیت سفارش هنگام ثبت هم دوباره بررسی می‌شود. ردیف «مهمان» همیشه اول فهرست است و بدون نیاز به سفارش، چند بار در روز قابل ثبت است. ثبت فیش از چاپ فیزیکی جداست؛ حالت «بدون فیش» فقط رویداد تردد را ثبت می‌کند. تاریخ آینده مجاز نیست.</p>'
+      + '<p class="muted">فهرست فقط کارکنان فعالِ دارای سفارش ناهارِ روز انتخاب‌شده را نشان می‌دهد؛ وضعیت سفارش هنگام ثبت هم دوباره بررسی می‌شود. ردیف «مهمان» همیشه اول فهرست است و بدون نیاز به سفارش، چند بار در روز قابل ثبت است. ثبت فیش از چاپ فیزیکی جداست. اگر ادمین اصلی فردی را انتخاب کند که رویداد «تردد/بدون فیش» دارد، همان رویداد به فیش صادرشده تبدیل می‌شود؛ حالت «بدون فیش» فقط تردد جدید ثبت می‌کند. تاریخ آینده مجاز نیست.</p>'
       + (S.manualError ? '<p class="manual-error" role="alert">' + esc(S.manualError) + '</p>' : '')
       + (S.manualLoading ? '<p class="muted">در حال بارگذاری فهرست کارکنان و ثبت‌های این روز…</p>' : '')
       + '<div class="manual-attendance-controls">'
@@ -137,9 +151,11 @@
       + '<label class="field">جستجوی زنده<input id="fg-manual-filter" type="search" value="' + esc(S.manualFilter) + '" placeholder="نام یا کد پرسنلی" autocomplete="off"></label>'
       + (canEdit ? '<div class="manual-select-actions"><button type="button" class="btn ghost" data-manual-action="manual-select-visible"' + (eligibleVisible.length ? '' : ' disabled') + '>انتخاب افرادِ قابل‌انتخابِ نتیجه</button>'
         + '<button type="button" class="btn ghost" data-manual-action="manual-clear-selection"' + (chosenCount ? '' : ' disabled') + '>پاک‌کردن انتخاب</button><span class="muted">انتخاب‌شده: ' + chosenCount + ' نفر</span></div>'
-        + '<fieldset class="manual-ticket-mode"><legend>نوع ثبت</legend><label><input type="radio" name="fg-manual-with-ticket" value="yes"' + (S.manualWithTicket ? ' checked' : '') + '> ثبت تردد با صدور فیش</label>'
+        + '<fieldset class="manual-ticket-mode"><legend>نوع ثبت</legend>'
+        + (canIssueTicket ? '<label><input type="radio" name="fg-manual-with-ticket" value="yes"' + (S.manualWithTicket ? ' checked' : '') + '> ثبت تردد با صدور فیش</label>' : '')
         + '<label><input type="radio" name="fg-manual-with-ticket" value="no"' + (!S.manualWithTicket ? ' checked' : '') + '> ثبت تردد بدون فیش</label>'
-        + (S.manualWithTicket ? '<label class="manual-physical-print"><input id="fg-manual-print" type="checkbox"' + (S.manualPhysicalPrint ? ' checked' : '') + '> چاپ فیزیکی فیش از چاپگر</label>' : '')
+        + (canIssueTicket && S.manualWithTicket ? '<label class="manual-physical-print"><input id="fg-manual-print" type="checkbox"' + (S.manualPhysicalPrint ? ' checked' : '') + '> چاپ فیزیکی فیش از چاپگر</label>' : '')
+        + (!canIssueTicket ? '<p class="muted">صدور دستی فیش فقط با مجوز مستقل و دسترسی ادمین اصلی ممکن است.</p>' : '')
         + '</fieldset><label class="field">علت ثبت دستی<input id="fg-manual-reason" maxlength="300" value="' + esc(S.manualReason) + '" placeholder="علت ثبت را وارد کنید؛ برای همهٔ انتخاب‌شده‌ها ثبت می‌شود."></label>'
         + '<div class="actions"><button type="button" class="btn primary" data-manual-action="manual-save"' + (S.manualSaving || S.manualLoading || !chosenCount ? ' disabled' : '') + '>'
         + (S.manualSaving ? 'در حال ثبت…' : 'ثبت تردد برای ' + chosenCount + ' نفر') + '</button><button type="button" class="btn ghost" data-manual-action="manual-reload"' + (S.manualLoading || S.manualSaving ? ' disabled' : '') + '>به‌روزرسانی فهرست</button></div>'

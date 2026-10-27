@@ -3,65 +3,52 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>دانلود به‌روزرسانی Ticket 1.62.20 — پایان بخش اصلی فاز ۲ بازسازی کدها (بدون تغییر رفتاری) + همهٔ اصلاح‌های 1.62.4 تا 1.62.12</title>
+  <title>بستهٔ اصلاح‌شدهٔ ترمیم ۱.۶۲.۳۶</title>
   <style>
-    :root { font-family: Tahoma, Arial, sans-serif; color: #17324d; background: #f2f6fa; }
-    * { box-sizing: border-box; }
-    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
-    main { width: min(100%, 760px); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; padding: clamp(24px, 6vw, 48px); box-shadow: 0 18px 50px #18344d12; }
-    .tag { display: inline-block; padding: 7px 12px; border-radius: 999px; color: #075e56; background: #e7f6f1; font-size: 13px; font-weight: 700; }
-    h1 { margin: 18px 0 10px; font-size: clamp(25px, 5vw, 34px); line-height: 1.5; }
-    p { color: #53677b; line-height: 2; margin: 8px 0; }
-    ul { margin: 12px 0 24px; padding-right: 22px; color: #344e65; line-height: 2; }
-    .download { display: flex; justify-content: center; align-items: center; min-height: 58px; margin-top: 25px; padding: 14px 20px; border-radius: 12px; background: #087e72; color: #fff; text-decoration: none; font-size: 17px; font-weight: 700; transition: background .15s, transform .15s; }
-    .download:hover { background: #066b62; transform: translateY(-1px); }
-    .file { margin-top: 12px; text-align: center; direction: ltr; font-size: 13px; color: #6c7f90; overflow-wrap: anywhere; }
-    .hint { margin-top: 22px; padding: 12px 14px; border-radius: 10px; background: #f4f8fc; color: #53677b; font-size: 13px; line-height: 1.9; }
+    :root{color-scheme:light;--ink:#132b3a;--muted:#5c7180;--line:#d9e4e8;--teal:#087f78;--red:#a32e2e}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#e7f4f2,#f4f7fa 60%,#e8eff4);color:var(--ink);font:16px/1.9 Tahoma,"Segoe UI",sans-serif}
+    main{width:min(100%,900px);padding:32px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px #173d4a18}.eyebrow{color:var(--teal);font-size:13px;font-weight:700}h1{margin:4px 0 8px;font-size:26px}h2{margin:24px 0 6px;font-size:18px}p{margin:8px 0 16px;color:var(--muted)}
+    .meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:20px 0}.meta div{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#f8fbfc}.meta small{display:block;color:var(--muted)}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:9px 18px;border-radius:10px;text-decoration:none;font-weight:700}.primary{background:var(--teal);color:#fff}.secondary{border:1px solid var(--line);color:var(--ink);background:#fff}
+    ol,ul{padding-right:24px;color:var(--ink)}li{margin:7px 0}.safe,.warning{margin-top:16px;padding:13px 15px;border-right:4px solid var(--teal);border-radius:8px;background:#effaf8;color:#285951;font-size:14px}.warning{border-color:#d69623;background:#fff8e8;color:#684b16}.filename{direction:ltr;text-align:left;overflow-wrap:anywhere;font:13px/1.7 monospace}.revoked{padding:13px 15px;border-right:4px solid var(--red);border-radius:8px;background:#fff1f1;color:#7d2929;font-weight:700}
+    @media(max-width:520px){main{padding:22px}h1{font-size:22px}.actions a{width:100%}}
   </style>
 </head>
-<body>
-  <main>
-    <span class="tag">بستهٔ جاری · 1.62.20 · ۲۰۲۶/۱۰/۲۵</span>
-    <h1>Ticket نسخهٔ ۱.۶۲.۱۹ — فاز ۲ بازسازی کدها، برش ۸ (بدون تغییر رفتاری)</h1>
-    <p>بستهٔ کاملاً تجمعی و آفلاین؛ مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند و دوباره اجرا نمی‌شوند). جایگزین 1.62.12 است و (از fix1) اجتماع کامل فایل‌های <b>1.62.0 تا 1.62.13</b> را حمل می‌کند:</p>
-    <ul>
-      <li><b>جدید (1.62.20):</b> برش ۹: اکشن‌های پشتیبان‌گیری/به‌روزرسانی به <code>actions/backup-actions.php</code> (بایت‌به‌بایت)؛ تفکیک <code>bootstrap.php</code> به ۸ ماژول <code>lib/</code> با حفظ عینی ترتیب؛ حذف ۸ تابع بدون استفاده با اثبات ماشینی. هیچ تغییر رفتاری ندارد. بسته اجتماع کامل 1.62.0 تا 1.62.20 (۶۶ فایل) است.</li>
-      <li><b>1.62.19:</b> انتقال اکشن‌های «عملیات گروهی» و «ساختارهای پایه و کاربران» به فایل‌های موضوعی (بدون تغییر رفتاری).</li>
-      <li><b>جدید (1.62.18):</b> ۹ اکشن در ۴ فایل موضوعی جدا شد — ورود/پروفایل/تم (<code>actions/account-actions.php</code>)، برند فیش غذا، آرشیو CD/DVD و اعلان‌ها — بدون هیچ تغییری (بایت‌به‌بایت، اثبات ماشینی داخل بسته). گروه پشتیبان‌گیری/به‌روزرسانی عمداً دست نخورد. بسته اجتماع کامل 1.62.0 تا 1.62.18 (۵۵ فایل) است.</li>
-      <li><b>جدید (1.62.17):</b> ۴ اکشن «تصمیم‌های سرپرست و امتیازدهی» به <code>actions/supervisor-actions.php</code> و ۴ اکشن «تقویم و تعطیلات» به <code>actions/holiday-actions.php</code> بدون هیچ تغییری (بایت‌به‌بایت، اثبات ماشینی داخل بسته) منتقل شد. بسته اجتماع کامل 1.62.0 تا 1.62.17 (۵۱ فایل) است.</li>
-      <li><b>جدید (1.62.16):</b> ۴ اکشن «نقش‌ها و دسترسی‌ها» به <code>actions/role-actions.php</code> و ۵ اکشن «نگهداری/LDAP و تنظیمات» به <code>actions/settings-actions.php</code> بدون هیچ تغییری (بایت‌به‌بایت، اثبات ماشینی داخل بسته) منتقل شد. بسته اجتماع کامل 1.62.0 تا 1.62.16 (۴۹ فایل) است.</li>
-      <li><b>جدید (1.62.15):</b> پاپ‌آپ‌های صفحهٔ «خدمات» دیگر زیر هدر نمی‌روند و مثل بقیهٔ پاپ‌آپ‌های سامانه با <b>کلیک روی پس‌زمینه یا Esc</b> هم بسته می‌شوند (علاوه بر دکمه). <code>style.css?v=3.4.46</code> و <code>app.js?v=3.4.27</code>.</li>
-      <li><b>جدید (1.62.14):</b> ۷ اکشن «خدمات، دسته‌ها و پایگاه دانش» بدون هیچ تغییری (بایت‌به‌بایت، با اثبات ماشینی داخل بسته) به <code>actions/service-actions.php</code> منتقل شد؛ شرح فارسی هر اکشن در سرآیند فایل. بسته اجتماع کامل 1.62.0 تا 1.62.14 (۴۷ فایل) است.</li>
-      <li><b>fix1 (مهم):</b> رفع پیام «نمای کامل داشبورد بارگذاری نشد… فایل‌های داشبورد را از بستهٔ 1.62.2 نصب کنید» — فایل‌های داشبورد غذا (<code>food-capitalio-dashboard-r42.js/.css</code>) و همهٔ فایل‌های بسته‌های 1.62.0 تا 1.62.3 + تمام assetهای ارجاع‌شدهٔ پنل غذا به بسته اضافه شدند (۴۶ فایل). هیچ تغییر کدی ندارد؛ فقط فایل‌های جاافتاده.</li>
-      <li><b>جدید (1.62.13):</b> ۷ اکشن چرخهٔ درخواست‌ها به <code>actions/ticket-actions.php</code> و ۱۰ اکشن اموال/اسکن دامین به <code>actions/asset-actions.php</code> منتقل شدند — بایت‌به‌بایت با اثبات ماشینی، <b>صفر تغییر رفتاری</b>؛ شرح فارسی تک‌تک بخش‌ها در سرآیند همان فایل‌ها. index.php از ~۶۲۰۰ به ~۴۷۰۰ خط رسید.</li>
-      <li><b>جدید (1.62.12):</b> ۱۳ اکشن چارت سازمانی بدون هیچ تغییری (بایت‌به‌بایت، با اثبات ماشینی) از <code>index.php</code> به فایل جدید <code>actions/org-actions.php</code> منتقل شد؛ <b>صفر تغییر رفتاری</b>. فایل جدید در برابر دسترسی مستقیم محافظ 404 دارد.</li>
-      <li><b>جدید (1.62.11):</b> فاز ۱ بهینه‌سازی و خوانایی کدها — فقط کامنت‌های ناوبری در <code>index.php</code> و <code>bootstrap.php</code> و دو سند معماری/ممیزی در مخزن؛ <b>صفر تغییر رفتاری</b> (با مقایسهٔ ماشینی اثبات شد). اسنپشات امن: tag <code>snapshot-pre-refactor-20261025</code>.</li>
-      <li><b>اصلاح بسته‌بندی:</b> بستهٔ قبلی چند فایل نسخه‌های 1.62.4 تا 1.62.6 (مثل <code>assets/app.js</code>) را نداشت؛ این بسته کامل است.</li>
-      <li><b>جدید:</b> در چارت سازمانی می‌توان در <b>دو سمت راست و چپ کادر مدیرعامل</b> (هر سمت حداکثر یک واحد) «واحد مستقل (نمایندگی)» ساخت؛ کارت آن کمی پایین‌تر از مدیرعامل و <b>بدون هیچ خط اتصالی</b> نمایش داده می‌شود — هیچ نشانه‌ای از زیرمجموعهٔ مدیرعامل بودن ندارد.</li>
-      <li><b>جدید:</b> نمایندهٔ واحد مستقل از روی خود کارت (کلیک، منوی ⋮ یا درگ‌انددراپ) تعیین/تغییر/برداشته می‌شود؛ نقش کاربریِ او با این انتصاب تغییر نمی‌کند و این واحدها در «معاونت درخواست‌کننده» و ارجاع خودکار درخواست‌ها نقشی ندارند.</li>
-      <li><b>جدید:</b> «ثبت دستی فیش» یک <b>فیلد تاریخ شمسی با تقویم</b> دارد؛ فیش برای هر روز گذشته (تا امروز) قابل ثبت است — مناسب پنجشنبه/جمعه‌های تعطیل که سلف بسته بوده. تاریخ آینده رد می‌شود.</li>
-      <li><b>جدید:</b> ردیف <b>«مهمان»</b> همیشه اول فهرست ثبت دستی است؛ بدون سفارش و کد پرسنلی، چند بار در روز قابل ثبت (رویداد «فیش مهمان» با غذای «مهمان»).</li>
-      <li><b>جدید:</b> چهار فیلد فرم «مقاصد ملاقات و تأییدکنندگان» (عنوان + ۳ تأییدکننده) حالا در یک خط جا می‌گیرند.</li>
-      <li>در «برنامهٔ غذایی ← عملیات گروهی»، دکمهٔ «پیش‌نمایش و بررسی» به بالای فهرست، کنار «پاک‌کردن انتخاب» منتقل شد (1.62.8 fix2).</li>
-      <li><b>جدید:</b> تکمیل خودکار فرم ثبت تردد علاوه بر کد ملی با <b>نام و نام خانوادگی</b> و <b>تلفن همراه</b> هم کار می‌کند؛ فقط فیلدهای خالی پر می‌شوند.</li>
-      <li><b>جدید:</b> هر مقصد ملاقات می‌تواند <b>۱ تا ۳ تأییدکننده</b> داشته باشد؛ در مقصد چندتأییدکننده، ثبت‌کننده یکی را از فهرست همان مقصد انتخاب می‌کند (نام آزاد پذیرفته نمی‌شود).</li>
-      <li>کلید «نمایش همهٔ رویدادها» به زبانهٔ «تاریخچهٔ ویرایش‌ها»ی کنترل تردد اضافه شد؛ رکوردهای ثبت خروج و حذف — که از 1.62.4 فقط از نمایش فیلتر شده بودند و هرگز حذف نشده‌اند — دوباره قابل مشاهده‌اند.</li>
-      <li>مدیران چارت سازمانی (معاون/مدیر اداره) دیگر مقصد ارجاع خودکار درخواست‌ها نمی‌شوند مگر هیچ کاندیدای واقعی فعال نباشد؛ کارت «تشخیص ارجاع خودکار درخواست‌ها» و فرم ترمیم نقش «مدیر پشتیبانی» اشتباه به صفحهٔ سازمان اضافه شد.</li>
-      <li>دکمهٔ شب/روز در همهٔ صفحات کار می‌کند (حمل <code>assets/app.js</code> که در بسته‌های قبلی جا مانده بود).</li>
-      <li>پوشش کامل حالت شب در برگهٔ برنامهٔ غذایی (هر دو مسیر میزبان و پنل مستقل).</li>
-      <li>«تاریخچهٔ ویرایش‌ها»ی کنترل تردد فقط رکوردهای واقعاً ویرایش‌شده را نشان می‌دهد.</li>
-      <li>صفحه‌های پنل مدیریت غذا وسط‌چین شدند؛ داشبورد دیگر به سمت راست نمی‌چسبد.</li>
-      <li>ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب».</li>
-    </ul>
-    <a class="download" href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" download="ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip">⬇ دریافت بستهٔ 1.62.20</a>
-    <div class="file">ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip · SHA-256: c169b7c188c6cc39396656b1417a8267d84aba7c356a6d89a2410387421625b2</div>
-    <p class="file"><a href="https://raw.githubusercontent.com/alirezarahimy-code/ticket/arena/dba0774e-ticket/downloads/ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip.sha256">دریافت فایل SHA-256</a> · <a href="ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" download>دانلود مستقیم از همین صفحه</a></p>
-    <p>گزارش تغییرات: <a href="../updates/2026-10-25-release-162-19-bulk-user-structure-actions-split/CHANGE-REPORT-FA.md">CHANGE-REPORT-FA</a> · <a href="https://github.com/alirezarahimy-code/ticket/releases/tag/v1.62.13">انتشار GitHub v1.62.13</a></p>
-    <div class="hint">این بسته رفتار سامانه را تغییر نمی‌دهد (فاز ۱ فقط کامنت و سند است). پس از نصب کافی است یک بار سامانه را باز کنید و کارکرد عادی را ببینید. اگر واحد مستقل (نمایندگی) نسخهٔ ۱.۶۲.۱۰ را هنوز امتحان نکرده‌اید: صفحهٔ «سازمان» را با Ctrl+F5 باز کنید؛ مدیر چارت دو کادر خط‌چین در دو سمت کادر مدیرعامل می‌بیند. در صورت بروز هر مشکل، بازگشت کامل: tag <code>snapshot-1.62.12-20261025</code> (یا اسنپشات قدیمی‌تر snapshot-pre-refactor-20261025). آزمون پیشنهادی روی سرور تست: چرخهٔ کامل یک درخواست (ثبت با پیوست، پاسخ، به‌عهده‌گرفتن، بازگشایی، لغو)، عملیات اموال/اسکن دامین، و عملیات صفحهٔ «سازمان».</div>
-  </main>
-</body>
-</html>
+<body><main>
+  <span class="eyebrow">بستهٔ بازسازی‌شده از آرشیوهای تجمعی رسمی ۱.۶۲.۲۴ تا ۱.۶۲.۳۶</span>
+  <h1>ترمیم فایل‌های سامانهٔ ۱.۶۲.۳۶</h1>
+  <p>بستهٔ ترمیم قبلی از snapshot ناقص ساخته شده بود و می‌توانست فایل‌های قدیمی را جایگزین کند. آن ZIP را نصب نکنید. لینک اصلی این صفحه اکنون به بستهٔ بازسازی‌شده از آرشیوهای نسخه‌های رسمی اشاره می‌کند.</p>
+  <div class="warning"><strong>پیش‌نیاز:</strong> بستهٔ ترمیم برای نصب مجدد نسخهٔ ۱.۶۲.۳۶ است. پیش از نصب از فایل‌های سرور و پایگاه‌دادهٔ شما پشتیبان بگیرید. ۷۱ مسیر فایل جایگزین می‌شود و migrationهای افزایشیِ ۰۰۹ تا ۰۱۳ در صورت ثبت‌نشدن اجرا می‌شوند.</div>
+  <div class="revoked">بستهٔ ۱.۶۲.۳۴ را برای این ترمیم نصب نکنید. بستهٔ افزایشی اصلی ۱.۶۲.۳۶ فقط از ۱.۶۲.۳۵ نصب می‌شود و جایگزین بستهٔ ترمیم کاملِ لینک‌شده در بالای صفحه نیست. نصب ۱.۶۲.۳۵ به‌تنهایی نیز مدرک اصلاح رکوردهای زنده نیست.</div>
+  <section class="meta" aria-label="مشخصات بسته">
+    <div><small>بستهٔ ترمیم مستقیم</small><strong class="filename">ticket-repair-1.62.36-full-source-restore-20261027.zip</strong></div>
+    <div><small>نسخهٔ بسته</small><strong>۱.۶۲.۳۶ — نصب مجدد</strong></div>
+    <div><small>فایل‌های بازسازی‌شده</small><strong>۷۱ مسیر</strong></div>
+    <div><small>مهاجرت‌ها</small><strong>۰۰۹، ۰۱۰، ۰۱۱، ۰۱۲، ۰۱۳</strong></div>
+  </section>
+  <div class="actions">
+    <a class="button primary" href="ticket-repair-1.62.36-full-source-restore-20261027.zip" download>دانلود مستقیم بستهٔ ترمیم اصلاح‌شده</a>
+    <a class="button secondary" href="ticket-repair-1.62.36-full-source-restore-20261027.zip.sha256" download>دانلود SHA-256</a>
+    <a class="button secondary" href="ticket-repair-1.62.36-full-source-restore-20261027.html">راهنمای نصب و جزئیات</a>
+  </div>
+  <h2>این بسته چه چیزهایی را بازسازی می‌کند؟</h2>
+  <ul>
+    <li>فایل‌های پنل غذا، داشبورد Capitalio، تم‌ها، عملیات گروهی و گزارش‌های سفارش.</li>
+    <li>ثبت دستی فیش/تردد، قواعد تحویل و پاک‌سازی غیبت‌های متناقض.</li>
+    <li>نسخه‌های تجمعی گزارش سلامت، فرم شناسنامهٔ فنی و اجزای سازمانی/دامنه.</li>
+    <li>migrationهای لازم برای تأییدکنندگان مقصد، واحدهای نمایندگی و آشتی‌دادن رکوردهای دستی.</li>
+  </ul>
+  <h2>بستهٔ افزایشی اصلی ۱.۶۲.۳۶</h2>
+  <p>این ZIP جداگانه برای نصب استاندارد نسخهٔ ۱.۶۲.۳۶ از روی ۱.۶۲.۳۵ است؛ فقط اصلاحات همان نسخه را دارد و جایگزین بستهٔ ترمیم بالا نیست.</p>
+  <div class="actions">
+    <a class="button secondary" href="ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip" download>دانلود بستهٔ افزایشی ۱.۶۲.۳۶</a>
+    <a class="button secondary" href="ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip.sha256" download>دانلود SHA-256 افزایشی</a>
+  </div>
+  <h2>نصب و راستی‌آزمایی</h2>
+  <ol>
+    <li>اگر نسخهٔ فعلی پایین‌تر از ۱.۶۲.۳۶ است، بستهٔ ترمیم را نصب نکنید؛ ابتدا زنجیرهٔ نسخه‌ها و پایگاه‌داده باید به وضعیت ۱.۶۲.۳۶ برسد.</li>
+    <li>ZIP ترمیم را از updater سامانه نصب کنید؛ updater پیش از اجرا backup می‌گیرد و migrationهای ثبت‌نشده را اعمال می‌کند.</li>
+    <li>بعد از نصب، نسخهٔ سامانه را بررسی و مسیرهای داشبورد غذا، ثبت دستی، گزارش تحویل و فهرست غیبت را بازبینی کنید.</li>
+  </ol>
+  <div class="safe">بستهٔ اصلاح‌شده در مخزن ساخته و آزموده شده است؛ روی سرور زنده نصب نشده و هیچ تغییری در داده‌های سرور شما از اینجا انجام نشده است.</div>
+</main></body></html>

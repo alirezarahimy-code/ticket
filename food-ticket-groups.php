@@ -249,6 +249,70 @@ function food_ticket_absence_ensure(): bool
 }
 
 /**
+ * Reconcile stored manual attendance records over an inclusive date range.
+ * @return array{delivered:int,absences_cleared:int}
+ */
+function food_ticket_manual_attendance_reconcile_range(string $fromDate, string $toDate): array
+{
+    static $done = [];
+    foreach ([$fromDate, $toDate] as $date) {
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            throw new RuntimeException('تاریخ آشتی‌دادن حضور و فیش معتبر نیست.');
+        }
+    }
+    if ($fromDate > $toDate) {
+        throw new RuntimeException('بازهٔ آشتی‌دادن حضور و فیش معتبر نیست.');
+    }
+    $cacheKey = $fromDate . '|' . $toDate;
+    if (isset($done[$cacheKey])) {
+        return $done[$cacheKey];
+    }
+    if (!function_exists('food_ticket_events_ensure_delivery') || !food_ticket_events_ensure_delivery()) {
+        throw new RuntimeException('ستون‌های وضعیت تحویل غذا در دسترس نیستند؛ ثبت حضور و تحویل قابل همگام‌سازی نیست.');
+    }
+    if (!food_ticket_absence_ensure()) {
+        throw new RuntimeException('جدول غیبت روزانه در دسترس نیست؛ ثبت حضور دستی قابل همگام‌سازی نیست.');
+    }
+    try {
+        $tickets = db()->prepare(
+            'UPDATE food_ticket_events SET '
+            . 'print_status = CASE WHEN source_uid = "manual-attendance" AND event_type = "printed" '
+            . 'AND COALESCE(print_status, "") NOT IN ("pending", "printing") THEN "printed" ELSE print_status END, '
+            . 'delivered_by = CASE WHEN delivery_status IS NULL OR delivery_status <> "delivered" THEN NULL ELSE delivered_by END, '
+            . 'delivery_status = "delivered", delivered_at = COALESCE(delivered_at, NOW()) '
+            . 'WHERE punch_date BETWEEN ? AND ? AND user_id IS NOT NULL AND '
+            . '((source_uid = "manual-attendance" AND event_type = "printed") '
+            . 'OR (event_type = "printed" AND print_status = "printed")) '
+            . 'AND (delivery_status IS NULL OR delivery_status <> "delivered" '
+            . 'OR (source_uid = "manual-attendance" AND event_type = "printed" '
+            . 'AND COALESCE(print_status, "") NOT IN ("printed", "pending", "printing")))'
+        );
+        $tickets->execute([$fromDate, $toDate]);
+        $delivered = $tickets->rowCount();
+
+        $absences = db()->prepare(
+            'DELETE a FROM food_ticket_daily_absence AS a '
+            . 'INNER JOIN food_ticket_events AS e ON e.user_id = a.user_id AND e.punch_date = a.absence_date '
+            . 'WHERE a.absence_date BETWEEN ? AND ? AND e.user_id IS NOT NULL AND '
+            . '((e.source_uid = "manual-attendance" AND e.event_type IN ("printed", "no_food")) '
+            . 'OR (e.event_type = "printed" AND e.print_status = "printed"))'
+        );
+        $absences->execute([$fromDate, $toDate]);
+        $result = ['delivered' => $delivered, 'absences_cleared' => $absences->rowCount()];
+        $done[$cacheKey] = $result;
+        return $result;
+    } catch (Throwable $exception) {
+        app_error_log('[food-manual-attendance] historical reconciliation failed: ' . $exception->getMessage());
+        throw new RuntimeException('همگام‌سازی فیش‌های قبلی و فهرست غیبت انجام نشد؛ جزئیات در لاگ سامانه ثبت شد.', 0, $exception);
+    }
+}
+
+function food_ticket_manual_attendance_reconcile_date(string $date): array
+{
+    return food_ticket_manual_attendance_reconcile_range($date, $date);
+}
+
+/**
  * رکوردهای غیبت یک تاریخ (اختیاری: محدود به یک گروه).
  * @return array<int,array<string,mixed>> کلید = user_id
  */
@@ -257,6 +321,7 @@ function food_ticket_absence_load(string $date, ?int $groupId = null): array
     if (!food_ticket_absence_ensure()) {
         return [];
     }
+    food_ticket_manual_attendance_reconcile_date($date);
     try {
         if ($groupId !== null) {
             $q = db()->prepare('SELECT * FROM food_ticket_daily_absence WHERE absence_date = ? AND (group_id = ? OR group_id IS NULL)');
@@ -1807,6 +1872,7 @@ function food_ticket_manual_attendance_guest_row(): array
 function food_ticket_api_manual_attendance(string $date = ''): array
 {
     $date = food_ticket_manual_attendance_date($date);
+    food_ticket_manual_attendance_reconcile_date($date);
 
     // از همان نقشهٔ سفارش داخلی/فعال ناهار استفاده می‌شود که صدور فیش بررسی می‌کند.
     // خطای دریافت سفارش‌ها باید درخواست را متوقف کند؛ فهرست همهٔ کاربران fallback مجاز نیست.
@@ -1887,6 +1953,58 @@ function food_ticket_api_manual_attendance(string $date = ''): array
     return ['date' => $date, 'employees' => $employees, 'items' => $items];
 }
 
+/** ثبت دستی تردد یعنی حضور؛ اگر قبلاً غایب ثبت شده، همان روز را حاضر می‌کند. */
+function food_ticket_manual_attendance_clear_absence(int $userId, string $date, array $actor, string $reason): bool
+{
+    if ($userId <= 0 || !function_exists('food_ticket_absence_ensure') || !food_ticket_absence_ensure()) {
+        return false;
+    }
+    try {
+        $query = db()->prepare('SELECT id, group_id FROM food_ticket_daily_absence WHERE absence_date = ? AND user_id = ? LIMIT 1');
+        $query->execute([$date, $userId]);
+        $absence = $query->fetch() ?: null;
+        if ($absence === null) {
+            return false;
+        }
+        $groupId = (int) ($absence['group_id'] ?? 0);
+        if ($groupId > 0 && food_ticket_group_absence_locked($groupId, $date)
+            && !food_ticket_can_override_absence($actor)) {
+            app_error_log('[food-manual-attendance] kept locked absence for user ' . $userId . ' on ' . $date);
+            return false;
+        }
+        $deleted = db()->prepare('DELETE FROM food_ticket_daily_absence WHERE id = ?');
+        $deleted->execute([(int) $absence['id']]);
+        if ($deleted->rowCount() < 1) {
+            return false;
+        }
+        try {
+            food_ticket_audit('food_absence_cleared_by_manual_attendance', [
+                'user_id' => (int) ($actor['id'] ?? 0),
+                'target_type' => 'food_absence',
+                'target_id' => $userId,
+                'target_label' => 'تردد دستی / تاریخ ' . $date,
+                'old' => 'absent',
+                'new' => 'present',
+                'reason' => $reason,
+                'meta' => ['date' => $date, 'group_id' => $groupId ?: null, 'source' => 'manual-attendance'],
+            ]);
+        } catch (Throwable $auditError) {
+            app_error_log('[food-manual-attendance] absence audit: ' . $auditError->getMessage());
+        }
+        if (function_exists('food_ticket_release_held_ticket')) {
+            try {
+                food_ticket_release_held_ticket($userId, $date, $actor, $reason);
+            } catch (Throwable $releaseError) {
+                app_error_log('[food-manual-attendance] release held ticket: ' . $releaseError->getMessage());
+            }
+        }
+        return true;
+    } catch (Throwable $exception) {
+        app_error_log('[food-manual-attendance] clear absence: ' . $exception->getMessage());
+        return false;
+    }
+}
+
 /** ثبت دستی یک تردد برای روز انتخاب‌شده (امروز یا روزهای قبل)؛ صدور فیش و چاپ فیزیکی دو انتخاب مستقل هستند. */
 function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, bool $physicalPrint, string $reason, array $actor, array &$orderMaps, string $date = ''): array
 {
@@ -1930,12 +2048,17 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
     }
 
     $duplicate = db()->prepare(
-        'SELECT id, event_type, print_status FROM food_ticket_events '
+        'SELECT id, event_type, print_status, source_uid, source_key, source_payload FROM food_ticket_events '
         . 'WHERE user_id = ? AND punch_date = ? AND event_type <> "unknown" ORDER BY id DESC LIMIT 1'
     );
     $duplicate->execute([$userId, $targetDate]);
-    if ($existingToday = $duplicate->fetch()) {
-        throw new RuntimeException('برای این کارمند در این روز تردد ثبت شده است؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingToday['event_type'] ?? 'نامشخص') . '.');
+    $existingToday = $duplicate->fetch() ?: null;
+    $replaceNoFood = $existingToday !== null
+        && (string) ($existingToday['event_type'] ?? '') === 'no_food'
+        && $withTicket
+        && (string) ($existingToday['print_status'] ?? '') !== 'printed';
+    if ($existingToday !== null && !$replaceNoFood) {
+        throw new RuntimeException('برای این کارمند در این روز تردد یا فیش ثبت شده است؛ ثبت تکراری مجاز نیست. وضعیت فعلی: ' . (string) ($existingToday['event_type'] ?? 'نامشخص') . '.');
     }
 
     $now = function_exists('food_order_now') ? food_order_now()->format('H:i:s') : date('H:i:s');
@@ -2005,7 +2128,7 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         $payload = $decision['payload'];
         $payload['source_uid'] = 'manual-attendance';
         $payload['event_type'] = 'printed';
-        $payload['print_status'] = 'not_printed';
+        $payload['print_status'] = $physicalPrint ? 'pending' : 'printed';
         $payload['source_payload'] = json_encode([
             'manual_attendance' => [
                 'actor_id' => (int) ($actor['id'] ?? 0),
@@ -2017,31 +2140,87 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 
-    try {
-        $eventId = food_ticket_add_event($payload);
-    } catch (PDOException $exception) {
-        if ((int) $exception->getCode() === 23000 || str_contains($exception->getMessage(), 'Duplicate')) {
-            throw new RuntimeException('این تردد هم‌زمان از مسیر دیگری ثبت شده است؛ از ثبت دوباره جلوگیری شد.');
+    if ($replaceNoFood) {
+        $eventId = (int) ($existingToday['id'] ?? 0);
+        $existingSourceKey = trim((string) ($existingToday['source_key'] ?? ''));
+        if ($existingSourceKey !== '') {
+            $payload['source_key'] = $existingSourceKey;
         }
-        throw $exception;
-    }
-    if ($eventId <= 0) {
-        throw new RuntimeException('ثبت رویداد تردد انجام نشد.');
+        $oldSourcePayload = json_decode((string) ($existingToday['source_payload'] ?? ''), true);
+        if (!is_array($oldSourcePayload)) {
+            $oldRaw = (string) ($existingToday['source_payload'] ?? '');
+            $oldSourcePayload = $oldRaw !== '' ? ['original_source_payload' => $oldRaw] : [];
+        }
+        $previousManual = is_array($oldSourcePayload['manual_attendance'] ?? null)
+            ? $oldSourcePayload['manual_attendance'] : [];
+        $manualMeta = [
+            'actor_id' => (int) ($actor['id'] ?? 0),
+            'reason' => $reason,
+            'with_ticket' => true,
+            'physical_print' => $physicalPrint,
+            'recorded_at' => $recordedAt,
+            'converted_from_no_food' => true,
+        ];
+        if ($previousManual !== []) {
+            $manualMeta['previous_manual_attendance'] = $previousManual;
+        }
+        $oldSourcePayload['manual_attendance'] = $manualMeta;
+        $mergedPayload = json_encode($oldSourcePayload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($eventId <= 0 || $mergedPayload === false) {
+            throw new RuntimeException('رویداد قبلی برای تبدیل به فیش معتبر نیست.');
+        }
+        $updated = db()->prepare(
+            'UPDATE food_ticket_events SET source_uid = ?, personnel_code = ?, full_name = ?, national_code = ?, food_type = ?, ticket_key = ?, '
+            . 'event_type = "printed", print_status = ?, last_error = NULL, source_payload = ?, processed_at = NOW(), next_retry_at = NULL '
+            . 'WHERE id = ? AND event_type = "no_food"'
+        );
+        $updated->execute([
+            'manual-attendance', food_ticket_code($employeeNumber), $fullName,
+            food_ticket_digits($person['national_code'] ?? ''), (string) ($payload['food_type'] ?? ''),
+            (string) ($payload['ticket_key'] ?? ''), $physicalPrint ? 'pending' : 'printed', $mergedPayload, $eventId,
+        ]);
+        if ($updated->rowCount() !== 1) {
+            throw new RuntimeException('رویداد تردد هم‌زمان تغییر کرده است؛ فهرست را تازه‌سازی و دوباره بررسی کنید.');
+        }
+    } else {
+        try {
+            $eventId = food_ticket_add_event($payload);
+        } catch (PDOException $exception) {
+            if ((int) $exception->getCode() === 23000 || str_contains($exception->getMessage(), 'Duplicate')) {
+                throw new RuntimeException('این تردد هم‌زمان از مسیر دیگری ثبت شده است؛ از ثبت دوباره جلوگیری شد.');
+            }
+            throw $exception;
+        }
+        if ($eventId <= 0) {
+            throw new RuntimeException('ثبت رویداد تردد انجام نشد.');
+        }
     }
 
     if ($withTicket && $physicalPrint) {
         food_ticket_enqueue_print($eventId, $config);
-        $message = 'فیش صادر شد و برای چاپ فیزیکی در صف قرار گرفت.';
+        $message = 'فیش صادر شد و برای چاپ فیزیکی در صف قرار گرفت؛ تحویل پس از چاپ موفق ثبت می‌شود.';
         $printStatus = 'pending';
     } elseif ($withTicket) {
         if (function_exists('food_ticket_print_log')) {
             food_ticket_print_log($eventId, '', (string) $payload['source_key'], (string) $payload['ticket_key'], 'ثبت دستی', 'manual_issued', 0, 'فیش صادر شد؛ چاپ فیزیکی انتخاب نشده است.');
         }
-        $message = 'فیش صادر شد؛ چاپ فیزیکی انجام نشد.';
-        $printStatus = 'not_printed';
+        $message = 'فیش و تحویل غذا در سامانه «چاپ‌شده/تحویل‌شده» ثبت شد؛ چاپ فیزیکی انجام نشد.';
+        $printStatus = 'printed';
     } else {
         $message = 'تردد دستی ثبت شد؛ فیش صادر نشد.';
         $printStatus = 'not_printed';
+    }
+
+    // طبق سیاست سامانه، صدور دستی بدون چاپ فیزیکی هم به معنی تحویل غذا است.
+    // در حالت چاپ فیزیکی، Worker پس از چاپ موفق همین وضعیت را ثبت می‌کند.
+    if ($withTicket && !$physicalPrint && function_exists('food_ticket_mark_delivered_on_print')) {
+        food_ticket_mark_delivered_on_print($eventId);
+    }
+
+    // ثبت دستی حضور با هر نوع فیش یا بدون فیش، با رکورد غیبت همان روز ناسازگار است.
+    $absenceCleared = food_ticket_manual_attendance_clear_absence($userId, $targetDate, $actor, $reason);
+    if ($absenceCleared) {
+        $message .= ' ثبت حضور در فهرست غایبان نیز اصلاح شد.';
     }
 
     food_ticket_audit('food_ticket_manual_attendance', [
@@ -2054,6 +2233,8 @@ function food_ticket_api_manual_attendance_save(int $userId, bool $withTicket, b
             'date' => $targetDate,
             'with_ticket' => $withTicket,
             'physical_print' => $physicalPrint,
+            'delivery_status' => ($withTicket && !$physicalPrint) ? 'delivered' : 'pending',
+            'absence_cleared' => $absenceCleared,
             'ticket_key' => (string) ($payload['ticket_key'] ?? ''),
             'reason' => $reason,
         ],
@@ -2187,6 +2368,10 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     // ۱.۶۲.۹: تاریخ انتخابی (امروز یا روزهای قبل) برای همهٔ ثبت‌های این نوبت اعمال می‌شود.
     $date = food_ticket_manual_attendance_date((string) ($body['date'] ?? ''));
     $withTicket = array_key_exists('with_ticket', $body) ? filter_var($body['with_ticket'], FILTER_VALIDATE_BOOLEAN) : true;
+    if ($withTicket && (!function_exists('food_ticket_is_primary_admin') || !food_ticket_is_primary_admin($actor)
+        || !function_exists('user_can') || !user_can($actor, 'food.manual_ticket'))) {
+        throw new RuntimeException('دسترسی صدور دستی فیش فقط برای ادمین اصلی مجاز است.');
+    }
     $physicalPrint = $withTicket && !empty($body['physical_print']);
     $reason = (string) ($body['reason'] ?? '');
     $labels = [0 => ['name' => 'مهمان', 'pc' => '']];

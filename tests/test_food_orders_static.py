@@ -202,11 +202,11 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }", employee_css)
 
         panel_html = read("food-ticket-web/index.html")
-        self.assertIn('href="assets/food-order.css?v=13"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=32"', panel_html)
+        self.assertIn('href="assets/food-order.css?v=11"', panel_html)
+        self.assertIn('href="assets/food-menu.css?v=23"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=31"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=20"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -392,7 +392,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertNotIn("employee_number", export)
         self.assertNotIn("food_order_export_excel_range", php)
         ticket = read("food-ticket.php")
-        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
+        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
 
         js = read("assets/food-menu.js")
         orders_start = js.index("function renderOrders()")
@@ -617,7 +617,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
     def test_admin_order_edit_route_and_controls_are_removed_owner_flow_remains(self) -> None:
         ticket = read("food-ticket.php")
         self.assertNotIn("food-menu/order-edit", ticket)
-        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
+        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
 
         order_php = read("food-order.php")
         self.assertNotIn("function food_order_admin_edit(", order_php)

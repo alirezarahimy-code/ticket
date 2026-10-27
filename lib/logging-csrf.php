@@ -200,21 +200,29 @@ function system_error_mask(string $text): string
 }
 
 /** ثبت یک خطای فنی با توضیح فارسی در system_logs (هیچ‌وقت خودش خطا ایجاد نمی‌کند). */
-function system_error_record(string $level, string $source, string $rawMessage, string $location = ''): void
+function system_error_record(string $level, string $source, string $rawMessage, string $location = '', string $errorType = ''): void
 {
     try {
+        $errorType = str_replace('\\', '', trim($errorType));
+        if ($errorType !== '' && !preg_match('/^[A-Za-z_][A-Za-z0-9_]{0,79}$/D', $errorType)) {
+            $errorType = '';
+        }
         $explain = system_error_explain($rawMessage);
         $title = $explain['title'];
         if ($title === 'خطای نامشخص سامانه') {
             // عنوان عمومی همهٔ خطاهای ناشناخته یکی می‌شد؛ متن کوتاه خطا جای آن می‌نشیند تا گروه‌ها جدا بمانند.
             $title = 'خطای ناشناخته: ' . mb_substr(system_error_mask($rawMessage), 0, 140);
         }
-        system_log($level, $source, $title, [
+        $meta = [
             'cause' => $explain['cause'],
             'action' => $explain['action'],
             'technical' => system_error_mask($rawMessage),
             'location' => $location,
-        ]);
+        ];
+        if ($errorType !== '') {
+            $meta['error_type'] = $errorType;
+        }
+        system_log($level, $source, $title, $meta);
     } catch (Throwable) {
         // ثبت لاگ نباید خود باعث خطای دیگری شود.
     }
@@ -224,7 +232,7 @@ function system_error_record(string $level, string $source, string $rawMessage, 
 if (PHP_SAPI !== 'cli') {
     $GLOBALS['__request_started_at'] = microtime(true);
     set_exception_handler(static function (Throwable $e): void {
-        system_error_record('error', 'خطای نهایی‌نشده', $e->getMessage(), $e->getFile() . ':' . $e->getLine());
+        system_error_record('error', 'خطای نهایی‌نشده', $e->getMessage(), $e->getFile() . ':' . $e->getLine(), get_class($e));
         if (!headers_sent()) {
             http_response_code(500);
             header('Content-Type: text/html; charset=utf-8');
@@ -234,7 +242,13 @@ if (PHP_SAPI !== 'cli') {
     register_shutdown_function(static function (): void {
         $error = error_get_last();
         if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
-            system_error_record('error', 'خطای قاتل PHP', (string) $error['message'], (string) $error['file'] . ':' . (string) $error['line']);
+            $errorType = match ((int) $error['type']) {
+                E_PARSE => 'E_PARSE',
+                E_CORE_ERROR => 'E_CORE_ERROR',
+                E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+                default => 'E_ERROR',
+            };
+            system_error_record('error', 'خطای قاتل PHP', (string) $error['message'], (string) $error['file'] . ':' . (string) $error['line'], $errorType);
         }
         $elapsed = microtime(true) - (float) ($GLOBALS['__request_started_at'] ?? microtime(true));
         if ($elapsed >= 2.0) {

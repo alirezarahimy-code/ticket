@@ -20,7 +20,7 @@ guide = read("help-guide.php")
 schema = read("schema.sql")
 install = read("install-empty-db.sql")
 perms = read("permissions.php")
-bootstrap = (read("bootstrap.php") + read("lib/db-core.php") + read("lib/logging-csrf.php") + read("lib/auth-scope.php") + read("lib/settings-effects.php") + read("lib/ldap.php") + read("lib/tickets-sla.php") + read("lib/notify-users.php") + read("lib/activity-audit.php"))  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
+bootstrap = read("bootstrap.php") + "\n" + read("lib/activity-audit.php")
 admin_js = read("food-ticket-web/assets/food-groups.js")
 
 check("CREATE TABLE IF NOT EXISTS food_ticket_day_visits" in groups
@@ -38,9 +38,8 @@ check("عضو دائم گروه نمی‌تواند محل تحویل را عو�
       and "خوداظهاری فقط برای امروز مجاز است" in groups,
       "ungrouped-only and lock-after-print rules are in the save path")
 check("food_ticket_group_members_for_date($groupId, $date)" in groups, "group print includes today's visitors")
-check("'visitor' => $isVisitor" in groups and "مهمان امروز" in admin_js
-      and "today_visitors" in groups and "today_visitors" in admin_js
-      and "temporary_transfer" in admin_js,
+check("$row['visitor'] = true" in groups and "مهمان امروز" in admin_js
+      and "today_visitors" in groups and "today_visitors" in admin_js,
       "kitchen group list shows today's visitors separately from permanent members")
 css = (ROOT / "food-ticket-web/assets/food-menu.css").read_text(encoding="utf-8")
 check("grid-template-columns:repeat(4,minmax(0,1fr))" in css
@@ -78,9 +77,22 @@ check("visit_change_until" in groups
       and "function food_ticket_api_cancel_day_visit" in groups
       and "مهلت تغییر سلف" in admin_js
       and 'id="fg-visit-until"' in admin_js
-      and "data-fg=\"visit-cancel\"" in admin_js
+      and 'id="fg-deadline-box"' in admin_js
+      and "مهلت تغییر سلف امروز" in admin_js
+      and 'data-fg="visit-cancel"' in admin_js
       and "لغو تغییر سلف" in admin_js,
       "each food group has a visible cafeteria-change deadline and support can cancel visits")
+panel = read("food-ticket-web/index.html")
+check("food-groups.js?v=16" in panel, "food-groups.js cache buster is bumped")
+check("FOOD_TICKET_PANEL_VERSION = '1.37.27'" in ticket
+      and "PANEL_VERSION='1.37.27'" in panel,
+      "food panel version matches host expected version")
+check("function dashboardView" in panel
+      and "food-capitalio-dashboard-r42.js" in panel
+      and "food-capitalio-dashboard-root" in panel
+      and "function loadDashboardData" in panel,
+      "dashboard renders through the Capitalio dashboard module and live data loader")
+chatbot = read("chatbot.php")
 check("visit_change_until TIME NULL" in schema
       and "visit_change_until TIME NULL" in install,
       "fresh-install schemas include cafeteria-change deadline")

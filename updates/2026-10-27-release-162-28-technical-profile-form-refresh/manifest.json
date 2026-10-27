@@ -1,0 +1,16 @@
+{
+  "name": "release-162-28-technical-profile-form-refresh",
+  "version": "1.62.28",
+  "date": "2026-10-27",
+  "title": "استقرار فرم جدید شناسنامه‌های فنی و یکسان‌سازی اجزای نمایش",
+  "requires_version": "1.62.25",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "asset-profile.php",
+    "asset-inventory-page.php",
+    "assets/style.css",
+    "index.php"
+  ],
+  "notes": "فایل تعریف فیلدها، رندر و ذخیرهٔ فرم شناسنامه‌ها از کد فعلی منتشر می‌شود؛ CSS هماهنگ و نسخهٔ cache-busting به‌روز می‌شود و index.php نسخهٔ ماژولار سازگار با نسخهٔ ۱.۶۲.۲۴ به‌روزرسانی می‌شود. سازگاری امضای قدیمی و جدید صفحه حفظ می‌شود. هیچ داده‌ای حذف نمی‌شود؛ ستون‌های جدیدِ لازم به‌صورت افزایشی توسط asset_profile_ensure_schema ساخته می‌شوند."
+}

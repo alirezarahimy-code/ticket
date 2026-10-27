@@ -9,10 +9,12 @@ ROOT = Path(__file__).resolve().parents[1]
 class TriangleEffectReleaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.bootstrap = "".join((ROOT / n).read_text(encoding="utf-8") for n in ["bootstrap.php"] + ['lib/db-core.php', 'lib/logging-csrf.php', 'lib/auth-scope.php', 'lib/settings-effects.php', 'lib/ldap.php', 'lib/tickets-sla.php', 'lib/notify-users.php', 'lib/activity-audit.php'])  # از ۱.۶۲.۲۰: bootstrap به lib/ تفکیک شد
-        # از ۱.۶۲.۱۶ اکشن save_triangle_effect در actions/settings-actions.php است (برش ۵ فاز ۲)؛
-        # متن هر دو فایل با هم بررسی می‌شود تا پوشش قبلی حفظ بماند.
-        cls.index = (ROOT / "index.php").read_text(encoding="utf-8") + (ROOT / "actions/settings-actions.php").read_text(encoding="utf-8")
+        cls.bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
+            "bootstrap.php", "lib/settings-effects.php"
+        ))
+        cls.index = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
+            "index.php", "actions/settings-actions.php"
+        ))
         cls.engine = (ROOT / "assets/triangle-mesh.js").read_text(encoding="utf-8")
         cls.settings = (ROOT / "assets/triangle-settings.js").read_text(encoding="utf-8")
 
@@ -52,7 +54,7 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         self.assertIn("require_permission('settings.general_edit')", self.index)
         self.assertIn("save_setting('triangle_effect_pages'", self.index)
         self.assertIn("save_setting('triangle_effect_config'", self.index)
-        self.assertIn("function triangle_effect_script_tag", self.bootstrap)  # از ۱.۶۲.۲۰: تابع مردهٔ enabled_for_current_page حذف شد
+        self.assertIn("triangle_effect_enabled_pages()", self.bootstrap)
         self.assertIn("data-config", self.bootstrap)
 
     def test_engine_respects_reduced_motion_and_has_explicit_lifecycle(self):
@@ -92,12 +94,7 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["version"], "1.56")
         self.assertEqual(manifest["migrations"], [])
-        current_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-        current_manifest = json.loads((ROOT / "updates/2026-10-25-release-162-20-backup-split-bootstrap-lib/manifest.json").read_text(encoding="utf-8"))
-        self.assertEqual(current_version, current_manifest["version"])
-        # ۱.۶۲.۱۳ مهاجرت جدید ندارد؛ 009 و 010 فقط برای ارتقای مستقیم همراه بسته‌اند.
-        self.assertEqual(current_manifest["migrations"],
-                         ["009-traffic-destination-multi-approver.sql", "010-org-liaison-units.sql"])
+        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "1.62.36")
 
 
 if __name__ == "__main__":

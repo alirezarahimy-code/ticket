@@ -148,6 +148,7 @@ function permission_catalog(): array
                 ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
                 ['code' => 'food.emergency', 'label' => 'سفارش اضطراری غذا (ثبت و لغو برای هر فرد در روز بسته)'],
+                ['code' => 'food.manual_ticket', 'label' => 'صدور دستی فیش بدون چاپ فیزیکی (ادمین اصلی)'],
                 ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
                 ['code' => 'food.db_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
@@ -327,6 +328,7 @@ function print_fish_role_codes(string $role, array $codes): array
     if ($role === 'primary_admin') {
         return $codes;
     }
+    $codes = array_values(array_filter($codes, static fn ($c): bool => (string) $c !== 'food.manual_ticket'));
     $kept = array_values(array_filter($codes, static fn ($c): bool => !str_starts_with((string) $c, 'food.')));
     $targets = print_fish_role_targets();
     return array_values(array_unique(array_merge($kept, $targets[$role] ?? [])));
@@ -440,6 +442,10 @@ function role_permissions_normalize_codes(array $codes): array
 function role_permission_effective_codes(string $role, array $storedCodes, bool $custom): array
 {
     if ($custom) {
+        // مجوز صدور فیش دستی از داده‌های سفارشی قدیمی/دستی به نقش غیرادمین نشت نمی‌کند.
+        if ($role !== 'primary_admin') {
+            $storedCodes = array_values(array_filter($storedCodes, static fn ($code): bool => (string) $code !== 'food.manual_ticket'));
+        }
         // نقش‌های ذخیره‌شده: ویرایش بدون بخش (داده‌های قدیمی) بخش را هم می‌گیرد تا دسترسی قبلی حفظ شود.
         return role_permissions_add_parents(role_permissions_normalize_codes($storedCodes));
     }
@@ -654,6 +660,9 @@ function role_permissions_save(string $role, array $codes): void
     }
     $valid = permission_all_codes();
     $codes = role_permissions_normalize_codes($codes);
+    if ($role !== 'primary_admin') {
+        $codes = array_values(array_filter($codes, static fn (string $code): bool => $code !== 'food.manual_ticket'));
+    }
     $codes = array_values(array_intersect($codes, $valid));
     // ویرایش بدون بخش ذخیره نمی‌شود.
     $codes = role_permissions_strip_orphan_edits($codes);

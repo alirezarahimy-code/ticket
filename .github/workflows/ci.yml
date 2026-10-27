@@ -21,7 +21,7 @@ jobs:
         coverage: none
 
     - name: Check PHP syntax
-      run: git ls-files -z -- '*.php' | xargs -0 -n1 php -l
+      run: git ls-files -z -- '*.php' | php tools/lint-php-syntax.php
 
     - name: Run security tests
       run: php tests/SecurityTest.php

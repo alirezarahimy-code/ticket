@@ -1095,7 +1095,9 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
             try {
                 $matrix = food_ticket_tpl_qr_matrix(food_ticket_tpl_qr_payload($event));
             } catch (Throwable $e) {
-                app_error_log('[food-template] QR skipped: ' . $e->getMessage());
+                if (function_exists('system_log')) {
+                    system_log('warning', 'food_template', '[food-template] QR skipped: ' . $e->getMessage());
+                }
                 continue;
             }
             $side = min($w, $h);
@@ -1258,8 +1260,8 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
     $model['win_top_shift_mm'] = $winShift;
     [$model, $shift] = food_ticket_tpl_trim_top($model, $gap);
     $model['top_gap_mm'] = $gap;
-    if ($shift > 0) {
-        app_error_log(sprintf('[food-template] top gap trimmed by %.1fmm (template #%d)', $shift, (int) $row['id']));
+    if ($shift > 0 && function_exists('system_log')) {
+        system_log('debug', 'food_template', sprintf('[food-template] top gap trimmed by %.1fmm (template #%d)', $shift, (int) $row['id']));
     }
 
     // ── پایین فیش: ارتفاع صفحه = آخرین محتوا + حاشیهٔ پایین (هیچ کاغذی هدر نمی‌رود) ──
@@ -1289,8 +1291,8 @@ function food_ticket_tpl_model(array $event, ?array $row = null): array
     }
     if ($fitBottom) {
         [$model, $tailTrim] = food_ticket_tpl_fit_bottom($model, $tailMm);
-        if (abs($tailTrim) > 0.5) {
-            app_error_log(sprintf('[food-template] bottom fit %.1fmm (template #%d) → paper %.1fmm', $tailTrim, (int) $row['id'], (float) $model['paper_h']));
+        if (abs($tailTrim) > 0.5 && function_exists('system_log')) {
+            system_log('debug', 'food_template', sprintf('[food-template] bottom fit %.1fmm (template #%d) → paper %.1fmm', $tailTrim, (int) $row['id'], (float) $model['paper_h']));
         }
     }
     return $model;
@@ -1724,7 +1726,9 @@ function food_ticket_tpl_network_payload(array $event, ?array $row = null): arra
             : ''
     ));
     foreach ((array) $info['warnings'] as $w) {
-        app_error_log('[food-template] ' . $w);
+        if (function_exists('system_log')) {
+            system_log('warning', 'food_template', '[food-template] ' . $w);
+        }
     }
     return [$payload, $model];
 }
@@ -2018,15 +2022,17 @@ function food_ticket_tpl_print_windows(array $event, string $printer): void
             $hDiff = abs((float) ($res['applied_h'] ?? 0) - (float) ($res['paper_h'] ?? 0));
             if ($hDiff > 1.5) {
                 // ارتفاعی که درایور واقعاً چاپ می‌کند بیشتر از طرح است → همان مقدار، پرتِ پایین فیش می‌شود
-                app_error_log(sprintf(
-                    '[food-template] درایور ارتفاع %.1fmm را نپذیرفت و %.1fmm چاپ می‌کند (%.1fmm پرت در پایین فیش). در تنظیمات چاپگر یک Form با ارتفاع %.1f میلی‌متر بسازید.',
-                    (float) ($res['paper_h'] ?? 0), (float) ($res['applied_h'] ?? 0), $hDiff, (float) ($res['paper_h'] ?? 0)
-                ));
+                if (function_exists('system_log')) {
+                    system_log('warning', 'food_template', sprintf(
+                        '[food-template] درایور ارتفاع %.1fmm را نپذیرفت و %.1fmm چاپ می‌کند (%.1fmm پرت در پایین فیش). در تنظیمات چاپگر یک Form با ارتفاع %.1f میلی‌متر بسازید.',
+                        (float) ($res['paper_h'] ?? 0), (float) ($res['applied_h'] ?? 0), $hDiff, (float) ($res['paper_h'] ?? 0)
+                    ));
+                }
             } else {
                 food_ticket_tpl_last_info($info . sprintf(' | page %.1fmm (ink %.1f..%.1f)', (float) ($res['applied_h'] ?? 0), (float) ($res['ink_first_mm'] ?? 0), (float) ($res['ink_last_mm'] ?? 0)));
             }
-            if (abs((float) ($res['applied_w'] ?? 0) - (float) ($res['paper_w'] ?? 0)) > 1.5 || !empty($res['note'])) {
-                app_error_log('[food-template] درایور اندازهٔ کاغذ ' . ($res['paper_w'] ?? '?') . 'x' . ($res['paper_h'] ?? '?') . ' را نپذیرفت؛ اندازهٔ اعمال‌شده: ' . ($res['applied_w'] ?? '?') . 'x' . ($res['applied_h'] ?? '?') . ' ' . ($res['note'] ?? '') . ' — در تنظیمات چاپگر یک Form/Paper با همین اندازه بسازید.');
+            if ((abs((float) ($res['applied_w'] ?? 0) - (float) ($res['paper_w'] ?? 0)) > 1.5 || !empty($res['note'])) && function_exists('system_log')) {
+                system_log('warning', 'food_template', '[food-template] درایور اندازهٔ کاغذ ' . ($res['paper_w'] ?? '?') . 'x' . ($res['paper_h'] ?? '?') . ' را نپذیرفت؛ اندازهٔ اعمال‌شده: ' . ($res['applied_w'] ?? '?') . 'x' . ($res['applied_h'] ?? '?') . ' ' . ($res['note'] ?? '') . ' — در تنظیمات چاپگر یک Form/Paper با همین اندازه بسازید.');
             }
         } else {
             $info = sprintf('tpl=#%d "%s" win %.1fx%.1fmm', (int) $model['template_id'], (string) $model['template_name'], (float) $model['paper_w'], (float) $model['paper_h']);
