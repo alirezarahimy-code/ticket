@@ -1026,7 +1026,6 @@
       + '<div class="fm-alert good">فرد: ' + esc(em.person.name) + ' (' + esc(em.person.username) + ') — کد ملی تأیید شد.</div>'
       + '<div class="fm-emergency-step"><label class="fm-field">غذا' + select + '</label>'
       + (items.length ? '<button type="button" class="fm-btn" data-em-action="order">' + (hasActive ? 'تغییر سفارش' : 'ثبت سفارش') + '</button>' : '')
-      + (hasActive ? '<div class="fm-alert warn">این گزینه فقط در سامانه فیش را «چاپ‌شده» ثبت می‌کند؛ هیچ چاپ فیزیکی انجام نمی‌شود و وضعیت تحویل غذا را هم تأیید نمی‌کند.</div><button type="button" class="fm-btn secondary" data-em-action="issue-manual-ticket">ثبت فیش دستی بدون چاپ</button>' : '')
       + '<button type="button" class="fm-btn secondary" data-em-action="reset">تغییر کاربر</button></div>'
       + '<h4>سفارش‌های این فرد در این روز</h4>' + orderList + '</div>';
   }
@@ -1087,11 +1086,6 @@
         var select = root.querySelector('[name="emergency_item"]');
         var result = await request('food-menu/emergency/order', null, { method: 'POST', body: JSON.stringify({ food_date: state.selectedDate, employee_id: em.person.id, national_code: em.nc, calendar_item_id: Number(select && select.value), emergency: true }) });
         em.notice = result.message || 'سفارش اضطراری ثبت شد.';
-        await emergencyLoadOrders();
-      } else if (action === 'issue-manual-ticket') {
-        if (typeof global.confirm === 'function' && !global.confirm('فیش این سفارش در سامانه «چاپ‌شده» ثبت می‌شود، اما چاپ فیزیکی انجام نمی‌شود. ادامه می‌دهید؟')) return;
-        var manualResult = await request('food-menu/emergency/issue-ticket', null, { method: 'POST', body: JSON.stringify({ food_date: state.selectedDate, employee_id: em.person.id, national_code: em.nc }) });
-        em.notice = manualResult.message || 'فیش دستی ثبت شد.';
         await emergencyLoadOrders();
       } else if (action === 'cancel') {
         var cancelled = await request('food-menu/emergency/cancel', null, { method: 'POST', body: JSON.stringify({ order_id: Number(button.dataset.orderId), employee_id: em.person.id, national_code: em.nc }) });

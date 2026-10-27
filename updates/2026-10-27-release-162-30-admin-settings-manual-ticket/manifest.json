@@ -1,0 +1,20 @@
+{
+  "name": "release-162-30-admin-settings-manual-ticket",
+  "version": "1.62.30",
+  "date": "2026-10-27",
+  "title": "محدودسازی ثبت دستی فیش به ادمین اصلی و انتقال به تنظیمات سامانه",
+  "requires_version": "1.62.25",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "food-order.php",
+    "food-ticket.php",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "permissions.php",
+    "index.php",
+    "actions/settings-actions.php",
+    "assets/style.css"
+  ],
+  "notes": "ویژگی اشتباهاً افزوده‌شده به سفارش اضطراری حذف می‌شود. ثبت دستی فقط در تنظیمات سیستم، فقط برای primary_admin و با مجوز food.manual_ticket اجرا می‌شود. ثبت نیازمند سفارش فعال همان تاریخ، تطبیق کد ملی و ثبت علت است؛ رویداد printed بدون تماس با چاپگر ایجاد/تکمیل می‌شود، وضعیت تحویل تغییر نمی‌کند و actor/reason در ممیزی ذخیره می‌شود. نقش‌های غیرادمین—even custom—نمی‌توانند food.manual_ticket را دریافت کنند."
+}

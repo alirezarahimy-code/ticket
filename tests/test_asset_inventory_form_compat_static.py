@@ -65,6 +65,6 @@ def test_form_hotfix_is_a_valid_incremental_upgrade_from_16225():
     sidecar = (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
     assert digest in sidecar
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.29-manual-ticket-without-physical-print-20261027.zip"
+    current = "ticket-update-1.62.30-admin-settings-manual-ticket-20261027.zip"
     assert current in page
     assert f"{current}.sha256" in page
