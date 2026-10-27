@@ -110,10 +110,10 @@ def test_update_manifest_paths_are_safe_for_the_app_updater():
             assert re.match(r"^(manifest\.json|migrations/[^/]+\.sql|files/.+)$", name)
 
 
-def test_download_page_points_to_the_existing_manual_attendance_fix():
+def test_download_page_points_to_manual_ticket_delivery_semantics_fix():
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.31-manual-attendance-existing-no-food-conversion-20261027.zip"
+    current = "ticket-update-1.62.32-manual-ticket-counts-as-delivered-20261027.zip"
     assert current in page
     assert f"{current}.sha256" in page
-    assert "۱.۶۲.۲۸" in page and "۱.۶۲.۳۱" in page
-    assert "۱.۶۲.۲۹ و ۱.۶۲.۳۰ لغو" in page
+    assert "۱.۶۲.۲۸" in page and "۱.۶۲.۳۲" in page
+    assert "۱.۶۲.۲۹ و ۱.۶۲.۳۰ لغو" in page and "۱.۶۲.۳۱ نیز با این اصلاح" in page
