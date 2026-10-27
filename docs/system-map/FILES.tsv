@@ -103,7 +103,7 @@ actions/supervisor-actions.php	actions	154	13444
 actions/ticket-actions.php	actions	646	55042
 actions/user-structure-actions.php	actions	367	28765
 admin-layout-design.php	core	361	15733
-api/inventory.php	api	205	9609
+api/inventory.php	api	205	9604
 app/Controllers/DashboardController.php	app-mvc	24	446
 app/Controllers/ReportController.php	app-mvc	39	774
 app/Controllers/SettingsController.php	app-mvc	39	770
@@ -158,7 +158,7 @@ assets/theme-mode.css	assets	251	22017
 assets/traffic-control.js	assets	372	16316
 assets/triangle-mesh.js	assets	644	25195
 assets/triangle-settings.js	assets	266	10914
-backup.php	core	239	10286
+backup.php	core	276	12343
 benchmark-results/benchmark-250.json	benchmark	217	5221
 benchmark-results/benchmark-250.md	benchmark	41	3175
 benchmark-results/benchmark-operations.json	benchmark	1967	66662
@@ -290,6 +290,7 @@ migrations/012-manual-attendance-clears-absences.sql	migrations	24	1320
 migrations/013-manual-attendance-record-backfill.sql	migrations	59	2556
 migrations/014-asset-identity-dedupe.sql	migrations	53	3463
 migrations/015-asset-identity-hotfix.sql	migrations	37	2168
+migrations/016-auto-asset-finish.sql	migrations	140	8265
 ola.php	core	111	11927
 organization.php	core	467	18244
 permissions.php	core	843	44938
@@ -311,7 +312,7 @@ status-food-worker-SERVICE.ps1	root-misc	107	4918
 storage/.htaccess	config	3	141
 storage/sessions/.htaccess	config	3	117
 system-health.php	core	766	47970
-system-update.php	core	188	9670
+system-update.php	core	218	11414
 tests/.htaccess	tests	1	19
 tests/ArchitectureTest.php	tests	177	4538
 tests/README.md	tests	64	11253
@@ -364,6 +365,7 @@ tests/test_food_update_package_assets.py	tests	65	2824
 tests/test_global_theme_mode.py	tests	62	3408
 tests/test_inventory_truth_static.py	tests	197	12454
 tests/test_manual_no_print_food_ticket_static.py	tests	126	8105
+tests/test_no_duplicate_php_functions.py	tests	72	3343
 tests/test_org_chart_experts_static.py	tests	143	5696
 tests/test_particle_effect_runtime_node.js	tests	171	7734
 tests/test_particle_effect_static.py	tests	95	5171
@@ -413,6 +415,7 @@ tests/tts_normalize_test.php	tests	188	7738
 tools/.htaccess	tools	1	19
 tools/README.md	tools	19	3057
 tools/asset_dedupe.php	tools	229	12621
+tools/backup-files.php	tools	105	4527
 tools/backup.ps1	tools	103	4684
 tools/benchmark_250.py	tools	332	18142
 tools/benchmark_db_report.php	tools	52	2634

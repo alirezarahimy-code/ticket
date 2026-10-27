@@ -139,6 +139,8 @@ food_order_logs	migrations/003-sync-schema-151.sql	1070
 traffic_visit_history	migrations/007-traffic-visit-history.sql	2
 food_ticket_daily_absence	migrations/012-manual-attendance-clears-absences.sql	4
 food_ticket_daily_absence	migrations/013-manual-attendance-record-backfill.sql	12
+tmp_asset_dedupe_map	migrations/016-auto-asset-finish.sql	39
+asset_dedupe_backup_016	migrations/016-auto-asset-finish.sql	53
 settings	schema.sql	1
 departments	schema.sql	6
 org_units	schema.sql	16
