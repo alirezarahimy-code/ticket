@@ -21,9 +21,7 @@ jobs:
         coverage: none
 
     - name: Check PHP syntax
-      run: |
-        git ls-files -z -- '*.php' | xargs -0 -n1 -P4 php -l > /tmp/php-lint.log || { cat /tmp/php-lint.log; exit 1; }
-        echo "PHP syntax OK for $(git ls-files -- '*.php' | wc -l) files"
+      run: git ls-files -z -- '*.php' | php tools/lint-php-syntax.php
 
     - name: Run security tests
       run: php tests/SecurityTest.php
