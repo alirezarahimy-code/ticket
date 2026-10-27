@@ -11,6 +11,7 @@
   var root = null;
   var state = {
     mounted: false,
+    embeddedMode: '',
     tab: canMenu ? 'calendar' : 'orders',
     year: 1405,
     month: 1,
@@ -170,7 +171,8 @@
     if (canClose) {
       var cancelCount = (state.cancelRequests || []).length;
       var cancelLabel = 'درخواست‌های لغو' + (cancelCount ? (' (' + faDigits(cancelCount) + ')') : '');
-      tabs.push(['orders', 'سفارش‌های روز'], ['cancel-requests', cancelLabel], ['statistics', 'آمار سفارش‌ها']);
+      // «سفارش‌های روز» و «آمار سفارش‌ها» به منوی «گزارش‌ها» منتقل شدند.
+      tabs.push(['cancel-requests', cancelLabel]);
     }
     return '<div class="fm-tabs" role="tablist">' + tabs.map(function (tab) {
       return '<button class="fm-tab ' + (state.tab === tab[0] ? 'active' : '') + '" type="button" role="tab" aria-selected="' + (state.tab === tab[0] ? 'true' : 'false') + '" data-fm-tab="' + tab[0] + '">' + tab[1] + '</button>';
@@ -788,7 +790,7 @@
       picker = '<div class="fm-selected-employee-picker"><label class="fm-field">جست‌وجوی زندهٔ نام یا شمارهٔ پرسنلی<input type="search" data-stat-employee-search autocomplete="off" placeholder="نام یا شمارهٔ پرسنلی را وارد کنید" value="' + esc(state.reportEmployeeQuery || '') + '"></label>' + matchList
         + '<div class="fm-selected-employee-tags">' + (tags || '<span class="fm-small">هنوز پرسنلی انتخاب نشده است.</span>') + '</div><small class="fm-small">برای انتخاب یا برداشتن هر نفر، تیک کنار نام را بزنید؛ فهرست اولیه تا ۵۰۰ نفر است؛ از جست‌وجو برای یافتن سریع استفاده کنید. حداکثر ۱۰۰ نفر قابل انتخاب است.</small></div>';
     }
-    return '<section class="fm-card fm-statistics"><div class="fm-toolbar"><div><h3>' + modeTitle + '</h3><span class="fm-small">بازه: ' + esc(rangeText) + '</span></div></div><form id="fm-statistics-date" class="fm-statistics-form"><div class="fm-stats-modes" role="radiogroup" aria-label="نوع گزارش"><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="food"' + (mode === 'food' ? ' checked' : '') + ' required><span>آمار نوع غذا</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="employee"' + (mode === 'employee' ? ' checked' : '') + ' required><span>آمار سفارش نفرات</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="selected"' + (mode === 'selected' ? ' checked' : '') + ' required><span>جزئیات سفارش پرسنل انتخابی</span></label></div><div class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="statistics-export"' + (actionsEnabled ? '' : ' disabled') + '>خروجی اکسل</button><button class="btn secondary" type="button" data-fm-action="statistics-print"' + (actionsEnabled ? '' : ' disabled') + '>پرینت</button></div>' + picker + '</form>' + result + '</section>' + renderPrintedDeliveryReport();
+    return '<section class="fm-card fm-statistics"><div class="fm-toolbar"><div><h3>' + modeTitle + '</h3><span class="fm-small">بازه: ' + esc(rangeText) + '</span></div></div><form id="fm-statistics-date" class="fm-statistics-form"><div class="fm-stats-modes" role="radiogroup" aria-label="نوع گزارش"><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="food"' + (mode === 'food' ? ' checked' : '') + ' required><span>آمار نوع غذا</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="employee"' + (mode === 'employee' ? ' checked' : '') + ' required><span>آمار سفارش نفرات</span></label><label class="fm-stats-mode"><input type="radio" name="statistics_mode" value="selected"' + (mode === 'selected' ? ' checked' : '') + ' required><span>جزئیات سفارش پرسنل انتخابی</span></label></div><div class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="statistics-export"' + (actionsEnabled ? '' : ' disabled') + '>خروجی اکسل</button><button class="btn secondary" type="button" data-fm-action="statistics-print"' + (actionsEnabled ? '' : ' disabled') + '>پرینت</button></div>' + picker + '</form>' + result + '</section>';
   }
 
   function bulkOperationTitle(operation) {
@@ -1002,6 +1004,23 @@
     return '<div class="fm-meal-switch" role="group" aria-label="وعدهٔ غذایی" style="display:flex;gap:8px;margin:0 0 12px"><button class="btn ' + (state.mealType === 'lunch' ? 'primary' : 'secondary') + '" type="button" data-fm-action="meal-type" data-meal-type="lunch">ناهار</button><button class="btn ' + (state.mealType === 'dinner' ? 'primary' : 'secondary') + '" type="button" data-fm-action="meal-type" data-meal-type="dinner">شام</button></div>';
   }
 
+  /** پنل مربوط به تبهای reportها را (بدون منوی برنامهٔ غذایی) برمیگرداند. */
+  function embeddedPanel() {
+    if (state.embeddedMode === 'delivered') return '<div class="fm-embedded-head"><h2>غذای تحویلی</h2><span class="fm-small">فیشهای چاپشده و غذای تحویلشده</span></div>' + renderPrintedDeliveryReport();
+    if (state.embeddedMode === 'statistics') return '<div class="fm-embedded-head"><h2>آمار سفارشها</h2><span class="fm-small">گزارش نوع غذا و آمار سفارشات</span></div>' + renderStatistics();
+    if (state.embeddedMode === 'todayorders') return '<div class="fm-embedded-head"><h2>سفارشهای امروز</h2><span class="fm-small">فهرست سفارشهای ثبتشده روز</span></div>' + renderOrders();
+    return '';
+  }
+  /** لود دیتای مخصوص پنل جاسازیشده. */
+  function loadEmbedded() {
+    if (!state.embeddedMode) return Promise.resolve();
+    var from = state.statisticsFrom || state.selectedDate;
+    var to = state.statisticsTo || state.selectedDate;
+    if (state.embeddedMode === 'todayorders') return loadOrders(state.ordersDate || state.selectedDate);
+    if (state.embeddedMode === 'delivered') return loadPrintedDeliveryReport(from, to);
+    return loadStatistics(from, to, state.statisticsMode || 'food');
+  }
+
   function render() {
     if (!root || !root.isConnected) root = document.getElementById('food-menu-root');
     if (!root) return;
@@ -1013,9 +1032,9 @@
       root.innerHTML = '<div class="fm-alert error">تقویم شمسی سامانه بارگذاری نشد. صفحه را تازه‌سازی کنید.</div>';
       return;
     }
-    var panel = state.tab === 'calendar' && (canMenu || canClose) ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : state.tab === 'bulk' && canEmergency ? renderBulkOperations() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>';
+    var panel = state.embeddedMode ? embeddedPanel() : (state.tab === 'calendar' && (canMenu || canClose) ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : state.tab === 'bulk' && canEmergency ? renderBulkOperations() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>');
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
-    root.innerHTML = '<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel;
+    root.innerHTML = state.embeddedMode ? ('<div class="fm-embedded-report">' + notices + panel + '</div>') : ('<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel);
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
   }
 
@@ -1219,8 +1238,11 @@
     var jobs = [];
     if (canMenu) jobs.push(loadCatalog());
     if (canMenu || canClose) jobs.push(loadMonth());
-    if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
-    if (canClose) { jobs.push(loadCancelRequests()); jobs.push(loadFoodGroups()); }
+    if (state.embeddedMode) jobs.push(loadEmbedded());
+    else {
+      if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
+      if (canClose) { jobs.push(loadCancelRequests()); jobs.push(loadFoodGroups()); }
+    }
     await Promise.all(jobs);
     render();
     if (canClose && state.tab === 'statistics' && state.statisticsMode === 'selected' && !state.reportEmployeeResultsLoaded && !state.reportEmployeeSearchLoading) searchSelectedReportEmployees('');
@@ -1655,7 +1677,7 @@
       if (act === 'reload-month') loadMonth();
       if (act === 'show-orders') {
         state.ordersDate = state.selectedDate;
-        switchTab('orders');
+        if (global.document) global.document.dispatchEvent(new Event('food-open-report'));
       }
       if (act === 'confirm-impact') saveDay(true, state.pendingImpactExpected);
       if (act === 'cancel-impact') { state.pendingImpact = null; state.pendingImpactExpected = 0; state.pendingImpactMessage = ''; render(); }
@@ -1821,7 +1843,14 @@
 
   function mount() {
     root = document.getElementById('food-menu-root');
-    if (!root || root.dataset.fmMounted === '1') return;
+    if (!root) return;
+    state.embeddedMode = String(root.dataset.fmMode || '');
+    if (root.dataset.fmMounted === '1') {
+      // تب عوض شده؛ دیتای پنل جدید را لود کن، ولی لیسنرها را دوباره وصل نکن.
+      if (state.embeddedMode) loadEmbedded();
+      render();
+      return;
+    }
     root.dataset.fmMounted = '1';
     root.addEventListener('click', emergencyClick);
     root.addEventListener('click', eventClick);
@@ -1834,7 +1863,13 @@
     refreshAll();
   }
 
-  global.FoodMenuUI = { html: function () { return '<div id="food-menu-root"><div class="fm-card fm-spinner">در حال آماده‌سازی برنامهٔ غذایی…</div></div>'; }, mount: mount };
+  global.FoodMenuUI = {
+    html: function (mode) {
+      var attr = mode ? ' data-fm-mode="' + String(mode).replace(/[^a-z]/g, '') + '"' : '';
+      return '<div id="food-menu-root"' + attr + '><div class="fm-card fm-spinner">در حال آمادهسازی…</div></div>';
+    },
+    mount: mount,
+  };
   if (typeof document !== 'undefined') document.dispatchEvent(new Event('food-menu-ready'));
   if (typeof module !== 'undefined' && module.exports) module.exports = global.FoodMenuUI;
 })(typeof window !== 'undefined' ? window : globalThis);

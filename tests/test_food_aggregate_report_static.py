@@ -92,7 +92,7 @@ def main() -> int:
 
     # ۵) UI — دوتا تب ----------------------------------------------------------
     for marker in (
-        'data-report-tab="classic"', 'data-report-tab="aggregate"',
+        "['classic','گزارشگیری']", "['aggregate','گزارش تجمیعی']",
         "گزارش تجمیعی", "گزارشگیری",
         "function reportAggregateView()", "function reportView(){",
         "function reportClassicView(){",
@@ -120,7 +120,7 @@ def main() -> int:
     check("aggregate:_ag" in html, "دادهٔ موقت aggregate در persist ذخیره میشود")
 
     # ۶) نسخه پنل بالا رفته باشد ----------------------------------------------
-    check("PANEL_VERSION='1.37.32'" in html,
+    check("PANEL_VERSION='1.37.33'" in html,
           "نسخهٔ پنل برای جلوگیری از کش قدیمی بالا نرفته است")
 
     # ۷) اجرای تست رفتاری JS --------------------------------------------------
