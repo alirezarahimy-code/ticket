@@ -1,0 +1,26 @@
+{
+  "name": "release-162-33-manual-delivery-and-technical-profile",
+  "version": "1.62.33",
+  "date": "2026-10-27",
+  "title": "اصلاح تحویل فیش‌های دستی و فرم شناسنامهٔ سیستم",
+  "requires_version": "1.62.25",
+  "migrations": [
+    "011-manual-attendance-delivery.sql"
+  ],
+  "files": [
+    "VERSION",
+    "food-order.php",
+    "food-ticket.php",
+    "food-ticket-groups.php",
+    "food-ticket-web/assets/food-manual-attendance.js",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "permissions.php",
+    "index.php",
+    "actions/settings-actions.php",
+    "assets/style.css",
+    "asset-profile.php",
+    "asset-inventory-page.php"
+  ],
+  "notes": "بستهٔ تجمعی: اصلاح انتخاب/تبدیل رویداد no_food به فیش دستی و ثبت delivery_status=delivered برای صدور دستی بدون چاپ؛ چاپ فیزیکی پس از چاپ موفق توسط Worker تحویل ثبت می‌شود. Migration تکرارپذیر، فیش‌های دستی چاپ‌شدهٔ قبلی را نیز به تحویل‌شده تبدیل می‌کند. همچنین شامل ماژول‌های کامل فرم ۷۴ فیلدی شناسنامهٔ فنی و سبک/renderer لازم است تا فرم جدید حتی اگر ماژول‌های قبلی نصب نشده باشند، در دسترس باشد. خطای ساخت schema دیگر پنهان نمی‌ماند و پیام قابل‌اقدام نمایش داده می‌شود."
+}

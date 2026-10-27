@@ -6,7 +6,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parents[1]
-NAME = "ticket-update-1.62.32-manual-ticket-counts-as-delivered-20261027.zip"
+NAME = "ticket-update-1.62.33-manual-delivery-and-technical-profile-20261027.zip"
 PACKAGE = ROOT / "downloads" / NAME
 
 
@@ -26,6 +26,7 @@ def test_existing_settings_manual_attendance_bug_fix_package():
     assert not (ROOT / "downloads/ticket-update-1.62.29-manual-ticket-without-physical-print-20261027.zip").exists()
     assert not (ROOT / "downloads/ticket-update-1.62.30-admin-settings-manual-ticket-20261027.zip").exists()
     assert not (ROOT / "downloads/ticket-update-1.62.31-manual-attendance-existing-no-food-conversion-20261027.zip").exists()
+    assert not (ROOT / "downloads/ticket-update-1.62.32-manual-ticket-counts-as-delivered-20261027.zip").exists()
     expected = {
         "VERSION",
         "food-order.php",
@@ -38,12 +39,15 @@ def test_existing_settings_manual_attendance_bug_fix_package():
         "index.php",
         "actions/settings-actions.php",
         "assets/style.css",
+        "asset-profile.php",
+        "asset-inventory-page.php",
     }
     with ZipFile(PACKAGE) as archive:
         assert archive.testzip() is None
         manifest = json.loads(archive.read("manifest.json"))
-        assert manifest["version"] == "1.62.32"
-        assert manifest["requires_version"] == "1.62.28"
+        assert manifest["version"] == "1.62.33"
+        assert manifest["requires_version"] == "1.62.25"
+        assert len(manifest["files"]) == len(set(manifest["files"]))
         assert manifest["migrations"] == ["011-manual-attendance-delivery.sql"]
         migration = archive.read("migrations/011-manual-attendance-delivery.sql").decode("utf-8")
         assert "source_uid = 'manual-attendance'" in migration
@@ -51,7 +55,7 @@ def test_existing_settings_manual_attendance_bug_fix_package():
         assert "delivery_status = 'delivered'" in migration
         assert set(manifest["files"]) == expected
         assert {n[6:] for n in archive.namelist() if n.startswith("files/")} == expected
-        assert archive.read("files/VERSION").decode().strip() == "1.62.32"
+        assert archive.read("files/VERSION").decode().strip() == "1.62.33"
 
         groups = archive.read("files/food-ticket-groups.php").decode("utf-8")
         panel = archive.read("files/food-ticket-web/assets/food-manual-attendance.js").decode("utf-8")
@@ -60,6 +64,15 @@ def test_existing_settings_manual_attendance_bug_fix_package():
         main_index = archive.read("files/index.php").decode("utf-8")
         settings_actions = archive.read("files/actions/settings-actions.php").decode("utf-8")
         permissions = archive.read("files/permissions.php").decode("utf-8")
+        profile = archive.read("files/asset-profile.php").decode("utf-8")
+        inventory_component = archive.read("files/asset-inventory-page.php").decode("utf-8")
+        app_index = archive.read("files/index.php").decode("utf-8")
+
+        # This cumulative package also carries the current system-profile form modules.
+        assert "function asset_profile_render_sections" in profile
+        assert "اجازهٔ CREATE/ALTER" in profile
+        assert "asset_profile_render_sections($profile)" in app_index
+        assert "index.php?page=inventory&id=" in inventory_component
 
         # This is a fix to the pre-existing panel settings flow, not a duplicate main-system form.
         assert "FOOD_TICKET_CAN_MANUAL_TICKET" in host
@@ -96,4 +109,4 @@ def test_existing_settings_manual_attendance_bug_fix_package():
     assert digest in (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
     assert NAME in page and f"{NAME}.sha256" in page
-    assert "۱.۶۲.۲۹" in page and "۱.۶۲.۳۰" in page and "۱.۶۲.۳۱" in page and "۱.۶۲.۳۲" in page
+    assert "۱.۶۲.۲۹" in page and "۱.۶۲.۳۰" in page and "۱.۶۲.۳۲" in page and "۱.۶۲.۳۳" in page

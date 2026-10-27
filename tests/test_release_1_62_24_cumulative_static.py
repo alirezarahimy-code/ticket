@@ -110,10 +110,10 @@ def test_update_manifest_paths_are_safe_for_the_app_updater():
             assert re.match(r"^(manifest\.json|migrations/[^/]+\.sql|files/.+)$", name)
 
 
-def test_download_page_points_to_manual_ticket_delivery_semantics_fix():
+def test_download_page_points_to_cumulative_ticket_and_profile_fix():
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.32-manual-ticket-counts-as-delivered-20261027.zip"
+    current = "ticket-update-1.62.33-manual-delivery-and-technical-profile-20261027.zip"
     assert current in page
     assert f"{current}.sha256" in page
-    assert "۱.۶۲.۲۸" in page and "۱.۶۲.۳۲" in page
-    assert "۱.۶۲.۲۹ و ۱.۶۲.۳۰ لغو" in page and "۱.۶۲.۳۱ نیز با این اصلاح" in page
+    assert "۱.۶۲.۲۵" in page and "۱.۶۲.۳۳" in page
+    assert "۱.۶۲.۲۹ و ۱.۶۲.۳۰ نیز لغو" in page and "۱.۶۲.۳۲ با این بسته جایگزین" in page

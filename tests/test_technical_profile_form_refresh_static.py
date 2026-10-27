@@ -25,6 +25,12 @@ def test_current_profile_module_has_complete_form_and_additive_schema():
     assert "function asset_profile_save" in PROFILE
     assert "DROP TABLE" not in PROFILE.upper()
     assert "ALTER TABLE asset_profiles ADD COLUMN" in PROFILE
+    ensure_start = PROFILE.index("function asset_profile_ensure_schema")
+    ensure_end = PROFILE.index("function asset_profile_sections", ensure_start)
+    ensure = PROFILE[ensure_start:ensure_end]
+    assert ensure.index("$done = true;") > ensure.index("foreach ($assetAdd as $name => $definition)")
+    assert "ساختار پایگاه‌دادهٔ شناسنامهٔ سیستم آماده نیست" in ensure
+    assert "throw new RuntimeException(" in ensure
 
 
 def test_form_hotfix_packages_the_renderer_styles_and_compatible_page():

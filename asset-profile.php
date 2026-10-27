@@ -27,7 +27,6 @@ function asset_profile_ensure_schema(): void
     if ($done) {
         return;
     }
-    $done = true;
     try {
         db()->exec('CREATE TABLE IF NOT EXISTS asset_profiles (asset_id INT UNSIGNED NOT NULL PRIMARY KEY, updated_by INT UNSIGNED NULL, updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
         $columns = db()->query("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'asset_profiles'")->fetchAll(PDO::FETCH_COLUMN);
@@ -45,10 +44,19 @@ function asset_profile_ensure_schema(): void
                 db()->exec('ALTER TABLE assets ADD COLUMN `' . $name . '` ' . $definition);
             }
         }
+        $done = true;
     } catch (Throwable $exception) {
         if (function_exists('system_log')) {
-            system_log('error', 'asset_profile_schema', $exception->getMessage());
+            try {
+                system_log('error', 'asset_profile_schema', $exception->getMessage());
+            } catch (Throwable) {
+            }
         }
+        throw new RuntimeException(
+            'ساختار پایگاه‌دادهٔ شناسنامهٔ سیستم آماده نیست. کاربر پایگاه‌داده باید اجازهٔ CREATE/ALTER روی جدول‌های asset_profiles و assets داشته باشد؛ جزئیات خطا در گزارش سامانه ثبت شد.',
+            0,
+            $exception
+        );
     }
 }
 
