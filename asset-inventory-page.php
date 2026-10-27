@@ -8,12 +8,29 @@ function inventory_render_assets_content(
     bool $canImportAssets,
     bool $canPingAssets,
     bool $canExtractAssets,
-    bool $canConfigureNetworkScan,
-    bool $networkScanEnabled,
-    bool $canSelectAssets,
-    int $onlineCount,
-    int $collectedCount
+    bool $configureOrLegacyExtract,
+    bool $networkOrConfigure,
+    bool $selectOrNetwork,
+    bool|int $selectOrOnline,
+    int $onlineOrCollected,
+    ?int $legacyCollected = null
 ): void {
+    // سازگاری با index.phpهای قدیمی که هنوز آرگومان canExtractLocalServer را
+    // به‌صورت هفتم می‌فرستند. در آن حالت آرگومان‌های بعدی یک خانه جابه‌جا هستند؛
+    // mismatch باعث TypeError در ورود به این تابع و خالی‌ماندن صفحهٔ شناسنامه‌ها می‌شد.
+    if ($legacyCollected !== null) {
+        $canConfigureNetworkScan = $networkOrConfigure;
+        $networkScanEnabled = $selectOrNetwork;
+        $canSelectAssets = (bool) $selectOrOnline;
+        $onlineCount = $onlineOrCollected;
+        $collectedCount = $legacyCollected;
+    } else {
+        $canConfigureNetworkScan = $configureOrLegacyExtract;
+        $networkScanEnabled = $networkOrConfigure;
+        $canSelectAssets = $selectOrNetwork;
+        $onlineCount = (int) $selectOrOnline;
+        $collectedCount = $onlineOrCollected;
+    }
     echo '<section class="page-heading inventory-page-heading"><div><span class="eyebrow">Technical Inventory</span><h1>شناسنامه‌های فنی سیستم</h1><p>کامپیوترها را از دامنه وارد کنید، سیستم‌های انتخابیِ در دسترس شبکه را استخراج کنید و اطلاعات تکمیلی هر شناسنامه را جداگانه ویرایش کنید.</p></div><div class="inventory-top-actions">';
     if ($canImportAssets) {
         echo '<form method="post" class="inline-action">' . csrf_field() . '<input type="hidden" name="action" value="import_domain_assets"><button class="button secondary" type="submit">ورود کامپیوترهای دامنه</button></form>';

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>به‌روزرسانی ۱.۶۲.۲۵ — اصلاح گزارش سلامت سامانه</title>
+  <title>به‌روزرسانی ۱.۶۲.۲۶ — رفع فرم شناسنامه‌های فنی</title>
   <style>
     :root{color-scheme:light;--ink:#132b3a;--muted:#5c7180;--line:#d9e4e8;--teal:#087f78;--amber:#8a5b12}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#e7f4f2,#f4f7fa 60%,#e8eff4);color:var(--ink);font:16px/1.9 Tahoma,"Segoe UI",sans-serif}
@@ -15,32 +15,32 @@
   </style>
 </head>
 <body><main>
-  <span class="eyebrow">Hotfix · نیازمند نسخهٔ ۱.۶۲.۲۴</span>
-  <h1>۱.۶۲.۲۵ — اصلاح دقت و پیگیری گزارش لاگ</h1>
-  <p>این بسته، ناسازگاری شمارش رخدادها را اصلاح می‌کند و برای خطاهای ناشناخته مرجع فنی کم‌خطر می‌افزاید؛ متن خام خطا و مسیر کامل سرور به گزارش امن اضافه نمی‌شوند.</p>
+  <span class="eyebrow">Hotfix · نیازمند نسخهٔ ۱.۶۲.۲۵</span>
+  <h1>۱.۶۲.۲۶ — بازگردانی نمایش فرم شناسنامه‌های فنی</h1>
+  <p>این بسته خطای TypeError هنگام نمایش صفحهٔ شناسنامه‌های فنی را رفع می‌کند. آرگومان قدیمی اضافه در بعضی نسخه‌های index.php باعث جابه‌جایی پارامترها و رندرنشدن صفحه می‌شد.</p>
   <section class="meta" aria-label="مشخصات بسته">
-    <div><small>فایل دانلود</small><strong class="filename">ticket-update-1.62.25-system-health-accuracy-20261027.zip</strong></div>
-    <div><small>نسخهٔ پایه</small><strong>۱.۶۲.۲۴</strong></div>
-    <div><small>نسخهٔ نهایی</small><strong>۱.۶۲.۲۵</strong></div>
+    <div><small>فایل دانلود</small><strong class="filename">ticket-update-1.62.26-asset-profile-form-fix-20261027.zip</strong></div>
+    <div><small>نسخهٔ پایه</small><strong>۱.۶۲.۲۵</strong></div>
+    <div><small>نسخهٔ نهایی</small><strong>۱.۶۲.۲۶</strong></div>
     <div><small>مهاجرت دیتابیس</small><strong>ندارد</strong></div>
   </section>
   <div class="actions">
-    <a class="button primary" href="ticket-update-1.62.25-system-health-accuracy-20261027.zip" download>دانلود hotfix</a>
-    <a class="button secondary" href="ticket-update-1.62.25-system-health-accuracy-20261027.zip.sha256" download>دانلود SHA-256</a>
+    <a class="button primary" href="ticket-update-1.62.26-asset-profile-form-fix-20261027.zip" download>دانلود hotfix</a>
+    <a class="button secondary" href="ticket-update-1.62.26-asset-profile-form-fix-20261027.zip.sha256" download>دانلود SHA-256</a>
   </div>
   <h2>چه چیزی اصلاح شده؟</h2>
   <ul>
-    <li>جمع خطاها و هشدارها از کل رخدادهای بازه محاسبه می‌شود، نه فقط از گروه‌هایی که در جدول جا شده‌اند.</li>
-    <li>حداکثر ۱۰۰ گروه پرتکرار خطا و ۱۰۰ گروه پرتکرار هشدار نمایش داده می‌شود؛ تعداد گروه‌های فهرست‌نشده هم مشخص است.</li>
-    <li>مرجع فنی شامل نوع استثنا یا نام فایل و شمارهٔ خط (بدون مسیر کامل) یا کد کوتاه رخداد است.</li>
+    <li>آرگومان‌های نسخهٔ قدیمی و جدید به‌درستی تشخیص داده و هم‌تراز می‌شوند.</li>
+    <li>شمارنده‌های وضعیت شبکه و استخراج دیگر به آرگومان بولی اشتباه متصل نمی‌شوند.</li>
+    <li>تغییری در شناسنامه‌ها یا پایگاه‌داده ایجاد نمی‌شود.</li>
   </ul>
   <h2>نصب</h2>
   <ol>
-    <li>این بسته را فقط روی ۱.۶۲.۲۴ نصب کنید؛ روی نسخهٔ بالاتر downgrade نکنید.</li>
+    <li>این بسته را فقط روی ۱.۶۲.۲۵ نصب کنید؛ روی نسخهٔ بالاتر downgrade نکنید.</li>
     <li>پیش از اجرا از دیتابیس و فایل‌های سامانه پشتیبان مستقل بگیرید.</li>
     <li>ZIP را از بخش به‌روزرسانی خود سامانه بارگذاری کنید؛ دستی extract نکنید.</li>
-    <li>پس از نصب، گزارش خوانا را دوباره تهیه کنید. آمار کل بازه کامل است، اما فهرست جزئیات همچنان محدود و اولویت‌بندی‌شده است.</li>
+    <li>پس از نصب، صفحهٔ شناسنامه‌های فنی را باز کنید و ویرایش یک رکورد را آزمایش کنید.</li>
   </ol>
-  <div class="safe">خروجی امن همچنان متن خام خطا، URL، شناسه و اطلاعات کاربر را پنهان می‌کند. برای عیب‌یابی، «مرجع فنی» را به مسئول سامانه بدهید تا جزئیات داخلی همان رخداد بررسی شود.</div>
+  <div class="safe">اگر صفحه باز نشد، فایل قبلی asset-inventory-page.php را از نسخهٔ پشتیبان برگردانید و خطای جدید را بررسی کنید.</div>
   <div class="note">ZIP و تست‌های ایستا در محیط توسعه بررسی شده‌اند؛ روی سرور شما اجرا نشده‌اند. ابتدا بکاپ بگیرید و در صورت امکان در محیط آزمایشی نصب کنید.</div>
 </main></body></html>

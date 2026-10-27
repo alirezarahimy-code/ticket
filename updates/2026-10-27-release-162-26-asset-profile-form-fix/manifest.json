@@ -1,0 +1,13 @@
+{
+  "name": "release-162-26-asset-profile-form-compatibility",
+  "version": "1.62.26",
+  "date": "2026-10-27",
+  "title": "رفع خطای TypeError و بازگرداندن فرم شناسنامه‌های فنی",
+  "requires_version": "1.62.25",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "asset-inventory-page.php"
+  ],
+  "notes": "سازگاری تابع نمایش فهرست شناسنامه‌های فنی با هر دو امضای قدیمی و فعلی index.php. یک آرگومان قدیمی اضافه باعث جابه‌جایی پارامترها و TypeError هنگام بازشدن صفحه می‌شد. بدون تغییر دیتابیس."
+}
