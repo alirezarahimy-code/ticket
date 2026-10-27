@@ -2262,6 +2262,125 @@ function food_order_api_handle(string $route, array $user): never
 }
 
 
+/**
+ * ثبت فیش دستی برای یک سفارش فعال، بدون ارسال به چاپگر.
+ * رویداد با وضعیت printed ثبت می‌شود تا در گزارش فیش و گزارش غایبین دیده شود؛
+ * delivery_status عمداً دست‌نخورده/در انتظار می‌ماند چون چاپ فیزیکی یا تحویل غذا تأیید نشده است.
+ */
+function food_order_emergency_issue_ticket_no_print(int $employeeId, string $dateInput, string $nationalCode, array $actor): array
+{
+    if (!food_order_user_can($actor, 'food.emergency')) {
+        throw new RuntimeException('دسترسی ثبت فیش دستی ندارید.');
+    }
+    if ($employeeId < 1 || (int) ($actor['id'] ?? 0) < 1) {
+        throw new RuntimeException('کاربر انتخاب‌شده معتبر نیست.');
+    }
+    food_order_schema_ensure();
+    $iso = food_order_iso_date($dateInput);
+    if ($iso === null) {
+        throw new RuntimeException('تاریخ فیش معتبر نیست.');
+    }
+    $target = food_order_verify_employee_national_code($employeeId, $nationalCode, true);
+    $national = food_order_digits($target['national_code'] ?? '');
+    if (strlen($national) !== 10) {
+        throw new RuntimeException('کد ملی کاربر معتبر نیست.');
+    }
+    if (!function_exists('food_ticket_add_event')) {
+        throw new RuntimeException('ثبت رویداد فیش در دسترس نیست.');
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        // سفارش فعال همان روز باید وجود داشته باشد؛ این عملیات فقط صدور دستی را ثبت می‌کند و سفارش نمی‌سازد.
+        $orderQuery = $pdo->prepare("SELECT o.id AS order_id, o.calendar_item_id, o.food_date, o.status,
+                    i.calendar_id, f.food_name, u.id AS user_id, u.employee_number, u.national_code,
+                    u.full_name, u.first_name, u.last_name
+                FROM food_orders o
+                JOIN food_calendar_items i ON i.id = o.calendar_item_id
+                JOIN food_catalog f ON f.id = i.food_id
+                JOIN users u ON u.id = o.employee_id
+                WHERE o.employee_id = ? AND o.food_date = ? AND o.status = 'active'
+                ORDER BY o.id DESC LIMIT 1 FOR UPDATE");
+        $orderQuery->execute([$employeeId, $iso]);
+        $order = $orderQuery->fetch(PDO::FETCH_ASSOC);
+        if (!$order) {
+            throw new RuntimeException('برای این کارمند در تاریخ انتخاب‌شده سفارش فعال پیدا نشد.');
+        }
+        $orderNational = food_order_digits($order['national_code'] ?? '');
+        if ($orderNational === '' || !hash_equals($national, $orderNational)) {
+            throw new RuntimeException('کد ملی سفارش با کاربر انتخاب‌شده هم‌خوانی ندارد.');
+        }
+
+        $ticketKey = 'food:' . $iso . ':' . $national;
+        $find = $pdo->prepare('SELECT id, user_id, event_type, print_status, source_payload FROM food_ticket_events WHERE ticket_key = ? LIMIT 1 FOR UPDATE');
+        $find->execute([$ticketKey]);
+        $event = $find->fetch(PDO::FETCH_ASSOC);
+        if ($event && (int) ($event['user_id'] ?? 0) > 0 && (int) $event['user_id'] !== $employeeId) {
+            throw new RuntimeException('کلید فیش این روز به کاربر دیگری تعلق دارد؛ برای جلوگیری از ثبت تکراری، فیش ساخته نشد.');
+        }
+        if ($event && (string) ($event['print_status'] ?? '') === 'printed'
+            && in_array((string) ($event['event_type'] ?? ''), ['printed', 'print', 'guest'], true)) {
+            $pdo->commit();
+            return ['ok' => true, 'already_issued' => true, 'event_id' => (int) $event['id'], 'message' => 'فیش این کاربر برای این روز از قبل در سامانه صادرشده ثبت شده است؛ مورد تکراری ساخته نشد.'];
+        }
+
+        $manualMeta = [
+            'issued_without_physical_print' => true,
+            'actor_id' => (int) $actor['id'],
+            'employee_id' => $employeeId,
+            'food_order_id' => (int) $order['order_id'],
+            'food_date' => $iso,
+            'issued_at' => date(DATE_ATOM),
+        ];
+        $oldState = $event ? ['event_type' => (string) $event['event_type'], 'print_status' => (string) $event['print_status']] : null;
+        if ($event) {
+            $eventId = (int) $event['id'];
+            $rawPayload = (string) ($event['source_payload'] ?? '');
+            $payload = json_decode($rawPayload, true);
+            if (!is_array($payload)) {
+                $payload = $rawPayload !== '' ? ['original_source_payload' => $rawPayload] : [];
+            }
+            $payload['manual_issue'] = $manualMeta;
+            $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+            $pdo->prepare('UPDATE food_ticket_events SET event_type = "printed", print_status = "printed", last_error = NULL, processed_at = NOW(), next_retry_at = NULL, source_payload = ? WHERE id = ?')
+                ->execute([$payloadJson === false ? null : $payloadJson, $eventId]);
+        } else {
+            $payloadJson = json_encode(['manual_issue' => $manualMeta], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+            $personName = food_order_full_name($order);
+            $eventId = food_ticket_add_event([
+                'source_key' => hash('sha256', 'manual-food-ticket:' . (int) $order['order_id']),
+                'source_uid' => null,
+                'source_card' => null,
+                'punch_date' => $iso,
+                'punch_time' => null,
+                'personnel_code' => trim((string) ($order['employee_number'] ?? '')),
+                'user_id' => $employeeId,
+                'national_code' => $national,
+                'full_name' => $personName,
+                'food_type' => (string) ($order['food_name'] ?? ''),
+                'ticket_key' => $ticketKey,
+                'event_type' => 'printed',
+                'print_status' => 'printed',
+                'last_error' => null,
+                'source_payload' => $payloadJson === false ? null : $payloadJson,
+            ]);
+        }
+        food_order_log((int) $order['order_id'], (int) $order['calendar_id'], 'manual_ticket_no_physical_print', (int) $actor['id'], $oldState, ['event_type' => 'printed', 'print_status' => 'printed', 'event_id' => $eventId], 'ثبت فیش دستی بدون چاپ فیزیکی');
+        $pdo->commit();
+        food_order_audit('manual_ticket_no_physical_print', $actor, 'food_ticket_event', $eventId, $oldState, [
+            'employee_id' => $employeeId, 'food_order_id' => (int) $order['order_id'], 'food_date' => $iso,
+            'event_type' => 'printed', 'physical_print' => false,
+        ], 'ثبت فیش دستی بدون چاپ فیزیکی');
+        return ['ok' => true, 'already_issued' => false, 'event_id' => $eventId, 'message' => 'فیش دستی برای این تاریخ در سامانه «چاپ‌شده» ثبت شد؛ چاپ فیزیکی انجام نشد.'];
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+}
+
 /** مسیرهای «سفارش اضطراری» در فرم برنامه غذایی (فقط food.emergency). */
 function food_order_emergency_handle(string $route, string $method, array $user): never
 {
@@ -2322,6 +2441,14 @@ function food_order_emergency_handle(string $route, string $method, array $user)
                 (string) ($body['national_code'] ?? ''),
                 $user,
                 true
+            ));
+        }
+        if ($method === 'POST' && $route === 'food-menu/emergency/issue-ticket') {
+            food_order_send_json(food_order_emergency_issue_ticket_no_print(
+                max(0, (int) ($body['employee_id'] ?? 0)),
+                (string) ($body['food_date'] ?? ''),
+                (string) ($body['national_code'] ?? ''),
+                $user
             ));
         }
         food_order_send_json(['error' => 'مسیر سفارش اضطراری پیدا نشد.'], 404);

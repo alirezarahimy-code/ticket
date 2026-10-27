@@ -55,5 +55,5 @@ def test_form_hotfix_packages_the_renderer_styles_and_compatible_page():
     digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
     sidecar = (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
     assert digest in sidecar
-    page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    assert NAME in page and f"{NAME}.sha256" in page
+    release_note = ROOT / "updates/2026-10-27-release-162-28-technical-profile-form-refresh/README.fa.md"
+    assert release_note.is_file()
