@@ -22,6 +22,8 @@ def test_current_profile_module_has_complete_form_and_additive_schema():
     for key in ["record_number", "plaque_monitor", "owner_full_name", "os_name", "cpu_model", "ram_total", "ip_address", "monitor_model", "antivirus", "ad_online"]:
         assert key in field_keys
     assert "function asset_profile_render_sections" in PROFILE
+    assert "function asset_profile_fill_from_asset" in PROFILE
+    assert "function asset_profile_collection_status_summary" in PROFILE
     assert "function asset_profile_save" in PROFILE
     assert "DROP TABLE" not in PROFILE.upper()
     assert "ALTER TABLE asset_profiles ADD COLUMN" in PROFILE
