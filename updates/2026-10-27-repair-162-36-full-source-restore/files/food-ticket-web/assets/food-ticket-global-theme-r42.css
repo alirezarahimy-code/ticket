@@ -1,0 +1,168 @@
+/* R42 shared system color mode for the full food-ticket screen. */
+html[data-theme-mode="dark"] {
+    color-scheme: dark;
+    --ink: #e5eee8;
+    --muted: #aabbb1;
+    --line: #354940;
+    --soft: #202e27;
+    --paper: #0e1713;
+    --white: #18231e;
+    --teal2: #1a3c31;
+    --food-paper: #0e1713;
+    --food-white: #18231e;
+    --food-line: #354940;
+    --food-muted: #aabbb1;
+    --food-shadow: 0 14px 40px rgba(0,0,0,.32);
+}
+html[data-theme-mode="dark"] body,
+html[data-theme-mode="dark"] .shell,
+html[data-theme-mode="dark"] .page { background: #0e1713 !important; color: #e5eee8 !important; }
+html[data-theme-mode="dark"] .topbar {
+    background: radial-gradient(circle at 80% -110%, rgba(211,179,98,.13), transparent 38%), linear-gradient(120deg,#10251e,#183b2f 58%,#112820) !important;
+    border-bottom-color: #3b5749 !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35) !important;
+}
+html[data-theme-mode="dark"] .top-meta { color: #c3d0c8 !important; }
+html[data-theme-mode="dark"] .top-meta .pill { background: #24382e !important; color: #d9e8df !important; border: 1px solid #3d5749; }
+.food-global-theme-toggle {
+    display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:34px;
+    padding:6px 11px; border:1px solid rgba(255,255,255,.32); border-radius:999px;
+    background:rgba(255,255,255,.12); color:#fff; font:inherit; font-size:11px;
+    font-weight:700; white-space:nowrap; cursor:pointer;
+}
+.food-global-theme-toggle:hover { background:rgba(255,255,255,.2); }
+html.theme-mode-transition::view-transition-old(root) { animation:none; }
+html.theme-mode-transition::view-transition-new(root) {
+    z-index:1;
+    animation:850ms cubic-bezier(.2,.7,.2,1) both food-theme-mode-center-reveal;
+}
+@keyframes food-theme-mode-center-reveal {
+    from { clip-path:circle(0 at var(--theme-transition-x,50vw) var(--theme-transition-y,50vh)); }
+    to { clip-path:circle(var(--theme-transition-radius,150vmax) at var(--theme-transition-x,50vw) var(--theme-transition-y,50vh)); }
+}
+html[data-theme-mode="dark"] :is(.card, .stat, .boot-card, .settings-tabs, .printer-grid-status .box,
+    .printer-list-box, .design-toolbar button, .design-canvas-wrap, .calendar-popup,
+    .print-preview-box, .settings-card, .health, .table-wrap, .report-preview-table) {
+    background-color:#18231e !important; color:#e5eee8 !important; border-color:#354940 !important;
+    box-shadow:0 14px 32px rgba(0,0,0,.25) !important;
+}
+html[data-theme-mode="dark"] :is(.field, .field label, .heading p, .design-help, .stat .label,
+    .stat .delta, .week-day label, .chart-legend, .empty, .health, .settings-tab) { color:#aabbb1 !important; }
+html[data-theme-mode="dark"] :is(.heading h2, .card h3, .stat strong, .field b, .ticket-company,
+    .ticket-title, .ticket-row, .table td, .table th) { color:#e5eee8 !important; }
+html[data-theme-mode="dark"] :is(.field input, .field select, .field textarea, .design-props input,
+    .design-props select, .design-props textarea, .design-mode select, .date-field button,
+    .report-preview-table, .table th, .table td) {
+    background:#111c17 !important; color:#e5eee8 !important; border-color:#40564a !important;
+}
+html[data-theme-mode="dark"] :is(.btn, .btn.ghost, .design-toolbar button, .settings-tab) {
+    background:#26372f !important; color:#e5eee8 !important; border-color:#41584b !important;
+}
+html[data-theme-mode="dark"] .btn.primary { background:#287957 !important; color:#fff !important; }
+html[data-theme-mode="dark"] .btn.orange { background:#7c5422 !important; color:#fff2d0 !important; }
+html[data-theme-mode="dark"] .btn.danger { background:#4b2724 !important; color:#ffc4ba !important; }
+html[data-theme-mode="dark"] .status.ok, html[data-theme-mode="dark"] .notice.good { background:#163a2b !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .status.warn, html[data-theme-mode="dark"] .notice.warn { background:#382f1b !important; color:#f2d98e !important; }
+html[data-theme-mode="dark"] .status.bad { background:#3b2322 !important; color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .status.info, html[data-theme-mode="dark"] .notice { background:#172f3d !important; color:#a5d7f3 !important; }
+html[data-theme-mode="dark"] .table th { background:#202d26 !important; color:#b8c8bf !important; }
+html[data-theme-mode="dark"] .table td { border-color:#2b3d34 !important; }
+html[data-theme-mode="dark"] .printer-hero { background:linear-gradient(135deg,#18382c,#1d3441) !important; color:#dcebe2; border-color:#365d4a; }
+html[data-theme-mode="dark"] .printer-list-box label:hover { background:#24362d !important; }
+html[data-theme-mode="dark"] .design-canvas-wrap { background:#131f19 !important; }
+html[data-theme-mode="dark"] .design-canvas,
+html[data-theme-mode="dark"] .print-preview-paper { background-color:#f7f1e1 !important; color:#18231e !important; }
+html[data-theme-mode="dark"] .preview-ticket { background:#f7f1e1 !important; color:#18231e !important; }
+html[data-theme-mode="dark"] .preview-ticket * { color:#18231e !important; }
+html[data-theme-mode="dark"] .report-preview-table th,
+html[data-theme-mode="dark"] .report-preview-table td { background:#18231e !important; color:#e5eee8 !important; }
+html[data-theme-mode="dark"] .food-capitalio-dashboard-widget header button[aria-label^="تغییر به حالت"] { display:none !important; }
+html[data-theme-mode="dark"] .food-capitalio-dashboard-widget { color-scheme:dark; }
+html[data-theme-mode="dark"] .toast { background:#20342a !important; color:#f1f7f3 !important; }
+@media (prefers-reduced-motion: reduce) {
+    html[data-theme-mode] *, html[data-theme-mode] *::before, html[data-theme-mode] *::after { transition-duration:0.01ms !important; animation-duration:0.01ms !important; }
+}
+
+/* R44: theme-aware food planning forms, schedules and interactive report lists. */
+html[data-theme-mode="dark"] {
+    --card:#18231e; --fm-card:#18231e; --fm-soft:#202e27; --fm-border:#3a5145;
+    --fm-muted:#a9bbb0; --teal-light:#1b3b2f; --food-paper:#0e1713; --food-white:#18231e;
+}
+html[data-theme-mode="dark"] :is(#food-menu-root,.fm-root,.fm-card,.fm-calendar-card,.fm-statistics,.fm-stat-day,
+    .fm-status-pill,.fm-food-group,.fm-food-check,.fm-report-fields,.fm-order-date,.fm-selected-employee-matches,
+    .fm-selected-employee-option,.fm-selected-employee-tag,.fm-bulk-modal) {
+    background-color:#18231e !important; color:#e5eee8 !important; border-color:#354940 !important;
+}
+html[data-theme-mode="dark"] :is(.fm-field input,.fm-field select,.fm-field textarea,.fm-food-search,.fm-selected-employee-picker input,
+    .fm-selected-employee-option,.fm-name-form input,.fm-catalog-form input,.fm-catalog-form select) {
+    background:#111c17 !important; color:#e5eee8 !important; border-color:#40564a !important; color-scheme:dark;
+}
+html[data-theme-mode="dark"] .fm-field select option { background:#111c17 !important; color:#e5eee8 !important; }
+html[data-theme-mode="dark"] :is(.fm-rows th,.fm-stat-day h4,.fm-food-group-toggle,.fm-selected-employee-option:hover) {
+    background:#202d26 !important; color:#dbe9e0 !important; border-color:#354940 !important;
+}
+html[data-theme-mode="dark"] :is(.fm-intro h2,.fm-card h3,.fm-stat-day h4,.fm-group-report-title) { color:#e5eee8 !important; }
+html[data-theme-mode="dark"] :is(.fm-small,.fm-field,.fm-card p,.fm-empty,.fm-spinner) { color:#a9bbb0 !important; }
+html[data-theme-mode="dark"] :is(.fm-alert,.fm-alert.good) { background:#163a2b !important; color:#9ce2ba !important; border-color:#286044 !important; }
+html[data-theme-mode="dark"] .fm-alert.warn { background:#382f1b !important; color:#f2d98e !important; border-color:#655126 !important; }
+html[data-theme-mode="dark"] .fm-alert.error { background:#3b2322 !important; color:#ffb4ab !important; border-color:#693631 !important; }
+html[data-theme-mode="dark"] :is(.food-order-page,#food-order-app,.fo-modal,.fo-calendar-card,.fo-visit-card,
+    .fo-my-orders,.fo-search-results,.fo-search-result,.fo-person-choice,.fo-person-select-trigger,
+    .fo-meal-option,.fo-recipient-banner,.food-order-loading) {
+    background-color:#18231e !important; color:#e5eee8 !important; border-color:#354940 !important;
+}
+html[data-theme-mode="dark"] :is(.fo-modal .fo-form-field input,.fo-modal .fo-form-field select,.fo-combobox > input,
+    .fo-person-select-trigger,.fo-meal-option,.fo-modal-close,.fo-search-result) {
+    background:#111c17 !important; color:#e5eee8 !important; border-color:#40564a !important; color-scheme:dark;
+}
+html[data-theme-mode="dark"] :is(.fo-day,.fo-day.is-adjacent) { background:#182b24 !important; color:#e5eee8 !important; border-color:#354940 !important; }
+html[data-theme-mode="dark"] :is(.fo-day.is-weekend,.fo-day.is-holiday) { background:#382526 !important; border-color:#69413e !important; }
+html[data-theme-mode="dark"] :is(.fo-day.is-weekend .fo-day-number,.fo-day.is-holiday .fo-day-number) { color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .fo-day.has-order { background:#3a331b !important; border-color:#b09227 !important; }
+html[data-theme-mode="dark"] :is(.fo-day-status,.fo-day-order-marker) { background:#24362d !important; color:#dbe9e0 !important; border-color:#40564a !important; }
+html[data-theme-mode="dark"] .fo-day-status.is-open { background:#163a2b !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fo-day-status.is-closed,.fo-day-status.is-holiday) { background:#3b2322 !important; color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .fo-day-order-marker { background:#4b4018 !important; color:#f2d98e !important; border-color:#927728 !important; }
+html[data-theme-mode="dark"] .fo-legend { color:#a9bbb0 !important; }
+html[data-theme-mode="dark"] .fo-modal::backdrop { background:rgba(0,0,0,.72) !important; }
+
+/* ── v1.62.4: پوشش کامل حالت شب برای فرم‌های برنامه غذایی، گروه‌های غذا، بانک غذا و عملیات گروهی ── */
+html[data-theme-mode="dark"] :is(.fm-radio, .fm-food-picker, .fg-people-box, .fm-bank-item, .fm-cat-group, .fm-bulk-results, .fm-statistics-form > .fm-order-date) {
+    background:#18231e !important; color:#e5eee8 !important; border-color:#354940 !important;
+}
+html[data-theme-mode="dark"] :is(.fg-person, .fm-bulk-row-blocked, .fm-bank-item:nth-child(6n+4), .fm-bank-item:nth-child(6n+5), .fm-bank-item:nth-child(6n+6)) {
+    background:#1d2a24 !important; color:#e5eee8 !important; border-color:#2b3d34 !important;
+}
+html[data-theme-mode="dark"] :is(.fg-person:nth-child(8n+5), .fg-person:nth-child(8n+6), .fg-person:nth-child(8n+7), .fg-person:nth-child(8n+8)) { background:#203028 !important; }
+html[data-theme-mode="dark"] .fg-person:hover { background:#24362d !important; }
+html[data-theme-mode="dark"] :is(.fm-cat-toggle, .fm-bulk-controls) { background:#202d26 !important; color:#dbe9e0 !important; border-color:#354940 !important; }
+html[data-theme-mode="dark"] :is(.fm-cat-toggle:hover, .fm-food-group-toggle:hover) { background:#24362d !important; }
+html[data-theme-mode="dark"] :is(.fm-bank-field input, .fm-bank-field select, .fm-bulk-controls input, .fm-bulk-controls select, .fm-bulk-controls textarea, .fm-bulk-tools input) {
+    background:#111c17 !important; color:#e5eee8 !important; border-color:#40564a !important; color-scheme:dark;
+}
+html[data-theme-mode="dark"] .fm-bulk-mode { background:#24362d !important; color:#dbe9e0 !important; border-color:#40564a !important; }
+html[data-theme-mode="dark"] .fm-bulk-mode.active { background:#287957 !important; color:#fff !important; border-color:#2f8a63 !important; }
+html[data-theme-mode="dark"] .fm-bulk-admin-tag { background:#163a2b !important; color:#9ce2ba !important; border-color:#286044 !important; }
+html[data-theme-mode="dark"] .fm-bulk-footer { color:#a9bbb0 !important; border-color:#2b3d34 !important; }
+html[data-theme-mode="dark"] .fm-bulk-footer b { color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fm-bulk-modal header, .fm-bulk-modal footer) { border-color:#2b3d34 !important; }
+html[data-theme-mode="dark"] :is(.fm-bulk-modal-body, .fm-bulk-modal header p, .fm-bulk-summary small, .fm-bulk-secondary, .fm-bulk-controls .fm-field small, .fm-bulk-people-head small, .fm-bulk-row-blocked td) { color:#a9bbb0 !important; }
+html[data-theme-mode="dark"] .fm-bulk-summary > div { background:#202e27 !important; border-color:#354940 !important; }
+html[data-theme-mode="dark"] .fm-bulk-summary b { color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .fm-bulk-state.ok { background:#163a2b !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .fm-bulk-state.blocked { background:#3b2322 !important; color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .fm-bulk-state.override { background:#382f1b !important; color:#f2d98e !important; }
+html[data-theme-mode="dark"] .fm-confirm-box { background:#382f1b !important; color:#f2d98e !important; border-color:#655126 !important; }
+html[data-theme-mode="dark"] .fm-order-state { background:#163a2b !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] .fm-order-state.cancelled { background:#3b2322 !important; color:#ffb4ab !important; }
+html[data-theme-mode="dark"] .fm-selected-employee-tag button { background:rgba(255,255,255,.14) !important; color:#ffb4ab !important; }
+
+/* ── v1.62.4: سفارش غذا — سطح‌هایی که رنگ روشن ثابت یا گرادیان داشتند ── */
+html[data-theme-mode="dark"] .fo-recipient-banner { background:#18231e !important; border-color:#354940 !important; box-shadow:0 6px 18px rgba(0,0,0,.3) !important; }
+html[data-theme-mode="dark"] :is(.fo-recipient-avatar, .fo-choice-icon) { background:#1b3b2f !important; color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fo-day-meal, .fo-visit-current, .fo-recipient-details strong, .fo-loading-panel strong, .fo-visit-card h2, .fo-month-label) { color:#e5eee8 !important; }
+html[data-theme-mode="dark"] .fo-day-my-order { color:#9ce2ba !important; }
+html[data-theme-mode="dark"] :is(.fo-day-count, .fo-recipient-details span, .fo-recipient-details small, .fo-person-choice small, .fo-combo-message, .fo-weekday) { color:#a9bbb0 !important; }
+html[data-theme-mode="dark"] :is(.fo-person-choice:hover, .fo-person-choice:focus-visible, .fo-search-result:hover, .fo-search-result:focus-visible, .fo-search-result.is-highlighted, .fo-search-result[aria-selected="true"]) { background:#1b3b2f !important; border-color:#59bd8c !important; }
+html[data-theme-mode="dark"] .fo-meal-option:has(input:checked) { background:#1b3b2f !important; border-color:#59bd8c !important; box-shadow:0 0 0 2px rgba(89,189,140,.25) !important; }
+html[data-theme-mode="dark"] .fo-combobox .fo-search-results { background:#18231e !important; border-color:#354940 !important; }
