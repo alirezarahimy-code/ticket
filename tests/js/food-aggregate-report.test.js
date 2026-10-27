@@ -120,9 +120,9 @@ m.aggSaveFields(['pc', 'name']);
 assert.deepStrictEqual(m.aggFields(), ['pc', 'name'], 'ذخیره/بازیابی فیلدها کار نمیکند');
 assert.strictEqual(m.aggSelectedCols().length, 2, 'تعداد ستونهای انتخابشده نادرست است');
 out = m.aggTable([{ pc: '1', name: 'الف' }], 'خالی');
-assert(out.includes('<span>کد پرسنلی</span>') && out.includes('<span>نام و نام خانوادگی</span>'), 'برچسب فیلدها ناقصاند');
-assert(!out.includes('<span>نوع غذا</span>'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
-assert(out.includes('agg-grid-3'), 'چیدمان ۳ ستونهای برای ۲ فیلد اعمال نشد');
+assert(out.includes('<th>کد پرسنلی</th>') && out.includes('<th>نام و نام خانوادگی</th>'), 'سرستونها ناقصاند');
+assert(!out.includes('<th>نوع غذا</th>'), 'فیلد انتخابنشده همچنان نمایش داده میشود');
+assert(out.includes('agg-block-start'), 'بلوکبندی ۳تایی برای ۲ فیلد اعمال نشد');
 storage.clear();
 
 // ۵ب) سورت بر اساس نام خانوادگی
