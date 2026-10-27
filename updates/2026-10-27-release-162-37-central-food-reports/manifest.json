@@ -1,0 +1,22 @@
+{
+  "name": "release-162-37-central-food-reports",
+  "version": "1.62.37",
+  "date": "2026-10-27",
+  "title": "انتقال و تجمیع گزارش‌های غذا در مرکز گزارش‌ها",
+  "requires_version": "1.62.36",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "assets/food-menu.css",
+    "assets/food-menu.js",
+    "assets/style.css",
+    "food-order.php",
+    "food-ticket-order-source.php",
+    "food-ticket.php",
+    "food-ticket-web/assets/food-menu.css",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "index.php"
+  ],
+  "notes": "بستهٔ افزایشی، نه سورس کامل برنامه. برای سامانه‌ای است که نسخهٔ 1.62.36 را دارد. گزارش‌های غذا به مرکز گزارش‌ها اضافه می‌شوند و گزارش‌های سفارش‌ها، چاپ/تحویل و تجمعی را در بر می‌گیرند. هیچ migration پایگاه‌داده، تغییر schema یا اصلاح دادهٔ زنده در این بسته نیست. مقدار VERSION داخل بسته 1.62.37 است؛ فایل VERSION ریشهٔ مخزن توسعه در این خروجی هنوز 1.60.4 است و مرجع نسخهٔ نصب‌شده، VERSION داخل بستهٔ update است."
+}
