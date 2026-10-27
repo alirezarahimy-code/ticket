@@ -1,0 +1,23 @@
+{
+  "name": "repair-162-36-full-source-restore",
+  "version": "1.62.36",
+  "date": "2026-10-27",
+  "title": "ترمیم فایل‌های سامانهٔ ۱.۶۲.۳۶ و بازگردانی پنل و ثبت دستی غذا",
+  "requires_version": "1.62.36",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "assets/food-menu.css",
+    "assets/food-menu.js",
+    "assets/style.css",
+    "food-order.php",
+    "food-ticket-groups.php",
+    "food-ticket-order-source.php",
+    "food-ticket.php",
+    "food-ticket-web/assets/food-menu.css",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "index.php"
+  ],
+  "notes": "بستهٔ ترمیم مجدد نسخهٔ ۱.۶۲.۳۶ برای نصب‌هایی که قبلاً بستهٔ محدود ۱.۶۲.۳۶ را اعمال کرده‌اند اما فایل‌های پنل/داشبورد یا ثبت دستی غذا هنوز برنگشته‌اند. فایل‌ها از درخت کد پیش از تغییرات گزارش مرکزی (commit 62dc749) برداشته شده‌اند. نسخهٔ داخل فایل VERSION همان ۱.۶۲.۳۶ می‌ماند تا updater آن را به‌صورت reinstall اعمال کند. هیچ migration یا تغییری در پایگاه داده انجام نمی‌شود. فایل‌های فهرست‌شده کامل جایگزین می‌شوند؛ پیش از نصب از فایل‌های سرور بکاپ بگیرید و تغییرات اختصاصی را بررسی کنید."
+}
