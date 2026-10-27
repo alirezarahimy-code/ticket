@@ -1,0 +1,15 @@
+{
+  "name": "release-162-27-food-log-levels-and-asset-form-compatibility",
+  "version": "1.62.27",
+  "date": "2026-10-27",
+  "title": "اصلاح سطح رخدادهای چاپ و سازگاری صفحهٔ شناسنامه‌های فنی",
+  "requires_version": "1.62.25",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "asset-inventory-page.php",
+    "food-ticket-netprint.php",
+    "food-ticket-templates.php"
+  ],
+  "notes": "ثبت موفقِ trim/alignment چاپ به debug منتقل شد، هشدارهای محدودیت چاپ و قالب به warning منتقل شدند تا در شمار خطاهای حقیقی محسوب نشوند. سازگاری صفحهٔ شناسنامه با فراخوانی قدیمی و جدید index.php حفظ شده است. خطاهای واقعی چاپ/قالب به‌صورت خودکار رفع نمی‌شوند و گزارش تاریخی تغییر نمی‌کند."
+}
