@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.27';
+const FOOD_TICKET_PANEL_VERSION = '1.37.28';
 
 function food_ticket_panel_version(): string
 {
@@ -138,7 +138,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
     }
     if (!function_exists('user_can')) {
         return food_ticket_is_support_manager($user)
-            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'dashboard', 'health', 'self-test', 'test-connections', 'config', 'database-file', 'session'], true)
+            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'aggregate-report', 'aggregate-report-export', 'dashboard', 'health', 'self-test', 'test-connections', 'config', 'database-file', 'session'], true)
                 || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route)));
     }
     if (in_array($route, ['login', 'sso-login'], true)) {
@@ -149,6 +149,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'monitoring' => 'food.monitor',
         'absent' => 'food.reports',
         'guest-requests-report' => 'food.reports',
+        'aggregate-report' => 'food.reports',
+        'aggregate-report-export' => 'food.reports',
         'orders' => 'food.dashboard',
         'reports/export' => 'food.reports',
         'employees' => 'food.employees',
@@ -3004,6 +3006,187 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
     return ['items' => $items, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy];
 }
 
+/**
+ * گزارش تجمیعی روزانه غذا: شمارش سفارشها، فیشهای مهمان، فیشهای چاپشدهٔ قطعی،
+ * غایبین و بررسی مغایرت، بههمراه فهرست اسامی برای نمایش/استخراج/چاپ.
+ * فقط خواندنی است و هیچ جدولی را تغییر نمیدهد.
+ */
+function food_ticket_api_aggregate_report(string $fromDate, string $toDate): array
+{
+    $from = food_ticket_parse_date($fromDate);
+    $to = food_ticket_parse_date($toDate);
+    if ($from === null || $to === null || $from > $to) {
+        throw new RuntimeException('بازهٔ تاریخ گزارش تجمیعی معتبر نیست.');
+    }
+
+    $pdo = db();
+    $counts = ['total_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0];
+    $printedPeople = [];
+    $sourceNotes = [];
+
+    // ۱) تعداد کل سفارشهای فعال روز (منبع داخلی MySQL)
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active"');
+        $stmt->execute([$from, $to]);
+        $counts['total_orders'] = (int) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'سفارشها: ' . $e->getMessage();
+        app_error_log('[aggregate-report] orders: ' . $e->getMessage());
+    }
+
+    // ۲) فیش مهمان چاپشده و ۳) فیش چاپشدهٔ قطعی پرسنل — از رویدادهای پایش
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT event_type, COUNT(*) AS c FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
+               AND event_type IN ('printed','guest') GROUP BY event_type"
+        );
+        $stmt->execute([$from, $to]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            if ((string) $row['event_type'] === 'guest') {
+                $counts['guest_printed'] = (int) $row['c'];
+            } else {
+                $counts['printed_final'] = (int) $row['c'];
+            }
+        }
+        $stmt = $pdo->prepare(
+            "SELECT full_name, personnel_code, punch_date, punch_time, food_type, event_type
+             FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
+               AND event_type IN ('printed','guest') ORDER BY punch_date, punch_time, id"
+        );
+        $stmt->execute([$from, $to]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $printedPeople[] = [
+                'date' => (string) ($row['punch_date'] ?? ''),
+                'time' => (string) ($row['punch_time'] ?? ''),
+                'pc' => (string) ($row['personnel_code'] ?? ''),
+                'name' => (string) ($row['full_name'] ?? ''),
+                'food' => (string) ($row['food_type'] ?? ''),
+                'kind' => (string) $row['event_type'] === 'guest' ? 'مهمان' : 'پرسنل',
+            ];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'فیشهای چاپشده: ' . $e->getMessage();
+        app_error_log('[aggregate-report] events: ' . $e->getMessage());
+    }
+
+    // ۴) غایبین (سفارش دارند ولی فیش نگرفتند)
+    $absentPeople = [];
+    try {
+        foreach (food_ticket_api_absent($from, $to) as $row) {
+            $absentPeople[] = [
+                'date' => (string) ($row['foodDate'] ?? $from),
+                'pc' => (string) ($row['pc'] ?? ''),
+                'name' => (string) ($row['full_name'] ?? trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? ''))),
+                'food' => (string) ($row['food'] ?? ''),
+                'status' => (string) ($row['status'] ?? 'غایب'),
+                'declared' => !empty($row['declared_absent']),
+            ];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'غایبین: ' . $e->getMessage();
+        app_error_log('[aggregate-report] absent: ' . $e->getMessage());
+    }
+
+    $counts['absent'] = count($absentPeople);
+    $expected = $counts['total_orders'] - ($counts['guest_printed'] + $counts['printed_final']);
+    $counts['has_mismatch'] = ($expected !== $counts['absent']);
+    $counts['difference'] = $expected - $counts['absent'];
+
+    return [
+        'from' => $from,
+        'to' => $to,
+        'counts' => $counts,
+        'printed_people' => $printedPeople,
+        'absent_people' => $absentPeople,
+        'source_notes' => $sourceNotes,
+    ];
+}
+
+/** ستونهای قابلانتخاب گزارش تجمیعی (برای نمایش، استخراج و چاپ). */
+function food_ticket_aggregate_columns(): array
+{
+    return [
+        ['key' => 'row', 'label' => 'ردیف'],
+        ['key' => 'date', 'label' => 'تاریخ'],
+        ['key' => 'time', 'label' => 'ساعت'],
+        ['key' => 'pc', 'label' => 'کد پرسنلی'],
+        ['key' => 'name', 'label' => 'نام و نام خانوادگی'],
+        ['key' => 'food', 'label' => 'نوع غذا'],
+        ['key' => 'kind', 'label' => 'نوع فیش'],
+        ['key' => 'status', 'label' => 'وضعیت'],
+    ];
+}
+
+/** خروجی XLSX گزارش تجمیعی — فقط ستونهای انتخابشده. */
+function food_ticket_aggregate_export(string $fromDate, string $toDate, string $fieldsRaw): never
+{
+    $report = food_ticket_api_aggregate_report($fromDate, $toDate);
+    $all = food_ticket_aggregate_columns();
+    $keys = array_values(array_unique(array_filter(array_map('trim', explode(',', $fieldsRaw)))));
+    $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], $keys, true)));
+    if ($selected === []) {
+        $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], ['row', 'pc', 'name', 'food'], true)));
+    }
+    $headers = array_map(static fn (array $c): string => $c['label'], $selected);
+    $rangeLabel = $report['from'] === $report['to']
+        ? food_order_jalali_label($report['from'])
+        : food_order_jalali_label($report['from']) . ' تا ' . food_order_jalali_label($report['to']);
+    $c = $report['counts'];
+    $rows = [];
+    $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
+    $rows[] = ['تعداد کل سفارشها', $c['total_orders'], 'فیش مهمان چاپشده', $c['guest_printed']];
+    $rows[] = ['فیش چاپشده قطعی', $c['printed_final'], 'تعداد غایبین', $c['absent']];
+    $rows[] = ['مغایرت', $c['has_mismatch'] ? 'دارد' : 'ندارد'];
+    $rows[] = [];
+    $rows[] = ['فهرست نفراتی که فیش چاپشده دارند'];
+    $rows[] = $headers;
+    $i = 0;
+    foreach ($report['printed_people'] as $person) {
+        $i++;
+        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'status' => 'چاپشده']);
+    }
+    $rows[] = [];
+    $rows[] = ['فهرست غایبین'];
+    $rows[] = $headers;
+    $i = 0;
+    foreach ($report['absent_people'] as $person) {
+        $i++;
+        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'time' => '', 'kind' => '—']);
+    }
+    $token = preg_replace('/[^0-9A-Za-z_-]/', '', $report['from'] . '_' . $report['to']) ?: date('Y-m-d');
+    require_once __DIR__ . '/xlsx-writer.php';
+    $columnCount = max(1, count($headers));
+    $bytes = xlsx_build([[
+        'name' => 'گزارش تجمیعی',
+        'rows' => $rows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 22),
+    ]]);
+    xlsx_send('گزارش-تجمیعی-غذا-' . $token . '.xlsx', $bytes);
+}
+
+/** یک ردیف خروجی متناسب با ستونهای انتخابشده میسازد. */
+function food_ticket_aggregate_row(array $selected, array $person): array
+{
+    $out = [];
+    foreach ($selected as $column) {
+        $value = $person[$column['key']] ?? '';
+        if ($column['key'] === 'date' && $value !== '') {
+            $value = food_order_jalali_label((string) $value);
+        }
+        if ($column['key'] === 'time' && $value !== '') {
+            $value = substr((string) $value, 0, 5);
+        }
+        if ($column['key'] === 'kind' && $person['declared'] ?? false) {
+            $value = 'غیبت اعلامشده';
+        }
+        $out[] = $value;
+    }
+    return $out;
+}
+
 function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
 {
     $fromDate = food_ticket_parse_date($fromDate) ?: trim($fromDate);
@@ -4076,6 +4259,23 @@ function food_ticket_api_handle(string $route, array $user): never
                 food_ticket_api_json(['items' => food_ticket_api_monitoring($from, $to), 'from' => $from, 'to' => $to]);
             }
             food_ticket_api_json(['items' => food_ticket_api_monitoring()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report') {
+            $aggFrom = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $aggTo = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
+            }
+            food_ticket_api_json(['ok' => true] + food_ticket_api_aggregate_report($aggFrom, $aggTo)
+                + ['columns' => food_ticket_aggregate_columns()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report-export') {
+            $aggFrom = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $aggTo = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
+            }
+            food_ticket_aggregate_export($aggFrom, $aggTo, (string) ($_GET['fields'] ?? ''));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absent') {
             $legacyDate = (string) ($_GET['date'] ?? $_GET['food_date'] ?? '');
