@@ -84,8 +84,30 @@ $hostname = inventory_api_text($payload['hostname'] ?? '', 190);
 if ($hostname === '') {
     inventory_api_response(422, ['ok' => false, 'error' => 'نام سیستم الزامی است.']);
 }
+if (inventory_hardware_score($payload) === 0) {
+    inventory_api_response(422, ['ok' => false, 'error' => 'درخواست دریافت شد، اما هیچ ردیف سخت‌افزاری قابل‌استفاده‌ای ندارد؛ روی کلاینت دسترسی WMI/CIM و اجرای اسکریپت را بررسی کنید.']);
+}
 
 $assetTag = inventory_api_asset_tag($payload);
+$receivedPayload = $payload;
+$assetQuery = db()->prepare('SELECT * FROM assets WHERE asset_tag = ? LIMIT 1');
+$assetQuery->execute([$assetTag]);
+$existing = $assetQuery->fetch();
+$existingId = 0;
+$existingPeripherals = [];
+$previousStatus = [];
+if ($existing) {
+    $existingId = (int) $existing['id'];
+    $existingPeripherals = json_decode((string) ($existing['peripherals_json'] ?? ''), true) ?: [];
+    $previous = inventory_saved_asset_snapshot($existing);
+    $previousStatus = $previous['collection_status'] ?? [];
+    $payload = inventory_merge_missing_values($payload, $previous);
+    if ((int) ($payload['memory_mb'] ?? 0) <= 0 && (int) ($previous['memory_mb'] ?? 0) > 0) {
+        $payload['memory_mb'] = (int) $previous['memory_mb'];
+    }
+}
+$payload = inventory_apply_collection_status_metadata($payload, $previousStatus, 'agent');
+
 $domainUsername = inventory_api_text($payload['domain_username'] ?? '', 190);
 $ownerId = null;
 $departmentId = null;
@@ -106,18 +128,10 @@ $manufacturer = inventory_api_text($payload['manufacturer'] ?? ($hardware['manuf
 $model = inventory_api_text($payload['model'] ?? ($hardware['model'] ?? ''), 190);
 $osArchitecture = inventory_api_text($payload['os_architecture'] ?? ($operatingSystem['OSArchitecture'] ?? ''), 40);
 $osSerial = inventory_api_text($payload['os_serial'] ?? '', 190);
-$existingId = 0;
-$existingPeripherals = [];
-$assetQuery = db()->prepare('SELECT id, peripherals_json FROM assets WHERE asset_tag = ? LIMIT 1');
-$assetQuery->execute([$assetTag]);
-$existing = $assetQuery->fetch();
-if ($existing) {
-    $existingId = (int) $existing['id'];
-    $existingPeripherals = json_decode((string) $existing['peripherals_json'], true) ?: [];
-}
 $manual = inventory_api_manual_fields($existingPeripherals);
 if ($manual !== []) {
     $peripherals['manual_entries'] = $manual;
+    $payload['peripherals'] = $peripherals;
 }
 
 $values = [
@@ -153,12 +167,12 @@ try {
         db()->prepare('UPDATE assets SET hostname = ?, serial_number = ?, computer_type = ?, manufacturer = ?, model = ?, owner_user_id = COALESCE(?, owner_user_id), department_id = COALESCE(?, department_id), operating_system = ?, os_architecture = ?, os_serial = ?, ip_address = ?, mac_address = ?, cpu = ?, memory_mb = ?, disks_json = ?, software_json = ?, hardware_json = ?, peripherals_json = ?, domain_username = ?, antivirus = ?, source = "agent", last_inventory_at = NOW() WHERE id = ?')->execute([...$values, $existingId]);
         $assetId = $existingId;
     } else {
-        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, ...$values]);
+        db()->prepare('INSERT INTO assets (asset_tag, hostname, serial_number, computer_type, manufacturer, model, owner_user_id, department_id, operating_system, os_architecture, os_serial, ip_address, mac_address, cpu, memory_mb, disks_json, software_json, hardware_json, peripherals_json, domain_username, antivirus, source, last_inventory_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "agent", NOW())')->execute([$assetTag, ...$values]);
         $assetId = (int) db()->lastInsertId();
     }
     sync_inventory_rows($assetId, $payload, 'agent');
     asset_profile_apply_auto($assetId, asset_profile_auto_values($payload), 0, false);
-    $snapshot = $payload;
+    $snapshot = $receivedPayload;
     $snapshot['asset_tag'] = $assetTag;
     $snapshot['received_at'] = date('c');
     db()->prepare('INSERT INTO asset_inventory_history (asset_id, snapshot_json, collected_by) VALUES (?, ?, NULL)')->execute([$assetId, inventory_api_json($snapshot)]);
@@ -169,6 +183,7 @@ try {
     if ($pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
     }
+    app_error_log('[inventory-api] save failed: ' . $exception->getMessage());
     inventory_api_response(500, ['ok' => false, 'error' => 'ذخیره Inventory انجام نشد.']);
 }
 

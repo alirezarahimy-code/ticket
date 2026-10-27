@@ -34,7 +34,7 @@ $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, password_
     employee_number TEXT, national_code TEXT, role TEXT, auth_source TEXT, is_active INTEGER, must_change_password INTEGER DEFAULT 0)');
 $pdo->exec('CREATE TABLE food_catalog (id INTEGER PRIMARY KEY, food_name TEXT, active INTEGER)');
 $pdo->exec('CREATE TABLE food_calendar_items (id INTEGER PRIMARY KEY, food_id INTEGER, active INTEGER)');
-$pdo->exec('CREATE TABLE food_orders (id INTEGER PRIMARY KEY, employee_id INTEGER, calendar_item_id INTEGER, food_date TEXT, status TEXT)');
+$pdo->exec("CREATE TABLE food_orders (id INTEGER PRIMARY KEY, employee_id INTEGER, calendar_item_id INTEGER, food_date TEXT, meal_type TEXT DEFAULT 'lunch', status TEXT)");
 $GLOBALS['tdb'] = $pdo;
 
 function db(): PDO
@@ -86,9 +86,9 @@ $pdo->exec("INSERT INTO food_calendar_items VALUES (1, 1, 1)");
 $pdo->exec("INSERT INTO users VALUES (10, 'a', NULL, 'الف', 'الف', 'ب', '1001', '1234567890', 'user', 'food', 1, 0)");
 $pdo->exec("INSERT INTO users VALUES (11, 'c', NULL, 'ج', 'ج', 'د', '1002', '1234567890', 'user', 'food', 1, 0)");
 $pdo->exec("INSERT INTO users VALUES (12, 'e', NULL, 'ه', 'و', 'ز', '1003', '0012345678', 'user', 'food', 1, 0)");
-$pdo->exec("INSERT INTO food_orders VALUES (1, 10, 1, '2026-10-10', 'active')");
-$pdo->exec("INSERT INTO food_orders VALUES (2, 11, 1, '2026-10-10', 'active')");
-$pdo->exec("INSERT INTO food_orders VALUES (3, 12, 1, '2026-10-10', 'active')");
+$pdo->exec("INSERT INTO food_orders VALUES (1, 10, 1, '2026-10-10', 'lunch', 'active')");
+$pdo->exec("INSERT INTO food_orders VALUES (2, 11, 1, '2026-10-10', 'lunch', 'active')");
+$pdo->exec("INSERT INTO food_orders VALUES (3, 12, 1, '2026-10-10', 'lunch', 'active')");
 try {
     $map = food_order_internal_map('2026-10-10');
     check('نقشهٔ سفارش با کد ملی تکراری (کلید عددی) بدون خطا اجرا می‌شود', true);

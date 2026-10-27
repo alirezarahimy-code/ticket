@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — اتصال قطعی حساب دامین با کد دستی (R18)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "Builds on R17 with a dedicated primary-admin-only domain-to-food linking action. The code entered in this explicit action overrides an older employee number stored on the domain user, and can locate a unique food/local account by employee_number or a legacy local username. It creates a users backup and transfers references transactionally; it does not delete an account directly. The prior order-only manual attendance restrictions remain included. Code-only update; no production account changes or database migration."
+}

@@ -90,7 +90,11 @@ final class FreshFakeDb
 
     public function query(string $sql): FakeStmt
     {
-        if (preg_match('/^SELECT COUNT\(\*\) FROM `([a-z_]+)`$/i', trim($sql), $m) === 1) {
+        $sql = trim($sql);
+        if (preg_match('/^SELECT 1 FROM `([a-z_]+)` LIMIT 1$/i', $sql, $m) === 1) {
+            return new FakeStmt([], !empty($this->counts[$m[1]]) ? 1 : false);
+        }
+        if (preg_match('/^SELECT COUNT\(\*\) FROM `([a-z_]+)`$/i', $sql, $m) === 1) {
             return new FakeStmt([], (string) ($this->counts[$m[1]] ?? 0));
         }
         return new FakeStmt([]);
@@ -149,7 +153,7 @@ $GLOBALS['freshDb']->settings = ['db_install_token' => 'tok-existing'];
 $state2 = db_install_state(true);
 check('۲: دیتابیس دارای رکورد → fresh=false', $state2['fresh'] === false);
 check('۲-ب: توکن موجود دست‌نخورده می‌ماند (پایدار)', $state2['token'] === 'tok-existing', $state2['token']);
-check('۲-پ: مجموع رکوردها درست محاسبه می‌شود', array_sum($state2['counts']) === 16, json_encode($state2['counts']));
+check('۲-پ: شمارنده‌های سبک، جدول‌های غیرخالی را گزارش می‌کنند', array_sum($state2['counts']) === 2 && $state2['counts']['users'] === 1 && $state2['counts']['tickets'] === 1, json_encode($state2['counts']));
 
 /* ───────── ۳) نبود جدول‌ها (سرور نصب‌نشده) ───────── */
 $GLOBALS['freshDb'] = new FreshFakeDb();

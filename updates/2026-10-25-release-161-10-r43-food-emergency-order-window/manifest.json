@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "release": "R43",
+  "title": "Ticket 1.61.10 — R43 food order surname sort and temporary emergency window",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-food-orders-surname-emergency-window-r43-20261025.zip",
+  "migrations": [],
+  "notes": "Sorts the food order list by last name and then first name when the full-name column is selected. Adds manager-authorized, auditable late ordering for one specific date and meal, requiring a reason and expiring automatically after a selected 1, 2, 4, 8, or 24 hours. Grants are limited to today or at most seven past days and can be revoked early. Uses the existing food_order_logs table; no schema migration, permanent reopening, cloud dependency, or sample data is added."
+}

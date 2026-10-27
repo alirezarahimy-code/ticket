@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — R37 approved Food Dashboard Preview 4179 integration",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-food-dashboard-capitalio-r37-20261025.zip",
+  "archive_sha256": "a45fe4504a5787d426211c60ccb95cfc127edd9e7a0c2f490a245c3dda230b25",
+  "migrations": [],
+  "notes": "Uses the actual dashboard page components, dashboard CSS tokens, chart palette, and topbar structure from Food Dashboard Preview:4179. Product-specific adaptation is limited to local API data, native food navigation, and explicit empty/error states. No preview fixture data, external runtime, iframe, or database migration."
+}

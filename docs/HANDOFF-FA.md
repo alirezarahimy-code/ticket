@@ -1,12 +1,101 @@
 # سند ادامهٔ کار (Handoff) — سامانه ticket
 
-آخرین به‌روزرسانی: ۱۴۰۵/۰۷/۲۷ — نسخهٔ جاری: **۱.۶۰.۳** (شاخهٔ نشست `arena/1f9ebe28-ticket`؛ انتشار فقط روی همین شاخه انجام می‌شود)
+آخرین به‌روزرسانی: ۱۴۰۵/۰۸/۰۳ — نسخهٔ جاری: **۱.۶۲.۹** (شاخهٔ نشست `arena/dba0774e-ticket`)
 
 این سند برای ادامهٔ کار در گفتگوی جدید نوشته شده. هر چیزی که در گفتگوی قبلی تصمیم گرفته یا انجام شده، اینجا ثبت است.
 
+> **قاعدهٔ لازم‌الاجرا برای هر تحویل دانلودی:** `docs/DOWNLOAD-PUBLISHING-POLICY-FA.md` را رعایت کنید. فقط `downloads/index.html` صفحهٔ عمومیِ جاری باشد و فقط ZIP یکتای آخر در آن دیده شود؛ لینک مستقیم و checksum را بررسی کنید، انتشار GitHub را `Latest` کنید و پیش از اعلام تکمیل، صفحه و دانلود را از راه دور تأیید کنید. فایل‌های قدیمی را در صفحهٔ جاری فهرست نکنید؛ آرشیو را بدون درخواست صریح حذف نکنید.
+
 ---
 
-## وضعیت نشست جاری — انتشار نسخهٔ ۱.۶۰.۳ (بازرسی به‌جای نگهبان + اعلان لغو و مهلت سلف)
+## وضعیت جاری — انتشار نسخهٔ ۱.۶۲.۱۹ (۲۰۲۶/۱۰/۲۵)
+
+> **🧷 اسنپشات‌های امن:** جدیدترین: tag `snapshot-1.62.19-20261025` (= v1.62.19، کامیت 2016695) و `snapshot-1.62.18-20261025` (کامیت `14e6dc2` = v1.62.18)؛ قبلی‌ها: `snapshot-1.62.17-20261025`، `snapshot-1.62.16-20261025`؛ قبلی‌ها: `snapshot-1.62.14-20261025`، `snapshot-1.62.13-fix1-20261025`، `snapshot-1.62.12-20261025` و `snapshot-pre-refactor-20261025`. هر دو push و از راه دور تأیید شده‌اند. اگر در جریان بازسازی چیزی خراب شد، بازگشت کامل:
+> `git fetch origin --tags && git reset --hard snapshot-pre-refactor-20261025`
+> (بستهٔ نصب همان `ticket-update-1.62.10-org-liaison-units-20261025.zip` است؛ دیتابیس دست نمی‌خورد.)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip` (SHA-256: `c169b7c188c6cc39396656b1417a8267d84aba7c356a6d89a2410387421625b2`) — نسخهٔ ۱.۶۲.۲۰، پایان بخش اصلی فاز ۲: برش ۹ (۳ اکشن پشتیبان‌گیری/به‌روزرسانی → `actions/backup-actions.php`، بایت‌به‌بایت؛ دیگر هیچ اکشن درون‌خطی در index نیست؛ index.php → ۳۴۴۳ خط) + تفکیک `bootstrap.php` (۳۳۲۶ خط) به ۸ ماژول `lib/` با حفظ عینی ترتیب (bootstrap فقط بارکننده، ۶۴ خط) + حذف ۸ تابع مرده با اثبات صفر-ارجاع. تجمعی 1.62.0..1.62.20 = ۶۶ فایل. تست‌های پین‌شده: ~۱۱ تستِ خوانندهٔ bootstrap → الحاق bootstrap+lib؛ schema_heal، food_employee_local، triangle/particle (نام‌های حذف‌شده)، startup_performance (→ lib/notify-users.php)، 1_62_19 (فلیپ)، triangle (مسیر مانیفست).
+- بستهٔ قبلی: `downloads/ticket-update-1.62.18-account-misc-actions-split-20261025.zip` (SHA-256: `cbc75400625e08ff6fb332ab5067b5b2384aeb1a407448cb436b48524f55668c`) — نسخهٔ ۱.۶۲.۱۸، فاز ۲ برش ۷: ۹ اکشن در ۴ فایل — ورود/پروفایل/تم → `actions/account-actions.php`، برند فیش غذا → `actions/food-brand-actions.php`، CD/DVD → `actions/cd-dvd-actions.php`، اعلان‌ها → `actions/notification-actions.php` (بایت‌به‌بایت، اثبات ماشینی داخل ZIP؛ index.php → ۳۹۰۹ خط؛ تجمعی 1.62.0..1.62.18 = ۵۵ فایل). گروه پشتیبان‌گیری/system_update عمداً دست نخورد (برش جداگانه با احتیاط ویژه). تست‌های پین‌شده: startup_performance (برش login از فایل جدید)، 1_62_11 (بنرها=۱۶)، 1_62_17، triangle.
+- بستهٔ قبلی: `downloads/ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip` (SHA-256: `f96f7efaac2dda05d6075eec891578d7cb4dcd7b49beb9d4bf432040184248ab`) — نسخهٔ ۱.۶۲.۱۷، فاز ۲ برش ۶: ۴ اکشن سرپرستی/امتیازدهی → `actions/supervisor-actions.php` و ۴ اکشن تقویم/تعطیلات → `actions/holiday-actions.php` (بایت‌به‌بایت، اثبات ماشینی داخل ZIP؛ index.php → ۴۰۵۵ خط؛ تجمعی کامل 1.62.0..1.62.17 = ۵۱ فایل). تست‌های پین‌شده: food_orders، ticket_cancellation، 1_62_11 (بنرها=۱۷)، 1_62_16، triangle.
+- بستهٔ قبلی: `downloads/ticket-update-1.62.16-role-settings-actions-split-20261025.zip` (SHA-256: `ecc4da255521764ed4eeaeb89d741f4da8d67752c2c0f7b9e35a94ce4c9cec0d`) — نسخهٔ ۱.۶۲.۱۶، فاز ۲ برش ۵: ۴ اکشن نقش‌ها/دسترسی‌ها → `actions/role-actions.php` و ۵ اکشن نگهداری‌لاگ/LDAP/تنظیمات → `actions/settings-actions.php` (بایت‌به‌بایت، اثبات ماشینی داخل ZIP؛ index.php → ۴۲۵۰ خط؛ تجمعی کامل 1.62.0..1.62.16 = ۴۹ فایل). تست‌های پین‌شده: triangle(2)، particle، ticket_cancellation، traffic_phone_inspection، 1_62_11 (بنرها=۱۸)، 1_62_12.
+- بستهٔ قبلی: `downloads/ticket-update-1.62.15-service-modal-fix-20261025.zip` (SHA-256: `11e659042a261cf21a6c996c2a9cbf71a87158a4aa39b92e07daf9c7ab67c67b`) — نسخهٔ ۱.۶۲.۱۵: اصلاح پاپ‌آپ‌های فرم خدمات (زیر هدر نرود + بستن با کلیک پس‌زمینه/Esc مثل بقیهٔ سامانه). علت فنی: قاعدهٔ عمومی `.content-wrap > *` با specificity بالاتر z-index لایه را ۱ می‌کرد؛ و هر `.service-modal` با inset:0 کل لایه را می‌پوشاند و کلیک به لایه نمی‌رسید. `style.css?v=3.4.46` + `app.js?v=3.4.27`. تجمعی کامل 1.62.0..1.62.15 (۴۷ فایل).
+- بستهٔ قبلی: `downloads/ticket-update-1.62.14-service-actions-split-20261025.zip` (SHA-256: `f762617746c38aa47ac6039bf3dea9772ec0ebfdbdec9e1068c14a274eadfb31`) — نسخهٔ ۱.۶۲.۱۴، بازسازی فاز ۲ برش ۴: ۷ اکشن خدمات/دسته‌ها/پایگاه دانش → `actions/service-actions.php` (بایت‌به‌بایت، اثبات ماشینی داخل ZIP؛ تجمعی کامل 1.62.0..1.62.14 = ۴۷ فایل طبق درس fix1).
+- بستهٔ قبلی: `downloads/ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip` (SHA-256: `6414461bae685d55d6227f76bc163c7d968939aff950636cff2d0f9b62da2a8e`) — **fix1**: کاربر پیام «نمای کامل داشبورد بارگذاری نشد؛ فایل‌های داشبورد را از بستهٔ 1.62.2 نصب کنید» گرفت؛ علت: اجتماع تجمعی از 1.62.4 شروع می‌شد و فایل‌های 1.62.0 تا 1.62.3 (از جمله food-capitalio-dashboard-r42.js/.css) جا مانده بود. fix1 اجتماع را به 1.62.0..1.62.13 گسترش داد + همهٔ assetهای ارجاع‌شدهٔ food-ticket-web/index.html (۴۶ فایل، بدون هیچ تغییر کد). درس: اجتماع تجمعی باید از اولین نسخهٔ پس از requires_version شروع شود و ارجاع‌های HTML پنل‌ها ماشینی کنترل شوند (در تست 1_62_13 دائمی شد).
+- بستهٔ قبلی (ناقص): `downloads/ticket-update-1.62.13-ticket-asset-actions-split-20261025.zip` (SHA-256: `294f11154c3147abff7728ef7fe704d8e1697efedf58928d4741710c996313c1`)؛ گزارش: `updates/2026-10-25-release-162-13-ticket-asset-actions-split/CHANGE-REPORT-FA.md`؛ کاملاً تجمعی 1.62.4 تا 1.62.13 (۲۸ فایل + مهاجرت‌های 009 و 010 برای ارتقای مستقیم).
+- ۱.۶۲.۱۳ = فاز ۲ برش‌های ۲ و ۳: ۷ اکشن درخواست‌ها → `actions/ticket-actions.php` و ۱۰ اکشن اموال/اسکن دامین → `actions/asset-actions.php` (بایت‌به‌بایت، اثبات ماشینی در مخزن و داخل ZIP، محافظ APP_ROOT/404، شرح فارسی بخش‌ها در سرآیند هر فایل — خواستهٔ کاربر). دام‌های بی‌خطر شناخته‌شده در بلوک اموال: یک کلوژر بی‌نام و یک continue داخل حلقه. تست‌های پین‌شده (inventory_truth ×۴، ticket_cancellation، ticket_auto_assignment ×۲) به مسیر جدید به‌روز شدند.
+- بستهٔ قبلی ۱.۶۲.۱۲: `downloads/ticket-update-1.62.12-org-actions-split-20261025.zip` (SHA-256: `3ce12854be16066a5b30a09f601d16d1fc09bf99e0bdfe2a90d75f4c58bbd0d9`)؛ گزارش: `updates/2026-10-25-release-162-12-org-actions-split/CHANGE-REPORT-FA.md`؛ کاملاً تجمعی 1.62.4 تا 1.62.12 (۲۶ فایل + مهاجرت‌های 009 و 010 برای ارتقای مستقیم).
+- ۱.۶۲.۱۲ = فاز ۲ برش ۱: ۱۳ اکشن چارت سازمانی بایت‌به‌بایت از index.php به `actions/org-actions.php` منتقل شد (require در همان نقطه؛ بدون دام include — اسکن شد؛ محافظ APP_ROOT/404؛ اثبات ماشینی بازسازی). تست‌های پین‌شده (org_chart_experts، release_1_62_6، release_1_62_10) به مسیر جدید به‌روز شدند. قاعدهٔ برش‌ها در ARCHITECTURE-FA.md بند ۹.
+- بستهٔ قبلی ۱.۶۲.۱۱: `downloads/ticket-update-1.62.11-code-navigation-phase1-20261025.zip` (SHA-256: `f4e13e87b65fb338daafc22191bfe72c50a06045cea5ebfd797a61ab8ac8f989`)؛ گزارش: `updates/2026-10-25-release-162-11-code-navigation-phase1/CHANGE-REPORT-FA.md`؛ بدون مهاجرت جدید (009 و 010 برای ارتقای مستقیم همراه بسته)؛ **کاملاً تجمعی** — اجتماع فایل‌های 1.62.4 تا 1.62.11 (بستهٔ 1.62.10 چند فایل 1.62.4–1.62.6 مثل assets/app.js را نداشت؛ اصلاح شد).
+- ۱.۶۲.۱۱ = فاز ۱ بهینه‌سازی کدها (صفر تغییر رفتاری): بانرهای ناوبری index.php (۳ ناحیه + ۱۹ گروه اکشن)، TOC خانواده‌های توابع bootstrap.php، سندهای جدید `docs/ARCHITECTURE-FA.md` و `docs/CODE-AUDIT-FA.md` (۸ تابع مرده با اثبات + ۷۵ کلاس CSS کاندید — حذف نشده؛ فاز ۲ با تأیید کاربر: تفکیک index/bootstrap، سرور آزمایشی موجود، هر فاز یک نسخه).
+- بستهٔ قبلی: `downloads/ticket-update-1.62.10-org-liaison-units-20261025.zip` (SHA-256: `1fd128fba81308ced492b682dd7c6132edad470713992a046db85c9cf010ffc0`)؛ مهاجرت 010 (ستون `chart_side`).
+- ۱.۶۲.۱۰: «واحد مستقل (نمایندگی)» در دو سمت راست/چپ کادر مدیرعامل (هر سمت حداکثر یکی)، کمی پایین‌تر و بدون هیچ خط اتصال؛ نمایندهٔ واحد بدون تغییر نقش کاربری؛ خارج از «معاونت درخواست‌کننده» و ارجاع خودکار. بستهٔ قبلی: `downloads/ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip` (SHA-256: `a350dda2db0d02b618a6f64350c483f104aef1dbf47d0d8c3b002822e03819fe`).
+- ثبت دستی فیش برای روزهای قبل: `food_ticket_manual_attendance_date()` تاریخ گذشته (تا امروز) را می‌پذیرد و آینده را با خطا رد می‌کند؛ `food_ticket_api_manual_attendance[_save[_many]]` تاریخ پارامتری دارند (`$targetDate`)؛ مسیر POST در `food-ticket.php` دیگر «فقط امروز» را تحمیل نمی‌کند. UI: `food-manual-attendance.js?v=4` با فیلد `fg-manual-date` (`data-jalali` + `ItsmJalali.enhanceAll`؛ تبدیل با `isoDateFor` سراسری پنل) و ارسال `date` انتخابی در POST.
+- فیش مهمان دستی: ردیف «مهمان» (شناسهٔ ۰) همیشه اول فهرست (`food_ticket_manual_attendance_guest_row` + `array_unshift`)؛ `food_ticket_api_manual_attendance_save_guest`: user_id خالی، full_name/food_type «مهمان»، event_type=guest (یا no_food)، ticket_key خالی، source_key تصادفی (random_bytes) → چندبار در روز قابل ثبت؛ بدون شرط سفارش/کد پرسنلی/تکرار؛ چاپ فیزیکی اختیاری با `food_ticket_enqueue_print`. `save_many` شناسهٔ ۰ را می‌پذیرد (`< 0` فیلتر می‌شود).
+- فرم مقصدهای ملاقات: `assets/style.css` — هر دو فرم افزودن/ویرایش `repeat(4, minmax(0, 1fr)) auto` تا چهار فیلد در یک خط بنشینند؛ زیر ۱۱۰۰px دو ستونه، موبایل تک‌ستونه؛ `style.css?v=3.4.44` در `index.php`.
+- راهنما/چت‌بات: بخش ۶.۱۰ `help-guide.php` به‌روز شد (چت‌بات از همین فایل ایندکس می‌گیرد)؛ مجوز جدیدی لازم نشد (همان `food.groups`).
+- آزمون‌ها: `tests/test_release_1_62_9_manual_ticket_date_guest_static.py` جدید + jsdom رفتاری؛ پین‌های `test_food_manual_attendance_static.py`، `test_release_1_62_4_fixes_static.py` (v4) و `test_traffic_destination_approver_static.py` (نام بسته) به‌روز شد. اعتبارسنجی فقط ایستا.
+- پاسخ به پرسش کاربر (پنجشنبه/جمعهٔ تعطیل): راه‌حل همین ثبت دستی با تاریخ گذشته است؛ شنبه مسئول سلف فیش روز تعطیل را ثبت می‌کند.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۸ (۲۰۲۶/۱۰/۲۵)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.8-traffic-autofill-multi-approver-fix2-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-8-traffic-autofill-multi-approver/CHANGE-REPORT-FA.md`؛ مهاجرت: `009-traffic-destination-multi-approver.sql` (دو ستون اختیاری approver_name2/3 روی traffic_destinations، idempotent)؛ تجمعی (شامل 1.62.4 تا 1.62.7).
+- تکمیل خودکار فرم ثبت تردد: API `traffic_api=lookup` علاوه بر `code` پارامترهای `phone` (۱۱ رقم 09xxxxxxxxx) و `name` (تطبیق دقیق full_name، حداقل ۳ حرف) را می‌پذیرد و `national_code` را هم برمی‌گرداند؛ `traffic_find_last_visit_by()` با whitelist ستون و شرط `COALESCE(is_notice,0)=0`. JS: جست‌وجوی تلفن با کامل شدن ۹ رقم پایانی و جست‌وجوی نام در blur، هر دو بی‌سروصدا (quiet)؛ فقط فیلدهای خالی پر می‌شوند؛ `traffic-control.js?v=12`.
+- چند تأییدکننده: هر مقصد ۱ تا ۳ تأییدکننده (`approver_name`, `approver_name2`, `approver_name3`)؛ فرم‌های افزودن/ویرایش مقصد سه فیلد دارند (اولی اجباری)؛ فیلد تأییدکنندهٔ فرم ثبت/ویرایش تردد `select name="approved_by"` شد که JS از `data-approvers` (JSON روی optionهای مقصد) پر می‌کند؛ سرور با `traffic_destination_approver($title, $record, $requested)` فقط نام داخل فهرست همان مقصد را می‌پذیرد (تک‌تأییدکننده/درخواست خالی → خودکار؛ نام خارج فهرست → TrafficInputException). تأییدکنندهٔ قبلی رکورد موجود برای همان مقصد مجاز می‌ماند.
+- آزمون‌ها: `tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py` جدید؛ پین‌های `test_traffic_destination_approver_static.py` به طراحی جدید به‌روز شد. اعتبارسنجی فقط ایستا.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۷ (۲۰۲۶/۱۰/۲۵)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.7-traffic-history-all-events-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-7-traffic-history-all-events/CHANGE-REPORT-FA.md`؛ بدون migration؛ تجمعی (شامل 1.62.4 تا 1.62.6).
+- موضوع: کاربر گمان می‌کرد رکوردهای تاریخچهٔ ویرایش تردد حذف شده‌اند. بررسی نشان داد هیچ داده‌ای حذف نشده: تا 1.61.10 فهرست همهٔ رویدادها (ویرایش/ثبت خروج/حذف) را نشان می‌داد و از 1.62.4 نمایش به «فقط ویرایش‌های واقعی» محدود شد؛ ردیف‌های خروج/حذف فقط از نمایش فیلتر شده بودند و در `traffic_visit_history` سالم‌اند.
+- رفع: کلید «نمایش همهٔ رویدادها» در زبانهٔ «تاریخچهٔ ویرایش‌ها» (پارامتر `events=all`)؛ پیش‌فرض همان فیلتر 1.62.4؛ صفحه‌بندی حالت را حفظ می‌کند؛ `traffic_history_records()/traffic_history_count()` پارامتر اختیاری `includeAllEvents` گرفتند؛ متن توضیح + راهنما + استایل `traffic-change-filter` به‌روزرسانی شد. آزمون: `tests/test_release_1_62_7_traffic_history_events_static.py`.
+- اعتبارسنجی فقط ایستا؛ نمایش واقعی رویدادها روی سرور کاربر تأیید می‌شود.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۶ (۲۰۲۶/۱۰/۲۵)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.6-ticket-auto-assign-org-guard-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-6-ticket-auto-assign-org-guard/CHANGE-REPORT-FA.md`؛ بدون migration؛ تجمعی (شامل 1.62.4 و 1.62.5).
+- ارجاع خودکار درخواست‌ها: `ticket_org_manager_rank_sql()` مدیران چارت سازمانی را در هر دو کوئری `choose_handling_agent` آخرِ صف می‌گذارد (روی نصب بدون جدول چارت بی‌اثر است). صفحهٔ سازمان: کارت «تشخیص ارجاع خودکار درخواست‌ها» + فرم/اکشن `repair_org_manager_support_roles` کنار ترمیم قبلی ادمین اصلی. راهنما بخش «مسئول درخواست (تیکت) چه کسی می‌شود؟» گرفت. آزمون: `tests/test_release_1_62_6_auto_assign_static.py`. قاعدهٔ واژگانی «درخواست/تیکت» در index.php رعایت شد.
+- اعتبارسنجی فقط ایستا؛ رفتار SQL روی دادهٔ واقعی اجرا نشده است.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۵ (۲۰۲۶/۱۰/۲۵)
+
+- بستهٔ جاری: `downloads/ticket-update-1.62.6-ticket-auto-assign-org-guard-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-6-ticket-auto-assign-org-guard/CHANGE-REPORT-FA.md`؛ بدون migration؛ تجمعی (شامل همهٔ اصلاح‌های 1.62.4).
+- رفع اصلی: منطق دکمهٔ شب/روز صفحات میزبان در `assets/app.js` است که در هیچ بستهٔ 1.62.x نبود؛ این بسته آن را حمل می‌کند. راه‌اندازی app.js در برابر بارگذاری بعد از DOMContentLoaded مقاوم شد و کلیک دکمهٔ تم delegation شد. ارجاع‌ها در index.php، governance.php، ola.php و footer.php به `app.js?v=3.4.26&theme-mode=2` به‌روز شدند.
+- رفتار دکمه با jsdom (سه سناریو) تأیید شد؛ آزمون ایستای جدید: `tests/test_release_1_62_5_theme_toggle_static.py`. مرورگر واقعی در دسترس نبود.
+
+## سابقه — انتشار نسخهٔ ۱.۶۲.۴ (۲۰۲۶/۱۰/۲۵)
+
+- بسته: `downloads/ticket-update-1.62.6-ticket-auto-assign-org-guard-20261025.zip`؛ گزارش: `updates/2026-10-25-release-162-6-ticket-auto-assign-org-guard/CHANGE-REPORT-FA.md`؛ بدون migration.
+- چهار اصلاح: (۱) پوشش کامل حالت شب در برگهٔ برنامهٔ غذایی در هر دو فایل تم میزبان و پنل (`theme-mode.css?v=3`، `food-ticket-global-theme-r42.css?v=45`)، (۲) «تاریخچهٔ ویرایش‌ها»ی کنترل تردد فقط `action='updated'` را فهرست می‌کند (ثبت خروج/حذف همچنان برای ممیزی ذخیره می‌شود)، (۳) صفحه‌های پنل غذا با `margin-inline:auto` وسط‌چین و میزبان داشبورد تمام‌عرض (`food-ticket-theme.css?v=10`)، (۴) ثبت دستی فیش بدون انتخاب پیش‌فرض + تیک «انتخاب همه» در سرستون «انتخاب» (`food-manual-attendance.js?v=3`؛ PANEL_VERSION=1.37.25).
+- راهنمای فارسی دو بخش جدید گرفت (تاریخچهٔ ویرایش تردد و ثبت دستی فیش)؛ چت‌بات از همان راهنما ایندکس می‌سازد. مجوز جدیدی لازم نشد.
+- اعتبارسنجی: lint نحوی PHP با php-wasm 8.3، node --check، آزمون‌های ایستای مخزن (۱۵۹ قبولی؛ ۷ خطای باقی‌مانده پیش از این تغییرات هم روی درخت تمیز بودند)، آزمون جدید `tests/test_release_1_62_4_fixes_static.py`. اصلاح‌های ظاهری در مرورگر واقعی دیده نشده‌اند.
+
+## وضعیت جاری — انتشار R31 نسخهٔ ۱.۶۱.۱۰
+
+- بستهٔ تازه: [دانلود R31](../downloads/ticket-update-1.61.10-asset-quality-performance-r31-final-20261022.zip)؛ [صفحهٔ دانلود مشترک](../downloads/index.html).
+- گزارش انتشار: [CHANGE-REPORT-FA.md](../updates/2026-10-22-release-161-10-r31/CHANGE-REPORT-FA.md)؛ این بسته migration ندارد.
+- R31 دادهٔ معتبر قبلی Inventory را هنگام خطای WMI/CIM یا نبود پوشش collector حفظ می‌کند و وضعیت منبع/زمان تلاش و پاسخ موفق را برای داده‌های خودکار ثبت می‌کند.
+- شروع پنل مدیریت غذا با موازی‌کردن درخواست‌های مستقل و دسته‌ای‌کردن بررسی برخورد نام کاربری کارکنان بهینه شده است.
+- زمان‌سنجی رندر پنل غذا، APIها و ورود LDAP به لاگ افزوده شده؛ این لاگ به‌تنهایی اجرای واقعی یا اثبات علت کندی نیست.
+- [گزارش مدیریتی آزمون سامانه](../benchmark-results/full-system-management-report-fa.md) نتایج CI پس از اصلاحات را ثبت می‌کند: Python (۱۳۸ تست + ۱۸ subtest)، هر پنج اسکریپت Node، route/API smoke (۷۴/۷۴) و workload نوشتنی مصنوعی قبول شدند؛ اما تست‌های PHP offline و ۷ assertion در `tests/smoke.php` شکست دارند و quality gate قرمز است. WMI/Windows، LDAP/AD واقعی، Access/ODBC، چاپگر فیزیکی و production/staging اجرا نشده‌اند.
+
+## سابقه — انتشار نسخهٔ ۱.۶۱.۹
+
+- مدیران تردد می‌توانند مشخصات و تاریخ/ساعت را اصلاح کنند؛ تغییرهای بعد از نصب در تاریخچه ثبت می‌شوند.
+- اتصال طراحی چیدمان پنل چاپ غذا اختیاری و مقاوم شد.
+- بسته: `downloads/ticket-update-1.61.9.zip`؛ گزارش: `updates/2026-10-20-release-161-9/CHANGE-REPORT-FA.md`.
+
+## سابقه — انتشار نسخهٔ ۱.۶۱.۸
+
+- نمای طراحیِ فقط‌برای‌ادمین‌اصلی روی صفحه‌های موجود: ویرایش زندهٔ اندازه/فاصله/تراز/چینش، ذخیره به‌ازای هر صفحه، بازگردانی و اعتبارسنجی امن سمت سرور؛ در پوستهٔ اصلی و پنل مدیریت غذا.
+- اصلاح دکمهٔ لغو سفارش: جدول‌های سفارش ۹ ستون مشخص دارند و دکمه در همان سطر می‌ماند.
+- گزارش انتشار: `updates/2026-10-20-release-161-8/CHANGE-REPORT-FA.md`.
+
+## سابقه — انتشار نسخهٔ ۱.۶۱.۷
+
+- نمایش زمان درخواست لغو غذا، مجوزهای ورودی/خروجی CD/DVD، و شمارش سفارش‌ها/فاصلهٔ بهتر در چاپ گروهی.
+- بسته: `downloads/ticket-update-1.61.7.zip`؛ گزارش: `updates/2026-10-20-release-161-7/CHANGE-REPORT-FA.md`.
+
+## سابقه — انتشار نسخهٔ ۱.۶۰.۳ (بازرسی به‌جای نگهبان + اعلان لغو و مهلت سلف)
 
 - نام «نگهبان» در سامانه به «بازرسی» تبدیل شد؛ کد نقش `guard` برای سازگاری دیتابیس مانده است.
 - اعلان درخواست لغو غذا فقط به مدیر پشتیبانی و مدیر اصلی می‌رسد.

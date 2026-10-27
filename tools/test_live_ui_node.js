@@ -306,7 +306,13 @@ check('ب-۲۶: در حوزهٔ پشتیبانی انتخاب سیستم پاک 
   hiddenSelect.value + ' / ' + search.getAttribute('aria-required'));
 groupRadios[0].checked = true;
 groupRadios[0].dispatchEvent(new ticketWindow.Event('change', { bubbles: true }));
-check('ب-۲۷: بازگشت به حوزهٔ IT فیلد را دوباره پیدا و الزامی می‌کند',
+serviceSelector.value = '';
+serviceSelector.dispatchEvent(new ticketWindow.Event('change', { bubbles: true }));
+check('ب-۲۷: بازگشت به حوزهٔ IT فیلد را نشان می‌دهد ولی تا انتخاب خدمت الزام ایجاد نمی‌کند',
+  assetLabel.hidden === false && search.getAttribute('aria-required') === 'false');
+serviceSelector.value = '6';
+serviceSelector.dispatchEvent(new ticketWindow.Event('change', { bubbles: true }));
+check('ب-۲۸: پس از انتخاب خدمت IT، فیلد سیستم دوباره الزامی می‌شود',
   assetLabel.hidden === false && search.getAttribute('aria-required') === 'true');
 
 console.log('\n' + (fail === 0

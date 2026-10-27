@@ -8,7 +8,7 @@ declare(strict_types=1);
  *   C:\xampp\php\php.exe tools\diag_asset_profile.php
  *   C:\xampp\php\php.exe tools\diag_asset_profile.php --asset=12         بررسی شناسنامهٔ یک سیستم
  *   C:\xampp\php\php.exe tools\diag_asset_profile.php --asset=12 --apply  ذخیرهٔ فیلدهای خالی با مقادیر استخراج‌شده
- *   C:\xampp\php\php.exe tools\diag_asset_profile.php --client=192.168.1.25   استخراج یک سیستم دیگر شبکه (با حساب تنظیمات)
+ *   برای --client، ITSM_SCAN_USER و ITSM_SCAN_PASS را فقط در محیط موقت فرایند تنظیم کنید؛ رمز را در آرگومان خط فرمان ننویسید.
  *
  * چه چیزی نشان می‌دهد:
  *   ۱) محیط اجرا: shell_exec/proc_open، disable_functions، مسیر PowerShell، اسکریپت جمع‌آوری
@@ -136,10 +136,14 @@ if ($clientIp !== '') {
     if ($problem !== null) {
         $say('  [FAIL] ' . $problem);
     } else {
-        $many = domain_scan_remote_inventory_many([$clientIp], 1);
+        $scanCredentials = [
+            'username' => (string) (getenv('ITSM_SCAN_USER') ?: ''),
+            'password' => (string) (getenv('ITSM_SCAN_PASS') ?: ''),
+        ];
+        $many = domain_scan_remote_inventory_many([$clientIp], 1, $scanCredentials);
         $row = $many[$clientIp] ?? ['inventory' => [], 'error' => 'نتیجه‌ای برنگشت'];
         if (($row['inventory'] ?? []) === []) {
-            $say('  [FAIL] ' . (string) ($row['error'] ?? 'خطای نامشخص') . ' — حساب/رمز «استخراج شبکه» و دسترسی WMI را بررسی کنید.');
+            $say('  [FAIL] ' . (string) ($row['error'] ?? 'خطای نامشخص') . ' — برای آزمون CLI، ITSM_SCAN_USER و ITSM_SCAN_PASS را فقط در محیط موقت همان پردازه تنظیم کنید؛ رمز را در خط فرمان ننویسید.');
         } else {
             $say('  موفق. امتیاز سخت‌افزار: ' . inventory_hardware_score($row['inventory']));
             $clientValues = asset_profile_auto_values($row['inventory']);

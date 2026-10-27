@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — نمایش و دسترسی به پنل ترمیم نقش مدیران سازمانی (R21)",
+  "date": "2026-10-21",
+  "migrations": [],
+  "notes": "Builds on R20. The org admin repair panel existed but was appended after a fixed-height, overflow-hidden organization workspace and therefore clipped from view. R21 allows document scrolling on the organization page and adds a primary-admin header shortcut to the panel; CSS is cache-busted. Manager role repair continues to preserve unit assignments and requires at least one active primary admin. R20 employee-code search changes remain. No production database was accessed or changed."
+}

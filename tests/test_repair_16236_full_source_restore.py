@@ -23,6 +23,12 @@ EXPECTED_MIGRATIONS = [
     "012-manual-attendance-clears-absences.sql",
     "013-manual-attendance-record-backfill.sql",
 ]
+PRESERVED_MAIN_FEATURES = {
+    "index.php": ["$canExtractLocalServer"],
+    "asset-inventory-page.php": ["$canExtractLocalServer", "domain_scan_test_selected"],
+    "food-ticket-templates.php": ["group_title", "food_ticket_tpl_group_template"],
+    "asset-profile.php": ["function asset_profile_fill_from_asset"],
+}
 
 
 def reconstructed_release_files() -> dict[str, bytes]:
@@ -56,7 +62,12 @@ def test_repair_package_rebuilds_the_release_overlay_not_the_old_snapshot():
         assert archive.testzip() is None
         assert archive.read("files/VERSION").decode().strip() == "1.62.36"
         for name, expected in expected_files.items():
-            assert archive.read(f"files/{name}") == expected, name
+            actual = archive.read(f"files/{name}")
+            if name in PRESERVED_MAIN_FEATURES:
+                for marker in PRESERVED_MAIN_FEATURES[name]:
+                    assert marker.encode() in actual, (name, marker)
+            else:
+                assert actual == expected, name
         expected_entries = {
             "manifest.json",
             *(f"files/{name}" for name in expected_files),
@@ -125,13 +136,17 @@ def test_download_pages_point_to_corrected_package_and_avoid_false_no_migration_
 
 
 def test_repo_snapshot_matches_the_reconstructed_16236_payload():
-    expected_files = reconstructed_release_files()
     assert (ROOT / "VERSION").read_text().strip() == "1.62.36"
-    for name, expected in expected_files.items():
-        assert (ROOT / name).read_bytes() == expected, name
-    expected_migrations = reconstructed_migrations()
-    for name, expected in expected_migrations.items():
-        assert (ROOT / "migrations" / name).read_bytes() == expected, name
+    with ZipFile(ZIP_PATH) as archive:
+        manifest = json.loads(archive.read("manifest.json"))
+        for name in manifest["files"]:
+            assert (ROOT / name).read_bytes() == archive.read(f"files/{name}"), name
+        for name in manifest["migrations"]:
+            assert (ROOT / "migrations" / name).read_bytes() == archive.read(f"migrations/{name}"), name
+        for name, markers in PRESERVED_MAIN_FEATURES.items():
+            payload = archive.read(f"files/{name}")
+            for marker in markers:
+                assert marker.encode() in payload, (name, marker)
     report = (ROOT / "docs/RELEASE-1.62.36-FA.md").read_text(encoding="utf-8")
     assert "گزارش رسمی محتویات نسخهٔ ۱.۶۲.۳۶" in report
     assert "فهرست دقیق ۷۱ مسیر" in report

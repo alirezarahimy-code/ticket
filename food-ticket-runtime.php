@@ -126,6 +126,47 @@ function food_ticket_save_template(array $template): void
 function food_ticket_render_from_template(array $event, ?array $template = null): string
 {
     $tpl = $template ?: food_ticket_template();
+    if (!empty($event['group_ticket']) && is_array($event['group_ticket_rows'] ?? null)) {
+        $org = trim((string) ($tpl['company'] ?? ''));
+        if ($org === '') {
+            $org = function_exists('food_ticket_tpl_system_name') ? food_ticket_tpl_system_name() : 'سازمان';
+        }
+        $title = trim((string) ($tpl['title'] ?? '')) ?: 'فیش گروهی غذا';
+        $date = (string) ($event['punch_date'] ?? '');
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $date, $m) && function_exists('gregorian_to_jalali')) {
+            [$jy, $jm, $jd] = gregorian_to_jalali((int) $m[1], (int) $m[2], (int) $m[3]);
+            $date = sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
+        }
+        $lines = [$org, $title];
+        if (trim((string) ($event['group_title'] ?? '')) !== '') {
+            $lines[] = 'گروه: ' . (string) $event['group_title'];
+        }
+        $lines[] = 'تاریخ: ' . $date;
+        $time = trim((string) ($event['punch_time'] ?? ''));
+        if (preg_match('/^(\\d{1,2}):(\\d{2})/', $time, $timeParts)) {
+            $time = sprintf('%02d:%02d', (int) $timeParts[1], (int) $timeParts[2]);
+        }
+        $lines[] = 'ساعت: ' . $time;
+        $lines[] = '------------------------------';
+        foreach ($event['group_ticket_rows'] as $groupRow) {
+            $food = trim((string) ($groupRow['food'] ?? ''));
+            $names = array_values(array_filter(array_map('strval', (array) ($groupRow['members'] ?? [])), static fn (string $n): bool => trim($n) !== ''));
+            if ($food === '' || !$names) {
+                continue;
+            }
+            $count = max(0, (int) ($groupRow['count'] ?? count($names)));
+            $lines[] = (string) ($groupRow['label'] ?? 'منو') . ' — ' . $food . ' — ' . $count . ' عدد';
+            $lines[] = '';
+            foreach ($names as $name) {
+                $lines[] = 'نام و نام خانوادگی: ' . $name;
+            }
+        }
+        if (trim((string) ($tpl['footer'] ?? '')) !== '') {
+            $lines[] = (string) $tpl['footer'];
+        }
+        $out = implode("\n", $lines) . "\n";
+        return function_exists('food_ticket_fa_digits') ? food_ticket_fa_digits($out) : $out;
+    }
     $event['food_date'] = (string) ($event['food_date'] ?? $event['punch_date'] ?? '');
     $event['attendance_time'] = (string) ($event['attendance_time'] ?? $event['punch_time'] ?? '');
     $fields = $tpl['fields'] ?? [];
@@ -256,6 +297,183 @@ function food_ticket_can_delete_source_after_print(string $printStatus): bool
 /**
  * پردازش صف چاپ — جدا از دریافت تردد.
  */
+/**
+ * چاپ یک اجرای گروهی به‌صورت یک فیش مشترک. رویدادهای اعضا همچنان جداگانه
+ * در جدول رویدادها/گزارش‌ها نگه داشته می‌شوند؛ فقط خروجی فیزیکی تجمیع می‌شود.
+ * @return array{handled:bool,ids:list<int>,printed?:bool,failed?:bool,deferred?:bool}
+ */
+function food_ticket_print_group_run(array $event, array $config, array $tpl, int $maxRetry, int $delay): array
+{
+    if (function_exists('food_ticket_group_print_mode') && food_ticket_group_print_mode() === 'individual') {
+        return ['handled' => false, 'ids' => []]; // مسیر عادی صف، فیش هر عضو را جداگانه چاپ می‌کند.
+    }
+    $payload = json_decode((string) ($event['source_payload'] ?? ''), true);
+    $runId = is_array($payload) ? (int) ($payload['run_id'] ?? 0) : 0;
+    if ($runId <= 0 || !function_exists('food_ticket_group_event_ids_for_run')) {
+        return ['handled' => false, 'ids' => []];
+    }
+
+    try {
+        $runQuery = db()->prepare('SELECT status, group_title, punch_date, punch_time FROM food_ticket_group_runs WHERE id = ? LIMIT 1');
+        $runQuery->execute([$runId]);
+        $run = $runQuery->fetch();
+    } catch (Throwable $e) {
+        app_error_log('[food-print] group run lookup failed run=' . $runId . ': ' . $e->getMessage());
+        return ['handled' => true, 'ids' => [], 'deferred' => true];
+    }
+    if (!$run || (string) ($run['status'] ?? '') !== 'done') {
+        // اجرای ناقص گروه هرگز به‌صورت فیش نهایی چاپ نمی‌شود.
+        return ['handled' => true, 'ids' => [], 'deferred' => true];
+    }
+
+    $allIds = food_ticket_group_event_ids_for_run($runId);
+    if (!$allIds) {
+        return ['handled' => true, 'ids' => []];
+    }
+    $ids = array_values(array_unique(array_filter(array_map('intval', $allIds), static fn (int $id): bool => $id > 0)));
+    $marks = implode(',', array_fill(0, count($ids), '?'));
+    try {
+        $q = db()->prepare('SELECT * FROM food_ticket_events WHERE id IN (' . $marks . ') ORDER BY id ASC');
+        $q->execute($ids);
+        $events = $q->fetchAll();
+    } catch (Throwable $e) {
+        app_error_log('[food-print] group event lookup failed run=' . $runId . ': ' . $e->getMessage());
+        return ['handled' => true, 'ids' => $ids, 'deferred' => true];
+    }
+
+    $eligible = [];
+    foreach ($events as $memberEvent) {
+        if ((string) ($memberEvent['event_type'] ?? '') !== 'printed'
+            || trim((string) ($memberEvent['food_type'] ?? '')) === ''
+            || trim((string) ($memberEvent['full_name'] ?? '')) === '') {
+            continue;
+        }
+        if (food_ticket_delivery_supported() && (string) ($memberEvent['delivery_status'] ?? 'pending') === 'delivered'
+            && (string) ($memberEvent['print_status'] ?? '') !== 'printed') {
+            $memberId = (int) ($memberEvent['id'] ?? 0);
+            db()->prepare('UPDATE food_ticket_events SET print_status = "printed", next_retry_at = NULL, last_error = NULL WHERE id = ?')->execute([$memberId]);
+            food_ticket_print_log($memberId, (string) ($memberEvent['print_job_id'] ?? ''), $memberEvent['source_key'] ?? null, $memberEvent['ticket_key'] ?? null, (string) ($memberEvent['printer_name'] ?? ''), 'skipped', (int) ($memberEvent['retry_count'] ?? 0), 'ticket already delivered; group print skipped');
+            continue;
+        }
+        $status = (string) ($memberEvent['print_status'] ?? '');
+        if (in_array($status, ['pending', 'failed', 'print_error'], true)
+            || ($status === 'printing' && strtotime((string) ($memberEvent['updated_at'] ?? '')) < time() - 1800)) {
+            $eligible[] = $memberEvent;
+        }
+    }
+    if (!$eligible) {
+        return ['handled' => true, 'ids' => $ids];
+    }
+
+    $eligibleIds = array_map(static fn (array $e): int => (int) $e['id'], $eligible);
+    $eligibleMarks = implode(',', array_fill(0, count($eligibleIds), '?'));
+    $jobId = (string) ($event['print_job_id'] ?? '');
+    if ($jobId === '') {
+        $jobId = food_ticket_new_job_id('group-run:' . $runId);
+    }
+    $printer = function_exists('food_ticket_printer_label')
+        ? food_ticket_printer_label($config)
+        : (string) ($event['printer_name'] ?? $config['printer_host'] ?? '');
+    $retry = 0;
+    foreach ($eligible as $memberEvent) {
+        $retry = max($retry, (int) ($memberEvent['retry_count'] ?? 0), (int) ($memberEvent['print_attempts'] ?? 0));
+    }
+    if ($retry >= $maxRetry) {
+        $staleIds = [];
+        foreach ($eligible as $memberEvent) {
+            if ((string) ($memberEvent['print_status'] ?? '') === 'printing') {
+                $staleIds[] = (int) $memberEvent['id'];
+            }
+        }
+        if ($staleIds) {
+            $staleMarks = implode(',', array_fill(0, count($staleIds), '?'));
+            db()->prepare('UPDATE food_ticket_events SET print_status = "failed", next_retry_at = NULL, last_error = ? WHERE id IN (' . $staleMarks . ')')
+                ->execute(array_merge(['Group ticket retry limit reached.'], $staleIds));
+        }
+        // مانند صف فیش‌های فردی، رویدادی که به سقف تلاش رسیده دوباره چاپ نمی‌شود.
+        return ['handled' => true, 'ids' => $ids];
+    }
+
+    // همهٔ اعضا با یک job شناسه‌گذاری می‌شوند تا worker دوم نتواند فیشی از همین اجرا بردارد.
+    $claim = db()->prepare('UPDATE food_ticket_events SET print_status = "printing", print_job_id = ?, printer_name = ?, '
+        . 'retry_count = COALESCE(retry_count, 0) + 1, print_attempts = print_attempts + 1, next_retry_at = NULL '
+        . 'WHERE id IN (' . $eligibleMarks . ') AND (print_status IN ("pending", "failed", "print_error") OR (print_status = "printing" AND updated_at < DATE_SUB(NOW(), INTERVAL 30 MINUTE)))');
+    $claim->execute(array_merge([$jobId, $printer], $eligibleIds));
+    if ($claim->rowCount() !== count($eligibleIds)) {
+        return ['handled' => true, 'ids' => $ids, 'deferred' => true];
+    }
+
+    $byFood = [];
+    foreach ($eligible as $memberEvent) {
+        $food = trim((string) $memberEvent['food_type']);
+        $name = trim((string) $memberEvent['full_name']);
+        $byFood[$food] ??= ['members' => [], 'count' => 0];
+        $byFood[$food]['count']++;
+        if (!in_array($name, $byFood[$food]['members'], true)) {
+            $byFood[$food]['members'][] = $name;
+        }
+    }
+    $groupRows = [];
+    $menuNumber = 1;
+    foreach ($byFood as $food => $foodData) {
+        $names = $foodData['members'];
+        if (!$names) {
+            continue;
+        }
+        $groupRows[] = [
+            'label' => 'منو' . $menuNumber,
+            'food' => $food,
+            'count' => (int) $foodData['count'],
+            'members' => $names,
+        ];
+        $menuNumber++;
+    }
+    if (!$groupRows) {
+        db()->prepare('UPDATE food_ticket_events SET print_status = "failed", next_retry_at = ?, last_error = ? WHERE id IN (' . $eligibleMarks . ')')
+            ->execute(array_merge([date('Y-m-d H:i:s', time() + $delay), 'No eligible group ticket rows.'], $eligibleIds));
+        return ['handled' => true, 'ids' => $ids, 'failed' => true, 'count' => count($eligible)];
+    }
+
+    $ticket = $eligible[0];
+    $ticket['group_ticket'] = 1;
+    $ticket['group_ticket_rows'] = $groupRows;
+    $ticket['group_title'] = (string) ($run['group_title'] ?? $payload['group_title'] ?? '');
+    $ticket['punch_date'] = (string) ($run['punch_date'] ?? $ticket['punch_date'] ?? '');
+    $ticket['punch_time'] = (string) ($run['punch_time'] ?? $ticket['punch_time'] ?? '');
+    $ticket['full_name'] = $ticket['group_title'];
+
+    $groupTpl = $tpl;
+    if (trim((string) ($groupTpl['company'] ?? '')) === '') {
+        $groupTpl['company'] = function_exists('food_ticket_tpl_system_name') ? food_ticket_tpl_system_name() : 'سازمان';
+    }
+    if (trim((string) ($groupTpl['title'] ?? '')) === '') {
+        $groupTpl['title'] = 'فیش گروهی غذا';
+    }
+
+    try {
+        $text = food_ticket_render_from_template($ticket, $groupTpl);
+        food_ticket_send_raw_payload($text, $config, $groupTpl, $ticket);
+        $update = db()->prepare('UPDATE food_ticket_events SET print_status = "printed", event_type = IF(event_type = "guest", "guest", "printed"), '
+            . 'processed_at = NOW(), last_error = NULL, next_retry_at = NULL WHERE id IN (' . $eligibleMarks . ')');
+        $update->execute($eligibleIds);
+        foreach ($eligible as $memberEvent) {
+            $memberId = (int) $memberEvent['id'];
+            food_ticket_mark_delivered_on_print($memberId);
+            food_ticket_print_log($memberId, $jobId, $memberEvent['source_key'] ?? null, $memberEvent['ticket_key'] ?? null, $printer, 'printed', $retry, 'group ticket printed once for run ' . $runId);
+        }
+        return ['handled' => true, 'ids' => $ids, 'printed' => true, 'count' => count($eligible)];
+    } catch (Throwable $e) {
+        $next = date('Y-m-d H:i:s', time() + $delay);
+        db()->prepare('UPDATE food_ticket_events SET print_status = "failed", next_retry_at = ?, last_error = ?, processed_at = NOW() WHERE id IN (' . $eligibleMarks . ')')
+            ->execute(array_merge([$next, $e->getMessage()], $eligibleIds));
+        foreach ($eligible as $memberEvent) {
+            food_ticket_print_log((int) $memberEvent['id'], $jobId, $memberEvent['source_key'] ?? null, $memberEvent['ticket_key'] ?? null, $printer, 'failed', $retry + 1, $e->getMessage());
+        }
+        app_error_log('[food-print] group ticket FAILED run=' . $runId . ': ' . $e->getMessage());
+        return ['handled' => true, 'ids' => $ids, 'failed' => true, 'count' => count($eligible)];
+    }
+}
+
 function food_ticket_process_print_queue(?array $config = null, int $limit = 30): array
 {
     $config = $config ?: food_ticket_config(true);
@@ -263,6 +481,7 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
     $maxRetry = max(1, (int) ($tpl['retry_count'] ?? 5));
     $delay = max(5, (int) ($tpl['retry_delay_seconds'] ?? 30));
     $summary = ['claimed' => 0, 'printed' => 0, 'failed' => 0, 'skipped' => 0];
+    $groupHandledIds = [];
     // صف چاپ بدون آدرس چاپگر اجرا نمی‌شود؛ هر فیش بعداً وقتی چاپگر تنظیم شد چاپ می‌شود.
     if (trim((string) ($config['printer_host'] ?? '')) === '' && trim((string) ($config['printer_share'] ?? '')) === '') {
         return $summary;
@@ -287,11 +506,32 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
     }
 
     foreach ($rows as $event) {
+        if (isset($groupHandledIds[(int) ($event['id'] ?? 0)])) {
+            continue;
+        }
         if ($printerDown || (microtime(true) - $queueStarted) > 20) {
             $summary['skipped']++;
             continue;
         }
         $id = (int) $event['id'];
+        $sourcePayload = json_decode((string) ($event['source_payload'] ?? ''), true);
+        if (is_array($sourcePayload) && (int) ($sourcePayload['run_id'] ?? 0) > 0
+            && function_exists('food_ticket_group_event_ids_for_run')) {
+            $groupResult = food_ticket_print_group_run($event, $config, $tpl, $maxRetry, $delay);
+            if (!empty($groupResult['handled'])) {
+                foreach ((array) ($groupResult['ids'] ?? []) as $handledId) {
+                    $groupHandledIds[(int) $handledId] = true;
+                }
+                $groupCount = (int) ($groupResult['count'] ?? 0);
+                $summary['claimed'] += !empty($groupResult['printed']) || !empty($groupResult['failed']) ? $groupCount : 0;
+                $summary['printed'] += !empty($groupResult['printed']) ? $groupCount : 0;
+                $summary['failed'] += !empty($groupResult['failed']) ? $groupCount : 0;
+                if (!empty($groupResult['deferred'])) {
+                    $summary['skipped']++;
+                }
+                continue;
+            }
+        }
         $retry = max((int) ($event['retry_count'] ?? 0), (int) ($event['print_attempts'] ?? 0));
         $jobId = (string) ($event['print_job_id'] ?? food_ticket_new_job_id((string) ($event['ticket_key'] ?? $id)));
         // ۱.۳۷.۶ — مقصد واقعی چاپ باید *پیش از* هر لاگ/محافظ تعیین شود.
@@ -428,6 +668,37 @@ function food_ticket_fa_digits(string $value): string
  */
 function food_ticket_graphic_rows(array $event, array $tpl): array
 {
+    if (!empty($event['group_ticket']) && is_array($event['group_ticket_rows'] ?? null)) {
+        $date = (string) ($event['punch_date'] ?? '');
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})/', $date, $m) && function_exists('gregorian_to_jalali')) {
+            [$jy, $jm, $jd] = gregorian_to_jalali((int) $m[1], (int) $m[2], (int) $m[3]);
+            $date = sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
+        }
+        $fa = static fn (string $v): string => function_exists('food_ticket_fa_digits') ? food_ticket_fa_digits($v) : $v;
+        $rows = [];
+        if (trim((string) ($event['group_title'] ?? '')) !== '') {
+            $rows[] = ['l' => 'گروه', 'v' => $fa((string) $event['group_title'])];
+        }
+        $rows[] = ['l' => 'تاریخ', 'v' => $fa($date)];
+        $time = trim((string) ($event['punch_time'] ?? ''));
+        if (preg_match('/^(\\d{1,2}):(\\d{2})/', $time, $timeParts)) {
+            $time = sprintf('%02d:%02d', (int) $timeParts[1], (int) $timeParts[2]);
+        }
+        $rows[] = ['l' => 'ساعت', 'v' => $fa($time)];
+        foreach ($event['group_ticket_rows'] as $groupRow) {
+            $food = trim((string) ($groupRow['food'] ?? ''));
+            $names = array_values(array_filter(array_map('strval', (array) ($groupRow['members'] ?? [])), static fn (string $n): bool => trim($n) !== ''));
+            if ($food === '' || !$names) {
+                continue;
+            }
+            $count = max(0, (int) ($groupRow['count'] ?? count($names)));
+            $rows[] = ['l' => (string) ($groupRow['label'] ?? 'منو'), 'v' => $fa($food . ' — ' . $count . ' عدد')];
+            foreach ($names as $name) {
+                $rows[] = ['l' => 'نام و نام خانوادگی', 'v' => $fa($name)];
+            }
+        }
+        return ['food' => '', 'food_label' => 'نوع غذا', 'rows' => $rows];
+    }
     $event['food_date'] = (string) ($event['food_date'] ?? $event['punch_date'] ?? '');
     $event['attendance_time'] = (string) ($event['attendance_time'] ?? $event['punch_time'] ?? '');
     $fields = $tpl['fields'] ?? [];

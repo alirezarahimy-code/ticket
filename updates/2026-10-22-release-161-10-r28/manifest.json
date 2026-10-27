@@ -1,0 +1,7 @@
+{
+  "version": "1.61.10",
+  "title": "Ticket 1.61.10 — تکمیل روند اسکن شبکه با آزمون یک مقصد (R28)",
+  "date": "2026-10-22",
+  "migrations": [],
+  "notes": "R28 adds a non-persistent single-target credential/connectivity test, detects WinRM-only endpoints over TCP 5985 when ICMP is blocked, improves target-side WinRM diagnostics, and documents a secure one-account domain scan workflow. No database migration or production data change."
+}

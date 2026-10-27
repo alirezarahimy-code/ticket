@@ -2895,7 +2895,7 @@ if ($page === 'assets') {
         $collectedCount += !empty($assetRow['last_inventory_at']) ? 1 : 0;
     }
     render_header('دارایی‌ها', $assetUser);
-    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
+    inventory_render_assets_content($assetRows, $assetSearch, $networkFilter, $canImportAssets, $canPingAssets, $canExtractAssets, $canExtractLocalServer, $canConfigureNetworkScan, $networkScanEnabled, $canSelectAssets, $onlineCount, $collectedCount);
     render_footer();
     exit;
 }

@@ -1,0 +1,9 @@
+{
+  "version": "1.62.3",
+  "release": "1.62.3",
+  "title": "Ticket 1.62.3 — staff report selection, food theme surfaces, and support ticket scope",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.3-food-staff-report-theme-20261025.zip",
+  "migrations": [],
+  "notes": "Cumulative offline update preserving the separate 1.62.2 package. The selected-staff food report loads up to 500 active employees initially, supports text search returning up to 50 matches and checkbox selection, with date controls/actions above the search/list. Dark mode covers the food form surfaces and schedule in both host and standalone panel styles. Source audit confirms support_manager ticket_scope is hard-limited to support before any view_all permission, including dashboard/list/detail, search, analytics, queue/supervisor, governance and chatbot queries. No migration, cloud dependency, production deployment or full real-environment validation."
+}

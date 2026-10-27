@@ -13,7 +13,11 @@ const segment = src.slice(start, end);
 // وابستگی‌ها: esc و faDigits و state مثل فایل اصلی
 const esc = (v) => String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const faDigits = (v) => String(v).replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
-const state = { ordersSort: { key: 'food', dir: 'asc' } };
+const state = {
+  ordersSort: { key: 'food', dir: 'asc' },
+  // Match the default report columns initialized by assets/food-menu.js.
+  orderReportFields: ['row', 'national_code', 'employee_number', 'full_name', 'food_name', 'food_date', 'reserve_date', 'reserve_time', 'status_label', 'record_type', 'menu_no', 'meal_type'],
+};
 const factory = new Function('esc', 'faDigits', 'state', 'jalaliFromIso', segment + '\nreturn { orderByMenuHtml, orderTableHtml };');
 const { orderByMenuHtml } = factory(esc, faDigits, state, () => '۱۴۰۵/۰۷/۲۱');
 

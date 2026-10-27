@@ -1,0 +1,40 @@
+{
+  "name": "release-162-12-org-actions-split",
+  "version": "1.62.12",
+  "date": "2026-10-25",
+  "title": "فاز ۲ بازسازی کدها — برش ۱: جداسازی ۱۳ اکشن چارت سازمانی از index.php (بدون تغییر رفتاری)",
+  "requires_version": "1.61.9",
+  "migrations": [
+    "009-traffic-destination-multi-approver.sql",
+    "010-org-liaison-units.sql"
+  ],
+  "files": [
+    "VERSION",
+    "actions/org-actions.php",
+    "app/Views/layout/footer.php",
+    "app/Views/layout/header.php",
+    "assets/app.js",
+    "assets/organization.js",
+    "assets/style.css",
+    "assets/theme-mode.css",
+    "assets/traffic-control.js",
+    "bootstrap.php",
+    "food-ticket-groups.php",
+    "food-ticket-web/assets/food-manual-attendance.js",
+    "food-ticket-web/assets/food-ticket-global-theme-r42.css",
+    "food-ticket-web/assets/food-ticket-theme.css",
+    "food-ticket-web/index.html",
+    "food-ticket.php",
+    "governance.php",
+    "help-guide.php",
+    "index.php",
+    "install-empty-db.sql",
+    "migrations/009-traffic-destination-multi-approver.sql",
+    "migrations/010-org-liaison-units.sql",
+    "ola.php",
+    "organization.php",
+    "schema.sql",
+    "traffic-control.php"
+  ],
+  "notes": "برش اول فاز ۲ بازسازی: ۱۳ اکشن POST چارت سازمانی (save_org_node تا repair_org_manager_support_roles) بدون هیچ تغییری — بایت‌به‌بایت — از index.php به فایل جدید actions/org-actions.php منتقل شد و index.php همان‌جا با require آن را بارگذاری می‌کند (همان حوزهٔ متغیرها؛ بلوک منتقل‌شده هیچ return/function/break ندارد که معنای include را عوض کند). اثبات ماشینی: جایگذاری متن فایل جدید به‌جای خط require، فایل index.php قبلی را بایت‌به‌بایت بازسازی می‌کند. فایل جدید محافظ دسترسی مستقیم دارد (بدون APP_ROOT پاسخ 404). مهاجرت جدید ندارد (009 و 010 فقط برای ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته‌اند). بستهٔ کاملاً تجمعی 1.62.4 تا 1.62.12. هیچ داده‌ای تغییر نمی‌کند."
+}

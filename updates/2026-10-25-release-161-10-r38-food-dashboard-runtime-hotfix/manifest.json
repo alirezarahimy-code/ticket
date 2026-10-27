@@ -1,0 +1,9 @@
+{
+  "version": "1.61.10",
+  "release": "R38",
+  "title": "Ticket 1.61.10 — R38 Food Dashboard runtime hotfix",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.61.10-food-dashboard-runtime-hotfix-r38-20261025.zip",
+  "migrations": [],
+  "notes": "Fixes the R37 browser runtime failure where process.env.NODE_ENV was referenced without a browser process object, leaving the food dashboard root unmounted. A local production-mode process shim is scoped inside the R38 dashboard bundle. No sample records, external runtime, or database migration."
+}

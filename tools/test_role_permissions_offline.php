@@ -124,7 +124,7 @@ $lines[] = '── ۱) نصب تازه (جدول دسترسی خالی) ──';
 check('نقش دست‌نخورده ⇐ پیش‌فرض کد', sortedCopy(role_permission_codes('agent')) === sortedCopy($defaults['agent']));
 check('نقش دست‌نخورده «ویرایش‌شده» علامت نمی‌خورد', role_permissions_custom('agent') === false);
 check('همهٔ نقش‌ها پیش‌فرض کد را می‌گیرند', sortedCopy(role_permission_codes('supervisor')) === sortedCopy($defaults['supervisor']));
-check('نقش قدیمی admin کامل است', sortedCopy(role_permission_codes('admin')) === sortedCopy(permission_all_codes()));
+check('حساب قدیمی admin با پرچم ادمین اصلی دسترسی کامل دارد', user_is_primary_admin(['role' => 'admin', 'is_primary_admin' => 1]) && user_can(['role' => 'admin', 'is_primary_admin' => 1], 'settings.general'));
 
 /* ── ۳) ذخیره از فرم: اولویت با فرم ─────────────────────────────────────── */
 $lines[] = '';

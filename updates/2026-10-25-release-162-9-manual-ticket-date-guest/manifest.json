@@ -1,0 +1,22 @@
+{
+  "name": "release-162-9-manual-ticket-date-guest",
+  "version": "1.62.9",
+  "date": "2026-10-25",
+  "title": "ثبت دستی فیش برای روزهای قبل + فیش مهمان دستی + فرم مقصدهای ملاقات در یک خط",
+  "requires_version": "1.61.9",
+  "migrations": [
+    "009-traffic-destination-multi-approver.sql"
+  ],
+  "files": [
+    "food-ticket-groups.php",
+    "food-ticket.php",
+    "food-ticket-web/index.html",
+    "food-ticket-web/assets/food-manual-attendance.js",
+    "help-guide.php",
+    "index.php",
+    "assets/style.css",
+    "migrations/009-traffic-destination-multi-approver.sql",
+    "VERSION"
+  ],
+  "notes": "۱) «ثبت دستی فیش» دیگر فقط برای امروز نیست: یک فیلد تاریخ شمسی با تقویم اضافه شد و فیش برای هر روز گذشته (تا امروز) قابل ثبت است؛ تاریخ آینده رد می‌شود. ۲) ردیف «مهمان» همیشه اولین ردیف فهرست ثبت دستی است؛ بدون نیاز به سفارش یا کد پرسنلی، چند بار در روز قابل ثبت است و رویداد با نوع «فیش مهمان» و غذای «مهمان» ذخیره می‌شود. ۳) در «مقاصد ملاقات و تأییدکنندگان» چهار فیلد (عنوان + ۳ تأییدکننده) فشرده شدند تا در یک خط جا بگیرند. این نسخه مهاجرت جدیدی ندارد؛ مهاجرت 009 فقط برای مسیر ارتقای مستقیم از ۱.۶۱.۹+ همراه بسته مانده است (idempotent و در schema_updates ددوپ می‌شود؛ هیچ داده‌ای حذف نمی‌شود)."
+}

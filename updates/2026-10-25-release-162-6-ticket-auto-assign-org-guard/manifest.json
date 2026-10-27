@@ -1,0 +1,9 @@
+{
+  "version": "1.62.6",
+  "release": "1.62.6",
+  "title": "Ticket 1.62.6 — keep org-chart managers out of automatic ticket assignment, diagnostics and repair tooling",
+  "date": "2026-10-25",
+  "archive_filename": "ticket-update-1.62.6-ticket-auto-assign-org-guard-20261025.zip",
+  "migrations": [],
+  "notes": "Cumulative offline update, no database migration. Automatic ticket assignment keeps its design (IT → primary admin, support → support manager, least open load, same-unit fallback) but org-chart managers (deputies/office heads) are now ranked last in both the owner and fallback queries, so they are only picked when no genuine candidate is active — this stops tickets rotating to unrelated people who were wrongly promoted by the historical org-manager bug. The organization page gains a diagnostics card showing, per domain, who would be auto-assigned right now and the full candidate list with role/unit/open-load/org-manager columns, plus a second repair form that demotes org managers wrongly holding the support_manager role back to manager (the existing primary-admin repair form is untouched). The rank subquery is skipped safely on installs without org chart tables. Persian help gained a section explaining who the ticket assignee is; the chatbot indexes it automatically. Includes all fixes from 1.62.4/1.62.5. Static tests and PHP syntax lint only — no database or production validation."
+}

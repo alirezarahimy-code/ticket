@@ -109,7 +109,8 @@ check("function ticket_is_waiting_status" in bootstrap
       and "SET `status` = 'waiting_user'" in migration_pending
       and "WHERE `status` = 'pending'" in migration_pending,
       "pending is treated as waiting_user for SLA/OLA and normalized by migration")
-check("تیکت" not in index
+index_user_text = "\n".join(line for line in index.splitlines() if not line.lstrip().startswith("//"))
+check("تیکت" not in index_user_text
       and "تیکت" not in bootstrap
       and "تیکت" not in permissions
       and "ثبت درخواست" in index

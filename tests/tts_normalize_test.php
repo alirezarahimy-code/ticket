@@ -128,7 +128,7 @@ expect_contains($phone, 'صفر', '۱۰. تلفن رقم‌به‌رقم');
 expect_contains($phone, 'نه', '۱۰. تلفن شامل نه');
 
 $tkt = tts_bare('TKT-12-345');
-expect_contains($tkt, 'شمارهٔ پیگیری', '۱۱. TKT');
+expect_contains($tkt, 'شماره‌یِ پیگیری', '۱۱. TKT با قاعدهٔ آوایی ezafe');
 expect_contains($tkt, 'دوازده', '۱۱. TKT دوازده');
 expect_contains($tts = tts_bare('USB'), 'یو اس بی', '۱۱. USB');
 expect_contains(tts_bare('DVD'), 'دی وی دی', '۱۱. DVD');

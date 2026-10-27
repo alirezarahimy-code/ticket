@@ -1,0 +1,21 @@
+PASS: synthetic prerequisite identities and department exist
+PASS: domain-scan worker handles a finished synthetic run without contacting a host
+PASS: LDAP is disabled in synthetic test configuration
+PASS: LDAP cron exits safely when the external provider is disabled
+PASS: synthetic print queue is empty before queue-worker probe
+PASS: food-ticket queue worker completes one synthetic empty-queue cycle without device access
+PASS: SLA maintenance emits the correct due-soon and overdue alerts
+PASS: OLA maintenance emits two synthetic response_overdue alerts
+PASS: OLA maintenance emits two synthetic resolution_overdue alerts
+PASS: OLA maintenance emits two synthetic escalation_1 alerts
+PASS: OLA maintenance emits two synthetic escalation_2 alerts
+PASS: SLA/OLA worker reports its completed cycle
+PASS: auto-close closes an eligible old resolved ticket
+PASS: auto-close preserves a recently rated ticket
+PASS: auto-close preserves a cancellation-pending ticket
+PASS: auto-close preserves a recently resolved ticket
+PASS: auto-close reports exactly one closure
+PASS: activity-log pruning deletes stale synthetic rows and keeps fresh rows
+PASS: system-log pruning deletes rows older than 30 days only
+PASS: activity pruning job reports completion
+Synthetic cron integration checks passed: 20
