@@ -110,8 +110,9 @@ def test_update_manifest_paths_are_safe_for_the_app_updater():
             assert re.match(r"^(manifest\.json|migrations/[^/]+\.sql|files/.+)$", name)
 
 
-def test_download_page_points_to_the_cumulative_archive_and_hash():
+def test_download_page_points_to_the_system_health_accuracy_hotfix():
     page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    assert NAME in page
-    assert f"{NAME}.sha256" in page
-    assert "۱.۶۲.۲۰" in page and "۱.۶۲.۲۴" in page
+    current = "ticket-update-1.62.25-system-health-accuracy-20261027.zip"
+    assert current in page
+    assert f"{current}.sha256" in page
+    assert "۱.۶۲.۲۴" in page and "۱.۶۲.۲۵" in page

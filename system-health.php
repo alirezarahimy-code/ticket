@@ -134,9 +134,34 @@ function system_health_humanize_event(array $item): array
     return [
         'module' => system_health_human_module($context),
         'title' => 'یک رخداد فنی نیازمند بررسی ثبت شده است',
-        'cause' => 'جزئیات تخصصی برای خوانایی و حفظ حریم خصوصی در این گزارش نمایش داده نمی‌شود.',
-        'action' => 'اگر هنگام کار با سامانه مشکلی دیدید، زمان رخداد را یادداشت کنید و همین گزارش را به پشتیبانی بدهید.',
+        'cause' => 'علت دقیق از روی اطلاعات قابل‌نمایش مشخص نیست؛ متن خام در گزارش امن پنهان می‌ماند.',
+        'action' => 'مرجع فنی این رخداد را به مسئول سامانه بدهید تا جزئیات همان مورد در لاگ داخلی بررسی شود.',
     ];
+}
+
+/** مرجع کم‌خطر برای وصل‌کردن ردیف خروجی به رخداد در لاگ داخلی؛ مسیر کامل و متن خام را برنمی‌گرداند. */
+function system_health_event_reference(array $item): string
+{
+    $parts = [];
+    $errorType = trim((string) ($item['error_type'] ?? ''));
+    $safeType = str_replace('\\', '', $errorType);
+    if ($safeType !== '' && preg_match('/^[A-Za-z_][A-Za-z0-9_]{0,79}$/D', $safeType)) {
+        $parts[] = 'نوع ' . $safeType;
+    }
+
+    $location = strtr(trim((string) ($item['location'] ?? '')), ['\\' => '/']);
+    if ($location !== '' && preg_match('~(?:^|/)([A-Za-z0-9_.-]+\.php):(\d+)$~i', $location, $match)) {
+        $parts[] = $match[1] . ':' . $match[2];
+    }
+    if ($parts !== []) {
+        return implode(' · ', $parts);
+    }
+
+    $fingerprint = strtolower((string) ($item['fingerprint'] ?? ''));
+    if (!preg_match('/^[a-f0-9]{40}$/', $fingerprint)) {
+        $fingerprint = system_health_fingerprint((string) ($item['context'] ?? ''), (string) ($item['title'] ?? ''));
+    }
+    return 'کد ' . strtoupper(substr($fingerprint, 0, 10));
 }
 
 /** URL خام درخواست را به نام صفحه تبدیل می‌کند و همهٔ پارامترها را کنار می‌گذارد. */
@@ -224,41 +249,79 @@ function system_health_groups(int $days = 7): array
     system_health_ensure();
     system_logs_ensure();
     $days = max(1, min(90, $days));
-    $stmt = db()->prepare("SELECT g.context, g.message, g.level, g.cnt, g.first_at, g.last_at, s.meta_json, s.request_uri,
+    $sql = "SELECT g.context, g.message, g.level, g.cnt, g.first_at, g.last_at, s.meta_json, s.request_uri,
             COALESCE(i.status, 'open') AS status, i.note
         FROM (
-            SELECT context, message, CASE WHEN SUM(level = 'error') > 0 THEN 'error' ELSE 'warning' END AS level, COUNT(*) AS cnt, MIN(created_at) AS first_at, MAX(created_at) AS last_at, MAX(id) AS last_id
+            SELECT context, message, level, COUNT(*) AS cnt, MIN(created_at) AS first_at, MAX(created_at) AS last_at, MAX(id) AS last_id
             FROM system_logs
-            WHERE created_at >= NOW() - INTERVAL ? DAY AND level IN ('error', 'warning')
-            GROUP BY context, message
+            WHERE created_at >= NOW() - INTERVAL ? DAY AND level = ?
+            GROUP BY context, message, level
         ) g
         JOIN system_logs s ON s.id = g.last_id
         LEFT JOIN system_incidents i ON i.fingerprint = SHA1(CONCAT(g.context, '|', g.message))
-        ORDER BY g.last_at DESC
-        LIMIT 200");
-    $stmt->execute([$days]);
+        ORDER BY g.cnt DESC, g.last_at DESC
+        LIMIT 100";
     $items = [];
-    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $meta = json_decode((string) ($row['meta_json'] ?? ''), true);
-        $meta = is_array($meta) ? $meta : [];
-        $items[] = [
-            'fingerprint' => system_health_fingerprint((string) $row['context'], (string) $row['message']),
-            'context' => (string) $row['context'],
-            'title' => (string) $row['message'],
-            'level' => (string) $row['level'],
-            'count' => (int) $row['cnt'],
-            'first_at' => (string) $row['first_at'],
-            'last_at' => (string) $row['last_at'],
-            'cause' => (string) ($meta['cause'] ?? ''),
-            'action' => (string) ($meta['action'] ?? ''),
-            'technical' => (string) ($meta['technical'] ?? ''),
-            'location' => (string) ($meta['location'] ?? ''),
-            'request_uri' => (string) ($row['request_uri'] ?? ''),
-            'status' => (string) $row['status'],
-            'note' => (string) ($row['note'] ?? ''),
-        ];
+    foreach (['error', 'warning'] as $level) {
+        $stmt = db()->prepare($sql);
+        $stmt->execute([$days, $level]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $meta = json_decode((string) ($row['meta_json'] ?? ''), true);
+            $meta = is_array($meta) ? $meta : [];
+            $items[] = [
+                'fingerprint' => system_health_fingerprint((string) $row['context'], (string) $row['message']),
+                'context' => (string) $row['context'],
+                'title' => (string) $row['message'],
+                'level' => (string) $row['level'],
+                'count' => (int) $row['cnt'],
+                'first_at' => (string) $row['first_at'],
+                'last_at' => (string) $row['last_at'],
+                'cause' => (string) ($meta['cause'] ?? ''),
+                'action' => (string) ($meta['action'] ?? ''),
+                'technical' => (string) ($meta['technical'] ?? ''),
+                'location' => (string) ($meta['location'] ?? ''),
+                'error_type' => (string) ($meta['error_type'] ?? ''),
+                'request_uri' => (string) ($row['request_uri'] ?? ''),
+                'status' => (string) $row['status'],
+                'note' => (string) ($row['note'] ?? ''),
+            ];
+        }
     }
+    usort($items, static function (array $a, array $b): int {
+        $rankA = ($a['level'] ?? '') === 'error' ? 0 : 1;
+        $rankB = ($b['level'] ?? '') === 'error' ? 0 : 1;
+        return ($rankA <=> $rankB)
+            ?: ((int) ($b['count'] ?? 0) <=> (int) ($a['count'] ?? 0))
+            ?: strcmp((string) ($b['last_at'] ?? ''), (string) ($a['last_at'] ?? ''));
+    });
     return $items;
+}
+
+/** شمارش کامل رخدادها و گروه‌ها؛ مستقل از سقف گروه‌های نمایشی در صفحه/Excel. */
+function system_health_event_totals(int $days = 7): array
+{
+    system_logs_ensure();
+    $days = max(1, min(90, $days));
+    $totalsStmt = db()->prepare("SELECT
+        SUM(level = 'error') AS errors,
+        SUM(level = 'warning') AS warnings
+        FROM system_logs
+        WHERE created_at >= NOW() - INTERVAL ? DAY AND level IN ('error', 'warning')");
+    $totalsStmt->execute([$days]);
+    $totals = $totalsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+    $groupsStmt = db()->prepare("SELECT COUNT(*) FROM (
+        SELECT context, message, level
+        FROM system_logs
+        WHERE created_at >= NOW() - INTERVAL ? DAY AND level IN ('error', 'warning')
+        GROUP BY context, message, level
+    ) AS grouped_events");
+    $groupsStmt->execute([$days]);
+    return [
+        'errors' => (int) ($totals['errors'] ?? 0),
+        'warnings' => (int) ($totals['warnings'] ?? 0),
+        'groups' => (int) $groupsStmt->fetchColumn(),
+    ];
 }
 
 /** بررسی‌های خودکار سلامت. هر مورد: [عنوان، وضعیت ok|warn|fail، توضیح]. */
@@ -508,15 +571,11 @@ function system_health_export_safe_xlsx(array $user): never
     }
     $checks = system_health_checks();
     $summary = system_health_apply_check_state(system_health_summary(), $checks);
-    $errorOccurrences = 0;
-    $warningOccurrences = 0;
-    foreach ($events as $event) {
-        if (($event['row']['level'] ?? '') === 'error') {
-            $errorOccurrences += (int) ($event['row']['count'] ?? 0);
-        } else {
-            $warningOccurrences += (int) ($event['row']['count'] ?? 0);
-        }
-    }
+    $eventTotals = system_health_event_totals($days);
+    $errorOccurrences = $eventTotals['errors'];
+    $warningOccurrences = $eventTotals['warnings'];
+    $shownGroupCount = count($events);
+    $omittedGroupCount = max(0, $eventTotals['groups'] - $shownGroupCount);
     $periodLabel = '۷ روز اخیر';
     if ($days !== 7) {
         $periodLabel = number_format($days) . ' روز اخیر';
@@ -532,11 +591,13 @@ function system_health_export_safe_xlsx(array $user): never
         [['v' => 'صفحه‌های کند', 's' => 'body'], ['v' => number_format((int) $summary['slow_pages_24h']), 's' => 'body'], ['v' => 'اگر کاربران کندی حس نمی‌کنند، این مورد را فقط پایش کنید.', 's' => 'body']],
         [['v' => 'درخواست‌های کند پایگاه داده', 's' => 'body'], ['v' => number_format((int) $summary['slow_queries_24h']), 's' => 'body'], ['v' => 'متن کوئری و جزئیات خام در این فایل قرار نمی‌گیرد.', 's' => 'body']],
         [['v' => 'خطاهای جدی در یک ساعت اخیر', 's' => 'body'], ['v' => number_format((int) $summary['fatal_1h']), 's' => 'body'], ['v' => 'اگر عدد بیشتر از صفر است، گزارش را زودتر برای مسئول فنی بفرستید.', 's' => 'body']],
-        [['v' => 'رخدادهای خطا در بازهٔ گزارش', 's' => 'body'], ['v' => number_format($errorOccurrences), 's' => 'body'], ['v' => 'تعداد تکرار هر نوع رخداد در برگهٔ «رخدادها» آمده است.', 's' => 'body']],
-        [['v' => 'رخدادهای هشدار در بازهٔ گزارش', 's' => 'body'], ['v' => number_format($warningOccurrences), 's' => 'body'], ['v' => 'رخدادهای اطلاع‌رسانی عادی از خروجی حذف شده‌اند.', 's' => 'body']],
+        [['v' => 'رخدادهای خطا در بازهٔ گزارش', 's' => 'body'], ['v' => number_format($errorOccurrences), 's' => 'body'], ['v' => 'جمع کل خطاها در بازه است؛ فهرست بعدی فقط گروه‌های پرتکرار را نشان می‌دهد.', 's' => 'body']],
+        [['v' => 'رخدادهای هشدار در بازهٔ گزارش', 's' => 'body'], ['v' => number_format($warningOccurrences), 's' => 'body'], ['v' => 'جمع کل هشدارها در بازه است؛ اطلاع‌رسانی‌های عادی حذف شده‌اند.', 's' => 'body']],
         [['v' => 'اقدام پیشنهادی', 's' => 'body'], ['v' => (string) $summary['next_step'], 's' => 'body'], ['v' => 'برای فهمیدن عنوان‌های اولویت‌دار، برگهٔ «رخدادها» را ببینید.', 's' => 'body']],
         [['v' => 'حریم خصوصی', 's' => 'body'], ['v' => 'اطلاعات کاربران در خروجی نیست', 's' => 'body'], ['v' => 'نام/شناسهٔ کاربر، IP، نشانی درخواست، یادداشت و متن خام خطا یا کوئری صادر نمی‌شود.', 's' => 'body']],
         [['v' => 'زمان تهیه', 's' => 'body'], ['v' => persian_date(date('Y-m-d H:i:s')), 's' => 'body'], ['v' => 'در صورت ارسال، فقط همین فایل را بفرستید؛ فایل خام سرور لازم نیست.', 's' => 'body']],
+        [['v' => 'گروه‌های رخداد در برگهٔ بعدی', 's' => 'body'], ['v' => number_format($shownGroupCount) . ' از ' . number_format($eventTotals['groups']), 's' => 'body'], ['v' => 'حداکثر ۱۰۰ گروه پرتکرار از هر سطح نمایش داده می‌شود؛ جمع خطا و هشدار بالا از کل بازه محاسبه شده است.', 's' => 'body']],
+        [['v' => 'گروه‌های باقی‌ماندهٔ نمایش‌داده‌نشده', 's' => 'body'], ['v' => number_format($omittedGroupCount), 's' => 'body'], ['v' => 'برای جزئیات بیشتر، بازه را کوتاه‌تر کنید یا لاگ داخلی را بررسی کنید.', 's' => 'body']],
         [['v' => 'بررسی‌های پایهٔ سامانه', 's' => 'title']],
         [['v' => 'بررسی', 's' => 'header'], ['v' => 'نتیجه', 's' => 'header'], ['v' => 'توضیح ساده', 's' => 'header']],
     ];
@@ -551,8 +612,8 @@ function system_health_export_safe_xlsx(array $user): never
 
     $eventRows = [
         [['v' => 'رخدادهای قابل‌فهم برای پیگیری', 's' => 'title']],
-        [['v' => 'فقط خطاها و هشدارها نمایش داده می‌شوند؛ ردیف‌های پرتکرار بالاتر آمده‌اند. متن خام و اطلاعات کاربران حذف شده است.', 's' => 'body']],
-        array_map(static fn (string $header): array => ['v' => $header, 's' => 'header'], ['اولویت', 'بخش سامانه', 'چه اتفاقی افتاده؟', 'چند بار؟', 'اولین مشاهده', 'آخرین مشاهده', 'علت احتمالی به زبان ساده', 'پیشنهاد بعدی', 'وضعیت پیگیری']),
+        [['v' => 'فقط خطاها و هشدارها نمایش داده می‌شوند؛ حداکثر ۱۰۰ گروه پرتکرار از هر سطح. جمع کل بازه کامل است؛ متن خام، مسیر کامل و اطلاعات کاربران صادر نمی‌شود.', 's' => 'body']],
+        array_map(static fn (string $header): array => ['v' => $header, 's' => 'header'], ['اولویت', 'بخش سامانه', 'چه اتفاقی افتاده؟', 'چند بار؟', 'اولین مشاهده', 'آخرین مشاهده', 'علت احتمالی به زبان ساده', 'پیشنهاد بعدی', 'وضعیت پیگیری', 'مرجع فنی امن']),
     ];
     foreach ($events as $event) {
         $row = $event['row'];
@@ -573,6 +634,7 @@ function system_health_export_safe_xlsx(array $user): never
             $safe((string) $friendly['cause']),
             $safe((string) $friendly['action']),
             SYSTEM_HEALTH_STATUSES[(string) ($row['status'] ?? 'open')] ?? 'باز',
+            system_health_event_reference($row),
         ]);
     }
     if ($events === []) {
@@ -583,13 +645,13 @@ function system_health_export_safe_xlsx(array $user): never
             'name' => 'خلاصهٔ قابل‌فهم',
             'rows' => $summaryRows,
             'widths' => [34, 32, 80],
-            'merges' => ['A1:C1', 'A15:C15'],
+            'merges' => ['A1:C1', 'A17:C17'],
         ],
         [
             'name' => 'رخدادها',
             'rows' => $eventRows,
-            'widths' => [22, 24, 42, 14, 22, 22, 56, 56, 20],
-            'merges' => ['A1:I1', 'A2:I2'],
+            'widths' => [22, 24, 42, 14, 22, 22, 56, 56, 20, 28],
+            'merges' => ['A1:J1', 'A2:J2'],
         ],
     ]);
     xlsx_send('system-health-readable-' . date('Y-m-d') . '.xlsx', $bytes);
@@ -611,6 +673,7 @@ function system_health_render(array $user): never
     $checks = system_health_checks();
     $summary = system_health_apply_check_state($summary, $checks);
     $groups = system_health_groups(7);
+    $eventTotals = system_health_event_totals(7);
     $canManage = user_can($user, 'system.health');
     $stateClass = ['ok' => 'good', 'warning' => 'warn', 'critical' => 'danger'][$summary['state']] ?? 'warn';
     $checkClass = ['ok' => 'good', 'warn' => 'warn', 'fail' => 'danger'];
@@ -630,7 +693,7 @@ function system_health_render(array $user): never
     }
     echo '</section>';
 
-    echo '<section class="card ticket-table"><div class="section-title"><div><h2>خطاها و هشدارهای ۷ روز گذشته</h2><p class="muted">رخدادهای تکراری گروه‌بندی و به زبان ساده توضیح داده شده‌اند؛ اطلاع‌رسانی‌های عادی در این فهرست نمی‌آیند.</p></div></div>';
+    echo '<section class="card ticket-table"><div class="section-title"><div><h2>خطاها و هشدارهای ۷ روز گذشته</h2><p class="muted">رخدادها گروه‌بندی شده‌اند؛ این فهرست حداکثر ۱۰۰ گروه پرتکرار از هر سطح را نشان می‌دهد (' . count($groups) . ' از ' . number_format($eventTotals['groups']) . ' گروه). شمارنده‌های Excel از کل بازه محاسبه می‌شوند.</p></div></div>';
     if ($groups === []) {
         echo '<div class="table-row"><span class="muted">در ۷ روز گذشته خطا یا هشداری ثبت نشده است.</span></div>';
     }
@@ -639,7 +702,8 @@ function system_health_render(array $user): never
         $levelLabel = system_health_human_level((string) $item['level']);
         $repeatLabel = number_format((int) $item['count']) . ' بار در ۷ روز';
         $statusLabel = SYSTEM_HEALTH_STATUSES[$item['status']] ?? $item['status'];
-        echo '<div class="table-row"><span><strong>' . e($friendly['title']) . '</strong><br><small class="muted">بخش: ' . e($friendly['module']) . ' • ' . e($levelLabel) . ' • تکرار: ' . e($repeatLabel) . '</small></span>';
+        $safeReference = system_health_event_reference($item);
+        echo '<div class="table-row"><span><strong>' . e($friendly['title']) . '</strong><br><small class="muted">بخش: ' . e($friendly['module']) . ' • ' . e($levelLabel) . ' • تکرار: ' . e($repeatLabel) . ' • مرجع فنی: <code dir="ltr">' . e($safeReference) . '</code></small></span>';
         echo '<span class="muted">' . e($statusLabel) . '</span>';
         echo '<span class="muted"><small>آخرین مشاهده: ' . e(persian_date($item['last_at'])) . '</small>';
         if ($friendly['cause'] !== '') {

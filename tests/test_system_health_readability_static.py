@@ -16,7 +16,8 @@ def test_health_status_rules_include_warnings_and_basic_checks():
     assert "$summary['warnings_24h'] > 0" in summary
     assert "نیازمند رسیدگی فوری" in summary
     assert "به معنی ازکارافتادن سامانه نیست" in summary
-    assert "CASE WHEN SUM(level = 'error') > 0 THEN 'error' ELSE 'warning' END" in HEALTH
+    assert "GROUP BY context, message, level" in HEALTH
+    assert "function system_health_event_totals" in HEALTH
     assert "food_ticket_events" in HEALTH
     assert "قابلیت در تنظیمات خاموش است و نبودنش مشکل سامانه محسوب نمی‌شود" in HEALTH
 

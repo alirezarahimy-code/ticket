@@ -31,7 +31,8 @@ def test_humanizer_uses_safe_categories_and_common_masks():
     end = TEXT.index("/** URL خام درخواست", start)
     humanizer = TEXT[start:end]
     assert "system_error_explain($technical !== '' ? $technical : $rawTitle)" in humanizer
-    assert "جزئیات تخصصی برای خوانایی و حفظ حریم خصوصی" in humanizer
+    assert "علت دقیق از روی اطلاعات قابل‌نمایش مشخص نیست" in humanizer
+    assert "مرجع فنی این رخداد" in humanizer
     start = TEXT.index("function system_health_export_safe_text")
     end = TEXT.index("/** خروجی امن Excel", start)
     sanitizer = TEXT[start:end]
