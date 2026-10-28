@@ -40,6 +40,21 @@ class FoodGuestRequestManagerActionTests(unittest.TestCase):
         self.assertIn("food_guest_request_same_day_is_open($now)", self.order)
         self.assertIn("food_guest_request_change_window_open((string) ($row['request_date'] ?? ''))", self.order)
 
+    def test_past_guest_requests_can_be_deleted_without_bypassing_permissions_or_audit(self):
+        listing_start = self.order.index("function food_guest_request_list(")
+        listing_end = self.order.index("function food_guest_request_create(", listing_start)
+        listing = self.order[listing_start:listing_end]
+        self.assertIn("$canDelete = $canManage && ($date < $today || food_guest_request_change_window_open($date, $now));", listing)
+
+        delete_start = self.order.index("function food_guest_request_delete(")
+        delete_end = self.order.index("function food_order_api_handle(", delete_start)
+        delete = self.order[delete_start:delete_end]
+        self.assertIn("food_guest_request_can_manage($user, $row)", delete)
+        self.assertIn("food_order_audit('food_guest_request_delete'", delete)
+        self.assertIn("DELETE FROM food_guest_requests WHERE id = ?", delete)
+        self.assertIn("$requestDate >= food_order_today() && !food_guest_request_change_window_open($requestDate)", delete)
+        self.assertIn("$canDelete = $canManage && ($date < $today || food_guest_request_change_window_open($date, $now));", listing)
+
 
 if __name__ == "__main__":
     unittest.main()

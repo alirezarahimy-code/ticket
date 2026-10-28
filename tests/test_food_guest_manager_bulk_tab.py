@@ -44,10 +44,12 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
         self.assertIn("if (item.can_edit)", self.ui)
         self.assertIn("if (item.can_cancel)", self.ui)
         self.assertIn("if (item.can_delete)", self.ui)
+        self.assertIn("سوابق گذشته", self.ui)
+        self.assertIn("row.request_jalali || row.request_date", self.ui)
 
     def test_served_asset_copy_and_cache_buster_match(self):
         self.assertEqual(self.ui, self.web_ui)
-        self.assertIn('assets/food-menu.js?v=35', self.web_index)
+        self.assertIn('assets/food-menu.js?v=36', self.web_index)
 
 
 if __name__ == "__main__":

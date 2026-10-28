@@ -1245,7 +1245,7 @@
     if (actionName === 'delete' && !row.can_delete) return;
     var prompt = actionName === 'cancel'
       ? 'درخواست فعال غذای مهمان لغو شود؟'
-      : 'درخواست غذای مهمان به‌طور کامل حذف شود؟ این کار قابل بازگشت نیست.';
+      : 'درخواست مهمان تاریخ ' + String(row.request_jalali || row.request_date || '') + '، ' + String(row.organization || '') + ' به‌طور کامل حذف شود؟ این کار قابل بازگشت نیست.';
     if (!global.confirm(prompt)) return;
     state.guestActionBusyId = Number(id);
     state.error = '';
@@ -1280,7 +1280,7 @@
       var status = item.status === 'cancelled' ? 'لغوشده' : 'فعال';
       return '<tr><td>' + esc(faDigits(item.request_jalali || '—')) + '</td><td>' + esc(item.deputy_name || '—') + '</td><td>' + esc(item.organization || '—') + '</td><td>' + esc(faDigits(item.guest_count || 0)) + '</td><td>' + esc(item.requester_name || '—') + '</td><td>' + esc(item.created_by_name || '—') + '</td><td>' + status + '</td><td>' + (actions.join(' ') || '<span class="fm-small">—</span>') + '</td></tr>';
     }).join('') || '<tr><td colspan="8" class="fm-empty">' + (state.guestRequests.length ? 'با این جست‌وجو درخواستی پیدا نشد.' : 'درخواستی برای نمایش وجود ندارد.') + '</td></tr>';
-    return '<section class="fm-card fm-guest-request-manager"><div class="fm-toolbar"><div><h3>مدیریت درخواست‌های غذای مهمان</h3><span class="fm-small">همهٔ درخواست‌ها، شامل سوابق گذشته؛ عملیات فقط در مهلت مجاز انجام می‌شود.</span></div><button class="btn secondary" type="button" data-fm-action="guest-reload"' + (state.loadingGuestRequests ? ' disabled' : '') + '>به‌روزرسانی</button></div>' + editForm + '<div class="fm-bulk-tools"><input type="search" data-guest-request-search placeholder="جست‌وجوی تاریخ، سازمان، مدیر یا درخواست‌دهنده" value="' + esc(state.guestRequestSearch || '') + '"><span class="fm-small">' + faDigits(rows.length) + ' از ' + faDigits((state.guestRequests || []).length) + ' درخواست</span></div><div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>مدیر ثبت‌کننده</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + tableRows + '</tbody></table></div></section>';
+    return '<section class="fm-card fm-guest-request-manager"><div class="fm-toolbar"><div><h3>مدیریت درخواست‌های غذای مهمان</h3><span class="fm-small">همهٔ درخواست‌ها، شامل سوابق گذشته؛ ویرایش/لغو طبق مهلت، حذف سوابق گذشته برای مدیر مجاز.</span></div><button class="btn secondary" type="button" data-fm-action="guest-reload"' + (state.loadingGuestRequests ? ' disabled' : '') + '>به‌روزرسانی</button></div>' + editForm + '<div class="fm-bulk-tools"><input type="search" data-guest-request-search placeholder="جست‌وجوی تاریخ، سازمان، مدیر یا درخواست‌دهنده" value="' + esc(state.guestRequestSearch || '') + '"><span class="fm-small">' + faDigits(rows.length) + ' از ' + faDigits((state.guestRequests || []).length) + ' درخواست</span></div><div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>مدیر ثبت‌کننده</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + tableRows + '</tbody></table></div></section>';
   }
 
   async function decideCancelRequest(id, decision) {

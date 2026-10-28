@@ -2352,7 +2352,7 @@ function food_guest_request_can_manage(array $user, array $row): bool
         && food_guest_user_deputy_id($user, true) > 0;
 }
 
-/** تغییر/حذف روز جاری فقط تا مهلت ثبت مهمان مجاز است؛ روزهای گذشته قفل‌اند. */
+/** ویرایش درخواست روز جاری فقط تا مهلت ثبت مهمان مجاز است؛ سوابق گذشته برای ویرایش قفل‌اند. */
 function food_guest_request_change_window_open(string $date, ?DateTimeImmutable $now = null): bool
 {
     $now ??= food_order_now();
@@ -2561,7 +2561,8 @@ function food_guest_request_list(array $user, bool $includePast = false): array
         $active = (string) $r['status'] === 'active';
         $canEdit = $canManage && $active && food_guest_request_change_window_open($date, $now);
         $canCancel = $canManage && $active && $date > $today;
-        $canDelete = $canManage && $date >= $today && food_guest_request_change_window_open($date, $now);
+        // سوابق گذشته برای مدیران مجاز قابل حذف است؛ محدودیت زمانی حذف امروز/آینده حفظ می‌شود.
+        $canDelete = $canManage && ($date < $today || food_guest_request_change_window_open($date, $now));
         $items[] = [
             'id' => (int) $r['id'],
             'can_manage' => $canManage,
@@ -2760,8 +2761,10 @@ function food_guest_request_delete(array $user, int $id): array
         if (!food_guest_request_can_manage($user, $row)) {
             throw new RuntimeException('فقط مدیر ثبت‌کننده یا مدیر پشتیبانی می‌تواند این درخواست را حذف کند.');
         }
-        if (!food_guest_request_change_window_open((string) ($row['request_date'] ?? ''))) {
-            throw new RuntimeException('درخواست روزهای گذشته یا پس از پایان مهلت امروز قابل حذف نیست.');
+        // حذف سوابق گذشته مجاز است؛ محدودیت زمانی حذف امروز/آینده و دسترسی مالک/بازبین حفظ می‌شود.
+        $requestDate = (string) ($row['request_date'] ?? '');
+        if ($requestDate >= food_order_today() && !food_guest_request_change_window_open($requestDate)) {
+            throw new RuntimeException('مهلت حذف درخواست امروز گذشته است.');
         }
         // پیش از حذف، تلاش برای ثبت Audit مقدار قبلی انجام می‌شود.
         food_order_audit('food_guest_request_delete', $user, 'food_guest_request', $id, $row, null);
