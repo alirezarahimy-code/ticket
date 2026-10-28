@@ -217,7 +217,9 @@
     if (!canMenu) {
       var readOnlyFoods = day && Array.isArray(day.items) ? day.items.map(function (item) { return esc(item.food_name || ''); }).join('، ') : '';
       var readOnlyStatus = day && day.order_status === 'closed' ? 'بسته' : (day && day.order_status === 'open' ? 'باز' : 'بدون برنامه');
-      return '<div class="fm-card"><div class="fm-toolbar"><div><h3>برنامهٔ روز ' + esc(faDigits(jalaliFromIso(iso))) + '</h3><span class="fm-small">وضعیت سفارش: ' + readOnlyStatus + '</span></div></div>' + (readOnlyFoods ? '<p>' + readOnlyFoods + '</p>' : '<div class="fm-empty">برای این روز برنامهٔ غذایی ثبت نشده است.</div>') + '</div>';
+      var readOnlyCount = activeOrderCount(day);
+      var readOnlyCountHtml = readOnlyCount ? '<p><span class="fo-day-order-marker">' + faDigits(readOnlyCount) + ' سفارش فعال</span></p>' : '';
+      return '<div class="fm-card"><div class="fm-toolbar"><div><h3>برنامهٔ روز ' + esc(faDigits(jalaliFromIso(iso))) + '</h3><span class="fm-small">وضعیت سفارش: ' + readOnlyStatus + '</span></div></div>' + (readOnlyFoods ? '<p>' + readOnlyFoods + '</p>' : '<div class="fm-empty">برای این روز برنامهٔ غذایی ثبت نشده است.</div>') + readOnlyCountHtml + '</div>';
     }
     var scheduled = day && Array.isArray(day.items) ? day.items : [];
     var scheduledIds = scheduled.map(function (item) { return Number(item.food_id); });

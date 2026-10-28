@@ -141,7 +141,7 @@ assets/chatbot-drag.js	assets	173	7358
 assets/custom.css	assets	217	3678
 assets/fonts/README.md	assets	10	767
 assets/food-menu.css	assets	353	32930
-assets/food-menu.js	assets	1899	136691
+assets/food-menu.js	assets	1901	136914
 assets/food-order-calendar.js	assets	102	4186
 assets/food-order-guest.js	assets	222	11678
 assets/food-order.css	assets	176	16575
@@ -194,6 +194,8 @@ docs/DOWNLOAD-PUBLISHING-POLICY-FA.md	docs	16	2814
 docs/HANDOFF-FA.md	docs	407	63893
 docs/NETWORK-INVENTORY-SETUP-FA.md	docs	46	11221
 docs/PLAN-CODE-PROTECTION-FA.md	docs	32	4317
+docs/README-FIX-FOOD-CALENDAR-COUNT-FA.md	docs	15	1622
+docs/README-RECOVERY-FA.md	docs	45	2543
 docs/RELEASE-1.62.36-FA.md	docs	142	9435
 docs/REPORT-FA.md	docs	43	4702
 docs/SESSION-BOOT-FA.md	docs	137	6866
@@ -205,11 +207,12 @@ docs/aggregate-report-preview.html	docs	85	7297
 domain-scan.php	core	1278	68420
 download-r34/index.html	other	21	1739
 downloads/README-AGGREGATE-UPDATE.md	history-downloads	15	609
+downloads/README-RECOVERY-FA.md	history-downloads	45	2543
 downloads/URGENT-FIX-1.62.38-FA.md	history-downloads	51	3340
 downloads/index.html	history-downloads	54	6825
 downloads/ticket-repair-1.62.36-full-source-restore-20261027.html	history-downloads	21	5176
 food-order-import.php	core	476	26389
-food-order.php	core	3282	173045
+food-order.php	core	3293	173397
 food-personnel-link.php	core	817	42352
 food-ticket-engine.php	core	1070	52256
 food-ticket-env.php	core	234	13236
@@ -242,7 +245,7 @@ food-ticket-web/assets/food-designer.js	food-web	881	69298
 food-ticket-web/assets/food-groups.js	food-web	511	34668
 food-ticket-web/assets/food-manual-attendance.js	food-web	332	21972
 food-ticket-web/assets/food-menu.css	food-web	353	32930
-food-ticket-web/assets/food-menu.js	food-web	1899	136691
+food-ticket-web/assets/food-menu.js	food-web	1901	136914
 food-ticket-web/assets/food-order-calendar.js	food-web	102	4186
 food-ticket-web/assets/food-order.css	food-web	176	16575
 food-ticket-web/assets/food-ticket-global-theme-r42.css	food-web	168	14815
@@ -320,6 +323,7 @@ tests/SecurityTest.php	tests	249	8526
 tests/food-engine-checklist.md	tests	59	4865
 tests/js/food-aggregate-report.test.js	tests	183	11560
 tests/js/food-bulk-past-window.test.js	tests	32	1683
+tests/js/food-calendar-order-count.test.js	tests	94	5887
 tests/js/food-dashboard-count.test.js	tests	26	1494
 tests/js/food-menu-by-menu.test.js	tests	43	2828
 tests/js/food-order-name-sort.test.js	tests	32	1446
@@ -408,7 +412,7 @@ tests/test_traffic_destination_approver_static.py	tests	56	3656
 tests/test_traffic_edit_history_static.py	tests	69	3183
 tests/test_traffic_import_static.py	tests	67	3349
 tests/test_traffic_phone_and_inspection_reminder_static.py	tests	54	3026
-tests/test_triangle_effect_static.py	tests	101	4669
+tests/test_triangle_effect_static.py	tests	101	4676
 tests/test_tts_normalize_static.py	tests	55	3543
 tests/tts_listen_checklist_fa.md	tests	34	1616
 tests/tts_normalize_test.php	tests	188	7738

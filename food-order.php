@@ -172,6 +172,17 @@ function food_order_require_permission(array $user, string $permission): void
     }
 }
 
+/** Read-only calendar count access follows access to the food calendar itself. */
+function food_order_can_view_order_counts(array $user): bool
+{
+    foreach (["food.menu", "food.order_close", "food.reports", "food.orders"] as $permission) {
+        if (food_order_user_can($user, $permission)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function food_order_require_primary_admin(array $user): void
 {
     if (!$user || !food_order_is_primary_admin($user)) {
@@ -3084,7 +3095,7 @@ function food_order_menu_api_handle(string $route, array $user): never
             if (!food_order_user_can($user, 'food.menu') && !food_order_user_can($user, 'food.order_close')) {
                 throw new RuntimeException('دسترسی food.menu یا food.order_close لازم است.');
             }
-            $includeCounts = food_order_user_can($user, 'food.order_close');
+            $includeCounts = food_order_can_view_order_counts($user);
             food_order_send_json(food_order_month_status((string) ($_GET['month'] ?? ''), $user, $includeCounts, true, food_order_meal_type($_GET['meal_type'] ?? 'lunch')));
         }
         if ($method === 'GET' && $route === 'food-menu/catalog') {
