@@ -2529,7 +2529,7 @@ function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
     return 0;
 }
 
-function food_guest_request_list(array $user): array
+function food_guest_request_list(array $user, bool $includePast = false): array
 {
     food_guest_schema_ensure();
     $now = food_order_now();
@@ -2537,6 +2537,10 @@ function food_guest_request_list(array $user): array
     $uid = (int) ($user['id'] ?? 0);
     $isReviewer = food_guest_request_is_reviewer($user);
     $myDeputyId = $isReviewer ? 0 : food_guest_user_deputy_id($user, true);
+    $dateFilter = $includePast ? '' : 'WHERE r.request_date >= ?';
+    $sortOrder = $includePast ? 'DESC' : 'ASC';
+    $idSortOrder = $includePast ? 'DESC' : 'ASC';
+    $rowLimit = $includePast ? '' : 'LIMIT 300';
     $stmt = db()->prepare(
         "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.note, r.status,
                 r.created_by, r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
@@ -2545,11 +2549,11 @@ function food_guest_request_list(array $user): array
            LEFT JOIN food_catalog c ON c.id = r.food_id
            LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
            LEFT JOIN users u ON u.id = r.created_by
-          WHERE r.request_date >= ?
-          ORDER BY r.request_date ASC, r.id ASC
-          LIMIT 300"
+          $dateFilter
+          ORDER BY r.request_date $sortOrder, r.id $idSortOrder
+          $rowLimit"
     );
-    $stmt->execute([$today]);
+    $stmt->execute($includePast ? [] : [$today]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
         $canManage = $isReviewer || ($uid > 0 && $myDeputyId > 0 && (int) ($r['created_by'] ?? 0) === $uid);
@@ -3241,6 +3245,27 @@ function food_order_menu_api_handle(string $route, array $user): never
         food_order_emergency_handle($route, $method, $user);
     }
     try {
+        if (in_array($route, ['food-menu/guest-requests', 'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete'], true)) {
+            if (!food_guest_request_is_reviewer($user)) {
+                throw new RuntimeException('دسترسی مدیریت همهٔ درخواست‌های مهمان فقط برای مدیر پشتیبانی و ادمین اصلی مجاز است.');
+            }
+            if ($method === 'GET' && $route === 'food-menu/guest-requests') {
+                food_order_send_json(food_guest_request_list($user, true) + ['allowed' => true]);
+            }
+            if ($method === 'POST' && $route === 'food-menu/guest-request-update') {
+                $body = food_order_api_body();
+                food_order_send_json(food_guest_request_update($user, (int) ($body['id'] ?? 0), $body));
+            }
+            if ($method === 'POST' && $route === 'food-menu/guest-request-cancel') {
+                $body = food_order_api_body();
+                food_guest_request_cancel($user, (int) ($body['id'] ?? 0));
+                food_order_send_json(['ok' => true, 'message' => 'درخواست غذای مهمان لغو شد.']);
+            }
+            if ($method === 'POST' && $route === 'food-menu/guest-request-delete') {
+                $body = food_order_api_body();
+                food_order_send_json(food_guest_request_delete($user, (int) ($body['id'] ?? 0)));
+            }
+        }
         if ($method === 'GET' && $route === 'food-menu/status') {
             if (!food_order_user_can($user, 'food.menu') && !food_order_user_can($user, 'food.order_close')) {
                 throw new RuntimeException('دسترسی food.menu یا food.order_close لازم است.');

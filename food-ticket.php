@@ -57,7 +57,8 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close', 'food.emergency']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close', 'food.emergency'])
+            || (function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user));
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -111,6 +112,9 @@ function food_ticket_route_allowed(array $user, string $route): bool
         }
         if (in_array($route, ['food-menu/emergency-window', 'food-menu/emergency-window-state'], true)) {
             return false;
+        }
+        if (in_array($route, ['food-menu/guest-requests', 'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete'], true)) {
+            return function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user);
         }
         $menuPermission = match ($route) {
             'food-menu/status', 'food-menu/month' => 'food.menu|food.order_close',
@@ -4906,11 +4910,12 @@ function food_ticket_render_page(array $user): void
     // دسترسی هر بخش پنل از روی کدهای food.* (ادمین اصلی همه‌چیز). سرور هم هر درخواست را جداگانه کنترل می‌کند.
     $fpIsPrimary = food_ticket_is_primary_admin($user);
     $fpCan = static fn (string $code): bool => $fpIsPrimary || (function_exists('user_can') && user_can($user, $code));
+    $fpCanManageGuestRequests = function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user);
     $fpViews = [
         'dashboard' => $fpCan('food.dashboard'),
         'live' => $fpCan('food.monitor'),
         'employees' => $fpCan('food.employees'),
-        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close') || $fpCan('food.emergency'),
+        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close') || $fpCan('food.emergency') || $fpCanManageGuestRequests,
         'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),
         'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.groups'),
@@ -4934,6 +4939,7 @@ function food_ticket_render_page(array $user): void
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ((food_ticket_is_primary_admin($user) || (function_exists('user_can') && user_can($user, 'food.emergency'))) ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE=' . ($fpCanManageGuestRequests ? 'true' : 'false')
         . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false')
         . ';window.FOOD_TICKET_USER_ID=' . (int) ($user['id'] ?? 0) . ';</script>';
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:
