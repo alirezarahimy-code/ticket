@@ -3033,6 +3033,157 @@ function food_ticket_aggregate_sort_people(array &$people): void
         return $cmp !== 0 ? $cmp : strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
     });
 }
+function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, array $printedPeople, array $counts, array &$sourceNotes): array
+{
+    $orderRows = [];
+    try {
+        // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
+        $orderRows = food_ticket_api_orders($fromDate, $toDate);
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
+    }
+
+    $identities = [];
+    $byNational = [];
+    $byPersonnel = [];
+    $withoutNational = [];
+    $withoutNationalCount = 0;
+    foreach ($orderRows as $row) {
+        $date = (string) ($row['foodDate'] ?? '');
+        $national = food_ticket_digits($row['nat'] ?? '');
+        $personnel = trim((string) ($row['pc'] ?? ''));
+        if ($national === '') {
+            $withoutNationalCount++;
+            if (count($withoutNational) < 100) {
+                $withoutNational[] = ['date' => $date, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'pc' => $personnel];
+            }
+            continue;
+        }
+        $key = $date . '|nat:' . $national;
+        if (!isset($identities[$key])) {
+            $identities[$key] = ['date' => $date, 'nat' => $national, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'rows' => 0];
+        }
+        $identities[$key]['rows']++;
+        $byNational[$date . '|' . $national] = $key;
+        if ($personnel !== '') {
+            $byPersonnel[$date . '|' . $personnel] = $key;
+        }
+    }
+
+    $duplicates = [];
+    $duplicateRows = 0;
+    $duplicateIdentityCount = 0;
+    foreach ($identities as $identity) {
+        if ((int) $identity['rows'] > 1) {
+            $duplicateIdentityCount++;
+            $duplicateRows += (int) $identity['rows'] - 1;
+            if (count($duplicates) < 100) {
+                $duplicates[] = $identity;
+            }
+        }
+    }
+
+    $matched = [];
+    $unmatchedPrintedEvents = [];
+    $unmatchedPrintedCount = 0;
+    $legacyPrintedEvents = [];
+    foreach ($printedPeople as $event) {
+        if (($event['kind'] ?? '') === 'مهمان') {
+            continue;
+        }
+        $date = (string) ($event['date'] ?? '');
+        $national = food_ticket_digits($event['nat'] ?? '');
+        $personnel = trim((string) ($event['pc'] ?? ''));
+        $key = $national !== '' ? ($byNational[$date . '|' . $national] ?? '') : '';
+        if ($key === '' && $personnel !== '') {
+            $key = $byPersonnel[$date . '|' . $personnel] ?? '';
+        }
+        if ($key !== '') {
+            $matched[$key] = true;
+        } else {
+            $unmatchedPrintedCount++;
+            if (count($unmatchedPrintedEvents) < 100) {
+                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => !empty($event['legacy_printed'])];
+            }
+        }
+        if (!empty($event['legacy_printed']) && count($legacyPrintedEvents) < 100) {
+            $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'pc' => $personnel];
+        }
+    }
+
+    $unprintableCount = 0;
+    $unprintableOrders = [];
+    try {
+        $missingJoinsSql = "FROM food_orders o
+            LEFT JOIN users u ON u.id = o.employee_id
+            LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id
+            LEFT JOIN food_catalog c ON c.id = i.food_id
+            WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'
+              AND (u.id IS NULL OR i.id IS NULL OR c.id IS NULL OR COALESCE(i.active, 0) <> 1 OR COALESCE(c.active, 0) <> 1)";
+        $countStmt = db()->prepare('SELECT COUNT(*) ' . $missingJoinsSql);
+        $countStmt->execute([$fromDate, $toDate]);
+        $unprintableCount = (int) $countStmt->fetchColumn();
+        if ($unprintableCount > 0) {
+            $rowsStmt = db()->prepare(
+                "SELECT o.id, o.food_date, o.employee_id, COALESCE(u.full_name, '') AS name,
+                        COALESCE(u.employee_number, '') AS personnel_code,
+                        CASE WHEN u.id IS NULL THEN 'کاربر سفارش پیدا نشد'
+                             WHEN i.id IS NULL THEN 'آیتم تقویم غذا پیدا نشد'
+                             WHEN c.id IS NULL THEN 'غذای کاتالوگ پیدا نشد'
+                             WHEN COALESCE(i.active, 0) <> 1 THEN 'آیتم تقویم غیرفعال است'
+                             WHEN COALESCE(c.active, 0) <> 1 THEN 'غذای کاتالوگ غیرفعال است' END AS issue
+                 " . $missingJoinsSql . ' ORDER BY o.food_date, o.id LIMIT 100'
+            );
+            $rowsStmt->execute([$fromDate, $toDate]);
+            foreach ($rowsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $unprintableOrders[] = ['id' => (int) $row['id'], 'date' => (string) $row['food_date'], 'name' => (string) $row['name'], 'pc' => (string) $row['personnel_code'], 'issue' => (string) $row['issue']];
+            }
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش ناهارِ غیرقابل‌چاپ: ' . $e->getMessage();
+    }
+
+    $eventTypeStatusCounts = [];
+    try {
+        $eventsStmt = db()->prepare(
+            "SELECT event_type, print_status, COUNT(*) AS total
+             FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND event_type IN ('printed','print','guest')
+             GROUP BY event_type, print_status ORDER BY event_type, print_status"
+        );
+        $eventsStmt->execute([$fromDate, $toDate]);
+        foreach ($eventsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $eventTypeStatusCounts[] = ['event_type' => (string) $row['event_type'], 'print_status' => (string) $row['print_status'], 'total' => (int) $row['total']];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی رویدادهای چاپ: ' . $e->getMessage();
+    }
+
+    return [
+        'active_orders_all_meals' => (int) ($counts['total_orders'] ?? 0),
+        'active_lunch_orders' => (int) ($counts['lunch_orders'] ?? 0),
+        'active_dinner_orders' => (int) ($counts['dinner_orders'] ?? 0),
+        'active_other_meal_orders' => (int) ($counts['other_meal_orders'] ?? 0),
+        'reportable_lunch_rows' => count($orderRows),
+        'unique_lunch_identities' => count($identities),
+        'matched_printed_lunch_identities' => count($matched),
+        'orders_without_national_code' => $withoutNational,
+        'orders_without_national_code_count' => $withoutNationalCount,
+        'duplicate_order_identities' => $duplicates,
+        'duplicate_order_identity_count' => $duplicateIdentityCount,
+        'duplicate_order_rows' => $duplicateRows,
+        'unprintable_lunch_order_count' => $unprintableCount,
+        'unprintable_lunch_orders' => $unprintableOrders,
+        'unmatched_printed_events' => $unmatchedPrintedEvents,
+        'unmatched_printed_event_count' => $unmatchedPrintedCount,
+        'legacy_printed_events' => $legacyPrintedEvents,
+        'legacy_printed_event_count' => (int) ($counts['legacy_printed'] ?? 0),
+        'event_type_status_counts' => $eventTypeStatusCounts,
+        'absent_count' => (int) ($counts['absent'] ?? 0),
+        'difference' => (int) ($counts['difference'] ?? 0),
+    ];
+}
+
 function food_ticket_api_aggregate_report(string $fromDate, string $toDate): array
 {
     $from = food_ticket_parse_date($fromDate);
@@ -3042,7 +3193,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     }
 
     $pdo = db();
-    $counts = ['total_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0];
+    $counts = ['total_orders' => 0, 'lunch_orders' => 0, 'dinner_orders' => 0, 'other_meal_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0, 'legacy_printed' => 0];
     $printedPeople = [];
     $sourceNotes = [];
 
@@ -3055,37 +3206,63 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
         $sourceNotes[] = 'سفارشها: ' . $e->getMessage();
         app_error_log('[aggregate-report] orders: ' . $e->getMessage());
     }
+    try {
+        $mealStmt = $pdo->prepare('SELECT meal_type, COUNT(*) AS c FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active" GROUP BY meal_type');
+        $mealStmt->execute([$from, $to]);
+        foreach ($mealStmt->fetchAll(PDO::FETCH_ASSOC) as $mealRow) {
+            $meal = (string) ($mealRow['meal_type'] ?? '');
+            if ($meal === 'lunch') {
+                $counts['lunch_orders'] = (int) $mealRow['c'];
+            } elseif ($meal === 'dinner') {
+                $counts['dinner_orders'] = (int) $mealRow['c'];
+            } else {
+                $counts['other_meal_orders'] += (int) $mealRow['c'];
+            }
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'تفکیک وعده‌های سفارش: ' . $e->getMessage();
+        app_error_log('[aggregate-report] meal breakdown: ' . $e->getMessage());
+    }
 
     // ۲) فیش مهمان چاپشده و ۳) فیش چاپشدهٔ قطعی پرسنل — از رویدادهای پایش
     try {
         $stmt = $pdo->prepare(
             "SELECT event_type, COUNT(*) AS c FROM food_ticket_events
              WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
-               AND event_type IN ('printed','guest') GROUP BY event_type"
+               AND event_type IN ('printed','print','guest') GROUP BY event_type"
         );
         $stmt->execute([$from, $to]);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-            if ((string) $row['event_type'] === 'guest') {
+            $eventType = (string) $row['event_type'];
+            if ($eventType === 'guest') {
                 $counts['guest_printed'] = (int) $row['c'];
             } else {
-                $counts['printed_final'] = (int) $row['c'];
+                $counts['printed_final'] += (int) $row['c'];
+                if ($eventType === 'print') {
+                    // رویدادهای قدیمی print در فهرست غایبین از قبل چاپ‌شده حساب می‌شدند،
+                    // اما در شمار فیش قطعی جا می‌افتادند.
+                    $counts['legacy_printed'] = (int) $row['c'];
+                }
             }
         }
         $stmt = $pdo->prepare(
-            "SELECT full_name, personnel_code, punch_date, punch_time, food_type, event_type
+            "SELECT id, full_name, personnel_code, national_code, punch_date, punch_time, food_type, event_type
              FROM food_ticket_events
              WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
-               AND event_type IN ('printed','guest') ORDER BY punch_date, punch_time, id"
+               AND event_type IN ('printed','print','guest') ORDER BY punch_date, punch_time, id"
         );
         $stmt->execute([$from, $to]);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $printedPeople[] = [
+                'event_id' => (int) ($row['id'] ?? 0),
                 'date' => (string) ($row['punch_date'] ?? ''),
                 'time' => (string) ($row['punch_time'] ?? ''),
                 'pc' => (string) ($row['personnel_code'] ?? ''),
+                'nat' => food_ticket_digits($row['national_code'] ?? ''),
                 'name' => (string) ($row['full_name'] ?? ''),
                 'food' => (string) ($row['food_type'] ?? ''),
                 'kind' => (string) $row['event_type'] === 'guest' ? 'مهمان' : 'پرسنل',
+                'legacy_printed' => (string) $row['event_type'] === 'print',
             ];
         }
     } catch (Throwable $e) {
@@ -3112,18 +3289,29 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     }
 
     $counts['absent'] = count($absentPeople);
-    $expected = $counts['total_orders'] - ($counts['guest_printed'] + $counts['printed_final']);
+    // چاپ فیش و گزارش غایبین فقط بر اساس سفارش‌های ناهار است؛ سفارش شام نباید وارد مخرج تطبیق شود.
+    // فیش مهمان هم رکورد food_orders ندارد، پس از تعداد سفارش کارکنان کسر نمی‌شود.
+    $expected = $counts['lunch_orders'] - $counts['printed_final'];
+    $counts['expected_absent'] = $expected;
     $counts['has_mismatch'] = ($expected !== $counts['absent']);
     $counts['difference'] = $expected - $counts['absent'];
 
     food_ticket_aggregate_sort_people($printedPeople);
     food_ticket_aggregate_sort_people($absentPeople);
+    $diagnostics = food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes);
+    $publicPrintedPeople = $printedPeople;
+    foreach ($publicPrintedPeople as &$person) {
+        // کد ملی/شناسهٔ داخلی فقط برای محاسبهٔ سمت سرور است و نباید به کلاینت گزارش ارسال شود.
+        unset($person['nat'], $person['event_id'], $person['legacy_printed']);
+    }
+    unset($person);
     return [
         'from' => $from,
         'to' => $to,
         'counts' => $counts,
-        'printed_people' => $printedPeople,
+        'printed_people' => $publicPrintedPeople,
         'absent_people' => $absentPeople,
+        'diagnostics' => $diagnostics,
         'source_notes' => $sourceNotes,
     ];
 }
@@ -3160,9 +3348,12 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
     $c = $report['counts'];
     $rows = [];
     $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
-    $rows[] = ['تعداد کل سفارشها', $c['total_orders'], 'فیش مهمان چاپشده', $c['guest_printed']];
-    $rows[] = ['فیش چاپشده قطعی', $c['printed_final'], 'تعداد غایبین', $c['absent']];
-    $rows[] = ['مغایرت', $c['has_mismatch'] ? 'دارد' : 'ندارد'];
+    $rows[] = ['تعداد کل سفارشها (همهٔ وعده‌ها)', $c['total_orders'], 'سفارش ناهارِ مبنای تطبیق', $c['lunch_orders']];
+    $rows[] = ['سفارش شام (خارج از تطبیق چاپ)', $c['dinner_orders'], 'سایر وعده‌ها', $c['other_meal_orders']];
+    $rows[] = ['فیش مهمان چاپشده', $c['guest_printed'], 'فیش چاپشده قطعی', $c['printed_final']];
+    $rows[] = ['تعداد غایبین', $c['absent'], 'غایب موردانتظار', $c['expected_absent'] ?? 0];
+    $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
+    $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
     $rows[] = [];
     $rows[] = ['فهرست نفراتی که فیش چاپشده دارند'];
     $rows[] = $headers;

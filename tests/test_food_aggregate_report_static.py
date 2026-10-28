@@ -54,8 +54,12 @@ def main() -> int:
           "شمارش سفارشها وضعیت active را فیلتر نمیکند")
     check("print_status = 'printed'" in agg_body,
           "فیشهای چاپشده فیلتر نشدهاند")
-    check("event_type IN ('printed','guest')" in agg_body,
-          "تفکیک فیش مهمان/پرسنل انجام نمیشود")
+    check("event_type IN ('printed','print','guest')" in agg_body,
+          "فیشهای چاپی legacy به تفکیک مهمان/پرسنل وارد نمیشوند")
+    check("$expected = $counts['lunch_orders'] - $counts['printed_final'];" in agg_body,
+          "مغایرت باید فقط با سفارشهای ناهار، هم scope گزارش غایبین، سنجیده شود")
+    check("food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes)" in agg_body,
+          "تفکیک علل مغایرت در پاسخ گزارش وجود ندارد")
     check("food_ticket_api_absent($from, $to)" in agg_body,
           "غایبین از تابع رسمی سامانه گرفته نمیشوند")
     check("has_mismatch" in agg_body and "difference" in agg_body,
@@ -120,7 +124,7 @@ def main() -> int:
     check("aggregate:_ag" in html, "دادهٔ موقت aggregate در persist ذخیره میشود")
 
     # ۶) نسخه پنل بالا رفته باشد ----------------------------------------------
-    check("PANEL_VERSION='1.37.34'" in html,
+    check("PANEL_VERSION='1.37.42'" in html,
           "نسخهٔ پنل برای جلوگیری از کش قدیمی بالا نرفته است")
 
     # ۷) اجرای تست رفتاری JS --------------------------------------------------

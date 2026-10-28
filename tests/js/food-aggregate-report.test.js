@@ -90,7 +90,8 @@ env.state.reportTab = 'aggregate';
 
 // ۳) پنج شمارنده + مغایرت
 env.state.aggregate = {
-  counts: { total_orders: 120, guest_printed: 8, printed_final: 102, absent: 10, has_mismatch: false, difference: 0 },
+  counts: { total_orders: 120, lunch_orders: 112, dinner_orders: 8, guest_printed: 8, printed_final: 102, absent: 10, expected_absent: 10, has_mismatch: false, difference: 0 },
+  diagnostics: { active_orders_all_meals: 120, active_lunch_orders: 112, active_dinner_orders: 8, reportable_lunch_rows: 112, unique_lunch_identities: 112, matched_printed_lunch_identities: 102, absent_count: 10, difference: 0 },
   printed_people: [{ pc: '1001', name: 'علی رضایی', food: 'چلوکباب', kind: 'پرسنل', date: '2026-10-27', time: '12:01:00' }],
   absent_people: [{ pc: '1002', name: 'مریم احمدی', food: 'قورمهسبزی', status: 'غایب', date: '2026-10-27', declared: true }],
   source_notes: [],
@@ -101,6 +102,8 @@ for (const label of ['تعداد کل سفارشها', 'فیش مهمان چاپ
 }
 assert(out.includes('۱۲۰') && out.includes('۱۰۲') && out.includes('۱۰'), 'اعداد فارسی نشان داده نشدند');
 assert(out.includes('ندارد'), 'وضعیت «مغایرت ندارد» نشان داده نشد');
+assert(out.includes('مبنای تطبیق') && out.includes('خارج از تطبیق ناهار: ۸'), 'تفکیک ناهار/شام برای بررسی مغایرت نشان داده نشد');
+assert(out.includes('عیب‌یابی و تفکیک منبع آمار'), 'جزئیات عیب‌یابی در پنل وجود ندارد');
 assert(out.includes('علی رضایی') && out.includes('مریم احمدی'), 'اسامی چاپشدهها/غایبین نشان داده نشد');
 assert(out.includes('غیبت اعلامشده'), 'برچسب غیبت اعلامشده نشان داده نشد');
 assert(out.includes('aggregate-export') && out.includes('aggregate-print'), 'دکمههای استخراج/چاپ وجود ندارند');
@@ -108,7 +111,8 @@ assert(out.includes('id="aggregate-filter"'), 'فرم انتخاب روز وجو
 assert(out.includes('data-agg-field="name"'), 'انتخاب فیلد وجود ندارد');
 
 // ۴) حالت مغایرtdارد
-env.state.aggregate.counts = { total_orders: 120, guest_printed: 8, printed_final: 100, absent: 10, has_mismatch: true, difference: 2 };
+env.state.aggregate.counts = { total_orders: 120, lunch_orders: 112, dinner_orders: 8, guest_printed: 8, printed_final: 100, absent: 10, expected_absent: 12, has_mismatch: true, difference: 2 };
+env.state.aggregate.diagnostics.difference = 2;
 out = m.reportAggregateView();
 assert(out.includes('>دارد</b>') && out.includes('agg-mismatch-text'), 'وضعیت «مغایرت دارد» نشان داده نشد');
 assert(out.includes('agg-mismatch'), 'استایل هشدار مغایرت اعمال نشد');
@@ -165,6 +169,7 @@ fire('click', {
 });
 assert(created.length > beforeLayers, 'لایه پیشنمایش چاپ ساخته نشد');
 assert(created[created.length - 1].innerHTML.includes('پیشنمایش گزارش تجمیعی'), 'محتوای پیشنمایش ناقص است');
+assert(created[created.length - 1].innerHTML.includes('مبنای تطبیق'), 'تفکیک ناهار و مغایرت در نسخهٔ قابل چاپ نیست');
 
 // ۹) فرم تاریخ نامعتبر → خطا، بدون رندر
 toastCalls.length = 0;
