@@ -17,6 +17,7 @@
     loadError: '',
     formError: '',
     saving: false,
+    editingId: 0,
     form: { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' }
   };
   var dialog = null;
@@ -75,11 +76,13 @@
     var f = state.form;
     var deputyBox = state.myDeputy
       ? '<div class="alert info" role="status">معاونت درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از چارت سازمانی شما خوانده می‌شود)</div>'
-      : '<div class="alert danger" role="alert">معاونت شما در چارت سازمانی پیدا نشد؛ ثبت سفارش مهمان غیرفعال است. با مدیر سامانه هماهنگ کنید.</div>';
+      : '<div class="alert info" role="status">برای ثبت درخواست جدید باید در چارت سازمانی زیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
     var rows = state.items.map(function (r) {
-      var action = r.editable && r.status === 'active'
-        ? '<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>'
-        : '<span class="muted">—</span>';
+      var actions = [];
+      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + r.id + '">ویرایش</button>');
+      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>');
+      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + r.id + '">حذف</button>');
+      var action = actions.length ? actions.join(' ') : '<span class="muted">—</span>';
       var status = r.status === 'cancelled' ? '<span class="muted">لغو شده</span>' : 'فعال';
       return '<tr>'
         + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
@@ -87,12 +90,13 @@
         + '<td>' + esc(r.organization) + '</td>'
         + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
         + '<td>' + esc(r.requester_name) + '</td>'
+        + '<td>' + esc(r.created_by_name || '—') + '</td>'
         + '<td>' + status + '</td>'
         + '<td>' + action + '</td></tr>';
     }).join('');
     var table = state.items.length
       ? '<div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr>'
-        + '<th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>وضعیت</th><th></th>'
+        + '<th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>مدیر ثبت‌کننده</th><th>وضعیت</th><th>عملیات</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
       : '<p class="muted">درخواست فعالی برای امروز یا روزهای آینده ثبت نشده است.</p>';
     var deadlineNotice = state.sameDayOpen === null
@@ -102,7 +106,7 @@
         : '<div class="alert warning" role="status">مهلت ثبت درخواست مهمان برای امروز گذشته است (تا پایان دقیقهٔ <b>' + esc(faDigits(state.sameDayCutoff || '09:30')) + '</b>). از فردا به بعد همچنان می‌توانید درخواست ثبت کنید.</div>';
     dialog.innerHTML = ''
       + '<div class="fo-modal-inner">'
-      + '<div class="fo-modal-head"><div><h2 id="fg-title">سفارش غذای مهمان</h2>'
+      + '<div class="fo-modal-head"><div><h2 id="fg-title">' + (state.editingId ? 'ویرایش درخواست غذای مهمان' : 'سفارش غذای مهمان') + '</h2>'
       + '</div>'
       + '<button type="button" class="button secondary" data-fg-action="close">بستن</button></div>'
       + (state.loadError ? '<div class="alert danger" role="alert">' + esc(state.loadError) + '</div>' : '')
@@ -115,7 +119,8 @@
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
       + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
       + '<label>یادداشت (اختیاری)<input type="text" name="note" maxlength="500" value="' + esc(f.note) + '"></label>'
-      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || !state.myDeputy ? ' disabled' : '') + '>ثبت درخواست مهمان</button></div>'
+      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.myDeputy) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
+      + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
       + '<h3 style="margin-top:20px">درخواست‌های ثبت‌شدهٔ مهمان (از امروز به بعد)</h3>'
       + table
@@ -136,6 +141,9 @@
       var act = btn.dataset.fgAction;
       if (act === 'close') dialog.close();
       if (act === 'cancel') cancel(Number(btn.dataset.id || 0));
+      if (act === 'edit') beginEdit(Number(btn.dataset.id || 0));
+      if (act === 'edit-cancel') cancelEdit();
+      if (act === 'delete') removeRequest(Number(btn.dataset.id || 0));
     });
     dialog.addEventListener('submit', function (event) {
       if (!event.target || event.target.id !== 'fg-form') return;
@@ -174,6 +182,8 @@
       requester_name: f.requester_name.trim(),
       note: f.note.trim()
     };
+    var editingId = Number(state.editingId || 0);
+    if (editingId) body.id = editingId;
     state.formError = '';
     if (!body.request_date) { state.formError = 'تاریخ را وارد کنید.'; return render(); }
     if (!body.organization) { state.formError = 'نام سازمان یا شرکت را وارد کنید.'; return render(); }
@@ -184,11 +194,13 @@
     state.saving = true;
     render();
     try {
-      var res = await request('guest-request', null, { method: 'POST', body: JSON.stringify(body) });
+      var res = await request(editingId ? 'guest-request-update' : 'guest-request', null, { method: 'POST', body: JSON.stringify(body) });
       state.saving = false;
+      state.editingId = 0;
       state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
       dialog.close();
-      toast(res.message || 'درخواست غذای مهمان ثبت شد.', false);
+      toast(res.message || (editingId ? 'درخواست غذای مهمان ویرایش شد.' : 'درخواست غذای مهمان ثبت شد.'), false);
+      await load();
     } catch (e) {
       state.saving = false;
       state.formError = e.message;
@@ -207,10 +219,49 @@
     }
   }
 
+  function beginEdit(id) {
+    var row = state.items.find(function (item) { return Number(item.id) === Number(id); });
+    if (!row || !row.can_edit) return;
+    state.editingId = Number(row.id);
+    state.formError = '';
+    state.form = {
+      request_date: row.request_jalali || '',
+      organization: row.organization || '',
+      guest_count: String(row.guest_count || ''),
+      requester_name: row.requester_name || '',
+      note: row.note || ''
+    };
+    render();
+    var form = dialog && dialog.querySelector('#fg-form');
+    if (form) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function cancelEdit() {
+    state.editingId = 0;
+    state.formError = '';
+    state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    render();
+  }
+
+  async function removeRequest(id) {
+    var row = state.items.find(function (item) { return Number(item.id) === Number(id); });
+    if (!row || !row.can_delete) return;
+    if (!window.confirm('درخواست مهمان به‌طور کامل حذف شود؟ این کار قابل بازگشت نیست.')) return;
+    try {
+      var res = await request('guest-request-delete', null, { method: 'POST', body: JSON.stringify({ id: Number(id) }) });
+      toast(res.message || 'درخواست حذف شد.', false);
+      await load();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  }
+
   /** از دکمهٔ «سفارش غذای مهمان» تقویم صدا زده می‌شود. */
   function open() {
     ensureDialog();
+    state.editingId = 0;
     state.formError = '';
+    state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
     render();
     if (!dialog.open) {
       try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', 'open'); }
