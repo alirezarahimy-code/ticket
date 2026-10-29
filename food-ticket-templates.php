@@ -2296,6 +2296,10 @@ function food_ticket_templates_api(string $route, array $user): never
             food_ticket_api_json(['error' => 'ذخیرهٔ طراحی فیش گروهی انجام نشد.'], 500);
         }
         save_setting('food_ticket_group_template', $encoded);
+        // خواندن مجدد مستقیم از دیتابیس؛ پاسخ موفق فقط وقتی برگردد که تنظیم واقعاً ذخیره شده باشد.
+        if (food_ticket_tpl_setting('food_ticket_group_template', '') !== $encoded) {
+            food_ticket_api_json(['error' => 'قالب گروهی ذخیره نشد؛ مقدار ثبت‌شده با طراحی ارسالی یکسان نیست.'], 500);
+        }
         food_ticket_print_log(null, null, null, null, null, 'group_template_saved', 0, 'group template by user ' . $uid);
         food_ticket_api_json(['ok' => true] + food_ticket_tpl_list_payload());
     }
@@ -2305,6 +2309,9 @@ function food_ticket_templates_api(string $route, array $user): never
             food_ticket_api_json(['error' => 'حالت چاپ گروهی معتبر نیست.'], 422);
         }
         save_setting('food_ticket_group_print_mode', $mode);
+        if (food_ticket_tpl_setting('food_ticket_group_print_mode', '') !== $mode) {
+            food_ticket_api_json(['error' => 'حالت چاپ گروهی در پایگاه‌داده ذخیره نشد.'], 500);
+        }
         food_ticket_api_json(['ok' => true] + food_ticket_tpl_list_payload());
     }
     if ($route === 'templates') {

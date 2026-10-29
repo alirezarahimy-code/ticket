@@ -55,7 +55,8 @@ class InventoryTruthStaticTests(unittest.TestCase):
         self.assertIn("استخراج محلی همین سیستم", index)
         self.assertIn("میزبانی اجرا می‌شود که PHP سامانه روی آن نصب است", index)
         page = read("asset-inventory-page.php")
-        self.assertIn("bool $canExtractLocalServer", page)
+        self.assertIn("bool $canExtractAssets", page)
+        self.assertIn("canExtractLocalServer", page)  # لایهٔ سازگاری با index.php قدیمی
         self.assertIn("name=\"action\" value=\"collect_inventory\"", page)
         action = index[index.index("if ($action === 'collect_inventory')"):index.index("if ($action === 'asset_profile_selftest')")]
         self.assertLess(action.index("if ($hardwareScore === 0)"), action.index("inventory_upsert_server_asset($serverInventory"))

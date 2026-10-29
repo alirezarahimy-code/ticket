@@ -123,7 +123,7 @@ check('۲۳: صفت title آمادهٔ درج در HTML', strpos(asset_name_attr
 
 /* ───── ۶) اتصال به همهٔ جاهای نمایش (سرور) ───── */
 $index = (string) file_get_contents($root . '/index.php');
-check('۲۴: ماژول نام‌ها در index.php بارگذاری شده است', strpos($index, "require __DIR__ . '/asset-names.php';") !== false);
+check('۲۴: ماژول نام‌ها در index.php بارگذاری شده است', preg_match('/require(_once)? __DIR__ \. \'\/asset-names\.php\';/', $index) === 1);
 check('۲۵: فهرست شناسنامه‌ها از نام نمایشی استفاده می‌کند',
     substr_count($index, 'asset_display_name(') >= 6, (string) substr_count($index, 'asset_display_name('));
 check('۲۶: گزینه‌های کمبوی «سیستم مرتبط» هم نام کوتاه را نشان می‌دهند',

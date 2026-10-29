@@ -1,0 +1,85 @@
+<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8">
+<title>پیشنمایش — گزارش تجمیعی</title>
+<style>
+:root{--line:#e2e8f0;--teal:#0f766e;--teal2:#e6f4f1;--muted:#64748b;--ink:#0f172a;--red:#dc2626;--shadow:0 1px 3px rgba(0,0,0,.08)}
+*{box-sizing:border-box}body{font-family:Tahoma,'Segoe UI',sans-serif;background:#f6f8fa;color:var(--ink);padding:28px;margin:0}
+.page{max-width:1000px;margin:auto}.heading{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.heading h2{margin:0;font-size:22px}.heading p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 14px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:700}
+.btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.btn.ghost{background:transparent}
+.agg-tabs{display:flex;gap:8px;margin:0 0 18px;border-bottom:2px solid var(--line)}
+.agg-tab{padding:10px 18px;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--muted);font-weight:700;font-size:14px;cursor:pointer;margin-bottom:-2px}
+.agg-tab.active{color:var(--teal);border-bottom-color:var(--teal)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;align-items:end}
+.field{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--muted)}
+.field input{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:14px;direction:ltr;text-align:right}
+.form-actions{display:flex;gap:8px}
+.grid{display:grid;gap:14px}.section-gap{margin-top:16px}
+.agg-cards{grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+.stat{display:flex;flex-direction:column;gap:6px}.stat .label{font-size:12px;color:var(--muted);font-weight:700}.stat strong{font-size:30px;line-height:1}
+.agg-ok strong{color:var(--teal)}.agg-mismatch{border-color:var(--red)!important}.agg-mismatch strong{color:var(--red)}
+.agg-fields{display:flex;flex-wrap:wrap;gap:10px 18px;margin:12px 0 8px}
+.agg-field{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer}
+h3{font-size:15px;margin:20px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right}th{background:#f8fafc;font-weight:700;color:var(--muted)}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;background:var(--teal2);color:var(--teal);font-size:11px;font-weight:700}
+.notice{background:var(--teal2);border-radius:8px;padding:12px;font-size:13px;line-height:2}
+small{color:var(--muted)}
+</style></head><body><div class="page">
+
+<div class="agg-tabs" role="tablist">
+  <button class="agg-tab" role="tab">گزارشگیری</button>
+  <button class="agg-tab active" role="tab" aria-selected="true">گزارش تجمیعی</button>
+</div>
+
+<div class="heading">
+  <div><h2>گزارش تجمیعی</h2><p>شمارش سفارشها، فیشهای چاپشده و غایبین — بازه: ۱۴۰۵/۰۸/۰۵</p></div>
+  <div style="display:flex;gap:8px"><button class="btn primary">استخراج Excel</button><button class="btn ghost">چاپ گزارش</button></div>
+</div>
+
+<form class="card form-grid">
+  <label class="field">از تاریخ (شمسی)<input value="۱۴۰۵/۰۸/۰۵" placeholder="۱۴۰۵/۰۷/۰۱"></label>
+  <label class="field">تا تاریخ (شمسی)<input value="۱۴۰۵/۰۸/۰۵" placeholder="۱۴۰۵/۰۷/۳۰"></label>
+  <div class="form-actions"><button class="btn primary">نمایش گزارش</button><button class="btn ghost">امروز</button></div>
+</form>
+
+<div class="grid section-gap agg-cards">
+  <div class="card stat"><span class="label">تعداد کل سفارشها</span><strong>۱۲۰</strong></div>
+  <div class="card stat"><span class="label">فیش مهمان چاپشده</span><strong>۸</strong></div>
+  <div class="card stat"><span class="label">فیش چاپشده قطعی</span><strong>۱۰۲</strong></div>
+  <div class="card stat"><span class="label">تعداد غایبین</span><strong>۱۰</strong></div>
+  <div class="card stat agg-ok"><span class="label">مغایرت</span><strong>ندارد</strong></div>
+</div>
+
+<div class="card section-gap"><strong>فیلدهای گزارش</strong>
+  <div class="agg-fields">
+    <label class="agg-field"><input type="checkbox" checked><span>ردیف</span></label>
+    <label class="agg-field"><input type="checkbox"><span>تاریخ</span></label>
+    <label class="agg-field"><input type="checkbox"><span>ساعت</span></label>
+    <label class="agg-field"><input type="checkbox" checked><span>کد پرسنلی</span></label>
+    <label class="agg-field"><input type="checkbox" checked><span>نام و نام خانوادگی</span></label>
+    <label class="agg-field"><input type="checkbox" checked><span>نوع غذا</span></label>
+    <label class="agg-field"><input type="checkbox" checked><span>نوع فیش</span></label>
+    <label class="agg-field"><input type="checkbox" checked><span>وضعیت</span></label>
+  </div>
+  <small>فیلدهای انتخابشده در جداول، استخراج و چاپ نمایش داده میشوند.</small>
+</div>
+
+<div class="section-gap"><h3>نفراتی که فیش چاپشده دارند (۱۰۲ نفر)</h3>
+  <div class="card table-wrap"><table><thead><tr><th>ردیف</th><th>کد پرسنلی</th><th>نام و نام خانوادگی</th><th>نوع غذا</th><th>نوع فیش</th><th>وضعیت</th></tr></thead><tbody>
+  <tr><td>۱</td><td>۱۰۰۱</td><td>علی رضایی</td><td>چلوکباب</td><td>پرسنل</td><td><span class="badge">چاپشده</span></td></tr>
+  <tr><td>۲</td><td>۱۰۰۳</td><td>حسن محمدی</td><td>قورمهسبزی</td><td>پرسنل</td><td><span class="badge">چاپشده</span></td></tr>
+  <tr><td>۳</td><td>—</td><td>مهمان (سازمان همکار)</td><td>چلوکباب</td><td>مهمان</td><td><span class="badge">چاپشده</span></td></tr>
+  <tr><td colspan="6" style="color:#64748b">… ۹۹ ردیف دیگر</td></tr>
+  </tbody></table></div></div>
+
+<div class="section-gap"><h3>غایبین (۱۰ نفر)</h3>
+  <div class="card table-wrap"><table><thead><tr><th>ردیف</th><th>کد پرسنلی</th><th>نام و نام خانوادگی</th><th>نوع غذا</th><th>نوع فیش</th><th>وضعیت</th></tr></thead><tbody>
+  <tr><td>۱</td><td>۱۰۰۲</td><td>مریم احمدی</td><td>قورمهسبزی</td><td>غیبت اعلامشده</td><td>غایب</td></tr>
+  <tr><td>۲</td><td>۱۰۰۵</td><td>رضا کریمی</td><td>چلوکباب</td><td>—</td><td>غایب</td></tr>
+  <tr><td colspan="6" style="color:#64748b">… ۸ ردیف دیگر</td></tr>
+  </tbody></table></div></div>
+
+<div class="notice" style="margin-top:22px"><b>نکته:</b> اعداد بالا فقط نمونهاند؛ مقدار واقعی هنگام اجرا از دیتابیس خوانده میشود (سفارشهای فعال + فیشهای چاپشدهٔ مهمان/پرسنل + غایبین همان روز).</div>
+</div></body></html>
