@@ -70,19 +70,21 @@ for action_name in ("save_org_node", "assign_org_manager", "save_org_unit"):
     )
 repair_action = index.split("if ($action === 'repair_org_manager_admin_roles')", 1)[1].split("if ($action ===", 1)[0]
 org_page = index.split("if ($page === 'organization')", 1)[1].split("if ($page === 'settings')", 1)[0]
+settings_page = index.split("if ($page === 'settings')", 1)[1].split("if ($page === 'logs')", 1)[0]
 check(
     "if ($action === 'repair_org_manager_admin_roles')" in index
-    and "role = \"manager\", is_primary_admin = 0" in repair_action
+    and 'role = "manager", is_primary_admin = 0' in repair_action
     and "org_unit_managers" in repair_action
-    and "اصلاح مدیران سازمانی که ادمین اصلی شده‌اند" in org_page,
-    "primary admin can safely restore mistakenly promoted org managers without breaking their unit assignments",
+    and "اصلاح مدیران سازمانی که ادمین اصلی شده‌اند" in settings_page,
+    "primary admin can safely restore mistakenly promoted org managers from settings without breaking their unit assignments",
 )
 check(
-    "$canRepairOrgAdminRoles = user_is_primary_admin($organizationUser)" in org_page
-    and "__REPAIR_ROLE_LINK__" in org_page
-    and "body.page-organization { height: auto; min-height: 100vh; overflow-x: hidden; overflow-y: auto; }" in style
-    and "body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow: visible; }" in style,
-    "admin repair panel is reachable by scrolling and has a visible header shortcut",
+    'href="#org-admin-repair"' in settings_page
+    and 'id="org-admin-repair"' in settings_page
+    and "اصلاح مدیران سازمانی که ادمین اصلی شده‌اند" not in org_page
+    and "تشخیص ارجاع خودکار درخواست‌ها" not in org_page
+    and "__REPAIR_ROLE_LINK__" not in org_page,
+    "repair and routing diagnostics are in a primary-admin settings tab, not the organization chart",
 )
 
 check(
@@ -92,8 +94,9 @@ check(
     "deputy card has department and expert add buttons",
 )
 check(
-    "if (deputyExperts.length) html += '<li>' + expertNode(deputy) + '</li>';" in org_js,
-    "deputy expert box appears only after experts are assigned",
+    "if (!experts.length) return '';" in org_js
+    and "renderExperts(item)" in org_js,
+    "empty expert boxes are omitted until users are explicitly assigned",
 )
 check(
     "expertHosts" in org_js

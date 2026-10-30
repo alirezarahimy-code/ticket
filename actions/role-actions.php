@@ -55,6 +55,11 @@ if (!defined('APP_ROOT')) {
             }
             $oldSupervisors = key_role_user_ids('supervisor');
             $oldExperts = key_role_user_ids('it_expert');
+            // The key-role editor may manage supervisor/inspection assignments, but only
+            // the primary admin can add or remove an IT expert (which grants primary-admin status).
+            if (!user_is_primary_admin($rolesAdmin)) {
+                $itExperts = $oldExperts;
+            }
             db()->beginTransaction();
             try {
                 foreach (array_diff($supervisors, $oldSupervisors) as $id) {

@@ -11,9 +11,14 @@ function traffic_can_manage(array $user): bool
     return function_exists('user_can') ? user_can($user, 'traffic.manage') : ($user['role'] ?? '') === 'admin';
 }
 
-function traffic_can_manage_destinations(array $user): bool
+function traffic_can_view_destinations(array $user): bool
 {
     return function_exists('user_can') ? user_can($user, 'traffic.destinations') : ($user['role'] ?? '') === 'admin';
+}
+
+function traffic_can_manage_destinations(array $user): bool
+{
+    return function_exists('user_can') ? user_can($user, 'traffic.destinations_edit') : ($user['role'] ?? '') === 'admin';
 }
 
 function traffic_destinations(bool $activeOnly = true): array
@@ -886,6 +891,9 @@ function traffic_render_page(array $user): never
     if (in_array($tab, ['edit', 'changes'], true)) {
         $user = require_permission('traffic.manage');
     }
+    if ($tab === 'destinations') {
+        $user = require_permission('traffic.destinations');
+    }
     $filters = [
         'search' => trim((string) ($_GET['search'] ?? '')),
         'range' => valid_choice((string) ($_GET['range'] ?? 'week'), ['today', 'week', 'all'], 'week'),
@@ -979,7 +987,7 @@ function traffic_render_page(array $user): never
             <a class="<?= $tab === 'new' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=new">➕ ثبت تردد</a>
             <a class="<?= $tab === 'history' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=history">📋 سوابق</a>
             <?php if (traffic_can_manage($user)): ?><a class="<?= $tab === 'changes' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=changes">🕘 تاریخچهٔ ویرایش‌ها</a><?php endif; ?>
-            <?php if (traffic_can_manage_destinations($user)): ?><a class="<?= $tab === 'destinations' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=destinations">🏷️ مقاصد ملاقات و تأییدکنندگان</a><?php endif; ?>
+            <?php if (traffic_can_view_destinations($user)): ?><a class="<?= $tab === 'destinations' ? 'active' : '' ?>" href="index.php?page=traffic-control&amp;tab=destinations">🏷️ مقاصد ملاقات و تأییدکنندگان</a><?php endif; ?>
         </nav>
         <?php if ($formError): ?>
         <div class="alert danger" role="alert" tabindex="-1" id="traffic-form-error" data-focus-form="<?= $tab === 'new' ? 'traffic-new-form' : '' ?>" data-focus-field="<?= e((string) $formError['field']) ?>"><?= e((string) $formError['message']) ?></div>
@@ -1233,15 +1241,17 @@ function traffic_render_page(array $user): never
         </section>
         <?php endif; ?>
 
-        <?php if ($tab === 'destinations' && traffic_can_manage_destinations($user)): ?>
+        <?php if ($tab === 'destinations' && traffic_can_view_destinations($user)): ?>
         <section class="card traffic-destinations-card">
             <div class="section-title"><div><span class="eyebrow">تنظیمات</span><h2>مقاصد ملاقات و تأییدکنندگان</h2><p class="muted">برای هر مقصد ۱ تا ۳ تأییدکننده ثبت کنید؛ هنگام ثبت تردد، تأییدکنندهٔ همان مقصد خودکار نمایش داده می‌شود و اگر بیش از یکی باشد قابل انتخاب است.</p></div></div>
-            <form method="post" class="traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><label>عنوان مقصد<input name="title" placeholder="مثلاً ملاقات با مدیرعامل" maxlength="190" required></label><label>تأییدکنندهٔ ۱ (اصلی)<input name="approver_name" placeholder="نام تأییدکننده" maxlength="190" required></label><label>تأییدکنندهٔ ۲ (اختیاری)<input name="approver_name2" placeholder="در صورت نیاز" maxlength="190"></label><label>تأییدکنندهٔ ۳ (اختیاری)<input name="approver_name3" placeholder="در صورت نیاز" maxlength="190"></label><button class="button" type="submit">افزودن مقصد</button></form>
+            <?php if (traffic_can_manage_destinations($user)): ?><form method="post" class="traffic-destination-add-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_add_destination"><label>عنوان مقصد<input name="title" placeholder="مثلاً ملاقات با مدیرعامل" maxlength="190" required></label><label>تأییدکنندهٔ ۱ (اصلی)<input name="approver_name" placeholder="نام تأییدکننده" maxlength="190" required></label><label>تأییدکنندهٔ ۲ (اختیاری)<input name="approver_name2" placeholder="در صورت نیاز" maxlength="190"></label><label>تأییدکنندهٔ ۳ (اختیاری)<input name="approver_name3" placeholder="در صورت نیاز" maxlength="190"></label><button class="button" type="submit">افزودن مقصد</button></form><?php endif; ?>
             <div class="traffic-destinations-list">
                 <?php foreach (traffic_destinations(false) as $d): ?>
                 <div class="traffic-destination-row <?= (int) ($d['is_active'] ?? 1) === 1 ? '' : 'is-inactive' ?>">
+                    <?php if (traffic_can_manage_destinations($user)): ?>
                     <form method="post" class="traffic-destination-edit-form"><?= csrf_field() ?><input type="hidden" name="action" value="traffic_update_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><label>عنوان مقصد<input name="title" value="<?= e($d['title']) ?>" maxlength="190" required></label><label>تأییدکنندهٔ ۱ (اصلی)<input name="approver_name" value="<?= e((string) ($d['approver_name'] ?? '')) ?>" maxlength="190" required></label><label>تأییدکنندهٔ ۲ (اختیاری)<input name="approver_name2" value="<?= e((string) ($d['approver_name2'] ?? '')) ?>" maxlength="190"></label><label>تأییدکنندهٔ ۳ (اختیاری)<input name="approver_name3" value="<?= e((string) ($d['approver_name3'] ?? '')) ?>" maxlength="190"></label><button class="mini-button" type="submit">ذخیره</button></form>
                     <?php if ((int) ($d['is_active'] ?? 1) === 1): ?><form method="post" data-confirm="این مقصد از فهرست فعال غیرفعال شود؟ سوابق قبلی حفظ می‌شوند."><?= csrf_field() ?><input type="hidden" name="action" value="traffic_delete_destination"><input type="hidden" name="destination_id" value="<?= (int) $d['id'] ?>"><button class="mini-button danger" type="submit">غیرفعال‌کردن</button></form><?php else: ?><span class="traffic-destination-inactive-label">غیرفعال</span><?php endif; ?>
+                    <?php else: ?><div class="traffic-destination-readonly"><strong><?= e($d['title']) ?></strong><span><?= e(implode('، ', traffic_destination_row_approvers($d))) ?></span><?php if ((int) ($d['is_active'] ?? 1) !== 1): ?><em class="traffic-destination-inactive-label">غیرفعال</em><?php endif; ?></div><?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>

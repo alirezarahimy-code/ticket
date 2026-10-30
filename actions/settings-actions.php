@@ -24,6 +24,25 @@ if (!defined('APP_ROOT')) {
     exit;
 }
 
+        // نام‌های شرکت فقط برچسب نمایشی در انتخاب‌گر و کارت ریشه هستند؛ نقشی/عضویتی را تغییر نمی‌دهند.
+        if ($action === 'save_org_company_names') {
+            $companyAdmin = require_primary_admin();
+            if (!org_has_company_schema()) throw new RuntimeException('ابتدا migration شرکت‌ها را از مسیر رسمی به‌روزرسانی اجرا کنید.');
+            $names = $_POST['company_names'] ?? [];
+            if (!is_array($names)) throw new RuntimeException('فهرست نام شرکت‌ها معتبر نیست.');
+            $companies = org_companies_all();
+            $update = db()->prepare('UPDATE org_companies SET name = ? WHERE id = ? AND is_active = 1');
+            foreach ($companies as $company) {
+                $id = (int) $company['id'];
+                $name = trim((string) ($names[$id] ?? ''));
+                if ($name === '' || mb_strlen($name, 'UTF-8') > 190) throw new RuntimeException('نام نمایشی هر شرکت باید بین ۱ تا ۱۹۰ نویسه باشد.');
+                $update->execute([$name, $id]);
+            }
+            save_audit((int) $companyAdmin['id'], 'org_company_display_names_updated', null, ['companies' => array_map(static fn (array $company): int => (int) $company['id'], $companies)]);
+            flash('success', 'نام‌های نمایشی شرکت‌ها ذخیره شد؛ نقش و عضویت کارکنان تغییر نکرد.');
+            redirect('index.php?page=settings#users');
+        }
+
         // ───── گروه اکشن: نگهداری لاگ‌ها و LDAP ─────
         if ($action === 'prune_activity_logs') {
             $pruneAdmin = require_primary_admin();
