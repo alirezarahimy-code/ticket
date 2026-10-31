@@ -6,10 +6,10 @@ require_once __DIR__ . '/xlsx-writer.php';
 if (is_file(__DIR__ . '/admin-layout-design.php')) {
     require_once __DIR__ . '/admin-layout-design.php';
 }
-require __DIR__ . '/inventory.php';
-require __DIR__ . '/asset-profile.php';
-require __DIR__ . '/domain-scan.php';
-require __DIR__ . '/asset-names.php';
+require_once __DIR__ . '/inventory.php';
+require_once __DIR__ . '/asset-profile.php';
+require_once __DIR__ . '/domain-scan.php';
+require_once __DIR__ . '/asset-names.php';
 require __DIR__ . '/asset-inventory-page.php';
 require __DIR__ . '/organization.php';
 require __DIR__ . '/global-search.php';
@@ -695,7 +695,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.47">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -875,7 +875,7 @@ function render_footer(): void
         echo "[]";
     }
     $inspectionReminder = inspection_food_reminder_markup($layoutUser);
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.27&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
     if ($inspectionReminder !== '') {
         echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
     }
@@ -932,7 +932,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($page, ['organizat
     register_shutdown_function(static function (): void {
         try {
             org_sync_position_roles();
-        } catch (Throwable $ignored) {
+        } catch (Throwable $exception) {
+            error_log('org_role_sync_failed: ' . $exception->getMessage());
         }
     });
 }
@@ -2936,10 +2937,90 @@ if ($page === 'asset') {
 
 if ($page === 'organization') {
     $organizationUser = require_permission('org.view');
+    if (!org_has_company_schema()) throw new RuntimeException('برای نمایش ساختار چندشرکتی، migration 018-org-company-separation.sql را از مسیر رسمی به‌روزرسانی اجرا کنید.');
     org_ensure_schema();
+    $companyId = org_company_context_id($organizationUser, (int) ($_GET['company_id'] ?? 0));
+    $currentCompany = org_company_by_id($companyId) ?: throw new RuntimeException('شرکت انتخاب‌شده در دسترس نیست.');
+    $companyRootType = org_company_root_type($companyId);
+    $companyRootTitle = org_company_root_title($companyId);
     $canManageOrg = user_can_manage_organization($organizationUser);
-    $units = org_units_all(false);
-    $users = db()->query("SELECT u.id, u.full_name, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id FROM users u WHERE COALESCE(u.auth_source, '') <> 'food' ORDER BY u.full_name")->fetchAll();
+    $units = org_units_all(false, $companyId);
+    $usersQuery = db()->prepare("SELECT u.id, u.full_name, u.auth_source, u.is_active, u.org_unit_id, u.manager_user_id, COALESCE(org_membership.company_id, 0) AS company_id FROM users u " . org_user_company_membership_join_sql('u') . " WHERE COALESCE(u.auth_source, '') <> 'food' AND (org_membership.company_id = ? OR org_membership.user_id IS NULL) ORDER BY u.full_name");
+    $usersQuery->execute([$companyId]);
+    $users = $usersQuery->fetchAll();
+    $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
+    if ((string) ($_GET['export'] ?? '') === 'excel') {
+        $activeExportUnits = array_values(array_filter($units, static fn (array $exportUnit): bool => (int) ($exportUnit['is_active'] ?? 0) === 1));
+        foreach ($activeExportUnits as &$activeExportUnit) if ((string) $activeExportUnit['unit_type'] === $companyRootType) $activeExportUnit['name'] = $companyRootTitle;
+        unset($activeExportUnit);
+        $unitById = [];
+        $childrenByParent = [];
+        foreach ($activeExportUnits as $exportUnit) {
+            $exportId = (int) $exportUnit['id'];
+            $unitById[$exportId] = $exportUnit;
+            if ((string) $exportUnit['unit_type'] !== 'liaison' && (int) ($exportUnit['parent_id'] ?? 0) > 0) {
+                $childrenByParent[(int) $exportUnit['parent_id']][] = $exportUnit;
+            }
+        }
+        $sortExportUnits = static function (array &$items): void {
+            usort($items, static fn (array $a, array $b): int => ((int) ($a['sort_order'] ?? 0) <=> (int) ($b['sort_order'] ?? 0)) ?: strnatcasecmp((string) $a['name'], (string) $b['name']) ?: ((int) $a['id'] <=> (int) $b['id']));
+        };
+        foreach ($childrenByParent as &$exportChildren) $sortExportUnits($exportChildren);
+        unset($exportChildren);
+        $orderedExportUnits = [];
+        $visitedExportUnits = [];
+        $appendExportTree = static function (array $exportUnit) use (&$appendExportTree, &$orderedExportUnits, &$visitedExportUnits, $childrenByParent): void {
+            $id = (int) $exportUnit['id'];
+            if (isset($visitedExportUnits[$id])) return;
+            $visitedExportUnits[$id] = true;
+            $orderedExportUnits[] = $exportUnit;
+            foreach ($childrenByParent[$id] ?? [] as $childUnit) $appendExportTree($childUnit);
+        };
+        foreach ($activeExportUnits as $exportUnit) if ((string) $exportUnit['unit_type'] === 'ceo') $appendExportTree($exportUnit);
+        $otherRoots = array_values(array_filter($activeExportUnits, static fn (array $exportUnit): bool => (string) $exportUnit['unit_type'] === 'liaison' || (int) ($exportUnit['parent_id'] ?? 0) === 0));
+        $sortExportUnits($otherRoots);
+        foreach ($otherRoots as $exportUnit) $appendExportTree($exportUnit);
+        foreach ($activeExportUnits as $exportUnit) $appendExportTree($exportUnit);
+        $exportUserById = [];
+        foreach ($users as $exportUser) $exportUserById[(int) $exportUser['id']] = $exportUser;
+        $allManagerIds = [];
+        foreach ($activeExportUnits as $exportUnit) {
+            $unitId = (int) $exportUnit['id'];
+            $managerIds = org_unit_manager_ids($unitId);
+            $directManager = (int) ($exportUnit['manager_user_id'] ?? 0);
+            if ($directManager > 0) $managerIds[] = $directManager;
+            foreach ($managerIds as $managerId) $allManagerIds[(int) $managerId] = true;
+        }
+        $excelRows = [
+            [['v' => 'ساختار کامل سازمان · ' . (string) $currentCompany['name'], 's' => 'title'], '', '', '', '', '', ''],
+            [['v' => 'نوع رکورد', 's' => 'header'], ['v' => 'نام واحد/کارشناس', 's' => 'header'], ['v' => 'شناسه', 's' => 'header'], ['v' => 'واحد والد', 's' => 'header'], ['v' => 'مدیر/مسئول', 's' => 'header'], ['v' => 'کارشناسان این واحد', 's' => 'header'], ['v' => 'جایگاه/توضیح', 's' => 'header']],
+        ];
+        $unitTypeLabels = ['ceo' => 'مدیرعامل', 'company_manager' => 'مدیر شرکت', 'deputy' => 'معاونت', 'management' => 'مدیریت مستقل', 'office' => 'دفتر مدیرعامل', 'department' => 'اداره', 'liaison' => 'واحد مستقل'];
+        foreach ($orderedExportUnits as $exportUnit) {
+            $unitId = (int) $exportUnit['id'];
+            $managerIds = org_unit_manager_ids($unitId);
+            $directManager = (int) ($exportUnit['manager_user_id'] ?? 0);
+            if ($directManager > 0 && !in_array($directManager, $managerIds, true)) array_unshift($managerIds, $directManager);
+            $managerNames = [];
+            foreach ($managerIds as $managerId) if (isset($exportUserById[$managerId])) $managerNames[] = (string) $exportUserById[$managerId]['full_name'];
+            $expertNames = [];
+            foreach ($users as $exportUser) {
+                if ((int) ($exportUser['is_active'] ?? 0) === 1 && (int) ($exportUser['org_unit_id'] ?? 0) === $unitId && !isset($allManagerIds[(int) $exportUser['id']])) $expertNames[] = (string) $exportUser['full_name'];
+            }
+            $parentName = $unitById[(int) ($exportUnit['parent_id'] ?? 0)]['name'] ?? '';
+            $description = (string) $exportUnit['unit_type'] === 'liaison' ? ('واحد مستقل · سمت ' . ((string) ($exportUnit['chart_side'] ?? '') === 'left' ? 'چپ' : 'راست')) : (string) ($exportUnit['code'] ?? '');
+            $excelRows[] = [
+                ['v' => $unitTypeLabels[(string) $exportUnit['unit_type']] ?? (string) $exportUnit['unit_type'], 's' => 'body'],
+                ['v' => (string) $exportUnit['name'], 's' => 'body'],
+                ['v' => $unitId, 's' => 'body'],
+                ['v' => (string) $parentName, 's' => 'body'],
+                ['v' => implode('، ', array_unique($managerNames)), 's' => 'body'],
+                ['v' => implode('، ', $expertNames), 's' => 'body'],
+                ['v' => $description, 's' => 'body'],
+            ];
+        }
+        xlsx_send('organization-tree-company-' . $companyId . '-' . date('Ymd-His'), xlsx_build([['name' => 'ساختار سازمان', 'rows' => $excelRows, 'widths' => [24, 32, 12, 28, 32, 42, 28]]]));
+    }
     $activeUsers = array_values(array_filter($users, static fn (array $u): bool => (int) $u['is_active'] === 1));
     $ceoUnit = null;
     $deputies = [];
@@ -2949,7 +3030,7 @@ if ($page === 'organization') {
         if ((int) $unit['is_active'] !== 1) {
             continue;
         }
-        if ((string) $unit['unit_type'] === 'ceo') {
+        if ((string) $unit['unit_type'] === $companyRootType) {
             $ceoUnit = $unit;
         } elseif ((string) $unit['unit_type'] === 'deputy') {
             $deputies[] = $unit;
@@ -2969,14 +3050,16 @@ if ($page === 'organization') {
         }
         $orgChartUnits[] = [
             'id' => (int) $unit['id'],
-            'name' => (string) $unit['name'],
+            'name' => (string) $unit['unit_type'] === $companyRootType ? $companyRootTitle : (string) $unit['name'],
             'code' => (string) ($unit['code'] ?? ''),
             'parentId' => (int) ($unit['parent_id'] ?? 0),
             'type' => (string) $unit['unit_type'],
             'chartSide' => (string) ($unit['chart_side'] ?? ''),
             'managerId' => (int) ($unit['manager_user_id'] ?? 0),
+            'managerIds' => org_unit_manager_ids((int) $unit['id']),
             'managerName' => (string) ($unit['manager_name'] ?? ''),
             'primaryAdmin' => (int) ($unit['is_primary_admin'] ?? 0) === 1,
+            'sortOrder' => (int) ($unit['sort_order'] ?? 0),
         ];
     }
     $orgChartUsers = [];
@@ -2990,129 +3073,55 @@ if ($page === 'organization') {
             'source' => ((string) ($chartUser['auth_source'] ?? '') === 'ldap') ? 'ldap' : 'local',
         ];
     }
-    $orgUndo = org_undo_state();
+    $orgUndo = org_undo_state($companyId);
     $orgChartData = json_encode([
         'canManage' => $canManageOrg,
-        'undo' => $orgUndo !== null,
+        'companyId' => $companyId,
+        'companyName' => (string) $currentCompany['name'],
+        'companyType' => (string) $currentCompany['company_type'],
+        'companyRootType' => $companyRootType,
+        'companyRootTitle' => $companyRootTitle,
+        'companies' => user_is_primary_admin($organizationUser) ? org_companies_all() : [],
+        'sortEnabled' => org_has_sort_order(),
+        'undo' => $orgUndo !== null && !empty($orgUndo['can_undo']),
+        'redo' => $orgUndo !== null && !empty($orgUndo['can_redo']),
         'undoLabel' => (string) ($orgUndo['label'] ?? ''),
         'currentUser' => ['id' => (int) $organizationUser['id'], 'name' => (string) $organizationUser['full_name']],
         'units' => $orgChartUnits,
         'users' => $orgChartUsers,
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
     render_header('مدیریت سازمان', $organizationUser);
-    $canRepairOrgAdminRoles = user_is_primary_admin($organizationUser);
-    $repairRoleLink = $canRepairOrgAdminRoles
-        ? '<a class="org-icon-button org-repair-role-link" href="#repair-org-admin-roles" title="رفتن به اصلاح نقش مدیران سازمانی">ترمیم نقش‌ها</a>'
-        : '';
     $orgTemplate = <<<'HTML'
 <div class="organization-workspace" dir="rtl">
   <header class="org-header">
-    <div class="org-brand"><div class="org-brand-icon" aria-hidden="true">▥</div><div><div class="org-brand-title">سامانه ساختار سازمانی</div><div class="org-brand-subtitle">راه‌اندازی و مدیریت چارت</div></div></div>
+    <div class="org-brand"><div class="org-brand-icon" aria-hidden="true">▥</div><div><div class="org-brand-title">ساختار سازمانی</div><div class="org-brand-subtitle">__CURRENT_COMPANY_NAME__</div></div></div>
      <div class="org-divider"></div>
-     <div class="org-header-actions"><a class="org-icon-button" href="index.php" title="بازگشت به داشبورد">↩</a>__REPAIR_ROLE_LINK__<button class="org-icon-button" data-org-tool="undo" disabled title="بازگشت آخرین عملیات">↶ <span>بازگشت</span></button><button class="org-icon-button" data-org-tool="export" title="خروجی JSON">↓ <span>خروجی</span></button><button class="org-icon-button danger" data-org-tool="reset" title="شروع مجدد">↺ <span>ریست</span></button></div>
+     <div class="org-company-context">__ORG_COMPANY_SELECTOR__</div>
+     <div class="org-header-actions"><a class="org-icon-button" href="index.php" title="بازگشت به داشبورد">↩</a><button class="org-icon-button" data-org-tool="undo" disabled title="بازگشت آخرین تغییر ساختاری">↶ <span>بازگشت</span></button><button class="org-icon-button" data-org-tool="redo" disabled title="انجام دوبارهٔ تغییر ساختاری">↷ <span>دوباره</span></button><div class="org-export-wrap"><button type="button" class="org-icon-button" data-org-export-toggle aria-expanded="false" aria-controls="org-export-menu" title="انتخاب قالب خروجی">↓ <span>خروجی</span>⌄</button><div class="org-export-menu" id="org-export-menu" hidden><button type="button" data-org-export="pdf">PDF / پیش‌نمایش چاپ</button><button type="button" data-org-export="png">PNG</button><button type="button" data-org-export="excel">Excel (.xlsx)</button><button type="button" data-org-export="json">JSON</button></div></div><button class="org-icon-button" data-org-tool="print" title="چاپ نمای کلی درخت">▤ <span>چاپ</span></button><button class="org-icon-button" data-org-tool="backup" title="دانلود پشتیبان کامل JSON">⤓ <span>پشتیبان</span></button><button class="org-icon-button" data-org-tool="restore-backup" title="بازیابی از فایل پشتیبان JSON">⤒ <span>بازیابی</span></button><button class="org-icon-button danger" data-org-tool="reset" title="شروع مجدد">↺ <span>ریست</span></button></div>
   </header>
   <div class="org-main-layout">
     <aside class="org-sidebar" id="org-sidebar"></aside>
-    <main class="org-canvas" id="org-canvas">
+    <main class="org-canvas-shell">
       <div class="org-canvas-toolbar"><input class="org-search" id="org-chart-search" type="search" placeholder="جستجوی واحد یا کاربر..." aria-label="جستجو در چارت سازمانی"><div class="org-zoom-controls"><button type="button" data-org-zoom="out" aria-label="کوچک‌نمایی">−</button><span id="org-zoom-level">100٪</span><button type="button" data-org-zoom="in" aria-label="بزرگ‌نمایی">+</button><button type="button" data-org-zoom="reset" aria-label="نمایش اندازهٔ پیش‌فرض">↺</button><button type="button" data-org-zoom="fit" aria-label="جا دادن کل چارت در صفحه" title="جا دادن کل چارت در صفحه">⛶</button></div><button class="org-focus-toggle" type="button" data-org-view="focus" aria-pressed="false">◫ <span>تمرکز روی نمودار</span></button></div>
-      <div class="org-chart-wrap" id="org-chart-wrap"></div>
+      <div class="org-canvas" id="org-canvas"><div class="org-chart-wrap" id="org-chart-wrap"></div></div>
     </main>
     <aside class="org-pool-sidebar" id="org-pool-sidebar"></aside>
   </div>
    <div class="org-modal-backdrop" id="org-modal-backdrop"><section class="org-modal" role="dialog" aria-modal="true" aria-labelledby="org-modal-title"><header><div class="org-modal-icon" id="org-modal-icon"></div><div><h2 id="org-modal-title">انتخاب کاربر</h2><p id="org-modal-subtitle">از فهرست زیر انتخاب کنید</p></div><button class="org-modal-close" type="button" data-org-modal="close">×</button></header><div class="org-modal-preview" id="org-modal-preview"></div><div class="org-modal-hint" id="org-modal-hint">روی کاربر موردنظر کلیک کنید تا منصوب شود.</div><div class="org-modal-search"><input id="org-modal-search" type="search" placeholder="جستجو بر اساس نام..."></div><div class="org-modal-body" id="org-modal-body"></div><footer><span id="org-modal-info">موردی انتخاب نشده</span><button class="org-btn org-btn-ghost" type="button" data-org-modal="close">انصراف</button><button class="org-btn org-btn-success" type="button" id="org-modal-confirm" disabled>تأیید</button></footer></section></div>
    <div class="org-confirm-backdrop" id="org-confirm-backdrop"><section class="org-confirm-modal" role="dialog" aria-modal="true"><div class="org-confirm-icon" id="org-confirm-icon">!</div><h2 id="org-confirm-title">تأیید عملیات</h2><p id="org-confirm-message">آیا مطمئن هستید؟</p><div class="org-confirm-details" id="org-confirm-details"></div><footer><button class="org-btn org-btn-ghost" type="button" data-org-confirm="close">انصراف</button><button class="org-btn org-btn-danger" type="button" id="org-confirm-ok">تأیید</button></footer></section></div>
-   <div class="org-undo-bar" id="org-undo-bar"><span>↶</span><b id="org-undo-text"></b><button type="button" data-org-tool="undo">بازگشت</button><button type="button" data-org-undo="close">×</button></div>
+   <div class="org-undo-bar" id="org-undo-bar"><span>↶</span><b id="org-undo-text"></b><button type="button" data-org-tool="undo">بازگشت</button><button type="button" data-org-tool="redo">دوباره</button><button type="button" data-org-undo="close">×</button></div>
   <div class="org-toast" id="org-toast" role="status" aria-live="polite"></div>
-  <form method="post" id="org-action-form" class="org-hidden-form">__CSRF__<input type="hidden" name="action" value=""><input type="hidden" name="unit_id" value=""><input type="hidden" name="unit_name" value=""><input type="hidden" name="unit_code" value=""><input type="hidden" name="node_type" value=""><input type="hidden" name="parent_id" value=""><input type="hidden" name="unit_manager_id" value=""><input type="hidden" name="is_primary_admin" value="0"><input type="hidden" name="ceo_user_id" value=""><input type="hidden" name="member_unit_id" value=""><input type="hidden" name="user_id" value=""><input type="hidden" name="manager_user_id" value=""></form>
+  <input type="file" id="org-backup-file" accept="application/json,.json" hidden><form method="post" action="index.php?page=organization" id="org-action-form" class="org-hidden-form">__CSRF__<input type="hidden" name="company_id" value="__COMPANY_ID__"><input type="hidden" name="action" value=""><input type="hidden" name="unit_id" value=""><input type="hidden" name="unit_name" value=""><input type="hidden" name="unit_code" value=""><input type="hidden" name="node_type" value=""><input type="hidden" name="parent_id" value=""><input type="hidden" name="unit_manager_id" value=""><input type="hidden" name="is_primary_admin" value="0"><input type="hidden" name="ceo_user_id" value=""><input type="hidden" name="member_unit_id" value=""><input type="hidden" name="user_id" value=""><input type="hidden" name="manager_user_id" value=""></form>
 </div>
 HTML;
-    echo str_replace(['__CSRF__', '__REPAIR_ROLE_LINK__'], [csrf_field(), $repairRoleLink], $orgTemplate);
-    if ($canRepairOrgAdminRoles) {
-        $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
-        $repairCandidates = [];
-        foreach ($repairRows as $repairRow) {
-            $repairId = (int) $repairRow['id'];
-            if (!isset($repairCandidates[$repairId])) {
-                $repairCandidates[$repairId] = $repairRow;
-                $repairCandidates[$repairId]['unit_names'] = [];
-            }
-            $repairCandidates[$repairId]['unit_names'][] = (string) $repairRow['unit_name'];
-        }
-        echo '<section class="card form-card" id="repair-org-admin-roles"><h2>اصلاح مدیران سازمانی که ادمین اصلی شده‌اند</h2><p class="muted">این فهرست، ادمین‌های اصلیِ منصوب‌شده به معاونت/اداره را نشان می‌دهد. فقط افرادی را تیک بزنید که ادمین اصلی سامانه نیستند و اشتباهاً با انتساب سازمانی ادمین شده‌اند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت و ارجاع‌های سازمانی حفظ می‌شود. دست‌کم یک ادمین اصلی واقعی باید باقی بماند.</p>';
-        if ($repairCandidates === []) {
-            echo '<p class="muted">در حال حاضر مدیر سازمانیِ ادمین اصلی پیدا نشد.</p>';
-        } else {
-            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_admin_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
-            foreach ($repairCandidates as $repairId => $repairCandidate) {
-                $isCurrent = $repairId === (int) $organizationUser['id'];
-                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $repairId . '"' . ($isCurrent ? ' disabled' : '') . ' aria-label="اصلاح ' . e((string) $repairCandidate['full_name']) . '"></td><td>' . e((string) $repairCandidate['full_name']) . ' <small>#' . $repairId . ' · ' . e((string) $repairCandidate['username']) . '</small>' . ($isCurrent ? '<br><small>حساب جاری قابل تنزل نیست</small>' : '') . '</td><td>' . e(implode('، ', array_unique($repairCandidate['unit_names']))) . '</td></tr>';
-            }
-            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
-        }
-        echo '</section>';
-
-        // ۱.۶۲.۶ — ترمیم مدیران سازمانی که نقش «مدیر پشتیبانی» دارند (مقصد اشتباه ارجاع خودکار پشتیبانی).
-        $supportRepairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND u.role = "support_manager" AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
-        $supportRepairCandidates = [];
-        foreach ($supportRepairRows as $supportRepairRow) {
-            $supportRepairId = (int) $supportRepairRow['id'];
-            if (!isset($supportRepairCandidates[$supportRepairId])) {
-                $supportRepairCandidates[$supportRepairId] = $supportRepairRow;
-                $supportRepairCandidates[$supportRepairId]['unit_names'] = [];
-            }
-            $supportRepairCandidates[$supportRepairId]['unit_names'][] = (string) $supportRepairRow['unit_name'];
-        }
-        echo '<section class="card form-card" id="repair-org-support-roles"><h2>اصلاح مدیران سازمانی که «مدیر پشتیبانی» شده‌اند</h2><p class="muted">درخواست‌های پشتیبانی به‌صورت خودکار به «مدیر پشتیبانی» ارجاع می‌شوند. اگر معاون یا مدیر اداره‌ای به‌اشتباه این نقش را داشته باشد، مسئول درخواست‌های پشتیبانی می‌شود. فقط افرادی را تیک بزنید که واقعاً مدیر واحد پشتیبانی نیستند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت سازمانی حفظ می‌شود.</p>';
-        if ($supportRepairCandidates === []) {
-            echo '<p class="muted">در حال حاضر مدیر سازمانیِ دارای نقش «مدیر پشتیبانی» پیدا نشد.</p>';
-        } else {
-            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_support_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
-            foreach ($supportRepairCandidates as $supportRepairId => $supportRepairCandidate) {
-                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $supportRepairId . '" aria-label="اصلاح ' . e((string) $supportRepairCandidate['full_name']) . '"></td><td>' . e((string) $supportRepairCandidate['full_name']) . ' <small>#' . $supportRepairId . ' · ' . e((string) $supportRepairCandidate['username']) . '</small></td><td>' . e(implode('، ', array_unique($supportRepairCandidate['unit_names']))) . '</td></tr>';
-            }
-            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
-        }
-        echo '</section>';
-
-        // ۱.۶۲.۶ — تشخیص ارجاع خودکار: چه کسی الان مسئول درخواست جدید می‌شود و چرا.
-        $diagOpenLoadSql = '(SELECT COUNT(*) FROM tickets t WHERE t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled"))';
-        $diagOrgManagerSql = 'EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)))';
-        $diagRows = db()->query('SELECT u.id, u.full_name, u.username, u.role, u.is_primary_admin, hu.code AS hu_code, ' . $diagOpenLoadSql . ' AS open_load, ' . $diagOrgManagerSql . ' AS is_org_manager FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1) OR u.role = "support_manager" OR (u.role IN ("agent", "manager") AND hu.code IN ("it", "support"))) ORDER BY u.full_name')->fetchAll();
-        $diagPick = ['it' => choose_handling_agent('it'), 'support' => choose_handling_agent('support')];
-        $diagRoleLabel = static fn (array $diagRow): string => ([
-            'primary_admin' => 'ادمین اصلی',
-            'admin' => ((int) $diagRow['is_primary_admin'] === 1 ? 'ادمین (پرچم ادمین اصلی)' : 'ادمین'),
-            'support_manager' => 'مدیر پشتیبانی',
-            'manager' => 'مدیر',
-            'agent' => 'کارشناس',
-        ][(string) $diagRow['role']] ?? (string) $diagRow['role']);
-        echo '<section class="card form-card" id="ticket-auto-assign-diagnostics"><h2>تشخیص ارجاع خودکار درخواست‌ها</h2><p class="muted">مسئول درخواست جدید به‌صورت خودکار تعیین می‌شود: درخواست IT به «ادمین اصلی» و درخواست پشتیبانی به «مدیر پشتیبانی» می‌رسد (در صورت تعدد، کمترین درخواست باز؛ مدیران سازمانی آخرِ صف). اگر نام بی‌ربطی در این فهرست است، نقش او را از «مدیریت کاربران» یا فرم‌های ترمیم بالا اصلاح کنید.</p>';
-        foreach (['it' => 'حوزهٔ IT', 'support' => 'حوزهٔ پشتیبانی'] as $diagGroup => $diagGroupLabel) {
-            $diagCandidates = array_values(array_filter($diagRows, static fn (array $diagRow): bool => $diagGroup === 'it'
-                ? ((string) $diagRow['role'] === 'primary_admin' || ((string) $diagRow['role'] === 'admin' && (int) $diagRow['is_primary_admin'] === 1) || ((string) ($diagRow['hu_code'] ?? '') === 'it' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))
-                : ((string) $diagRow['role'] === 'support_manager' || ((string) ($diagRow['hu_code'] ?? '') === 'support' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))));
-            $diagPickId = (int) ($diagPick[$diagGroup] ?? 0);
-            $diagPickName = 'هیچ‌کس (درخواست بدون مسئول در «بررسی مدیر» می‌ماند)';
-            foreach ($diagCandidates as $diagRow) {
-                if ((int) $diagRow['id'] === $diagPickId) {
-                    $diagPickName = (string) $diagRow['full_name'];
-                }
-            }
-            echo '<h3 style="margin:14px 0 6px">' . $diagGroupLabel . '</h3><p class="muted">مقصد فعلی ارجاع خودکار: <b>' . e($diagPickName) . '</b></p>';
-            if ($diagCandidates === []) {
-                echo '<p class="muted">هیچ کاندیدایی برای این حوزه پیدا نشد.</p>';
-                continue;
-            }
-            echo '<div class="table-wrap"><table class="data-table"><thead><tr><th>کاربر</th><th>نقش</th><th>واحد رسیدگی</th><th>درخواست‌های باز</th><th>مدیر سازمانی؟</th></tr></thead><tbody>';
-            foreach ($diagCandidates as $diagRow) {
-                $diagIsPick = (int) $diagRow['id'] === $diagPickId;
-                echo '<tr' . ($diagIsPick ? ' style="font-weight:700"' : '') . '><td>' . e((string) $diagRow['full_name']) . ' <small>#' . (int) $diagRow['id'] . ' · ' . e((string) $diagRow['username']) . '</small>' . ($diagIsPick ? ' <span class="status ok">مقصد فعلی</span>' : '') . '</td><td>' . e($diagRoleLabel($diagRow)) . '</td><td>' . e((string) ($diagRow['hu_code'] === 'it' ? 'IT' : ($diagRow['hu_code'] === 'support' ? 'پشتیبانی' : '—'))) . '</td><td>' . (int) $diagRow['open_load'] . '</td><td>' . ((int) $diagRow['is_org_manager'] === 1 ? '<span class="status warn">بله — آخرِ صف ارجاع خودکار</span>' : 'خیر') . '</td></tr>';
-            }
-            echo '</tbody></table></div>';
-        }
-        echo '</section>';
-    }
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=7"></script>';
+    $companySelector = '';
+    if (user_is_primary_admin($organizationUser)) {
+        $companySelector = '<form method="get" class="org-company-picker"><input type="hidden" name="page" value="organization"><label for="org-company-select">شرکت</label><select id="org-company-select" name="company_id">';
+        foreach (org_companies_all() as $companyOption) $companySelector .= '<option value="' . (int) $companyOption['id'] . '"' . ((int) $companyOption['id'] === $companyId ? ' selected' : '') . '>' . e((string) $companyOption['name']) . '</option>';
+        $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
+    } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
+    echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=20"></script>';
     render_footer();
     exit;
 }
@@ -3133,8 +3142,11 @@ if ($page === 'settings') {
     $foodBrandName = setting('food_ticket_brand_name', $appName);
     $foodBrandLogo = setting('food_ticket_brand_logo', $logo);
     $departments = db()->query('SELECT id, name, code FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll();
-    $users = db()->query('SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, d.name AS department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.auth_source <> \'food\' AND NOT (u.auth_source = \'local\' AND u.role IN (\'local_user\',\'guard\')) ORDER BY u.full_name')->fetchAll();
     $canManageSettingsUsers = user_is_primary_admin($user);
+    $settingsCompanyId = user_is_primary_admin($user) ? 1 : org_user_company_id($user);
+    $settingsUserSql = 'SELECT u.id, u.username, u.full_name, u.employee_number, u.national_code, u.role, u.auth_source, u.is_active, u.is_it_agent, u.is_primary_admin, u.department_id, COALESCE(org_membership.company_id, 0) AS company_id, d.name AS department_name FROM users u ' . org_user_company_membership_join_sql('u') . ' LEFT JOIN departments d ON d.id = u.department_id WHERE u.auth_source <> \'food\' AND NOT (u.auth_source = \'local\' AND u.role IN (\'local_user\',\'guard\'))';
+    if (!user_is_primary_admin($user)) $settingsUserSql .= $settingsCompanyId > 0 ? ' AND org_membership.company_id = ' . (int) $settingsCompanyId : ' AND 1 = 0';
+    $users = db()->query($settingsUserSql . ' ORDER BY u.full_name')->fetchAll();
     $roleSelectableUsers = array_values(array_filter($users, static fn (array $roleUser): bool => (int) ($roleUser['is_active'] ?? 0) === 1));
     $roleCards = '';
     foreach ([
@@ -3146,7 +3158,8 @@ if ($page === 'settings') {
         $roleCards .= '<div class="key-role-block"><h3>' . e($roleMeta['label']) . '</h3><p class="muted">' . e($roleMeta['note']) . '</p><div class="form-grid">';
         for ($slot = 0; $slot < 2; $slot++) {
             $selectedId = (int) ($roleIds[$slot] ?? 0);
-            $roleCards .= '<label>کاربر ' . ($slot + 1) . '<select name="' . $roleKey . '_ids[]"><option value="0">— انتخاب نشده —</option>';
+            $roleSelectDisabled = $roleKey === 'it_expert' && !user_is_primary_admin($user) ? ' disabled' : '';
+            $roleCards .= '<label>کاربر ' . ($slot + 1) . '<select name="' . $roleKey . '_ids[]"' . $roleSelectDisabled . '><option value="0">— انتخاب نشده —</option>';
             foreach ($roleSelectableUsers as $roleUser) {
                 $roleCards .= '<option value="' . (int) $roleUser['id'] . '" ' . ((int) $roleUser['id'] === $selectedId ? 'selected' : '') . '>' . e($roleUser['full_name'] . ' - ' . $roleUser['username']) . '</option>';
             }
@@ -3171,6 +3184,9 @@ if ($page === 'settings') {
     }
     if ($canManageSettingsUsers) {
         $tabLinks .= '<a href="#roles">نقش‌ها و دسترسی‌ها</a>';
+    }
+    if ($canManageSettingsUsers) {
+        $tabLinks .= '<a href="#org-admin-repair">ترمیم نقش‌ها و تشخیص ارجاع</a>';
     }
     echo '<div class="settings-tabs">' . $tabLinks . '</div>';
     echo '<section class="settings-stack">';
@@ -3265,9 +3281,16 @@ if ($page === 'settings') {
     }
 
     if ($canSettingsUsers) {
-    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">کاربران دامینی با همگام‌سازی دامین یا در اولین ورود معرفی می‌شوند. ادمین اصلی می‌تواند از همین بخش نقش و وضعیت کاربران را تغییر دهد.</p><div class="category-list">';
+    echo '<div class="card form-card settings-panel" id="users"' . ($canSettingsUsersEdit ? '' : ' inert') . '><h2>کاربران</h2>' . (user_is_primary_admin($user) ? '<p><a class="button secondary" href="index.php?page=local-accounts">کاربران محلی (پرسنل غذا) و انتخاب بازرسی</a></p>' : '') . '<p class="muted">شرکت هر کاربر از جایگاه فعال او در درخت سازمانی به دست می‌آید؛ تا پیش از معرفی در یکی از درخت‌ها، وضعیت او «بدون شرکت» است. این تفکیک فقط برای نمایش فهرست کارکنان است و نقش‌ها را تغییر نمی‌دهد.</p>';
+    if (user_is_primary_admin($user)) {
+        $displayCompanies = org_companies_all();
+        echo '<section class="company-settings card"><h3>نام نمایشی شرکت‌ها</h3><p class="muted">این نام فقط در انتخاب‌گر شرکت و کارت ریشهٔ نمودار نمایش داده می‌شود؛ هیچ نقش، مجوز یا عضویت کاربر را تغییر نمی‌دهد.</p><form method="post" class="company-name-form">' . csrf_field() . '<input type="hidden" name="action" value="save_org_company_names">';
+        foreach ($displayCompanies as $displayCompany) echo '<label>' . e((string) $displayCompany['code'] === 'own' ? 'نام نمایشی شرکت اصلی' : 'نام نمایشی شرکت همکار') . '<input name="company_names[' . (int) $displayCompany['id'] . ']" value="' . e((string) $displayCompany['name']) . '" maxlength="190" required></label>';
+        echo '<button class="button" type="submit">ذخیره نام نمایشی</button></form></section>';
+    }
+    echo '<div class="category-list">';
     foreach ($users as $managedUser) {
-        echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
+        echo '<div><span><strong>' . e($managedUser['full_name']) . '</strong><small>' . e($managedUser['username']) . ' • ' . ($managedUser['auth_source'] === 'ldap' ? 'دامینی' : 'محلی') . ' • ' . e(org_company_user_label((int) ($managedUser['company_id'] ?? 0))) . ' • ' . ((int) $managedUser['is_active'] === 1 ? 'فعال' : 'غیرفعال') . '</small></span>';
         if ($canManageSettingsUsers) {
             $canLinkDomainCode = user_is_primary_admin($user) && (string) $managedUser['auth_source'] === 'ldap';
             $domainCodeDialogId = 'domain-code-link-dialog-' . (int) $managedUser['id'];
@@ -3289,7 +3312,7 @@ if ($page === 'settings') {
         echo '</div>';
     }
     echo '</div>';
-    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. «کارشناس IT» دسترسی ادمین اصلی می‌گیرد، «سوپروایز» نقش سوپروایزر را می‌گیرد و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را دارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
+    echo '<div id="key-roles" class="settings-subform"' . ($canSettingsKeyRolesEdit ? '' : ' inert') . '><h3>نقش‌های کلیدی</h3><p class="muted">برای هر نقش حداکثر دو کاربر انتخاب کنید. «کارشناس IT» دسترسی ادمین اصلی می‌گیرد، «سوپروایز» نقش سوپروایزر را می‌گیرد و «بازرسی» مجوز ثبت ورود رسانه در CD/DVD را دارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_key_roles">' . $roleCards . (user_is_primary_admin($user) ? '' : '<p class="muted">تعیین یا حذف کارشناس IT فقط توسط ادمین اصلی انجام می‌شود.</p>') . '<button class="button" type="submit">ذخیره نقش‌های کلیدی</button></form></div>';
     echo '</div>';
     }
 
@@ -3354,9 +3377,11 @@ if ($page === 'settings') {
                     foreach ($group['items'] as $gItem) {
                         $itemsByCode[$gItem['code']] = $gItem;
                     }
-                    $renderPerm = static function (array $pItem, bool $isChild) use ($active, $group): void {
-                        $pChecked = in_array($pItem['code'], $active, true);
-                        echo '<label class="perm-item' . ($isChild ? ' perm-child' : '') . ($pChecked ? ' checked' : '') . '" data-perm-item' . ($isChild ? ' data-perm-edit="1"' : '') . ' data-perm-label="' . e($pItem['label']) . '" data-perm-group="' . e($group['key']) . '"><input type="checkbox" name="permissions[]" value="' . e($pItem['code']) . '"' . ($pChecked ? ' checked' : '') . '><span class="perm-check">✓</span><span class="perm-label">' . e($pItem['label']) . '</span></label>';
+                    $renderPerm = static function (array $pItem, bool $isChild) use ($active, $group, $roleCode): void {
+                        $lockedCddvdEdit = $pItem['code'] === 'cddvd.edit'
+                            && !in_array($roleCode, permission_cddvd_direct_edit_roles(), true);
+                        $pChecked = !$lockedCddvdEdit && in_array($pItem['code'], $active, true);
+                        echo '<label class="perm-item' . ($isChild ? ' perm-child' : '') . ($pChecked ? ' checked' : '') . ($lockedCddvdEdit ? ' is-disabled' : '') . '" data-perm-item' . ($isChild ? ' data-perm-edit="1"' : '') . ' data-perm-label="' . e($pItem['label']) . '" data-perm-group="' . e($group['key']) . '"><input type="checkbox" name="permissions[]" value="' . e($pItem['code']) . '"' . ($pChecked ? ' checked' : '') . ($lockedCddvdEdit ? ' disabled title="فقط نقش‌های ادمین اصلی، سوپروایزر و بازرسی"' : '') . '><span class="perm-check">✓</span><span class="perm-label">' . e($pItem['label']) . '</span>' . ($lockedCddvdEdit ? '<small class="perm-lock-note">فقط ادمین اصلی، سوپروایزر و بازرسی</small>' : '') . '</label>';
                     };
                     foreach ($group['items'] as $item) {
                         if (in_array($item['code'], $editChildCodes, true)) {
@@ -3387,6 +3412,96 @@ if ($page === 'settings') {
             echo '<button type="button" class="copy-option" data-copy-source="' . e($srcCode) . '"><span class="copy-avatar">' . permission_icon($roleMeta[$srcCode]['icon'] ?? 'user') . '</span><span class="copy-info"><strong>' . e($srcLabel) . '</strong><small>' . ($srcCode === 'primary_admin' ? $totalAll : count(array_intersect(role_permission_codes($srcCode), $allCodes))) . ' از ' . $totalAll . ' دسترسی فعال</small></span></button>';
         }
         echo '</div><div class="copy-modal-foot"><button type="button" class="button secondary" data-copy-cancel>انصراف</button><button type="button" class="button" data-copy-apply disabled>کپی کن</button></div></div></div>';
+    }
+
+    if ($canManageSettingsUsers) {
+        echo '<div class="settings-panel" id="org-admin-repair"><h2>ترمیم نقش‌ها و تشخیص ارجاع سازمانی</h2><p class="muted">ابزارهای بازبینی و اصلاح نقش‌های مدیران سازمانی و تشخیص مقصد ارجاع خودکار درخواست‌ها.</p>';
+    if ($canManageSettingsUsers) {
+        $repairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, u.role, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $repairCandidates = [];
+        foreach ($repairRows as $repairRow) {
+            $repairId = (int) $repairRow['id'];
+            if (!isset($repairCandidates[$repairId])) {
+                $repairCandidates[$repairId] = $repairRow;
+                $repairCandidates[$repairId]['unit_names'] = [];
+            }
+            $repairCandidates[$repairId]['unit_names'][] = (string) $repairRow['unit_name'];
+        }
+        echo '<section class="card form-card" id="repair-org-admin-roles"><h2>اصلاح مدیران سازمانی که ادمین اصلی شده‌اند</h2><p class="muted">این فهرست، ادمین‌های اصلیِ منصوب‌شده به معاونت/اداره را نشان می‌دهد. فقط افرادی را تیک بزنید که ادمین اصلی سامانه نیستند و اشتباهاً با انتساب سازمانی ادمین شده‌اند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت و ارجاع‌های سازمانی حفظ می‌شود. دست‌کم یک ادمین اصلی واقعی باید باقی بماند.</p>';
+        if ($repairCandidates === []) {
+            echo '<p class="muted">در حال حاضر مدیر سازمانیِ ادمین اصلی پیدا نشد.</p>';
+        } else {
+            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_admin_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
+            foreach ($repairCandidates as $repairId => $repairCandidate) {
+                $isCurrent = $repairId === (int) $user['id'];
+                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $repairId . '"' . ($isCurrent ? ' disabled' : '') . ' aria-label="اصلاح ' . e((string) $repairCandidate['full_name']) . '"></td><td>' . e((string) $repairCandidate['full_name']) . ' <small>#' . $repairId . ' · ' . e((string) $repairCandidate['username']) . '</small>' . ($isCurrent ? '<br><small>حساب جاری قابل تنزل نیست</small>' : '') . '</td><td>' . e(implode('، ', array_unique($repairCandidate['unit_names']))) . '</td></tr>';
+            }
+            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+
+        // ۱.۶۲.۶ — ترمیم مدیران سازمانی که نقش «مدیر پشتیبانی» دارند (مقصد اشتباه ارجاع خودکار پشتیبانی).
+        $supportRepairRows = db()->query('SELECT DISTINCT u.id, u.username, u.full_name, ou.name AS unit_name FROM users u JOIN org_units ou ON (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)) WHERE u.is_active = 1 AND u.role = "support_manager" AND ou.is_active = 1 ORDER BY u.full_name, ou.name')->fetchAll();
+        $supportRepairCandidates = [];
+        foreach ($supportRepairRows as $supportRepairRow) {
+            $supportRepairId = (int) $supportRepairRow['id'];
+            if (!isset($supportRepairCandidates[$supportRepairId])) {
+                $supportRepairCandidates[$supportRepairId] = $supportRepairRow;
+                $supportRepairCandidates[$supportRepairId]['unit_names'] = [];
+            }
+            $supportRepairCandidates[$supportRepairId]['unit_names'][] = (string) $supportRepairRow['unit_name'];
+        }
+        echo '<section class="card form-card" id="repair-org-support-roles"><h2>اصلاح مدیران سازمانی که «مدیر پشتیبانی» شده‌اند</h2><p class="muted">درخواست‌های پشتیبانی به‌صورت خودکار به «مدیر پشتیبانی» ارجاع می‌شوند. اگر معاون یا مدیر اداره‌ای به‌اشتباه این نقش را داشته باشد، مسئول درخواست‌های پشتیبانی می‌شود. فقط افرادی را تیک بزنید که واقعاً مدیر واحد پشتیبانی نیستند؛ نقش آن‌ها به «مدیر» برمی‌گردد و چارت سازمانی حفظ می‌شود.</p>';
+        if ($supportRepairCandidates === []) {
+            echo '<p class="muted">در حال حاضر مدیر سازمانیِ دارای نقش «مدیر پشتیبانی» پیدا نشد.</p>';
+        } else {
+            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="repair_org_manager_support_roles"><div class="table-wrap"><table class="data-table"><thead><tr><th>اصلاح</th><th>کاربر</th><th>واحدهای مدیریتی</th></tr></thead><tbody>';
+            foreach ($supportRepairCandidates as $supportRepairId => $supportRepairCandidate) {
+                echo '<tr><td><input type="checkbox" name="user_ids[]" value="' . $supportRepairId . '" aria-label="اصلاح ' . e((string) $supportRepairCandidate['full_name']) . '"></td><td>' . e((string) $supportRepairCandidate['full_name']) . ' <small>#' . $supportRepairId . ' · ' . e((string) $supportRepairCandidate['username']) . '</small></td><td>' . e(implode('، ', array_unique($supportRepairCandidate['unit_names']))) . '</td></tr>';
+            }
+            echo '</tbody></table></div><button class="button" type="submit">بازگرداندن نقش انتخاب‌شده‌ها به مدیر</button></form>';
+        }
+        echo '</section>';
+
+        // ۱.۶۲.۶ — تشخیص ارجاع خودکار: چه کسی الان مسئول درخواست جدید می‌شود و چرا.
+        $diagOpenLoadSql = '(SELECT COUNT(*) FROM tickets t WHERE t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled"))';
+        $diagOrgManagerSql = 'EXISTS (SELECT 1 FROM org_units ou WHERE ou.is_active = 1 AND (ou.manager_user_id = u.id OR EXISTS (SELECT 1 FROM org_unit_managers oum WHERE oum.unit_id = ou.id AND oum.user_id = u.id)))';
+        $diagRows = db()->query('SELECT u.id, u.full_name, u.username, u.role, u.is_primary_admin, hu.code AS hu_code, ' . $diagOpenLoadSql . ' AS open_load, ' . $diagOrgManagerSql . ' AS is_org_manager FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1) OR u.role = "support_manager" OR (u.role IN ("agent", "manager") AND hu.code IN ("it", "support"))) ORDER BY u.full_name')->fetchAll();
+        $diagPick = ['it' => choose_handling_agent('it'), 'support' => choose_handling_agent('support')];
+        $diagRoleLabel = static fn (array $diagRow): string => ([
+            'primary_admin' => 'ادمین اصلی',
+            'admin' => ((int) $diagRow['is_primary_admin'] === 1 ? 'ادمین (پرچم ادمین اصلی)' : 'ادمین'),
+            'support_manager' => 'مدیر پشتیبانی',
+            'manager' => 'مدیر',
+            'agent' => 'کارشناس',
+        ][(string) $diagRow['role']] ?? (string) $diagRow['role']);
+        echo '<section class="card form-card" id="ticket-auto-assign-diagnostics"><h2>تشخیص ارجاع خودکار درخواست‌ها</h2><p class="muted">مسئول درخواست جدید به‌صورت خودکار تعیین می‌شود: درخواست IT به «ادمین اصلی» و درخواست پشتیبانی به «مدیر پشتیبانی» می‌رسد (در صورت تعدد، کمترین درخواست باز؛ مدیران سازمانی آخرِ صف). اگر نام بی‌ربطی در این فهرست است، نقش او را از «مدیریت کاربران» یا فرم‌های ترمیم بالا اصلاح کنید.</p>';
+        foreach (['it' => 'حوزهٔ IT', 'support' => 'حوزهٔ پشتیبانی'] as $diagGroup => $diagGroupLabel) {
+            $diagCandidates = array_values(array_filter($diagRows, static fn (array $diagRow): bool => $diagGroup === 'it'
+                ? ((string) $diagRow['role'] === 'primary_admin' || ((string) $diagRow['role'] === 'admin' && (int) $diagRow['is_primary_admin'] === 1) || ((string) ($diagRow['hu_code'] ?? '') === 'it' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))
+                : ((string) $diagRow['role'] === 'support_manager' || ((string) ($diagRow['hu_code'] ?? '') === 'support' && in_array((string) $diagRow['role'], ['agent', 'manager'], true)))));
+            $diagPickId = (int) ($diagPick[$diagGroup] ?? 0);
+            $diagPickName = 'هیچ‌کس (درخواست بدون مسئول در «بررسی مدیر» می‌ماند)';
+            foreach ($diagCandidates as $diagRow) {
+                if ((int) $diagRow['id'] === $diagPickId) {
+                    $diagPickName = (string) $diagRow['full_name'];
+                }
+            }
+            echo '<h3 style="margin:14px 0 6px">' . $diagGroupLabel . '</h3><p class="muted">مقصد فعلی ارجاع خودکار: <b>' . e($diagPickName) . '</b></p>';
+            if ($diagCandidates === []) {
+                echo '<p class="muted">هیچ کاندیدایی برای این حوزه پیدا نشد.</p>';
+                continue;
+            }
+            echo '<div class="table-wrap"><table class="data-table"><thead><tr><th>کاربر</th><th>نقش</th><th>واحد رسیدگی</th><th>درخواست‌های باز</th><th>مدیر سازمانی؟</th></tr></thead><tbody>';
+            foreach ($diagCandidates as $diagRow) {
+                $diagIsPick = (int) $diagRow['id'] === $diagPickId;
+                echo '<tr' . ($diagIsPick ? ' style="font-weight:700"' : '') . '><td>' . e((string) $diagRow['full_name']) . ' <small>#' . (int) $diagRow['id'] . ' · ' . e((string) $diagRow['username']) . '</small>' . ($diagIsPick ? ' <span class="status ok">مقصد فعلی</span>' : '') . '</td><td>' . e($diagRoleLabel($diagRow)) . '</td><td>' . e((string) ($diagRow['hu_code'] === 'it' ? 'IT' : ($diagRow['hu_code'] === 'support' ? 'پشتیبانی' : '—'))) . '</td><td>' . (int) $diagRow['open_load'] . '</td><td>' . ((int) $diagRow['is_org_manager'] === 1 ? '<span class="status warn">بله — آخرِ صف ارجاع خودکار</span>' : 'خیر') . '</td></tr>';
+            }
+            echo '</tbody></table></div>';
+        }
+        echo '</section>';
+    }
+        echo '</div>';
     }
 
     echo '</section>';

@@ -82,7 +82,7 @@ class FoodBulkOperationsStaticTests(unittest.TestCase):
     def test_bulk_tab_date_picker_and_removed_calendar_emergency_panel(self):
         js = read("food-ticket-web/assets/food-menu.js")
         self.assertIn("tabs.push(['bulk', 'عملیات گروهی'])", js)
-        self.assertIn("state.tab === 'bulk' && canEmergency ? renderBulkOperations()", js)
+        self.assertIn("state.tab === 'bulk' && (canEmergency || canManageGuestRequests) ? renderBulkOperations()", js)
         self.assertIn("id=\"fm-bulk-date-form\"", js)
         self.assertIn("name=\"date\" data-jalali", js)
         self.assertIn("data-fm-action=\"bulk-confirm\"", js)

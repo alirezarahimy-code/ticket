@@ -98,7 +98,8 @@ function permission_catalog(): array
             'items' => [
                 ['code' => 'traffic.view', 'label' => 'مشاهدهٔ کنترل تردد'],
                 ['code' => 'traffic.manage', 'label' => 'ثبت، ویرایش و ورود گروهی سوابق'],
-                ['code' => 'traffic.destinations', 'label' => 'مدیریت مقصدهای ملاقات'],
+                ['code' => 'traffic.destinations', 'label' => 'مقصدهای ملاقات'],
+                ['code' => 'traffic.destinations_edit', 'label' => 'ویرایش'],
             ],
         ],
         [
@@ -127,7 +128,8 @@ function permission_catalog(): array
                 ['code' => 'analytics.view', 'label' => 'چارت‌ها'],
                 ['code' => 'audit.view', 'label' => 'ممیزی'],
                 ['code' => 'logs.view', 'label' => 'گزارش خطا'],
-                ['code' => 'system.health', 'label' => 'سلامت سامانه و خطاهای فنی (وضعیت، پیگیری، نگهداری لاگ)'],
+                ['code' => 'system.health', 'label' => 'سلامت سامانه و خطاهای فنی'],
+                ['code' => 'system.health_edit', 'label' => 'ویرایش وضعیت و نگهداری لاگ'],
                 ['code' => 'logs.activity', 'label' => 'فعالیت کاربران'],
                 ['code' => 'logs.activity_export', 'label' => 'خروجی فعالیت کاربران'],
             ],
@@ -138,28 +140,33 @@ function permission_catalog(): array
             'items' => [
                 ['code' => 'food.dashboard', 'label' => 'داشبورد'],
                 ['code' => 'food.monitor', 'label' => 'پایش لحظه‌ای'],
-                ['code' => 'food.monitor_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
                 ['code' => 'food.employees', 'label' => 'کارکنان'],
                 ['code' => 'food.employees_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.guest', 'label' => 'کارت مهمان'],
-                ['code' => 'food.guest_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.groups', 'label' => 'گروه‌های غذا (نماینده با L_UID و غیبت روزانه)'],
+                ['code' => 'food.menu', 'label' => 'برنامه غذایی'],
+                ['code' => 'food.menu_edit', 'label' => 'ویرایش'],
+                ['code' => 'food.groups', 'label' => 'گروه‌های غذا'],
                 ['code' => 'food.groups_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.groups_override', 'label' => 'اصلاح غیبت بعد از قفل شدن (Audit)'],
-                ['code' => 'food.emergency', 'label' => 'سفارش اضطراری غذا (ثبت و لغو برای هر فرد در روز بسته)'],
-                ['code' => 'food.manual_ticket', 'label' => 'صدور دستی فیش بدون چاپ فیزیکی (ادمین اصلی)'],
-                ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها'],
+                ['code' => 'food.reports', 'label' => 'گزارش‌ها'],
+            ],
+        ],
+        [
+            'key' => 'food_settings',
+            'label' => 'تنظیمات سیستم مدیریت غذا',
+            'items' => [
+                ['code' => 'food.db', 'label' => 'اتصال پایگاه‌ها و تردد'],
                 ['code' => 'food.db_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.printer', 'label' => 'چاپگر سیستم'],
                 ['code' => 'food.printer_edit', 'label' => 'ویرایش'],
+                ['code' => 'food.guest', 'label' => 'کارت مهمان'],
+                ['code' => 'food.guest_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.design', 'label' => 'طراحی فیش'],
                 ['code' => 'food.design_edit', 'label' => 'ویرایش'],
                 ['code' => 'food.health', 'label' => 'سلامت سیستم'],
                 ['code' => 'food.health_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.menu', 'label' => 'برنامه غذایی و بانک غذا'],
-                ['code' => 'food.menu_edit', 'label' => 'ویرایش'],
-                ['code' => 'food.order_close', 'label' => 'بستن/بازکردن روز، مشاهدهٔ سفارش‌ها و اعطای مهلت اضطراری محدود'],
+                ['code' => 'food.manual_attendance', 'label' => 'ثبت دستی فیش/تردد'],
+                ['code' => 'food.manual_attendance_edit', 'label' => 'ویرایش'],
+                ['code' => 'food.emergency_window', 'label' => 'مدیریت مهلت اضطراری سفارش غذا'],
+                ['code' => 'food.emergency_window_edit', 'label' => 'ویرایش'],
             ],
         ],
         [
@@ -167,7 +174,6 @@ function permission_catalog(): array
             'label' => 'سفارش غذای کارکنان',
             'items' => [
                 ['code' => 'foodorder.self', 'label' => 'ثبت و مشاهدهٔ سفارش خود'],
-                ['code' => 'foodorder.proxy', 'label' => 'ثبت سفارش برای کارکنان دیگر'],
             ],
         ],
         [
@@ -218,20 +224,35 @@ function permission_all_codes(): array
 }
 
 /**
- * نقشهٔ «بخش ← ویرایش»: کد ویرایش فرزند کد مشاهدهٔ همان بخش است.
- * فرزند فقط وقتی معنا دارد که والدش فعال باشد؛ با تیک بخش، ویرایش به‌صورت پیش‌فرض فعال می‌شود.
+ * نقشهٔ «مشاهده ← ویرایش»: کد ویرایش مستقل است؛ انتخاب ویرایش، مشاهده را هم می‌دهد،
+ * اما انتخاب مشاهده به‌تنهایی هرگز مجوز ویرایش را اضافه نمی‌کند.
  */
+/** Roles permitted to directly edit or delete CD/DVD history records. */
+function permission_cddvd_direct_edit_roles(): array
+{
+    return ['primary_admin', 'supervisor', 'inspector', 'guard'];
+}
+
+/** Remove the fixed-allowlist CD/DVD grant from every other role, including stale saved rows. */
+function permission_filter_role_codes(string $role, array $codes): array
+{
+    if (!in_array($role, permission_cddvd_direct_edit_roles(), true)) {
+        $codes = array_values(array_diff($codes, ['cddvd.edit']));
+    }
+    return $codes;
+}
+
 function permission_edit_map(): array
 {
     return [
         'services.view' => 'services.manage',
         'knowledge.view' => 'knowledge.manage',
-        'cddvd.view' => 'cddvd.edit',
         'traffic.view' => 'traffic.manage',
+        'traffic.destinations' => 'traffic.destinations_edit',
         'asset.view' => 'asset.edit',
         'org.view' => 'org.manage',
+        'system.health' => 'system.health_edit',
         'food.groups' => 'food.groups_edit',
-        'food.monitor' => 'food.monitor_edit',
         'food.employees' => 'food.employees_edit',
         'food.guest' => 'food.guest_edit',
         'food.db' => 'food.db_edit',
@@ -239,6 +260,8 @@ function permission_edit_map(): array
         'food.design' => 'food.design_edit',
         'food.health' => 'food.health_edit',
         'food.menu' => 'food.menu_edit',
+        'food.manual_attendance' => 'food.manual_attendance_edit',
+        'food.emergency_window' => 'food.emergency_window_edit',
         'ola.view' => 'ola.manage',
         'governance.view' => 'governance.manage',
         'holidays.view' => 'holidays.manage',
@@ -254,49 +277,13 @@ function permission_edit_map(): array
     ];
 }
 
-/**
- * بخش‌هایی که قبلاً نوشتن‌شان فقط با کد بخش کنترل می‌شد. کد ویرایش تازه‌شان به نقش‌هایی که بخش را دارند
- * داده می‌شود تا دسترسی قبلی حفظ شود (پیش‌فرض‌ها و داده‌های ذخیره‌شده).
- */
-function permission_legacy_parent_edit_pairs(): array
-{
-    return [
-        'food.groups' => 'food.groups_edit',
-        'food.monitor' => 'food.monitor_edit',
-        'food.employees' => 'food.employees_edit',
-        'food.guest' => 'food.guest_edit',
-        'food.db' => 'food.db_edit',
-        'food.printer' => 'food.printer_edit',
-        'food.design' => 'food.design_edit',
-        'food.health' => 'food.health_edit',
-        'food.menu' => 'food.menu_edit',
-        'settings.general' => 'settings.general_edit',
-        'settings.domain' => 'settings.domain_edit',
-        'settings.users' => 'settings.users_edit',
-        'settings.key_roles' => 'settings.key_roles_edit',
-        'domain.scan' => 'asset.remote_extract',
-    ];
-}
-
-/** اگر کد ویرایش داخل مجموعه باشد ولی بخش (والد) نباشد، والد هم اضافه می‌شود (حفظ دسترسی‌های قبلی). */
+/** اگر کد ویرایش داده شود، کد مشاهدهٔ والد هم در مجموعهٔ مؤثر قرار می‌گیرد. */
 function role_permissions_add_parents(array $codes): array
 {
     $set = array_fill_keys($codes, true);
     foreach (permission_edit_map() as $parent => $child) {
         if (isset($set[$child])) {
             $set[$parent] = true;
-        }
-    }
-    return array_keys($set);
-}
-
-/** ویرایشِ بدون بخش حذف می‌شود؛ ویرایش بی‌والد معنی ندارد. */
-function role_permissions_strip_orphan_edits(array $codes): array
-{
-    $set = array_fill_keys($codes, true);
-    foreach (permission_edit_map() as $parent => $child) {
-        if (!isset($set[$parent])) {
-            unset($set[$child]);
         }
     }
     return array_keys($set);
@@ -316,7 +303,7 @@ function print_fish_role_targets(): array
 {
     return [
         // مدیر پشتیبانی: داشبورد، پایش، گزارش، کارکنان، گروه‌ها، برنامهٔ غذایی و بستن روز؛ بدون تنظیمات.
-        'support_manager' => ['system.health', 'food.dashboard', 'food.monitor', 'food.monitor_edit', 'food.reports', 'food.employees', 'food.employees_edit', 'food.groups', 'food.groups_edit', 'food.groups_override', 'food.emergency', 'food.menu', 'food.menu_edit', 'food.order_close'],
+        'support_manager' => ['system.health', 'food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.employees_edit', 'food.groups', 'food.groups_edit', 'food.menu', 'food.menu_edit'],
         // بازرس: فقط داشبورد و مشاهدهٔ گروه‌های غذا.
         'inspector' => ['food.dashboard', 'food.groups'],
     ];
@@ -328,7 +315,7 @@ function print_fish_role_codes(string $role, array $codes): array
     if ($role === 'primary_admin') {
         return $codes;
     }
-    $codes = array_values(array_filter($codes, static fn ($c): bool => (string) $c !== 'food.manual_ticket'));
+    $codes = permission_food_legacy_codes($codes);
     $kept = array_values(array_filter($codes, static fn ($c): bool => !str_starts_with((string) $c, 'food.')));
     $targets = print_fish_role_targets();
     return array_values(array_unique(array_merge($kept, $targets[$role] ?? [])));
@@ -338,21 +325,16 @@ function permission_defaults(): array
 {
     $defaults = permission_defaults_raw();
     foreach ($defaults as $role => $codes) {
-        $codes = role_permissions_normalize_codes($codes);
+        $codes = permission_food_legacy_codes($codes);
         // ویرایشِ بی‌والد نباشد؛ دسترسی‌های پیش‌فرض دیگری اضافه نمی‌شود.
         $codes = role_permissions_add_parents($codes);
         // ویرایش درخواست: پیش‌تر کسانی درخواست را تغییر می‌دادند که مدیر ارجاع (ticket.assign) یا کارشناس قابل ارجاع بودند.
         if (in_array('ticket.assign', $codes, true) || in_array($role, assignable_role_codes(), true)) {
             $codes[] = 'ticket.edit';
         }
-        // بخش‌های قبلاً بی‌ویرایش: هرکس بخش را داشت، کارهای ثبتی‌اش را هم داشت؛ پس ویرایش‌شان هم داده می‌شود.        // بخش‌های قبلاً بی‌ویرایش: هرکس بخش را داشت، کارهای ثبتی‌اش را هم داشت؛ پس ویرایششان هم داده می‌شود.
-        foreach (permission_legacy_parent_edit_pairs() as $legacyParent => $legacyChild) {
-            if (in_array($legacyParent, $codes, true)) {
-                $codes[] = $legacyChild;
-            }
-        }
         // بعد از افزودن ویرایش‌های قدیمی هم فیلتر می‌شود تا چیزی از چاپ فیش به نقش‌های غیرمجاز نرسد.
         $codes = print_fish_role_codes($role, $codes);
+        $codes = permission_filter_role_codes($role, $codes);
         $defaults[$role] = array_values(array_unique($codes));
     }
     return $defaults;
@@ -361,7 +343,7 @@ function permission_defaults(): array
 /** کدهایی که از پیش‌فرض نقش user برداشته شدند (تصمیم کاربر). */
 function user_default_removed_codes(): array
 {
-    return ['cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.monitor_edit', 'food.orders_edit', 'governance.view', 'governance.manage'];
+    return ['cddvd.view', 'cddvd.submit_out', 'traffic.view', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.orders_edit', 'governance.view', 'governance.manage'];
 }
 
 function permission_defaults_raw(): array
@@ -372,8 +354,8 @@ function permission_defaults_raw(): array
         'primary_admin' => permission_all_codes(),
         // ۱.۳۷.۷ — پیش‌فرض نقش قدیمی «admin» (قابل ویرایش از تنظیمات ← نقش‌ها).
         'supervisor' => array_values(array_unique(array_merge($common, ['ticket.view_all', 'ticket.edit', 'supervisor.panel', 'supervisor.decide', 'supervisor.reopen', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'domain.import', 'domain.scan', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'logs.activity', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override']))),
-        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.edit', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.order_close', 'settings.general', 'settings.domain', 'holidays.manage']))),
-        'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
+        'support_manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'services.manage', 'service_cat.manage', 'service_field.manage', 'knowledge.manage', 'cddvd.view_all', 'traffic.destinations', 'analytics.view', 'asset.edit', 'asset.extract', 'asset.ping', 'asset.remote_extract', 'inventory.diagnostics', 'domain.import', 'domain.scan', 'audit.view', 'logs.view', 'logs.activity', 'logs.activity_export', 'food.dashboard', 'food.monitor', 'food.orders', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.groups_override', 'food.menu', 'food.menu_edit', 'settings.general', 'settings.domain', 'holidays.manage']))),
+        'inspector' => array_values(array_unique(array_merge($all, ['ticket.view_unit', 'ticket.view_all', 'ticket.edit', 'queue.view', 'assets.view', 'asset.view', 'asset.history', 'asset.ping', 'reports.view', 'analytics.view', 'audit.view', 'inventory.view', 'cddvd.submit_in', 'cddvd.edit', 'cddvd.view_all', 'cddvd.history', 'cddvd.export', 'traffic.manage']))),
         'manager' => array_values(array_unique(array_merge($common, ['ticket.edit', 'ticket.assign', 'ticket.bulk', 'ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping', 'analytics.view']))),
         'agent' => array_values(array_unique(array_merge($common, ['ticket.attach_asset', 'knowledge.manage', 'asset.edit', 'asset.extract', 'asset.ping']))),
         // کاربر عادی (از جمله کاربران AD): بخش‌های چاپ فیش، نظارت و سیاست‌های دارایی/ترافیک ندارد.
@@ -382,7 +364,7 @@ function permission_defaults_raw(): array
         // کاربر محلی (پرسنل غذایی که در دامین نیستند): فقط سفارش غذای خود و پروفایل.
         'local_user' => ['foodorder.self', 'profile.edit'],
         // بازرسی: سفارش غذا، پروفایل، و کنترل CD/DVD و تردد با دسترسی کامل.
-        'guard' => ['foodorder.self', 'profile.edit', 'cddvd.view', 'cddvd.edit', 'traffic.view', 'traffic.manage', 'traffic.destinations'],
+        'guard' => ['foodorder.self', 'profile.edit', 'cddvd.view', 'cddvd.submit_in', 'cddvd.edit', 'traffic.view', 'traffic.manage', 'traffic.destinations'],
     ];
 }
 
@@ -436,6 +418,34 @@ function role_permissions_normalize_codes(array $codes): array
     return array_values(array_unique(array_filter($codes, static fn (string $code): bool => $code !== '')));
 }
 
+/** Map retired food capabilities into the agreed section-level grants. */
+function permission_food_legacy_codes(array $codes): array
+{
+    $codes = role_permissions_normalize_codes($codes);
+    $set = array_fill_keys($codes, true);
+    if (isset($set['food.order_close']) || isset($set['food.emergency'])) {
+        $set['food.menu_edit'] = true;
+        $set['food.menu'] = true;
+    }
+    if (isset($set['food.groups_override'])) {
+        $set['food.groups_edit'] = true;
+        $set['food.groups'] = true;
+    }
+    // Monitoring is now a single view-only grant; old edit grant folds into it.
+    if (isset($set['food.monitor_edit'])) {
+        $set['food.monitor'] = true;
+    }
+    // The manual-attendance section replaces the old primary-admin-only permission.
+    if (isset($set['food.manual_ticket'])) {
+        $set['food.manual_attendance_edit'] = true;
+        $set['food.manual_attendance'] = true;
+    }
+    foreach (['food.order_close', 'food.emergency', 'food.groups_override', 'food.monitor_edit', 'food.manual_ticket', 'food.orders', 'food.orders_edit', 'foodorder.proxy'] as $retired) {
+        unset($set[$retired]);
+    }
+    return array_keys($set);
+}
+
 /**
  * مجموعهٔ مؤثر یک نقش (تابع خالص؛ بدون دیتابیس قابل آزمون است).
  */
@@ -443,14 +453,13 @@ function role_permission_effective_codes(string $role, array $storedCodes, bool 
 {
     if ($custom) {
         // مجوز صدور فیش دستی از داده‌های سفارشی قدیمی/دستی به نقش غیرادمین نشت نمی‌کند.
-        if ($role !== 'primary_admin') {
-            $storedCodes = array_values(array_filter($storedCodes, static fn ($code): bool => (string) $code !== 'food.manual_ticket'));
-        }
+        $storedCodes = permission_food_legacy_codes($storedCodes);
+        $storedCodes = permission_filter_role_codes($role, $storedCodes);
         // نقش‌های ذخیره‌شده: ویرایش بدون بخش (داده‌های قدیمی) بخش را هم می‌گیرد تا دسترسی قبلی حفظ شود.
         return role_permissions_add_parents(role_permissions_normalize_codes($storedCodes));
     }
     $defaults = permission_defaults();
-    return role_permissions_normalize_codes($defaults[$role] ?? []);
+    return permission_filter_role_codes($role, role_permissions_normalize_codes($defaults[$role] ?? []));
 }
 
 /** مقایسهٔ مجموعه‌ای دو فهرست کد؛ ترتیب و تکرار مهم نیست. */
@@ -548,19 +557,18 @@ function role_permissions_migrate_once(): void
             // دفعهٔ بعد دوباره تلاش می‌شود.
         }
     }
-    if (setting('perm_edit_v2') === '1') {
-        return;
-    }
-    try {
-        foreach (permission_legacy_parent_edit_pairs() as $legacyParent => $legacyChild) {
-            $copy = db()->prepare("INSERT IGNORE INTO role_permissions (role, permission) SELECT role, ? FROM role_permissions WHERE permission = ?");
-            $copy->execute([$legacyChild, $legacyParent]);
+    if (setting('perm_edit_v4') !== '1') {
+        try {
+            // مشاهده به‌تنهایی نباید ویرایش را فعال کند؛ مجوزهای ویرایش فقط از انتخاب صریح نقش می‌آیند.
+            db()->exec("DELETE FROM role_permissions WHERE permission = 'cddvd.edit' AND role NOT IN ('primary_admin', 'supervisor', 'inspector', 'guard')");
+            db()->exec("DELETE FROM role_permissions WHERE permission = 'foodorder.proxy'");
+            save_setting('perm_edit_v4', '1');
+            role_permissions_flush_cache();
+        } catch (Throwable $exception) {
+            // Retry this additive permission reconciliation on the next request.
         }
-        save_setting('perm_edit_v2', '1');
-        role_permissions_flush_cache();
-    } catch (Throwable $exception) {
-        // در صورت خطا دفعهٔ بعد دوباره تلاش می‌شود.
     }
+
 }
 
 function role_permission_codes(string $role): array
@@ -661,11 +669,12 @@ function role_permissions_save(string $role, array $codes): void
     $valid = permission_all_codes();
     $codes = role_permissions_normalize_codes($codes);
     if ($role !== 'primary_admin') {
-        $codes = array_values(array_filter($codes, static fn (string $code): bool => $code !== 'food.manual_ticket'));
+        $codes = permission_food_legacy_codes($codes);
     }
     $codes = array_values(array_intersect($codes, $valid));
-    // ویرایش بدون بخش ذخیره نمی‌شود.
-    $codes = role_permissions_strip_orphan_edits($codes);
+    $codes = permission_filter_role_codes($role, $codes);
+    // مجوز ویرایش، مشاهدهٔ والد را هم دارد؛ اما مشاهده هرگز مجوز ویرایش اضافه نمی‌کند.
+    $codes = role_permissions_add_parents($codes);
     if ($role === 'primary_admin') {
         $codes = $valid;
     }

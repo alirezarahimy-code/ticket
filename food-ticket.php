@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.27';
+const FOOD_TICKET_PANEL_VERSION = '1.37.46';
 
 function food_ticket_panel_version(): string
 {
@@ -57,7 +57,7 @@ function food_ticket_is_support_manager(array $user): bool
 function food_ticket_is_allowed(array $user): bool
 {
     if (function_exists('user_can')) {
-        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.order_close', 'food.emergency']);
+        return user_can_any($user, ['food.dashboard', 'food.monitor', 'food.reports', 'food.employees', 'food.guest', 'food.groups', 'food.db', 'food.printer', 'food.design', 'food.health', 'food.menu', 'food.manual_attendance', 'food.emergency_window']);
     }
     return food_ticket_is_primary_admin($user) || food_ticket_is_support_manager($user);
 }
@@ -65,11 +65,11 @@ function food_ticket_is_allowed(array $user): bool
 /** کد ویرایش لازم برای مسیرهای نوشتن هر بخش (نگاشت مسیر ← کد ویرایش). */
 function food_ticket_route_edit_permission(string $route): ?string
 {
-    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear', 'food-manual-attendance'], true)) {
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)) {
         return 'food.groups_edit';
     }
-    if (in_array($route, ['process', 'delivery', 'cleanup-source_row', 'reprint-errors'], true)) {
-        return 'food.monitor_edit';
+    if ($route === 'food-manual-attendance') {
+        return 'food.manual_attendance_edit';
     }
     if ($route === 'orders-import') {
         return 'food.db_edit';
@@ -77,10 +77,10 @@ function food_ticket_route_edit_permission(string $route): ?string
     if (in_array($route, ['employees', 'employees-import'], true)) {
         return 'food.employees_edit';
     }
-    if ($route === 'guest-cards') {
+    if (in_array($route, ['guest-cards', 'guest-cap'], true)) {
         return 'food.guest_edit';
     }
-    if (in_array($route, ['config', 'database-file', 'test-connections', 'diag-source_row-delete', 'browse-file', 'browse-folder', 'browse-list'], true)
+    if (in_array($route, ['database-file', 'test-connections', 'diag-source_row-delete', 'browse-file', 'browse-folder', 'browse-list'], true)
         || (function_exists('food_ticket_legacy_key') && $route === food_ticket_legacy_key('route_test'))
         || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route))) {
         return 'food.db_edit';
@@ -93,6 +93,12 @@ function food_ticket_route_edit_permission(string $route): ?string
     }
     if ($route === 'self-test') {
         return 'food.health_edit';
+    }
+    if ($route === 'process') {
+        return 'food.manual_attendance_edit';
+    }
+    if (in_array($route, ['reprint-errors', 'delivery'], true)) {
+        return $route === 'delivery' ? 'food.manual_attendance_edit' : 'food.printer_edit';
     }
     return null;
 }
@@ -109,46 +115,88 @@ function food_ticket_route_allowed(array $user, string $route): bool
         if (food_ticket_is_primary_admin($user)) {
             return true;
         }
-        if (in_array($route, ['food-menu/emergency-window', 'food-menu/emergency-window-state'], true)) {
+        if (!function_exists('user_can')) {
             return false;
         }
-        $menuPermission = match ($route) {
-            'food-menu/status', 'food-menu/month' => 'food.menu|food.order_close',
-            'food-menu/catalog', 'food-menu/day' => 'food.menu',
-            'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close',
-            'food-menu/employee-search' => 'food.order_close',
-            'food-menu/group-orders', 'food-menu/groups' => 'food.order_close',
-            'food-menu/emergency/people', 'food-menu/emergency/lookup', 'food-menu/emergency/orders', 'food-menu/emergency/order', 'food-menu/emergency/cancel', 'food-menu/bulk-snapshot', 'food-menu/bulk-apply' => 'food.emergency',
-            default => null,
-        };
-        if ($menuPermission === null || !function_exists('user_can')) {
-            return false;
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $readMenu = [
+            'food-menu/status', 'food-menu/month', 'food-menu/catalog', 'food-menu/cancel-requests',
+            'food-menu/emergency/people', 'food-menu/emergency/orders', 'food-menu/bulk-snapshot',
+            'food-menu/guest-requests',
+        ];
+        $writeMenu = [
+            'food-menu/catalog', 'food-menu/day', 'food-menu/cancel-request-decide',
+            'food-menu/emergency/order', 'food-menu/emergency/cancel', 'food-menu/bulk-apply',
+            'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete',
+        ];
+        $reportRoutes = [
+            'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export',
+            'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/employee-search',
+            'food-menu/group-orders', 'food-menu/groups',
+        ];
+        if ($route === 'food-menu/emergency-window-state') {
+            return $method === 'GET' && user_can($user, 'food.emergency_window');
         }
-        // ذخیرهٔ کاتالوگ و روز (نوشتن) فقط با ویرایش برنامه غذایی.
-        if (in_array($route, ['food-menu/catalog', 'food-menu/day'], true) && strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) !== 'GET') {
+        if ($route === 'food-menu/emergency-window') {
+            return $method === 'POST' && user_can($user, 'food.emergency_window_edit');
+        }
+        if ($route === 'food-menu/emergency/lookup') {
+            return $method === 'POST' && user_can($user, 'food.menu');
+        }
+        if (in_array($route, $reportRoutes, true)) {
+            return $method === 'GET' && user_can($user, 'food.reports');
+        }
+        if (in_array($route, $writeMenu, true) && $method !== 'GET') {
             return user_can($user, 'food.menu_edit');
         }
-        if ($menuPermission === 'food.menu|food.order_close') {
-            return user_can($user, 'food.menu') || user_can($user, 'food.order_close');
+        if (in_array($route, $readMenu, true) && $method === 'GET') {
+            return user_can($user, 'food.menu');
         }
-        return user_can($user, $menuPermission);
+        return false;
     }
     if (food_ticket_is_primary_admin($user)) {
         return true;
     }
     if (!function_exists('user_can')) {
         return food_ticket_is_support_manager($user)
-            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'dashboard', 'health', 'self-test', 'test-connections', 'config', 'database-file', 'session'], true)
+            && (in_array($route, ['login', 'sso-login', 'monitoring', 'employees', 'orders', 'reports/export', 'aggregate-report', 'aggregate-report-export', 'dashboard', 'health', 'self-test', 'test-connections', 'config', 'database-file', 'session'], true)
                 || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route)));
     }
     if (in_array($route, ['login', 'sso-login'], true)) {
         return food_ticket_is_allowed($user);
     }
+    if ($route === 'config') {
+        $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+        $views = ['food.db', 'food.printer', 'food.guest', 'food.design', 'food.health', 'food.manual_attendance', 'food.emergency_window'];
+        $edits = ['food.db_edit', 'food.printer_edit', 'food.guest_edit', 'food.design_edit', 'food.health_edit', 'food.manual_attendance_edit', 'food.emergency_window_edit'];
+        foreach ($method === 'GET' ? $views : $edits as $permission) {
+            if (user_can($user, $permission)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    if (in_array($route, ['dashboard-data'], true)) {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.dashboard');
+    }
+    if ($route === 'report-data') {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.reports');
+    }
+    if ($route === 'monitoring') {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.monitor');
+    }
+    if (in_array($route, ['orders'], true)) {
+        return strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET' && user_can($user, 'food.dashboard');
+    }
     $routePermission = [
         'dashboard' => 'food.dashboard',
+        'dashboard-data' => 'food.dashboard',
+        'report-data' => 'food.reports',
         'monitoring' => 'food.monitor',
         'absent' => 'food.reports',
         'guest-requests-report' => 'food.reports',
+        'aggregate-report' => 'food.reports',
+        'aggregate-report-export' => 'food.reports',
         'orders' => 'food.dashboard',
         'reports/export' => 'food.reports',
         'employees' => 'food.employees',
@@ -158,9 +206,8 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'guest-cards' => 'food.guest',
         'guest-cap' => 'food.guest',
         'food-groups' => 'food.groups',
-        'food-manual-attendance' => 'food.groups',
+        'food-manual-attendance' => 'food.manual_attendance',
         'food-visit-cancel' => 'food.groups',
-        'config' => 'food.db',
         'database-file' => 'food.db',
         'printers' => 'food.printer',
         'test-print' => 'food.printer',
@@ -179,14 +226,13 @@ function food_ticket_route_allowed(array $user, string $route): bool
         'templates/group-design' => 'food.design',
         'health' => 'food.health',
         'self-test' => 'food.health',
-        'process' => 'food.monitor',
-        'reprint-errors' => 'food.monitor',
-        // غیبت روزانه و تحویل غذا بخشی از فرم گروه‌ها هستند؛ ویرایش غیبت با food.groups،
-        // اما «اصلاح بعد از قفل» در خودِ توابع با food.groups_override کنترل می‌شود.
+        'process' => 'food.manual_attendance',
+        'reprint-errors' => 'food.printer',
+        // غیبت روزانه بخشی از گروه‌های غذاست؛ خواندن با food.groups و هر ویرایش با food.groups_edit.
         'absence-status' => 'food.groups',
         'absence-save' => 'food.groups',
         'absence-clear' => 'food.groups',
-        'delivery' => 'food.monitor',
+        'delivery' => 'food.manual_attendance',
         'diag-source_row-delete' => 'food.db',
         // سازگاری: لینک قدیمی «آزمون اتصال منبع تردد»
         (function_exists('food_ticket_legacy_key') ? food_ticket_legacy_key('route_test') : 'test-source') => 'food.db',
@@ -2909,7 +2955,7 @@ function food_ticket_api_print_diag(): array
     ];
 }
 
-function food_ticket_api_config(): array
+function food_ticket_api_config(array $user = []): array
 {
     $config = food_ticket_config();
     $brand = food_ticket_brand_params();
@@ -2919,7 +2965,7 @@ function food_ticket_api_config(): array
     $dbState = function_exists('db_install_state')
         ? db_install_state()
         : ['token' => '', 'fresh' => true, 'existing' => false, 'counts' => []];
-    return [
+    $payload = [
         'db' => $dbState,
         'attendancePath' => (string) ($config['attendance_path'] ?? ''),
         'attendanceTable' => food_ticket_source_table(),
@@ -2954,6 +3000,31 @@ function food_ticket_api_config(): array
             'paper' => '80mm',
         ],
     ];
+    if ($user && function_exists('user_can')) {
+        if (!user_can($user, 'food.db')) {
+            foreach (['db', 'attendancePath', 'attendanceTable', 'pollSeconds', 'cutSourceRows', 'enabled'] as $key) {
+                unset($payload[$key]);
+            }
+        }
+        if (!user_can($user, 'food.guest')) {
+            foreach (['guestCardUIDs', 'maxGuestTicketsPerDay', 'guestCapMode', 'guestCapStart', 'guestCapCutoff', 'guestCapEnd', 'guestRequestSameDayCutoff', 'guestFoodType'] as $key) {
+                unset($payload[$key]);
+            }
+        }
+        if (!user_can($user, 'food.printer')) {
+            if (user_can($user, 'food.design') && isset($payload['printer'])) {
+                $payload['printer'] = array_intersect_key($payload['printer'], array_flip(['company', 'title', 'footer', 'showLogo', 'paper']));
+            } else {
+                unset($payload['printer']);
+            }
+        } elseif (!user_can($user, 'food.design') && isset($payload['printer'])) {
+            foreach (['company', 'title', 'footer', 'showLogo', 'paper'] as $key) {
+                unset($payload['printer'][$key]);
+            }
+        }
+        unset($payload['brandName'], $payload['brandLogo']);
+    }
+    return $payload;
 }
 
 
@@ -3002,6 +3073,398 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
         ];
     }
     return ['items' => $items, 'deputies' => $deputies, 'from' => $from, 'to' => $to, 'deputy_id' => $deputy];
+}
+
+/**
+ * گزارش تجمیعی روزانه غذا: شمارش سفارشها، فیشهای مهمان، فیشهای چاپشدهٔ قطعی،
+ * غایبین و بررسی مغایرت، بههمراه فهرست اسامی برای نمایش/استخراج/چاپ.
+ * فقط خواندنی است و هیچ جدولی را تغییر نمیدهد.
+ */
+/** نام خانوادگی برای مرتبسازی فهرست اشخاص (آخرین واژهٔ نام). */
+function food_ticket_aggregate_last_name($person): string
+{
+    $name = trim((string) preg_replace('/\s+/u', ' ', (string) ($person['name'] ?? '')));
+    if ($name === '') { return ''; }
+    $words = preg_split('/ /u', $name) ?: [];
+    return (string) end($words);
+}
+/** فهرست اشخاص را بر اساس نام خانوادگی، سپس نام کامل مرتب میکند. */
+function food_ticket_aggregate_sort_people(array &$people): void
+{
+    usort($people, static function ($a, $b): int {
+        $x = food_ticket_aggregate_last_name(is_array($a) ? $a : []);
+        $y = food_ticket_aggregate_last_name(is_array($b) ? $b : []);
+        $cmp = strcmp($x, $y);
+        return $cmp !== 0 ? $cmp : strcmp((string) ($a['name'] ?? ''), (string) ($b['name'] ?? ''));
+    });
+}
+function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, array $printedPeople, array $counts, array &$sourceNotes): array
+{
+    $orderRows = [];
+    try {
+        // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
+        $orderRows = food_ticket_api_orders($fromDate, $toDate);
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
+    }
+
+    $identities = [];
+    $byNational = [];
+    $byPersonnel = [];
+    $withoutNational = [];
+    $withoutNationalCount = 0;
+    foreach ($orderRows as $row) {
+        $date = (string) ($row['foodDate'] ?? '');
+        $national = food_ticket_digits($row['nat'] ?? '');
+        $personnel = trim((string) ($row['pc'] ?? ''));
+        if ($national === '') {
+            $withoutNationalCount++;
+            if (count($withoutNational) < 100) {
+                $withoutNational[] = ['date' => $date, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'pc' => $personnel];
+            }
+            continue;
+        }
+        $key = $date . '|nat:' . $national;
+        if (!isset($identities[$key])) {
+            $identities[$key] = ['date' => $date, 'nat' => $national, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'rows' => 0];
+        }
+        $identities[$key]['rows']++;
+        $byNational[$date . '|' . $national] = $key;
+        if ($personnel !== '') {
+            $byPersonnel[$date . '|' . $personnel] = $key;
+        }
+    }
+
+    $duplicates = [];
+    $duplicateRows = 0;
+    $duplicateIdentityCount = 0;
+    foreach ($identities as $identity) {
+        if ((int) $identity['rows'] > 1) {
+            $duplicateIdentityCount++;
+            $duplicateRows += (int) $identity['rows'] - 1;
+            if (count($duplicates) < 100) {
+                $duplicates[] = $identity;
+            }
+        }
+    }
+
+    $matched = [];
+    $unmatchedPrintedEvents = [];
+    $unmatchedPrintedCount = 0;
+    $legacyPrintedEvents = [];
+    foreach ($printedPeople as $event) {
+        if (($event['kind'] ?? '') === 'مهمان') {
+            continue;
+        }
+        $date = (string) ($event['date'] ?? '');
+        $national = food_ticket_digits($event['nat'] ?? '');
+        $personnel = trim((string) ($event['pc'] ?? ''));
+        $key = $national !== '' ? ($byNational[$date . '|' . $national] ?? '') : '';
+        if ($key === '' && $personnel !== '') {
+            $key = $byPersonnel[$date . '|' . $personnel] ?? '';
+        }
+        if ($key !== '') {
+            $matched[$key] = true;
+        } else {
+            $unmatchedPrintedCount++;
+            if (count($unmatchedPrintedEvents) < 100) {
+                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => !empty($event['legacy_printed'])];
+            }
+        }
+        if (!empty($event['legacy_printed']) && count($legacyPrintedEvents) < 100) {
+            $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'pc' => $personnel];
+        }
+    }
+
+    $unprintableCount = 0;
+    $unprintableOrders = [];
+    try {
+        $missingJoinsSql = "FROM food_orders o
+            LEFT JOIN users u ON u.id = o.employee_id
+            LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id
+            LEFT JOIN food_catalog c ON c.id = i.food_id
+            WHERE o.food_date BETWEEN ? AND ? AND o.meal_type = 'lunch' AND o.status = 'active'
+              AND (u.id IS NULL OR i.id IS NULL OR c.id IS NULL OR COALESCE(i.active, 0) <> 1 OR COALESCE(c.active, 0) <> 1)";
+        $countStmt = db()->prepare('SELECT COUNT(*) ' . $missingJoinsSql);
+        $countStmt->execute([$fromDate, $toDate]);
+        $unprintableCount = (int) $countStmt->fetchColumn();
+        if ($unprintableCount > 0) {
+            $rowsStmt = db()->prepare(
+                "SELECT o.id, o.food_date, o.employee_id, COALESCE(u.full_name, '') AS name,
+                        COALESCE(u.employee_number, '') AS personnel_code,
+                        CASE WHEN u.id IS NULL THEN 'کاربر سفارش پیدا نشد'
+                             WHEN i.id IS NULL THEN 'آیتم تقویم غذا پیدا نشد'
+                             WHEN c.id IS NULL THEN 'غذای کاتالوگ پیدا نشد'
+                             WHEN COALESCE(i.active, 0) <> 1 THEN 'آیتم تقویم غیرفعال است'
+                             WHEN COALESCE(c.active, 0) <> 1 THEN 'غذای کاتالوگ غیرفعال است' END AS issue
+                 " . $missingJoinsSql . ' ORDER BY o.food_date, o.id LIMIT 100'
+            );
+            $rowsStmt->execute([$fromDate, $toDate]);
+            foreach ($rowsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $unprintableOrders[] = ['id' => (int) $row['id'], 'date' => (string) $row['food_date'], 'name' => (string) $row['name'], 'pc' => (string) $row['personnel_code'], 'issue' => (string) $row['issue']];
+            }
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی سفارش ناهارِ غیرقابل‌چاپ: ' . $e->getMessage();
+    }
+
+    $eventTypeStatusCounts = [];
+    try {
+        $eventsStmt = db()->prepare(
+            "SELECT event_type, print_status, COUNT(*) AS total
+             FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND event_type IN ('printed','print','guest')
+             GROUP BY event_type, print_status ORDER BY event_type, print_status"
+        );
+        $eventsStmt->execute([$fromDate, $toDate]);
+        foreach ($eventsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $eventTypeStatusCounts[] = ['event_type' => (string) $row['event_type'], 'print_status' => (string) $row['print_status'], 'total' => (int) $row['total']];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'عیب‌یابی رویدادهای چاپ: ' . $e->getMessage();
+    }
+
+    return [
+        'active_orders_all_meals' => (int) ($counts['total_orders'] ?? 0),
+        'active_lunch_orders' => (int) ($counts['lunch_orders'] ?? 0),
+        'active_dinner_orders' => (int) ($counts['dinner_orders'] ?? 0),
+        'active_other_meal_orders' => (int) ($counts['other_meal_orders'] ?? 0),
+        'reportable_lunch_rows' => count($orderRows),
+        'unique_lunch_identities' => count($identities),
+        'matched_printed_lunch_identities' => count($matched),
+        'orders_without_national_code' => $withoutNational,
+        'orders_without_national_code_count' => $withoutNationalCount,
+        'duplicate_order_identities' => $duplicates,
+        'duplicate_order_identity_count' => $duplicateIdentityCount,
+        'duplicate_order_rows' => $duplicateRows,
+        'unprintable_lunch_order_count' => $unprintableCount,
+        'unprintable_lunch_orders' => $unprintableOrders,
+        'unmatched_printed_events' => $unmatchedPrintedEvents,
+        'unmatched_printed_event_count' => $unmatchedPrintedCount,
+        'legacy_printed_events' => $legacyPrintedEvents,
+        'legacy_printed_event_count' => (int) ($counts['legacy_printed'] ?? 0),
+        'event_type_status_counts' => $eventTypeStatusCounts,
+        'absent_count' => (int) ($counts['absent'] ?? 0),
+        'difference' => (int) ($counts['difference'] ?? 0),
+    ];
+}
+
+function food_ticket_api_aggregate_report(string $fromDate, string $toDate): array
+{
+    $from = food_ticket_parse_date($fromDate);
+    $to = food_ticket_parse_date($toDate);
+    if ($from === null || $to === null || $from > $to) {
+        throw new RuntimeException('بازهٔ تاریخ گزارش تجمیعی معتبر نیست.');
+    }
+
+    $pdo = db();
+    $counts = ['total_orders' => 0, 'lunch_orders' => 0, 'dinner_orders' => 0, 'other_meal_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0, 'legacy_printed' => 0];
+    $printedPeople = [];
+    $sourceNotes = [];
+
+    // ۱) تعداد کل سفارشهای فعال روز (منبع داخلی MySQL)
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active"');
+        $stmt->execute([$from, $to]);
+        $counts['total_orders'] = (int) $stmt->fetchColumn();
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'سفارشها: ' . $e->getMessage();
+        app_error_log('[aggregate-report] orders: ' . $e->getMessage());
+    }
+    try {
+        $mealStmt = $pdo->prepare('SELECT meal_type, COUNT(*) AS c FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active" GROUP BY meal_type');
+        $mealStmt->execute([$from, $to]);
+        foreach ($mealStmt->fetchAll(PDO::FETCH_ASSOC) as $mealRow) {
+            $meal = (string) ($mealRow['meal_type'] ?? '');
+            if ($meal === 'lunch') {
+                $counts['lunch_orders'] = (int) $mealRow['c'];
+            } elseif ($meal === 'dinner') {
+                $counts['dinner_orders'] = (int) $mealRow['c'];
+            } else {
+                $counts['other_meal_orders'] += (int) $mealRow['c'];
+            }
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'تفکیک وعده‌های سفارش: ' . $e->getMessage();
+        app_error_log('[aggregate-report] meal breakdown: ' . $e->getMessage());
+    }
+
+    // ۲) فیش مهمان چاپشده و ۳) فیش چاپشدهٔ قطعی پرسنل — از رویدادهای پایش
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT event_type, COUNT(*) AS c FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
+               AND event_type IN ('printed','print','guest') GROUP BY event_type"
+        );
+        $stmt->execute([$from, $to]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $eventType = (string) $row['event_type'];
+            if ($eventType === 'guest') {
+                $counts['guest_printed'] = (int) $row['c'];
+            } else {
+                $counts['printed_final'] += (int) $row['c'];
+                if ($eventType === 'print') {
+                    // رویدادهای قدیمی print در فهرست غایبین از قبل چاپ‌شده حساب می‌شدند،
+                    // اما در شمار فیش قطعی جا می‌افتادند.
+                    $counts['legacy_printed'] = (int) $row['c'];
+                }
+            }
+        }
+        $stmt = $pdo->prepare(
+            "SELECT id, full_name, personnel_code, national_code, punch_date, punch_time, food_type, event_type
+             FROM food_ticket_events
+             WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
+               AND event_type IN ('printed','print','guest') ORDER BY punch_date, punch_time, id"
+        );
+        $stmt->execute([$from, $to]);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $printedPeople[] = [
+                'event_id' => (int) ($row['id'] ?? 0),
+                'date' => (string) ($row['punch_date'] ?? ''),
+                'time' => (string) ($row['punch_time'] ?? ''),
+                'pc' => (string) ($row['personnel_code'] ?? ''),
+                'nat' => food_ticket_digits($row['national_code'] ?? ''),
+                'name' => (string) ($row['full_name'] ?? ''),
+                'food' => (string) ($row['food_type'] ?? ''),
+                'kind' => (string) $row['event_type'] === 'guest' ? 'مهمان' : 'پرسنل',
+                'legacy_printed' => (string) $row['event_type'] === 'print',
+            ];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'فیشهای چاپشده: ' . $e->getMessage();
+        app_error_log('[aggregate-report] events: ' . $e->getMessage());
+    }
+
+    // ۴) غایبین (سفارش دارند ولی فیش نگرفتند)
+    $absentPeople = [];
+    try {
+        foreach (food_ticket_api_absent($from, $to) as $row) {
+            $absentPeople[] = [
+                'date' => (string) ($row['foodDate'] ?? $from),
+                'pc' => (string) ($row['pc'] ?? ''),
+                'name' => (string) ($row['full_name'] ?? trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? ''))),
+                'food' => (string) ($row['food'] ?? ''),
+                'status' => (string) ($row['status'] ?? 'غایب'),
+                'declared' => !empty($row['declared_absent']),
+            ];
+        }
+    } catch (Throwable $e) {
+        $sourceNotes[] = 'غایبین: ' . $e->getMessage();
+        app_error_log('[aggregate-report] absent: ' . $e->getMessage());
+    }
+
+    $counts['absent'] = count($absentPeople);
+    // چاپ فیش و گزارش غایبین فقط بر اساس سفارش‌های ناهار است؛ سفارش شام نباید وارد مخرج تطبیق شود.
+    // فیش مهمان هم رکورد food_orders ندارد، پس از تعداد سفارش کارکنان کسر نمی‌شود.
+    $expected = $counts['lunch_orders'] - $counts['printed_final'];
+    $counts['expected_absent'] = $expected;
+    $counts['has_mismatch'] = ($expected !== $counts['absent']);
+    $counts['difference'] = $expected - $counts['absent'];
+
+    food_ticket_aggregate_sort_people($printedPeople);
+    food_ticket_aggregate_sort_people($absentPeople);
+    $diagnostics = food_ticket_aggregate_diagnostics($from, $to, $printedPeople, $counts, $sourceNotes);
+    $publicPrintedPeople = $printedPeople;
+    foreach ($publicPrintedPeople as &$person) {
+        // کد ملی/شناسهٔ داخلی فقط برای محاسبهٔ سمت سرور است و نباید به کلاینت گزارش ارسال شود.
+        unset($person['nat'], $person['event_id'], $person['legacy_printed']);
+    }
+    unset($person);
+    return [
+        'from' => $from,
+        'to' => $to,
+        'counts' => $counts,
+        'printed_people' => $publicPrintedPeople,
+        'absent_people' => $absentPeople,
+        'diagnostics' => $diagnostics,
+        'source_notes' => $sourceNotes,
+    ];
+}
+
+/** ستونهای قابلانتخاب گزارش تجمیعی (برای نمایش، استخراج و چاپ). */
+function food_ticket_aggregate_columns(): array
+{
+    return [
+        ['key' => 'row', 'label' => 'ردیف'],
+        ['key' => 'date', 'label' => 'تاریخ'],
+        ['key' => 'time', 'label' => 'ساعت'],
+        ['key' => 'pc', 'label' => 'کد پرسنلی'],
+        ['key' => 'name', 'label' => 'نام و نام خانوادگی'],
+        ['key' => 'food', 'label' => 'نوع غذا'],
+        ['key' => 'kind', 'label' => 'نوع فیش'],
+        ['key' => 'status', 'label' => 'وضعیت'],
+    ];
+}
+
+/** خروجی XLSX گزارش تجمیعی — فقط ستونهای انتخابشده. */
+function food_ticket_aggregate_export(string $fromDate, string $toDate, string $fieldsRaw): never
+{
+    $report = food_ticket_api_aggregate_report($fromDate, $toDate);
+    $all = food_ticket_aggregate_columns();
+    $keys = array_values(array_unique(array_filter(array_map('trim', explode(',', $fieldsRaw)))));
+    $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], $keys, true)));
+    if ($selected === []) {
+        $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], ['row', 'pc', 'name', 'food'], true)));
+    }
+    $headers = array_map(static fn (array $c): string => $c['label'], $selected);
+    $rangeLabel = $report['from'] === $report['to']
+        ? food_order_jalali_label($report['from'])
+        : food_order_jalali_label($report['from']) . ' تا ' . food_order_jalali_label($report['to']);
+    $c = $report['counts'];
+    $rows = [];
+    $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
+    $rows[] = ['تعداد کل سفارشها (همهٔ وعده‌ها)', $c['total_orders'], 'سفارش ناهارِ مبنای تطبیق', $c['lunch_orders']];
+    $rows[] = ['سفارش شام (خارج از تطبیق چاپ)', $c['dinner_orders'], 'سایر وعده‌ها', $c['other_meal_orders']];
+    $rows[] = ['فیش مهمان چاپشده', $c['guest_printed'], 'فیش چاپشده قطعی', $c['printed_final']];
+    $rows[] = ['تعداد غایبین', $c['absent'], 'غایب موردانتظار', $c['expected_absent'] ?? 0];
+    $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
+    $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
+    $rows[] = [];
+    $rows[] = ['فهرست نفراتی که فیش چاپشده دارند'];
+    $rows[] = $headers;
+    $i = 0;
+    foreach ($report['printed_people'] as $person) {
+        $i++;
+        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'status' => 'چاپشده']);
+    }
+    $rows[] = [];
+    $rows[] = ['فهرست غایبین'];
+    $rows[] = $headers;
+    $i = 0;
+    foreach ($report['absent_people'] as $person) {
+        $i++;
+        $rows[] = food_ticket_aggregate_row($selected, $person + ['row' => $i, 'time' => '', 'kind' => '—']);
+    }
+    $token = preg_replace('/[^0-9A-Za-z_-]/', '', $report['from'] . '_' . $report['to']) ?: date('Y-m-d');
+    require_once __DIR__ . '/xlsx-writer.php';
+    $columnCount = max(1, count($headers));
+    $bytes = xlsx_build([[
+        'name' => 'گزارش تجمیعی',
+        'rows' => $rows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 22),
+    ]]);
+    xlsx_send('گزارش-تجمیعی-غذا-' . $token . '.xlsx', $bytes);
+}
+
+/** یک ردیف خروجی متناسب با ستونهای انتخابشده میسازد. */
+function food_ticket_aggregate_row(array $selected, array $person): array
+{
+    $out = [];
+    foreach ($selected as $column) {
+        $value = $person[$column['key']] ?? '';
+        if ($column['key'] === 'date' && $value !== '') {
+            $value = food_order_jalali_label((string) $value);
+        }
+        if ($column['key'] === 'time' && $value !== '') {
+            $value = substr((string) $value, 0, 5);
+        }
+        if ($column['key'] === 'kind' && $person['declared'] ?? false) {
+            $value = 'غیبت اعلامشده';
+        }
+        $out[] = $value;
+    }
+    return $out;
 }
 
 function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
@@ -3542,6 +4005,30 @@ function food_ticket_api_delete_guest_card(int $id, int $userId, string $cardNum
 
 function food_ticket_api_save_config(array $data, array $user): void
 {
+    $dbFields = ['enabled', 'attendance', 'attendancePath', 'attendancePassword', 'attendanceTable', 'poll_seconds', 'pollSeconds', 'cutSourceRows', 'clear', 'clear_paths'];
+    $guestFields = ['guestCardUIDs', 'maxGuestTicketsPerDay', 'guestFoodType', 'guestCapMode', 'guestCapStart', 'guestCapCutoff', 'guestCapEnd', 'guestRequestSameDayCutoff'];
+    $printerPayload = is_array($data['printer'] ?? null) ? $data['printer'] : [];
+    $printerFields = ['printer_mode', 'printer_host', 'printer_port', 'printer_share'];
+    $designFields = ['company', 'title', 'footer', 'template'];
+    $hasDbFields = count(array_intersect(array_keys($data), $dbFields)) > 0;
+    $hasGuestFields = count(array_intersect(array_keys($data), $guestFields)) > 0;
+    $hasPrinterFields = count(array_intersect(array_keys($data), $printerFields)) > 0
+        || array_intersect(['mode', 'host', 'port', 'name'], array_keys($printerPayload)) !== [];
+    $hasDesignFields = array_intersect($designFields, array_keys($printerPayload)) !== []
+        || array_intersect($designFields, array_keys($data)) !== [];
+    if ($hasDbFields && !user_can($user, 'food.db_edit')) {
+        throw new RuntimeException('ویرایش اتصال پایگاه‌ها مجاز نیست.');
+    }
+    if ($hasGuestFields && !user_can($user, 'food.guest_edit')) {
+        throw new RuntimeException('ویرایش تنظیمات کارت مهمان مجاز نیست.');
+    }
+    if ($hasPrinterFields && !user_can($user, 'food.printer_edit')) {
+        throw new RuntimeException('ویرایش چاپگر مجاز نیست.');
+    }
+    if ($hasDesignFields && !user_can($user, 'food.design_edit')) {
+        throw new RuntimeException('ویرایش طراحی فیش مجاز نیست.');
+    }
+
     $guestRequestSameDayCutoff = null;
     if (array_key_exists('guestRequestSameDayCutoff', $data)) {
         $rawCutoff = trim(food_ticket_normalize_digits((string) $data['guestRequestSameDayCutoff']));
@@ -3643,7 +4130,7 @@ function food_ticket_api_save_config(array $data, array $user): void
     if ($guestRequestSameDayCutoff !== null) {
         save_setting('food_guest_request_same_day_cutoff', $guestRequestSameDayCutoff);
     }
-    if (((string) ($user['role'] ?? '') === 'admin' || (string) ($user['role'] ?? '') === 'primary_admin') && array_key_exists('brandName', $data) && trim((string) $data['brandName']) !== '') {
+    if (user_can($user, 'food.design_edit') && array_key_exists('brandName', $data) && trim((string) $data['brandName']) !== '') {
         save_setting('food_ticket_brand_name', trim((string) $data['brandName']));
         if (array_key_exists('brandLogo', $data)) {
             save_setting('food_ticket_brand_logo', trim((string) $data['brandLogo']));
@@ -4054,12 +4541,27 @@ function food_ticket_api_handle(string $route, array $user): never
     }
     try {
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'config') {
-            food_ticket_api_json(food_ticket_api_config());
+            food_ticket_api_json(food_ticket_api_config($user));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'diag-source_row-delete') {
             // ابزار تشخیص حذف SOURCE_TABLE — فقط خواندنی؛ با ?delete=1 یک ردیف نمونه واقعاً حذف می‌شود.
             require APP_ROOT . '/tools/diag_source_row_delete.php';
             exit;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && in_array($route, ['dashboard-data', 'report-data'], true)) {
+            $from = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $to = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($from === null || $to === null || $from > $to) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ معتبر نیست.'], 400);
+            }
+            food_ticket_api_json([
+                'monitoring' => food_ticket_api_monitoring($from, $to),
+                'items' => food_ticket_api_monitoring($from, $to),
+                'orders' => food_ticket_api_orders($from, '', $to),
+                'active_employee_count' => (int) db()->query('SELECT COUNT(*) FROM users WHERE is_active = 1')->fetchColumn(),
+                'from' => $from,
+                'to' => $to,
+            ]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'monitoring') {
             $fromRaw = isset($_GET['from']) ? (string) $_GET['from'] : null;
@@ -4076,6 +4578,23 @@ function food_ticket_api_handle(string $route, array $user): never
                 food_ticket_api_json(['items' => food_ticket_api_monitoring($from, $to), 'from' => $from, 'to' => $to]);
             }
             food_ticket_api_json(['items' => food_ticket_api_monitoring()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report') {
+            $aggFrom = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $aggTo = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
+            }
+            food_ticket_api_json(['ok' => true] + food_ticket_api_aggregate_report($aggFrom, $aggTo)
+                + ['columns' => food_ticket_aggregate_columns()]);
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'aggregate-report-export') {
+            $aggFrom = food_ticket_parse_date((string) ($_GET['from'] ?? ''));
+            $aggTo = food_ticket_parse_date((string) ($_GET['to'] ?? ''));
+            if ($aggFrom === null || $aggTo === null || $aggFrom > $aggTo) {
+                food_ticket_api_json(['error' => 'بازهٔ تاریخ گزارش تجمیعی معتبر نیست.'], 400);
+            }
+            food_ticket_aggregate_export($aggFrom, $aggTo, (string) ($_GET['fields'] ?? ''));
         }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'absent') {
             $legacyDate = (string) ($_GET['date'] ?? $_GET['food_date'] ?? '');
@@ -4444,9 +4963,6 @@ function food_ticket_api_handle(string $route, array $user): never
             food_ticket_api_json(['template' => function_exists('food_ticket_template') ? food_ticket_template() : []]);
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'template') {
-            if (!food_ticket_is_primary_admin($user)) {
-                throw new RuntimeException('ذخیره قالب فیش فقط برای ادمین اصلی مجاز است.');
-            }
             $body = food_ticket_api_body();
             $tpl = is_array($body['template'] ?? null) ? $body['template'] : $body;
             food_ticket_save_template($tpl);
@@ -4681,19 +5197,21 @@ function food_ticket_render_page(array $user): void
         ? food_ticket_web_host_bootstrap($apiBase, csrf_token(), is_array($brand) ? $brand : [], (string) ($user['role'] ?? ''), food_ticket_is_primary_admin($user), $nonce, function_exists('db_install_state') ? db_install_state() : null)
         : '';
     $canMenuEdit = function_exists('user_can') ? user_can($user, 'food.menu_edit') : food_ticket_is_primary_admin($user);
-    $canOrderClose = function_exists('user_can') ? user_can($user, 'food.order_close') : food_ticket_is_primary_admin($user);
-    $canFoodMenu = $canMenuEdit || $canOrderClose;
+    $canMenuView = function_exists('user_can') ? user_can($user, 'food.menu') : food_ticket_is_primary_admin($user);
+    $canOrderClose = $canMenuEdit;
+    $canFoodMenu = $canMenuView || $canMenuEdit;
     // دسترسی هر بخش پنل از روی کدهای food.* (ادمین اصلی همه‌چیز). سرور هم هر درخواست را جداگانه کنترل می‌کند.
     $fpIsPrimary = food_ticket_is_primary_admin($user);
     $fpCan = static fn (string $code): bool => $fpIsPrimary || (function_exists('user_can') && user_can($user, $code));
+    $fpCanManageGuestRequests = function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user);
     $fpViews = [
         'dashboard' => $fpCan('food.dashboard'),
         'live' => $fpCan('food.monitor'),
         'employees' => $fpCan('food.employees'),
-        'food-menu' => $fpCan('food.menu') || $fpCan('food.order_close') || $fpCan('food.emergency'),
+        'food-menu' => $fpCan('food.menu') || $fpCan('food.menu_edit'),
         'food-groups' => $fpCan('food.groups'),
         'reports' => $fpCan('food.reports'),
-        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.groups'),
+        'settings' => $fpCan('food.db') || $fpCan('food.printer') || $fpCan('food.guest') || $fpCan('food.design') || $fpCan('food.health') || $fpCan('food.manual_attendance') || $fpCan('food.emergency_window'),
     ];
     $fpSections = [
         'connections' => $fpCan('food.db'),
@@ -4701,19 +5219,34 @@ function food_ticket_render_page(array $user): void
         'guests' => $fpCan('food.guest'),
         'ticket-design' => $fpCan('food.design'),
         'health' => $fpCan('food.health'),
-        'manual-attendance' => $fpCan('food.groups'),
-        'emergency-window' => food_ticket_is_primary_admin($user),
+        'manual-attendance' => $fpCan('food.manual_attendance'),
+        'emergency-window' => $fpCan('food.emergency_window'),
+    ];
+    $fpSectionEdits = [
+        'connections' => $fpCan('food.db_edit'),
+        'printer' => $fpCan('food.printer_edit'),
+        'guests' => $fpCan('food.guest_edit'),
+        'ticket-design' => $fpCan('food.design_edit'),
+        'health' => $fpCan('food.health_edit'),
+        'manual-attendance' => $fpCan('food.manual_attendance_edit'),
+        'emergency-window' => $fpCan('food.emergency_window_edit'),
     ];
     $fpGroupsEdit = $fpCan('food.groups_edit');
-    $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections)
+    $bootstrap .= '<script nonce="' . $nonce . '">window.FOOD_TICKET_VIEWS=' . json_encode($fpViews) . ';window.FOOD_TICKET_SECTIONS=' . json_encode($fpSections) . ';window.FOOD_TICKET_SECTION_EDITS=' . json_encode($fpSectionEdits)
         . ';window.FOOD_TICKET_CAN_GROUPS_EDIT=' . ($fpGroupsEdit ? 'true' : 'false')
-        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE=' . ($fpCan('food.groups_edit') ? 'true' : 'false')
-        . ';window.FOOD_TICKET_CAN_MANUAL_TICKET=' . ($fpIsPrimary && $fpCan('food.manual_ticket') ? 'true' : 'false')
-        . ';window.FOOD_TICKET_CAN_CANCEL_VISIT=' . ((food_ticket_is_primary_admin($user) || (string) ($user['role'] ?? '') === 'support_manager') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_EMPLOYEES_EDIT=' . ($fpCan('food.employees_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_DB_EDIT=' . ($fpCan('food.db_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_PRINTER_EDIT=' . ($fpCan('food.printer_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE_EDIT=' . ($fpCan('food.manual_attendance_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_ATTENDANCE=' . ($fpCan('food.manual_attendance_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MANUAL_TICKET=' . ($fpCan('food.manual_attendance_edit') ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_CANCEL_VISIT=' . ($fpCan('food.groups_edit') ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_FOOD_MENU=' . ($canFoodMenu ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_MENU=' . ($canMenuView ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_MENU_EDIT=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_CAN_ORDER_CLOSE=' . ($canOrderClose ? 'true' : 'false')
-        . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ((food_ticket_is_primary_admin($user) || (function_exists('user_can') && user_can($user, 'food.emergency'))) ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_EMERGENCY=' . ($canMenuEdit ? 'true' : 'false')
+        . ';window.FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE=' . ($canMenuEdit ? 'true' : 'false')
         . ';window.FOOD_TICKET_IS_PRIMARY_ADMIN=' . (food_ticket_is_primary_admin($user) ? 'true' : 'false')
         . ';window.FOOD_TICKET_USER_ID=' . (int) ($user['id'] ?? 0) . ';</script>';
     // برچسب‌های قدیمی (نام‌های نسخه‌های پیشین) در متن نمایش داده نشوند:

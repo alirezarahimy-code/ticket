@@ -202,11 +202,11 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }", employee_css)
 
         panel_html = read("food-ticket-web/index.html")
-        self.assertIn('href="assets/food-order.css?v=11"', panel_html)
-        self.assertIn('href="assets/food-menu.css?v=23"', panel_html)
+        self.assertIn('href="assets/food-order.css?v=13"', panel_html)
+        self.assertIn('href="assets/food-menu.css?v=34"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=20"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=35"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -408,7 +408,12 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn('name="to" data-jalali', statistics_panel)
         self.assertIn('name="statistics_mode" value="food"', statistics_panel)
         self.assertIn('name="statistics_mode" value="employee"', statistics_panel)
-        self.assertIn("['statistics', 'آمار سفارش‌ها']", js)
+        # تب «آمار سفارشها» به منوی «گزارشها» منتقل شده است.
+        self.assertNotIn("['statistics', 'آمار سفارش‌ها']", js)
+        panel_report_html = read("food-ticket-web/index.html")
+        self.assertIn("['statistics','آمار سفارشها']", panel_report_html)
+        self.assertIn("['todayorders','سفارشهای امروز']", panel_report_html)
+        self.assertIn("['delivered','غذای تحویلی']", panel_report_html)
         self.assertIn("async function loadOrders(date)", js)
         self.assertIn("request('food-menu/orders', { date: selected, meal_type: state.mealType })", js)
         self.assertIn("data-fm-action=\"orders-export\"", daily_panel)

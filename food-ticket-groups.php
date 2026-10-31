@@ -16,7 +16,7 @@ declare(strict_types=1);
  *    رکوردها تاریخ‌محور هستند (absence_date) و هیچ Reset/Cron روزانه‌ای لازم نیست.
  *
  *  - قفل لیست غیبت: فقط تا قبل از ثبت تردد معتبر نماینده قابل ویرایش است؛
- *    بعد از آن، اصلاح فقط با مجوز food.groups_override و با ثبت Audit.
+ *    بعد از آن، اصلاح با دسترسی ویرایش گروه‌های غذا و ثبت Audit انجام می‌شود.
  *    ⚠️ هیچ قاعده‌ای بر اساس ساعت ۱۲ (یا هر ساعت دیگر) وجود ندارد.
  *
  *  - اجرای اول (first): اعضای واجد شرایط (سفارش دارد، غایب نیست، قبلاً فیش نگرفته)
@@ -508,25 +508,12 @@ function food_ticket_absence_held_count(int $groupId, string $date): int
     }
 }
 
-/** آیا کاربر مجاز به اصلاح غیبت بعد از قفل است؟ (مجوز صریح یا نقش‌های ارشد) */
+/** ویرایش و اصلاح غیبت در هر زمان با دسترسی ویرایش گروه‌های غذا انجام می‌شود. */
 function food_ticket_can_override_absence(array $user): bool
 {
-    if (function_exists('user_can')) {
-        if (user_can($user, 'food.groups_override')) {
-            return true;
-        }
-    }
-    try {
-        if (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($user)) {
-            return true;
-        }
-        if (function_exists('food_ticket_is_support_manager') && food_ticket_is_support_manager($user)) {
-            return true;
-        }
-    } catch (Throwable) {
-        // نادیده: بررسی مجوز کافی است
-    }
-    return in_array((string) ($user['role'] ?? ''), ['supervisor', 'support_manager'], true);
+    return function_exists('user_can')
+        ? user_can($user, 'food.groups_edit')
+        : (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($user));
 }
 
 // ───────────────────────── گروه‌ها: بارگذاری و شناسایی ─────────────────────────
@@ -930,22 +917,9 @@ function food_ticket_visit_change_guard(mixed $until, string $groupTitle): void
 /** لغو اعلام تغییر سلف بعد از مهلت ساعت: فقط مدیر پشتیبانی یا مدیر اصلی. */
 function food_ticket_can_cancel_day_visit(array $user): bool
 {
-    if (!$user) {
-        return false;
-    }
-    if (function_exists('food_order_is_primary_admin') && food_order_is_primary_admin($user)) {
-        return true;
-    }
-    if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
-        return true;
-    }
-    if ((int) ($user['is_primary_admin'] ?? 0) === 1) {
-        return true;
-    }
-    if (function_exists('food_ticket_is_support_manager') && food_ticket_is_support_manager($user)) {
-        return true;
-    }
-    return (string) ($user['role'] ?? '') === 'support_manager';
+    return function_exists('user_can')
+        ? user_can($user, 'food.groups_edit')
+        : (function_exists('food_ticket_is_primary_admin') && food_ticket_is_primary_admin($user));
 }
 
 /** وضعیت خوداظهاری محل تحویل امروز برای صفحهٔ سفارش غذا. */
@@ -1022,8 +996,9 @@ function food_ticket_day_visit_save(array $user, int $groupId, string $date = ''
         throw new RuntimeException('جدول خوداظهاری غذا در دسترس نیست.');
     }
     $actor = $actor ?? $user;
-    if ($managerOverride && (!food_ticket_can_cancel_day_visit($actor)
-        || (function_exists('food_order_user_can') && !food_order_user_can($actor, 'food.emergency') && !food_ticket_is_primary_admin($actor)))) {
+    if ($managerOverride
+        && !food_ticket_can_cancel_day_visit($actor)
+        && !(function_exists('user_can') && user_can($actor, 'food.menu_edit'))) {
         throw new RuntimeException('دسترسی عملیات گروهی غذا ندارید.');
     }
     $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) ? $date : date('Y-m-d');
@@ -2368,9 +2343,8 @@ function food_ticket_api_manual_attendance_save_many(array $body, array $actor):
     // ۱.۶۲.۹: تاریخ انتخابی (امروز یا روزهای قبل) برای همهٔ ثبت‌های این نوبت اعمال می‌شود.
     $date = food_ticket_manual_attendance_date((string) ($body['date'] ?? ''));
     $withTicket = array_key_exists('with_ticket', $body) ? filter_var($body['with_ticket'], FILTER_VALIDATE_BOOLEAN) : true;
-    if ($withTicket && (!function_exists('food_ticket_is_primary_admin') || !food_ticket_is_primary_admin($actor)
-        || !function_exists('user_can') || !user_can($actor, 'food.manual_ticket'))) {
-        throw new RuntimeException('دسترسی صدور دستی فیش فقط برای ادمین اصلی مجاز است.');
+    if (!function_exists('user_can') || !user_can($actor, 'food.manual_attendance_edit')) {
+        throw new RuntimeException('ویرایش ثبت دستی فیش/تردد مجاز نیست.');
     }
     $physicalPrint = $withTicket && !empty($body['physical_print']);
     $reason = (string) ($body['reason'] ?? '');

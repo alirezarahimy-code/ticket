@@ -480,6 +480,7 @@ function sys_maint_table_overview(): array
 
 function system_health_handle_post(array $user): void
 {
+    require_permission('system.health_edit');
     require_csrf();
     $action = (string) ($_POST['action'] ?? '');
     if ($action === 'incident_status') {
@@ -674,7 +675,7 @@ function system_health_render(array $user): never
     $summary = system_health_apply_check_state($summary, $checks);
     $groups = system_health_groups(7);
     $eventTotals = system_health_event_totals(7);
-    $canManage = user_can($user, 'system.health');
+    $canManage = user_can($user, 'system.health_edit');
     $stateClass = ['ok' => 'good', 'warning' => 'warn', 'critical' => 'danger'][$summary['state']] ?? 'warn';
     $checkClass = ['ok' => 'good', 'warn' => 'warn', 'fail' => 'danger'];
     $checkLabel = ['ok' => 'مناسب', 'warn' => 'نیازمند توجه', 'fail' => 'ناموفق'];

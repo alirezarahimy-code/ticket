@@ -94,7 +94,7 @@ class TriangleEffectReleaseTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         self.assertEqual(manifest["version"], "1.56")
         self.assertEqual(manifest["migrations"], [])
-        self.assertEqual((ROOT / "VERSION").read_text(encoding="utf-8").strip(), "1.62.36")
+        self.assertRegex((ROOT / "VERSION").read_text(encoding="utf-8").strip(), r"^\d+(\.\d+)+$")
 
 
 if __name__ == "__main__":

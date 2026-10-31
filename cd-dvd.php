@@ -70,10 +70,16 @@ function cd_dvd_can_see_all(array $user): bool
 
 function cd_dvd_can_edit_records(array $user): bool
 {
-    if (function_exists('user_can')) {
-        return user_can($user, 'cddvd.edit');
+    if (cd_dvd_is_primary_admin($user)) {
+        return true;
     }
-    return cd_dvd_is_primary_admin($user) || in_array((string) ($user['role'] ?? ''), ['supervisor', 'support_manager', 'inspector'], true);
+    $allowedRoles = function_exists('permission_cddvd_direct_edit_roles')
+        ? permission_cddvd_direct_edit_roles()
+        : ['supervisor', 'inspector', 'guard'];
+    if (!in_array((string) ($user['role'] ?? ''), $allowedRoles, true)) {
+        return false;
+    }
+    return function_exists('user_can') ? user_can($user, 'cddvd.edit') : in_array((string) ($user['role'] ?? ''), ['supervisor', 'inspector', 'guard'], true);
 }
 
 function cd_dvd_can_export(array $user): bool
@@ -155,12 +161,9 @@ function cd_dvd_scope(array $user, string $alias = 'r'): array
 
 function cd_dvd_can_manage_record(array $record, array $user): bool
 {
-    if (!cd_dvd_can_edit_records($user)) {
-        return false;
-    }
-    return (string) ($record['direction'] ?? '') === 'IN'
-        ? cd_dvd_can_register_in($user)
-        : cd_dvd_can_submit_out($user);
+    // Direct edits/deletes are controlled only by cddvd.edit and its role allowlist;
+    // registration-direction grants do not act as a second hidden guard here.
+    return cd_dvd_can_edit_records($user);
 }
 
 function cd_dvd_types(): array
@@ -259,16 +262,18 @@ function cd_dvd_default_date(): string
     return sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
 }
 
-function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0): array
+function cd_dvd_validate_payload(array $data, array $user, int $excludeId = 0, ?string $originalDirection = null): array
 {
     $media = valid_choice((string) ($data['media'] ?? ''), ['CD', 'DVD'], 'CD');
     $direction = valid_choice((string) ($data['direction'] ?? ''), ['IN', 'OUT'], 'OUT');
-    if ($direction === 'IN' && !cd_dvd_can_register_in($user)) {
-        throw new RuntimeException('فقط کاربر بازرسی می‌تواند ورود رسانه را ثبت کند.');
+    if (($originalDirection === null || $direction !== $originalDirection)
+        && $direction === 'IN' && !cd_dvd_can_register_in($user)) {
+        throw new RuntimeException('ثبت ورود رسانه فقط برای نقش‌های دارای مجوز مجاز است.');
     }
     // ۱.۳۷.۷ — کد دسترسی cddvd.submit_out پیش‌تر فقط نمایشی بود (تب فرم)، ولی خود ثبت خروج
     // برای هر کاربر واردشده‌ای ممکن بود. اکنون مثل مسیر ورود، سمت سرور هم بررسی می‌شود.
-    if ($direction === 'OUT' && !cd_dvd_can_submit_out($user)) {
+    if (($originalDirection === null || $direction !== $originalDirection)
+        && $direction === 'OUT' && !cd_dvd_can_submit_out($user)) {
         throw new RuntimeException('ثبت خروج رسانه برای نقش شما مجاز نیست.');
     }
     $serial = cd_dvd_normalize_serial((string) ($data['serial'] ?? ''));
@@ -448,9 +453,9 @@ function cd_dvd_update_record(array $user): void
     $id = (int) ($_POST['record_id'] ?? 0);
     $record = cd_dvd_fetch_record($id);
     if (!$record || !cd_dvd_can_edit_records($user)) {
-        throw new RuntimeException('ویرایش مستقیم CD/DVD فقط برای ادمین اصلی و سوپروایزر مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
+        throw new RuntimeException('ویرایش مستقیم سوابق فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
     }
-    $payload = cd_dvd_validate_payload($_POST, $user, $id);
+    $payload = cd_dvd_validate_payload($_POST, $user, $id, (string) ($record['direction'] ?? ''));
     db()->beginTransaction();
     try {
         $query = db()->prepare('UPDATE cd_dvd_records SET media = ?, direction = ?, serial = ?, info_type = ?, info_desc = ?, jy = ?, jm = ?, jd = ?, date_str = ?, sort_key = ?, receiver = ?, receiver_unit = ?, brought_by = ?, brought_by_user_id = ?, exit_sheet = ?, note = ?, department_id = ? WHERE id = ?');
@@ -471,7 +476,7 @@ function cd_dvd_delete_record(array $user): void
     $id = (int) ($_POST['record_id'] ?? 0);
     $record = cd_dvd_fetch_record($id);
     if (!$record || !cd_dvd_can_edit_records($user)) {
-        throw new RuntimeException('حذف مستقیم CD/DVD فقط برای ادمین اصلی و سوپروایزر مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
+        throw new RuntimeException('حذف مستقیم سوابق فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است؛ برای اصلاح این رکورد درخواست ثبت کنید.');
     }
     db()->beginTransaction();
     try {
@@ -695,7 +700,7 @@ function cd_dvd_render_page_legacy(array $user): never
     </section>
     <section class="card cd-dvd-form-card">
         <div class="section-title"><div><h2><?= $editRecord ? 'ویرایش ثبت رسانه' : 'ثبت گردش جدید' ?></h2><p>شماره خروج برای CD و DVD از بازه جداگانه سازمانی تولید می‌شود.</p></div><?php if ($editRecord): ?><a class="button secondary" href="index.php?page=cd-dvd">ثبت جدید</a><?php endif; ?></div>
-        <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی و سوپروایزر مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
+        <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
         <?php if (!$canIn): ?><div class="alert info">ثبت ورود فقط برای کاربر بازرسی فعال است. شما فعلاً فقط می‌توانید خروج رسانه را ثبت کنید.</div><?php endif; ?>
         <form method="post" class="cd-dvd-form" novalidate>
             <?= csrf_field() ?><input type="hidden" name="action" value="<?= e($formAction) ?>"><input type="hidden" name="record_id" value="<?= (int) $form['id'] ?>">
@@ -823,7 +828,7 @@ function cd_dvd_render_page(array $user): never
         <section id="cd-dvd-register" class="cd-dvd-subform" data-cd-dvd-panel="new" <?= $tab === 'new' ? '' : 'hidden' ?>>
             <section class="card cd-dvd-form-card cd-dvd-reference-form">
                 <div class="section-title"><div><span class="eyebrow">فرم ثبت</span><h2><?= $editRecord ? 'ویرایش رسانه ثبت‌شده' : 'ثبت رسانه جدید' ?></h2><p>فیلد ثبت‌کننده به‌صورت خودکار از حساب فعلی سامانه ذخیره می‌شود.</p></div><a class="button secondary" href="<?= e($tabUrl('dashboard')) ?>">بازگشت به داشبورد</a></div>
-                <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی و سوپروایزر مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
+                <?php if ($editDeniedRecord): ?><div class="alert info">ویرایش مستقیم این رکورد فقط برای ادمین اصلی، سوپروایزر و بازرسی مجاز است. <a href="index.php?page=new-ticket&amp;request=cd_dvd_edit&amp;record_id=<?= (int) $editDeniedRecord['id'] ?>">ثبت درخواست اصلاح</a></div><?php endif; ?>
                 <?php if (!$canIn): ?><div class="alert info">ثبت رسانه ورودی فقط برای کاربر منتسب به بازرسی فعال است.</div><?php endif; ?>
                 <form method="post" class="cd-dvd-form" novalidate>
                     <?= csrf_field() ?><input type="hidden" name="action" value="<?= e($formAction) ?>"><input type="hidden" name="record_id" value="<?= (int) $form['id'] ?>">

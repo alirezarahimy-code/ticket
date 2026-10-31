@@ -99,6 +99,40 @@ function backup_uploads(string $destination): int
     return $count;
 }
 
+
+/** ۱.۶۲.۴۱ — ZIP کردن فایلهای پوشهٔ سامانه (بدون دیتابیس، uploads، storage). */
+function backup_system_files_zip(string $destination): array
+{
+    if (!class_exists('ZipArchive')) {
+        return ['ok' => false, 'error' => 'ZipArchive در PHP فعال نیست.'];
+    }
+    $root = APP_ROOT;
+    $skip = ['storage','uploads','downloads','.git','node_modules','vendor','.cache','preview','updates','temp','tmp'];
+    $zipPath = $destination . DIRECTORY_SEPARATOR . 'system-files.zip';
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+        return ['ok' => false, 'error' => 'ساخت ZIP فایلها ممکن نیست.'];
+    }
+    $count = 0; $bytes = 0;
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+    foreach ($iterator as $item) {
+        $relative = str_replace('\\', '/', substr($item->getPathname(), strlen($root) + 1));
+        $top = explode('/', $relative)[0];
+        if (in_array($top, $skip, true) || $item->isDir()) { continue; }
+        if ($item->getSize() > 25 * 1024 * 1024) { continue; }
+        if (!$zip->addFile($item->getPathname(), $relative)) { continue; }
+        $count++; $bytes += $item->getSize();
+    }
+    $zip->addFromString('BACKUP-INFO.txt',
+        "بکاپ فایلهای سامانه\nتاریخ: " . date('Y-m-d H:i:s') . "\nتعداد فایلها: {$count}\n"
+        . "برای برگردانی: extract کنید و روی پوشهٔ اصلی سامانه کپی کنید.\n");
+    $zip->close();
+    return ['ok' => true, 'file' => 'system-files.zip', 'files' => $count, 'bytes' => $bytes];
+}
+
 function create_backup_bundle(): array
 {
     $dumpBinary = backup_mysql_binary('mysqldump');
@@ -124,12 +158,15 @@ function create_backup_bundle(): array
         $dbName,
     ], null, $dumpPath);
     $uploadCount = backup_uploads($destination);
+    // ۱.۶۲.۴۱ — بکاپ کامل فایلهای سامانه (جدا از دیتابیس)، قبل از هر بهروزرسانی.
+    $filesBackup = backup_system_files_zip($destination);
     file_put_contents($destination . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
         'created_at' => date('c'),
         'database' => $dbName,
         'uploads' => $uploadCount,
+        'system_files' => $filesBackup,
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    return ['name' => $name, 'path' => $destination, 'uploads' => $uploadCount];
+    return ['name' => $name, 'path' => $destination, 'uploads' => $uploadCount, 'system_files' => $filesBackup];
 }
 
 function backup_runs(): array

@@ -13,21 +13,45 @@ CREATE TABLE IF NOT EXISTS departments (
     INDEX idx_departments_manager (manager_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS org_companies (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(40) NOT NULL UNIQUE,
+    name VARCHAR(190) NOT NULL,
+    company_type VARCHAR(20) NOT NULL DEFAULT 'partner',
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_org_companies_active (is_active, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO org_companies (id, code, name, company_type, is_active) VALUES
+    (1, 'own', 'شرکت شما', 'own', 1),
+    (2, 'partner', 'شرکت همکار', 'partner', 1);
+
 CREATE TABLE IF NOT EXISTS org_units (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT UNSIGNED NOT NULL DEFAULT 1,
     name VARCHAR(190) NOT NULL,
     code VARCHAR(60) NULL,
     parent_id INT UNSIGNED NULL,
     unit_type VARCHAR(20) NOT NULL DEFAULT 'department',
     chart_side VARCHAR(10) NULL,
+    sort_order INT NOT NULL DEFAULT 0,
     manager_user_id INT UNSIGNED NULL,
     is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_org_parent (parent_id),
     INDEX idx_org_type (unit_type),
-    INDEX idx_org_manager (manager_user_id)
+    INDEX idx_org_manager (manager_user_id),
+    INDEX idx_org_units_company (company_id, is_active, unit_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO org_units (company_id, name, code, parent_id, unit_type, chart_side, manager_user_id, is_primary_admin, is_active, sort_order)
+SELECT 1, 'مدیرعامل', 'CEO', NULL, 'ceo', NULL, NULL, 0, 1, 0
+WHERE NOT EXISTS (SELECT 1 FROM org_units WHERE company_id = 1 AND unit_type = 'ceo');
+INSERT INTO org_units (company_id, name, code, parent_id, unit_type, chart_side, manager_user_id, is_primary_admin, is_active, sort_order)
+SELECT 2, 'مدیر شرکت همکار', 'PARTNER', NULL, 'company_manager', NULL, NULL, 0, 1, 0
+WHERE NOT EXISTS (SELECT 1 FROM org_units WHERE company_id = 2 AND unit_type = 'company_manager');
 
 CREATE TABLE IF NOT EXISTS org_unit_managers (
     unit_id INT UNSIGNED NOT NULL,
@@ -39,6 +63,7 @@ CREATE TABLE IF NOT EXISTS org_unit_managers (
 
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    company_id INT UNSIGNED NOT NULL DEFAULT 1,
     username VARCHAR(190) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NULL,
     full_name VARCHAR(190) NOT NULL,
@@ -64,6 +89,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_login_at DATETIME NULL,
     must_change_password TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_users_company (company_id, is_active, auth_source),
     INDEX idx_users_role (role),
     INDEX idx_users_department (department),
     INDEX idx_users_department_id (department_id),
@@ -484,7 +510,7 @@ CREATE TABLE IF NOT EXISTS assets (
     os_serial VARCHAR(190) NULL,
     os_install_date DATETIME NULL,
     registered_users INT UNSIGNED NULL,
-    source ENUM('manual','server_inventory','agent') NOT NULL DEFAULT 'manual',
+    source ENUM('manual','server_inventory','agent','domain') NOT NULL DEFAULT 'manual',
     lifecycle_status ENUM('planned','in_stock','assigned','in_repair','retired','disposed') NOT NULL DEFAULT 'in_stock',
     purchase_date DATE NULL,
     warranty_until DATE NULL,
@@ -558,7 +584,7 @@ CREATE TABLE IF NOT EXISTS asset_peripherals (
     asset_number VARCHAR(100) NULL,
     seal_number VARCHAR(100) NULL,
     details_json JSON NULL,
-    source ENUM('manual','agent','server_inventory') NOT NULL DEFAULT 'manual',
+    source ENUM('manual','agent','server_inventory','domain') NOT NULL DEFAULT 'manual',
     collected_at DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_asset_peripheral_slot (asset_id, peripheral_type, slot_no),

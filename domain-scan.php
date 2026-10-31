@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/asset-names.php';
 
 function domain_scan_ensure_schema(): void
 {
@@ -249,10 +250,10 @@ function domain_scan_asset_for(string $hostname): int
     if ($hostname === '') {
         return 0;
     }
-    $query = db()->prepare('SELECT id FROM assets WHERE hostname = ? ORDER BY id ASC LIMIT 1');
-    $query->execute([$hostname]);
-    $assetId = (int) ($query->fetchColumn() ?: 0);
+    // ۱.۶۲.۳۷ — تشخیص یکتا بر اساس هویت نرمالشده (PC1، PC1.domain.local و PC1$ یکیاند).
+    $assetId = asset_resolve_id($hostname);
     if ($assetId > 0) {
+        asset_sync_identity_key($assetId);
         return $assetId;
     }
     $short = strtoupper(explode('.', $hostname)[0]);
@@ -264,8 +265,10 @@ function domain_scan_asset_for(string $hostname): int
         db()->prepare('UPDATE assets SET hostname = ?, source = "domain", updated_at = NOW() WHERE id = ?')->execute([$hostname, $assetId]);
         return $assetId;
     }
-    db()->prepare('INSERT INTO assets (asset_tag, hostname, computer_type, source) VALUES (?, ?, "", "domain")')->execute([$tag, $hostname]);
-    return (int) db()->lastInsertId();
+    db()->prepare('INSERT INTO assets (asset_tag, hostname, hostname_key, computer_type, source) VALUES (?, ?, ?, "", "domain")')->execute([$tag, $hostname, asset_identity_key($hostname)]);
+    $newId = (int) db()->lastInsertId();
+    asset_sync_identity_key($newId);
+    return $newId;
 }
 
 function domain_scan_ad_values(array $pc): array
@@ -356,9 +359,8 @@ function domain_scan_import(int $userId): array
         if ($host === '') {
             continue;
         }
-        $exists = db()->prepare('SELECT id FROM assets WHERE hostname = ? LIMIT 1');
-        $exists->execute([$host]);
-        if ($exists->fetchColumn()) {
+        $existsId = asset_resolve_id($host);
+        if ($existsId > 0) {
             $updated++;
         } else {
             $created++;
