@@ -1,0 +1,33 @@
+{
+  "name": "cumulative-role-food-permissions-and-organization-chart-visual-fix",
+  "version": "1.62.59",
+  "requires_version": "1.62.58",
+  "date": "2026-10-31",
+  "title": "بستهٔ تجمیعی 1.62.59 با اصلاح رنگ دکمه‌های درخت سازمان",
+  "panel_version": "1.37.46",
+  "migrations": [],
+  "files": [
+    "VERSION",
+    "actions/user-structure-actions.php",
+    "actions/org-actions.php",
+    "assets/app.js",
+    "assets/food-menu.js",
+    "assets/food-order-guest.js",
+    "assets/organization.js",
+    "assets/style.css",
+    "food-order.php",
+    "food-ticket-groups.php",
+    "food-ticket.php",
+    "food-ticket-web/assets/food-menu.js",
+    "food-ticket-web/index.html",
+    "help-guide.php",
+    "index.php",
+    "install-empty-db.sql",
+    "organization.php",
+    "permissions.php",
+    "schema.sql",
+    "CHANGE-REPORT-FA-1.62.59.md",
+    "CHANGE-REPORT-FA-1.62.59-CUMULATIVE.md"
+  ],
+  "notes": "محتویات بستهٔ تجمیعی قبلی 1.62.59 به‌همراه اصلاح کنتراست هر سه دکمهٔ معاونت، مدیریت و دفتر در حالت عادی و hover/focus. پیش‌نیاز 1.62.58 است. migration تازه ندارد؛ فایل‌های schema صرفاً برای نصب تازه‌اند و هیچ DDL هنگام نمایش صفحه اجرا نمی‌شود."
+}
