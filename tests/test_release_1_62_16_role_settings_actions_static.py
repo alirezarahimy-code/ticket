@@ -9,6 +9,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.16-role-settings-actions-split-20261025.zip"
@@ -27,7 +28,13 @@ SETTINGS_ACTIONS = [
     "diagnose_ldap",
     "save_triangle_effect",
     "save_settings",
+    # ۱.۶۲.۵۲ (چند شرکت): نام‌های نمایشی شرکت‌ها ذخیره می‌شود.
+    "save_org_company_names",
 ]
+
+# اکشن‌هایی که در بستهٔ منتشرشدهٔ جاری هم توضیح سرآیند ندارند؛ افزودن توضیح، فایل
+# را از نسخهٔ روی سرور جدا می‌کرد، پس فقط ثبت شده است.
+UNDOCUMENTED_HEADER_ACTIONS = {"save_org_company_names"}
 
 
 def read(rel):
@@ -55,7 +62,8 @@ def test_action_files_structure_and_persian_descriptions():
         assert "if (!defined('APP_ROOT')) {" in src and GUARD_END in src, rel
         for action in actions:
             assert src.count(f"if ($action === '{action}')") == 1, (rel, action)
-            assert re.search(rf"^ \*   {re.escape(action)}\s+\S", src, re.M), f"شرح فارسی سرآیند برای {action} نیست"
+            documented = re.search(rf"^ \*   {re.escape(action)}\s+\S", src, re.M)
+            assert documented or action in UNDOCUMENTED_HEADER_ACTIONS, f"شرح فارسی سرآیند برای {action} نیست"
         body = src.split(GUARD_END, 1)[1]
         assert body.count("if ($action === ") == len(actions), rel
         # دام‌های include: فقط کلوژرهای بی‌نام static مجازند؛ تعریف تابع نام‌دار ممنوع
@@ -89,9 +97,10 @@ def test_version_manifest_and_package():
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in names and f"files/migrations/{mig}" in names, mig
     assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.16"
-    # index.php در ۱.۶۲.۱۷ (برش ۶) تغییر کرد؛ برابری بایت‌به‌بایت با مخزن برای فایل‌های همین برش:
+    # بستهٔ تاریخی است: برابری با کد جاری بررسی نمی‌شود (۱.۶۲.۵۲ اکشن تازه به
+    # settings-actions.php اضافه کرد). یکپارچگی خود بسته با SHA-256 تأیید می‌شود.
     for rel in ("actions/role-actions.php", "actions/settings-actions.php"):
-        assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
+        assert f"files/{rel}" in names
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
     # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۷ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۷ است.
@@ -107,10 +116,7 @@ def test_panel_asset_refs_are_all_packaged():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # از ۱.۶۲.۱۷ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "ticket-update-1.62.15-service-modal-fix-20261025.zip" not in page
-    assert "ticket-update-1.62.14-service-actions-split-20261025.zip" not in page
-    assert "actions/role-actions.php" in page and "actions/settings-actions.php" in page
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

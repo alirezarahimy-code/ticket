@@ -4,6 +4,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip"
@@ -109,12 +110,9 @@ def test_version_manifest_and_package():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # از ۱.۶۲.۱۴ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد؛ بسته‌های قبلی نباید در صفحه باشند.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "ticket-update-1.62.12-org-actions-split-20261025.zip" not in page
-    assert "actions/ticket-actions.php" in page and "actions/asset-actions.php" in page
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
 
 
 def test_fix1_dashboard_files_and_all_panel_asset_refs_are_packaged():

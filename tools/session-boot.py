@@ -42,6 +42,7 @@ GUARD_TESTS = [
     ROOT / "tests" / "test_skill_manifest_static.py",
     ROOT / "tests" / "test_system_map_static.py",
     ROOT / "tests" / "test_cache_pin_consistency_static.py",
+    ROOT / "tests" / "test_version_source_of_truth_static.py",
     ROOT / "tests" / "test_session_boot_static.py",
 ]
 

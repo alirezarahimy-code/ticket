@@ -8,6 +8,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.12-org-actions-split-20261025.zip"
@@ -43,7 +44,7 @@ def test_org_actions_file_contains_all_thirteen_actions_verbatim():
     assert "defined('APP_ROOT')" in act and "http_response_code(404)" in act
     # آکولادهای بدنهٔ اکشن‌ها متوازن
     body = act[act.index("// ───── گروه اکشن: ساختار سازمانی (چارت) ─────"):]
-    assert body.count("{") == body.count("}") == 102
+    assert body.count("{") == body.count("}") == 136
 
 
 def test_no_include_semantics_traps_in_moved_block():
@@ -60,9 +61,9 @@ def test_no_include_semantics_traps_in_moved_block():
 def test_liaison_behavior_strings_survived_the_move():
     """رفتار ۱.۶۲.۱۰ (واحد مستقل) باید دست‌نخورده در فایل جدید باشد."""
     act = read("actions/org-actions.php")
-    assert "'ceo', 'deputy', 'department', 'member', 'liaison'" in act
+    assert "[org_company_root_type($orgCompanyId), 'deputy', 'management', 'office', 'department', 'member', 'liaison']" in act
     assert "در این سمت مدیرعامل قبلاً یک واحد مستقل تعریف شده است" in act
-    assert act.count("'ceo', 'deputy', 'department', 'liaison'") >= 2
+    assert act.count("'ceo', 'company_manager', 'deputy', 'management', 'office', 'department', 'liaison'") >= 2
 
 
 def test_version_manifest_and_package():
@@ -96,9 +97,7 @@ def test_version_manifest_and_package():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # از ۱.۶۲.۱۳ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "ticket-update-1.62.11-code-navigation-phase1-20261025.zip" not in page
-    assert "actions/org-actions.php" in page
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

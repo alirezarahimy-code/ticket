@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from zipfile import ZipFile
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = (ROOT / "asset-inventory-page.php").read_text(encoding="utf-8")
@@ -26,11 +27,13 @@ def test_renderer_normalizes_legacy_and_current_argument_orders():
     assert "$collectedCount = $legacyCollected" in signature
 
 
-def test_current_index_call_uses_the_11_argument_layout():
+def test_current_index_call_uses_the_12_argument_layout():
     calls = [line.strip() for line in INDEX.splitlines() if "inventory_render_assets_content(" in line]
     assert len(calls) == 1
     call = calls[0]
-    assert "$canExtractLocalServer" not in call
+    # از ۱.۶۲.۳۷ آرگومان canExtractLocalServer صریح پاس داده می‌شود؛ امضای تابع هم
+    # سازگاری نسخهٔ قدیمی را با پارامتر اختیاری حفظ کرده است.
+    assert "$canExtractLocalServer" in call
     assert "$canConfigureNetworkScan" in call and "$collectedCount" in call
 
 
@@ -64,7 +67,4 @@ def test_form_hotfix_is_a_valid_incremental_upgrade_from_16225():
     digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
     sidecar = (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
     assert digest in sidecar
-    page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
-    assert current in page
-    assert f"{current}.sha256" in page
+    check_download_page_lists_only_latest_package()

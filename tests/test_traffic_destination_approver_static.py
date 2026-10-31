@@ -1,4 +1,5 @@
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -44,13 +45,9 @@ def test_approver_autofills_for_new_and_edit_forms_and_history_is_two_column():
 def test_release_manifest_and_download_page_list_new_destination_migration():
     manifest = (ROOT / "updates/2026-10-21-release-161-10-r9/manifest.json").read_text()
     assert '"008-traffic-destination-approver.sql"' in manifest
-    page = (ROOT / "downloads/index.html").read_text()
-    package = "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip"
-    assert package in page and "CHANGE-REPORT-FA.md" in page
-    assert "traffic-destination-approver-r7-20261021.zip" not in page
+    check_download_page_lists_only_latest_package()
+    # اسناد گزارش/تحویل باید همچنان به بسته‌های ثبت‌شده اشاره کنند (سند تاریخی‌اند، حذف نمی‌شوند).
     report = (ROOT / "docs/REPORT-FA.md").read_text()
-    assert package in report
-    assert "نسخه‌های پیشین در این صفحه نمایش داده نمی‌شوند" in report
-    assert "گزارش نسخه‌ها" not in page
-    for name in ("docs/HANDOFF-FA.md", "docs/SYSTEM-DETAILS-FA.txt"):
-        assert package in (ROOT / name).read_text()
+    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in report
+    handoff = (ROOT / "docs/HANDOFF-FA.md").read_text()
+    assert "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" in handoff

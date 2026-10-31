@@ -9,6 +9,7 @@ import re
 import json
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip"
@@ -163,8 +164,7 @@ def test_version_manifest_and_package():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # صفحهٔ دانلود فقط آخرین بسته را نشان می‌دهد؛ از ۱.۶۲.۱۰ بستهٔ جدید جایگزین شد.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "fix2-20261025.zip" not in page
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

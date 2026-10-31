@@ -107,7 +107,9 @@ class FoodOrdersStaticTests(unittest.TestCase):
         ticket = read("food-ticket.php")
         self.assertIn("'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff()", ticket)
         self.assertIn("save_setting('food_guest_request_same_day_cutoff', $guestRequestSameDayCutoff)", ticket)
-        self.assertIn("'config' => 'food.db'", ticket)
+        # مسیر config با فهرست مجوزهای مشاهده/ویرایش بررسی می‌شود، نه نگاشت تک‌کلیدی.
+        self.assertIn("if ($route === 'config')", ticket)
+        self.assertIn("'food.db', 'food.printer', 'food.guest'", ticket)
         self.assertIn("return 'food.db_edit';", ticket)
 
         panel = read("food-ticket-web/index.html")
@@ -176,13 +178,16 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertNotIn("food_order_require_permission($user, 'foodorder.proxy')", search)
         self.assertNotIn("food_order_require_permission($user, 'foodorder.self')", search)
 
-    def test_proxy_permission_is_explicit_not_a_support_manager_default(self) -> None:
+    def test_proxy_order_is_gated_by_national_code_and_rate_limit(self) -> None:
+        # تا ۱.۶۲.۵۷ مجوز مستقل foodorder.proxy وجود داشت؛ از ۱.۶۲.۵۸ بازنشسته شد و
+        # سفارش نیابتی با «کد ملی گیرنده + محدودیت نرخ + ثبت audit» کنترل می‌شود.
         permissions = read("permissions.php")
-        self.assertIn("['code' => 'foodorder.proxy'", permissions)
-        start = permissions.index("'support_manager' => array_values")
-        end = permissions.index("\n        'inspector'", start)
-        self.assertNotIn("foodorder.proxy", permissions[start:end])
-        self.assertIn("'foodorder.self'", permissions[permissions.index("$all ="):permissions.index("$common =")])
+        self.assertNotIn("['code' => 'foodorder.proxy'", permissions)
+        self.assertIn("'foodorder.proxy'", permissions)  # فقط در فهرست بازنشسته‌ها
+        php = read("food-order.php")
+        self.assertIn("food_order_verify_employee_national_code(", php)
+        self.assertIn("check_api_rate_limit('food_order_proxy_attempt_", php)
+        self.assertIn("order_proxy_create", php)
 
     def test_panel_and_employee_assets_are_present_and_locally_loaded(self) -> None:
         main_index = read("index.php")
@@ -206,7 +211,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn('href="assets/food-menu.css?v=34"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=35"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=38"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -242,7 +247,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("food-menu/group-orders", js)
         self.assertIn("food_ticket_group_members_for_date($groupId, $iso)", php)
         self.assertIn("food_order_manager_orders($iso, $mealType)", php)
-        self.assertIn("'food-menu/group-orders', 'food-menu/groups' => 'food.order_close'", ticket)
+        self.assertIn("'food-menu/group-orders', 'food-menu/groups'", ticket)
 
     def test_food_statistics_are_grouped_by_day_with_jalali_weekday(self) -> None:
         js = read("assets/food-menu.js")
@@ -304,16 +309,16 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
     def test_day_impact_confirmation_locks_and_reuses_the_confirmed_plan(self) -> None:
         js = read("assets/food-menu.js")
-        self.assertIn("if (!canMenu || state.daySaving) return;", js)
+        self.assertIn("if (!canMenuEdit || state.daySaving) return;", js)
         self.assertIn("body = Object.assign({}, state.pendingImpact);", js)
-        self.assertIn("Boolean(state.daySaving || impactPending ||", js)
+        self.assertIn("var editorLocked = Boolean(state.daySaving || impactPending);", js)
         self.assertIn("state.daySaving = false; render();", js)
 
     def test_selected_employee_orders_report_has_search_dates_and_excel_export(self) -> None:
         php = read("food-order.php")
         self.assertIn("function food_order_report_employee_search(string $query): array", php)
         self.assertIn("food-menu/employee-search", php)
-        self.assertIn("food_order_require_permission($user, 'food.order_close')", php)
+        self.assertIn("food_order_require_permission($user, 'food.reports')", php)
         self.assertIn("food_order_report_employee_search($query)", php)
         self.assertIn("function food_order_selected_orders_range(", php)
         self.assertIn("function food_order_export_selected_orders_range(", php)
@@ -328,13 +333,13 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
     def test_emergency_order_window_is_under_system_settings_and_primary_admin_only(self) -> None:
         php = read("food-order.php")
-        self.assertIn("function food_order_require_primary_admin(array $user): void", php)
+        # از ۱.۶۲.۵۷ مهلت اضطراری با مجوز نقش سامانه کنترل می‌شود (پیش‌فرض: مدیر اصلی).
         grant_start = php.index("function food_order_emergency_window_grant(")
         grant_end = php.index("\nfunction ", grant_start + 10)
-        self.assertIn("food_order_require_primary_admin($user)", php[grant_start:grant_end])
+        self.assertIn("food_order_require_permission($user, 'food.emergency_window_edit')", php[grant_start:grant_end])
         revoke_start = php.index("function food_order_emergency_window_revoke(")
         revoke_end = php.index("\nfunction ", revoke_start + 10)
-        self.assertIn("food_order_require_primary_admin($user)", php[revoke_start:revoke_end])
+        self.assertIn("food_order_require_permission(", php[revoke_start:revoke_end])
         self.assertIn("food-menu/emergency-window-state", php)
         self.assertIn("food_order_emergency_window_state($calendarId)", php)
 
@@ -342,15 +347,21 @@ class FoodOrdersStaticTests(unittest.TestCase):
         allowed_start = ticket.index("function food_ticket_route_allowed(")
         allowed_end = ticket.index("\nfunction ", allowed_start + 10)
         allowed = ticket[allowed_start:allowed_end]
-        self.assertIn("in_array($route, ['food-menu/emergency-window', 'food-menu/emergency-window-state'], true)", allowed)
+        self.assertIn("if ($route === 'food-menu/emergency-window-state')", allowed)
+        self.assertIn("if ($route === 'food-menu/emergency-window')", allowed)
+        self.assertIn("user_can($user, 'food.emergency_window')", allowed)
+        self.assertIn("user_can($user, 'food.emergency_window_edit')", allowed)
         self.assertIn("return false;", allowed)
-        self.assertIn("'emergency-window' => food_ticket_is_primary_admin($user)", ticket)
+        # مسیر صفحهٔ تنظیمات هم با مجوز نقش کنترل می‌شود (پیش‌فرض: مدیر اصلی).
+        self.assertIn("'emergency-window' => $fpCan('food.emergency_window')", ticket)
 
         panel = read("food-ticket-web/index.html")
-        manual = panel.index("sections.push(['manual-attendance','ثبت دستی فیش','sub'])")
-        emergency = panel.index("sections.push(['emergency-window','ثبت اضطراری سفارش غذا','sub'])")
+        # ترتیب بخش‌های تنظیمات: ثبت دستی پیش از مهلت اضطراری می‌ماند.
+        manual = panel.index("['manual-attendance','ثبت دستی فیش/تردد']")
+        emergency = panel.index("['emergency-window','مدیریت مهلت اضطراری']")
         self.assertLess(manual, emergency)
-        self.assertIn("if(isPrimaryAdmin()&&available('emergency-window'))", panel)
+        self.assertIn(".filter(x=>available(x[0]))", panel)
+        self.assertIn("if(!serviceMode||!isPrimaryAdmin())", panel)
         self.assertIn("function emergencyWindowSettingsForm()", panel)
         self.assertIn('id="emergency-window-settings-form"', panel)
         self.assertIn("food-menu/emergency-window-state?date=", panel)
@@ -392,7 +403,10 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertNotIn("employee_number", export)
         self.assertNotIn("food_order_export_excel_range", php)
         ticket = read("food-ticket.php")
-        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
+        # از ۱.۶۲.۵۸ مجوز گزارش‌ها یکپارچه و food.order_close بازنشسته شد.
+        self.assertIn("$reportRoutes = [", ticket)
+        self.assertIn("user_can($user, 'food.reports')", ticket)
+        self.assertNotIn("food.order_close", ticket)
 
         js = read("assets/food-menu.js")
         orders_start = js.index("function renderOrders()")
@@ -449,8 +463,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
         day_start = php.index("function food_order_save_day(")
         day_end = php.index("\nfunction ", day_start + 10)
         day_save = php[day_start:day_end]
-        self.assertIn("if ($status === 'closed' || $status === 'open')", day_save)
-        self.assertIn("food_order_user_can($user, 'food.order_close')", day_save)
+        self.assertIn("if ($rawStatus !== '' && !in_array($rawStatus, ['open', 'closed'], true))", day_save)
+        self.assertIn("food_order_require_permission($user, 'food.menu_edit')", day_save)
         self.assertNotIn("$body['reason']", day_save)
 
     def test_proxy_calendar_reads_only_the_verified_recipient_and_marks_their_order(self) -> None:
@@ -622,7 +636,8 @@ class FoodOrdersStaticTests(unittest.TestCase):
     def test_admin_order_edit_route_and_controls_are_removed_owner_flow_remains(self) -> None:
         ticket = read("food-ticket.php")
         self.assertNotIn("food-menu/order-edit", ticket)
-        self.assertIn("'food-menu/orders', 'food-menu/orders-export', 'food-menu/statistics', 'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests', 'food-menu/cancel-request-decide' => 'food.order_close'", ticket)
+        self.assertIn("user_can($user, 'food.reports')", ticket)
+        self.assertNotIn("food.order_close", ticket)
 
         order_php = read("food-order.php")
         self.assertNotIn("function food_order_admin_edit(", order_php)

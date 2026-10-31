@@ -57,13 +57,17 @@ def test_safe_reference_uses_only_class_basename_line_or_fingerprint():
 
 
 def test_future_exception_logs_include_a_validated_error_class():
-    start = BOOTSTRAP.index("function system_error_record")
-    end = BOOTSTRAP.index("// هندلرهای سراسری", start)
-    recorder = BOOTSTRAP[start:end]
+    # از ۱.۶۲.۲۱ تابع ثبت خطا به lib/logging-csrf.php منتقل شده است.
+    logging = (ROOT / "lib/logging-csrf.php").read_text(encoding="utf-8")
+    start = logging.index("function system_error_record")
+    end = logging.index("\nfunction ", start + 10)
+    recorder = logging[start:end]
     assert "string $errorType = ''" in recorder
     assert "$meta['error_type'] = $errorType" in recorder
-    assert "get_class($e)" in BOOTSTRAP
-    assert "E_PARSE" in BOOTSTRAP and "E_COMPILE_ERROR" in BOOTSTRAP
+    assert "get_class($e)" in logging
+    assert "E_PARSE" in logging and "E_COMPILE_ERROR" in logging
+    # bootstrap باید همان ماژول را بارگذاری کند.
+    assert "lib/logging-csrf.php" in BOOTSTRAP
 
 
 def test_hotfix_package_is_a_valid_upgrade_from_16224():

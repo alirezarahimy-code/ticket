@@ -39,7 +39,7 @@ def test_health_ui_and_export_use_plain_language_without_raw_user_fields():
 
 
 def test_system_logs_page_displays_safe_export_and_friendly_descriptions():
-    assert "خروجی فعالیت کاربران برای ممیزی است" in INDEX
+    assert "خروجی فعالیت کاربران (ممیزی؛ شامل اطلاعات کاربران)" in INDEX
     assert "دانلود گزارش خوانا و امن (Excel)" in INDEX
     assert "system_health_humanize_event" in INDEX
     assert "system_health_request_label" in INDEX

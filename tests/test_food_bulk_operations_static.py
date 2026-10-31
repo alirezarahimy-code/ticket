@@ -11,13 +11,20 @@ def read(path: str) -> str:
 class FoodBulkOperationsStaticTests(unittest.TestCase):
     def test_bulk_api_and_food_menu_view_are_restricted_to_emergency_permission(self):
         ticket = read("food-ticket.php")
-        self.assertIn("'food-menu/bulk-snapshot', 'food-menu/bulk-apply' => 'food.emergency'", ticket)
-        self.assertIn("$fpCan('food.emergency')", ticket)
-        self.assertIn("'food.order_close', 'food.emergency'", ticket)
+        self.assertIn("'food-menu/bulk-snapshot',", ticket)
+        self.assertIn("'food-menu/bulk-apply',", ticket)
+        self.assertIn("user_can($user, 'food.menu')", ticket)
+        self.assertIn("user_can($user, 'food.menu_edit')", ticket)
+        # مجوز اضطراری بازنشسته شد؛ عملیات گروهی با زوج food.menu/food.menu_edit کنترل می‌شود.
+        self.assertIn("$fpCan('food.emergency_window')", ticket)
+        self.assertNotIn("'food.order_close'", ticket)
 
         order = read("food-order.php")
         self.assertIn("if (str_starts_with($route, 'food-menu/bulk-'))", order)
-        self.assertIn("food_order_require_permission($user, 'food.emergency')", order)
+        self.assertIn(
+            "food_order_require_permission($user, $method === 'GET' && $route === 'food-menu/bulk-snapshot' ? 'food.menu' : 'food.menu_edit')",
+            order,
+        )
         self.assertIn("require_csrf();", order)
 
     def test_snapshot_includes_active_local_or_domain_staff_without_national_codes(self):
@@ -43,7 +50,7 @@ class FoodBulkOperationsStaticTests(unittest.TestCase):
         self.assertIn("food_order_emergency_window_state($calendarId)['active']", apply)
         self.assertIn("$actor, null, true, $mealType, true", apply)
         self.assertIn("$actor, true, true, $reason", apply)
-        self.assertIn("'food.emergency'", apply)
+        self.assertIn("food_order_require_permission($actor, 'food.menu_edit')", apply)
 
         create_start = order.index("function food_order_create_or_change(")
         create_end = order.index("\nfunction ", create_start + 10)
@@ -82,7 +89,7 @@ class FoodBulkOperationsStaticTests(unittest.TestCase):
     def test_bulk_tab_date_picker_and_removed_calendar_emergency_panel(self):
         js = read("food-ticket-web/assets/food-menu.js")
         self.assertIn("tabs.push(['bulk', 'عملیات گروهی'])", js)
-        self.assertIn("state.tab === 'bulk' && (canEmergency || canManageGuestRequests) ? renderBulkOperations()", js)
+        self.assertIn("state.tab === 'bulk' && canMenu ? renderBulkOperations()", js)
         self.assertIn("id=\"fm-bulk-date-form\"", js)
         self.assertIn("name=\"date\" data-jalali", js)
         self.assertIn("data-fm-action=\"bulk-confirm\"", js)

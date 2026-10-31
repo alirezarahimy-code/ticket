@@ -77,6 +77,10 @@ def main() -> int:
             # ردیفهای assertNotIn / "not in" عمداً نسخهٔ قدیمی را چک میکنند.
             if "assertNotIn" in line or " not in " in line or "not in src" in line:
                 continue
+            # پین‌هایی که محتوای یک بستهٔ ZIP تاریخی را توصیف می‌کنند با نشانهٔ
+            # «cache-pin-guard: legacy-zip» از بررسی زنده مستثنا می‌شوند.
+            if "cache-pin-guard: legacy-zip" in line:
+                continue
             for match in ASSET_PIN_RE.finditer(line):
                 asset, pinned = match.group(1), match.group(2)
                 basename = asset.rsplit("/", 1)[-1]

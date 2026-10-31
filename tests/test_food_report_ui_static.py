@@ -106,7 +106,7 @@ class FoodReportUiStaticTests(unittest.TestCase):
         self.assertIn("data-domain-code-dialog-open", script)
         self.assertIn("dialog.showModal()", script)
         self.assertIn(".domain-code-link-dialog::backdrop", css)
-        self.assertIn("assets/app.js?v=3.4.27", index)
+        self.assertIn("assets/app.js?v=3.4.28", index)
 
 
 if __name__ == "__main__":

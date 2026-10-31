@@ -34,11 +34,13 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
     def test_report_api_is_restricted_to_food_order_close(self) -> None:
         ticket = read("food-ticket.php")
         order = read("food-order.php")
-        self.assertIn("'food-menu/export', 'food-menu/printed-delivery', 'food-menu/printed-delivery-export', 'food-menu/cancel-requests'", ticket)
-        self.assertIn("=> 'food.order_close'", ticket)
+        self.assertIn("$reportRoutes = [", ticket)
+        self.assertIn("user_can($user, 'food.reports')", ticket)
+        self.assertNotIn("food.order_close", ticket)
         self.assertIn("$route === 'food-menu/printed-delivery'", order)
         self.assertIn("$route === 'food-menu/printed-delivery-export'", order)
-        self.assertIn("food_order_require_permission($user, 'food.order_close');", order)
+        self.assertIn("food_order_require_permission($user, 'food.reports');", order)
+        self.assertNotIn("food.order_close", order)
 
     def test_report_is_appended_after_statistics_and_matches_daily_order_controls(self) -> None:
         ui = read("food-ticket-web/assets/food-menu.js")
@@ -56,7 +58,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
     def test_mirrored_assets_and_cache_versions_are_updated(self) -> None:
         panel = read("food-ticket-web/index.html")
         self.assertIn('assets/food-menu.css?v=34', panel)
-        self.assertIn('assets/food-menu.js?v=33', panel)
+        self.assertIn('assets/food-menu.js?v=38', panel)
         self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
         self.assertEqual(read("assets/food-menu.css"), read("food-ticket-web/assets/food-menu.css"))
 
