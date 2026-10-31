@@ -24,7 +24,7 @@ def test_recursive_tree_and_nested_department_validation():
     assert "children(item.id).filter(function (child) { return child.type === 'department'; })" in js
     assert "org-orphan-units" in js and "org-cycle-warning" in js
     assert "var directDepartments = children(ceo.id, 'department')" in js
-    assert "['deputy', 'department', org_company_root_type($orgCompanyId)]" in actions
+    assert "[org_company_root_type($orgCompanyId), 'deputy', 'management', 'office', 'department', 'member', 'liaison']" in actions
     assert "org_unit_subtree_ids($unitId)" in actions
     assert "انتقال واحد به خودش یا یکی از زیرمجموعه‌هایش مجاز نیست" in actions
 
@@ -38,7 +38,8 @@ def test_undo_redo_is_delta_scoped_and_does_not_restore_user_roles():
     assert "function org_snapshot(?int $companyId = null)" in org
     assert "JOIN org_units ou ON ou.id = m.unit_id WHERE ou.company_id = " in org
     snapshot = org.split("function org_snapshot(?int $companyId = null): array", 1)[1].split("function org_snapshot_maps", 1)[0]
-    assert "SELECT id, org_unit_id, manager_user_id' . $companyField . ' FROM users' . $userWhere" in snapshot
+    assert "SELECT u.id, u.org_unit_id, u.manager_user_id FROM users u" in snapshot
+    assert "org_user_company_membership_join_sql('u')" in snapshot
     assert "SELECT id, org_unit_id, manager_user_id, role" not in snapshot
 
 
@@ -58,7 +59,9 @@ def test_ui_keeps_fixed_sidebars_focus_pan_and_four_deputies_per_row():
     js = read("assets/organization.js")
     css = read("assets/style.css")
     page = read("index.php")
-    assert "for (var i = 0; i < deputies.length; i += 4)" in js
+    # از ۱.۶۲.۵۳ ردیف‌ها با اندازهٔ دستهٔ متغیر ساخته می‌شوند (۵ + تعداد دسته‌ها).
+    assert "var batchSize = 5 + batches.length;" in js
+    assert "class=\"org-deputy-row org-root-unit-row\"" in js
     assert "event.code === 'Space'" in js and "org-panning" in js
     assert "data-org-view=\"focus\"" in page and "◫" in page
     assert ".org-sidebar { order: 3;" in css and ".org-pool-sidebar { order: 1;" in css

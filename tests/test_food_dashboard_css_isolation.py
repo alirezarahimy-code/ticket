@@ -22,7 +22,8 @@ def test_r40_dashboard_grids_are_isolated_from_legacy_host_grid_rule():
         "margin: revert-layer",
     ):
         assert declaration in css
-    assert "food-capitalio-dashboard-r40.css?v=1.61.10-r40" in index
+    # از ۱.۶۲.۲ شیت r42 جای r40 را در پنل گرفته است؛ قاعدهٔ isolation باید در فایل r40 بماند.
+    assert "food-capitalio-dashboard-r42.css?v=1.62.2-dashboard-fix" in index
 
     assert PACKAGE.is_file()
     with ZipFile(PACKAGE) as archive:

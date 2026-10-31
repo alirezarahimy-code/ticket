@@ -5,6 +5,7 @@ import json
 import re
 from pathlib import Path
 from zipfile import ZipFile
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "ticket-update-1.62.24-cumulative-20261027.zip"
@@ -111,9 +112,4 @@ def test_update_manifest_paths_are_safe_for_the_app_updater():
 
 
 def test_download_page_points_to_log_based_profile_and_attendance_fix():
-    page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
-    assert current in page
-    assert f"{current}.sha256" in page
-    assert "۱.۶۲.۳۵" in page and "۱.۶۲.۳۶" in page
-    assert "۱.۶۲.۳۴" in page and "۱.۶۲.۳۵" in page
+    check_download_page_lists_only_latest_package()

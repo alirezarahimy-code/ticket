@@ -22,7 +22,7 @@ def test_app_js_theme_toggle_is_robust():
 
 def test_all_host_shells_load_the_new_app_js():
     for path in ["index.php", "governance.php", "ola.php", "app/Views/layout/footer.php"]:
-        assert "assets/app.js?v=3.4.27" in read(path), path
+        assert "assets/app.js?v=3.4.28" in read(path), path
 
 
 def test_release_package_ships_app_js():

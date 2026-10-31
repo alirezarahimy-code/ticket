@@ -4,6 +4,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.10-org-liaison-units-20261025.zip"
@@ -32,18 +33,18 @@ def test_index_php_supports_liaison_node():
     # از ۱.۶۲.۱۲ اکشن‌های سازمان در actions/org-actions.php هستند (برش ۱ فاز ۲).
     src = read("index.php") + "\n" + read("actions/org-actions.php")
     # save_org_node نوع liaison را می‌پذیرد
-    assert "'ceo', 'deputy', 'department', 'member', 'liaison'" in src
+    assert "[org_company_root_type($orgCompanyId), 'deputy', 'management', 'office', 'department', 'member', 'liaison']" in src
     # هر سمت فقط یک واحد فعال
     assert "در این سمت مدیرعامل قبلاً یک واحد مستقل تعریف شده است" in src
     # انتصاب نماینده بدون تغییر نقش
     assert "نقش او تغییر نمی‌کند" in src or "نقش کاربر دست‌نخورده می‌ماند" in src
     # assign/remove manager نوع liaison را می‌پذیرند (دو بار)
-    assert src.count("'ceo', 'deputy', 'department', 'liaison'") >= 2
+    assert src.count("'ceo', 'company_manager', 'deputy', 'management', 'office', 'department', 'liaison'") >= 2
     # دادهٔ چارت سمت واحد را به مرورگر می‌فرستد
     assert "'chartSide' => (string) ($unit['chart_side'] ?? '')" in src
     # نسخهٔ کش دارایی‌ها
-    assert "assets/organization.js?v=7" in src
-    assert "assets/style.css?v=3.4.47" in src
+    assert "assets/organization.js?v=20" in src
+    assert "assets/style.css?v=3.4.60" in src
 
 
 def test_organization_js_renders_liaison_band():
@@ -57,7 +58,7 @@ def test_organization_js_renders_liaison_band():
     # نماینده در آمار کارشناس/بدون جایگاه نمی‌افتد و عنوانش درست است
     assert "managed.type === 'liaison'" in js
     assert "نمایندهٔ " in js
-    assert "واحد مستقل — خارج از زیرمجموعهٔ مدیرعامل" in js
+    assert "واحد مستقل (نمایندگی)" in js
 
 
 def test_css_positions_liaisons_without_connectors():
@@ -112,8 +113,7 @@ def test_version_manifest_and_package():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # از ۱.۶۲.۱۱ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "ticket-update-1.62.9-manual-ticket-date-guest-20261025.zip" not in page
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

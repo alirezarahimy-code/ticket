@@ -24,7 +24,7 @@ function ola_header(string $title, array $user): void
 function ola_footer(): void
 {
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
-    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js?v=3.4.27&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . '</body></html>';
+    echo '</div><footer class="footer">' . e($appName) . ' • نسخه سازمانی فارسی • سازنده سامانه: Ali.r.Rahimi • نسخهٔ سامانه ' . e(app_version()) . '</footer></div><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . '</body></html>';
 }
 
 // ۱.۳۷.۷ — این صفحه با require_admin() باز می‌شد، اما منوی برنامه و کاتالوگ دسترسی‌ها بر پایهٔ

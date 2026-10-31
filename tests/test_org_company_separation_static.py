@@ -68,7 +68,7 @@ def test_primary_admin_can_edit_display_only_company_names_without_changing_memb
 
 def test_manager_positions_map_to_existing_global_manager_role_without_admin_promotion():
     helpers = read('organization.php')
-    assert "return ['ceo', 'company_manager', 'deputy', 'department'];" in helpers
+    assert "return ['ceo', 'company_manager', 'deputy', 'management', 'office', 'department'];" in helpers
     assert "role = 'manager'" in helpers
     assert 'function org_expert_user_ids()' in helpers
     assert "role = 'user' WHERE id IN ($expertPlaceholders)" in helpers

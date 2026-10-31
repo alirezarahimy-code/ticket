@@ -41,6 +41,7 @@ GUARD_TESTS = [
     "tests/test_skill_manifest_static.py",
     "tests/test_system_map_static.py",
     "tests/test_cache_pin_consistency_static.py",
+    "tests/test_version_source_of_truth_static.py",
 ]
 
 TRIGGER_PHRASES = ("بهروز شو", "بوت کن")

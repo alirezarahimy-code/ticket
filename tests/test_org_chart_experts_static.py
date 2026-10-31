@@ -100,8 +100,7 @@ check(
 )
 check(
     "expertHosts" in org_js
-    and "ابتدا معاونت بسازید" in org_js
-    and "کارشناس بعد از ساخت معاونت اضافه می‌شود" in org_js,
+    and "کارشناس بعد از ساخت معاونت یا مدیریت مستقل اضافه می‌شود" in org_js,
     "quick-add expert is available after a deputy exists",
 )
 check(
@@ -121,7 +120,7 @@ check(
     "organization layout no longer depends on browser support for :has()",
 )
 check(
-    "سمت راست «افزودن اداره»" in guide
+    "روی کارت معاونت یا مدیریت مستقل دو دکمهٔ «افزودن اداره» و «افزودن کارشناس»" in guide
     and "کاربران دامینی و محلی" in guide,
     "help guide describes deputy experts and local users",
 )
@@ -139,7 +138,8 @@ check(
     "org tree zoom keeps scroll size and can fit the canvas",
 )
 check(
-    "نمودار" in guide and "کارشناس بعد از ساخت حداقل یک معاونت" in guide,
+    "نمودار" in guide
+    and "کادر کارشناس زیر معاونت فقط بعد از انتخاب نفرات ظاهر می‌شود" in guide,
     "guide documents the current organization-chart workflow",
 )
 

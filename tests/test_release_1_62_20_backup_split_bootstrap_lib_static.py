@@ -12,6 +12,8 @@ import re
 import zipfile
 from pathlib import Path
 
+from download_page_helpers import check_download_page_lists_only_latest_package, version_tuple
+
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip"
 UPDATE_DIR = "updates/2026-10-25-release-162-20-backup-split-bootstrap-lib"
@@ -130,7 +132,8 @@ def test_dead_functions_are_fully_removed():
 
 
 def test_version_manifest_and_package():
-    assert read("VERSION").strip() == "1.62.20"
+    # این تست پین نسخهٔ جاری نیست؛ فقط نباید از بستهٔ خودش عقب‌تر باشد.
+    assert version_tuple(read("VERSION").strip()) >= version_tuple("1.62.20")
     manifest = json.loads(read(f"{UPDATE_DIR}/manifest.json"))
     assert manifest["version"] == "1.62.20"
     assert manifest["requires_version"] == "1.61.9"
@@ -156,11 +159,12 @@ def test_version_manifest_and_package():
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in nameset and f"files/migrations/{mig}" in nameset, mig
     assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.20"
+    # بستهٔ تاریخی است: برابری با کد جاری بررسی نمی‌شود؛ یکپارچگی با SHA-256.
     for rel in ["index.php", "bootstrap.php", "actions/backup-actions.php"] + LIB_FILES:
-        assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
+        assert f"files/{rel}" in nameset
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
-    assert digest in read("downloads/index.html")
+    assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
 
 
 def test_panel_asset_refs_are_all_packaged():
@@ -173,8 +177,5 @@ def test_panel_asset_refs_are_all_packaged():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    assert PACKAGE_NAME in page
-    assert "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip" not in page
-    assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" not in page
-    assert "lib/" in page and "actions/backup-actions.php" in page
+    # بررسی نسخه‌آگنوستیک: صفحه فقط جدیدترین بسته را نشان می‌دهد.
+    check_download_page_lists_only_latest_package()

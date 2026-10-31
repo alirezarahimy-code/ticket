@@ -9,6 +9,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.15-service-modal-fix-20261025.zip"
@@ -41,9 +42,10 @@ def test_backdrop_click_closes_service_modal_like_other_popups():
 
 
 def test_cache_bust_versions_bumped():
+    # پین‌ها با هر انتشار جلو می‌روند؛ نسخهٔ ۱.۶۲.۵۹: style 3.4.60 و app 3.4.28.
     src = read("index.php")
-    assert "assets/style.css?v=3.4.46" in src
-    assert "assets/app.js?v=3.4.27" in src
+    assert "assets/style.css?v=3.4.60" in src
+    assert "assets/app.js?v=3.4.28" in src
     assert "assets/style.css?v=3.4.45" not in src
     assert "assets/app.js?v=3.4.26" not in src
 
@@ -76,9 +78,11 @@ def test_version_manifest_and_package():
     # خود اصلاح داخل بسته هم هست
     assert ".content-wrap > .service-modal-layer { position: fixed; z-index: 1300; }" in zf.read("files/assets/style.css").decode("utf-8")
     assert "event.target.classList.contains('service-modal')" in zf.read("files/assets/app.js").decode("utf-8")
-    # index.php در ۱.۶۲.۱۶ (برش ۵) تغییر کرد؛ برابری بایت‌به‌بایت با مخزن برای فایل‌های همین اصلاح:
+    # بستهٔ تاریخی است: محتوایش با کد جاری مقایسه نمی‌شود (style/app.js از ۱.۶۲.۱۵
+    # جلوتر رفته‌اند). یکپارچگی خودِ بسته با SHA-256 اش بررسی می‌شود و همهٔ مسیرهای
+    # manifest باید در مخزن موجود باشند (بالاتر بررسی شد).
     for rel in ("assets/style.css", "assets/app.js"):
-        assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
+        assert f"files/{rel}" in names
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
     # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۶ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۶ است.
@@ -94,9 +98,7 @@ def test_panel_asset_refs_are_all_packaged():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # از ۱.۶۲.۱۶ صفحهٔ دانلود فقط بستهٔ جدید را نشان می‌دهد.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "ticket-update-1.62.14-service-actions-split-20261025.zip" not in page
-    assert "ticket-update-1.62.13-ticket-asset-actions-split-fix1-20261025.zip" not in page
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

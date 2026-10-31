@@ -75,8 +75,9 @@ def test_report_is_after_statistics_with_selectable_fields_and_menu_view():
     assert "deliveredReportByMenuHtml" in js
     assert "delivered-report-export" in js and "delivered-report-print" in js
     assert "تأیید مستقل دریافت غذا نیست" in js
-    assert "assets/food-menu.css?v=34" in page
-    assert "assets/food-menu.js?v=33" in page
+    # مقادیر داخل همین بستهٔ تاریخی ۱.۶۲.۲۱ (نه نسخهٔ جاری مخزن).
+    assert "assets/food-menu.css?v=33" in page  # cache-pin-guard: legacy-zip
+    assert "assets/food-menu.js?v=32" in page  # cache-pin-guard: legacy-zip
     assert "const PANEL_VERSION='1.37.26'" in page
     assert "fm-print-delivered-report" in css
 

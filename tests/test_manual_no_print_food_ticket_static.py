@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from zipfile import ZipFile
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "ticket-update-1.62.35-profile-and-attendance-reconciliation-20261027.zip"
@@ -110,7 +111,9 @@ def test_existing_settings_manual_attendance_bug_fix_package():
         assert "food_ticket_manual_attendance_clear_absence($userId, $targetDate, $actor, $reason)" in save
         assert "'absence_cleared' => $absenceCleared" in save
         assert "در سامانه چاپ‌شده؛ چاپ فیزیکی انجام نشد" in panel
-        assert "1.37.34" in host and "PANEL_VERSION='1.37.34'" in panel_index
+        # داخل همین بستهٔ تاریخی ۱.۶۲.۳۵، نسخهٔ پنل ۱.۳۷.۲۷ است.
+        assert "FOOD_TICKET_PANEL_VERSION = '1.37.27'" in host
+        assert "PANEL_VERSION='1.37.27'" in panel_index
 
         for name in expected:
             if name.endswith(".php") or name.endswith(".js"):
@@ -119,8 +122,9 @@ def test_existing_settings_manual_attendance_bug_fix_package():
 
     digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
     assert digest in (ROOT / "downloads" / f"{NAME}.sha256").read_text(encoding="ascii")
-    page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    current = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
-    assert current in page and f"{current}.sha256" in page
-    assert "۱.۶۲.۳۴" in page and "۱.۶۲.۳۵" in page and "۱.۶۲.۳۶" in page
-    assert "۱.۶۲.۳۵ به‌تنهایی نیز مدرک اصلاح رکوردهای زنده نیست" in page
+    # صفحهٔ دانلود فقط جدیدترین بسته را نشان می‌دهد (بررسی نسخه‌آگنوستیک).
+    check_download_page_lists_only_latest_package()
+    # سند تاریخی ترمیم ۱.۶۲.۳۶ به downloads/repair-1.62.36.html منتقل شده و حفظ است.
+    archived = (ROOT / "downloads" / "repair-1.62.36.html").read_text(encoding="utf-8")
+    assert "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip" in archived
+    assert "۱.۶۲.۳۵ به‌تنهایی نیز مدرک اصلاح رکوردهای زنده نیست" in archived

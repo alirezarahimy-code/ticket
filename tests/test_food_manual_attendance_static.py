@@ -13,7 +13,7 @@ class FoodManualAttendanceStaticTests(unittest.TestCase):
         index = read("food-ticket-web/index.html")
         groups_js = read("food-ticket-web/assets/food-groups.js")
         manual_js = read("food-ticket-web/assets/food-manual-attendance.js")
-        self.assertIn("['manual-attendance','ثبت دستی فیش','sub']", index)
+        self.assertIn("['manual-attendance','ثبت دستی فیش/تردد']", index)
         self.assertIn("'manual-attendance':()=>window.FoodManualAttendanceUI?window.FoodManualAttendanceUI.html()", index)
         self.assertIn("FoodManualAttendanceUI.mount()", index)
         self.assertIn('src="assets/food-manual-attendance.js?v=5"', index)
@@ -25,8 +25,8 @@ class FoodManualAttendanceStaticTests(unittest.TestCase):
 
     def test_manual_write_requires_group_edit_permission_and_today(self):
         ticket = read("food-ticket.php")
-        self.assertIn("'food-manual-attendance' => 'food.groups'", ticket)
-        self.assertIn("'food-manual-attendance'], true))", ticket)
+        self.assertIn("'food-manual-attendance' => 'food.manual_attendance'", ticket)
+        self.assertIn("'food.manual_attendance_edit'", ticket)
         self.assertIn("'food.groups_edit'", ticket)
         self.assertIn("$_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'food-manual-attendance'", ticket)
         self.assertIn("food_ticket_api_manual_attendance_save_many($body, $user)", ticket)

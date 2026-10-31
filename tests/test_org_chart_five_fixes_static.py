@@ -68,15 +68,17 @@ def test_exports_cover_full_chart_and_include_print_preview_and_backup_restore()
     assert "data-org-tool=\"print\"" in index and "data-org-tool=\"backup\"" in index
     assert "data-org-tool=\"restore-backup\"" in index
     assert "units: units, users: data.users || []" in js
-    assert "export=excel" in js and "xlsx_send('organization-tree-'" in index
+    # از ۱.۶۲.۵۲ نام فایل خروجی اکسل به تفکیک شرکت است.
+    assert "export=excel" in js and "xlsx_send('organization-tree-company-'" in index
     assert "foreignObject" in js and "toBlob" in js
-    assert "org-printing" in js and "@page { size: landscape" in css
+    assert "org-printing" in css and "@page { size: landscape" in css
     assert "restore_org_backup" in actions and "role =" not in actions.split("if ($action === 'restore_org_backup')", 1)[1].split("if ($action === 'reset_org_structure')", 1)[0]
 
 
 def test_server_actions_refresh_chart_data_without_reloading_and_preserve_view():
     js = read("assets/organization.js")
-    assert "fetch(form.action || window.location.href" in js
+    assert "fetch(endpoint.toString()," in js
+    assert "new FormData(form)" in js
     assert "window.location.reload(); return;" in js
     assert "savedView = { zoom: state.zoom, left: canvas ? canvas.scrollLeft : 0, top: canvas ? canvas.scrollTop : 0 }" in js
     assert "state.zoom = savedView.zoom" in js
@@ -88,8 +90,8 @@ def test_ceo_peer_units_accept_and_display_experts_inside_their_card():
     php = read("organization.php")
     actions = read("actions/org-actions.php")
     assert "item.type === 'liaison'" in js and "org-liaison-experts" in js
-    assert "['department', 'deputy', 'liaison']" in php
-    assert "کارشناس را می‌توان به معاونت، اداره یا واحد هم‌تراز مدیرعامل وصل کرد" in actions
+    assert "['department', 'deputy', 'management', 'liaison']" in php
+    assert "کارشناس را می‌توان به معاونت، مدیریت مستقل، اداره یا واحد مستقل وصل کرد" in actions
 
 
 def test_space_repeats_are_prevented_and_wires_use_measured_zoom_scale():

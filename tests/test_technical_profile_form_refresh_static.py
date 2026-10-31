@@ -57,7 +57,7 @@ def test_form_hotfix_packages_the_renderer_styles_and_compatible_page():
         assert "asset_profile_save" in profile and "save_inventory_form" in page
         assert "function asset_profile_sections" in profile
         assert "?int $legacyCollected = null" in component
-        assert "assets/style.css?v=3.4.47" in page
+        assert "assets/style.css?v=3.4.47" in page  # cache-pin-guard: legacy-zip
         assert ".inventory-form" in css and ".profile-grid" in css and ".form-section-head" in css
 
     digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()

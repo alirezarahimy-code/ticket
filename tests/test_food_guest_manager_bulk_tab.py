@@ -24,7 +24,7 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
         self.assertIn("food_guest_request_is_reviewer($user)", self.order)
         self.assertIn("food_guest_request_list($user, true)", self.order)
         self.assertIn("food-menu/guest-request-update", self.ticket)
-        self.assertIn("return function_exists('food_guest_request_is_reviewer') && food_guest_request_is_reviewer($user);", self.ticket)
+        self.assertIn("$fpCanManageGuestRequests = function_exists('food_guest_request_is_reviewer')", self.ticket)
         self.assertIn("FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE", self.ticket)
 
     def test_support_view_includes_historical_requests_but_member_view_stays_scoped(self):
@@ -49,7 +49,7 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
 
     def test_served_asset_copy_and_cache_buster_match(self):
         self.assertEqual(self.ui, self.web_ui)
-        self.assertIn('assets/food-menu.js?v=36', self.web_index)
+        self.assertIn('assets/food-menu.js?v=38', self.web_index)
 
 
 if __name__ == "__main__":

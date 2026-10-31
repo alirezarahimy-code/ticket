@@ -35,7 +35,9 @@ assert "if ($storedHostname !== '')" in client_identity
 # Render the panel shell before its sequential, optional API hydration starts.
 start_panel = food_page[food_page.index("async function startPanel(){"):food_page.index("function updateAbsentRangeLabel()")]
 assert start_panel.index("shell();") < start_panel.index("panelStartupApi('config','/api/config')")
-assert "const [printerResult,employeeResult]=await Promise.all" in start_panel
+# از ۱.۶۲.۵۷ بارگذاری اولیه با صف jobs و یک Promise.all(jobs) انجام می‌شود.
+assert "const jobs=[]" in start_panel
+assert "await Promise.all(jobs)" in start_panel
 assert "__FOOD_PANEL_STARTUP_TIMINGS" in food_page
 assert "document-ttfb" in food_page
 assert "document-download" in food_page

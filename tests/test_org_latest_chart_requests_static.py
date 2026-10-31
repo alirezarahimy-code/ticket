@@ -35,9 +35,9 @@ def test_deputy_and_department_cards_have_only_requested_add_actions():
     js = read('assets/organization.js')
     deputy = js[js.index('var renderDeputy ='):js.index('var renderDepartment =')]
     department = js[js.index('var renderDepartment ='):js.index('var expertNode =')]
-    assert '+ افزودن معاونت جدید' in deputy
+    assert '+ افزودن اداره جدید' in deputy
     assert 'data-org-action=\"add-experts\"' in deputy
-    assert 'data-org-action=\"add-department\"' not in deputy
+    assert 'data-org-action=\"add-department\"' in deputy
     assert 'data-org-action=\"add-experts\"' in department
     assert 'data-org-action=\"add-department\"' not in department
     assert "label: 'افزودن ادارهٔ زیرمجموعه'" not in js

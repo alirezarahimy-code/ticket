@@ -9,6 +9,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_NAME = "ticket-update-1.62.19-bulk-user-structure-actions-split-20261025.zip"
@@ -83,9 +84,10 @@ def test_version_manifest_and_package():
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in names and f"files/migrations/{mig}" in names, mig
     assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.19"
-    # index.php در ۱.۶۲.۲۰ (برش ۹) تغییر کرد؛ مقایسهٔ بایتی فقط برای فایل‌های برش ۸ این نسخه.
+    # بستهٔ تاریخی است: مقایسهٔ بایتی با کد جاری انجام نمی‌شود (این فایل‌ها در
+    # ۱.۶۲.۵۲..۱.۶۲.۵۹ تغییر کرده‌اند). یکپارچگی بسته با SHA-256 تأیید می‌شود.
     for rel in list(FILES_AND_ACTIONS):
-        assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
+        assert f"files/{rel}" in names
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
     # پین SHA در صفحهٔ دانلود از ۱.۶۲.۲۰ حذف شد (صفحه فقط بستهٔ جاری را نشان می‌دهد).
@@ -111,10 +113,7 @@ def test_panel_asset_refs_are_all_packaged():
 
 
 def test_download_page_lists_only_latest_package():
-    page = read("downloads/index.html")
-    # از ۱.۶۲.۲۰ صفحهٔ دانلود فقط بستهٔ جاری را نشان می‌دهد.
-    assert "ticket-update-1.62.20-backup-split-bootstrap-lib-20261025.zip" in page
-    assert PACKAGE_NAME not in page
-    assert "ticket-update-1.62.18-account-misc-actions-split-20261025.zip" not in page
-    assert "ticket-update-1.62.17-supervisor-holiday-actions-split-20261025.zip" not in page
-    # از ۱.۶۲.۲۰ متن صفحه دربارهٔ بستهٔ جاری است؛ پین محتوای برش ۸ حذف شد.
+    # قاعدهٔ پروژه: صفحهٔ دانلود فقط جدیدترین بستهٔ منتشرشده را نشان می‌دهد.
+    # بررسی نسخه‌آگنوستیک است تا با هر انتشار، تست کهنه نشود.
+    check_download_page_lists_only_latest_package()
+

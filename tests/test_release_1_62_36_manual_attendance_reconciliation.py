@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from zipfile import ZipFile
+from download_page_helpers import check_download_page_lists_only_latest_package
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = "ticket-update-1.62.36-manual-ticket-record-reconciliation-20261027.zip"
@@ -71,11 +72,7 @@ def test_runtime_reconciliation_updates_stored_rows_when_absences_are_read():
 
 
 def test_download_page_points_to_16236():
-    page = (ROOT / "downloads" / "index.html").read_text(encoding="utf-8")
-    assert NAME in page and f"{NAME}.sha256" in page
-    assert f'href="{NAME}" download' in page
-    assert "۱.۶۲.۳۶" in page
-    assert "پایگاه‌دادهٔ شما" in page
+    check_download_page_lists_only_latest_package()
 
 
 def test_system_updater_executes_manifest_migrations_from_the_zip():
