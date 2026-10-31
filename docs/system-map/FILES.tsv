@@ -217,14 +217,16 @@ downloads/CHANGE-REPORT-FA-1.62.56-CUMULATIVE.md	history-downloads	27	4938
 downloads/CHANGE-REPORT-FA-1.62.57.md	history-downloads	23	3013
 downloads/CHANGE-REPORT-FA-1.62.58.md	history-downloads	28	3160
 downloads/CHANGE-REPORT-FA-1.62.59-CUMULATIVE.md	history-downloads	31	3187
+downloads/CHANGE-REPORT-FA-1.62.59-VERSION-INTEGRITY.md	history-downloads	17	3700
 downloads/CHANGE-REPORT-FA-1.62.59.md	history-downloads	13	1392
 downloads/ORG-TREE-UPDATE-README-FA-1.62.56-CUMULATIVE.md	history-downloads	9	1486
 downloads/README-AGGREGATE-UPDATE.md	history-downloads	15	609
 downloads/README-RECOVERY-FA.md	history-downloads	45	2543
 downloads/URGENT-FIX-1.62.38-FA.md	history-downloads	51	3340
-downloads/index.html	history-downloads	47	5608
+downloads/index.html	history-downloads	47	6077
 downloads/repair-1.62.36.html	history-downloads	54	6825
 downloads/ticket-repair-1.62.36-full-source-restore-20261027.html	history-downloads	21	5176
+downloads/verify-package-1.62.59.php	history-downloads	64	2346
 food-order-import.php	core	476	26389
 food-order.php	core	3487	184600
 food-personnel-link.php	core	817	42352
@@ -351,6 +353,7 @@ tests/js/list-sort-export.test.js	tests	62	3238
 tests/js/list-sort-rowclasses.test.js	tests	38	2145
 tests/js/list-sort.test.js	tests	110	5679
 tests/smoke.php	tests	182	35323
+tests/test_16259_version_integrity_package.py	tests	49	2559
 tests/test_admin_layout_design_static.py	tests	98	5621
 tests/test_asset_inventory_form_compat_static.py	tests	70	3439
 tests/test_asset_profile_mapping_static.py	tests	66	3799
@@ -853,6 +856,9 @@ updates/2026-10-31-release-162-59-cumulative-visual-fix/CHANGE-REPORT-FA-1.62.59
 updates/2026-10-31-release-162-59-cumulative-visual-fix/CHANGE-REPORT-FA-1.62.59.md	history-updates	17	2116
 updates/2026-10-31-release-162-59-cumulative-visual-fix/README.fa.md	history-updates	10	1043
 updates/2026-10-31-release-162-59-cumulative-visual-fix/manifest.json	history-updates	33	1350
+updates/2026-11-01-release-162-59-version-integrity/CHANGE-REPORT-FA.md	history-updates	17	3700
+updates/2026-11-01-release-162-59-version-integrity/manifest.json	history-updates	34	1189
+updates/2026-11-01-release-162-59-version-integrity/migrations/.gitkeep	history-updates	0	0
 upgrade-1.1-departments.sql	sql-root	15	999
 upgrade-1.10-priority.sql	sql-root	10	804
 upgrade-1.11-user-profile.sql	sql-root	4	311
