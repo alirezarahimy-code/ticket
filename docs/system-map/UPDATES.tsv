@@ -109,3 +109,6 @@ package	version	requires_version	files	migrations	date
 2026-10-27-release-162-35-profile-functions-and-attendance-reconciliation	1.62.35	1.62.25	13	2	2026-10-27
 2026-10-27-release-162-36-manual-attendance-record-backfill	1.62.36	1.62.35	3	3	2026-10-27
 2026-10-27-repair-162-36-full-source-restore	1.62.36	1.62.36	71	5	2026-10-27
+2026-10-30-release-162-56-cumulative-org-access-chart-multicompany	1.62.56	1.62.47	15	2	2026-10-30
+2026-10-31-release-162-59-cumulative-post59	1.62.59	1.62.58	21	0	2026-10-31
+2026-10-31-release-162-59-cumulative-visual-fix	1.62.59	1.62.58	21	0	2026-10-31

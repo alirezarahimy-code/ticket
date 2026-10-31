@@ -11,6 +11,8 @@
   var state = {
     items: [],
     myDeputy: null,
+    canCreate: false,
+    canCreateWithoutDeputy: false,
     todayJalali: '',
     sameDayCutoff: '09:30',
     sameDayOpen: null,
@@ -75,8 +77,10 @@
   function render() {
     var f = state.form;
     var deputyBox = state.myDeputy
-      ? '<div class="alert info" role="status">معاونت درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از چارت سازمانی شما خوانده می‌شود)</div>'
-      : '<div class="alert info" role="status">برای ثبت درخواست جدید باید در چارت سازمانی زیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
+      ? '<div class="alert info" role="status">معاونت درخواست‌کننده: <b>' + esc(state.myDeputy.name) + '</b> (از جایگاه مدیریتی شما خوانده می‌شود)</div>'
+      : state.canCreateWithoutDeputy
+        ? '<div class="alert info" role="status">درخواست شما با عنوان «مدیریت مرکزی» ثبت می‌شود و به معاونت خاصی نسبت داده نمی‌شود.</div>'
+        : '<div class="alert info" role="status">برای ثبت درخواست جدید باید مدیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
     var rows = state.items.map(function (r) {
       var actions = [];
       if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + r.id + '">ویرایش</button>');
@@ -119,7 +123,7 @@
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
       + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
       + '<label>یادداشت (اختیاری)<input type="text" name="note" maxlength="500" value="' + esc(f.note) + '"></label>'
-      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.myDeputy) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
+      + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.canCreate) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
       + '<h3 style="margin-top:20px">درخواست‌های ثبت‌شدهٔ مهمان (از امروز به بعد)</h3>'
@@ -160,6 +164,8 @@
       var data = await request('guest-requests');
       state.items = data.items || [];
       state.myDeputy = data.my_deputy || null;
+      state.canCreate = data.can_create === true || !!state.myDeputy;
+      state.canCreateWithoutDeputy = data.can_create_without_deputy === true;
       state.todayJalali = data.today_jalali || state.todayJalali;
       state.sameDayCutoff = data.same_day_cutoff || '09:30';
       state.sameDayOpen = data.same_day_open !== false;
@@ -260,6 +266,9 @@
   function open() {
     ensureDialog();
     state.editingId = 0;
+    state.canCreate = false;
+    state.canCreateWithoutDeputy = false;
+    state.myDeputy = null;
     state.formError = '';
     state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
     render();

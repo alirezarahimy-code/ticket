@@ -53,7 +53,7 @@ if (!defined('APP_ROOT')) {
         // ───── گروه اکشن: اتصال کاربر دامین به غذا و نقش کاربران ─────
         if ($action === 'link_domain_food_by_code') {
             require_primary_admin();
-            require_once __DIR__ . '/food-personnel-link.php';
+            require_once dirname(__DIR__) . '/food-personnel-link.php';
             $domainId = (int) ($_POST['user_id'] ?? 0);
             $authoritativeCode = normalize_employee_number(post_value('employee_number'));
             if ($domainId <= 0 || $authoritativeCode === null) {
@@ -226,7 +226,7 @@ if (!defined('APP_ROOT')) {
             }
             $employeeNumberValue = normalize_employee_number($employeeNumber);
             if ($employeeNumberValue !== null) {
-                require_once __DIR__ . '/food-personnel-link.php';
+                require_once dirname(__DIR__) . '/food-personnel-link.php';
             }
             $mergeFoodId = 0;
             $mergeFood = null;
@@ -343,7 +343,7 @@ if (!defined('APP_ROOT')) {
             foreach ($memberIds as $memberId) {
                 $clearOldManagers->execute([$memberId, $departmentId]);
             }
-            db()->prepare('UPDATE users SET role = "manager" WHERE id = ? AND role NOT IN ("admin", "supervisor")')->execute([$managerId]);
+            db()->prepare('UPDATE users SET role = "manager" WHERE id = ? AND role NOT IN ("admin", "primary_admin", "supervisor", "support_manager", "inspector") AND is_primary_admin = 0')->execute([$managerId]);
             db()->prepare('UPDATE departments SET manager_user_id = ? WHERE id = ?')->execute([$managerId, $departmentId]);
             db_commit('index.php');
             flash('success', 'مدیر و اعضای معاونت ذخیره شدند.');

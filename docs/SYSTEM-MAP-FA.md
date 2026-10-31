@@ -1,7 +1,7 @@
 # نقشهٔ کامل سامانه (SYSTEM MAP) — مرجع ناوبری ۰ تا ۱۰۰
 
 **تاریخ تهیه:** ۲۰۲۶-۱۰-۲۷ · **شاخه:** `arena/38fea5b6-ticket`
-**نسخهٔ سامانه:** `1.62.36` (تگ `v1.62.36`، کامیت `e2afc13`)
+**نسخهٔ سامانه:** `1.62.59` (هم‌تراز با بستهٔ منتشرشدهٔ `ticket-update-1.62.59-cumulative-org-card-drag-20261031`؛ آخرین تگ رسمی `v1.62.36` روی `e2afc13`)
 **منبع حقیقت:** `tools/build_system_map.py` → `docs/system-map/*.tsv`
 **تست تازگی:** `python3 tools/build_system_map.py --check`
 

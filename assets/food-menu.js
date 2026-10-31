@@ -3,8 +3,10 @@
   'use strict';
 
   var Cal = global.FoodOrderCalendar;
-  var canMenu = global.FOOD_TICKET_CAN_MENU_EDIT === true;
-  var canClose = global.FOOD_TICKET_CAN_ORDER_CLOSE === true;
+  var canMenu = global.FOOD_TICKET_CAN_MENU === true || global.FOOD_TICKET_CAN_MENU_EDIT === true;
+  var canMenuEdit = global.FOOD_TICKET_CAN_MENU_EDIT === true;
+  var canClose = canMenuEdit;
+  var canReports = !!(global.FOOD_TICKET_VIEWS && global.FOOD_TICKET_VIEWS.reports === true);
   var isPrimary = global.FOOD_TICKET_IS_PRIMARY_ADMIN === true;
   var apiBase = String(global.FOOD_TICKET_API_BASE || '');
   var csrf = String(global.FOOD_TICKET_CSRF || '');
@@ -173,10 +175,10 @@
 
   function navTabs() {
     var tabs = [];
-    if (canMenu || canClose) tabs.push(['calendar', 'برنامهٔ روزانه']);
+    if (canMenu) tabs.push(['calendar', 'برنامهٔ روزانه']);
     if (canMenu) tabs.push(['catalog', 'بانک غذا']);
-    if (canEmergency || canManageGuestRequests) tabs.push(['bulk', 'عملیات گروهی']);
-    if (canClose) {
+    if (canMenu) tabs.push(['bulk', 'عملیات گروهی']);
+    if (canMenu) {
       var cancelCount = (state.cancelRequests || []).length;
       var cancelLabel = 'درخواست‌های لغو' + (cancelCount ? (' (' + faDigits(cancelCount) + ')') : '');
       // «سفارش‌های روز» و «آمار سفارش‌ها» به منوی «گزارش‌ها» منتقل شدند.
@@ -221,7 +223,7 @@
     if (!state.selectedDate) return '<div class="fm-card"><div class="fm-empty">یک روز از تقویم انتخاب کنید.</div></div>';
     var iso = state.selectedDate;
     var day = getDay(iso);
-    if (!canMenu) {
+    if (!canMenuEdit) {
       var readOnlyFoods = day && Array.isArray(day.items) ? day.items.map(function (item) { return esc(item.food_name || ''); }).join('، ') : '';
       var readOnlyStatus = day && day.order_status === 'closed' ? 'بسته' : (day && day.order_status === 'open' ? 'باز' : 'بدون برنامه');
       var readOnlyCount = activeOrderCount(day);
@@ -232,10 +234,9 @@
     var scheduledIds = scheduled.map(function (item) { return Number(item.food_id); });
     var title = jalaliFromIso(iso);
     var inactiveSchedule = scheduled.filter(function (item) { return item.food_active === false; });
-    var dayReadOnly = state.status && state.status.today && iso < state.status.today;
     var impactPending = Boolean(state.pendingImpact && state.pendingImpact.date === iso);
-    var editorLocked = Boolean(state.daySaving || impactPending || (day && day.order_status === 'closed' && !canClose) || (dayReadOnly && !isPrimary));
-    var lockedMessage = day && day.order_status === 'closed' && !canClose ? 'این روز بسته است؛ برای تغییر برنامهٔ روز بسته مجوز food.order_close لازم است.' : (dayReadOnly && !isPrimary ? 'روز گذشته فقط‌خواندنی است؛ فقط ادمین اصلی می‌تواند برنامه‌اش را اصلاح کند.' : '');
+    var editorLocked = Boolean(state.daySaving || impactPending);
+    var lockedMessage = '';
     var choiceHtml = function (food) {
       var included = scheduledIds.indexOf(Number(food.id)) >= 0;
       var inactive = !food.active;
@@ -260,7 +261,7 @@
     var selectedStatus = day && day.order_status ? day.order_status : 'open';
     var statusControl = canClose
       ? '<fieldset class="fm-field fm-status-choice"><legend>وضعیت سفارش‌گیری</legend><label class="fm-radio"><input type="radio" name="order_status" value="open" ' + (selectedStatus === 'open' ? 'checked' : '') + (editorLocked ? ' disabled' : '') + '>باز</label><label class="fm-radio"><input type="radio" name="order_status" value="closed" ' + (selectedStatus === 'closed' ? 'checked' : '') + (editorLocked ? ' disabled' : '') + '>بسته</label></fieldset>'
-      : '<div class="fm-alert">وضعیت روز: ' + esc(selectedStatus === 'closed' ? 'بسته' : 'باز') + ' — برای تغییر وضعیت دسترسی food.order_close لازم است.</div>';
+      : '<div class="fm-alert">وضعیت روز: ' + esc(selectedStatus === 'closed' ? 'بسته' : 'باز') + ' — برای تغییر وضعیت به دسترسی ویرایش برنامهٔ غذایی نیاز است.</div>';
     var impactButtonsDisabled = state.daySaving ? ' disabled' : '';
     var pending = state.pendingImpact && state.pendingImpact.date === iso ? '<div class="fm-confirm-box"><strong>' + esc(state.pendingImpactMessage || 'این تغییر سفارش فعال را لغو می‌کند.') + '</strong><span>برای انجام تغییر و ثبت لغوها، تأیید کنید. حذف فیزیکی سفارش انجام نمی‌شود.</span><button class="btn danger" type="button" data-fm-action="confirm-impact"' + impactButtonsDisabled + '>تأیید و ادامه</button><button class="btn secondary" type="button" data-fm-action="cancel-impact"' + impactButtonsDisabled + '>بازگشت</button></div>' : '';
     var message = state.dayError ? '<div class="fm-alert error">' + esc(state.dayError) + '</div>' : '';
@@ -316,9 +317,10 @@
         + body + '</div>';
     }).join('');
     var list = catalog.length ? '<div class="fm-cat-list">' + groups + '</div>' : '<div class="fm-empty">غذایی ثبت نشده است.</div>' + groups;
-    return '<div class="fm-card"><div class="fm-toolbar"><div><h3>بانک غذا</h3><span class="fm-small">هر غذا یک بار و با یک نام ثبت می‌شود؛ نام تکراری پذیرفته نمی‌شود. دسته‌بندی‌ها ریشه‌اند: با «+» غذاهای آن دسته (دو ستونه) باز می‌شود و با «-» جمع می‌شود. غیرفعال‌سازی به‌جای حذف فیزیکی انجام می‌شود. غذای استفاده‌شده در تقویم قابل تغییر نام نیست تا سابقهٔ سفارش حفظ شود.</span></div></div>'
-      + '<form id="fm-catalog-add" class="fm-catalog-form"><label class="fm-field">نام غذای جدید<input type="text" name="food_name" maxlength="190" required placeholder="مثلاً چلو مرغ"></label><label class="fm-field">دسته‌بندی<select name="category" aria-label="دسته‌بندی غذای جدید">' + categoryOptions('سایر') + '</select></label><button class="btn primary" type="submit">افزودن غذا</button></form>'
-      + list + '</div>';
+    var addForm = canMenuEdit ? '<form id="fm-catalog-add" class="fm-catalog-form"><label class="fm-field">نام غذای جدید<input type="text" name="food_name" maxlength="190" required placeholder="مثلاً چلو مرغ"></label><label class="fm-field">دسته‌بندی<select name="category" aria-label="دسته‌بندی غذای جدید">' + categoryOptions('سایر') + '</select></label><button class="btn primary" type="submit">افزودن غذا</button></form>' : '';
+    var catalogList = list;
+    if (!canMenuEdit) catalogList = catalogList.replace(/<(input|select|button)\b/g, '<$1 disabled');
+    return '<div class="fm-card"><div class="fm-toolbar"><div><h3>بانک غذا</h3><span class="fm-small">هر غذا یک بار و با یک نام ثبت می‌شود؛ نام تکراری پذیرفته نمی‌شود. دسته‌بندی‌ها ریشه‌اند: با «+» غذاهای آن دسته (دو ستونه) باز می‌شود و با «-» جمع می‌شود. غیرفعال‌سازی به‌جای حذف فیزیکی انجام می‌شود. غذای استفاده‌شده در تقویم قابل تغییر نام نیست تا سابقهٔ سفارش حفظ شود.</span></div></div>' + addForm + catalogList + '</div>';
   }
 
   var ORDER_COLUMNS = [
@@ -720,7 +722,7 @@
       ? '<div class="fm-view-switch" aria-label="نحوهٔ نمایش سفارش‌های گروه">'
         + '<button class="btn ' + (state.groupOrdersView === 'list' ? 'primary' : 'secondary') + '" type="button" data-fm-action="group-orders-view" data-orders-view="list">فهرست یکجا</button>'
         + '<button class="btn ' + (state.groupOrdersView === 'menu' ? 'primary' : 'secondary') + '" type="button" data-fm-action="group-orders-view" data-orders-view="menu">نمایش بر اساس منو</button></div>' : '';
-    return '<section class="fm-card fm-group-orders"><div class="fm-toolbar"><div><h3>لیست سفارش گروه‌های غذا</h3><span class="fm-small">سفارش اعضای گروه در تاریخ انتخاب‌شده، با جابه‌جایی روزانهٔ اعضا لحاظ‌شده.</span></div>' + (state.groupOrdersLoaded ? '<button class="btn secondary" type="button" data-fm-action="group-orders-print">چاپ</button>' : '') + '</div><form id="fm-group-orders-form" class="fm-order-date"><label class="fm-field">گروه غذا<select name="group_id" required' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>' + groupOptions + '</select></label><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(dateLabel)) + '" required></label><button class="btn primary" type="submit"' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>مشاهده</button></form>' + (!state.foodGroupsLoaded ? '<div class="fm-small">در حال بارگذاری فهرست گروه‌ها…</div>' : (!state.foodGroups.length ? '<div class="fm-empty">گروه فعالی برای انتخاب وجود ندارد.</div>' : '')) + viewBar + '<div class="fm-group-report-content">' + report + '</div></section>';
+    return '<section class="fm-card fm-group-orders"><div class="fm-toolbar"><div><h3>لیست سفارش گروه‌های غذا</h3><span class="fm-small">سفارش اعضای گروه در تاریخ انتخاب‌شده، با جابه‌جایی روزانهٔ اعضا لحاظ‌شده.</span></div>' + (state.groupOrdersLoaded ? '<button class="btn secondary" type="button" data-fm-action="group-orders-print">چاپ</button>' : '') + '</div><form id="fm-group-orders-form" class="fm-order-date"><label class="fm-field">گروه غذا<select name="group_id" required' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>' + groupOptions + '</select></label><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(dateLabel)) + '" required></label><button class="btn primary" type="submit"' + (!state.foodGroupsLoaded || !state.foodGroups.length ? ' disabled' : '') + '>مشاهده</button></form>' + (!state.foodGroupsLoaded ? '<div class="fm-small">در حال بارگذاری فهرست گروه‌ها…</div>' : (!state.foodGroups.length ? '<div class="fm-empty">گروهی برای انتخاب وجود ندارد.</div>' : '')) + viewBar + '<div class="fm-group-report-content">' + report + '</div></section>';
   }
 
   function renderCancelRequests() {
@@ -734,8 +736,7 @@
       body = '<div class="fm-table-wrap"><table class="fm-rows"><thead><tr><th>تاریخ غذا</th><th>وعده</th><th>نام پرسنل</th><th>غذا</th><th>درخواست‌دهنده</th><th>زمان ثبت درخواست</th><th>عملیات</th></tr></thead><tbody>'
         + rows.map(function (row) {
           return '<tr><td>' + esc(faDigits(row.food_date_jalali || jalaliFromIso(row.food_date) || row.food_date || '')) + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(row.employee_name || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + esc(row.requester_name || '—') + '</td><td>' + esc(faDigits(row.requested_at_label || row.requested_at || row.created_at || '—')) + '</td><td>'
-            + '<button class="btn danger" type="button" data-fm-action="cancel-req-approve" data-id="' + Number(row.id) + '">لغو سفارش</button> '
-            + '<button class="btn secondary" type="button" data-fm-action="cancel-req-reject" data-id="' + Number(row.id) + '">رد درخواست</button></td></tr>';
+            + (canMenuEdit ? '<button class="btn danger" type="button" data-fm-action="cancel-req-approve" data-id="' + Number(row.id) + '">لغو سفارش</button> <button class="btn secondary" type="button" data-fm-action="cancel-req-reject" data-id="' + Number(row.id) + '">رد درخواست</button>' : 'فقط‌خواندنی') + '</td></tr>';
         }).join('') + '</tbody></table></div>';
     }
     return '<section class="fm-card"><div class="fm-toolbar"><div><h3>درخواست لغو روزهای بسته‌شده</h3><span class="fm-small">کاربر وقتی روز سفارش بسته است درخواست می‌فرستد. همین فهرست در داشبورد مدیر پشتیبانی و مدیر اصلی هم هست؛ اعلان در زنگولهٔ سامانه ثبت می‌شود.</span></div><button class="btn secondary" type="button" data-fm-action="cancel-req-reload">تازه‌سازی</button></div>' + body + '</section>';
@@ -826,7 +827,7 @@
 
   function bulkCanSelect(person) {
     var bulk = state.bulk;
-    if (!bulk.snapshot) return false;
+    if (!canMenuEdit || !bulk.snapshot) return false;
     var pastWindowAllowed = Boolean(bulk.snapshot.is_past && bulk.snapshot.late_order_window_open && ['order', 'cancel'].includes(bulk.operation));
     if (bulk.snapshot.is_past && !pastWindowAllowed) return false;
     if (bulk.operation === 'order') return Boolean(bulk.snapshot.has_calendar && (bulk.items || []).length && Number(bulk.target || 0) > 0);
@@ -843,7 +844,7 @@
   }
 
   function loadBulkSnapshot(date, mealType) {
-    if (!canEmergency || state.bulk.operation === 'guest') return;
+    if (!canMenu || state.bulk.operation === 'guest') return;
     var bulk = state.bulk;
     var iso = normalizeIsoDate(date || bulk.date || state.selectedDate || (state.status && state.status.today) || localTodayIso());
     if (!iso) { state.error = 'تاریخ را از تقویم شمسی به‌درستی انتخاب کنید.'; render(); return; }
@@ -939,13 +940,13 @@
 
   function renderBulkOperations() {
     var bulk = state.bulk;
-    var availableModes = canEmergency ? [['canteen', 'تغییر سلف'], ['order', 'ثبت یا تغییر سفارش'], ['cancel', 'لغو سفارش']] : [];
-    if (canManageGuestRequests) availableModes.push(['guest', 'مدیریت درخواست مهمان']);
+    var availableModes = [];
+    if (canMenu) availableModes.push(['canteen', 'تغییر سلف'], ['order', 'ثبت یا تغییر سفارش'], ['cancel', 'لغو سفارش'], ['guest', 'مدیریت درخواست مهمان']);
     var operationTabs = availableModes.map(function (item) {
       return '<button type="button" class="fm-bulk-mode ' + (bulk.operation === item[0] ? 'active' : '') + '" role="tab" aria-selected="' + (bulk.operation === item[0] ? 'true' : 'false') + '" data-fm-action="bulk-mode" data-mode="' + item[0] + '">' + item[1] + '</button>';
     }).join('');
-    var sectionHead = '<div class="fm-toolbar"><div><h3>عملیات گروهی غذا</h3><span class="fm-small">مدیریت گروهی سفارش‌ها و درخواست‌های غذای مهمان.</span></div><span class="fm-bulk-admin-tag">دسترسی مدیر پشتیبانی / ادمین اصلی</span></div><div class="fm-bulk-operation-tabs" role="tablist">' + operationTabs + '</div>';
-    if (bulk.operation === 'guest' && canManageGuestRequests) return '<section class="fm-card fm-bulk-page">' + sectionHead + renderGuestRequestManager() + '</section>';
+    var sectionHead = '<div class="fm-toolbar"><div><h3>عملیات گروهی غذا</h3><span class="fm-small">مدیریت گروهی سفارش‌ها و درخواست‌های غذای مهمان.</span></div><span class="fm-bulk-admin-tag">مجوزهای برنامهٔ غذایی</span></div><div class="fm-bulk-operation-tabs" role="tablist">' + operationTabs + '</div>';
+    if (bulk.operation === 'guest' && canMenu) return '<section class="fm-card fm-bulk-page">' + sectionHead + renderGuestRequestManager() + '</section>';
     if (!bulk.snapshot && bulk.loading) return '<section class="fm-card fm-bulk-page">' + sectionHead + '<div class="fm-spinner">در حال بارگذاری فهرست پرسنل و سفارش‌های روز…</div></section>';
     var snapshot = bulk.snapshot;
     if (!snapshot) return '<section class="fm-card fm-bulk-page">' + sectionHead + '<div class="fm-empty">برای مشاهدهٔ عملیات گروهی، تاریخ و وعده را انتخاب کنید.</div></section>';
@@ -971,17 +972,19 @@
       : (isClosed ? '<div class="fm-alert good">سفارش این روز بسته شده است؛ در این تب مدیر مجاز است سفارش را ثبت/تغییر/لغو کند.</div>' : '');
     if (isPastBlocked) topStatus += '<div class="fm-alert warn">این تاریخ گذشته است و مهلت اضطراری فعال ندارد؛ عملیات سفارش/لغو ممکن نیست.</div>';
     else if (isPast && pastOperationAllowed) topStatus += '<div class="fm-alert good">مهلت اضطراری همین تاریخ و وعده فعال است؛ ثبت یا لغو گروهی سفارش تا پایان مهلت مجاز است. تغییر سلف برای تاریخ گذشته مجاز نیست.</div>';
-    var previewDisabled = (!bulk.selectedIds.length || isPastBlocked || (bulk.operation === 'cancel' && !String(bulk.reason || '').trim())) ? ' disabled' : '';
+    var previewDisabled = (!canMenuEdit || !bulk.selectedIds.length || isPastBlocked || (bulk.operation === 'cancel' && !String(bulk.reason || '').trim())) ? ' disabled' : '';
     return '<section class="fm-card fm-bulk-page">' + sectionHead
       + topStatus
+      + (!canMenuEdit ? '<div class="fm-alert warn" role="status">حالت مشاهده: برای اجرای عملیات گروهی، مجوز ویرایش «برنامه غذایی» لازم است.</div>' : '')
       + '<form id="fm-bulk-date-form" class="fm-bulk-controls"><label class="fm-field">تاریخ غذا<input type="text" name="date" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(jalaliFromIso(bulk.date) || bulk.date)) + '" required></label><label class="fm-field">وعدهٔ غذایی<select name="meal_type"><option value="lunch"' + (bulk.mealType === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (bulk.mealType === 'dinner' ? ' selected' : '') + '>شام</option></select></label>' + targetBlock + '<button class="btn secondary" type="submit"' + (bulk.loading ? ' disabled' : '') + '>بارگذاری فهرست روز</button></form>'
-      + '<div class="fm-bulk-people-head"><div><strong>پرسنل</strong><small>' + faDigits(rows.length) + ' نفر در فهرست · ' + faDigits(bulk.selectedIds.length) + ' نفر انتخاب‌شده</small></div><div class="fm-bulk-tools"><input type="search" data-bulk-search placeholder="جست‌وجوی نام، شماره یا واحد" value="' + esc(bulk.search || '') + '"><button type="button" class="btn secondary" data-fm-action="bulk-select-all">انتخاب واجدان شرایط</button><button type="button" class="btn secondary" data-fm-action="bulk-clear-selection">پاک‌کردن انتخاب</button><button type="button" class="btn primary" data-fm-action="bulk-preview"' + previewDisabled + '>پیش‌نمایش و بررسی</button></div></div>'
+      + '<div class="fm-bulk-people-head"><div><strong>پرسنل</strong><small>' + faDigits(rows.length) + ' نفر در فهرست · ' + faDigits(bulk.selectedIds.length) + ' نفر انتخاب‌شده</small></div><div class="fm-bulk-tools"><input type="search" data-bulk-search placeholder="جست‌وجوی نام، شماره یا واحد" value="' + esc(bulk.search || '') + '"><button type="button" class="btn secondary" data-fm-action="bulk-select-all"' + (canMenuEdit ? '' : ' disabled') + '>انتخاب واجدان شرایط</button><button type="button" class="btn secondary" data-fm-action="bulk-clear-selection">پاک‌کردن انتخاب</button><button type="button" class="btn primary" data-fm-action="bulk-preview"' + previewDisabled + '>پیش‌نمایش و بررسی</button></div></div>'
       + '<div class="fm-table-wrap"><table class="fm-rows fm-bulk-table"><thead><tr><th></th><th>نام پرسنل / واحد</th><th>شمارهٔ پرسنلی</th><th>' + (bulk.operation === 'canteen' ? 'سلف فعلی' : 'سفارش فعلی') + '</th><th>وضعیت عملیات</th></tr></thead><tbody>' + peopleRows + '</tbody></table></div>'
       + '<div class="fm-bulk-footer"><span>انتخاب‌شده: <b>' + faDigits(bulk.selectedIds.length) + '</b> نفر</span></div>'
       + renderBulkResults() + renderBulkModal() + '</section>';
   }
 
   function bulkTogglePerson(id, checked) {
+    if (!canMenuEdit) return;
     var selected = new Set((state.bulk.selectedIds || []).map(Number));
     if (checked && selected.size >= 100 && !selected.has(Number(id))) { state.error = 'در هر نوبت حداکثر ۱۰۰ نفر قابل انتخاب است.'; render(); return; }
     if (checked) selected.add(Number(id)); else selected.delete(Number(id));
@@ -992,6 +995,7 @@
   }
 
   function bulkSelectEligible() {
+    if (!canMenuEdit) return;
     var eligible = (state.bulk.people || []).filter(bulkCanSelect).map(function (person) { return Number(person.id); });
     state.bulk.selectedIds = eligible.slice(0, 100);
     state.error = eligible.length > 100 ? 'برای هر نوبت فقط ۱۰۰ نفر انتخاب شد؛ برای بقیه، عملیات را در نوبت بعدی اجرا کنید.' : '';
@@ -999,6 +1003,7 @@
   }
 
   async function submitBulkOperation() {
+    if (!canMenuEdit) return;
     var bulk = state.bulk;
     var ids = (bulk.selectedIds || []).map(Number).filter(function (id) { return id > 0; });
     if (!ids.length) { state.error = 'حداقل یک نفر را انتخاب کنید.'; render(); return; }
@@ -1037,7 +1042,12 @@
     if (!state.embeddedMode) return Promise.resolve();
     var from = state.statisticsFrom || state.selectedDate;
     var to = state.statisticsTo || state.selectedDate;
-    if (state.embeddedMode === 'todayorders') return loadOrders(state.ordersDate || state.selectedDate);
+    if (state.embeddedMode === 'todayorders') {
+      return Promise.all([
+        loadOrders(state.ordersDate || state.selectedDate),
+        loadFoodGroups()
+      ]);
+    }
     if (state.embeddedMode === 'delivered') { var d = deliveryDateForReport(); return loadPrintedDeliveryReport(d, d); }
     return loadStatistics(from, to, state.statisticsMode || 'food');
   }
@@ -1053,14 +1063,14 @@
       root.innerHTML = '<div class="fm-alert error">تقویم شمسی سامانه بارگذاری نشد. صفحه را تازه‌سازی کنید.</div>';
       return;
     }
-    var panel = state.embeddedMode ? embeddedPanel() : (state.tab === 'calendar' && (canMenu || canClose) ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canClose ? renderOrders() : state.tab === 'cancel-requests' && canClose ? renderCancelRequests() : state.tab === 'statistics' && canClose ? renderStatistics() : state.tab === 'bulk' && (canEmergency || canManageGuestRequests) ? renderBulkOperations() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>');
+    var panel = state.embeddedMode ? embeddedPanel() : (state.tab === 'calendar' && (canMenu || canClose) ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canReports ? renderOrders() : state.tab === 'cancel-requests' && canMenu ? renderCancelRequests() : state.tab === 'statistics' && canReports ? renderStatistics() : state.tab === 'bulk' && canMenu ? renderBulkOperations() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>');
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
     root.innerHTML = state.embeddedMode ? ('<div class="fm-embedded-report">' + notices + panel + '</div>') : ('<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel);
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
   }
 
   async function loadStatus() {
-    if (!canMenu && !canClose) return null;
+    if (!canMenu) return null;
     try {
       state.status = await request('food-menu/status');
       if (!state.selectedDate && state.status.today) state.selectedDate = state.status.today;
@@ -1079,7 +1089,7 @@
     } catch (e) { state.catalog = []; state.error = e.message || 'بانک غذا بارگذاری نشد.'; }
   }
   async function loadMonth() {
-    if (!canMenu && !canClose) return;
+    if (!canMenu) return;
     state.loading = true;
     try {
       state.monthData = await request('food-menu/month', { month: monthKey(), meal_type: state.mealType });
@@ -1087,7 +1097,7 @@
     finally { state.loading = false; render(); }
   }
   async function loadOrders(date) {
-    if (!canClose) return;
+    if (!canReports) return;
     var selected = normalizeIsoDate(date || state.ordersDate || state.selectedDate);
     if (!selected) return;
     state.ordersDate = selected;
@@ -1105,7 +1115,12 @@
   }
 
   async function loadFoodGroups() {
-    if (!canClose) return;
+    if (!canReports) {
+      state.foodGroups = [];
+      state.foodGroupsLoaded = true;
+      render();
+      return;
+    }
     state.foodGroupsLoaded = false;
     try {
       var result = await request('food-menu/groups');
@@ -1117,10 +1132,11 @@
       state.foodGroupsLoaded = true;
       state.error = e.message || 'فهرست گروه‌های غذا بارگذاری نشد.';
     }
+    render();
   }
 
   async function loadGroupOrders(groupId, date) {
-    if (!canClose) return;
+    if (!canReports) return;
     var selectedGroup = String(groupId || state.groupOrdersGroupId || '');
     var selectedDate = normalizeIsoDate(date || state.groupOrdersDate || state.ordersDate || state.selectedDate);
     if (!selectedGroup || !selectedDate) return;
@@ -1148,7 +1164,7 @@
   }
 
   async function loadCancelRequests() {
-    if (!canClose) return;
+    if (!canMenu) return;
     state.loadingCancelRequests = true;
     render();
     try {
@@ -1165,7 +1181,7 @@
   }
 
   async function loadGuestRequests() {
-    if (!canManageGuestRequests) return;
+    if (!canMenu) return;
     state.loadingGuestRequests = true;
     state.error = '';
     render();
@@ -1299,7 +1315,7 @@
   }
 
   async function loadStatistics(fromDate, toDate, mode) {
-    if (!canClose) return;
+    if (!canReports) return;
     var from = normalizeIsoDate(fromDate || state.statisticsFrom || state.selectedDate);
     var to = normalizeIsoDate(toDate || state.statisticsTo || from);
     var selectedMode = String(mode || state.statisticsMode || 'food');
@@ -1377,23 +1393,24 @@
     if (initialMonth && !state.monthData) { state.year = initialMonth[0]; state.month = initialMonth[1]; }
     var jobs = [];
     if (canMenu) jobs.push(loadCatalog());
-    if (canMenu || canClose) jobs.push(loadMonth());
+    if (canMenu) jobs.push(loadMonth());
     if (state.embeddedMode) jobs.push(loadEmbedded());
     else {
-      if (canClose && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
-      if (canClose) { jobs.push(loadCancelRequests()); jobs.push(loadFoodGroups()); }
+      if (canReports && state.tab === 'orders') jobs.push(loadOrders(state.ordersDate || state.selectedDate));
+      if (canMenu && state.tab === 'cancel-requests') jobs.push(loadCancelRequests());
+      if (canReports && state.tab === 'statistics') jobs.push(loadFoodGroups());
     }
     await Promise.all(jobs);
     render();
-    if (canClose && state.tab === 'statistics' && state.statisticsMode === 'selected' && !state.reportEmployeeResultsLoaded && !state.reportEmployeeSearchLoading) searchSelectedReportEmployees('');
-    if ((canEmergency || canManageGuestRequests) && state.tab === 'bulk') {
+    if (canReports && state.tab === 'statistics' && state.statisticsMode === 'selected' && !state.reportEmployeeResultsLoaded && !state.reportEmployeeSearchLoading) searchSelectedReportEmployees('');
+    if (canMenu && state.tab === 'bulk') {
       if (state.bulk.operation === 'guest' && !state.guestRequestsLoaded && !state.loadingGuestRequests) loadGuestRequests();
       else if (state.bulk.operation !== 'guest' && !state.bulk.snapshot && !state.bulk.loading) loadBulkSnapshot(state.bulk.date || state.selectedDate, state.bulk.mealType || state.mealType);
     }
   }
 
   async function saveDay(confirmed, expectedImpact) {
-    if (!canMenu || state.daySaving) return;
+    if (!canMenuEdit || state.daySaving) return;
     var form = root.querySelector('#fm-day-form');
     if (!form) return;
     var body;
@@ -1425,7 +1442,7 @@
       var result = await request('food-menu/day', null, { method: 'POST', body: JSON.stringify(body) });
       state.notice = result.message || 'برنامهٔ روز ذخیره شد.'; state.error = ''; state.dayError = '';
       await loadMonth();
-      if (canClose && state.tab === 'orders') await loadOrders(state.ordersDate || state.selectedDate);
+      if (canReports && state.tab === 'orders') await loadOrders(state.ordersDate || state.selectedDate);
     } catch (e) {
       if (e.payload && e.payload.confirmation_required) {
         state.pendingImpact = body;
@@ -1438,7 +1455,7 @@
   }
 
   async function saveCatalog(form) {
-    if (!canMenu) return;
+    if (!canMenuEdit) return;
     var isNew = form.id === 'fm-catalog-add';
     var data = new FormData(form);
     var body = { id: Number(data.get('id') || 0), food_name: String(data.get('food_name') || '').trim(), category: String(data.get('category') || 'سایر'), active: String(data.get('active') || '1') === '1' };
@@ -1501,7 +1518,7 @@
   }
 
   function downloadOrders() {
-    if (!canClose || (state.tab !== 'orders' && state.embeddedMode !== 'todayorders') || !state.ordersLoaded || state.loadingOrders || !state.ordersDate) return;
+    if (!canReports || (state.tab !== 'orders' && state.embeddedMode !== 'todayorders') || !state.ordersLoaded || state.loadingOrders || !state.ordersDate) return;
     downloadOrdersCsv();
   }
 
@@ -1537,12 +1554,12 @@
   }
 
   function printOrders() {
-    if (!canClose || (state.tab !== 'orders' && state.embeddedMode !== 'todayorders') || state.mealType !== 'lunch' || !state.ordersLoaded || state.loadingOrders) return;
+    if (!canReports || (state.tab !== 'orders' && state.embeddedMode !== 'todayorders') || state.mealType !== 'lunch' || !state.ordersLoaded || state.loadingOrders) return;
     printScopedReport('.fm-daily-orders .fm-table-wrap', 'fm-print-orders');
   }
 
   function downloadStatistics() {
-    if (!canClose || !state.statisticsLoaded || !state.statisticsFrom || !state.statisticsTo) return;
+    if (!canReports || !state.statisticsLoaded || !state.statisticsFrom || !state.statisticsTo) return;
     var params = { from: state.statisticsFrom, to: state.statisticsTo, mode: state.statisticsMode || 'food', meal_type: state.mealType };
     if (params.mode === 'selected') params.employee_ids = (state.reportSelectedEmployees || []).map(function (person) { return Number(person.id); }).filter(function (id) { return id > 0; }).join(',');
     global.location.href = buildUrl('food-menu/export', params);
@@ -1568,9 +1585,10 @@
     loadMonth();
   }
   function switchTab(tab) {
-    if ((tab === 'calendar' && !canMenu && !canClose) || (tab === 'catalog' && !canMenu)) return;
-    if ((tab === 'orders' || tab === 'statistics' || tab === 'cancel-requests') && !canClose) return;
-    if (tab === 'bulk' && !canEmergency && !canManageGuestRequests) return;
+    if ((tab === 'calendar' && !canMenu) || (tab === 'catalog' && !canMenu)) return;
+    if ((tab === 'orders' || tab === 'statistics') && !canReports) return;
+    if (tab === 'cancel-requests' && !canMenu) return;
+    if (tab === 'bulk' && !canMenu) return;
     state.tab = tab; state.error = ''; state.notice = ''; render();
     if (tab === 'cancel-requests') {
       loadCancelRequests();
@@ -1583,7 +1601,7 @@
       loadStatistics(state.statisticsFrom || state.selectedDate, state.statisticsTo || state.selectedDate, state.statisticsMode || 'food');
     }
     if (tab === 'statistics' && state.statisticsMode === 'selected' && !state.reportEmployeeResultsLoaded && !state.reportEmployeeSearchLoading) searchSelectedReportEmployees('');
-    if (tab === 'calendar' && !state.monthData && (canMenu || canClose)) loadMonth();
+    if (tab === 'calendar' && !state.monthData && canMenu) loadMonth();
     if (tab === 'catalog' && !state.catalog.length && canMenu) loadCatalog().then(render);
     if (tab === 'bulk') {
       if (state.bulk.operation === 'guest') loadGuestRequests();
@@ -1598,8 +1616,8 @@
   // ترتیب: ۱) انتخاب کاربر ۲) وارد کردن کد ملی و تطبیق با همان کاربر ۳) ثبت / تغییر سفارش یا لغو سفارش.
   var canEmergency = global.FOOD_TICKET_CAN_EMERGENCY === true;
   var canManageGuestRequests = global.FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE === true;
-  if (canEmergency && !canMenu && !canClose) state.tab = 'bulk';
-  if (canManageGuestRequests && !canEmergency && !canMenu && !canClose) {
+  if (canEmergency && !canMenu) state.tab = 'bulk';
+  if (canManageGuestRequests && !canEmergency && !canMenu) {
     state.tab = 'bulk';
     state.bulk.operation = 'guest';
   }
@@ -1810,8 +1828,7 @@
       }
       if (act === 'bulk-mode') {
         var requestedBulkMode = String(action.dataset.mode || '');
-        if (requestedBulkMode === 'guest' && !canManageGuestRequests) return;
-        if (['order', 'cancel', 'canteen'].includes(requestedBulkMode) && !canEmergency) return;
+        if (!canMenu || !['order', 'cancel', 'canteen', 'guest'].includes(requestedBulkMode)) return;
         var nextBulkMode = ['order', 'cancel', 'canteen', 'guest'].includes(requestedBulkMode) ? requestedBulkMode : 'canteen';
         state.bulk.operation = nextBulkMode;
         state.bulk.selectedIds = [];

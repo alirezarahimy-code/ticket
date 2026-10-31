@@ -348,14 +348,14 @@ function org_ceo_unit_id(?int $companyId = null): int
     throw new RuntimeException('ریشهٔ سازمان این شرکت در پایگاه‌داده پیدا نشد؛ migration شرکت‌ها را از مسیر رسمی به‌روزرسانی اجرا کنید.');
 }
 
-/** واحدهایی که می‌توان کارشناس مستقیم به آن‌ها وصل کرد: اداره یا معاونت. */
+/** واحدهایی که می‌توان کارشناس مستقیم به آن‌ها وصل کرد: معاونت، مدیریت مستقل، اداره یا واحد نمایندگی. */
 function org_unit_accepts_experts(?array $unit): bool
 {
     if ($unit === null) {
         return false;
     }
     $type = (string) ($unit['unit_type'] ?? '');
-    return in_array($type, ['department', 'deputy', 'liaison'], true) && (int) ($unit['is_active'] ?? 0) === 1;
+    return in_array($type, ['department', 'deputy', 'management', 'liaison'], true) && (int) ($unit['is_active'] ?? 0) === 1;
 }
 
 function org_unit_by_id(int $id): ?array
@@ -675,7 +675,7 @@ function org_restore_snapshot(array $target, array $expected, ?int $companyId = 
  */
 function org_position_unit_types(): array
 {
-    return ['ceo', 'company_manager', 'deputy', 'department'];
+    return ['ceo', 'company_manager', 'deputy', 'management', 'office', 'department'];
 }
 
 function org_exempt_roles(): array
@@ -724,7 +724,7 @@ function org_position_user_ids(): array
 /** @return int[] شناسهٔ کاربران عادی/کارشناسی که در واحد فعال عضو هستند. */
 function org_expert_user_ids(): array
 {
-    $rows = db()->query("SELECT DISTINCT u.id FROM users u JOIN org_units ou ON ou.id = u.org_unit_id WHERE u.org_unit_id IS NOT NULL AND u.org_unit_id > 0 AND ou.is_active = 1 AND ou.unit_type IN ('deputy', 'department', 'liaison')")->fetchAll(PDO::FETCH_COLUMN);
+    $rows = db()->query("SELECT DISTINCT u.id FROM users u JOIN org_units ou ON ou.id = u.org_unit_id WHERE u.org_unit_id IS NOT NULL AND u.org_unit_id > 0 AND ou.is_active = 1 AND ou.unit_type IN ('deputy', 'management', 'department', 'liaison')")->fetchAll(PDO::FETCH_COLUMN);
     return array_map('intval', $rows);
 }
 

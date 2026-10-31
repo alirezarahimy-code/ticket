@@ -73,7 +73,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             org_ensure_schema();
             $orgUndoSnapshot = org_snapshot($orgCompanyId);
-            $nodeType = valid_choice(post_value('node_type'), [org_company_root_type($orgCompanyId), 'deputy', 'department', 'member', 'liaison'], 'department');
+            $nodeType = valid_choice(post_value('node_type'), [org_company_root_type($orgCompanyId), 'deputy', 'management', 'office', 'department', 'member', 'liaison'], 'department');
             $ceoId = org_ceo_unit_id($orgCompanyId);
 
             if ($nodeType === org_company_root_type($orgCompanyId)) {
@@ -131,7 +131,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 throw new RuntimeException('نام واحد الزامی است.');
             }
             $chartSide = null;
-            if ($nodeType === 'deputy') {
+            if (in_array($nodeType, ['deputy', 'management', 'office'], true)) {
                 $parentId = $ceoId;
             } elseif ($nodeType === 'liaison') {
                 // ۱.۶۲.۱۰: واحد مستقل (نمایندگی) کنار مدیرعامل؛ والد ندارد و زیرمجموعهٔ مدیرعامل نیست.
@@ -145,12 +145,17 @@ if (in_array($action, $orgCompanyActions, true)) {
             } else {
                 $parentId = max(0, (int) post_value('parent_id', '0'));
                 $parentUnit = $parentId > 0 ? org_unit_by_id($parentId) : null;
-                if ($parentUnit === null || (int) ($parentUnit['is_active'] ?? 0) !== 1 || !in_array((string) $parentUnit['unit_type'], ['deputy', 'department', org_company_root_type($orgCompanyId)], true)) {
-                    throw new RuntimeException('اداره باید زیر معاونت یا ادارهٔ فعال تعریف شود.');
+                if ($parentUnit === null || (int) ($parentUnit['is_active'] ?? 0) !== 1 || !in_array((string) $parentUnit['unit_type'], ['deputy', 'management', 'department', org_company_root_type($orgCompanyId)], true)) {
+                    throw new RuntimeException('اداره باید زیر معاونت، مدیریت مستقل یا ادارهٔ فعال تعریف شود.');
                 }
                 if ($unitId > 0 && in_array($parentId, org_unit_subtree_ids($unitId), true)) {
                     throw new RuntimeException('انتقال واحد به خودش یا یکی از زیرمجموعه‌هایش مجاز نیست.');
                 }
+            }
+            if ($nodeType === 'office') {
+                $officeExists = db()->prepare('SELECT id FROM org_units WHERE company_id = ? AND unit_type = "office" AND is_active = 1 AND id <> ? LIMIT 1');
+                $officeExists->execute([$orgCompanyId, $unitId]);
+                if ($officeExists->fetchColumn()) throw new RuntimeException('برای این شرکت فقط یک دفتر مدیرعامل مجاز است؛ دفتر موجود را ویرایش کنید.');
             }
             $managerId = max(0, (int) post_value('unit_manager_id', '0'));
             if ($managerId > 0) {
@@ -194,7 +199,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot, $orgCompanyId);
             save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'chart_side' => $chartSide, 'manager' => $managerId]);
-            flash('success', $nodeType === 'deputy' ? 'معاونت ذخیره شد.' : ($nodeType === 'liaison' ? 'واحد مستقل (نمایندگی) ذخیره شد.' : 'اداره ذخیره شد.'));
+            flash('success', match ($nodeType) { 'deputy' => 'معاونت ذخیره شد.', 'management' => 'مدیریت مستقل ذخیره شد.', 'office' => 'دفتر مدیرعامل ذخیره شد.', 'liaison' => 'واحد مستقل ذخیره شد.', default => 'اداره ذخیره شد.' });
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $unitId));
         }
 
@@ -278,7 +283,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             org_ensure_schema();
             $orgUndoSnapshot = org_snapshot($orgCompanyId);
-            $targetType = valid_choice(post_value('target_type'), [org_company_root_type($orgCompanyId), 'ceo', 'company_manager', 'deputy', 'department', 'liaison'], 'department');
+            $targetType = valid_choice(post_value('target_type'), [org_company_root_type($orgCompanyId), 'ceo', 'company_manager', 'deputy', 'management', 'office', 'department', 'liaison'], 'department');
             $targetId = max(0, (int) post_value('unit_id', '0'));
             $target = in_array($targetType, ['ceo', 'company_manager'], true) ? org_unit_by_company(org_ceo_unit_id($orgCompanyId), $orgCompanyId) : org_unit_by_company($targetId, $orgCompanyId);
             if ($target === null || (int) $target['is_active'] !== 1 || (string) $target['unit_type'] !== $targetType) {
@@ -323,7 +328,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             org_ensure_schema();
             $orgUndoSnapshot = org_snapshot($orgCompanyId);
-            $targetType = valid_choice(post_value('target_type'), [org_company_root_type($orgCompanyId), 'ceo', 'company_manager', 'deputy', 'department', 'liaison'], 'department');
+            $targetType = valid_choice(post_value('target_type'), [org_company_root_type($orgCompanyId), 'ceo', 'company_manager', 'deputy', 'management', 'office', 'department', 'liaison'], 'department');
             $targetId = max(0, (int) post_value('unit_id', '0'));
             $target = in_array($targetType, ['ceo', 'company_manager'], true) ? org_unit_by_company(org_ceo_unit_id($orgCompanyId), $orgCompanyId) : org_unit_by_company($targetId, $orgCompanyId);
             if ($target === null || (int) $target['is_active'] !== 1 || (string) $target['unit_type'] !== $targetType) {
@@ -380,7 +385,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             $unitId = max(0, (int) post_value('member_unit_id', '0'));
             $unit = $unitId > 0 ? org_unit_by_id($unitId) : null;
             if (!org_unit_accepts_experts($unit)) {
-                throw new RuntimeException('کارشناس را می‌توان به معاونت، اداره یا واحد هم‌تراز مدیرعامل وصل کرد.');
+                throw new RuntimeException('کارشناس را می‌توان به معاونت، مدیریت مستقل، اداره یا واحد مستقل وصل کرد.');
             }
             $userIds = $_POST['user_ids'] ?? [];
             $userIds = is_array($userIds) ? array_values(array_unique(array_filter(array_map('intval', $userIds)))) : [];
@@ -431,7 +436,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 $unitId = (int) ($backupUnit['id'] ?? 0);
                 $unitType = (string) ($backupUnit['type'] ?? '');
                 $unitName = trim((string) ($backupUnit['name'] ?? ''));
-                if ($unitId <= 0 || $unitName === '' || mb_strlen($unitName, 'UTF-8') > 190 || !in_array($unitType, [$rootType, 'deputy', 'department', 'liaison'], true) || isset($backupUnits[$unitId])) {
+                if ($unitId <= 0 || $unitName === '' || mb_strlen($unitName, 'UTF-8') > 190 || !in_array($unitType, [$rootType, 'deputy', 'management', 'office', 'department', 'liaison'], true) || isset($backupUnits[$unitId])) {
                     throw new RuntimeException('شناسه، نام یا نوع یکی از واحدهای پشتیبان معتبر نیست.');
                 }
                 $backupUnit['id'] = $unitId; $backupUnit['type'] = $unitType; $backupUnit['name'] = $unitName;
@@ -454,12 +459,14 @@ if (in_array($action, $orgCompanyActions, true)) {
                 $backupUsers[$userId] = $backupUser;
             }
             $liaisonSides = [];
+            $officeCount = 0;
             foreach ($backupUnits as $unitId => $backupUnit) {
                 $parentId = (int) $backupUnit['parentId'];
                 $type = (string) $backupUnit['type'];
                 if ($type === $rootType && $parentId !== 0) throw new RuntimeException('ریشهٔ شرکت در پشتیبان نباید والد داشته باشد.');
-                if ($type === 'deputy' && $parentId !== (int) $rootIds[0]) throw new RuntimeException('معاونت باید مستقیماً زیر ریشهٔ شرکت باشد.');
-                if ($type === 'department' && ($parentId <= 0 || !isset($backupUnits[$parentId]) || !in_array((string) $backupUnits[$parentId]['type'], [$rootType, 'deputy', 'department'], true))) throw new RuntimeException('والد اداره در پشتیبان معتبر نیست.');
+                if (in_array($type, ['deputy', 'management', 'office'], true) && $parentId !== (int) $rootIds[0]) throw new RuntimeException('معاونت، مدیریت مستقل و دفتر باید مستقیماً زیر ریشهٔ شرکت باشند.');
+                if ($type === 'office' && ++$officeCount > 1) throw new RuntimeException('پشتیبان بیش از یک دفتر مدیرعامل دارد.');
+                if ($type === 'department' && ($parentId <= 0 || !isset($backupUnits[$parentId]) || !in_array((string) $backupUnits[$parentId]['type'], [$rootType, 'deputy', 'management', 'department'], true))) throw new RuntimeException('والد اداره در پشتیبان معتبر نیست.');
                 if ($type === 'liaison') {
                     $side = (string) ($backupUnit['chartSide'] ?? '');
                     if ($parentId !== 0 || !in_array($side, ['left', 'right'], true)) throw new RuntimeException('واحد هم‌تراز مدیرعامل باید مستقل و دارای سمت معتبر باشد.');
@@ -586,22 +593,27 @@ if (in_array($action, $orgCompanyActions, true)) {
             $unitId = max(0, (int) post_value('unit_id', '0'));
             $name = trim((string) post_value('unit_name', ''));
             $code = trim((string) post_value('unit_code', ''));
-            $unitType = valid_choice(post_value('unit_type'), ['deputy', 'department'], 'department');
+            $unitType = valid_choice(post_value('unit_type'), ['deputy', 'management', 'office', 'department'], 'department');
             $parentId = max(0, (int) post_value('parent_id', '0'));
             if ($name === '') {
                 throw new RuntimeException('نام واحد الزامی است.');
             }
             $ceoId = org_ceo_unit_id($orgCompanyId);
-            if ($unitType === 'deputy') {
+            if (in_array($unitType, ['deputy', 'management', 'office'], true)) {
                 $parentId = $ceoId;
             } else {
                 $parentUnit = $parentId > 0 ? org_unit_by_id($parentId) : null;
-                if ($parentUnit === null || (int) ($parentUnit['is_active'] ?? 0) !== 1 || !in_array((string) $parentUnit['unit_type'], ['deputy', 'department', org_company_root_type($orgCompanyId)], true)) {
-                    throw new RuntimeException('اداره باید زیر معاونت یا ادارهٔ فعال تعریف شود.');
+                if ($parentUnit === null || (int) ($parentUnit['is_active'] ?? 0) !== 1 || !in_array((string) $parentUnit['unit_type'], ['deputy', 'management', 'department', org_company_root_type($orgCompanyId)], true)) {
+                    throw new RuntimeException('اداره باید زیر معاونت، مدیریت مستقل یا ادارهٔ فعال تعریف شود.');
                 }
                 if ($unitId > 0 && in_array($parentId, org_unit_subtree_ids($unitId), true)) {
                     throw new RuntimeException('انتقال واحد به خودش یا یکی از زیرمجموعه‌هایش مجاز نیست.');
                 }
+            }
+            if ($unitType === 'office') {
+                $officeExists = db()->prepare('SELECT id FROM org_units WHERE company_id = ? AND unit_type = "office" AND is_active = 1 AND id <> ? LIMIT 1');
+                $officeExists->execute([$orgCompanyId, $unitId]);
+                if ($officeExists->fetchColumn()) throw new RuntimeException('برای این شرکت فقط یک دفتر مدیرعامل مجاز است؛ دفتر موجود را ویرایش کنید.');
             }
             if ($unitId > 0) {
                 $existing = org_unit_by_id($unitId);

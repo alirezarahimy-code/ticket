@@ -275,7 +275,7 @@
             var changesBadge = panel.querySelector('[data-role-changes]');
             var resetBtn = panel.querySelector('[data-perm-reset]');
             var countLabel = panel.querySelector('[data-role-count]');
-            var original = Array.prototype.map.call(items, function (item) { return item.querySelector('input').checked; });
+            var original = [];
 
             var refreshGroup = function (card) {
                 var groupItems = card.querySelectorAll('[data-perm-item] input');
@@ -293,24 +293,24 @@
                 if (fill) fill.style.width = (total ? Math.round(checked / total * 100) : 0) + '%';
                 if (allBtn) allBtn.textContent = checked === total && total > 0 ? 'حذف همه' : 'انتخاب همه';
             };
-            // ویرایش هر بخش (فرزند) : با تیک بخش، ویرایش خودکار روشن می‌شود؛ با برداشتن بخش، ویرایش خاموش و غیرفعال می‌شود.
-            // follow=true یعنی ویرایش هم‌حالت بخش شود؛ only=اگر تعیین شود فقط همان بخش بررسی می‌شود.
-            var syncEdits = function (follow, only) {
+            // «مشاهده» و «ویرایش» مستقل‌اند: مشاهده به‌تنهایی ویرایش نمی‌دهد؛
+            // انتخاب ویرایش، مشاهده را هم فعال می‌کند؛ برداشتن مشاهده، ویرایش را لغو می‌کند.
+            var syncEdits = function (changedInput) {
                 panel.querySelectorAll('[data-perm-item][data-perm-edit]').forEach(function (child) {
                     var parent = child.previousElementSibling;
                     if (!parent || !parent.hasAttribute('data-perm-item') || parent.hasAttribute('data-perm-edit')) return;
                     var pIn = parent.querySelector('input'), cIn = child.querySelector('input');
                     if (!pIn || !cIn) return;
-                    if (follow && (!only || only === pIn)) cIn.checked = pIn.checked;
-                    if (!pIn.checked) cIn.checked = false;
-                    cIn.disabled = !pIn.checked;
+                    if (changedInput === pIn && !pIn.checked) cIn.checked = false;
+                    if (cIn.checked && !pIn.checked) pIn.checked = true;
+                    parent.classList.toggle('checked', pIn.checked);
                     child.classList.toggle('checked', cIn.checked);
-                    child.classList.toggle('is-disabled', !pIn.checked);
                 });
             };
-            syncEdits(false, null);
+            syncEdits(null);
+            original = Array.prototype.map.call(items, function (item) { return item.querySelector('input').checked; });
             var refreshChanges = function () {
-                syncEdits(false, null);
+                syncEdits(null);
                 var added = 0, removed = 0;
                 Array.prototype.forEach.call(items, function (item, index) {
                     var now = item.querySelector('input').checked;
@@ -347,7 +347,7 @@
                         input.checked = !allChecked;
                         input.closest('[data-perm-item]').classList.toggle('checked', input.checked);
                     });
-                    syncEdits(true, null);
+                    syncEdits(null);
                     refreshGroup(card);
                     refreshChanges();
                 });
@@ -355,7 +355,7 @@
             panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
                 input.addEventListener('change', function () {
                     input.closest('[data-perm-item]').classList.toggle('checked', input.checked);
-                    syncEdits(true, input);
+                    syncEdits(input);
                     var card = input.closest('[data-perm-group-card]');
                     if (card) refreshGroup(card);
                     refreshChanges();
@@ -368,7 +368,7 @@
                     input.checked = true;
                     input.closest('[data-perm-item]').classList.add('checked');
                 });
-                syncEdits(true, null);
+                syncEdits(null);
                 cards.forEach(refreshGroup);
                 refreshChanges();
             });
@@ -377,7 +377,7 @@
                     input.checked = false;
                     input.closest('[data-perm-item]').classList.remove('checked');
                 });
-                syncEdits(true, null);
+                syncEdits(null);
                 cards.forEach(refreshGroup);
                 refreshChanges();
             });

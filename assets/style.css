@@ -1632,10 +1632,23 @@ body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow
 .org-wires { position: absolute; z-index: -1; inset: 0 auto auto 0; overflow: visible; pointer-events: none; }
 .org-wire { fill: none; stroke: #6d8a7a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .76; }
 .org-wire-shared { stroke: #9aa9a0; stroke-width: 1.7; }
-.org-top-row { display: grid; grid-template-columns: minmax(210px,1fr) auto minmax(210px,1fr); align-items: start; gap: clamp(25px,5vw,90px); min-height: 128px; direction: ltr; position: relative; z-index: 1; }
+.org-top-row { display: grid; grid-template-columns: minmax(210px,1fr) auto auto minmax(210px,1fr); align-items: start; gap: clamp(25px,5vw,90px); min-height: 128px; direction: ltr; position: relative; z-index: 1; }
 .org-liaison-cell, .org-ceo-cell { display: flex; justify-content: center; direction: rtl; }
 .org-liaison-cell { padding-top: 30px; }
+.org-office-cell { display: flex; align-items: center; justify-content: flex-end; direction: ltr; }
+.org-office-cell > .org-node { width: 205px; }
 .org-ceo-cell > .org-node { width: 230px; }
+.org-ceo-add-actions { display: flex; width: 100%; gap: 5px; margin-top: 9px; direction: rtl; }
+.org-ceo-add-button { min-width: 0; flex: 1; padding: 6px 3px; border: 1px solid rgba(255,255,255,.82); border-radius: 7px; background: #f2c14e; color: #1e3a5f; cursor: pointer; font-size: 10px; font-weight: 800; line-height: 1.3; transition: background .15s ease, color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.org-ceo-add-button:hover, .org-ceo-add-button:focus-visible { background: #d99b0b; color: #172b46; transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,.24); }
+.org-ceo-add-button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.org-ceo-add-management { background: #0f766e; color: #fff; }
+.org-ceo-add-management:hover, .org-ceo-add-management:focus-visible { background: #115e59; color: #fff; }
+.org-ceo-add-office { background: #c2410c; color: #fff; }
+.org-ceo-add-office:hover, .org-ceo-add-office:focus-visible { background: #9a3412; color: #fff; }
+.org-node.org-management { border-color: #b5a4d4; border-top: 3px solid #7453a6; background: #fbf9ff; }
+.org-node.org-office-node { border-color: #b9a7ce; border-top: 3px solid #79549c; background: #fcfaff; }
+.org-node.org-office-node .org-node-count { background: #eee7f5; color: #694c83; }
 .org-deputy-rows { display: flex; flex-direction: column; align-items: stretch; gap: 62px; position: relative; z-index: 1; padding-bottom: 20px; }
 .org-deputy-row { display: flex; width: max-content; min-width: 100%; justify-content: center; align-items: flex-start; gap: clamp(24px,4vw,70px); direction: rtl; }
 .org-branch { position: relative; display: flex; flex: 0 0 auto; flex-direction: column; align-items: center; min-width: 205px; direction: rtl; }
@@ -1644,7 +1657,12 @@ body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow
 .org-children { position: relative; display: flex; align-items: flex-start; justify-content: center; gap: 28px; padding-top: 36px; width: max-content; max-width: none; }
 .org-children:empty { display: none; }
 .org-node { position: relative; }
-.org-node.org-deputy, .org-node.org-department, .org-node.org-ceo, .org-node.org-liaison-node { padding: 14px 13px; border-top-width: 3px; border-radius: 12px; }
+.org-canvas.org-free-move-ready .org-node, .org-canvas.org-free-move-ready .org-experts-group { cursor: grab; }
+.org-canvas.org-free-move-ready .org-sort-handle { cursor: grab; }
+.org-node.org-free-positioned, .org-experts-group.org-free-positioned { transform: translate3d(var(--org-free-x, 0px), var(--org-free-y, 0px), 0); transition: none !important; }
+.org-node.org-free-moving, .org-experts-group.org-free-moving { z-index: 80 !important; cursor: grabbing !important; transition: none !important; user-select: none; }
+.org-node.org-free-moving *, .org-experts-group.org-free-moving * { user-select: none; }
+.org-node.org-deputy, .org-node.org-management, .org-node.org-department, .org-node.org-ceo, .org-node.org-office-node, .org-node.org-liaison-node { padding: 14px 13px; border-top-width: 3px; border-radius: 12px; }
 .org-node.org-department { border-top-color: #338f76; }
 .org-node-add-row { display: flex; gap: 6px; margin-top: 10px; width: 100%; }
 .org-node-add-row .org-node-add { position: static; flex: 1; width: auto; height: auto; margin: 0; padding: 7px 5px; border: 1px solid var(--white); border-radius: 7px; opacity: 1; transform: none; font-size: 10px; }
@@ -1686,6 +1704,7 @@ body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow
 
 /* هر شاخهٔ معاونت رنگ مخصوص خود را به کارت‌ها، کارشناسان و اتصالات منتقل می‌کند. */
 .org-branch .org-node.org-deputy,
+.org-branch .org-node.org-management,
 .org-branch .org-node.org-department { border-top-color: var(--org-branch-color); }
 .org-branch .org-experts-group { border-color: color-mix(in srgb, var(--org-branch-color) 28%, white); background: color-mix(in srgb, var(--org-branch-color) 5%, white); }
 .org-branch .org-expert-heading { color: var(--org-branch-color); border-bottom-color: color-mix(in srgb, var(--org-branch-color) 16%, white); }

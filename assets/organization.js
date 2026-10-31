@@ -4,7 +4,7 @@
     var data = window.PERSIAN_ORG_DATA || { canManage: false, undo: false, undoLabel: '', units: [], users: [] };
     var units = data.units || [];
     var users = (data.users || []).filter(function (item) { return item.active; });
-    var state = { zoom: 1, search: '', poolSearch: '', filterStat: null, modal: null, inline: null, confirm: null, spaceDown: false, pan: null, deputyDrag: null, submitting: false, printSnapshot: null, wireObserver: null, observedStage: null, initialCentered: false };
+    var state = { zoom: 1, search: '', poolSearch: '', filterStat: null, modal: null, inline: null, confirm: null, spaceDown: false, pan: null, deputyDrag: null, freeDrag: null, ctrlDown: false, suppressFreeClick: null, freeWireFrame: 0, submitting: false, printSnapshot: null, wireObserver: null, observedStage: null, initialCentered: false };
     var $ = function (selector) { return document.querySelector(selector); };
     var $$ = function (selector) { return Array.prototype.slice.call(document.querySelectorAll(selector)); };
     var esc = function (value) {
@@ -17,6 +17,8 @@
         var paths = {
             ceo: '<path d="M4 20h16M6 20V8l6-4 6 4v12M9 12h2v2H9m4 0h2v-2h-2m-4 4h2v2H9m4 0h2v-2h-2"/>',
             deputy: '<path d="M3 20h18M5 20V8l7-4 7 4v12M8 11v6m4-6v6m4-6v6M7 20h10"/>',
+            management: '<path d="M3 20h18M5 20V8l7-4 7 4v12M8 11v6m4-6v6m4-6v6M7 20h10"/>',
+            office: '<path d="M4 20h16M6 20V7h12v13M9 10h2m2 0h2m-6 4h2m2 0h2m-5 6v-3h2v3"/>',
             department: '<path d="M3 6h7l2 2h9v10H3zM3 10h18"/>',
             manager: '<circle cx="12" cy="8" r="3"/><path d="M5 20c.7-3.6 2.9-5.5 7-5.5s6.3 1.9 7 5.5M17 5v4m-2-2h4"/>',
             expert: '<circle cx="12" cy="8" r="3"/><path d="M5 20c.7-3.6 2.9-5.5 7-5.5s6.3 1.9 7 5.5M17 15v4m-2-2h4"/>',
@@ -38,6 +40,41 @@
     var rootType = function () { return data.companyRootType || 'ceo'; };
     var rootLabel = function () { return data.companyRootTitle || (data.companyType === 'partner' ? 'مدیر «' + (data.companyName || 'شرکت همکار') + '»' : 'مدیرعامل'); };
     var root = function () { return units.find(function (item) { return item.type === rootType(); }) || null; };
+    var freeLayoutStorageKey = 'persian-org-free-card-layout-v1:' + Number(data.companyId || 1);
+    var freePositions = Object.create(null);
+    try {
+        var storedFreePositions = JSON.parse(window.localStorage.getItem(freeLayoutStorageKey) || '{}');
+        if (storedFreePositions && typeof storedFreePositions === 'object' && !Array.isArray(storedFreePositions)) freePositions = storedFreePositions;
+    } catch (ignoredFreeLayoutRead) {}
+    var freeNodeKey = function (node) {
+        if (!node) return '';
+        var side = node.getAttribute('data-liaison-side');
+        if (side) return 'liaison-slot:' + side;
+        if (node.classList.contains('org-experts-group')) { var expertUnitId = node.getAttribute('data-unit-id'); if (expertUnitId) return 'experts:' + expertUnitId; }
+        var unitId = node.getAttribute('data-unit');
+        if (unitId) return 'unit:' + unitId;
+        unitId = node.getAttribute('data-unit-id');
+        if (unitId) return (node.getAttribute('data-drop') || 'card') + ':' + unitId;
+        return '';
+    };
+    var freePosition = function (key) {
+        var saved = freePositions[key] || {};
+        var x = Number(saved.x), y = Number(saved.y);
+        return { x: Number.isFinite(x) ? x : 0, y: Number.isFinite(y) ? y : 0 };
+    };
+    var applyFreePositions = function (container) {
+        container.querySelectorAll('.org-node, .org-experts-group').forEach(function (node) {
+            var key = freeNodeKey(node);
+            if (!key || !Object.prototype.hasOwnProperty.call(freePositions, key)) return;
+            var pos = freePosition(key);
+            node.style.setProperty('--org-free-x', pos.x + 'px');
+            node.style.setProperty('--org-free-y', pos.y + 'px');
+            node.classList.add('org-free-positioned');
+        });
+    };
+    var saveFreePositions = function () {
+        try { window.localStorage.setItem(freeLayoutStorageKey, JSON.stringify(freePositions)); } catch (ignoredFreeLayoutWrite) {}
+    };
     var children = function (parentId, type) {
         return units.filter(function (item) { return Number(item.parentId) === Number(parentId) && (!type || item.type === type) && item.type !== 'liaison'; })
             .sort(function (a, b) { return Number(a.sortOrder || 0) - Number(b.sortOrder || 0) || a.name.localeCompare(b.name, 'fa') || Number(a.id) - Number(b.id); });
@@ -57,6 +94,8 @@
         var ceo = root();
         if (ceo && Number(ceo.managerId) === Number(item.id)) return rootType() === 'company_manager' ? 'company_manager' : 'ceo';
         if (managed && managed.type === 'deputy') return 'dep';
+        if (managed && managed.type === 'management') return 'management';
+        if (managed && managed.type === 'office') return 'office';
         if (managed && managed.type === 'department') return 'dept';
         if (managed && managed.type === 'liaison') return 'liaison';
         return Number(item.unitId) > 0 ? 'expert' : 'pool';
@@ -65,6 +104,7 @@
         var managed = managedUnit(item.id);
         if (managed && (managed.type === 'ceo' || managed.type === 'company_manager')) return rootLabel();
         if (managed && managed.type === 'liaison') return 'نمایندهٔ ' + managed.name;
+        if (managed && managed.type === 'office') return 'رئیس دفتر';
         if (managed) return 'مدیر ' + managed.name;
         if (Number(item.unitId) > 0) {
             var assigned = unit(item.unitId);
@@ -78,7 +118,7 @@
     };
     var allDepartments = function () { return units.filter(function (item) { return item.type === 'department'; }); };
     var expertHosts = function () {
-        return units.filter(function (item) { return item.type === 'deputy' || item.type === 'department' || item.type === 'liaison'; });
+        return units.filter(function (item) { return item.type === 'deputy' || item.type === 'management' || item.type === 'department' || item.type === 'liaison'; });
     };
     var expertsIn = function (unitId) { return users.filter(function (item) { return Number(item.unitId) === Number(unitId) && roleOf(item) === 'expert'; }); };
     var poolUsers = function () { return users.filter(function (item) { return roleOf(item) === 'pool'; }); };
@@ -208,6 +248,8 @@
     var renderLeftSidebar = function () {
         var ceo = root();
         var deputies = ceo ? children(ceo.id, 'deputy') : [];
+        var managements = ceo ? children(ceo.id, 'management') : [];
+        var offices = ceo ? children(ceo.id, 'office') : [];
         var departments = allDepartments();
         var expertCount = users.filter(function (item) { return roleOf(item) === 'expert'; }).length;
         var freeCount = poolUsers().length;
@@ -215,16 +257,18 @@
         var progress = users.length ? Math.round(assigned * 100 / users.length) : 0;
         var stat = function (key, icon, label, number) { return '<button class="org-stat ' + (state.filterStat === key ? 'active' : '') + '" data-org-filter="' + key + '"><span class="org-stat-icon ' + key + '">' + iconFor(icon) + '</span><span>' + esc(label) + '</span><b>' + number + '</b></button>'; };
         var quick = function (type, label, action, tone) { return '<button class="org-big-add ' + (tone || '') + '" data-org-action="' + action + '"><span class="org-action-symbol">' + iconFor(type) + '</span><span>' + label + '</span></button>'; };
-        var quickUnits = quick('deputy', 'افزودن معاونت', 'add-deputy') + (root() ? quick('department', 'افزودن اداره', 'quick-department', 'green') : '<p class="org-side-note">برای ساخت اداره، ابتدا ریشهٔ سازمان را بسازید.</p>') + (deputies.length ? quick('expert', 'افزودن کارشناس', 'quick-expert', 'amber') : '<p class="org-side-note">کارشناس بعد از ساخت معاونت اضافه می‌شود؛ می‌تواند زیر معاونت یا هر اداره باشد.</p>');
-        $('#org-sidebar').innerHTML = '<section class="org-sidebar-section"><h4>آمار سازمان</h4>' + stat('ceo', 'ceo', rootLabel(), ceo && ceo.managerId ? 1 : 0) + stat('dep', 'deputy', 'معاونت', deputies.length) + stat('dept', 'department', 'اداره', departments.length) + stat('expert', 'expert', 'کارشناس', expertCount) + stat('pool', 'pool', 'آزاد', freeCount) + '<div class="org-progress"><div><span>پیشرفت چیدمان</span><b>' + progress + '٪</b></div><i style="width:' + progress + '%"></i></div></section>' +
-            '<section class="org-sidebar-section"><h4>افزودن سریع</h4>' + quickUnits + '</section><section class="org-sidebar-section"><h4>راهنما</h4><div class="org-help"><b>کلیک کارت</b> = تغییر مسئول<br>⋮ <b>منوی کارت</b> = عملیات بیشتر<br>Space + کشیدن <b>پس‌زمینه</b> = جابه‌جایی نمودار<br>' + (data.sortEnabled ? '⠿ <b>کشیدن دستگیره</b> = مرتب‌سازی معاونت‌ها' : 'برای ذخیرهٔ ترتیب معاونت‌ها مهاجرت افزایشی sort_order لازم است') + '<br>↕ <b>کشیدن کاربر</b> = انتساب سریع<br>↶ <b>بازگشت</b> = آخرین عملیات</div></section>';
+        var quickUnits = quick('deputy', 'افزودن معاونت', 'add-deputy') + (root() ? quick('management', 'افزودن مدیریت مستقل', 'add-management') : '') + (root() ? quick('department', 'افزودن اداره', 'quick-department', 'green') : '<p class="org-side-note">برای ساخت اداره، ابتدا ریشهٔ سازمان را بسازید.</p>') + (deputies.length || managements.length ? quick('expert', 'افزودن کارشناس', 'quick-expert', 'amber') : '<p class="org-side-note">کارشناس بعد از ساخت معاونت یا مدیریت مستقل اضافه می‌شود.</p>');
+        $('#org-sidebar').innerHTML = '<section class="org-sidebar-section"><h4>آمار سازمان</h4>' + stat('ceo', 'ceo', rootLabel(), ceo && ceo.managerId ? 1 : 0) + stat('dep', 'deputy', 'معاونت', deputies.length) + stat('management', 'management', 'مدیریت مستقل', managements.length) + stat('office', 'office', 'دفتر', offices.length) + stat('dept', 'department', 'اداره', departments.length) + stat('expert', 'expert', 'کارشناس', expertCount) + stat('pool', 'pool', 'آزاد', freeCount) + '<div class="org-progress"><div><span>پیشرفت چیدمان</span><b>' + progress + '٪</b></div><i style="width:' + progress + '%"></i></div></section>' +
+            '<section class="org-sidebar-section"><h4>افزودن سریع</h4>' + quickUnits + '</section><section class="org-sidebar-section"><h4>راهنما</h4><div class="org-help"><b>کلیک کارت</b> = تغییر مسئول<br>⋮ <b>منوی کارت</b> = عملیات بیشتر<br>Space + کشیدن <b>پس‌زمینه</b> = جابه‌جایی نمودار<br>Ctrl + کشیدن <b>کارت</b> = جابه‌جایی آزاد کارت روی بوم<br>' + (data.sortEnabled ? '⠿ <b>کشیدن دستگیره</b> = مرتب‌سازی معاونت‌ها' : 'برای ذخیرهٔ ترتیب معاونت‌ها مهاجرت افزایشی sort_order لازم است') + '<br>↕ <b>کشیدن کاربر</b> = انتساب سریع<br>↶ <b>بازگشت</b> = آخرین عملیات</div></section>';
     };
     var renderPoolSidebar = function () {
         var list;
         var title = 'کاربران آزاد';
         if (state.filterStat === 'ceo') { list = root() && root().managerId ? [person(root().managerId)] : []; title = rootLabel(); }
         else if (state.filterStat === 'dep') { list = users.filter(function (item) { return roleOf(item) === 'dep'; }); title = 'مدیران معاونت'; }
-        else if (state.filterStat === 'dept') { list = users.filter(function (item) { return roleOf(item) === 'dept'; }); title = 'رؤسای ادارات'; }
+        else if (state.filterStat === 'management') { list = users.filter(function (item) { return roleOf(item) === 'management'; }); title = 'مدیران مستقل'; }
+        else if (state.filterStat === 'office') { list = users.filter(function (item) { return roleOf(item) === 'office'; }); title = 'رئیس دفتر'; }
+        else if (state.filterStat === 'dept') { list = users.filter(function (item) { return roleOf(item) === 'dept'; }); title = 'مدیران ادارات'; }
         else if (state.filterStat === 'expert') { list = users.filter(function (item) { return roleOf(item) === 'expert'; }); title = 'کارشناسان'; }
         else list = poolUsers();
         list = list.filter(Boolean);
@@ -240,11 +284,15 @@
 
     var nodeMatch = function (item) { return match(item) ? ' is-match' : ''; };
     var nodeMenuButton = function (unitId) { return data.canManage ? '<button class="org-node-menu-btn" data-org-menu="open" data-unit-id="' + unitId + '">⋮</button>' : ''; };
+    var renderCeoAddActions = function () {
+        if (!data.canManage) return '';
+        return '<div class="org-ceo-add-actions"><button type="button" class="org-ceo-add-button" title="افزودن معاونت" data-org-action="add-deputy">معاونت</button><button type="button" class="org-ceo-add-button org-ceo-add-management" title="افزودن مدیریت مستقل" data-org-action="add-management">مدیریت</button><button type="button" class="org-ceo-add-button org-ceo-add-office" title="افزودن یا ویرایش دفتر" data-org-action="add-office">دفتر</button></div>';
+    };
     var renderCeo = function () {
         var ceo = root();
         var manager = ceo && person(ceo.managerId);
-        if (!manager) return '<div class="org-node org-empty-slot org-ceo-slot" data-unit="' + ceo.id + '" data-drop="ceo" data-org-action="pick-ceo"><span class="org-empty-icon">' + iconFor('ceo') + '</span><b>تعیین ' + esc(rootLabel()) + '</b><small class="org-company-node-name">' + esc(data.companyName || '') + '</small><small>کلیک یا کشیدن کاربر</small>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-deputy">+ افزودن معاونت</button>' : '') + '</div>';
-        return '<div class="org-node org-ceo' + nodeMatch(manager) + '" data-unit="' + ceo.id + '" data-drop="ceo"><div class="org-node-menu-wrap">' + nodeMenuButton(ceo.id) + '</div><div class="org-avatar">' + esc(initial(manager.name)) + '</div><div class="org-node-name">' + esc(manager.name) + '</div><div class="org-node-title"><span class="org-title-icon">' + iconFor('manager') + '</span> ' + esc(rootLabel()) + '</div><div class="org-company-node-name">' + esc(data.companyName || '') + '</div><div class="org-node-count">' + iconFor('deputy') + ' ' + children(ceo.id, 'deputy').length + ' معاونت</div>' + (data.canManage ? '<button class="org-node-add" data-org-action="add-deputy">+ افزودن معاونت</button>' : '') + '</div>';
+        if (!manager) return '<div class="org-node org-empty-slot org-ceo-slot" data-unit="' + ceo.id + '" data-drop="ceo" data-org-action="pick-ceo"><span class="org-empty-icon">' + iconFor('ceo') + '</span><b>تعیین ' + esc(rootLabel()) + '</b><small class="org-company-node-name">' + esc(data.companyName || '') + '</small><small>کلیک یا کشیدن کاربر</small>' + renderCeoAddActions() + '</div>';
+        return '<div class="org-node org-ceo' + nodeMatch(manager) + '" data-unit="' + ceo.id + '" data-drop="ceo"><div class="org-node-menu-wrap">' + nodeMenuButton(ceo.id) + '</div><div class="org-avatar">' + esc(initial(manager.name)) + '</div><div class="org-node-name">' + esc(manager.name) + '</div><div class="org-node-title"><span class="org-title-icon">' + iconFor('manager') + '</span> ' + esc(rootLabel()) + '</div><div class="org-company-node-name">' + esc(data.companyName || '') + '</div><div class="org-node-count">' + iconFor('deputy') + ' ' + children(ceo.id, 'deputy').length + ' معاونت</div>' + renderCeoAddActions() + '</div>';
     };
     var renderLiaisonSide = function (side) {
         var sideLabel = side === 'right' ? 'راست' : 'چپ';
@@ -258,7 +306,13 @@
         var title = manager ? iconFor('manager') + ' نمایندهٔ ' + esc(item.name) : iconFor('deputy') + ' بدون نماینده';
         var expertRoster = experts.length ? '<div class="org-liaison-experts"><b>' + iconFor('expert') + ' کارشناسان</b><span>' + experts.map(function (expert) { return esc(expert.name); }).join('، ') + '</span></div>' : '';
         var expertAdd = data.canManage ? '<button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button>' : '';
-        return '<div class="org-node org-liaison-node' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-unit-id="' + item.id + '" data-drop="liaison"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('deputy')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">واحد هم‌تراز ' + esc(rootLabel()) + '</div>' + expertRoster + extra + expertAdd + '</div>';
+        return '<div class="org-node org-liaison-node' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-unit-id="' + item.id + '" data-drop="liaison"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('deputy')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">واحد مستقل</div>' + expertRoster + extra + expertAdd + '</div>';
+    };
+    var renderOffice = function (item) {
+        var manager = person(item.managerId);
+        var managerAction = !manager && data.canManage ? '<button class="org-node-add" data-org-action="pick-manager" data-unit-id="' + item.id + '">تعیین رئیس دفتر</button>' : '';
+        var title = manager ? iconFor('manager') + ' رئیس دفتر' : iconFor('office') + ' بدون رئیس دفتر';
+        return '<div class="org-node org-office-node' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-unit-id="' + item.id + '" data-drop="office"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('office')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">دفتر مدیرعامل</div>' + managerAction + '</div>';
     };
     var renderLiaisonBand = function () {
         var right = renderLiaisonSide('right');
@@ -273,15 +327,24 @@
         var deptCount = children(item.id, 'department').length;
         var expertCount = expertsIn(item.id).length;
         var addButtons = data.canManage
-            ? (data.sortEnabled && root() && Number(item.parentId) === Number(root().id) ? '<button class="org-sort-handle" type="button" data-deputy-drag="' + item.id + '" title="کشیدن برای مرتب‌سازی معاونت‌ها" aria-label="مرتب‌سازی ' + esc(item.name) + '">⠿</button>' : '') + '<div class="org-node-add-row"><button class="org-node-add" data-org-action="add-deputy">+ افزودن معاونت جدید</button><button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button></div>'
+            ? (data.sortEnabled && root() && Number(item.parentId) === Number(root().id) ? '<button class="org-sort-handle" type="button" data-deputy-drag="' + item.id + '" title="کشیدن برای مرتب‌سازی معاونت‌ها" aria-label="مرتب‌سازی ' + esc(item.name) + '">⠿</button>' : '') + '<div class="org-node-add-row"><button class="org-node-add" data-org-action="add-department" data-unit-id="' + item.id + '">+ افزودن اداره جدید</button><button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button></div>'
             : '';
         return '<div class="org-node org-deputy' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-drop="deputy"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('deputy')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">' + iconFor('department') + ' ' + deptCount + ' اداره • ' + iconFor('expert') + ' ' + expertCount + ' کارشناس</div>' + extra + addButtons + '</div>';
+    };
+    var renderManagement = function (item) {
+        var manager = person(item.managerId);
+        var managerAction = !manager && data.canManage ? '<button class="org-node-add" data-org-action="pick-manager" data-unit-id="' + item.id + '">تعیین مدیر</button>' : '';
+        var departments = children(item.id, 'department').length;
+        var expertCount = expertsIn(item.id).length;
+        var addButtons = data.canManage ? '<div class="org-node-add-row"><button class="org-node-add" data-org-action="add-department" data-unit-id="' + item.id + '">+ افزودن اداره</button><button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button></div>' : '';
+        var title = manager ? iconFor('manager') + ' مدیر ' + esc(item.name) : iconFor('deputy') + ' بدون مدیر';
+        return '<div class="org-node org-management' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-drop="management"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('management')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">' + iconFor('department') + ' ' + departments + ' اداره • ' + iconFor('expert') + ' ' + expertCount + ' کارشناس</div>' + managerAction + addButtons + '</div>';
     };
     var renderDepartment = function (item) {
         var manager = person(item.managerId);
         var experts = expertsIn(item.id);
-        var extra = !manager && data.canManage ? '<button class="org-node-add" data-org-action="pick-manager" data-unit-id="' + item.id + '">' + iconFor('manager') + ' تعیین رئیس</button>' : '';
-        var title = manager ? iconFor('manager') + ' رئیس ' + esc(item.name) : iconFor('department') + ' بدون رئیس';
+        var extra = !manager && data.canManage ? '<button class="org-node-add" data-org-action="pick-manager" data-unit-id="' + item.id + '">' + iconFor('manager') + ' تعیین مدیر</button>' : '';
+        var title = manager ? iconFor('manager') + ' مدیر ' + esc(item.name) : iconFor('department') + ' بدون مدیر';
         return '<div class="org-node org-department' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-drop="department"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('department')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">' + iconFor('expert') + ' ' + experts.length + ' کارشناس • ' + children(item.id, 'department').length + ' ادارهٔ زیرمجموعه</div>' + (data.canManage ? '<button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button>' : '') + extra + '</div>';
     };
     var expertNode = function (item) {
@@ -302,23 +365,31 @@
         var path = Array.isArray(ancestors) ? ancestors.slice() : [];
         if (path.indexOf(Number(item.id)) !== -1) return '<div class="org-cycle-warning">پیوند والد/فرزند حلقه‌ای است؛ این کارت برای جلوگیری از توقف صفحه متوقف شد.</div>';
         path.push(Number(item.id));
-        var card = item.type === 'deputy' ? renderDeputy(item) : renderDepartment(item);
+        var card = item.type === 'deputy' ? renderDeputy(item) : (item.type === 'management' ? renderManagement(item) : (item.type === 'office' ? renderOffice(item) : renderDepartment(item)));
         var subunits = children(item.id).filter(function (child) { return child.type === 'department'; });
         var descendants = subunits.map(function (child) { return renderUnitBranch(child, path, branchColor); }).join('');
         var colorStyle = branchColor ? ' style="--org-branch-color:' + branchColor + '"' : '';
         return '<div class="org-branch" data-branch-id="' + item.id + '"' + colorStyle + '><div class="org-branch-card">' + card + renderExperts(item) + '</div>' + (descendants ? '<div class="org-children">' + descendants + '</div>' : '') + '</div>';
     };
-    var renderCeoBranch = function (ceo, deputies) {
-        var batches = [];
-        for (var i = 0; i < deputies.length; i += 4) batches.push(deputies.slice(i, i + 4));
+    var renderCeoBranch = function (ceo, rootBranches) {
+        // ردیف اول ۵ کارت، ردیف دوم ۶ و هر ردیف بعدی یک کارت بیشتر می‌گیرد.
+        var batches = [], batchStart = 0;
+        while (batchStart < rootBranches.length) {
+            var batchSize = 5 + batches.length;
+            var batch = rootBranches.slice(batchStart, batchStart + batchSize);
+            batches.push(batch);
+            batchStart += batch.length;
+        }
         var rows = batches.map(function (batch, index) {
-            return '<div class="org-deputy-row org-root-unit-row" data-row="' + index + '">' + batch.map(function (item) { return renderUnitBranch(item, [], branchColorAt(deputies.indexOf(item))); }).join('') + '</div>';
+            return '<div class="org-deputy-row org-root-unit-row" data-row="' + index + '">' + batch.map(function (item) { return renderUnitBranch(item, [], branchColorAt(rootBranches.indexOf(item))); }).join('') + '</div>';
         }).join('');
         var directDepartments = children(ceo.id, 'department');
+        var office = children(ceo.id, 'office')[0] || null;
         var reachable = Object.create(null);
         var markTree = function (item) { var id = Number(item.id); if (reachable[id]) return; reachable[id] = true; children(id, 'department').forEach(markTree); };
-        deputies.forEach(markTree); directDepartments.forEach(markTree);
-        var orphans = units.filter(function (item) { return ['deputy', 'department'].indexOf(item.type) !== -1 && !reachable[Number(item.id)]; });
+        rootBranches.forEach(markTree); directDepartments.forEach(markTree);
+        if (office) reachable[Number(office.id)] = true;
+        var orphans = units.filter(function (item) { return ['deputy', 'management', 'department', 'office'].indexOf(item.type) !== -1 && !reachable[Number(item.id)]; });
         var orphanIds = orphans.map(function (item) { return Number(item.id); });
         var orphanRoots = orphans.filter(function (item) { return orphanIds.indexOf(Number(item.parentId)) === -1; });
         var covered = Object.create(null);
@@ -327,32 +398,80 @@
         while (Object.keys(covered).length < orphans.length) {
             var next = orphanRoots.find(function (item) { return !covered[Number(item.id)]; }) || orphans.find(function (item) { return !covered[Number(item.id)]; });
             if (!next) break;
-            orphanMarkup += renderUnitBranch(next, [], branchColorAt(deputies.length + directDepartments.length + orphanIndex++));
+            orphanMarkup += renderUnitBranch(next, [], branchColorAt(rootBranches.length + directDepartments.length + orphanIndex++));
             markOrphanTree(next);
         }
-        var directMarkup = directDepartments.length ? '<div class="org-root-department-row org-root-unit-row">' + directDepartments.map(function (item, index) { return renderUnitBranch(item, [], branchColorAt(deputies.length + index)); }).join('') + '</div>' : '';
+        var directMarkup = directDepartments.length ? '<div class="org-root-department-row org-root-unit-row">' + directDepartments.map(function (item, index) { return renderUnitBranch(item, [], branchColorAt(rootBranches.length + index)); }).join('') + '</div>' : '';
         var orphanSection = orphanMarkup ? '<section class="org-orphan-units"><h3>واحدهای خارج از مسیر اصلی یا دارای والد ناسازگار</h3><p>رکوردها حفظ شده‌اند؛ این بخش برای جلوگیری از پنهان‌شدن داده‌های قدیمی/ناقص است. با ویرایش والد می‌توان آن‌ها را به مسیر معتبر منتقل کرد.</p><div class="org-orphan-row">' + orphanMarkup + '</div></section>' : '';
         var leftLiaison = rootType() === 'company_manager' ? '' : renderLiaisonSide('left');
         var rightLiaison = rootType() === 'company_manager' ? '' : renderLiaisonSide('right');
-        var markup = '<div class="org-chart-stage"><svg class="org-wires" id="org-wires" aria-hidden="true"></svg><div class="org-top-row"><div class="org-liaison-cell physical-left">' + leftLiaison + '</div><div class="org-ceo-cell">' + renderCeo() + '</div><div class="org-liaison-cell physical-right">' + rightLiaison + '</div></div><div class="org-deputy-rows">' + (rows || (data.canManage ? '<div class="org-empty-branch-hint">از «افزودن معاونت» برای شروع ساختار استفاده کنید.</div>' : '')) + directMarkup + orphanSection + '</div></div>';
-        return markup;
+        var officeMarkup = office ? renderOffice(office) : '';
+        var emptyHint = !rootBranches.length && !directDepartments.length && data.canManage ? '<div class="org-empty-branch-hint">از دکمه‌های کارت مدیرعامل، معاونت یا مدیریت مستقل را اضافه کنید.</div>' : '';
+        return '<div class="org-chart-stage"><svg class="org-wires" id="org-wires" aria-hidden="true"></svg><div class="org-top-row"><div class="org-liaison-cell physical-left">' + leftLiaison + '</div><div class="org-office-cell">' + officeMarkup + '</div><div class="org-ceo-cell">' + renderCeo() + '</div><div class="org-liaison-cell physical-right">' + rightLiaison + '</div></div><div class="org-deputy-rows">' + rows + directMarkup + emptyHint + orphanSection + '</div></div>';
+    };
+    var expandCanvasForNegativeCards = function (stage) {
+        var wrap = stage.closest('.org-chart-wrap'), canvas = $('#org-canvas');
+        if (!wrap || !canvas) return;
+        var rect = stage.getBoundingClientRect(), scaleX = stage.offsetWidth ? rect.width / stage.offsetWidth : 1, scaleY = stage.offsetHeight ? rect.height / stage.offsetHeight : 1;
+        scaleX = Math.max(.01, scaleX); scaleY = Math.max(.01, scaleY);
+        var minX = 0, minY = 0;
+        Array.prototype.forEach.call(stage.querySelectorAll('.org-node, .org-experts-group'), function (node) {
+            var box = node.getBoundingClientRect();
+            minX = Math.min(minX, (box.left - rect.left) / scaleX);
+            minY = Math.min(minY, (box.top - rect.top) / scaleY);
+        });
+        var computed = window.getComputedStyle(wrap);
+        if (!wrap.dataset.orgFreeBasePaddingLeft) wrap.dataset.orgFreeBasePaddingLeft = String(parseFloat(computed.paddingLeft) || 0);
+        if (!wrap.dataset.orgFreeBasePaddingTop) wrap.dataset.orgFreeBasePaddingTop = String(parseFloat(computed.paddingTop) || 0);
+        var extraLeft = Math.ceil(Math.max(0, -minX)), extraTop = Math.ceil(Math.max(0, -minY));
+        var oldLeft = Number(wrap.dataset.orgFreeExtraLeft || 0), oldTop = Number(wrap.dataset.orgFreeExtraTop || 0);
+        if (extraLeft === oldLeft && extraTop === oldTop) return;
+        var canvasLeft = canvas.scrollLeft, canvasTop = canvas.scrollTop, before = stage.getBoundingClientRect();
+        wrap.style.paddingLeft = (Number(wrap.dataset.orgFreeBasePaddingLeft) + extraLeft) + 'px';
+        wrap.style.paddingTop = (Number(wrap.dataset.orgFreeBasePaddingTop) + extraTop) + 'px';
+        wrap.dataset.orgFreeExtraLeft = String(extraLeft); wrap.dataset.orgFreeExtraTop = String(extraTop);
+        var shifted = stage.getBoundingClientRect(), shiftX = shifted.left - before.left, shiftY = shifted.top - before.top;
+        var preserveAxis = function (axis, initial, shift, beforePoint) {
+            if (Math.abs(shift) < .5) return;
+            var prop = axis === 'x' ? 'scrollLeft' : 'scrollTop';
+            canvas[prop] = initial + shift;
+            var plus = Math.abs((stage.getBoundingClientRect()[axis === 'x' ? 'left' : 'top']) - beforePoint);
+            canvas[prop] = initial - shift;
+            var minus = Math.abs((stage.getBoundingClientRect()[axis === 'x' ? 'left' : 'top']) - beforePoint);
+            if (plus <= minus) canvas[prop] = initial + shift;
+        };
+        preserveAxis('x', canvasLeft, shiftX, before.left);
+        preserveAxis('y', canvasTop, shiftY, before.top);
     };
     var drawOrgWires = function () {
         var stage = $('.org-chart-stage'), svg = $('#org-wires');
         if (!stage || !svg) return;
+        expandCanvasForNegativeCards(stage);
         var rect = stage.getBoundingClientRect(), scaleX = stage.offsetWidth ? rect.width / stage.offsetWidth : 1, scaleY = stage.offsetHeight ? rect.height / stage.offsetHeight : 1;
         scaleX = Math.max(.01, scaleX); scaleY = Math.max(.01, scaleY);
         var width = Math.max(stage.scrollWidth, stage.offsetWidth), height = Math.max(stage.scrollHeight, stage.offsetHeight);
-        svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height); svg.setAttribute('width', width); svg.setAttribute('height', height); svg.innerHTML = '';
         var rel = function (element) { var r = element.getBoundingClientRect(); return { x: ((r.left + r.right) / 2 - rect.left) / scaleX, top: (r.top - rect.top) / scaleY, bottom: (r.bottom - rect.top) / scaleY, left: (r.left - rect.left) / scaleX, right: (r.right - rect.left) / scaleX }; };
+        var bounds = { left: 0, top: 0, right: width, bottom: height };
+        Array.prototype.forEach.call(stage.querySelectorAll('.org-node, .org-experts-group'), function (node) { var box = rel(node); bounds.left = Math.min(bounds.left, box.left); bounds.top = Math.min(bounds.top, box.top); bounds.right = Math.max(bounds.right, box.right); bounds.bottom = Math.max(bounds.bottom, box.bottom); });
+        var wireWidth = Math.max(1, bounds.right - bounds.left), wireHeight = Math.max(1, bounds.bottom - bounds.top);
+        svg.style.left = bounds.left + 'px'; svg.style.top = bounds.top + 'px';
+        svg.setAttribute('viewBox', bounds.left + ' ' + bounds.top + ' ' + wireWidth + ' ' + wireHeight); svg.setAttribute('width', wireWidth); svg.setAttribute('height', wireHeight); svg.innerHTML = '';
         var path = function (d, cls, color) { var p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', d); p.setAttribute('class', cls || 'org-wire'); if (color) p.style.stroke = color; svg.appendChild(p); };
         var ceoCard = stage.querySelector('.org-ceo');
         if (!ceoCard) ceoCard = stage.querySelector('.org-ceo-slot');
         var rows = $$('.org-deputy-row, .org-root-department-row');
+        var officeCard = stage.querySelector('.org-office-node');
+        if (ceoCard && officeCard) {
+            var officeRect = rel(officeCard), ceoRect = rel(ceoCard);
+            var officeY = officeRect.top + (officeRect.bottom - officeRect.top) / 2;
+            var ceoY = ceoRect.top + (ceoRect.bottom - ceoRect.top) / 2;
+            var officeJoinX = (officeRect.right + ceoRect.left) / 2;
+            path('M ' + officeRect.right + ' ' + officeY + ' H ' + officeJoinX + ' V ' + ceoY + ' H ' + ceoRect.left, 'org-wire org-wire-shared');
+        }
         if (ceoCard && rows.length) {
             var c = rel(ceoCard), rowRects = rows.map(function (row) { var cards = Array.prototype.slice.call(row.querySelectorAll(':scope > .org-branch > .org-branch-card > .org-node')); if (!cards.length) return null; var rs = cards.map(rel); return { top: Math.min.apply(null, rs.map(function (x) { return x.top; })), left: Math.min.apply(null, rs.map(function (x) { return x.x; })), right: Math.max.apply(null, rs.map(function (x) { return x.x; })), centers: rs.map(function (x) { return x.x; }), cards: cards }; }).filter(Boolean);
             if (rowRects.length) {
-                var trunkX = width - 15, firstY = rowRects[0].top - 19, lastY = rowRects[rowRects.length - 1].top - 19;
+                var trunkX = bounds.right - 15, firstY = rowRects[0].top - 19, lastY = rowRects[rowRects.length - 1].top - 19;
                 path('M ' + c.x + ' ' + c.bottom + ' V ' + firstY + ' H ' + trunkX, 'org-wire org-wire-shared');
                 if (rowRects.length > 1) path('M ' + trunkX + ' ' + firstY + ' V ' + lastY, 'org-wire org-wire-shared');
                 rowRects.forEach(function (row) { path('M ' + trunkX + ' ' + (row.top - 19) + ' H ' + row.left, 'org-wire org-wire-shared'); row.centers.forEach(function (x, cardIndex) { var branch = row.cards[cardIndex].closest('.org-branch'), color = branch ? getComputedStyle(branch).getPropertyValue('--org-branch-color').trim() : ''; path('M ' + x + ' ' + (row.top - 19) + ' V ' + row.top, 'org-wire org-wire-shared', color); }); });
@@ -363,7 +482,7 @@
             var childrenRow = branch.querySelector(':scope > .org-children');
             if (!parent) return;
             var p = rel(parent), expertCard = branch.querySelector(':scope > .org-branch-card > .org-experts-group');
-            if (expertCard) { var e = rel(expertCard); path('M ' + p.x + ' ' + p.bottom + ' V ' + e.top, 'org-wire org-wire-expert', getComputedStyle(branch).getPropertyValue('--org-branch-color').trim()); }
+            if (expertCard) { var e = rel(expertCard), expertJoinY = (p.bottom + e.top) / 2; path('M ' + p.x + ' ' + p.bottom + ' V ' + expertJoinY + ' H ' + e.x + ' V ' + e.top, 'org-wire org-wire-expert', getComputedStyle(branch).getPropertyValue('--org-branch-color').trim()); }
             if (!childrenRow) return;
             var childCards = Array.prototype.slice.call(childrenRow.querySelectorAll(':scope > .org-branch > .org-branch-card > .org-node'));
             if (!childCards.length) return;
@@ -392,7 +511,8 @@
         event.preventDefault();
         $$('.org-drop-before').forEach(function (item) { item.classList.remove('org-drop-before'); });
         var target = document.elementFromPoint(event.clientX, event.clientY); target = target && target.closest('.org-branch[data-branch-id]');
-        if (target && target.closest('.org-deputy-row') && Number(target.getAttribute('data-branch-id')) !== state.deputyDrag.id) target.classList.add('org-drop-before');
+        var targetUnit = target ? unit(Number(target.getAttribute('data-branch-id'))) : null;
+        if (target && target.closest('.org-deputy-row') && targetUnit && targetUnit.type === 'deputy' && Number(target.getAttribute('data-branch-id')) !== state.deputyDrag.id) target.classList.add('org-drop-before');
     };
     var clearDeputyDrag = function () {
         if (state.deputyDrag) { var branch = state.deputyDrag.handle.closest('.org-branch'); if (branch) branch.classList.remove('is-dragging'); }
@@ -414,12 +534,13 @@
     };
     var cancelDeputyDrag = function () { clearDeputyDrag(); };
     var renderChart = function () {
-        var ceo = root(), wrap = $('#org-chart-wrap'), deputies = ceo ? children(ceo.id, 'deputy') : [];
+        var ceo = root(), wrap = $('#org-chart-wrap'), deputies = ceo ? children(ceo.id, 'deputy') : [], rootBranches = ceo ? children(ceo.id).filter(function (item) { return item.type === 'deputy' || item.type === 'management'; }) : [];
         if (!ceo) {
             wrap.innerHTML = '<div class="org-start-screen"><div class="org-start-icon">' + iconFor('start') + '</div><h2>شروع ساختار سازمانی</h2><p>در سه مرحله ساده، ساختار سازمان را بسازید.</p><div class="org-start-steps"><span><b>۱</b> ' + esc(rootLabel()) + '</span><span><b>۲</b> معاونت</span><span><b>۳</b> اداره یا کارشناس</span></div><button class="org-btn org-btn-primary" data-org-action="pick-ceo">' + esc('تعیین ' + rootLabel()) + '</button><button class="org-btn org-btn-ghost" data-org-action="add-deputy">افزودن معاونت بدون مدیر</button></div>';
             return;
         }
-        wrap.innerHTML = renderCeoBranch(ceo, deputies);
+        wrap.innerHTML = renderCeoBranch(ceo, rootBranches);
+        applyFreePositions(wrap);
         wrap.style.transform = 'scale(' + state.zoom + ')';
         if (!state.initialCentered && !state.printSnapshot) { state.initialCentered = true; window.requestAnimationFrame(function () { var rootCard = wrap.querySelector('.org-ceo, .org-ceo-slot'); if (rootCard) rootCard.scrollIntoView({ block: 'start', inline: 'center' }); }); }
         $('#org-zoom-level').textContent = Math.round(state.zoom * 100) + '٪';
@@ -435,43 +556,48 @@
 
     var openManagerPicker = function (target) {
         var current = target.managerId ? person(target.managerId) : null;
-        openModal({ icon: iconFor(target.type), title: (current ? 'تغییر ' : 'تعیین ') + ((target.type === 'ceo' || target.type === 'company_manager') ? rootLabel() : target.type === 'deputy' ? 'مدیر «' + target.name + '»' : target.type === 'liaison' ? 'نمایندهٔ «' + target.name + '»' : 'رئیس «' + target.name + '»'), subtitle: 'روی کاربر موردنظر کلیک کنید', users: users, currentUser: current, onPick: function (selected) { submit('assign_org_manager', { target_type: target.type, unit_id: target.id, user_id: selected.id }); } });
+        openModal({ icon: iconFor(target.type), title: (current ? 'تغییر ' : 'تعیین ') + ((target.type === 'ceo' || target.type === 'company_manager') ? rootLabel() : target.type === 'deputy' || target.type === 'management' ? 'مدیر «' + target.name + '»' : target.type === 'office' ? 'رئیس دفتر' : target.type === 'liaison' ? 'نمایندهٔ «' + target.name + '»' : 'مدیر ادارهٔ «' + target.name + '»'), subtitle: 'روی کاربر موردنظر کلیک کنید', users: users, currentUser: current, onPick: function (selected) { submit('assign_org_manager', { target_type: target.type, unit_id: target.id, user_id: selected.id }); } });
     };
     var addExperts = function (unitId) {
         var target = unit(unitId);
         if (!target) return;
-        var hostKind = target.type === 'deputy' ? 'معاونت' : (target.type === 'liaison' ? ('واحد هم‌تراز ' + rootLabel()) : 'اداره');
+        var hostKind = target.type === 'deputy' ? 'معاونت' : (target.type === 'management' ? 'مدیریت مستقل' : (target.type === 'liaison' ? 'واحد مستقل' : 'اداره'));
         openModal({ icon: iconFor('expert'), title: 'افزودن کارشناس به ' + hostKind + ' «' + target.name + '»', subtitle: 'کاربران دامینی و محلی آزاد را با تیک انتخاب کنید', users: poolUsers(), poolOnly: true, multi: true, onConfirm: function (selected) { submit('save_org_assign_users', { member_unit_id: unitId, user_ids: selected.map(function (item) { return item.id; }) }); } });
     };
     var quickAddDepartment = function () {
-        var parents = units.filter(function (item) { return ['deputy', 'department', rootType()].indexOf(item.type) !== -1; });
-        if (!parents.length) return toast('ابتدا معاونت بسازید', iconFor('warning'));
+        var parents = units.filter(function (item) { return ['deputy', 'management', 'department', rootType()].indexOf(item.type) !== -1; });
+        if (!parents.length) return toast('ابتدا معاونت یا مدیریت بسازید', iconFor('warning'));
         if (parents.length === 1) return showInlineAddDepartment(parents[0].id);
-        openModal({ icon: iconFor('department'), title: 'افزودن اداره', subtitle: 'معاونت یا ادارهٔ والد را انتخاب کنید', users: parents.map(function (item) { return { id: item.id, name: item.name, code: children(item.id, 'department').length + ' اداره', role: 'choice' }; }), custom: true, onPick: function (selected) { showInlineAddDepartment(selected.id); } });
+        openModal({ icon: iconFor('department'), title: 'افزودن اداره', subtitle: 'معاونت، مدیریت یا ادارهٔ والد را انتخاب کنید', users: parents.map(function (item) { return { id: item.id, name: item.name, code: children(item.id, 'department').length + ' اداره', role: 'choice' }; }), custom: true, onPick: function (selected) { showInlineAddDepartment(selected.id); } });
     };
     var quickAddExpert = function () {
         var hosts = expertHosts();
-        if (!hosts.length) return toast('ابتدا معاونت بسازید', iconFor('warning'));
+        if (!hosts.length) return toast('ابتدا معاونت یا مدیریت بسازید', iconFor('warning'));
         if (hosts.length === 1) return addExperts(hosts[0].id);
-        openModal({ icon: iconFor('expert'), title: 'افزودن کارشناس', subtitle: 'معاونت یا اداره مقصد را انتخاب کنید', users: hosts.map(function (item) {
-            var kind = item.type === 'deputy' ? 'معاونت' : (item.type === 'liaison' ? ('واحد هم‌تراز ' + rootLabel()) : 'اداره');
-            var extra = item.type === 'deputy'
+        openModal({ icon: iconFor('expert'), title: 'افزودن کارشناس', subtitle: 'معاونت، مدیریت مستقل یا اداره مقصد را انتخاب کنید', users: hosts.map(function (item) {
+            var kind = item.type === 'deputy' ? 'معاونت' : (item.type === 'management' ? 'مدیریت مستقل' : (item.type === 'liaison' ? 'واحد مستقل' : 'اداره'));
+            var extra = item.type === 'deputy' || item.type === 'management'
                 ? (children(item.id, 'department').length + ' اداره • ' + expertsIn(item.id).length + ' کارشناس')
-                : (item.type === 'liaison' ? ('هم‌تراز ' + rootLabel() + ' • ' + expertsIn(item.id).length + ' کارشناس') : ((unit(item.parentId) ? unit(item.parentId).name : 'اداره') + ' • ' + expertsIn(item.id).length + ' کارشناس'));
+                : (item.type === 'liaison' ? ('واحد مستقل • ' + expertsIn(item.id).length + ' کارشناس') : ((unit(item.parentId) ? unit(item.parentId).name : 'اداره') + ' • ' + expertsIn(item.id).length + ' کارشناس'));
             return { id: item.id, name: item.name, code: kind + ' — ' + extra, role: 'choice' };
         }), custom: true, onPick: function (selected) { addExperts(selected.id); } });
     };
     var showInline = function (type, parentId, side) {
-        var anchor = type === 'deputy' ? ($('.org-node.org-ceo') || $('.org-node.org-ceo-slot'))
+        var anchor = ['deputy', 'management', 'office'].indexOf(type) !== -1 ? ($('.org-node.org-ceo') || $('.org-node.org-ceo-slot'))
             : type === 'liaison' ? $('.org-liaison-slot[data-liaison-side="' + side + '"]')
             : $('.org-node[data-unit="' + parentId + '"]');
         if (!anchor) return;
         $$('.org-inline-form-wrap').forEach(function (item) { item.remove(); });
         var wrapper = document.createElement('div');
         wrapper.className = 'org-inline-form-wrap';
-        wrapper.innerHTML = type === 'deputy' ? '<div class="org-inline-form"><label>نام معاونت *</label><input data-inline-field="name" placeholder="معاونت فناوری"><label>کد اختیاری</label><input data-inline-field="code" placeholder="DEP-01"><div><button class="org-btn org-btn-success" data-inline-submit="deputy">✓ افزودن</button><button class="org-btn org-btn-ghost" data-inline-cancel>انصراف</button></div></div>'
-            : type === 'liaison' ? '<div class="org-inline-form"><label>نام واحد مستقل *</label><input data-inline-field="name" placeholder="مثلاً حراست مجموعه"><label>کد اختیاری</label><input data-inline-field="code" placeholder="LN-01"><div><button class="org-btn org-btn-success" data-inline-submit="liaison">✓ افزودن</button><button class="org-btn org-btn-ghost" data-inline-cancel>انصراف</button></div></div>'
-            : '<div class="org-inline-form"><label>نام اداره *</label><input data-inline-field="name" placeholder="اداره فناوری اطلاعات"><div><button class="org-btn org-btn-success" data-inline-submit="department">✓ افزودن</button><button class="org-btn org-btn-ghost" data-inline-cancel>انصراف</button></div></div>';
+        var formConfig = {
+            deputy: ['نام معاونت *', 'معاونت فناوری', 'کد اختیاری', 'DEP-01'],
+            management: ['نام مدیریت مستقل *', 'مدیریت اداری', 'کد اختیاری', 'MG-01'],
+            office: ['نام دفتر *', 'دفتر مدیرعامل', 'کد اختیاری', 'OF-01'],
+            liaison: ['نام واحد مستقل *', 'مثلاً حراست مجموعه', 'کد اختیاری', 'LN-01'],
+            department: ['نام اداره *', 'اداره فناوری اطلاعات', '', '']
+        }[type] || ['نام واحد *', '', '', ''];
+        wrapper.innerHTML = '<div class="org-inline-form"><label>' + formConfig[0] + '</label><input data-inline-field="name" placeholder="' + formConfig[1] + '">' + (formConfig[2] ? '<label>' + formConfig[2] + '</label><input data-inline-field="code" placeholder="' + formConfig[3] + '">' : '') + '<div><button class="org-btn org-btn-success" data-inline-submit="' + type + '">✓ افزودن</button><button class="org-btn org-btn-ghost" data-inline-cancel>انصراف</button></div></div>';
         anchor.appendChild(wrapper);
         wrapper.addEventListener('click', function (event) { event.stopPropagation(); });
         wrapper.querySelector('[data-inline-field="name"]').focus();
@@ -480,7 +606,7 @@
             var name = wrapper.querySelector('[data-inline-field="name"]').value.trim();
             var code = wrapper.querySelector('[data-inline-field="code"]');
             if (!name) return toast('نام الزامی است', iconFor('warning'));
-            var fields = { node_type: type, unit_name: name, unit_code: code ? code.value.trim() : '', parent_id: type === 'deputy' ? root().id : (type === 'liaison' ? 0 : parentId), unit_manager_id: 0, is_primary_admin: 0 };
+            var fields = { node_type: type, unit_name: name, unit_code: code ? code.value.trim() : '', parent_id: ['deputy', 'management', 'office'].indexOf(type) !== -1 ? root().id : (type === 'liaison' ? 0 : parentId), unit_manager_id: 0, is_primary_admin: 0 };
             if (type === 'liaison') fields.chart_side = side;
             submit('save_org_node', fields);
         });
@@ -493,14 +619,15 @@
         if (!node) return;
         $$('.org-inline-form-wrap').forEach(function (item) { item.remove(); });
         var isDepartment = target.type === 'department';
+        var typeLabel = target.type === 'deputy' ? 'معاونت' : (target.type === 'management' ? 'مدیریت مستقل' : (target.type === 'office' ? 'دفتر' : (target.type === 'liaison' ? 'واحد مستقل' : 'اداره')));
         var blockedParents = descendantIds(target.id).concat([Number(target.id)]);
-        var parentOptions = isDepartment ? units.filter(function (item) { return ['deputy', 'department', rootType()].indexOf(item.type) !== -1 && blockedParents.indexOf(Number(item.id)) === -1; }).map(function (item) {
+        var parentOptions = isDepartment ? units.filter(function (item) { return ['deputy', 'management', 'department', rootType()].indexOf(item.type) !== -1 && blockedParents.indexOf(Number(item.id)) === -1; }).map(function (item) {
             var level = 0, cursor = item, guard = 0; while (cursor && Number(cursor.parentId) > 0 && guard++ < 40) { level++; cursor = unit(cursor.parentId); }
             return '<option value="' + item.id + '"' + (Number(item.id) === Number(target.parentId) ? ' selected' : '') + '>' + '　'.repeat(Math.min(level, 8)) + esc(item.name) + '</option>';
         }).join('') : '';
         var wrapper = document.createElement('div');
         wrapper.className = 'org-inline-form-wrap';
-        wrapper.innerHTML = '<div class="org-inline-form"><label>نام ' + (isDepartment ? 'اداره' : (target.type === 'liaison' ? 'واحد مستقل' : 'معاونت')) + ' *</label><input data-inline-field="name" value="' + esc(target.name) + '">'
+        wrapper.innerHTML = '<div class="org-inline-form"><label>نام ' + typeLabel + ' *</label><input data-inline-field="name" value="' + esc(target.name) + '">'
             + '<label>کد اختیاری</label><input data-inline-field="code" value="' + esc(target.code || '') + '">'
             + (isDepartment ? '<label>معاونت والد</label><select data-inline-field="parent">' + parentOptions + '</select>' : '')
             + '<div><button class="org-btn org-btn-success" data-inline-submit="edit">✓ ذخیره تغییرات</button><button class="org-btn org-btn-ghost" data-inline-cancel>انصراف</button></div></div>';
@@ -567,6 +694,13 @@
         askConfirm({ icon: iconFor('delete'), title: 'پیش‌نمایش حذف نرم', message: '«' + target.name + '» و ' + (affected.length - 1) + ' ادارهٔ زیرمجموعه غیرفعال می‌شوند.', details: '<b>واحدهای متأثر:</b><br>' + list + '<br><br><b>' + assigned + ' کاربر</b> از این واحدها آزاد می‌شوند. رکوردها پاک نمی‌شوند و با Undo قابل بازگشت‌اند.', okText: 'تأیید حذف نرم', danger: true, onConfirm: function () { submit('delete_org_unit', { unit_id: unitId }); } });
     };
 
+    var addOrEditOffice = function () {
+        var ceo = root();
+        if (!ceo) return toast('ابتدا مدیرعامل را تعیین کنید', iconFor('warning'));
+        var currentOffice = children(ceo.id, 'office')[0] || null;
+        if (!currentOffice) return showInline('office', ceo.id);
+        return currentOffice.managerId ? showInlineEdit(currentOffice) : openManagerPicker(currentOffice);
+    };
     var renderMenu = function (button) {
         $$('.org-node-menu').forEach(function (item) { item.remove(); });
         var id = Number(button.getAttribute('data-unit-id'));
@@ -576,10 +710,11 @@
         menu.className = 'org-node-menu';
         var hasManager = Number(target.managerId) > 0;
         var items = [];
-        if (target.type === 'ceo' || target.type === 'company_manager') items = [{ icon: iconFor('manager'), label: 'تغییر ' + rootLabel(), action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن معاونت', action: showInlineAddDeputy }, { divider: true }, { icon: iconFor('remove'), label: 'برداشتن از سمت', danger: true, action: function () { removeManager(target); } }];
-        if (target.type === 'deputy') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر مدیر' : 'تعیین مدیر', action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن اداره', action: function () { showInlineAddDepartment(target.id); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { icon: iconFor('manage'), label: 'ویرایش معاونت', action: function () { showInlineEdit(target); } }, { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن مدیر', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل معاونت', danger: true, action: function () { removeUnit(target.id); } }];
+        if (target.type === 'ceo' || target.type === 'company_manager') items = [{ icon: iconFor('manager'), label: 'تغییر ' + rootLabel(), action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن معاونت', action: showInlineAddDeputy }, { icon: iconFor('add'), label: 'افزودن مدیریت مستقل', action: function () { showInline('management', root().id); } }, { icon: iconFor('add'), label: 'افزودن دفتر', action: addOrEditOffice }, { divider: true }, { icon: iconFor('remove'), label: 'برداشتن از سمت', danger: true, action: function () { removeManager(target); } }];
+        if (target.type === 'deputy' || target.type === 'management') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر مدیر' : 'تعیین مدیر', action: function () { openManagerPicker(target); } }, { icon: iconFor('add'), label: 'افزودن اداره', action: function () { showInlineAddDepartment(target.id); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { icon: iconFor('manage'), label: target.type === 'management' ? 'ویرایش مدیریت مستقل' : 'ویرایش معاونت', action: function () { showInlineEdit(target); } }, { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن مدیر', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: target.type === 'management' ? 'حذف مدیریت مستقل' : 'حذف کل معاونت', danger: true, action: function () { removeUnit(target.id); } }];
         if (target.type === 'liaison') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر نماینده' : 'تعیین نماینده', action: function () { openManagerPicker(target); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { icon: iconFor('manage'), label: 'ویرایش واحد مستقل', action: function () { showInlineEdit(target); } }, { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن نماینده', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف واحد مستقل', danger: true, action: function () { removeUnit(target.id); } }];
-        if (target.type === 'department') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر رئیس' : 'تعیین رئیس', action: function () { openManagerPicker(target); } }, { icon: iconFor('manage'), label: 'ویرایش اداره', action: function () { showInlineEdit(target); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن رئیس', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل اداره', danger: true, action: function () { removeUnit(target.id); } }];
+        if (target.type === 'office') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر رئیس دفتر' : 'تعیین رئیس دفتر', action: function () { openManagerPicker(target); } }, { icon: iconFor('manage'), label: 'ویرایش دفتر', action: function () { showInlineEdit(target); } }, { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن رئیس دفتر', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف دفتر', danger: true, action: function () { removeUnit(target.id); } }];
+        if (target.type === 'department') items = [{ icon: iconFor('manager'), label: hasManager ? 'تغییر مدیر' : 'تعیین مدیر', action: function () { openManagerPicker(target); } }, { icon: iconFor('manage'), label: 'ویرایش اداره', action: function () { showInlineEdit(target); } }, { icon: iconFor('expert'), label: 'افزودن کارشناس', action: function () { addExperts(target.id); } }, ...(expertsIn(target.id).length ? [{ icon: iconFor('manage'), label: 'مدیریت کارشناسان', action: function () { openExpertManager(target.id); } }, { icon: iconFor('delete'), label: 'عزل همه کارشناسان', danger: true, action: function () { removeAllExperts(target.id); } }] : []), { divider: true }, ...(hasManager ? [{ icon: iconFor('remove'), label: 'برداشتن مدیر', danger: true, action: function () { removeManager(target); } }] : []), { icon: iconFor('delete'), label: 'حذف کل اداره', danger: true, action: function () { removeUnit(target.id); } }];
         items.forEach(function (item) {
             if (item.divider) { var divider = document.createElement('div'); divider.className = 'org-menu-divider'; menu.appendChild(divider); return; }
             var row = document.createElement('button'); row.type = 'button'; row.className = 'org-menu-item' + (item.danger ? ' danger' : ''); row.innerHTML = '<span>' + item.icon + '</span><b>' + esc(item.label) + '</b>'; row.addEventListener('click', function (event) { event.stopPropagation(); menu.remove(); item.action(); }); menu.appendChild(row);
@@ -599,6 +734,8 @@
         var id = Number(element.getAttribute('data-unit-id') || 0);
         if (action === 'pick-ceo') return openManagerPicker(root());
         if (action === 'add-deputy') return showInlineAddDeputy();
+        if (action === 'add-management') return showInline('management', root() ? root().id : 0);
+        if (action === 'add-office') return addOrEditOffice();
         if (action === 'add-liaison') return showInline('liaison', 0, element.getAttribute('data-liaison-side') || 'right');
         if (action === 'add-department') return showInlineAddDepartment(id);
         if (action === 'quick-department') return quickAddDepartment();
@@ -624,6 +761,11 @@
     };
 
     document.addEventListener('click', function (event) {
+        if (state.suppressFreeClick) {
+            var clickedFreeKey = freeNodeKey(event.target.closest('.org-node, .org-experts-group'));
+            if (Date.now() <= state.suppressFreeClick.until && clickedFreeKey === state.suppressFreeClick.key) { state.suppressFreeClick = null; event.preventDefault(); event.stopImmediatePropagation(); return; }
+            if (Date.now() > state.suppressFreeClick.until) state.suppressFreeClick = null;
+        }
         if (!event.target.closest('.org-export-wrap')) closeExportMenu();
         var exportToggle = event.target.closest('[data-org-export-toggle]');
         if (exportToggle) { var menu = $('#org-export-menu'), opening = menu.hidden; menu.hidden = !opening; exportToggle.setAttribute('aria-expanded', opening ? 'true' : 'false'); return; }
@@ -674,15 +816,84 @@
     if (companySelect) companySelect.addEventListener('change', function () { var url = new URL(window.location.href); url.searchParams.set('page', 'organization'); url.searchParams.set('company_id', this.value); url.hash = ''; window.location.assign(url.toString()); });
     var focusToggle = $('[data-org-view="focus"]');
     if (focusToggle) focusToggle.addEventListener('click', function () { var workspace = $('.organization-workspace'), active = !workspace.classList.contains('org-focus-mode'); workspace.classList.toggle('org-focus-mode', active); focusToggle.setAttribute('aria-pressed', active ? 'true' : 'false'); var label = focusToggle.querySelector('span'); if (label) label.textContent = active ? 'نمایش پنل‌ها' : 'تمرکز روی نمودار'; window.requestAnimationFrame(drawOrgWires); });
+    var beginFreeMove = function (event) {
+        if (!event.ctrlKey || event.button !== 0 || state.freeDrag || state.pan) return;
+        var node = event.target.closest('.org-node, .org-experts-group');
+        if (!node || event.target.closest('button,a,input,textarea,select,[contenteditable="true"],.org-node-menu,.org-sort-handle,[data-deputy-drag]')) return;
+        var key = freeNodeKey(node);
+        if (!key) return;
+        var pos = freePosition(key);
+        state.freeDrag = { node: node, key: key, pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, x: pos.x, y: pos.y, moved: false };
+        node.classList.add('org-free-moving');
+        event.preventDefault(); event.stopPropagation();
+        try { node.setPointerCapture(event.pointerId); } catch (ignoredPointerCapture) {}
+        document.addEventListener('pointermove', moveFreeCard, { passive: false });
+        document.addEventListener('pointerup', endFreeCard);
+        document.addEventListener('pointercancel', endFreeCard);
+    };
+    var moveFreeCard = function (event) {
+        var drag = state.freeDrag;
+        if (!drag || event.pointerId !== drag.pointerId) return;
+        var zoom = Math.max(.01, Number(state.zoom) || 1);
+        var dx = (event.clientX - drag.startX) / zoom, dy = (event.clientY - drag.startY) / zoom;
+        if (Math.abs(dx) + Math.abs(dy) > 2) drag.moved = true;
+        if (!drag.moved) return;
+        drag.lastX = event.clientX; drag.lastY = event.clientY;
+        event.preventDefault();
+        drag.node.style.setProperty('--org-free-x', (drag.x + dx) + 'px');
+        drag.node.style.setProperty('--org-free-y', (drag.y + dy) + 'px');
+        drag.node.classList.add('org-free-positioned');
+        if (!state.freeWireFrame) state.freeWireFrame = window.requestAnimationFrame(function () { state.freeWireFrame = 0; drawOrgWires(); });
+    };
+    var endFreeCard = function (event) {
+        var drag = state.freeDrag;
+        if (!drag || (event && event.pointerId !== drag.pointerId)) return;
+        document.removeEventListener('pointermove', moveFreeCard);
+        document.removeEventListener('pointerup', endFreeCard);
+        document.removeEventListener('pointercancel', endFreeCard);
+        drag.node.classList.remove('org-free-moving');
+        if (drag.moved) {
+            var zoom = Math.max(.01, Number(state.zoom) || 1);
+            var x = drag.x + ((event.clientX - drag.startX) / zoom);
+            var y = drag.y + ((event.clientY - drag.startY) / zoom);
+            drag.node.style.setProperty('--org-free-x', x + 'px');
+            drag.node.style.setProperty('--org-free-y', y + 'px');
+            drag.node.classList.add('org-free-positioned');
+            freePositions[drag.key] = { x: x, y: y };
+            saveFreePositions();
+            state.suppressFreeClick = { key: drag.key, until: Date.now() + 450 };
+        }
+        state.freeDrag = null;
+        window.requestAnimationFrame(drawOrgWires);
+    };
+    var cancelFreeCard = function () {
+        if (!state.freeDrag) return;
+        var drag = state.freeDrag;
+        drag.node.classList.remove('org-free-moving');
+        if (drag.moved) {
+            var zoom = Math.max(.01, Number(state.zoom) || 1);
+            var x = drag.x + ((typeof drag.lastX === 'number' ? drag.lastX : drag.startX) - drag.startX) / zoom;
+            var y = drag.y + ((typeof drag.lastY === 'number' ? drag.lastY : drag.startY) - drag.startY) / zoom;
+            freePositions[drag.key] = { x: x, y: y };
+            saveFreePositions();
+        }
+        state.freeDrag = null;
+        document.removeEventListener('pointermove', moveFreeCard);
+        document.removeEventListener('pointerup', endFreeCard);
+        document.removeEventListener('pointercancel', endFreeCard);
+        window.requestAnimationFrame(drawOrgWires);
+    };
+    $('#org-canvas').addEventListener('pointerdown', beginFreeMove);
     document.addEventListener('keydown', function (event) {
+        if (event.key === 'Control') { state.ctrlDown = true; var freeCanvas = $('#org-canvas'); if (freeCanvas) freeCanvas.classList.add('org-free-move-ready'); }
         var editing = event.target.closest('input,textarea,select,[contenteditable="true"]');
         if (event.code === 'Space' && !editing) {
             event.preventDefault();
             if (!event.repeat) { state.spaceDown = true; var canvas = $('#org-canvas'); if (canvas) canvas.classList.add('org-pan-ready'); }
         }
-        if (event.key === 'Escape') { closeModal(); closeConfirm(); closeExportMenu(); $$('.org-node-menu').forEach(function (item) { item.remove(); }); }
+        if (event.key === 'Escape') { cancelFreeCard(); closeModal(); closeConfirm(); closeExportMenu(); $$('.org-node-menu').forEach(function (item) { item.remove(); }); }
     }, true);
-    document.addEventListener('keyup', function (event) { if (event.code === 'Space') { state.spaceDown = false; var canvas = $('#org-canvas'); if (canvas) { canvas.classList.remove('org-pan-ready'); if (!state.pan) canvas.classList.remove('org-panning'); } } });
+    document.addEventListener('keyup', function (event) { if (event.key === 'Control') { state.ctrlDown = false; var freeCanvas = $('#org-canvas'); if (freeCanvas) freeCanvas.classList.remove('org-free-move-ready'); } if (event.code === 'Space') { state.spaceDown = false; var canvas = $('#org-canvas'); if (canvas) { canvas.classList.remove('org-pan-ready'); if (!state.pan) canvas.classList.remove('org-panning'); } } });
     $('#org-canvas').addEventListener('pointerdown', function (event) {
         if (!state.spaceDown || event.button !== 0 || event.target.closest('.org-canvas-toolbar, .org-node, .org-experts-group, [data-deputy-drag], input, button, select, textarea')) return;
         var canvas = $('#org-canvas'); state.pan = { x: event.clientX, y: event.clientY, left: canvas.scrollLeft, top: canvas.scrollTop, pointerId: event.pointerId };
@@ -693,7 +904,7 @@
     $('#org-canvas').addEventListener('pointerup', endPan);
     $('#org-canvas').addEventListener('pointercancel', endPan);
     $('#org-canvas').addEventListener('lostpointercapture', function () { if (state.pan) { state.pan = null; $('#org-canvas').classList.remove('org-panning'); } });
-    window.addEventListener('blur', function () { state.spaceDown = false; endPan(); var canvas = $('#org-canvas'); if (canvas) canvas.classList.remove('org-pan-ready', 'org-panning'); });
+    window.addEventListener('blur', function () { state.spaceDown = false; state.ctrlDown = false; endPan(); cancelFreeCard(); var canvas = $('#org-canvas'); if (canvas) canvas.classList.remove('org-pan-ready', 'org-panning', 'org-free-move-ready'); });
 
     var askReset = function () {
         if (!data.canManage) return;
@@ -721,7 +932,7 @@
         drawOrgWires();
         var width = Math.max(stage.scrollWidth, stage.offsetWidth), height = Math.max(stage.scrollHeight, stage.offsetHeight);
         if (!width || !height) return done(null, null);
-        fetch('assets/style.css?v=3.4.57', { credentials: 'same-origin' }).then(function (response) {
+        fetch('assets/style.css?v=3.4.60', { credentials: 'same-origin' }).then(function (response) {
             if (!response.ok) throw new Error('دریافت قالب نمودار ناموفق بود.');
             return response.text();
         }).then(function (cssText) {
@@ -757,7 +968,7 @@
     var printWholeChart = function () {
         var printWindow = window.open('', '_blank');
         if (!printWindow) return toast('برای چاپ، پنجرهٔ بازشو را در مرورگر مجاز کنید و دوباره تلاش کنید.', iconFor('warning'));
-        var cssUrl = new URL('assets/style.css?v=3.4.57', window.location.href).toString();
+        var cssUrl = new URL('assets/style.css?v=3.4.60', window.location.href).toString();
         printWindow.document.open();
         printWindow.document.write('<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><title>چاپ کامل نمودار سازمانی</title><link rel="stylesheet" href="' + esc(cssUrl) + '"></head><body class="org-image-print-page"></body></html>');
         printWindow.document.close();

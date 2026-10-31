@@ -695,7 +695,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.57">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -875,7 +875,7 @@ function render_footer(): void
         echo "[]";
     }
     $inspectionReminder = inspection_food_reminder_markup($layoutUser);
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.27&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
     if ($inspectionReminder !== '') {
         echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
     }
@@ -932,7 +932,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && in_array($page, ['organizat
     register_shutdown_function(static function (): void {
         try {
             org_sync_position_roles();
-        } catch (Throwable $ignored) {
+        } catch (Throwable $exception) {
+            error_log('org_role_sync_failed: ' . $exception->getMessage());
         }
     });
 }
@@ -2994,7 +2995,7 @@ if ($page === 'organization') {
             [['v' => 'ساختار کامل سازمان · ' . (string) $currentCompany['name'], 's' => 'title'], '', '', '', '', '', ''],
             [['v' => 'نوع رکورد', 's' => 'header'], ['v' => 'نام واحد/کارشناس', 's' => 'header'], ['v' => 'شناسه', 's' => 'header'], ['v' => 'واحد والد', 's' => 'header'], ['v' => 'مدیر/مسئول', 's' => 'header'], ['v' => 'کارشناسان این واحد', 's' => 'header'], ['v' => 'جایگاه/توضیح', 's' => 'header']],
         ];
-        $unitTypeLabels = ['ceo' => 'مدیرعامل', 'company_manager' => 'مدیر شرکت', 'deputy' => 'معاونت', 'department' => 'اداره', 'liaison' => 'واحد هم‌تراز ' . $companyRootTitle];
+        $unitTypeLabels = ['ceo' => 'مدیرعامل', 'company_manager' => 'مدیر شرکت', 'deputy' => 'معاونت', 'management' => 'مدیریت مستقل', 'office' => 'دفتر مدیرعامل', 'department' => 'اداره', 'liaison' => 'واحد مستقل'];
         foreach ($orderedExportUnits as $exportUnit) {
             $unitId = (int) $exportUnit['id'];
             $managerIds = org_unit_manager_ids($unitId);
@@ -3007,7 +3008,7 @@ if ($page === 'organization') {
                 if ((int) ($exportUser['is_active'] ?? 0) === 1 && (int) ($exportUser['org_unit_id'] ?? 0) === $unitId && !isset($allManagerIds[(int) $exportUser['id']])) $expertNames[] = (string) $exportUser['full_name'];
             }
             $parentName = $unitById[(int) ($exportUnit['parent_id'] ?? 0)]['name'] ?? '';
-            $description = (string) $exportUnit['unit_type'] === 'liaison' ? ('هم‌تراز ' . $companyRootTitle . ' · سمت ' . ((string) ($exportUnit['chart_side'] ?? '') === 'left' ? 'چپ' : 'راست')) : (string) ($exportUnit['code'] ?? '');
+            $description = (string) $exportUnit['unit_type'] === 'liaison' ? ('واحد مستقل · سمت ' . ((string) ($exportUnit['chart_side'] ?? '') === 'left' ? 'چپ' : 'راست')) : (string) ($exportUnit['code'] ?? '');
             $excelRows[] = [
                 ['v' => $unitTypeLabels[(string) $exportUnit['unit_type']] ?? (string) $exportUnit['unit_type'], 's' => 'body'],
                 ['v' => (string) $exportUnit['name'], 's' => 'body'],
@@ -3120,7 +3121,7 @@ HTML;
         $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
     } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
     echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=16"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=20"></script>';
     render_footer();
     exit;
 }
