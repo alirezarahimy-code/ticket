@@ -65,6 +65,10 @@ food_calendar_items	install-empty-db.sql	1186
 food_orders	install-empty-db.sql	1201
 food_order_logs	install-empty-db.sql	1217
 food_order_cancel_requests	install-empty-db.sql	1235
+chatbot_faq	install-empty-db.sql	1259
+chatbot_logs	install-empty-db.sql	1271
+system_incidents	install-empty-db.sql	1284
+food_guest_requests	install-empty-db.sql	1293
 settings	migrations/003-sync-schema-151.sql	5
 departments	migrations/003-sync-schema-151.sql	9
 org_units	migrations/003-sync-schema-151.sql	18
@@ -135,6 +139,8 @@ food_order_logs	migrations/003-sync-schema-151.sql	1070
 traffic_visit_history	migrations/007-traffic-visit-history.sql	2
 food_ticket_daily_absence	migrations/012-manual-attendance-clears-absences.sql	4
 food_ticket_daily_absence	migrations/013-manual-attendance-record-backfill.sql	12
+tmp_asset_dedupe_map	migrations/016-auto-asset-finish.sql	39
+asset_dedupe_backup_016	migrations/016-auto-asset-finish.sql	53
 settings	schema.sql	1
 departments	schema.sql	6
 org_units	schema.sql	16

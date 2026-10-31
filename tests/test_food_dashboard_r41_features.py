@@ -15,8 +15,10 @@ def test_r41_is_integrated_and_self_contained():
     js = BUNDLE.read_text(encoding="utf-8")
     css = CSS.read_text(encoding="utf-8")
 
-    assert "food-capitalio-dashboard-r41.css?v=1.61.10-r41" in html
-    assert "food-capitalio-dashboard-r41.js?v=1.61.10-r41" in html
+    # پنل زنده از ۱.۶۲.۲ به بعد روی R42 است؛ بستهٔ R41 همچنان بهعنوان
+    # آرشیو انتشار معتبر است و نباید از مخزن حذف شود. هر دو مسیر چک میشوند.
+    assert "food-capitalio-dashboard-r42.css?v=1.62.2-dashboard-fix" in html
+    assert "food-capitalio-dashboard-r42.js?v=1.62.2-dashboard-fix" in html
     assert "id:'today-guests',title:'مهمانان امروز'" in html
     assert "sources.monitoring?(statusItems.find(item=>item.key==='guests')?.count||0):null" in html
     assert "ماه اخیر" in js

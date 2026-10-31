@@ -1620,3 +1620,189 @@ body.page-organization .content-wrap { height: auto; min-height: 100vh; overflow
   #users .category-list > div { align-items:flex-start; flex-direction:column; gap:9px; }
   #users .role-form { width:100%; }
 }
+
+/* درخت سازمان پویا: چهار معاونت در هر ردیف، اداره‌های تو‌در‌تو، خطوط متصل به کارت‌ها. */
+.org-main-layout { direction: ltr; }
+.org-sidebar, .org-pool-sidebar { direction: rtl; display: block !important; width: 166px; flex: 0 0 166px; }
+.org-sidebar { order: 3; border-left: 1px solid var(--line); border-right: 0; }
+.org-canvas { order: 2; direction: rtl; }
+.org-pool-sidebar { order: 1; border-left: 1px solid var(--line); border-right: 0; }
+.org-chart-wrap { display: block; width: max-content; min-width: 100%; padding: 18px 34px 48px; text-align: center; transform-origin: top center; }
+.org-chart-stage { position: relative; width: max-content; min-width: 100%; min-height: 230px; padding-top: 10px; isolation: isolate; }
+.org-wires { position: absolute; z-index: -1; inset: 0 auto auto 0; overflow: visible; pointer-events: none; }
+.org-wire { fill: none; stroke: #6d8a7a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; opacity: .76; }
+.org-wire-shared { stroke: #9aa9a0; stroke-width: 1.7; }
+.org-top-row { display: grid; grid-template-columns: minmax(210px,1fr) auto minmax(210px,1fr); align-items: start; gap: clamp(25px,5vw,90px); min-height: 128px; direction: ltr; position: relative; z-index: 1; }
+.org-liaison-cell, .org-ceo-cell { display: flex; justify-content: center; direction: rtl; }
+.org-liaison-cell { padding-top: 30px; }
+.org-ceo-cell > .org-node { width: 230px; }
+.org-deputy-rows { display: flex; flex-direction: column; align-items: stretch; gap: 62px; position: relative; z-index: 1; padding-bottom: 20px; }
+.org-deputy-row { display: flex; width: max-content; min-width: 100%; justify-content: center; align-items: flex-start; gap: clamp(24px,4vw,70px); direction: rtl; }
+.org-branch { position: relative; display: flex; flex: 0 0 auto; flex-direction: column; align-items: center; min-width: 205px; direction: rtl; }
+.org-branch-card { display: flex; flex-direction: column; align-items: center; gap: 10px; width: max-content; min-width: 205px; max-width: 270px; }
+.org-branch-card > .org-node { width: 205px; min-height: 148px; flex: 0 0 auto; }
+.org-children { position: relative; display: flex; align-items: flex-start; justify-content: center; gap: 28px; padding-top: 36px; width: max-content; max-width: none; }
+.org-children:empty { display: none; }
+.org-node { position: relative; }
+.org-node.org-deputy, .org-node.org-department, .org-node.org-ceo, .org-node.org-liaison-node { padding: 14px 13px; border-top-width: 3px; border-radius: 12px; }
+.org-node.org-department { border-top-color: #338f76; }
+.org-node-add-row { display: flex; gap: 6px; margin-top: 10px; width: 100%; }
+.org-node-add-row .org-node-add { position: static; flex: 1; width: auto; height: auto; margin: 0; padding: 7px 5px; border: 1px solid var(--white); border-radius: 7px; opacity: 1; transform: none; font-size: 10px; }
+.org-node-add-row .org-node-add-expert { background: #d6a842; }
+.org-sort-handle { position: absolute; left: 42px; top: 8px; z-index: 5; display: grid; place-items: center; width: 29px; height: 29px; padding: 0; border: 1px solid var(--line); border-radius: 7px; background: #fff; color: #64748b; cursor: grab; touch-action: none; user-select: none; font-size: 18px; }
+.org-sort-handle:active { cursor: grabbing; }
+.org-branch.is-dragging { opacity: .4; }
+.org-branch.org-drop-before > .org-branch-card > .org-node { outline: 2px solid #91aef8; outline-offset: 3px; }
+.org-experts-group { width: 205px; min-width: 205px; max-width: 250px; padding: 9px 10px; border: 1px solid #cde5d4; border-radius: 10px; background: #f8fcf8; text-align: right; box-shadow: 0 4px 12px rgba(25,80,48,.06); }
+.org-expert-heading { display: flex; align-items: center; gap: 6px; padding-bottom: 7px; margin-bottom: 5px; border-bottom: 1px solid #e4eee5; color: #28764c; font-size: 10px; }
+.org-expert-heading b { flex: 1; }.org-expert-heading > span { padding: 2px 7px; border-radius: 12px; background: #e2f4e9; }
+.org-expert-person { display: flex; align-items: center; gap: 6px; margin: 4px 0; overflow: hidden; color: #53665a; font-size: 10px; white-space: nowrap; text-overflow: ellipsis; }
+.org-expert-person > span { display: grid; place-items: center; width: 19px; height: 19px; flex: none; border-radius: 50%; background: #e2f4e9; color: #237b55; font-weight: 700; }
+.org-expert-more, .org-expert-empty { color: #87948a; font-size: 9px; padding: 4px; }
+.org-expert-manage { margin-top: 6px; padding: 4px 8px; border: 1px solid #cde5d4; border-radius: 6px; background: #fff; color: #28764c; cursor: pointer; font-size: 9px; }
+.org-empty-branch-hint { margin: 4px auto; padding: 10px 16px; border: 1px dashed #d7dfd9; border-radius: 20px; background: #fff; color: #77857b; font-size: 11px; }
+.org-canvas.org-pan-ready { cursor: grab; }
+.org-canvas.org-panning { cursor: grabbing !important; user-select: none; }
+.org-canvas.org-panning { touch-action: none; }
+.org-icon-button:disabled { opacity: .42; cursor: not-allowed; }
+.org-sidebar-section .org-help { line-height: 2; }
+@media (max-width: 1100px) { .org-sidebar, .org-pool-sidebar { width: 142px; flex-basis: 142px; } }
+@media (max-width: 900px) { .org-sidebar, .org-pool-sidebar { display: block !important; width: 125px; flex-basis: 125px; } }
+@media (max-width: 700px) { .org-sidebar, .org-pool-sidebar { display: block !important; width: 108px; flex-basis: 108px; }.org-canvas { min-width: 0; padding: 12px 8px; }.org-chart-wrap { padding: 12px 18px 30px; }.org-top-row { gap: 15px; }.org-branch-card > .org-node { width: 190px; } }
+.org-root-department-row { display: flex; width: max-content; min-width: 100%; justify-content: center; align-items: flex-start; gap: clamp(24px,4vw,70px); direction: rtl; }
+.org-orphan-units { margin: 44px auto 10px; padding: 16px; border: 1px solid #e7d29b; border-radius: 13px; background: #fffdf7; text-align: right; }
+.org-orphan-units h3 { margin: 0 0 6px; color: #795a16; font-size: 13px; }
+.org-orphan-units > p { margin: 0 0 12px; color: #827249; font-size: 10px; line-height: 1.8; }
+.org-orphan-row { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 28px; }
+.org-cycle-warning { width: 205px; padding: 10px; border: 1px dashed #c16a43; border-radius: 9px; background: #fff5ef; color: #9b4b2c; font-size: 10px; line-height: 1.8; }
+.org-wire-expert { stroke: #8eab93; stroke-width: 1.6; stroke-dasharray: 3 3; opacity: .8; }
+
+
+/* چارت سازمان: پیمایش با Space+drag بدون smooth-scroll ناخواستهٔ کل صفحه */
+.org-canvas { scroll-behavior: auto !important; overscroll-behavior: contain; }
+.org-canvas.org-pan-ready { cursor: grab; touch-action: none; }
+.org-canvas.org-panning { cursor: grabbing !important; touch-action: none; }
+.org-canvas.org-panning * { user-select: none !important; }
+
+/* هر شاخهٔ معاونت رنگ مخصوص خود را به کارت‌ها، کارشناسان و اتصالات منتقل می‌کند. */
+.org-branch .org-node.org-deputy,
+.org-branch .org-node.org-department { border-top-color: var(--org-branch-color); }
+.org-branch .org-experts-group { border-color: color-mix(in srgb, var(--org-branch-color) 28%, white); background: color-mix(in srgb, var(--org-branch-color) 5%, white); }
+.org-branch .org-expert-heading { color: var(--org-branch-color); border-bottom-color: color-mix(in srgb, var(--org-branch-color) 16%, white); }
+.org-branch .org-expert-heading > span,
+.org-branch .org-expert-person > span { background: color-mix(in srgb, var(--org-branch-color) 12%, white); color: var(--org-branch-color); }
+
+/* چارت سازمان: منوی خروجی، واحدهای هم‌تراز و نماهای کامل */
+.org-export-wrap { position: relative; }
+.org-header-actions { overflow: visible; }
+.org-header-actions [hidden] { display: none !important; }
+.org-header { position: relative; z-index: 15; }
+.org-export-menu { position: absolute; z-index: 100; top: calc(100% + 7px); right: 0; display: grid; min-width: 180px; padding: 6px; border: 1px solid #dbe3e8; border-radius: 10px; background: #fff; box-shadow: 0 12px 30px rgba(15,23,42,.18); direction: rtl; }
+.org-export-menu[hidden] { display: none !important; }
+.org-export-menu button { width: 100%; padding: 9px 12px; border: 0; border-radius: 7px; background: transparent; color: #263846; text-align: right; cursor: pointer; font: inherit; font-size: 12px; }
+.org-export-menu button:hover, .org-export-menu button:focus-visible { background: #eef5f2; outline: 0; }
+.org-liaison-cell { position: relative; z-index: 3; }
+.org-node.org-liaison-node { z-index: 2; background: #fff; box-shadow: 0 8px 22px rgba(23,79,67,.12); }
+.org-liaison-experts { width: 100%; padding: 8px 9px; margin-top: 7px; border: 1px solid #d9e4e8; border-radius: 8px; background: #f7fafb; text-align: right; }
+.org-liaison-experts b { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; color: #386a73; font-size: 10px; }
+.org-liaison-experts b .org-svg-icon { width: 14px; height: 14px; }
+.org-liaison-experts > span { display: block; color: #53636c; font-size: 10px; line-height: 1.8; white-space: normal; }
+.org-liaison-node > .org-node-add { position: static; width: auto; min-height: 28px; height: auto; padding: 6px 8px; margin-top: 6px; opacity: 1; transform: none; font-size: 10px; }
+.org-liaison-node > .org-node-add-expert { background: #d6a842; }
+.organization-workspace.org-ajax-saving { cursor: progress; }
+.organization-workspace.org-ajax-saving .org-canvas { cursor: progress; }
+
+@media print {
+  @page { size: landscape; margin: 8mm; }
+  body.page-organization.org-printing,
+  body.page-organization.org-printing .app-shell,
+  body.page-organization.org-printing .content-wrap { width: auto !important; height: auto !important; min-height: 0 !important; max-height: none !important; overflow: visible !important; }
+  body.page-organization.org-printing .topbar,
+  body.page-organization.org-printing .org-header,
+  body.page-organization.org-printing .org-sidebar,
+  body.page-organization.org-printing .org-pool-sidebar,
+  body.page-organization.org-printing .org-canvas-toolbar,
+  body.page-organization.org-printing .org-node-menu-wrap,
+  body.page-organization.org-printing .org-node-add,
+  body.page-organization.org-printing .org-sort-handle,
+  body.page-organization.org-printing .org-undo-bar,
+  body.page-organization.org-printing .org-toast,
+  body.page-organization.org-printing .org-modal-backdrop,
+  body.page-organization.org-printing .org-confirm-backdrop { display: none !important; }
+  body.page-organization.org-printing .org-main-layout { display: block !important; width: auto !important; height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  body.page-organization.org-printing .org-canvas { display: block !important; width: auto !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; background: #fff !important; }
+  body.page-organization.org-printing .org-chart-wrap { width: max-content !important; min-width: 0 !important; padding: 0 !important; margin: 0 auto !important; overflow: visible !important; transform: none !important; transform-origin: top left !important; }
+  body.page-organization.org-printing .org-chart-stage { width: max-content !important; min-width: 0 !important; overflow: visible !important; }
+  body.page-organization.org-printing .org-node,
+  body.page-organization.org-printing .org-branch { break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* چندشرکتی: انتخاب‌گر شرکت در چارت */
+.org-company-context { display: flex; align-items: center; min-width: 150px; }
+.org-company-picker { display: flex; align-items: center; gap: 7px; margin: 0; }
+.org-company-picker label, .org-company-label { color: #60716e; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.org-company-picker select { min-width: 145px; max-width: 230px; padding: 7px 28px 7px 9px; border: 1px solid #d9e5e1; border-radius: 8px; background: #fff; color: #203a34; font: inherit; font-size: 12px; }
+@media (max-width: 900px) { .org-company-context { min-width: 0; } .org-company-picker { flex-wrap: wrap; } .org-company-picker select { min-width: 120px; max-width: 165px; } }
+
+/* اصلاحات چارت: ابزار ثابت، خروجی چاپ کامل و ورودی بازیابی پنهان */
+.org-canvas-shell { order: 2; display: flex; flex: 1 1 0; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.org-canvas-shell > .org-canvas-toolbar { position: relative; inset: auto; top: auto; z-index: 40; flex: 0 0 auto; width: min(1100px, calc(100% - 24px)); max-width: 1100px; margin: 10px auto 0; }
+.org-canvas-shell > .org-canvas { order: initial; flex: 1 1 0; min-width: 0; min-height: 0; width: 100%; overflow: auto; }
+#org-backup-file[hidden] { display: none !important; visibility: hidden !important; width: 0 !important; height: 0 !important; }
+.org-node.is-match { position: relative; z-index: 6; outline: 3px solid rgba(219, 145, 31, .5); outline-offset: 3px; box-shadow: 0 0 0 6px rgba(245, 185, 66, .18), 0 8px 24px rgba(128, 89, 20, .22) !important; }
+.org-expert-person.is-match { border-radius: 5px; background: #fff1bd; color: #6c4710; box-shadow: 0 0 0 2px #e3a82d; }
+@media print {
+  @page { size: landscape; margin: 8mm; }
+  body.org-printing,
+  body.org-printing .app-shell,
+  body.org-printing .content-wrap,
+  body.org-printing .organization-workspace { width: auto !important; height: auto !important; min-width: 0 !important; min-height: 0 !important; max-width: none !important; max-height: none !important; overflow: visible !important; }
+  body.org-printing .topbar,
+  body.org-printing .org-header,
+  body.org-printing .org-sidebar,
+  body.org-printing .org-pool-sidebar,
+  body.org-printing .org-canvas-toolbar,
+  body.org-printing .org-node-menu-wrap,
+  body.org-printing .org-node-add,
+  body.org-printing .org-sort-handle,
+  body.org-printing .org-undo-bar,
+  body.org-printing .org-toast,
+  body.org-printing .org-modal-backdrop,
+  body.org-printing .org-confirm-backdrop { display: none !important; }
+  body.org-printing .org-main-layout,
+  body.org-printing .org-canvas-shell { display: block !important; width: auto !important; height: auto !important; min-height: 0 !important; overflow: visible !important; }
+  body.org-printing .org-canvas { display: block !important; width: auto !important; height: auto !important; min-height: 0 !important; overflow: visible !important; padding: 0 !important; background: #fff !important; }
+  body.org-printing .org-chart-wrap { display: block !important; box-sizing: border-box !important; width: var(--org-print-width, max-content) !important; height: var(--org-print-height, auto) !important; min-width: 0 !important; padding: 0 !important; margin: 0 auto !important; overflow: visible !important; transform: none !important; }
+  body.org-printing .org-chart-stage { display: block !important; width: max-content !important; min-width: 0 !important; overflow: visible !important; transform: scale(var(--org-print-scale, 1)) !important; transform-origin: top left !important; }
+  body.org-printing .org-node,
+  body.org-printing .org-branch { break-inside: avoid; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+@media (max-width: 700px) {
+  .org-canvas-shell { flex-basis: 0; }
+  .org-canvas-shell > .org-canvas-toolbar { width: calc(100% - 12px); margin-top: 6px; }
+}
+
+/* چاپ مبتنی بر تصویر کامل و نام شرکت در کارت ریشه */
+.org-header { z-index: 60; }
+.org-export-wrap { z-index: 20; }
+.org-export-menu { z-index: 200; }
+.org-company-node-name { display: inline-block; margin: 5px auto 2px; padding: 3px 8px; border: 1px solid rgba(255,255,255,.3); border-radius: 20px; color: rgba(255,255,255,.94); font-size: 10px; font-weight: 700; line-height: 1.5; }
+.org-empty-slot .org-company-node-name { color: #426455; border-color: #dbe9df; background: #f5faf6; }
+body.org-image-print-page { box-sizing: border-box; display: grid; place-items: center; width: 100vw; min-height: 100vh; margin: 0; padding: 0; overflow: auto; background: #fff; }
+body.org-image-print-page img { display: block; width: min(100vw, 100%); height: min(100vh, 100%); max-width: 100%; max-height: 100vh; object-fit: contain; }
+@media print {
+  @page { size: landscape; margin: 5mm; }
+  body.org-image-print-page { display: grid; width: 100%; height: 100%; min-height: 0; overflow: hidden; }
+  body.org-image-print-page img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; break-inside: avoid; page-break-inside: avoid; }
+}
+
+/* فیلد نام شرکت‌ها صرفاً برچسب نمایشی انتخاب‌گر و کارت ریشه است */
+.company-settings { margin: 15px 0; padding: 16px; }
+.company-settings h3 { margin: 0 0 7px; }
+.company-name-form { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }
+.company-name-form label { display: grid; gap: 5px; min-width: 190px; color: #52605d; font-size: 12px; }
+.company-name-form input { min-height: 38px; padding: 7px 10px; border: 1px solid #d8e2df; border-radius: 8px; background: #fff; color: #203a34; font: inherit; }
+.org-company-edit-link { color: #e8f4ec; font-size: 10px; font-weight: 700; text-decoration: underline; white-space: nowrap; }
+.org-company-edit-link:hover { color: #fff; }
+@media (max-width: 900px) { .org-company-edit-link { font-size: 9px; } }
+@media (max-width: 700px) { .org-company-edit-link { width: 20px; overflow: hidden; font-size: 0; text-decoration: none; text-align: center; }.org-company-edit-link::before { content: '✎'; color: #fff; font-size: 14px; } }

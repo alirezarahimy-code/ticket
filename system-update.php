@@ -99,6 +99,33 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
 }
 
 /** فایل ZIP را اعتبارسنجی می‌کند، بکاپ می‌گیرد، مهاجرت‌ها را اجرا می‌کند و فایل‌ها را کپی می‌کند. */
+
+/** ۱.۶۲.۴۱ — اسنپشات ZIP از فایلهای سامانه، مستقل از توابع backup.php. */
+function system_update_files_snapshot(string $destination): array
+{
+    if ($destination === '' || !class_exists('ZipArchive')) { return []; }
+    $root = APP_ROOT;
+    $skip = ['storage','uploads','downloads','.git','node_modules','vendor','.cache','preview','updates','temp','tmp'];
+    $path = $destination . DIRECTORY_SEPARATOR . 'system-files-before-update.zip';
+    $zip = new ZipArchive();
+    if ($zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) { return []; }
+    $count = 0;
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+    foreach ($iterator as $item) {
+        $rel = str_replace('\\', '/', substr($item->getPathname(), strlen($root) + 1));
+        if (in_array(explode('/', $rel)[0], $skip, true) || $item->isDir()) { continue; }
+        if ($item->getSize() > 25 * 1024 * 1024) { continue; }
+        if ($zip->addFile($item->getPathname(), $rel)) { $count++; }
+    }
+    $zip->addFromString('BACKUP-INFO.txt',
+        "بکاپ فایلها قبل از آپدیت\nتاریخ: " . date('Y-m-d H:i:s') . "\nفایلها: {$count}\n");
+    $zip->close();
+    return ['file' => basename($path), 'files' => $count];
+}
+
 function system_update_apply(array $upload, array $actor, bool $allowDowngrade = false): array
 {
     if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
@@ -118,8 +145,11 @@ function system_update_apply(array $upload, array $actor, bool $allowDowngrade =
         throw new RuntimeException('mysql پیدا نشد؛ مسیر ITSM_MYSQL_PATH یا XAMPP را بررسی کنید.');
     }
 
-    // ۱. بکاپ قبل از هر تغییر
+    // ۱. بکاپ قبل از هر تغییر (دیتابیس + uploads + فایلهای سامانه)
     $backup = create_backup_bundle();
+    // ۱.۶۲.۴۱ — پشتیبان مستقل از فایلها، حتی اگر نسخهٔ قدیمی backup.php لود شده باشد.
+    $fileSnapshot = system_update_files_snapshot($backup['path'] ?? '');
+    if ($fileSnapshot) { $backup['files_snapshot'] = $fileSnapshot; }
 
     // ۲. استخراج در پوشهٔ موقت
     $stage = APP_ROOT . '/storage/updates/' . $version . '-' . date('YmdHis');

@@ -172,6 +172,17 @@ function food_order_require_permission(array $user, string $permission): void
     }
 }
 
+/** Read-only calendar count access follows access to the food calendar itself. */
+function food_order_can_view_order_counts(array $user): bool
+{
+    foreach (["food.menu", "food.order_close", "food.reports", "food.orders"] as $permission) {
+        if (food_order_user_can($user, $permission)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function food_order_require_primary_admin(array $user): void
 {
     if (!$user || !food_order_is_primary_admin($user)) {
@@ -2312,9 +2323,44 @@ function food_guest_request_roles(): array
 }
 
 /** فقط کسانی که جایگاه مدیریتی در چارت دارند (مدیر واحدی که زیر یک معاونت است)؛ نقش سامانه ملاک نیست. */
+function food_guest_request_is_reviewer(array $user): bool
+{
+    if (function_exists('food_order_user_is_cancel_reviewer') && food_order_user_is_cancel_reviewer($user)) {
+        return true;
+    }
+    return (string) ($user['role'] ?? '') === 'manager'
+        && function_exists('user_service_group')
+        && user_service_group($user) === 'support';
+}
+
 function food_guest_request_allowed(array $user): bool
 {
-    return food_guest_user_deputy_id($user, true) > 0;
+    // مدیرِ معاونت درخواست ثبت می‌کند؛ مدیر پشتیبانی و ادمین اصلی هم برای رسیدگی مجازند.
+    return food_guest_request_is_reviewer($user) || food_guest_user_deputy_id($user, true) > 0;
+}
+
+/** آیا کاربر می‌تواند درخواست مشخصی را مدیریت کند؟ مدیر عادی فقط درخواست خودش را؛
+ * مدیر پشتیبانی/ادمین اصلی همهٔ درخواست‌ها را. */
+function food_guest_request_can_manage(array $user, array $row): bool
+{
+    if (food_guest_request_is_reviewer($user)) {
+        return true;
+    }
+    $uid = (int) ($user['id'] ?? 0);
+    return $uid > 0
+        && (int) ($row['created_by'] ?? 0) === $uid
+        && food_guest_user_deputy_id($user, true) > 0;
+}
+
+/** ویرایش درخواست روز جاری فقط تا مهلت ثبت مهمان مجاز است؛ سوابق گذشته برای ویرایش قفل‌اند. */
+function food_guest_request_change_window_open(string $date, ?DateTimeImmutable $now = null): bool
+{
+    $now ??= food_order_now();
+    $today = $now->format('Y-m-d');
+    if ($date < $today) {
+        return false;
+    }
+    return $date > $today || food_guest_request_same_day_is_open($now);
 }
 
 /** آخرین دقیقهٔ مجاز ثبت درخواست مهمان برای همان روز؛ مستقل از ساعت قطع سقف فیش مهمان است. */
@@ -2483,28 +2529,46 @@ function food_guest_user_deputy_id(array $user, bool $managedOnly = false): int
     return 0;
 }
 
-function food_guest_request_list(array $user): array
+function food_guest_request_list(array $user, bool $includePast = false): array
 {
     food_guest_schema_ensure();
     $now = food_order_now();
     $today = $now->format('Y-m-d');
+    $uid = (int) ($user['id'] ?? 0);
+    $isReviewer = food_guest_request_is_reviewer($user);
+    $myDeputyId = $isReviewer ? 0 : food_guest_user_deputy_id($user, true);
+    $dateFilter = $includePast ? '' : 'WHERE r.request_date >= ?';
+    $sortOrder = $includePast ? 'DESC' : 'ASC';
+    $idSortOrder = $includePast ? 'DESC' : 'ASC';
+    $rowLimit = $includePast ? '' : 'LIMIT 300';
     $stmt = db()->prepare(
         "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.note, r.status,
-                r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
+                r.created_by, r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
                 TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS created_by_name
            FROM food_guest_requests r
            LEFT JOIN food_catalog c ON c.id = r.food_id
            LEFT JOIN org_units ou ON ou.id = r.deputy_unit_id
            LEFT JOIN users u ON u.id = r.created_by
-          WHERE r.request_date >= ?
-          ORDER BY r.request_date ASC, r.id ASC
-          LIMIT 300"
+          $dateFilter
+          ORDER BY r.request_date $sortOrder, r.id $idSortOrder
+          $rowLimit"
     );
-    $stmt->execute([$today]);
+    $stmt->execute($includePast ? [] : [$today]);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $canManage = $isReviewer || ($uid > 0 && $myDeputyId > 0 && (int) ($r['created_by'] ?? 0) === $uid);
+        $date = (string) $r['request_date'];
+        $active = (string) $r['status'] === 'active';
+        $canEdit = $canManage && $active && food_guest_request_change_window_open($date, $now);
+        $canCancel = $canManage && $active && $date > $today;
+        // سوابق گذشته برای مدیران مجاز قابل حذف است؛ محدودیت زمانی حذف امروز/آینده حفظ می‌شود.
+        $canDelete = $canManage && ($date < $today || food_guest_request_change_window_open($date, $now));
         $items[] = [
             'id' => (int) $r['id'],
+            'can_manage' => $canManage,
+            'can_edit' => $canEdit,
+            'can_cancel' => $canCancel,
+            'can_delete' => $canDelete,
             'request_date' => (string) $r['request_date'],
             'request_jalali' => food_order_jalali_label((string) $r['request_date']),
             'organization' => (string) $r['organization'],
@@ -2518,14 +2582,13 @@ function food_guest_request_list(array $user): array
             'status' => (string) $r['status'],
             'created_by_name' => (string) ($r['created_by_name'] ?? ''),
             'created_at' => (string) $r['created_at'],
-            'editable' => $r['status'] === 'active' && (string) $r['request_date'] > $today,
+            'editable' => $canEdit,
         ];
     }
     $foods = array_values(array_map(
         static fn (array $f): array => ['id' => $f['id'], 'name' => $f['food_name']],
         array_filter(food_order_catalog(false), static fn (array $f): bool => $f['active'])
     ));
-    $myDeputyId = food_guest_user_deputy_id($user);
     $myDeputy = null;
     foreach (food_guest_deputies() as $d) {
         if ($d['id'] === $myDeputyId) {
@@ -2595,13 +2658,16 @@ function food_guest_request_cancel(array $user, int $id): void
 {
     food_guest_schema_ensure();
     $today = food_order_today();
-    $stmt = db()->prepare('SELECT request_date, status, organization, guest_count FROM food_guest_requests WHERE id = ? FOR UPDATE');
+    $stmt = db()->prepare('SELECT * FROM food_guest_requests WHERE id = ? FOR UPDATE');
     db()->beginTransaction();
     try {
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$row) {
             throw new RuntimeException('درخواست پیدا نشد.');
+        }
+        if (!food_guest_request_can_manage($user, $row)) {
+            throw new RuntimeException('فقط مدیر ثبت‌کننده یا مدیر پشتیبانی می‌تواند این درخواست را مدیریت کند.');
         }
         if ($row['status'] !== 'active') {
             throw new RuntimeException('این درخواست قبلاً لغو شده است.');
@@ -2617,6 +2683,100 @@ function food_guest_request_cancel(array $user, int $id): void
         throw $e;
     }
     food_order_audit('food_guest_request_cancel', $user, 'food_guest_request', $id, $row, ['status' => 'cancelled']);
+}
+
+/** ویرایش درخواست فعال توسط مدیر ثبت‌کننده یا مدیر پشتیبانی/ادمین اصلی. */
+function food_guest_request_update(array $user, int $id, array $body): array
+{
+    food_guest_schema_ensure();
+    $date = food_order_iso_date($body['request_date'] ?? '');
+    if ($date === null) {
+        throw new RuntimeException('تاریخ شمسی معتبر نیست.');
+    }
+    $dateError = food_guest_request_date_error($date);
+    if ($dateError !== null) {
+        throw new RuntimeException($dateError);
+    }
+    $organization = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['organization'] ?? '')));
+    if (mb_strlen($organization) < 2 || mb_strlen($organization) > 190) {
+        throw new RuntimeException('نام سازمان یا شرکت باید بین ۲ تا ۱۹۰ نویسه باشد.');
+    }
+    $count = filter_var(food_order_normalize_digits($body['guest_count'] ?? ''), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 500]]);
+    if ($count === false) {
+        throw new RuntimeException('تعداد مهمان باید عددی بین ۱ تا ۵۰۰ باشد.');
+    }
+    $requester = trim((string) preg_replace('/\s+/u', ' ', (string) ($body['requester_name'] ?? '')));
+    if (mb_strlen($requester) < 2 || mb_strlen($requester) > 150) {
+        throw new RuntimeException('نام درخواست‌دهنده باید بین ۲ تا ۱۵۰ نویسه باشد.');
+    }
+    $note = trim((string) ($body['note'] ?? ''));
+    if (mb_strlen($note) > 500) {
+        throw new RuntimeException('یادداشت نباید بیش از ۵۰۰ نویسه باشد.');
+    }
+
+    db()->beginTransaction();
+    try {
+        $stmt = db()->prepare('SELECT * FROM food_guest_requests WHERE id = ? FOR UPDATE');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            throw new RuntimeException('درخواست پیدا نشد.');
+        }
+        if (!food_guest_request_can_manage($user, $row)) {
+            throw new RuntimeException('فقط مدیر ثبت‌کننده یا مدیر پشتیبانی می‌تواند این درخواست را ویرایش کند.');
+        }
+        if ((string) ($row['status'] ?? '') !== 'active') {
+            throw new RuntimeException('درخواست لغوشده قابل ویرایش نیست.');
+        }
+        if (!food_guest_request_change_window_open((string) ($row['request_date'] ?? ''))) {
+            throw new RuntimeException('مهلت ویرایش این درخواست گذشته است.');
+        }
+        db()->prepare(
+            'UPDATE food_guest_requests SET request_date = ?, organization = ?, guest_count = ?, requester_name = ?, note = ? WHERE id = ?'
+        )->execute([$date, $organization, $count, $requester, $note === '' ? null : $note, $id]);
+        db()->commit();
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $e;
+    }
+    $newValue = ['request_date' => $date, 'organization' => $organization, 'guest_count' => (int) $count, 'requester_name' => $requester, 'note' => $note];
+    food_order_audit('food_guest_request_update', $user, 'food_guest_request', $id, $row, $newValue);
+    return ['ok' => true, 'message' => 'درخواست غذای مهمان ویرایش شد.'];
+}
+
+/** حذف قطعی درخواست؛ پیش از حذف برای ثبت مقدار قبلی در Audit تلاش می‌شود. */
+function food_guest_request_delete(array $user, int $id): array
+{
+    food_guest_schema_ensure();
+    db()->beginTransaction();
+    try {
+        $stmt = db()->prepare('SELECT * FROM food_guest_requests WHERE id = ? FOR UPDATE');
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            throw new RuntimeException('درخواست پیدا نشد.');
+        }
+        if (!food_guest_request_can_manage($user, $row)) {
+            throw new RuntimeException('فقط مدیر ثبت‌کننده یا مدیر پشتیبانی می‌تواند این درخواست را حذف کند.');
+        }
+        // حذف سوابق گذشته مجاز است؛ محدودیت زمانی حذف امروز/آینده و دسترسی مالک/بازبین حفظ می‌شود.
+        $requestDate = (string) ($row['request_date'] ?? '');
+        if ($requestDate >= food_order_today() && !food_guest_request_change_window_open($requestDate)) {
+            throw new RuntimeException('مهلت حذف درخواست امروز گذشته است.');
+        }
+        // پیش از حذف، تلاش برای ثبت Audit مقدار قبلی انجام می‌شود.
+        food_order_audit('food_guest_request_delete', $user, 'food_guest_request', $id, $row, null);
+        db()->prepare('DELETE FROM food_guest_requests WHERE id = ?')->execute([$id]);
+        db()->commit();
+    } catch (Throwable $e) {
+        if (db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $e;
+    }
+    return ['ok' => true, 'message' => 'درخواست غذای مهمان حذف شد.'];
 }
 
 function food_order_api_handle(string $route, array $user): never
@@ -2660,11 +2820,25 @@ function food_order_api_handle(string $route, array $user): never
         }
         if ($method === 'POST' && $route === 'guest-request-cancel') {
             if (!food_guest_request_allowed($user)) {
-                food_order_send_json(['error' => 'این بخش فقط برای مدیران و بالاتر فعال است.'], 403);
+                food_order_send_json(['error' => 'این بخش فقط برای مدیر درخواست‌کننده یا مدیر پشتیبانی فعال است.'], 403);
             }
             $body = food_order_api_body();
             food_guest_request_cancel($user, (int) ($body['id'] ?? 0));
             food_order_send_json(['ok' => true, 'message' => 'درخواست غذای مهمان لغو شد.']);
+        }
+        if ($method === 'POST' && $route === 'guest-request-update') {
+            if (!food_guest_request_allowed($user)) {
+                food_order_send_json(['error' => 'این بخش فقط برای مدیر درخواست‌کننده یا مدیر پشتیبانی فعال است.'], 403);
+            }
+            $body = food_order_api_body();
+            food_order_send_json(food_guest_request_update($user, (int) ($body['id'] ?? 0), $body));
+        }
+        if ($method === 'POST' && $route === 'guest-request-delete') {
+            if (!food_guest_request_allowed($user)) {
+                food_order_send_json(['error' => 'این بخش فقط برای مدیر درخواست‌کننده یا مدیر پشتیبانی فعال است.'], 403);
+            }
+            $body = food_order_api_body();
+            food_order_send_json(food_guest_request_delete($user, (int) ($body['id'] ?? 0)));
         }
         if ($method === 'GET' && $route === 'my-orders') {
             $range = food_order_list_range((string) ($_GET['from'] ?? ''), (string) ($_GET['to'] ?? ''), (int) $user['id']);
@@ -3074,6 +3248,27 @@ function food_order_menu_api_handle(string $route, array $user): never
         food_order_emergency_handle($route, $method, $user);
     }
     try {
+        if (in_array($route, ['food-menu/guest-requests', 'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete'], true)) {
+            if (!food_guest_request_is_reviewer($user)) {
+                throw new RuntimeException('دسترسی مدیریت همهٔ درخواست‌های مهمان فقط برای مدیر پشتیبانی و ادمین اصلی مجاز است.');
+            }
+            if ($method === 'GET' && $route === 'food-menu/guest-requests') {
+                food_order_send_json(food_guest_request_list($user, true) + ['allowed' => true]);
+            }
+            if ($method === 'POST' && $route === 'food-menu/guest-request-update') {
+                $body = food_order_api_body();
+                food_order_send_json(food_guest_request_update($user, (int) ($body['id'] ?? 0), $body));
+            }
+            if ($method === 'POST' && $route === 'food-menu/guest-request-cancel') {
+                $body = food_order_api_body();
+                food_guest_request_cancel($user, (int) ($body['id'] ?? 0));
+                food_order_send_json(['ok' => true, 'message' => 'درخواست غذای مهمان لغو شد.']);
+            }
+            if ($method === 'POST' && $route === 'food-menu/guest-request-delete') {
+                $body = food_order_api_body();
+                food_order_send_json(food_guest_request_delete($user, (int) ($body['id'] ?? 0)));
+            }
+        }
         if ($method === 'GET' && $route === 'food-menu/status') {
             if (!food_order_user_can($user, 'food.menu') && !food_order_user_can($user, 'food.order_close')) {
                 throw new RuntimeException('دسترسی food.menu یا food.order_close لازم است.');
@@ -3084,7 +3279,7 @@ function food_order_menu_api_handle(string $route, array $user): never
             if (!food_order_user_can($user, 'food.menu') && !food_order_user_can($user, 'food.order_close')) {
                 throw new RuntimeException('دسترسی food.menu یا food.order_close لازم است.');
             }
-            $includeCounts = food_order_user_can($user, 'food.order_close');
+            $includeCounts = food_order_can_view_order_counts($user);
             food_order_send_json(food_order_month_status((string) ($_GET['month'] ?? ''), $user, $includeCounts, true, food_order_meal_type($_GET['meal_type'] ?? 'lunch')));
         }
         if ($method === 'GET' && $route === 'food-menu/catalog') {
@@ -3276,7 +3471,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=21"></script><script defer src="assets/food-order-guest.js?v=4"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=21"></script><script defer src="assets/food-order-guest.js?v=5"></script>';
     render_footer();
     exit;
 }

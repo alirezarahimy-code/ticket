@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/asset-names.php';
+if (function_exists('asset_profile_column_sql')) { return; }
 
 function asset_profile_column_sql(): array
 {
@@ -280,122 +282,6 @@ function asset_profile_fetch(int $assetId): array
     return $row ? array_merge($defaults, $row) : $defaults;
 }
 
-function asset_profile_fill_from_asset(array $profile, array $asset): array
-{
-    $hardware = json_decode((string) ($asset['hardware_json'] ?? ''), true);
-    $peripherals = json_decode((string) ($asset['peripherals_json'] ?? ''), true);
-    $hardware = is_array($hardware) ? $hardware : [];
-    $peripherals = is_array($peripherals) ? $peripherals : [];
-    $derived = asset_profile_auto_values([
-        'hostname' => $asset['hostname'] ?? '',
-        'computer_type' => $asset['computer_type'] ?? '',
-        'operating_system' => $asset['operating_system'] ?? '',
-        'os_serial' => $asset['os_serial'] ?? '',
-        'ip_address' => $asset['ip_address'] ?? '',
-        'mac_address' => $asset['mac_address'] ?? '',
-        'cpu' => $asset['cpu'] ?? '',
-        'memory_mb' => $asset['memory_mb'] ?? 0,
-        'domain_username' => $asset['domain_username'] ?? '',
-        'antivirus' => $asset['antivirus'] ?? '',
-        'hardware' => $hardware,
-        'peripherals' => $peripherals,
-    ]);
-    $fieldProvenance = is_array($derived['_field_provenance'] ?? null) ? $derived['_field_provenance'] : [];
-    unset($derived['_field_provenance'], $derived['_clear_fields']);
-    $assetFallbacks = [
-        'record_number' => trim((string) ($asset['record_number'] ?? '')) !== '' ? $asset['record_number'] : ($asset['asset_tag'] ?? null),
-        'registry_date' => $asset['created_at'] ?? null,
-        'unit_name' => $asset['department_name'] ?? null,
-        'computer_type' => $asset['computer_type'] ?? null,
-        'user_login' => $asset['domain_username'] ?? null,
-        'owner_full_name' => $asset['owner_name'] ?? null,
-        'phone' => $asset['phone'] ?? null,
-        'personnel_number' => trim((string) ($asset['person_number'] ?? '')) !== '' ? $asset['person_number'] : ($asset['employee_number'] ?? null),
-        'plaque_number' => $asset['plaque_number'] ?? null,
-        'os_name' => $asset['operating_system'] ?? null,
-        'hostname' => $asset['hostname'] ?? null,
-        'windows_serial' => $asset['os_serial'] ?? null,
-        'os_install_date' => $asset['os_install_date'] ?? null,
-        'user_count' => $asset['registered_users'] ?? null,
-        'cpu_model' => $asset['cpu'] ?? null,
-        'ram_total' => !empty($asset['memory_mb']) ? ((int) $asset['memory_mb'] . ' MB') : null,
-        'ip_address' => $asset['ip_address'] ?? null,
-        'mac_address' => $asset['mac_address'] ?? null,
-        'netcard' => $asset['network_card'] ?? null,
-        'audio' => $asset['sound_card'] ?? null,
-        'antivirus' => $asset['antivirus'] ?? null,
-    ];
-    $fallbacks = $derived;
-    foreach ($assetFallbacks as $key => $value) {
-        if ($value !== null && $value !== '') {
-            $fallbacks[$key] = $value;
-        }
-    }
-    foreach ($fallbacks as $key => $value) {
-        if (($profile[$key] ?? null) === null || $profile[$key] === '') {
-            $profile[$key] = $value;
-        }
-    }
-    $profile['_field_provenance'] = $fieldProvenance;
-    return $profile;
-}
-
-/** Summarize current collector status separately from values retained from older scans. */
-function asset_profile_collection_status_summary(array $asset): array
-{
-    $hardware = json_decode((string) ($asset['hardware_json'] ?? ''), true);
-    $hardware = is_array($hardware) ? $hardware : [];
-    $status = is_array($hardware['collection_status'] ?? null)
-        ? $hardware['collection_status']
-        : (is_array($asset['collection_status'] ?? null) ? $asset['collection_status'] : []);
-    $labels = [
-        'root/cimv2|Win32_ComputerSystem' => 'مشخصات پایهٔ رایانه',
-        'root/cimv2|Win32_BIOS' => 'BIOS و سریال دستگاه',
-        'root/cimv2|Win32_Processor' => 'پردازنده',
-        'root/cimv2|Win32_OperatingSystem' => 'سیستم‌عامل',
-        'root/cimv2|Win32_PhysicalMemory' => 'ماژول‌های RAM',
-        'root/cimv2|Win32_DiskDrive' => 'دیسک‌های فیزیکی',
-        'root/cimv2|Win32_VideoController' => 'کارت گرافیک',
-        'root/cimv2|Win32_NetworkAdapterConfiguration' => 'پیکربندی شبکه',
-        'root/cimv2|Win32_Printer' => 'چاپگرها',
-        'root/cimv2|Win32_PnPEntity' => 'تجهیزات Plug and Play',
-        'root/wmi|WmiMonitorID' => 'شناسهٔ مانیتورها',
-        'root/Microsoft/Windows/Storage|MSFT_PhysicalDisk' => 'اطلاعات ذخیره‌سازهای پیشرفته',
-        'root/Microsoft/Windows/Storage|MSFT_StorageReliabilityCounter' => 'شاخص‌های سلامت ذخیره‌ساز',
-        'root/wmi|MSStorageDriver_FailurePredictStatus' => 'وضعیت SMART',
-    ];
-    $issues = [];
-    foreach ($status as $key => $result) {
-        if (!is_array($result)) {
-            continue;
-        }
-        $ok = ($result['ok'] ?? false) === true;
-        $count = max(0, (int) ($result['count'] ?? 0));
-        if (($result['attempted'] ?? true) === false || !array_key_exists('ok', $result) || $result['ok'] === null) {
-            $issues[] = ['name' => $labels[$key] ?? (string) $key, 'state' => 'not_attempted'];
-        } elseif ($ok === false) {
-            $issues[] = [
-                'name' => $labels[$key] ?? (string) $key,
-                'state' => 'failed',
-                'last_success_at' => (string) ($result['last_success_at'] ?? ''),
-                'last_success_source' => (string) ($result['last_success_source'] ?? ''),
-            ];
-        } elseif ($ok === true && $count === 0) {
-            $issues[] = ['name' => $labels[$key] ?? (string) $key, 'state' => 'empty'];
-        }
-    }
-    return $issues;
-}
-
-/**
- * واکشی گروهی شناسنامه‌ها با یک کوئری (جلوگیری از N+1 در لیست/خروجی).
- * @param int[] $assetIds
- * @return array<int, array>
- */
-/**
- * Fill legacy/mirrored profile fields from the canonical asset row without overwriting
- * values stored specifically in asset_profiles. This keeps older records visible.
- */
 function asset_profile_fill_from_asset(array $profile, array $asset): array
 {
     $hardware = json_decode((string) ($asset['hardware_json'] ?? ''), true);
@@ -1120,6 +1006,7 @@ function asset_profile_apply_auto(int $assetId, array $values, int $userId, bool
     }
     if (!empty($filtered['hostname'])) {
         db()->prepare('UPDATE assets SET hostname = ? WHERE id = ?')->execute([$filtered['hostname'], $assetId]);
+        if (function_exists('asset_sync_identity_key')) { asset_sync_identity_key($assetId); }
     }
     if (!empty($filtered['computer_type'])) {
         db()->prepare('UPDATE assets SET computer_type = ? WHERE id = ?')->execute([$filtered['computer_type'], $assetId]);

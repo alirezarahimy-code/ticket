@@ -1,0 +1,30 @@
+{
+  "name": "cumulative-access-organization-multicompany",
+  "version": "1.62.56",
+  "requires_version": "1.62.47",
+  "date": "2026-10-30",
+  "title": "بستهٔ تجمیعی دسترسی، چارت سازمانی و تفکیک شرکت‌ها",
+  "panel_version": "1.37.44",
+  "migrations": [
+    "017-org-tree-order.sql",
+    "018-org-company-separation.sql"
+  ],
+  "files": [
+    "VERSION",
+    "permissions.php",
+    "cd-dvd.php",
+    "traffic-control.php",
+    "system-health.php",
+    "actions/role-actions.php",
+    "index.php",
+    "organization.php",
+    "actions/org-actions.php",
+    "actions/settings-actions.php",
+    "actions/user-structure-actions.php",
+    "assets/organization.js",
+    "assets/style.css",
+    "CHANGE-REPORT-FA-1.62.56-CUMULATIVE.md",
+    "ORG-TREE-UPDATE-README-FA-1.62.56-CUMULATIVE.md"
+  ],
+  "notes": "شامل اصلاحات نسخه‌های 1.62.48 تا 1.62.56 روی پایهٔ 1.62.47. دو migration فقط از مسیر رسمی System Update اجرا می‌شوند؛ هیچ DDL هنگام بارگذاری صفحه وجود ندارد. نام شرکت فقط نمایش است و برای عضویت/نقش/مجوز استفاده نمی‌شود."
+}

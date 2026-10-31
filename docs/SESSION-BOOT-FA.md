@@ -1,7 +1,6 @@
 # راهنمای شروع جلسهٔ جدید — «بهروز شو»
 
-> **تاریخ:** ۲۰۲۶-۱۰-۲۷ · **بازنشانی در نشست جدید:** ۲۰۲۶-۱۱-۰۱
-> **شاخه:** شاخهٔ فعال همان نشست (`arena/*-ticket`) — ثابت نیست و در هر گفتگو تغییر می‌کند.
+> **تاریخ:** ۲۰۲۶-۱۰-۲۷ · **شاخه:** `arena/38fea5b6-ticket`
 > **هدف:** اینکه هیچوقت مجبور نباشی کارها رو از صفر تکرار کنی.
 
 ---
@@ -112,9 +111,8 @@ python3 tools/find-in-system.py --stats
 | 🔗 پوینترها | `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`, `.cursor/rules/arena-boot.mdc`, `.cursorrules` |
 | 📖 راهنما | همین فایل |
 
-**کامیت مرجع اولیه:** `0039c31` — نسخهٔ پایدار روی `main`.
-**لینک:** https://github.com/alirezarahimy-code/ticket/tree/main/docs
-**یادداشت بازنشانی (۲۰۲۶-۱۱-۰۱):** این فایل‌ها از شاخهٔ `alirezarahimy-code-patch-1` (PR #4) به `main` منتقل شدند تا در نشست‌های بعدی با «به‌روز شو» بازیابی شوند.
+**کامیت مرجع:** `0039c31` و کامیت بوت (بعد از این فایل).
+**لینک:** https://github.com/alirezarahimy-code/ticket/tree/arena/38fea5b6-ticket
 
 ---
 
