@@ -33,6 +33,60 @@ function notification_target_url(array $notification): string
     return 'index.php?page=notifications';
 }
 
+/** Read effective view permissions without running role migrations inside a job transaction. */
+function ticket_notification_user_can(array $user, string $permission): bool
+{
+    if (user_is_primary_admin($user)) {
+        return true;
+    }
+    static $sets = [];
+    $role = (string) ($user['role'] ?? 'user');
+    $role = isset(permission_roles()[$role]) ? $role : 'user';
+    if (!array_key_exists($role, $sets)) {
+        try {
+            $stored = [];
+            if (permission_table_ready()) {
+                $query = db()->prepare('SELECT permission FROM role_permissions WHERE role = ?');
+                $query->execute([$role]);
+                $stored = array_map('strval', $query->fetchAll(PDO::FETCH_COLUMN));
+            }
+            $sets[$role] = array_fill_keys(role_permission_effective_codes($role, $stored, role_permissions_custom($role)), true);
+        } catch (Throwable) {
+            $sets[$role] = []; // Fail closed if permissions cannot be read.
+        }
+    }
+    return isset($sets[$role][$permission]);
+}
+
+/** اعلان فقط به حساب‌های فعال با دسترسی واقعی به همان درخواست برسد. */
+function ticket_notification_recipients(array $ticket, array $candidateIds, ?callable $permissionCheck = null, bool $staffOnly = false): array
+{
+    $ids = array_values(array_unique(array_filter(array_map('intval', $candidateIds), static fn ($id) => $id > 0)));
+    if (!$ids) {
+        return [];
+    }
+    $marks = implode(',', array_fill(0, count($ids), '?'));
+    $query = db()->prepare('SELECT u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND u.id IN (' . $marks . ')');
+    $query->execute($ids);
+    $eligible = [];
+    foreach ($query->fetchAll() as $recipient) {
+        if ($staffOnly && !is_staff_role((string) ($recipient['role'] ?? '')) && !user_is_primary_admin($recipient)) {
+            continue;
+        }
+        if (ticket_user_can_view($ticket, $recipient, $permissionCheck ?? 'ticket_notification_user_can')) {
+            $eligible[] = (int) $recipient['id'];
+        }
+    }
+    return $eligible;
+}
+
+/** Potential handlers for an unassigned request; visibility is checked afterwards. */
+function ticket_unassigned_notify_candidates(): array
+{
+    $query = db()->query('SELECT id FROM users WHERE is_active = 1 AND (role IN ("agent", "manager", "support_manager", "primary_admin") OR (role = "admin" AND is_primary_admin = 1))');
+    return array_map('intval', $query->fetchAll(PDO::FETCH_COLUMN));
+}
+
 function notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
 {
     $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
@@ -45,11 +99,9 @@ function notify_ticket_parties(int $ticketId, string $type, string $title, strin
     $supervisorIds = array_map('intval', $supervisorQuery->fetchAll(PDO::FETCH_COLUMN));
     $unassignedAgentIds = [];
     if ($type === 'ticket_created' && empty($ticket['assigned_to'])) {
-        $agentQuery = db()->prepare('SELECT u.id FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (u.is_it_agent = 1 OR u.role IN ("agent", "admin")) AND (u.role = "admin" OR hu.code = ?)');
-        $agentQuery->execute([(string) ($ticket['service_group'] ?? 'it')]);
-        $unassignedAgentIds = array_map('intval', $agentQuery->fetchAll(PDO::FETCH_COLUMN));
+        $unassignedAgentIds = ticket_unassigned_notify_candidates();
     }
-    $recipients = array_unique(array_filter(array_merge([(int) $ticket['requester_id'], (int) $ticket['assigned_to'], (int) $ticket['manager_user_id'], (int) $ticket['handling_manager_id']], $supervisorIds, $unassignedAgentIds)));
+    $recipients = ticket_notification_recipients($ticket, array_merge([(int) $ticket['requester_id'], (int) $ticket['assigned_to'], (int) $ticket['manager_user_id'], (int) $ticket['handling_manager_id']], $supervisorIds, $unassignedAgentIds));
     foreach ($recipients as $recipientId) {
         if ($excludeUserId === null || $recipientId !== $excludeUserId) {
             notify_user($recipientId, $type, $title, $body, $ticketId);
@@ -59,7 +111,7 @@ function notify_ticket_parties(int $ticketId, string $type, string $title, strin
 
 function notify_ticket_staff(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
 {
-    $query = db()->prepare('SELECT t.assigned_to, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
+    $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
     $query->execute([$ticketId]);
     $ticket = $query->fetch();
     if (!$ticket) {
@@ -69,11 +121,9 @@ function notify_ticket_staff(int $ticketId, string $type, string $title, string 
     $supervisorIds = array_map('intval', $supervisorQuery->fetchAll(PDO::FETCH_COLUMN));
     $unassignedAgentIds = [];
     if (empty($ticket['assigned_to'])) {
-        $agentQuery = db()->prepare('SELECT u.id FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (u.is_it_agent = 1 OR u.role IN ("agent", "admin")) AND (u.role = "admin" OR hu.code = ?)');
-        $agentQuery->execute([(string) ($ticket['service_group'] ?? 'it')]);
-        $unassignedAgentIds = array_map('intval', $agentQuery->fetchAll(PDO::FETCH_COLUMN));
+        $unassignedAgentIds = ticket_unassigned_notify_candidates();
     }
-    foreach (array_unique(array_filter(array_merge([(int) $ticket['assigned_to'], (int) $ticket['manager_user_id'], (int) $ticket['handling_manager_id']], $supervisorIds, $unassignedAgentIds))) as $recipientId) {
+    foreach (ticket_notification_recipients($ticket, array_merge([(int) $ticket['assigned_to'], (int) $ticket['manager_user_id'], (int) $ticket['handling_manager_id']], $supervisorIds, $unassignedAgentIds), null, true) as $recipientId) {
         if ($excludeUserId === null || $recipientId !== $excludeUserId) {
             notify_user($recipientId, $type, $title, $body, $ticketId);
         }

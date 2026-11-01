@@ -544,23 +544,55 @@ function business_elapsed_minutes(DateTimeImmutable $start, DateTimeImmutable $e
     return $minutes;
 }
 
+/** Base of the current SLA cycle, not necessarily the original creation time. */
+function ticket_sla_cycle_start(array $ticket): string
+{
+    $createdAt = (string) ($ticket['created_at'] ?? 'now');
+    if (empty($ticket['id'])) {
+        return $createdAt;
+    }
+    try {
+        $query = db()->prepare('SELECT created_at FROM ticket_events WHERE ticket_id = ? AND (event_type IN ("reopened_by_user", "supervisor_reopened", "supervisor_rework") OR (from_status = "resolved" AND to_status IN ("assigned", "in_progress") AND event_type IN ("status_changed", "assigned", "bulk_status_changed"))) ORDER BY id DESC LIMIT 1');
+        $query->execute([(int) $ticket['id']]);
+        $reopenedAt = $query->fetchColumn();
+        return $reopenedAt !== false && $reopenedAt !== null && $reopenedAt !== '' ? (string) $reopenedAt : $createdAt;
+    } catch (Throwable) {
+        // Older installations may lack history; keep the existing fallback.
+        return $createdAt;
+    }
+}
+
 function ticket_sla_transition(array $ticket, string $newStatus, string $priority): array
 {
     $zone = new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'));
+    $oldStatus = (string) ($ticket['status'] ?? 'new');
+    if ($oldStatus === 'resolved' && in_array($newStatus, ['assigned', 'in_progress'], true)) {
+        return [business_due_at(priority_sla_minutes($priority))->format('Y-m-d H:i:s'), null, 0];
+    }
     $pauseMinutes = (int) ($ticket['sla_pause_minutes'] ?? 0);
     $pauseAt = !empty($ticket['sla_paused_at']) ? new DateTimeImmutable((string) $ticket['sla_paused_at'], $zone) : null;
-    $oldStatus = (string) ($ticket['status'] ?? 'new');
     $wasWaiting = ticket_is_waiting_status($oldStatus);
     $isWaiting = ticket_is_waiting_status($newStatus);
+    $newPauseMinutes = 0;
     if ($wasWaiting && !$isWaiting && $pauseAt) {
-        $pauseMinutes += business_elapsed_minutes($pauseAt, new DateTimeImmutable('now', $zone));
+        $newPauseMinutes = business_elapsed_minutes($pauseAt, new DateTimeImmutable('now', $zone));
+        $pauseMinutes += $newPauseMinutes;
         $pauseAt = null;
     } elseif (!$wasWaiting && $isWaiting) {
         $pauseAt = new DateTimeImmutable('now', $zone);
     }
-    $createdAt = new DateTimeImmutable((string) $ticket['created_at'], $zone);
-    $baseDue = business_due_at(priority_sla_minutes($priority), $createdAt);
-    $dueAt = $pauseMinutes > 0 ? business_due_at($pauseMinutes, $baseDue) : $baseDue;
+    if ($priority === (string) ($ticket['priority'] ?? '') && !empty($ticket['due_at'])) {
+        // A reopen may already have reset this deadline; never recalculate it from
+        // the original creation time just because a message was sent.
+        $dueAt = new DateTimeImmutable((string) $ticket['due_at'], $zone);
+        if ($newPauseMinutes > 0) {
+            $dueAt = business_due_at($newPauseMinutes, $dueAt);
+        }
+    } else {
+        $cycleStart = new DateTimeImmutable(ticket_sla_cycle_start($ticket), $zone);
+        $baseDue = business_due_at(priority_sla_minutes($priority), $cycleStart);
+        $dueAt = $pauseMinutes > 0 ? business_due_at($pauseMinutes, $baseDue) : $baseDue;
+    }
     return [$dueAt->format('Y-m-d H:i:s'), $pauseAt?->format('Y-m-d H:i:s'), $pauseMinutes];
 }
 
@@ -574,12 +606,15 @@ function ticket_ola_transition(array $ticket, string $newStatus, string $priorit
     $oldStatus = (string) ($ticket['status'] ?? 'new');
     $departmentId = (int) ($ticket['department_id'] ?? 0) ?: null;
     $oldPriority = (string) ($ticket['priority'] ?? 'normal');
+    if ($oldStatus === 'resolved' && in_array($newStatus, ['assigned', 'in_progress'], true)) {
+        return ola_deadlines($departmentId, $priority, (new DateTimeImmutable('now', $zone))->format('Y-m-d H:i:s'));
+    }
     $recalculate = $priority !== $oldPriority
         || empty($ticket['ola_policy_id'])
         || (!array_key_exists('ola_due_at', $ticket));
 
     if ($recalculate) {
-        $deadlines = ola_deadlines($departmentId, $priority, (string) $ticket['created_at']);
+        $deadlines = ola_deadlines($departmentId, $priority, ticket_sla_cycle_start($ticket));
     } else {
         $deadlines = [
             'policy_id' => (int) $ticket['ola_policy_id'],

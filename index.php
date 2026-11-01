@@ -425,43 +425,7 @@ function fetch_ticket(int $id): ?array
 
 function can_view_ticket(array $ticket, array $user): bool
 {
-    // جداسازی حوزه پیش از درخواست‌های خود و مجوزهای سفارشی؛ کارمند پشتیبانی فقط پشتیبانی.
-    // این کنترل روی جزئیات، پیوست، پاسخ، ارجاع و عملیات گروهی هم اعمال می‌شود.
-    $role = (string) ($user['role'] ?? '');
-    $ticketGroup = (string) ($ticket['service_group'] ?? '');
-    if ($role === 'support_manager' && $ticketGroup !== 'support') {
-        return false;
-    }
-    if (in_array($role, ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
-        return false;
-    }
-    // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ درخواست از سطوح دسترسی نقش‌ها خوانده می‌شود:
-    // ticket.view_own (درخواست‌های خودم)، ticket.view_unit (واحد/زیرمجموعه)، ticket.view_all (همهٔ درخواست‌ها).
-    if ((int) $ticket['requester_id'] === (int) $user['id'] && user_can($user, 'ticket.view_own')) {
-        return true;
-    }
-    if (is_global_ticket_role($user['role']) && user_can($user, 'ticket.view_all')) {
-        return true;
-    }
-    if (!user_can($user, 'ticket.view_unit')) {
-        return false;
-    }
-    if (($user['role'] ?? '') === 'support_manager') {
-        // مدیر پشتیبانی فقط حوزه پشتیبانی؛ بدون دسترسی به درخواست‌های IT و بدون فیلتر معاونت.
-        return (string) ($ticket['service_group'] ?? '') === 'support';
-    }
-    if ($user['role'] === 'agent') {
-        return (string) ($ticket['service_group'] ?? '') === user_service_group($user);
-    }
-    if ($user['role'] === 'manager') {
-        // هم‌تراز با ticket_scope: مدیر بدون معاونت، کل حوزه را می‌بیند؛ وگرنه فقط معاونت خودش.
-        if ((string) ($ticket['service_group'] ?? '') !== user_service_group($user)) {
-            return false;
-        }
-        $managerDept = (int) ($user['department_id'] ?? 0);
-        return $managerDept <= 0 || (int) ($ticket['department_id'] ?? 0) === $managerDept;
-    }
-    return false;
+    return ticket_user_can_view($ticket, $user);
 }
 
 /**
@@ -500,26 +464,33 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null):
     $ownerCondition = $serviceGroup === 'it'
         ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
         : 'u.role = "support_manager"';
-    $ownerQuery = db()->query('SELECT u.id FROM users u' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1');
-    $id = $ownerQuery->fetchColumn();
-    if ($id !== false) {
-        return (int) $id;
+    $candidateFields = 'u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code';
+    $routingTicket = ['requester_id' => 0, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
+    $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
+    foreach ($ownerQuery->fetchAll() as $candidate) {
+        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
+            return (int) $candidate['id'];
+        }
     }
 
     // اگر مسئول اصلی غیرفعال/تعریف‌نشده باشد، فقط کارشناس همان حوزه جایگزین می‌شود.
     // عمداً دیگر به کارشناس حوزهٔ دیگر ارجاع نمی‌دهیم؛ در نبود جایگزین، درخواست در manager_review می‌ماند.
     $fallback = db()->prepare(
-        'SELECT u.id FROM users u '
+        'SELECT ' . $candidateFields . ' FROM users u '
         . 'LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
         . $loadJoin
-        . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager", "support_manager", "primary_admin") AND hu.code = ?'
+        . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
         // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
-        . ' GROUP BY u.id ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1'
+        . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
     );
     $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
-    $id = $fallback->fetchColumn();
-    return $id === false ? null : (int) $id;
+    foreach ($fallback->fetchAll() as $candidate) {
+        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
+            return (int) $candidate['id'];
+        }
+    }
+    return null;
 }
 
 /**
@@ -562,43 +533,6 @@ function ticket_requester_can_cancel(array $ticket, array $user): bool
         && (int) ($ticket['requester_id'] ?? 0) === (int) ($user['id'] ?? 0)
         && in_array((string) ($ticket['status'] ?? ''), ticket_requester_cancelable_statuses(), true)
         && empty($ticket['cancel_requested_at']);
-}
-
-/** امتیازی معتبر است که ثبت شده باشد و قدیمی‌تر از آخرین «حل‌شدن» درخواست نباشد. */
-function ticket_rating_is_current(array $ticket): bool
-{
-    if (empty($ticket['rating_score'])) {
-        return false;
-    }
-    if (empty($ticket['resolved_at']) || empty($ticket['rating_at'])) {
-        return true;
-    }
-    return strtotime((string) $ticket['rating_at']) >= strtotime((string) $ticket['resolved_at']);
-}
-
-/**
- * سطح اختیار کاربر روی درخواست: manager (ارجاع/تغییر کامل)، assignee (کارشناس مسئول)، یا رشتهٔ خالی.
- */
-function ticket_handler_level(array $ticket, array $user): string
-{
-    if (!can_view_ticket($ticket, $user)) {
-        return '';
-    }
-    // جداسازی حوزه حتی اگر مجوز ارجاع به‌اشتباه داده شده باشد: مدیر پشتیبانی فقط پشتیبانی.
-    $ticketGroup = (string) ($ticket['service_group'] ?? '');
-    if (($user['role'] ?? '') === 'support_manager' && $ticketGroup !== 'support') {
-        return '';
-    }
-    if (in_array(($user['role'] ?? ''), ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
-        return '';
-    }
-    if (user_can($user, 'ticket.assign')) {
-        return 'manager';
-    }
-    if ((int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && is_assignable_role((string) ($user['role'] ?? ''))) {
-        return 'assignee';
-    }
-    return '';
 }
 
 /** اعلان «حل شد» به کاربر (برای ثبت امتیاز یا بازگشایی) و به مسئولان (برای پیگیری تأیید نهایی). */
@@ -1209,7 +1143,7 @@ if (($_GET['action'] ?? '') === 'download_attachment') {
     $attachmentQuery->execute([$attachmentId]);
     $attachment = $attachmentQuery->fetch();
     $attachmentTicket = $attachment ? fetch_ticket((int) $attachment['ticket_id']) : null;
-    $canDownloadInternal = is_staff_role($downloadUser['role']);
+    $canDownloadInternal = is_staff_role($downloadUser['role']) || user_is_primary_admin($downloadUser);
     if (!$attachment || !$attachmentTicket || !can_view_ticket($attachmentTicket, $downloadUser) || ((int) $attachment['is_internal'] === 1 && !$canDownloadInternal)) {
         http_response_code(404);
         exit('فایل پیدا نشد.');
@@ -2323,10 +2257,10 @@ if ($page === 'ticket') {
             $attachments[(int) $attachment['message_id']][] = $attachment;
         }
     }
-    $staff = is_staff_role($user['role']);
-    $canManageTicket = $staff;
-    $isRequester = (int) $ticket['requester_id'] === (int) $user['id'];
-    $requesterView = $isRequester && !$staff;
+    $staff = is_staff_role($user['role']) || user_is_primary_admin($user);
+    $canManageTicket = $staff && user_can($user, 'ticket.edit');
+    $isRequester = ticket_user_is_requester($ticket, $user);
+    $requesterView = $isRequester;
     $canCancelOwnTicket = ticket_requester_can_cancel($ticket, $user);
     $handlerLevel = ticket_handler_level($ticket, $user);
     $cancelHasRequest = !empty($ticket['cancel_requested_at']);
@@ -2380,7 +2314,9 @@ if ($page === 'ticket') {
             echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>تصمیم مسئول رسیدگی دربارهٔ لغو</h3><label>یادداشت تصمیم (برای رد، نوشتن دلیل الزامی است)<textarea name="decision_note" maxlength="1000" rows="2" placeholder="در صورت رد، توضیح دهید رسیدگی چگونه ادامه می‌یابد."></textarea></label><div class="actions"><button class="button danger-button" type="submit" name="decision" value="approve" data-confirm="درخواست لغو را تأیید کنید؟ با این کار درخواست از صف فعال خارج می‌شود و سابقه حفظ می‌ماند.">تأیید لغو</button><button class="button secondary" type="submit" name="decision" value="reject">رد و ادامهٔ رسیدگی</button></div></form>';
         }
     }
-    if ($requiresRating) {
+    if ($requiresRating && !user_can($user, 'ticket.rate')) {
+        echo '<div class="card"><p>دسترسی ثبت امتیاز برای حساب شما فعال نیست؛ برای بررسی دسترسی با مدیر سامانه تماس بگیرید.</p></div>';
+    } elseif ($requiresRating) {
          echo '<form class="card rating-card required-rating" method="post">' . csrf_field() . '<input type="hidden" name="action" value="rate_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>ثبت امتیاز رضایت الزامی است</h3><p class="muted">برای نهایی‌شدن این درخواست، میزان رضایت خود از واحد رسیدگی را ثبت کنید.</p><div class="rating-options">';
          for ($score = 1; $score <= 5; $score++) {
              echo '<label><input type="radio" name="score" value="' . $score . '" required><span>' . $score . '★</span></label>';
@@ -2402,8 +2338,8 @@ if ($page === 'ticket') {
          if (!$requiresRating) {
              echo '<div class="card"><p class="muted">این درخواست بسته شده است. برای ادامه، درخواست جدید ثبت کنید.</p></div>';
          }
-     } elseif (!$requiresRating) {
-         $afterOptions = ($handlerLevel !== '' && !empty($ticket['assigned_to']) && !$cancelHasRequest) ? array_values(array_intersect(['waiting_user', 'resolved'], ticket_allowed_transitions((string) $ticket['status']))) : [];
+     } elseif (!$requiresRating && user_can($user, 'ticket.reply')) {
+         $afterOptions = (!$isRequester && user_can($user, 'ticket.edit') && $handlerLevel !== '' && !empty($ticket['assigned_to']) && !$cancelHasRequest) ? array_values(array_intersect(['waiting_user', 'resolved'], ticket_allowed_transitions((string) $ticket['status']))) : [];
          $afterSelect = '';
          if ($afterOptions) {
              $afterSelect = '<label>پس از ارسال<select name="after_status"><option value="">بدون تغییر وضعیت</option>';
@@ -2414,11 +2350,11 @@ if ($page === 'ticket') {
          } elseif ($cancelHasRequest && $handlerLevel !== '') {
              $afterSelect = '<small class="muted">تا تصمیم لغو، تغییر وضعیت از مسیر پاسخ متوقف است؛ پیام شما به‌عنوان گفت‌وگو ثبت می‌شود.</small>';
          }
-         echo '<form class="card reply-box" method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="reply"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>پاسخ شما<textarea name="body" required rows="5" placeholder="پیام خود را بنویسید..."></textarea></label><div class="reply-actions"><label class="file-input compact">پیوست<input type="file" name="attachment"></label>' . ($staff ? '<label class="check-label"><input type="checkbox" name="is_internal" value="1"> یادداشت داخلی</label>' : '') . $afterSelect . '<button class="button" type="submit">ارسال پاسخ</button></div></form>';
+         echo '<form class="card reply-box" method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="reply"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>پاسخ شما<textarea name="body" required rows="5" placeholder="پیام خود را بنویسید..."></textarea></label><div class="reply-actions"><label class="file-input compact">پیوست<input type="file" name="attachment"></label>' . ($staff && !$isRequester ? '<label class="check-label"><input type="checkbox" name="is_internal" value="1"> یادداشت داخلی</label>' : '') . $afterSelect . '<button class="button" type="submit">ارسال پاسخ</button></div></form>';
      }
      echo '</section>';
         echo '<aside class="ticket-sidebar"><div class="card detail-card"><h3>اطلاعات درخواست</h3><dl><dt>ثبت‌کننده</dt><dd>' . e($ticket['requester_name']) . '</dd><dt>حوزه</dt><dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? 'پشتیبانی' : 'IT') . '</dd><dt>نوع</dt><dd>' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</dd><dt>خدمت</dt><dd>' . e($ticket['service_name'] ?: 'بدون خدمت') . '</dd><dt>واحد رسیدگی</dt><dd>' . e(($ticket['service_group'] ?? 'it') === 'support' ? 'واحد پشتیبانی' : 'واحد فناوری اطلاعات') . '</dd><dt>معاونت سازمانی</dt><dd>' . e($ticket['requesting_unit_name'] ?: ($ticket['department_name'] ?: 'بدون معاونت')) . '</dd><dt>دسته‌بندی</dt><dd>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</dd><dt>کارشناس</dt><dd>' . e($ticket['assignee_name'] ?: 'تخصیص داده نشده') . '</dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? '<dt>محل خدمت</dt><dd>' . e($ticket['support_location'] ?: 'ثبت نشده') . '</dd><dt>تجهیز / مورد</dt><dd>' . e($ticket['support_equipment'] ?: 'ثبت نشده') . '</dd>' : '<dt>سیستم</dt><dd>' . e($ticket['hostname'] ? asset_display_name($ticket['hostname']) . (asset_is_auto_domain_tag($ticket['asset_tag']) ? '' : ' (' . $ticket['asset_tag'] . ')') : 'بدون سیستم مرتبط') . '</dd>') . '<dt>مهلت SLA</dt><dd>' . e($ticket['due_at'] ? persian_date($ticket['due_at']) : 'ثبت نشده') . '</dd><dt>مهلت پاسخ OLA</dt><dd>' . e($ticket['ola_response_due_at'] ? persian_date($ticket['ola_response_due_at']) : 'ثبت نشده') . '</dd><dt>مهلت حل OLA</dt><dd>' . e($ticket['ola_due_at'] ? persian_date($ticket['ola_due_at']) : 'ثبت نشده') . '</dd>' . (ticket_rating_is_current($ticket) ? '<dt>رضایت کاربر</dt><dd>' . e((string) $ticket['rating_score']) . ' از ۵</dd>' : '') . '</dl></div>';
-    if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && is_assignable_role((string) $user['role']) && !$cancelHasRequest) {
+    if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && ticket_assignee_is_eligible($ticket, $user, 'ticket_notification_user_can') && !$cancelHasRequest) {
         echo '<div class="card detail-card"><h3>برداشتن درخواست</h3><p class="muted">این درخواست هنوز کارشناس مسئول ندارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="claim_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><button class="button wide" type="submit">برداشتن و شروع رسیدگی</button></form></div>';
     }
     if ($canManageTicket && $handlerLevel !== '' && $cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
@@ -2427,8 +2363,9 @@ if ($page === 'ticket') {
     if ($canManageTicket && $handlerLevel !== '' && !$cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
          if ($canAssignTicket) {
               $ticketGroupForList = (string) ($ticket['service_group'] ?? 'it');
-              $agentSql = 'SELECT u.id, u.full_name, u.username FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND u.role IN ("agent", "manager", "support_manager", "primary_admin", "admin") AND (u.role = "admin" OR (u.role = "primary_admin" AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR hu.code = ?)';
-              $agentParams = [$ticketGroupForList, $ticketGroupForList, $ticketGroupForList];
+              $agentSql = 'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (((u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR (u.role IN ("agent", "manager") AND hu.code = ?)) AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))';
+              $ticketDepartmentForList = (int) ($ticket['department_id'] ?? 0);
+              $agentParams = [$ticketGroupForList, $ticketGroupForList, $ticketGroupForList, $ticketDepartmentForList, $ticketDepartmentForList];
               if (($user['role'] ?? '') === 'manager' && $ticketGroupForList === 'support' && (int) ($user['department_id'] ?? 0) > 0) {
                   $agentSql .= ' AND u.department_id = ?';
                   $agentParams[] = (int) $user['department_id'];
@@ -2436,7 +2373,7 @@ if ($page === 'ticket') {
               $agentSql .= ' ORDER BY u.full_name';
               $agentQuery = db()->prepare($agentSql);
               $agentQuery->execute($agentParams);
-              $agents = $agentQuery->fetchAll();
+              $agents = array_values(array_filter($agentQuery->fetchAll(), static fn ($candidate) => ticket_assignee_is_eligible($ticket, $candidate, 'ticket_notification_user_can')));
         }
         echo '<div class="card detail-card"><h3>مدیریت درخواست</h3><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="update_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>وضعیت<select name="status">';
         $statusChoices = array_values(array_unique(array_merge([(string) $ticket['status']], array_filter(ticket_allowed_transitions((string) $ticket['status']), fn ($allowedStatus) => $canAssignTicket || in_array($allowedStatus, ['in_progress', 'waiting_user', 'resolved'], true)))));

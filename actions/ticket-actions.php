@@ -227,7 +227,7 @@ if (!defined('APP_ROOT')) {
             if ($directCancellation) {
                 [$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes] = ticket_sla_transition($ticket, 'cancelled', (string) $ticket['priority']);
                 $cancelOla = ticket_ola_transition($ticket, 'cancelled', (string) $ticket['priority']);
-                $cancelQuery = db()->prepare('UPDATE tickets SET status = "cancelled", due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, updated_at = NOW() WHERE id = ? AND requester_id = ? AND status = ? AND cancel_requested_at IS NULL');
+                $cancelQuery = db()->prepare('UPDATE tickets SET status = "cancelled", due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, updated_at = NOW() WHERE id = ? AND requester_id = ? AND status = ? AND cancel_requested_at IS NULL AND assigned_to IS NULL AND first_response_at IS NULL AND resolved_at IS NULL');
                 $cancelQuery->execute([$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes, $cancelOla['policy_id'], $cancelOla['response_due_at'], $cancelOla['due_at'], $cancelOla['escalation_1_at'], $cancelOla['escalation_2_at'], $ticketId, (int) $cancelUser['id'], $oldStatus]);
                 if ($cancelQuery->rowCount() < 1) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
@@ -327,8 +327,8 @@ if (!defined('APP_ROOT')) {
             if (!$ticket || !can_view_ticket($ticket, $claimUser)) {
                 throw new RuntimeException('درخواست پیدا نشد یا دسترسی ندارید.');
             }
-            if (!is_assignable_role((string) $claimUser['role'])) {
-                throw new RuntimeException('فقط کارشناس یا مدیر واحد می‌تواند درخواست را بردارد.');
+            if (!ticket_assignee_is_eligible($ticket, $claimUser, 'ticket_notification_user_can')) {
+                throw new RuntimeException('برداشتن درخواست فقط برای مسئول فعال و دارای دسترسی رسیدگی در همین حوزه و معاونت مجاز است.');
             }
             $claimTicketGroup = (string) ($ticket['service_group'] ?? '');
             if (($claimUser['role'] ?? '') === 'support_manager' && $claimTicketGroup !== 'support') {
@@ -401,8 +401,8 @@ if (!defined('APP_ROOT')) {
             if (!$ticket || !can_view_ticket($ticket, $user)) {
                 throw new RuntimeException('درخواست پیدا نشد یا دسترسی ندارید.');
             }
-            $isStaffUser = is_staff_role((string) $user['role']);
-            $asRequester = (int) $ticket['requester_id'] === (int) $user['id'] && !$isStaffUser;
+            $isStaffUser = is_staff_role((string) $user['role']) || user_is_primary_admin($user);
+            $asRequester = ticket_user_is_requester($ticket, $user);
             if ((int) $ticket['requester_id'] === (int) $user['id'] && $ticket['status'] === 'closed' && !ticket_rating_is_current($ticket)) {
                 throw new RuntimeException('ثبت امتیاز رضایت برای این درخواست الزامی است.');
             }
@@ -419,7 +419,10 @@ if (!defined('APP_ROOT')) {
             if ($body === '') {
                 throw new RuntimeException('متن پاسخ را وارد کنید.');
             }
-            $internal = !empty($_POST['is_internal']) && $isStaffUser ? 1 : 0;
+            if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester)) {
+                throw new RuntimeException('یادداشت داخلی برای درخواست‌کننده مجاز نیست؛ پیام عمومی ارسال کنید.');
+            }
+            $internal = !empty($_POST['is_internal']) ? 1 : 0;
             $oldStatus = (string) $ticket['status'];
             $newStatus = $oldStatus;
             $cancelPendingReply = !empty($ticket['cancel_requested_at']);
@@ -437,7 +440,7 @@ if (!defined('APP_ROOT')) {
                         }
                     }
                 } else {
-                    if ($oldStatus === 'assigned' && !$cancelPendingReply) {
+                    if (ticket_reply_starts_work($ticket, $user)) {
                         $newStatus = 'in_progress';
                     }
                     $afterStatus = valid_choice(post_value('after_status'), ['', 'waiting_user', 'resolved'], '');
@@ -445,7 +448,7 @@ if (!defined('APP_ROOT')) {
                         if ($cancelPendingReply) {
                             throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا آن را تأیید یا رد کنید.');
                         }
-                        if (ticket_handler_level($ticket, $user) === '') {
+                        if (!user_can($user, 'ticket.edit') || ticket_handler_level($ticket, $user) === '') {
                             throw new RuntimeException('فقط کارشناس مسئول یا مدیر واحد می‌تواند وضعیت درخواست را تغییر دهد.');
                         }
                         if (empty($ticket['assigned_to'])) {
@@ -461,15 +464,17 @@ if (!defined('APP_ROOT')) {
                     }
                 }
             }
-            $firstResponseSql = ($isStaffUser && !$internal) ? ', first_response_at = COALESCE(first_response_at, NOW())' : '';
+            $firstResponseSql = ($isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== '' && !$internal) ? ', first_response_at = COALESCE(first_response_at, NOW())' : '';
             $resolvedSql = ($newStatus === 'resolved' && $oldStatus !== 'resolved') ? ', resolved_at = NOW()' : '';
             [$replyDueAt, $replyPauseAt, $replyPauseMinutes] = ticket_sla_transition($ticket, $newStatus, (string) $ticket['priority']);
             $replyOla = ticket_ola_transition($ticket, $newStatus, (string) $ticket['priority']);
             db()->beginTransaction();
-            $replyLock = db()->prepare('SELECT status, cancel_requested_at FROM tickets WHERE id = ? FOR UPDATE');
+            $replyLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority FROM tickets WHERE id = ? FOR UPDATE');
             $replyLock->execute([$ticketId]);
             $lockedReply = $replyLock->fetch();
-            if (!$lockedReply || (string) $lockedReply['status'] !== $oldStatus) {
+            if (!$lockedReply || (string) $lockedReply['status'] !== $oldStatus
+                || (int) ($lockedReply['assigned_to'] ?? 0) !== (int) ($ticket['assigned_to'] ?? 0)
+                || (string) $lockedReply['priority'] !== (string) $ticket['priority']) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ پیام شما ذخیره نشد. صفحه را تازه کنید.');
             }
             if (!empty($lockedReply['cancel_requested_at']) && $newStatus !== $oldStatus) {
@@ -498,7 +503,7 @@ if (!defined('APP_ROOT')) {
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, 'وضعیت به حل‌شده تغییر کرد.');
             } elseif ($internal) {
                 notify_ticket_staff($ticketId, 'internal_note', 'یادداشت داخلی جدید', 'در درخواست ' . ticket_number($ticketId) . ' یادداشت داخلی ثبت شد.', (int) $user['id']);
-            } elseif ($isStaffUser) {
+            } elseif (!$asRequester && $isStaffUser) {
                 notify_user((int) $ticket['requester_id'], 'ticket_reply', 'پاسخ جدید به درخواست', 'برای درخواست ' . ticket_number($ticketId) . ' پاسخ جدید ثبت شد.', (int) $ticketId);
             } else {
                 notify_ticket_staff($ticketId, 'ticket_reply', 'پاسخ جدید کاربر', 'کاربر در درخواست ' . ticket_number($ticketId) . ' پاسخ جدید ثبت کرد.', (int) $user['id']);
@@ -542,17 +547,23 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('این وضعیت فقط توسط مدیر واحد قابل تنظیم است.');
             }
             $assigneeChanged = (int) $assignee !== (int) ($ticket['assigned_to'] ?? 0);
+            if ($oldStatus === 'resolved' && $status === 'resolved' && $assigneeChanged) {
+                throw new RuntimeException('برای تغییر مسئول درخواست حل‌شده، ابتدا وضعیت را برای ادامهٔ رسیدگی تغییر دهید.');
+            }
             $ticketGroupForAssign = (string) ($ticket['service_group'] ?? 'it');
-            if ($assignee && $assigneeChanged) {
-                 $assigneeQuery = db()->prepare('SELECT u.id, u.department_id, u.role, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
+            if ($assignee) {
+                 $assigneeQuery = db()->prepare('SELECT u.id, u.department_id, u.role, u.is_active, u.is_it_agent, u.is_primary_admin, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
                  $assigneeQuery->execute([$assignee]);
                  $assigneeRow = $assigneeQuery->fetch();
                  $assigneeRole = (string) ($assigneeRow['role'] ?? '');
                  $assigneeHu = (string) ($assigneeRow['handling_unit_code'] ?? '');
                  $assigneeGroupOk = $assigneeRow
-                     && (($assigneeRole === 'primary_admin' && $ticketGroupForAssign === 'it')
+                     && ((user_is_primary_admin($assigneeRow) && $ticketGroupForAssign === 'it')
                          || ($assigneeRole === 'support_manager' && $ticketGroupForAssign === 'support')
-                         || ($assigneeHu === $ticketGroupForAssign));
+                         || (in_array($assigneeRole, ['agent', 'manager'], true) && $assigneeHu === $ticketGroupForAssign));
+                 $assigneeDepartmentOk = $assigneeRole !== 'manager'
+                     || ((int) ($ticket['department_id'] ?? 0) > 0
+                         && (int) ($assigneeRow['department_id'] ?? 0) === (int) $ticket['department_id']);
                  $staffGroupOk = true;
                  if (($staffUser['role'] ?? '') === 'support_manager' && $ticketGroupForAssign !== 'support') {
                      $staffGroupOk = false;
@@ -565,7 +576,7 @@ if (!defined('APP_ROOT')) {
                      $deptOk = (int) ($assigneeRow['department_id'] ?? 0) === $staffDept
                          && (int) ($ticket['department_id'] ?? 0) === $staffDept;
                  }
-                 if (!$assigneeRow || !is_assignable_role($assigneeRole) || !$assigneeGroupOk || !$staffGroupOk || !$deptOk) {
+                 if (!$assigneeRow || !ticket_assignee_is_eligible($ticket, $assigneeRow, 'ticket_notification_user_can') || !$assigneeGroupOk || !$assigneeDepartmentOk || !$staffGroupOk || !$deptOk) {
                     throw new RuntimeException('کارشناس انتخاب‌شده به این واحد تعلق ندارد.');
                 }
             }
@@ -611,10 +622,12 @@ if (!defined('APP_ROOT')) {
             $params[] = $ticketId;
             $params[] = $oldStatus;
             db()->beginTransaction();
-            $updateLock = db()->prepare('SELECT status, cancel_requested_at FROM tickets WHERE id = ? FOR UPDATE');
+            $updateLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority FROM tickets WHERE id = ? FOR UPDATE');
             $updateLock->execute([$ticketId]);
             $lockedTicket = $updateLock->fetch();
-            if (!$lockedTicket || (string) $lockedTicket['status'] !== $oldStatus || !empty($lockedTicket['cancel_requested_at'])) {
+            if (!$lockedTicket || (string) $lockedTicket['status'] !== $oldStatus || !empty($lockedTicket['cancel_requested_at'])
+                || (int) ($lockedTicket['assigned_to'] ?? 0) !== (int) ($ticket['assigned_to'] ?? 0)
+                || (string) $lockedTicket['priority'] !== (string) $ticket['priority']) {
                 throw new RuntimeException('وضعیت یا درخواست لغو درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
             db()->prepare('UPDATE tickets SET ' . $fields . ' WHERE id = ? AND status = ? AND cancel_requested_at IS NULL')->execute($params);

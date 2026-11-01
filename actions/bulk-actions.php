@@ -70,10 +70,12 @@ if (!defined('APP_ROOT')) {
                     continue;
                 }
                 $bulkOld = (string) $bulkTicket['status'];
-                $bulkLock = db()->prepare('SELECT status, cancel_requested_at FROM tickets WHERE id = ? FOR UPDATE');
+                $bulkLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority FROM tickets WHERE id = ? FOR UPDATE');
                 $bulkLock->execute([$ticketId]);
                 $lockedBulkTicket = $bulkLock->fetch();
-                if (!$lockedBulkTicket || (string) $lockedBulkTicket['status'] !== $bulkOld || !empty($lockedBulkTicket['cancel_requested_at'])) {
+                if (!$lockedBulkTicket || (string) $lockedBulkTicket['status'] !== $bulkOld || !empty($lockedBulkTicket['cancel_requested_at'])
+                    || (int) ($lockedBulkTicket['assigned_to'] ?? 0) !== (int) ($bulkTicket['assigned_to'] ?? 0)
+                    || (string) $lockedBulkTicket['priority'] !== (string) $bulkTicket['priority']) {
                     $bulkSkipped++;
                     continue;
                 }

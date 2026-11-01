@@ -97,8 +97,9 @@ def test_lib_files_structure_and_strictness():
         assert "جداشده از bootstrap.php در نسخهٔ ۱.۶۲.۲۰" in src, rel
         body = src.split(GUARD_END, 1)[1]
         assert body.count("{") == body.count("}"), rel
-    # مجموع تعریف‌های سطح‌بالا: ۱۴۶ قدیمی منهای ۸ تابع مرده = ۱۳۸
-    total = sum(len(re.findall(r"^function ", read(rel), re.M)) for rel in LIB_FILES)
+    # شمارش دقیق مربوط به بستهٔ تاریخی است؛ کد جاری می‌تواند توابع جدید داشته باشد.
+    with zipfile.ZipFile(ROOT / "downloads" / PACKAGE_NAME) as archive:
+        total = sum(len(re.findall(r"^function ", archive.read(f"files/{rel}").decode("utf-8"), re.M)) for rel in LIB_FILES)
     assert total == 138, total
 
 

@@ -29,5 +29,11 @@ jobs:
     - name: Run architecture tests
       run: php tests/ArchitectureTest.php
 
+    - name: Run ticket routing unit tests
+      run: php tests/test_ticket_routing_unit.php
+
+    - name: Run ticket SLA unit tests
+      run: php tests/test_ticket_sla_unit.php
+
     - name: Run standalone worker logic tests
       run: php tests/test_food_ticket_logic.php
