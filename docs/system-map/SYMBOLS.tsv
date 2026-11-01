@@ -2244,8 +2244,6 @@ sortBtn	function	tests/js/list-sort-export.test.js	32	tests
 rowTexts	function	tests/js/list-sort.test.js	32	tests
 clickHeader	function	tests/js/list-sort.test.js	36	tests
 headerBtns	function	tests/js/list-sort.test.js	42	tests
-test_corrected_package_contract_and_checksum	def	tests/test_16259_version_integrity_package.py	14	tests
-test_verifier_is_cli_only_and_read_only	def	tests/test_16259_version_integrity_package.py	42	tests
 AdminLayoutDesignStaticTests	class	tests/test_admin_layout_design_static.py	5	tests
 test_layout_editor_is_admin_only_and_saves_validated_page_settings	def	tests/test_admin_layout_design_static.py	8	tests
 test_design_view_is_available_in_shared_pages_and_food_ticket_panel	def	tests/test_admin_layout_design_static.py	18	tests
