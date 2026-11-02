@@ -82,6 +82,10 @@ do {
             throw $dbEx;
         }
 
+        // Worker --loop is long-lived; request-scoped settings must not stay cached across cycles.
+        if (function_exists('setting_forget_cache')) {
+            setting_forget_cache();
+        }
         $config = food_ticket_config(true);
         if (!(int) ($config['enabled'] ?? 0)) {
             $cycle['message'] = 'پردازشگر چاپ فیش غیرفعال است.';

@@ -51,6 +51,25 @@ function food_order_internal_map(string $isoDate): array
     return $map;
 }
 
+/** Current active lunch choice for the actual employee, not a batch-wide cached map. */
+function food_order_internal_food_for_employee(int $employeeId, string $isoDate): ?string
+{
+    $date = food_order_iso_date($isoDate);
+    if ($employeeId <= 0 || $date === null) {
+        throw new RuntimeException('شناسه یا تاریخ سفارش برای چاپ معتبر نیست.');
+    }
+    $stmt = db()->prepare("SELECT c.food_name FROM food_orders o
+        JOIN food_calendar_items i ON i.id = o.calendar_item_id AND i.active = 1
+        JOIN food_calendar cal ON cal.id = i.calendar_id AND cal.food_date = o.food_date AND cal.meal_type = o.meal_type
+        JOIN food_catalog c ON c.id = i.food_id AND c.active = 1
+        WHERE o.employee_id = ? AND o.food_date = ? AND o.meal_type = 'lunch' AND o.status = 'active'");
+    $stmt->execute([$employeeId, $date]);
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (count($rows) > 1) throw new RuntimeException('چند سفارش فعال برای این پرسنل وجود دارد؛ چاپ متوقف شد.');
+    $food = trim((string) ($rows[0]['food_name'] ?? ''));
+    return $food !== '' ? $food : null;
+}
+
 /** خروجی با قرارداد صفحهٔ سفارش‌های پنل چاپ فیش (nat/pc/first/last/food/foodDate/...). */
 function food_order_internal_items(string $fromDate, ?string $toDate = null): array
 {

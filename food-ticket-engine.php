@@ -584,6 +584,11 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
         } elseif ($guestMode === 'requested' && function_exists('food_guest_requested_total')) {
             $variableCap = food_guest_requested_total((string) $date);
         }
+        if ($guestMode === 'requested' && $variableCap === null) {
+            // Never fall back to an unrelated fixed/traffic limit in request-based mode.
+            // The batch catches this error and leaves the source row for a later retry.
+            throw new RuntimeException('جمع درخواست‌های مهمان در دسترس نیست؛ صدور فیش تا رفع خطا متوقف شد.');
+        }
         if (food_ticket_guest_cap_reached($guestCount, $variableCap, $maxGuest, $cardCount, $cardLimit)) {
             return [
                 'event_type' => 'guest_limit',
@@ -686,9 +691,13 @@ function food_ticket_decide_for_user(array $user, string $date, array $base, arr
             ],
         ];
     }
-    $food = $orderMaps[$date][$national]
-        ?? $orderMaps[$date][ltrim($national, '0') ?: '0']
-        ?? null;
+    // A batch map can become stale while other people are processed. Resolve the
+    // actual employee's active order again immediately before making this event.
+    // Existing event snapshots and already printed receipts are never rewritten.
+    if (!function_exists('food_order_internal_food_for_employee')) {
+        throw new RuntimeException('منبع خواندن سفارش به‌روز در دسترس نیست؛ چاپ فیش متوقف شد.');
+    }
+    $food = food_order_internal_food_for_employee((int) ($user['id'] ?? 0), $date);
 
     if ($food === null || $food === '') {
         return [
@@ -810,6 +819,8 @@ function food_ticket_read_source_rows_today($sourceDb, int $limit, string $today
 
 function food_ticket_process_batch_v2(?int $requestedLimit = null): array
 {
+    // Reload persistent settings even when called by a long-running Worker or another batch caller.
+    if (function_exists('setting_forget_cache')) setting_forget_cache();
     $config = food_ticket_config(true);
     $summary = [
         'processed' => 0,

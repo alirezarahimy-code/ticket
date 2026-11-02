@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.46';
+const FOOD_TICKET_PANEL_VERSION = '1.37.47';
 
 function food_ticket_panel_version(): string
 {
@@ -4029,6 +4029,9 @@ function food_ticket_api_save_config(array $data, array $user): void
         throw new RuntimeException('ویرایش طراحی فیش مجاز نیست.');
     }
 
+    if (array_key_exists('guestCapMode', $data) && !in_array((string) $data['guestCapMode'], ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت سقف مهمان معتبر نیست.');
+    }
     $guestRequestSameDayCutoff = null;
     if (array_key_exists('guestRequestSameDayCutoff', $data)) {
         $rawCutoff = trim(food_ticket_normalize_digits((string) $data['guestRequestSameDayCutoff']));
@@ -4119,7 +4122,7 @@ function food_ticket_api_save_config(array $data, array $user): void
     ], $user);
     if (array_key_exists('guestCapMode', $data)) {
         $guestCapModeIn = (string) ($data['guestCapMode'] ?? '');
-        save_setting('food_guest_cap_mode', $guestCapModeIn === 'variable' ? 'variable' : 'requested');
+        save_setting('food_guest_cap_mode', $guestCapModeIn);
     }
     $capTimeKeys = ['guestCapStart' => 'food_guest_cap_start', 'guestCapCutoff' => 'food_guest_cap_cutoff', 'guestCapEnd' => 'food_guest_cap_end'];
     foreach ($capTimeKeys as $field => $settingKey) {

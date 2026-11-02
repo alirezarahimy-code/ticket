@@ -196,7 +196,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         php = read("food-order.php")
         self.assertIn('href="assets/food-order.css?v=19"', php)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', php)
-        self.assertIn('src="assets/food-order.js?v=21"', php)
+        self.assertIn('src="assets/food-order.js?v=22"', php)
         employee_css = read("assets/food-order.css")
         self.assertIn(".fo-my-orders .table-head,.fo-my-orders .table-row", employee_css)
         self.assertIn("grid-template-columns:42px minmax(140px,1.35fr)", employee_css)
