@@ -95,6 +95,53 @@ function require_supervisor(): array
     return $user;
 }
 
+/** Active descendants of units actually managed by this user, restricted to each company. */
+function ticket_manager_scope_unit_ids(array $user): array
+{
+    $id = (int) ($user['id'] ?? 0);
+    if ($id <= 0) return [];
+    try {
+        $roots = db()->prepare('SELECT ou.id FROM org_units ou JOIN org_companies company ON company.id = ou.company_id AND company.is_active = 1 WHERE ou.manager_user_id = ? AND ou.is_active = 1 UNION SELECT ou.id FROM org_unit_managers m JOIN org_units ou ON ou.id = m.unit_id JOIN org_companies company ON company.id = ou.company_id AND company.is_active = 1 WHERE m.user_id = ? AND ou.is_active = 1');
+        $roots->execute([$id, $id]);
+        $rootIds = array_map('intval', $roots->fetchAll(PDO::FETCH_COLUMN));
+        if (!$rootIds) return [];
+        $units = db()->query('SELECT id, parent_id, company_id FROM org_units WHERE is_active = 1')->fetchAll(PDO::FETCH_ASSOC);
+        $byId = []; $children = [];
+        foreach ($units as $unit) {
+            $uid = (int) $unit['id'];
+            $byId[$uid] = $unit;
+            $children[(int) ($unit['parent_id'] ?? 0)][] = $uid;
+        }
+        $result = [];
+        foreach ($rootIds as $root) {
+            if (!isset($byId[$root]) || (int) ($byId[$root]['company_id'] ?? 0) <= 0) continue;
+            $company = (int) $byId[$root]['company_id']; $stack = [$root]; $seen = [];
+            while ($stack) {
+                $unitId = array_pop($stack);
+                if (isset($seen[$unitId]) || !isset($byId[$unitId]) || (int) ($byId[$unitId]['company_id'] ?? 0) !== $company) continue;
+                $seen[$unitId] = true; $result[$unitId] = $unitId;
+                foreach ($children[$unitId] ?? [] as $child) $stack[] = $child;
+            }
+        }
+        return array_values($result);
+    } catch (Throwable $error) {
+        // Missing schema or incomplete chart must not grant the entire support pool.
+        if (function_exists('app_error_log')) app_error_log('[ticket-scope] ' . $error->getMessage());
+        return [];
+    }
+}
+
+/** SQL predicate shared by list and single-ticket authorization. */
+function ticket_requester_tree_predicate(string $requesterExpr, array $unitIds): array
+{
+    if (!$unitIds) return ['1 = 0', []];
+    $marks = implode(',', array_fill(0, count($unitIds), '?'));
+    return ['EXISTS (SELECT 1 FROM users scope_user WHERE scope_user.id = ' . $requesterExpr
+        . ' AND (scope_user.org_unit_id IN (' . $marks . ')'
+        . ' OR EXISTS (SELECT 1 FROM org_units scope_managed WHERE scope_managed.is_active = 1 AND scope_managed.manager_user_id = scope_user.id AND scope_managed.id IN (' . $marks . '))'
+        . ' OR EXISTS (SELECT 1 FROM org_unit_managers scope_members JOIN org_units scope_unit ON scope_unit.id = scope_members.unit_id AND scope_unit.is_active = 1 WHERE scope_members.user_id = scope_user.id AND scope_unit.id IN (' . $marks . '))))', array_merge($unitIds, $unitIds, $unitIds)];
+}
+
 function ticket_user_can_view(array $ticket, array $user, ?callable $permissionCheck = null): bool
 {
     $permissionCheck = $permissionCheck ?? 'user_can';
@@ -130,12 +177,17 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
         return (string) ($ticket['service_group'] ?? '') === user_service_group($user);
     }
     if ($user['role'] === 'manager') {
-        // هم‌تراز با ticket_scope: مدیر بدون معاونت، کل حوزه را می‌بیند؛ وگرنه فقط معاونت خودش.
-        if ((string) ($ticket['service_group'] ?? '') !== user_service_group($user)) {
+        $ids = ticket_manager_scope_unit_ids($user);
+        if (!$ids) return false;
+        [$predicate, $params] = ticket_requester_tree_predicate('?', $ids);
+        try {
+            $query = db()->prepare('SELECT ' . $predicate);
+            $query->execute(array_merge([(int) ($ticket['requester_id'] ?? 0)], $params));
+            return (bool) $query->fetchColumn();
+        } catch (Throwable $error) {
+            if (function_exists('app_error_log')) app_error_log('[ticket-scope] ' . $error->getMessage());
             return false;
         }
-        $managerDept = (int) ($user['department_id'] ?? 0);
-        return $managerDept <= 0 || (int) ($ticket['department_id'] ?? 0) === $managerDept;
     }
     return false;
 }
@@ -247,28 +299,24 @@ function ticket_reply_starts_work(array $ticket, array $user): bool
 
 function ticket_scope(array $user, string $alias = 't'): array
 {
-    if (user_is_primary_admin($user)) {
-        return ['', []];
-    }
-    // این قید پیش از هر مجوز «مشاهده همه» اجرا می‌شود تا مدیر پشتیبانی هرگز
-    // با مجوز سفارشی/قدیمی ticket.view_all به حوزهٔ IT دسترسی نگیرد.
-    if (($user['role'] ?? '') === 'support_manager') {
-        return ["WHERE {$alias}.service_group = ?", ['support']];
-    }
-    if (function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) {
-        return ['', []];
-    }
-    if (in_array($user['role'], ['agent', 'manager'], true)) {
-        $group = user_service_group($user);
-        $departmentId = (int) ($user['department_id'] ?? 0);
-        if ($user['role'] === 'agent') {
-            return ["WHERE {$alias}.service_group = ?", [$group]];
+    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $alias)) throw new InvalidArgumentException('Invalid ticket alias');
+    if (user_is_primary_admin($user)) return ['', []];
+    $role = (string) ($user['role'] ?? '');
+    $own = user_can($user, 'ticket.view_own');
+    $unit = user_can($user, 'ticket.view_unit');
+    if (is_global_ticket_role($role) && user_can($user, 'ticket.view_all')) return ['', []];
+    if (in_array($role, ['support_manager', 'agent', 'manager'], true)) {
+        $group = $role === 'support_manager' ? 'support' : user_service_group($user);
+        if ($unit && $role !== 'manager') return ["WHERE {$alias}.service_group = ?", [$group]];
+        $parts = []; $params = [$group];
+        if ($own) { $parts[] = "{$alias}.requester_id = ?"; $params[] = (int) ($user['id'] ?? 0); }
+        if ($unit && $role === 'manager') {
+            [$tree, $treeParams] = ticket_requester_tree_predicate("{$alias}.requester_id", ticket_manager_scope_unit_ids($user));
+            $parts[] = $tree; $params = array_merge($params, $treeParams);
         }
-        // A manager may view their own request in another department, but remains
-        // unable to handle it there (ticket_handler_level enforces that scope).
-        return $departmentId > 0 ? ["WHERE {$alias}.service_group = ? AND ({$alias}.department_id = ? OR {$alias}.requester_id = ?)", [$group, $departmentId, (int) $user['id']]] : ["WHERE {$alias}.service_group = ?", [$group]];
+        return ["WHERE {$alias}.service_group = ? AND (" . ($parts ? implode(' OR ', $parts) : '1 = 0') . ')', $params];
     }
-    return ["WHERE {$alias}.requester_id = ?", [(int) $user['id']]];
+    return $own ? ["WHERE {$alias}.requester_id = ?", [(int) ($user['id'] ?? 0)]] : ['WHERE 1 = 0', []];
 }
 
 function ticket_is_waiting_status(string $status): bool

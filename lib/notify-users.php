@@ -166,6 +166,16 @@ function notification_visibility_sql(int $userId, ?array $user = null, string $a
     return " AND {$col} <> 'food_cancel_request'";
 }
 
+/** Do not expose stale ticket notifications after a role or chart change. */
+function notification_ticket_visibility(?array $user, string $alias = 'notifications'): array
+{
+    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $alias)) throw new InvalidArgumentException('Invalid notification alias');
+    if (!$user) return [" AND {$alias}.ticket_id IS NULL", []];
+    [$where, $params] = ticket_scope($user, 'notification_ticket');
+    if ($where === '') return ['', []];
+    return [" AND ({$alias}.ticket_id IS NULL OR EXISTS (SELECT 1 FROM tickets notification_ticket {$where} AND notification_ticket.id = {$alias}.ticket_id))", $params];
+}
+
 /**
  * شمارش اعلان‌های نخوانده + آخرین شناسه با یک کوئری (برای کارایی؛ در هدر استفاده می‌شود).
  */
@@ -176,8 +186,9 @@ function notification_header_summary(int $userId, ?array $user = null): array
         return $cache[$userId];
     }
     try {
-        $query = db()->prepare('SELECT COALESCE(SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END), 0) AS unread, COALESCE(MAX(id), 0) AS latest FROM notifications WHERE user_id = ?' . notification_visibility_sql($userId, $user));
-        $query->execute([$userId]);
+        [$ticketFilter, $ticketParams] = notification_ticket_visibility($user);
+        $query = db()->prepare('SELECT COALESCE(SUM(CASE WHEN is_read = 0 THEN 1 ELSE 0 END), 0) AS unread, COALESCE(MAX(id), 0) AS latest FROM notifications WHERE user_id = ?' . notification_visibility_sql($userId, $user) . $ticketFilter);
+        $query->execute(array_merge([$userId], $ticketParams));
         $row = $query->fetch() ?: [];
         return $cache[$userId] = [
             'unread' => (int) ($row['unread'] ?? 0),

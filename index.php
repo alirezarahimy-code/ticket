@@ -449,7 +449,7 @@ function ticket_org_manager_rank_sql(): string
         : '';
 }
 
-function choose_handling_agent(string $serviceGroup, ?int $departmentId = null): ?int
+function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, int $requesterId = 0): ?int
 {
     $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
     $departmentId = (int) ($departmentId ?? 0);
@@ -465,7 +465,7 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null):
         ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
         : 'u.role = "support_manager"';
     $candidateFields = 'u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code';
-    $routingTicket = ['requester_id' => 0, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
+    $routingTicket = ['requester_id' => $requesterId, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
     $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
     foreach ($ownerQuery->fetchAll() as $candidate) {
         if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
@@ -963,8 +963,9 @@ if (($_GET['action'] ?? '') === 'notification_feed') {
         @session_write_close();
     }
     $afterId = max(0, (int) ($_GET['after'] ?? 0));
-    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . ' ORDER BY n.id ASC LIMIT 20');
-    $feedQuery->execute([(int) $user['id'], $afterId]);
+    [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($user, 'n');
+    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . $notificationTicketFilter . ' ORDER BY n.id ASC LIMIT 20');
+    $feedQuery->execute(array_merge([(int) $user['id'], $afterId], $notificationTicketParams));
     $items = array_map(static function (array $item): array {
         return [
             'id' => (int) $item['id'],
@@ -1626,8 +1627,9 @@ if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
 }
 if ($page === 'notifications') {
     $notificationUser = require_login();
-    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . ' ORDER BY n.created_at DESC LIMIT 100');
-    $notificationQuery->execute([(int) $notificationUser['id']]);
+    [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($notificationUser, 'n');
+    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . $notificationTicketFilter . ' ORDER BY n.created_at DESC LIMIT 100');
+    $notificationQuery->execute(array_merge([(int) $notificationUser['id']], $notificationTicketParams));
     render_header('اعلان‌های داخلی', $notificationUser);
     echo '<section class="page-heading"><div><span class="eyebrow">اعلان داخلی آفلاین</span><h1>اعلان‌های شما</h1><p>تغییرات درخواست‌ها بدون نیاز به ایمیل یا پیامک در همین سامانه اعلام می‌شوند.</p></div><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_all_notifications"><button class="button secondary" type="submit">خوانده‌شدن همه</button></form></section><section class="card notification-list">';
     foreach ($notificationQuery->fetchAll() as $notification) {
@@ -3058,7 +3060,7 @@ HTML;
         $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
     } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
     echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=20"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=22"></script>';
     render_footer();
     exit;
 }

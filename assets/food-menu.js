@@ -471,7 +471,7 @@
     { key: 'national_code', label: 'کد ملی' },
     { key: 'employee_number', label: 'کد پرسنلی' },
     { key: 'full_name', label: 'نام و نام خانوادگی' },
-    { key: 'food_name', label: 'نوع غذا' },
+    { key: 'food_name', label: 'غذای فیش / سفارش فعلی' },
     { key: 'food_date', label: 'تاریخ غذا' },
     { key: 'punch_time', label: 'ساعت تردد' },
     { key: 'record_type', label: 'نوع فیش' },
@@ -499,7 +499,7 @@
     if (key === 'national_code') return faDigits(row.national_code || '—');
     if (key === 'employee_number') return faDigits(row.employee_number || '—');
     if (key === 'full_name') return row.full_name || '—';
-    if (key === 'food_name') return row.food_name || '—';
+    if (key === 'food_name') { var food = row.food_name || '—'; if (row.current_order_state === 'different') return food + ' | سفارش فعلی: ' + (row.current_order_food || '—') + ' (متفاوت)'; if (row.current_order_state === 'cancelled') return food + ' | سفارش فعلی لغو شده'; if (row.current_order_state === 'missing') return food + ' | سفارش فعلی یافت نشد'; if (row.current_order_state === 'unavailable') return food + ' | مقایسه نامشخص'; return food; }
     if (key === 'food_date') return faDigits(jalaliFromIso(row.food_date) || '—');
     if (key === 'punch_time') return faDigits((row.punch_time || '').slice(0, 5) || '—');
     if (key === 'record_type') return row.event_type === 'guest' ? 'مهمان' : 'پرسنل';
@@ -609,7 +609,7 @@
       : '<div class="fm-delivery-counts"><div><span>پرسنل</span><strong>' + faDigits(state.deliveredReportEmployeeCount) + '</strong></div><div><span>فیش مهمان چاپ‌شده</span><strong>' + faDigits(state.deliveredReportGuestCount) + '</strong></div></div>'
         + viewBar + '<div class="fm-table-wrap fm-delivery-report-results">' + (state.deliveredReportView === 'menu' ? deliveredReportByMenuHtml(state.deliveredReport) : deliveredReportTableHtml(state.deliveredReport)) + '</div>';
     var actionsEnabled = state.deliveredReportLoaded && !state.deliveredReportLoading;
-    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">تاریخ: ' + esc(faDigits(singleDateLabel || '—')) + ' — پرسنل فقط با فیش چاپ‌شده و وضعیت تحویل‌شده؛ مهمان با فیش چاپ‌شده. وضعیت تحویل در سامانه از ثبت چاپ می‌آید و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
+    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">تاریخ: ' + esc(faDigits(singleDateLabel || '—')) + ' — پرسنل فقط با فیش چاپ‌شده و وضعیت تحویل‌شده؛ مهمان با فیش چاپ‌شده. غذای فیش محفوظ است؛ سفارش فعلیِ متفاوت جداگانه نمایش داده می‌شود و ممکن است پس از صدور تغییر کرده باشد. وضعیت تحویل از ثبت چاپ می‌آید و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
       + dateForm
       + '<div class="fm-report-fields"><strong>فیلدهای گزارش</strong>' + fields + '</div>'
       + (state.deliveredReportLoaded || state.deliveredReportLoading ? results : '<div class="fm-empty">تاریخ موردنظر را انتخاب کنید و «نمایش گزارش» بزنید.</div>')

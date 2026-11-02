@@ -23,7 +23,9 @@ final class FakeTicketStatement {
     public array $ids = [];
     public function execute(array $ids): void { $this->ids = $ids; }
     public function fetch(): array { return $GLOBALS['fake_event_order'] ?? []; }
+    public function fetchColumn(): mixed { if (str_contains($this->sql, 'scope_user')) return (int) in_array(($GLOBALS['fake_requester_units'][$this->ids[0]] ?? 0), array_slice($this->ids, 1), true); return false; }
     public function fetchAll(?int $mode = null): array {
+        if (str_contains($this->sql, 'SELECT ou.id FROM org_units ou JOIN org_companies')) return $GLOBALS['fake_managed'][$this->ids[0]] ?? [];
         if (str_contains($this->sql, 'SELECT permission FROM role_permissions')) {
             return $GLOBALS['fake_permissions'][$this->ids[0]] ?? [];
         }
@@ -32,6 +34,7 @@ final class FakeTicketStatement {
 }
 final class FakeTicketDatabase {
     public function prepare(string $sql): FakeTicketStatement { return new FakeTicketStatement($sql); }
+    public function query(string $sql): object { return new class { public function fetchAll(?int $mode=null): array { return [['id'=>501,'parent_id'=>0,'company_id'=>1],['id'=>701,'parent_id'=>0,'company_id'=>1]]; } }; }
 }
 function db(): FakeTicketDatabase { static $db; return $db ??= new FakeTicketDatabase(); }
 require APP_ROOT . '/lib/auth-scope.php';
@@ -56,6 +59,8 @@ $users = [
     ['id'=>10, 'role'=>'user', 'permissions'=>['ticket.view_own', 'ticket.assign'], 'is_active'=>1],
 ];
 $GLOBALS['fake_users'] = $users;
+$GLOBALS['fake_managed'] = [4=>[501], 5=>[701]];
+$GLOBALS['fake_requester_units'] = [1=>501];
 $GLOBALS['fake_permissions'] = [
     'user'=>$view, 'agent'=>$unit, 'manager'=>$managerPerm,
     'supervisor'=>['ticket.view_all'], 'support_manager'=>$managerPerm,
@@ -94,7 +99,7 @@ check_ticket(ticket_handler_level($ownTicket, $users[9]) === '', 'custom assignm
 $ownTicket['requester_id'] = 5;
 check_ticket(ticket_user_can_view($ownTicket, $users[4]) && ticket_handler_level($ownTicket, $users[4]) === '', 'own ticket does not give manager authority outside department');
 [$ownScope, $ownParameters] = ticket_scope($users[4]);
-check_ticket(str_contains($ownScope, 'requester_id = ?') && $ownParameters === ['support', 7, 5], 'manager list includes own requests outside their department but within their group');
+check_ticket(str_contains($ownScope, 'requester_id = ?') && $ownParameters === ['support', 5, 701, 701, 701], 'manager list includes own requests outside their department but within their group');
 $ticket['cancel_requested_at'] = '2026-01-01 12:00:00';
 check_ticket(!ticket_reply_starts_work($ticket, $users[2]), 'pending cancellation blocks implicit transition');
 

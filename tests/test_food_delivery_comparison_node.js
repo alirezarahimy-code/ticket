@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('assert'),fs=require('fs'),{JSDOM}=require('jsdom');
+const html='<!doctype html><html><body><div id="out"></div></body></html>';
+let src=fs.readFileSync('assets/food-menu.js','utf8');
+src=src.replace('  global.FoodMenuUI = {', `  global.testDelivery={render:deliveredReportTableHtml,value:deliveredReportFieldValue};\n  global.FoodMenuUI = {`);
+const d=new JSDOM(html,{url:'https://test.invalid/',runScripts:'outside-only'});d.window.FOOD_TICKET_VIEWS={reports:true};d.window.eval(src);
+const r={event_type:'printed',food_name:'ساندویچ',current_order_food:'جوجه کباب',current_order_state:'different'};
+const value=d.window.testDelivery.value(r,'food_name',0);assert(value.includes('ساندویچ') && value.includes('جوجه کباب') && value.includes('متفاوت'));
+d.window.document.getElementById('out').innerHTML=d.window.testDelivery.render([r]);const txt=d.window.document.getElementById('out').textContent;assert(txt.includes('ساندویچ') && txt.includes('جوجه کباب'));
+r.current_order_food='<img src=x onerror=bad()>';d.window.document.getElementById('out').innerHTML=d.window.testDelivery.render([r]);assert.equal(d.window.document.querySelectorAll('img').length,0);
+console.log('PASS report rendering and export field show both receipt and current order, safely escaped');d.window.close();

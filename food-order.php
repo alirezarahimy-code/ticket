@@ -887,9 +887,13 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
             COALESCE(NULLIF(e.national_code, ''), u.national_code, '') AS national_code,
             COALESCE(NULLIF(e.full_name, ''), u.full_name, 'مهمان') AS full_name,
             COALESCE(NULLIF(e.food_type, ''), IF(e.event_type = 'guest', 'مهمان', '')) AS food_name,
-            e.event_type, e.print_status, e.delivery_status, e.delivered_at
+            e.event_type, e.print_status, e.delivery_status, e.delivered_at,
+            current_order.id AS current_order_id, current_order.status AS current_order_status, current_food.food_name AS current_order_food
         FROM food_ticket_events e
         LEFT JOIN users u ON u.id = e.user_id
+        LEFT JOIN food_orders current_order ON current_order.employee_id = e.user_id AND current_order.food_date = e.punch_date AND current_order.meal_type = 'lunch'
+        LEFT JOIN food_calendar_items current_item ON current_item.id = current_order.calendar_item_id
+        LEFT JOIN food_catalog current_food ON current_food.id = current_item.food_id
         WHERE e.punch_date BETWEEN ? AND ?
           AND (e.print_status = 'printed' OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'))
           AND ((e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
@@ -918,6 +922,8 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
             'national_code' => food_order_digits($row['national_code'] ?? ''),
             'full_name' => (string) ($row['full_name'] ?? ''),
             'food_name' => $food,
+            'current_order_food' => $eventType !== 'guest' && ($row['current_order_status'] ?? '') === 'active' ? (string) ($row['current_order_food'] ?? '') : '',
+            'current_order_state' => $eventType === 'guest' ? 'not_applicable' : ((int) ($row['current_order_id'] ?? 0) <= 0 ? 'missing' : (($row['current_order_status'] ?? '') !== 'active' ? 'cancelled' : (empty($row['current_order_food']) ? 'unavailable' : ($food === (string) $row['current_order_food'] ? 'same' : 'different')))),
             'event_type' => $eventType,
             'menu_no' => (int) ($menuMap[$date . "\0" . $food] ?? 0),
             'delivered_at' => (string) ($row['delivered_at'] ?? ''),
@@ -932,7 +938,7 @@ function food_order_export_printed_delivery_report(string $fromDate, string $toD
     $report = food_order_printed_delivery_report($fromDate, $toDate);
     $labels = [
         'row' => 'ردیف', 'national_code' => 'کد ملی', 'employee_number' => 'کد پرسنلی',
-        'full_name' => 'نام و نام خانوادگی', 'food_name' => 'نوع غذا', 'food_date' => 'تاریخ غذا',
+        'full_name' => 'نام و نام خانوادگی', 'food_name' => 'غذای فیش / سفارش فعلی', 'food_date' => 'تاریخ غذا',
         'punch_time' => 'ساعت تردد', 'record_type' => 'نوع فیش', 'menu_no' => 'شماره منو',
         'delivered_at' => 'زمان ثبت تحویل',
     ];
@@ -955,7 +961,8 @@ function food_order_export_printed_delivery_report(string $fromDate, string $toD
                 'row' => $index + 1,
                 'national_code' => food_order_digits($item['national_code'] ?? ''),
                 'employee_number' => (string) ($item['employee_number'] ?? ''),
-                'full_name', 'food_name' => (string) ($item[$field] ?? ''),
+                'full_name' => (string) ($item[$field] ?? ''),
+                'food_name' => (string) ($item['food_name'] ?? '') . (($item['current_order_state'] ?? '') === 'different' ? ' | سفارش فعلی: ' . (string) $item['current_order_food'] . ' (متفاوت)' : (($item['current_order_state'] ?? '') === 'cancelled' ? ' | سفارش فعلی لغو شده' : (($item['current_order_state'] ?? '') === 'missing' ? ' | سفارش فعلی یافت نشد' : (($item['current_order_state'] ?? '') === 'unavailable' ? ' | مقایسه نامشخص' : '')))),
                 'food_date' => food_order_jalali_label((string) ($item['food_date'] ?? '')),
                 'punch_time' => substr((string) ($item['punch_time'] ?? ''), 0, 5),
                 'record_type' => ($item['event_type'] ?? '') === 'guest' ? 'مهمان' : 'پرسنل',
