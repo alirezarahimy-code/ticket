@@ -257,6 +257,8 @@ document.addEventListener('click', function (event) {
     }
 
     function activateTab(name, updateUrl) {
+        const shell = document.querySelector('.content-wrap');
+        if (shell) shell.classList.toggle('cd-history-wide', name === 'history');
         tabLinks.forEach(function (link) {
             const active = link.dataset.cdDvdTab === name;
             link.classList.toggle('active', active);

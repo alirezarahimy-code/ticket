@@ -10,9 +10,9 @@ function valid_choice($v,$values,$fallback){return in_array($v,$values,true)?$v:
 function e($v):string{return htmlspecialchars((string)$v,ENT_QUOTES,'UTF-8');}
 function csrf_field():string{return '<input type="hidden" name="csrf" value="x">';}
 function csp_nonce():string{return 'test';}
-function render_header($title,$user):void{echo '<!doctype html><html lang="fa"><body>';}
-function render_footer():void{echo '</body></html>';}
+function render_header($title,$user):void{echo '<!doctype html><html lang="fa" dir="rtl"><body><div class="content-wrap">';}
+function render_footer():void{echo '</div></body></html>';}
 function flash(...$v):void{}
 require APP_ROOT.'/lib/tickets-sla.php';require APP_ROOT.'/traffic-control.php';
-$_GET=['tab'=>'new'];$_SESSION=[];
+$_GET=['tab'=>$argv[1] ?? 'new'];$_SESSION=[];
 traffic_render_page(['id'=>1,'role'=>'admin']);

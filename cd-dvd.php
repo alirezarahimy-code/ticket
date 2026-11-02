@@ -602,14 +602,15 @@ function cd_dvd_render_surface(array $user, string $baseUrl): string
     };
     $items = '';
     foreach ($records as $record) {
-        $items .= '<div class="cd-dvd-surface-row"><span><em class="media-direction ' . ($record['direction'] === 'IN' ? 'in' : 'out') . '">' . ($record['direction'] === 'IN' ? 'ورودی' : 'خروجی') . '</em></span><span><b class="media-tag ' . strtolower((string) $record['media']) . '">' . e($record['media']) . '</b></span><strong>' . e($record['serial']) . '</strong><span>' . e($record['info_type']) . '</span><time>' . e($record['date_str']) . '</time><span>' . e($record['recorder_display_name'] ?: $record['recorder_name']) . '</span></div>';
+        $exitSheet = $record['direction'] === 'OUT' && trim((string) ($record['exit_sheet'] ?? '')) !== '' ? (string) $record['exit_sheet'] : '—';
+        $items .= '<div class="cd-dvd-surface-row"><span><em class="media-direction ' . ($record['direction'] === 'IN' ? 'in' : 'out') . '">' . ($record['direction'] === 'IN' ? 'ورودی' : 'خروجی') . '</em></span><span>' . e($exitSheet) . '</span><span><b class="media-tag ' . strtolower((string) $record['media']) . '">' . e($record['media']) . '</b></span><strong>' . e($record['serial']) . '</strong><span>' . e($record['info_type']) . '</span><time>' . e($record['date_str']) . '</time><span>' . e($record['recorder_display_name'] ?: $record['recorder_name']) . '</span></div>';
     }
     $filtersHtml = '<nav class="cd-dvd-surface-filters" aria-label="فیلتر رسانه"><a data-cd-dvd-filter-link class="' . ($quick === 'all' ? 'active' : '') . '" href="' . e($filterUrl('all')) . '"><strong>' . (int) $stats['total'] . '</strong><span>کل رسانه‌های ثبت‌شده</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'CD' ? 'active' : '') . '" href="' . e($filterUrl('CD')) . '"><strong>' . (int) $stats['cd'] . '</strong><span>CD</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'DVD' ? 'active' : '') . '" href="' . e($filterUrl('DVD')) . '"><strong>' . (int) $stats['dvd'] . '</strong><span>DVD</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'IN' ? 'active' : '') . '" href="' . e($filterUrl('IN')) . '"><strong>' . (int) $stats['incoming'] . '</strong><span>ورودی</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'OUT' ? 'active' : '') . '" href="' . e($filterUrl('OUT')) . '"><strong>' . (int) $stats['outgoing'] . '</strong><span>خروجی</span></a><a data-cd-dvd-filter-link class="' . ($quick === 'outside' ? 'active' : '') . '" href="' . e($filterUrl('outside')) . '"><strong>' . (int) $stats['outside'] . '</strong><span>رسانه‌های خارج از سازمان</span></a></nav>';
     $searchUrl = $baseUrl . (str_contains($baseUrl, '?') ? '&' : '?') . 'cd_filter=' . rawurlencode($quick);
     $registerLink = cd_dvd_can_submit_out($user) || cd_dvd_can_register_in($user)
         ? '<a class="button" href="index.php?page=cd-dvd&tab=new">ثبت رسانه جدید</a>'
         : '';
-    return '<section class="card cd-dvd-surface" data-cd-dvd-surface><div class="cd-dvd-surface-heading"><div><span class="eyebrow">کنترل اموال سازمان</span><h2>سوابق CD/DVD</h2><p>با انتخاب هر گزینه، فهرست سوابق همان گروه نمایش داده می‌شود.</p></div>' . $registerLink . '</div>' . $filtersHtml . '<form class="cd-dvd-surface-search" method="get" action="' . e($baseUrl) . '" data-cd-dvd-filter-form><input type="hidden" name="cd_filter" value="' . e($quick) . '"><label>جست‌وجوی سریع<input name="cd_search" value="' . e($search) . '" placeholder="شماره، نوع اطلاعات یا ثبت‌کننده را بنویسید" autocomplete="off"></label></form><div class="cd-dvd-surface-table"><div class="cd-dvd-surface-head"><span>جهت</span><span>رسانه</span><span>شماره</span><span>نوع رسانه</span><span>تاریخ</span><span>ثبت‌کننده</span></div>' . ($items !== '' ? $items : '<div class="empty-state compact-empty"><strong>رکوردی برای این فیلتر پیدا نشد.</strong></div>') . '</div></section>';
+    return '<link rel="stylesheet" href="assets/traffic-records-1.62.69.css"><section class="card cd-dvd-surface" data-cd-dvd-surface><div class="cd-dvd-surface-heading"><div><span class="eyebrow">کنترل اموال سازمان</span><h2>سوابق CD/DVD</h2><p>با انتخاب هر گزینه، فهرست سوابق همان گروه نمایش داده می‌شود.</p></div>' . $registerLink . '</div>' . $filtersHtml . '<form class="cd-dvd-surface-search" method="get" action="' . e($baseUrl) . '" data-cd-dvd-filter-form><input type="hidden" name="cd_filter" value="' . e($quick) . '"><label>جست‌وجوی سریع<input name="cd_search" value="' . e($search) . '" placeholder="شماره، نوع اطلاعات یا ثبت‌کننده را بنویسید" autocomplete="off"></label></form><div class="cd-dvd-surface-table"><div class="cd-dvd-surface-head"><span>جهت</span><span>شماره برگه خروج</span><span>رسانه</span><span>شماره</span><span>نوع رسانه</span><span>تاریخ</span><span>ثبت‌کننده</span></div>' . ($items !== '' ? $items : '<div class="empty-state compact-empty"><strong>رکوردی برای این فیلتر پیدا نشد.</strong></div>') . '</div></section>';
 }
 
 function cd_dvd_render_page_legacy(array $user): never
@@ -813,6 +814,7 @@ function cd_dvd_render_page(array $user): never
     render_header('کنترل CD/DVD', $user);
     ?>
     <link rel="stylesheet" href="assets/traffic-records-1.62.68.css">
+    <link rel="stylesheet" href="assets/traffic-records-1.62.69.css">
     <section class="cd-dvd-page">
         <header class="cd-dvd-banner">
             <div><span class="eyebrow">ثبت و پیگیری رسانه‌های اطلاعاتی</span><h1>کنترل گردش CD / DVD</h1><p>ثبت ورود و خروج، تاریخچه سریال و گزارش‌گیری یکپارچه</p></div>
@@ -861,7 +863,7 @@ function cd_dvd_render_page(array $user): never
                 <?php if (!$records): ?><div class="empty-state"><h3>رکوردی پیدا نشد.</h3><p>فیلتر دیگری انتخاب کنید یا ثبت جدید را بزنید.</p></div><?php endif; ?></div>
             </section>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.10"></script>
+    <script nonce="<?= e(csp_nonce()) ?>">window.CD_DVD_NEXT = <?= json_encode(['CD' => cd_dvd_next_serial('CD'), 'DVD' => cd_dvd_next_serial('DVD')], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script><script src="assets/cd-dvd.js?v=3.4.11"></script>
     <?php
     render_footer();
     exit;

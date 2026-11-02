@@ -9,4 +9,4 @@ $records=[array_merge($base,['direction'=>'OUT','exit_sheet'=>'شماره 123'])
 $source=file_get_contents(__DIR__.'/../cd-dvd.php');$start=strpos($source,'<div class="cd-dvd-record-table"><div class="cd-dvd-record-head">',strpos($source,'function cd_dvd_render_page(array'));
 $end=strpos($source,'<?php endif; ?></div>',$start)+strlen('<?php endif; ?></div>');
 if (!$start || !$end) throw new Exception('CD table not found');
-echo '<!doctype html><html dir="rtl"><body><section id="cd-dvd-history">';eval('?>'.substr($source,$start,$end-$start));echo '</section></body></html>';
+echo '<!doctype html><html dir="rtl"><body><div class="content-wrap cd-history-wide"><div class="cd-dvd-page"><section id="cd-dvd-history">';eval('?>'.substr($source,$start,$end-$start));echo '</section></div></div></body></html>';
