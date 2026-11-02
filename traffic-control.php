@@ -1062,6 +1062,7 @@ function traffic_render_page(array $user): never
     ?>
     <link rel="stylesheet" href="assets/traffic-records-1.62.68.css">
     <link rel="stylesheet" href="assets/traffic-records-1.62.69.css">
+    <link rel="stylesheet" href="assets/traffic-report-1.62.70.css">
     <section class="traffic-page">
         <header class="cd-dvd-banner">
             <div><span class="eyebrow">ثبت و پیگیری مراجعین و میهمانان</span><h1>کنترل تردد</h1></div>
@@ -1181,17 +1182,16 @@ function traffic_render_page(array $user): never
                     <div class="traffic-report-date-grid">
                         <label>از تاریخ<input type="text" data-jalali name="from_date" required value="<?= e(jalali_date(date('Y-m-d'), false)) ?>"></label>
                         <label>تا تاریخ<input type="text" data-jalali name="to_date" required value="<?= e(jalali_date(date('Y-m-d'), false)) ?>"></label>
+                        <div class="traffic-report-destination-field" role="group" aria-labelledby="traffic-report-destination-label">
+                            <span id="traffic-report-destination-label">مقصد ملاقات</span>
+                            <details class="traffic-destination-dropdown"><summary>انتخاب مقصدهای ملاقات</summary>
+                                <div class="traffic-destination-options">
+                                    <label><input type="checkbox" id="traffic-report-all" name="all_destinations" value="1" checked> همه مقصدها و رکوردهای بدون مقصد</label>
+                                    <?php foreach ($destinations as $destination): ?><label><input type="checkbox" name="destinations[]" value="<?= (int) $destination['id'] ?>" checked><span><?= e($destination['title']) ?><?= empty($destination['is_active']) ? ' (غیرفعال)' : '' ?></span></label><?php endforeach; ?>
+                                </div>
+                            </details>
+                        </div>
                     </div>
-                    <fieldset class="traffic-report-destination-fieldset">
-                        <legend>مقصد ملاقات</legend>
-                        <details class="traffic-destination-dropdown"><summary>انتخاب مقصدهای ملاقات</summary>
-                            <div class="traffic-destination-options">
-                                <label><input type="checkbox" id="traffic-report-all" name="all_destinations" value="1" checked> همه مقصدها و رکوردهای بدون مقصد</label>
-                                <?php foreach ($destinations as $destination): ?><label><input type="checkbox" name="destinations[]" value="<?= (int) $destination['id'] ?>" checked><span><?= e($destination['title']) ?><?= empty($destination['is_active']) ? ' (غیرفعال)' : '' ?></span></label><?php endforeach; ?>
-                            </div>
-                        </details>
-                        <small>فهرست از تنظیمات «مقاصد ملاقات و تأییدکنندگان» خوانده می‌شود؛ مقاصد غیرفعال برای گزارش سوابق نیز قابل انتخاب‌اند.</small>
-                    </fieldset>
                     <input type="hidden" name="fields_present" value="1">
                     <fieldset class="traffic-report-fields"><legend>فیلدهای گزارش تردد</legend>
                         <?php foreach (traffic_report_columns() as $key => $label): ?><label><input type="checkbox" name="fields[]" value="<?= e($key) ?>" checked><span><?= e($label) ?></span></label><?php endforeach; ?>
@@ -1350,7 +1350,7 @@ function traffic_render_page(array $user): never
         </section>
         <?php endif; ?>
     </section>
-    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=14"></script>
+    <script nonce="<?= e(csp_nonce()) ?>" src="assets/traffic-control.js?v=15"></script>
     <?php
     render_footer();
     exit;

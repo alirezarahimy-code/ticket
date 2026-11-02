@@ -196,9 +196,21 @@
     var summary = dropdown ? dropdown.querySelector('summary') : null;
     function updateDestinationSummary() {
         if (!summary) return;
-        if (all.checked) { summary.textContent = 'همه مقصدها و رکوردهای بدون مقصد'; return; }
         var selected = destinations.filter(function (input) { return input.checked; });
-        summary.textContent = selected.length ? selected.map(function (input) { return input.parentNode.textContent.trim(); }).join('، ') : 'انتخاب مقصدهای ملاقات';
+        var text = all.checked ? 'همه مقصدها و رکوردهای بدون مقصد' : (selected.length ? selected.map(function (input) { return input.parentNode.textContent.trim(); }).join('، ') : 'انتخاب مقصدهای ملاقات');
+        summary.textContent = text;
+        summary.title = text;
+    }
+    if (dropdown) {
+        document.addEventListener('click', function (event) {
+            if (dropdown.open && !dropdown.contains(event.target)) dropdown.open = false;
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && dropdown.open) {
+                dropdown.open = false;
+                if (summary) summary.focus();
+            }
+        });
     }
     updateDestinationSummary();
     all.addEventListener('change', function () {
