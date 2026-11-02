@@ -351,11 +351,22 @@ function food_ticket_sort_punches(array $items): array
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
 /** حالت سقف فیش مهمان: «variable» (پیش‌فرض؛ تعداد نفرات داخل ساختمان در بازهٔ زمانی) یا «requested» (جمع درخواست مهمان معاونت‌ها در روز جاری). */
-function food_guest_cap_mode(): string
+function food_guest_cap_mode(bool $fresh = false): string
 {
-    // پیش‌فرض از نسخهٔ ۱.۵۱: حالت متغیر (تعداد افراد داخل ساختمان در بازهٔ زمانی).
-    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'variable') ?? 'variable') : 'variable';
-    return $mode === 'requested' ? 'requested' : 'variable';
+    if ($fresh) {
+        // A long batch must use the persisted setting for each guest, even if
+        // this process or another caller has an old request-scoped cache.
+        $query = db()->prepare('SELECT value FROM settings WHERE `key` = ? LIMIT 1');
+        $query->execute(['food_guest_cap_mode']);
+        $value = $query->fetchColumn();
+        $mode = ($value === false || $value === null) ? 'variable' : trim((string) $value);
+    } else {
+        $mode = function_exists('setting') ? trim((string) (setting('food_guest_cap_mode', 'variable') ?? 'variable')) : 'variable';
+    }
+    if (!in_array($mode, ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت ذخیره‌شدهٔ سقف مهمان نامعتبر است؛ صدور تا اصلاح تنظیم متوقف شد.');
+    }
+    return $mode;
 }
 
 /** نرمال‌سازی ساعت (HH:MM یا HH:MM:SS) به HH:MM:SS؛ اگر معتبر نبود پیش‌فرض. */
@@ -583,7 +594,7 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
         $cardLimit = (int) ($guestCard['daily_limit'] ?? 0);
         $maxGuest = (int) ($config['max_guest_daily'] ?? 0);
         // حالت «متغیر»: سقف از تعداد داخل ساختمان؛ حالت «درخواست مهمان»: سقف = جمع مهمان‌های درخواستی مدیران برای همان روز.
-        $guestMode = food_guest_cap_mode();
+        $guestMode = food_guest_cap_mode(true);
         $variableCap = null;
         if ($guestMode === 'variable') {
             $variableCap = food_ticket_guest_variable_cap($date, $time);

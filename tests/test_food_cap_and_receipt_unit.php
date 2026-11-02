@@ -31,7 +31,7 @@ class ReceiptStmt {
         if (str_contains($this->sql, 'SELECT c.food_name FROM food_orders')) return $GLOBALS['current_food_rows'][$this->params[0]] ?? [];
         return [];
     }
-    public function fetchColumn(int $col=0): mixed { return str_contains($this->sql, 'food_ticket_events') ? $GLOBALS['issued'] : false; }
+    public function fetchColumn(int $col=0): mixed { if (str_contains($this->sql, 'FROM settings')) return $GLOBALS['settings_db'][$this->params[0]] ?? false; return str_contains($this->sql, 'food_ticket_events') ? $GLOBALS['issued'] : false; }
     public function fetch(int $mode=0): array|false { return str_contains($this->sql, 'traffic_visits') ? ['entries'=>0,'early_exits'=>0] : false; }
 }
 class ReceiptDB {

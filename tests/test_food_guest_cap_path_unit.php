@@ -29,6 +29,10 @@ chk(!food_ticket_route_allowed(['permissions'=>['food.guest']], 'guest-cap') && 
 $GLOBALS['dbsettings']=['food_guest_cap_mode'=>'variable'];$GLOBALS['requested']=12;$GLOBALS['issued']=3;$GLOBALS['card_issued']=3;$GLOBALS['card_limit']=0;
 $today=(new DateTimeImmutable('now',new DateTimeZone('Asia/Tehran')))->format('Y-m-d');$item=['date_raw'=>$today,'time_raw'=>'12:30:00','uid'=>'','card'=>'CARDXYZ','row'=>[]];$config=['guest_card_uids'=>'CARDXYZ','max_guest_daily'=>5];$map=[];
 chk(food_ticket_decide_punch($item,$config,$map)['event_type']==='guest_limit','traffic mode blocks when 3 already issued and traffic cap 2');
+chk(food_guest_cap_mode()==='variable','existing process caches variable');$GLOBALS['dbsettings']['food_guest_cap_mode']='requested';
+chk(food_guest_cap_mode()==='variable' && food_ticket_decide_punch($item,$config,$map)['event_type']==='guest','decision reads requested from DB even with stale settings cache');
+$GLOBALS['dbsettings']['food_guest_cap_mode']='bogus';try {food_ticket_decide_punch($item,$config,$map);chk(false,'invalid stored mode');} catch(RuntimeException $e){chk(str_contains($e->getMessage(),'نامعتبر'),'invalid mode does not silently use traffic');}
+$GLOBALS['dbsettings']['food_guest_cap_mode']='variable';
 chk(food_ticket_save_guest_cap_mode('requested')==='requested' && $GLOBALS['dbsettings']['food_guest_cap_mode']==='requested','mode is persisted and read back');
 chk(food_ticket_decide_punch($item,$config,$map)['event_type']==='guest','request cap 12 overrides traffic cap 2 and fallback 5');
 $GLOBALS['issued']=11;chk(food_ticket_decide_punch($item,$config,$map)['event_type']==='guest','12th ticket permitted');
