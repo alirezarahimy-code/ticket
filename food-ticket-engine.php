@@ -441,6 +441,14 @@ function food_ticket_guest_variable_cap(?string $date, ?string $time): ?int
  * سقف کل = تعداد داخل ساختمان در همان لحظه (اگر تردد در دسترس باشد)، وگرنه سقف ثابت قدیمی.
  * فیش‌های قبلاً صادرشده برگردانده نمی‌شوند؛ فقط صدور جدید بسته می‌شود.
  */
+/** Count the same issued/queued guest tickets in both the decision and live panel. */
+function food_ticket_guest_issued_total(string $date): int
+{
+    $query = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND event_type = "guest" AND print_status IN ("pending","printing","printed")');
+    $query->execute([$date]);
+    return (int) $query->fetchColumn();
+}
+
 function food_ticket_guest_cap_reached(int $issuedToday, ?int $insideNow, int $fallbackMax, int $cardIssued, int $cardLimit): bool
 {
     $capActive = $insideNow !== null || $fallbackMax > 0;
@@ -568,15 +576,13 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
     // مهمان
     if (!$user && $guestCard !== null) {
         $guestName = trim((string) ($guestCard['guest_name'] ?? '')) ?: 'مهمان';
-        $guestCountQ = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND event_type = "guest" AND print_status IN ("pending","printing","printed")');
-        $guestCountQ->execute([$date]);
-        $guestCount = (int) $guestCountQ->fetchColumn();
+        $guestCount = food_ticket_guest_issued_total((string) $date);
         $cardCountQ = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND source_card = ? AND event_type = "guest" AND print_status IN ("pending","printing","printed")');
         $cardCountQ->execute([$date, $card]);
         $cardCount = (int) $cardCountQ->fetchColumn();
         $cardLimit = (int) ($guestCard['daily_limit'] ?? 0);
         $maxGuest = (int) ($config['max_guest_daily'] ?? 0);
-                // حالت «متغیر»: سقف از تعداد داخل ساختمان؛ حالت «درخواست مهمان»: سقف = جمع مهمان‌های درخواستی مدیران برای همان روز.
+        // حالت «متغیر»: سقف از تعداد داخل ساختمان؛ حالت «درخواست مهمان»: سقف = جمع مهمان‌های درخواستی مدیران برای همان روز.
         $guestMode = food_guest_cap_mode();
         $variableCap = null;
         if ($guestMode === 'variable') {
@@ -594,7 +600,10 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
                 'event_type' => 'guest_limit',
                 'print' => false,
                 'delete' => true,
-                'payload' => $base + ['full_name' => $guestName, 'food_type' => 'مهمان', 'event_type' => 'guest_limit'],
+                'payload' => $base + ['full_name' => $guestName, 'food_type' => 'مهمان', 'event_type' => 'guest_limit',
+                    'last_error' => ($cardLimit > 0 && $cardCount >= $cardLimit
+                        ? 'سقف مستقل این کارت: ' . $cardCount . ' از ' . $cardLimit . '. ' : '')
+                        . 'سقف کل (' . ($guestMode === 'requested' ? 'جمع درخواست مهمان' : 'کنترل تردد') . '): ' . $guestCount . ' از ' . ($variableCap ?? $maxGuest) . '.'],
             ];
         }
         return [

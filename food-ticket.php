@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.48';
+const FOOD_TICKET_PANEL_VERSION = '1.37.49';
 
 function food_ticket_panel_version(): string
 {
@@ -4025,6 +4025,18 @@ function food_ticket_api_delete_guest_card(int $id, int $userId, string $cardNum
     food_ticket_sync_guest_card_config($userId);
 }
 
+/** Save and read back only the cap mode, independently of the other guest settings. */
+function food_ticket_save_guest_cap_mode(string $mode): string
+{
+    if (!in_array($mode, ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت سقف مهمان معتبر نیست.');
+    }
+    save_setting('food_guest_cap_mode', $mode);
+    if (function_exists('setting_forget_cache')) setting_forget_cache();
+    if (food_guest_cap_mode() !== $mode) throw new RuntimeException('ذخیرهٔ حالت سقف مهمان تأیید نشد.');
+    return $mode;
+}
+
 function food_ticket_api_save_config(array $data, array $user): void
 {
     $dbFields = ['enabled', 'attendance', 'attendancePath', 'attendancePassword', 'attendanceTable', 'poll_seconds', 'pollSeconds', 'cutSourceRows', 'clear', 'clear_paths'];
@@ -4660,6 +4672,12 @@ function food_ticket_api_handle(string $route, array $user): never
                 'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff(),
             ]);
         }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'guest-cap') {
+            // The mode is independent of the rest of the guest form and its optional fields.
+            $body = food_ticket_api_body();
+            $mode = food_ticket_save_guest_cap_mode((string) ($body['mode'] ?? ''));
+            food_ticket_api_json(['ok' => true, 'mode' => $mode]);
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
             // سقف فعلی: یا جمع درخواست مهمان معاونت‌ها، یا تعداد داخل ساختمان
             $nowTime = date('H:i:s');
@@ -4675,11 +4693,18 @@ function food_ticket_api_handle(string $route, array $user): never
                 $insideNow = null;
             }
             $guestCfg = food_ticket_config();
+            try {
+                $issued = food_ticket_guest_issued_total($today);
+            } catch (Throwable $e) {
+                $issued = null;
+            }
             food_ticket_api_json([
                 'mode' => food_guest_cap_mode(),
                 'time' => substr($nowTime, 0, 5),
                 'cap' => $capNow,
                 'requested' => $requested,
+                'issued' => $issued,
+                'remaining' => $issued === null || $capNow === null ? null : max(0, $capNow - $issued),
                 'inside' => $insideNow,
                 'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
             ]);
