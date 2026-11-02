@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.47';
+const FOOD_TICKET_PANEL_VERSION = '1.37.48';
 
 function food_ticket_panel_version(): string
 {
@@ -3597,15 +3597,29 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
         }
         $fromDate = $toDate = $today;
     }
-    $query = db()->prepare(
-        'SELECT id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
+    // Preserve the receipt snapshot; show the current order separately when available.
+    $baseSql = 'SELECT id, user_id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
         . 'event_type AS result, print_status' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
         . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group, source_uid, '
         . 'CASE WHEN source_uid = \'manual-attendance\' THEN source_payload ELSE NULL END AS manual_source_payload '
-        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown" ORDER BY id DESC'
-    );
-    $query->execute([$fromDate, $toDate]);
-    return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete): array {
+        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown"';
+    $comparisonAvailable = true;
+    try {
+        $query = db()->prepare('SELECT e.*, o.id AS current_order_id, o.status AS current_order_status, c.food_name AS current_order_food '
+            . 'FROM (' . $baseSql . ') e '
+            . "LEFT JOIN food_orders o ON o.employee_id = e.user_id AND o.food_date = e.attendance_date AND o.meal_type = 'lunch' "
+            . 'LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id '
+            . 'LEFT JOIN food_catalog c ON c.id = i.food_id ORDER BY e.id DESC');
+        $query->execute([$fromDate, $toDate]);
+        $monitorRows = $query->fetchAll();
+    } catch (Throwable $e) {
+        app_error_log('[food-monitoring] order comparison unavailable: ' . $e->getMessage());
+        $comparisonAvailable = false;
+        $query = db()->prepare($baseSql . ' ORDER BY id DESC');
+        $query->execute([$fromDate, $toDate]);
+        $monitorRows = $query->fetchAll();
+    }
+    return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete, $comparisonAvailable): array {
         $rawResult = (string) ($row['result'] ?? '');
         $rawStatus = (string) ($row['print_status'] ?? 'not_printed');
         $resultLabel = food_ticket_label($rawResult);
@@ -3642,6 +3656,14 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
             'pc_code' => (string) ($row['pc_code'] ?? ''),
             'full_name' => (string) ($row['full_name'] ?? ''),
             'food_type' => (string) ($row['food_type'] ?? ''),
+            // Current order is not evidence that the original paper was wrong: it can change later.
+            'current_order_food' => $comparisonAvailable && (string) ($row['current_order_status'] ?? '') === 'active' ? (string) ($row['current_order_food'] ?? '') : '',
+            'current_order_state' => !$comparisonAvailable ? 'unavailable'
+                : (!str_starts_with((string) ($row['ticket_key'] ?? ''), 'food:') ? 'not_applicable'
+                    : ((int) ($row['current_order_id'] ?? 0) <= 0 ? 'missing'
+                        : ((string) ($row['current_order_status'] ?? '') !== 'active' ? 'cancelled'
+                            : ((string) ($row['current_order_food'] ?? '') === '' ? 'unavailable'
+                                : ((string) ($row['food_type'] ?? '') === (string) $row['current_order_food'] ? 'same' : 'different'))))),
             'result' => $resultLabel,
             'print_status' => $rawStatus,
             'print_state_label' => $rawStatus === 'held_absent' ? 'متوقف — غایب اعلام‌شده' : '',
@@ -3654,7 +3676,7 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
             'source_deleted' => $hasSourceDelete ? (bool) ((int) ($row['source_deleted'] ?? 0) === 1) : null,
             'source_delete_note' => $hasSourceDelete ? (string) ($row['source_delete_note'] ?? '') : '',
         ];
-    }, $query->fetchAll());
+    }, $monitorRows);
 }
 
 
