@@ -79,7 +79,7 @@ def test_forms_render_approver_select_with_data_approvers():
     assert 'select name="approved_by" id="traffic-approved-by"' in source
     assert 'select name="approved_by" id="traffic-edit-approved-by"' in source
     assert "data-approvers=" in source
-    assert 'assets/traffic-control.js?v=12' in source
+    assert 'assets/traffic-control.js?v=13' in source
     script = read("assets/traffic-control.js")
     assert "function parseApprovers(option)" in script
     assert "traffic-edit-approved-by" in script

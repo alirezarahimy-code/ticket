@@ -328,7 +328,9 @@ function printCdDvdHistory() {
     const surfaceTable = table.classList.contains('cd-dvd-surface-table');
     const header = table.querySelector(surfaceTable ? '.cd-dvd-surface-head' : '.cd-dvd-record-head');
     const rowSelector = surfaceTable ? '.cd-dvd-surface-row' : '.cd-dvd-record-row';
-    const headers = header ? Array.from(header.children).map(function (cell) { return '<th>' + cell.innerHTML + '</th>'; }).join('') : '';
+    const headerCells = header ? Array.from(header.children) : [];
+    if (!surfaceTable && headerCells.length) headerCells.pop(); // عملیات در نسخهٔ چاپی حذف می‌شود.
+    const headers = header ? headerCells.map(function (cell) { return '<th>' + cell.innerHTML + '</th>'; }).join('') : '';
     const rows = Array.from(table.querySelectorAll(rowSelector)).map(function (row) {
         const cells = surfaceTable ? Array.from(row.children) : Array.from(row.children).slice(0, -1);
         return '<tr>' + cells.map(function (cell) { return '<td>' + cell.innerHTML + '</td>'; }).join('') + '</tr>';
