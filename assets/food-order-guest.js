@@ -84,28 +84,33 @@
         : '<div class="alert info" role="status">برای ثبت درخواست جدید باید مدیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
     var rows = state.items.map(function (r) {
       var actions = [];
-      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + r.id + '">ویرایش</button>');
-      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>');
-      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + r.id + '">حذف</button>');
-      var action = actions.length ? '<div class="fg-request-actions">' + actions.join(' ') + '</div>' : '';
+      var id = Number(r.id);
+      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + id + '">ویرایش</button>');
+      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + id + '">لغو</button>');
+      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + id + '">حذف</button>');
+      var action = actions.length ? actions.join(' ') : '—';
       var status = r.status === 'cancelled' ? 'لغو شده' : 'فعال';
-      return '<li class="fg-request-item">'
-        + '<div class="fg-request-heading"><strong>' + esc(faDigits(r.request_jalali)) + '</strong>'
-        + '<span class="fg-request-status' + (r.status === 'cancelled' ? ' is-cancelled' : '') + '">' + status + '</span></div>'
-        + '<dl class="fg-request-details">'
-        + '<div><dt>سازمان / شرکت</dt><dd>' + esc(r.organization) + '</dd></div>'
-        + '<div><dt>تعداد مهمان</dt><dd>' + esc(faDigits(r.guest_count)) + '</dd></div>'
-        + '<div><dt>معاونت</dt><dd>' + esc(r.deputy_name || '—') + '</dd></div>'
-        + '<div><dt>درخواست‌دهنده</dt><dd>' + esc(r.requester_name) + '</dd></div>'
-        + '<div><dt>ثبت‌کننده</dt><dd>' + esc(r.created_by_name || '—') + '</dd></div>'
-        + '</dl>' + action + '</li>';
+      return '<tr class="fg-request-item">'
+        + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
+        + '<td>' + esc(r.deputy_name || '—') + '</td>'
+        + '<td>' + esc(r.organization) + '</td>'
+        + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
+        + '<td>' + esc(r.requester_name) + '</td>'
+        + '<td>' + esc(r.created_by_name || '—') + '</td>'
+        + '<td>' + esc(r.note || '—') + '</td>'
+        + '<td>' + status + '</td>'
+        + '<td><div class="fg-request-actions">' + action + '</div></td></tr>';
     }).join('');
     var table = state.loading
       ? '<p class="muted fg-request-empty">در حال دریافت درخواست‌های شما…</p>'
       : state.loadError
         ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
         : state.items.length
-      ? '<ul class="fg-request-list" aria-label="درخواست‌های مهمان من">' + rows + '</ul>'
+      ? '<div class="fg-request-list" role="region" tabindex="0" aria-label="درخواست‌های مهمان من؛ جدول قابل پیمایش">'
+        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">معاونت</th>'
+        + '<th scope="col">سازمان / شرکت</th><th scope="col">تعداد</th><th scope="col">درخواست‌دهنده</th>'
+        + '<th scope="col">ثبت‌کننده</th><th scope="col">یادداشت</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>'
+        + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
         + (state.items.length >= 300 ? '<p class="muted fg-request-empty">حداکثر ۳۰۰ درخواست نخست نمایش داده می‌شود.</p>' : '')
       : '<p class="muted fg-request-empty">درخواستی برای امروز یا روزهای آینده ثبت نکرده‌اید.</p>';
     var deadlineNotice = state.sameDayOpen === null

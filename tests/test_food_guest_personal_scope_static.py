@@ -21,6 +21,6 @@ def test_personal_and_privileged_guest_routes_are_isolated():
 
 def test_guest_assets_cache_busted_and_css_mirrored():
     text = (ROOT / 'food-order.php').read_text(encoding='utf-8')
-    assert 'assets/food-order.css?v=18' in text
-    assert 'assets/food-order-guest.js?v=7' in text
+    assert 'assets/food-order.css?v=19' in text
+    assert 'assets/food-order-guest.js?v=8' in text
     assert (ROOT / 'assets/food-order.css').read_bytes() == (ROOT / 'food-ticket-web/assets/food-order.css').read_bytes()
