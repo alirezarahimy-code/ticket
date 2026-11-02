@@ -16,6 +16,7 @@
     todayJalali: '',
     sameDayCutoff: '09:30',
     sameDayOpen: null,
+    loading: false,
     loadError: '',
     formError: '',
     saving: false,
@@ -86,23 +87,27 @@
       if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + r.id + '">ویرایش</button>');
       if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>');
       if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + r.id + '">حذف</button>');
-      var action = actions.length ? actions.join(' ') : '<span class="muted">—</span>';
-      var status = r.status === 'cancelled' ? '<span class="muted">لغو شده</span>' : 'فعال';
-      return '<tr>'
-        + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
-        + '<td>' + esc(r.deputy_name || '—') + '</td>'
-        + '<td>' + esc(r.organization) + '</td>'
-        + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
-        + '<td>' + esc(r.requester_name) + '</td>'
-        + '<td>' + esc(r.created_by_name || '—') + '</td>'
-        + '<td>' + status + '</td>'
-        + '<td>' + action + '</td></tr>';
+      var action = actions.length ? '<div class="fg-request-actions">' + actions.join(' ') + '</div>' : '';
+      var status = r.status === 'cancelled' ? 'لغو شده' : 'فعال';
+      return '<li class="fg-request-item">'
+        + '<div class="fg-request-heading"><strong>' + esc(faDigits(r.request_jalali)) + '</strong>'
+        + '<span class="fg-request-status' + (r.status === 'cancelled' ? ' is-cancelled' : '') + '">' + status + '</span></div>'
+        + '<dl class="fg-request-details">'
+        + '<div><dt>سازمان / شرکت</dt><dd>' + esc(r.organization) + '</dd></div>'
+        + '<div><dt>تعداد مهمان</dt><dd>' + esc(faDigits(r.guest_count)) + '</dd></div>'
+        + '<div><dt>معاونت</dt><dd>' + esc(r.deputy_name || '—') + '</dd></div>'
+        + '<div><dt>درخواست‌دهنده</dt><dd>' + esc(r.requester_name) + '</dd></div>'
+        + '<div><dt>ثبت‌کننده</dt><dd>' + esc(r.created_by_name || '—') + '</dd></div>'
+        + '</dl>' + action + '</li>';
     }).join('');
-    var table = state.items.length
-      ? '<div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr>'
-        + '<th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>مدیر ثبت‌کننده</th><th>وضعیت</th><th>عملیات</th>'
-        + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
-      : '<p class="muted">درخواست فعالی برای امروز یا روزهای آینده ثبت نشده است.</p>';
+    var table = state.loading
+      ? '<p class="muted fg-request-empty">در حال دریافت درخواست‌های شما…</p>'
+      : state.loadError
+        ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
+        : state.items.length
+      ? '<ul class="fg-request-list" aria-label="درخواست‌های مهمان من">' + rows + '</ul>'
+        + (state.items.length >= 300 ? '<p class="muted fg-request-empty">حداکثر ۳۰۰ درخواست نخست نمایش داده می‌شود.</p>' : '')
+      : '<p class="muted fg-request-empty">درخواستی برای امروز یا روزهای آینده ثبت نکرده‌اید.</p>';
     var deadlineNotice = state.sameDayOpen === null
       ? '<div class="alert info" role="status">در حال بررسی مهلت ثبت درخواست مهمان برای امروز…</div>'
       : state.sameDayOpen
@@ -126,7 +131,7 @@
       + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.canCreate) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
-      + '<h3 style="margin-top:20px">درخواست‌های ثبت‌شدهٔ مهمان (از امروز به بعد)</h3>'
+      + '<h3 class="fg-request-title">درخواست‌های مهمان من (از امروز به بعد)</h3>'
       + table
       + '</div>';
     if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(dialog);
@@ -170,8 +175,10 @@
       state.sameDayCutoff = data.same_day_cutoff || '09:30';
       state.sameDayOpen = data.same_day_open !== false;
     } catch (e) {
+      state.items = [];
       state.loadError = e.message;
     }
+    state.loading = false;
     readForm();
     if (!state.form.request_date && state.todayJalali && state.sameDayOpen) state.form.request_date = state.todayJalali;
     render();
@@ -266,6 +273,10 @@
   function open() {
     ensureDialog();
     state.editingId = 0;
+    state.items = [];
+    state.loading = true;
+    state.loadError = '';
+    state.sameDayOpen = null;
     state.canCreate = false;
     state.canCreateWithoutDeputy = false;
     state.myDeputy = null;

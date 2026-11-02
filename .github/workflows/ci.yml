@@ -35,5 +35,8 @@ jobs:
     - name: Run ticket SLA unit tests
       run: php tests/test_ticket_sla_unit.php
 
+    - name: Run guest order personal scope tests
+      run: php tests/test_food_guest_personal_scope.php
+
     - name: Run standalone worker logic tests
       run: php tests/test_food_ticket_logic.php

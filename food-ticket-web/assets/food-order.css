@@ -174,3 +174,20 @@
 
 /* Separate lunch and dinner without changing the existing calendar or form layout. */
 .fo-meal-switch{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+/* فهرست شخصی درخواست مهمان: فضای محدود، خوانا و مستقل از جدول‌های سراسری. */
+.fg-request-title { margin:18px 0 9px; font-size:14px; }
+.fg-request-list { list-style:none; margin:0; padding:0; max-height:min(36vh, 270px); overflow-y:auto; overscroll-behavior:contain; display:grid; align-content:start; gap:8px; }
+.fg-request-item { min-width:0; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font-size:12px; }
+.fg-request-heading { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.fg-request-status { padding:2px 8px; border-radius:999px; background:#ecfdf3; color:#027a48; font-size:11px; }
+.fg-request-status.is-cancelled { background:#fef3f2; color:#b42318; }
+.fg-request-details { margin:8px 0 0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:5px 12px; }
+.fg-request-details div { display:flex; flex-wrap:wrap; gap:2px 5px; min-width:0; }
+.fg-request-details dt { color:var(--muted); }
+.fg-request-details dt::after { content:':'; }
+.fg-request-details dd { margin:0; min-width:0; overflow-wrap:anywhere; }
+.fg-request-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.fg-request-actions .button { padding:5px 9px; font-size:11px; }
+.fg-request-empty { margin:8px 0; font-size:12px; }
+@media(max-width:400px) { .fg-request-details { grid-template-columns:minmax(0,1fr); } }

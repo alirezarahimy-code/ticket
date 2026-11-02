@@ -194,7 +194,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn("index.php?page=food-order", main_index)
         self.assertNotIn("'food-order' => 'foodorder.self'", main_index)
         php = read("food-order.php")
-        self.assertIn('href="assets/food-order.css?v=17"', php)
+        self.assertIn('href="assets/food-order.css?v=18"', php)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', php)
         self.assertIn('src="assets/food-order.js?v=21"', php)
         employee_css = read("assets/food-order.css")

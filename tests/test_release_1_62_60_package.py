@@ -27,9 +27,12 @@ class ReleasePackageTest(unittest.TestCase):
                         'actions/bulk-actions.php', 'lib/auth-scope.php', 'lib/notify-users.php',
                         'lib/tickets-sla.php', 'cron/ticket_auto_close.php', 'index.php', 'help-guide.php'):
                 self.assertIn(rel, manifest['files'])
-            for rel in manifest['files']:
-                target = ROOT / ('downloads/' + rel if rel.startswith('CHANGE-REPORT-') else rel)
-                self.assertEqual(archive.read('files/' + rel), target.read_bytes(), rel)
+            # Once a newer version is under development, 1.62.60 is a historical
+            # immutable archive. Its checksum below protects it independently of HEAD.
+            if (ROOT / 'VERSION').read_text().strip() == '1.62.60':
+                for rel in manifest['files']:
+                    target = ROOT / ('downloads/' + rel if rel.startswith('CHANGE-REPORT-') else rel)
+                    self.assertEqual(archive.read('files/' + rel), target.read_bytes(), rel)
         self.assertEqual(hashlib.sha256(PACKAGE.read_bytes()).hexdigest(),
                          (PACKAGE.parent / (PACKAGE.name + '.sha256')).read_text().split()[0])
 
