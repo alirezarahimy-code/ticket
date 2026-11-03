@@ -1,0 +1,20 @@
+/* Scoped to the CD/DVD history only: no effect on the traffic grids. */
+#cd-dvd-history .cd-dvd-record-table { overflow-x: auto; }
+#cd-dvd-history .cd-dvd-record-head,
+#cd-dvd-history .cd-dvd-record-row {
+    min-width: 1450px;
+    grid-template-columns: 55px 150px 75px 130px 90px 130px minmax(240px, 1fr) 120px 150px 225px;
+}
+#cd-dvd-history .cd-dvd-record-head > span,
+#cd-dvd-history .cd-dvd-record-row > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#cd-dvd-history .cd-dvd-record-row > .actions { display: flex; flex-wrap: nowrap; align-items: center; gap: 4px; overflow: visible; }
+#cd-dvd-history .cd-dvd-record-row > .actions form { display: inline-flex; margin: 0; flex: 0 0 auto; }
+#cd-dvd-history .cd-dvd-record-row > .actions .mini-button { white-space: nowrap; flex: 0 0 auto; }
+.traffic-page-controls { display: flex; gap: 8px; margin-top: 12px; }
+.traffic-page-controls button { padding: 7px 14px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; cursor: pointer; }
+.traffic-page-controls button:disabled { opacity: .45; cursor: default; }
+.traffic-report-preview { margin-top: 24px; }
+.traffic-report-table-wrap { max-width: 100%; overflow-x: auto; }
+.traffic-report-table { min-width: 1500px; border-collapse: collapse; width: 100%; }
+.traffic-report-table th, .traffic-report-table td { padding: 8px; border: 1px solid #dbe4ec; text-align: right; white-space: nowrap; }
+.traffic-report-table th { background: #f2f7fa; }

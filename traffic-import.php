@@ -945,7 +945,7 @@ function traffic_import_apply_plan_in_transaction(array $plan, int $actorId, PDO
     if (!$pdo->inTransaction()) {
         throw new RuntimeException('تراکنش ثبت سوابق باز نیست.');
     }
-    $insert = $pdo->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, phone, company, entry_time, exit_time, no_visit, with_car, with_mobile, meeting_with, approved_by, description, is_notice, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    $insert = $pdo->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, phone, company, entry_time, exit_time, no_visit, with_car, with_mobile, meeting_with, destination_id, approved_by, description, is_notice, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, (SELECT id FROM traffic_destinations WHERE title = ? LIMIT 1), ?, ?, ?, ?)');
     foreach ((array) ($plan['rows'] ?? []) as $row) {
         if (!is_array($row) || ($row['action'] ?? '') !== 'insert') {
             continue;
@@ -963,6 +963,7 @@ function traffic_import_apply_plan_in_transaction(array $plan, int $actorId, PDO
             (int) ($row['with_car'] ?? 0),
             (int) ($row['with_mobile'] ?? 0),
             trim((string) ($row['meeting_with'] ?? '')) !== '' ? (string) $row['meeting_with'] : null,
+            trim((string) ($row['meeting_with'] ?? '')),
             trim((string) ($row['approved_by'] ?? '')) !== '' ? (string) $row['approved_by'] : null,
             trim((string) ($row['description'] ?? '')) !== '' ? (string) $row['description'] : null,
             (int) ($row['is_notice'] ?? 0),

@@ -23,6 +23,7 @@
     orders: [],
     error: '',
     modalDate: '',
+    selectedItemId: 0,
     recipientReady: false,
     flowStage: 'choice',
     flowDismissed: false,
@@ -532,7 +533,9 @@
     var selfOrder = state.targetMode === 'self' ? existingOrder : null;
     var showMeals = state.targetMode === 'self' ? hasNational : (state.targetId > 0 && normalizedDigits(state.nationalCode).length === 10);
     var radios = showMeals ? items.map(function (item, index) {
-      var checked = existingOrder ? Number(existingOrder.food_id) === Number(item.food_id) : index === 0;
+      // Keep the user's explicit selection through unrelated async re-renders.
+      var checked = state.selectedItemId > 0 ? Number(item.item_id) === state.selectedItemId
+        : (existingOrder ? Number(existingOrder.food_id) === Number(item.food_id) : index === 0);
       var menuNo = Number(item.sort_order) > 0 ? Number(item.sort_order) : index + 1;
       return '<label class="fo-meal-option"><span class="fo-meal-menu">منو ' + esc(faDigits(menuNo)) + '</span><input type="radio" name="fo-food" value="' + Number(item.item_id) + '" ' + (checked ? 'checked' : '') + '><span class="fo-meal-name">' + esc(item.food_name) + '</span></label>';
     }).join('') : '';
@@ -606,6 +609,7 @@
     if (!Cal.jalaliDateFromIso(iso)) return;
     state.proxyCancelConfirmingOrderId = 0;
     state.modalDate = iso;
+    state.selectedItemId = 0;
     render();
   }
 
@@ -614,6 +618,7 @@
     if (dialog && dialog.open) dialog.close();
     state.proxyCancelConfirmingOrderId = 0;
     state.modalDate = '';
+    state.selectedItemId = 0;
     render();
   }
 
@@ -816,6 +821,7 @@
     try {
       var response = await request('order', null, { method: 'POST', body: JSON.stringify(body) });
       var notice = response.message || 'سفارش ثبت شد.';
+      if (!isProxy && response.food_name) notice += ' غذای ثبت‌شده: ' + String(response.food_name);
       if (isProxy) {
         var foodName = response.food_name || selectedFoodName;
         var jalaliDate = isoToJalali(state.modalDate);
@@ -1026,6 +1032,12 @@
     }
     var dayButton = event.target.closest('[data-fo-day]');
     if (dayButton) openDay(dayButton.dataset.foDay, dayButton.dataset.currentMonth === '1');
+  });
+
+  root.addEventListener('change', function (event) {
+    if (event.target && event.target.name === 'fo-food' && event.target.checked && state.modalDate) {
+      state.selectedItemId = Number(event.target.value) || 0;
+    }
   });
 
   root.addEventListener('focusin', function (event) {

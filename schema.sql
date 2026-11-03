@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     with_car TINYINT(1) NOT NULL DEFAULT 0,
     with_mobile TINYINT(1) NOT NULL DEFAULT 0,
     meeting_with VARCHAR(190) DEFAULT NULL,
+    destination_id INT UNSIGNED DEFAULT NULL,
     approved_by VARCHAR(190) DEFAULT NULL,
     description TEXT,
     is_notice TINYINT(1) NOT NULL DEFAULT 0,
@@ -186,6 +187,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_traffic_national_code (national_code),
     KEY idx_traffic_visit_date (visit_date),
+    KEY idx_traffic_destination_id (destination_id),
     KEY idx_traffic_serial (serial_no),
     KEY idx_traffic_created_by (created_by),
     CONSTRAINT fk_traffic_visits_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL

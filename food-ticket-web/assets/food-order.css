@@ -174,3 +174,16 @@
 
 /* Separate lunch and dinner without changing the existing calendar or form layout. */
 .fo-meal-switch{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+
+/* فهرست شخصی درخواست مهمان: فضای محدود، خوانا و مستقل از جدول‌های سراسری. */
+/* A single compact row per request. The table scrolls horizontally on narrow screens. */
+#fg-dialog.fo-modal { width:min(1100px,calc(100vw - 24px)); max-width:calc(100vw - 24px); }
+.fg-request-title { margin:18px 0 9px; font-size:14px; }
+.fg-request-list { max-height:min(36vh, 270px); overflow:auto; overscroll-behavior:contain; border:1px solid var(--line); border-radius:8px; }
+.fg-request-table { width:100%; border-collapse:collapse; font-size:11px; line-height:1.4; }
+.fg-request-table th, .fg-request-table td { display:table-cell; padding:6px 8px; text-align:right; vertical-align:middle; white-space:nowrap; word-break:normal; overflow-wrap:normal; border-bottom:1px solid var(--line); }
+.fg-request-table th { position:sticky; top:0; z-index:1; background:#f3f6f5; font-weight:700; }
+.fg-request-table tr:last-child td { border-bottom:0; }
+.fg-request-actions { display:flex; flex-wrap:nowrap; gap:4px; }
+.fg-request-actions .button { flex:none; padding:4px 7px; font-size:11px; line-height:1.4; white-space:nowrap; }
+.fg-request-empty { margin:8px 0; font-size:12px; }

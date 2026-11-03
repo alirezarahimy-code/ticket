@@ -37,7 +37,7 @@ if (is_file(__DIR__ . '/food-ticket-import.php')) {
 
 /** نسخهٔ پنل (food-ticket-web/index.html). پنل همان عدد را دارد و اگر مرورگر
  *  نسخهٔ کش‌شدهٔ قدیمی را نشان دهد، خودش هشدار می‌دهد. */
-const FOOD_TICKET_PANEL_VERSION = '1.37.46';
+const FOOD_TICKET_PANEL_VERSION = '1.37.51';
 
 function food_ticket_panel_version(): string
 {
@@ -3103,7 +3103,7 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
     $orderRows = [];
     try {
         // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
-        $orderRows = food_ticket_api_orders($fromDate, $toDate);
+        $orderRows = food_ticket_api_orders($fromDate, '', $toDate);
     } catch (Throwable $e) {
         $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
     }
@@ -3225,7 +3225,7 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
     }
 
     return [
-        'active_orders_all_meals' => (int) ($counts['total_orders'] ?? 0),
+        'active_orders_all_meals' => (int) ($counts['all_meal_orders'] ?? 0),
         'active_lunch_orders' => (int) ($counts['lunch_orders'] ?? 0),
         'active_dinner_orders' => (int) ($counts['dinner_orders'] ?? 0),
         'active_other_meal_orders' => (int) ($counts['other_meal_orders'] ?? 0),
@@ -3258,7 +3258,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     }
 
     $pdo = db();
-    $counts = ['total_orders' => 0, 'lunch_orders' => 0, 'dinner_orders' => 0, 'other_meal_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0, 'legacy_printed' => 0];
+    $counts = ['total_orders' => 0, 'all_meal_orders' => 0, 'cancelled_orders' => 0, 'order_rows' => 0, 'lunch_orders' => 0, 'dinner_orders' => 0, 'other_meal_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0, 'legacy_printed' => 0];
     $printedPeople = [];
     $sourceNotes = [];
 
@@ -3266,10 +3266,11 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     try {
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active"');
         $stmt->execute([$from, $to]);
-        $counts['total_orders'] = (int) $stmt->fetchColumn();
+        $counts['all_meal_orders'] = (int) $stmt->fetchColumn();
     } catch (Throwable $e) {
         $sourceNotes[] = 'سفارشها: ' . $e->getMessage();
         app_error_log('[aggregate-report] orders: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
     try {
         $mealStmt = $pdo->prepare('SELECT meal_type, COUNT(*) AS c FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active" GROUP BY meal_type');
@@ -3287,7 +3288,15 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     } catch (Throwable $e) {
         $sourceNotes[] = 'تفکیک وعده‌های سفارش: ' . $e->getMessage();
         app_error_log('[aggregate-report] meal breakdown: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
+
+    // The main comparable count is current active lunch orders; keep all-meals separate.
+    $summary = food_order_report_summary($from, $to, 'lunch');
+    $counts['total_orders'] = $summary['active'];
+    $counts['lunch_orders'] = $summary['active'];
+    $counts['cancelled_orders'] = $summary['cancelled'];
+    $counts['order_rows'] = $summary['total'];
 
     // ۲) فیش مهمان چاپشده و ۳) فیش چاپشدهٔ قطعی پرسنل — از رویدادهای پایش
     try {
@@ -3333,6 +3342,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     } catch (Throwable $e) {
         $sourceNotes[] = 'فیشهای چاپشده: ' . $e->getMessage();
         app_error_log('[aggregate-report] events: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
 
     // ۴) غایبین (سفارش دارند ولی فیش نگرفتند)
@@ -3351,6 +3361,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     } catch (Throwable $e) {
         $sourceNotes[] = 'غایبین: ' . $e->getMessage();
         app_error_log('[aggregate-report] absent: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
 
     $counts['absent'] = count($absentPeople);
@@ -3413,10 +3424,12 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
     $c = $report['counts'];
     $rows = [];
     $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
-    $rows[] = ['تعداد کل سفارشها (همهٔ وعده‌ها)', $c['total_orders'], 'سفارش ناهارِ مبنای تطبیق', $c['lunch_orders']];
+    $rows[] = ['سفارش فعال ناهار', $c['total_orders'], 'لغوشدهٔ ناهار', $c['cancelled_orders']];
+    $rows[] = ['مجموع ردیف‌های ناهار', $c['order_rows'], 'سفارش فعال همهٔ وعده‌ها', $c['all_meal_orders']];
     $rows[] = ['سفارش شام (خارج از تطبیق چاپ)', $c['dinner_orders'], 'سایر وعده‌ها', $c['other_meal_orders']];
     $rows[] = ['فیش مهمان چاپشده', $c['guest_printed'], 'فیش چاپشده قطعی', $c['printed_final']];
-    $rows[] = ['تعداد غایبین', $c['absent'], 'غایب موردانتظار', $c['expected_absent'] ?? 0];
+    $rows[] = ['تعداد غایبین', $c['absent'], 'تفریق تخمینی، نه تطبیق فردی', $c['expected_absent'] ?? 0];
+    $rows[] = ['فیش چاپی به‌تنهایی تأیید مستقل تحویل فیزیکی غذا نیست.'];
     $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
     $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
     $rows[] = [];
@@ -3509,7 +3522,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
             "SELECT punch_date, national_code, personnel_code FROM food_ticket_events
              WHERE punch_date BETWEEN ? AND ?
                AND print_status = 'printed'
-              AND event_type IN ('printed','print','guest')"
+              AND event_type IN ('printed','print')"
         );
         $q->execute([$fromDate, $toDate]);
         foreach ($q->fetchAll() as $row) {
@@ -3525,6 +3538,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         }
     } catch (Throwable $e) {
         app_error_log('[absent] events: ' . $e->getMessage());
+        throw new RuntimeException('وضعیت چاپ برای محاسبهٔ فیش‌های دریافت‌نشده در دسترس نیست.', 0, $e);
     }
 
     // «غایب اعلام‌شده»: کسانی که برای همان تاریخ در فرم گروه، غایب ثبت شده‌اند
@@ -3597,15 +3611,29 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
         }
         $fromDate = $toDate = $today;
     }
-    $query = db()->prepare(
-        'SELECT id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
+    // Preserve the receipt snapshot; show the current order separately when available.
+    $baseSql = 'SELECT id, user_id, punch_date AS attendance_date, punch_time AS attendance_time, personnel_code AS pc_code, full_name, food_type, '
         . 'event_type AS result, print_status' . $deliveryCols . $sourceDeleteCols . ', ticket_key, last_error, '
         . 'CASE WHEN source_payload LIKE \'%"group_id"%\' THEN 1 ELSE 0 END AS from_group, source_uid, '
         . 'CASE WHEN source_uid = \'manual-attendance\' THEN source_payload ELSE NULL END AS manual_source_payload '
-        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown" ORDER BY id DESC'
-    );
-    $query->execute([$fromDate, $toDate]);
-    return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete): array {
+        . 'FROM food_ticket_events WHERE punch_date BETWEEN ? AND ? AND event_type <> "unknown"';
+    $comparisonAvailable = true;
+    try {
+        $query = db()->prepare('SELECT e.*, o.id AS current_order_id, o.status AS current_order_status, c.food_name AS current_order_food '
+            . 'FROM (' . $baseSql . ') e '
+            . "LEFT JOIN food_orders o ON o.employee_id = e.user_id AND o.food_date = e.attendance_date AND o.meal_type = 'lunch' "
+            . 'LEFT JOIN food_calendar_items i ON i.id = o.calendar_item_id '
+            . 'LEFT JOIN food_catalog c ON c.id = i.food_id ORDER BY e.id DESC');
+        $query->execute([$fromDate, $toDate]);
+        $monitorRows = $query->fetchAll();
+    } catch (Throwable $e) {
+        app_error_log('[food-monitoring] order comparison unavailable: ' . $e->getMessage());
+        $comparisonAvailable = false;
+        $query = db()->prepare($baseSql . ' ORDER BY id DESC');
+        $query->execute([$fromDate, $toDate]);
+        $monitorRows = $query->fetchAll();
+    }
+    return array_map(static function (array $row) use ($hasDelivery, $hasSourceDelete, $comparisonAvailable): array {
         $rawResult = (string) ($row['result'] ?? '');
         $rawStatus = (string) ($row['print_status'] ?? 'not_printed');
         $resultLabel = food_ticket_label($rawResult);
@@ -3642,7 +3670,16 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
             'pc_code' => (string) ($row['pc_code'] ?? ''),
             'full_name' => (string) ($row['full_name'] ?? ''),
             'food_type' => (string) ($row['food_type'] ?? ''),
+            // Current order is not evidence that the original paper was wrong: it can change later.
+            'current_order_food' => $comparisonAvailable && (string) ($row['current_order_status'] ?? '') === 'active' ? (string) ($row['current_order_food'] ?? '') : '',
+            'current_order_state' => !$comparisonAvailable ? 'unavailable'
+                : (!str_starts_with((string) ($row['ticket_key'] ?? ''), 'food:') ? 'not_applicable'
+                    : ((int) ($row['current_order_id'] ?? 0) <= 0 ? 'missing'
+                        : ((string) ($row['current_order_status'] ?? '') !== 'active' ? 'cancelled'
+                            : ((string) ($row['current_order_food'] ?? '') === '' ? 'unavailable'
+                                : ((string) ($row['food_type'] ?? '') === (string) $row['current_order_food'] ? 'same' : 'different'))))),
             'result' => $resultLabel,
+            'event_type' => $rawResult,
             'print_status' => $rawStatus,
             'print_state_label' => $rawStatus === 'held_absent' ? 'متوقف — غایب اعلام‌شده' : '',
             'delivery_status' => $delivery,
@@ -3654,7 +3691,7 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
             'source_deleted' => $hasSourceDelete ? (bool) ((int) ($row['source_deleted'] ?? 0) === 1) : null,
             'source_delete_note' => $hasSourceDelete ? (string) ($row['source_delete_note'] ?? '') : '',
         ];
-    }, $query->fetchAll());
+    }, $monitorRows);
 }
 
 
@@ -4003,6 +4040,18 @@ function food_ticket_api_delete_guest_card(int $id, int $userId, string $cardNum
     food_ticket_sync_guest_card_config($userId);
 }
 
+/** Save and read back only the cap mode, independently of the other guest settings. */
+function food_ticket_save_guest_cap_mode(string $mode): string
+{
+    if (!in_array($mode, ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت سقف مهمان معتبر نیست.');
+    }
+    save_setting('food_guest_cap_mode', $mode);
+    if (function_exists('setting_forget_cache')) setting_forget_cache();
+    if (food_guest_cap_mode() !== $mode) throw new RuntimeException('ذخیرهٔ حالت سقف مهمان تأیید نشد.');
+    return $mode;
+}
+
 function food_ticket_api_save_config(array $data, array $user): void
 {
     $dbFields = ['enabled', 'attendance', 'attendancePath', 'attendancePassword', 'attendanceTable', 'poll_seconds', 'pollSeconds', 'cutSourceRows', 'clear', 'clear_paths'];
@@ -4029,6 +4078,9 @@ function food_ticket_api_save_config(array $data, array $user): void
         throw new RuntimeException('ویرایش طراحی فیش مجاز نیست.');
     }
 
+    if (array_key_exists('guestCapMode', $data) && !in_array((string) $data['guestCapMode'], ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت سقف مهمان معتبر نیست.');
+    }
     $guestRequestSameDayCutoff = null;
     if (array_key_exists('guestRequestSameDayCutoff', $data)) {
         $rawCutoff = trim(food_ticket_normalize_digits((string) $data['guestRequestSameDayCutoff']));
@@ -4119,7 +4171,7 @@ function food_ticket_api_save_config(array $data, array $user): void
     ], $user);
     if (array_key_exists('guestCapMode', $data)) {
         $guestCapModeIn = (string) ($data['guestCapMode'] ?? '');
-        save_setting('food_guest_cap_mode', $guestCapModeIn === 'variable' ? 'variable' : 'requested');
+        save_setting('food_guest_cap_mode', $guestCapModeIn);
     }
     $capTimeKeys = ['guestCapStart' => 'food_guest_cap_start', 'guestCapCutoff' => 'food_guest_cap_cutoff', 'guestCapEnd' => 'food_guest_cap_end'];
     foreach ($capTimeKeys as $field => $settingKey) {
@@ -4558,6 +4610,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 'monitoring' => food_ticket_api_monitoring($from, $to),
                 'items' => food_ticket_api_monitoring($from, $to),
                 'orders' => food_ticket_api_orders($from, '', $to),
+                'order_summary' => food_order_report_summary($from, $to, 'lunch'),
                 'active_employee_count' => (int) db()->query('SELECT COUNT(*) FROM users WHERE is_active = 1')->fetchColumn(),
                 'from' => $from,
                 'to' => $to,
@@ -4635,6 +4688,12 @@ function food_ticket_api_handle(string $route, array $user): never
                 'guestRequestSameDayCutoff' => food_guest_request_same_day_cutoff(),
             ]);
         }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && $route === 'guest-cap') {
+            // The mode is independent of the rest of the guest form and its optional fields.
+            $body = food_ticket_api_body();
+            $mode = food_ticket_save_guest_cap_mode((string) ($body['mode'] ?? ''));
+            food_ticket_api_json(['ok' => true, 'mode' => $mode]);
+        }
         if ($_SERVER['REQUEST_METHOD'] === 'GET' && $route === 'guest-cap') {
             // سقف فعلی: یا جمع درخواست مهمان معاونت‌ها، یا تعداد داخل ساختمان
             $nowTime = date('H:i:s');
@@ -4650,11 +4709,18 @@ function food_ticket_api_handle(string $route, array $user): never
                 $insideNow = null;
             }
             $guestCfg = food_ticket_config();
+            try {
+                $issued = food_ticket_guest_issued_total($today);
+            } catch (Throwable $e) {
+                $issued = null;
+            }
             food_ticket_api_json([
                 'mode' => food_guest_cap_mode(),
                 'time' => substr($nowTime, 0, 5),
                 'cap' => $capNow,
                 'requested' => $requested,
+                'issued' => $issued,
+                'remaining' => $issued === null || $capNow === null ? null : max(0, $capNow - $issued),
                 'inside' => $insideNow,
                 'fallback' => (int) ($guestCfg['max_guest_daily'] ?? 0),
             ]);

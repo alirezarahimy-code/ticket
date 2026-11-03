@@ -1,0 +1,6 @@
+/* Only traffic history; preserve other tabs. */
+.content-wrap:has(.traffic-page #traffic-history-table) { max-width: none; padding-inline: 16px; }
+.traffic-page:has(#traffic-history-table) { max-width: none; }
+.traffic-record-table { max-width: 100%; overflow-x: auto; }
+.traffic-record-table .cd-dvd-record-head, .traffic-record-table .cd-dvd-record-row { min-width: 1180px; grid-template-columns: 1.05fr .8fr 1.25fr .95fr 1.25fr .6fr .6fr 1fr 1fr 1.6fr; }
+.traffic-record-table .cd-dvd-record-head > span, .traffic-record-table .cd-dvd-record-row > span:not(.actions) { min-width: 0; overflow-wrap: anywhere; }

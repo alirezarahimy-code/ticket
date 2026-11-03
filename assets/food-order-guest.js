@@ -16,6 +16,7 @@
     todayJalali: '',
     sameDayCutoff: '09:30',
     sameDayOpen: null,
+    loading: false,
     loadError: '',
     formError: '',
     saving: false,
@@ -83,26 +84,35 @@
         : '<div class="alert info" role="status">برای ثبت درخواست جدید باید مدیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
     var rows = state.items.map(function (r) {
       var actions = [];
-      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + r.id + '">ویرایش</button>');
-      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>');
-      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + r.id + '">حذف</button>');
-      var action = actions.length ? actions.join(' ') : '<span class="muted">—</span>';
-      var status = r.status === 'cancelled' ? '<span class="muted">لغو شده</span>' : 'فعال';
-      return '<tr>'
+      var id = Number(r.id);
+      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + id + '">ویرایش</button>');
+      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + id + '">لغو</button>');
+      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + id + '">حذف</button>');
+      var action = actions.length ? actions.join(' ') : '—';
+      var status = r.status === 'cancelled' ? 'لغو شده' : 'فعال';
+      return '<tr class="fg-request-item">'
         + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
         + '<td>' + esc(r.deputy_name || '—') + '</td>'
         + '<td>' + esc(r.organization) + '</td>'
         + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
         + '<td>' + esc(r.requester_name) + '</td>'
         + '<td>' + esc(r.created_by_name || '—') + '</td>'
+        + '<td>' + esc(r.note || '—') + '</td>'
         + '<td>' + status + '</td>'
-        + '<td>' + action + '</td></tr>';
+        + '<td><div class="fg-request-actions">' + action + '</div></td></tr>';
     }).join('');
-    var table = state.items.length
-      ? '<div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr>'
-        + '<th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>مدیر ثبت‌کننده</th><th>وضعیت</th><th>عملیات</th>'
+    var table = state.loading
+      ? '<p class="muted fg-request-empty">در حال دریافت درخواست‌های شما…</p>'
+      : state.loadError
+        ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
+        : state.items.length
+      ? '<div class="fg-request-list" role="region" tabindex="0" aria-label="درخواست‌های مهمان من؛ جدول قابل پیمایش">'
+        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">معاونت</th>'
+        + '<th scope="col">سازمان / شرکت</th><th scope="col">تعداد</th><th scope="col">درخواست‌دهنده</th>'
+        + '<th scope="col">ثبت‌کننده</th><th scope="col">یادداشت</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
-      : '<p class="muted">درخواست فعالی برای امروز یا روزهای آینده ثبت نشده است.</p>';
+        + (state.items.length >= 300 ? '<p class="muted fg-request-empty">حداکثر ۳۰۰ درخواست نخست نمایش داده می‌شود.</p>' : '')
+      : '<p class="muted fg-request-empty">درخواستی برای امروز یا روزهای آینده ثبت نکرده‌اید.</p>';
     var deadlineNotice = state.sameDayOpen === null
       ? '<div class="alert info" role="status">در حال بررسی مهلت ثبت درخواست مهمان برای امروز…</div>'
       : state.sameDayOpen
@@ -126,7 +136,7 @@
       + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.canCreate) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
-      + '<h3 style="margin-top:20px">درخواست‌های ثبت‌شدهٔ مهمان (از امروز به بعد)</h3>'
+      + '<h3 class="fg-request-title">درخواست‌های مهمان من (از امروز به بعد)</h3>'
       + table
       + '</div>';
     if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(dialog);
@@ -170,8 +180,10 @@
       state.sameDayCutoff = data.same_day_cutoff || '09:30';
       state.sameDayOpen = data.same_day_open !== false;
     } catch (e) {
+      state.items = [];
       state.loadError = e.message;
     }
+    state.loading = false;
     readForm();
     if (!state.form.request_date && state.todayJalali && state.sameDayOpen) state.form.request_date = state.todayJalali;
     render();
@@ -266,6 +278,10 @@
   function open() {
     ensureDialog();
     state.editingId = 0;
+    state.items = [];
+    state.loading = true;
+    state.loadError = '';
+    state.sameDayOpen = null;
     state.canCreate = false;
     state.canCreateWithoutDeputy = false;
     state.myDeputy = null;
