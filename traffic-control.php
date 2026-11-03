@@ -162,7 +162,7 @@ function traffic_query_records(array $filters, int $limit = 300, string $sort = 
     if (!empty($filters['open_only'])) $where[] = 'v.exit_time IS NULL';
     $sql = 'SELECT v.*, u.full_name AS recorder_name FROM traffic_visits v LEFT JOIN users u ON u.id = v.created_by';
     if ($where) $sql .= ' WHERE ' . implode(' AND ', $where);
-    $sortMap = ['serial' => 'v.serial_no', 'date' => 'v.visit_date', 'name' => 'v.full_name', 'national' => 'v.national_code', 'entry' => 'v.entry_time', 'exit' => 'v.exit_time', 'meeting' => 'v.meeting_with', 'recorder' => 'u.full_name', '__tie' => 'v.id'];
+    $sortMap = ['serial' => 'v.serial_no', 'date' => 'v.visit_date', 'name' => 'v.full_name', 'national' => 'v.national_code', 'company' => 'v.company', 'entry' => 'v.entry_time', 'exit' => 'v.exit_time', 'meeting' => 'v.meeting_with', 'recorder' => 'u.full_name', '__tie' => 'v.id'];
     $sql .= log_sort_order($sortMap, $sort, $dir, ' ORDER BY v.visit_date DESC, v.id DESC') . ' LIMIT ' . max(1, min(301, $limit)) . ' OFFSET ' . max(0, $offset);
     $query = db()->prepare($sql); $query->execute($params);
     return $query->fetchAll();
@@ -851,6 +851,7 @@ function traffic_history_rows_html(array $records, array $user): string
                     <span><?= e(jalali_date($r['visit_date'], false)) ?></span>
                     <span><?= e((!empty($r['is_notice']) ? 'تردد خاص: ' : '') . $r['full_name']) ?></span>
                     <span><?= empty($r['is_notice']) ? e($r['national_code']) : '—' ?></span>
+                    <span><?= e(trim((string) ($r['company'] ?? '')) ?: '—') ?></span>
                     <span><?= e(substr((string) $r['entry_time'], 0, 5)) ?></span>
                     <span><?= $r['exit_time'] ? e(substr((string) $r['exit_time'], 0, 5)) : '<em class="media-status inside">داخل</em>' ?></span>
                     <span><?= e($r['meeting_with'] ?? '-') ?></span>
@@ -1063,6 +1064,7 @@ function traffic_render_page(array $user): never
     <link rel="stylesheet" href="assets/traffic-records-1.62.68.css">
     <link rel="stylesheet" href="assets/traffic-records-1.62.69.css">
     <link rel="stylesheet" href="assets/traffic-report-1.62.70.css">
+    <link rel="stylesheet" href="assets/traffic-history-1.62.72.css">
     <section class="traffic-page">
         <header class="cd-dvd-banner">
             <div><span class="eyebrow">ثبت و پیگیری مراجعین و میهمانان</span><h1>کنترل تردد</h1></div>
@@ -1219,7 +1221,7 @@ function traffic_render_page(array $user): never
             </form>
             <p id="traffic-history-status" aria-live="polite"></p><noscript>جست‌وجوی زنده و صفحه‌بندی به JavaScript نیاز دارند؛ این نما حداکثر ۱۰۰ نتیجهٔ اول را نشان می‌دهد.</noscript>
             <div class="cd-dvd-record-table traffic-record-table" id="traffic-history-table">
-                <?= log_sort_header_row([['serial', 'شماره برگ'], ['date', 'تاریخ'], ['name', 'نام'], ['national', 'کد ملی'], ['entry', 'ورود'], ['exit', 'خروج'], ['meeting', 'ملاقات با'], ['recorder', 'ثبت‌کننده'], ['', 'عملیات']], 'sort_t', 'dir_t', $_GET, (string) ($_GET['sort_t'] ?? ''), (string) ($_GET['dir_t'] ?? ''), 'cd-dvd-record-head') ?>
+                <?= log_sort_header_row([['serial', 'شماره برگ'], ['date', 'تاریخ'], ['name', 'نام'], ['national', 'کد ملی'], ['company', 'مؤسسه / شرکت'], ['entry', 'ورود'], ['exit', 'خروج'], ['meeting', 'ملاقات با'], ['recorder', 'ثبت‌کننده'], ['', 'عملیات']], 'sort_t', 'dir_t', $_GET, (string) ($_GET['sort_t'] ?? ''), (string) ($_GET['dir_t'] ?? ''), 'cd-dvd-record-head') ?>
                 <div id="traffic-history-rows"><?= traffic_history_rows_html(traffic_query_records($filters, 100, (string) ($_GET['sort_t'] ?? ''), (string) ($_GET['dir_t'] ?? '')), $user) ?></div>
                 <p class="traffic-history-empty" id="traffic-history-empty" hidden>موردی با این جست‌وجو یافت نشد.</p>
             </div>

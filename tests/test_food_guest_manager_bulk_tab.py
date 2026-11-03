@@ -50,7 +50,7 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
 
     def test_served_asset_copy_and_cache_buster_match(self):
         self.assertEqual(self.ui, self.web_ui)
-        self.assertIn('assets/food-menu.js?v=39', self.web_index)
+        self.assertIn('assets/food-menu.js?v=1.62.72', self.web_index)
 
 
 if __name__ == "__main__":

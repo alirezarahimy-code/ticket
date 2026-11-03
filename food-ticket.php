@@ -3103,7 +3103,7 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
     $orderRows = [];
     try {
         // همان منبع و همان scope ناهار که گزارش غایبین استفاده می‌کند.
-        $orderRows = food_ticket_api_orders($fromDate, $toDate);
+        $orderRows = food_ticket_api_orders($fromDate, '', $toDate);
     } catch (Throwable $e) {
         $sourceNotes[] = 'عیب‌یابی سفارش‌ها: ' . $e->getMessage();
     }
@@ -3225,7 +3225,7 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
     }
 
     return [
-        'active_orders_all_meals' => (int) ($counts['total_orders'] ?? 0),
+        'active_orders_all_meals' => (int) ($counts['all_meal_orders'] ?? 0),
         'active_lunch_orders' => (int) ($counts['lunch_orders'] ?? 0),
         'active_dinner_orders' => (int) ($counts['dinner_orders'] ?? 0),
         'active_other_meal_orders' => (int) ($counts['other_meal_orders'] ?? 0),
@@ -3258,7 +3258,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     }
 
     $pdo = db();
-    $counts = ['total_orders' => 0, 'lunch_orders' => 0, 'dinner_orders' => 0, 'other_meal_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0, 'legacy_printed' => 0];
+    $counts = ['total_orders' => 0, 'all_meal_orders' => 0, 'cancelled_orders' => 0, 'order_rows' => 0, 'lunch_orders' => 0, 'dinner_orders' => 0, 'other_meal_orders' => 0, 'guest_printed' => 0, 'printed_final' => 0, 'legacy_printed' => 0];
     $printedPeople = [];
     $sourceNotes = [];
 
@@ -3266,10 +3266,11 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     try {
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active"');
         $stmt->execute([$from, $to]);
-        $counts['total_orders'] = (int) $stmt->fetchColumn();
+        $counts['all_meal_orders'] = (int) $stmt->fetchColumn();
     } catch (Throwable $e) {
         $sourceNotes[] = 'سفارشها: ' . $e->getMessage();
         app_error_log('[aggregate-report] orders: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
     try {
         $mealStmt = $pdo->prepare('SELECT meal_type, COUNT(*) AS c FROM food_orders WHERE food_date BETWEEN ? AND ? AND status = "active" GROUP BY meal_type');
@@ -3287,7 +3288,15 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     } catch (Throwable $e) {
         $sourceNotes[] = 'تفکیک وعده‌های سفارش: ' . $e->getMessage();
         app_error_log('[aggregate-report] meal breakdown: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
+
+    // The main comparable count is current active lunch orders; keep all-meals separate.
+    $summary = food_order_report_summary($from, $to, 'lunch');
+    $counts['total_orders'] = $summary['active'];
+    $counts['lunch_orders'] = $summary['active'];
+    $counts['cancelled_orders'] = $summary['cancelled'];
+    $counts['order_rows'] = $summary['total'];
 
     // ۲) فیش مهمان چاپشده و ۳) فیش چاپشدهٔ قطعی پرسنل — از رویدادهای پایش
     try {
@@ -3333,6 +3342,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     } catch (Throwable $e) {
         $sourceNotes[] = 'فیشهای چاپشده: ' . $e->getMessage();
         app_error_log('[aggregate-report] events: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
 
     // ۴) غایبین (سفارش دارند ولی فیش نگرفتند)
@@ -3351,6 +3361,7 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     } catch (Throwable $e) {
         $sourceNotes[] = 'غایبین: ' . $e->getMessage();
         app_error_log('[aggregate-report] absent: ' . $e->getMessage());
+        throw new RuntimeException('منابع گزارش تجمیعی در دسترس نیستند؛ آمار قابل محاسبه نیست.', 0, $e);
     }
 
     $counts['absent'] = count($absentPeople);
@@ -3413,10 +3424,12 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
     $c = $report['counts'];
     $rows = [];
     $rows[] = ['گزارش تجمیعی غذا — بازه: ' . $rangeLabel];
-    $rows[] = ['تعداد کل سفارشها (همهٔ وعده‌ها)', $c['total_orders'], 'سفارش ناهارِ مبنای تطبیق', $c['lunch_orders']];
+    $rows[] = ['سفارش فعال ناهار', $c['total_orders'], 'لغوشدهٔ ناهار', $c['cancelled_orders']];
+    $rows[] = ['مجموع ردیف‌های ناهار', $c['order_rows'], 'سفارش فعال همهٔ وعده‌ها', $c['all_meal_orders']];
     $rows[] = ['سفارش شام (خارج از تطبیق چاپ)', $c['dinner_orders'], 'سایر وعده‌ها', $c['other_meal_orders']];
     $rows[] = ['فیش مهمان چاپشده', $c['guest_printed'], 'فیش چاپشده قطعی', $c['printed_final']];
-    $rows[] = ['تعداد غایبین', $c['absent'], 'غایب موردانتظار', $c['expected_absent'] ?? 0];
+    $rows[] = ['تعداد غایبین', $c['absent'], 'تفریق تخمینی، نه تطبیق فردی', $c['expected_absent'] ?? 0];
+    $rows[] = ['فیش چاپی به‌تنهایی تأیید مستقل تحویل فیزیکی غذا نیست.'];
     $rows[] = ['فیش‌های قدیمی نوع print', $c['legacy_printed'], 'باقیماندهٔ مغایرت', $c['difference'] ?? 0];
     $rows[] = ['مغایرت ناهار', $c['has_mismatch'] ? 'دارد' : 'ندارد', 'اختلاف', $c['difference'] ?? 0];
     $rows[] = [];
@@ -3509,7 +3522,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
             "SELECT punch_date, national_code, personnel_code FROM food_ticket_events
              WHERE punch_date BETWEEN ? AND ?
                AND print_status = 'printed'
-              AND event_type IN ('printed','print','guest')"
+              AND event_type IN ('printed','print')"
         );
         $q->execute([$fromDate, $toDate]);
         foreach ($q->fetchAll() as $row) {
@@ -3525,6 +3538,7 @@ function food_ticket_api_absent(string $fromDate, ?string $toDate = null): array
         }
     } catch (Throwable $e) {
         app_error_log('[absent] events: ' . $e->getMessage());
+        throw new RuntimeException('وضعیت چاپ برای محاسبهٔ فیش‌های دریافت‌نشده در دسترس نیست.', 0, $e);
     }
 
     // «غایب اعلام‌شده»: کسانی که برای همان تاریخ در فرم گروه، غایب ثبت شده‌اند
@@ -3665,6 +3679,7 @@ function food_ticket_api_monitoring(?string $fromDate = null, ?string $toDate = 
                             : ((string) ($row['current_order_food'] ?? '') === '' ? 'unavailable'
                                 : ((string) ($row['food_type'] ?? '') === (string) $row['current_order_food'] ? 'same' : 'different'))))),
             'result' => $resultLabel,
+            'event_type' => $rawResult,
             'print_status' => $rawStatus,
             'print_state_label' => $rawStatus === 'held_absent' ? 'متوقف — غایب اعلام‌شده' : '',
             'delivery_status' => $delivery,
@@ -4595,6 +4610,7 @@ function food_ticket_api_handle(string $route, array $user): never
                 'monitoring' => food_ticket_api_monitoring($from, $to),
                 'items' => food_ticket_api_monitoring($from, $to),
                 'orders' => food_ticket_api_orders($from, '', $to),
+                'order_summary' => food_order_report_summary($from, $to, 'lunch'),
                 'active_employee_count' => (int) db()->query('SELECT COUNT(*) FROM users WHERE is_active = 1')->fetchColumn(),
                 'from' => $from,
                 'to' => $to,
