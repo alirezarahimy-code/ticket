@@ -13,9 +13,12 @@ PACKAGE = ROOT / "downloads/ticket-update-1.62.74-food-meal-reconciliation-20261
 REPORT = ROOT / "CHANGE-REPORT-FA-1.62.74.md"
 EXPECTED_BASE_SHA256 = "2aba2ead127c9a69a96f113a4f4d401ac7bf033c567a2a6cc75fc4aff916fb2c"
 EXPECTED_PACKAGE_SHA256 = "ff1d40fc9fa8f3d9e7aadb9aae5e3eeb8fafe504fec05b3048dffd1dee127391"
+# 1.62.78 پنجرهٔ کاری Worker را به food-ticket.php اضافه کرد؛ بستهٔ ۱.۶۲.۷۴ دست‌نخورده می‌ماند.
 POST_RELEASE_WORKTREE_CHANGES = {
     "VERSION",
     "README.md",
+    "food-ticket.php",
+    "food-ticket-web/index.html",
     "assets/app.js",
     "assets/style.css",
     "help-guide.php",
