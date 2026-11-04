@@ -18,7 +18,9 @@ final class GuestStatement {
         return false;
     }
     public function fetchAll(int $mode = 0): array {
-        if (str_contains($this->sql, "TABLE_NAME = 'food_guest_requests'")) return ['request_date', 'organization', 'guest_count', 'food_id', 'requester_name', 'deputy_unit_id', 'status'];
+        // Mirrors the post-migration schema: 021-food-auto-receipts.sql adds meal_type,
+        // and food-order.php refuses to serve guest requests until that column exists.
+        if (str_contains($this->sql, "TABLE_NAME = 'food_guest_requests'")) return ['request_date', 'meal_type', 'organization', 'guest_count', 'food_id', 'requester_name', 'deputy_unit_id', 'status'];
         if (str_contains($this->sql, 'SELECT TABLE_NAME FROM information_schema.TABLES')) return ['food_catalog','food_calendar','food_calendar_items','food_orders','food_order_logs'];
         if (str_contains($this->sql, "TABLE_NAME IN ('food_calendar', 'food_orders')")) return ['food_calendar','food_orders'];
         if (str_contains($this->sql, 'FROM food_catalog')) return [];
@@ -54,7 +56,7 @@ function denied(callable $fn): bool { try { $fn(); return false; } catch (Runtim
 
 $future = (new DateTimeImmutable('+7 days'))->format('Y-m-d');
 $past = (new DateTimeImmutable('-7 days'))->format('Y-m-d');
-$row = ['request_date'=>$future,'organization'=>'Company','guest_count'=>2,'requester_name'=>'Name','note'=>'', 'status'=>'active', 'created_at'=>'', 'food_id'=>null, 'food_name'=>null, 'deputy_unit_id'=>null, 'deputy_name'=>'', 'created_by_name'=>'Owner'];
+$row = ['request_date'=>$future,'meal_type'=>'lunch','organization'=>'Company','guest_count'=>2,'requester_name'=>'Name','note'=>'', 'status'=>'active', 'created_at'=>'', 'food_id'=>null, 'food_name'=>null, 'deputy_unit_id'=>null, 'deputy_name'=>'', 'created_by_name'=>'Owner'];
 // Many other people's rows before our own prove that filtering happens before the limit.
 for ($i = 1; $i <= 310; $i++) db()->rows[$i] = $row + ['id'=>$i, 'created_by'=>2];
 db()->rows[311] = $row + ['id'=>311, 'created_by'=>1];
