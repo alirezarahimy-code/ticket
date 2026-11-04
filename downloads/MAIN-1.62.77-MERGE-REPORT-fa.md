@@ -16,7 +16,7 @@
 | مهاجرت‌های لاگ | `024` تا `030` (هفت فایل، همگی idempotent) |
 | اسکریپت‌های `cron/` لاگ | ۱۲ فایل |
 | بستهٔ نصبی | `downloads/ticket-update-1.62.76-to-1.62.77-logging-full-20261104.zip` |
-| SHA-256 بسته | `8310ba1ad096225ee0ff353b2d7a2f20d50b67c26a9c98dc408401b85b33180a` |
+| SHA-256 بسته | `4a850bbdbaff4246caef9105c940e4cd941c935166288d4dffa7f16cc8766262` |
 
 اجزای اصلی سامانهٔ لاگ که اکنون روی `main` هستند: `lib/logging-core.php`،
 `lib/log-catalog.php`، `lib/logging-csrf.php`، `lib/logging-replay.php`،
