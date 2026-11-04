@@ -40,3 +40,6 @@ jobs:
 
     - name: Run standalone worker logic tests
       run: php tests/test_food_ticket_logic.php
+
+    - name: Run food worker window tests
+      run: php tests/test_food_worker_window.php
