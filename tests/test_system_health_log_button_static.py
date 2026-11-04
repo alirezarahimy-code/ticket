@@ -17,7 +17,7 @@ def test_current_system_logs_page_shows_safe_export_and_readable_events():
     assert "system_health_humanize_event" in logs_page
     assert "system_health_request_label" in logs_page
     assert "خطاها و هشدارها (پیشنهادی)" in logs_page
-    assert "s.level IN ('error', 'warning')" in logs_page
+    assert "s.level IN ('critical', 'error', 'warning')" in logs_page  # از ۱.۶۲.۷۶ سطح critical هم به فیلتر پیشنهادی افزوده شد
 
 
 def test_update_zip_contains_button_in_the_actual_unified_log_page():

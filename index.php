@@ -148,6 +148,27 @@ function log_sort_header_row(array $columns, string $sortParam, string $dirParam
     return $html . '</div>';
 }
 
+/** حداکثر بازهٔ گزارش لاگ را به ۳۶۵ روز محدود می‌کند تا جست‌وجوهای بدون کران دیتابیس را تحت فشار نگذارند. */
+function log_bounded_date_range(string $fromText, string $toText, int $maxDays = 365): array
+{
+    $from = $fromText !== '' ? jalali_input_to_gregorian($fromText) : null;
+    $to = $toText !== '' ? jalali_input_to_gregorian($toText, true) : null;
+    $maxDays = max(1, min(365, $maxDays));
+    if ($from === null && $to === null) {
+        $from = date('Y-m-d 00:00:00', time() - (90 * 86400));
+        $to = date('Y-m-d 23:59:59');
+    } elseif ($from !== null && $to === null) {
+        $to = date('Y-m-d 23:59:59');
+        if (strtotime($from) < time() - ($maxDays * 86400)) $from = date('Y-m-d 00:00:00', time() - ($maxDays * 86400));
+    } elseif ($from === null && $to !== null) {
+        $from = date('Y-m-d 00:00:00', strtotime($to) - ($maxDays * 86400));
+    } elseif ($from !== null && $to !== null) {
+        if (strtotime($from) > strtotime($to)) { $swap = $from; $from = $to; $to = $swap; }
+        if ((strtotime($to) - strtotime($from)) > ($maxDays * 86400)) $from = date('Y-m-d 00:00:00', strtotime($to) - ($maxDays * 86400));
+    }
+    return [$from, $to, null];
+}
+
 function activity_log_filters(): array
 {
     $conditions = [];
@@ -162,6 +183,26 @@ function activity_log_filters(): array
         $conditions[] = 'l.action_code = ?';
         $params[] = $actionCode;
     }
+    $eventCode = trim((string) ($_GET['event_code'] ?? ''));
+    if ($eventCode !== '' && preg_match('/^[A-Z0-9][A-Z0-9._-]{2,39}$/i', $eventCode)) {
+        $conditions[] = 'l.code = ?';
+        $params[] = strtoupper($eventCode);
+    }
+    $eventCategory = valid_choice((string) ($_GET['event_category'] ?? ''), ['', 'security', 'audit', 'business', 'operation', 'system', 'integration', 'performance'], '');
+    if ($eventCategory !== '') {
+        $conditions[] = 'l.category = ?';
+        $params[] = $eventCategory;
+    }
+    $result = valid_choice((string) ($_GET['result'] ?? ''), ['', 'success', 'failure', 'denied', 'unknown'], '');
+    if ($result !== '') {
+        $conditions[] = 'l.result = ?';
+        $params[] = $result;
+    }
+    $requestId = trim((string) ($_GET['request_id'] ?? ''));
+    if ($requestId !== '' && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $requestId)) {
+        $conditions[] = 'l.request_id = ?';
+        $params[] = $requestId;
+    }
     $module = trim((string) ($_GET['module'] ?? ''));
     if ($module !== '') {
         $conditions[] = 'l.module = ?';
@@ -172,22 +213,9 @@ function activity_log_filters(): array
         $conditions[] = 'l.ip_address LIKE ?';
         $params[] = '%' . $ip . '%';
     }
-    $from = trim((string) ($_GET['from'] ?? ''));
-    if ($from !== '') {
-        $date = jalali_input_to_gregorian($from);
-        if ($date) {
-            $conditions[] = 'l.created_at >= ?';
-            $params[] = $date;
-        }
-    }
-    $to = trim((string) ($_GET['to'] ?? ''));
-    if ($to !== '') {
-        $date = jalali_input_to_gregorian($to, true);
-        if ($date) {
-            $conditions[] = 'l.created_at <= ?';
-            $params[] = $date;
-        }
-    }
+    [$boundedFrom, $boundedTo] = log_bounded_date_range(trim((string) ($_GET['from'] ?? '')), trim((string) ($_GET['to'] ?? '')));
+    if ($boundedFrom !== null) { $conditions[] = 'l.created_at >= ?'; $params[] = $boundedFrom; }
+    if ($boundedTo !== null) { $conditions[] = 'l.created_at <= ?'; $params[] = $boundedTo; }
     $search = trim((string) ($_GET['q'] ?? ''));
     if ($search !== '') {
         $conditions[] = '(l.full_name LIKE ? OR l.username LIKE ? OR l.action_label LIKE ? OR l.action_code LIKE ? OR l.computer_name LIKE ? OR l.ip_address LIKE ? OR l.meta_json LIKE ?)';
@@ -198,8 +226,9 @@ function activity_log_filters(): array
         $conditions[] = '(l.module = ? OR l.action_code LIKE ? OR l.action_code = ?)';
         array_push($params, 'auth', 'login_%', 'logout');
     } elseif ($category === 'admin') {
-        $conditions[] = '(l.module IN (?, ?, ?) OR l.action_code LIKE ? OR l.action_code LIKE ? OR (l.module IS NULL AND l.action_code NOT LIKE ? AND l.action_code <> ? AND l.action_code <> ?))';
-        array_push($params, 'settings', 'permissions', 'audit', 'settings_%', 'role_%', 'login_%', 'logout', 'page_view');
+        // Historical NULL-module rows must not act as a wildcard that pulls unrelated business events into the admin view.
+        $conditions[] = "(l.category = 'audit' OR l.module IN (?, ?, ?) OR l.action_code LIKE ? OR l.action_code LIKE ?)";
+        array_push($params, 'settings', 'permissions', 'audit', 'settings_%', 'role_%');
     } elseif ($category === 'errors') {
         $conditions[] = '(l.action_code LIKE ? OR l.action_code LIKE ? OR l.action_code LIKE ? OR l.module = ?)';
         array_push($params, '%failed%', '%error%', '%locked%', 'error');
@@ -213,15 +242,15 @@ function activity_log_meta_lines(?string $json): array
     if (!$json) return [];
     $data = json_decode($json, true);
     if (!is_array($data)) return [['جزئیات', $json]];
-    $labels = ['before'=>'قبل','after'=>'بعد','old'=>'مقدار قبلی','new'=>'مقدار جدید','old_status'=>'وضعیت قبلی','new_status'=>'وضعیت جدید','status'=>'وضعیت','role'=>'نقش','theme'=>'تم','reason'=>'علت','rows'=>'تعداد ردیف','deleted'=>'حذف‌شده','days'=>'بازه (روز)','ip'=>'آی‌پی','module'=>'بخش','page'=>'صفحه','target'=>'مورد','field'=>'فیلد','value'=>'مقدار','from'=>'از','to'=>'به','ok'=>'نتیجه','file'=>'فایل','line'=>'خط','uri'=>'نشانی درخواست','request_uri'=>'نشانی درخواست','attempts'=>'تعداد تلاش'];
+    $labels = ['before'=>'قبل','after'=>'بعد','old'=>'مقدار قبلی','new'=>'مقدار جدید','old_status'=>'وضعیت قبلی','new_status'=>'وضعیت جدید','status'=>'وضعیت','role'=>'نقش','theme'=>'تم','reason'=>'علت','rows'=>'تعداد ردیف','deleted'=>'حذف‌شده','days'=>'بازه (روز)','ip'=>'آی‌پی','module'=>'بخش','page'=>'صفحه','target'=>'مورد','field'=>'فیلد','value'=>'مقدار','from'=>'از','to'=>'به','ok'=>'نتیجه','file'=>'فایل','line'=>'خط','uri'=>'نشانی درخواست','request_uri'=>'نشانی درخواست','attempts'=>'تعداد تلاش','serial'=>'شماره سریال','media'=>'نوع رسانه','record_id'=>'شناسه رکورد','change_id'=>'شناسه تغییر','change_number'=>'شماره تغییر','problem_id'=>'شناسه مشکل','problem_number'=>'شماره مشکل','holiday_id'=>'شناسه تعطیلی','holiday_date'=>'تاریخ تعطیلی','title'=>'عنوان','count'=>'تعداد','skipped_weekends'=>'تعطیلات آخر هفته نادیده‌گرفته‌شده','is_active'=>'وضعیت فعال','priority'=>'اولویت','assigned_to'=>'شناسه ارجاع‌شونده','service_id'=>'خدمت','ticket_type'=>'نوع درخواست','sla_minutes'=>'زمان SLA (دقیقه)','department_id'=>'شناسه معاونت','decision'=>'تصمیم CAB','risk_level'=>'سطح ریسک','implementation_note'=>'یادداشت اجرا','from_status'=>'وضعیت قبلی','to_status'=>'وضعیت جدید','created'=>'ایجادشده','updated'=>'به‌روزرسانی‌شده','disabled'=>'غیرفعال‌شده','failed'=>'ناموفق'];
     $lines=[]; $walk=function(array $items,string $prefix='') use (&$walk,&$lines,$labels): void {
         foreach($items as $key=>$value) {
-            $key=(string)$key; if (preg_match('/pass(word)?|token|secret|credential|private.?key/i',$key)) {$lines[]=[($labels[$key]??$key),'••••••'];continue;}
+            $key=(string)$key; if ((function_exists('logging_sensitive_key') && logging_sensitive_key($key)) || preg_match('/pass(word)?|token|secret|credential|private.?key/i',$key)) {$lines[]=[($labels[$key]??$key),'••••••'];continue;}
             $label=$labels[$key]??str_replace('_',' ',$key); $label=$prefix!==''?$prefix.' · '.$label:$label;
             if(is_array($value)){ if($value===[]) {$lines[]=[$label,'—'];} else {$walk($value,$label);} }
             elseif(is_bool($value)) {$lines[]=[$label,$value?'بله':'خیر'];}
             elseif($value===null || $value==='') {$lines[]=[$label,'—'];}
-            else {$lines[]=[$label,mb_substr((string)$value,0,500,'UTF-8')];}
+            else {$lines[]=[$label,logging_utf8_substr((string)$value,0,500)];}
             if(count($lines)>=20) return;
         }
     };
@@ -630,7 +659,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.61">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -965,7 +994,7 @@ if (($_GET['action'] ?? '') === 'notification_feed') {
     }
     $afterId = max(0, (int) ($_GET['after'] ?? 0));
     [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($user, 'n');
-    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . $notificationTicketFilter . ' ORDER BY n.id ASC LIMIT 20');
+    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . ' ORDER BY n.id ASC LIMIT 20');
     $feedQuery->execute(array_merge([(int) $user['id'], $afterId], $notificationTicketParams));
     $items = array_map(static function (array $item): array {
         return [
@@ -1168,10 +1197,11 @@ if ($page === 'food-personnel-link') {
 }
 
 
-// ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (77 اکشن، گروه‌بندی با بانر) ═══
+// ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با بانر) ═══
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
     $action = (string) ($_POST['action'] ?? '');
+    if (function_exists('logging_begin_operation')) logging_begin_operation('post:' . $action);
     $GLOBALS['activity_post'] = ['action' => $action, 'page' => (string) ($_GET['page'] ?? ''), 'failed' => false];
     register_shutdown_function(static function (): void {
         $pending = $GLOBALS['activity_post'] ?? null;
@@ -1249,6 +1279,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ───── گروه اکشن: نقش‌های کلیدی و دسترسی‌ها — ۴ اکشن از ۱.۶۲.۱۶ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/role-actions.php';
 
+
         // ───── گروه اکشن: گروه‌های عمومی دسترسی — ۳ اکشن مستقل (ساخت، ذخیره، حذف) ─────
         require __DIR__ . '/actions/access-group-actions.php';
 
@@ -1262,8 +1293,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (db()->inTransaction()) {
             db_rollback('index.php');
         }
+        if (function_exists('activity_log')) {
+            try {
+                activity_log([
+                    'action_code' => 'post_action_failed',
+                    'action_label' => 'عملیات POST ناموفق بود',
+                    'module' => (string) ($_GET['page'] ?? 'action'),
+                    'result' => 'failure',
+                    'meta' => [
+                        'action' => (string) ($GLOBALS['activity_post']['action'] ?? 'unknown'),
+                        'page' => (string) ($_GET['page'] ?? ''),
+                        'error_type' => get_class($exception),
+                    ],
+                ]);
+            } catch (Throwable) {}
+        }
+        // app_error_log خودش یک رخداد فنی ساخت‌یافته ثبت می‌کند؛ system_log دوم باعث دوباره‌شماری همین خطا می‌شد.
         app_error_log('ITSM request failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
-        system_log('error', 'request', $exception->getMessage(), ['uri' => (string) ($_SERVER['REQUEST_URI'] ?? ''), 'file' => $exception->getFile(), 'line' => $exception->getLine()]);
         flash('danger', $exception instanceof RuntimeException ? $exception->getMessage() : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
         $errorRedirect = 'index.php?page=' . urlencode($page);
         if ($page === 'settings' && in_array((string) ($action ?? ''), ['create_access_group', 'save_access_group', 'delete_access_group'], true)) {
@@ -1334,6 +1380,7 @@ $pagePermissions = [
 // food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی صفحه فقط با food.monitor باز
 // می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌دید و به ۴۰۳ می‌خورد.
 if ($page === 'food-ticket' && !(function_exists('food_ticket_is_allowed') ? food_ticket_is_allowed($user) : user_can($user, 'food.monitor'))) {
+    security_log_access_denied($user, 'food.*', 'food-ticket');
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه هماهنگ کنید.</p></div><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
@@ -1341,6 +1388,7 @@ if ($page === 'food-ticket' && !(function_exists('food_ticket_is_allowed') ? foo
     exit;
 }
 if (isset($pagePermissions[$page]) && !user_can($user, $pagePermissions[$page])) {
+    security_log_access_denied($user, (string) $pagePermissions[$page], (string) $page);
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه هماهنگ کنید.</p></div><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
@@ -1348,6 +1396,7 @@ if (isset($pagePermissions[$page]) && !user_can($user, $pagePermissions[$page]))
     exit;
 }
 if ($page === 'settings' && !user_can_any($user, ['settings.general', 'settings.domain', 'settings.users', 'settings.key_roles'])) {
+    security_log_access_denied($user, 'settings.*', 'settings');
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به تنظیمات مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه هماهنگ کنید.</p></div><a class="button" href="index.php">بازگشت به داشبورد</a></section>';
@@ -1389,6 +1438,7 @@ if ($page === 'food-ticket') {
 }
 
 if ($page === 'food-order' && $user && !user_can($user, 'foodorder.self')) {
+    security_log_access_denied($user, 'foodorder.self', 'food-order');
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
@@ -1631,6 +1681,7 @@ if ($page === 'knowledge') {
 }
 
 if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
+    security_log_access_denied($user, 'notif.view', 'notifications');
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
@@ -1640,7 +1691,7 @@ if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
 if ($page === 'notifications') {
     $notificationUser = require_login();
     [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($notificationUser, 'n');
-    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . $notificationTicketFilter . ' ORDER BY n.created_at DESC LIMIT 100');
+    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . ' ORDER BY n.created_at DESC LIMIT 100');
     $notificationQuery->execute(array_merge([(int) $notificationUser['id']], $notificationTicketParams));
     render_header('اعلان‌های داخلی', $notificationUser);
     echo '<section class="page-heading"><div><span class="eyebrow">اعلان داخلی آفلاین</span><h1>اعلان‌های شما</h1><p>تغییرات درخواست‌ها بدون نیاز به ایمیل یا پیامک در همین سامانه اعلام می‌شوند.</p></div><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_all_notifications"><button class="button secondary" type="submit">خوانده‌شدن همه</button></form></section><section class="card notification-list">';
@@ -1658,6 +1709,7 @@ if ($page === 'notifications') {
 if ($page === 'audit') {
     $legacyAuditUser = require_login();
     if (!user_can_any($legacyAuditUser, ['logs.activity', 'audit.view', 'logs.view'])) {
+        security_log_access_denied($legacyAuditUser, 'logs.activity|audit.view|logs.view', 'audit');
         http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.');
     }
     redirect('index.php?page=activity-log');
@@ -1669,7 +1721,7 @@ if ($page === 'system-health') {
 
 if ($page === 'logs') {
     $legacyLogUser = require_login();
-    if (!user_can_any($legacyLogUser, ['logs.view', 'logs.activity', 'audit.view'])) { http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.'); }
+    if (!user_can_any($legacyLogUser, ['logs.view', 'logs.activity', 'audit.view'])) { security_log_access_denied($legacyLogUser, 'logs.view|logs.activity|audit.view', 'logs'); http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.'); }
     redirect(user_can($legacyLogUser, 'system.health') ? 'index.php?page=system-health' : 'index.php?page=activity-log&category=errors');
 }
 
@@ -1678,6 +1730,7 @@ if ($page === 'activity-log') {
     $canViewActivityLogs = user_can_any($logUser, ['logs.activity', 'audit.view']);
     $canViewSystemLogs = user_can($logUser, 'logs.view');
     if (!$canViewActivityLogs && !$canViewSystemLogs) {
+        security_log_access_denied($logUser, 'logs.activity|audit.view|logs.view', 'activity-log');
         http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.');
     }
     if (!$canViewActivityLogs && $canViewSystemLogs && (string) ($_GET['category'] ?? 'errors') !== 'errors') {
@@ -1703,9 +1756,15 @@ if ($page === 'activity-log') {
     if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
         system_logs_ensure();
         $systemConditions = [];
-        $systemLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'warning', 'error'], '');
+        $systemLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'notice', 'warning', 'error', 'critical'], '');
         if ($systemLevel !== '') { $systemConditions[] = 's.level = ?'; $systemParams[] = $systemLevel; }
-        else { $systemConditions[] = "s.level IN ('error', 'warning')"; }
+        else { $systemConditions[] = "s.level IN ('critical', 'error', 'warning')"; }
+        $systemCode = trim((string) ($_GET['event_code'] ?? ''));
+        if ($systemCode !== '' && preg_match('/^[A-Z0-9][A-Z0-9._-]{2,39}$/i', $systemCode)) { $systemConditions[] = 's.code = ?'; $systemParams[] = strtoupper($systemCode); }
+        $systemCategory = valid_choice((string) ($_GET['event_category'] ?? ''), ['', 'security', 'audit', 'business', 'operation', 'system', 'integration', 'performance'], '');
+        if ($systemCategory !== '') { $systemConditions[] = 's.category = ?'; $systemParams[] = $systemCategory; }
+        $systemRequestId = trim((string) ($_GET['request_id'] ?? ''));
+        if ($systemRequestId !== '' && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $systemRequestId)) { $systemConditions[] = 's.request_id = ?'; $systemParams[] = $systemRequestId; }
         $systemSearch = trim((string) ($_GET['q'] ?? ''));
         if ($systemSearch !== '') {
             $systemConditions[] = '(s.context LIKE ? OR s.message LIKE ? OR s.meta_json LIKE ? OR s.request_uri LIKE ?)';
@@ -1713,11 +1772,9 @@ if ($page === 'activity-log') {
         }
         $systemUserId = (int) ($_GET['user_id'] ?? 0);
         if ($systemUserId > 0) { $systemConditions[] = 's.user_id = ?'; $systemParams[] = $systemUserId; }
-        foreach (['from' => '>=', 'to' => '<='] as $key => $operator) {
-            $dateText = trim((string) ($_GET[$key] ?? ''));
-            $dateValue = $dateText !== '' ? jalali_input_to_gregorian($dateText, $key === 'to') : null;
-            if ($dateValue !== null) { $systemConditions[] = 's.created_at ' . $operator . ' ?'; $systemParams[] = $dateValue; }
-        }
+        [$systemFrom, $systemTo] = log_bounded_date_range(trim((string) ($_GET['from'] ?? '')), trim((string) ($_GET['to'] ?? '')));
+        if ($systemFrom !== null) { $systemConditions[] = 's.created_at >= ?'; $systemParams[] = $systemFrom; }
+        if ($systemTo !== null) { $systemConditions[] = 's.created_at <= ?'; $systemParams[] = $systemTo; }
         $systemWhere = $systemConditions ? ' WHERE ' . implode(' AND ', $systemConditions) : '';
         $systemCount = db()->prepare('SELECT COUNT(*) FROM system_logs s' . $systemWhere);
         $systemCount->execute($systemParams);
@@ -1735,7 +1792,7 @@ if ($page === 'activity-log') {
     $activityQuery->execute($logParams);
     $activityRows = $activityQuery->fetchAll();
     if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
-        $systemQuery = db()->prepare('SELECT s.*, u.username, u.full_name FROM system_logs s LEFT JOIN users u ON u.id = s.user_id' . $systemWhere . log_sort_order(['time' => 's.created_at', 'user' => 'u.full_name', 'level' => "FIELD(s.level, 'debug', 'info', 'warning', 'error')", 'context' => 's.context', 'request' => 's.request_uri', 'message' => 's.message', 'meta' => 's.meta_json', '__tie' => 's.id'], $logSortS, $logDirS, ' ORDER BY s.created_at DESC, s.id DESC') . ' LIMIT ' . $perPage . ' OFFSET ' . $offset);
+        $systemQuery = db()->prepare('SELECT s.*, u.username, u.full_name FROM system_logs s LEFT JOIN users u ON u.id = s.user_id' . $systemWhere . log_sort_order(['time' => 's.created_at', 'user' => 'u.full_name', 'level' => "FIELD(s.level, 'debug', 'info', 'notice', 'warning', 'error', 'critical')", 'context' => 's.context', 'request' => 's.request_uri', 'message' => 's.message', 'meta' => 's.meta_json', '__tie' => 's.id'], $logSortS, $logDirS, ' ORDER BY s.created_at DESC, s.id DESC') . ' LIMIT ' . $perPage . ' OFFSET ' . $offset);
         $systemQuery->execute($systemParams);
         $systemRows = $systemQuery->fetchAll();
     }
@@ -1755,17 +1812,28 @@ if ($page === 'activity-log') {
     foreach($tabNames as $tab=>$label){ echo '<a class="' . ($category===$tab?'active':'') . '" href="index.php?page=activity-log&category=' . e($tab) . '">' . e($label) . '</a>'; }
     echo '</nav><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="activity-log"><input type="hidden" name="category" value="' . e($category) . '"><div class="filter-grid">';
     if ($canViewSystemLogs && in_array($category, ['all', 'errors'], true)) {
-        $selectedLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'warning', 'error'], '');
-        echo '<label>نوع رخداد<select name="level"><option value="">خطاها و هشدارها (پیشنهادی)</option><option value="error"' . ($selectedLevel === 'error' ? ' selected' : '') . '>خطا</option><option value="warning"' . ($selectedLevel === 'warning' ? ' selected' : '') . '>هشدار</option><option value="info"' . ($selectedLevel === 'info' ? ' selected' : '') . '>اطلاع‌رسانی</option><option value="debug"' . ($selectedLevel === 'debug' ? ' selected' : '') . '>جزئیات تخصصی</option></select></label>';
+        $selectedLevel = valid_choice((string) ($_GET['level'] ?? ''), ['debug', 'info', 'notice', 'warning', 'error', 'critical'], '');
+        echo '<label>شدت رخداد<select name="level"><option value="">خطاها و هشدارها (پیشنهادی)</option>';
+        foreach (['critical'=>'بحرانی','error'=>'خطا','warning'=>'هشدار','notice'=>'اعلان','info'=>'اطلاع‌رسانی','debug'=>'جزئیات تخصصی'] as $levelKey=>$levelLabel) {
+            echo '<option value="' . $levelKey . '"' . ($selectedLevel === $levelKey ? ' selected' : '') . '>' . $levelLabel . '</option>';
+        }
+        echo '</select></label>';
     }
     if ($canViewActivityLogs) {
         echo '<label>کاربر<select name="user_id"><option value="">همه کاربران</option>';
-        foreach ($activityUsers as $option) echo '<option value="' . (int)$option['id'] . '"' . ((int)($_GET['user_id']??0)===(int)$option['id']?' selected':'') . '>' . e($option['full_name'].' ('.$option['username'].')') . '</option>';
+        foreach ($activityUsers as $option) echo '<option value="' . (int) $option['id'] . '"' . ((int) ($_GET['user_id'] ?? 0) === (int) $option['id'] ? ' selected' : '') . '>' . e($option['full_name'] . ' (' . $option['username'] . ')') . '</option>';
         echo '</select></label><label>نوع عملیات<select name="action_code"><option value="">همه عملیات</option>';
-        foreach($activityActions as $option) echo '<option value="'.e($option['action_code']).'"'.((string)($_GET['action_code']??'')===(string)$option['action_code']?' selected':'').'>'.e($option['label']?:$option['action_code']).' ('.(int)$option['total'].')</option>';
+        foreach ($activityActions as $option) echo '<option value="' . e($option['action_code']) . '"' . ((string) ($_GET['action_code'] ?? '') === (string) $option['action_code'] ? ' selected' : '') . '>' . e($option['label'] ?: $option['action_code']) . ' (' . (int) $option['total'] . ')</option>';
         echo '</select></label><label>بخش سامانه<select name="module"><option value="">همه بخش‌ها</option>';
-        foreach($activityModules as $option) echo '<option value="'.e($option['module']).'"'.((string)($_GET['module']??'')===(string)$option['module']?' selected':'').'>'.e($option['module']).' ('.(int)$option['total'].')</option>';
+        foreach ($activityModules as $option) echo '<option value="' . e($option['module']) . '"' . ((string) ($_GET['module'] ?? '') === (string) $option['module'] ? ' selected' : '') . '>' . e($option['module']) . ' (' . (int) $option['total'] . ')</option>';
+        echo '</select></label><label>نتیجه<select name="result"><option value="">همه نتایج</option>';
+        foreach (['success'=>'موفق','failure'=>'ناموفق','denied'=>'ردشده','unknown'=>'نامشخص (سوابق قدیمی)'] as $resultKey=>$resultLabel) echo '<option value="' . $resultKey . '"' . ((string) ($_GET['result'] ?? '') === $resultKey ? ' selected' : '') . '>' . $resultLabel . '</option>';
         echo '</select></label>';
+    }
+    if ($canViewActivityLogs || ($canViewSystemLogs && in_array($category, ['all', 'errors'], true))) {
+        echo '<label>کد رخداد<input name="event_code" dir="ltr" maxlength="40" placeholder="SYS-DB-001" value="' . e($_GET['event_code'] ?? '') . '"></label><label>دستهٔ رخداد<select name="event_category"><option value="">همه دسته‌ها</option>';
+        foreach (['security'=>'امنیت','audit'=>'حسابرسی','system'=>'سیستم','business'=>'کسب‌وکار','operation'=>'عملیات','integration'=>'یکپارچه‌سازی','performance'=>'عملکرد'] as $catKey=>$catLabel) echo '<option value="' . $catKey . '"' . ((string) ($_GET['event_category'] ?? '') === $catKey ? ' selected' : '') . '>' . $catLabel . '</option>';
+        echo '</select></label><label class="full">کد پیگیری درخواست<input name="request_id" dir="ltr" maxlength="36" value="' . e($_GET['request_id'] ?? '') . '"></label>';
     }
     echo '<label>از تاریخ<input name="from" placeholder="۱۴۰۵/۰۷/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ<input name="to" placeholder="۱۴۰۵/۰۷/۳۰" value="' . e($_GET['to'] ?? '') . '"></label>' . ($canViewActivityLogs ? '<label>آی‌پی<input name="ip" placeholder="مثلاً 192.168.1." value="' . e($_GET['ip'] ?? '') . '"></label>' : '') . '<label class="full">جست‌وجوی متن<input type="search" name="q" placeholder="کاربر، عملیات، نام رایانه یا جزئیات" value="' . e($_GET['q'] ?? '') . '"></label></div><div class="actions"><button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="index.php?page=activity-log&category=' . e($category) . '">پاک‌کردن فیلترها</a></div></form></section>';
     if (in_array($category, ['all', 'errors'], true) && user_can($logUser, 'logs.view')) {
@@ -1773,7 +1841,7 @@ if ($page === 'activity-log') {
         if ($systemRows) { foreach ($systemRows as $systemRow) {
             $systemMeta = json_decode((string) ($systemRow['meta_json'] ?? ''), true);
             $systemMeta = is_array($systemMeta) ? $systemMeta : [];
-            $humanEvent = system_health_humanize_event(['context' => (string) ($systemRow['context'] ?? ''), 'title' => (string) ($systemRow['message'] ?? ''), 'technical' => (string) ($systemMeta['technical'] ?? '')]);
+            $humanEvent = system_health_humanize_event(['context' => (string) ($systemRow['context'] ?? ''), 'title' => (string) ($systemRow['message'] ?? ''), 'code' => (string) ($systemRow['code'] ?? ''), 'category' => (string) ($systemRow['category'] ?? 'system'), 'level' => (string) ($systemRow['level'] ?? 'error'), 'technical' => (string) ($systemMeta['technical'] ?? '')]);
             $humanLevel = system_health_human_level((string) $systemRow['level']);
             $systemTitle = in_array((string) $systemRow['level'], ['error', 'warning'], true) ? $humanEvent['title'] : 'رویداد اطلاع‌رسانی سامانه';
             $systemActor = !empty($systemRow['user_id']) ? 'مرتبط با یک حساب کاربری' : 'خود سامانه';
@@ -1839,6 +1907,7 @@ if ($page === 'backup') {
 }
 
 if ($page === 'search' && $user && !user_can($user, 'search.global')) {
+    security_log_access_denied($user, 'search.global', 'search');
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
@@ -2108,6 +2177,7 @@ implode('', array_map(static fn ($y) => '<option value="' . $y . '"' . ($y === (
 }
 
 if ($page === 'new-ticket' && $user && !user_can($user, 'ticket.create')) {
+    security_log_access_denied($user, 'ticket.create', 'new-ticket');
     http_response_code(403);
     render_header('عدم دسترسی', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">عدم دسترسی</span><h1>دسترسی به این بخش مجاز نیست</h1><p>برای دریافت دسترسی با ادمین اصلی سامانه تماس بگیرید.</p></div></section>';
@@ -2420,12 +2490,61 @@ if ($page === 'ticket') {
         echo '<button class="button wide" type="submit">ذخیره تغییرات</button></form></div>';
     }
     echo '</aside></div>';
-    $eventsQuery = db()->prepare('SELECT e.*, u.full_name FROM ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE e.ticket_id = ? ORDER BY e.created_at DESC');
-    $eventsQuery->execute([$ticket['id']]);
-    echo '<section class="card event-log"><h3>ردگیری و سوابق انجام کار</h3><div class="event-list">';
-    foreach ($eventsQuery->fetchAll() as $event) {
+    $eventSearch = trim((string) ($_GET['event_q'] ?? ''));
+    $eventConditions = ['e.ticket_id = ?'];
+    $eventParams = [(int) $ticket['id']];
+    if ($eventSearch !== '') {
+        $needle = '%' . logging_utf8_substr($eventSearch, 0, 100) . '%';
+        $searchParts = ['e.event_type LIKE ?', 'e.from_status LIKE ?', 'e.to_status LIKE ?', 'u.full_name LIKE ?'];
+        array_push($eventParams, $needle, $needle, $needle, $needle);
+        if ($staff) {
+            $searchParts[] = 'CAST(e.details AS CHAR) LIKE ?';
+            $eventParams[] = $needle;
+        } else {
+            // Requesters may search only the same safe detail keys that are rendered to them.
+            foreach (['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'] as $safeSearchKey) {
+                $searchParts[] = "JSON_UNQUOTE(JSON_EXTRACT(e.details, '$." . $safeSearchKey . "')) LIKE ?";
+                $eventParams[] = $needle;
+            }
+        }
+        $eventConditions[] = '(' . implode(' OR ', $searchParts) . ')';
+    }
+    $eventCountQuery = db()->prepare('SELECT COUNT(*) FROM ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE ' . implode(' AND ', $eventConditions));
+    $eventCountQuery->execute($eventParams);
+    $eventTotal = (int) $eventCountQuery->fetchColumn();
+    $eventPageSize = 100;
+    $eventPages = max(1, (int) ceil($eventTotal / $eventPageSize));
+    $eventPage = min(max(1, (int) ($_GET['event_page'] ?? 1)), $eventPages);
+    $eventOffset = ($eventPage - 1) * $eventPageSize;
+    $eventsQuery = db()->prepare('SELECT e.*, u.full_name FROM ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE ' . implode(' AND ', $eventConditions) . ' ORDER BY e.created_at DESC, e.id DESC LIMIT ' . $eventPageSize . ' OFFSET ' . $eventOffset);
+    $eventsQuery->execute($eventParams);
+    $ticketEvents = $eventsQuery->fetchAll();
+    echo '<section class="card event-log"><div class="section-title"><div><h3>ردگیری و سوابق انجام کار</h3><p class="muted">' . number_format($eventTotal) . ' رخداد مطابق فیلتر؛ صفحه ' . number_format($eventPage) . ' از ' . number_format($eventPages) . '. جزئیات قابل‌مشاهده بر اساس سطح دسترسی پالایش می‌شود.</p></div></div>';
+    echo '<form method="get" class="inline-form"><input type="hidden" name="page" value="ticket"><input type="hidden" name="id" value="' . (int) $ticket['id'] . '"><label>جست‌وجوی رویداد<input type="search" name="event_q" maxlength="100" value="' . e($eventSearch) . '" placeholder="نوع رویداد، وضعیت، توضیحات یا عامل"></label><button class="button secondary" type="submit">جست‌وجو</button>' . ($eventSearch !== '' ? '<a class="button secondary" href="index.php?page=ticket&amp;id=' . (int) $ticket['id'] . '">پاک‌کردن</a>' : '') . '</form><div class="event-list">';
+    foreach ($ticketEvents as $event) {
         $eventText = ['created' => 'درخواست ثبت شد', 'assigned' => 'درخواست به کارشناس ارجاع شد', 'status_changed' => 'وضعیت درخواست تغییر کرد', 'reply' => 'پاسخ ثبت شد', 'internal_note' => 'یادداشت داخلی ثبت شد', 'claimed' => 'درخواست توسط کارشناس برداشته شد', 'rated' => 'امتیاز رضایت کاربر ثبت شد', 'reopened_by_user' => 'کاربر اعلام کرد مشکل حل نشده است', 'supervisor_approved' => 'تأیید نهایی و بسته‌شدن', 'supervisor_rework' => 'برگشت برای اصلاح توسط سوپروایزر', 'supervisor_reopened' => 'بازگشایی رسمی توسط سوپروایزر', 'cancelled_by_requester' => 'لغو مستقیم توسط ثبت‌کننده پیش از ارجاع', 'cancellation_requested' => 'درخواست لغو در انتظار تصمیم مسئول', 'cancellation_approved' => 'تأیید لغو توسط مسئول رسیدگی', 'cancellation_rejected' => 'رد درخواست لغو و ادامهٔ رسیدگی', 'auto_assigned' => 'ارجاع خودکار به مسئول حوزه', 'auto_closed' => 'بسته‌شدن خودکار (بدون امتیاز کاربر)', 'bulk_status_changed' => 'تغییر وضعیت گروهی', 'priority_changed' => 'اولویت تغییر کرد'][$event['event_type']] ?? $event['event_type'];
-        echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e($eventText) . '</strong><small>' . e($event['full_name'] ?: 'سامانه') . ' • ' . persian_date($event['created_at']) . '</small></div><em>' . e(status_label((string) $event['to_status'])) . '</em></div>';
+        $eventDetails = json_decode((string) ($event['details'] ?? ''), true);
+        $eventDetails = is_array($eventDetails) ? $eventDetails : [];
+        $visibleDetails = [];
+        $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'];
+        if ($staff) $safeKeys = array_merge($safeKeys, ['note','assigned_to','requested_at','actor_id']);
+        foreach ($eventDetails as $detailKey => $detailValue) {
+            if (in_array((string) $detailKey, $safeKeys, true)) $visibleDetails[$detailKey] = $detailValue;
+        }
+        $detailLines = $visibleDetails ? activity_log_meta_lines(json_encode($visibleDetails, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) : [];
+        $detailHtml = $detailLines ? '<details class="log-details"><summary>جزئیات (' . count($detailLines) . ')</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $detailLines)) . '</dl></details>' : '';
+        $fromStatus = trim((string) ($event['from_status'] ?? ''));
+        $toStatus = trim((string) ($event['to_status'] ?? ''));
+        $transition = ($fromStatus !== '' || $toStatus !== '') ? '<small class="muted">' . e($fromStatus !== '' ? status_label($fromStatus) : '—') . ' ← ' . e($toStatus !== '' ? status_label($toStatus) : '—') . '</small>' : '';
+        $correlationHtml = $staff && !empty($event['request_id'])
+            ? '<small class="muted" dir="ltr">Request: ' . e((string) $event['request_id']) . (!empty($event['trace_id']) ? ' · Trace: ' . e((string) $event['trace_id']) : '') . '</small>'
+            : '';
+        echo '<div class="event-item"><span class="event-dot"></span><div><strong>' . e($eventText) . '</strong><small>' . e($event['full_name'] ?: 'سامانه') . ' • ' . persian_date($event['created_at']) . '</small>' . $transition . $detailHtml . $correlationHtml . '</div><em>' . e($toStatus !== '' ? status_label($toStatus) : '—') . '</em></div>';
+    }
+    if (!$ticketEvents) echo '<p class="muted">رخدادی با این عبارت پیدا نشد.</p>';
+    if ($eventPages > 1) {
+        $eventBase = 'index.php?page=ticket&amp;id=' . (int) $ticket['id'] . ($eventSearch !== '' ? '&amp;event_q=' . rawurlencode($eventSearch) : '') . '&amp;event_page=';
+        echo '<div class="actions">' . ($eventPage > 1 ? '<a class="button secondary" href="' . $eventBase . ($eventPage - 1) . '">رخدادهای قدیمی‌تر</a>' : '') . ($eventPage < $eventPages ? '<a class="button secondary" href="' . $eventBase . ($eventPage + 1) . '">رخدادهای جدیدتر</a>' : '') . '</div>';
     }
     echo '</div></section>';
     render_footer();
@@ -2584,6 +2703,7 @@ if ($page === 'supervisor') {
 if ($page === 'inventory') {
     $inventoryUser = require_permission('inventory.view');
     if (!is_global_ticket_role($inventoryUser['role']) && user_service_group($inventoryUser) !== 'it') {
+        security_log_access_denied($inventoryUser, 'inventory.scope.it', 'inventory');
         http_response_code(403);
         exit('شناسنامه فنی سیستم‌ها فقط در حوزه IT قابل دسترسی است.');
     }
@@ -2684,6 +2804,7 @@ if ($page === 'inventory') {
 if ($page === 'inventory-diagnostics') {
     $diagUser = require_permission('inventory.diagnostics');
     if (!is_global_ticket_role($diagUser['role']) && user_service_group($diagUser) !== 'it') {
+        security_log_access_denied($diagUser, 'inventory.scope.it', 'inventory-diagnostics');
         http_response_code(403);
         exit('این بخش فقط در حوزه IT قابل دسترسی است.');
     }
@@ -2811,6 +2932,7 @@ if ($page === 'domain-scan') {
 if ($page === 'assets') {
     $assetUser = require_permission('assets.view');
     if (!is_global_ticket_role($assetUser['role']) && user_service_group($assetUser) !== 'it') {
+        security_log_access_denied($assetUser, 'assets.scope.it', 'assets');
         http_response_code(403);
         exit('شناسنامه فنی سیستم‌ها فقط در حوزه IT قابل دسترسی است.');
     }
@@ -3072,7 +3194,7 @@ HTML;
         $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
     } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
     echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=22"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=20"></script>';
     render_footer();
     exit;
 }
@@ -3161,7 +3283,7 @@ if ($page === 'settings') {
         } catch (Throwable) {
             $activityCount = 0;
         }
-        echo '<div class="card form-card" id="activity-log-settings"><h2>گزارش فعالیت کاربران</h2><p class="muted">تمام عملیات کاربران ثبت می‌شود. رکوردهای قدیمی‌تر از بازهٔ نگهداری به‌صورت خودکار با کران پاک می‌شوند. رکوردهای فعلی: ' . number_format($activityCount) . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="prune_activity_logs"><label>بازهٔ نگهداری (روز)<input type="number" name="retention_days" min="7" max="3650" value="' . (int) $activityRetention . '"></label><small>پیش‌فرض ۶۰ روز (حدود دو ماه).</small><button class="button secondary" type="submit">ذخیره و پاک‌سازی لاگ‌های قدیمی</button></form></div>';
+        echo '<div class="card form-card" id="activity-log-settings"><h2>گزارش فعالیت کاربران</h2><p class="muted">تمام عملیات کاربران ثبت می‌شود. رکوردهای قدیمی‌تر از بازهٔ نگهداری به‌صورت خودکار با کران پاک می‌شوند. رکوردهای فعلی: ' . number_format($activityCount) . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="prune_activity_logs"><label>بازهٔ نگهداری (روز)<input type="number" name="retention_days" min="30" max="3650" value="' . (int) $activityRetention . '"></label><small>حداقل ۳۰ روز برای فعالیت‌های عادی؛ امنیت، حسابرسی و عملیات حساس حداقل ۱۸۳ روز نگهداری می‌شوند.</small><button class="button secondary" type="submit">ذخیره و پاک‌سازی لاگ‌های قدیمی</button></form></div>';
     }
     echo '</div>';
     }
@@ -3534,15 +3656,17 @@ if ($page === 'settings') {
 
 if ($page === 'logs') {
     $logUser = require_permission('logs.view');
-    $levelFilter = valid_choice((string) ($_GET['level'] ?? ''), ['', 'error', 'warning', 'info', 'debug'], '');
-    $logRows = system_logs_recent(200, $levelFilter);
+    $levelFilter = valid_choice((string) ($_GET['level'] ?? ''), ['', 'critical', 'error', 'warning', 'notice', 'info', 'debug'], '');
+    $requestFilter = trim((string) ($_GET['request_id'] ?? ''));
+    $requestFilter = preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $requestFilter) ? $requestFilter : '';
+    $logRows = system_logs_recent(200, $levelFilter, $requestFilter);
     render_header('گزارش خطا', $logUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">System Logs</span><h1>گزارش خطا و رویدادهای سامانه</h1><p>خطاهای برنامه، استخراج شناسنامه و رویدادهای مهم اینجا ثبت می‌شوند. فایل خام: storage/logs/app.log</p></div><div class="actions"><a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=info">اطلاعات</a></div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">System Logs</span><h1>گزارش خطا و رویدادهای سامانه</h1><p>خطاهای برنامه، استخراج شناسنامه و رویدادهای مهم اینجا ثبت می‌شوند. کد پیگیری درخواست برای ردیابی رخدادها در دسترس است. فایل سازگار: storage/logs/app.log</p></div><div class="actions"><a class="button secondary" href="index.php?page=logs">همه</a><a class="button secondary" href="index.php?page=logs&level=error">فقط خطاها</a><a class="button secondary" href="index.php?page=logs&level=info">اطلاعات</a></div></section>';
     echo '<section class="card ticket-table audit-table"><div class="table-head"><span>زمان</span><span>سطح</span><span>بخش</span><span>پیام</span><span>آدرس</span></div>';
     if ($logRows) {
         foreach ($logRows as $logRow) {
-            $levelClass = $logRow['level'] === 'error' ? 'critical' : ($logRow['level'] === 'warning' ? 'urgent' : 'normal');
-            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e($logRow['level']) . '</em></span><span>' . e($logRow['context']) . '</span><span class="muted">' . e($logRow['message']) . system_log_meta_html((string) ($logRow['meta_json'] ?? '')) . '</span><span class="muted">' . e($logRow['request_uri']) . '</span></div>';
+            $levelClass = in_array($logRow['level'], ['critical', 'error'], true) ? 'critical' : (in_array($logRow['level'], ['warning', 'notice'], true) ? 'urgent' : 'normal');
+            echo '<div class="table-row"><span class="date-cell">' . e(persian_date($logRow['created_at'])) . '</span><span><em class="status ' . $levelClass . '">' . e($logRow['level']) . '</em></span><span>' . e($logRow['context']) . '</span><span class="muted">' . e($logRow['message']) . system_log_meta_html((string) ($logRow['meta_json'] ?? '')) . '</span><span class="muted">' . e($logRow['request_uri']) . '<small class="muted" dir="ltr">' . e((string) ($logRow['request_id'] ?? '')) . '</small></span></div>'; 
         }
     } else {
         echo '<div class="table-row"><span class="muted">گزارشی ثبت نشده است.</span></div>';

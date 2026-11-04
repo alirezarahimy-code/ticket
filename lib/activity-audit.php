@@ -13,57 +13,48 @@ if (!defined('APP_ROOT')) {
 
 function activity_logs_ensure(): void
 {
-    static $ready = false;
-    if ($ready) {
-        return;
-    }
-    $ready = true;
+    // DDL در مسیر درخواست اجرا نمی‌شود؛ جدول باید از schema.sql یا Migrationها آماده شده باشد.
+    static $checked = false;
+    if ($checked) return;
+    $checked = true;
     try {
-        // هر درخواست DDL نمی‌فرستد؛ DDL روی جدول موجود می‌تواند با قفل‌های metadata، درخواست‌های دیگر را معطل کند.
-        if (db_table_exists('activity_logs')) {
-            return;
+        if (!function_exists('db_table_exists') || !db_table_exists('activity_logs')) {
+            logging_emergency_failure('activity_logs_table_missing', 'apply database schema/migrations');
         }
-        db()->exec('CREATE TABLE IF NOT EXISTS activity_logs (
-            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            user_id INT UNSIGNED NULL,
-            username VARCHAR(190) NULL,
-            full_name VARCHAR(190) NULL,
-            role VARCHAR(40) NULL,
-            action_code VARCHAR(120) NOT NULL,
-            action_label VARCHAR(190) NULL,
-            module VARCHAR(80) NULL,
-            target_type VARCHAR(40) NULL,
-            target_id BIGINT UNSIGNED NULL,
-            target_label VARCHAR(255) NULL,
-            meta_json JSON NULL,
-            ip_address VARCHAR(64) NULL,
-            computer_name VARCHAR(190) NULL,
-            hostname VARCHAR(190) NULL,
-            user_agent VARCHAR(255) NULL,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_activity_created (created_at),
-            INDEX idx_activity_user (user_id),
-            INDEX idx_activity_action (action_code),
-            INDEX idx_activity_module (module),
-            INDEX idx_activity_ip (ip_address)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
-    } catch (Throwable) {
+    } catch (Throwable $exception) {
+        logging_emergency_failure('activity_logs_schema_check_failed', get_class($exception));
     }
 }
 
 function activity_client_ip(): string
 {
-    foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'] as $header) {
-        $value = trim((string) ($_SERVER[$header] ?? ''));
-        if ($value === '') {
+    $remote = trim((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+    if (!filter_var($remote, FILTER_VALIDATE_IP)) {
+        return '';
+    }
+    $trusted = cfg('app.trusted_proxies', []);
+    if (is_string($trusted)) {
+        $trusted = array_filter(array_map('trim', explode(',', $trusted)));
+    }
+    if (!is_array($trusted) || !in_array($remote, $trusted, true)) {
+        return $remote;
+    }
+    $forwarded = trim((string) ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? ''));
+    if ($forwarded === '') {
+        return $remote;
+    }
+    $chain = array_map('trim', explode(',', $forwarded));
+    $chain[] = $remote;
+    for ($i = count($chain) - 1; $i >= 0; $i--) {
+        $candidate = $chain[$i];
+        if (!filter_var($candidate, FILTER_VALIDATE_IP)) {
             continue;
         }
-        if ($header === 'HTTP_X_FORWARDED_FOR') {
-            $value = trim(explode(',', $value)[0]);
+        if (!in_array($candidate, $trusted, true)) {
+            return substr($candidate, 0, 64);
         }
-        return substr($value, 0, 64);
     }
-    return '';
+    return $remote;
 }
 
 function activity_computer_name(?string $ip = null): string
@@ -99,6 +90,7 @@ function activity_computer_name(?string $ip = null): string
 function activity_action_label(string $code): string
 {
     static $map = [
+        'login' => 'ورود به سامانه',
         'login_local' => 'ورود با حساب محلی',
         'login_ldap' => 'ورود با حساب دامین',
         'login_failed' => 'تلاش ناموفق ورود',
@@ -106,6 +98,73 @@ function activity_action_label(string $code): string
         'logout' => 'خروج از سامانه',
         'page_view' => 'مشاهدهٔ صفحه',
         'profile_updated' => 'به‌روزرسانی پروفایل',
+        'change_created' => 'ایجاد درخواست تغییر',
+        'change_updated' => 'ویرایش درخواست تغییر',
+        'change_submitted' => 'ارسال تغییر برای بررسی CAB',
+        'change_cab_approved' => 'تأیید تغییر توسط CAB',
+        'change_cab_rejected' => 'رد تغییر توسط CAB',
+        'change_transition' => 'تغییر وضعیت اجرای تغییر',
+        'change_scheduled' => 'زمان‌بندی اجرای تغییر',
+        'change_implemented' => 'ثبت اجرای تغییر',
+        'change_rolled_back' => 'بازگشت تغییر',
+        'change_closed' => 'بستن تغییر',
+        'change_ticket_linked' => 'اتصال درخواست به تغییر',
+        'problem_ticket_linked' => 'اتصال درخواست به مشکل',
+        'problem_created' => 'ایجاد رکورد مشکل',
+        'problem_updated' => 'به‌روزرسانی رکورد مشکل',
+        'holiday_created' => 'ثبت تعطیلی',
+        'holiday_activated' => 'فعال‌سازی تعطیلی',
+        'holiday_deactivated' => 'غیرفعال‌سازی تعطیلی',
+        'holiday_deleted' => 'حذف تعطیلی',
+        'holidays_imported' => 'ورود گروهی تعطیلات',
+        'traffic_visit_created' => 'ثبت ورود مراجعه‌کننده',
+        'traffic_visit_updated' => 'ویرایش ورود مراجعه‌کننده',
+        'traffic_visit_deleted' => 'حذف رکورد مراجعه‌کننده',
+        'traffic_visit_exit_set' => 'ثبت خروج مراجعه‌کننده',
+        'traffic_notice_created' => 'ثبت اطلاعیه تردد',
+        'food_orders_imported' => 'ورود گروهی سفارش‌های غذا',
+        'food_employees_imported' => 'ورود گروهی کارکنان فیش غذا',
+        'food_ticket_config_saved' => 'ذخیره تنظیمات چاپ فیش غذا',
+        'food_ticket_access_database_uploaded' => 'بارگذاری دیتابیس دسترسی فیش غذا',
+        'traffic_records_imported' => 'ورود گروهی تردد',
+        'maintenance_cache_purged' => 'پاک‌سازی Cache سامانه',
+        'maintenance_tables_analyzed' => 'بهینه‌سازی و تحلیل جداول',
+        'system_logs_pruned' => 'پاک‌سازی لاگ‌های سامانه',
+        'system_incident_status' => 'تغییر وضعیت رخداد سلامت سامانه',
+        'page_layout_saved' => 'ذخیره چیدمان صفحه',
+        'page_layout_reset' => 'بازنشانی چیدمان صفحه',
+        'chatbot_faq_saved' => 'ذخیره پرسش و پاسخ آریا',
+        'chatbot_tts_saved' => 'ذخیره تنظیمات گفتار آریا',
+        'chatbot_widget_saved' => 'ذخیره تنظیمات ابزارک آریا',
+        'chatbot_tts_ezafe_pairs' => 'به‌روزرسانی واژگان کسره اضافه',
+        'org_action_undo_requested' => 'درخواست بازگردانی تغییر ساختار سازمان',
+        'org_action_redo_requested' => 'درخواست تکرار تغییر ساختار سازمان',
+        'org_action_undone' => 'بازگردانی تغییر ساختار سازمان',
+        'org_action_redone' => 'تکرار تغییر ساختار سازمان',
+        'backup_restore_started' => 'شروع بازیابی پشتیبان',
+        'system_update_started' => 'شروع به‌روزرسانی سامانه',
+        'ldap_bulk_sync_started' => 'شروع همگام‌سازی گروهی دامین',
+        'ldap_bulk_sync' => 'نتیجه همگام‌سازی گروهی دامین',
+        'ldap_diagnosed' => 'آزمون ارتباط LDAP',
+        'activity_logs_prune_started' => 'شروع پاک‌سازی گزارش فعالیت',
+        'service_created' => 'ایجاد خدمت در کاتالوگ',
+        'service_updated' => 'ویرایش خدمت در کاتالوگ',
+        'service_deleted' => 'غیرفعال‌سازی خدمت در کاتالوگ',
+        'service_category_saved' => 'ذخیره دسته‌بندی خدمت',
+        'service_category_deleted' => 'غیرفعال‌سازی دسته‌بندی خدمت',
+        'service_field_created' => 'ایجاد فیلد سفارشی خدمت',
+        'knowledge_created' => 'ایجاد مقاله دانش‌نامه',
+        'department_structure_updated' => 'تغییر مدیر و اعضای معاونت',
+        'cd_dvd_inspection_user_changed' => 'تغییر مسئول بازرسی CD/DVD',
+        'food_ticket_brand_updated' => 'تغییر هویت بصری پنل فیش غذا',
+        'domain_inventory_scan_queued' => 'ثبت نوبت استخراج کل دامنه',
+        'domain_inventory_selected' => 'ثبت نوبت استخراج سیستم‌های انتخاب‌شده',
+        'domain_inventory_retry' => 'ثبت تلاش دوباره استخراج دامنه',
+        'domain_assets_imported' => 'ورود دارایی‌های دامنه',
+        'server_inventory_collect_started' => 'شروع استخراج شناسنامه سرور',
+        'server_inventory_collected' => 'ثبت شناسنامه سرور',
+        'asset_profile_saved' => 'ذخیره شناسنامه دارایی',
+        'asset_profile_selftest_applied' => 'اعمال داده‌های آزمون شناسنامه دارایی',
         'user_theme_changed' => 'تغییر تم شخصی',
         'ticket_created' => 'ثبت درخواست جدید',
         'ticket_replied' => 'پاسخ در درخواست',
@@ -161,6 +220,9 @@ function activity_action_label(string $code): string
         'food_ticket_ticket_released' => 'بازگشت فیش به صف چاپ (حاضر شد)',
         'food_ticket_delivered' => 'ثبت تحویل غذا',
         'food_ticket_delivery_revoked' => 'لغو تحویل غذا',
+        'access_group_created' => 'ایجاد گروه دسترسی',
+        'access_group_updated' => 'ویرایش اعضا و دسترسی‌های گروه',
+        'access_group_deleted' => 'حذف گروه دسترسی',
         'settings_updated' => 'به‌روزرسانی تنظیمات',
         'activity_logs_pruned' => 'پاک‌سازی لاگ‌های قدیمی',
         'import_domain_users' => 'ورود کاربران دامین',
@@ -218,9 +280,6 @@ function activity_action_label(string $code): string
         'domain_scan_batch' => 'ادامهٔ اسکن دامنه',
         'save_settings' => 'ذخیرهٔ تنظیمات سامانه',
         'save_role_permissions' => 'ذخیرهٔ دسترسی‌های نقش',
-        'access_group_created' => 'ایجاد گروه دسترسی',
-        'access_group_updated' => 'ویرایش اعضا و دسترسی‌های گروه',
-        'access_group_deleted' => 'حذف گروه دسترسی',
         'reset_role_permissions' => 'بازگرداندن همهٔ نقش‌ها به پیش‌فرض',
         'reset_role_defaults' => 'بازگرداندن دسترسی یک نقش به پیش‌فرض کد',
         'save_key_roles' => 'ذخیرهٔ نقش‌های کلیدی',
@@ -239,54 +298,58 @@ function activity_action_label(string $code): string
     return $map[$code] ?? $code;
 }
 
-function activity_log(array $data): void
+function activity_default_result(string $actionCode): string
 {
-    try {
-        activity_logs_ensure();
-        $user = $data['user'] ?? null;
-        if (is_array($user)) {
-            $userId = isset($user['id']) ? (int) $user['id'] : null;
-            $username = (string) ($user['username'] ?? '');
-            $fullName = (string) ($user['full_name'] ?? '');
-            $role = (string) ($user['role'] ?? '');
-        } else {
-            $userId = isset($data['user_id']) ? (int) $data['user_id'] : (isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null);
-            $username = (string) ($data['username'] ?? '');
-            $fullName = (string) ($data['full_name'] ?? '');
-            $role = (string) ($data['role'] ?? '');
-        }
-        if ($userId && ($username === '' || $fullName === '' || $role === '')) {
-            $lookup = db()->prepare('SELECT username, full_name, role FROM users WHERE id = ? LIMIT 1');
-            $lookup->execute([$userId]);
-            $identity = $lookup->fetch() ?: [];
-            $username = $username !== '' ? $username : (string) ($identity['username'] ?? '');
-            $fullName = $fullName !== '' ? $fullName : (string) ($identity['full_name'] ?? '');
-            $role = $role !== '' ? $role : (string) ($identity['role'] ?? '');
-        }
-        $code = substr((string) ($data['action_code'] ?? 'unknown'), 0, 120);
-        $meta = $data['meta'] ?? [];
-        $ip = (string) ($data['ip_address'] ?? activity_client_ip());
-        $computer = (string) ($data['computer_name'] ?? activity_computer_name($ip));
-        $hostname = (string) ($data['hostname'] ?? ($_SERVER['SERVER_NAME'] ?? ''));
-        db()->prepare('INSERT INTO activity_logs (user_id, username, full_name, role, action_code, action_label, module, target_type, target_id, target_label, meta_json, ip_address, computer_name, hostname, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([
-            $userId,
-            substr($username, 0, 190),
-            substr($fullName, 0, 190),
-            substr($role, 0, 40),
-            $code,
-            substr((string) ($data['action_label'] ?? activity_action_label($code)), 0, 190),
-            isset($data['module']) && $data['module'] !== null ? substr((string) $data['module'], 0, 80) : null,
-            isset($data['target_type']) && $data['target_type'] !== null ? substr((string) $data['target_type'], 0, 40) : null,
-            isset($data['target_id']) && $data['target_id'] !== null ? (int) $data['target_id'] : null,
-            isset($data['target_label']) && $data['target_label'] !== null ? substr((string) $data['target_label'], 0, 255) : null,
-            $meta !== [] ? json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null,
-            $ip !== '' ? $ip : null,
-            $computer !== '' ? $computer : null,
-            $hostname !== '' ? $hostname : null,
-            substr((string) ($data['user_agent'] ?? ($_SERVER['HTTP_USER_AGENT'] ?? '')), 0, 255),
-        ]);
-    } catch (Throwable) {
+    $code = strtolower(trim($actionCode));
+    if ($code === '' || $code === 'unknown') return 'unknown';
+    if (in_array($code, ['login_failed','post_action_failed','food_ticket_print_failed'], true) || str_ends_with($code, '_failed') || str_ends_with($code, '_error')) return 'failure';
+    if (in_array($code, ['login_locked','access_denied','csrf_419'], true) || str_ends_with($code, '_denied') || str_ends_with($code, '_locked')) return 'denied';
+    // API قدیمی activity_log پس از عملیات موفق فراخوانی می‌شود؛ نتیجهٔ موفق صریح/قابل‌استنباط است.
+    return 'success';
+}
+
+function activity_log(array $data): bool
+{
+    $user = $data['user'] ?? null;
+    if (is_array($user)) {
+        $userId = isset($user['id']) ? (int) $user['id'] : null;
+        $username = (string) ($user['username'] ?? '');
+        $fullName = (string) ($user['full_name'] ?? '');
+        $role = (string) ($user['role'] ?? '');
+    } else {
+        $userId = isset($data['user_id']) ? (int) $data['user_id'] : (isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null);
+        $sessionUser = is_array($_SESSION['audit_user'] ?? null) ? $_SESSION['audit_user'] : (is_array($_SESSION['user'] ?? null) ? $_SESSION['user'] : []);
+        $username = (string) ($data['username'] ?? $sessionUser['username'] ?? '');
+        $fullName = (string) ($data['full_name'] ?? $sessionUser['full_name'] ?? '');
+        $role = (string) ($data['role'] ?? $sessionUser['role'] ?? '');
     }
+    $code = substr((string) ($data['action_code'] ?? 'unknown'), 0, 120);
+    $eventDefinition = logging_action_event_definition($code);
+    $meta = is_array($data['meta'] ?? null) ? logging_sanitize_event_meta($data['meta'], $eventDefinition['code'], $code) : [];
+    $ip = activity_client_ip();
+    if (!filter_var($ip, FILTER_VALIDATE_IP)) $ip = '';
+    $computer = (string) ($data['computer_name'] ?? activity_computer_name($ip));
+    $hostname = (string) ($data['hostname'] ?? ($_SERVER['SERVER_NAME'] ?? ''));
+    $result = $data['result'] ?? activity_default_result($code);
+    $event = [
+        'event_id' => (isset($data['event_id']) && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', (string) $data['event_id'])) ? strtolower((string) $data['event_id']) : logging_uuid(), 'user_id' => $userId,
+        'username' => substr(logging_sanitize_text($username, 190), 0, 190),
+        'full_name' => substr(logging_sanitize_text($fullName, 190), 0, 190),
+        'role' => substr(logging_sanitize_text($role, 40), 0, 40),
+        'action_code' => $code, 'code' => $eventDefinition['code'], 'category' => $eventDefinition['category'],
+        'action_label' => substr(logging_sanitize_text((string) ($data['action_label'] ?? activity_action_label($code)), 190), 0, 190),
+        'module' => isset($data['module']) && $data['module'] !== null ? substr((string) $data['module'], 0, 80) : null,
+        'target_type' => isset($data['target_type']) && $data['target_type'] !== null ? substr((string) $data['target_type'], 0, 40) : null,
+        'target_id' => isset($data['target_id']) && $data['target_id'] !== null ? (int) $data['target_id'] : null,
+        'target_label' => isset($data['target_label']) && $data['target_label'] !== null ? substr(logging_sanitize_text((string) $data['target_label'], 255), 0, 255) : null,
+        'meta' => $meta, 'ip_address' => $ip !== '' ? $ip : null,
+        'computer_name' => $computer !== '' ? substr($computer, 0, 190) : null,
+        'hostname' => $hostname !== '' ? substr($hostname, 0, 190) : null,
+        'user_agent' => substr(logging_sanitize_text((string) ($data['user_agent'] ?? ($_SERVER['HTTP_USER_AGENT'] ?? '')), 255), 0, 255),
+        'result' => in_array($result, ['success', 'failure', 'denied', 'unknown'], true) ? (string) $result : 'unknown',
+    ];
+    // هیچ Query هویتی پیش از ساخت payload اجرا نمی‌شود؛ در قطع DB، همین payload کامل به Spool می‌رود.
+    return logging_store_activity($event);
 }
 
 /**
@@ -333,11 +396,14 @@ function activity_log_view(string $page): void
 
 function activity_logs_prune(int $days = 60): int
 {
-    $days = max(1, $days);
+    $days = max(30, min(3650, $days));
+    $auditDays = max(183, $days);
     try {
-        activity_logs_ensure();
-        return db_delete_in_batches('activity_logs', 'created_at < (NOW() - INTERVAL ? DAY)', [$days]);
-    } catch (Throwable) {
+            $businessDeleted = db_delete_in_batches('activity_logs', "category NOT IN ('security','audit','operation') AND created_at < (NOW() - INTERVAL ? DAY)", [$days]);
+        $protectedDeleted = db_delete_in_batches('activity_logs', "category IN ('security','audit','operation') AND created_at < (NOW() - INTERVAL ? DAY)", [$auditDays]);
+        return $businessDeleted + $protectedDeleted;
+    } catch (Throwable $exception) {
+        logging_emergency_failure('activity_logs_prune_failed', get_class($exception));
         return 0;
     }
 }
@@ -384,23 +450,150 @@ function ops_low_value_tables_prune(): array
 function activity_log_retention_days(): int
 {
     $days = (int) (setting('activity_log_retention_days', '60') ?? '60');
-    return $days > 0 ? $days : 60;
+    return max(30, min(3650, $days > 0 ? $days : 60));
 }
 
-function save_audit(int $userId, string $action, ?int $ticketId = null, array $meta = []): void
+/** Resolve stable module and target columns for audit events instead of leaving them NULL. */
+function activity_audit_context(string $action, ?int $ticketId, array $meta): array
 {
-    $GLOBALS['activity_audited'] = true;
-    activity_log([
+    $module = match (true) {
+        str_starts_with($action, 'ticket_'), in_array($action, ['ticket_created','ticket_updated','ticket_replied','ticket_rated'], true) => 'tickets',
+        str_starts_with($action, 'cd_dvd_') => 'cd-dvd',
+        str_starts_with($action, 'holiday_'), $action === 'holidays_imported' => 'holidays',
+        str_starts_with($action, 'change_'), str_starts_with($action, 'problem_') => 'governance',
+        str_starts_with($action, 'ldap_'), $action === 'sync_ldap_users' => 'ldap',
+        in_array($action, ['profile_updated','user_theme_changed','local_password_reset'], true) => 'account',
+        str_starts_with($action, 'org_'), str_starts_with($action, 'department_') => 'organization',
+        str_contains($action, 'role'), str_contains($action, 'permission') => 'permissions',
+        str_contains($action, 'backup'), str_starts_with($action, 'system_update') => 'backup',
+        str_starts_with($action, 'service_'), str_starts_with($action, 'knowledge_') => 'services',
+        str_starts_with($action, 'traffic_') => 'traffic',
+        str_starts_with($action, 'asset_'), str_starts_with($action, 'domain_'), str_starts_with($action, 'server_inventory_') => 'assets',
+        str_starts_with($action, 'settings_'), str_starts_with($action, 'save_settings'), str_starts_with($action, 'update_setting') => 'settings',
+        default => 'audit',
+    };
+
+    $targetType = null;
+    $targetId = null;
+    $targetLabel = null;
+    if (str_starts_with($action, 'cd_dvd_') && isset($meta['record_id'])) {
+        $targetType = 'cd_dvd_record'; $targetId = (int) $meta['record_id'];
+        $targetLabel = isset($meta['serial']) ? (string) $meta['serial'] : ('#' . $targetId);
+    } elseif (str_starts_with($action, 'change_') && isset($meta['change_id'])) {
+        $targetType = 'change'; $targetId = (int) $meta['change_id'];
+        $targetLabel = isset($meta['change_number']) ? (string) $meta['change_number'] : ('#' . $targetId);
+    } elseif (str_starts_with($action, 'problem_') && isset($meta['problem_id'])) {
+        $targetType = 'problem'; $targetId = (int) $meta['problem_id'];
+        $targetLabel = isset($meta['problem_number']) ? (string) $meta['problem_number'] : ('#' . $targetId);
+    } elseif (str_starts_with($action, 'holiday_') && (isset($meta['holiday_id']) || isset($meta['holiday_date']))) {
+        $targetType = 'holiday'; $targetId = isset($meta['holiday_id']) ? (int) $meta['holiday_id'] : null;
+        $targetLabel = (string) ($meta['holiday_date'] ?? $meta['title'] ?? 'تعطیلی');
+    } elseif (isset($meta['unit_id'])) {
+        $targetType = 'org_unit'; $targetId = (int) $meta['unit_id'];
+        $targetLabel = isset($meta['name']) ? (string) $meta['name'] : ('#' . $targetId);
+    } elseif ($ticketId !== null || isset($meta['ticket_id'])) {
+        $targetType = 'ticket';
+        $targetId = $ticketId ?? (int) $meta['ticket_id'];
+        $targetLabel = function_exists('ticket_number') ? (string) ticket_number((int) $targetId) : ('#' . (int) $targetId);
+    } elseif (isset($meta['user_id'])) {
+        $targetType = 'user'; $targetId = (int) $meta['user_id']; $targetLabel = 'کاربر #' . $targetId;
+    }
+
+    return [
+        'module' => $module,
+        'target_type' => $targetType,
+        'target_id' => $targetId,
+        'target_label' => $targetLabel,
+    ];
+}
+
+function save_audit(int $userId, string $action, ?int $ticketId = null, array $meta = []): bool
+{
+    if ($ticketId !== null && !isset($meta['ticket_id'])) $meta['ticket_id'] = $ticketId;
+    $context = activity_audit_context($action, $ticketId, $meta);
+    $persisted = activity_log([
         'user_id' => $userId,
         'action_code' => $action,
-        'target_type' => $ticketId !== null ? 'ticket' : null,
-        'target_id' => $ticketId,
+        'target_id' => $context['target_id'],
+        'target_type' => $context['target_type'],
+        'target_label' => $context['target_label'],
+        'module' => $context['module'],
         'meta' => $meta,
     ]);
+    $GLOBALS['activity_audited'] = (bool) $persisted;
+    return (bool) $persisted;
+}
+
+/** عملیات حساس باید پیش از Commit، ثبت پایدار Audit را الزام کند. */
+function save_audit_required(int $userId, string $action, ?int $ticketId = null, array $meta = [], string $result = 'success', ?string $eventId = null): void
+{
+    if (!in_array($result, ['success', 'failure', 'denied', 'unknown'], true)) $result = 'unknown';
+    if ($ticketId !== null && !isset($meta['ticket_id'])) $meta['ticket_id'] = $ticketId;
+    $context = activity_audit_context($action, $ticketId, $meta);
+    $persisted = activity_log([
+        'user_id' => $userId,
+        'action_code' => $action,
+        'target_type' => $context['target_type'],
+        'target_id' => $context['target_id'],
+        'target_label' => $context['target_label'],
+        'module' => $context['module'],
+        'meta' => $meta,
+        'result' => $result,
+        'event_id' => $eventId,
+    ]);
+    $GLOBALS['activity_audited'] = (bool) $persisted;
+    if (!$persisted) {
+        throw new RuntimeException('Required audit persistence failed for action: ' . $action);
+    }
 }
 
 function log_ticket_event(int $ticketId, ?int $userId, string $eventType, ?string $fromStatus = null, ?string $toStatus = null, array $details = []): void
 {
-    $query = db()->prepare('INSERT INTO ticket_events (ticket_id, user_id, event_type, from_status, to_status, details) VALUES (?, ?, ?, ?, ?, ?)');
-    $query->execute([$ticketId, $userId, $eventType, $fromStatus, $toStatus, json_encode($details, JSON_UNESCAPED_UNICODE)]);
+    $eventId = logging_uuid();
+    $requestId = logging_request_id();
+    $traceId = logging_trace_id();
+    $operationId = logging_operation_id();
+    $parentEventId = logging_parent_event_id();
+    $pdo = null;
+    $insideTransaction = false;
+
+    try {
+        $pdo = db();
+        $insideTransaction = $pdo->inTransaction();
+        $query = $pdo->prepare('INSERT INTO ticket_events (event_id, request_id, trace_id, operation_id, parent_event_id, ticket_id, user_id, event_type, from_status, to_status, details) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $query->execute([
+            $eventId, $requestId, $traceId, $operationId, $parentEventId, $ticketId, $userId,
+            $eventType, $fromStatus, $toStatus, logging_json($details),
+        ]);
+        // Circuit فقط پس از موفقیت واقعی INSERT بسته می‌شود.
+        if (function_exists('logging_db_circuit_success')) logging_db_circuit_success();
+        if ($parentEventId === null) $GLOBALS['__logging_parent_event_id'] = $eventId;
+    } catch (Throwable $exception) {
+        if ($insideTransaction) {
+            // رخداد وابسته به تراکنش rollback‌شده نباید بیرون از آن بازپخش شود.
+            throw $exception;
+        }
+        if (function_exists('logging_db_error_is_transient') && logging_db_error_is_transient($exception)) {
+            if (function_exists('logging_db_circuit_failure')) logging_db_circuit_failure($exception);
+            $queued = logging_record_failure('ticket_event', [
+                'event_id' => $eventId,
+                'request_id' => $requestId,
+                'trace_id' => $traceId,
+                'operation_id' => $operationId,
+                'parent_event_id' => $parentEventId,
+                'ticket_id' => $ticketId,
+                // FK user_id may be locked/deleted while replaying; actor id remains in sanitized details.
+                'user_id' => null,
+                'event_type' => $eventType,
+                'from_status' => $fromStatus,
+                'to_status' => $toStatus,
+                'details' => $details + ($userId !== null ? ['actor_id' => $userId] : []),
+            ]);
+            if (!$queued) logging_emergency_failure('ticket_event_spool_unconfirmed', $eventId);
+            if ($parentEventId === null) $GLOBALS['__logging_parent_event_id'] = $eventId;
+            return;
+        }
+        // خطای Schema/FK/داده به‌عنوان خطای قطعی پنهان نمی‌شود و در caller قابل مشاهده است.
+        throw $exception;
+    }
 }

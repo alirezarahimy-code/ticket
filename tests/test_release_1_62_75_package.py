@@ -21,6 +21,15 @@ EXPECTED_ADDITIONS = {
     "docs/USER-ACCESS-GROUPS-FA.md",
     "CHANGE-REPORT-FA-1.62.75.md",
 }
+# فایل‌هایی که نسخهٔ بعدی (۱.۶۲.۷۶ — لاگ‌گیری مرکزی) دوباره آن‌ها را تغییر داده است.
+# بستهٔ ۱.۶۲.۷۵ تغییرناپذیر می‌ماند و همچنان بررسی می‌شود، ولی محتوای مخزن برای این
+# فایل‌ها باید با تازه‌ترین بسته یکی باشد نه با ۱.۶۲.۷۵ (قاعدهٔ test_version_source_of_truth).
+SUPERSEDED_BY_LATER_RELEASE = {
+    "VERSION",
+    "README.md",
+    "index.php",
+    "lib/activity-audit.php",
+}
 EXPECTED_REPLACEMENTS = {
     "VERSION",
     "README.md",
@@ -73,12 +82,15 @@ class PublicAccessGroupsReleasePackageTest(unittest.TestCase):
                 if before != after:
                     changed.add(relative)
                 if relative in EXPECTED_REPLACEMENTS:
-                    self.assertEqual(after, (ROOT / relative).read_bytes(), relative)
+                    if relative not in SUPERSEDED_BY_LATER_RELEASE:
+                        self.assertEqual(after, (ROOT / relative).read_bytes(), relative)
                 else:
                     self.assertEqual(after, before, relative)
             self.assertEqual(changed, EXPECTED_REPLACEMENTS)
 
             for relative in EXPECTED_ADDITIONS:
+                if relative in SUPERSEDED_BY_LATER_RELEASE:
+                    continue
                 self.assertEqual(package.read("files/" + relative), (ROOT / relative).read_bytes(), relative)
             migration = package.read("migrations/023-user-access-groups.sql")
             self.assertEqual(package.read("files/migrations/023-user-access-groups.sql"), migration)

@@ -6,7 +6,7 @@
   از شاخهٔ `work/logging-1.62.76-from-v1.62.75-20261104` (کامیت `19c7f63ea41f4f910b542cd0eec4b81064fbe680`)
   — sha256 `5f028aaac5aa163605f0fda119c45713a2e23163ff40f51cd35d48704da1702e`
 - **خروجی (قابل نصب):** `downloads/ticket-update-1.62.75-to-1.62.76-logging-20261104.zip`
-  — sha256 `7f5d7d02dbc2980ddc348188f1cf45e9abf349ecec6665d1123c9a0c7035609c` — ۱۸۲٬۲۱۸ بایت
+  — sha256 `723dee40373052b340806280f73952c35bc4b3a7d39643b2cb48139b7deeffef` — ۱۸۶٬۱۱۸ بایت (۳۲ فایل payload + ۷ مهاجرت)
 
 > در تمام این فرایند هیچ اتصالی به پایگاه‌داده برقرار نشد و هیچ مهاجرتی اجرا نشد.
 
@@ -78,15 +78,51 @@
 | توابع حل‌نشده در payload | **۰** (`security_log_access_denied` تعریف شد، `logging_dashboard_render` حذف شد) |
 | پوشش ستون پس از مهاجرت | `activity_logs` ۲۴ نیاز / ۱۷ پایه + ۸ افزوده ⇒ **کسری ندارد**؛ `system_logs` ۱۵ نیاز / ۸ پایه + ۸ افزوده ⇒ **کسری ندارد** |
 
-## ۵) ترکیب بستهٔ خروجی
+## ۵) ماژول‌هایی که بستهٔ خام اصلاً نداشت
 
-۳۶ فایل payload + ۷ مهاجرت + `manifest.json`. نسبت به بستهٔ خام این‌ها **حذف** شدند:
+اجرای تست‌های خودِ بستهٔ خام روی درخت نصب شبیه‌سازی‌شده نشان داد ۹ تست به ماژول‌هایی ارجاع می‌دهند که
+**نه در بسته و نه در مخزن** وجود دارند: `lib/logging-replay.php`، `logging-dashboard.php`،
+`cron/check_logging_health.php`، `cron/deliver_logging_issue_notifications.php`،
+`cron/export_logging_integrity.php`، `cron/run_logging_maintenance.bat`، `cron/run_logging_retention.bat`،
+`tests/run_logging_staging_checks.ps1`، `tests/test_logging_acl_windows.ps1` و
+`tests/logging-acceptance/run-mysql-integration.sh`.
+
+بنابراین ۴ تست پایتون و ۱ تست PHP که این ماژول‌ها را می‌آزمودند، به‌همراه گردش‌کار
+`.github/workflows/logging-acceptance.yml` (که به اسکریپت‌های غایب و شماره‌های قدیمی مهاجرت ارجاع می‌داد)
+از بستهٔ نهایی حذف شدند؛ فهرست کامل در `docs/LOGGING-1.62.76-PACKAGE-SCOPE-FA.md` آمده است.
+تست‌های باقی‌مانده سبزند: `test_logging_phase76_static.py` (۸ آزمون) و `test_migration_retention_1_62_76.py` (۲ آزمون).
+
+همچنین ۳۶ ارجاع به نام قدیمی فایل‌های مهاجرت در ۶ سند و تست، به شماره‌های جدید ۰۲۴–۰۳۰ اصلاح شد.
+
+## ۶) همگام‌سازی مخزن و نتیجهٔ مجموعه‌تست
+
+قاعدهٔ `tests/test_version_source_of_truth_static.py` می‌گوید `VERSION` مخزن باید برابر بیشترین نسخهٔ
+بستهٔ موجود در `downloads/` باشد. پس مخزن هم با همین payload همگام شد: `VERSION` = `1.62.76`،
+هفت مهاجرت در `migrations/`، و خط «نسخه تحویل فعلی» در `README.md` (با حفظ هر ۲۰ سرفصل).
+
+دو تست مخزن به‌صورت حداقلی به‌روزرسانی شدند:
+
+- `tests/test_system_health_log_button_static.py` — فیلتر پیشنهادی لاگ از `('error','warning')` به
+  `('critical','error','warning')` گسترش یافته (قابلیت قوی‌تر، نه ضعیف‌تر)؛ assert با آن هماهنگ شد.
+- `tests/test_release_1_62_75_package.py` — مجموعهٔ مستندشدهٔ `SUPERSEDED_BY_LATER_RELEASE` افزوده شد تا
+  چهار فایلی که نسخهٔ بعدی تغییرشان داده (`VERSION`, `README.md`, `index.php`, `lib/activity-audit.php`)
+  مخزن را برای همیشه در ۱.۶۲.۷۵ قفل نکنند. بقیهٔ assertهای آن بسته دست‌نخورده‌اند.
+
+**نتیجهٔ مجموعه‌تست پایتون (۴۰۶ آزمون):** پیش از کار ۵۲ شکست / ۳۴۴ قبولی ← پس از کار **۴۹ شکست / ۳۵۷ قبولی**.
+**هیچ شکست جدیدی ایجاد نشد** و ۳ شکست قبلی برطرف شد
+(`test_release_1_62_10_org_liaison_static`, `test_release_1_62_15_service_modal_fix_static`,
+`test_version_source_of_truth::test_repo_matches_the_newest_package_of_the_current_version`).
+۴۹ شکست باقی‌مانده همگی از پیش موجود بودند و به ماژول غذا/تاریخچه مربوط‌اند.
+
+## ۷) ترکیب بستهٔ خروجی
+
+۳۲ فایل payload + ۷ مهاجرت + `manifest.json`. نسبت به بستهٔ خام این‌ها **حذف** شدند:
 
 - `README.md` و `DELIVERY-MANIFEST-fa.txt` — نسخه‌های کوتاه‌شده بودند و نسخهٔ کامل مخزن را خراب می‌کردند.
 - `AGENTS.md`، `docs/SKILL-MANIFEST-FA.md`، `tests/test_skill_manifest_static.py` — بایت‌به‌بایت با مخزن یکسان بودند (کپی بی‌اثر).
 - `files/migrations/*` با شماره‌های قدیمی — جای درست مهاجرت ریشهٔ ZIP است تا updater اجرایشان کند؛ نسخهٔ شماره‌گذاری‌شده هم زیر `files/migrations/` نگهداری می‌شود.
 
-## ۶) دستور نصب روی سامانه
+## ۸) دستور نصب روی سامانه
 
 ۱. از پایگاه‌داده و پوشهٔ برنامه نسخهٔ پشتیبان بگیرید.
 ۲. مطمئن شوید نسخهٔ نصب‌شده دقیقاً `1.62.75` است (مقدار فایل `VERSION`).

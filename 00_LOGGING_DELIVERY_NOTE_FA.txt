@@ -1,0 +1,13 @@
+تحویل اصلاحات Logging — نسخه 1.62.76
+تاریخ: 2026-11-04
+
+مبنای دقیق Update: نسخه 1.62.75
+Migration جدید: ندارد.
+
+اصلاحات: fail-closed کردن Audit موفق در Circuit Open و تراکنش فعال؛ تکمیل Module/Target/Target Label در save_audit_required و save_audit؛ Audit اجباری Holiday در همان تراکنش؛ تکمیل Allowlist و Catalog برای CD/DVD، Governance/CAB، LDAP، Profile و Ticket؛ اصلاح تب مدیریتی با حذف wildcard مربوط به Module خالی؛ جست‌وجو، جزئیات پالایش‌شده و صفحه‌بندی تاریخچه Ticket.
+
+بازبینی تکمیلی: چهار مسیر Holiday از db_commit() محافظت‌شده استفاده می‌کنند؛ Commit ناموفق نباید موفق گزارش شود.
+
+آزمون‌ها: PHP lint برابر 209/209 PASS؛ Python Logging/static برابر 95 PASS؛ PHP Logging برابر 20 PASS و 1 SKIP (MySQL Integration به علت نبود pdo_mysql/DSN). کل Python suite: 430 PASS، 54 FAIL، 10 SKIP و 18 subtests؛ شکست‌های کل مخزن در تست‌های Logging نیستند و عمدتاً به بسته‌های ZIP تاریخی غایب مربوط‌اند.
+
+محیط دیتابیس واقعی و Windows CI در این محیط اجرا نشدند؛ DNS مخازن Debian در دسترس نبود و نصب pdo_mysql/MariaDB ممکن نشد. Staging مقصد NOT ACCEPTED؛ Production NOT APPROVED.
