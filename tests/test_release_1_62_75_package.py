@@ -29,6 +29,10 @@ SUPERSEDED_BY_LATER_RELEASE = {
     "README.md",
     "index.php",
     "lib/activity-audit.php",
+    # ۱.۶۲.۷۹ ستون‌های «بازهٔ کاری دستگاه تردد» را به schema.sql افزود تا نصب تازه هم
+    # آن‌ها را داشته باشد (install.php پوشهٔ migrations/ را اجرا نمی‌کند).
+    "schema.sql",
+    "install-empty-db.sql",
 }
 EXPECTED_REPLACEMENTS = {
     "VERSION",

@@ -38,8 +38,41 @@ function system_update_migration_applied(string $version, string $migration): bo
     return (int) $stmt->fetchColumn() > 0;
 }
 
+/**
+ * آیا نصب این بسته روی نسخهٔ فعلی، سامانه را نیمه‌کاره می‌گذارد؟
+ *
+ * `requires_version` در manifest یعنی «این بسته فقط فایل‌هایی را دارد که نسبت به آن
+ * نسخه عوض شده‌اند». اگر نسخهٔ نصب‌شده پایین‌تر باشد، فایل‌های نسخه‌های میانی در بسته
+ * نیستند و نصب، بی‌آنکه هیچ خطایی دیده شود، سامانه را خراب می‌کند. تا پیش از این،
+ * requires_version فقط یک یادداشت توضیحی بود و هیچ‌جا بررسی نمی‌شد.
+ *
+ * @param string $current   نسخهٔ نصب‌شده
+ * @param mixed  $requires  مقدار requires_version در manifest (ممکن است نباشد)
+ * @param string $mode      upgrade | reinstall | downgrade
+ * @param bool   $ignore    ادمین صریحاً «نادیده بگیر» را تیک زده است
+ * @return string|null      متن خطا، یا null اگر نصب بی‌خطر است
+ */
+function system_update_requires_violation(string $current, mixed $requires, string $mode, bool $ignore = false): ?string
+{
+    if ($ignore || $mode === 'downgrade') {
+        return null;
+    }
+    $requires = trim((string) ($requires ?? ''));
+    if ($requires === '' || !preg_match('/^\d+(\.\d+)*$/', $requires)) {
+        return null; // بسته‌های قدیمی که این کلید را ندارند، مثل قبل رفتار می‌کنند.
+    }
+    if (version_compare($current, $requires, '>=')) {
+        return null;
+    }
+    return 'این بسته افزایشی است و فقط روی نسخهٔ ' . $requires . ' به بعد نصب می‌شود، '
+        . 'ولی نسخهٔ نصب‌شده ' . $current . ' است. نصب آن فایل‌های نسخه‌های میانی را جا می‌اندازد '
+        . 'و سامانه نیمه‌کاره می‌ماند. یا بسته‌های میانی را به ترتیب نصب کنید، '
+        . 'یا از بستهٔ کامل سورس استفاده کنید. '
+        . 'اگر مطمئن هستید، گزینهٔ «پیش‌نیاز نسخهٔ پک را نادیده بگیر» را تیک بزنید.';
+}
+
 /** پک را بررسی می‌کند و manifest را برمی‌گرداند. پرتاب خطا یعنی پک معتبر نیست. */
-function system_update_read_package(string $zipPath, bool $allowDowngrade = false): array
+function system_update_read_package(string $zipPath, bool $allowDowngrade = false, bool $ignoreRequires = false): array
 {
     if (!class_exists('ZipArchive')) {
         throw new RuntimeException('افزونهٔ ZipArchive در PHP فعال نیست.');
@@ -83,6 +116,11 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
             }
             $mode = 'downgrade';
         }
+        $requiresError = system_update_requires_violation($current, $manifest['requires_version'] ?? null, $mode, $ignoreRequires);
+        if ($requiresError !== null) {
+            throw new RuntimeException($requiresError);
+        }
+
         $migrations = $manifest['migrations'] ?? [];
         if (!is_array($migrations)) {
             throw new RuntimeException('فهرست مهاجرت‌ها در manifest معتبر نیست.');
@@ -126,7 +164,7 @@ function system_update_files_snapshot(string $destination): array
     return ['file' => basename($path), 'files' => $count];
 }
 
-function system_update_apply(array $upload, array $actor, bool $allowDowngrade = false): array
+function system_update_apply(array $upload, array $actor, bool $allowDowngrade = false, bool $ignoreRequires = false): array
 {
     if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
         throw new RuntimeException('فایل به‌روزرسانی آپلود نشد. ZIP را انتخاب کنید.');
@@ -137,7 +175,7 @@ function system_update_apply(array $upload, array $actor, bool $allowDowngrade =
     if ((int) $upload['size'] <= 0 || (int) $upload['size'] > SYSTEM_UPDATE_MAX_BYTES) {
         throw new RuntimeException('حجم فایل به‌روزرسانی مجاز نیست.');
     }
-    $package = system_update_read_package((string) $upload['tmp_name'], $allowDowngrade);
+    $package = system_update_read_package((string) $upload['tmp_name'], $allowDowngrade, $ignoreRequires);
     $version = $package['version'];
 
     $mysqlBinary = backup_mysql_binary('mysql');
