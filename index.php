@@ -23,6 +23,7 @@ require __DIR__ . '/traffic-control.php';
 require __DIR__ . '/local-accounts.php';
 require __DIR__ . '/system-health.php';
 require_once __DIR__ . '/logging-dashboard.php';
+require_once __DIR__ . '/holiday-board.php';
 
 ticket_number_ensure_schema(); // پیش از هر تراکنش: DDL اینجا بی‌خطر است و داخل تراکنش دیگر اجرا نمی‌شود
 ticket_number_autofill();
@@ -2159,25 +2160,12 @@ if ($page === 'chatbot-admin') {
 }
 
 if ($page === 'holidays') {
-    // فقط کاربر با holidays.manage می‌تواند تعطیلی ثبت/حذف کند؛ بقیه فهرست را فقط می‌بینند.
-    $holidayInert = user_can($user, 'holidays.manage') ? '' : ' inert';
+    // تابلو در holiday-board.php نگهداری می‌شود و با همان markup زیر تب «تقویم و تعطیلات»
+    // در صفحهٔ تنظیمات هم رندر می‌شود؛ پس این دو نما هیچ‌وقت از هم جدا نمی‌افتند.
     $holidayAdmin = require_permission('holidays.view');
-    $holidayQuery = db()->query('SELECT h.*, u.full_name FROM holidays h LEFT JOIN users u ON u.id = h.created_by ORDER BY h.holiday_date');
     render_header('تقویم SLA', $holidayAdmin);
-     echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section><div class="holiday-guard"' . $holidayInert . '><section class="card form-card"><h2>افزودن تعطیلی</h2><form method="post"><input type="hidden" name="action" value="add_holiday">' . csrf_field() . '<div class="form-grid"><label class="date-picker-field">تاریخ جلالی<div class="jalali-picker" data-jalali-picker><input id="holiday-date" name="holiday_date" required autocomplete="off" placeholder="۱۴۰۵/۰۱/۰۱"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div><small class="field-help">پنج‌شنبه و جمعه در تقویم غیرفعال هستند و خودکار تعطیل محسوب می‌شوند.</small></label><label>عنوان تعطیلی<input name="holiday_title" required placeholder="نوروز"></label></div><button class="button" type="submit">افزودن به تقویم</button></form><div class="fixed-holidays"><span class="tag">تعطیلی ثابت</span><b>پنج‌شنبه و جمعه</b><small>در محاسبه SLA به‌صورت خودکار از روزهای کاری حذف می‌شوند.</small></div><hr><h2>تقویم سالانه — تیک روز تعطیل</h2>
-<p class="muted">روی هر روز کلیک کنید تا به‌عنوان تعطیل ثبت یا حذف شود. رنگ <strong style="color:#dc2626">قرمز</strong> = تعطیل. پنج‌شنبه و جمعه ثابت‌اند.</p>
-<div class="year-holiday-board" data-year-holiday-board>
-<div class="board-head"><label>سال جلالی <select data-year-board-year">' .
-implode('', array_map(static fn ($y) => '<option value="' . $y . '"' . ($y === (int) (gregorian_to_jalali((int) date('Y'), (int) date('n'), (int) date('j'))[0]) ? ' selected' : '') . '>' . $y . '</option>', range(1400, 1415))) .
-'</select></label></div>
-<div class="year-grid" data-year-board-grid></div>
-<form method="post" data-toggle-holiday class="hidden-toggle" style="position:absolute;left:-9999px">' . csrf_field() . '<input type="hidden" name="action" value="toggle_holiday"><input type="hidden" name="holiday_date" value=""><input type="hidden" name="holiday_title" value="تعطیل رسمی"></form>
-</div>
-<hr><h2>ورود تقویم سالانه</h2><p class="muted">فرمت‌های استاندارد CSV و ICS از منابع تقویم قابل استفاده‌اند. در CSV ستون‌های date و title یا ردیف‌های تاریخ و عنوان را وارد کنید؛ تاریخ جلالی ۱۴۰۵/۰۱/۰۱ و میلادی 2026-03-21 هر دو پذیرفته می‌شوند. پنج‌شنبه و جمعه از ورود فایل نیز حذف می‌شوند.</p><form method="post" enctype="multipart/form-data"><input type="hidden" name="action" value="import_holidays">' . csrf_field() . '<label class="file-input">فایل تقویم<input type="file" name="calendar_file" accept=".csv,.ics,.txt,text/csv,text/calendar" required><small>حداکثر ۲ مگابایت؛ تاریخ‌های تکراری به‌روزرسانی می‌شوند.</small></label><button class="button secondary" type="submit">واردکردن تقویم</button></form></section><section class="card category-list holiday-list">';
-    foreach ($holidayQuery->fetchAll() as $holiday) {
-        echo '<div><span><strong>' . e(jalali_date($holiday['holiday_date'], false)) . ' • ' . e($holiday['title']) . '</strong><small>ثبت‌کننده: ' . e($holiday['full_name'] ?: 'سامانه') . '</small></span><form method="post" data-confirm="این روز تعطیل حذف شود؟">' . csrf_field() . '<input type="hidden" name="action" value="delete_holiday"><input type="hidden" name="holiday_id" value="' . (int) $holiday['id'] . '"><button class="mini-button danger" type="submit">حذف</button></form></div>';
-    }
-    echo '</div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section>';
+    holiday_board_render($user);
     render_footer();
     exit;
 }
@@ -3210,6 +3198,8 @@ if ($page === 'settings') {
     $canSettingsGeneral = user_can($user, 'settings.general');
     $canSettingsDomain = user_can($user, 'settings.domain');
     $canSettingsUsers = user_can($user, 'settings.users');
+    // تب تقویم تعطیلات: همان تابلوی صفحهٔ holidays، زیر تنظیمات.
+    $canHolidaysView = user_can($user, 'holidays.view');
     $canSettingsKeyRoles = user_can($user, 'settings.key_roles');
     // ویرایش هر بخش جدا از دیدن آن است؛ بدون کد ویرایش، فرم‌ها غیرفعال (inert) نمایش داده می‌شوند.
     $canSettingsGeneralEdit = user_can($user, 'settings.general_edit');
@@ -3266,6 +3256,9 @@ if ($page === 'settings') {
     }
     if ($canManageSettingsUsers) {
         $tabLinks .= '<a href="#org-admin-repair">ترمیم نقش‌ها و تشخیص ارجاع</a>';
+    }
+    if ($canHolidaysView) {
+        $tabLinks .= '<a href="#holidays">تقویم و تعطیلات</a>';
     }
     echo '<div class="settings-tabs">' . $tabLinks . '</div>';
     echo '<section class="settings-stack">';
@@ -3655,6 +3648,16 @@ if ($page === 'settings') {
         echo '</div>';
     }
 
+
+    if ($canHolidaysView) {
+        // همان تابلوی index.php?page=holidays؛ return_to باعث می‌شود پس از ثبت/حذف
+        // به همین تب برگردیم نه به صفحهٔ مستقل تعطیلات.
+        echo '<div class="settings-panel" id="holidays">';
+        echo '<div class="card form-card settings-panel-full"><h2>تقویم تعطیلات و توقف SLA</h2>'
+            . '<p class="muted">پنج‌شنبه و جمعه تعطیل ثابت هستند. تعطیلات رسمی ثبت‌شده در این تقویم، هم از محاسبهٔ SLA و هم از بازهٔ کاری پردازشگر فیش غذا حذف می‌شوند.</p></div>';
+        holiday_board_render($user, 'settings');
+        echo '</div>';
+    }
     echo '</section>';
     render_footer();
     exit;

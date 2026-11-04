@@ -4,6 +4,11 @@ declare(strict_types=1);
 if (is_file(__DIR__ . '/food-ticket-env.php')) {
     require_once __DIR__ . '/food-ticket-env.php';
 }
+// پنجرهٔ کاری باید پیش از food_ticket_config() در دسترس باشد تا پیش‌فرض‌های آن
+// به آرایهٔ تنظیمات اضافه شوند (مهاجرت ۰۳۱).
+if (is_file(__DIR__ . '/food-ticket-window.php')) {
+    require_once __DIR__ . '/food-ticket-window.php';
+}
 if (!function_exists('food_ticket_enqueue_print') && is_file(__DIR__ . '/food-ticket-runtime.php')) {
     require_once __DIR__ . '/food-ticket-runtime.php';
 }
@@ -412,6 +417,11 @@ function food_ticket_config(bool $reload = false): array
         'poll_seconds' => 2, 'max_batch' => 100, 'guest_card_uids' => '',
         'max_guest_daily' => 20, 'cut_source_rows' => 1, 'updated_by' => null,
     ];
+    // ستون‌های پنجرهٔ کاری (مهاجرت ۰۳۱). روی نصب‌هایی که هنوز مهاجرت نکرده‌اند
+    // این ستون‌ها وجود ندارند، پس فقط آن‌هایی که واقعاً در جدول هستند SELECT می‌شوند.
+    if (function_exists('food_ticket_window_defaults')) {
+        $defaults += food_ticket_window_defaults();
+    }
     try {
         $colPath = food_ticket_db_column('attendance_path');
         $colPwd = food_ticket_db_column('attendance_password_enc');
@@ -421,9 +431,17 @@ function food_ticket_config(bool $reload = false): array
                 throw new RuntimeException('نام ستون تنظیمات تردد معتبر نیست.');
             }
         }
+        $optional = '';
+        if (function_exists('food_ticket_window_defaults') && function_exists('food_ticket_config_has_column')) {
+            foreach (array_keys(food_ticket_window_defaults()) as $windowColumn) {
+                if (food_ticket_config_has_column($windowColumn)) {
+                    $optional .= ', `' . $windowColumn . '`';
+                }
+            }
+        }
         $sql = 'SELECT id, enabled, `' . $colPath . '` AS attendance_path, `' . $colPwd . '` AS attendance_password_enc, '
             . 'printer_mode, printer_host, printer_port, printer_share, poll_seconds, max_batch, guest_card_uids, '
-            . 'max_guest_daily, `' . $colCut . '` AS cut_source_rows, updated_by FROM food_ticket_config WHERE id = 1';
+            . 'max_guest_daily, `' . $colCut . '` AS cut_source_rows, updated_by' . $optional . ' FROM food_ticket_config WHERE id = 1';
         $row = db()->query($sql)->fetch() ?: [];
         // پایگاه‌داده‌های نصب‌شده نام ستون‌های قدیمی دارند → نگاشت به نام‌های منطقی کد
         if (function_exists('food_ticket_config_alias_row')) {
@@ -628,8 +646,83 @@ function food_ticket_ident(string $name): string
     return '[' . str_replace(']', ']]', $name) . ']';
 }
 
+/**
+ * روشن/خاموش کردن نگه‌داشتن اتصال Access بین چرخه‌های Worker.
+ *
+ * چرا؟ هر odbc_connect روی فایل Access روی شبکه (SMB) بین ۰٫۵ تا ۲ ثانیه طول می‌کشد،
+ * چون Jet باید فایل قفل .laccdb را بسازد و بعد حذف کند. وقتی Worker هر ثانیه یک بار
+ * چرخه می‌زند، همین هزینه بزرگ‌ترین بخش تأخیر چاپ است. با نگه‌داشتن اتصال، این هزینه
+ * فقط یک بار در شروع پنجرهٔ کاری پرداخت می‌شود.
+ *
+ * فقط Worker این را روشن می‌کند؛ درخواست‌های وب همچنان اتصال کوتاه‌عمر می‌گیرند.
+ */
+function food_ticket_odbc_pool(?bool $enable = null): bool
+{
+    static $enabled = false;
+    if ($enable !== null && $enable !== $enabled) {
+        if (!$enable) {
+            food_ticket_odbc_release();
+        }
+        $enabled = $enable;
+    }
+    return $enabled;
+}
+
+/**
+ * اتصال نگه‌داشته‌شده را واقعاً می‌بندد و قفل Access را آزاد می‌کند.
+ * Worker این را هنگام خروج از پنجرهٔ کاری، بعد از هر چرخهٔ خطادار و هنگام پایان کار صدا می‌زند.
+ */
+function food_ticket_odbc_release(): void
+{
+    $handle = food_ticket_odbc_pool_handle();
+    if ($handle !== null && (is_resource($handle) || is_object($handle)) && function_exists('odbc_close')) {
+        @odbc_close($handle);
+    }
+    food_ticket_odbc_pool_handle(false, null, '');
+}
+
+/**
+ * نگهدارندهٔ وضعیت استخر اتصال. فقط از food_ticket_odbc* صدا زده می‌شود.
+ *
+ * @return mixed اتصال نگه‌داشته‌شده یا null
+ */
+function food_ticket_odbc_pool_handle(bool $store = false, mixed $handle = null, string $key = '')
+{
+    static $pooled = null;
+    static $pooledKey = '';
+    static $pooledAt = 0;
+    if ($store) {
+        $pooled = $handle;
+        $pooledKey = $key;
+        $pooledAt = $handle === null ? 0 : time();
+        return $pooled;
+    }
+    if ($pooled === null) {
+        return null;
+    }
+    // کلید عوض شده (مسیر/رمز تغییر کرده) یا اتصال کهنه شده ⇒ دور انداخته شود.
+    // سقف ۶۰۰ ثانیه عمداً محافظه‌کارانه است تا اگر فایل‌سرور وسط روز ریست شد،
+    // Worker حداکثر ۱۰ دقیقه با هندل مرده کار نکند.
+    if (($key !== '' && $key !== $pooledKey) || (time() - $pooledAt) > 600) {
+        return null;
+    }
+    if (!is_resource($pooled) && !is_object($pooled)) {
+        return null;
+    }
+    return $pooled;
+}
+
 function food_ticket_odbc(string $path, string $password = '')
 {
+    $poolKey = $path . '|' . $password;
+    if (food_ticket_odbc_pool()) {
+        $existing = food_ticket_odbc_pool_handle(false, null, $poolKey);
+        if ($existing !== null) {
+            return $existing;
+        }
+        // هندل قبلی یا کهنه بود یا مربوط به مسیر دیگری؛ قبل از اتصال تازه آزادش کن.
+        food_ticket_odbc_release();
+    }
     $path = trim(str_replace(['/', "\0"], [DIRECTORY_SEPARATOR === '\\' ? '\\' : '/', ''], $path));
     // نرمال‌سازی مسیر ویندوز
     if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
@@ -654,6 +747,9 @@ function food_ticket_odbc(string $path, string $password = '')
             $connection = sprintf('Driver={%s};Dbq=%s;Uid=Admin;Pwd=%s;', $driver, $path, $password);
             $handle = @odbc_connect($connection, '', '');
             if ($handle) {
+                if (food_ticket_odbc_pool()) {
+                    food_ticket_odbc_pool_handle(true, $handle, $poolKey);
+                }
                 return $handle;
             }
             $odbcErrors[] = $driver . ': ' . (string) odbc_errormsg();
@@ -682,6 +778,11 @@ function food_ticket_is_ps_access($connection): bool
 function food_ticket_access_close($connection): void
 {
     if (food_ticket_is_ps_access($connection)) {
+        return;
+    }
+    // اتصال نگه‌داشته‌شدهٔ Worker نباید در پایان هر چرخه بسته شود؛
+    // بستن آن با food_ticket_odbc_release() انجام می‌شود.
+    if (food_ticket_odbc_pool() && $connection !== null && $connection === food_ticket_odbc_pool_handle()) {
         return;
     }
     if (is_resource($connection) || (is_object($connection) && function_exists('odbc_close'))) {
@@ -2639,8 +2740,20 @@ function food_ticket_save_config(array $data, array $user): void
     if ((int) ($saved['printer_port'] ?? 0) !== $wantedPort) {
         throw new RuntimeException('پورت چاپگر در پایگاه‌داده ذخیره نشد؛ مقدار واردشده با مقدار خوانده‌شده برابر نیست.');
     }
+    // تنظیمات پنجرهٔ کاری جداگانه نوشته می‌شوند تا نصب‌های بدون مهاجرت ۰۳۱ نشکنند.
+    $windowSaved = [];
+    if (function_exists('food_ticket_window_save')) {
+        try {
+            $windowSaved = food_ticket_window_save($data);
+        } catch (Throwable $windowError) {
+            app_error_log('Food ticket window settings not saved: ' . $windowError->getMessage());
+        }
+    }
     food_ticket_config(true);
-    save_audit((int) $user['id'], 'food_ticket_config_saved', null, ['printer_mode' => $wantedMode, 'printer_host' => $wantedHost]);
+    save_audit((int) $user['id'], 'food_ticket_config_saved', null, array_merge(
+        ['printer_mode' => $wantedMode, 'printer_host' => $wantedHost],
+        $windowSaved === [] ? [] : ['window' => $windowSaved]
+    ));
 }
 
 function food_ticket_handle_post(string $action, array $user): void
@@ -3014,6 +3127,30 @@ function food_ticket_api_config(array $user = []): array
         'guestFoodType' => 'مهمان',
         'cutSourceRows' => !empty($config['cut_source_rows']),
         'enabled' => !empty($config['enabled']),
+        // بازهٔ کاری دستگاه تردد؛ پنل هم مقادیر را نشان می‌دهد و هم وضعیت لحظه‌ای را.
+        'window' => function_exists('food_ticket_window_state')
+            ? (static function (array $config): array {
+                $state = food_ticket_window_state($config);
+                $defaults = food_ticket_window_defaults();
+                return [
+                    'enabled' => (int) ($config['window_enabled'] ?? $defaults['window_enabled']) === 1,
+                    'days' => food_ticket_window_days($config['window_days'] ?? $defaults['window_days']),
+                    'start' => substr((string) ($config['window_start'] ?? $defaults['window_start']), 0, 5),
+                    'end' => substr((string) ($config['window_end'] ?? $defaults['window_end']), 0, 5),
+                    'marginBefore' => (int) ($config['window_margin_before_minutes'] ?? $defaults['window_margin_before_minutes']),
+                    'marginAfter' => (int) ($config['window_margin_after_minutes'] ?? $defaults['window_margin_after_minutes']),
+                    'idlePollSeconds' => (int) ($config['idle_poll_seconds'] ?? $defaults['idle_poll_seconds']),
+                    'activePollMs' => (int) ($config['active_poll_ms'] ?? $defaults['active_poll_ms']),
+                    'persistentSource' => (int) ($config['persistent_source_connection'] ?? $defaults['persistent_source_connection']) === 1,
+                    'effectiveStart' => $state['start'],
+                    'effectiveEnd' => $state['end'],
+                    'openNow' => (bool) $state['open'],
+                    'reason' => (string) $state['reason'],
+                    'nextOpen' => (string) $state['next_open_label'],
+                    'supported' => function_exists('food_ticket_config_has_column') && food_ticket_config_has_column('window_enabled'),
+                ];
+            })($config)
+            : null,
         'brandName' => (string) ($brand['brand_name'] ?? 'سامانه مدیریت غذا'),
         'brandLogo' => (string) ($brand['brand_logo'] ?? ''),
         'panelVersion' => FOOD_TICKET_PANEL_VERSION,
@@ -4145,7 +4282,12 @@ function food_ticket_save_guest_cap_mode(string $mode): string
 
 function food_ticket_api_save_config(array $data, array $user): void
 {
-    $dbFields = ['enabled', 'attendance', 'attendancePath', 'attendancePassword', 'attendanceTable', 'poll_seconds', 'pollSeconds', 'cutSourceRows', 'clear', 'clear_paths'];
+    $dbFields = ['enabled', 'attendance', 'attendancePath', 'attendancePassword', 'attendanceTable', 'poll_seconds', 'pollSeconds', 'cutSourceRows', 'clear', 'clear_paths',
+        // بازهٔ کاری ورکر زیر همان مجوز ویرایش اتصال تردد قرار می‌گیرد.
+        'window_enabled', 'windowEnabled', 'window_days', 'windowDays', 'window_start', 'windowStart',
+        'window_end', 'windowEnd', 'window_margin_before_minutes', 'windowMarginBefore',
+        'window_margin_after_minutes', 'windowMarginAfter', 'idle_poll_seconds', 'idlePollSeconds',
+        'active_poll_ms', 'activePollMs', 'persistent_source_connection', 'persistentSourceConnection'];
     $guestFields = ['guestCardUIDs', 'maxGuestTicketsPerDay', 'guestFoodType', 'guestCapMode', 'guestCapStart', 'guestCapCutoff', 'guestCapEnd', 'guestRequestSameDayCutoff'];
     $printerPayload = is_array($data['printer'] ?? null) ? $data['printer'] : [];
     $printerFields = ['printer_mode', 'printer_host', 'printer_port', 'printer_share'];
@@ -4246,7 +4388,22 @@ function food_ticket_api_save_config(array $data, array $user): void
     } else {
         $enabledFlag = !empty($current['enabled']) ? 1 : 0;
     }
-    food_ticket_save_config([
+    // کلیدهای پنجرهٔ کاری بدون تغییر عبور داده می‌شوند تا food_ticket_window_save()
+    // بتواند فقط فیلدهایی را که پنل واقعاً فرستاده به‌روزرسانی کند.
+    $windowPassthrough = [];
+    foreach ([
+        'window_enabled', 'windowEnabled', 'window_days', 'windowDays',
+        'window_start', 'windowStart', 'window_end', 'windowEnd',
+        'window_margin_before_minutes', 'windowMarginBefore',
+        'window_margin_after_minutes', 'windowMarginAfter',
+        'idle_poll_seconds', 'idlePollSeconds', 'active_poll_ms', 'activePollMs',
+        'persistent_source_connection', 'persistentSourceConnection',
+    ] as $windowKey) {
+        if (array_key_exists($windowKey, $data)) {
+            $windowPassthrough[$windowKey] = $data[$windowKey];
+        }
+    }
+    food_ticket_save_config($windowPassthrough + [
         'enabled' => $enabledFlag,
         'attendance_path' => $attendancePath,
         'attendance_password' => $value($sourceDb, 'password', $value($data, 'attendancePassword', '')),

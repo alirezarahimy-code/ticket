@@ -12,7 +12,7 @@ declare(strict_types=1);
  *   delete_holiday    حذف یک تعطیلی ثبت‌شده
  *
  * این فایل فقط از دل بلوک try در «ناحیهٔ ۴» index.php با require بارگذاری می‌شود و در
- * همان حوزهٔ متغیرها اجرا می‌شود. متن اکشن‌ها بایت‌به‌بایت منتقل شده؛ تنها مورد
+ * همان حوزهٔ متغیرها اجرا می‌شود. متن اکشن‌ها جز مقصد بازگشت (return_to) بدون تغییر منتقل شده؛ تنها مورد
  * continue داخل بلوک، continue داخل حلقهٔ import است که برای include کاملاً بی‌خطر است.
  */
 
@@ -21,6 +21,14 @@ if (!defined('APP_ROOT')) {
     http_response_code(404);
     exit;
 }
+
+// مقصد بازگشت پس از هر اکشن: صفحهٔ مستقل تقویم، یا تب «تقویم و تعطیلات» زیر تنظیمات
+// وقتی فرم از همان تب ارسال شده باشد. هر مقدار دیگری نادیده گرفته می‌شود.
+$holidayReturnTo = static function (): string {
+    return (string) ($_POST['return_to'] ?? '') === 'settings'
+        ? 'index.php?page=settings#holidays'
+        : 'index.php?page=holidays';
+};
 
         // ───── گروه اکشن: تقویم و تعطیلات ─────
         if ($action === 'toggle_holiday') {
@@ -33,7 +41,7 @@ if (!defined('APP_ROOT')) {
             $dow = (int) (new DateTimeImmutable($day, new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('N');
             if (in_array($dow, [4, 5], true)) {
                 flash('warning', 'پنج‌شنبه و جمعه به‌صورت ثابت تعطیل هستند.');
-                redirect('index.php?page=holidays');
+                redirect($holidayReturnTo());
             }
             db()->beginTransaction();
             try {
@@ -61,7 +69,7 @@ if (!defined('APP_ROOT')) {
                 if (db()->inTransaction()) db()->rollBack();
                 throw $exception;
             }
-            redirect('index.php?page=holidays');
+            redirect($holidayReturnTo());
         }
 
         if ($action === 'add_holiday') {
@@ -87,7 +95,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'تعطیلی به تقویم SLA اضافه شد.');
-            redirect('index.php?page=holidays');
+            redirect($holidayReturnTo());
         }
 
         if ($action === 'import_holidays') {
@@ -112,7 +120,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', $importedCount . ' تعطیلی از فایل تقویم وارد شد؛ پنج‌شنبه و جمعه نادیده گرفته شدند.');
-            redirect('index.php?page=holidays');
+            redirect($holidayReturnTo());
         }
 
         if ($action === 'delete_holiday') {
@@ -133,5 +141,5 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'تعطیلی حذف شد.');
-            redirect('index.php?page=holidays');
+            redirect($holidayReturnTo());
         }

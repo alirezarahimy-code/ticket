@@ -174,6 +174,38 @@ function food_ticket_db_column(string $logical): string
     return $logical;
 }
 
+/**
+ * آیا ستون داده‌شده واقعاً در جدول food_ticket_config وجود دارد؟
+ *
+ * برای ستون‌های اختیاریِ مهاجرت‌های تازه (مثل ستون‌های پنجرهٔ کاری در ۰۳۱) لازم است؛
+ * نصبی که هنوز مهاجرت را اجرا نکرده نباید با خطای «Unknown column» کل تنظیمات را از
+ * دست بدهد. نتیجه برای هر درخواست یک بار از INFORMATION_SCHEMA خوانده می‌شود.
+ */
+function food_ticket_config_has_column(string $column): bool
+{
+    static $resolved = null;
+    if ($resolved === null) {
+        $resolved = [];
+        try {
+            if (function_exists('db')) {
+                $rows = db()->query("SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_ticket_config'")->fetchAll() ?: [];
+                foreach ($rows as $r) {
+                    $name = (string) ($r['COLUMN_NAME'] ?? (is_array($r) ? reset($r) : ''));
+                    if ($name !== '') {
+                        $resolved[strtolower($name)] = true;
+                    }
+                }
+            }
+        } catch (Throwable) {
+            $resolved = [];
+        }
+    }
+    if (!preg_match('/^[A-Za-z0-9_]+$/', $column)) {
+        return false;
+    }
+    return isset($resolved[strtolower($column)]);
+}
+
 /** ردیف جدول تنظیمات را از نام ستون‌های قدیمی به نام‌های منطقی کد نگاشت می‌کند. */
 function food_ticket_config_alias_row(array $row): array
 {

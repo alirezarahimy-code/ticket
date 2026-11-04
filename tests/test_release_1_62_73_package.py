@@ -31,10 +31,12 @@ EXPECTED_ADDITIONS = {
 }
 OLD_ARCHIVE_SHA256 = "d749b961b6aa8722fad1aab92ff8f00f6d6a5cb24109de46ffe76b23da234502"
 EXPECTED_PACKAGE_SHA256 = "00aa28a4a13f6a3552ac4fe3e38620f1c36ff8f39bd208ad4414b32a79252043"
-# The published 1.62.73 updater is immutable; later worktree updates belong to R2, 1.62.74, and 1.62.75.
+# The published 1.62.73 updater is immutable; later worktree updates belong to R2, 1.62.74, 1.62.75,
+# and 1.62.78 (food worker window + print latency).
 POST_RELEASE_WORKTREE_CHANGES = {
     "VERSION",
     "README.md",
+    "cron/food_ticket_worker.php",
     "assets/app.js",
     "assets/food-menu.js",
     "assets/style.css",
