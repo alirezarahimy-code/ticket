@@ -99,46 +99,40 @@ function ticket_service_category_map(): array
 
 function system_logs_ensure(): void
 {
-    static $ready = false;
-    if ($ready) {
-        return;
-    }
-    $ready = true;
+    static $checked = false;
+    if ($checked) return;
+    $checked = true;
     try {
-        db()->exec('CREATE TABLE IF NOT EXISTS system_logs (
-            id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            level VARCHAR(20) NOT NULL DEFAULT "error",
-            context VARCHAR(120) NULL,
-            message TEXT NULL,
-            meta_json JSON NULL,
-            user_id INT UNSIGNED NULL,
-            request_uri VARCHAR(255) NULL,
-            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_system_logs_created (created_at),
-            INDEX idx_system_logs_level (level)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
-    } catch (Throwable) {
+        if (!function_exists('db_table_exists') || !db_table_exists('system_logs')) {
+            logging_emergency_failure('system_logs_table_missing', 'apply database schema/migrations');
+        }
+    } catch (Throwable $exception) {
+        logging_emergency_failure('system_logs_schema_check_failed', get_class($exception));
     }
 }
 
 function system_log(string $level, string $context, string $message, array $meta = []): void
 {
-    $level = in_array($level, ['debug', 'info', 'warning', 'error'], true) ? $level : 'error';
-    $userId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
-    $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
-    try {
-        system_logs_ensure();
-        db()->prepare('INSERT INTO system_logs (level, context, message, meta_json, user_id, request_uri) VALUES (?, ?, ?, ?, ?, ?)')->execute([$level, substr($context, 0, 120), $message, $meta !== [] ? json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null, $userId, substr($uri, 0, 255)]);
-    } catch (Throwable) {
-    }
-    try {
-        $dir = APP_ROOT . '/storage/logs';
-        if (!is_dir($dir)) {
-            @mkdir($dir, 0755, true);
-        }
-        $line = date('c') . ' [' . $level . '] ' . $context . ' — ' . $message . ($meta !== [] ? ' ' . json_encode($meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '') . PHP_EOL;
-        @file_put_contents($dir . '/app.log', $line, FILE_APPEND);
-    } catch (Throwable) {
+    $level = in_array($level, ['debug', 'info', 'notice', 'warning', 'error', 'critical'], true) ? $level : 'error';
+    $meta = logging_sanitize_value($meta);
+    $code = (string) ($meta['code'] ?? 'SYS-LEGACY-001');
+    $definition = logging_catalog_resolve($code, (string) ($meta['category'] ?? 'system'), $level);
+    $meta = logging_sanitize_event_meta($meta, $definition['code'], $context);
+    $event = [
+        'event_id' => logging_uuid(),
+        'code' => $definition['code'],
+        'category' => $definition['category'],
+        'level' => $level,
+        'context' => $context,
+        'message' => $message,
+        'meta' => $meta,
+        'fingerprint' => logging_fingerprint_current($definition['code'], $context, $message),
+    ];
+    logging_store_system($event);
+    $safeMeta = logging_json($meta) ?? '';
+    $line = date('c') . ' [' . $level . '] ' . logging_sanitize_single_line($context, 120) . ' — ' . logging_sanitize_single_line($message, 2000) . ($safeMeta !== '' ? ' ' . $safeMeta : '');
+    if (!logging_append_legacy_file($line)) {
+        logging_emergency_failure('app_log_write_failed', '');
     }
 }
 
@@ -194,24 +188,32 @@ function system_error_explain(string $message): array
 /** حذف اطلاعات حساس پیش از ثبت: کد ملی (۱۰ رقم)، رمز و کلیدها. */
 function system_error_mask(string $text): string
 {
-    $text = (string) preg_replace('/\b\d{10}\b/u', '[کد ملی مخفی]', $text);
-    $text = (string) preg_replace('/(password|pass|pwd|رمز)\s*[=:]\s*\S+/iu', '$1=[مخفی]', $text);
-    return mb_substr($text, 0, 2000);
+    return logging_sanitize_text($text, 2000);
 }
 
 /** ثبت یک خطای فنی با توضیح فارسی در system_logs (هیچ‌وقت خودش خطا ایجاد نمی‌کند). */
-function system_error_record(string $level, string $source, string $rawMessage, string $location = '', string $errorType = ''): void
+function system_error_record(string $level, string $source, string $rawMessage, string $location = '', string $errorType = '', ?Throwable $exception = null): void
 {
     try {
         $errorType = str_replace('\\', '', trim($errorType));
         if ($errorType !== '' && !preg_match('/^[A-Za-z_][A-Za-z0-9_]{0,79}$/D', $errorType)) {
             $errorType = '';
         }
+        $location = str_replace('\\', '/', trim($location));
+        $rootPrefix = rtrim(str_replace('\\', '/', APP_ROOT), '/') . '/';
+        if ($location !== '' && str_starts_with($location, $rootPrefix)) {
+            $location = substr($location, strlen($rootPrefix));
+        } elseif ($location !== '' && preg_match('~^[A-Za-z]:/|^/~', $location)) {
+            $location = basename(preg_replace('/:\d+$/', '', $location)) . (preg_match('/:(\d+)$/', $location, $lineMatch) ? ':' . $lineMatch[1] : '');
+        }
+        $location = logging_sanitize_text($location, 240);
         $explain = system_error_explain($rawMessage);
         $title = $explain['title'];
         if ($title === 'خطای نامشخص سامانه') {
             // عنوان عمومی همهٔ خطاهای ناشناخته یکی می‌شد؛ متن کوتاه خطا جای آن می‌نشیند تا گروه‌ها جدا بمانند.
-            $title = 'خطای ناشناخته: ' . mb_substr(system_error_mask($rawMessage), 0, 140);
+            $safeMessage = system_error_mask($rawMessage);
+            $shortMessage = logging_utf8_substr($safeMessage, 0, 140);
+            $title = 'خطای ناشناخته: ' . $shortMessage;
         }
         $meta = [
             'cause' => $explain['cause'],
@@ -222,54 +224,115 @@ function system_error_record(string $level, string $source, string $rawMessage, 
         if ($errorType !== '') {
             $meta['error_type'] = $errorType;
         }
+        if ($exception instanceof Throwable) {
+            $meta['stack_trace'] = logging_exception_trace($exception, 12);
+        }
+        $meta['code'] = $errorType === 'PDOException' || stripos($rawMessage, 'SQLSTATE') !== false ? 'SYS-DB-001' : (stripos($rawMessage, 'LdapErr') !== false ? 'INT-LDAP-001' : (stripos($rawMessage, 'CSRF') !== false ? 'SEC-CSRF-001' : 'SYS-PHP-001'));
+        $meta['category'] = $meta['code'] === 'INT-LDAP-001' ? 'integration' : ($meta['code'] === 'SEC-CSRF-001' ? 'security' : 'system');
+        $catalogDefinition = logging_catalog_resolve((string) $meta['code'], (string) $meta['category'], $level);
+        $GLOBALS['__logging_user_message'] = (string) ($catalogDefinition['user_message'] ?? 'در اجرای عملیات مشکلی پیش آمد. کد پیگیری را به پشتیبانی بدهید.');
         system_log($level, $source, $title, $meta);
-    } catch (Throwable) {
-        // ثبت لاگ نباید خود باعث خطای دیگری شود.
+    } catch (Throwable $exception) {
+        logging_emergency_failure('system_error_record_failed', get_class($exception));
     }
 }
 
-// هندلرهای سراسری: استثنای نهایی‌نشده، خطای قاتل PHP و کندی صفحه.
-if (PHP_SAPI !== 'cli') {
-    $GLOBALS['__request_started_at'] = microtime(true);
-    set_exception_handler(static function (Throwable $e): void {
-        system_error_record('error', 'خطای نهایی‌نشده', $e->getMessage(), $e->getFile() . ':' . $e->getLine(), get_class($e));
-        if (!headers_sent()) {
+// هندلرهای سراسری برای HTTP و CLI؛ خروجی هر محیط مستقل است و خطای خام به کاربر وب نشت نمی‌کند.
+@ini_set('display_errors', '0');
+@ini_set('display_startup_errors', '0');
+$GLOBALS['__request_started_at'] = microtime(true);
+set_exception_handler(static function (Throwable $e): void {
+    system_error_record('error', 'خطای نهایی‌نشده', $e->getMessage(), $e->getFile() . ':' . $e->getLine(), get_class($e), $e);
+    $requestId = logging_request_id();
+    if (PHP_SAPI === 'cli') {
+        if (defined('STDERR')) fwrite(STDERR, '[FATAL] ' . get_class($e) . ': ' . logging_sanitize_text($e->getMessage(), 500) . ' | Request-ID: ' . $requestId . PHP_EOL);
+        exit(1);
+    }
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/html; charset=utf-8');
+    }
+    $friendlyMessage = (string) ($GLOBALS['__logging_user_message'] ?? 'در اجرای عملیات مشکلی پیش آمد. دوباره تلاش کنید؛ اگر تکرار شد کد پیگیری را به پشتیبانی بدهید.');
+    echo '<!doctype html><meta charset="utf-8"><body style="font-family:sans-serif;direction:rtl;padding:24px"><h2>عملیات انجام نشد</h2><p>' . htmlspecialchars($friendlyMessage, ENT_QUOTES, 'UTF-8') . '</p><p>کد پیگیری: <b dir="ltr">' . htmlspecialchars($requestId, ENT_QUOTES, 'UTF-8') . '</b></p></body>';
+});
+set_error_handler(static function (int $severity, string $message, string $file, int $line): bool {
+    if (!(error_reporting() & $severity)) return false;
+    // جلوگیری از recursion و سیل Warning/Notice/Deprecated؛ خطاهای واقعی همچنان ثبت می‌شوند.
+    if (!empty($GLOBALS['__logging_php_error_handler_active'])) return true;
+    static $seenLowSeverity = [];
+    static $lowSeverityCount = 0;
+    $lowSeverity = in_array($severity, [E_WARNING, E_USER_WARNING, E_NOTICE, E_USER_NOTICE, E_DEPRECATED, E_USER_DEPRECATED, E_STRICT], true);
+    if ($lowSeverity) {
+        $fingerprint = hash('sha256', $severity . "\0" . $file . "\0" . $line . "\0" . $message);
+        if (isset($seenLowSeverity[$fingerprint]) || $lowSeverityCount >= 20) {
+            $GLOBALS['__logging_php_error_handler_active'] = true;
+            try {
+                if (function_exists('logging_increment_counter')) logging_increment_counter('throttled_total');
+            } finally {
+                $GLOBALS['__logging_php_error_handler_active'] = false;
+            }
+            return true;
+        }
+        $seenLowSeverity[$fingerprint] = true;
+        $lowSeverityCount++;
+    }
+    $GLOBALS['__logging_php_error_handler_active'] = true;
+    try {
+    $level = match ($severity) {
+        E_USER_ERROR, E_RECOVERABLE_ERROR => 'error',
+        E_WARNING, E_USER_WARNING => 'warning',
+        E_NOTICE, E_USER_NOTICE => 'notice',
+        E_DEPRECATED, E_USER_DEPRECATED, E_STRICT => 'debug',
+        default => 'warning',
+    };
+    $type = match ($severity) {
+        E_WARNING => 'E_WARNING', E_NOTICE => 'E_NOTICE', E_DEPRECATED => 'E_DEPRECATED',
+        E_USER_WARNING => 'E_USER_WARNING', E_USER_NOTICE => 'E_USER_NOTICE',
+        E_USER_DEPRECATED => 'E_USER_DEPRECATED', E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+        default => 'PHP_ERROR',
+    };
+    system_error_record($level, 'PHP ' . $type, $message, basename($file) . ':' . $line, $type);
+    } finally {
+        $GLOBALS['__logging_php_error_handler_active'] = false;
+    }
+    return true;
+});
+register_shutdown_function(static function (): void {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        $errorType = match ((int) $error['type']) {
+            E_PARSE => 'E_PARSE', E_CORE_ERROR => 'E_CORE_ERROR', E_COMPILE_ERROR => 'E_COMPILE_ERROR', default => 'E_ERROR',
+        };
+        system_error_record('error', 'خطای قاتل PHP', (string) $error['message'], (string) $error['file'] . ':' . (string) $error['line'], $errorType);
+        if (PHP_SAPI === 'cli') {
+            if (defined('STDERR')) fwrite(STDERR, '[FATAL] ' . $errorType . ': ' . logging_sanitize_text((string) $error['message'], 500) . ' | Request-ID: ' . logging_request_id() . PHP_EOL);
+        } elseif (!headers_sent()) {
             http_response_code(500);
             header('Content-Type: text/html; charset=utf-8');
+            $friendlyMessage = (string) ($GLOBALS['__logging_user_message'] ?? 'در اجرای عملیات مشکلی پیش آمد. کد پیگیری را به پشتیبانی بدهید.');
+            echo '<!doctype html><meta charset="utf-8"><body style="font-family:sans-serif;direction:rtl;padding:24px"><h2>عملیات انجام نشد</h2><p>' . htmlspecialchars($friendlyMessage, ENT_QUOTES, 'UTF-8') . '</p><p>کد پیگیری: <b dir="ltr">' . htmlspecialchars(logging_request_id(), ENT_QUOTES, 'UTF-8') . '</b></p></body>';
         }
-        echo '<!doctype html><meta charset="utf-8"><body style="font-family:sans-serif;direction:rtl;padding:24px"><h2>خطای داخلی سامانه</h2><p>خطا ثبت شد و برای پیگیری در گزارش خطا قابل دیدن است.</p></body>';
-    });
-    register_shutdown_function(static function (): void {
-        $error = error_get_last();
-        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
-            $errorType = match ((int) $error['type']) {
-                E_PARSE => 'E_PARSE',
-                E_CORE_ERROR => 'E_CORE_ERROR',
-                E_COMPILE_ERROR => 'E_COMPILE_ERROR',
-                default => 'E_ERROR',
-            };
-            system_error_record('error', 'خطای قاتل PHP', (string) $error['message'], (string) $error['file'] . ':' . (string) $error['line'], $errorType);
-        }
-        $elapsed = microtime(true) - (float) ($GLOBALS['__request_started_at'] ?? microtime(true));
-        if ($elapsed >= 2.0) {
-            $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
-            $page = preg_match('/page=([a-z0-9_\-]+)/i', $uri, $m) ? $m[1] : 'نامشخص';
-            system_log('warning', 'کندی صفحه', 'صفحهٔ «' . $page . '» ' . round($elapsed, 1) . ' ثانیه طول کشید', [
-                'cause' => 'کندی معمولاً از کوئری سنگین، گزارش بزرگ یا بار بالای سرور است.',
-                'action' => 'اگر این پیام تکرار شد، بازهٔ گزارش یا تعداد رکوردها را بررسی کنید.',
-                'ms' => (int) round($elapsed * 1000),
-            ]);
-        }
-    });
-}
+    }
+    $elapsed = microtime(true) - (float) ($GLOBALS['__request_started_at'] ?? microtime(true));
+    if ($elapsed >= 2.0) {
+        $uri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+        $page = PHP_SAPI === 'cli' ? basename((string) ($_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? 'worker')) : (preg_match('/page=([a-z0-9_\\-]+)/i', $uri, $m) ? $m[1] : 'نامشخص');
+        system_log('warning', PHP_SAPI === 'cli' ? 'کندی Worker' : 'کندی صفحه', 'اجرای «' . $page . '» ' . round($elapsed, 1) . ' ثانیه طول کشید', [
+            'cause' => 'کندی معمولاً از کوئری سنگین، گزارش بزرگ یا بار بالای سرور است.',
+            'action' => 'اگر این پیام تکرار شد، بازهٔ گزارش یا تعداد رکوردها را بررسی کنید.',
+            'ms' => (int) round($elapsed * 1000),
+        ]);
+    }
+});
 
 /** نمایش فارسی جزئیات یک لاگ: علت احتمالی، اقدام پیشنهادی و جزئیات فنی زیر «جزئیات». */
 /**
  * ثبت خطای برنامه هم در گزارش سرور و هم در «سلامت سامانه» (system_logs).
- * یک پیام تکراری در هر ۶۰ ثانیه فقط یک‌بار در جدول ثبت می‌شود تا حلقه‌های خطا جدول را پر نکنند.
+ * پیام یکسان در همان اجرای PHP فقط یک‌بار ثبت می‌شود؛ تجمیع بین درخواست‌ها در صفحهٔ سلامت بر اساس fingerprint انجام می‌شود.
  */
 function app_error_log(string $message): bool
 {
+    $message = system_error_mask($message);
     error_log($message);
     static $recent = [];
     $key = sha1($message);
@@ -337,28 +400,49 @@ function db_delete_in_batches(string $table, string $where, array $params, int $
     return $total;
 }
 
-/** حذف لاگ‌های فنی قدیمی‌تر از بازهٔ نگهداری (پیش‌فرض ۳۰ روز). */
-function system_logs_prune(int $days = 30): int
+/**
+ * پاک‌سازی بر اساس کلاس نگهداری:
+ * امنیت/حسابرسی/عملیات حساس ۱۸۳ روز، کسب‌وکار ۶۰ روز، خطاهای فنی حداقل ۹۰ روز، info/notice سی روز و debug هفت روز.
+ * پارامتر days فقط می‌تواند دورهٔ خطاهای فنی را طولانی‌تر کند؛ کلاس‌های محافظت‌شده کوتاه نمی‌شوند.
+ */
+function system_logs_prune(int $days = 90): int
 {
-    $days = max(1, min(3650, $days));
+    $technicalDays = max(90, min(3650, $days));
     try {
         system_logs_ensure();
-        return db_delete_in_batches('system_logs', 'created_at < (NOW() - INTERVAL ? DAY)', [$days]);
-    } catch (Throwable) {
+        $total = 0;
+        $total += db_delete_in_batches('system_logs', "category IN ('security','audit','operation') AND created_at < DATE_SUB(NOW(), INTERVAL 183 DAY)", []);
+        $total += db_delete_in_batches('system_logs', "category = 'business' AND created_at < DATE_SUB(NOW(), INTERVAL 60 DAY)", []);
+        $total += db_delete_in_batches('system_logs', "level = 'debug' AND category NOT IN ('security','audit','operation','business') AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)", []);
+        $total += db_delete_in_batches('system_logs', "level IN ('info','notice') AND category NOT IN ('security','audit','operation','business') AND created_at < DATE_SUB(NOW(), INTERVAL 30 DAY)", []);
+        $total += db_delete_in_batches('system_logs', "level IN ('warning','error','critical') AND category NOT IN ('security','audit','operation','business') AND created_at < DATE_SUB(NOW(), INTERVAL " . $technicalDays . " DAY)", []);
+        if (function_exists('db_table_exists') && db_table_exists('log_issues')) {
+            $total += db_delete_in_batches('log_issues', "status = 'resolved' AND last_seen < DATE_SUB(NOW(), INTERVAL 365 DAY)", []);
+        }
+        return $total;
+    } catch (Throwable $exception) {
+        logging_emergency_failure('system_logs_prune_failed', get_class($exception));
         return 0;
     }
 }
 
-function system_logs_recent(int $limit = 200, string $level = ''): array
+function system_logs_recent(int $limit = 200, string $level = '', string $requestId = ''): array
 {
     try {
         system_logs_ensure();
+        $conditions = [];
+        $params = [];
         if ($level !== '') {
-            $query = db()->prepare('SELECT * FROM system_logs WHERE level = ? ORDER BY id DESC LIMIT ' . max(1, min(500, $limit)));
-            $query->execute([$level]);
-        } else {
-            $query = db()->query('SELECT * FROM system_logs ORDER BY id DESC LIMIT ' . max(1, min(500, $limit)));
+            $conditions[] = 'level = ?';
+            $params[] = $level;
         }
+        if ($requestId !== '' && preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $requestId)) {
+            $conditions[] = 'request_id = ?';
+            $params[] = $requestId;
+        }
+        $where = $conditions !== [] ? ' WHERE ' . implode(' AND ', $conditions) : '';
+        $query = db()->prepare('SELECT * FROM system_logs' . $where . ' ORDER BY id DESC LIMIT ' . max(1, min(500, $limit)));
+        $query->execute($params);
         return $query->fetchAll();
     } catch (Throwable) {
         return [];
@@ -417,6 +501,9 @@ function require_csrf(): void
     $expected = csrf_token();
     $provided = (string) ($_POST['csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
     if ($expected === '' || $provided === '' || !hash_equals($expected, $provided)) {
+        if (function_exists('activity_log')) {
+            try { activity_log(['action_code' => 'csrf_419', 'action_label' => 'درخواست امنیتی نامعتبر', 'module' => (string) ($_GET['page'] ?? 'request'), 'result' => 'denied', 'meta' => ['method' => (string) ($_SERVER['REQUEST_METHOD'] ?? 'POST')]]); } catch (Throwable) {}
+        }
         http_response_code(419);
         exit('درخواست نامعتبر است. صفحه را تازه‌سازی کنید.');
     }

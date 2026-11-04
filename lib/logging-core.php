@@ -1532,7 +1532,8 @@ logging_bootstrap();
 
 /**
  * ثبت تلاش دسترسی غیرمجاز در گزارش فعالیت کاربران.
- * index.php این تابع را صدا می‌زند؛ در بستهٔ ورودی تعریف نشده بود و باعث خطای مرگبار می‌شد.
+ * index.php، system-health.php و logging-dashboard.php روی هم ۱۸ بار این تابع را صدا می‌زنند
+ * ولی در بستهٔ خام هیچ‌جا تعریف نشده بود و باعث خطای مرگبار می‌شد.
  * ثبت لاگ هرگز نباید درخواست کاربر را بشکند، پس همهٔ خطاها بلعیده می‌شوند.
  */
 function security_log_access_denied(array $user, string $permission, string $page): void

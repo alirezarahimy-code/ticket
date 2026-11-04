@@ -39,9 +39,9 @@ $cspNonce = rtrim(strtr(base64_encode(random_bytes(18)), '+/', '-_'), '=');
 // ───── هسته، پیکربندی، HTTP امن و پایگاه داده (شرح در سرآیند همان فایل) ─────
 require __DIR__ . '/lib/db-core.php';
 
-// ───── هستهٔ مرکزی Logging (کاتالوگ رخداد، شناسهٔ درخواست، پالایش داده) ─────
-// باید پیش از logging-csrf و activity-audit بارگذاری شود؛ این دو به توابع logging_* وابسته‌اند.
+// ───── هستهٔ مرکزی ثبت رخداد و هم‌بستگی درخواست ─────
 require_once __DIR__ . '/lib/logging-core.php';
+require_once __DIR__ . '/lib/logging-diagnostics.php';
 
 // ───── پیام‌های فلش، لاگ سیستمی و CSRF (شرح در سرآیند همان فایل) ─────
 require __DIR__ . '/lib/logging-csrf.php';

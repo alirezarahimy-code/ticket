@@ -22,6 +22,7 @@ require __DIR__ . '/food-ticket.php';
 require __DIR__ . '/traffic-control.php';
 require __DIR__ . '/local-accounts.php';
 require __DIR__ . '/system-health.php';
+require_once __DIR__ . '/logging-dashboard.php';
 
 ticket_number_ensure_schema(); // پیش از هر تراکنش: DDL اینجا بی‌خطر است و داخل تراکنش دیگر اجرا نمی‌شود
 ticket_number_autofill();
@@ -720,6 +721,7 @@ function render_header(string $title, ?array $user = null): void
             $reportLinks[] = $submenuLink('index.php?page=activity-log', 'لاگ سامانه');
         }
         if (user_can($user, 'system.health')) {
+            $reportLinks[] = $submenuLink('index.php?page=logging-dashboard', 'داشبورد مانیتورینگ لاگینگ');
             $reportLinks[] = $submenuLink('index.php?page=system-health', 'سلامت سامانه');
         }
         $adminLinks = [];
@@ -1713,6 +1715,10 @@ if ($page === 'audit') {
         http_response_code(403); exit('دسترسی به لاگ سامانه مجاز نیست.');
     }
     redirect('index.php?page=activity-log');
+}
+
+if ($page === 'logging-dashboard') {
+    logging_dashboard_render(require_login());
 }
 
 if ($page === 'system-health') {
