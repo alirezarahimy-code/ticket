@@ -20,6 +20,9 @@ BOARD = (ROOT / "holiday-board.php").read_text(encoding="utf-8")
 ACTIONS = (ROOT / "actions/holiday-actions.php").read_text(encoding="utf-8")
 PANEL = (ROOT / "food-ticket-web/index.html").read_text(encoding="utf-8")
 MIGRATION = (ROOT / "migrations/031-food-worker-window.sql").read_text(encoding="utf-8")
+SCHEMA = (ROOT / "schema.sql").read_text(encoding="utf-8")
+EMPTY_DB = (ROOT / "install-empty-db.sql").read_text(encoding="utf-8")
+UPDATER = (ROOT / "system-update.php").read_text(encoding="utf-8")
 
 WINDOW_COLUMNS = [
     "window_enabled",
@@ -75,6 +78,53 @@ def test_migration_defaults_match_php_defaults() -> None:
     for column, default in expected.items():
         pattern = rf"ADD COLUMN {column} [^']*?DEFAULT {re.escape(default)}"
         assert re.search(pattern, MIGRATION), column
+
+
+def test_fresh_install_schema_has_every_window_column() -> None:
+    """install.php فقط schema.sql را اجرا می‌کند و سراغ migrations/ نمی‌رود؛
+    بدون این ستون‌ها یک نصب تازه قابلیت پنجره را اصلاً نمی‌دید."""
+    for sql, label in ((SCHEMA, "schema.sql"), (EMPTY_DB, "install-empty-db.sql")):
+        table = sql[sql.index("CREATE TABLE IF NOT EXISTS food_ticket_config") :]
+        table = table[: table.index("ENGINE=InnoDB")]
+        for column in WINDOW_COLUMNS:
+            assert f"{column} " in table, f"{label} ← {column}"
+
+
+def test_fresh_install_defaults_match_the_migration() -> None:
+    """نصب تازه و نصب ارتقایی باید دقیقاً یک رفتار بدهند."""
+    expected = {
+        "window_enabled": "0",
+        "window_days": "'6,7,1,2,3'",
+        "window_start": "'11:00:00'",
+        "window_end": "'14:00:00'",
+        "window_margin_before_minutes": "30",
+        "window_margin_after_minutes": "15",
+        "idle_poll_seconds": "60",
+        "active_poll_ms": "500",
+        "persistent_source_connection": "1",
+    }
+    for sql, label in ((SCHEMA, "schema.sql"), (EMPTY_DB, "install-empty-db.sql")):
+        for column, default in expected.items():
+            pattern = rf"{column} [^,]*?DEFAULT {re.escape(default)}"
+            assert re.search(pattern, sql), f"{label} ← {column}"
+
+
+def test_updater_enforces_the_incremental_prerequisite() -> None:
+    """بستهٔ افزایشی روی نسخهٔ پایین‌تر = نصب نیمه‌کارهٔ بی‌صدا."""
+    assert "function system_update_requires_violation(" in UPDATER
+    assert "system_update_requires_violation($current, $manifest['requires_version'] ?? null, $mode, $ignoreRequires)" in UPDATER
+    assert "bool $ignoreRequires = false" in UPDATER
+
+
+def test_updater_prerequisite_has_an_explicit_escape_hatch() -> None:
+    guard = UPDATER[UPDATER.index("function system_update_requires_violation(") :][:1800]
+    assert "if ($ignore || $mode === 'downgrade') {" in guard
+    # بسته‌های قدیمی بدون این کلید نباید مسدود شوند.
+    assert "return null; // بسته‌های قدیمی" in guard
+    assert 'name="ignore_requires"' in INDEX
+    assert "!empty($_POST['ignore_requires'])" in (
+        ROOT / "actions/backup-actions.php"
+    ).read_text(encoding="utf-8")
 
 
 def test_window_disabled_by_default_so_upgrades_keep_old_behaviour() -> None:

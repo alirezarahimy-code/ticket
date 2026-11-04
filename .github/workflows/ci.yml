@@ -43,3 +43,6 @@ jobs:
 
     - name: Run food worker window tests
       run: php tests/test_food_worker_window.php
+
+    - name: Run system update prerequisite tests
+      run: php tests/test_system_update_requires_version.php

@@ -41,7 +41,7 @@ if (!defined('APP_ROOT')) {
             $updateAdmin = require_primary_admin();
             require_permission('update.apply');
             try {
-                $updateResult = system_update_apply($_FILES['update_package'] ?? [], $updateAdmin, !empty($_POST['allow_downgrade']));
+                $updateResult = system_update_apply($_FILES['update_package'] ?? [], $updateAdmin, !empty($_POST['allow_downgrade']), !empty($_POST['ignore_requires']));
             } catch (RuntimeException $updateError) {
                 flash('danger', 'به‌روزرسانی انجام نشد: ' . $updateError->getMessage());
                 redirect('index.php?page=backup');

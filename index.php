@@ -1892,6 +1892,7 @@ if ($page === 'backup') {
             . '<form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="system_update">'
             . '<label class="field">فایل به‌روزرسانی (ZIP)<input type="file" name="update_package" accept=".zip" required></label>'
             . '<label class="check-label"><input type="checkbox" name="allow_downgrade" value="1"> برگشت به نسخهٔ قدیمی‌تر را تأیید می‌کنم (فقط اگر پک قدیمی‌تر از نسخهٔ فعلی است)</label>'
+            . '<label class="check-label"><input type="checkbox" name="ignore_requires" value="1"> پیش‌نیاز نسخهٔ پک را نادیده بگیر (فقط وقتی مطمئنید فایل‌های نسخه‌های میانی را جداگانه دارید)</label>'
             . '<button class="button" type="submit">به‌روزرسانی</button></form></section>';
     }
     echo '<section class="settings-grid backup-grid"' . $backupInert . '><div class="card form-card"><h2>ساخت نسخه پشتیبان</h2><p class="muted">یک نسخه از دیتابیس و پوشه پیوست‌ها می‌سازد. قبل از هر بازیابی نیز یک نسخه ایمنی خودکار ساخته می‌شود.</p><p class="' . ($dumpAvailable ? 'alert success' : 'alert danger') . '">' . ($dumpAvailable ? 'ابزار mysqldump پیدا شد و پشتیبان‌گیری آماده است.' : 'mysqldump پیدا نشد؛ مسیر ITSM_MYSQLDUMP_PATH یا مسیر XAMPP را تنظیم کنید.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="create_backup"><button class="button" type="submit" ' . ($dumpAvailable ? '' : 'disabled') . '>ساخت نسخه پشتیبان اکنون</button></form><small class="muted">مسیر ذخیره: ' . e(backup_root_path()) . '</small></div>';

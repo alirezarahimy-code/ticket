@@ -868,6 +868,16 @@ CREATE TABLE IF NOT EXISTS food_ticket_config (
     guest_card_uids TEXT NULL,
     max_guest_daily SMALLINT UNSIGNED NOT NULL DEFAULT 20,
     cut_source_rows TINYINT(1) NOT NULL DEFAULT 1,
+    -- پنجرهٔ کاری Worker (هم‌تراز با migrations/031-food-worker-window.sql)
+    window_enabled TINYINT(1) NOT NULL DEFAULT 0,
+    window_days VARCHAR(32) NOT NULL DEFAULT '6,7,1,2,3',
+    window_start TIME NOT NULL DEFAULT '11:00:00',
+    window_end TIME NOT NULL DEFAULT '14:00:00',
+    window_margin_before_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 30,
+    window_margin_after_minutes SMALLINT UNSIGNED NOT NULL DEFAULT 15,
+    idle_poll_seconds SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+    active_poll_ms SMALLINT UNSIGNED NOT NULL DEFAULT 500,
+    persistent_source_connection TINYINT(1) NOT NULL DEFAULT 1,
     updated_by INT UNSIGNED NULL,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_food_config_user FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
