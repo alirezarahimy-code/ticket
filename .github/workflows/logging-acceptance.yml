@@ -1,47 +1,10 @@
 name: Logging 1.62.76 Acceptance
 
-# توجه: اجرای خودکار روی push غیرفعال شد تا تا پیش از تأیید PHP Lint و آزمون MySQL روی
-# Staging، گردش‌کار پذیرش به‌صورت ناخواسته قرمز نشود. اجرای دستی از تب Actions در دسترس است.
+# فقط اجرای دستی. این گردش‌کار به MariaDB و Windows runner نیاز دارد و تا تأیید روی
+# Staging نباید خودکار اجرا شود. کلید push عمداً حذف شده است — یک کلید ناشناخته زیر on:
+# کل فایل را نامعتبر می‌کند و گردش‌کار پیش از ساخت job قرمز می‌شود.
 on:
   workflow_dispatch:
-  _disabled_push:
-    paths:
-      - 'lib/logging-*.php'
-      - 'lib/activity-audit.php'
-      - 'index.php'
-      - 'governance.php'
-      - 'actions/holiday-actions.php'
-      - 'cron/*logging*.php'
-      - 'actions/role-actions.php'
-      - 'actions/org-actions.php'
-      - 'actions/ticket-actions.php'
-      - 'actions/supervisor-actions.php'
-      - 'actions/bulk-actions.php'
-      - 'actions/service-actions.php'
-      - 'actions/settings-actions.php'
-      - 'actions/asset-actions.php'
-      - 'actions/user-structure-actions.php'
-      - 'actions/backup-actions.php'
-      - 'actions/food-brand-actions.php'
-      - 'domain-scan.php'
-      - 'schema.sql'
-      - 'cron/run_logging_integrity_export.bat'
-      - 'cron/reconcile_update_audit.php'
-      - 'tests/run_logging_staging_checks.ps1'
-      - 'tools/test_ticket_txn_offline.php'
-      - 'local-accounts.php'
-      - 'migrations/024-*.sql'
-      - 'migrations/025-*.sql'
-      - 'migrations/026-*.sql'
-      - 'migrations/027-*.sql'
-      - 'migrations/028-*.sql'
-      - 'migrations/029-*.sql'
-      - 'migrations/030-*.sql'
-      - 'tests/test_logging_*'
-      - 'tests/test_windows_logging_static.py'
-      - 'tests/test_logging_acl_windows.ps1'
-      - 'tools/*logging*.ps1'
-      - '.github/workflows/logging-acceptance.yml'
 
 permissions:
   contents: read
