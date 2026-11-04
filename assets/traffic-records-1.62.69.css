@@ -1,0 +1,49 @@
+/* Wide layouts are confined to these two pages/tabs, not the rest of the application. */
+.content-wrap.cd-history-wide, .content-wrap.traffic-report-wide,
+.content-wrap:has(#cd-dvd-history:not([hidden])), .content-wrap:has(.traffic-report-panel) {
+    max-width: none; padding-inline: 16px;
+}
+.content-wrap.cd-history-wide .cd-dvd-page,
+.content-wrap:has(#cd-dvd-history:not([hidden])) .cd-dvd-page { max-width: none; }
+#cd-dvd-history .cd-dvd-record-head, #cd-dvd-history .cd-dvd-record-row {
+    min-width: 0; width: 100%; gap: 5px; padding: 10px 4px;
+    grid-template-columns: 38px 100px 50px 95px 65px 85px minmax(100px, 2fr) 85px minmax(90px, 1fr) 190px;
+}
+#cd-dvd-history .cd-dvd-record-head > span,
+#cd-dvd-history .cd-dvd-record-row > span:not(.actions) {
+    white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere;
+}
+#cd-dvd-history .cd-dvd-record-row > .actions { white-space: nowrap; flex-wrap: nowrap; margin: 0; }
+#cd-dvd-history .cd-dvd-record-row > .actions .mini-button { padding: 5px 6px; margin: 1px; }
+@media (min-width: 701px) and (max-width: 1100px) {
+    #cd-dvd-history .cd-dvd-record-head, #cd-dvd-history .cd-dvd-record-row {
+        grid-template-columns: 25px 75px 40px 75px 55px minmax(45px, .8fr) minmax(90px, 2fr) 70px minmax(65px, 1fr) 150px;
+        gap: 3px; font-size: 10px;
+    }
+    #cd-dvd-history .cd-dvd-record-row > .actions .mini-button { font-size: 10px; padding: 4px; }
+}
+@media (max-width: 700px) {
+    #cd-dvd-history .cd-dvd-record-head, #cd-dvd-history .cd-dvd-record-row { min-width: 1050px; }
+}
+.cd-dvd-surface-head, .cd-dvd-surface-row {
+    grid-template-columns: .8fr 1.2fr .7fr 1.1fr 1.6fr 1fr 1.4fr;
+    min-width: 880px;
+}
+.traffic-report-table { min-width: 0; table-layout: fixed; }
+.traffic-report-table th, .traffic-report-table td { font-size: 11px; line-height: 1.5; padding: 6px 4px; white-space: normal; overflow-wrap: anywhere; }
+.traffic-report-table [hidden] { display: none; }
+.traffic-destination-dropdown { position: relative; max-width: 480px; }
+.traffic-destination-dropdown > summary { padding: 9px 12px; border: 1px solid #cad5d2; border-radius: 8px; cursor: pointer; background: #fff; }
+.traffic-destination-options { display: grid; gap: 2px; max-height: 240px; overflow: auto; padding: 8px; border: 1px solid #cad5d2; border-radius: 8px; background: #fff; }
+.traffic-destination-options label, .traffic-report-fields label { display: inline-flex; gap: 6px; align-items: center; padding: 5px; font-size: 11px; }
+.traffic-destination-options input, .traffic-report-fields input { width: auto; margin: 0; }
+.traffic-report-fields { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 12px 0; border: 1px solid #dbe4ec; border-radius: 9px; }
+.traffic-report-fields legend { font-weight: 700; font-size: 12px; }
+.traffic-report-fields-message { font-size: 11px; color: #b42318; margin: 0; }
+@media (max-width: 700px) { .traffic-report-table { min-width: 720px; } }
+@media print {
+    body.cd-dvd-print-selected > .cd-dvd-print-host .cd-dvd-surface-head,
+    body.cd-dvd-print-selected > .cd-dvd-print-host .cd-dvd-surface-row {
+        grid-template-columns: .7fr 1fr .65fr 1.1fr 1.4fr .8fr 1fr !important;
+    }
+}

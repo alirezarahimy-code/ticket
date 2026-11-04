@@ -64,11 +64,14 @@ try {
 $heartbeatFile = $storageDir . '/food_worker.heartbeat';
 $lastPrintedSig = '';
 $lastPrintedAt = 0;
+$lastAutoReceiptRunDay = '';
+$lastAutoReceiptAttemptAt = 0;
 
 fwrite(STDOUT, '[food-ticket-worker] ' . date('c') . ' start loop=' . ($loop ? '1' : '0') . ' pid=' . getmypid() . ' max_minutes=' . $maxMinutes . PHP_EOL);
 
 do {
     $cycle = ['processed' => 0, 'printed' => 0, 'errors' => 0, 'message' => ''];
+    $autoReceiptCycle = null;
     try {
         try {
             db(true);
@@ -80,6 +83,30 @@ do {
                 continue;
             }
             throw $dbEx;
+        }
+
+        // Worker --loop is long-lived; request-scoped settings must not stay cached across cycles.
+        if (function_exists('setting_forget_cache')) {
+            setting_forget_cache();
+        }
+
+        // یک بار در شروع هر روز تهران، سفارش‌های روزِ تمام‌شده را فقط در دفتر رویداد ثبت می‌کنیم.
+        // در صورت خاموشی Worker، اجرای نخست پس از بازگشت catch-up می‌کند؛ کلید یکتا در helper مانع تکرار است.
+        $tehranNow = new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran'));
+        $tehranDay = $tehranNow->format('Y-m-d');
+        if ($lastAutoReceiptRunDay !== $tehranDay && (time() - $lastAutoReceiptAttemptAt) >= 60) {
+            $lastAutoReceiptAttemptAt = time();
+            $autoTargetDate = $tehranNow->modify('-1 day')->format('Y-m-d');
+            try {
+                $autoReceiptCycle = food_ticket_auto_receipts_run($autoTargetDate);
+                if (empty($autoReceiptCycle['locked'])) {
+                    $lastAutoReceiptRunDay = $tehranDay;
+                }
+            } catch (Throwable $autoReceiptError) {
+                $autoReceiptCycle = ['date' => $autoTargetDate, 'error' => $autoReceiptError->getMessage()];
+                $cycle['errors']++;
+                fwrite(STDERR, '[auto-receipts] date=' . $autoTargetDate . ' ' . $autoReceiptError->getMessage() . PHP_EOL);
+            }
         }
 
         $config = food_ticket_config(true);
@@ -106,6 +133,10 @@ do {
                 fwrite(STDERR, '[queue] ' . $qEx->getMessage() . PHP_EOL);
                 $cycle['errors'] = (int) ($cycle['errors'] ?? 0) + 1;
             }
+        }
+
+        if (is_array($autoReceiptCycle)) {
+            $cycle['auto_receipts'] = $autoReceiptCycle;
         }
 
         try {

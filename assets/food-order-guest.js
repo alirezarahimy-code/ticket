@@ -16,11 +16,12 @@
     todayJalali: '',
     sameDayCutoff: '09:30',
     sameDayOpen: null,
+    loading: false,
     loadError: '',
     formError: '',
     saving: false,
     editingId: 0,
-    form: { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' }
+    form: { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' }
   };
   var dialog = null;
 
@@ -67,6 +68,7 @@
     var fd = new FormData(form);
     state.form = {
       request_date: String(fd.get('request_date') || ''),
+      meal_type: String(fd.get('meal_type') || 'lunch'),
       organization: String(fd.get('organization') || ''),
       guest_count: String(fd.get('guest_count') || ''),
       requester_name: String(fd.get('requester_name') || ''),
@@ -81,28 +83,42 @@
       : state.canCreateWithoutDeputy
         ? '<div class="alert info" role="status">درخواست شما با عنوان «مدیریت مرکزی» ثبت می‌شود و به معاونت خاصی نسبت داده نمی‌شود.</div>'
         : '<div class="alert info" role="status">برای ثبت درخواست جدید باید مدیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
+    var mealCount = function (meal, status) { return state.items.filter(function (item) { return (item.meal_type === 'dinner' ? 'dinner' : 'lunch') === meal && item.status === status; }).length; };
+    var activeGuestCount = state.items.filter(function (item) { return item.status === 'active'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
+    var cancelledGuestCount = state.items.filter(function (item) { return item.status === 'cancelled'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
+    var summary = state.loading || state.loadError ? '' : '<div class="alert info fg-request-summary" role="status">ناهار: فعال ' + faDigits(mealCount('lunch', 'active')) + '، لغوشده ' + faDigits(mealCount('lunch', 'cancelled')) + '، مجموع ' + faDigits(mealCount('lunch', 'active') + mealCount('lunch', 'cancelled')) + ' · شام: فعال ' + faDigits(mealCount('dinner', 'active')) + '، لغوشده ' + faDigits(mealCount('dinner', 'cancelled')) + '، مجموع ' + faDigits(mealCount('dinner', 'active') + mealCount('dinner', 'cancelled')) + ' · کل: ' + faDigits(state.items.filter(function (item) { return item.status === 'active'; }).length) + ' فعال، ' + faDigits(state.items.filter(function (item) { return item.status === 'cancelled'; }).length) + ' لغوشده، ' + faDigits(state.items.length) + ' ردیف · مهمان‌ها: ' + faDigits(activeGuestCount) + ' فعال و ' + faDigits(cancelledGuestCount) + ' لغوشده</div>' + (state.items.length >= 300 ? '<div class="alert warning fg-request-summary">تعدادها فقط برای حداکثر ۳۰۰ درخواست نخست بارگذاری‌شده است.</div>' : '');
     var rows = state.items.map(function (r) {
       var actions = [];
-      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + r.id + '">ویرایش</button>');
-      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + r.id + '">لغو</button>');
-      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + r.id + '">حذف</button>');
-      var action = actions.length ? actions.join(' ') : '<span class="muted">—</span>';
-      var status = r.status === 'cancelled' ? '<span class="muted">لغو شده</span>' : 'فعال';
-      return '<tr>'
+      var id = Number(r.id);
+      if (r.can_edit) actions.push('<button type="button" class="button secondary" data-fg-action="edit" data-id="' + id + '">ویرایش</button>');
+      if (r.can_cancel) actions.push('<button type="button" class="button secondary" data-fg-action="cancel" data-id="' + id + '">لغو</button>');
+      if (r.can_delete) actions.push('<button type="button" class="button danger" data-fg-action="delete" data-id="' + id + '">حذف</button>');
+      var action = actions.length ? actions.join(' ') : '—';
+      var status = r.status === 'cancelled' ? 'لغو شده' : 'فعال';
+      return '<tr class="fg-request-item">'
         + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
+        + '<td>' + (r.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td>'
         + '<td>' + esc(r.deputy_name || '—') + '</td>'
         + '<td>' + esc(r.organization) + '</td>'
         + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
         + '<td>' + esc(r.requester_name) + '</td>'
         + '<td>' + esc(r.created_by_name || '—') + '</td>'
+        + '<td>' + esc(r.note || '—') + '</td>'
         + '<td>' + status + '</td>'
-        + '<td>' + action + '</td></tr>';
+        + '<td><div class="fg-request-actions">' + action + '</div></td></tr>';
     }).join('');
-    var table = state.items.length
-      ? '<div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr>'
-        + '<th>تاریخ</th><th>معاونت</th><th>سازمان / شرکت</th><th>تعداد</th><th>درخواست‌دهنده</th><th>مدیر ثبت‌کننده</th><th>وضعیت</th><th>عملیات</th>'
+    var table = state.loading
+      ? '<p class="muted fg-request-empty">در حال دریافت درخواست‌های شما…</p>'
+      : state.loadError
+        ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
+        : state.items.length
+      ? '<div class="fg-request-list" role="region" tabindex="0" aria-label="درخواست‌های مهمان من؛ جدول قابل پیمایش">'
+        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">وعده</th><th scope="col">معاونت</th>'
+        + '<th scope="col">سازمان / شرکت</th><th scope="col">تعداد</th><th scope="col">درخواست‌دهنده</th>'
+        + '<th scope="col">ثبت‌کننده</th><th scope="col">یادداشت</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
-      : '<p class="muted">درخواست فعالی برای امروز یا روزهای آینده ثبت نشده است.</p>';
+        + (state.items.length >= 300 ? '<p class="muted fg-request-empty">حداکثر ۳۰۰ درخواست نخست نمایش داده می‌شود.</p>' : '')
+      : '<p class="muted fg-request-empty">درخواستی برای امروز یا روزهای آینده ثبت نکرده‌اید.</p>';
     var deadlineNotice = state.sameDayOpen === null
       ? '<div class="alert info" role="status">در حال بررسی مهلت ثبت درخواست مهمان برای امروز…</div>'
       : state.sameDayOpen
@@ -116,9 +132,11 @@
       + (state.loadError ? '<div class="alert danger" role="alert">' + esc(state.loadError) + '</div>' : '')
       + deputyBox
       + deadlineNotice
+      + '<div class="alert info" role="status">سفارش مهمانِ ثبت‌شده برای تعطیلات یا وعدهٔ شام، پس از پایان روز به‌صورت فیش خودکار ثبت می‌شود؛ چاپ فیزیکی انجام نمی‌شود.</div>'
       + (state.formError ? '<div class="alert danger" role="alert">' + esc(state.formError) + '</div>' : '')
       + '<form id="fg-form" class="form-grid" novalidate>'
       + '<label>تاریخ مورد نیاز (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali name="request_date" value="' + esc(f.request_date) + '" required></label>'
+      + '<label>وعدهٔ غذایی<select name="meal_type"><option value="lunch"' + (f.meal_type !== 'dinner' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (f.meal_type === 'dinner' ? ' selected' : '') + '>شام</option></select></label>'
       + '<label>سازمان / شرکت مهمان<input type="text" name="organization" maxlength="190" value="' + esc(f.organization) + '" required></label>'
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
       + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
@@ -126,7 +144,8 @@
       + '<div><button type="submit" class="button primary" data-fg-action="save"' + (state.saving || (!state.editingId && !state.canCreate) ? ' disabled' : '') + '>' + (state.editingId ? 'ذخیرهٔ ویرایش' : 'ثبت درخواست مهمان') + '</button>'
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
-      + '<h3 style="margin-top:20px">درخواست‌های ثبت‌شدهٔ مهمان (از امروز به بعد)</h3>'
+      + '<h3 class="fg-request-title">درخواست‌های مهمان من (از امروز به بعد)</h3>'
+      + summary
       + table
       + '</div>';
     if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(dialog);
@@ -170,8 +189,10 @@
       state.sameDayCutoff = data.same_day_cutoff || '09:30';
       state.sameDayOpen = data.same_day_open !== false;
     } catch (e) {
+      state.items = [];
       state.loadError = e.message;
     }
+    state.loading = false;
     readForm();
     if (!state.form.request_date && state.todayJalali && state.sameDayOpen) state.form.request_date = state.todayJalali;
     render();
@@ -183,6 +204,7 @@
     var f = state.form;
     var body = {
       request_date: normDigits(f.request_date).trim(),
+      meal_type: f.meal_type === 'dinner' ? 'dinner' : 'lunch',
       organization: f.organization.trim(),
       guest_count: normDigits(f.guest_count).trim(),
       requester_name: f.requester_name.trim(),
@@ -203,7 +225,7 @@
       var res = await request(editingId ? 'guest-request-update' : 'guest-request', null, { method: 'POST', body: JSON.stringify(body) });
       state.saving = false;
       state.editingId = 0;
-      state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+      state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
       dialog.close();
       toast(res.message || (editingId ? 'درخواست غذای مهمان ویرایش شد.' : 'درخواست غذای مهمان ثبت شد.'), false);
       await load();
@@ -232,6 +254,7 @@
     state.formError = '';
     state.form = {
       request_date: row.request_jalali || '',
+      meal_type: row.meal_type === 'dinner' ? 'dinner' : 'lunch',
       organization: row.organization || '',
       guest_count: String(row.guest_count || ''),
       requester_name: row.requester_name || '',
@@ -245,7 +268,7 @@
   function cancelEdit() {
     state.editingId = 0;
     state.formError = '';
-    state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
     render();
   }
 
@@ -266,11 +289,15 @@
   function open() {
     ensureDialog();
     state.editingId = 0;
+    state.items = [];
+    state.loading = true;
+    state.loadError = '';
+    state.sameDayOpen = null;
     state.canCreate = false;
     state.canCreateWithoutDeputy = false;
     state.myDeputy = null;
     state.formError = '';
-    state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
     render();
     if (!dialog.open) {
       try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', 'open'); }

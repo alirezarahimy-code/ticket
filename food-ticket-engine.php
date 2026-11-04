@@ -351,11 +351,22 @@ function food_ticket_sort_punches(array $items): array
  * @return array{event_type:string,print:bool,delete:bool,payload:array,food?:string}
  */
 /** حالت سقف فیش مهمان: «variable» (پیش‌فرض؛ تعداد نفرات داخل ساختمان در بازهٔ زمانی) یا «requested» (جمع درخواست مهمان معاونت‌ها در روز جاری). */
-function food_guest_cap_mode(): string
+function food_guest_cap_mode(bool $fresh = false): string
 {
-    // پیش‌فرض از نسخهٔ ۱.۵۱: حالت متغیر (تعداد افراد داخل ساختمان در بازهٔ زمانی).
-    $mode = function_exists('setting') ? (string) (setting('food_guest_cap_mode', 'variable') ?? 'variable') : 'variable';
-    return $mode === 'requested' ? 'requested' : 'variable';
+    if ($fresh) {
+        // A long batch must use the persisted setting for each guest, even if
+        // this process or another caller has an old request-scoped cache.
+        $query = db()->prepare('SELECT value FROM settings WHERE `key` = ? LIMIT 1');
+        $query->execute(['food_guest_cap_mode']);
+        $value = $query->fetchColumn();
+        $mode = ($value === false || $value === null) ? 'variable' : trim((string) $value);
+    } else {
+        $mode = function_exists('setting') ? trim((string) (setting('food_guest_cap_mode', 'variable') ?? 'variable')) : 'variable';
+    }
+    if (!in_array($mode, ['variable', 'requested'], true)) {
+        throw new RuntimeException('حالت ذخیره‌شدهٔ سقف مهمان نامعتبر است؛ صدور تا اصلاح تنظیم متوقف شد.');
+    }
+    return $mode;
 }
 
 /** نرمال‌سازی ساعت (HH:MM یا HH:MM:SS) به HH:MM:SS؛ اگر معتبر نبود پیش‌فرض. */
@@ -441,6 +452,14 @@ function food_ticket_guest_variable_cap(?string $date, ?string $time): ?int
  * سقف کل = تعداد داخل ساختمان در همان لحظه (اگر تردد در دسترس باشد)، وگرنه سقف ثابت قدیمی.
  * فیش‌های قبلاً صادرشده برگردانده نمی‌شوند؛ فقط صدور جدید بسته می‌شود.
  */
+/** Count the same issued/queued guest tickets in both the decision and live panel. */
+function food_ticket_guest_issued_total(string $date): int
+{
+    $query = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND event_type = "guest" AND print_status IN ("pending","printing","printed")');
+    $query->execute([$date]);
+    return (int) $query->fetchColumn();
+}
+
 function food_ticket_guest_cap_reached(int $issuedToday, ?int $insideNow, int $fallbackMax, int $cardIssued, int $cardLimit): bool
 {
     $capActive = $insideNow !== null || $fallbackMax > 0;
@@ -568,28 +587,34 @@ function food_ticket_decide_punch(array $item, array $config, array &$orderMaps)
     // مهمان
     if (!$user && $guestCard !== null) {
         $guestName = trim((string) ($guestCard['guest_name'] ?? '')) ?: 'مهمان';
-        $guestCountQ = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND event_type = "guest" AND print_status IN ("pending","printing","printed")');
-        $guestCountQ->execute([$date]);
-        $guestCount = (int) $guestCountQ->fetchColumn();
+        $guestCount = food_ticket_guest_issued_total((string) $date);
         $cardCountQ = db()->prepare('SELECT COUNT(*) FROM food_ticket_events WHERE punch_date = ? AND source_card = ? AND event_type = "guest" AND print_status IN ("pending","printing","printed")');
         $cardCountQ->execute([$date, $card]);
         $cardCount = (int) $cardCountQ->fetchColumn();
         $cardLimit = (int) ($guestCard['daily_limit'] ?? 0);
         $maxGuest = (int) ($config['max_guest_daily'] ?? 0);
-                // حالت «متغیر»: سقف از تعداد داخل ساختمان؛ حالت «درخواست مهمان»: سقف = جمع مهمان‌های درخواستی مدیران برای همان روز.
-        $guestMode = food_guest_cap_mode();
+        // حالت «متغیر»: سقف از تعداد داخل ساختمان؛ حالت «درخواست مهمان»: سقف = جمع مهمان‌های درخواستی مدیران برای همان روز.
+        $guestMode = food_guest_cap_mode(true);
         $variableCap = null;
         if ($guestMode === 'variable') {
             $variableCap = food_ticket_guest_variable_cap($date, $time);
         } elseif ($guestMode === 'requested' && function_exists('food_guest_requested_total')) {
             $variableCap = food_guest_requested_total((string) $date);
         }
+        if ($guestMode === 'requested' && $variableCap === null) {
+            // Never fall back to an unrelated fixed/traffic limit in request-based mode.
+            // The batch catches this error and leaves the source row for a later retry.
+            throw new RuntimeException('جمع درخواست‌های مهمان در دسترس نیست؛ صدور فیش تا رفع خطا متوقف شد.');
+        }
         if (food_ticket_guest_cap_reached($guestCount, $variableCap, $maxGuest, $cardCount, $cardLimit)) {
             return [
                 'event_type' => 'guest_limit',
                 'print' => false,
                 'delete' => true,
-                'payload' => $base + ['full_name' => $guestName, 'food_type' => 'مهمان', 'event_type' => 'guest_limit'],
+                'payload' => $base + ['full_name' => $guestName, 'food_type' => 'مهمان', 'event_type' => 'guest_limit',
+                    'last_error' => ($cardLimit > 0 && $cardCount >= $cardLimit
+                        ? 'سقف مستقل این کارت: ' . $cardCount . ' از ' . $cardLimit . '. ' : '')
+                        . 'سقف کل (' . ($guestMode === 'requested' ? 'جمع درخواست مهمان' : 'کنترل تردد') . '): ' . $guestCount . ' از ' . ($variableCap ?? $maxGuest) . '.'],
             ];
         }
         return [
@@ -686,9 +711,13 @@ function food_ticket_decide_for_user(array $user, string $date, array $base, arr
             ],
         ];
     }
-    $food = $orderMaps[$date][$national]
-        ?? $orderMaps[$date][ltrim($national, '0') ?: '0']
-        ?? null;
+    // A batch map can become stale while other people are processed. Resolve the
+    // actual employee's active order again immediately before making this event.
+    // Existing event snapshots and already printed receipts are never rewritten.
+    if (!function_exists('food_order_internal_food_for_employee')) {
+        throw new RuntimeException('منبع خواندن سفارش به‌روز در دسترس نیست؛ چاپ فیش متوقف شد.');
+    }
+    $food = food_order_internal_food_for_employee((int) ($user['id'] ?? 0), $date);
 
     if ($food === null || $food === '') {
         return [
@@ -810,6 +839,8 @@ function food_ticket_read_source_rows_today($sourceDb, int $limit, string $today
 
 function food_ticket_process_batch_v2(?int $requestedLimit = null): array
 {
+    // Reload persistent settings even when called by a long-running Worker or another batch caller.
+    if (function_exists('setting_forget_cache')) setting_forget_cache();
     $config = food_ticket_config(true);
     $summary = [
         'processed' => 0,

@@ -192,54 +192,169 @@
     if (!form || !all) return;
 
     var destinations = Array.prototype.slice.call(form.querySelectorAll('input[name="destinations[]"]'));
+    var dropdown = form.querySelector('.traffic-destination-dropdown');
+    var summary = dropdown ? dropdown.querySelector('summary') : null;
+    function updateDestinationSummary() {
+        if (!summary) return;
+        var selected = destinations.filter(function (input) { return input.checked; });
+        var text = all.checked ? 'همه مقصدها و رکوردهای بدون مقصد' : (selected.length ? selected.map(function (input) { return input.parentNode.textContent.trim(); }).join('، ') : 'انتخاب مقصدهای ملاقات');
+        summary.textContent = text;
+        summary.title = text;
+    }
+    if (dropdown) {
+        document.addEventListener('click', function (event) {
+            if (dropdown.open && !dropdown.contains(event.target)) dropdown.open = false;
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && dropdown.open) {
+                dropdown.open = false;
+                if (summary) summary.focus();
+            }
+        });
+    }
+    updateDestinationSummary();
     all.addEventListener('change', function () {
         all.setCustomValidity('');
         destinations.forEach(function (input) { input.checked = all.checked; });
+        updateDestinationSummary();
     });
     destinations.forEach(function (input) {
         input.addEventListener('change', function () {
             all.setCustomValidity('');
-            if (!input.checked) all.checked = false;
-            else all.checked = destinations.length > 0 && destinations.every(function (item) { return item.checked; });
+            // Only the explicit «all» option includes old/unassigned destinations.
+            all.checked = false;
+            updateDestinationSummary();
         });
     });
     form.addEventListener('submit', function (event) {
         if (all.checked || destinations.some(function (input) { return input.checked; })) return;
         event.preventDefault();
+        if (dropdown) dropdown.open = true;
         all.setCustomValidity('یک مقصد را انتخاب کنید یا گزینهٔ «همه» را علامت بزنید.');
         all.reportValidity();
     });
 }());
 
 /* جست‌وجوی آنی در سوابق تردد: به‌محض تایپ، ردیف‌های غیرمرتبط مخفی می‌شوند. */
+// Server-side filtering and pagination: every search covers the whole permitted data set.
 (function () {
-    var input = document.getElementById('traffic-history-search');
-    var table = document.getElementById('traffic-history-table');
-    if (!input || !table) return;
-    var rows = table.querySelectorAll('[data-traffic-row]');
-    var empty = document.getElementById('traffic-history-empty');
-    function normalize(value) {
-        return (value || '')
-            .toString()
-            .replace(/ي/g, 'ی')
-            .replace(/ك/g, 'ک')
-            .replace(/[۰-۹]/g, function (d) { return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)); })
-            .replace(/[٠-٩]/g, function (d) { return String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)); })
-            .toLowerCase()
-            .trim();
-    }
-    function apply() {
-        var query = normalize(input.value);
-        var visible = 0;
-        Array.prototype.forEach.call(rows, function (row) {
-            var match = query === '' || normalize(row.getAttribute('data-search') || '').indexOf(query) !== -1;
-            row.hidden = !match;
-            if (match) visible++;
+    'use strict';
+    function liveList(mode) {
+        var form = document.getElementById('traffic-' + mode + '-form');
+        var rows = document.getElementById('traffic-' + mode + '-rows');
+        var status = document.getElementById('traffic-' + mode + '-status');
+        var prev = document.getElementById('traffic-' + mode + '-prev');
+        var next = document.getElementById('traffic-' + mode + '-next');
+        if (!form || !rows || !status || !prev || !next) return;
+        var offset = 0, revision = 0, timer = null, more = false, lastItems = [];
+        var fieldInputs = mode === 'report' ? Array.prototype.slice.call(form.querySelectorAll('input[name="fields[]"]')) : [];
+        var storageKey = 'traffic-report-fields-v1:' + (form.getAttribute('data-user-id') || 'shared');
+        var fieldMessage = document.getElementById('traffic-report-fields-message');
+        if (mode === 'report') {
+            var shell = document.querySelector('.content-wrap');
+            if (shell) shell.classList.add('traffic-report-wide');
+            try {
+                var saved = JSON.parse(window.localStorage.getItem(storageKey) || 'null');
+                if (Array.isArray(saved) && fieldInputs.some(function (input) { return saved.indexOf(input.value) !== -1; })) {
+                    fieldInputs.forEach(function (input) { input.checked = saved.indexOf(input.value) !== -1; });
+                }
+            } catch (ignore) {}
+        }
+        function selectedFields() { return fieldInputs.filter(function (input) { return input.checked; }).map(function (input) { return input.value; }); }
+        function renderReport(items) {
+            var keys = selectedFields();
+            // Legacy test fixtures and integrations without a field chooser still see all columns.
+            if (!fieldInputs.length) keys = ['serial','date','name','national','phone','company','meeting','approver','entry','exit','no_visit','with_car','with_mobile','description','recorder'];
+            var table = rows.closest('table');
+            if (table) table.querySelectorAll('thead [data-report-key]').forEach(function (th) { th.hidden = keys.indexOf(th.getAttribute('data-report-key')) === -1; });
+            rows.replaceChildren();
+            items.forEach(function (item) {
+                var tr = document.createElement('tr');
+                keys.forEach(function (key) { var td = document.createElement('td'); td.textContent = item[key] || '—'; tr.appendChild(td); });
+                rows.appendChild(tr);
+            });
+        }
+        fieldInputs.forEach(function (input) {
+            input.addEventListener('change', function () {
+                var fields = selectedFields();
+                if (!fields.length) {
+                    input.checked = true;
+                    if (fieldMessage) fieldMessage.textContent = 'حداقل یک فیلد گزارش باید انتخاب شود.';
+                    return;
+                }
+                if (fieldMessage) fieldMessage.textContent = '';
+                try { window.localStorage.setItem(storageKey, JSON.stringify(fields)); } catch (ignore) {}
+                renderReport(lastItems);
+            });
         });
-        if (empty) empty.hidden = visible !== 0 || rows.length === 0;
+        if (mode === 'report') renderReport(lastItems);
+        function schedule(reset, delay) {
+            revision++;
+            var current = revision;
+            if (reset) offset = 0;
+            prev.disabled = true; next.disabled = true;
+            clearTimeout(timer);
+            status.textContent = 'در حال دریافت اطلاعات…';
+            timer = setTimeout(function () { load(current); }, delay);
+        }
+        function load(current) {
+            var params = new URLSearchParams(new FormData(form));
+            params.delete('action');
+            params.set('page', 'traffic-control');
+            params.set('traffic_api', mode);
+            params.set('offset', String(offset));
+            if (mode === 'history') {
+                var urlParams = new URLSearchParams(window.location.search);
+                ['sort_t', 'dir_t'].forEach(function (key) { if (urlParams.has(key)) params.set(key, urlParams.get(key)); });
+            }
+            fetch('index.php?' + params.toString(), { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                .then(function (response) { return response.json().then(function (data) { if (!response.ok) throw new Error(data.error || 'دریافت اطلاعات ناموفق بود.'); return data; }); })
+                .then(function (data) {
+                    if (current !== revision) return;
+                    more = !!data.more;
+                    if (mode === 'history') {
+                        rows.innerHTML = data.html; // HTML is escaped and rendered by the trusted server.
+                        var empty = document.getElementById('traffic-history-empty');
+                        if (empty) empty.hidden = data.count !== 0;
+                    } else {
+                        lastItems = data.items;
+                        renderReport(lastItems);
+                    }
+                    status.textContent = data.count ? 'نمایش ' + (offset + 1) + ' تا ' + (offset + data.count) + (more ? ' — نتایج بیشتری وجود دارد.' : ' — پایان نتایج.') : 'رکوردی با این معیارها یافت نشد.';
+                    prev.disabled = offset === 0; next.disabled = !more;
+                })
+                .catch(function (error) {
+                    if (current !== revision) return;
+                    rows.replaceChildren();
+                    status.textContent = error.message || 'ارتباط با سرور برقرار نشد.';
+                    prev.disabled = true; next.disabled = true;
+                });
+        }
+        form.addEventListener('input', function (event) {
+            if (event.target.name === 'search' || event.target.matches('input[type=text], input[type=date]')) schedule(true, 300);
+        });
+        form.addEventListener('change', function (event) { if (event.target.name !== 'fields[]') schedule(true, 0); });
+        if (mode === 'history') {
+            form.addEventListener('submit', function (event) { event.preventDefault(); schedule(true, 0); });
+            document.querySelectorAll('#traffic-history-table .log-sort').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    var url = new URL(link.href, window.location.href);
+                    var values = new FormData(form);
+                    ['search', 'range', 'open_only'].forEach(function (key) { url.searchParams.delete(key); if (values.has(key)) url.searchParams.set(key, values.get(key)); });
+                    window.location.href = url.toString();
+                });
+            });
+        }
+        prev.addEventListener('click', function () { offset = Math.max(0, offset - 100); schedule(false, 0); });
+        next.addEventListener('click', function () { if (more) { offset += 100; schedule(false, 0); } });
+        if (mode === 'history') schedule(true, 0);
+        else {
+            var from = form.querySelector('[name=from_date]'), to = form.querySelector('[name=to_date]');
+            if (from && to && from.value && to.value) schedule(true, 0);
+        }
     }
-    input.addEventListener('input', apply);
-    apply();
+    liveList('history'); liveList('report');
 }());
 
 (function () {

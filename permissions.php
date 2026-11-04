@@ -2,11 +2,12 @@
 declare(strict_types=1);
 
 /**
- * Role-based permissions.
+ * Role permissions with additive public access-group grants.
  *
  * Roles are stored in users.role (existing enum + new values added by upgrade-1.22).
- * Permissions per role are stored in the role_permissions table.
- * A permission row means "this role has this permission".
+ * Permissions per role are stored in role_permissions; optional user access groups
+ * add grants through user_access_group_members / user_access_group_permissions.
+ * A group grant never removes or replaces a role grant. primary_admin is implicit-full.
  */
 
 function permission_roles(): array
@@ -609,6 +610,63 @@ function role_permission_set(string $role): array
     return $GLOBALS['__role_permission_sets'][$role];
 }
 
+/**
+ * Additive permissions granted to a user through any of their access groups.
+ * A request-local cache keeps the extra lookup to at most one query per user.
+ * Missing migration tables intentionally mean "no group grants", never a fatal error.
+ */
+function user_access_group_permission_set(array $user): array
+{
+    $userId = (int) ($user['id'] ?? 0);
+    if ($userId <= 0) {
+        return [];
+    }
+
+    if (!isset($GLOBALS['__user_access_group_permission_codes']) || !is_array($GLOBALS['__user_access_group_permission_codes'])) {
+        $GLOBALS['__user_access_group_permission_codes'] = [];
+    }
+    if (!array_key_exists($userId, $GLOBALS['__user_access_group_permission_codes'])) {
+        $codes = [];
+        try {
+            $query = db()->prepare(
+                'SELECT DISTINCT gp.permission_code
+                 FROM user_access_group_members gm
+                 INNER JOIN user_access_groups g ON g.id = gm.group_id
+                 INNER JOIN user_access_group_permissions gp ON gp.group_id = g.id
+                 INNER JOIN users group_user ON group_user.id = gm.user_id
+                 WHERE gm.user_id = ? AND group_user.is_active = 1 AND group_user.auth_source <> \'food\''
+            );
+            $query->execute([$userId]);
+            $codes = array_map('strval', $query->fetchAll(PDO::FETCH_COLUMN));
+        } catch (Throwable) {
+            // A not-yet-applied additive migration must not break role-only access.
+            $codes = [];
+        }
+
+        $codes = permission_food_legacy_codes($codes);
+        $codes = array_values(array_intersect($codes, permission_all_codes()));
+        $GLOBALS['__user_access_group_permission_codes'][$userId] = array_values(array_unique($codes));
+    }
+
+    // Preserve the explicit CD/DVD role allowlist even when that capability is group-assigned.
+    $codes = permission_filter_role_codes(user_role_code($user), $GLOBALS['__user_access_group_permission_codes'][$userId]);
+    $codes = role_permissions_add_parents($codes);
+    return array_fill_keys($codes, true);
+}
+
+/** Drop the request-local effective-group cache after a group or membership update. */
+function user_access_group_permissions_flush_cache(?int $userId = null): void
+{
+    if (!isset($GLOBALS['__user_access_group_permission_codes']) || !is_array($GLOBALS['__user_access_group_permission_codes'])) {
+        return;
+    }
+    if ($userId === null) {
+        unset($GLOBALS['__user_access_group_permission_codes']);
+        return;
+    }
+    unset($GLOBALS['__user_access_group_permission_codes'][$userId]);
+}
+
 function role_permissions_seeded(): bool
 {
     if (!permission_table_ready()) {
@@ -725,7 +783,7 @@ function user_is_primary_admin(array $user): bool
 }
 
 /**
- * True when the user's role has the given permission.
+ * True when the user's role or any public access group grants the permission.
  * primary_admin (and admin+is_primary_admin) always pass.
  */
 function user_can(array $user, string $permission): bool
@@ -736,7 +794,8 @@ function user_can(array $user, string $permission): bool
     if (user_is_primary_admin($user)) {
         return true;
     }
-    return isset(role_permission_set(user_role_code($user))[$permission]);
+    return isset(role_permission_set(user_role_code($user))[$permission])
+        || isset(user_access_group_permission_set($user)[$permission]);
 }
 
 function user_can_any(array $user, array $permissions): bool

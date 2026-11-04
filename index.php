@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/user-access-groups.php';
 require_once __DIR__ . '/xlsx-writer.php';
 if (is_file(__DIR__ . '/admin-layout-design.php')) {
     require_once __DIR__ . '/admin-layout-design.php';
@@ -425,43 +426,7 @@ function fetch_ticket(int $id): ?array
 
 function can_view_ticket(array $ticket, array $user): bool
 {
-    // جداسازی حوزه پیش از درخواست‌های خود و مجوزهای سفارشی؛ کارمند پشتیبانی فقط پشتیبانی.
-    // این کنترل روی جزئیات، پیوست، پاسخ، ارجاع و عملیات گروهی هم اعمال می‌شود.
-    $role = (string) ($user['role'] ?? '');
-    $ticketGroup = (string) ($ticket['service_group'] ?? '');
-    if ($role === 'support_manager' && $ticketGroup !== 'support') {
-        return false;
-    }
-    if (in_array($role, ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
-        return false;
-    }
-    // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ درخواست از سطوح دسترسی نقش‌ها خوانده می‌شود:
-    // ticket.view_own (درخواست‌های خودم)، ticket.view_unit (واحد/زیرمجموعه)، ticket.view_all (همهٔ درخواست‌ها).
-    if ((int) $ticket['requester_id'] === (int) $user['id'] && user_can($user, 'ticket.view_own')) {
-        return true;
-    }
-    if (is_global_ticket_role($user['role']) && user_can($user, 'ticket.view_all')) {
-        return true;
-    }
-    if (!user_can($user, 'ticket.view_unit')) {
-        return false;
-    }
-    if (($user['role'] ?? '') === 'support_manager') {
-        // مدیر پشتیبانی فقط حوزه پشتیبانی؛ بدون دسترسی به درخواست‌های IT و بدون فیلتر معاونت.
-        return (string) ($ticket['service_group'] ?? '') === 'support';
-    }
-    if ($user['role'] === 'agent') {
-        return (string) ($ticket['service_group'] ?? '') === user_service_group($user);
-    }
-    if ($user['role'] === 'manager') {
-        // هم‌تراز با ticket_scope: مدیر بدون معاونت، کل حوزه را می‌بیند؛ وگرنه فقط معاونت خودش.
-        if ((string) ($ticket['service_group'] ?? '') !== user_service_group($user)) {
-            return false;
-        }
-        $managerDept = (int) ($user['department_id'] ?? 0);
-        return $managerDept <= 0 || (int) ($ticket['department_id'] ?? 0) === $managerDept;
-    }
-    return false;
+    return ticket_user_can_view($ticket, $user);
 }
 
 /**
@@ -485,7 +450,7 @@ function ticket_org_manager_rank_sql(): string
         : '';
 }
 
-function choose_handling_agent(string $serviceGroup, ?int $departmentId = null): ?int
+function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, int $requesterId = 0): ?int
 {
     $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
     $departmentId = (int) ($departmentId ?? 0);
@@ -500,26 +465,33 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null):
     $ownerCondition = $serviceGroup === 'it'
         ? '(u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1))'
         : 'u.role = "support_manager"';
-    $ownerQuery = db()->query('SELECT u.id FROM users u' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1');
-    $id = $ownerQuery->fetchColumn();
-    if ($id !== false) {
-        return (int) $id;
+    $candidateFields = 'u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code';
+    $routingTicket = ['requester_id' => $requesterId, 'service_group' => $serviceGroup, 'department_id' => $departmentId];
+    $ownerQuery = db()->query('SELECT ' . $candidateFields . ' FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id' . $loadJoin . ' WHERE u.is_active = 1 AND ' . $ownerCondition . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id');
+    foreach ($ownerQuery->fetchAll() as $candidate) {
+        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
+            return (int) $candidate['id'];
+        }
     }
 
     // اگر مسئول اصلی غیرفعال/تعریف‌نشده باشد، فقط کارشناس همان حوزه جایگزین می‌شود.
     // عمداً دیگر به کارشناس حوزهٔ دیگر ارجاع نمی‌دهیم؛ در نبود جایگزین، درخواست در manager_review می‌ماند.
     $fallback = db()->prepare(
-        'SELECT u.id FROM users u '
+        'SELECT ' . $candidateFields . ' FROM users u '
         . 'LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id'
         . $loadJoin
-        . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager", "support_manager", "primary_admin") AND hu.code = ?'
+        . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
         // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
-        . ' GROUP BY u.id ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1'
+        . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
     );
     $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
-    $id = $fallback->fetchColumn();
-    return $id === false ? null : (int) $id;
+    foreach ($fallback->fetchAll() as $candidate) {
+        if (ticket_assignee_is_eligible($routingTicket, $candidate, 'ticket_notification_user_can')) {
+            return (int) $candidate['id'];
+        }
+    }
+    return null;
 }
 
 /**
@@ -562,43 +534,6 @@ function ticket_requester_can_cancel(array $ticket, array $user): bool
         && (int) ($ticket['requester_id'] ?? 0) === (int) ($user['id'] ?? 0)
         && in_array((string) ($ticket['status'] ?? ''), ticket_requester_cancelable_statuses(), true)
         && empty($ticket['cancel_requested_at']);
-}
-
-/** امتیازی معتبر است که ثبت شده باشد و قدیمی‌تر از آخرین «حل‌شدن» درخواست نباشد. */
-function ticket_rating_is_current(array $ticket): bool
-{
-    if (empty($ticket['rating_score'])) {
-        return false;
-    }
-    if (empty($ticket['resolved_at']) || empty($ticket['rating_at'])) {
-        return true;
-    }
-    return strtotime((string) $ticket['rating_at']) >= strtotime((string) $ticket['resolved_at']);
-}
-
-/**
- * سطح اختیار کاربر روی درخواست: manager (ارجاع/تغییر کامل)، assignee (کارشناس مسئول)، یا رشتهٔ خالی.
- */
-function ticket_handler_level(array $ticket, array $user): string
-{
-    if (!can_view_ticket($ticket, $user)) {
-        return '';
-    }
-    // جداسازی حوزه حتی اگر مجوز ارجاع به‌اشتباه داده شده باشد: مدیر پشتیبانی فقط پشتیبانی.
-    $ticketGroup = (string) ($ticket['service_group'] ?? '');
-    if (($user['role'] ?? '') === 'support_manager' && $ticketGroup !== 'support') {
-        return '';
-    }
-    if (in_array(($user['role'] ?? ''), ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
-        return '';
-    }
-    if (user_can($user, 'ticket.assign')) {
-        return 'manager';
-    }
-    if ((int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && is_assignable_role((string) ($user['role'] ?? ''))) {
-        return 'assignee';
-    }
-    return '';
 }
 
 /** اعلان «حل شد» به کاربر (برای ثبت امتیاز یا بازگشایی) و به مسئولان (برای پیگیری تأیید نهایی). */
@@ -695,7 +630,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.61">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3"></head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -1029,8 +964,9 @@ if (($_GET['action'] ?? '') === 'notification_feed') {
         @session_write_close();
     }
     $afterId = max(0, (int) ($_GET['after'] ?? 0));
-    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . ' ORDER BY n.id ASC LIMIT 20');
-    $feedQuery->execute([(int) $user['id'], $afterId]);
+    [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($user, 'n');
+    $feedQuery = db()->prepare('SELECT n.id, n.ticket_id, n.notification_type, n.title, n.body, n.created_at FROM notifications n WHERE n.user_id = ? AND n.id > ?' . notification_visibility_sql((int) $user['id'], $user, 'n') . $notificationTicketFilter . ' ORDER BY n.id ASC LIMIT 20');
+    $feedQuery->execute(array_merge([(int) $user['id'], $afterId], $notificationTicketParams));
     $items = array_map(static function (array $item): array {
         return [
             'id' => (int) $item['id'],
@@ -1209,7 +1145,7 @@ if (($_GET['action'] ?? '') === 'download_attachment') {
     $attachmentQuery->execute([$attachmentId]);
     $attachment = $attachmentQuery->fetch();
     $attachmentTicket = $attachment ? fetch_ticket((int) $attachment['ticket_id']) : null;
-    $canDownloadInternal = is_staff_role($downloadUser['role']);
+    $canDownloadInternal = is_staff_role($downloadUser['role']) || user_is_primary_admin($downloadUser);
     if (!$attachment || !$attachmentTicket || !can_view_ticket($attachmentTicket, $downloadUser) || ((int) $attachment['is_internal'] === 1 && !$canDownloadInternal)) {
         http_response_code(404);
         exit('فایل پیدا نشد.');
@@ -1232,7 +1168,7 @@ if ($page === 'food-personnel-link') {
 }
 
 
-// ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با بانر) ═══
+// ═══ ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (77 اکشن، گروه‌بندی با بانر) ═══
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_csrf();
     $action = (string) ($_POST['action'] ?? '');
@@ -1313,6 +1249,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ───── گروه اکشن: نقش‌های کلیدی و دسترسی‌ها — ۴ اکشن از ۱.۶۲.۱۶ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/role-actions.php';
 
+        // ───── گروه اکشن: گروه‌های عمومی دسترسی — ۳ اکشن مستقل (ساخت، ذخیره، حذف) ─────
+        require __DIR__ . '/actions/access-group-actions.php';
+
 
         // ───── گروه اکشن: نگهداری لاگ‌ها/LDAP و تنظیمات عمومی — ۵ اکشن از ۱.۶۲.۱۶ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/settings-actions.php';
@@ -1326,7 +1265,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         app_error_log('ITSM request failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
         system_log('error', 'request', $exception->getMessage(), ['uri' => (string) ($_SERVER['REQUEST_URI'] ?? ''), 'file' => $exception->getFile(), 'line' => $exception->getLine()]);
         flash('danger', $exception instanceof RuntimeException ? $exception->getMessage() : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
-        redirect('index.php?page=' . urlencode($page));
+        $errorRedirect = 'index.php?page=' . urlencode($page);
+        if ($page === 'settings' && in_array((string) ($action ?? ''), ['create_access_group', 'save_access_group', 'delete_access_group'], true)) {
+            $failedGroupId = max(0, (int) ($_POST['group_id'] ?? 0));
+            if ($failedGroupId > 0) {
+                $errorRedirect .= '&access_group_id=' . $failedGroupId;
+            }
+            $errorRedirect .= '#access-groups';
+        }
+        redirect($errorRedirect);
     }
 }
 
@@ -1692,8 +1639,9 @@ if ($page === 'notifications' && $user && !user_can($user, 'notif.view')) {
 }
 if ($page === 'notifications') {
     $notificationUser = require_login();
-    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . ' ORDER BY n.created_at DESC LIMIT 100');
-    $notificationQuery->execute([(int) $notificationUser['id']]);
+    [$notificationTicketFilter, $notificationTicketParams] = notification_ticket_visibility($notificationUser, 'n');
+    $notificationQuery = db()->prepare('SELECT n.*, t.subject FROM notifications n LEFT JOIN tickets t ON t.id = n.ticket_id WHERE n.user_id = ?' . notification_visibility_sql((int) $notificationUser['id'], $notificationUser, 'n') . $notificationTicketFilter . ' ORDER BY n.created_at DESC LIMIT 100');
+    $notificationQuery->execute(array_merge([(int) $notificationUser['id']], $notificationTicketParams));
     render_header('اعلان‌های داخلی', $notificationUser);
     echo '<section class="page-heading"><div><span class="eyebrow">اعلان داخلی آفلاین</span><h1>اعلان‌های شما</h1><p>تغییرات درخواست‌ها بدون نیاز به ایمیل یا پیامک در همین سامانه اعلام می‌شوند.</p></div><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="mark_all_notifications"><button class="button secondary" type="submit">خوانده‌شدن همه</button></form></section><section class="card notification-list">';
     foreach ($notificationQuery->fetchAll() as $notification) {
@@ -2323,10 +2271,10 @@ if ($page === 'ticket') {
             $attachments[(int) $attachment['message_id']][] = $attachment;
         }
     }
-    $staff = is_staff_role($user['role']);
-    $canManageTicket = $staff;
-    $isRequester = (int) $ticket['requester_id'] === (int) $user['id'];
-    $requesterView = $isRequester && !$staff;
+    $staff = is_staff_role($user['role']) || user_is_primary_admin($user);
+    $canManageTicket = $staff && user_can($user, 'ticket.edit');
+    $isRequester = ticket_user_is_requester($ticket, $user);
+    $requesterView = $isRequester;
     $canCancelOwnTicket = ticket_requester_can_cancel($ticket, $user);
     $handlerLevel = ticket_handler_level($ticket, $user);
     $cancelHasRequest = !empty($ticket['cancel_requested_at']);
@@ -2380,7 +2328,9 @@ if ($page === 'ticket') {
             echo '<form class="card cancellation-decision" method="post">' . csrf_field() . '<input type="hidden" name="action" value="decide_ticket_cancellation"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>تصمیم مسئول رسیدگی دربارهٔ لغو</h3><label>یادداشت تصمیم (برای رد، نوشتن دلیل الزامی است)<textarea name="decision_note" maxlength="1000" rows="2" placeholder="در صورت رد، توضیح دهید رسیدگی چگونه ادامه می‌یابد."></textarea></label><div class="actions"><button class="button danger-button" type="submit" name="decision" value="approve" data-confirm="درخواست لغو را تأیید کنید؟ با این کار درخواست از صف فعال خارج می‌شود و سابقه حفظ می‌ماند.">تأیید لغو</button><button class="button secondary" type="submit" name="decision" value="reject">رد و ادامهٔ رسیدگی</button></div></form>';
         }
     }
-    if ($requiresRating) {
+    if ($requiresRating && !user_can($user, 'ticket.rate')) {
+        echo '<div class="card"><p>دسترسی ثبت امتیاز برای حساب شما فعال نیست؛ برای بررسی دسترسی با مدیر سامانه تماس بگیرید.</p></div>';
+    } elseif ($requiresRating) {
          echo '<form class="card rating-card required-rating" method="post">' . csrf_field() . '<input type="hidden" name="action" value="rate_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>ثبت امتیاز رضایت الزامی است</h3><p class="muted">برای نهایی‌شدن این درخواست، میزان رضایت خود از واحد رسیدگی را ثبت کنید.</p><div class="rating-options">';
          for ($score = 1; $score <= 5; $score++) {
              echo '<label><input type="radio" name="score" value="' . $score . '" required><span>' . $score . '★</span></label>';
@@ -2402,8 +2352,8 @@ if ($page === 'ticket') {
          if (!$requiresRating) {
              echo '<div class="card"><p class="muted">این درخواست بسته شده است. برای ادامه، درخواست جدید ثبت کنید.</p></div>';
          }
-     } elseif (!$requiresRating) {
-         $afterOptions = ($handlerLevel !== '' && !empty($ticket['assigned_to']) && !$cancelHasRequest) ? array_values(array_intersect(['waiting_user', 'resolved'], ticket_allowed_transitions((string) $ticket['status']))) : [];
+     } elseif (!$requiresRating && user_can($user, 'ticket.reply')) {
+         $afterOptions = (!$isRequester && user_can($user, 'ticket.edit') && $handlerLevel !== '' && !empty($ticket['assigned_to']) && !$cancelHasRequest) ? array_values(array_intersect(['waiting_user', 'resolved'], ticket_allowed_transitions((string) $ticket['status']))) : [];
          $afterSelect = '';
          if ($afterOptions) {
              $afterSelect = '<label>پس از ارسال<select name="after_status"><option value="">بدون تغییر وضعیت</option>';
@@ -2414,11 +2364,11 @@ if ($page === 'ticket') {
          } elseif ($cancelHasRequest && $handlerLevel !== '') {
              $afterSelect = '<small class="muted">تا تصمیم لغو، تغییر وضعیت از مسیر پاسخ متوقف است؛ پیام شما به‌عنوان گفت‌وگو ثبت می‌شود.</small>';
          }
-         echo '<form class="card reply-box" method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="reply"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>پاسخ شما<textarea name="body" required rows="5" placeholder="پیام خود را بنویسید..."></textarea></label><div class="reply-actions"><label class="file-input compact">پیوست<input type="file" name="attachment"></label>' . ($staff ? '<label class="check-label"><input type="checkbox" name="is_internal" value="1"> یادداشت داخلی</label>' : '') . $afterSelect . '<button class="button" type="submit">ارسال پاسخ</button></div></form>';
+         echo '<form class="card reply-box" method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="reply"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>پاسخ شما<textarea name="body" required rows="5" placeholder="پیام خود را بنویسید..."></textarea></label><div class="reply-actions"><label class="file-input compact">پیوست<input type="file" name="attachment"></label>' . ($staff && !$isRequester ? '<label class="check-label"><input type="checkbox" name="is_internal" value="1"> یادداشت داخلی</label>' : '') . $afterSelect . '<button class="button" type="submit">ارسال پاسخ</button></div></form>';
      }
      echo '</section>';
         echo '<aside class="ticket-sidebar"><div class="card detail-card"><h3>اطلاعات درخواست</h3><dl><dt>ثبت‌کننده</dt><dd>' . e($ticket['requester_name']) . '</dd><dt>حوزه</dt><dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? 'پشتیبانی' : 'IT') . '</dd><dt>نوع</dt><dd>' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</dd><dt>خدمت</dt><dd>' . e($ticket['service_name'] ?: 'بدون خدمت') . '</dd><dt>واحد رسیدگی</dt><dd>' . e(($ticket['service_group'] ?? 'it') === 'support' ? 'واحد پشتیبانی' : 'واحد فناوری اطلاعات') . '</dd><dt>معاونت سازمانی</dt><dd>' . e($ticket['requesting_unit_name'] ?: ($ticket['department_name'] ?: 'بدون معاونت')) . '</dd><dt>دسته‌بندی</dt><dd>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</dd><dt>کارشناس</dt><dd>' . e($ticket['assignee_name'] ?: 'تخصیص داده نشده') . '</dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? '<dt>محل خدمت</dt><dd>' . e($ticket['support_location'] ?: 'ثبت نشده') . '</dd><dt>تجهیز / مورد</dt><dd>' . e($ticket['support_equipment'] ?: 'ثبت نشده') . '</dd>' : '<dt>سیستم</dt><dd>' . e($ticket['hostname'] ? asset_display_name($ticket['hostname']) . (asset_is_auto_domain_tag($ticket['asset_tag']) ? '' : ' (' . $ticket['asset_tag'] . ')') : 'بدون سیستم مرتبط') . '</dd>') . '<dt>مهلت SLA</dt><dd>' . e($ticket['due_at'] ? persian_date($ticket['due_at']) : 'ثبت نشده') . '</dd><dt>مهلت پاسخ OLA</dt><dd>' . e($ticket['ola_response_due_at'] ? persian_date($ticket['ola_response_due_at']) : 'ثبت نشده') . '</dd><dt>مهلت حل OLA</dt><dd>' . e($ticket['ola_due_at'] ? persian_date($ticket['ola_due_at']) : 'ثبت نشده') . '</dd>' . (ticket_rating_is_current($ticket) ? '<dt>رضایت کاربر</dt><dd>' . e((string) $ticket['rating_score']) . ' از ۵</dd>' : '') . '</dl></div>';
-    if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && is_assignable_role((string) $user['role']) && !$cancelHasRequest) {
+    if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && ticket_assignee_is_eligible($ticket, $user, 'ticket_notification_user_can') && !$cancelHasRequest) {
         echo '<div class="card detail-card"><h3>برداشتن درخواست</h3><p class="muted">این درخواست هنوز کارشناس مسئول ندارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="claim_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><button class="button wide" type="submit">برداشتن و شروع رسیدگی</button></form></div>';
     }
     if ($canManageTicket && $handlerLevel !== '' && $cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
@@ -2427,8 +2377,9 @@ if ($page === 'ticket') {
     if ($canManageTicket && $handlerLevel !== '' && !$cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
          if ($canAssignTicket) {
               $ticketGroupForList = (string) ($ticket['service_group'] ?? 'it');
-              $agentSql = 'SELECT u.id, u.full_name, u.username FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND u.role IN ("agent", "manager", "support_manager", "primary_admin", "admin") AND (u.role = "admin" OR (u.role = "primary_admin" AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR hu.code = ?)';
-              $agentParams = [$ticketGroupForList, $ticketGroupForList, $ticketGroupForList];
+              $agentSql = 'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (((u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR (u.role IN ("agent", "manager") AND hu.code = ?)) AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))';
+              $ticketDepartmentForList = (int) ($ticket['department_id'] ?? 0);
+              $agentParams = [$ticketGroupForList, $ticketGroupForList, $ticketGroupForList, $ticketDepartmentForList, $ticketDepartmentForList];
               if (($user['role'] ?? '') === 'manager' && $ticketGroupForList === 'support' && (int) ($user['department_id'] ?? 0) > 0) {
                   $agentSql .= ' AND u.department_id = ?';
                   $agentParams[] = (int) $user['department_id'];
@@ -2436,7 +2387,7 @@ if ($page === 'ticket') {
               $agentSql .= ' ORDER BY u.full_name';
               $agentQuery = db()->prepare($agentSql);
               $agentQuery->execute($agentParams);
-              $agents = $agentQuery->fetchAll();
+              $agents = array_values(array_filter($agentQuery->fetchAll(), static fn ($candidate) => ticket_assignee_is_eligible($ticket, $candidate, 'ticket_notification_user_can')));
         }
         echo '<div class="card detail-card"><h3>مدیریت درخواست</h3><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="update_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>وضعیت<select name="status">';
         $statusChoices = array_values(array_unique(array_merge([(string) $ticket['status']], array_filter(ticket_allowed_transitions((string) $ticket['status']), fn ($allowedStatus) => $canAssignTicket || in_array($allowedStatus, ['in_progress', 'waiting_user', 'resolved'], true)))));
@@ -3121,7 +3072,7 @@ HTML;
         $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
     } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
     echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=20"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=22"></script>';
     render_footer();
     exit;
 }
@@ -3412,6 +3363,78 @@ if ($page === 'settings') {
             echo '<button type="button" class="copy-option" data-copy-source="' . e($srcCode) . '"><span class="copy-avatar">' . permission_icon($roleMeta[$srcCode]['icon'] ?? 'user') . '</span><span class="copy-info"><strong>' . e($srcLabel) . '</strong><small>' . ($srcCode === 'primary_admin' ? $totalAll : count(array_intersect(role_permission_codes($srcCode), $allCodes))) . ' از ' . $totalAll . ' دسترسی فعال</small></span></button>';
         }
         echo '</div><div class="copy-modal-foot"><button type="button" class="button secondary" data-copy-cancel>انصراف</button><button type="button" class="button" data-copy-apply disabled>کپی کن</button></div></div></div>';
+
+        // گروه‌های عمومی دسترسی؛ عضویت و مجوزهای گروه مستقل از نقش ذخیره می‌شوند.
+        $accessGroupsReady = user_access_groups_schema_ready();
+        $accessGroups = $accessGroupsReady ? user_access_groups_all() : [];
+        $accessGroupUsers = $accessGroupsReady ? user_access_groups_admin_users() : [];
+        $selectedAccessGroupId = max(0, (int) ($_GET['access_group_id'] ?? 0));
+        if ($selectedAccessGroupId <= 0 || !array_filter($accessGroups, static fn (array $group): bool => (int) $group['id'] === $selectedAccessGroupId)) {
+            $selectedAccessGroupId = (int) ($accessGroups[0]['id'] ?? 0);
+        }
+
+        echo '<div class="card form-card settings-panel roles-shell access-groups-shell" id="access-groups">';
+        echo '<div class="roles-shell-head"><div><h2>گروه‌های دسترسی</h2><p class="muted">کاربران با نقش‌های متفاوت را در یک یا چند گروه عضو کنید. مجوز مؤثر از جمع مجوزهای نقش و همهٔ گروه‌های کاربر به دست می‌آید؛ گروه هرگز نقش یا دسترسی نقش را جایگزین نمی‌کند. مدیریت گروه‌ها فقط در اختیار ادمین اصلی است.</p><p class="muted">محدودیت‌های ویژهٔ نقش و محدودهٔ داده‌ها همچنان رعایت می‌شوند؛ برای نمونه، مجوزهای دارای محدودیت ذاتی (مثل ویرایش مستقیم CD/DVD) از قاعدهٔ مجاز خود خارج نمی‌شوند. ادمین اصلی همچنان دسترسی کامل دارد.</p></div></div>';
+        if (!$accessGroupsReady) {
+            echo '<div class="perm-locked-note"><span>نیاز به مهاجرت</span> ساختار ذخیره‌سازی گروه‌های دسترسی موجود نیست. پس از اجرای <code>migrations/023-user-access-groups.sql</code> صفحه را تازه کنید؛ تا آن زمان مجوزهای نقش بدون تغییر کار می‌کنند.</div>';
+        } else {
+            echo '<form method="post" class="access-group-create-form">' . csrf_field() . '<input type="hidden" name="action" value="create_access_group"><label>نام گروه جدید<input name="group_name" maxlength="120" required placeholder="مثلاً گزارش‌گیرندگان"></label><label class="access-group-create-description">توضیح کوتاه<input name="group_description" maxlength="500" placeholder="هدف این گروه (اختیاری)"></label><button class="button" type="submit">ساخت گروه</button></form>';
+            if (!$accessGroups) {
+                echo '<div class="perm-empty access-group-empty"><strong>هنوز گروهی ساخته نشده است.</strong><br>از فرم بالا یک گروه بسازید؛ سپس اعضا و دسترسی‌های تکمیلی آن را انتخاب کنید.</div>';
+            } else {
+                $accessGroupMemberSets = user_access_groups_member_sets();
+                $accessGroupPermissionSets = user_access_groups_permission_sets();
+                echo '<div class="roles-layout"><aside class="roles-sidebar"><div class="roles-sidebar-head"><strong>گروه‌های دسترسی</strong><small>برای ویرایش گروه انتخاب کنید</small></div><div class="roles-list">';
+                foreach ($accessGroups as $accessGroup) {
+                    $accessGroupId = (int) $accessGroup['id'];
+                    $memberCount = (int) ($accessGroup['member_count'] ?? 0);
+                    $permissionCount = (int) ($accessGroup['permission_count'] ?? 0);
+                    $permissionPct = $totalAll > 0 ? (int) round($permissionCount / $totalAll * 100) : 0;
+                    $accessTab = 'access-group-' . $accessGroupId;
+                    echo '<button type="button" class="role-item' . ($accessGroupId === $selectedAccessGroupId ? ' active' : '') . '" data-role-tab="' . e($accessTab) . '" aria-controls="' . e($accessTab) . '-panel"><span class="role-avatar">' . permission_icon('g-base') . '</span><span class="role-info"><span class="role-name">' . e((string) $accessGroup['name']) . '</span><span class="role-stats"><span class="role-count">' . $memberCount . ' عضو · ' . $permissionCount . ' مجوز</span><span class="mini-bar"><span class="mini-bar-fill" style="width:' . $permissionPct . '%"></span></span></span></span></button>';
+                }
+                echo '</div></aside><section class="roles-content">';
+                foreach ($accessGroups as $accessGroup) {
+                    $accessGroupId = (int) $accessGroup['id'];
+                    $accessTab = 'access-group-' . $accessGroupId;
+                    $isSelectedAccessGroup = $accessGroupId === $selectedAccessGroupId;
+                    $selectedPermissions = array_keys($accessGroupPermissionSets[$accessGroupId] ?? []);
+                    $selectedMembers = $accessGroupMemberSets[$accessGroupId] ?? [];
+                    $memberSelectedCount = count($selectedMembers);
+                    echo '<section class="role-panel access-group-panel' . ($isSelectedAccessGroup ? ' active' : '') . '" data-role-panel="' . e($accessTab) . '" id="' . e($accessTab) . '-panel">';
+                    echo '<form method="post" class="access-group-save-form">' . csrf_field() . '<input type="hidden" name="action" value="save_access_group"><input type="hidden" name="group_id" value="' . $accessGroupId . '">';
+                    echo '<div class="role-panel-head"><div class="role-panel-title"><span class="role-icon-lg">' . permission_icon('g-base') . '</span><div><h3>' . e((string) $accessGroup['name']) . '</h3><p class="muted">مجوزها به دسترسی نقش اعضا اضافه می‌شوند.</p></div></div><div class="role-active-count"><small>دسترسی‌های گروه</small><strong data-role-count="' . e($accessTab) . '">' . count($selectedPermissions) . '<span>/' . $totalAll . '</span></strong></div></div>';
+                    echo '<div class="access-group-fields"><label>نام گروه<input data-access-group-field="name" name="group_name" maxlength="120" required value="' . e((string) $accessGroup['name']) . '"></label><label>توضیح کوتاه<input data-access-group-field="description" name="group_description" maxlength="500" value="' . e((string) ($accessGroup['description'] ?? '')) . '" placeholder="هدف یا دامنهٔ این گروه"></label></div>';
+                    echo '<section class="access-group-members"><div class="access-group-section-head"><div><strong>اعضای گروه</strong><small>هر کاربر می‌تواند عضو چند گروه باشد؛ نقش فعلی او دست‌نخورده می‌ماند.</small></div><span class="access-group-member-count" data-access-member-count>' . $memberSelectedCount . ' عضو</span></div><div class="access-group-member-toolbar"><input type="search" data-access-member-search placeholder="جست‌وجوی نام، نام کاربری یا نقش..." aria-label="جست‌وجوی اعضا"><button type="button" class="toolbar-btn" data-access-member-select-visible>انتخاب نتایج</button><button type="button" class="toolbar-btn" data-access-member-clear-visible>پاک‌کردن نتایج</button></div><div class="access-group-members-list" data-access-member-list>';
+                    foreach ($accessGroupUsers as $accessGroupUser) {
+                        $memberUserId = (int) $accessGroupUser['id'];
+                        $memberRoleCode = (string) ($accessGroupUser['role'] ?? '');
+                        $memberRoleLabel = user_access_group_role_label($memberRoleCode);
+                        $memberSourceLabel = (string) ($accessGroupUser['auth_source'] ?? '') === 'ldap' ? 'دامینی' : 'محلی';
+                        $memberName = trim((string) ($accessGroupUser['full_name'] ?? ''));
+                        if ($memberName === '') {
+                            $memberName = (string) $accessGroupUser['username'];
+                        }
+                        $memberSearchText = $memberName . ' ' . (string) $accessGroupUser['username'] . ' ' . $memberRoleLabel . ' ' . $memberSourceLabel;
+                        $isGroupMember = isset($selectedMembers[$memberUserId]);
+                        echo '<label class="access-group-member" data-access-member data-member-label="' . e($memberSearchText) . '"><input type="checkbox" name="members[]" value="' . $memberUserId . '"' . ($isGroupMember ? ' checked' : '') . '><span class="access-group-member-info"><strong>' . e($memberName) . '</strong><small>' . e((string) $accessGroupUser['username']) . ' · ' . e($memberSourceLabel) . '</small></span><span class="access-group-role-label">' . e($memberRoleLabel) . '</span></label>';
+                    }
+                    if (!$accessGroupUsers) {
+                        echo '<p class="muted access-group-no-users">کاربر فعالی برای عضویت در گروه پیدا نشد.</p>';
+                    }
+                    echo '<p class="muted access-group-no-users" data-access-member-empty hidden>کاربری با این عبارت پیدا نشد.</p>';
+                    echo '</div></section>';
+                    echo '<div class="perm-toolbar"><button type="button" class="toolbar-btn" data-perm-all="1">انتخاب همهٔ دسترسی‌ها</button><button type="button" class="toolbar-btn" data-perm-none="1">حذف همهٔ دسترسی‌ها</button><div class="perm-toolbar-spacer"></div><span class="perm-changes" data-role-changes hidden></span><button type="button" class="toolbar-btn warn" data-perm-reset hidden>بازگشت به حالت اولیه</button></div>';
+                    echo '<div class="perm-search"><input type="search" class="perm-search-input" data-perm-search placeholder="جست‌وجوی دسترسی یا گروه..."></div><div class="groups-container">' . user_access_group_permission_matrix_markup($selectedPermissions, $catalog) . '</div>';
+                    echo '<div class="perm-locked-note access-group-catalog-note"><span>کاتالوگ مشترک</span> مجوزهای ویرایش، مجوز مشاهدهٔ والد را نیز فعال می‌کنند. مجوز «ویرایش مستقیم CD/DVD» فقط برای نقش‌های مجاز فعلی مؤثر است.</div>';
+                    echo '<div class="role-actions"><button class="button" type="submit">ذخیرهٔ اعضا و دسترسی‌های گروه</button></div></form>';
+                    echo '<form method="post" class="access-group-delete-form">' . csrf_field() . '<input type="hidden" name="action" value="delete_access_group"><input type="hidden" name="group_id" value="' . $accessGroupId . '"><button class="button secondary" type="submit" data-confirm="این گروه و همهٔ عضویت‌ها و مجوزهای وابستهٔ آن حذف شوند؟ نقش‌ها و مجوزهای اصلی کاربران تغییر نمی‌کنند.">حذف گروه</button></form>';
+                    echo '</section>';
+                }
+                echo '</section></div>';
+            }
+        }
+        echo '</div>';
     }
 
     if ($canManageSettingsUsers) {

@@ -147,7 +147,7 @@ function gov_header(string $title, array $user): void
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
     $themeMode = app_theme_mode();
-    $__notif = notification_header_summary((int) $user['id']);
+    $__notif = notification_header_summary((int) $user['id'], $user);
     $notificationCount = $__notif['unread'];
     $staffLinks = '<a href="index.php?page=queue">صف کاری</a><a href="index.php?page=reports">گزارش‌ها</a><a href="index.php?page=assets">شناسنامه‌های فنی</a><a href="governance.php">تغییر و مشکل</a>';
     if (in_array($user['role'], ['supervisor', 'primary_admin', 'support_manager'], true)) {

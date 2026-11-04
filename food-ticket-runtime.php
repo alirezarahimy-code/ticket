@@ -295,8 +295,63 @@ function food_ticket_can_delete_source_after_print(string $printStatus): bool
 }
 
 /**
- * پردازش صف چاپ — جدا از دریافت تردد.
+ * Compare the saved queue snapshot with the current order by employee ID.
+ * Already issued/attempted receipts are never rewritten automatically.
+ * This function only prepares a change; callers claim the job before applying it.
  */
+function food_ticket_prepare_queued_food(array $event): array
+{
+    if ((string) ($event['event_type'] ?? '') === 'guest' || str_starts_with((string) ($event['ticket_key'] ?? ''), 'guest:')) {
+        if (trim((string) ($event['food_type'] ?? '')) === '') throw new RuntimeException('نوع فیش مهمان خالی است؛ چاپ متوقف شد.');
+        return $event;
+    }
+    if (!str_starts_with((string) ($event['ticket_key'] ?? ''), 'food:')) {
+        throw new RuntimeException('شناسهٔ فیش پرسنلی معتبر نیست؛ چاپ برای بررسی متوقف شد.');
+    }
+    if (!function_exists('food_order_internal_food_for_employee')) {
+        throw new RuntimeException('منبع سفارش به‌روز در دسترس نیست؛ چاپ متوقف شد.');
+    }
+    $userId = (int) ($event['user_id'] ?? 0);
+    $date = (string) ($event['punch_date'] ?? '');
+    if ($userId <= 0 || $date === '') throw new RuntimeException('هویت یا تاریخ فیش معتبر نیست؛ چاپ متوقف شد.');
+    $food = food_order_internal_food_for_employee($userId, $date);
+    if ($food === null || $food === '') throw new RuntimeException('سفارش فعال این کارمند برای چاپ در دسترس نیست؛ چاپ متوقف شد.');
+    $old = (string) ($event['food_type'] ?? '');
+    if ($food === $old) return $event;
+    $attempts = max((int) ($event['retry_count'] ?? 0), (int) ($event['print_attempts'] ?? 0));
+    if ((string) ($event['print_status'] ?? '') !== 'pending' || $attempts > 0) {
+        throw new RuntimeException('سفارش فعلی با فیشی که قبلاً تلاش چاپ داشته متفاوت است؛ برای جلوگیری از چاپ تکراری بررسی دستی لازم است.');
+    }
+    $event['_queued_food_before'] = $event['food_type'] ?? null;
+    $event['_queued_food_after'] = $food;
+    return $event;
+}
+
+/** Apply an audited correction only to an unprinted job already claimed by this worker. */
+function food_ticket_apply_queued_food(array $event, string $jobId, string $printer): array
+{
+    if (!array_key_exists('_queued_food_after', $event)) return $event;
+    $newFood = (string) $event['_queued_food_after'];
+    $oldFood = $event['_queued_food_before'];
+    $update = db()->prepare('UPDATE food_ticket_events SET food_type = ? WHERE id = ? AND print_status = "printing" AND food_type <=> ?');
+    $update->execute([$newFood, (int) $event['id'], $oldFood]);
+    if ($update->rowCount() !== 1) throw new RuntimeException('فیش در صف تغییر کرده است؛ چاپ برای بررسی متوقف شد.');
+    food_ticket_print_log((int) $event['id'], $jobId, $event['source_key'] ?? null, $event['ticket_key'] ?? null, $printer, 'food_reconciled', 0, 'قبل از نخستین چاپ: ' . (string) $oldFood . ' ← ' . $newFood);
+    $event['food_type'] = $newFood;
+    unset($event['_queued_food_before'], $event['_queued_food_after']);
+    return $event;
+}
+
+/** Last check after reconciliation, immediately before rendering/sending. */
+function food_ticket_verify_queued_food(array $event): void
+{
+    if ((string) ($event['event_type'] ?? '') === 'guest' || str_starts_with((string) ($event['ticket_key'] ?? ''), 'guest:')) return;
+    $current = food_order_internal_food_for_employee((int) ($event['user_id'] ?? 0), (string) ($event['punch_date'] ?? ''));
+    if ($current === null || $current !== (string) ($event['food_type'] ?? '')) {
+        throw new RuntimeException('سفارش هنگام آماده‌سازی چاپ تغییر کرد؛ چاپ برای بررسی متوقف شد.');
+    }
+}
+
 /**
  * چاپ یک اجرای گروهی به‌صورت یک فیش مشترک. رویدادهای اعضا همچنان جداگانه
  * در جدول رویدادها/گزارش‌ها نگه داشته می‌شوند؛ فقط خروجی فیزیکی تجمیع می‌شود.
@@ -343,9 +398,7 @@ function food_ticket_print_group_run(array $event, array $config, array $tpl, in
 
     $eligible = [];
     foreach ($events as $memberEvent) {
-        if ((string) ($memberEvent['event_type'] ?? '') !== 'printed'
-            || trim((string) ($memberEvent['food_type'] ?? '')) === ''
-            || trim((string) ($memberEvent['full_name'] ?? '')) === '') {
+        if ((string) ($memberEvent['event_type'] ?? '') !== 'printed') {
             continue;
         }
         if (food_ticket_delivery_supported() && (string) ($memberEvent['delivery_status'] ?? 'pending') === 'delivered'
@@ -403,54 +456,63 @@ function food_ticket_print_group_run(array $event, array $config, array $tpl, in
         return ['handled' => true, 'ids' => $ids, 'deferred' => true];
     }
 
-    $byFood = [];
-    foreach ($eligible as $memberEvent) {
-        $food = trim((string) $memberEvent['food_type']);
-        $name = trim((string) $memberEvent['full_name']);
-        $byFood[$food] ??= ['members' => [], 'count' => 0];
-        $byFood[$food]['count']++;
-        if (!in_array($name, $byFood[$food]['members'], true)) {
-            $byFood[$food]['members'][] = $name;
-        }
-    }
-    $groupRows = [];
-    $menuNumber = 1;
-    foreach ($byFood as $food => $foodData) {
-        $names = $foodData['members'];
-        if (!$names) {
-            continue;
-        }
-        $groupRows[] = [
-            'label' => 'منو' . $menuNumber,
-            'food' => $food,
-            'count' => (int) $foodData['count'],
-            'members' => $names,
-        ];
-        $menuNumber++;
-    }
-    if (!$groupRows) {
-        db()->prepare('UPDATE food_ticket_events SET print_status = "failed", next_retry_at = ?, last_error = ? WHERE id IN (' . $eligibleMarks . ')')
-            ->execute(array_merge([date('Y-m-d H:i:s', time() + $delay), 'No eligible group ticket rows.'], $eligibleIds));
-        return ['handled' => true, 'ids' => $ids, 'failed' => true, 'count' => count($eligible)];
-    }
-
-    $ticket = $eligible[0];
-    $ticket['group_ticket'] = 1;
-    $ticket['group_ticket_rows'] = $groupRows;
-    $ticket['group_title'] = (string) ($run['group_title'] ?? $payload['group_title'] ?? '');
-    $ticket['punch_date'] = (string) ($run['punch_date'] ?? $ticket['punch_date'] ?? '');
-    $ticket['punch_time'] = (string) ($run['punch_time'] ?? $ticket['punch_time'] ?? '');
-    $ticket['full_name'] = $ticket['group_title'];
-
-    $groupTpl = $tpl;
-    if (trim((string) ($groupTpl['company'] ?? '')) === '') {
-        $groupTpl['company'] = function_exists('food_ticket_tpl_system_name') ? food_ticket_tpl_system_name() : 'سازمان';
-    }
-    if (trim((string) ($groupTpl['title'] ?? '')) === '') {
-        $groupTpl['title'] = 'فیش گروهی غذا';
-    }
-
     try {
+        // Validate all members before changing any queued snapshot or sending paper.
+        $prepared = [];
+        foreach ($eligible as $memberEvent) {
+            if (trim((string) ($memberEvent['full_name'] ?? '')) === '') throw new RuntimeException('نام یکی از اعضای فیش گروهی مشخص نیست؛ چاپ متوقف شد.');
+            $prepared[] = food_ticket_prepare_queued_food($memberEvent);
+        }
+        foreach ($prepared as $i => $memberEvent) $eligible[$i] = food_ticket_apply_queued_food($memberEvent, $jobId, $printer);
+        foreach ($eligible as $memberEvent) food_ticket_verify_queued_food($memberEvent);
+
+        $byFood = [];
+        foreach ($eligible as $memberEvent) {
+            $food = trim((string) $memberEvent['food_type']);
+            $name = trim((string) $memberEvent['full_name']);
+            $byFood[$food] ??= ['members' => [], 'count' => 0];
+            $byFood[$food]['count']++;
+            if (!in_array($name, $byFood[$food]['members'], true)) {
+                $byFood[$food]['members'][] = $name;
+            }
+        }
+        $groupRows = [];
+        $menuNumber = 1;
+        foreach ($byFood as $food => $foodData) {
+            $names = $foodData['members'];
+            if (!$names) {
+                continue;
+            }
+            $groupRows[] = [
+                'label' => 'منو' . $menuNumber,
+                'food' => $food,
+                'count' => (int) $foodData['count'],
+                'members' => $names,
+            ];
+            $menuNumber++;
+        }
+        if (!$groupRows) {
+            db()->prepare('UPDATE food_ticket_events SET print_status = "failed", next_retry_at = ?, last_error = ? WHERE id IN (' . $eligibleMarks . ')')
+                ->execute(array_merge([date('Y-m-d H:i:s', time() + $delay), 'No eligible group ticket rows.'], $eligibleIds));
+            return ['handled' => true, 'ids' => $ids, 'failed' => true, 'count' => count($eligible)];
+        }
+
+        $ticket = $eligible[0];
+        $ticket['group_ticket'] = 1;
+        $ticket['group_ticket_rows'] = $groupRows;
+        $ticket['group_title'] = (string) ($run['group_title'] ?? $payload['group_title'] ?? '');
+        $ticket['punch_date'] = (string) ($run['punch_date'] ?? $ticket['punch_date'] ?? '');
+        $ticket['punch_time'] = (string) ($run['punch_time'] ?? $ticket['punch_time'] ?? '');
+        $ticket['full_name'] = $ticket['group_title'];
+
+        $groupTpl = $tpl;
+        if (trim((string) ($groupTpl['company'] ?? '')) === '') {
+            $groupTpl['company'] = function_exists('food_ticket_tpl_system_name') ? food_ticket_tpl_system_name() : 'سازمان';
+        }
+        if (trim((string) ($groupTpl['title'] ?? '')) === '') {
+            $groupTpl['title'] = 'فیش گروهی غذا';
+        }
+
         $text = food_ticket_render_from_template($ticket, $groupTpl);
         food_ticket_send_raw_payload($text, $config, $groupTpl, $ticket);
         $update = db()->prepare('UPDATE food_ticket_events SET print_status = "printed", event_type = IF(event_type = "guest", "guest", "printed"), '
@@ -589,30 +651,9 @@ function food_ticket_process_print_queue(?array $config = null, int $limit = 30)
         food_ticket_print_log($id, $jobId, $event['source_key'] ?? null, $event['ticket_key'] ?? null, $printer, 'printing', $retry, null);
 
         try {
-            // متن از قالب
-            // اگر نوع غذا به‌خاطر encoding خراب شده، یک‌بار از سفارش زنده بخوان
-            $ft = (string) ($event['food_type'] ?? '');
-            if ($ft === '' || preg_match('/^[\s\?؟]+$/u', $ft)) {
-                try {
-                    $cfg = $config ?: food_ticket_config(true);
-                    $nat = food_ticket_digits((string) ($event['national_code'] ?? ''));
-                    $pdate = (string) ($event['punch_date'] ?? date('Y-m-d'));
-                    if (!function_exists('food_order_mode') || !function_exists('food_order_internal_map') || food_order_mode() !== 'INTERNAL-DB') {
-                        throw new RuntimeException('منبع سفارش داخلی در دسترس نیست؛ Access سفارش مجاز نیست.');
-                    }
-                    if ($nat !== '') {
-                        $omap = food_order_internal_map($pdate);
-                        $reFood = $omap[$nat] ?? $omap[ltrim($nat, '0') ?: '0'] ?? '';
-                        if (is_string($reFood) && $reFood !== '' && !preg_match('/^[\s\?؟]+$/u', $reFood)) {
-                            $event['food_type'] = $reFood;
-                            db()->prepare('UPDATE food_ticket_events SET food_type = ? WHERE id = ?')->execute([$reFood, $id]);
-                        }
-                    }
-                } catch (Throwable $ignoreFood) {
-                    app_error_log('[food-print] food re-lookup: ' . $ignoreFood->getMessage());
-                    throw new RuntimeException('بازخوانی سفارش داخلی برای فیش ناموفق بود؛ چاپ فیش خالی انجام نمی‌شود.', 0, $ignoreFood);
-                }
-            }
+            // A valid-looking cached name can still be stale; recheck before paper.
+            $event = food_ticket_apply_queued_food(food_ticket_prepare_queued_food($event), $jobId, $printer);
+            food_ticket_verify_queued_food($event);
             $text = food_ticket_render_from_template($event, $tpl);
             food_ticket_send_raw_payload($text, $config, $tpl, $event);
             db()->prepare(

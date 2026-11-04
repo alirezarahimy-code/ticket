@@ -28,7 +28,7 @@ if ($days < 1) {
     exit(0);
 }
 
-$candidates = db()->query('SELECT t.id, t.requester_id, t.asset_id FROM tickets t LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id WHERE t.status = "resolved" AND t.cancel_requested_at IS NULL AND COALESCE(t.resolved_at, t.updated_at) <= DATE_SUB(NOW(), INTERVAL ' . $days . ' DAY) AND (tr.id IS NULL OR tr.created_at < t.resolved_at) ORDER BY t.id LIMIT 500')->fetchAll();
+$candidates = db()->query('SELECT t.id, t.requester_id, t.asset_id FROM tickets t LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id WHERE t.status = "resolved" AND t.cancel_requested_at IS NULL AND COALESCE(t.resolved_at, t.updated_at) <= DATE_SUB(NOW(), INTERVAL ' . $days . ' DAY) AND (tr.id IS NULL OR tr.created_at < t.resolved_at OR (tr.created_at = t.resolved_at AND (SELECT MAX(e.id) FROM ticket_events e WHERE e.ticket_id = t.id AND e.event_type = "rated") < (SELECT MAX(e.id) FROM ticket_events e WHERE e.ticket_id = t.id AND e.to_status = "resolved" AND (e.from_status IS NULL OR e.from_status <> "resolved")))) ORDER BY t.id LIMIT 500')->fetchAll();
 $closeQuery = db()->prepare('UPDATE tickets SET status = "closed", closed_at = NOW(), supervisor_note = ?, updated_at = NOW() WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL');
 $closed = 0;
 
@@ -36,6 +36,25 @@ foreach ($candidates as $row) {
     $ticketId = (int) $row['id'];
     try {
         db()->beginTransaction();
+        // Re-check the deadline, status and rating under the same ticket lock used
+        // by rating and reopen; the initial candidate list may already be stale.
+        $lock = db()->prepare('SELECT id, requester_id, asset_id, resolved_at FROM tickets WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL AND COALESCE(resolved_at, updated_at) <= DATE_SUB(NOW(), INTERVAL ' . $days . ' DAY) FOR UPDATE');
+        $lock->execute([$ticketId]);
+        $current = $lock->fetch();
+        if (!$current) {
+            db()->rollBack();
+            continue;
+        }
+        $ratingQuery = db()->prepare('SELECT score, created_at FROM ticket_ratings WHERE ticket_id = ? LIMIT 1');
+        $ratingQuery->execute([$ticketId]);
+        $rating = $ratingQuery->fetch();
+        $current['rating_score'] = $rating['score'] ?? null;
+        $current['rating_at'] = $rating['created_at'] ?? null;
+        if (ticket_rating_is_current($current)) {
+            db()->rollBack();
+            continue;
+        }
+        $row = $current;
         $closeQuery->execute(['بسته‌شدن خودکار: کاربر ظرف ' . $days . ' روز پس از حل‌شدن امتیاز ثبت نکرد.', $ticketId]);
         if ($closeQuery->rowCount() < 1) {
             db()->rollBack();

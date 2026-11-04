@@ -21,7 +21,7 @@ if (!defined('APP_ROOT')) {
 }
 
 // درخواست‌های UI چارت برای جلوگیری از ثبت دوباره در double-click/replay محدود می‌شوند.
-$orgTokenActions = ['save_org_node', 'save_org_unit', 'delete_org_unit', 'assign_org_manager', 'remove_org_manager', 'remove_org_experts', 'save_org_assign_users', 'reset_org_structure', 'save_org_ceo', 'save_user_org', 'sort_org_deputies', 'undo_org_action', 'redo_org_action', 'restore_org_backup'];
+$orgTokenActions = ['save_org_node', 'save_org_unit', 'delete_org_unit', 'assign_org_manager', 'remove_org_manager', 'remove_org_experts', 'save_org_assign_users', 'reset_org_structure', 'save_org_ceo', 'save_user_org', 'sort_org_deputies', 'sort_org_root_units', 'undo_org_action', 'redo_org_action', 'restore_org_backup'];
 if (in_array($action, $orgTokenActions, true)) {
     $requestToken = trim((string) ($_POST['org_request_token'] ?? ''));
     if ($requestToken !== '' && !preg_match('/^[a-f0-9]{48}$/i', $requestToken)) {
@@ -42,7 +42,7 @@ if (in_array($action, $orgTokenActions, true)) {
     }
 }
 
-$orgCompanyActions = ['save_org_node', 'undo_org_action', 'redo_org_action', 'assign_org_manager', 'remove_org_manager', 'remove_org_experts', 'save_org_assign_users', 'reset_org_structure', 'save_org_ceo', 'save_org_unit', 'delete_org_unit', 'save_user_org', 'sort_org_deputies', 'restore_org_backup'];
+$orgCompanyActions = ['save_org_node', 'undo_org_action', 'redo_org_action', 'assign_org_manager', 'remove_org_manager', 'remove_org_experts', 'save_org_assign_users', 'reset_org_structure', 'save_org_ceo', 'save_org_unit', 'delete_org_unit', 'save_user_org', 'sort_org_deputies', 'sort_org_root_units', 'restore_org_backup'];
 $orgCompanyId = 0;
 if (in_array($action, $orgCompanyActions, true)) {
     if (!org_has_company_schema()) throw new RuntimeException('ابتدا migration شرکت‌ها را از مسیر رسمی به‌روزرسانی اجرا کنید.');
@@ -236,6 +236,37 @@ if (in_array($action, $orgCompanyActions, true)) {
             $_SESSION['org_undo']['can_redo'] = false;
             save_audit((int) $orgAdmin['id'], 'org_action_redone', null, ['label' => (string) ($redo['label'] ?? '')]);
             flash('success', 'آخرین تغییر ساختاری دوباره انجام شد.');
+            redirect(org_company_redirect_url($orgCompanyId));
+        }
+
+        // مرتب‌سازی نمایشی معاونت‌ها و مدیریت‌های مستقل هم‌رده؛ والد تغییر نمی‌کند.
+        if ($action === 'sort_org_root_units') {
+            $orgAdmin = require_permission('org.manage');
+            if (!user_can_manage_organization($orgAdmin) || !org_has_sort_order()) {
+                throw new RuntimeException('مجوز یا زیرساخت مرتب‌سازی سازمان موجود نیست.');
+            }
+            $ids = array_values(array_map('intval', (array) ($_POST['unit_ids'] ?? [])));
+            $rootId = org_ceo_unit_id($orgCompanyId);
+            $snapshot = org_snapshot($orgCompanyId);
+            db()->beginTransaction();
+            try {
+                $query = db()->prepare('SELECT id FROM org_units WHERE parent_id = ? AND company_id = ? AND unit_type IN ("deputy", "management") AND is_active = 1 FOR UPDATE');
+                $query->execute([$rootId, $orgCompanyId]);
+                $expected = array_map('intval', $query->fetchAll(PDO::FETCH_COLUMN));
+                $sortedIds = $ids; sort($sortedIds); sort($expected);
+                if (!$ids || $sortedIds !== $expected || count(array_unique($ids)) !== count($ids)) {
+                    throw new RuntimeException('فهرست کارت‌ها تغییر کرده است؛ صفحه را تازه کنید.');
+                }
+                $update = db()->prepare('UPDATE org_units SET sort_order = ? WHERE id = ? AND parent_id = ? AND company_id = ? AND unit_type IN ("deputy", "management") AND is_active = 1');
+                foreach ($ids as $index => $id) $update->execute([($index + 1) * 10, $id, $rootId, $orgCompanyId]);
+                db()->commit();
+            } catch (Throwable $error) {
+                if (db()->inTransaction()) db()->rollBack();
+                throw $error;
+            }
+            org_record_undo('مرتب‌سازی کارت‌های هم‌رده', $snapshot, $orgCompanyId);
+            save_audit((int) $orgAdmin['id'], 'org_root_units_sorted', null, ['unit_ids' => $ids]);
+            flash('success', 'ترتیب کارت‌ها ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
 

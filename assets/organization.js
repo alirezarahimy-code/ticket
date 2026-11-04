@@ -336,7 +336,8 @@
         var managerAction = !manager && data.canManage ? '<button class="org-node-add" data-org-action="pick-manager" data-unit-id="' + item.id + '">تعیین مدیر</button>' : '';
         var departments = children(item.id, 'department').length;
         var expertCount = expertsIn(item.id).length;
-        var addButtons = data.canManage ? '<div class="org-node-add-row"><button class="org-node-add" data-org-action="add-department" data-unit-id="' + item.id + '">+ افزودن اداره</button><button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button></div>' : '';
+        var sortHandle = data.canManage && data.sortEnabled && root() && Number(item.parentId) === Number(root().id) ? '<button class="org-sort-handle" type="button" data-deputy-drag="' + item.id + '" title="کشیدن برای مرتب‌سازی کارت‌ها" aria-label="مرتب‌سازی ' + esc(item.name) + '">⠿</button>' : '';
+        var addButtons = data.canManage ? sortHandle + '<div class="org-node-add-row"><button class="org-node-add" data-org-action="add-department" data-unit-id="' + item.id + '">+ افزودن اداره</button><button class="org-node-add org-node-add-expert" data-org-action="add-experts" data-unit-id="' + item.id + '">+ افزودن کارشناس</button></div>' : '';
         var title = manager ? iconFor('manager') + ' مدیر ' + esc(item.name) : iconFor('deputy') + ' بدون مدیر';
         return '<div class="org-node org-management' + nodeMatch(item) + (manager ? nodeMatch(manager) : '') + '" data-unit="' + item.id + '" data-drop="management"><div class="org-node-menu-wrap">' + nodeMenuButton(item.id) + '</div><div class="org-avatar ' + (!manager ? 'org-warning-avatar' : '') + '">' + (manager ? esc(initial(manager.name)) : iconFor('management')) + '</div><div class="org-node-name">' + esc(manager ? manager.name : item.name) + '</div><div class="org-node-title ' + (!manager ? 'org-warning-text' : '') + '">' + title + '</div><div class="org-node-count">' + iconFor('department') + ' ' + departments + ' اداره • ' + iconFor('expert') + ' ' + expertCount + ' کارشناس</div>' + managerAction + addButtons + '</div>';
     };
@@ -469,12 +470,12 @@
             path('M ' + officeRect.right + ' ' + officeY + ' H ' + officeJoinX + ' V ' + ceoY + ' H ' + ceoRect.left, 'org-wire org-wire-shared');
         }
         if (ceoCard && rows.length) {
-            var c = rel(ceoCard), rowRects = rows.map(function (row) { var cards = Array.prototype.slice.call(row.querySelectorAll(':scope > .org-branch > .org-branch-card > .org-node')); if (!cards.length) return null; var rs = cards.map(rel); return { top: Math.min.apply(null, rs.map(function (x) { return x.top; })), left: Math.min.apply(null, rs.map(function (x) { return x.x; })), right: Math.max.apply(null, rs.map(function (x) { return x.x; })), centers: rs.map(function (x) { return x.x; }), cards: cards }; }).filter(Boolean);
+            var c = rel(ceoCard), rowRects = rows.map(function (row) { var cards = Array.prototype.slice.call(row.querySelectorAll(':scope > .org-branch > .org-branch-card > .org-node')); if (!cards.length) return null; var rs = cards.map(rel); return { top: Math.min.apply(null, rs.map(function (x) { return x.top; })), left: Math.min.apply(null, rs.map(function (x) { return x.x; })), right: Math.max.apply(null, rs.map(function (x) { return x.x; })), centers: rs.map(function (x) { return x.x; }), rects: rs, cards: cards }; }).filter(Boolean);
             if (rowRects.length) {
                 var trunkX = bounds.right - 15, firstY = rowRects[0].top - 19, lastY = rowRects[rowRects.length - 1].top - 19;
                 path('M ' + c.x + ' ' + c.bottom + ' V ' + firstY + ' H ' + trunkX, 'org-wire org-wire-shared');
                 if (rowRects.length > 1) path('M ' + trunkX + ' ' + firstY + ' V ' + lastY, 'org-wire org-wire-shared');
-                rowRects.forEach(function (row) { path('M ' + trunkX + ' ' + (row.top - 19) + ' H ' + row.left, 'org-wire org-wire-shared'); row.centers.forEach(function (x, cardIndex) { var branch = row.cards[cardIndex].closest('.org-branch'), color = branch ? getComputedStyle(branch).getPropertyValue('--org-branch-color').trim() : ''; path('M ' + x + ' ' + (row.top - 19) + ' V ' + row.top, 'org-wire org-wire-shared', color); }); });
+                rowRects.forEach(function (row) { path('M ' + trunkX + ' ' + (row.top - 19) + ' H ' + row.left, 'org-wire org-wire-shared'); row.centers.forEach(function (x, cardIndex) { var branch = row.cards[cardIndex].closest('.org-branch'), color = branch ? getComputedStyle(branch).getPropertyValue('--org-branch-color').trim() : ''; path('M ' + x + ' ' + (row.top - 19) + ' V ' + row.rects[cardIndex].top, 'org-wire org-wire-shared', color); }); });
             }
         }
         $$('.org-branch').forEach(function (branch) {
@@ -512,7 +513,7 @@
         $$('.org-drop-before').forEach(function (item) { item.classList.remove('org-drop-before'); });
         var target = document.elementFromPoint(event.clientX, event.clientY); target = target && target.closest('.org-branch[data-branch-id]');
         var targetUnit = target ? unit(Number(target.getAttribute('data-branch-id'))) : null;
-        if (target && target.closest('.org-deputy-row') && targetUnit && targetUnit.type === 'deputy' && Number(target.getAttribute('data-branch-id')) !== state.deputyDrag.id) target.classList.add('org-drop-before');
+        if (target && target.parentElement && target.parentElement.matches('.org-deputy-row') && targetUnit && ['deputy', 'management'].indexOf(targetUnit.type) !== -1 && Number(target.getAttribute('data-branch-id')) !== state.deputyDrag.id) target.classList.add('org-drop-before');
     };
     var clearDeputyDrag = function () {
         if (state.deputyDrag) { var branch = state.deputyDrag.handle.closest('.org-branch'); if (branch) branch.classList.remove('is-dragging'); }
@@ -522,15 +523,15 @@
     var onDeputyUp = function (event) {
         if (!state.deputyDrag) return;
         var sourceId = state.deputyDrag.id, hit = document.elementFromPoint(event.clientX, event.clientY), target = hit && hit.closest('.org-branch[data-branch-id]');
-        var current = children(root() ? root().id : 0, 'deputy').map(function (item) { return Number(item.id); });
-        var targetId = target && target.closest('.org-deputy-row') ? Number(target.getAttribute('data-branch-id')) : 0;
+        var current = children(root() ? root().id : 0).filter(function (item) { return item.type === 'deputy' || item.type === 'management'; }).map(function (item) { return Number(item.id); });
+        var targetId = target && target.parentElement && target.parentElement.matches('.org-deputy-row') ? Number(target.getAttribute('data-branch-id')) : 0;
         clearDeputyDrag();
         var from = current.indexOf(sourceId), to = current.indexOf(targetId);
         if (from < 0 || to < 0 || from === to) return;
         current.splice(to, 0, current.splice(from, 1)[0]);
         current.forEach(function (id, index) { var node = unit(id); if (node) node.sortOrder = (index + 1) * 10; });
         renderChart();
-        if (data.canManage) submit('sort_org_deputies', { unit_ids: current });
+        if (data.canManage) submit('sort_org_root_units', { unit_ids: current });
     };
     var cancelDeputyDrag = function () { clearDeputyDrag(); };
     var renderChart = function () {

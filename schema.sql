@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     with_car TINYINT(1) NOT NULL DEFAULT 0,
     with_mobile TINYINT(1) NOT NULL DEFAULT 0,
     meeting_with VARCHAR(190) DEFAULT NULL,
+    destination_id INT UNSIGNED DEFAULT NULL,
     approved_by VARCHAR(190) DEFAULT NULL,
     description TEXT,
     is_notice TINYINT(1) NOT NULL DEFAULT 0,
@@ -186,6 +187,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     KEY idx_traffic_national_code (national_code),
     KEY idx_traffic_visit_date (visit_date),
+    KEY idx_traffic_destination_id (destination_id),
     KEY idx_traffic_serial (serial_no),
     KEY idx_traffic_created_by (created_by),
     CONSTRAINT fk_traffic_visits_user FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
@@ -867,7 +869,8 @@ CREATE TABLE IF NOT EXISTS food_ticket_events (
     food_type VARCHAR(190) NULL,
     ticket_key VARCHAR(190) NULL UNIQUE,
     print_job_id VARCHAR(64) NULL,
-    event_type ENUM('printed','print_error','no_food','unknown','inactive','repeat','guest','guest_limit','config_error') NOT NULL,
+    event_type ENUM('printed','print','print_error','no_food','unknown','inactive','repeat','guest','auto_printed','auto_guest','guest_limit','config_error') NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     print_status ENUM('not_printed','pending','printing','printed','print_error','failed','held_absent') NOT NULL DEFAULT 'not_printed',
     delivery_status ENUM('pending','delivered') NOT NULL DEFAULT 'pending',
     delivered_at DATETIME NULL,
@@ -1189,6 +1192,7 @@ CREATE TABLE IF NOT EXISTS food_catalog (
 CREATE TABLE IF NOT EXISTS food_guest_requests (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     request_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
     organization VARCHAR(190) NOT NULL,
     guest_count SMALLINT UNSIGNED NOT NULL,
     food_id INT UNSIGNED NULL,
@@ -1285,4 +1289,94 @@ CREATE TABLE IF NOT EXISTS food_order_cancel_requests (
     INDEX idx_food_cancel_req_status (status, created_at),
     INDEX idx_food_cancel_req_order (order_id),
     INDEX idx_food_cancel_req_employee (employee_id, food_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- همگام‌سازی با مهاجرت 022: تطبیق روزانه و فاکتورهای ماهانهٔ غذا.
+-- تطبیق سفارش و توزیع غذای روزانه و بایگانی فاکتورهای ماهانه.
+-- افزایشی است؛ سفارش‌ها، درخواست مهمان و سوابق غیبت موجود را تغییر یا حذف نمی‌کند.
+
+CREATE TABLE IF NOT EXISTS food_meal_reconciliations (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    food_date DATE NOT NULL,
+    meal_type ENUM('lunch','dinner') NOT NULL DEFAULT 'lunch',
+    employee_orders_at_order INT UNSIGNED NULL,
+    guest_meals_at_order INT UNSIGNED NULL,
+    supplier_order_quantity INT UNSIGNED NOT NULL DEFAULT 0,
+    received_quantity INT UNSIGNED NULL,
+    employee_served_quantity INT UNSIGNED NULL,
+    guest_served_quantity INT UNSIGNED NULL,
+    waste_quantity INT UNSIGNED NOT NULL DEFAULT 0,
+    status ENUM('ordered','closed') NOT NULL DEFAULT 'ordered',
+    note VARCHAR(1000) NULL,
+    ordered_by INT UNSIGNED NULL,
+    ordered_at DATETIME NULL,
+    snapshot_at DATETIME NULL,
+    closed_by INT UNSIGNED NULL,
+    closed_at DATETIME NULL,
+    created_by INT UNSIGNED NULL,
+    updated_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_food_meal_reconciliation_date_meal (food_date, meal_type),
+    INDEX idx_food_meal_reconciliation_status_date (status, food_date),
+    INDEX idx_food_meal_reconciliation_month_meal (food_date, meal_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS food_monthly_invoices (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    invoice_month DATE NOT NULL,
+    invoice_date DATE NOT NULL,
+    supplier_name VARCHAR(190) NOT NULL,
+    invoice_number VARCHAR(100) NOT NULL,
+    portion_count INT UNSIGNED NOT NULL,
+    amount_toman BIGINT UNSIGNED NULL,
+    original_name VARCHAR(255) NOT NULL,
+    stored_name VARCHAR(96) NOT NULL,
+    mime_type VARCHAR(120) NOT NULL,
+    size_bytes INT UNSIGNED NOT NULL,
+    sha256 CHAR(64) NOT NULL,
+    uploaded_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_food_monthly_invoice_number (invoice_month, supplier_name, invoice_number),
+    UNIQUE KEY uq_food_monthly_invoice_stored_name (stored_name),
+    INDEX idx_food_monthly_invoice_month (invoice_month, invoice_date),
+    INDEX idx_food_monthly_invoice_uploaded_by (uploaded_by, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- گروه‌های عمومی دسترسی؛ مجوزهای گروه به مجوزهای نقش اضافه می‌شوند.
+CREATE TABLE IF NOT EXISTS user_access_groups (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    description VARCHAR(500) NULL,
+    created_by INT UNSIGNED NULL,
+    updated_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_user_access_groups_name (name),
+    INDEX idx_user_access_groups_updated_at (updated_at),
+    CONSTRAINT fk_user_access_groups_created_by FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    CONSTRAINT fk_user_access_groups_updated_by FOREIGN KEY (updated_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_access_group_members (
+    group_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    added_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (group_id, user_id),
+    INDEX idx_user_access_group_members_user (user_id, group_id),
+    CONSTRAINT fk_user_access_group_members_group FOREIGN KEY (group_id) REFERENCES user_access_groups(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_access_group_members_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_access_group_members_added_by FOREIGN KEY (added_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS user_access_group_permissions (
+    group_id INT UNSIGNED NOT NULL,
+    permission_code VARCHAR(100) NOT NULL,
+    assigned_by INT UNSIGNED NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (group_id, permission_code),
+    INDEX idx_user_access_group_permissions_code (permission_code),
+    CONSTRAINT fk_user_access_group_permissions_group FOREIGN KEY (group_id) REFERENCES user_access_groups(id) ON DELETE CASCADE,
+    CONSTRAINT fk_user_access_group_permissions_assigned_by FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

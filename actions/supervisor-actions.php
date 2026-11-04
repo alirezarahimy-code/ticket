@@ -45,7 +45,7 @@ if (!defined('APP_ROOT')) {
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $decision = valid_choice(post_value('decision'), ['approve', 'rework'], 'rework');
             $ticket = fetch_ticket($ticketId);
-            if (!$ticket || $ticket['status'] !== 'resolved') {
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'resolved') {
                 throw new RuntimeException('فقط درخواست حل‌شده و بسته‌نشده قابل تأیید یا برگشت برای اصلاح است.');
             }
             if (!empty($ticket['cancel_requested_at'])) {
@@ -59,6 +59,13 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('دلیل برگشت درخواست برای اصلاح را بنویسید.');
             }
             db()->beginTransaction();
+            $decisionLock = db()->prepare('SELECT id FROM tickets WHERE id = ? FOR UPDATE');
+            $decisionLock->execute([$ticketId]);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'resolved' || !empty($ticket['cancel_requested_at'])
+                || ($decision === 'approve' && !ticket_rating_is_current($ticket))) {
+                throw new RuntimeException('وضعیت درخواست یا امتیاز آن هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+            }
             if ($decision === 'approve') {
                 $closeQuery = db()->prepare('UPDATE tickets SET status = "closed", closed_at = COALESCE(closed_at, NOW()), supervisor_id = ?, supervisor_approved_at = NOW(), supervisor_note = ?, updated_at = NOW() WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL');
                 $closeQuery->execute([$supervisor['id'], $note, $ticketId]);
@@ -94,7 +101,7 @@ if (!defined('APP_ROOT')) {
             }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
-            if (!$ticket || $ticket['status'] !== 'closed') {
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'closed') {
                 throw new RuntimeException('فقط درخواست بسته‌شده قابل بازگشایی رسمی است.');
             }
             $note = post_value('supervisor_note', 'بازگشایی رسمی برای ادامه رسیدگی');
@@ -142,6 +149,16 @@ if (!defined('APP_ROOT')) {
             }
             $comment = post_value('rating_comment');
             db()->beginTransaction();
+            // Lock the ticket first, then re-read the rating and status: reopening and
+            // automatic closure use the same lock and cannot race this decision.
+            $ratingLock = db()->prepare('SELECT id FROM tickets WHERE id = ? FOR UPDATE');
+            $ratingLock->execute([$ticketId]);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || (int) $ticket['requester_id'] !== (int) $user['id']
+                || !in_array($ticket['status'], ['resolved', 'closed'], true)
+                || ticket_rating_is_current($ticket)) {
+                throw new RuntimeException('وضعیت درخواست یا امتیاز آن هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+            }
             // اگر درخواست پس از امتیاز قبلی دوباره باز و حل شده باشد، امتیاز جدید جایگزین می‌شود.
             db()->prepare('INSERT INTO ticket_ratings (ticket_id, agent_id, requester_id, score, comment) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE agent_id = VALUES(agent_id), score = VALUES(score), comment = VALUES(comment), created_at = NOW()')->execute([$ticketId, $ticket['assigned_to'] ?: null, $user['id'], $score, $comment !== '' ? $comment : null]);
             save_audit((int) $user['id'], 'ticket_rated', $ticketId, ['score' => $score]);

@@ -1825,3 +1825,40 @@ body.org-image-print-page img { display: block; width: min(100vw, 100%); height:
 .org-company-edit-link:hover { color: #fff; }
 @media (max-width: 900px) { .org-company-edit-link { font-size: 9px; } }
 @media (max-width: 700px) { .org-company-edit-link { width: 20px; overflow: hidden; font-size: 0; text-decoration: none; text-align: center; }.org-company-edit-link::before { content: '✎'; color: #fff; font-size: 14px; } }
+
+/* گروه‌های عمومی دسترسی: همان برد نقش‌ها با ویرایش عضویت چندگانه */
+.access-group-create-form { display: grid; grid-template-columns: minmax(190px, 1fr) minmax(220px, 1.4fr) auto; align-items: end; gap: 10px; margin: 16px 0; padding: 14px; border: 1px solid var(--line); border-radius: 13px; background: #f8fbf9; }
+.access-group-create-form label, .access-group-fields label { display: grid; gap: 5px; color: #536777; font-size: 11px; font-weight: 700; }
+.access-group-create-form input, .access-group-fields input { width: 100%; min-width: 0; margin: 0; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--text, #263746); font: inherit; font-size: 12px; }
+.access-group-create-form .button { min-height: 38px; white-space: nowrap; }
+.access-group-empty { padding: 34px 16px; border: 1px dashed var(--line); border-radius: 12px; background: #fbfdfc; }
+.access-group-fields { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(240px, 1.5fr); gap: 11px; margin: 15px 0; }
+.access-group-members { margin: 15px 0 4px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
+.access-group-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 13px; border-bottom: 1px solid var(--line); background: #f6faf8; }
+.access-group-section-head strong { display: block; color: var(--navy); font-size: 12px; }
+.access-group-section-head small { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+.access-group-member-count { flex-shrink: 0; padding: 4px 9px; border: 1px solid #d6e9dd; border-radius: 99px; background: #eaf5ef; color: #1c7048; font-size: 10px; font-weight: 700; }
+.access-group-member-toolbar { display: flex; align-items: center; gap: 7px; padding: 9px 11px; border-bottom: 1px solid #edf1f2; }
+.access-group-member-toolbar input { flex: 1; min-width: 150px; margin: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 11px; }
+.access-group-member-toolbar .toolbar-btn { padding: 7px 9px; font-size: 10px; white-space: nowrap; }
+.access-group-members-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 2px; max-height: 270px; overflow: auto; padding: 7px 10px; }
+.access-group-member { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 8px; border: 1px solid transparent; border-radius: 9px; cursor: pointer; }
+.access-group-member:hover { border-color: var(--line); background: #f6faf8; }
+.access-group-member[hidden] { display: none !important; }
+.access-group-member > input { width: 16px; height: 16px; flex: 0 0 auto; margin: 0; accent-color: var(--green, #1f7a4d); }
+.access-group-member-info { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; gap: 1px; }
+.access-group-member-info strong { overflow: hidden; color: var(--navy); font-size: 11px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.access-group-member-info small { overflow: hidden; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.access-group-role-label { flex: 0 0 auto; padding: 2px 6px; border-radius: 7px; background: #f0f4f7; color: #526879; font-size: 9px; white-space: nowrap; }
+.access-group-no-users { grid-column: 1 / -1; margin: 4px; padding: 14px; text-align: center; }
+.access-group-catalog-note { margin-top: 12px; }
+.access-group-delete-form { display: inline-flex; margin: 0; }
+.access-group-delete-form .button { border-color: #efcccc; color: #a93b3b; }
+.access-group-panel .role-actions { justify-content: flex-start; }
+@media (max-width: 740px) {
+  .access-group-create-form { grid-template-columns: 1fr; }
+  .access-group-create-form .button { justify-self: start; }
+  .access-group-fields { grid-template-columns: 1fr; }
+  .access-group-member-toolbar { flex-wrap: wrap; }
+  .access-group-member-toolbar input { flex-basis: 100%; }
+}
