@@ -21,7 +21,7 @@
     formError: '',
     saving: false,
     editingId: 0,
-    form: { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' }
+    form: { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' }
   };
   var dialog = null;
 
@@ -68,6 +68,7 @@
     var fd = new FormData(form);
     state.form = {
       request_date: String(fd.get('request_date') || ''),
+      meal_type: String(fd.get('meal_type') || 'lunch'),
       organization: String(fd.get('organization') || ''),
       guest_count: String(fd.get('guest_count') || ''),
       requester_name: String(fd.get('requester_name') || ''),
@@ -82,6 +83,10 @@
       : state.canCreateWithoutDeputy
         ? '<div class="alert info" role="status">درخواست شما با عنوان «مدیریت مرکزی» ثبت می‌شود و به معاونت خاصی نسبت داده نمی‌شود.</div>'
         : '<div class="alert info" role="status">برای ثبت درخواست جدید باید مدیر یک معاونت باشید؛ درخواست‌های مجاز را می‌توانید از فهرست پایین ویرایش، لغو یا حذف کنید.</div>';
+    var mealCount = function (meal, status) { return state.items.filter(function (item) { return (item.meal_type === 'dinner' ? 'dinner' : 'lunch') === meal && item.status === status; }).length; };
+    var activeGuestCount = state.items.filter(function (item) { return item.status === 'active'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
+    var cancelledGuestCount = state.items.filter(function (item) { return item.status === 'cancelled'; }).reduce(function (sum, item) { return sum + Number(item.guest_count || 0); }, 0);
+    var summary = state.loading || state.loadError ? '' : '<div class="alert info fg-request-summary" role="status">ناهار: فعال ' + faDigits(mealCount('lunch', 'active')) + '، لغوشده ' + faDigits(mealCount('lunch', 'cancelled')) + '، مجموع ' + faDigits(mealCount('lunch', 'active') + mealCount('lunch', 'cancelled')) + ' · شام: فعال ' + faDigits(mealCount('dinner', 'active')) + '، لغوشده ' + faDigits(mealCount('dinner', 'cancelled')) + '، مجموع ' + faDigits(mealCount('dinner', 'active') + mealCount('dinner', 'cancelled')) + ' · کل: ' + faDigits(state.items.filter(function (item) { return item.status === 'active'; }).length) + ' فعال، ' + faDigits(state.items.filter(function (item) { return item.status === 'cancelled'; }).length) + ' لغوشده، ' + faDigits(state.items.length) + ' ردیف · مهمان‌ها: ' + faDigits(activeGuestCount) + ' فعال و ' + faDigits(cancelledGuestCount) + ' لغوشده</div>' + (state.items.length >= 300 ? '<div class="alert warning fg-request-summary">تعدادها فقط برای حداکثر ۳۰۰ درخواست نخست بارگذاری‌شده است.</div>' : '');
     var rows = state.items.map(function (r) {
       var actions = [];
       var id = Number(r.id);
@@ -92,6 +97,7 @@
       var status = r.status === 'cancelled' ? 'لغو شده' : 'فعال';
       return '<tr class="fg-request-item">'
         + '<td>' + esc(faDigits(r.request_jalali)) + '</td>'
+        + '<td>' + (r.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td>'
         + '<td>' + esc(r.deputy_name || '—') + '</td>'
         + '<td>' + esc(r.organization) + '</td>'
         + '<td>' + esc(faDigits(r.guest_count)) + '</td>'
@@ -107,7 +113,7 @@
         ? '<p class="muted fg-request-empty">فهرست درخواست‌ها دریافت نشد.</p>'
         : state.items.length
       ? '<div class="fg-request-list" role="region" tabindex="0" aria-label="درخواست‌های مهمان من؛ جدول قابل پیمایش">'
-        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">معاونت</th>'
+        + '<table class="fg-request-table"><thead><tr><th scope="col">تاریخ</th><th scope="col">وعده</th><th scope="col">معاونت</th>'
         + '<th scope="col">سازمان / شرکت</th><th scope="col">تعداد</th><th scope="col">درخواست‌دهنده</th>'
         + '<th scope="col">ثبت‌کننده</th><th scope="col">یادداشت</th><th scope="col">وضعیت</th><th scope="col">عملیات</th>'
         + '</tr></thead><tbody>' + rows + '</tbody></table></div>'
@@ -126,9 +132,11 @@
       + (state.loadError ? '<div class="alert danger" role="alert">' + esc(state.loadError) + '</div>' : '')
       + deputyBox
       + deadlineNotice
+      + '<div class="alert info" role="status">سفارش مهمانِ ثبت‌شده برای تعطیلات یا وعدهٔ شام، پس از پایان روز به‌صورت فیش خودکار ثبت می‌شود؛ چاپ فیزیکی انجام نمی‌شود.</div>'
       + (state.formError ? '<div class="alert danger" role="alert">' + esc(state.formError) + '</div>' : '')
       + '<form id="fg-form" class="form-grid" novalidate>'
       + '<label>تاریخ مورد نیاز (شمسی)<input type="text" inputmode="numeric" autocomplete="off" data-jalali name="request_date" value="' + esc(f.request_date) + '" required></label>'
+      + '<label>وعدهٔ غذایی<select name="meal_type"><option value="lunch"' + (f.meal_type !== 'dinner' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (f.meal_type === 'dinner' ? ' selected' : '') + '>شام</option></select></label>'
       + '<label>سازمان / شرکت مهمان<input type="text" name="organization" maxlength="190" value="' + esc(f.organization) + '" required></label>'
       + '<label>تعداد مهمان<input type="text" inputmode="numeric" name="guest_count" maxlength="3" value="' + esc(f.guest_count) + '" required></label>'
       + '<label>نام درخواست‌دهنده<input type="text" name="requester_name" maxlength="150" value="' + esc(f.requester_name) + '" required></label>'
@@ -137,6 +145,7 @@
       + (state.editingId ? ' <button type="button" class="button secondary" data-fg-action="edit-cancel">لغو ویرایش</button>' : '') + '</div>'
       + '</form>'
       + '<h3 class="fg-request-title">درخواست‌های مهمان من (از امروز به بعد)</h3>'
+      + summary
       + table
       + '</div>';
     if (window.ItsmJalali && typeof window.ItsmJalali.enhanceAll === 'function') window.ItsmJalali.enhanceAll(dialog);
@@ -195,6 +204,7 @@
     var f = state.form;
     var body = {
       request_date: normDigits(f.request_date).trim(),
+      meal_type: f.meal_type === 'dinner' ? 'dinner' : 'lunch',
       organization: f.organization.trim(),
       guest_count: normDigits(f.guest_count).trim(),
       requester_name: f.requester_name.trim(),
@@ -215,7 +225,7 @@
       var res = await request(editingId ? 'guest-request-update' : 'guest-request', null, { method: 'POST', body: JSON.stringify(body) });
       state.saving = false;
       state.editingId = 0;
-      state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+      state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
       dialog.close();
       toast(res.message || (editingId ? 'درخواست غذای مهمان ویرایش شد.' : 'درخواست غذای مهمان ثبت شد.'), false);
       await load();
@@ -244,6 +254,7 @@
     state.formError = '';
     state.form = {
       request_date: row.request_jalali || '',
+      meal_type: row.meal_type === 'dinner' ? 'dinner' : 'lunch',
       organization: row.organization || '',
       guest_count: String(row.guest_count || ''),
       requester_name: row.requester_name || '',
@@ -257,7 +268,7 @@
   function cancelEdit() {
     state.editingId = 0;
     state.formError = '';
-    state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
     render();
   }
 
@@ -286,7 +297,7 @@
     state.canCreateWithoutDeputy = false;
     state.myDeputy = null;
     state.formError = '';
-    state.form = { request_date: '', organization: '', guest_count: '', requester_name: selfName, note: '' };
+    state.form = { request_date: '', meal_type: 'lunch', organization: '', guest_count: '', requester_name: selfName, note: '' };
     render();
     if (!dialog.open) {
       try { dialog.showModal(); } catch (e) { dialog.setAttribute('open', 'open'); }

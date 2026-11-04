@@ -214,7 +214,8 @@
             ['domain', 'اتصال دامین'],
             ['triangle', 'افکت نمایشی'],
             ['users', 'کاربران'],
-            ['roles', 'نقش‌ها و دسترسی‌ها']
+            ['roles', 'نقش‌ها و دسترسی‌ها'],
+            ['access-groups', 'گروه‌های دسترسی']
         ];
         var panels = definitions.map(function (item) { return document.getElementById(item[0]); }).filter(Boolean);
         if (!panels.length) return;
@@ -245,235 +246,313 @@
     };
     bindSettingsTabs();
     var bindRolesBoard = function () {
-        var shell = document.querySelector('.roles-shell');
-        if (!shell) return;
-        var tabs = shell.querySelectorAll('[data-role-tab]');
-        var panels = shell.querySelectorAll('[data-role-panel]');
-        if (!tabs.length || !panels.length) return;
-        var activate = function (name) {
+        var shells = document.querySelectorAll('.roles-shell');
+        if (!shells.length) return;
+        shells.forEach(function (shell) {
+            var tabs = shell.querySelectorAll('[data-role-tab]');
+            var panels = shell.querySelectorAll('[data-role-panel]');
+            if (!tabs.length || !panels.length) return;
+            var activate = function (name) {
+                tabs.forEach(function (tab) {
+                    var active = tab.getAttribute('data-role-tab') === name;
+                    tab.classList.toggle('active', active);
+                    tab.setAttribute('aria-selected', active ? 'true' : 'false');
+                });
+                panels.forEach(function (panel) { panel.classList.toggle('active', panel.getAttribute('data-role-panel') === name); });
+            };
             tabs.forEach(function (tab) {
-                var active = tab.getAttribute('data-role-tab') === name;
-                tab.classList.toggle('active', active);
-                tab.setAttribute('aria-selected', active ? 'true' : 'false');
+                tab.addEventListener('click', function () { activate(tab.getAttribute('data-role-tab')); });
             });
-            panels.forEach(function (panel) { panel.classList.toggle('active', panel.getAttribute('data-role-panel') === name); });
-        };
-        tabs.forEach(function (tab) {
-            tab.addEventListener('click', function () { activate(tab.getAttribute('data-role-tab')); });
-        });
-        var current = Array.prototype.find.call(panels, function (panel) { return panel.classList.contains('active'); }) || panels[0];
-        activate(current.getAttribute('data-role-panel'));
+            var current = Array.prototype.find.call(panels, function (panel) { return panel.classList.contains('active'); }) || panels[0];
+            activate(current.getAttribute('data-role-panel'));
 
-        var normalize = function (value) {
-            return String(value || '').toLowerCase().replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/\s+/g, ' ').trim();
-        };
-        panels.forEach(function (panel) {
-            var items = panel.querySelectorAll('[data-perm-item]');
-            var cards = panel.querySelectorAll('[data-perm-group-card]');
-            var search = panel.querySelector('[data-perm-search]');
-            var empty = panel.querySelector('[data-perm-empty]');
-            var changesBadge = panel.querySelector('[data-role-changes]');
-            var resetBtn = panel.querySelector('[data-perm-reset]');
-            var countLabel = panel.querySelector('[data-role-count]');
-            var original = [];
+            var normalize = function (value) {
+                return String(value || '').toLowerCase().replace(/[يى]/g, 'ی').replace(/ك/g, 'ک').replace(/\s+/g, ' ').trim();
+            };
+            panels.forEach(function (panel) {
+                var items = panel.querySelectorAll('[data-perm-item]');
+                var cards = panel.querySelectorAll('[data-perm-group-card]');
+                var search = panel.querySelector('[data-perm-search]');
+                var empty = panel.querySelector('[data-perm-empty]');
+                var changesBadge = panel.querySelector('[data-role-changes]');
+                var resetBtn = panel.querySelector('[data-perm-reset]');
+                var countLabel = panel.querySelector('[data-role-count]');
+                var original = [];
+                var memberInputs = panel.querySelectorAll('input[name="members[]"]');
+                var memberFields = panel.querySelectorAll('[data-access-group-field]');
+                var originalMembers = Array.prototype.map.call(memberInputs, function (input) { return input.checked; });
+                var originalMemberFields = Array.prototype.map.call(memberFields, function (field) { return field.value; });
 
-            var refreshGroup = function (card) {
-                var groupItems = card.querySelectorAll('[data-perm-item] input');
-                var checked = Array.prototype.filter.call(groupItems, function (input) { return input.checked; }).length;
-                var total = groupItems.length;
-                var count = card.querySelector('[data-group-count]');
-                var fill = card.querySelector('.group-bar-fill');
-                var allBtn = card.querySelector('[data-group-all]');
-                if (count) {
-                    count.textContent = checked + ' از ' + total;
-                    count.classList.toggle('full', checked === total && total > 0);
-                    count.classList.toggle('empty', checked === 0);
-                    count.classList.toggle('partial', checked > 0 && checked < total);
-                }
-                if (fill) fill.style.width = (total ? Math.round(checked / total * 100) : 0) + '%';
-                if (allBtn) allBtn.textContent = checked === total && total > 0 ? 'حذف همه' : 'انتخاب همه';
-            };
-            // «مشاهده» و «ویرایش» مستقل‌اند: مشاهده به‌تنهایی ویرایش نمی‌دهد؛
-            // انتخاب ویرایش، مشاهده را هم فعال می‌کند؛ برداشتن مشاهده، ویرایش را لغو می‌کند.
-            var syncEdits = function (changedInput) {
-                panel.querySelectorAll('[data-perm-item][data-perm-edit]').forEach(function (child) {
-                    var parent = child.previousElementSibling;
-                    if (!parent || !parent.hasAttribute('data-perm-item') || parent.hasAttribute('data-perm-edit')) return;
-                    var pIn = parent.querySelector('input'), cIn = child.querySelector('input');
-                    if (!pIn || !cIn) return;
-                    if (changedInput === pIn && !pIn.checked) cIn.checked = false;
-                    if (cIn.checked && !pIn.checked) pIn.checked = true;
-                    parent.classList.toggle('checked', pIn.checked);
-                    child.classList.toggle('checked', cIn.checked);
-                });
-            };
-            syncEdits(null);
-            original = Array.prototype.map.call(items, function (item) { return item.querySelector('input').checked; });
-            var refreshChanges = function () {
-                syncEdits(null);
-                var added = 0, removed = 0;
-                Array.prototype.forEach.call(items, function (item, index) {
-                    var now = item.querySelector('input').checked;
-                    if (now && !original[index]) added++;
-                    if (!now && original[index]) removed++;
-                });
-                if (changesBadge) {
-                    var hasChange = added > 0 || removed > 0;
-                    changesBadge.hidden = !hasChange;
-                    changesBadge.textContent = (added ? '+' + added : '') + (removed ? ' −' + removed : '') + ' تغییر ذخیره‌نشده';
-                }
-                if (resetBtn) resetBtn.hidden = added === 0 && removed === 0;
-                if (countLabel) {
-                    var total = items.length, checked = 0;
-                    Array.prototype.forEach.call(items, function (item) { if (item.querySelector('input').checked) checked++; });
-                    countLabel.innerHTML = checked + '<span>/' + total + '</span>';
-                }
-            };
-            panel.querySelectorAll('[data-group-toggle]').forEach(function (header) {
-                header.addEventListener('click', function (event) {
-                    if (event.target.closest('[data-group-all]')) return;
-                    var card = header.closest('[data-perm-group-card]');
-                    if (card) card.classList.toggle('collapsed');
-                });
-            });
-            panel.querySelectorAll('[data-group-all]').forEach(function (button) {
-                button.addEventListener('click', function (event) {
-                    event.stopPropagation();
-                    var card = button.closest('[data-perm-group-card]');
-                    if (!card) return;
-                    var inputs = card.querySelectorAll('[data-perm-item] input');
-                    var allChecked = Array.prototype.every.call(inputs, function (input) { return input.checked; });
-                    Array.prototype.forEach.call(inputs, function (input) {
-                        input.checked = !allChecked;
-                        input.closest('[data-perm-item]').classList.toggle('checked', input.checked);
-                    });
-                    syncEdits(null);
-                    refreshGroup(card);
-                    refreshChanges();
-                });
-            });
-            panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
-                input.addEventListener('change', function () {
-                    input.closest('[data-perm-item]').classList.toggle('checked', input.checked);
-                    syncEdits(input);
-                    var card = input.closest('[data-perm-group-card]');
-                    if (card) refreshGroup(card);
-                    refreshChanges();
-                });
-            });
-            var allBtn = panel.querySelector('[data-perm-all]');
-            var noneBtn = panel.querySelector('[data-perm-none]');
-            if (allBtn) allBtn.addEventListener('click', function () {
-                panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
-                    input.checked = true;
-                    input.closest('[data-perm-item]').classList.add('checked');
-                });
-                syncEdits(null);
-                cards.forEach(refreshGroup);
-                refreshChanges();
-            });
-            if (noneBtn) noneBtn.addEventListener('click', function () {
-                panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
-                    input.checked = false;
-                    input.closest('[data-perm-item]').classList.remove('checked');
-                });
-                syncEdits(null);
-                cards.forEach(refreshGroup);
-                refreshChanges();
-            });
-            if (resetBtn) resetBtn.addEventListener('click', function () {
-                Array.prototype.forEach.call(items, function (item, index) {
-                    var input = item.querySelector('input');
-                    input.checked = original[index];
-                    item.classList.toggle('checked', input.checked);
-                });
-                cards.forEach(refreshGroup);
-                refreshChanges();
-            });
-            if (search) search.addEventListener('input', function () {
-                var query = normalize(search.value);
-                var visible = 0;
-                cards.forEach(function (card) {
-                    var groupLabel = normalize(card.getAttribute('data-group-label'));
-                    var groupVisible = query === '' || groupLabel.indexOf(query) !== -1;
-                    var anyItem = false;
-                    card.querySelectorAll('[data-perm-item]').forEach(function (item) {
-                        var match = groupVisible || normalize(item.getAttribute('data-perm-label')).indexOf(query) !== -1;
-                        item.hidden = !match;
-                        if (match) { anyItem = true; visible++; }
-                    });
-                    card.hidden = !anyItem;
-                });
-                if (empty) empty.hidden = !(query !== '' && visible === 0);
-            });
-            cards.forEach(refreshGroup);
-            refreshChanges();
-        });
-
-        var copyModal = shell.parentNode.querySelector('[data-copy-modal]');
-        var copyBtn = shell.querySelector('[data-copy-role]');
-        var selectedSource = null;
-        var activeInputs = function () {
-            var panel = Array.prototype.find.call(panels, function (item) { return item.classList.contains('active'); });
-            return panel ? panel.querySelectorAll('[data-perm-item] input') : [];
-        };
-        var applyCopy = function () {
-            var sources = copyModal ? copyModal.querySelectorAll('[data-copy-source]') : [];
-            sources.forEach(function (option) {
-                if (option.getAttribute('data-copy-source') === selectedSource) option.classList.add('selected');
-                else option.classList.remove('selected');
-            });
-            var applyBtn = copyModal ? copyModal.querySelector('[data-copy-apply]') : null;
-            if (applyBtn) applyBtn.disabled = !selectedSource;
-        };
-        if (copyBtn && copyModal) {
-            copyBtn.addEventListener('click', function () { selectedSource = null; applyCopy(); copyModal.hidden = false; });
-        }
-        if (copyModal) copyModal.querySelectorAll('[data-copy-source]').forEach(function (option) {
-            option.addEventListener('click', function () { selectedSource = option.getAttribute('data-copy-source'); applyCopy(); });
-        });
-        var cancelCopy = copyModal ? copyModal.querySelector('[data-copy-cancel]') : null;
-        if (cancelCopy) cancelCopy.addEventListener('click', function () { copyModal.hidden = true; });
-        var applyBtn = copyModal ? copyModal.querySelector('[data-copy-apply]') : null;
-        if (applyBtn) applyBtn.addEventListener('click', function () {
-            if (!selectedSource) return;
-            var sourceRole = selectedSource;
-            // خواندن دسترسی‌های نقش مبدأ از پنل مخفی همان نقش
-            var sourcePanel = Array.prototype.find.call(panels, function (panel) { return panel.getAttribute('data-role-panel') === sourceRole; });
-            var sourceChecked = [];
-            if (sourcePanel) sourcePanel.querySelectorAll('[data-perm-item]').forEach(function (item) {
-                if (item.querySelector('input').checked) sourceChecked.push(item.getAttribute('data-perm-label'));
-            });
-            var targetPanel = Array.prototype.find.call(panels, function (panel) { return panel.classList.contains('active'); });
-            if (targetPanel && targetPanel.getAttribute('data-role-panel') !== 'primary_admin') {
-                targetPanel.querySelectorAll('[data-perm-item]').forEach(function (item) {
-                    var input = item.querySelector('input');
-                    input.checked = sourceChecked.indexOf(item.getAttribute('data-perm-label')) !== -1;
-                    item.classList.toggle('checked', input.checked);
-                });
-                targetPanel.querySelectorAll('[data-perm-group-card]').forEach(function (card) {
-                    var inputs = card.querySelectorAll('[data-perm-item] input');
-                    var checked = Array.prototype.filter.call(inputs, function (input) { return input.checked; }).length;
+                var refreshGroup = function (card) {
+                    var groupItems = card.querySelectorAll('[data-perm-item] input');
+                    var checked = Array.prototype.filter.call(groupItems, function (input) { return input.checked; }).length;
+                    var total = groupItems.length;
                     var count = card.querySelector('[data-group-count]');
                     var fill = card.querySelector('.group-bar-fill');
-                    var groupAll = card.querySelector('[data-group-all]');
+                    var allBtn = card.querySelector('[data-group-all]');
                     if (count) {
-                        count.textContent = checked + ' از ' + inputs.length;
-                        count.classList.toggle('full', checked === inputs.length && inputs.length > 0);
+                        count.textContent = checked + ' از ' + total;
+                        count.classList.toggle('full', checked === total && total > 0);
                         count.classList.toggle('empty', checked === 0);
-                        count.classList.toggle('partial', checked > 0 && checked < inputs.length);
+                        count.classList.toggle('partial', checked > 0 && checked < total);
                     }
-                    if (fill) fill.style.width = (inputs.length ? Math.round(checked / inputs.length * 100) : 0) + '%';
-                    if (groupAll) groupAll.textContent = checked === inputs.length && inputs.length > 0 ? 'حذف همه' : 'انتخاب همه';
+                    if (fill) fill.style.width = (total ? Math.round(checked / total * 100) : 0) + '%';
+                    if (allBtn) allBtn.textContent = checked === total && total > 0 ? 'حذف همه' : 'انتخاب همه';
+                };
+                // «مشاهده» و «ویرایش» مستقل‌اند: مشاهده به‌تنهایی ویرایش نمی‌دهد؛
+                // انتخاب ویرایش، مشاهده را هم فعال می‌کند؛ برداشتن مشاهده، ویرایش را لغو می‌کند.
+                var syncEdits = function (changedInput) {
+                    panel.querySelectorAll('[data-perm-item][data-perm-edit]').forEach(function (child) {
+                        var parent = child.previousElementSibling;
+                        if (!parent || !parent.hasAttribute('data-perm-item') || parent.hasAttribute('data-perm-edit')) return;
+                        var pIn = parent.querySelector('input'), cIn = child.querySelector('input');
+                        if (!pIn || !cIn) return;
+                        if (changedInput === pIn && !pIn.checked) cIn.checked = false;
+                        if (cIn.checked && !pIn.checked) pIn.checked = true;
+                        parent.classList.toggle('checked', pIn.checked);
+                        child.classList.toggle('checked', cIn.checked);
+                    });
+                };
+                syncEdits(null);
+                original = Array.prototype.map.call(items, function (item) { return item.querySelector('input').checked; });
+                var refreshChanges = function () {
+                    syncEdits(null);
+                    var added = 0, removed = 0;
+                    Array.prototype.forEach.call(items, function (item, index) {
+                        var now = item.querySelector('input').checked;
+                        if (now && !original[index]) added++;
+                        if (!now && original[index]) removed++;
+                    });
+                    var memberChanges = 0, fieldChanges = 0;
+                    Array.prototype.forEach.call(memberInputs, function (input, index) {
+                        if (input.checked !== originalMembers[index]) memberChanges++;
+                    });
+                    Array.prototype.forEach.call(memberFields, function (field, index) {
+                        if (field.value !== originalMemberFields[index]) fieldChanges++;
+                    });
+                    var totalChanges = added + removed + memberChanges + fieldChanges;
+                    if (changesBadge) {
+                        changesBadge.hidden = totalChanges === 0;
+                        changesBadge.textContent = totalChanges + ' تغییر ذخیره‌نشده';
+                    }
+                    if (resetBtn) resetBtn.hidden = totalChanges === 0;
+                    if (countLabel) {
+                        var total = items.length, checked = 0;
+                        Array.prototype.forEach.call(items, function (item) { if (item.querySelector('input').checked) checked++; });
+                        countLabel.innerHTML = checked + '<span>/' + total + '</span>';
+                    }
+                };
+                panel.querySelectorAll('[data-group-toggle]').forEach(function (header) {
+                    header.addEventListener('click', function (event) {
+                        if (event.target.closest('[data-group-all]')) return;
+                        var card = header.closest('[data-perm-group-card]');
+                        if (card) card.classList.toggle('collapsed');
+                    });
                 });
-                var badge = targetPanel.querySelector('[data-role-changes]');
-                var reset = targetPanel.querySelector('[data-perm-reset]');
-                if (badge) { badge.hidden = false; badge.textContent = 'کپی شد؛ برای اعمال ذخیره کنید'; }
-                if (reset) reset.hidden = false;
-                var label = targetPanel.querySelector('[data-role-count]');
-                if (label) label.innerHTML = sourceChecked.length + '<span>/' + targetPanel.querySelectorAll('[data-perm-item]').length + '</span>';
+                panel.querySelectorAll('[data-group-all]').forEach(function (button) {
+                    button.addEventListener('click', function (event) {
+                        event.stopPropagation();
+                        var card = button.closest('[data-perm-group-card]');
+                        if (!card) return;
+                        var inputs = card.querySelectorAll('[data-perm-item] input');
+                        var allChecked = Array.prototype.every.call(inputs, function (input) { return input.checked; });
+                        Array.prototype.forEach.call(inputs, function (input) {
+                            input.checked = !allChecked;
+                            input.closest('[data-perm-item]').classList.toggle('checked', input.checked);
+                        });
+                        syncEdits(null);
+                        refreshGroup(card);
+                        refreshChanges();
+                    });
+                });
+                panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
+                    input.addEventListener('change', function () {
+                        input.closest('[data-perm-item]').classList.toggle('checked', input.checked);
+                        syncEdits(input);
+                        var card = input.closest('[data-perm-group-card]');
+                        if (card) refreshGroup(card);
+                        refreshChanges();
+                    });
+                });
+                var allBtn = panel.querySelector('[data-perm-all]');
+                var noneBtn = panel.querySelector('[data-perm-none]');
+                if (allBtn) allBtn.addEventListener('click', function () {
+                    panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
+                        input.checked = true;
+                        input.closest('[data-perm-item]').classList.add('checked');
+                    });
+                    syncEdits(null);
+                    cards.forEach(refreshGroup);
+                    refreshChanges();
+                });
+                if (noneBtn) noneBtn.addEventListener('click', function () {
+                    panel.querySelectorAll('[data-perm-item] input').forEach(function (input) {
+                        input.checked = false;
+                        input.closest('[data-perm-item]').classList.remove('checked');
+                    });
+                    syncEdits(null);
+                    cards.forEach(refreshGroup);
+                    refreshChanges();
+                });
+                if (resetBtn) resetBtn.addEventListener('click', function () {
+                    Array.prototype.forEach.call(items, function (item, index) {
+                        var input = item.querySelector('input');
+                        input.checked = original[index];
+                        item.classList.toggle('checked', input.checked);
+                    });
+                    Array.prototype.forEach.call(memberInputs, function (input, index) { input.checked = originalMembers[index]; });
+                    Array.prototype.forEach.call(memberFields, function (field, index) { field.value = originalMemberFields[index]; });
+                    if (groupNameField && groupHeading) groupHeading.textContent = groupNameField.value || 'گروه دسترسی';
+                    if (groupTabName && groupNameField) groupTabName.textContent = groupNameField.value || 'گروه جدید';
+                    cards.forEach(refreshGroup);
+                    refreshMembers();
+                    refreshChanges();
+                });
+                if (search) search.addEventListener('input', function () {
+                    var query = normalize(search.value);
+                    var visible = 0;
+                    cards.forEach(function (card) {
+                        var groupLabel = normalize(card.getAttribute('data-group-label'));
+                        var groupVisible = query === '' || groupLabel.indexOf(query) !== -1;
+                        var anyItem = false;
+                        card.querySelectorAll('[data-perm-item]').forEach(function (item) {
+                            var match = groupVisible || normalize(item.getAttribute('data-perm-label')).indexOf(query) !== -1;
+                            item.hidden = !match;
+                            if (match) { anyItem = true; visible++; }
+                        });
+                        card.hidden = !anyItem;
+                    });
+                    if (empty) empty.hidden = !(query !== '' && visible === 0);
+                });
+
+                var memberList = panel.querySelector('[data-access-member-list]');
+                var memberSearch = panel.querySelector('[data-access-member-search]');
+                var memberCount = panel.querySelector('[data-access-member-count]');
+                var memberEmpty = panel.querySelector('[data-access-member-empty]');
+                var memberRows = memberList ? memberList.querySelectorAll('[data-access-member]') : [];
+                var refreshMembers = function () {
+                    if (!memberList) return;
+                    var checked = memberList.querySelectorAll('input[name="members[]"]:checked').length;
+                    if (memberCount) memberCount.textContent = checked + ' عضو';
+                };
+                if (memberSearch) memberSearch.addEventListener('input', function () {
+                    var query = normalize(memberSearch.value);
+                    var visible = 0;
+                    memberRows.forEach(function (row) {
+                        var label = normalize(row.getAttribute('data-member-label') || row.textContent);
+                        var match = query === '' || label.indexOf(query) !== -1;
+                        row.hidden = !match;
+                        if (match) visible++;
+                    });
+                    if (memberEmpty) memberEmpty.hidden = !(query !== '' && visible === 0);
+                });
+                if (memberList) memberList.querySelectorAll('input[name="members[]"]').forEach(function (input) {
+                    input.addEventListener('change', function () { refreshMembers(); refreshChanges(); });
+                });
+                memberFields.forEach(function (field) {
+                    field.addEventListener('input', refreshChanges);
+                    field.addEventListener('change', refreshChanges);
+                });
+                var groupNameField = panel.querySelector('[data-access-group-field="name"]');
+                var groupHeading = panel.querySelector('.role-panel-title h3');
+                var currentTab = Array.prototype.find.call(tabs, function (tab) {
+                    return tab.getAttribute('data-role-tab') === panel.getAttribute('data-role-panel');
+                });
+                var groupTabName = currentTab ? currentTab.querySelector('.role-name') : null;
+                if (groupNameField) groupNameField.addEventListener('input', function () {
+                    if (groupHeading) groupHeading.textContent = groupNameField.value || 'گروه دسترسی';
+                    if (groupTabName) groupTabName.textContent = groupNameField.value || 'گروه جدید';
+                });
+                var selectVisibleMembers = panel.querySelector('[data-access-member-select-visible]');
+                if (selectVisibleMembers) selectVisibleMembers.addEventListener('click', function () {
+                    memberRows.forEach(function (row) {
+                        if (row.hidden) return;
+                        var input = row.querySelector('input[name="members[]"]');
+                        if (input) input.checked = true;
+                    });
+                    refreshMembers();
+                    refreshChanges();
+                });
+                var clearVisibleMembers = panel.querySelector('[data-access-member-clear-visible]');
+                if (clearVisibleMembers) clearVisibleMembers.addEventListener('click', function () {
+                    memberRows.forEach(function (row) {
+                        if (row.hidden) return;
+                        var input = row.querySelector('input[name="members[]"]');
+                        if (input) input.checked = false;
+                    });
+                    refreshMembers();
+                    refreshChanges();
+                });
+                cards.forEach(refreshGroup);
+                refreshChanges();
+                refreshMembers();
+            });
+
+            var copyBtn = shell.querySelector('[data-copy-role]');
+            var copyModal = copyBtn ? shell.parentNode.querySelector('[data-copy-modal]') : null;
+            var selectedSource = null;
+            var activeInputs = function () {
+                var panel = Array.prototype.find.call(panels, function (item) { return item.classList.contains('active'); });
+                return panel ? panel.querySelectorAll('[data-perm-item] input') : [];
+            };
+            var applyCopy = function () {
+                var sources = copyModal ? copyModal.querySelectorAll('[data-copy-source]') : [];
+                sources.forEach(function (option) {
+                    if (option.getAttribute('data-copy-source') === selectedSource) option.classList.add('selected');
+                    else option.classList.remove('selected');
+                });
+                var applyBtn = copyModal ? copyModal.querySelector('[data-copy-apply]') : null;
+                if (applyBtn) applyBtn.disabled = !selectedSource;
+            };
+            if (copyBtn && copyModal) {
+                copyBtn.addEventListener('click', function () { selectedSource = null; applyCopy(); copyModal.hidden = false; });
             }
-            copyModal.hidden = true;
+            if (copyModal) copyModal.querySelectorAll('[data-copy-source]').forEach(function (option) {
+                option.addEventListener('click', function () { selectedSource = option.getAttribute('data-copy-source'); applyCopy(); });
+            });
+            var cancelCopy = copyModal ? copyModal.querySelector('[data-copy-cancel]') : null;
+            if (cancelCopy) cancelCopy.addEventListener('click', function () { copyModal.hidden = true; });
+            var applyBtn = copyModal ? copyModal.querySelector('[data-copy-apply]') : null;
+            if (applyBtn) applyBtn.addEventListener('click', function () {
+                if (!selectedSource) return;
+                var sourceRole = selectedSource;
+                // خواندن دسترسی‌های نقش مبدأ از پنل مخفی همان نقش
+                var sourcePanel = Array.prototype.find.call(panels, function (panel) { return panel.getAttribute('data-role-panel') === sourceRole; });
+                var sourceChecked = [];
+                if (sourcePanel) sourcePanel.querySelectorAll('[data-perm-item]').forEach(function (item) {
+                    if (item.querySelector('input').checked) sourceChecked.push(item.getAttribute('data-perm-label'));
+                });
+                var targetPanel = Array.prototype.find.call(panels, function (panel) { return panel.classList.contains('active'); });
+                if (targetPanel && targetPanel.getAttribute('data-role-panel') !== 'primary_admin') {
+                    targetPanel.querySelectorAll('[data-perm-item]').forEach(function (item) {
+                        var input = item.querySelector('input');
+                        input.checked = sourceChecked.indexOf(item.getAttribute('data-perm-label')) !== -1;
+                        item.classList.toggle('checked', input.checked);
+                    });
+                    targetPanel.querySelectorAll('[data-perm-group-card]').forEach(function (card) {
+                        var inputs = card.querySelectorAll('[data-perm-item] input');
+                        var checked = Array.prototype.filter.call(inputs, function (input) { return input.checked; }).length;
+                        var count = card.querySelector('[data-group-count]');
+                        var fill = card.querySelector('.group-bar-fill');
+                        var groupAll = card.querySelector('[data-group-all]');
+                        if (count) {
+                            count.textContent = checked + ' از ' + inputs.length;
+                            count.classList.toggle('full', checked === inputs.length && inputs.length > 0);
+                            count.classList.toggle('empty', checked === 0);
+                            count.classList.toggle('partial', checked > 0 && checked < inputs.length);
+                        }
+                        if (fill) fill.style.width = (inputs.length ? Math.round(checked / inputs.length * 100) : 0) + '%';
+                        if (groupAll) groupAll.textContent = checked === inputs.length && inputs.length > 0 ? 'حذف همه' : 'انتخاب همه';
+                    });
+                    var badge = targetPanel.querySelector('[data-role-changes]');
+                    var reset = targetPanel.querySelector('[data-perm-reset]');
+                    if (badge) { badge.hidden = false; badge.textContent = 'کپی شد؛ برای اعمال ذخیره کنید'; }
+                    if (reset) reset.hidden = false;
+                    var label = targetPanel.querySelector('[data-role-count]');
+                    if (label) label.innerHTML = sourceChecked.length + '<span>/' + targetPanel.querySelectorAll('[data-perm-item]').length + '</span>';
+                }
+                copyModal.hidden = true;
+            });
         });
     };
     bindRolesBoard();

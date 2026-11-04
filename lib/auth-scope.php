@@ -70,7 +70,7 @@ function require_primary_admin(): array
         : ($user['role'] === 'primary_admin' || ($user['role'] === 'admin' && (int) ($user['is_primary_admin'] ?? 0) === 1));
     if (!$isPrimary) {
         http_response_code(403);
-        exit('فقط ادمین اصلی اجازه مدیریت نقش‌ها و معاونت‌ها را دارد.');
+        exit('فقط ادمین اصلی اجازهٔ مدیریت نقش‌ها، معاونت‌ها و گروه‌های دسترسی را دارد.');
     }
     return $user;
 }

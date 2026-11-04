@@ -18,14 +18,14 @@ def test_event_totals_are_independent_of_the_display_limit():
     end = HEALTH.index("/** بررسی‌های خودکار سلامت", start)
     groups = HEALTH[start:end]
     assert "GROUP BY context, message, level" in groups
-    assert "foreach (['error', 'warning'] as $level)" in groups
+    assert "foreach (['critical', 'error', 'warning'] as $level)" in groups
     assert "ORDER BY g.cnt DESC, g.last_at DESC" in groups
     assert "LIMIT 100" in groups
 
     totals_start = HEALTH.index("function system_health_event_totals")
     totals_end = HEALTH.index("/** بررسی‌های خودکار سلامت", totals_start)
     totals = HEALTH[totals_start:totals_end]
-    assert "SUM(level = 'error') AS errors" in totals
+    assert "SUM(level IN ('critical','error')) AS errors" in totals  # از ۱.۶۲.۷۷ سطح critical هم در شمارش خطاها می‌آید
     assert "SUM(level = 'warning') AS warnings" in totals
     assert "GROUP BY context, message, level" in totals
     assert "LIMIT" not in totals

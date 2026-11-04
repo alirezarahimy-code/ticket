@@ -22,7 +22,7 @@ def test_export_omits_user_linked_and_raw_log_fields():
     assert "SELECT full_name FROM users" in export
     assert "SELECT username FROM users" in export
     assert "system_health_humanize_event($row)" in export
-    assert "['error', 'warning']" in export
+    assert "['critical', 'error', 'warning']" in export
     assert "user_id" not in export
 
 

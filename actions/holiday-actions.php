@@ -35,18 +35,31 @@ if (!defined('APP_ROOT')) {
                 flash('warning', 'پنج‌شنبه و جمعه به‌صورت ثابت تعطیل هستند.');
                 redirect('index.php?page=holidays');
             }
-            $exists = db()->prepare('SELECT id, is_active FROM holidays WHERE holiday_date = ? LIMIT 1');
-            $exists->execute([$day]);
-            $row = $exists->fetch();
-            if ($row && (int) $row['is_active'] === 1) {
-                db()->prepare('UPDATE holidays SET is_active = 0 WHERE id = ?')->execute([(int) $row['id']]);
-                flash('success', 'تعطیلی حذف شد.');
-            } elseif ($row) {
-                db()->prepare('UPDATE holidays SET is_active = 1, title = ?, created_by = ? WHERE id = ?')->execute([post_value('holiday_title') ?: 'تعطیل رسمی', $holidayAdmin['id'], (int) $row['id']]);
-                flash('success', 'تعطیلی فعال شد.');
-            } else {
-                db()->prepare('INSERT INTO holidays (holiday_date, title, created_by, is_active) VALUES (?, ?, ?, 1)')->execute([$day, post_value('holiday_title') ?: 'تعطیل رسمی', $holidayAdmin['id']]);
-                flash('success', 'تعطیلی ثبت شد.');
+            db()->beginTransaction();
+            try {
+                $exists = db()->prepare('SELECT id, is_active, title FROM holidays WHERE holiday_date = ? LIMIT 1 FOR UPDATE');
+                $exists->execute([$day]);
+                $row = $exists->fetch();
+                if ($row && (int) $row['is_active'] === 1) {
+                    db()->prepare('UPDATE holidays SET is_active = 0 WHERE id = ?')->execute([(int) $row['id']]);
+                    save_audit_required((int) $holidayAdmin['id'], 'holiday_deactivated', null, ['holiday_id' => (int) $row['id'], 'holiday_date' => $day, 'title' => (string) $row['title'], 'is_active' => 0]);
+                    flash('success', 'تعطیلی غیرفعال شد.');
+                } elseif ($row) {
+                    $title = post_value('holiday_title') ?: 'تعطیل رسمی';
+                    db()->prepare('UPDATE holidays SET is_active = 1, title = ?, created_by = ? WHERE id = ?')->execute([$title, $holidayAdmin['id'], (int) $row['id']]);
+                    save_audit_required((int) $holidayAdmin['id'], 'holiday_activated', null, ['holiday_id' => (int) $row['id'], 'holiday_date' => $day, 'title' => $title, 'is_active' => 1]);
+                    flash('success', 'تعطیلی فعال شد.');
+                } else {
+                    $title = post_value('holiday_title') ?: 'تعطیل رسمی';
+                    db()->prepare('INSERT INTO holidays (holiday_date, title, created_by, is_active) VALUES (?, ?, ?, 1)')->execute([$day, $title, $holidayAdmin['id']]);
+                    $holidayId = (int) db()->lastInsertId();
+                    save_audit_required((int) $holidayAdmin['id'], 'holiday_created', null, ['holiday_id' => $holidayId, 'holiday_date' => $day, 'title' => $title, 'is_active' => 1]);
+                    flash('success', 'تعطیلی ثبت شد.');
+                }
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if (db()->inTransaction()) db()->rollBack();
+                throw $exception;
             }
             redirect('index.php?page=holidays');
         }
@@ -61,7 +74,18 @@ if (!defined('APP_ROOT')) {
             if (in_array($holidayDayOfWeek, [4, 5], true)) {
                 throw new RuntimeException('پنج‌شنبه و جمعه به‌صورت خودکار تعطیل هستند و نیازی به ثبت جداگانه ندارند.');
             }
-            db()->prepare('INSERT INTO holidays (holiday_date, title, created_by) VALUES (?, ?, ?)')->execute([substr($holidayDate, 0, 10), post_value('holiday_title'), $holidayAdmin['id']]);
+            $day = substr($holidayDate, 0, 10);
+            $title = post_value('holiday_title');
+            db()->beginTransaction();
+            try {
+                db()->prepare('INSERT INTO holidays (holiday_date, title, created_by) VALUES (?, ?, ?)')->execute([$day, $title, $holidayAdmin['id']]);
+                $holidayId = (int) db()->lastInsertId();
+                save_audit_required((int) $holidayAdmin['id'], 'holiday_created', null, ['holiday_id' => $holidayId, 'holiday_date' => $day, 'title' => $title, 'is_active' => 1]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if (db()->inTransaction()) db()->rollBack();
+                throw $exception;
+            }
             flash('success', 'تعطیلی به تقویم SLA اضافه شد.');
             redirect('index.php?page=holidays');
         }
@@ -72,22 +96,42 @@ if (!defined('APP_ROOT')) {
             $insert = db()->prepare('INSERT INTO holidays (holiday_date, title, created_by) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), is_active = 1, created_by = VALUES(created_by)');
             db()->beginTransaction();
             $importedCount = 0;
-            foreach ($events as $event) {
-                $eventDayOfWeek = (int) (new DateTimeImmutable(substr($event['date'], 0, 10), new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('N');
-                if (in_array($eventDayOfWeek, [4, 5], true)) {
-                    continue;
+            try {
+                foreach ($events as $event) {
+                    $eventDayOfWeek = (int) (new DateTimeImmutable(substr($event['date'], 0, 10), new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('N');
+                    if (in_array($eventDayOfWeek, [4, 5], true)) {
+                        continue;
+                    }
+                    $insert->execute([substr($event['date'], 0, 10), $event['title'], $holidayAdmin['id']]);
+                    $importedCount++;
                 }
-                $insert->execute([substr($event['date'], 0, 10), $event['title'], $holidayAdmin['id']]);
-                $importedCount++;
+                save_audit_required((int) $holidayAdmin['id'], 'holidays_imported', null, ['count' => $importedCount, 'skipped_weekends' => count($events) - $importedCount, 'source' => 'calendar_import']);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if (db()->inTransaction()) db()->rollBack();
+                throw $exception;
             }
-            db_commit('index.php');
             flash('success', $importedCount . ' تعطیلی از فایل تقویم وارد شد؛ پنج‌شنبه و جمعه نادیده گرفته شدند.');
             redirect('index.php?page=holidays');
         }
 
         if ($action === 'delete_holiday') {
-            require_permission('holidays.manage');
-            db()->prepare('DELETE FROM holidays WHERE id = ?')->execute([(int) ($_POST['holiday_id'] ?? 0)]);
+            $holidayAdmin = require_permission('holidays.manage');
+            $holidayId = max(0, (int) ($_POST['holiday_id'] ?? 0));
+            db()->beginTransaction();
+            try {
+                $lookup = db()->prepare('SELECT id, holiday_date, title FROM holidays WHERE id = ? LIMIT 1 FOR UPDATE');
+                $lookup->execute([$holidayId]);
+                $holiday = $lookup->fetch();
+                if ($holiday) {
+                    db()->prepare('DELETE FROM holidays WHERE id = ?')->execute([$holidayId]);
+                    save_audit_required((int) $holidayAdmin['id'], 'holiday_deleted', null, ['holiday_id' => $holidayId, 'holiday_date' => (string) $holiday['holiday_date'], 'title' => (string) $holiday['title']]);
+                }
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if (db()->inTransaction()) db()->rollBack();
+                throw $exception;
+            }
             flash('success', 'تعطیلی حذف شد.');
             redirect('index.php?page=holidays');
         }

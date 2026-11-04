@@ -15,7 +15,7 @@
   ├─ ناحیهٔ ۲: تعیین $page از ?page=... + پیش‌شرط‌ها (تغییر رمز اجباری و …)
   ├─ ناحیهٔ ۳: ماژول‌های خودگردان — food-ticket / food-order / traffic-control
   │            (این‌ها POST و رندر خودشان را کامل خودشان انجام می‌دهند)
-  ├─ ناحیهٔ ۴: if (REQUEST_METHOD === 'POST') → ۷۴ اکشن
+  ├─ ناحیهٔ ۴: if (REQUEST_METHOD === 'POST') → ۷۷ اکشن
   │            (برش‌های فاز ۲ — require در همان نقطه، همان حوزهٔ متغیرها:
   │             سازمان → actions/org-actions.php | درخواست‌ها → actions/ticket-actions.php
   │             اموال/اسکن دامین → actions/asset-actions.php | خدمات/دانش → actions/service-actions.php؛ شرح فارسی بخش‌ها در سرآیند هر فایل)
@@ -56,7 +56,7 @@
 | `lib/tickets-sla.php` | ~620 | شمارهٔ درخواست، تقویم شمسی، SLA/OLA، تاریخچهٔ دارایی |
 | `lib/notify-users.php` | ~435 | اعلان‌ها، ورود دامین (ldap_authenticate)، upsert کاربران |
 | `lib/activity-audit.php` | ~390 | ثبت فعالیت، حسابرسی save_audit، رویداد درخواست‌ها |
-| `permissions.php` | — | تعریف دسترسی‌ها + نقش‌های پیش‌فرض (هر قابلیت جدید باید اینجا هم ثبت شود) |
+| `permissions.php` | — | تعریف دسترسی‌ها، نقش‌ها و اجتماع افزایشی مجوزهای گروه (هر قابلیت جدید باید اینجا هم ثبت شود) |
 | `session_bootstrap.php` | — | شروع امن سشن (مشترک بین index و install) |
 | `organization.php` | — | چارت سازمانی: org_units/org_unit_managers، واحد مستقل (liaison)، همگام‌سازی نقش‌ها |
 | `food-ticket.php` + `food-ticket-*.php` | ~4800+ | «سامانه مدیریت غذا» — زیرماژول‌ها: engine، runtime، groups (ثبت دستی فیش)، templates، netprint، import، web-host، env، order-source |
@@ -72,11 +72,11 @@
 | `install.php`, `install-empty-db.sql`, `schema.sql` | — | نصب تازه؛ هر ستون جدید باید در هر دو SQL + ترمیم اسکیما (`*_ensure_schema`) بیاید |
 | `cron/prune_activity_logs.php` | — | کران هرس لاگ (از `ops_low_value_tables_prune` استفاده می‌کند) |
 
-## ۳. گروه‌های اکشن POST در index.php (۷۴ اکشن)
+## ۳. گروه‌های اکشن POST در index.php (۷۷ اکشن)
 
 به ترتیب فایل — هر گروه در کد بانر دارد:
 
-۱–۲. ورود + پروفایل/تم: ۳ اکشن — **در `actions/account-actions.php`** ۳. برند فیش غذا — **در `actions/food-brand-actions.php`** ۴. CD/DVD: ۳ اکشن — **در `actions/cd-dvd-actions.php`** ۵. پشتیبان‌گیری/به‌روزرسانی: ۳ اکشن — **در `actions/backup-actions.php`** (برش ۹) ۶. اعلان‌ها: ۲ اکشن — **در `actions/notification-actions.php`** ۷–۸. تصمیم‌های سرپرست + امتیازدهی: ۴ اکشن — **در `actions/supervisor-actions.php`** ۹. اموال و اسکن دامین: ۱۰ اکشن — **در `actions/asset-actions.php`** ۱۰. چرخهٔ درخواست‌ها: ۷ اکشن — **در `actions/ticket-actions.php`** ۱۱. خدمات/دسته/دانش: ۷ اکشن — **در `actions/service-actions.php`** ۱۲. تعطیلات: ۴ اکشن — **در `actions/holiday-actions.php`** ۱۳. ارتباط دارایی + عملیات گروهی: ۲ اکشن — **در `actions/bulk-actions.php`** ۱۴–۱۵. ساختار پایه + کاربران: ۶ اکشن — **در `actions/user-structure-actions.php`** ۱۶. سازمان: ۱۳ اکشن — **در فایل جدای `actions/org-actions.php`** (save_org_node شامل liaison، undo، assign/remove manager، experts، assign_users، reset، ceo، unit، delete_unit، user_org، دو فرم ترمیم نقش) ۱۷. نقش‌ها و دسترسی‌ها: ۴ اکشن — **در `actions/role-actions.php`** ۱۸–۱۹. لاگ/LDAP + افکت/تنظیمات: ۵ اکشن — **در `actions/settings-actions.php`**
+۱–۲. ورود + پروفایل/تم: ۳ اکشن — **در `actions/account-actions.php`** ۳. برند فیش غذا — **در `actions/food-brand-actions.php`** ۴. CD/DVD: ۳ اکشن — **در `actions/cd-dvd-actions.php`** ۵. پشتیبان‌گیری/به‌روزرسانی: ۳ اکشن — **در `actions/backup-actions.php`** (برش ۹) ۶. اعلان‌ها: ۲ اکشن — **در `actions/notification-actions.php`** ۷–۸. تصمیم‌های سرپرست + امتیازدهی: ۴ اکشن — **در `actions/supervisor-actions.php`** ۹. اموال و اسکن دامین: ۱۰ اکشن — **در `actions/asset-actions.php`** ۱۰. چرخهٔ درخواست‌ها: ۷ اکشن — **در `actions/ticket-actions.php`** ۱۱. خدمات/دسته/دانش: ۷ اکشن — **در `actions/service-actions.php`** ۱۲. تعطیلات: ۴ اکشن — **در `actions/holiday-actions.php`** ۱۳. ارتباط دارایی + عملیات گروهی: ۲ اکشن — **در `actions/bulk-actions.php`** ۱۴–۱۵. ساختار پایه + کاربران: ۶ اکشن — **در `actions/user-structure-actions.php`** ۱۶. سازمان: ۱۳ اکشن — **در فایل جدای `actions/org-actions.php`** (save_org_node شامل liaison، undo، assign/remove manager، experts، assign_users، reset، ceo، unit، delete_unit، user_org، دو فرم ترمیم نقش) ۱۷. نقش‌ها و دسترسی‌ها: ۴ اکشن — **در `actions/role-actions.php`** ۱۸–۱۹. لاگ/LDAP + افکت/تنظیمات: ۵ اکشن — **در `actions/settings-actions.php`** ۲۰. گروه‌های عمومی دسترسی: ۳ اکشن — **در `actions/access-group-actions.php`**
 
 ## ۴. صفحه‌ها (۳۸ مقدار `?page=`)
 

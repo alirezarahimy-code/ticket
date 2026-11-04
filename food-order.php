@@ -744,6 +744,49 @@ function food_order_manager_orders(string $date, string $mealType = 'lunch'): ar
     return food_order_report_descriptions($items, $iso);
 }
 
+/** همهٔ ردیف‌های سفارش یک بازه؛ وعده و وضعیت هر ردیف حفظ می‌شود. */
+function food_order_report_rows_range(string $fromDate, string $toDate): array
+{
+    food_order_schema_ensure();
+    $from = food_order_iso_date($fromDate);
+    $to = food_order_iso_date($toDate);
+    if ($from === null || $to === null || $from > $to) {
+        throw new RuntimeException('بازهٔ گزارش سفارش معتبر نیست.');
+    }
+    $span = (int) (new DateTimeImmutable($from, new DateTimeZone('UTC')))->diff(new DateTimeImmutable($to, new DateTimeZone('UTC')))->days;
+    if ($span > 366) {
+        throw new RuntimeException('بازهٔ گزارش سفارش حداکثر یک سال است.');
+    }
+    $stmt = db()->prepare("SELECT o.id, o.employee_id, o.food_date, o.meal_type, o.status, o.created_at,
+            u.full_name, u.first_name, u.last_name, u.employee_number, c.food_name, i.sort_order AS menu_no
+        FROM food_orders o
+        JOIN users u ON u.id = o.employee_id
+        JOIN food_calendar_items i ON i.id = o.calendar_item_id
+        JOIN food_catalog c ON c.id = i.food_id
+        WHERE o.food_date BETWEEN ? AND ? AND o.status IN ('active','cancelled')
+        ORDER BY o.food_date, o.meal_type, CASE WHEN o.status = 'active' THEN 0 ELSE 1 END,
+                 u.last_name, u.first_name, u.full_name, o.id");
+    $stmt->execute([$from, $to]);
+    $items = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $created = (string) ($row['created_at'] ?? '');
+        $items[] = [
+            'id' => (int) ($row['id'] ?? 0),
+            'employee_id' => (int) ($row['employee_id'] ?? 0),
+            'food_date' => (string) ($row['food_date'] ?? ''),
+            'meal_type' => food_order_meal_type($row['meal_type'] ?? 'lunch'),
+            'status' => (string) ($row['status'] ?? ''),
+            'full_name' => food_order_full_name($row),
+            'employee_number' => (string) ($row['employee_number'] ?? ''),
+            'food_name' => (string) ($row['food_name'] ?? ''),
+            'menu_no' => (int) ($row['menu_no'] ?? 0),
+            'reserve_date' => substr($created, 0, 10),
+            'reserve_time' => substr($created, 11, 8),
+        ];
+    }
+    return $items;
+}
+
 /** سفارش‌های فعال/لغوشدهٔ اعضای گروه در روز انتخابی (با جابه‌جایی روزانهٔ گروه لحاظ‌شده). */
 function food_order_group_orders(int $groupId, string $date, string $mealType = 'lunch'): array
 {
@@ -928,7 +971,7 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
     // رویداد فیش منبع ردیف‌هاست؛ منو فقط به‌عنوان مشخصه از برنامهٔ همان روز خوانده می‌شود.
     $menuMap = [];
     try {
-        $menuStmt = db()->prepare("SELECT cal.food_date, c.food_name, i.sort_order
+        $menuStmt = db()->prepare("SELECT cal.food_date, cal.meal_type, c.food_name, i.sort_order
             FROM food_calendar cal
             JOIN food_calendar_items i ON i.calendar_id = cal.id
             JOIN food_catalog c ON c.id = i.food_id
@@ -938,7 +981,8 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
         foreach ($menuStmt->fetchAll(PDO::FETCH_ASSOC) as $menuRow) {
             $food = trim((string) ($menuRow['food_name'] ?? ''));
             $date = (string) ($menuRow['food_date'] ?? '');
-            $key = $date . "\0" . $food;
+            $mealType = food_order_meal_type($menuRow['meal_type'] ?? 'lunch');
+            $key = $date . "\0" . $mealType . "\0" . $food;
             if ($food !== '' && !isset($menuMap[$key])) {
                 $menuMap[$key] = (int) ($menuRow['sort_order'] ?? 0);
             }
@@ -951,50 +995,83 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
             COALESCE(NULLIF(e.personnel_code, ''), u.employee_number, '') AS employee_number,
             COALESCE(NULLIF(e.national_code, ''), u.national_code, '') AS national_code,
             COALESCE(NULLIF(e.full_name, ''), u.full_name, 'مهمان') AS full_name,
-            COALESCE(NULLIF(e.food_type, ''), IF(e.event_type = 'guest', 'مهمان', '')) AS food_name,
-            e.event_type, e.print_status, e.delivery_status, e.delivered_at,
+            COALESCE(NULLIF(e.food_type, ''), IF(e.event_type IN ('guest','auto_guest'), 'مهمان', '')) AS food_name,
+            COALESCE(e.meal_type, 'lunch') AS meal_type, e.event_type, e.print_status, e.delivery_status, e.delivered_at,
             current_order.id AS current_order_id, current_order.status AS current_order_status, current_food.food_name AS current_order_food
         FROM food_ticket_events e
         LEFT JOIN users u ON u.id = e.user_id
-        LEFT JOIN food_orders current_order ON current_order.employee_id = e.user_id AND current_order.food_date = e.punch_date AND current_order.meal_type = 'lunch'
+        LEFT JOIN food_orders current_order ON current_order.employee_id = e.user_id AND current_order.food_date = e.punch_date AND current_order.meal_type = COALESCE(e.meal_type, 'lunch')
         LEFT JOIN food_calendar_items current_item ON current_item.id = current_order.calendar_item_id
         LEFT JOIN food_catalog current_food ON current_food.id = current_item.food_id
         WHERE e.punch_date BETWEEN ? AND ?
           AND (e.print_status = 'printed' OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'))
-          AND ((e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
+          AND ((e.event_type IN ('printed','print') AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
+               OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered')
                OR e.event_type = 'guest')
         ORDER BY e.punch_date, e.food_type, e.full_name, e.id");
     $stmt->execute([$from, $to]);
     $items = [];
     $employeeIds = [];
+    $mealEmployeeIds = ['lunch' => [], 'dinner' => []];
+    $mealGuestCounts = ['lunch' => 0, 'dinner' => 0];
+    $mealRowCounts = ['lunch' => 0, 'dinner' => 0];
     $guestCount = 0;
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $date = (string) ($row['food_date'] ?? '');
         $food = trim((string) ($row['food_name'] ?? ''));
         $eventType = (string) ($row['event_type'] ?? '');
+        $mealType = food_order_meal_type($row['meal_type'] ?? 'lunch');
+        $mealRowCounts[$mealType]++;
         $userId = (int) ($row['user_id'] ?? 0);
-        if ($eventType === 'guest') {
+        if (in_array($eventType, ['guest', 'auto_guest'], true)) {
             $guestCount++;
+            $mealGuestCounts[$mealType]++;
         } else {
             $employeeIds[$userId] = true;
+            if ($userId > 0) $mealEmployeeIds[$mealType][$userId] = true;
         }
         $items[] = [
             'id' => (int) ($row['id'] ?? 0),
             'user_id' => $userId,
             'food_date' => $date,
+            'meal_type' => $mealType,
             'punch_time' => (string) ($row['punch_time'] ?? ''),
             'employee_number' => (string) ($row['employee_number'] ?? ''),
             'national_code' => food_order_digits($row['national_code'] ?? ''),
             'full_name' => (string) ($row['full_name'] ?? ''),
             'food_name' => $food,
-            'current_order_food' => $eventType !== 'guest' && ($row['current_order_status'] ?? '') === 'active' ? (string) ($row['current_order_food'] ?? '') : '',
-            'current_order_state' => $eventType === 'guest' ? 'not_applicable' : ((int) ($row['current_order_id'] ?? 0) <= 0 ? 'missing' : (($row['current_order_status'] ?? '') !== 'active' ? 'cancelled' : (empty($row['current_order_food']) ? 'unavailable' : ($food === (string) $row['current_order_food'] ? 'same' : 'different')))),
+            'current_order_food' => !in_array($eventType, ['guest', 'auto_guest'], true) && ($row['current_order_status'] ?? '') === 'active' ? (string) ($row['current_order_food'] ?? '') : '',
+            'current_order_state' => in_array($eventType, ['guest', 'auto_guest'], true) ? 'not_applicable' : ((int) ($row['current_order_id'] ?? 0) <= 0 ? 'missing' : (($row['current_order_status'] ?? '') !== 'active' ? 'cancelled' : (empty($row['current_order_food']) ? 'unavailable' : ($food === (string) $row['current_order_food'] ? 'same' : 'different')))),
             'event_type' => $eventType,
-            'menu_no' => (int) ($menuMap[$date . "\0" . $food] ?? 0),
+            'menu_no' => (int) ($menuMap[$date . "\0" . $mealType . "\0" . $food] ?? 0),
             'delivered_at' => (string) ($row['delivered_at'] ?? ''),
         ];
     }
-    return ['items' => $items, 'employee_count' => count($employeeIds), 'guest_count' => $guestCount];
+    $autoReceiptCounts = ['lunch' => ['staff' => 0, 'guest' => 0], 'dinner' => ['staff' => 0, 'guest' => 0]];
+    try {
+        $autoStmt = db()->prepare("SELECT COALESCE(meal_type, 'lunch') AS meal_type, event_type, COUNT(*) AS total
+            FROM food_ticket_events
+            WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed' AND event_type IN ('auto_printed','auto_guest')
+            GROUP BY COALESCE(meal_type, 'lunch'), event_type");
+        $autoStmt->execute([$from, $to]);
+        foreach ($autoStmt->fetchAll(PDO::FETCH_ASSOC) as $autoRow) {
+            $meal = food_order_meal_type($autoRow['meal_type'] ?? 'lunch');
+            $kind = (string) ($autoRow['event_type'] ?? '') === 'auto_guest' ? 'guest' : 'staff';
+            $autoReceiptCounts[$meal][$kind] += (int) ($autoRow['total'] ?? 0);
+        }
+    } catch (Throwable $autoError) {
+        // گزارش فیزیکی همچنان قابل ارائه است؛ نبود شمار خودکار در خلاصه نباید جای فهرست چاپ را بگیرد.
+    }
+    return [
+        'items' => $items,
+        'employee_count' => count($employeeIds),
+        'guest_count' => $guestCount,
+        'meal_counts' => [
+            'lunch' => ['employee_count' => count($mealEmployeeIds['lunch']), 'guest_count' => $mealGuestCounts['lunch'], 'total' => $mealRowCounts['lunch']],
+            'dinner' => ['employee_count' => count($mealEmployeeIds['dinner']), 'guest_count' => $mealGuestCounts['dinner'], 'total' => $mealRowCounts['dinner']],
+        ],
+        'auto_receipt_counts' => $autoReceiptCounts,
+    ];
 }
 
 function food_order_export_printed_delivery_report(string $fromDate, string $toDate, array $user, array $requestedFields, string $view = 'list'): never
@@ -1005,15 +1082,16 @@ function food_order_export_printed_delivery_report(string $fromDate, string $toD
         'row' => 'ردیف', 'national_code' => 'کد ملی', 'employee_number' => 'کد پرسنلی',
         'full_name' => 'نام و نام خانوادگی', 'food_name' => 'غذای فیش / سفارش فعلی', 'food_date' => 'تاریخ غذا',
         'punch_time' => 'ساعت تردد', 'record_type' => 'نوع فیش', 'menu_no' => 'شماره منو',
-        'delivered_at' => 'زمان ثبت تحویل',
+        'delivered_at' => 'زمان ثبت تحویل', 'meal_type' => 'وعده',
     ];
     $fields = array_values(array_unique(array_filter($requestedFields, static fn ($field): bool => is_string($field) && isset($labels[$field]))));
     if (!$fields) {
-        $fields = ['row', 'employee_number', 'full_name', 'food_name', 'food_date', 'punch_time', 'record_type', 'menu_no'];
+        $fields = ['row', 'employee_number', 'full_name', 'food_name', 'food_date', 'meal_type', 'punch_time', 'record_type', 'menu_no'];
     }
     $items = $report['items'];
     if ($view === 'menu') {
-        usort($items, static fn (array $a, array $b): int => ((int) $a['menu_no'] <=> (int) $b['menu_no'])
+        usort($items, static fn (array $a, array $b): int => strcmp((string) ($a['meal_type'] ?? 'lunch'), (string) ($b['meal_type'] ?? 'lunch'))
+            ?: ((int) $a['menu_no'] <=> (int) $b['menu_no'])
             ?: strcmp((string) $a['food_name'], (string) $b['food_name'])
             ?: strcmp((string) $a['full_name'], (string) $b['full_name']));
     }
@@ -1030,8 +1108,9 @@ function food_order_export_printed_delivery_report(string $fromDate, string $toD
                 'food_name' => (string) ($item['food_name'] ?? '') . (($item['current_order_state'] ?? '') === 'different' ? ' | سفارش فعلی: ' . (string) $item['current_order_food'] . ' (متفاوت)' : (($item['current_order_state'] ?? '') === 'cancelled' ? ' | سفارش فعلی لغو شده' : (($item['current_order_state'] ?? '') === 'missing' ? ' | سفارش فعلی یافت نشد' : (($item['current_order_state'] ?? '') === 'unavailable' ? ' | مقایسه نامشخص' : '')))),
                 'food_date' => food_order_jalali_label((string) ($item['food_date'] ?? '')),
                 'punch_time' => substr((string) ($item['punch_time'] ?? ''), 0, 5),
-                'record_type' => ($item['event_type'] ?? '') === 'guest' ? 'مهمان' : 'پرسنل',
-                'menu_no' => (int) ($item['menu_no'] ?? 0) > 0 ? 'منوی ' . food_order_digits($item['menu_no']) : (($item['event_type'] ?? '') === 'guest' ? 'مهمان' : 'بدون منو'),
+                'record_type' => match ((string) ($item['event_type'] ?? '')) { 'guest' => 'مهمان', 'auto_guest' => 'چاپ خودکار مهمان', 'auto_printed' => 'چاپ خودکار', default => 'پرسنل' },
+                'meal_type' => (string) ($item['meal_type'] ?? 'lunch') === 'dinner' ? 'شام' : 'ناهار',
+                'menu_no' => (int) ($item['menu_no'] ?? 0) > 0 ? 'منوی ' . food_order_digits($item['menu_no']) : (in_array((string) ($item['event_type'] ?? ''), ['guest', 'auto_guest'], true) ? 'مهمان' : 'بدون منو'),
                 'delivered_at' => (string) ($item['delivered_at'] ?? ''),
                 default => '',
             };
@@ -2507,9 +2586,9 @@ function food_guest_schema_missing(): array
         );
         $have = array_map('strval', $colStmt->fetchAll(PDO::FETCH_COLUMN));
         $missing = [];
-        foreach (['request_date', 'organization', 'guest_count', 'food_id', 'requester_name', 'deputy_unit_id', 'status'] as $col) {
+        foreach (['request_date', 'meal_type', 'organization', 'guest_count', 'food_id', 'requester_name', 'deputy_unit_id', 'status'] as $col) {
             if (!in_array($col, $have, true)) {
-                $missing[] = 'ستون ' . $col . ' (upgrade-' . ($col === 'deputy_unit_id' ? '1.40' : '1.39') . ')';
+                $missing[] = 'ستون ' . $col . ' (upgrade-' . ($col === 'deputy_unit_id' ? '1.40' : ($col === 'meal_type' ? '1.62.73' : '1.39')) . ')';
             }
         }
         return $missing;
@@ -2529,7 +2608,7 @@ function food_guest_schema_ready(): bool
 function food_guest_schema_ensure(): void
 {
     if (!food_guest_schema_ready()) {
-        throw new RuntimeException('بخش سفارش مهمان هنوز فعال نشده است؛ ابتدا upgrade-1.39-food-guest-requests.sql و upgrade-1.40-food-guest-deputy.sql را روی دیتابیس اجرا کنید.');
+        throw new RuntimeException('بخش سفارش مهمان هنوز فعال نشده است؛ به‌روزرسانی‌های سفارش مهمان و مهاجرت 021-food-auto-receipts.sql را روی دیتابیس اجرا کنید.');
     }
 }
 
@@ -2624,7 +2703,7 @@ function food_guest_request_list(array $user, bool $includePast = false, bool $a
     $idSortOrder = $includePast ? 'DESC' : 'ASC';
     $rowLimit = $includePast ? '' : 'LIMIT 300';
     $stmt = db()->prepare(
-        "SELECT r.id, r.request_date, r.organization, r.guest_count, r.requester_name, r.note, r.status,
+        "SELECT r.id, r.request_date, r.meal_type, r.organization, r.guest_count, r.requester_name, r.note, r.status,
                 r.created_by, r.created_at, r.food_id, c.food_name, r.deputy_unit_id, ou.name AS deputy_name,
                 TRIM(CONCAT(COALESCE(u.first_name,''), ' ', COALESCE(u.last_name,''))) AS created_by_name
            FROM food_guest_requests r
@@ -2652,6 +2731,7 @@ function food_guest_request_list(array $user, bool $includePast = false, bool $a
             'can_cancel' => $canCancel,
             'can_delete' => $canDelete,
             'request_date' => (string) $r['request_date'],
+            'meal_type' => food_order_meal_type($r['meal_type'] ?? 'lunch'),
             'request_jalali' => food_order_jalali_label((string) $r['request_date']),
             'organization' => (string) $r['organization'],
             'guest_count' => (int) $r['guest_count'],
@@ -2699,6 +2779,7 @@ function food_guest_request_create(array $user, array $body): array
     if ($date === null) {
         throw new RuntimeException('تاریخ شمسی معتبر نیست.');
     }
+    $mealType = food_order_meal_type($body['meal_type'] ?? 'lunch');
     $dateError = food_guest_request_date_error($date);
     if ($dateError !== null) {
         throw new RuntimeException($dateError);
@@ -2729,13 +2810,13 @@ function food_guest_request_create(array $user, array $body): array
         throw new RuntimeException('یادداشت نباید بیش از ۵۰۰ نویسه باشد.');
     }
     $stmt = db()->prepare(
-        'INSERT INTO food_guest_requests (request_date, organization, guest_count, food_id, requester_name, deputy_unit_id, note, status, created_by)
-         VALUES (?, ?, ?, ?, ?, ?, ?, \'active\', ?)'
+        'INSERT INTO food_guest_requests (request_date, meal_type, organization, guest_count, food_id, requester_name, deputy_unit_id, note, status, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, \'active\', ?)'
     );
-    $stmt->execute([$date, $organization, $count, $foodId, $requester, $deputyId, $note === '' ? null : $note, (int) $user['id']]);
+    $stmt->execute([$date, $mealType, $organization, $count, $foodId, $requester, $deputyId, $note === '' ? null : $note, (int) $user['id']]);
     $id = (int) db()->lastInsertId();
     food_order_audit('food_guest_request_create', $user, 'food_guest_request', $id, null, [
-        'request_date' => $date, 'organization' => $organization, 'guest_count' => $count, 'food_id' => $foodId, 'requester_name' => $requester, 'deputy_unit_id' => $deputyId,
+        'request_date' => $date, 'meal_type' => $mealType, 'organization' => $organization, 'guest_count' => $count, 'food_id' => $foodId, 'requester_name' => $requester, 'deputy_unit_id' => $deputyId,
     ]);
     return ['id' => $id, 'request_date' => $date];
 }
@@ -2782,6 +2863,7 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
     if ($date === null) {
         throw new RuntimeException('تاریخ شمسی معتبر نیست.');
     }
+    $mealType = food_order_meal_type($body['meal_type'] ?? 'lunch');
     $dateError = food_guest_request_date_error($date);
     if ($dateError !== null) {
         throw new RuntimeException($dateError);
@@ -2824,8 +2906,8 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
             throw new RuntimeException('مهلت ویرایش این درخواست گذشته است.');
         }
         db()->prepare(
-            'UPDATE food_guest_requests SET request_date = ?, organization = ?, guest_count = ?, requester_name = ?, note = ? WHERE id = ?'
-        )->execute([$date, $organization, $count, $requester, $note === '' ? null : $note, $id]);
+            'UPDATE food_guest_requests SET request_date = ?, meal_type = ?, organization = ?, guest_count = ?, requester_name = ?, note = ? WHERE id = ?'
+        )->execute([$date, $mealType, $organization, $count, $requester, $note === '' ? null : $note, $id]);
         db()->commit();
     } catch (Throwable $e) {
         if (db()->inTransaction()) {
@@ -2833,7 +2915,7 @@ function food_guest_request_update(array $user, int $id, array $body, bool $owne
         }
         throw $e;
     }
-    $newValue = ['request_date' => $date, 'organization' => $organization, 'guest_count' => (int) $count, 'requester_name' => $requester, 'note' => $note];
+    $newValue = ['request_date' => $date, 'meal_type' => $mealType, 'organization' => $organization, 'guest_count' => (int) $count, 'requester_name' => $requester, 'note' => $note];
     food_order_audit('food_guest_request_update', $user, 'food_guest_request', $id, $row, $newValue);
     return ['ok' => true, 'message' => 'درخواست غذای مهمان ویرایش شد.'];
 }
@@ -3349,6 +3431,15 @@ function food_order_menu_api_handle(string $route, array $user): never
         food_order_emergency_handle($route, $method, $user);
     }
     try {
+        if (in_array($route, [
+            'food-menu/reconciliation', 'food-menu/reconciliation-save',
+            'food-menu/reconciliation-export', 'food-menu/invoice-upload', 'food-menu/invoice-file',
+        ], true)) {
+            if (!function_exists('food_reconciliation_api_handle')) {
+                throw new RuntimeException('ماژول تطبیق و فاکتور غذا بارگذاری نشده است.');
+            }
+            food_reconciliation_api_handle($route, $method, $user);
+        }
         if (in_array($route, ['food-menu/guest-requests', 'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete'], true)) {
             food_order_require_permission($user, $method === 'GET' ? 'food.menu' : 'food.menu_edit');
             if (!food_guest_request_is_reviewer($user)) {

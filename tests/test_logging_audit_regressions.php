@@ -1,0 +1,47 @@
+<?php
+declare(strict_types=1);
+$root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'itsm-logging-regression-' . bin2hex(random_bytes(5));
+mkdir($root, 0750, true);
+define('APP_ROOT', $root);
+require dirname(__DIR__) . '/lib/logging-core.php';
+$checks = [];
+$checks['Persian password key is redacted'] = logging_sanitize_value(['رمز' => 'very-secret'])['رمز'] === '[REDACTED]';
+$checks['Persian password phrase key is redacted'] = logging_sanitize_value(['رمز عبور' => 'very-secret'])['رمز عبور'] === '[REDACTED]';
+$checks['Persian secret in text is redacted'] = !str_contains(logging_sanitize_text('کاربر رمز=very-secret وارد شد'), 'very-secret');
+$checks['Nested Persian sensitive key is redacted'] = logging_sanitize_value(['nested' => ['کد ملی' => '1234567890']])['nested']['کد ملی'] === '[REDACTED]';
+$meta = logging_sanitize_event_meta(['error_type'=>'PDOException','technical'=>'SQL failure','unapproved_payload'=>'private','password'=>'secret'], 'SYS-PHP-001', 'request');
+$checks['Event-specific allowlist removes unknown metadata'] = !isset($meta['unapproved_payload']) && !isset($meta['password']) && isset($meta['error_type']);
+$activityMeta = logging_sanitize_event_meta(['attempts'=>5,'username_hash'=>str_repeat('a',64),'raw_username'=>'ali','password'=>'secret'], 'SEC-AUTH-001', 'login_failed');
+$checks['Authentication activity allowlist keeps safe counters and removes raw identity'] = isset($activityMeta['attempts']) && isset($activityMeta['username_hash']) && !isset($activityMeta['raw_username']) && !isset($activityMeta['password']);
+$operationA = logging_begin_operation('test:one');
+$checks['Operation ID is a valid UUID and operation reset clears parent'] = (bool) preg_match('/^[a-f0-9-]{36}$/i', $operationA) && logging_parent_event_id() === null;
+$dir = $root . '/storage/logs/spool';
+mkdir($dir, 0750, true);
+$now = time();
+$recent = date('c', $now - 60);
+$old = date('c', $now - 3600);
+file_put_contents($dir . '/system-a.jsonl', json_encode(['queued_at'=>$recent])."\n" . json_encode(['queued_at'=>$old])."\n");
+file_put_contents($dir . '/activity-b.jsonl.processing', json_encode(['queued_at'=>$recent])."\n");
+file_put_contents($dir . '/stale.rewrite.tmp', 'partial rewrite');
+$stats = logging_spool_stats();
+$checks['Spool age scans every record and processing files'] = $stats['files'] === 2 && $stats['processing_files'] === 1 && $stats['age_seconds'] >= 3500;
+$checks['Spool health exposes orphan rewrite temporary files'] = $stats['rewrite_temp_files'] === 1;
+$counterPath = $root . '/storage/logs/logging-health.json';
+file_put_contents($counterPath, '{broken');
+$counter = logging_health_counters();
+$checks['Corrupt counter is unknown, not zero'] = $counter['state'] === 'corrupt' && $counter['dropped_total'] === null;
+logging_increment_counter('dropped_total');
+$checks['Corrupt counter file is preserved instead of reset to zero'] = (string) file_get_contents($counterPath) === '{broken';
+logging_emergency_failure('regression_emergency_path', 'password=do-not-write-this');
+$emergencyText = (string) @file_get_contents($root . '/storage/logs/emergency.log');
+$checks['Emergency failure has an independent local file and excludes detail payload'] = str_contains($emergencyText, 'regression_emergency_path') && !str_contains($emergencyText, 'do-not-write-this');
+file_put_contents($root . '/storage/logs/emergency.log', str_repeat('x', 5 * 1024 * 1024 + 10));
+logging_emergency_failure('emergency_rotation_test');
+$checks['Emergency log rotates at its hard size limit'] = is_file($root . '/storage/logs/emergency.log.1') && str_contains((string) file_get_contents($root . '/storage/logs/emergency.log'), 'emergency_rotation_test');
+$failed=[];
+foreach ($checks as $name=>$ok) { echo ($ok?'[PASS] ':'[FAIL] ').$name.PHP_EOL; if (!$ok) $failed[]=$name; }
+$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
+foreach ($it as $f) $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+@rmdir($root);
+if ($failed) { fwrite(STDERR, count($failed)." regression(s) failed\n"); exit(1); }
+echo count($checks)." logging regression tests passed.\n";

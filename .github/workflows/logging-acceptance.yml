@@ -1,0 +1,129 @@
+name: Logging 1.62.76 Acceptance
+
+# توجه: اجرای خودکار روی push غیرفعال شد تا تا پیش از تأیید PHP Lint و آزمون MySQL روی
+# Staging، گردش‌کار پذیرش به‌صورت ناخواسته قرمز نشود. اجرای دستی از تب Actions در دسترس است.
+on:
+  workflow_dispatch:
+  _disabled_push:
+    paths:
+      - 'lib/logging-*.php'
+      - 'lib/activity-audit.php'
+      - 'index.php'
+      - 'governance.php'
+      - 'actions/holiday-actions.php'
+      - 'cron/*logging*.php'
+      - 'actions/role-actions.php'
+      - 'actions/org-actions.php'
+      - 'actions/ticket-actions.php'
+      - 'actions/supervisor-actions.php'
+      - 'actions/bulk-actions.php'
+      - 'actions/service-actions.php'
+      - 'actions/settings-actions.php'
+      - 'actions/asset-actions.php'
+      - 'actions/user-structure-actions.php'
+      - 'actions/backup-actions.php'
+      - 'actions/food-brand-actions.php'
+      - 'domain-scan.php'
+      - 'schema.sql'
+      - 'cron/run_logging_integrity_export.bat'
+      - 'cron/reconcile_update_audit.php'
+      - 'tests/run_logging_staging_checks.ps1'
+      - 'tools/test_ticket_txn_offline.php'
+      - 'local-accounts.php'
+      - 'migrations/024-*.sql'
+      - 'migrations/025-*.sql'
+      - 'migrations/026-*.sql'
+      - 'migrations/027-*.sql'
+      - 'migrations/028-*.sql'
+      - 'migrations/029-*.sql'
+      - 'migrations/030-*.sql'
+      - 'tests/test_logging_*'
+      - 'tests/test_windows_logging_static.py'
+      - 'tests/test_logging_acl_windows.ps1'
+      - 'tools/*logging*.ps1'
+      - '.github/workflows/logging-acceptance.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  linux-mariadb-integration:
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: test-root-password
+          MARIADB_DATABASE: itsm_logging_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, mbstring, zip
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: PHP syntax checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          find . -type f -name '*.php' \
+            -not -path './updates/*' -not -path './vendor/*' \
+            -not -path './release-archive/*' -not -path './backup/*' -print0 |
+            while IFS= read -r -d '' file; do php -l "$file" >/dev/null; done
+      - name: Offline PHP Logging tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in tests/test_logging_*.php; do
+            if [[ "$test" == 'tests/test_logging_mysql_integration.php' ]]; then continue; fi
+            php "$test"
+          done
+      - name: MySQL/MariaDB integration tests (dedicated disposable database)
+        env:
+          ITSM_TEST_ALLOW_DESTRUCTIVE: 'YES'
+          ITSM_TEST_DSN: 'mysql:host=127.0.0.1;port=3306;dbname=itsm_logging_test;charset=utf8mb4'
+          ITSM_TEST_DB_USER: root
+          ITSM_TEST_DB_PASS: test-root-password
+        run: php tests/test_logging_mysql_integration.php
+      - name: Python Logging/static contract tests
+        run: >-
+          python -m pytest -q
+          tests/test_logging_*.py
+          tests/test_windows_logging_static.py
+          tests/test_update_manifest_guard_static.py
+
+  windows-acl-and-runtime:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, mbstring, zip
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test runner
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: PHP syntax and offline Logging tests
+        shell: pwsh
+        run: |
+          $env:PHP_EXE = (Get-Command php.exe).Source
+          $env:PYTHON_EXE = (Get-Command python.exe).Source
+          & .\tests\run_logging_staging_checks.ps1
+      - name: Real Windows NTFS ACL verifier test
+        shell: powershell
+        run: .\tests\test_logging_acl_windows.ps1
