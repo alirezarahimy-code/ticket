@@ -52,7 +52,10 @@ def test_ticket_actions_file_sections_and_persian_descriptions():
     assert "ثبت درخواست جدید" in src and "بازگشایی درخواست" in src
     assert "defined('APP_ROOT')" in src and "http_response_code(404)" in src
     body = body_of("actions/ticket-actions.php")
-    assert body.count("{") == body.count("}") == 130
+    assert body.count("{") == body.count("}")
+    with zipfile.ZipFile(ROOT / PACKAGE_NAME.replace("ticket-update", "downloads/ticket-update")) as archive:
+        historical = archive.read("files/actions/ticket-actions.php").decode("utf-8").split(GUARD_END, 1)[1]
+    assert historical.count("{") == historical.count("}") == 130
     # بدون دام include
     assert "?>" not in body
     for trap in (r"\breturn\b", r"\bfunction\s", r"\bgoto\b", r"\bbreak;", r"\bcontinue;", r"__FILE__", r"__DIR__"):

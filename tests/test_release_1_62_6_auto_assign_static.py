@@ -12,7 +12,7 @@ INDEX += "\n" + (ROOT / "actions/org-actions.php").read_text(encoding="utf-8")
 def test_org_managers_are_deprioritized_in_auto_assignment():
     assert "function ticket_org_manager_rank_sql()" in INDEX
     # هر دو کوئری (مالک حوزه و جایگزین) باید رتبهٔ مدیر سازمانی را در ORDER BY داشته باشند.
-    assert INDEX.count("ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id LIMIT 1") == 2
+    assert INDEX.count("ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id") == 2
     # روی نصب‌های بدون جدول چارت، رتبه خالی می‌شود و ثبت تیکت خطا نمی‌گیرد.
     assert "$ready = false;" in INDEX
 

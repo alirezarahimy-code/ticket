@@ -1,0 +1,34 @@
+'use strict';
+const {JSDOM}=require('jsdom'), assert=require('assert'), fs=require('fs');
+const html=fs.readFileSync('/tmp/traffic69-report.html','utf8');
+const script=fs.readFileSync('assets/traffic-control.js','utf8');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+(async()=>{
+ const dom=new JSDOM(html,{runScripts:'outside-only',url:'https://example.test/index.php?page=traffic-control&tab=report'});const w=dom.window, requests=[];
+ w.fetch=url=>new Promise(resolve=>requests.push({url:new URL(url,w.location.href),resolve}));
+ w.eval(script);await wait(30);
+ assert.equal(requests.length,1);
+ requests[0].resolve({ok:true,json:async()=>({items:[{serial:'A1',name:'<img src=x>',meeting:'الف',approver:'اول'}],count:1,more:false})});await wait(20);
+ const form=w.document.querySelector('#traffic-report-form'),fields=[...form.querySelectorAll('input[name="fields[]"]')];
+ assert(fields.length>10);assert.equal(w.document.querySelectorAll('#traffic-report-rows tr td').length,fields.length);
+ assert.equal(w.document.querySelector('#traffic-report-rows img'),null);
+ for (const el of fields.filter(el=>!['name','meeting'].includes(el.value))) { el.checked=false;el.dispatchEvent(new w.Event('change',{bubbles:true})); }
+ assert.equal(requests.length,1, 'changing fields must not refetch or change selected records');
+ assert.deepEqual([...w.document.querySelectorAll('#traffic-report-rows tr td')].map(td=>td.textContent),['<img src=x>','الف']);
+ const visible=[...w.document.querySelectorAll('.traffic-report-table thead th')].filter(th=>!th.hidden).map(th=>th.dataset.reportKey);
+ assert.deepEqual(visible,['name','meeting']);
+ assert.deepEqual(new w.FormData(form).getAll('fields[]'),['name','meeting']);
+ assert.deepEqual(JSON.parse(w.localStorage.getItem('traffic-report-fields-v1:1')),['name','meeting']);
+ const meeting=fields.find(el=>el.value==='meeting'), name=fields.find(el=>el.value==='name');
+ meeting.checked=false;meeting.dispatchEvent(new w.Event('change',{bubbles:true}));name.checked=false;name.dispatchEvent(new w.Event('change',{bubbles:true}));
+ assert(name.checked,'last field cannot be deselected');assert.match(w.document.querySelector('#traffic-report-fields-message').textContent,/حداقل/);
+ const all=form.querySelector('#traffic-report-all'),dest=form.querySelector('input[name="destinations[]"]');
+ assert.equal(dest.value,'1'); dest.checked=false;dest.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(20);
+ assert(!all.checked);assert.equal(requests.length,2);requests[1].resolve({ok:false,json:async()=>({error:'مقصد انتخاب کنید'})});await wait(20);
+ dest.checked=true;dest.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(20);
+ assert(!all.checked, 'manual selection does not implicitly mean all records');assert.equal(requests[2].url.searchParams.get('destinations[]'),'1');assert.equal(requests[2].url.searchParams.get('all_destinations'),null);
+ requests[2].resolve({ok:true,json:async()=>({items:[],count:0,more:false})});await wait(20);
+ all.checked=true;all.dispatchEvent(new w.Event('change',{bubbles:true}));await wait(20);assert.equal(requests[3].url.searchParams.get('all_destinations'),'1');
+ assert.equal(w.document.querySelector('.traffic-destination-dropdown summary').textContent,'همه مقصدها و رکوردهای بدون مقصد');
+ console.log('PASS real report form: linked destination ids, all semantics, dynamic fields, local persistence, export form and escaping');dom.window.close();
+})().catch(e=>{console.error(e);process.exitCode=1});

@@ -92,9 +92,9 @@ def test_version_manifest_and_package():
     for mig in manifest["migrations"]:
         assert f"migrations/{mig}" in names and f"files/migrations/{mig}" in names, mig
     assert zf.read("files/VERSION").decode("utf-8").strip() == "1.62.17"
-    # index.php در ۱.۶۲.۱۸ (برش ۷) تغییر کرد؛ برابری بایت‌به‌بایت با مخزن برای فایل‌های همین برش:
+    # بستهٔ تاریخی با SHA تأیید می‌شود؛ فایل سرپرست از آن زمان تغییر کرده است.
     for rel in ("actions/supervisor-actions.php", "actions/holiday-actions.php"):
-        assert zf.read(f"files/{rel}") == (ROOT / rel).read_bytes(), rel
+        assert f"files/{rel}" in names
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
     # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۸ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۸ است.

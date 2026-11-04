@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('assert'),fs=require('fs'),{JSDOM}=require('jsdom');
+const html=fs.readFileSync(process.argv[2]||'/tmp/traffic-new.html','utf8');
+const dom=new JSDOM(html,{runScripts:'outside-only',url:'https://example.test/index.php?page=traffic-control&tab=new'});
+const w=dom.window;w.fetch=()=>Promise.reject(new Error('unused'));
+w.eval(fs.readFileSync('assets/traffic-control.js','utf8'));
+const form=w.document.querySelector('#traffic-new-form');const notice=form.querySelector('#traffic-notice-only');
+notice.checked=true;notice.dispatchEvent(new w.Event('change',{bubbles:true}));
+const destination=form.querySelector('[name=meeting_with]'),approver=form.querySelector('[name=approved_by]');
+assert.equal(destination.disabled,false);assert.equal(approver.disabled,false);assert.equal(form.querySelector('[name=national_code]').disabled,true);
+destination.value='الف';destination.dispatchEvent(new w.Event('change',{bubbles:true}));
+assert.deepEqual(Array.from(approver.options).map(o=>o.value),['اول','دوم']);approver.value='دوم';
+const posted=new w.FormData(form);assert.equal(posted.get('meeting_with'),'الف');assert.equal(posted.get('approved_by'),'دوم');assert.equal(posted.has('national_code'),false);assert.equal(posted.get('notice_only'),'1');
+notice.checked=false;notice.dispatchEvent(new w.Event('change',{bubbles:true}));assert.equal(form.querySelector('[name=national_code]').disabled,false);
+console.log('PASS actual rendered form, special toggle, destination approvers and POST data');dom.window.close();

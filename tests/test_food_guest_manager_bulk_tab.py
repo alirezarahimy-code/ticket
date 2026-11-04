@@ -22,16 +22,17 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
         ]:
             self.assertIn("'" + route + "'", self.ticket)
         self.assertIn("food_guest_request_is_reviewer($user)", self.order)
-        self.assertIn("food_guest_request_list($user, true)", self.order)
+        self.assertIn("food_guest_request_list($user, true, true)", self.order)
         self.assertIn("food-menu/guest-request-update", self.ticket)
         self.assertIn("$fpCanManageGuestRequests = function_exists('food_guest_request_is_reviewer')", self.ticket)
         self.assertIn("FOOD_TICKET_CAN_GUEST_REQUEST_MANAGE", self.ticket)
 
     def test_support_view_includes_historical_requests_but_member_view_stays_scoped(self):
-        self.assertIn("function food_guest_request_list(array $user, bool $includePast = false)", self.order)
-        self.assertIn("$dateFilter = $includePast ? '' : 'WHERE r.request_date >= ?';", self.order)
+        self.assertIn("function food_guest_request_list(array $user, bool $includePast = false, bool $allRequests = false)", self.order)
+        self.assertIn("$filters[] = 'r.created_by = ?';", self.order)
+        self.assertIn("$filters[] = 'r.request_date >= ?';", self.order)
         self.assertIn("$rowLimit = $includePast ? '' : 'LIMIT 300';", self.order)
-        self.assertIn("$stmt->execute($includePast ? [] : [$today]);", self.order)
+        self.assertIn("$stmt->execute($params);", self.order)
         self.assertIn("$canEdit = $canManage && $active && food_guest_request_change_window_open($date, $now);", self.order)
 
     def test_guest_manager_tab_and_actions_are_inside_group_operations(self):
@@ -49,7 +50,7 @@ class FoodGuestManagerBulkTabTests(unittest.TestCase):
 
     def test_served_asset_copy_and_cache_buster_match(self):
         self.assertEqual(self.ui, self.web_ui)
-        self.assertIn('assets/food-menu.js?v=38', self.web_index)
+        self.assertIn('assets/food-menu.js?v=1.62.72', self.web_index)
 
 
 if __name__ == "__main__":

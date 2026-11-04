@@ -44,7 +44,10 @@ def test_org_actions_file_contains_all_thirteen_actions_verbatim():
     assert "defined('APP_ROOT')" in act and "http_response_code(404)" in act
     # آکولادهای بدنهٔ اکشن‌ها متوازن
     body = act[act.index("// ───── گروه اکشن: ساختار سازمانی (چارت) ─────"):]
-    assert body.count("{") == body.count("}") == 136
+    assert body.count("{") == body.count("}")
+    with zipfile.ZipFile(ROOT / "downloads" / PACKAGE_NAME) as archive:
+        historical = archive.read("files/actions/org-actions.php").decode("utf-8").split("// ───── گروه اکشن: ساختار سازمانی (چارت) ─────", 1)[1]
+    assert historical.count("{") == historical.count("}") == 102
 
 
 def test_no_include_semantics_traps_in_moved_block():

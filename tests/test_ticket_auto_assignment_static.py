@@ -11,14 +11,14 @@ class TicketAutoAssignmentStaticTests(unittest.TestCase):
         start = source.index("function choose_handling_agent(")
         end = source.index("\nfunction ", start + 10)
         chooser = source[start:end]
-        self.assertIn("function choose_handling_agent(string $serviceGroup, ?int $departmentId = null)", chooser)
+        self.assertIn("function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, int $requesterId = 0)", chooser)
         self.assertIn('u.role <> "manager" OR (? > 0 AND u.department_id = ?)', chooser)
         self.assertIn("$fallback->execute([$serviceGroup, $departmentId, $departmentId]);", chooser)
 
     def test_ticket_creation_passes_its_resolved_department_to_auto_assignment(self) -> None:
         # اکشن‌های چرخهٔ درخواست‌ها از ۱.۶۲.۱۳ در فایل جدا هستند (برش ۲ فاز ۲).
         source = (ROOT / "index.php").read_text(encoding="utf-8") + "\n" + (ROOT / "actions/ticket-actions.php").read_text(encoding="utf-8")
-        self.assertIn("$agentId = choose_handling_agent($serviceGroup, $departmentId);", source)
+        self.assertIn("$agentId = choose_handling_agent($serviceGroup, $departmentId, (int) $user['id']);", source)
 
 
 if __name__ == "__main__":

@@ -79,7 +79,7 @@ def test_forms_render_approver_select_with_data_approvers():
     assert 'select name="approved_by" id="traffic-approved-by"' in source
     assert 'select name="approved_by" id="traffic-edit-approved-by"' in source
     assert "data-approvers=" in source
-    assert 'assets/traffic-control.js?v=12' in source
+    assert 'assets/traffic-control.js?v=15' in source
     script = read("assets/traffic-control.js")
     assert "function parseApprovers(option)" in script
     assert "traffic-edit-approved-by" in script
@@ -94,7 +94,7 @@ def test_bulk_preview_button_moved_next_to_clear_selection():
         footer = script.split('fm-bulk-footer', 1)[1].split("'", 1)[0] + script.split('fm-bulk-footer', 1)[1]
         assert "پیش‌نمایش و بررسی" not in script.split('fm-bulk-footer', 1)[1].split('</div>', 1)[0], path
         assert "var previewDisabled" in script, path
-    assert 'food-menu.js?v=38' in read("food-ticket-web/index.html")
+    assert 'food-menu.js?v=1.62.72' in read("food-ticket-web/index.html")
 
 
 def test_help_guide_documents_both_features():

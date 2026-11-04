@@ -39,7 +39,7 @@ def test_approver_autofills_for_new_and_edit_forms_and_history_is_two_column():
     assert "traffic-edit-meeting-with" in script
     assert ".traffic-change-list { grid-template-columns: repeat(2, minmax(0, 1fr));" in style
     assert "@media (max-width: 760px)" in style
-    assert 'assets/traffic-control.js?v=12' in source
+    assert 'assets/traffic-control.js?v=15' in source
 
 
 def test_release_manifest_and_download_page_list_new_destination_migration():

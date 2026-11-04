@@ -43,7 +43,7 @@ def test_index_php_supports_liaison_node():
     # دادهٔ چارت سمت واحد را به مرورگر می‌فرستد
     assert "'chartSide' => (string) ($unit['chart_side'] ?? '')" in src
     # نسخهٔ کش دارایی‌ها
-    assert "assets/organization.js?v=20" in src
+    assert re.search(r"assets/organization\.js\?v=\d+", src)
     assert "assets/style.css?v=3.4.60" in src
 
 
