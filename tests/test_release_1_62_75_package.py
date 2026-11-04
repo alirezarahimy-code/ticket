@@ -33,6 +33,8 @@ SUPERSEDED_BY_LATER_RELEASE = {
     # آن‌ها را داشته باشد (install.php پوشهٔ migrations/ را اجرا نمی‌کند).
     "schema.sql",
     "install-empty-db.sql",
+    # ۱.۶۲.۸۰ بخش «کدام بستهٔ به‌روزرسانی را نصب کنم؟» را به راهنما افزود.
+    "help-guide.php",
 }
 EXPECTED_REPLACEMENTS = {
     "VERSION",
