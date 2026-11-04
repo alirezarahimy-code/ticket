@@ -40,6 +40,14 @@ WINDOW_COLUMNS = [
 # ───────────────────────── مهاجرت ۰۳۱ ─────────────────────────
 
 
+def _css_rule(css: str, selector: str) -> str:
+    """متن یک قاعدهٔ CSS را برمی‌گرداند تا تست به ترتیب خصیصه‌ها حساس نباشد."""
+    marker = selector + "{"
+    assert marker in css, selector
+    start = css.index(marker) + len(marker)
+    return css[start : css.index("}", start)]
+
+
 def test_migration_031_is_the_only_new_file() -> None:
     names = sorted(p.name for p in (ROOT / "migrations").glob("*.sql"))
     assert "031-food-worker-window.sql" in names
@@ -345,6 +353,78 @@ def test_panel_exposes_window_fields() -> None:
         "persistentSourceConnection",
     ):
         assert f'name="{name}"' in PANEL, name
+
+
+def test_week_days_render_on_one_row_not_stacked() -> None:
+    """ریشهٔ باگ: کانتینر روزها کلاس .field داشت و .field{flex-direction:column}
+    هیچ‌جا بازنویسی نمی‌شد، پس هر هفت روز زیر هم می‌افتادند."""
+    assert '<div class="window-days">' in PANEL
+    assert 'class="field full window-days"' not in PANEL, "کانتینر نباید .field باشد"
+    rule = _css_rule(PANEL, ".window-days")
+    assert "flex-direction:row" in rule, "جهت باید صریحاً row باشد"
+    assert "display:flex" in rule
+    assert "grid-column:1/-1" in rule, "باید کل عرض فرم را بگیرد"
+
+
+def test_every_week_day_is_still_rendered() -> None:
+    assert PANEL.count("[6,'شنبه']") == 1
+    labels = ("شنبه", "یک‌شنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه")
+    row = PANEL[PANEL.index("const WINDOW_DAY_LABELS=") :][:220]
+    for label in labels:
+        assert f"'{label}'" in row, label
+    assert '<span class="window-days-label">روزهای کاری</span>' in PANEL
+
+
+def test_six_window_fields_sit_in_two_rows_of_three() -> None:
+    assert '<div class="window-grid">' in PANEL
+    block = PANEL[PANEL.index('<div class="window-grid">') :]
+    block = block[: block.index("</div>")]
+    assert block.count('<label class="field">') == 6, "دقیقاً شش فیلد"
+    rule = _css_rule(PANEL, ".window-grid")
+    assert "grid-template-columns:repeat(3,minmax(0,1fr))" in rule, "سه ستون"
+    assert "grid-column:1/-1" in rule
+
+
+def test_time_inputs_are_forced_to_24_hour() -> None:
+    """input[type=time] قالبش را از locale می‌گیرد؛ lang=en-GB یعنی ۲۴ساعته."""
+    for name in ("windowStart", "windowEnd"):
+        field = PANEL[PANEL.index(f'name="{name}"') :][:140]
+        assert 'type="time"' in field, name
+        assert 'lang="en-GB"' in field, name
+        assert 'dir="ltr"' in field, name
+        assert 'step="60"' in field, name
+
+
+def test_time_picker_icon_stays_attached_to_its_field() -> None:
+    assert "::-webkit-calendar-picker-indicator" in PANEL
+    assert ".window-grid input[type=time]" in PANEL
+
+
+def test_database_time_value_is_trimmed_for_the_time_input() -> None:
+    """ستون TIME مقدار 11:00:00 می‌دهد ولی input با step=60 فقط HH:MM می‌پذیرد."""
+    assert "function hhmm(value){" in PANEL
+    assert "esc(hhmm(w.start))" in PANEL
+    assert "esc(hhmm(w.end))" in PANEL
+    assert "normalizeDigits(value)" in PANEL[PANEL.index("function hhmm(value){") :][:260]
+
+
+def test_panel_version_was_bumped_with_the_panel_markup() -> None:
+    """اگر این دو عدد یکی نباشند، بنر «پنل قدیمی» به‌اشتباه روشن می‌شود."""
+    web = re.search(r"const PANEL_VERSION='([\d.]+)'", PANEL)
+    php = re.search(r"const FOOD_TICKET_PANEL_VERSION = '([\d.]+)'", TICKET)
+    assert web and php
+    assert web.group(1) == php.group(1), (web.group(1), php.group(1))
+
+
+def test_help_guide_explains_which_package_to_install() -> None:
+    guide = (ROOT / "help-guide.php").read_text(encoding="utf-8")
+    assert 'id="update-packages"' in guide
+    assert '<a href="#update-packages">' in guide, "باید در فهرست مطالب باشد"
+    assert "VERSION" in guide
+    for version in ("1.62.77", "1.62.75", "1.62.74"):
+        assert version in guide, version
+    assert "install.php" in guide and "migrations/" in guide, "هشدار سورس کامل"
+    assert "restart-food-worker-SERVICE.bat" in guide
 
 
 def test_panel_sends_window_payload_on_save() -> None:
