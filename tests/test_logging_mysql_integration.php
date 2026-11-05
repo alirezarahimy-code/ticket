@@ -48,7 +48,7 @@ require dirname(__DIR__) . '/lib/logging-replay.php';
 require dirname(__DIR__) . '/lib/activity-audit.php';
 
 $migration = file_get_contents(dirname(__DIR__) . '/migrations/025-logging-issues-alerts.sql');
-if (!is_string($migration)) throw new RuntimeException('Migration 020 could not be read.');
+if (!is_string($migration)) throw new RuntimeException('Migration 025 could not be read.');
 foreach (preg_split('/;\s*(?:\r?\n|$)/', $migration) ?: [] as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
     if ($statement !== '') execute_migration_statement($pdo, $statement);
@@ -58,14 +58,14 @@ foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.
     if (!is_string($migration)) throw new RuntimeException($migrationName . ' could not be read.');
     foreach (preg_split('/;\s*(?:\r?\n|$)/', $migration) ?: [] as $statement) {
         $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
-        if ($statement !== '') $pdo->exec($statement);
+        if ($statement !== '') execute_migration_statement($pdo, $statement);
     }
 }
 // Migration 025 must remain safe when the updater retries a migration after an interrupted release.
 $migration025 = file_get_contents(dirname(__DIR__) . '/migrations/030-logging-notification-idempotency-and-ticket-history.sql');
 foreach (preg_split('/;\s*(?:\r?\n|$)/', (string) $migration025) ?: [] as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
-    if ($statement !== '') $pdo->exec($statement);
+    if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
 
 $checks = [];
