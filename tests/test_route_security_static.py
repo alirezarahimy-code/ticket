@@ -60,3 +60,12 @@ def test_action_handlers_refuse_direct_http_access():
         if "defined('APP_ROOT')" not in head and 'defined("APP_ROOT")' not in head:
             unguarded.append(path.relative_to(ROOT).as_posix())
     assert not unguarded, "Action handlers missing front-controller guard: " + ", ".join(unguarded)
+
+
+def test_self_service_password_change_is_audited_atomically():
+    source = read("local-accounts.php")
+    handler = section(source, "function lac_change_password_request", "\nfunction ")
+    assert "beginTransaction()" in handler
+    assert "save_audit_required(" in handler
+    assert "$pdo->commit()" in handler
+    assert "$pdo->rollBack()" in handler
