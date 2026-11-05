@@ -92,7 +92,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                     // نقش مدیر به‌صورت همگام و قابل‌بازگشت در org_sync_position_roles تنظیم می‌شود.
                 }
                 org_record_undo('تغییر ' . $orgRootLabel, $orgUndoSnapshot, $orgCompanyId);
-                save_audit((int) $orgAdmin['id'], 'org_ceo_saved', null, ['user_id' => $ceoUserId]);
+                save_audit_required((int) $orgAdmin['id'], 'org_ceo_saved', null, ['user_id' => $ceoUserId]);
                 flash('success', $orgRootLabel . ' ذخیره شد.');
                 redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $ceoId));
             }
@@ -119,7 +119,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = ? WHERE id = ?')
                     ->execute([$unitId > 0 ? $unitId : null, $managerId > 0 ? $managerId : null, $targetUserId]);
                 org_record_undo('تغییر عضویت سازمانی کاربر', $orgUndoSnapshot, $orgCompanyId);
-                save_audit((int) $orgAdmin['id'], 'user_org_updated', null, ['user_id' => $targetUserId, 'unit_id' => $unitId, 'manager_user_id' => $managerId]);
+                save_audit_required((int) $orgAdmin['id'], 'user_org_updated', null, ['user_id' => $targetUserId, 'unit_id' => $unitId, 'manager_user_id' => $managerId]);
                 flash('success', $unitId > 0 ? 'کارشناس به اداره وصل شد.' : 'کارشناس از اداره جدا شد.');
                 redirect(org_company_redirect_url($orgCompanyId, 'user-' . $targetUserId));
             }
@@ -198,7 +198,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
             }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'chart_side' => $chartSide, 'manager' => $managerId]);
+            save_audit_required((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'type' => $nodeType, 'chart_side' => $chartSide, 'manager' => $managerId]);
             flash('success', match ($nodeType) { 'deputy' => 'معاونت ذخیره شد.', 'management' => 'مدیریت مستقل ذخیره شد.', 'office' => 'دفتر مدیرعامل ذخیره شد.', 'liaison' => 'واحد مستقل ذخیره شد.', default => 'اداره ذخیره شد.' });
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $unitId));
         }
@@ -216,7 +216,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             org_restore_snapshot($undo['before'], $undo['after'], $orgCompanyId);
             $_SESSION['org_undo']['can_undo'] = false;
             $_SESSION['org_undo']['can_redo'] = true;
-            save_audit((int) $orgAdmin['id'], 'org_action_undone', null, ['label' => (string) ($undo['label'] ?? '')]);
+            save_audit_required((int) $orgAdmin['id'], 'org_action_undone', null, ['label' => (string) ($undo['label'] ?? '')]);
             flash('success', 'آخرین تغییر ساختاری بازگردانده شد؛ در همین نشست امکان انجام دوباره وجود دارد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -234,7 +234,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             org_restore_snapshot($redo['after'], $redo['before'], $orgCompanyId);
             $_SESSION['org_undo']['can_undo'] = true;
             $_SESSION['org_undo']['can_redo'] = false;
-            save_audit((int) $orgAdmin['id'], 'org_action_redone', null, ['label' => (string) ($redo['label'] ?? '')]);
+            save_audit_required((int) $orgAdmin['id'], 'org_action_redone', null, ['label' => (string) ($redo['label'] ?? '')]);
             flash('success', 'آخرین تغییر ساختاری دوباره انجام شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -265,7 +265,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 throw $error;
             }
             org_record_undo('مرتب‌سازی کارت‌های هم‌رده', $snapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_root_units_sorted', null, ['unit_ids' => $ids]);
+            save_audit_required((int) $orgAdmin['id'], 'org_root_units_sorted', null, ['unit_ids' => $ids]);
             flash('success', 'ترتیب کارت‌ها ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -302,7 +302,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 throw $sortError;
             }
             org_record_undo('مرتب‌سازی معاونت‌ها', $snapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_deputies_sorted', null, ['unit_ids' => $ids]);
+            save_audit_required((int) $orgAdmin['id'], 'org_deputies_sorted', null, ['unit_ids' => $ids]);
             flash('success', 'ترتیب معاونت‌ها ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -347,7 +347,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             db_commit('index.php');
             org_record_undo('انتصاب مدیر سازمان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_manager_assigned', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $userId]);
+            save_audit_required((int) $orgAdmin['id'], 'org_manager_assigned', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $userId]);
             flash('success', '«' . (string) $managerUser['full_name'] . '» برای «' . (string) $target['name'] . '» منصوب شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . (int) $target['id']));
         }
@@ -374,7 +374,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             db_commit('index.php');
             org_record_undo('عزل مدیر سازمان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_manager_removed', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $managerId]);
+            save_audit_required((int) $orgAdmin['id'], 'org_manager_removed', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $managerId]);
             flash('success', 'مدیر «' . (string) $target['name'] . '» عزل شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . (int) $target['id']));
         }
@@ -401,7 +401,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             $query = db()->prepare('UPDATE users SET org_unit_id = NULL, manager_user_id = NULL WHERE org_unit_id = ? AND id IN (' . $placeholders . ') AND COALESCE(auth_source, "") <> "food"');
             $query->execute($params);
             org_record_undo('عزل کارشناسان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_experts_removed', null, ['unit_id' => $unitId, 'user_ids' => $userIds]);
+            save_audit_required((int) $orgAdmin['id'], 'org_experts_removed', null, ['unit_id' => $unitId, 'user_ids' => $userIds]);
             flash('success', 'کارشناسان انتخاب‌شده از واحد عزل شدند.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $unitId));
         }
@@ -438,7 +438,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             db_commit('index.php');
             org_record_undo('افزودن کارشناسان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_users_assigned', null, ['unit_id' => $unitId, 'user_ids' => $validIds]);
+            save_audit_required((int) $orgAdmin['id'], 'org_users_assigned', null, ['unit_id' => $unitId, 'user_ids' => $validIds]);
             flash('success', count($validIds) . ' کارشناس به «' . (string) $unit['name'] . '» اضافه شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $unitId));
         }
@@ -557,7 +557,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 throw $restoreError;
             }
             org_record_undo('بازیابی پشتیبان ساختار سازمانی', $snapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_backup_restored', null, ['units' => count($backupUnits), 'users' => count($backupUsers)]);
+            save_audit_required((int) $orgAdmin['id'], 'org_backup_restored', null, ['units' => count($backupUnits), 'users' => count($backupUsers)]);
             flash('success', 'پشتیبان همین شرکت و انتساب‌ها بازیابی شد؛ عضویت شرکت و نقش‌های دستی تغییر نکرد. نقش‌های خودکار مدیر طبق جایگاه‌های فعال همگام می‌شوند.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -581,7 +581,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             db()->prepare('UPDATE org_units SET is_active = 0, manager_user_id = NULL WHERE company_id = ? AND id <> ?')->execute([$orgCompanyId, $ceoId]);
             db_commit('index.php');
             org_record_undo('ریست ساختار سازمانی', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_structure_reset');
+            save_audit_required((int) $orgAdmin['id'], 'org_structure_reset');
             flash('success', 'ساختار سازمانی پاک شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -609,7 +609,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 // نقش مدیر به‌صورت همگام و قابل‌بازگشت در org_sync_position_roles تنظیم می‌شود.
             }
             org_record_undo('تغییر ' . $orgRootLabel, $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_ceo_saved', null, ['user_id' => $ceoUserId]);
+            save_audit_required((int) $orgAdmin['id'], 'org_ceo_saved', null, ['user_id' => $ceoUserId]);
             flash('success', $ceoUserId > 0 ? $orgRootLabel . ' تعیین شد.' : $orgRootLabel . ' حذف شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $ceoId));
         }
@@ -688,7 +688,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 db()->prepare('UPDATE users SET org_unit_id = ? WHERE id = ?')->execute([$unitId, $managerId]);
             }
             org_record_undo($unitId > 0 ? 'ویرایش واحد سازمانی' : 'افزودن واحد سازمانی', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'managers' => $managerIds]);
+            save_audit_required((int) $orgAdmin['id'], 'org_unit_saved', null, ['unit_id' => $unitId, 'name' => $name, 'managers' => $managerIds]);
             flash('success', 'واحد سازمانی ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $unitId));
         }
@@ -724,7 +724,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             db()->prepare('UPDATE org_units SET is_active = 0, manager_user_id = NULL WHERE id IN (' . $placeholders . ')')->execute($unitIds);
             db_commit('index.php');
             org_record_undo('حذف واحد سازمانی', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'org_unit_deleted', null, ['unit_id' => $unitId, 'subtree_ids' => $unitIds]);
+            save_audit_required((int) $orgAdmin['id'], 'org_unit_deleted', null, ['unit_id' => $unitId, 'subtree_ids' => $unitIds]);
             flash('success', 'واحد و زیرمجموعه‌های آن غیرفعال شدند.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -757,7 +757,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = ? WHERE id = ?')
                 ->execute([$unitId > 0 ? $unitId : null, $managerId > 0 ? $managerId : null, $targetUserId]);
             org_record_undo('تغییر عضویت سازمانی کاربر', $orgUndoSnapshot, $orgCompanyId);
-            save_audit((int) $orgAdmin['id'], 'user_org_updated', null, ['user_id' => $targetUserId, 'unit_id' => $unitId, 'manager_user_id' => $managerId]);
+            save_audit_required((int) $orgAdmin['id'], 'user_org_updated', null, ['user_id' => $targetUserId, 'unit_id' => $unitId, 'manager_user_id' => $managerId]);
             flash('success', 'عضویت سازمانی کاربر ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'user-' . $targetUserId));
         }
@@ -798,7 +798,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
                 throw $repairError;
             }
-            save_audit((int) $repairAdmin['id'], 'org_manager_primary_admin_repaired', null, ['user_ids' => $eligible]);
+            save_audit_required((int) $repairAdmin['id'], 'org_manager_primary_admin_repaired', null, ['user_ids' => $eligible]);
             flash('success', count($eligible) . ' کاربر مدیر سازمانی به نقش «مدیر» برگردانده شدند؛ انتساب معاونت/اداره و عضویت آن‌ها حفظ شد.');
             redirect('index.php?page=settings#org-admin-repair');
         }
@@ -834,7 +834,7 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
                 throw $repairError;
             }
-            save_audit((int) $repairAdmin['id'], 'org_manager_support_role_repaired', null, ['user_ids' => $eligible]);
+            save_audit_required((int) $repairAdmin['id'], 'org_manager_support_role_repaired', null, ['user_ids' => $eligible]);
             $remaining = $supportManagerCount - count($eligible);
             flash('success', count($eligible) . ' مدیر سازمانی از نقش «مدیر پشتیبانی» به «مدیر» برگردانده شدند؛ چارت سازمانی حفظ شد.'
                 . ($remaining < 1 ? ' توجه: دیگر مدیر پشتیبانی فعالی باقی نمانده؛ درخواست‌های پشتیبانی تا تعیین مدیر پشتیبانی واقعی بدون مسئول در «بررسی مدیر» می‌مانند.' : ''));
