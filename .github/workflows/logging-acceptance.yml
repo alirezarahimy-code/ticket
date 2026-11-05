@@ -123,6 +123,7 @@ jobs:
             tests/test_backup_restore_static.py \
             tests/test_update_manifest_guard_static.py
           php tests/test_system_update_archive_zip.php
+          php tests/test_system_update_migration_registry.php
           php tests/test_backup_restore_archive.php
       - uses: actions/upload-artifact@v4
         with:
