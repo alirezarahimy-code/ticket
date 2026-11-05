@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 /*
  * به‌روزرسانی سامانه از فایل ZIP.
  * ساختار پک:
