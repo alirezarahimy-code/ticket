@@ -39,7 +39,7 @@ if (!defined('APP_ROOT')) {
                 }
                 save_setting('food_ticket_brand_logo', 'assets/uploads/' . $filename);
             }
-            save_audit((int) $settingsAdmin['id'], 'food_ticket_brand_updated');
+            save_audit_required((int) $settingsAdmin['id'], 'food_ticket_brand_updated');
             flash('success', 'هویت بصری پنل چاپ فیش ذخیره شد.');
             redirect('index.php?page=settings#food-ticket-brand');
         }
