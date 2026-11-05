@@ -20,6 +20,14 @@ jobs:
         extensions: pdo_mysql, ldap, mbstring, xml
         coverage: none
 
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Python test runner
+      run: python -m pip install --disable-pip-version-check pytest
+
     - name: Check PHP syntax
       run: git ls-files -z -- '*.php' | php tools/lint-php-syntax.php
 
@@ -55,3 +63,6 @@ jobs:
 
     - name: Run system update archive path safety tests
       run: php tests/test_system_update_archive_paths.php
+
+    - name: Run update and Windows acceptance static contracts
+      run: python -m pytest -q tests/test_update_manifest_guard_static.py tests/test_windows_logging_static.py
