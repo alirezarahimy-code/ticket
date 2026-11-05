@@ -81,6 +81,11 @@ def test_internal_modules_refuse_direct_http_access():
         "traffic-import.php",
         "local-accounts.php",
         "backup.php",
+        "system-update.php",
+        "asset-profile.php",
+        "domain-scan.php",
+        "inventory.php",
+        "cd-dvd.php",
     ]
     for module in modules:
         source = read(module)
