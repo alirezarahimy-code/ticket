@@ -26,7 +26,7 @@ action	create_backup	actions/backup-actions.php	18
 action	restore_backup	actions/backup-actions.php	25
 action	system_update	actions/backup-actions.php	40
 page	inventory	actions/bulk-actions.php	41
-page	queue	actions/bulk-actions.php	119
+page	queue	actions/bulk-actions.php	132
 action	add_asset_relation	actions/bulk-actions.php	24
 action	bulk_update_tickets	actions/bulk-actions.php	44
 page	cd-dvd	actions/cd-dvd-actions.php	27
@@ -379,11 +379,11 @@ page	logs	index.php	1729
 page	search	index.php	1917
 page	ticket	index.php	2004
 page	inventory	index.php	2005
-page	holidays	index.php	2163
-page	asset-history	index.php	2784
-page	inventory-diagnostics	index.php	2799
-page	domain-scan	index.php	2849
-page	asset	index.php	2972
+page	holidays	index.php	2166
+page	asset-history	index.php	2789
+page	inventory-diagnostics	index.php	2804
+page	domain-scan	index.php	2854
+page	asset	index.php	2977
 page	queue	ola.php	18
 page	notifications	ola.php	18
 page	reports	ola.php	98

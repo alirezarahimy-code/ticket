@@ -42,7 +42,33 @@ function ticket_number(int $id): string
     if ($cache[$id] !== '') {
         return $cache[$id];
     }
-    return 'SBU1-86-' . str_pad((string) $id, 6, '0', STR_PAD_LEFT);
+    // درخواست بدون شمارهٔ ثبت‌شده: شناسهٔ داخلی نشان داده می‌شود، نه شماره‌ای ساختگی.
+    // قالب قدیمی «SBU1-86-xxxxxx» شماره‌ای می‌ساخت که در دیتابیس وجود نداشت؛ کاربر آن را
+    // یادداشت می‌کرد و جست‌وجویش بی‌نتیجه می‌ماند. «#شناسه» صریحاً داخلی است و
+    // chatbot_ticket_ref() هم آن را به‌عنوان شناسهٔ عددی تشخیص می‌دهد.
+    return '#' . $id;
+}
+
+/**
+ * پرکردن کش شماره از ردیف‌هایی که قبلاً واکشی شده‌اند.
+ *
+ * صفحه‌های فهرست (مثل صف کار) ستون ticket_no را با SELECT اصلی می‌گیرند؛ بدون این تابع
+ * هر فراخوانی ticket_number() داخل حلقه یک کوئری جدا می‌زد (N+1).
+ *
+ * @param array<int, array<string, mixed>> $rows ردیف‌هایی با کلیدهای id و ticket_no
+ */
+function ticket_number_cache_prime(array $rows): void
+{
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $id = (int) ($row['id'] ?? 0);
+        if ($id <= 0 || !array_key_exists('ticket_no', $row)) {
+            continue;
+        }
+        ticket_number_cache_set($id, trim((string) ($row['ticket_no'] ?? '')));
+    }
 }
 
 function ticket_number_prefix(string $serviceGroup): string
@@ -261,6 +287,53 @@ function ticket_number_peek(string $prefix): string
 }
 
 /**
+ * کف شمارنده برای یک پیشوند: بزرگ‌ترین مقدار بین شمارندهٔ ثبت‌شده و بزرگ‌ترین شمارهٔ موجود.
+ *
+ * همان منطقی که ticket_number_next() برای تولید شمارهٔ تازه به کار می‌برد، ولی بدون قفل
+ * سطری — چون ترمیم دسته‌ای در تراکنش جداگانه اجرا نمی‌شود. شروع از صفر (رفتار قبلی)
+ * شماره‌های تکراری می‌ساخت و به نقض uq_tickets_no می‌خورد.
+ */
+function ticket_number_sequence_floor(string $prefix): int
+{
+    $current = 0;
+    try {
+        $query = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? LIMIT 1');
+        $query->execute([$prefix]);
+        $current = (int) ($query->fetchColumn() ?: 0);
+    } catch (Throwable) {
+    }
+    $existing = 0;
+    try {
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+        $maxQuery = db()->prepare('SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED)) FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?');
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existing = (int) ($maxQuery->fetchColumn() ?: 0);
+    } catch (Throwable) {
+    }
+    return max($current, $existing);
+}
+
+/**
+ * ثبت شمارندهٔ رسیده در ticket_number_seq تا تولید شمارهٔ بعدی از همین‌جا ادامه یابد.
+ * GREATEST به کار می‌رود تا اگر هم‌زمان درخواست تازه‌ای شماره گرفته باشد، عقب نرود.
+ *
+ * @param array<string, int> $sequence نگاشت پیشوند به آخرین شمارهٔ مصرف‌شده
+ */
+function ticket_number_sequence_persist(array $sequence): void
+{
+    foreach ($sequence as $prefix => $value) {
+        if ((int) $value <= 0) {
+            continue;
+        }
+        try {
+            $query = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, ?) ON DUPLICATE KEY UPDATE seq = GREATEST(seq, VALUES(seq))');
+            $query->execute([(string) $prefix, (int) $value]);
+        } catch (Throwable) {
+        }
+    }
+}
+
+/**
  * پرکردن شمارهٔ درخواست‌های قدیمی که ticket_no ندارند.
  *
  * ⚠️ این تابع در ابتدای هر درخواست صدا زده می‌شد و هر بار یک SELECT روی کل جدول
@@ -287,22 +360,67 @@ function ticket_number_autofill(bool $force = false): void
     }
     try {
         ticket_number_ensure_schema();
-        $marker = 'ticket_autofill_done';
-        $rows = db()->query("SELECT id, service_group FROM tickets WHERE ticket_no IS NULL OR ticket_no = '' ORDER BY id ASC")->fetchAll();
-        if (!$rows) {
-            // دفعهٔ بعد دوباره کل جدول اسکن نشود (این خط، هزینهٔ هر بارگذاری صفحه را کم می‌کند)
+        $sequence = [];
+        $filled = 0;
+        $skipped = 0;
+        // شرط ticket_no در UPDATE تکرار می‌شود تا اگر درخواستی هم‌زمان شماره گرفته باشد، بازنویسی نشود.
+        $update = db()->prepare("UPDATE tickets SET ticket_no = ? WHERE id = ? AND (ticket_no IS NULL OR ticket_no = '')");
+        // دسته‌ای خوانده می‌شود تا جدول بزرگ، حافظه را پر نکند.
+        for ($batch = 0; $batch < 50; $batch++) {
+            $rows = db()->query("SELECT id, service_group FROM tickets WHERE ticket_no IS NULL OR ticket_no = '' ORDER BY id ASC LIMIT 500")->fetchAll();
+            if (!$rows) {
+                break;
+            }
+            $progress = 0;
+            foreach ($rows as $row) {
+                $prefix = ticket_number_prefix((string) $row['service_group']);
+                if (!array_key_exists($prefix, $sequence)) {
+                    $sequence[$prefix] = ticket_number_sequence_floor($prefix);
+                }
+                // هر رکورد مستقل است: برخورد یکتایی روی یکی نباید کل ترمیم را قطع کند
+                // (رفتار قبلی: اولین استثنا از حلقه بیرون می‌پرید و بقیه بی‌شماره می‌ماندند).
+                $written = false;
+                for ($attempt = 0; $attempt < 5; $attempt++) {
+                    $sequence[$prefix]++;
+                    $candidate = $prefix . '-' . str_pad((string) $sequence[$prefix], 5, '0', STR_PAD_LEFT);
+                    try {
+                        $update->execute([$candidate, (int) $row['id']]);
+                        $written = true;
+                        break;
+                    } catch (Throwable) {
+                        continue; // شمارهٔ گرفته‌شده: شمارنده جلو می‌رود و دوباره تلاش می‌شود
+                    }
+                }
+                if ($written) {
+                    $filled++;
+                    $progress++;
+                } else {
+                    $skipped++;
+                }
+            }
+            ticket_number_sequence_persist($sequence);
+            if ($progress === 0) {
+                break; // هیچ پیشرفتی نشد؛ از حلقهٔ بی‌پایان جلوگیری می‌شود
+            }
+        }
+        $remaining = 1; // محافظه‌کارانه: اگر شمارش ممکن نشد، نشانگر ثبت نشود
+        try {
+            $remaining = (int) db()->query("SELECT COUNT(*) FROM tickets WHERE ticket_no IS NULL OR ticket_no = ''")->fetchColumn();
+        } catch (Throwable) {
+        }
+        if ($remaining === 0) {
+            // نشانگر فقط وقتی ثبت می‌شود که واقعاً چیزی باقی نمانده باشد — چه ترمیمی انجام شده
+            // باشد چه از اول کاری نبوده. رفتار قبلی آن را فقط در شاخهٔ «چیزی نبود» ثبت می‌کرد،
+            // پس بعد از یک ترمیم ناموفق هرگز ثبت نمی‌شد و هر بارگذاری صفحه دوباره اسکن می‌کرد.
             try {
                 save_setting('ticket_autofill_done', '1');
             } catch (Throwable) {
             }
-            return;
+        } elseif (function_exists('system_log')) {
+            system_log('warning', 'ticket_number_autofill', 'شمارهٔ برخی درخواست‌ها تکمیل نشد.', ['remaining' => $remaining, 'filled' => $filled, 'skipped' => $skipped]);
         }
-        $sequence = [];
-        $update = db()->prepare('UPDATE tickets SET ticket_no = ? WHERE id = ?');
-        foreach ($rows as $row) {
-            $prefix = ticket_number_prefix((string) $row['service_group']);
-            $sequence[$prefix] = ($sequence[$prefix] ?? 0) + 1;
-            $update->execute([$prefix . '-' . str_pad((string) $sequence[$prefix], 5, '0', STR_PAD_LEFT), (int) $row['id']]);
+        if ($filled > 0 && function_exists('system_log')) {
+            system_log('info', 'ticket_number_autofill', 'شمارهٔ درخواست‌های بدون شماره تکمیل شد.', ['filled' => $filled]);
         }
     } catch (Throwable $exception) {
         if (function_exists('system_log')) {

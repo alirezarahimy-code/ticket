@@ -101,13 +101,15 @@ README-FA.txt	root-misc	10	1666
 README.md	root-misc	270	46624
 START-FOOD-WORKER.txt	root-misc	33	2858
 START-HERE.txt	root-misc	85	9823
+TICKET-NUMBER-REPAIR-1.62.83-CHANGE-REPORT-fa.md	root-misc	172	10838
+TICKET-NUMBER-REPAIR-1.62.83-UPDATE-NOTE-fa.txt	root-misc	91	7839
 UPDATE-WORKER-V4.txt	root-misc	14	1082
 VERSION	config	1	8
 actions/access-group-actions.php	actions	181	8594
 actions/account-actions.php	actions	124	8453
 actions/asset-actions.php	actions	418	26557
 actions/backup-actions.php	actions	52	3848
-actions/bulk-actions.php	actions	120	9073
+actions/bulk-actions.php	actions	133	10370
 actions/cd-dvd-actions.php	actions	38	1762
 actions/food-brand-actions.php	actions	45	2747
 actions/holiday-actions.php	actions	145	9122
@@ -199,7 +201,7 @@ calendar-template.csv	root-misc	4	119
 calendar-template.ics	root-misc	14	297
 cd-dvd.php	core	892	71802
 chatbot-tts-lexicon.php	core	14	472
-chatbot.php	core	3412	180631
+chatbot.php	core	3412	180625
 client-agent/Collect-Inventory.ps1	client-agent	147	7378
 config.sample.php	config	49	1397
 cron/.htaccess	cron	1	19
@@ -367,9 +369,9 @@ food-ticket-worker-install-fa.html	root-misc	176	23682
 food-ticket.php	core	5675	280002
 global-search.php	core	121	12295
 governance.php	core	521	47346
-help-guide.php	core	721	135669
+help-guide.php	core	721	135663
 holiday-board.php	core	47	5564
-index.php	core	3726	372670
+index.php	core	3732	373286
 install-empty-db.sql	sql-root	1575	80155
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -389,7 +391,7 @@ lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	509	25449
 lib/settings-effects.php	lib	385	14247
-lib/tickets-sla.php	lib	671	30451
+lib/tickets-sla.php	lib	789	36895
 local-accounts.php	core	216	12240
 logging-dashboard.php	core	162	19905
 migrations/001-local-accounts.sql	migrations	6	545
@@ -469,7 +471,7 @@ tests/js/list-sort.test.js	tests	110	5679
 tests/logging-acceptance/compose.yaml	tests	16	394
 tests/logging-acceptance/run-mysql-integration.sh	tests	14	816
 tests/run_logging_staging_checks.ps1	tests	101	6223
-tests/smoke.php	tests	182	35323
+tests/smoke.php	tests	182	35276
 tests/test_admin_layout_design_static.py	tests	98	5621
 tests/test_asset_inventory_form_compat_static.py	tests	70	3439
 tests/test_asset_profile_mapping_static.py	tests	66	3799
@@ -622,6 +624,8 @@ tests/test_technical_profile_form_refresh_static.py	tests	67	3618
 tests/test_ticket_auto_assignment_static.py	tests	25	1517
 tests/test_ticket_cancellation_static.py	tests	133	8418
 tests/test_ticket_lifecycle_guide_static.py	tests	41	1801
+tests/test_ticket_number_autofill_unit.php	tests	158	7261
+tests/test_ticket_number_repair_static.py	tests	145	6732
 tests/test_ticket_routing_unit.php	tests	112	8911
 tests/test_ticket_scope_sql_node.js	tests	21	2883
 tests/test_ticket_sla_unit.php	tests	51	3353
@@ -1086,6 +1090,9 @@ updates/2026-11-04-user-access-groups-1.62.75/CHANGE-REPORT-FA-1.62.75.md	histor
 updates/2026-11-04-user-access-groups-1.62.75/README.md	history-updates	11	898
 updates/2026-11-04-user-access-groups-1.62.75/manifest.json	history-updates	87	3101
 updates/2026-11-04-user-access-groups-1.62.75/migrations/023-user-access-groups.sql	history-updates	38	2475
+updates/2026-11-05-ticket-number-repair-1.62.83/CHANGE-REPORT-FA-1.62.83.md	history-updates	172	10838
+updates/2026-11-05-ticket-number-repair-1.62.83/README.md	history-updates	13	912
+updates/2026-11-05-ticket-number-repair-1.62.83/manifest.json	history-updates	21	694
 upgrade-1.1-departments.sql	sql-root	15	999
 upgrade-1.10-priority.sql	sql-root	10	804
 upgrade-1.11-user-profile.sql	sql-root	4	311
