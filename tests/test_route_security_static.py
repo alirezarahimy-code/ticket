@@ -91,3 +91,11 @@ def test_internal_modules_refuse_direct_http_access():
     for module in modules:
         source = read(module)
         assert "defined('APP_ROOT') || exit;" in source[:500], f"{module} is directly reachable"
+
+
+def test_it_ticket_asset_reference_obeys_asset_own_unit_scope():
+    source = read("actions/ticket-actions.php")
+    handler = section(source, "$assetId = (int) ($_POST['asset_id']", "$supportLocation = post_value")
+    assert "user_service_group($user) === 'it'" in handler
+    assert "asset_scope($user, 'a')" in handler
+    assert "assetScopeParams" in handler
