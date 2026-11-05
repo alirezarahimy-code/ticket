@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 if (is_file(__DIR__ . '/food-ticket-env.php')) {
     require_once __DIR__ . '/food-ticket-env.php';
 }
