@@ -118,7 +118,7 @@ if (!defined('APP_ROOT')) {
             }
             $values[] = (int) $user['id'];
             $query->execute($values);
-            save_audit((int) $user['id'], 'profile_updated');
+            save_audit_required((int) $user['id'], 'profile_updated');
             flash('success', 'پروفایل کاربری شما ذخیره شد.');
             redirect('index.php?page=profile');
         }
