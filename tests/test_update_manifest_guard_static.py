@@ -25,3 +25,15 @@ def test_manifest_file_list_and_optional_sha256_are_verified():
     assert "$manifest['files']" in source
     assert "$manifest['sha256']" in source
     assert "hash_file('sha256'" in source
+
+
+def test_cumulative_update_contains_security_scope_runtime_overlays():
+    source = (ROOT / "tools/build_cumulative_update.py").read_text(encoding="utf-8")
+    for required in (
+        "actions/cd-dvd-actions.php",
+        "actions/notification-actions.php",
+        "lib/auth-scope.php",
+        "actions/ticket-actions.php",
+        "tools/Run-Logging-Acceptance-1.62.83.ps1",
+    ):
+        assert f'"{required}"' in source
