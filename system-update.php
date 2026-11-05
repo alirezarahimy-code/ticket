@@ -35,8 +35,11 @@ function system_update_ensure_table(): void
 
 function system_update_migration_applied(string $version, string $migration): bool
 {
-    $stmt = db()->prepare('SELECT COUNT(*) FROM schema_updates WHERE version = ? AND migration = ?');
-    $stmt->execute([$version, $migration]);
+    // Migration filenames are globally unique and immutable across releases.
+    // A migration recorded under an earlier package version must not run again
+    // merely because the same cumulative package is installed at a new version.
+    $stmt = db()->prepare('SELECT COUNT(*) FROM schema_updates WHERE migration = ?');
+    $stmt->execute([$migration]);
     return (int) $stmt->fetchColumn() > 0;
 }
 
