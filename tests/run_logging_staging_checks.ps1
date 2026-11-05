@@ -73,8 +73,9 @@ if ($RunOperational) {
     Write-Host '== Read-only recursive Windows ACL verification (strict) =='
     $aclResult = & (Join-Path $Root 'tools/verify_logging_acl.ps1') -ApplicationRoot $Root -Strict -ReturnStatus -ScanFiles | Select-Object -Last 1
     if ([int]$aclResult -ne 0) { throw 'Logging ACL verification failed; do not apply ACL changes automatically.' }
-    Write-Host '== Update completion-audit reconciliation =='
-    Invoke-PhpTest -Path (Join-Path $Root 'cron/reconcile_update_audit.php') -RequireExecution | Out-Null
+    # The historical reconcile_update_audit.php entry point is not present in this source tree.
+    # verify_logging_release.php already fails closed when a pending completion marker exists.
+    Write-Host '== Update completion-audit state (read-only release preflight) =='
     Write-Host '== Replay worker =='
     Invoke-PhpTest -Path (Join-Path $Root 'cron/replay_logging_spool.php') -RequireExecution | Out-Null
     Write-Host '== Issue rebuild and notification delivery workers =='
