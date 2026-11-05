@@ -404,6 +404,6 @@ function system_update_apply(array $upload, array $actor, bool $allowDowngrade =
 
     file_put_contents(APP_ROOT . '/VERSION', $version . "\n");
 
-    save_audit((int) ($actor['id'] ?? 0), 'system_updated', null, ['version' => $version, 'mode' => $package['mode'], 'from' => $package['current'], 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']]);
+    save_audit_required((int) ($actor['id'] ?? 0), 'system_updated', null, ['version' => $version, 'mode' => $package['mode'], 'from' => $package['current'], 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']]);
     return ['version' => $version, 'mode' => $package['mode'], 'from' => $package['current'], 'migrations' => $applied, 'files' => $copied, 'backup' => $backup['name']];
 }
