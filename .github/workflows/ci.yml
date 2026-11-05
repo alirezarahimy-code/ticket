@@ -70,6 +70,9 @@ jobs:
     - name: Run system update archive path safety tests
       run: php tests/test_system_update_archive_paths.php
 
+    - name: Run offline ticket transaction regression test
+      run: php tools/test_ticket_txn_offline.php
+
     - name: Run system update ZIP entry behavioral tests
       run: php tests/test_system_update_archive_zip.php
 
