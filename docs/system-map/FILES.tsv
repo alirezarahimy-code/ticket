@@ -233,7 +233,7 @@ docs/STAGING-ACCEPTANCE-REPORT-1.62.76-FA.md	docs	21	1419
 docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
 docs/SYSTEM-MAP-FA.md	docs	551	37833
 docs/TEST-ALIGNMENT-1.62.59-FA.md	docs	87	6996
-docs/TEST-DEBT-FA.md	docs	85	5853
+docs/TEST-DEBT-FA.md	docs	115	8764
 docs/TEST-REPORT-1.62.76-FA.md	docs	30	2546
 docs/TEST_COVERAGE_MATRIX_FA.md	docs	50	8233
 docs/USER-ACCESS-GROUPS-FA.md	docs	43	3988
@@ -371,7 +371,7 @@ lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	509	25449
 lib/settings-effects.php	lib	385	14247
-lib/tickets-sla.php	lib	864	40697
+lib/tickets-sla.php	lib	890	42426
 local-accounts.php	core	216	12240
 logging-dashboard.php	core	162	19905
 migrations/001-local-accounts.sql	migrations	6	545
@@ -509,6 +509,8 @@ tests/test_food_worker_window_static.py	tests	451	21758
 tests/test_fresh_install_schema_parity.py	tests	314	14808
 tests/test_global_theme_mode.py	tests	62	3408
 tests/test_group_ticket_design_repair_static.py	tests	38	2227
+tests/test_hot_schema_guard_unit.php	tests	65	3891
+tests/test_hot_schema_transaction_guard_static.py	tests	173	8488
 tests/test_inventory_truth_static.py	tests	197	12454
 tests/test_ldap_secret_and_legacy_status_static.py	tests	209	11728
 tests/test_ldap_secret_unit.php	tests	53	3725

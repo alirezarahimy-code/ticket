@@ -112,7 +112,33 @@ function ticket_number_ensure_schema(): void
 function ticket_hot_schema_ensure(): void
 {
     static $ready = false;
+    static $deferred = false;
     if ($ready) {
+        return;
+    }
+    // هر DDL در MySQL یک COMMIT ضمنی می‌زند. همان درسی که سرآیند
+    // ticket_number_prefix() مستند کرده (خطای «There is no active transaction»)
+    // اینجا هم صدق می‌کند، فقط با دامنهٔ بزرگ‌تر: این تابع حدود ۳۵ ALTER روی
+    // tickets و users دارد و به org_ensure_schema()، org_ticket_schema_ensure()
+    // و lac_ensure_schema() هم شاخه می‌دهد. اجرای هر کدام در میانهٔ تراکنش یعنی
+    // نیمهٔ نوشته‌شده بی‌صدا نهایی می‌شود و rollBack بعدی دیگر کاری نمی‌کند.
+    //
+    // توجه حیاتی: $ready در این شاخه عمداً دست‌نخورده می‌ماند. اگر اینجا true
+    // شود، تابع «انجام‌شده» علامت می‌خورد و مهاجرتِ موکول‌شده هم زودهنگام
+    // برمی‌گردد — یعنی ستون‌ها هرگز ساخته نمی‌شوند.
+    if (function_exists('db_in_transaction') ? db_in_transaction() : db()->inTransaction()) {
+        if (!$deferred) {
+            $deferred = true;
+            if (function_exists('system_log')) {
+                system_log('warning', 'ticket_hot_schema', 'مهاجرت ستون‌های پرکاربرد در میانهٔ تراکنش لازم شد؛ به پایان درخواست موکول شد.');
+            }
+            register_shutdown_function(static function (): void {
+                try {
+                    ticket_hot_schema_ensure();
+                } catch (Throwable) {
+                }
+            });
+        }
         return;
     }
     $ready = true;
