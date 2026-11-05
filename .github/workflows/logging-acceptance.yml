@@ -112,6 +112,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install package validation test runner
+        run: python -m pip install --disable-pip-version-check pytest
       - name: Build and validate cumulative update package
         run: |
           python -m py_compile tools/build_cumulative_update.py
