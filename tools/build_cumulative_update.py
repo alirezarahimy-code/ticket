@@ -63,6 +63,7 @@ OVERLAY_FILES = (
     "tools/set_logging_acl.ps1",
     "tools/verify_logging_acl.ps1",
     "tools/verify_logging_web_protection.ps1",
+    "tools/Run-Logging-Acceptance-1.62.83.ps1",
 )
 
 FORBIDDEN_ROOTS = {"storage", "uploads", ".git", "node_modules", "vendor", "config.php", ".env"}
