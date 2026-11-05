@@ -63,6 +63,8 @@ $php = if ($env:PHP_EXE) { $env:PHP_EXE } else {
 if (-not $php -or -not (Test-Path -LiteralPath $php -PathType Leaf)) {
     throw 'PHP CLI not found. Set PHP_EXE to the full path of php.exe.'
 }
+& $php -l $workerScript
+if ($LASTEXITCODE -ne 0) { throw 'PHP stress worker syntax check failed; no load was generated.' }
 
 try { $baseUri = [Uri]$BaseUrl } catch { throw "Invalid BaseUrl: $BaseUrl" }
 if ($baseUri.Scheme -notin @('http','https') -or -not [string]::IsNullOrEmpty($baseUri.UserInfo) -or $baseUri.Query -or $baseUri.Fragment) {
