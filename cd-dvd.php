@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 function cd_dvd_media_bounds(string $media): array
 {
     return strtoupper($media) === 'DVD' ? [1001, 2000] : [1, 1000];
