@@ -33,6 +33,9 @@ $limit = $limit ?? 5;
 fwrite(STDOUT, '[domain-scan-worker] ' . date('c') . ' start loop=' . ($loop ? '1' : '0') . ' run=' . $runArg . PHP_EOL);
 
 do {
+    if (function_exists('logging_begin_execution')) {
+        logging_begin_execution('worker:domain-scan:cycle');
+    }
     try {
         domain_scan_ensure_schema();
         $run = $runArg > 0 ? domain_scan_run($runArg) : domain_scan_latest_run();
@@ -53,6 +56,9 @@ do {
             sleep(2);
         }
     } catch (Throwable $exception) {
+        if (function_exists('system_log')) {
+            try { system_log('error', 'domain-scan-worker', $exception->getMessage(), ['exception' => get_class($exception)]); } catch (Throwable) {}
+        }
         fwrite(STDERR, '[domain-scan-worker] ' . $exception->getMessage() . PHP_EOL);
         if (!$loop) {
             break;
