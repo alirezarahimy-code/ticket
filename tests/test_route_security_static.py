@@ -69,3 +69,19 @@ def test_self_service_password_change_is_audited_atomically():
     assert "save_audit_required(" in handler
     assert "$pdo->commit()" in handler
     assert "$pdo->rollBack()" in handler
+
+
+def test_internal_modules_refuse_direct_http_access():
+    modules = [
+        "food-order.php",
+        "food-reconciliation.php",
+        "food-ticket-templates.php",
+        "food-ticket.php",
+        "traffic-control.php",
+        "traffic-import.php",
+        "local-accounts.php",
+        "backup.php",
+    ]
+    for module in modules:
+        source = read(module)
+        assert "defined('APP_ROOT') || exit;" in source[:500], f"{module} is directly reachable"
