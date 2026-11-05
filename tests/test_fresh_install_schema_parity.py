@@ -264,6 +264,45 @@ def test_schema_executes_in_order_without_forward_foreign_keys():
         )
 
 
+def test_both_schema_files_seed_the_same_structural_rows():
+    """ردیف‌های پیش‌فرضِ ساختاری باید در هر دو فایل باشند.
+
+    بعضی جدول‌ها (مثلاً ``food_ticket_config``) طبق قرارداد کد همیشه دقیقاً
+    یک ردیف دارند — ``db_install_fresh_tables()`` در ``lib/db-core.php`` روی
+    همین فرض بنا شده. اگر این ردیف فقط در یکی از دو فایل درج شود، نصب تازه
+    بسته به مسیر انتخابی رفتار متفاوت می‌دهد.
+
+    دو کلید ``settings`` عمداً فقط در ``install-empty-db.sql`` هستند و نشانهٔ
+    همان مسیر نصب‌اند، نه شکاف: ``db_install_token`` خوددرمان است
+    (``lib/db-core.php`` اگر نباشد می‌سازد) و ``installed_mode`` را هیچ کدی
+    نمی‌خواند.
+    """
+    seeded_only_in_empty_db = {"settings"}
+    pattern = re.compile(r"INSERT\s+(?:IGNORE\s+)?INTO\s+`?([A-Za-z_][\w]*)`?", re.I)
+    counts = {}
+    for name in SCHEMA_FILES:
+        tables: dict[str, int] = {}
+        for m in pattern.finditer(_schema_text(name)):
+            table = m.group(1).strip("`").lower()
+            tables[table] = tables.get(table, 0) + 1
+        counts[name] = tables
+    a, b = SCHEMA_FILES
+    only_a = {t: n for t, n in counts[a].items() if t not in counts[b]}
+    only_b = {
+        t: n
+        for t, n in counts[b].items()
+        if t not in counts[a] and t not in seeded_only_in_empty_db
+    }
+    assert not only_a, f"{a} ردیف پیش‌فرضی دارد که در {b} نیست: {only_a}"
+    assert not only_b, f"{b} ردیف پیش‌فرضی دارد که در {a} نیست: {only_b}"
+    differing = {
+        t: (counts[a][t], counts[b][t])
+        for t in set(counts[a]) & set(counts[b])
+        if counts[a][t] != counts[b][t] and t not in seeded_only_in_empty_db
+    }
+    assert not differing, f"شمار ردیف‌های پیش‌فرض بین دو فایل فرق دارد: {differing}"
+
+
 def test_full_rebuild_drops_every_table_in_both_schema_files():
     """``rebuild-final.sql`` نباید جدولی را جا بیندازد، وگرنه بازسازی ناقص است."""
     rebuild = _strip_sql_comments((ROOT / "rebuild-final.sql").read_text(encoding="utf-8"))
