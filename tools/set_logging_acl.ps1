@@ -37,7 +37,14 @@ if (-not $Apply) {
     Write-Output "PLAN ONLY: would grant Modify to the service account and FullControl to local Administrators and SYSTEM on $target. No ACL was changed."
     return
 }
-if ($PSCmdlet.ShouldProcess($target, 'Add restricted Logging ACL entries')) {
+$shouldApply = $true
+if ($WhatIfPreference) {
+    Write-Output "WHATIF: would add restricted Logging ACL entries to $target."
+    $shouldApply = $false
+} elseif ($null -ne $PSCmdlet) {
+    $shouldApply = $PSCmdlet.ShouldProcess($target, 'Add restricted Logging ACL entries')
+}
+if ($shouldApply) {
     $acl = Get-Acl -LiteralPath $target
     foreach ($principal in $principals) {
         $rule = [System.Security.AccessControl.FileSystemAccessRule]::new($principal.Sid, $principal.Rights, $inherit, [System.Security.AccessControl.PropagationFlags]::None, [System.Security.AccessControl.AccessControlType]::Allow)
