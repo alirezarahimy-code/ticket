@@ -20,6 +20,7 @@ REPORT_NAME = "CHANGE-REPORT-FA-1.62.83.md"
 OVERLAY_MIGRATIONS = (
     "migrations/026-logging-legacy-result-unknown.sql",
     "migrations/032-schema-updates-baseline.sql",
+    "migrations/033-logging-legacy-context-collation.sql",
 )
 
 OVERLAY_FILES = (
@@ -55,6 +56,7 @@ OVERLAY_FILES = (
     "lib/notify-users.php",
     "local-accounts.php",
     "migrations/026-logging-legacy-result-unknown.sql",
+    "migrations/033-logging-legacy-context-collation.sql",
     "schema.sql",
     "traffic-control.php",
     "traffic-import.php",
@@ -153,7 +155,7 @@ main{{width:min(100%,900px);padding:32px;background:#fff;border:1px solid var(--
 <p>بستهٔ اصلاحات امنیتی نصب‌کننده، Logging، حسابرسی رویدادها، پشتیبان‌گیری و بازیابی، و ابزارهای کنترل ACL ویندوز.</p>
 <section class="package">
 <h2>به‌روزرسانی نصب موجود — ۱.۶۲.۸۳</h2>
-<p>بستهٔ تجمیعی از پایهٔ <b>۱.۶۲.۷۷</b>؛ شامل تغییرات ۱.۶۲.۷۸ تا ۱.۶۲.۸۳ و مهاجرت ۰۳۱. فقط همین ZIP را در صفحهٔ «به‌روزرسانی و پشتیبان‌گیری» بارگذاری کنید.</p>
+<p>بستهٔ تجمیعی از پایهٔ <b>۱.۶۲.۷۷</b>؛ شامل تغییرات ۱.۶۲.۷۸ تا ۱.۶۲.۸۳ و مهاجرت‌های تکمیلی ۰۳۲ و ۰۳۳. فقط همین ZIP را در صفحهٔ «به‌روزرسانی و پشتیبان‌گیری» بارگذاری کنید.</p>
 <div class="actions">
 <a class="button primary" href="{package_name}" download>دانلود بستهٔ به‌روزرسانی ۱.۶۲.۸۳ (ZIP)</a>
 <a class="button secondary" href="{package_name}.sha256" download>SHA-256 بسته</a>
