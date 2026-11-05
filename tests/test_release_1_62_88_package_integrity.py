@@ -37,5 +37,5 @@ def test_032_is_excluded_from_executable_migrations():
 
 
 def test_report_does_not_claim_all_migrations_are_additive():
-    assert "صرفاً افزایشی‌اند" not in REPORT
+    assert "ادعای قبلی مبنی بر اینکه هر ۹ مهاجرت صرفاً افزایشی‌اند" in REPORT
     assert "داده‌های موجود را به‌روزرسانی می‌کنند" in REPORT
