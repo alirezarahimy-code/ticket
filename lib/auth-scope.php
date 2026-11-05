@@ -284,6 +284,24 @@ function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $perm
     if ((int) ($user['is_active'] ?? 0) !== 1) {
         return false;
     }
+    // تفکیک وظایف در لحظهٔ ارجاع: ثبت‌کنندهٔ یک درخواست، مسئول رسیدگی به درخواست
+    // خودش نمی‌شود — نه با ارجاع خودکار هنگام ثبت، نه با «برداشتن درخواست»، نه از
+    // فهرست کشویی ارجاع دستی. این تابع تنها نقطهٔ مشترک هر پنج مسیر ارجاع است، پس
+    // قاعده همین‌جا می‌نشیند تا مثل قبل به‌صورت وصله در چند جا تکرار (و در بقیه جا
+    // انداخته) نشود. دادهٔ لازم از قبل اینجا بود: choose_handling_agent() همان ابتدا
+    // requester_id را داخل آرایهٔ درخواست می‌گذارد.
+    //
+    // دریچهٔ اضطراری: واحدی که فقط یک رسیدگی‌کننده دارد با این قاعده قفل می‌شود،
+    // چون کسی برای ارجاع باقی نمی‌ماند و درخواست در manager_review بی‌صاحب می‌ماند.
+    // چنین واحدی می‌تواند security.allow_self_assignment را آگاهانه باز کند.
+    // function_exists لازم است چون این تابع در بافت‌های بدون لایهٔ تنظیمات هم
+    // (از جمله تست واحد مسیر ارجاع) فراخوانی می‌شود.
+    $allowSelfAssignment = function_exists('cfg')
+        ? (bool) cfg('security.allow_self_assignment', false)
+        : false;
+    if (!$allowSelfAssignment && ticket_user_is_requester($ticket, $user)) {
+        return false;
+    }
     if (user_is_primary_admin($user)) {
         return $group === 'it';
     }

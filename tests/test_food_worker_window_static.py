@@ -320,12 +320,12 @@ def test_holiday_actions_return_to_the_originating_tab() -> None:
     assert "$holidayReturnTo = static function (): string {" in ACTIONS
     assert "index.php?page=settings#holidays" in ACTIONS
     assert "redirect('index.php?page=holidays');" not in ACTIONS
-    assert ACTIONS.count("redirect($holidayReturnTo());") == 5
+    assert ACTIONS.count("redirect($holidayReturnTo());") == 6
 
 
 def test_every_holiday_form_carries_return_to() -> None:
-    """۴ فرم (افزودن، تیک روز، ورود فایل، حذف) باید return_to بفرستند."""
-    assert BOARD.count("csrf_field() . $returnField") == 4
+    """۵ فرم (افزودن، تیک روز، ورود فایل، حذف، تقویم کاری) باید return_to بفرستند."""
+    assert BOARD.count("csrf_field() . $returnField") == 5
     assert """'<input type="hidden" name="return_to" value="' . e($returnTo) . '">'""" in BOARD
 
 

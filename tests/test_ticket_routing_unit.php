@@ -131,3 +131,51 @@ $GLOBALS['fake_event_order'] = ['rated_id'=>13, 'resolved_id'=>12];
 check_ticket(ticket_rating_is_current($ratingTicket), 'new rating in same second is valid after resolution');
 $GLOBALS['fake_event_order'] = [];
 check_ticket(ticket_rating_is_current($ratingTicket), 'old records without events keep compatible rating behaviour');
+
+// ───── تفکیک وظایف در لحظهٔ ارجاع و تقویم کاری (بستهٔ ۶ — نسخهٔ ۱.۶۲.۸۵) ─────
+// بستهٔ ۵ نمای پس از ارجاع را بست؛ اینجا خودِ لحظهٔ ارجاع سنجیده می‌شود.
+// $users[2] کارشناس پشتیبانی فعال و واجد شرایط است (بررسی‌های بالاتر همین فایل).
+
+// ۱) کارشناس روی درخواست دیگری همچنان واجد شرایط است — قاعده نباید همه را ببندد.
+$otherTicket = ['requester_id'=>1, 'service_group'=>'support', 'department_id'=>5];
+check_ticket(ticket_assignee_is_eligible($otherTicket, $users[2], 'user_can'), 'agent stays eligible for a ticket raised by someone else');
+
+// ۲) همان کارشناس روی درخواستی که خودش ثبت کرده، دیگر واجد شرایط نیست.
+$selfTicket = ['requester_id'=>(int) $users[2]['id'], 'service_group'=>'support', 'department_id'=>5];
+check_ticket(!ticket_assignee_is_eligible($selfTicket, $users[2], 'user_can'), 'agent cannot be assigned to a ticket they raised themselves');
+
+// ۳) ادمین اصلی هم مستثنا نیست؛ میان‌بُر نقش نباید گارد را دور بزند.
+$primaryAdmin = null;
+foreach ($users as $candidate) {
+    if (user_is_primary_admin($candidate) && (int) ($candidate['is_active'] ?? 0) === 1) { $primaryAdmin = $candidate; break; }
+}
+if ($primaryAdmin !== null) {
+    $adminOther = ['requester_id'=>1, 'service_group'=>'it', 'department_id'=>5];
+    $adminSelf = ['requester_id'=>(int) $primaryAdmin['id'], 'service_group'=>'it', 'department_id'=>5];
+    check_ticket(ticket_assignee_is_eligible($adminOther, $primaryAdmin, 'user_can'), 'primary admin stays eligible for other people tickets');
+    check_ticket(!ticket_assignee_is_eligible($adminSelf, $primaryAdmin, 'user_can'), 'primary admin cannot be assigned to their own ticket');
+}
+
+// ۴) درخواست بدون ثبت‌کنندهٔ مشخص (requester_id = 0) نباید بسته شود؛
+//    choose_handling_agent() در حالت پیش‌فرض دقیقاً همین آرایه را می‌سازد.
+$anonTicket = ['requester_id'=>0, 'service_group'=>'support', 'department_id'=>5];
+check_ticket(ticket_assignee_is_eligible($anonTicket, $users[2], 'user_can'), 'routing with unknown requester is not blocked by the new guard');
+
+// ۵) سازگاری با بستهٔ ۵: کسی که هم ثبت‌کننده و هم مسئول فعلی است، نمای assignee را
+//    از دست نمی‌دهد. گارد تازه فقط ارجاعِ تازه را می‌بندد، نه کارِ در جریان را.
+$bothNow = ['requester_id'=>(int) $users[2]['id'], 'assigned_to'=>(int) $users[2]['id'], 'service_group'=>'support', 'department_id'=>5, 'status'=>'in_progress', 'cancel_requested_at'=>null];
+check_ticket(ticket_handler_level($bothNow, $users[2]) === 'assignee', 'existing requester-assignee keeps working on an already assigned ticket');
+check_ticket(!ticket_assignee_is_eligible($bothNow, $users[2], 'user_can'), 'but they are not offered as a fresh assignee candidate');
+
+// ۶) دریچهٔ اضطراری واحد تک‌نفره: وقتی security.allow_self_assignment باز است،
+//    همان کاربر دوباره واجد شرایط می‌شود. cfg() از پیکربندی ساختگی می‌خواند؛
+//    چون کلید پیش‌فرض تعریف نشده، همهٔ بررسی‌های بالاتر مسیر «بسته» را سنجیده‌اند.
+$GLOBALS['fake_cfg']['security.allow_self_assignment'] = true;
+check_ticket(ticket_assignee_is_eligible($selfTicket, $users[2], 'user_can'), 'single-handler unit can reopen self assignment on purpose');
+$GLOBALS['fake_cfg']['security.allow_self_assignment'] = false;
+check_ticket(!ticket_assignee_is_eligible($selfTicket, $users[2], 'user_can'), 'closing the escape hatch restores separation of duties');
+
+function cfg(string $key, mixed $default = null): mixed
+{
+    return $GLOBALS['fake_cfg'][$key] ?? $default;
+}

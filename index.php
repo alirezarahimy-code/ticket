@@ -661,7 +661,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -2170,7 +2170,7 @@ if ($page === 'holidays') {
     // در صفحهٔ تنظیمات هم رندر می‌شود؛ پس این دو نما هیچ‌وقت از هم جدا نمی‌افتند.
     $holidayAdmin = require_permission('holidays.view');
     render_header('تقویم SLA', $holidayAdmin);
-    echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>روزهای تعطیل هفتگی و ساعت کاری را در همین صفحه تنظیم کنید؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section>';
     holiday_board_render($user);
     render_footer();
     exit;
@@ -3666,7 +3666,7 @@ if ($page === 'settings') {
         // به همین تب برگردیم نه به صفحهٔ مستقل تعطیلات.
         echo '<div class="settings-panel" id="holidays">';
         echo '<div class="card form-card settings-panel-full"><h2>تقویم تعطیلات و توقف SLA</h2>'
-            . '<p class="muted">پنج‌شنبه و جمعه تعطیل ثابت هستند. تعطیلات رسمی ثبت‌شده در این تقویم، هم از محاسبهٔ SLA و هم از بازهٔ کاری پردازشگر فیش غذا حذف می‌شوند.</p></div>';
+            . '<p class="muted">روزهای تعطیل هفتگی و ساعت کاری در همین تب قابل تنظیم‌اند. تعطیلات رسمی ثبت‌شده در این تقویم، هم از محاسبهٔ SLA و هم از بازهٔ کاری پردازشگر فیش غذا حذف می‌شوند.</p></div>';
         holiday_board_render($user, 'settings');
         echo '</div>';
     }

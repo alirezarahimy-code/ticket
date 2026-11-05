@@ -93,12 +93,24 @@
     return set;
   }
 
+  // روزهای تعطیل هفتگی از تقویم کاری سازمان می‌آید و دیگر ثابت نیست. سرور آن را با
+  // شمارهٔ ISO-8601 (دوشنبه ۱ تا یکشنبه ۷) روی body می‌گذارد؛ اینجا به شمارهٔ
+  // getDay() جاوااسکریپت (یکشنبه ۰ تا شنبه ۶) ترجمه می‌شود. نبود این صفت یعنی
+  // پیش‌فرض پنج‌شنبه و جمعه.
+  function weekendDays() {
+    var raw = (document.body && document.body.getAttribute('data-weekend-days')) || '';
+    var out = [];
+    raw.split(',').forEach(function (part) {
+      var iso = parseInt(part, 10);
+      if (iso >= 1 && iso <= 7) { out.push(iso === 7 ? 0 : iso); }
+    });
+    return out.length ? out : [4, 5];
+  }
+
   function isWeekendJalali(jy, jm, jd) {
     var g = j2g(jy, jm, jd);
     var d = new Date(g[0], g[1] - 1, g[2]);
-    var n = d.getDay(); // 0 Sun .. 5 Fri 6 Sat — in Iran week starts Sat
-    // JS: Thu=4, Fri=5 — Iranian weekend Thu+Fri
-    return n === 4 || n === 5;
+    return weekendDays().indexOf(d.getDay()) !== -1;
   }
 
   function todayJ() {

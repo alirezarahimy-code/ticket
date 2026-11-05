@@ -112,7 +112,7 @@ actions/backup-actions.php	actions	52	3848
 actions/bulk-actions.php	actions	133	10394
 actions/cd-dvd-actions.php	actions	38	1762
 actions/food-brand-actions.php	actions	45	2747
-actions/holiday-actions.php	actions	145	9122
+actions/holiday-actions.php	actions	193	12053
 actions/notification-actions.php	actions	32	1853
 actions/org-actions.php	actions	842	66585
 actions/role-actions.php	actions	140	8471
@@ -143,7 +143,7 @@ assets/food-order-guest.js	assets	309	18637
 assets/food-order.css	assets	212	19709
 assets/food-order.js	assets	1114	68278
 assets/inspection-food-reminder.js	assets	113	4124
-assets/jalali-calendar.js	assets	334	13294
+assets/jalali-calendar.js	assets	346	13976
 assets/list-sort.js	assets	322	15241
 assets/logging-dashboard.css	assets	5	6692
 assets/logging-dashboard.js	assets	19	645
@@ -338,7 +338,7 @@ food-ticket-web/assets/food-order.css	food-web	212	19709
 food-ticket-web/assets/food-ticket-global-theme-r42.css	food-web	168	14815
 food-ticket-web/assets/food-ticket-persistence.js	food-web	23	1137
 food-ticket-web/assets/food-ticket-theme.css	food-web	420	19438
-food-ticket-web/assets/jalali-calendar.js	food-web	334	13294
+food-ticket-web/assets/jalali-calendar.js	food-web	346	13976
 food-ticket-web/assets/list-sort.js	food-web	322	15241
 food-ticket-web/index.html	food-web	800	237771
 food-ticket-web/integration-contract-fa.md	food-web	24	1961
@@ -350,8 +350,8 @@ food-ticket.php	core	5675	280002
 global-search.php	core	121	12295
 governance.php	core	521	47346
 help-guide.php	core	721	135663
-holiday-board.php	core	47	5564
-index.php	core	3738	373944
+holiday-board.php	core	75	8205
+index.php	core	3738	374107
 install-empty-db.sql	sql-root	1575	80155
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -359,7 +359,7 @@ install.php	core	367	33296
 inventory.php	core	833	43689
 lib/activity-audit.php	lib	599	34995
 lib/asset-identity.php	lib	3	163
-lib/auth-scope.php	lib	398	19182
+lib/auth-scope.php	lib	416	20824
 lib/db-core.php	lib	611	26637
 lib/ldap.php	lib	329	16564
 lib/log-catalog.php	lib	48	20811
@@ -371,7 +371,7 @@ lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	509	25449
 lib/settings-effects.php	lib	385	14247
-lib/tickets-sla.php	lib	789	36895
+lib/tickets-sla.php	lib	864	40697
 local-accounts.php	core	216	12240
 logging-dashboard.php	core	162	19905
 migrations/001-local-accounts.sql	migrations	6	545
@@ -462,6 +462,7 @@ tests/test_change_history_through_16259.py	tests	83	4005
 tests/test_chatbot_relevance.py	tests	123	4665
 tests/test_chatbot_tts_static.py	tests	144	9034
 tests/test_chatbot_widget_static.py	tests	76	4007
+tests/test_duty_split_and_work_hours_static.py	tests	246	13020
 tests/test_food_aggregate_report_static.py	tests	148	7669
 tests/test_food_bulk_operations_static.py	tests	104	5801
 tests/test_food_cancel_request_timestamp.py	tests	32	1442
@@ -504,7 +505,7 @@ tests/test_food_ticket_diagnostic_log_levels_static.py	tests	62	3240
 tests/test_food_ticket_logic.php	tests	51	3199
 tests/test_food_update_package_assets.py	tests	69	3184
 tests/test_food_worker_window.php	tests	140	8485
-tests/test_food_worker_window_static.py	tests	451	21736
+tests/test_food_worker_window_static.py	tests	451	21758
 tests/test_fresh_install_schema_parity.py	tests	314	14808
 tests/test_global_theme_mode.py	tests	62	3408
 tests/test_group_ticket_design_repair_static.py	tests	38	2227
@@ -566,7 +567,7 @@ tests/test_release_1_62_13_ticket_asset_actions_static.py	tests	134	7013
 tests/test_release_1_62_14_service_actions_static.py	tests	117	6131
 tests/test_release_1_62_15_service_modal_fix_static.py	tests	104	5880
 tests/test_release_1_62_16_role_settings_actions_static.py	tests	122	6420
-tests/test_release_1_62_17_supervisor_holiday_actions_static.py	tests	116	6179
+tests/test_release_1_62_17_supervisor_holiday_actions_static.py	tests	118	6338
 tests/test_release_1_62_18_account_misc_actions_static.py	tests	112	6129
 tests/test_release_1_62_19_bulk_user_structure_actions_static.py	tests	119	6376
 tests/test_release_1_62_20_backup_split_bootstrap_lib_static.py	tests	182	9477
@@ -606,7 +607,7 @@ tests/test_ticket_cancellation_static.py	tests	133	8418
 tests/test_ticket_lifecycle_guide_static.py	tests	41	1801
 tests/test_ticket_number_autofill_unit.php	tests	158	7261
 tests/test_ticket_number_repair_static.py	tests	145	6732
-tests/test_ticket_routing_unit.php	tests	133	11280
+tests/test_ticket_routing_unit.php	tests	181	15390
 tests/test_ticket_scope_sql_node.js	tests	21	2883
 tests/test_ticket_sla_unit.php	tests	51	3353
 tests/test_ticket_three_views_static.py	tests	154	8121

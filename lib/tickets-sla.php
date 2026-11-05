@@ -607,33 +607,107 @@ function ola_deadlines(?int $departmentId, string $priority, string $createdAt):
     ];
 }
 
+/**
+ * تقویم کاری سازمان: ساعت شروع، ساعت پایان و روزهای تعطیل هفتگی.
+ *
+ * پیش‌تر این سه مقدار در متن سه تابع جداگانه هاردکد بود (۸ تا ۱۶، پنج‌شنبه و جمعه).
+ * اکنون از جدول تنظیمات خوانده می‌شود تا سازمانی با شیفت دیگر یا تعطیلی فقط جمعه
+ * هم بتواند SLA درست حساب کند.
+ *
+ * اعتبارسنجی اینجا تزئینی نیست و حتماً باید بماند: business_due_at() حلقه‌ای دارد که
+ * تا تمام‌شدن دقیقه‌های مهلت جلو می‌رود. اگر ساعت پایان کوچک‌تر یا مساوی ساعت شروع
+ * شود ظرفیت هر روز صفر می‌شود و آن حلقه هرگز تمام نمی‌شود؛ و اگر هر هفت روز هفته
+ * تعطیل اعلام شود next_business_start() بی‌نهایت جلو می‌رود. هر مقدار نامعتبر به
+ * همین دلیل بی‌صدا به پیش‌فرض برمی‌گردد، چون یک SLA اشتباه خیلی بهتر از قفل‌شدن
+ * کل مسیر درخواست است.
+ *
+ * @return array{start:int, end:int, weekend:list<int>}
+ */
+function sla_business_hours(bool $forget = false): array
+{
+    static $cache = null;
+    if ($forget) {
+        $cache = null;
+        return ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
+    }
+    if ($cache !== null) {
+        return $cache;
+    }
+    $default = ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
+    if (!function_exists('setting')) {
+        return $cache = $default;
+    }
+    try {
+        $start = (int) setting('sla.work_start_hour', '8');
+        $end = (int) setting('sla.work_end_hour', '16');
+        $weekendRaw = (string) setting('sla.weekend_days', '4,5');
+    } catch (Throwable) {
+        return $cache = $default;
+    }
+    if ($start < 0 || $start > 23 || $end <= $start || $end > 24) {
+        $start = $default['start'];
+        $end = $default['end'];
+    }
+    $weekend = [];
+    foreach (explode(',', $weekendRaw) as $day) {
+        $day = (int) trim($day);
+        if ($day >= 1 && $day <= 7 && !in_array($day, $weekend, true)) {
+            $weekend[] = $day;
+        }
+    }
+    // هفتهٔ کاملاً تعطیل پذیرفته نیست؛ وگرنه هیچ روز کاری‌ای برای رسیدن وجود ندارد.
+    if (count($weekend) >= 7) {
+        $weekend = $default['weekend'];
+    }
+    return $cache = ['start' => $start, 'end' => $end, 'weekend' => array_values($weekend)];
+}
+
+/**
+ * فراموش‌کردن کش تقویم کاری — پس از ذخیرهٔ تنظیمات در همان درخواست.
+ *
+ * بدون این، مقدار قدیمی تا پایان درخواست جاری باقی می‌ماند و صفحهٔ بازگشتی
+ * هنوز ساعت قبلی را نشان می‌دهد. تست‌های رفتاری هم با همین تابع می‌توانند چند
+ * پیکربندی مختلف را در یک پروسه بسنجند.
+ */
+function sla_business_hours_forget_cache(): void
+{
+    sla_business_hours(true);
+}
+
 function next_business_start(DateTimeImmutable $date): DateTimeImmutable
 {
+    $hours = sla_business_hours();
     $date = $date->setTimezone(new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran')));
-    while (in_array((int) $date->format('N'), [4, 5], true) || is_sla_holiday($date)) {
-        $date = $date->modify('+1 day')->setTime(8, 0);
+    while (in_array((int) $date->format('N'), $hours['weekend'], true) || is_sla_holiday($date)) {
+        $date = $date->modify('+1 day')->setTime($hours['start'], 0);
     }
-    if ((int) $date->format('H') < 8) {
-        return $date->setTime(8, 0);
+    if ((int) $date->format('H') < $hours['start']) {
+        return $date->setTime($hours['start'], 0);
     }
-    if ((int) $date->format('H') >= 16) {
-        return next_business_start($date->modify('+1 day')->setTime(8, 0));
+    if ((int) $date->format('H') >= $hours['end']) {
+        return next_business_start($date->modify('+1 day')->setTime($hours['start'], 0));
     }
     return $date;
 }
 
 function business_due_at(int $minutes, ?DateTimeImmutable $start = null): DateTimeImmutable
 {
+    $hours = sla_business_hours();
     $cursor = next_business_start($start ?: new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))));
     $remaining = max(0, $minutes);
     while ($remaining > 0) {
-        $end = $cursor->setTime(16, 0);
+        $end = $cursor->setTime($hours['end'], 0);
         $available = (int) (($end->getTimestamp() - $cursor->getTimestamp()) / 60);
+        if ($available <= 0) {
+            // نباید پیش بیاید چون sla_business_hours() بازهٔ وارونه را مهار می‌کند،
+            // ولی اگر روزی مهار دور زده شود این شرط جلوی حلقهٔ بی‌نهایت را می‌گیرد.
+            return $cursor;
+        }
         if ($remaining <= $available) {
             return $cursor->modify('+' . $remaining . ' minutes');
         }
         $remaining -= $available;
-        $cursor = next_business_start($cursor->modify('+1 day')->setTime(8, 0));
+        $cursor = next_business_start($cursor->modify('+1 day')->setTime($hours['start'], 0));
     }
     return $cursor;
 }
@@ -646,18 +720,19 @@ function business_elapsed_minutes(DateTimeImmutable $start, DateTimeImmutable $e
     if ($finish <= $cursor) {
         return 0;
     }
+    $hours = sla_business_hours();
     $minutes = 0;
     while ($cursor->format('Y-m-d') <= $finish->format('Y-m-d')) {
-        if (!in_array((int) $cursor->format('N'), [4, 5], true) && !is_sla_holiday($cursor)) {
-            $dayStart = $cursor->setTime(8, 0);
-            $dayEnd = $cursor->setTime(16, 0);
+        if (!in_array((int) $cursor->format('N'), $hours['weekend'], true) && !is_sla_holiday($cursor)) {
+            $dayStart = $cursor->setTime($hours['start'], 0);
+            $dayEnd = $cursor->setTime($hours['end'], 0);
             $from = $cursor > $dayStart ? $cursor : $dayStart;
             $to = $finish < $dayEnd ? $finish : $dayEnd;
             if ($to > $from) {
                 $minutes += (int) floor(($to->getTimestamp() - $from->getTimestamp()) / 60);
             }
         }
-        $cursor = $cursor->modify('+1 day')->setTime(8, 0);
+        $cursor = $cursor->modify('+1 day')->setTime($hours['start'], 0);
     }
     return $minutes;
 }
