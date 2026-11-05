@@ -147,14 +147,15 @@ function __test_register_shutdown(callable $cb): void
 }
 
 /* ───────── بارگذاری توابع تحت آزمون (بدون bootstrap واقعی) ───────── */
-$bootstrap = dirname(__DIR__) . '/bootstrap.php';
-eval(grabFunction($bootstrap, 'db_in_transaction'));
-eval(grabFunction($bootstrap, 'db_commit'));
-eval(grabFunction($bootstrap, 'db_rollback'));
-$ensureRun = grabFunction($bootstrap, 'ticket_number_ensure_schema_run');
+$dbCore = dirname(__DIR__) . '/lib/db-core.php';
+$ticketsSla = dirname(__DIR__) . '/lib/tickets-sla.php';
+eval(grabFunction($dbCore, 'db_in_transaction'));
+eval(grabFunction($dbCore, 'db_commit'));
+eval(grabFunction($dbCore, 'db_rollback'));
+$ensureRun = grabFunction($ticketsSla, 'ticket_number_ensure_schema_run');
 $ensureRun = str_replace('register_shutdown_function(', '__test_register_shutdown(', $ensureRun);
 eval($ensureRun);
-eval(grabFunction($bootstrap, 'ticket_number_ensure_schema'));
+eval(grabFunction($ticketsSla, 'ticket_number_ensure_schema'));
 
 echo "=== آزمون تراکنش درخواست (۱.۳۴) ===\n\n";
 
@@ -220,8 +221,8 @@ check('۷: در create_ticket هیچ db()->commit() خامی نمانده', strp
 check('۷-ب: create_ticket از db_commit استفاده می‌کند', strpos($body, "db_commit('index.php')") !== false);
 check('۷-پ: یک‌بار متغیر $ticketNo ساخته می‌شود و داخل تراکنش پیام خطا نمی‌دهد', substr_count($body, 'ticket_number_next(') === 1, (string) substr_count($body, 'ticket_number_next('));
 
-$bootstrapSrc = (string) file_get_contents($bootstrap);
-check('۷-ت: شماره‌گذاری درخواست، DDL خود را با SELECT بررسی می‌کند', strpos($bootstrapSrc, "SELECT 1 FROM ticket_number_seq LIMIT 1") !== false);
+$ticketsSlaSrc = (string) file_get_contents($ticketsSla);
+check('۷-ت: شماره‌گذاری درخواست، DDL خود را با SELECT بررسی می‌کند', strpos($ticketsSlaSrc, "SELECT 1 FROM ticket_number_seq LIMIT 1") !== false);
 check('۷-ث: اسکیمای شماره‌گذاری قبل از هر تراکنش در ابتدای درخواست آماده می‌شود', strpos($index, 'ticket_number_ensure_schema();') !== false);
 
 echo "\n";
