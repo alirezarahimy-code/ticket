@@ -15,7 +15,13 @@ $root = dirname(__DIR__);
 require_once $root . '/permissions.php';
 
 // کش نقش‌ها را به‌جای دیتابیس پر می‌کنیم: بازرس فقط گروه‌های غذا (مشاهده + ویرایش).
-$GLOBALS['__role_permission_codes'] = ['inspector' => ['food.groups', 'food.groups_edit']];
+$GLOBALS['__role_permission_codes'] = [
+    'inspector' => ['food.groups', 'food.groups_edit'],
+    'group_viewer' => ['food.groups'],
+    'monitor_viewer' => ['food.monitor'],
+    'db_editor' => ['food.db', 'food.db_edit'],
+    'db_viewer' => ['food.db'],
+];
 $GLOBALS['__role_permission_sets'] = [];
 
 $pass = 0;
@@ -59,6 +65,16 @@ foreach ($readRoutes as $route) {
 $_SERVER['REQUEST_METHOD'] = 'POST';
 check('ثبت غیبت گروه‌ها با food.groups_edit باز است', food_ticket_route_allowed($user, 'absence-save'));
 check('ثبت در فهرست سفارش‌ها بسته است', !food_ticket_route_allowed($user, 'orders-import'));
+
+$groupViewer = ['id' => 2, 'role' => 'group_viewer', 'is_primary_admin' => 0];
+$monitorViewer = ['id' => 3, 'role' => 'monitor_viewer', 'is_primary_admin' => 0];
+$dbEditor = ['id' => 4, 'role' => 'db_editor', 'is_primary_admin' => 0];
+$dbViewer = ['id' => 5, 'role' => 'db_viewer', 'is_primary_admin' => 0];
+check('لغو تردد با دسترسی صرفاً مشاهدهٔ گروه‌ها بسته است', !food_ticket_route_allowed($groupViewer, 'food-visit-cancel'));
+check('لغو تردد فقط با food.groups_edit باز است', food_ticket_route_allowed($user, 'food-visit-cancel'));
+check('پاک‌سازی SOURCE_TABLE با دسترسی صرفاً نظارت بسته است', !food_ticket_route_allowed($monitorViewer, 'cleanup-source_row'));
+check('پاک‌سازی SOURCE_TABLE با food.db_edit باز است', food_ticket_route_allowed($dbEditor, 'cleanup-source_row'));
+check('حذف تشخیصی ردیف منبع حتی با GET به food.db_edit نیاز دارد', !food_ticket_route_allowed($dbViewer, 'diag-source_row-delete'));
 
 // پیش‌فرض نقش user: بخش‌های چاپ فیش و نظارت برداشته شده‌اند؛ سفارش غذای خود باقی است.
 $userDefaults = permission_defaults()['user'] ?? [];
