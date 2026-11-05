@@ -171,7 +171,7 @@ def build(output_dir: Path) -> tuple[Path, Path]:
     for migration_path in OVERLAY_MIGRATIONS:
         migration_file = ROOT / migration_path
         migration_name = migration_file.name
-        if not re.fullmatch(r"\\d{3}-[a-z0-9-]+\\.sql", migration_name):
+        if not re.fullmatch(r"\d{3}-[a-z0-9-]+\.sql", migration_name):
             raise SystemExit(f"Unsafe release migration name: {migration_name}")
         migration_data = migration_file.read_bytes()
         migrations[migration_name] = migration_data
