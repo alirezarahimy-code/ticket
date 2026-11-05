@@ -233,7 +233,7 @@ docs/STAGING-ACCEPTANCE-REPORT-1.62.76-FA.md	docs	21	1419
 docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
 docs/SYSTEM-MAP-FA.md	docs	551	37833
 docs/TEST-ALIGNMENT-1.62.59-FA.md	docs	87	6996
-docs/TEST-DEBT-FA.md	docs	115	8764
+docs/TEST-DEBT-FA.md	docs	143	11035
 docs/TEST-REPORT-1.62.76-FA.md	docs	30	2546
 docs/TEST_COVERAGE_MATRIX_FA.md	docs	50	8233
 docs/USER-ACCESS-GROUPS-FA.md	docs	43	3988
@@ -290,10 +290,12 @@ downloads/SHA256SUMS-1.62.76.txt	history-downloads	2	219
 downloads/SHA256SUMS-1.62.77.txt	history-downloads	3	344
 downloads/SHA256SUMS-1.62.79.txt	history-downloads	3	361
 downloads/SHA256SUMS-1.62.80.txt	history-downloads	2	230
+downloads/TICKET-HARDENING-1.62.87-CHANGE-REPORT-fa.md	history-downloads	189	13393
+downloads/TICKET-HARDENING-1.62.87-UPDATE-NOTE-fa.txt	history-downloads	113	7178
 downloads/TICKET-NUMBER-REPAIR-1.62.83-CHANGE-REPORT-fa.md	history-downloads	172	10838
 downloads/TICKET-NUMBER-REPAIR-1.62.83-UPDATE-NOTE-fa.txt	history-downloads	91	7839
 downloads/URGENT-FIX-1.62.38-FA.md	history-downloads	51	3340
-downloads/index.html	history-downloads	40	6769
+downloads/index.html	history-downloads	36	8871
 downloads/repair-1.62.36.html	history-downloads	54	6825
 downloads/ticket-repair-1.62.36-full-source-restore-20261027.html	history-downloads	21	5176
 food-order-import.php	core	476	26389
@@ -1077,6 +1079,9 @@ updates/2026-11-04-user-access-groups-1.62.75/CHANGE-REPORT-FA-1.62.75.md	histor
 updates/2026-11-04-user-access-groups-1.62.75/README.md	history-updates	11	898
 updates/2026-11-04-user-access-groups-1.62.75/manifest.json	history-updates	87	3101
 updates/2026-11-04-user-access-groups-1.62.75/migrations/023-user-access-groups.sql	history-updates	38	2475
+updates/2026-11-05-ticket-hardening-1.62.87/CHANGE-REPORT-FA-1.62.87.md	history-updates	189	13393
+updates/2026-11-05-ticket-hardening-1.62.87/PACKAGE-README.md	history-updates	13	949
+updates/2026-11-05-ticket-hardening-1.62.87/manifest.json	history-updates	71	2537
 updates/2026-11-05-ticket-number-repair-1.62.83/CHANGE-REPORT-FA-1.62.83.md	history-updates	172	10838
 updates/2026-11-05-ticket-number-repair-1.62.83/README.md	history-updates	13	912
 updates/2026-11-05-ticket-number-repair-1.62.83/manifest.json	history-updates	21	694
