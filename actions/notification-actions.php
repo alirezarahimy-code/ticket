@@ -21,7 +21,8 @@ if (!defined('APP_ROOT')) {
 
         // ───── گروه اکشن: اعلان‌ها ─────
         if ($action === 'mark_all_notifications') {
-            db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0')->execute([(int) $user['id']]);
+            $notificationUser = require_login();
+            db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0')->execute([(int) $notificationUser['id']]);
             flash('success', 'همه اعلان‌ها خوانده‌شده علامت‌گذاری شدند.');
             redirect('index.php?page=notifications');
         }
