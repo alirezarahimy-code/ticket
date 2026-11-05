@@ -77,7 +77,7 @@ function system_update_requires_violation(string $current, mixed $requires, stri
  */
 function system_update_archive_path_is_safe(string $name): bool
 {
-    if ($name === '' || str_contains($name, "\0") || str_contains($name, '\\\\')
+    if ($name === '' || str_contains($name, "\0") || str_contains($name, '\\')
         || str_starts_with($name, '/') || preg_match('/^[A-Za-z]:/', $name)) {
         return false;
     }
@@ -113,7 +113,7 @@ function system_update_validate_zip_entries(ZipArchive $zip): void
         if (isset($seen[$key])) {
             throw new RuntimeException('نام تکراری یا ناسازگار با Windows در ZIP: ' . $name);
         }
-        $seen[$key] = true;
+        $seen[$key] = ['directory' => str_ends_with($name, '/')];
         $stat = $zip->statIndex($i);
         if (!is_array($stat)) {
             throw new RuntimeException('اطلاعات ورودی ZIP قابل خواندن نیست: ' . $name);
@@ -137,7 +137,7 @@ function system_update_validate_zip_entries(ZipArchive $zip): void
         $parts = explode('/', $key); array_pop($parts); $parent = '';
         foreach ($parts as $part) {
             $parent = $parent === '' ? $part : $parent . '/' . $part;
-            if (isset($seen[$parent])) {
+            if (isset($seen[$parent]) && !$seen[$parent]['directory']) {
                 throw new RuntimeException('تعارض فایل/پوشه در ساختار ZIP: ' . $key);
             }
         }
