@@ -1,10 +1,11 @@
 name: Logging 1.62.82 Acceptance
 
-# فقط اجرای دستی. این گردش‌کار به MariaDB و Windows runner نیاز دارد و تا تأیید روی
-# Staging نباید خودکار اجرا شود. کلید push عمداً حذف شده است — یک کلید ناشناخته زیر on:
-# کل فایل را نامعتبر می‌کند و گردش‌کار پیش از ساخت job قرمز می‌شود.
+# اجرای PR فقط از دیتابیس MariaDB دورریختنی و پوشه‌های موقت Windows استفاده می‌کند.
+# بررسی‌های عملیاتی Staging همچنان دستی و با RunOperational اجرا می‌شوند.
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ main ]
 
 permissions:
   contents: read
