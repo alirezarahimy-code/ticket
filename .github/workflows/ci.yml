@@ -80,7 +80,7 @@ jobs:
       run: php tests/test_system_update_archive_zip.php
 
     - name: Run update and Windows acceptance static contracts
-      run: python -m pytest -q tests/test_update_manifest_guard_static.py tests/test_windows_logging_static.py tests/test_migration_registry_seed.py tests/test_backup_restore_static.py
+      run: python -m pytest -q tests/test_update_manifest_guard_static.py tests/test_windows_logging_static.py tests/test_migration_registry_seed.py tests/test_backup_restore_static.py tests/test_route_security_static.py
 
     - name: Verify fresh-install schema parity
       run: python -m pytest -q tests/test_fresh_install_schema_parity.py
