@@ -8,7 +8,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $ApplicationRoot).Path
 $target = Join-Path $root 'storage\logs'
-$broadSids = @('S-1-1-0','S-1-5-11','S-1-5-32-545')
+$broadSids = @('S-1-1-0','S-1-5-11','S-1-5-32-545','S-1-5-32-546','S-1-5-4','S-1-5-2','S-1-5-14','S-1-5-113')
 $issues = [System.Collections.Generic.List[string]]::new()
 if (-not (Test-Path -LiteralPath $target -PathType Container)) {
     $issues.Add("Logging directory is missing: $target")
