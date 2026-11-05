@@ -4772,31 +4772,31 @@ function food_ticket_api_upload_access_file(array $user): never
         @unlink($destination);
         food_ticket_api_json(['error' => 'مسیر نهایی فایل روی سرور خوانده نشد.'], 500);
     }
+    $pdo = db();
+    $pdo->beginTransaction();
     try {
         $column = food_ticket_db_column('attendance_path');
         if (!preg_match('/^[A-Za-z0-9_]+$/', $column)) {
             throw new RuntimeException('نام ستون مسیر دیتابیس معتبر نیست.');
         }
-        $exists = db()->query('SELECT id FROM food_ticket_config WHERE id = 1')->fetchColumn();
+        $exists = $pdo->query('SELECT id FROM food_ticket_config WHERE id = 1')->fetchColumn();
         if ($exists === false) {
             throw new RuntimeException('ردیف تنظیمات فیش غذا ساخته نشده است؛ ابتدا تنظیمات را در پنل ذخیره کنید.');
         }
-        $stmt = db()->prepare('UPDATE food_ticket_config SET `' . $column . '` = ? WHERE id = 1');
+        $stmt = $pdo->prepare('UPDATE food_ticket_config SET `' . $column . '` = ? WHERE id = 1');
         $stmt->execute([$realPath]);
         $savedPath = db()->query('SELECT `' . $column . '` FROM food_ticket_config WHERE id = 1')->fetchColumn();
         if (!is_string($savedPath) || $savedPath !== $realPath) {
             throw new RuntimeException('مسیر فایل در تنظیمات ذخیره نشد یا با مسیر بارگذاری‌شده یکی نیست.');
         }
-        if (function_exists('save_audit_required')) {
-            try {
-                save_audit_required((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
-            } catch (Throwable $auditError) {
-                app_error_log('[food-ticket] database upload audit failed: ' . $auditError->getMessage());
-            }
-        }
+        save_audit_required((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
+        $pdo->commit();
         food_ticket_config(true);
         food_ticket_api_json(['ok' => true, 'kind' => $kind, 'path' => $realPath, 'message' => 'فایل بارگذاری شد و مسیر سرور ذخیره شد.']);
     } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         @unlink($destination);
         food_ticket_api_json(['error' => 'فایل بارگذاری شد اما مسیر در تنظیمات ذخیره نشد: ' . $e->getMessage()], 500);
     }
