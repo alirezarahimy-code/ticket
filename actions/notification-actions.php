@@ -27,7 +27,8 @@ if (!defined('APP_ROOT')) {
             redirect('index.php?page=notifications');
         }
         if ($action === 'mark_notification') {
+            $notificationUser = require_login();
             $notificationId = (int) ($_POST['notification_id'] ?? 0);
-            db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?')->execute([$notificationId, (int) $user['id']]);
+            db()->prepare('UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?')->execute([$notificationId, (int) $notificationUser['id']]);
             redirect('index.php?page=notifications');
         }
