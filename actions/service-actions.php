@@ -97,7 +97,7 @@ if (!defined('APP_ROOT')) {
             }
             db()->prepare('UPDATE service_catalog SET name = ?, code = ?, description = ?, service_group = ?, default_priority = ?, department_id = ?, category_id = ?, handling_unit_id = ?, default_ticket_type = ?, requires_asset = ?, is_active = ? WHERE id = ?')
                 ->execute([$name, $code, post_value('service_description'), $serviceGroup, $priority, (int) post_value('department_id', '0') ?: null, $categoryId, $handlingUnitId, $defaultType, $serviceGroup === 'it' ? 1 : 0, post_value('is_active') === '1' ? 1 : 0, $serviceId]);
-            save_audit((int) $serviceAdmin['id'], 'service_updated', null, ['service_id' => $serviceId, 'name' => $name]);
+            save_audit_required((int) $serviceAdmin['id'], 'service_updated', null, ['service_id' => $serviceId, 'name' => $name]);
             flash('success', 'خدمت ویرایش شد.');
             redirect('index.php?page=services#tab-list');
         }
@@ -111,7 +111,7 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('خدمت انتخابی معتبر نیست.');
             }
             db()->prepare('UPDATE service_catalog SET is_active = 0 WHERE id = ?')->execute([$serviceId]);
-            save_audit((int) $serviceAdmin['id'], 'service_deleted', null, ['service_id' => $serviceId]);
+            save_audit_required((int) $serviceAdmin['id'], 'service_deleted', null, ['service_id' => $serviceId]);
             flash('success', 'خدمت از کاتالوگ حذف شد.');
             redirect('index.php?page=services#tab-list');
         }
@@ -133,7 +133,7 @@ if (!defined('APP_ROOT')) {
                 db()->prepare('INSERT INTO categories (name, code, service_group, is_active) VALUES (?, ?, ?, ?)')
                     ->execute([$name, $code !== '' ? $code : null, $serviceGroup, $isActive]);
             }
-            save_audit((int) $serviceAdmin['id'], 'service_category_saved', null, ['category_id' => $categoryId, 'name' => $name]);
+            save_audit_required((int) $serviceAdmin['id'], 'service_category_saved', null, ['category_id' => $categoryId, 'name' => $name]);
             flash('success', 'دسته‌بندی ذخیره شد.');
             redirect('index.php?page=services#tab-categories');
         }
@@ -145,7 +145,7 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('دسته‌بندی انتخابی معتبر نیست.');
             }
             db()->prepare('UPDATE categories SET is_active = 0 WHERE id = ?')->execute([$categoryId]);
-            save_audit((int) $serviceAdmin['id'], 'service_category_deleted', null, ['category_id' => $categoryId]);
+            save_audit_required((int) $serviceAdmin['id'], 'service_category_deleted', null, ['category_id' => $categoryId]);
             flash('success', 'دسته‌بندی غیرفعال شد.');
             redirect('index.php?page=services#tab-categories');
         }
