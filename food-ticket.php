@@ -4790,8 +4790,8 @@ function food_ticket_api_upload_access_file(array $user): never
             throw new RuntimeException('مسیر فایل در تنظیمات ذخیره نشد یا با مسیر بارگذاری‌شده یکی نیست.');
         }
         save_audit_required((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
-        $pdo->commit();
         food_ticket_config(true);
+        $pdo->commit();
         food_ticket_api_json(['ok' => true, 'kind' => $kind, 'path' => $realPath, 'message' => 'فایل بارگذاری شد و مسیر سرور ذخیره شد.']);
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
