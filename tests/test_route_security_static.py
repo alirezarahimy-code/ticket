@@ -30,14 +30,15 @@ def test_food_ticket_api_requires_login_and_csrf_for_post():
     food = read("food-ticket.php")
     api = section(food, "function food_ticket_api_handle(", "\nfunction ")
     assert "require_food_ticket_access()" in api
-    assert "if ($method === 'POST') {" in api
+    assert "$_SERVER['REQUEST_METHOD'] === 'POST'" in api
     assert "require_csrf();" in api
 
 
-def test_food_order_api_requires_login_and_csrf_for_post():
+def test_food_order_api_requires_authenticated_user_and_csrf_for_post():
     food = read("food-order.php")
     api = section(food, "function food_order_api_handle(", "\nfunction ")
-    assert "require_login()" in api
+    assert "if (!$user)" in api
+    assert "], 401);" in api
     assert "if ($method === 'POST') {" in api
     assert "require_csrf();" in api
 
