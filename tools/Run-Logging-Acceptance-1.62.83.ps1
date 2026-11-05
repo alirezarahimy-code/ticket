@@ -51,7 +51,14 @@ foreach ($relative in $releaseFiles) {
 
 $php = if ($env:PHP_EXE) { $env:PHP_EXE } else {
     $command = Get-Command php.exe -ErrorAction SilentlyContinue
-    if ($command) { $command.Source } else { $null }
+    if ($command) {
+        $command.Source
+    } else {
+        # Standard XAMPP layout: <xampp>\htdocs\<app> and <xampp>\php\php.exe.
+        $xamppRoot = Split-Path (Split-Path $InstallPath -Parent) -Parent
+        $candidate = Join-Path $xamppRoot 'php\php.exe'
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) { $candidate } else { $null }
+    }
 }
 if (-not $php -or -not (Test-Path -LiteralPath $php -PathType Leaf)) {
     throw 'PHP CLI was not found. Set PHP_EXE to the full path of php.exe.'
