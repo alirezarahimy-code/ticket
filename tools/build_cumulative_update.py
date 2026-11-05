@@ -41,6 +41,7 @@ OVERLAY_FILES = (
     "install-empty-db.sql",
     "lib/logging-audit.php",
     "local-accounts.php",
+    "migrations/026-logging-legacy-result-unknown.sql",
     "schema.sql",
     "traffic-control.php",
     "traffic-import.php",
