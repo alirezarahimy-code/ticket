@@ -11,7 +11,7 @@ import hashlib
 import json
 import subprocess
 import zipfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.62.88"
@@ -58,10 +58,17 @@ def changed_files() -> list[str]:
 
 def safe_archive_path(name: str) -> bool:
     p = PurePosixPath(name)
-    return bool(name) and not p.is_absolute() and "\\\\" not in name and all(
-        part not in ("", ".", "..") for part in p.parts
+    win = PureWindowsPath(name)
+    return (
+        bool(name)
+        and not p.is_absolute()
+        and not win.is_absolute()
+        and not win.drive
+        and "\\" not in name
+        and "//" not in name
+        and not name.endswith("/")
+        and all(part not in ("", ".", "..") for part in p.parts)
     )
-
 
 def validate_archive(path: Path, expected_manifest: dict) -> str:
     with zipfile.ZipFile(path, "r") as z:
