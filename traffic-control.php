@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 require_once __DIR__ . '/traffic-import.php';
 
 // کنترل تردد مراجعین و میهمانان — پورت‌شده از کنترل_تردد.xlsm
