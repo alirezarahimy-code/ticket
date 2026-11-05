@@ -23,7 +23,8 @@ if (!defined('APP_ROOT')) {
             redirect('index.php?page=backup');
         }
         if ($action === 'restore_backup') {
-            $backupAdmin = require_permission('backup.manage');
+            $backupAdmin = require_primary_admin();
+            require_permission('backup.manage');
             if (post_value('restore_confirm') !== '1') {
                 throw new RuntimeException('برای بازیابی باید تأیید نهایی را فعال کنید.');
             }
