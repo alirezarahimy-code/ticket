@@ -8,7 +8,7 @@ import hashlib
 import json
 import re
 import zipfile
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE_PACKAGE = ROOT / "downloads" / "ticket-update-1.62.77-to-1.62.82-audit-visibility-20261105.zip"
@@ -105,7 +105,7 @@ def load_base_package() -> tuple[dict, dict[str, bytes], dict[str, bytes]]:
     if not migrations:
         raise SystemExit("Base package has no migrations; refusing to build a cumulative package.")
     expected_files = set(manifest.get("files", []))
-    if expected_files and expected_files != set(files):
+    if "files" in manifest and expected_files != set(files):
         raise SystemExit("Base package files inventory does not match its manifest.")
     expected_migrations = set(manifest.get("migrations", []))
     if expected_migrations != set(migrations):
