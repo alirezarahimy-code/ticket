@@ -97,10 +97,22 @@ function lac_change_password_request(): never
         } elseif ($new === LAC_DEFAULT_PASSWORD) {
             flash('danger', 'رمز جدید نباید همان رمز پیش‌فرض باشد.');
         } else {
-            db()->prepare('UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?')
-                ->execute([password_hash($new, PASSWORD_DEFAULT), (int) $user['id']]);
-            flash('success', 'رمز شما تغییر کرد.');
-            redirect('index.php');
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?')
+                    ->execute([password_hash($new, PASSWORD_DEFAULT), (int) $user['id']]);
+                save_audit_required((int) $user['id'], 'password_changed', null, ['method' => 'self_service']);
+                $pdo->commit();
+                flash('success', 'رمز شما تغییر کرد.');
+                redirect('index.php');
+            } catch (Throwable $passwordError) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                app_error_log('[local-accounts] password change failed: ' . $passwordError->getMessage());
+                flash('danger', 'تغییر رمز انجام نشد؛ لطفاً دوباره تلاش کنید.');
+            }
         }
         redirect('index.php?page=change-password');
     }
