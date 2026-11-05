@@ -44,6 +44,8 @@ Write-Host '== Transaction/commit contract test =='
 Invoke-PhpTest -Path (Join-Path $Root 'tools/test_ticket_txn_offline.php') -RequireExecution | Out-Null
 Invoke-PhpTest -Path (Join-Path $Root 'tools/test_module_grant_offline.php') -RequireExecution | Out-Null
 Invoke-PhpTest -Path (Join-Path $Root 'tests/test_system_update_migration_registry.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tests/test_asset_scope_permissions.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tools/test_access_coverage_offline.php') -RequireExecution | Out-Null
 Invoke-PhpTest -Path (Join-Path $Root 'tests/test_backup_restore_archive.php') -RequireExecution | Out-Null
 
 Write-Host '== PHP Logging tests =='
