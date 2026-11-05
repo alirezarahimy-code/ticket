@@ -259,13 +259,13 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
                 $update = db()->prepare('UPDATE org_units SET sort_order = ? WHERE id = ? AND parent_id = ? AND company_id = ? AND unit_type IN ("deputy", "management") AND is_active = 1');
                 foreach ($ids as $index => $id) $update->execute([($index + 1) * 10, $id, $rootId, $orgCompanyId]);
+                save_audit_required((int) $orgAdmin['id'], 'org_root_units_sorted', null, ['unit_ids' => $ids]);
                 db()->commit();
             } catch (Throwable $error) {
                 if (db()->inTransaction()) db()->rollBack();
                 throw $error;
             }
             org_record_undo('مرتب‌سازی کارت‌های هم‌رده', $snapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_root_units_sorted', null, ['unit_ids' => $ids]);
             flash('success', 'ترتیب کارت‌ها ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -296,13 +296,13 @@ if (in_array($action, $orgCompanyActions, true)) {
             try {
                 $updateOrder = db()->prepare('UPDATE org_units SET sort_order = ? WHERE id = ? AND parent_id = ? AND company_id = ? AND unit_type = "deputy"');
                 foreach ($ids as $index => $id) $updateOrder->execute([($index + 1) * 10, $id, $ceoId, $orgCompanyId]);
+                save_audit_required((int) $orgAdmin['id'], 'org_deputies_sorted', null, ['unit_ids' => $ids]);
                 db()->commit();
             } catch (Throwable $sortError) {
                 if (db()->inTransaction()) db()->rollBack();
                 throw $sortError;
             }
             org_record_undo('مرتب‌سازی معاونت‌ها', $snapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_deputies_sorted', null, ['unit_ids' => $ids]);
             flash('success', 'ترتیب معاونت‌ها ذخیره شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -345,9 +345,9 @@ if (in_array($action, $orgCompanyActions, true)) {
             } else {
                 db()->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = NULL WHERE id = ?')->execute([(int) $target['id'], $userId]);
             }
+            save_audit_required((int) $orgAdmin['id'], 'org_manager_assigned', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $userId]);
             db_commit('index.php');
             org_record_undo('انتصاب مدیر سازمان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_manager_assigned', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $userId]);
             flash('success', '«' . (string) $managerUser['full_name'] . '» برای «' . (string) $target['name'] . '» منصوب شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . (int) $target['id']));
         }
@@ -372,9 +372,9 @@ if (in_array($action, $orgCompanyActions, true)) {
             if ($managerId > 0) {
                 db()->prepare('UPDATE users SET org_unit_id = NULL, manager_user_id = NULL WHERE id = ? AND org_unit_id = ?')->execute([$managerId, (int) $target['id']]);
             }
+            save_audit_required((int) $orgAdmin['id'], 'org_manager_removed', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $managerId]);
             db_commit('index.php');
             org_record_undo('عزل مدیر سازمان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_manager_removed', null, ['unit_id' => (int) $target['id'], 'target_type' => $targetType, 'user_id' => $managerId]);
             flash('success', 'مدیر «' . (string) $target['name'] . '» عزل شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . (int) $target['id']));
         }
@@ -436,9 +436,9 @@ if (in_array($action, $orgCompanyActions, true)) {
             foreach ($validIds as $userId) {
                 $assign->execute([$unitId, $managerId > 0 && $managerId !== $userId ? $managerId : null, $userId]);
             }
+            save_audit_required((int) $orgAdmin['id'], 'org_users_assigned', null, ['unit_id' => $unitId, 'user_ids' => $validIds]);
             db_commit('index.php');
             org_record_undo('افزودن کارشناسان', $orgUndoSnapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_users_assigned', null, ['unit_id' => $unitId, 'user_ids' => $validIds]);
             flash('success', count($validIds) . ' کارشناس به «' . (string) $unit['name'] . '» اضافه شد.');
             redirect(org_company_redirect_url($orgCompanyId, 'unit-' . $unitId));
         }
@@ -551,13 +551,13 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
                 $saveAssignment = $pdo->prepare('UPDATE users SET org_unit_id = ?, manager_user_id = ? WHERE id = ? AND COALESCE(auth_source, "") <> "food"');
                 foreach ($backupUsers as $userId => $backupUser) $saveAssignment->execute([$backupUser['unitId'] > 0 ? $backupUser['unitId'] : null, $backupUser['managerId'] > 0 ? $backupUser['managerId'] : null, $userId]);
+                save_audit_required((int) $orgAdmin['id'], 'org_backup_restored', null, ['units' => count($backupUnits), 'users' => count($backupUsers)]);
                 $pdo->commit();
             } catch (Throwable $restoreError) {
                 if ($pdo->inTransaction()) $pdo->rollBack();
                 throw $restoreError;
             }
             org_record_undo('بازیابی پشتیبان ساختار سازمانی', $snapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_backup_restored', null, ['units' => count($backupUnits), 'users' => count($backupUsers)]);
             flash('success', 'پشتیبان همین شرکت و انتساب‌ها بازیابی شد؛ عضویت شرکت و نقش‌های دستی تغییر نکرد. نقش‌های خودکار مدیر طبق جایگاه‌های فعال همگام می‌شوند.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -579,9 +579,9 @@ if (in_array($action, $orgCompanyActions, true)) {
             db()->prepare('DELETE m FROM org_unit_managers m JOIN org_units ou ON ou.id = m.unit_id WHERE ou.company_id = ?')->execute([$orgCompanyId]);
             db()->prepare('UPDATE org_units SET manager_user_id = NULL, is_active = 1 WHERE id = ? AND company_id = ?')->execute([$ceoId, $orgCompanyId]);
             db()->prepare('UPDATE org_units SET is_active = 0, manager_user_id = NULL WHERE company_id = ? AND id <> ?')->execute([$orgCompanyId, $ceoId]);
+            save_audit_required((int) $orgAdmin['id'], 'org_structure_reset');
             db_commit('index.php');
             org_record_undo('ریست ساختار سازمانی', $orgUndoSnapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_structure_reset');
             flash('success', 'ساختار سازمانی پاک شد.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -722,9 +722,9 @@ if (in_array($action, $orgCompanyActions, true)) {
             }
             db()->prepare('DELETE m FROM org_unit_managers m JOIN users u ON u.id = m.user_id WHERE m.unit_id IN (' . $placeholders . ') AND COALESCE(u.auth_source, "") <> "food"')->execute($unitIds);
             db()->prepare('UPDATE org_units SET is_active = 0, manager_user_id = NULL WHERE id IN (' . $placeholders . ')')->execute($unitIds);
+            save_audit_required((int) $orgAdmin['id'], 'org_unit_deleted', null, ['unit_id' => $unitId, 'subtree_ids' => $unitIds]);
             db_commit('index.php');
             org_record_undo('حذف واحد سازمانی', $orgUndoSnapshot, $orgCompanyId);
-            save_audit_required((int) $orgAdmin['id'], 'org_unit_deleted', null, ['unit_id' => $unitId, 'subtree_ids' => $unitIds]);
             flash('success', 'واحد و زیرمجموعه‌های آن غیرفعال شدند.');
             redirect(org_company_redirect_url($orgCompanyId));
         }
@@ -791,6 +791,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             try {
                 $placeholders = implode(',', array_fill(0, count($eligible), '?'));
                 $pdo->prepare('UPDATE users SET role = "manager", is_primary_admin = 0 WHERE id IN (' . $placeholders . ')')->execute($eligible);
+                save_audit_required((int) $repairAdmin['id'], 'org_manager_primary_admin_repaired', null, ['user_ids' => $eligible]);
                 $pdo->commit();
             } catch (Throwable $repairError) {
                 if ($pdo->inTransaction()) {
@@ -798,7 +799,6 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
                 throw $repairError;
             }
-            save_audit_required((int) $repairAdmin['id'], 'org_manager_primary_admin_repaired', null, ['user_ids' => $eligible]);
             flash('success', count($eligible) . ' کاربر مدیر سازمانی به نقش «مدیر» برگردانده شدند؛ انتساب معاونت/اداره و عضویت آن‌ها حفظ شد.');
             redirect('index.php?page=settings#org-admin-repair');
         }
@@ -827,6 +827,7 @@ if (in_array($action, $orgCompanyActions, true)) {
             try {
                 $placeholders = implode(',', array_fill(0, count($eligible), '?'));
                 $pdo->prepare('UPDATE users SET role = "manager", is_primary_admin = 0 WHERE id IN (' . $placeholders . ')')->execute($eligible);
+                save_audit_required((int) $repairAdmin['id'], 'org_manager_support_role_repaired', null, ['user_ids' => $eligible]);
                 $pdo->commit();
             } catch (Throwable $repairError) {
                 if ($pdo->inTransaction()) {
@@ -834,7 +835,6 @@ if (in_array($action, $orgCompanyActions, true)) {
                 }
                 throw $repairError;
             }
-            save_audit_required((int) $repairAdmin['id'], 'org_manager_support_role_repaired', null, ['user_ids' => $eligible]);
             $remaining = $supportManagerCount - count($eligible);
             flash('success', count($eligible) . ' مدیر سازمانی از نقش «مدیر پشتیبانی» به «مدیر» برگردانده شدند؛ چارت سازمانی حفظ شد.'
                 . ($remaining < 1 ? ' توجه: دیگر مدیر پشتیبانی فعالی باقی نمانده؛ درخواست‌های پشتیبانی تا تعیین مدیر پشتیبانی واقعی بدون مسئول در «بررسی مدیر» می‌مانند.' : ''));
