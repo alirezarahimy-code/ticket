@@ -37,6 +37,9 @@ foreach ($File in $PhpFiles) {
 }
 Write-Host ("PASS: {0} PHP files" -f $PhpFiles.Count)
 
+Write-Host '== Installed release acceptance preflight =='
+& (Join-Path $Root 'tools/Run-Logging-Acceptance-1.62.83.ps1') -Root $Root -InstalledRoot $Root
+
 Write-Host '== Transaction/commit contract test =='
 Invoke-PhpTest -Path (Join-Path $Root 'tools/test_ticket_txn_offline.php') -RequireExecution | Out-Null
 Invoke-PhpTest -Path (Join-Path $Root 'tools/test_module_grant_offline.php') -RequireExecution | Out-Null
