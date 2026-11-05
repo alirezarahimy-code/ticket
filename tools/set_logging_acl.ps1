@@ -8,7 +8,7 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $ApplicationRoot).Path
 $target = Join-Path $root 'storage\logs'
 if (-not (Test-Path -LiteralPath $target -PathType Container)) { throw "Logging directory is missing: $target" }
-$broadSids = @('S-1-1-0','S-1-5-11','S-1-5-32-545')
+$broadSids = @('S-1-1-0','S-1-5-11','S-1-5-32-545','S-1-5-32-546','S-1-5-4','S-1-5-2','S-1-5-14','S-1-5-113')
 foreach ($item in @((Get-Item -LiteralPath $target)) + @(Get-ChildItem -LiteralPath $target -Force -Recurse)) {
     $acl = Get-Acl -LiteralPath $item.FullName
     foreach ($ace in $acl.Access) {
