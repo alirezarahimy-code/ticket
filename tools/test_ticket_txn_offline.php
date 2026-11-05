@@ -219,7 +219,7 @@ $body = $createStart === false
     ? ''
     : substr($ticketActions, $createStart, ($createEnd === false ? 20000 : (int) $createEnd - (int) $createStart));
 check('۷: در create_ticket هیچ db()->commit() خامی نمانده', strpos($body, 'db()->commit();') === false);
-check('۷-ب: create_ticket از db_commit استفاده می‌کند', strpos($body, "db_commit('index.php')") !== false);
+check('۷-ب: create_ticket از db_commit_or_fail استفاده می‌کند', strpos($body, "db_commit_or_fail('ticket:create_ticket')") !== false);
 check('۷-پ: یک‌بار متغیر $ticketNo ساخته می‌شود و داخل تراکنش پیام خطا نمی‌دهد', substr_count($body, 'ticket_number_next(') === 1, (string) substr_count($body, 'ticket_number_next('));
 
 $ticketsSlaSrc = (string) file_get_contents($ticketsSla);
