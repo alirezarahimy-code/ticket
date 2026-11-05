@@ -56,6 +56,8 @@ $PythonTestFiles = @(
     Get-ChildItem -Path (Join-Path $Root 'tests') -Filter 'test_logging_*.py' -File
     Get-Item (Join-Path $Root 'tests/test_windows_logging_static.py')
     Get-Item (Join-Path $Root 'tests/test_update_manifest_guard_static.py')
+    Get-Item (Join-Path $Root 'tests/test_migration_registry_seed.py')
+    Get-Item (Join-Path $Root 'tests/test_backup_restore_static.py')
 ) | Sort-Object FullName -Unique
 & $Python -m pytest -q @($PythonTestFiles.FullName)
 if ($LASTEXITCODE -ne 0) { throw 'Python Logging/static contract tests failed.' }
