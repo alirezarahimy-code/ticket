@@ -432,7 +432,7 @@ function cd_dvd_create_record(array $user): int
             $query = db()->prepare('INSERT INTO cd_dvd_records (media, direction, serial, info_type, info_desc, jy, jm, jd, date_str, sort_key, receiver, receiver_unit, brought_by, brought_by_user_id, exit_sheet, note, department_id, recorder_id, recorder_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $user['id'], $user['full_name']]);
             $id = (int) db()->lastInsertId();
-            save_audit((int) $user['id'], 'cd_dvd_' . strtolower($payload['direction']), null, ['record_id' => $id, 'serial' => $payload['serial'], 'media' => $payload['media']]);
+            save_audit_required((int) $user['id'], 'cd_dvd_' . strtolower($payload['direction']), null, ['record_id' => $id, 'serial' => $payload['serial'], 'media' => $payload['media']]);
             db()->commit();
             return $id;
         } catch (Throwable $exception) {
@@ -461,7 +461,7 @@ function cd_dvd_update_record(array $user): void
         $query = db()->prepare('UPDATE cd_dvd_records SET media = ?, direction = ?, serial = ?, info_type = ?, info_desc = ?, jy = ?, jm = ?, jd = ?, date_str = ?, sort_key = ?, receiver = ?, receiver_unit = ?, brought_by = ?, brought_by_user_id = ?, exit_sheet = ?, note = ?, department_id = ? WHERE id = ?');
         $query->execute([$payload['media'], $payload['direction'], $payload['serial'], $payload['info_type'], $payload['info_desc'], $payload['jy'], $payload['jm'], $payload['jd'], $payload['date_str'], $payload['sort_key'], $payload['receiver'], $payload['receiver_unit'], $payload['brought_by'], $payload['brought_by_user_id'], $payload['exit_sheet'], $payload['note'], $payload['department_id'], $id]);
         $after = cd_dvd_fetch_record($id) ?: [];
-        save_audit((int) $user['id'], 'cd_dvd_updated', null, ['record_id' => $id, 'serial' => $payload['serial'], 'before' => cd_dvd_audit_snapshot($record), 'after' => cd_dvd_audit_snapshot($after)]);
+        save_audit_required((int) $user['id'], 'cd_dvd_updated', null, ['record_id' => $id, 'serial' => $payload['serial'], 'before' => cd_dvd_audit_snapshot($record), 'after' => cd_dvd_audit_snapshot($after)]);
         db()->commit();
     } catch (Throwable $exception) {
         if (db()->inTransaction()) {
@@ -481,7 +481,7 @@ function cd_dvd_delete_record(array $user): void
     db()->beginTransaction();
     try {
         db()->prepare('DELETE FROM cd_dvd_records WHERE id = ?')->execute([$id]);
-        save_audit((int) $user['id'], 'cd_dvd_deleted', null, ['record_id' => $id, 'serial' => $record['serial'], 'before' => cd_dvd_audit_snapshot($record), 'after' => null]);
+        save_audit_required((int) $user['id'], 'cd_dvd_deleted', null, ['record_id' => $id, 'serial' => $record['serial'], 'before' => cd_dvd_audit_snapshot($record), 'after' => null]);
         db()->commit();
     } catch (Throwable $exception) {
         if (db()->inTransaction()) {
