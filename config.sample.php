@@ -37,6 +37,9 @@ return [
         ],
     ],
     'security' => [
+        // روزهای بی‌فعالیت تا خروج خودکار کاربر. ۰ = غیرفعال (نشست تا یک سال باز می‌ماند).
+        // کاربری که هر روز کار می‌کند هیچ‌وقت بیرون انداخته نمی‌شود؛ فقط نشست رهاشده منقضی می‌شود.
+        'session_idle_days' => 30,
         'max_upload_mb' => 8,
         'allowed_uploads' => ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'zip'],
         'inventory_token' => '',
