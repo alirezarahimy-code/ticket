@@ -17,6 +17,10 @@ REQUIRES_VERSION = "1.62.77"
 PACKAGE_NAME = "ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip"
 REPORT_NAME = "CHANGE-REPORT-FA-1.62.83.md"
 
+OVERLAY_MIGRATIONS = (
+    "migrations/032-schema-updates-baseline.sql",
+)
+
 OVERLAY_FILES = (
     "VERSION",
     "README.md",
@@ -164,6 +168,15 @@ def build(output_dir: Path) -> tuple[Path, Path]:
         raise SystemExit(f"Release report not found: {report_path}")
 
     manifest, files, migrations = load_base_package()
+    for migration_path in OVERLAY_MIGRATIONS:
+        migration_file = ROOT / migration_path
+        migration_name = migration_file.name
+        if not re.fullmatch(r"\\d{3}-[a-z0-9-]+\\.sql", migration_name):
+            raise SystemExit(f"Unsafe release migration name: {migration_name}")
+        migration_data = migration_file.read_bytes()
+        migrations[migration_name] = migration_data
+        files["migrations/" + migration_name] = migration_data
+
     for relative in OVERLAY_FILES:
         source = ROOT / relative
         if not source.is_file():
