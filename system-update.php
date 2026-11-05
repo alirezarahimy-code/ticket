@@ -71,6 +71,134 @@ function system_update_requires_violation(string $current, mixed $requires, stri
         . 'اگر مطمئن هستید، گزینهٔ «پیش‌نیاز نسخهٔ پک را نادیده بگیر» را تیک بزنید.';
 }
 
+/**
+ * اعتبارسنجی نام ورودی ZIP با درنظرگرفتن محدودیت‌های Windows و Linux.
+ * فقط مسیرهای نسبی POSIX داخل ساختار مجاز بسته پذیرفته می‌شوند.
+ */
+function system_update_archive_path_is_safe(string $name): bool
+{
+    if ($name === '' || str_contains($name, "\0") || str_contains($name, '\\\\')
+        || str_starts_with($name, '/') || preg_match('/^[A-Za-z]:/', $name)) {
+        return false;
+    }
+    $directory = str_ends_with($name, '/');
+    $path = $directory ? substr($name, 0, -1) : $name;
+    if ($path === '' || str_contains($path, '//')) { return false; }
+    foreach (explode('/', $path) as $segment) {
+        if ($segment === '' || $segment === '.' || $segment === '..'
+            || preg_match('/[<>:"|?*\\x00-\\x1F]/', $segment)
+            || preg_match('/[. ]$/', $segment)
+            || preg_match('/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\\..*)?$/i', $segment)) {
+            return false;
+        }
+    }
+    return (bool) preg_match('#^(manifest\\.json|migrations/[^/]+\\.sql|files/.+)$#', $path)
+        || in_array($path, ['migrations', 'files'], true);
+}
+
+/** همه ورودی‌ها پیش از استخراج بررسی می‌شوند. */
+function system_update_validate_zip_entries(ZipArchive $zip): void
+{
+    if ($zip->numFiles < 1 || $zip->numFiles > 5000) {
+        throw new RuntimeException('تعداد فایل‌های ZIP خارج از محدوده مجاز است.');
+    }
+    $seen = [];
+    $totalBytes = 0;
+    for ($i = 0; $i < $zip->numFiles; $i++) {
+        $name = (string) $zip->getNameIndex($i);
+        if (!system_update_archive_path_is_safe($name)) {
+            throw new RuntimeException('مسیر نامعتبر در پک: ' . $name);
+        }
+        $key = strtolower(rtrim($name, '/'));
+        if (isset($seen[$key])) {
+            throw new RuntimeException('نام تکراری یا ناسازگار با Windows در ZIP: ' . $name);
+        }
+        $seen[$key] = true;
+        $stat = $zip->statIndex($i);
+        if (!is_array($stat)) {
+            throw new RuntimeException('اطلاعات ورودی ZIP قابل خواندن نیست: ' . $name);
+        }
+        $size = max(0, (int) ($stat['size'] ?? 0));
+        $totalBytes += $size;
+        if ($size > 128 * 1024 * 1024 || $totalBytes > 512 * 1024 * 1024) {
+            throw new RuntimeException('اندازه استخراج ZIP از سقف ایمنی عبور می‌کند.');
+        }
+        if (method_exists($zip, 'getExternalAttributesIndex')) {
+            $opsys = 0; $attributes = 0;
+            if ($zip->getExternalAttributesIndex($i, $opsys, $attributes)) {
+                $unixMode = ($attributes >> 16) & 0170000;
+                if ($opsys === ZipArchive::OPSYS_UNIX && $unixMode === 0120000) {
+                    throw new RuntimeException('لینک نمادین در بسته به‌روزرسانی مجاز نیست: ' . $name);
+                }
+            }
+        }
+    }
+    foreach (array_keys($seen) as $key) {
+        $parts = explode('/', $key); array_pop($parts); $parent = '';
+        foreach ($parts as $part) {
+            $parent = $parent === '' ? $part : $parent . '/' . $part;
+            if (isset($seen[$parent])) {
+                throw new RuntimeException('تعارض فایل/پوشه در ساختار ZIP: ' . $key);
+            }
+        }
+    }
+}
+
+/** صحت فایل‌های stage و hashهای اختیاری manifest. */
+function system_update_verify_staged_package(string $stage, array $manifest): void
+{
+    $stageReal = realpath($stage);
+    if (!is_string($stageReal) || !is_file($stageReal . DIRECTORY_SEPARATOR . 'manifest.json')) {
+        throw new RuntimeException('بسته پس از استخراج کامل نیست یا manifest ندارد.');
+    }
+    $files = $manifest['files'] ?? [];
+    if (!is_array($files)) { throw new RuntimeException('فهرست files در manifest معتبر نیست.'); }
+    $seen = [];
+    foreach ($files as $relative) {
+        $relative = (string) $relative;
+        if ($relative === '' || !system_update_archive_path_is_safe('files/' . $relative)) {
+            throw new RuntimeException('مسیر فایل در manifest نامعتبر است: ' . $relative);
+        }
+        $key = strtolower($relative);
+        if (isset($seen[$key])) { throw new RuntimeException('فایل تکراری در manifest: ' . $relative); }
+        $seen[$key] = true;
+        $candidate = $stageReal . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relative);
+        $real = realpath($candidate);
+        $filesRoot = realpath($stageReal . DIRECTORY_SEPARATOR . 'files');
+        if (!is_string($real) || !is_string($filesRoot) || !is_file($real)
+            || !str_starts_with($real, $filesRoot . DIRECTORY_SEPARATOR)) {
+            throw new RuntimeException('فایل اعلام‌شده در manifest موجود نیست یا از stage خارج شده است: ' . $relative);
+        }
+    }
+    $hashes = $manifest['sha256'] ?? [];
+    if ($hashes !== [] && !is_array($hashes)) { throw new RuntimeException('بخش sha256 در manifest معتبر نیست.'); }
+    foreach ($hashes as $relative => $expected) {
+        $relative = (string) $relative; $expected = strtolower((string) $expected);
+        if (!isset($seen[strtolower($relative)]) || !preg_match('/^[a-f0-9]{64}$/', $expected)) {
+            throw new RuntimeException('تعریف hash نامعتبر در manifest: ' . $relative);
+        }
+        $file = $stageReal . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relative);
+        $actual = hash_file('sha256', $file);
+        if (!is_string($actual) || !hash_equals($expected, strtolower($actual))) {
+            throw new RuntimeException('تطبیق SHA-256 فایل ناموفق است: ' . $relative);
+        }
+    }
+}
+
+/** استخراج کنترل‌شده؛ هر خطا مانع اجرای migration می‌شود. */
+function system_update_extract_package(string $zipPath, string $stage, array $manifest): void
+{
+    $zip = new ZipArchive();
+    if ($zip->open($zipPath) !== true) { throw new RuntimeException('بازکردن مجدد ZIP برای استخراج ناموفق بود.'); }
+    try {
+        system_update_validate_zip_entries($zip);
+        if (!$zip->extractTo($stage)) { throw new RuntimeException('استخراج ZIP ناموفق بود؛ هیچ مهاجرتی اجرا نشد.'); }
+    } finally {
+        $zip->close();
+    }
+    system_update_verify_staged_package($stage, $manifest);
+}
+
 /** پک را بررسی می‌کند و manifest را برمی‌گرداند. پرتاب خطا یعنی پک معتبر نیست. */
 function system_update_read_package(string $zipPath, bool $allowDowngrade = false, bool $ignoreRequires = false): array
 {
@@ -82,15 +210,7 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
         throw new RuntimeException('فایل ZIP باز نشد.');
     }
     try {
-        for ($i = 0; $i < $zip->numFiles; $i++) {
-            $name = (string) $zip->getNameIndex($i);
-            if ($name === '' || str_contains($name, '..') || str_starts_with($name, '/') || str_contains($name, '\\')) {
-                throw new RuntimeException('مسیر نامعتبر در پک: ' . $name);
-            }
-            if (!preg_match('#^(manifest\.json|migrations/[^/]+\.sql|files/.+)$#', $name) && !str_ends_with($name, '/')) {
-                throw new RuntimeException('فایل خارج از ساختار پک: ' . $name);
-            }
-        }
+        system_update_validate_zip_entries($zip);
         $manifestRaw = $zip->getFromName('manifest.json');
         if ($manifestRaw === false) {
             throw new RuntimeException('پک فاقد manifest.json است.');
@@ -125,9 +245,23 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
         if (!is_array($migrations)) {
             throw new RuntimeException('فهرست مهاجرت‌ها در manifest معتبر نیست.');
         }
+        $migrationNames = [];
         foreach ($migrations as $migration) {
-            if (!preg_match('/^\d{3}-[a-z0-9-]+\.sql$/', (string) $migration) || $zip->locateName('migrations/' . $migration) === false) {
-                throw new RuntimeException('مهاجرت نامعتبر یا فایل آن در پک نیست: ' . $migration);
+            $migration = (string) $migration;
+            if (!preg_match('/^\\d{3}-[a-z0-9-]+\\.sql$/', $migration)
+                || $zip->locateName('migrations/' . $migration) === false
+                || isset($migrationNames[strtolower($migration)])) {
+                throw new RuntimeException('مهاجرت نامعتبر، تکراری یا فایل آن در پک نیست: ' . $migration);
+            }
+            $migrationNames[strtolower($migration)] = true;
+        }
+        $files = $manifest['files'] ?? [];
+        if (!is_array($files)) { throw new RuntimeException('فهرست فایل‌ها در manifest معتبر نیست.'); }
+        foreach ($files as $relative) {
+            $relative = (string) $relative;
+            if ($relative === '' || !system_update_archive_path_is_safe('files/' . $relative)
+                || $zip->locateName('files/' . $relative) === false) {
+                throw new RuntimeException('فایل اعلام‌شده در manifest نامعتبر یا مفقود است: ' . $relative);
             }
         }
         return ['manifest' => $manifest, 'version' => $version, 'mode' => $mode, 'current' => $current, 'migrations' => array_values($migrations)];
@@ -190,14 +324,15 @@ function system_update_apply(array $upload, array $actor, bool $allowDowngrade =
     if ($fileSnapshot) { $backup['files_snapshot'] = $fileSnapshot; }
 
     // ۲. استخراج در پوشهٔ موقت
-    $stage = APP_ROOT . '/storage/updates/' . $version . '-' . date('YmdHis');
-    if (!is_dir($stage) && !mkdir($stage, 0775, true) && !is_dir($stage)) {
-        throw new RuntimeException('ساخت پوشهٔ موقت به‌روزرسانی ممکن نیست.');
+    $stageRoot = APP_ROOT . '/storage/updates';
+    if (!is_dir($stageRoot) && !mkdir($stageRoot, 0700, true) && !is_dir($stageRoot)) {
+        throw new RuntimeException('ساخت ریشهٔ stage به‌روزرسانی ممکن نیست.');
     }
-    $zip = new ZipArchive();
-    $zip->open((string) $upload['tmp_name']);
-    $zip->extractTo($stage);
-    $zip->close();
+    $stage = $stageRoot . '/' . $version . '-' . date('YmdHis') . '-' . bin2hex(random_bytes(4));
+    if (!mkdir($stage, 0700, true)) {
+        throw new RuntimeException('ساخت پوشهٔ یکتای stage به‌روزرسانی ممکن نیست.');
+    }
+    system_update_extract_package((string) $upload['tmp_name'], $stage, $package['manifest']);
 
     // ۳. مهاجرت‌ها به ترتیب؛ هر کدام فقط یک بار ثبت می‌شود
     system_update_ensure_table();
