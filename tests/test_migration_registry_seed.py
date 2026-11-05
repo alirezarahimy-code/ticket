@@ -4,12 +4,19 @@ import re
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMAS = ("schema.sql", "install-empty-db.sql")
 
+# Data-only repair migrations are safe to execute on a fresh empty database;
+# they are deliberately not pre-marked as applied by the schema baseline.
+FRESH_INSTALL_DATA_REPAIR_MIGRATIONS = {
+    "033-logging-legacy-context-collation.sql",
+}
+
 
 def test_fresh_install_schemas_seed_every_forward_migration():
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
     expected = {
         p.name for p in (ROOT / "migrations").glob("*.sql")
         if "rollback" not in p.name.lower()
+        and p.name not in FRESH_INSTALL_DATA_REPAIR_MIGRATIONS
     }
     assert expected, "No forward migrations found"
 
