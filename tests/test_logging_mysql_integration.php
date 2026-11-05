@@ -211,9 +211,16 @@ $goodEvent = ['event_id'=>logging_uuid(),'request_id'=>logging_uuid(),'code'=>'S
 $goodLine = json_encode(['version'=>1,'stream'=>'system','queued_at'=>date('c'),'payload'=>$goodEvent], JSON_UNESCAPED_SLASHES) . "\n";
 file_put_contents($badFile, $badLine . $goodLine, FILE_APPEND | LOCK_EX);
 $poisonResult = logging_replay_process_directory($root . '/storage/logs/spool', 500);
-$remainingPoison = file_get_contents($badFile);
-$checks['invalid spool line is retained without blocking later valid records'] = $poisonResult['replayed'] === 1
-    && $poisonResult['failed'] === 1 && str_contains((string) $remainingPoison, '{not-json}')
+// The replay worker atomically renames the source file and publishes a retry file.
+$remainingPoison = '';
+foreach (glob($root . '/storage/logs/spool/system*.jsonl') ?: [] as $activeSpoolFile) {
+    $activeContents = @file_get_contents($activeSpoolFile);
+    if (is_string($activeContents)) {
+        $remainingPoison .= $activeContents;
+    }
+}
+$checks['invalid spool line is retained in the retry queue without blocking later valid records'] = $poisonResult['replayed'] === 1
+    && $poisonResult['failed'] === 1 && str_contains($remainingPoison, '{not-json}')
     && (int) $pdo->query("SELECT COUNT(*) FROM system_logs WHERE context = 'poison-test'")->fetchColumn() === 1;
 $checks['migration created alert throttle table'] = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'logging_health_alerts'")->fetchColumn() === 1;
 
