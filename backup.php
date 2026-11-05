@@ -217,11 +217,9 @@ function backup_upload_archive_entry(string $name): ?array
         || str_starts_with($name, '/') || preg_match('/^[A-Za-z]:/', $name)) {
         return null;
     }
-    $directory = str_ends_with($name, '/');
-    $relative = $directory ? substr($name, 0, -1) : $name;
-    if (strncasecmp($relative, 'uploads/', 8) === 0) {
-        $relative = substr($relative, 8);
-    }
+    $normalized = strncasecmp($name, 'uploads/', 8) === 0 ? substr($name, 8) : $name;
+    $directory = str_ends_with($normalized, '/');
+    $relative = $directory ? substr($normalized, 0, -1) : $normalized;
     if ($relative === '') {
         return $directory ? ['relative' => '', 'directory' => true] : null;
     }
