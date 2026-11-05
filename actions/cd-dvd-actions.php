@@ -34,7 +34,8 @@ if (!defined('APP_ROOT')) {
             redirect('index.php?page=cd-dvd');
         }
         if ($action === 'cd_dvd_delete') {
-            cd_dvd_delete_record($user);
+            $cdDvdUser = require_login();
+            cd_dvd_delete_record($cdDvdUser);
             flash('success', 'ثبت رسانه حذف شد.');
             redirect('index.php?page=cd-dvd');
         }
