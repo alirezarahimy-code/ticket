@@ -1,4 +1,4 @@
-name: Logging 1.62.76 Acceptance
+name: Logging 1.62.82 Acceptance
 
 # فقط اجرای دستی. این گردش‌کار به MariaDB و Windows runner نیاز دارد و تا تأیید روی
 # Staging نباید خودکار اجرا شود. کلید push عمداً حذف شده است — یک کلید ناشناخته زیر on:
