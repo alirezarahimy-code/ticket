@@ -124,6 +124,16 @@ jobs:
             tests/test_update_manifest_guard_static.py
           php tests/test_system_update_archive_zip.php
           php tests/test_backup_restore_archive.php
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ticket-update-1.62.83-hardening
+          path: |
+            downloads/ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip
+            downloads/ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip.sha256
+            downloads/CHANGE-REPORT-FA-1.62.83.md
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Commit package to the PR branch only
         env:
           PACKAGE_NAME: ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip
@@ -136,12 +146,3 @@ jobs:
             git commit -m "release: build cumulative update 1.62.83"
             git push origin "HEAD:$PR_BRANCH"
           fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ticket-update-1.62.83-hardening
-          path: |
-            downloads/ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip
-            downloads/ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip.sha256
-            downloads/CHANGE-REPORT-FA-1.62.83.md
-          if-no-files-found: error
-          retention-days: 30
