@@ -146,7 +146,33 @@ if ($AuditEvents -gt 0) {
 }
 
 Write-Host 'Load is running...'
-$jobs | Wait-Job -Timeout 900 | Out-Null
+$performanceSamples = New-Object System.Collections.Generic.List[object]
+$previousCpu = @{}
+$deadline = (Get-Date).AddMinutes(15)
+do {
+    $sampleTime = Get-Date
+    foreach ($proc in (Get-AppProcesses)) {
+        $cpuSeconds = if ($null -ne $proc.CPU) { [double]$proc.CPU } else { 0.0 }
+        $cpuDelta = 0.0
+        if ($previousCpu.ContainsKey([int]$proc.Id)) {
+            $cpuDelta = [math]::Max(0.0, $cpuSeconds - [double]$previousCpu[[int]$proc.Id])
+        }
+        $previousCpu[[int]$proc.Id] = $cpuSeconds
+        $cpuPercent = [math]::Round(($cpuDelta / 2.0 / [Environment]::ProcessorCount) * 100.0, 2)
+        $performanceSamples.Add([pscustomobject]@{
+            SampledAt = $sampleTime.ToString('o')
+            ProcessName = [string]$proc.ProcessName
+            ProcessId = [int]$proc.Id
+            CpuSecondsTotal = [math]::Round($cpuSeconds,2)
+            CpuPercentApprox = $cpuPercent
+            WorkingSetMB = [math]::Round(([double]$proc.WorkingSet64 / 1MB),2)
+        })
+    }
+    $running = @($jobs | Where-Object { $_.State -eq 'Running' -or $_.State -eq 'NotStarted' })
+    if ($running.Count -eq 0) { break }
+    if ((Get-Date) -ge $deadline) { break }
+    Start-Sleep -Seconds 2
+} while ($true)
 $unfinished = @($jobs | Where-Object { $_.State -eq 'Running' -or $_.State -eq 'NotStarted' })
 if ($unfinished.Count -gt 0) {
     $unfinished | Stop-Job
@@ -219,6 +245,7 @@ $report = [ordered]@{
     }
     processes_before = $processesBefore
     processes_after = $processesAfter
+    performance_samples = @($performanceSamples)
     safety = @{
         http_methods = @('GET')
         business_mutations = $false
@@ -229,8 +256,10 @@ $report = [ordered]@{
 }
 $reportPath = Join-Path $OutputDirectory ("logging-stress-$runId.json")
 $csvPath = Join-Path $OutputDirectory ("logging-stress-http-$runId.csv")
+$performanceCsvPath = Join-Path $OutputDirectory ("logging-stress-processes-$runId.csv")
 $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $reportPath -Encoding UTF8
 $httpRows | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8
+@($performanceSamples) | Export-Csv -LiteralPath $performanceCsvPath -NoTypeInformation -Encoding UTF8
 
 Write-Host ''
 Write-Host '========== LOGGING STRESS RESULT =========='
@@ -239,6 +268,7 @@ Write-Host ("Audit events: expected={0} | stored={1} | unique={2} | correlated={
 Write-Host ("Spool: files {0} -> {1} | bytes {2} -> {3}" -f $spoolBefore.Files,$spoolAfter.Files,$spoolBefore.Bytes,$spoolAfter.Bytes)
 Write-Host "JSON report: $reportPath"
 Write-Host "HTTP CSV: $csvPath"
+Write-Host "Process metrics CSV: $performanceCsvPath"
 Write-Host "Synthetic audit rows are intentionally retained and marked $($report.logging.test_record_marker)."
 
 if ($httpRows.Count -ne $HttpRequests -or $httpFailures -gt 0 -or $phpFailures -gt 0 -or -not $auditPass) {
