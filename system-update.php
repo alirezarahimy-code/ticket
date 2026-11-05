@@ -274,11 +274,13 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
                 $archiveFiles[strtolower(substr($entry, 6))] = true;
             }
         }
-        $expectedFiles = array_keys($manifestFiles);
-        $actualFiles = array_keys($archiveFiles);
-        sort($expectedFiles); sort($actualFiles);
-        if ($expectedFiles !== $actualFiles) {
-            throw new RuntimeException('فهرست files در manifest با فایل‌های واقعی ZIP یکسان نیست.');
+        if (array_key_exists('files', $manifest)) {
+            $expectedFiles = array_keys($manifestFiles);
+            $actualFiles = array_keys($archiveFiles);
+            sort($expectedFiles); sort($actualFiles);
+            if ($expectedFiles !== $actualFiles) {
+                throw new RuntimeException('فهرست files در manifest با فایل‌های واقعی ZIP یکسان نیست.');
+            }
         }
         return ['manifest' => $manifest, 'version' => $version, 'mode' => $mode, 'current' => $current, 'migrations' => array_values($migrations)];
     } finally {
