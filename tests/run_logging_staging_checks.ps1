@@ -37,8 +37,16 @@ foreach ($File in $PhpFiles) {
 }
 Write-Host ("PASS: {0} PHP files" -f $PhpFiles.Count)
 
+Write-Host '== Installed release acceptance preflight =='
+& (Join-Path $Root 'tools/Run-Logging-Acceptance-1.62.83.ps1') -Root $Root -InstalledRoot $Root
+
 Write-Host '== Transaction/commit contract test =='
 Invoke-PhpTest -Path (Join-Path $Root 'tools/test_ticket_txn_offline.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tools/test_module_grant_offline.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tests/test_system_update_migration_registry.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tests/test_asset_scope_permissions.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tools/test_access_coverage_offline.php') -RequireExecution | Out-Null
+Invoke-PhpTest -Path (Join-Path $Root 'tests/test_backup_restore_archive.php') -RequireExecution | Out-Null
 
 Write-Host '== PHP Logging tests =='
 $PhpTests = Get-ChildItem -Path (Join-Path $Root 'tests') -Filter 'test_logging_*.php' -File | Sort-Object Name
@@ -55,6 +63,9 @@ $PythonTestFiles = @(
     Get-ChildItem -Path (Join-Path $Root 'tests') -Filter 'test_logging_*.py' -File
     Get-Item (Join-Path $Root 'tests/test_windows_logging_static.py')
     Get-Item (Join-Path $Root 'tests/test_update_manifest_guard_static.py')
+    Get-Item (Join-Path $Root 'tests/test_route_security_static.py')
+    Get-Item (Join-Path $Root 'tests/test_migration_registry_seed.py')
+    Get-Item (Join-Path $Root 'tests/test_backup_restore_static.py')
 ) | Sort-Object FullName -Unique
 & $Python -m pytest -q @($PythonTestFiles.FullName)
 if ($LASTEXITCODE -ne 0) { throw 'Python Logging/static contract tests failed.' }
@@ -73,8 +84,9 @@ if ($RunOperational) {
     Write-Host '== Read-only recursive Windows ACL verification (strict) =='
     $aclResult = & (Join-Path $Root 'tools/verify_logging_acl.ps1') -ApplicationRoot $Root -Strict -ReturnStatus -ScanFiles | Select-Object -Last 1
     if ([int]$aclResult -ne 0) { throw 'Logging ACL verification failed; do not apply ACL changes automatically.' }
-    Write-Host '== Update completion-audit reconciliation =='
-    Invoke-PhpTest -Path (Join-Path $Root 'cron/reconcile_update_audit.php') -RequireExecution | Out-Null
+    # The historical reconcile_update_audit.php entry point is not present in this source tree.
+    # verify_logging_release.php already fails closed when a pending completion marker exists.
+    Write-Host '== Update completion-audit state (read-only release preflight) =='
     Write-Host '== Replay worker =='
     Invoke-PhpTest -Path (Join-Path $Root 'cron/replay_logging_spool.php') -RequireExecution | Out-Null
     Write-Host '== Issue rebuild and notification delivery workers =='

@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
+
+defined('APP_ROOT') || exit;
 require_once __DIR__ . '/asset-names.php';
 if (function_exists('asset_profile_column_sql')) { return; }
 

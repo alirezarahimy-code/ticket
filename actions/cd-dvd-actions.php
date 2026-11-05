@@ -22,17 +22,20 @@ if (!defined('APP_ROOT')) {
 
         // ───── گروه اکشن: آرشیو CD/DVD ─────
         if ($action === 'cd_dvd_create') {
-            $id = cd_dvd_create_record($user);
+            $cdDvdUser = require_login();
+            $id = cd_dvd_create_record($cdDvdUser);
             flash('success', 'گردش رسانه با شماره ثبت ' . $id . ' ذخیره شد.');
             redirect('index.php?page=cd-dvd');
         }
         if ($action === 'cd_dvd_update') {
-            cd_dvd_update_record($user);
+            $cdDvdUser = require_login();
+            cd_dvd_update_record($cdDvdUser);
             flash('success', 'ثبت رسانه به‌روزرسانی شد.');
             redirect('index.php?page=cd-dvd');
         }
         if ($action === 'cd_dvd_delete') {
-            cd_dvd_delete_record($user);
+            $cdDvdUser = require_login();
+            cd_dvd_delete_record($cdDvdUser);
             flash('success', 'ثبت رسانه حذف شد.');
             redirect('index.php?page=cd-dvd');
         }

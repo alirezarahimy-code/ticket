@@ -31,14 +31,22 @@ if (!defined('APP_ROOT')) {
             $names = $_POST['company_names'] ?? [];
             if (!is_array($names)) throw new RuntimeException('فهرست نام شرکت‌ها معتبر نیست.');
             $companies = org_companies_all();
-            $update = db()->prepare('UPDATE org_companies SET name = ? WHERE id = ? AND is_active = 1');
-            foreach ($companies as $company) {
-                $id = (int) $company['id'];
-                $name = trim((string) ($names[$id] ?? ''));
-                if ($name === '' || mb_strlen($name, 'UTF-8') > 190) throw new RuntimeException('نام نمایشی هر شرکت باید بین ۱ تا ۱۹۰ نویسه باشد.');
-                $update->execute([$name, $id]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $update = $pdo->prepare('UPDATE org_companies SET name = ? WHERE id = ? AND is_active = 1');
+                foreach ($companies as $company) {
+                    $id = (int) $company['id'];
+                    $name = trim((string) ($names[$id] ?? ''));
+                    if ($name === '' || mb_strlen($name, 'UTF-8') > 190) throw new RuntimeException('نام نمایشی هر شرکت باید بین ۱ تا ۱۹۰ نویسه باشد.');
+                    $update->execute([$name, $id]);
+                }
+                save_audit_required((int) $companyAdmin['id'], 'org_company_display_names_updated', null, ['companies' => array_map(static fn (array $company): int => (int) $company['id'], $companies)]);
+                $pdo->commit();
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                throw $exception;
             }
-            save_audit((int) $companyAdmin['id'], 'org_company_display_names_updated', null, ['companies' => array_map(static fn (array $company): int => (int) $company['id'], $companies)]);
             flash('success', 'نام‌های نمایشی شرکت‌ها ذخیره شد؛ نقش و عضویت کارکنان تغییر نکرد.');
             redirect('index.php?page=settings#users');
         }
@@ -53,7 +61,7 @@ if (!defined('APP_ROOT')) {
                 $days = activity_log_retention_days();
             }
             $deleted = activity_logs_prune($days);
-            save_audit((int) $pruneAdmin['id'], 'activity_logs_pruned', null, ['days' => $days, 'deleted' => $deleted]);
+            save_audit_required((int) $pruneAdmin['id'], 'activity_logs_pruned', null, ['days' => $days, 'deleted' => $deleted]);
             flash('success', 'لاگ‌های قدیمی‌تر از ' . $days . ' روز پاک شد. تعداد حذف‌شده: ' . $deleted . '.');
             redirect('index.php?page=settings#general');
         }
@@ -61,7 +69,7 @@ if (!defined('APP_ROOT')) {
         if ($action === 'sync_ldap_users') {
             $settingsAdmin = require_permission('settings.users_edit');
             $syncResult = ldap_sync_all_users();
-            save_audit((int) $settingsAdmin['id'], 'ldap_bulk_sync', null, $syncResult);
+            save_audit_required((int) $settingsAdmin['id'], 'ldap_bulk_sync', null, $syncResult);
             flash('success', 'همگام‌سازی کاربران دامین انجام شد. جدید: ' . $syncResult['created'] . '، به‌روزشده: ' . $syncResult['updated'] . '، غیرفعال: ' . $syncResult['disabled'] . '.');
             redirect('index.php?page=settings#users');
         }
@@ -69,7 +77,7 @@ if (!defined('APP_ROOT')) {
         if ($action === 'diagnose_ldap') {
             $diagnoseAdmin = require_permission('settings.domain_edit');
             $diagnoseResult = ldap_diagnose();
-            save_audit((int) $diagnoseAdmin['id'], 'ldap_diagnosed', null, ['ok' => $diagnoseResult['ok']]);
+            save_audit_required((int) $diagnoseAdmin['id'], 'ldap_diagnosed', null, ['ok' => $diagnoseResult['ok']]);
             if ($diagnoseResult['ok']) {
                 flash('success', 'اتصال دامنه سالم است. ' . $diagnoseResult['summary']);
             } else {
@@ -138,6 +146,10 @@ if (!defined('APP_ROOT')) {
                     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
                 ));
                 save_setting('display_effect_type', $activeEffect);
+                save_audit_required((int) $effectUser['id'], 'triangle_effect_saved', null, [
+                    'pages' => count($enabledPages),
+                    'effect' => $activeEffect,
+                ]);
                 $settingsPdo->commit();
             } catch (Throwable $settingsError) {
                 if ($settingsPdo->inTransaction()) {
@@ -146,10 +158,6 @@ if (!defined('APP_ROOT')) {
                 setting_forget_cache();
                 throw $settingsError;
             }
-            save_audit((int) $effectUser['id'], 'triangle_effect_saved', null, [
-                'pages' => count($enabledPages),
-                'effect' => $activeEffect,
-            ]);
             flash('success', 'تنظیمات افکت نمایشی ذخیره شد.');
             redirect('index.php?page=settings#triangle');
         }
@@ -160,7 +168,7 @@ if (!defined('APP_ROOT')) {
                 $settingsAdmin = require_primary_admin();
                 $enabled = post_value('inspection_food_absence_alarm_enabled', '0') === '1' ? '1' : '0';
                 save_setting('inspection_food_absence_alarm_enabled', $enabled);
-                save_audit((int) $settingsAdmin['id'], 'inspection_food_absence_alarm_updated', null, ['enabled' => $enabled === '1']);
+                save_audit_required((int) $settingsAdmin['id'], 'inspection_food_absence_alarm_updated', null, ['enabled' => $enabled === '1']);
                 flash('success', $enabled === '1' ? 'یادآور روزانهٔ بازرسی فعال شد.' : 'یادآور روزانهٔ بازرسی غیرفعال شد.');
                 redirect('index.php?page=settings#general');
             }

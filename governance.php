@@ -236,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ticketId > 0) {
                 db()->prepare('INSERT INTO change_ticket_links (change_id, ticket_id, created_by) VALUES (?, ?, ?)')->execute([$changeId, $ticketId, $user['id']]);
             }
-            save_audit((int) $user['id'], 'change_created', $ticketId > 0 ? $ticketId : null, ['change_id' => $changeId, 'change_number' => gov_change_number($changeId)]);
+            save_audit_required((int) $user['id'], 'change_created', $ticketId > 0 ? $ticketId : null, ['change_id' => $changeId, 'change_number' => gov_change_number($changeId)]);
             db()->commit();
             flash('success', 'درخواست تغییر ' . gov_change_number($changeId) . ' ساخته شد.');
             redirect('governance.php?change_id=' . $changeId);
@@ -258,8 +258,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (gov_post('planned_start') !== '' && $start === null || gov_post('planned_end') !== '' && $end === null || ($start && $end && $end < $start)) {
                 throw new RuntimeException('بازه زمان‌بندی تغییر معتبر نیست.');
             }
-            db()->prepare('UPDATE change_records SET title = ?, description = ?, justification = ?, risk_level = ?, impact = ?, planned_start = ?, planned_end = ?, updated_at = NOW() WHERE id = ? AND status IN ("draft", "rejected")')->execute([$title, $description, gov_post('justification') ?: null, gov_choice(gov_post('risk_level', 'medium'), ['low', 'medium', 'high', 'critical'], 'medium'), gov_post('impact') ?: null, $start, $end, $changeId]);
-            save_audit((int) $user['id'], 'change_updated', null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE change_records SET title = ?, description = ?, justification = ?, risk_level = ?, impact = ?, planned_start = ?, planned_end = ?, updated_at = NOW() WHERE id = ? AND status IN ("draft", "rejected")')->execute([$title, $description, gov_post('justification') ?: null, gov_choice(gov_post('risk_level', 'medium'), ['low', 'medium', 'high', 'critical'], 'medium'), gov_post('impact') ?: null, $start, $end, $changeId]);
+                save_audit_required((int) $user['id'], 'change_updated', null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
+                $pdo->commit();
+            } catch (Throwable $updateError) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                throw $updateError;
+            }
             flash('success', 'اطلاعات تغییر اصلاح شد.');
             redirect('governance.php?change_id=' . $changeId);
         }
@@ -277,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('وضعیت تغییر هم‌زمان تغییر کرده است؛ صفحه را تازه‌سازی کنید.');
             }
             db()->prepare('INSERT INTO change_approvals (change_id, approver_id, decision, note) VALUES (?, ?, "submitted", ?)')->execute([$changeId, $user['id'], gov_post('note') ?: null]);
-            save_audit((int) $user['id'], 'change_submitted', null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
+            save_audit_required((int) $user['id'], 'change_submitted', null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
             db()->commit();
             flash('success', 'تغییر برای بررسی CAB ارسال شد.');
             redirect('governance.php?change_id=' . $changeId);
@@ -299,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('تصمیم CAB هم‌زمان ثبت شده است؛ صفحه را تازه‌سازی کنید.');
             }
             db()->prepare('INSERT INTO change_approvals (change_id, approver_id, decision, note) VALUES (?, ?, ?, ?)')->execute([$changeId, $cabUser['id'], $decision, $note ?: null]);
-            save_audit((int) $cabUser['id'], 'change_cab_' . $decision, null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
+            save_audit_required((int) $cabUser['id'], 'change_cab_' . $decision, null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
             gov_notify_linked_tickets('change_ticket_links', 'change_id', $changeId, 'change_cab_' . $decision, 'تصمیم CAB برای تغییر', 'تغییر ' . $change['change_number'] . ' به وضعیت «' . gov_change_status_label($decision) . '» رسید.', (int) $cabUser['id']);
             db()->commit();
             flash($decision === 'approved' ? 'success' : 'info', $decision === 'approved' ? 'تغییر توسط CAB تأیید شد.' : 'تغییر توسط CAB رد شد.');
@@ -323,7 +331,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new RuntimeException('وضعیت تغییر هم‌زمان عوض شده است؛ صفحه را تازه‌سازی کنید.');
             }
             db()->prepare('INSERT INTO change_approvals (change_id, approver_id, decision, note) VALUES (?, ?, ?, ?)')->execute([$changeId, $user['id'], $transition, $note ?: null]);
-            save_audit((int) $user['id'], 'change_' . $transition, null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
+            save_audit_required((int) $user['id'], 'change_' . $transition, null, ['change_id' => $changeId, 'change_number' => $change['change_number']]);
             gov_notify_linked_tickets('change_ticket_links', 'change_id', $changeId, 'change_' . $transition, 'به‌روزرسانی تغییر', 'تغییر ' . $change['change_number'] . ' به وضعیت «' . gov_change_status_label($transition) . '» رسید.', (int) $user['id']);
             db()->commit();
             flash('success', 'وضعیت تغییر به‌روزرسانی شد.');
@@ -355,7 +363,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($ticketId > 0) {
                 db()->prepare('INSERT INTO problem_ticket_links (problem_id, ticket_id, created_by) VALUES (?, ?, ?)')->execute([$problemId, $ticketId, $user['id']]);
             }
-            save_audit((int) $user['id'], 'problem_created', $ticketId > 0 ? $ticketId : null, ['problem_id' => $problemId, 'problem_number' => gov_problem_number($problemId)]);
+            save_audit_required((int) $user['id'], 'problem_created', $ticketId > 0 ? $ticketId : null, ['problem_id' => $problemId, 'problem_number' => gov_problem_number($problemId)]);
             db()->commit();
             flash('success', 'رکورد مشکل ' . gov_problem_number($problemId) . ' ساخته شد.');
             redirect('governance.php?problem_id=' . $problemId);
@@ -376,9 +384,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $status = 'known_error';
             }
             $resolvedAt = in_array($status, ['resolved', 'closed'], true) ? ($problem['resolved_at'] ?: date('Y-m-d H:i:s')) : null;
-            db()->prepare('UPDATE problem_records SET root_cause = ?, workaround = ?, known_error = ?, priority = ?, status = ?, owner_id = ?, resolved_at = ?, updated_at = NOW() WHERE id = ?')->execute([gov_post('root_cause') ?: null, gov_post('workaround') ?: null, $knownError, gov_choice(gov_post('priority', 'normal'), ['normal', 'urgent', 'critical'], 'normal'), $status, $user['id'], $resolvedAt, $problemId]);
-            save_audit((int) $user['id'], 'problem_updated', null, ['problem_id' => $problemId, 'problem_number' => $problem['problem_number'], 'status' => $status]);
-            gov_notify_linked_tickets('problem_ticket_links', 'problem_id', $problemId, 'problem_updated', 'مشکل مرتبط به‌روزرسانی شد', 'رکورد مشکل ' . $problem['problem_number'] . ' به وضعیت «' . gov_problem_status_label($status) . '» رسید.', (int) $user['id']);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE problem_records SET root_cause = ?, workaround = ?, known_error = ?, priority = ?, status = ?, owner_id = ?, resolved_at = ?, updated_at = NOW() WHERE id = ?')->execute([gov_post('root_cause') ?: null, gov_post('workaround') ?: null, $knownError, gov_choice(gov_post('priority', 'normal'), ['normal', 'urgent', 'critical'], 'normal'), $status, $user['id'], $resolvedAt, $problemId]);
+                save_audit_required((int) $user['id'], 'problem_updated', null, ['problem_id' => $problemId, 'problem_number' => $problem['problem_number'], 'status' => $status]);
+                gov_notify_linked_tickets('problem_ticket_links', 'problem_id', $problemId, 'problem_updated', 'مشکل مرتبط به‌روزرسانی شد', 'رکورد مشکل ' . $problem['problem_number'] . ' به وضعیت «' . gov_problem_status_label($status) . '» رسید.', (int) $user['id']);
+                $pdo->commit();
+            } catch (Throwable $updateError) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                throw $updateError;
+            }
             flash('success', 'رکورد مشکل به‌روزرسانی شد.');
             redirect('governance.php?problem_id=' . $problemId);
         }
@@ -394,8 +410,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $table = $kind === 'change' ? 'change_ticket_links' : 'problem_ticket_links';
             $column = $kind === 'change' ? 'change_id' : 'problem_id';
-            db()->prepare('INSERT IGNORE INTO ' . $table . ' (' . $column . ', ticket_id, created_by) VALUES (?, ?, ?)')->execute([$recordId, $ticketId, $user['id']]);
-            save_audit((int) $user['id'], $kind . '_ticket_linked', $ticketId, [$column => $recordId, 'ticket_id' => $ticketId]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('INSERT IGNORE INTO ' . $table . ' (' . $column . ', ticket_id, created_by) VALUES (?, ?, ?)')->execute([$recordId, $ticketId, $user['id']]);
+                save_audit_required((int) $user['id'], $kind . '_ticket_linked', $ticketId, [$column => $recordId, 'ticket_id' => $ticketId]);
+                $pdo->commit();
+            } catch (Throwable $linkError) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+                throw $linkError;
+            }
             flash('success', 'درخواست به رکورد مدیریتی متصل شد.');
             redirect('governance.php?' . ($kind === 'change' ? 'change_id' : 'problem_id') . '=' . $recordId);
         }

@@ -18,12 +18,13 @@ if (!defined('APP_ROOT')) {
         if ($action === 'create_backup') {
             $backupAdmin = require_permission('backup.manage');
             $bundle = create_backup_bundle();
-            save_audit((int) $backupAdmin['id'], 'backup_created', null, ['name' => $bundle['name'], 'uploads' => $bundle['uploads']]);
+            save_audit_required((int) $backupAdmin['id'], 'backup_created', null, ['name' => $bundle['name'], 'uploads' => $bundle['uploads']]);
             flash('success', 'نسخه پشتیبان ' . $bundle['name'] . ' ساخته شد.');
             redirect('index.php?page=backup');
         }
         if ($action === 'restore_backup') {
-            $backupAdmin = require_permission('backup.manage');
+            $backupAdmin = require_primary_admin();
+            require_permission('backup.manage');
             if (post_value('restore_confirm') !== '1') {
                 throw new RuntimeException('برای بازیابی باید تأیید نهایی را فعال کنید.');
             }
@@ -33,7 +34,7 @@ if (!defined('APP_ROOT')) {
             if (($_FILES['uploads_archive']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
                 $restoredUploads = restore_upload_archive($_FILES['uploads_archive']);
             }
-            save_audit((int) $backupAdmin['id'], 'backup_restored', null, ['safety_backup' => $safetyBundle['name'], 'uploads' => $restoredUploads]);
+            save_audit_required((int) $backupAdmin['id'], 'backup_restored', null, ['safety_backup' => $safetyBundle['name'], 'uploads' => $restoredUploads]);
             flash('success', 'بازیابی انجام شد. نسخه ایمنی قبل از بازیابی: ' . $safetyBundle['name']);
             redirect('index.php?page=backup');
         }

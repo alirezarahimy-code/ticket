@@ -345,6 +345,11 @@ if (!defined('APP_ROOT')) {
             }
             db()->prepare('UPDATE users SET role = "manager" WHERE id = ? AND role NOT IN ("admin", "primary_admin", "supervisor", "support_manager", "inspector") AND is_primary_admin = 0')->execute([$managerId]);
             db()->prepare('UPDATE departments SET manager_user_id = ? WHERE id = ?')->execute([$managerId, $departmentId]);
+            save_audit_required((int) $settingsAdmin['id'], 'department_members_saved', null, [
+                'department_id' => $departmentId,
+                'manager_user_id' => $managerId,
+                'member_ids' => $memberIds,
+            ]);
             db_commit('index.php');
             flash('success', 'مدیر و اعضای معاونت ذخیره شدند.');
             redirect('index.php?page=' . valid_choice(post_value('return_page'), ['settings#departments', 'organization'], 'settings#departments'));
@@ -361,7 +366,7 @@ if (!defined('APP_ROOT')) {
                 }
             }
             save_setting('cd_dvd_inspection_user_id', (string) $inspectionUserId);
-            save_audit((int) $settingsAdmin['id'], 'cd_dvd_inspection_user_changed', null, ['user_id' => $inspectionUserId]);
+            save_audit_required((int) $settingsAdmin['id'], 'cd_dvd_inspection_user_changed', null, ['user_id' => $inspectionUserId]);
             flash('success', $inspectionUserId > 0 ? 'کاربر بازرسی CD/DVD تعیین شد.' : 'کاربر بازرسی CD/DVD حذف شد.');
             redirect('index.php?page=settings#cd-dvd-settings');
         }

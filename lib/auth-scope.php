@@ -404,13 +404,39 @@ function user_service_group(array $user): string
 
 function asset_scope(array $user, string $alias = 'a'): array
 {
-    if ((function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) || (is_it_agent($user) && user_service_group($user) === 'it')) {
+    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $alias)) {
+        throw new InvalidArgumentException('Invalid asset alias');
+    }
+
+    $role = (string) ($user['role'] ?? '');
+    $isPrimaryAdmin = function_exists('user_is_primary_admin')
+        ? user_is_primary_admin($user)
+        : $role === 'primary_admin';
+    $isGlobal = function_exists('is_global_ticket_role')
+        ? is_global_ticket_role($role)
+        : in_array($role, ['supervisor', 'inspector', 'primary_admin'], true);
+    if ($isPrimaryAdmin || $isGlobal) {
         return ['', []];
     }
+
+    // Support-side users never receive access to the IT asset inventory.
     if (user_service_group($user) !== 'it') {
         return ['WHERE 1 = 0', []];
     }
+
+    // assets.own_unit is a scope limiter: when granted, restrict the inventory
+    // to the user's department. Without it, an authorized IT user sees all IT assets.
+    // If the permission system is unavailable, fail closed to the user's own unit.
+    $ownUnitOnly = function_exists('user_can')
+        ? user_can($user, 'assets.own_unit')
+        : true;
+    if (!$ownUnitOnly) {
+        return ['', []];
+    }
+
     $departmentId = (int) ($user['department_id'] ?? 0);
-    return $departmentId > 0 ? ["WHERE {$alias}.department_id = ?", [$departmentId]] : ['WHERE 1 = 0', []];
+    return $departmentId > 0
+        ? ["WHERE {$alias}.department_id = ?", [$departmentId]]
+        : ['WHERE 1 = 0', []];
 }
 

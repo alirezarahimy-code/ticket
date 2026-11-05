@@ -95,7 +95,9 @@ def test_version_manifest_and_package():
     assert json.loads(zf.read("manifest.json").decode("utf-8"))["version"] == "1.62.14"
     # فایل‌های داخل ZIP بایت‌به‌بایت با مخزن یکی هستند (نمونه‌های حساس)
     # index.php در ۱.۶۲.۱۵ (cache-bust) تغییر کرد؛ برابری بایت‌به‌بایت با مخزن فقط برای فایل برش:
-    assert zf.read("files/actions/service-actions.php") == (ROOT / "actions/service-actions.php").read_bytes()
+    # ۱.۶۲.۸۸ سخت‌سازی امنیتی این فایل را پس از انتشار تغییر داد. برابری بایت‌به‌بایت دیگر برقرار نیست؛
+    # در عوض تضمین می‌کنیم فایل بستهٔ منجمد سالم و غیرتهی باقی مانده است.
+    assert len(zf.read("files/actions/service-actions.php")) > 0
     digest = hashlib.sha256(package.read_bytes()).hexdigest()
     assert digest in read(f"downloads/{PACKAGE_NAME}.sha256")
     # صفحهٔ دانلود اکنون بستهٔ ۱.۶۲.۱۵ را نشان می‌دهد؛ پین SHA صفحه در تست ریلیز ۱.۶۲.۱۵ است.
