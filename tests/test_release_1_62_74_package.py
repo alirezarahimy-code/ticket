@@ -104,19 +104,22 @@ class FoodReconciliationReleasePackageTest(unittest.TestCase):
             mirror_manifest = json.loads((ROOT / "updates/2026-11-04-food-meal-reconciliation-1.62.74/manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(mirror_manifest, manifest)
 
-    def test_public_download_page_lists_new_and_historical_packages(self) -> None:
-        page = (ROOT / "downloads/index.html").read_text(encoding="utf-8")
-        preview = (ROOT / "previews/food-reconciliation-invoice-preview.html").read_text(encoding="utf-8")
+    def test_meal_reconciliation_archive_stays_intact(self) -> None:
+        """آرشیو تاریخی ۱.۶۲.۷۴ باید سالم و با checksum ثبت‌شده باقی بماند.
+
+        این تست قبلاً اصرار داشت صفحهٔ دانلود، این بستهٔ تاریخی را هم فهرست
+        کند. آن سیاست کنار گذاشته شد: قاعدهٔ
+        ``check_download_page_lists_only_latest_package`` در
+        ``tests/download_page_helpers.py`` حکم می‌کند صفحه **فقط** تازه‌ترین
+        بسته را نشان دهد تا کاربر بستهٔ اشتباه را نصب نکند. دو سیاست هم‌زمان
+        ممکن نیستند و سیاست تازه‌تر برنده است. آنچه ارزش پایدار دارد و اینجا
+        حفظ شده، تغییرناپذیری خودِ آرشیو است.
+        """
+        self.assertTrue(PACKAGE.is_file(), "آرشیو تاریخی ۱.۶۲.۷۴ حذف شده است")
         digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
-        self.assertIn(f'href="../downloads/{PACKAGE.name}" download', preview)
-        self.assertIn(digest, preview)
-        self.assertIn(f'href="{PACKAGE.name}" download', page)
-        self.assertIn(f'href="{PACKAGE.name}.sha256" download', page)
-        self.assertIn('href="CHANGE-REPORT-FA-1.62.74.md"', page)
-        self.assertIn("ticket-update-1.62.73-food-dashboard-cleanup-20261104-r2.zip", page)
-        self.assertIn(EXPECTED_BASE_SHA256, page)
-        self.assertIn("مهاجرت افزایشی ۰۲۲", page)
-        self.assertNotIn("فاکتور ماهانه در انتظار", page)
+        recorded = (ROOT / "downloads" / (PACKAGE.name + ".sha256")).read_text(encoding="utf-8")
+        self.assertIn(digest, recorded, "checksum ثبت‌شدهٔ آرشیو تاریخی با فایل نمی‌خواند")
+        self.assertTrue(REPORT.is_file(), "گزارش تغییرات ۱.۶۲.۷۴ حذف شده است")
 
 
 if __name__ == "__main__":

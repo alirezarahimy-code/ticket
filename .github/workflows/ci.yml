@@ -23,6 +23,12 @@ jobs:
     - name: Check PHP syntax
       run: git ls-files -z -- '*.php' | php tools/lint-php-syntax.php
 
+    # ممیزی سلامت سامانه. روی سرور از دل cron/check_logging_health.php اجرا
+    # می‌شود و در سیستم لاگ ثبت می‌گردد؛ اینجا با --no-db فقط بررسی‌هایی که
+    # به پایگاه داده نیاز ندارند اجرا می‌شوند تا نقص زودتر از ادغام دیده شود.
+    - name: System health audit
+      run: php tools/system_audit.php --no-db --check
+
     - name: Run security tests
       run: php tests/SecurityTest.php
 

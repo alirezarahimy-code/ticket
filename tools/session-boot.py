@@ -135,6 +135,38 @@ def refresh_map_if_stale(allow_refresh: bool) -> dict[str, str]:
     }
 
 
+def block_index_status() -> dict[str, str]:
+    """وضعیت نقشهٔ بلوکی و درصد بازبینی خط‌به‌خط.
+
+    این عدد باید همان ابتدای جلسه دیده شود: بدون آن، ایجنت تازه نمی‌داند
+    چه بخشی از سامانه بازبینی شده و چه بخشی هنوز دست‌نخورده است.
+    """
+    blocks_path = ROOT / "docs/system-map/BLOCKS.json"
+    ledger_path = ROOT / "docs/system-map/REVIEW-LEDGER.json"
+    if not blocks_path.is_file():
+        return {"state": "MISSING", "detail": "docs/system-map/BLOCKS.json وجود ندارد"}
+    try:
+        idx = json.loads(blocks_path.read_text(encoding="utf-8"))
+        ledger = json.loads(ledger_path.read_text(encoding="utf-8")) if ledger_path.is_file() else {"reviewed": {}}
+    except (json.JSONDecodeError, OSError) as exc:
+        return {"state": "FAIL", "detail": f"خواندن نقشهٔ بلوکی ناموفق: {exc}"}
+
+    reviewed = ledger.get("reviewed", {})
+    blocks = [b for f in idx["files"] for b in f["blocks"]]
+    lines = sum(f["lines"] for f in idx["files"])
+    done = [b for b in blocks if b["id"] in reviewed]
+    done_lines = sum(b["lines"] for b in done)
+    pct = (done_lines / lines * 100) if lines else 0.0
+    return {
+        "state": "OK",
+        "files": str(len(idx["files"])),
+        "blocks": str(len(blocks)),
+        "lines": f"{lines:,}",
+        "reviewed": f"{len(done):,} آدرس / {done_lines:,} خط ({pct:.1f}%)",
+        "detail": "مرجع: docs/system-map/REVIEW-MAP-FA.md — فهرست موضوعی در صدر همان فایل",
+    }
+
+
 def run_guard_tests() -> list[tuple[str, int, str]]:
     results = []
     for test in GUARD_TESTS:
@@ -199,6 +231,7 @@ def build_context(args: argparse.Namespace, skip_tests: bool = False) -> dict:
             "docs/SESSION-BOOT-FA.md": BOOT_GUIDE.is_file(),
         },
         "boot_command": "python3 tools/session-boot.py",
+        "blocks": block_index_status(),
     }
 
 
@@ -225,6 +258,14 @@ def print_briefing(ctx: dict) -> None:
     print(f"  • نقشه/ایندکسها: {r['state']} — {r['action']}")
     if r["detail"]:
         print(f"    {r['detail']}")
+    b = ctx.get("blocks") or {}
+    if b.get("state") == "OK":
+        print(f"  • نقشهٔ بلوکی (آدرسدهی خطبهخط): {b['files']} فایل | "
+              f"{b['blocks']} آدرس | {b['lines']} خط")
+        print(f"    بازبینیشده: {b['reviewed']}")
+        print(f"    {b['detail']}")
+    elif b:
+        print(f"  • نقشهٔ بلوکی: {b.get('state')} — {b.get('detail','')}")
     if s:
         print(f"  • ایندکس: {s.get('total_files_indexed','?')} فایل | "
               f"{s.get('symbols','?')} نماد | {s.get('routes','?')} روت | "

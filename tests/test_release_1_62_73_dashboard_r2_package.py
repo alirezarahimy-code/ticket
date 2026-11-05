@@ -79,18 +79,22 @@ class DashboardR2ReleasePackageTest(unittest.TestCase):
             self.assertIn("<tr><th>فیش خودکار پرسنل</th>", panel)
             self.assertIn("<tr><th>فیش خودکار مهمان</th>", panel)
 
-    def test_public_download_page_links_to_this_package_and_sha256(self) -> None:
-        page = (ROOT / "downloads/index.html").read_text(encoding="utf-8")
+    def test_dashboard_r2_archive_stays_intact(self) -> None:
+        """آرشیو ۱.۶۲.۷۳ r2 باید سالم و با checksum ثبت‌شده باقی بماند.
+
+        این تست قبلاً اصرار داشت صفحهٔ دانلود، این بستهٔ تاریخی را هم فهرست
+        کند. آن سیاست کنار گذاشته شد: قاعدهٔ
+        ``check_download_page_lists_only_latest_package`` در
+        ``tests/download_page_helpers.py`` حکم می‌کند صفحه **فقط** تازه‌ترین
+        بسته را نشان دهد تا کاربر بستهٔ اشتباه را نصب نکند. دو سیاست هم‌زمان
+        ممکن نیستند و سیاست تازه‌تر برنده است. آنچه ارزش پایدار دارد و اینجا
+        حفظ شده، تغییرناپذیری خودِ آرشیو است.
+        """
+        self.assertTrue(PACKAGE.is_file(), "آرشیو تاریخی ۱.۶۲.۷۳ r2 حذف شده است")
         digest = hashlib.sha256(PACKAGE.read_bytes()).hexdigest()
-        base_url = "https://github.com/alirezarahimy-code/ticket/"
-        self.assertIn(PACKAGE.name, page)
-        self.assertIn(PACKAGE.name + ".sha256", page)
-        self.assertIn(digest, page)
-        self.assertIn(base_url + "raw/refs/heads/arena/642158e3-ticket/downloads/" + PACKAGE.name, page)
-        self.assertIn(base_url + "raw/refs/heads/arena/642158e3-ticket/downloads/" + PACKAGE.name + ".sha256", page)
-        self.assertIn(base_url + "blob/arena/642158e3-ticket/downloads/" + REPORT.name, page)
-        self.assertNotIn("اصلاح داشبوردِ بازبینی دوم در این updater نیست", page)
-        self.assertIsNotNone(re.search(r"ticket-update-1\.62\.73-food-dashboard-cleanup-20261104-r2\.zip", page))
+        recorded = (ROOT / "downloads" / (PACKAGE.name + ".sha256")).read_text(encoding="utf-8")
+        self.assertIn(digest, recorded, "checksum ثبت‌شدهٔ آرشیو تاریخی با فایل نمی‌خواند")
+        self.assertTrue(REPORT.is_file(), "گزارش تغییرات ۱.۶۲.۷۳ r2 حذف شده است")
 
 
 if __name__ == "__main__":

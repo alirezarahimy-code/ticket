@@ -27,6 +27,34 @@ python3 tools/session-boot.py
 فایلهای بارگذاری خودکار: `AGENTS.md`, `CLAUDE.md`,
 `.github/copilot-instructions.md`, `.cursor/rules/arena-boot.mdc`, `.cursorrules`.
 
+### 🔎 «فلان جای سامانه کجاست؟» — فهرست موضوعی
+
+برای پیدا کردن یک بخش **بدون جست‌وجو در کد**، فایل زیر را باز کنید و نام
+فارسی بخش را `Ctrl+F` کنید:
+
+[`docs/system-map/REVIEW-MAP-FA.md`](system-map/REVIEW-MAP-FA.md)
+
+در صدر آن سه جدول هست: **۴۰ صفحه**، **۱۰۱ مجوز**، **۸۴ جدول پایگاه داده** —
+هر کدام با آدرس دقیق کد. مثلاً «تنظیمات سامانه» ⇒ `PAGE-058.100`
+(`index.php:3197`).
+
+#### تفاوتش با ایندکس‌های این پوشه
+
+| فایل | چه می‌دهد |
+|---|---|
+| `SYMBOLS.tsv` | نام نماد ⇒ فایل و **خط شروع** |
+| `BLOCKS.json` | **محدودهٔ کامل خطی** هر بلوک + اثر انگشت محتوا + امتیاز ریسک |
+| `TOPICS.json` | نام فارسی بخش ⇒ آدرس‌های مرتبط، مرتب‌شده بر اساس ربط |
+| `REVIEW-LEDGER.json` | کدام آدرس‌ها خط‌به‌خط بازبینی شده‌اند |
+
+`BLOCKS.json` تضمین می‌کند **هر خط ناخالی سامانه دقیقاً در یک آدرس** قرار
+دارد (۱۰۰٪ پوشش، اثبات‌شده در `tests/test_system_map_blocks.py`). بازتولید:
+
+```bash
+php tools/code_index.php > docs/system-map/BLOCKS.json
+python3 tools/topic_index.py && python3 tools/render_code_map.py
+```
+
 ### ابزار جستجوی سریع — «فلان جای سامانه کجاست؟»
 
 ```bash

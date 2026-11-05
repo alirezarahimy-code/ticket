@@ -150,6 +150,31 @@ try {
     // نبود مجوز خواندن timezone فقط به‌عنوان دادهٔ تشخیصی ناموجود تلقی می‌شود.
 }
 
+// ممیزی سلامت سامانه: ساختار پایگاه دادهٔ همین نصب، مهاجرت‌های اجرانشده،
+// مشکلات باز و ضربان Workerها. عمداً همین‌جا اجرا می‌شود و نه در یک کرون
+// جدا، تا هشدارهایش از همان مسیر همیشگی (logging_health_alerts + اعلان به
+// ادمین) عبور کند و سامانهٔ موازی ساخته نشود.
+try {
+    require_once APP_ROOT . '/lib/logging-audit.php';
+    $auditRun = logging_audit_run_and_record(false, $alerts);
+    $auditFindings = array_sum($auditRun['metrics'] ?? []);
+    fwrite(
+        STDOUT,
+        'System audit: ' . count($auditRun['checks'] ?? []) . ' checks, '
+        . $auditFindings . ' findings, '
+        . count($auditRun['regressions'] ?? []) . ' regressions, '
+        . count($auditRun['structural_problems'] ?? []) . " structural\n"
+    );
+} catch (Throwable $auditException) {
+    // ممیزی که خودش می‌افتد نباید بی‌صدا بماند — همان اشتباهی که این ممیزی
+    // برای پیدا کردنش ساخته شده است.
+    $alerts['system_audit_failed'] = 'ممیزی سلامت سامانه اجرا نشد (' . get_class($auditException)
+        . ')؛ وضعیت ساختاری این نصب در این بازه نامعلوم است.';
+    if (function_exists('logging_emergency_failure')) {
+        logging_emergency_failure('system_audit_failed', get_class($auditException));
+    }
+}
+
 $adminIds = [];
 try {
     $adminIds = db()->query("SELECT id FROM users WHERE role = 'primary_admin'")->fetchAll(PDO::FETCH_COLUMN);
