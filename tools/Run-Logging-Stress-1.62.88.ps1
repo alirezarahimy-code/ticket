@@ -36,7 +36,7 @@ function Get-AppProcesses {
 }
 
 if (-not $ConfirmLoadTest) {
-    throw 'بارگذاری واقعی متوقف شد. پس از آماده‌سازی سامانه و اطلاع‌رسانی به کاربران، پارامتر -ConfirmLoadTest را اضافه کنید.'
+    throw 'Load test is disabled. After preparing the server and notifying users, rerun with -ConfirmLoadTest.'
 }
 if ($HttpRequests -gt 10000 -or $HttpConcurrency -gt 20 -or $AuditEvents -gt 20000) {
     throw 'Requested load exceeds the script safety ceiling.'
