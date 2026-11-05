@@ -97,7 +97,7 @@ jobs:
     needs: [linux-mariadb-integration, windows-acl-and-runtime]
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,7 +132,7 @@ jobs:
           name: ticket-update-1.62.88-verified
           path: |
             downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
-            downloads/ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip.sha256
+            downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip.sha256
             downloads/CHANGE-REPORT-FA-1.62.88.md
           if-no-files-found: error
           retention-days: 30
