@@ -210,13 +210,14 @@ check('۶: commit روی تراکنش باز → true و commit واقعی', db_
 
 /* ───────── ۷) بررسی خود فایل create_ticket ───────── */
 $index = (string) file_get_contents(dirname(__DIR__) . '/index.php');
-$createStart = strpos($index, "if (\$action === 'create_ticket') {");
+$ticketActions = (string) file_get_contents(dirname(__DIR__) . '/actions/ticket-actions.php');
+$createStart = strpos($ticketActions, "if (\$action === 'create_ticket') {");
 // ۱.۳۷.۲: مرز بدنه با «اکشن بعدی» تعیین می‌شود، نه با عدد ثابت — تا افزودن چند خط
 // کامنت/اعتبارسنجی در create_ticket این آزمون را بی‌دلیل قرمز نکند.
-$createEnd = $createStart === false ? false : strpos($index, "if (\$action === ", (int) $createStart + 20);
+$createEnd = $createStart === false ? false : strpos($ticketActions, "if (\$action === ", (int) $createStart + 20);
 $body = $createStart === false
     ? ''
-    : substr($index, $createStart, ($createEnd === false ? 20000 : (int) $createEnd - (int) $createStart));
+    : substr($ticketActions, $createStart, ($createEnd === false ? 20000 : (int) $createEnd - (int) $createStart));
 check('۷: در create_ticket هیچ db()->commit() خامی نمانده', strpos($body, 'db()->commit();') === false);
 check('۷-ب: create_ticket از db_commit استفاده می‌کند', strpos($body, "db_commit('index.php')") !== false);
 check('۷-پ: یک‌بار متغیر $ticketNo ساخته می‌شود و داخل تراکنش پیام خطا نمی‌دهد', substr_count($body, 'ticket_number_next(') === 1, (string) substr_count($body, 'ticket_number_next('));
