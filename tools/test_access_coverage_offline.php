@@ -187,12 +187,12 @@ check('index.php: CSRF پیش از بارگذاری ماژول‌های POST ب�
 
 $logoutOffset = strpos($index, "if (\$_SERVER['REQUEST_METHOD'] === 'POST' && (\$_POST['action'] ?? '') === 'logout')");
 $logoutCsrfOffset = $logoutOffset !== false ? strpos($index, 'require_csrf();', $logoutOffset) : false;
-$logoutClearOffset = $logoutOffset !== false ? strpos($index, '\$_SESSION = [];', $logoutOffset) : false;
+$logoutClearOffset = $logoutOffset !== false ? strpos($index, '$_SESSION = [];', $logoutOffset) : false;
 check('index.php: خروج پیش از احراز هویت، CSRF معتبر می‌خواهد', $logoutOffset !== false && $logoutCsrfOffset !== false && $logoutClearOffset !== false && $logoutCsrfOffset < $logoutClearOffset);
 
 $accountActions = (string) file_get_contents(APP_ROOT . '/actions/account-actions.php');
 $loginOffset = strpos($accountActions, "if (\$action === 'login') {");
-$accountLoginGuard = strpos($accountActions, '\$user = require_login();');
+$accountLoginGuard = strpos($accountActions, '$user = require_login();');
 check('account-actions: ورود تنها اکشن پیش از require_login است', $loginOffset !== false && $accountLoginGuard !== false && $loginOffset < $accountLoginGuard);
 
 $actionFiles = glob(APP_ROOT . '/actions/*.php') ?: [];
