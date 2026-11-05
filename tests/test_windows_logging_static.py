@@ -10,6 +10,7 @@ def test_windows_logging_acceptance_assets_exist():
         "tools/verify_logging_acl.ps1",
         "tools/set_logging_acl.ps1",
         "tools/verify_logging_web_protection.ps1",
+        "tools/Run-Logging-Acceptance-1.62.83.ps1",
     ]
     missing = [name for name in required if not (ROOT / name).is_file()]
     assert not missing, f"Missing Windows Logging acceptance assets: {missing}"
