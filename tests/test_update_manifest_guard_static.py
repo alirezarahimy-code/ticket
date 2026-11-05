@@ -37,3 +37,22 @@ def test_cumulative_update_contains_security_scope_runtime_overlays():
         "tools/Run-Logging-Acceptance-1.62.83.ps1",
     ):
         assert f'"{required}"' in source
+
+
+
+def test_cumulative_update_includes_all_logging_migrations_from_024_through_030():
+    source = (ROOT / "tools/build_cumulative_update.py").read_text(encoding="utf-8")
+    required = (
+        "migrations/024-central-logging.sql",
+        "migrations/025-logging-issues-alerts.sql",
+        "migrations/026-logging-legacy-result-unknown.sql",
+        "migrations/027-logging-correlation-ids.sql",
+        "migrations/028-logging-fingerprint-v2.sql",
+        "migrations/029-activity-result-default-unknown.sql",
+        "migrations/030-logging-notification-idempotency-and-ticket-history.sql",
+    )
+    start = source.index("OVERLAY_MIGRATIONS = (")
+    end = source.index("\n)", start)
+    overlay = source[start:end]
+    missing = [migration for migration in required if f'"{migration}"' not in overlay]
+    assert not missing, f"Cumulative update omits required Logging migrations: {missing}"
