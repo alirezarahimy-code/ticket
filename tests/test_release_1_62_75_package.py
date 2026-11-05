@@ -37,6 +37,10 @@ SUPERSEDED_BY_LATER_RELEASE = {
     "help-guide.php",
     # ۱.۶۲.۸۱ بند ۱۱ (ممیزی دورهٔ‌ای سامانه) را به سند معماری افزود.
     "docs/ARCHITECTURE-FA.md",
+    # ۱.۶۲.۸۴ قاعدهٔ تفکیک وظایف را داخل ticket_handler_level() نشاند و دو تابع
+    # ticket_view_mode() و ticket_can_see_internal() را افزود، تا نمای صفحه تابع
+    # نسبت کاربر با همان درخواست باشد نه نقش سراسری او.
+    "lib/auth-scope.php",
 }
 EXPECTED_REPLACEMENTS = {
     "VERSION",

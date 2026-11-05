@@ -100,6 +100,27 @@ $ownTicket['requester_id'] = 5;
 check_ticket(ticket_user_can_view($ownTicket, $users[4]) && ticket_handler_level($ownTicket, $users[4]) === '', 'own ticket does not give manager authority outside department');
 [$ownScope, $ownParameters] = ticket_scope($users[4]);
 check_ticket(str_contains($ownScope, 'requester_id = ?') && $ownParameters === ['support', 5, 701, 701, 701], 'manager list includes own requests outside their department but within their group');
+// ───── تفکیک وظایف و سه نما (۱.۶۲.۸۴) ─────
+// سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه و همان واحد) خودش درخواست می‌دهد.
+$selfTicket = ['requester_id'=>4, 'assigned_to'=>3, 'service_group'=>'support', 'department_id'=>5, 'status'=>'assigned', 'cancel_requested_at'=>null];
+check_ticket(ticket_handler_level($selfTicket, $users[3]) === '', 'a manager has no supervisor authority over a ticket they filed themselves');
+check_ticket(ticket_view_mode($selfTicket, $users[3]) === 'requester', 'the manager sees the requester view on their own ticket');
+check_ticket(!ticket_can_see_internal($selfTicket, $users[3]), 'the requester never reads internal notes about their own request');
+// همان مدیر روی درخواست دیگران همچنان سرپرست است.
+check_ticket(ticket_view_mode($ticket, $users[3]) === 'supervisor', 'the same manager still supervises other people requests');
+check_ticket(ticket_can_see_internal($ticket, $users[3]), 'internal notes stay visible to the handling side');
+// کارشناس مسئول: نمای کارشناس، نه سرپرست.
+check_ticket(ticket_view_mode($ticket, $users[2]) === 'assignee', 'the assigned agent gets the agent view');
+check_ticket(ticket_can_see_internal($ticket, $users[2]), 'the assigned agent reads internal notes');
+// ثبت‌کنندهٔ عادی.
+check_ticket(ticket_view_mode($ticket, $users[0]) === 'requester', 'an ordinary requester gets the requester view');
+check_ticket(!ticket_can_see_internal($ticket, $users[0]), 'an ordinary requester never reads internal notes');
+// استثنای مهم: کسی که هم ثبت‌کننده و هم کارشناس مسئول همان درخواست است باید کار کند.
+$bothTicket = ['requester_id'=>3, 'assigned_to'=>3, 'service_group'=>'support', 'department_id'=>5, 'status'=>'assigned', 'cancel_requested_at'=>null];
+check_ticket(ticket_handler_level($bothTicket, $users[2]) === 'assignee', 'a requester who is also the assigned agent can still work the ticket');
+check_ticket(ticket_can_see_internal($bothTicket, $users[2]), 'that same person keeps access to internal notes');
+check_ticket(!ticket_reply_starts_work($bothTicket, $users[2]), 'but replying still does not silently advance their own ticket');
+
 $ticket['cancel_requested_at'] = '2026-01-01 12:00:00';
 check_ticket(!ticket_reply_starts_work($ticket, $users[2]), 'pending cancellation blocks implicit transition');
 

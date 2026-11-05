@@ -1177,7 +1177,9 @@ if (($_GET['action'] ?? '') === 'download_attachment') {
     $attachmentQuery->execute([$attachmentId]);
     $attachment = $attachmentQuery->fetch();
     $attachmentTicket = $attachment ? fetch_ticket((int) $attachment['ticket_id']) : null;
-    $canDownloadInternal = is_staff_role($downloadUser['role']) || user_is_primary_admin($downloadUser);
+    // پیوست داخلی را بر پایهٔ نسبت کاربر با همین درخواست می‌سنجیم، نه نقش سراسری:
+    // کارمندی که خودش ثبت‌کنندهٔ درخواست است نباید پیوست داخلی آن را بگیرد.
+    $canDownloadInternal = $attachmentTicket ? ticket_can_see_internal($attachmentTicket, $downloadUser) : false;
     if (!$attachment || !$attachmentTicket || !can_view_ticket($attachmentTicket, $downloadUser) || ((int) $attachment['is_internal'] === 1 && !$canDownloadInternal)) {
         http_response_code(404);
         exit('فایل پیدا نشد.');
@@ -2345,6 +2347,10 @@ if ($page === 'ticket') {
     $requesterView = $isRequester;
     $canCancelOwnTicket = ticket_requester_can_cancel($ticket, $user);
     $handlerLevel = ticket_handler_level($ticket, $user);
+    // نمای فعال: 'requester' | 'assignee' | 'supervisor'. تنها منبع حقیقتِ «چه چیزی
+    // نشان داده شود»، تا نما و اختیار از هم جدا نیفتند.
+    $viewMode = ticket_view_mode($ticket, $user);
+    $canSeeInternal = ticket_can_see_internal($ticket, $user);
     $cancelHasRequest = !empty($ticket['cancel_requested_at']);
     $cancelDecidable = $cancelHasRequest
         && in_array((string) $ticket['status'], ticket_requester_cancelable_statuses(), true);
@@ -2357,9 +2363,9 @@ if ($page === 'ticket') {
     $canAssignTicket = $handlerLevel === 'manager';
     $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
     render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
-     echo '<section class="page-heading"><div><a class="back-link" href="index.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout"><section class="conversation">';
+     echo '<section class="page-heading"><div><a class="back-link" href="index.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
     foreach ($messages as $message) {
-        if ((int) $message['is_internal'] === 1 && !$staff) {
+        if ((int) $message['is_internal'] === 1 && !$canSeeInternal) {
             continue;
         }
          $messageRole = ((int) $message['is_internal'] === 1) ? 'internal' : (is_staff_role($message['role']) ? 'agent' : ($message['role'] === 'supervisor' ? 'supervisor' : 'user'));

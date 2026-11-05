@@ -31902,8 +31902,8 @@
             "id": "PAGE-034",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 3733,
-            "file_fingerprint": "8f5733710fb0",
+            "lines": 3739,
+            "file_fingerprint": "8693eda0dd6f",
             "blocks": [
                 {
                     "kind": "region",
@@ -32500,9 +32500,9 @@
                     "kind": "region",
                     "anchor": "خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های هم",
                     "line_start": 1084,
-                    "line_end": 1196,
-                    "lines": 113,
-                    "fingerprint": "128d73b510ef",
+                    "line_end": 1198,
+                    "lines": 115,
+                    "fingerprint": "627d7bec6dfe",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -32515,8 +32515,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-personnel-link",
-                    "line_start": 1197,
-                    "line_end": 1202,
+                    "line_start": 1199,
+                    "line_end": 1204,
                     "lines": 6,
                     "fingerprint": "19cd1122ddcd",
                     "risk": {
@@ -32528,8 +32528,8 @@
                 {
                     "kind": "region",
                     "anchor": "ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با ب",
-                    "line_start": 1203,
-                    "line_end": 1206,
+                    "line_start": 1205,
+                    "line_end": 1208,
                     "lines": 4,
                     "fingerprint": "c8585701f829",
                     "risk": {
@@ -32543,8 +32543,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logging_begin_operation",
-                    "line_start": 1207,
-                    "line_end": 1317,
+                    "line_start": 1209,
+                    "line_end": 1319,
                     "lines": 111,
                     "fingerprint": "937c1790c45d",
                     "risk": {
@@ -32559,8 +32559,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings|create_access_group|save_access_group",
-                    "line_start": 1318,
-                    "line_end": 1328,
+                    "line_start": 1320,
+                    "line_end": 1330,
                     "lines": 11,
                     "fingerprint": "4718e06c3f86",
                     "risk": {
@@ -32574,8 +32574,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-api",
-                    "line_start": 1329,
-                    "line_end": 1381,
+                    "line_start": 1331,
+                    "line_end": 1383,
                     "lines": 53,
                     "fingerprint": "318a5024ad97",
                     "risk": {
@@ -32587,8 +32587,8 @@
                 {
                     "kind": "region",
                     "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
-                    "line_start": 1382,
-                    "line_end": 1382,
+                    "line_start": 1384,
+                    "line_end": 1384,
                     "lines": 1,
                     "fingerprint": "dc537f6d8cd4",
                     "risk": {
@@ -32600,8 +32600,8 @@
                 {
                     "kind": "region",
                     "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
-                    "line_start": 1383,
-                    "line_end": 1383,
+                    "line_start": 1385,
+                    "line_end": 1385,
                     "lines": 1,
                     "fingerprint": "ded263ea996a",
                     "risk": {
@@ -32613,8 +32613,8 @@
                 {
                     "kind": "region",
                     "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
-                    "line_start": 1384,
-                    "line_end": 1384,
+                    "line_start": 1386,
+                    "line_end": 1386,
                     "lines": 1,
                     "fingerprint": "127c6305eea4",
                     "risk": {
@@ -32626,8 +32626,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
-                    "line_start": 1385,
-                    "line_end": 1392,
+                    "line_start": 1387,
+                    "line_end": 1394,
                     "lines": 8,
                     "fingerprint": "9a2638f68caf",
                     "risk": {
@@ -32639,8 +32639,8 @@
                 {
                     "kind": "region",
                     "anchor": "شرط مسیریابی",
-                    "line_start": 1393,
-                    "line_end": 1400,
+                    "line_start": 1395,
+                    "line_end": 1402,
                     "lines": 8,
                     "fingerprint": "f0442e04b38a",
                     "risk": {
@@ -32652,8 +32652,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings|settings.general|settings.domain",
-                    "line_start": 1401,
-                    "line_end": 1409,
+                    "line_start": 1403,
+                    "line_end": 1411,
                     "lines": 9,
                     "fingerprint": "6104a36b9f4a",
                     "risk": {
@@ -32665,8 +32665,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: change-password",
-                    "line_start": 1410,
-                    "line_end": 1412,
+                    "line_start": 1412,
+                    "line_end": 1414,
                     "lines": 3,
                     "fingerprint": "124bfe57a669",
                     "risk": {
@@ -32678,8 +32678,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: local-accounts",
-                    "line_start": 1413,
-                    "line_end": 1415,
+                    "line_start": 1415,
+                    "line_end": 1417,
                     "lines": 3,
                     "fingerprint": "b29f0eab1a78",
                     "risk": {
@@ -32691,8 +32691,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: profile",
-                    "line_start": 1416,
-                    "line_end": 1433,
+                    "line_start": 1418,
+                    "line_end": 1435,
                     "lines": 18,
                     "fingerprint": "17fcefba2ed2",
                     "risk": {
@@ -32704,8 +32704,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: governance",
-                    "line_start": 1434,
-                    "line_end": 1437,
+                    "line_start": 1436,
+                    "line_end": 1439,
                     "lines": 4,
                     "fingerprint": "f648535c873c",
                     "risk": {
@@ -32717,8 +32717,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket",
-                    "line_start": 1438,
-                    "line_end": 1442,
+                    "line_start": 1440,
+                    "line_end": 1444,
                     "lines": 5,
                     "fingerprint": "ae9f68a9cd0b",
                     "risk": {
@@ -32730,8 +32730,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order|foodorder.self",
-                    "line_start": 1443,
-                    "line_end": 1450,
+                    "line_start": 1445,
+                    "line_end": 1452,
                     "lines": 8,
                     "fingerprint": "04d0caca12c5",
                     "risk": {
@@ -32743,8 +32743,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order",
-                    "line_start": 1451,
-                    "line_end": 1454,
+                    "line_start": 1453,
+                    "line_end": 1456,
                     "lines": 4,
                     "fingerprint": "bc897f4ac2b2",
                     "risk": {
@@ -32756,8 +32756,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cd-dvd",
-                    "line_start": 1455,
-                    "line_end": 1458,
+                    "line_start": 1457,
+                    "line_end": 1460,
                     "lines": 4,
                     "fingerprint": "787561b508a4",
                     "risk": {
@@ -32769,8 +32769,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cd-dvd-history",
-                    "line_start": 1459,
-                    "line_end": 1462,
+                    "line_start": 1461,
+                    "line_end": 1464,
                     "lines": 4,
                     "fingerprint": "382f96759a4b",
                     "risk": {
@@ -32782,8 +32782,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control",
-                    "line_start": 1463,
-                    "line_end": 1465,
+                    "line_start": 1465,
+                    "line_end": 1467,
                     "lines": 3,
                     "fingerprint": "4d764e6a405e",
                     "risk": {
@@ -32795,8 +32795,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control-print",
-                    "line_start": 1466,
-                    "line_end": 1469,
+                    "line_start": 1468,
+                    "line_end": 1471,
                     "lines": 4,
                     "fingerprint": "87cc679fbb4c",
                     "risk": {
@@ -32810,8 +32810,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: services",
-                    "line_start": 1470,
-                    "line_end": 1555,
+                    "line_start": 1472,
+                    "line_end": 1557,
                     "lines": 86,
                     "fingerprint": "ae4d1f91e883",
                     "risk": {
@@ -32826,8 +32826,8 @@
                 {
                     "kind": "region",
                     "anchor": "سربرگ‌ها (تب‌ها)",
-                    "line_start": 1556,
-                    "line_end": 1564,
+                    "line_start": 1558,
+                    "line_end": 1566,
                     "lines": 9,
                     "fingerprint": "6bc7b8fb4e4f",
                     "risk": {
@@ -32839,8 +32839,8 @@
                 {
                     "kind": "region",
                     "anchor": "تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)",
-                    "line_start": 1565,
-                    "line_end": 1574,
+                    "line_start": 1567,
+                    "line_end": 1576,
                     "lines": 10,
                     "fingerprint": "ee159520f9f2",
                     "risk": {
@@ -32852,8 +32852,8 @@
                 {
                     "kind": "region",
                     "anchor": "تب ۲: لیست خدمات + فیلتر",
-                    "line_start": 1575,
-                    "line_end": 1598,
+                    "line_start": 1577,
+                    "line_end": 1600,
                     "lines": 24,
                     "fingerprint": "80ad3ce2d717",
                     "risk": {
@@ -32868,8 +32868,8 @@
                 {
                     "kind": "region",
                     "anchor": "تب ۳: دسته‌بندی‌ها",
-                    "line_start": 1599,
-                    "line_end": 1612,
+                    "line_start": 1601,
+                    "line_end": 1614,
                     "lines": 14,
                     "fingerprint": "de14feab019b",
                     "risk": {
@@ -32884,8 +32884,8 @@
                 {
                     "kind": "region",
                     "anchor": "پنجره‌های ویرایش\/فیلد (rendered outside the tab panels, fixed overlay)",
-                    "line_start": 1613,
-                    "line_end": 1640,
+                    "line_start": 1615,
+                    "line_end": 1642,
                     "lines": 28,
                     "fingerprint": "846f21e22ee9",
                     "risk": {
@@ -32899,8 +32899,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: help",
-                    "line_start": 1641,
-                    "line_end": 1648,
+                    "line_start": 1643,
+                    "line_end": 1650,
                     "lines": 8,
                     "fingerprint": "f98b5e6182d3",
                     "risk": {
@@ -32912,8 +32912,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: knowledge",
-                    "line_start": 1649,
-                    "line_end": 1685,
+                    "line_start": 1651,
+                    "line_end": 1687,
                     "lines": 37,
                     "fingerprint": "a678358f57c8",
                     "risk": {
@@ -32927,8 +32927,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications|notif.view",
-                    "line_start": 1686,
-                    "line_end": 1693,
+                    "line_start": 1688,
+                    "line_end": 1695,
                     "lines": 8,
                     "fingerprint": "dc86bc55d5b1",
                     "risk": {
@@ -32940,8 +32940,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications",
-                    "line_start": 1694,
-                    "line_end": 1711,
+                    "line_start": 1696,
+                    "line_end": 1713,
                     "lines": 18,
                     "fingerprint": "3f21cd6d56c6",
                     "risk": {
@@ -32955,8 +32955,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: audit",
-                    "line_start": 1712,
-                    "line_end": 1720,
+                    "line_start": 1714,
+                    "line_end": 1722,
                     "lines": 9,
                     "fingerprint": "87a567f11e96",
                     "risk": {
@@ -32968,8 +32968,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logging-dashboard",
-                    "line_start": 1721,
-                    "line_end": 1724,
+                    "line_start": 1723,
+                    "line_end": 1726,
                     "lines": 4,
                     "fingerprint": "54e47224bef5",
                     "risk": {
@@ -32981,8 +32981,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: system-health",
-                    "line_start": 1725,
-                    "line_end": 1728,
+                    "line_start": 1727,
+                    "line_end": 1730,
                     "lines": 4,
                     "fingerprint": "be1344b02adc",
                     "risk": {
@@ -32994,8 +32994,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 1729,
-                    "line_end": 1734,
+                    "line_start": 1731,
+                    "line_end": 1736,
                     "lines": 6,
                     "fingerprint": "c65f22cdca8f",
                     "risk": {
@@ -33007,8 +33007,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: activity-log",
-                    "line_start": 1735,
-                    "line_end": 1877,
+                    "line_start": 1737,
+                    "line_end": 1879,
                     "lines": 143,
                     "fingerprint": "84d1643d662a",
                     "risk": {
@@ -33024,8 +33024,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: backup",
-                    "line_start": 1878,
-                    "line_end": 1916,
+                    "line_start": 1880,
+                    "line_end": 1918,
                     "lines": 39,
                     "fingerprint": "fe4ec71b0d1e",
                     "risk": {
@@ -33040,8 +33040,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: search|search.global",
-                    "line_start": 1917,
-                    "line_end": 1924,
+                    "line_start": 1919,
+                    "line_end": 1926,
                     "lines": 8,
                     "fingerprint": "08b9308aa266",
                     "risk": {
@@ -33053,8 +33053,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: search",
-                    "line_start": 1925,
-                    "line_end": 2015,
+                    "line_start": 1927,
+                    "line_end": 2017,
                     "lines": 91,
                     "fingerprint": "a630c183e8ff",
                     "risk": {
@@ -33069,8 +33069,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: queue",
-                    "line_start": 2016,
-                    "line_end": 2062,
+                    "line_start": 2018,
+                    "line_end": 2064,
                     "lines": 47,
                     "fingerprint": "c3620fcd5906",
                     "risk": {
@@ -33085,8 +33085,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-admin",
-                    "line_start": 2063,
-                    "line_end": 2165,
+                    "line_start": 2065,
+                    "line_end": 2167,
                     "lines": 103,
                     "fingerprint": "bada5e1b1cb6",
                     "risk": {
@@ -33101,8 +33101,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: holidays",
-                    "line_start": 2166,
-                    "line_end": 2176,
+                    "line_start": 2168,
+                    "line_end": 2178,
                     "lines": 11,
                     "fingerprint": "54bfc2c8d866",
                     "risk": {
@@ -33114,8 +33114,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: new-ticket|ticket.create",
-                    "line_start": 2177,
-                    "line_end": 2184,
+                    "line_start": 2179,
+                    "line_end": 2186,
                     "lines": 8,
                     "fingerprint": "79353460e294",
                     "risk": {
@@ -33127,8 +33127,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: new-ticket",
-                    "line_start": 2185,
-                    "line_end": 2319,
+                    "line_start": 2187,
+                    "line_end": 2321,
                     "lines": 135,
                     "fingerprint": "5d49a686b145",
                     "risk": {
@@ -33144,10 +33144,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: ticket",
-                    "line_start": 2320,
-                    "line_end": 2551,
-                    "lines": 232,
-                    "fingerprint": "74bd6c3ed029",
+                    "line_start": 2322,
+                    "line_end": 2557,
+                    "lines": 236,
+                    "fingerprint": "866fb1abb851",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -33161,8 +33161,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: analytics",
-                    "line_start": 2552,
-                    "line_end": 2595,
+                    "line_start": 2558,
+                    "line_end": 2601,
                     "lines": 44,
                     "fingerprint": "5e9e7788ad46",
                     "risk": {
@@ -33176,8 +33176,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: reports",
-                    "line_start": 2596,
-                    "line_end": 2657,
+                    "line_start": 2602,
+                    "line_end": 2663,
                     "lines": 62,
                     "fingerprint": "1c94f6eec606",
                     "risk": {
@@ -33192,8 +33192,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: supervisor",
-                    "line_start": 2658,
-                    "line_end": 2702,
+                    "line_start": 2664,
+                    "line_end": 2708,
                     "lines": 45,
                     "fingerprint": "1b46fe01c59d",
                     "risk": {
@@ -33208,8 +33208,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory",
-                    "line_start": 2703,
-                    "line_end": 2803,
+                    "line_start": 2709,
+                    "line_end": 2809,
                     "lines": 101,
                     "fingerprint": "f107c7c13c1c",
                     "risk": {
@@ -33224,8 +33224,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory-diagnostics",
-                    "line_start": 2804,
-                    "line_end": 2835,
+                    "line_start": 2810,
+                    "line_end": 2841,
                     "lines": 32,
                     "fingerprint": "31f6b97d664f",
                     "risk": {
@@ -33239,8 +33239,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset-history",
-                    "line_start": 2836,
-                    "line_end": 2853,
+                    "line_start": 2842,
+                    "line_end": 2859,
                     "lines": 18,
                     "fingerprint": "f05d04d150f3",
                     "risk": {
@@ -33255,8 +33255,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: domain-scan",
-                    "line_start": 2854,
-                    "line_end": 2931,
+                    "line_start": 2860,
+                    "line_end": 2937,
                     "lines": 78,
                     "fingerprint": "383375bbfd1a",
                     "risk": {
@@ -33270,8 +33270,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: assets",
-                    "line_start": 2932,
-                    "line_end": 2976,
+                    "line_start": 2938,
+                    "line_end": 2982,
                     "lines": 45,
                     "fingerprint": "53502350682a",
                     "risk": {
@@ -33286,8 +33286,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset",
-                    "line_start": 2977,
-                    "line_end": 3010,
+                    "line_start": 2983,
+                    "line_end": 3016,
                     "lines": 34,
                     "fingerprint": "59179257a2c4",
                     "risk": {
@@ -33302,8 +33302,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: organization",
-                    "line_start": 3011,
-                    "line_end": 3201,
+                    "line_start": 3017,
+                    "line_end": 3207,
                     "lines": 191,
                     "fingerprint": "5afc13d6b768",
                     "risk": {
@@ -33318,8 +33318,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings",
-                    "line_start": 3202,
-                    "line_end": 3671,
+                    "line_start": 3208,
+                    "line_end": 3677,
                     "lines": 470,
                     "fingerprint": "45611417ed0b",
                     "risk": {
@@ -33336,8 +33336,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 3672,
-                    "line_end": 3693,
+                    "line_start": 3678,
+                    "line_end": 3699,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -33351,8 +33351,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: dashboard",
-                    "line_start": 3694,
-                    "line_end": 3733,
+                    "line_start": 3700,
+                    "line_end": 3739,
                     "lines": 40,
                     "fingerprint": "a018b81df29a",
                     "risk": {
@@ -36032,8 +36032,8 @@
             "id": "CORE-003",
             "path": "lib\/auth-scope.php",
             "area": "CORE",
-            "lines": 347,
-            "file_fingerprint": "ad817c5687b9",
+            "lines": 399,
+            "file_fingerprint": "9e855049fdc7",
             "blocks": [
                 {
                     "kind": "region",
@@ -36186,9 +36186,9 @@
                     "kind": "function",
                     "anchor": "ticket_handler_level",
                     "line_start": 196,
-                    "line_end": 224,
-                    "lines": 29,
-                    "fingerprint": "6c0711cf1e30",
+                    "line_end": 238,
+                    "lines": 43,
+                    "fingerprint": "17467ebc4f70",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -36197,11 +36197,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_assignee_is_eligible",
-                    "line_start": 226,
-                    "line_end": 251,
-                    "lines": 26,
-                    "fingerprint": "7f7f802d3c35",
+                    "anchor": "ticket_view_mode",
+                    "line_start": 240,
+                    "line_end": 257,
+                    "lines": 18,
+                    "fingerprint": "496d7d0e9154",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -36210,26 +36210,24 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_rating_is_current",
-                    "line_start": 253,
-                    "line_end": 282,
-                    "lines": 30,
-                    "fingerprint": "928c7d0356b7",
+                    "anchor": "ticket_can_see_internal",
+                    "line_start": 259,
+                    "line_end": 276,
+                    "lines": 18,
+                    "fingerprint": "4516e1c2cebd",
                     "risk": {
-                        "score": 4,
-                        "flags": {
-                            "silent_catch": 4
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "CORE-003.14"
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_user_is_requester",
-                    "line_start": 284,
-                    "line_end": 288,
-                    "lines": 5,
-                    "fingerprint": "0eaea8a7179f",
+                    "anchor": "ticket_assignee_is_eligible",
+                    "line_start": 278,
+                    "line_end": 303,
+                    "lines": 26,
+                    "fingerprint": "7f7f802d3c35",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -36238,39 +36236,39 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_reply_starts_work",
-                    "line_start": 290,
-                    "line_end": 298,
-                    "lines": 9,
-                    "fingerprint": "1f0d3bc9ddbf",
+                    "anchor": "ticket_rating_is_current",
+                    "line_start": 305,
+                    "line_end": 334,
+                    "lines": 30,
+                    "fingerprint": "928c7d0356b7",
                     "risk": {
-                        "score": 0,
-                        "flags": []
+                        "score": 4,
+                        "flags": {
+                            "silent_catch": 4
+                        }
                     },
                     "id": "CORE-003.16"
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_scope",
-                    "line_start": 300,
-                    "line_end": 320,
-                    "lines": 21,
-                    "fingerprint": "64479c62f6e8",
+                    "anchor": "ticket_user_is_requester",
+                    "line_start": 336,
+                    "line_end": 340,
+                    "lines": 5,
+                    "fingerprint": "0eaea8a7179f",
                     "risk": {
-                        "score": 5,
-                        "flags": {
-                            "sql_concat": 5
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "CORE-003.17"
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_is_waiting_status",
-                    "line_start": 322,
-                    "line_end": 326,
-                    "lines": 5,
-                    "fingerprint": "4d8863ac4210",
+                    "anchor": "ticket_reply_starts_work",
+                    "line_start": 342,
+                    "line_end": 350,
+                    "lines": 9,
+                    "fingerprint": "1f0d3bc9ddbf",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -36279,22 +36277,50 @@
                 },
                 {
                     "kind": "function",
+                    "anchor": "ticket_scope",
+                    "line_start": 352,
+                    "line_end": 372,
+                    "lines": 21,
+                    "fingerprint": "64479c62f6e8",
+                    "risk": {
+                        "score": 5,
+                        "flags": {
+                            "sql_concat": 5
+                        }
+                    },
+                    "id": "CORE-003.19"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "ticket_is_waiting_status",
+                    "line_start": 374,
+                    "line_end": 378,
+                    "lines": 5,
+                    "fingerprint": "4d8863ac4210",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-003.20"
+                },
+                {
+                    "kind": "function",
                     "anchor": "user_service_group",
-                    "line_start": 328,
-                    "line_end": 333,
+                    "line_start": 380,
+                    "line_end": 385,
                     "lines": 6,
                     "fingerprint": "51f1920eb56f",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-003.19"
+                    "id": "CORE-003.21"
                 },
                 {
                     "kind": "function",
                     "anchor": "asset_scope",
-                    "line_start": 335,
-                    "line_end": 345,
+                    "line_start": 387,
+                    "line_end": 397,
                     "lines": 11,
                     "fingerprint": "9229f53c711f",
                     "risk": {
@@ -36303,7 +36329,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-003.20"
+                    "id": "CORE-003.22"
                 }
             ]
         },
@@ -69950,16 +69976,16 @@
             "id": "TEST-148",
             "path": "tests\/test_release_1_62_75_package.py",
             "area": "TEST",
-            "lines": 134,
-            "file_fingerprint": "f769c851ef65",
+            "lines": 138,
+            "file_fingerprint": "4beaaa8f7b47",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 54,
-                    "lines": 54,
-                    "fingerprint": "4525e6838461",
+                    "line_end": 58,
+                    "lines": 58,
+                    "fingerprint": "6e0b11d25566",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -69971,8 +69997,8 @@
                 {
                     "kind": "block",
                     "anchor": "PublicAccessGroupsReleasePackageTest",
-                    "line_start": 55,
-                    "line_end": 55,
+                    "line_start": 59,
+                    "line_end": 59,
                     "lines": 1,
                     "fingerprint": "9d471a9d1532",
                     "risk": {
@@ -69984,8 +70010,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_cumulative_payload_migration_and_checksum",
-                    "line_start": 56,
-                    "line_end": 113,
+                    "line_start": 60,
+                    "line_end": 117,
                     "lines": 58,
                     "fingerprint": "4735cee6134f",
                     "risk": {
@@ -69997,8 +70023,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_public_access_groups_archive_stays_intact",
-                    "line_start": 114,
-                    "line_end": 134,
+                    "line_start": 118,
+                    "line_end": 138,
                     "lines": 21,
                     "fingerprint": "5f7cc1d239f4",
                     "risk": {
@@ -73127,8 +73153,8 @@
             "id": "TEST-173",
             "path": "tests\/test_ticket_routing_unit.php",
             "area": "TEST",
-            "lines": 113,
-            "file_fingerprint": "fda8f5d3a9bd",
+            "lines": 134,
+            "file_fingerprint": "f88622e3cbcb",
             "blocks": [
                 {
                     "kind": "region",
@@ -73353,16 +73379,94 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 46-113",
+                    "anchor": "بلوک رویه‌ای 46-102",
                     "line_start": 46,
-                    "line_end": 113,
-                    "lines": 68,
-                    "fingerprint": "2db75f66fbdc",
+                    "line_end": 102,
+                    "lines": 57,
+                    "fingerprint": "2eac81ffdc98",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "TEST-173.18"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "تفکیک وظایف و سه نما (۱.۶۲.۸۴)",
+                    "line_start": 103,
+                    "line_end": 103,
+                    "lines": 1,
+                    "fingerprint": "67431f0ff41a",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-173.19"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه و همان وا",
+                    "line_start": 104,
+                    "line_end": 108,
+                    "lines": 5,
+                    "fingerprint": "4206644c282d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-173.20"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "همان مدیر روی درخواست دیگران همچنان سرپرست است.",
+                    "line_start": 109,
+                    "line_end": 111,
+                    "lines": 3,
+                    "fingerprint": "13fde9e2adf0",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-173.21"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "کارشناس مسئول: نمای کارشناس، نه سرپرست.",
+                    "line_start": 112,
+                    "line_end": 114,
+                    "lines": 3,
+                    "fingerprint": "fc39fe965c50",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-173.22"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "ثبت‌کنندهٔ عادی.",
+                    "line_start": 115,
+                    "line_end": 117,
+                    "lines": 3,
+                    "fingerprint": "11aa75038394",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-173.23"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "استثنای مهم: کسی که هم ثبت‌کننده و هم کارشناس مسئول همان درخ",
+                    "line_start": 118,
+                    "line_end": 134,
+                    "lines": 17,
+                    "fingerprint": "82ed90165720",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-173.24"
                 }
             ]
         },
@@ -73635,6 +73739,184 @@
         },
         {
             "id": "TEST-176",
+            "path": "tests\/test_ticket_three_views_static.py",
+            "area": "TEST",
+            "lines": 155,
+            "file_fingerprint": "ac3095df4902",
+            "blocks": [
+                {
+                    "kind": "block",
+                    "anchor": "مقدمهٔ فایل",
+                    "line_start": 1,
+                    "line_end": 30,
+                    "lines": 30,
+                    "fingerprint": "22ae18a45f9d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.01"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "read",
+                    "line_start": 31,
+                    "line_end": 35,
+                    "lines": 5,
+                    "fingerprint": "9aecf07a517e",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.02"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "php_function",
+                    "line_start": 36,
+                    "line_end": 42,
+                    "lines": 7,
+                    "fingerprint": "cf2ee1c1526e",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.03"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "strip_php_comments",
+                    "line_start": 43,
+                    "line_end": 50,
+                    "lines": 8,
+                    "fingerprint": "1aec4315c4e3",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.04"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_handler_level_denies_supervisor_authority_over_your_own_ticket",
+                    "line_start": 51,
+                    "line_end": 64,
+                    "lines": 14,
+                    "fingerprint": "f206707ef730",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.05"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_a_requester_who_is_also_the_assigned_agent_can_still_work",
+                    "line_start": 65,
+                    "line_end": 76,
+                    "lines": 12,
+                    "fingerprint": "40ca578120b6",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.06"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_reply_guard_keeps_its_explicit_requester_check",
+                    "line_start": 77,
+                    "line_end": 87,
+                    "lines": 11,
+                    "fingerprint": "e7ac3cc55a68",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.07"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_a_single_function_answers_which_view_to_render",
+                    "line_start": 88,
+                    "line_end": 100,
+                    "lines": 13,
+                    "fingerprint": "59145b39bdcf",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.08"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_the_ticket_page_uses_the_single_view_function",
+                    "line_start": 101,
+                    "line_end": 112,
+                    "lines": 12,
+                    "fingerprint": "8f9a5d86d0a4",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.09"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_internal_notes_are_hidden_from_the_requester_even_if_they_are_staff",
+                    "line_start": 113,
+                    "line_end": 125,
+                    "lines": 13,
+                    "fingerprint": "0f398cdeb897",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.10"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_message_list_no_longer_decides_by_global_role",
+                    "line_start": 126,
+                    "line_end": 133,
+                    "lines": 8,
+                    "fingerprint": "0a6e9104678f",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.11"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_internal_attachment_download_uses_the_same_rule",
+                    "line_start": 134,
+                    "line_end": 146,
+                    "lines": 13,
+                    "fingerprint": "231755483d07",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.12"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_scope_isolation_rules_are_untouched",
+                    "line_start": 147,
+                    "line_end": 155,
+                    "lines": 9,
+                    "fingerprint": "4f697a486f8f",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.13"
+                }
+            ]
+        },
+        {
+            "id": "TEST-177",
             "path": "tests\/test_ticket_tree_visibility_unit.php",
             "area": "TEST",
             "lines": 41,
@@ -73651,7 +73933,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.01"
+                    "id": "TEST-177.01"
                 },
                 {
                     "kind": "function",
@@ -73664,7 +73946,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.02"
+                    "id": "TEST-177.02"
                 },
                 {
                     "kind": "function",
@@ -73677,7 +73959,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.03"
+                    "id": "TEST-177.03"
                 },
                 {
                     "kind": "function",
@@ -73690,7 +73972,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.04"
+                    "id": "TEST-177.04"
                 },
                 {
                     "kind": "function",
@@ -73703,7 +73985,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.05"
+                    "id": "TEST-177.05"
                 },
                 {
                     "kind": "class",
@@ -73716,7 +73998,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.06"
+                    "id": "TEST-177.06"
                 },
                 {
                     "kind": "class",
@@ -73729,7 +74011,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.07"
+                    "id": "TEST-177.07"
                 },
                 {
                     "kind": "function",
@@ -73742,7 +74024,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.08"
+                    "id": "TEST-177.08"
                 },
                 {
                     "kind": "region",
@@ -73755,7 +74037,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.09"
+                    "id": "TEST-177.09"
                 },
                 {
                     "kind": "function",
@@ -73768,7 +74050,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.10"
+                    "id": "TEST-177.10"
                 },
                 {
                     "kind": "region",
@@ -73781,12 +74063,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.11"
+                    "id": "TEST-177.11"
                 }
             ]
         },
         {
-            "id": "TEST-177",
+            "id": "TEST-178",
             "path": "tests\/test_ticket_workflow_safety_static.py",
             "area": "TEST",
             "lines": 102,
@@ -73803,7 +74085,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.01"
+                    "id": "TEST-178.01"
                 },
                 {
                     "kind": "block",
@@ -73816,7 +74098,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.02"
+                    "id": "TEST-178.02"
                 },
                 {
                     "kind": "block",
@@ -73829,7 +74111,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.03"
+                    "id": "TEST-178.03"
                 },
                 {
                     "kind": "block",
@@ -73842,7 +74124,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.04"
+                    "id": "TEST-178.04"
                 },
                 {
                     "kind": "block",
@@ -73855,7 +74137,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.05"
+                    "id": "TEST-178.05"
                 },
                 {
                     "kind": "block",
@@ -73870,7 +74152,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-177.06"
+                    "id": "TEST-178.06"
                 },
                 {
                     "kind": "block",
@@ -73885,7 +74167,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "TEST-177.07"
+                    "id": "TEST-178.07"
                 },
                 {
                     "kind": "block",
@@ -73900,7 +74182,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-177.08"
+                    "id": "TEST-178.08"
                 },
                 {
                     "kind": "block",
@@ -73913,7 +74195,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.09"
+                    "id": "TEST-178.09"
                 },
                 {
                     "kind": "block",
@@ -73926,7 +74208,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.10"
+                    "id": "TEST-178.10"
                 },
                 {
                     "kind": "block",
@@ -73939,7 +74221,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.11"
+                    "id": "TEST-178.11"
                 },
                 {
                     "kind": "block",
@@ -73952,7 +74234,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.12"
+                    "id": "TEST-178.12"
                 },
                 {
                     "kind": "block",
@@ -73965,12 +74247,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-177.13"
+                    "id": "TEST-178.13"
                 }
             ]
         },
         {
-            "id": "TEST-178",
+            "id": "TEST-179",
             "path": "tests\/test_traffic_69_link_static.py",
             "area": "TEST",
             "lines": 25,
@@ -73987,7 +74269,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-178.01"
+                    "id": "TEST-179.01"
                 },
                 {
                     "kind": "block",
@@ -74000,7 +74282,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-178.02"
+                    "id": "TEST-179.02"
                 },
                 {
                     "kind": "block",
@@ -74013,12 +74295,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-178.03"
+                    "id": "TEST-179.03"
                 }
             ]
         },
         {
-            "id": "TEST-179",
+            "id": "TEST-180",
             "path": "tests\/test_traffic_70_upgrade_static.py",
             "area": "TEST",
             "lines": 20,
@@ -74035,7 +74317,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-179.01"
+                    "id": "TEST-180.01"
                 },
                 {
                     "kind": "block",
@@ -74048,7 +74330,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-179.02"
+                    "id": "TEST-180.02"
                 },
                 {
                     "kind": "block",
@@ -74061,12 +74343,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-179.03"
+                    "id": "TEST-180.03"
                 }
             ]
         },
         {
-            "id": "TEST-180",
+            "id": "TEST-181",
             "path": "tests\/test_traffic_destination_approver_static.py",
             "area": "TEST",
             "lines": 54,
@@ -74083,7 +74365,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-180.01"
+                    "id": "TEST-181.01"
                 },
                 {
                     "kind": "block",
@@ -74096,7 +74378,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-180.02"
+                    "id": "TEST-181.02"
                 },
                 {
                     "kind": "block",
@@ -74111,7 +74393,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "TEST-180.03"
+                    "id": "TEST-181.03"
                 },
                 {
                     "kind": "block",
@@ -74124,7 +74406,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-180.04"
+                    "id": "TEST-181.04"
                 },
                 {
                     "kind": "block",
@@ -74139,12 +74421,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-180.05"
+                    "id": "TEST-181.05"
                 }
             ]
         },
         {
-            "id": "TEST-181",
+            "id": "TEST-182",
             "path": "tests\/test_traffic_destination_popup_browser.js",
             "area": "TEST",
             "lines": 66,
@@ -74161,7 +74443,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-181.01"
+                    "id": "TEST-182.01"
                 },
                 {
                     "kind": "block",
@@ -74174,12 +74456,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-181.02"
+                    "id": "TEST-182.02"
                 }
             ]
         },
         {
-            "id": "TEST-182",
+            "id": "TEST-183",
             "path": "tests\/test_traffic_edit_history_static.py",
             "area": "TEST",
             "lines": 70,
@@ -74196,7 +74478,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.01"
+                    "id": "TEST-183.01"
                 },
                 {
                     "kind": "block",
@@ -74209,7 +74491,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.02"
+                    "id": "TEST-183.02"
                 },
                 {
                     "kind": "block",
@@ -74222,7 +74504,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.03"
+                    "id": "TEST-183.03"
                 },
                 {
                     "kind": "block",
@@ -74235,7 +74517,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.04"
+                    "id": "TEST-183.04"
                 },
                 {
                     "kind": "block",
@@ -74248,7 +74530,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.05"
+                    "id": "TEST-183.05"
                 },
                 {
                     "kind": "block",
@@ -74261,7 +74543,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.06"
+                    "id": "TEST-183.06"
                 },
                 {
                     "kind": "block",
@@ -74274,7 +74556,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.07"
+                    "id": "TEST-183.07"
                 },
                 {
                     "kind": "block",
@@ -74287,12 +74569,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-182.08"
+                    "id": "TEST-183.08"
                 }
             ]
         },
         {
-            "id": "TEST-183",
+            "id": "TEST-184",
             "path": "tests\/test_traffic_form_render_node.js",
             "area": "TEST",
             "lines": 16,
@@ -74311,12 +74593,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TEST-183.01"
+                    "id": "TEST-184.01"
                 }
             ]
         },
         {
-            "id": "TEST-184",
+            "id": "TEST-185",
             "path": "tests\/test_traffic_import_static.py",
             "area": "TEST",
             "lines": 68,
@@ -74333,7 +74615,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.01"
+                    "id": "TEST-185.01"
                 },
                 {
                     "kind": "block",
@@ -74346,7 +74628,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.02"
+                    "id": "TEST-185.02"
                 },
                 {
                     "kind": "block",
@@ -74359,7 +74641,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.03"
+                    "id": "TEST-185.03"
                 },
                 {
                     "kind": "block",
@@ -74372,7 +74654,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.04"
+                    "id": "TEST-185.04"
                 },
                 {
                     "kind": "block",
@@ -74385,7 +74667,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.05"
+                    "id": "TEST-185.05"
                 },
                 {
                     "kind": "block",
@@ -74398,7 +74680,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.06"
+                    "id": "TEST-185.06"
                 },
                 {
                     "kind": "block",
@@ -74411,12 +74693,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-184.07"
+                    "id": "TEST-185.07"
                 }
             ]
         },
         {
-            "id": "TEST-185",
+            "id": "TEST-186",
             "path": "tests\/test_traffic_live_node.js",
             "area": "TEST",
             "lines": 41,
@@ -74433,7 +74715,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-185.01"
+                    "id": "TEST-186.01"
                 },
                 {
                     "kind": "block",
@@ -74448,12 +74730,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TEST-185.02"
+                    "id": "TEST-186.02"
                 }
             ]
         },
         {
-            "id": "TEST-186",
+            "id": "TEST-187",
             "path": "tests\/test_traffic_live_report_unit.php",
             "area": "TEST",
             "lines": 73,
@@ -74470,7 +74752,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.01"
+                    "id": "TEST-187.01"
                 },
                 {
                     "kind": "function",
@@ -74483,7 +74765,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.02"
+                    "id": "TEST-187.02"
                 },
                 {
                     "kind": "function",
@@ -74496,7 +74778,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.03"
+                    "id": "TEST-187.03"
                 },
                 {
                     "kind": "function",
@@ -74509,7 +74791,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.04"
+                    "id": "TEST-187.04"
                 },
                 {
                     "kind": "function",
@@ -74522,7 +74804,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.05"
+                    "id": "TEST-187.05"
                 },
                 {
                     "kind": "function",
@@ -74535,7 +74817,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.06"
+                    "id": "TEST-187.06"
                 },
                 {
                     "kind": "function",
@@ -74548,7 +74830,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.07"
+                    "id": "TEST-187.07"
                 },
                 {
                     "kind": "function",
@@ -74561,7 +74843,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.08"
+                    "id": "TEST-187.08"
                 },
                 {
                     "kind": "class",
@@ -74574,7 +74856,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.09"
+                    "id": "TEST-187.09"
                 },
                 {
                     "kind": "function",
@@ -74587,7 +74869,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.10"
+                    "id": "TEST-187.10"
                 },
                 {
                     "kind": "region",
@@ -74600,7 +74882,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.11"
+                    "id": "TEST-187.11"
                 },
                 {
                     "kind": "function",
@@ -74613,7 +74895,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-186.12"
+                    "id": "TEST-187.12"
                 },
                 {
                     "kind": "region",
@@ -74629,12 +74911,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TEST-186.13"
+                    "id": "TEST-187.13"
                 }
             ]
         },
         {
-            "id": "TEST-187",
+            "id": "TEST-188",
             "path": "tests\/test_traffic_phone_and_inspection_reminder_static.py",
             "area": "TEST",
             "lines": 55,
@@ -74651,7 +74933,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-187.01"
+                    "id": "TEST-188.01"
                 },
                 {
                     "kind": "block",
@@ -74664,7 +74946,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-187.02"
+                    "id": "TEST-188.02"
                 },
                 {
                     "kind": "block",
@@ -74677,7 +74959,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-187.03"
+                    "id": "TEST-188.03"
                 },
                 {
                     "kind": "block",
@@ -74690,7 +74972,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-187.04"
+                    "id": "TEST-188.04"
                 },
                 {
                     "kind": "block",
@@ -74703,12 +74985,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-187.05"
+                    "id": "TEST-188.05"
                 }
             ]
         },
         {
-            "id": "TEST-188",
+            "id": "TEST-189",
             "path": "tests\/test_traffic_report_fields_node.js",
             "area": "TEST",
             "lines": 35,
@@ -74727,12 +75009,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TEST-188.01"
+                    "id": "TEST-189.01"
                 }
             ]
         },
         {
-            "id": "TEST-189",
+            "id": "TEST-190",
             "path": "tests\/test_transaction_truthfulness_static.py",
             "area": "TEST",
             "lines": 162,
@@ -74749,7 +75031,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.01"
+                    "id": "TEST-190.01"
                 },
                 {
                     "kind": "block",
@@ -74762,7 +75044,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.02"
+                    "id": "TEST-190.02"
                 },
                 {
                     "kind": "block",
@@ -74775,7 +75057,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.03"
+                    "id": "TEST-190.03"
                 },
                 {
                     "kind": "block",
@@ -74788,7 +75070,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.04"
+                    "id": "TEST-190.04"
                 },
                 {
                     "kind": "block",
@@ -74801,7 +75083,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.05"
+                    "id": "TEST-190.05"
                 },
                 {
                     "kind": "block",
@@ -74814,7 +75096,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.06"
+                    "id": "TEST-190.06"
                 },
                 {
                     "kind": "block",
@@ -74827,7 +75109,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.07"
+                    "id": "TEST-190.07"
                 },
                 {
                     "kind": "block",
@@ -74840,7 +75122,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.08"
+                    "id": "TEST-190.08"
                 },
                 {
                     "kind": "block",
@@ -74853,7 +75135,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.09"
+                    "id": "TEST-190.09"
                 },
                 {
                     "kind": "block",
@@ -74866,7 +75148,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.10"
+                    "id": "TEST-190.10"
                 },
                 {
                     "kind": "block",
@@ -74879,7 +75161,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.11"
+                    "id": "TEST-190.11"
                 },
                 {
                     "kind": "block",
@@ -74892,7 +75174,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.12"
+                    "id": "TEST-190.12"
                 },
                 {
                     "kind": "block",
@@ -74905,12 +75187,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.13"
+                    "id": "TEST-190.13"
                 }
             ]
         },
         {
-            "id": "TEST-190",
+            "id": "TEST-191",
             "path": "tests\/test_triangle_effect_static.py",
             "area": "TEST",
             "lines": 102,
@@ -74927,7 +75209,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.01"
+                    "id": "TEST-191.01"
                 },
                 {
                     "kind": "block",
@@ -74940,7 +75222,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.02"
+                    "id": "TEST-191.02"
                 },
                 {
                     "kind": "block",
@@ -74953,7 +75235,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.03"
+                    "id": "TEST-191.03"
                 },
                 {
                     "kind": "block",
@@ -74966,7 +75248,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.04"
+                    "id": "TEST-191.04"
                 },
                 {
                     "kind": "block",
@@ -74979,7 +75261,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.05"
+                    "id": "TEST-191.05"
                 },
                 {
                     "kind": "block",
@@ -74992,7 +75274,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.06"
+                    "id": "TEST-191.06"
                 },
                 {
                     "kind": "block",
@@ -75005,7 +75287,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.07"
+                    "id": "TEST-191.07"
                 },
                 {
                     "kind": "block",
@@ -75020,7 +75302,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-190.08"
+                    "id": "TEST-191.08"
                 },
                 {
                     "kind": "block",
@@ -75033,7 +75315,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.09"
+                    "id": "TEST-191.09"
                 },
                 {
                     "kind": "block",
@@ -75046,12 +75328,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.10"
+                    "id": "TEST-191.10"
                 }
             ]
         },
         {
-            "id": "TEST-191",
+            "id": "TEST-192",
             "path": "tests\/test_tts_normalize_static.py",
             "area": "TEST",
             "lines": 56,
@@ -75068,7 +75350,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.01"
+                    "id": "TEST-192.01"
                 },
                 {
                     "kind": "block",
@@ -75081,12 +75363,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.02"
+                    "id": "TEST-192.02"
                 }
             ]
         },
         {
-            "id": "TEST-192",
+            "id": "TEST-193",
             "path": "tests\/test_user_access_groups_static.py",
             "area": "TEST",
             "lines": 90,
@@ -75103,7 +75385,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.01"
+                    "id": "TEST-193.01"
                 },
                 {
                     "kind": "block",
@@ -75116,7 +75398,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.02"
+                    "id": "TEST-193.02"
                 },
                 {
                     "kind": "block",
@@ -75129,7 +75411,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.03"
+                    "id": "TEST-193.03"
                 },
                 {
                     "kind": "block",
@@ -75142,7 +75424,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.04"
+                    "id": "TEST-193.04"
                 },
                 {
                     "kind": "block",
@@ -75157,7 +75439,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-192.05"
+                    "id": "TEST-193.05"
                 },
                 {
                     "kind": "block",
@@ -75170,7 +75452,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.06"
+                    "id": "TEST-193.06"
                 },
                 {
                     "kind": "block",
@@ -75183,7 +75465,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.07"
+                    "id": "TEST-193.07"
                 },
                 {
                     "kind": "block",
@@ -75196,12 +75478,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.08"
+                    "id": "TEST-193.08"
                 }
             ]
         },
         {
-            "id": "TEST-193",
+            "id": "TEST-194",
             "path": "tests\/test_version_source_of_truth_static.py",
             "area": "TEST",
             "lines": 208,
@@ -75220,7 +75502,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-193.01"
+                    "id": "TEST-194.01"
                 },
                 {
                     "kind": "block",
@@ -75233,7 +75515,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.02"
+                    "id": "TEST-194.02"
                 },
                 {
                     "kind": "block",
@@ -75246,7 +75528,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.03"
+                    "id": "TEST-194.03"
                 },
                 {
                     "kind": "block",
@@ -75259,7 +75541,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.04"
+                    "id": "TEST-194.04"
                 },
                 {
                     "kind": "block",
@@ -75272,7 +75554,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.05"
+                    "id": "TEST-194.05"
                 },
                 {
                     "kind": "block",
@@ -75285,7 +75567,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.06"
+                    "id": "TEST-194.06"
                 },
                 {
                     "kind": "block",
@@ -75298,7 +75580,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.07"
+                    "id": "TEST-194.07"
                 },
                 {
                     "kind": "block",
@@ -75311,7 +75593,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.08"
+                    "id": "TEST-194.08"
                 },
                 {
                     "kind": "block",
@@ -75324,7 +75606,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.09"
+                    "id": "TEST-194.09"
                 },
                 {
                     "kind": "block",
@@ -75337,7 +75619,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.10"
+                    "id": "TEST-194.10"
                 },
                 {
                     "kind": "block",
@@ -75350,12 +75632,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.11"
+                    "id": "TEST-194.11"
                 }
             ]
         },
         {
-            "id": "TEST-194",
+            "id": "TEST-195",
             "path": "tests\/tts_normalize_test.php",
             "area": "TEST",
             "lines": 189,
@@ -75372,7 +75654,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.01"
+                    "id": "TEST-195.01"
                 },
                 {
                     "kind": "function",
@@ -75385,7 +75667,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.02"
+                    "id": "TEST-195.02"
                 },
                 {
                     "kind": "region",
@@ -75398,7 +75680,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.03"
+                    "id": "TEST-195.03"
                 },
                 {
                     "kind": "function",
@@ -75411,7 +75693,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.04"
+                    "id": "TEST-195.04"
                 },
                 {
                     "kind": "region",
@@ -75424,7 +75706,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.05"
+                    "id": "TEST-195.05"
                 },
                 {
                     "kind": "function",
@@ -75437,7 +75719,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.06"
+                    "id": "TEST-195.06"
                 },
                 {
                     "kind": "region",
@@ -75450,7 +75732,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.07"
+                    "id": "TEST-195.07"
                 },
                 {
                     "kind": "function",
@@ -75463,7 +75745,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.08"
+                    "id": "TEST-195.08"
                 },
                 {
                     "kind": "region",
@@ -75476,7 +75758,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.09"
+                    "id": "TEST-195.09"
                 },
                 {
                     "kind": "function",
@@ -75489,7 +75771,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.10"
+                    "id": "TEST-195.10"
                 },
                 {
                     "kind": "region",
@@ -75502,7 +75784,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.11"
+                    "id": "TEST-195.11"
                 },
                 {
                     "kind": "function",
@@ -75515,7 +75797,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.12"
+                    "id": "TEST-195.12"
                 },
                 {
                     "kind": "function",
@@ -75528,7 +75810,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.13"
+                    "id": "TEST-195.13"
                 },
                 {
                     "kind": "function",
@@ -75541,7 +75823,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.14"
+                    "id": "TEST-195.14"
                 },
                 {
                     "kind": "function",
@@ -75554,7 +75836,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.15"
+                    "id": "TEST-195.15"
                 },
                 {
                     "kind": "function",
@@ -75567,7 +75849,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.16"
+                    "id": "TEST-195.16"
                 },
                 {
                     "kind": "region",
@@ -75580,7 +75862,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-194.17"
+                    "id": "TEST-195.17"
                 }
             ]
         },

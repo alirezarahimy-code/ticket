@@ -213,6 +213,20 @@ function ticket_handler_level(array $ticket, array $user): string
         && (int) ($user['department_id'] ?? 0) !== (int) ($ticket['department_id'] ?? 0)) {
         return '';
     }
+    // تفکیک وظایف: نما و اختیار تابع «نسبت این کاربر با همین درخواست» است، نه نقش
+    // سراسری او. کارشناس یا مدیری که خودش درخواستی ثبت کرده، روی آن درخواست
+    // ثبت‌کننده است — نه سرپرست. وگرنه می‌توانست درخواست خودش را به خودش ارجاع
+    // دهد، وضعیتش را تغییر دهد و کار خودش را تأیید کند.
+    //
+    // استثنا: اگر واقعاً کارشناس مسئول همان درخواست باشد باید بتواند رویش کار کند،
+    // ولی فقط در حد کارشناس. (ticket_reply_starts_work گارد جداگانهٔ خودش را دارد
+    // تا پاسخِ چنین کاربری وضعیت را به‌طور ضمنی جلو نبرد.)
+    if (ticket_user_is_requester($ticket, $user)) {
+        return ((int) ($ticket['assigned_to'] ?? 0) === (int) ($user['id'] ?? 0)
+            && is_assignable_role((string) ($user['role'] ?? '')))
+            ? 'assignee'
+            : '';
+    }
     if ((is_assignable_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user))
         && user_can($user, 'ticket.assign')) {
         return 'manager';
@@ -221,6 +235,44 @@ function ticket_handler_level(array $ticket, array $user): string
         return 'assignee';
     }
     return '';
+}
+
+/**
+ * کدام یک از سه نما باید برای این کاربر روی همین درخواست رندر شود.
+ *
+ *   'requester'  ثبت‌کننده یا بینندهٔ ساده — وضعیت، گفت‌وگو، امتیاز، لغو
+ *   'assignee'   کارشناس مسئول همین درخواست — کار روی درخواست، یادداشت داخلی
+ *   'supervisor' مدیر حوزه — به‌علاوهٔ ارجاع، اولویت و تصمیم‌های سرپرستی
+ *
+ * عمداً از ticket_handler_level() مشتق می‌شود تا نما و اختیار هیچ‌وقت از هم جدا
+ * نیفتند؛ دو منبع حقیقت موازی همان چیزی بود که این نقص را ساخت.
+ */
+function ticket_view_mode(array $ticket, array $user): string
+{
+    return match (ticket_handler_level($ticket, $user)) {
+        'manager' => 'supervisor',
+        'assignee' => 'assignee',
+        default => 'requester',
+    };
+}
+
+/**
+ * آیا این کاربر یادداشت‌ها و پیوست‌های داخلی همین درخواست را می‌بیند؟
+ *
+ * پیش از این تصمیم فقط با نقش سراسری گرفته می‌شد، پس کارشناس یا مدیری که خودش
+ * درخواست داده بود، یادداشت‌های داخلیِ تیم رسیدگی‌کننده دربارهٔ درخواست خودش را
+ * می‌دید. یادداشت داخلی برای هماهنگی تیم است، نه برای ثبت‌کننده.
+ *
+ * دامنه عمداً فقط برای همین حالت تنگ شده است: بقیهٔ کارکنانی که به درخواست
+ * دسترسی دید دارند همچنان می‌بینند تا همکاری و جانشینی مختل نشود.
+ */
+function ticket_can_see_internal(array $ticket, array $user): bool
+{
+    if (ticket_user_is_requester($ticket, $user)
+        && (int) ($ticket['assigned_to'] ?? 0) !== (int) ($user['id'] ?? 0)) {
+        return false;
+    }
+    return is_staff_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user);
 }
 
 /** A ticket assignee must be active, in the right scope and able to handle it. */

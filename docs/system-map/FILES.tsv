@@ -351,7 +351,7 @@ global-search.php	core	121	12295
 governance.php	core	521	47346
 help-guide.php	core	721	135663
 holiday-board.php	core	47	5564
-index.php	core	3732	373286
+index.php	core	3738	373944
 install-empty-db.sql	sql-root	1575	80155
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -359,7 +359,7 @@ install.php	core	367	33296
 inventory.php	core	833	43689
 lib/activity-audit.php	lib	599	34995
 lib/asset-identity.php	lib	3	163
-lib/auth-scope.php	lib	346	15935
+lib/auth-scope.php	lib	398	19182
 lib/db-core.php	lib	611	26637
 lib/ldap.php	lib	329	16564
 lib/log-catalog.php	lib	48	20811
@@ -581,7 +581,7 @@ tests/test_release_1_62_6_auto_assign_static.py	tests	46	2297
 tests/test_release_1_62_73_dashboard_r2_package.py	tests	101	5720
 tests/test_release_1_62_73_package.py	tests	144	6828
 tests/test_release_1_62_74_package.py	tests	126	6717
-tests/test_release_1_62_75_package.py	tests	133	7143
+tests/test_release_1_62_75_package.py	tests	137	7487
 tests/test_release_1_62_7_traffic_history_events_static.py	tests	72	3393
 tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	6687
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
@@ -606,9 +606,10 @@ tests/test_ticket_cancellation_static.py	tests	133	8418
 tests/test_ticket_lifecycle_guide_static.py	tests	41	1801
 tests/test_ticket_number_autofill_unit.php	tests	158	7261
 tests/test_ticket_number_repair_static.py	tests	145	6732
-tests/test_ticket_routing_unit.php	tests	112	8911
+tests/test_ticket_routing_unit.php	tests	133	11280
 tests/test_ticket_scope_sql_node.js	tests	21	2883
 tests/test_ticket_sla_unit.php	tests	51	3353
+tests/test_ticket_three_views_static.py	tests	154	8121
 tests/test_ticket_tree_visibility_unit.php	tests	40	3489
 tests/test_ticket_workflow_safety_static.py	tests	101	6222
 tests/test_traffic_69_link_static.py	tests	24	1410
