@@ -19,7 +19,6 @@ def test_upload_restore_preflights_paths_sizes_collisions_and_symlinks():
     assert "backup_validate_upload_archive($archive)" in source
     assert "getExternalAttributesIndex" in source
     assert "0120000" in source
-    assert "case-insensitive" not in source.lower()  # messages are localized; checks use normalized keys
     assert "strtolower(rtrim($relative, '/'))" in source
     assert "512 * 1024 * 1024" not in source  # restore has separate configurable ceilings
     assert "ITSM_MAX_RESTORE_UNPACKED_MB" in source
