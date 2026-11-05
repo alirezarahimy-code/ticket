@@ -34,3 +34,10 @@ def test_web_protection_verifier_preserves_application_subpath():
     assert "$base.AbsoluteUri.TrimEnd('/') + '/'" in source
     assert "$base.Query" in source
     assert "[Uri]::new($base, $path)" in source
+
+
+def test_acl_setter_uses_least_privilege_for_service_account():
+    source = (ROOT / "tools/set_logging_acl.ps1").read_text(encoding="utf-8")
+    assert "Rights = [System.Security.AccessControl.FileSystemRights]::Modify" in source
+    assert "Rights = [System.Security.AccessControl.FileSystemRights]::FullControl" in source
+    assert "Set-Acl" in source
