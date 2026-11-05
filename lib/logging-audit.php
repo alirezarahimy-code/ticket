@@ -193,7 +193,7 @@ function logging_audit_check_db_pending_migrations(): array
     }
     $applied = [];
     try {
-        $rows = db()->query('SELECT filename FROM schema_updates')->fetchAll(PDO::FETCH_COLUMN) ?: [];
+        $rows = db()->query('SELECT migration FROM schema_updates')->fetchAll(PDO::FETCH_COLUMN) ?: [];
         foreach ($rows as $row) {
             $applied[strtolower(basename((string) $row))] = true;
         }
