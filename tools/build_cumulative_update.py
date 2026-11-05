@@ -17,8 +17,17 @@ REQUIRES_VERSION = "1.62.77"
 PACKAGE_NAME = "ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip"
 REPORT_NAME = "CHANGE-REPORT-FA-1.62.83.md"
 
+# The 1.62.82 base archive is not a full cumulative migration archive: it
+# contains 031 only. Re-include every Logging migration introduced in 024-030
+# so installations starting at 1.62.77 can upgrade directly without gaps.
 OVERLAY_MIGRATIONS = (
+    "migrations/024-central-logging.sql",
+    "migrations/025-logging-issues-alerts.sql",
     "migrations/026-logging-legacy-result-unknown.sql",
+    "migrations/027-logging-correlation-ids.sql",
+    "migrations/028-logging-fingerprint-v2.sql",
+    "migrations/029-activity-result-default-unknown.sql",
+    "migrations/030-logging-notification-idempotency-and-ticket-history.sql",
     "migrations/032-schema-updates-baseline.sql",
     "migrations/033-logging-legacy-context-collation.sql",
 )
