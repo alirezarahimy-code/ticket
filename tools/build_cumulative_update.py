@@ -18,12 +18,14 @@ PACKAGE_NAME = "ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip"
 REPORT_NAME = "CHANGE-REPORT-FA-1.62.83.md"
 
 OVERLAY_MIGRATIONS = (
+    "migrations/026-logging-legacy-result-unknown.sql",
     "migrations/032-schema-updates-baseline.sql",
 )
 
 OVERLAY_FILES = (
     "VERSION",
     "README.md",
+    "index.php",
     "system-update.php",
     "asset-profile.php",
     "domain-scan.php",
@@ -50,6 +52,7 @@ OVERLAY_FILES = (
     "governance.php",
     "install-empty-db.sql",
     "lib/logging-audit.php",
+    "lib/notify-users.php",
     "local-accounts.php",
     "migrations/026-logging-legacy-result-unknown.sql",
     "schema.sql",
