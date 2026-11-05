@@ -78,3 +78,78 @@ assert_zip_rejected(['manifest.json' => '{}', 'files/node' => 'file', 'files/nod
 assert_zip_rejected(['manifest.json' => '{}', 'files/link' => 'target'], 'symbolic link', 'files/link');
 
 echo "All ZIP entry validation tests passed.\n";
+
+
+function package_test_rejects(string $zipPath, string $label): void
+{
+    try {
+        system_update_read_package($zipPath);
+        throw new RuntimeException('Expected package rejection: ' . $label);
+    } catch (RuntimeException $error) {
+        if (str_starts_with($error->getMessage(), 'Expected package rejection:')) { throw $error; }
+        echo "PASS rejected package: {$label}\n";
+    }
+}
+
+$versionContents = "1.62.83\n";
+$manifest = json_encode([
+    'version' => '1.62.83',
+    'requires_version' => '1.62.82',
+    'migrations' => [],
+    'files' => ['VERSION'],
+    'sha256' => ['VERSION' => hash('sha256', $versionContents)],
+], JSON_UNESCAPED_UNICODE);
+$validPackage = make_test_zip([
+    'manifest.json' => $manifest,
+    'files/VERSION' => $versionContents,
+]);
+$stage = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'itsm-stage-test-' . bin2hex(random_bytes(6));
+try {
+    $package = system_update_read_package($validPackage);
+    if ($package['version'] !== '1.62.83' || $package['mode'] !== 'upgrade') {
+        throw new RuntimeException('Valid update package metadata was not accepted.');
+    }
+    if (!mkdir($stage, 0700, true)) { throw new RuntimeException('Could not create extraction stage.'); }
+    system_update_extract_package($validPackage, $stage, $package['manifest']);
+    if (trim((string) file_get_contents($stage . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'VERSION')) !== '1.62.83') {
+        throw new RuntimeException('Valid update package did not extract the expected VERSION.');
+    }
+    echo "PASS accepts, extracts and hash-verifies a complete update package\n";
+} finally {
+    @unlink($validPackage);
+    if (is_dir($stage)) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($stage, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($iterator as $item) {
+            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+        }
+        @rmdir($stage);
+    }
+}
+
+$extraFileManifest = json_encode(['version' => '1.62.83', 'files' => ['VERSION'], 'migrations' => []]);
+$extraFilePackage = make_test_zip([
+    'manifest.json' => $extraFileManifest,
+    'files/VERSION' => $versionContents,
+    'files/extra.txt' => 'not declared',
+]);
+try { package_test_rejects($extraFilePackage, 'undeclared payload file'); }
+finally { @unlink($extraFilePackage); }
+
+$missingFileManifest = json_encode(['version' => '1.62.83', 'files' => ['MISSING.txt'], 'migrations' => []]);
+$missingFilePackage = make_test_zip([
+    'manifest.json' => $missingFileManifest,
+    'files/VERSION' => $versionContents,
+]);
+try { package_test_rejects($missingFilePackage, 'missing manifest-listed file'); }
+finally { @unlink($missingFilePackage); }
+
+$badMigrationManifest = json_encode(['version' => '1.62.83', 'files' => ['VERSION'], 'migrations' => ['032-missing.sql']]);
+$badMigrationPackage = make_test_zip([
+    'manifest.json' => $badMigrationManifest,
+    'files/VERSION' => $versionContents,
+]);
+try { package_test_rejects($badMigrationPackage, 'missing manifest-listed migration'); }
+finally { @unlink($badMigrationPackage); }
