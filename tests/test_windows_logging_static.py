@@ -46,4 +46,5 @@ def test_acl_setter_uses_least_privilege_for_service_account():
 def test_acl_setter_handles_script_whatif_without_null_pscmdlet():
     source = (ROOT / "tools/set_logging_acl.ps1").read_text(encoding="utf-8")
     assert "$WhatIfPreference" in source
-    assert "$null -ne $PSCmdlet" in source
+    assert "ShouldProcess(" not in source
+    assert "if (-not $Apply)" in source
