@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 function backup_root_path(): string
 {
     $configured = trim((string) (getenv('ITSM_BACKUP_PATH') ?: ''));
