@@ -345,6 +345,92 @@ function logging_audit_check_worker_heartbeats(): array
 // اجرا
 // ---------------------------------------------------------------------------
 
+/** مسیر ضربان ممیزی — کنار ضربان بقیهٔ Workerها. */
+function logging_audit_heartbeat_path(): string
+{
+    return APP_ROOT . '/storage/logs/worker-heartbeats/system-audit.json';
+}
+
+/**
+ * فاصلهٔ بیش از حد از اجرای قبلی یعنی کرون سلامت مدتی نخوابیده بوده.
+ *
+ * محدودیت صادقانه: ممیزی نمی‌تواند نبودِ خودش را گزارش کند، چون وقتی اجرا
+ * نمی‌شود کدی هم اجرا نمی‌شود. ولی وقتی **دوباره** اجرا شد می‌تواند بگوید
+ * «من مدت زیادی اجرا نشده بودم» — و همین برای تشخیص قطعی سرویس کافی است.
+ */
+function logging_audit_check_audit_continuity(): array
+{
+    $findings = [];
+    $path = logging_audit_heartbeat_path();
+    $maxGap = 172800; // دو شبانه‌روز
+    if (is_file($path)) {
+        $data = json_decode((string) @file_get_contents($path), true);
+        $last = is_array($data) && !empty($data['last_run_at']) ? strtotime((string) $data['last_run_at']) : false;
+        if ($last !== false && $last < time() - $maxGap) {
+            $findings[] = logging_audit_finding(
+                'system-audit',
+                'آخرین ممیزی ' . intdiv(time() - $last, 86400) . ' روز پیش بوده؛ کرون سلامت در این بازه اجرا نشده است'
+            );
+        }
+    }
+    return [
+        'key' => 'audit_continuity',
+        'title' => 'پیوستگی اجرای ممیزی',
+        'findings' => $findings,
+        'rationale' => 'اگر کرون سلامت بخوابد، هیچ بررسی‌ای انجام نمی‌شود و سکوت داشبورد به‌اشتباه نشانهٔ سلامت تلقی می‌شود.',
+    ];
+}
+
+/** ثبت ضربان ممیزی تا قطعی سرویس در اجرای بعدی دیده شود. */
+function logging_audit_write_heartbeat(array $summary): bool
+{
+    $path = logging_audit_heartbeat_path();
+    $dir = dirname($path);
+    if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+        return false;
+    }
+    return @file_put_contents($path, json_encode([
+        'last_run_at' => date('Y-m-d H:i:s'),
+        'findings' => (int) ($summary['findings'] ?? 0),
+        'regressions' => (int) ($summary['regressions'] ?? 0),
+        'structural' => (int) ($summary['structural'] ?? 0),
+    ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . "\n") !== false;
+}
+
+/**
+ * تعیین اینکه کدام یافته‌ها «ناسازگاری ساختاری» و کدام «پس‌رفت» هستند.
+ *
+ * عمداً جداگانه نوشته شده تا هم مسیر کرون و هم مسیر خط فرمان از یک منطق
+ * استفاده کنند. نسخهٔ قبلی این محاسبه را فقط در مسیر کرون داشت، پس
+ * «php tools/system_audit.php --no-db --check» هرگز نمی‌توانست شکست بدهد
+ * و مرحلهٔ CI بی‌اثر بود.
+ */
+function logging_audit_summarize(array $checks, array $baseline): array
+{
+    $structural = [];
+    $regressions = [];
+    $failed = [];
+    foreach ($checks as $check) {
+        $key = (string) $check['key'];
+        $metric = (int) ($check['metric'] ?? 0);
+        if (!empty($check['failed'])) {
+            $failed[] = $key;
+            continue;
+        }
+        if (!empty($check['structural'])) {
+            if ($metric > 0) {
+                $structural[] = $key;
+            }
+            continue;
+        }
+        $base = $baseline[$key] ?? null;
+        if ($base !== null && $metric > $base) {
+            $regressions[$key] = ['metric' => $metric, 'baseline' => $base];
+        }
+    }
+    return ['structural_problems' => $structural, 'regressions' => $regressions, 'failed_checks' => $failed];
+}
+
 /** فهرست همهٔ بررسی‌ها. */
 function logging_audit_checks(): array
 {
@@ -356,6 +442,7 @@ function logging_audit_checks(): array
         'logging_audit_check_spool_backlog',
         'logging_audit_check_unresolved_issues',
         'logging_audit_check_worker_heartbeats',
+        'logging_audit_check_audit_continuity',
     ];
 }
 
@@ -430,6 +517,23 @@ function logging_audit_run_and_record(bool $updateBaseline = false, array &$aler
 {
     $run = logging_audit_run();
     $baseline = logging_audit_load_baseline();
+
+    // خط مبنای خالی یعنی هیچ پس‌رفتی هرگز تشخیص داده نمی‌شود — یک بی‌عملیِ
+    // خاموش، دقیقاً همان چیزی که این ممیزی برای پیدا کردنش ساخته شده. پس
+    // در اولین اجرا خودکار ساخته و صریح اعلام می‌شود.
+    $bootstrappedBaseline = false;
+    if ($baseline === [] && !$updateBaseline) {
+        $bootstrappedBaseline = logging_audit_save_baseline($run['metrics']);
+        $baseline = $run['metrics'];
+        $alerts['audit_baseline_created'] = 'خط مبنای ممیزی برای این نصب ساخته شد: '
+            . implode('، ', array_map(
+                static fn($k, $v): string => $k . '=' . $v,
+                array_keys($run['metrics']),
+                $run['metrics']
+            ))
+            . '. از این پس فقط بدتر شدن این اعداد هشدار می‌دهد؛ اگر عددی از همین حالا بالاست، آن را بررسی کنید.';
+    }
+
     $regressions = [];
     $structuralProblems = [];
 
@@ -525,5 +629,14 @@ function logging_audit_run_and_record(bool $updateBaseline = false, array &$aler
     $run['regressions'] = $regressions;
     $run['structural_problems'] = array_keys($structuralProblems);
     $run['baseline'] = $baseline;
+    $run['baseline_bootstrapped'] = $bootstrappedBaseline;
+
+    // ضربان بعد از همه‌چیز نوشته می‌شود تا اجرای ناقص، قطعی سرویس را پنهان نکند.
+    logging_audit_write_heartbeat([
+        'findings' => array_sum($run['metrics']),
+        'regressions' => count($regressions),
+        'structural' => count($structuralProblems),
+    ]);
+
     return $run;
 }

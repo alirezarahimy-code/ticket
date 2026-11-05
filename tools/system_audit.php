@@ -44,7 +44,11 @@ if ($noDb) {
         $result['structural'] = in_array($result['key'], logging_audit_structural_checks(), true);
         $results[] = $result;
     }
-    $run = ['checks' => $results, 'metrics' => array_column($results, 'metric', 'key'), 'regressions' => []];
+    // از همان منطق مشترک استفاده می‌شود، وگرنه --check اینجا بی‌اثر می‌ماند.
+    // نسخهٔ اول همین فایل این محاسبه را نداشت و مرحلهٔ CI هرگز نمی‌توانست
+    // قرمز شود — یعنی دقیقاً همان «همیشه‌سبز و بی‌فایده».
+    $run = ['checks' => $results, 'metrics' => array_column($results, 'metric', 'key')];
+    $run += logging_audit_summarize($results, logging_audit_load_baseline());
 } else {
     require_once dirname(__DIR__) . '/bootstrap.php';
     require_once APP_ROOT . '/lib/logging-audit.php';

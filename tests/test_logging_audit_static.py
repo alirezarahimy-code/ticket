@@ -187,3 +187,84 @@ def test_ci_runs_the_audit_without_a_database():
     assert "--no-db" in workflow, (
         "در CI پایگاه داده نیست؛ بدون --no-db اجرا شکست می‌خورد"
     )
+
+
+# ---------------------------------------------------------------------------
+# شکاف‌هایی که در بازبینی خودِ ممیزی پیدا شدند
+# ---------------------------------------------------------------------------
+
+
+def test_cli_check_mode_can_actually_fail():
+    """نسخهٔ اول --no-db هرگز نمی‌توانست قرمز شود، پس مرحلهٔ CI بی‌اثر بود.
+
+    در آن مسیر کلید structural_problems اصلاً ساخته نمی‌شد و regressions
+    همیشه آرایهٔ خالی بود، پس شرط شکست همیشه صفر می‌ماند.
+    """
+    src = read(CLI)
+    assert "logging_audit_summarize(" in src, (
+        "مسیر --no-db باید از منطق مشترک جمع‌بندی استفاده کند، وگرنه --check بی‌اثر است"
+    )
+    assert "'regressions' => []" not in src, (
+        "مقداردهی ثابت regressions به آرایهٔ خالی یعنی پس‌رفت هرگز دیده نمی‌شود"
+    )
+
+
+def test_summarize_is_shared_by_both_paths():
+    """یک منطق جمع‌بندی برای کرون و خط فرمان، تا از هم جدا نیفتند."""
+    module = read(MODULE)
+    assert "function logging_audit_summarize(" in module
+    assert "logging_audit_summarize(" in read(CLI)
+
+
+def test_empty_baseline_is_not_a_silent_no_op():
+    """بدون خط مبنا هیچ پس‌رفتی تشخیص داده نمی‌شود — خودش یک خرابی خاموش است."""
+    src = read(MODULE)
+    assert "$bootstrappedBaseline" in src, "ساخت خودکار خط مبنا در اولین اجرا پیاده نشده"
+    assert "audit_baseline_created" in src, (
+        "ساخت خط مبنا باید صریح به ادمین اعلام شود، نه بی‌صدا"
+    )
+
+
+def test_audit_writes_its_own_heartbeat():
+    src = read(MODULE)
+    assert "function logging_audit_write_heartbeat(" in src
+    assert "logging_audit_heartbeat_path(" in src
+    assert "worker-heartbeats" in src, "ضربان ممیزی باید کنار ضربان بقیهٔ Workerها باشد"
+
+    # صرفِ وجودِ نامِ تابع کافی نیست: باید داخل run_and_record و بدون شرط
+    # صدا زده شود. نسخهٔ اول این تست فقط وجود رشته را می‌دید و با
+    # «if (false) logging_audit_write_heartbeat(...)» هم سبز می‌ماند.
+    body = src[src.index("function logging_audit_run_and_record("):]
+    calls = [
+        line.strip()
+        for line in body.splitlines()
+        if "logging_audit_write_heartbeat(" in line
+    ]
+    assert calls, "run_and_record ضربان نمی‌نویسد، پس قطعی سرویس هرگز دیده نمی‌شود"
+    for call in calls:
+        assert not re.match(r"(if|while|for|foreach|elseif)\s*\(", call), (
+            f"فراخوانی ضربان مشروط شده و می‌تواند هرگز اجرا نشود: {call}"
+        )
+        assert call.startswith("logging_audit_write_heartbeat("), (
+            f"فراخوانی ضربان باید دستور مستقل و بی‌قیدوشرط باشد: {call}"
+        )
+
+
+def test_audit_detects_its_own_outage_after_recovery():
+    """ممیزی نمی‌تواند نبودِ خودش را بگوید، ولی بعد از بازگشت می‌تواند."""
+    src = read(MODULE)
+    assert "function logging_audit_check_audit_continuity(" in src
+    assert "'logging_audit_check_audit_continuity'" in src, (
+        "بررسی پیوستگی تعریف شده ولی در فهرست اجرا نیست"
+    )
+
+
+def test_every_defined_check_is_registered():
+    """بررسی تعریف‌شده ولی ثبت‌نشده هرگز اجرا نمی‌شود و حس امنیت کاذب می‌دهد."""
+    src = read(MODULE)
+    defined = set(re.findall(r"function (logging_audit_check_\w+)\(\)", src))
+    listed = set(re.findall(r"'(logging_audit_check_\w+)'", src))
+    orphan = defined - listed
+    assert not orphan, f"این بررسی‌ها تعریف شده‌اند ولی در logging_audit_checks() نیستند: {orphan}"
+    ghost = listed - defined
+    assert not ghost, f"این‌ها در فهرست هستند ولی تعریف نشده‌اند: {ghost}"
