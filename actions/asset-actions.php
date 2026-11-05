@@ -53,7 +53,7 @@ if (!defined('APP_ROOT')) {
               $assetId = inventory_upsert_server_asset($serverInventory, (int) $user['id']);
               $filled = asset_profile_apply_auto($assetId, $autoValues, (int) $user['id'], $overwrite);
               record_asset_history($assetId, 'inventory_collected', 'استخراج محلی اطلاعات این سیستم (میزبان PHP)', (int) $user['id'], null, 'اطلاعات سخت‌افزاری و نرم‌افزاری از میزبان PHP دریافت شد.');
-              save_audit((int) $user['id'], 'server_inventory_collected', null, ['asset_id' => $assetId, 'overwrite' => $overwrite, 'hardware_score' => $hardwareScore]);
+              save_audit_required((int) $user['id'], 'server_inventory_collected', null, ['asset_id' => $assetId, 'overwrite' => $overwrite, 'hardware_score' => $hardwareScore]);
               if (session_status() !== PHP_SESSION_ACTIVE) {
                   session_start();
               }
@@ -117,7 +117,7 @@ if (!defined('APP_ROOT')) {
         if ($action === 'import_domain_assets') {
             $importUser = require_permission('domain.import');
             $importResult = domain_scan_import((int) $importUser['id']);
-            save_audit((int) $importUser['id'], 'domain_assets_imported', null, $importResult);
+            save_audit_required((int) $importUser['id'], 'domain_assets_imported', null, $importResult);
             flash('success', 'کامپیوترهای دامنه خوانده شد: ' . $importResult['created'] . ' سیستم جدید ثبت و ' . $importResult['updated'] . ' سیستم به‌روزرسانی شد (مجموع ' . $importResult['total'] . ').');
             redirect('index.php?page=assets');
         }
@@ -242,7 +242,7 @@ if (!defined('APP_ROOT')) {
                 }
             }
             system_log('info', 'domain_scan', 'پینگ دستی سیستم‌ها', ['checked' => $checkedCount, 'online' => $onlineCount]);
-            save_audit((int) $pingUser['id'], 'assets_pinged', null, ['checked' => $checkedCount, 'online' => $onlineCount]);
+            save_audit_required((int) $pingUser['id'], 'assets_pinged', null, ['checked' => $checkedCount, 'online' => $onlineCount]);
             if ($pingAjax) {
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['ok' => true, 'checked' => $checkedCount, 'online' => $onlineCount, 'states' => $pingStates], JSON_UNESCAPED_UNICODE);
@@ -265,7 +265,7 @@ if (!defined('APP_ROOT')) {
             }
             domain_scan_store_run_credentials((int) $retry['run_id'], (int) $retryUser['id'], $scanUsername, $scanPassword);
             unset($scanPassword);
-            save_audit((int) $retryUser['id'], 'domain_inventory_retry', null, ['from_run' => $retryRunId, 'run_id' => $retry['run_id'], 'total' => $retry['total']]);
+            save_audit_required((int) $retryUser['id'], 'domain_inventory_retry', null, ['from_run' => $retryRunId, 'run_id' => $retry['run_id'], 'total' => $retry['total']]);
             flash('success', $retry['total'] . ' سیستم ناموفق در نوبت تازه #' . $retry['run_id'] . ' دوباره در صف استخراج قرار گرفت.');
             redirect('index.php?page=domain-scan&run=' . $retry['run_id']);
         }
@@ -341,7 +341,7 @@ if (!defined('APP_ROOT')) {
             $scanResult = domain_scan_start_selected((array) ($_POST['asset_ids'] ?? []), $scanUser);
             domain_scan_store_run_credentials((int) $scanResult['run_id'], (int) $scanUser['id'], $scanUsername, $scanPassword);
             unset($scanPassword);
-            save_audit((int) $scanUser['id'], 'domain_inventory_selected', null, ['run_id' => $scanResult['run_id'], 'total' => $scanResult['total']]);
+            save_audit_required((int) $scanUser['id'], 'domain_inventory_selected', null, ['run_id' => $scanResult['run_id'], 'total' => $scanResult['total']]);
             flash('success', $scanResult['total'] . ' سیستم وارد صف استخراج شبکه‌ای شد. سیستم‌های خاموش یا غیرقابل‌دسترسی با وضعیت جداگانه گزارش می‌شوند.');
             redirect('index.php?page=domain-scan&run=' . $scanResult['run_id']);
         }
