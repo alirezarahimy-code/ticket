@@ -199,8 +199,8 @@ $GLOBALS['fakeDb']->inTx = false;
 $GLOBALS['logs'] = [];
 $committed = db_commit('test');
 $rolled = db_rollback('test');
-check('۵: commit روی تراکنش بسته → false و بدون Exception', $committed === false && $rolled === false);
-check('۵-ب: هیچ commit/rollback واقعی صدا زده نشد', !in_array('commit', $GLOBALS['fakeDb']->log, true) && !in_array('rollback', $GLOBALS['fakeDb']->log, true));
+check('۵: commit روی تراکنش بسته‌شدهٔ implicit → true و rollback بدون تراکنش → false', $committed === true && $rolled === false);
+check('۵-ب: commit/rollback واقعی روی تراکنش بسته صدا زده نشد', !in_array('commit', $GLOBALS['fakeDb']->log, true) && !in_array('rollback', $GLOBALS['fakeDb']->log, true));
 check('۵-پ: وضعیت در لاگ سامانه ثبت شد', count($GLOBALS['logs']) === 1 && $GLOBALS['logs'][0][1] === 'transaction', json_encode($GLOBALS['logs'], JSON_UNESCAPED_UNICODE));
 
 /* ───────── ۶) db_commit روی تراکنش باز ───────── */
