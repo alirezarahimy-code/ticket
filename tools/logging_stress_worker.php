@@ -11,7 +11,7 @@ if (PHP_SAPI !== 'cli') {
     exit("Not found\n");
 }
 
-$options = getopt('', ['run-id:', 'count::', 'worker::', 'verify']);
+$options = getopt('', ['run-id:', 'count:', 'worker:', 'verify']);
 $runId = strtolower((string)($options['run-id'] ?? ''));
 if (!preg_match('/^[a-f0-9]{32}$/D', $runId)) {
     fwrite(STDERR, "Invalid --run-id. Expected 32 lowercase hexadecimal characters.\n");
