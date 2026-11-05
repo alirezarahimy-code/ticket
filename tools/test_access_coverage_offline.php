@@ -122,12 +122,13 @@ if (preg_match('/function role_permissions_seed\\(bool \\$force = false\\): void
 }
 check('تابع seed دیگر پیش‌فرض‌ها را در جدول نمی‌ریزد', $seedBody !== '' && !str_contains($seedBody, 'INSERT') && str_contains($seedBody, 'role_permissions_reconciled'));
 $indexSource2 = (string) file_get_contents(APP_ROOT . '/index.php');
+$roleActionsSource = (string) file_get_contents(APP_ROOT . '/actions/role-actions.php');
 check('فرم: دکمهٔ «بازگردانی به پیش‌فرض کد» برای هر نقش', str_contains($indexSource2, 'value="reset_role_defaults"'));
-check('فرم: اکشن reset_role_defaults با نقش هدف', str_contains($indexSource2, "if (\$action === 'reset_role_defaults')"));
+check('اکشن reset_role_defaults در ماژول جدا و با نقش هدف اجرا می‌شود', str_contains($roleActionsSource, "if (\$action === 'reset_role_defaults')") && str_contains($roleActionsSource, "\$targetRole = post_value('role');"));
 check('فرم: نشان «پیش‌فرض کد» / «ویرایش‌شده»', str_contains($indexSource2, 'roleStateBadge') && str_contains($indexSource2, "'پیش‌فرض کد'") && str_contains($indexSource2, "'ویرایش‌شده'"));
 check('فرم: نشان قبل از استفاده تعریف شده', ($badgeDefine = strpos($indexSource2, '$roleStateBadge = $isPrimary')) !== false && strpos($indexSource2, '\' . $roleStateBadge . \'') > $badgeDefine);
 check('فرم: دکمهٔ بازگردانی داخل همان فرم نقش است', str_contains($indexSource2, 'name="action" value="reset_role_defaults" data-confirm='));
-check('بازگردانی همهٔ نقش‌ها شامل نقش admin هم می‌شود', str_contains($indexSource2, 'foreach (array_keys(permission_roles()) as $resetRole)'));
+check('بازگردانی همهٔ نقش‌های تعریف‌شده انجام می‌شود و نقش قدیمی admin وارد فهرست نمی‌شود', str_contains($roleActionsSource, 'foreach (array_keys(permission_roles()) as $resetRole)') && !isset(permission_roles()['admin']));
 check('فرم: نقش admin در فهرست پنل‌ها نیست', !str_contains($indexSource2, "'admin' => ['icon' => 'owner'"));
 
 $staff = staff_role_codes();
@@ -148,7 +149,7 @@ foreach (['*.php' => true] as $pattern => $_) {
         $sourceFiles[] = $file;
     }
 }
-foreach (['api', 'cron', 'lib', 'tools'] as $dir) {
+foreach (['actions', 'api', 'cron', 'lib', 'tools'] as $dir) {
     foreach (glob($root . '/' . $dir . '/*.php') ?: [] as $file) {
         // فایل‌های آزمون، دادهٔ آزمایشی دارند (نام کدها را برای سنجش می‌نویسند) و شمرده نمی‌شوند.
         if ($dir === 'tools' && str_starts_with(basename($file), 'test_')) {
@@ -179,22 +180,30 @@ check('فهرست کدهای بی‌استفاده تغییر نکرده', $unus
 $lines[] = '';
 $lines[] = '── ۳) گارد اکشن‌ها ──';
 $index = (string) file_get_contents(APP_ROOT . '/index.php');
-$guardOffset = strpos($index, '$user = require_login();');
-check('index.php: گارد ورود بعد از اکشن login قرار دارد', $guardOffset !== false);
-preg_match('/if \(\$action === \'login\'\) \{/', $index, $loginMatch, PREG_OFFSET_CAPTURE);
-$loginOffset = $loginMatch[0][1] ?? -1;
-check('index.php: اکشن login تنها اکشن قبل از گارد است', $loginOffset > 0 && $guardOffset !== false && $loginOffset < $guardOffset);
+$dispatchOffset = strpos($index, "if (\$_SERVER['REQUEST_METHOD'] === 'POST') {");
+$csrfOffset = $dispatchOffset !== false ? strpos($index, 'require_csrf();', $dispatchOffset) : false;
+$firstActionInclude = $dispatchOffset !== false ? strpos($index, "require __DIR__ . '/actions/account-actions.php';", $dispatchOffset) : false;
+check('index.php: CSRF پیش از بارگذاری ماژول‌های POST بررسی می‌شود', $dispatchOffset !== false && $csrfOffset !== false && $firstActionInclude !== false && $csrfOffset < $firstActionInclude);
 
-preg_match_all('/if \(\$action === \'([a-z_]+)\'\)/i', $index, $actions, PREG_OFFSET_CAPTURE);
-$unguarded = [];
-foreach ($actions[1] as $i => $action) {
-    $offset = $actions[0][$i][1];
-    if ($action[0] === 'login' || ($guardOffset !== false && $offset > $guardOffset)) {
-        continue;
+$logoutOffset = strpos($index, "if (\$_SERVER['REQUEST_METHOD'] === 'POST' && (\$_POST['action'] ?? '') === 'logout')");
+$logoutCsrfOffset = $logoutOffset !== false ? strpos($index, 'require_csrf();', $logoutOffset) : false;
+$logoutClearOffset = $logoutOffset !== false ? strpos($index, '\$_SESSION = [];', $logoutOffset) : false;
+check('index.php: خروج پیش از احراز هویت، CSRF معتبر می‌خواهد', $logoutOffset !== false && $logoutCsrfOffset !== false && $logoutClearOffset !== false && $logoutCsrfOffset < $logoutClearOffset);
+
+$accountActions = (string) file_get_contents(APP_ROOT . '/actions/account-actions.php');
+$loginOffset = strpos($accountActions, "if (\$action === 'login') {");
+$accountLoginGuard = strpos($accountActions, '\$user = require_login();');
+check('account-actions: ورود تنها اکشن پیش از require_login است', $loginOffset !== false && $accountLoginGuard !== false && $loginOffset < $accountLoginGuard);
+
+$actionFiles = glob(APP_ROOT . '/actions/*.php') ?: [];
+$ungatedActionFiles = [];
+foreach ($actionFiles as $actionFile) {
+    $actionSource = (string) file_get_contents($actionFile);
+    if (preg_match('/require_(?:login|permission|primary_admin|staff)\\s*\\(/', $actionSource) !== 1) {
+        $ungatedActionFiles[] = basename($actionFile);
     }
-    $unguarded[] = $action[0];
 }
-check('index.php: هیچ اکشن POSTی بدون ورود نیست', $unguarded === [], 'بی‌گارد: ' . implode(', ', $unguarded));
+check('تمام ماژول‌های اکشن POST دارای گارد ورود یا مجوز هستند', $ungatedActionFiles === [], 'بدون گارد: ' . implode(', ', $ungatedActionFiles));
 
 $governance = (string) file_get_contents(APP_ROOT . '/governance.php');
 check('governance.php: require_staff()', str_contains($governance, '$user = require_staff();'));
