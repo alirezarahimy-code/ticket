@@ -16,13 +16,13 @@ def test_fresh_install_schemas_seed_every_forward_migration():
     for schema_name in SCHEMAS:
         source = (ROOT / schema_name).read_text(encoding="utf-8")
         match = re.search(
-            r"INSERT\\s+IGNORE\\s+INTO\\s+schema_updates\\s*"
-            r"\\(\\s*version\\s*,\\s*migration\\s*\\)\\s*VALUES(.*?);",
+            r"INSERT\s+IGNORE\s+INTO\s+schema_updates\s*"
+            r"\(\s*version\s*,\s*migration\s*\)\s*VALUES(.*?);",
             source,
             re.I | re.S,
         )
         assert match, f"{schema_name} does not seed the schema_updates baseline"
-        rows = re.findall(r"\\('([^']+)'\\s*,\\s*'([^']+)'\\)", match.group(1))
+        rows = re.findall(r"\('([^']+)'\s*,\s*'([^']+)'\)", match.group(1))
         versions = {row[0] for row in rows}
         actual = {row[1] for row in rows}
         assert versions == {version}, f"{schema_name} baseline version mismatch: {versions}"
