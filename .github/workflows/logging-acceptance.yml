@@ -101,8 +101,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: \${{ github.repository }}
-          ref: \${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
       - uses: shivammathur/setup-php@v2
         with:
@@ -127,7 +127,7 @@ jobs:
       - name: Commit package to the PR branch only
         env:
           PACKAGE_NAME: ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip
-          PR_BRANCH: \${{ github.event.pull_request.head.ref }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
