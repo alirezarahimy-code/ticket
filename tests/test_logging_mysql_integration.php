@@ -124,7 +124,7 @@ foreach (split_sql_statements($migration) as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
     if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
-foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql'] as $migrationName) {
+foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql', '033-logging-legacy-context-collation.sql'] as $migrationName) {
     $migration = file_get_contents(dirname(__DIR__) . '/migrations/' . $migrationName);
     if (!is_string($migration)) throw new RuntimeException($migrationName . ' could not be read.');
     foreach (split_sql_statements($migration) as $statement) {
