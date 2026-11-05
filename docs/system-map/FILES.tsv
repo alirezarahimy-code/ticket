@@ -94,9 +94,11 @@ FOOD-ORDERS-1.38-PATCH-5-NOTES-fa.md	root-misc	23	3029
 FOOD-ORDERS-1.38-PATCH-6-NOTES-fa.md	root-misc	24	3690
 FRESH-INSTALL-SCHEMA-1.62.81-CHANGE-REPORT-fa.md	root-misc	75	6029
 FRESH-INSTALL-SCHEMA-1.62.81-UPDATE-NOTE-fa.txt	root-misc	43	2849
+FRESH-INSTALL-SCHEMA-1.62.82-CHANGE-REPORT-fa.md	root-misc	43	2733
+FRESH-INSTALL-SCHEMA-1.62.82-UPDATE-NOTE-fa.txt	root-misc	47	3132
 OPTIMIZATION_SUMMARY.md	root-misc	111	3409
 README-FA.txt	root-misc	10	1666
-README.md	root-misc	270	46397
+README.md	root-misc	270	46624
 START-FOOD-WORKER.txt	root-misc	33	2858
 START-HERE.txt	root-misc	85	9823
 UPDATE-WORKER-V4.txt	root-misc	14	1082
@@ -291,6 +293,8 @@ downloads/FOOD-WORKER-WINDOW-1.62.79-UPDATE-NOTE-fa.txt	history-downloads	49	373
 downloads/FOOD-WORKER-WINDOW-1.62.80-UPDATE-NOTE-fa.txt	history-downloads	60	4545
 downloads/FRESH-INSTALL-SCHEMA-1.62.81-CHANGE-REPORT-fa.md	history-downloads	75	6029
 downloads/FRESH-INSTALL-SCHEMA-1.62.81-UPDATE-NOTE-fa.txt	history-downloads	43	2849
+downloads/FRESH-INSTALL-SCHEMA-1.62.82-CHANGE-REPORT-fa.md	history-downloads	43	2733
+downloads/FRESH-INSTALL-SCHEMA-1.62.82-UPDATE-NOTE-fa.txt	history-downloads	47	3132
 downloads/FULL-PACKAGE-1.62.73-FA.md	history-downloads	23	2027
 downloads/FULL-PACKAGE-1.62.73-R2-FA.md	history-downloads	24	2439
 downloads/LOGGING-1.62.76-SYNC-REPORT-fa.md	history-downloads	137	14802
@@ -307,7 +311,7 @@ downloads/SHA256SUMS-1.62.77.txt	history-downloads	3	344
 downloads/SHA256SUMS-1.62.79.txt	history-downloads	3	361
 downloads/SHA256SUMS-1.62.80.txt	history-downloads	2	230
 downloads/URGENT-FIX-1.62.38-FA.md	history-downloads	51	3340
-downloads/index.html	history-downloads	39	6690
+downloads/index.html	history-downloads	39	6678
 downloads/repair-1.62.36.html	history-downloads	54	6825
 downloads/ticket-repair-1.62.36-full-source-restore-20261027.html	history-downloads	21	5176
 food-order-import.php	core	476	26389
@@ -440,7 +444,7 @@ status-food-worker-SERVICE.bat	root-misc	9	214
 status-food-worker-SERVICE.ps1	root-misc	107	4918
 storage/.htaccess	config	3	141
 storage/sessions/.htaccess	config	3	117
-system-health.php	core	1283	94019
+system-health.php	core	1339	98357
 system-update.php	core	256	14017
 tests/.htaccess	tests	1	19
 tests/ArchitectureTest.php	tests	177	4538
@@ -607,6 +611,7 @@ tests/test_session_boot_static.py	tests	142	6457
 tests/test_skill_manifest_static.py	tests	195	9080
 tests/test_startup_performance_static.py	tests	50	2638
 tests/test_system_health_accuracy_static.py	tests	98	4779
+tests/test_system_health_audit_visibility_static.py	tests	80	4153
 tests/test_system_health_log_button_static.py	tests	38	1890
 tests/test_system_health_readability_static.py	tests	62	3418
 tests/test_system_health_safe_export_static.py	tests	62	3003

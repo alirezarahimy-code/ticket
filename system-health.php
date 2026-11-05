@@ -563,6 +563,62 @@ function system_health_checks(): array
         $checks[] = ['ورود با حساب شبکه', 'warn', 'وضعیت بررسی نشد؛ اگر از ورود شبکه استفاده نمی‌کنید، این مورد قابل چشم‌پوشی است.'];
     }
 
+    // ── ممیزی سلامت سامانه ──────────────────────────────────────────────
+    // ممیزی در کرون هر دقیقه اجرا می‌شود. اینجا فقط *گزارش* می‌شود تا مدیر
+    // بدون ورود به سرور بفهمد واقعاً اجرا شده یا نه. اگر این دو ردیف را
+    // نگذاریم، سکوت صفحه به‌اشتباه نشانهٔ سلامت تلقی می‌شود — همان تله‌ای
+    // که این ممیزی برای گرفتنش ساخته شده.
+    try {
+        require_once __DIR__ . '/lib/logging-audit.php';
+
+        $heartbeat = logging_audit_heartbeat_path();
+        if (!is_file($heartbeat)) {
+            $checks[] = ['ممیزی سلامت سامانه', 'warn',
+                'هنوز هیچ اجرایی ثبت نشده است. ممیزی بخشی از کرون «بررسی سلامت لاگ» است؛ '
+                . 'اگر تا چند دقیقه پس از به‌روزرسانی همچنان این پیام را می‌بینید، '
+                . 'Scheduled Task مربوط به cron\\run_logging_maintenance.bat اجرا نمی‌شود.'];
+        } else {
+            $hb = json_decode((string) @file_get_contents($heartbeat), true);
+            $lastAt = is_array($hb) ? (string) ($hb['last_run_at'] ?? '') : '';
+            $lastTs = $lastAt !== '' ? strtotime($lastAt) : false;
+            $findings = is_array($hb) ? (int) ($hb['findings'] ?? 0) : 0;
+            $structural = is_array($hb) ? (int) ($hb['structural'] ?? 0) : 0;
+            $regressions = is_array($hb) ? (int) ($hb['regressions'] ?? 0) : 0;
+            if ($lastTs === false) {
+                $checks[] = ['ممیزی سلامت سامانه', 'warn',
+                    'فایل ضربان ممیزی خوانا نیست؛ زمان آخرین اجرا نامشخص است.'];
+            } elseif ($lastTs < time() - 86400) {
+                $checks[] = ['ممیزی سلامت سامانه', 'fail',
+                    'آخرین اجرا ' . persian_date(date('Y-m-d H:i:s', $lastTs))
+                    . ' بوده و بیش از یک شبانه‌روز گذشته است؛ کرون سلامت اجرا نمی‌شود.'];
+            } elseif ($structural > 0) {
+                $checks[] = ['ممیزی سلامت سامانه', 'fail',
+                    $structural . ' ناسازگاری ساختاری یافت شد (جدول یا ستون گم‌شده، مهاجرت اجرانشده یا '
+                    . 'پوشهٔ غیرقابل نوشتن). جزئیات در لاگ سامانه با کد OPS-AUDIT-003.'];
+            } elseif ($regressions > 0) {
+                $checks[] = ['ممیزی سلامت سامانه', 'warn',
+                    $regressions . ' مورد نسبت به خط مبنا بدتر شده است؛ کد OPS-AUDIT-002 در لاگ سامانه.'];
+            } else {
+                $checks[] = ['ممیزی سلامت سامانه', 'ok',
+                    'آخرین اجرا: ' . persian_date(date('Y-m-d H:i:s', $lastTs))
+                    . ' — بدون ناسازگاری ساختاری و بدون پس‌رفت (' . number_format($findings) . ' یافتهٔ رفتاری).'];
+            }
+        }
+
+        $baselinePath = logging_audit_baseline_path();
+        $checks[] = is_file($baselinePath)
+            ? ['خط مبنای ممیزی', 'ok',
+                'ساخته شده است؛ از این پس فقط بدتر شدن اعداد هشدار می‌دهد. '
+                . 'مسیر: storage/logs/' . basename($baselinePath)]
+            : ['خط مبنای ممیزی', 'warn',
+                'هنوز ساخته نشده است. اولین اجرای ممیزی آن را خودکار می‌سازد و در لاگ اعلام می‌کند؛ '
+                . 'نیازی به اجرای دستی روی سرور نیست.'];
+    } catch (Throwable $auditProbe) {
+        $checks[] = ['ممیزی سلامت سامانه', 'fail',
+            'وضعیت ممیزی خوانده نشد: ' . $auditProbe->getMessage()
+            . ' — این خودش یک مشکل است و نباید نادیده گرفته شود.'];
+    }
+
     $loggingCounters = logging_health_counters();
     $droppedRecent = !empty($loggingCounters['dropped_last_at']) && strtotime((string) $loggingCounters['dropped_last_at']) >= time() - 86400;
     if (in_array(($loggingCounters['state'] ?? 'unknown'), ['unreadable', 'corrupt'], true)) {
