@@ -28,19 +28,19 @@ try {
     }
 } catch { throw "Service account could not be resolved: $ServiceAccount" }
 $principals = @(
-    $account,
-    [System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'),
-    [System.Security.Principal.SecurityIdentifier]::new('S-1-5-18')
+    [pscustomobject]@{ Sid = $account; Rights = [System.Security.AccessControl.FileSystemRights]::Modify },
+    [pscustomobject]@{ Sid = [System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'); Rights = [System.Security.AccessControl.FileSystemRights]::FullControl },
+    [pscustomobject]@{ Sid = [System.Security.Principal.SecurityIdentifier]::new('S-1-5-18'); Rights = [System.Security.AccessControl.FileSystemRights]::FullControl }
 )
 $inherit = [System.Security.AccessControl.InheritanceFlags]::ContainerInherit -bor [System.Security.AccessControl.InheritanceFlags]::ObjectInherit
 if (-not $Apply) {
-    Write-Output "PLAN ONLY: would grant FullControl on $target to the service account, local Administrators and SYSTEM. No ACL was changed."
+    Write-Output "PLAN ONLY: would grant Modify to the service account and FullControl to local Administrators and SYSTEM on $target. No ACL was changed."
     return
 }
 if ($PSCmdlet.ShouldProcess($target, 'Add restricted Logging ACL entries')) {
     $acl = Get-Acl -LiteralPath $target
-    foreach ($sid in $principals) {
-        $rule = [System.Security.AccessControl.FileSystemAccessRule]::new($sid, [System.Security.AccessControl.FileSystemRights]::FullControl, $inherit, [System.Security.AccessControl.PropagationFlags]::None, [System.Security.AccessControl.AccessControlType]::Allow)
+    foreach ($principal in $principals) {
+        $rule = [System.Security.AccessControl.FileSystemAccessRule]::new($principal.Sid, $principal.Rights, $inherit, [System.Security.AccessControl.PropagationFlags]::None, [System.Security.AccessControl.AccessControlType]::Allow)
         [void]$acl.AddAccessRule($rule)
     }
     Set-Acl -LiteralPath $target -AclObject $acl
