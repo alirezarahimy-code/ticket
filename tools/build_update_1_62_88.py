@@ -35,6 +35,11 @@ MIGRATIONS = [
     "033-logging-legacy-context-collation.sql",
 ]
 EXCLUDED_MIGRATIONS = {"032-schema-updates-baseline.sql"}
+EXCLUDED_FILES = {
+    "tools/Run-Logging-Acceptance-1.62.83.ps1",
+    "tools/build_cumulative_update.py",
+    "tools/build_update_1_62_88.py",
+}
 
 
 def sha256(data: bytes) -> str:
@@ -53,6 +58,7 @@ def changed_files() -> list[str]:
     names = git("diff", "--diff-filter=ACMR", "--name-only", BASE_COMMIT, "HEAD").splitlines()
     keep = [n for n in names if n.strip() and not n.startswith(EXCLUDED_PREFIXES)]
     keep = [n for n in keep if Path(n).name not in EXCLUDED_MIGRATIONS]
+    keep = [n for n in keep if n not in EXCLUDED_FILES]
     return sorted(set(keep))
 
 
