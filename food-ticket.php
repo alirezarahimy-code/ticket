@@ -2750,7 +2750,7 @@ function food_ticket_save_config(array $data, array $user): void
         }
     }
     food_ticket_config(true);
-    save_audit((int) $user['id'], 'food_ticket_config_saved', null, array_merge(
+    save_audit_required((int) $user['id'], 'food_ticket_config_saved', null, array_merge(
         ['printer_mode' => $wantedMode, 'printer_host' => $wantedHost],
         $windowSaved === [] ? [] : ['window' => $windowSaved]
     ));
@@ -4787,9 +4787,9 @@ function food_ticket_api_upload_access_file(array $user): never
         if (!is_string($savedPath) || $savedPath !== $realPath) {
             throw new RuntimeException('مسیر فایل در تنظیمات ذخیره نشد یا با مسیر بارگذاری‌شده یکی نیست.');
         }
-        if (function_exists('save_audit')) {
+        if (function_exists('save_audit_required')) {
             try {
-                save_audit((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
+                save_audit_required((int) ($user['id'] ?? 0), 'food_ticket_access_database_uploaded', null, ['kind' => $kind, 'filename' => $filename, 'size' => $size]);
             } catch (Throwable $auditError) {
                 app_error_log('[food-ticket] database upload audit failed: ' . $auditError->getMessage());
             }
