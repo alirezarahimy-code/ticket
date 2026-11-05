@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 /**
  * ورود کنترل‌شدهٔ سوابق تردد از Excel/CSV؛ مسیر این فایل API عمومی ندارد.
  * فرم فقط از مسیر مخفی index.php?page=traffic-control&tab=import باز می‌شود.
