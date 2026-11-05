@@ -170,7 +170,7 @@
         "TEST-081.06",
         "TOOL-009.01",
         "PAGE-030.03",
-        "TEST-189.04",
+        "TEST-190.04",
         "TOOL-030.06",
         "TOOL-064.03"
       ],
@@ -1588,7 +1588,7 @@
         "PAGE-009.12",
         "PAGE-041.07",
         "PAGE-041.16",
-        "TEST-191.08",
+        "TEST-192.08",
         "PAGE-048.10"
       ],
       "total": 9
@@ -2649,7 +2649,7 @@
         "ACT-013.08",
         "PAGE-034.100",
         "ACT-013.07",
-        "TEST-189.06"
+        "TEST-190.06"
       ],
       "related": [
         "PAGE-041.03",
@@ -4936,10 +4936,10 @@
       ],
       "related": [
         "ACT-001.03",
-        "TEST-191.05",
+        "TEST-192.05",
         "PAGE-041.29",
-        "TEST-191.04",
-        "TEST-191.06",
+        "TEST-192.04",
+        "TEST-192.06",
         "PAGE-048.02"
       ],
       "total": 12
@@ -4956,10 +4956,10 @@
       ],
       "related": [
         "ACT-001.03",
-        "TEST-191.05",
+        "TEST-192.05",
         "PAGE-041.29",
         "DB-035.02",
-        "TEST-191.04",
+        "TEST-192.04",
         "PAGE-048.02"
       ],
       "total": 12
@@ -4980,7 +4980,7 @@
         "ACT-001.02",
         "ACT-001.03",
         "ACT-001.04",
-        "TEST-191.05",
+        "TEST-192.05",
         "PAGE-041.29"
       ],
       "total": 10
@@ -5844,12 +5844,12 @@
       "line": 30,
       "anchor": "مسیر: create_ticket",
       "risk": 3,
-      "lines": 179
+      "lines": 181
     },
     "ACT-015.04": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 209,
+      "line": 211,
       "anchor": "مسیر: cancel_ticket",
       "risk": 7,
       "lines": 49
@@ -5857,7 +5857,7 @@
     "ACT-015.05": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 258,
+      "line": 260,
       "anchor": "مسیر: decide_ticket_cancellation",
       "risk": 2,
       "lines": 65
@@ -5865,7 +5865,7 @@
     "ACT-015.06": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 323,
+      "line": 325,
       "anchor": "مسیر: claim_ticket",
       "risk": 2,
       "lines": 37
@@ -5873,7 +5873,7 @@
     "ACT-015.07": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 360,
+      "line": 362,
       "anchor": "مسیر: reopen_ticket",
       "risk": 7,
       "lines": 35
@@ -5881,7 +5881,7 @@
     "ACT-015.08": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 395,
+      "line": 397,
       "anchor": "مسیر: reply",
       "risk": 8,
       "lines": 122
@@ -5889,7 +5889,7 @@
     "ACT-015.09": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 517,
+      "line": 519,
       "anchor": "مسیر: update_ticket",
       "risk": 8,
       "lines": 144
@@ -25940,12 +25940,20 @@
       "line": 546,
       "anchor": "db_commit",
       "risk": 0,
-      "lines": 17
+      "lines": 31
     },
     "CORE-004.35": {
       "path": "lib/db-core.php",
       "area": "CORE",
-      "line": 564,
+      "line": 578,
+      "anchor": "db_commit_or_fail",
+      "risk": 0,
+      "lines": 18
+    },
+    "CORE-004.36": {
+      "path": "lib/db-core.php",
+      "area": "CORE",
+      "line": 597,
       "anchor": "db_rollback",
       "risk": 0,
       "lines": 14
@@ -47279,6 +47287,110 @@
       "lines": 35
     },
     "TEST-189.01": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 30
+    },
+    "TEST-189.02": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 31,
+      "anchor": "read",
+      "risk": 0,
+      "lines": 5
+    },
+    "TEST-189.03": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 36,
+      "anchor": "strip_php_comments",
+      "risk": 0,
+      "lines": 11
+    },
+    "TEST-189.04": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 47,
+      "anchor": "function_body",
+      "risk": 0,
+      "lines": 7
+    },
+    "TEST-189.05": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 54,
+      "anchor": "function_code",
+      "risk": 0,
+      "lines": 6
+    },
+    "TEST-189.06": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 60,
+      "anchor": "test_commit_returns_true_when_the_work_is_already_persisted",
+      "risk": 0,
+      "lines": 21
+    },
+    "TEST-189.07": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 81,
+      "anchor": "test_commit_still_reports_a_genuine_failure_as_false",
+      "risk": 0,
+      "lines": 7
+    },
+    "TEST-189.08": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 88,
+      "anchor": "test_a_strict_commit_helper_exists_and_raises_a_persian_error",
+      "risk": 0,
+      "lines": 22
+    },
+    "TEST-189.09": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 110,
+      "anchor": "test_every_ticket_write_path_uses_the_strict_commit",
+      "risk": 0,
+      "lines": 9
+    },
+    "TEST-189.10": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 119,
+      "anchor": "test_strict_commit_calls_name_the_action_for_diagnosis",
+      "risk": 0,
+      "lines": 13
+    },
+    "TEST-189.11": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 132,
+      "anchor": "test_other_modules_keep_their_existing_commit_contract",
+      "risk": 0,
+      "lines": 10
+    },
+    "TEST-189.12": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 142,
+      "anchor": "test_auto_assignment_does_not_invent_a_state_the_ticket_never_had",
+      "risk": 0,
+      "lines": 15
+    },
+    "TEST-189.13": {
+      "path": "tests/test_transaction_truthfulness_static.py",
+      "area": "TEST",
+      "line": 157,
+      "anchor": "test_creation_event_records_the_real_initial_status",
+      "risk": 0,
+      "lines": 6
+    },
+    "TEST-190.01": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 1,
@@ -47286,7 +47398,7 @@
       "risk": 0,
       "lines": 8
     },
-    "TEST-189.02": {
+    "TEST-190.02": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 9,
@@ -47294,7 +47406,7 @@
       "risk": 0,
       "lines": 2
     },
-    "TEST-189.03": {
+    "TEST-190.03": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 11,
@@ -47302,7 +47414,7 @@
       "risk": 0,
       "lines": 10
     },
-    "TEST-189.04": {
+    "TEST-190.04": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 21,
@@ -47310,7 +47422,7 @@
       "risk": 0,
       "lines": 13
     },
-    "TEST-189.05": {
+    "TEST-190.05": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 34,
@@ -47318,7 +47430,7 @@
       "risk": 0,
       "lines": 18
     },
-    "TEST-189.06": {
+    "TEST-190.06": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 52,
@@ -47326,7 +47438,7 @@
       "risk": 0,
       "lines": 8
     },
-    "TEST-189.07": {
+    "TEST-190.07": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 60,
@@ -47334,7 +47446,7 @@
       "risk": 0,
       "lines": 9
     },
-    "TEST-189.08": {
+    "TEST-190.08": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 69,
@@ -47342,7 +47454,7 @@
       "risk": 1,
       "lines": 13
     },
-    "TEST-189.09": {
+    "TEST-190.09": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 82,
@@ -47350,7 +47462,7 @@
       "risk": 0,
       "lines": 9
     },
-    "TEST-189.10": {
+    "TEST-190.10": {
       "path": "tests/test_triangle_effect_static.py",
       "area": "TEST",
       "line": 91,
@@ -47358,7 +47470,7 @@
       "risk": 0,
       "lines": 12
     },
-    "TEST-190.01": {
+    "TEST-191.01": {
       "path": "tests/test_tts_normalize_static.py",
       "area": "TEST",
       "line": 1,
@@ -47366,7 +47478,7 @@
       "risk": 0,
       "lines": 12
     },
-    "TEST-190.02": {
+    "TEST-191.02": {
       "path": "tests/test_tts_normalize_static.py",
       "area": "TEST",
       "line": 13,
@@ -47374,7 +47486,7 @@
       "risk": 0,
       "lines": 44
     },
-    "TEST-191.01": {
+    "TEST-192.01": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 1,
@@ -47382,7 +47494,7 @@
       "risk": 0,
       "lines": 6
     },
-    "TEST-191.02": {
+    "TEST-192.02": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 7,
@@ -47390,7 +47502,7 @@
       "risk": 0,
       "lines": 2
     },
-    "TEST-191.03": {
+    "TEST-192.03": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 9,
@@ -47398,7 +47510,7 @@
       "risk": 0,
       "lines": 8
     },
-    "TEST-191.04": {
+    "TEST-192.04": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 17,
@@ -47406,7 +47518,7 @@
       "risk": 0,
       "lines": 14
     },
-    "TEST-191.05": {
+    "TEST-192.05": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 31,
@@ -47414,7 +47526,7 @@
       "risk": 1,
       "lines": 12
     },
-    "TEST-191.06": {
+    "TEST-192.06": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 43,
@@ -47422,7 +47534,7 @@
       "risk": 0,
       "lines": 17
     },
-    "TEST-191.07": {
+    "TEST-192.07": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 60,
@@ -47430,7 +47542,7 @@
       "risk": 0,
       "lines": 21
     },
-    "TEST-191.08": {
+    "TEST-192.08": {
       "path": "tests/test_user_access_groups_static.py",
       "area": "TEST",
       "line": 81,
@@ -47438,7 +47550,7 @@
       "risk": 0,
       "lines": 10
     },
-    "TEST-192.01": {
+    "TEST-193.01": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 1,
@@ -47446,7 +47558,7 @@
       "risk": 1,
       "lines": 48
     },
-    "TEST-192.02": {
+    "TEST-193.02": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 49,
@@ -47454,7 +47566,7 @@
       "risk": 0,
       "lines": 5
     },
-    "TEST-192.03": {
+    "TEST-193.03": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 54,
@@ -47462,7 +47574,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-192.04": {
+    "TEST-193.04": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 58,
@@ -47470,7 +47582,7 @@
       "risk": 0,
       "lines": 33
     },
-    "TEST-192.05": {
+    "TEST-193.05": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 91,
@@ -47478,7 +47590,7 @@
       "risk": 0,
       "lines": 15
     },
-    "TEST-192.06": {
+    "TEST-193.06": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 106,
@@ -47486,7 +47598,7 @@
       "risk": 0,
       "lines": 5
     },
-    "TEST-192.07": {
+    "TEST-193.07": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 111,
@@ -47494,7 +47606,7 @@
       "risk": 0,
       "lines": 1
     },
-    "TEST-192.08": {
+    "TEST-193.08": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 112,
@@ -47502,7 +47614,7 @@
       "risk": 0,
       "lines": 15
     },
-    "TEST-192.09": {
+    "TEST-193.09": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 127,
@@ -47510,7 +47622,7 @@
       "risk": 0,
       "lines": 38
     },
-    "TEST-192.10": {
+    "TEST-193.10": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 165,
@@ -47518,7 +47630,7 @@
       "risk": 0,
       "lines": 29
     },
-    "TEST-192.11": {
+    "TEST-193.11": {
       "path": "tests/test_version_source_of_truth_static.py",
       "area": "TEST",
       "line": 194,
@@ -47526,7 +47638,7 @@
       "risk": 0,
       "lines": 15
     },
-    "TEST-193.01": {
+    "TEST-194.01": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 1,
@@ -47534,7 +47646,7 @@
       "risk": 0,
       "lines": 13
     },
-    "TEST-193.02": {
+    "TEST-194.02": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 14,
@@ -47542,7 +47654,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.03": {
+    "TEST-194.03": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 18,
@@ -47550,7 +47662,7 @@
       "risk": 0,
       "lines": 2
     },
-    "TEST-193.04": {
+    "TEST-194.04": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 20,
@@ -47558,7 +47670,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.05": {
+    "TEST-194.05": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 24,
@@ -47566,7 +47678,7 @@
       "risk": 0,
       "lines": 2
     },
-    "TEST-193.06": {
+    "TEST-194.06": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 26,
@@ -47574,7 +47686,7 @@
       "risk": 0,
       "lines": 3
     },
-    "TEST-193.07": {
+    "TEST-194.07": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 29,
@@ -47582,7 +47694,7 @@
       "risk": 0,
       "lines": 2
     },
-    "TEST-193.08": {
+    "TEST-194.08": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 31,
@@ -47590,7 +47702,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.09": {
+    "TEST-194.09": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 35,
@@ -47598,7 +47710,7 @@
       "risk": 0,
       "lines": 2
     },
-    "TEST-193.10": {
+    "TEST-194.10": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 37,
@@ -47606,7 +47718,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.11": {
+    "TEST-194.11": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 41,
@@ -47614,7 +47726,7 @@
       "risk": 0,
       "lines": 12
     },
-    "TEST-193.12": {
+    "TEST-194.12": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 53,
@@ -47622,7 +47734,7 @@
       "risk": 0,
       "lines": 6
     },
-    "TEST-193.13": {
+    "TEST-194.13": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 60,
@@ -47630,7 +47742,7 @@
       "risk": 0,
       "lines": 11
     },
-    "TEST-193.14": {
+    "TEST-194.14": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 72,
@@ -47638,7 +47750,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.15": {
+    "TEST-194.15": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 77,
@@ -47646,7 +47758,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.16": {
+    "TEST-194.16": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 82,
@@ -47654,7 +47766,7 @@
       "risk": 0,
       "lines": 4
     },
-    "TEST-193.17": {
+    "TEST-194.17": {
       "path": "tests/tts_normalize_test.php",
       "area": "TEST",
       "line": 86,

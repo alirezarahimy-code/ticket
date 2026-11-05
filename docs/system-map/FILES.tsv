@@ -109,7 +109,7 @@ actions/access-group-actions.php	actions	181	8594
 actions/account-actions.php	actions	124	8453
 actions/asset-actions.php	actions	418	26557
 actions/backup-actions.php	actions	52	3848
-actions/bulk-actions.php	actions	133	10370
+actions/bulk-actions.php	actions	133	10394
 actions/cd-dvd-actions.php	actions	38	1762
 actions/food-brand-actions.php	actions	45	2747
 actions/holiday-actions.php	actions	145	9122
@@ -119,7 +119,7 @@ actions/role-actions.php	actions	140	8471
 actions/service-actions.php	actions	165	11691
 actions/settings-actions.php	actions	264	17150
 actions/supervisor-actions.php	actions	171	14875
-actions/ticket-actions.php	actions	659	56707
+actions/ticket-actions.php	actions	661	57167
 actions/user-structure-actions.php	actions	367	28857
 admin-layout-design.php	core	361	15733
 api/inventory.php	api	205	9604
@@ -360,7 +360,7 @@ inventory.php	core	833	43689
 lib/activity-audit.php	lib	599	34995
 lib/asset-identity.php	lib	3	163
 lib/auth-scope.php	lib	346	15935
-lib/db-core.php	lib	578	24276
+lib/db-core.php	lib	611	26637
 lib/ldap.php	lib	329	16564
 lib/log-catalog.php	lib	48	20811
 lib/logging-audit.php	lib	642	30184
@@ -622,6 +622,7 @@ tests/test_traffic_live_node.js	tests	40	4426
 tests/test_traffic_live_report_unit.php	tests	72	8243
 tests/test_traffic_phone_and_inspection_reminder_static.py	tests	54	3026
 tests/test_traffic_report_fields_node.js	tests	34	3562
+tests/test_transaction_truthfulness_static.py	tests	161	8784
 tests/test_triangle_effect_static.py	tests	101	4676
 tests/test_tts_normalize_static.py	tests	55	3543
 tests/test_user_access_groups_static.py	tests	89	5944

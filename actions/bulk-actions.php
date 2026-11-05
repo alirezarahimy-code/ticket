@@ -120,7 +120,7 @@ if (!defined('APP_ROOT')) {
                 }
                 $bulkChanged++;
             }
-            db_commit('index.php');
+            db_commit_or_fail('ticket:bulk_status_update');
             $bulkMessage = $bulkChanged . ' درخواست به‌روزرسانی شد.';
             if ($bulkAlready > 0) {
                 $bulkMessage .= ' ' . $bulkAlready . ' درخواست از قبل در همین وضعیت بود.';

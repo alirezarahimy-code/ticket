@@ -8,12 +8,12 @@
 
 | سنجه | مقدار |
 |---|---|
-| فایل‌های کد تولیدی | 507 |
-| خطوط | 119,201 |
-| آدرس‌ها (بلوک) | 6,347 |
+| فایل‌های کد تولیدی | 508 |
+| خطوط | 119,398 |
+| آدرس‌ها (بلوک) | 6,361 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,347 آدرس |
+| باقی‌مانده | 6,361 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -76,12 +76,12 @@
 | داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-034.74` <sub>index.php:1686</sub> | 6 |
 | داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-041.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1329</sub><br>`PAGE-041.16` <sub>permissions.php:350</sub> | 3 |
 | داشبورد و پایه | **استفاده از بات پاسخ‌گو** | `chatbot.use` | `PAGE-011.27` <sub>chatbot.php:700</sub><br>`PAGE-011.123` <sub>chatbot.php:3206</sub> | 5 |
-| درخواست | **ثبت درخواست جدید** | `ticket.create` | `ACT-015.04` <sub>actions/ticket-actions.php:209</sub><br>`ACT-015.03` <sub>actions/ticket-actions.php:30</sub><br>`PAGE-034.87` <sub>index.php:2177</sub> | 12 |
+| درخواست | **ثبت درخواست جدید** | `ticket.create` | `ACT-015.04` <sub>actions/ticket-actions.php:211</sub><br>`ACT-015.03` <sub>actions/ticket-actions.php:30</sub><br>`PAGE-034.87` <sub>index.php:2177</sub> | 12 |
 | درخواست | **مشاهدهٔ درخواست‌های خودم** | `ticket.view_own` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.17` <sub>lib/auth-scope.php:300</sub> | 7 |
 | درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.17` <sub>lib/auth-scope.php:300</sub> | 8 |
 | درخواست | **مشاهدهٔ همهٔ درخواست‌ها** | `ticket.view_all` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.17` <sub>lib/auth-scope.php:300</sub> | 5 |
-| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `ACT-015.07` <sub>actions/ticket-actions.php:360</sub><br>`PAGE-034.89` <sub>index.php:2320</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:395</sub> | 7 |
-| درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:517</sub><br>`PAGE-034.89` <sub>index.php:2320</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:395</sub> | 12 |
+| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `ACT-015.07` <sub>actions/ticket-actions.php:362</sub><br>`PAGE-034.89` <sub>index.php:2320</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:397</sub> | 7 |
+| درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:519</sub><br>`PAGE-034.89` <sub>index.php:2320</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:397</sub> | 12 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 6 |
 | درخواست | **ویرایش** | `ticket.bulk` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub> | 4 |
 | درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-034.89` <sub>index.php:2320</sub><br>`ACT-014.06` <sub>actions/supervisor-actions.php:131</sub> | 6 |
@@ -285,14 +285,14 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 193 | 1,335 | 16,929 |
+| `TEST` | TEST | 194 | 1,348 | 17,091 |
 | `TOOL` | TOOL | 82 | 645 | 15,840 |
 | `DB` | DB | 79 | 1,369 | 7,776 |
 | `PAGE` | صفحات (ریشه) | 49 | 1,348 | 43,399 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 762 | 13,879 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 431 | 9,002 |
-| `ACT` | کنش‌ها (actions/) | 16 | 117 | 3,792 |
-| `CORE` | موتور مشترک (lib/) | 15 | 298 | 6,938 |
+| `ACT` | کنش‌ها (actions/) | 16 | 117 | 3,794 |
+| `CORE` | موتور مشترک (lib/) | 15 | 299 | 6,971 |
 | `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,440 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
 
@@ -3155,90 +3155,111 @@
 </details>
 
 <details>
-<summary><b>TEST-189</b> — <code>tests/test_triangle_effect_static.py</code> (102 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-189</b> — <code>tests/test_transaction_truthfulness_static.py</code> (162 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-189.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-189.02` | 9–10 | بلوک | `TriangleEffectReleaseTests` | 0 | ⬜ |
-| `TEST-189.03` | 11–20 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-189.04` | 21–33 | بلوک | `test_catalog_has_37_valid_non_print_routes` | 0 | ⬜ |
-| `TEST-189.05` | 34–51 | بلوک | `test_configuration_keys_match_the_engine` | 0 | ⬜ |
-| `TEST-189.06` | 52–59 | بلوک | `test_settings_are_saved_with_existing_permission_a` | 0 | ⬜ |
-| `TEST-189.07` | 60–68 | بلوک | `test_engine_respects_reduced_motion_and_has_explic` | 0 | ⬜ |
-| `TEST-189.08` | 69–81 | بلوک | `test_interaction_controls_are_wired` | 1 | ⬜ |
-| `TEST-189.09` | 82–90 | بلوک | `test_help_and_chatbot_cover_the_feature` | 0 | ⬜ |
-| `TEST-189.10` | 91–102 | بلوک | `test_release_manifest_is_migration_free` | 0 | ⬜ |
+| `TEST-189.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-189.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
+| `TEST-189.03` | 36–46 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-189.04` | 47–53 | بلوک | `function_body` | 0 | ⬜ |
+| `TEST-189.05` | 54–59 | بلوک | `function_code` | 0 | ⬜ |
+| `TEST-189.06` | 60–80 | بلوک | `test_commit_returns_true_when_the_work_is_already_` | 0 | ⬜ |
+| `TEST-189.07` | 81–87 | بلوک | `test_commit_still_reports_a_genuine_failure_as_fal` | 0 | ⬜ |
+| `TEST-189.08` | 88–109 | بلوک | `test_a_strict_commit_helper_exists_and_raises_a_pe` | 0 | ⬜ |
+| `TEST-189.09` | 110–118 | بلوک | `test_every_ticket_write_path_uses_the_strict_commi` | 0 | ⬜ |
+| `TEST-189.10` | 119–131 | بلوک | `test_strict_commit_calls_name_the_action_for_diagn` | 0 | ⬜ |
+| `TEST-189.11` | 132–141 | بلوک | `test_other_modules_keep_their_existing_commit_cont` | 0 | ⬜ |
+| `TEST-189.12` | 142–156 | بلوک | `test_auto_assignment_does_not_invent_a_state_the_t` | 0 | ⬜ |
+| `TEST-189.13` | 157–162 | بلوک | `test_creation_event_records_the_real_initial_statu` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-190</b> — <code>tests/test_tts_normalize_static.py</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-190</b> — <code>tests/test_triangle_effect_static.py</code> (102 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-190.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-190.02` | 13–56 | بلوک | `check` | 0 | ⬜ |
+| `TEST-190.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-190.02` | 9–10 | بلوک | `TriangleEffectReleaseTests` | 0 | ⬜ |
+| `TEST-190.03` | 11–20 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-190.04` | 21–33 | بلوک | `test_catalog_has_37_valid_non_print_routes` | 0 | ⬜ |
+| `TEST-190.05` | 34–51 | بلوک | `test_configuration_keys_match_the_engine` | 0 | ⬜ |
+| `TEST-190.06` | 52–59 | بلوک | `test_settings_are_saved_with_existing_permission_a` | 0 | ⬜ |
+| `TEST-190.07` | 60–68 | بلوک | `test_engine_respects_reduced_motion_and_has_explic` | 0 | ⬜ |
+| `TEST-190.08` | 69–81 | بلوک | `test_interaction_controls_are_wired` | 1 | ⬜ |
+| `TEST-190.09` | 82–90 | بلوک | `test_help_and_chatbot_cover_the_feature` | 0 | ⬜ |
+| `TEST-190.10` | 91–102 | بلوک | `test_release_manifest_is_migration_free` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-191</b> — <code>tests/test_user_access_groups_static.py</code> (90 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-191</b> — <code>tests/test_tts_normalize_static.py</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-191.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-191.02` | 7–8 | بلوک | `UserAccessGroupStaticTests` | 0 | ⬜ |
-| `TEST-191.03` | 9–16 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-191.04` | 17–30 | بلوک | `test_group_permissions_are_additive_and_primary_ad` | 0 | ⬜ |
-| `TEST-191.05` | 31–42 | بلوک | `test_schema_supports_many_groups_per_user_and_casc` | 1 | ⬜ |
-| `TEST-191.06` | 43–59 | بلوک | `test_create_update_and_delete_are_primary_admin_on` | 0 | ⬜ |
-| `TEST-191.07` | 60–80 | بلوک | `test_settings_ui_reuses_permission_catalog_and_mem` | 0 | ⬜ |
-| `TEST-191.08` | 81–90 | بلوک | `test_special_role_constraints_and_documentation_ar` | 0 | ⬜ |
+| `TEST-191.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-191.02` | 13–56 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-192</b> — <code>tests/test_version_source_of_truth_static.py</code> (208 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-192</b> — <code>tests/test_user_access_groups_static.py</code> (90 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-192.01` | 1–48 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-192.02` | 49–53 | بلوک | `version_tuple` | 0 | ⬜ |
-| `TEST-192.03` | 54–57 | بلوک | `repo_version` | 0 | ⬜ |
-| `TEST-192.04` | 58–90 | بلوک | `scan_packages` | 0 | ⬜ |
-| `TEST-192.05` | 91–105 | بلوک | `resolve_repo_path` | 0 | ⬜ |
-| `TEST-192.06` | 106–110 | بلوک | `newest_package_for` | 0 | ⬜ |
-| `TEST-192.07` | 111–111 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
-| `TEST-192.08` | 112–126 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
-| `TEST-192.09` | 127–164 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
-| `TEST-192.10` | 165–193 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
-| `TEST-192.11` | 194–208 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
+| `TEST-192.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-192.02` | 7–8 | بلوک | `UserAccessGroupStaticTests` | 0 | ⬜ |
+| `TEST-192.03` | 9–16 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-192.04` | 17–30 | بلوک | `test_group_permissions_are_additive_and_primary_ad` | 0 | ⬜ |
+| `TEST-192.05` | 31–42 | بلوک | `test_schema_supports_many_groups_per_user_and_casc` | 1 | ⬜ |
+| `TEST-192.06` | 43–59 | بلوک | `test_create_update_and_delete_are_primary_admin_on` | 0 | ⬜ |
+| `TEST-192.07` | 60–80 | بلوک | `test_settings_ui_reuses_permission_catalog_and_mem` | 0 | ⬜ |
+| `TEST-192.08` | 81–90 | بلوک | `test_special_role_constraints_and_documentation_ar` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-193</b> — <code>tests/tts_normalize_test.php</code> (189 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-193</b> — <code>tests/test_version_source_of_truth_static.py</code> (208 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-193.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `TEST-193.02` | 14–17 | تابع | `setting` | 0 | ⬜ |
-| `TEST-193.03` | 18–19 | ناحیه | `بلوک رویه‌ای 18-19` | 0 | ⬜ |
-| `TEST-193.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
-| `TEST-193.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
-| `TEST-193.06` | 26–28 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-193.07` | 29–30 | ناحیه | `بلوک رویه‌ای 29-30` | 0 | ⬜ |
-| `TEST-193.08` | 31–34 | تابع | `e` | 0 | ⬜ |
-| `TEST-193.09` | 35–36 | ناحیه | `بلوک رویه‌ای 35-36` | 0 | ⬜ |
-| `TEST-193.10` | 37–40 | تابع | `csrf_field` | 0 | ⬜ |
-| `TEST-193.11` | 41–52 | ناحیه | `بلوک رویه‌ای 41-52` | 0 | ⬜ |
-| `TEST-193.12` | 53–58 | تابع | `tts_bare` | 0 | ⬜ |
-| `TEST-193.13` | 60–70 | تابع | `expect_true` | 0 | ⬜ |
-| `TEST-193.14` | 72–75 | تابع | `expect_eq` | 0 | ⬜ |
-| `TEST-193.15` | 77–80 | تابع | `expect_contains` | 0 | ⬜ |
-| `TEST-193.16` | 82–85 | تابع | `expect_not_contains` | 0 | ⬜ |
-| `TEST-193.17` | 86–189 | ناحیه | `بلوک رویه‌ای 86-189` | 0 | ⬜ |
+| `TEST-193.01` | 1–48 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-193.02` | 49–53 | بلوک | `version_tuple` | 0 | ⬜ |
+| `TEST-193.03` | 54–57 | بلوک | `repo_version` | 0 | ⬜ |
+| `TEST-193.04` | 58–90 | بلوک | `scan_packages` | 0 | ⬜ |
+| `TEST-193.05` | 91–105 | بلوک | `resolve_repo_path` | 0 | ⬜ |
+| `TEST-193.06` | 106–110 | بلوک | `newest_package_for` | 0 | ⬜ |
+| `TEST-193.07` | 111–111 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
+| `TEST-193.08` | 112–126 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
+| `TEST-193.09` | 127–164 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
+| `TEST-193.10` | 165–193 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
+| `TEST-193.11` | 194–208 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TEST-194</b> — <code>tests/tts_normalize_test.php</code> (189 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TEST-194.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `TEST-194.02` | 14–17 | تابع | `setting` | 0 | ⬜ |
+| `TEST-194.03` | 18–19 | ناحیه | `بلوک رویه‌ای 18-19` | 0 | ⬜ |
+| `TEST-194.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
+| `TEST-194.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
+| `TEST-194.06` | 26–28 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-194.07` | 29–30 | ناحیه | `بلوک رویه‌ای 29-30` | 0 | ⬜ |
+| `TEST-194.08` | 31–34 | تابع | `e` | 0 | ⬜ |
+| `TEST-194.09` | 35–36 | ناحیه | `بلوک رویه‌ای 35-36` | 0 | ⬜ |
+| `TEST-194.10` | 37–40 | تابع | `csrf_field` | 0 | ⬜ |
+| `TEST-194.11` | 41–52 | ناحیه | `بلوک رویه‌ای 41-52` | 0 | ⬜ |
+| `TEST-194.12` | 53–58 | تابع | `tts_bare` | 0 | ⬜ |
+| `TEST-194.13` | 60–70 | تابع | `expect_true` | 0 | ⬜ |
+| `TEST-194.14` | 72–75 | تابع | `expect_eq` | 0 | ⬜ |
+| `TEST-194.15` | 77–80 | تابع | `expect_contains` | 0 | ⬜ |
+| `TEST-194.16` | 82–85 | تابع | `expect_not_contains` | 0 | ⬜ |
+| `TEST-194.17` | 86–189 | ناحیه | `بلوک رویه‌ای 86-189` | 0 | ⬜ |
 
 </details>
 
@@ -10172,19 +10193,19 @@
 </details>
 
 <details>
-<summary><b>ACT-015</b> — <code>actions/ticket-actions.php</code> (660 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>ACT-015</b> — <code>actions/ticket-actions.php</code> (662 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `ACT-015.01` | 1–22 | ناحیه | `بلوک رویه‌ای 1-22` | 0 | ⬜ |
 | `ACT-015.02` | 23–29 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `ACT-015.03` | 30–208 | ناحیه | `مسیر: create_ticket` | 3 | ⬜ |
-| `ACT-015.04` | 209–257 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
-| `ACT-015.05` | 258–322 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
-| `ACT-015.06` | 323–359 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
-| `ACT-015.07` | 360–394 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
-| `ACT-015.08` | 395–516 | ناحیه | `مسیر: reply` | **8** | ⬜ |
-| `ACT-015.09` | 517–660 | ناحیه | `مسیر: update_ticket` | **8** | ⬜ |
+| `ACT-015.03` | 30–210 | ناحیه | `مسیر: create_ticket` | 3 | ⬜ |
+| `ACT-015.04` | 211–259 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
+| `ACT-015.05` | 260–324 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
+| `ACT-015.06` | 325–361 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
+| `ACT-015.07` | 362–396 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
+| `ACT-015.08` | 397–518 | ناحیه | `مسیر: reply` | **8** | ⬜ |
+| `ACT-015.09` | 519–662 | ناحیه | `مسیر: update_ticket` | **8** | ⬜ |
 
 </details>
 
@@ -10270,7 +10291,7 @@
 </details>
 
 <details>
-<summary><b>CORE-004</b> — <code>lib/db-core.php</code> (579 خط، 35 آدرس، بازبینی‌شده 0/35)</summary>
+<summary><b>CORE-004</b> — <code>lib/db-core.php</code> (612 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -10307,8 +10328,9 @@
 | `CORE-004.31` | 483–488 | تابع | `db_install_fresh_tables` | 0 | ⬜ |
 | `CORE-004.32` | 490–527 | تابع | `db_install_state` | 5 | ⬜ |
 | `CORE-004.33` | 529–544 | تابع | `db_in_transaction` | 0 | ⬜ |
-| `CORE-004.34` | 546–562 | تابع | `db_commit` | 0 | ⬜ |
-| `CORE-004.35` | 564–577 | تابع | `db_rollback` | 0 | ⬜ |
+| `CORE-004.34` | 546–576 | تابع | `db_commit` | 0 | ⬜ |
+| `CORE-004.35` | 578–595 | تابع | `db_commit_or_fail` | 0 | ⬜ |
+| `CORE-004.36` | 597–610 | تابع | `db_rollback` | 0 | ⬜ |
 
 </details>
 

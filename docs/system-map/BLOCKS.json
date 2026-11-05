@@ -435,7 +435,7 @@
             "path": "actions\/bulk-actions.php",
             "area": "ACT",
             "lines": 134,
-            "file_fingerprint": "24a0fef327e1",
+            "file_fingerprint": "f0c0fc6e6c73",
             "blocks": [
                 {
                     "kind": "region",
@@ -486,7 +486,7 @@
                     "line_start": 44,
                     "line_end": 134,
                     "lines": 91,
-                    "fingerprint": "16d412b6eed4",
+                    "fingerprint": "f25f337f8c3d",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -1597,8 +1597,8 @@
             "id": "ACT-015",
             "path": "actions\/ticket-actions.php",
             "area": "ACT",
-            "lines": 660,
-            "file_fingerprint": "6c310d0b752b",
+            "lines": 662,
+            "file_fingerprint": "1dfe95dbc437",
             "blocks": [
                 {
                     "kind": "region",
@@ -1630,9 +1630,9 @@
                     "kind": "region",
                     "anchor": "مسیر: create_ticket",
                     "line_start": 30,
-                    "line_end": 208,
-                    "lines": 179,
-                    "fingerprint": "280582a31f84",
+                    "line_end": 210,
+                    "lines": 181,
+                    "fingerprint": "505deded2e09",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -1645,10 +1645,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cancel_ticket",
-                    "line_start": 209,
-                    "line_end": 257,
+                    "line_start": 211,
+                    "line_end": 259,
                     "lines": 49,
-                    "fingerprint": "aa3969434d35",
+                    "fingerprint": "298b166abfbc",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -1661,10 +1661,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: decide_ticket_cancellation",
-                    "line_start": 258,
-                    "line_end": 322,
+                    "line_start": 260,
+                    "line_end": 324,
                     "lines": 65,
-                    "fingerprint": "d66f94e641e4",
+                    "fingerprint": "2403ecb4dbfe",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -1676,10 +1676,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: claim_ticket",
-                    "line_start": 323,
-                    "line_end": 359,
+                    "line_start": 325,
+                    "line_end": 361,
                     "lines": 37,
-                    "fingerprint": "3e54300514e1",
+                    "fingerprint": "11e829031794",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -1691,10 +1691,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: reopen_ticket",
-                    "line_start": 360,
-                    "line_end": 394,
+                    "line_start": 362,
+                    "line_end": 396,
                     "lines": 35,
-                    "fingerprint": "96db81853ad2",
+                    "fingerprint": "dc56c7097721",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -1707,10 +1707,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: reply",
-                    "line_start": 395,
-                    "line_end": 516,
+                    "line_start": 397,
+                    "line_end": 518,
                     "lines": 122,
-                    "fingerprint": "cce2cf4093f6",
+                    "fingerprint": "c4735b041340",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -1724,10 +1724,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
-                    "line_start": 517,
-                    "line_end": 660,
+                    "line_start": 519,
+                    "line_end": 662,
                     "lines": 144,
-                    "fingerprint": "b4d608cb0924",
+                    "fingerprint": "be68156063a2",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -36311,8 +36311,8 @@
             "id": "CORE-004",
             "path": "lib\/db-core.php",
             "area": "CORE",
-            "lines": 579,
-            "file_fingerprint": "a5b98af69df5",
+            "lines": 612,
+            "file_fingerprint": "20fcdc0ac342",
             "blocks": [
                 {
                     "kind": "region",
@@ -36775,9 +36775,9 @@
                     "kind": "function",
                     "anchor": "db_commit",
                     "line_start": 546,
-                    "line_end": 562,
-                    "lines": 17,
-                    "fingerprint": "e283e07e8b5d",
+                    "line_end": 576,
+                    "lines": 31,
+                    "fingerprint": "2601194b4ca9",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -36786,16 +36786,29 @@
                 },
                 {
                     "kind": "function",
+                    "anchor": "db_commit_or_fail",
+                    "line_start": 578,
+                    "line_end": 595,
+                    "lines": 18,
+                    "fingerprint": "c9a26dcc6300",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-004.35"
+                },
+                {
+                    "kind": "function",
                     "anchor": "db_rollback",
-                    "line_start": 564,
-                    "line_end": 577,
+                    "line_start": 597,
+                    "line_end": 610,
                     "lines": 14,
                     "fingerprint": "0c1b04c580c7",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-004.35"
+                    "id": "CORE-004.36"
                 }
             ]
         },
@@ -74720,6 +74733,184 @@
         },
         {
             "id": "TEST-189",
+            "path": "tests\/test_transaction_truthfulness_static.py",
+            "area": "TEST",
+            "lines": 162,
+            "file_fingerprint": "2e885a2f50a1",
+            "blocks": [
+                {
+                    "kind": "block",
+                    "anchor": "مقدمهٔ فایل",
+                    "line_start": 1,
+                    "line_end": 30,
+                    "lines": 30,
+                    "fingerprint": "5875b3bf07bc",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.01"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "read",
+                    "line_start": 31,
+                    "line_end": 35,
+                    "lines": 5,
+                    "fingerprint": "9aecf07a517e",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.02"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "strip_php_comments",
+                    "line_start": 36,
+                    "line_end": 46,
+                    "lines": 11,
+                    "fingerprint": "13483f000f8b",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.03"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "function_body",
+                    "line_start": 47,
+                    "line_end": 53,
+                    "lines": 7,
+                    "fingerprint": "a00327197600",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.04"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "function_code",
+                    "line_start": 54,
+                    "line_end": 59,
+                    "lines": 6,
+                    "fingerprint": "56b0f03adab9",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.05"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_commit_returns_true_when_the_work_is_already_persisted",
+                    "line_start": 60,
+                    "line_end": 80,
+                    "lines": 21,
+                    "fingerprint": "4686775f6d8d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.06"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_commit_still_reports_a_genuine_failure_as_false",
+                    "line_start": 81,
+                    "line_end": 87,
+                    "lines": 7,
+                    "fingerprint": "b94469be2b95",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.07"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_a_strict_commit_helper_exists_and_raises_a_persian_error",
+                    "line_start": 88,
+                    "line_end": 109,
+                    "lines": 22,
+                    "fingerprint": "e50e0dfacdc1",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.08"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_every_ticket_write_path_uses_the_strict_commit",
+                    "line_start": 110,
+                    "line_end": 118,
+                    "lines": 9,
+                    "fingerprint": "c8b510d62980",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.09"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_strict_commit_calls_name_the_action_for_diagnosis",
+                    "line_start": 119,
+                    "line_end": 131,
+                    "lines": 13,
+                    "fingerprint": "07982436fa00",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.10"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_other_modules_keep_their_existing_commit_contract",
+                    "line_start": 132,
+                    "line_end": 141,
+                    "lines": 10,
+                    "fingerprint": "f0581f6a6905",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.11"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_auto_assignment_does_not_invent_a_state_the_ticket_never_had",
+                    "line_start": 142,
+                    "line_end": 156,
+                    "lines": 15,
+                    "fingerprint": "81f30e09fcb5",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.12"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_creation_event_records_the_real_initial_status",
+                    "line_start": 157,
+                    "line_end": 162,
+                    "lines": 6,
+                    "fingerprint": "783a1d99c0a2",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-189.13"
+                }
+            ]
+        },
+        {
+            "id": "TEST-190",
             "path": "tests\/test_triangle_effect_static.py",
             "area": "TEST",
             "lines": 102,
@@ -74736,7 +74927,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.01"
+                    "id": "TEST-190.01"
                 },
                 {
                     "kind": "block",
@@ -74749,7 +74940,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.02"
+                    "id": "TEST-190.02"
                 },
                 {
                     "kind": "block",
@@ -74762,7 +74953,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.03"
+                    "id": "TEST-190.03"
                 },
                 {
                     "kind": "block",
@@ -74775,7 +74966,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.04"
+                    "id": "TEST-190.04"
                 },
                 {
                     "kind": "block",
@@ -74788,7 +74979,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.05"
+                    "id": "TEST-190.05"
                 },
                 {
                     "kind": "block",
@@ -74801,7 +74992,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.06"
+                    "id": "TEST-190.06"
                 },
                 {
                     "kind": "block",
@@ -74814,7 +75005,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.07"
+                    "id": "TEST-190.07"
                 },
                 {
                     "kind": "block",
@@ -74829,7 +75020,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-189.08"
+                    "id": "TEST-190.08"
                 },
                 {
                     "kind": "block",
@@ -74842,7 +75033,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.09"
+                    "id": "TEST-190.09"
                 },
                 {
                     "kind": "block",
@@ -74855,12 +75046,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-189.10"
+                    "id": "TEST-190.10"
                 }
             ]
         },
         {
-            "id": "TEST-190",
+            "id": "TEST-191",
             "path": "tests\/test_tts_normalize_static.py",
             "area": "TEST",
             "lines": 56,
@@ -74877,7 +75068,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.01"
+                    "id": "TEST-191.01"
                 },
                 {
                     "kind": "block",
@@ -74890,12 +75081,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-190.02"
+                    "id": "TEST-191.02"
                 }
             ]
         },
         {
-            "id": "TEST-191",
+            "id": "TEST-192",
             "path": "tests\/test_user_access_groups_static.py",
             "area": "TEST",
             "lines": 90,
@@ -74912,7 +75103,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.01"
+                    "id": "TEST-192.01"
                 },
                 {
                     "kind": "block",
@@ -74925,7 +75116,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.02"
+                    "id": "TEST-192.02"
                 },
                 {
                     "kind": "block",
@@ -74938,7 +75129,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.03"
+                    "id": "TEST-192.03"
                 },
                 {
                     "kind": "block",
@@ -74951,7 +75142,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.04"
+                    "id": "TEST-192.04"
                 },
                 {
                     "kind": "block",
@@ -74966,7 +75157,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-191.05"
+                    "id": "TEST-192.05"
                 },
                 {
                     "kind": "block",
@@ -74979,7 +75170,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.06"
+                    "id": "TEST-192.06"
                 },
                 {
                     "kind": "block",
@@ -74992,7 +75183,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.07"
+                    "id": "TEST-192.07"
                 },
                 {
                     "kind": "block",
@@ -75005,12 +75196,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-191.08"
+                    "id": "TEST-192.08"
                 }
             ]
         },
         {
-            "id": "TEST-192",
+            "id": "TEST-193",
             "path": "tests\/test_version_source_of_truth_static.py",
             "area": "TEST",
             "lines": 208,
@@ -75029,7 +75220,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TEST-192.01"
+                    "id": "TEST-193.01"
                 },
                 {
                     "kind": "block",
@@ -75042,7 +75233,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.02"
+                    "id": "TEST-193.02"
                 },
                 {
                     "kind": "block",
@@ -75055,7 +75246,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.03"
+                    "id": "TEST-193.03"
                 },
                 {
                     "kind": "block",
@@ -75068,7 +75259,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.04"
+                    "id": "TEST-193.04"
                 },
                 {
                     "kind": "block",
@@ -75081,7 +75272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.05"
+                    "id": "TEST-193.05"
                 },
                 {
                     "kind": "block",
@@ -75094,7 +75285,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.06"
+                    "id": "TEST-193.06"
                 },
                 {
                     "kind": "block",
@@ -75107,7 +75298,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.07"
+                    "id": "TEST-193.07"
                 },
                 {
                     "kind": "block",
@@ -75120,7 +75311,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.08"
+                    "id": "TEST-193.08"
                 },
                 {
                     "kind": "block",
@@ -75133,7 +75324,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.09"
+                    "id": "TEST-193.09"
                 },
                 {
                     "kind": "block",
@@ -75146,7 +75337,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.10"
+                    "id": "TEST-193.10"
                 },
                 {
                     "kind": "block",
@@ -75159,12 +75350,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-192.11"
+                    "id": "TEST-193.11"
                 }
             ]
         },
         {
-            "id": "TEST-193",
+            "id": "TEST-194",
             "path": "tests\/tts_normalize_test.php",
             "area": "TEST",
             "lines": 189,
@@ -75181,7 +75372,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.01"
+                    "id": "TEST-194.01"
                 },
                 {
                     "kind": "function",
@@ -75194,7 +75385,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.02"
+                    "id": "TEST-194.02"
                 },
                 {
                     "kind": "region",
@@ -75207,7 +75398,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.03"
+                    "id": "TEST-194.03"
                 },
                 {
                     "kind": "function",
@@ -75220,7 +75411,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.04"
+                    "id": "TEST-194.04"
                 },
                 {
                     "kind": "region",
@@ -75233,7 +75424,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.05"
+                    "id": "TEST-194.05"
                 },
                 {
                     "kind": "function",
@@ -75246,7 +75437,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.06"
+                    "id": "TEST-194.06"
                 },
                 {
                     "kind": "region",
@@ -75259,7 +75450,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.07"
+                    "id": "TEST-194.07"
                 },
                 {
                     "kind": "function",
@@ -75272,7 +75463,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.08"
+                    "id": "TEST-194.08"
                 },
                 {
                     "kind": "region",
@@ -75285,7 +75476,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.09"
+                    "id": "TEST-194.09"
                 },
                 {
                     "kind": "function",
@@ -75298,7 +75489,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.10"
+                    "id": "TEST-194.10"
                 },
                 {
                     "kind": "region",
@@ -75311,7 +75502,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.11"
+                    "id": "TEST-194.11"
                 },
                 {
                     "kind": "function",
@@ -75324,7 +75515,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.12"
+                    "id": "TEST-194.12"
                 },
                 {
                     "kind": "function",
@@ -75337,7 +75528,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.13"
+                    "id": "TEST-194.13"
                 },
                 {
                     "kind": "function",
@@ -75350,7 +75541,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.14"
+                    "id": "TEST-194.14"
                 },
                 {
                     "kind": "function",
@@ -75363,7 +75554,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.15"
+                    "id": "TEST-194.15"
                 },
                 {
                     "kind": "function",
@@ -75376,7 +75567,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.16"
+                    "id": "TEST-194.16"
                 },
                 {
                     "kind": "region",
@@ -75389,7 +75580,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-193.17"
+                    "id": "TEST-194.17"
                 }
             ]
         },
