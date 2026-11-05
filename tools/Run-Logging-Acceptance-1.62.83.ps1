@@ -32,6 +32,8 @@ $releaseFiles = @(
     'lib/logging-core.php',
     'lib/logging-audit.php',
     'lib/notify-users.php',
+    'migrations/026-logging-legacy-result-unknown.sql',
+    'migrations/032-schema-updates-baseline.sql',
     'migrations/033-logging-legacy-context-collation.sql',
     'tools/verify_logging_acl.ps1',
     'tools/set_logging_acl.ps1',
