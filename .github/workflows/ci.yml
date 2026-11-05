@@ -64,6 +64,9 @@ jobs:
     - name: Run Logging migration registry regression test
       run: php tests/test_logging_audit_migration_registry.php
 
+    - name: Run backup upload restore archive security tests
+      run: php tests/test_backup_restore_archive.php
+
     - name: Run system update archive path safety tests
       run: php tests/test_system_update_archive_paths.php
 
