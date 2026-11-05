@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ساخت docs/CODE-MAP-FA.md از docs/code-index.json.
+"""ساخت docs/system-map/REVIEW-MAP-FA.md از docs/system-map/BLOCKS.json.
 
 نقشهٔ خوانا عمداً «تولیدشده» است نه دست‌نویس: نقشهٔ دست‌نویس ظرف چند
 هفته از کد عقب می‌افتد و اعتماد کاذب می‌سازد.
@@ -9,8 +9,10 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-idx = json.loads((ROOT / "docs/code-index.json").read_text(encoding="utf-8"))
-ledger = json.loads((ROOT / "docs/code-audit-ledger.json").read_text(encoding="utf-8"))
+idx = json.loads((ROOT / "docs/system-map/BLOCKS.json").read_text(encoding="utf-8"))
+ledger = json.loads((ROOT / "docs/system-map/REVIEW-LEDGER.json").read_text(encoding="utf-8"))
+topics = json.loads((ROOT / "docs/system-map/TOPICS.json").read_text(encoding="utf-8"))
+TMETA = topics["address_meta"]
 reviewed = ledger.get("reviewed", {})
 
 AREA_FA = {
@@ -36,7 +38,7 @@ out = []
 w = out.append
 w("# نقشهٔ کد سامانه — فهرست آدرس‌دهی\n")
 w("> این فایل **تولید می‌شود**. دستی ویرایشش نکنید.\n>")
-w("> بازتولید: `php tools/code_index.php > docs/code-index.json`"
+w("> بازتولید: `php tools/code_index.php > docs/system-map/BLOCKS.json`"
   " سپس `python tools/render_code_map.py`\n")
 w("## وضعیت بازبینی\n")
 w("| سنجه | مقدار |")
@@ -44,8 +46,45 @@ w("|---|---|")
 w(f"| فایل‌های کد تولیدی | {len(idx['files'])} |")
 w(f"| خطوط | {total_lines:,} |")
 w(f"| آدرس‌ها (بلوک) | {len(blocks):,} |")
+w(f"| موضوع‌های قابل جست‌وجو | {len(topics['pages'])} صفحه + {len(topics['permissions'])} مجوز + {len(topics['tables'])} جدول |")
 w(f"| بازبینی‌شده | {done:,} آدرس ({done/len(blocks)*100:.1f}%) — {done_lines:,} خط ({done_lines/total_lines*100:.1f}%) |")
 w(f"| باقی‌مانده | {len(blocks)-done:,} آدرس |\n")
+
+# ── فهرست موضوعی: نقطهٔ ورود اصلی ──────────────────────────────────────
+w("## 🔎 فهرست موضوعی — از اینجا شروع کنید\n")
+w("دنبال بخشی از برنامه می‌گردید؟ **اینجا `Ctrl+F` بزنید**، نه در کد."
+  " نام فارسی بخش را بنویسید و مستقیم به آدرسش بروید.\n")
+
+def addr_cell(ids, n=4):
+    out = []
+    for i in ids[:n]:
+        m = TMETA[i]
+        out.append(f"`{i}` <sub>{m['path']}:{m['line']}</sub>")
+    return "<br>".join(out) if out else "—"
+
+w("### صفحه‌های سامانه\n")
+w("| بخش | نام فنی | مجوز لازم | آدرس‌های اصلی | کل |")
+w("|---|---|---|---|---|")
+for t in topics["pages"]:
+    perm = f"`{t['permission']}`" if t.get("permission") else "—"
+    w(f"| **{t['fa']}** | `{t['key']}` | {perm} | {addr_cell(t['primary'])} | {t['total']} |")
+w("")
+
+w("### مجوزها و دسترسی‌ها\n")
+w("<details>\n<summary>۱۰۱ مجوز — باز کنید</summary>\n")
+w("| گروه | مجوز | کد | آدرس‌های اصلی | کل |")
+w("|---|---|---|---|---|")
+for t in topics["permissions"]:
+    w(f"| {t.get('group','')} | **{t['fa']}** | `{t['key']}` | {addr_cell(t['primary'], 3)} | {t['total']} |")
+w("\n</details>\n")
+
+w("### جدول‌های پایگاه داده\n")
+w("<details>\n<summary>۸۴ جدول — باز کنید</summary>\n")
+w("| جدول | آدرس‌های اصلی | کل |")
+w("|---|---|---|")
+for t in topics["tables"]:
+    w(f"| `{t['key']}` | {addr_cell(t['primary'], 3)} | {t['total']} |")
+w("\n</details>\n")
 
 w("## چطور از این فهرست استفاده کنم؟\n")
 w("هر آدرس شکل `ناحیه-شمارهٔ‌فایل.شمارهٔ‌بلوک` دارد؛ مثلاً `CORE-008.14`.\n")
@@ -109,5 +148,5 @@ for area, _ in ac.most_common():
         w("\n</details>")
 w("")
 
-(ROOT / "docs/CODE-MAP-FA.md").write_text("\n".join(out) + "\n", encoding="utf-8")
-print(f"نوشته شد: docs/CODE-MAP-FA.md ({len(out)} خط)")
+(ROOT / "docs/system-map/REVIEW-MAP-FA.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+print(f"نوشته شد: docs/system-map/REVIEW-MAP-FA.md ({len(out)} خط)")

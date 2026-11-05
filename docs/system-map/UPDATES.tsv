@@ -113,3 +113,7 @@ package	version	requires_version	files	migrations	date
 2026-10-31-release-162-59-cumulative-post59	1.62.59	1.62.58	21	0	2026-10-31
 2026-10-31-release-162-59-cumulative-visual-fix	1.62.59	1.62.58	21	0	2026-10-31
 2026-11-01-ticket-workflow-safety	1.62.60	1.62.58	27	0	2026-11-01
+2026-11-03-food-report-traffic-1.62.72	1.62.72	1.62.58	59	1	2026-11-03
+2026-11-04-food-dashboard-cleanup-1.62.73-r2	1.62.73	1.62.58	63	2	2026-11-04
+2026-11-04-food-meal-reconciliation-1.62.74	1.62.74	1.62.73	66	1	2026-11-04
+2026-11-04-user-access-groups-1.62.75	1.62.75	1.62.74	73	1	2026-11-04

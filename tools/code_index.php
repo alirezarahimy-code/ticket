@@ -1,6 +1,6 @@
 <?php
 /**
- * استخراج‌کنندهٔ نقشهٔ کد — سازندهٔ docs/code-index.json
+ * استخراج‌کنندهٔ نقشهٔ کد — سازندهٔ docs/system-map/BLOCKS.json
  *
  * چرا با token_get_all و نه regex؟ چون regex روی PHP واقعی می‌شکند:
  * آکولاد داخل رشته، heredoc، کامنت، و `}` داخل درون‌یابی رشته همگی
@@ -14,12 +14,15 @@
  * می‌شود و تست نگهبان، کهنه بودن فهرست را می‌گیرد. این همان قانونی است
  * که خواسته شده: جابه‌جایی یا تغییر محتوا ⇒ آدرس باید به‌روز شود.
  *
- * اجرا:  php tools/code_index.php > docs/code-index.json
+ * اجرا:  php tools/code_index.php > docs/system-map/BLOCKS.json
  */
 
 declare(strict_types=1);
 
 const AREA_MAP = [
+    'migrations/'      => 'DB',
+    'tests/'           => 'TEST',
+    'tools/'           => 'TOOL',
     'lib/'             => 'CORE',
     'actions/'         => 'ACT',
     'cron/'            => 'CRON',
@@ -28,6 +31,25 @@ const AREA_MAP = [
     'food-ticket-web/' => 'WEB',
 ];
 
+/**
+ * طول و برش امن روی UTF-8 بدون وابستگی به mbstring.
+ * ابزار باید هم روی سرور (با mbstring) و هم در محیط تحلیل (بدون آن)
+ * یکسان کار کند، وگرنه نقشه در دو جا دو جور ساخته می‌شود.
+ */
+function ci_strlen(string $s): int
+{
+    return function_exists('mb_strlen') ? mb_strlen($s, 'UTF-8') : (int) preg_match_all('/./us', $s);
+}
+
+function ci_substr(string $s, int $start, int $len): string
+{
+    if (function_exists('mb_substr')) {
+        return mb_substr($s, $start, $len, 'UTF-8');
+    }
+    preg_match_all('/./us', $s, $m);
+    return implode('', array_slice($m[0], $start, $len));
+}
+
 /** ناحیهٔ یک فایل از روی مسیرش. فایل‌های ریشه صفحه‌اند. */
 function ci_area(string $path): string
 {
@@ -35,6 +57,9 @@ function ci_area(string $path): string
         if (str_starts_with($path, $prefix)) {
             return $area;
         }
+    }
+    if (str_ends_with($path, '.sql')) {
+        return 'DB';
     }
     return 'PAGE';
 }
@@ -73,6 +98,15 @@ function ci_anchor_label(string $line): ?string
     }
     if (preg_match("~^case\s+'([^']+)'~u", $t, $m)) {
         return 'case: ' . $m[1];
+    }
+    // کامنت سطح بالا (ستون صفر) تقریباً همیشه سرفصل یک مرحله از کار است.
+    // بدون این، فایل‌های رویه‌ای مثل cron/ یک بلوک غول‌پیکر می‌شوند و
+    // آدرس‌دهی هدف خودش را از دست می‌دهد.
+    if ($line !== '' && $line[0] === '/' && preg_match('~^//+\s*(.+?)\s*$~u', $t, $m)) {
+        $label = trim((string) preg_replace('~[\x{2500}-\x{257F}\-=_]{2,}~u', '', $m[1]));
+        if ($label !== '' && ci_strlen($label) >= 3) {
+            return ci_substr($label, 0, 60);
+        }
     }
     return null;
 }
@@ -224,8 +258,13 @@ function ci_extract_php(string $path, string $src): array
     // هیچ بلوکی نمی‌افتد و بی‌صدا از نقشه حذف می‌شود.
     $prevEnd = 0;
     foreach ($symbols as $k => $s) {
-        $absorbed = ci_absorb_docblock($lines, $s['line_start']);
-        $symbols[$k]['line_start'] = max($absorbed, $prevEnd + 1);
+        $start = ci_absorb_docblock($lines, $s['line_start']);
+        if ($s['kind'] !== 'method' && $prevEnd > 0) {
+            $start = max($start, $prevEnd + 1);
+        }
+        // فایل‌های fixture گاهی چند تابع را روی یک خط می‌گذارند؛ بدون این
+        // مهار، شروع از پایان جلو می‌زند و محدودهٔ معکوس تولید می‌شود.
+        $symbols[$k]['line_start'] = min($start, $s['line_end']);
         if ($s['kind'] !== 'method') {
             $prevEnd = max($prevEnd, $s['line_end']);
         }
@@ -338,34 +377,21 @@ function ci_extract_plain(string $path, string $src): array
             || preg_match('~^(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:function|\()~', $t, $m)
             || preg_match('~^([A-Za-z_$][\w$]*)\s*:\s*(?:async\s*)?function~', $t, $m)) {
             $anchors[] = ['line' => $idx + 1, 'name' => $m[1]];
-        } elseif (preg_match('~^/\*+\s*[-=]{2,}\s*(.+?)\s*[-=]{2,}~u', $t, $m)) {
+        } elseif (preg_match('~^(?:async\s+)?def\s+([A-Za-z_]\w*)~', $t, $m)
+            || preg_match('~^class\s+([A-Za-z_]\w*)~', $t, $m)) {
+            $anchors[] = ['line' => $idx + 1, 'name' => $m[1]];
+        } elseif (preg_match('~^/\*+\s*[-=]{2,}\s*(.+?)\s*[-=]{2,}~u', $t, $m)
+            || preg_match('~^#\s*[-=]{2,}\s*(.+?)\s*[-=]{2,}$~u', $t, $m)) {
             $anchors[] = ['line' => $idx + 1, 'name' => trim($m[1])];
+        } elseif ($line !== '' && $line[0] === '/' && preg_match('~^/\*+\s*(.+?)\s*\*+/$~u', $t, $m)) {
+            // کامنت تک‌خطی ستون صفر: سرفصل بخش در CSS و JS.
+            $name = trim((string) preg_replace('~[\x{2500}-\x{257F}\-=_]{2,}~u', '', $m[1]));
+            if ($name !== '' && ci_strlen($name) >= 3) {
+                $anchors[] = ['line' => $idx + 1, 'name' => ci_substr($name, 0, 60)];
+            }
         }
     }
-    // هر فایل باید از خط ۱ پوشش داده شود، وگرنه مقدمهٔ فایل (مثلاً بدنهٔ
-    // یک IIFE پیش از اولین تابع) در نقشه جا می‌ماند و «بررسی کامل» دروغ
-    // می‌شود. در نسخهٔ اول همین اتفاق افتاد: ۱۵۹۵ خط نامرئی ماند.
-    if (!$anchors || $anchors[0]['line'] > 1) {
-        array_unshift($anchors, ['line' => 1, 'name' => 'مقدمهٔ فایل']);
-    }
-    $blocks = [];
-    foreach ($anchors as $i => $a) {
-        $end = isset($anchors[$i + 1]) ? $anchors[$i + 1]['line'] - 1 : $total;
-        if ($end < $a['line']) {
-            continue;
-        }
-        $text = ci_slice($lines, $a['line'], $end);
-        $blocks[] = [
-            'kind' => 'block',
-            'anchor' => $a['name'],
-            'line_start' => $a['line'],
-            'line_end' => $end,
-            'lines' => $end - $a['line'] + 1,
-            'fingerprint' => ci_fingerprint($text),
-            'risk' => ci_risk($text),
-        ];
-    }
-    return $blocks;
+    return ci_blocks_from_anchors($lines, $total, $anchors);
 }
 
 /** عقب بردن شروع بلوک تا ابتدای docblock چسبیده به آن. */
@@ -389,6 +415,67 @@ function ci_absorb_docblock(array $lines, int $start): int
         $l--;
     }
     return $start;
+}
+
+/**
+ * بلوک‌بندی فایل SQL. لنگر = دستور سطح بالا یا کامنت عنوان‌دار.
+ * اسکیما هم بخشی از سامانه است و باید آدرس داشته باشد؛ بیشتر خرابی‌های
+ * این پروژه از ناهماهنگی اسکیما با کد آمده‌اند.
+ */
+function ci_extract_sql(string $path, string $src): array
+{
+    $lines = preg_split('/\r\n|\n|\r/', $src) ?: [];
+    $total = count($lines);
+    if ($total === 0) {
+        return [];
+    }
+    $create = '~^(CREATE\s+(?:OR\s+REPLACE\s+)?(?:TABLE|UNIQUE\s+INDEX|INDEX|VIEW|TRIGGER|PROCEDURE|FUNCTION|DATABASE))'
+        . '\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"\']?([A-Za-z0-9_]+)~i';
+    $change = '~^(ALTER\s+TABLE|INSERT\s+INTO|REPLACE\s+INTO|UPDATE|DELETE\s+FROM|DROP\s+TABLE(?:\s+IF\s+EXISTS)?|TRUNCATE\s+TABLE)'
+        . '\s+[`"\']?([A-Za-z0-9_]+)~i';
+    $anchors = [];
+    foreach ($lines as $i => $line) {
+        $t = trim($line);
+        if (preg_match($create, $t, $m) || preg_match($change, $t, $m)) {
+            $anchors[] = [
+                'line' => $i + 1,
+                'name' => strtoupper((string) preg_replace('~\s+~', ' ', $m[1])) . ' ' . $m[2],
+            ];
+        } elseif (preg_match('~^--\s*[-=]{2,}\s*(.+?)\s*[-=]{2,}$~u', $t, $m)) {
+            $anchors[] = ['line' => $i + 1, 'name' => trim($m[1])];
+        }
+    }
+    return ci_blocks_from_anchors($lines, $total, $anchors);
+}
+
+/**
+ * ساخت بلوک‌های پیوسته از فهرست لنگرها — مشترک بین SQL و فایل‌های متنی.
+ * شروع اجباری از خط ۱ تضمین می‌کند مقدمهٔ فایل جا نماند.
+ */
+function ci_blocks_from_anchors(array $lines, int $total, array $anchors): array
+{
+    if (!$anchors || $anchors[0]['line'] > 1) {
+        array_unshift($anchors, ['line' => 1, 'name' => 'مقدمهٔ فایل']);
+    }
+    $blocks = [];
+    $an = count($anchors);
+    foreach ($anchors as $i => $a) {
+        $end = $i + 1 < $an ? $anchors[$i + 1]['line'] - 1 : $total;
+        if ($end < $a['line']) {
+            continue;
+        }
+        $text = ci_slice($lines, $a['line'], $end);
+        $blocks[] = [
+            'kind' => 'block',
+            'anchor' => $a['name'],
+            'line_start' => $a['line'],
+            'line_end' => $end,
+            'lines' => $end - $a['line'] + 1,
+            'fingerprint' => ci_fingerprint($text),
+            'risk' => ci_risk($text),
+        ];
+    }
+    return $blocks;
 }
 
 function ci_slice(array $lines, int $from, int $to): string
@@ -438,7 +525,13 @@ function ci_build(array $paths, string $root): array
         }
         $src = (string) file_get_contents($full);
         $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        $blocks = $ext === 'php' ? ci_extract_php($path, $src) : ci_extract_plain($path, $src);
+        if ($ext === 'php') {
+            $blocks = ci_extract_php($path, $src);
+        } elseif ($ext === 'sql') {
+            $blocks = ci_extract_sql($path, $src);
+        } else {
+            $blocks = ci_extract_plain($path, $src);
+        }
         $area = ci_area($path);
         $counters[$area] = ($counters[$area] ?? 0) + 1;
         $fileId = sprintf('%s-%03d', $area, $counters[$area]);
@@ -463,9 +556,10 @@ function ci_build(array $paths, string $root): array
 if (PHP_SAPI === 'cli' && isset($argv[0]) && realpath($argv[0]) === realpath(__FILE__)) {
     $root = dirname(__DIR__);
     $list = [];
-    exec('cd ' . escapeshellarg($root) . ' && git ls-files "*.php" "*.js" "*.css"', $list);
+    exec('cd ' . escapeshellarg($root) . ' && git ls-files "*.php" "*.js" "*.css" "*.sql" "*.py"', $list);
     $paths = array_values(array_filter($list, static function (string $p): bool {
-        return !preg_match('~^(tests|tools|updates|downloads|docs|vendor)/~', $p);
+        // updates/ و downloads/ کپی منجمد نسخه‌های منتشرشده‌اند، نه کد زنده.
+        return !preg_match('~^(updates|downloads|vendor)/~', $p);
     }));
     $files = ci_build($paths, $root);
     echo json_encode([

@@ -1,4 +1,4 @@
-"""نگهبان نقشهٔ کد — docs/code-index.json
+"""نگهبان نقشهٔ کد — docs/system-map/BLOCKS.json
 
 قانونی که این تست اجرا می‌کند: «اگر محتوای یک آدرس تغییر کند یا جابه‌جا
 شود، آدرس باید به‌روز شود.» بدون نگهبان، نقشه ظرف چند هفته دروغ می‌شود و
@@ -20,11 +20,14 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-INDEX_PATH = ROOT / "docs" / "code-index.json"
-LEDGER_PATH = ROOT / "docs" / "code-audit-ledger.json"
+INDEX_PATH = ROOT / "docs/system-map/BLOCKS.json"
+LEDGER_PATH = ROOT / "docs/system-map/REVIEW-LEDGER.json"
 
-EXCLUDED_PREFIXES = ("tests/", "tools/", "updates/", "downloads/", "docs/", "vendor/")
-TRACKED_GLOBS = ("*.php", "*.js", "*.css")
+# باید مو‌به‌مو با tools/code_index.php یکی باشد، وگرنه یکی از دو طرف
+# فایل‌هایی را می‌بیند که دیگری نمی‌بیند و نگهبان بی‌دلیل قرمز می‌شود.
+# updates/ و downloads/ کپی منجمد نسخه‌های منتشرشده‌اند، نه کد زنده.
+EXCLUDED_PREFIXES = ("updates/", "downloads/", "vendor/")
+TRACKED_GLOBS = ("*.php", "*.js", "*.css", "*.sql", "*.py")
 
 
 def _tracked_production_files() -> list[str]:
@@ -56,7 +59,7 @@ def fingerprint(text: str) -> str:
 @pytest.fixture(scope="module")
 def index() -> dict:
     assert INDEX_PATH.is_file(), (
-        "docs/code-index.json وجود ندارد. با «php tools/code_index.php» بسازید."
+        "docs/system-map/BLOCKS.json وجود ندارد. با «php tools/code_index.php» بسازید."
     )
     return json.loads(INDEX_PATH.read_text(encoding="utf-8"))
 
@@ -123,7 +126,7 @@ def test_file_fingerprints_are_current(index, sources):
             stale.append(f["path"])
     assert not stale, (
         f"{len(stale)} فایل بعد از ساخت نقشه تغییر کرده‌اند. نقشه را بازتولید کنید "
-        f"(php tools/code_index.php > docs/code-index.json): {stale[:10]}"
+        f"(php tools/code_index.php > docs/system-map/BLOCKS.json): {stale[:10]}"
     )
 
 
@@ -181,8 +184,21 @@ def test_every_nonblank_line_is_covered_exactly_once(index, sources):
                 continue  # متد داخل کلاس است؛ بلوک کلاس پوششش می‌دهد
             for ln in range(b["line_start"], min(b["line_end"], n) + 1):
                 count[ln] += 1
+        # همپوشانی فقط روی خطی مجاز است که واقعاً چند نماد سطح‌بالا روی آن
+        # شروع شده باشند (فایل‌های fixture گاهی چند تابع را در یک خط
+        # می‌نویسند). هر همپوشانی دیگری یعنی نقشه خراب است.
+        starts: dict[int, int] = {}
+        for b in f["blocks"]:
+            if b["kind"] == "method":
+                continue
+            starts[b["line_start"]] = starts.get(b["line_start"], 0) + 1
+        shared = {ln for ln, c in starts.items() if c > 1}
+
         miss = [ln for ln in range(1, n + 1) if lines[ln - 1].strip() and count[ln] == 0]
-        over = [ln for ln in range(1, n + 1) if lines[ln - 1].strip() and count[ln] > 1]
+        over = [
+            ln for ln in range(1, n + 1)
+            if lines[ln - 1].strip() and count[ln] > 1 and ln not in shared
+        ]
         missing_total += len(miss)
         overlap_total += len(over)
         if miss or over:
@@ -208,7 +224,9 @@ def test_symbol_blocks_end_on_a_closing_brace(index, sources):
             if b["kind"] not in ("function", "method", "class", "trait", "interface"):
                 continue
             last = lines[b["line_end"] - 1].strip()
-            if not last.startswith("}"):
+            # تابع تک‌خطی («function e($s) { return $s; }») با } تمام می‌شود
+            # ولی با آن شروع نمی‌شود؛ هر دو حالت معتبرند.
+            if not (last.startswith("}") or last.endswith("}")):
                 bad.append(f"{b['id']} {f['path']}:{b['line_end']} «{last[:40]}»")
     assert not bad, f"بلوک نمادی که با آکولاد بسته تمام نمی‌شود: {bad[:10]}"
 
@@ -219,7 +237,7 @@ def test_symbol_blocks_end_on_a_closing_brace(index, sources):
 
 
 def test_ledger_exists_and_is_valid_json():
-    assert LEDGER_PATH.is_file(), "docs/code-audit-ledger.json وجود ندارد"
+    assert LEDGER_PATH.is_file(), "docs/system-map/REVIEW-LEDGER.json وجود ندارد"
     data = json.loads(LEDGER_PATH.read_text(encoding="utf-8"))
     assert isinstance(data.get("reviewed"), dict)
 
@@ -253,8 +271,8 @@ def test_ledger_flags_blocks_changed_since_review(index):
 
 def test_human_readable_map_is_in_sync(index):
     """نقشهٔ خوانا باید از همین فهرست ساخته شده باشد، نه نسخه‌ای قدیمی."""
-    map_path = ROOT / "docs" / "CODE-MAP-FA.md"
-    assert map_path.is_file(), "docs/CODE-MAP-FA.md وجود ندارد"
+    map_path = ROOT / "docs/system-map/REVIEW-MAP-FA.md"
+    assert map_path.is_file(), "docs/system-map/REVIEW-MAP-FA.md وجود ندارد"
     text = map_path.read_text(encoding="utf-8")
     n_blocks = sum(len(f["blocks"]) for f in index["files"])
     assert f"| آدرس‌ها (بلوک) | {n_blocks:,} |" in text, (
@@ -264,3 +282,65 @@ def test_human_readable_map_is_in_sync(index):
     assert f"| فایل‌های کد تولیدی | {len(index['files'])} |" in text, (
         "تعداد فایل‌ها در نقشهٔ خوانا کهنه است"
     )
+
+
+# ---------------------------------------------------------------------------
+# فهرست موضوعی — «فلان بخش کجاست؟»
+# ---------------------------------------------------------------------------
+
+TOPICS_PATH = ROOT / "docs" / "system-map" / "TOPICS.json"
+
+
+@pytest.fixture(scope="module")
+def topics() -> dict:
+    assert TOPICS_PATH.is_file(), "docs/system-map/TOPICS.json وجود ندارد"
+    return json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+
+
+def test_every_page_of_the_system_has_a_topic(topics):
+    """هر صفحه‌ای که در کد مسیریابی می‌شود باید در فهرست موضوعی باشد.
+
+    وگرنه کاربر نام بخشی را جست‌وجو می‌کند، پیدا نمی‌کند، و دوباره مجبور
+    می‌شود کل کد را بگردد — یعنی فهرست کار خودش را نکرده.
+    """
+    src = (ROOT / "index.php").read_text(encoding="utf-8")
+    routed = set(re.findall(r"\$page\s*===?\s*'([a-z0-9\-]+)'", src))
+    listed = {t["key"] for t in topics["pages"]}
+    missing = routed - listed
+    assert not missing, f"این صفحه‌ها در فهرست موضوعی نیستند: {sorted(missing)}"
+
+
+def test_every_permission_has_a_topic(topics):
+    src = (ROOT / "permissions.php").read_text(encoding="utf-8")
+    codes = set(re.findall(r"'code'\s*=>\s*'([a-z0-9_.]+)'", src))
+    listed = {t["key"] for t in topics["permissions"]}
+    missing = codes - listed
+    assert not missing, f"این مجوزها در فهرست موضوعی نیستند: {sorted(missing)[:10]}"
+
+
+def test_every_topic_resolves_to_at_least_one_address(topics):
+    empty = [
+        t["id"] for t in topics["pages"] + topics["permissions"] + topics["tables"]
+        if not t["primary"]
+    ]
+    assert not empty, f"این موضوع‌ها هیچ آدرس اصلی ندارند: {empty[:10]}"
+
+
+def test_topic_addresses_exist_in_the_block_index(index, topics):
+    """آدرسی که در فهرست موضوعی هست ولی در نقشه نیست، کاربر را گمراه می‌کند."""
+    known = {b["id"] for f in index["files"] for b in f["blocks"]}
+    bad = []
+    for t in topics["pages"] + topics["permissions"] + topics["tables"]:
+        for i in t["primary"] + t["related"]:
+            if i not in known:
+                bad.append(f"{t['id']} → {i}")
+    assert not bad, f"آدرس ناموجود در فهرست موضوعی: {bad[:10]}"
+
+
+def test_boot_file_points_agents_at_the_map():
+    """الزام بوت: ایجنت جلسهٔ تازه باید اول نقشه را بشناسد."""
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+    assert "docs/system-map/REVIEW-MAP-FA.md" in agents, (
+        "AGENTS.md به نقشهٔ موضوعی ارجاع نمی‌دهد؛ ایجنت جلسهٔ بعد آن را پیدا نمی‌کند"
+    )
+    assert "tools/code_index.php" in agents, "دستور بازتولید نقشه در AGENTS.md نیست"
