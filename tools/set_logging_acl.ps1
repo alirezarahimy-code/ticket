@@ -20,8 +20,13 @@ foreach ($item in @((Get-Item -LiteralPath $target)) + @(Get-ChildItem -LiteralP
         }
     }
 }
-try { $account = ([System.Security.Principal.NTAccount]::new($ServiceAccount)).Translate([System.Security.Principal.SecurityIdentifier]) }
-catch { throw "Service account could not be resolved: $ServiceAccount" }
+try {
+    if ($ServiceAccount -match '^S-1-') {
+        $account = [System.Security.Principal.SecurityIdentifier]::new($ServiceAccount)
+    } else {
+        $account = ([System.Security.Principal.NTAccount]::new($ServiceAccount)).Translate([System.Security.Principal.SecurityIdentifier])
+    }
+} catch { throw "Service account could not be resolved: $ServiceAccount" }
 $principals = @(
     $account,
     [System.Security.Principal.SecurityIdentifier]::new('S-1-5-32-544'),
