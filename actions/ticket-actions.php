@@ -137,8 +137,19 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است. از فهرست سیستم‌ها یکی را انتخاب کنید؛ اگر دارایی در فهرست نیست، با واحد IT تماس بگیرید.');
             }
             if ($assetId !== null) {
-                $assetCheck = db()->prepare('SELECT id, owner_user_id, department_id, ip_address FROM assets WHERE id = ? LIMIT 1');
-                $assetCheck->execute([$assetId]);
+                $assetScopeSql = '';
+                $assetScopeParams = [];
+                // IT staff must use the same own-unit boundary as the asset inventory.
+                // Requesters and support-side staff retain their separate owner/IP and
+                // department checks below.
+                if (user_service_group($user) === 'it' && (is_staff_role((string) $user['role']) || is_it_agent($user))) {
+                    [$assetScopeSql, $assetScopeParams] = asset_scope($user, 'a');
+                }
+                $assetWhereSql = $assetScopeSql !== ''
+                    ? $assetScopeSql . ' AND a.id = ?'
+                    : 'WHERE a.id = ?';
+                $assetCheck = db()->prepare('SELECT a.id, a.owner_user_id, a.department_id, a.ip_address FROM assets a ' . $assetWhereSql . ' LIMIT 1');
+                $assetCheck->execute([...$assetScopeParams, $assetId]);
                 $assetRow = $assetCheck->fetch();
                 $sameClient = $assetRow && inventory_client_ip() !== '' && (string) $assetRow['ip_address'] === inventory_client_ip();
                 $requesterAssetLimited = !is_staff_role((string) $user['role']) && !is_it_agent($user);
