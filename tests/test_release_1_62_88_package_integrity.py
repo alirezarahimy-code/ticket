@@ -39,3 +39,9 @@ def test_032_is_excluded_from_executable_migrations():
 def test_report_does_not_claim_all_migrations_are_additive():
     assert "ادعای قبلی مبنی بر اینکه هر ۹ مهاجرت صرفاً افزایشی‌اند" in REPORT
     assert "داده‌های موجود را به‌روزرسانی می‌کنند" in REPORT
+
+
+def test_package_excludes_obsolete_release_helpers():
+    assert '"tools/Run-Logging-Acceptance-1.62.83.ps1"' in BUILDER
+    assert '"tools/build_cumulative_update.py"' in BUILDER
+    assert '"tools/build_update_1_62_88.py"' in BUILDER
