@@ -52,3 +52,6 @@ jobs:
 
     - name: Run system update prerequisite tests
       run: php tests/test_system_update_requires_version.php
+
+    - name: Run system update archive path safety tests
+      run: php tests/test_system_update_archive_paths.php
