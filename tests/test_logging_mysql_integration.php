@@ -33,6 +33,16 @@ define('APP_ROOT', $root);
 $GLOBALS['__logging_mysql_test_pdo'] = $pdo;
 $GLOBALS['__app_pdo_instance'] = $pdo;
 function db(bool $reconnect = false): PDO { return $GLOBALS['__logging_mysql_test_pdo']; }
+function execute_migration_statement(PDO $pdo, string $sql): void
+{
+    $statement = $pdo->query($sql);
+    if ($statement instanceof PDOStatement) {
+        do {
+            $statement->fetchAll(PDO::FETCH_ASSOC);
+        } while ($statement->nextRowset());
+        $statement->closeCursor();
+    }
+}
 require dirname(__DIR__) . '/lib/logging-core.php';
 require dirname(__DIR__) . '/lib/logging-replay.php';
 require dirname(__DIR__) . '/lib/activity-audit.php';
@@ -41,7 +51,7 @@ $migration = file_get_contents(dirname(__DIR__) . '/migrations/025-logging-issue
 if (!is_string($migration)) throw new RuntimeException('Migration 020 could not be read.');
 foreach (preg_split('/;\s*(?:\r?\n|$)/', $migration) ?: [] as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
-    if ($statement !== '') $pdo->exec($statement);
+    if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
 foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql'] as $migrationName) {
     $migration = file_get_contents(dirname(__DIR__) . '/migrations/' . $migrationName);
