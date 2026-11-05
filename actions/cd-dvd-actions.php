@@ -28,7 +28,8 @@ if (!defined('APP_ROOT')) {
             redirect('index.php?page=cd-dvd');
         }
         if ($action === 'cd_dvd_update') {
-            cd_dvd_update_record($user);
+            $cdDvdUser = require_login();
+            cd_dvd_update_record($cdDvdUser);
             flash('success', 'ثبت رسانه به‌روزرسانی شد.');
             redirect('index.php?page=cd-dvd');
         }
