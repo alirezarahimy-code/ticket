@@ -76,6 +76,12 @@ jobs:
     - name: Run cross-version migration registry test
       run: php tests/test_system_update_migration_registry.php
 
+    - name: Run asset scope permission tests
+      run: php tests/test_asset_scope_permissions.php
+
+    - name: Run offline permission coverage test
+      run: php tools/test_access_coverage_offline.php
+
     - name: Run offline ticket transaction regression test
       run: php tools/test_ticket_txn_offline.php
 
