@@ -148,7 +148,7 @@ foreach (['*.php' => true] as $pattern => $_) {
         $sourceFiles[] = $file;
     }
 }
-foreach (['api', 'cron', 'tools'] as $dir) {
+foreach (['api', 'cron', 'lib', 'tools'] as $dir) {
     foreach (glob($root . '/' . $dir . '/*.php') ?: [] as $file) {
         // فایل‌های آزمون، دادهٔ آزمایشی دارند (نام کدها را برای سنجش می‌نویسند) و شمرده نمی‌شوند.
         if ($dir === 'tools' && str_starts_with(basename($file), 'test_')) {
