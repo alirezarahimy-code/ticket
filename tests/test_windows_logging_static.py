@@ -57,3 +57,21 @@ def test_installed_acceptance_script_is_version_pinned_and_read_only():
     assert "Get-FileHash" in source
     assert "-Strict -ReturnStatus -ScanFiles" in source
     assert "Set-Acl" not in source
+
+
+def test_installed_acceptance_checks_complete_logging_migration_chain():
+    source = (ROOT / "tools/Run-Logging-Acceptance-1.62.83.ps1").read_text(encoding="utf-8")
+    required = (
+        "migrations/024-central-logging.sql",
+        "migrations/025-logging-issues-alerts.sql",
+        "migrations/026-logging-legacy-result-unknown.sql",
+        "migrations/027-logging-correlation-ids.sql",
+        "migrations/028-logging-fingerprint-v2.sql",
+        "migrations/029-activity-result-default-unknown.sql",
+        "migrations/030-logging-notification-idempotency-and-ticket-history.sql",
+        "migrations/031-food-worker-window.sql",
+        "migrations/032-schema-updates-baseline.sql",
+        "migrations/033-logging-legacy-context-collation.sql",
+    )
+    missing = [migration for migration in required if f"'{migration}'" not in source]
+    assert not missing, f"Installed acceptance preflight omits migrations: {missing}"
