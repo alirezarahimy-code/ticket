@@ -49,3 +49,11 @@ def test_acl_setter_handles_script_whatif_without_null_pscmdlet():
     assert "$WhatIfPreference" in source
     assert "ShouldProcess(" not in source
     assert "if (-not $Apply)" in source
+
+
+def test_installed_acceptance_script_is_version_pinned_and_read_only():
+    source = (ROOT / "tools/Run-Logging-Acceptance-1.62.83.ps1").read_text(encoding="utf-8")
+    assert "$ExpectedVersion = '1.62.83'" in source
+    assert "Get-FileHash" in source
+    assert "-Strict -ReturnStatus -ScanFiles" in source
+    assert "Set-Acl" not in source
