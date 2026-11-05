@@ -8,12 +8,12 @@
 
 | سنجه | مقدار |
 |---|---|
-| فایل‌های کد تولیدی | 530 |
-| خطوط | 123,797 |
-| آدرس‌ها (بلوک) | 6,617 |
+| فایل‌های کد تولیدی | 531 |
+| خطوط | 123,963 |
+| آدرس‌ها (بلوک) | 6,624 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,617 آدرس |
+| باقی‌مانده | 6,624 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -27,7 +27,7 @@
 | **chatbot api** | `chatbot-api` | — | `PAGE-034.48` <sub>index.php:1335</sub> | 2 |
 | **domain scan** | `domain-scan` | `domain.scan` | `PAGE-034.96` <sub>index.php:2865</sub><br>`PAGE-013.37` <sub>domain-scan.php:1157</sub><br>`PAGE-013.19` <sub>domain-scan.php:390</sub><br>`PAGE-013.16` <sub>domain-scan.php:311</sub> | 48 |
 | **food personnel link** | `food-personnel-link` | — | `PAGE-034.44` <sub>index.php:1203</sub><br>`PAGE-016.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-016.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-016.10` <sub>food-personnel-link.php:317</sub> | 30 |
-| **food ticket** | `food-ticket` | — | `PAGE-034.40` <sub>index.php:916</sub><br>`PAGE-034.52` <sub>index.php:1391</sub><br>`PAGE-034.59` <sub>index.php:1444</sub><br>`TOOL-027.04` <sub>tools/food_system_router.php:21</sub> | 147 |
+| **food ticket** | `food-ticket` | — | `PAGE-034.40` <sub>index.php:916</sub><br>`PAGE-034.52` <sub>index.php:1391</sub><br>`PAGE-034.59` <sub>index.php:1444</sub><br>`TOOL-028.04` <sub>tools/food_system_router.php:21</sub> | 147 |
 | **governance** | `governance` | — | `PAGE-031.32` <sub>governance.php:402</sub><br>`PAGE-034.58` <sub>index.php:1440</sub><br>`PAGE-031.29` <sub>governance.php:317</sub><br>`PAGE-031.10` <sub>governance.php:54</sub> | 42 |
 | **help** | `help` | — | `PAGE-034.72` <sub>index.php:1647</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 4 |
 | **local accounts** | `local-accounts` | — | `PAGE-034.56` <sub>index.php:1419</sub><br>`PAGE-037.03` <sub>local-accounts.php:25</sub><br>`PAGE-037.05` <sub>local-accounts.php:81</sub><br>`PAGE-037.06` <sub>local-accounts.php:138</sub> | 10 |
@@ -48,7 +48,7 @@
 | **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 173 |
 | **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.102` <sub>index.php:3705</sub><br>`CORE-014.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.73` <sub>index.php:1655</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **سفارش غذا** | `food-order` | — | `PAGE-034.41` <sub>index.php:930</sub><br>`PAGE-034.60` <sub>index.php:1449</sub><br>`PAGE-034.61` <sub>index.php:1457</sub><br>`TOOL-027.03` <sub>tools/food_system_router.php:18</sub> | 196 |
+| **سفارش غذا** | `food-order` | — | `PAGE-034.41` <sub>index.php:930</sub><br>`PAGE-034.60` <sub>index.php:1449</sub><br>`PAGE-034.61` <sub>index.php:1457</sub><br>`TOOL-028.03` <sub>tools/food_system_router.php:18</sub> | 196 |
 | **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-034.98` <sub>index.php:2988</sub><br>`PAGE-004.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **شناسنامه سیستم‌ها** | `inventory` | `inventory.view` | `PAGE-036.31` <sub>inventory.php:704</sub><br>`PAGE-036.29` <sub>inventory.php:636</sub><br>`PAGE-036.02` <sub>inventory.php:7</sub><br>`PAGE-036.20` <sub>inventory.php:346</sub> | 56 |
 | **صف کاری** | `queue` | `queue.view` | `PAGE-034.84` <sub>index.php:2022</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 17 |
@@ -71,7 +71,7 @@
 
 | گروه | مجوز | کد | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
-| داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-041.26` <sub>permissions.php:487</sub><br>`PAGE-041.03` <sub>permissions.php:28</sub><br>`TOOL-046.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
+| داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-041.26` <sub>permissions.php:487</sub><br>`PAGE-041.03` <sub>permissions.php:28</sub><br>`TOOL-047.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
 | داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-034.82` <sub>index.php:1923</sub> | 3 |
 | داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-034.74` <sub>index.php:1692</sub> | 6 |
 | داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-041.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1335</sub><br>`PAGE-041.16` <sub>permissions.php:350</sub> | 3 |
@@ -286,7 +286,7 @@
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
 | `TEST` | TEST | 211 | 1,544 | 19,304 |
-| `TOOL` | TOOL | 84 | 676 | 16,897 |
+| `TOOL` | TOOL | 85 | 683 | 17,063 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 50 | 1,362 | 43,887 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
@@ -302,7 +302,7 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 817 |
+| `write_no_tx` | نوشتن بدون تراکنش | 819 |
 | `error_suppression` | سرکوب @ | 272 |
 | `dangerous_call` | فراخوانی خطرناک | 187 |
 | `sql_concat` | الحاق در SQL | 181 |
@@ -316,13 +316,13 @@
 
 | # | آدرس | مسیر:خط | لنگر | ریسک | نشانه‌ها | وضعیت |
 |---|---|---|---|---|---|---|
-| 1 | `TOOL-016.01` | `tools/diag_connection.php:1` | بلوک رویه‌ای 1-258 | 20 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 2 | `TOOL-057.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 1 | `TOOL-017.01` | `tools/diag_connection.php:1` | بلوک رویه‌ای 1-258 | 20 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 2 | `TOOL-058.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 3 | `PAGE-025.29` | `food-ticket-runtime.php:1193` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 4 | `PAGE-029.84` | `food-ticket.php:2379` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 5 | `PAGE-029.129` | `food-ticket.php:4737` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 6 | `PAGE-029.130` | `food-ticket.php:4807` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 7 | `TOOL-054.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 7 | `TOOL-055.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 8 | `PAGE-025.22` | `food-ticket-runtime.php:815` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 9 | `PAGE-029.39` | `food-ticket.php:795` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 10 | `PAGE-029.41` | `food-ticket.php:1013` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
@@ -332,7 +332,7 @@
 | 14 | `PAGE-011.27` | `chatbot.php:700` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 15 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 16 | `TEST-105.06` | `tests/test_logging_mysql_integration.php:135` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 17 | `TOOL-022.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 17 | `TOOL-023.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 18 | `PAGE-025.18` | `food-ticket-runtime.php:539` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 19 | `WEB-003.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 20 | `WEB-005.01` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
@@ -352,8 +352,8 @@
 | 34 | `PAGE-035.13` | `install.php:152` | مسیر: test_ldap | 10 | ورودی خام، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 35 | `CORE-015.13` | `lib/tickets-sla.php:362` | ticket_number_autofill | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 36 | `TOOL-008.02` | `tools/benchmark_seed.php:36` | Match the filesystem prerequisite crea | 10 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 37 | `TOOL-055.13` | `tools/test_food_dupes_offline.php:101` | بخش ۲: کد ملی یکتا در ثبت و ویرایش کار | 10 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 38 | `TOOL-058.01` | `tools/test_food_groups.php:1` | بلوک رویه‌ای 1-205 | 10 | الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 37 | `TOOL-056.13` | `tools/test_food_dupes_offline.php:101` | بخش ۲: کد ملی یکتا در ثبت و ویرایش کار | 10 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 38 | `TOOL-059.01` | `tools/test_food_groups.php:1` | بلوک رویه‌ای 1-205 | 10 | الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 39 | `PAGE-006.03` | `asset-profile.php:28` | asset_profile_ensure_schema | 9 | catch بی‌صدا، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 40 | `CRON-001.09` | `cron/check_logging_health.php:224` | وضعیت‌هایی که برطرف شده‌اند، بدون حذف  | 9 | catch بی‌صدا، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 
@@ -3752,1197 +3752,1212 @@
 </details>
 
 <details>
-<summary><b>TOOL-012</b> — <code>tools/code_index.php</code> (571 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TOOL-012</b> — <code>tools/build_update_1_62_88.py</code> (166 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-012.01` | 1–33 | ناحیه | `بلوک رویه‌ای 1-33` | 0 | ⬜ |
-| `TOOL-012.02` | 34–42 | تابع | `ci_strlen` | 0 | ⬜ |
-| `TOOL-012.03` | 44–51 | تابع | `ci_substr` | 0 | ⬜ |
-| `TOOL-012.04` | 53–65 | تابع | `ci_area` | 0 | ⬜ |
-| `TOOL-012.05` | 67–73 | تابع | `ci_fingerprint` | 0 | ⬜ |
-| `TOOL-012.06` | 75–112 | تابع | `ci_anchor_label` | 0 | ⬜ |
-| `TOOL-012.07` | 114–160 | تابع | `ci_risk` | 0 | ⬜ |
-| `TOOL-012.08` | 162–363 | تابع | `ci_extract_php` | 7 | ⬜ |
-| `TOOL-012.09` | 365–395 | تابع | `ci_extract_plain` | 0 | ⬜ |
-| `TOOL-012.10` | 397–418 | تابع | `ci_absorb_docblock` | 0 | ⬜ |
-| `TOOL-012.11` | 420–449 | تابع | `ci_extract_sql` | 1 | ⬜ |
-| `TOOL-012.12` | 451–479 | تابع | `ci_blocks_from_anchors` | 0 | ⬜ |
-| `TOOL-012.13` | 481–484 | تابع | `ci_slice` | 0 | ⬜ |
-| `TOOL-012.14` | 486–494 | تابع | `ci_token_line` | 0 | ⬜ |
-| `TOOL-012.15` | 496–513 | تابع | `ci_next_name` | 0 | ⬜ |
-| `TOOL-012.16` | 515–553 | تابع | `ci_build` | 0 | ⬜ |
-| `TOOL-012.17` | 555–571 | ناحیه | `اجرای مستقیم از خط فرمان (در php-wasm این بخش اجرا` | 4 | ⬜ |
+| `TOOL-012.01` | 1–54 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TOOL-012.02` | 55–58 | بلوک | `sha256` | 0 | ⬜ |
+| `TOOL-012.03` | 59–64 | بلوک | `git` | 0 | ⬜ |
+| `TOOL-012.04` | 65–75 | بلوک | `changed_files` | 0 | ⬜ |
+| `TOOL-012.05` | 76–121 | بلوک | `build` | 1 | ⬜ |
+| `TOOL-012.06` | 122–134 | بلوک | `entry` | 0 | ⬜ |
+| `TOOL-012.07` | 135–166 | بلوک | `اعتبارسنجی پس از ساخت` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-013</b> — <code>tools/db_health_report.php</code> (129 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-013</b> — <code>tools/code_index.php</code> (571 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-013.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TOOL-013.02` | 22–25 | تابع | `dbh_line` | 3 | ⬜ |
-| `TOOL-013.03` | 26–35 | ناحیه | `بلوک رویه‌ای 26-35` | 0 | ⬜ |
-| `TOOL-013.04` | 36–51 | ناحیه | `۱) اندازه و تعداد ردیف جداول` | 0 | ⬜ |
-| `TOOL-013.05` | 52–69 | ناحیه | `۲) کوئری‌های کند ۷ روز اخیر (از لاگ فنی؛ کوئری‌های` | 0 | ⬜ |
-| `TOOL-013.06` | 70–129 | ناحیه | `۳) EXPLAIN کوئری‌های داغ` | 0 | ⬜ |
+| `TOOL-013.01` | 1–33 | ناحیه | `بلوک رویه‌ای 1-33` | 0 | ⬜ |
+| `TOOL-013.02` | 34–42 | تابع | `ci_strlen` | 0 | ⬜ |
+| `TOOL-013.03` | 44–51 | تابع | `ci_substr` | 0 | ⬜ |
+| `TOOL-013.04` | 53–65 | تابع | `ci_area` | 0 | ⬜ |
+| `TOOL-013.05` | 67–73 | تابع | `ci_fingerprint` | 0 | ⬜ |
+| `TOOL-013.06` | 75–112 | تابع | `ci_anchor_label` | 0 | ⬜ |
+| `TOOL-013.07` | 114–160 | تابع | `ci_risk` | 0 | ⬜ |
+| `TOOL-013.08` | 162–363 | تابع | `ci_extract_php` | 7 | ⬜ |
+| `TOOL-013.09` | 365–395 | تابع | `ci_extract_plain` | 0 | ⬜ |
+| `TOOL-013.10` | 397–418 | تابع | `ci_absorb_docblock` | 0 | ⬜ |
+| `TOOL-013.11` | 420–449 | تابع | `ci_extract_sql` | 1 | ⬜ |
+| `TOOL-013.12` | 451–479 | تابع | `ci_blocks_from_anchors` | 0 | ⬜ |
+| `TOOL-013.13` | 481–484 | تابع | `ci_slice` | 0 | ⬜ |
+| `TOOL-013.14` | 486–494 | تابع | `ci_token_line` | 0 | ⬜ |
+| `TOOL-013.15` | 496–513 | تابع | `ci_next_name` | 0 | ⬜ |
+| `TOOL-013.16` | 515–553 | تابع | `ci_build` | 0 | ⬜ |
+| `TOOL-013.17` | 555–571 | ناحیه | `اجرای مستقیم از خط فرمان (در php-wasm این بخش اجرا` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-014</b> — <code>tools/diag_asset_duplicates.php</code> (79 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TOOL-014</b> — <code>tools/db_health_report.php</code> (129 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-014.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `TOOL-014.02` | 14–14 | تابع | `out` | 3 | ⬜ |
-| `TOOL-014.03` | 15–15 | تابع | `q` | 0 | ⬜ |
-| `TOOL-014.04` | 16–23 | ناحیه | `بلوک رویه‌ای 16-23` | 0 | ⬜ |
-| `TOOL-014.05` | 24–29 | ناحیه | `۱) تکرار بر اساس hostname دقیق` | 0 | ⬜ |
-| `TOOL-014.06` | 30–48 | ناحیه | `۲) تکرار بر اساس نام نمایشی نرمالشده (همون چی که ت` | 0 | ⬜ |
-| `TOOL-014.07` | 49–54 | ناحیه | `۳) پراکندگی منبع` | 0 | ⬜ |
-| `TOOL-014.08` | 55–59 | ناحیه | `۴) چند ردیف با hostname خالی` | 0 | ⬜ |
-| `TOOL-014.09` | 60–66 | ناحیه | `۵) source نامعتبر` | 0 | ⬜ |
-| `TOOL-014.10` | 67–72 | ناحیه | `۶) asset_profiles یتیم / خالی` | 0 | ⬜ |
-| `TOOL-014.11` | 73–79 | ناحیه | `۷) تگهای خودکار DOMAIN- و CLIENT-` | 0 | ⬜ |
+| `TOOL-014.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TOOL-014.02` | 22–25 | تابع | `dbh_line` | 3 | ⬜ |
+| `TOOL-014.03` | 26–35 | ناحیه | `بلوک رویه‌ای 26-35` | 0 | ⬜ |
+| `TOOL-014.04` | 36–51 | ناحیه | `۱) اندازه و تعداد ردیف جداول` | 0 | ⬜ |
+| `TOOL-014.05` | 52–69 | ناحیه | `۲) کوئری‌های کند ۷ روز اخیر (از لاگ فنی؛ کوئری‌های` | 0 | ⬜ |
+| `TOOL-014.06` | 70–129 | ناحیه | `۳) EXPLAIN کوئری‌های داغ` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-015</b> — <code>tools/diag_asset_profile.php</code> (163 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-015</b> — <code>tools/diag_asset_duplicates.php</code> (79 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-015.01` | 1–163 | ناحیه | `بلوک رویه‌ای 1-163` | **9** | ⬜ |
+| `TOOL-015.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `TOOL-015.02` | 14–14 | تابع | `out` | 3 | ⬜ |
+| `TOOL-015.03` | 15–15 | تابع | `q` | 0 | ⬜ |
+| `TOOL-015.04` | 16–23 | ناحیه | `بلوک رویه‌ای 16-23` | 0 | ⬜ |
+| `TOOL-015.05` | 24–29 | ناحیه | `۱) تکرار بر اساس hostname دقیق` | 0 | ⬜ |
+| `TOOL-015.06` | 30–48 | ناحیه | `۲) تکرار بر اساس نام نمایشی نرمالشده (همون چی که ت` | 0 | ⬜ |
+| `TOOL-015.07` | 49–54 | ناحیه | `۳) پراکندگی منبع` | 0 | ⬜ |
+| `TOOL-015.08` | 55–59 | ناحیه | `۴) چند ردیف با hostname خالی` | 0 | ⬜ |
+| `TOOL-015.09` | 60–66 | ناحیه | `۵) source نامعتبر` | 0 | ⬜ |
+| `TOOL-015.10` | 67–72 | ناحیه | `۶) asset_profiles یتیم / خالی` | 0 | ⬜ |
+| `TOOL-015.11` | 73–79 | ناحیه | `۷) تگهای خودکار DOMAIN- و CLIENT-` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-016</b> — <code>tools/diag_connection.php</code> (258 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-016</b> — <code>tools/diag_asset_profile.php</code> (163 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-016.01` | 1–258 | ناحیه | `بلوک رویه‌ای 1-258` | **20** | ⬜ |
+| `TOOL-016.01` | 1–163 | ناحیه | `بلوک رویه‌ای 1-163` | **9** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-017</b> — <code>tools/diag_food_duplicates.php</code> (31 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-017</b> — <code>tools/diag_connection.php</code> (258 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-017.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 0 | ⬜ |
+| `TOOL-017.01` | 1–258 | ناحیه | `بلوک رویه‌ای 1-258` | **20** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-018</b> — <code>tools/diag_food_match.php</code> (111 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TOOL-018</b> — <code>tools/diag_food_duplicates.php</code> (31 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-018.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 0 | ⬜ |
-| `TOOL-018.02` | 43–57 | ناحیه | `کاربران` | 0 | ⬜ |
-| `TOOL-018.03` | 58–91 | ناحیه | `SOURCE_TABLE` | 0 | ⬜ |
-| `TOOL-018.04` | 92–111 | ناحیه | `سفارش داخلی` | 0 | ⬜ |
+| `TOOL-018.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-019</b> — <code>tools/diag_food_ticket.php</code> (103 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TOOL-019</b> — <code>tools/diag_food_match.php</code> (111 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-019.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
-| `TOOL-019.02` | 27–48 | ناحیه | `Internal orders diagnostic (aggregate only; no Acc` | 0 | ⬜ |
-| `TOOL-019.03` | 49–67 | ناحیه | `User lookup 377` | 0 | ⬜ |
-| `TOOL-019.04` | 68–103 | ناحیه | `نمونهٔ ردیف‌های منبع تردد` | 1 | ⬜ |
+| `TOOL-019.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 0 | ⬜ |
+| `TOOL-019.02` | 43–57 | ناحیه | `کاربران` | 0 | ⬜ |
+| `TOOL-019.03` | 58–91 | ناحیه | `SOURCE_TABLE` | 0 | ⬜ |
+| `TOOL-019.04` | 92–111 | ناحیه | `سفارش داخلی` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-020</b> — <code>tools/diag_netprint.php</code> (112 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-020</b> — <code>tools/diag_food_ticket.php</code> (103 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-020.01` | 1–112 | ناحیه | `بلوک رویه‌ای 1-112` | 1 | ⬜ |
+| `TOOL-020.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
+| `TOOL-020.02` | 27–48 | ناحیه | `Internal orders diagnostic (aggregate only; no Acc` | 0 | ⬜ |
+| `TOOL-020.03` | 49–67 | ناحیه | `User lookup 377` | 0 | ⬜ |
+| `TOOL-020.04` | 68–103 | ناحیه | `نمونهٔ ردیف‌های منبع تردد` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-021</b> — <code>tools/diag_print_margin.php</code> (313 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TOOL-021</b> — <code>tools/diag_netprint.php</code> (112 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-021.01` | 1–49 | ناحیه | `بلوک رویه‌ای 1-49` | 3 | ⬜ |
-| `TOOL-021.02` | 50–77 | ناحیه | `۱) تنظیمات چاپ` | 1 | ⬜ |
-| `TOOL-021.03` | 78–103 | ناحیه | `۲) مسیر فعال چاپ` | 4 | ⬜ |
-| `TOOL-021.04` | 104–129 | ناحیه | `۲.۱) ترازِ دقیق لبه‌ها (۱.۳۷): شروع چاپ = لبهٔ کاغ` | 0 | ⬜ |
-| `TOOL-021.05` | 130–158 | ناحیه | `۳) قالب فعال و فاصلهٔ بالای محتوا` | 0 | ⬜ |
-| `TOOL-021.06` | 159–186 | ناحیه | `مدل نهایی (پس از حذف عناصر بدون مقدار و تراز خودکا` | 0 | ⬜ |
-| `TOOL-021.07` | 187–247 | ناحیه | `۴) رسم واقعی و شمارش ردیف‌های سفید` | 1 | ⬜ |
-| `TOOL-021.08` | 248–313 | ناحیه | `۵) اندازه‌گیری واقعی درایور ویندوز (بدون چاپ)` | 7 | ⬜ |
+| `TOOL-021.01` | 1–112 | ناحیه | `بلوک رویه‌ای 1-112` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-022</b> — <code>tools/diag_source_row_delete.php</code> (128 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-022</b> — <code>tools/diag_print_margin.php</code> (313 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-022.01` | 1–128 | ناحیه | `بلوک رویه‌ای 1-128` | **12** | ⬜ |
+| `TOOL-022.01` | 1–49 | ناحیه | `بلوک رویه‌ای 1-49` | 3 | ⬜ |
+| `TOOL-022.02` | 50–77 | ناحیه | `۱) تنظیمات چاپ` | 1 | ⬜ |
+| `TOOL-022.03` | 78–103 | ناحیه | `۲) مسیر فعال چاپ` | 4 | ⬜ |
+| `TOOL-022.04` | 104–129 | ناحیه | `۲.۱) ترازِ دقیق لبه‌ها (۱.۳۷): شروع چاپ = لبهٔ کاغ` | 0 | ⬜ |
+| `TOOL-022.05` | 130–158 | ناحیه | `۳) قالب فعال و فاصلهٔ بالای محتوا` | 0 | ⬜ |
+| `TOOL-022.06` | 159–186 | ناحیه | `مدل نهایی (پس از حذف عناصر بدون مقدار و تراز خودکا` | 0 | ⬜ |
+| `TOOL-022.07` | 187–247 | ناحیه | `۴) رسم واقعی و شمارش ردیف‌های سفید` | 1 | ⬜ |
+| `TOOL-022.08` | 248–313 | ناحیه | `۵) اندازه‌گیری واقعی درایور ویندوز (بدون چاپ)` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-023</b> — <code>tools/diagnose_ldap.php</code> (111 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-023</b> — <code>tools/diag_source_row_delete.php</code> (128 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-023.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 0 | ⬜ |
-| `TOOL-023.02` | 28–36 | ناحیه | `۱) افزونه LDAP` | 0 | ⬜ |
-| `TOOL-023.03` | 37–59 | ناحیه | `۲) تنظیمات` | 0 | ⬜ |
-| `TOOL-023.04` | 60–71 | ناحیه | `۳) اتصال` | 3 | ⬜ |
-| `TOOL-023.05` | 72–88 | ناحیه | `۴) Bind` | 2 | ⬜ |
-| `TOOL-023.06` | 89–111 | ناحیه | `۵) جست‌وجو` | 3 | ⬜ |
+| `TOOL-023.01` | 1–128 | ناحیه | `بلوک رویه‌ای 1-128` | **12** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-024</b> — <code>tools/export_domain_users.php</code> (87 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TOOL-024</b> — <code>tools/diagnose_ldap.php</code> (111 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-024.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TOOL-024.02` | 4–65 | تابع | `dud_export` | 0 | ⬜ |
-| `TOOL-024.03` | 67–82 | تابع | `dud_main` | 0 | ⬜ |
-| `TOOL-024.04` | 83–87 | ناحیه | `بلوک رویه‌ای 83-87` | 0 | ⬜ |
+| `TOOL-024.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 0 | ⬜ |
+| `TOOL-024.02` | 28–36 | ناحیه | `۱) افزونه LDAP` | 0 | ⬜ |
+| `TOOL-024.03` | 37–59 | ناحیه | `۲) تنظیمات` | 0 | ⬜ |
+| `TOOL-024.04` | 60–71 | ناحیه | `۳) اتصال` | 3 | ⬜ |
+| `TOOL-024.05` | 72–88 | ناحیه | `۴) Bind` | 2 | ⬜ |
+| `TOOL-024.06` | 89–111 | ناحیه | `۵) جست‌وجو` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-025</b> — <code>tools/find-in-system.py</code> (236 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TOOL-025</b> — <code>tools/export_domain_users.php</code> (87 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-025.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-025.02` | 34–43 | بلوک | `normalize` | 0 | ⬜ |
-| `TOOL-025.03` | 44–51 | بلوک | `load` | 0 | ⬜ |
-| `TOOL-025.04` | 52–74 | بلوک | `score` | 0 | ⬜ |
-| `TOOL-025.05` | 75–92 | بلوک | `top` | 0 | ⬜ |
-| `TOOL-025.06` | 93–117 | بلوک | `print_features` | 0 | ⬜ |
-| `TOOL-025.07` | 118–128 | بلوک | `print_section` | 0 | ⬜ |
-| `TOOL-025.08` | 129–236 | بلوک | `main` | 0 | ⬜ |
+| `TOOL-025.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TOOL-025.02` | 4–65 | تابع | `dud_export` | 0 | ⬜ |
+| `TOOL-025.03` | 67–82 | تابع | `dud_main` | 0 | ⬜ |
+| `TOOL-025.04` | 83–87 | ناحیه | `بلوک رویه‌ای 83-87` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-026</b> — <code>tools/fix_food_columns.php</code> (140 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-026</b> — <code>tools/find-in-system.py</code> (236 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-026.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
-| `TOOL-026.02` | 27–57 | ناحیه | `پیام روشن اگر فایل تنظیمات نیست (bootstrap در CLI ` | 0 | ⬜ |
-| `TOOL-026.03` | 58–63 | ناحیه | `۱) وجود جدول` | 0 | ⬜ |
-| `TOOL-026.04` | 64–77 | ناحیه | `۲) فهرست زندهٔ ستون‌ها (بدون تکیه بر کش)` | 0 | ⬜ |
-| `TOOL-026.05` | 78–117 | ناحیه | `۳) تشخیص توابع سامانه (همان تابعی که دکمهٔ تحویل ا` | 4 | ⬜ |
-| `TOOL-026.06` | 118–140 | ناحیه | `۴) بررسی پس از اصلاح (زنده)` | 1 | ⬜ |
+| `TOOL-026.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-026.02` | 34–43 | بلوک | `normalize` | 0 | ⬜ |
+| `TOOL-026.03` | 44–51 | بلوک | `load` | 0 | ⬜ |
+| `TOOL-026.04` | 52–74 | بلوک | `score` | 0 | ⬜ |
+| `TOOL-026.05` | 75–92 | بلوک | `top` | 0 | ⬜ |
+| `TOOL-026.06` | 93–117 | بلوک | `print_features` | 0 | ⬜ |
+| `TOOL-026.07` | 118–128 | بلوک | `print_section` | 0 | ⬜ |
+| `TOOL-026.08` | 129–236 | بلوک | `main` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-027</b> — <code>tools/food_system_router.php</code> (28 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TOOL-027</b> — <code>tools/fix_food_columns.php</code> (140 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-027.01` | 1–11 | ناحیه | `بلوک رویه‌ای 1-11` | 2 | ⬜ |
-| `TOOL-027.02` | 12–17 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
-| `TOOL-027.03` | 18–20 | ناحیه | `مسیر: food-order` | 0 | ⬜ |
-| `TOOL-027.04` | 21–28 | ناحیه | `مسیر: food-ticket` | 0 | ⬜ |
+| `TOOL-027.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
+| `TOOL-027.02` | 27–57 | ناحیه | `پیام روشن اگر فایل تنظیمات نیست (bootstrap در CLI ` | 0 | ⬜ |
+| `TOOL-027.03` | 58–63 | ناحیه | `۱) وجود جدول` | 0 | ⬜ |
+| `TOOL-027.04` | 64–77 | ناحیه | `۲) فهرست زندهٔ ستون‌ها (بدون تکیه بر کش)` | 0 | ⬜ |
+| `TOOL-027.05` | 78–117 | ناحیه | `۳) تشخیص توابع سامانه (همان تابعی که دکمهٔ تحویل ا` | 4 | ⬜ |
+| `TOOL-027.06` | 118–140 | ناحیه | `۴) بررسی پس از اصلاح (زنده)` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-028</b> — <code>tools/food_system_seed.php</code> (134 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TOOL-028</b> — <code>tools/food_system_router.php</code> (28 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-028.01` | 1–85 | ناحیه | `بلوک رویه‌ای 1-85` | 0 | ⬜ |
-| `TOOL-028.02` | 86–86 | ناحیه | `Prebuild application sessions instead of using the` | 0 | ⬜ |
-| `TOOL-028.03` | 87–134 | ناحیه | `unrelated client-inventory collection. Each sessio` | 0 | ⬜ |
+| `TOOL-028.01` | 1–11 | ناحیه | `بلوک رویه‌ای 1-11` | 2 | ⬜ |
+| `TOOL-028.02` | 12–17 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
+| `TOOL-028.03` | 18–20 | ناحیه | `مسیر: food-order` | 0 | ⬜ |
+| `TOOL-028.04` | 21–28 | ناحیه | `مسیر: food-ticket` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-029</b> — <code>tools/food_system_stress.py</code> (479 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
+<summary><b>TOOL-029</b> — <code>tools/food_system_seed.php</code> (134 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-029.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-029.02` | 26–26 | بلوک | `Metrics` | 0 | ⬜ |
-| `TOOL-029.03` | 27–31 | بلوک | `__init__` | 0 | ⬜ |
-| `TOOL-029.04` | 32–37 | بلوک | `add` | 0 | ⬜ |
-| `TOOL-029.05` | 38–42 | بلوک | `fail` | 0 | ⬜ |
-| `TOOL-029.06` | 43–49 | بلوک | `api_path` | 1 | ⬜ |
-| `TOOL-029.07` | 50–85 | بلوک | `request` | 0 | ⬜ |
-| `TOOL-029.08` | 86–90 | بلوک | `expect` | 0 | ⬜ |
-| `TOOL-029.09` | 91–102 | بلوک | `parse_json` | 0 | ⬜ |
-| `TOOL-029.10` | 103–111 | بلوک | `find_order` | 0 | ⬜ |
-| `TOOL-029.11` | 112–149 | بلوک | `self_order_flow` | 0 | ⬜ |
-| `TOOL-029.12` | 150–155 | بلوک | `manager_crud` | 0 | ⬜ |
-| `TOOL-029.13` | 156–233 | بلوک | `post` | 1 | ⬜ |
-| `TOOL-029.14` | 234–237 | بلوک | `text_preview` | 0 | ⬜ |
-| `TOOL-029.15` | 238–276 | بلوک | `bulk_lifecycle` | 0 | ⬜ |
-| `TOOL-029.16` | 277–301 | بلوک | `build_read_routes` | 0 | ⬜ |
-| `TOOL-029.17` | 302–321 | بلوک | `manager_read_worker` | 0 | ⬜ |
-| `TOOL-029.18` | 322–331 | بلوک | `percentile` | 0 | ⬜ |
-| `TOOL-029.19` | 332–401 | بلوک | `write_report` | 0 | ⬜ |
-| `TOOL-029.20` | 402–479 | بلوک | `main` | 0 | ⬜ |
+| `TOOL-029.01` | 1–85 | ناحیه | `بلوک رویه‌ای 1-85` | 0 | ⬜ |
+| `TOOL-029.02` | 86–86 | ناحیه | `Prebuild application sessions instead of using the` | 0 | ⬜ |
+| `TOOL-029.03` | 87–134 | ناحیه | `unrelated client-inventory collection. Each sessio` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-030</b> — <code>tools/food_system_verify.php</code> (96 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-030</b> — <code>tools/food_system_stress.py</code> (479 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-030.01` | 1–96 | ناحیه | `بلوک رویه‌ای 1-96` | 5 | ⬜ |
+| `TOOL-030.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-030.02` | 26–26 | بلوک | `Metrics` | 0 | ⬜ |
+| `TOOL-030.03` | 27–31 | بلوک | `__init__` | 0 | ⬜ |
+| `TOOL-030.04` | 32–37 | بلوک | `add` | 0 | ⬜ |
+| `TOOL-030.05` | 38–42 | بلوک | `fail` | 0 | ⬜ |
+| `TOOL-030.06` | 43–49 | بلوک | `api_path` | 1 | ⬜ |
+| `TOOL-030.07` | 50–85 | بلوک | `request` | 0 | ⬜ |
+| `TOOL-030.08` | 86–90 | بلوک | `expect` | 0 | ⬜ |
+| `TOOL-030.09` | 91–102 | بلوک | `parse_json` | 0 | ⬜ |
+| `TOOL-030.10` | 103–111 | بلوک | `find_order` | 0 | ⬜ |
+| `TOOL-030.11` | 112–149 | بلوک | `self_order_flow` | 0 | ⬜ |
+| `TOOL-030.12` | 150–155 | بلوک | `manager_crud` | 0 | ⬜ |
+| `TOOL-030.13` | 156–233 | بلوک | `post` | 1 | ⬜ |
+| `TOOL-030.14` | 234–237 | بلوک | `text_preview` | 0 | ⬜ |
+| `TOOL-030.15` | 238–276 | بلوک | `bulk_lifecycle` | 0 | ⬜ |
+| `TOOL-030.16` | 277–301 | بلوک | `build_read_routes` | 0 | ⬜ |
+| `TOOL-030.17` | 302–321 | بلوک | `manager_read_worker` | 0 | ⬜ |
+| `TOOL-030.18` | 322–331 | بلوک | `percentile` | 0 | ⬜ |
+| `TOOL-030.19` | 332–401 | بلوک | `write_report` | 0 | ⬜ |
+| `TOOL-030.20` | 402–479 | بلوک | `main` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-031</b> — <code>tools/full_system_route_smoke.py</code> (694 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
+<summary><b>TOOL-031</b> — <code>tools/food_system_verify.php</code> (96 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-031.01` | 1–26 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-031.02` | 27–27 | بلوک | `RouteSmoke` | 0 | ⬜ |
-| `TOOL-031.03` | 28–37 | بلوک | `__init__` | 0 | ⬜ |
-| `TOOL-031.04` | 38–67 | بلوک | `request` | 0 | ⬜ |
-| `TOOL-031.05` | 68–83 | بلوک | `login` | 0 | ⬜ |
-| `TOOL-031.06` | 84–107 | بلوک | `pages` | 0 | ⬜ |
-| `TOOL-031.07` | 108–114 | بلوک | `request_xlsx` | 0 | ⬜ |
-| `TOOL-031.08` | 115–166 | بلوک | `exports_and_cron_boundaries` | 0 | ⬜ |
-| `TOOL-031.09` | 167–184 | بلوک | `get_json` | 0 | ⬜ |
-| `TOOL-031.10` | 185–240 | بلوک | `apis` | 0 | ⬜ |
-| `TOOL-031.11` | 241–322 | بلوک | `role_matrix` | 0 | ⬜ |
-| `TOOL-031.12` | 323–378 | بلوک | `inventory_api_lifecycle` | 0 | ⬜ |
-| `TOOL-031.13` | 379–384 | بلوک | `_synthetic_iranian_national_code` | 0 | ⬜ |
-| `TOOL-031.14` | 385–455 | بلوک | `traffic_control_lifecycle` | 1 | ⬜ |
-| `TOOL-031.15` | 456–493 | بلوک | `food_ticket_group_lifecycle` | 1 | ⬜ |
-| `TOOL-031.16` | 494–506 | بلوک | `requester_permission_checks` | 0 | ⬜ |
-| `TOOL-031.17` | 507–559 | بلوک | `food_order_lifecycle` | 0 | ⬜ |
-| `TOOL-031.18` | 560–694 | بلوک | `main` | 2 | ⬜ |
+| `TOOL-031.01` | 1–96 | ناحیه | `بلوک رویه‌ای 1-96` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-032</b> — <code>tools/install-1.50.php</code> (92 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-032</b> — <code>tools/full_system_route_smoke.py</code> (694 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-032.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 1 | ⬜ |
-| `TOOL-032.02` | 43–49 | ناحیه | `اگر دیتابیس از قبل کامل است، چیزی تغییر نمی‌کند و ` | 0 | ⬜ |
-| `TOOL-032.03` | 50–54 | ناحیه | `۱. پشتیبان` | 4 | ⬜ |
-| `TOOL-032.04` | 55–75 | ناحیه | `۲. نقش‌ها: مقادیر فعلی ENUM حفظ می‌شود و فقط نقش‌ه` | 4 | ⬜ |
-| `TOOL-032.05` | 76–83 | ناحیه | `۳. ستون اجبار تغییر رمز` | 4 | ⬜ |
-| `TOOL-032.06` | 84–92 | ناحیه | `۴. بررسی نهایی` | 3 | ⬜ |
+| `TOOL-032.01` | 1–26 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-032.02` | 27–27 | بلوک | `RouteSmoke` | 0 | ⬜ |
+| `TOOL-032.03` | 28–37 | بلوک | `__init__` | 0 | ⬜ |
+| `TOOL-032.04` | 38–67 | بلوک | `request` | 0 | ⬜ |
+| `TOOL-032.05` | 68–83 | بلوک | `login` | 0 | ⬜ |
+| `TOOL-032.06` | 84–107 | بلوک | `pages` | 0 | ⬜ |
+| `TOOL-032.07` | 108–114 | بلوک | `request_xlsx` | 0 | ⬜ |
+| `TOOL-032.08` | 115–166 | بلوک | `exports_and_cron_boundaries` | 0 | ⬜ |
+| `TOOL-032.09` | 167–184 | بلوک | `get_json` | 0 | ⬜ |
+| `TOOL-032.10` | 185–240 | بلوک | `apis` | 0 | ⬜ |
+| `TOOL-032.11` | 241–322 | بلوک | `role_matrix` | 0 | ⬜ |
+| `TOOL-032.12` | 323–378 | بلوک | `inventory_api_lifecycle` | 0 | ⬜ |
+| `TOOL-032.13` | 379–384 | بلوک | `_synthetic_iranian_national_code` | 0 | ⬜ |
+| `TOOL-032.14` | 385–455 | بلوک | `traffic_control_lifecycle` | 1 | ⬜ |
+| `TOOL-032.15` | 456–493 | بلوک | `food_ticket_group_lifecycle` | 1 | ⬜ |
+| `TOOL-032.16` | 494–506 | بلوک | `requester_permission_checks` | 0 | ⬜ |
+| `TOOL-032.17` | 507–559 | بلوک | `food_order_lifecycle` | 0 | ⬜ |
+| `TOOL-032.18` | 560–694 | بلوک | `main` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-033</b> — <code>tools/lint-php-syntax.php</code> (25 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-033</b> — <code>tools/install-1.50.php</code> (92 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-033.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
+| `TOOL-033.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 1 | ⬜ |
+| `TOOL-033.02` | 43–49 | ناحیه | `اگر دیتابیس از قبل کامل است، چیزی تغییر نمی‌کند و ` | 0 | ⬜ |
+| `TOOL-033.03` | 50–54 | ناحیه | `۱. پشتیبان` | 4 | ⬜ |
+| `TOOL-033.04` | 55–75 | ناحیه | `۲. نقش‌ها: مقادیر فعلی ENUM حفظ می‌شود و فقط نقش‌ه` | 4 | ⬜ |
+| `TOOL-033.05` | 76–83 | ناحیه | `۳. ستون اجبار تغییر رمز` | 4 | ⬜ |
+| `TOOL-033.06` | 84–92 | ناحیه | `۴. بررسی نهایی` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-034</b> — <code>tools/migrate-legacy-attachments.php</code> (42 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-034</b> — <code>tools/lint-php-syntax.php</code> (25 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-034.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 1 | ⬜ |
+| `TOOL-034.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-035</b> — <code>tools/preview_asset_names.php</code> (126 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-035</b> — <code>tools/migrate-legacy-attachments.php</code> (42 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-035.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TOOL-035.02` | 22–42 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-035.03` | 43–44 | ناحیه | `بلوک رویه‌ای 43-44` | 0 | ⬜ |
-| `TOOL-035.04` | 45–48 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-035.05` | 49–52 | تابع | `e` | 0 | ⬜ |
-| `TOOL-035.06` | 53–126 | ناحیه | `بلوک رویه‌ای 53-126` | 5 | ⬜ |
+| `TOOL-035.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-036</b> — <code>tools/preview_food_import.php</code> (68 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-036</b> — <code>tools/preview_asset_names.php</code> (126 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-036.01` | 1–68 | ناحیه | `بلوک رویه‌ای 1-68` | 0 | ⬜ |
+| `TOOL-036.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TOOL-036.02` | 22–42 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-036.03` | 43–44 | ناحیه | `بلوک رویه‌ای 43-44` | 0 | ⬜ |
+| `TOOL-036.04` | 45–48 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-036.05` | 49–52 | تابع | `e` | 0 | ⬜ |
+| `TOOL-036.06` | 53–126 | ناحیه | `بلوک رویه‌ای 53-126` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-037</b> — <code>tools/print_calibration.php</code> (137 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TOOL-037</b> — <code>tools/preview_food_import.php</code> (68 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-037.01` | 1–65 | ناحیه | `بلوک رویه‌ای 1-65` | 0 | ⬜ |
-| `TOOL-037.02` | 66–78 | ناحیه | `تنظیمات فعلی و اینکه چه چیزی روی این کارت اثر می‌گ` | 0 | ⬜ |
-| `TOOL-037.03` | 79–102 | ناحیه | `ساخت کارت با همان تابع مشترک چاپ (منبع یکتا: food_` | 2 | ⬜ |
-| `TOOL-037.04` | 103–112 | ناحیه | `ارسال به چاپگر` | 0 | ⬜ |
-| `TOOL-037.05` | 113–137 | ناحیه | `مسیر: windows_share` | 0 | ⬜ |
+| `TOOL-037.01` | 1–68 | ناحیه | `بلوک رویه‌ای 1-68` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-038</b> — <code>tools/print_test.php</code> (51 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-038</b> — <code>tools/print_calibration.php</code> (137 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-038.01` | 1–51 | ناحیه | `بلوک رویه‌ای 1-51` | 1 | ⬜ |
+| `TOOL-038.01` | 1–65 | ناحیه | `بلوک رویه‌ای 1-65` | 0 | ⬜ |
+| `TOOL-038.02` | 66–78 | ناحیه | `تنظیمات فعلی و اینکه چه چیزی روی این کارت اثر می‌گ` | 0 | ⬜ |
+| `TOOL-038.03` | 79–102 | ناحیه | `ساخت کارت با همان تابع مشترک چاپ (منبع یکتا: food_` | 2 | ⬜ |
+| `TOOL-038.04` | 103–112 | ناحیه | `ارسال به چاپگر` | 0 | ⬜ |
+| `TOOL-038.05` | 113–137 | ناحیه | `مسیر: windows_share` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-039</b> — <code>tools/render_code_map.py</code> (153 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TOOL-039</b> — <code>tools/print_test.php</code> (51 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-039.01` | 1–57 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-039.02` | 58–153 | بلوک | `addr_cell` | 0 | ⬜ |
+| `TOOL-039.01` | 1–51 | ناحیه | `بلوک رویه‌ای 1-51` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-040</b> — <code>tools/session-boot.py</code> (347 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TOOL-040</b> — <code>tools/render_code_map.py</code> (153 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-040.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-040.02` | 50–56 | بلوک | `read` | 0 | ⬜ |
-| `TOOL-040.03` | 57–66 | بلوک | `run` | 0 | ⬜ |
-| `TOOL-040.04` | 67–67 | بلوک | `git_info` | 0 | ⬜ |
-| `TOOL-040.05` | 68–87 | بلوک | `q` | 0 | ⬜ |
-| `TOOL-040.06` | 88–105 | بلوک | `extract_section` | 0 | ⬜ |
-| `TOOL-040.07` | 106–115 | بلوک | `skill_rows` | 0 | ⬜ |
-| `TOOL-040.08` | 116–120 | بلوک | `bullets` | 0 | ⬜ |
-| `TOOL-040.09` | 121–137 | بلوک | `refresh_map_if_stale` | 0 | ⬜ |
-| `TOOL-040.10` | 138–169 | بلوک | `block_index_status` | 0 | ⬜ |
-| `TOOL-040.11` | 170–181 | بلوک | `run_guard_tests` | 0 | ⬜ |
-| `TOOL-040.12` | 182–237 | بلوک | `build_context` | 0 | ⬜ |
-| `TOOL-040.13` | 238–323 | بلوک | `print_briefing` | 0 | ⬜ |
-| `TOOL-040.14` | 324–347 | بلوک | `main` | 0 | ⬜ |
+| `TOOL-040.01` | 1–57 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-040.02` | 58–153 | بلوک | `addr_cell` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-041</b> — <code>tools/set_attendance_password.php</code> (110 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-041</b> — <code>tools/session-boot.py</code> (347 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-041.01` | 1–110 | ناحیه | `بلوک رویه‌ای 1-110` | 6 | ⬜ |
+| `TOOL-041.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-041.02` | 50–56 | بلوک | `read` | 0 | ⬜ |
+| `TOOL-041.03` | 57–66 | بلوک | `run` | 0 | ⬜ |
+| `TOOL-041.04` | 67–67 | بلوک | `git_info` | 0 | ⬜ |
+| `TOOL-041.05` | 68–87 | بلوک | `q` | 0 | ⬜ |
+| `TOOL-041.06` | 88–105 | بلوک | `extract_section` | 0 | ⬜ |
+| `TOOL-041.07` | 106–115 | بلوک | `skill_rows` | 0 | ⬜ |
+| `TOOL-041.08` | 116–120 | بلوک | `bullets` | 0 | ⬜ |
+| `TOOL-041.09` | 121–137 | بلوک | `refresh_map_if_stale` | 0 | ⬜ |
+| `TOOL-041.10` | 138–169 | بلوک | `block_index_status` | 0 | ⬜ |
+| `TOOL-041.11` | 170–181 | بلوک | `run_guard_tests` | 0 | ⬜ |
+| `TOOL-041.12` | 182–237 | بلوک | `build_context` | 0 | ⬜ |
+| `TOOL-041.13` | 238–323 | بلوک | `print_briefing` | 0 | ⬜ |
+| `TOOL-041.14` | 324–347 | بلوک | `main` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-042</b> — <code>tools/set_print_gap.php</code> (42 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-042</b> — <code>tools/set_attendance_password.php</code> (110 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-042.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 0 | ⬜ |
+| `TOOL-042.01` | 1–110 | ناحیه | `بلوک رویه‌ای 1-110` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-043</b> — <code>tools/sync_domain_users.php</code> (41 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-043</b> — <code>tools/set_print_gap.php</code> (42 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-043.01` | 1–41 | ناحیه | `بلوک رویه‌ای 1-41` | 3 | ⬜ |
+| `TOOL-043.01` | 1–42 | ناحیه | `بلوک رویه‌ای 1-42` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-044</b> — <code>tools/system_audit.php</code> (93 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-044</b> — <code>tools/sync_domain_users.php</code> (41 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-044.01` | 1–93 | ناحیه | `بلوک رویه‌ای 1-93` | 1 | ⬜ |
+| `TOOL-044.01` | 1–41 | ناحیه | `بلوک رویه‌ای 1-41` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-045</b> — <code>tools/system_loadtest.php</code> (711 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
+<summary><b>TOOL-045</b> — <code>tools/system_audit.php</code> (93 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-045.01` | 1–38 | ناحیه | `بلوک رویه‌ای 1-38` | 0 | ⬜ |
-| `TOOL-045.02` | 39–61 | ناحیه | `پارامترها` | 0 | ⬜ |
-| `TOOL-045.03` | 62–81 | ناحیه | `بوت‌استرپ` | 1 | ⬜ |
-| `TOOL-045.04` | 82–94 | ناحیه | `ساختار گزارش` | 0 | ⬜ |
-| `TOOL-045.05` | 95–100 | تابع | `out` | 3 | ⬜ |
-| `TOOL-045.06` | 101–107 | تابع | `head` | 0 | ⬜ |
-| `TOOL-045.07` | 108–116 | تابع | `pad` | 0 | ⬜ |
-| `TOOL-045.08` | 117–121 | تابع | `row` | 0 | ⬜ |
-| `TOOL-045.09` | 122–126 | تابع | `sect` | 0 | ⬜ |
-| `TOOL-045.10` | 127–135 | تابع | `safe` | 0 | ⬜ |
-| `TOOL-045.11` | 136–139 | ناحیه | `بلوک رویه‌ای 136-139` | 0 | ⬜ |
-| `TOOL-045.12` | 140–174 | ناحیه | `بخش A — محیط` | 3 | ⬜ |
-| `TOOL-045.13` | 175–175 | ناحیه | `بخش B — کاوش قابلیت‌ها` | 0 | ⬜ |
-| `TOOL-045.14` | 176–176 | ناحیه | `این بخش مهم‌ترین قسمت برای تشخیص نسخه است: دقیقاً ` | 0 | ⬜ |
-| `TOOL-045.15` | 177–207 | ناحیه | `اصلاحات روی این نصب حاضرند و کدام نیستند.` | 0 | ⬜ |
-| `TOOL-045.16` | 208–252 | ناحیه | `بخش C — پایگاه داده و اسکیما` | 5 | ⬜ |
-| `TOOL-045.17` | 253–253 | ناحیه | `بخش D — یکپارچگی شمارهٔ درخواست (فقط‌خواندنی)` | 0 | ⬜ |
-| `TOOL-045.18` | 254–298 | ناحیه | `این بخش همان باگی را می‌سنجد که بیشترین اثر را روی` | 0 | ⬜ |
-| `TOOL-045.19` | 299–299 | ناحیه | `بخش E — کارایی صفحه‌ها (فقط‌خواندنی)` | 0 | ⬜ |
-| `TOOL-045.20` | 300–343 | ناحیه | `الگوی کوئری‌های فهرست را با داده‌های واقعی زمان می` | 0 | ⬜ |
-| `TOOL-045.21` | 344–371 | ناحیه | `بخش F — ایندکس‌های جدول درخواست` | 0 | ⬜ |
-| `TOOL-045.22` | 372–405 | ناحیه | `بخش G — سلامت لاگ و ممیزی` | 6 | ⬜ |
-| `TOOL-045.23` | 406–456 | ناحیه | `بخش H — منطق دسترسی (فقط‌خواندنی، بدون نوشتن)` | 0 | ⬜ |
-| `TOOL-045.24` | 457–677 | ناحیه | `بخش I — حالت نوشتن: ساخت کاربر و درخواست` | **9** | ⬜ |
-| `TOOL-045.25` | 678–711 | ناحیه | `جمع‌بندی` | 2 | ⬜ |
+| `TOOL-045.01` | 1–93 | ناحیه | `بلوک رویه‌ای 1-93` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-046</b> — <code>tools/test_access_coverage_offline.php</code> (238 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TOOL-046</b> — <code>tools/system_loadtest.php</code> (711 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-046.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TOOL-046.02` | 22–22 | ناحیه | `تزریق حداقلی محیط: DB وجود ندارد` | 0 | ⬜ |
-| `TOOL-046.03` | 23–26 | تابع | `db` | 0 | ⬜ |
-| `TOOL-046.04` | 28–31 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-046.05` | 33–35 | تابع | `save_setting` | 0 | ⬜ |
-| `TOOL-046.06` | 37–58 | ناحیه | `پیش‌بررسی: این آزمون باید در ریشهٔ سامانه (کنار in` | 0 | ⬜ |
-| `TOOL-046.07` | 59–69 | تابع | `check` | 0 | ⬜ |
-| `TOOL-046.08` | 70–90 | ناحیه | `بلوک رویه‌ای 70-90` | 0 | ⬜ |
-| `TOOL-046.09` | 91–103 | ناحیه | `بدون دیتابیس، جدول role_permissions آماده نیست ⇒ م` | 0 | ⬜ |
-| `TOOL-046.10` | 104–105 | ناحیه | `نقش دست‌نخورده ⇒ پیش‌فرض کد (حتی اگر ردیف‌های قدیم` | 0 | ⬜ |
-| `TOOL-046.11` | 106–107 | ناحیه | `نقش ذخیره‌شده ⇒ همان مقادیر فرم، حتی اگر با پیش‌فر` | 0 | ⬜ |
-| `TOOL-046.12` | 108–141 | ناحیه | `ذخیرهٔ «هیچ‌کدام» یک تصمیم عمدی است و باید محترم ب` | 1 | ⬜ |
-| `TOOL-046.13` | 142–142 | ناحیه | `این فهرست عمدی است: کدهایی که فقط «برچسب» هستند و ` | 0 | ⬜ |
-| `TOOL-046.14` | 143–238 | ناحیه | `افزودن کد بی‌اثر جدید یا وصل‌کردن یکی از این‌ها با` | 2 | ⬜ |
+| `TOOL-046.01` | 1–38 | ناحیه | `بلوک رویه‌ای 1-38` | 0 | ⬜ |
+| `TOOL-046.02` | 39–61 | ناحیه | `پارامترها` | 0 | ⬜ |
+| `TOOL-046.03` | 62–81 | ناحیه | `بوت‌استرپ` | 1 | ⬜ |
+| `TOOL-046.04` | 82–94 | ناحیه | `ساختار گزارش` | 0 | ⬜ |
+| `TOOL-046.05` | 95–100 | تابع | `out` | 3 | ⬜ |
+| `TOOL-046.06` | 101–107 | تابع | `head` | 0 | ⬜ |
+| `TOOL-046.07` | 108–116 | تابع | `pad` | 0 | ⬜ |
+| `TOOL-046.08` | 117–121 | تابع | `row` | 0 | ⬜ |
+| `TOOL-046.09` | 122–126 | تابع | `sect` | 0 | ⬜ |
+| `TOOL-046.10` | 127–135 | تابع | `safe` | 0 | ⬜ |
+| `TOOL-046.11` | 136–139 | ناحیه | `بلوک رویه‌ای 136-139` | 0 | ⬜ |
+| `TOOL-046.12` | 140–174 | ناحیه | `بخش A — محیط` | 3 | ⬜ |
+| `TOOL-046.13` | 175–175 | ناحیه | `بخش B — کاوش قابلیت‌ها` | 0 | ⬜ |
+| `TOOL-046.14` | 176–176 | ناحیه | `این بخش مهم‌ترین قسمت برای تشخیص نسخه است: دقیقاً ` | 0 | ⬜ |
+| `TOOL-046.15` | 177–207 | ناحیه | `اصلاحات روی این نصب حاضرند و کدام نیستند.` | 0 | ⬜ |
+| `TOOL-046.16` | 208–252 | ناحیه | `بخش C — پایگاه داده و اسکیما` | 5 | ⬜ |
+| `TOOL-046.17` | 253–253 | ناحیه | `بخش D — یکپارچگی شمارهٔ درخواست (فقط‌خواندنی)` | 0 | ⬜ |
+| `TOOL-046.18` | 254–298 | ناحیه | `این بخش همان باگی را می‌سنجد که بیشترین اثر را روی` | 0 | ⬜ |
+| `TOOL-046.19` | 299–299 | ناحیه | `بخش E — کارایی صفحه‌ها (فقط‌خواندنی)` | 0 | ⬜ |
+| `TOOL-046.20` | 300–343 | ناحیه | `الگوی کوئری‌های فهرست را با داده‌های واقعی زمان می` | 0 | ⬜ |
+| `TOOL-046.21` | 344–371 | ناحیه | `بخش F — ایندکس‌های جدول درخواست` | 0 | ⬜ |
+| `TOOL-046.22` | 372–405 | ناحیه | `بخش G — سلامت لاگ و ممیزی` | 6 | ⬜ |
+| `TOOL-046.23` | 406–456 | ناحیه | `بخش H — منطق دسترسی (فقط‌خواندنی، بدون نوشتن)` | 0 | ⬜ |
+| `TOOL-046.24` | 457–677 | ناحیه | `بخش I — حالت نوشتن: ساخت کاربر و درخواست` | **9** | ⬜ |
+| `TOOL-046.25` | 678–711 | ناحیه | `جمع‌بندی` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-047</b> — <code>tools/test_api_contract_offline.php</code> (241 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-047</b> — <code>tools/test_access_coverage_offline.php</code> (238 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-047.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
-| `TOOL-047.02` | 29–39 | تابع | `check` | 0 | ⬜ |
-| `TOOL-047.03` | 40–132 | ناحیه | `بلوک رویه‌ای 40-132` | 1 | ⬜ |
-| `TOOL-047.04` | 133–136 | ناحیه | `مسیرهای ورود عمومی صریحاً پیش از نگاشت مجوز بررسی ` | 0 | ⬜ |
-| `TOOL-047.05` | 137–139 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
-| `TOOL-047.06` | 140–241 | ناحیه | `مسیر: login\|sso-login` | 0 | ⬜ |
+| `TOOL-047.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TOOL-047.02` | 22–22 | ناحیه | `تزریق حداقلی محیط: DB وجود ندارد` | 0 | ⬜ |
+| `TOOL-047.03` | 23–26 | تابع | `db` | 0 | ⬜ |
+| `TOOL-047.04` | 28–31 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-047.05` | 33–35 | تابع | `save_setting` | 0 | ⬜ |
+| `TOOL-047.06` | 37–58 | ناحیه | `پیش‌بررسی: این آزمون باید در ریشهٔ سامانه (کنار in` | 0 | ⬜ |
+| `TOOL-047.07` | 59–69 | تابع | `check` | 0 | ⬜ |
+| `TOOL-047.08` | 70–90 | ناحیه | `بلوک رویه‌ای 70-90` | 0 | ⬜ |
+| `TOOL-047.09` | 91–103 | ناحیه | `بدون دیتابیس، جدول role_permissions آماده نیست ⇒ م` | 0 | ⬜ |
+| `TOOL-047.10` | 104–105 | ناحیه | `نقش دست‌نخورده ⇒ پیش‌فرض کد (حتی اگر ردیف‌های قدیم` | 0 | ⬜ |
+| `TOOL-047.11` | 106–107 | ناحیه | `نقش ذخیره‌شده ⇒ همان مقادیر فرم، حتی اگر با پیش‌فر` | 0 | ⬜ |
+| `TOOL-047.12` | 108–141 | ناحیه | `ذخیرهٔ «هیچ‌کدام» یک تصمیم عمدی است و باید محترم ب` | 1 | ⬜ |
+| `TOOL-047.13` | 142–142 | ناحیه | `این فهرست عمدی است: کدهایی که فقط «برچسب» هستند و ` | 0 | ⬜ |
+| `TOOL-047.14` | 143–238 | ناحیه | `افزودن کد بی‌اثر جدید یا وصل‌کردن یکی از این‌ها با` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-048</b> — <code>tools/test_asset_names_offline.php</code> (156 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TOOL-048</b> — <code>tools/test_api_contract_offline.php</code> (241 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-048.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
-| `TOOL-048.02` | 21–31 | تابع | `check` | 0 | ⬜ |
-| `TOOL-048.03` | 33–55 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-048.04` | 56–59 | ناحیه | `بلوک رویه‌ای 56-59` | 0 | ⬜ |
-| `TOOL-048.05` | 60–61 | ناحیه | `محیط حداقلی: setting() و e() و mb_* (همان چیزهایی ` | 0 | ⬜ |
-| `TOOL-048.06` | 62–65 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-048.07` | 66–69 | تابع | `e` | 0 | ⬜ |
-| `TOOL-048.08` | 70–73 | تابع | `set_style` | 0 | ⬜ |
-| `TOOL-048.09` | 74–156 | ناحیه | `بلوک رویه‌ای 74-156` | 4 | ⬜ |
+| `TOOL-048.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
+| `TOOL-048.02` | 29–39 | تابع | `check` | 0 | ⬜ |
+| `TOOL-048.03` | 40–132 | ناحیه | `بلوک رویه‌ای 40-132` | 1 | ⬜ |
+| `TOOL-048.04` | 133–136 | ناحیه | `مسیرهای ورود عمومی صریحاً پیش از نگاشت مجوز بررسی ` | 0 | ⬜ |
+| `TOOL-048.05` | 137–139 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
+| `TOOL-048.06` | 140–241 | ناحیه | `مسیر: login\|sso-login` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-049</b> — <code>tools/test_brand_neutral_offline.php</code> (150 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TOOL-049</b> — <code>tools/test_asset_names_offline.php</code> (156 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-049.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 0 | ⬜ |
-| `TOOL-049.02` | 28–39 | تابع | `check` | 0 | ⬜ |
-| `TOOL-049.03` | 40–150 | ناحیه | `بلوک رویه‌ای 40-150` | 3 | ⬜ |
+| `TOOL-049.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
+| `TOOL-049.02` | 21–31 | تابع | `check` | 0 | ⬜ |
+| `TOOL-049.03` | 33–55 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-049.04` | 56–59 | ناحیه | `بلوک رویه‌ای 56-59` | 0 | ⬜ |
+| `TOOL-049.05` | 60–61 | ناحیه | `محیط حداقلی: setting() و e() و mb_* (همان چیزهایی ` | 0 | ⬜ |
+| `TOOL-049.06` | 62–65 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-049.07` | 66–69 | تابع | `e` | 0 | ⬜ |
+| `TOOL-049.08` | 70–73 | تابع | `set_style` | 0 | ⬜ |
+| `TOOL-049.09` | 74–156 | ناحیه | `بلوک رویه‌ای 74-156` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-050</b> — <code>tools/test_column_detect_offline.php</code> (285 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
+<summary><b>TOOL-050</b> — <code>tools/test_brand_neutral_offline.php</code> (150 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-050.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
-| `TOOL-050.02` | 31–31 | ناحیه | `Isolated functions log expected ALTER failures thr` | 0 | ⬜ |
-| `TOOL-050.03` | 32–35 | تابع | `app_error_log` | 0 | ⬜ |
-| `TOOL-050.04` | 37–48 | تابع | `check` | 0 | ⬜ |
-| `TOOL-050.05` | 50–72 | تابع | `grab` | 0 | ⬜ |
-| `TOOL-050.06` | 74–96 | کلاس | `FakeStatement` | 0 | ⬜ |
-| `TOOL-050.07` | 98–130 | کلاس | `FakeDb` | 4 | ⬜ |
-| `TOOL-050.08` | 131–132 | ناحیه | `بلوک رویه‌ای 131-132` | 0 | ⬜ |
-| `TOOL-050.09` | 133–137 | تابع | `db` | 0 | ⬜ |
-| `TOOL-050.10` | 138–144 | ناحیه | `بلوک رویه‌ای 138-144` | 4 | ⬜ |
-| `TOOL-050.11` | 145–146 | ناحیه | `دیتابیس زنده در دسترس نیست → مسیر دوم (db_table_co` | 0 | ⬜ |
-| `TOOL-050.12` | 147–151 | تابع | `db_table_columns` | 0 | ⬜ |
-| `TOOL-050.13` | 152–161 | ناحیه | `بلوک رویه‌ای 152-161` | 0 | ⬜ |
-| `TOOL-050.14` | 162–162 | ناحیه | `تابع قبلی قابل بازتعریف نیست؛ همان تابع از مسیر دو` | 0 | ⬜ |
-| `TOOL-050.15` | 163–164 | ناحیه | `(این جدول در آزمون‌های آفلاین با SQLite ساخته می‌ش` | 0 | ⬜ |
-| `TOOL-050.16` | 165–235 | ناحیه | `شبیه‌سازی شکل فهرست با یک آرایه موقت: تابع با (arr` | 4 | ⬜ |
-| `TOOL-050.17` | 236–247 | ناحیه | `۷-الف) ستون نیست، ALTER موفق ⇒ باید true برگردد (ق` | 0 | ⬜ |
-| `TOOL-050.18` | 248–254 | ناحیه | `۷-ب) ستون هست ⇒ هیچ ALTER نباید زده شود (سناریوی و` | 0 | ⬜ |
-| `TOOL-050.19` | 255–285 | ناحیه | `۷-ج) ستون نیست و دسترسی ALTER هم نیست ⇒ پیام روشن ` | 0 | ⬜ |
+| `TOOL-050.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 0 | ⬜ |
+| `TOOL-050.02` | 28–39 | تابع | `check` | 0 | ⬜ |
+| `TOOL-050.03` | 40–150 | ناحیه | `بلوک رویه‌ای 40-150` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-051</b> — <code>tools/test_cron_synthetic.php</code> (214 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TOOL-051</b> — <code>tools/test_column_detect_offline.php</code> (285 خط، 19 آدرس، بازبینی‌شده 0/19)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-051.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
-| `TOOL-051.02` | 26–34 | تابع | `cron_assert` | 0 | ⬜ |
-| `TOOL-051.03` | 36–53 | تابع | `cron_run` | 4 | ⬜ |
-| `TOOL-051.04` | 55–80 | تابع | `cron_insert_ticket` | 6 | ⬜ |
-| `TOOL-051.05` | 82–89 | تابع | `cron_run_assert` | 0 | ⬜ |
-| `TOOL-051.06` | 90–214 | ناحیه | `بلوک رویه‌ای 90-214` | 6 | ⬜ |
+| `TOOL-051.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
+| `TOOL-051.02` | 31–31 | ناحیه | `Isolated functions log expected ALTER failures thr` | 0 | ⬜ |
+| `TOOL-051.03` | 32–35 | تابع | `app_error_log` | 0 | ⬜ |
+| `TOOL-051.04` | 37–48 | تابع | `check` | 0 | ⬜ |
+| `TOOL-051.05` | 50–72 | تابع | `grab` | 0 | ⬜ |
+| `TOOL-051.06` | 74–96 | کلاس | `FakeStatement` | 0 | ⬜ |
+| `TOOL-051.07` | 98–130 | کلاس | `FakeDb` | 4 | ⬜ |
+| `TOOL-051.08` | 131–132 | ناحیه | `بلوک رویه‌ای 131-132` | 0 | ⬜ |
+| `TOOL-051.09` | 133–137 | تابع | `db` | 0 | ⬜ |
+| `TOOL-051.10` | 138–144 | ناحیه | `بلوک رویه‌ای 138-144` | 4 | ⬜ |
+| `TOOL-051.11` | 145–146 | ناحیه | `دیتابیس زنده در دسترس نیست → مسیر دوم (db_table_co` | 0 | ⬜ |
+| `TOOL-051.12` | 147–151 | تابع | `db_table_columns` | 0 | ⬜ |
+| `TOOL-051.13` | 152–161 | ناحیه | `بلوک رویه‌ای 152-161` | 0 | ⬜ |
+| `TOOL-051.14` | 162–162 | ناحیه | `تابع قبلی قابل بازتعریف نیست؛ همان تابع از مسیر دو` | 0 | ⬜ |
+| `TOOL-051.15` | 163–164 | ناحیه | `(این جدول در آزمون‌های آفلاین با SQLite ساخته می‌ش` | 0 | ⬜ |
+| `TOOL-051.16` | 165–235 | ناحیه | `شبیه‌سازی شکل فهرست با یک آرایه موقت: تابع با (arr` | 4 | ⬜ |
+| `TOOL-051.17` | 236–247 | ناحیه | `۷-الف) ستون نیست، ALTER موفق ⇒ باید true برگردد (ق` | 0 | ⬜ |
+| `TOOL-051.18` | 248–254 | ناحیه | `۷-ب) ستون هست ⇒ هیچ ALTER نباید زده شود (سناریوی و` | 0 | ⬜ |
+| `TOOL-051.19` | 255–285 | ناحیه | `۷-ج) ستون نیست و دسترسی ALTER هم نیست ⇒ پیام روشن ` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-052</b> — <code>tools/test_date_input_offline.php</code> (153 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TOOL-052</b> — <code>tools/test_cron_synthetic.php</code> (214 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-052.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TOOL-052.02` | 22–59 | تابع | `extractFunction` | 0 | ⬜ |
-| `TOOL-052.03` | 60–64 | ناحیه | `بلوک رویه‌ای 60-64` | 0 | ⬜ |
-| `TOOL-052.04` | 65–67 | ناحیه | `مبدل خود سامانه با نام مرجع (تا مسیر پشتیبان محلی ` | 4 | ⬜ |
-| `TOOL-052.05` | 68–75 | ناحیه | `توابع فایل فیش غذا (food_ticket_parse_date در نبود` | 4 | ⬜ |
-| `TOOL-052.06` | 76–86 | تابع | `check` | 0 | ⬜ |
-| `TOOL-052.07` | 87–153 | ناحیه | `بلوک رویه‌ای 87-153` | 3 | ⬜ |
+| `TOOL-052.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
+| `TOOL-052.02` | 26–34 | تابع | `cron_assert` | 0 | ⬜ |
+| `TOOL-052.03` | 36–53 | تابع | `cron_run` | 4 | ⬜ |
+| `TOOL-052.04` | 55–80 | تابع | `cron_insert_ticket` | 6 | ⬜ |
+| `TOOL-052.05` | 82–89 | تابع | `cron_run_assert` | 0 | ⬜ |
+| `TOOL-052.06` | 90–214 | ناحیه | `بلوک رویه‌ای 90-214` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-053</b> — <code>tools/test_delivery_flow_offline.php</code> (222 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TOOL-053</b> — <code>tools/test_date_input_offline.php</code> (153 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-053.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
-| `TOOL-053.02` | 29–40 | تابع | `check` | 0 | ⬜ |
-| `TOOL-053.03` | 41–42 | ناحیه | `بلوک رویه‌ای 41-42` | 0 | ⬜ |
-| `TOOL-053.04` | 43–79 | کلاس | `MysqlishSqlite` | 4 | ⬜ |
-| `TOOL-053.05` | 80–91 | ناحیه | `بلوک رویه‌ای 80-91` | 5 | ⬜ |
-| `TOOL-053.06` | 92–96 | تابع | `db` | 0 | ⬜ |
-| `TOOL-053.07` | 98–107 | تابع | `db_table_columns` | 0 | ⬜ |
-| `TOOL-053.08` | 108–110 | ناحیه | `بلوک رویه‌ای 108-110` | 0 | ⬜ |
-| `TOOL-053.09` | 111–114 | تابع | `activity_log` | 0 | ⬜ |
-| `TOOL-053.10` | 116–138 | تابع | `grab` | 0 | ⬜ |
-| `TOOL-053.11` | 139–198 | ناحیه | `بلوک رویه‌ای 139-198` | 5 | ⬜ |
-| `TOOL-053.12` | 199–222 | ناحیه | `در SQLite امکان ALTER ADD COLUMN هست → سامانه خودش` | 0 | ⬜ |
+| `TOOL-053.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TOOL-053.02` | 22–59 | تابع | `extractFunction` | 0 | ⬜ |
+| `TOOL-053.03` | 60–64 | ناحیه | `بلوک رویه‌ای 60-64` | 0 | ⬜ |
+| `TOOL-053.04` | 65–67 | ناحیه | `مبدل خود سامانه با نام مرجع (تا مسیر پشتیبان محلی ` | 4 | ⬜ |
+| `TOOL-053.05` | 68–75 | ناحیه | `توابع فایل فیش غذا (food_ticket_parse_date در نبود` | 4 | ⬜ |
+| `TOOL-053.06` | 76–86 | تابع | `check` | 0 | ⬜ |
+| `TOOL-053.07` | 87–153 | ناحیه | `بلوک رویه‌ای 87-153` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-054</b> — <code>tools/test_employees_import_offline.php</code> (276 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TOOL-054</b> — <code>tools/test_delivery_flow_offline.php</code> (222 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-054.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
-| `TOOL-054.02` | 27–37 | تابع | `check` | 0 | ⬜ |
-| `TOOL-054.03` | 38–40 | ناحیه | `بلوک رویه‌ای 38-40` | 0 | ⬜ |
-| `TOOL-054.04` | 41–41 | ناحیه | `تابع bootstrap که ایمپورت برای نرمال‌سازی کد پرسنل` | 0 | ⬜ |
-| `TOOL-054.05` | 42–47 | تابع | `normalize_employee_number` | 0 | ⬜ |
-| `TOOL-054.06` | 48–50 | ناحیه | `بلوک رویه‌ای 48-50` | 0 | ⬜ |
-| `TOOL-054.07` | 51–73 | تابع | `db` | 4 | ⬜ |
-| `TOOL-054.08` | 74–76 | ناحیه | `بلوک رویه‌ای 74-76` | 0 | ⬜ |
-| `TOOL-054.09` | 77–120 | تابع | `make_xlsx` | 0 | ⬜ |
-| `TOOL-054.10` | 121–276 | ناحیه | `بلوک رویه‌ای 121-276` | **14** | ⬜ |
+| `TOOL-054.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
+| `TOOL-054.02` | 29–40 | تابع | `check` | 0 | ⬜ |
+| `TOOL-054.03` | 41–42 | ناحیه | `بلوک رویه‌ای 41-42` | 0 | ⬜ |
+| `TOOL-054.04` | 43–79 | کلاس | `MysqlishSqlite` | 4 | ⬜ |
+| `TOOL-054.05` | 80–91 | ناحیه | `بلوک رویه‌ای 80-91` | 5 | ⬜ |
+| `TOOL-054.06` | 92–96 | تابع | `db` | 0 | ⬜ |
+| `TOOL-054.07` | 98–107 | تابع | `db_table_columns` | 0 | ⬜ |
+| `TOOL-054.08` | 108–110 | ناحیه | `بلوک رویه‌ای 108-110` | 0 | ⬜ |
+| `TOOL-054.09` | 111–114 | تابع | `activity_log` | 0 | ⬜ |
+| `TOOL-054.10` | 116–138 | تابع | `grab` | 0 | ⬜ |
+| `TOOL-054.11` | 139–198 | ناحیه | `بلوک رویه‌ای 139-198` | 5 | ⬜ |
+| `TOOL-054.12` | 199–222 | ناحیه | `در SQLite امکان ALTER ADD COLUMN هست → سامانه خودش` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-055</b> — <code>tools/test_food_dupes_offline.php</code> (168 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TOOL-055</b> — <code>tools/test_employees_import_offline.php</code> (276 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-055.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TOOL-055.02` | 4–4 | ناحیه | `آزمون آفلاین: (۱) خطای ltrim با کلید عددی در نقشهٔ` | 0 | ⬜ |
-| `TOOL-055.03` | 5–8 | ناحیه | `توابع از فایل‌های اصلی استخراج می‌شوند و دیتابیس S` | 0 | ⬜ |
-| `TOOL-055.04` | 9–29 | تابع | `extract_php_function` | 0 | ⬜ |
-| `TOOL-055.05` | 30–39 | ناحیه | `بلوک رویه‌ای 30-39` | 4 | ⬜ |
-| `TOOL-055.06` | 40–43 | تابع | `db` | 0 | ⬜ |
-| `TOOL-055.07` | 44–47 | تابع | `food_order_schema_ensure` | 0 | ⬜ |
-| `TOOL-055.08` | 48–51 | تابع | `cfg` | 0 | ⬜ |
-| `TOOL-055.09` | 52–55 | تابع | `lac_default_hash` | 0 | ⬜ |
-| `TOOL-055.10` | 56–70 | ناحیه | `بلوک رویه‌ای 56-70` | 4 | ⬜ |
-| `TOOL-055.11` | 71–81 | تابع | `check` | 0 | ⬜ |
-| `TOOL-055.12` | 83–100 | ناحیه | `بخش ۱: نقشهٔ سفارش با کلید عددی و کد ملی تکراری (ق` | 5 | ⬜ |
-| `TOOL-055.13` | 101–168 | ناحیه | `بخش ۲: کد ملی یکتا در ثبت و ویرایش کارمند` | **10** | ⬜ |
+| `TOOL-055.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
+| `TOOL-055.02` | 27–37 | تابع | `check` | 0 | ⬜ |
+| `TOOL-055.03` | 38–40 | ناحیه | `بلوک رویه‌ای 38-40` | 0 | ⬜ |
+| `TOOL-055.04` | 41–41 | ناحیه | `تابع bootstrap که ایمپورت برای نرمال‌سازی کد پرسنل` | 0 | ⬜ |
+| `TOOL-055.05` | 42–47 | تابع | `normalize_employee_number` | 0 | ⬜ |
+| `TOOL-055.06` | 48–50 | ناحیه | `بلوک رویه‌ای 48-50` | 0 | ⬜ |
+| `TOOL-055.07` | 51–73 | تابع | `db` | 4 | ⬜ |
+| `TOOL-055.08` | 74–76 | ناحیه | `بلوک رویه‌ای 74-76` | 0 | ⬜ |
+| `TOOL-055.09` | 77–120 | تابع | `make_xlsx` | 0 | ⬜ |
+| `TOOL-055.10` | 121–276 | ناحیه | `بلوک رویه‌ای 121-276` | **14** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-056</b> — <code>tools/test_food_group_logic_offline.php</code> (133 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TOOL-056</b> — <code>tools/test_food_dupes_offline.php</code> (168 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-056.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
-| `TOOL-056.02` | 19–20 | ناحیه | `جایگزین‌های حداقلی توابع کمکی (همان قرارداد food-t` | 0 | ⬜ |
-| `TOOL-056.03` | 21–29 | تابع | `food_ticket_normalize_digits` | 0 | ⬜ |
-| `TOOL-056.04` | 30–31 | ناحیه | `بلوک رویه‌ای 30-31` | 0 | ⬜ |
-| `TOOL-056.05` | 32–46 | تابع | `food_ticket_code` | 0 | ⬜ |
-| `TOOL-056.06` | 47–48 | ناحیه | `بلوک رویه‌ای 47-48` | 0 | ⬜ |
-| `TOOL-056.07` | 49–52 | تابع | `food_ticket_digits` | 0 | ⬜ |
-| `TOOL-056.08` | 53–82 | ناحیه | `بلوک رویه‌ای 53-82` | 0 | ⬜ |
-| `TOOL-056.09` | 83–99 | ناحیه | `۱) محاسبهٔ حاضر/غایب/واجد شرایط/بدون سفارش/فیش‌گرف` | 0 | ⬜ |
-| `TOOL-056.10` | 100–103 | ناحیه | `۲) عضوی که قبلاً فیش گرفته دوباره واجد شرایط نمی‌ش` | 0 | ⬜ |
-| `TOOL-056.11` | 104–110 | ناحیه | `۳) استقلال تاریخ‌ها: با همان اعضا و بدون غیبت، در ` | 0 | ⬜ |
-| `TOOL-056.12` | 111–114 | ناحیه | `۴) خالص بودن تابع: اجرای دوباره با همان ورودی‌ها ن` | 0 | ⬜ |
-| `TOOL-056.13` | 115–118 | ناحیه | `۵) گروه بدون عضو` | 0 | ⬜ |
-| `TOOL-056.14` | 119–122 | ناحیه | `۶) غیبت بر سفارش اولویت دارد (کسی که سفارش دارد ول` | 0 | ⬜ |
-| `TOOL-056.15` | 123–125 | ناحیه | `۷) نرمال‌سازی کد ملی (فارسی/صفر ابتدایی) در کلید ف` | 0 | ⬜ |
-| `TOOL-056.16` | 126–126 | ناحیه | `نکته: موتور فیش (food_ticket_decide_punch) هم از f` | 0 | ⬜ |
-| `TOOL-056.17` | 127–133 | ناحیه | `حفظ می‌کند؛ پس کلیدهای گروهی و فردی دقیقاً یکسان س` | 0 | ⬜ |
+| `TOOL-056.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TOOL-056.02` | 4–4 | ناحیه | `آزمون آفلاین: (۱) خطای ltrim با کلید عددی در نقشهٔ` | 0 | ⬜ |
+| `TOOL-056.03` | 5–8 | ناحیه | `توابع از فایل‌های اصلی استخراج می‌شوند و دیتابیس S` | 0 | ⬜ |
+| `TOOL-056.04` | 9–29 | تابع | `extract_php_function` | 0 | ⬜ |
+| `TOOL-056.05` | 30–39 | ناحیه | `بلوک رویه‌ای 30-39` | 4 | ⬜ |
+| `TOOL-056.06` | 40–43 | تابع | `db` | 0 | ⬜ |
+| `TOOL-056.07` | 44–47 | تابع | `food_order_schema_ensure` | 0 | ⬜ |
+| `TOOL-056.08` | 48–51 | تابع | `cfg` | 0 | ⬜ |
+| `TOOL-056.09` | 52–55 | تابع | `lac_default_hash` | 0 | ⬜ |
+| `TOOL-056.10` | 56–70 | ناحیه | `بلوک رویه‌ای 56-70` | 4 | ⬜ |
+| `TOOL-056.11` | 71–81 | تابع | `check` | 0 | ⬜ |
+| `TOOL-056.12` | 83–100 | ناحیه | `بخش ۱: نقشهٔ سفارش با کلید عددی و کد ملی تکراری (ق` | 5 | ⬜ |
+| `TOOL-056.13` | 101–168 | ناحیه | `بخش ۲: کد ملی یکتا در ثبت و ویرایش کارمند` | **10** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-057</b> — <code>tools/test_food_group_representative.php</code> (517 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-057</b> — <code>tools/test_food_group_logic_offline.php</code> (133 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-057.01` | 1–517 | ناحیه | `بلوک رویه‌ای 1-517` | **16** | ⬜ |
+| `TOOL-057.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
+| `TOOL-057.02` | 19–20 | ناحیه | `جایگزین‌های حداقلی توابع کمکی (همان قرارداد food-t` | 0 | ⬜ |
+| `TOOL-057.03` | 21–29 | تابع | `food_ticket_normalize_digits` | 0 | ⬜ |
+| `TOOL-057.04` | 30–31 | ناحیه | `بلوک رویه‌ای 30-31` | 0 | ⬜ |
+| `TOOL-057.05` | 32–46 | تابع | `food_ticket_code` | 0 | ⬜ |
+| `TOOL-057.06` | 47–48 | ناحیه | `بلوک رویه‌ای 47-48` | 0 | ⬜ |
+| `TOOL-057.07` | 49–52 | تابع | `food_ticket_digits` | 0 | ⬜ |
+| `TOOL-057.08` | 53–82 | ناحیه | `بلوک رویه‌ای 53-82` | 0 | ⬜ |
+| `TOOL-057.09` | 83–99 | ناحیه | `۱) محاسبهٔ حاضر/غایب/واجد شرایط/بدون سفارش/فیش‌گرف` | 0 | ⬜ |
+| `TOOL-057.10` | 100–103 | ناحیه | `۲) عضوی که قبلاً فیش گرفته دوباره واجد شرایط نمی‌ش` | 0 | ⬜ |
+| `TOOL-057.11` | 104–110 | ناحیه | `۳) استقلال تاریخ‌ها: با همان اعضا و بدون غیبت، در ` | 0 | ⬜ |
+| `TOOL-057.12` | 111–114 | ناحیه | `۴) خالص بودن تابع: اجرای دوباره با همان ورودی‌ها ن` | 0 | ⬜ |
+| `TOOL-057.13` | 115–118 | ناحیه | `۵) گروه بدون عضو` | 0 | ⬜ |
+| `TOOL-057.14` | 119–122 | ناحیه | `۶) غیبت بر سفارش اولویت دارد (کسی که سفارش دارد ول` | 0 | ⬜ |
+| `TOOL-057.15` | 123–125 | ناحیه | `۷) نرمال‌سازی کد ملی (فارسی/صفر ابتدایی) در کلید ف` | 0 | ⬜ |
+| `TOOL-057.16` | 126–126 | ناحیه | `نکته: موتور فیش (food_ticket_decide_punch) هم از f` | 0 | ⬜ |
+| `TOOL-057.17` | 127–133 | ناحیه | `حفظ می‌کند؛ پس کلیدهای گروهی و فردی دقیقاً یکسان س` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-058</b> — <code>tools/test_food_groups.php</code> (205 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-058</b> — <code>tools/test_food_group_representative.php</code> (517 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-058.01` | 1–205 | ناحیه | `بلوک رویه‌ای 1-205` | **10** | ⬜ |
+| `TOOL-058.01` | 1–517 | ناحیه | `بلوک رویه‌ای 1-517` | **16** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-059</b> — <code>tools/test_food_guest_request_deadline_offline.php</code> (80 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TOOL-059</b> — <code>tools/test_food_groups.php</code> (205 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-059.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TOOL-059.02` | 4–6 | ناحیه | `آزمون آفلاین مهلت ثبت سفارش مهمان در همان روز؛ بدو` | 0 | ⬜ |
-| `TOOL-059.03` | 7–27 | تابع | `extract_php_function` | 0 | ⬜ |
-| `TOOL-059.04` | 28–29 | ناحیه | `بلوک رویه‌ای 28-29` | 0 | ⬜ |
-| `TOOL-059.05` | 30–33 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-059.06` | 34–48 | ناحیه | `بلوک رویه‌ای 34-48` | 4 | ⬜ |
-| `TOOL-059.07` | 49–54 | تابع | `check` | 0 | ⬜ |
-| `TOOL-059.08` | 55–58 | تابع | `moment` | 0 | ⬜ |
-| `TOOL-059.09` | 59–80 | ناحیه | `بلوک رویه‌ای 59-80` | 0 | ⬜ |
+| `TOOL-059.01` | 1–205 | ناحیه | `بلوک رویه‌ای 1-205` | **10** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-060</b> — <code>tools/test_food_guest_requests.php</code> (141 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TOOL-060</b> — <code>tools/test_food_guest_request_deadline_offline.php</code> (80 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TOOL-060.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TOOL-060.02` | 4–4 | ناحیه | `آزمون واقعی (نیاز به دیتابیس تست و ITSM_CONFIG_PAT` | 0 | ⬜ |
-| `TOOL-060.03` | 5–17 | ناحیه | `لغو، گزارش با فیلتر معاونت، و سقف حالت «درخواست مه` | 0 | ⬜ |
-| `TOOL-060.04` | 18–23 | تابع | `check` | 0 | ⬜ |
-| `TOOL-060.05` | 24–32 | تابع | `expect_error` | 0 | ⬜ |
-| `TOOL-060.06` | 33–40 | ناحیه | `بلوک رویه‌ای 33-40` | 5 | ⬜ |
-| `TOOL-060.07` | 41–73 | ناحیه | `چارت آزمایشی: دو معاونت؛ زیر معاونت اول یک اداره (` | 1 | ⬜ |
-| `TOOL-060.08` | 74–96 | ناحیه | `مقدار ارسالی فرم برای معاونت نادیده گرفته می‌شود` | 0 | ⬜ |
-| `TOOL-060.09` | 97–101 | ناحیه | `سقف حالت درخواست مهمان` | 0 | ⬜ |
-| `TOOL-060.10` | 102–117 | ناحیه | `گزارش با فیلتر معاونت` | 0 | ⬜ |
-| `TOOL-060.11` | 118–132 | ناحیه | `فهرست: معاونت کاربر در پاسخ` | 0 | ⬜ |
-| `TOOL-060.12` | 133–141 | ناحیه | `پاک‌سازی` | 5 | ⬜ |
+| `TOOL-060.02` | 4–6 | ناحیه | `آزمون آفلاین مهلت ثبت سفارش مهمان در همان روز؛ بدو` | 0 | ⬜ |
+| `TOOL-060.03` | 7–27 | تابع | `extract_php_function` | 0 | ⬜ |
+| `TOOL-060.04` | 28–29 | ناحیه | `بلوک رویه‌ای 28-29` | 0 | ⬜ |
+| `TOOL-060.05` | 30–33 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-060.06` | 34–48 | ناحیه | `بلوک رویه‌ای 34-48` | 4 | ⬜ |
+| `TOOL-060.07` | 49–54 | تابع | `check` | 0 | ⬜ |
+| `TOOL-060.08` | 55–58 | تابع | `moment` | 0 | ⬜ |
+| `TOOL-060.09` | 59–80 | ناحیه | `بلوک رویه‌ای 59-80` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-061</b> — <code>tools/test_food_order_range_offline.php</code> (100 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TOOL-061</b> — <code>tools/test_food_guest_requests.php</code> (141 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TOOL-061.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TOOL-061.02` | 4–4 | ناحیه | `آزمون آفلاین بازهٔ فهرست سفارش‌های غذا (my-orders ` | 0 | ⬜ |
-| `TOOL-061.03` | 5–8 | ناحیه | `توابع را مستقیم از فایل‌های اصلی استخراج می‌کند تا` | 0 | ⬜ |
-| `TOOL-061.04` | 9–30 | تابع | `extract_php_function` | 0 | ⬜ |
-| `TOOL-061.05` | 31–44 | ناحیه | `بلوک رویه‌ای 31-44` | 4 | ⬜ |
-| `TOOL-061.06` | 45–55 | تابع | `check` | 0 | ⬜ |
-| `TOOL-061.07` | 56–64 | تابع | `throws` | 0 | ⬜ |
-| `TOOL-061.08` | 66–75 | ناحیه | `۱. تبدیل تاریخ ورودی` | 0 | ⬜ |
-| `TOOL-061.09` | 76–88 | ناحیه | `۲. پیش‌فرض: از امروز تا پایان ماه شمسی بعد (سفارش ` | 5 | ⬜ |
-| `TOOL-061.10` | 89–100 | ناحیه | `۳. بازهٔ دلخواه` | 0 | ⬜ |
+| `TOOL-061.02` | 4–4 | ناحیه | `آزمون واقعی (نیاز به دیتابیس تست و ITSM_CONFIG_PAT` | 0 | ⬜ |
+| `TOOL-061.03` | 5–17 | ناحیه | `لغو، گزارش با فیلتر معاونت، و سقف حالت «درخواست مه` | 0 | ⬜ |
+| `TOOL-061.04` | 18–23 | تابع | `check` | 0 | ⬜ |
+| `TOOL-061.05` | 24–32 | تابع | `expect_error` | 0 | ⬜ |
+| `TOOL-061.06` | 33–40 | ناحیه | `بلوک رویه‌ای 33-40` | 5 | ⬜ |
+| `TOOL-061.07` | 41–73 | ناحیه | `چارت آزمایشی: دو معاونت؛ زیر معاونت اول یک اداره (` | 1 | ⬜ |
+| `TOOL-061.08` | 74–96 | ناحیه | `مقدار ارسالی فرم برای معاونت نادیده گرفته می‌شود` | 0 | ⬜ |
+| `TOOL-061.09` | 97–101 | ناحیه | `سقف حالت درخواست مهمان` | 0 | ⬜ |
+| `TOOL-061.10` | 102–117 | ناحیه | `گزارش با فیلتر معاونت` | 0 | ⬜ |
+| `TOOL-061.11` | 118–132 | ناحیه | `فهرست: معاونت کاربر در پاسخ` | 0 | ⬜ |
+| `TOOL-061.12` | 133–141 | ناحیه | `پاک‌سازی` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-062</b> — <code>tools/test_food_personnel_link_offline.php</code> (275 خط، 22 آدرس، بازبینی‌شده 0/22)</summary>
+<summary><b>TOOL-062</b> — <code>tools/test_food_order_range_offline.php</code> (100 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TOOL-062.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TOOL-062.02` | 4–4 | ناحیه | `آزمون آفلاین اتصال کاربران دامین به پرسنل غذا (SQL` | 0 | ⬜ |
-| `TOOL-062.03` | 5–12 | ناحیه | `تطبیق نام، همنام‌ها، کد ملی متفاوت، ادغام، بازگشت ` | 0 | ⬜ |
-| `TOOL-062.04` | 13–23 | تابع | `check` | 0 | ⬜ |
-| `TOOL-062.05` | 24–46 | ناحیه | `بلوک رویه‌ای 24-46` | 5 | ⬜ |
-| `TOOL-062.06` | 47–53 | ناحیه | `کاربران دامین` | 0 | ⬜ |
-| `TOOL-062.07` | 54–60 | ناحیه | `پرسنل غذا` | 0 | ⬜ |
-| `TOOL-062.08` | 61–64 | ناحیه | `سفارش‌های نمونه: پرسنل غذای ۱۲ (رضا احمدی) سفارش د` | 5 | ⬜ |
-| `TOOL-062.09` | 65–77 | ناحیه | `تطبیق` | 0 | ⬜ |
-| `TOOL-062.10` | 78–82 | ناحیه | `مجوز انتخاب` | 0 | ⬜ |
-| `TOOL-062.11` | 83–94 | ناحیه | `ادغام ناموفق (تداخل سفارش در یک روز) → بدون تغییر` | 5 | ⬜ |
-| `TOOL-062.12` | 95–111 | ناحیه | `اجرای واقعی` | 0 | ⬜ |
-| `TOOL-062.13` | 112–115 | ناحیه | `انتخاب تکراری همان پرسنل غذا برای دو کاربر` | 0 | ⬜ |
-| `TOOL-062.14` | 116–119 | ناحیه | `انتخاب ناسازگار در اجرا رد می‌شود` | 0 | ⬜ |
-| `TOOL-062.15` | 120–122 | ناحیه | `نام کاربری‌های موقت نباید بماند` | 0 | ⬜ |
-| `TOOL-062.16` | 123–151 | ناحیه | `گزارش` | 5 | ⬜ |
-| `TOOL-062.17` | 152–170 | ناحیه | `کاربر دامین غیرفعال: نه تطبیق، نه گزارش تطبیق` | 5 | ⬜ |
-| `TOOL-062.18` | 171–198 | ناحیه | `اتصال دستی با کد پرسنلی (بدون تطبیق نام)` | 5 | ⬜ |
-| `TOOL-062.19` | 199–221 | ناحیه | `اتصال حساب محلی کارکنان (کد AD به‌دلیل unique بودن` | 5 | ⬜ |
-| `TOOL-062.20` | 222–235 | ناحیه | `کد دستی دامین بر نام اولویت دارد و کد هم‌ارز با صف` | 5 | ⬜ |
-| `TOOL-062.21` | 236–243 | ناحیه | `کد دستی جدید باید مقدار قدیمی و اشتباه دامین را جا` | 5 | ⬜ |
-| `TOOL-062.22` | 244–275 | ناحیه | `هم‌زمانی رکورد واقعی پرسنل غذا و حساب ورود محلی بر` | 4 | ⬜ |
+| `TOOL-062.02` | 4–4 | ناحیه | `آزمون آفلاین بازهٔ فهرست سفارش‌های غذا (my-orders ` | 0 | ⬜ |
+| `TOOL-062.03` | 5–8 | ناحیه | `توابع را مستقیم از فایل‌های اصلی استخراج می‌کند تا` | 0 | ⬜ |
+| `TOOL-062.04` | 9–30 | تابع | `extract_php_function` | 0 | ⬜ |
+| `TOOL-062.05` | 31–44 | ناحیه | `بلوک رویه‌ای 31-44` | 4 | ⬜ |
+| `TOOL-062.06` | 45–55 | تابع | `check` | 0 | ⬜ |
+| `TOOL-062.07` | 56–64 | تابع | `throws` | 0 | ⬜ |
+| `TOOL-062.08` | 66–75 | ناحیه | `۱. تبدیل تاریخ ورودی` | 0 | ⬜ |
+| `TOOL-062.09` | 76–88 | ناحیه | `۲. پیش‌فرض: از امروز تا پایان ماه شمسی بعد (سفارش ` | 5 | ⬜ |
+| `TOOL-062.10` | 89–100 | ناحیه | `۳. بازهٔ دلخواه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-063</b> — <code>tools/test_food_templates.php</code> (270 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-063</b> — <code>tools/test_food_personnel_link_offline.php</code> (275 خط، 22 آدرس، بازبینی‌شده 0/22)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-063.01` | 1–270 | ناحیه | `بلوک رویه‌ای 1-270` | **9** | ⬜ |
+| `TOOL-063.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TOOL-063.02` | 4–4 | ناحیه | `آزمون آفلاین اتصال کاربران دامین به پرسنل غذا (SQL` | 0 | ⬜ |
+| `TOOL-063.03` | 5–12 | ناحیه | `تطبیق نام، همنام‌ها، کد ملی متفاوت، ادغام، بازگشت ` | 0 | ⬜ |
+| `TOOL-063.04` | 13–23 | تابع | `check` | 0 | ⬜ |
+| `TOOL-063.05` | 24–46 | ناحیه | `بلوک رویه‌ای 24-46` | 5 | ⬜ |
+| `TOOL-063.06` | 47–53 | ناحیه | `کاربران دامین` | 0 | ⬜ |
+| `TOOL-063.07` | 54–60 | ناحیه | `پرسنل غذا` | 0 | ⬜ |
+| `TOOL-063.08` | 61–64 | ناحیه | `سفارش‌های نمونه: پرسنل غذای ۱۲ (رضا احمدی) سفارش د` | 5 | ⬜ |
+| `TOOL-063.09` | 65–77 | ناحیه | `تطبیق` | 0 | ⬜ |
+| `TOOL-063.10` | 78–82 | ناحیه | `مجوز انتخاب` | 0 | ⬜ |
+| `TOOL-063.11` | 83–94 | ناحیه | `ادغام ناموفق (تداخل سفارش در یک روز) → بدون تغییر` | 5 | ⬜ |
+| `TOOL-063.12` | 95–111 | ناحیه | `اجرای واقعی` | 0 | ⬜ |
+| `TOOL-063.13` | 112–115 | ناحیه | `انتخاب تکراری همان پرسنل غذا برای دو کاربر` | 0 | ⬜ |
+| `TOOL-063.14` | 116–119 | ناحیه | `انتخاب ناسازگار در اجرا رد می‌شود` | 0 | ⬜ |
+| `TOOL-063.15` | 120–122 | ناحیه | `نام کاربری‌های موقت نباید بماند` | 0 | ⬜ |
+| `TOOL-063.16` | 123–151 | ناحیه | `گزارش` | 5 | ⬜ |
+| `TOOL-063.17` | 152–170 | ناحیه | `کاربر دامین غیرفعال: نه تطبیق، نه گزارش تطبیق` | 5 | ⬜ |
+| `TOOL-063.18` | 171–198 | ناحیه | `اتصال دستی با کد پرسنلی (بدون تطبیق نام)` | 5 | ⬜ |
+| `TOOL-063.19` | 199–221 | ناحیه | `اتصال حساب محلی کارکنان (کد AD به‌دلیل unique بودن` | 5 | ⬜ |
+| `TOOL-063.20` | 222–235 | ناحیه | `کد دستی دامین بر نام اولویت دارد و کد هم‌ارز با صف` | 5 | ⬜ |
+| `TOOL-063.21` | 236–243 | ناحیه | `کد دستی جدید باید مقدار قدیمی و اشتباه دامین را جا` | 5 | ⬜ |
+| `TOOL-063.22` | 244–275 | ناحیه | `هم‌زمانی رکورد واقعی پرسنل غذا و حساب ورود محلی بر` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-064</b> — <code>tools/test_fresh_db_offline.php</code> (225 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TOOL-064</b> — <code>tools/test_food_templates.php</code> (270 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-064.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
-| `TOOL-064.02` | 26–36 | تابع | `check` | 0 | ⬜ |
-| `TOOL-064.03` | 38–58 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-064.04` | 60–81 | کلاس | `FakeStmt` | 0 | ⬜ |
-| `TOOL-064.05` | 83–107 | کلاس | `FreshFakeDb` | 0 | ⬜ |
-| `TOOL-064.06` | 108–109 | ناحیه | `بلوک رویه‌ای 108-109` | 0 | ⬜ |
-| `TOOL-064.07` | 110–113 | تابع | `db` | 0 | ⬜ |
-| `TOOL-064.08` | 114–117 | تابع | `db_table_exists` | 0 | ⬜ |
-| `TOOL-064.09` | 118–121 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-064.10` | 122–125 | تابع | `save_setting` | 0 | ⬜ |
-| `TOOL-064.11` | 126–128 | تابع | `system_log` | 0 | ⬜ |
-| `TOOL-064.12` | 129–209 | ناحیه | `بلوک رویه‌ای 129-209` | 5 | ⬜ |
-| `TOOL-064.13` | 210–218 | تابع | `food_ticket_web_host_bootstrap_standalone` | 4 | ⬜ |
-| `TOOL-064.14` | 219–225 | ناحیه | `بلوک رویه‌ای 219-225` | 3 | ⬜ |
+| `TOOL-064.01` | 1–270 | ناحیه | `بلوک رویه‌ای 1-270` | **9** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-065</b> — <code>tools/test_fresh_state_node.js</code> (126 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TOOL-065</b> — <code>tools/test_fresh_db_offline.php</code> (225 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-065.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-065.02` | 33–42 | بلوک | `check` | 0 | ⬜ |
-| `TOOL-065.03` | 43–43 | بلوک | `اجرای گارد با کش مرورگر و توکن سرور مشخص.` | 0 | ⬜ |
-| `TOOL-065.04` | 44–81 | بلوک | `boot` | 1 | ⬜ |
-| `TOOL-065.05` | 82–90 | بلوک | `۱) توکن متفاوت → دور ریخته شود` | 0 | ⬜ |
-| `TOOL-065.06` | 91–95 | بلوک | `۲) دیتابیس خام → دور ریخته شود (حتی با توکن یکسان)` | 0 | ⬜ |
-| `TOOL-065.07` | 96–99 | بلوک | `۳) توکن یکسان و دیتابیس پر → کش معتبر بماند` | 0 | ⬜ |
-| `TOOL-065.08` | 100–105 | بلوک | `۴) resetLocalState آرایه‌ها را خالی می‌کند` | 0 | ⬜ |
-| `TOOL-065.09` | 106–126 | بلوک | `۵) applyDbIdentity با پاسخ زندهٔ سرور` | 0 | ⬜ |
+| `TOOL-065.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
+| `TOOL-065.02` | 26–36 | تابع | `check` | 0 | ⬜ |
+| `TOOL-065.03` | 38–58 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-065.04` | 60–81 | کلاس | `FakeStmt` | 0 | ⬜ |
+| `TOOL-065.05` | 83–107 | کلاس | `FreshFakeDb` | 0 | ⬜ |
+| `TOOL-065.06` | 108–109 | ناحیه | `بلوک رویه‌ای 108-109` | 0 | ⬜ |
+| `TOOL-065.07` | 110–113 | تابع | `db` | 0 | ⬜ |
+| `TOOL-065.08` | 114–117 | تابع | `db_table_exists` | 0 | ⬜ |
+| `TOOL-065.09` | 118–121 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-065.10` | 122–125 | تابع | `save_setting` | 0 | ⬜ |
+| `TOOL-065.11` | 126–128 | تابع | `system_log` | 0 | ⬜ |
+| `TOOL-065.12` | 129–209 | ناحیه | `بلوک رویه‌ای 129-209` | 5 | ⬜ |
+| `TOOL-065.13` | 210–218 | تابع | `food_ticket_web_host_bootstrap_standalone` | 4 | ⬜ |
+| `TOOL-065.14` | 219–225 | ناحیه | `بلوک رویه‌ای 219-225` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-066</b> — <code>tools/test_global_search_offline.php</code> (122 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TOOL-066</b> — <code>tools/test_fresh_state_node.js</code> (126 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-066.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
-| `TOOL-066.02` | 27–37 | تابع | `check` | 0 | ⬜ |
-| `TOOL-066.03` | 38–122 | ناحیه | `بلوک رویه‌ای 38-122` | 0 | ⬜ |
+| `TOOL-066.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-066.02` | 33–42 | بلوک | `check` | 0 | ⬜ |
+| `TOOL-066.03` | 43–43 | بلوک | `اجرای گارد با کش مرورگر و توکن سرور مشخص.` | 0 | ⬜ |
+| `TOOL-066.04` | 44–81 | بلوک | `boot` | 1 | ⬜ |
+| `TOOL-066.05` | 82–90 | بلوک | `۱) توکن متفاوت → دور ریخته شود` | 0 | ⬜ |
+| `TOOL-066.06` | 91–95 | بلوک | `۲) دیتابیس خام → دور ریخته شود (حتی با توکن یکسان)` | 0 | ⬜ |
+| `TOOL-066.07` | 96–99 | بلوک | `۳) توکن یکسان و دیتابیس پر → کش معتبر بماند` | 0 | ⬜ |
+| `TOOL-066.08` | 100–105 | بلوک | `۴) resetLocalState آرایه‌ها را خالی می‌کند` | 0 | ⬜ |
+| `TOOL-066.09` | 106–126 | بلوک | `۵) applyDbIdentity با پاسخ زندهٔ سرور` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-067</b> — <code>tools/test_group_flow_offline.php</code> (705 خط، 56 آدرس، بازبینی‌شده 0/56)</summary>
+<summary><b>TOOL-067</b> — <code>tools/test_global_search_offline.php</code> (122 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-067.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
-| `TOOL-067.02` | 26–30 | کلاس | `OfflinePdoException` | 0 | ⬜ |
-| `TOOL-067.03` | 32–119 | کلاس | `OfflineStmt` | 0 | ⬜ |
-| `TOOL-067.04` | 121–187 | کلاس | `OfflinePdo` | 4 | ⬜ |
-| `TOOL-067.05` | 188–197 | ناحیه | `بلوک رویه‌ای 188-197` | 0 | ⬜ |
-| `TOOL-067.06` | 198–204 | تابع | `db` | 0 | ⬜ |
-| `TOOL-067.07` | 206–209 | تابع | `activity_log` | 0 | ⬜ |
-| `TOOL-067.08` | 211–214 | تابع | `system_log` | 0 | ⬜ |
-| `TOOL-067.09` | 216–224 | تابع | `db_table_columns` | 0 | ⬜ |
-| `TOOL-067.10` | 226–230 | تابع | `food_ticket_normalize_digits` | 0 | ⬜ |
-| `TOOL-067.11` | 231–248 | تابع | `food_ticket_code` | 0 | ⬜ |
-| `TOOL-067.12` | 249–252 | تابع | `food_ticket_digits` | 0 | ⬜ |
-| `TOOL-067.13` | 253–260 | تابع | `food_ticket_card_key` | 0 | ⬜ |
-| `TOOL-067.14` | 261–266 | تابع | `food_ticket_card_equals` | 0 | ⬜ |
-| `TOOL-067.15` | 267–279 | تابع | `food_ticket_parse_date` | 0 | ⬜ |
-| `TOOL-067.16` | 280–289 | تابع | `food_ticket_parse_time` | 0 | ⬜ |
-| `TOOL-067.17` | 290–298 | تابع | `food_ticket_source_key` | 0 | ⬜ |
-| `TOOL-067.18` | 299–304 | تابع | `food_ticket_normalize_event_type` | 0 | ⬜ |
-| `TOOL-067.19` | 305–309 | تابع | `food_ticket_normalize_print_status` | 0 | ⬜ |
-| `TOOL-067.20` | 310–323 | تابع | `food_ticket_add_event` | 1 | ⬜ |
-| `TOOL-067.21` | 324–329 | تابع | `food_ticket_existing_source` | 0 | ⬜ |
-| `TOOL-067.22` | 330–335 | تابع | `food_ticket_existing_ticket` | 0 | ⬜ |
-| `TOOL-067.23` | 336–339 | تابع | `food_ticket_config` | 0 | ⬜ |
-| `TOOL-067.24` | 340–343 | تابع | `food_ticket_odbc` | 0 | ⬜ |
-| `TOOL-067.25` | 344–347 | تابع | `food_ticket_order_map_lazy` | 0 | ⬜ |
-| `TOOL-067.26` | 348–351 | تابع | `food_ticket_template` | 0 | ⬜ |
-| `TOOL-067.27` | 352–356 | تابع | `food_ticket_enqueue_print` | 1 | ⬜ |
-| `TOOL-067.28` | 357–360 | تابع | `food_ticket_process_print_queue_locked` | 0 | ⬜ |
-| `TOOL-067.29` | 361–386 | تابع | `food_ticket_decide_for_user` | 6 | ⬜ |
-| `TOOL-067.30` | 387–390 | تابع | `food_ticket_delivery_supported` | 0 | ⬜ |
-| `TOOL-067.31` | 391–394 | تابع | `user_can` | 0 | ⬜ |
-| `TOOL-067.32` | 395–396 | ناحیه | `بلوک رویه‌ای 395-396` | 0 | ⬜ |
-| `TOOL-067.33` | 397–400 | تابع | `app_error_log` | 0 | ⬜ |
-| `TOOL-067.34` | 401–465 | ناحیه | `بلوک رویه‌ای 401-465` | 5 | ⬜ |
-| `TOOL-067.35` | 466–476 | ناحیه | `۱) ساخت گروه با L_UID` | 0 | ⬜ |
-| `TOOL-067.36` | 477–481 | ناحیه | `۳) شناسایی با L_UID (با نرمال‌سازی صفر ابتدایی)` | 0 | ⬜ |
-| `TOOL-067.37` | 482–490 | ناحیه | `۴) رد L_UID تکراری` | 0 | ⬜ |
-| `TOOL-067.38` | 491–499 | ناحیه | `۵) رد عضویت تکراری در دو گروه` | 0 | ⬜ |
-| `TOOL-067.39` | 500–510 | ناحیه | `۶) غیبت روزانه (Exception) + قفل‌نبودن قبل از تردد` | 0 | ⬜ |
-| `TOOL-067.40` | 511–541 | ناحیه | `۷) تردد نماینده (L_UID) → فیش اعضای واجد شرایط` | 0 | ⬜ |
-| `TOOL-067.41` | 542–561 | ناحیه | `۸) قفل بعد از تردد + رد ویرایش کاربر عادی + اجازهٔ` | 0 | ⬜ |
-| `TOOL-067.42` | 562–574 | ناحیه | `۹) تردد مجدد همان نماینده → تکرار، بدون فیش جدید` | 0 | ⬜ |
-| `TOOL-067.43` | 575–580 | ناحیه | `۱۰) کشیدن دوبارهٔ همان ردیف (≤۴ ثانیه) → نادیده` | 0 | ⬜ |
-| `TOOL-067.44` | 581–584 | ناحیه | `۱۱) استقلال تاریخ‌ها: فردا غیبتی ندارد` | 0 | ⬜ |
-| `TOOL-067.45` | 585–591 | ناحیه | `۱۲) API وضعیت غیبت (داخل فرم گروه‌ها)` | 0 | ⬜ |
-| `TOOL-067.46` | 592–598 | ناحیه | `۱۳) ذخیرهٔ گروهی غیبت از طریق API` | 0 | ⬜ |
-| `TOOL-067.47` | 599–602 | ناحیه | `۱۴) حذف همهٔ غیبت‌ها (همه حاضر)` | 0 | ⬜ |
-| `TOOL-067.48` | 603–617 | ناحیه | `۱۵) تردد با L_UID ناشناخته (سابقهٔ نمایندگی دارد)` | 0 | ⬜ |
-| `TOOL-067.49` | 618–638 | ناحیه | `۱۵-۵) آمار بازرسی: غایب‌کردن بعد از صدور فیش → توق` | 1 | ⬜ |
-| `TOOL-067.50` | 639–643 | ناحیه | `فیش متوقف‌شده در فهرست چاپ مجدد خطاها نیست (فقط pe` | 0 | ⬜ |
-| `TOOL-067.51` | 644–656 | ناحیه | `«حاضر» شدن دوباره → برگشت به صف چاپ` | 0 | ⬜ |
-| `TOOL-067.52` | 657–663 | ناحیه | `فیش چاپ‌شده هرگز با غیبت تغییر نمی‌کند` | 1 | ⬜ |
-| `TOOL-067.53` | 664–670 | ناحیه | `۱۶) گروه غیرفعال → هیچ فیش جدیدی` | 0 | ⬜ |
-| `TOOL-067.54` | 671–673 | ناحیه | `۱۷) کسی که امروز از مسیر عادی فیش گرفته، از مسیر گ` | 0 | ⬜ |
-| `TOOL-067.55` | 674–696 | ناحیه | `فیش فردی امروز (مثل تردد عادی همان کارمند)` | 0 | ⬜ |
-| `TOOL-067.56` | 697–705 | ناحیه | `۱۸) دسترسی‌ها/پاک‌سازی داده` | 5 | ⬜ |
+| `TOOL-067.01` | 1–26 | ناحیه | `بلوک رویه‌ای 1-26` | 0 | ⬜ |
+| `TOOL-067.02` | 27–37 | تابع | `check` | 0 | ⬜ |
+| `TOOL-067.03` | 38–122 | ناحیه | `بلوک رویه‌ای 38-122` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-068</b> — <code>tools/test_guest_cap_offline.php</code> (90 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TOOL-068</b> — <code>tools/test_group_flow_offline.php</code> (705 خط، 56 آدرس، بازبینی‌شده 0/56)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-068.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
-| `TOOL-068.02` | 17–18 | ناحیه | `تنظیمات تست: مقدار را از $GLOBALS['test_settings']` | 0 | ⬜ |
-| `TOOL-068.03` | 19–22 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-068.04` | 23–25 | ناحیه | `بلوک رویه‌ای 23-25` | 0 | ⬜ |
-| `TOOL-068.05` | 26–31 | تابع | `check` | 0 | ⬜ |
-| `TOOL-068.06` | 32–34 | ناحیه | `بلوک رویه‌ای 32-34` | 0 | ⬜ |
-| `TOOL-068.07` | 35–37 | ناحیه | `۱) ساعت ۱۲:۱۰ — ۴ نفر وارد شده‌اند، هیچ‌کس قبل از ` | 0 | ⬜ |
-| `TOOL-068.08` | 38–42 | ناحیه | `۲) ۱۲:۳۰ — دو نفر که فیش گرفته‌اند بعد از ۱۲ خارج ` | 0 | ⬜ |
-| `TOOL-068.09` | 43–46 | ناحیه | `۳) ۱۲:۴۵ — یک نفر جدید وارد می‌شود ⇒ ورودها ۵ ⇒ سق` | 0 | ⬜ |
-| `TOOL-068.10` | 47–50 | ناحیه | `۴) خروج قبل از ساعت قطع سقف را کم می‌کند.` | 0 | ⬜ |
-| `TOOL-068.11` | 51–54 | ناحیه | `۵) کسی نیامده ⇒ بسته؛ سقف هرگز منفی نمی‌شود.` | 0 | ⬜ |
-| `TOOL-068.12` | 55–59 | ناحیه | `۶) تردد در دسترس نیست ⇒ سقف ثابت قدیمی.` | 0 | ⬜ |
-| `TOOL-068.13` | 60–63 | ناحیه | `۷) سقف هر کارت همچنان اعمال می‌شود.` | 0 | ⬜ |
-| `TOOL-068.14` | 64–65 | ناحیه | `۸) پیش‌فرض‌ها بدون تنظیمات: حالت ثابت و ساعت قطع ۱` | 0 | ⬜ |
-| `TOOL-068.15` | 66–73 | ناحیه | `بازهٔ ۱۱ تا ۱۵: قبل از ۱۱ و از ۱۵ به بعد سقف صفر ا` | 0 | ⬜ |
-| `TOOL-068.16` | 74–90 | ناحیه | `۹) ساعت‌های قابل تنظیم: شروع، قطع و پایان از فرم ک` | 0 | ⬜ |
+| `TOOL-068.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
+| `TOOL-068.02` | 26–30 | کلاس | `OfflinePdoException` | 0 | ⬜ |
+| `TOOL-068.03` | 32–119 | کلاس | `OfflineStmt` | 0 | ⬜ |
+| `TOOL-068.04` | 121–187 | کلاس | `OfflinePdo` | 4 | ⬜ |
+| `TOOL-068.05` | 188–197 | ناحیه | `بلوک رویه‌ای 188-197` | 0 | ⬜ |
+| `TOOL-068.06` | 198–204 | تابع | `db` | 0 | ⬜ |
+| `TOOL-068.07` | 206–209 | تابع | `activity_log` | 0 | ⬜ |
+| `TOOL-068.08` | 211–214 | تابع | `system_log` | 0 | ⬜ |
+| `TOOL-068.09` | 216–224 | تابع | `db_table_columns` | 0 | ⬜ |
+| `TOOL-068.10` | 226–230 | تابع | `food_ticket_normalize_digits` | 0 | ⬜ |
+| `TOOL-068.11` | 231–248 | تابع | `food_ticket_code` | 0 | ⬜ |
+| `TOOL-068.12` | 249–252 | تابع | `food_ticket_digits` | 0 | ⬜ |
+| `TOOL-068.13` | 253–260 | تابع | `food_ticket_card_key` | 0 | ⬜ |
+| `TOOL-068.14` | 261–266 | تابع | `food_ticket_card_equals` | 0 | ⬜ |
+| `TOOL-068.15` | 267–279 | تابع | `food_ticket_parse_date` | 0 | ⬜ |
+| `TOOL-068.16` | 280–289 | تابع | `food_ticket_parse_time` | 0 | ⬜ |
+| `TOOL-068.17` | 290–298 | تابع | `food_ticket_source_key` | 0 | ⬜ |
+| `TOOL-068.18` | 299–304 | تابع | `food_ticket_normalize_event_type` | 0 | ⬜ |
+| `TOOL-068.19` | 305–309 | تابع | `food_ticket_normalize_print_status` | 0 | ⬜ |
+| `TOOL-068.20` | 310–323 | تابع | `food_ticket_add_event` | 1 | ⬜ |
+| `TOOL-068.21` | 324–329 | تابع | `food_ticket_existing_source` | 0 | ⬜ |
+| `TOOL-068.22` | 330–335 | تابع | `food_ticket_existing_ticket` | 0 | ⬜ |
+| `TOOL-068.23` | 336–339 | تابع | `food_ticket_config` | 0 | ⬜ |
+| `TOOL-068.24` | 340–343 | تابع | `food_ticket_odbc` | 0 | ⬜ |
+| `TOOL-068.25` | 344–347 | تابع | `food_ticket_order_map_lazy` | 0 | ⬜ |
+| `TOOL-068.26` | 348–351 | تابع | `food_ticket_template` | 0 | ⬜ |
+| `TOOL-068.27` | 352–356 | تابع | `food_ticket_enqueue_print` | 1 | ⬜ |
+| `TOOL-068.28` | 357–360 | تابع | `food_ticket_process_print_queue_locked` | 0 | ⬜ |
+| `TOOL-068.29` | 361–386 | تابع | `food_ticket_decide_for_user` | 6 | ⬜ |
+| `TOOL-068.30` | 387–390 | تابع | `food_ticket_delivery_supported` | 0 | ⬜ |
+| `TOOL-068.31` | 391–394 | تابع | `user_can` | 0 | ⬜ |
+| `TOOL-068.32` | 395–396 | ناحیه | `بلوک رویه‌ای 395-396` | 0 | ⬜ |
+| `TOOL-068.33` | 397–400 | تابع | `app_error_log` | 0 | ⬜ |
+| `TOOL-068.34` | 401–465 | ناحیه | `بلوک رویه‌ای 401-465` | 5 | ⬜ |
+| `TOOL-068.35` | 466–476 | ناحیه | `۱) ساخت گروه با L_UID` | 0 | ⬜ |
+| `TOOL-068.36` | 477–481 | ناحیه | `۳) شناسایی با L_UID (با نرمال‌سازی صفر ابتدایی)` | 0 | ⬜ |
+| `TOOL-068.37` | 482–490 | ناحیه | `۴) رد L_UID تکراری` | 0 | ⬜ |
+| `TOOL-068.38` | 491–499 | ناحیه | `۵) رد عضویت تکراری در دو گروه` | 0 | ⬜ |
+| `TOOL-068.39` | 500–510 | ناحیه | `۶) غیبت روزانه (Exception) + قفل‌نبودن قبل از تردد` | 0 | ⬜ |
+| `TOOL-068.40` | 511–541 | ناحیه | `۷) تردد نماینده (L_UID) → فیش اعضای واجد شرایط` | 0 | ⬜ |
+| `TOOL-068.41` | 542–561 | ناحیه | `۸) قفل بعد از تردد + رد ویرایش کاربر عادی + اجازهٔ` | 0 | ⬜ |
+| `TOOL-068.42` | 562–574 | ناحیه | `۹) تردد مجدد همان نماینده → تکرار، بدون فیش جدید` | 0 | ⬜ |
+| `TOOL-068.43` | 575–580 | ناحیه | `۱۰) کشیدن دوبارهٔ همان ردیف (≤۴ ثانیه) → نادیده` | 0 | ⬜ |
+| `TOOL-068.44` | 581–584 | ناحیه | `۱۱) استقلال تاریخ‌ها: فردا غیبتی ندارد` | 0 | ⬜ |
+| `TOOL-068.45` | 585–591 | ناحیه | `۱۲) API وضعیت غیبت (داخل فرم گروه‌ها)` | 0 | ⬜ |
+| `TOOL-068.46` | 592–598 | ناحیه | `۱۳) ذخیرهٔ گروهی غیبت از طریق API` | 0 | ⬜ |
+| `TOOL-068.47` | 599–602 | ناحیه | `۱۴) حذف همهٔ غیبت‌ها (همه حاضر)` | 0 | ⬜ |
+| `TOOL-068.48` | 603–617 | ناحیه | `۱۵) تردد با L_UID ناشناخته (سابقهٔ نمایندگی دارد)` | 0 | ⬜ |
+| `TOOL-068.49` | 618–638 | ناحیه | `۱۵-۵) آمار بازرسی: غایب‌کردن بعد از صدور فیش → توق` | 1 | ⬜ |
+| `TOOL-068.50` | 639–643 | ناحیه | `فیش متوقف‌شده در فهرست چاپ مجدد خطاها نیست (فقط pe` | 0 | ⬜ |
+| `TOOL-068.51` | 644–656 | ناحیه | `«حاضر» شدن دوباره → برگشت به صف چاپ` | 0 | ⬜ |
+| `TOOL-068.52` | 657–663 | ناحیه | `فیش چاپ‌شده هرگز با غیبت تغییر نمی‌کند` | 1 | ⬜ |
+| `TOOL-068.53` | 664–670 | ناحیه | `۱۶) گروه غیرفعال → هیچ فیش جدیدی` | 0 | ⬜ |
+| `TOOL-068.54` | 671–673 | ناحیه | `۱۷) کسی که امروز از مسیر عادی فیش گرفته، از مسیر گ` | 0 | ⬜ |
+| `TOOL-068.55` | 674–696 | ناحیه | `فیش فردی امروز (مثل تردد عادی همان کارمند)` | 0 | ⬜ |
+| `TOOL-068.56` | 697–705 | ناحیه | `۱۸) دسترسی‌ها/پاک‌سازی داده` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-069</b> — <code>tools/test_live_ui_node.js</code> (322 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TOOL-069</b> — <code>tools/test_guest_cap_offline.php</code> (90 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-069.01` | 1–37 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
-| `TOOL-069.02` | 38–47 | بلوک | `check` | 0 | ⬜ |
-| `TOOL-069.03` | 48–48 | بلوک | `اجرای app.js در یک صفحهٔ ساختگی و برگرداندن window` | 0 | ⬜ |
-| `TOOL-069.04` | 49–59 | بلوک | `boot` | 4 | ⬜ |
-| `TOOL-069.05` | 60–65 | بلوک | `pressKey` | 0 | ⬜ |
-| `TOOL-069.06` | 66–69 | بلوک | `rowVisible` | 0 | ⬜ |
-| `TOOL-069.07` | 70–150 | بلوک | `الف) صفحهٔ شناسنامه‌های فنی` | 0 | ⬜ |
-| `TOOL-069.08` | 151–250 | بلوک | `ب) کمبوی زندهٔ «سیستم مرتبط»` | 0 | ⬜ |
-| `TOOL-069.09` | 251–254 | بلوک | `۱.۳۷.۲: قاعدهٔ حوزه‌محور برای «سیستم مرتبط»` | 0 | ⬜ |
-| `TOOL-069.10` | 255–322 | بلوک | `submitForm` | 0 | ⬜ |
+| `TOOL-069.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
+| `TOOL-069.02` | 17–18 | ناحیه | `تنظیمات تست: مقدار را از $GLOBALS['test_settings']` | 0 | ⬜ |
+| `TOOL-069.03` | 19–22 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-069.04` | 23–25 | ناحیه | `بلوک رویه‌ای 23-25` | 0 | ⬜ |
+| `TOOL-069.05` | 26–31 | تابع | `check` | 0 | ⬜ |
+| `TOOL-069.06` | 32–34 | ناحیه | `بلوک رویه‌ای 32-34` | 0 | ⬜ |
+| `TOOL-069.07` | 35–37 | ناحیه | `۱) ساعت ۱۲:۱۰ — ۴ نفر وارد شده‌اند، هیچ‌کس قبل از ` | 0 | ⬜ |
+| `TOOL-069.08` | 38–42 | ناحیه | `۲) ۱۲:۳۰ — دو نفر که فیش گرفته‌اند بعد از ۱۲ خارج ` | 0 | ⬜ |
+| `TOOL-069.09` | 43–46 | ناحیه | `۳) ۱۲:۴۵ — یک نفر جدید وارد می‌شود ⇒ ورودها ۵ ⇒ سق` | 0 | ⬜ |
+| `TOOL-069.10` | 47–50 | ناحیه | `۴) خروج قبل از ساعت قطع سقف را کم می‌کند.` | 0 | ⬜ |
+| `TOOL-069.11` | 51–54 | ناحیه | `۵) کسی نیامده ⇒ بسته؛ سقف هرگز منفی نمی‌شود.` | 0 | ⬜ |
+| `TOOL-069.12` | 55–59 | ناحیه | `۶) تردد در دسترس نیست ⇒ سقف ثابت قدیمی.` | 0 | ⬜ |
+| `TOOL-069.13` | 60–63 | ناحیه | `۷) سقف هر کارت همچنان اعمال می‌شود.` | 0 | ⬜ |
+| `TOOL-069.14` | 64–65 | ناحیه | `۸) پیش‌فرض‌ها بدون تنظیمات: حالت ثابت و ساعت قطع ۱` | 0 | ⬜ |
+| `TOOL-069.15` | 66–73 | ناحیه | `بازهٔ ۱۱ تا ۱۵: قبل از ۱۱ و از ۱۵ به بعد سقف صفر ا` | 0 | ⬜ |
+| `TOOL-069.16` | 74–90 | ناحیه | `۹) ساعت‌های قابل تنظیم: شروع، قطع و پایان از فرم ک` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-070</b> — <code>tools/test_module_grant_offline.php</code> (154 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TOOL-070</b> — <code>tools/test_live_ui_node.js</code> (322 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-070.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
-| `TOOL-070.02` | 17–28 | ناحیه | `کش نقش‌ها را به‌جای دیتابیس پر می‌کنیم: بازرس فقط ` | 0 | ⬜ |
-| `TOOL-070.03` | 29–34 | تابع | `check` | 0 | ⬜ |
-| `TOOL-070.04` | 35–39 | ناحیه | `بلوک رویه‌ای 35-39` | 0 | ⬜ |
-| `TOOL-070.05` | 40–99 | ناحیه | `مسیرهای فیش را از خود فایل می‌خوانیم تا آزمون با ت` | 0 | ⬜ |
-| `TOOL-070.06` | 100–100 | تابع | `food_ticket_is_primary_admin` | 0 | ⬜ |
-| `TOOL-070.07` | 101–126 | ناحیه | `بلوک رویه‌ای 101-126` | 5 | ⬜ |
-| `TOOL-070.08` | 127–134 | ناحیه | `پیش‌فرض نقش user: بخش‌های چاپ فیش و نظارت برداشته ` | 0 | ⬜ |
-| `TOOL-070.09` | 135–154 | ناحیه | `چاپ فیش فقط برای ادمین اصلی، مدیر پشتیبانی (محدود)` | 0 | ⬜ |
+| `TOOL-070.01` | 1–37 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TOOL-070.02` | 38–47 | بلوک | `check` | 0 | ⬜ |
+| `TOOL-070.03` | 48–48 | بلوک | `اجرای app.js در یک صفحهٔ ساختگی و برگرداندن window` | 0 | ⬜ |
+| `TOOL-070.04` | 49–59 | بلوک | `boot` | 4 | ⬜ |
+| `TOOL-070.05` | 60–65 | بلوک | `pressKey` | 0 | ⬜ |
+| `TOOL-070.06` | 66–69 | بلوک | `rowVisible` | 0 | ⬜ |
+| `TOOL-070.07` | 70–150 | بلوک | `الف) صفحهٔ شناسنامه‌های فنی` | 0 | ⬜ |
+| `TOOL-070.08` | 151–250 | بلوک | `ب) کمبوی زندهٔ «سیستم مرتبط»` | 0 | ⬜ |
+| `TOOL-070.09` | 251–254 | بلوک | `۱.۳۷.۲: قاعدهٔ حوزه‌محور برای «سیستم مرتبط»` | 0 | ⬜ |
+| `TOOL-070.10` | 255–322 | بلوک | `submitForm` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-071</b> — <code>tools/test_org_role_sync_offline.php</code> (84 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TOOL-071</b> — <code>tools/test_module_grant_offline.php</code> (154 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-071.01` | 1–1 | ناحیه | `بلوک رویه‌ای 1-1` | 0 | ⬜ |
-| `TOOL-071.02` | 2–12 | ناحیه | `آزمون همگام‌سازی نقش با سمت‌های چارت سازمانی (روی ` | 0 | ⬜ |
-| `TOOL-071.03` | 13–13 | تابع | `db` | 0 | ⬜ |
-| `TOOL-071.04` | 14–16 | ناحیه | `بلوک رویه‌ای 14-16` | 0 | ⬜ |
-| `TOOL-071.05` | 17–17 | تابع | `check` | 0 | ⬜ |
-| `TOOL-071.06` | 18–18 | تابع | `roleOf` | 0 | ⬜ |
-| `TOOL-071.07` | 19–41 | ناحیه | `بلوک رویه‌ای 19-41` | 6 | ⬜ |
-| `TOOL-071.08` | 42–47 | ناحیه | `۱) کاربر «کاربر» معاون می‌شود → مدیر` | 1 | ⬜ |
-| `TOOL-071.09` | 48–52 | ناحیه | `۲) کارشناس هم با سمت معاونت به مدیر تبدیل می‌شود (` | 1 | ⬜ |
-| `TOOL-071.10` | 53–57 | ناحیه | `۳) برداشتن سمت → بازگشت به نقش قبلی` | 1 | ⬜ |
-| `TOOL-071.11` | 58–66 | ناحیه | `۴) بازرس و سوپروایزر با سمت مدیریتی تغییر نمی‌کنند` | 1 | ⬜ |
-| `TOOL-071.12` | 67–74 | ناحیه | `۵) عضو مدیریت (جدول چند مدیر) هم مدیر می‌شود` | 1 | ⬜ |
-| `TOOL-071.13` | 75–79 | ناحیه | `۶) مدیر دستی (غیر خودکار) با برداشتن سمت‌ها دست‌نخ` | 1 | ⬜ |
-| `TOOL-071.14` | 80–84 | ناحیه | `پاکسازی فقط داده‌های همین اجرای مصنوعی؛ سایر واحده` | 0 | ⬜ |
+| `TOOL-071.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
+| `TOOL-071.02` | 17–28 | ناحیه | `کش نقش‌ها را به‌جای دیتابیس پر می‌کنیم: بازرس فقط ` | 0 | ⬜ |
+| `TOOL-071.03` | 29–34 | تابع | `check` | 0 | ⬜ |
+| `TOOL-071.04` | 35–39 | ناحیه | `بلوک رویه‌ای 35-39` | 0 | ⬜ |
+| `TOOL-071.05` | 40–99 | ناحیه | `مسیرهای فیش را از خود فایل می‌خوانیم تا آزمون با ت` | 0 | ⬜ |
+| `TOOL-071.06` | 100–100 | تابع | `food_ticket_is_primary_admin` | 0 | ⬜ |
+| `TOOL-071.07` | 101–126 | ناحیه | `بلوک رویه‌ای 101-126` | 5 | ⬜ |
+| `TOOL-071.08` | 127–134 | ناحیه | `پیش‌فرض نقش user: بخش‌های چاپ فیش و نظارت برداشته ` | 0 | ⬜ |
+| `TOOL-071.09` | 135–154 | ناحیه | `چاپ فیش فقط برای ادمین اصلی، مدیر پشتیبانی (محدود)` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-072</b> — <code>tools/test_panel_printer_node.js</code> (526 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TOOL-072</b> — <code>tools/test_org_role_sync_offline.php</code> (84 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-072.01` | 1–39 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
-| `TOOL-072.02` | 40–66 | بلوک | `check` | 0 | ⬜ |
-| `TOOL-072.03` | 67–67 | بلوک | `تبدیل مقدار ذخیره‌شده به ساختار align_state سرور (` | 0 | ⬜ |
-| `TOOL-072.04` | 68–112 | بلوک | `alignStateFrom` | 1 | ⬜ |
-| `TOOL-072.05` | 113–148 | بلوک | `response` | 4 | ⬜ |
-| `TOOL-072.06` | 149–186 | بلوک | `method` | 0 | ⬜ |
-| `TOOL-072.07` | 187–187 | بلوک | `headers` | 0 | ⬜ |
-| `TOOL-072.08` | 188–268 | بلوک | `fd` | 1 | ⬜ |
-| `TOOL-072.09` | 269–272 | بلوک | `nextTick` | 0 | ⬜ |
-| `TOOL-072.10` | 273–273 | بلوک | `تا وقتی شرط درست شود (یا مهلت تمام شود) صبر می‌کند` | 0 | ⬜ |
-| `TOOL-072.11` | 274–376 | بلوک | `waitFor` | 0 | ⬜ |
-| `TOOL-072.12` | 377–519 | بلوک | `alignBody` | 2 | ⬜ |
-| `TOOL-072.13` | 520–526 | بلوک | `finish` | 0 | ⬜ |
+| `TOOL-072.01` | 1–1 | ناحیه | `بلوک رویه‌ای 1-1` | 0 | ⬜ |
+| `TOOL-072.02` | 2–12 | ناحیه | `آزمون همگام‌سازی نقش با سمت‌های چارت سازمانی (روی ` | 0 | ⬜ |
+| `TOOL-072.03` | 13–13 | تابع | `db` | 0 | ⬜ |
+| `TOOL-072.04` | 14–16 | ناحیه | `بلوک رویه‌ای 14-16` | 0 | ⬜ |
+| `TOOL-072.05` | 17–17 | تابع | `check` | 0 | ⬜ |
+| `TOOL-072.06` | 18–18 | تابع | `roleOf` | 0 | ⬜ |
+| `TOOL-072.07` | 19–41 | ناحیه | `بلوک رویه‌ای 19-41` | 6 | ⬜ |
+| `TOOL-072.08` | 42–47 | ناحیه | `۱) کاربر «کاربر» معاون می‌شود → مدیر` | 1 | ⬜ |
+| `TOOL-072.09` | 48–52 | ناحیه | `۲) کارشناس هم با سمت معاونت به مدیر تبدیل می‌شود (` | 1 | ⬜ |
+| `TOOL-072.10` | 53–57 | ناحیه | `۳) برداشتن سمت → بازگشت به نقش قبلی` | 1 | ⬜ |
+| `TOOL-072.11` | 58–66 | ناحیه | `۴) بازرس و سوپروایزر با سمت مدیریتی تغییر نمی‌کنند` | 1 | ⬜ |
+| `TOOL-072.12` | 67–74 | ناحیه | `۵) عضو مدیریت (جدول چند مدیر) هم مدیر می‌شود` | 1 | ⬜ |
+| `TOOL-072.13` | 75–79 | ناحیه | `۶) مدیر دستی (غیر خودکار) با برداشتن سمت‌ها دست‌نخ` | 1 | ⬜ |
+| `TOOL-072.14` | 80–84 | ناحیه | `پاکسازی فقط داده‌های همین اجرای مصنوعی؛ سایر واحده` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-073</b> — <code>tools/test_print_bottom_fit_offline.php</code> (364 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TOOL-073</b> — <code>tools/test_panel_printer_node.js</code> (526 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-073.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
-| `TOOL-073.02` | 26–29 | تابع | `app_error_log` | 0 | ⬜ |
-| `TOOL-073.03` | 30–33 | ناحیه | `بلوک رویه‌ای 30-33` | 0 | ⬜ |
-| `TOOL-073.04` | 34–44 | تابع | `check` | 0 | ⬜ |
-| `TOOL-073.05` | 46–68 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-073.06` | 70–75 | تابع | `evalOnce` | 4 | ⬜ |
-| `TOOL-073.07` | 76–103 | ناحیه | `بلوک رویه‌ای 76-103` | 0 | ⬜ |
-| `TOOL-073.08` | 104–335 | ناحیه | `همان وضعیت شکایت: طرح ۲۰ میلی‌متر بالا خالی داشته ` | **8** | ⬜ |
-| `TOOL-073.09` | 336–364 | ناحیه | `پروفایل پیلود: باید دو خط لاگ با فرمان عقب‌راندن و` | 6 | ⬜ |
+| `TOOL-073.01` | 1–39 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TOOL-073.02` | 40–66 | بلوک | `check` | 0 | ⬜ |
+| `TOOL-073.03` | 67–67 | بلوک | `تبدیل مقدار ذخیره‌شده به ساختار align_state سرور (` | 0 | ⬜ |
+| `TOOL-073.04` | 68–112 | بلوک | `alignStateFrom` | 1 | ⬜ |
+| `TOOL-073.05` | 113–148 | بلوک | `response` | 4 | ⬜ |
+| `TOOL-073.06` | 149–186 | بلوک | `method` | 0 | ⬜ |
+| `TOOL-073.07` | 187–187 | بلوک | `headers` | 0 | ⬜ |
+| `TOOL-073.08` | 188–268 | بلوک | `fd` | 1 | ⬜ |
+| `TOOL-073.09` | 269–272 | بلوک | `nextTick` | 0 | ⬜ |
+| `TOOL-073.10` | 273–273 | بلوک | `تا وقتی شرط درست شود (یا مهلت تمام شود) صبر می‌کند` | 0 | ⬜ |
+| `TOOL-073.11` | 274–376 | بلوک | `waitFor` | 0 | ⬜ |
+| `TOOL-073.12` | 377–519 | بلوک | `alignBody` | 2 | ⬜ |
+| `TOOL-073.13` | 520–526 | بلوک | `finish` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-074</b> — <code>tools/test_print_top_trim_offline.php</code> (170 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TOOL-074</b> — <code>tools/test_print_bottom_fit_offline.php</code> (364 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TOOL-074.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
-| `TOOL-074.02` | 26–36 | تابع | `check` | 0 | ⬜ |
-| `TOOL-074.03` | 38–60 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-074.04` | 61–68 | ناحیه | `بلوک رویه‌ای 61-68` | 4 | ⬜ |
-| `TOOL-074.05` | 69–117 | ناحیه | `همان وضعیت قالب پیش‌فرضِ بدون لوگو: اولین متن در y` | 0 | ⬜ |
-| `TOOL-074.06` | 118–118 | تابع | `app_error_log` | 0 | ⬜ |
-| `TOOL-074.07` | 119–170 | ناحیه | `بلوک رویه‌ای 119-170` | 7 | ⬜ |
+| `TOOL-074.02` | 26–29 | تابع | `app_error_log` | 0 | ⬜ |
+| `TOOL-074.03` | 30–33 | ناحیه | `بلوک رویه‌ای 30-33` | 0 | ⬜ |
+| `TOOL-074.04` | 34–44 | تابع | `check` | 0 | ⬜ |
+| `TOOL-074.05` | 46–68 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-074.06` | 70–75 | تابع | `evalOnce` | 4 | ⬜ |
+| `TOOL-074.07` | 76–103 | ناحیه | `بلوک رویه‌ای 76-103` | 0 | ⬜ |
+| `TOOL-074.08` | 104–335 | ناحیه | `همان وضعیت شکایت: طرح ۲۰ میلی‌متر بالا خالی داشته ` | **8** | ⬜ |
+| `TOOL-074.09` | 336–364 | ناحیه | `پروفایل پیلود: باید دو خط لاگ با فرمان عقب‌راندن و` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-075</b> — <code>tools/test_release_134_offline.php</code> (176 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TOOL-075</b> — <code>tools/test_print_top_trim_offline.php</code> (170 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-075.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
-| `TOOL-075.02` | 19–29 | تابع | `check` | 0 | ⬜ |
-| `TOOL-075.03` | 31–51 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-075.04` | 52–87 | ناحیه | `بلوک رویه‌ای 52-87` | 1 | ⬜ |
-| `TOOL-075.05` | 88–88 | ناحیه | `آزمون واقعی food_ticket_group_resolve: ردیفی که فق` | 0 | ⬜ |
-| `TOOL-075.06` | 89–92 | تابع | `food_ticket_code` | 0 | ⬜ |
-| `TOOL-075.07` | 93–96 | تابع | `food_ticket_card_key` | 0 | ⬜ |
-| `TOOL-075.08` | 97–100 | تابع | `food_ticket_group_find_by_uid` | 0 | ⬜ |
-| `TOOL-075.09` | 101–109 | ناحیه | `بلوک رویه‌ای 101-109` | 4 | ⬜ |
-| `TOOL-075.10` | 110–113 | تابع | `cfg` | 0 | ⬜ |
-| `TOOL-075.11` | 114–117 | تابع | `food_ticket_config` | 0 | ⬜ |
-| `TOOL-075.12` | 118–121 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-075.13` | 122–124 | ناحیه | `بلوک رویه‌ای 122-124` | 4 | ⬜ |
-| `TOOL-075.14` | 125–129 | تابع | `food_ticket_env_value` | 0 | ⬜ |
-| `TOOL-075.15` | 130–176 | ناحیه | `بلوک رویه‌ای 130-176` | 7 | ⬜ |
+| `TOOL-075.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
+| `TOOL-075.02` | 26–36 | تابع | `check` | 0 | ⬜ |
+| `TOOL-075.03` | 38–60 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-075.04` | 61–68 | ناحیه | `بلوک رویه‌ای 61-68` | 4 | ⬜ |
+| `TOOL-075.05` | 69–117 | ناحیه | `همان وضعیت قالب پیش‌فرضِ بدون لوگو: اولین متن در y` | 0 | ⬜ |
+| `TOOL-075.06` | 118–118 | تابع | `app_error_log` | 0 | ⬜ |
+| `TOOL-075.07` | 119–170 | ناحیه | `بلوک رویه‌ای 119-170` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-076</b> — <code>tools/test_role_permissions_offline.php</code> (207 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TOOL-076</b> — <code>tools/test_release_134_offline.php</code> (176 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-076.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 0 | ⬜ |
-| `TOOL-076.02` | 32–42 | تابع | `check` | 0 | ⬜ |
-| `TOOL-076.03` | 44–68 | کلاس | `MysqlishSqlite` | 5 | ⬜ |
-| `TOOL-076.04` | 69–74 | ناحیه | `بلوک رویه‌ای 69-74` | 4 | ⬜ |
-| `TOOL-076.05` | 75–79 | تابع | `db` | 0 | ⬜ |
-| `TOOL-076.06` | 80–82 | ناحیه | `بلوک رویه‌ای 80-82` | 0 | ⬜ |
-| `TOOL-076.07` | 83–86 | تابع | `setting` | 0 | ⬜ |
-| `TOOL-076.08` | 87–90 | تابع | `save_setting` | 0 | ⬜ |
-| `TOOL-076.09` | 91–93 | ناحیه | `بلوک رویه‌ای 91-93` | 0 | ⬜ |
-| `TOOL-076.10` | 94–102 | تابع | `seedRows` | 1 | ⬜ |
-| `TOOL-076.11` | 104–111 | تابع | `rowsOf` | 0 | ⬜ |
-| `TOOL-076.12` | 113–118 | تابع | `sortedCopy` | 0 | ⬜ |
-| `TOOL-076.13` | 119–145 | ناحیه | `بلوک رویه‌ای 119-145` | 0 | ⬜ |
-| `TOOL-076.14` | 146–181 | ناحیه | `حتی اگر پیش‌فرض کد عوض شود، نقش ویرایش‌شده دست‌نخو` | 0 | ⬜ |
-| `TOOL-076.15` | 182–183 | ناحیه | `نقش user: ردیف‌هایش دقیقاً همان پیش‌فرض قدیم است ⇒` | 0 | ⬜ |
-| `TOOL-076.16` | 184–207 | ناحیه | `نقش support_manager: یک کد عمداً برداشته شده ⇒ بای` | 0 | ⬜ |
+| `TOOL-076.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
+| `TOOL-076.02` | 19–29 | تابع | `check` | 0 | ⬜ |
+| `TOOL-076.03` | 31–51 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-076.04` | 52–87 | ناحیه | `بلوک رویه‌ای 52-87` | 1 | ⬜ |
+| `TOOL-076.05` | 88–88 | ناحیه | `آزمون واقعی food_ticket_group_resolve: ردیفی که فق` | 0 | ⬜ |
+| `TOOL-076.06` | 89–92 | تابع | `food_ticket_code` | 0 | ⬜ |
+| `TOOL-076.07` | 93–96 | تابع | `food_ticket_card_key` | 0 | ⬜ |
+| `TOOL-076.08` | 97–100 | تابع | `food_ticket_group_find_by_uid` | 0 | ⬜ |
+| `TOOL-076.09` | 101–109 | ناحیه | `بلوک رویه‌ای 101-109` | 4 | ⬜ |
+| `TOOL-076.10` | 110–113 | تابع | `cfg` | 0 | ⬜ |
+| `TOOL-076.11` | 114–117 | تابع | `food_ticket_config` | 0 | ⬜ |
+| `TOOL-076.12` | 118–121 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-076.13` | 122–124 | ناحیه | `بلوک رویه‌ای 122-124` | 4 | ⬜ |
+| `TOOL-076.14` | 125–129 | تابع | `food_ticket_env_value` | 0 | ⬜ |
+| `TOOL-076.15` | 130–176 | ناحیه | `بلوک رویه‌ای 130-176` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-077</b> — <code>tools/test_scan_errors_offline.php</code> (115 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TOOL-077</b> — <code>tools/test_role_permissions_offline.php</code> (207 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-077.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
-| `TOOL-077.02` | 19–29 | تابع | `check` | 0 | ⬜ |
-| `TOOL-077.03` | 30–115 | ناحیه | `بلوک رویه‌ای 30-115` | 0 | ⬜ |
+| `TOOL-077.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 0 | ⬜ |
+| `TOOL-077.02` | 32–42 | تابع | `check` | 0 | ⬜ |
+| `TOOL-077.03` | 44–68 | کلاس | `MysqlishSqlite` | 5 | ⬜ |
+| `TOOL-077.04` | 69–74 | ناحیه | `بلوک رویه‌ای 69-74` | 4 | ⬜ |
+| `TOOL-077.05` | 75–79 | تابع | `db` | 0 | ⬜ |
+| `TOOL-077.06` | 80–82 | ناحیه | `بلوک رویه‌ای 80-82` | 0 | ⬜ |
+| `TOOL-077.07` | 83–86 | تابع | `setting` | 0 | ⬜ |
+| `TOOL-077.08` | 87–90 | تابع | `save_setting` | 0 | ⬜ |
+| `TOOL-077.09` | 91–93 | ناحیه | `بلوک رویه‌ای 91-93` | 0 | ⬜ |
+| `TOOL-077.10` | 94–102 | تابع | `seedRows` | 1 | ⬜ |
+| `TOOL-077.11` | 104–111 | تابع | `rowsOf` | 0 | ⬜ |
+| `TOOL-077.12` | 113–118 | تابع | `sortedCopy` | 0 | ⬜ |
+| `TOOL-077.13` | 119–145 | ناحیه | `بلوک رویه‌ای 119-145` | 0 | ⬜ |
+| `TOOL-077.14` | 146–181 | ناحیه | `حتی اگر پیش‌فرض کد عوض شود، نقش ویرایش‌شده دست‌نخو` | 0 | ⬜ |
+| `TOOL-077.15` | 182–183 | ناحیه | `نقش user: ردیف‌هایش دقیقاً همان پیش‌فرض قدیم است ⇒` | 0 | ⬜ |
+| `TOOL-077.16` | 184–207 | ناحیه | `نقش support_manager: یک کد عمداً برداشته شده ⇒ بای` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-078</b> — <code>tools/test_source_delete_offline.php</code> (187 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TOOL-078</b> — <code>tools/test_scan_errors_offline.php</code> (115 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-078.01` | 1–24 | ناحیه | `بلوک رویه‌ای 1-24` | 0 | ⬜ |
-| `TOOL-078.02` | 25–28 | تابع | `app_error_log` | 0 | ⬜ |
-| `TOOL-078.03` | 29–32 | ناحیه | `بلوک رویه‌ای 29-32` | 0 | ⬜ |
-| `TOOL-078.04` | 33–70 | تابع | `extractFunction` | 0 | ⬜ |
-| `TOOL-078.05` | 71–90 | ناحیه | `بلوک رویه‌ای 71-90` | 4 | ⬜ |
-| `TOOL-078.06` | 91–101 | تابع | `check` | 0 | ⬜ |
-| `TOOL-078.07` | 102–187 | ناحیه | `بلوک رویه‌ای 102-187` | 3 | ⬜ |
+| `TOOL-078.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
+| `TOOL-078.02` | 19–29 | تابع | `check` | 0 | ⬜ |
+| `TOOL-078.03` | 30–115 | ناحیه | `بلوک رویه‌ای 30-115` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-079</b> — <code>tools/test_ticket_txn_offline.php</code> (234 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TOOL-079</b> — <code>tools/test_source_delete_offline.php</code> (187 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-079.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
-| `TOOL-079.02` | 29–39 | تابع | `check` | 0 | ⬜ |
-| `TOOL-079.03` | 41–61 | تابع | `grabFunction` | 0 | ⬜ |
-| `TOOL-079.04` | 63–74 | کلاس | `FakeStmt` | 0 | ⬜ |
-| `TOOL-079.05` | 76–131 | کلاس | `FakeDb` | 4 | ⬜ |
-| `TOOL-079.06` | 132–133 | ناحیه | `بلوک رویه‌ای 132-133` | 0 | ⬜ |
-| `TOOL-079.07` | 134–137 | تابع | `db` | 0 | ⬜ |
-| `TOOL-079.08` | 138–138 | ناحیه | `بلوک رویه‌ای 138-138` | 0 | ⬜ |
-| `TOOL-079.09` | 139–142 | تابع | `system_log` | 0 | ⬜ |
-| `TOOL-079.10` | 143–143 | ناحیه | `بلوک رویه‌ای 143-143` | 0 | ⬜ |
-| `TOOL-079.11` | 144–147 | تابع | `__test_register_shutdown` | 0 | ⬜ |
-| `TOOL-079.12` | 148–214 | ناحیه | `بلوک رویه‌ای 148-214` | 4 | ⬜ |
-| `TOOL-079.13` | 215–215 | ناحیه | `۱.۳۷.۲: مرز بدنه با «اکشن بعدی» تعیین می‌شود، نه ب` | 0 | ⬜ |
-| `TOOL-079.14` | 216–234 | ناحیه | `کامنت/اعتبارسنجی در create_ticket این آزمون را بی‌` | 3 | ⬜ |
+| `TOOL-079.01` | 1–24 | ناحیه | `بلوک رویه‌ای 1-24` | 0 | ⬜ |
+| `TOOL-079.02` | 25–28 | تابع | `app_error_log` | 0 | ⬜ |
+| `TOOL-079.03` | 29–32 | ناحیه | `بلوک رویه‌ای 29-32` | 0 | ⬜ |
+| `TOOL-079.04` | 33–70 | تابع | `extractFunction` | 0 | ⬜ |
+| `TOOL-079.05` | 71–90 | ناحیه | `بلوک رویه‌ای 71-90` | 4 | ⬜ |
+| `TOOL-079.06` | 91–101 | تابع | `check` | 0 | ⬜ |
+| `TOOL-079.07` | 102–187 | ناحیه | `بلوک رویه‌ای 102-187` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-080</b> — <code>tools/test_traffic_form_offline.php</code> (75 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TOOL-080</b> — <code>tools/test_ticket_txn_offline.php</code> (234 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-080.01` | 1–12 | ناحیه | `بلوک رویه‌ای 1-12` | 0 | ⬜ |
-| `TOOL-080.02` | 13–14 | ناحیه | `تابع اعتبارسنجی کد ملی در index.php است؛ اینجا فقط` | 0 | ⬜ |
-| `TOOL-080.03` | 15–27 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
-| `TOOL-080.04` | 28–33 | ناحیه | `بلوک رویه‌ای 28-33` | 0 | ⬜ |
-| `TOOL-080.05` | 34–39 | تابع | `check` | 0 | ⬜ |
-| `TOOL-080.06` | 41–49 | تابع | `tryValidate` | 0 | ⬜ |
-| `TOOL-080.07` | 51–55 | ناحیه | `کد ملی اشتباه ⇒ فیلد national_code` | 0 | ⬜ |
-| `TOOL-080.08` | 56–59 | ناحیه | `کد ملی با ارقام فارسی و معتبر ⇒ بدون خطا` | 0 | ⬜ |
-| `TOOL-080.09` | 60–63 | ناحیه | `نام خالی ⇒ فیلد full_name` | 0 | ⬜ |
-| `TOOL-080.10` | 64–67 | ناحیه | `ورودی درست ⇒ بدون خطا (با کد ملی موردقبول stub)` | 0 | ⬜ |
-| `TOOL-080.11` | 68–75 | ناحیه | `خطای عمومی (بدون فیلد) ⇒ TrafficInputException با ` | 0 | ⬜ |
+| `TOOL-080.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 0 | ⬜ |
+| `TOOL-080.02` | 29–39 | تابع | `check` | 0 | ⬜ |
+| `TOOL-080.03` | 41–61 | تابع | `grabFunction` | 0 | ⬜ |
+| `TOOL-080.04` | 63–74 | کلاس | `FakeStmt` | 0 | ⬜ |
+| `TOOL-080.05` | 76–131 | کلاس | `FakeDb` | 4 | ⬜ |
+| `TOOL-080.06` | 132–133 | ناحیه | `بلوک رویه‌ای 132-133` | 0 | ⬜ |
+| `TOOL-080.07` | 134–137 | تابع | `db` | 0 | ⬜ |
+| `TOOL-080.08` | 138–138 | ناحیه | `بلوک رویه‌ای 138-138` | 0 | ⬜ |
+| `TOOL-080.09` | 139–142 | تابع | `system_log` | 0 | ⬜ |
+| `TOOL-080.10` | 143–143 | ناحیه | `بلوک رویه‌ای 143-143` | 0 | ⬜ |
+| `TOOL-080.11` | 144–147 | تابع | `__test_register_shutdown` | 0 | ⬜ |
+| `TOOL-080.12` | 148–214 | ناحیه | `بلوک رویه‌ای 148-214` | 4 | ⬜ |
+| `TOOL-080.13` | 215–215 | ناحیه | `۱.۳۷.۲: مرز بدنه با «اکشن بعدی» تعیین می‌شود، نه ب` | 0 | ⬜ |
+| `TOOL-080.14` | 216–234 | ناحیه | `کامنت/اعتبارسنجی در create_ticket این آزمون را بی‌` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-081</b> — <code>tools/test_traffic_import_offline.php</code> (179 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-081</b> — <code>tools/test_traffic_form_offline.php</code> (75 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-081.01` | 1–179 | ناحیه | `بلوک رویه‌ای 1-179` | **9** | ⬜ |
+| `TOOL-081.01` | 1–12 | ناحیه | `بلوک رویه‌ای 1-12` | 0 | ⬜ |
+| `TOOL-081.02` | 13–14 | ناحیه | `تابع اعتبارسنجی کد ملی در index.php است؛ اینجا فقط` | 0 | ⬜ |
+| `TOOL-081.03` | 15–27 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
+| `TOOL-081.04` | 28–33 | ناحیه | `بلوک رویه‌ای 28-33` | 0 | ⬜ |
+| `TOOL-081.05` | 34–39 | تابع | `check` | 0 | ⬜ |
+| `TOOL-081.06` | 41–49 | تابع | `tryValidate` | 0 | ⬜ |
+| `TOOL-081.07` | 51–55 | ناحیه | `کد ملی اشتباه ⇒ فیلد national_code` | 0 | ⬜ |
+| `TOOL-081.08` | 56–59 | ناحیه | `کد ملی با ارقام فارسی و معتبر ⇒ بدون خطا` | 0 | ⬜ |
+| `TOOL-081.09` | 60–63 | ناحیه | `نام خالی ⇒ فیلد full_name` | 0 | ⬜ |
+| `TOOL-081.10` | 64–67 | ناحیه | `ورودی درست ⇒ بدون خطا (با کد ملی موردقبول stub)` | 0 | ⬜ |
+| `TOOL-081.11` | 68–75 | ناحیه | `خطای عمومی (بدون فیلد) ⇒ TrafficInputException با ` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-082</b> — <code>tools/test_ui_features_offline.php</code> (44 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TOOL-082</b> — <code>tools/test_traffic_import_offline.php</code> (179 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-082.01` | 1–44 | ناحیه | `بلوک رویه‌ای 1-44` | 0 | ⬜ |
+| `TOOL-082.01` | 1–179 | ناحیه | `بلوک رویه‌ای 1-179` | **9** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-083</b> — <code>tools/test_web_host_offline.php</code> (142 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TOOL-083</b> — <code>tools/test_ui_features_offline.php</code> (44 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-083.01` | 1–58 | ناحیه | `بلوک رویه‌ای 1-58` | 0 | ⬜ |
-| `TOOL-083.02` | 59–83 | ناحیه | `۱) نسخهٔ فعلی روی دیسک: رفتار «قبل» نباید تغییر کن` | 0 | ⬜ |
-| `TOOL-083.03` | 84–107 | ناحیه | `۲) نسخهٔ تازه‌تر پنل: شمارهٔ نسخه‌ها و نام فایل‌ها` | 0 | ⬜ |
-| `TOOL-083.04` | 108–114 | ناحیه | `۳) نسخه‌ای که لنگر brand را ندارد (نام برند عوض شد` | 0 | ⬜ |
-| `TOOL-083.05` | 115–120 | ناحیه | `۴) خروجی دوباره میزبانی شود → تزریق مضاعف/پیشوند م` | 0 | ⬜ |
-| `TOOL-083.06` | 121–127 | ناحیه | `۵) حالت پنل مستقل (C#): مسیر ../assets/style.css ب` | 0 | ⬜ |
-| `TOOL-083.07` | 128–142 | ناحیه | `۶) HTML حداقلی/شکسته: نباید خطا بدهد و باید بوت‌اس` | 0 | ⬜ |
+| `TOOL-083.01` | 1–44 | ناحیه | `بلوک رویه‌ای 1-44` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TOOL-084</b> — <code>tools/topic_index.py</code> (209 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TOOL-084</b> — <code>tools/test_web_host_offline.php</code> (142 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TOOL-084.01` | 1–26 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TOOL-084.02` | 27–30 | بلوک | `read` | 0 | ⬜ |
-| `TOOL-084.03` | 31–32 | بلوک | `-` | 0 | ⬜ |
-| `TOOL-084.04` | 33–34 | بلوک | `-` | 0 | ⬜ |
-| `TOOL-084.05` | 35–51 | بلوک | `page_labels` | 0 | ⬜ |
-| `TOOL-084.06` | 52–67 | بلوک | `permission_catalog` | 0 | ⬜ |
-| `TOOL-084.07` | 68–75 | بلوک | `page_permissions` | 0 | ⬜ |
-| `TOOL-084.08` | 76–87 | بلوک | `db_tables` | 0 | ⬜ |
-| `TOOL-084.09` | 88–89 | بلوک | `-` | 0 | ⬜ |
-| `TOOL-084.10` | 90–97 | بلوک | `-` | 1 | ⬜ |
-| `TOOL-084.11` | 98–117 | بلوک | `build_inverted` | 0 | ⬜ |
-| `TOOL-084.12` | 118–157 | بلوک | `rank` | 1 | ⬜ |
-| `TOOL-084.13` | 158–209 | بلوک | `main` | 0 | ⬜ |
+| `TOOL-084.01` | 1–58 | ناحیه | `بلوک رویه‌ای 1-58` | 0 | ⬜ |
+| `TOOL-084.02` | 59–83 | ناحیه | `۱) نسخهٔ فعلی روی دیسک: رفتار «قبل» نباید تغییر کن` | 0 | ⬜ |
+| `TOOL-084.03` | 84–107 | ناحیه | `۲) نسخهٔ تازه‌تر پنل: شمارهٔ نسخه‌ها و نام فایل‌ها` | 0 | ⬜ |
+| `TOOL-084.04` | 108–114 | ناحیه | `۳) نسخه‌ای که لنگر brand را ندارد (نام برند عوض شد` | 0 | ⬜ |
+| `TOOL-084.05` | 115–120 | ناحیه | `۴) خروجی دوباره میزبانی شود → تزریق مضاعف/پیشوند م` | 0 | ⬜ |
+| `TOOL-084.06` | 121–127 | ناحیه | `۵) حالت پنل مستقل (C#): مسیر ../assets/style.css ب` | 0 | ⬜ |
+| `TOOL-084.07` | 128–142 | ناحیه | `۶) HTML حداقلی/شکسته: نباید خطا بدهد و باید بوت‌اس` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TOOL-085</b> — <code>tools/topic_index.py</code> (209 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TOOL-085.01` | 1–26 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TOOL-085.02` | 27–30 | بلوک | `read` | 0 | ⬜ |
+| `TOOL-085.03` | 31–32 | بلوک | `-` | 0 | ⬜ |
+| `TOOL-085.04` | 33–34 | بلوک | `-` | 0 | ⬜ |
+| `TOOL-085.05` | 35–51 | بلوک | `page_labels` | 0 | ⬜ |
+| `TOOL-085.06` | 52–67 | بلوک | `permission_catalog` | 0 | ⬜ |
+| `TOOL-085.07` | 68–75 | بلوک | `page_permissions` | 0 | ⬜ |
+| `TOOL-085.08` | 76–87 | بلوک | `db_tables` | 0 | ⬜ |
+| `TOOL-085.09` | 88–89 | بلوک | `-` | 0 | ⬜ |
+| `TOOL-085.10` | 90–97 | بلوک | `-` | 1 | ⬜ |
+| `TOOL-085.11` | 98–117 | بلوک | `build_inverted` | 0 | ⬜ |
+| `TOOL-085.12` | 118–157 | بلوک | `rank` | 1 | ⬜ |
+| `TOOL-085.13` | 158–209 | بلوک | `main` | 0 | ⬜ |
 
 </details>
 

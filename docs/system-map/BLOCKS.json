@@ -79731,6 +79731,110 @@
         },
         {
             "id": "TOOL-012",
+            "path": "tools\/build_update_1_62_88.py",
+            "area": "TOOL",
+            "lines": 166,
+            "file_fingerprint": "9178b2ed3448",
+            "blocks": [
+                {
+                    "kind": "block",
+                    "anchor": "مقدمهٔ فایل",
+                    "line_start": 1,
+                    "line_end": 54,
+                    "lines": 54,
+                    "fingerprint": "88a27d4bd9cc",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TOOL-012.01"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "sha256",
+                    "line_start": 55,
+                    "line_end": 58,
+                    "lines": 4,
+                    "fingerprint": "775c87ac30d4",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TOOL-012.02"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "git",
+                    "line_start": 59,
+                    "line_end": 64,
+                    "lines": 6,
+                    "fingerprint": "dacec4d095c3",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TOOL-012.03"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "changed_files",
+                    "line_start": 65,
+                    "line_end": 75,
+                    "lines": 11,
+                    "fingerprint": "77e1590e012d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TOOL-012.04"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "build",
+                    "line_start": 76,
+                    "line_end": 121,
+                    "lines": 46,
+                    "fingerprint": "3f3b829bce67",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TOOL-012.05"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "entry",
+                    "line_start": 122,
+                    "line_end": 134,
+                    "lines": 13,
+                    "fingerprint": "726278c28719",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TOOL-012.06"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "اعتبارسنجی پس از ساخت",
+                    "line_start": 135,
+                    "line_end": 166,
+                    "lines": 32,
+                    "fingerprint": "1267db79844b",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TOOL-012.07"
+                }
+            ]
+        },
+        {
+            "id": "TOOL-013",
             "path": "tools\/code_index.php",
             "area": "TOOL",
             "lines": 571,
@@ -79747,7 +79851,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.01"
+                    "id": "TOOL-013.01"
                 },
                 {
                     "kind": "function",
@@ -79760,7 +79864,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.02"
+                    "id": "TOOL-013.02"
                 },
                 {
                     "kind": "function",
@@ -79773,7 +79877,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.03"
+                    "id": "TOOL-013.03"
                 },
                 {
                     "kind": "function",
@@ -79786,7 +79890,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.04"
+                    "id": "TOOL-013.04"
                 },
                 {
                     "kind": "function",
@@ -79799,7 +79903,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.05"
+                    "id": "TOOL-013.05"
                 },
                 {
                     "kind": "function",
@@ -79812,7 +79916,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.06"
+                    "id": "TOOL-013.06"
                 },
                 {
                     "kind": "function",
@@ -79825,7 +79929,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.07"
+                    "id": "TOOL-013.07"
                 },
                 {
                     "kind": "function",
@@ -79842,7 +79946,7 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-012.08"
+                    "id": "TOOL-013.08"
                 },
                 {
                     "kind": "function",
@@ -79855,7 +79959,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.09"
+                    "id": "TOOL-013.09"
                 },
                 {
                     "kind": "function",
@@ -79868,7 +79972,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.10"
+                    "id": "TOOL-013.10"
                 },
                 {
                     "kind": "function",
@@ -79883,7 +79987,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-012.11"
+                    "id": "TOOL-013.11"
                 },
                 {
                     "kind": "function",
@@ -79896,7 +80000,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.12"
+                    "id": "TOOL-013.12"
                 },
                 {
                     "kind": "function",
@@ -79909,7 +80013,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.13"
+                    "id": "TOOL-013.13"
                 },
                 {
                     "kind": "function",
@@ -79922,7 +80026,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.14"
+                    "id": "TOOL-013.14"
                 },
                 {
                     "kind": "function",
@@ -79935,7 +80039,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.15"
+                    "id": "TOOL-013.15"
                 },
                 {
                     "kind": "function",
@@ -79948,7 +80052,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-012.16"
+                    "id": "TOOL-013.16"
                 },
                 {
                     "kind": "region",
@@ -79963,12 +80067,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-012.17"
+                    "id": "TOOL-013.17"
                 }
             ]
         },
         {
-            "id": "TOOL-013",
+            "id": "TOOL-014",
             "path": "tools\/db_health_report.php",
             "area": "TOOL",
             "lines": 129,
@@ -79985,7 +80089,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-013.01"
+                    "id": "TOOL-014.01"
                 },
                 {
                     "kind": "function",
@@ -80000,7 +80104,7 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-013.02"
+                    "id": "TOOL-014.02"
                 },
                 {
                     "kind": "region",
@@ -80013,7 +80117,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-013.03"
+                    "id": "TOOL-014.03"
                 },
                 {
                     "kind": "region",
@@ -80026,7 +80130,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-013.04"
+                    "id": "TOOL-014.04"
                 },
                 {
                     "kind": "region",
@@ -80039,7 +80143,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-013.05"
+                    "id": "TOOL-014.05"
                 },
                 {
                     "kind": "region",
@@ -80052,12 +80156,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-013.06"
+                    "id": "TOOL-014.06"
                 }
             ]
         },
         {
-            "id": "TOOL-014",
+            "id": "TOOL-015",
             "path": "tools\/diag_asset_duplicates.php",
             "area": "TOOL",
             "lines": 79,
@@ -80074,7 +80178,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.01"
+                    "id": "TOOL-015.01"
                 },
                 {
                     "kind": "function",
@@ -80089,7 +80193,7 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-014.02"
+                    "id": "TOOL-015.02"
                 },
                 {
                     "kind": "function",
@@ -80102,7 +80206,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.03"
+                    "id": "TOOL-015.03"
                 },
                 {
                     "kind": "region",
@@ -80115,7 +80219,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.04"
+                    "id": "TOOL-015.04"
                 },
                 {
                     "kind": "region",
@@ -80128,7 +80232,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.05"
+                    "id": "TOOL-015.05"
                 },
                 {
                     "kind": "region",
@@ -80141,7 +80245,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.06"
+                    "id": "TOOL-015.06"
                 },
                 {
                     "kind": "region",
@@ -80154,7 +80258,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.07"
+                    "id": "TOOL-015.07"
                 },
                 {
                     "kind": "region",
@@ -80167,7 +80271,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.08"
+                    "id": "TOOL-015.08"
                 },
                 {
                     "kind": "region",
@@ -80180,7 +80284,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.09"
+                    "id": "TOOL-015.09"
                 },
                 {
                     "kind": "region",
@@ -80193,7 +80297,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.10"
+                    "id": "TOOL-015.10"
                 },
                 {
                     "kind": "region",
@@ -80206,12 +80310,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-014.11"
+                    "id": "TOOL-015.11"
                 }
             ]
         },
         {
-            "id": "TOOL-015",
+            "id": "TOOL-016",
             "path": "tools\/diag_asset_profile.php",
             "area": "TOOL",
             "lines": 163,
@@ -80233,12 +80337,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-015.01"
+                    "id": "TOOL-016.01"
                 }
             ]
         },
         {
-            "id": "TOOL-016",
+            "id": "TOOL-017",
             "path": "tools\/diag_connection.php",
             "area": "TOOL",
             "lines": 258,
@@ -80262,12 +80366,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-016.01"
+                    "id": "TOOL-017.01"
                 }
             ]
         },
         {
-            "id": "TOOL-017",
+            "id": "TOOL-018",
             "path": "tools\/diag_food_duplicates.php",
             "area": "TOOL",
             "lines": 31,
@@ -80284,12 +80388,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-017.01"
+                    "id": "TOOL-018.01"
                 }
             ]
         },
         {
-            "id": "TOOL-018",
+            "id": "TOOL-019",
             "path": "tools\/diag_food_match.php",
             "area": "TOOL",
             "lines": 111,
@@ -80306,7 +80410,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-018.01"
+                    "id": "TOOL-019.01"
                 },
                 {
                     "kind": "region",
@@ -80319,7 +80423,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-018.02"
+                    "id": "TOOL-019.02"
                 },
                 {
                     "kind": "region",
@@ -80332,7 +80436,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-018.03"
+                    "id": "TOOL-019.03"
                 },
                 {
                     "kind": "region",
@@ -80345,12 +80449,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-018.04"
+                    "id": "TOOL-019.04"
                 }
             ]
         },
         {
-            "id": "TOOL-019",
+            "id": "TOOL-020",
             "path": "tools\/diag_food_ticket.php",
             "area": "TOOL",
             "lines": 103,
@@ -80367,7 +80471,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-019.01"
+                    "id": "TOOL-020.01"
                 },
                 {
                     "kind": "region",
@@ -80380,7 +80484,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-019.02"
+                    "id": "TOOL-020.02"
                 },
                 {
                     "kind": "region",
@@ -80393,7 +80497,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-019.03"
+                    "id": "TOOL-020.03"
                 },
                 {
                     "kind": "region",
@@ -80408,12 +80512,12 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-019.04"
+                    "id": "TOOL-020.04"
                 }
             ]
         },
         {
-            "id": "TOOL-020",
+            "id": "TOOL-021",
             "path": "tools\/diag_netprint.php",
             "area": "TOOL",
             "lines": 112,
@@ -80432,12 +80536,12 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-020.01"
+                    "id": "TOOL-021.01"
                 }
             ]
         },
         {
-            "id": "TOOL-021",
+            "id": "TOOL-022",
             "path": "tools\/diag_print_margin.php",
             "area": "TOOL",
             "lines": 313,
@@ -80456,7 +80560,7 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-021.01"
+                    "id": "TOOL-022.01"
                 },
                 {
                     "kind": "region",
@@ -80471,7 +80575,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-021.02"
+                    "id": "TOOL-022.02"
                 },
                 {
                     "kind": "region",
@@ -80486,7 +80590,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "TOOL-021.03"
+                    "id": "TOOL-022.03"
                 },
                 {
                     "kind": "region",
@@ -80499,7 +80603,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-021.04"
+                    "id": "TOOL-022.04"
                 },
                 {
                     "kind": "region",
@@ -80512,7 +80616,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-021.05"
+                    "id": "TOOL-022.05"
                 },
                 {
                     "kind": "region",
@@ -80525,7 +80629,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-021.06"
+                    "id": "TOOL-022.06"
                 },
                 {
                     "kind": "region",
@@ -80540,7 +80644,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-021.07"
+                    "id": "TOOL-022.07"
                 },
                 {
                     "kind": "region",
@@ -80556,12 +80660,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-021.08"
+                    "id": "TOOL-022.08"
                 }
             ]
         },
         {
-            "id": "TOOL-022",
+            "id": "TOOL-023",
             "path": "tools\/diag_source_row_delete.php",
             "area": "TOOL",
             "lines": 128,
@@ -80584,12 +80688,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-022.01"
+                    "id": "TOOL-023.01"
                 }
             ]
         },
         {
-            "id": "TOOL-023",
+            "id": "TOOL-024",
             "path": "tools\/diagnose_ldap.php",
             "area": "TOOL",
             "lines": 111,
@@ -80606,7 +80710,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-023.01"
+                    "id": "TOOL-024.01"
                 },
                 {
                     "kind": "region",
@@ -80619,7 +80723,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-023.02"
+                    "id": "TOOL-024.02"
                 },
                 {
                     "kind": "region",
@@ -80632,7 +80736,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-023.03"
+                    "id": "TOOL-024.03"
                 },
                 {
                     "kind": "region",
@@ -80647,7 +80751,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "TOOL-023.04"
+                    "id": "TOOL-024.04"
                 },
                 {
                     "kind": "region",
@@ -80662,7 +80766,7 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "TOOL-023.05"
+                    "id": "TOOL-024.05"
                 },
                 {
                     "kind": "region",
@@ -80677,12 +80781,12 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "TOOL-023.06"
+                    "id": "TOOL-024.06"
                 }
             ]
         },
         {
-            "id": "TOOL-024",
+            "id": "TOOL-025",
             "path": "tools\/export_domain_users.php",
             "area": "TOOL",
             "lines": 87,
@@ -80699,7 +80803,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-024.01"
+                    "id": "TOOL-025.01"
                 },
                 {
                     "kind": "function",
@@ -80712,7 +80816,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-024.02"
+                    "id": "TOOL-025.02"
                 },
                 {
                     "kind": "function",
@@ -80725,7 +80829,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-024.03"
+                    "id": "TOOL-025.03"
                 },
                 {
                     "kind": "region",
@@ -80738,12 +80842,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-024.04"
+                    "id": "TOOL-025.04"
                 }
             ]
         },
         {
-            "id": "TOOL-025",
+            "id": "TOOL-026",
             "path": "tools\/find-in-system.py",
             "area": "TOOL",
             "lines": 236,
@@ -80760,7 +80864,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.01"
+                    "id": "TOOL-026.01"
                 },
                 {
                     "kind": "block",
@@ -80773,7 +80877,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.02"
+                    "id": "TOOL-026.02"
                 },
                 {
                     "kind": "block",
@@ -80786,7 +80890,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.03"
+                    "id": "TOOL-026.03"
                 },
                 {
                     "kind": "block",
@@ -80799,7 +80903,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.04"
+                    "id": "TOOL-026.04"
                 },
                 {
                     "kind": "block",
@@ -80812,7 +80916,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.05"
+                    "id": "TOOL-026.05"
                 },
                 {
                     "kind": "block",
@@ -80825,7 +80929,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.06"
+                    "id": "TOOL-026.06"
                 },
                 {
                     "kind": "block",
@@ -80838,7 +80942,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.07"
+                    "id": "TOOL-026.07"
                 },
                 {
                     "kind": "block",
@@ -80851,12 +80955,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-025.08"
+                    "id": "TOOL-026.08"
                 }
             ]
         },
         {
-            "id": "TOOL-026",
+            "id": "TOOL-027",
             "path": "tools\/fix_food_columns.php",
             "area": "TOOL",
             "lines": 140,
@@ -80873,7 +80977,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-026.01"
+                    "id": "TOOL-027.01"
                 },
                 {
                     "kind": "region",
@@ -80886,7 +80990,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-026.02"
+                    "id": "TOOL-027.02"
                 },
                 {
                     "kind": "region",
@@ -80899,7 +81003,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-026.03"
+                    "id": "TOOL-027.03"
                 },
                 {
                     "kind": "region",
@@ -80912,7 +81016,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-026.04"
+                    "id": "TOOL-027.04"
                 },
                 {
                     "kind": "region",
@@ -80927,7 +81031,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-026.05"
+                    "id": "TOOL-027.05"
                 },
                 {
                     "kind": "region",
@@ -80942,12 +81046,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-026.06"
+                    "id": "TOOL-027.06"
                 }
             ]
         },
         {
-            "id": "TOOL-027",
+            "id": "TOOL-028",
             "path": "tools\/food_system_router.php",
             "area": "TOOL",
             "lines": 28,
@@ -80966,7 +81070,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "TOOL-027.01"
+                    "id": "TOOL-028.01"
                 },
                 {
                     "kind": "region",
@@ -80979,7 +81083,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-027.02"
+                    "id": "TOOL-028.02"
                 },
                 {
                     "kind": "region",
@@ -80992,7 +81096,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-027.03"
+                    "id": "TOOL-028.03"
                 },
                 {
                     "kind": "region",
@@ -81005,12 +81109,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-027.04"
+                    "id": "TOOL-028.04"
                 }
             ]
         },
         {
-            "id": "TOOL-028",
+            "id": "TOOL-029",
             "path": "tools\/food_system_seed.php",
             "area": "TOOL",
             "lines": 134,
@@ -81027,7 +81131,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-028.01"
+                    "id": "TOOL-029.01"
                 },
                 {
                     "kind": "region",
@@ -81040,7 +81144,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-028.02"
+                    "id": "TOOL-029.02"
                 },
                 {
                     "kind": "region",
@@ -81053,12 +81157,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-028.03"
+                    "id": "TOOL-029.03"
                 }
             ]
         },
         {
-            "id": "TOOL-029",
+            "id": "TOOL-030",
             "path": "tools\/food_system_stress.py",
             "area": "TOOL",
             "lines": 479,
@@ -81075,7 +81179,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.01"
+                    "id": "TOOL-030.01"
                 },
                 {
                     "kind": "block",
@@ -81088,7 +81192,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.02"
+                    "id": "TOOL-030.02"
                 },
                 {
                     "kind": "block",
@@ -81101,7 +81205,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.03"
+                    "id": "TOOL-030.03"
                 },
                 {
                     "kind": "block",
@@ -81114,7 +81218,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.04"
+                    "id": "TOOL-030.04"
                 },
                 {
                     "kind": "block",
@@ -81127,7 +81231,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.05"
+                    "id": "TOOL-030.05"
                 },
                 {
                     "kind": "block",
@@ -81142,7 +81246,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-029.06"
+                    "id": "TOOL-030.06"
                 },
                 {
                     "kind": "block",
@@ -81155,7 +81259,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.07"
+                    "id": "TOOL-030.07"
                 },
                 {
                     "kind": "block",
@@ -81168,7 +81272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.08"
+                    "id": "TOOL-030.08"
                 },
                 {
                     "kind": "block",
@@ -81181,7 +81285,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.09"
+                    "id": "TOOL-030.09"
                 },
                 {
                     "kind": "block",
@@ -81194,7 +81298,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.10"
+                    "id": "TOOL-030.10"
                 },
                 {
                     "kind": "block",
@@ -81207,7 +81311,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.11"
+                    "id": "TOOL-030.11"
                 },
                 {
                     "kind": "block",
@@ -81220,7 +81324,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.12"
+                    "id": "TOOL-030.12"
                 },
                 {
                     "kind": "block",
@@ -81235,7 +81339,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-029.13"
+                    "id": "TOOL-030.13"
                 },
                 {
                     "kind": "block",
@@ -81248,7 +81352,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.14"
+                    "id": "TOOL-030.14"
                 },
                 {
                     "kind": "block",
@@ -81261,7 +81365,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.15"
+                    "id": "TOOL-030.15"
                 },
                 {
                     "kind": "block",
@@ -81274,7 +81378,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.16"
+                    "id": "TOOL-030.16"
                 },
                 {
                     "kind": "block",
@@ -81287,7 +81391,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.17"
+                    "id": "TOOL-030.17"
                 },
                 {
                     "kind": "block",
@@ -81300,7 +81404,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.18"
+                    "id": "TOOL-030.18"
                 },
                 {
                     "kind": "block",
@@ -81313,7 +81417,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.19"
+                    "id": "TOOL-030.19"
                 },
                 {
                     "kind": "block",
@@ -81326,12 +81430,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-029.20"
+                    "id": "TOOL-030.20"
                 }
             ]
         },
         {
-            "id": "TOOL-030",
+            "id": "TOOL-031",
             "path": "tools\/food_system_verify.php",
             "area": "TOOL",
             "lines": 96,
@@ -81350,12 +81454,12 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "TOOL-030.01"
+                    "id": "TOOL-031.01"
                 }
             ]
         },
         {
-            "id": "TOOL-031",
+            "id": "TOOL-032",
             "path": "tools\/full_system_route_smoke.py",
             "area": "TOOL",
             "lines": 694,
@@ -81372,7 +81476,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.01"
+                    "id": "TOOL-032.01"
                 },
                 {
                     "kind": "block",
@@ -81385,7 +81489,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.02"
+                    "id": "TOOL-032.02"
                 },
                 {
                     "kind": "block",
@@ -81398,7 +81502,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.03"
+                    "id": "TOOL-032.03"
                 },
                 {
                     "kind": "block",
@@ -81411,7 +81515,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.04"
+                    "id": "TOOL-032.04"
                 },
                 {
                     "kind": "block",
@@ -81424,7 +81528,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.05"
+                    "id": "TOOL-032.05"
                 },
                 {
                     "kind": "block",
@@ -81437,7 +81541,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.06"
+                    "id": "TOOL-032.06"
                 },
                 {
                     "kind": "block",
@@ -81450,7 +81554,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.07"
+                    "id": "TOOL-032.07"
                 },
                 {
                     "kind": "block",
@@ -81463,7 +81567,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.08"
+                    "id": "TOOL-032.08"
                 },
                 {
                     "kind": "block",
@@ -81476,7 +81580,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.09"
+                    "id": "TOOL-032.09"
                 },
                 {
                     "kind": "block",
@@ -81489,7 +81593,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.10"
+                    "id": "TOOL-032.10"
                 },
                 {
                     "kind": "block",
@@ -81502,7 +81606,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.11"
+                    "id": "TOOL-032.11"
                 },
                 {
                     "kind": "block",
@@ -81515,7 +81619,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.12"
+                    "id": "TOOL-032.12"
                 },
                 {
                     "kind": "block",
@@ -81528,7 +81632,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.13"
+                    "id": "TOOL-032.13"
                 },
                 {
                     "kind": "block",
@@ -81543,7 +81647,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-031.14"
+                    "id": "TOOL-032.14"
                 },
                 {
                     "kind": "block",
@@ -81558,7 +81662,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-031.15"
+                    "id": "TOOL-032.15"
                 },
                 {
                     "kind": "block",
@@ -81571,7 +81675,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.16"
+                    "id": "TOOL-032.16"
                 },
                 {
                     "kind": "block",
@@ -81584,7 +81688,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-031.17"
+                    "id": "TOOL-032.17"
                 },
                 {
                     "kind": "block",
@@ -81600,12 +81704,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-031.18"
+                    "id": "TOOL-032.18"
                 }
             ]
         },
         {
-            "id": "TOOL-032",
+            "id": "TOOL-033",
             "path": "tools\/install-1.50.php",
             "area": "TOOL",
             "lines": 92,
@@ -81624,7 +81728,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-032.01"
+                    "id": "TOOL-033.01"
                 },
                 {
                     "kind": "region",
@@ -81637,7 +81741,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-032.02"
+                    "id": "TOOL-033.02"
                 },
                 {
                     "kind": "region",
@@ -81652,7 +81756,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-032.03"
+                    "id": "TOOL-033.03"
                 },
                 {
                     "kind": "region",
@@ -81667,7 +81771,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-032.04"
+                    "id": "TOOL-033.04"
                 },
                 {
                     "kind": "region",
@@ -81682,7 +81786,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-032.05"
+                    "id": "TOOL-033.05"
                 },
                 {
                     "kind": "region",
@@ -81697,12 +81801,12 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-032.06"
+                    "id": "TOOL-033.06"
                 }
             ]
         },
         {
-            "id": "TOOL-033",
+            "id": "TOOL-034",
             "path": "tools\/lint-php-syntax.php",
             "area": "TOOL",
             "lines": 25,
@@ -81719,12 +81823,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-033.01"
+                    "id": "TOOL-034.01"
                 }
             ]
         },
         {
-            "id": "TOOL-034",
+            "id": "TOOL-035",
             "path": "tools\/migrate-legacy-attachments.php",
             "area": "TOOL",
             "lines": 42,
@@ -81743,12 +81847,12 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-034.01"
+                    "id": "TOOL-035.01"
                 }
             ]
         },
         {
-            "id": "TOOL-035",
+            "id": "TOOL-036",
             "path": "tools\/preview_asset_names.php",
             "area": "TOOL",
             "lines": 126,
@@ -81765,7 +81869,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-035.01"
+                    "id": "TOOL-036.01"
                 },
                 {
                     "kind": "function",
@@ -81778,7 +81882,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-035.02"
+                    "id": "TOOL-036.02"
                 },
                 {
                     "kind": "region",
@@ -81791,7 +81895,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-035.03"
+                    "id": "TOOL-036.03"
                 },
                 {
                     "kind": "function",
@@ -81804,7 +81908,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-035.04"
+                    "id": "TOOL-036.04"
                 },
                 {
                     "kind": "function",
@@ -81817,7 +81921,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-035.05"
+                    "id": "TOOL-036.05"
                 },
                 {
                     "kind": "region",
@@ -81833,12 +81937,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-035.06"
+                    "id": "TOOL-036.06"
                 }
             ]
         },
         {
-            "id": "TOOL-036",
+            "id": "TOOL-037",
             "path": "tools\/preview_food_import.php",
             "area": "TOOL",
             "lines": 68,
@@ -81855,12 +81959,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-036.01"
+                    "id": "TOOL-037.01"
                 }
             ]
         },
         {
-            "id": "TOOL-037",
+            "id": "TOOL-038",
             "path": "tools\/print_calibration.php",
             "area": "TOOL",
             "lines": 137,
@@ -81877,7 +81981,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-037.01"
+                    "id": "TOOL-038.01"
                 },
                 {
                     "kind": "region",
@@ -81890,7 +81994,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-037.02"
+                    "id": "TOOL-038.02"
                 },
                 {
                     "kind": "region",
@@ -81905,7 +82009,7 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "TOOL-037.03"
+                    "id": "TOOL-038.03"
                 },
                 {
                     "kind": "region",
@@ -81918,7 +82022,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-037.04"
+                    "id": "TOOL-038.04"
                 },
                 {
                     "kind": "region",
@@ -81931,12 +82035,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-037.05"
+                    "id": "TOOL-038.05"
                 }
             ]
         },
         {
-            "id": "TOOL-038",
+            "id": "TOOL-039",
             "path": "tools\/print_test.php",
             "area": "TOOL",
             "lines": 51,
@@ -81955,12 +82059,12 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-038.01"
+                    "id": "TOOL-039.01"
                 }
             ]
         },
         {
-            "id": "TOOL-039",
+            "id": "TOOL-040",
             "path": "tools\/render_code_map.py",
             "area": "TOOL",
             "lines": 153,
@@ -81977,7 +82081,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-039.01"
+                    "id": "TOOL-040.01"
                 },
                 {
                     "kind": "block",
@@ -81990,12 +82094,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-039.02"
+                    "id": "TOOL-040.02"
                 }
             ]
         },
         {
-            "id": "TOOL-040",
+            "id": "TOOL-041",
             "path": "tools\/session-boot.py",
             "area": "TOOL",
             "lines": 347,
@@ -82012,7 +82116,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.01"
+                    "id": "TOOL-041.01"
                 },
                 {
                     "kind": "block",
@@ -82025,7 +82129,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.02"
+                    "id": "TOOL-041.02"
                 },
                 {
                     "kind": "block",
@@ -82038,7 +82142,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.03"
+                    "id": "TOOL-041.03"
                 },
                 {
                     "kind": "block",
@@ -82051,7 +82155,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.04"
+                    "id": "TOOL-041.04"
                 },
                 {
                     "kind": "block",
@@ -82064,7 +82168,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.05"
+                    "id": "TOOL-041.05"
                 },
                 {
                     "kind": "block",
@@ -82077,7 +82181,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.06"
+                    "id": "TOOL-041.06"
                 },
                 {
                     "kind": "block",
@@ -82090,7 +82194,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.07"
+                    "id": "TOOL-041.07"
                 },
                 {
                     "kind": "block",
@@ -82103,7 +82207,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.08"
+                    "id": "TOOL-041.08"
                 },
                 {
                     "kind": "block",
@@ -82116,7 +82220,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.09"
+                    "id": "TOOL-041.09"
                 },
                 {
                     "kind": "block",
@@ -82129,7 +82233,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.10"
+                    "id": "TOOL-041.10"
                 },
                 {
                     "kind": "block",
@@ -82142,7 +82246,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.11"
+                    "id": "TOOL-041.11"
                 },
                 {
                     "kind": "block",
@@ -82155,7 +82259,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.12"
+                    "id": "TOOL-041.12"
                 },
                 {
                     "kind": "block",
@@ -82168,7 +82272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.13"
+                    "id": "TOOL-041.13"
                 },
                 {
                     "kind": "block",
@@ -82181,12 +82285,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-040.14"
+                    "id": "TOOL-041.14"
                 }
             ]
         },
         {
-            "id": "TOOL-041",
+            "id": "TOOL-042",
             "path": "tools\/set_attendance_password.php",
             "area": "TOOL",
             "lines": 110,
@@ -82206,12 +82310,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-041.01"
+                    "id": "TOOL-042.01"
                 }
             ]
         },
         {
-            "id": "TOOL-042",
+            "id": "TOOL-043",
             "path": "tools\/set_print_gap.php",
             "area": "TOOL",
             "lines": 42,
@@ -82228,12 +82332,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-042.01"
+                    "id": "TOOL-043.01"
                 }
             ]
         },
         {
-            "id": "TOOL-043",
+            "id": "TOOL-044",
             "path": "tools\/sync_domain_users.php",
             "area": "TOOL",
             "lines": 41,
@@ -82252,12 +82356,12 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-043.01"
+                    "id": "TOOL-044.01"
                 }
             ]
         },
         {
-            "id": "TOOL-044",
+            "id": "TOOL-045",
             "path": "tools\/system_audit.php",
             "area": "TOOL",
             "lines": 93,
@@ -82276,12 +82380,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-044.01"
+                    "id": "TOOL-045.01"
                 }
             ]
         },
         {
-            "id": "TOOL-045",
+            "id": "TOOL-046",
             "path": "tools\/system_loadtest.php",
             "area": "TOOL",
             "lines": 711,
@@ -82298,7 +82402,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.01"
+                    "id": "TOOL-046.01"
                 },
                 {
                     "kind": "region",
@@ -82311,7 +82415,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.02"
+                    "id": "TOOL-046.02"
                 },
                 {
                     "kind": "region",
@@ -82326,7 +82430,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-045.03"
+                    "id": "TOOL-046.03"
                 },
                 {
                     "kind": "region",
@@ -82339,7 +82443,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.04"
+                    "id": "TOOL-046.04"
                 },
                 {
                     "kind": "function",
@@ -82354,7 +82458,7 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-045.05"
+                    "id": "TOOL-046.05"
                 },
                 {
                     "kind": "function",
@@ -82367,7 +82471,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.06"
+                    "id": "TOOL-046.06"
                 },
                 {
                     "kind": "function",
@@ -82380,7 +82484,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.07"
+                    "id": "TOOL-046.07"
                 },
                 {
                     "kind": "function",
@@ -82393,7 +82497,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.08"
+                    "id": "TOOL-046.08"
                 },
                 {
                     "kind": "function",
@@ -82406,7 +82510,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.09"
+                    "id": "TOOL-046.09"
                 },
                 {
                     "kind": "function",
@@ -82419,7 +82523,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.10"
+                    "id": "TOOL-046.10"
                 },
                 {
                     "kind": "region",
@@ -82432,7 +82536,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.11"
+                    "id": "TOOL-046.11"
                 },
                 {
                     "kind": "region",
@@ -82447,7 +82551,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "TOOL-045.12"
+                    "id": "TOOL-046.12"
                 },
                 {
                     "kind": "region",
@@ -82460,7 +82564,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.13"
+                    "id": "TOOL-046.13"
                 },
                 {
                     "kind": "region",
@@ -82473,7 +82577,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.14"
+                    "id": "TOOL-046.14"
                 },
                 {
                     "kind": "region",
@@ -82486,7 +82590,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.15"
+                    "id": "TOOL-046.15"
                 },
                 {
                     "kind": "region",
@@ -82501,7 +82605,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "TOOL-045.16"
+                    "id": "TOOL-046.16"
                 },
                 {
                     "kind": "region",
@@ -82514,7 +82618,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.17"
+                    "id": "TOOL-046.17"
                 },
                 {
                     "kind": "region",
@@ -82527,7 +82631,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.18"
+                    "id": "TOOL-046.18"
                 },
                 {
                     "kind": "region",
@@ -82540,7 +82644,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.19"
+                    "id": "TOOL-046.19"
                 },
                 {
                     "kind": "region",
@@ -82553,7 +82657,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.20"
+                    "id": "TOOL-046.20"
                 },
                 {
                     "kind": "region",
@@ -82566,7 +82670,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.21"
+                    "id": "TOOL-046.21"
                 },
                 {
                     "kind": "region",
@@ -82582,7 +82686,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-045.22"
+                    "id": "TOOL-046.22"
                 },
                 {
                     "kind": "region",
@@ -82595,7 +82699,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-045.23"
+                    "id": "TOOL-046.23"
                 },
                 {
                     "kind": "region",
@@ -82613,7 +82717,7 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-045.24"
+                    "id": "TOOL-046.24"
                 },
                 {
                     "kind": "region",
@@ -82628,12 +82732,12 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "TOOL-045.25"
+                    "id": "TOOL-046.25"
                 }
             ]
         },
         {
-            "id": "TOOL-046",
+            "id": "TOOL-047",
             "path": "tools\/test_access_coverage_offline.php",
             "area": "TOOL",
             "lines": 238,
@@ -82650,7 +82754,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.01"
+                    "id": "TOOL-047.01"
                 },
                 {
                     "kind": "region",
@@ -82663,7 +82767,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.02"
+                    "id": "TOOL-047.02"
                 },
                 {
                     "kind": "function",
@@ -82676,7 +82780,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.03"
+                    "id": "TOOL-047.03"
                 },
                 {
                     "kind": "function",
@@ -82689,7 +82793,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.04"
+                    "id": "TOOL-047.04"
                 },
                 {
                     "kind": "function",
@@ -82702,7 +82806,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.05"
+                    "id": "TOOL-047.05"
                 },
                 {
                     "kind": "region",
@@ -82715,7 +82819,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.06"
+                    "id": "TOOL-047.06"
                 },
                 {
                     "kind": "function",
@@ -82728,7 +82832,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.07"
+                    "id": "TOOL-047.07"
                 },
                 {
                     "kind": "region",
@@ -82741,7 +82845,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.08"
+                    "id": "TOOL-047.08"
                 },
                 {
                     "kind": "region",
@@ -82754,7 +82858,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.09"
+                    "id": "TOOL-047.09"
                 },
                 {
                     "kind": "region",
@@ -82767,7 +82871,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.10"
+                    "id": "TOOL-047.10"
                 },
                 {
                     "kind": "region",
@@ -82780,7 +82884,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.11"
+                    "id": "TOOL-047.11"
                 },
                 {
                     "kind": "region",
@@ -82795,7 +82899,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-046.12"
+                    "id": "TOOL-047.12"
                 },
                 {
                     "kind": "region",
@@ -82808,7 +82912,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-046.13"
+                    "id": "TOOL-047.13"
                 },
                 {
                     "kind": "region",
@@ -82823,12 +82927,12 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "TOOL-046.14"
+                    "id": "TOOL-047.14"
                 }
             ]
         },
         {
-            "id": "TOOL-047",
+            "id": "TOOL-048",
             "path": "tools\/test_api_contract_offline.php",
             "area": "TOOL",
             "lines": 241,
@@ -82845,7 +82949,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-047.01"
+                    "id": "TOOL-048.01"
                 },
                 {
                     "kind": "function",
@@ -82858,7 +82962,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-047.02"
+                    "id": "TOOL-048.02"
                 },
                 {
                     "kind": "region",
@@ -82873,7 +82977,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "TOOL-047.03"
+                    "id": "TOOL-048.03"
                 },
                 {
                     "kind": "region",
@@ -82886,7 +82990,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-047.04"
+                    "id": "TOOL-048.04"
                 },
                 {
                     "kind": "region",
@@ -82899,7 +83003,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-047.05"
+                    "id": "TOOL-048.05"
                 },
                 {
                     "kind": "region",
@@ -82912,12 +83016,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-047.06"
+                    "id": "TOOL-048.06"
                 }
             ]
         },
         {
-            "id": "TOOL-048",
+            "id": "TOOL-049",
             "path": "tools\/test_asset_names_offline.php",
             "area": "TOOL",
             "lines": 156,
@@ -82934,7 +83038,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.01"
+                    "id": "TOOL-049.01"
                 },
                 {
                     "kind": "function",
@@ -82947,7 +83051,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.02"
+                    "id": "TOOL-049.02"
                 },
                 {
                     "kind": "function",
@@ -82960,7 +83064,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.03"
+                    "id": "TOOL-049.03"
                 },
                 {
                     "kind": "region",
@@ -82973,7 +83077,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.04"
+                    "id": "TOOL-049.04"
                 },
                 {
                     "kind": "region",
@@ -82986,7 +83090,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.05"
+                    "id": "TOOL-049.05"
                 },
                 {
                     "kind": "function",
@@ -82999,7 +83103,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.06"
+                    "id": "TOOL-049.06"
                 },
                 {
                     "kind": "function",
@@ -83012,7 +83116,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.07"
+                    "id": "TOOL-049.07"
                 },
                 {
                     "kind": "function",
@@ -83025,7 +83129,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-048.08"
+                    "id": "TOOL-049.08"
                 },
                 {
                     "kind": "region",
@@ -83040,12 +83144,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-048.09"
+                    "id": "TOOL-049.09"
                 }
             ]
         },
         {
-            "id": "TOOL-049",
+            "id": "TOOL-050",
             "path": "tools\/test_brand_neutral_offline.php",
             "area": "TOOL",
             "lines": 150,
@@ -83062,7 +83166,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-049.01"
+                    "id": "TOOL-050.01"
                 },
                 {
                     "kind": "function",
@@ -83075,7 +83179,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-049.02"
+                    "id": "TOOL-050.02"
                 },
                 {
                     "kind": "region",
@@ -83090,12 +83194,12 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "TOOL-049.03"
+                    "id": "TOOL-050.03"
                 }
             ]
         },
         {
-            "id": "TOOL-050",
+            "id": "TOOL-051",
             "path": "tools\/test_column_detect_offline.php",
             "area": "TOOL",
             "lines": 285,
@@ -83112,7 +83216,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.01"
+                    "id": "TOOL-051.01"
                 },
                 {
                     "kind": "region",
@@ -83125,7 +83229,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.02"
+                    "id": "TOOL-051.02"
                 },
                 {
                     "kind": "function",
@@ -83138,7 +83242,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.03"
+                    "id": "TOOL-051.03"
                 },
                 {
                     "kind": "function",
@@ -83151,7 +83255,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.04"
+                    "id": "TOOL-051.04"
                 },
                 {
                     "kind": "function",
@@ -83164,7 +83268,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.05"
+                    "id": "TOOL-051.05"
                 },
                 {
                     "kind": "class",
@@ -83177,7 +83281,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.06"
+                    "id": "TOOL-051.06"
                 },
                 {
                     "kind": "class",
@@ -83192,7 +83296,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-050.07"
+                    "id": "TOOL-051.07"
                 },
                 {
                     "kind": "region",
@@ -83205,7 +83309,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.08"
+                    "id": "TOOL-051.08"
                 },
                 {
                     "kind": "function",
@@ -83218,7 +83322,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.09"
+                    "id": "TOOL-051.09"
                 },
                 {
                     "kind": "region",
@@ -83233,7 +83337,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-050.10"
+                    "id": "TOOL-051.10"
                 },
                 {
                     "kind": "region",
@@ -83246,7 +83350,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.11"
+                    "id": "TOOL-051.11"
                 },
                 {
                     "kind": "function",
@@ -83259,7 +83363,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.12"
+                    "id": "TOOL-051.12"
                 },
                 {
                     "kind": "region",
@@ -83272,7 +83376,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.13"
+                    "id": "TOOL-051.13"
                 },
                 {
                     "kind": "region",
@@ -83285,7 +83389,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.14"
+                    "id": "TOOL-051.14"
                 },
                 {
                     "kind": "region",
@@ -83298,7 +83402,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.15"
+                    "id": "TOOL-051.15"
                 },
                 {
                     "kind": "region",
@@ -83313,7 +83417,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-050.16"
+                    "id": "TOOL-051.16"
                 },
                 {
                     "kind": "region",
@@ -83326,7 +83430,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.17"
+                    "id": "TOOL-051.17"
                 },
                 {
                     "kind": "region",
@@ -83339,7 +83443,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.18"
+                    "id": "TOOL-051.18"
                 },
                 {
                     "kind": "region",
@@ -83352,12 +83456,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-050.19"
+                    "id": "TOOL-051.19"
                 }
             ]
         },
         {
-            "id": "TOOL-051",
+            "id": "TOOL-052",
             "path": "tools\/test_cron_synthetic.php",
             "area": "TOOL",
             "lines": 214,
@@ -83374,7 +83478,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-051.01"
+                    "id": "TOOL-052.01"
                 },
                 {
                     "kind": "function",
@@ -83387,7 +83491,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-051.02"
+                    "id": "TOOL-052.02"
                 },
                 {
                     "kind": "function",
@@ -83402,7 +83506,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-051.03"
+                    "id": "TOOL-052.03"
                 },
                 {
                     "kind": "function",
@@ -83418,7 +83522,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-051.04"
+                    "id": "TOOL-052.04"
                 },
                 {
                     "kind": "function",
@@ -83431,7 +83535,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-051.05"
+                    "id": "TOOL-052.05"
                 },
                 {
                     "kind": "region",
@@ -83448,12 +83552,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-051.06"
+                    "id": "TOOL-052.06"
                 }
             ]
         },
         {
-            "id": "TOOL-052",
+            "id": "TOOL-053",
             "path": "tools\/test_date_input_offline.php",
             "area": "TOOL",
             "lines": 153,
@@ -83470,7 +83574,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-052.01"
+                    "id": "TOOL-053.01"
                 },
                 {
                     "kind": "function",
@@ -83483,7 +83587,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-052.02"
+                    "id": "TOOL-053.02"
                 },
                 {
                     "kind": "region",
@@ -83496,7 +83600,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-052.03"
+                    "id": "TOOL-053.03"
                 },
                 {
                     "kind": "region",
@@ -83511,7 +83615,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-052.04"
+                    "id": "TOOL-053.04"
                 },
                 {
                     "kind": "region",
@@ -83526,7 +83630,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-052.05"
+                    "id": "TOOL-053.05"
                 },
                 {
                     "kind": "function",
@@ -83539,7 +83643,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-052.06"
+                    "id": "TOOL-053.06"
                 },
                 {
                     "kind": "region",
@@ -83554,12 +83658,12 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-052.07"
+                    "id": "TOOL-053.07"
                 }
             ]
         },
         {
-            "id": "TOOL-053",
+            "id": "TOOL-054",
             "path": "tools\/test_delivery_flow_offline.php",
             "area": "TOOL",
             "lines": 222,
@@ -83576,7 +83680,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.01"
+                    "id": "TOOL-054.01"
                 },
                 {
                     "kind": "function",
@@ -83589,7 +83693,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.02"
+                    "id": "TOOL-054.02"
                 },
                 {
                     "kind": "region",
@@ -83602,7 +83706,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.03"
+                    "id": "TOOL-054.03"
                 },
                 {
                     "kind": "class",
@@ -83617,7 +83721,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-053.04"
+                    "id": "TOOL-054.04"
                 },
                 {
                     "kind": "region",
@@ -83633,7 +83737,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-053.05"
+                    "id": "TOOL-054.05"
                 },
                 {
                     "kind": "function",
@@ -83646,7 +83750,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.06"
+                    "id": "TOOL-054.06"
                 },
                 {
                     "kind": "function",
@@ -83659,7 +83763,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.07"
+                    "id": "TOOL-054.07"
                 },
                 {
                     "kind": "region",
@@ -83672,7 +83776,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.08"
+                    "id": "TOOL-054.08"
                 },
                 {
                     "kind": "function",
@@ -83685,7 +83789,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.09"
+                    "id": "TOOL-054.09"
                 },
                 {
                     "kind": "function",
@@ -83698,7 +83802,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.10"
+                    "id": "TOOL-054.10"
                 },
                 {
                     "kind": "region",
@@ -83714,7 +83818,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-053.11"
+                    "id": "TOOL-054.11"
                 },
                 {
                     "kind": "region",
@@ -83727,12 +83831,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-053.12"
+                    "id": "TOOL-054.12"
                 }
             ]
         },
         {
-            "id": "TOOL-054",
+            "id": "TOOL-055",
             "path": "tools\/test_employees_import_offline.php",
             "area": "TOOL",
             "lines": 276,
@@ -83749,7 +83853,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.01"
+                    "id": "TOOL-055.01"
                 },
                 {
                     "kind": "function",
@@ -83762,7 +83866,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.02"
+                    "id": "TOOL-055.02"
                 },
                 {
                     "kind": "region",
@@ -83775,7 +83879,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.03"
+                    "id": "TOOL-055.03"
                 },
                 {
                     "kind": "region",
@@ -83788,7 +83892,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.04"
+                    "id": "TOOL-055.04"
                 },
                 {
                     "kind": "function",
@@ -83801,7 +83905,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.05"
+                    "id": "TOOL-055.05"
                 },
                 {
                     "kind": "region",
@@ -83814,7 +83918,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.06"
+                    "id": "TOOL-055.06"
                 },
                 {
                     "kind": "function",
@@ -83829,7 +83933,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-054.07"
+                    "id": "TOOL-055.07"
                 },
                 {
                     "kind": "region",
@@ -83842,7 +83946,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.08"
+                    "id": "TOOL-055.08"
                 },
                 {
                     "kind": "function",
@@ -83855,7 +83959,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-054.09"
+                    "id": "TOOL-055.09"
                 },
                 {
                     "kind": "region",
@@ -83874,12 +83978,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-054.10"
+                    "id": "TOOL-055.10"
                 }
             ]
         },
         {
-            "id": "TOOL-055",
+            "id": "TOOL-056",
             "path": "tools\/test_food_dupes_offline.php",
             "area": "TOOL",
             "lines": 168,
@@ -83896,7 +84000,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.01"
+                    "id": "TOOL-056.01"
                 },
                 {
                     "kind": "region",
@@ -83909,7 +84013,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.02"
+                    "id": "TOOL-056.02"
                 },
                 {
                     "kind": "region",
@@ -83922,7 +84026,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.03"
+                    "id": "TOOL-056.03"
                 },
                 {
                     "kind": "function",
@@ -83935,7 +84039,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.04"
+                    "id": "TOOL-056.04"
                 },
                 {
                     "kind": "region",
@@ -83950,7 +84054,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-055.05"
+                    "id": "TOOL-056.05"
                 },
                 {
                     "kind": "function",
@@ -83963,7 +84067,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.06"
+                    "id": "TOOL-056.06"
                 },
                 {
                     "kind": "function",
@@ -83976,7 +84080,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.07"
+                    "id": "TOOL-056.07"
                 },
                 {
                     "kind": "function",
@@ -83989,7 +84093,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.08"
+                    "id": "TOOL-056.08"
                 },
                 {
                     "kind": "function",
@@ -84002,7 +84106,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.09"
+                    "id": "TOOL-056.09"
                 },
                 {
                     "kind": "region",
@@ -84017,7 +84121,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-055.10"
+                    "id": "TOOL-056.10"
                 },
                 {
                     "kind": "function",
@@ -84030,7 +84134,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-055.11"
+                    "id": "TOOL-056.11"
                 },
                 {
                     "kind": "region",
@@ -84046,7 +84150,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-055.12"
+                    "id": "TOOL-056.12"
                 },
                 {
                     "kind": "region",
@@ -84063,12 +84167,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-055.13"
+                    "id": "TOOL-056.13"
                 }
             ]
         },
         {
-            "id": "TOOL-056",
+            "id": "TOOL-057",
             "path": "tools\/test_food_group_logic_offline.php",
             "area": "TOOL",
             "lines": 133,
@@ -84085,7 +84189,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.01"
+                    "id": "TOOL-057.01"
                 },
                 {
                     "kind": "region",
@@ -84098,7 +84202,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.02"
+                    "id": "TOOL-057.02"
                 },
                 {
                     "kind": "function",
@@ -84111,7 +84215,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.03"
+                    "id": "TOOL-057.03"
                 },
                 {
                     "kind": "region",
@@ -84124,7 +84228,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.04"
+                    "id": "TOOL-057.04"
                 },
                 {
                     "kind": "function",
@@ -84137,7 +84241,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.05"
+                    "id": "TOOL-057.05"
                 },
                 {
                     "kind": "region",
@@ -84150,7 +84254,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.06"
+                    "id": "TOOL-057.06"
                 },
                 {
                     "kind": "function",
@@ -84163,7 +84267,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.07"
+                    "id": "TOOL-057.07"
                 },
                 {
                     "kind": "region",
@@ -84176,7 +84280,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.08"
+                    "id": "TOOL-057.08"
                 },
                 {
                     "kind": "region",
@@ -84189,7 +84293,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.09"
+                    "id": "TOOL-057.09"
                 },
                 {
                     "kind": "region",
@@ -84202,7 +84306,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.10"
+                    "id": "TOOL-057.10"
                 },
                 {
                     "kind": "region",
@@ -84215,7 +84319,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.11"
+                    "id": "TOOL-057.11"
                 },
                 {
                     "kind": "region",
@@ -84228,7 +84332,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.12"
+                    "id": "TOOL-057.12"
                 },
                 {
                     "kind": "region",
@@ -84241,7 +84345,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.13"
+                    "id": "TOOL-057.13"
                 },
                 {
                     "kind": "region",
@@ -84254,7 +84358,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.14"
+                    "id": "TOOL-057.14"
                 },
                 {
                     "kind": "region",
@@ -84267,7 +84371,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.15"
+                    "id": "TOOL-057.15"
                 },
                 {
                     "kind": "region",
@@ -84280,7 +84384,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.16"
+                    "id": "TOOL-057.16"
                 },
                 {
                     "kind": "region",
@@ -84293,12 +84397,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-056.17"
+                    "id": "TOOL-057.17"
                 }
             ]
         },
         {
-            "id": "TOOL-057",
+            "id": "TOOL-058",
             "path": "tools\/test_food_group_representative.php",
             "area": "TOOL",
             "lines": 517,
@@ -84321,12 +84425,12 @@
                             "very_long": 3
                         }
                     },
-                    "id": "TOOL-057.01"
+                    "id": "TOOL-058.01"
                 }
             ]
         },
         {
-            "id": "TOOL-058",
+            "id": "TOOL-059",
             "path": "tools\/test_food_groups.php",
             "area": "TOOL",
             "lines": 205,
@@ -84348,12 +84452,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-058.01"
+                    "id": "TOOL-059.01"
                 }
             ]
         },
         {
-            "id": "TOOL-059",
+            "id": "TOOL-060",
             "path": "tools\/test_food_guest_request_deadline_offline.php",
             "area": "TOOL",
             "lines": 80,
@@ -84370,7 +84474,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.01"
+                    "id": "TOOL-060.01"
                 },
                 {
                     "kind": "region",
@@ -84383,7 +84487,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.02"
+                    "id": "TOOL-060.02"
                 },
                 {
                     "kind": "function",
@@ -84396,7 +84500,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.03"
+                    "id": "TOOL-060.03"
                 },
                 {
                     "kind": "region",
@@ -84409,7 +84513,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.04"
+                    "id": "TOOL-060.04"
                 },
                 {
                     "kind": "function",
@@ -84422,7 +84526,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.05"
+                    "id": "TOOL-060.05"
                 },
                 {
                     "kind": "region",
@@ -84437,7 +84541,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-059.06"
+                    "id": "TOOL-060.06"
                 },
                 {
                     "kind": "function",
@@ -84450,7 +84554,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.07"
+                    "id": "TOOL-060.07"
                 },
                 {
                     "kind": "function",
@@ -84463,7 +84567,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.08"
+                    "id": "TOOL-060.08"
                 },
                 {
                     "kind": "region",
@@ -84476,12 +84580,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-059.09"
+                    "id": "TOOL-060.09"
                 }
             ]
         },
         {
-            "id": "TOOL-060",
+            "id": "TOOL-061",
             "path": "tools\/test_food_guest_requests.php",
             "area": "TOOL",
             "lines": 141,
@@ -84498,7 +84602,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.01"
+                    "id": "TOOL-061.01"
                 },
                 {
                     "kind": "region",
@@ -84511,7 +84615,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.02"
+                    "id": "TOOL-061.02"
                 },
                 {
                     "kind": "region",
@@ -84524,7 +84628,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.03"
+                    "id": "TOOL-061.03"
                 },
                 {
                     "kind": "function",
@@ -84537,7 +84641,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.04"
+                    "id": "TOOL-061.04"
                 },
                 {
                     "kind": "function",
@@ -84550,7 +84654,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.05"
+                    "id": "TOOL-061.05"
                 },
                 {
                     "kind": "region",
@@ -84566,7 +84670,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-060.06"
+                    "id": "TOOL-061.06"
                 },
                 {
                     "kind": "region",
@@ -84581,7 +84685,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-060.07"
+                    "id": "TOOL-061.07"
                 },
                 {
                     "kind": "region",
@@ -84594,7 +84698,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.08"
+                    "id": "TOOL-061.08"
                 },
                 {
                     "kind": "region",
@@ -84607,7 +84711,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.09"
+                    "id": "TOOL-061.09"
                 },
                 {
                     "kind": "region",
@@ -84620,7 +84724,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.10"
+                    "id": "TOOL-061.10"
                 },
                 {
                     "kind": "region",
@@ -84633,7 +84737,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-060.11"
+                    "id": "TOOL-061.11"
                 },
                 {
                     "kind": "region",
@@ -84649,12 +84753,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-060.12"
+                    "id": "TOOL-061.12"
                 }
             ]
         },
         {
-            "id": "TOOL-061",
+            "id": "TOOL-062",
             "path": "tools\/test_food_order_range_offline.php",
             "area": "TOOL",
             "lines": 100,
@@ -84671,7 +84775,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.01"
+                    "id": "TOOL-062.01"
                 },
                 {
                     "kind": "region",
@@ -84684,7 +84788,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.02"
+                    "id": "TOOL-062.02"
                 },
                 {
                     "kind": "region",
@@ -84697,7 +84801,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.03"
+                    "id": "TOOL-062.03"
                 },
                 {
                     "kind": "function",
@@ -84710,7 +84814,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.04"
+                    "id": "TOOL-062.04"
                 },
                 {
                     "kind": "region",
@@ -84725,7 +84829,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-061.05"
+                    "id": "TOOL-062.05"
                 },
                 {
                     "kind": "function",
@@ -84738,7 +84842,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.06"
+                    "id": "TOOL-062.06"
                 },
                 {
                     "kind": "function",
@@ -84751,7 +84855,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.07"
+                    "id": "TOOL-062.07"
                 },
                 {
                     "kind": "region",
@@ -84764,7 +84868,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.08"
+                    "id": "TOOL-062.08"
                 },
                 {
                     "kind": "region",
@@ -84779,7 +84883,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "TOOL-061.09"
+                    "id": "TOOL-062.09"
                 },
                 {
                     "kind": "region",
@@ -84792,12 +84896,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-061.10"
+                    "id": "TOOL-062.10"
                 }
             ]
         },
         {
-            "id": "TOOL-062",
+            "id": "TOOL-063",
             "path": "tools\/test_food_personnel_link_offline.php",
             "area": "TOOL",
             "lines": 275,
@@ -84814,7 +84918,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.01"
+                    "id": "TOOL-063.01"
                 },
                 {
                     "kind": "region",
@@ -84827,7 +84931,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.02"
+                    "id": "TOOL-063.02"
                 },
                 {
                     "kind": "region",
@@ -84840,7 +84944,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.03"
+                    "id": "TOOL-063.03"
                 },
                 {
                     "kind": "function",
@@ -84853,7 +84957,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.04"
+                    "id": "TOOL-063.04"
                 },
                 {
                     "kind": "region",
@@ -84869,7 +84973,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.05"
+                    "id": "TOOL-063.05"
                 },
                 {
                     "kind": "region",
@@ -84882,7 +84986,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.06"
+                    "id": "TOOL-063.06"
                 },
                 {
                     "kind": "region",
@@ -84895,7 +84999,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.07"
+                    "id": "TOOL-063.07"
                 },
                 {
                     "kind": "region",
@@ -84911,7 +85015,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.08"
+                    "id": "TOOL-063.08"
                 },
                 {
                     "kind": "region",
@@ -84924,7 +85028,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.09"
+                    "id": "TOOL-063.09"
                 },
                 {
                     "kind": "region",
@@ -84937,7 +85041,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.10"
+                    "id": "TOOL-063.10"
                 },
                 {
                     "kind": "region",
@@ -84953,7 +85057,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.11"
+                    "id": "TOOL-063.11"
                 },
                 {
                     "kind": "region",
@@ -84966,7 +85070,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.12"
+                    "id": "TOOL-063.12"
                 },
                 {
                     "kind": "region",
@@ -84979,7 +85083,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.13"
+                    "id": "TOOL-063.13"
                 },
                 {
                     "kind": "region",
@@ -84992,7 +85096,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.14"
+                    "id": "TOOL-063.14"
                 },
                 {
                     "kind": "region",
@@ -85005,7 +85109,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-062.15"
+                    "id": "TOOL-063.15"
                 },
                 {
                     "kind": "region",
@@ -85021,7 +85125,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-062.16"
+                    "id": "TOOL-063.16"
                 },
                 {
                     "kind": "region",
@@ -85037,7 +85141,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.17"
+                    "id": "TOOL-063.17"
                 },
                 {
                     "kind": "region",
@@ -85053,7 +85157,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.18"
+                    "id": "TOOL-063.18"
                 },
                 {
                     "kind": "region",
@@ -85069,7 +85173,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.19"
+                    "id": "TOOL-063.19"
                 },
                 {
                     "kind": "region",
@@ -85085,7 +85189,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.20"
+                    "id": "TOOL-063.20"
                 },
                 {
                     "kind": "region",
@@ -85101,7 +85205,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-062.21"
+                    "id": "TOOL-063.21"
                 },
                 {
                     "kind": "region",
@@ -85116,12 +85220,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-062.22"
+                    "id": "TOOL-063.22"
                 }
             ]
         },
         {
-            "id": "TOOL-063",
+            "id": "TOOL-064",
             "path": "tools\/test_food_templates.php",
             "area": "TOOL",
             "lines": 270,
@@ -85143,12 +85247,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-063.01"
+                    "id": "TOOL-064.01"
                 }
             ]
         },
         {
-            "id": "TOOL-064",
+            "id": "TOOL-065",
             "path": "tools\/test_fresh_db_offline.php",
             "area": "TOOL",
             "lines": 225,
@@ -85165,7 +85269,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.01"
+                    "id": "TOOL-065.01"
                 },
                 {
                     "kind": "function",
@@ -85178,7 +85282,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.02"
+                    "id": "TOOL-065.02"
                 },
                 {
                     "kind": "function",
@@ -85191,7 +85295,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.03"
+                    "id": "TOOL-065.03"
                 },
                 {
                     "kind": "class",
@@ -85204,7 +85308,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.04"
+                    "id": "TOOL-065.04"
                 },
                 {
                     "kind": "class",
@@ -85217,7 +85321,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.05"
+                    "id": "TOOL-065.05"
                 },
                 {
                     "kind": "region",
@@ -85230,7 +85334,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.06"
+                    "id": "TOOL-065.06"
                 },
                 {
                     "kind": "function",
@@ -85243,7 +85347,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.07"
+                    "id": "TOOL-065.07"
                 },
                 {
                     "kind": "function",
@@ -85256,7 +85360,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.08"
+                    "id": "TOOL-065.08"
                 },
                 {
                     "kind": "function",
@@ -85269,7 +85373,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.09"
+                    "id": "TOOL-065.09"
                 },
                 {
                     "kind": "function",
@@ -85282,7 +85386,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.10"
+                    "id": "TOOL-065.10"
                 },
                 {
                     "kind": "function",
@@ -85295,7 +85399,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-064.11"
+                    "id": "TOOL-065.11"
                 },
                 {
                     "kind": "region",
@@ -85311,7 +85415,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-064.12"
+                    "id": "TOOL-065.12"
                 },
                 {
                     "kind": "function",
@@ -85326,7 +85430,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-064.13"
+                    "id": "TOOL-065.13"
                 },
                 {
                     "kind": "region",
@@ -85341,12 +85445,12 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-064.14"
+                    "id": "TOOL-065.14"
                 }
             ]
         },
         {
-            "id": "TOOL-065",
+            "id": "TOOL-066",
             "path": "tools\/test_fresh_state_node.js",
             "area": "TOOL",
             "lines": 126,
@@ -85363,7 +85467,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.01"
+                    "id": "TOOL-066.01"
                 },
                 {
                     "kind": "block",
@@ -85376,7 +85480,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.02"
+                    "id": "TOOL-066.02"
                 },
                 {
                     "kind": "block",
@@ -85389,7 +85493,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.03"
+                    "id": "TOOL-066.03"
                 },
                 {
                     "kind": "block",
@@ -85404,7 +85508,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-065.04"
+                    "id": "TOOL-066.04"
                 },
                 {
                     "kind": "block",
@@ -85417,7 +85521,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.05"
+                    "id": "TOOL-066.05"
                 },
                 {
                     "kind": "block",
@@ -85430,7 +85534,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.06"
+                    "id": "TOOL-066.06"
                 },
                 {
                     "kind": "block",
@@ -85443,7 +85547,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.07"
+                    "id": "TOOL-066.07"
                 },
                 {
                     "kind": "block",
@@ -85456,7 +85560,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.08"
+                    "id": "TOOL-066.08"
                 },
                 {
                     "kind": "block",
@@ -85469,12 +85573,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-065.09"
+                    "id": "TOOL-066.09"
                 }
             ]
         },
         {
-            "id": "TOOL-066",
+            "id": "TOOL-067",
             "path": "tools\/test_global_search_offline.php",
             "area": "TOOL",
             "lines": 122,
@@ -85491,7 +85595,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-066.01"
+                    "id": "TOOL-067.01"
                 },
                 {
                     "kind": "function",
@@ -85504,7 +85608,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-066.02"
+                    "id": "TOOL-067.02"
                 },
                 {
                     "kind": "region",
@@ -85517,12 +85621,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-066.03"
+                    "id": "TOOL-067.03"
                 }
             ]
         },
         {
-            "id": "TOOL-067",
+            "id": "TOOL-068",
             "path": "tools\/test_group_flow_offline.php",
             "area": "TOOL",
             "lines": 705,
@@ -85539,7 +85643,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.01"
+                    "id": "TOOL-068.01"
                 },
                 {
                     "kind": "class",
@@ -85552,7 +85656,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.02"
+                    "id": "TOOL-068.02"
                 },
                 {
                     "kind": "class",
@@ -85565,7 +85669,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.03"
+                    "id": "TOOL-068.03"
                 },
                 {
                     "kind": "class",
@@ -85580,7 +85684,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-067.04"
+                    "id": "TOOL-068.04"
                 },
                 {
                     "kind": "region",
@@ -85593,7 +85697,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.05"
+                    "id": "TOOL-068.05"
                 },
                 {
                     "kind": "function",
@@ -85606,7 +85710,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.06"
+                    "id": "TOOL-068.06"
                 },
                 {
                     "kind": "function",
@@ -85619,7 +85723,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.07"
+                    "id": "TOOL-068.07"
                 },
                 {
                     "kind": "function",
@@ -85632,7 +85736,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.08"
+                    "id": "TOOL-068.08"
                 },
                 {
                     "kind": "function",
@@ -85645,7 +85749,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.09"
+                    "id": "TOOL-068.09"
                 },
                 {
                     "kind": "function",
@@ -85658,7 +85762,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.10"
+                    "id": "TOOL-068.10"
                 },
                 {
                     "kind": "function",
@@ -85671,7 +85775,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.11"
+                    "id": "TOOL-068.11"
                 },
                 {
                     "kind": "function",
@@ -85684,7 +85788,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.12"
+                    "id": "TOOL-068.12"
                 },
                 {
                     "kind": "function",
@@ -85697,7 +85801,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.13"
+                    "id": "TOOL-068.13"
                 },
                 {
                     "kind": "function",
@@ -85710,7 +85814,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.14"
+                    "id": "TOOL-068.14"
                 },
                 {
                     "kind": "function",
@@ -85723,7 +85827,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.15"
+                    "id": "TOOL-068.15"
                 },
                 {
                     "kind": "function",
@@ -85736,7 +85840,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.16"
+                    "id": "TOOL-068.16"
                 },
                 {
                     "kind": "function",
@@ -85749,7 +85853,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.17"
+                    "id": "TOOL-068.17"
                 },
                 {
                     "kind": "function",
@@ -85762,7 +85866,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.18"
+                    "id": "TOOL-068.18"
                 },
                 {
                     "kind": "function",
@@ -85775,7 +85879,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.19"
+                    "id": "TOOL-068.19"
                 },
                 {
                     "kind": "function",
@@ -85790,7 +85894,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-067.20"
+                    "id": "TOOL-068.20"
                 },
                 {
                     "kind": "function",
@@ -85803,7 +85907,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.21"
+                    "id": "TOOL-068.21"
                 },
                 {
                     "kind": "function",
@@ -85816,7 +85920,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.22"
+                    "id": "TOOL-068.22"
                 },
                 {
                     "kind": "function",
@@ -85829,7 +85933,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.23"
+                    "id": "TOOL-068.23"
                 },
                 {
                     "kind": "function",
@@ -85842,7 +85946,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.24"
+                    "id": "TOOL-068.24"
                 },
                 {
                     "kind": "function",
@@ -85855,7 +85959,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.25"
+                    "id": "TOOL-068.25"
                 },
                 {
                     "kind": "function",
@@ -85868,7 +85972,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.26"
+                    "id": "TOOL-068.26"
                 },
                 {
                     "kind": "function",
@@ -85883,7 +85987,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-067.27"
+                    "id": "TOOL-068.27"
                 },
                 {
                     "kind": "function",
@@ -85896,7 +86000,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.28"
+                    "id": "TOOL-068.28"
                 },
                 {
                     "kind": "function",
@@ -85912,7 +86016,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-067.29"
+                    "id": "TOOL-068.29"
                 },
                 {
                     "kind": "function",
@@ -85925,7 +86029,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.30"
+                    "id": "TOOL-068.30"
                 },
                 {
                     "kind": "function",
@@ -85938,7 +86042,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.31"
+                    "id": "TOOL-068.31"
                 },
                 {
                     "kind": "region",
@@ -85951,7 +86055,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.32"
+                    "id": "TOOL-068.32"
                 },
                 {
                     "kind": "function",
@@ -85964,7 +86068,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.33"
+                    "id": "TOOL-068.33"
                 },
                 {
                     "kind": "region",
@@ -85980,7 +86084,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-067.34"
+                    "id": "TOOL-068.34"
                 },
                 {
                     "kind": "region",
@@ -85993,7 +86097,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.35"
+                    "id": "TOOL-068.35"
                 },
                 {
                     "kind": "region",
@@ -86006,7 +86110,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.36"
+                    "id": "TOOL-068.36"
                 },
                 {
                     "kind": "region",
@@ -86019,7 +86123,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.37"
+                    "id": "TOOL-068.37"
                 },
                 {
                     "kind": "region",
@@ -86032,7 +86136,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.38"
+                    "id": "TOOL-068.38"
                 },
                 {
                     "kind": "region",
@@ -86045,7 +86149,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.39"
+                    "id": "TOOL-068.39"
                 },
                 {
                     "kind": "region",
@@ -86058,7 +86162,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.40"
+                    "id": "TOOL-068.40"
                 },
                 {
                     "kind": "region",
@@ -86071,7 +86175,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.41"
+                    "id": "TOOL-068.41"
                 },
                 {
                     "kind": "region",
@@ -86084,7 +86188,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.42"
+                    "id": "TOOL-068.42"
                 },
                 {
                     "kind": "region",
@@ -86097,7 +86201,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.43"
+                    "id": "TOOL-068.43"
                 },
                 {
                     "kind": "region",
@@ -86110,7 +86214,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.44"
+                    "id": "TOOL-068.44"
                 },
                 {
                     "kind": "region",
@@ -86123,7 +86227,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.45"
+                    "id": "TOOL-068.45"
                 },
                 {
                     "kind": "region",
@@ -86136,7 +86240,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.46"
+                    "id": "TOOL-068.46"
                 },
                 {
                     "kind": "region",
@@ -86149,7 +86253,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.47"
+                    "id": "TOOL-068.47"
                 },
                 {
                     "kind": "region",
@@ -86162,7 +86266,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.48"
+                    "id": "TOOL-068.48"
                 },
                 {
                     "kind": "region",
@@ -86177,7 +86281,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-067.49"
+                    "id": "TOOL-068.49"
                 },
                 {
                     "kind": "region",
@@ -86190,7 +86294,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.50"
+                    "id": "TOOL-068.50"
                 },
                 {
                     "kind": "region",
@@ -86203,7 +86307,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.51"
+                    "id": "TOOL-068.51"
                 },
                 {
                     "kind": "region",
@@ -86218,7 +86322,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-067.52"
+                    "id": "TOOL-068.52"
                 },
                 {
                     "kind": "region",
@@ -86231,7 +86335,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.53"
+                    "id": "TOOL-068.53"
                 },
                 {
                     "kind": "region",
@@ -86244,7 +86348,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.54"
+                    "id": "TOOL-068.54"
                 },
                 {
                     "kind": "region",
@@ -86257,7 +86361,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-067.55"
+                    "id": "TOOL-068.55"
                 },
                 {
                     "kind": "region",
@@ -86273,12 +86377,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-067.56"
+                    "id": "TOOL-068.56"
                 }
             ]
         },
         {
-            "id": "TOOL-068",
+            "id": "TOOL-069",
             "path": "tools\/test_guest_cap_offline.php",
             "area": "TOOL",
             "lines": 90,
@@ -86295,7 +86399,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.01"
+                    "id": "TOOL-069.01"
                 },
                 {
                     "kind": "region",
@@ -86308,7 +86412,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.02"
+                    "id": "TOOL-069.02"
                 },
                 {
                     "kind": "function",
@@ -86321,7 +86425,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.03"
+                    "id": "TOOL-069.03"
                 },
                 {
                     "kind": "region",
@@ -86334,7 +86438,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.04"
+                    "id": "TOOL-069.04"
                 },
                 {
                     "kind": "function",
@@ -86347,7 +86451,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.05"
+                    "id": "TOOL-069.05"
                 },
                 {
                     "kind": "region",
@@ -86360,7 +86464,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.06"
+                    "id": "TOOL-069.06"
                 },
                 {
                     "kind": "region",
@@ -86373,7 +86477,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.07"
+                    "id": "TOOL-069.07"
                 },
                 {
                     "kind": "region",
@@ -86386,7 +86490,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.08"
+                    "id": "TOOL-069.08"
                 },
                 {
                     "kind": "region",
@@ -86399,7 +86503,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.09"
+                    "id": "TOOL-069.09"
                 },
                 {
                     "kind": "region",
@@ -86412,7 +86516,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.10"
+                    "id": "TOOL-069.10"
                 },
                 {
                     "kind": "region",
@@ -86425,7 +86529,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.11"
+                    "id": "TOOL-069.11"
                 },
                 {
                     "kind": "region",
@@ -86438,7 +86542,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.12"
+                    "id": "TOOL-069.12"
                 },
                 {
                     "kind": "region",
@@ -86451,7 +86555,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.13"
+                    "id": "TOOL-069.13"
                 },
                 {
                     "kind": "region",
@@ -86464,7 +86568,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.14"
+                    "id": "TOOL-069.14"
                 },
                 {
                     "kind": "region",
@@ -86477,7 +86581,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.15"
+                    "id": "TOOL-069.15"
                 },
                 {
                     "kind": "region",
@@ -86490,12 +86594,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-068.16"
+                    "id": "TOOL-069.16"
                 }
             ]
         },
         {
-            "id": "TOOL-069",
+            "id": "TOOL-070",
             "path": "tools\/test_live_ui_node.js",
             "area": "TOOL",
             "lines": 322,
@@ -86514,7 +86618,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "TOOL-069.01"
+                    "id": "TOOL-070.01"
                 },
                 {
                     "kind": "block",
@@ -86527,7 +86631,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.02"
+                    "id": "TOOL-070.02"
                 },
                 {
                     "kind": "block",
@@ -86540,7 +86644,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.03"
+                    "id": "TOOL-070.03"
                 },
                 {
                     "kind": "block",
@@ -86555,7 +86659,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-069.04"
+                    "id": "TOOL-070.04"
                 },
                 {
                     "kind": "block",
@@ -86568,7 +86672,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.05"
+                    "id": "TOOL-070.05"
                 },
                 {
                     "kind": "block",
@@ -86581,7 +86685,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.06"
+                    "id": "TOOL-070.06"
                 },
                 {
                     "kind": "block",
@@ -86594,7 +86698,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.07"
+                    "id": "TOOL-070.07"
                 },
                 {
                     "kind": "block",
@@ -86607,7 +86711,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.08"
+                    "id": "TOOL-070.08"
                 },
                 {
                     "kind": "block",
@@ -86620,7 +86724,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.09"
+                    "id": "TOOL-070.09"
                 },
                 {
                     "kind": "block",
@@ -86633,12 +86737,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-069.10"
+                    "id": "TOOL-070.10"
                 }
             ]
         },
         {
-            "id": "TOOL-070",
+            "id": "TOOL-071",
             "path": "tools\/test_module_grant_offline.php",
             "area": "TOOL",
             "lines": 154,
@@ -86655,7 +86759,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.01"
+                    "id": "TOOL-071.01"
                 },
                 {
                     "kind": "region",
@@ -86668,7 +86772,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.02"
+                    "id": "TOOL-071.02"
                 },
                 {
                     "kind": "function",
@@ -86681,7 +86785,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.03"
+                    "id": "TOOL-071.03"
                 },
                 {
                     "kind": "region",
@@ -86694,7 +86798,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.04"
+                    "id": "TOOL-071.04"
                 },
                 {
                     "kind": "region",
@@ -86707,7 +86811,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.05"
+                    "id": "TOOL-071.05"
                 },
                 {
                     "kind": "function",
@@ -86720,7 +86824,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.06"
+                    "id": "TOOL-071.06"
                 },
                 {
                     "kind": "region",
@@ -86736,7 +86840,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-070.07"
+                    "id": "TOOL-071.07"
                 },
                 {
                     "kind": "region",
@@ -86749,7 +86853,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.08"
+                    "id": "TOOL-071.08"
                 },
                 {
                     "kind": "region",
@@ -86762,12 +86866,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-070.09"
+                    "id": "TOOL-071.09"
                 }
             ]
         },
         {
-            "id": "TOOL-071",
+            "id": "TOOL-072",
             "path": "tools\/test_org_role_sync_offline.php",
             "area": "TOOL",
             "lines": 84,
@@ -86784,7 +86888,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.01"
+                    "id": "TOOL-072.01"
                 },
                 {
                     "kind": "region",
@@ -86797,7 +86901,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.02"
+                    "id": "TOOL-072.02"
                 },
                 {
                     "kind": "function",
@@ -86810,7 +86914,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.03"
+                    "id": "TOOL-072.03"
                 },
                 {
                     "kind": "region",
@@ -86823,7 +86927,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.04"
+                    "id": "TOOL-072.04"
                 },
                 {
                     "kind": "function",
@@ -86836,7 +86940,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.05"
+                    "id": "TOOL-072.05"
                 },
                 {
                     "kind": "function",
@@ -86849,7 +86953,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.06"
+                    "id": "TOOL-072.06"
                 },
                 {
                     "kind": "region",
@@ -86865,7 +86969,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.07"
+                    "id": "TOOL-072.07"
                 },
                 {
                     "kind": "region",
@@ -86880,7 +86984,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.08"
+                    "id": "TOOL-072.08"
                 },
                 {
                     "kind": "region",
@@ -86895,7 +86999,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.09"
+                    "id": "TOOL-072.09"
                 },
                 {
                     "kind": "region",
@@ -86910,7 +87014,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.10"
+                    "id": "TOOL-072.10"
                 },
                 {
                     "kind": "region",
@@ -86925,7 +87029,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.11"
+                    "id": "TOOL-072.11"
                 },
                 {
                     "kind": "region",
@@ -86940,7 +87044,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.12"
+                    "id": "TOOL-072.12"
                 },
                 {
                     "kind": "region",
@@ -86955,7 +87059,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-071.13"
+                    "id": "TOOL-072.13"
                 },
                 {
                     "kind": "region",
@@ -86968,12 +87072,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-071.14"
+                    "id": "TOOL-072.14"
                 }
             ]
         },
         {
-            "id": "TOOL-072",
+            "id": "TOOL-073",
             "path": "tools\/test_panel_printer_node.js",
             "area": "TOOL",
             "lines": 526,
@@ -86992,7 +87096,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "TOOL-072.01"
+                    "id": "TOOL-073.01"
                 },
                 {
                     "kind": "block",
@@ -87005,7 +87109,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.02"
+                    "id": "TOOL-073.02"
                 },
                 {
                     "kind": "block",
@@ -87018,7 +87122,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.03"
+                    "id": "TOOL-073.03"
                 },
                 {
                     "kind": "block",
@@ -87033,7 +87137,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-072.04"
+                    "id": "TOOL-073.04"
                 },
                 {
                     "kind": "block",
@@ -87048,7 +87152,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "TOOL-072.05"
+                    "id": "TOOL-073.05"
                 },
                 {
                     "kind": "block",
@@ -87061,7 +87165,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.06"
+                    "id": "TOOL-073.06"
                 },
                 {
                     "kind": "block",
@@ -87074,7 +87178,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.07"
+                    "id": "TOOL-073.07"
                 },
                 {
                     "kind": "block",
@@ -87089,7 +87193,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-072.08"
+                    "id": "TOOL-073.08"
                 },
                 {
                     "kind": "block",
@@ -87102,7 +87206,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.09"
+                    "id": "TOOL-073.09"
                 },
                 {
                     "kind": "block",
@@ -87115,7 +87219,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.10"
+                    "id": "TOOL-073.10"
                 },
                 {
                     "kind": "block",
@@ -87128,7 +87232,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.11"
+                    "id": "TOOL-073.11"
                 },
                 {
                     "kind": "block",
@@ -87144,7 +87248,7 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-072.12"
+                    "id": "TOOL-073.12"
                 },
                 {
                     "kind": "block",
@@ -87157,12 +87261,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-072.13"
+                    "id": "TOOL-073.13"
                 }
             ]
         },
         {
-            "id": "TOOL-073",
+            "id": "TOOL-074",
             "path": "tools\/test_print_bottom_fit_offline.php",
             "area": "TOOL",
             "lines": 364,
@@ -87179,7 +87283,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-073.01"
+                    "id": "TOOL-074.01"
                 },
                 {
                     "kind": "function",
@@ -87192,7 +87296,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-073.02"
+                    "id": "TOOL-074.02"
                 },
                 {
                     "kind": "region",
@@ -87205,7 +87309,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-073.03"
+                    "id": "TOOL-074.03"
                 },
                 {
                     "kind": "function",
@@ -87218,7 +87322,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-073.04"
+                    "id": "TOOL-074.04"
                 },
                 {
                     "kind": "function",
@@ -87231,7 +87335,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-073.05"
+                    "id": "TOOL-074.05"
                 },
                 {
                     "kind": "function",
@@ -87246,7 +87350,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-073.06"
+                    "id": "TOOL-074.06"
                 },
                 {
                     "kind": "region",
@@ -87259,7 +87363,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-073.07"
+                    "id": "TOOL-074.07"
                 },
                 {
                     "kind": "region",
@@ -87276,7 +87380,7 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-073.08"
+                    "id": "TOOL-074.08"
                 },
                 {
                     "kind": "region",
@@ -87292,12 +87396,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-073.09"
+                    "id": "TOOL-074.09"
                 }
             ]
         },
         {
-            "id": "TOOL-074",
+            "id": "TOOL-075",
             "path": "tools\/test_print_top_trim_offline.php",
             "area": "TOOL",
             "lines": 170,
@@ -87314,7 +87418,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-074.01"
+                    "id": "TOOL-075.01"
                 },
                 {
                     "kind": "function",
@@ -87327,7 +87431,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-074.02"
+                    "id": "TOOL-075.02"
                 },
                 {
                     "kind": "function",
@@ -87340,7 +87444,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-074.03"
+                    "id": "TOOL-075.03"
                 },
                 {
                     "kind": "region",
@@ -87355,7 +87459,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-074.04"
+                    "id": "TOOL-075.04"
                 },
                 {
                     "kind": "region",
@@ -87368,7 +87472,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-074.05"
+                    "id": "TOOL-075.05"
                 },
                 {
                     "kind": "function",
@@ -87381,7 +87485,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-074.06"
+                    "id": "TOOL-075.06"
                 },
                 {
                     "kind": "region",
@@ -87397,12 +87501,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-074.07"
+                    "id": "TOOL-075.07"
                 }
             ]
         },
         {
-            "id": "TOOL-075",
+            "id": "TOOL-076",
             "path": "tools\/test_release_134_offline.php",
             "area": "TOOL",
             "lines": 176,
@@ -87419,7 +87523,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.01"
+                    "id": "TOOL-076.01"
                 },
                 {
                     "kind": "function",
@@ -87432,7 +87536,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.02"
+                    "id": "TOOL-076.02"
                 },
                 {
                     "kind": "function",
@@ -87445,7 +87549,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.03"
+                    "id": "TOOL-076.03"
                 },
                 {
                     "kind": "region",
@@ -87460,7 +87564,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-075.04"
+                    "id": "TOOL-076.04"
                 },
                 {
                     "kind": "region",
@@ -87473,7 +87577,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.05"
+                    "id": "TOOL-076.05"
                 },
                 {
                     "kind": "function",
@@ -87486,7 +87590,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.06"
+                    "id": "TOOL-076.06"
                 },
                 {
                     "kind": "function",
@@ -87499,7 +87603,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.07"
+                    "id": "TOOL-076.07"
                 },
                 {
                     "kind": "function",
@@ -87512,7 +87616,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.08"
+                    "id": "TOOL-076.08"
                 },
                 {
                     "kind": "region",
@@ -87527,7 +87631,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-075.09"
+                    "id": "TOOL-076.09"
                 },
                 {
                     "kind": "function",
@@ -87540,7 +87644,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.10"
+                    "id": "TOOL-076.10"
                 },
                 {
                     "kind": "function",
@@ -87553,7 +87657,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.11"
+                    "id": "TOOL-076.11"
                 },
                 {
                     "kind": "function",
@@ -87566,7 +87670,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.12"
+                    "id": "TOOL-076.12"
                 },
                 {
                     "kind": "region",
@@ -87581,7 +87685,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-075.13"
+                    "id": "TOOL-076.13"
                 },
                 {
                     "kind": "function",
@@ -87594,7 +87698,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-075.14"
+                    "id": "TOOL-076.14"
                 },
                 {
                     "kind": "region",
@@ -87610,12 +87714,12 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-075.15"
+                    "id": "TOOL-076.15"
                 }
             ]
         },
         {
-            "id": "TOOL-076",
+            "id": "TOOL-077",
             "path": "tools\/test_role_permissions_offline.php",
             "area": "TOOL",
             "lines": 207,
@@ -87632,7 +87736,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.01"
+                    "id": "TOOL-077.01"
                 },
                 {
                     "kind": "function",
@@ -87645,7 +87749,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.02"
+                    "id": "TOOL-077.02"
                 },
                 {
                     "kind": "class",
@@ -87661,7 +87765,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-076.03"
+                    "id": "TOOL-077.03"
                 },
                 {
                     "kind": "region",
@@ -87676,7 +87780,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-076.04"
+                    "id": "TOOL-077.04"
                 },
                 {
                     "kind": "function",
@@ -87689,7 +87793,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.05"
+                    "id": "TOOL-077.05"
                 },
                 {
                     "kind": "region",
@@ -87702,7 +87806,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.06"
+                    "id": "TOOL-077.06"
                 },
                 {
                     "kind": "function",
@@ -87715,7 +87819,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.07"
+                    "id": "TOOL-077.07"
                 },
                 {
                     "kind": "function",
@@ -87728,7 +87832,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.08"
+                    "id": "TOOL-077.08"
                 },
                 {
                     "kind": "region",
@@ -87741,7 +87845,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.09"
+                    "id": "TOOL-077.09"
                 },
                 {
                     "kind": "function",
@@ -87756,7 +87860,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-076.10"
+                    "id": "TOOL-077.10"
                 },
                 {
                     "kind": "function",
@@ -87769,7 +87873,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.11"
+                    "id": "TOOL-077.11"
                 },
                 {
                     "kind": "function",
@@ -87782,7 +87886,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.12"
+                    "id": "TOOL-077.12"
                 },
                 {
                     "kind": "region",
@@ -87795,7 +87899,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.13"
+                    "id": "TOOL-077.13"
                 },
                 {
                     "kind": "region",
@@ -87808,7 +87912,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.14"
+                    "id": "TOOL-077.14"
                 },
                 {
                     "kind": "region",
@@ -87821,7 +87925,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.15"
+                    "id": "TOOL-077.15"
                 },
                 {
                     "kind": "region",
@@ -87834,12 +87938,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-076.16"
+                    "id": "TOOL-077.16"
                 }
             ]
         },
         {
-            "id": "TOOL-077",
+            "id": "TOOL-078",
             "path": "tools\/test_scan_errors_offline.php",
             "area": "TOOL",
             "lines": 115,
@@ -87856,7 +87960,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-077.01"
+                    "id": "TOOL-078.01"
                 },
                 {
                     "kind": "function",
@@ -87869,7 +87973,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-077.02"
+                    "id": "TOOL-078.02"
                 },
                 {
                     "kind": "region",
@@ -87882,12 +87986,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-077.03"
+                    "id": "TOOL-078.03"
                 }
             ]
         },
         {
-            "id": "TOOL-078",
+            "id": "TOOL-079",
             "path": "tools\/test_source_delete_offline.php",
             "area": "TOOL",
             "lines": 187,
@@ -87904,7 +88008,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-078.01"
+                    "id": "TOOL-079.01"
                 },
                 {
                     "kind": "function",
@@ -87917,7 +88021,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-078.02"
+                    "id": "TOOL-079.02"
                 },
                 {
                     "kind": "region",
@@ -87930,7 +88034,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-078.03"
+                    "id": "TOOL-079.03"
                 },
                 {
                     "kind": "function",
@@ -87943,7 +88047,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-078.04"
+                    "id": "TOOL-079.04"
                 },
                 {
                     "kind": "region",
@@ -87958,7 +88062,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-078.05"
+                    "id": "TOOL-079.05"
                 },
                 {
                     "kind": "function",
@@ -87971,7 +88075,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-078.06"
+                    "id": "TOOL-079.06"
                 },
                 {
                     "kind": "region",
@@ -87986,12 +88090,12 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-078.07"
+                    "id": "TOOL-079.07"
                 }
             ]
         },
         {
-            "id": "TOOL-079",
+            "id": "TOOL-080",
             "path": "tools\/test_ticket_txn_offline.php",
             "area": "TOOL",
             "lines": 234,
@@ -88008,7 +88112,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.01"
+                    "id": "TOOL-080.01"
                 },
                 {
                     "kind": "function",
@@ -88021,7 +88125,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.02"
+                    "id": "TOOL-080.02"
                 },
                 {
                     "kind": "function",
@@ -88034,7 +88138,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.03"
+                    "id": "TOOL-080.03"
                 },
                 {
                     "kind": "class",
@@ -88047,7 +88151,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.04"
+                    "id": "TOOL-080.04"
                 },
                 {
                     "kind": "class",
@@ -88062,7 +88166,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-079.05"
+                    "id": "TOOL-080.05"
                 },
                 {
                     "kind": "region",
@@ -88075,7 +88179,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.06"
+                    "id": "TOOL-080.06"
                 },
                 {
                     "kind": "function",
@@ -88088,7 +88192,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.07"
+                    "id": "TOOL-080.07"
                 },
                 {
                     "kind": "region",
@@ -88101,7 +88205,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.08"
+                    "id": "TOOL-080.08"
                 },
                 {
                     "kind": "function",
@@ -88114,7 +88218,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.09"
+                    "id": "TOOL-080.09"
                 },
                 {
                     "kind": "region",
@@ -88127,7 +88231,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.10"
+                    "id": "TOOL-080.10"
                 },
                 {
                     "kind": "function",
@@ -88140,7 +88244,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.11"
+                    "id": "TOOL-080.11"
                 },
                 {
                     "kind": "region",
@@ -88155,7 +88259,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TOOL-079.12"
+                    "id": "TOOL-080.12"
                 },
                 {
                     "kind": "region",
@@ -88168,7 +88272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-079.13"
+                    "id": "TOOL-080.13"
                 },
                 {
                     "kind": "region",
@@ -88183,12 +88287,12 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "TOOL-079.14"
+                    "id": "TOOL-080.14"
                 }
             ]
         },
         {
-            "id": "TOOL-080",
+            "id": "TOOL-081",
             "path": "tools\/test_traffic_form_offline.php",
             "area": "TOOL",
             "lines": 75,
@@ -88205,7 +88309,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.01"
+                    "id": "TOOL-081.01"
                 },
                 {
                     "kind": "region",
@@ -88218,7 +88322,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.02"
+                    "id": "TOOL-081.02"
                 },
                 {
                     "kind": "function",
@@ -88231,7 +88335,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.03"
+                    "id": "TOOL-081.03"
                 },
                 {
                     "kind": "region",
@@ -88244,7 +88348,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.04"
+                    "id": "TOOL-081.04"
                 },
                 {
                     "kind": "function",
@@ -88257,7 +88361,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.05"
+                    "id": "TOOL-081.05"
                 },
                 {
                     "kind": "function",
@@ -88270,7 +88374,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.06"
+                    "id": "TOOL-081.06"
                 },
                 {
                     "kind": "region",
@@ -88283,7 +88387,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.07"
+                    "id": "TOOL-081.07"
                 },
                 {
                     "kind": "region",
@@ -88296,7 +88400,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.08"
+                    "id": "TOOL-081.08"
                 },
                 {
                     "kind": "region",
@@ -88309,7 +88413,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.09"
+                    "id": "TOOL-081.09"
                 },
                 {
                     "kind": "region",
@@ -88322,7 +88426,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.10"
+                    "id": "TOOL-081.10"
                 },
                 {
                     "kind": "region",
@@ -88335,12 +88439,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-080.11"
+                    "id": "TOOL-081.11"
                 }
             ]
         },
         {
-            "id": "TOOL-081",
+            "id": "TOOL-082",
             "path": "tools\/test_traffic_import_offline.php",
             "area": "TOOL",
             "lines": 179,
@@ -88362,12 +88466,12 @@
                             "long": 1
                         }
                     },
-                    "id": "TOOL-081.01"
+                    "id": "TOOL-082.01"
                 }
             ]
         },
         {
-            "id": "TOOL-082",
+            "id": "TOOL-083",
             "path": "tools\/test_ui_features_offline.php",
             "area": "TOOL",
             "lines": 44,
@@ -88384,12 +88488,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-082.01"
+                    "id": "TOOL-083.01"
                 }
             ]
         },
         {
-            "id": "TOOL-083",
+            "id": "TOOL-084",
             "path": "tools\/test_web_host_offline.php",
             "area": "TOOL",
             "lines": 142,
@@ -88406,7 +88510,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.01"
+                    "id": "TOOL-084.01"
                 },
                 {
                     "kind": "region",
@@ -88419,7 +88523,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.02"
+                    "id": "TOOL-084.02"
                 },
                 {
                     "kind": "region",
@@ -88432,7 +88536,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.03"
+                    "id": "TOOL-084.03"
                 },
                 {
                     "kind": "region",
@@ -88445,7 +88549,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.04"
+                    "id": "TOOL-084.04"
                 },
                 {
                     "kind": "region",
@@ -88458,7 +88562,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.05"
+                    "id": "TOOL-084.05"
                 },
                 {
                     "kind": "region",
@@ -88471,7 +88575,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.06"
+                    "id": "TOOL-084.06"
                 },
                 {
                     "kind": "region",
@@ -88484,12 +88588,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-083.07"
+                    "id": "TOOL-084.07"
                 }
             ]
         },
         {
-            "id": "TOOL-084",
+            "id": "TOOL-085",
             "path": "tools\/topic_index.py",
             "area": "TOOL",
             "lines": 209,
@@ -88506,7 +88610,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.01"
+                    "id": "TOOL-085.01"
                 },
                 {
                     "kind": "block",
@@ -88519,7 +88623,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.02"
+                    "id": "TOOL-085.02"
                 },
                 {
                     "kind": "block",
@@ -88532,7 +88636,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.03"
+                    "id": "TOOL-085.03"
                 },
                 {
                     "kind": "block",
@@ -88545,7 +88649,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.04"
+                    "id": "TOOL-085.04"
                 },
                 {
                     "kind": "block",
@@ -88558,7 +88662,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.05"
+                    "id": "TOOL-085.05"
                 },
                 {
                     "kind": "block",
@@ -88571,7 +88675,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.06"
+                    "id": "TOOL-085.06"
                 },
                 {
                     "kind": "block",
@@ -88584,7 +88688,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.07"
+                    "id": "TOOL-085.07"
                 },
                 {
                     "kind": "block",
@@ -88597,7 +88701,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.08"
+                    "id": "TOOL-085.08"
                 },
                 {
                     "kind": "block",
@@ -88610,7 +88714,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.09"
+                    "id": "TOOL-085.09"
                 },
                 {
                     "kind": "block",
@@ -88625,7 +88729,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-084.10"
+                    "id": "TOOL-085.10"
                 },
                 {
                     "kind": "block",
@@ -88638,7 +88742,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.11"
+                    "id": "TOOL-085.11"
                 },
                 {
                     "kind": "block",
@@ -88653,7 +88757,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "TOOL-084.12"
+                    "id": "TOOL-085.12"
                 },
                 {
                     "kind": "block",
@@ -88666,7 +88770,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TOOL-084.13"
+                    "id": "TOOL-085.13"
                 }
             ]
         },

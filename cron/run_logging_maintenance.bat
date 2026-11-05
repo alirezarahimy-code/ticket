@@ -4,6 +4,9 @@ set "APP_ROOT=%~dp0.."
 for %%I in ("%APP_ROOT%") do set "APP_ROOT=%%~fI"
 
 if not defined PHP_EXE set "PHP_EXE=C:\PHP\php.exe"
+rem 1.62.88: XAMPP most often installs PHP outside C:\PHP and outside PATH.
+if not exist "%PHP_EXE%" if exist "C:\xampp\php\php.exe" set "PHP_EXE=C:\xampp\php\php.exe"
+if not exist "%PHP_EXE%" if exist "D:\xampp\php\php.exe" set "PHP_EXE=D:\xampp\php\php.exe"
 if not exist "%PHP_EXE%" (
     for /f "delims=" %%P in ('where php 2^>nul') do if not defined PHP_EXE_FOUND set "PHP_EXE_FOUND=%%P"
     if defined PHP_EXE_FOUND set "PHP_EXE=%PHP_EXE_FOUND%"
@@ -15,8 +18,12 @@ if not exist "%PHP_EXE%" (
 
 if not exist "%APP_ROOT%\storage\logs" mkdir "%APP_ROOT%\storage\logs"
 
-"%PHP_EXE%" "%APP_ROOT%\cron\reconcile_update_audit.php" >> "%APP_ROOT%\storage\logs\update-audit-reconcile-task.log" 2>&1
-set "UPDATE_AUDIT_EXIT=%ERRORLEVEL%"
+rem 1.62.88: this helper is optional; a missing file must not fail the whole task.
+set "UPDATE_AUDIT_EXIT=0"
+if exist "%APP_ROOT%\cron\reconcile_update_audit.php" (
+    "%PHP_EXE%" "%APP_ROOT%\cron\reconcile_update_audit.php" >> "%APP_ROOT%\storage\logs\update-audit-reconcile-task.log" 2>&1
+    set "UPDATE_AUDIT_EXIT=%ERRORLEVEL%"
+)
 "%PHP_EXE%" "%APP_ROOT%\cron\replay_logging_spool.php" >> "%APP_ROOT%\storage\logs\logging-worker-task.log" 2>&1
 set "REPLAY_EXIT=%ERRORLEVEL%"
 "%PHP_EXE%" "%APP_ROOT%\cron\rebuild_logging_issues.php" 500 >> "%APP_ROOT%\storage\logs\logging-issue-rebuild-task.log" 2>&1
