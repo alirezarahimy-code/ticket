@@ -207,6 +207,9 @@ function create_backup_bundle(): array
     $uploadCount = backup_uploads($destination);
     // ۱.۶۲.۴۱ — بکاپ کامل فایلهای سامانه (جدا از دیتابیس)، قبل از هر بهروزرسانی.
     $filesBackup = backup_system_files_zip($destination);
+    if (empty($filesBackup['ok'])) {
+        throw new RuntimeException('پشتیبان فایل‌های سامانه کامل نشد: ' . (string) ($filesBackup['error'] ?? 'خطای نامشخص'));
+    }
     file_put_contents($destination . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
         'created_at' => date('c'),
         'database' => $dbName,
