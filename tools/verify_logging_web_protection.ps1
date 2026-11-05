@@ -2,10 +2,12 @@
 param([Parameter(Mandatory=$true)][string]$BaseUrl)
 $ErrorActionPreference = 'Stop'
 $base = [Uri]$BaseUrl
-if (-not $base.IsAbsoluteUri -or $base.Scheme -notin @('http','https') -or $base.UserInfo) {
+if (-not $base.IsAbsoluteUri -or $base.Scheme -notin @('http','https') -or $base.UserInfo -or $base.Query -or $base.Fragment) {
     throw 'BaseUrl must be an absolute HTTP(S) URL without embedded credentials.'
 }
-$paths = @('/config.php','/storage/','/storage/logs/','/storage/backups/','/uploads/')
+$base = [Uri]($base.AbsoluteUri.TrimEnd('/') + '/')
+# Paths are relative to the application URL, which may be hosted under /ticket/.
+$paths = @('config.php','storage/','storage/logs/','storage/backups/','uploads/')
 $failed = 0
 foreach ($path in $paths) {
     $uri = [Uri]::new($base, $path)
