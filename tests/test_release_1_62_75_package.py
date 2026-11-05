@@ -35,6 +35,8 @@ SUPERSEDED_BY_LATER_RELEASE = {
     "install-empty-db.sql",
     # ۱.۶۲.۸۰ بخش «کدام بستهٔ به‌روزرسانی را نصب کنم؟» را به راهنما افزود.
     "help-guide.php",
+    # ۱.۶۲.۸۱ بند ۱۱ (ممیزی دورهٔ‌ای سامانه) را به سند معماری افزود.
+    "docs/ARCHITECTURE-FA.md",
 }
 EXPECTED_REPLACEMENTS = {
     "VERSION",

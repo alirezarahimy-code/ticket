@@ -1,0 +1,15 @@
+{
+  "_توضیح": "وضعیت پذیرفته‌شدهٔ فعلی. ممیزی فقط وقتی قرمز می‌شود که عددی از این مقادیر بیشتر شود. برای بهبود، عدد را کم کنید و دوباره ثبت کنید.",
+  "metrics": {
+    "code_table_references": 0,
+    "schema_parity": 0,
+    "secrets": 0,
+    "migration_guards": 0,
+    "release_consistency": 0,
+    "silent_error_swallowing": 84,
+    "architecture_pressure": 7,
+    "filesystem_safety": 0,
+    "hardcoded_environment": 13,
+    "index_monolith": 39
+  }
+}
