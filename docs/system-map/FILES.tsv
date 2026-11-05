@@ -117,7 +117,7 @@ actions/notification-actions.php	actions	32	1853
 actions/org-actions.php	actions	842	66585
 actions/role-actions.php	actions	140	8471
 actions/service-actions.php	actions	165	11691
-actions/settings-actions.php	actions	264	17150
+actions/settings-actions.php	actions	266	17434
 actions/supervisor-actions.php	actions	171	14875
 actions/ticket-actions.php	actions	661	57167
 actions/user-structure-actions.php	actions	367	28857
@@ -180,7 +180,7 @@ cd-dvd.php	core	892	71802
 chatbot-tts-lexicon.php	core	14	472
 chatbot.php	core	3412	180625
 client-agent/Collect-Inventory.ps1	client-agent	147	7378
-config.sample.php	config	52	1764
+config.sample.php	config	56	2332
 cron/.htaccess	cron	1	19
 cron/check_logging_health.php	cron	239	17449
 cron/deliver_logging_issue_notifications.php	cron	92	5882
@@ -233,7 +233,7 @@ docs/STAGING-ACCEPTANCE-REPORT-1.62.76-FA.md	docs	21	1419
 docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
 docs/SYSTEM-MAP-FA.md	docs	551	37833
 docs/TEST-ALIGNMENT-1.62.59-FA.md	docs	87	6996
-docs/TEST-DEBT-FA.md	docs	69	4266
+docs/TEST-DEBT-FA.md	docs	85	5853
 docs/TEST-REPORT-1.62.76-FA.md	docs	30	2546
 docs/TEST_COVERAGE_MATRIX_FA.md	docs	50	8233
 docs/USER-ACCESS-GROUPS-FA.md	docs	43	3988
@@ -351,7 +351,7 @@ global-search.php	core	121	12295
 governance.php	core	521	47346
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
-index.php	core	3738	374107
+index.php	core	3742	374998
 install-empty-db.sql	sql-root	1575	80155
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -361,7 +361,7 @@ lib/activity-audit.php	lib	599	34995
 lib/asset-identity.php	lib	3	163
 lib/auth-scope.php	lib	416	20824
 lib/db-core.php	lib	611	26637
-lib/ldap.php	lib	329	16564
+lib/ldap.php	lib	411	20350
 lib/log-catalog.php	lib	48	20811
 lib/logging-audit.php	lib	642	30184
 lib/logging-core.php	lib	1558	84664
@@ -510,6 +510,8 @@ tests/test_fresh_install_schema_parity.py	tests	314	14808
 tests/test_global_theme_mode.py	tests	62	3408
 tests/test_group_ticket_design_repair_static.py	tests	38	2227
 tests/test_inventory_truth_static.py	tests	197	12454
+tests/test_ldap_secret_and_legacy_status_static.py	tests	209	11728
+tests/test_ldap_secret_unit.php	tests	53	3725
 tests/test_logging_acceptance_harness_static.py	tests	38	1742
 tests/test_logging_acl_windows.ps1	tests	74	5093
 tests/test_logging_architecture_static.py	tests	52	2499

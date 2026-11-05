@@ -200,8 +200,10 @@ if (!defined('APP_ROOT')) {
                 foreach ($ldapKeys as $key) {
                     save_setting($key, post_value($key));
                 }
+                // رمز حساب سرویس دامین فقط رمزشده در جدول تنظیمات می‌نشیند؛
+                // در نبود app.key رفتار قبلی (متن ساده) حفظ می‌شود تا ارتقا چیزی نشکند.
                 if (post_value('ldap_bind_password') !== '') {
-                    save_setting('ldap_bind_password', post_value('ldap_bind_password'));
+                    save_setting('ldap_bind_password', ldap_secret_encrypt(post_value('ldap_bind_password')));
                 }
             }
             if (post_value('settings_section') === 'domain_scan') {
