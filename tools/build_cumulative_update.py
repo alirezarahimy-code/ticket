@@ -55,15 +55,15 @@ FORBIDDEN_ROOTS = {"storage", "uploads", ".git", "node_modules", "vendor", "conf
 def safe_relative_path(value: str) -> bool:
     if not value or "\\" in value or "//" in value or value.startswith("/") or re.match(r"^[A-Za-z]:", value):
         return False
-    path = PurePosixPath(value)
-    if any(part in ("", ".", "..") for part in path.parts):
+    parts = value.split("/")
+    if any(part in ("", ".", "..") for part in parts):
         return False
-    for part in path.parts:
+    for part in parts:
         if re.search(r'[<>:"|?*\x00-\x1f]', part) or part.endswith((".", " ")):
             return False
         if re.match(r"^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?$", part, re.I):
             return False
-    return path.parts[0].lower() not in FORBIDDEN_ROOTS
+    return parts[0].lower() not in FORBIDDEN_ROOTS
 
 
 def sha256(data: bytes) -> str:
