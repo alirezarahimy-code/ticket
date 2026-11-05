@@ -257,12 +257,28 @@ function system_update_read_package(string $zipPath, bool $allowDowngrade = fals
         }
         $files = $manifest['files'] ?? [];
         if (!is_array($files)) { throw new RuntimeException('فهرست فایل‌ها در manifest معتبر نیست.'); }
+        $manifestFiles = [];
         foreach ($files as $relative) {
             $relative = (string) $relative;
+            $key = strtolower($relative);
             if ($relative === '' || !system_update_archive_path_is_safe('files/' . $relative)
-                || $zip->locateName('files/' . $relative) === false) {
-                throw new RuntimeException('فایل اعلام‌شده در manifest نامعتبر یا مفقود است: ' . $relative);
+                || $zip->locateName('files/' . $relative) === false || isset($manifestFiles[$key])) {
+                throw new RuntimeException('فایل اعلام‌شده در manifest نامعتبر، تکراری یا مفقود است: ' . $relative);
             }
+            $manifestFiles[$key] = true;
+        }
+        $archiveFiles = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $entry = (string) $zip->getNameIndex($i);
+            if (str_starts_with($entry, 'files/') && !str_ends_with($entry, '/')) {
+                $archiveFiles[strtolower(substr($entry, 6))] = true;
+            }
+        }
+        $expectedFiles = array_keys($manifestFiles);
+        $actualFiles = array_keys($archiveFiles);
+        sort($expectedFiles); sort($actualFiles);
+        if ($expectedFiles !== $actualFiles) {
+            throw new RuntimeException('فهرست files در manifest با فایل‌های واقعی ZIP یکسان نیست.');
         }
         return ['manifest' => $manifest, 'version' => $version, 'mode' => $mode, 'current' => $current, 'migrations' => array_values($migrations)];
     } finally {
