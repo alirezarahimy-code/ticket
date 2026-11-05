@@ -67,7 +67,7 @@ if (!defined('APP_ROOT')) {
         }
 
         if ($action === 'add_service_field') {
-            require_permission('service_field.manage');
+            $fieldAdmin = require_permission('service_field.manage');
             $serviceId = (int) ($_POST['service_id'] ?? 0);
             $fieldKey = strtolower((string) preg_replace('/[^a-zA-Z0-9_]/', '_', post_value('field_key')));
             $label = post_value('field_label');
@@ -81,7 +81,7 @@ if (!defined('APP_ROOT')) {
             try {
                 $pdo->prepare('INSERT INTO service_catalog_fields (service_id, field_key, label, field_type, options_json, is_required, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$serviceId, $fieldKey, $label, $fieldType, json_encode($options, JSON_UNESCAPED_UNICODE), !empty($_POST['field_required']) ? 1 : 0, max(0, (int) ($_POST['sort_order'] ?? 0))]);
                 $fieldId = (int) $pdo->lastInsertId();
-                save_audit_required((int) $knowledgeUser['id'] ?? (int) $serviceId, 'service_field_created', null, ['service_id' => $serviceId, 'field_id' => $fieldId, 'field_key' => $fieldKey]);
+                save_audit_required((int) $fieldAdmin['id'], 'service_field_created', null, ['service_id' => $serviceId, 'field_id' => $fieldId, 'field_key' => $fieldKey]);
                 db_commit('index.php');
             } catch (Throwable $exception) {
                 if ($pdo->inTransaction()) db_rollback('index.php');
