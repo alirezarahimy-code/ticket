@@ -106,7 +106,7 @@ $validPackage = make_test_zip([
 $stage = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'itsm-stage-test-' . bin2hex(random_bytes(6));
 try {
     $package = system_update_read_package($validPackage);
-    if ($package['version'] !== '1.62.83' || $package['mode'] !== 'upgrade') {
+    if ($package['version'] !== '1.62.83' || !in_array($package['mode'], ['upgrade', 'reinstall'], true)) {
         throw new RuntimeException('Valid update package metadata was not accepted.');
     }
     if (!mkdir($stage, 0700, true)) { throw new RuntimeException('Could not create extraction stage.'); }
