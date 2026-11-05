@@ -83,6 +83,12 @@ DROP TABLE IF EXISTS
     food_ticket_worker_status,
     food_ticket_guest_cards,
     food_ticket_print_log,
+    log_issues,
+    log_issue_history,
+    log_issue_events,
+    log_issue_notifications,
+    logging_health_alerts,
+    schema_updates,
     food_ticket_config;
 
 SET FOREIGN_KEY_CHECKS = 1;

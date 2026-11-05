@@ -119,19 +119,25 @@ class ReleasePackageTest(unittest.TestCase):
                 new.read("files/food-ticket-web/assets/food-menu.js"),
             )
 
-    def test_download_page_points_to_latest_dashboard_cleanup_archive(self) -> None:
-        page = (ROOT / "downloads/index.html").read_text(encoding="utf-8")
+    def test_dashboard_cleanup_archive_stays_intact(self) -> None:
+        """آرشیو ۱.۶۲.۷۳ r2 باید سالم و با checksum ثبت‌شده باقی بماند.
+
+        این تست قبلاً اصرار داشت که صفحهٔ دانلود همین بستهٔ تاریخی را هم
+        فهرست کند. آن سیاست کنار گذاشته شد: از نسخه‌های بعدی، قاعدهٔ
+        ``check_download_page_lists_only_latest_package`` در
+        ``tests/download_page_helpers.py`` حکم می‌کند صفحهٔ دانلود **فقط**
+        تازه‌ترین بسته را نشان دهد تا کاربر به‌اشتباه بستهٔ قدیمی را نصب
+        نکند. دو سیاست هم‌زمان ممکن نیستند و سیاست تازه برنده است.
+
+        آنچه ارزش پایدار دارد و اینجا حفظ شده، تغییرناپذیری خودِ آرشیو است.
+        """
         latest = ROOT / "downloads/ticket-update-1.62.73-food-dashboard-cleanup-20261104-r2.zip"
-        self.assertTrue(latest.is_file())
+        self.assertTrue(latest.is_file(), "آرشیو تاریخی ۱.۶۲.۷۳ r2 حذف شده است")
         digest = hashlib.sha256(latest.read_bytes()).hexdigest()
-        self.assertIn(latest.name, page)
-        self.assertIn(latest.name + ".sha256", page)
-        self.assertIn(digest, page)
-        github_branch = "https://github.com/alirezarahimy-code/ticket/"
-        self.assertIn(github_branch + "raw/refs/heads/arena/642158e3-ticket/downloads/" + latest.name, page)
-        self.assertIn(github_branch + "raw/refs/heads/arena/642158e3-ticket/downloads/" + latest.name + ".sha256", page)
-        self.assertIn(github_branch + "blob/arena/642158e3-ticket/downloads/CHANGE-REPORT-FA-1.62.73-DASHBOARD-R2.md", page)
-        self.assertNotIn("پس از ساخت بسته درج می‌شود", page)
+        recorded = (ROOT / "downloads" / (latest.name + ".sha256")).read_text(encoding="utf-8")
+        self.assertIn(digest, recorded, "checksum ثبت‌شدهٔ آرشیو تاریخی با فایل نمی‌خواند")
+        report = ROOT / "downloads/CHANGE-REPORT-FA-1.62.73-DASHBOARD-R2.md"
+        self.assertTrue(report.is_file(), "گزارش تغییرات ۱.۶۲.۷۳ r2 حذف شده است")
 
 
 if __name__ == "__main__":

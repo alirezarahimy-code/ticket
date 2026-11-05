@@ -104,10 +104,11 @@ CREATE TABLE IF NOT EXISTS users (
     handling_unit_id INT UNSIGNED NULL,
     is_it_agent TINYINT(1) NOT NULL DEFAULT 0,
     is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
-    role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector') NOT NULL DEFAULT 'user',
+    role ENUM('user','agent','manager','supervisor','admin','primary_admin','support_manager','inspector','local_user','guard') NOT NULL DEFAULT 'user',
     auth_source ENUM('local','ldap','food') NOT NULL DEFAULT 'local',
     is_active TINYINT(1) NOT NULL DEFAULT 1,
     last_login_at DATETIME NULL,
+    must_change_password TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_users_company (company_id, is_active, auth_source),
     INDEX idx_users_role (role),
@@ -189,7 +190,7 @@ CREATE TABLE IF NOT EXISTS traffic_visits (
     serial_no VARCHAR(30) NOT NULL,
     visit_date DATE NOT NULL,
     full_name VARCHAR(190) NOT NULL,
-    national_code VARCHAR(10) NULL,
+    national_code VARCHAR(10) DEFAULT NULL,
     phone VARCHAR(20) DEFAULT NULL,
     company VARCHAR(190) DEFAULT NULL,
     entry_time TIME DEFAULT NULL,
@@ -394,6 +395,15 @@ CREATE TABLE IF NOT EXISTS ticket_attachments (
 
 CREATE TABLE IF NOT EXISTS activity_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    -- هستهٔ لاگ‌گیری مرکزی (هم‌تراز با migrations/024، 025، 027، 029)
+    event_id CHAR(36) NULL,
+    request_id CHAR(36) NULL,
+    trace_id CHAR(36) NULL,
+    operation_id CHAR(36) NULL,
+    parent_event_id CHAR(36) NULL,
+    result VARCHAR(16) NOT NULL DEFAULT 'unknown',
+    code VARCHAR(40) NULL,
+    category VARCHAR(24) NOT NULL DEFAULT 'audit',
     user_id INT UNSIGNED NULL,
     username VARCHAR(190) NULL,
     full_name VARCHAR(190) NULL,
@@ -415,6 +425,10 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     INDEX idx_activity_action (action_code),
     INDEX idx_activity_module (module),
     INDEX idx_activity_ip (ip_address),
+    UNIQUE KEY uq_activity_event_id (event_id),
+    KEY idx_activity_request (request_id),
+    INDEX idx_activity_category_result_time (category, result, created_at),
+    INDEX idx_activity_trace (trace_id, operation_id),
     CONSTRAINT fk_activity_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -435,7 +449,10 @@ CREATE TABLE IF NOT EXISTS notifications (
     is_read TINYINT(1) NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     read_at DATETIME NULL,
+    -- جلوگیری از اعلان تکراری (هم‌تراز با migrations/030)
+    idempotency_key CHAR(64) NULL,
     INDEX idx_notifications_user (user_id, is_read, created_at),
+    UNIQUE KEY uq_notifications_idempotency (idempotency_key),
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_notifications_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -460,6 +477,12 @@ CREATE TABLE IF NOT EXISTS ticket_sla_alerts (
 
 CREATE TABLE IF NOT EXISTS ticket_events (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    -- هستهٔ لاگ‌گیری مرکزی (هم‌تراز با migrations/024، 027)
+    event_id CHAR(36) NULL,
+    request_id CHAR(36) NULL,
+    trace_id CHAR(36) NULL,
+    operation_id CHAR(36) NULL,
+    parent_event_id CHAR(36) NULL,
     ticket_id INT UNSIGNED NOT NULL,
     user_id INT UNSIGNED NULL,
     event_type VARCHAR(80) NOT NULL,
@@ -469,6 +492,9 @@ CREATE TABLE IF NOT EXISTS ticket_events (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_events_ticket (ticket_id),
     INDEX idx_events_created (created_at),
+    UNIQUE KEY uq_ticket_event_id (event_id),
+    KEY idx_ticket_events_request (request_id),
+    INDEX idx_ticket_events_trace (trace_id, operation_id),
     CONSTRAINT fk_events_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
     CONSTRAINT fk_events_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -502,6 +528,8 @@ CREATE TABLE IF NOT EXISTS assets (
     asset_tag VARCHAR(100) NOT NULL UNIQUE,
     record_number VARCHAR(100) NULL,
     hostname VARCHAR(190) NULL,
+    -- یکتاسازی نام میزبان (هم‌تراز با migrations/014، 015، 016)
+    hostname_key VARCHAR(191) NULL,
     serial_number VARCHAR(190) NULL,
     computer_type VARCHAR(100) NULL,
     manufacturer VARCHAR(190) NULL,
@@ -532,7 +560,7 @@ CREATE TABLE IF NOT EXISTS assets (
     os_serial VARCHAR(190) NULL,
     os_install_date DATETIME NULL,
     registered_users INT UNSIGNED NULL,
-    source ENUM('manual','server_inventory','agent') NOT NULL DEFAULT 'manual',
+    source ENUM('manual','server_inventory','agent','domain') NOT NULL DEFAULT 'manual',
     lifecycle_status ENUM('planned','in_stock','assigned','in_repair','retired','disposed') NOT NULL DEFAULT 'in_stock',
     purchase_date DATE NULL,
     warranty_until DATE NULL,
@@ -545,6 +573,8 @@ CREATE TABLE IF NOT EXISTS assets (
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_assets_department (department_id),
     INDEX idx_assets_hostname (hostname),
+    INDEX idx_assets_hostname_key (hostname_key),
+    UNIQUE KEY uq_assets_hostname_key (hostname_key),
     CONSTRAINT fk_assets_owner FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL,
     CONSTRAINT fk_assets_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -606,7 +636,7 @@ CREATE TABLE IF NOT EXISTS asset_peripherals (
     asset_number VARCHAR(100) NULL,
     seal_number VARCHAR(100) NULL,
     details_json JSON NULL,
-    source ENUM('manual','agent','server_inventory') NOT NULL DEFAULT 'manual',
+    source ENUM('manual','agent','server_inventory','domain') NOT NULL DEFAULT 'manual',
     collected_at DATETIME NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_asset_peripheral_slot (asset_id, peripheral_type, slot_no),
@@ -1070,6 +1100,15 @@ CREATE TABLE IF NOT EXISTS food_ticket_print_log (
 
 CREATE TABLE IF NOT EXISTS system_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    -- هستهٔ لاگ‌گیری مرکزی (هم‌تراز با migrations/024، 025، 027، 028)
+    event_id CHAR(36) NULL,
+    request_id CHAR(36) NULL,
+    trace_id CHAR(36) NULL,
+    operation_id CHAR(36) NULL,
+    parent_event_id CHAR(36) NULL,
+    code VARCHAR(40) NULL,
+    category VARCHAR(24) NOT NULL DEFAULT 'system',
+    fingerprint CHAR(64) NULL,
     level VARCHAR(20) NOT NULL DEFAULT 'error',
     context VARCHAR(120) NULL,
     message TEXT NULL,
@@ -1078,7 +1117,12 @@ CREATE TABLE IF NOT EXISTS system_logs (
     request_uri VARCHAR(255) NULL,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_system_logs_created (created_at),
-    INDEX idx_system_logs_level (level)
+    INDEX idx_system_logs_level (level),
+    UNIQUE KEY uq_system_event_id (event_id),
+    KEY idx_system_logs_request (request_id),
+    KEY idx_system_logs_fingerprint_time (fingerprint, created_at),
+    INDEX idx_system_logs_code_category_level_time (code, category, level, created_at),
+    INDEX idx_system_logs_trace (trace_id, operation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS ticket_number_seq (
@@ -1437,4 +1481,95 @@ CREATE TABLE IF NOT EXISTS user_access_group_permissions (
     INDEX idx_user_access_group_permissions_code (permission_code),
     CONSTRAINT fk_user_access_group_permissions_group FOREIGN KEY (group_id) REFERENCES user_access_groups(id) ON DELETE CASCADE,
     CONSTRAINT fk_user_access_group_permissions_assigned_by FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- پیگیری خطاهای لاگ و هشدار سلامت (هم‌تراز با migrations/025 و 026).
+-- این جدول‌ها پیش از این فقط در مهاجرت‌ها بودند و چون install.php پوشهٔ
+-- migrations/ را اجرا نمی‌کند، یک نصب تازه اصلاً آن‌ها را نداشت.
+-- ─────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS log_issues (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    fingerprint CHAR(64) NOT NULL,
+    code VARCHAR(40) NOT NULL,
+    category VARCHAR(24) NOT NULL DEFAULT 'system',
+    context VARCHAR(120) NOT NULL DEFAULT 'system',
+    severity VARCHAR(20) NOT NULL DEFAULT 'error',
+    title VARCHAR(255) NOT NULL,
+    first_seen DATETIME NOT NULL,
+    last_seen DATETIME NOT NULL,
+    occurrences BIGINT UNSIGNED NOT NULL DEFAULT 1,
+    last_event_id CHAR(36) NULL,
+    last_request_id CHAR(36) NULL,
+    status ENUM('open','investigating','resolved') NOT NULL DEFAULT 'open',
+    resolution_note VARCHAR(1000) NULL,
+    assigned_to INT UNSIGNED NULL,
+    last_notified_at DATETIME NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_log_issues_fingerprint (fingerprint),
+    KEY idx_log_issues_status_severity (status, severity),
+    KEY idx_log_issues_last_seen (last_seen),
+    KEY idx_log_issues_code_category (code, category)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS logging_health_alerts (
+    alert_key VARCHAR(80) NOT NULL,
+    last_sent_at DATETIME NULL,
+    last_state VARCHAR(20) NOT NULL DEFAULT 'clear',
+    occurrences BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (alert_key),
+    KEY idx_logging_alert_sent (last_sent_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS log_issue_history (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    fingerprint CHAR(64) NOT NULL,
+    actor_id INT UNSIGNED NULL,
+    request_id CHAR(36) NULL,
+    before_status VARCHAR(20) NULL,
+    after_status VARCHAR(20) NOT NULL,
+    before_assigned_to INT UNSIGNED NULL,
+    after_assigned_to INT UNSIGNED NULL,
+    before_note VARCHAR(1000) NULL,
+    after_note VARCHAR(1000) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_log_issue_history_fingerprint_time (fingerprint, created_at),
+    KEY idx_log_issue_history_actor_time (actor_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS log_issue_events (
+    event_id CHAR(36) NOT NULL PRIMARY KEY,
+    fingerprint CHAR(64) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_log_issue_events_fingerprint_time (fingerprint, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS log_issue_notifications (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    notification_key CHAR(64) NOT NULL,
+    fingerprint CHAR(64) NOT NULL,
+    recipient_id INT UNSIGNED NOT NULL,
+    state ENUM('pending','sending','sent','failed') NOT NULL DEFAULT 'pending',
+    attempts INT UNSIGNED NOT NULL DEFAULT 0,
+    next_attempt_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_error VARCHAR(255) NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    delivered_at DATETIME NULL,
+    UNIQUE KEY uq_log_issue_notification_key (notification_key),
+    KEY idx_log_issue_notification_due (state, next_attempt_at),
+    KEY idx_log_issue_notification_fingerprint (fingerprint)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- رجیستری مهاجرت‌های اجراشده. تا پیش از این فقط system-update.php آن را
+-- در لحظهٔ نیاز می‌ساخت؛ بودنش در اسکیمای پایه، نصب تازه را هم‌شکل می‌کند.
+CREATE TABLE IF NOT EXISTS schema_updates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    version VARCHAR(32) NOT NULL,
+    migration VARCHAR(190) NOT NULL,
+    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_schema_update (version, migration)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
