@@ -53,7 +53,7 @@ FORBIDDEN_ROOTS = {"storage", "uploads", ".git", "node_modules", "vendor", "conf
 
 
 def safe_relative_path(value: str) -> bool:
-    if not value or "\\" in value or value.startswith("/") or re.match(r"^[A-Za-z]:", value):
+    if not value or "\\" in value or "//" in value or value.startswith("/") or re.match(r"^[A-Za-z]:", value):
         return False
     path = PurePosixPath(value)
     if any(part in ("", ".", "..") for part in path.parts):
@@ -85,6 +85,9 @@ def load_base_package() -> tuple[dict, dict[str, bytes], dict[str, bytes]]:
             if info.is_dir():
                 continue
             name = info.filename
+            mode = (info.external_attr >> 16) & 0o170000
+            if mode == 0o120000:
+                raise SystemExit(f"Symlink found in base package: {name}")
             if name == "manifest.json":
                 continue
             if name.startswith("files/"):
@@ -101,6 +104,15 @@ def load_base_package() -> tuple[dict, dict[str, bytes], dict[str, bytes]]:
                 raise SystemExit(f"Unexpected root entry in base update package: {name}")
     if not migrations:
         raise SystemExit("Base package has no migrations; refusing to build a cumulative package.")
+    expected_files = set(manifest.get("files", []))
+    if expected_files and expected_files != set(files):
+        raise SystemExit("Base package files inventory does not match its manifest.")
+    expected_migrations = set(manifest.get("migrations", []))
+    if expected_migrations != set(migrations):
+        raise SystemExit("Base package migration inventory does not match its manifest.")
+    for relative, expected in (manifest.get("sha256") or {}).items():
+        if relative not in files or sha256(files[relative]) != expected:
+            raise SystemExit(f"Base package SHA-256 mismatch: {relative}")
     return manifest, files, migrations
 
 
