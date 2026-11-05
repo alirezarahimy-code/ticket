@@ -131,18 +131,24 @@ function lac_admin_request(): never
         if ($action === 'save_roles') {
             $guardIds = array_map('intval', (array) ($_POST['guard'] ?? []));
             $changed = 0;
-            $select = db()->prepare("SELECT id, role FROM users WHERE auth_source = 'local' AND is_primary_admin = 0 AND role IN ('local_user','guard')");
-            $select->execute();
-            $update = db()->prepare('UPDATE users SET role = ? WHERE id = ?');
-            foreach ($select->fetchAll() as $row) {
-                $newRole = in_array((int) $row['id'], $guardIds, true) ? 'guard' : 'local_user';
-                if ($newRole !== (string) $row['role']) {
-                    $update->execute([$newRole, (int) $row['id']]);
-                    $changed++;
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $select = $pdo->prepare("SELECT id, role FROM users WHERE auth_source = 'local' AND is_primary_admin = 0 AND role IN ('local_user','guard') FOR UPDATE");
+                $select->execute();
+                $update = $pdo->prepare('UPDATE users SET role = ? WHERE id = ?');
+                foreach ($select->fetchAll() as $row) {
+                    $newRole = in_array((int) $row['id'], $guardIds, true) ? 'guard' : 'local_user';
+                    if ($newRole !== (string) $row['role']) {
+                        $update->execute([$newRole, (int) $row['id']]);
+                        $changed++;
+                    }
                 }
-            }
-            if (function_exists('save_audit')) {
-                save_audit((int) ($admin['id'] ?? 0), 'local_guard_roles_saved', null, ['changed' => $changed]);
+                save_audit_required((int) ($admin['id'] ?? 0), 'local_guard_roles_saved', null, ['changed' => $changed]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
             }
             flash('success', 'نقش‌های بازرسی ذخیره شد. تعداد حساب‌های تغییریافته: ' . $changed . '.');
         } elseif ($action === 'reset') {
@@ -150,10 +156,16 @@ function lac_admin_request(): never
             $check = db()->prepare("SELECT id FROM users WHERE id = ? AND auth_source = 'local' AND is_primary_admin = 0 LIMIT 1");
             $check->execute([$targetId]);
             if ($targetId > 0 && $check->fetchColumn() !== false) {
-                db()->prepare('UPDATE users SET password_hash = ?, must_change_password = 1 WHERE id = ?')
-                    ->execute([lac_default_hash(), $targetId]);
-                if (function_exists('save_audit')) {
-                    save_audit((int) ($admin['id'] ?? 0), 'local_password_reset', null, ['user_id' => $targetId]);
+                $pdo = db();
+                $pdo->beginTransaction();
+                try {
+                    $pdo->prepare('UPDATE users SET password_hash = ?, must_change_password = 1 WHERE id = ?')
+                        ->execute([lac_default_hash(), $targetId]);
+                    save_audit_required((int) ($admin['id'] ?? 0), 'local_password_reset', null, ['user_id' => $targetId]);
+                    db_commit('index.php');
+                } catch (Throwable $exception) {
+                    if ($pdo->inTransaction()) db_rollback('index.php');
+                    throw $exception;
                 }
                 flash('success', 'رمز به حالت پیش‌فرض برگشت و در ورود بعدی باید تغییر کند.');
             } else {
