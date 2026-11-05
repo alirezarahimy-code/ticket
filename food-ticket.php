@@ -76,7 +76,7 @@ function food_ticket_is_allowed(array $user): bool
 /** کد ویرایش لازم برای مسیرهای نوشتن هر بخش (نگاشت مسیر ← کد ویرایش). */
 function food_ticket_route_edit_permission(string $route): ?string
 {
-    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear'], true)) {
+    if (in_array($route, ['food-groups', 'absence-save', 'absence-clear', 'food-visit-cancel'], true)) {
         return 'food.groups_edit';
     }
     if ($route === 'food-manual-attendance') {
@@ -91,7 +91,7 @@ function food_ticket_route_edit_permission(string $route): ?string
     if (in_array($route, ['guest-cards', 'guest-cap'], true)) {
         return 'food.guest_edit';
     }
-    if (in_array($route, ['database-file', 'test-connections', 'diag-source_row-delete', 'browse-file', 'browse-folder', 'browse-list'], true)
+    if (in_array($route, ['database-file', 'test-connections', 'diag-source_row-delete', 'browse-file', 'browse-folder', 'browse-list', 'cleanup-source_row'], true)
         || (function_exists('food_ticket_legacy_key') && $route === food_ticket_legacy_key('route_test'))
         || (function_exists('food_ticket_route_is_test_attendance') && food_ticket_route_is_test_attendance($route))) {
         return 'food.db_edit';
