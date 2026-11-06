@@ -10,7 +10,7 @@ on:
       - 'tests/test_ticket_workflow_safety_static.py'
       - 'tests/test_ticket_cancellation_static.py'
       - 'tests/test_ticket_three_views_static.py'
-      - 'tests/test_ticket_lifecycle_guide_static.py'
+      - 'tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py'
       - 'lib/auth-scope.php'
       - 'actions/ticket-actions.php'
       - 'actions/supervisor-actions.php'
