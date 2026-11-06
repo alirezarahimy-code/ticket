@@ -64,6 +64,15 @@ $user = ['id' => 1, 'role' => 'user'];
 $list = $repository->listVisible($user, 1, 50);
 check_request_center($list['total'] === 1, 'list count is constrained by the shared scope predicate');
 check_request_center(count($list['rows']) === 1 && (int) $list['rows'][0]['id'] === 101, 'list does not return another requester ticket');
+$searched = $repository->listVisible($user, 1, 50, ['q' => 'Visible']);
+check_request_center($searched['total'] === 1, 'search returns a matching in-scope request');
+$privateSearch = $repository->listVisible($user, 1, 50, ['q' => 'Private']);
+check_request_center($privateSearch['total'] === 0, 'search cannot reveal another requester ticket');
+$filtered = $repository->listVisible($user, 1, 50, ['status' => 'assigned', 'priority' => 'normal', 'service_group' => 'it']);
+check_request_center($filtered['total'] === 1, 'status, priority and service-group filters compose with the access scope');
+$injection = $repository->listVisible($user, 1, 50, ['q' => "' OR 1=1 --"]);
+check_request_center($injection['total'] === 0, 'search input remains parameterized and cannot broaden visibility');
+
 $visible = $repository->findVisible(101, $user);
 check_request_center(is_array($visible) && $visible['subject'] === 'Visible request', 'visible detail loads joined display data');
 check_request_center($repository->findVisible(202, $user) === null, 'out-of-scope detail is indistinguishable from missing detail');
