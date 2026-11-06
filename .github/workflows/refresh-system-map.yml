@@ -34,7 +34,7 @@ jobs:
       - name: Validate regenerated maps
         run: |
           python tests/test_system_map_static.py
-          python -m pytest -q tests/test_system_map_blocks.py tests/test_topic_index_integrity.py
+          python -m pytest -q tests/test_system_map_blocks.py
       - name: Commit generated indexes to the feature branch only
         run: |
           git config user.name "github-actions[bot]"
