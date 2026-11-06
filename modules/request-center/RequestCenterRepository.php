@@ -69,16 +69,47 @@ final class RequestCenterRepository
     }
 
     /** @return array{total:int,rows:array<int,array<string,mixed>>} */
-    public function listVisible(array $user, int $page = 1, int $perPage = 50): array
+    public function listVisible(array $user, int $page = 1, int $perPage = 50, array $filters = []): array
     {
         $page = max(1, $page);
         $perPage = min(100, max(1, $perPage));
         $offset = ($page - 1) * $perPage;
         [$scopeSql, $scopeParams] = ticket_scope($user, 't');
-        $where = $scopeSql !== '' ? $scopeSql : '';
+        $clauses = [];
+        $params = $scopeParams;
+
+        $status = (string) ($filters['status'] ?? '');
+        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled'], true)) {
+            $clauses[] = 't.status = ?';
+            $params[] = $status;
+        }
+        $priority = (string) ($filters['priority'] ?? '');
+        if (in_array($priority, ['normal', 'urgent', 'critical'], true)) {
+            $clauses[] = 't.priority = ?';
+            $params[] = $priority;
+        }
+        $serviceGroup = (string) ($filters['service_group'] ?? '');
+        if (in_array($serviceGroup, ['it', 'support'], true)) {
+            $clauses[] = 't.service_group = ?';
+            $params[] = $serviceGroup;
+        }
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $search = function_exists('mb_substr') ? mb_substr($search, 0, 100, 'UTF-8') : substr($search, 0, 100);
+            $clauses[] = '(t.subject LIKE ? OR t.ticket_no LIKE ?)';
+            $params[] = '%' . $search . '%';
+            $params[] = '%' . $search . '%';
+        }
+
+        $whereParts = [];
+        if ($scopeSql !== '') {
+            $whereParts[] = preg_replace('/^\\s*WHERE\\s+/i', '', trim($scopeSql));
+        }
+        array_push($whereParts, ...$clauses);
+        $where = $whereParts !== [] ? ' WHERE ' . implode(' AND ', $whereParts) : '';
 
         $count = $this->pdo->prepare('SELECT COUNT(*) FROM tickets t ' . $where);
-        $count->execute($scopeParams);
+        $count->execute($params);
         $total = (int) $count->fetchColumn();
 
         $sql = 'SELECT t.id, t.ticket_no, t.subject, t.status, t.priority, t.service_group,
@@ -93,7 +124,7 @@ final class RequestCenterRepository
                 ORDER BY t.updated_at DESC, t.id DESC
                 LIMIT ' . $perPage . ' OFFSET ' . $offset;
         $query = $this->pdo->prepare($sql);
-        $query->execute($scopeParams);
+        $query->execute($params);
 
         return ['total' => $total, 'rows' => $query->fetchAll(PDO::FETCH_ASSOC)];
     }
