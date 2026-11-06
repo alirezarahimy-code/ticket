@@ -240,9 +240,18 @@ if (!defined('APP_ROOT')) {
             if ($directCancellation) {
                 [$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes] = ticket_sla_transition($ticket, 'cancelled', (string) $ticket['priority']);
                 $cancelOla = ticket_ola_transition($ticket, 'cancelled', (string) $ticket['priority']);
-                $cancelQuery = db()->prepare('UPDATE tickets SET status = "cancelled", due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, updated_at = NOW() WHERE id = ? AND requester_id = ? AND status = ? AND cancel_requested_at IS NULL AND assigned_to IS NULL AND first_response_at IS NULL AND resolved_at IS NULL');
-                $cancelQuery->execute([$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes, $cancelOla['policy_id'], $cancelOla['response_due_at'], $cancelOla['due_at'], $cancelOla['escalation_1_at'], $cancelOla['escalation_2_at'], $ticketId, (int) $cancelUser['id'], $oldStatus]);
-                if ($cancelQuery->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $cancelApplied = $workflow->transition($ticketId, $oldStatus, 'cancelled', [
+                    'due_at' => $cancelDueAt,
+                    'sla_paused_at' => $cancelPauseAt,
+                    'sla_pause_minutes' => $cancelPauseMinutes,
+                    'ola_policy_id' => $cancelOla['policy_id'],
+                    'ola_response_due_at' => $cancelOla['response_due_at'],
+                    'ola_due_at' => $cancelOla['due_at'],
+                    'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
+                ], 'requester_cancel', ['requester_id' => (int) $cancelUser['id']]);
+                if (!$cancelApplied) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $cancelUser['id'], 'درخواست پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason]);
@@ -300,9 +309,22 @@ if (!defined('APP_ROOT')) {
             if ($decision === 'approve') {
                 [$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes] = ticket_sla_transition($ticket, 'cancelled', (string) $ticket['priority']);
                 $cancelOla = ticket_ola_transition($ticket, 'cancelled', (string) $ticket['priority']);
-                $approveQuery = db()->prepare('UPDATE tickets SET status = "cancelled", resolved_at = NULL, cancel_requested_at = NULL, cancel_requested_by = NULL, cancel_request_reason = NULL, due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, updated_at = NOW() WHERE id = ? AND status = ? AND cancel_requested_at = ?');
-                $approveQuery->execute([$cancelDueAt, $cancelPauseAt, $cancelPauseMinutes, $cancelOla['policy_id'], $cancelOla['response_due_at'], $cancelOla['due_at'], $cancelOla['escalation_1_at'], $cancelOla['escalation_2_at'], $ticketId, $oldStatus, $requestAt]);
-                if ($approveQuery->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $approved = $workflow->transition($ticketId, $oldStatus, 'cancelled', [
+                    'resolved_at' => null,
+                    'cancel_requested_at' => null,
+                    'cancel_requested_by' => null,
+                    'cancel_request_reason' => null,
+                    'due_at' => $cancelDueAt,
+                    'sla_paused_at' => $cancelPauseAt,
+                    'sla_pause_minutes' => $cancelPauseMinutes,
+                    'ola_policy_id' => $cancelOla['policy_id'],
+                    'ola_response_due_at' => $cancelOla['response_due_at'],
+                    'ola_due_at' => $cancelOla['due_at'],
+                    'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
+                ], 'cancellation_approved', ['cancel_requested_at' => $requestAt]);
+                if (!$approved) {
                     throw new RuntimeException('درخواست لغو یا وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
                 $decisionBody = 'درخواست لغو درخواست تأیید شد: ' . $requestReason . ($note !== '' ? "\nیادداشت مسئول: " . $note : '');
@@ -357,9 +379,12 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('این درخواست قبلاً به کارشناس ارجاع شده است.');
             }
             db()->beginTransaction();
-            $claimQuery = db()->prepare('UPDATE tickets SET assigned_to = ?, assigned_at = NOW(), status = "assigned", updated_at = NOW() WHERE id = ? AND assigned_to IS NULL AND status IN ("new", "manager_review") AND cancel_requested_at IS NULL');
-            $claimQuery->execute([(int) $claimUser['id'], $ticketId]);
-            if ($claimQuery->rowCount() < 1) {
+            $workflow = new RequestCenterWorkflowService(db());
+            $claimed = $workflow->transition($ticketId, (string) $ticket['status'], 'assigned', [
+                'assigned_to' => (int) $claimUser['id'],
+                'assigned_at' => RequestCenterSqlExpression::now(),
+            ], 'standard', ['assigned_to' => null, 'cancel_requested_at' => null]);
+            if (!$claimed) {
                 throw new RuntimeException('این درخواست هم‌زمان توسط شخص دیگری برداشته شد.');
             }
             save_audit_required((int) $claimUser['id'], 'ticket_claimed', $ticketId);
@@ -391,9 +416,19 @@ if (!defined('APP_ROOT')) {
             $reopenDue = business_due_at(priority_sla_minutes((string) $ticket['priority']))->format('Y-m-d H:i:s');
             $reopenOla = ola_deadlines((int) ($ticket['department_id'] ?? 0), (string) $ticket['priority'], (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('Y-m-d H:i:s'));
             db()->beginTransaction();
-            $reopenQuery = db()->prepare('UPDATE tickets SET status = ?, resolved_at = NULL, due_at = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, sla_paused_at = NULL, sla_pause_minutes = 0, updated_at = NOW() WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL');
-            $reopenQuery->execute([$reopenStatus, $reopenDue, $reopenOla['policy_id'], $reopenOla['response_due_at'], $reopenOla['due_at'], $reopenOla['escalation_1_at'], $reopenOla['escalation_2_at'], $ticketId]);
-            if ($reopenQuery->rowCount() < 1) {
+            $workflow = new RequestCenterWorkflowService(db());
+            $reopened = $workflow->transition($ticketId, 'resolved', $reopenStatus, [
+                'resolved_at' => null,
+                'due_at' => $reopenDue,
+                'ola_policy_id' => $reopenOla['policy_id'],
+                'ola_response_due_at' => $reopenOla['response_due_at'],
+                'ola_due_at' => $reopenOla['due_at'],
+                'ola_escalation_1_at' => $reopenOla['escalation_1_at'],
+                'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
+                'sla_paused_at' => null,
+                'sla_pause_minutes' => 0,
+            ], 'requester_reopen', ['cancel_requested_at' => null]);
+            if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
             db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $user['id'], 'مشکل حل نشده است (بازگشایی توسط کاربر): ' . $reason]);
