@@ -16410,16 +16410,16 @@
             "id": "CRON-012",
             "path": "cron\/ticket_auto_close.php",
             "area": "CRON",
-            "lines": 78,
-            "file_fingerprint": "bf85c63ec214",
+            "lines": 79,
+            "file_fingerprint": "994f8960f6d8",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-78",
+                    "anchor": "بلوک رویه‌ای 1-79",
                     "line_start": 1,
-                    "line_end": 78,
-                    "lines": 78,
-                    "fingerprint": "bf85c63ec214",
+                    "line_end": 79,
+                    "lines": 79,
+                    "fingerprint": "994f8960f6d8",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -31996,16 +31996,16 @@
             "id": "PAGE-034",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 3744,
-            "file_fingerprint": "ddafb84d0fb0",
+            "lines": 3730,
+            "file_fingerprint": "42294bcf7fd1",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-30",
+                    "anchor": "بلوک رویه‌ای 1-31",
                     "line_start": 1,
-                    "line_end": 30,
-                    "lines": 30,
-                    "fingerprint": "58d1b81fd3fe",
+                    "line_end": 31,
+                    "lines": 31,
+                    "fingerprint": "1e59e94e673a",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -32017,8 +32017,8 @@
                 {
                     "kind": "region",
                     "anchor": "تبدیل رکوردهای قدیمی غذا فقط هنگام بارگذاری فهرست کارکنان پن",
-                    "line_start": 31,
-                    "line_end": 31,
+                    "line_start": 32,
+                    "line_end": 32,
                     "lines": 1,
                     "fingerprint": "6f39f797bbd2",
                     "risk": {
@@ -32030,8 +32030,8 @@
                 {
                     "kind": "region",
                     "anchor": "نه در هر درخواست و نه قبل از نمایش فرم ورود.",
-                    "line_start": 32,
-                    "line_end": 37,
+                    "line_start": 33,
+                    "line_end": 38,
                     "lines": 6,
                     "fingerprint": "be6c08bda047",
                     "risk": {
@@ -32045,8 +32045,8 @@
                 {
                     "kind": "function",
                     "anchor": "post_value",
-                    "line_start": 38,
-                    "line_end": 41,
+                    "line_start": 39,
+                    "line_end": 42,
                     "lines": 4,
                     "fingerprint": "839a47923e04",
                     "risk": {
@@ -32060,8 +32060,8 @@
                 {
                     "kind": "function",
                     "anchor": "csv_cell",
-                    "line_start": 43,
-                    "line_end": 47,
+                    "line_start": 44,
+                    "line_end": 48,
                     "lines": 5,
                     "fingerprint": "f94b47eaaec8",
                     "risk": {
@@ -32073,8 +32073,8 @@
                 {
                     "kind": "function",
                     "anchor": "excel_cell",
-                    "line_start": 49,
-                    "line_end": 52,
+                    "line_start": 50,
+                    "line_end": 53,
                     "lines": 4,
                     "fingerprint": "3516b67eb706",
                     "risk": {
@@ -32086,8 +32086,8 @@
                 {
                     "kind": "function",
                     "anchor": "excel_download",
-                    "line_start": 54,
-                    "line_end": 115,
+                    "line_start": 55,
+                    "line_end": 116,
                     "lines": 62,
                     "fingerprint": "fee434783b2b",
                     "risk": {
@@ -32101,8 +32101,8 @@
                 {
                     "kind": "function",
                     "anchor": "valid_choice",
-                    "line_start": 117,
-                    "line_end": 120,
+                    "line_start": 118,
+                    "line_end": 121,
                     "lines": 4,
                     "fingerprint": "ec1c48dd070f",
                     "risk": {
@@ -32114,8 +32114,8 @@
                 {
                     "kind": "function",
                     "anchor": "log_sort_order",
-                    "line_start": 122,
-                    "line_end": 130,
+                    "line_start": 123,
+                    "line_end": 131,
                     "lines": 9,
                     "fingerprint": "bcc68c998050",
                     "risk": {
@@ -32127,8 +32127,8 @@
                 {
                     "kind": "function",
                     "anchor": "log_sort_header_row",
-                    "line_start": 132,
-                    "line_end": 151,
+                    "line_start": 133,
+                    "line_end": 152,
                     "lines": 20,
                     "fingerprint": "c02e21315045",
                     "risk": {
@@ -32140,8 +32140,8 @@
                 {
                     "kind": "function",
                     "anchor": "log_bounded_date_range",
-                    "line_start": 153,
-                    "line_end": 172,
+                    "line_start": 154,
+                    "line_end": 173,
                     "lines": 20,
                     "fingerprint": "befe1c18ce56",
                     "risk": {
@@ -32153,8 +32153,8 @@
                 {
                     "kind": "function",
                     "anchor": "activity_log_filters",
-                    "line_start": 174,
-                    "line_end": 239,
+                    "line_start": 175,
+                    "line_end": 240,
                     "lines": 66,
                     "fingerprint": "2b944d4837bc",
                     "risk": {
@@ -32168,8 +32168,8 @@
                 {
                     "kind": "function",
                     "anchor": "activity_log_meta_lines",
-                    "line_start": 241,
-                    "line_end": 261,
+                    "line_start": 242,
+                    "line_end": 262,
                     "lines": 21,
                     "fingerprint": "6df5a6289eb4",
                     "risk": {
@@ -32181,8 +32181,8 @@
                 {
                     "kind": "function",
                     "anchor": "imported_calendar_date",
-                    "line_start": 263,
-                    "line_end": 277,
+                    "line_start": 264,
+                    "line_end": 278,
                     "lines": 15,
                     "fingerprint": "093a0ec4575c",
                     "risk": {
@@ -32194,8 +32194,8 @@
                 {
                     "kind": "function",
                     "anchor": "calendar_unescape",
-                    "line_start": 279,
-                    "line_end": 282,
+                    "line_start": 280,
+                    "line_end": 283,
                     "lines": 4,
                     "fingerprint": "28bce79c207d",
                     "risk": {
@@ -32207,8 +32207,8 @@
                 {
                     "kind": "function",
                     "anchor": "parse_calendar_import",
-                    "line_start": 284,
-                    "line_end": 355,
+                    "line_start": 285,
+                    "line_end": 356,
                     "lines": 72,
                     "fingerprint": "75c03bd1abf6",
                     "risk": {
@@ -32220,8 +32220,8 @@
                 {
                     "kind": "function",
                     "anchor": "store_attachment",
-                    "line_start": 357,
-                    "line_end": 410,
+                    "line_start": 358,
+                    "line_end": 411,
                     "lines": 54,
                     "fingerprint": "aefad6e63bff",
                     "risk": {
@@ -32237,8 +32237,8 @@
                 {
                     "kind": "function",
                     "anchor": "store_profile_photo",
-                    "line_start": 412,
-                    "line_end": 435,
+                    "line_start": 413,
+                    "line_end": 436,
                     "lines": 24,
                     "fingerprint": "fccc34dfbe14",
                     "risk": {
@@ -32252,8 +32252,8 @@
                 {
                     "kind": "function",
                     "anchor": "valid_iranian_national_code",
-                    "line_start": 437,
-                    "line_end": 449,
+                    "line_start": 438,
+                    "line_end": 450,
                     "lines": 13,
                     "fingerprint": "711d16c1e7ce",
                     "risk": {
@@ -32265,8 +32265,8 @@
                 {
                     "kind": "function",
                     "anchor": "fetch_ticket",
-                    "line_start": 451,
-                    "line_end": 456,
+                    "line_start": 452,
+                    "line_end": 457,
                     "lines": 6,
                     "fingerprint": "0666886407a9",
                     "risk": {
@@ -32278,8 +32278,8 @@
                 {
                     "kind": "function",
                     "anchor": "can_view_ticket",
-                    "line_start": 458,
-                    "line_end": 461,
+                    "line_start": 459,
+                    "line_end": 462,
                     "lines": 4,
                     "fingerprint": "97f02a9d6662",
                     "risk": {
@@ -32291,8 +32291,8 @@
                 {
                     "kind": "function",
                     "anchor": "ticket_org_manager_rank_sql",
-                    "line_start": 463,
-                    "line_end": 482,
+                    "line_start": 464,
+                    "line_end": 483,
                     "lines": 20,
                     "fingerprint": "c6b3b2a91df7",
                     "risk": {
@@ -32304,8 +32304,8 @@
                 {
                     "kind": "function",
                     "anchor": "choose_handling_agent",
-                    "line_start": 484,
-                    "line_end": 526,
+                    "line_start": 485,
+                    "line_end": 527,
                     "lines": 43,
                     "fingerprint": "15d895992750",
                     "risk": {
@@ -32319,10 +32319,10 @@
                 {
                     "kind": "function",
                     "anchor": "ticket_allowed_transitions",
-                    "line_start": 528,
-                    "line_end": 550,
-                    "lines": 23,
-                    "fingerprint": "3da3ba5f08c0",
+                    "line_start": 529,
+                    "line_end": 537,
+                    "lines": 9,
+                    "fingerprint": "65ec4fe6a1e2",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32332,8 +32332,8 @@
                 {
                     "kind": "function",
                     "anchor": "ticket_requester_cancelable_statuses",
-                    "line_start": 552,
-                    "line_end": 556,
+                    "line_start": 538,
+                    "line_end": 542,
                     "lines": 5,
                     "fingerprint": "a2aefafb7d6a",
                     "risk": {
@@ -32345,8 +32345,8 @@
                 {
                     "kind": "function",
                     "anchor": "ticket_requester_can_cancel_directly",
-                    "line_start": 558,
-                    "line_end": 564,
+                    "line_start": 544,
+                    "line_end": 550,
                     "lines": 7,
                     "fingerprint": "b6f46425e521",
                     "risk": {
@@ -32358,8 +32358,8 @@
                 {
                     "kind": "function",
                     "anchor": "ticket_requester_can_cancel",
-                    "line_start": 566,
-                    "line_end": 572,
+                    "line_start": 552,
+                    "line_end": 558,
                     "lines": 7,
                     "fingerprint": "89c240333435",
                     "risk": {
@@ -32371,8 +32371,8 @@
                 {
                     "kind": "function",
                     "anchor": "notify_ticket_resolved",
-                    "line_start": 574,
-                    "line_end": 583,
+                    "line_start": 560,
+                    "line_end": 569,
                     "lines": 10,
                     "fingerprint": "cb4564b667e5",
                     "risk": {
@@ -32384,8 +32384,8 @@
                 {
                     "kind": "function",
                     "anchor": "report_query_filters",
-                    "line_start": 584,
-                    "line_end": 638,
+                    "line_start": 570,
+                    "line_end": 624,
                     "lines": 55,
                     "fingerprint": "84439a30370d",
                     "risk": {
@@ -32399,8 +32399,8 @@
                 {
                     "kind": "function",
                     "anchor": "render_header",
-                    "line_start": 640,
-                    "line_end": 789,
+                    "line_start": 626,
+                    "line_end": 775,
                     "lines": 150,
                     "fingerprint": "112647300de0",
                     "risk": {
@@ -32416,8 +32416,8 @@
                 {
                     "kind": "function",
                     "anchor": "list_sort_page_off",
-                    "line_start": 791,
-                    "line_end": 798,
+                    "line_start": 777,
+                    "line_end": 784,
                     "lines": 8,
                     "fingerprint": "58c426e3031d",
                     "risk": {
@@ -32431,8 +32431,8 @@
                 {
                     "kind": "function",
                     "anchor": "inspection_food_reminder_markup",
-                    "line_start": 800,
-                    "line_end": 821,
+                    "line_start": 786,
+                    "line_end": 807,
                     "lines": 22,
                     "fingerprint": "c1606ff28c22",
                     "risk": {
@@ -32444,8 +32444,8 @@
                 {
                     "kind": "function",
                     "anchor": "render_footer",
-                    "line_start": 823,
-                    "line_end": 854,
+                    "line_start": 809,
+                    "line_end": 840,
                     "lines": 32,
                     "fingerprint": "c2afef9b43e2",
                     "risk": {
@@ -32456,9 +32456,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 855-860",
-                    "line_start": 855,
-                    "line_end": 860,
+                    "anchor": "بلوک رویه‌ای 841-846",
+                    "line_start": 841,
+                    "line_end": 846,
                     "lines": 6,
                     "fingerprint": "3840c6886ca8",
                     "risk": {
@@ -32472,8 +32472,8 @@
                 {
                     "kind": "region",
                     "anchor": "ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)",
-                    "line_start": 861,
-                    "line_end": 880,
+                    "line_start": 847,
+                    "line_end": 866,
                     "lines": 20,
                     "fingerprint": "b66b35a0e3c5",
                     "risk": {
@@ -32487,8 +32487,8 @@
                 {
                     "kind": "region",
                     "anchor": "ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن",
-                    "line_start": 881,
-                    "line_end": 882,
+                    "line_start": 867,
+                    "line_end": 868,
                     "lines": 2,
                     "fingerprint": "38510fecda69",
                     "risk": {
@@ -32502,8 +32502,8 @@
                 {
                     "kind": "region",
                     "anchor": "۱.۵۰: کاربر محلی\/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌ف",
-                    "line_start": 883,
-                    "line_end": 890,
+                    "line_start": 869,
+                    "line_end": 876,
                     "lines": 8,
                     "fingerprint": "717ff456bd9c",
                     "risk": {
@@ -32517,8 +32517,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: must_change_password|change-password",
-                    "line_start": 891,
-                    "line_end": 901,
+                    "line_start": 877,
+                    "line_end": 887,
                     "lines": 11,
                     "fingerprint": "e722ae2b9213",
                     "risk": {
@@ -32532,8 +32532,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: REQUEST_METHOD|POST|organization",
-                    "line_start": 902,
-                    "line_end": 915,
+                    "line_start": 888,
+                    "line_end": 901,
                     "lines": 14,
                     "fingerprint": "f2106fcdd212",
                     "risk": {
@@ -32545,8 +32545,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket|food_api",
-                    "line_start": 916,
-                    "line_end": 929,
+                    "line_start": 902,
+                    "line_end": 915,
                     "lines": 14,
                     "fingerprint": "cca8025393d0",
                     "risk": {
@@ -32560,8 +32560,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order|food_api",
-                    "line_start": 930,
-                    "line_end": 941,
+                    "line_start": 916,
+                    "line_end": 927,
                     "lines": 12,
                     "fingerprint": "274532b07a3d",
                     "risk": {
@@ -32575,8 +32575,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control|traffic_api",
-                    "line_start": 942,
-                    "line_end": 1087,
+                    "line_start": 928,
+                    "line_end": 1073,
                     "lines": 146,
                     "fingerprint": "0844eeb96485",
                     "risk": {
@@ -32593,8 +32593,8 @@
                 {
                     "kind": "region",
                     "anchor": "خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های هم",
-                    "line_start": 1088,
-                    "line_end": 1202,
+                    "line_start": 1074,
+                    "line_end": 1188,
                     "lines": 115,
                     "fingerprint": "627d7bec6dfe",
                     "risk": {
@@ -32609,8 +32609,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-personnel-link",
-                    "line_start": 1203,
-                    "line_end": 1208,
+                    "line_start": 1189,
+                    "line_end": 1194,
                     "lines": 6,
                     "fingerprint": "19cd1122ddcd",
                     "risk": {
@@ -32622,8 +32622,8 @@
                 {
                     "kind": "region",
                     "anchor": "ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با ب",
-                    "line_start": 1209,
-                    "line_end": 1212,
+                    "line_start": 1195,
+                    "line_end": 1198,
                     "lines": 4,
                     "fingerprint": "c8585701f829",
                     "risk": {
@@ -32637,8 +32637,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logging_begin_operation",
-                    "line_start": 1213,
-                    "line_end": 1323,
+                    "line_start": 1199,
+                    "line_end": 1309,
                     "lines": 111,
                     "fingerprint": "937c1790c45d",
                     "risk": {
@@ -32653,8 +32653,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings|create_access_group|save_access_group",
-                    "line_start": 1324,
-                    "line_end": 1334,
+                    "line_start": 1310,
+                    "line_end": 1320,
                     "lines": 11,
                     "fingerprint": "4718e06c3f86",
                     "risk": {
@@ -32668,8 +32668,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-api",
-                    "line_start": 1335,
-                    "line_end": 1387,
+                    "line_start": 1321,
+                    "line_end": 1373,
                     "lines": 53,
                     "fingerprint": "318a5024ad97",
                     "risk": {
@@ -32681,8 +32681,8 @@
                 {
                     "kind": "region",
                     "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
-                    "line_start": 1388,
-                    "line_end": 1388,
+                    "line_start": 1374,
+                    "line_end": 1374,
                     "lines": 1,
                     "fingerprint": "dc537f6d8cd4",
                     "risk": {
@@ -32694,8 +32694,8 @@
                 {
                     "kind": "region",
                     "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
-                    "line_start": 1389,
-                    "line_end": 1389,
+                    "line_start": 1375,
+                    "line_end": 1375,
                     "lines": 1,
                     "fingerprint": "ded263ea996a",
                     "risk": {
@@ -32707,8 +32707,8 @@
                 {
                     "kind": "region",
                     "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
-                    "line_start": 1390,
-                    "line_end": 1390,
+                    "line_start": 1376,
+                    "line_end": 1376,
                     "lines": 1,
                     "fingerprint": "127c6305eea4",
                     "risk": {
@@ -32720,8 +32720,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
-                    "line_start": 1391,
-                    "line_end": 1398,
+                    "line_start": 1377,
+                    "line_end": 1384,
                     "lines": 8,
                     "fingerprint": "9a2638f68caf",
                     "risk": {
@@ -32733,8 +32733,8 @@
                 {
                     "kind": "region",
                     "anchor": "شرط مسیریابی",
-                    "line_start": 1399,
-                    "line_end": 1406,
+                    "line_start": 1385,
+                    "line_end": 1392,
                     "lines": 8,
                     "fingerprint": "f0442e04b38a",
                     "risk": {
@@ -32746,8 +32746,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings|settings.general|settings.domain",
-                    "line_start": 1407,
-                    "line_end": 1415,
+                    "line_start": 1393,
+                    "line_end": 1401,
                     "lines": 9,
                     "fingerprint": "6104a36b9f4a",
                     "risk": {
@@ -32759,8 +32759,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: change-password",
-                    "line_start": 1416,
-                    "line_end": 1418,
+                    "line_start": 1402,
+                    "line_end": 1404,
                     "lines": 3,
                     "fingerprint": "124bfe57a669",
                     "risk": {
@@ -32772,8 +32772,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: local-accounts",
-                    "line_start": 1419,
-                    "line_end": 1421,
+                    "line_start": 1405,
+                    "line_end": 1407,
                     "lines": 3,
                     "fingerprint": "b29f0eab1a78",
                     "risk": {
@@ -32785,8 +32785,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: profile",
-                    "line_start": 1422,
-                    "line_end": 1439,
+                    "line_start": 1408,
+                    "line_end": 1425,
                     "lines": 18,
                     "fingerprint": "17fcefba2ed2",
                     "risk": {
@@ -32798,8 +32798,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: governance",
-                    "line_start": 1440,
-                    "line_end": 1443,
+                    "line_start": 1426,
+                    "line_end": 1429,
                     "lines": 4,
                     "fingerprint": "f648535c873c",
                     "risk": {
@@ -32811,8 +32811,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket",
-                    "line_start": 1444,
-                    "line_end": 1448,
+                    "line_start": 1430,
+                    "line_end": 1434,
                     "lines": 5,
                     "fingerprint": "ae9f68a9cd0b",
                     "risk": {
@@ -32824,8 +32824,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order|foodorder.self",
-                    "line_start": 1449,
-                    "line_end": 1456,
+                    "line_start": 1435,
+                    "line_end": 1442,
                     "lines": 8,
                     "fingerprint": "04d0caca12c5",
                     "risk": {
@@ -32837,8 +32837,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order",
-                    "line_start": 1457,
-                    "line_end": 1460,
+                    "line_start": 1443,
+                    "line_end": 1446,
                     "lines": 4,
                     "fingerprint": "bc897f4ac2b2",
                     "risk": {
@@ -32850,8 +32850,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cd-dvd",
-                    "line_start": 1461,
-                    "line_end": 1464,
+                    "line_start": 1447,
+                    "line_end": 1450,
                     "lines": 4,
                     "fingerprint": "787561b508a4",
                     "risk": {
@@ -32863,8 +32863,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cd-dvd-history",
-                    "line_start": 1465,
-                    "line_end": 1468,
+                    "line_start": 1451,
+                    "line_end": 1454,
                     "lines": 4,
                     "fingerprint": "382f96759a4b",
                     "risk": {
@@ -32876,8 +32876,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control",
-                    "line_start": 1469,
-                    "line_end": 1471,
+                    "line_start": 1455,
+                    "line_end": 1457,
                     "lines": 3,
                     "fingerprint": "4d764e6a405e",
                     "risk": {
@@ -32889,8 +32889,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control-print",
-                    "line_start": 1472,
-                    "line_end": 1475,
+                    "line_start": 1458,
+                    "line_end": 1461,
                     "lines": 4,
                     "fingerprint": "87cc679fbb4c",
                     "risk": {
@@ -32904,8 +32904,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: services",
-                    "line_start": 1476,
-                    "line_end": 1561,
+                    "line_start": 1462,
+                    "line_end": 1547,
                     "lines": 86,
                     "fingerprint": "ae4d1f91e883",
                     "risk": {
@@ -32920,8 +32920,8 @@
                 {
                     "kind": "region",
                     "anchor": "سربرگ‌ها (تب‌ها)",
-                    "line_start": 1562,
-                    "line_end": 1570,
+                    "line_start": 1548,
+                    "line_end": 1556,
                     "lines": 9,
                     "fingerprint": "6bc7b8fb4e4f",
                     "risk": {
@@ -32933,8 +32933,8 @@
                 {
                     "kind": "region",
                     "anchor": "تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)",
-                    "line_start": 1571,
-                    "line_end": 1580,
+                    "line_start": 1557,
+                    "line_end": 1566,
                     "lines": 10,
                     "fingerprint": "ee159520f9f2",
                     "risk": {
@@ -32946,8 +32946,8 @@
                 {
                     "kind": "region",
                     "anchor": "تب ۲: لیست خدمات + فیلتر",
-                    "line_start": 1581,
-                    "line_end": 1604,
+                    "line_start": 1567,
+                    "line_end": 1590,
                     "lines": 24,
                     "fingerprint": "80ad3ce2d717",
                     "risk": {
@@ -32962,8 +32962,8 @@
                 {
                     "kind": "region",
                     "anchor": "تب ۳: دسته‌بندی‌ها",
-                    "line_start": 1605,
-                    "line_end": 1618,
+                    "line_start": 1591,
+                    "line_end": 1604,
                     "lines": 14,
                     "fingerprint": "de14feab019b",
                     "risk": {
@@ -32978,8 +32978,8 @@
                 {
                     "kind": "region",
                     "anchor": "پنجره‌های ویرایش\/فیلد (rendered outside the tab panels, fixed overlay)",
-                    "line_start": 1619,
-                    "line_end": 1646,
+                    "line_start": 1605,
+                    "line_end": 1632,
                     "lines": 28,
                     "fingerprint": "846f21e22ee9",
                     "risk": {
@@ -32993,8 +32993,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: help",
-                    "line_start": 1647,
-                    "line_end": 1654,
+                    "line_start": 1633,
+                    "line_end": 1640,
                     "lines": 8,
                     "fingerprint": "f98b5e6182d3",
                     "risk": {
@@ -33006,8 +33006,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: knowledge",
-                    "line_start": 1655,
-                    "line_end": 1691,
+                    "line_start": 1641,
+                    "line_end": 1677,
                     "lines": 37,
                     "fingerprint": "a678358f57c8",
                     "risk": {
@@ -33021,8 +33021,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications|notif.view",
-                    "line_start": 1692,
-                    "line_end": 1699,
+                    "line_start": 1678,
+                    "line_end": 1685,
                     "lines": 8,
                     "fingerprint": "dc86bc55d5b1",
                     "risk": {
@@ -33034,8 +33034,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications",
-                    "line_start": 1700,
-                    "line_end": 1717,
+                    "line_start": 1686,
+                    "line_end": 1703,
                     "lines": 18,
                     "fingerprint": "3f21cd6d56c6",
                     "risk": {
@@ -33049,8 +33049,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: audit",
-                    "line_start": 1718,
-                    "line_end": 1726,
+                    "line_start": 1704,
+                    "line_end": 1712,
                     "lines": 9,
                     "fingerprint": "87a567f11e96",
                     "risk": {
@@ -33062,8 +33062,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logging-dashboard",
-                    "line_start": 1727,
-                    "line_end": 1730,
+                    "line_start": 1713,
+                    "line_end": 1716,
                     "lines": 4,
                     "fingerprint": "54e47224bef5",
                     "risk": {
@@ -33075,8 +33075,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: system-health",
-                    "line_start": 1731,
-                    "line_end": 1734,
+                    "line_start": 1717,
+                    "line_end": 1720,
                     "lines": 4,
                     "fingerprint": "be1344b02adc",
                     "risk": {
@@ -33088,8 +33088,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 1735,
-                    "line_end": 1740,
+                    "line_start": 1721,
+                    "line_end": 1726,
                     "lines": 6,
                     "fingerprint": "c65f22cdca8f",
                     "risk": {
@@ -33101,8 +33101,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: activity-log",
-                    "line_start": 1741,
-                    "line_end": 1883,
+                    "line_start": 1727,
+                    "line_end": 1869,
                     "lines": 143,
                     "fingerprint": "84d1643d662a",
                     "risk": {
@@ -33118,8 +33118,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: backup",
-                    "line_start": 1884,
-                    "line_end": 1922,
+                    "line_start": 1870,
+                    "line_end": 1908,
                     "lines": 39,
                     "fingerprint": "fe4ec71b0d1e",
                     "risk": {
@@ -33134,8 +33134,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: search|search.global",
-                    "line_start": 1923,
-                    "line_end": 1930,
+                    "line_start": 1909,
+                    "line_end": 1916,
                     "lines": 8,
                     "fingerprint": "08b9308aa266",
                     "risk": {
@@ -33147,8 +33147,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: search",
-                    "line_start": 1931,
-                    "line_end": 2021,
+                    "line_start": 1917,
+                    "line_end": 2007,
                     "lines": 91,
                     "fingerprint": "a630c183e8ff",
                     "risk": {
@@ -33163,8 +33163,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: queue",
-                    "line_start": 2022,
-                    "line_end": 2068,
+                    "line_start": 2008,
+                    "line_end": 2054,
                     "lines": 47,
                     "fingerprint": "c3620fcd5906",
                     "risk": {
@@ -33179,8 +33179,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-admin",
-                    "line_start": 2069,
-                    "line_end": 2171,
+                    "line_start": 2055,
+                    "line_end": 2157,
                     "lines": 103,
                     "fingerprint": "bada5e1b1cb6",
                     "risk": {
@@ -33195,8 +33195,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: holidays",
-                    "line_start": 2172,
-                    "line_end": 2182,
+                    "line_start": 2158,
+                    "line_end": 2168,
                     "lines": 11,
                     "fingerprint": "a1479fd7dd66",
                     "risk": {
@@ -33208,8 +33208,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: new-ticket|ticket.create",
-                    "line_start": 2183,
-                    "line_end": 2190,
+                    "line_start": 2169,
+                    "line_end": 2176,
                     "lines": 8,
                     "fingerprint": "79353460e294",
                     "risk": {
@@ -33221,8 +33221,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: new-ticket",
-                    "line_start": 2191,
-                    "line_end": 2326,
+                    "line_start": 2177,
+                    "line_end": 2312,
                     "lines": 136,
                     "fingerprint": "eae79b38d9c9",
                     "risk": {
@@ -33238,8 +33238,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: ticket",
-                    "line_start": 2327,
-                    "line_end": 2562,
+                    "line_start": 2313,
+                    "line_end": 2548,
                     "lines": 236,
                     "fingerprint": "866fb1abb851",
                     "risk": {
@@ -33255,8 +33255,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: analytics",
-                    "line_start": 2563,
-                    "line_end": 2606,
+                    "line_start": 2549,
+                    "line_end": 2592,
                     "lines": 44,
                     "fingerprint": "5e9e7788ad46",
                     "risk": {
@@ -33270,8 +33270,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: reports",
-                    "line_start": 2607,
-                    "line_end": 2668,
+                    "line_start": 2593,
+                    "line_end": 2654,
                     "lines": 62,
                     "fingerprint": "1c94f6eec606",
                     "risk": {
@@ -33286,8 +33286,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: supervisor",
-                    "line_start": 2669,
-                    "line_end": 2713,
+                    "line_start": 2655,
+                    "line_end": 2699,
                     "lines": 45,
                     "fingerprint": "1b46fe01c59d",
                     "risk": {
@@ -33302,8 +33302,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory",
-                    "line_start": 2714,
-                    "line_end": 2814,
+                    "line_start": 2700,
+                    "line_end": 2800,
                     "lines": 101,
                     "fingerprint": "f107c7c13c1c",
                     "risk": {
@@ -33318,8 +33318,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory-diagnostics",
-                    "line_start": 2815,
-                    "line_end": 2846,
+                    "line_start": 2801,
+                    "line_end": 2832,
                     "lines": 32,
                     "fingerprint": "31f6b97d664f",
                     "risk": {
@@ -33333,8 +33333,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset-history",
-                    "line_start": 2847,
-                    "line_end": 2864,
+                    "line_start": 2833,
+                    "line_end": 2850,
                     "lines": 18,
                     "fingerprint": "f05d04d150f3",
                     "risk": {
@@ -33349,8 +33349,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: domain-scan",
-                    "line_start": 2865,
-                    "line_end": 2942,
+                    "line_start": 2851,
+                    "line_end": 2928,
                     "lines": 78,
                     "fingerprint": "383375bbfd1a",
                     "risk": {
@@ -33364,8 +33364,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: assets",
-                    "line_start": 2943,
-                    "line_end": 2987,
+                    "line_start": 2929,
+                    "line_end": 2973,
                     "lines": 45,
                     "fingerprint": "53502350682a",
                     "risk": {
@@ -33380,8 +33380,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset",
-                    "line_start": 2988,
-                    "line_end": 3021,
+                    "line_start": 2974,
+                    "line_end": 3007,
                     "lines": 34,
                     "fingerprint": "59179257a2c4",
                     "risk": {
@@ -33396,8 +33396,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: organization",
-                    "line_start": 3022,
-                    "line_end": 3212,
+                    "line_start": 3008,
+                    "line_end": 3198,
                     "lines": 191,
                     "fingerprint": "5afc13d6b768",
                     "risk": {
@@ -33412,8 +33412,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings",
-                    "line_start": 3213,
-                    "line_end": 3682,
+                    "line_start": 3199,
+                    "line_end": 3668,
                     "lines": 470,
                     "fingerprint": "eaf775ca9627",
                     "risk": {
@@ -33430,8 +33430,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 3683,
-                    "line_end": 3704,
+                    "line_start": 3669,
+                    "line_end": 3690,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -33445,8 +33445,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: dashboard",
-                    "line_start": 3705,
-                    "line_end": 3744,
+                    "line_start": 3691,
+                    "line_end": 3730,
                     "lines": 40,
                     "fingerprint": "a018b81df29a",
                     "risk": {
@@ -52352,7 +52352,7 @@
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
             "lines": 217,
-            "file_fingerprint": "d9da8f233337",
+            "file_fingerprint": "22b132605313",
             "blocks": [
                 {
                     "kind": "region",
@@ -52386,7 +52386,7 @@
                     "line_start": 28,
                     "line_end": 216,
                     "lines": 189,
-                    "fingerprint": "4bf9c6b41d04",
+                    "fingerprint": "f316cab1e6c2",
                     "risk": {
                         "score": 2,
                         "flags": {

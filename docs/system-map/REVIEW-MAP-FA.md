@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 539 |
-| خطوط | 125,141 |
+| خطوط | 125,128 |
 | آدرس‌ها (بلوک) | 6,665 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -23,46 +23,46 @@
 
 | بخش | نام فنی | مجوز لازم | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
-| **audit** | `audit` | — | `PAGE-034.76` <sub>index.php:1718</sub><br>`CORE-007.33` <sub>lib/logging-audit.php:508</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:456</sub><br>`CORE-012.03` <sub>lib/logging-replay.php:45</sub> | 28 |
-| **chatbot api** | `chatbot-api` | — | `PAGE-034.48` <sub>index.php:1335</sub> | 2 |
-| **domain scan** | `domain-scan` | `domain.scan` | `PAGE-034.96` <sub>index.php:2865</sub><br>`PAGE-013.37` <sub>domain-scan.php:1157</sub><br>`PAGE-013.19` <sub>domain-scan.php:390</sub><br>`PAGE-013.16` <sub>domain-scan.php:311</sub> | 48 |
-| **food personnel link** | `food-personnel-link` | — | `PAGE-034.44` <sub>index.php:1203</sub><br>`PAGE-016.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-016.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-016.10` <sub>food-personnel-link.php:317</sub> | 30 |
-| **food ticket** | `food-ticket` | — | `PAGE-034.40` <sub>index.php:916</sub><br>`PAGE-034.52` <sub>index.php:1391</sub><br>`PAGE-034.59` <sub>index.php:1444</sub><br>`TOOL-028.04` <sub>tools/food_system_router.php:21</sub> | 147 |
-| **governance** | `governance` | — | `PAGE-031.32` <sub>governance.php:402</sub><br>`PAGE-034.58` <sub>index.php:1440</sub><br>`PAGE-031.29` <sub>governance.php:317</sub><br>`PAGE-031.10` <sub>governance.php:54</sub> | 42 |
-| **help** | `help` | — | `PAGE-034.72` <sub>index.php:1647</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 4 |
-| **local accounts** | `local-accounts` | — | `PAGE-034.56` <sub>index.php:1419</sub><br>`PAGE-037.03` <sub>local-accounts.php:25</sub><br>`PAGE-037.05` <sub>local-accounts.php:81</sub><br>`PAGE-037.06` <sub>local-accounts.php:138</sub> | 10 |
-| **logging dashboard** | `logging-dashboard` | — | `PAGE-034.77` <sub>index.php:1727</sub><br>`ASSET-016.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-038.04` <sub>logging-dashboard.php:112</sub><br>`PAGE-038.02` <sub>logging-dashboard.php:4</sub> | 10 |
-| **system health** | `system-health` | — | `PAGE-034.78` <sub>index.php:1731</sub><br>`PAGE-048.28` <sub>system-health.php:947</sub><br>`PAGE-048.03` <sub>system-health.php:25</sub><br>`PAGE-048.04` <sub>system-health.php:43</sub> | 35 |
-| **اعلان‌ها** | `notifications` | — | `PAGE-034.75` <sub>index.php:1700</sub><br>`ACT-009.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.74` <sub>index.php:1692</sub><br>`DB-002.30` <sub>install-empty-db.sql:442</sub> | 41 |
+| **audit** | `audit` | — | `PAGE-034.76` <sub>index.php:1704</sub><br>`CORE-007.33` <sub>lib/logging-audit.php:508</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:456</sub><br>`CORE-012.03` <sub>lib/logging-replay.php:45</sub> | 28 |
+| **chatbot api** | `chatbot-api` | — | `PAGE-034.48` <sub>index.php:1321</sub> | 2 |
+| **domain scan** | `domain-scan` | `domain.scan` | `PAGE-034.96` <sub>index.php:2851</sub><br>`PAGE-013.37` <sub>domain-scan.php:1157</sub><br>`PAGE-013.19` <sub>domain-scan.php:390</sub><br>`PAGE-013.16` <sub>domain-scan.php:311</sub> | 48 |
+| **food personnel link** | `food-personnel-link` | — | `PAGE-034.44` <sub>index.php:1189</sub><br>`PAGE-016.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-016.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-016.10` <sub>food-personnel-link.php:317</sub> | 30 |
+| **food ticket** | `food-ticket` | — | `PAGE-034.40` <sub>index.php:902</sub><br>`PAGE-034.52` <sub>index.php:1377</sub><br>`PAGE-034.59` <sub>index.php:1430</sub><br>`TOOL-028.04` <sub>tools/food_system_router.php:21</sub> | 147 |
+| **governance** | `governance` | — | `PAGE-031.32` <sub>governance.php:402</sub><br>`PAGE-034.58` <sub>index.php:1426</sub><br>`PAGE-031.29` <sub>governance.php:317</sub><br>`PAGE-031.10` <sub>governance.php:54</sub> | 42 |
+| **help** | `help` | — | `PAGE-034.72` <sub>index.php:1633</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 4 |
+| **local accounts** | `local-accounts` | — | `PAGE-034.56` <sub>index.php:1405</sub><br>`PAGE-037.03` <sub>local-accounts.php:25</sub><br>`PAGE-037.05` <sub>local-accounts.php:81</sub><br>`PAGE-037.06` <sub>local-accounts.php:138</sub> | 10 |
+| **logging dashboard** | `logging-dashboard` | — | `PAGE-034.77` <sub>index.php:1713</sub><br>`ASSET-016.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-038.04` <sub>logging-dashboard.php:112</sub><br>`PAGE-038.02` <sub>logging-dashboard.php:4</sub> | 10 |
+| **system health** | `system-health` | — | `PAGE-034.78` <sub>index.php:1717</sub><br>`PAGE-048.28` <sub>system-health.php:947</sub><br>`PAGE-048.03` <sub>system-health.php:25</sub><br>`PAGE-048.04` <sub>system-health.php:43</sub> | 35 |
+| **اعلان‌ها** | `notifications` | — | `PAGE-034.75` <sub>index.php:1686</sub><br>`ACT-009.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.74` <sub>index.php:1678</sub><br>`DB-002.30` <sub>install-empty-db.sql:442</sub> | 41 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-007.04` <sub>backup.php:32</sub><br>`PAGE-007.02` <sub>backup.php:6</sub><br>`PAGE-007.03` <sub>backup.php:12</sub><br>`PAGE-007.05` <sub>backup.php:78</sub> | 42 |
-| **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-034.63` <sub>index.php:1465</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
-| **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-034.95` <sub>index.php:2847</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 4 |
-| **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-034.90` <sub>index.php:2563</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-034.94` <sub>index.php:2815</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تغییر رمز عبور** | `change-password` | — | `PAGE-034.38` <sub>index.php:891</sub><br>`PAGE-034.55` <sub>index.php:1416</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-008.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.86` <sub>index.php:2172</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 33 |
-| **تنظیمات سامانه** | `settings` | — | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.47` <sub>index.php:1324</sub><br>`PAGE-034.54` <sub>index.php:1407</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 60 |
-| **ثبت درخواست** | `new-ticket` | — | `PAGE-034.88` <sub>index.php:2191</sub><br>`PAGE-034.87` <sub>index.php:2183</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 10 |
-| **جزئیات درخواست** | `ticket` | — | `PAGE-034.89` <sub>index.php:2327</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
-| **جست‌وجو** | `search` | — | `PAGE-034.83` <sub>index.php:1931</sub><br>`PAGE-034.82` <sub>index.php:1923</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 43 |
-| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 176 |
-| **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.102` <sub>index.php:3705</sub><br>`CORE-014.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 27 |
-| **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.73` <sub>index.php:1655</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **سفارش غذا** | `food-order` | — | `PAGE-034.41` <sub>index.php:930</sub><br>`PAGE-034.60` <sub>index.php:1449</sub><br>`PAGE-034.61` <sub>index.php:1457</sub><br>`TOOL-028.03` <sub>tools/food_system_router.php:18</sub> | 196 |
-| **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-034.98` <sub>index.php:2988</sub><br>`PAGE-004.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
+| **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-034.63` <sub>index.php:1451</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
+| **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-034.95` <sub>index.php:2833</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 4 |
+| **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-034.90` <sub>index.php:2549</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-034.94` <sub>index.php:2801</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **تغییر رمز عبور** | `change-password` | — | `PAGE-034.38` <sub>index.php:877</sub><br>`PAGE-034.55` <sub>index.php:1402</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-008.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.86` <sub>index.php:2158</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 33 |
+| **تنظیمات سامانه** | `settings` | — | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.47` <sub>index.php:1310</sub><br>`PAGE-034.54` <sub>index.php:1393</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 60 |
+| **ثبت درخواست** | `new-ticket` | — | `PAGE-034.88` <sub>index.php:2177</sub><br>`PAGE-034.87` <sub>index.php:2169</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 10 |
+| **جزئیات درخواست** | `ticket` | — | `PAGE-034.89` <sub>index.php:2313</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
+| **جست‌وجو** | `search` | — | `PAGE-034.83` <sub>index.php:1917</sub><br>`PAGE-034.82` <sub>index.php:1909</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 43 |
+| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2929</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 176 |
+| **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.102` <sub>index.php:3691</sub><br>`CORE-014.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 27 |
+| **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.73` <sub>index.php:1641</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 8 |
+| **سفارش غذا** | `food-order` | — | `PAGE-034.41` <sub>index.php:916</sub><br>`PAGE-034.60` <sub>index.php:1435</sub><br>`PAGE-034.61` <sub>index.php:1443</sub><br>`TOOL-028.03` <sub>tools/food_system_router.php:18</sub> | 196 |
+| **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-034.98` <sub>index.php:2974</sub><br>`PAGE-004.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **شناسنامه سیستم‌ها** | `inventory` | `inventory.view` | `PAGE-036.31` <sub>inventory.php:704</sub><br>`PAGE-036.29` <sub>inventory.php:636</sub><br>`PAGE-036.02` <sub>inventory.php:7</sub><br>`PAGE-036.20` <sub>inventory.php:346</sub> | 56 |
-| **صف کاری** | `queue` | `queue.view` | `PAGE-034.84` <sub>index.php:2022</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 17 |
-| **لاگ سامانه** | `activity-log` | — | `PAGE-034.80` <sub>index.php:1741</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 12 |
-| **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-034.85` <sub>index.php:2069</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **مدیریت سازمان** | `organization` | `org.view` | `PAGE-042.39` <sub>organization.php:486</sub><br>`PAGE-034.99` <sub>index.php:3022</sub><br>`PAGE-034.39` <sub>index.php:902</sub><br>`PAGE-042.02` <sub>organization.php:4</sub> | 193 |
-| **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-034.57` <sub>index.php:1422</sub><br>`PAGE-006.16` <sub>asset-profile.php:494</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 12 |
-| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-034.92` <sub>index.php:2669</sub><br>`CORE-003.08` <sub>lib/auth-scope.php:88</sub><br>`CORE-003.22` <sub>lib/auth-scope.php:405</sub><br>`CORE-003.07` <sub>lib/auth-scope.php:78</sub> | 63 |
-| **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-034.65` <sub>index.php:1472</sub> | 6 |
-| **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-034.66` <sub>index.php:1476</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:456</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
-| **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-034.62` <sub>index.php:1461</sub><br>`PAGE-009.43` <sub>cd-dvd.php:735</sub><br>`PAGE-009.33` <sub>cd-dvd.php:403</sub><br>`PAGE-009.19` <sub>cd-dvd.php:153</sub> | 68 |
-| **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-034.42` <sub>index.php:942</sub><br>`PAGE-034.64` <sub>index.php:1469</sub><br>`PAGE-050.63` <sub>traffic-control.php:981</sub><br>`PAGE-050.16` <sub>traffic-control.php:119</sub> | 102 |
-| **گزارش خطا** | `logs` | — | `PAGE-034.101` <sub>index.php:3683</sub><br>`PAGE-034.79` <sub>index.php:1735</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 16 |
-| **گزارش‌ها** | `reports` | `reports.view` | `PAGE-034.91` <sub>index.php:2607</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 15 |
+| **صف کاری** | `queue` | `queue.view` | `PAGE-034.84` <sub>index.php:2008</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 17 |
+| **لاگ سامانه** | `activity-log` | — | `PAGE-034.80` <sub>index.php:1727</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 12 |
+| **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-034.85` <sub>index.php:2055</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **مدیریت سازمان** | `organization` | `org.view` | `PAGE-042.39` <sub>organization.php:486</sub><br>`PAGE-034.99` <sub>index.php:3008</sub><br>`PAGE-034.39` <sub>index.php:888</sub><br>`PAGE-042.02` <sub>organization.php:4</sub> | 193 |
+| **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-034.57` <sub>index.php:1408</sub><br>`PAGE-006.16` <sub>asset-profile.php:494</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 12 |
+| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-034.92` <sub>index.php:2655</sub><br>`CORE-003.08` <sub>lib/auth-scope.php:88</sub><br>`CORE-003.22` <sub>lib/auth-scope.php:405</sub><br>`CORE-003.07` <sub>lib/auth-scope.php:78</sub> | 63 |
+| **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-034.65` <sub>index.php:1458</sub> | 6 |
+| **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-034.66` <sub>index.php:1462</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:456</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
+| **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-034.62` <sub>index.php:1447</sub><br>`PAGE-009.43` <sub>cd-dvd.php:735</sub><br>`PAGE-009.33` <sub>cd-dvd.php:403</sub><br>`PAGE-009.19` <sub>cd-dvd.php:153</sub> | 68 |
+| **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-034.42` <sub>index.php:928</sub><br>`PAGE-034.64` <sub>index.php:1455</sub><br>`PAGE-050.63` <sub>traffic-control.php:981</sub><br>`PAGE-050.16` <sub>traffic-control.php:119</sub> | 102 |
+| **گزارش خطا** | `logs` | — | `PAGE-034.101` <sub>index.php:3669</sub><br>`PAGE-034.79` <sub>index.php:1721</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 16 |
+| **گزارش‌ها** | `reports` | `reports.view` | `PAGE-034.91` <sub>index.php:2593</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 15 |
 
 ### مجوزها و دسترسی‌ها
 
@@ -72,63 +72,63 @@
 | گروه | مجوز | کد | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
 | داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-043.26` <sub>permissions.php:487</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub><br>`TOOL-048.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
-| داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-034.82` <sub>index.php:1923</sub> | 3 |
-| داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-034.74` <sub>index.php:1692</sub> | 6 |
-| داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1335</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
+| داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-034.82` <sub>index.php:1909</sub> | 3 |
+| داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-034.74` <sub>index.php:1678</sub> | 6 |
+| داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1321</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
 | داشبورد و پایه | **استفاده از بات پاسخ‌گو** | `chatbot.use` | `PAGE-011.27` <sub>chatbot.php:700</sub><br>`PAGE-011.123` <sub>chatbot.php:3206</sub> | 5 |
-| درخواست | **ثبت درخواست جدید** | `ticket.create` | `ACT-015.03` <sub>actions/ticket-actions.php:30</sub><br>`ACT-015.04` <sub>actions/ticket-actions.php:222</sub><br>`PAGE-034.88` <sub>index.php:2191</sub> | 15 |
+| درخواست | **ثبت درخواست جدید** | `ticket.create` | `ACT-015.03` <sub>actions/ticket-actions.php:30</sub><br>`ACT-015.04` <sub>actions/ticket-actions.php:222</sub><br>`PAGE-034.88` <sub>index.php:2177</sub> | 15 |
 | درخواست | **مشاهدهٔ درخواست‌های خودم** | `ticket.view_own` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 7 |
 | درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 8 |
 | درخواست | **مشاهدهٔ همهٔ درخواست‌ها** | `ticket.view_all` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 5 |
-| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `ACT-015.07` <sub>actions/ticket-actions.php:373</sub><br>`PAGE-034.89` <sub>index.php:2327</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:408</sub> | 7 |
-| درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:530</sub><br>`PAGE-034.89` <sub>index.php:2327</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:408</sub> | 12 |
+| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `ACT-015.07` <sub>actions/ticket-actions.php:373</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:408</sub> | 7 |
+| درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:530</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:408</sub> | 12 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
 | درخواست | **ویرایش** | `ticket.bulk` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub> | 4 |
-| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-034.89` <sub>index.php:2327</sub><br>`ACT-014.06` <sub>actions/supervisor-actions.php:131</sub> | 6 |
+| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-014.06` <sub>actions/supervisor-actions.php:131</sub> | 6 |
 | درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `ACT-005.03` <sub>actions/bulk-actions.php:24</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
-| درخواست | **صف کاری** | `queue.view` | `PAGE-034.84` <sub>index.php:2022</sub> | 9 |
-| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `ACT-014.04` <sub>actions/supervisor-actions.php:40</sub><br>`ACT-014.05` <sub>actions/supervisor-actions.php:97</sub><br>`PAGE-034.92` <sub>index.php:2669</sub> | 9 |
+| درخواست | **صف کاری** | `queue.view` | `PAGE-034.84` <sub>index.php:2008</sub> | 9 |
+| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `ACT-014.04` <sub>actions/supervisor-actions.php:40</sub><br>`ACT-014.05` <sub>actions/supervisor-actions.php:97</sub><br>`PAGE-034.92` <sub>index.php:2655</sub> | 9 |
 | درخواست | **ویرایش** | `supervisor.decide` | `ACT-014.04` <sub>actions/supervisor-actions.php:40</sub> | 4 |
 | درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `ACT-014.05` <sub>actions/supervisor-actions.php:97</sub> | 3 |
-| خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1335</sub> | 5 |
+| خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 5 |
 | خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `ACT-012.03` <sub>actions/service-actions.php:29</sub><br>`ACT-012.07` <sub>actions/service-actions.php:155</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 8 |
 | خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`ACT-016.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
 | خدمات و دسته‌بندی | **مدیریت فیلدهای خدمت** | `service_field.manage` | `ACT-012.04` <sub>actions/service-actions.php:69</sub> | 3 |
-| دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1335</sub> | 5 |
+| دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 5 |
 | دانش‌نامه | **ویرایش** | `knowledge.manage` | `ACT-012.09` <sub>actions/service-actions.php:206</sub> | 4 |
-| کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `PAGE-034.83` <sub>index.php:1931</sub><br>`PAGE-034.30` <sub>index.php:640</sub><br>`TEST-018.01` <sub>tests/smoke.php:1</sub> | 10 |
+| کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `PAGE-034.83` <sub>index.php:1917</sub><br>`PAGE-034.30` <sub>index.php:626</sub><br>`TEST-018.01` <sub>tests/smoke.php:1</sub> | 10 |
 | کنترل CD/DVD | **ثبت خروج رسانه** | `cddvd.submit_out` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-009.17` <sub>cd-dvd.php:128</sub><br>`PAGE-043.15` <sub>permissions.php:344</sub> | 4 |
 | کنترل CD/DVD | **ثبت ورود رسانه (بازرسی)** | `cddvd.submit_in` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`TEST-135.05` <sub>tests/test_permissions_followup_static.py:30</sub><br>`PAGE-009.16` <sub>cd-dvd.php:120</sub> | 4 |
-| کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-043.26` <sub>permissions.php:487</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 9 |
+| کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-043.26` <sub>permissions.php:487</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 9 |
 | کنترل CD/DVD | **مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)** | `cddvd.view_all` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-009.11` <sub>cd-dvd.php:65</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
-| کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1335</sub> | 4 |
-| کنترل CD/DVD | **خروجی Excel/CSV** | `cddvd.export` | `PAGE-034.43` <sub>index.php:1088</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-009.13` <sub>cd-dvd.php:87</sub> | 4 |
+| کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 4 |
+| کنترل CD/DVD | **خروجی Excel/CSV** | `cddvd.export` | `PAGE-034.43` <sub>index.php:1074</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-009.13` <sub>cd-dvd.php:87</sub> | 4 |
 | کنترل تردد مراجعین | **مشاهدهٔ کنترل تردد** | `traffic.view` | `PAGE-050.63` <sub>traffic-control.php:981</sub><br>`PAGE-050.59` <sub>traffic-control.php:888</sub><br>`PAGE-051.23` <sub>traffic-import.php:853</sub> | 18 |
 | کنترل تردد مراجعین | **ثبت، ویرایش و ورود گروهی سوابق** | `traffic.manage` | `PAGE-050.63` <sub>traffic-control.php:981</sub><br>`PAGE-050.54` <sub>traffic-control.php:786</sub><br>`PAGE-051.23` <sub>traffic-import.php:853</sub> | 10 |
 | کنترل تردد مراجعین | **مقصدهای ملاقات** | `traffic.destinations` | `PAGE-050.63` <sub>traffic-control.php:981</sub><br>`PAGE-050.05` <sub>traffic-control.php:16</sub><br>`TEST-135.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 6 |
 | کنترل تردد مراجعین | **ویرایش** | `traffic.destinations_edit` | `PAGE-050.06` <sub>traffic-control.php:21</sub><br>`TEST-135.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 4 |
-| دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-034.97` <sub>index.php:2943</sub> | 9 |
+| دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-034.97` <sub>index.php:2929</sub> | 9 |
 | دارایی و شناسنامه فنی | **فقط دارایی‌های واحد خودم** | `assets.own_unit` | `CORE-003.22` <sub>lib/auth-scope.php:405</sub> | 4 |
-| دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1335</sub><br>`PAGE-043.08` <sub>permissions.php:246</sub> | 4 |
+| دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1321</sub><br>`PAGE-043.08` <sub>permissions.php:246</sub> | 4 |
 | دارایی و شناسنامه فنی | **ویرایش** | `asset.edit` | `ACT-003.12` <sub>actions/asset-actions.php:361</sub> | 4 |
-| دارایی و شناسنامه فنی | **استخراج سخت‌افزار (همین سرور)** | `asset.extract` | `PAGE-034.97` <sub>index.php:2943</sub><br>`PAGE-034.98` <sub>index.php:2988</sub><br>`ACT-003.03` <sub>actions/asset-actions.php:33</sub> | 6 |
+| دارایی و شناسنامه فنی | **استخراج سخت‌افزار (همین سرور)** | `asset.extract` | `PAGE-034.97` <sub>index.php:2929</sub><br>`PAGE-034.98` <sub>index.php:2974</sub><br>`ACT-003.03` <sub>actions/asset-actions.php:33</sub> | 6 |
 | دارایی و شناسنامه فنی | **ویرایش** | `asset.remote_extract` | `ACT-003.10` <sub>actions/asset-actions.php:285</sub><br>`ACT-003.06` <sub>actions/asset-actions.php:131</sub><br>`ACT-003.07` <sub>actions/asset-actions.php:148</sub> | 10 |
-| دارایی و شناسنامه فنی | **تاریخچهٔ دارایی** | `asset.history` | `PAGE-034.95` <sub>index.php:2847</sub> | 4 |
-| دارایی و شناسنامه فنی | **پینگ سیستم‌های انتخابی** | `asset.ping` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub> | 4 |
-| دارایی و شناسنامه فنی | **فهرست موجودی** | `inventory.view` | `ACT-003.12` <sub>actions/asset-actions.php:361</sub><br>`PAGE-034.93` <sub>index.php:2714</sub> | 6 |
-| دارایی و شناسنامه فنی | **تشخیص موجودی** | `inventory.diagnostics` | `PAGE-034.94` <sub>index.php:2815</sub> | 6 |
+| دارایی و شناسنامه فنی | **تاریخچهٔ دارایی** | `asset.history` | `PAGE-034.95` <sub>index.php:2833</sub> | 4 |
+| دارایی و شناسنامه فنی | **پینگ سیستم‌های انتخابی** | `asset.ping` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2929</sub> | 4 |
+| دارایی و شناسنامه فنی | **فهرست موجودی** | `inventory.view` | `ACT-003.12` <sub>actions/asset-actions.php:361</sub><br>`PAGE-034.93` <sub>index.php:2700</sub> | 6 |
+| دارایی و شناسنامه فنی | **تشخیص موجودی** | `inventory.diagnostics` | `PAGE-034.94` <sub>index.php:2801</sub> | 6 |
 | دارایی و شناسنامه فنی | **ورود کامپیوترهای دامنه** | `domain.import` | `ACT-003.05` <sub>actions/asset-actions.php:123</sub> | 6 |
-| دارایی و شناسنامه فنی | **اسکن دامنه** | `domain.scan` | `PAGE-034.96` <sub>index.php:2865</sub> | 10 |
-| گزارش و تحلیل | **گزارش‌ها** | `reports.view` | `PAGE-034.91` <sub>index.php:2607</sub> | 7 |
-| گزارش و تحلیل | **چارت‌ها** | `analytics.view` | `PAGE-034.90` <sub>index.php:2563</sub> | 6 |
-| گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-034.76` <sub>index.php:1718</sub> | 7 |
-| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-034.101` <sub>index.php:3683</sub><br>`PAGE-034.79` <sub>index.php:1735</sub> | 12 |
+| دارایی و شناسنامه فنی | **اسکن دامنه** | `domain.scan` | `PAGE-034.96` <sub>index.php:2851</sub> | 10 |
+| گزارش و تحلیل | **گزارش‌ها** | `reports.view` | `PAGE-034.91` <sub>index.php:2593</sub> | 7 |
+| گزارش و تحلیل | **چارت‌ها** | `analytics.view` | `PAGE-034.90` <sub>index.php:2549</sub> | 6 |
+| گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-034.76` <sub>index.php:1704</sub> | 7 |
+| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-034.101` <sub>index.php:3669</sub><br>`PAGE-034.79` <sub>index.php:1721</sub> | 12 |
 | گزارش و تحلیل | **سلامت سامانه و خطاهای فنی** | `system.health` | `PAGE-048.28` <sub>system-health.php:947</sub><br>`PAGE-048.30` <sub>system-health.php:1118</sub> | 11 |
 | گزارش و تحلیل | **ویرایش وضعیت و نگهداری لاگ** | `system.health_edit` | `PAGE-048.30` <sub>system-health.php:1118</sub><br>`PAGE-048.25` <sub>system-health.php:787</sub> | 5 |
-| گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-034.79` <sub>index.php:1735</sub> | 7 |
-| گزارش و تحلیل | **خروجی فعالیت کاربران** | `logs.activity_export` | `PAGE-034.42` <sub>index.php:942</sub><br>`PAGE-034.80` <sub>index.php:1741</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 5 |
+| گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-034.79` <sub>index.php:1721</sub> | 7 |
+| گزارش و تحلیل | **خروجی فعالیت کاربران** | `logs.activity_export` | `PAGE-034.42` <sub>index.php:928</sub><br>`PAGE-034.80` <sub>index.php:1727</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 5 |
 | سامانه مدیریت غذا | **داشبورد** | `food.dashboard` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub><br>`PAGE-029.07` <sub>food-ticket.php:70</sub> | 9 |
-| سامانه مدیریت غذا | **پایش لحظه‌ای** | `food.monitor` | `PAGE-034.52` <sub>index.php:1391</sub><br>`PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 11 |
+| سامانه مدیریت غذا | **پایش لحظه‌ای** | `food.monitor` | `PAGE-034.52` <sub>index.php:1377</sub><br>`PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 11 |
 | سامانه مدیریت غذا | **کارکنان** | `food.employees` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub><br>`PAGE-029.07` <sub>food-ticket.php:70</sub> | 8 |
 | سامانه مدیریت غذا | **ویرایش** | `food.employees_edit` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.08` <sub>food-ticket.php:78</sub> | 5 |
 | سامانه مدیریت غذا | **برنامه غذایی** | `food.menu` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-015.100` <sub>food-order.php:3422</sub><br>`PAGE-015.96` <sub>food-order.php:3133</sub> | 16 |
@@ -150,27 +150,27 @@
 | تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.manual_attendance_edit` | `PAGE-021.61` <sub>food-ticket-groups.php:2320</sub><br>`PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 8 |
 | تنظیمات سیستم مدیریت غذا | **مدیریت مهلت اضطراری سفارش غذا** | `food.emergency_window` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-015.100` <sub>food-order.php:3422</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 8 |
 | تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.emergency_window_edit` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub><br>`PAGE-015.46` <sub>food-order.php:1284</sub> | 9 |
-| سفارش غذای کارکنان | **ثبت و مشاهدهٔ سفارش خود** | `foodorder.self` | `PAGE-034.60` <sub>index.php:1449</sub> | 11 |
-| سازمان | **مشاهدهٔ چارت سازمانی** | `org.view` | `PAGE-034.99` <sub>index.php:3022</sub> | 7 |
+| سفارش غذای کارکنان | **ثبت و مشاهدهٔ سفارش خود** | `foodorder.self` | `PAGE-034.60` <sub>index.php:1435</sub> | 11 |
+| سازمان | **مشاهدهٔ چارت سازمانی** | `org.view` | `PAGE-034.99` <sub>index.php:3008</sub> | 7 |
 | سازمان | **ویرایش** | `org.manage` | `ACT-010.13` <sub>actions/org-actions.php:382</sub><br>`ACT-010.18` <sub>actions/org-actions.php:617</sub><br>`ACT-010.14` <sub>actions/org-actions.php:409</sub> | 17 |
-| تنظیمات و سیستم | **تنظیمات عمومی و افکت نمایشی** | `settings.general` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.54` <sub>index.php:1407</sub><br>`CORE-014.17` <sub>lib/settings-effects.php:291</sub> | 11 |
-| تنظیمات و سیستم | **ویرایش تنظیمات عمومی و افکت نمایشی** | `settings.general_edit` | `ACT-013.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.100` <sub>index.php:3213</sub><br>`ACT-013.07` <sub>actions/settings-actions.php:91</sub> | 6 |
-| تنظیمات و سیستم | **اتصال دامین و اسکن دامنه** | `settings.domain` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.54` <sub>index.php:1407</sub> | 10 |
-| تنظیمات و سیستم | **ویرایش** | `settings.domain_edit` | `ACT-013.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.100` <sub>index.php:3213</sub><br>`ACT-013.06` <sub>actions/settings-actions.php:77</sub> | 5 |
-| تنظیمات و سیستم | **مدیریت کاربران و دسترسی‌ها** | `settings.users` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.54` <sub>index.php:1407</sub> | 7 |
-| تنظیمات و سیستم | **ویرایش** | `settings.users_edit` | `PAGE-034.100` <sub>index.php:3213</sub><br>`ACT-016.08` <sub>actions/user-structure-actions.php:358</sub><br>`ACT-013.05` <sub>actions/settings-actions.php:69</sub> | 6 |
-| تنظیمات و سیستم | **نقش‌های کلیدی** | `settings.key_roles` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.54` <sub>index.php:1407</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `settings.key_roles_edit` | `PAGE-034.100` <sub>index.php:3213</sub> | 4 |
-| تنظیمات و سیستم | **پشتیبان‌گیری/بازگردانی** | `backup.view` | `PAGE-034.81` <sub>index.php:1884</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `backup.manage` | `ACT-004.02` <sub>actions/backup-actions.php:18</sub><br>`ACT-004.03` <sub>actions/backup-actions.php:25</sub><br>`PAGE-034.81` <sub>index.php:1884</sub> | 7 |
-| تنظیمات و سیستم | **مشاهدهٔ به‌روزرسانی سامانه** | `update.view` | `PAGE-034.81` <sub>index.php:1884</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 2 |
+| تنظیمات و سیستم | **تنظیمات عمومی و افکت نمایشی** | `settings.general` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.54` <sub>index.php:1393</sub><br>`CORE-014.17` <sub>lib/settings-effects.php:291</sub> | 11 |
+| تنظیمات و سیستم | **ویرایش تنظیمات عمومی و افکت نمایشی** | `settings.general_edit` | `ACT-013.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.100` <sub>index.php:3199</sub><br>`ACT-013.07` <sub>actions/settings-actions.php:91</sub> | 6 |
+| تنظیمات و سیستم | **اتصال دامین و اسکن دامنه** | `settings.domain` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.54` <sub>index.php:1393</sub> | 10 |
+| تنظیمات و سیستم | **ویرایش** | `settings.domain_edit` | `ACT-013.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.100` <sub>index.php:3199</sub><br>`ACT-013.06` <sub>actions/settings-actions.php:77</sub> | 5 |
+| تنظیمات و سیستم | **مدیریت کاربران و دسترسی‌ها** | `settings.users` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.54` <sub>index.php:1393</sub> | 7 |
+| تنظیمات و سیستم | **ویرایش** | `settings.users_edit` | `PAGE-034.100` <sub>index.php:3199</sub><br>`ACT-016.08` <sub>actions/user-structure-actions.php:358</sub><br>`ACT-013.05` <sub>actions/settings-actions.php:69</sub> | 6 |
+| تنظیمات و سیستم | **نقش‌های کلیدی** | `settings.key_roles` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.54` <sub>index.php:1393</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `settings.key_roles_edit` | `PAGE-034.100` <sub>index.php:3199</sub> | 4 |
+| تنظیمات و سیستم | **پشتیبان‌گیری/بازگردانی** | `backup.view` | `PAGE-034.81` <sub>index.php:1870</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `backup.manage` | `ACT-004.02` <sub>actions/backup-actions.php:18</sub><br>`ACT-004.03` <sub>actions/backup-actions.php:25</sub><br>`PAGE-034.81` <sub>index.php:1870</sub> | 7 |
+| تنظیمات و سیستم | **مشاهدهٔ به‌روزرسانی سامانه** | `update.view` | `PAGE-034.81` <sub>index.php:1870</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 2 |
 | تنظیمات و سیستم | **اجرای به‌روزرسانی سامانه** | `update.apply` | `ACT-004.04` <sub>actions/backup-actions.php:41</sub> | 3 |
-| تنظیمات و سیستم | **مدیریت پرسش‌ها و پاسخ‌های بات** | `chatbot.manage` | `PAGE-034.85` <sub>index.php:2069</sub><br>`PAGE-034.48` <sub>index.php:1335</sub> | 4 |
+| تنظیمات و سیستم | **مدیریت پرسش‌ها و پاسخ‌های بات** | `chatbot.manage` | `PAGE-034.85` <sub>index.php:2055</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 4 |
 | تنظیمات و سیستم | **تنظیمات OLA/SLA** | `ola.view` | `PAGE-041.07` <sub>ola.php:32</sub> | 5 |
 | تنظیمات و سیستم | **ویرایش** | `ola.manage` | `PAGE-041.07` <sub>ola.php:32</sub> | 5 |
 | تنظیمات و سیستم | **تغییر و مشکل** | `governance.view` | `PAGE-031.24` <sub>governance.php:174</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `governance.manage` | `PAGE-031.24` <sub>governance.php:174</sub> | 8 |
-| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-034.86` <sub>index.php:2172</sub><br>`TEST-076.33` <sub>tests/test_food_worker_window_static.py:306</sub> | 6 |
+| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-034.86` <sub>index.php:2158</sub><br>`TEST-076.33` <sub>tests/test_food_worker_window_static.py:306</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `holidays.manage` | `ACT-008.07` <sub>actions/holiday-actions.php:102</sub> | 13 |
 
 </details>
@@ -193,7 +193,7 @@
 | `asset_profiles` | `DB-002.45` <sub>install-empty-db.sql:688</sub><br>`DB-005.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-039.42` <sub>schema.sql:667</sub> | 96 |
 | `asset_relations` | `DB-002.44` <sub>install-empty-db.sql:675</sub><br>`DB-005.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-039.41` <sub>schema.sql:654</sub> | 12 |
 | `asset_storage_devices` | `DB-002.39` <sub>install-empty-db.sql:599</sub><br>`DB-005.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-039.36` <sub>schema.sql:578</sub> | 17 |
-| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 176 |
+| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2929</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 176 |
 | `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-039.18` <sub>schema.sql:223</sub> | 30 |
 | `cd_dvd_records` | `DB-002.16` <sub>install-empty-db.sql:144</sub><br>`DB-005.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-039.13` <sub>schema.sql:123</sub> | 40 |
 | `cd_dvd_types` | `DB-002.15` <sub>install-empty-db.sql:136</sub><br>`DB-039.12` <sub>schema.sql:115</sub><br>`DB-074.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
@@ -228,7 +228,7 @@
 | `food_ticket_templates` | `DB-002.90` <sub>install-empty-db.sql:1201</sub><br>`DB-005.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-039.90` <sub>schema.sql:1214</sub> | 21 |
 | `food_ticket_worker_status` | `DB-002.56` <sub>install-empty-db.sql:957</sub><br>`DB-005.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-039.53` <sub>schema.sql:936</sub> | 17 |
 | `handling_units` | `DB-002.13` <sub>install-empty-db.sql:123</sub><br>`DB-005.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-039.10` <sub>schema.sql:102</sub> | 40 |
-| `holidays` | `ACT-008.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.86` <sub>index.php:2172</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 33 |
+| `holidays` | `ACT-008.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.86` <sub>index.php:2158</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 33 |
 | `knowledge_articles` | `DB-002.34` <sub>install-empty-db.sql:502</sub><br>`DB-005.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-039.31` <sub>schema.sql:481</sub> | 17 |
 | `log_issue_events` | `DB-029.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-002.119` <sub>install-empty-db.sql:1543</sub><br>`DB-039.108` <sub>schema.sql:1494</sub> | 15 |
 | `log_issue_history` | `DB-002.118` <sub>install-empty-db.sql:1527</sub><br>`DB-029.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-039.107` <sub>schema.sql:1478</sub> | 12 |
@@ -236,7 +236,7 @@
 | `log_issues` | `DB-002.116` <sub>install-empty-db.sql:1491</sub><br>`DB-028.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-039.105` <sub>schema.sql:1442</sub> | 28 |
 | `logging_health_alerts` | `DB-002.117` <sub>install-empty-db.sql:1517</sub><br>`DB-028.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-039.106` <sub>schema.sql:1468</sub> | 13 |
 | `login_attempts` | `DB-002.31` <sub>install-empty-db.sql:460</sub><br>`DB-005.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-039.28` <sub>schema.sql:439</sub> | 14 |
-| `notifications` | `PAGE-034.75` <sub>index.php:1700</sub><br>`ACT-009.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.74` <sub>index.php:1692</sub> | 41 |
+| `notifications` | `PAGE-034.75` <sub>index.php:1686</sub><br>`ACT-009.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.74` <sub>index.php:1678</sub> | 41 |
 | `ola_policies` | `DB-002.46` <sub>install-empty-db.sql:770</sub><br>`DB-005.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-039.43` <sub>schema.sql:749</sub> | 24 |
 | `org_companies` | `DB-002.06` <sub>install-empty-db.sql:37</sub><br>`DB-021.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-039.03` <sub>schema.sql:16</sub> | 11 |
 | `org_unit_managers` | `DB-002.10` <sub>install-empty-db.sql:77</sub><br>`DB-005.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-039.07` <sub>schema.sql:56</sub> | 36 |
@@ -247,7 +247,7 @@
 | `schema_updates` | `DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`DB-039.110` <sub>schema.sql:1520</sub><br>`CORE-007.04` <sub>lib/logging-audit.php:61</sub> | 16 |
 | `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-039.19` <sub>schema.sql:232</sub> | 55 |
 | `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-039.20` <sub>schema.sql:258</sub> | 16 |
-| `settings` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.47` <sub>index.php:1324</sub><br>`PAGE-034.54` <sub>index.php:1407</sub> | 60 |
+| `settings` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.47` <sub>index.php:1310</sub><br>`PAGE-034.54` <sub>index.php:1393</sub> | 60 |
 | `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1367</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-039.65` <sub>schema.sql:1132</sub> | 9 |
 | `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1101</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-039.62` <sub>schema.sql:1080</sub> | 61 |
 | `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-039.24` <sub>schema.sql:364</sub> | 16 |
@@ -288,12 +288,12 @@
 | `TEST` | TEST | 215 | 1,572 | 19,707 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,443 |
+| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,429 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
 | `ACT` | کنش‌ها (actions/) | 16 | 118 | 3,987 |
 | `CORE` | موتور مشترک (lib/) | 15 | 306 | 7,264 |
-| `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,452 |
+| `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,453 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
 
 ## نشانه‌های ریسک
@@ -345,7 +345,7 @@
 | 27 | `WEB-012.04` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 28 | `WEB-014.01` | `food-ticket-web/assets/food-capitalio-dashboard-r42.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 29 | `WEB-014.04` | `food-ticket-web/assets/food-capitalio-dashboard-r42.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 30 | `PAGE-034.100` | `index.php:3213` | مسیر: settings | 11 | الحاق در SQL، ورودی خام، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 30 | `PAGE-034.100` | `index.php:3199` | مسیر: settings | 11 | الحاق در SQL، ورودی خام، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 31 | `CORE-008.44` | `lib/logging-core.php:1025` | logging_emergency_failure | 11 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 32 | `PAGE-021.03` | `food-ticket-groups.php:62` | food_ticket_groups_ensure | 10 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 33 | `PAGE-021.52` | `food-ticket-groups.php:1737` | food_ticket_group_try_unknown | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
@@ -8250,112 +8250,112 @@
 </details>
 
 <details>
-<summary><b>PAGE-034</b> — <code>index.php</code> (3,744 خط، 102 آدرس، بازبینی‌شده 0/102)</summary>
+<summary><b>PAGE-034</b> — <code>index.php</code> (3,730 خط، 102 آدرس، بازبینی‌شده 0/102)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-034.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 1 | ⬜ |
-| `PAGE-034.02` | 31–31 | ناحیه | `تبدیل رکوردهای قدیمی غذا فقط هنگام بارگذاری فهرست ` | 0 | ⬜ |
-| `PAGE-034.03` | 32–37 | ناحیه | `نه در هر درخواست و نه قبل از نمایش فرم ورود.` | 2 | ⬜ |
-| `PAGE-034.04` | 38–41 | تابع | `post_value` | 2 | ⬜ |
-| `PAGE-034.05` | 43–47 | تابع | `csv_cell` | 0 | ⬜ |
-| `PAGE-034.06` | 49–52 | تابع | `excel_cell` | 0 | ⬜ |
-| `PAGE-034.07` | 54–115 | تابع | `excel_download` | 4 | ⬜ |
-| `PAGE-034.08` | 117–120 | تابع | `valid_choice` | 0 | ⬜ |
-| `PAGE-034.09` | 122–130 | تابع | `log_sort_order` | 0 | ⬜ |
-| `PAGE-034.10` | 132–151 | تابع | `log_sort_header_row` | 0 | ⬜ |
-| `PAGE-034.11` | 153–172 | تابع | `log_bounded_date_range` | 0 | ⬜ |
-| `PAGE-034.12` | 174–239 | تابع | `activity_log_filters` | 2 | ⬜ |
-| `PAGE-034.13` | 241–261 | تابع | `activity_log_meta_lines` | 0 | ⬜ |
-| `PAGE-034.14` | 263–277 | تابع | `imported_calendar_date` | 0 | ⬜ |
-| `PAGE-034.15` | 279–282 | تابع | `calendar_unescape` | 0 | ⬜ |
-| `PAGE-034.16` | 284–355 | تابع | `parse_calendar_import` | 0 | ⬜ |
-| `PAGE-034.17` | 357–410 | تابع | `store_attachment` | 6 | ⬜ |
-| `PAGE-034.18` | 412–435 | تابع | `store_profile_photo` | 1 | ⬜ |
-| `PAGE-034.19` | 437–449 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
-| `PAGE-034.20` | 451–456 | تابع | `fetch_ticket` | 0 | ⬜ |
-| `PAGE-034.21` | 458–461 | تابع | `can_view_ticket` | 0 | ⬜ |
-| `PAGE-034.22` | 463–482 | تابع | `ticket_org_manager_rank_sql` | 0 | ⬜ |
-| `PAGE-034.23` | 484–526 | تابع | `choose_handling_agent` | 5 | ⬜ |
-| `PAGE-034.24` | 528–550 | تابع | `ticket_allowed_transitions` | 0 | ⬜ |
-| `PAGE-034.25` | 552–556 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
-| `PAGE-034.26` | 558–564 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
-| `PAGE-034.27` | 566–572 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
-| `PAGE-034.28` | 574–583 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
-| `PAGE-034.29` | 584–638 | تابع | `report_query_filters` | 2 | ⬜ |
-| `PAGE-034.30` | 640–789 | تابع | `render_header` | 4 | ⬜ |
-| `PAGE-034.31` | 791–798 | تابع | `list_sort_page_off` | 2 | ⬜ |
-| `PAGE-034.32` | 800–821 | تابع | `inspection_food_reminder_markup` | 0 | ⬜ |
-| `PAGE-034.33` | 823–854 | تابع | `render_footer` | 0 | ⬜ |
-| `PAGE-034.34` | 855–860 | ناحیه | `بلوک رویه‌ای 855-860` | 2 | ⬜ |
-| `PAGE-034.35` | 861–880 | ناحیه | `ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)` | 2 | ⬜ |
-| `PAGE-034.36` | 881–882 | ناحیه | `ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن` | 2 | ⬜ |
-| `PAGE-034.37` | 883–890 | ناحیه | `۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛` | 2 | ⬜ |
-| `PAGE-034.38` | 891–901 | ناحیه | `مسیر: must_change_password\|change-password` | 2 | ⬜ |
-| `PAGE-034.39` | 902–915 | ناحیه | `مسیر: REQUEST_METHOD\|POST\|organization` | 0 | ⬜ |
-| `PAGE-034.40` | 916–929 | ناحیه | `مسیر: food-ticket\|food_api` | 2 | ⬜ |
-| `PAGE-034.41` | 930–941 | ناحیه | `مسیر: food-order\|food_api` | 2 | ⬜ |
-| `PAGE-034.42` | 942–1087 | ناحیه | `مسیر: traffic-control\|traffic_api` | **9** | ⬜ |
-| `PAGE-034.43` | 1088–1202 | ناحیه | `خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط د` | 7 | ⬜ |
-| `PAGE-034.44` | 1203–1208 | ناحیه | `مسیر: food-personnel-link` | 0 | ⬜ |
-| `PAGE-034.45` | 1209–1212 | ناحیه | `ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه` | 2 | ⬜ |
-| `PAGE-034.46` | 1213–1323 | ناحیه | `مسیر: logging_begin_operation` | 6 | ⬜ |
-| `PAGE-034.47` | 1324–1334 | ناحیه | `مسیر: settings\|create_access_group\|save_access_g` | 2 | ⬜ |
-| `PAGE-034.48` | 1335–1387 | ناحیه | `مسیر: chatbot-api` | 0 | ⬜ |
-| `PAGE-034.49` | 1388–1388 | ناحیه | `۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدها` | 0 | ⬜ |
-| `PAGE-034.50` | 1389–1389 | ناحیه | `food_ticket_is_allowed() (هر کد food.*) نمایش داده` | 0 | ⬜ |
-| `PAGE-034.51` | 1390–1390 | ناحیه | `می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لی` | 0 | ⬜ |
-| `PAGE-034.52` | 1391–1398 | ناحیه | `مسیر: food-ticket\|food_ticket_is_allowed\|food.mo` | 0 | ⬜ |
-| `PAGE-034.53` | 1399–1406 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
-| `PAGE-034.54` | 1407–1415 | ناحیه | `مسیر: settings\|settings.general\|settings.domain` | 0 | ⬜ |
-| `PAGE-034.55` | 1416–1418 | ناحیه | `مسیر: change-password` | 0 | ⬜ |
-| `PAGE-034.56` | 1419–1421 | ناحیه | `مسیر: local-accounts` | 0 | ⬜ |
-| `PAGE-034.57` | 1422–1439 | ناحیه | `مسیر: profile` | 0 | ⬜ |
-| `PAGE-034.58` | 1440–1443 | ناحیه | `مسیر: governance` | 0 | ⬜ |
-| `PAGE-034.59` | 1444–1448 | ناحیه | `مسیر: food-ticket` | 0 | ⬜ |
-| `PAGE-034.60` | 1449–1456 | ناحیه | `مسیر: food-order\|foodorder.self` | 0 | ⬜ |
-| `PAGE-034.61` | 1457–1460 | ناحیه | `مسیر: food-order` | 0 | ⬜ |
-| `PAGE-034.62` | 1461–1464 | ناحیه | `مسیر: cd-dvd` | 0 | ⬜ |
-| `PAGE-034.63` | 1465–1468 | ناحیه | `مسیر: cd-dvd-history` | 0 | ⬜ |
-| `PAGE-034.64` | 1469–1471 | ناحیه | `مسیر: traffic-control` | 0 | ⬜ |
-| `PAGE-034.65` | 1472–1475 | ناحیه | `مسیر: traffic-control-print` | 2 | ⬜ |
-| `PAGE-034.66` | 1476–1561 | ناحیه | `مسیر: services` | 7 | ⬜ |
-| `PAGE-034.67` | 1562–1570 | ناحیه | `سربرگ‌ها (تب‌ها)` | 0 | ⬜ |
-| `PAGE-034.68` | 1571–1580 | ناحیه | `تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)` | 0 | ⬜ |
-| `PAGE-034.69` | 1581–1604 | ناحیه | `تب ۲: لیست خدمات + فیلتر` | 6 | ⬜ |
-| `PAGE-034.70` | 1605–1618 | ناحیه | `تب ۳: دسته‌بندی‌ها` | 6 | ⬜ |
-| `PAGE-034.71` | 1619–1646 | ناحیه | `پنجره‌های ویرایش/فیلد (rendered outside the tab pa` | 5 | ⬜ |
-| `PAGE-034.72` | 1647–1654 | ناحیه | `مسیر: help` | 0 | ⬜ |
-| `PAGE-034.73` | 1655–1691 | ناحیه | `مسیر: knowledge` | 2 | ⬜ |
-| `PAGE-034.74` | 1692–1699 | ناحیه | `مسیر: notifications\|notif.view` | 0 | ⬜ |
-| `PAGE-034.75` | 1700–1717 | ناحیه | `مسیر: notifications` | 5 | ⬜ |
-| `PAGE-034.76` | 1718–1726 | ناحیه | `مسیر: audit` | 0 | ⬜ |
-| `PAGE-034.77` | 1727–1730 | ناحیه | `مسیر: logging-dashboard` | 0 | ⬜ |
-| `PAGE-034.78` | 1731–1734 | ناحیه | `مسیر: system-health` | 0 | ⬜ |
-| `PAGE-034.79` | 1735–1740 | ناحیه | `مسیر: logs` | 0 | ⬜ |
-| `PAGE-034.80` | 1741–1883 | ناحیه | `مسیر: activity-log` | **8** | ⬜ |
-| `PAGE-034.81` | 1884–1922 | ناحیه | `مسیر: backup` | 6 | ⬜ |
-| `PAGE-034.82` | 1923–1930 | ناحیه | `مسیر: search\|search.global` | 0 | ⬜ |
-| `PAGE-034.83` | 1931–2021 | ناحیه | `مسیر: search` | 7 | ⬜ |
-| `PAGE-034.84` | 2022–2068 | ناحیه | `مسیر: queue` | 7 | ⬜ |
-| `PAGE-034.85` | 2069–2171 | ناحیه | `مسیر: chatbot-admin` | 5 | ⬜ |
-| `PAGE-034.86` | 2172–2182 | ناحیه | `مسیر: holidays` | 0 | ⬜ |
-| `PAGE-034.87` | 2183–2190 | ناحیه | `مسیر: new-ticket\|ticket.create` | 0 | ⬜ |
-| `PAGE-034.88` | 2191–2326 | ناحیه | `مسیر: new-ticket` | **8** | ⬜ |
-| `PAGE-034.89` | 2327–2562 | ناحیه | `مسیر: ticket` | **8** | ⬜ |
-| `PAGE-034.90` | 2563–2606 | ناحیه | `مسیر: analytics` | 5 | ⬜ |
-| `PAGE-034.91` | 2607–2668 | ناحیه | `مسیر: reports` | 7 | ⬜ |
-| `PAGE-034.92` | 2669–2713 | ناحیه | `مسیر: supervisor` | 7 | ⬜ |
-| `PAGE-034.93` | 2714–2814 | ناحیه | `مسیر: inventory` | 7 | ⬜ |
-| `PAGE-034.94` | 2815–2846 | ناحیه | `مسیر: inventory-diagnostics` | 2 | ⬜ |
-| `PAGE-034.95` | 2847–2864 | ناحیه | `مسیر: asset-history` | 7 | ⬜ |
-| `PAGE-034.96` | 2865–2942 | ناحیه | `مسیر: domain-scan` | 2 | ⬜ |
-| `PAGE-034.97` | 2943–2987 | ناحیه | `مسیر: assets` | 7 | ⬜ |
-| `PAGE-034.98` | 2988–3021 | ناحیه | `مسیر: asset` | 7 | ⬜ |
-| `PAGE-034.99` | 3022–3212 | ناحیه | `مسیر: organization` | 3 | ⬜ |
-| `PAGE-034.100` | 3213–3682 | ناحیه | `مسیر: settings` | **11** | ⬜ |
-| `PAGE-034.101` | 3683–3704 | ناحیه | `مسیر: logs` | 2 | ⬜ |
-| `PAGE-034.102` | 3705–3744 | ناحیه | `مسیر: dashboard` | 5 | ⬜ |
+| `PAGE-034.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 1 | ⬜ |
+| `PAGE-034.02` | 32–32 | ناحیه | `تبدیل رکوردهای قدیمی غذا فقط هنگام بارگذاری فهرست ` | 0 | ⬜ |
+| `PAGE-034.03` | 33–38 | ناحیه | `نه در هر درخواست و نه قبل از نمایش فرم ورود.` | 2 | ⬜ |
+| `PAGE-034.04` | 39–42 | تابع | `post_value` | 2 | ⬜ |
+| `PAGE-034.05` | 44–48 | تابع | `csv_cell` | 0 | ⬜ |
+| `PAGE-034.06` | 50–53 | تابع | `excel_cell` | 0 | ⬜ |
+| `PAGE-034.07` | 55–116 | تابع | `excel_download` | 4 | ⬜ |
+| `PAGE-034.08` | 118–121 | تابع | `valid_choice` | 0 | ⬜ |
+| `PAGE-034.09` | 123–131 | تابع | `log_sort_order` | 0 | ⬜ |
+| `PAGE-034.10` | 133–152 | تابع | `log_sort_header_row` | 0 | ⬜ |
+| `PAGE-034.11` | 154–173 | تابع | `log_bounded_date_range` | 0 | ⬜ |
+| `PAGE-034.12` | 175–240 | تابع | `activity_log_filters` | 2 | ⬜ |
+| `PAGE-034.13` | 242–262 | تابع | `activity_log_meta_lines` | 0 | ⬜ |
+| `PAGE-034.14` | 264–278 | تابع | `imported_calendar_date` | 0 | ⬜ |
+| `PAGE-034.15` | 280–283 | تابع | `calendar_unescape` | 0 | ⬜ |
+| `PAGE-034.16` | 285–356 | تابع | `parse_calendar_import` | 0 | ⬜ |
+| `PAGE-034.17` | 358–411 | تابع | `store_attachment` | 6 | ⬜ |
+| `PAGE-034.18` | 413–436 | تابع | `store_profile_photo` | 1 | ⬜ |
+| `PAGE-034.19` | 438–450 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
+| `PAGE-034.20` | 452–457 | تابع | `fetch_ticket` | 0 | ⬜ |
+| `PAGE-034.21` | 459–462 | تابع | `can_view_ticket` | 0 | ⬜ |
+| `PAGE-034.22` | 464–483 | تابع | `ticket_org_manager_rank_sql` | 0 | ⬜ |
+| `PAGE-034.23` | 485–527 | تابع | `choose_handling_agent` | 5 | ⬜ |
+| `PAGE-034.24` | 529–537 | تابع | `ticket_allowed_transitions` | 0 | ⬜ |
+| `PAGE-034.25` | 538–542 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
+| `PAGE-034.26` | 544–550 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
+| `PAGE-034.27` | 552–558 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
+| `PAGE-034.28` | 560–569 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
+| `PAGE-034.29` | 570–624 | تابع | `report_query_filters` | 2 | ⬜ |
+| `PAGE-034.30` | 626–775 | تابع | `render_header` | 4 | ⬜ |
+| `PAGE-034.31` | 777–784 | تابع | `list_sort_page_off` | 2 | ⬜ |
+| `PAGE-034.32` | 786–807 | تابع | `inspection_food_reminder_markup` | 0 | ⬜ |
+| `PAGE-034.33` | 809–840 | تابع | `render_footer` | 0 | ⬜ |
+| `PAGE-034.34` | 841–846 | ناحیه | `بلوک رویه‌ای 841-846` | 2 | ⬜ |
+| `PAGE-034.35` | 847–866 | ناحیه | `ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)` | 2 | ⬜ |
+| `PAGE-034.36` | 867–868 | ناحیه | `ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن` | 2 | ⬜ |
+| `PAGE-034.37` | 869–876 | ناحیه | `۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛` | 2 | ⬜ |
+| `PAGE-034.38` | 877–887 | ناحیه | `مسیر: must_change_password\|change-password` | 2 | ⬜ |
+| `PAGE-034.39` | 888–901 | ناحیه | `مسیر: REQUEST_METHOD\|POST\|organization` | 0 | ⬜ |
+| `PAGE-034.40` | 902–915 | ناحیه | `مسیر: food-ticket\|food_api` | 2 | ⬜ |
+| `PAGE-034.41` | 916–927 | ناحیه | `مسیر: food-order\|food_api` | 2 | ⬜ |
+| `PAGE-034.42` | 928–1073 | ناحیه | `مسیر: traffic-control\|traffic_api` | **9** | ⬜ |
+| `PAGE-034.43` | 1074–1188 | ناحیه | `خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط د` | 7 | ⬜ |
+| `PAGE-034.44` | 1189–1194 | ناحیه | `مسیر: food-personnel-link` | 0 | ⬜ |
+| `PAGE-034.45` | 1195–1198 | ناحیه | `ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه` | 2 | ⬜ |
+| `PAGE-034.46` | 1199–1309 | ناحیه | `مسیر: logging_begin_operation` | 6 | ⬜ |
+| `PAGE-034.47` | 1310–1320 | ناحیه | `مسیر: settings\|create_access_group\|save_access_g` | 2 | ⬜ |
+| `PAGE-034.48` | 1321–1373 | ناحیه | `مسیر: chatbot-api` | 0 | ⬜ |
+| `PAGE-034.49` | 1374–1374 | ناحیه | `۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدها` | 0 | ⬜ |
+| `PAGE-034.50` | 1375–1375 | ناحیه | `food_ticket_is_allowed() (هر کد food.*) نمایش داده` | 0 | ⬜ |
+| `PAGE-034.51` | 1376–1376 | ناحیه | `می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لی` | 0 | ⬜ |
+| `PAGE-034.52` | 1377–1384 | ناحیه | `مسیر: food-ticket\|food_ticket_is_allowed\|food.mo` | 0 | ⬜ |
+| `PAGE-034.53` | 1385–1392 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
+| `PAGE-034.54` | 1393–1401 | ناحیه | `مسیر: settings\|settings.general\|settings.domain` | 0 | ⬜ |
+| `PAGE-034.55` | 1402–1404 | ناحیه | `مسیر: change-password` | 0 | ⬜ |
+| `PAGE-034.56` | 1405–1407 | ناحیه | `مسیر: local-accounts` | 0 | ⬜ |
+| `PAGE-034.57` | 1408–1425 | ناحیه | `مسیر: profile` | 0 | ⬜ |
+| `PAGE-034.58` | 1426–1429 | ناحیه | `مسیر: governance` | 0 | ⬜ |
+| `PAGE-034.59` | 1430–1434 | ناحیه | `مسیر: food-ticket` | 0 | ⬜ |
+| `PAGE-034.60` | 1435–1442 | ناحیه | `مسیر: food-order\|foodorder.self` | 0 | ⬜ |
+| `PAGE-034.61` | 1443–1446 | ناحیه | `مسیر: food-order` | 0 | ⬜ |
+| `PAGE-034.62` | 1447–1450 | ناحیه | `مسیر: cd-dvd` | 0 | ⬜ |
+| `PAGE-034.63` | 1451–1454 | ناحیه | `مسیر: cd-dvd-history` | 0 | ⬜ |
+| `PAGE-034.64` | 1455–1457 | ناحیه | `مسیر: traffic-control` | 0 | ⬜ |
+| `PAGE-034.65` | 1458–1461 | ناحیه | `مسیر: traffic-control-print` | 2 | ⬜ |
+| `PAGE-034.66` | 1462–1547 | ناحیه | `مسیر: services` | 7 | ⬜ |
+| `PAGE-034.67` | 1548–1556 | ناحیه | `سربرگ‌ها (تب‌ها)` | 0 | ⬜ |
+| `PAGE-034.68` | 1557–1566 | ناحیه | `تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)` | 0 | ⬜ |
+| `PAGE-034.69` | 1567–1590 | ناحیه | `تب ۲: لیست خدمات + فیلتر` | 6 | ⬜ |
+| `PAGE-034.70` | 1591–1604 | ناحیه | `تب ۳: دسته‌بندی‌ها` | 6 | ⬜ |
+| `PAGE-034.71` | 1605–1632 | ناحیه | `پنجره‌های ویرایش/فیلد (rendered outside the tab pa` | 5 | ⬜ |
+| `PAGE-034.72` | 1633–1640 | ناحیه | `مسیر: help` | 0 | ⬜ |
+| `PAGE-034.73` | 1641–1677 | ناحیه | `مسیر: knowledge` | 2 | ⬜ |
+| `PAGE-034.74` | 1678–1685 | ناحیه | `مسیر: notifications\|notif.view` | 0 | ⬜ |
+| `PAGE-034.75` | 1686–1703 | ناحیه | `مسیر: notifications` | 5 | ⬜ |
+| `PAGE-034.76` | 1704–1712 | ناحیه | `مسیر: audit` | 0 | ⬜ |
+| `PAGE-034.77` | 1713–1716 | ناحیه | `مسیر: logging-dashboard` | 0 | ⬜ |
+| `PAGE-034.78` | 1717–1720 | ناحیه | `مسیر: system-health` | 0 | ⬜ |
+| `PAGE-034.79` | 1721–1726 | ناحیه | `مسیر: logs` | 0 | ⬜ |
+| `PAGE-034.80` | 1727–1869 | ناحیه | `مسیر: activity-log` | **8** | ⬜ |
+| `PAGE-034.81` | 1870–1908 | ناحیه | `مسیر: backup` | 6 | ⬜ |
+| `PAGE-034.82` | 1909–1916 | ناحیه | `مسیر: search\|search.global` | 0 | ⬜ |
+| `PAGE-034.83` | 1917–2007 | ناحیه | `مسیر: search` | 7 | ⬜ |
+| `PAGE-034.84` | 2008–2054 | ناحیه | `مسیر: queue` | 7 | ⬜ |
+| `PAGE-034.85` | 2055–2157 | ناحیه | `مسیر: chatbot-admin` | 5 | ⬜ |
+| `PAGE-034.86` | 2158–2168 | ناحیه | `مسیر: holidays` | 0 | ⬜ |
+| `PAGE-034.87` | 2169–2176 | ناحیه | `مسیر: new-ticket\|ticket.create` | 0 | ⬜ |
+| `PAGE-034.88` | 2177–2312 | ناحیه | `مسیر: new-ticket` | **8** | ⬜ |
+| `PAGE-034.89` | 2313–2548 | ناحیه | `مسیر: ticket` | **8** | ⬜ |
+| `PAGE-034.90` | 2549–2592 | ناحیه | `مسیر: analytics` | 5 | ⬜ |
+| `PAGE-034.91` | 2593–2654 | ناحیه | `مسیر: reports` | 7 | ⬜ |
+| `PAGE-034.92` | 2655–2699 | ناحیه | `مسیر: supervisor` | 7 | ⬜ |
+| `PAGE-034.93` | 2700–2800 | ناحیه | `مسیر: inventory` | 7 | ⬜ |
+| `PAGE-034.94` | 2801–2832 | ناحیه | `مسیر: inventory-diagnostics` | 2 | ⬜ |
+| `PAGE-034.95` | 2833–2850 | ناحیه | `مسیر: asset-history` | 7 | ⬜ |
+| `PAGE-034.96` | 2851–2928 | ناحیه | `مسیر: domain-scan` | 2 | ⬜ |
+| `PAGE-034.97` | 2929–2973 | ناحیه | `مسیر: assets` | 7 | ⬜ |
+| `PAGE-034.98` | 2974–3007 | ناحیه | `مسیر: asset` | 7 | ⬜ |
+| `PAGE-034.99` | 3008–3198 | ناحیه | `مسیر: organization` | 3 | ⬜ |
+| `PAGE-034.100` | 3199–3668 | ناحیه | `مسیر: settings` | **11** | ⬜ |
+| `PAGE-034.101` | 3669–3690 | ناحیه | `مسیر: logs` | 2 | ⬜ |
+| `PAGE-034.102` | 3691–3730 | ناحیه | `مسیر: dashboard` | 5 | ⬜ |
 
 </details>
 
@@ -11323,11 +11323,11 @@
 </details>
 
 <details>
-<summary><b>CRON-012</b> — <code>cron/ticket_auto_close.php</code> (78 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>CRON-012</b> — <code>cron/ticket_auto_close.php</code> (79 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `CRON-012.01` | 1–78 | ناحیه | `بلوک رویه‌ای 1-78` | 5 | ⬜ |
+| `CRON-012.01` | 1–79 | ناحیه | `بلوک رویه‌ای 1-79` | 5 | ⬜ |
 
 </details>
 

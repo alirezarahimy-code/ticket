@@ -199,7 +199,7 @@ cron/run_logging_integrity_export.bat	cron	20	1605
 cron/run_logging_maintenance.bat	cron	40	1970
 cron/run_logging_retention.bat	cron	12	508
 cron/sla_maintenance.php	cron	93	5532
-cron/ticket_auto_close.php	cron	77	4757
+cron/ticket_auto_close.php	cron	78	4836
 cron/verify_logging_integrity.php	cron	26	1365
 cron/verify_logging_release.php	cron	25	4981
 docs/ARCHITECTURE-FA.md	docs	167	17142
@@ -359,7 +359,7 @@ global-search.php	core	121	12295
 governance.php	core	545	48255
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
-index.php	core	3743	375047
+index.php	core	3729	374141
 install-empty-db.sql	sql-root	1612	82181
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -418,7 +418,7 @@ migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 modules/request-center/README.md	other	40	3662
 modules/request-center/RequestCenterRepository.php	other	177	7365
-modules/request-center/WorkflowService.php	other	216	9491
+modules/request-center/WorkflowService.php	other	216	9554
 ola.php	core	111	11934
 organization.php	core	786	39767
 permissions.php	core	911	47450
