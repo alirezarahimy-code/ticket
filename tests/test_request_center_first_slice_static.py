@@ -50,6 +50,24 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("FOR UPDATE", service)
         self.assertIn("RequestCenterWorkflowService::allowedTransitions($from)", index)
 
+    def test_migrated_status_writes_use_the_central_workflow_service(self):
+        paths = (
+            "actions/ticket-actions.php",
+            "actions/supervisor-actions.php",
+            "actions/bulk-actions.php",
+            "cron/ticket_auto_close.php",
+        )
+        for path in paths:
+            source = read(path)
+            self.assertNotRegex(
+                source,
+                r"UPDATE\\s+tickets\\s+SET\\s+status\\s*=",
+                f"direct ticket status write remains in {path}",
+            )
+            self.assertIn("WorkflowService", source, f"workflow service is not loaded/used in {path}")
+        self.assertIn("require_once __DIR__ . '/modules/request-center/WorkflowService.php';", read("index.php"))
+        self.assertIn("require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';", read("cron/ticket_auto_close.php"))
+
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
         entry = read("request-center.php")
         self.assertIn("htmlspecialchars(", entry)
