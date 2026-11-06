@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 533 |
-| خطوط | 124,322 |
+| خطوط | 124,325 |
 | آدرس‌ها (بلوک) | 6,640 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 212 | 1,553 | 19,444 |
+| `TEST` | TEST | 212 | 1,553 | 19,447 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 50 | 1,362 | 43,887 |
@@ -2671,14 +2671,14 @@
 </details>
 
 <details>
-<summary><b>TEST-157</b> — <code>tests/test_release_1_62_74_package.py</code> (228 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-157</b> — <code>tests/test_release_1_62_74_package.py</code> (231 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-157.01` | 1–145 | بلوک | `مقدمهٔ فایل` | 2 | ⬜ |
-| `TEST-157.02` | 146–146 | بلوک | `FoodReconciliationReleasePackageTest` | 0 | ⬜ |
-| `TEST-157.03` | 147–207 | بلوک | `test_cumulative_package_manifest_payload_and_check` | 0 | ⬜ |
-| `TEST-157.04` | 208–228 | بلوک | `test_meal_reconciliation_archive_stays_intact` | 0 | ⬜ |
+| `TEST-157.01` | 1–148 | بلوک | `مقدمهٔ فایل` | 2 | ⬜ |
+| `TEST-157.02` | 149–149 | بلوک | `FoodReconciliationReleasePackageTest` | 0 | ⬜ |
+| `TEST-157.03` | 150–210 | بلوک | `test_cumulative_package_manifest_payload_and_check` | 0 | ⬜ |
+| `TEST-157.04` | 211–231 | بلوک | `test_meal_reconciliation_archive_stays_intact` | 0 | ⬜ |
 
 </details>
 

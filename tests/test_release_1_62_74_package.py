@@ -123,6 +123,9 @@ POST_RELEASE_WORKTREE_CHANGES = {
     "permissions.php",
     "schema.sql",
     "lib/auth-scope.php",
+    # ۱.۶۲.۸۸ اصلاح آزمون‌های بحرانی این دو دارایی را پس از انتشار ۱.۶۲.۷۴ تغییر داد.
+    "assets/food-menu.js",
+    "food-ticket-web/assets/food-menu.js",
 }
 EXPECTED_ADDITIONS = {
     "food-reconciliation.php",

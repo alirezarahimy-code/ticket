@@ -71838,16 +71838,16 @@
             "id": "TEST-157",
             "path": "tests\/test_release_1_62_74_package.py",
             "area": "TEST",
-            "lines": 228,
-            "file_fingerprint": "443009233c93",
+            "lines": 231,
+            "file_fingerprint": "00b374af50ce",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 145,
-                    "lines": 145,
-                    "fingerprint": "d8d825b9d306",
+                    "line_end": 148,
+                    "lines": 148,
+                    "fingerprint": "93660dbce8f4",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -71860,8 +71860,8 @@
                 {
                     "kind": "block",
                     "anchor": "FoodReconciliationReleasePackageTest",
-                    "line_start": 146,
-                    "line_end": 146,
+                    "line_start": 149,
+                    "line_end": 149,
                     "lines": 1,
                     "fingerprint": "5be70c908604",
                     "risk": {
@@ -71873,8 +71873,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_cumulative_package_manifest_payload_and_checksum",
-                    "line_start": 147,
-                    "line_end": 207,
+                    "line_start": 150,
+                    "line_end": 210,
                     "lines": 61,
                     "fingerprint": "74d80a5246df",
                     "risk": {
@@ -71886,8 +71886,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_meal_reconciliation_archive_stays_intact",
-                    "line_start": 208,
-                    "line_end": 228,
+                    "line_start": 211,
+                    "line_end": 231,
                     "lines": 21,
                     "fingerprint": "13d7e1407be6",
                     "risk": {

@@ -598,7 +598,7 @@ tests/test_release_1_62_61_package.py	tests	28	1802
 tests/test_release_1_62_6_auto_assign_static.py	tests	46	2297
 tests/test_release_1_62_73_dashboard_r2_package.py	tests	101	5720
 tests/test_release_1_62_73_package.py	tests	144	6828
-tests/test_release_1_62_74_package.py	tests	227	10679
+tests/test_release_1_62_74_package.py	tests	230	10897
 tests/test_release_1_62_75_package.py	tests	233	10945
 tests/test_release_1_62_7_traffic_history_events_static.py	tests	72	3393
 tests/test_release_1_62_88_package_integrity.py	tests	47	1904

@@ -45716,12 +45716,12 @@
       "line": 1,
       "anchor": "مقدمهٔ فایل",
       "risk": 2,
-      "lines": 145
+      "lines": 148
     },
     "TEST-157.02": {
       "path": "tests/test_release_1_62_74_package.py",
       "area": "TEST",
-      "line": 146,
+      "line": 149,
       "anchor": "FoodReconciliationReleasePackageTest",
       "risk": 0,
       "lines": 1
@@ -45729,7 +45729,7 @@
     "TEST-157.03": {
       "path": "tests/test_release_1_62_74_package.py",
       "area": "TEST",
-      "line": 147,
+      "line": 150,
       "anchor": "test_cumulative_package_manifest_payload_and_checksum",
       "risk": 0,
       "lines": 61
@@ -45737,7 +45737,7 @@
     "TEST-157.04": {
       "path": "tests/test_release_1_62_74_package.py",
       "area": "TEST",
-      "line": 208,
+      "line": 211,
       "anchor": "test_meal_reconciliation_archive_stays_intact",
       "risk": 0,
       "lines": 21
