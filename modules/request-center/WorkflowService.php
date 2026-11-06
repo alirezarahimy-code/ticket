@@ -208,7 +208,7 @@ final class RequestCenterWorkflowService
                 return;
 
             case 'same_state':
-                if ($from !== $to || !$cancelPending && false) {
+                if ($from !== $to) {
                     throw new RuntimeException('فرمان بدون تغییر وضعیت نباید وضعیت مقصد متفاوت داشته باشد.');
                 }
                 return;
