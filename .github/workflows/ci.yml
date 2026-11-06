@@ -10,6 +10,24 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      # دیتابیس واقعی برای آزمون یکپارچگی نصب تازه و مهاجرت‌ها — فقط همین job و فقط ephemeral.
+      # نکته: مهاجرت‌های پروژه با سینتکس MariaDB نوشته شده‌اند (ADD COLUMN IF NOT EXISTS)
+      # و روی MySQL 8 شکست می‌خورند؛ به همین دلیل تصویر mariadb انتخاب شده است.
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
+          MARIADB_ROOT_HOST: '%'
+          MARIADB_DATABASE: persian_ticketing_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -pci-ephemeral-root-password --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -38,6 +56,56 @@ jobs:
         python tests/test_skill_manifest_static.py
         python tests/test_system_map_static.py
         python tests/test_session_boot_static.py
+
+    # ─── یکپارچگی واقعی دیتابیس (MariaDB) ───────────────────────────────
+    # اسکیمای نصب تازه (install-empty-db.sql، ۸۲ جدول) روی MariaDB واقعی بارگذاری
+    # می‌شود و سپس همهٔ مهاجرت‌ها (به‌جز فایل *-rollback.sql) دوبار اعمال می‌شوند
+    # تا ایده‌مپوتنسی تأیید شود. هیچ دادهٔ واقعی درگیر نیست.
+    - name: Install MariaDB client
+      run: sudo apt-get update && sudo apt-get install -y mariadb-client
+
+    - name: Wait for MariaDB
+      run: |
+        for i in $(seq 1 60); do
+          mariadb-admin ping -h 127.0.0.1 -uroot -pci-ephemeral-root-password --silent && exit 0
+          sleep 2
+        done
+        echo "MariaDB آماده نشد" >&2
+        exit 1
+
+    - name: Load fresh-install schema
+      run: mariadb -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
+
+    - name: Fresh install integrity (PDO)
+      run: php tests/test_mariadb_fresh_install.php fresh-install
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+        CI_DB_REQUIRED: '1'
+
+    - name: Apply all migrations twice (idempotency)
+      run: |
+        set -e
+        for pass in 1 2; do
+          echo "── migration pass $pass"
+          for f in $(ls migrations/*.sql | grep -v -- '-rollback.sql' | LC_ALL=C sort); do
+            echo "→ $f"
+            mariadb -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < "$f"
+          done
+        done
+
+    - name: Migration registry integrity
+      run: php tests/test_mariadb_fresh_install.php migrations-applied
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+        CI_DB_REQUIRED: '1'
 
     - name: Check PHP syntax
       run: git ls-files -z -- '*.php' | php tools/lint-php-syntax.php

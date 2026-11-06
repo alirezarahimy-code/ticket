@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/build_system_map.py",
-  "total_files_indexed": 1160,
-  "total_lines_indexed": 209301,
+  "total_files_indexed": 1161,
+  "total_lines_indexed": 209502,
   "categories": {
     "actions": 16,
     "api": 1,
@@ -23,11 +23,11 @@
     "root-misc": 105,
     "routes": 1,
     "sql-root": 47,
-    "tests": 220,
+    "tests": 221,
     "tools": 100,
     "workflows": 8
   },
-  "symbols": 5520,
+  "symbols": 5521,
   "routes": 414,
   "table_definitions": 455,
   "unique_tables": 84,
