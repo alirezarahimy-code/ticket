@@ -120,6 +120,12 @@ $visibleUser = ['id' => $requesterId, 'role' => 'user'];
 $list = $repository->listVisible($visibleUser, 1, 20);
 check_request_center($list['total'] === 1, 'MariaDB list count uses the shared scope predicate');
 check_request_center(count($list['rows']) === 1 && (int) $list['rows'][0]['id'] === $ticketId, 'MariaDB list returns the scoped request');
+$personalQueue = $repository->listVisible($visibleUser, 1, 20, ['assigned_to' => $agentId]);
+check_request_center($personalQueue['total'] === 1, 'MariaDB personal queue applies the assigned-agent filter');
+$otherQueue = $repository->listVisible($visibleUser, 1, 20, ['assigned_to' => $requesterId]);
+check_request_center($otherQueue['total'] === 0, 'MariaDB personal queue does not return tickets assigned to another account');
+$requesterOnly = $repository->listVisible($visibleUser, 1, 20, ['requester_id' => $requesterId]);
+check_request_center($requesterOnly['total'] === 1, 'MariaDB requester workspace remains constrained to the signed-in requester');
 $detail = $repository->findVisible($ticketId, $visibleUser);
 check_request_center(is_array($detail) && $detail['service_name'] === 'RC Support', 'MariaDB detail joins service and reference data');
 
