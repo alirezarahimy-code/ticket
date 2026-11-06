@@ -131,13 +131,31 @@ if ($ticket === null) {
 ?>
 <?php else: ?>
 <?php
-$result = $repo->listVisible($user, $page, 50);
+$filters = [
+    'q' => trim((string) ($_GET['q'] ?? '')),
+    'status' => (string) ($_GET['status'] ?? ''),
+    'priority' => (string) ($_GET['priority'] ?? ''),
+    'service_group' => (string) ($_GET['service_group'] ?? ''),
+];
+if (!in_array($filters['status'], array_keys($statusLabels), true)) $filters['status'] = '';
+if (!in_array($filters['priority'], array_keys($priorityLabels), true)) $filters['priority'] = '';
+if (!in_array($filters['service_group'], ['it', 'support'], true)) $filters['service_group'] = '';
+$filters['q'] = function_exists('mb_substr') ? mb_substr($filters['q'], 0, 100, 'UTF-8') : substr($filters['q'], 0, 100);
+$result = $repo->listVisible($user, $page, 50, $filters);
 $pages = max(1, (int) ceil($result['total'] / 50));
 $page = min($page, $pages);
+$queryString = http_build_query(array_filter($filters, static fn ($value): bool => $value !== ''));
 ?>
 <section class="heading"><div><h1>درخواست‌های قابل مشاهده</h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div>
 <?php if (user_can($user, 'ticket.create')): ?><a class="button" href="index.php?page=new-ticket">ثبت درخواست جدید</a><?php endif; ?>
 </section>
+<form method="get" action="request-center.php" class="card" style="padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+<label>جست‌وجو<input type="search" name="q" maxlength="100" value="<?= $escape($filters['q']) ?>" placeholder="شماره یا عنوان" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"></label>
+<label>وضعیت<select name="status" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($statusLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['status'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
+<label>اولویت<select name="priority" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($priorityLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['priority'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
+<label>حوزه<select name="service_group" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><option value="it" <?= $filters['service_group'] === 'it' ? 'selected' : '' ?>>فناوری اطلاعات</option><option value="support" <?= $filters['service_group'] === 'support' ? 'selected' : '' ?>>پشتیبانی</option></select></label>
+<button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="request-center.php">پاک‌کردن</a>
+</form>
 <section class="card">
 <?php if (!$result['rows']): ?><div class="empty">درخواستی در محدودهٔ دسترسی شما وجود ندارد.</div><?php else: ?>
 <div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>آخرین تغییر</th></tr></thead><tbody>
