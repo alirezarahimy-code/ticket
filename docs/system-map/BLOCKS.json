@@ -1599,8 +1599,8 @@
             "id": "ACT-015",
             "path": "actions\/ticket-actions.php",
             "area": "ACT",
-            "lines": 708,
-            "file_fingerprint": "a541099ad763",
+            "lines": 734,
+            "file_fingerprint": "ba17341f3ee2",
             "blocks": [
                 {
                     "kind": "region",
@@ -1711,13 +1711,12 @@
                     "kind": "region",
                     "anchor": "مسیر: reply",
                     "line_start": 443,
-                    "line_end": 564,
-                    "lines": 122,
-                    "fingerprint": "f99e079e7e9c",
+                    "line_end": 590,
+                    "lines": 148,
+                    "fingerprint": "7bc42b490b53",
                     "risk": {
-                        "score": 8,
+                        "score": 3,
                         "flags": {
-                            "sql_concat": 5,
                             "raw_input": 2,
                             "long": 1
                         }
@@ -1727,8 +1726,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
-                    "line_start": 565,
-                    "line_end": 708,
+                    "line_start": 591,
+                    "line_end": 734,
                     "lines": 144,
                     "fingerprint": "2affc4387c67",
                     "risk": {
@@ -52352,7 +52351,7 @@
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
             "lines": 236,
-            "file_fingerprint": "b16fec7f223e",
+            "file_fingerprint": "3874332828f1",
             "blocks": [
                 {
                     "kind": "region",
@@ -52386,7 +52385,7 @@
                     "line_start": 28,
                     "line_end": 235,
                     "lines": 208,
-                    "fingerprint": "acb62cced664",
+                    "fingerprint": "50d990acd861",
                     "risk": {
                         "score": 2,
                         "flags": {

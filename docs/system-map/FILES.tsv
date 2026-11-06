@@ -122,7 +122,7 @@ actions/role-actions.php	actions	161	9369
 actions/service-actions.php	actions	228	14500
 actions/settings-actions.php	actions	274	17803
 actions/supervisor-actions.php	actions	171	14875
-actions/ticket-actions.php	actions	707	58386
+actions/ticket-actions.php	actions	733	59298
 actions/user-structure-actions.php	actions	372	29121
 admin-layout-design.php	core	361	15733
 api/inventory.php	api	205	9604
@@ -418,7 +418,7 @@ migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 modules/request-center/README.md	other	40	3662
 modules/request-center/RequestCenterRepository.php	other	177	7365
-modules/request-center/WorkflowService.php	other	235	10660
+modules/request-center/WorkflowService.php	other	235	10681
 ola.php	core	111	11934
 organization.php	core	786	39767
 permissions.php	core	911	47450

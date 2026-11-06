@@ -98,7 +98,7 @@ action	decide_ticket_cancellation	actions/ticket-actions.php	280
 action	claim_ticket	actions/ticket-actions.php	358
 action	reopen_ticket	actions/ticket-actions.php	398
 action	reply	actions/ticket-actions.php	443
-action	update_ticket	actions/ticket-actions.php	565
+action	update_ticket	actions/ticket-actions.php	591
 page	settings	actions/user-structure-actions.php	37
 action	add_category	actions/user-structure-actions.php	29
 action	add_department	actions/user-structure-actions.php	40

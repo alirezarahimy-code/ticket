@@ -4714,10 +4714,10 @@
       "related": [
         "TOOL-047.24",
         "ACT-015.03",
-        "ACT-015.08",
         "ACT-015.09",
         "PAGE-034.89",
-        "ACT-005.04"
+        "ACT-005.04",
+        "ACT-014.04"
       ],
       "total": 29
     },
@@ -5909,13 +5909,13 @@
       "area": "ACT",
       "line": 443,
       "anchor": "مسیر: reply",
-      "risk": 8,
-      "lines": 122
+      "risk": 3,
+      "lines": 148
     },
     "ACT-015.09": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 565,
+      "line": 591,
       "anchor": "مسیر: update_ticket",
       "risk": 8,
       "lines": 144
