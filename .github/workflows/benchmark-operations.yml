@@ -1,6 +1,7 @@
 name: Isolated Full-System Resilience and Ticket/CD-DVD Write Stress
 
 on:
+  workflow_call:
   push:
     branches:
       - arena/8edbdf95-ticket
