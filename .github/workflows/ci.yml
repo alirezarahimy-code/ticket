@@ -48,14 +48,16 @@ jobs:
     - name: Install Python test runner
       run: python -m pip install --disable-pip-version-check pytest
 
-    # تستهای نگهبان بوت جلسه: مانیفست مهارتها، نقشهٔ سامانه و دکمهٔ استارت.
-    # جلوگیری از پوسیدن docs/SKILL-MANIFEST-FA.md و docs/system-map با هر کامیت.
-    # اسکریپتها خروجی exit-code دارند و pytest برایشان جمعکننده نیست؛ مستقیم اجرا میشوند.
-    - name: Session boot guard tests
-      run: |
-        python tests/test_skill_manifest_static.py
-        python tests/test_system_map_static.py
-        python tests/test_session_boot_static.py
+    # تست‌های نگهبان بوت جلسه به‌صورت سه گام جدا — تا در صورت قرمزشدن دقیقاً مشخص باشد کدام خراب است.
+    # اسکریپت‌ها خروجی exit-code دارند و pytest برایشان جمع‌کننده نیست؛ مستقیم اجرا می‌شوند.
+    - name: Guard — skill manifest
+      run: python tests/test_skill_manifest_static.py
+
+    - name: Guard — system map freshness
+      run: python tests/test_system_map_static.py
+
+    - name: Guard — session boot
+      run: python tests/test_session_boot_static.py
 
     # ─── یکپارچگی واقعی دیتابیس (MariaDB) ───────────────────────────────
     # اسکیمای نصب تازه (install-empty-db.sql، ۸۲ جدول) روی MariaDB واقعی بارگذاری

@@ -5,7 +5,7 @@ path	category	lines	bytes
 .github/copilot-instructions.md	workflows	23	1566
 .github/workflows/benchmark-250.yml	workflows	116	4154
 .github/workflows/benchmark-operations.yml	workflows	367	15800
-.github/workflows/ci.yml	workflows	196	7750
+.github/workflows/ci.yml	workflows	205	8161
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	138	5159
