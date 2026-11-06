@@ -72864,7 +72864,7 @@
             "path": "tests\/test_request_center_first_slice_static.py",
             "area": "TEST",
             "lines": 88,
-            "file_fingerprint": "01356e5013c8",
+            "file_fingerprint": "70bf5900ff9c",
             "blocks": [
                 {
                     "kind": "block",
@@ -72978,7 +72978,7 @@
                     "line_start": 53,
                     "line_end": 70,
                     "lines": 18,
-                    "fingerprint": "2213bc0f5791",
+                    "fingerprint": "5b02f2c38872",
                     "risk": {
                         "score": 1,
                         "flags": {
