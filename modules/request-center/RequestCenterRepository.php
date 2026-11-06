@@ -93,6 +93,12 @@ final class RequestCenterRepository
             $clauses[] = 't.requester_id = ?';
             $params[] = $requesterId;
         }
+
+        $assigneeId = (int) ($filters['assigned_to'] ?? 0);
+        if ($assigneeId > 0) {
+            $clauses[] = 't.assigned_to = ?';
+            $params[] = $assigneeId;
+        }
         $serviceGroup = (string) ($filters['service_group'] ?? '');
         if (in_array($serviceGroup, ['it', 'support'], true)) {
             $clauses[] = 't.service_group = ?';
