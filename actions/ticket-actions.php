@@ -512,8 +512,8 @@ if (!defined('APP_ROOT')) {
                     }
                 }
             }
-            $firstResponseSql = ($isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== '' && !$internal) ? ', first_response_at = COALESCE(first_response_at, NOW())' : '';
-            $resolvedSql = ($newStatus === 'resolved' && $oldStatus !== 'resolved') ? ', resolved_at = NOW()' : '';
+            $setFirstResponse = $isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== '' && !$internal;
+            $setResolvedAt = $newStatus === 'resolved' && $oldStatus !== 'resolved';
             [$replyDueAt, $replyPauseAt, $replyPauseMinutes] = ticket_sla_transition($ticket, $newStatus, (string) $ticket['priority']);
             $replyOla = ticket_ola_transition($ticket, $newStatus, (string) $ticket['priority']);
             db()->beginTransaction();
@@ -539,8 +539,34 @@ if (!defined('APP_ROOT')) {
             $query->execute([$ticketId, $user['id'], $body, $internal]);
             $messageId = (int) db()->lastInsertId();
             store_attachment($messageId, $_FILES['attachment'] ?? []);
-            $replyUpdate = db()->prepare('UPDATE tickets SET status = ?, due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, updated_at = NOW()' . $firstResponseSql . $resolvedSql . ' WHERE id = ? AND status = ?');
-            $replyUpdate->execute([$newStatus, $replyDueAt, $replyPauseAt, $replyPauseMinutes, $replyOla['policy_id'], $replyOla['response_due_at'], $replyOla['due_at'], $replyOla['escalation_1_at'], $replyOla['escalation_2_at'], $ticketId, $oldStatus]);
+            $replyUpdates = [
+                'due_at' => $replyDueAt,
+                'sla_paused_at' => $replyPauseAt,
+                'sla_pause_minutes' => $replyPauseMinutes,
+                'ola_policy_id' => $replyOla['policy_id'],
+                'ola_response_due_at' => $replyOla['response_due_at'],
+                'ola_due_at' => $replyOla['due_at'],
+                'ola_escalation_1_at' => $replyOla['escalation_1_at'],
+                'ola_escalation_2_at' => $replyOla['escalation_2_at'],
+            ];
+            if ($setFirstResponse) {
+                $replyUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();
+            }
+            if ($setResolvedAt) {
+                $replyUpdates['resolved_at'] = RequestCenterSqlExpression::now();
+            }
+            $replyTransitionKind = !empty($lockedReply['cancel_requested_at']) && $newStatus === $oldStatus
+                ? 'same_state'
+                : 'standard';
+            $workflow = new RequestCenterWorkflowService(db());
+            $replySaved = $workflow->transition($ticketId, $oldStatus, $newStatus, $replyUpdates, $replyTransitionKind, [
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'priority' => $ticket['priority'],
+                'cancel_requested_at' => $lockedReply['cancel_requested_at'] ?? null,
+            ]);
+            if (!$replySaved) {
+                throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ پیام شما ذخیره نشد. صفحه را تازه کنید.');
+            }
             save_audit_required((int) $user['id'], 'ticket_replied', $ticketId);
             if ($newStatus !== $oldStatus) {
                 log_ticket_event($ticketId, (int) $user['id'], 'status_changed', $oldStatus, $newStatus);
