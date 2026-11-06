@@ -100,17 +100,16 @@ def hidden_value(html: str, name: str) -> str:
 
 
 def selected_option_value(html: str, name: str) -> str:
-    select = re.search(r'<select\\b(?=[^>]*\\bname=["\\']' + re.escape(name) + r'["\\'])[^>]*>(.*?)</select>', html, re.I | re.S)
+    select = re.search(r'<select\b(?=[^>]*\bname=["\']' + re.escape(name) + r'["\'])[^>]*>(.*?)</select>', html, re.I | re.S)
     if not select:
         return hidden_value(html, name)
-    for option in re.finditer(r'<option\\b([^>]*)>', select.group(1), re.I | re.S):
+    for option in re.finditer(r'<option\b([^>]*)>', select.group(1), re.I | re.S):
         attrs = option.group(1)
-        if re.search(r'\\bselected(?:\\s|=|$)', attrs, re.I):
-            value = re.search(r'\\bvalue=["\\']([^"\\']*)["\\']', attrs, re.I)
+        if re.search(r'\bselected(?:\s|=|$)', attrs, re.I):
+            value = re.search(r'\bvalue=["\']([^"\']*)["\']', attrs, re.I)
             if value:
                 return value.group(1)
     return ''
-
 
 def input_value(html: str, name: str) -> str:
     return hidden_value(html, name)
