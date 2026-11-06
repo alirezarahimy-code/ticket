@@ -56,7 +56,8 @@ $groups = (string) file_get_contents($root . '/food-ticket-groups.php');
 $groupsJs = (string) file_get_contents($root . '/food-ticket-web/assets/food-groups.js');
 $ticket = (string) file_get_contents($root . '/food-ticket.php');
 $inventory = (string) file_get_contents($root . '/inventory.php');
-$bootstrap = (string) file_get_contents($root . '/bootstrap.php');
+$bootstrap = (string) file_get_contents($root . '/lib/tickets-sla.php');
+$assetActions = (string) file_get_contents($root . '/actions/asset-actions.php');
 
 echo "=== آزمون بستهٔ ۱.۳۴ ===\n\n";
 
