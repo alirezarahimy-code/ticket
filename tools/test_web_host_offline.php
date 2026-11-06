@@ -106,7 +106,7 @@ $check('۲-پ: استایل تازهٔ پنل هم بازنویسی شد', strpo
 $check('۲-ت: هیچ ارجاع assets/ پنل دست‌نخورده نمانده', strpos($h2, 'src="assets/food-designer') === false && strpos($h2, 'src="assets/food-groups.js') === false);
 
 // ── ۳) نسخه‌ای که لنگر brand را ندارد (نام برند عوض شده) ──
-$noBrand = (string) preg_replace('#<script\\b[^>]*\\bsrc="[^\"]*food-brand\\.js[^\"]*"[^>]*>\\s*</script>#i', '<script src="assets/ft-panel-boot.js?v=1"></script>', $current, 1);
+$noBrand = (string) preg_replace('#<script\b[^>]*\bsrc="[^"]*food-brand\.js[^"]*"[^>]*>\s*</script>#i', '<script src="assets/ft-panel-boot.js?v=1"></script>', $current, 1);
 $r3 = $host($noBrand);
 $check('۳-الف: بوت‌استرپ از مسیر جایگزین (head) تزریق شد', in_array('bootstrap:head', $r3['notes'], true), implode(',', $r3['notes']));
 $check('۳-ب: بوت‌استرپ یک‌بار و پیش از food-brand باقی‌مانده‌ها', $count($r3['html'], 'FOOD_TICKET_HOST_BOOT') === 1);
