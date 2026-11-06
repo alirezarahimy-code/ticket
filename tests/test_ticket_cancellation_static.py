@@ -43,10 +43,10 @@ check("decide_ticket_cancellation" in index
       and "cancel_requested_by" in index
       and "cancel_requested_at = ?" in index,
       "only the scoped handler/manager (not the requester) can decide, with compare-and-set protection")
-check("UPDATE tickets SET status = \"cancelled\"" in index
-      and "cancelled_by_requester" in index
-      and "cancellation_approved" in index
-      and "ticket_messages" in index,
+check("$workflow->transition($ticketId, $oldStatus, 'cancelled'" in ticket_actions
+      and "'requester_cancel'" in ticket_actions
+      and "'cancellation_approved'" in ticket_actions
+      and "ticket_messages" in ticket_actions,
       "cancellation is soft, reasoned, and retained in the conversation and event history")
 check("queue=cancellation_requested" in index and "queue=cancelled" in index
       and "t.status = \"cancelled\"" in index,
