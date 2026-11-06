@@ -28,10 +28,18 @@ if ($action === 'create_access_group') {
         throw new RuntimeException('گروهی با این نام از قبل وجود دارد.');
     }
 
-    $insert = db()->prepare('INSERT INTO user_access_groups (name, description, created_by, updated_by) VALUES (?, ?, ?, ?)');
-    $insert->execute([$name, $description !== '' ? $description : null, (int) $admin['id'], (int) $admin['id']]);
-    $groupId = (int) db()->lastInsertId();
-    save_audit((int) $admin['id'], 'access_group_created', null, ['group_id' => $groupId, 'name' => $name]);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $insert = $pdo->prepare('INSERT INTO user_access_groups (name, description, created_by, updated_by) VALUES (?, ?, ?, ?)');
+        $insert->execute([$name, $description !== '' ? $description : null, (int) $admin['id'], (int) $admin['id']]);
+        $groupId = (int) $pdo->lastInsertId();
+        save_audit_required((int) $admin['id'], 'access_group_created', null, ['group_id' => $groupId, 'name' => $name]);
+        db_commit('index.php');
+    } catch (Throwable $exception) {
+        if (db()->inTransaction()) db_rollback('index.php');
+        throw $exception;
+    }
     flash('success', 'گروه دسترسی ساخته شد؛ اعضا و مجوزهای آن را تنظیم کنید.');
     user_access_groups_redirect($groupId);
 }
@@ -140,6 +148,12 @@ if ($action === 'save_access_group') {
         foreach ($permissions as $permission) {
             $insertPermission->execute([$groupId, $permission, (int) $admin['id']]);
         }
+        save_audit_required((int) $admin['id'], 'access_group_updated', null, [
+            'group_id' => $groupId,
+            'name' => $name,
+            'member_count' => count($memberIds),
+            'permission_count' => count($permissions),
+        ]);
         db_commit('index.php');
     } catch (Throwable $exception) {
         if (db()->inTransaction()) {
@@ -149,12 +163,6 @@ if ($action === 'save_access_group') {
     }
 
     user_access_group_permissions_flush_cache();
-    save_audit((int) $admin['id'], 'access_group_updated', null, [
-        'group_id' => $groupId,
-        'name' => $name,
-        'member_count' => count($memberIds),
-        'permission_count' => count($permissions),
-    ]);
     flash('success', 'اعضای گروه و دسترسی‌های تکمیلی آن ذخیره شد.');
     user_access_groups_redirect($groupId);
 }
@@ -173,9 +181,17 @@ if ($action === 'delete_access_group') {
         throw new RuntimeException('گروه دسترسی پیدا نشد؛ صفحه را تازه کنید.');
     }
 
-    db()->prepare('DELETE FROM user_access_groups WHERE id = ?')->execute([$groupId]);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('DELETE FROM user_access_groups WHERE id = ?')->execute([$groupId]);
+        save_audit_required((int) $admin['id'], 'access_group_deleted', null, ['group_id' => $groupId, 'name' => (string) $group['name']]);
+        db_commit('index.php');
+    } catch (Throwable $exception) {
+        if (db()->inTransaction()) db_rollback('index.php');
+        throw $exception;
+    }
     user_access_group_permissions_flush_cache();
-    save_audit((int) $admin['id'], 'access_group_deleted', null, ['group_id' => $groupId, 'name' => (string) $group['name']]);
     flash('success', 'گروه دسترسی و عضویت‌ها و مجوزهای وابستهٔ آن حذف شد.');
     user_access_groups_redirect();
 }

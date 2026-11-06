@@ -1,6 +1,7 @@
 name: Isolated Food Management and Orders Stress
 
 on:
+  workflow_call:
   push:
     branches:
       - arena/8edbdf95-ticket
@@ -76,6 +77,7 @@ jobs:
 
       - name: Run food-only Python static tests
         id: python_static
+        continue-on-error: true
         run: |
           set -o pipefail
           mkdir -p benchmark-results updates/2026-10-20-release-161-6
@@ -84,12 +86,18 @@ jobs:
           pytest -q tests/test_food*.py --junitxml=benchmark-results/food-system-python-tests.xml 2>&1 | tee benchmark-results/food-system-python-tests.log
 
       - name: Run food-only JavaScript test
+        id: javascript_tests
+        continue-on-error: true
         run: node tests/test_food_order_calendar_node.js
 
       - name: Run food-menu grouping JavaScript test
+        id: grouping_js_tests
+        continue-on-error: true
         run: node tests/js/food-menu-by-menu.test.js
 
       - name: Run food-only PHP logic tests (offline; no physical printer)
+        id: php_logic_tests
+        continue-on-error: true
         run: |
           set -euo pipefail
           php tests/test_food_ticket_logic.php
@@ -146,6 +154,7 @@ jobs:
           exit "$status"
 
       - name: Verify persisted food outcomes and audit rows
+        id: food_verify
         if: steps.food_stress.outcome == 'success'
         run: php tools/food_system_verify.php
 
@@ -184,6 +193,20 @@ jobs:
             tail -n 60 benchmark-results/food-system-python-tests.log >> "$GITHUB_STEP_SUMMARY" || true
           fi
 
+      - name: Fail if any food static or runtime quality gate failed
+        if: always()
+        env:
+          PYTHON_STATIC_OUTCOME: ${{ steps.python_static.outcome }}
+          JAVASCRIPT_OUTCOME: ${{ steps.javascript_tests.outcome }}
+          GROUPING_JS_OUTCOME: ${{ steps.grouping_js_tests.outcome }}
+          PHP_LOGIC_OUTCOME: ${{ steps.php_logic_tests.outcome }}
+          FOOD_STRESS_OUTCOME: ${{ steps.food_stress.outcome }}
+          FOOD_VERIFY_OUTCOME: ${{ steps.food_verify.outcome }}
+        run: |
+          printf 'Python=%s JavaScript=%s GroupingJS=%s PHP=%s FoodStress=%s Verify=%s\\n' "$PYTHON_STATIC_OUTCOME" "$JAVASCRIPT_OUTCOME" "$GROUPING_JS_OUTCOME" "$PHP_LOGIC_OUTCOME" "$FOOD_STRESS_OUTCOME" "$FOOD_VERIFY_OUTCOME"
+          if [ "$PYTHON_STATIC_OUTCOME" != success ] || [ "$JAVASCRIPT_OUTCOME" != success ] || [ "$GROUPING_JS_OUTCOME" != success ] || [ "$PHP_LOGIC_OUTCOME" != success ] || [ "$FOOD_STRESS_OUTCOME" != success ] || [ "$FOOD_VERIFY_OUTCOME" != success ]; then
+            exit 1
+          fi
       - name: Upload food-only reports and logs
         if: always()
         uses: actions/upload-artifact@v4

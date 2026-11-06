@@ -42,7 +42,33 @@ function ticket_number(int $id): string
     if ($cache[$id] !== '') {
         return $cache[$id];
     }
-    return 'SBU1-86-' . str_pad((string) $id, 6, '0', STR_PAD_LEFT);
+    // درخواست بدون شمارهٔ ثبت‌شده: شناسهٔ داخلی نشان داده می‌شود، نه شماره‌ای ساختگی.
+    // قالب قدیمی «SBU1-86-xxxxxx» شماره‌ای می‌ساخت که در دیتابیس وجود نداشت؛ کاربر آن را
+    // یادداشت می‌کرد و جست‌وجویش بی‌نتیجه می‌ماند. «#شناسه» صریحاً داخلی است و
+    // chatbot_ticket_ref() هم آن را به‌عنوان شناسهٔ عددی تشخیص می‌دهد.
+    return '#' . $id;
+}
+
+/**
+ * پرکردن کش شماره از ردیف‌هایی که قبلاً واکشی شده‌اند.
+ *
+ * صفحه‌های فهرست (مثل صف کار) ستون ticket_no را با SELECT اصلی می‌گیرند؛ بدون این تابع
+ * هر فراخوانی ticket_number() داخل حلقه یک کوئری جدا می‌زد (N+1).
+ *
+ * @param array<int, array<string, mixed>> $rows ردیف‌هایی با کلیدهای id و ticket_no
+ */
+function ticket_number_cache_prime(array $rows): void
+{
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            continue;
+        }
+        $id = (int) ($row['id'] ?? 0);
+        if ($id <= 0 || !array_key_exists('ticket_no', $row)) {
+            continue;
+        }
+        ticket_number_cache_set($id, trim((string) ($row['ticket_no'] ?? '')));
+    }
 }
 
 function ticket_number_prefix(string $serviceGroup): string
@@ -86,7 +112,33 @@ function ticket_number_ensure_schema(): void
 function ticket_hot_schema_ensure(): void
 {
     static $ready = false;
+    static $deferred = false;
     if ($ready) {
+        return;
+    }
+    // هر DDL در MySQL یک COMMIT ضمنی می‌زند. همان درسی که سرآیند
+    // ticket_number_prefix() مستند کرده (خطای «There is no active transaction»)
+    // اینجا هم صدق می‌کند، فقط با دامنهٔ بزرگ‌تر: این تابع حدود ۳۵ ALTER روی
+    // tickets و users دارد و به org_ensure_schema()، org_ticket_schema_ensure()
+    // و lac_ensure_schema() هم شاخه می‌دهد. اجرای هر کدام در میانهٔ تراکنش یعنی
+    // نیمهٔ نوشته‌شده بی‌صدا نهایی می‌شود و rollBack بعدی دیگر کاری نمی‌کند.
+    //
+    // توجه حیاتی: $ready در این شاخه عمداً دست‌نخورده می‌ماند. اگر اینجا true
+    // شود، تابع «انجام‌شده» علامت می‌خورد و مهاجرتِ موکول‌شده هم زودهنگام
+    // برمی‌گردد — یعنی ستون‌ها هرگز ساخته نمی‌شوند.
+    if (function_exists('db_in_transaction') ? db_in_transaction() : db()->inTransaction()) {
+        if (!$deferred) {
+            $deferred = true;
+            if (function_exists('system_log')) {
+                system_log('warning', 'ticket_hot_schema', 'مهاجرت ستون‌های پرکاربرد در میانهٔ تراکنش لازم شد؛ به پایان درخواست موکول شد.');
+            }
+            register_shutdown_function(static function (): void {
+                try {
+                    ticket_hot_schema_ensure();
+                } catch (Throwable) {
+                }
+            });
+        }
         return;
     }
     $ready = true;
@@ -261,6 +313,53 @@ function ticket_number_peek(string $prefix): string
 }
 
 /**
+ * کف شمارنده برای یک پیشوند: بزرگ‌ترین مقدار بین شمارندهٔ ثبت‌شده و بزرگ‌ترین شمارهٔ موجود.
+ *
+ * همان منطقی که ticket_number_next() برای تولید شمارهٔ تازه به کار می‌برد، ولی بدون قفل
+ * سطری — چون ترمیم دسته‌ای در تراکنش جداگانه اجرا نمی‌شود. شروع از صفر (رفتار قبلی)
+ * شماره‌های تکراری می‌ساخت و به نقض uq_tickets_no می‌خورد.
+ */
+function ticket_number_sequence_floor(string $prefix): int
+{
+    $current = 0;
+    try {
+        $query = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? LIMIT 1');
+        $query->execute([$prefix]);
+        $current = (int) ($query->fetchColumn() ?: 0);
+    } catch (Throwable) {
+    }
+    $existing = 0;
+    try {
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+        $maxQuery = db()->prepare('SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED)) FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?');
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existing = (int) ($maxQuery->fetchColumn() ?: 0);
+    } catch (Throwable) {
+    }
+    return max($current, $existing);
+}
+
+/**
+ * ثبت شمارندهٔ رسیده در ticket_number_seq تا تولید شمارهٔ بعدی از همین‌جا ادامه یابد.
+ * GREATEST به کار می‌رود تا اگر هم‌زمان درخواست تازه‌ای شماره گرفته باشد، عقب نرود.
+ *
+ * @param array<string, int> $sequence نگاشت پیشوند به آخرین شمارهٔ مصرف‌شده
+ */
+function ticket_number_sequence_persist(array $sequence): void
+{
+    foreach ($sequence as $prefix => $value) {
+        if ((int) $value <= 0) {
+            continue;
+        }
+        try {
+            $query = db()->prepare('INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, ?) ON DUPLICATE KEY UPDATE seq = GREATEST(seq, VALUES(seq))');
+            $query->execute([(string) $prefix, (int) $value]);
+        } catch (Throwable) {
+        }
+    }
+}
+
+/**
  * پرکردن شمارهٔ درخواست‌های قدیمی که ticket_no ندارند.
  *
  * ⚠️ این تابع در ابتدای هر درخواست صدا زده می‌شد و هر بار یک SELECT روی کل جدول
@@ -287,22 +386,67 @@ function ticket_number_autofill(bool $force = false): void
     }
     try {
         ticket_number_ensure_schema();
-        $marker = 'ticket_autofill_done';
-        $rows = db()->query("SELECT id, service_group FROM tickets WHERE ticket_no IS NULL OR ticket_no = '' ORDER BY id ASC")->fetchAll();
-        if (!$rows) {
-            // دفعهٔ بعد دوباره کل جدول اسکن نشود (این خط، هزینهٔ هر بارگذاری صفحه را کم می‌کند)
+        $sequence = [];
+        $filled = 0;
+        $skipped = 0;
+        // شرط ticket_no در UPDATE تکرار می‌شود تا اگر درخواستی هم‌زمان شماره گرفته باشد، بازنویسی نشود.
+        $update = db()->prepare("UPDATE tickets SET ticket_no = ? WHERE id = ? AND (ticket_no IS NULL OR ticket_no = '')");
+        // دسته‌ای خوانده می‌شود تا جدول بزرگ، حافظه را پر نکند.
+        for ($batch = 0; $batch < 50; $batch++) {
+            $rows = db()->query("SELECT id, service_group FROM tickets WHERE ticket_no IS NULL OR ticket_no = '' ORDER BY id ASC LIMIT 500")->fetchAll();
+            if (!$rows) {
+                break;
+            }
+            $progress = 0;
+            foreach ($rows as $row) {
+                $prefix = ticket_number_prefix((string) $row['service_group']);
+                if (!array_key_exists($prefix, $sequence)) {
+                    $sequence[$prefix] = ticket_number_sequence_floor($prefix);
+                }
+                // هر رکورد مستقل است: برخورد یکتایی روی یکی نباید کل ترمیم را قطع کند
+                // (رفتار قبلی: اولین استثنا از حلقه بیرون می‌پرید و بقیه بی‌شماره می‌ماندند).
+                $written = false;
+                for ($attempt = 0; $attempt < 5; $attempt++) {
+                    $sequence[$prefix]++;
+                    $candidate = $prefix . '-' . str_pad((string) $sequence[$prefix], 5, '0', STR_PAD_LEFT);
+                    try {
+                        $update->execute([$candidate, (int) $row['id']]);
+                        $written = true;
+                        break;
+                    } catch (Throwable) {
+                        continue; // شمارهٔ گرفته‌شده: شمارنده جلو می‌رود و دوباره تلاش می‌شود
+                    }
+                }
+                if ($written) {
+                    $filled++;
+                    $progress++;
+                } else {
+                    $skipped++;
+                }
+            }
+            ticket_number_sequence_persist($sequence);
+            if ($progress === 0) {
+                break; // هیچ پیشرفتی نشد؛ از حلقهٔ بی‌پایان جلوگیری می‌شود
+            }
+        }
+        $remaining = 1; // محافظه‌کارانه: اگر شمارش ممکن نشد، نشانگر ثبت نشود
+        try {
+            $remaining = (int) db()->query("SELECT COUNT(*) FROM tickets WHERE ticket_no IS NULL OR ticket_no = ''")->fetchColumn();
+        } catch (Throwable) {
+        }
+        if ($remaining === 0) {
+            // نشانگر فقط وقتی ثبت می‌شود که واقعاً چیزی باقی نمانده باشد — چه ترمیمی انجام شده
+            // باشد چه از اول کاری نبوده. رفتار قبلی آن را فقط در شاخهٔ «چیزی نبود» ثبت می‌کرد،
+            // پس بعد از یک ترمیم ناموفق هرگز ثبت نمی‌شد و هر بارگذاری صفحه دوباره اسکن می‌کرد.
             try {
                 save_setting('ticket_autofill_done', '1');
             } catch (Throwable) {
             }
-            return;
+        } elseif (function_exists('system_log')) {
+            system_log('warning', 'ticket_number_autofill', 'شمارهٔ برخی درخواست‌ها تکمیل نشد.', ['remaining' => $remaining, 'filled' => $filled, 'skipped' => $skipped]);
         }
-        $sequence = [];
-        $update = db()->prepare('UPDATE tickets SET ticket_no = ? WHERE id = ?');
-        foreach ($rows as $row) {
-            $prefix = ticket_number_prefix((string) $row['service_group']);
-            $sequence[$prefix] = ($sequence[$prefix] ?? 0) + 1;
-            $update->execute([$prefix . '-' . str_pad((string) $sequence[$prefix], 5, '0', STR_PAD_LEFT), (int) $row['id']]);
+        if ($filled > 0 && function_exists('system_log')) {
+            system_log('info', 'ticket_number_autofill', 'شمارهٔ درخواست‌های بدون شماره تکمیل شد.', ['filled' => $filled]);
         }
     } catch (Throwable $exception) {
         if (function_exists('system_log')) {
@@ -489,33 +633,107 @@ function ola_deadlines(?int $departmentId, string $priority, string $createdAt):
     ];
 }
 
+/**
+ * تقویم کاری سازمان: ساعت شروع، ساعت پایان و روزهای تعطیل هفتگی.
+ *
+ * پیش‌تر این سه مقدار در متن سه تابع جداگانه هاردکد بود (۸ تا ۱۶، پنج‌شنبه و جمعه).
+ * اکنون از جدول تنظیمات خوانده می‌شود تا سازمانی با شیفت دیگر یا تعطیلی فقط جمعه
+ * هم بتواند SLA درست حساب کند.
+ *
+ * اعتبارسنجی اینجا تزئینی نیست و حتماً باید بماند: business_due_at() حلقه‌ای دارد که
+ * تا تمام‌شدن دقیقه‌های مهلت جلو می‌رود. اگر ساعت پایان کوچک‌تر یا مساوی ساعت شروع
+ * شود ظرفیت هر روز صفر می‌شود و آن حلقه هرگز تمام نمی‌شود؛ و اگر هر هفت روز هفته
+ * تعطیل اعلام شود next_business_start() بی‌نهایت جلو می‌رود. هر مقدار نامعتبر به
+ * همین دلیل بی‌صدا به پیش‌فرض برمی‌گردد، چون یک SLA اشتباه خیلی بهتر از قفل‌شدن
+ * کل مسیر درخواست است.
+ *
+ * @return array{start:int, end:int, weekend:list<int>}
+ */
+function sla_business_hours(bool $forget = false): array
+{
+    static $cache = null;
+    if ($forget) {
+        $cache = null;
+        return ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
+    }
+    if ($cache !== null) {
+        return $cache;
+    }
+    $default = ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
+    if (!function_exists('setting')) {
+        return $cache = $default;
+    }
+    try {
+        $start = (int) setting('sla.work_start_hour', '8');
+        $end = (int) setting('sla.work_end_hour', '16');
+        $weekendRaw = (string) setting('sla.weekend_days', '4,5');
+    } catch (Throwable) {
+        return $cache = $default;
+    }
+    if ($start < 0 || $start > 23 || $end <= $start || $end > 24) {
+        $start = $default['start'];
+        $end = $default['end'];
+    }
+    $weekend = [];
+    foreach (explode(',', $weekendRaw) as $day) {
+        $day = (int) trim($day);
+        if ($day >= 1 && $day <= 7 && !in_array($day, $weekend, true)) {
+            $weekend[] = $day;
+        }
+    }
+    // هفتهٔ کاملاً تعطیل پذیرفته نیست؛ وگرنه هیچ روز کاری‌ای برای رسیدن وجود ندارد.
+    if (count($weekend) >= 7) {
+        $weekend = $default['weekend'];
+    }
+    return $cache = ['start' => $start, 'end' => $end, 'weekend' => array_values($weekend)];
+}
+
+/**
+ * فراموش‌کردن کش تقویم کاری — پس از ذخیرهٔ تنظیمات در همان درخواست.
+ *
+ * بدون این، مقدار قدیمی تا پایان درخواست جاری باقی می‌ماند و صفحهٔ بازگشتی
+ * هنوز ساعت قبلی را نشان می‌دهد. تست‌های رفتاری هم با همین تابع می‌توانند چند
+ * پیکربندی مختلف را در یک پروسه بسنجند.
+ */
+function sla_business_hours_forget_cache(): void
+{
+    sla_business_hours(true);
+}
+
 function next_business_start(DateTimeImmutable $date): DateTimeImmutable
 {
+    $hours = sla_business_hours();
     $date = $date->setTimezone(new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran')));
-    while (in_array((int) $date->format('N'), [4, 5], true) || is_sla_holiday($date)) {
-        $date = $date->modify('+1 day')->setTime(8, 0);
+    while (in_array((int) $date->format('N'), $hours['weekend'], true) || is_sla_holiday($date)) {
+        $date = $date->modify('+1 day')->setTime($hours['start'], 0);
     }
-    if ((int) $date->format('H') < 8) {
-        return $date->setTime(8, 0);
+    if ((int) $date->format('H') < $hours['start']) {
+        return $date->setTime($hours['start'], 0);
     }
-    if ((int) $date->format('H') >= 16) {
-        return next_business_start($date->modify('+1 day')->setTime(8, 0));
+    if ((int) $date->format('H') >= $hours['end']) {
+        return next_business_start($date->modify('+1 day')->setTime($hours['start'], 0));
     }
     return $date;
 }
 
 function business_due_at(int $minutes, ?DateTimeImmutable $start = null): DateTimeImmutable
 {
+    $hours = sla_business_hours();
     $cursor = next_business_start($start ?: new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))));
     $remaining = max(0, $minutes);
     while ($remaining > 0) {
-        $end = $cursor->setTime(16, 0);
+        $end = $cursor->setTime($hours['end'], 0);
         $available = (int) (($end->getTimestamp() - $cursor->getTimestamp()) / 60);
+        if ($available <= 0) {
+            // نباید پیش بیاید چون sla_business_hours() بازهٔ وارونه را مهار می‌کند،
+            // ولی اگر روزی مهار دور زده شود این شرط جلوی حلقهٔ بی‌نهایت را می‌گیرد.
+            return $cursor;
+        }
         if ($remaining <= $available) {
             return $cursor->modify('+' . $remaining . ' minutes');
         }
         $remaining -= $available;
-        $cursor = next_business_start($cursor->modify('+1 day')->setTime(8, 0));
+        $cursor = next_business_start($cursor->modify('+1 day')->setTime($hours['start'], 0));
     }
     return $cursor;
 }
@@ -528,18 +746,19 @@ function business_elapsed_minutes(DateTimeImmutable $start, DateTimeImmutable $e
     if ($finish <= $cursor) {
         return 0;
     }
+    $hours = sla_business_hours();
     $minutes = 0;
     while ($cursor->format('Y-m-d') <= $finish->format('Y-m-d')) {
-        if (!in_array((int) $cursor->format('N'), [4, 5], true) && !is_sla_holiday($cursor)) {
-            $dayStart = $cursor->setTime(8, 0);
-            $dayEnd = $cursor->setTime(16, 0);
+        if (!in_array((int) $cursor->format('N'), $hours['weekend'], true) && !is_sla_holiday($cursor)) {
+            $dayStart = $cursor->setTime($hours['start'], 0);
+            $dayEnd = $cursor->setTime($hours['end'], 0);
             $from = $cursor > $dayStart ? $cursor : $dayStart;
             $to = $finish < $dayEnd ? $finish : $dayEnd;
             if ($to > $from) {
                 $minutes += (int) floor(($to->getTimestamp() - $from->getTimestamp()) / 60);
             }
         }
-        $cursor = $cursor->modify('+1 day')->setTime(8, 0);
+        $cursor = $cursor->modify('+1 day')->setTime($hours['start'], 0);
     }
     return $minutes;
 }

@@ -1,0 +1,54 @@
+name: Critical System Stress — Full ITSM, Food, Traffic and CD/DVD
+
+on:
+  pull_request:
+    branches:
+      - test/1.62.88-logging-stress-harness
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  operations-stress:
+    name: ITSM, tickets, traffic, CD/DVD and system-wide routes
+    uses: ./.github/workflows/benchmark-operations.yml
+    permissions:
+      contents: write
+
+  food-stress:
+    name: Food orders, menu, groups, bulk operations and delivery
+    uses: ./.github/workflows/food-system-stress.yml
+    permissions:
+      contents: read
+
+  final-gate:
+    name: Combined critical-system result
+    if: always()
+    needs:
+      - operations-stress
+      - food-stress
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish combined result
+        env:
+          OPERATIONS_RESULT: ${{ needs.operations-stress.result }}
+          FOOD_RESULT: ${{ needs.food-stress.result }}
+        run: |
+          {
+            echo "# گزارش نهایی آزمون سنگین سامانه"
+            echo
+            echo "| حوزه | نتیجه |"
+            echo "|---|---|"
+            echo "| ITSM، درخواست‌ها، تردد، CD/DVD، مسیرها و تاب‌آوری | ${OPERATIONS_RESULT} |"
+            echo "| مدیریت غذا، سفارش‌ها، منو، گروه‌ها و عملیات گروهی | ${FOOD_RESULT} |"
+            echo
+            if [ "$OPERATIONS_RESULT" = "success" ] && [ "$FOOD_RESULT" = "success" ]; then
+              echo "**نتیجه نهایی: PASS** — هر دو مجموعه آزمون مستقل موفق شدند."
+            else
+              echo "**نتیجه نهایی: FAIL** — حداقل یکی از مجموعه‌های آزمون موفق نشده است."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$OPERATIONS_RESULT" != "success" ] || [ "$FOOD_RESULT" != "success" ]; then
+            exit 1
+          fi

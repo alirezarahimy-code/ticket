@@ -51,13 +51,23 @@ if (!defined('APP_ROOT')) {
             if ($serviceGroup === 'support') {
                 $defaultType = in_array($defaultType, ['incident', 'request'], true) ? $defaultType : 'request';
             }
-            db()->prepare('INSERT INTO service_catalog (name, code, description, service_group, default_priority, department_id, category_id, handling_unit_id, requires_asset, default_ticket_type, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([$name, $code, post_value('service_description'), $serviceGroup, $priority, (int) ($_POST['department_id'] ?? 0) ?: null, (int) ($_POST['category_id'] ?? 0) ?: null, $handlingUnitId, $serviceGroup === 'it' ? 1 : 0, $defaultType, $serviceAdmin['id']]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('INSERT INTO service_catalog (name, code, description, service_group, default_priority, department_id, category_id, handling_unit_id, requires_asset, default_ticket_type, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([$name, $code, post_value('service_description'), $serviceGroup, $priority, (int) ($_POST['department_id'] ?? 0) ?: null, (int) ($_POST['category_id'] ?? 0) ?: null, $handlingUnitId, $serviceGroup === 'it' ? 1 : 0, $defaultType, $serviceAdmin['id']]);
+                $serviceId = (int) $pdo->lastInsertId();
+                save_audit_required((int) $serviceAdmin['id'], 'service_created', null, ['service_id' => $serviceId, 'name' => $name, 'code' => $code]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
+            }
             flash('success', 'خدمت جدید به کاتالوگ اضافه شد.');
             redirect('index.php?page=services#tab-list');
         }
 
         if ($action === 'add_service_field') {
-            require_permission('service_field.manage');
+            $fieldAdmin = require_permission('service_field.manage');
             $serviceId = (int) ($_POST['service_id'] ?? 0);
             $fieldKey = strtolower((string) preg_replace('/[^a-zA-Z0-9_]/', '_', post_value('field_key')));
             $label = post_value('field_label');
@@ -66,7 +76,17 @@ if (!defined('APP_ROOT')) {
             if ($serviceId <= 0 || !preg_match('/^[a-z][a-z0-9_]{1,79}$/', $fieldKey) || $label === '') {
                 throw new RuntimeException('خدمت، کلید انگلیسی و عنوان فیلد را کامل کنید.');
             }
-            db()->prepare('INSERT INTO service_catalog_fields (service_id, field_key, label, field_type, options_json, is_required, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$serviceId, $fieldKey, $label, $fieldType, json_encode($options, JSON_UNESCAPED_UNICODE), !empty($_POST['field_required']) ? 1 : 0, max(0, (int) ($_POST['sort_order'] ?? 0))]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('INSERT INTO service_catalog_fields (service_id, field_key, label, field_type, options_json, is_required, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$serviceId, $fieldKey, $label, $fieldType, json_encode($options, JSON_UNESCAPED_UNICODE), !empty($_POST['field_required']) ? 1 : 0, max(0, (int) ($_POST['sort_order'] ?? 0))]);
+                $fieldId = (int) $pdo->lastInsertId();
+                save_audit_required((int) $fieldAdmin['id'], 'service_field_created', null, ['service_id' => $serviceId, 'field_id' => $fieldId, 'field_key' => $fieldKey]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
+            }
             flash('success', 'فیلد خدمت اضافه شد.');
             redirect('index.php?page=services&tab=tab-list#tab-list');
         }
@@ -95,9 +115,17 @@ if (!defined('APP_ROOT')) {
                 $unitQuery->execute([$serviceGroup]);
                 $handlingUnitId = (int) ($unitQuery->fetchColumn() ?: 0) ?: null;
             }
-            db()->prepare('UPDATE service_catalog SET name = ?, code = ?, description = ?, service_group = ?, default_priority = ?, department_id = ?, category_id = ?, handling_unit_id = ?, default_ticket_type = ?, requires_asset = ?, is_active = ? WHERE id = ?')
-                ->execute([$name, $code, post_value('service_description'), $serviceGroup, $priority, (int) post_value('department_id', '0') ?: null, $categoryId, $handlingUnitId, $defaultType, $serviceGroup === 'it' ? 1 : 0, post_value('is_active') === '1' ? 1 : 0, $serviceId]);
-            save_audit((int) $serviceAdmin['id'], 'service_updated', null, ['service_id' => $serviceId, 'name' => $name]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE service_catalog SET name = ?, code = ?, description = ?, service_group = ?, default_priority = ?, department_id = ?, category_id = ?, handling_unit_id = ?, default_ticket_type = ?, requires_asset = ?, is_active = ? WHERE id = ?')
+                    ->execute([$name, $code, post_value('service_description'), $serviceGroup, $priority, (int) post_value('department_id', '0') ?: null, $categoryId, $handlingUnitId, $defaultType, $serviceGroup === 'it' ? 1 : 0, post_value('is_active') === '1' ? 1 : 0, $serviceId]);
+                save_audit_required((int) $serviceAdmin['id'], 'service_updated', null, ['service_id' => $serviceId, 'name' => $name]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
+            }
             flash('success', 'خدمت ویرایش شد.');
             redirect('index.php?page=services#tab-list');
         }
@@ -110,8 +138,16 @@ if (!defined('APP_ROOT')) {
             if ($serviceId <= 0 || !$existsQuery->fetchColumn()) {
                 throw new RuntimeException('خدمت انتخابی معتبر نیست.');
             }
-            db()->prepare('UPDATE service_catalog SET is_active = 0 WHERE id = ?')->execute([$serviceId]);
-            save_audit((int) $serviceAdmin['id'], 'service_deleted', null, ['service_id' => $serviceId]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE service_catalog SET is_active = 0 WHERE id = ?')->execute([$serviceId]);
+                save_audit_required((int) $serviceAdmin['id'], 'service_deleted', null, ['service_id' => $serviceId]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
+            }
             flash('success', 'خدمت از کاتالوگ حذف شد.');
             redirect('index.php?page=services#tab-list');
         }
@@ -126,14 +162,23 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('نام دسته‌بندی الزامی است.');
             }
             $isActive = isset($_POST['category_active']) ? 1 : 0;
-            if ($categoryId > 0) {
-                db()->prepare('UPDATE categories SET name = ?, code = ?, service_group = ?, is_active = ? WHERE id = ?')
-                    ->execute([$name, $code !== '' ? $code : null, $serviceGroup, $isActive, $categoryId]);
-            } else {
-                db()->prepare('INSERT INTO categories (name, code, service_group, is_active) VALUES (?, ?, ?, ?)')
-                    ->execute([$name, $code !== '' ? $code : null, $serviceGroup, $isActive]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                if ($categoryId > 0) {
+                    $pdo->prepare('UPDATE categories SET name = ?, code = ?, service_group = ?, is_active = ? WHERE id = ?')
+                        ->execute([$name, $code !== '' ? $code : null, $serviceGroup, $isActive, $categoryId]);
+                } else {
+                    $pdo->prepare('INSERT INTO categories (name, code, service_group, is_active) VALUES (?, ?, ?, ?)')
+                        ->execute([$name, $code !== '' ? $code : null, $serviceGroup, $isActive]);
+                    $categoryId = (int) $pdo->lastInsertId();
+                }
+                save_audit_required((int) $serviceAdmin['id'], 'service_category_saved', null, ['category_id' => $categoryId, 'name' => $name]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
             }
-            save_audit((int) $serviceAdmin['id'], 'service_category_saved', null, ['category_id' => $categoryId, 'name' => $name]);
             flash('success', 'دسته‌بندی ذخیره شد.');
             redirect('index.php?page=services#tab-categories');
         }
@@ -144,8 +189,16 @@ if (!defined('APP_ROOT')) {
             if ($categoryId <= 0) {
                 throw new RuntimeException('دسته‌بندی انتخابی معتبر نیست.');
             }
-            db()->prepare('UPDATE categories SET is_active = 0 WHERE id = ?')->execute([$categoryId]);
-            save_audit((int) $serviceAdmin['id'], 'service_category_deleted', null, ['category_id' => $categoryId]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('UPDATE categories SET is_active = 0 WHERE id = ?')->execute([$categoryId]);
+                save_audit_required((int) $serviceAdmin['id'], 'service_category_deleted', null, ['category_id' => $categoryId]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
+            }
             flash('success', 'دسته‌بندی غیرفعال شد.');
             redirect('index.php?page=services#tab-categories');
         }
@@ -159,7 +212,17 @@ if (!defined('APP_ROOT')) {
             }
             $slug = strtolower((string) preg_replace('/[^a-z0-9]+/i', '-', $title));
             $slug = trim($slug, '-') . '-' . bin2hex(random_bytes(3));
-            db()->prepare('INSERT INTO knowledge_articles (title, slug, body, category, is_published, created_by) VALUES (?, ?, ?, ?, ?, ?)')->execute([$title, $slug, $body, post_value('article_category'), !empty($_POST['is_published']) ? 1 : 0, $knowledgeUser['id']]);
+            $pdo = db();
+            $pdo->beginTransaction();
+            try {
+                $pdo->prepare('INSERT INTO knowledge_articles (title, slug, body, category, is_published, created_by) VALUES (?, ?, ?, ?, ?, ?)')->execute([$title, $slug, $body, post_value('article_category'), !empty($_POST['is_published']) ? 1 : 0, $knowledgeUser['id']]);
+                $articleId = (int) $pdo->lastInsertId();
+                save_audit_required((int) $knowledgeUser['id'], 'knowledge_article_created', null, ['article_id' => $articleId, 'title' => $title]);
+                db_commit('index.php');
+            } catch (Throwable $exception) {
+                if ($pdo->inTransaction()) db_rollback('index.php');
+                throw $exception;
+            }
             flash('success', 'مقاله دانش‌نامه ذخیره شد.');
             redirect('index.php?page=knowledge');
         }

@@ -137,8 +137,19 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است. از فهرست سیستم‌ها یکی را انتخاب کنید؛ اگر دارایی در فهرست نیست، با واحد IT تماس بگیرید.');
             }
             if ($assetId !== null) {
-                $assetCheck = db()->prepare('SELECT id, owner_user_id, department_id, ip_address FROM assets WHERE id = ? LIMIT 1');
-                $assetCheck->execute([$assetId]);
+                $assetScopeSql = '';
+                $assetScopeParams = [];
+                // IT staff must use the same own-unit boundary as the asset inventory.
+                // Requesters and support-side staff retain their separate owner/IP and
+                // department checks below.
+                if (user_service_group($user) === 'it' && (is_staff_role((string) $user['role']) || is_it_agent($user))) {
+                    [$assetScopeSql, $assetScopeParams] = asset_scope($user, 'a');
+                }
+                $assetWhereSql = $assetScopeSql !== ''
+                    ? $assetScopeSql . ' AND a.id = ?'
+                    : 'WHERE a.id = ?';
+                $assetCheck = db()->prepare('SELECT a.id, a.owner_user_id, a.department_id, a.ip_address FROM assets a ' . $assetWhereSql . ' LIMIT 1');
+                $assetCheck->execute([...$assetScopeParams, $assetId]);
                 $assetRow = $assetCheck->fetch();
                 $sameClient = $assetRow && inventory_client_ip() !== '' && (string) $assetRow['ip_address'] === inventory_client_ip();
                 $requesterAssetLimited = !is_staff_role((string) $user['role']) && !is_it_agent($user);
@@ -192,16 +203,18 @@ if (!defined('APP_ROOT')) {
                  $ticketAuditMeta['cd_dvd_record_id'] = $cdDvdRequestId;
                  $ticketEventDetails['cd_dvd_record_id'] = $cdDvdRequestId;
              }
-             save_audit((int) $user['id'], 'ticket_created', $ticketId, $ticketAuditMeta);
+             save_audit_required((int) $user['id'], 'ticket_created', $ticketId, $ticketAuditMeta);
              log_ticket_event($ticketId, (int) $user['id'], 'created', null, $initialStatus, $ticketEventDetails);
             if ($agentId) {
-                log_ticket_event($ticketId, (int) $user['id'], 'auto_assigned', 'manager_review', 'assigned', ['assigned_to' => $agentId]);
+                // مبدأ null است چون درخواست مستقیم با وضعیت assigned ساخته شد و هیچ‌وقت در
+                // manager_review نبود؛ ثبت گذاری که رخ نداده، تاریخچه را دروغ می‌کرد.
+                log_ticket_event($ticketId, (int) $user['id'], 'auto_assigned', null, 'assigned', ['assigned_to' => $agentId]);
             }
             notify_ticket_parties($ticketId, 'ticket_created', 'درخواست جدید ثبت شد', 'درخواست ' . ticket_number($ticketId) . ' برای رسیدگی ثبت شد.', (int) $user['id']);
             if ($assetId) {
                 record_asset_history((int) $assetId, 'ticket_created', 'ثبت درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, $subject);
             }
-            db_commit('index.php');
+            db_commit_or_fail('ticket:create_ticket');
             flash('success', 'درخواست ' . ticket_number($ticketId) . ' ثبت شد.');
             redirect('index.php?page=ticket&id=' . $ticketId);
         }
@@ -233,11 +246,11 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $cancelUser['id'], 'درخواست پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason]);
-                save_audit((int) $cancelUser['id'], 'ticket_cancelled_by_requester', $ticketId, ['reason' => $reason]);
+                save_audit_required((int) $cancelUser['id'], 'ticket_cancelled_by_requester', $ticketId, ['reason' => $reason]);
                 log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancelled_by_requester', $oldStatus, 'cancelled', ['reason' => $reason, 'mode' => 'direct_before_assignment']);
                 notify_ticket_parties($ticketId, 'ticket_cancelled', 'درخواست لغو شد', 'درخواست ' . ticket_number($ticketId) . ' پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason, (int) $cancelUser['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_cancelled', 'لغو درخواست ' . ticket_number($ticketId), (int) $cancelUser['id'], $ticketId, $reason);
-                db_commit('index.php');
+                db_commit_or_fail('ticket:cancelled_by_requester');
                 flash('success', 'درخواست لغو شد؛ سابقه و پیام‌های آن برای پیگیری حفظ می‌شوند.');
             } else {
                 $requestQuery = db()->prepare('UPDATE tickets SET cancel_requested_at = NOW(), cancel_requested_by = ?, cancel_request_reason = ?, updated_at = NOW() WHERE id = ? AND requester_id = ? AND status = ? AND cancel_requested_at IS NULL');
@@ -246,10 +259,10 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('وضعیت درخواست یا درخواست لغو هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $cancelUser['id'], 'درخواست لغو درخواست ثبت شد: ' . $reason]);
-                save_audit((int) $cancelUser['id'], 'ticket_cancellation_requested', $ticketId, ['reason' => $reason, 'status' => $oldStatus]);
+                save_audit_required((int) $cancelUser['id'], 'ticket_cancellation_requested', $ticketId, ['reason' => $reason, 'status' => $oldStatus]);
                 log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancellation_requested', $oldStatus, $oldStatus, ['reason' => $reason]);
                 notify_ticket_parties($ticketId, 'ticket_cancellation_requested', 'درخواست لغو درخواست ثبت شد', 'ثبت‌کننده درخواست لغو درخواست ' . ticket_number($ticketId) . ' را ثبت کرده است. تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.', (int) $cancelUser['id']);
-                db_commit('index.php');
+                db_commit_or_fail('ticket:cancel_request_submitted');
                 flash('info', 'درخواست لغو ثبت شد؛ تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.');
             }
             redirect('index.php?page=ticket&id=' . $ticketId);
@@ -294,11 +307,11 @@ if (!defined('APP_ROOT')) {
                 }
                 $decisionBody = 'درخواست لغو درخواست تأیید شد: ' . $requestReason . ($note !== '' ? "\nیادداشت مسئول: " . $note : '');
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $decisionBody]);
-                save_audit((int) $decisionUser['id'], 'ticket_cancellation_approved', $ticketId, ['reason' => $requestReason, 'note' => $note]);
+                save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_approved', $ticketId, ['reason' => $requestReason, 'note' => $note]);
                 log_ticket_event($ticketId, (int) $decisionUser['id'], 'cancellation_approved', $oldStatus, 'cancelled', ['reason' => $requestReason, 'note' => $note, 'requested_at' => $requestAt]);
                 notify_ticket_parties($ticketId, 'ticket_cancelled', 'درخواست لغو تأیید شد', 'درخواست لغو درخواست ' . ticket_number($ticketId) . ' توسط مسئول رسیدگی تأیید شد.', (int) $decisionUser['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_cancelled', 'تأیید لغو درخواست ' . ticket_number($ticketId), (int) $decisionUser['id'], $ticketId, $requestReason . ($note !== '' ? "\n" . $note : ''));
-                db_commit('index.php');
+                db_commit_or_fail('ticket:cancel_request_approved');
                 flash('success', 'درخواست لغو تأیید شد؛ تاریخچهٔ درخواست حفظ شده است.');
             } else {
                 $rejectQuery = db()->prepare('UPDATE tickets SET cancel_requested_at = NULL, cancel_requested_by = NULL, cancel_request_reason = NULL, updated_at = NOW() WHERE id = ? AND status = ? AND cancel_requested_at = ?');
@@ -311,10 +324,10 @@ if (!defined('APP_ROOT')) {
                     ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . status_label($oldStatus) . ' شده بود): ' . $note
                     : 'درخواست لغو رد شد و رسیدگی ادامه می‌یابد: ' . $note;
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $rejectBody]);
-                save_audit((int) $decisionUser['id'], 'ticket_cancellation_rejected', $ticketId, ['reason' => $requestReason, 'note' => $note]);
+                save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_rejected', $ticketId, ['reason' => $requestReason, 'note' => $note]);
                 log_ticket_event($ticketId, (int) $decisionUser['id'], 'cancellation_rejected', $oldStatus, $oldStatus, ['reason' => $requestReason, 'note' => $note, 'requested_at' => $requestAt]);
                 notify_ticket_parties($ticketId, 'ticket_cancellation_rejected', 'درخواست لغو رد شد', $isStaleClosed ? 'درخواست لغو قدیمی درخواست ' . ticket_number($ticketId) . ' پاک‌سازی شد: ' . $note : 'مسئول رسیدگی درخواست لغو درخواست ' . ticket_number($ticketId) . ' را رد کرد. رسیدگی ادامه می‌یابد: ' . $note, (int) $decisionUser['id']);
-                db_commit('index.php');
+                db_commit_or_fail('ticket:cancel_request_rejected');
                 flash('info', $isStaleClosed ? 'درخواست لغو قدیمی پاک‌سازی شد.' : 'درخواست لغو رد شد و درخواست برای ادامهٔ رسیدگی فعال ماند.');
             }
             redirect('index.php?page=ticket&id=' . $ticketId);
@@ -349,10 +362,10 @@ if (!defined('APP_ROOT')) {
             if ($claimQuery->rowCount() < 1) {
                 throw new RuntimeException('این درخواست هم‌زمان توسط شخص دیگری برداشته شد.');
             }
-            save_audit((int) $claimUser['id'], 'ticket_claimed', $ticketId);
+            save_audit_required((int) $claimUser['id'], 'ticket_claimed', $ticketId);
             log_ticket_event($ticketId, (int) $claimUser['id'], 'claimed', (string) $ticket['status'], 'assigned', ['assigned_to' => (int) $claimUser['id']]);
             notify_ticket_parties($ticketId, 'ticket_updated', 'درخواست به کارشناس ارجاع شد', 'درخواست ' . ticket_number($ticketId) . ' توسط ' . ($claimUser['full_name'] ?? 'کارشناس') . ' برای رسیدگی برداشته شد.', (int) $claimUser['id']);
-            db_commit('index.php');
+            db_commit_or_fail('ticket:claim_ticket');
             flash('success', 'درخواست به شما ارجاع شد.');
             redirect('index.php?page=ticket&id=' . $ticketId);
         }
@@ -384,10 +397,10 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
             db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $user['id'], 'مشکل حل نشده است (بازگشایی توسط کاربر): ' . $reason]);
-            save_audit((int) $user['id'], 'ticket_reopened_by_user', $ticketId, ['reason' => $reason]);
+            save_audit_required((int) $user['id'], 'ticket_reopened_by_user', $ticketId, ['reason' => $reason]);
             log_ticket_event($ticketId, (int) $user['id'], 'reopened_by_user', 'resolved', $reopenStatus, ['reason' => $reason]);
             notify_ticket_staff($ticketId, 'ticket_reopened', 'کاربر اعلام کرد مشکل حل نشده است', 'درخواست ' . ticket_number($ticketId) . ' توسط ثبت‌کننده بازگشایی شد: ' . $reason, (int) $user['id']);
-            db_commit('index.php');
+            db_commit_or_fail('ticket:reopen_ticket');
             flash('info', 'درخواست دوباره برای رسیدگی ارسال شد.');
             redirect('index.php?page=ticket&id=' . $ticketId);
         }
@@ -493,7 +506,7 @@ if (!defined('APP_ROOT')) {
             store_attachment($messageId, $_FILES['attachment'] ?? []);
             $replyUpdate = db()->prepare('UPDATE tickets SET status = ?, due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, updated_at = NOW()' . $firstResponseSql . $resolvedSql . ' WHERE id = ? AND status = ?');
             $replyUpdate->execute([$newStatus, $replyDueAt, $replyPauseAt, $replyPauseMinutes, $replyOla['policy_id'], $replyOla['response_due_at'], $replyOla['due_at'], $replyOla['escalation_1_at'], $replyOla['escalation_2_at'], $ticketId, $oldStatus]);
-            save_audit((int) $user['id'], 'ticket_replied', $ticketId);
+            save_audit_required((int) $user['id'], 'ticket_replied', $ticketId);
             if ($newStatus !== $oldStatus) {
                 log_ticket_event($ticketId, (int) $user['id'], 'status_changed', $oldStatus, $newStatus);
             }
@@ -509,7 +522,7 @@ if (!defined('APP_ROOT')) {
                 notify_ticket_staff($ticketId, 'ticket_reply', 'پاسخ جدید کاربر', 'کاربر در درخواست ' . ticket_number($ticketId) . ' پاسخ جدید ثبت کرد.', (int) $user['id']);
             }
             record_asset_history((int) ($ticket['asset_id'] ?? 0), $internal ? 'ticket_internal_note' : 'ticket_reply', $internal ? 'یادداشت داخلی درخواست ' . ticket_number($ticketId) : 'پاسخ جدید در درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, $body);
-            db_commit('index.php');
+            db_commit_or_fail('ticket:reply');
             flash('success', 'پاسخ شما ثبت شد.');
             redirect('index.php?page=ticket&id=' . $ticketId);
         }
@@ -631,7 +644,7 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('وضعیت یا درخواست لغو درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
             db()->prepare('UPDATE tickets SET ' . $fields . ' WHERE id = ? AND status = ? AND cancel_requested_at IS NULL')->execute($params);
-            save_audit((int) $staffUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'priority' => $priority]);
+            save_audit_required((int) $staffUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'priority' => $priority]);
             if ($updateNote !== '') {
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $staffUser['id'], $updateNote]);
                 log_ticket_event($ticketId, (int) $staffUser['id'], 'reply');
@@ -653,7 +666,7 @@ if (!defined('APP_ROOT')) {
             } elseif ($status !== $oldStatus || $assigneeChanged) {
                 notify_ticket_parties($ticketId, 'ticket_updated', 'درخواست به‌روزرسانی شد', 'وضعیت درخواست ' . ticket_number($ticketId) . ' به «' . status_label($status) . '» تغییر کرد.', (int) $staffUser['id']);
             }
-            db_commit('index.php');
+            db_commit_or_fail('ticket:update_ticket');
             flash('success', 'تغییرات درخواست ذخیره شد.');
             redirect('index.php?page=ticket&id=' . $ticketId);
         }

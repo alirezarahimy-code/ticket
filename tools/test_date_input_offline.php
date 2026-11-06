@@ -10,7 +10,7 @@ declare(strict_types=1);
  * میلادی Y-m-d است. اگر تبدیل شمسی→میلادی یک روز/یک سال خطا بدهد، غیبت روی تاریخ
  * اشتباه ثبت می‌شود. این آزمون:
  *   ۱) مبدل محلی food_ticket_jalali_to_gregorian را با مبدل خود سامانه
- *      (bootstrap.php → jalali_to_gregorian) روی صدها تاریخ مقایسه می‌کند
+ *      (lib/tickets-sla.php → jalali_to_gregorian) روی صدها تاریخ مقایسه می‌کند
  *   ۲) چند تاریخ مرجع (نوروزها و ۳۰ اسفند سال کبیسه) را چک می‌کند
  *   ۳) food_ticket_iso_date_input را با ورودی شمسی، میلادی، رقم فارسی و ورودی خراب می‌آزماید
  */
@@ -60,7 +60,7 @@ function extractFunction(string $source, string $name, ?string $rename = null): 
 
 $root = dirname(__DIR__);
 $srcFood = (string) file_get_contents($root . '/food-ticket.php');
-$srcApp = (string) file_get_contents($root . '/bootstrap.php');
+$srcApp = (string) file_get_contents($root . '/lib/tickets-sla.php');
 
 // مبدل خود سامانه با نام مرجع (تا مسیر پشتیبان محلی هم واقعاً آزموده شود)
 eval(extractFunction($srcApp, 'jalali_to_gregorian', 'jalali_to_gregorian_ref'));

@@ -462,9 +462,17 @@ function csrf_field(): string
 }
 
 /**
- * توکن CSRF.
- * توکن در session نگه داشته می‌شود، اما در یک کوکی نیز نگه‌داری می‌شود تا اگر session زودتر
- * بسته شد (برای آزادسازی قفل فایل)، فرم‌های صفحه همچنان توکن معتبر داشته باشند.
+ * توکن CSRF — فقط از نشست خوانده می‌شود.
+ *
+ * کاشت اولیهٔ توکن در app_session_start() انجام می‌شود، یعنی بلافاصله پس از باز شدن
+ * نشست و پیش از هر session_write_close()؛ پس دیگر نیازی نیست توکن در کوکی نگه‌داری
+ * شود. این تابع فقط همان مقدار را برمی‌گرداند و در صورت نبودش یکی می‌سازد.
+ *
+ * تا پیش از نسخهٔ ۱.۶۲.۸۳، اگر نشست توکن نداشت مقدار کوکی itsm_csrf به‌عنوان توکن
+ * معتبر پذیرفته می‌شد. نتیجه این بود که هرکس بتواند روی مرورگر قربانی کوکی بنشاند —
+ * از یک زیردامنه، یا روی شبکهٔ داخلی بدون TLS — می‌توانست خودش توکن را تعیین کند و
+ * بعد فرم جعلی با همان مقدار بفرستد؛ یعنی محافظت CSRF کاملاً دور می‌خورد. آن مسیر
+ * حذف شد: هیچ مقداری که از مرورگر می‌آید دیگر به‌عنوان توکن پذیرفته نمی‌شود.
  */
 function csrf_token(): string
 {
@@ -472,28 +480,32 @@ function csrf_token(): string
     if ($token !== null) {
         return $token;
     }
-    if (!empty($_SESSION['csrf'])) {
-        return $token = (string) $_SESSION['csrf'];
-    }
-    $cookieName = 'itsm_csrf';
-    $fromCookie = (string) ($_COOKIE[$cookieName] ?? '');
-    if (preg_match('/^[a-f0-9]{64}$/', $fromCookie) === 1) {
-        $_SESSION['csrf'] = $fromCookie;
-        return $token = $fromCookie;
+    $stored = (string) ($_SESSION['csrf'] ?? '');
+    if (preg_match('/^[a-f0-9]{64}$/', $stored) === 1) {
+        return $token = $stored;
     }
     $token = bin2hex(random_bytes(32));
     $_SESSION['csrf'] = $token;
-    if (!headers_sent() && session_status() !== PHP_SESSION_DISABLED) {
-        setcookie($cookieName, $token, [
-            'expires' => time() + 86400 * 7,
-            'path' => '/',
-            'httponly' => true,
-            'samesite' => 'Lax',
-            'secure' => (($_SERVER['HTTPS'] ?? '') === 'on'),
-        ]);
-        $_COOKIE[$cookieName] = $token;
-    }
     return $token;
+}
+
+/**
+ * کوکی itsm_csrf دیگر خوانده نمی‌شود؛ اگر از نسخه‌های قبل در مرورگر مانده باشد
+ * پاک می‌شود تا یک توکن معتبر بی‌جهت روی دستگاه کاربر نماند.
+ */
+function csrf_discard_legacy_cookie(): void
+{
+    if (!isset($_COOKIE['itsm_csrf']) || headers_sent() || session_status() === PHP_SESSION_DISABLED) {
+        return;
+    }
+    setcookie('itsm_csrf', '', [
+        'expires' => time() - 3600,
+        'path' => '/',
+        'httponly' => true,
+        'samesite' => 'Lax',
+        'secure' => (($_SERVER['HTTPS'] ?? '') === 'on'),
+    ]);
+    unset($_COOKIE['itsm_csrf']);
 }
 
 function require_csrf(): void

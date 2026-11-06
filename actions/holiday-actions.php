@@ -3,13 +3,14 @@
 declare(strict_types=1);
 
 /**
- * actions/holiday-actions.php — ۴ اکشن POST تقویم و تعطیلات (فاز ۲ بازسازی، برش ۶ — نسخهٔ ۱.۶۲.۱۷).
+ * actions/holiday-actions.php — ۵ اکشن POST تقویم و تعطیلات (فاز ۲ بازسازی، برش ۶ — نسخهٔ ۱.۶۲.۱۷).
  *
  * شرح فارسی بخش‌ها (به ترتیب داخل فایل):
  *   toggle_holiday    تغییر وضعیت تعطیلی یک روز از روی تقویم
  *   add_holiday       افزودن تعطیلی جدید با تاریخ شمسی
  *   import_holidays   ورود گروهی تعطیلات (هر سطر یک تاریخ)
  *   delete_holiday    حذف یک تعطیلی ثبت‌شده
+ *   save_work_hours   ذخیرهٔ ساعت کاری و روزهای تعطیل هفتگی مبنای SLA
  *
  * این فایل فقط از دل بلوک try در «ناحیهٔ ۴» index.php با require بارگذاری می‌شود و در
  * همان حوزهٔ متغیرها اجرا می‌شود. متن اکشن‌ها جز مقصد بازگشت (return_to) بدون تغییر منتقل شده؛ تنها مورد
@@ -120,6 +121,53 @@ $holidayReturnTo = static function (): string {
                 throw $exception;
             }
             flash('success', $importedCount . ' تعطیلی از فایل تقویم وارد شد؛ پنج‌شنبه و جمعه نادیده گرفته شدند.');
+            redirect($holidayReturnTo());
+        }
+
+        // ───── تقویم کاری: ساعت و روزهای تعطیل هفتگی مبنای محاسبهٔ SLA ─────
+        // اعتبارسنجی اینجا سخت‌گیرانه است چون مقدار نامعتبر مستقیم وارد حلقه‌های
+        // business_due_at() و next_business_start() می‌شود. sla_business_hours()
+        // هم لایهٔ دوم مهار را دارد، ولی خطا باید همین‌جا به کاربر گفته شود نه
+        // اینکه بی‌صدا به پیش‌فرض برگردد.
+        if ($action === 'save_work_hours') {
+            $holidayAdmin = require_permission('holidays.manage');
+            $workStart = (int) ($_POST['work_start_hour'] ?? 8);
+            $workEnd = (int) ($_POST['work_end_hour'] ?? 16);
+            if ($workStart < 0 || $workStart > 23) {
+                throw new RuntimeException('ساعت شروع کار باید بین ۰ تا ۲۳ باشد.');
+            }
+            if ($workEnd > 24 || $workEnd <= $workStart) {
+                throw new RuntimeException('ساعت پایان کار باید بزرگ‌تر از ساعت شروع و حداکثر ۲۴ باشد.');
+            }
+            $weekendDays = [];
+            foreach ((array) ($_POST['weekend_days'] ?? []) as $rawDay) {
+                $day = (int) $rawDay;
+                if ($day >= 1 && $day <= 7 && !in_array($day, $weekendDays, true)) {
+                    $weekendDays[] = $day;
+                }
+            }
+            sort($weekendDays);
+            if (count($weekendDays) >= 7) {
+                throw new RuntimeException('دست‌کم یک روز هفته باید روز کاری بماند.');
+            }
+            db()->beginTransaction();
+            try {
+                save_setting('sla.work_start_hour', (string) $workStart);
+                save_setting('sla.work_end_hour', (string) $workEnd);
+                save_setting('sla.weekend_days', implode(',', $weekendDays));
+                save_audit_required((int) $holidayAdmin['id'], 'work_hours_updated', null, [
+                    'work_start_hour' => $workStart,
+                    'work_end_hour' => $workEnd,
+                    'weekend_days' => implode(',', $weekendDays),
+                ]);
+                db_commit_or_fail('holiday-actions.php:save_work_hours');
+            } catch (Throwable $exception) {
+                if (db()->inTransaction()) db()->rollBack();
+                throw $exception;
+            }
+            setting_forget_cache();
+            sla_business_hours_forget_cache();
+            flash('success', 'تقویم کاری ذخیره شد. مهلت درخواست‌های جدید با این ساعت‌ها حساب می‌شود.');
             redirect($holidayReturnTo());
         }
 

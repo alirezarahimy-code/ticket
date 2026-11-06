@@ -209,8 +209,11 @@ class RouteSmoke:
         for route, query in food_order:
             suffix = "&" + query if query else ""
             self.get_json(f"food-order API GET {route}", f"index.php?page=food-order&food_api={urllib.parse.quote(route, safe='/-')}{suffix}")
-        self.get_json("food-order guest requests correctly rejects a non-deputy synthetic admin",
-                      "index.php?page=food-order&food_api=guest-requests", expected=(403,))
+        non_deputy = RouteSmoke(self.base, self.password, "loadtest-role-agent", self.jalali_month)
+        non_deputy.login()
+        non_deputy.get_json("food-order guest requests rejects a non-deputy agent",
+                            "index.php?page=food-order&food_api=guest-requests", expected=(403,))
+        self.results.extend(non_deputy.results)
         for route, query in [
             ("absent", f"from={today}&to={today}"),
             ("guest-requests-report", f"from={today}&to={today}&deputy_id=all"),

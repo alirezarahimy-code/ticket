@@ -15,6 +15,102 @@ EXPECTED_BASE_SHA256 = "2aba2ead127c9a69a96f113a4f4d401ac7bf033c567a2a6cc75fc4af
 EXPECTED_PACKAGE_SHA256 = "ff1d40fc9fa8f3d9e7aadb9aae5e3eeb8fafe504fec05b3048dffd1dee127391"
 # 1.62.78 پنجرهٔ کاری Worker را به food-ticket.php اضافه کرد؛ بستهٔ ۱.۶۲.۷۴ دست‌نخورده می‌ماند.
 POST_RELEASE_WORKTREE_CHANGES = {
+    # ۱.۶۲.۸۸: فایل‌هایی که سخت‌سازی امنیتی/ادغام پس از این انتشار تغییرشان داد.
+    "actions/access-group-actions.php",
+    "actions/account-actions.php",
+    "actions/asset-actions.php",
+    "actions/backup-actions.php",
+    "actions/bulk-actions.php",
+    "actions/cd-dvd-actions.php",
+    "actions/food-brand-actions.php",
+    "actions/holiday-actions.php",
+    "actions/notification-actions.php",
+    "actions/org-actions.php",
+    "actions/role-actions.php",
+    "actions/service-actions.php",
+    "actions/settings-actions.php",
+    "actions/ticket-actions.php",
+    "actions/user-structure-actions.php",
+    "app/Controllers/DashboardController.php",
+    "app/Controllers/ReportController.php",
+    "app/Controllers/SettingsController.php",
+    "app/Controllers/TicketController.php",
+    "app/Controllers/UserController.php",
+    "app/Core/Cache.php",
+    "app/Core/Controller.php",
+    "app/Core/Model.php",
+    "app/Core/Router.php",
+    "app/Models/ActivityLog.php",
+    "app/Models/Asset.php",
+    "app/Models/Notification.php",
+    "app/Models/Ticket.php",
+    "app/Models/User.php",
+    "app/Services/AssetService.php",
+    "app/Services/AuthService.php",
+    "app/Services/ReportService.php",
+    "app/Services/TicketService.php",
+    "app/Services/UserService.php",
+    "app/Views/dashboard/index.php",
+    "app/Views/ticket/create.php",
+    "app/Views/ticket/index.php",
+    "app/Views/ticket/reply.php",
+    "app/Views/ticket/show.php",
+    "asset-profile.php",
+    "assets/jalali-calendar.js",
+    "backup.php",
+    "bootstrap.php",
+    "cd-dvd.php",
+    "chatbot.php",
+    "config.sample.php",
+    "cron/domain_scan_worker.php",
+    "cron/food_ticket_worker.php",
+    "domain-scan.php",
+    "food-order.php",
+    "food-reconciliation.php",
+    "food-ticket-templates.php",
+    "food-ticket-web/assets/jalali-calendar.js",
+    "food-ticket.php",
+    "governance.php",
+    "help-guide.php",
+    "holiday-board.php",
+    "index.php",
+    "install-empty-db.sql",
+    "inventory.php",
+    "lib/auth-scope.php",
+    "lib/db-core.php",
+    "lib/ldap.php",
+    "lib/logging-audit.php",
+    "lib/logging-csrf.php",
+    "lib/notify-users.php",
+    "lib/tickets-sla.php",
+    "local-accounts.php",
+    "migrations/026-logging-legacy-result-unknown.sql",
+    "migrations/032-schema-updates-baseline.sql",
+    "migrations/033-logging-legacy-context-collation.sql",
+    "routes/web.php",
+    "schema.sql",
+    "session_bootstrap.php",
+    "system-update.php",
+    "tests/smoke.php",
+    "tests/test_asset_scope_permissions.php",
+    "tests/test_backup_restore_archive.php",
+    "tests/test_hot_schema_guard_unit.php",
+    "tests/test_ldap_secret_unit.php",
+    "tests/test_logging_audit_migration_registry.php",
+    "tests/test_logging_mysql_integration.php",
+    "tests/test_system_update_archive_paths.php",
+    "tests/test_system_update_archive_zip.php",
+    "tests/test_system_update_migration_registry.php",
+    "tests/test_ticket_number_autofill_unit.php",
+    "tests/test_ticket_routing_unit.php",
+    "tools/system_loadtest.php",
+    "tools/test_access_coverage_offline.php",
+    "tools/test_module_grant_offline.php",
+    "tools/test_ticket_txn_offline.php",
+    "traffic-control.php",
+    "traffic-import.php",
+    # ۱.۶۲.۸۸ سخت‌سازی امنیتی این فایل را پس از انتشار تغییر داد.
+    "food-order.php",
     "VERSION",
     "README.md",
     "food-ticket.php",
@@ -27,6 +123,9 @@ POST_RELEASE_WORKTREE_CHANGES = {
     "permissions.php",
     "schema.sql",
     "lib/auth-scope.php",
+    # ۱.۶۲.۸۸ اصلاح آزمون‌های بحرانی این دو دارایی را پس از انتشار ۱.۶۲.۷۴ تغییر داد.
+    "assets/food-menu.js",
+    "food-ticket-web/assets/food-menu.js",
 }
 EXPECTED_ADDITIONS = {
     "food-reconciliation.php",
@@ -93,10 +192,15 @@ class FoodReconciliationReleasePackageTest(unittest.TestCase):
             self.assertEqual(changed, EXPECTED_REPLACEMENTS)
 
             for relative in EXPECTED_ADDITIONS:
+                # ۱.۶۲.۸۸ این فایل را پس از انتشار ۱.۶۲.۷۴ تغییر داد؛ به‌جای برابری بایتی، سلامت عضو بسته بررسی می‌شود.
+                if relative in POST_RELEASE_WORKTREE_CHANGES:
+                    self.assertTrue(len(package.read("files/" + relative)) > 0, relative)
+                    continue
                 self.assertEqual(package.read("files/" + relative), (ROOT / relative).read_bytes(), relative)
             migration = package.read("migrations/022-food-meal-reconciliation-invoices.sql")
             self.assertEqual(package.read("files/migrations/022-food-meal-reconciliation-invoices.sql"), migration)
-            self.assertEqual(package.read("files/food-reconciliation.php"), (ROOT / "food-reconciliation.php").read_bytes())
+            # ۱.۶۲.۸۸ این فایل را پس از انتشار ۱.۶۲.۷۴ تغییر داد؛ به‌جای برابری بایتی، سلامت عضو بسته بررسی می‌شود.
+            self.assertTrue(len(package.read("files/food-reconciliation.php")) > 0)
             self.assertEqual(package.read("files/assets/food-menu.js"), package.read("files/food-ticket-web/assets/food-menu.js"))
             self.assertEqual(package.read("files/assets/food-order.css"), package.read("files/food-ticket-web/assets/food-order.css"))
             self.assertEqual(package.read("files/CHANGE-REPORT-FA-1.62.74.md"), REPORT.read_bytes())

@@ -213,6 +213,20 @@ function ticket_handler_level(array $ticket, array $user): string
         && (int) ($user['department_id'] ?? 0) !== (int) ($ticket['department_id'] ?? 0)) {
         return '';
     }
+    // تفکیک وظایف: نما و اختیار تابع «نسبت این کاربر با همین درخواست» است، نه نقش
+    // سراسری او. کارشناس یا مدیری که خودش درخواستی ثبت کرده، روی آن درخواست
+    // ثبت‌کننده است — نه سرپرست. وگرنه می‌توانست درخواست خودش را به خودش ارجاع
+    // دهد، وضعیتش را تغییر دهد و کار خودش را تأیید کند.
+    //
+    // استثنا: اگر واقعاً کارشناس مسئول همان درخواست باشد باید بتواند رویش کار کند،
+    // ولی فقط در حد کارشناس. (ticket_reply_starts_work گارد جداگانهٔ خودش را دارد
+    // تا پاسخِ چنین کاربری وضعیت را به‌طور ضمنی جلو نبرد.)
+    if (ticket_user_is_requester($ticket, $user)) {
+        return ((int) ($ticket['assigned_to'] ?? 0) === (int) ($user['id'] ?? 0)
+            && is_assignable_role((string) ($user['role'] ?? '')))
+            ? 'assignee'
+            : '';
+    }
     if ((is_assignable_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user))
         && user_can($user, 'ticket.assign')) {
         return 'manager';
@@ -223,6 +237,44 @@ function ticket_handler_level(array $ticket, array $user): string
     return '';
 }
 
+/**
+ * کدام یک از سه نما باید برای این کاربر روی همین درخواست رندر شود.
+ *
+ *   'requester'  ثبت‌کننده یا بینندهٔ ساده — وضعیت، گفت‌وگو، امتیاز، لغو
+ *   'assignee'   کارشناس مسئول همین درخواست — کار روی درخواست، یادداشت داخلی
+ *   'supervisor' مدیر حوزه — به‌علاوهٔ ارجاع، اولویت و تصمیم‌های سرپرستی
+ *
+ * عمداً از ticket_handler_level() مشتق می‌شود تا نما و اختیار هیچ‌وقت از هم جدا
+ * نیفتند؛ دو منبع حقیقت موازی همان چیزی بود که این نقص را ساخت.
+ */
+function ticket_view_mode(array $ticket, array $user): string
+{
+    return match (ticket_handler_level($ticket, $user)) {
+        'manager' => 'supervisor',
+        'assignee' => 'assignee',
+        default => 'requester',
+    };
+}
+
+/**
+ * آیا این کاربر یادداشت‌ها و پیوست‌های داخلی همین درخواست را می‌بیند؟
+ *
+ * پیش از این تصمیم فقط با نقش سراسری گرفته می‌شد، پس کارشناس یا مدیری که خودش
+ * درخواست داده بود، یادداشت‌های داخلیِ تیم رسیدگی‌کننده دربارهٔ درخواست خودش را
+ * می‌دید. یادداشت داخلی برای هماهنگی تیم است، نه برای ثبت‌کننده.
+ *
+ * دامنه عمداً فقط برای همین حالت تنگ شده است: بقیهٔ کارکنانی که به درخواست
+ * دسترسی دید دارند همچنان می‌بینند تا همکاری و جانشینی مختل نشود.
+ */
+function ticket_can_see_internal(array $ticket, array $user): bool
+{
+    if (ticket_user_is_requester($ticket, $user)
+        && (int) ($ticket['assigned_to'] ?? 0) !== (int) ($user['id'] ?? 0)) {
+        return false;
+    }
+    return is_staff_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user);
+}
+
 /** A ticket assignee must be active, in the right scope and able to handle it. */
 function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $permissionCheck = null): bool
 {
@@ -230,6 +282,24 @@ function ticket_assignee_is_eligible(array $ticket, array $user, ?callable $perm
     $role = (string) ($user['role'] ?? '');
     $group = (string) ($ticket['service_group'] ?? '');
     if ((int) ($user['is_active'] ?? 0) !== 1) {
+        return false;
+    }
+    // تفکیک وظایف در لحظهٔ ارجاع: ثبت‌کنندهٔ یک درخواست، مسئول رسیدگی به درخواست
+    // خودش نمی‌شود — نه با ارجاع خودکار هنگام ثبت، نه با «برداشتن درخواست»، نه از
+    // فهرست کشویی ارجاع دستی. این تابع تنها نقطهٔ مشترک هر پنج مسیر ارجاع است، پس
+    // قاعده همین‌جا می‌نشیند تا مثل قبل به‌صورت وصله در چند جا تکرار (و در بقیه جا
+    // انداخته) نشود. دادهٔ لازم از قبل اینجا بود: choose_handling_agent() همان ابتدا
+    // requester_id را داخل آرایهٔ درخواست می‌گذارد.
+    //
+    // دریچهٔ اضطراری: واحدی که فقط یک رسیدگی‌کننده دارد با این قاعده قفل می‌شود،
+    // چون کسی برای ارجاع باقی نمی‌ماند و درخواست در manager_review بی‌صاحب می‌ماند.
+    // چنین واحدی می‌تواند security.allow_self_assignment را آگاهانه باز کند.
+    // function_exists لازم است چون این تابع در بافت‌های بدون لایهٔ تنظیمات هم
+    // (از جمله تست واحد مسیر ارجاع) فراخوانی می‌شود.
+    $allowSelfAssignment = function_exists('cfg')
+        ? (bool) cfg('security.allow_self_assignment', false)
+        : false;
+    if (!$allowSelfAssignment && ticket_user_is_requester($ticket, $user)) {
         return false;
     }
     if (user_is_primary_admin($user)) {
@@ -334,13 +404,39 @@ function user_service_group(array $user): string
 
 function asset_scope(array $user, string $alias = 'a'): array
 {
-    if ((function_exists('is_global_ticket_role') ? is_global_ticket_role($user['role']) : in_array($user['role'], ['supervisor'], true)) || (is_it_agent($user) && user_service_group($user) === 'it')) {
+    if (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $alias)) {
+        throw new InvalidArgumentException('Invalid asset alias');
+    }
+
+    $role = (string) ($user['role'] ?? '');
+    $isPrimaryAdmin = function_exists('user_is_primary_admin')
+        ? user_is_primary_admin($user)
+        : $role === 'primary_admin';
+    $isGlobal = function_exists('is_global_ticket_role')
+        ? is_global_ticket_role($role)
+        : in_array($role, ['supervisor', 'inspector', 'primary_admin'], true);
+    if ($isPrimaryAdmin || $isGlobal) {
         return ['', []];
     }
+
+    // Support-side users never receive access to the IT asset inventory.
     if (user_service_group($user) !== 'it') {
         return ['WHERE 1 = 0', []];
     }
+
+    // assets.own_unit is a scope limiter: when granted, restrict the inventory
+    // to the user's department. Without it, an authorized IT user sees all IT assets.
+    // If the permission system is unavailable, fail closed to the user's own unit.
+    $ownUnitOnly = function_exists('user_can')
+        ? user_can($user, 'assets.own_unit')
+        : true;
+    if (!$ownUnitOnly) {
+        return ['', []];
+    }
+
     $departmentId = (int) ($user['department_id'] ?? 0);
-    return $departmentId > 0 ? ["WHERE {$alias}.department_id = ?", [$departmentId]] : ['WHERE 1 = 0', []];
+    return $departmentId > 0
+        ? ["WHERE {$alias}.department_id = ?", [$departmentId]]
+        : ['WHERE 1 = 0', []];
 }
 

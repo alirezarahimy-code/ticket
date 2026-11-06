@@ -1,0 +1,21 @@
+{
+  "name": "ticket-update",
+  "version": "1.62.83",
+  "requires_version": "1.62.82",
+  "date": "2026-11-05",
+  "title": "ترمیم شماره‌گذاری درخواست‌ها، حذف شمارهٔ ساختگی، حذف کوئری تکراری فهرست‌ها و سقف عملیات گروهی (1.62.82 ← 1.62.83)",
+  "migrations": [],
+  "files": [
+    "README.md",
+    "TICKET-NUMBER-REPAIR-1.62.83-CHANGE-REPORT-fa.md",
+    "TICKET-NUMBER-REPAIR-1.62.83-UPDATE-NOTE-fa.txt",
+    "VERSION",
+    "actions/bulk-actions.php",
+    "chatbot.php",
+    "help-guide.php",
+    "index.php",
+    "lib/tickets-sla.php",
+    "tests/smoke.php",
+    "tests/test_ticket_number_autofill_unit.php"
+  ]
+}

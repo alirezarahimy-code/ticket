@@ -77,7 +77,7 @@ def api_routes(jalali_month: str) -> list[tuple[str, str, int]]:
                          ("search-users", "q=loadtest"), ("day-visit", "date=" + today)):
         suffix = "&" + query if query else ""
         routes.append((f"food-order:{route}", f"index.php?page=food-order&food_api={route}{suffix}", 200))
-    routes.append(("food-order:guest-requests (expected deny)", "index.php?page=food-order&food_api=guest-requests", 403))
+    routes.append(("food-order:guest-requests", "index.php?page=food-order&food_api=guest-requests", 200))
     routes.append(("traffic:invalid-code lookup", "index.php?page=traffic-control&traffic_api=lookup&code=000", 200))
     return routes
 

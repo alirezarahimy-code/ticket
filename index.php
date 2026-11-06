@@ -537,6 +537,10 @@ function ticket_allowed_transitions(string $from): array
         'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review'],
         'in_progress' => ['waiting_user', 'resolved', 'assigned', 'manager_review'],
         'waiting_user' => ['in_progress', 'resolved', 'assigned', 'manager_review'],
+        // pending یک وضعیت «میراثی» از نسخه‌های قدیمی است: عمداً هیچ وضعیتی آن را
+        // به‌عنوان مقصد ندارد، پس هیچ درخواست تازه‌ای به آن نمی‌رسد. ولی سطر زیر
+        // حذف نمی‌شود، چون اگر در دیتابیسی ردیفی با همین وضعیت مانده باشد بدون
+        // مسیر خروج برای همیشه قفل می‌شود. قاعده: ورود ممنوع، خروج همیشه باز.
         'pending' => ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
         'resolved' => ['in_progress', 'assigned'],
         'closed' => [],
@@ -661,7 +665,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -1177,7 +1181,9 @@ if (($_GET['action'] ?? '') === 'download_attachment') {
     $attachmentQuery->execute([$attachmentId]);
     $attachment = $attachmentQuery->fetch();
     $attachmentTicket = $attachment ? fetch_ticket((int) $attachment['ticket_id']) : null;
-    $canDownloadInternal = is_staff_role($downloadUser['role']) || user_is_primary_admin($downloadUser);
+    // پیوست داخلی را بر پایهٔ نسبت کاربر با همین درخواست می‌سنجیم، نه نقش سراسری:
+    // کارمندی که خودش ثبت‌کنندهٔ درخواست است نباید پیوست داخلی آن را بگیرد.
+    $canDownloadInternal = $attachmentTicket ? ticket_can_see_internal($attachmentTicket, $downloadUser) : false;
     if (!$attachment || !$attachmentTicket || !can_view_ticket($attachmentTicket, $downloadUser) || ((int) $attachment['is_internal'] === 1 && !$canDownloadInternal)) {
         http_response_code(404);
         exit('فایل پیدا نشد.');
@@ -2038,6 +2044,9 @@ if ($page === 'queue') {
         $queueQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $queueWhere . ' ORDER BY CASE WHEN t.cancel_requested_at IS NOT NULL THEN 0 WHEN (t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))) THEN 1 ELSE 2 END, FIELD(t.priority, "critical", "urgent", "normal"), t.created_at ASC LIMIT ' . $queuePerPage . ' OFFSET ' . $queueOffset);
     $queueQuery->execute($queueParams);
     $queueRows = $queueQuery->fetchAll();
+    // ستون ticket_no با همین SELECT آمده است؛ بدون این خط هر ticket_number() داخل حلقه
+    // یک کوئری جدا می‌زد (۱۰۰ کوئری اضافه در هر بار باز کردن صف).
+    ticket_number_cache_prime($queueRows);
     render_header('صف کاری', $queueUser);
      echo '<section class="page-heading"><div><span class="eyebrow">صف مرکزی خدمات</span><h1>صف کار واحد رسیدگی</h1><p>درخواست‌های هر حوزه جدا هستند؛ موارد خارج از SLA/OLA و اولویت‌های حیاتی بالاتر قرار می‌گیرند. نمایش ' . ($queueRows ? number_format($queueOffset + 1) . ' تا ' . number_format($queueOffset + count($queueRows)) . ' از ' . number_format($queueTotal) : '۰ از ' . number_format($queueTotal)) . ' درخواست.</p></div><a class="button secondary" href="index.php?page=reports">گزارش کامل</a></section><div class="queue-tabs"><a class="' . ($queueName === 'all' ? 'active' : '') . '" href="index.php?page=queue&queue=all">همه</a><a class="' . ($queueName === 'unassigned' ? 'active' : '') . '" href="index.php?page=queue&queue=unassigned">بدون مسئول</a><a class="' . ($queueName === 'overdue' ? 'active' : '') . '" href="index.php?page=queue&queue=overdue">خارج از SLA/OLA</a><a class="' . ($queueName === 'mine' ? 'active' : '') . '" href="index.php?page=queue&queue=mine">مسئول من</a><a class="' . ($queueName === 'waiting_user' ? 'active' : '') . '" href="index.php?page=queue&queue=waiting_user">انتظار کاربر</a><a class="' . ($queueName === 'resolved' ? 'active' : '') . '" href="index.php?page=queue&queue=resolved">حل‌شده</a><a class="' . ($queueName === 'cancellation_requested' ? 'active' : '') . '" href="index.php?page=queue&queue=cancellation_requested">درخواست لغو</a><a class="' . ($queueName === 'cancelled' ? 'active' : '') . '" href="index.php?page=queue&queue=cancelled">لغوشده</a></div><form method="post"><section class="card ticket-table queue-table"><div class="table-head"><span>انتخاب / درخواست</span><span>معاونت</span><span>ثبت‌کننده</span><span>مسئول</span><span>وضعیت</span></div>';
     foreach ($queueRows as $queueTicket) {
@@ -2165,7 +2174,7 @@ if ($page === 'holidays') {
     // در صفحهٔ تنظیمات هم رندر می‌شود؛ پس این دو نما هیچ‌وقت از هم جدا نمی‌افتند.
     $holidayAdmin = require_permission('holidays.view');
     render_header('تقویم SLA', $holidayAdmin);
-    echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>پنج‌شنبه و جمعه تعطیل ثابت هستند؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">تقویم کاری</span><h1>تعطیلات رسمی و توقف SLA</h1><p>روزهای تعطیل هفتگی و ساعت کاری را در همین صفحه تنظیم کنید؛ سایر تعطیلات را با تقویم شمسی انتخاب کنید.</p></div></section>';
     holiday_board_render($user);
     render_footer();
     exit;
@@ -2180,6 +2189,7 @@ if ($page === 'new-ticket' && $user && !user_can($user, 'ticket.create')) {
     exit;
 }
 if ($page === 'new-ticket') {
+    $user = require_permission('ticket.create');
     $cdDvdRequestRecord = null;
     $subjectDefault = '';
     $descriptionDefault = '';
@@ -2342,6 +2352,10 @@ if ($page === 'ticket') {
     $requesterView = $isRequester;
     $canCancelOwnTicket = ticket_requester_can_cancel($ticket, $user);
     $handlerLevel = ticket_handler_level($ticket, $user);
+    // نمای فعال: 'requester' | 'assignee' | 'supervisor'. تنها منبع حقیقتِ «چه چیزی
+    // نشان داده شود»، تا نما و اختیار از هم جدا نیفتند.
+    $viewMode = ticket_view_mode($ticket, $user);
+    $canSeeInternal = ticket_can_see_internal($ticket, $user);
     $cancelHasRequest = !empty($ticket['cancel_requested_at']);
     $cancelDecidable = $cancelHasRequest
         && in_array((string) $ticket['status'], ticket_requester_cancelable_statuses(), true);
@@ -2354,9 +2368,9 @@ if ($page === 'ticket') {
     $canAssignTicket = $handlerLevel === 'manager';
     $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
     render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
-     echo '<section class="page-heading"><div><a class="back-link" href="index.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout"><section class="conversation">';
+     echo '<section class="page-heading"><div><a class="back-link" href="index.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
     foreach ($messages as $message) {
-        if ((int) $message['is_internal'] === 1 && !$staff) {
+        if ((int) $message['is_internal'] === 1 && !$canSeeInternal) {
             continue;
         }
          $messageRole = ((int) $message['is_internal'] === 1) ? 'internal' : (is_staff_role($message['role']) ? 'agent' : ($message['role'] === 'supervisor' ? 'supervisor' : 'user'));
@@ -2611,6 +2625,7 @@ if ($page === 'reports') {
      $rowsQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $where . ' ORDER BY t.created_at DESC LIMIT ' . $reportPerPage . ' OFFSET ' . $reportOffset);
     $rowsQuery->execute($params);
     $reportRows = $rowsQuery->fetchAll();
+    ticket_number_cache_prime($reportRows); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
     $departments = is_global_ticket_role($reportUser['role']) ? db()->query('SELECT id, name FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll() : [];
     $queryString = http_build_query(array_filter($_GET, static fn ($value, $key): bool => $key !== 'page' && $key !== 'action' && $value !== '', ARRAY_FILTER_USE_BOTH));
     render_header('گزارش‌ها', $reportUser);
@@ -2665,6 +2680,7 @@ if ($page === 'supervisor') {
      $ticketsQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name, tr.score AS rating_score, tr.created_at AS rating_at FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id ' . $where . ' ORDER BY CASE WHEN t.status = "resolved" THEN 0 WHEN t.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending") THEN 1 ELSE 2 END, t.updated_at DESC LIMIT ' . $supervisorPerPage . ' OFFSET ' . $supervisorOffset);
     $ticketsQuery->execute($params);
     $supervisorRows = $ticketsQuery->fetchAll();
+    ticket_number_cache_prime($supervisorRows); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
     render_header('پنل سوپروایزر', $supervisor);
     echo '<section class="page-heading"><div><span class="eyebrow">نظارت سراسری</span><h1>پنل سوپروایزر</h1><p>تمام مراحل از ثبت تا انجام و تأیید نهایی را کنترل کنید.</p></div><a class="button secondary" href="index.php?page=reports">گزارش کامل</a></section><section class="stat-grid"><div class="stat-card accent"><span class="stat-icon">▣</span><div><strong>' . (int) $summary['total'] . '</strong><small>کل درخواست‌ها</small></div></div><div class="stat-card"><span class="stat-icon blue">◈</span><div><strong>' . (int) $summary['active'] . '</strong><small>در گردش</small></div></div><div class="stat-card"><span class="stat-icon" style="background:#fff8e7;color:#9a6700">✓</span><div><strong>' . (int) $summary['awaiting_approval'] . '</strong><small>منتظر تأیید شما</small></div></div><div class="stat-card"><span class="stat-icon green">✓</span><div><strong>' . (int) $summary['closed'] . '</strong><small>بسته‌شده</small></div></div><div class="stat-card"><span class="stat-icon gray">×</span><div><strong>' . (int) $summary['cancelled'] . '</strong><small>لغوشده</small></div></div></section><section class="card supervisor-list"><div class="table-head"><span>درخواست</span><span>واحد</span><span>کارشناس</span><span>وضعیت</span><span>عملیات</span></div>';
     foreach ($supervisorRows as $ticket) {
@@ -3346,7 +3362,7 @@ if ($page === 'settings') {
 
     if ($canSettingsDomain) {
     echo '<div class="settings-panel settings-panel-grid" id="domain"' . ($canSettingsDomainEdit ? '' : ' inert') . '>';
-    echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';
+    echo '<div class="card form-card settings-panel-tall"><h2>اتصال Active Directory</h2><p class="muted">رمز حساب سرویس در صورت خالی‌گذاشتن تغییر نمی‌کند. ' . (ldap_secret_key() === null ? '<b>توجه:</b> کلید <code>app.key</code> در config.php تنظیم نشده، پس این رمز به‌صورت متن ساده ذخیره می‌شود.' : 'این رمز رمزشده ذخیره می‌شود؛ با عوض‌کردن <code>app.key</code> باید دوباره وارد شود.') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label class="switch-row"><input type="checkbox" name="ldap_enabled" value="1" ' . (setting('ldap_enabled', cfg('ldap.enabled') ? '1' : '0') === '1' ? 'checked' : '') . '> ورود کاربران شبکه فعال باشد</label><div class="form-grid"><label>آدرس کنترلر<input name="ldap_host" value="' . e(setting('ldap_host', (string) cfg('ldap.host', ''))) . '"></label><label>پورت<input type="number" name="ldap_port" value="' . e(setting('ldap_port', (string) cfg('ldap.port', '389'))) . '"></label><label class="full">Base DN<input name="ldap_base_dn" value="' . e(setting('ldap_base_dn', (string) cfg('ldap.base_dn', ''))) . '"></label><label class="full">حساب سرویس<input name="ldap_bind_dn" value="' . e(setting('ldap_bind_dn', (string) cfg('ldap.bind_dn', ''))) . '"></label><label class="full">رمز حساب سرویس<input type="password" name="ldap_bind_password" placeholder="بدون تغییر"></label><label>Domain suffix<input name="ldap_domain_suffix" value="' . e(setting('ldap_domain_suffix', (string) cfg('ldap.domain_suffix', ''))) . '"></label></div><label class="switch-row"><input type="checkbox" name="ldap_ssl" value="1" ' . (setting('ldap_ssl', cfg('ldap.ssl') ? '1' : '0') === '1' ? 'checked' : '') . '> استفاده از LDAPS</label><button class="button" type="submit">ذخیره تنظیمات دامین</button></form></div>';
     echo '<div class="card form-card" id="domain-scan"' . (user_can($user, 'asset.remote_extract') ? '' : ' inert') . '><h2>اسکن دامنه و استخراج از شبکه</h2><p class="muted">همهٔ کامپیوترهای دامنه از Active Directory خوانده می‌شوند، سپس در صورت آنلاین بودن، اطلاعات سخت‌افزاری آن‌ها از راه دور دریافت و در شناسنامه ثبت می‌شود. برای دریافت سخت‌افزار، حساب وارد‌شده باید روی کلاینت‌ها دسترسی ادمین محلی داشته باشد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="domain_scan"><input type="hidden" name="app_name" value="' . e($appName) . '"><p class="muted">نام کاربری و رمز ادمین در فرم استخراج هر نوبت وارد می‌شوند؛ رمز در تنظیمات پایگاه‌داده ذخیره نمی‌شود و برای ارسال آن HTTPS لازم است. حساب باید روی کلاینت‌ها عضو Administrators محلی باشد.</p><div class="form-grid"><label>دامنه (NetBIOS)<input name="domain_scan_domain" value="' . e(setting('domain_scan_domain', '')) . '" placeholder="COMPANY"></label><label>زمان انتظار پینگ (میلی‌ثانیه)<input type="number" name="domain_scan_timeout" min="500" max="30000" value="' . e(setting('domain_scan_timeout', '2500')) . '"></label><label>ترتیب پروتکل اتصال (۱.۳۷)<select name="domain_scan_protocols"><option value=""' . (setting('domain_scan_protocols', '') === '' ? ' selected' : '') . '>خودکار (اول DCOM، بعد WinRM)</option><option value="Wsman,Dcom"' . (setting('domain_scan_protocols', '') === 'Wsman,Dcom' ? ' selected' : '') . '>اول WinRM، بعد DCOM (اگر WinRM روی مقصدها فعال است)</option><option value="Dcom"' . (setting('domain_scan_protocols', '') === 'Dcom' ? ' selected' : '') . '>فقط DCOM</option><option value="Wsman"' . (setting('domain_scan_protocols', '') === 'Wsman' ? ' selected' : '') . '>فقط WinRM (نیازمند فعال‌بودن WinRM روی مقصدها)</option></select></label></div><p class="muted">خطاهای رایج استخراج («RPC/WMI در دسترس نیست» و «دسترسی رد شد») در صفحهٔ «اسکن دامنه» با راه‌حل گام‌به‌گام نمایش داده می‌شوند؛ پس از هر اصلاح، از همان صفحه «تلاش دوباره برای ناموفق‌ها» را بزنید.</p><button class="button" type="submit">ذخیره تنظیمات اسکن دامنه</button></form></div>';
     echo '<div class="card form-card" id="ldap-sync"><h2>معرفی کاربران دامین</h2><p class="muted">همه کاربران قابل مشاهده در Base DN را بدون نیاز به اولین ورود به سامانه معرفی می‌کند. حساب‌هایی که دیگر در دامین پیدا نشوند یا غیرفعال باشند، غیرفعال می‌شوند.</p><div class="actions" style="margin-top:0"><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="sync_ldap_users"><button class="button" type="submit">همگام‌سازی همه کاربران دامین</button></form><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="diagnose_ldap"><button class="button secondary" type="submit">تشخیص اتصال دامنه</button></form></div></div>';
     echo '<div class="card form-card settings-panel-full" id="ldap-role-map"><h2>نقش‌دهی گروه‌های AD</h2><p class="muted">هر خط یک JSON معتبر برای نقش باشد؛ مثال: {"agent":["CN=IT-Helpdesk,OU=Groups,DC=example,DC=local"]}. کاربران جدید دامینی بر اساس عضویت گروه نقش می‌گیرند و نقش کاربران فعلی دستی حفظ می‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="save_settings"><input type="hidden" name="settings_section" value="ldap"><input type="hidden" name="app_name" value="' . e($appName) . '"><label>تنظیم JSON نگاشت گروه به نقش<textarea name="ldap_group_map" rows="2" class="compact-textarea" placeholder="{&quot;agent&quot;:[&quot;CN=IT-Helpdesk,...&quot;]}">' . e(setting('ldap_group_map', '{}')) . '</textarea></label><button class="button secondary" type="submit">ذخیره نگاشت گروه‌ها</button></form></div>';
@@ -3655,7 +3671,7 @@ if ($page === 'settings') {
         // به همین تب برگردیم نه به صفحهٔ مستقل تعطیلات.
         echo '<div class="settings-panel" id="holidays">';
         echo '<div class="card form-card settings-panel-full"><h2>تقویم تعطیلات و توقف SLA</h2>'
-            . '<p class="muted">پنج‌شنبه و جمعه تعطیل ثابت هستند. تعطیلات رسمی ثبت‌شده در این تقویم، هم از محاسبهٔ SLA و هم از بازهٔ کاری پردازشگر فیش غذا حذف می‌شوند.</p></div>';
+            . '<p class="muted">روزهای تعطیل هفتگی و ساعت کاری در همین تب قابل تنظیم‌اند. تعطیلات رسمی ثبت‌شده در این تقویم، هم از محاسبهٔ SLA و هم از بازهٔ کاری پردازشگر فیش غذا حذف می‌شوند.</p></div>';
         holiday_board_render($user, 'settings');
         echo '</div>';
     }
@@ -3701,6 +3717,7 @@ foreach ($countQuery->fetchAll() as $count) {
 $listQuery = db()->prepare('SELECT t.*, c.name AS category_name, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN categories c ON c.id = t.category_id LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $ticketWhere . ' ORDER BY t.updated_at DESC LIMIT 50');
 $listQuery->execute($ticketParams);
 $tickets = $listQuery->fetchAll();
+ticket_number_cache_prime($tickets); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
 render_header('داشبورد', $user);
 $activeCount = $counts['new'] + $counts['manager_review'] + $counts['assigned'] + $counts['in_progress'] + $counts['waiting_user'] + $counts['pending'];
 $cdDvdReady = cd_dvd_available();

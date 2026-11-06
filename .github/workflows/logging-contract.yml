@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -24,6 +26,9 @@ jobs:
         run: python -m pip install --quiet pytest
       - name: Verify the central logging contract
         run: python -m pytest -q tests/test_logging_system_contract.py
+      # Rebuild the release archive from this checkout before comparing repository bytes.
+      - name: Rebuild 1.62.88 package before source-of-truth guard
+        run: python tools/build_update_1_62_88.py
       # Keeps the repository and the shipped update package byte-identical.
       # Nothing else in CI runs this guard, so a package could silently drift.
       - name: Verify the repository matches the shipped package

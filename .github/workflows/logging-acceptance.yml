@@ -1,10 +1,11 @@
-name: Logging 1.62.76 Acceptance
+name: Logging 1.62.88 Acceptance
 
-# فقط اجرای دستی. این گردش‌کار به MariaDB و Windows runner نیاز دارد و تا تأیید روی
-# Staging نباید خودکار اجرا شود. کلید push عمداً حذف شده است — یک کلید ناشناخته زیر on:
-# کل فایل را نامعتبر می‌کند و گردش‌کار پیش از ساخت job قرمز می‌شود.
+# اجرای PR فقط از دیتابیس MariaDB دورریختنی و پوشه‌های موقت Windows استفاده می‌کند.
+# بررسی‌های عملیاتی Staging همچنان دستی و با RunOperational اجرا می‌شوند.
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -90,3 +91,48 @@ jobs:
       - name: Real Windows NTFS ACL verifier test
         shell: powershell
         run: .\tests\test_logging_acl_windows.ps1
+
+  build-1-62-88-update:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: [linux-mariadb-integration, windows-acl-and-runtime]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, mbstring, zip
+          coverage: none
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install package validation test runner
+        run: python -m pip install --disable-pip-version-check pytest
+      - name: Build and validate cumulative update package
+        run: |
+          python -m py_compile tools/build_update_1_62_88.py
+          python tools/build_update_1_62_88.py
+          python -m pytest -q \
+            tests/test_version_source_of_truth_static.py \
+            tests/test_migration_registry_seed.py \
+            tests/test_fresh_install_schema_parity.py \
+            tests/test_backup_restore_static.py \
+            tests/test_update_manifest_guard_static.py
+          php tests/test_system_update_archive_zip.php
+          php tests/test_system_update_migration_registry.php
+          php tests/test_backup_restore_archive.php
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ticket-update-1.62.88-verified
+          path: |
+            downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
+            downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip.sha256
+            downloads/CHANGE-REPORT-FA-1.62.88.md
+          if-no-files-found: error
+          retention-days: 30

@@ -33,29 +33,110 @@ define('APP_ROOT', $root);
 $GLOBALS['__logging_mysql_test_pdo'] = $pdo;
 $GLOBALS['__app_pdo_instance'] = $pdo;
 function db(bool $reconnect = false): PDO { return $GLOBALS['__logging_mysql_test_pdo']; }
+function execute_migration_statement(PDO $pdo, string $sql): void
+{
+    $statement = $pdo->query($sql);
+    if ($statement instanceof PDOStatement) {
+        do {
+            $statement->fetchAll(PDO::FETCH_ASSOC);
+        } while ($statement->nextRowset());
+        $statement->closeCursor();
+    }
+}
+function split_sql_statements(string $sql): array
+{
+    $statements = [];
+    $buffer = '';
+    $quote = null;
+    $lineComment = false;
+    $blockComment = false;
+    $length = strlen($sql);
+    for ($i = 0; $i < $length; $i++) {
+        $char = $sql[$i];
+        $next = $sql[$i + 1] ?? '';
+        if ($lineComment) {
+            if ($char === "\n") {
+                $lineComment = false;
+                $buffer .= "\n";
+            }
+            continue;
+        }
+        if ($blockComment) {
+            if ($char === '*' && $next === '/') {
+                $blockComment = false;
+                $i++;
+            }
+            continue;
+        }
+        if ($quote !== null) {
+            $buffer .= $char;
+            if ($char === '\\' && $i + 1 < $length) {
+                $buffer .= $sql[++$i];
+                continue;
+            }
+            if ($char === $quote) {
+                if ($next === $quote) {
+                    $buffer .= $sql[++$i];
+                    continue;
+                }
+                $quote = null;
+            }
+            continue;
+        }
+        if ($char === '-' && $next === '-' && ($i + 2 >= $length || ctype_space($sql[$i + 2]))) {
+            $lineComment = true;
+            $i++;
+            continue;
+        }
+        if ($char === '#') {
+            $lineComment = true;
+            continue;
+        }
+        if ($char === '/' && $next === '*') {
+            $blockComment = true;
+            $i++;
+            continue;
+        }
+        if ($char === "'" || $char === '"' || ord($char) === 96) {
+            $quote = $char;
+            $buffer .= $char;
+            continue;
+        }
+        if ($char === ';') {
+            $statement = trim($buffer);
+            if ($statement !== '') $statements[] = $statement;
+            $buffer = '';
+            continue;
+        }
+        $buffer .= $char;
+    }
+    $statement = trim($buffer);
+    if ($statement !== '') $statements[] = $statement;
+    return $statements;
+}
 require dirname(__DIR__) . '/lib/logging-core.php';
 require dirname(__DIR__) . '/lib/logging-replay.php';
 require dirname(__DIR__) . '/lib/activity-audit.php';
 
 $migration = file_get_contents(dirname(__DIR__) . '/migrations/025-logging-issues-alerts.sql');
-if (!is_string($migration)) throw new RuntimeException('Migration 020 could not be read.');
-foreach (preg_split('/;\s*(?:\r?\n|$)/', $migration) ?: [] as $statement) {
+if (!is_string($migration)) throw new RuntimeException('Migration 025 could not be read.');
+foreach (split_sql_statements($migration) as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
-    if ($statement !== '') $pdo->exec($statement);
+    if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
-foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql'] as $migrationName) {
+foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql', '033-logging-legacy-context-collation.sql'] as $migrationName) {
     $migration = file_get_contents(dirname(__DIR__) . '/migrations/' . $migrationName);
     if (!is_string($migration)) throw new RuntimeException($migrationName . ' could not be read.');
-    foreach (preg_split('/;\s*(?:\r?\n|$)/', $migration) ?: [] as $statement) {
+    foreach (split_sql_statements($migration) as $statement) {
         $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
-        if ($statement !== '') $pdo->exec($statement);
+        if ($statement !== '') execute_migration_statement($pdo, $statement);
     }
 }
 // Migration 025 must remain safe when the updater retries a migration after an interrupted release.
 $migration025 = file_get_contents(dirname(__DIR__) . '/migrations/030-logging-notification-idempotency-and-ticket-history.sql');
-foreach (preg_split('/;\s*(?:\r?\n|$)/', (string) $migration025) ?: [] as $statement) {
+foreach (split_sql_statements((string) $migration025) as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
-    if ($statement !== '') $pdo->exec($statement);
+    if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
 
 $checks = [];
@@ -130,9 +211,16 @@ $goodEvent = ['event_id'=>logging_uuid(),'request_id'=>logging_uuid(),'code'=>'S
 $goodLine = json_encode(['version'=>1,'stream'=>'system','queued_at'=>date('c'),'payload'=>$goodEvent], JSON_UNESCAPED_SLASHES) . "\n";
 file_put_contents($badFile, $badLine . $goodLine, FILE_APPEND | LOCK_EX);
 $poisonResult = logging_replay_process_directory($root . '/storage/logs/spool', 500);
-$remainingPoison = file_get_contents($badFile);
-$checks['invalid spool line is retained without blocking later valid records'] = $poisonResult['replayed'] === 1
-    && $poisonResult['failed'] === 1 && str_contains((string) $remainingPoison, '{not-json}')
+// The replay worker atomically renames the source file and publishes a retry file.
+$remainingPoison = '';
+foreach (glob($root . '/storage/logs/spool/system*.jsonl') ?: [] as $activeSpoolFile) {
+    $activeContents = @file_get_contents($activeSpoolFile);
+    if (is_string($activeContents)) {
+        $remainingPoison .= $activeContents;
+    }
+}
+$checks['invalid spool line is retained in the retry queue without blocking later valid records'] = $poisonResult['replayed'] === 1
+    && $poisonResult['failed'] === 1 && str_contains($remainingPoison, '{not-json}')
     && (int) $pdo->query("SELECT COUNT(*) FROM system_logs WHERE context = 'poison-test'")->fetchColumn() === 1;
 $checks['migration created alert throttle table'] = (int) $pdo->query("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'logging_health_alerts'")->fetchColumn() === 1;
 

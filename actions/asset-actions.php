@@ -53,7 +53,7 @@ if (!defined('APP_ROOT')) {
               $assetId = inventory_upsert_server_asset($serverInventory, (int) $user['id']);
               $filled = asset_profile_apply_auto($assetId, $autoValues, (int) $user['id'], $overwrite);
               record_asset_history($assetId, 'inventory_collected', 'استخراج محلی اطلاعات این سیستم (میزبان PHP)', (int) $user['id'], null, 'اطلاعات سخت‌افزاری و نرم‌افزاری از میزبان PHP دریافت شد.');
-              save_audit((int) $user['id'], 'server_inventory_collected', null, ['asset_id' => $assetId, 'overwrite' => $overwrite, 'hardware_score' => $hardwareScore]);
+              save_audit_required((int) $user['id'], 'server_inventory_collected', null, ['asset_id' => $assetId, 'overwrite' => $overwrite, 'hardware_score' => $hardwareScore]);
               if (session_status() !== PHP_SESSION_ACTIVE) {
                   session_start();
               }
@@ -104,6 +104,12 @@ if (!defined('APP_ROOT')) {
                 $report['asset_id'] = inventory_upsert_server_asset($inventory, (int) $diagUser['id']);
                 if ($report['asset_id'] > 0) {
                     $report['applied'] = asset_profile_apply_auto($report['asset_id'], $values, (int) $diagUser['id'], $overwrite);
+                    save_audit_required((int) $diagUser['id'], 'asset_profile_selftest_applied', null, [
+                        'asset_id' => $report['asset_id'],
+                        'filled' => $report['filled'],
+                        'applied' => $report['applied'],
+                        'overwrite' => $overwrite,
+                    ]);
                 }
             }
             $_SESSION['asset_selftest'] = $report;
@@ -117,7 +123,7 @@ if (!defined('APP_ROOT')) {
         if ($action === 'import_domain_assets') {
             $importUser = require_permission('domain.import');
             $importResult = domain_scan_import((int) $importUser['id']);
-            save_audit((int) $importUser['id'], 'domain_assets_imported', null, $importResult);
+            save_audit_required((int) $importUser['id'], 'domain_assets_imported', null, $importResult);
             flash('success', 'کامپیوترهای دامنه خوانده شد: ' . $importResult['created'] . ' سیستم جدید ثبت و ' . $importResult['updated'] . ' سیستم به‌روزرسانی شد (مجموع ' . $importResult['total'] . ').');
             redirect('index.php?page=assets');
         }
@@ -133,6 +139,7 @@ if (!defined('APP_ROOT')) {
             }
             $scanResult = domain_scan_start((int) $scanUser['id']);
             domain_scan_store_run_credentials((int) $scanResult['run_id'], (int) $scanUser['id'], $scanUsername, $scanPassword);
+            save_audit_required((int) $scanUser['id'], 'domain_scan_started', null, ['run_id' => (int) $scanResult['run_id'], 'total' => (int) $scanResult['total']]);
             unset($scanPassword);
             flash('success', 'اسکن دامنه آغاز شد: ' . $scanResult['total'] . ' کامپیوتر در صف قرار گرفت.');
             redirect('index.php?page=domain-scan&run=' . $scanResult['run_id']);
@@ -156,6 +163,11 @@ if (!defined('APP_ROOT')) {
             }
             $batchResult = domain_scan_process($runId, (int) ($_POST['limit'] ?? 3), (int) $scanUser['id'], $runCredentials);
             unset($runCredentials);
+            system_log('info', 'domain_scan', 'پردازش دستهٔ اسکن دامنه', [
+                'run_id' => $runId,
+                'processed' => (int) ($batchResult['processed'] ?? 0),
+                'pending' => (int) ($batchResult['pending'] ?? 0),
+            ]);
             $runRow = domain_scan_run($runId);
             if ($runRow && (string) $runRow['status'] === 'finished') {
                 domain_scan_clear_run_credentials($runId);
@@ -242,7 +254,7 @@ if (!defined('APP_ROOT')) {
                 }
             }
             system_log('info', 'domain_scan', 'پینگ دستی سیستم‌ها', ['checked' => $checkedCount, 'online' => $onlineCount]);
-            save_audit((int) $pingUser['id'], 'assets_pinged', null, ['checked' => $checkedCount, 'online' => $onlineCount]);
+            save_audit_required((int) $pingUser['id'], 'assets_pinged', null, ['checked' => $checkedCount, 'online' => $onlineCount]);
             if ($pingAjax) {
                 header('Content-Type: application/json; charset=utf-8');
                 echo json_encode(['ok' => true, 'checked' => $checkedCount, 'online' => $onlineCount, 'states' => $pingStates], JSON_UNESCAPED_UNICODE);
@@ -265,7 +277,7 @@ if (!defined('APP_ROOT')) {
             }
             domain_scan_store_run_credentials((int) $retry['run_id'], (int) $retryUser['id'], $scanUsername, $scanPassword);
             unset($scanPassword);
-            save_audit((int) $retryUser['id'], 'domain_inventory_retry', null, ['from_run' => $retryRunId, 'run_id' => $retry['run_id'], 'total' => $retry['total']]);
+            save_audit_required((int) $retryUser['id'], 'domain_inventory_retry', null, ['from_run' => $retryRunId, 'run_id' => $retry['run_id'], 'total' => $retry['total']]);
             flash('success', $retry['total'] . ' سیستم ناموفق در نوبت تازه #' . $retry['run_id'] . ' دوباره در صف استخراج قرار گرفت.');
             redirect('index.php?page=domain-scan&run=' . $retry['run_id']);
         }
@@ -341,7 +353,7 @@ if (!defined('APP_ROOT')) {
             $scanResult = domain_scan_start_selected((array) ($_POST['asset_ids'] ?? []), $scanUser);
             domain_scan_store_run_credentials((int) $scanResult['run_id'], (int) $scanUser['id'], $scanUsername, $scanPassword);
             unset($scanPassword);
-            save_audit((int) $scanUser['id'], 'domain_inventory_selected', null, ['run_id' => $scanResult['run_id'], 'total' => $scanResult['total']]);
+            save_audit_required((int) $scanUser['id'], 'domain_inventory_selected', null, ['run_id' => $scanResult['run_id'], 'total' => $scanResult['total']]);
             flash('success', $scanResult['total'] . ' سیستم وارد صف استخراج شبکه‌ای شد. سیستم‌های خاموش یا غیرقابل‌دسترسی با وضعیت جداگانه گزارش می‌شوند.');
             redirect('index.php?page=domain-scan&run=' . $scanResult['run_id']);
         }
@@ -403,6 +415,8 @@ if (!defined('APP_ROOT')) {
             try {
                 db()->prepare('UPDATE assets SET ' . $set . ', updated_at = NOW() WHERE id = ?')->execute([...array_values($fields), $assetId]);
                 asset_profile_save($assetId, $_POST, (int) $inventoryUser['id']);
+                record_asset_history($assetId, 'inventory_manual_update', 'ویرایش شناسنامه سیستم', (int) $inventoryUser['id'], null, 'فرم شناسنامه سیستم ذخیره شد.', $asset, $fields);
+                save_audit_required((int) $inventoryUser['id'], 'asset_inventory_updated', null, ['asset_id' => $assetId, 'fields' => array_keys($fields)]);
                 if (db()->inTransaction()) {
                     db_commit('index.php');
                 }
@@ -412,7 +426,6 @@ if (!defined('APP_ROOT')) {
                 }
                 throw $saveException;
             }
-            record_asset_history($assetId, 'inventory_manual_update', 'ویرایش شناسنامه سیستم', (int) $inventoryUser['id'], null, 'فرم شناسنامه سیستم ذخیره شد.', $asset, $fields);
             flash('success', 'شناسنامه سیستم و اطلاعات سخت‌افزاری ذخیره شد.');
              redirect('index.php?page=inventory&id=' . $assetId);
          }

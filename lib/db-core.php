@@ -543,22 +543,55 @@ function db_in_transaction(): bool
     }
 }
 
+/**
+ * تراکنش را می‌بندد و می‌گوید داده واقعاً ماندگار شد یا نه.
+ *
+ * تا پیش از نسخهٔ ۱.۶۲.۸۴ این تابع در سه وضعیت متفاوت false برمی‌گرداند و یکی از
+ * آن‌ها — «تراکنش باز نبود» — اصلاً خطا نبود: یک DDL در میانهٔ کار باعث COMMIT
+ * ضمنی شده و داده از قبل نوشته شده بود. در نتیجه false معنای روشنی نداشت، بررسی
+ * کردنش هشدار کاذب می‌داد، و عملاً هیچ‌یک از ۲۶ فراخوانی نتیجه را بررسی نمی‌کرد.
+ *
+ * حالا قرارداد روشن است:
+ *   true  = داده ماندگار شد (چه با commit صریح، چه با COMMIT ضمنی قبلی)
+ *   false = داده ماندگار نشد
+ */
 function db_commit(string $context = ''): bool
 {
     try {
         if (db()->inTransaction()) {
             return db()->commit();
         }
+        // تراکنش از قبل بسته شده (COMMIT ضمنی). هشدار می‌ماند چون نشانهٔ DDL در
+        // مسیر درخواست است، ولی این حالت شکست نیست: کار انجام شده است.
         if (function_exists('system_log')) {
             system_log('warning', 'transaction', 'commit روی تراکنشِ بسته‌شده (COMMIT ضمنی) — کار انجام شده است.', ['context' => $context]);
         }
-        return false;
+        return true;
     } catch (Throwable $exception) {
         if (function_exists('system_log')) {
             system_log('error', 'transaction', 'commit ناموفق: ' . $exception->getMessage(), ['context' => $context]);
         }
         return false;
     }
+}
+
+/**
+ * مثل db_commit()، ولی اگر داده ماندگار نشود استثنا می‌اندازد.
+ *
+ * چرا لازم است: مسیرهای نوشتن درخواست بلافاصله پس از commit پیام «ثبت شد» به
+ * کاربر نشان می‌دادند. اگر commit شکست می‌خورد، کاربر پیام موفقیت می‌دید در حالی
+ * که هیچ داده‌ای ذخیره نشده بود — بدترین نوع خطا، چون کسی متوجه نمی‌شد.
+ *
+ * RuntimeException انتخاب شده چون catch سراسری در index.php پیام همین نوع استثنا
+ * را مستقیم به کاربر نشان می‌دهد، تراکنش را برمی‌گرداند و رخداد post_action_failed
+ * را در همان سیستم لاگ موجود ثبت می‌کند.
+ */
+function db_commit_or_fail(string $context = ''): void
+{
+    if (db_commit($context)) {
+        return;
+    }
+    throw new RuntimeException('ثبت نهایی اطلاعات در پایگاه داده انجام نشد و تغییرات اعمال نشده است. لطفاً دوباره تلاش کنید؛ اگر تکرار شد با پشتیبانی تماس بگیرید.');
 }
 
 function db_rollback(string $context = ''): bool

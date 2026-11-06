@@ -11,6 +11,84 @@ if (!defined('APP_ROOT')) {
     exit;
 }
 
+/**
+ * کلید رمزگذاری رمز حساب سرویس دامین.
+ *
+ * عمداً همان الگوی جاافتادهٔ مخزن است: مشتق‌کردن از cfg('app.key') با sha256 و
+ * یک فضای‌نام اختصاصی — دقیقاً مثل domain_scan_credential_key(). فضای‌نام جداست
+ * تا لو رفتن یا چرخش کلید یک قابلیت، قابلیت دیگر را هم باز نکند.
+ *
+ * برخلاف نسخهٔ اسکن دامنه اینجا استثنا پرتاب نمی‌شود: نبود app.key نباید ذخیرهٔ
+ * تنظیمات را بشکند، چون آن‌وقت نصب‌های موجود با یک ارتقا از کار می‌افتند.
+ * در نبود کلید، رفتار امروز (ذخیرهٔ متن ساده) بدون تغییر ادامه می‌یابد.
+ */
+function ldap_secret_key(): ?string
+{
+    $appKey = trim((string) cfg('app.key', ''));
+    if ($appKey === '' || !function_exists('openssl_encrypt') || !function_exists('openssl_decrypt')) {
+        return null;
+    }
+    return hash('sha256', 'ticket-ldap-secret:' . $appKey, true);
+}
+
+/** پاکت رمزشده برای جدول تنظیمات؛ در نبود کلید همان متن ساده برمی‌گردد. */
+function ldap_secret_encrypt(string $plain): string
+{
+    if ($plain === '') {
+        return '';
+    }
+    $key = ldap_secret_key();
+    if ($key === null) {
+        return $plain;
+    }
+    $iv = random_bytes(12);
+    $tag = '';
+    $cipher = openssl_encrypt($plain, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag, 'ldap-bind-password:v1');
+    if (!is_string($cipher) || $cipher === '') {
+        return $plain;
+    }
+    return 'enc:v1:' . base64_encode($iv . $tag . $cipher);
+}
+
+/**
+ * رمزگشایی مقدار جدول تنظیمات.
+ *
+ * مقدارهای قدیمیِ متن ساده بدون پیشوند `enc:v1:` ذخیره شده‌اند و باید همچنان کار
+ * کنند، وگرنه یک ارتباط دامینیِ سالم با ارتقا می‌شکند.
+ *
+ * شکست رمزگشایی عمداً «بسته» شکست می‌خورد: اگر خودِ پاکت برگردانده شود، همان متن
+ * رمزشده به‌عنوان رمز به سرور دامین فرستاده می‌شود — هم بی‌فایده و هم نشت مقدار
+ * رمزشده در لاگ‌های سمت دامین. معمول‌ترین علتش عوض‌شدن app.key است، پس پیام لاگ
+ * همین را می‌گوید تا مدیر بداند باید رمز را دوباره وارد کند.
+ */
+function ldap_secret_decrypt(string $stored): string
+{
+    if (!str_starts_with($stored, 'enc:v1:')) {
+        return $stored;
+    }
+    $key = ldap_secret_key();
+    $raw = base64_decode(substr($stored, 7), true);
+    $plain = false;
+    if ($key !== null && is_string($raw) && strlen($raw) > 28) {
+        $plain = openssl_decrypt(
+            substr($raw, 28),
+            'aes-256-gcm',
+            $key,
+            OPENSSL_RAW_DATA,
+            substr($raw, 0, 12),
+            substr($raw, 12, 16),
+            'ldap-bind-password:v1'
+        );
+    }
+    if (!is_string($plain)) {
+        if (function_exists('system_log')) {
+            system_log('error', 'ldap', 'رمز حساب سرویس دامین قابل رمزگشایی نیست؛ احتمالاً app.key عوض شده است. رمز را از صفحهٔ تنظیمات دوباره وارد کنید.');
+        }
+        return '';
+    }
+    return $plain;
+}
+
 function ldap_cfg(string $key, mixed $default = null): mixed
 {
     $map = [
@@ -26,6 +104,10 @@ function ldap_cfg(string $key, mixed $default = null): mixed
     $value = isset($map[$key]) ? setting($map[$key]) : null;
     if ($value === null) {
         return cfg('ldap.' . $key, $default);
+    }
+    // تنها نقطهٔ خواندن رمز در کل سامانه؛ هر شش مصرف‌کننده از همین‌جا رد می‌شوند.
+    if ($key === 'bind_password') {
+        return ldap_secret_decrypt((string) $value);
     }
     if (in_array($key, ['enabled', 'ssl'], true)) {
         return $value === '1';

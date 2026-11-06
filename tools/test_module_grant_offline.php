@@ -15,7 +15,13 @@ $root = dirname(__DIR__);
 require_once $root . '/permissions.php';
 
 // کش نقش‌ها را به‌جای دیتابیس پر می‌کنیم: بازرس فقط گروه‌های غذا (مشاهده + ویرایش).
-$GLOBALS['__role_permission_codes'] = ['inspector' => ['food.groups', 'food.groups_edit']];
+$GLOBALS['__role_permission_codes'] = [
+    'inspector' => ['food.groups', 'food.groups_edit'],
+    'user' => ['food.groups'],
+    'manager' => ['food.monitor'],
+    'support_manager' => ['food.db', 'food.db_edit'],
+    'agent' => ['food.db'],
+];
 $GLOBALS['__role_permission_sets'] = [];
 
 $pass = 0;
@@ -34,18 +40,66 @@ check('دسترسی بخش‌های دیگر چاپ فیش بسته است', !us
 // مسیرهای فیش را از خود فایل می‌خوانیم تا آزمون با تغییرات واقعی هم‌خوان بماند.
 if (!function_exists('food_ticket_route_allowed')) {
     $src = (string) file_get_contents($root . '/food-ticket.php');
-    // فقط تعریف‌ها را بارگذاری می‌کنیم: تابع‌های مسیر به دیتابیس وابسته نیستند.
-    preg_match('/function food_ticket_route_edit_permission.*?\n}\n/s', $src, $m2);
-    preg_match('/function food_ticket_route_allowed.*?\n}\n/s', $src, $m3);
-    if (!$m3 || !$m2) {
-        fwrite(STDERR, "توابع مسیر پیدا نشدند\n");
+
+    // Extract PHP functions by token boundaries, not a newline/brace regex.
+    // The route functions contain nested arrays and closures, so a shallow regex
+    // can stop at the wrong brace or fail when formatting changes.
+    $extractFunction = static function (string $source, string $name): ?string {
+        $tokens = token_get_all($source);
+        $offsets = [];
+        $offset = 0;
+        foreach ($tokens as $token) {
+            $value = is_array($token) ? $token[1] : $token;
+            $offsets[] = $offset;
+            $offset += strlen($value);
+        }
+        foreach ($tokens as $index => $token) {
+            if (!is_array($token) || $token[0] !== T_FUNCTION) {
+                continue;
+            }
+            $cursor = $index + 1;
+            while (isset($tokens[$cursor]) && is_array($tokens[$cursor])
+                && in_array($tokens[$cursor][0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
+                $cursor++;
+            }
+            if (($tokens[$cursor] ?? null) === '&') {
+                $cursor++;
+            }
+            if (!isset($tokens[$cursor]) || !is_array($tokens[$cursor])
+                || $tokens[$cursor][0] !== T_STRING || $tokens[$cursor][1] !== $name) {
+                continue;
+            }
+            $start = $offsets[$index];
+            $depth = 0;
+            $opened = false;
+            for ($end = $cursor + 1; $end < count($tokens); $end++) {
+                $value = is_array($tokens[$end]) ? $tokens[$end][1] : $tokens[$end];
+                if ($value === '{') {
+                    $depth++;
+                    $opened = true;
+                } elseif ($value === '}' && $opened) {
+                    $depth--;
+                    if ($depth === 0) {
+                        return substr($source, $start, $offsets[$end] + 1 - $start);
+                    }
+                }
+            }
+        }
+        return null;
+    };
+
+    $routeEditPermission = $extractFunction($src, 'food_ticket_route_edit_permission');
+    $routeAllowed = $extractFunction($src, 'food_ticket_route_allowed');
+    if ($routeAllowed === null || $routeEditPermission === null) {
+        fwrite(STDERR, "توابع مسیر در food-ticket.php پیدا نشدند\n");
         exit(2);
     }
+
     // تابع کمکی فقط برای مسیر «ادمین اصلی» است؛ این آزمون بازرس را بررسی می‌کند.
     if (!function_exists('food_ticket_is_primary_admin')) {
         function food_ticket_is_primary_admin(array $user): bool { return user_is_primary_admin($user); }
     }
-    eval($m2[0] . "\n" . 'function food_ticket_route_edit_always(string $route): bool { return $route === "diag-source_row-delete"; }' . "\n" . $m3[0]);
+    eval($routeEditPermission . "\n" . 'function food_ticket_route_edit_always(string $route): bool { return $route === "diag-source_row-delete"; }' . "\n" . $routeAllowed);
 }
 
 $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -59,6 +113,16 @@ foreach ($readRoutes as $route) {
 $_SERVER['REQUEST_METHOD'] = 'POST';
 check('ثبت غیبت گروه‌ها با food.groups_edit باز است', food_ticket_route_allowed($user, 'absence-save'));
 check('ثبت در فهرست سفارش‌ها بسته است', !food_ticket_route_allowed($user, 'orders-import'));
+
+$groupViewer = ['id' => 2, 'role' => 'user', 'is_primary_admin' => 0];
+$monitorViewer = ['id' => 3, 'role' => 'manager', 'is_primary_admin' => 0];
+$dbEditor = ['id' => 4, 'role' => 'support_manager', 'is_primary_admin' => 0];
+$dbViewer = ['id' => 5, 'role' => 'agent', 'is_primary_admin' => 0];
+check('لغو تردد با دسترسی صرفاً مشاهدهٔ گروه‌ها بسته است', !food_ticket_route_allowed($groupViewer, 'food-visit-cancel'));
+check('لغو تردد فقط با food.groups_edit باز است', food_ticket_route_allowed($user, 'food-visit-cancel'));
+check('پاک‌سازی SOURCE_TABLE با دسترسی صرفاً نظارت بسته است', !food_ticket_route_allowed($monitorViewer, 'cleanup-source_row'));
+check('پاک‌سازی SOURCE_TABLE با food.db_edit باز است', food_ticket_route_allowed($dbEditor, 'cleanup-source_row'));
+check('حذف تشخیصی ردیف منبع حتی با GET به food.db_edit نیاز دارد', !food_ticket_route_allowed($dbViewer, 'diag-source_row-delete'));
 
 // پیش‌فرض نقش user: بخش‌های چاپ فیش و نظارت برداشته شده‌اند؛ سفارش غذای خود باقی است.
 $userDefaults = permission_defaults()['user'] ?? [];

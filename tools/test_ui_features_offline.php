@@ -4,8 +4,9 @@ declare(strict_types=1);
 /** آزمون آفلاین ویژگی‌های لاگ یکپارچه، تم شخصی و مدیریت صفحه ورود. */
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit('CLI only'); }
 $root = dirname(__DIR__);
-$index = (string) file_get_contents($root . '/index.php');
-$bootstrap = (string) file_get_contents($root . '/bootstrap.php');
+$index = (string) file_get_contents($root . '/index.php') . "\n" . (string) file_get_contents($root . '/actions/account-actions.php');
+$activity = (string) file_get_contents($root . '/lib/activity-audit.php');
+$settingsActions = (string) file_get_contents($root . '/actions/settings-actions.php');
 $css = (string) file_get_contents($root . '/assets/style.css');
 $search = (string) file_get_contents($root . '/global-search.php');
 $checks = [];
@@ -22,7 +23,7 @@ $check('قواعد تم چیدمان grid را دستکاری نمی‌کنند'
 $check('متن‌های صفحه ورود از تنظیمات خوانده می‌شوند', str_contains($index, "setting('login_title'") && str_contains($index, "setting('login_intro'") && str_contains($index, "setting('login_art_title'"));
 $check('پیام متحرک صفحه ورود از تنظیمات خوانده می‌شود', str_contains($index, "setting('login_announcement'") && str_contains($css, '@keyframes login-message-scroll'));
 $check('مدیریت صفحه ورود در تنظیمات عمومی قرار دارد', str_contains($index, 'id="login-branding"') && str_contains($index, 'login_branding') && str_contains($index, 'settings.general'));
-$check('لوگوی جداگانه ورود با محدودیت نوع/حجم ذخیره می‌شود', str_contains($index, "name=\"login_logo\"") && str_contains($index, "'image/png' => 'png'") && str_contains($index, "'image/jpeg' => 'jpg'") && str_contains($index, '2 * 1024 * 1024'));
+$check('لوگوی جداگانه ورود با محدودیت نوع/حجم ذخیره می‌شود', str_contains($index, "name=\"login_logo\"") && str_contains($settingsActions, "'image/png' => 'png'") && str_contains($settingsActions, "'image/jpeg' => 'jpg'") && str_contains($settingsActions, '2 * 1024 * 1024'));
 $check('ممیزی قدیمی به لاگ یکپارچه هدایت می‌شود', str_contains($index, "if (\$page === 'audit')") && str_contains($index, "redirect('index.php?page=activity-log')"));
 $check('گزارش فعالیت و ممیزی فقط یک پیوند منویی دارند', str_contains($index, "'لاگ سامانه'") && !str_contains($index, 'گزارش ممیزی'));
 $check('لاگ یکپارچه تبهای دسته‌بندی دارد', str_contains($index, 'همه رویدادها') && str_contains($index, 'ورود و خروج') && str_contains($index, 'مدیریتی و تنظیمات') && str_contains($index, 'خطاها و تلاش‌های ناموفق'));
@@ -33,7 +34,7 @@ $check('جست‌وجو سوابق تردد را فقط با مجوز traffic.vi
 $check('جست‌وجوی CD/DVD از محدوده دسترسی همان نقش پیروی می‌کند', str_contains($index, 'cd_dvd_scope($searchUser') && str_contains($index, 'FROM cd_dvd_records r'));
 $check('جست‌وجو فیلدهای قابل‌مشاهده شناسنامه فنی را هم می‌گردد', str_contains($index, 'db_table_columns(\'asset_profiles\')') && str_contains($index, 'p.owner_full_name'));
 $check('جست‌وجوی بخش لاگ به مسیر واحد می‌رود', str_contains($search, 'لاگ سامانه (فعالیت و ممیزی)') && !str_contains($search, "'key' => 'audit'"));
-$check('برچسب تغییر تم برای لاگ فارسی شده', str_contains($bootstrap, 'user_theme_changed') && str_contains($bootstrap, 'تغییر تم شخصی'));
+$check('برچسب تغییر تم برای لاگ فارسی شده', str_contains($activity, 'user_theme_changed') && str_contains($activity, 'تغییر تم شخصی'));
 $check('لاگ‌های فنی قدیمی در تب خطاهای صفحه یکپارچه باز می‌شوند', str_contains($index, 'if ($page === \'logs\')') && str_contains($index, 'redirect(\'index.php?page=activity-log&category=errors\')'));
 $check('خطاهای فنی از system_logs با مجوز جداگانه داخل لاگ دیده می‌شوند', str_contains($index, 'system_logs_ensure()') && str_contains($index, 'SELECT s.*, u.username, u.full_name') && str_contains($index, 'user_can($logUser,') && str_contains($index, 'logs.view'));
 

@@ -46,6 +46,13 @@ require_once __DIR__ . '/lib/logging-diagnostics.php';
 // ───── پیام‌های فلش، لاگ سیستمی و CSRF (شرح در سرآیند همان فایل) ─────
 require __DIR__ . '/lib/logging-csrf.php';
 
+// ───── سخت‌سازی نشست ─────
+// اینجا اجرا می‌شود چون cfg() در lib/db-core.php تعریف شده و باید پیش از
+// lib/auth-scope.php باشد تا نشستِ منقضی اصلاً به لایهٔ احراز هویت نرسد.
+// security.session_idle_days: روزهای بی‌فعالیت تا خروج خودکار (۰ = غیرفعال).
+app_session_enforce_idle((int) cfg('security.session_idle_days', 30));
+csrf_discard_legacy_cookie();
+
 // ───── نشست کاربر، سطوح دسترسی و دامنهٔ دید (شرح در سرآیند همان فایل) ─────
 require __DIR__ . '/lib/auth-scope.php';
 

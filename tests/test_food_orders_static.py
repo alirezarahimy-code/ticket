@@ -207,11 +207,11 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn(".fo-my-orders .table-row > td:last-child .button { white-space:nowrap; }", employee_css)
 
         panel_html = read("food-ticket-web/index.html")
-        self.assertIn('href="assets/food-order.css?v=13"', panel_html)
+        self.assertIn('href="assets/food-order.css?v=14"', panel_html)
         self.assertIn('href="assets/food-menu.css?v=34"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=1.62.72"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=1.62.74"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
@@ -262,7 +262,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
 
     def test_food_dashboard_prints_each_printed_event_once_and_has_asset_fallback(self) -> None:
         panel = read("food-ticket-web/index.html")
-        self.assertIn("if(event.status==='printed')daily[day].printed++", panel)
+        self.assertIn("if(event.status==='printed'&&!['guest','auto_guest','auto_printed'].includes(receiptType))daily[day].printed++", panel)
         self.assertIn("if(kind!=='printed'&&daily[day][kind]!==undefined)daily[day][kind]++", panel)
         self.assertIn("if(window.FoodCapitalioDashboard){window.FoodCapitalioDashboard.render(container,payload);return}", panel)
         self.assertIn("نمای کامل داشبورد بارگذاری نشد", panel)
@@ -608,7 +608,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         panel_css = read("food-ticket-web/assets/food-ticket-theme.css")
         self.assertIn("body.printing-report > *:not(.print-preview-layer)", panel_css)
         panel = read("food-ticket-web/index.html")
-        self.assertIn("[q('تاریخ شروع'),q(faDate(from))]", panel)
+        self.assertIn("function clientExcel()", panel)
         self.assertIn('<th>تاریخ شروع</th><td colspan="5">${faDate(from)}</td>', panel)
         self.assertIn('<th>تاریخ پایان</th><td colspan="5">${faDate(to)}</td>', panel)
 

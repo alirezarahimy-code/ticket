@@ -8,6 +8,7 @@ $GLOBALS['db']->sqliteCreateFunction('CURDATE', fn() => '2026-10-12', 0);
 $GLOBALS['db']->sqliteCreateFunction('CURTIME', fn() => '14:15:00', 0);
 function db(): PDO {return $GLOBALS['db'];}
 function save_audit(...$args): void {}
+function save_audit_required(...$args): void { save_audit(...$args); }
 function log_sort_order(array $map, string $key, string $dir, string $default): string {return $default;}
 function e($value): string {return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');}
 function user_can($u,$perm): bool {return in_array($perm, $u['perms'] ?? [], true);}

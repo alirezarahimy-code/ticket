@@ -60,8 +60,15 @@ if (!defined('APP_ROOT')) {
             if (!$ticketIds) {
                 throw new RuntimeException('حداقل یک درخواست را انتخاب کنید.');
             }
+            // سقف تعداد: حلقه داخل یک تراکنش اجرا می‌شود و به ازای هر درخواست یک SELECT ... FOR UPDATE
+            // می‌گیرد. بدون سقف، یک ارسال بزرگ قفل‌های سطری را تا پایان حلقه نگه می‌دارد و بقیهٔ
+            // کاربران پشت آن می‌مانند. صفحهٔ صف حداکثر ۱۰۰ ردیف نشان می‌دهد، پس ۲۰۰ دست‌ودل‌بازانه است.
+            if (count($ticketIds) > 200) {
+                throw new RuntimeException('در هر عملیات گروهی حداکثر ۲۰۰ درخواست قابل انتخاب است؛ انتخاب را کوچک‌تر کنید.');
+            }
             $bulkChanged = 0;
             $bulkSkipped = 0;
+            $bulkAlready = 0;
             db()->beginTransaction();
             foreach ($ticketIds as $ticketId) {
                 $bulkTicket = fetch_ticket($ticketId);
@@ -80,6 +87,9 @@ if (!defined('APP_ROOT')) {
                     continue;
                 }
                 if ($bulkOld === $status) {
+                    // از قبل در همین وضعیت بود: جداگانه شمرده می‌شود تا در گزارش گم نشود
+                    // (رفتار قبلی نه «تغییر یافته» می‌شمرد نه «تغییر نکرده»، و مجموع جور درنمی‌آمد).
+                    $bulkAlready++;
                     continue;
                 }
                 // فقط کارشناس مسئول یا مدیر واحد، فقط روی درخواست دارای کارشناس و فقط در مسیر مجاز وضعیت.
@@ -110,8 +120,11 @@ if (!defined('APP_ROOT')) {
                 }
                 $bulkChanged++;
             }
-            db_commit('index.php');
+            db_commit_or_fail('ticket:bulk_status_update');
             $bulkMessage = $bulkChanged . ' درخواست به‌روزرسانی شد.';
+            if ($bulkAlready > 0) {
+                $bulkMessage .= ' ' . $bulkAlready . ' درخواست از قبل در همین وضعیت بود.';
+            }
             if ($bulkSkipped > 0) {
                 $bulkMessage .= ' ' . $bulkSkipped . ' درخواست (بدون کارشناس مسئول، خارج از اختیار شما، درخواست لغو در انتظار یا مسیر وضعیت نامعتبر) تغییر نکرد.';
             }

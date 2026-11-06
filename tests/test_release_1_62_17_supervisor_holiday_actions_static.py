@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """تست‌های ایستای ریلیز ۱.۶۲.۱۷ — بازسازی فاز ۲، برش ۶:
 جداسازی ۴ اکشن «تصمیم‌های سرپرست و امتیازدهی» به actions/supervisor-actions.php
-و ۴ اکشن «تقویم و تعطیلات» به actions/holiday-actions.php
+و اکشن‌های «تقویم و تعطیلات» به actions/holiday-actions.php
 بدون هیچ تغییر رفتاری + پین‌های بسته‌بندی/صفحهٔ دانلود طبق سیاست انتشار.
 """
 import hashlib
@@ -27,6 +27,8 @@ HOLIDAY_ACTIONS = [
     "add_holiday",
     "import_holidays",
     "delete_holiday",
+    # ۱.۶۲.۸۵: تقویم کاری قابل تنظیم شد و پنجمین اکشن به همین فایل اضافه شد.
+    "save_work_hours",
 ]
 
 

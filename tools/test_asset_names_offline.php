@@ -122,7 +122,7 @@ check('۲۲: وقتی نام کوتاه و کامل یکی است، راهنما
 check('۲۳: صفت title آمادهٔ درج در HTML', strpos(asset_name_attr('ADMINIT2.DOMAIN.LOCAL', 'DOMAIN-ADMINIT2'), 'title="ADMINIT2.DOMAIN.LOCAL"') !== false, asset_name_attr('ADMINIT2.DOMAIN.LOCAL', 'DOMAIN-ADMINIT2'));
 
 /* ───── ۶) اتصال به همهٔ جاهای نمایش (سرور) ───── */
-$index = (string) file_get_contents($root . '/index.php');
+$index = (string) file_get_contents($root . '/index.php') . "\n" . (string) file_get_contents($root . '/actions/asset-actions.php') . "\n" . (string) file_get_contents($root . '/actions/settings-actions.php');
 check('۲۴: ماژول نام‌ها در index.php بارگذاری شده است', preg_match('/require(_once)? __DIR__ \. \'\/asset-names\.php\';/', $index) === 1);
 check('۲۵: فهرست شناسنامه‌ها از نام نمایشی استفاده می‌کند',
     substr_count($index, 'asset_display_name(') >= 6, (string) substr_count($index, 'asset_display_name('));

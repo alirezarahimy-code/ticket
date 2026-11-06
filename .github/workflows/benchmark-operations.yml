@@ -1,6 +1,7 @@
 name: Isolated Full-System Resilience and Ticket/CD-DVD Write Stress
 
 on:
+  workflow_call:
   push:
     branches:
       - arena/8edbdf95-ticket
@@ -68,8 +69,10 @@ jobs:
           --health-retries=20
 
     steps:
-      - name: Checkout active branch
+      - name: Checkout active branch with complete history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -93,6 +96,12 @@ jobs:
           php-version: '8.2'
           extensions: pdo_mysql, ldap, mbstring, xml, zip
           coverage: none
+
+      - name: Rebuild release package and system map for this exact commit
+        run: |
+          set -euo pipefail
+          python3 tools/build_update_1_62_88.py
+          php tools/code_index.php > docs/system-map/BLOCKS.json
 
       - name: Validate benchmark scripts
         run: |
@@ -165,6 +174,7 @@ jobs:
           : > "$report"
           failed=0
           while IFS= read -r -d '' file; do
+            case "$file" in updates/*|downloads/*) continue ;; esac
             echo "=== php -l $file ===" | tee -a "$report"
             php -l "$file" 2>&1 | tee -a "$report"
             status=${PIPESTATUS[0]}
@@ -312,6 +322,9 @@ jobs:
             benchmark-results/full-system-javascript-tests.log
             benchmark-results/full-system-php-offline-tests.log
             benchmark-results/full-system-cron-tests.log
+            downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
+            downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip.sha256
+            docs/system-map/BLOCKS.json
             /tmp/ticket-full-system-routes.log
             /tmp/ticket-system-resilience.log
             /tmp/ticket-operations-benchmark.log
@@ -319,7 +332,7 @@ jobs:
           retention-days: 14
 
       - name: Commit isolated operations report for remote review
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           test -f benchmark-results/benchmark-operations.md

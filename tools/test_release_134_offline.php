@@ -56,7 +56,8 @@ $groups = (string) file_get_contents($root . '/food-ticket-groups.php');
 $groupsJs = (string) file_get_contents($root . '/food-ticket-web/assets/food-groups.js');
 $ticket = (string) file_get_contents($root . '/food-ticket.php');
 $inventory = (string) file_get_contents($root . '/inventory.php');
-$bootstrap = (string) file_get_contents($root . '/bootstrap.php');
+$bootstrap = (string) file_get_contents($root . '/lib/tickets-sla.php');
+$assetActions = (string) file_get_contents($root . '/actions/asset-actions.php');
 
 echo "=== آزمون بستهٔ ۱.۳۴ ===\n\n";
 
@@ -165,7 +166,7 @@ echo "\n-- شناسنامهٔ سیستم --\n";
 $profile = (string) file_get_contents($root . '/asset-profile.php');
 check('۵: فیلد user_login از نام کاربر فعلی سیستم و fallback inventory پر می‌شود', strpos($profile, "'user_login' => (function () use (\$inventory, \$hardware): string {") !== false && strpos($profile, "inventory_value(\$hardware, ['user', 'domain_username'], '')") !== false && strpos($profile, "(string) (\$inventory['domain_username'] ?? '')") !== false);
 check('۵-ب: صفحهٔ «تست جمع‌آوری» دکمهٔ استخراج آزمایشی دارد', strpos($index, "value=\"asset_profile_selftest\"") !== false);
-check('۵-پ: اکشن استخراج آزمایشی با مجوز inventory.diagnostics محافظت می‌شود', preg_match('/\$action === \'asset_profile_selftest\'[\s\S]{0,200}inventory\.diagnostics/', $index) === 1);
+check('۵-پ: اکشن استخراج آزمایشی با مجوز inventory.diagnostics محافظت می‌شود', preg_match('/\$action === \'asset_profile_selftest\'[\s\S]{0,200}inventory\.diagnostics/', $assetActions) === 1);
 check('۵-ت: ابزارهای تشخیص چاپ/شناسنامه ساخته شده‌اند', is_file($root . '/tools/diag_print_margin.php') && is_file($root . '/tools/diag_asset_profile.php'));
 
 echo "\n";

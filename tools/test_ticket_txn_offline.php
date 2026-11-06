@@ -147,14 +147,15 @@ function __test_register_shutdown(callable $cb): void
 }
 
 /* ───────── بارگذاری توابع تحت آزمون (بدون bootstrap واقعی) ───────── */
-$bootstrap = dirname(__DIR__) . '/bootstrap.php';
-eval(grabFunction($bootstrap, 'db_in_transaction'));
-eval(grabFunction($bootstrap, 'db_commit'));
-eval(grabFunction($bootstrap, 'db_rollback'));
-$ensureRun = grabFunction($bootstrap, 'ticket_number_ensure_schema_run');
+$dbCore = dirname(__DIR__) . '/lib/db-core.php';
+$ticketsSla = dirname(__DIR__) . '/lib/tickets-sla.php';
+eval(grabFunction($dbCore, 'db_in_transaction'));
+eval(grabFunction($dbCore, 'db_commit'));
+eval(grabFunction($dbCore, 'db_rollback'));
+$ensureRun = grabFunction($ticketsSla, 'ticket_number_ensure_schema_run');
 $ensureRun = str_replace('register_shutdown_function(', '__test_register_shutdown(', $ensureRun);
 eval($ensureRun);
-eval(grabFunction($bootstrap, 'ticket_number_ensure_schema'));
+eval(grabFunction($ticketsSla, 'ticket_number_ensure_schema'));
 
 echo "=== آزمون تراکنش درخواست (۱.۳۴) ===\n\n";
 
@@ -198,8 +199,8 @@ $GLOBALS['fakeDb']->inTx = false;
 $GLOBALS['logs'] = [];
 $committed = db_commit('test');
 $rolled = db_rollback('test');
-check('۵: commit روی تراکنش بسته → false و بدون Exception', $committed === false && $rolled === false);
-check('۵-ب: هیچ commit/rollback واقعی صدا زده نشد', !in_array('commit', $GLOBALS['fakeDb']->log, true) && !in_array('rollback', $GLOBALS['fakeDb']->log, true));
+check('۵: commit روی تراکنش بسته‌شدهٔ implicit → true و rollback بدون تراکنش → false', $committed === true && $rolled === false);
+check('۵-ب: commit/rollback واقعی روی تراکنش بسته صدا زده نشد', !in_array('commit', $GLOBALS['fakeDb']->log, true) && !in_array('rollback', $GLOBALS['fakeDb']->log, true));
 check('۵-پ: وضعیت در لاگ سامانه ثبت شد', count($GLOBALS['logs']) === 1 && $GLOBALS['logs'][0][1] === 'transaction', json_encode($GLOBALS['logs'], JSON_UNESCAPED_UNICODE));
 
 /* ───────── ۶) db_commit روی تراکنش باز ───────── */
@@ -209,19 +210,20 @@ check('۶: commit روی تراکنش باز → true و commit واقعی', db_
 
 /* ───────── ۷) بررسی خود فایل create_ticket ───────── */
 $index = (string) file_get_contents(dirname(__DIR__) . '/index.php');
-$createStart = strpos($index, "if (\$action === 'create_ticket') {");
+$ticketActions = (string) file_get_contents(dirname(__DIR__) . '/actions/ticket-actions.php');
+$createStart = strpos($ticketActions, "if (\$action === 'create_ticket') {");
 // ۱.۳۷.۲: مرز بدنه با «اکشن بعدی» تعیین می‌شود، نه با عدد ثابت — تا افزودن چند خط
 // کامنت/اعتبارسنجی در create_ticket این آزمون را بی‌دلیل قرمز نکند.
-$createEnd = $createStart === false ? false : strpos($index, "if (\$action === ", (int) $createStart + 20);
+$createEnd = $createStart === false ? false : strpos($ticketActions, "if (\$action === ", (int) $createStart + 20);
 $body = $createStart === false
     ? ''
-    : substr($index, $createStart, ($createEnd === false ? 20000 : (int) $createEnd - (int) $createStart));
+    : substr($ticketActions, $createStart, ($createEnd === false ? 20000 : (int) $createEnd - (int) $createStart));
 check('۷: در create_ticket هیچ db()->commit() خامی نمانده', strpos($body, 'db()->commit();') === false);
-check('۷-ب: create_ticket از db_commit استفاده می‌کند', strpos($body, "db_commit('index.php')") !== false);
+check('۷-ب: create_ticket از db_commit_or_fail استفاده می‌کند', strpos($body, "db_commit_or_fail('ticket:create_ticket')") !== false);
 check('۷-پ: یک‌بار متغیر $ticketNo ساخته می‌شود و داخل تراکنش پیام خطا نمی‌دهد', substr_count($body, 'ticket_number_next(') === 1, (string) substr_count($body, 'ticket_number_next('));
 
-$bootstrapSrc = (string) file_get_contents($bootstrap);
-check('۷-ت: شماره‌گذاری درخواست، DDL خود را با SELECT بررسی می‌کند', strpos($bootstrapSrc, "SELECT 1 FROM ticket_number_seq LIMIT 1") !== false);
+$ticketsSlaSrc = (string) file_get_contents($ticketsSla);
+check('۷-ت: شماره‌گذاری درخواست، DDL خود را با SELECT بررسی می‌کند', strpos($ticketsSlaSrc, "SELECT 1 FROM ticket_number_seq LIMIT 1") !== false);
 check('۷-ث: اسکیمای شماره‌گذاری قبل از هر تراکنش در ابتدای درخواست آماده می‌شود', strpos($index, 'ticket_number_ensure_schema();') !== false);
 
 echo "\n";

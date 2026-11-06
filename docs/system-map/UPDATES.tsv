@@ -117,3 +117,5 @@ package	version	requires_version	files	migrations	date
 2026-11-04-food-dashboard-cleanup-1.62.73-r2	1.62.73	1.62.58	63	2	2026-11-04
 2026-11-04-food-meal-reconciliation-1.62.74	1.62.74	1.62.73	66	1	2026-11-04
 2026-11-04-user-access-groups-1.62.75	1.62.75	1.62.74	73	1	2026-11-04
+2026-11-05-ticket-hardening-1.62.87	1.62.87	1.62.83	34	0	2026-11-05
+2026-11-05-ticket-number-repair-1.62.83	1.62.83	1.62.82	11	0	2026-11-05

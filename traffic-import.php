@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 /**
  * ورود کنترل‌شدهٔ سوابق تردد از Excel/CSV؛ مسیر این فایل API عمومی ندارد.
  * فرم فقط از مسیر مخفی index.php?page=traffic-control&tab=import باز می‌شود.
@@ -971,8 +973,8 @@ function traffic_import_apply_plan_in_transaction(array $plan, int $actorId, PDO
         ]);
     }
     $counts = is_array($plan['counts'] ?? null) ? $plan['counts'] : [];
-    if ((int) ($counts['insert'] ?? 0) > 0 && function_exists('save_audit')) {
-        save_audit($actorId, 'traffic_records_imported', null, [
+    if ((int) ($counts['insert'] ?? 0) > 0) {
+        save_audit_required($actorId, 'traffic_records_imported', null, [
             'inserted' => (int) ($counts['insert'] ?? 0),
             'existing' => (int) ($counts['exists'] ?? 0),
             'duplicates' => (int) ($counts['duplicate'] ?? 0),
