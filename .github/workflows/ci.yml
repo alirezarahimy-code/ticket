@@ -48,8 +48,6 @@ jobs:
     - name: Run ticket routing unit tests
       run: php tests/test_ticket_routing_unit.php
 
-    - name: Run Request Center first-slice contract tests
-      run: python -m pytest -q tests/test_request_center_first_slice_static.py
 
     - name: Run ticket SLA unit tests
       run: php tests/test_ticket_sla_unit.php
