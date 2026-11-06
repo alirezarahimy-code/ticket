@@ -30,8 +30,9 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('if ($assignee) {', update)
         self.assertIn('$assigneeDepartmentOk', update)
         self.assertIn("in_array($assigneeRole, ['agent', 'manager'], true)", update)
-        self.assertIn("$lockedTicket['assigned_to']", update)
-        self.assertIn("$lockedTicket['priority']", update)
+        self.assertIn("'assigned_to' => $ticket['assigned_to'] ?? null", update)
+        self.assertIn("'priority' => $ticket['priority']", update)
+        self.assertIn("new RequestCenterWorkflowService(db())", update)
         chooser = section(source('index.php'), 'function choose_handling_agent(', 'function ticket_allowed_transitions(')
         self.assertIn('u.role IN ("agent", "manager") AND hu.code = ?', chooser)
         self.assertEqual(chooser.count("ticket_assignee_is_eligible($routingTicket, $candidate"), 2)
@@ -58,7 +59,8 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('ticket_rating_is_current($ticket)', decision[decision.index('FOR UPDATE'):])
         cron = source('cron/ticket_auto_close.php')
         self.assertLess(cron.index('FOR UPDATE'), cron.index("SELECT score, created_at FROM ticket_ratings"))
-        self.assertLess(cron.index("SELECT score, created_at FROM ticket_ratings"), cron.index('$closeQuery->execute'))
+        self.assertLess(cron.index("SELECT score, created_at FROM ticket_ratings"), cron.index("$workflow->transition"))
+        self.assertIn("'auto_close'", cron)
         self.assertIn('COALESCE(resolved_at, updated_at) <= DATE_SUB', cron)
 
     def test_claim_uses_full_assignee_eligibility(self):
@@ -91,10 +93,15 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
     def test_direct_cancel_and_bulk_defend_stale_assignment(self):
         action = source('actions/ticket-actions.php')
         direct = section(action, 'if ($directCancellation)', '} else {')
-        self.assertIn('assigned_to IS NULL AND first_response_at IS NULL AND resolved_at IS NULL', direct)
+        workflow = source('modules/request-center/WorkflowService.php')
+        self.assertIn("case 'requester_cancel':", workflow)
+        self.assertIn("!empty($current['assigned_to'])", workflow)
+        self.assertIn("!empty($current['first_response_at'])", workflow)
+        self.assertIn("!empty($current['resolved_at'])", workflow)
         bulk = source('actions/bulk-actions.php')
-        self.assertIn("$lockedBulkTicket['assigned_to']", bulk)
-        self.assertIn("$lockedBulkTicket['priority']", bulk)
+        self.assertIn("'assigned_to' => $bulkTicket['assigned_to'] ?? null", bulk)
+        self.assertIn("'priority' => $bulkTicket['priority']", bulk)
+        self.assertIn("new RequestCenterWorkflowService(db())", bulk)
 
 
 if __name__ == '__main__':
