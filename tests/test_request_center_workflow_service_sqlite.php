@@ -33,6 +33,7 @@ $insert->execute([7, 'new', 16, null, 'normal', null]);
 $insert->execute([8, 'resolved', 17, 27, 'normal', null]);
 $insert->execute([9, 'resolved', 18, 28, 'normal', null]);
 $insert->execute([10, 'resolved', 19, 29, 'normal', null]);
+$insert->execute([11, 'assigned', 20, 30, 'normal', '2026-11-01 12:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
 workflow_check(
@@ -138,6 +139,15 @@ $pdo->beginTransaction();
 workflow_check(
     $service->transition(10, 'resolved', 'closed', ['closed_at' => RequestCenterSqlExpression::coalesceNow()], 'supervisor_close'),
     'supervisor close follows its explicit exception'
+);
+$pdo->commit();
+
+$pdo->beginTransaction();
+workflow_check(
+    $service->transition(11, 'assigned', 'assigned', ['supervisor_note' => 'reply while cancellation is pending'], 'same_state', [
+        'cancel_requested_at' => '2026-11-01 12:00:00',
+    ]),
+    'same-state conversation metadata can be persisted while cancellation decision is pending'
 );
 $pdo->commit();
 
