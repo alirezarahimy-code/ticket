@@ -73019,8 +73019,8 @@
             "id": "TEST-165",
             "path": "tests\/test_request_center_repository_sqlite.php",
             "area": "TEST",
-            "lines": 87,
-            "file_fingerprint": "223e5e95b59e",
+            "lines": 96,
+            "file_fingerprint": "3a6517943aea",
             "blocks": [
                 {
                     "kind": "region",
@@ -73078,11 +73078,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 23-87",
+                    "anchor": "بلوک رویه‌ای 23-96",
                     "line_start": 23,
-                    "line_end": 87,
-                    "lines": 65,
-                    "fingerprint": "64e970713456",
+                    "line_end": 96,
+                    "lines": 74,
+                    "fingerprint": "cf05536d50ba",
                     "risk": {
                         "score": 5,
                         "flags": {
