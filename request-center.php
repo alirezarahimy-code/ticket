@@ -31,6 +31,31 @@ $statusLabels = [
 ];
 $priorityLabels = ['normal' => 'عادی', 'urgent' => 'فوری', 'critical' => 'بحرانی'];
 $typeLabels = ['incident' => 'رخداد', 'request' => 'درخواست خدمت', 'problem' => 'مشکل', 'change' => 'تغییر'];
+$workspaceLabels = [
+    'requester' => 'درخواست‌دهنده',
+    'agent' => 'کارشناس و مدیر رسیدگی',
+    'supervisor' => 'سوپروایزر',
+    'admin' => 'مدیر مرکز درخواست‌ها',
+];
+$workspaceOptions = [];
+if (user_can($user, 'ticket.create') || user_can($user, 'ticket.view_own')) {
+    $workspaceOptions['requester'] = $workspaceLabels['requester'];
+}
+if (user_can($user, 'ticket.edit') || user_can($user, 'queue.view')) {
+    $workspaceOptions['agent'] = $workspaceLabels['agent'];
+}
+if (user_can($user, 'supervisor.panel')) {
+    $workspaceOptions['supervisor'] = $workspaceLabels['supervisor'];
+}
+if (user_is_primary_admin($user)) {
+    $workspaceOptions['admin'] = $workspaceLabels['admin'];
+}
+$defaultWorkspace = user_is_primary_admin($user) ? 'admin'
+    : (user_can($user, 'supervisor.panel') ? 'supervisor'
+        : (isset($workspaceOptions['agent']) ? 'agent' : 'requester'));
+$requestedWorkspace = (string) ($_GET['workspace'] ?? $defaultWorkspace);
+$workspace = isset($workspaceOptions[$requestedWorkspace]) ? $requestedWorkspace : $defaultWorkspace;
+$workspaceTitle = $workspaceOptions[$workspace] ?? $workspaceLabels['requester'];
 $repo = new RequestCenterRepository(db());
 $schemaProblems = $repo->schemaProblems();
 if ($schemaProblems !== []) {
@@ -63,7 +88,7 @@ header('Cache-Control: private, no-store');
 :root{color-scheme:light;--ink:#172b4d;--muted:#66758b;--line:#e4eaf1;--surface:#fff;--canvas:#f4f7fb;--brand:#2459a6;--soft:#edf4ff}
 *{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font-family:Tahoma,"Segoe UI",sans-serif;line-height:1.8}
 a{color:var(--brand);text-decoration:none}a:hover{text-decoration:underline}
-header{background:#fff;border-bottom:1px solid var(--line)}.bar{max-width:1180px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+header{background:#fff;border-bottom:1px solid var(--line)}.bar{max-width:1180px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.workspace-nav{max-width:1180px;margin:auto;padding:0 22px 12px;display:flex;gap:8px;flex-wrap:wrap}.workspace-nav a{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);font-size:13px}.workspace-nav a.active{background:var(--soft);border-color:#bfd5f2;color:var(--brand);font-weight:700}
 .brand{font-size:19px;font-weight:700}.bar small{color:var(--muted)}main{max-width:1180px;margin:28px auto;padding:0 22px}
 .heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}.heading h1{font-size:25px;margin:0}.heading p{margin:4px 0 0;color:var(--muted)}
 .button{display:inline-flex;align-items:center;justify-content:center;padding:9px 15px;border-radius:9px;background:var(--brand);color:#fff;font-weight:700}.button.secondary{background:#fff;color:var(--brand);border:1px solid var(--line)}
@@ -78,7 +103,9 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:v
 </style>
 </head>
 <body>
-<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escape($user['full_name'] ?? $user['username'] ?? '') ?></small></div><a class="button secondary" href="index.php">بازگشت به سامانه</a></div></header>
+<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escape($user['full_name'] ?? $user['username'] ?? '') ?></small></div><a class="button secondary" href="index.php">بازگشت به سامانه</a></div>
+<?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $workspace === $key ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escape($key) ?>"><?= $escape($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
+</header>
 <main>
 <?php if ($ticketId > 0): ?>
 <?php
