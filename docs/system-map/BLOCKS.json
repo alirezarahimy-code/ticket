@@ -52351,8 +52351,8 @@
             "id": "PAGE-040",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
-            "lines": 217,
-            "file_fingerprint": "22b132605313",
+            "lines": 218,
+            "file_fingerprint": "41d3b5a35a2d",
             "blocks": [
                 {
                     "kind": "region",
@@ -52384,9 +52384,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterWorkflowService",
                     "line_start": 28,
-                    "line_end": 216,
-                    "lines": 189,
-                    "fingerprint": "f316cab1e6c2",
+                    "line_end": 217,
+                    "lines": 190,
+                    "fingerprint": "9afd4b3c9190",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -64694,8 +64694,8 @@
             "id": "TEST-083",
             "path": "tests\/test_ldap_secret_and_legacy_status_static.py",
             "area": "TEST",
-            "lines": 210,
-            "file_fingerprint": "c841d32efeba",
+            "lines": 217,
+            "file_fingerprint": "4d70f099a26f",
             "blocks": [
                 {
                     "kind": "block",
@@ -64868,11 +64868,11 @@
                 },
                 {
                     "kind": "block",
-                    "anchor": "transition_map",
+                    "anchor": "transition_body",
                     "line_start": 172,
-                    "line_end": 179,
-                    "lines": 8,
-                    "fingerprint": "41fde266558b",
+                    "line_end": 178,
+                    "lines": 7,
+                    "fingerprint": "48d9f2d1e11a",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -64881,11 +64881,11 @@
                 },
                 {
                     "kind": "block",
-                    "anchor": "test_nothing_transitions_into_pending",
-                    "line_start": 180,
-                    "line_end": 190,
-                    "lines": 11,
-                    "fingerprint": "f59885b7ac78",
+                    "anchor": "transition_map",
+                    "line_start": 179,
+                    "line_end": 186,
+                    "lines": 8,
+                    "fingerprint": "af92d28479c8",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -64894,11 +64894,11 @@
                 },
                 {
                     "kind": "block",
-                    "anchor": "test_pending_always_has_a_way_out",
-                    "line_start": 191,
-                    "line_end": 202,
-                    "lines": 12,
-                    "fingerprint": "70d36192e668",
+                    "anchor": "test_nothing_transitions_into_pending",
+                    "line_start": 187,
+                    "line_end": 197,
+                    "lines": 11,
+                    "fingerprint": "f59885b7ac78",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -64907,16 +64907,29 @@
                 },
                 {
                     "kind": "block",
-                    "anchor": "test_pending_is_documented_as_legacy",
-                    "line_start": 203,
-                    "line_end": 210,
-                    "lines": 8,
-                    "fingerprint": "9e4914a9422d",
+                    "anchor": "test_pending_always_has_a_way_out",
+                    "line_start": 198,
+                    "line_end": 209,
+                    "lines": 12,
+                    "fingerprint": "70d36192e668",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "TEST-083.17"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_pending_is_documented_as_legacy",
+                    "line_start": 210,
+                    "line_end": 217,
+                    "lines": 8,
+                    "fingerprint": "d01f60e48324",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-083.18"
                 }
             ]
         },

@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 539 |
-| خطوط | 125,128 |
-| آدرس‌ها (بلوک) | 6,665 |
+| خطوط | 125,136 |
+| آدرس‌ها (بلوک) | 6,666 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,665 آدرس |
+| باقی‌مانده | 6,666 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -285,10 +285,10 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 215 | 1,572 | 19,707 |
+| `TEST` | TEST | 215 | 1,573 | 19,714 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,429 |
+| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,430 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
 | `ACT` | کنش‌ها (actions/) | 16 | 118 | 3,987 |
@@ -1587,7 +1587,7 @@
 </details>
 
 <details>
-<summary><b>TEST-083</b> — <code>tests/test_ldap_secret_and_legacy_status_static.py</code> (210 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-083</b> — <code>tests/test_ldap_secret_and_legacy_status_static.py</code> (217 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -1604,10 +1604,11 @@
 | `TEST-083.11` | 131–139 | بلوک | `test_failed_decryption_fails_closed` | 0 | ⬜ |
 | `TEST-083.12` | 140–160 | بلوک | `test_envelope_layout_offsets_are_consistent` | 0 | ⬜ |
 | `TEST-083.13` | 161–171 | بلوک | `test_failed_decryption_is_logged` | 0 | ⬜ |
-| `TEST-083.14` | 172–179 | بلوک | `transition_map` | 0 | ⬜ |
-| `TEST-083.15` | 180–190 | بلوک | `test_nothing_transitions_into_pending` | 0 | ⬜ |
-| `TEST-083.16` | 191–202 | بلوک | `test_pending_always_has_a_way_out` | 0 | ⬜ |
-| `TEST-083.17` | 203–210 | بلوک | `test_pending_is_documented_as_legacy` | 0 | ⬜ |
+| `TEST-083.14` | 172–178 | بلوک | `transition_body` | 0 | ⬜ |
+| `TEST-083.15` | 179–186 | بلوک | `transition_map` | 0 | ⬜ |
+| `TEST-083.16` | 187–197 | بلوک | `test_nothing_transitions_into_pending` | 0 | ⬜ |
+| `TEST-083.17` | 198–209 | بلوک | `test_pending_always_has_a_way_out` | 0 | ⬜ |
+| `TEST-083.18` | 210–217 | بلوک | `test_pending_is_documented_as_legacy` | 0 | ⬜ |
 
 </details>
 
@@ -8460,13 +8461,13 @@
 </details>
 
 <details>
-<summary><b>PAGE-040</b> — <code>modules/request-center/WorkflowService.php</code> (217 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-040</b> — <code>modules/request-center/WorkflowService.php</code> (218 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-040.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
 | `PAGE-040.02` | 4–26 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
-| `PAGE-040.03` | 28–216 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
+| `PAGE-040.03` | 28–217 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
 
 </details>
 

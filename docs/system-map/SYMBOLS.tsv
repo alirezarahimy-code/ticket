@@ -2152,7 +2152,7 @@ UPDATE_COLUMNS	const	modules/request-center/WorkflowService.php	34	other
 __construct	function	modules/request-center/WorkflowService.php	45	other
 allowedTransitions	function	modules/request-center/WorkflowService.php	49	other
 transition	function	modules/request-center/WorkflowService.php	81	other
-assertTransitionAllowed	function	modules/request-center/WorkflowService.php	162	other
+assertTransitionAllowed	function	modules/request-center/WorkflowService.php	163	other
 ola_post	function	ola.php	5	core
 ola_header	function	ola.php	10	core
 ola_footer	function	ola.php	23	core
@@ -2829,10 +2829,11 @@ test_legacy_plaintext_values_still_readable	def	tests/test_ldap_secret_and_legac
 test_failed_decryption_fails_closed	def	tests/test_ldap_secret_and_legacy_status_static.py	129	tests
 test_envelope_layout_offsets_are_consistent	def	tests/test_ldap_secret_and_legacy_status_static.py	138	tests
 test_failed_decryption_is_logged	def	tests/test_ldap_secret_and_legacy_status_static.py	159	tests
-transition_map	def	tests/test_ldap_secret_and_legacy_status_static.py	170	tests
-test_nothing_transitions_into_pending	def	tests/test_ldap_secret_and_legacy_status_static.py	178	tests
-test_pending_always_has_a_way_out	def	tests/test_ldap_secret_and_legacy_status_static.py	189	tests
-test_pending_is_documented_as_legacy	def	tests/test_ldap_secret_and_legacy_status_static.py	201	tests
+transition_body	def	tests/test_ldap_secret_and_legacy_status_static.py	170	tests
+transition_map	def	tests/test_ldap_secret_and_legacy_status_static.py	177	tests
+test_nothing_transitions_into_pending	def	tests/test_ldap_secret_and_legacy_status_static.py	185	tests
+test_pending_always_has_a_way_out	def	tests/test_ldap_secret_and_legacy_status_static.py	196	tests
+test_pending_is_documented_as_legacy	def	tests/test_ldap_secret_and_legacy_status_static.py	208	tests
 APP_ROOT	const	tests/test_ldap_secret_unit.php	8	tests
 check_ldap	function	tests/test_ldap_secret_unit.php	11	tests
 cfg	function	tests/test_ldap_secret_unit.php	18	tests

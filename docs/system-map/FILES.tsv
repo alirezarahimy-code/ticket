@@ -418,7 +418,7 @@ migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 modules/request-center/README.md	other	40	3662
 modules/request-center/RequestCenterRepository.php	other	177	7365
-modules/request-center/WorkflowService.php	other	216	9554
+modules/request-center/WorkflowService.php	other	217	9674
 ola.php	core	111	11934
 organization.php	core	786	39767
 permissions.php	core	911	47450
@@ -530,7 +530,7 @@ tests/test_group_ticket_design_repair_static.py	tests	38	2227
 tests/test_hot_schema_guard_unit.php	tests	65	3891
 tests/test_hot_schema_transaction_guard_static.py	tests	173	8488
 tests/test_inventory_truth_static.py	tests	197	12454
-tests/test_ldap_secret_and_legacy_status_static.py	tests	209	11728
+tests/test_ldap_secret_and_legacy_status_static.py	tests	216	11895
 tests/test_ldap_secret_unit.php	tests	53	3725
 tests/test_logging_acceptance_harness_static.py	tests	38	1742
 tests/test_logging_acl_windows.ps1	tests	88	6204
