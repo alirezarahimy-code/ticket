@@ -12,10 +12,6 @@ path	category	lines	bytes
 .github/workflows/logging-contract.yml	workflows	35	1359
 .gitignore	config	27	447
 .htaccess	config	24	788
-.local-php-toolchain/package-lock.json	other	408	14566
-.local-php-toolchain/package.json	other	1	107
-.local-php-toolchain/php	other	2	74
-.local-php-toolchain/php.mjs	other	11	546
 00-FULL-PACKAGE-1.62.73-FA.md	root-misc	27	3236
 00_APPLY_PATCH_FA.txt	root-misc	35	2629
 00_BUNDLE_INFO_FA.txt	root-misc	15	2163
@@ -678,7 +674,7 @@ tools/benchmark_operations_seed.php	tools	51	2994
 tools/benchmark_seed.php	tools	139	9027
 tools/benchmark_system_resilience.py	tools	367	22395
 tools/build_cumulative_update.py	tools	273	14596
-tools/build_system_map.py	tools	474	27127
+tools/build_system_map.py	tools	474	27151
 tools/build_update_1_62_88.py	tools	193	8725
 tools/ci_load_schema.php	tools	106	3555
 tools/code_index.php	tools	570	22757
