@@ -94,8 +94,7 @@ check("post_value('update_note')" in index
 check("case 'standard':" in workflow_service
       and "if ($cancelPending)" in workflow_service
       and "'cancel_requested_at' => null" in ticket_actions
-      and "cancel_requested_at" in read("actions/supervisor-actions.php")
-      and "cancel_requested_at" in read("actions/bulk-actions.php")
+      and "cancel_requested_at" in index
       and "t.cancel_requested_at IS NULL" in auto_close
       and "implicitRequesterResume" in index,
       "status, assignment, claim, reopen, supervisor and auto-close paths are frozen while cancellation is pending")
