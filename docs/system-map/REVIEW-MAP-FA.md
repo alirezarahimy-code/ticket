@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,535 |
+| خطوط | 125,553 |
 | آدرس‌ها (بلوک) | 6,671 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -44,7 +44,7 @@
 | **تنظیمات سامانه** | `settings` | — | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.47` <sub>index.php:1310</sub><br>`PAGE-034.54` <sub>index.php:1393</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 60 |
 | **ثبت درخواست** | `new-ticket` | — | `PAGE-034.88` <sub>index.php:2177</sub><br>`PAGE-034.87` <sub>index.php:2169</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 10 |
 | **جزئیات درخواست** | `ticket` | — | `PAGE-034.89` <sub>index.php:2313</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
-| **جست‌وجو** | `search` | — | `PAGE-034.83` <sub>index.php:1917</sub><br>`PAGE-034.82` <sub>index.php:1909</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 43 |
+| **جست‌وجو** | `search` | — | `PAGE-034.83` <sub>index.php:1917</sub><br>`PAGE-034.82` <sub>index.php:1909</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 44 |
 | **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2929</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 176 |
 | **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.102` <sub>index.php:3691</sub><br>`CORE-014.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.73` <sub>index.php:1641</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 8 |
@@ -288,7 +288,7 @@
 | `TEST` | TEST | 216 | 1,578 | 19,939 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,487 |
+| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,505 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
 | `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,098 |
@@ -8630,11 +8630,11 @@
 </details>
 
 <details>
-<summary><b>PAGE-045</b> — <code>request-center.php</code> (161 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-045</b> — <code>request-center.php</code> (179 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-045.01` | 1–161 | ناحیه | `بلوک رویه‌ای 1-161` | 4 | ⬜ |
+| `PAGE-045.01` | 1–179 | ناحیه | `بلوک رویه‌ای 1-179` | 4 | ⬜ |
 
 </details>
 
