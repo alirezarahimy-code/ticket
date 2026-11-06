@@ -48,7 +48,6 @@ jobs:
     - name: Run ticket routing unit tests
       run: php tests/test_ticket_routing_unit.php
 
-
     - name: Run ticket SLA unit tests
       run: php tests/test_ticket_sla_unit.php
 
