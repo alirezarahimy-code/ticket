@@ -56,6 +56,7 @@ $defaultWorkspace = user_is_primary_admin($user) ? 'admin'
 $requestedWorkspace = (string) ($_GET['workspace'] ?? $defaultWorkspace);
 $workspace = isset($workspaceOptions[$requestedWorkspace]) ? $requestedWorkspace : $defaultWorkspace;
 $workspaceTitle = $workspaceOptions[$workspace] ?? $workspaceLabels['requester'];
+$workspaceUrl = 'request-center.php?workspace=' . rawurlencode($workspace);
 $agentView = 'mine';
 if ($workspace === 'agent' && user_can($user, 'queue.view')
     && (string) ($_GET['agent_view'] ?? 'mine') === 'team') {
@@ -63,6 +64,9 @@ if ($workspace === 'agent' && user_can($user, 'queue.view')
 }
 if ($workspace === 'agent') {
     $workspaceTitle .= $agentView === 'team' ? ' — صف گروهی' : ' — صف شخصی';
+}
+if ($workspace === 'agent') {
+    $workspaceUrl .= '&amp;agent_view=' . rawurlencode($agentView);
 }
 if ($workspaceOptions === []) {
     http_response_code(403);
@@ -124,7 +128,7 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:v
 $ticket = $repo->findVisible($ticketId, $user);
 if ($ticket === null) {
     http_response_code(404);
-    echo '<section class="card empty"><h2>درخواست پیدا نشد</h2><p>درخواست وجود ندارد یا در حوزهٔ دسترسی حساب شما نیست.</p><a class="button secondary" href="request-center.php">بازگشت به فهرست</a></section>';
+    echo '<section class="card empty"><h2>درخواست پیدا نشد</h2><p>درخواست وجود ندارد یا در حوزهٔ دسترسی حساب شما نیست.</p><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a></section>';
 } else {
     $includeInternal = ticket_can_see_internal($ticket, $user);
     $messages = $repo->messages($ticketId, $includeInternal);
@@ -210,14 +214,14 @@ $queryString = http_build_query(array_merge($queryParams, array_filter($filters,
 <label>وضعیت<select name="status" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($statusLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['status'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
 <label>اولویت<select name="priority" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($priorityLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['priority'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
 <label>حوزه<select name="service_group" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><option value="it" <?= $filters['service_group'] === 'it' ? 'selected' : '' ?>>فناوری اطلاعات</option><option value="support" <?= $filters['service_group'] === 'support' ? 'selected' : '' ?>>پشتیبانی</option></select></label>
-<button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="request-center.php">پاک‌کردن</a>
+<button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">پاک‌کردن</a>
 </form>
 <section class="card">
 <?php if (!$result['rows']): ?><div class="empty">درخواستی در محدودهٔ دسترسی شما وجود ندارد.</div><?php else: ?>
 <div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>آخرین تغییر</th></tr></thead><tbody>
 <?php foreach ($result['rows'] as $row): ?>
 <tr>
-<td><a class="subject" href="request-center.php?id=<?= (int) $row['id'] ?>"><?= $escape($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escape($row['subject']) ?></a><small class="meta"><?= $escape($typeLabels[(string) ($row['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape(($row['service_group'] ?? '') === 'support' ? 'پشتیبانی' : 'فناوری اطلاعات') ?></small></td>
+<td><a class="subject" href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=<?= $escape(rawurlencode($workspace)) ?><?= $workspace === 'agent' ? '&amp;agent_view=' . $escape(rawurlencode($agentView)) : '' ?>"><?= $escape($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escape($row['subject']) ?></a><small class="meta"><?= $escape($typeLabels[(string) ($row['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape(($row['service_group'] ?? '') === 'support' ? 'پشتیبانی' : 'فناوری اطلاعات') ?></small></td>
 <td><?= $escape($row['requester_name']) ?></td><td><?= $escape($row['assignee_name'] ?: 'بدون مسئول') ?></td>
 <td><span class="status"><?= $escape($statusLabels[(string) $row['status']] ?? $row['status']) ?></span></td>
 <td><span class="priority"><?= $escape($priorityLabels[(string) $row['priority']] ?? $row['priority']) ?></span></td>
