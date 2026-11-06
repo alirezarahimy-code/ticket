@@ -98,8 +98,8 @@ check("case 'standard':" in workflow_service
       and "t.cancel_requested_at IS NULL" in auto_close
       and "implicitRequesterResume" in index,
       "status, assignment, claim, reopen, supervisor and auto-close paths are frozen while cancellation is pending")
-check("'pending', 'resolved']" in index
-      and "resolved_at = NULL" in index,
+check("array_merge(ticket_requester_cancelable_statuses(), ['resolved'])" in ticket_actions
+      and "'resolved_at' => null" in ticket_actions,
       "resolved tickets can request cancellation and leave no stale resolved_at when cancelled")
 check("NOT EXISTS (SELECT 1 FROM ticket_sla_alerts" in cron
       and "NOT EXISTS (SELECT 1 FROM ticket_ola_alerts" in cron
