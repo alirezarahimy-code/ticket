@@ -163,7 +163,7 @@ check('۳: سرور نصب‌نشده (بدون جدول) → fresh=true و بد
 
 /* ───────── ۴) پاسخ /api/config کلید db دارد ───────── */
 $foodTicket = (string) file_get_contents($root . '/food-ticket.php');
-check('۴: food_ticket_api_config کلید db را برمی‌گرداند', preg_match("/return \\[\\s*\\n?\\s*'db' => \\\$dbState,/", $foodTicket) === 1);
+check('۴: food_ticket_api_config کلید db را برمی‌گرداند', str_contains($foodTicket, '$payload = [') && str_contains($foodTicket, "'db' => \$dbState"));
 check('۴-ب: پاسخ /api/config از db_install_state تغذیه می‌شود', strpos($foodTicket, 'db_install_state()') !== false);
 
 /* ───────── ۵) بوت‌استرپ پنل متغیرهای دیتابیس را تزریق می‌کند ───────── */
