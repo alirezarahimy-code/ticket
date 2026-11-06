@@ -99,10 +99,23 @@ if (!defined('APP_ROOT')) {
                 }
                 [$bulkDue, $bulkPauseAt, $bulkPauseMinutes] = ticket_sla_transition($bulkTicket, $status, (string) $bulkTicket['priority']);
                 $bulkOla = ticket_ola_transition($bulkTicket, $status, (string) $bulkTicket['priority']);
-                $resolvedAt = $status === 'resolved' ? 'COALESCE(resolved_at, NOW())' : 'NULL';
-                $bulkUpdate = db()->prepare('UPDATE tickets SET status = ?, due_at = ?, sla_paused_at = ?, sla_pause_minutes = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, resolved_at = ' . $resolvedAt . ', updated_at = NOW() WHERE id = ? AND status = ? AND cancel_requested_at IS NULL');
-                $bulkUpdate->execute([$status, $bulkDue, $bulkPauseAt, $bulkPauseMinutes, $bulkOla['policy_id'], $bulkOla['response_due_at'], $bulkOla['due_at'], $bulkOla['escalation_1_at'], $bulkOla['escalation_2_at'], $ticketId, $bulkOld]);
-                if ($bulkUpdate->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $bulkUpdated = $workflow->transition($ticketId, $bulkOld, $status, [
+                    'due_at' => $bulkDue,
+                    'sla_paused_at' => $bulkPauseAt,
+                    'sla_pause_minutes' => $bulkPauseMinutes,
+                    'ola_policy_id' => $bulkOla['policy_id'],
+                    'ola_response_due_at' => $bulkOla['response_due_at'],
+                    'ola_due_at' => $bulkOla['due_at'],
+                    'ola_escalation_1_at' => $bulkOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $bulkOla['escalation_2_at'],
+                    'resolved_at' => $status === 'resolved' ? RequestCenterSqlExpression::coalesceNow() : null,
+                ], 'standard', [
+                    'assigned_to' => $bulkTicket['assigned_to'] ?? null,
+                    'priority' => $bulkTicket['priority'],
+                    'cancel_requested_at' => null,
+                ]);
+                if (!$bulkUpdated) {
                     $bulkSkipped++;
                     continue;
                 }
