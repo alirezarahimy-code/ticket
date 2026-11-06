@@ -212,6 +212,40 @@ def main() -> int:
             if not (ticket_ok and dvd_ok):
                 raise RuntimeError('could not prepare the forms')
 
+            # A ticket must not be assigned to the same account that created it.
+            # Use the next synthetic primary-admin account as requester and keep
+            # this worker's account as the independent handling agent.
+            requester_index = (vu + 1) % args.vus
+            requester_jar = http.cookiejar.CookieJar()
+            requester_opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(requester_jar))
+            status, requester_login_html, _, requester_ms, requester_error = request(
+                requester_opener, args.base_url, 'index.php?page=login'
+            )
+            requester_login_csrf = hidden_value(requester_login_html, 'csrf')
+            requester_form_ok = status == 200 and not requester_error and bool(requester_login_csrf) and is_login_page(requester_login_html)
+            recorder.add('requester-login-form', requester_ms, status, requester_form_ok,
+                         requester_error or ('requester login form/CSRF unavailable' if not requester_form_ok else ''))
+            if not requester_login_csrf:
+                raise RuntimeError('requester CSRF field absent on login form')
+            status, requester_home, _, requester_ms, requester_error = request(requester_opener, args.base_url, 'index.php?page=login', {
+                'csrf': requester_login_csrf, 'action': 'login',
+                'username': f'loadtest-{requester_index + 1:03d}', 'password': args.password,
+            })
+            requester_login_ok = status == 200 and not requester_error and not is_login_page(requester_home)
+            recorder.add('requester-login-post', requester_ms, status, requester_login_ok,
+                         requester_error or ('requester authentication failed' if not requester_login_ok else ''))
+            if not requester_login_ok:
+                raise RuntimeError('synthetic requester authentication failed')
+            status, requester_ticket_form, _, requester_ms, requester_error = request(
+                requester_opener, args.base_url, 'index.php?page=new-ticket'
+            )
+            requester_ticket_csrf = hidden_value(requester_ticket_form, 'csrf')
+            requester_ticket_ok = status == 200 and not requester_error and not is_login_page(requester_ticket_form) and bool(requester_ticket_csrf)
+            recorder.add('prepare-requester-ticket', requester_ms, status, requester_ticket_ok,
+                         requester_error or ('requester ticket form/CSRF unavailable' if not requester_ticket_ok else ''))
+            if not requester_ticket_ok:
+                raise RuntimeError('requester ticket form unavailable')
+
             try:
                 barrier.wait()
             except threading.BrokenBarrierError as exc:
@@ -224,13 +258,13 @@ def main() -> int:
             else:
                 serial = f'P86-{outgoing_index[(media, str(vu))]:04d}'
             ticket_data = {
-                'csrf': ticket_csrf, 'action': 'create_ticket', 'subject': f'OPS-{token}-{vu + 1:04d}',
+                'csrf': requester_ticket_csrf, 'action': 'create_ticket', 'subject': f'OPS-{token}-{vu + 1:04d}',
                 'description': f'Synthetic concurrent end-to-end ticket stress test {token}, worker {vu + 1}.',
                 'service_id': str(seed['service_id']), 'service_group': 'it', 'ticket_type': 'incident',
                 'requesting_unit_id': str(seed['org_unit_id']), 'department_id': str(seed['department_id']),
-                'asset_id': str(seed['asset_ids'][vu]), 'priority': 'normal',
+                'asset_id': str(seed['asset_ids'][requester_index]), 'priority': 'normal',
             }
-            status, html, final_url, ms, error = request(opener, args.base_url, 'index.php?page=new-ticket', ticket_data)
+            status, html, final_url, ms, error = request(requester_opener, args.base_url, 'index.php?page=new-ticket', ticket_data)
             query = urllib.parse.parse_qs(urllib.parse.urlparse(final_url).query)
             ticket_id = int((query.get('id') or ['0'])[0]) if (query.get('id') or [''])[0].isdigit() else 0
             created = status == 200 and not error and ticket_id > 0 and not is_login_page(html)
@@ -267,14 +301,26 @@ def main() -> int:
                 post_cd(1000 + pair_id, pair_serial, pair_direction, pair_id)
 
             if created:
-                update = {
-                    'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
-                    'status': 'resolved', 'assigned_to': str(seed['user_ids'][vu]),
-                    'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
+                claim = {
+                    'csrf': ticket_csrf, 'action': 'claim_ticket', 'ticket_id': str(ticket_id),
                 }
-                status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
-                resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
-                recorder.add('ticket-resolve', ms2, status2, resolved, error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
+                status_claim, claim_html, _, claim_ms, claim_error = request(
+                    opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', claim
+                )
+                claimed = status_claim == 200 and not claim_error and 'درخواست به شما ارجاع شد' in claim_html and not is_login_page(claim_html)
+                recorder.add('ticket-claim', claim_ms, status_claim, claimed,
+                             claim_error or ('claim handler did not confirm assignment' if not claimed else ''))
+                if claimed:
+                    update = {
+                        'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
+                        'status': 'resolved',
+                        'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
+                    }
+                    status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
+                    resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
+                    recorder.add('ticket-resolve', ms2, status2, resolved, error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
+                else:
+                    recorder.add('ticket-resolve', 0, 0, False, 'ticket claim did not succeed; resolution was not attempted')
         except Exception as exc:
             with worker_error_lock:
                 worker_errors.append(f'vu={vu + 1}: {type(exc).__name__}: {exc}')
