@@ -43,13 +43,13 @@ def test_baseline_migration_does_not_pre_register_itself():
     migration_name = "032-schema-updates-baseline.sql"
     source = (ROOT / "migrations" / migration_name).read_text(encoding="utf-8")
     match = re.search(
-        r"INSERT\\s+IGNORE\\s+INTO\\s+schema_updates\\s*"
-        r"\\(\\s*version\\s*,\\s*migration\\s*\\)\\s*VALUES(.*?);",
+        r"INSERT\s+IGNORE\s+INTO\s+schema_updates\s*"
+        r"\(\s*version\s*,\s*migration\s*\)\s*VALUES(.*?);",
         source,
         re.I | re.S,
     )
     assert match, "032 must seed the existing migration registry"
-    seeded = {name for name in re.findall(r"'([^']+\\.sql)'", match.group(1))}
+    seeded = {name for name in re.findall(r"'([^']+\.sql)'", match.group(1))}
     assert migration_name not in seeded, (
         "032 must not register itself: the updater records the migration after "
         "execution, and pre-registering it causes a duplicate-key failure"
