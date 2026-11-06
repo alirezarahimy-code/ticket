@@ -52351,8 +52351,8 @@
             "id": "PAGE-040",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
-            "lines": 218,
-            "file_fingerprint": "41d3b5a35a2d",
+            "lines": 236,
+            "file_fingerprint": "b16fec7f223e",
             "blocks": [
                 {
                     "kind": "region",
@@ -52384,9 +52384,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterWorkflowService",
                     "line_start": 28,
-                    "line_end": 217,
-                    "lines": 190,
-                    "fingerprint": "9afd4b3c9190",
+                    "line_end": 235,
+                    "lines": 208,
+                    "fingerprint": "acb62cced664",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -75665,16 +75665,16 @@
             "id": "TEST-188",
             "path": "tests\/test_ticket_cancellation_static.py",
             "area": "TEST",
-            "lines": 134,
-            "file_fingerprint": "74ae0dd8cfbc",
+            "lines": 135,
+            "file_fingerprint": "43c0e1d882a2",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 20,
-                    "lines": 20,
-                    "fingerprint": "dd788bf86f9b",
+                    "line_end": 21,
+                    "lines": 21,
+                    "fingerprint": "c6fb6c890ca8",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -75684,10 +75684,10 @@
                 {
                     "kind": "block",
                     "anchor": "check",
-                    "line_start": 21,
-                    "line_end": 134,
+                    "line_start": 22,
+                    "line_end": 135,
                     "lines": 114,
-                    "fingerprint": "435c7b29254c",
+                    "fingerprint": "a37967b974b1",
                     "risk": {
                         "score": 1,
                         "flags": {
