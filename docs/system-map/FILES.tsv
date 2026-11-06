@@ -613,7 +613,7 @@ tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_request_center_first_slice_static.py	tests	61	2648
 tests/test_request_center_repository_sqlite.php	tests	86	4621
-tests/test_request_center_schema_preflight_mariadb.php	tests	24	991
+tests/test_request_center_schema_preflight_mariadb.php	tests	110	5306
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
 tests/test_schema_heal_static.py	tests	45	2290

@@ -73007,21 +73007,77 @@
             "id": "TEST-166",
             "path": "tests\/test_request_center_schema_preflight_mariadb.php",
             "area": "TEST",
-            "lines": 25,
-            "file_fingerprint": "6f45f40f6067",
+            "lines": 111,
+            "file_fingerprint": "b41951ee040f",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-25",
+                    "anchor": "بلوک رویه‌ای 1-3",
                     "line_start": 1,
-                    "line_end": 25,
-                    "lines": 25,
-                    "fingerprint": "6f45f40f6067",
+                    "line_end": 3,
+                    "lines": 3,
+                    "fingerprint": "2fa88eb34b3b",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "TEST-166.01"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "ticket_scope",
+                    "line_start": 4,
+                    "line_end": 7,
+                    "lines": 4,
+                    "fingerprint": "5519e2cc7075",
+                    "risk": {
+                        "score": 5,
+                        "flags": {
+                            "sql_concat": 5
+                        }
+                    },
+                    "id": "TEST-166.02"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "ticket_user_can_view",
+                    "line_start": 9,
+                    "line_end": 12,
+                    "lines": 4,
+                    "fingerprint": "42da289b9e08",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-166.03"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "check_request_center",
+                    "line_start": 14,
+                    "line_end": 20,
+                    "lines": 7,
+                    "fingerprint": "a6c9ddb6553c",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-166.04"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 21-111",
+                    "line_start": 21,
+                    "line_end": 111,
+                    "lines": 91,
+                    "fingerprint": "b601783d931a",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TEST-166.05"
                 }
             ]
         },

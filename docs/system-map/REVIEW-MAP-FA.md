@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 538 |
-| خطوط | 124,838 |
-| آدرس‌ها (بلوک) | 6,658 |
+| خطوط | 124,924 |
+| آدرس‌ها (بلوک) | 6,662 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,658 آدرس |
+| باقی‌مانده | 6,662 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -45,7 +45,7 @@
 | **ثبت درخواست** | `new-ticket` | — | `PAGE-034.88` <sub>index.php:2191</sub><br>`PAGE-034.87` <sub>index.php:2183</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 10 |
 | **جزئیات درخواست** | `ticket` | — | `PAGE-034.89` <sub>index.php:2327</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
 | **جست‌وجو** | `search` | — | `PAGE-034.83` <sub>index.php:1931</sub><br>`PAGE-034.82` <sub>index.php:1923</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 43 |
-| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 175 |
+| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 176 |
 | **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.102` <sub>index.php:3705</sub><br>`CORE-014.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.73` <sub>index.php:1655</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 8 |
 | **سفارش غذا** | `food-order` | — | `PAGE-034.41` <sub>index.php:930</sub><br>`PAGE-034.60` <sub>index.php:1449</sub><br>`PAGE-034.61` <sub>index.php:1457</sub><br>`TOOL-028.03` <sub>tools/food_system_router.php:18</sub> | 196 |
@@ -193,8 +193,8 @@
 | `asset_profiles` | `DB-002.45` <sub>install-empty-db.sql:688</sub><br>`DB-005.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-039.42` <sub>schema.sql:667</sub> | 96 |
 | `asset_relations` | `DB-002.44` <sub>install-empty-db.sql:675</sub><br>`DB-005.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-039.41` <sub>schema.sql:654</sub> | 12 |
 | `asset_storage_devices` | `DB-002.39` <sub>install-empty-db.sql:599</sub><br>`DB-005.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-039.36` <sub>schema.sql:578</sub> | 17 |
-| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 175 |
-| `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-039.18` <sub>schema.sql:223</sub> | 29 |
+| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.97` <sub>index.php:2943</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 176 |
+| `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-039.18` <sub>schema.sql:223</sub> | 30 |
 | `cd_dvd_records` | `DB-002.16` <sub>install-empty-db.sql:144</sub><br>`DB-005.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-039.13` <sub>schema.sql:123</sub> | 40 |
 | `cd_dvd_types` | `DB-002.15` <sub>install-empty-db.sql:136</sub><br>`DB-039.12` <sub>schema.sql:115</sub><br>`DB-074.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
 | `change_approvals` | `DB-002.50` <sub>install-empty-db.sql:829</sub><br>`DB-005.39` <sub>migrations/003-sync-schema-151.sql:678</sub><br>`DB-039.47` <sub>schema.sql:808</sub> | 15 |
@@ -202,7 +202,7 @@
 | `change_ticket_links` | `DB-002.51` <sub>install-empty-db.sql:841</sub><br>`DB-005.40` <sub>migrations/003-sync-schema-151.sql:689</sub><br>`DB-039.48` <sub>schema.sql:820</sub> | 15 |
 | `chatbot_faq` | `DB-002.107` <sub>install-empty-db.sql:1342</sub><br>`DB-005.54` <sub>migrations/003-sync-schema-151.sql:914</sub><br>`DB-039.63` <sub>schema.sql:1107</sub> | 13 |
 | `chatbot_logs` | `DB-002.108` <sub>install-empty-db.sql:1354</sub><br>`DB-005.55` <sub>migrations/003-sync-schema-151.sql:925</sub><br>`DB-039.64` <sub>schema.sql:1119</sub> | 14 |
-| `departments` | `DB-002.05` <sub>install-empty-db.sql:27</sub><br>`DB-005.03` <sub>migrations/003-sync-schema-151.sql:9</sub><br>`DB-039.02` <sub>schema.sql:6</sub> | 63 |
+| `departments` | `DB-002.05` <sub>install-empty-db.sql:27</sub><br>`DB-005.03` <sub>migrations/003-sync-schema-151.sql:9</sub><br>`DB-039.02` <sub>schema.sql:6</sub> | 64 |
 | `domain_scan_queue` | `DB-002.69` <sub>install-empty-db.sql:1156</sub><br>`DB-005.60` <sub>migrations/003-sync-schema-151.sql:968</sub><br>`DB-039.69` <sub>schema.sql:1169</sub> | 19 |
 | `domain_scan_runs` | `DB-002.68` <sub>install-empty-db.sql:1143</sub><br>`DB-005.59` <sub>migrations/003-sync-schema-151.sql:956</sub><br>`DB-039.68` <sub>schema.sql:1156</sub> | 22 |
 | `food_calendar` | `DB-002.100` <sub>install-empty-db.sql:1254</sub><br>`DB-005.65` <sub>migrations/003-sync-schema-151.sql:1029</sub><br>`DB-039.95` <sub>schema.sql:1265</sub> | 39 |
@@ -240,24 +240,24 @@
 | `ola_policies` | `DB-002.46` <sub>install-empty-db.sql:770</sub><br>`DB-005.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-039.43` <sub>schema.sql:749</sub> | 24 |
 | `org_companies` | `DB-002.06` <sub>install-empty-db.sql:37</sub><br>`DB-021.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-039.03` <sub>schema.sql:16</sub> | 11 |
 | `org_unit_managers` | `DB-002.10` <sub>install-empty-db.sql:77</sub><br>`DB-005.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-039.07` <sub>schema.sql:56</sub> | 36 |
-| `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-039.04` <sub>schema.sql:30</sub> | 87 |
+| `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-039.04` <sub>schema.sql:30</sub> | 88 |
 | `problem_records` | `DB-002.52` <sub>install-empty-db.sql:852</sub><br>`DB-005.41` <sub>migrations/003-sync-schema-151.sql:699</sub><br>`DB-039.49` <sub>schema.sql:831</sub> | 26 |
 | `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:876</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-039.50` <sub>schema.sql:855</sub> | 14 |
 | `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:435</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-039.26` <sub>schema.sql:414</sub> | 21 |
 | `schema_updates` | `DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`DB-039.110` <sub>schema.sql:1520</sub><br>`CORE-007.04` <sub>lib/logging-audit.php:61</sub> | 16 |
-| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-039.19` <sub>schema.sql:232</sub> | 54 |
+| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-039.19` <sub>schema.sql:232</sub> | 55 |
 | `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-039.20` <sub>schema.sql:258</sub> | 16 |
 | `settings` | `PAGE-034.100` <sub>index.php:3213</sub><br>`PAGE-034.47` <sub>index.php:1324</sub><br>`PAGE-034.54` <sub>index.php:1407</sub> | 60 |
 | `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1367</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-039.65` <sub>schema.sql:1132</sub> | 9 |
 | `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1101</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-039.62` <sub>schema.sql:1080</sub> | 61 |
-| `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-039.24` <sub>schema.sql:364</sub> | 15 |
+| `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-039.24` <sub>schema.sql:364</sub> | 16 |
 | `ticket_events` | `DB-002.33` <sub>install-empty-db.sql:478</sub><br>`DB-005.24` <sub>migrations/003-sync-schema-151.sql:359</sub><br>`DB-039.30` <sub>schema.sql:457</sub> | 40 |
-| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-039.22` <sub>schema.sql:338</sub> | 28 |
+| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-039.22` <sub>schema.sql:338</sub> | 29 |
 | `ticket_number_seq` | `DB-002.66` <sub>install-empty-db.sql:1128</sub><br>`DB-005.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-039.66` <sub>schema.sql:1141</sub> | 19 |
 | `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-039.44` <sub>schema.sql:767</sub> | 12 |
 | `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-039.23` <sub>schema.sql:350</sub> | 18 |
 | `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-039.29` <sub>schema.sql:447</sub> | 13 |
-| `tickets` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 179 |
+| `tickets` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 180 |
 | `tmp_asset_dedupe_map` | `DB-018.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-018.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-018.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
 | `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-039.14` <sub>schema.sql:156</sub> | 31 |
 | `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-039.16` <sub>schema.sql:196</sub> | 10 |
@@ -265,7 +265,7 @@
 | `user_access_group_members` | `DB-002.114` <sub>install-empty-db.sql:1463</sub><br>`DB-026.03` <sub>migrations/023-user-access-groups.sql:17</sub><br>`DB-039.103` <sub>schema.sql:1414</sub> | 12 |
 | `user_access_group_permissions` | `DB-002.115` <sub>install-empty-db.sql:1475</sub><br>`DB-026.04` <sub>migrations/023-user-access-groups.sql:29</sub><br>`DB-039.104` <sub>schema.sql:1426</sub> | 12 |
 | `user_access_groups` | `DB-002.113` <sub>install-empty-db.sql:1449</sub><br>`DB-026.02` <sub>migrations/023-user-access-groups.sql:3</sub><br>`DB-039.102` <sub>schema.sql:1400</sub> | 10 |
-| `users` | `ACT-010.14` <sub>actions/org-actions.php:409</sub><br>`DB-002.11` <sub>install-empty-db.sql:85</sub><br>`DB-005.06` <sub>migrations/003-sync-schema-151.sql:39</sub> | 278 |
+| `users` | `ACT-010.14` <sub>actions/org-actions.php:409</sub><br>`DB-002.11` <sub>install-empty-db.sql:85</sub><br>`DB-005.06` <sub>migrations/003-sync-schema-151.sql:39</sub> | 279 |
 
 </details>
 
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 215 | 1,568 | 19,621 |
+| `TEST` | TEST | 215 | 1,572 | 19,707 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 52 | 1,365 | 44,226 |
@@ -302,10 +302,10 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 821 |
+| `write_no_tx` | نوشتن بدون تراکنش | 822 |
 | `error_suppression` | سرکوب @ | 273 |
 | `dangerous_call` | فراخوانی خطرناک | 189 |
-| `sql_concat` | الحاق در SQL | 183 |
+| `sql_concat` | الحاق در SQL | 184 |
 | `raw_input` | ورودی خام | 176 |
 | `silent_catch` | catch بی‌صدا | 122 |
 | `long` | >۱۲۰ خط | 121 |
@@ -2820,11 +2820,15 @@
 </details>
 
 <details>
-<summary><b>TEST-166</b> — <code>tests/test_request_center_schema_preflight_mariadb.php</code> (25 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-166</b> — <code>tests/test_request_center_schema_preflight_mariadb.php</code> (111 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-166.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 0 | ⬜ |
+| `TEST-166.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-166.02` | 4–7 | تابع | `ticket_scope` | 5 | ⬜ |
+| `TEST-166.03` | 9–12 | تابع | `ticket_user_can_view` | 0 | ⬜ |
+| `TEST-166.04` | 14–20 | تابع | `check_request_center` | 0 | ⬜ |
+| `TEST-166.05` | 21–111 | ناحیه | `بلوک رویه‌ای 21-111` | 1 | ⬜ |
 
 </details>
 

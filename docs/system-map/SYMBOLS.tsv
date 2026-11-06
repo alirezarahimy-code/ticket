@@ -3312,6 +3312,9 @@ test_legacy_workflow_is_not_removed_by_first_slice	def	tests/test_request_center
 ticket_scope	function	tests/test_request_center_repository_sqlite.php	5	tests
 ticket_user_can_view	function	tests/test_request_center_repository_sqlite.php	10	tests
 check_request_center	function	tests/test_request_center_repository_sqlite.php	15	tests
+ticket_scope	function	tests/test_request_center_schema_preflight_mariadb.php	3	tests
+ticket_user_can_view	function	tests/test_request_center_schema_preflight_mariadb.php	8	tests
+check_request_center	function	tests/test_request_center_schema_preflight_mariadb.php	13	tests
 read	def	tests/test_role_permissions_ui_static.py	4	tests
 check	def	tests/test_role_permissions_ui_static.py	8	tests
 read	def	tests/test_route_security_static.py	4	tests
