@@ -75,6 +75,17 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertNotIn("stored_name", repo)
 
+    def test_workspace_views_are_permission_gated_and_scope_bound(self):
+        entry = read("request-center.php")
+        repo = read("modules/request-center/RequestCenterRepository.php")
+        self.assertIn("user_can($user, 'supervisor.panel')", entry)
+        self.assertIn("user_is_primary_admin($user)", entry)
+        self.assertIn("$filters['requester_id'] = (int) $user['id'];", entry)
+        self.assertIn("$filters['assigned_to'] = (int) $user['id'];", entry)
+        self.assertIn("user_can($user, 'queue.view')", entry)
+        self.assertIn("$clauses[] = 't.assigned_to = ?';", repo)
+        self.assertIn("ticket_scope($user, 't')", repo)
+
     def test_legacy_workflow_is_not_removed_by_first_slice(self):
         action = read("actions/ticket-actions.php")
         self.assertIn("if ($action === 'create_ticket')", action)
