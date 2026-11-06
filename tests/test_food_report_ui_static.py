@@ -37,7 +37,8 @@ class FoodReportUiStaticTests(unittest.TestCase):
         self.assertIn("printList.classList.add('fm-print-list')", ui)
         self.assertIn(".fm-daily-orders .fm-table-wrap', 'fm-print-orders'", ui)
         self.assertIn(".fm-group-orders .fm-group-report-content", ui)
-        self.assertIn(".fm-statistics .fm-statistics-results", ui)
+        self.assertIn("printScopedReport('.fm-statistics .fm-statistics-content', 'fm-print-statistics')", ui)
+        self.assertIn("fm-statistics-results", ui)
         self.assertIn(".fm-print-list", css)
         self.assertIn("body.fm-print-statistics > *:not(.fm-print-host)", css)
 
