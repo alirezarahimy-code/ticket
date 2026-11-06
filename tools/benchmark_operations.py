@@ -301,26 +301,18 @@ def main() -> int:
                 post_cd(1000 + pair_id, pair_serial, pair_direction, pair_id)
 
             if created:
-                claim = {
-                    'csrf': ticket_csrf, 'action': 'claim_ticket', 'ticket_id': str(ticket_id),
+                # create_ticket assigns the ticket automatically. Calling claim_ticket
+                # again is invalid for an already-assigned ticket and creates a false
+                # application error. Exercise the real next step: resolve the ticket.
+                update = {
+                    'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
+                    'status': 'resolved',
+                    'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
                 }
-                status_claim, claim_html, _, claim_ms, claim_error = request(
-                    opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', claim
-                )
-                claimed = status_claim == 200 and not claim_error and 'درخواست به شما ارجاع شد' in claim_html and not is_login_page(claim_html)
-                recorder.add('ticket-claim', claim_ms, status_claim, claimed,
-                             claim_error or ('claim handler did not confirm assignment' if not claimed else ''))
-                if claimed:
-                    update = {
-                        'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
-                        'status': 'resolved',
-                        'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
-                    }
-                    status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
-                    resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
-                    recorder.add('ticket-resolve', ms2, status2, resolved, error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
-                else:
-                    recorder.add('ticket-resolve', 0, 0, False, 'ticket claim did not succeed; resolution was not attempted')
+                status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
+                resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
+                recorder.add('ticket-resolve', ms2, status2, resolved,
+                             error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
         except Exception as exc:
             with worker_error_lock:
                 worker_errors.append(f'vu={vu + 1}: {type(exc).__name__}: {exc}')
