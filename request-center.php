@@ -56,6 +56,14 @@ $defaultWorkspace = user_is_primary_admin($user) ? 'admin'
 $requestedWorkspace = (string) ($_GET['workspace'] ?? $defaultWorkspace);
 $workspace = isset($workspaceOptions[$requestedWorkspace]) ? $requestedWorkspace : $defaultWorkspace;
 $workspaceTitle = $workspaceOptions[$workspace] ?? $workspaceLabels['requester'];
+$agentView = 'mine';
+if ($workspace === 'agent' && user_can($user, 'queue.view')
+    && (string) ($_GET['agent_view'] ?? 'mine') === 'team') {
+    $agentView = 'team';
+}
+if ($workspace === 'agent') {
+    $workspaceTitle .= $agentView === 'team' ? ' — صف گروهی' : ' — صف شخصی';
+}
 if ($workspaceOptions === []) {
     http_response_code(403);
     exit('دسترسی به مرکز درخواست‌ها برای این حساب فعال نیست.');
@@ -174,17 +182,30 @@ if (!in_array($filters['service_group'], ['it', 'support'], true)) $filters['ser
 $filters['q'] = function_exists('mb_substr') ? mb_substr($filters['q'], 0, 100, 'UTF-8') : substr($filters['q'], 0, 100);
 if ($workspace === 'requester') {
     $filters['requester_id'] = (int) $user['id'];
+} elseif ($workspace === 'agent' && $agentView === 'mine') {
+    $filters['assigned_to'] = (int) $user['id'];
 }
 $result = $repo->listVisible($user, $page, 50, $filters);
 $pages = max(1, (int) ceil($result['total'] / 50));
 $page = min($page, $pages);
-$queryString = http_build_query(array_merge(['workspace' => $workspace], array_filter($filters, static fn ($value): bool => $value !== '')));
+$queryParams = ['workspace' => $workspace];
+if ($workspace === 'agent') {
+    $queryParams['agent_view'] = $agentView;
+}
+$queryString = http_build_query(array_merge($queryParams, array_filter($filters, static fn ($value): bool => $value !== '')));
 ?>
+<?php if ($workspace === 'agent' && user_can($user, 'queue.view')): ?>
+<nav class="workspace-nav" aria-label="نوع صف کارشناس">
+<a class="<?= $agentView === 'mine' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=mine">صف شخصی من</a>
+<a class="<?= $agentView === 'team' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=team">صف گروهی مجاز</a>
+</nav>
+<?php endif; ?>
 <section class="heading"><div><h1><?= $escape($workspaceTitle) ?></h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div>
 <?php if (user_can($user, 'ticket.create')): ?><a class="button" href="index.php?page=new-ticket">ثبت درخواست جدید</a><?php endif; ?>
 </section>
 <form method="get" action="request-center.php" class="card" style="padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
 <input type="hidden" name="workspace" value="<?= $escape($workspace) ?>">
+<?php if ($workspace === 'agent'): ?><input type="hidden" name="agent_view" value="<?= $escape($agentView) ?>"><?php endif; ?>
 <label>جست‌وجو<input type="search" name="q" maxlength="100" value="<?= $escape($filters['q']) ?>" placeholder="شماره یا عنوان" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"></label>
 <label>وضعیت<select name="status" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($statusLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['status'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
 <label>اولویت<select name="priority" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($priorityLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['priority'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
