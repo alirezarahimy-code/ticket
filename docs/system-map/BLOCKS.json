@@ -52310,8 +52310,8 @@
             "id": "PAGE-039",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
-            "lines": 209,
-            "file_fingerprint": "dd05207c2ee8",
+            "lines": 211,
+            "file_fingerprint": "4341ed0b9a1a",
             "blocks": [
                 {
                     "kind": "region",
@@ -52330,9 +52330,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterRepository",
                     "line_start": 4,
-                    "line_end": 208,
-                    "lines": 205,
-                    "fingerprint": "e0a1160d325a",
+                    "line_end": 210,
+                    "lines": 207,
+                    "fingerprint": "3a08176e401c",
                     "risk": {
                         "score": 6,
                         "flags": {
