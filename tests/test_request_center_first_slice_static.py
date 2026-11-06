@@ -82,6 +82,8 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("user_is_primary_admin($user)", entry)
         self.assertIn("$filters['requester_id'] = (int) $user['id'];", entry)
         self.assertIn("$filters['assigned_to'] = (int) $user['id'];", entry)
+        self.assertIn("$workspaceUrl .= '&agent_view='", entry)
+        self.assertIn('href="<?= $escape($workspaceUrl) ?>"', entry)
         self.assertIn("user_can($user, 'queue.view')", entry)
         self.assertIn("$clauses[] = 't.assigned_to = ?';", repo)
         self.assertIn("ticket_scope($user, 't')", repo)
