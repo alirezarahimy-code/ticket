@@ -29,7 +29,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo_mysql, mbstring
+          extensions: pdo_mysql, pdo_sqlite, mbstring
           coverage: none
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -43,6 +43,8 @@ jobs:
           php -l modules/request-center/RequestCenterRepository.php
       - name: First-slice security and architecture contract
         run: python -m pytest -q tests/test_request_center_first_slice_static.py
+      - name: Repository query and visibility integration tests
+        run: php tests/test_request_center_repository_sqlite.php
       - name: Existing workflow safety contracts
         run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py
       - name: Existing ticket routing unit tests
