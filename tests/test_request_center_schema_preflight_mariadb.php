@@ -20,6 +20,7 @@ function check_request_center(bool $condition, string $message): void
 }
 
 require_once dirname(__DIR__) . '/modules/request-center/RequestCenterRepository.php';
+require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';
 
 $host = (string) (getenv('CI_DB_HOST') ?: '127.0.0.1');
 $port = (string) (getenv('CI_DB_PORT') ?: '3306');
@@ -74,6 +75,34 @@ $ticket->execute([
     $departmentId, $categoryId, $serviceId, $assetId, $unitId, 'it', 'assigned',
 ]);
 $ticketId = (int) $pdo->lastInsertId();
+$workflow = new RequestCenterWorkflowService($pdo);
+$pdo->beginTransaction();
+$transitioned = $workflow->transition(
+    $ticketId,
+    'assigned',
+    'in_progress',
+    ['first_response_at' => RequestCenterSqlExpression::coalesceNow()],
+    'standard',
+    ['assigned_to' => $agentId, 'cancel_requested_at' => null]
+);
+if (!$transitioned) {
+    $pdo->rollBack();
+    throw new RuntimeException('MariaDB WorkflowService did not apply a valid transition');
+}
+$pdo->commit();
+$persisted = $pdo->prepare('SELECT status, first_response_at FROM tickets WHERE id = ?');
+$persisted->execute([$ticketId]);
+$persistedState = $persisted->fetch();
+check_request_center(
+    $persistedState['status'] === 'in_progress' && !empty($persistedState['first_response_at']),
+    'MariaDB WorkflowService locks, validates and persists status with first-response metadata'
+);
+
+$pdo->beginTransaction();
+$staleTransition = $workflow->transition($ticketId, 'assigned', 'resolved', [], 'standard');
+$pdo->rollBack();
+check_request_center(!$staleTransition, 'MariaDB WorkflowService rejects a stale expected status');
+
 
 $message = $pdo->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, ?)');
 $message->execute([$ticketId, $requesterId, 'Public message', 0]);
