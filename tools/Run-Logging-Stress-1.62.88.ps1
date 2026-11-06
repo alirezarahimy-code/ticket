@@ -245,7 +245,7 @@ $report = [ordered]@{
     }
     processes_before = $processesBefore
     processes_after = $processesAfter
-    performance_samples = @($performanceSamples)
+    performance_samples = $performanceSamples.ToArray()
     safety = @{
         http_methods = @('GET')
         business_mutations = $false
@@ -259,7 +259,7 @@ $csvPath = Join-Path $OutputDirectory ("logging-stress-http-$runId.csv")
 $performanceCsvPath = Join-Path $OutputDirectory ("logging-stress-processes-$runId.csv")
 $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $reportPath -Encoding UTF8
 $httpRows | Export-Csv -LiteralPath $csvPath -NoTypeInformation -Encoding UTF8
-@($performanceSamples) | Export-Csv -LiteralPath $performanceCsvPath -NoTypeInformation -Encoding UTF8
+$performanceSamples.ToArray() | Export-Csv -LiteralPath $performanceCsvPath -NoTypeInformation -Encoding UTF8
 
 Write-Host ''
 Write-Host '========== LOGGING STRESS RESULT =========='
