@@ -73083,8 +73083,8 @@
             "id": "TEST-166",
             "path": "tests\/test_request_center_schema_preflight_mariadb.php",
             "area": "TEST",
-            "lines": 111,
-            "file_fingerprint": "b41951ee040f",
+            "lines": 140,
+            "file_fingerprint": "f076186f7f1b",
             "blocks": [
                 {
                     "kind": "region",
@@ -73142,16 +73142,14 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 21-111",
+                    "anchor": "بلوک رویه‌ای 21-140",
                     "line_start": 21,
-                    "line_end": 111,
-                    "lines": 91,
-                    "fingerprint": "b601783d931a",
+                    "line_end": 140,
+                    "lines": 120,
+                    "fingerprint": "8561a5083f4e",
                     "risk": {
-                        "score": 1,
-                        "flags": {
-                            "write_no_tx": 1
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "TEST-166.05"
                 }
