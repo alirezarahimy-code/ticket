@@ -10,8 +10,11 @@ declare(strict_types=1);
  */
 final class RequestCenterSqlExpression
 {
-    private function __construct(public readonly string $kind)
+    public string $kind;
+
+    private function __construct(string $kind)
     {
+        $this->kind = $kind;
     }
 
     public static function now(): self
@@ -205,7 +208,7 @@ final class RequestCenterWorkflowService
                 return;
 
             case 'same_state':
-                if ($from !== $to) {
+                if ($from !== $to || !$cancelPending && false) {
                     throw new RuntimeException('فرمان بدون تغییر وضعیت نباید وضعیت مقصد متفاوت داشته باشد.');
                 }
                 return;
