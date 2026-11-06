@@ -63,9 +63,9 @@ $h1 = $r1['html'];
 $check('۱-الف: بوت‌استرپ یک‌بار تزریق شد', $count($h1, 'FOOD_TICKET_HOST_BOOT') === 1, 'count=' . $count($h1, 'FOOD_TICKET_HOST_BOOT'));
 $check('۱-الف۲: انتساب window.FOOD_TICKET_API_BASE= یک‌بار', $count($h1, 'window.FOOD_TICKET_API_BASE=') === 1, 'count=' . $count($h1, 'window.FOOD_TICKET_API_BASE='));
 $check('۱-ب: مسیر از لنگر food-brand.js انجام شد', in_array('bootstrap:brand', $r1['notes'], true), implode(',', $r1['notes']));
-$check('۱-پ: food-designer.js به پوشهٔ پنل اشاره می‌کند', strpos($h1, 'src="food-ticket-web/assets/food-designer.js?v=9"') !== false);
+$check('۱-پ: food-designer.js به پوشهٔ پنل اشاره می‌کند', strpos($h1, 'src="food-ticket-web/assets/food-designer.js') !== false);
 $check('۱-ت: مسیر قدیمی assets/food-designer.js باقی نمانده', strpos($h1, 'src="assets/food-designer.js') === false);
-$check('۱-ث: دارایی‌های برنامه غذایی هم به پوشهٔ پنل بازنویسی شدند', strpos($h1, 'href="food-ticket-web/assets/food-menu.css?v=29"') !== false && strpos($h1, 'src="food-ticket-web/assets/food-menu.js?v=24"') !== false, implode(',', $r1['notes']));
+$check('۱-ث: دارایی‌های برنامه غذایی هم به پوشهٔ پنل بازنویسی شدند', strpos($h1, 'href="food-ticket-web/assets/food-menu.css') !== false && strpos($h1, 'src="food-ticket-web/assets/food-menu.js') !== false, implode(',', $r1['notes']));
 $check('۱-ج: استایل سامانه (style.css) پیش از استایل پنل', ($p1 = strpos($h1, 'assets/style.css?v=3')) !== false && ($p2 = strpos($h1, 'food-ticket-web/assets/food-ticket-theme.css')) !== false && $p1 < $p2);
 preg_match_all('/<script\\b([^>]*)>/i', $h1, $scriptTags);
 $inlineScriptTags = array_values(array_filter($scriptTags[1] ?? [], static fn (string $attrs): bool => preg_match('/\\bsrc\\s*=/i', $attrs) !== 1));
@@ -106,7 +106,7 @@ $check('۲-پ: استایل تازهٔ پنل هم بازنویسی شد', strpo
 $check('۲-ت: هیچ ارجاع assets/ پنل دست‌نخورده نمانده', strpos($h2, 'src="assets/food-designer') === false && strpos($h2, 'src="assets/food-groups.js') === false);
 
 // ── ۳) نسخه‌ای که لنگر brand را ندارد (نام برند عوض شده) ──
-$noBrand = str_replace('<script src="assets/food-brand.js?v=2"></script>', '<script src="assets/ft-panel-boot.js?v=1"></script>', $current);
+$noBrand = (string) preg_replace('#<script\\b[^>]*\\bsrc="[^\"]*food-brand\\.js[^\"]*"[^>]*>\\s*</script>#i', '<script src="assets/ft-panel-boot.js?v=1"></script>', $current, 1);
 $r3 = $host($noBrand);
 $check('۳-الف: بوت‌استرپ از مسیر جایگزین (head) تزریق شد', in_array('bootstrap:head', $r3['notes'], true), implode(',', $r3['notes']));
 $check('۳-ب: بوت‌استرپ یک‌بار و پیش از food-brand باقی‌مانده‌ها', $count($r3['html'], 'FOOD_TICKET_HOST_BOOT') === 1);
