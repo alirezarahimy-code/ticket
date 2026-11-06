@@ -16,7 +16,14 @@ if (!extension_loaded('pdo_mysql')) {
 }
 
 $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_EMULATE_PREPARES => false]);
-$pdo->exec('DROP TABLE IF EXISTS log_issue_notifications, log_issue_history, log_issue_events, logging_health_alerts, log_issues, notifications, ticket_events, tickets, activity_logs, system_logs');
+$pdo->exec('DROP TABLE IF EXISTS schema_updates, log_issue_notifications, log_issue_history, log_issue_events, logging_health_alerts, log_issues, notifications, ticket_events, tickets, activity_logs, system_logs');
+$pdo->exec("CREATE TABLE schema_updates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    version VARCHAR(32) NOT NULL,
+    migration VARCHAR(190) NOT NULL,
+    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_schema_update (version, migration)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 $pdo->exec("CREATE TABLE system_logs (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, event_id CHAR(36) NULL UNIQUE, request_id CHAR(36) NULL, trace_id CHAR(36) NULL, operation_id CHAR(36) NULL, parent_event_id CHAR(36) NULL,
     code VARCHAR(40) NULL, category VARCHAR(24) NOT NULL DEFAULT 'system', fingerprint CHAR(64) NULL,
@@ -140,6 +147,25 @@ foreach (split_sql_statements((string) $migration025) as $statement) {
 }
 
 $checks = [];
+
+// Migration 032 must not pre-register itself: the updater records the current
+// migration after its SQL completes. A self-insert would make that final INSERT
+// fail on uq_schema_update(version, migration) and abort the package update.
+$baselineSql = file_get_contents(dirname(__DIR__) . '/migrations/032-schema-updates-baseline.sql');
+if (!is_string($baselineSql)) throw new RuntimeException('Migration 032 could not be read.');
+foreach (split_sql_statements($baselineSql) as $statement) {
+    $statement = preg_replace('/^\\s*--.*$/m', '', trim($statement));
+    if ($statement !== '') execute_migration_statement($pdo, $statement);
+}
+$updaterRegistryInsertSucceeded = true;
+try {
+    $pdo->prepare('INSERT INTO schema_updates (version, migration) VALUES (?, ?)')
+        ->execute(['1.62.83', '032-schema-updates-baseline.sql']);
+} catch (PDOException) {
+    $updaterRegistryInsertSucceeded = false;
+}
+$checks['migration 032 leaves its own registry row for the updater'] = $updaterRegistryInsertSucceeded
+    && (int) $pdo->query("SELECT COUNT(*) FROM schema_updates WHERE version='1.62.83' AND migration='032-schema-updates-baseline.sql'")->fetchColumn() === 1;
 $event = ['event_id'=>logging_uuid(),'code'=>'SYS-DB-001','category'=>'system','level'=>'error','context'=>'integration-test','message'=>'database integration failure','meta'=>[]];
 $checks['system log inserts and creates one aggregated issue'] = logging_store_system($event)
     && (int) $pdo->query('SELECT COUNT(*) FROM system_logs')->fetchColumn() === 1
@@ -247,7 +273,7 @@ foreach ($checks as $name=>$passed) {
     echo ($passed ? '[PASS] ' : '[FAIL] ') . $name . PHP_EOL;
     if (!$passed) $failed[] = $name;
 }
-$pdo->exec('DROP TABLE IF EXISTS log_issue_notifications, log_issue_history, log_issue_events, logging_health_alerts, log_issues, notifications, ticket_events, tickets, activity_logs, system_logs');
+$pdo->exec('DROP TABLE IF EXISTS schema_updates, log_issue_notifications, log_issue_history, log_issue_events, logging_health_alerts, log_issues, notifications, ticket_events, tickets, activity_logs, system_logs');
 $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
 foreach ($iterator as $item) $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
 @rmdir($root);
