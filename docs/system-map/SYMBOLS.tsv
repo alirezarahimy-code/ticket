@@ -2137,10 +2137,11 @@ logging_dashboard_svg_trend	function	logging-dashboard.php	94	core
 logging_dashboard_render	function	logging-dashboard.php	111	core
 RequestCenterRepository	class	modules/request-center/RequestCenterRepository.php	11	other
 __construct	function	modules/request-center/RequestCenterRepository.php	13	other
-listVisible	function	modules/request-center/RequestCenterRepository.php	18	other
-findVisible	function	modules/request-center/RequestCenterRepository.php	48	other
-messages	function	modules/request-center/RequestCenterRepository.php	79	other
-attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	98	other
+schemaProblems	function	modules/request-center/RequestCenterRepository.php	23	other
+listVisible	function	modules/request-center/RequestCenterRepository.php	72	other
+findVisible	function	modules/request-center/RequestCenterRepository.php	102	other
+messages	function	modules/request-center/RequestCenterRepository.php	133	other
+attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	152	other
 ola_post	function	ola.php	5	core
 ola_header	function	ola.php	10	core
 ola_footer	function	ola.php	23	core

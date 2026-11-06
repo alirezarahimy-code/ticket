@@ -52313,8 +52313,8 @@
             "id": "PAGE-039",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
-            "lines": 124,
-            "file_fingerprint": "fc248bc67bcb",
+            "lines": 178,
+            "file_fingerprint": "50392db1992c",
             "blocks": [
                 {
                     "kind": "region",
@@ -52333,13 +52333,14 @@
                     "kind": "class",
                     "anchor": "RequestCenterRepository",
                     "line_start": 4,
-                    "line_end": 123,
-                    "lines": 120,
-                    "fingerprint": "8c251ecb3c82",
+                    "line_end": 177,
+                    "lines": 174,
+                    "fingerprint": "cc1bd9012a52",
                     "risk": {
-                        "score": 5,
+                        "score": 6,
                         "flags": {
-                            "sql_concat": 5
+                            "sql_concat": 5,
+                            "long": 1
                         }
                     },
                     "id": "PAGE-039.02"
@@ -53947,16 +53948,16 @@
             "id": "PAGE-044",
             "path": "request-center.php",
             "area": "PAGE",
-            "lines": 147,
-            "file_fingerprint": "23b11fd96898",
+            "lines": 161,
+            "file_fingerprint": "b4ce69e4b4a3",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-147",
+                    "anchor": "بلوک رویه‌ای 1-161",
                     "line_start": 1,
-                    "line_end": 147,
-                    "lines": 147,
-                    "fingerprint": "23b11fd96898",
+                    "line_end": 161,
+                    "lines": 161,
+                    "fingerprint": "b4ce69e4b4a3",
                     "risk": {
                         "score": 4,
                         "flags": {
