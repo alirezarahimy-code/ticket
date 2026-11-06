@@ -32,4 +32,4 @@ INSERT IGNORE INTO schema_updates (version, migration) VALUES
 ('1.62.83', '029-activity-result-default-unknown.sql'),
 ('1.62.83', '030-logging-notification-idempotency-and-ticket-history.sql'),
 ('1.62.83', '031-food-worker-window.sql'),
-('1.62.83', '032-schema-updates-baseline.sql');
+('1.62.83', '031-food-worker-window.sql');
