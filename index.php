@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/modules/request-center/WorkflowService.php';
 require_once __DIR__ . '/user-access-groups.php';
 require_once __DIR__ . '/xlsx-writer.php';
 if (is_file(__DIR__ . '/admin-layout-design.php')) {
@@ -531,24 +532,9 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
  */
 function ticket_allowed_transitions(string $from): array
 {
-    $map = [
-        'new' => ['manager_review', 'assigned', 'in_progress'],
-        'manager_review' => ['assigned', 'in_progress'],
-        'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review'],
-        'in_progress' => ['waiting_user', 'resolved', 'assigned', 'manager_review'],
-        'waiting_user' => ['in_progress', 'resolved', 'assigned', 'manager_review'],
-        // pending یک وضعیت «میراثی» از نسخه‌های قدیمی است: عمداً هیچ وضعیتی آن را
-        // به‌عنوان مقصد ندارد، پس هیچ درخواست تازه‌ای به آن نمی‌رسد. ولی سطر زیر
-        // حذف نمی‌شود، چون اگر در دیتابیسی ردیفی با همین وضعیت مانده باشد بدون
-        // مسیر خروج برای همیشه قفل می‌شود. قاعده: ورود ممنوع، خروج همیشه باز.
-        'pending' => ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
-        'resolved' => ['in_progress', 'assigned'],
-        'closed' => [],
-        'cancelled' => [],
-    ];
-    return $map[$from] ?? [];
+    // pending یک وضعیت میراثی است؛ سیاست متمرکز در WorkflowService نگهداری می‌شود.
+    return RequestCenterWorkflowService::allowedTransitions($from);
 }
-
 function ticket_requester_cancelable_statuses(): array
 {
     // درخواست حل‌شده هم تا پیش از بسته‌شدن نهایی، با تأیید مسئول قابل لغو است.
