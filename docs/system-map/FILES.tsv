@@ -75,7 +75,7 @@ path	category	lines	bytes
 00_PLAN_PERMISSIONS_FA.txt	root-misc	187	13518
 00_PLAN_ROLE_DELEGATION_FA.txt	root-misc	33	2622
 00_WORKER_RUNBOOK_FA.txt	root-misc	33	2858
-AGENTS.md	root-misc	165	12141
+AGENTS.md	root-misc	104	9334
 ARCHITECTURE.md	root-misc	237	18661
 CHANGE-REPORT-FA-1.62.68.md	root-misc	17	4096
 CHANGE-REPORT-FA-1.62.69.md	root-misc	19	4569
@@ -239,6 +239,7 @@ docs/TEST-REPORT-1.62.76-FA.md	docs	30	2546
 docs/TEST_COVERAGE_MATRIX_FA.md	docs	50	8233
 docs/USER-ACCESS-GROUPS-FA.md	docs	43	3988
 docs/aggregate-report-preview.html	docs	85	7297
+docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	346	27556
 domain-scan.php	core	1280	68450
 download-r34/index.html	other	21	1739
 downloads/CHANGE-REPORT-FA-1.62.43.md	history-downloads	16	1879
