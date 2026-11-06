@@ -8,6 +8,7 @@ bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
     "bootstrap.php", "lib/tickets-sla.php", "lib/db-core.php", "lib/auth-scope.php"
 ))
 permissions = (ROOT / "permissions.php").read_text(encoding="utf-8")
+workflow_service = (ROOT / "modules/request-center/WorkflowService.php").read_text(encoding="utf-8")
 cron = (ROOT / "cron/sla_maintenance.php").read_text(encoding="utf-8")
 auto_close = (ROOT / "cron/ticket_auto_close.php").read_text(encoding="utf-8")
 chatbot = (ROOT / "chatbot.php").read_text(encoding="utf-8")
@@ -58,7 +59,7 @@ check("status NOT IN (\"resolved\", \"closed\", \"cancelled\")" in cron
 check("ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?" in index
       and "ticket_ola_transition($ticket, $newStatus" in index,
       "reply transitions persist OLA deadlines after resuming from waiting_user")
-check("'cancelled' => []" in index and "'cancelled' => 'لغوشده به درخواست ثبت‌کننده'" in bootstrap,
+check("'cancelled' => []" in workflow_service and "'cancelled' => 'لغوشده به درخواست ثبت‌کننده'" in bootstrap,
       "cancelled is a terminal, human-readable ticket status")
 check("$ownerCondition = $serviceGroup === 'it'" in index
       and "AND hu.code = ?" in index
