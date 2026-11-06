@@ -13,7 +13,7 @@ SET @logging_context_ddl = IF(@logging_context_exists = 0, 'ALTER TABLE log_issu
 PREPARE logging_context_stmt FROM @logging_context_ddl; EXECUTE logging_context_stmt; DEALLOCATE PREPARE logging_context_stmt;
 
 UPDATE log_issues i
-JOIN system_logs s ON s.event_id = i.last_event_id
+JOIN system_logs s ON BINARY s.event_id = BINARY i.last_event_id
 SET i.context = s.context
 WHERE i.context = 'system';
 

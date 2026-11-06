@@ -1573,3 +1573,40 @@ CREATE TABLE IF NOT EXISTS schema_updates (
     applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE KEY uq_schema_update (version, migration)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- نصب تازه از اسکیما‌ی تجمیعی ساخته می‌شود؛ مهاجرت‌های تاریخی در همین اسکیما اعمال شده‌اند.
+-- ثبت baseline مانع گزارش کاذب «مهاجرت اجرا نشده» روی نصب تازه می‌شود.
+INSERT IGNORE INTO schema_updates (version, migration) VALUES
+    ('1.62.83', '001-local-accounts.sql'),
+    ('1.62.83', '002-traffic-notices.sql'),
+    ('1.62.83', '003-sync-schema-151.sql'),
+    ('1.62.83', '004-ticket-cancellation.sql'),
+    ('1.62.83', '005-normalize-pending-status.sql'),
+    ('1.62.83', '006-food-meal-type.sql'),
+    ('1.62.83', '007-traffic-visit-history.sql'),
+    ('1.62.83', '008-traffic-destination-approver.sql'),
+    ('1.62.83', '009-traffic-destination-multi-approver.sql'),
+    ('1.62.83', '010-org-liaison-units.sql'),
+    ('1.62.83', '011-manual-attendance-delivery.sql'),
+    ('1.62.83', '012-manual-attendance-clears-absences.sql'),
+    ('1.62.83', '013-manual-attendance-record-backfill.sql'),
+    ('1.62.83', '014-asset-identity-dedupe.sql'),
+    ('1.62.83', '015-asset-identity-hotfix.sql'),
+    ('1.62.83', '016-auto-asset-finish.sql'),
+    ('1.62.83', '017-org-tree-order.sql'),
+    ('1.62.83', '018-org-company-separation.sql'),
+    ('1.62.83', '019-traffic-destination-link.sql'),
+    ('1.62.83', '020-traffic-destination-upgrade.sql'),
+    ('1.62.83', '021-food-auto-receipts.sql'),
+    ('1.62.83', '022-food-meal-reconciliation-invoices.sql'),
+    ('1.62.83', '023-user-access-groups.sql'),
+    ('1.62.83', '024-central-logging.sql'),
+    ('1.62.83', '025-logging-issues-alerts.sql'),
+    ('1.62.83', '026-logging-legacy-result-unknown.sql'),
+    ('1.62.83', '027-logging-correlation-ids.sql'),
+    ('1.62.83', '028-logging-fingerprint-v2.sql'),
+    ('1.62.83', '029-activity-result-default-unknown.sql'),
+    ('1.62.83', '030-logging-notification-idempotency-and-ticket-history.sql'),
+    ('1.62.83', '031-food-worker-window.sql'),
+    ('1.62.83', '032-schema-updates-baseline.sql');
+

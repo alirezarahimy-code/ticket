@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 require_once __DIR__ . '/traffic-import.php';
 
 // کنترل تردد مراجعین و میهمانان — پورت‌شده از کنترل_تردد.xlsm
@@ -470,11 +472,19 @@ function traffic_create_record(array $user): int
     $destinationId = traffic_destination_id((string) $payload['meeting_with']);
     if ($payload['meeting_with'] !== null && $destinationId === null) throw new TrafficInputException('مقصد تغییر کرده است؛ دوباره انتخاب کنید.', 'meeting_with');
     $serial = traffic_next_serial();
-    $stmt = db()->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, phone, company, entry_time, exit_time, no_visit, with_car, with_mobile, meeting_with, destination_id, approved_by, description, created_by) VALUES (?, CURDATE(), ?, ?, ?, ?, CURTIME(), NULL, ?, ?, ?, ?, ?, ?, ?, ?)');
-    $stmt->execute([$serial, $payload['full_name'], $payload['national_code'], $payload['phone'], $payload['company'], $payload['no_visit'], $payload['with_car'], $payload['with_mobile'], $payload['meeting_with'], $destinationId, $payload['approved_by'], $payload['description'], (int) $user['id']]);
-    $id = (int) db()->lastInsertId();
-    save_audit((int) $user['id'], 'traffic_visit_created', null, ['visit_id' => $id, 'serial' => $serial]);
-    return $id;
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, phone, company, entry_time, exit_time, no_visit, with_car, with_mobile, meeting_with, destination_id, approved_by, description, created_by) VALUES (?, CURDATE(), ?, ?, ?, ?, CURTIME(), NULL, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$serial, $payload['full_name'], $payload['national_code'], $payload['phone'], $payload['company'], $payload['no_visit'], $payload['with_car'], $payload['with_mobile'], $payload['meeting_with'], $destinationId, $payload['approved_by'], $payload['description'], (int) $user['id']]);
+        $id = (int) $pdo->lastInsertId();
+        save_audit_required((int) $user['id'], 'traffic_visit_created', null, ['visit_id' => $id, 'serial' => $serial]);
+        $pdo->commit();
+        return $id;
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $exception;
+    }
 }
 
 function traffic_update_record(array $user): void
@@ -523,6 +533,7 @@ function traffic_update_record(array $user): void
             throw new RuntimeException('رکورد تردد پس از ذخیره پیدا نشد.');
         }
         traffic_record_history($record, $updated, $user, 'updated');
+        save_audit_required((int) $user['id'], 'traffic_visit_updated', null, ['visit_id' => $id]);
         $pdo->commit();
     } catch (Throwable $exception) {
         if ($pdo->inTransaction()) {
@@ -530,7 +541,6 @@ function traffic_update_record(array $user): void
         }
         throw $exception;
     }
-    save_audit((int) $user['id'], 'traffic_visit_updated', null, ['visit_id' => $id]);
 }
 
 function traffic_delete_record(array $user): void
@@ -548,6 +558,7 @@ function traffic_delete_record(array $user): void
     try {
         traffic_record_history($record, null, $user, 'deleted');
         $pdo->prepare('DELETE FROM traffic_visits WHERE id = ?')->execute([$id]);
+        save_audit_required((int) $user['id'], 'traffic_visit_deleted', null, ['visit_id' => $id]);
         $pdo->commit();
     } catch (Throwable $exception) {
         if ($pdo->inTransaction()) {
@@ -555,7 +566,6 @@ function traffic_delete_record(array $user): void
         }
         throw $exception;
     }
-    save_audit((int) $user['id'], 'traffic_visit_deleted', null, ['visit_id' => $id]);
 }
 
 function traffic_set_exit(array $user): void
@@ -599,6 +609,7 @@ function traffic_set_exit(array $user): void
             throw new RuntimeException('رکورد تردد پس از ثبت خروج پیدا نشد.');
         }
         traffic_record_history($record, $updated, $user, 'exit_set');
+        save_audit_required((int) $user['id'], 'traffic_visit_exit_set', null, ['visit_id' => $id]);
         $pdo->commit();
     } catch (Throwable $exception) {
         if ($pdo->inTransaction()) {
@@ -606,7 +617,6 @@ function traffic_set_exit(array $user): void
         }
         throw $exception;
     }
-    save_audit((int) $user['id'], 'traffic_visit_exit_set', null, ['visit_id' => $id]);
 }
 
 /** خودترمیمی ستون‌های تردد خاص: اگر مهاجرت اجرا نشده باشد، همین‌جا اضافه/اصلاح می‌شود (یک‌بار در هر درخواست). */
@@ -655,11 +665,19 @@ function traffic_notice_create(array $user): int
     $destinationId = traffic_destination_id($meeting);
     if ($destinationId === null) throw new TrafficInputException('مقصد تغییر کرده است؛ دوباره انتخاب کنید.', 'meeting_with');
     $serial = traffic_next_serial();
-    $stmt = db()->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, entry_time, exit_time, no_visit, with_car, with_mobile, is_notice, meeting_with, destination_id, approved_by, created_by) VALUES (?, CURDATE(), ?, NULL, CURTIME(), NULL, 0, 0, 0, 1, ?, ?, ?, ?)');
-    $stmt->execute([$serial, $name, $meeting, $destinationId, $approver, (int) $user['id']]);
-    $id = (int) db()->lastInsertId();
-    save_audit((int) $user['id'], 'traffic_notice_created', null, ['visit_id' => $id, 'serial' => $serial]);
-    return $id;
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare('INSERT INTO traffic_visits (serial_no, visit_date, full_name, national_code, entry_time, exit_time, no_visit, with_car, with_mobile, is_notice, meeting_with, destination_id, approved_by, created_by) VALUES (?, CURDATE(), ?, NULL, CURTIME(), NULL, 0, 0, 0, 1, ?, ?, ?, ?)');
+        $stmt->execute([$serial, $name, $meeting, $destinationId, $approver, (int) $user['id']]);
+        $id = (int) $pdo->lastInsertId();
+        save_audit_required((int) $user['id'], 'traffic_notice_created', null, ['visit_id' => $id, 'serial' => $serial]);
+        $pdo->commit();
+        return $id;
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $exception;
+    }
 }
 
 /** تأییدکننده‌های POST فرم مقصد: اولی اجباری، دومی و سومی اختیاری؛ تکراری‌ها حذف و فاصله‌ها فشرده می‌شوند. */

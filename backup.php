@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+defined('APP_ROOT') || exit;
+
 function backup_root_path(): string
 {
     $configured = trim((string) (getenv('ITSM_BACKUP_PATH') ?: ''));
@@ -76,7 +78,7 @@ function backup_run_process(string $binary, array $arguments, ?string $inputPath
 function backup_uploads(string $destination): int
 {
     if (!class_exists('ZipArchive')) {
-        return 0;
+        throw new RuntimeException('افزونه ZipArchive برای پشتیبان‌گیری از پیوست‌ها لازم است.');
     }
     $uploadsRoot = APP_ROOT . '/storage/uploads';
     $archive = new ZipArchive();
@@ -84,21 +86,44 @@ function backup_uploads(string $destination): int
         throw new RuntimeException('ساخت آرشیو پیوست‌ها انجام نشد.');
     }
     $count = 0;
-    if (is_dir($uploadsRoot)) {
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($uploadsRoot, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::LEAVES_ONLY);
-        foreach ($iterator as $file) {
-            if (!$file->isFile()) {
-                continue;
-            }
-            $relative = ltrim(str_replace(DIRECTORY_SEPARATOR, '/', substr($file->getPathname(), strlen($uploadsRoot))), '/');
-            $archive->addFile($file->getPathname(), 'uploads/' . $relative);
-            $count++;
+    try {
+        $uploadsRootReal = is_dir($uploadsRoot) ? realpath($uploadsRoot) : false;
+        if (is_dir($uploadsRoot) && !is_string($uploadsRootReal)) {
+            throw new RuntimeException('مسیر واقعی پوشهٔ پیوست‌ها قابل تشخیص نیست.');
         }
+        if (is_string($uploadsRootReal)) {
+            $prefix = rtrim($uploadsRootReal, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($uploadsRootReal, FilesystemIterator::SKIP_DOTS),
+                RecursiveIteratorIterator::LEAVES_ONLY
+            );
+            foreach ($iterator as $file) {
+                if ($file->isLink()) {
+                    throw new RuntimeException('لینک نمادین در پوشهٔ پیوست‌ها وجود دارد؛ پشتیبان‌گیری برای جلوگیری از خروج از مسیر متوقف شد.');
+                }
+                if (!$file->isFile()) {
+                    continue;
+                }
+                $realFile = realpath($file->getPathname());
+                if (!is_string($realFile) || !str_starts_with($realFile, $prefix)) {
+                    throw new RuntimeException('فایل پیوست خارج از پوشهٔ مجاز قرار دارد.');
+                }
+                $relative = ltrim(str_replace(DIRECTORY_SEPARATOR, '/', substr($realFile, strlen($uploadsRootReal))), '/');
+                if (!$archive->addFile($realFile, 'uploads/' . $relative)) {
+                    throw new RuntimeException('افزودن یکی از پیوست‌ها به آرشیو انجام نشد: ' . $relative);
+                }
+                $count++;
+            }
+        }
+        if (!$archive->close()) {
+            throw new RuntimeException('بستن آرشیو پیوست‌ها ناموفق بود.');
+        }
+        return $count;
+    } catch (Throwable $exception) {
+        $archive->close();
+        throw $exception;
     }
-    $archive->close();
-    return $count;
 }
-
 
 /** ۱.۶۲.۴۱ — ZIP کردن فایلهای پوشهٔ سامانه (بدون دیتابیس، uploads، storage). */
 function backup_system_files_zip(string $destination): array
@@ -107,6 +132,10 @@ function backup_system_files_zip(string $destination): array
         return ['ok' => false, 'error' => 'ZipArchive در PHP فعال نیست.'];
     }
     $root = APP_ROOT;
+    $rootReal = realpath($root);
+    if (!is_string($rootReal)) {
+        return ['ok' => false, 'error' => 'مسیر واقعی ریشهٔ سامانه قابل تشخیص نیست.'];
+    }
     $skip = ['storage','uploads','downloads','.git','node_modules','vendor','.cache','preview','updates','temp','tmp'];
     $zipPath = $destination . DIRECTORY_SEPARATOR . 'system-files.zip';
     $zip = new ZipArchive();
@@ -114,23 +143,43 @@ function backup_system_files_zip(string $destination): array
         return ['ok' => false, 'error' => 'ساخت ZIP فایلها ممکن نیست.'];
     }
     $count = 0; $bytes = 0;
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::SELF_FIRST
-    );
-    foreach ($iterator as $item) {
-        $relative = str_replace('\\', '/', substr($item->getPathname(), strlen($root) + 1));
-        $top = explode('/', $relative)[0];
-        if (in_array($top, $skip, true) || $item->isDir()) { continue; }
-        if ($item->getSize() > 25 * 1024 * 1024) { continue; }
-        if (!$zip->addFile($item->getPathname(), $relative)) { continue; }
-        $count++; $bytes += $item->getSize();
+    try {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($rootReal, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($iterator as $item) {
+            $relative = str_replace('\\', '/', substr($item->getPathname(), strlen($rootReal) + 1));
+            $top = explode('/', $relative)[0];
+            if (in_array($top, $skip, true) || $item->isDir()) {
+                continue;
+            }
+            if ($item->isLink()) {
+                throw new RuntimeException('لینک نمادین در فایل‌های سامانه پیدا شد؛ برای جلوگیری از افزودن فایل خارج از ریشه، پشتیبان‌گیری متوقف شد: ' . $relative);
+            }
+            $realFile = realpath($item->getPathname());
+            if (!is_string($realFile) || !str_starts_with($realFile, rtrim($rootReal, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)) {
+                throw new RuntimeException('فایل خارج از ریشهٔ سامانه پیدا شد: ' . $relative);
+            }
+            if (!$zip->addFile($realFile, $relative)) {
+                throw new RuntimeException('افزودن فایل سامانه به آرشیو انجام نشد: ' . $relative);
+            }
+            $count++;
+            $bytes += $item->getSize();
+        }
+        $info = "بکاپ فایلهای سامانه\nتاریخ: " . date('Y-m-d H:i:s') . "\nتعداد فایلها: {$count}\n"
+            . "برای برگردانی: extract کنید و روی پوشهٔ اصلی سامانه کپی کنید.\n";
+        if (!$zip->addFromString('BACKUP-INFO.txt', $info)) {
+            throw new RuntimeException('افزودن راهنمای پشتیبان به آرشیو انجام نشد.');
+        }
+        if (!$zip->close()) {
+            throw new RuntimeException('بستن آرشیو فایل‌های سامانه ناموفق بود.');
+        }
+        return ['ok' => true, 'file' => 'system-files.zip', 'files' => $count, 'bytes' => $bytes];
+    } catch (Throwable $exception) {
+        $zip->close();
+        return ['ok' => false, 'error' => $exception->getMessage()];
     }
-    $zip->addFromString('BACKUP-INFO.txt',
-        "بکاپ فایلهای سامانه\nتاریخ: " . date('Y-m-d H:i:s') . "\nتعداد فایلها: {$count}\n"
-        . "برای برگردانی: extract کنید و روی پوشهٔ اصلی سامانه کپی کنید.\n");
-    $zip->close();
-    return ['ok' => true, 'file' => 'system-files.zip', 'files' => $count, 'bytes' => $bytes];
 }
 
 function create_backup_bundle(): array
@@ -160,6 +209,9 @@ function create_backup_bundle(): array
     $uploadCount = backup_uploads($destination);
     // ۱.۶۲.۴۱ — بکاپ کامل فایلهای سامانه (جدا از دیتابیس)، قبل از هر بهروزرسانی.
     $filesBackup = backup_system_files_zip($destination);
+    if (empty($filesBackup['ok'])) {
+        throw new RuntimeException('پشتیبان فایل‌های سامانه کامل نشد: ' . (string) ($filesBackup['error'] ?? 'خطای نامشخص'));
+    }
     file_put_contents($destination . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
         'created_at' => date('c'),
         'database' => $dbName,
@@ -211,6 +263,93 @@ function backup_download_path(string $relative): ?string
     return $path && $root && str_starts_with($path, $prefix) && is_file($path) ? $path : null;
 }
 
+function backup_upload_archive_entry(string $name): ?array
+{
+    if ($name === '' || str_contains($name, "\0") || str_contains($name, '\\')
+        || str_starts_with($name, '/') || preg_match('/^[A-Za-z]:/', $name)) {
+        return null;
+    }
+    $directory = str_ends_with($name, '/');
+    $normalized = strncasecmp($name, 'uploads/', 8) === 0 ? substr($name, 8) : $name;
+    $relative = $directory && str_ends_with($normalized, '/') ? substr($normalized, 0, -1) : $normalized;
+    if ($relative === '') {
+        return $directory ? ['relative' => '', 'directory' => true] : null;
+    }
+    if (str_contains($relative, '//')) {
+        return null;
+    }
+    foreach (explode('/', $relative) as $segment) {
+        if ($segment === '' || $segment === '.' || $segment === '..'
+            || preg_match('/[<>:"|?*\\x00-\\x1F]/', $segment)
+            || preg_match('/[. ]$/', $segment)
+            || preg_match('/^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\\..*)?$/i', $segment)) {
+            return null;
+        }
+    }
+    return ['relative' => $relative, 'directory' => $directory];
+}
+
+/** Validate every entry before writing any restored upload. */
+function backup_validate_upload_archive(ZipArchive $archive): array
+{
+    if ($archive->numFiles > 10000) {
+        throw new RuntimeException('تعداد فایل‌های آرشیو پیوست از سقف مجاز بیشتر است.');
+    }
+    $maxEntry = max(1, (int) (getenv('ITSM_MAX_RESTORE_ENTRY_MB') ?: 256)) * 1024 * 1024;
+    $maxTotal = max(1, (int) (getenv('ITSM_MAX_RESTORE_UNPACKED_MB') ?: 1024)) * 1024 * 1024;
+    $entries = [];
+    $seen = [];
+    $total = 0;
+    for ($index = 0; $index < $archive->numFiles; $index++) {
+        $name = (string) $archive->getNameIndex($index);
+        $entry = backup_upload_archive_entry($name);
+        if ($entry === null) {
+            throw new RuntimeException('مسیر نامعتبر در آرشیو پیوست: ' . $name);
+        }
+        $relative = $entry['relative'];
+        if ($relative !== '') {
+            $key = strtolower(rtrim($relative, '/'));
+            if (isset($seen[$key])) {
+                throw new RuntimeException('نام تکراری یا ناسازگار با Windows در آرشیو پیوست: ' . $name);
+            }
+            $seen[$key] = ['directory' => $entry['directory']];
+        }
+        $stat = $archive->statIndex($index);
+        if (!is_array($stat)) {
+            throw new RuntimeException('اطلاعات ورودی آرشیو پیوست قابل خواندن نیست: ' . $name);
+        }
+        $size = max(0, (int) ($stat['size'] ?? 0));
+        if (!$entry['directory']) {
+            $total += $size;
+            if ($size > $maxEntry || $total > $maxTotal) {
+                throw new RuntimeException('حجم استخراج آرشیو پیوست از سقف مجاز بیشتر است.');
+            }
+        }
+        if (method_exists($archive, 'getExternalAttributesIndex')) {
+            $opsys = 0; $attributes = 0;
+            if ($archive->getExternalAttributesIndex($index, $opsys, $attributes)) {
+                $unixMode = ($attributes >> 16) & 0170000;
+                if ($opsys === ZipArchive::OPSYS_UNIX && $unixMode === 0120000) {
+                    throw new RuntimeException('لینک نمادین در آرشیو پیوست مجاز نیست: ' . $name);
+                }
+            }
+        }
+        $entries[] = ['index' => $index, 'relative' => $relative, 'directory' => $entry['directory'], 'size' => $size];
+    }
+    foreach (array_keys($seen) as $key) {
+        $parts = explode('/', $key);
+        array_pop($parts);
+        $parent = '';
+        foreach ($parts as $part) {
+            $parent = $parent === '' ? $part : $parent . '/' . $part;
+            if (isset($seen[$parent]) && !$seen[$parent]['directory']) {
+                throw new RuntimeException('تعارض فایل/پوشه در آرشیو پیوست: ' . $key);
+            }
+        }
+    }
+    return $entries;
+}
+
 function restore_upload_archive(array $file): int
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !class_exists('ZipArchive')) {
@@ -224,34 +363,60 @@ function restore_upload_archive(array $file): int
     if ($archive->open((string) $file['tmp_name']) !== true) {
         throw new RuntimeException('بازکردن آرشیو پیوست انجام نشد.');
     }
-    $uploadsRoot = APP_ROOT . '/storage/uploads';
-    if (!is_dir($uploadsRoot) && !mkdir($uploadsRoot, 0750, true) && !is_dir($uploadsRoot)) {
-        throw new RuntimeException('پوشه پیوست‌ها قابل ایجاد نیست.');
+    try {
+        $entries = backup_validate_upload_archive($archive);
+        $uploadsRoot = APP_ROOT . '/storage/uploads';
+        if (!is_dir($uploadsRoot) && !mkdir($uploadsRoot, 0750, true) && !is_dir($uploadsRoot)) {
+            throw new RuntimeException('پوشه پیوست‌ها قابل ایجاد نیست.');
+        }
+        $uploadsRootReal = realpath($uploadsRoot);
+        if (!is_string($uploadsRootReal)) {
+            throw new RuntimeException('مسیر واقعی پوشه پیوست‌ها قابل تشخیص نیست.');
+        }
+        $rootPrefix = rtrim($uploadsRootReal, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+        $count = 0;
+        foreach ($entries as $entry) {
+            if ($entry['directory'] || $entry['relative'] === '') {
+                continue;
+            }
+            $target = $uploadsRootReal . DIRECTORY_SEPARATOR
+                . str_replace('/', DIRECTORY_SEPARATOR, $entry['relative']);
+            $directory = dirname($target);
+            if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
+                throw new RuntimeException('ساخت مسیر پیوست انجام نشد.');
+            }
+            $directoryReal = realpath($directory);
+            if (!is_string($directoryReal)
+                || ($directoryReal !== $uploadsRootReal && !str_starts_with($directoryReal . DIRECTORY_SEPARATOR, $rootPrefix))) {
+                throw new RuntimeException('مسیر مقصد پیوست از پوشه مجاز خارج شده است.');
+            }
+            if (is_link($target) || (file_exists($target) && !is_file($target))) {
+                throw new RuntimeException('مقصد پیوست فایل عادی نیست: ' . $entry['relative']);
+            }
+            $input = $archive->getStreamIndex($entry['index']);
+            if (!is_resource($input)) {
+                throw new RuntimeException('خواندن یکی از پیوست‌ها انجام نشد.');
+            }
+            $output = @fopen($target, 'wb');
+            if (!is_resource($output)) {
+                fclose($input);
+                throw new RuntimeException('نوشتن یکی از پیوست‌ها انجام نشد.');
+            }
+            try {
+                $copied = stream_copy_to_stream($input, $output);
+                if (!is_int($copied) || $copied !== $entry['size']) {
+                    throw new RuntimeException('بازیابی کامل یکی از پیوست‌ها انجام نشد: ' . $entry['relative']);
+                }
+            } finally {
+                fclose($input);
+                fclose($output);
+            }
+            $count++;
+        }
+        return $count;
+    } finally {
+        $archive->close();
     }
-    $count = 0;
-    for ($index = 0; $index < $archive->numFiles; $index++) {
-        $name = str_replace('\\', '/', (string) $archive->getNameIndex($index));
-        $name = preg_replace('#^uploads/#', '', $name) ?? $name;
-        if ($name === '' || str_ends_with($name, '/') || str_starts_with($name, '/') || preg_match('#(^|/)\.\.(/|$)#', $name)) {
-            continue;
-        }
-        $target = $uploadsRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $name);
-        $directory = dirname($target);
-        if (!is_dir($directory) && !mkdir($directory, 0750, true) && !is_dir($directory)) {
-            throw new RuntimeException('ساخت مسیر پیوست انجام نشد.');
-        }
-        $input = $archive->getStream($index);
-        $output = fopen($target, 'wb');
-        if (!is_resource($input) || !is_resource($output)) {
-            throw new RuntimeException('بازیابی یکی از پیوست‌ها انجام نشد.');
-        }
-        stream_copy_to_stream($input, $output);
-        fclose($input);
-        fclose($output);
-        $count++;
-    }
-    $archive->close();
-    return $count;
 }
 
 function restore_sql_dump(array $file): void

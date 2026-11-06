@@ -67,6 +67,20 @@ try {
     & $powershell -NoProfile -ExecutionPolicy Bypass -File $verifier -ApplicationRoot $root -Strict -ScanFiles | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "ACL verifier did not accept the restored ACL (exit $LASTEXITCODE)." }
 
+    # Positive control: apply the restricted ACL on a clean tree and verify least privilege.
+    & $setter -ApplicationRoot $root -ServiceAccount 'S-1-5-20' -Apply
+    $appliedAcl = Get-Acl -LiteralPath $logs
+    $serviceAce = @($appliedAcl.Access | Where-Object {
+        $_.IdentityReference.Translate([System.Security.Principal.SecurityIdentifier]).Value -eq 'S-1-5-20'
+    })
+    if (-not $serviceAce.Count) { throw 'Set ACL did not add the service account ACE.' }
+    $modify = [System.Security.AccessControl.FileSystemRights]::Modify
+    $full = [System.Security.AccessControl.FileSystemRights]::FullControl
+    if (($serviceAce[0].FileSystemRights -band $modify) -ne $modify) { throw 'Service account ACE does not include Modify.' }
+    if (($serviceAce[0].FileSystemRights -band $full) -eq $full) { throw 'Service account was granted FullControl instead of Modify.' }
+    & $powershell -NoProfile -ExecutionPolicy Bypass -File $verifier -ApplicationRoot $root -Strict -ScanFiles | Out-Host
+    if ($LASTEXITCODE -ne 0) { throw "ACL verifier rejected the applied restricted ACL (exit $LASTEXITCODE)." }
+
     Write-Output 'PASS: Windows ACL verifier baseline, broad-ACE rejection, and restoration checks.'
 }
 finally {

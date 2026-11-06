@@ -11,11 +11,25 @@ if (!defined('APP_ROOT')) {
     exit;
 }
 
-function notify_user(int $userId, string $type, string $title, string $body, ?int $ticketId = null): void
+function notify_user(int $userId, string $type, string $title, string $body, ?int $ticketId = null, ?string $idempotencyKey = null): void
 {
     if ($userId <= 0) {
         return;
     }
+
+    if ($idempotencyKey !== null) {
+        $idempotencyKey = trim($idempotencyKey);
+        if (!preg_match('/^[a-f0-9]{64}$/i', $idempotencyKey)) {
+            throw new InvalidArgumentException('Notification idempotency key must be a SHA-256 hex digest.');
+        }
+        db()->prepare(
+            'INSERT INTO notifications (user_id, ticket_id, notification_type, title, body, idempotency_key)
+             VALUES (?, ?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)'
+        )->execute([$userId, $ticketId, $type, $title, $body, strtolower($idempotencyKey)]);
+        return;
+    }
+
     db()->prepare('INSERT INTO notifications (user_id, ticket_id, notification_type, title, body) VALUES (?, ?, ?, ?, ?)')->execute([$userId, $ticketId, $type, $title, $body]);
 }
 

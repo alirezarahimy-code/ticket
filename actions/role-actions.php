@@ -79,6 +79,11 @@ if (!defined('APP_ROOT')) {
                 if ($primaryCount < 1) {
                     throw new RuntimeException('حداقل یک ادمین اصلی باید باقی بماند.');
                 }
+                save_setting('role_supervisor_ids', implode(',', $supervisors));
+                save_setting('role_inspection_ids', implode(',', $inspectors));
+                save_setting('role_it_expert_ids', implode(',', $itExperts));
+                save_setting('cd_dvd_inspection_user_id', (string) ($inspectors[0] ?? 0));
+                save_audit_required((int) $rolesAdmin['id'], 'key_roles_updated', null, ['supervisors' => $supervisors, 'inspectors' => $inspectors, 'it_experts' => $itExperts]);
                 if (db()->inTransaction()) {
                     db_commit('index.php');
                 }
@@ -88,11 +93,6 @@ if (!defined('APP_ROOT')) {
                 }
                 throw $roleException;
             }
-            save_setting('role_supervisor_ids', implode(',', $supervisors));
-            save_setting('role_inspection_ids', implode(',', $inspectors));
-            save_setting('role_it_expert_ids', implode(',', $itExperts));
-            save_setting('cd_dvd_inspection_user_id', (string) ($inspectors[0] ?? 0));
-            save_audit((int) $rolesAdmin['id'], 'key_roles_updated', null, ['supervisors' => $supervisors, 'inspectors' => $inspectors, 'it_experts' => $itExperts]);
             flash('success', 'نقش‌های کلیدی ذخیره شد (سوپروایز: ' . count($supervisors) . '، بازرسی: ' . count($inspectors) . '، کارشناس IT: ' . count($itExperts) . ').');
             redirect('index.php?page=settings#key-roles');
         }
@@ -108,8 +108,15 @@ if (!defined('APP_ROOT')) {
             if (!is_array($codes)) {
                 $codes = [];
             }
-            role_permissions_save($targetRole, $codes);
-            save_audit((int) $permAdmin['id'], 'role_permissions_updated', null, ['role' => $targetRole, 'permissions' => array_values($codes)]);
+            db()->beginTransaction();
+            try {
+                role_permissions_save($targetRole, $codes);
+                save_audit_required((int) $permAdmin['id'], 'role_permissions_updated', null, ['role' => $targetRole, 'permissions' => array_values($codes)]);
+                db_commit('index.php');
+            } catch (Throwable $permissionError) {
+                if (db()->inTransaction()) db_rollback('index.php');
+                throw $permissionError;
+            }
             flash('success', 'دسترسی‌های نقش «' . permission_roles()[$targetRole] . '» ذخیره شد.');
             redirect('index.php?page=settings#roles');
         }
@@ -121,8 +128,15 @@ if (!defined('APP_ROOT')) {
                 flash('error', 'نقش نامعتبر است.');
                 redirect('index.php?page=settings#roles');
             }
-            role_permissions_reset($targetRole);
-            save_audit((int) $permAdmin['id'], 'reset_role_defaults', null, ['role' => $targetRole]);
+            db()->beginTransaction();
+            try {
+                role_permissions_reset($targetRole);
+                save_audit_required((int) $permAdmin['id'], 'reset_role_defaults', null, ['role' => $targetRole]);
+                db_commit('index.php');
+            } catch (Throwable $permissionError) {
+                if (db()->inTransaction()) db_rollback('index.php');
+                throw $permissionError;
+            }
             flash('success', 'دسترسی‌های نقش «' . permission_roles()[$targetRole] . '» به پیش‌فرض داخل کد برگشت.');
             redirect('index.php?page=settings#roles');
         }
@@ -131,10 +145,17 @@ if (!defined('APP_ROOT')) {
             $permAdmin = require_primary_admin();
             // ۱.۳۷.۷ — به‌جای ریختن دوبارهٔ پیش‌فرض‌ها در جدول (که نقش را «ویرایش‌شده» علامت می‌زد)،
             // همهٔ نقش‌ها به حالت «دست‌نخورده» برمی‌گردند تا از این پس پیش‌فرض‌های کد اعمال شوند.
-            foreach (array_keys(permission_roles()) as $resetRole) {
-                role_permissions_reset($resetRole);
+            db()->beginTransaction();
+            try {
+                foreach (array_keys(permission_roles()) as $resetRole) {
+                    role_permissions_reset($resetRole);
+                }
+                save_audit_required((int) $permAdmin['id'], 'role_permissions_reset', null, ['roles' => array_keys(permission_roles())]);
+                db_commit('index.php');
+            } catch (Throwable $permissionError) {
+                if (db()->inTransaction()) db_rollback('index.php');
+                throw $permissionError;
             }
-            save_audit((int) $permAdmin['id'], 'role_permissions_reset', null, ['roles' => array_keys(permission_roles())]);
             flash('success', 'همهٔ نقش‌ها به پیش‌فرض داخل کد بازگشتند.');
             redirect('index.php?page=settings#roles');
         }

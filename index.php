@@ -2180,6 +2180,7 @@ if ($page === 'new-ticket' && $user && !user_can($user, 'ticket.create')) {
     exit;
 }
 if ($page === 'new-ticket') {
+    $user = require_permission('ticket.create');
     $cdDvdRequestRecord = null;
     $subjectDefault = '';
     $descriptionDefault = '';

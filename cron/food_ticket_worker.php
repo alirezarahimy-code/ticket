@@ -107,6 +107,9 @@ $foodWorkerPendingPrints = static function (): int {
 };
 
 do {
+    if (function_exists('logging_begin_execution')) {
+        logging_begin_execution('worker:food-ticket:cycle');
+    }
     $cycle = ['processed' => 0, 'printed' => 0, 'errors' => 0, 'message' => ''];
     $autoReceiptCycle = null;
     try {
@@ -262,6 +265,9 @@ do {
             $lastPrintedAt = time();
         }
     } catch (Throwable $fatal) {
+        if (function_exists('system_log')) {
+            try { system_log('error', 'food-ticket-worker', $fatal->getMessage(), ['exception' => get_class($fatal)]); } catch (Throwable) {}
+        }
         fwrite(STDERR, '[cycle] ' . $fatal->getMessage() . PHP_EOL);
         try {
             food_ticket_worker_heartbeat([], $fatal);
