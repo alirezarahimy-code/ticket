@@ -23,7 +23,7 @@ class FoodGuestRequestManagerActionTests(unittest.TestCase):
         self.assertIn("food_order_audit('food_guest_request_update'", self.order)
         self.assertIn("food_order_audit('food_guest_request_delete'", self.order)
         self.assertIn("food_order_audit('food_guest_request_cancel'", self.order)
-        self.assertIn("UPDATE food_guest_requests SET request_date = ?, organization = ?, guest_count = ?, requester_name = ?, note = ?", self.order)
+        self.assertIn("UPDATE food_guest_requests SET request_date = ?, meal_type = ?, organization = ?, guest_count = ?, requester_name = ?, note = ?", self.order)
         self.assertIn("DELETE FROM food_guest_requests WHERE id = ?", self.order)
 
     def test_ui_renders_authorized_edit_cancel_delete_actions(self):

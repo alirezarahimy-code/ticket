@@ -99,6 +99,18 @@ def hidden_value(html: str, name: str) -> str:
     return match.group(1) if match else ''
 
 
+def selected_option_value(html: str, name: str) -> str:
+    select = re.search(r'<select\b(?=[^>]*\bname=["\']' + re.escape(name) + r'["\'])[^>]*>(.*?)</select>', html, re.I | re.S)
+    if not select:
+        return hidden_value(html, name)
+    for option in re.finditer(r'<option\b([^>]*)>', select.group(1), re.I | re.S):
+        attrs = option.group(1)
+        if re.search(r'\bselected(?:\s|=|$)', attrs, re.I):
+            value = re.search(r'\bvalue=["\']([^"\']*)["\']', attrs, re.I)
+            if value:
+                return value.group(1)
+    return ''
+
 def input_value(html: str, name: str) -> str:
     return hidden_value(html, name)
 
@@ -212,6 +224,40 @@ def main() -> int:
             if not (ticket_ok and dvd_ok):
                 raise RuntimeError('could not prepare the forms')
 
+            # A ticket must not be assigned to the same account that created it.
+            # Use the next synthetic primary-admin account as requester and keep
+            # this worker's account as the independent handling agent.
+            requester_index = (vu + 1) % args.vus
+            requester_jar = http.cookiejar.CookieJar()
+            requester_opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(requester_jar))
+            status, requester_login_html, _, requester_ms, requester_error = request(
+                requester_opener, args.base_url, 'index.php?page=login'
+            )
+            requester_login_csrf = hidden_value(requester_login_html, 'csrf')
+            requester_form_ok = status == 200 and not requester_error and bool(requester_login_csrf) and is_login_page(requester_login_html)
+            recorder.add('requester-login-form', requester_ms, status, requester_form_ok,
+                         requester_error or ('requester login form/CSRF unavailable' if not requester_form_ok else ''))
+            if not requester_login_csrf:
+                raise RuntimeError('requester CSRF field absent on login form')
+            status, requester_home, _, requester_ms, requester_error = request(requester_opener, args.base_url, 'index.php?page=login', {
+                'csrf': requester_login_csrf, 'action': 'login',
+                'username': f'loadtest-{requester_index + 1:03d}', 'password': args.password,
+            })
+            requester_login_ok = status == 200 and not requester_error and not is_login_page(requester_home)
+            recorder.add('requester-login-post', requester_ms, status, requester_login_ok,
+                         requester_error or ('requester authentication failed' if not requester_login_ok else ''))
+            if not requester_login_ok:
+                raise RuntimeError('synthetic requester authentication failed')
+            status, requester_ticket_form, _, requester_ms, requester_error = request(
+                requester_opener, args.base_url, 'index.php?page=new-ticket'
+            )
+            requester_ticket_csrf = hidden_value(requester_ticket_form, 'csrf')
+            requester_ticket_ok = status == 200 and not requester_error and not is_login_page(requester_ticket_form) and bool(requester_ticket_csrf)
+            recorder.add('prepare-requester-ticket', requester_ms, status, requester_ticket_ok,
+                         requester_error or ('requester ticket form/CSRF unavailable' if not requester_ticket_ok else ''))
+            if not requester_ticket_ok:
+                raise RuntimeError('requester ticket form unavailable')
+
             try:
                 barrier.wait()
             except threading.BrokenBarrierError as exc:
@@ -224,13 +270,13 @@ def main() -> int:
             else:
                 serial = f'P86-{outgoing_index[(media, str(vu))]:04d}'
             ticket_data = {
-                'csrf': ticket_csrf, 'action': 'create_ticket', 'subject': f'OPS-{token}-{vu + 1:04d}',
+                'csrf': requester_ticket_csrf, 'action': 'create_ticket', 'subject': f'OPS-{token}-{vu + 1:04d}',
                 'description': f'Synthetic concurrent end-to-end ticket stress test {token}, worker {vu + 1}.',
                 'service_id': str(seed['service_id']), 'service_group': 'it', 'ticket_type': 'incident',
                 'requesting_unit_id': str(seed['org_unit_id']), 'department_id': str(seed['department_id']),
-                'asset_id': str(seed['asset_ids'][vu]), 'priority': 'normal',
+                'asset_id': str(seed['asset_ids'][requester_index]), 'priority': 'normal',
             }
-            status, html, final_url, ms, error = request(opener, args.base_url, 'index.php?page=new-ticket', ticket_data)
+            status, html, final_url, ms, error = request(requester_opener, args.base_url, 'index.php?page=new-ticket', ticket_data)
             query = urllib.parse.parse_qs(urllib.parse.urlparse(final_url).query)
             ticket_id = int((query.get('id') or ['0'])[0]) if (query.get('id') or [''])[0].isdigit() else 0
             created = status == 200 and not error and ticket_id > 0 and not is_login_page(html)
@@ -267,14 +313,29 @@ def main() -> int:
                 post_cd(1000 + pair_id, pair_serial, pair_direction, pair_id)
 
             if created:
-                update = {
-                    'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
-                    'status': 'resolved', 'assigned_to': str(seed['user_ids'][vu]),
-                    'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
-                }
-                status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
-                resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
-                recorder.add('ticket-resolve', ms2, status2, resolved, error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
+                detail_status, detail_html, _, detail_ms, detail_error = request(
+                    opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', None
+                )
+                assignee_id = selected_option_value(detail_html, 'assigned_to')
+                detail_csrf = hidden_value(detail_html, 'csrf') or ticket_csrf
+                assignee_ok = (
+                    detail_status == 200 and not detail_error and not is_login_page(detail_html)
+                    and assignee_id.isdigit() and int(assignee_id) > 0
+                )
+                recorder.add('ticket-assignee-read', detail_ms, detail_status, assignee_ok,
+                             detail_error or ('ticket detail did not expose an assigned handler' if not assignee_ok else ''))
+                if assignee_ok:
+                    update = {
+                        'csrf': detail_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
+                        'assigned_to': assignee_id, 'status': 'resolved',
+                        'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
+                    }
+                    status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
+                    resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
+                    recorder.add('ticket-resolve', ms2, status2, resolved,
+                                 error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
+                else:
+                    recorder.add('ticket-resolve', 0, detail_status, False, 'ticket has no readable assigned handler; resolution was not attempted')
         except Exception as exc:
             with worker_error_lock:
                 worker_errors.append(f'vu={vu + 1}: {type(exc).__name__}: {exc}')
@@ -338,6 +399,7 @@ def main() -> int:
                        'max_ms': round(max(times, default=0), 2)})
     expected_tickets = args.vus
     ticket_create = sum(row['successes'] for row in totals if row['operation'] == 'ticket-create')
+    ticket_assignee_read = sum(row['successes'] for row in totals if row['operation'] == 'ticket-assignee-read')
     ticket_resolve = sum(row['successes'] for row in totals if row['operation'] == 'ticket-resolve')
     regular_media_attempts = args.vus
     duplicate_attempts = 120
@@ -345,6 +407,8 @@ def main() -> int:
     invariant_failures = []
     if ticket_create != expected_tickets:
         invariant_failures.append(f'ticket creates confirmed by HTTP: {ticket_create}/{expected_tickets}')
+    if ticket_assignee_read != expected_tickets:
+        invariant_failures.append(f'ticket assignees confirmed by detail page: {ticket_assignee_read}/{expected_tickets}')
     if ticket_resolve != expected_tickets:
         invariant_failures.append(f'ticket resolutions confirmed by HTTP: {ticket_resolve}/{expected_tickets}')
     if int(db_report.get('tickets', {}).get('resolved_for_run', -1)) != expected_tickets:
@@ -371,7 +435,7 @@ def main() -> int:
         'started_utc': test_started_utc.isoformat(),
         'environment': 'ephemeral CI runner; disposable MariaDB; PHP CLI worker pool; synthetic identities/data only',
         'target': '127.0.0.1 only; production and staging were not contacted',
-        'scenario': '250 concurrent sessions; each creates and resolves one ticket through application POST handlers and records one CD/DVD event; 60 additional same-serial duplicate races (30 IN, 30 OUT) test serial-state integrity.',
+        'scenario': '250 concurrent sessions; each creates a ticket as a requester, verifies automatic assignment through the authorized update path, resolves it, and records one CD/DVD event; 60 additional same-serial duplicate races (30 IN, 30 OUT) test serial-state integrity.',
         'virtual_users': args.vus, 'php_workers': args.php_workers,
         'elapsed_wall_seconds': round(elapsed, 2), 'logical_operations': sum(len(rows) for rows in recorder.rows.values()),
         'overall_logical_operations_per_second': round(sum(len(rows) for rows in recorder.rows.values()) / elapsed, 2),

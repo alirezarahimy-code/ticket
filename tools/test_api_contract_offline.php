@@ -132,6 +132,7 @@ check('۴: مسیرهای API پنل استخراج شدند', count($used) > 8,
 
 // مسیرهای ورود عمومی صریحاً پیش از نگاشت مجوز بررسی می‌شوند؛ این منطق دیگر محدود به ابتدای فایل نیست.
 $publicLoginGuard = "if (in_array(\$route, ['login', 'sso-login'], true))";
+$configGuard = "if (\$route === 'config')";
 $unmapped = [];
 foreach ($used as $route) {
     if (str_contains($foodTicket, "'" . $route . "' => '")) {
@@ -140,6 +141,7 @@ foreach ($used as $route) {
     if (in_array($route, ['login', 'sso-login'], true) && str_contains($foodTicket, $publicLoginGuard)) {
         continue;
     }
+    if ($route === 'config' && str_contains($foodTicket, $configGuard)) { continue; }
     $unmapped[] = $route;
 }
 check('۵: هر مسیر API پنل در نگاشت مجوز food-ticket.php هست', $unmapped === [], implode(' | ', $unmapped));
@@ -190,6 +192,7 @@ check('۱۶: نتیجهٔ آزمون اتصال خط‌به‌خط نمایش د
 $netprint = (string) file_get_contents($root . '/food-ticket-netprint.php');
 $appJs = (string) file_get_contents($root . '/assets/app.js');
 $indexPhp = (string) file_get_contents($root . '/index.php');
+$ticketActions = (string) file_get_contents($root . '/actions/ticket-actions.php');
 check('۱۷: کارت کالیبراسیون اگر تنظیمات settings خالی باشد از چاپگر واقعی فیش استفاده می‌کند',
     str_contains($netprint, "food_ticket_config()") && str_contains($netprint, "\$source = 'food_ticket_config';"));
 check('۱۸: پیام روشن برای «آدرس چاپگر تنظیم نشده» و حالت صف ویندوز وجود دارد',
@@ -208,8 +211,8 @@ check('۲۲: سوئیچ روش چاپ زنده است (بدون رندر مجد�
 check('۲۳: فرم درخواست با حوزهٔ «خدمات کامپیوتری» باز می‌شود',
     str_contains($indexPhp, "\$ticketDefaultGroup = \$cdDvdRequestRecord ? 'support' : 'it';"));
 check('۲۴: الزام «سیستم مرتبط» در حوزهٔ IT پس از انتخاب خدمت در سرور و پنل اعمال شده است',
-    str_contains($indexPhp, "\$requiresAsset = \$serviceGroup === 'it';")
-    && str_contains($indexPhp, 'برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است')
+    str_contains($ticketActions, "\$requiresAsset = \$serviceGroup === 'it';")
+    && str_contains($ticketActions, 'برای همهٔ خدمات IT، انتخاب «سیستم مرتبط» الزامی است')
     && str_contains($appJs, 'var requiresAsset = isItGroup && hasSelectedService;')
     && str_contains($appJs, "var requiresAsset = getGroup() === 'it' && !!(submittedService && submittedService.value !== '');")
     && str_contains($appJs, "if (requiresAsset && assetSelector.value === '')"));

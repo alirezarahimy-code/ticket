@@ -1,6 +1,14 @@
 <?php
 declare(strict_types=1);
 
+if (!function_exists('system_log')) {
+    function system_log(string $level, string $context, string $message, array $meta = []): void
+    {
+        error_log($message);
+    }
+}
+
+
 /**
  * آزمون آفلاین «پرتیِ کاغذ در بالا و پایین فیش» — نسخهٔ ۱.۳۷
  * ============================================================================

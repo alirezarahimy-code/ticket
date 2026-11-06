@@ -55,7 +55,7 @@ function lac_default_hash(): string
 }
 
 $code = '';
-foreach ([[$root . '/bootstrap.php', 'normalize_employee_number'],
+foreach ([[$root . '/lib/notify-users.php', 'normalize_employee_number'],
           [$root . '/food-order.php', 'food_order_normalize_digits'],
           [$root . '/food-order.php', 'food_order_digits'],
           [$root . '/food-order.php', 'food_order_iso_date'],

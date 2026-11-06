@@ -179,7 +179,7 @@ try {
     cron_assert(str_contains($autoClose['stdout'], 'ticket_auto_close: 1 closed'), 'auto-close reports exactly one closure');
 
     // Prune only synthetic rows deliberately older than the documented retention windows.
-    $oldActivity = $pdo->prepare("INSERT INTO activity_logs (user_id, username, full_name, role, action_code, module, created_at) VALUES (?, 'loadtest-001', 'Synthetic Admin', 'primary_admin', ?, 'cron-smoke', DATE_SUB(NOW(), INTERVAL 61 DAY))");
+    $oldActivity = $pdo->prepare("INSERT INTO activity_logs (user_id, username, full_name, role, action_code, module, created_at) VALUES (?, 'loadtest-001', 'Synthetic Admin', 'primary_admin', ?, 'cron-smoke', DATE_SUB(NOW(), INTERVAL 184 DAY))");
     $oldActivity->execute([$primaryAdminId, 'cron_smoke_old_' . bin2hex(random_bytes(3))]);
     $oldActivityId = (int) $pdo->lastInsertId();
     $freshActivity = $pdo->prepare("INSERT INTO activity_logs (user_id, username, full_name, role, action_code, module, created_at) VALUES (?, 'loadtest-001', 'Synthetic Admin', 'primary_admin', ?, 'cron-smoke', NOW())");

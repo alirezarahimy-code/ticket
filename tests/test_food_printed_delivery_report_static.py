@@ -21,7 +21,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
         self.assertIn("e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'", report)
         self.assertIn("e.punch_date BETWEEN ? AND ?", report)
         self.assertIn("e.print_status = 'printed'", report)
-        self.assertIn("e.event_type = 'printed' AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered'", report)
+        self.assertIn("e.event_type IN ('printed','print') AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered'", report)
         self.assertIn("OR e.event_type = 'guest'", report)
         self.assertIn("JOIN food_calendar_items i ON i.calendar_id = cal.id", report)
         self.assertIn("'employee_count' => count($employeeIds)", report)
@@ -47,7 +47,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
         stats = ui[ui.index("function renderStatistics()") : ui.index("function render()", ui.index("function renderStatistics()"))]
         self.assertIn("+ renderPrintedDeliveryReport()", stats)
         self.assertIn("data-fm-delivery-field", ui)
-        self.assertIn("itsm-food-printed-delivery-report-fields-v1", ui)
+        self.assertIn("itsm-food-printed-delivery-report-fields-v2", ui)
         self.assertIn("data-delivery-view=\"menu\"", ui)
         self.assertIn("fm-order-block-start", ui)
         self.assertIn("تأیید مستقل دریافت غذا نیست", ui)
@@ -58,7 +58,7 @@ class PrintedDeliveryReportStaticTests(unittest.TestCase):
     def test_mirrored_assets_and_cache_versions_are_updated(self) -> None:
         panel = read("food-ticket-web/index.html")
         self.assertIn('assets/food-menu.css?v=34', panel)
-        self.assertIn('assets/food-menu.js?v=1.62.72', panel)
+        self.assertIn('assets/food-menu.js?v=1.62.74', panel)
         self.assertEqual(read("assets/food-menu.js"), read("food-ticket-web/assets/food-menu.js"))
         self.assertEqual(read("assets/food-menu.css"), read("food-ticket-web/assets/food-menu.css"))
 

@@ -30,7 +30,7 @@ function extract_php_function(string $file, string $name): string
 }
 
 $foodOrder = $root . '/food-order.php';
-$bootstrap = $root . '/bootstrap.php';
+$bootstrap = $root . '/lib/tickets-sla.php';
 $code = '';
 foreach (['gregorian_to_jalali', 'jalali_to_gregorian'] as $fn) {
     $code .= extract_php_function($bootstrap, $fn) . "\n";
