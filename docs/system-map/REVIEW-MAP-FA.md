@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,411 |
+| خطوط | 125,414 |
 | آدرس‌ها (بلوک) | 6,670 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -288,7 +288,7 @@
 | `TEST` | TEST | 216 | 1,577 | 19,854 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,448 |
+| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,451 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
 | `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,098 |
@@ -8473,13 +8473,13 @@
 </details>
 
 <details>
-<summary><b>PAGE-040</b> — <code>modules/request-center/WorkflowService.php</code> (236 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-040</b> — <code>modules/request-center/WorkflowService.php</code> (239 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-040.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-040.02` | 4–26 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
-| `PAGE-040.03` | 28–235 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
+| `PAGE-040.02` | 4–29 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
+| `PAGE-040.03` | 31–238 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
 
 </details>
 

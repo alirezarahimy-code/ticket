@@ -52348,8 +52348,8 @@
             "id": "PAGE-040",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
-            "lines": 236,
-            "file_fingerprint": "3874332828f1",
+            "lines": 239,
+            "file_fingerprint": "88a77e701cb2",
             "blocks": [
                 {
                     "kind": "region",
@@ -52368,9 +52368,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterSqlExpression",
                     "line_start": 4,
-                    "line_end": 26,
-                    "lines": 23,
-                    "fingerprint": "583271762ce7",
+                    "line_end": 29,
+                    "lines": 26,
+                    "fingerprint": "96b17857f5ca",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -52380,8 +52380,8 @@
                 {
                     "kind": "class",
                     "anchor": "RequestCenterWorkflowService",
-                    "line_start": 28,
-                    "line_end": 235,
+                    "line_start": 31,
+                    "line_end": 238,
                     "lines": 208,
                     "fingerprint": "50d990acd861",
                     "risk": {
