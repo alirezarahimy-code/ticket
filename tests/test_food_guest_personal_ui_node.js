@@ -28,7 +28,7 @@ window.eval(source);
   assert(list && list.getAttribute('aria-label').includes('من'));
   assert.strictEqual(list.querySelectorAll('.fg-request-item').length, 2);
   assert.strictEqual(list.querySelectorAll('tbody tr').length, 2);
-  assert.strictEqual(list.querySelector('tbody tr').querySelectorAll('td').length, 9);
+  assert.strictEqual(list.querySelector('tbody tr').querySelectorAll('td').length, 10);
   assert(!list.querySelector('script'), 'untrusted organization must be escaped');
   assert(list.textContent.includes('<script>unsafe</script>'));
   assert.strictEqual(list.querySelectorAll('[data-fg-action="edit"]').length, 1);
