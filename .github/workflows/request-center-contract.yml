@@ -23,13 +23,26 @@ on:
 jobs:
   request-center-contract:
     runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
+          MARIADB_DATABASE: persian_ticketing_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
     steps:
       - uses: actions/checkout@v4
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo_mysql, pdo_sqlite, mbstring
+          extensions: pdo_mysql, pdo_sqlite, mbstring, xml, zip
           coverage: none
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -45,6 +58,22 @@ jobs:
         run: python -m pytest -q tests/test_request_center_first_slice_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
+      - name: Load fresh-install schema into disposable MariaDB
+        run: php tools/ci_load_schema.php install-empty-db.sql
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+      - name: Request Center schema preflight on MariaDB
+        run: php tests/test_request_center_schema_preflight_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
       - name: Existing workflow safety contracts
         run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py
       - name: Existing ticket routing unit tests
