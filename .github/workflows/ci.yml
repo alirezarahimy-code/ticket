@@ -10,6 +10,25 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      # دیتابیس واقعی برای آزمون یکپارچگی نصب تازه و مهاجرت‌ها — فقط همین job و فقط ephemeral.
+      # همان الگوی اثبات‌شده در .github/workflows/logging-acceptance.yml است (۴ ورک‌فلوی دیگر
+      # پروژه هم دقیقاً همین پیکربندی را با سبزِ مستمر اجرا می‌کنند): پورت پیش‌فرض ۳۳۰۶
+      # و اسکریپتِ رسمی healthcheck داخلی ایمیج (healthcheck.sh) به‌جای ping دستی —
+      # رانیت‌های ubuntu-latest با همین الگو بدون هیچ گامِ انتظاری به دیتابیس می‌رسند.
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
+          MARIADB_DATABASE: persian_ticketing_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -30,6 +49,77 @@ jobs:
     - name: Install Python test runner
       run: python -m pip install --disable-pip-version-check pytest
 
+    # تست‌های نگهبان بوت جلسه به‌صورت سه گام جدا — تا در صورت قرمزشدن دقیقاً مشخص باشد کدام خراب است.
+    # اسکریپت‌ها خروجی exit-code دارند و pytest برایشان جمع‌کننده نیست؛ مستقیم اجرا می‌شوند.
+    - name: Guard — skill manifest
+      run: python tests/test_skill_manifest_static.py
+
+    - name: Guard — system map freshness
+      run: python tests/test_system_map_static.py
+
+    - name: Guard — session boot
+      run: python tests/test_session_boot_static.py
+
+    # ─── یکپارچگی واقعی دیتابیس (MariaDB) ───────────────────────────────
+    # اسکیمای نصب تازه (install-empty-db.sql، ۸۲ جدول) روی MariaDB واقعی بارگذاری
+    # می‌شود و سپس همهٔ مهاجرت‌ها (به‌جز فایل *-rollback.sql) دوبار اعمال می‌شوند
+    # تا ایده‌مپوتنسی تأیید شود. هیچ دادهٔ واقعی درگیر نیست.
+    - name: Install MariaDB client
+      run: sudo apt-get update && sudo apt-get install -y mariadb-client
+
+    # همان الگوی اثبات‌شدهٔ logging-acceptance (اتصال از PDO، نه کلاینت)؛ خطای واقعی به‌صورت annotation منتشر می‌شود.
+    - name: Load fresh-install schema
+      run: php tools/ci_load_schema.php install-empty-db.sql
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+
+    - name: Fresh install integrity (PDO)
+      run: php tests/test_mariadb_fresh_install.php fresh-install
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+        CI_DB_REQUIRED: '1'
+
+    - name: Apply all migrations twice (idempotency)
+      run: |
+        set -e
+        for pass in 1 2; do
+          echo "── migration pass $pass"
+          for f in $(ls migrations/*.sql | grep -v -- '-rollback.sql' | LC_ALL=C sort); do
+            echo "→ $f"
+            if ! output=$(mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < "$f" 2>&1); then
+              msg=$(printf '%s' "$output" | tail -3 | tr '\n' ' ' | cut -c1-700 | sed 's/%/%25/g; s/\r//g')
+              pass_label="pass${pass} ${f}"
+              echo "::error title=migration::${pass_label}: ${msg}"
+              exit 1
+            fi
+          done
+        done
+
+    - name: Migration registry integrity
+      run: php tests/test_mariadb_fresh_install.php migrations-applied
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
+        CI_DB_REQUIRED: '1'
+
+    # اگر هر گام قبلی red شد، لاگ کانتینر MariaDB چاپ شود (تشخیص بدون نیاز به دسترسی به رانر).
+    - name: MariaDB diagnostics (if failure)
+      if: failure()
+      run: |
+        docker ps -a || true
+        docker logs $(docker ps -aq -f ancestor=mariadb:10.11 | head -n1) 2>&1 | tail -150 || true
+
     - name: Check PHP syntax
       run: git ls-files -z -- '*.php' | php tools/lint-php-syntax.php
 
@@ -47,7 +137,6 @@ jobs:
 
     - name: Run ticket routing unit tests
       run: php tests/test_ticket_routing_unit.php
-
 
     - name: Run ticket SLA unit tests
       run: php tests/test_ticket_sla_unit.php
