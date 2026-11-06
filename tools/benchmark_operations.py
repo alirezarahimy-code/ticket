@@ -99,6 +99,19 @@ def hidden_value(html: str, name: str) -> str:
     return match.group(1) if match else ''
 
 
+def selected_option_value(html: str, name: str) -> str:
+    select = re.search(r'<select\\b(?=[^>]*\\bname=["\\']' + re.escape(name) + r'["\\'])[^>]*>(.*?)</select>', html, re.I | re.S)
+    if not select:
+        return hidden_value(html, name)
+    for option in re.finditer(r'<option\\b([^>]*)>', select.group(1), re.I | re.S):
+        attrs = option.group(1)
+        if re.search(r'\\bselected(?:\\s|=|$)', attrs, re.I):
+            value = re.search(r'\\bvalue=["\\']([^"\\']*)["\\']', attrs, re.I)
+            if value:
+                return value.group(1)
+    return ''
+
+
 def input_value(html: str, name: str) -> str:
     return hidden_value(html, name)
 
@@ -301,18 +314,29 @@ def main() -> int:
                 post_cd(1000 + pair_id, pair_serial, pair_direction, pair_id)
 
             if created:
-                # create_ticket assigns the ticket automatically. Calling claim_ticket
-                # again is invalid for an already-assigned ticket and creates a false
-                # application error. Exercise the real next step: resolve the ticket.
-                update = {
-                    'csrf': ticket_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
-                    'status': 'resolved',
-                    'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
-                }
-                status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
-                resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
-                recorder.add('ticket-resolve', ms2, status2, resolved,
-                             error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
+                detail_status, detail_html, _, detail_ms, detail_error = request(
+                    opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', None
+                )
+                assignee_id = selected_option_value(detail_html, 'assigned_to')
+                detail_csrf = hidden_value(detail_html, 'csrf') or ticket_csrf
+                assignee_ok = (
+                    detail_status == 200 and not detail_error and not is_login_page(detail_html)
+                    and assignee_id.isdigit() and int(assignee_id) > 0
+                )
+                recorder.add('ticket-assignee-read', detail_ms, detail_status, assignee_ok,
+                             detail_error or ('ticket detail did not expose an assigned handler' if not assignee_ok else ''))
+                if assignee_ok:
+                    update = {
+                        'csrf': detail_csrf, 'action': 'update_ticket', 'ticket_id': str(ticket_id),
+                        'assigned_to': assignee_id, 'status': 'resolved',
+                        'update_note': f'Synthetic resolution for isolated benchmark {token}, worker {vu + 1}.'
+                    }
+                    status2, html2, _, ms2, error2 = request(opener, args.base_url, f'index.php?page=ticket&id={ticket_id}', update)
+                    resolved = status2 == 200 and not error2 and 'تغییرات درخواست ذخیره شد' in html2 and not is_login_page(html2)
+                    recorder.add('ticket-resolve', ms2, status2, resolved,
+                                 error2 or ('resolution handler did not confirm saved change' if not resolved else ''))
+                else:
+                    recorder.add('ticket-resolve', 0, detail_status, False, 'ticket has no readable assigned handler; resolution was not attempted')
         except Exception as exc:
             with worker_error_lock:
                 worker_errors.append(f'vu={vu + 1}: {type(exc).__name__}: {exc}')
@@ -376,6 +400,7 @@ def main() -> int:
                        'max_ms': round(max(times, default=0), 2)})
     expected_tickets = args.vus
     ticket_create = sum(row['successes'] for row in totals if row['operation'] == 'ticket-create')
+    ticket_assignee_read = sum(row['successes'] for row in totals if row['operation'] == 'ticket-assignee-read')
     ticket_resolve = sum(row['successes'] for row in totals if row['operation'] == 'ticket-resolve')
     regular_media_attempts = args.vus
     duplicate_attempts = 120
@@ -383,6 +408,8 @@ def main() -> int:
     invariant_failures = []
     if ticket_create != expected_tickets:
         invariant_failures.append(f'ticket creates confirmed by HTTP: {ticket_create}/{expected_tickets}')
+    if ticket_assignee_read != expected_tickets:
+        invariant_failures.append(f'ticket assignees confirmed by detail page: {ticket_assignee_read}/{expected_tickets}')
     if ticket_resolve != expected_tickets:
         invariant_failures.append(f'ticket resolutions confirmed by HTTP: {ticket_resolve}/{expected_tickets}')
     if int(db_report.get('tickets', {}).get('resolved_for_run', -1)) != expected_tickets:
