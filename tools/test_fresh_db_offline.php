@@ -128,7 +128,7 @@ function system_log(string $level, string $context, string $message, array $meta
 }
 
 $root = dirname(__DIR__);
-$bootstrap = $root . '/bootstrap.php';
+$bootstrap = $root . '/lib/db-core.php';
 eval(grabFunction($bootstrap, 'db_install_token'));
 eval(grabFunction($bootstrap, 'db_install_token_forget'));
 eval(grabFunction($bootstrap, 'db_install_fresh_tables'));
