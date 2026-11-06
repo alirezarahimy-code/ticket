@@ -10,11 +10,16 @@ declare(strict_types=1);
  */
 final class RequestCenterSqlExpression
 {
-    public string $kind;
+    private string $kind;
 
     private function __construct(string $kind)
     {
         $this->kind = $kind;
+    }
+
+    public function kind(): string
+    {
+        return $this->kind;
     }
 
     public static function now(): self
@@ -136,9 +141,9 @@ final class RequestCenterWorkflowService
         $params = [$targetStatus];
         foreach ($updates as $column => $value) {
             if ($value instanceof RequestCenterSqlExpression) {
-                if ($value->kind === 'now') {
+                if ($value->kind() === 'now') {
                     $sets[] = $column . ' = ' . $nowExpression;
-                } elseif ($value->kind === 'coalesce_now') {
+                } elseif ($value->kind() === 'coalesce_now') {
                     $sets[] = $column . ' = COALESCE(' . $column . ', ' . $nowExpression . ')';
                 } else {
                     throw new InvalidArgumentException('عبارت SQL برای گذار ناشناخته است.');
