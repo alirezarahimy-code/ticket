@@ -56,3 +56,8 @@ def test_cumulative_update_includes_all_logging_migrations_from_024_through_030(
     overlay = source[start:end]
     missing = [migration for migration in required if f'"{migration}"' not in overlay]
     assert not missing, f"Cumulative update omits required Logging migrations: {missing}"
+
+
+def test_cumulative_package_title_matches_release_version():
+    source = (ROOT / "tools/build_cumulative_update.py").read_text(encoding="utf-8")
+    assert 'manifest["title"] = "سخت‌سازی نصب‌کننده، Logging و بازیابی (1.62.77 ← 1.62.83)"' in source
