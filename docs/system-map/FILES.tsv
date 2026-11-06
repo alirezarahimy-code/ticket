@@ -636,7 +636,7 @@ tests/test_system_update_migration_registry.php	tests	67	2242
 tests/test_system_update_requires_version.php	tests	95	5750
 tests/test_technical_profile_form_refresh_static.py	tests	67	3618
 tests/test_ticket_auto_assignment_static.py	tests	25	1517
-tests/test_ticket_cancellation_static.py	tests	135	8662
+tests/test_ticket_cancellation_static.py	tests	137	8813
 tests/test_ticket_lifecycle_guide_static.py	tests	41	1801
 tests/test_ticket_number_autofill_unit.php	tests	158	7261
 tests/test_ticket_number_repair_static.py	tests	145	6732

@@ -47838,7 +47838,7 @@
       "line": 23,
       "anchor": "check",
       "risk": 1,
-      "lines": 114
+      "lines": 116
     },
     "TEST-189.01": {
       "path": "tests/test_ticket_lifecycle_guide_static.py",

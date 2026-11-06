@@ -75662,8 +75662,8 @@
             "id": "TEST-188",
             "path": "tests\/test_ticket_cancellation_static.py",
             "area": "TEST",
-            "lines": 136,
-            "file_fingerprint": "d92a8138e598",
+            "lines": 138,
+            "file_fingerprint": "48e8a6a39058",
             "blocks": [
                 {
                     "kind": "block",
@@ -75682,9 +75682,9 @@
                     "kind": "block",
                     "anchor": "check",
                     "line_start": 23,
-                    "line_end": 136,
-                    "lines": 114,
-                    "fingerprint": "0bf5159df48c",
+                    "line_end": 138,
+                    "lines": 116,
+                    "fingerprint": "0590139c06f8",
                     "risk": {
                         "score": 1,
                         "flags": {
