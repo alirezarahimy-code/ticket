@@ -386,7 +386,7 @@ function food_ticket_decide_for_user(array $user, string $date, array $base, arr
 }
 function food_ticket_delivery_supported(): bool
 {
-    return false; // ستون تحویل در این شبیه‌ساز وجود ندارد؛ آزمون تحویل روی MySQL انجام می‌شود.
+    return true; // ستون delivery_status در schema SQLite همین آزمون ساخته شده است.
 }
 function user_can(array $user, string $permission): bool
 {
