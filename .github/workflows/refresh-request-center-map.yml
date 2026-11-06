@@ -15,6 +15,7 @@ on:
       - 'tests/test_request_center_*.py'
       - 'tests/test_ticket_*static.py'
       - 'tests/test_ldap_secret_and_legacy_status_static.py'
+      - '.github/workflows/refresh-request-center-map.yml'
   workflow_dispatch:
 
 permissions:
@@ -41,6 +42,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install map test dependencies
+        run: python3 -m pip install --disable-pip-version-check pytest
       - name: Regenerate machine-readable maps
         run: |
           python3 tools/build_system_map.py
