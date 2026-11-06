@@ -9,6 +9,7 @@ bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
 ))
 permissions = (ROOT / "permissions.php").read_text(encoding="utf-8")
 workflow_service = (ROOT / "modules/request-center/WorkflowService.php").read_text(encoding="utf-8")
+ticket_actions = (ROOT / "actions/ticket-actions.php").read_text(encoding="utf-8")
 cron = (ROOT / "cron/sla_maintenance.php").read_text(encoding="utf-8")
 auto_close = (ROOT / "cron/ticket_auto_close.php").read_text(encoding="utf-8")
 chatbot = (ROOT / "chatbot.php").read_text(encoding="utf-8")
