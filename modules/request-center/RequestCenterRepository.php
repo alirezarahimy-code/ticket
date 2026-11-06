@@ -14,6 +14,60 @@ final class RequestCenterRepository
     {
     }
 
+    /**
+     * Read-only schema preflight. The independent entry point must never heal
+     * or mutate schema at request time; incomplete installs fail closed.
+     *
+     * @return array<int,string>
+     */
+    public function schemaProblems(): array
+    {
+        try {
+            $tableRows = $this->pdo->query(
+                'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()'
+            )->fetchAll(PDO::FETCH_COLUMN);
+            $tables = array_fill_keys(array_map('strtolower', $tableRows), true);
+            $required = [
+                'tickets' => ['id', 'ticket_no', 'subject', 'status', 'priority', 'service_group', 'ticket_type',
+                    'created_at', 'updated_at', 'due_at', 'requester_id', 'assigned_to', 'department_id',
+                    'category_id', 'service_id', 'asset_id', 'requesting_unit_id'],
+                'users' => ['id', 'full_name', 'role'],
+                'departments' => ['id', 'name'],
+                'categories' => ['id', 'name'],
+                'service_catalog' => ['id', 'name'],
+                'assets' => ['id', 'hostname', 'asset_tag'],
+                'org_units' => ['id', 'name'],
+                'ticket_messages' => ['id', 'ticket_id', 'user_id', 'body', 'is_internal', 'created_at'],
+                'ticket_attachments' => ['id', 'message_id', 'original_name', 'mime', 'size_bytes'],
+            ];
+            $columnRows = $this->pdo->query(
+                'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
+            )->fetchAll(PDO::FETCH_ASSOC);
+            $columns = [];
+            foreach ($columnRows as $row) {
+                $table = strtolower((string) $row['TABLE_NAME']);
+                $column = strtolower((string) $row['COLUMN_NAME']);
+                $columns[$table][$column] = true;
+            }
+
+            $problems = [];
+            foreach ($required as $table => $names) {
+                if (!isset($tables[$table])) {
+                    $problems[] = 'جدول ' . $table . ' وجود ندارد.';
+                    continue;
+                }
+                foreach ($names as $name) {
+                    if (!isset($columns[$table][$name])) {
+                        $problems[] = 'ستون ' . $table . '.' . $name . ' وجود ندارد.';
+                    }
+                }
+            }
+            return $problems;
+        } catch (Throwable $exception) {
+            return ['بررسی ساختار پایگاه‌داده ممکن نشد: ' . get_class($exception)];
+        }
+    }
+
     /** @return array{total:int,rows:array<int,array<string,mixed>>} */
     public function listVisible(array $user, int $page = 1, int $perPage = 50): array
     {
