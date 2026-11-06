@@ -1,6 +1,7 @@
 name: Isolated Food Management and Orders Stress
 
 on:
+  workflow_call:
   push:
     branches:
       - arena/8edbdf95-ticket
