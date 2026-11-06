@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,598 |
+| خطوط | 125,605 |
 | آدرس‌ها (بلوک) | 6,671 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 216 | 1,578 | 19,969 |
+| `TEST` | TEST | 216 | 1,578 | 19,976 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,520 |
@@ -3370,7 +3370,7 @@
 </details>
 
 <details>
-<summary><b>TEST-197</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (102 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-197</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (109 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -3379,14 +3379,14 @@
 | `TEST-197.03` | 11–14 | بلوک | `section` | 0 | ⬜ |
 | `TEST-197.04` | 15–15 | بلوک | `TicketWorkflowSafetyTests` | 0 | ⬜ |
 | `TEST-197.05` | 16–26 | بلوک | `test_notification_candidates_are_checked_for_actua` | 0 | ⬜ |
-| `TEST-197.06` | 27–39 | بلوک | `test_assignment_checks_existing_assignee_and_role_` | 1 | ⬜ |
-| `TEST-197.07` | 40–51 | بلوک | `test_requester_and_nonhandler_reply_guards` | 2 | ⬜ |
-| `TEST-197.08` | 52–63 | بلوک | `test_concurrent_rating_and_auto_close_revalidate_u` | 1 | ⬜ |
-| `TEST-197.09` | 64–69 | بلوک | `test_claim_uses_full_assignee_eligibility` | 0 | ⬜ |
-| `TEST-197.10` | 70–76 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
-| `TEST-197.11` | 77–84 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
-| `TEST-197.12` | 85–90 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
-| `TEST-197.13` | 91–102 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
+| `TEST-197.06` | 27–40 | بلوک | `test_assignment_checks_existing_assignee_and_role_` | 1 | ⬜ |
+| `TEST-197.07` | 41–52 | بلوک | `test_requester_and_nonhandler_reply_guards` | 2 | ⬜ |
+| `TEST-197.08` | 53–65 | بلوک | `test_concurrent_rating_and_auto_close_revalidate_u` | 1 | ⬜ |
+| `TEST-197.09` | 66–71 | بلوک | `test_claim_uses_full_assignee_eligibility` | 0 | ⬜ |
+| `TEST-197.10` | 72–78 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
+| `TEST-197.11` | 79–86 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
+| `TEST-197.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
+| `TEST-197.13` | 93–109 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
 
 </details>
 

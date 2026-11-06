@@ -48838,12 +48838,12 @@
       "line": 27,
       "anchor": "test_assignment_checks_existing_assignee_and_role_department",
       "risk": 1,
-      "lines": 13
+      "lines": 14
     },
     "TEST-197.07": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 40,
+      "line": 41,
       "anchor": "test_requester_and_nonhandler_reply_guards",
       "risk": 2,
       "lines": 12
@@ -48851,15 +48851,15 @@
     "TEST-197.08": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 52,
+      "line": 53,
       "anchor": "test_concurrent_rating_and_auto_close_revalidate_under_lock",
       "risk": 1,
-      "lines": 12
+      "lines": 13
     },
     "TEST-197.09": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 64,
+      "line": 66,
       "anchor": "test_claim_uses_full_assignee_eligibility",
       "risk": 0,
       "lines": 6
@@ -48867,7 +48867,7 @@
     "TEST-197.10": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 70,
+      "line": 72,
       "anchor": "test_supervisor_actions_check_ticket_visibility",
       "risk": 0,
       "lines": 7
@@ -48875,7 +48875,7 @@
     "TEST-197.11": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 77,
+      "line": 79,
       "anchor": "test_autoclose_candidates_do_not_starve_on_current_same_second_ratings",
       "risk": 0,
       "lines": 8
@@ -48883,7 +48883,7 @@
     "TEST-197.12": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 85,
+      "line": 87,
       "anchor": "test_reopen_sla_cycle_is_used_on_priority_change",
       "risk": 0,
       "lines": 6
@@ -48891,10 +48891,10 @@
     "TEST-197.13": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 91,
+      "line": 93,
       "anchor": "test_direct_cancel_and_bulk_defend_stale_assignment",
       "risk": 0,
-      "lines": 12
+      "lines": 17
     },
     "TEST-198.01": {
       "path": "tests/test_traffic_69_link_static.py",

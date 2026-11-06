@@ -645,7 +645,7 @@ tests/test_ticket_scope_sql_node.js	tests	21	2873
 tests/test_ticket_sla_unit.php	tests	51	3353
 tests/test_ticket_three_views_static.py	tests	154	8121
 tests/test_ticket_tree_visibility_unit.php	tests	40	3489
-tests/test_ticket_workflow_safety_static.py	tests	101	6222
+tests/test_ticket_workflow_safety_static.py	tests	108	6695
 tests/test_traffic_69_link_static.py	tests	24	1410
 tests/test_traffic_70_upgrade_static.py	tests	19	1046
 tests/test_traffic_destination_approver_static.py	tests	53	3613

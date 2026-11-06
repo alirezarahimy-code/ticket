@@ -77327,8 +77327,8 @@
             "id": "TEST-197",
             "path": "tests\/test_ticket_workflow_safety_static.py",
             "area": "TEST",
-            "lines": 102,
-            "file_fingerprint": "04f43f6326fb",
+            "lines": 109,
+            "file_fingerprint": "e66c0fd8b2f6",
             "blocks": [
                 {
                     "kind": "block",
@@ -77399,9 +77399,9 @@
                     "kind": "block",
                     "anchor": "test_assignment_checks_existing_assignee_and_role_department",
                     "line_start": 27,
-                    "line_end": 39,
-                    "lines": 13,
-                    "fingerprint": "5101a89f5a3d",
+                    "line_end": 40,
+                    "lines": 14,
+                    "fingerprint": "6eea6fbacdc4",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -77413,8 +77413,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_requester_and_nonhandler_reply_guards",
-                    "line_start": 40,
-                    "line_end": 51,
+                    "line_start": 41,
+                    "line_end": 52,
                     "lines": 12,
                     "fingerprint": "9423a5b254bd",
                     "risk": {
@@ -77428,10 +77428,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_concurrent_rating_and_auto_close_revalidate_under_lock",
-                    "line_start": 52,
-                    "line_end": 63,
-                    "lines": 12,
-                    "fingerprint": "cedbd0e66cb1",
+                    "line_start": 53,
+                    "line_end": 65,
+                    "lines": 13,
+                    "fingerprint": "f0b09672fd2a",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -77443,8 +77443,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_claim_uses_full_assignee_eligibility",
-                    "line_start": 64,
-                    "line_end": 69,
+                    "line_start": 66,
+                    "line_end": 71,
                     "lines": 6,
                     "fingerprint": "5c45df9d51eb",
                     "risk": {
@@ -77456,8 +77456,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_supervisor_actions_check_ticket_visibility",
-                    "line_start": 70,
-                    "line_end": 76,
+                    "line_start": 72,
+                    "line_end": 78,
                     "lines": 7,
                     "fingerprint": "33ede9875208",
                     "risk": {
@@ -77469,8 +77469,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_autoclose_candidates_do_not_starve_on_current_same_second_ratings",
-                    "line_start": 77,
-                    "line_end": 84,
+                    "line_start": 79,
+                    "line_end": 86,
                     "lines": 8,
                     "fingerprint": "a479327e43ce",
                     "risk": {
@@ -77482,8 +77482,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_reopen_sla_cycle_is_used_on_priority_change",
-                    "line_start": 85,
-                    "line_end": 90,
+                    "line_start": 87,
+                    "line_end": 92,
                     "lines": 6,
                     "fingerprint": "1db082b6df36",
                     "risk": {
@@ -77495,10 +77495,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_direct_cancel_and_bulk_defend_stale_assignment",
-                    "line_start": 91,
-                    "line_end": 102,
-                    "lines": 12,
-                    "fingerprint": "24e2553bdf44",
+                    "line_start": 93,
+                    "line_end": 109,
+                    "lines": 17,
+                    "fingerprint": "9283bb524e70",
                     "risk": {
                         "score": 0,
                         "flags": []
