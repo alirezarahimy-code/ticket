@@ -388,6 +388,10 @@ function food_ticket_delivery_supported(): bool
 {
     return true; // ستون delivery_status در schema SQLite همین آزمون ساخته شده است.
 }
+function food_ticket_events_ensure_delivery(): bool
+{
+    return true; // ستون‌های تحویل در fixture این آزمون آماده هستند.
+}
 function user_can(array $user, string $permission): bool
 {
     return false;
