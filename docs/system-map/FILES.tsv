@@ -5,7 +5,7 @@ path	category	lines	bytes
 .github/copilot-instructions.md	workflows	23	1566
 .github/workflows/benchmark-250.yml	workflows	116	4154
 .github/workflows/benchmark-operations.yml	workflows	367	15800
-.github/workflows/ci.yml	workflows	119	4207
+.github/workflows/ci.yml	workflows	209	8707
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	138	5159
@@ -75,7 +75,7 @@ path	category	lines	bytes
 00_PLAN_PERMISSIONS_FA.txt	root-misc	187	13518
 00_PLAN_ROLE_DELEGATION_FA.txt	root-misc	33	2622
 00_WORKER_RUNBOOK_FA.txt	root-misc	33	2858
-AGENTS.md	root-misc	165	12141
+AGENTS.md	root-misc	104	9334
 ARCHITECTURE.md	root-misc	237	18661
 CHANGE-REPORT-FA-1.62.68.md	root-misc	17	4096
 CHANGE-REPORT-FA-1.62.69.md	root-misc	19	4569
@@ -229,7 +229,7 @@ docs/RELEASE-MANIFEST-1.62.76-FA.md	docs	14	795
 docs/REPORT-FA.md	docs	43	4702
 docs/ROLLBACK-RUNBOOK-1.62.76-FA.md	docs	19	1572
 docs/SESSION-BOOT-FA.md	docs	137	6866
-docs/SKILL-MANIFEST-FA.md	docs	485	45809
+docs/SKILL-MANIFEST-FA.md	docs	485	45831
 docs/STAGING-ACCEPTANCE-REPORT-1.62.76-FA.md	docs	21	1419
 docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
 docs/SYSTEM-MAP-FA.md	docs	551	37833
@@ -239,6 +239,7 @@ docs/TEST-REPORT-1.62.76-FA.md	docs	30	2546
 docs/TEST_COVERAGE_MATRIX_FA.md	docs	50	8233
 docs/USER-ACCESS-GROUPS-FA.md	docs	43	3988
 docs/aggregate-report-preview.html	docs	85	7297
+docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	346	27556
 domain-scan.php	core	1280	68450
 download-r34/index.html	other	21	1739
 downloads/CHANGE-REPORT-FA-1.62.43.md	history-downloads	16	1879
@@ -561,6 +562,7 @@ tests/test_logging_system_contract.py	tests	274	13734
 tests/test_logging_ticket_event_replay.php	tests	71	3670
 tests/test_logging_trace_coverage.php	tests	49	3359
 tests/test_manual_no_print_food_ticket_static.py	tests	130	8517
+tests/test_mariadb_fresh_install.php	tests	133	6381
 tests/test_migration_registry_seed.py	tests	39	1587
 tests/test_migration_retention_1_62_76.py	tests	28	1045
 tests/test_no_duplicate_php_functions.py	tests	72	3343
@@ -672,8 +674,9 @@ tools/benchmark_operations_seed.php	tools	51	2994
 tools/benchmark_seed.php	tools	139	9027
 tools/benchmark_system_resilience.py	tools	367	22395
 tools/build_cumulative_update.py	tools	273	14596
-tools/build_system_map.py	tools	474	27127
+tools/build_system_map.py	tools	474	27151
 tools/build_update_1_62_88.py	tools	193	8725
+tools/ci_load_schema.php	tools	106	3555
 tools/code_index.php	tools	570	22757
 tools/collect_server_inventory.ps1	tools	252	16147
 tools/db_health_report.php	tools	128	5847

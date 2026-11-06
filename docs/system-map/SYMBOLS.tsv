@@ -3032,6 +3032,7 @@ fetchColumn	function	tests/test_logging_ticket_event_replay.php	37	tests
 db	function	tests/test_logging_ticket_event_replay.php	40	tests
 test_wrong_emergency_implementation_is_removed_from_root_sources	def	tests/test_manual_no_print_food_ticket_static.py	12	tests
 test_existing_settings_manual_attendance_bug_fix_package	def	tests/test_manual_no_print_food_ticket_static.py	23	tests
+check	function	tests/test_mariadb_fresh_install.php	35	tests
 test_fresh_install_schemas_seed_every_forward_migration	def	tests/test_migration_registry_seed.py	12	tests
 test_historical_logging_migrations_are_retained_in_source	def	tests/test_migration_retention_1_62_76.py	14	tests
 test_update_migration_policy_is_explicit_and_non_executing	def	tests/test_migration_retention_1_62_76.py	19	tests
@@ -3700,6 +3701,7 @@ safe_archive_path	def	tools/build_update_1_62_88.py	63	tools
 validate_archive	def	tools/build_update_1_62_88.py	78	tools
 build	def	tools/build_update_1_62_88.py	112	tools
 entry	def	tools/build_update_1_62_88.py	158	tools
+ci_error	function	tools/ci_load_schema.php	25	tools
 AREA_MAP	const	tools/code_index.php	21	tools
 ci_strlen	function	tools/code_index.php	39	tools
 ci_substr	function	tools/code_index.php	43	tools
