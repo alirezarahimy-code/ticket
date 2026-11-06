@@ -57,8 +57,10 @@ check("t.ola_response_due_at IS NOT NULL" in index
 check("status NOT IN (\"resolved\", \"closed\", \"cancelled\")" in cron
       and "sla_paused_at IS NULL" in cron,
       "SLA and OLA maintenance ignores cancelled tickets and pauses while waiting on the requester")
-check("ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?" in index
-      and "ticket_ola_transition($ticket, $newStatus" in index,
+check("'ola_policy_id' => $replyOla['policy_id']" in ticket_actions
+      and "'ola_response_due_at' => $replyOla['response_due_at']" in ticket_actions
+      and "'ola_due_at' => $replyOla['due_at']" in ticket_actions
+      and "ticket_ola_transition($ticket, $newStatus" in ticket_actions,
       "reply transitions persist OLA deadlines after resuming from waiting_user")
 check("'cancelled' => []" in workflow_service and "'cancelled' => 'لغوشده به درخواست ثبت‌کننده'" in bootstrap,
       "cancelled is a terminal, human-readable ticket status")
