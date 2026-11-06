@@ -676,35 +676,39 @@ if (!defined('APP_ROOT')) {
             if (mb_strlen($updateNote, 'UTF-8') > 5000) {
                 throw new RuntimeException('پیام مدیریت درخواست نباید بیشتر از ۵۰۰۰ نویسه باشد.');
             }
-            $fields = 'status = ?, priority = ?, assigned_to = ?, updated_at = NOW()';
-            $params = [$status, $priority, $assignee];
-            if ($assignee) {
-                $fields .= $assigneeChanged ? ', assigned_at = NOW()' : ', assigned_at = COALESCE(assigned_at, NOW())';
-            } else {
-                $fields .= ', assigned_at = NULL';
-            }
-            if ($status === 'resolved') {
-                $fields .= ', resolved_at = COALESCE(resolved_at, NOW())';
-            } else {
-                $fields .= ', resolved_at = NULL';
-            }
-             $slaMinutes = priority_sla_minutes($priority);
-             [$newDueAt, $newPauseAt, $newPauseMinutes] = ticket_sla_transition($ticket, $status, $priority);
-             $ola = ticket_ola_transition($ticket, $status, $priority);
-             $fields .= ', sla_minutes = ?, due_at = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, sla_paused_at = ?, sla_pause_minutes = ?';
-             array_push($params, $slaMinutes, $newDueAt, $ola['policy_id'], $ola['response_due_at'], $ola['due_at'], $ola['escalation_1_at'], $ola['escalation_2_at'], $newPauseAt, $newPauseMinutes);
-            $params[] = $ticketId;
-            $params[] = $oldStatus;
+            $slaMinutes = priority_sla_minutes($priority);
+            [$newDueAt, $newPauseAt, $newPauseMinutes] = ticket_sla_transition($ticket, $status, $priority);
+            $ola = ticket_ola_transition($ticket, $status, $priority);
+            $workflowUpdates = [
+                'priority' => $priority,
+                'assigned_to' => $assignee,
+                'assigned_at' => $assignee
+                    ? ($assigneeChanged ? RequestCenterSqlExpression::now() : RequestCenterSqlExpression::coalesceNow())
+                    : null,
+                'resolved_at' => $status === 'resolved'
+                    ? RequestCenterSqlExpression::coalesceNow()
+                    : null,
+                'sla_minutes' => $slaMinutes,
+                'due_at' => $newDueAt,
+                'ola_policy_id' => $ola['policy_id'],
+                'ola_response_due_at' => $ola['response_due_at'],
+                'ola_due_at' => $ola['due_at'],
+                'ola_escalation_1_at' => $ola['escalation_1_at'],
+                'ola_escalation_2_at' => $ola['escalation_2_at'],
+                'sla_paused_at' => $newPauseAt,
+                'sla_pause_minutes' => $newPauseMinutes,
+            ];
             db()->beginTransaction();
-            $updateLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority FROM tickets WHERE id = ? FOR UPDATE');
-            $updateLock->execute([$ticketId]);
-            $lockedTicket = $updateLock->fetch();
-            if (!$lockedTicket || (string) $lockedTicket['status'] !== $oldStatus || !empty($lockedTicket['cancel_requested_at'])
-                || (int) ($lockedTicket['assigned_to'] ?? 0) !== (int) ($ticket['assigned_to'] ?? 0)
-                || (string) $lockedTicket['priority'] !== (string) $ticket['priority']) {
-                throw new RuntimeException('وضعیت یا درخواست لغو درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+            $workflow = new RequestCenterWorkflowService(db());
+            $workflowKind = $status === $oldStatus ? 'same_state' : 'standard';
+            $updated = $workflow->transition($ticketId, $oldStatus, $status, $workflowUpdates, $workflowKind, [
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'priority' => $ticket['priority'],
+                'cancel_requested_at' => null,
+            ]);
+            if (!$updated) {
+                throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
-            db()->prepare('UPDATE tickets SET ' . $fields . ' WHERE id = ? AND status = ? AND cancel_requested_at IS NULL')->execute($params);
             save_audit_required((int) $staffUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'priority' => $priority]);
             if ($updateNote !== '') {
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $staffUser['id'], $updateNote]);
