@@ -7,7 +7,9 @@
 - Repository: modules/request-center/RequestCenterRepository.php
 - ممیزی As-Is: docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md
 - قرارداد CI: .github/workflows/request-center-contract.yml
-- آخرین بازتولید نقشه: commit f6f41aa7916f7d8e98a3b09afedf0c8d3ae4d8b6
+- آخرین بازتولید نقشه: commit f09593e68bfff4ebcf87c6b078e5e0798c900b48
 - تست‌های نقشه: test_system_map_static.py و test_system_map_blocks.py
 
 این برش فقط خواندنی است؛ انتقال عملیات نوشتن، WorkflowService، چهار فضای کاری کامل، تقویم کارشناسان و بستهٔ انتشار در مراحل بعد قرار دارند. این یادداشت و CI موفق به‌معنی مجوز ادغام به main یا نصب روی سامانه عملیاتی نیستند.
+
+- فایل CI عمومی شاخه با نسخهٔ فعلی main همسان‌سازی شده است؛ تغییر رفتاری برنامه در این فایل وجود ندارد.
