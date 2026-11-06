@@ -416,7 +416,7 @@ migrations/030-logging-notification-idempotency-and-ticket-history.sql	migration
 migrations/031-food-worker-window.sql	migrations	99	5449
 migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
-modules/request-center/README.md	other	40	3662
+modules/request-center/README.md	other	52	5741
 modules/request-center/RequestCenterRepository.php	other	210	8822
 modules/request-center/WorkflowService.php	other	243	10801
 ola.php	core	111	11934
