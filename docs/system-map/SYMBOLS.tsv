@@ -2142,6 +2142,17 @@ listVisible	function	modules/request-center/RequestCenterRepository.php	72	other
 findVisible	function	modules/request-center/RequestCenterRepository.php	102	other
 messages	function	modules/request-center/RequestCenterRepository.php	133	other
 attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	152	other
+RequestCenterSqlExpression	class	modules/request-center/WorkflowService.php	11	other
+__construct	function	modules/request-center/WorkflowService.php	13	other
+now	function	modules/request-center/WorkflowService.php	16	other
+coalesceNow	function	modules/request-center/WorkflowService.php	21	other
+RequestCenterWorkflowService	class	modules/request-center/WorkflowService.php	27	other
+STATUSES	const	modules/request-center/WorkflowService.php	30	other
+UPDATE_COLUMNS	const	modules/request-center/WorkflowService.php	34	other
+__construct	function	modules/request-center/WorkflowService.php	45	other
+allowedTransitions	function	modules/request-center/WorkflowService.php	49	other
+transition	function	modules/request-center/WorkflowService.php	81	other
+assertTransitionAllowed	function	modules/request-center/WorkflowService.php	162	other
 ola_post	function	ola.php	5	core
 ola_header	function	ola.php	10	core
 ola_footer	function	ola.php	23	core
