@@ -13,6 +13,7 @@ declare(strict_types=1);
  *   C:\xampp\php\php.exe C:\xampp\htdocs\ticket\cron\ticket_auto_close.php
  */
 require dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';
 if (function_exists('ticket_hot_schema_ensure')) {
     ticket_hot_schema_ensure();
 }
