@@ -1367,8 +1367,8 @@
         "PAGE-034.84"
       ],
       "related": [
-        "ACT-005.04",
         "PAGE-034.30",
+        "ACT-005.04",
         "PAGE-043.03",
         "PAGE-030.03",
         "PAGE-034.48",
@@ -4715,9 +4715,9 @@
         "TOOL-047.24",
         "ACT-015.03",
         "PAGE-034.89",
-        "ACT-005.04",
         "ACT-014.04",
-        "ACT-015.04"
+        "ACT-015.04",
+        "ACT-015.07"
       ],
       "total": 29
     },
@@ -4847,7 +4847,7 @@
         "PAGE-034.42",
         "TOOL-047.24"
       ],
-      "total": 179
+      "total": 178
     },
     {
       "id": "table:tmp_asset_dedupe_map",
@@ -5269,8 +5269,8 @@
       "area": "ACT",
       "line": 44,
       "anchor": "مسیر: bulk_update_tickets",
-      "risk": 7,
-      "lines": 91
+      "risk": 2,
+      "lines": 104
     },
     "ACT-006.01": {
       "path": "actions/cd-dvd-actions.php",
@@ -5830,20 +5830,20 @@
       "line": 40,
       "anchor": "مسیر: supervisor_decision",
       "risk": 7,
-      "lines": 57
+      "lines": 74
     },
     "ACT-014.05": {
       "path": "actions/supervisor-actions.php",
       "area": "ACT",
-      "line": 97,
+      "line": 114,
       "anchor": "مسیر: supervisor_reopen",
       "risk": 2,
-      "lines": 34
+      "lines": 50
     },
     "ACT-014.06": {
       "path": "actions/supervisor-actions.php",
       "area": "ACT",
-      "line": 131,
+      "line": 164,
       "anchor": "مسیر: rate_ticket",
       "risk": 2,
       "lines": 42
@@ -14404,9 +14404,9 @@
       "path": "cron/ticket_auto_close.php",
       "area": "CRON",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-79",
+      "anchor": "بلوک رویه‌ای 1-85",
       "risk": 5,
-      "lines": 79
+      "lines": 85
     },
     "CRON-013.01": {
       "path": "cron/verify_logging_integrity.php",

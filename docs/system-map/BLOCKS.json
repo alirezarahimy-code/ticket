@@ -432,8 +432,8 @@
             "id": "ACT-005",
             "path": "actions\/bulk-actions.php",
             "area": "ACT",
-            "lines": 134,
-            "file_fingerprint": "f0c0fc6e6c73",
+            "lines": 147,
+            "file_fingerprint": "d96b40c20ece",
             "blocks": [
                 {
                     "kind": "region",
@@ -482,13 +482,12 @@
                     "kind": "region",
                     "anchor": "مسیر: bulk_update_tickets",
                     "line_start": 44,
-                    "line_end": 134,
-                    "lines": 91,
-                    "fingerprint": "f25f337f8c3d",
+                    "line_end": 147,
+                    "lines": 104,
+                    "fingerprint": "d7720e40a4bb",
                     "risk": {
-                        "score": 7,
+                        "score": 2,
                         "flags": {
-                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -1503,8 +1502,8 @@
             "id": "ACT-014",
             "path": "actions\/supervisor-actions.php",
             "area": "ACT",
-            "lines": 172,
-            "file_fingerprint": "b14e9a052d4d",
+            "lines": 205,
+            "file_fingerprint": "5bd40133bfed",
             "blocks": [
                 {
                     "kind": "region",
@@ -1551,9 +1550,9 @@
                     "kind": "region",
                     "anchor": "مسیر: supervisor_decision",
                     "line_start": 40,
-                    "line_end": 96,
-                    "lines": 57,
-                    "fingerprint": "b47105f9e751",
+                    "line_end": 113,
+                    "lines": 74,
+                    "fingerprint": "491a13d46829",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -1566,10 +1565,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: supervisor_reopen",
-                    "line_start": 97,
-                    "line_end": 130,
-                    "lines": 34,
-                    "fingerprint": "32326f4c44b5",
+                    "line_start": 114,
+                    "line_end": 163,
+                    "lines": 50,
+                    "fingerprint": "c60bdcd5863a",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -1581,8 +1580,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: rate_ticket",
-                    "line_start": 131,
-                    "line_end": 172,
+                    "line_start": 164,
+                    "line_end": 205,
                     "lines": 42,
                     "fingerprint": "8d51d29d754e",
                     "risk": {
@@ -16408,16 +16407,16 @@
             "id": "CRON-012",
             "path": "cron\/ticket_auto_close.php",
             "area": "CRON",
-            "lines": 79,
-            "file_fingerprint": "994f8960f6d8",
+            "lines": 85,
+            "file_fingerprint": "55001947619b",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-79",
+                    "anchor": "بلوک رویه‌ای 1-85",
                     "line_start": 1,
-                    "line_end": 79,
-                    "lines": 79,
-                    "fingerprint": "994f8960f6d8",
+                    "line_end": 85,
+                    "lines": 85,
+                    "fingerprint": "55001947619b",
                     "risk": {
                         "score": 5,
                         "flags": {

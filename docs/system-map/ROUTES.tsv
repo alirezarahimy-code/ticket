@@ -26,7 +26,7 @@ action	create_backup	actions/backup-actions.php	18
 action	restore_backup	actions/backup-actions.php	25
 action	system_update	actions/backup-actions.php	41
 page	inventory	actions/bulk-actions.php	41
-page	queue	actions/bulk-actions.php	132
+page	queue	actions/bulk-actions.php	145
 action	add_asset_relation	actions/bulk-actions.php	24
 action	bulk_update_tickets	actions/bulk-actions.php	44
 page	cd-dvd	actions/cd-dvd-actions.php	28
@@ -85,12 +85,12 @@ action	diagnose_ldap	actions/settings-actions.php	77
 action	save_triangle_effect	actions/settings-actions.php	91
 action	save_settings	actions/settings-actions.php	165
 page	dashboard	actions/supervisor-actions.php	38
-page	supervisor	actions/supervisor-actions.php	94
-page	ticket	actions/supervisor-actions.php	170
+page	supervisor	actions/supervisor-actions.php	111
+page	ticket	actions/supervisor-actions.php	203
 action	food_order_cancel_decide	actions/supervisor-actions.php	26
 action	supervisor_decision	actions/supervisor-actions.php	40
-action	supervisor_reopen	actions/supervisor-actions.php	97
-action	rate_ticket	actions/supervisor-actions.php	131
+action	supervisor_reopen	actions/supervisor-actions.php	114
+action	rate_ticket	actions/supervisor-actions.php	164
 page	ticket	actions/ticket-actions.php	219
 action	create_ticket	actions/ticket-actions.php	30
 action	cancel_ticket	actions/ticket-actions.php	222

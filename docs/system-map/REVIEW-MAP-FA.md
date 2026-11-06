@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,359 |
+| خطوط | 125,411 |
 | آدرس‌ها (بلوک) | 6,670 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -84,12 +84,12 @@
 | درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:591</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:443</sub> | 12 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
 | درخواست | **ویرایش** | `ticket.bulk` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub> | 4 |
-| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-014.06` <sub>actions/supervisor-actions.php:131</sub> | 6 |
+| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-014.06` <sub>actions/supervisor-actions.php:164</sub> | 6 |
 | درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `ACT-005.03` <sub>actions/bulk-actions.php:24</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
 | درخواست | **صف کاری** | `queue.view` | `PAGE-034.84` <sub>index.php:2008</sub> | 9 |
-| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `ACT-014.04` <sub>actions/supervisor-actions.php:40</sub><br>`ACT-014.05` <sub>actions/supervisor-actions.php:97</sub><br>`PAGE-034.92` <sub>index.php:2655</sub> | 9 |
+| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `ACT-014.04` <sub>actions/supervisor-actions.php:40</sub><br>`ACT-014.05` <sub>actions/supervisor-actions.php:114</sub><br>`PAGE-034.92` <sub>index.php:2655</sub> | 9 |
 | درخواست | **ویرایش** | `supervisor.decide` | `ACT-014.04` <sub>actions/supervisor-actions.php:40</sub> | 4 |
-| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `ACT-014.05` <sub>actions/supervisor-actions.php:97</sub> | 3 |
+| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `ACT-014.05` <sub>actions/supervisor-actions.php:114</sub> | 3 |
 | خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 5 |
 | خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `ACT-012.03` <sub>actions/service-actions.php:29</sub><br>`ACT-012.07` <sub>actions/service-actions.php:155</sub><br>`PAGE-043.03` <sub>permissions.php:28</sub> | 8 |
 | خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-043.03` <sub>permissions.php:28</sub><br>`ACT-016.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-043.16` <sub>permissions.php:350</sub> | 3 |
@@ -257,7 +257,7 @@
 | `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-039.44` <sub>schema.sql:767</sub> | 12 |
 | `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-039.23` <sub>schema.sql:350</sub> | 18 |
 | `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-039.29` <sub>schema.sql:447</sub> | 13 |
-| `tickets` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 179 |
+| `tickets` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 178 |
 | `tmp_asset_dedupe_map` | `DB-018.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-018.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-018.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
 | `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-039.14` <sub>schema.sql:156</sub> | 31 |
 | `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-039.16` <sub>schema.sql:196</sub> | 10 |
@@ -291,9 +291,9 @@
 | `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,448 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
-| `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,052 |
+| `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,098 |
 | `CORE` | موتور مشترک (lib/) | 15 | 306 | 7,264 |
-| `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,453 |
+| `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,459 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
 
 ## نشانه‌های ریسک
@@ -305,7 +305,7 @@
 | `write_no_tx` | نوشتن بدون تراکنش | 824 |
 | `error_suppression` | سرکوب @ | 273 |
 | `dangerous_call` | فراخوانی خطرناک | 190 |
-| `sql_concat` | الحاق در SQL | 182 |
+| `sql_concat` | الحاق در SQL | 181 |
 | `raw_input` | ورودی خام | 176 |
 | `long` | >۱۲۰ خط | 122 |
 | `silent_catch` | catch بی‌صدا | 122 |
@@ -10595,14 +10595,14 @@
 </details>
 
 <details>
-<summary><b>ACT-005</b> — <code>actions/bulk-actions.php</code> (134 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>ACT-005</b> — <code>actions/bulk-actions.php</code> (147 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `ACT-005.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
 | `ACT-005.02` | 17–23 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `ACT-005.03` | 24–43 | ناحیه | `مسیر: add_asset_relation` | **8** | ⬜ |
-| `ACT-005.04` | 44–134 | ناحیه | `مسیر: bulk_update_tickets` | 7 | ⬜ |
+| `ACT-005.04` | 44–147 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
 
 </details>
 
@@ -10737,16 +10737,16 @@
 </details>
 
 <details>
-<summary><b>ACT-014</b> — <code>actions/supervisor-actions.php</code> (172 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>ACT-014</b> — <code>actions/supervisor-actions.php</code> (205 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `ACT-014.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
 | `ACT-014.02` | 19–25 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `ACT-014.03` | 26–39 | ناحیه | `مسیر: food_order_cancel_decide` | 2 | ⬜ |
-| `ACT-014.04` | 40–96 | ناحیه | `مسیر: supervisor_decision` | 7 | ⬜ |
-| `ACT-014.05` | 97–130 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
-| `ACT-014.06` | 131–172 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
+| `ACT-014.04` | 40–113 | ناحیه | `مسیر: supervisor_decision` | 7 | ⬜ |
+| `ACT-014.05` | 114–163 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
+| `ACT-014.06` | 164–205 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
 
 </details>
 
@@ -11336,11 +11336,11 @@
 </details>
 
 <details>
-<summary><b>CRON-012</b> — <code>cron/ticket_auto_close.php</code> (79 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>CRON-012</b> — <code>cron/ticket_auto_close.php</code> (85 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `CRON-012.01` | 1–79 | ناحیه | `بلوک رویه‌ای 1-79` | 5 | ⬜ |
+| `CRON-012.01` | 1–85 | ناحیه | `بلوک رویه‌ای 1-85` | 5 | ⬜ |
 
 </details>
 

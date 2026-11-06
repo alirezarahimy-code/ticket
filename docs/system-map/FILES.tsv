@@ -112,7 +112,7 @@ actions/access-group-actions.php	actions	197	9107
 actions/account-actions.php	actions	124	8462
 actions/asset-actions.php	actions	431	27566
 actions/backup-actions.php	actions	53	3903
-actions/bulk-actions.php	actions	133	10394
+actions/bulk-actions.php	actions	146	10682
 actions/cd-dvd-actions.php	actions	41	1903
 actions/food-brand-actions.php	actions	45	2756
 actions/holiday-actions.php	actions	193	12053
@@ -121,7 +121,7 @@ actions/org-actions.php	actions	842	66776
 actions/role-actions.php	actions	161	9369
 actions/service-actions.php	actions	228	14500
 actions/settings-actions.php	actions	274	17803
-actions/supervisor-actions.php	actions	171	14875
+actions/supervisor-actions.php	actions	204	15442
 actions/ticket-actions.php	actions	737	58936
 actions/user-structure-actions.php	actions	372	29121
 admin-layout-design.php	core	361	15733
@@ -199,7 +199,7 @@ cron/run_logging_integrity_export.bat	cron	20	1605
 cron/run_logging_maintenance.bat	cron	40	1970
 cron/run_logging_retention.bat	cron	12	508
 cron/sla_maintenance.php	cron	93	5532
-cron/ticket_auto_close.php	cron	78	4836
+cron/ticket_auto_close.php	cron	84	4966
 cron/verify_logging_integrity.php	cron	26	1365
 cron/verify_logging_release.php	cron	25	4981
 docs/ARCHITECTURE-FA.md	docs	167	17142
