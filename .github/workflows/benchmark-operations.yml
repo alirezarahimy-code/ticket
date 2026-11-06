@@ -320,7 +320,7 @@ jobs:
           retention-days: 14
 
       - name: Commit isolated operations report for remote review
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           test -f benchmark-results/benchmark-operations.md
