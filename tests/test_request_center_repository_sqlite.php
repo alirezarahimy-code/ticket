@@ -70,6 +70,10 @@ $privateSearch = $repository->listVisible($user, 1, 50, ['q' => 'Private']);
 check_request_center($privateSearch['total'] === 0, 'search cannot reveal another requester ticket');
 $filtered = $repository->listVisible($user, 1, 50, ['status' => 'assigned', 'priority' => 'normal', 'service_group' => 'it']);
 check_request_center($filtered['total'] === 1, 'status, priority and service-group filters compose with the access scope');
+$crossRequesterFilter = $repository->listVisible($user, 1, 50, ['requester_id' => 2]);
+check_request_center($crossRequesterFilter['total'] === 0, 'requester workspace filter cannot override the shared access scope');
+$ownRequesterFilter = $repository->listVisible($user, 1, 50, ['requester_id' => 1]);
+check_request_center($ownRequesterFilter['total'] === 1, 'requester workspace can explicitly constrain the list to the signed-in requester');
 $injection = $repository->listVisible($user, 1, 50, ['q' => "' OR 1=1 --"]);
 check_request_center($injection['total'] === 0, 'search input remains parameterized and cannot broaden visibility');
 
