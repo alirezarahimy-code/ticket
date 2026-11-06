@@ -61,7 +61,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
             source = read(path)
             self.assertNotRegex(
                 source,
-                r"UPDATE\\s+tickets\\s+SET\\s+status\\s*=",
+                r"UPDATE\s+tickets\s+SET\s+status\s*=",
                 f"direct ticket status write remains in {path}",
             )
             self.assertIn("WorkflowService", source, f"workflow service is not loaded/used in {path}")
