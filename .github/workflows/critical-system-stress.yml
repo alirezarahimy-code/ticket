@@ -1,6 +1,9 @@
 name: Critical System Stress — Full ITSM, Food, Traffic and CD/DVD
 
 on:
+  pull_request:
+    branches:
+      - test/1.62.88-logging-stress-harness
   workflow_dispatch:
 
 permissions:
