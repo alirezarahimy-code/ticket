@@ -42,6 +42,14 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertNotIn(marker, combined)
 
+    def test_transition_policy_is_owned_by_module_service(self):
+        service = read("modules/request-center/WorkflowService.php")
+        index = read("index.php")
+        self.assertIn("public static function allowedTransitions(", service)
+        self.assertIn("public function transition(", service)
+        self.assertIn("FOR UPDATE", service)
+        self.assertIn("RequestCenterWorkflowService::allowedTransitions($from)", index)
+
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
         entry = read("request-center.php")
         self.assertIn("htmlspecialchars(", entry)
