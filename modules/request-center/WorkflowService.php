@@ -128,14 +128,15 @@ final class RequestCenterWorkflowService
 
         $this->assertTransitionAllowed($current, $expectedStatus, $targetStatus, $kind);
 
+        $nowExpression = $driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()';
         $sets = ['status = ?'];
         $params = [$targetStatus];
         foreach ($updates as $column => $value) {
             if ($value instanceof RequestCenterSqlExpression) {
                 if ($value->kind === 'now') {
-                    $sets[] = $column . ' = NOW()';
+                    $sets[] = $column . ' = ' . $nowExpression;
                 } elseif ($value->kind === 'coalesce_now') {
-                    $sets[] = $column . ' = COALESCE(' . $column . ', NOW())';
+                    $sets[] = $column . ' = COALESCE(' . $column . ', ' . $nowExpression . ')';
                 } else {
                     throw new InvalidArgumentException('عبارت SQL برای گذار ناشناخته است.');
                 }
@@ -144,7 +145,7 @@ final class RequestCenterWorkflowService
                 $params[] = $value;
             }
         }
-        $sets[] = 'updated_at = NOW()';
+        $sets[] = 'updated_at = ' . $nowExpression;
         $params[] = $ticketId;
         $params[] = $expectedStatus;
 
