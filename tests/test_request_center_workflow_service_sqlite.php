@@ -29,6 +29,10 @@ $insert->execute([3, 'assigned', 12, 22, 'normal', '2026-11-01 10:00:00']);
 $insert->execute([4, 'resolved', 13, 23, 'normal', null]);
 $insert->execute([5, 'closed', 14, 24, 'normal', null]);
 $insert->execute([6, 'assigned', 15, 25, 'normal', null]);
+$insert->execute([7, 'new', 16, null, 'normal', null]);
+$insert->execute([8, 'resolved', 17, 27, 'normal', null]);
+$insert->execute([9, 'resolved', 18, 28, 'normal', null]);
+$insert->execute([10, 'resolved', 19, 29, 'normal', null]);
 
 $service = new RequestCenterWorkflowService($pdo);
 workflow_check(
@@ -108,6 +112,34 @@ $pdo->beginTransaction();
 $guarded = $service->transition(6, 'assigned', 'in_progress', [], 'standard', ['priority' => 'urgent']);
 $pdo->rollBack();
 workflow_check(!$guarded, 'optimistic field guards reject changed priority');
+
+$pdo->beginTransaction();
+workflow_check(
+    $service->transition(7, 'new', 'cancelled', ['due_at' => null], 'requester_cancel', ['requester_id' => 16]),
+    'requester can cancel an unassigned request before first response'
+);
+$pdo->commit();
+
+$pdo->beginTransaction();
+workflow_check(
+    $service->transition(8, 'resolved', 'in_progress', ['resolved_at' => null], 'requester_reopen'),
+    'requester reopen follows the explicit resolved-to-in-progress exception'
+);
+$pdo->commit();
+
+$pdo->beginTransaction();
+workflow_check(
+    $service->transition(9, 'resolved', 'in_progress', ['resolved_at' => null, 'supervisor_note' => 'rework'], 'supervisor_rework'),
+    'supervisor rework follows its explicit exception'
+);
+$pdo->commit();
+
+$pdo->beginTransaction();
+workflow_check(
+    $service->transition(10, 'resolved', 'closed', ['closed_at' => RequestCenterSqlExpression::coalesceNow()], 'supervisor_close'),
+    'supervisor close follows its explicit exception'
+);
+$pdo->commit();
 
 $noTransaction = false;
 try {
