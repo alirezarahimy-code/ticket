@@ -4095,8 +4095,8 @@
         "PAGE-035.13",
         "TOOL-008.02",
         "ACT-015.03",
-        "ACT-015.09",
-        "PAGE-034.89"
+        "PAGE-034.89",
+        "PAGE-034.66"
       ],
       "total": 40
     },
@@ -4714,10 +4714,10 @@
       "related": [
         "TOOL-047.24",
         "ACT-015.03",
-        "ACT-015.09",
         "PAGE-034.89",
         "ACT-005.04",
-        "ACT-014.04"
+        "ACT-014.04",
+        "ACT-015.04"
       ],
       "total": 29
     },
@@ -4847,7 +4847,7 @@
         "PAGE-034.42",
         "TOOL-047.24"
       ],
-      "total": 180
+      "total": 179
     },
     {
       "id": "table:tmp_asset_dedupe_map",
@@ -5917,8 +5917,8 @@
       "area": "ACT",
       "line": 591,
       "anchor": "مسیر: update_ticket",
-      "risk": 8,
-      "lines": 144
+      "risk": 3,
+      "lines": 148
     },
     "ACT-016.01": {
       "path": "actions/user-structure-actions.php",

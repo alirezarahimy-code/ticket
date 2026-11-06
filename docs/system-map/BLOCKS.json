@@ -1599,8 +1599,8 @@
             "id": "ACT-015",
             "path": "actions\/ticket-actions.php",
             "area": "ACT",
-            "lines": 734,
-            "file_fingerprint": "ba17341f3ee2",
+            "lines": 738,
+            "file_fingerprint": "9b0c66cd2e8d",
             "blocks": [
                 {
                     "kind": "region",
@@ -1727,13 +1727,12 @@
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
                     "line_start": 591,
-                    "line_end": 734,
-                    "lines": 144,
-                    "fingerprint": "2affc4387c67",
+                    "line_end": 738,
+                    "lines": 148,
+                    "fingerprint": "410e0f2179bc",
                     "risk": {
-                        "score": 8,
+                        "score": 3,
                         "flags": {
-                            "sql_concat": 5,
                             "raw_input": 2,
                             "long": 1
                         }

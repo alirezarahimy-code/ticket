@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,355 |
+| خطوط | 125,359 |
 | آدرس‌ها (بلوک) | 6,670 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -257,7 +257,7 @@
 | `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-039.44` <sub>schema.sql:767</sub> | 12 |
 | `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-039.23` <sub>schema.sql:350</sub> | 18 |
 | `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-039.29` <sub>schema.sql:447</sub> | 13 |
-| `tickets` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 180 |
+| `tickets` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 179 |
 | `tmp_asset_dedupe_map` | `DB-018.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-018.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-018.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
 | `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-039.14` <sub>schema.sql:156</sub> | 31 |
 | `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-039.16` <sub>schema.sql:196</sub> | 10 |
@@ -291,7 +291,7 @@
 | `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,448 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
-| `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,048 |
+| `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,052 |
 | `CORE` | موتور مشترک (lib/) | 15 | 306 | 7,264 |
 | `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,453 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
@@ -305,7 +305,7 @@
 | `write_no_tx` | نوشتن بدون تراکنش | 824 |
 | `error_suppression` | سرکوب @ | 273 |
 | `dangerous_call` | فراخوانی خطرناک | 190 |
-| `sql_concat` | الحاق در SQL | 183 |
+| `sql_concat` | الحاق در SQL | 182 |
 | `raw_input` | ورودی خام | 176 |
 | `long` | >۱۲۰ خط | 122 |
 | `silent_catch` | catch بی‌صدا | 122 |
@@ -10751,7 +10751,7 @@
 </details>
 
 <details>
-<summary><b>ACT-015</b> — <code>actions/ticket-actions.php</code> (734 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>ACT-015</b> — <code>actions/ticket-actions.php</code> (738 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -10763,7 +10763,7 @@
 | `ACT-015.06` | 358–397 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
 | `ACT-015.07` | 398–442 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
 | `ACT-015.08` | 443–590 | ناحیه | `مسیر: reply` | 3 | ⬜ |
-| `ACT-015.09` | 591–734 | ناحیه | `مسیر: update_ticket` | **8** | ⬜ |
+| `ACT-015.09` | 591–738 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
 
 </details>
 
