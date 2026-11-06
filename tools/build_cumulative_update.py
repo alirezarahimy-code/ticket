@@ -219,6 +219,7 @@ def build(output_dir: Path) -> tuple[Path, Path]:
 
     manifest["version"] = RELEASE_VERSION
     manifest["requires_version"] = REQUIRES_VERSION
+    manifest["title"] = "سخت‌سازی نصب‌کننده، Logging و بازیابی (1.62.77 ← 1.62.83)"
     manifest["files"] = sorted(files)
     manifest["sha256"] = {name: sha256(files[name]) for name in sorted(files)}
     manifest["migrations"] = sorted(migrations)
