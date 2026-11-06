@@ -66,7 +66,7 @@ if ($workspace === 'agent') {
     $workspaceTitle .= $agentView === 'team' ? ' — صف گروهی' : ' — صف شخصی';
 }
 if ($workspace === 'agent') {
-    $workspaceUrl .= '&amp;agent_view=' . rawurlencode($agentView);
+    $workspaceUrl .= '&agent_view=' . rawurlencode($agentView);
 }
 if ($workspaceOptions === []) {
     http_response_code(403);
