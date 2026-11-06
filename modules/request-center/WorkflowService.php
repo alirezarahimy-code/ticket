@@ -34,7 +34,7 @@ final class RequestCenterWorkflowService
 
     private const UPDATE_COLUMNS = [
         'assigned_to', 'assigned_at', 'due_at', 'sla_minutes', 'sla_paused_at',
-        'sla_pause_minutes', 'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
+        'sla_pause_minutes', 'first_response_at', 'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
         'ola_escalation_1_at', 'ola_escalation_2_at', 'resolved_at', 'closed_at',
         'supervisor_id', 'supervisor_approved_at', 'supervisor_note',
         'cancel_requested_at', 'cancel_requested_by', 'cancel_request_reason',
