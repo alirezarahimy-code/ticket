@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,573 |
+| خطوط | 125,598 |
 | آدرس‌ها (بلوک) | 6,671 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -285,10 +285,10 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 216 | 1,578 | 19,957 |
+| `TEST` | TEST | 216 | 1,578 | 19,969 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,507 |
+| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,520 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
 | `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,098 |
@@ -2836,13 +2836,13 @@
 </details>
 
 <details>
-<summary><b>TEST-167</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (173 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-167</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (185 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-167.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
 | `TEST-167.02` | 6–12 | تابع | `workflow_check` | 0 | ⬜ |
-| `TEST-167.03` | 13–173 | ناحیه | `بلوک رویه‌ای 13-173` | 5 | ⬜ |
+| `TEST-167.03` | 13–185 | ناحیه | `بلوک رویه‌ای 13-185` | 5 | ⬜ |
 
 </details>
 
@@ -8474,13 +8474,13 @@
 </details>
 
 <details>
-<summary><b>PAGE-040</b> — <code>modules/request-center/WorkflowService.php</code> (244 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-040</b> — <code>modules/request-center/WorkflowService.php</code> (257 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-040.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
 | `PAGE-040.02` | 4–34 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
-| `PAGE-040.03` | 36–243 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
+| `PAGE-040.03` | 36–256 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
 
 </details>
 
