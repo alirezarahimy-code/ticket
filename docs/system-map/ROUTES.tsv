@@ -94,11 +94,11 @@ action	rate_ticket	actions/supervisor-actions.php	131
 page	ticket	actions/ticket-actions.php	219
 action	create_ticket	actions/ticket-actions.php	30
 action	cancel_ticket	actions/ticket-actions.php	222
-action	decide_ticket_cancellation	actions/ticket-actions.php	271
-action	claim_ticket	actions/ticket-actions.php	336
-action	reopen_ticket	actions/ticket-actions.php	373
-action	reply	actions/ticket-actions.php	408
-action	update_ticket	actions/ticket-actions.php	530
+action	decide_ticket_cancellation	actions/ticket-actions.php	280
+action	claim_ticket	actions/ticket-actions.php	358
+action	reopen_ticket	actions/ticket-actions.php	398
+action	reply	actions/ticket-actions.php	443
+action	update_ticket	actions/ticket-actions.php	565
 page	settings	actions/user-structure-actions.php	37
 action	add_category	actions/user-structure-actions.php	29
 action	add_department	actions/user-structure-actions.php	40

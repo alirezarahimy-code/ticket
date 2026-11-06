@@ -122,7 +122,7 @@ actions/role-actions.php	actions	161	9369
 actions/service-actions.php	actions	228	14500
 actions/settings-actions.php	actions	274	17803
 actions/supervisor-actions.php	actions	171	14875
-actions/ticket-actions.php	actions	672	57961
+actions/ticket-actions.php	actions	707	58386
 actions/user-structure-actions.php	actions	372	29121
 admin-layout-design.php	core	361	15733
 api/inventory.php	api	205	9604

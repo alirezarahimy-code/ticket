@@ -1599,8 +1599,8 @@
             "id": "ACT-015",
             "path": "actions\/ticket-actions.php",
             "area": "ACT",
-            "lines": 673,
-            "file_fingerprint": "50e1e88ec245",
+            "lines": 708,
+            "file_fingerprint": "a541099ad763",
             "blocks": [
                 {
                     "kind": "region",
@@ -1649,9 +1649,9 @@
                     "kind": "region",
                     "anchor": "مسیر: cancel_ticket",
                     "line_start": 222,
-                    "line_end": 270,
-                    "lines": 49,
-                    "fingerprint": "5129bd170170",
+                    "line_end": 279,
+                    "lines": 58,
+                    "fingerprint": "143103280b33",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -1664,10 +1664,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: decide_ticket_cancellation",
-                    "line_start": 271,
-                    "line_end": 335,
-                    "lines": 65,
-                    "fingerprint": "de4911c1c5c3",
+                    "line_start": 280,
+                    "line_end": 357,
+                    "lines": 78,
+                    "fingerprint": "dd41e5796ddf",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -1679,10 +1679,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: claim_ticket",
-                    "line_start": 336,
-                    "line_end": 372,
-                    "lines": 37,
-                    "fingerprint": "489d2061ea8c",
+                    "line_start": 358,
+                    "line_end": 397,
+                    "lines": 40,
+                    "fingerprint": "e2c3a645fab9",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -1694,10 +1694,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: reopen_ticket",
-                    "line_start": 373,
-                    "line_end": 407,
-                    "lines": 35,
-                    "fingerprint": "40afaf9a2c66",
+                    "line_start": 398,
+                    "line_end": 442,
+                    "lines": 45,
+                    "fingerprint": "473cf0827e39",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -1710,8 +1710,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: reply",
-                    "line_start": 408,
-                    "line_end": 529,
+                    "line_start": 443,
+                    "line_end": 564,
                     "lines": 122,
                     "fingerprint": "f99e079e7e9c",
                     "risk": {
@@ -1727,8 +1727,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
-                    "line_start": 530,
-                    "line_end": 673,
+                    "line_start": 565,
+                    "line_end": 708,
                     "lines": 144,
                     "fingerprint": "2affc4387c67",
                     "risk": {

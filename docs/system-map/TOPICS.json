@@ -4847,7 +4847,7 @@
         "PAGE-034.42",
         "TOOL-047.24"
       ],
-      "total": 182
+      "total": 180
     },
     {
       "id": "table:tmp_asset_dedupe_map",
@@ -5878,36 +5878,36 @@
       "line": 222,
       "anchor": "مسیر: cancel_ticket",
       "risk": 7,
-      "lines": 49
+      "lines": 58
     },
     "ACT-015.05": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 271,
+      "line": 280,
       "anchor": "مسیر: decide_ticket_cancellation",
       "risk": 2,
-      "lines": 65
+      "lines": 78
     },
     "ACT-015.06": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 336,
+      "line": 358,
       "anchor": "مسیر: claim_ticket",
       "risk": 2,
-      "lines": 37
+      "lines": 40
     },
     "ACT-015.07": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 373,
+      "line": 398,
       "anchor": "مسیر: reopen_ticket",
       "risk": 7,
-      "lines": 35
+      "lines": 45
     },
     "ACT-015.08": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 408,
+      "line": 443,
       "anchor": "مسیر: reply",
       "risk": 8,
       "lines": 122
@@ -5915,7 +5915,7 @@
     "ACT-015.09": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 530,
+      "line": 565,
       "anchor": "مسیر: update_ticket",
       "risk": 8,
       "lines": 144
