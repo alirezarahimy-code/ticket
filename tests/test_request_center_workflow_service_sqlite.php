@@ -144,12 +144,24 @@ $pdo->commit();
 
 $pdo->beginTransaction();
 workflow_check(
-    $service->transition(11, 'assigned', 'assigned', ['supervisor_note' => 'reply while cancellation is pending'], 'same_state', [
+    $service->transition(11, 'assigned', 'assigned', ['first_response_at' => RequestCenterSqlExpression::coalesceNow()], 'same_state', [
         'cancel_requested_at' => '2026-11-01 12:00:00',
     ]),
     'same-state conversation metadata can be persisted while cancellation decision is pending'
 );
 $pdo->commit();
+
+$blockedPendingAssignment = false;
+$pdo->beginTransaction();
+try {
+    $service->transition(11, 'assigned', 'assigned', ['assigned_to' => 31], 'same_state', [
+        'cancel_requested_at' => '2026-11-01 12:00:00',
+    ]);
+} catch (RuntimeException) {
+    $blockedPendingAssignment = true;
+}
+$pdo->rollBack();
+workflow_check($blockedPendingAssignment, 'same-state pending-cancellation path cannot change assignment');
 
 $noTransaction = false;
 try {
