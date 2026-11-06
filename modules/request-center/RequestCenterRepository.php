@@ -88,6 +88,11 @@ final class RequestCenterRepository
             $clauses[] = 't.priority = ?';
             $params[] = $priority;
         }
+        $requesterId = (int) ($filters['requester_id'] ?? 0);
+        if ($requesterId > 0) {
+            $clauses[] = 't.requester_id = ?';
+            $params[] = $requesterId;
+        }
         $serviceGroup = (string) ($filters['service_group'] ?? '');
         if (in_array($serviceGroup, ['it', 'support'], true)) {
             $clauses[] = 't.service_group = ?';
