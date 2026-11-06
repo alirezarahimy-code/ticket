@@ -67,22 +67,15 @@ jobs:
     - name: Install MariaDB client
       run: sudo apt-get update && sudo apt-get install -y mariadb-client
 
-    # گیت‌هاب تا سالم‌شدن سرویس (healthcheck.sh) صبر می‌کند و فقط بعد از آن گام‌ها را اجرا می‌کند؛
-    # فقط یک پرشِ امن روی بارگذاری اسکیما می‌ماند تا هر رقابتی در اولین اتصال حل شود.
+    # همان الگوی اثبات‌شدهٔ logging-acceptance (اتصال از PDO، نه کلاینت)؛ خطای واقعی به‌صورت annotation منتشر می‌شود.
     - name: Load fresh-install schema
-      run: |
-        for i in $(seq 1 30); do
-          if mariadb -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql; then
-            echo "اسکیمای نصب تازه بارگذاری شد (تلاش $i)"
-            exit 0
-          fi
-          echo "تلاش $i: هنوز آماده نیست — 2 ثانیه صبر"
-          sleep 2
-        done
-        echo "بارگذاری اسکیما ناموفق بود؛ گزارش کانتینر:" >&2
-        docker ps -a || true
-        docker logs $(docker ps -aq -f ancestor=mariadb:10.11 | head -n1) 2>&1 | tail -100 || true
-        exit 1
+      run: php tools/ci_load_schema.php install-empty-db.sql
+      env:
+        CI_DB_HOST: 127.0.0.1
+        CI_DB_PORT: '3306'
+        CI_DB_NAME: persian_ticketing_ci
+        CI_DB_USER: root
+        CI_DB_PASS: ci-ephemeral-root-password
 
     - name: Fresh install integrity (PDO)
       run: php tests/test_mariadb_fresh_install.php fresh-install
@@ -101,7 +94,12 @@ jobs:
           echo "── migration pass $pass"
           for f in $(ls migrations/*.sql | grep -v -- '-rollback.sql' | LC_ALL=C sort); do
             echo "→ $f"
-            mariadb --protocol=tcp -h 127.0.0.1 -P 3306 -uroot -pci-ephemeral-root-password persian_ticketing_ci < "$f"
+            if ! output=$(mariadb -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < "$f" 2>&1); then
+              msg=$(printf '%s' "$output" | tail -3 | tr '\n' ' ' | cut -c1-700 | sed 's/%/%25/g; s/\r//g')
+              pass_label="pass${pass} ${f}"
+              echo "::error title=migration::${pass_label}: ${msg}"
+              exit 1
+            fi
           done
         done
 

@@ -3701,6 +3701,7 @@ safe_archive_path	def	tools/build_update_1_62_88.py	63	tools
 validate_archive	def	tools/build_update_1_62_88.py	78	tools
 build	def	tools/build_update_1_62_88.py	112	tools
 entry	def	tools/build_update_1_62_88.py	158	tools
+ci_error	function	tools/ci_load_schema.php	25	tools
 AREA_MAP	const	tools/code_index.php	21	tools
 ci_strlen	function	tools/code_index.php	39	tools
 ci_substr	function	tools/code_index.php	43	tools
