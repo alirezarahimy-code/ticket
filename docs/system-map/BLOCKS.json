@@ -75662,16 +75662,16 @@
             "id": "TEST-188",
             "path": "tests\/test_ticket_cancellation_static.py",
             "area": "TEST",
-            "lines": 135,
-            "file_fingerprint": "43c0e1d882a2",
+            "lines": 136,
+            "file_fingerprint": "d92a8138e598",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 21,
-                    "lines": 21,
-                    "fingerprint": "c6fb6c890ca8",
+                    "line_end": 22,
+                    "lines": 22,
+                    "fingerprint": "7a629845ed91",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -75681,10 +75681,10 @@
                 {
                     "kind": "block",
                     "anchor": "check",
-                    "line_start": 22,
-                    "line_end": 135,
+                    "line_start": 23,
+                    "line_end": 136,
                     "lines": 114,
-                    "fingerprint": "a37967b974b1",
+                    "fingerprint": "0bf5159df48c",
                     "risk": {
                         "score": 1,
                         "flags": {

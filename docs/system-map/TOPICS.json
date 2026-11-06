@@ -4847,7 +4847,7 @@
         "PAGE-034.42",
         "TOOL-047.24"
       ],
-      "total": 178
+      "total": 177
     },
     {
       "id": "table:tmp_asset_dedupe_map",
@@ -47830,12 +47830,12 @@
       "line": 1,
       "anchor": "مقدمهٔ فایل",
       "risk": 0,
-      "lines": 21
+      "lines": 22
     },
     "TEST-188.02": {
       "path": "tests/test_ticket_cancellation_static.py",
       "area": "TEST",
-      "line": 22,
+      "line": 23,
       "anchor": "check",
       "risk": 1,
       "lines": 114
