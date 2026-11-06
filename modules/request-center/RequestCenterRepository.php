@@ -105,7 +105,9 @@ final class RequestCenterRepository
         if ($scopeSql !== '') {
             $whereParts[] = preg_replace('/^\\s*WHERE\\s+/i', '', trim($scopeSql));
         }
-        array_push($whereParts, ...$clauses);
+        foreach ($clauses as $clause) {
+            $whereParts[] = $clause;
+        }
         $where = $whereParts !== [] ? ' WHERE ' . implode(' AND ', $whereParts) : '';
 
         $count = $this->pdo->prepare('SELECT COUNT(*) FROM tickets t ' . $where);
