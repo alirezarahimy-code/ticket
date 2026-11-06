@@ -67,9 +67,14 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('وضعیت درخواست یا امتیاز آن هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
             if ($decision === 'approve') {
-                $closeQuery = db()->prepare('UPDATE tickets SET status = "closed", closed_at = COALESCE(closed_at, NOW()), supervisor_id = ?, supervisor_approved_at = NOW(), supervisor_note = ?, updated_at = NOW() WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL');
-                $closeQuery->execute([$supervisor['id'], $note, $ticketId]);
-                if ($closeQuery->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $closed = $workflow->transition($ticketId, 'resolved', 'closed', [
+                    'closed_at' => RequestCenterSqlExpression::coalesceNow(),
+                    'supervisor_id' => (int) $supervisor['id'],
+                    'supervisor_approved_at' => RequestCenterSqlExpression::now(),
+                    'supervisor_note' => $note,
+                ], 'supervisor_close', ['cancel_requested_at' => null]);
+                if (!$closed) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', ['note' => $note]);
@@ -80,9 +85,21 @@ if (!defined('APP_ROOT')) {
                 $reworkStatus = !empty($ticket['assigned_to']) ? 'in_progress' : 'manager_review';
                 $reworkDue = business_due_at(priority_sla_minutes((string) $ticket['priority']))->format('Y-m-d H:i:s');
                 $reworkOla = ola_deadlines((int) ($ticket['department_id'] ?? 0), (string) $ticket['priority'], (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('Y-m-d H:i:s'));
-                $reworkQuery = db()->prepare('UPDATE tickets SET status = ?, resolved_at = NULL, due_at = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, sla_paused_at = NULL, sla_pause_minutes = 0, supervisor_id = ?, supervisor_note = ?, updated_at = NOW() WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL');
-                $reworkQuery->execute([$reworkStatus, $reworkDue, $reworkOla['policy_id'], $reworkOla['response_due_at'], $reworkOla['due_at'], $reworkOla['escalation_1_at'], $reworkOla['escalation_2_at'], $supervisor['id'], $note, $ticketId]);
-                if ($reworkQuery->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $reworked = $workflow->transition($ticketId, 'resolved', $reworkStatus, [
+                    'resolved_at' => null,
+                    'due_at' => $reworkDue,
+                    'ola_policy_id' => $reworkOla['policy_id'],
+                    'ola_response_due_at' => $reworkOla['response_due_at'],
+                    'ola_due_at' => $reworkOla['due_at'],
+                    'ola_escalation_1_at' => $reworkOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $reworkOla['escalation_2_at'],
+                    'sla_paused_at' => null,
+                    'sla_pause_minutes' => 0,
+                    'supervisor_id' => (int) $supervisor['id'],
+                    'supervisor_note' => $note,
+                ], 'supervisor_rework', ['cancel_requested_at' => null]);
+                if (!$reworked) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note]);
@@ -110,9 +127,25 @@ if (!defined('APP_ROOT')) {
             $reopenOla = ola_deadlines((int) ($ticket['department_id'] ?? 0), (string) $ticket['priority'], (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('Y-m-d H:i:s'));
             $hadStaleCancel = !empty($ticket['cancel_requested_at']);
             db()->beginTransaction();
-            $reopenQuery = db()->prepare('UPDATE tickets SET status = ?, closed_at = NULL, resolved_at = NULL, supervisor_approved_at = NULL, supervisor_note = ?, due_at = ?, ola_policy_id = ?, ola_response_due_at = ?, ola_due_at = ?, ola_escalation_1_at = ?, ola_escalation_2_at = ?, sla_paused_at = NULL, sla_pause_minutes = 0, cancel_requested_at = NULL, cancel_requested_by = NULL, cancel_request_reason = NULL, updated_at = NOW() WHERE id = ? AND status = "closed"');
-            $reopenQuery->execute([$reopenStatus, $note, $dueAt, $reopenOla['policy_id'], $reopenOla['response_due_at'], $reopenOla['due_at'], $reopenOla['escalation_1_at'], $reopenOla['escalation_2_at'], $ticketId]);
-            if ($reopenQuery->rowCount() < 1) {
+            $workflow = new RequestCenterWorkflowService(db());
+            $reopened = $workflow->transition($ticketId, 'closed', $reopenStatus, [
+                'closed_at' => null,
+                'resolved_at' => null,
+                'supervisor_approved_at' => null,
+                'supervisor_note' => $note,
+                'due_at' => $dueAt,
+                'ola_policy_id' => $reopenOla['policy_id'],
+                'ola_response_due_at' => $reopenOla['response_due_at'],
+                'ola_due_at' => $reopenOla['due_at'],
+                'ola_escalation_1_at' => $reopenOla['escalation_1_at'],
+                'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
+                'sla_paused_at' => null,
+                'sla_pause_minutes' => 0,
+                'cancel_requested_at' => null,
+                'cancel_requested_by' => null,
+                'cancel_request_reason' => null,
+            ], 'supervisor_reopen');
+            if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
             log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_reopened', 'closed', $reopenStatus, ['note' => $note]);
