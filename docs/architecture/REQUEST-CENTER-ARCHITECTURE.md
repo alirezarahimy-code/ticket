@@ -7,7 +7,7 @@
 | وضعیت | مصوب برای شروع اجرا طبق فازبندی این سند |
 | نسخه مبنای کد | ۱٫۶۲٫۸۸ |
 | Commit مبنای کد | \`ab073ee9fffc56ccd1a2093d02725b95891e0d63\` |
-| شاخه کاری سورس مبنا | \`arena/ac59be1f-ticket\` |
+| شاخه کاری اجرای پروژه | \`feature/request-center-module-1.62.88\` |
 | شاخه مستندات | \`docs/request-center-architecture-1.1-approved-updates\` |
 | دامنه | استقلال ساختاری ماژول ثبت درخواست، بازطراحی چرخه عمر درخواست و تقویم برنامه‌ریزی رسیدگی |
 | مخزن | \`alirezarahimy-code/ticket\` |
