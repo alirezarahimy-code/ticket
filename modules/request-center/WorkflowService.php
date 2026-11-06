@@ -192,6 +192,24 @@ final class RequestCenterWorkflowService
                 }
                 return;
 
+            case 'requester_reopen':
+                if ($from !== 'resolved' || !in_array($to, ['in_progress', 'manager_review'], true) || $cancelPending) {
+                    throw new RuntimeException('بازگشایی درخواست حل‌شده در وضعیت فعلی مجاز نیست.');
+                }
+                return;
+
+            case 'supervisor_rework':
+                if ($from !== 'resolved' || !in_array($to, ['in_progress', 'manager_review'], true) || $cancelPending) {
+                    throw new RuntimeException('برگشت برای اصلاح فقط از وضعیت حل‌شده و بدون لغو در انتظار مجاز است.');
+                }
+                return;
+
+            case 'same_state':
+                if ($from !== $to) {
+                    throw new RuntimeException('فرمان بدون تغییر وضعیت نباید وضعیت مقصد متفاوت داشته باشد.');
+                }
+                return;
+
             case 'supervisor_close':
                 if ($from !== 'resolved' || $to !== 'closed' || $cancelPending) {
                     throw new RuntimeException('بستن نهایی فقط برای درخواست حل‌شده و بدون لغو در انتظار مجاز است.');
