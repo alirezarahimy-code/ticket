@@ -2139,9 +2139,9 @@ RequestCenterRepository	class	modules/request-center/RequestCenterRepository.php
 __construct	function	modules/request-center/RequestCenterRepository.php	13	other
 schemaProblems	function	modules/request-center/RequestCenterRepository.php	23	other
 listVisible	function	modules/request-center/RequestCenterRepository.php	72	other
-findVisible	function	modules/request-center/RequestCenterRepository.php	102	other
-messages	function	modules/request-center/RequestCenterRepository.php	133	other
-attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	152	other
+findVisible	function	modules/request-center/RequestCenterRepository.php	133	other
+messages	function	modules/request-center/RequestCenterRepository.php	164	other
+attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	183	other
 RequestCenterSqlExpression	class	modules/request-center/WorkflowService.php	11	other
 __construct	function	modules/request-center/WorkflowService.php	14	other
 kind	function	modules/request-center/WorkflowService.php	19	other
