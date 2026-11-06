@@ -55,7 +55,7 @@ final class RequestCenterWorkflowService
             'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review'],
             'in_progress' => ['waiting_user', 'resolved', 'assigned', 'manager_review'],
             'waiting_user' => ['in_progress', 'resolved', 'assigned', 'manager_review'],
-            // Legacy pending may leave, but no new workflow may enter it.
+            // pending یک وضعیت میراثی است: خروج باز می‌ماند، اما ورود جدید ممنوع است.
             'pending' => ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
             'resolved' => ['in_progress', 'assigned'],
             'closed' => [],
