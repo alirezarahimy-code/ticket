@@ -14,6 +14,8 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("require __DIR__ . '/bootstrap.php';", entry)
         self.assertIn("$user = require_login();", entry)
         self.assertIn("RequestCenterRepository", entry)
+        self.assertIn("$schemaProblems = $repo->schemaProblems();", entry)
+        self.assertIn("public function schemaProblems()", read("modules/request-center/RequestCenterRepository.php"))
 
     def test_repository_uses_existing_visibility_contracts(self):
         repo = read("modules/request-center/RequestCenterRepository.php")
