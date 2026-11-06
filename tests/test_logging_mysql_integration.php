@@ -154,7 +154,7 @@ $checks = [];
 $baselineSql = file_get_contents(dirname(__DIR__) . '/migrations/032-schema-updates-baseline.sql');
 if (!is_string($baselineSql)) throw new RuntimeException('Migration 032 could not be read.');
 foreach (split_sql_statements($baselineSql) as $statement) {
-    $statement = preg_replace('/^\\s*--.*$/m', '', trim($statement));
+    $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
     if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
 $updaterRegistryInsertSucceeded = true;
