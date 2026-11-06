@@ -32,6 +32,20 @@ $statusLabels = [
 $priorityLabels = ['normal' => 'عادی', 'urgent' => 'فوری', 'critical' => 'بحرانی'];
 $typeLabels = ['incident' => 'رخداد', 'request' => 'درخواست خدمت', 'problem' => 'مشکل', 'change' => 'تغییر'];
 $repo = new RequestCenterRepository(db());
+$schemaProblems = $repo->schemaProblems();
+if ($schemaProblems !== []) {
+    http_response_code(503);
+    header('X-Content-Type-Options: nosniff');
+    header('Cache-Control: private, no-store');
+    ?><!doctype html>
+    <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>آماده‌سازی مرکز درخواست‌ها</title>
+    <style>body{font-family:Tahoma,sans-serif;background:#f4f7fb;color:#172b4d;margin:0;padding:32px}.card{max-width:760px;margin:6vh auto;background:#fff;border:1px solid #e4eaf1;border-radius:14px;padding:24px;line-height:2}h1{font-size:22px}.muted{color:#66758b}</style></head>
+    <body><section class="card"><h1>ساختار پایگاه‌داده برای مرکز درخواست‌ها کامل نیست</h1>
+    <p>این ورودی عمداً هیچ تغییری در Schema ایجاد نمی‌کند. ابتدا بستهٔ Migration رسمی همین نسخه را روی یک نسخهٔ پشتیبان‌شده از پایگاه‌داده اعمال و سپس دوباره تلاش کنید.</p>
+    <ul><?php foreach ($schemaProblems as $problem): ?><li><?= $escape($problem) ?></li><?php endforeach; ?></ul>
+    <p class="muted">برای جلوگیری از تغییر ناخواسته، ادامهٔ درخواست متوقف شد.</p><a href="index.php">بازگشت به سامانه</a></section></body></html><?php
+    exit;
+}
 $ticketId = max(0, (int) ($_GET['id'] ?? 0));
 $page = max(1, (int) ($_GET['p'] ?? 1));
 
