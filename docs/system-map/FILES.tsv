@@ -5,7 +5,7 @@ path	category	lines	bytes
 .github/copilot-instructions.md	workflows	23	1566
 .github/workflows/benchmark-250.yml	workflows	116	4154
 .github/workflows/benchmark-operations.yml	workflows	367	15800
-.github/workflows/ci.yml	workflows	119	4207
+.github/workflows/ci.yml	workflows	128	4790
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	138	5159
@@ -229,7 +229,7 @@ docs/RELEASE-MANIFEST-1.62.76-FA.md	docs	14	795
 docs/REPORT-FA.md	docs	43	4702
 docs/ROLLBACK-RUNBOOK-1.62.76-FA.md	docs	19	1572
 docs/SESSION-BOOT-FA.md	docs	137	6866
-docs/SKILL-MANIFEST-FA.md	docs	485	45809
+docs/SKILL-MANIFEST-FA.md	docs	485	45831
 docs/STAGING-ACCEPTANCE-REPORT-1.62.76-FA.md	docs	21	1419
 docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
 docs/SYSTEM-MAP-FA.md	docs	551	37833
