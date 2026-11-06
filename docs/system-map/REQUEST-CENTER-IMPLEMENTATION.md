@@ -3,7 +3,7 @@
 این یادداشت وضعیت واقعی برش اجرایی Request Center را ثبت می‌کند. این فایل سند وضعیت ماژول است و جایگزین نقشهٔ ماشینی سراسری سامانه نیست.
 
 - شاخهٔ اجرایی: `feature/request-center-module-1.62.88`
-- Commit اجرایی فعلی: `cba4dc1e4c0560c06e1297a82e4f9ebc632f8138`
+- Commit اجرایی فعلی: `ae01dd0f4b41f64efb29d37516f18d48cc78919b`
 - ورودی مستقل: `request-center.php`
 - Repository خواندنی: `modules/request-center/RequestCenterRepository.php`
 - سرویس متمرکز گذار وضعیت: `modules/request-center/WorkflowService.php`
@@ -15,9 +15,9 @@
 - فهرست و جزئیات مستقل با استفاده از احراز هویت، مجوز و scope فعلی سامانه.
 - فیلتر پارامتری شماره/عنوان، وضعیت، اولویت و حوزهٔ خدمت.
 - Workspace درخواست‌دهنده با محدودسازی اضافی به شناسهٔ کاربر جاری.
-- Workspace کارشناس با صف شخصی بر پایهٔ `assigned_to` و صف گروهی مشروط به `queue.view`؛ هر دو همچنان در محدودهٔ `ticket_scope()` هستند.
+- Workspace کارشناس با صف شخصی بر پایهٔ `assigned_to` و صف گروهی مشروط به `queue.view`؛ هر دو همچنان در محدودهٔ `ticket_scope()` هستند. مسیرهای صفحه‌بندی، بازگشت از جزئیات و پاک‌کردن فیلترها Workspace جاری را حفظ می‌کنند.
 - انتقال نخستین مجموعهٔ مسیرهای تغییر وضعیت به `RequestCenterWorkflowService`؛ سرویس در تراکنش فراخواننده ردیف را قفل و وضعیت و guardهای هم‌زمانی را بررسی می‌کند.
-- آزمون‌های SQLite و آزمون integration روی MariaDB 10.11 برای preflight، Repository و WorkflowService.
+- آزمون‌های SQLite و آزمون integration روی MariaDB 10.11 برای preflight، Repository و WorkflowService؛ آخرین اجرای Request Center Contract روی commit فوق موفق است.
 
 ## هنوز انجام‌نشده
 
