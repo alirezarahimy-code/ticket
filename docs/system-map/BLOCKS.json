@@ -75677,7 +75677,7 @@
             "path": "tests\/test_ticket_cancellation_static.py",
             "area": "TEST",
             "lines": 140,
-            "file_fingerprint": "dcecd30e20af",
+            "file_fingerprint": "dc87fbd54159",
             "blocks": [
                 {
                     "kind": "block",
@@ -75698,7 +75698,7 @@
                     "line_start": 23,
                     "line_end": 140,
                     "lines": 118,
-                    "fingerprint": "3453a2e0c866",
+                    "fingerprint": "7d98f364278a",
                     "risk": {
                         "score": 1,
                         "flags": {
