@@ -4,7 +4,7 @@ declare(strict_types=1);
 /** آزمون آفلاین ویژگی‌های لاگ یکپارچه، تم شخصی و مدیریت صفحه ورود. */
 if (PHP_SAPI !== 'cli') { http_response_code(403); exit('CLI only'); }
 $root = dirname(__DIR__);
-$index = (string) file_get_contents($root . '/index.php');
+$index = (string) file_get_contents($root . '/index.php') . "\n" . (string) file_get_contents($root . '/actions/account-actions.php');
 $activity = (string) file_get_contents($root . '/lib/activity-audit.php');
 $settingsActions = (string) file_get_contents($root . '/actions/settings-actions.php');
 $css = (string) file_get_contents($root . '/assets/style.css');
