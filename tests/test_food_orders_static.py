@@ -211,7 +211,7 @@ class FoodOrdersStaticTests(unittest.TestCase):
         self.assertIn('href="assets/food-menu.css?v=34"', panel_html)
         self.assertIn('src="assets/jalali-calendar.js?v=2"', panel_html)
         self.assertIn('src="assets/food-order-calendar.js?v=1"', panel_html)
-        self.assertIn('src="assets/food-menu.js?v=1.62.72"', panel_html)
+        self.assertIn('src="assets/food-menu.js?v=1.62.74"', panel_html)
         self.assertIn("FoodMenuUI.mount()", panel_html)
         for path in (
             "assets/food-order.css",
