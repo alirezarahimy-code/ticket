@@ -20,8 +20,11 @@ jobs:
           MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
           MARIADB_ROOT_HOST: '%'
           MARIADB_DATABASE: persian_ticketing_ci
+        # روی پورت ۳۳۰۷ مپ می‌شود تا با MySQL/MariaDB احتمالیِ نصب‌شده روی خودِ رانر
+        # (که روی ۱۲۷.۰.۰.۱:۳۳۰۶ پاسخ می‌دهد) تداخل نکند؛ در غیر این‌صورت fsockopen موفق
+        # می‌شود ولی ping همیشه شکست می‌خورد.
         ports:
-          - 3306:3306
+          - 3307:3306
         options: >-
           --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -pci-ephemeral-root-password --silent"
           --health-interval=10s
@@ -70,26 +73,30 @@ jobs:
       run: |
         # حداکثر ۶ دقیقه صبر می‌کنیم؛ کشیدن ایمیج اولیه ممکن است طولایی باشد.
         for i in $(seq 1 180); do
-          if php -r "exit(@fsockopen('127.0.0.1', 3306, \$e, \$s, 2) ? 0 : 1);"; then
-            echo "پورت 3306 باز است (تلاش $i)"
-            if mariadb-admin ping -h 127.0.0.1 -uroot -pci-ephemeral-root-password; then
+          if php -r "exit(@fsockopen('127.0.0.1', 3307, \$e, \$s, 2) ? 0 : 1);"; then
+            echo "پورت 3307 باز است (تلاش $i)"
+            if mariadb-admin ping --protocol=tcp -h 127.0.0.1 -P 3307 -uroot -pci-ephemeral-root-password; then
               echo "MariaDB آماده است (تلاش $i)"
               exit 0
+            else
+              # خطای واقعی ping چاپ شود تا در لاگ دیده شود
+              mariadb-admin ping --protocol=tcp -h 127.0.0.1 -P 3307 -uroot -pci-ephemeral-root-password || true
             fi
           fi
           sleep 2
         done
-        echo "MariaDB آماده نشد" >&2
+        echo "MariaDB آماده نشد؛ وضعیت کانتینرها:" >&2
+        docker ps -a || true
         exit 1
 
     - name: Load fresh-install schema
-      run: mariadb -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
+      run: mariadb --protocol=tcp -h 127.0.0.1 -P 3307 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
 
     - name: Fresh install integrity (PDO)
       run: php tests/test_mariadb_fresh_install.php fresh-install
       env:
         CI_DB_HOST: 127.0.0.1
-        CI_DB_PORT: '3306'
+        CI_DB_PORT: '3307'
         CI_DB_NAME: persian_ticketing_ci
         CI_DB_USER: root
         CI_DB_PASS: ci-ephemeral-root-password
@@ -102,7 +109,7 @@ jobs:
           echo "── migration pass $pass"
           for f in $(ls migrations/*.sql | grep -v -- '-rollback.sql' | LC_ALL=C sort); do
             echo "→ $f"
-            mariadb -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < "$f"
+            mariadb --protocol=tcp -h 127.0.0.1 -P 3307 -uroot -pci-ephemeral-root-password persian_ticketing_ci < "$f"
           done
         done
 
@@ -110,7 +117,7 @@ jobs:
       run: php tests/test_mariadb_fresh_install.php migrations-applied
       env:
         CI_DB_HOST: 127.0.0.1
-        CI_DB_PORT: '3306'
+        CI_DB_PORT: '3307'
         CI_DB_NAME: persian_ticketing_ci
         CI_DB_USER: root
         CI_DB_PASS: ci-ephemeral-root-password
