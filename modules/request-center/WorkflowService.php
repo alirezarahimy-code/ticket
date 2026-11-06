@@ -40,6 +40,12 @@ final class RequestCenterWorkflowService
         'pending', 'resolved', 'closed', 'cancelled',
     ];
 
+    private const CANCELLATION_PENDING_SAME_STATE_COLUMNS = [
+        'due_at', 'sla_paused_at', 'sla_pause_minutes', 'first_response_at',
+        'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
+        'ola_escalation_1_at', 'ola_escalation_2_at',
+    ];
+
     private const UPDATE_COLUMNS = [
         'assigned_to', 'assigned_at', 'due_at', 'sla_minutes', 'sla_paused_at',
         'sla_pause_minutes', 'first_response_at', 'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
@@ -135,6 +141,13 @@ final class RequestCenterWorkflowService
         }
 
         $this->assertTransitionAllowed($current, $expectedStatus, $targetStatus, $kind);
+        if ($kind === 'same_state' && !empty($current['cancel_requested_at'])) {
+            foreach (array_keys($updates) as $column) {
+                if (!in_array($column, self::CANCELLATION_PENDING_SAME_STATE_COLUMNS, true)) {
+                    throw new RuntimeException('در زمان انتظار تصمیم لغو، فقط ثبت پاسخ و به‌روزرسانی زمان‌های مرتبط مجاز است.');
+                }
+            }
+        }
 
         $nowExpression = $driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()';
         $sets = ['status = ?'];
