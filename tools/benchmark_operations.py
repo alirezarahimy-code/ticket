@@ -376,7 +376,6 @@ def main() -> int:
                        'max_ms': round(max(times, default=0), 2)})
     expected_tickets = args.vus
     ticket_create = sum(row['successes'] for row in totals if row['operation'] == 'ticket-create')
-    ticket_claim = sum(row['successes'] for row in totals if row['operation'] == 'ticket-claim')
     ticket_resolve = sum(row['successes'] for row in totals if row['operation'] == 'ticket-resolve')
     regular_media_attempts = args.vus
     duplicate_attempts = 120
@@ -384,8 +383,6 @@ def main() -> int:
     invariant_failures = []
     if ticket_create != expected_tickets:
         invariant_failures.append(f'ticket creates confirmed by HTTP: {ticket_create}/{expected_tickets}')
-    if ticket_claim != expected_tickets:
-        invariant_failures.append(f'ticket claims confirmed by HTTP: {ticket_claim}/{expected_tickets}')
     if ticket_resolve != expected_tickets:
         invariant_failures.append(f'ticket resolutions confirmed by HTTP: {ticket_resolve}/{expected_tickets}')
     if int(db_report.get('tickets', {}).get('resolved_for_run', -1)) != expected_tickets:
@@ -412,7 +409,7 @@ def main() -> int:
         'started_utc': test_started_utc.isoformat(),
         'environment': 'ephemeral CI runner; disposable MariaDB; PHP CLI worker pool; synthetic identities/data only',
         'target': '127.0.0.1 only; production and staging were not contacted',
-        'scenario': '250 concurrent sessions; each creates a ticket as a requester, claims it with a different synthetic handler, resolves it, and records one CD/DVD event; 60 additional same-serial duplicate races (30 IN, 30 OUT) test serial-state integrity.',
+        'scenario': '250 concurrent sessions; each creates a ticket as a requester, verifies automatic assignment through the authorized update path, resolves it, and records one CD/DVD event; 60 additional same-serial duplicate races (30 IN, 30 OUT) test serial-state integrity.',
         'virtual_users': args.vus, 'php_workers': args.php_workers,
         'elapsed_wall_seconds': round(elapsed, 2), 'logical_operations': sum(len(rows) for rows in recorder.rows.values()),
         'overall_logical_operations_per_second': round(sum(len(rows) for rows in recorder.rows.values()) / elapsed, 2),
