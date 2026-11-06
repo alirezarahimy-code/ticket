@@ -169,8 +169,15 @@ def test_failed_decryption_is_logged() -> None:
 # ───────────────────────── محور ۲: وضعیت میراثی pending ─────────────────────────
 
 
+def transition_body() -> str:
+    source = read("modules/request-center/WorkflowService.php")
+    start = source.index("public static function allowedTransitions(")
+    end = source.index("\n    public function transition(", start)
+    return source[start:end]
+
+
 def transition_map() -> dict[str, list[str]]:
-    body = php_function("index.php", "function ticket_allowed_transitions(")
+    body = transition_body()
     found: dict[str, list[str]] = {}
     for source, targets in re.findall(r"'(\w+)'\s*=>\s*\[([^\]]*)\]", body):
         found[source] = re.findall(r"'(\w+)'", targets)
@@ -202,7 +209,7 @@ def test_pending_always_has_a_way_out() -> None:
 
 def test_pending_is_documented_as_legacy() -> None:
     """بدون توضیح، نفر بعدی یا احیایش می‌کند یا پاکش می‌کند — هر دو اشتباه."""
-    body = php_function("index.php", "function ticket_allowed_transitions(")
+    body = transition_body()
     assert "میراثی" in body, (
         "نقشهٔ گذار توضیح نمی‌دهد که pending یک وضعیت میراثی است و چرا "
         "نه حذف می‌شود نه مقصد می‌گیرد."
