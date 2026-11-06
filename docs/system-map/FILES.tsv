@@ -612,7 +612,7 @@ tests/test_release_1_62_88_package_integrity.py	tests	47	1904
 tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	6687
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
-tests/test_request_center_first_slice_static.py	tests	69	3089
+tests/test_request_center_first_slice_static.py	tests	87	3976
 tests/test_request_center_repository_sqlite.php	tests	86	4621
 tests/test_request_center_schema_preflight_mariadb.php	tests	139	6480
 tests/test_request_center_workflow_service_sqlite.php	tests	130	4696

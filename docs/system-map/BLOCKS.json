@@ -72863,8 +72863,8 @@
             "id": "TEST-164",
             "path": "tests\/test_request_center_first_slice_static.py",
             "area": "TEST",
-            "lines": 70,
-            "file_fingerprint": "db589d5824f6",
+            "lines": 88,
+            "file_fingerprint": "01356e5013c8",
             "blocks": [
                 {
                     "kind": "block",
@@ -72974,29 +72974,44 @@
                 },
                 {
                     "kind": "block",
-                    "anchor": "test_user_supplied_text_is_escaped_and_attachment_download_is_delegated",
+                    "anchor": "test_migrated_status_writes_use_the_central_workflow_service",
                     "line_start": 53,
-                    "line_end": 59,
+                    "line_end": 70,
+                    "lines": 18,
+                    "fingerprint": "2213bc0f5791",
+                    "risk": {
+                        "score": 1,
+                        "flags": {
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TEST-164.09"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_user_supplied_text_is_escaped_and_attachment_download_is_delegated",
+                    "line_start": 71,
+                    "line_end": 77,
                     "lines": 7,
                     "fingerprint": "49a40ad8ae7d",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-164.09"
+                    "id": "TEST-164.10"
                 },
                 {
                     "kind": "block",
                     "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
-                    "line_start": 60,
-                    "line_end": 70,
+                    "line_start": 78,
+                    "line_end": 88,
                     "lines": 11,
                     "fingerprint": "b79420b129d3",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-164.10"
+                    "id": "TEST-164.11"
                 }
             ]
         },

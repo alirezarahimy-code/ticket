@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,446 |
-| آدرس‌ها (بلوک) | 6,670 |
+| خطوط | 125,464 |
+| آدرس‌ها (بلوک) | 6,671 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,670 آدرس |
+| باقی‌مانده | 6,671 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 216 | 1,577 | 19,886 |
+| `TEST` | TEST | 216 | 1,578 | 19,904 |
 | `TOOL` | TOOL | 86 | 690 | 17,282 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,451 |
@@ -302,7 +302,7 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 823 |
+| `write_no_tx` | نوشتن بدون تراکنش | 824 |
 | `error_suppression` | سرکوب @ | 273 |
 | `dangerous_call` | فراخوانی خطرناک | 190 |
 | `sql_concat` | الحاق در SQL | 181 |
@@ -2791,7 +2791,7 @@
 </details>
 
 <details>
-<summary><b>TEST-164</b> — <code>tests/test_request_center_first_slice_static.py</code> (70 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-164</b> — <code>tests/test_request_center_first_slice_static.py</code> (88 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -2803,8 +2803,9 @@
 | `TEST-164.06` | 26–30 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
 | `TEST-164.07` | 31–44 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
 | `TEST-164.08` | 45–52 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
-| `TEST-164.09` | 53–59 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
-| `TEST-164.10` | 60–70 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
+| `TEST-164.09` | 53–70 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
+| `TEST-164.10` | 71–77 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
+| `TEST-164.11` | 78–88 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
 
 </details>
 
