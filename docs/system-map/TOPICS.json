@@ -34998,12 +34998,12 @@
       "line": 4,
       "anchor": "RequestCenterSqlExpression",
       "risk": 0,
-      "lines": 26
+      "lines": 31
     },
     "PAGE-040.03": {
       "path": "modules/request-center/WorkflowService.php",
       "area": "PAGE",
-      "line": 31,
+      "line": 36,
       "anchor": "RequestCenterWorkflowService",
       "risk": 2,
       "lines": 208
