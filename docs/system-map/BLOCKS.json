@@ -72941,8 +72941,8 @@
             "id": "TEST-165",
             "path": "tests\/test_request_center_first_slice_static.py",
             "area": "TEST",
-            "lines": 107,
-            "file_fingerprint": "44fc6101d049",
+            "lines": 112,
+            "file_fingerprint": "73b784a8cf53",
             "blocks": [
                 {
                     "kind": "block",
@@ -73097,9 +73097,9 @@
                     "kind": "block",
                     "anchor": "test_not_found_and_detail_navigation_preserve_workspace",
                     "line_start": 91,
-                    "line_end": 96,
-                    "lines": 6,
-                    "fingerprint": "069c61314803",
+                    "line_end": 101,
+                    "lines": 11,
+                    "fingerprint": "ed84e05383f8",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -73111,8 +73111,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
-                    "line_start": 97,
-                    "line_end": 107,
+                    "line_start": 102,
+                    "line_end": 112,
                     "lines": 11,
                     "fingerprint": "b79420b129d3",
                     "risk": {

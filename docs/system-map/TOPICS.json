@@ -46408,12 +46408,12 @@
       "line": 91,
       "anchor": "test_not_found_and_detail_navigation_preserve_workspace",
       "risk": 3,
-      "lines": 6
+      "lines": 11
     },
     "TEST-165.13": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 97,
+      "line": 102,
       "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
       "risk": 0,
       "lines": 11
