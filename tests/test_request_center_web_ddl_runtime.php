@@ -213,19 +213,19 @@ PHP;
 
     // A required column is removed on the disposable DB. The independent RC entry point must fail closed.
     $pdo->exec('SET GLOBAL general_log = OFF');
-    $pdo->exec('ALTER TABLE tickets DROP COLUMN due_at');
+    $pdo->exec('ALTER TABLE tickets DROP COLUMN first_response_at');
     t04_reset_log($pdo);
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
     $rcIncomplete = t04_http('http://' . $address . '/request-center.php', ['Cookie: ' . $cookie]);
     $rcIncompleteLog = t04_log_window($pdo, $start, $webUser);
-    t04_check($rcIncomplete['status'] === 503, 'independent request-center.php fails closed on missing tickets.due_at (status ' . $rcIncomplete['status'] . ')');
+    t04_check($rcIncomplete['status'] === 503, 'independent request-center.php fails closed on missing tickets.first_response_at (status ' . $rcIncomplete['status'] . ')');
     t04_check(count($rcIncompleteLog['ddl']) === 0, 'independent request-center.php executes zero DDL on incomplete schema');
     $column = $pdo->prepare(
         "SELECT COUNT(*) FROM information_schema.COLUMNS
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'due_at'"
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'first_response_at'"
     );
     $column->execute();
-    t04_check((int) $column->fetchColumn() === 0, 'independent Request Center leaves missing due_at untouched');
+    t04_check((int) $column->fetchColumn() === 0, 'independent Request Center leaves missing first_response_at untouched');
 
     // Legacy index.php is still allowed to heal the same incomplete schema during an HTTP request.
     t04_reset_log($pdo);
@@ -235,7 +235,7 @@ PHP;
     $drift = t04_log_window($pdo, $start, $webUser);
     $column->execute();
     $restored = (int) $column->fetchColumn() === 1;
-    t04_check($restored, 'legacy index.php restored the missing tickets.due_at column');
+    t04_check($restored, 'legacy index.php restored the missing tickets.first_response_at column');
     t04_check(count($drift['ddl']) >= 1, 'legacy index.php executed DDL when the schema was incomplete');
     foreach ($drift['ddl'] as $sql) {
         echo 'T04 drift DDL: ' . substr($sql, 0, 500) . PHP_EOL;
