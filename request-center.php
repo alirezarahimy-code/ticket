@@ -10,6 +10,12 @@ declare(strict_types=1);
  * forwarded in-process to the front controller (no redirect, payload intact).
  */
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    // تقویم/نوبت‌های رسیدگی، POST اختصاصی خودشان را دارند (بدون کلید action)؛
+    // مثل مسیر GET مستقیماً به داخل شاخهٔ POST مربوطهٔ ماژول می‌روند.
+    if ((string) ($_GET['calendar'] ?? '') === '1') {
+        require __DIR__ . '/modules/request-center/Pages/index.php';
+        exit;
+    }
     require_once __DIR__ . '/modules/request-center/post-handler.php';
     $rcPostAction = (string) ($_POST['action'] ?? '');
     if (request_center_is_post_action($rcPostAction)) {

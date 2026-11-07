@@ -18,6 +18,7 @@ on:
       - 'tests/test_request_center_claim_concurrency_mariadb.php'
       - 'tests/test_request_center_t07_migration_clone.php'
       - 'tests/test_request_center_jalali_parity.mjs'
+      - 'tests/test_request_center_appointments_sqlite.php'
       - 'tests/fixtures/jalali-php-convert.php'
       - 'tests/fixtures/request-center-claim-worker.php'
       - 'tests/fixtures/request-center-ddl-probe.php'
@@ -86,10 +87,15 @@ jobs:
           php -l modules/request-center/RequestCenterRepository.php
           php -l modules/request-center/WorkflowService.php
           php -l modules/request-center/lib/functions.php
+          php -l modules/request-center/AppointmentRepository.php
+          php -l modules/request-center/Actions/appointment-actions.php
+          php -l modules/request-center/Pages/calendar.php
       - name: First-slice security and architecture contract
         run: python -m pytest -q tests/test_request_center_first_slice_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
+      - name: Appointment lifecycle, conflict and capacity contract (SQLite)
+        run: php tests/test_request_center_appointments_sqlite.php
       - name: WorkflowService transition policy and concurrency guards (SQLite)
         run: php tests/test_request_center_workflow_service_sqlite.php
       - name: WorkflowService real MariaDB locking and transaction integration

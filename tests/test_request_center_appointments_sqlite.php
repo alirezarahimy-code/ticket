@@ -13,9 +13,9 @@ function check_request_center(bool $condition, string $message): void
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, full_name TEXT)');
+$pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, full_name TEXT, role TEXT, is_active INTEGER)');
 $pdo->exec('CREATE TABLE tickets (id INTEGER PRIMARY KEY, ticket_no TEXT, subject TEXT)');
-$pdo->exec("INSERT INTO users VALUES (1, 'Agent One'), (2, 'Agent Two')");
+$pdo->exec("INSERT INTO users VALUES (1, 'Agent One', 'agent', 1), (2, 'Agent Two', 'agent', 1)");
 $pdo->exec("INSERT INTO tickets VALUES (101, 'RC-00101', 'Test request')");
 $pdo->exec('CREATE TABLE request_center_appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,4 +65,53 @@ check_request_center($elevated['ok'] === true, 'elevated user can cancel any app
 $cancelledTwice = $repo->cancel((int) $first['id'], 1, false);
 check_request_center($cancelledTwice['ok'] === false, 'already cancelled appointment cannot be cancelled again');
 
-echo "ALL-APPOINTMENT-TESTS-PASSED\n";
+
+// ——— فاز ۴: اتمام، محدوده، ظرفیت و شمارشگرها ———
+$pastStart = date('Y-m-d H:i:s', strtotime('-50 minutes'));
+$pastEnd = date('Y-m-d H:i:s', strtotime('-5 minutes'));
+$pastPlanned = $repo->create(101, 1, $pastStart, $pastEnd, 'work', 'نوبتِ معوقِ گذشته', 1);
+check_request_center($pastPlanned['ok'] === true, 'past planned appointment is creatable (retro-record)');
+
+$completeByStranger = $repo->complete((int) $otherAssignee['id'], 1, false);
+check_request_center($completeByStranger['ok'] === false, 'complete by another ordinary agent is rejected');
+
+$completeByOwner = $repo->complete((int) $otherAssignee['id'], 2, false); // owner is assignee 2
+check_request_center($completeByOwner['ok'] === true, 'owner can complete their own appointment');
+
+$completeTwice = $repo->complete((int) $otherAssignee['id'], 2, false);
+check_request_center($completeTwice['ok'] === false, 'already completed appointment cannot be completed again');
+
+$windowFrom = date('Y-m-d 00:00:00', strtotime('-3 days'));
+$windowTo = date('Y-m-d 23:59:59', strtotime('+3 days'));
+$rangeMine = $repo->listRange(1, $windowFrom, $windowTo);
+check_request_center(count($rangeMine) >= 2, 'listRange returns own appointments in window');
+$rangeTeam = $repo->listRange(null, $windowFrom, $windowTo);
+check_request_center(count($rangeTeam) >= 3, 'listRange(null) returns the whole team window');
+$rangeKind = $repo->listRange(1, $windowFrom, $windowTo, ['kind' => 'visit']);
+check_request_center(count($rangeKind) === 0, 'listRange kind filter excludes other kinds');
+$rangeDone = $repo->listRange(1, $windowFrom, $windowTo, ['status' => 'done']);
+foreach ($rangeDone as $doneRow) {
+    check_request_center((string) $doneRow['status'] === 'done', 'listRange status filter keeps only done rows');
+}
+
+$capacity = $repo->capacitySummary($windowFrom, $windowTo, date('Y-m-d H:i:s'));
+$byAssignee = [];
+foreach ($capacity as $capRow) {
+    $byAssignee[(int) $capRow['assignee_id']] = (int) $capRow['total'];
+}
+check_request_center(($byAssignee[1] ?? 0) >= 2 && ($byAssignee[2] ?? 0) >= 1, 'capacitySummary counts per-assignee planned LOAD');
+
+$counts = $repo->countsForRange(1, $windowFrom, $windowTo, date('Y-m-d H:i:s'));
+check_request_center($counts['overdue'] >= 1, 'countsForRange reports overdue planned own appointments');
+check_request_center($counts['done'] >= 0 && $counts['active'] >= 1, 'countsForRange returns active/done counters');
+
+$cancelledQuality = $repo->cancel((int) $adjacent['id'], 1, false);
+check_request_center($cancelledQuality['ok'] === true, 'owner can cancel their own planned appointment');
+$capacityAfterCancel = $repo->capacitySummary($windowFrom, $windowTo, date('Y-m-d H:i:s'));
+$byAssigneeAfter = [];
+foreach ($capacityAfterCancel as $capRow) {
+    $byAssigneeAfter[(int) $capRow['assignee_id']] = (int) $capRow['total'];
+}
+check_request_center(($byAssigneeAfter[1] ?? 0) === (($byAssignee[1] ?? 0) - 1), 'cancelled appointments leave the capacity window');
+
+echo "ALL-PHASE4-APPOINTMENT-TESTS-PASSED\n";

@@ -168,23 +168,205 @@ final class AppointmentRepository
             return ['ok' => false, 'error' => 'migration_035_missing'];
         }
         try {
-            $st = $this->pdo->prepare('SELECT assignee_id, status FROM request_center_appointments WHERE id = ?');
-            $st->execute([$appointmentId]);
+            $this->pdo->beginTransaction();
+            try {
+                $st = $this->pdo->prepare('SELECT assignee_id, status FROM request_center_appointments WHERE id = ? FOR UPDATE');
+                $st->execute([$appointmentId]);
+            } catch (Throwable) {
+                // SQLite (offline tests) has no FOR UPDATE — same predicate without the lock.
+                $st = $this->pdo->prepare('SELECT assignee_id, status FROM request_center_appointments WHERE id = ?');
+                $st->execute([$appointmentId]);
+            }
             $row = $st->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
+                $this->pdo->rollBack();
                 return ['ok' => false, 'error' => 'نوبت یافت نشد.'];
             }
             if ((string) $row['status'] !== self::STATUS_PLANNED) {
+                $this->pdo->rollBack();
                 return ['ok' => false, 'error' => 'فقط نوبت «برنامه‌ریزی‌شده» قابل لغو است.'];
             }
             if (!$elevated && (int) $row['assignee_id'] !== $actorId) {
+                $this->pdo->rollBack();
                 return ['ok' => false, 'error' => 'فقط مالک نوبت یا مدیر می‌تواند آن را لغو کند.'];
             }
             $upd = $this->pdo->prepare("UPDATE request_center_appointments SET status = ? WHERE id = ? AND status = ?");
             $upd->execute([self::STATUS_CANCELLED, $appointmentId, self::STATUS_PLANNED]);
-            return ['ok' => $upd->rowCount() > 0];
+            if ($upd->rowCount() > 0) {
+                $this->pdo->commit();
+                return ['ok' => true];
+            }
+            $this->pdo->rollBack();
+            return ['ok' => false, 'error' => 'لغو نوبت انجام نشد؛ مقدار وضعیت هم‌زمان تغییر کرد.'];
         } catch (Throwable) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             return ['ok' => false, 'error' => 'لغو نوبت انجام نشد؛ لطفاً دوباره تلاش کنید.'];
+        }
+    }
+
+    /**
+     * Range listing with ticket + assignee join (used by calendar cells/agenda).
+     *
+     * @param array{kind?: string|null, status?: string|null} $filters
+     */
+    public function listRange(?int $assigneeId, string $fromDatetime, string $toDatetime, array $filters = []): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+        $where = 'WHERE a.starts_at < ? AND a.ends_at > ?';
+        $params = [$toDatetime, $fromDatetime];
+        if ($assigneeId !== null) {
+            $where .= ' AND a.assignee_id = ?';
+            $params[] = $assigneeId;
+        }
+        $kind = trim((string) ($filters['kind'] ?? ''));
+        if ($kind !== '' && isset(self::KINDS[$kind])) {
+            $where .= ' AND a.kind = ?';
+            $params[] = $kind;
+        }
+        $status = trim((string) ($filters['status'] ?? ''));
+        if ($status !== '') {
+            $where .= ' AND a.status = ?';
+            $params[] = $status;
+        }
+        $st = $this->pdo->prepare(
+            "SELECT a.*, t.ticket_no, t.subject, u.full_name AS assignee_name
+             FROM request_center_appointments a
+             LEFT JOIN tickets t ON t.id = a.ticket_id
+             LEFT JOIN users u ON u.id = a.assignee_id
+             {$where}
+             ORDER BY a.starts_at ASC, a.id ASC"
+        );
+        $st->execute($params);
+        return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Team capacity: per-assignee appointment counts for a window. Planning view only;
+     * does not influence dispatch or routing decisions.
+     */
+    public function capacitySummary(string $fromDatetime, string $toDatetime, ?string $now = null): array
+    {
+        if (!$this->tableExists()) {
+            return [];
+        }
+        $now = $now ?? date('Y-m-d H:i:s');
+        $st = $this->pdo->prepare(
+            "SELECT a.assignee_id, u.full_name AS assignee_name,
+                    COUNT(*) AS total,
+                    SUM(a.kind = 'work') AS k_work,
+                    SUM(a.kind = 'visit') AS k_visit,
+                    SUM(a.kind = 'await') AS k_await,
+                    SUM(a.kind = 'followup') AS k_followup,
+                    SUM(a.status = 'done') AS done_count,
+                    SUM(a.status = 'planned' AND a.ends_at < ?) AS overdue_planned
+             FROM request_center_appointments a
+             LEFT JOIN users u ON u.id = a.assignee_id
+             WHERE a.status <> ? AND a.starts_at >= ? AND a.starts_at < ?
+             GROUP BY a.assignee_id, u.full_name
+             ORDER BY total DESC, a.assignee_id ASC"
+        );
+        $st->execute([$now, self::STATUS_CANCELLED, $fromDatetime, $toDatetime]);
+        return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /** KPI strip counters for the calendar page (visible scope-aware). */
+    public function countsForRange(?int $assigneeId, string $fromDatetime, string $toDatetime, string $now): array
+    {
+        if (!$this->tableExists()) {
+            return ['today' => 0, 'active' => 0, 'overdue' => 0, 'done' => 0];
+        }
+        $dayStart = date('Y-m-d 00:00:00', strtotime($now));
+        $dayEnd = date('Y-m-d 23:59:59', strtotime($now));
+        $scope = $assigneeId !== null ? ' AND assignee_id = ?' : '';
+        $args = [];
+        $st = $this->pdo->prepare(
+            "SELECT
+                COUNT(*) AS active,
+                SUM(starts_at < ? AND ends_at > ?) AS today,
+                SUM(status = 'planned' AND ends_at < ?) AS overdue,
+                SUM(status = 'done') AS done
+             FROM request_center_appointments
+             WHERE status <> 'cancelled' AND starts_at < ? AND ends_at > ?" . $scope
+        );
+        $params = [$dayEnd, $dayStart, $now, $toDatetime, $fromDatetime];
+        if ($assigneeId !== null) {
+            $params[] = $assigneeId;
+        }
+        $st->execute($params);
+        $row = $st->fetch(PDO::FETCH_ASSOC) ?: [];
+        return [
+            'active' => (int) ($row['active'] ?? 0),
+            'today' => (int) ($row['today'] ?? 0),
+            'overdue' => (int) ($row['overdue'] ?? 0),
+            'done' => (int) ($row['done'] ?? 0),
+        ];
+    }
+
+    /** Mark a planned appointment as done. Owner may complete own; elevated may complete any. */
+    public function complete(int $appointmentId, int $actorId, bool $elevated): array
+    {
+        if (!$this->tableExists()) {
+            return ['ok' => false, 'error' => 'migration_035_missing'];
+        }
+        try {
+            $this->pdo->beginTransaction();
+            try {
+                $st = $this->pdo->prepare('SELECT assignee_id, status FROM request_center_appointments WHERE id = ? FOR UPDATE');
+                $st->execute([$appointmentId]);
+            } catch (Throwable) {
+                // SQLite (offline tests) has no FOR UPDATE — same predicate without the lock.
+                $st = $this->pdo->prepare('SELECT assignee_id, status FROM request_center_appointments WHERE id = ?');
+                $st->execute([$appointmentId]);
+            }
+            $row = $st->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'error' => 'نوبت یافت نشد.'];
+            }
+            if ((string) $row['status'] !== self::STATUS_PLANNED) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'error' => 'فقط نوبت «برنامه‌ریزی‌شده» قابل اتمام است.'];
+            }
+            if (!$elevated && (int) $row['assignee_id'] !== $actorId) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'error' => 'فقط مالک نوبت یا مدیر می‌تواند آن را اتمام کند.'];
+            }
+            $upd = $this->pdo->prepare("UPDATE request_center_appointments SET status = ? WHERE id = ? AND status = ?");
+            $upd->execute([self::STATUS_DONE, $appointmentId, self::STATUS_PLANNED]);
+            if ($upd->rowCount() > 0) {
+                $this->pdo->commit();
+                return ['ok' => true];
+            }
+            $this->pdo->rollBack();
+            return ['ok' => false, 'error' => 'اتمام نوبت انجام نشد؛ مقدار وضعیت هم‌زمان تغییر کرد.'];
+        } catch (Throwable) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return ['ok' => false, 'error' => 'اتمام نوبت انجام نشد؛ لطفاً دوباره تلاش کنید.'];
+        }
+    }
+
+    /** Titles for assignees shown in forms (active staff, bounded). */
+    public function assignableStaff(int $limit = 200): array
+    {
+        // No module ownership of the users table; read-only via existing columns.
+        try {
+            $st = $this->pdo->prepare(
+                "SELECT id, full_name, role FROM users
+                 WHERE is_active = 1
+                   AND role IN ('agent','manager','support_manager','supervisor','admin','primary_admin','department_manager')
+                 ORDER BY full_name ASC, id ASC
+                 LIMIT " . max(1, min(500, $limit))
+            );
+            $st->execute();
+            return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        } catch (Throwable) {
+            return [];
         }
     }
 }
