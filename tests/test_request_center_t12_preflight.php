@@ -29,6 +29,7 @@ $admin = null;
 $servers = [];
 $configFiles = [];
 $createdDbs = [];
+$failure = false;
 
 function t12_fail(string $message): never
 {
@@ -242,7 +243,7 @@ try {
         $webUser = $app['web_user'];
         $admin->exec("DROP USER IF EXISTS '" . $webUser . "'@'127.0.0.1'");
         $admin->exec("CREATE USER '" . $webUser . "'@'127.0.0.1' IDENTIFIED BY '" . $webPass . "'");
-        $admin->exec('GRANT ALL PRIVILEGES ON ' . t12_ident($db) . '.* TO ' . t12_ident($webUser) . "@'127.0.0.1'");
+        $admin->exec('GRANT ALL PRIVILEGES ON ' . t12_ident($db) . ".* TO '" . $webUser . "'@'127.0.0.1'");
         $admin->exec('FLUSH PRIVILEGES');
 
         $pdo = new PDO(
@@ -287,7 +288,6 @@ try {
         'Behavioral scenarios executed: 0/10. T12 remains OPEN until all ten Legacy-vs-Feature scenarios pass.' . PHP_EOL;
 } catch (Throwable $error) {
     fwrite(STDERR, 'T12 PREFLIGHT FAIL: ' . $error->getMessage() . PHP_EOL);
-    exitCode:
     $failure = true;
 } finally {
     foreach ($servers as $process) {
