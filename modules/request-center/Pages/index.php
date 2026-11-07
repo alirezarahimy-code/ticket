@@ -301,9 +301,10 @@ $metricItems = $workspace === 'requester'
 <?php endforeach; ?>
 </section>
 <?php endif; ?>
-<section class="heading"><div><h1><?= $escape($workspaceTitle) ?></h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div>
+<section class="heading"><div><h1><?= $escape($workspaceTitle) ?></h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div><div style="display:flex;gap:8px;flex-wrap:wrap">
+<?php if ($workspace === 'agent'): ?><a class="button secondary" href="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>">تقویم موعد کارشناسان</a><?php endif; ?>
 <?php if (user_can($user, 'ticket.create')): ?><a class="button" href="request-center.php?page=new-ticket">ثبت درخواست جدید</a><?php endif; ?>
-</section>
+</div></section>
 <form method="get" action="request-center.php" class="card" style="padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
 <input type="hidden" name="workspace" value="<?= $escape($workspace) ?>">
 <?php if ($workspace === 'agent'): ?><input type="hidden" name="agent_view" value="<?= $escape($agentView) ?>"><?php endif; ?>
