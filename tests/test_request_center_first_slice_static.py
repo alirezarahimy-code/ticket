@@ -11,17 +11,19 @@ def read(path: str) -> str:
 class RequestCenterFirstSliceTests(unittest.TestCase):
     def test_independent_entrypoint_bootstraps_and_authenticates(self):
         entry = read("request-center.php")
-        self.assertIn("require __DIR__ . '/bootstrap.php';", entry)
-        self.assertIn("$user = require_login();", entry)
-        self.assertIn("RequestCenterRepository", entry)
-        self.assertIn("$schemaProblems = $repo->schemaProblems();", entry)
+        page = read("modules/request-center/Pages/index.php")
+        self.assertIn("require __DIR__ . '/modules/request-center/Pages/index.php';", entry)
+        self.assertIn("require dirname(__DIR__, 2) . '/bootstrap.php';", page)
+        self.assertIn("$user = require_login();", page)
+        self.assertIn("RequestCenterRepository", page)
+        self.assertIn("$schemaProblems = $repo->schemaProblems();", page)
         self.assertIn("public function schemaProblems()", read("modules/request-center/RequestCenterRepository.php"))
 
     def test_repository_uses_existing_visibility_contracts(self):
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertIn("ticket_scope($user, 't')", repo)
         self.assertIn("ticket_user_can_view($ticket, $user)", repo)
-        self.assertIn("ticket_can_see_internal", read("request-center.php"))
+        self.assertIn("ticket_can_see_internal", read("modules/request-center/Pages/index.php"))
 
     def test_internal_messages_are_filtered_in_sql(self):
         repo = read("modules/request-center/RequestCenterRepository.php")
@@ -31,6 +33,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
     def test_read_slice_has_no_schema_or_write_operations(self):
         files = [
             read("request-center.php"),
+            read("modules/request-center/Pages/index.php"),
             read("modules/request-center/RequestCenterRepository.php"),
         ]
         combined = "\n".join(files).lower()
@@ -85,14 +88,14 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';", read("cron/ticket_auto_close.php"))
 
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
-        entry = read("request-center.php")
+        entry = read("modules/request-center/Pages/index.php")
         self.assertIn("htmlspecialchars(", entry)
         self.assertIn("index.php?action=download_attachment", entry)
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertNotIn("stored_name", repo)
 
     def test_workspace_views_are_permission_gated_and_scope_bound(self):
-        entry = read("request-center.php")
+        entry = read("modules/request-center/Pages/index.php")
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertIn("user_can($user, 'supervisor.panel')", entry)
         self.assertIn("user_is_primary_admin($user)", entry)
@@ -105,7 +108,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("ticket_scope($user, 't')", repo)
 
     def test_not_found_and_detail_navigation_preserve_workspace(self):
-        entry = read("request-center.php")
+        entry = read("modules/request-center/Pages/index.php")
         self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', entry)
         self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a>', entry)
         not_found_branch = entry.split("if ($ticket === null)", 1)[1].split("} else {", 1)[0]
