@@ -141,14 +141,16 @@ try {
     t13_check((int) $p1->fetchColumn() === 1, 'database contains exactly one planned appointment for the racing window');
 
     // ——— سناریو B: بازه‌های غیرهم‌پوشان — همه باید موفق شوند ———
-    // نکته: روزِ جدا (دو روز بعد) تا ردیفِ برندهٔ سناریو A (فردا ۰۹:۰۰، planned) با B
-    // تداخل پیدا نکند؛ ردیف‌های A تا پایان آزمایش حفظ می‌شوند.
+    // نکته‌ها: (۱) روزِ جدا (دو روز بعد) تا ردیفِ برندهٔ سناریو A با B تداخل پیدا نکند؛
+    // (۲) پنجرهٔ کاری روز ۰۸:۰۰–۱۶:۰۰ است ⇒ ۱۶ بازهٔ ۲۰ دقیقه‌ای با گام ۳۰ دقیقه که دقیقاً
+    // کل روز کاری را پر می‌کنند و همه داخل پنجرهٔ مجازند.
     $baseB = $base->modify('+2 days');
+    $baseB = $baseB->setTime(8, 0);
     $linesB = [];
     $windowsB = [];
     for ($i = 0; $i < 16; $i++) {
-        $s = $baseB->modify('+' . ($i * 70) . ' minutes')->format('Y-m-d H:i:s');
-        $e = $baseB->modify('+' . ($i * 70 + 60) . ' minutes')->format('Y-m-d H:i:s');
+        $s = $baseB->modify('+' . ($i * 30) . ' minutes')->format('Y-m-d H:i:s');
+        $e = $baseB->modify('+' . ($i * 30 + 20) . ' minutes')->format('Y-m-d H:i:s');
         $windowsB[] = [$s, $e, 'work'];
     }
     $linesB = $race($windowsB);
@@ -176,11 +178,13 @@ try {
 
     // ——— سناریو D: سقف ظرفیت روزانهٔ یک کارشناس (۱ نوبت) با ۱۲ تلاش هم‌زمان ———
     $pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.daily_capacity_assignee','1') ON DUPLICATE KEY UPDATE `value` = '1'");
-    $baseD = new DateTimeImmutable('+3 days 09:00:00');
+    // ۱۲ بازهٔ ۲۰ دقیقه‌ای داخل پنجرهٔ کاری (۰۸:۰۰–۱۶:۰۰) با گام ۴۰ دقیقه — همه داخل پنجره
+    $baseD = new DateTimeImmutable('+3 days');
+    $baseD = $baseD->setTime(8, 0);
     $windowsD = [];
     for ($i = 0; $i < 12; $i++) {
-        $s = $baseD->modify('+' . ($i * 70) . ' minutes')->format('Y-m-d H:i:s');
-        $e = $baseD->modify('+' . ($i * 70 + 60) . ' minutes')->format('Y-m-d H:i:s');
+        $s = $baseD->modify('+' . ($i * 40) . ' minutes')->format('Y-m-d H:i:s');
+        $e = $baseD->modify('+' . ($i * 40 + 20) . ' minutes')->format('Y-m-d H:i:s');
         $windowsD[] = [$s, $e, 'work'];
     }
     $linesD = $race($windowsD);
