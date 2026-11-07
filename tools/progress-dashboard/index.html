@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>داشبورد روند پروژه — سامانهٔ م / مرکز درخواست‌ها</title>
+<style>
+:root{
+  --bg:#0b1420;--panel:#111f2e;--panel2:#16283a;--line:#21364d;--ink:#e8eef4;--muted:#8fa6b8;
+  --teal:#2dd4bf;--green:#34d399;--amber:#fbbf24;--red:#f87171;--blue:#60a5fa;--violet:#a78bfa;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(1200px 600px at 85% -10%,#15304a 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#102a34 0,transparent 55%),var(--bg);color:var(--ink);font:15px/1.85 Tahoma,"Segoe UI",sans-serif}
+code{font:12px/1.7 ui-monospace,Consolas,monospace;direction:ltr;unicode-bidi:embed;color:#c8d6e2;background:#0d1a28;border:1px solid var(--line);border-radius:6px;padding:1px 6px}
+.wrap{max-width:1200px;margin:0 auto;padding:22px 20px 56px}
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;border:1px solid var(--line);background:linear-gradient(135deg,#12223399,#0f1c2c99);backdrop-filter:blur(4px);border-radius:18px;padding:18px 22px;margin-bottom:18px}
+header h1{margin:0;font-size:21px;letter-spacing:-.2px}
+header .sub{color:var(--muted);font-size:12.5px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:12px;background:#0e1c2a}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ok{background:var(--green)}.warn{background:var(--amber)}.bad{background:var(--red)}.info{background:var(--blue)}.dim{background:#4b5f70}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{grid-column:span 3;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.card h3{margin:0 0 8px;font-size:12px;color:var(--muted);font-weight:400}
+.kpi{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.kpi small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:3px;direction:ltr;text-align:right}
+.kpi-good{color:var(--teal)}.kpi-warn{color:var(--amber)}.kpi-bad{color:var(--red)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-top:14px}
+section h2{margin:0 0 12px;font-size:16px;display:flex;align-items:center;gap:8px}
+h2 .tag{font-size:10.5px;color:#0b1420;background:var(--teal);border-radius:6px;padding:2px 8px;font-weight:700}
+.timeline{display:flex;flex-direction:column;gap:0}
+.step{display:grid;grid-template-columns:96px 22px 1fr;gap:12px;align-items:start;position:relative;padding:6px 0}
+.step::before{content:"";position:absolute;top:0;bottom:0;right:calc(96px + 10px);width:2px;background:var(--line)}
+.step:last-child::before{display:none}
+.ver{text-align:center}
+.ver b{display:block;font-size:17px;color:var(--blue)}
+.ver span{font-size:10.5px;color:var(--muted)}
+.node{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);background:#0e1c2a;position:relative;z-index:1;margin:4px auto 0}
+.step.done .node{border-color:var(--teal);background:#0f2d28}
+.step.live .node{border-color:var(--amber);background:#33270d;box-shadow:0 0 0 4px #fbbf2422}
+.step.blocked .node{border-color:var(--red);background:#331414}
+.body{border:1px solid var(--line);border-radius:12px;background:#0e1c2a;padding:10px 14px;margin-bottom:4px}
+.body h4{margin:0 0 4px;font-size:13.5px}
+.body p{margin:4px 0;color:#b9c8d4;font-size:12.5px}
+.badge{display:inline-block;font-size:10.5px;border-radius:6px;padding:2px 8px;border:1px solid var(--line);color:#cfe0ec;background:#122334;margin-left:4px}
+.b-green{border-color:#14532d;color:#86efac}.b-amber{border-color:#713f12;color:#fcd34d}.b-red{border-color:#7f1d1d;color:#fca5a5}.b-blue{border-color:#1e3a5f;color:#93c5fd}.b-violet{border-color:#4c1d95;color:#c4b5fd}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:right;vertical-align:top}
+th{background:#0e1c2a;color:var(--muted);font-weight:600}
+tr:nth-child(even) td{background:#0e1a28}
+.gate{display:flex;gap:10px;align-items:flex-start;border:1px solid #7f1d1d;background:#1f1314;border-radius:12px;padding:10px 14px;margin:10px 0}
+.gate.ok-gate{border-color:#14532d;background:#10231a}
+.gate b{color:#fca5a5}
+.gate.ok-gate b{color:#86efac}
+.files{columns:2;gap:18px;font-size:12.5px}
+.files div{break-inside:avoid;padding:4px 0;border-bottom:1px dashed var(--line)}
+.files span{color:var(--muted);font-size:11px}
+.foot{color:var(--muted);font-size:11.5px;margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+@media(max-width:980px){.card{grid-column:span 6}.files{columns:1}}
+@media(max-width:560px){.card{grid-column:span 12}header{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>داشبورد روند پروژه — سامانهٔ «م» / مرکز درخواست‌ها</h1>
+    <div class="sub">
+      <span class="pill"><i class="dot ok"></i> main: <code>d30d7dfa</code></span>
+      <span class="pill"><i class="dot ok"></i> VERSION روی main: <code>1.62.90</code></span>
+      <span class="pill"><i class="dot info"></i> شاخهٔ ارتقا: <code>feature/request-center-module-1.62.88</code> @ <code>f952e024</code></span>
+    </div>
+  </div>
+  <div style="text-align:left">
+    <span class="pill"><i class="dot warn"></i> Snapshot: ۲۰۲۶-۱۱-۰۷ ساعت ~۱۵:۲۰ (تهران)</span>
+    <div class="sub" style="margin-top:8px"><span class="pill"><i class="dot dim"></i> PR #30: OPEN · Draft · MERGEABLE · CI: UNSTABLE</span></div>
+  </div>
+</header>
+
+<div class="grid">
+  <div class="card"><h3>آخرین نسخه روی main</h3><div class="kpi kpi-good">1.62.90<small>آخرین انتشار (غذا) — ثبت‌شده در <code>VERSION</code></small></div></div>
+  <div class="card"><h3>مهاجرت اجرا‌شده (لاگینگ)</h3><div class="kpi kpi-good">034<small>در main و بستهٔ 1.62.89 ثبت و مصرف‌شده؛ ارتقا از <code>035</code></small></div></div>
+  <div class="card"><h3>Gate باز</h3><div class="kpi kpi-bad">T12<small>پیش‌نیاز اجباری همهٔ نوشتن‌ها؛ هنوز اجرا نشده (۰/۱۰)</small></div></div>
+  <div class="card"><h3>Gate شکست‌خورده</h3><div class="kpi kpi-bad">T07<small>Migration 003 / 014 / 016 روی clone کامل — FAIL</small></div></div>
+</div>
+
+<section>
+  <h2>خط زمان انتشار روی main <span class="tag">اتفاقات واقعی ثبت‌شده</span></h2>
+  <div class="timeline">
+
+    <div class="step done">
+      <div class="ver"><b>1.62.88</b><span>پایهٔ پروژه</span></div>
+      <div class="node"></div>
+      <div class="body"><h4>۱٫۶۲٫۸۸ — خط مبنای ارتقا (ادغام‌شده) <span class="badge b-blue">مرجع ممیزی</span></h4>
+        <p>مبنای <code>ab073ee</code> ثبت‌شده در سند معماری؛ ممیزی As-Is و خط مبنای کد پروژه روی <code>feature/request-center-module-1.62.88</code> انجام شد.</p>
+      </div>
+    </div>
+
+    <div class="step done">
+      <div class="ver"><b>1.62.90</b><span>2026-11-07</span></div>
+      <div class="node"></div>
+      <div class="body"><h4>۱٫۶۲٫۹۰ — اصلاحات رابط مدیریت غذا <span class="badge b-green">PR #33</span><span class="badge b-blue">نیاز به تأیید بصری شما</span></h4>
+        <p> merge <code>17d9d284…</code>؛ بدون مهاجرت دیتابیس. چهار فیکس: فوکوس جست‌وجوی پرسنل در گزارش سفارش‌ها، چیپ «غذای امروز» کنار اعضا، بازهٔ کاری دستگاه تردد ۲۴ساعته، دو تب «ترمیم نقش‌ها/تقویم» در تنظیمات. <code>sha256 ce0c7bed…</code></p>
+      </div>
+    </div>
+
+    <div class="step done">
+      <div class="ver"><b>1.62.89</b><span>2026-11-07</span></div>
+      <div class="node"></div>
+      <div class="body"><h4>۱٫۶۲٫۸۹ — لاگینگ: تشدید شدت + خلاصهٔ هوشمند <span class="badge b-green">ثبت صحیح: PR #35</span></h4>
+        <p> merge <code>d30d7dfa…</code>؛ <b>۱٫۶۲٫۹۱ هرگز منتشر/نصب نشد و حذف شد</b>. محتوای همان محمولهٔ تحویل شما (byte-identical) با شمارهٔ درست ۱٫۶۲٫۸۹ ثبت شد + مهاجرت <b>۰۳۴</b> در main. <code>sha256 635d2d9f…</code></p>
+        <p style="color:var(--amber)">روی سامانهٔ ≥۱٫۶۲٫۹۰ نصب عادی نمی‌شود؛ فقط با «تأیید برگشت» پنل — <b>تصمیم شما روی سامانه هنوز اعلام نشده</b>.</p>
+      </div>
+    </div>
+
+    <div class="step live">
+      <div class="ver"><b>Upgrade</b><span>در جریان</span></div>
+      <div class="node"></div>
+      <div class="body"><h4>ارتقای مرکز درخواست‌ها — شاخهٔ اجرایی (PR #30) <span class="badge b-amber">DRAFT</span><span class="badge b-violet">ماژول مستقل</span></h4>
+        <p>محتوای هر دو انتشار بالا وارد شاخه شد (<code>f952e024</code> = <code>bb7f2d5d</code> + <code>d30d7dfa</code>)؛ <code>VERSION</code> شاخه = ۱٫۶۲٫۹۰. map پروژه باید پس از این sync بازتولید شود (workflow اختصاصی <code>refresh-request-center-map.yml</code>).</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section>
+  <h2>فازهای اجرا (به ترتیب سند معماری — نسخهٔ ۱٫۱۴)</h2>
+  <table>
+    <thead><tr><th>فاز</th><th>هدف</th><th>وضعیت واقعی</th></tr></thead>
+    <tbody>
+      <tr><td>۰ — ممیزی و To-Be</td><td>As-Is با شواهد، ماتریس انتقال وضعیت، SLA/OLA، Role-to-Workspace</td><td><span class="badge b-green">ثبت As-Is</span> <span class="badge b-amber">T12 اثبات نشده</span> — سند در <code>docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md</code></td></tr>
+      <tr><td>۱ — ماژول مستقل</td><td>ورودی <code>request-center.php</code> + <code>modules/request-center/</code>؛ Repository و WorkflowService؛ خارج‌کردن منطق از index.php</td><td><span class="badge b-green">برش خواندنی پیاده</span> <span class="badge b-green">WorkflowService</span> — جزئیات در <code>docs/system-map/REQUEST-CENTER-IMPLEMENTATION.md</code></td></tr>
+      <tr><td>۲ — چرخه عمر</td><td>انتقال Writeها فقط پس از T12 + قرارداد و رگرسیون</td><td><span class="badge b-red">متوقف تا T12</span> — status writes فعلی فقط از مسیرهای legacy + سه Handler ماژول</td></tr>
+      <tr><td>۳ — تقویم کارشناسان</td><td>مدل مستقل نوبت/ظرفیت؛ مستقل از غذا؛ شمسی + تعطیلات</td><td><span class="badge b-amber">جزئی</span> — نمای ماهانهٔ موعدها (read-only) ساخته شده؛ نوبت مستقل و Migrationهای ماژول هنوز نه</td></tr>
+      <tr><td>۴ — سخت‌سازی و بسته</td><td>چهار Workspace کامل، End-to-End، Restore، بستهٔ ارتقا</td><td><span class="badge b-red">شروع نشده</span> — بستهٔ نهایی ارتقا وجود ندارد؛ requires_version نهایی ≥ ۱٫۶۲٫۹۰ خواهد بود</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>ماتریس آزمون‌های اجباری (T01–T12) — پیش از گسترش نوشتن/انتشار</h2>
+  <table>
+    <thead><tr><th>شناسه</th><th>آزمون</th><th>معیار پذیرش</th><th>وضعیت</th></tr></thead>
+    <tbody>
+      <tr><td>T01</td><td>DDL داخل تراکنش + ROLLBACK</td><td>اثر واقعی DDL و مرز implicit commit ثبت شود</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T02</td><td>CREATE TABLE IF NOT EXISTS داخل تراکنش (MariaDB 10.4.32)</td><td>رفتار واقعی نسخه ثبت شود</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T03</td><td>ALTER TABLE … ADD COLUMN IF NOT EXISTS</td><td>syntax/رفتار دقیق روی 10.4.32</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T04</td><td>شمارش DDL در مسیر عادی وب</td><td>صفر DDL یا هر مورد ثبت‌شده با مالک/برنامهٔ حذف</td><td><span class="badge b-red">FAIL / باز</span></td></tr>
+      <tr><td>T05</td><td>Migration سه‌دستوری با خطای عمدی دستور دوم (CLI)</td><td>ثبت دقیق دستور اول/سوم و رجیستری</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T06</td><td>قطع فرایند بین SQL و ثبت <code>schema_updates</code></td><td>reconciliation امن؛ بدون retry کور</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T07</td><td>بازاجرای Migrationهای ۰۰۱–۰۳۳ روی DB کامل</td><td>بدون خطا/تغییر ناخواسته؛ fingerprint قبل/بعد برابر</td><td><span class="badge b-red">FAIL</span> — 003 شش مقدار <code>service_catalog.requires_asset</code> را 0→1 کرد + updated_at سرویس‌ها تغییر کرد؛ 014/016 روی جدول <code>assets</code> Schema افزودند</td></tr>
+      <tr><td>T08</td><td>Restore خروجی <code>create_backup_bundle</code> روی DB خالی</td><td>تطبیق Schema و شمارش ردیف‌ها</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T09</td><td>ALTER هم‌زمان با تراکنش بلند</td><td>metadata lock/timeout اندازه‌گیری شود</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T10</td><td>۵۰ درخواست هم‌زمان <code>claim_ticket</code></td><td>دقیقاً یک برنده؛ بدون claim متناقض</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T11</td><td>تطبیق PHP و ItsmJalali (۱۳۰۰–۱۵۰۰)</td><td>مرز روز/سال صفر مورد انتظار</td><td><span class="badge b-amber">نیازمند آزمون</span></td></tr>
+      <tr><td>T12</td><td>Characterization ده نقطهٔ تغییر وضعیت</td><td>قبل/بعد <code>status</code>، <code>due_at</code>, <code>ola_*</code> و اعلان‌ها؛ مبنای مجوز Command Layer</td><td><span class="badge b-red">۰/۱۰ — اجرا نشده</span> preflight دو clone روی 10.4.32 و 10.11 PASS</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<div class="gate"><div>⛔</div><div><b>ادغام PR #30 به main ممنوع</b> تا موفقیت T12 و تأیید صریح کاربر. تصویب معماری (سند ۱٫۱۴) مجوز ادغام/نصب نیست؛ هر تغییر در محیط واقعی فقط پس از عبور دروازه‌های همان فاز مجاز است.</div></div>
+<div class="gate"><div>⛔</div><div><b>ماژول ارتقا مالک مهاجرت‌ها نیست مگر از ۰۳۵.</b> ۰۳۴ در main ثبت و مصرف‌شده است؛ ۰۳۲ هرگز منتشر/تنظیم نمی‌شود؛ بستهٔ نهایی ارتقاء نباید 034 یا محتوای ۱٫۶۲٫۸۹/۱٫۶۲٫۹۰ را تکرار کند — includes فقط کد Request Center.</div></div>
+<div class="gate ok-gate"><div>✅</div><div><b>قرارداد دامنه رعایت شده:</b> ۱٫۶۲٫۸۹ (فقط لاگینگ) و ۱٫۶۲٫۹۰ (فقط غذا) بدون هیچ فایلی خارج از محدودهٔ خودشان منتشر شدند؛ main = ۱٫۶۲٫۹۰؛ هر دو شاخه هماهنگ‌اند.</div></div>
+
+<section>
+  <h2>نادیده‌نگفتن موارد باز (صادقانه)</h2>
+  <table>
+    <thead><tr><th>مورد</th><th>وضعیت</th></tr></thead>
+    <tbody>
+      <tr><td>CI عمومی روی commit پس از بازتولید map</td><td>یادداشت اجرایی: موفق (Run <code>42350429417</code>)؛ سند معماری (کهنه‌تر) همچنان «تأیید نشده» — ناهم‌خوانی شفاف ثبت شد</td></tr>
+      <tr><td>Logging 1.62.88 Acceptance</td><td>در یادداشت اجرایی «باز» است — assertion مسیر قدیمی در آزمون trace متعلق به لاگینگ</td></tr>
+      <tr><td>تأیید بصری کاربر برای ۱٫۶۲٫۹۰</td><td><span class="badge b-amber">انجام نشده</span> (جست‌وجوی فوکوس، چیپ غذا، تب‌های تنظیمات، بازهٔ ۲۴ساعته)</td></tr>
+      <tr><td>۵ شکست پیش‌موجود js (غذا/مهمان)</td><td><span class="badge b-dim">دست‌نخورده</span> — عمداً اصلاح نمی‌شوند</td></tr>
+      <tr><td>قرارداد CI پین‌شده (گارد rebuild-1.62.88)</td><td><span class="badge b-red">قرمز/نامشخص از اینجا</span> — بدون اجازهٔ شما دست نمی‌زنم</td></tr>
+      <tr><td>MariaDB واقعی کاربر (۱۰٫۴٫۳۲) در مقابل CI (۱۰٫۱۱)</td><td><span class="badge b-amber">نیازمند آزمون on clone با نسخهٔ دقیق</span> — SELECT VERSION() ثبت‌شده</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>مرجع‌ها (همان فایل‌های مخزن)</h2>
+  <div class="files">
+    <div><code>docs/architecture/REQUEST-CENTER-ARCHITECTURE.md</code><br><span>سند نهایی معماری ارتقا — SAMANEH-M-RC-ARCH-001 v1.14</span></div>
+    <div><code>docs/system-map/REQUEST-CENTER-IMPLEMENTATION.md</code><br><span>یادداشت اجرای ماژول (آخرین ثبت: ۲۰۲۶-۱۱-۰۷)</span></div>
+    <div><code>downloads/CHANGE-REPORT-FA-1.62.89.md</code><br><span>گزارش انتشار لاگینگ (byte-identical با payload)</span></div>
+    <div><code>downloads/CHANGE-REPORT-FA-1.62.90.md</code><br><span>گزارش انتشار اصلاحات غذا</span></div>
+    <div><code>downloads/ticket-update-1.62.88-to-1.62.89-logging-escalation-20261107.zip</code><br><span>sha256: 635d2d9f3453230c… · requires 1.62.88 · migrations: 034</span></div>
+    <div><code>downloads/ticket-update-1.62.88-to-1.62.90-food-fixes-20261107.zip</code><br><span>sha256: ce0c7bed9c77485f… · requires 1.62.88 · بدون مهاجرت</span></div>
+    <div><code>migrations/034-logging-escalation.sql</code><br><span>sha256: 8bc0a6ab… · additive/idempotent · مصرف‌شده</span></div>
+    <div>PR <a style="color:var(--blue)" href="https://github.com/alirezarahimy-code/ticket/pull/30">#30</a> · <a style="color:var(--blue)" href="https://github.com/alirezarahimy-code/ticket/pull/33">#33</a> · <a style="color:var(--blue)" href="https://github.com/alirezarahimy-code/ticket/pull/34">#34</a> · <a style="color:var(--blue)" href="https://github.com/alirezarahimy-code/ticket/pull/35">#35</a><br><span>DRAFT · Open · Merged · Merged — همه در ریپو ثبت‌اند</span></div>
+  </div>
+</section>
+
+<p class="foot">این داشبورد یک snapshot ثابت از وضعیت واقعی و ثبت‌شده است (۲۰۲۶-۱۱-۰۷)؛ داده‌ها خودکار به‌روز نمی‌شوند. رنگ‌ها: سبز=انجام/سالم · زرد=در جریان/نیازمند آزمون · قرمز=مسدود/شکست. هیچ تغییری در کد یا مخزن توسط این فایل داده نمی‌شود؛ فایل فقط در <code>tools/progress-dashboard/</code> نگه‌داری می‌شود و روی main ثبت نشده است.</p>
+</div>
+</body>
+</html>

@@ -23,9 +23,10 @@ $schemaFile = dirname(__DIR__) . '/install-empty-db.sql';
 $scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10'))));
 $evidenceDir = (string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'));
 
+$portBase = 18100 + (getmypid() % 4000);
 $apps = [
-    'legacy' => ['root' => $legacyRoot, 'db' => 'rc_t12s_legacy', 'port' => 18771, 'web_user' => 'rc_t12s_legacy_web'],
-    'feature' => ['root' => $featureRoot, 'db' => 'rc_t12s_feature', 'port' => 18772, 'web_user' => 'rc_t12s_feature_web'],
+    'legacy' => ['root' => $legacyRoot, 'db' => 'rc_t12s_legacy', 'port' => $portBase, 'web_user' => 'rc_t12s_legacy_web'],
+    'feature' => ['root' => $featureRoot, 'db' => 'rc_t12s_feature', 'port' => $portBase + 1, 'web_user' => 'rc_t12s_feature_web'],
 ];
 $webPass = 'ci-t12-isolated-web-password';
 $results = [];
@@ -68,17 +69,22 @@ function t12s_start_server(string $root, int $port, string $configPath): mixed
     $env = getenv();
     if (!is_array($env)) { $env = []; }
     $env['ITSM_CONFIG_PATH'] = $configPath;
-    $p = proc_open([PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $root],
-        [0 => ['file', '/dev/null', 'r'], 1 => ['file', '/dev/null', 'a'], 2 => ['file', '/dev/null', 'a']],
+    $logFile = sys_get_temp_dir() . '/t12s-server-' . $port . '.log';
+    @unlink($logFile);
+    $p = proc_open([PHP_BINARY, '-d', 'display_errors=1', '-d', 'log_errors=1', '-d', 'error_log=' . $logFile,
+        '-S', '127.0.0.1:' . $port, '-t', $root],
+        [0 => ['file', '/dev/null', 'r'], 1 => ['file', $logFile, 'a'], 2 => ['file', $logFile, 'a']],
         $pipes, $root, $env);
     t12s_check(is_resource($p), 'start PHP server for ' . $root);
     $base = 'http://127.0.0.1:' . $port;
-    for ($i = 0; $i < 60; $i++) {
+    for ($i = 0; $i < 120; $i++) {
         $r = t12s_http($base . '/index.php');
         if (in_array($r['status'], [200, 302, 303], true)) { return $p; }
         usleep(150000);
     }
-    proc_terminate($p); t12s_fail('PHP server not ready for ' . $root);
+    $tail = is_file($logFile) ? substr((string) file_get_contents($logFile), -1200) : '(no server log)';
+    proc_terminate($p);
+    t12s_fail('PHP server not ready for ' . $root . ' — server log tail: ' . preg_replace('/\s+/', ' ', $tail));
 }
 
 function t12s_config(string $baseUrl, string $db, string $webUser, string $webPass, string $host, string $port): string
