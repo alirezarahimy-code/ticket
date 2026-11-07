@@ -116,7 +116,7 @@ try {
     $analyze = static function (array $lines): array {
         $ok = count(array_filter($lines, static fn (string $l): bool => str_contains($l, 'ok id=')));
         $overlap = count(array_filter($lines, static fn (string $l): bool => str_contains($l, 'تداخل')));
-        $unexpected = array_filter($lines, static fn (string $l): bool => !str_contains($l, 'ok id=') && !str_contains($l, 'تداخل'));
+        $unexpected = array_filter($lines, static fn (string $l): bool => !str_contains($l, 'ok id=') && !str_contains($l, 'تداخل') && !str_contains($l, 'ظرفیت'));
         $cap = count(array_filter($lines, static fn (string $l): bool => str_contains($l, 'ظرفیت')));
         $deadlock = count(array_filter($lines, static fn (string $l): bool => preg_match('/deadlock|lock wait|1213/i', $l) === 1));
         return ['ok' => $ok, 'overlap' => $overlap, 'unexpected' => $unexpected, 'deadlock' => $deadlock, 'cap' => $cap];
