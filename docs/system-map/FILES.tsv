@@ -245,7 +245,7 @@ docs/aggregate-report-preview.html	docs	85	7297
 docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	673	89043
 docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md	docs	195	18894
 docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
-docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	281	45653
+docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	300	48982
 docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	114	10112
 docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	92	10742
 docs/architecture/REQUEST-CENTER-T12-SOURCE-MAPPING-FA.md	docs	84	9169
@@ -426,7 +426,9 @@ migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 modules/request-center/Actions/bulk-actions.php	other	146	10682
 modules/request-center/Actions/supervisor-actions.php	other	204	15442
 modules/request-center/Actions/ticket-actions.php	other	752	59624
-modules/request-center/README.md	other	67	8679
+modules/request-center/Assets/request-center.css	other	1	255
+modules/request-center/Pages/index.php	other	244	18574
+modules/request-center/README.md	other	84	10307
 modules/request-center/RequestCenterRepository.php	other	221	9196
 modules/request-center/WorkflowService.php	other	256	11564
 ola.php	core	111	11934
@@ -439,7 +441,7 @@ preview/food-release-download/package.json	preview	13	232
 preview/food-release-download/public/food-update-1.62.3.html	preview	35	4501
 preview/food-release-download/vite.config.js	preview	56	1969
 rebuild-final.sql	sql-root	96	2188
-request-center.php	core	244	18766
+request-center.php	core	10	325
 restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
@@ -463,7 +465,7 @@ tests/fixture_traffic_render.php	tests	18	1313
 tests/fixtures/jalali-php-convert.php	tests	50	1690
 tests/fixtures/request-center-claim-worker.php	tests	67	1966
 tests/fixtures/request-center-ddl-probe.php	tests	11	372
-tests/fixtures/request-center-session-seed.php	tests	19	458
+tests/fixtures/request-center-session-seed.php	tests	20	486
 tests/food-engine-checklist.md	tests	59	4865
 tests/js/food-aggregate-report.test.js	tests	188	12454
 tests/js/food-bulk-past-window.test.js	tests	32	1683
