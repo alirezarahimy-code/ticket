@@ -92,7 +92,12 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         entry = read("request-center.php")
         self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', entry)
         self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a>', entry)
-        self.assertNotIn('href="<?= $escape($workspaceUrl) ?>"', entry.split("echo '<section class=\"card empty\"")[0] if "echo '<section class=\"card empty\"" in entry else "")
+        not_found_branch = entry.split("if ($ticket === null)", 1)[1].split("} else {", 1)[0]
+        self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', not_found_branch)
+        self.assertNotIn("echo '<section", not_found_branch)
+        self.assertNotIn('<?= $escape($workspaceUrl) ?>', not_found_branch.replace(
+            '<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', ''
+        ))
 
     def test_legacy_workflow_is_not_removed_by_first_slice(self):
         action = read("actions/ticket-actions.php")
