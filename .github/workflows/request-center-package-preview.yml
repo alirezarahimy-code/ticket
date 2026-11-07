@@ -1,0 +1,117 @@
+name: Request Center QA Package Preview
+
+on:
+  push:
+    branches: [ feature/request-center-module-1.62.88 ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: request-center-package-preview
+  cancel-in-progress: false
+
+jobs:
+  package-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/request-center-module-1.62.88
+          fetch-depth: 0
+
+      - name: Verify package baseline and required source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE_SHA="ab073ee9fffc56ccd1a2093d02725b95891e0d63"
+          git cat-file -e "${BASE_SHA}^{commit}"
+          test "$(git merge-base "${BASE_SHA}" HEAD)" = "${BASE_SHA}"
+          for file in \
+            index.php \
+            request-center.php \
+            actions/ticket-actions.php \
+            actions/supervisor-actions.php \
+            actions/bulk-actions.php \
+            cron/ticket_auto_close.php \
+            modules/request-center/RequestCenterRepository.php \
+            modules/request-center/WorkflowService.php
+          do
+            test -s "$file"
+          done
+
+      - name: Assemble isolated QA overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="dist/request-center-qa"
+          mkdir -p "$ROOT/overlay" "$ROOT/qa/tests" "$ROOT/qa/docs"
+          files=(
+            index.php
+            request-center.php
+            actions/ticket-actions.php
+            actions/supervisor-actions.php
+            actions/bulk-actions.php
+            cron/ticket_auto_close.php
+            modules/request-center/RequestCenterRepository.php
+            modules/request-center/WorkflowService.php
+          )
+          for file in "${files[@]}"; do
+            mkdir -p "$ROOT/overlay/$(dirname "$file")"
+            cp "$file" "$ROOT/overlay/$file"
+          done
+          tests=(
+            tests/test_request_center_first_slice_static.py
+            tests/test_request_center_repository_sqlite.php
+            tests/test_request_center_workflow_service_sqlite.php
+            tests/test_request_center_schema_preflight_mariadb.php
+            tests/test_ticket_workflow_safety_static.py
+            tests/test_ticket_cancellation_static.py
+            tests/test_ldap_secret_and_legacy_status_static.py
+          )
+          for file in "${tests[@]}"; do
+            test -s "$file"
+            cp "$file" "$ROOT/qa/tests/"
+          done
+          cp modules/request-center/README.md "$ROOT/qa/docs/REQUEST-CENTER-IMPLEMENTATION.md"
+          cat > "$ROOT/README-FA.txt" <<'EOF'
+          بستهٔ آزمایشی مرکز درخواست‌ها (Request Center)
+          ==============================================
+          وضعیت: QA PREVIEW — برای نصب عملیاتی تأیید نشده است.
+
+          این آرشیو یک Overlay از کدهای شاخهٔ توسعه و تست‌های قراردادی مربوط است.
+          این بسته نصب‌گر عملیاتی نیست؛ هیچ فایل را روی سامانهٔ زنده کپی نکنید.
+          هیچ Migration یا DDL در این بسته اجرا نمی‌شود.
+          آزمون‌ها را فقط روی Clone غیرعملیاتی با نسخهٔ سازگار PHP و MariaDB اجرا کنید.
+
+          مسیر overlay نسبت به ریشهٔ مخزن/سامانه حفظ شده است.
+          پوشهٔ qa شامل تست‌های قراردادی و توضیح وضعیت پیاده‌سازی است.
+          پیش از هر انتشار باید آزمون‌های T01 تا T12، آزمون End-to-End،
+          تمرین Backup/Restore و بررسی سازگاری نسخهٔ مقصد تکمیل شوند.
+          EOF
+          BASE_SHA="ab073ee9fffc56ccd1a2093d02725b95891e0d63"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          {
+            echo "package_kind=request-center-qa-overlay"
+            echo "release_status=NOT_FOR_PRODUCTION"
+            echo "base_commit=$BASE_SHA"
+            echo "head_commit=$HEAD_SHA"
+            echo "branch=feature/request-center-module-1.62.88"
+            echo "database_ddl_included=no"
+            echo "installer_included=no"
+            echo "rollback_script_included=no"
+            echo "runtime_files:"
+            printf ' - %s\n' "${files[@]}"
+          } > "$ROOT/PACKAGE-MANIFEST.txt"
+          find "$ROOT" -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > "$ROOT/SHA256SUMS"
+          cd dist
+          zip -qr request-center-qa-preview.zip request-center-qa
+
+      - name: Upload QA package preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: request-center-qa-preview
+          path: dist/request-center-qa-preview.zip
+          if-no-files-found: error
+          retention-days: 14
