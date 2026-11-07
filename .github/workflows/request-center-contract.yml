@@ -39,6 +39,9 @@ on:
   push:
     branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
 
+permissions:
+  contents: write
+
 jobs:
   request-center-contract:
     name: Request Center Contract (MariaDB ${{ matrix.mariadb-version }})
