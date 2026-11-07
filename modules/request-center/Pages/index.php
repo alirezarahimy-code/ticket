@@ -195,9 +195,27 @@ if ($workspace === 'requester') {
 } elseif ($workspace === 'agent' && $agentView === 'mine') {
     $filters['assigned_to'] = (int) $user['id'];
 }
-$result = $repo->listVisible($user, $page, 50, $filters);
-$pages = max(1, (int) ceil($result['total'] / 50));
-$page = min($page, $pages);
+$agentQueueName = 'mine';
+if ($workspace === 'agent') {
+    $allowedAgentQueues = user_can($user, 'queue.view')
+        ? ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled']
+        : ['mine'];
+    $requestedQueue = (string) ($_GET['queue'] ?? ($agentView === 'mine' ? 'mine' : 'all'));
+    $agentQueueName = in_array($requestedQueue, $allowedAgentQueues, true)
+        ? $requestedQueue
+        : ($agentView === 'mine' ? 'mine' : 'all');
+    if ($agentView === 'mine' && !user_can($user, 'queue.view')) {
+        $agentQueueName = 'mine';
+    }
+    $queueData = $repo->listQueue($user, $agentQueueName, $page, 50);
+    $result = ['total' => $queueData['total'], 'rows' => $queueData['rows']];
+    $pages = $queueData['pages'];
+    $page = $queueData['page'];
+} else {
+    $result = $repo->listVisible($user, $page, 50, $filters);
+    $pages = max(1, (int) ceil($result['total'] / 50));
+    $page = min($page, $pages);
+}
 $queryParams = ['workspace' => $workspace];
 if ($workspace === 'agent') {
     $queryParams['agent_view'] = $agentView;
@@ -208,6 +226,17 @@ $queryString = http_build_query(array_merge($queryParams, array_filter($filters,
 <nav class="workspace-nav" aria-label="نوع صف کارشناس">
 <a class="<?= $agentView === 'mine' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=mine">صف شخصی من</a>
 <a class="<?= $agentView === 'team' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=team">صف گروهی مجاز</a>
+</nav>
+<?php endif; ?>
+<?php if ($workspace === 'agent'): ?>
+<nav class="workspace-nav" aria-label="فیلتر صف عملیاتی">
+<?php
+$agentQueueLabels = ['all' => 'همه', 'unassigned' => 'بدون مسئول', 'overdue' => 'خارج از SLA/OLA', 'mine' => 'مسئول من', 'waiting_user' => 'انتظار کاربر', 'resolved' => 'حل‌شده', 'cancellation_requested' => 'درخواست لغو', 'cancelled' => 'لغوشده'];
+foreach ($agentQueueLabels as $queueKey => $queueLabel):
+    if (!user_can($user, 'queue.view') && $queueKey !== 'mine') continue;
+?>
+<a class="<?= $agentQueueName === $queueKey ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=<?= $escape($agentView) ?>&amp;queue=<?= $escape($queueKey) ?>"><?= $escape($queueLabel) ?></a>
+<?php endforeach; ?>
 </nav>
 <?php endif; ?>
 <section class="heading"><div><h1><?= $escape($workspaceTitle) ?></h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div>
