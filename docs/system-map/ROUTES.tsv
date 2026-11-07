@@ -361,11 +361,11 @@ page	logs	index.php	1551
 page	search	index.php	1739
 page	ticket	index.php	1826
 page	inventory	index.php	1827
-page	holidays	index.php	1988
-page	asset-history	index.php	2098
-page	inventory-diagnostics	index.php	2113
-page	domain-scan	index.php	2163
-page	asset	index.php	2286
+page	holidays	index.php	1942
+page	asset-history	index.php	2052
+page	inventory-diagnostics	index.php	2067
+page	domain-scan	index.php	2117
+page	asset	index.php	2240
 page	inventory	modules/request-center/Actions/bulk-actions.php	41
 page	queue	modules/request-center/Actions/bulk-actions.php	145
 action	add_asset_relation	modules/request-center/Actions/bulk-actions.php	24
