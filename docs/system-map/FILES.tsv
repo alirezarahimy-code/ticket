@@ -245,7 +245,7 @@ docs/aggregate-report-preview.html	docs	85	7297
 docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	673	89043
 docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md	docs	195	18894
 docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
-docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	246	41444
+docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	281	45653
 docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	114	10112
 docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	92	10742
 docs/architecture/REQUEST-CENTER-T12-SOURCE-MAPPING-FA.md	docs	84	9169
@@ -426,7 +426,7 @@ migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 modules/request-center/Actions/bulk-actions.php	other	146	10682
 modules/request-center/Actions/supervisor-actions.php	other	204	15442
 modules/request-center/Actions/ticket-actions.php	other	752	59624
-modules/request-center/README.md	other	67	8597
+modules/request-center/README.md	other	67	8679
 modules/request-center/RequestCenterRepository.php	other	221	9196
 modules/request-center/WorkflowService.php	other	256	11564
 ola.php	core	111	11934
