@@ -129,6 +129,22 @@
 | `.github/workflows/request-center-contract.yml` | افزودن ۳ خط‌path/lint/گام | ثبت گیت‌های فاز ۴ در Contract |
 | این سند | جدید | شواهد فاز ۴ |
 
+## ۷٫۵. نتیجهٔ Contract CI روی شِما (ثبت پس از اجرا — ۲۰۲۶-۱۱-۰۷)
+
+اجرای **Request Center Contract** روی کامیت `792caac` (شِمای کامل فاز ۴) با موفقیت ثبت شد جز red تاریخی مصوب D1:
+
+| گام | MariaDB 10.4.32 | MariaDB 10.11 |
+|---|---|---|
+| PHP syntax (entry + repository + appointments + actions + calendar page) | **success** | **success** |
+| First-slice static contracts | success | success |
+| Repository visibility SQLite | success | success |
+| **Appointment lifecycle/conflict/capacity (SQLite) — گامِ تازهٔ این فاز** | **success** | **success** |
+| بارگذاری اسکیمای تجمیعی تازه‌نصب (با `request_center_appointments`) روی دیتابیس disposable | **success** | **success** |
+| Request Center schema preflight | **success** | **success** |
+| **T07 full-database clone migration replay and fingerprint** | **failure (D1 تاریخی — بدون تغییر)** | **failure (D1 تاریخی — بدون تغییر)** |
+
+سایر workflowها: T12 Scenarios **success**؛ T12 Preflight **success**؛ CI/Logging/Package Preview قرمزها **مانند گذشته و بدون ارتباط با این فاز** (SecurityTest با دو assertion از پیش موجودِ باقی‌مانده در انتظار move شدن توابع به `lib/`؛ package-preview در انتظار تصمیم VERSION/release توسط مالک — VERSION عمداً لمس نشده). پس از آن، robots روی feature یک نوبۀ «docs(system-map): refresh» (کامیت `72da825`) را روی PR **افزودند و با کامیت فاز ۴ تداخل نداشت**؛ ران‌های بعدی همان PR در وضعیت `action_required` بر عهدهٔ تأیید Actions مالک هستند و دستی تغییر نشدند.
+
 ## ۸. شواهد اجراشده (خلاصه)
 
 - `php -l` روی همهٔ فایل‌های تغییر یافته: سبز.
