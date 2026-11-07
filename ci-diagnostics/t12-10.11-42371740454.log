@@ -1,0 +1,8 @@
+    [probe] tid_check: HTTP 302 location=index.php?page=dashboard tickets_count=0 max_id=NULL
+T12 SCENARIOS ERROR: create_ticket for legacy did not produce a ticket (location=index.php?page=dashboard); app.log tail:
+2026-11-07T15:47:07+03:30 [error] خطای برنامه — خطای ناشناخته: ITSM request failed: برای درخواست پشتیبانی، محل خدمت یا اتاق را وارد کنید. | /index.php {"cause":"علت دقیق از روی متن خطا مشخص نیست.","action":"جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.","technical":"ITSM request failed: برای درخواست پشتیبانی، محل خدمت یا اتاق را وارد کنید. | /index.php","location":"index.php:1321","code":"SYS-PHP-001","category":"system"}
+#0 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(427): t12s_create_ticket()
+#1 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(357): {closure}()
+#2 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(366): t12s_run_pair()
+#3 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(426): t12s_finish()
+#4 {main}
