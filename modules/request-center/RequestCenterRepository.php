@@ -225,14 +225,31 @@ final class RequestCenterRepository
      *
      * @return array<string,int>
      */
-    public function workspaceSummary(array $user): array
+    public function workspaceSummary(array $user, array $filters = []): array
     {
         [$scopeSql, $params] = ticket_scope($user, 't');
+        $conditions = [];
+        $requesterId = (int) ($filters['requester_id'] ?? 0);
+        if ($requesterId > 0) {
+            $conditions[] = 't.requester_id = ?';
+            $params[] = $requesterId;
+        }
+        $assigneeId = (int) ($filters['assigned_to'] ?? 0);
+        if ($assigneeId > 0) {
+            $conditions[] = 't.assigned_to = ?';
+            $params[] = $assigneeId;
+        }
+        $where = trim($scopeSql);
+        if ($conditions !== []) {
+            $where .= ($where === '' ? ' WHERE ' : ' AND ') . implode(' AND ', $conditions);
+        }
+
         $sql = 'SELECT
                     COUNT(*) AS total,
                     COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled")), 0) AS active,
                     COALESCE(SUM(t.assigned_to IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled")), 0) AS unassigned,
                     COALESCE(SUM(t.status IN ("new", "manager_review")), 0) AS awaiting_assignment,
+                    COALESCE(SUM(t.status IN ("waiting_user", "pending")), 0) AS waiting_user,
                     COALESCE(SUM(t.status = "resolved"), 0) AS awaiting_supervisor,
                     COALESCE(SUM(t.status = "closed"), 0) AS closed,
                     COALESCE(SUM(
@@ -245,14 +262,21 @@ final class RequestCenterRepository
                             OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW())
                             OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW())
                         )
-                    ), 0) AS overdue
-                FROM tickets t ' . $scopeSql;
+                    ), 0) AS overdue,
+                    COALESCE(SUM(
+                        t.status NOT IN ("resolved", "closed", "cancelled")
+                        AND t.sla_paused_at IS NULL
+                        AND t.due_at IS NOT NULL
+                        AND t.due_at >= NOW()
+                        AND t.due_at <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+                    ), 0) AS due_soon
+                FROM tickets t ' . $where;
         $query = $this->pdo->prepare($sql);
         $query->execute($params);
         $row = $query->fetch(PDO::FETCH_ASSOC) ?: [];
 
         $summary = [];
-        foreach (['total', 'active', 'unassigned', 'awaiting_assignment', 'awaiting_supervisor', 'closed', 'overdue'] as $key) {
+        foreach (['total', 'active', 'unassigned', 'awaiting_assignment', 'waiting_user', 'awaiting_supervisor', 'closed', 'overdue', 'due_soon'] as $key) {
             $summary[$key] = (int) ($row[$key] ?? 0);
         }
         return $summary;
