@@ -73979,7 +73979,7 @@
             "path": "tests\/test_request_center_t12_preflight.php",
             "area": "TEST",
             "lines": 322,
-            "file_fingerprint": "582e85c9b0fe",
+            "file_fingerprint": "f2df5671ea96",
             "blocks": [
                 {
                     "kind": "region",
@@ -74123,7 +74123,7 @@
                     "line_start": 210,
                     "line_end": 322,
                     "lines": 113,
-                    "fingerprint": "3dc561ac89e4",
+                    "fingerprint": "f440140e8583",
                     "risk": {
                         "score": 12,
                         "flags": {
