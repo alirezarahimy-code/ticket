@@ -126,6 +126,7 @@ header{background:#fff;border-bottom:1px solid var(--line)}.bar{max-width:1180px
 dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:var(--muted)}dd{margin:0;font-weight:600;overflow-wrap:anywhere}
 .notice{padding:13px 16px;margin-bottom:16px;background:#eef5ff;border:1px solid #d7e6fb;border-radius:10px;color:#27476f}
  .workspace-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.workspace-metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.workspace-metric strong{display:block;font-size:23px}.workspace-metric span{font-size:12px;color:var(--muted)}@media(max-width:700px){.workspace-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ .deadline{display:inline-flex;flex-direction:column;gap:1px;white-space:nowrap;font-size:11px}.deadline b{font-weight:700}.deadline small{font-size:10px}.deadline-late{color:#b42318}.deadline-soon{color:#9a6700}.deadline-paused,.deadline-empty{color:var(--muted)}.deadline-normal{color:#276749}
 @media(max-width:780px){.heading{align-items:flex-start;flex-direction:column}.detail-grid{grid-template-columns:1fr}.table th:nth-child(3),.table td:nth-child(3){display:none}.table th,.table td{padding:10px 8px;font-size:12px}}
 </style>
 </head>
@@ -236,6 +237,19 @@ if ($workspace === 'requester') {
     $workspaceSummaryFilters = $agentView === 'mine' ? ['assigned_to' => (int) $user['id']] : [];
     $workspaceSummary = $repo->workspaceSummary($user, $workspaceSummaryFilters);
 }
+$deadlineBadge = static function (mixed $value, bool $paused = false) use ($escape): string {
+    $raw = trim((string) $value);
+    if ($raw === '') {
+        return '<span class="deadline-empty">—</span>';
+    }
+    $timestamp = strtotime($raw);
+    if ($timestamp === false) {
+        return $escape($raw);
+    }
+    $state = $paused ? 'paused' : ($timestamp < time() ? 'late' : ($timestamp <= time() + 86400 ? 'soon' : 'normal'));
+    $label = $paused ? 'متوقف' : ($state === 'late' ? 'گذشته' : ($state === 'soon' ? 'نزدیک' : 'فعال'));
+    return '<span class="deadline deadline-' . $state . '"><b>' . $escape(date('Y/m/d H:i', $timestamp)) . '</b><small>' . $label . '</small></span>';
+};
 $queryParams = ['workspace' => $workspace];
 if ($workspace === 'agent') {
     $queryParams['agent_view'] = $agentView;
@@ -296,13 +310,18 @@ $metricItems = $workspace === 'requester'
 </form>
 <section class="card">
 <?php if (!$result['rows']): ?><div class="empty">درخواستی در محدودهٔ دسترسی شما وجود ندارد.</div><?php else: ?>
-<div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>آخرین تغییر</th></tr></thead><tbody>
+<div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>مهلت SLA</th><?php if ($workspace === 'agent'): ?><th>موعد پاسخ OLA</th><th>موعد حل OLA</th><?php endif; ?><th>آخرین تغییر</th></tr></thead><tbody>
 <?php foreach ($result['rows'] as $row): ?>
 <tr>
 <td><a class="subject" href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=<?= $escape(rawurlencode($workspace)) ?><?= $workspace === 'agent' ? '&amp;agent_view=' . $escape(rawurlencode($agentView)) : '' ?>"><?= $escape($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escape($row['subject']) ?></a><small class="meta"><?= $escape($typeLabels[(string) ($row['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape(($row['service_group'] ?? '') === 'support' ? 'پشتیبانی' : 'فناوری اطلاعات') ?></small></td>
 <td><?= $escape($row['requester_name']) ?></td><td><?= $escape($row['assignee_name'] ?: 'بدون مسئول') ?></td>
 <td><span class="status"><?= $escape($statusLabels[(string) $row['status']] ?? $row['status']) ?></span></td>
 <td><span class="priority"><?= $escape($priorityLabels[(string) $row['priority']] ?? $row['priority']) ?></span></td>
+<td><?= $deadlineBadge($row['due_at'] ?? null, !empty($row['sla_paused_at'])) ?></td>
+<?php if ($workspace === 'agent'): ?>
+<td><?= $deadlineBadge($row['ola_response_due_at'] ?? null, !empty($row['sla_paused_at'])) ?></td>
+<td><?= $deadlineBadge($row['ola_due_at'] ?? null, !empty($row['sla_paused_at'])) ?></td>
+<?php endif; ?>
 <td><?= $escape($row['updated_at']) ?></td>
 </tr>
 <?php endforeach; ?>
