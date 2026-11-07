@@ -4,7 +4,7 @@
 |---|---|
 | شناسه | RC-T12-SOURCE-MAP-01 |
 | شاخه هدف | `feature/request-center-module-1.62.88` |
-| HEAD مبنا | `e1f7f9b581a9005f3a6e08a8dbf5ad9244a5b3b1` |
+| commit کد مبنای نگاشت | `82ef7c1978c53a86ac31a5568d5e46417c42ede2` |
 | مبنای Legacy | `ab073ee9fffc56ccd1a2093d02725b95891e0d63` |
 | سند آزمون مادر | `REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md` |
 | وضعیت | نگاشت ایستای سورس تکمیل شد؛ اجرای رفتاری همچنان BLOCKED |
