@@ -250,7 +250,11 @@ if (!defined('APP_ROOT')) {
                     'ola_due_at' => $cancelOla['due_at'],
                     'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
                     'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
-                ], 'requester_cancel', ['requester_id' => (int) $cancelUser['id']]);
+                ], 'requester_cancel', [
+                    'requester_id' => (int) $cancelUser['id'],
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                ]);
                 if (!$cancelApplied) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
@@ -323,7 +327,11 @@ if (!defined('APP_ROOT')) {
                     'ola_due_at' => $cancelOla['due_at'],
                     'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
                     'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
-                ], 'cancellation_approved', ['cancel_requested_at' => $requestAt]);
+                ], 'cancellation_approved', [
+                    'cancel_requested_at' => $requestAt,
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                ]);
                 if (!$approved) {
                     throw new RuntimeException('درخواست لغو یا وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
@@ -427,7 +435,12 @@ if (!defined('APP_ROOT')) {
                 'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
                 'sla_paused_at' => null,
                 'sla_pause_minutes' => 0,
-            ], 'requester_reopen', ['cancel_requested_at' => null]);
+            ], 'requester_reopen', [
+                'cancel_requested_at' => null,
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+            ]);
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
@@ -562,6 +575,7 @@ if (!defined('APP_ROOT')) {
             $replySaved = $workflow->transition($ticketId, $oldStatus, $newStatus, $replyUpdates, $replyTransitionKind, [
                 'assigned_to' => $ticket['assigned_to'] ?? null,
                 'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
                 'cancel_requested_at' => $lockedReply['cancel_requested_at'] ?? null,
             ]);
             if (!$replySaved) {
@@ -704,6 +718,7 @@ if (!defined('APP_ROOT')) {
             $updated = $workflow->transition($ticketId, $oldStatus, $status, $workflowUpdates, $workflowKind, [
                 'assigned_to' => $ticket['assigned_to'] ?? null,
                 'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
                 'cancel_requested_at' => null,
             ]);
             if (!$updated) {
