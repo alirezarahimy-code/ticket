@@ -139,13 +139,31 @@ jobs:
           CI_DB_PASS: ci-ephemeral-root-password
 
       - name: Request Center T04 web DDL runtime diagnostic
-        run: php tests/test_request_center_web_ddl_runtime.php
+        id: t04
+        if: always()
+        run: php tests/test_request_center_web_ddl_runtime.php > "$RUNNER_TEMP/t04.log" 2>&1; code=$?; cat "$RUNNER_TEMP/t04.log"; exit $code
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Commit T04 diagnostic log on failure (workbench branch only)
+        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
+        run: |
+          set +e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
+          mkdir -p ci-diagnostics
+          cp "$RUNNER_TEMP/t04.log" "ci-diagnostics/contract-t04-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
+          git add ci-diagnostics
+          git commit -m "ci diagnostics: contract T04 ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}" || true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: T05-T06 migration runner failure and registry fault injection
         run: php tests/test_system_update_migration_failure_gates.php
