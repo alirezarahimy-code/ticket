@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 557 |
-| خطوط | 127,687 |
+| خطوط | 127,690 |
 | آدرس‌ها (بلوک) | 6,747 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 229 | 1,647 | 21,827 |
+| `TEST` | TEST | 229 | 1,647 | 21,830 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 56 | 1,387 | 45,702 |
@@ -2937,7 +2937,7 @@
 </details>
 
 <details>
-<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (285 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (288 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -2949,9 +2949,9 @@
 | `TEST-176.06` | 85–91 | تابع | `t07_tables` | 0 | ⬜ |
 | `TEST-176.07` | 93–130 | تابع | `t07_fingerprint` | 5 | ⬜ |
 | `TEST-176.08` | 132–141 | تابع | `t07_registry_rows` | 0 | ⬜ |
-| `TEST-176.09` | 142–156 | ناحیه | `بلوک رویه‌ای 142-156` | 4 | ⬜ |
-| `TEST-176.10` | 157–157 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
-| `TEST-176.11` | 158–285 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
+| `TEST-176.09` | 142–159 | ناحیه | `بلوک رویه‌ای 142-159` | 4 | ⬜ |
+| `TEST-176.10` | 160–160 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
+| `TEST-176.11` | 161–288 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
 
 </details>
 

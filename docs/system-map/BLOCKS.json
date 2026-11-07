@@ -73730,8 +73730,8 @@
             "id": "TEST-176",
             "path": "tests\/test_request_center_t07_migration_clone.php",
             "area": "TEST",
-            "lines": 285,
-            "file_fingerprint": "b011824b85f6",
+            "lines": 288,
+            "file_fingerprint": "2ea0f3223a4a",
             "blocks": [
                 {
                     "kind": "region",
@@ -73843,11 +73843,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 142-156",
+                    "anchor": "بلوک رویه‌ای 142-159",
                     "line_start": 142,
-                    "line_end": 156,
-                    "lines": 15,
-                    "fingerprint": "e398c6b88efd",
+                    "line_end": 159,
+                    "lines": 18,
+                    "fingerprint": "227d88545943",
                     "risk": {
                         "score": 4,
                         "flags": {
@@ -73859,8 +73859,8 @@
                 {
                     "kind": "region",
                     "anchor": "Strip only database-selection statements from the trusted du",
-                    "line_start": 157,
-                    "line_end": 157,
+                    "line_start": 160,
+                    "line_end": 160,
                     "lines": 1,
                     "fingerprint": "434ae3b1b084",
                     "risk": {
@@ -73872,8 +73872,8 @@
                 {
                     "kind": "region",
                     "anchor": "is forced into the disposable clone regardless of the source",
-                    "line_start": 158,
-                    "line_end": 285,
+                    "line_start": 161,
+                    "line_end": 288,
                     "lines": 128,
                     "fingerprint": "9f5b91aecb2d",
                     "risk": {

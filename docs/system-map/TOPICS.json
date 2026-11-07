@@ -46766,14 +46766,14 @@
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
       "line": 142,
-      "anchor": "بلوک رویه‌ای 142-156",
+      "anchor": "بلوک رویه‌ای 142-159",
       "risk": 4,
-      "lines": 15
+      "lines": 18
     },
     "TEST-176.10": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 157,
+      "line": 160,
       "anchor": "Strip only database-selection statements from the trusted du",
       "risk": 0,
       "lines": 1
@@ -46781,7 +46781,7 @@
     "TEST-176.11": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 158,
+      "line": 161,
       "anchor": "is forced into the disposable clone regardless of the source",
       "risk": 7,
       "lines": 128
