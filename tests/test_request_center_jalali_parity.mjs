@@ -1,10 +1,8 @@
-'use strict';
-
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const { execFileSync } = require('node:child_process');
-const path = require('node:path');
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import { execFileSync } from 'node:child_process';
+import path from 'node:path';
 
 const root = path.resolve(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'assets/jalali-calendar.js'), 'utf8');
