@@ -227,7 +227,25 @@ try {
         'support_location' => 'smoke-lab',
         'csrf' => $csrf,
     ], ['Cookie: ' . $cookie]);
+    if ($create['status'] !== 302) {
+        $logTail = '';
+        $logFile = $root . '/storage/logs/app.log';
+        if (is_file($logFile)) {
+            $logLines = @file($logFile, FILE_IGNORE_NEW_LINES) ?: [];
+            $logTail = " | app.log tail: " . implode(" ⏎ ", array_slice($logLines, -12));
+        }
+        smoke_check(false, 'independent create_ticket returns HTTP 302 (status ' . $create['status'] . '). Body snippet: ' . substr(strip_tags($create['body']), 0, 300) . $logTail);
+    }
     smoke_check($create['status'] === 302, 'independent create_ticket returns HTTP 302 (status ' . $create['status'] . ')');
+    if (!str_starts_with($create['location'], 'index.php?page=ticket&id=')) {
+        $logTail = '';
+        $logFile = $root . '/storage/logs/app.log';
+        if (is_file($logFile)) {
+            $logLines = @file($logFile, FILE_IGNORE_NEW_LINES) ?: [];
+            $logTail = " | app.log tail: " . implode(" ⏎ ", array_slice($logLines, -12));
+        }
+        smoke_check(false, 'independent create_ticket redirects to the ticket page. Location: ' . $create['location'] . $logTail);
+    }
     smoke_check(str_starts_with($create['location'], 'index.php?page=ticket&id='), 'independent create_ticket redirects to the ticket page (Location: ' . $create['location'] . ')');
     $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase-3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
     smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');

@@ -63,10 +63,21 @@ function request_center_handle_post(): bool
     require_once dirname(__DIR__, 2) . '/lib/http-post.php';
     post_context_begin();
 
-    require __DIR__ . '/Actions/dispatch.php';
+    // همان پیش‌شرط‌های هر درخواست production: seq/autofill/loggerها آماده باشد.
+    if (function_exists('ticket_number_ensure_schema')) {
+        ticket_number_ensure_schema();
+        ticket_number_autofill();
+    }
+
+    try {
+        require __DIR__ . '/Actions/dispatch.php';
+    } catch (Throwable $exception) {
+        // دقیقاً همان قرارداد خطای legacy: rollback + لاگ + فلش + redirect
+        post_context_on_error($exception, (string) ($_GET['page'] ?? ''));
+    }
 
     // Defensive fallback: every name in the registry is handled inside the
     // dispatcher (they redirect on success). Reached only if the registry and
     // the dispatcher diverge — fail loudly through the shared error contract.
-    post_context_on_error(new RuntimeException('عملیات مرکز درخواست‌ها پیدا نشد.'), (string) ($_GET['page'] ?? 'request-center'));
+    post_context_on_error(new RuntimeException('عملیات مرکز درخواست‌ها پیدا نشد.'), (string) ($_GET['page'] ?? ''));
 }
