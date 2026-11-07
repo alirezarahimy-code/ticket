@@ -17,6 +17,8 @@ on:
       - 'tests/test_request_center_metadata_lock_mariadb.php'
       - 'tests/test_backup_restore_mariadb_e2e.php'
       - 'tests/test_request_center_claim_concurrency_mariadb.php'
+      - 'tests/test_request_center_appointment_concurrency_mariadb.php'
+      - 'tests/fixtures/request-center-appointment-worker.php'
       - 'tests/test_request_center_t07_migration_clone.php'
       - 'tests/test_request_center_jalali_parity.mjs'
       - 'tests/test_request_center_appointments_sqlite.php'
@@ -220,6 +222,15 @@ jobs:
 
       - name: Request Center T10 50-worker Claim concurrency
         run: php tests/test_request_center_claim_concurrency_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T13 appointment double-booking InnoDB concurrency (both MariaDB versions)
+        run: php tests/test_request_center_appointment_concurrency_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'

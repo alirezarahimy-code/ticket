@@ -124,6 +124,28 @@ final class AppointmentRepository
         try {
             $this->pdo->beginTransaction();
 
+            // Locking point واقعی هم‌زمانی: قفل روی ردیف کاربر «مسئول» در همان تراکنش.
+            // چرا کافی نیست روی request_center_appointments با LIMIT 1 FOR UPDATE تکیه کنیم؟
+            // - در حالت صفر ردیف هم‌پوشان (اولین نوبت کارشناس)، دو تراکنش روی گپ بعدی/قبلی
+            //   قفل‌های گپ می‌گیرند که با هم سازگارند؛ هر دو INSERT می‌کنند و صف‌بندی insert-intention
+            //   باعث deadlock/timeout می‌شود (یا بدتر: باREAD COMMITTED که گپ‌لاک ندارد، هیچ کدام).
+            // - قفل ردیف والد (users) نقطهٔ سریال‌سازی قطعی می‌سازد: تراکنش دوم صبر می‌کند تا
+            //   اولی commit کند؛ سپس در خواندن قفل‌دار (FOR UPDATE) آخرین نگارش ثبت‌شده را می‌بیند
+            //   و باهمان predicate «هر نوبت کانسل‌نشده هم‌پوشان است؟» رد می‌شود. رفتار
+            //   همهٔ سطوح ایزولیشن یکسان است.
+            try {
+                $lock = $this->pdo->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+                $lock->execute([$assigneeId]);
+            } catch (Throwable) {
+                // SQLite: قفل ردیف موجود نیست؛ fixture تک‌نخی است و تست رفتار را پاس می‌کند.
+                $lock = $this->pdo->prepare('SELECT id FROM users WHERE id = ?');
+                $lock->execute([$assigneeId]);
+            }
+            if ((int) $lock->fetchColumn() <= 0) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'error' => 'کارشناس هدف معتبر نیست یا حساب او فعال نیست.'];
+            }
+
             $conflictSql = 'SELECT id FROM request_center_appointments
                             WHERE assignee_id = ? AND status <> ?
                               AND starts_at < ? AND ends_at > ? LIMIT 1 FOR UPDATE';
