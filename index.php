@@ -1238,7 +1238,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // ───── گروه اکشن: اعلان‌ها — ۲ اکشن از ۱.۶۲.۱۸ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
         require __DIR__ . '/actions/notification-actions.php';
 
-        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن از ۱.۶۲.۱۷ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
+        // ───── گروه اکشن: تصمیم لغو سفارش غذا — خارج از دامنهٔ Request Center ─────
+        require __DIR__ . '/actions/food-order-actions.php';
+
+        // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۳ اکشن درخواست‌ها ─────
         require __DIR__ . '/modules/request-center/Actions/supervisor-actions.php';
 
 
