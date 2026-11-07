@@ -310,6 +310,7 @@ function t12s_create_ticket(string $side, array $app, array $sess, array $extra 
         'service_group' => 'support',
         'ticket_type' => 'request',
         'priority' => 'normal',
+        'support_location' => 'ساختمان ۱ — اتاق ۱۰۱',
     ] + $extra;
     $r = t12s_post($app['base_url'] . '/index.php', $sess['requester'][$side], 'create_ticket', $fields);
     if ($r['status'] !== 302) {
