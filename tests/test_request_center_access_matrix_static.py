@@ -142,6 +142,28 @@ def test_calendar_items_read_is_scope_enforced_in_repository():
     assert "function calendarItems(" in source
 
 
+def test_pages_include_only_modules_are_guarded_and_htaccess_denies():
+    # هر صفحه فقط با require بارگذاری می‌شود؛ باید یا گارد APP_ROOT داشته باشد
+    # یا (مثل Pages/index.php) خودش bootstrap را بارگذاری کند (نقطهٔ ورود مستقل).
+    failures = []
+    for page in sorted(PAGES.glob("*.php")):
+        source = read(page)
+        guarded = "defined('APP_ROOT')" in source
+        self_boots = "dirname(__DIR__, 3) . '/bootstrap.php'" in source
+        if not (guarded or self_boots):
+            failures.append(page.name)
+    assert not failures, f"صفحه‌های بدون گارد APP_ROOT/خود-بوت: {failures}"
+    denied = ROOT / "modules" / "request-center"
+    for sub in ("Pages", "Actions", "lib"):
+        ht = denied / sub / ".htaccess"
+        assert ht.is_file(), f"{sub}/.htaccess مفقود است (deny غیرمستقیم وب)"
+        assert "Require all denied" in ht.read_text(encoding="utf-8"), f"{sub}/.htaccess باید دسترسی مستقیم را ببندد"
+    assets_ht = denied / "Assets" / ".htaccess"
+    if assets_ht.is_file():
+        assert "require all denied" not in assets_ht.read_text(encoding="utf-8").lower(), \
+            "پوشهٔ Assets نباید deny شود؛ کاربر به CSS از مرورگر نیاز دارد"
+
+
 def main() -> int:
     tests = [func for name, func in sorted(globals().items()) if name.startswith("test_")]
     failed = 0

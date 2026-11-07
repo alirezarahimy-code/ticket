@@ -1,0 +1,2 @@
+# اکشن های این پوشه فقط بهصورت require از طریق index.php/post-handler بارگذاری می شوند؛ دسترسی مستقیم وب ممنوع است.
+Require all denied

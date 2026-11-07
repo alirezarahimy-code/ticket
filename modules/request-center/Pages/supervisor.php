@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// محافظ: این فایل فقط از طریق نقاط ورود معتبر (index.php هسته یا request-center.php) بارگذاری می‌شود؛ دسترسی مستقیم قطعاً ممنوع.
+if (!defined('APP_ROOT')) {
+    http_response_code(404);
+    exit;
+}
+
 /**
  * Request Center supervisor workspace, retained in the legacy front-controller scope.
  * Existing permission checks, scope predicate, POST contracts and pagination are preserved.

@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// محافظ: این فایل فقط از طریق نقاط ورود معتبر (index.php هسته یا request-center.php) بارگذاری می‌شود؛ دسترسی مستقیم قطعاً ممنوع.
+if (!defined('APP_ROOT')) {
+    http_response_code(404);
+    exit;
+}
+
 /**
  * تقویم شمسی کارشناسان — فاز ۴ «تقویم کارشناسان و برنامه‌ریزی رسیدگی».
  *
@@ -185,13 +191,25 @@ $eventsToday = count($eventsByDay[$todayGStr] ?? []);
 
 // ——— تعطیلات رسمی در این بازه ———
 $holidayMap = [];
+$rcHolidaysUnavailable = false;
 try {
     $holStmt = db()->prepare('SELECT holiday_date, title FROM holidays WHERE is_active = 1 AND holiday_date BETWEEN ? AND ? ORDER BY holiday_date');
     $holStmt->execute([$gFrom, $gTo]);
     foreach ($holStmt->fetchAll(PDO::FETCH_ASSOC) ?: [] as $holRow) {
         $holidayMap[(string) $holRow['holiday_date']] = (string) $holRow['title'];
     }
-} catch (Throwable) {
+} catch (Throwable $exception) {
+    if (function_exists('activity_log')) {
+        try {
+            activity_log([
+                'action_code' => 'rc_holidays_lookup_failed',
+                'module' => 'request-center',
+                'result' => 'warning',
+                'meta' => ['error' => $exception->getMessage(), 'surface' => 'calendar'],
+            ]);
+        } catch (Throwable) {}
+    }
+    $rcHolidaysUnavailable = true;
     $holidayMap = [];
 }
 
@@ -213,8 +231,6 @@ $aliasStaff = $rcElevated && !$rcMissing ? $rcAppointments->assignableStaff(300)
 // ——— نوبت‌های امروز برای تایم‌لاین کوچک ———
 $todayGlance = $eventsByDay[$todayGStr] ?? [];
 
-// ——— ظرفیت تکمیل (برای جای‌ خالی‌ها) ———
-$completionRate = null;
 $plannedThisMonth = 0;
 foreach ($appointmentRows as $appt) {
     if ((string) $appt['status'] === AppointmentRepository::STATUS_PLANNED) {
@@ -463,7 +479,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
               <?= csrf_field() ?><input type="hidden" name="rc_appointment_create" value="1">
               <label class="rc-field"><span>شناسهٔ درخواست <em>عدد</em></span><input class="rc-input" type="number" name="ticket_id" min="1" step="1" required placeholder="مثلاً 123"></label>
               <div class="rc-twofold">
-                <label class="rc-field"><span>شروع</span><input class="rc-input" type="datetime-local" name="starts_at" required></label>
+                <label class="rc-field"><span>شروع</span><input class="rc-input" type="datetime-local" name="starts_at" required><small style="display:block;margin-top:4px;color:var(--rc-muted);font-size:11px">تا ۶۰ دقیقهٔ گذشته نیز قابل ثبت است؛ زودتر از آن ثبت نمی‌شود.</small></label>
                 <label class="rc-field"><span>پایان</span><input class="rc-input" type="datetime-local" name="ends_at" required></label>
               </div>
               <label class="rc-field"><span>نوع نوبت</span><select class="rc-select" name="kind"><?php foreach (AppointmentRepository::KINDS as $kindKey => $kindLabel): ?><option value="<?= $escape($kindKey) ?>"><?= $escape($kindLabel) ?></option><?php endforeach; ?></select></label>
@@ -599,9 +615,12 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
         <section class="rc-panel" aria-label="تعطیلات این ماه">
           <div class="rc-panel-title"><h2>تعطیلات رسمی این ماه</h2></div>
           <div class="rc-panel-body">
-            <?php if ($holidayMap === []): ?>
+            <?php if ($rcHolidaysUnavailable): ?>
+              <div class="rc-alert warn" role="alert" style="margin:0 0 8px">هشدار: بررسی جدول تعطیلات ممکن نشد؛ روزهای تعطیل در این ماه نمایش داده نشدند. با مدیر سامانه تماس بگیرید یا تاریخ‌ها را دستی بررسی کنید.</div>
+            <?php endif; ?>
+            <?php if (!$rcHolidaysUnavailable && $holidayMap === []): ?>
               <div class="rc-empty">تعطیلی ثبت‌شده‌ای برای این ماه در جدول «holidays» وجود ندارد.</div>
-            <?php else: ?>
+            <?php elseif ($holidayMap !== []): ?>
               <ul style="margin:0;padding:0;list-style:none">
                 <?php foreach ($holidayMap as $holDate => $holTitle): ?>
                   <li style="display:flex;gap:10px;align-items:baseline;padding:7px 2px;border-bottom:1px solid var(--rc-line-soft);font-size:12.5px">

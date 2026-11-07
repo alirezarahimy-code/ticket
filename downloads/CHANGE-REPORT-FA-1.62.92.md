@@ -22,6 +22,7 @@
 | ۳ | بازاستخراج پروتکل مشترک POST + اجرای رجیستری RC در مرز ماژول (`lib/http-post.php`)، رفع Bridgeها | POST مستقل RC + «forward درجا» برای بقیه |
 | ۴ | تقویم شمسی کارشناسان، نوبت‌های رسیدگی (create/cancel/complete تراکنشی + قفل)، تعطیلات از جدول `holidays`، ظرفیت تیم، KPI، اعلان `notify_user` با idempotency، `ApppointmentRepository` کامل | صفحهٔ `Pages/calendar.php` + طراحی کامل `.rc-shell` |
 | ۵ | بستهٔ ارتقا (همین سند و ZIP)، راهنمای نصب/بازگشت، ثبت گیت‌های Contract، ممیزی نمودار دسترسی (آزمـون ایستا `test_request_center_access_matrix_static.py`)، تکمیل overlay بستهٔ پیش‌نمایش | این سند + `tools/build_rc_update.py` |
+| ۵.۱ | موج اول اصلاحات ممیزی (پس از بازبینی ماژول در ۱۴۰۵/۰۸/۱۶): گاردهای `APP_ROOT` در تمام صفحات include-only + ۳ فایل `.htaccess` منع مستقیم (Pages/Actions/lib) + ۱ گیت جدید در نمودار دسترسی؛ تعطیلی‌های «fail-open خاموش» اکنون fail-loud هستند (رویداد `rc_holidays_lookup_failed` در `activity_log` + بنر هشدار)؛ hint پنجرهٔ ثبت معوق و مستندسازی نوبت‌ها در README؛ حذف کد مرده (`$completionRate`) و علامت‌گذاری `@internal` روی `listUpcoming()` | `.htaccess`ها + `Pages/*.php` + `appointment-actions.php` + `calendar.php` + رجیستر فاز ۵.۱ |
 
 ## فایل‌های مشترک که تغییر داده شده‌اند (با توجیه)
 
@@ -48,9 +49,22 @@
 
 - `Request Center Contract` روی PR #30: موفق در نصب schema تازه‌نصب + پیش‌فرضاردی Schema + SQLite نوبت‌ها (۲۴ قلم)؛ **فقط T07 (D1، مصوب) قرمز است**.
 - `T12 Scenarios`/`Preflight`: موفق.
-- `ArchitectureTest`: ۵/۵ سبز. `test_request_center_access_matrix_static.py`: ۱۰/۱۰ سبز.
+- `ArchitectureTest`: ۵/۵ سبز. `test_request_center_access_matrix_static.py`: ۱۱/۱۱ سبز.
 - نمونهٔ آفلاین تطبیق شمسی JS↔PHP روی ۱٬۶۹۵ تاریخ مرزی/کبیسه: صفر خطا.
 
+## موج ۱ پس از ممیزی (۱۴۰۵/۰۸/۱۶) — سخت‌سازی دفاع‌عمقی
+
+یافته‌های ممیزی دقیق ماژول (جزئیات در رجیستر فاز ۵ ← بخش «موج ۱») و اصلاحات اعمال‌شدهٔ این بازسازی:
+
+| یافته | خطر | اصلاح این بسته |
+|-------|------|----------------|
+| RC-A1: صفحات `Pages/*.php` (به‌جز `index.php` که خودش bootstrap را بارگذاری می‌کند) در برابر دسترسی مستقیم وب ایمن نبودند و در حالت بدون Apache یا با display_errors روشن می‌شدند | متوسط — 500/fatal و نشت مسیر | گارد `APP_ROOT` (۴۰۴ صریح) در ۱۰ صفحهٔ include-only + سه `.htaccess` منع مستقیم در `Pages/`، `Actions/`، `lib/` + گیت استاتیک یازدهم در `test_request_center_access_matrix_static.py` |
+| RC-A2: نگهبان تعطیلی‌ها در تقویم و هنگام ثبت نوبت، شکست کوئری را بی‌صدا «تعطیل وجود ندارد» تلقی می‌کرد | متوسط — ثبت نوبت روی روز تعطیل بدون هیچ هشداری | رویداد `rc_holidays_lookup_failed` در `activity_log` (دو مسیر) + بنر هشدار در پنل تعطیلات تقویم و تفکیک حالت «تعطیل ثبت‌شده نیست» از «بررسی ممکن نشد» |
+| RC-A3: نوبت با شروع حداکثر ۶۰ دقیقه در گذشته مجاز است ولی هیچ‌جا مستند نبود | کم — ابهام کاربر | hint زیر فیلد «شروع» + مستندسازی در README ماژول |
+| RC-A5: `listUpcoming()` فقط مصرف‌کنندهٔ تست داشت؛ `$completionRate` مرده بود | کم — بهداشت کد | `@internal` با اشاره به تست؛ حذف خط مرده |
+| RC-A11: README ماژول بخش نوبت‌ها/فاز ۴ را نداشت | کم — مستندات | افزودن زیربخش «نوبت‌های رسیدگی» |
+
+**عمداً اصلاح نشدند (موج ۲، با تصمیم مالک):** fail-closed نگهبان تعطیلات برای غیر elevated (RC-A2 سخت)؛ رندر نوبت چندروزه (RC-A4)؛ allowlist فقط staff برای assignee مدیر (RC-A5b)؛ اعلان به requester پس از complete (RC-A8)؛ قرارداد scope بدون `WHERE ` (RC-A6)؛ ریسک فقط-ANSI_QUOTES (RC-A7)؛ هم‌پوستهٔ لینک‌های RC→legacy (RC-A10). جزئیات در سند ممیزی ارائه‌شده به مالک آمده است.
 ## معلوم‌های به‌صراحت باز
 
 ۱. T07 (بازپخش کامل Migration روی کلون + fingerprint) با تصمیم مالکی (D1) قرمز باقی می‌ماند.

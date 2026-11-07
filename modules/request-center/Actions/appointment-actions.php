@@ -76,7 +76,7 @@ $rcDatesBetween = static function (string $startDate, string $endDate): array {
     return $days;
 };
 
-/** Active holidays for a set of dates (title map), or [] when the table is missing. */
+/** Active holidays for a set of dates (title map). Lookup failure is logged fail-loud; the caller decides how to surface it. */
 $rcHolidaysOn = static function (array $dates): array {
     if ($dates === []) {
         return [];
@@ -90,7 +90,17 @@ $rcHolidaysOn = static function (array $dates): array {
             $map[(string) $row['holiday_date']] = (string) $row['title'];
         }
         return $map;
-    } catch (Throwable) {
+    } catch (Throwable $exception) {
+        if (function_exists('activity_log')) {
+            try {
+                activity_log([
+                    'action_code' => 'rc_holidays_lookup_failed',
+                    'module' => 'request-center',
+                    'result' => 'warning',
+                    'meta' => ['error' => $exception->getMessage()],
+                ]);
+            } catch (Throwable) {}
+        }
         return [];
     }
 };

@@ -137,7 +137,11 @@ final class AppointmentRepository
         }
     }
 
-    /** Next planned appointments (for the signed-in expert, or everyone when $canManageAll). */
+    /** Next planned appointments (for the signed-in expert, or everyone when $canManageAll).
+     *
+     * @internal مصرف‌کننده‌های فعلی فقط تست SQLite ماژول هستند
+     *           (tests/test_request_center_appointments_sqlite.php)؛ مسیرهای محصول از listRange() استفاده می‌کنند.
+     */
     public function listUpcoming(?int $assigneeId, string $now, int $limit = 14): array
     {
         if (!$this->tableExists()) {

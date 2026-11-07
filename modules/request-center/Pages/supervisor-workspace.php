@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// محافظ: این فایل فقط از طریق نقاط ورود معتبر (index.php هسته یا request-center.php) بارگذاری می‌شود؛ دسترسی مستقیم قطعاً ممنوع.
+if (!defined('APP_ROOT')) {
+    http_response_code(404);
+    exit;
+}
+
 /** Supervisor workspace dashboard. All records are restricted by ticket_scope(). */
 if (!user_can($user, 'supervisor.panel')) {
     http_response_code(403);

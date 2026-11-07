@@ -1,6 +1,12 @@
 <?php
 declare(strict_types=1);
 
+// محافظ: این فایل فقط از طریق نقاط ورود معتبر (index.php هسته یا request-center.php) بارگذاری می‌شود؛ دسترسی مستقیم قطعاً ممنوع.
+if (!defined('APP_ROOT')) {
+    http_response_code(404);
+    exit;
+}
+
 /** Primary-admin workspace dashboard. Read-only and scoped through the core policy. */
 if (!user_is_primary_admin($user)) {
     http_response_code(403);
