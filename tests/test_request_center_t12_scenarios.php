@@ -396,6 +396,10 @@ copy($fixtureSource, $legacyFixture);
 t12s_check(is_file($legacyFixture), 'session fixture copied into Legacy worktree');
 
 t12s_web_users($rootUser, $rootPass, $host, $port, $apps);
+// Both databases must exist BEFORE the web servers start: the application
+// bootstrap performs a schema check on EVERY request and returns HTTP 500
+// while a clone database is absent.
+t12s_rebuild_all($apps, $rootUser, $rootPass, $host, $port, $mysql);
 
 $failure = false;
 try {
