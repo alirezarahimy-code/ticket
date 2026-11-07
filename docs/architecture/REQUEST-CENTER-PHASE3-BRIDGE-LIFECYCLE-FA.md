@@ -106,9 +106,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 |---|---|
 | `php -l` روی فایل‌های جدید/تغییریافته | سبز |
 | تطبیق خط‌به‌خط بلوک‌های منتقل‌شدهٔ پروتکل با نسخهٔ قبل از کامیت | قبل و بعد یکسان دیده‌شد (BEGIN block همه خط‌ها در helper حاضر؛ catch markers حاضر؛ `register_shutdown_function`های نامرتبط حفظ شدند) |
-| گوشت replay آزمایشی T12 (`--run-changed` روی push) | انتظار سبز؛ نتیجه در Run مربوطه ثبت می‌شود |
-| Contract (ماتریس هر دو MariaDB) | گام‌های T01–T06 سبز؛ گام **Phase-2 smoke** اکنون موارد ۱–۷ را پوشش می‌دهد؛ قرمزی باقی‌مانده **فقط** T07 replay تاریخی (D1) |
+| T12 Scenario Characterization (push‌های `ac79de9`، `228bf2d`، `caf4f9c`) | **success** — رفتار legacy بدون تغییر |
+| `Request Center Contract` (ماتریس هر دو MariaDB، run `42379825414`) | قرمزی **فقط** T07 replay تاریخی (D1). گام **Phase-2 smoke** سبز؛ شامل ۱ تا ۷ (419/302/forward) |
 | پنج مجموعهٔ safety-static محلی | 33 passed |
+
+### ۴٫۱ باگ‌های واقعی پیداشده با CI diagnostics (نه با چشم)
+
+۱. **نبود try/catch در `request_center_handle_post()`**: هر throw در dispatcher بدون مهار به HTTP 500 می‌رسید؛ در مسیر legacy این حالت با flash+redirect مدیریت می‌شود. اصلاح: اجرای dispatch داخل `try` و اتصال به `post_context_on_error(...)` — contract خطای legacy دقیقاً بازتولید شد.
+۲. **نبود لایهٔ ریشه‌ای (`organization.php`، `inventory.php`، `cd-dvd.php`) در ورودی مستقل**: `org_ticket_schema_ensure()` (فراخوان اول `create_ticket`) تابعِ تعریف‌نشده بود → 500. این سه فایل در production در هر درخواست توسط `index.php` لود می‌شوند؛ ورودی مستقل اکنون `require_once` همان سه فایل را (با همان گارد `is_file`) انجام می‌دهد — بدون کپی منطق.
+۳. **برخورد fixture smoke با پیش‌بود test preflight**: در CI، preflight روی همان DB قبل از smoke اجرا می‌شود و `service_catalog.id=1` را با `service_group='it'` می‌سازد؛ `INSERT IGNORE` سکوت کرد و ردیف no-op ماند؛ `create_ticket` به‌درستی (!) به دلیل نبود «سیستم مرتبط» خطا داد. اصلاح: ساخت ردیف‌های fixture با id اسیرشدهٔ `lastInsertId()` و اسامی تکی. (نمونهٔ «خطای واقعی مسیر مستقل» که مسیر legacy به‌طور خودکار می‌گیرد این‌جا رکورد شد.)
+
+مرحلهٔ قبل (run `42379483401`) بدون try/catch → 500 دیده شد؛ مرحلهٔ بعد `Location: index.php?page=` و متن دقیق خطا (`برای همهٔ خدمات IT، انتخاب «سیستم مرتبط»`) از tail لاگ CI استخراج شد — مسیر in-place debug محلی روی bootstrap/DB امکان نداشت.
 
 ## ۵. حدود و ادعاهای رد‌شده
 
