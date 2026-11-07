@@ -1386,10 +1386,11 @@ function logging_store_system(array $event): bool
             if (logging_parent_event_id() === null) $GLOBALS['__logging_parent_event_id'] = $event['event_id'];
             return false;
         }
-        $pdo->prepare('INSERT INTO system_logs (event_id, request_id, trace_id, operation_id, parent_event_id, code, category, fingerprint, level, context, message, meta_json, user_id, request_uri, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([
+        $pdo->prepare('INSERT INTO system_logs (event_id, request_id, trace_id, operation_id, parent_event_id, code, category, fingerprint, level, context, message, meta_json, user_id, request_uri, escalation_count, escalation_label, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')->execute([
             $event['event_id'], $event['request_id'], $event['trace_id'], $event['operation_id'], $event['parent_event_id'], $event['code'] ?? null, $event['category'] ?? 'system', $event['fingerprint'],
             $event['level'] ?? 'error', $event['context'], $event['message'], $event['meta_json'],
-            isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null, $event['request_uri'], $event['created_at'],
+            isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null, $event['request_uri'],
+            (int) ($event['escalation_count'] ?? 0), $event['escalation_label'] ?? null, $event['created_at'],
         ]);
         logging_db_circuit_success();
         $GLOBALS['__logging_persistence_status'] = 'durable_db';
