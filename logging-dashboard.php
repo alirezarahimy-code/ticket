@@ -8,7 +8,7 @@ function logging_dashboard_fetch(int $days = 7): array
     $out = [
         'database' => 'unknown', 'summary' => [], 'hourly' => [], 'daily' => [],
         'levels' => [], 'modules' => [], 'issues' => null, 'notifications' => null, 'checks' => [], 'recent' => [],
-        'spool' => [], 'worker' => [], 'generated_at' => date(DATE_ATOM),
+        'spool' => [], 'worker' => [], 'generated_at' => date(DATE_ATOM), 'smart_summary' => null,
     ];
     // منابع محلی را حتی در زمان قطع DB بخوان تا صف اضطراری از دید خارج نشود.
     try { $out['spool'] = logging_spool_stats(); } catch (Throwable $e) { $out['spool'] = ['state'=>'unknown']; }
@@ -89,6 +89,8 @@ function logging_dashboard_fetch(int $days = 7): array
         $out['notifications'] = $q->fetchAll(PDO::FETCH_ASSOC);
     } catch (Throwable $e) { logging_emergency_failure('logging_dashboard_notifications_failed', get_class($e)); }
     try { $out['checks'] = system_health_checks(); } catch (Throwable $e) { $out['checks'] = []; }
+    // فاز ۴ — خلاصهٔ هوشمند: جمع‌بندی خودکار خطاها/هشدارهای آخر ۶۰ دقیقه
+    try { $out['smart_summary'] = logging_smart_summary(60); } catch (Throwable $e) { $out['smart_summary'] = null; }
     return $out;
 }
 
@@ -137,6 +139,28 @@ function logging_dashboard_render(array $user): never
     echo '<section class="ld-head"><div><span class="ld-eyebrow">LOGGING OBSERVABILITY · OFFLINE</span><h1>داشبورد مانیتورینگ لاگینگ</h1><p>نمای اجرایی رخدادها، روند خطا، وضعیت صف، Worker و Issueها؛ داده‌ها مستقیماً از دیتابیس و فایل‌های محلی خوانده می‌شوند.</p></div><div class="ld-head-actions"><span class="ld-live"><i></i> به‌روزرسانی خودکار هر ۶۰ ثانیه</span><a class="button secondary" href="index.php?page=system-health">گزارش سلامت فنی</a><a class="button" href="index.php?page=activity-log&amp;category=errors">مشاهده لاگ‌ها</a></div></section>';
     echo '<section class="ld-status-row"><div class="ld-status-card"><span class="ld-status-dot '.$health.'"></span><div><small>وضعیت کلی Logging</small><strong>'.e($healthLabel).'</strong><em>آخرین بررسی: '.e(date('H:i:s')).'</em></div></div><div class="ld-status-card"><span class="ld-status-icon">DB</span><div><small>پایگاه داده</small><strong>'.($data['database']==='ok'?'متصل':'نامشخص').'</strong><em>'.($data['database']==='ok'?'SELECT 1 موفق':'آمار قابل محاسبه نیست').'</em></div></div><div class="ld-status-card"><span class="ld-status-icon">WK</span><div><small>Worker</small><strong>'.($workerFresh?'فعال':'نیازمند بررسی').'</strong><em>'.($workerAt!==false?'آخرین موفقیت '.e(date('Y-m-d H:i',$workerAt)):'سابقه موفقیت ثبت نشده').'</em></div></div><div class="ld-status-card"><span class="ld-status-icon">Q</span><div><small>صف اضطراری</small><strong>'.number_format($queueFiles).' فایل</strong><em>'.number_format((int)($spool['bytes']??0)/1048576,2).' MB · Dead Letter: '.number_format($dead).'</em></div></div></section>';
     if($data['database']!=='ok') echo '<div class="ld-alert">اتصال پایگاه داده در دسترس نیست؛ نمودارها و شمارنده‌های دیتابیسی نامشخص‌اند و صفر تلقی نمی‌شوند. وضعیت صف محلی همچنان نمایش داده می‌شود.</div>';
+    // فاز ۴ — خلاصهٔ هوشمند: جمع‌بندی خودکار آخر ۶۰ دقیقه
+    if (is_array($data['smart_summary']) && $data['smart_summary']['total'] > 0) {
+        $ss = $data['smart_summary'];
+        $ssStatus = $ss['total'] === 0 ? 'ok' : (isset($ss['errors']) && count($ss['errors']) > 0 ? (count($ss['errors']) >= 10 ? 'critical' : 'warning') : 'ok');
+        echo '<section class="ld-smart-summary" data-state="'.e($ssStatus).'">';
+        echo '<div class="ld-smart-head"><span class="ld-smart-icon ' . e($ssStatus) . '">📊</span><h3>خلاصهٔ هوشمند — ۶۰ دقیقهٔ اخیر</h3><span class="ld-smart-total">' . number_format($ss['total']) . ' رخداد مهم</span></div>';
+        if (!empty($ss['errors'])) {
+            echo '<div class="ld-smart-list">';
+            foreach ($ss['errors'] as $err) {
+                echo '<div class="ld-smart-item error"><b>❌ ' . number_format($err['count']) . ' بار</b> — <code>' . e($err['code']) . '</code> — <span>' . e($err['context']) . '</span></div>';
+            }
+            echo '</div>';
+        }
+        if (!empty($ss['warnings'])) {
+            echo '<div class="ld-smart-list">';
+            foreach ($ss['warnings'] as $warn) {
+                echo '<div class="ld-smart-item warning"><b>⚠️ ' . number_format($warn['count']) . ' بار</b> — <code>' . e($warn['code']) . '</code> — <span>' . e($warn['context']) . '</span></div>';
+            }
+            echo '</div>';
+        }
+        echo '</section>';
+    }
     echo '<section class="ld-kpis"><article class="ld-kpi"><span>خطا و بحرانی · ۲۴ ساعت</span><strong>'.($errors===null?'—':number_format($errors)).'</strong><small>رخدادهای ثبت‌شده در system_logs</small></article><article class="ld-kpi"><span>هشدار · ۲۴ ساعت</span><strong>'.($warnings===null?'—':number_format($warnings)).'</strong><small>نیازمند پایش و بررسی</small></article><article class="ld-kpi"><span>Issue باز</span><strong>'.($openIssues===null?'—':number_format($openIssues)).'</strong><small>موارد نیازمند رسیدگی</small></article><article class="ld-kpi"><span>Issue در حال بررسی</span><strong>'.($investigating===null?'—':number_format($investigating)).'</strong><small>موارد تخصیص‌یافته/در دست اقدام</small></article><article class="ld-kpi"><span>Issue حل‌شده</span><strong>'.($resolved===null?'—':number_format($resolved)).'</strong><small>سوابق بسته‌شده</small></article><article class="ld-kpi"><span>Dead Letter</span><strong>'.number_format($dead).'</strong><small>'.number_format((int)($spool['dead_letter_bytes']??0)/1048576,2).' MB فایل نیازمند رسیدگی</small></article></section>';
     echo '<section class="ld-grid"><article class="ld-panel ld-panel-wide"><div class="ld-panel-head"><div><h2>روند خطا و هشدار</h2><p>توزیع ساعتی در ۲۴ ساعت گذشته · زمان سرور</p></div><span class="ld-period">۲۴ ساعت</span></div>'.logging_dashboard_svg_trend($data['hourly']).'<div class="ld-legend"><span><i class="err"></i> خطا / بحرانی</span><span><i class="warn"></i> هشدار</span></div></article>';
     echo '<article class="ld-panel ld-panel-wide"><div class="ld-panel-head"><div><h2>روند روزانه رخدادها</h2><p>مقایسه خطا و هشدار در بازه انتخاب‌شده</p></div><span class="ld-period">'.number_format($days).' روز</span></div>'.logging_dashboard_svg_trend(array_map(static fn($r)=>['label'=>date('m/d',strtotime((string)$r['bucket'])),'errors'=>(int)$r['errors'],'warnings'=>(int)$r['warnings']],$data['daily']),'روند روزانه خطاها و هشدارها').'<div class="ld-legend"><span><i class="err"></i> خطا / بحرانی</span><span><i class="warn"></i> هشدار</span></div></article>';

@@ -118,6 +118,23 @@ function system_log(string $level, string $context, string $message, array $meta
     $code = (string) ($meta['code'] ?? 'SYS-LEGACY-001');
     $definition = logging_catalog_resolve($code, (string) ($meta['category'] ?? 'system'), $level);
     $meta = logging_sanitize_event_meta($meta, $definition['code'], $context);
+    $fingerprint = logging_fingerprint_current($definition['code'], $context, $message);
+
+    // فاز ۳ — تشدید شدت: شمارش تکرار‌های قبلی این fingerprint
+    $escalation = null;
+    if (in_array($level, ['error', 'critical', 'warning'], true)
+        && $fingerprint !== ''
+        && function_exists('logging_escalation_count')) {
+        $escalation = logging_escalation_count($fingerprint, 3600);
+        $meta['escalation_count'] = $escalation['count'];
+        $meta['escalation_label'] = $escalation['label'];
+        if ($level === 'warning' && $escalation['count'] >= 10) {
+            $level = 'error';
+        } elseif ($level === 'error' && $escalation['count'] >= 50) {
+            $level = 'critical';
+        }
+    }
+
     $event = [
         'event_id' => logging_uuid(),
         'code' => $definition['code'],
@@ -126,11 +143,14 @@ function system_log(string $level, string $context, string $message, array $meta
         'context' => $context,
         'message' => $message,
         'meta' => $meta,
-        'fingerprint' => logging_fingerprint_current($definition['code'], $context, $message),
+        'fingerprint' => $fingerprint,
+        'escalation_count' => $escalation ? $escalation['count'] : 0,
+        'escalation_label' => $escalation ? $escalation['label'] : null,
     ];
     logging_store_system($event);
     $safeMeta = logging_json($meta) ?? '';
-    $line = date('c') . ' [' . $level . '] ' . logging_sanitize_single_line($context, 120) . ' — ' . logging_sanitize_single_line($message, 2000) . ($safeMeta !== '' ? ' ' . $safeMeta : '');
+    $esc = $escalation ? ' [' . $escalation['label'] . ' ×' . $escalation['count'] . ']' : '';
+    $line = date('c') . ' [' . $level . '] ' . logging_sanitize_single_line($context, 120) . ' — ' . logging_sanitize_single_line($message, 2000) . $esc . ($safeMeta !== '' ? ' ' . $safeMeta : '');
     if (!logging_append_legacy_file($line)) {
         logging_emergency_failure('app_log_write_failed', '');
     }
