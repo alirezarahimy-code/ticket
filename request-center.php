@@ -2,9 +2,12 @@
 declare(strict_types=1);
 
 /**
- * Compatibility entry point for the independent Request Center workspace.
- *
- * The implementation is owned by modules/request-center/Pages/index.php.
- * Keep this root route stable for existing bookmarks and integrations.
+ * Independent Request Center entry point.
+ * Legacy page rendering is routed inside the module; old POST actions remain
+ * compatible through index.php until their approved migration is complete.
  */
+if (isset($_GET['page'])) {
+    require __DIR__ . '/modules/request-center/Pages/legacy-router.php';
+    exit;
+}
 require __DIR__ . '/modules/request-center/Pages/index.php';
