@@ -160,7 +160,7 @@ function t12_schema_fingerprint(PDO $pdo): array
     return $fingerprints;
 }
 
-function t12_session(string $baseUrl, int $userId): array
+function t12_session(string $baseUrl, int $userId, string $expectedDb): array
 {
     $response = t12_http($baseUrl . '/tests/fixtures/request-center-session-seed.php?user_id=' . $userId);
     t12_check($response['status'] === 200, 'session fixture responds over HTTP');
@@ -171,6 +171,8 @@ function t12_session(string $baseUrl, int $userId): array
         preg_match('/^[a-f0-9]{64}$/', (string) $payload['csrf']) === 1,
         'session fixture returns independent session and CSRF token'
     );
+    t12_check((int) ($payload['current_user_id'] ?? 0) === $userId, 'seeded HTTP session resolves the intended user');
+    t12_check((string) ($payload['database_name'] ?? '') === $expectedDb, 'HTTP app connects to its own isolated clone');
     return [
         'cookie' => (string) $payload['cookie_name'] . '=' . (string) $payload['session_id'],
         'session_id' => (string) $payload['session_id'],
@@ -269,7 +271,7 @@ try {
     foreach ($apps as $side => $app) {
         $response = t12_http($app['base_url'] . '/index.php');
         t12_check(in_array($response['status'], [200, 302, 303], true), $side . ' application index is reachable');
-        $sessions[$side] = t12_session($app['base_url'], $userIds[$side]);
+        $sessions[$side] = t12_session($app['base_url'], $userIds[$side], $app['db']);
         $cookieResponse = t12_http(
             $app['base_url'] . '/index.php',
             'GET',
