@@ -73,14 +73,6 @@ jobs:
         run: php tests/test_request_center_repository_sqlite.php
       - name: WorkflowService transition policy and concurrency guards
         run: php tests/test_request_center_workflow_service_sqlite.php
-      - name: Load fresh-install schema into disposable MariaDB
-        run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
-        env:
-          CI_DB_HOST: 127.0.0.1
-          CI_DB_PORT: '3306'
-          CI_DB_NAME: persian_ticketing_ci
-          CI_DB_USER: root
-          CI_DB_PASS: ci-ephemeral-root-password
       - name: Verify exact MariaDB service version
         run: |
           actual=$(mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password -Nse 'SELECT VERSION()')
@@ -91,6 +83,15 @@ jobs:
           esac
         env:
           EXPECTED_MARIADB_VERSION: ${{ matrix.mariadb-version }}
+
+      - name: Load fresh-install schema into disposable MariaDB
+        run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
       - name: Request Center schema preflight on MariaDB
         run: php tests/test_request_center_schema_preflight_mariadb.php
         env:
