@@ -313,8 +313,13 @@ function t12s_create_ticket(string $side, array $app, array $sess, array $extra 
     if ($r['status'] !== 302) {
         throw new RuntimeException("S1 create_ticket failed for {$side}: HTTP {$r['status']} body=" . substr(strip_tags($r['body']), 0, 160));
     }
+    $location = '';
+    foreach ($r['headers'] as $h) { if (stripos((string) $h, 'location:') === 0) { $location = trim(substr((string) $h, 9)); } }
     $pdo = t12s_db(getenv('CI_DB_USER') ?: 'root', getenv('CI_DB_PASS') ?: '', getenv('CI_DB_HOST') ?: '127.0.0.1', getenv('CI_DB_PORT') ?: '3306', $app['db']);
-    return (int) $pdo->query('SELECT MAX(id) FROM tickets')->fetchColumn();
+    $cnt = (int) $pdo->query('SELECT COUNT(*) FROM tickets')->fetchColumn();
+    $mx = $pdo->query('SELECT MAX(id) FROM tickets')->fetchColumn();
+    t12s_log('    [probe] tid_check: HTTP ' . $r['status'] . ' location=' . $location . ' tickets_count=' . $cnt . ' max_id=' . var_export($mx, true));
+    return (int) ($mx ?? 0);
 }
 
 function t12s_pdo(array $app): PDO
