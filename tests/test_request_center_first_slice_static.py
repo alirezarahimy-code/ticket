@@ -70,10 +70,18 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("require __DIR__ . '/modules/request-center/Actions/ticket-actions.php';", index)
         self.assertIn("require __DIR__ . '/modules/request-center/Actions/supervisor-actions.php';", index)
         self.assertIn("require __DIR__ . '/modules/request-center/Actions/bulk-actions.php';", index)
-        for legacy in ("actions/ticket-actions.php", "actions/supervisor-actions.php", "actions/bulk-actions.php"):
-            self.assertIn("modules/request-center/Actions/", read(legacy))
-        for module in ("modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/supervisor-actions.php", "modules/request-center/Actions/bulk-actions.php"):
-            self.assertIn("APP_ROOT", read(module))
+        bridges = {
+            "actions/ticket-actions.php": "ticket-actions.php",
+            "actions/supervisor-actions.php": "supervisor-actions.php",
+            "actions/bulk-actions.php": "bulk-actions.php",
+        }
+        for legacy, filename in bridges.items():
+            bridge = read(legacy)
+            self.assertIn("require dirname(__DIR__) . '/modules/request-center/Actions/" + filename + "';", bridge)
+            self.assertLessEqual(bridge.count("\\n"), 8, f"{legacy} must remain a thin compatibility bridge")
+            module = read("modules/request-center/Actions/" + filename)
+            self.assertIn("APP_ROOT", module)
+            self.assertIn("if ($action ===", module)
         self.assertIn("require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';", read("cron/ticket_auto_close.php"))
 
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
