@@ -2,7 +2,7 @@ name: Request Center QA Package Preview
 
 on:
   push:
-    branches: [ feature/request-center-module-1.62.88 ]
+    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
   workflow_dispatch:
 
 permissions:
