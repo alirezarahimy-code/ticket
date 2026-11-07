@@ -272,3 +272,15 @@ scope، Audit، اعلان، تراکنش و redirectهای موجود.
 `fetch_ticket()`، `store_attachment()` و `choose_handling_agent()`
 هنوز باید همراه با وابستگی‌های واقعی‌شان از بدنهٔ کنترلر/فایل‌های جانبی
 بررسی و به لایهٔ مناسب منتقل شوند؛ تا آن زمان اجرای مستقل کامل POST برقرار نیست.
+
+## فاز ۲ — استقلال ماژول (برش‌های استخراج‌شده از `index.php`)
+
+در این برش، مالکیت فیزیکی کد مرکز درخواست تمیزتر از orchestrator شد:
+
+- `modules/request-center/lib/functions.php`: توابع دامنهٔ RC (ذخیرهٔ پیوست، واکشی و قابل مشاهده بودن درخواست، رتبه‌بندی مدیر سازمانی، انتخاب کارشناس رسیدگی، transitionها و قابل لغو بودن درخواست، اعلان حل‌شدن و فیلترهای گزارش) انتقال یافت؛ بدنه‌ها بدون تغییر معنایی.
+- `lib/render.php`: `render_header()` و `render_footer()` و helperهای وابسته به ماژول UI مشترک منتقل شدند؛ فراخوان‌ها از orchestrator به این فایل اشاره می‌کنند.
+- `modules/request-center/lib/endpoints.php`: چهار برش HTTP — خروجی Excel گزارش، دانلود پیوست با `ticket_can_see_internal` رابطه‌محور، واکشی داده‌های داشبورد (`request_center_dashboard_rows`) و slice جست‌وجوی سراسری (`request_center_global_search`) — استخراج شد.
+- `index.php` فقط یک Bridge نازک نگه داشته است؛ منطق درخواست در ماژول ساکن است و اگر اصلاح رفتار لازم شود، منبع باید از مسیر ماژول خوانده شود.
+- دروازهٔ Contract اکنون یک گام **Phase-2 smoke** دارد: اجرای واقعی HTTP آن بر مسیرهای منتقل‌شده (dashboard=200، search=200، export_report = بایت‌های PK معتبر XLSX، download_attachment با شناسهٔ نامعتبر = 404) روی سرویس MariaDBِ disposable در CI.
+
+این فاز استقلال runtime کامل را تضمین نمی‌کند؛ Bridgeها عمداً حفظ شده‌اند تا URL/رفتار فرانت‌اند بدون تغییر بماند. جزئیات برش‌ها، شواهد و حدود در `docs/architecture/REQUEST-CENTER-PHASE2-EVIDENCE-REGISTER-FA.md` ثبت شده است.
