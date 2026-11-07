@@ -2,8 +2,12 @@
 declare(strict_types=1);
 
 /**
- * Stable Request Center URL entry point.
- * Keep the complete legacy bootstrap and page/action dispatch intact while
- * module page handlers are extracted incrementally.
+ * Stable Request Center entry point.
+ * The dedicated workspace UI uses the module read interface; legacy operational
+ * pages/actions continue through the complete system front controller.
  */
-require __DIR__ . '/index.php';
+if (isset($_GET['page'])) {
+    require __DIR__ . '/index.php';
+    exit;
+}
+require __DIR__ . '/modules/request-center/Pages/index.php';
