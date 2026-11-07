@@ -31,7 +31,7 @@ $testPdo = new PDO(
 
 $appRoot = sys_get_temp_dir() . '/rc-update-root-' . bin2hex(random_bytes(5));
 $backupDir = sys_get_temp_dir() . '/rc-update-backups-' . bin2hex(random_bytes(5));
-$packageFiles = [];
+$GLOBALS['rcUpdatePackageFiles'] = [];
 mkdir($appRoot, 0700, true);
 mkdir($backupDir, 0700, true);
 mkdir($appRoot . '/storage', 0700, true);
@@ -208,7 +208,7 @@ try {
         $admin->exec("DROP DATABASE IF EXISTS `{$dbName}`");
     } catch (Throwable) {
     }
-    foreach ($packageFiles as $file) {
+    foreach ($GLOBALS['rcUpdatePackageFiles'] as $file) {
         if (is_file($file)) {
             @unlink($file);
         }
