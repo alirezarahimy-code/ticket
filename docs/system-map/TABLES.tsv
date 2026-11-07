@@ -164,6 +164,7 @@ logging_health_alerts	migrations/025-logging-issues-alerts.sql	29
 log_issue_history	migrations/026-logging-legacy-result-unknown.sql	20
 log_issue_events	migrations/026-logging-legacy-result-unknown.sql	38
 log_issue_notifications	migrations/026-logging-legacy-result-unknown.sql	56
+request_center_appointments	migrations/035-request-center-appointments.sql	6
 settings	schema.sql	1
 departments	schema.sql	6
 org_companies	schema.sql	16
