@@ -778,15 +778,15 @@
         "PAGE-029.130",
         "PAGE-029.85",
         "CRON-006.11",
+        "PAGE-046.01",
         "WEB-003.02",
         "WEB-005.02",
         "WEB-007.02",
         "WEB-009.02",
         "WEB-012.02",
-        "WEB-014.02",
-        "TOOL-009.01"
+        "WEB-014.02"
       ],
-      "total": 18
+      "total": 19
     },
     {
       "id": "page:activity-log",
@@ -35015,9 +35015,9 @@
       "path": "modules/request-center/Pages/index.php",
       "area": "PAGE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-245",
+      "anchor": "بلوک رویه‌ای 1-277",
       "risk": 4,
-      "lines": 245
+      "lines": 277
     },
     "PAGE-047.01": {
       "path": "modules/request-center/Pages/queue.php",
@@ -35137,7 +35137,7 @@
       "line": 4,
       "anchor": "RequestCenterRepository",
       "risk": 8,
-      "lines": 303
+      "lines": 326
     },
     "PAGE-052.01": {
       "path": "modules/request-center/WorkflowService.php",

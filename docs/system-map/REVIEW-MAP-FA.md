@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 568 |
-| خطوط | 128,402 |
+| خطوط | 128,457 |
 | آدرس‌ها (بلوک) | 6,777 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -51,7 +51,7 @@
 | **سفارش غذا** | `food-order` | — | `PAGE-034.41` <sub>index.php:916</sub><br>`PAGE-034.60` <sub>index.php:1435</sub><br>`PAGE-034.61` <sub>index.php:1443</sub><br>`TOOL-029.03` <sub>tools/food_system_router.php:18</sub> | 196 |
 | **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-034.86` <sub>index.php:2240</sub><br>`PAGE-004.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **شناسنامه سیستم‌ها** | `inventory` | `inventory.view` | `PAGE-036.31` <sub>inventory.php:704</sub><br>`PAGE-036.29` <sub>inventory.php:636</sub><br>`PAGE-036.02` <sub>inventory.php:7</sub><br>`PAGE-036.20` <sub>inventory.php:346</sub> | 56 |
-| **صف کاری** | `queue` | `queue.view` | `PAGE-047.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`PAGE-047.01` <sub>modules/request-center/Pages/queue.php:1</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 18 |
+| **صف کاری** | `queue` | `queue.view` | `PAGE-047.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`PAGE-047.01` <sub>modules/request-center/Pages/queue.php:1</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 19 |
 | **لاگ سامانه** | `activity-log` | — | `PAGE-034.74` <sub>index.php:1557</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 12 |
 | **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-034.78` <sub>index.php:1839</sub><br>`CORE-014.05` <sub>lib/settings-effects.php:57</sub> | 7 |
 | **مدیریت سازمان** | `organization` | `org.view` | `PAGE-054.39` <sub>organization.php:486</sub><br>`PAGE-034.87` <sub>index.php:2274</sub><br>`PAGE-034.39` <sub>index.php:888</sub><br>`PAGE-054.02` <sub>organization.php:4</sub> | 193 |
@@ -288,7 +288,7 @@
 | `TEST` | TEST | 231 | 1,662 | 22,298 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 65 | 1,396 | 45,858 |
+| `PAGE` | صفحات (ریشه) | 65 | 1,396 | 45,913 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,933 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `ACT` | کنش‌ها (actions/) | 16 | 102 | 3,026 |
@@ -8750,11 +8750,11 @@
 </details>
 
 <details>
-<summary><b>PAGE-046</b> — <code>modules/request-center/Pages/index.php</code> (245 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-046</b> — <code>modules/request-center/Pages/index.php</code> (277 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-046.01` | 1–245 | ناحیه | `بلوک رویه‌ای 1-245` | 4 | ⬜ |
+| `PAGE-046.01` | 1–277 | ناحیه | `بلوک رویه‌ای 1-277` | 4 | ⬜ |
 
 </details>
 
@@ -8804,12 +8804,12 @@
 </details>
 
 <details>
-<summary><b>PAGE-051</b> — <code>modules/request-center/RequestCenterRepository.php</code> (307 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-051</b> — <code>modules/request-center/RequestCenterRepository.php</code> (330 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-051.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-051.02` | 4–306 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
+| `PAGE-051.02` | 4–329 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
 
 </details>
 
