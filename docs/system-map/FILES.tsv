@@ -439,7 +439,6 @@ modules/request-center/Pages/analytics.php	other	48	4880
 modules/request-center/Pages/create.php	other	146	14098
 modules/request-center/Pages/detail.php	other	245	29497
 modules/request-center/Pages/index.php	other	335	23791
-modules/request-center/Pages/legacy-router.php	other	33	1091
 modules/request-center/Pages/queue.php	other	38	5428
 modules/request-center/Pages/reports.php	other	66	9694
 modules/request-center/Pages/services.php	other	175	19749
@@ -458,7 +457,7 @@ preview/food-release-download/package.json	preview	13	232
 preview/food-release-download/public/food-update-1.62.3.html	preview	35	4501
 preview/food-release-download/vite.config.js	preview	56	1969
 rebuild-final.sql	sql-root	96	2188
-request-center.php	core	13	411
+request-center.php	core	13	368
 restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
