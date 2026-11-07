@@ -259,7 +259,7 @@ final class RequestCenterRepository
         }
         if ($queue === 'cancelled') {
             $conditions[] = 't.status = "cancelled"';
-        } else {
+        } elseif ((string) ($filters['status'] ?? '') !== 'cancelled') {
             $conditions[] = 't.status <> "cancelled"';
         }
 
