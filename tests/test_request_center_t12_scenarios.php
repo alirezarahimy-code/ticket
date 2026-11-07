@@ -554,7 +554,7 @@ try {
     t12s_log('T12 RESULT: ' . ($failed === [] ? 'ALL SELECTED SCENARIOS MATCH BETWEEN LEGACY AND FEATURE' : count($failed) . ' SCENARIO(S) DIFFER'));
     if ($failed !== []) { $failure = true; }
 } catch (Throwable $e) {
-    fwrite(STDERR, 'T12 SCENARIOS ERROR: ' . $e->getMessage() . PHP_EOL);
+    fwrite(STDERR, 'T12 SCENARIOS ERROR: ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
     $failure = true;
 } finally {
     foreach ($servers as $p) { if (is_resource($p)) { @proc_terminate($p); @proc_close($p); } }
