@@ -15,6 +15,8 @@ on:
       - 'tests/test_system_update_migration_failure_gates.php'
       - 'tests/test_request_center_metadata_lock_mariadb.php'
       - 'tests/test_request_center_claim_concurrency_mariadb.php'
+      - 'tests/test_request_center_jalali_parity.mjs'
+      - 'tests/fixtures/jalali-php-convert.php'
       - 'tests/fixtures/request-center-claim-worker.php'
       - 'tests/fixtures/request-center-ddl-probe.php'
       - 'tests/fixtures/request-center-session-seed.php'
@@ -164,3 +166,6 @@ jobs:
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T11 PHP and ItsmJalali date parity
+        run: node tests/test_request_center_jalali_parity.mjs
