@@ -31,7 +31,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: feature/request-center-module-1.62.88
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
       - name: Setup PHP and Python
@@ -197,7 +197,7 @@ jobs:
             echo "release_status=NOT_FOR_PRODUCTION"
             echo "base_commit=$BASE_SHA"
             echo "head_commit=$HEAD_SHA"
-            echo "branch=feature/request-center-module-1.62.88"
+            echo "branch=${{ github.ref_name }}"
             echo "database_ddl_included=no"
             echo "installer_included=no"
             echo "rollback_script_included=no"
