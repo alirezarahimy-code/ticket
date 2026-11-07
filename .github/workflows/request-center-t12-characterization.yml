@@ -13,7 +13,7 @@ on:
       - 'lib/**'
       - 'actions/**'
       - 'modules/request-center/**'
-      - 'tests/fixtures/request-center-session-seed.php'
+      - 'tests/fixtures/request-center-t12-session-seed.php'
       - 'tests/test_request_center_t12_preflight.php'
   pull_request:
     paths:
@@ -25,7 +25,7 @@ on:
       - 'lib/**'
       - 'actions/**'
       - 'modules/request-center/**'
-      - 'tests/fixtures/request-center-session-seed.php'
+      - 'tests/fixtures/request-center-t12-session-seed.php'
       - 'tests/test_request_center_t12_preflight.php'
 
 permissions:
