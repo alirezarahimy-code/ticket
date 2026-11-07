@@ -46784,7 +46784,7 @@
       "line": 161,
       "anchor": "is forced into the disposable clone regardless of the source",
       "risk": 7,
-      "lines": 128
+      "lines": 154
     },
     "TEST-177.01": {
       "path": "tests/test_request_center_web_ddl_runtime.php",

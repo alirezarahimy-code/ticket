@@ -73730,8 +73730,8 @@
             "id": "TEST-176",
             "path": "tests\/test_request_center_t07_migration_clone.php",
             "area": "TEST",
-            "lines": 288,
-            "file_fingerprint": "2ea0f3223a4a",
+            "lines": 314,
+            "file_fingerprint": "f6fcc8a8963b",
             "blocks": [
                 {
                     "kind": "region",
@@ -73873,9 +73873,9 @@
                     "kind": "region",
                     "anchor": "is forced into the disposable clone regardless of the source",
                     "line_start": 161,
-                    "line_end": 288,
-                    "lines": 128,
-                    "fingerprint": "9f5b91aecb2d",
+                    "line_end": 314,
+                    "lines": 154,
+                    "fingerprint": "0e00cd193380",
                     "risk": {
                         "score": 7,
                         "flags": {
