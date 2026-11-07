@@ -6,28 +6,15 @@ declare(strict_types=1);
 if ($page === 'queue') {
     $queueUser = require_permission('queue.view');
     $queueName = valid_choice((string) ($_GET['queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled'], 'all');
-    [$queueScope, $queueParams] = ticket_scope($queueUser);
-    $queueConditions = $queueScope !== '' ? [substr($queueScope, 6)] : [];
-    if ($queueName === 'unassigned') { $queueConditions[] = 't.assigned_to IS NULL'; }
-    if ($queueName === 'overdue') { $queueConditions[] = 't.sla_paused_at IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))'; }
-    if ($queueName === 'mine') { $queueConditions[] = 't.assigned_to = ?'; $queueParams[] = (int) $queueUser['id']; }
-    if ($queueName === 'waiting_user') { $queueConditions[] = 't.status IN ("waiting_user", "pending")'; }
-    if ($queueName === 'resolved') { $queueConditions[] = 't.status = "resolved"'; }
-    if ($queueName === 'cancellation_requested') { $queueConditions[] = 't.cancel_requested_at IS NOT NULL'; }
-    if ($queueName === 'cancelled') { $queueConditions[] = 't.status = "cancelled"'; }
-    else { $queueConditions[] = 't.status <> "cancelled"'; }
-    $queueWhere = $queueConditions ? 'WHERE ' . implode(' AND ', $queueConditions) : '';
+    require_once dirname(__DIR__) . '/RequestCenterRepository.php';
     $queuePerPage = 100;
     $queuePage = max(1, (int) ($_GET['p'] ?? 1));
-    $queueCountQuery = db()->prepare('SELECT COUNT(*) FROM tickets t ' . $queueWhere);
-    $queueCountQuery->execute($queueParams);
-    $queueTotal = (int) $queueCountQuery->fetchColumn();
-    $queuePages = max(1, (int) ceil($queueTotal / $queuePerPage));
-    $queuePage = min($queuePage, $queuePages);
-    $queueOffset = ($queuePage - 1) * $queuePerPage;
-        $queueQuery = db()->prepare('SELECT t.*, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $queueWhere . ' ORDER BY CASE WHEN t.cancel_requested_at IS NOT NULL THEN 0 WHEN (t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))) THEN 1 ELSE 2 END, FIELD(t.priority, "critical", "urgent", "normal"), t.created_at ASC LIMIT ' . $queuePerPage . ' OFFSET ' . $queueOffset);
-    $queueQuery->execute($queueParams);
-    $queueRows = $queueQuery->fetchAll();
+    $queueData = (new RequestCenterRepository(db()))->listQueue($queueUser, $queueName, $queuePage, $queuePerPage);
+    $queueTotal = $queueData['total'];
+    $queuePages = $queueData['pages'];
+    $queuePage = $queueData['page'];
+    $queueOffset = $queueData['offset'];
+    $queueRows = $queueData['rows'];
     // ستون ticket_no با همین SELECT آمده است؛ بدون این خط هر ticket_number() داخل حلقه
     // یک کوئری جدا می‌زد (۱۰۰ کوئری اضافه در هر بار باز کردن صف).
     ticket_number_cache_prime($queueRows);
