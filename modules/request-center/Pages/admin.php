@@ -53,7 +53,7 @@ header('Cache-Control: private, no-store');
 <?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'admin' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeAdmin($key) ?>"><?= $escapeAdmin($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 </header>
 <main>
-<section class="heading"><div><h1>مدیریت مرکز درخواست‌ها</h1><p>نمای عملیاتی و میان‌برهای پیکربندی ماژول؛ دسترسی داده‌ها همچنان تابع سیاست دامنهٔ هسته است.</p></div><a class="button" href="index.php?page=new-ticket">ثبت درخواست</a></section>
+<section class="heading"><div><h1>مدیریت مرکز درخواست‌ها</h1><p>نمای عملیاتی و میان‌برهای پیکربندی ماژول؛ دسترسی داده‌ها همچنان تابع سیاست دامنهٔ هسته است.</p></div><a class="button" href="request-center.php?page=new-ticket">ثبت درخواست</a></section>
 <section class="rc-admin-grid" aria-label="شاخص‌های کلیدی">
 <div class="rc-admin-stat"><strong><?= number_format($summary['total']) ?></strong><span>کل درخواست‌های قابل مشاهده</span></div>
 <div class="rc-admin-stat"><strong><?= number_format($summary['active']) ?></strong><span>درخواست‌های در گردش</span></div>
