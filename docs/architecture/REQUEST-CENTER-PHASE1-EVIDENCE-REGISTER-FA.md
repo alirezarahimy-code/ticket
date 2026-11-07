@@ -244,3 +244,38 @@ Dump موجود مستقیماً از Git blob خوانده و فقط ساختا
 ### یادداشت هماهنگی انتشار Logging 1.62.89 — 2026-11-07
 
 بستهٔ `ticket-update-1.62.88-to-1.62.89-logging-escalation-20261107.zip` صرفاً برای نگهداری و ثبت انتشار نهایی Logging است و بخشی از ارتقای Request Center نیست؛ هیچ فایل داخل بسته نباید به سورس این شاخه اعمال شود. مهاجرت `034-logging-escalation.sql` فقط روی `main` و در جریان انتشار Logging اجرا می‌شود؛ شاخهٔ ارتقای Request Center نباید مهاجرت `034-*.sql` بسازد یا مهاجرت موجودی را جابه‌جا/بازشماره‌گذاری کند و شمارهٔ مهاجرت‌های مخصوص ارتقا، در صورت نیاز و پس از رفع تعارض، از `035` به بعد خواهد بود. ورود این بسته به شاخهٔ ارتقای Request Center فقط پس از تحویل و ثبت آن روی `main` و با `fetch` و `merge origin/main` (بدون rebase و force-push) مجاز است. تا آن زمان شاخه باید مستقل بماند و هیچ فایل بسته در آن ثبت نشود.
+
+
+### پیگیری رفع ناسازگاری آزمون‌ها و نقشهٔ ماژول — 2026-11-07
+
+برای هم‌راستا کردن نگهبان‌های مخزن با انتقال فیزیکی Handlerهای RC به `modules/request-center/Actions/`، فقط آزمون‌ها و ابزارهای نقشه در شاخهٔ RC اصلاح شدند:
+
+- `tools/test_access_coverage_offline.php`: پیمایش Handlerهای ماژول را اضافه می‌کند و فایل‌های Legacy Bridge را به‌جای الزام گارد تکراری، از طریق Handler مقصد ارزیابی می‌کند.
+- `tools/test_ticket_txn_offline.php`: بدنهٔ واقعی `create_ticket` را از مسیر ماژول می‌خواند.
+- `tests/test_route_security_static.py`: گارد مستقیم را در Handler مقصد Bridge بررسی می‌کند و آزمون scope دارایی را از مسیر واقعی Handler می‌خواند.
+- `tools/build_system_map.py`: Actionهای پوشهٔ `modules/request-center/Actions/` را در ROUTES.tsv ثبت می‌کند؛ Workflow تازه‌سازی نقشه نیز با تغییر این ابزار اجرا می‌شود.
+- `.github/workflows/request-center-package-preview.yml`: سه Handler ماژول را در Overlay آزمایشی قرار می‌دهد تا Bridgeهای قدیمی به مقصدهای موجود اشاره کنند.
+
+**نتایج تأییدشده روی commit کد/ابزار `83052d444b709b803c25a6fc92a350a4787e9773`:**
+
+| بررسی | Run | نتیجه |
+|---|---:|---|
+| CI عمومی | `42350429417` | **PASS** |
+| Request Center Contract (push؛ MariaDB 10.4.32 و 10.11) | `42350427105` | **PASS** |
+| Request Center QA Package Preview | `42350427087` | **PASS** |
+| Refresh Request Center system map | `42350427076` | **PASS** |
+
+نقشهٔ تولیدشده اکنون دو Action منتقل‌شده را در مسیر واقعی ماژول ثبت می‌کند: `create_ticket` و `supervisor_decision`. commit تولیدی نقشه `d236d397be6da63ce6d48b6868c58ccfdd7d5b39` است.
+
+**محدودیت خارج از دامنه:** Logging 1.62.88 Acceptance در Run `42350429368` همچنان به‌علت یک assertion در `tests/test_logging_trace_coverage.php` شکست می‌خورد؛ این آزمون هنوز بدنهٔ Ticket را فقط در مسیر قدیمی `actions/ticket-actions.php` جست‌وجو می‌کند. برای رعایت مرز مصوب، هیچ فایل Logging یا آزمون متعلق به Logging در این مرحله تغییر نکرده است. این شکست به‌عنوان مانع CI پذیرش Logging باز می‌ماند و نباید PASS تلقی شود.
+
+این اصلاحات فقط نگهبان‌های آزمون/نقشه و Overlay آزمایشی را با محل جدید Handlerهای RC هم‌راستا کرده‌اند؛ رفتار runtime، Schema، Migration، VERSION و دادهٔ سامانه تغییر نکرده‌اند.
+
+### وضعیت گیت‌ها پس از اجرای فوق
+
+- T01–T03، T05–T06، T08–T11: شواهد اجرای موفق قبلی روی MariaDB 10.4.32 و 10.11 حفظ شده‌اند؛ اجرای مجدد Request Center Contract نیز روی هر دو نسخه موفق است.
+- T04: تشخیص مسیر Legacy در کل سامانه همچنان **FAIL/باز** است؛ رفع آن خارج از اختیار این شاخه است.
+- T07: **نیازمند آزمون**؛ اجرای Migrationهای 001–033 روی Clone کامل با fingerprint قبل/بعد هنوز ثبت نشده است.
+- T12: **BLOCKED**؛ اجرای رفتاری ده سناریو روی دو Clone مستقل Legacy/feature و مقایسهٔ Snapshot/side effectها هنوز انجام نشده است.
+- درخت کامل شاخه در این بررسی هیچ فایل `034-*.sql` ندارد؛ Migration شمارهٔ 034 ساخته، جابه‌جا یا بازشماره‌گذاری نشده است.
+- PR #30 همچنان Open/Draft است و base آن همان commit `2176d2aa57758a0fbef426636c9943879646b165` است؛ هیچ merge یا تغییر مستقیمی روی `main` انجام نشده است.
