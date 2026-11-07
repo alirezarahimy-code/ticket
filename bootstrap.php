@@ -45,6 +45,14 @@ require_once __DIR__ . '/lib/logging-diagnostics.php';
 
 // ───── پیام‌های فلش، لاگ سیستمی و CSRF (شرح در سرآیند همان فایل) ─────
 require __DIR__ . '/lib/logging-csrf.php';
+// ماژول تشدید شدت (افزوده‌شده در 1.62.89) — طبق قواعد ۳ و ۴ مخزن، انتخابی و با گارد:
+// اگر فایل موجود نباشد سامانه بدون آن اجرا می‌شود؛ system_log همهٔ فراخوانی‌های
+// این ماژول را با function_exists گارد می‌کند و هیچ require بی‌فایدگی خطای مرگبار نمی‌سازد.
+$__logging_escalation = __DIR__ . '/lib/logging-escalation.php';
+if (is_file($__logging_escalation)) {
+	require_once $__logging_escalation;
+}
+unset($__logging_escalation);
 
 // ───── سخت‌سازی نشست ─────
 // اینجا اجرا می‌شود چون cfg() در lib/db-core.php تعریف شده و باید پیش از
