@@ -16,7 +16,7 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->exec('CREATE TABLE tickets (
     id INTEGER PRIMARY KEY, status TEXT NOT NULL, requester_id INTEGER NOT NULL,
     assigned_to INTEGER NULL, first_response_at TEXT NULL, resolved_at TEXT NULL,
-    cancel_requested_at TEXT NULL, priority TEXT NOT NULL, due_at TEXT NULL,
+    cancel_requested_at TEXT NULL, priority TEXT NOT NULL, department_id INTEGER NULL, due_at TEXT NULL,
     assigned_at TEXT NULL, closed_at TEXT NULL, supervisor_id INTEGER NULL,
     supervisor_approved_at TEXT NULL, supervisor_note TEXT NULL,
     sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
