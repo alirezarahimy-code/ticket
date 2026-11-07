@@ -491,8 +491,10 @@ try {
             return function (string $side, array $app, array $sess) use ($decision) {
                 $tid = t12s_create_ticket($side, $app, $sess);
                 $pdo = t12s_pdo($app);
-                $pdo->exec("UPDATE tickets SET status = 'resolved', assigned_to = 102, assigned_at = NOW() - INTERVAL 2 HOUR, first_response_at = NOW() - INTERVAL 90 MINUTE, resolved_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
-                $pdo->exec("INSERT INTO ticket_ratings (ticket_id, requester_id, agent_id, score, created_at) VALUES ({$tid}, 101, 102, 5, (SELECT resolved_at FROM tickets WHERE id = {$tid}))");
+                $rows = $pdo->exec("UPDATE tickets SET status = 'resolved', assigned_to = 102, assigned_at = NOW() - INTERVAL 2 HOUR, first_response_at = NOW() - INTERVAL 90 MINUTE, resolved_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
+                $chk = $pdo->query("SELECT id, status, assigned_to, resolved_at FROM tickets WHERE id = " . (int) $tid)->fetch(PDO::FETCH_ASSOC);
+                t12s_log('    [fixture] tid=' . (int) $tid . ' update_rows=' . var_export($rows, true) . ' row=' . json_encode($chk, JSON_UNESCAPED_UNICODE));
+                $pdo->exec("INSERT INTO ticket_ratings (ticket_id, requester_id, agent_id, score, created_at) VALUES ({$tid}, 101, 102, 5, NOW())");
                 $r = t12s_post($app['base_url'] . '/index.php', $sess['supervisor'][$side], 'supervisor_decision', ['ticket_id' => $tid, 'decision' => $decision, 'supervisor_note' => 'تأیید نهایی T12']);
                 return [t12s_snapshot($pdo), ['decision_status' => $r['status']]];
             };
