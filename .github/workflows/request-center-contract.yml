@@ -9,6 +9,7 @@ on:
       - 'tests/test_request_center_first_slice_static.py'
       - 'tests/test_request_center_repository_sqlite.php'
       - 'tests/test_request_center_workflow_service_sqlite.php'
+      - 'tests/test_request_center_workflow_service_mariadb.php'
       - 'tests/test_request_center_schema_preflight_mariadb.php'
       - 'tests/test_ticket_workflow_safety_static.py'
       - 'tests/test_ticket_cancellation_static.py'
@@ -71,8 +72,16 @@ jobs:
         run: python -m pytest -q tests/test_request_center_first_slice_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
-      - name: WorkflowService transition policy and concurrency guards
+      - name: WorkflowService transition policy and concurrency guards (SQLite)
         run: php tests/test_request_center_workflow_service_sqlite.php
+      - name: WorkflowService real MariaDB locking and transaction integration
+        run: php tests/test_request_center_workflow_service_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
       - name: Verify exact MariaDB service version
         run: |
           actual=$(mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password -Nse 'SELECT VERSION()')
