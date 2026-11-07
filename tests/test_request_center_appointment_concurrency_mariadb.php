@@ -143,7 +143,10 @@ try {
     // ——— سناریو B: بازه‌های غیرهم‌پوشان — همه باید موفق شوند ———
     // نکته‌ها: (۱) روزِ جدا (دو روز بعد) تا ردیفِ برندهٔ سناریو A با B تداخل پیدا نکند؛
     // (۲) پنجرهٔ کاری روز ۰۸:۰۰–۱۶:۰۰ است ⇒ ۱۶ بازهٔ ۲۰ دقیقه‌ای با گام ۳۰ دقیقه که دقیقاً
-    // کل روز کاری را پر می‌کنند و همه داخل پنجرهٔ مجازند.
+    // کل روز کاری را پر می‌کنند و همه داخل پنجرهٔ مجازند؛ (۳) برای همان روز/کارشناس باید
+    // سقف ظرفیت روزانه برداشته شود (پیاده‌سازی P3 — سقف پیش‌فرض ۸)؛ برای سناریوی D آن را
+    // با کلید اختصاصی کنترل می‌کنیم.
+    $pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.daily_capacity_assignee','99') ON DUPLICATE KEY UPDATE `value` = '99'");
     $baseB = $base->modify('+2 days');
     $baseB = $baseB->setTime(8, 0);
     $linesB = [];
@@ -157,6 +160,7 @@ try {
     foreach ($linesB as $line) {
         fwrite(STDERR, 'workerB: ' . $line . "\n");
     }
+    $pdo->exec("DELETE FROM settings WHERE `key` = 'rc.daily_capacity_assignee'");
     $b = $analyze($linesB);
     t13_check($b['ok'] === 16, "all 16 non-overlapping appointments succeed (got {$b['ok']})");
     t13_check($b['unexpected'] === [], 'no unexpected failures in scenario B: ' . implode(' | ', $b['unexpected']));
