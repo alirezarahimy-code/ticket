@@ -184,7 +184,7 @@ if ($ticket === null) {
           <dt>آخرین تغییر</dt><dd><?= $escape($ticket['updated_at']) ?></dd>
           <dt>مهلت SLA</dt><dd><?= $escape($ticket['due_at'] ?: 'ثبت نشده') ?></dd>
         </dl>
-        <p><a class="button" href="index.php?page=ticket&amp;id=<?= $ticketId ?>">ورود به صفحهٔ عملیات و گردش‌کار</a></p>
+        <p><a class="button" href="request-center.php?page=ticket&amp;id=<?= $ticketId ?>">ورود به صفحهٔ عملیات و گردش‌کار</a></p>
       </aside>
     </div>
     <?php
@@ -297,7 +297,7 @@ $metricItems = $workspace === 'requester'
 </section>
 <?php endif; ?>
 <section class="heading"><div><h1><?= $escape($workspaceTitle) ?></h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div>
-<?php if (user_can($user, 'ticket.create')): ?><a class="button" href="index.php?page=new-ticket">ثبت درخواست جدید</a><?php endif; ?>
+<?php if (user_can($user, 'ticket.create')): ?><a class="button" href="request-center.php?page=new-ticket">ثبت درخواست جدید</a><?php endif; ?>
 </section>
 <form method="get" action="request-center.php" class="card" style="padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
 <input type="hidden" name="workspace" value="<?= $escape($workspace) ?>">
