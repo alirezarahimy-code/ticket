@@ -6,7 +6,7 @@
 | تاریخ ثبت | 2026-11-07 |
 | مخزن | `alirezarahimy-code/ticket` |
 | شاخه اجرایی | `feature/request-center-module-1.62.88` |
-| HEAD بررسی‌شده | `e080813232dc242f5dbf082b248eb4f892147d24` |
+| HEAD بررسی‌شده | `e242507dbf5446c6a237867b708a811ecf1678f6` |
 | مبنای As-Is | `ab073ee9fffc56ccd1a2093d02725b95891e0d63` |
 | سند معماری حاکم | `docs/architecture/REQUEST-CENTER-ARCHITECTURE.md` نسخه 1.14 |
 | PR | #30 — Open / Draft |
@@ -45,7 +45,7 @@
 - Commit مبنای As-Is یعنی `ab073ee9fffc56ccd1a2093d02725b95891e0d63` ancestor شاخه `main` است؛ `main` در مقایسه ۱۳ commit جلوتر و صفر commit عقب‌تر است.
 - فهرست تغییرات این ۱۳ commit فقط شامل workflow/AGENTS، مستندات، system-map، تست fresh-install و ابزارهای ساخت نقشه است؛ فایل اجرایی PHP برنامه در این فاصله تغییر نکرده است. بنابراین مبنای As-Is از نظر سورس اجرایی همچنان با main هم‌خوان است.
 - CI مربوط به Request Center روی commit `e1f7f9b581a9005f3a6e08a8dbf5ad9244a5b3b1` اجرا شد. مقایسه آن تا HEAD فعلی نشان می‌دهد ۷ commit بعدی فقط سه سند ممیزی/نگاشت را تغییر داده‌اند و هیچ کد، تست یا workflowی تغییر نکرده است؛ بنابراین نتایج CI برای سورس و تست فعلی همچنان قابل استنادند.
-- HEAD فعلی دفتر شواهد: `e080813232dc242f5dbf082b248eb4f892147d24`.
+- HEAD فعلی دفتر شواهد: `e242507dbf5446c6a237867b708a811ecf1678f6`.
 
 ## ۳. یافته‌های قطعی ممیزی فنی
 
