@@ -44,6 +44,18 @@ function request_center_handle_post(): bool
         require_once dirname(__DIR__, 2) . '/bootstrap.php';
     }
 
+    // همان لایه‌های ریشه‌ای که index.php در هر درخواست تولید به‌صورت تضمینی بارگذاری می‌کند.
+    // org: org_ticket_schema_ensure (فراخوان اول create_ticket — بدون آن، مسیر POST مستقل Fatal می‌داد)
+    // inventory: inventory_client_ip (مسیر اعتبارسنجی دارایی در خدمات IT)
+    // cd-dvd: cd_dvd_fetch_record/cd_dvd_can_* (کنترل «درخواست اصلاح CD/DVD» در create_ticket)
+    $rootDir = dirname(__DIR__, 2);
+    foreach (['/organization.php', '/inventory.php', '/cd-dvd.php'] as $stackFile) {
+        $stackPath = $rootDir . $stackFile;
+        if (is_file($stackPath)) {
+            require_once $stackPath;
+        }
+    }
+
     // Mirror the legacy front controller's load order for module code.
     require_once __DIR__ . '/WorkflowService.php';
     require_once __DIR__ . '/lib/functions.php';

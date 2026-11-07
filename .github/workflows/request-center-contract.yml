@@ -154,13 +154,29 @@ jobs:
 
       - name: Phase-2 smoke — moved RC handler code paths through real HTTP
         id: phase2_smoke
-        run: php tests/test_request_center_phase2_smoke_mariadb.php
+        run: php tests/test_request_center_phase2_smoke_mariadb.php > "$RUNNER_TEMP/phase2-smoke.log" 2>&1; code=$?; cat "$RUNNER_TEMP/phase2-smoke.log"; exit $code
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Commit Phase-2 smoke log on failure (workbench branch only)
+        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
+        run: |
+          set +e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
+          mkdir -p ci-diagnostics
+          cp "$RUNNER_TEMP/phase2-smoke.log" "ci-diagnostics/contract-phase2-smoke-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
+          git add ci-diagnostics
+          git commit -m "ci diagnostics: contract Phase-2 smoke ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}" || true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Commit T04 diagnostic log on failure (workbench branch only)
         if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
