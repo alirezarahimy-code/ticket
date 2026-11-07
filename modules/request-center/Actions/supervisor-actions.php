@@ -3,10 +3,9 @@
 declare(strict_types=1);
 
 /**
- * actions/supervisor-actions.php — ۴ اکشن POST تصمیم‌های سرپرست و امتیازدهی (فاز ۲ بازسازی، برش ۶ — نسخهٔ ۱.۶۲.۱۷).
+ * actions/supervisor-actions.php — ۳ اکشن POST تصمیم‌های سرپرست و امتیازدهی (فاز ۲ بازسازی، برش ۶ — نسخهٔ ۱.۶۲.۱۷).
  *
  * شرح فارسی بخش‌ها (به ترتیب داخل فایل):
- *   food_order_cancel_decide  رسیدگی سرپرست به درخواست لغو غذای ثبت‌شده
  *   supervisor_decision       تصمیم سرپرست دربارهٔ درخواست (تأیید/رد/ارجاع)
  *   supervisor_reopen         بازگشایی درخواست بسته‌شده توسط سرپرست
  *   rate_ticket               ثبت امتیاز رضایت درخواست‌کننده پس از انجام کار
@@ -23,20 +22,6 @@ if (!defined('APP_ROOT')) {
 }
 
         // ───── گروه اکشن: تصمیم‌های سرپرست (غذا و درخواست‌ها) ─────
-        if ($action === 'food_order_cancel_decide') {
-            $reviewer = require_login();
-            if (!function_exists('food_order_cancel_request_decide')) {
-                throw new RuntimeException('ماژول سفارش غذا در دسترس نیست.');
-            }
-            $result = food_order_cancel_request_decide(
-                (int) ($_POST['request_id'] ?? 0),
-                (string) ($_POST['decision'] ?? ''),
-                $reviewer,
-                (string) ($_POST['note'] ?? '')
-            );
-            flash('success', (string) ($result['message'] ?? 'انجام شد.'));
-            redirect('index.php?page=dashboard#food-cancel-requests');
-        }
         if ($action === 'supervisor_decision') {
             $supervisor = require_permission('supervisor.panel');
             if (!user_can($supervisor, 'supervisor.decide')) {
