@@ -181,9 +181,10 @@ try {
     t13_check($c['unexpected'] === [], 'no unexpected failures in scenario C: ' . implode(' | ', $c['unexpected']));
 
     // ——— سناریو D: سقف ظرفیت روزانهٔ یک کارشناس (۱ نوبت) با ۱۲ تلاش هم‌زمان ———
+    // هشدار تاریخی: B و D باید روزهای متفاوتی باشند (هر دو روی 2026-11-10 بودند ⇒ COUNT=16 ≥ 1 و ۱۲ رد شدنی).
     $pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.daily_capacity_assignee','1') ON DUPLICATE KEY UPDATE `value` = '1'");
-    // ۱۲ بازهٔ ۲۰ دقیقه‌ای داخل پنجرهٔ کاری (۰۸:۰۰–۱۶:۰۰) با گام ۴۰ دقیقه — همه داخل پنجره
-    $baseD = new DateTimeImmutable('+3 days');
+    // ۱۲ بازهٔ ۲۰ دقیقه‌ای داخل پنجرهٔ کاری (۰۸:۰۰–۱۶:۰۰) با گام ۴۰ دقیقه — همه داخل پنجره، روزِ جدا (+4)
+    $baseD = new DateTimeImmutable('+4 days');
     $baseD = $baseD->setTime(8, 0);
     $windowsD = [];
     for ($i = 0; $i < 12; $i++) {
