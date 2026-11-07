@@ -244,7 +244,15 @@ foreach ($byNumber as $number => $file) {
     $stepData = [];
     foreach (array_unique(array_merge(array_keys($stepBefore), array_keys($stepAfter))) as $table) {
         if (!isset($stepBefore[$table], $stepAfter[$table])) {
-            $stepSchema[] = $table . ' (table added/removed)';
+            if (!isset($stepBefore[$table]) && isset($stepAfter[$table])) {
+                $stepSchema[] = $table . ' (added)';
+                if ($stepAfter[$table]['rows'] !== null) {
+                    $stepData[] = $table . ' (new rows=' . $stepAfter[$table]['rows'] . ')';
+                }
+            } else {
+                $stepSchema[] = $table . ' (removed)';
+                $stepData[] = $table . ' (table removed)';
+            }
             continue;
         }
         if ($stepBefore[$table]['schema'] !== $stepAfter[$table]['schema']) {
@@ -252,7 +260,7 @@ foreach ($byNumber as $number => $file) {
         }
         if ($table !== 'schema_updates'
             && ($stepBefore[$table]['data'] !== $stepAfter[$table]['data'] || $stepBefore[$table]['rows'] !== $stepAfter[$table]['rows'])) {
-            $stepData[] = $table;
+            $stepData[] = $table . ' (rows=' . $stepBefore[$table]['rows'] . '->' . $stepAfter[$table]['rows'] . ')';
         }
     }
     if ($stepSchema !== [] || $stepData !== []) {
@@ -269,7 +277,15 @@ $schemaChanges = [];
 $dataChanges = [];
 foreach (array_unique(array_merge(array_keys($before), array_keys($after))) as $table) {
     if (!isset($before[$table], $after[$table])) {
-        $schemaChanges[] = $table . ' (table added/removed)';
+        if (!isset($before[$table]) && isset($after[$table])) {
+            $schemaChanges[] = $table . ' (added)';
+            if ($after[$table]['rows'] !== null) {
+                $dataChanges[] = $table . ' (new rows=' . $after[$table]['rows'] . ')';
+            }
+        } else {
+            $schemaChanges[] = $table . ' (removed)';
+            $dataChanges[] = $table . ' (table removed)';
+        }
         continue;
     }
     if ($before[$table]['schema'] !== $after[$table]['schema']) {
@@ -277,7 +293,7 @@ foreach (array_unique(array_merge(array_keys($before), array_keys($after))) as $
     }
     if ($table !== 'schema_updates'
         && ($before[$table]['data'] !== $after[$table]['data'] || $before[$table]['rows'] !== $after[$table]['rows'])) {
-        $dataChanges[] = $table;
+        $dataChanges[] = $table . ' (rows=' . $before[$table]['rows'] . '->' . $after[$table]['rows'] . ')';
     }
 }
 
