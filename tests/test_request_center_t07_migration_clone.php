@@ -153,6 +153,21 @@ function t07_registry_rows(PDO $pdo): array
     );
 }
 
+function t07_service_catalog_distribution(PDO $pdo): array
+{
+    $exists = $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.COLUMNS " .
+        "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'service_catalog' AND COLUMN_NAME = 'requires_asset'"
+    )->fetchColumn();
+    if ((int) $exists === 0) {
+        return ['column_present' => false];
+    }
+    return $pdo->query(
+        'SELECT service_group, requires_asset, COUNT(*) AS row_count ' .
+        'FROM service_catalog GROUP BY service_group, requires_asset ORDER BY service_group, requires_asset'
+    )->fetchAll(PDO::FETCH_ASSOC);
+}
+
 t07_check(getenv('GITHUB_ACTIONS') === 'true', 'test is running inside GitHub Actions');
 t07_check(in_array($host, ['127.0.0.1', 'localhost'], true), 'database host is the local ephemeral CI service');
 t07_check((string) (getenv('CI_DB_NAME') ?: '') === 'persian_ticketing_ci', 'workflow database has the expected disposable name');
@@ -248,10 +263,17 @@ foreach ($byNumber as $number => $file) {
     }
 
     $stepBefore = t07_fingerprint($pdo);
+    $serviceCatalogBefore = $name === '003-sync-schema-151.sql' ? t07_service_catalog_distribution($pdo) : null;
     t07_mysql_file($mysql, $host, $port, $user, $pass, $targetDb, $file);
     $register = $pdo->prepare('INSERT INTO schema_updates (version, migration) VALUES (?, ?)');
     $register->execute([$version, $name]);
     $stepAfter = t07_fingerprint($pdo);
+    if ($serviceCatalogBefore !== null) {
+        $serviceCatalogAfter = t07_service_catalog_distribution($pdo);
+        echo 'SERVICE_CATALOG requires_asset before=' .
+            json_encode($serviceCatalogBefore, JSON_UNESCAPED_SLASHES) .
+            ' after=' . json_encode($serviceCatalogAfter, JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    }
 
     $stepSchema = [];
     $stepData = [];
