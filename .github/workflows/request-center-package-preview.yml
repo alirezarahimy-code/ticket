@@ -100,6 +100,7 @@ jobs:
             actions/supervisor-actions.php \
             actions/bulk-actions.php \
             cron/ticket_auto_close.php \
+            modules/request-center/Pages/index.php \
             modules/request-center/RequestCenterRepository.php \
             modules/request-center/WorkflowService.php \
             modules/request-center/Actions/ticket-actions.php \
