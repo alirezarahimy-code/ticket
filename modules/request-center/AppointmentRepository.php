@@ -93,7 +93,7 @@ final class AppointmentRepository
      *
      * @return array{ok: bool, id?: int, error?: string}
      */
-    public function create(int $ticketId, int $assigneeId, string $startsAt, string $endsAt, string $kind, ?string $note, int $actorId): array
+    public function create(int $ticketId, int $assigneeId, string $startsAt, string $endsAt, string $kind, ?string $note, int $actorId, bool $allowOutsideBusinessHours = false): array
     {
         if (!isset(self::KINDS[$kind])) {
             return ['ok' => false, 'error' => 'نوع نوبت نامعتبر است.'];
@@ -111,6 +111,18 @@ final class AppointmentRepository
         }
         if ($startTs < time() - 3600) {
             return ['ok' => false, 'error' => 'زمان شروع نمی‌تواند در گذشته باشد.'];
+        }
+
+        // ——— پنجرهٔ ساعات کاری روز (پیش‌فرض سراسری از sla.*، override کارشناس از rc.work_hours_user_<id>) ———
+        // رفتار: fail-closed؛ مدیر سامانه می‌تواند با پرچم allowOutsideBusinessHours پیاده شود.
+        if (!$allowOutsideBusinessHours) {
+            [$winStartMin, $winEndMin] = $this->workingWindow($assigneeId);
+            $sameCalendarDay = date('Y-m-d', $startTs) === date('Y-m-d', $endTs);
+            $startMin = (int) date('H', $startTs) * 60 + (int) date('i', $startTs);
+            $endMin = (int) date('H', $endTs) * 60 + (int) date('i', $endTs);
+            if (!$sameCalendarDay || $startMin < $winStartMin || $endMin > $winEndMin) {
+                return ['ok' => false, 'error' => 'این نوبت خارج از ساعات کاری است (پنجرهٔ مجاز ' . $this->formatMinutes($winStartMin) . ' تا ' . $this->formatMinutes($winEndMin) . '). مدیر سامانه می‌تواند با «ثبت حتی بیرون از ساعت کاری» ثبت کند.'];
+            }
         }
         if (!$this->tableExists()) {
             return ['ok' => false, 'error' => 'migration_035_missing'];
@@ -133,17 +145,58 @@ final class AppointmentRepository
             //   اولی commit کند؛ سپس در خواندن قفل‌دار (FOR UPDATE) آخرین نگارش ثبت‌شده را می‌بیند
             //   و باهمان predicate «هر نوبت کانسل‌نشده هم‌پوشان است؟» رد می‌شود. رفتار
             //   همهٔ سطوح ایزولیشن یکسان است.
+            $assigneeRow = null;
             try {
-                $lock = $this->pdo->prepare('SELECT id FROM users WHERE id = ? FOR UPDATE');
+                $lock = $this->pdo->prepare('SELECT id, department_id FROM users WHERE id = ? FOR UPDATE');
                 $lock->execute([$assigneeId]);
+                $assigneeRow = $lock->fetch(PDO::FETCH_ASSOC) ?: null;
             } catch (Throwable) {
-                // SQLite: قفل ردیف موجود نیست؛ fixture تک‌نخی است و تست رفتار را پاس می‌کند.
-                $lock = $this->pdo->prepare('SELECT id FROM users WHERE id = ?');
-                $lock->execute([$assigneeId]);
+                // SQLite یا fixture بدون قفل ردیف: تلاش دوم بدون FOR UPDATE ولی با ستون department_id
+                try {
+                    $lock = $this->pdo->prepare('SELECT id, department_id FROM users WHERE id = ?');
+                    $lock->execute([$assigneeId]);
+                    $assigneeRow = $lock->fetch(PDO::FETCH_ASSOC) ?: null;
+                } catch (Throwable) {
+                    // fixture قدیمی بدون ستون department_id — فقط وجود ردیف بررسی می‌شود
+                    $lock = $this->pdo->prepare('SELECT id FROM users WHERE id = ?');
+                    $lock->execute([$assigneeId]);
+                    $assigneeRow = $lock->fetch(PDO::FETCH_ASSOC) ?: null;
+                    if (is_array($assigneeRow)) {
+                        $assigneeRow['department_id'] = null;
+                    }
+                }
             }
-            if ((int) $lock->fetchColumn() <= 0) {
+            if (!is_array($assigneeRow) || (int) ($assigneeRow['id'] ?? 0) <= 0) {
                 $this->pdo->rollBack();
                 return ['ok' => false, 'error' => 'کارشناس هدف معتبر نیست یا حساب او فعال نیست.'];
+            }
+            $assigneeDepartmentId = isset($assigneeRow['department_id']) && (int) $assigneeRow['department_id'] > 0
+                ? (int) $assigneeRow['department_id']
+                : null;
+
+            // ——— سقف ظرفیت روزانه (همان‌جا که سریال‌سازی وجود دارد) ———
+            $dayStart = date('Y-m-d 00:00:00', $startTs);
+            $dayEnd = date('Y-m-d 23:59:59', $startTs);
+            $limits = $this->dailyLimits($assigneeDepartmentId);
+            $countStmt = $this->pdo->prepare(
+                "SELECT COUNT(*) FROM request_center_appointments WHERE assignee_id = ? AND status <> ? AND starts_at >= ? AND starts_at <= ?"
+            );
+            $countStmt->execute([$assigneeId, self::STATUS_CANCELLED, $dayStart, $dayEnd]);
+            if ((int) $countStmt->fetchColumn() >= $limits['assignee']) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'error' => "ظرفیت روزانهٔ این کارشناس برای این تاریخ تکمیل است (سقف {$limits['assignee']} نوبت)."];
+            }
+            if ($limits['team'] > 0 && $assigneeDepartmentId !== null) {
+                $teamStmt = $this->pdo->prepare(
+                    "SELECT COUNT(*) FROM request_center_appointments a
+                     INNER JOIN users u ON u.id = a.assignee_id
+                     WHERE u.department_id = ? AND a.status <> ? AND a.starts_at >= ? AND a.starts_at <= ?"
+                );
+                $teamStmt->execute([$assigneeDepartmentId, self::STATUS_CANCELLED, $dayStart, $dayEnd]);
+                if ((int) $teamStmt->fetchColumn() >= $limits['team']) {
+                    $this->pdo->rollBack();
+                    return ['ok' => false, 'error' => "ظرفیت روزانهٔ تیم شما برای این تاریخ تکمیل است (سقف {$limits['team']} نوبت)."];
+                }
             }
 
             $conflictSql = 'SELECT id FROM request_center_appointments
@@ -176,6 +229,127 @@ final class AppointmentRepository
             }
             return ['ok' => false, 'error' => 'ثبت نوبت انجام نشد؛ لطفاً دوباره تلاش کنید.'];
         }
+    }
+
+    /**
+     * پنجرهٔ ساعات کاری روز برای کارشناس — override تخصصی (rc.work_hours_user_<id> = 'HH:MM-HH:MM')
+     * در صورت نبود/نامعتبر، به‌صورت fail-closed به پنجرهٔ سراسری sla.work_start_hour/sla.work_end_hour برمی‌گردد.
+     *
+     * @return array{0:int,1:int} دقیقه‌های شروع و پایان (مثلاً [480, 960])
+     */
+    private function workingWindow(int $assigneeId): array
+    {
+        $override = $this->rcSetting('rc.work_hours_user_' . $assigneeId);
+        if ($override !== null
+            && preg_match('/^([01]?\d|2[0-3]):([0-5]\d)\s*-\s*([01]?\d|2[0-4]):([0-5]\d)$/', trim($override), $m)
+        ) {
+            $startMin = ((int) $m[1]) * 60 + ((int) $m[2]);
+            $endMin = ((int) $m[3]) * 60 + ((int) $m[4]);
+            if ($endMin > $startMin) {
+                return [$startMin, $endMin];
+            }
+        }
+        $startHour = (int) ($this->rcSetting('sla.work_start_hour') ?? 8);
+        $endHour = (int) ($this->rcSetting('sla.work_end_hour') ?? 16);
+        if ($startHour < 0 || $endHour > 24 || $endHour <= $startHour) {
+            $startHour = 8;
+            $endHour = 16;
+        }
+        return [$startHour * 60, $endHour * 60];
+    }
+
+    private function formatMinutes(int $minutes): string
+    {
+        return sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60);
+    }
+
+    /**
+     * سقف ظرفیت روزانه: کارشناس (rc.daily_capacity_assignee، پیش‌فرض ۸) و تیم تجمعی
+     * (rc.team_daily_capacity_dept_<department_id> با fallback به rc.team_daily_capacity، پیش‌فرض ۲۴؛ صفر = غیرفعال).
+     *
+     * @return array{assignee:int, team:int}
+     */
+    private function dailyLimits(?int $departmentId): array
+    {
+        $assigneeRaw = $this->rcSetting('rc.daily_capacity_assignee');
+        $assignee = ($assigneeRaw !== null && is_numeric(trim($assigneeRaw))) ? max(1, (int) $assigneeRaw) : 8;
+
+        $teamRaw = null;
+        if ($departmentId !== null) {
+            $teamRaw = $this->rcSetting('rc.team_daily_capacity_dept_' . $departmentId);
+        }
+        if ($teamRaw === null || !is_numeric(trim((string) $teamRaw))) {
+            $teamRaw = $this->rcSetting('rc.team_daily_capacity');
+        }
+        $team = ($teamRaw !== null && is_numeric(trim((string) $teamRaw))) ? max(0, (int) $teamRaw) : 24;
+
+        return ['assignee' => $assignee, 'team' => $team];
+    }
+
+    /** خواندن مستقیم از جدول settings — مستقل از helper اپ (برای CI/tests)؛ نبودن جدول/کلید null. */
+    private function rcSetting(string $key): ?string
+    {
+        try {
+            $st = $this->pdo->prepare('SELECT `value` FROM settings WHERE `key` = ? LIMIT 1');
+            $st->execute([$key]);
+            $value = $st->fetchColumn();
+            return $value === false ? null : (string) $value;
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * بار ظرفیت امروز (یا یک روز مشخص): شمارش per-assignee و per-department.
+     *
+     * @return array{per_assignee:array<int,array{assignee_id:int, full_name:string, used:int, cap:int}>, per_dept:array<int,int>}
+     */
+    public function dailyLoadSnapshot(string $dayDate, int $defaultAssigneeCap = 8): array
+    {
+        $empty = ['per_assignee' => [], 'per_dept' => []];
+        if (!$this->tableExists()) {
+            return $empty;
+        }
+        $dayStart = substr($dayDate, 0, 10) . ' 00:00:00';
+        $dayEnd = substr($dayDate, 0, 10) . ' 23:59:59';
+
+        $assigneeStmt = $this->pdo->prepare(
+            "SELECT a.assignee_id, COALESCE(u.full_name, '') AS full_name, COUNT(*) AS used
+             FROM request_center_appointments a
+             LEFT JOIN users u ON u.id = a.assignee_id
+             WHERE a.status <> ? AND a.starts_at >= ? AND a.starts_at <= ?
+             GROUP BY a.assignee_id, u.full_name
+             ORDER BY used DESC, a.assignee_id ASC"
+        );
+        $assigneeStmt->execute([self::STATUS_CANCELLED, $dayStart, $dayEnd]);
+        $perAssignee = [];
+        foreach ($assigneeStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $assigneeId = (int) $row['assignee_id'];
+            $raw = $this->rcSetting('rc.daily_capacity_assignee');
+            $cap = ($raw !== null && is_numeric(trim($raw))) ? max(1, (int) $raw) : $defaultAssigneeCap;
+            $perAssignee[] = ['assignee_id' => $assigneeId, 'full_name' => (string) $row['full_name'], 'used' => (int) $row['used'], 'cap' => $cap];
+        }
+
+        $deptStmt = $this->pdo->prepare(
+            "SELECT u.department_id AS dept_id, COUNT(*) AS used
+             FROM request_center_appointments a
+             INNER JOIN users u ON u.id = a.assignee_id
+             WHERE a.status <> ? AND a.starts_at >= ? AND a.starts_at <= ? AND u.department_id IS NOT NULL
+             GROUP BY u.department_id"
+        );
+        $deptStmt->execute([self::STATUS_CANCELLED, $dayStart, $dayEnd]);
+        $perDept = [];
+        foreach ($deptStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $perDept[(int) $row['dept_id']] = (int) $row['used'];
+        }
+
+        return ['per_assignee' => $perAssignee, 'per_dept' => $perDept];
+    }
+    /** سقف روزانهٔ تیم (تجمعی) برای یک دایرهٔ مشخص — صفر یعنی غیرفعال. */
+    public function teamDailyCapacity(int $departmentId): int
+    {
+        $limits = $this->dailyLimits($departmentId);
+        return (int) $limits['team'];
     }
 
     /** Next planned appointments (for the signed-in expert, or everyone when $canManageAll).

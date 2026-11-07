@@ -13,9 +13,10 @@ function check_request_center(bool $condition, string $message): void
 
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-$pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, full_name TEXT, role TEXT, is_active INTEGER)');
+$pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, full_name TEXT, role TEXT, is_active INTEGER DEFAULT 1, department_id INTEGER NULL)');
 $pdo->exec('CREATE TABLE tickets (id INTEGER PRIMARY KEY, ticket_no TEXT, subject TEXT)');
-$pdo->exec("INSERT INTO users VALUES (1, 'Agent One', 'agent', 1), (2, 'Agent Two', 'agent', 1)");
+$pdo->exec('CREATE TABLE settings (`key` TEXT PRIMARY KEY, `value` TEXT NOT NULL)');
+$pdo->exec("INSERT INTO users (id, full_name, role, is_active) VALUES (1, 'Agent One', 'agent', 1), (2, 'Agent Two', 'agent', 1)");
 $pdo->exec("INSERT INTO tickets VALUES (101, 'RC-00101', 'Test request')");
 $pdo->exec('CREATE TABLE request_center_appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,8 +70,8 @@ check_request_center($cancelledTwice['ok'] === false, 'already cancelled appoint
 // ——— فاز ۴: اتمام، محدوده، ظرفیت و شمارشگرها ———
 $pastStart = date('Y-m-d H:i:s', strtotime('-50 minutes'));
 $pastEnd = date('Y-m-d H:i:s', strtotime('-5 minutes'));
-$pastPlanned = $repo->create(101, 1, $pastStart, $pastEnd, 'work', 'نوبتِ معوقِ گذشته', 1);
-check_request_center($pastPlanned['ok'] === true, 'past planned appointment is creatable (retro-record)');
+$pastPlanned = $repo->create(101, 1, $pastStart, $pastEnd, 'work', 'نوبتِ معوقِ گذشته', 1, true);
+check_request_center($pastPlanned['ok'] === true, 'past planned appointment is creatable with the elevated outside-window override (retro-record)');
 
 $completeByStranger = $repo->complete((int) $otherAssignee['id'], 1, false);
 check_request_center($completeByStranger['ok'] === false, 'complete by another ordinary agent is rejected');
@@ -126,3 +127,54 @@ check_request_center(AppointmentRepository::normalizeDateTime('2026-11-07') === 
 check_request_center(AppointmentRepository::normalizeDateTime('2026-11-07T10:60') === null, 'minute 60 is rejected');
 
 echo "ALL-PHASE4-APPOINTMENT-TESTS-PASSED\n";
+// ——— اولویت ۳: ساعت کاری روز + سقف ظرفیت روزانه (کارشناس/تیم) — settings key-based، بدون Migration ———
+$d2 = date('Y-m-d', strtotime('+2 days'));
+$rejectS = $d2 . ' 18:00:00'; $rejectE = $d2 . ' 19:00:00';
+$r = $repo->create(101, 1, $rejectS, $rejectE, 'work', null, 1);
+check_request_center($r['ok'] === false, 'appointment outside working window (18:00) is rejected');
+check_request_center(mb_strpos((string) ($r['error'] ?? ''), 'خارج از ساعات کاری') !== false, 'outside-window error is explicit');
+
+$rOutsideOwn = $repo->create(101, 1, $d2 . ' 07:30:00', $d2 . ' 08:00:00', 'work', null, 1);
+check_request_center($rOutsideOwn['ok'] === false, 'appointment starting before the window (07:30) is rejected');
+
+$rOverride = $repo->create(101, 1, $rejectS, $rejectE, 'work', null, 1, true);
+check_request_center($rOverride['ok'] === true, 'elevated allowOutsideBusinessHours permits 18:00 booking');
+
+$pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.work_hours_user_1','17:00-20:00')");
+$rUserOverride = $repo->create(101, 1, $d2 . ' 19:00:00', $d2 . ' 19:45:00', 'work', null, 1);
+check_request_center($rUserOverride['ok'] === true, 'per-user work-hours override (rc.work_hours_user_1) allows 18:00 for user 1');
+$rOtherReject = $repo->create(101, 2, $rejectS, $rejectE, 'work', null, 1);
+check_request_center($rOtherReject['ok'] === false, 'per-user override does NOT leak to other users');
+$pdo->exec("DELETE FROM settings WHERE `key` = 'rc.work_hours_user_1'");
+
+$capDay = date('Y-m-d', strtotime('+3 days'));
+$repo->create(101, 1, $capDay . ' 08:30:00', $capDay . ' 09:15:00', 'work', null, 1);
+$repo->create(101, 1, $capDay . ' 10:00:00', $capDay . ' 10:45:00', 'work', null, 1);
+$pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.daily_capacity_assignee','2')");
+$rCap = $repo->create(101, 1, $capDay . ' 12:00:00', $capDay . ' 12:45:00', 'work', null, 1);
+check_request_center($rCap['ok'] === false, 'third booking of the day is rejected once the assignee cap is hit');
+check_request_center(mb_strpos((string) ($rCap['error'] ?? ''), 'ظرفیت روزانهٔ این کارشناس') !== false, 'capacity error is explicit (assignee)');
+$pdo->exec("DELETE FROM settings WHERE `key` = 'rc.daily_capacity_assignee'");
+
+$pdo->exec("UPDATE users SET department_id = 7 WHERE id IN (1, 2)");
+$teamDay = date('Y-m-d', strtotime('+4 days'));
+$pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.team_daily_capacity_dept_7','3')");
+$pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.daily_capacity_assignee','8')");
+$t1 = $repo->create(101, 1, $teamDay . ' 09:00:00', $teamDay . ' 09:45:00', 'work', null, 1);
+$t2 = $repo->create(101, 2, $teamDay . ' 09:00:00', $teamDay . ' 09:45:00', 'work', null, 1);
+$t3 = $repo->create(101, 1, $teamDay . ' 11:00:00', $teamDay . ' 11:45:00', 'work', null, 1);
+$t4 = $repo->create(101, 2, $teamDay . ' 11:00:00', $teamDay . ' 11:45:00', 'work', null, 1);
+check_request_center($t1['ok'] === true && $t2['ok'] === true && $t3['ok'] === true, 'team of 3 appointments succeed up to the dept cap');
+check_request_center($t4['ok'] === false, 'fourth appointment under the dept cap is rejected');
+check_request_center(mb_strpos((string) ($t4['error'] ?? ''), 'ظرفیت روزانهٔ تیم') !== false, 'capacity error is explicit (team)');
+
+$pdo->exec("DELETE FROM settings WHERE `key` = 'rc.team_daily_capacity_dept_7'");
+$t4b = $repo->create(101, 2, $teamDay . ' 11:00:00', $teamDay . ' 11:45:00', 'work', null, 1);
+check_request_center($t4b['ok'] === true, 'removing the dept override restores the global team cap');
+$pdo->exec("DELETE FROM settings WHERE `key` = 'rc.daily_capacity_assignee'");
+
+$defaultDay = date('Y-m-d', strtotime('+5 days')) . ' 10:00:00';
+$defaultEnd = date('Y-m-d', strtotime('+5 days')) . ' 10:45:00';
+$dOk = $repo->create(101, 1, $defaultDay, $defaultEnd, 'work', null, 1);
+check_request_center($dOk['ok'] === true, 'defaults restored: booking inside the global window with empty settings works');
+echo "ALL-PHASE3-WORKING-HOURS-AND-CAPACITY-TESTS-PASSED\n";

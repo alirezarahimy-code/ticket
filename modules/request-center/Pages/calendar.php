@@ -228,6 +228,26 @@ foreach ($capacityRows as $capRow) {
 }
 $aliasStaff = $rcElevated && !$rcMissing ? $rcAppointments->assignableStaff(300) : [];
 
+// ——— ظرفیت امروز (سقف روزانهٔ کارشناس/دایرهٔ تیم) — فقط نمای مدیر ———
+$todayLoad = ['per_assignee' => [], 'per_dept' => []];
+$viewerDeptId = 0;
+$viewerTeamCap = 0;
+$viewerTeamUsed = 0;
+if (!$rcMissing && $rcElevated) {
+    $todayLoad = $rcAppointments->dailyLoadSnapshot($nowG->format('Y-m-d H:i:s'));
+    try {
+        $vd = db()->prepare('SELECT department_id FROM users WHERE id = ? LIMIT 1');
+        $vd->execute([$rcActorId]);
+        $viewerDeptId = (int) ($vd->fetchColumn() ?: 0);
+    } catch (Throwable) {
+        $viewerDeptId = 0;
+    }
+    if ($viewerDeptId > 0) {
+        $viewerTeamCap = $rcAppointments->teamDailyCapacity($viewerDeptId);
+        $viewerTeamUsed = (int) ($todayLoad['per_dept'][$viewerDeptId] ?? 0);
+    }
+}
+
 // ——— نوبت‌های امروز برای تایم‌لاین کوچک ———
 $todayGlance = $eventsByDay[$todayGStr] ?? [];
 
@@ -493,7 +513,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                     <?php endforeach; ?>
                   </select>
                 </label>
-                <label class="rc-check"><input type="checkbox" name="allow_outside_business" value="1"> ثبت حتی بیرون از تقویم کاری/تعطیلات (فقط مدیر)</label>
+                <label class="rc-check"><input type="checkbox" name="allow_outside_business" value="1"> ثبت حتی بیرون از تقویم کاری/ساعات کاری/تعطیلات (فقط مدیر)</label>
               <?php endif; ?>
               <label class="rc-field"><span>یادداشت <em>اختیاری · حداکثر ۵۰۰ نویسه</em></span><textarea class="rc-textarea" name="note" rows="2" maxlength="500" placeholder="جزئیات کوتاه…"></textarea></label>
               <button class="rc-primary" type="submit">ثبت نوبت رسیدگی</button>
@@ -610,6 +630,36 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
             <?php endif; ?>
           </div>
         </section>
+
+        <!-- ظرفیت امروز: سقف روزانهٔ کارشناس و دایره -->
+        <?php if ($rcElevated && !$rcMissing && $todayLoad['per_assignee'] !== []): ?>
+        <section class="rc-panel" aria-label="ظرفیت امروز">
+          <div class="rc-panel-title"><h2>ظرفیت امروز (سقف روزانه)</h2><span class="rc-kpi-label"><?= $escape($todayGStr) ?></span></div>
+          <div class="rc-panel-body">
+            <?php if ($viewerDeptId > 0 && $viewerTeamCap > 0): ?>
+              <p class="rc-hint" style="margin-bottom:8px">دایرهٔ شما امروز <?= $viewerTeamUsed ?> از <?= $viewerTeamCap ?> نوبت ثبت کرده است (سقف تجمعی تیم).</p>
+            <?php elseif ($viewerDeptId > 0): ?>
+              <p class="rc-hint" style="margin-bottom:8px">سقف تجمعی تیم شما غیرفعال است (۰) و اعمال نمی‌شود.</p>
+            <?php endif; ?>
+            <?php foreach (array_slice($todayLoad['per_assignee'], 0, 6) as $loadRow):
+                $used = (int) $loadRow['used'];
+                $cap = max(1, (int) $loadRow['cap']);
+                $pctToday = (int) round(100 * $used / $cap);
+                $loadClass = $pctToday >= 100 ? 'over' : ($pctToday >= 75 ? 'hot' : '');
+            ?>
+            <div class="rc-cap-row">
+              <div class="rc-cap-name">
+                <span class="rc-mini-avatar" style="background:<?= $avatarColor((int) $loadRow['assignee_id']) ?>"><?= $escape($avatarInitials((string) ($loadRow['full_name'] ?? '؟'))) ?></span>
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= $escape((string) ($loadRow['full_name'] ?: 'بدون مسئول')) ?></span>
+                <small><?= $used ?> از <?= $cap ?></small>
+              </div>
+              <div class="rc-cap-bar"><div class="rc-cap-fill <?= $loadClass ?>" style="width:<?= min(100, $pctToday) ?>%"></div></div>
+            </div>
+            <?php endforeach; ?>
+            <p class="rc-hint" style="margin-top:10px">مبنا: سقف روزانهٔ کارشناس از تنظیمات (<code>rc.daily_capacity_assignee</code>، پیش‌فرض ۸) و سقف تجمعی دایره (<code>rc.team_daily_capacity_dept_&lt;id&gt;</code> با fallback به <code>rc.team_daily_capacity</code>، پیش‌فرض ۲۴؛ صفر یعنی غیرفعال). ساعت کاری روز از «تقویم کاری» ادمین (یا <code>rc.work_hours_user_&lt;id&gt;</code> برای استثناِ کارشناس) خوانده می‌شود.</p>
+          </div>
+        </section>
+        <?php endif; ?>
 
         <!-- تعطیلات این ماه -->
         <section class="rc-panel" aria-label="تعطیلات این ماه">

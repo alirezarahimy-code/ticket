@@ -246,7 +246,7 @@ if ($outsideProblems !== []) {
     }
 }
 
-$result = $rcAppointments->create($ticketId, $assigneeId, $startsAt, $endsAt, $kind, $note, $rcActorId);
+$result = $rcAppointments->create($ticketId, $assigneeId, $startsAt, $endsAt, $kind, $note, $rcActorId, ($rcElevated && $outsideFlag));
 $rcLog('rc_appointment_create', $result['ok'] ? 'ok' : 'denied', [
     'ticket_id' => $ticketId,
     'assignee_id' => $assigneeId,

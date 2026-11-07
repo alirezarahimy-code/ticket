@@ -7,7 +7,8 @@ declare(strict_types=1);
  * چند کارگر PHP مستقل در یک «سد هم‌زمانی» صف می‌کشند و سپس همزمان ثبت نوبت
  * روی یک کارشناس را می‌آزمایند. نتیجهٔ درست: در بازهٔ هم‌پوشان، دقیقاً یک برنده.
  * همچنین سناریوهای «بازه‌های غیرهم‌پوشان» (همه موفق) و «لغو سپس ثبت دوباره»
- * (باز هم دقیقاً یک برنده) آزموده می‌شوند.
+ * (باز هم دقیقاً یک برنده) و «سقف ظرفیت روزانهٔ یک نفر» با ۱۲ تلاش هم‌زمان
+ * آزموده می‌شود (سناریوی D).
  *
  * این آزمون روی مخزن واقعی کد محصولی (AppointmentRepository::create) اجرا می‌شود،
  * نه یک بازنویسی موازی. بنابراین اثبات‌کنندهٔ رفتار قفل ردیف والد است.
@@ -116,8 +117,9 @@ try {
         $ok = count(array_filter($lines, static fn (string $l): bool => str_contains($l, 'ok id=')));
         $overlap = count(array_filter($lines, static fn (string $l): bool => str_contains($l, 'تداخل')));
         $unexpected = array_filter($lines, static fn (string $l): bool => !str_contains($l, 'ok id=') && !str_contains($l, 'تداخل'));
+        $cap = count(array_filter($lines, static fn (string $l): bool => str_contains($l, 'ظرفیت')));
         $deadlock = count(array_filter($lines, static fn (string $l): bool => preg_match('/deadlock|lock wait|1213/i', $l) === 1));
-        return ['ok' => $ok, 'overlap' => $overlap, 'unexpected' => $unexpected, 'deadlock' => $deadlock];
+        return ['ok' => $ok, 'overlap' => $overlap, 'unexpected' => $unexpected, 'deadlock' => $deadlock, 'cap' => $cap];
     };
 
     $base = new DateTimeImmutable('tomorrow 09:00:00');
@@ -172,11 +174,32 @@ try {
     t13_check($c['overlap'] === 5, 'the rest receive overlap rejection (got ' . $c['overlap'] . ')');
     t13_check($c['unexpected'] === [], 'no unexpected failures in scenario C: ' . implode(' | ', $c['unexpected']));
 
+    // ——— سناریو D: سقف ظرفیت روزانهٔ یک کارشناس (۱ نوبت) با ۱۲ تلاش هم‌زمان ———
+    $pdo->exec("INSERT INTO settings (`key`,`value`) VALUES ('rc.daily_capacity_assignee','1') ON DUPLICATE KEY UPDATE `value` = '1'");
+    $baseD = new DateTimeImmutable('+3 days 09:00:00');
+    $windowsD = [];
+    for ($i = 0; $i < 12; $i++) {
+        $s = $baseD->modify('+' . ($i * 70) . ' minutes')->format('Y-m-d H:i:s');
+        $e = $baseD->modify('+' . ($i * 70 + 60) . ' minutes')->format('Y-m-d H:i:s');
+        $windowsD[] = [$s, $e, 'work'];
+    }
+    $linesD = $race($windowsD);
+    foreach ($linesD as $line) {
+        fwrite(STDERR, 'workerD: ' . $line . "\n");
+    }
+    $d = $analyze($linesD);
+    t13_check($d['ok'] === 1, 'exactly one of 12 racers books once the daily assignee cap is 1 (got ' . $d['ok'] . ')');
+    t13_check($d['cap'] === 11, 'the rest are rejected on the daily assignee capacity (got ' . $d['cap'] . ')');
+    t13_check($d['unexpected'] === [], 'no unexpected failures in scenario D: ' . implode(' | ', $d['unexpected']));
+    t13_check($d['deadlock'] === 0, 'zero lock-wait deadlock/cancellation events in scenario D');
+    $pdo->exec("DELETE FROM settings WHERE `key` = 'rc.daily_capacity_assignee'");
+
     echo "ALL-T13-APPOINTMENT-CONCURRENCY-SCENARIOS-PASSED\n";
 
     // ——— پاک‌سازی داده‌های آزمایشی ———
     $cleanup = $pdo->prepare('DELETE FROM request_center_appointments WHERE created_by = ?');
     $cleanup->execute([$actorId]);
+    $pdo->exec("DELETE FROM settings WHERE `key` IN ('rc.daily_capacity_assignee')");
     $pdo->exec("DELETE FROM users WHERE username IN ('$agentUser', '$actorUser')");
     $pdo->exec('DROP TABLE IF EXISTS rc_t13_appt_barrier');
     exit(0);
