@@ -218,4 +218,89 @@ final class RequestCenterRepository
         }
         return $result;
     }
+
+    /**
+     * Return the operational queue with the same filters and ordering used by
+     * the legacy queue page. Authorization scope is always derived server-side.
+     *
+     * @return array{total:int,page:int,pages:int,offset:int,rows:array<int,array<string,mixed>>}
+     */
+    public function listQueue(array $user, string $queue = 'all', int $page = 1, int $perPage = 100): array
+    {
+        $allowedQueues = ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled'];
+        if (!in_array($queue, $allowedQueues, true)) {
+            $queue = 'all';
+        }
+
+        $perPage = min(100, max(1, $perPage));
+        [$scopeSql, $params] = ticket_scope($user, 't');
+        $conditions = [];
+        if ($scopeSql !== '') {
+            $conditions[] = preg_replace('/^\\s*WHERE\\s+/i', '', trim($scopeSql));
+        }
+        if ($queue === 'unassigned') {
+            $conditions[] = 't.assigned_to IS NULL';
+        }
+        if ($queue === 'overdue') {
+            $conditions[] = 't.sla_paused_at IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))';
+        }
+        if ($queue === 'mine') {
+            $conditions[] = 't.assigned_to = ?';
+            $params[] = (int) ($user['id'] ?? 0);
+        }
+        if ($queue === 'waiting_user') {
+            $conditions[] = 't.status IN ("waiting_user", "pending")';
+        }
+        if ($queue === 'resolved') {
+            $conditions[] = 't.status = "resolved"';
+        }
+        if ($queue === 'cancellation_requested') {
+            $conditions[] = 't.cancel_requested_at IS NOT NULL';
+        }
+        if ($queue === 'cancelled') {
+            $conditions[] = 't.status = "cancelled"';
+        } else {
+            $conditions[] = 't.status <> "cancelled"';
+        }
+
+        $where = $conditions !== [] ? ' WHERE ' . implode(' AND ', $conditions) : '';
+        $count = $this->pdo->prepare('SELECT COUNT(*) FROM tickets t ' . $where);
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = min(max(1, $page), $pages);
+        $offset = ($page - 1) * $perPage;
+
+        $sql = 'SELECT t.*, d.name AS department_name, r.full_name AS requester_name,
+                       a.full_name AS assignee_name
+                FROM tickets t
+                LEFT JOIN departments d ON d.id = t.department_id
+                JOIN users r ON r.id = t.requester_id
+                LEFT JOIN users a ON a.id = t.assigned_to
+                ' . $where . '
+                ORDER BY CASE
+                    WHEN t.cancel_requested_at IS NOT NULL THEN 0
+                    WHEN (t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL
+                        AND ((t.due_at IS NOT NULL AND t.due_at < NOW())
+                            OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW())
+                            OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW())
+                            OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW())
+                            OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))) THEN 1
+                    ELSE 2 END,
+                    FIELD(t.priority, "critical", "urgent", "normal"),
+                    t.created_at ASC
+                LIMIT ' . $perPage . ' OFFSET ' . $offset;
+        $query = $this->pdo->prepare($sql);
+        $query->execute($params);
+
+        return [
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'offset' => $offset,
+            'rows' => $query->fetchAll(PDO::FETCH_ASSOC),
+        ];
+    }
+
 }
