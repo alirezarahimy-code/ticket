@@ -12,6 +12,13 @@ declare(strict_types=1);
  * Keep only Request Center actions here. Cross-module actions must stay with
  * their owning module until that module has its own dispatcher.
  */
+
+// محافظ: رجیستری اکشن‌ها فقط داخل حوزهٔ اجرایی ماژول/کنترلر بارگذاری می‌شود.
+if (!defined('APP_ROOT')) {
+    http_response_code(404);
+    exit;
+}
+
 require __DIR__ . '/supervisor-actions.php';
 require __DIR__ . '/ticket-actions.php';
 require __DIR__ . '/service-actions.php';

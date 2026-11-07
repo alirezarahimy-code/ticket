@@ -11,6 +11,12 @@ declare(strict_types=1);
  * assignee allowlist, and notifications/audit for create/cancel/complete.
  */
 
+// محافظ: این فایل فقط از طریق شاخهٔ تقویم ماژول بارگذاری می‌شود؛ دسترسی مستقیم ممنوع.
+if (!defined('APP_ROOT')) {
+    http_response_code(404);
+    exit;
+}
+
 require_once dirname(__DIR__) . '/AppointmentRepository.php';
 
 $rcCanSchedule = user_can($user, 'ticket.edit') || user_can($user, 'queue.view')

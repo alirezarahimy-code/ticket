@@ -7,6 +7,7 @@ on:
       - 'request-center.php'
       - 'modules/request-center/**'
       - 'tests/test_request_center_first_slice_static.py'
+      - 'tests/test_request_center_access_matrix_static.py'
       - 'tests/test_request_center_repository_sqlite.php'
       - 'tests/test_request_center_workflow_service_sqlite.php'
       - 'tests/test_request_center_workflow_service_mariadb.php'
@@ -91,7 +92,7 @@ jobs:
           php -l modules/request-center/Actions/appointment-actions.php
           php -l modules/request-center/Pages/calendar.php
       - name: First-slice security and architecture contract
-        run: python -m pytest -q tests/test_request_center_first_slice_static.py
+        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
       - name: Appointment lifecycle, conflict and capacity contract (SQLite)
