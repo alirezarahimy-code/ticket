@@ -163,6 +163,11 @@ try {
 $pdo->rollBack();
 workflow_check($blockedPendingAssignment, 'same-state pending-cancellation path cannot change assignment');
 
+$pdo->beginTransaction();
+$guardedDepartment = $service->transition(8, 'resolved', 'in_progress', [], 'requester_reopen', ['department_id' => 999]);
+$pdo->rollBack();
+workflow_check(!$guardedDepartment, 'optimistic field guards reject changed department');
+
 $noTransaction = false;
 try {
     $service->transition(6, 'assigned', 'in_progress');
