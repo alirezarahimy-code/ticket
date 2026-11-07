@@ -120,6 +120,16 @@
 
 Job متناظر MariaDB 10.11 نیز موفق شد. این آزمون‌ها فقط جدول‌های Probe در دیتابیس disposable را ایجاد/حذف کردند و روی Dump یا DB عملیاتی اجرا نشدند. نتیجه، T01–T03 را می‌بندد؛ نه T04 یا آزمون‌های Migration/Restore/Workflow را.
 
+### ۴.۲. حدود پوشش آزمون‌های موفق MariaDB فعلی
+
+در همان Workflow، این آزمون‌ها نیز روی MariaDB 10.4.32 موفق شده‌اند:
+- Schema preflight روی `install-empty-db.sql` با fixtureهای مصنوعی requester/agent/ticket/message/attachment و یک transition واقعی؛ 33 assertion در این مرحله موفق شد.
+- آزمون Repository و فیلتر scope، پیام داخلی و پیوست با دیتابیس موقت.
+- آزمون WorkflowService با MariaDB؛ اما فایل `tests/test_request_center_workflow_service_mariadb.php` یک `TEMPORARY TABLE tickets` مختص همان اتصال می‌سازد. این آزمون پذیرش SQL `FOR UPDATE`، شرط وضعیت، allowlist و rollback همان اتصال را اثبات می‌کند؛ دو اتصال/worker رقابتی ایجاد نمی‌کند.
+- آزمون SQLite نیز guardهای سیاست را پوشش می‌دهد؛ SQLite جایگزین رفتار lock و metadata-lock در MariaDB نیست.
+
+بنابراین این نتایج، شواهد معتبر برای سازگاری syntax و یکپارچگی محدود Repository/WorkflowService در MariaDB 10.4.32 هستند؛ اما T09 (metadata lock با تراکنش بلند)، T10 (۵۰ Claim هم‌زمان با workerهای مستقل) و T12 (مقایسه Legacy و شاخه هدف) را PASS نمی‌کنند.
+
 ### ۴.۱. الزامات آزمون Migration که هنوز باید بسته شوند
 
 پیش از هر اجرای تغییردهنده روی Clone، نسخه دقیق DB با `SELECT VERSION()`، Schema فعال با `SELECT DATABASE()`، Engine جدول‌های درگیر و fingerprint ثبت شود. Migrationهای زیر نیازمند بازبینی دستی و post-check اختصاصی‌اند: `003`، `005`، `011`، `012`، `026`، `032` و `033`. نبود رکورد رجیستری 032 در Dump، به‌تنهایی اثبات اجرا نشدن SQL نیست. اجرای کور یا retry بدون reconciliation ممنوع است.
