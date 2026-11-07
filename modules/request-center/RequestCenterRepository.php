@@ -220,6 +220,45 @@ final class RequestCenterRepository
     }
 
     /**
+     * Return scoped operational counters shared by supervisor/admin workspaces.
+     * Every aggregate is constrained by the core ticket_scope() predicate.
+     *
+     * @return array<string,int>
+     */
+    public function workspaceSummary(array $user): array
+    {
+        [$scopeSql, $params] = ticket_scope($user, 't');
+        $sql = 'SELECT
+                    COUNT(*) AS total,
+                    COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled")), 0) AS active,
+                    COALESCE(SUM(t.assigned_to IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled")), 0) AS unassigned,
+                    COALESCE(SUM(t.status IN ("new", "manager_review")), 0) AS awaiting_assignment,
+                    COALESCE(SUM(t.status = "resolved"), 0) AS awaiting_supervisor,
+                    COALESCE(SUM(t.status = "closed"), 0) AS closed,
+                    COALESCE(SUM(
+                        t.status NOT IN ("resolved", "closed", "cancelled")
+                        AND t.sla_paused_at IS NULL
+                        AND (
+                            (t.due_at IS NOT NULL AND t.due_at < NOW())
+                            OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW())
+                            OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW())
+                            OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW())
+                            OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW())
+                        )
+                    ), 0) AS overdue
+                FROM tickets t ' . $scopeSql;
+        $query = $this->pdo->prepare($sql);
+        $query->execute($params);
+        $row = $query->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        $summary = [];
+        foreach (['total', 'active', 'unassigned', 'awaiting_assignment', 'awaiting_supervisor', 'closed', 'overdue'] as $key) {
+            $summary[$key] = (int) ($row[$key] ?? 0);
+        }
+        return $summary;
+    }
+
+    /**
      * Return the operational queue with the same filters and ordering used by
      * the legacy queue page. Authorization scope is always derived server-side.
      *
