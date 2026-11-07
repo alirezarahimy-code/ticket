@@ -126,6 +126,9 @@ try {
     $sameStart = $base->format('Y-m-d H:i:s');
     $sameEnd = $base->modify('+60 minutes')->format('Y-m-d H:i:s');
     $linesA = $race(array_fill(0, 16, [$sameStart, $sameEnd, 'work']));
+    foreach ($linesA as $line) {
+        fwrite(STDERR, 'workerA: ' . $line . "\n");
+    }
     $a = $analyze($linesA);
     t13_check($a['ok'] === 1, "exactly one winner books the identical window (got {$a['ok']})");
     t13_check($a['overlap'] === 15, "the other 15 racers receive a clean overlap rejection (got {$a['overlap']})");
@@ -136,14 +139,20 @@ try {
     t13_check((int) $p1->fetchColumn() === 1, 'database contains exactly one planned appointment for the racing window');
 
     // ——— سناریو B: بازه‌های غیرهم‌پوشان — همه باید موفق شوند ———
+    // نکته: روزِ جدا (دو روز بعد) تا ردیفِ برندهٔ سناریو A (فردا ۰۹:۰۰، planned) با B
+    // تداخل پیدا نکند؛ ردیف‌های A تا پایان آزمایش حفظ می‌شوند.
+    $baseB = $base->modify('+2 days');
     $linesB = [];
     $windowsB = [];
     for ($i = 0; $i < 16; $i++) {
-        $s = $base->modify('+' . ($i * 70) . ' minutes')->format('Y-m-d H:i:s');
-        $e = $base->modify('+' . ($i * 70 + 60) . ' minutes')->format('Y-m-d H:i:s');
+        $s = $baseB->modify('+' . ($i * 70) . ' minutes')->format('Y-m-d H:i:s');
+        $e = $baseB->modify('+' . ($i * 70 + 60) . ' minutes')->format('Y-m-d H:i:s');
         $windowsB[] = [$s, $e, 'work'];
     }
     $linesB = $race($windowsB);
+    foreach ($linesB as $line) {
+        fwrite(STDERR, 'workerB: ' . $line . "\n");
+    }
     $b = $analyze($linesB);
     t13_check($b['ok'] === 16, "all 16 non-overlapping appointments succeed (got {$b['ok']})");
     t13_check($b['unexpected'] === [], 'no unexpected failures in scenario B: ' . implode(' | ', $b['unexpected']));
@@ -155,6 +164,9 @@ try {
     t13_check($winnerId > 0, 'winner appointment from scenario A is found for cancellation');
     $pdo->prepare("UPDATE request_center_appointments SET status = 'cancelled' WHERE id = ?")->execute([$winnerId]);
     $linesC = $race(array_fill(0, 6, [$sameStart, $sameEnd, 'work']));
+    foreach ($linesC as $line) {
+        fwrite(STDERR, 'workerC: ' . $line . "\n");
+    }
     $c = $analyze($linesC);
     t13_check($c['ok'] === 1, 'after cancellation exactly one of 6 racers wins again (got ' . $c['ok'] . ')');
     t13_check($c['overlap'] === 5, 'the rest receive overlap rejection (got ' . $c['overlap'] . ')');
