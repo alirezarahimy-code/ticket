@@ -202,7 +202,7 @@ try {
     t04_check($seed['status'] === 200, 'session seed endpoint returned HTTP 200 (status ' . $seed['status'] . ')');
     $session = json_decode($seed['body'], true);
     if (!is_array($session) || json_last_error() !== JSON_ERROR_NONE) {
-        throw new RuntimeException('session seed body is not JSON (status ' . $seed['status'] . '): ' . substr((string) $seed['body'], 0, 800));
+        throw new RuntimeException('session seed not JSON (status ' . $seed['status'] . ') headers=' . json_encode($seed['headers'], JSON_UNESCAPED_UNICODE) . ' body=' . substr((string) $seed['body'], 0, 6000));
     }
     $cookie = (string) $session['cookie_name'] . '=' . (string) $session['session_id'];
     t04_check($cookie !== '=', 'created authenticated session for independent Request Center');
