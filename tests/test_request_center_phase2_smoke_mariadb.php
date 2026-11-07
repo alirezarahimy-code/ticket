@@ -37,6 +37,33 @@ function smoke_check(bool $ok, string $message): void
     echo ($ok ? 'PASS ' : 'FAIL ') . $message . PHP_EOL;
 }
 
+function smoke_http_post(string $url, array $form, array $headers = []): array
+{
+    $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+    $headers[] = 'Connection: close';
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'timeout' => 20,
+            'ignore_errors' => true,
+            'follow_location' => 0,
+            'header' => implode("\r\n", $headers) . "\r\n",
+            'content' => http_build_query($form),
+        ],
+    ]);
+    $body = @file_get_contents($url, false, $context);
+    $headersOut = $http_response_header ?? [];
+    $first = (string) ($headersOut[0] ?? '');
+    if (!preg_match('/\s([0-9]{3})\s/', $first, $match)) {
+        throw new RuntimeException('No HTTP status from POST ' . $url . '; body=' . substr((string) $body, 0, 300));
+    }
+    $location = '';
+    foreach ($headersOut as $h) {
+        if (stripos((string) $h, 'location:') === 0) { $location = trim(substr((string) $h, 9)); }
+    }
+    return ['status' => (int) $match[1], 'body' => (string) $body, 'headers' => $headersOut, 'location' => $location];
+}
+
 function smoke_wait_server(int $port): void
 {
     for ($i = 0; $i < 60; $i++) {
@@ -141,6 +168,12 @@ try {
     }
     smoke_wait_server($portHttp);
 
+    // Deterministic RC reference rows (support service) for the create_ticket round trip.
+    $pdo->exec("INSERT IGNORE INTO handling_units (id, code, name, is_active) VALUES (1, 'it', 'واحد فناوری', 1), (2, 'support', 'واحد پشتیبانی', 1)");
+    $pdo->exec("INSERT IGNORE INTO departments (id, name, code, is_active) VALUES (1, 'پشتیبانی کل', 'sup', 1), (2, 'فناوری اطلاعات', 'it', 1)");
+    $pdo->exec("INSERT IGNORE INTO categories (id, name, code, service_group, is_active) VALUES (1, 'درخواست عمومی', 'gen', 'support', 1)");
+    $pdo->exec("INSERT IGNORE INTO service_catalog (id, name, code, service_group, default_priority, department_id, category_id, handling_unit_id, requires_asset, default_ticket_type, is_active) VALUES (1, 'خدمت عمومی Smoke', 'smoke-support', 'support', 'normal', 1, 1, 2, 0, 'request', 1)");
+
     $seedUser = $pdo->prepare(
         "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active)
          VALUES ('rc_smoke_probe', 'not-used', 'RC Smoke Probe', 1, 'primary_admin', 1)
@@ -175,6 +208,34 @@ try {
     // 4) Attachment download with an unknown id (exercises request_center_download_attachment tail path).
     $download = smoke_http('http://' . $address . '/index.php?action=download_attachment&id=99999', ['Cookie: ' . $cookie]);
     smoke_check($download['status'] === 404, 'download_attachment with unknown id returns HTTP 404 (status ' . $download['status'] . ')');
+
+    // 5) Phase 3 — POST through the INDEPENDENT entry: no CSRF must yield 419 (legacy contract).
+    $noCsrf = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'create_ticket', 'subject' => 'should-be-rejected'], ['Cookie: ' . $cookie]);
+    smoke_check($noCsrf['status'] === 419, 'independent POST without CSRF is rejected with HTTP 419 (status ' . $noCsrf['status'] . ')');
+
+    // 6) Phase 3 — full create_ticket round trip through the INDEPENDENT entry.
+    $csrf = (string) $session['csrf'];
+    $create = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'create_ticket',
+        'subject' => 'RC phase-3 independent POST smoke',
+        'description' => 'Created via request-center.php POST path (same protocol as legacy)',
+        'category_id' => 1,
+        'service_id' => 1,
+        'service_group' => 'support',
+        'ticket_type' => 'request',
+        'priority' => 'normal',
+        'support_location' => 'smoke-lab',
+        'csrf' => $csrf,
+    ], ['Cookie: ' . $cookie]);
+    smoke_check($create['status'] === 302, 'independent create_ticket returns HTTP 302 (status ' . $create['status'] . ')');
+    smoke_check(str_starts_with($create['location'], 'index.php?page=ticket&id='), 'independent create_ticket redirects to the ticket page (Location: ' . $create['location'] . ')');
+    $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase-3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
+    smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');
+    smoke_check((string) ($ticketRow['ticket_type'] ?? '') === 'request', 'independent create_ticket stored the requested ticket type');
+
+    // 7) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
+    $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
+    smoke_check($forwarded['status'] === 200 && str_contains($forwarded['body'], 'داشبورد'), 'non-RC POST action is forwarded in-process and renders the dashboard (status ' . $forwarded['status'] . ')');
 
     echo "Phase-2 smoke: ALL ASSERTIONS PASS\n";
 } finally {
