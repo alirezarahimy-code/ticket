@@ -15,7 +15,8 @@ on:
       - 'tests/test_request_center_*.py'
       - 'tests/test_ticket_*static.py'
       - 'tests/test_ldap_secret_and_legacy_status_static.py'
-      - '.github/workflows/refresh-request-center-map.yml'
+      - '.github/workflows/*.yml'
+      - '.github/workflows/*.yaml'
   workflow_dispatch:
 
 permissions:
