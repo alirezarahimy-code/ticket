@@ -4,11 +4,13 @@ declare(strict_types=1);
 /**
  * T04 runtime diagnostic for a disposable CI database.
  *
- * - Starts the real index.php through PHP's HTTP server.
+ * - Starts index.php and request-center.php through PHP's HTTP server.
  * - Captures MariaDB general_log statements from a dedicated application DB user.
  * - Measures a healthy fresh-install request.
- * - Removes one nullable RC column, sends another HTTP request and proves whether
- *   the legacy request path performs DDL to heal the schema.
+ * - Seeds an authenticated primary-admin session and proves the independent RC
+ *   entry point fails closed without DDL when a required column is missing.
+ * - Removes one nullable RC column, then proves whether the legacy index path
+ *   performs DDL to heal the schema.
  * - Calls the exact ticket_service_ensure_schema() function through a CI-only
  *   probe endpoint and records DDL/DML side effects.
  *
@@ -181,24 +183,59 @@ PHP;
     foreach ($healthy['ddl'] as $sql) {
         echo 'T04 healthy DDL: ' . substr($sql, 0, 500) . PHP_EOL;
     }
+    foreach ($healthy['dml'] as $sql) {
+        echo 'T04 healthy DML: ' . substr($sql, 0, 300) . PHP_EOL;
+    }
 
-    // The same legacy web request must not silently migrate a damaged schema under the zero-DDL policy.
-    // Drop one nullable Request Center column on this disposable CI database only.
+    // Seed a real app session for the independent Request Center entry point.
+    $seedUser = $pdo->prepare(
+        "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active)
+         VALUES ('rc_t04_probe', 'not-used', 'RC T04 Probe', 1, 'primary_admin', 1)
+         ON DUPLICATE KEY UPDATE full_name = VALUES(full_name), is_primary_admin = 1, role = 'primary_admin', is_active = 1"
+    );
+    $seedUser->execute();
+    $userId = (int) $pdo->query("SELECT id FROM users WHERE username = 'rc_t04_probe' LIMIT 1")->fetchColumn();
+    t04_check($userId > 0, 'created disposable primary-admin account for request-center.php probe');
+    putenv('CI_T04_USER_ID=' . $userId);
+    $seed = t04_http('http://' . $address . '/tests/fixtures/request-center-session-seed.php');
+    $session = json_decode($seed['body'], true, 512, JSON_THROW_ON_ERROR);
+    $cookie = (string) $session['cookie_name'] . '=' . (string) $session['session_id'];
+    t04_check($cookie !== '=', 'created authenticated session for independent Request Center');
+
+    // Healthy independent Request Center request: it must not issue DDL.
+    t04_reset_log($pdo);
+    $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
+    $rcHealthy = t04_http('http://' . $address . '/request-center.php', ['Cookie: ' . $cookie]);
+    $rcHealthyLog = t04_log_window($pdo, $start, $webUser);
+    t04_check($rcHealthy['status'] === 200, 'independent request-center.php serves healthy schema (status ' . $rcHealthy['status'] . ')');
+    t04_check(count($rcHealthyLog['ddl']) === 0, 'independent request-center.php executes zero DDL on healthy schema');
+
+    // A required column is removed on the disposable DB. The independent RC entry point must fail closed.
     $pdo->exec('SET GLOBAL general_log = OFF');
-    $pdo->exec('ALTER TABLE tickets DROP COLUMN cancel_requested_at');
+    $pdo->exec('ALTER TABLE tickets DROP COLUMN due_at');
+    t04_reset_log($pdo);
+    $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
+    $rcIncomplete = t04_http('http://' . $address . '/request-center.php', ['Cookie: ' . $cookie]);
+    $rcIncompleteLog = t04_log_window($pdo, $start, $webUser);
+    t04_check($rcIncomplete['status'] === 503, 'independent request-center.php fails closed on missing tickets.due_at (status ' . $rcIncomplete['status'] . ')');
+    t04_check(count($rcIncompleteLog['ddl']) === 0, 'independent request-center.php executes zero DDL on incomplete schema');
+    $column = $pdo->prepare(
+        "SELECT COUNT(*) FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'due_at'"
+    );
+    $column->execute();
+    t04_check((int) $column->fetchColumn() === 0, 'independent Request Center leaves missing due_at untouched');
+
+    // Legacy index.php is still allowed to heal the same incomplete schema during an HTTP request.
     t04_reset_log($pdo);
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
     $driftResponse = t04_http('http://' . $address . '/index.php');
     t04_check($driftResponse['status'] >= 200 && $driftResponse['status'] < 400, 'index.php handled incomplete-schema HTTP request (status ' . $driftResponse['status'] . ')');
     $drift = t04_log_window($pdo, $start, $webUser);
-    $column = $pdo->prepare(
-        "SELECT COUNT(*) FROM information_schema.COLUMNS
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'cancel_requested_at'"
-    );
     $column->execute();
     $restored = (int) $column->fetchColumn() === 1;
-    t04_check($restored, 'legacy web request restored the missing cancel_requested_at column');
-    t04_check(count($drift['ddl']) >= 1, 'legacy web request executed DDL when the schema was incomplete');
+    t04_check($restored, 'legacy index.php restored the missing tickets.due_at column');
+    t04_check(count($drift['ddl']) >= 1, 'legacy index.php executed DDL when the schema was incomplete');
     foreach ($drift['ddl'] as $sql) {
         echo 'T04 drift DDL: ' . substr($sql, 0, 500) . PHP_EOL;
     }
