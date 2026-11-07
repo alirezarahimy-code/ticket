@@ -1343,6 +1343,44 @@
     return loadStatistics(from, to, state.statisticsMode || 'food');
   }
 
+  // ─── حفظ فوکوس و کرسر هنگام بازترسیم ─────────────────────────────
+  // render() کل ریشه را با innerHTML بازمی‌سازد؛ بدون این ترمیم، ورودی جست‌وجوی
+  // زنده (مثلاً «جزئیات سفارش پرسنل انتخابی») با هر تایپ فوکوس خود را از دست
+  // می‌داد و کاربر مجبور بود دوباره با ماوس کلیک کند. حالا جای عنصر فعال،
+  // موقعیت کرسر و اسکرول صفحه پس از بازترسیم ترمیم می‌شود.
+  function renderFocusKeyOf(el) {
+    if (el.id) { try { return '#' + CSS.escape(el.id); } catch (e) { return '#' + el.id; } }
+    if (el.hasAttribute && el.hasAttribute('data-stat-employee-search')) return '[data-stat-employee-search]';
+    var tag = el.tagName ? el.tagName.toLowerCase() : '';
+    var name = el.getAttribute && el.getAttribute('name');
+    if (tag && name) { try { return tag + '[name="' + CSS.escape(name) + '"]'; } catch (e) { return tag + '[name="' + name + '"]'; } }
+    return null;
+  }
+  function captureRenderFocus() {
+    try {
+      var el = document.activeElement;
+      if (!root || !el || !root.contains(el)) return null;
+      if (!el.matches || !el.matches('input,select,textarea')) return null;
+      var key = renderFocusKeyOf(el);
+      if (!key) return null;
+      var sel = null;
+      try { if (typeof el.selectionStart === 'number' && el.selectionStart !== null) sel = { start: el.selectionStart, end: el.selectionEnd }; } catch (e) { /* inputهایی مثل number/time پشتیبانی نمی‌کنند */ }
+      return { key: key, sel: sel, scrollY: window.scrollY || (document.documentElement && document.documentElement.scrollTop) || 0 };
+    } catch (e) { return null; }
+  }
+  function restoreRenderFocus(snap) {
+    if (!snap) return;
+    try {
+      var el = root && root.querySelector ? root.querySelector(snap.key) : null;
+      if (el) {
+        try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+        if (snap.sel && typeof el.setSelectionRange === 'function') {
+          try { el.setSelectionRange(snap.sel.start, snap.sel.end); } catch (e) { /* ignore */ }
+        }
+      }
+      if (typeof snap.scrollY === 'number' && window.scrollTo) window.scrollTo(0, snap.scrollY);
+    } catch (e) { /* بهترین تلاش؛ در بدترین حالت رفتار قبلی */ }
+  }
   function render() {
     if (!root || !root.isConnected) root = document.getElementById('food-menu-root');
     if (!root) return;
@@ -1356,8 +1394,10 @@
     }
     var panel = state.embeddedMode ? embeddedPanel() : (state.tab === 'calendar' && (canMenu || canClose) ? renderCalendar() : state.tab === 'catalog' && canMenu ? renderCatalog() : state.tab === 'orders' && canReports ? renderOrders() : state.tab === 'cancel-requests' && canMenu ? renderCancelRequests() : state.tab === 'statistics' && canReports ? renderStatistics() : state.tab === 'bulk' && canMenu ? renderBulkOperations() : '<div class="fm-card fm-empty">این بخش با مجوزهای فعلی در دسترس نیست.</div>');
     var notices = (state.error ? '<div class="fm-alert error">' + esc(state.error) + '</div>' : '') + (state.notice && !state.error ? '<div class="fm-alert good">' + esc(state.notice) + '</div>' : '');
+    var renderFocusSnap = captureRenderFocus();
     root.innerHTML = state.embeddedMode ? ('<div class="fm-embedded-report">' + notices + panel + '</div>') : ('<div class="fm-intro"><div><h2>برنامه غذایی</h2></div></div>' + notices + navTabs() + mealTypeSwitch() + panel);
     if (global.ItsmJalali && typeof global.ItsmJalali.enhanceAll === 'function') global.ItsmJalali.enhanceAll(root);
+    restoreRenderFocus(renderFocusSnap);
   }
 
   async function loadStatus() {

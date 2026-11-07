@@ -215,7 +215,9 @@
             ['triangle', 'افکت نمایشی'],
             ['users', 'کاربران'],
             ['roles', 'نقش‌ها و دسترسی‌ها'],
-            ['access-groups', 'گروه‌های دسترسی']
+            ['access-groups', 'گروه‌های دسترسی'],
+            ['org-admin-repair', 'ترمیم نقش‌ها و تشخیص ارجاع'],
+            ['holidays', 'تقویم و تعطیلات']
         ];
         var panels = definitions.map(function (item) { return document.getElementById(item[0]); }).filter(Boolean);
         if (!panels.length) return;
