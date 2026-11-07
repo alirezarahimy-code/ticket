@@ -100,7 +100,7 @@ git -C <target> checkout <previous-release-tag-or-commit> && <redeploy/restart>
 ## ۸) پیوست: شواهد ساخت بستهٔ کاندید
 
 - مسیر: `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip`
-- SHA-256: `afa55f38a0999fb4817ee1aec9e6b6854edf830cba3d06766a681cc845f5484a` (فایل کناری `.sha256` در همان پوشه)
+- SHA-256: `55013c7601004b9bc49cffe41a7890cd4200e1a8639f0e4c24a31266464bae06` (فایل کناری `.sha256` در همان پوشه)
 - اجزاء: `manifest.json` با `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `migrations/035-…`، ۶۱ فایل به‌همراه `VERSION` (۱.۶۲.۹۲) و مستندات معماری
 - ساخت و اعتبارسنجی لوکال: `python3 tools/build_rc_update.py` (CRC، مسیرهای امن، یکتایی مسیرها، تطبیق بایت‌به‌بایت manifest و sha256 هر فایل)
 
