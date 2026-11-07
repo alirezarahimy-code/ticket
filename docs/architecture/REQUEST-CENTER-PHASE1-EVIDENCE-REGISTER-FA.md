@@ -140,6 +140,24 @@ Job متناظر MariaDB 10.11 نیز موفق شد. این آزمون‌ها ف
 
 پیش از هر اجرای تغییردهنده روی Clone، نسخه دقیق DB با `SELECT VERSION()`، Schema فعال با `SELECT DATABASE()`، Engine جدول‌های درگیر و fingerprint ثبت شود. Migrationهای زیر نیازمند بازبینی دستی و post-check اختصاصی‌اند: `003`، `005`، `011`، `012`، `026`، `032` و `033`. نبود رکورد رجیستری 032 در Dump، به‌تنهایی اثبات اجرا نشدن SQL نیست. اجرای کور یا retry بدون reconciliation ممنوع است.
 
+### ۴.۳. بازبینی دستی Migrationهای پرریسک درخواستی
+
+هفت فایل زیر از نظر SQL و اثر داده‌ای بازبینی شدند. هیچ‌کدام در این ممیزی اجرا یا ویرایش نشده‌اند.
+
+| Migration | یافتهٔ دقیق | دامنه/ریسک | نتیجه ممیزی |
+|---|---|---|---|
+| `003-sync-schema-151.sql` | ۱۷۷۱ خط؛ ۶۷ دستور CREATE TABLE، ۶۸۱ دستور ALTER TABLE و یک UPDATE. از جمله ۴۲ ALTER روی `tickets`، شش روی `ticket_messages`، هفت روی `ticket_ratings`، هفت روی `ticket_attachments`، هشت روی `ticket_events`، شانزده روی `service_catalog` و شش روی `categories`. علاوه بر RC، تعداد زیادی جدول/ستون غذا، تردد، CD/DVD، دارایی، سازمان، Logging و Chatbot را تغییر می‌دهد. در بخش تیکت، ENUM وضعیت در خط ۱۲۲۲ MODIFY می‌شود و در خط ۱۱۹۲ یک backfill روی `service_catalog.requires_asset` وجود دارد. | بسیار پرریسک و چنددامنه‌ای؛ تعدادی ADD COLUMN از نوع NOT NULL بدون DEFAULT در جدول‌های پرشده، و MODIFY ENUM می‌تواند به SQL mode و داده قدیمی حساس باشد. اجرای موفق دوباره روی fresh schema، رفتار روی DB قدیمی/پرشده را اثبات نمی‌کند. | بازبینی ایستای فایل انجام شد؛ آزمون upgrade روی Clone و بررسی تک‌تک ستون‌های NOT NULL/ENUM لازم است. خارج از محدوده، نباید اصلاح شود. |
+| `005-normalize-pending-status.sql` | همهٔ `tickets.status='pending'` را به `waiting_user` تغییر می‌دهد و `updated_at` را به NOW() می‌زند؛ هیچ `ticket_events` متناظری ثبت نمی‌کند. | تغییر داده و معنای وضعیت تاریخی؛ زمان آخرین تغییر را بازنویسی می‌کند، حتی اگر درخواست قدیمی باشد. | باید تعداد ردیف‌های قبل/بعد، وضعیت SLA/OLA و گزارش‌های تاریخی در Clone ثبت شود؛ idempotent بودن به‌تنهایی کافی نیست. |
+| `011-manual-attendance-delivery.sql` | فقط `food_ticket_events` مربوط به `source_uid='manual-attendance'`، `event_type='printed'` و `print_status='printed'` را delivered می‌کند. | صرفاً ماژول غذا؛ خارج از دامنه RC. | رفتار شرط‌ها قابل فهم است؛ هیچ تغییری در این پروژه مجاز نیست. |
+| `012-manual-attendance-clears-absences.sql` | جدول `food_ticket_daily_absence` را در صورت نبود می‌سازد و سپس با JOIN، ردیف‌های غیبت متناقض با رویداد دستی `printed/no_food` را DELETE می‌کند. | حذف داده در ماژول غذا؛ اجرای مجدد ممکن است بی‌اثر باشد، اما حذف برگشت‌پذیر نیست مگر با backup. | قبل از اجرای هرگز باید تعداد DELETE و نمونه تطبیق روی Clone ثبت شود؛ خارج از دامنه RC و بدون مجوز اجرا نمی‌شود. |
+| `026-logging-legacy-result-unknown.sql` | نتیجه‌های قدیمی activity_logs را از success به unknown تغییر می‌دهد؛ DDL ستون `log_issues.context` را به‌شکل dynamic SQL با PREPARE/EXECUTE انجام می‌دهد؛ دو backfill در log_issues/log_issue_events دارد و سه جدول Logging می‌سازد. | Migration چندمرحله‌ای Logging؛ جست‌وجوی ساده‌ای که فقط خطوط ALTER را می‌بیند، DDL پویا را از دست می‌دهد. | خارج از دامنه RC؛ تغییر/اجرای مجدد آن در این پروژه ممنوع. |
+| `032-schema-updates-baseline.sql` | با INSERT IGNORE، ۳۲ نام Migration از 001 تا 032 را با version برابر 1.62.83 در `schema_updates` ثبت می‌کند. توضیح فایل، اجرای تاریخی را از روی نسخه نصب‌شده معتبر فرض می‌کند؛ این فایل schema/data هر Migration را مستقل راستی‌آزمایی نمی‌کند. | Bootstrap رجیستری بر پایه ادعای نسخه؛ در دیتابیسی با اجرای ناقص قبلی ممکن است فایل را «اعمال‌شده» نشان دهد، بی‌آنکه اثر واقعی SQL اثبات شده باشد. | باید همراه base version/hash، snapshot ساختار و post-checkها بررسی شود؛ صرف وجود رجیستری مدرک برابری Schema نیست. |
+| `033-logging-legacy-context-collation.sql` | فقط context رکوردهای `log_issues` را از `system_logs` با JOIN باینری روی event_id backfill می‌کند؛ برای DBهایی است که 026 را پیش از اصلاح collation ثبت کرده‌اند. | فقط Logging؛ خارج از دامنه RC. | فایل forward-fix است؛ دست‌کاری آن در این پروژه ممنوع. |
+
+**یافتهٔ رجیستری:** `schema_updates` در fresh-install دارای UNIQUE KEY روی `(version, migration)` است؛ اما `system_update_migration_applied()` در `system-update.php:36-42` فقط نام فایل Migration را جست‌وجو می‌کند و ستون hash/checksum ندارد. بنابراین سامانه فعلی تغییر محتوای یک فایل تاریخی با نام ثابت را از روی رجیستری تشخیص نمی‌دهد. این یک شکاف ثبت اصالت Migration است و اصلاح updater عمومی خارج از محدوده RC و نیازمند تصمیم مستقل است.
+
+**حد آزمون CI:** workflow عمومی `CI` تمام Migrationهای forward را روی fresh-install schema دوبار اجرا می‌کند و سپس رجیستری را بررسی می‌کند. این آزمون برای idempotency روی نصب تازه مفید است؛ اما جای اجرای ارتقا روی Dump/Clone واقعی، شمارش ردیف‌های تغییرکرده در 005/011/012، و سناریوی شکست/قطع وسط 003/026 را نمی‌گیرد. Migrationهای 011/012/026/033 متعلق به ماژول‌های دیگرند و در این پروژه نباید برای رفع مشکل RC تغییر کنند.
+
 ## ۵. خط مبنای CI و رگرسیون شاخه فعلی
 
 وضعیت‌ها در commit `e1f7f9b581a9005f3a6e08a8dbf5ad9244a5b3b1` بررسی شده‌اند:
