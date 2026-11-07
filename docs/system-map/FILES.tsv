@@ -438,13 +438,13 @@ modules/request-center/Pages/admin.php	other	81	6849
 modules/request-center/Pages/analytics.php	other	48	4880
 modules/request-center/Pages/create.php	other	146	14098
 modules/request-center/Pages/detail.php	other	245	29497
-modules/request-center/Pages/index.php	other	316	22305
+modules/request-center/Pages/index.php	other	335	23773
 modules/request-center/Pages/queue.php	other	38	5428
 modules/request-center/Pages/reports.php	other	66	9694
 modules/request-center/Pages/services.php	other	175	19749
 modules/request-center/Pages/supervisor-workspace.php	other	65	5596
 modules/request-center/Pages/supervisor.php	other	52	6589
-modules/request-center/README.md	other	202	21599
+modules/request-center/README.md	other	207	22209
 modules/request-center/RequestCenterRepository.php	other	392	17669
 modules/request-center/WorkflowService.php	other	256	11564
 ola.php	core	111	11934
