@@ -25,7 +25,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertEqual(text.count('= ticket_unassigned_notify_candidates();'), 2)
 
     def test_assignment_checks_existing_assignee_and_role_department(self):
-        action = source('actions/ticket-actions.php')
+        action = source('modules/request-center/Actions/ticket-actions.php')
         update = section(action, "if ($action === 'update_ticket')", "flash('success', 'تغییرات درخواست ذخیره شد.')")
         self.assertIn('if ($assignee) {', update)
         self.assertIn('$assigneeDepartmentOk', update)
@@ -39,7 +39,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("ticket_assignee_is_eligible($ticket, $assigneeRow", update)
 
     def test_requester_and_nonhandler_reply_guards(self):
-        action = source('actions/ticket-actions.php')
+        action = source('modules/request-center/Actions/ticket-actions.php')
         reply = section(action, "if ($action === 'reply')", "if ($action === 'update_ticket')")
         self.assertIn('ticket_user_is_requester($ticket, $user)', reply)
         self.assertIn('ticket_reply_starts_work($ticket, $user)', reply)
@@ -51,7 +51,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("$requiresRating && !user_can($user, 'ticket.rate')", source('index.php'))
 
     def test_concurrent_rating_and_auto_close_revalidate_under_lock(self):
-        actions = source('actions/supervisor-actions.php')
+        actions = source('modules/request-center/Actions/supervisor-actions.php')
         rating = actions[actions.index("if ($action === 'rate_ticket')"):]
         self.assertLess(rating.index('FOR UPDATE'), rating.index('$ticket = fetch_ticket($ticketId);', rating.index('FOR UPDATE')))
         self.assertIn('ticket_rating_is_current($ticket)', rating[rating.index('FOR UPDATE'):])
@@ -64,13 +64,13 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('COALESCE(resolved_at, updated_at) <= DATE_SUB', cron)
 
     def test_claim_uses_full_assignee_eligibility(self):
-        action = source('actions/ticket-actions.php')
+        action = source('modules/request-center/Actions/ticket-actions.php')
         claim = section(action, "if ($action === 'claim_ticket')", "if ($action === 'reopen_ticket')")
         self.assertIn("ticket_assignee_is_eligible($ticket, $claimUser", claim)
         self.assertIn("ticket_assignee_is_eligible($ticket, $user", source('index.php'))
 
     def test_supervisor_actions_check_ticket_visibility(self):
-        actions = source('actions/supervisor-actions.php')
+        actions = source('modules/request-center/Actions/supervisor-actions.php')
         decision = section(actions, "if ($action === 'supervisor_decision')", "if ($action === 'supervisor_reopen')")
         reopen = section(actions, "if ($action === 'supervisor_reopen')", "if ($action === 'rate_ticket')")
         self.assertGreaterEqual(decision.count('can_view_ticket($ticket, $supervisor)'), 2)
@@ -91,14 +91,14 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('ola_deadlines($departmentId, $priority, ticket_sla_cycle_start($ticket))', sla)
 
     def test_direct_cancel_and_bulk_defend_stale_assignment(self):
-        action = source('actions/ticket-actions.php')
+        action = source('modules/request-center/Actions/ticket-actions.php')
         direct = section(action, 'if ($directCancellation)', '} else {')
         workflow = source('modules/request-center/WorkflowService.php')
         self.assertIn("case 'requester_cancel':", workflow)
         self.assertIn("!empty($current['assigned_to'])", workflow)
         self.assertIn("!empty($current['first_response_at'])", workflow)
         self.assertIn("!empty($current['resolved_at'])", workflow)
-        bulk = source('actions/bulk-actions.php')
+        bulk = source('modules/request-center/Actions/bulk-actions.php')
         self.assertIn("'assigned_to' => $bulkTicket['assigned_to'] ?? null", bulk)
         self.assertIn("'priority' => $bulkTicket['priority']", bulk)
         self.assertIn("new RequestCenterWorkflowService(db())", bulk)
