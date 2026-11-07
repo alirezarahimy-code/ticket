@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 557 |
-| خطوط | 127,716 |
-| آدرس‌ها (بلوک) | 6,747 |
+| خطوط | 127,736 |
+| آدرس‌ها (بلوک) | 6,749 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,747 آدرس |
+| باقی‌مانده | 6,749 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 229 | 1,647 | 21,856 |
+| `TEST` | TEST | 229 | 1,649 | 21,876 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 56 | 1,387 | 45,702 |
@@ -304,7 +304,7 @@
 |---|---|---|
 | `write_no_tx` | نوشتن بدون تراکنش | 835 |
 | `error_suppression` | سرکوب @ | 282 |
-| `dangerous_call` | فراخوانی خطرناک | 207 |
+| `dangerous_call` | فراخوانی خطرناک | 208 |
 | `sql_concat` | الحاق در SQL | 187 |
 | `raw_input` | ورودی خام | 177 |
 | `long` | >۱۲۰ خط | 127 |
@@ -2937,7 +2937,7 @@
 </details>
 
 <details>
-<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (314 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (334 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -2951,7 +2951,9 @@
 | `TEST-176.08` | 132–141 | تابع | `t07_registry_rows` | 0 | ⬜ |
 | `TEST-176.09` | 142–159 | ناحیه | `بلوک رویه‌ای 142-159` | 4 | ⬜ |
 | `TEST-176.10` | 160–160 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
-| `TEST-176.11` | 161–314 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
+| `TEST-176.11` | 161–302 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
+| `TEST-176.12` | 303–303 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
+| `TEST-176.13` | 304–334 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
 
 </details>
 

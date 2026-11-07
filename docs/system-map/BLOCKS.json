@@ -73730,8 +73730,8 @@
             "id": "TEST-176",
             "path": "tests\/test_request_center_t07_migration_clone.php",
             "area": "TEST",
-            "lines": 314,
-            "file_fingerprint": "f6fcc8a8963b",
+            "lines": 334,
+            "file_fingerprint": "6f5a820f8443",
             "blocks": [
                 {
                     "kind": "region",
@@ -73873,9 +73873,9 @@
                     "kind": "region",
                     "anchor": "is forced into the disposable clone regardless of the source",
                     "line_start": 161,
-                    "line_end": 314,
-                    "lines": 154,
-                    "fingerprint": "0e00cd193380",
+                    "line_end": 302,
+                    "lines": 142,
+                    "fingerprint": "7631ccd0e3c0",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -73886,6 +73886,34 @@
                         }
                     },
                     "id": "TEST-176.11"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "Cross-check the actual 1.62.88 release manifest. The release",
+                    "line_start": 303,
+                    "line_end": 303,
+                    "lines": 1,
+                    "fingerprint": "b8cff03f6dce",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.12"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "excludes migration 032; all manifest migrations must already",
+                    "line_start": 304,
+                    "line_end": 334,
+                    "lines": 31,
+                    "fingerprint": "07e7d3c1fe54",
+                    "risk": {
+                        "score": 4,
+                        "flags": {
+                            "dangerous_call": 4
+                        }
+                    },
+                    "id": "TEST-176.13"
                 }
             ]
         },
