@@ -9,28 +9,28 @@
       "key": "audit",
       "permission": null,
       "primary": [
-        "PAGE-034.70",
-        "CORE-007.33",
+        "PAGE-034.68",
+        "CORE-008.33",
         "CORE-001.14",
-        "CORE-013.03",
-        "CORE-008.19",
-        "CORE-008.63",
+        "CORE-014.03",
+        "CORE-009.19",
+        "CORE-009.63",
         "CORE-001.10",
-        "CORE-006.02",
-        "CORE-008.18",
-        "CORE-009.15",
-        "CORE-015.05"
+        "CORE-007.02",
+        "CORE-009.18",
+        "CORE-010.15",
+        "CORE-016.05"
       ],
       "related": [
         "CRON-005.04",
-        "PAGE-034.74",
+        "PAGE-034.72",
         "TEST-096.06",
         "TEST-101.06",
         "PAGE-065.03",
         "TEST-111.01",
         "PAGE-065.30",
-        "PAGE-034.12",
-        "PAGE-034.89",
+        "PAGE-034.10",
+        "PAGE-034.87",
         "DB-002.28"
       ],
       "total": 28
@@ -42,7 +42,7 @@
       "key": "chatbot-api",
       "permission": null,
       "primary": [
-        "PAGE-034.48"
+        "PAGE-034.46"
       ],
       "related": [
         "TEST-183.05"
@@ -56,7 +56,7 @@
       "key": "domain-scan",
       "permission": "domain.scan",
       "primary": [
-        "PAGE-034.84",
+        "PAGE-034.82",
         "PAGE-013.37",
         "PAGE-013.19",
         "PAGE-013.16",
@@ -72,11 +72,11 @@
         "PAGE-013.20"
       ],
       "related": [
-        "PAGE-034.88",
-        "PAGE-034.31",
+        "PAGE-034.86",
+        "PAGE-034.29",
         "TOOL-009.01",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 48
@@ -88,7 +88,7 @@
       "key": "food-personnel-link",
       "permission": null,
       "primary": [
-        "PAGE-034.44",
+        "PAGE-034.42",
         "PAGE-016.09",
         "PAGE-016.04",
         "PAGE-016.10",
@@ -116,9 +116,9 @@
       "key": "food-ticket",
       "permission": null,
       "primary": [
-        "PAGE-034.40",
-        "PAGE-034.52",
-        "PAGE-034.59",
+        "PAGE-034.38",
+        "PAGE-034.50",
+        "PAGE-034.57",
         "TOOL-029.04",
         "PAGE-029.84",
         "PAGE-029.129",
@@ -136,7 +136,7 @@
         "TOOL-009.01",
         "TOOL-031.13",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TEST-195.04",
         "TOOL-014.06",
         "TOOL-031.15",
@@ -153,7 +153,7 @@
       "permission": null,
       "primary": [
         "PAGE-031.32",
-        "PAGE-034.58",
+        "PAGE-034.56",
         "PAGE-031.29",
         "PAGE-031.10",
         "PAGE-031.18",
@@ -168,7 +168,7 @@
         "PAGE-031.03"
       ],
       "related": [
-        "PAGE-034.77",
+        "PAGE-034.75",
         "TEST-096.06",
         "TOOL-009.01",
         "PAGE-030.03",
@@ -185,8 +185,8 @@
       "key": "help",
       "permission": null,
       "primary": [
-        "PAGE-034.66",
-        "CORE-015.05"
+        "PAGE-034.64",
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-009.01",
@@ -201,14 +201,14 @@
       "key": "local-accounts",
       "permission": null,
       "primary": [
-        "PAGE-034.56",
+        "PAGE-034.54",
         "PAGE-037.03",
         "PAGE-037.05",
         "PAGE-037.06",
         "PAGE-037.01",
         "PAGE-037.02",
         "PAGE-037.04",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-009.01",
@@ -223,7 +223,7 @@
       "key": "logging-dashboard",
       "permission": null,
       "primary": [
-        "PAGE-034.71",
+        "PAGE-034.69",
         "ASSET-016.01",
         "PAGE-038.04",
         "PAGE-038.02",
@@ -232,7 +232,7 @@
         "PAGE-038.03"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "TEST-103.02",
         "TEST-122.13"
       ],
@@ -245,7 +245,7 @@
       "key": "system-health",
       "permission": null,
       "primary": [
-        "PAGE-034.72",
+        "PAGE-034.70",
         "PAGE-065.28",
         "PAGE-065.03",
         "PAGE-065.04",
@@ -274,9 +274,9 @@
       "key": "notifications",
       "permission": null,
       "primary": [
-        "PAGE-034.69",
+        "PAGE-034.67",
         "ACT-010.03",
-        "PAGE-034.68",
+        "PAGE-034.66",
         "DB-002.30",
         "DB-005.21",
         "DB-040.27",
@@ -293,7 +293,7 @@
         "TEST-111.08",
         "TOOL-008.02",
         "CRON-001.09",
-        "PAGE-034.42",
+        "PAGE-034.40",
         "TEST-111.01",
         "CRON-014.01",
         "ACT-010.04",
@@ -321,7 +321,7 @@
         "PAGE-007.10",
         "PAGE-007.11",
         "PAGE-007.12",
-        "PAGE-034.75",
+        "PAGE-034.73",
         "ACT-004.04",
         "PAGE-007.13"
       ],
@@ -331,7 +331,7 @@
         "PAGE-032.01",
         "ACT-017.06",
         "PAGE-022.16",
-        "PAGE-034.87",
+        "PAGE-034.85",
         "TEST-023.01",
         "PAGE-016.22",
         "PAGE-066.13",
@@ -346,8 +346,8 @@
       "key": "cd-dvd-history",
       "permission": "cddvd.history",
       "primary": [
-        "PAGE-034.63",
-        "CORE-015.05"
+        "PAGE-034.61",
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-009.43",
@@ -357,7 +357,7 @@
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 11
@@ -369,12 +369,12 @@
       "key": "asset-history",
       "permission": "asset.history",
       "primary": [
-        "PAGE-034.83",
-        "CORE-015.05"
+        "PAGE-034.81",
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-001.12",
-        "PAGE-034.48"
+        "PAGE-034.46"
       ],
       "total": 4
     },
@@ -387,13 +387,13 @@
       "primary": [
         "PAGE-046.02",
         "PAGE-046.01",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 8
@@ -405,14 +405,14 @@
       "key": "inventory-diagnostics",
       "permission": "inventory.diagnostics",
       "primary": [
-        "PAGE-034.82",
-        "CORE-015.05"
+        "PAGE-034.80",
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 7
@@ -424,12 +424,12 @@
       "key": "change-password",
       "permission": null,
       "primary": [
-        "PAGE-034.38",
-        "PAGE-034.55",
-        "CORE-015.05"
+        "PAGE-034.36",
+        "PAGE-034.53",
+        "CORE-016.05"
       ],
       "related": [
-        "PAGE-034.37",
+        "PAGE-034.35",
         "TOOL-009.01",
         "PAGE-001.12",
         "TOOL-033.06"
@@ -444,7 +444,7 @@
       "permission": "holidays.view",
       "primary": [
         "ACT-009.07",
-        "PAGE-034.79",
+        "PAGE-034.77",
         "DB-002.35",
         "DB-005.26",
         "DB-040.32",
@@ -456,10 +456,10 @@
         "DB-005.298",
         "TEST-082.33",
         "CORE-001.14",
-        "CORE-014.13"
+        "CORE-015.13"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-015.29",
         "PAGE-029.132",
         "PAGE-033.03",
@@ -479,17 +479,17 @@
       "key": "settings",
       "permission": null,
       "primary": [
-        "PAGE-034.88",
-        "PAGE-034.47",
-        "PAGE-034.54",
+        "PAGE-034.86",
+        "PAGE-034.45",
+        "PAGE-034.52",
         "DB-002.04",
         "DB-005.02",
         "DB-040.01",
-        "CORE-015.04",
-        "CORE-015.02",
-        "CORE-015.05",
-        "CORE-015.17",
-        "CORE-015.18",
+        "CORE-016.04",
+        "CORE-016.02",
+        "CORE-016.05",
+        "CORE-016.17",
+        "CORE-016.18",
         "DB-002.93",
         "DB-002.94",
         "DB-057.05"
@@ -516,8 +516,8 @@
       "permission": null,
       "primary": [
         "PAGE-048.02",
-        "PAGE-034.80",
-        "CORE-015.05"
+        "PAGE-034.78",
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-009.01",
@@ -542,19 +542,19 @@
         "PAGE-026.24",
         "PAGE-026.56",
         "TEST-183.04",
-        "CORE-012.08",
+        "CORE-013.08",
         "CORE-001.14",
-        "CORE-012.10",
-        "CORE-015.05"
+        "CORE-013.10",
+        "CORE-016.05"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "CRON-005.04",
         "WEB-016.60",
         "PAGE-032.01",
         "ACT-014.08",
         "WEB-016.59",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-065.30",
         "PAGE-060.03",
         "TEST-203.02"
@@ -568,21 +568,21 @@
       "key": "search",
       "permission": null,
       "primary": [
-        "PAGE-034.77",
-        "PAGE-034.76",
+        "PAGE-034.75",
+        "PAGE-034.74",
         "PAGE-030.03",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-009.43",
-        "PAGE-034.74",
+        "PAGE-034.72",
         "PAGE-049.02",
         "PAGE-050.02",
         "TEST-221.14",
         "PAGE-067.63",
         "PAGE-067.19",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "TEST-220.02"
       ],
       "total": 44
@@ -595,12 +595,12 @@
       "permission": "assets.view",
       "primary": [
         "ACT-003.08",
-        "PAGE-034.85",
+        "PAGE-034.83",
         "DB-002.36",
         "DB-005.27",
         "DB-040.33",
         "DB-053.13",
-        "CORE-014.20",
+        "CORE-015.20",
         "DB-005.342",
         "DB-016.03",
         "DB-016.04",
@@ -630,9 +630,9 @@
       "key": "dashboard",
       "permission": "dash.view",
       "primary": [
-        "PAGE-034.90",
-        "CORE-015.16",
-        "CORE-015.05"
+        "PAGE-034.88",
+        "CORE-016.16",
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-009.43",
@@ -640,11 +640,11 @@
         "PAGE-067.63",
         "TOOL-073.07",
         "ASSET-002.01",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "TEST-023.01",
         "PAGE-001.13",
         "PAGE-029.10",
-        "PAGE-034.36"
+        "PAGE-034.34"
       ],
       "total": 27
     },
@@ -655,15 +655,15 @@
       "key": "knowledge",
       "permission": "knowledge.view",
       "primary": [
-        "PAGE-034.67",
-        "CORE-015.05"
+        "PAGE-034.65",
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-060.03",
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 8
@@ -675,9 +675,9 @@
       "key": "food-order",
       "permission": null,
       "primary": [
-        "PAGE-034.41",
-        "PAGE-034.60",
-        "PAGE-034.61",
+        "PAGE-034.39",
+        "PAGE-034.58",
+        "PAGE-034.59",
         "TOOL-029.03",
         "PAGE-015.29",
         "PAGE-015.67",
@@ -691,7 +691,7 @@
         "PAGE-015.41"
       ],
       "related": [
-        "PAGE-034.37",
+        "PAGE-034.35",
         "TOOL-009.01",
         "TOOL-031.13",
         "PAGE-001.12",
@@ -711,9 +711,9 @@
       "key": "asset",
       "permission": "asset.view",
       "primary": [
-        "PAGE-034.86",
+        "PAGE-034.84",
         "PAGE-004.02",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-017.01",
@@ -721,7 +721,7 @@
         "TEST-023.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-065.10",
         "PAGE-065.14"
       ],
@@ -756,7 +756,7 @@
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-065.10",
         "PAGE-065.14",
         "TOOL-003.08"
@@ -772,7 +772,7 @@
       "primary": [
         "PAGE-051.02",
         "PAGE-051.01",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-029.130",
@@ -795,12 +795,12 @@
       "key": "activity-log",
       "permission": null,
       "primary": [
-        "PAGE-034.74",
-        "CORE-015.05"
+        "PAGE-034.72",
+        "CORE-016.05"
       ],
       "related": [
-        "PAGE-034.42",
-        "PAGE-034.31",
+        "PAGE-034.40",
+        "PAGE-034.29",
         "TEST-191.03",
         "TOOL-009.01",
         "PAGE-001.12",
@@ -819,14 +819,14 @@
       "key": "chatbot-admin",
       "permission": "chatbot.manage",
       "primary": [
-        "PAGE-034.78",
-        "CORE-015.05"
+        "PAGE-034.76",
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-011.122",
         "TOOL-009.01",
         "PAGE-001.12",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 7
@@ -839,8 +839,8 @@
       "permission": "org.view",
       "primary": [
         "PAGE-059.39",
-        "PAGE-034.87",
-        "PAGE-034.39",
+        "PAGE-034.85",
+        "PAGE-034.37",
         "PAGE-059.02",
         "PAGE-059.49",
         "PAGE-059.12",
@@ -857,7 +857,7 @@
         "ACT-017.07",
         "PAGE-018.09",
         "TEST-062.01",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "ACT-017.06",
         "TEST-131.03",
         "ACT-017.04",
@@ -874,9 +874,9 @@
       "key": "profile",
       "permission": "profile.edit",
       "primary": [
-        "PAGE-034.57",
+        "PAGE-034.55",
         "PAGE-006.16",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "ACT-003.12",
@@ -886,7 +886,7 @@
         "ACT-002.04",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-033.06"
       ],
       "total": 12
@@ -905,14 +905,14 @@
         "CORE-003.22",
         "CORE-003.07",
         "CORE-003.13",
-        "CORE-005.06",
-        "CORE-014.07",
-        "CORE-014.08",
-        "CORE-015.05",
-        "CORE-015.19"
+        "CORE-006.06",
+        "CORE-015.07",
+        "CORE-015.08",
+        "CORE-016.05",
+        "CORE-016.19"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "TOOL-008.02",
         "PAGE-060.26",
         "PAGE-031.32",
@@ -932,13 +932,13 @@
       "key": "traffic-control-print",
       "permission": "traffic.view",
       "primary": [
-        "PAGE-034.65"
+        "PAGE-034.63"
       ],
       "related": [
         "TEST-221.14",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TEST-213.03"
       ],
       "total": 6
@@ -958,14 +958,14 @@
         "PAGE-053.03",
         "PAGE-053.04",
         "CORE-001.14",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-060.03",
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-036.27",
         "TOOL-033.06"
       ],
@@ -978,7 +978,7 @@
       "key": "cd-dvd",
       "permission": "cddvd.view",
       "primary": [
-        "PAGE-034.62",
+        "PAGE-034.60",
         "PAGE-009.43",
         "PAGE-009.33",
         "PAGE-009.19",
@@ -998,7 +998,7 @@
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TOOL-003.08",
         "TOOL-033.06",
         "TOOL-069.03"
@@ -1012,8 +1012,8 @@
       "key": "traffic-control",
       "permission": "traffic.view",
       "primary": [
-        "PAGE-034.42",
-        "PAGE-034.64",
+        "PAGE-034.40",
+        "PAGE-034.62",
         "PAGE-067.63",
         "PAGE-067.16",
         "PAGE-067.19",
@@ -1028,12 +1028,12 @@
         "PAGE-067.50"
       ],
       "related": [
-        "PAGE-034.31",
+        "PAGE-034.29",
         "PAGE-068.23",
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "TEST-195.04",
         "TEST-220.01",
         "TOOL-003.08",
@@ -1048,13 +1048,13 @@
       "key": "logs",
       "permission": null,
       "primary": [
-        "PAGE-034.89",
-        "PAGE-034.73",
-        "CORE-015.05"
+        "PAGE-034.87",
+        "PAGE-034.71",
+        "CORE-016.05"
       ],
       "related": [
         "TOOL-082.12",
-        "PAGE-034.31",
+        "PAGE-034.29",
         "TEST-131.03",
         "TOOL-009.01",
         "PAGE-001.12",
@@ -1075,17 +1075,17 @@
       "primary": [
         "PAGE-052.02",
         "PAGE-052.01",
-        "CORE-015.05"
+        "CORE-016.05"
       ],
       "related": [
         "PAGE-029.132",
         "PAGE-032.01",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "TOOL-009.01",
         "PAGE-001.12",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-063.06",
         "PAGE-065.14"
       ],
@@ -1105,7 +1105,7 @@
         "TOOL-049.12"
       ],
       "related": [
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16",
         "TOOL-049.10",
         "TOOL-049.11",
@@ -1121,7 +1121,7 @@
       "group": "داشبورد و پایه",
       "key": "search.global",
       "primary": [
-        "PAGE-034.76"
+        "PAGE-034.74"
       ],
       "related": [
         "PAGE-060.03",
@@ -1136,10 +1136,10 @@
       "group": "داشبورد و پایه",
       "key": "notif.view",
       "primary": [
-        "PAGE-034.68"
+        "PAGE-034.66"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "TOOL-049.12",
         "PAGE-060.16",
@@ -1155,7 +1155,7 @@
       "key": "profile.edit",
       "primary": [
         "PAGE-060.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16"
       ],
       "related": [],
@@ -1188,14 +1188,14 @@
         "PAGE-043.03",
         "PAGE-043.04",
         "PAGE-048.02",
-        "PAGE-034.80",
-        "PAGE-034.27",
+        "PAGE-034.78",
+        "PAGE-034.25",
         "TEST-183.04"
       ],
       "related": [
         "PAGE-011.27",
         "PAGE-050.02",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-050.01",
         "PAGE-060.03",
         "PAGE-011.14"
@@ -1380,7 +1380,7 @@
       ],
       "related": [
         "PAGE-050.02",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "TEST-172.11",
         "PAGE-039.04",
         "PAGE-050.01",
@@ -1402,7 +1402,7 @@
       ],
       "related": [
         "PAGE-047.01",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "TEST-172.11",
         "PAGE-050.01",
         "PAGE-060.03",
@@ -1450,7 +1450,7 @@
       "primary": [
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48"
+        "PAGE-034.46"
       ],
       "related": [
         "PAGE-060.08",
@@ -1516,7 +1516,7 @@
       "primary": [
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48"
+        "PAGE-034.46"
       ],
       "related": [
         "PAGE-060.08",
@@ -1547,15 +1547,15 @@
       "group": "کنترل CD/DVD",
       "key": "cddvd.view",
       "primary": [
-        "PAGE-034.77",
-        "PAGE-034.30",
+        "PAGE-034.75",
+        "PAGE-034.28",
         "TEST-023.01"
       ],
       "related": [
         "PAGE-060.03",
         "TEST-142.05",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.15",
         "PAGE-060.16"
       ],
@@ -1600,7 +1600,7 @@
       "group": "کنترل CD/DVD",
       "key": "cddvd.edit",
       "primary": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-060.26",
         "PAGE-060.03"
       ],
@@ -1637,7 +1637,7 @@
       "primary": [
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48"
+        "PAGE-034.46"
       ],
       "related": [
         "PAGE-060.16"
@@ -1651,7 +1651,7 @@
       "group": "کنترل CD/DVD",
       "key": "cddvd.export",
       "primary": [
-        "PAGE-034.43",
+        "PAGE-034.41",
         "PAGE-060.03",
         "PAGE-009.13"
       ],
@@ -1673,9 +1673,9 @@
         "PAGE-067.67"
       ],
       "related": [
-        "PAGE-034.43",
-        "PAGE-034.77",
-        "PAGE-034.30",
+        "PAGE-034.41",
+        "PAGE-034.75",
+        "PAGE-034.28",
         "TEST-023.01",
         "PAGE-060.03",
         "TOOL-049.14"
@@ -1745,13 +1745,13 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "assets.view",
       "primary": [
-        "PAGE-034.85"
+        "PAGE-034.83"
       ],
       "related": [
-        "PAGE-034.43",
-        "PAGE-034.81",
-        "PAGE-034.86",
-        "PAGE-034.30",
+        "PAGE-034.41",
+        "PAGE-034.79",
+        "PAGE-034.84",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03"
       ],
@@ -1781,7 +1781,7 @@
       "key": "asset.view",
       "primary": [
         "PAGE-060.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.08"
       ],
       "related": [
@@ -1812,12 +1812,12 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "asset.extract",
       "primary": [
-        "PAGE-034.85",
-        "PAGE-034.86",
+        "PAGE-034.83",
+        "PAGE-034.84",
         "ACT-003.03"
       ],
       "related": [
-        "PAGE-034.81",
+        "PAGE-034.79",
         "PAGE-060.03",
         "PAGE-060.16"
       ],
@@ -1837,7 +1837,7 @@
         "ACT-003.11"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-060.26",
         "PAGE-060.03",
         "PAGE-060.08",
@@ -1852,11 +1852,11 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "asset.history",
       "primary": [
-        "PAGE-034.83"
+        "PAGE-034.81"
       ],
       "related": [
         "PAGE-060.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16"
       ],
       "total": 4
@@ -1869,7 +1869,7 @@
       "key": "asset.ping",
       "primary": [
         "ACT-003.08",
-        "PAGE-034.85"
+        "PAGE-034.83"
       ],
       "related": [
         "PAGE-060.03",
@@ -1885,12 +1885,12 @@
       "key": "inventory.view",
       "primary": [
         "ACT-003.12",
-        "PAGE-034.81"
+        "PAGE-034.79"
       ],
       "related": [
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16"
       ],
       "total": 6
@@ -1902,13 +1902,13 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "inventory.diagnostics",
       "primary": [
-        "PAGE-034.82"
+        "PAGE-034.80"
       ],
       "related": [
         "ACT-003.04",
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16"
       ],
       "total": 6
@@ -1923,8 +1923,8 @@
         "ACT-003.05"
       ],
       "related": [
-        "PAGE-034.81",
-        "PAGE-034.85",
+        "PAGE-034.79",
+        "PAGE-034.83",
         "TEST-023.01",
         "PAGE-060.03",
         "PAGE-060.16"
@@ -1938,12 +1938,12 @@
       "group": "دارایی و شناسنامه فنی",
       "key": "domain.scan",
       "primary": [
-        "PAGE-034.84"
+        "PAGE-034.82"
       ],
       "related": [
         "PAGE-060.26",
-        "PAGE-034.81",
-        "PAGE-034.85",
+        "PAGE-034.79",
+        "PAGE-034.83",
         "TEST-023.01",
         "PAGE-060.03",
         "PAGE-030.03"
@@ -1960,11 +1960,11 @@
         "PAGE-052.02"
       ],
       "related": [
-        "PAGE-034.42",
-        "PAGE-034.30",
+        "PAGE-034.40",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16"
       ],
       "total": 7
@@ -1979,10 +1979,10 @@
         "PAGE-046.02"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.16"
       ],
       "total": 6
@@ -1994,14 +1994,14 @@
       "group": "گزارش و تحلیل",
       "key": "audit.view",
       "primary": [
-        "PAGE-034.70"
+        "PAGE-034.68"
       ],
       "related": [
-        "PAGE-034.74",
-        "PAGE-034.30",
+        "PAGE-034.72",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.73",
+        "PAGE-034.71",
         "PAGE-060.16"
       ],
       "total": 7
@@ -2013,12 +2013,12 @@
       "group": "گزارش و تحلیل",
       "key": "logs.view",
       "primary": [
-        "PAGE-034.89",
-        "PAGE-034.73"
+        "PAGE-034.87",
+        "PAGE-034.71"
       ],
       "related": [
-        "PAGE-034.74",
-        "PAGE-034.30",
+        "PAGE-034.72",
+        "PAGE-034.28",
         "PAGE-065.27",
         "PAGE-065.30",
         "PAGE-060.03",
@@ -2037,11 +2037,11 @@
         "PAGE-065.30"
       ],
       "related": [
-        "PAGE-034.74",
-        "PAGE-034.30",
+        "PAGE-034.72",
+        "PAGE-034.28",
         "PAGE-038.04",
         "PAGE-060.03",
-        "PAGE-034.73",
+        "PAGE-034.71",
         "PAGE-060.08"
       ],
       "total": 11
@@ -2070,14 +2070,14 @@
       "group": "گزارش و تحلیل",
       "key": "logs.activity",
       "primary": [
-        "PAGE-034.73"
+        "PAGE-034.71"
       ],
       "related": [
-        "PAGE-034.74",
-        "PAGE-034.30",
+        "PAGE-034.72",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.70",
+        "PAGE-034.68",
         "PAGE-060.16"
       ],
       "total": 7
@@ -2089,8 +2089,8 @@
       "group": "گزارش و تحلیل",
       "key": "logs.activity_export",
       "primary": [
-        "PAGE-034.42",
-        "PAGE-034.74",
+        "PAGE-034.40",
+        "PAGE-034.72",
         "PAGE-060.03"
       ],
       "related": [
@@ -2127,7 +2127,7 @@
       "group": "سامانه مدیریت غذا",
       "key": "food.monitor",
       "primary": [
-        "PAGE-034.52",
+        "PAGE-034.50",
         "PAGE-029.132",
         "PAGE-029.10",
         "PAGE-029.07",
@@ -2589,11 +2589,11 @@
       "group": "سفارش غذای کارکنان",
       "key": "foodorder.self",
       "primary": [
-        "PAGE-034.60"
+        "PAGE-034.58"
       ],
       "related": [
         "PAGE-015.95",
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-060.16",
         "TEST-014.03",
@@ -2608,13 +2608,13 @@
       "group": "سازمان",
       "key": "org.view",
       "primary": [
-        "PAGE-034.87"
+        "PAGE-034.85"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.08",
         "PAGE-060.16"
       ],
@@ -2651,13 +2651,13 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.general",
       "primary": [
-        "PAGE-034.88",
-        "PAGE-034.54",
-        "CORE-015.17",
-        "CORE-015.18"
+        "PAGE-034.86",
+        "PAGE-034.52",
+        "CORE-016.17",
+        "CORE-016.18"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
         "PAGE-060.08",
@@ -2674,7 +2674,7 @@
       "key": "settings.general_edit",
       "primary": [
         "ACT-014.08",
-        "PAGE-034.88",
+        "PAGE-034.86",
         "ACT-014.07",
         "TEST-225.06"
       ],
@@ -2691,13 +2691,13 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.domain",
       "primary": [
-        "PAGE-034.88",
-        "PAGE-034.54"
+        "PAGE-034.86",
+        "PAGE-034.52"
       ],
       "related": [
-        "PAGE-034.81",
-        "PAGE-034.85",
-        "PAGE-034.30",
+        "PAGE-034.79",
+        "PAGE-034.83",
+        "PAGE-034.28",
         "TEST-023.01",
         "PAGE-060.03",
         "PAGE-030.03"
@@ -2712,7 +2712,7 @@
       "key": "settings.domain_edit",
       "primary": [
         "ACT-014.08",
-        "PAGE-034.88",
+        "PAGE-034.86",
         "ACT-014.06"
       ],
       "related": [
@@ -2728,11 +2728,11 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.users",
       "primary": [
-        "PAGE-034.88",
-        "PAGE-034.54"
+        "PAGE-034.86",
+        "PAGE-034.52"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-030.03",
         "PAGE-060.08",
@@ -2747,7 +2747,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.users_edit",
       "primary": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "ACT-017.08",
         "ACT-014.05"
       ],
@@ -2765,8 +2765,8 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.key_roles",
       "primary": [
-        "PAGE-034.88",
-        "PAGE-034.54"
+        "PAGE-034.86",
+        "PAGE-034.52"
       ],
       "related": [
         "PAGE-060.03",
@@ -2782,7 +2782,7 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.key_roles_edit",
       "primary": [
-        "PAGE-034.88"
+        "PAGE-034.86"
       ],
       "related": [
         "ACT-012.03",
@@ -2798,12 +2798,12 @@
       "group": "تنظیمات و سیستم",
       "key": "backup.view",
       "primary": [
-        "PAGE-034.75"
+        "PAGE-034.73"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.08"
       ],
       "total": 5
@@ -2817,7 +2817,7 @@
       "primary": [
         "ACT-004.02",
         "ACT-004.03",
-        "PAGE-034.75",
+        "PAGE-034.73",
         "TEST-030.02"
       ],
       "related": [
@@ -2834,7 +2834,7 @@
       "group": "تنظیمات و سیستم",
       "key": "update.view",
       "primary": [
-        "PAGE-034.75",
+        "PAGE-034.73",
         "PAGE-060.03"
       ],
       "related": [],
@@ -2850,7 +2850,7 @@
         "ACT-004.04"
       ],
       "related": [
-        "PAGE-034.75",
+        "PAGE-034.73",
         "PAGE-060.03"
       ],
       "total": 3
@@ -2862,11 +2862,11 @@
       "group": "تنظیمات و سیستم",
       "key": "chatbot.manage",
       "primary": [
-        "PAGE-034.78",
-        "PAGE-034.48"
+        "PAGE-034.76",
+        "PAGE-034.46"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03"
       ],
       "total": 4
@@ -2881,7 +2881,7 @@
         "PAGE-058.07"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "TOOL-049.14",
         "PAGE-060.08"
@@ -2915,7 +2915,7 @@
         "PAGE-031.24"
       ],
       "related": [
-        "PAGE-034.30",
+        "PAGE-034.28",
         "PAGE-060.03",
         "PAGE-060.08",
         "PAGE-060.15",
@@ -2933,7 +2933,7 @@
         "PAGE-031.24"
       ],
       "related": [
-        "PAGE-034.77",
+        "PAGE-034.75",
         "PAGE-060.03",
         "TOOL-049.14",
         "PAGE-060.08",
@@ -2949,13 +2949,13 @@
       "group": "تنظیمات و سیستم",
       "key": "holidays.view",
       "primary": [
-        "PAGE-034.79",
+        "PAGE-034.77",
         "TEST-082.33"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-060.03",
-        "PAGE-034.48",
+        "PAGE-034.46",
         "PAGE-060.08"
       ],
       "total": 6
@@ -3002,8 +3002,8 @@
         "TOOL-060.01",
         "TEST-111.08",
         "TEST-111.06",
-        "PAGE-034.88",
-        "PAGE-034.42",
+        "PAGE-034.86",
+        "PAGE-034.40",
         "CRON-005.04"
       ],
       "total": 61
@@ -3081,7 +3081,7 @@
         "DB-005.390"
       ],
       "related": [
-        "PAGE-034.83",
+        "PAGE-034.81",
         "TEST-023.01"
       ],
       "total": 16
@@ -3177,9 +3177,9 @@
       "related": [
         "TOOL-001.01",
         "PAGE-006.03",
-        "PAGE-034.77",
-        "PAGE-034.81",
-        "PAGE-034.85",
+        "PAGE-034.75",
+        "PAGE-034.79",
+        "PAGE-034.83",
         "PAGE-006.16"
       ],
       "total": 96
@@ -3238,12 +3238,12 @@
       "key": "assets",
       "primary": [
         "ACT-003.08",
-        "PAGE-034.85",
+        "PAGE-034.83",
         "DB-002.36",
         "DB-005.27",
         "DB-040.33",
         "DB-053.13",
-        "CORE-014.20",
+        "CORE-015.20",
         "DB-005.342",
         "DB-016.03",
         "DB-016.04"
@@ -3304,7 +3304,7 @@
       ],
       "related": [
         "PAGE-009.33",
-        "PAGE-034.77",
+        "PAGE-034.75",
         "TOOL-006.01",
         "PAGE-009.39",
         "TEST-023.01",
@@ -3476,10 +3476,10 @@
       ],
       "related": [
         "TEST-171.03",
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-035.13",
         "TOOL-008.02",
-        "PAGE-034.42",
+        "PAGE-034.40",
         "PAGE-009.43"
       ],
       "total": 65
@@ -4104,7 +4104,7 @@
         "DB-005.114"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-035.13",
         "TOOL-008.02",
         "PAGE-043.03",
@@ -4120,7 +4120,7 @@
       "key": "holidays",
       "primary": [
         "ACT-009.07",
-        "PAGE-034.79",
+        "PAGE-034.77",
         "DB-002.35",
         "DB-005.26",
         "DB-040.32",
@@ -4131,7 +4131,7 @@
         "DB-005.297"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-015.29",
         "PAGE-029.132",
         "PAGE-033.03",
@@ -4158,9 +4158,9 @@
         "DB-005.290"
       ],
       "related": [
-        "PAGE-034.77",
+        "PAGE-034.75",
         "TEST-023.01",
-        "PAGE-034.67",
+        "PAGE-034.65",
         "PAGE-041.09",
         "TOOL-011.01"
       ],
@@ -4175,8 +4175,8 @@
         "DB-029.05",
         "DB-002.119",
         "DB-040.108",
-        "CORE-008.51",
-        "CORE-007.04"
+        "CORE-009.51",
+        "CORE-008.04"
       ],
       "related": [
         "CRON-009.01",
@@ -4197,7 +4197,7 @@
         "DB-002.118",
         "DB-029.04",
         "DB-040.107",
-        "CORE-007.04"
+        "CORE-008.04"
       ],
       "related": [
         "CRON-005.04",
@@ -4218,7 +4218,7 @@
         "DB-002.120",
         "DB-029.06",
         "DB-040.109",
-        "CORE-007.04"
+        "CORE-008.04"
       ],
       "related": [
         "TEST-111.08",
@@ -4241,11 +4241,11 @@
         "DB-040.105",
         "DB-029.03",
         "DB-036.02",
-        "CORE-008.51",
-        "CORE-007.04",
-        "CORE-007.05",
-        "CORE-007.20",
-        "CORE-009.15"
+        "CORE-009.51",
+        "CORE-008.04",
+        "CORE-008.05",
+        "CORE-008.20",
+        "CORE-010.15"
       ],
       "related": [
         "TEST-111.06",
@@ -4266,7 +4266,7 @@
         "DB-002.117",
         "DB-028.03",
         "DB-040.106",
-        "CORE-007.04"
+        "CORE-008.04"
       ],
       "related": [
         "CRON-001.09",
@@ -4306,9 +4306,9 @@
       "fa": "notifications",
       "key": "notifications",
       "primary": [
-        "PAGE-034.69",
+        "PAGE-034.67",
         "ACT-010.03",
-        "PAGE-034.68",
+        "PAGE-034.66",
         "DB-002.30",
         "DB-005.21",
         "DB-040.27",
@@ -4321,7 +4321,7 @@
         "TEST-111.08",
         "TOOL-008.02",
         "CRON-001.09",
-        "PAGE-034.42",
+        "PAGE-034.40",
         "TEST-111.01",
         "CRON-014.01"
       ],
@@ -4337,7 +4337,7 @@
         "DB-005.36",
         "DB-040.43",
         "DB-076.04",
-        "CORE-016.22",
+        "CORE-017.22",
         "DB-005.484",
         "DB-042.04",
         "DB-005.474",
@@ -4392,7 +4392,7 @@
         "CORE-003.09"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-059.02",
         "ACT-011.18",
         "ACT-011.21",
@@ -4419,7 +4419,7 @@
         "DB-040.05"
       ],
       "related": [
-        "PAGE-034.88",
+        "PAGE-034.86",
         "PAGE-059.02",
         "ACT-011.18",
         "PAGE-056.02",
@@ -4515,8 +4515,8 @@
       "primary": [
         "DB-002.121",
         "DB-040.110",
-        "CORE-007.04",
-        "CORE-007.14"
+        "CORE-008.04",
+        "CORE-008.14"
       ],
       "related": [
         "TEST-177.12",
@@ -4587,16 +4587,16 @@
       "fa": "settings",
       "key": "settings",
       "primary": [
-        "PAGE-034.88",
-        "PAGE-034.47",
-        "PAGE-034.54",
+        "PAGE-034.86",
+        "PAGE-034.45",
+        "PAGE-034.52",
         "DB-002.04",
         "DB-005.02",
         "DB-040.01",
-        "CORE-015.04",
-        "CORE-015.02",
-        "CORE-015.05",
-        "CORE-015.17"
+        "CORE-016.04",
+        "CORE-016.02",
+        "CORE-016.05",
+        "CORE-016.17"
       ],
       "related": [
         "PAGE-035.13",
@@ -4638,9 +4638,9 @@
         "DB-005.53",
         "DB-040.62",
         "DB-047.02",
-        "CORE-009.16",
-        "CORE-009.06",
-        "CORE-009.15",
+        "CORE-010.16",
+        "CORE-010.06",
+        "CORE-010.15",
         "DB-030.02",
         "DB-005.645",
         "DB-005.646"
@@ -4650,7 +4650,7 @@
         "TEST-111.06",
         "CRON-001.02",
         "CRON-005.04",
-        "PAGE-034.74",
+        "PAGE-034.72",
         "CRON-004.01"
       ],
       "total": 65
@@ -4674,8 +4674,8 @@
       "related": [
         "PAGE-049.02",
         "PAGE-056.02",
-        "PAGE-034.43",
-        "PAGE-034.17",
+        "PAGE-034.41",
+        "PAGE-034.15",
         "TEST-175.05",
         "TEST-176.05"
       ],
@@ -4729,7 +4729,7 @@
         "PAGE-043.03",
         "PAGE-049.02",
         "PAGE-056.02",
-        "PAGE-034.43",
+        "PAGE-034.41",
         "PAGE-042.03"
       ],
       "total": 29
@@ -4744,12 +4744,12 @@
         "DB-005.57",
         "DB-040.66",
         "DB-049.03",
-        "CORE-016.12",
-        "CORE-016.11",
+        "CORE-017.12",
+        "CORE-017.11",
         "DB-005.670",
-        "CORE-016.08",
-        "CORE-016.09",
-        "CORE-016.10"
+        "CORE-017.08",
+        "CORE-017.09",
+        "CORE-017.10"
       ],
       "related": [
         "TOOL-048.24",
@@ -4844,21 +4844,21 @@
         "DB-002.24",
         "DB-005.15",
         "DB-040.21",
-        "CORE-016.13",
-        "CORE-016.08",
-        "CORE-016.07",
-        "CORE-016.11",
-        "CORE-016.03",
-        "CORE-016.09",
+        "CORE-017.13",
+        "CORE-017.08",
+        "CORE-017.07",
+        "CORE-017.11",
+        "CORE-017.03",
+        "CORE-017.09",
         "DB-002.37"
       ],
       "related": [
         "TEST-171.03",
         "TEST-111.08",
         "TOOL-001.01",
-        "PAGE-034.88",
+        "PAGE-034.86",
         "TOOL-008.02",
-        "PAGE-034.42"
+        "PAGE-034.40"
       ],
       "total": 184
     },
@@ -4948,7 +4948,7 @@
       "related": [
         "PAGE-029.130",
         "TEST-221.14",
-        "PAGE-034.77",
+        "PAGE-034.75",
         "PAGE-068.20",
         "PAGE-067.16",
         "PAGE-067.19"
@@ -5026,7 +5026,7 @@
         "DB-002.11",
         "DB-005.06",
         "DB-040.08",
-        "CORE-005.10",
+        "CORE-006.10",
         "DB-002.14",
         "DB-021.08",
         "DB-040.11",
@@ -12674,6 +12674,14 @@
       "area": "PAGE",
       "line": 79,
       "anchor": "ثبت فعالیت، حسابرسی و رویداد درخواست‌ها (شرح در سرآیند همان ",
+      "risk": 0,
+      "lines": 3
+    },
+    "PAGE-008.18": {
+      "path": "bootstrap.php",
+      "area": "PAGE",
+      "line": 82,
+      "anchor": "Shared request input normalization and allowlisted choice he",
       "risk": 0,
       "lines": 4
     },
@@ -23217,694 +23225,678 @@
       "path": "index.php",
       "area": "PAGE",
       "line": 39,
-      "anchor": "post_value",
-      "risk": 2,
-      "lines": 4
+      "anchor": "csv_cell",
+      "risk": 0,
+      "lines": 5
     },
     "PAGE-034.05": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 44,
-      "anchor": "csv_cell",
+      "line": 45,
+      "anchor": "excel_cell",
       "risk": 0,
-      "lines": 5
+      "lines": 4
     },
     "PAGE-034.06": {
       "path": "index.php",
       "area": "PAGE",
       "line": 50,
-      "anchor": "excel_cell",
-      "risk": 0,
-      "lines": 4
-    },
-    "PAGE-034.07": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 55,
       "anchor": "excel_download",
       "risk": 4,
       "lines": 62
     },
-    "PAGE-034.08": {
+    "PAGE-034.07": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 118,
-      "anchor": "valid_choice",
-      "risk": 0,
-      "lines": 4
-    },
-    "PAGE-034.09": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 123,
+      "line": 113,
       "anchor": "log_sort_order",
       "risk": 0,
       "lines": 9
     },
-    "PAGE-034.10": {
+    "PAGE-034.08": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 133,
+      "line": 123,
       "anchor": "log_sort_header_row",
       "risk": 0,
       "lines": 20
     },
-    "PAGE-034.11": {
+    "PAGE-034.09": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 154,
+      "line": 144,
       "anchor": "log_bounded_date_range",
       "risk": 0,
       "lines": 20
     },
-    "PAGE-034.12": {
+    "PAGE-034.10": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 175,
+      "line": 165,
       "anchor": "activity_log_filters",
       "risk": 2,
       "lines": 66
     },
-    "PAGE-034.13": {
+    "PAGE-034.11": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 242,
+      "line": 232,
       "anchor": "activity_log_meta_lines",
       "risk": 0,
       "lines": 21
     },
-    "PAGE-034.14": {
+    "PAGE-034.12": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 264,
+      "line": 254,
       "anchor": "imported_calendar_date",
       "risk": 0,
       "lines": 15
     },
-    "PAGE-034.15": {
+    "PAGE-034.13": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 280,
+      "line": 270,
       "anchor": "calendar_unescape",
       "risk": 0,
       "lines": 4
     },
-    "PAGE-034.16": {
+    "PAGE-034.14": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 285,
+      "line": 275,
       "anchor": "parse_calendar_import",
       "risk": 0,
       "lines": 72
     },
-    "PAGE-034.17": {
+    "PAGE-034.15": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 358,
+      "line": 348,
       "anchor": "store_attachment",
       "risk": 6,
       "lines": 54
     },
-    "PAGE-034.18": {
+    "PAGE-034.16": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 413,
+      "line": 403,
       "anchor": "store_profile_photo",
       "risk": 1,
       "lines": 24
     },
-    "PAGE-034.19": {
+    "PAGE-034.17": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 438,
+      "line": 428,
       "anchor": "valid_iranian_national_code",
       "risk": 0,
       "lines": 13
     },
-    "PAGE-034.20": {
+    "PAGE-034.18": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 452,
+      "line": 442,
       "anchor": "fetch_ticket",
       "risk": 0,
       "lines": 6
     },
-    "PAGE-034.21": {
+    "PAGE-034.19": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 459,
+      "line": 449,
       "anchor": "can_view_ticket",
       "risk": 0,
       "lines": 4
     },
-    "PAGE-034.22": {
+    "PAGE-034.20": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 464,
+      "line": 454,
       "anchor": "ticket_org_manager_rank_sql",
       "risk": 0,
       "lines": 20
     },
-    "PAGE-034.23": {
+    "PAGE-034.21": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 485,
+      "line": 475,
       "anchor": "choose_handling_agent",
       "risk": 5,
       "lines": 43
     },
-    "PAGE-034.24": {
+    "PAGE-034.22": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 529,
+      "line": 519,
       "anchor": "ticket_allowed_transitions",
       "risk": 0,
       "lines": 9
     },
-    "PAGE-034.25": {
+    "PAGE-034.23": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 538,
+      "line": 528,
       "anchor": "ticket_requester_cancelable_statuses",
       "risk": 0,
       "lines": 5
     },
-    "PAGE-034.26": {
+    "PAGE-034.24": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 544,
+      "line": 534,
       "anchor": "ticket_requester_can_cancel_directly",
       "risk": 0,
       "lines": 7
     },
-    "PAGE-034.27": {
+    "PAGE-034.25": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 552,
+      "line": 542,
       "anchor": "ticket_requester_can_cancel",
       "risk": 0,
       "lines": 7
     },
-    "PAGE-034.28": {
+    "PAGE-034.26": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 560,
+      "line": 550,
       "anchor": "notify_ticket_resolved",
       "risk": 0,
       "lines": 10
     },
-    "PAGE-034.29": {
+    "PAGE-034.27": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 570,
+      "line": 560,
       "anchor": "report_query_filters",
       "risk": 2,
       "lines": 55
     },
-    "PAGE-034.30": {
+    "PAGE-034.28": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 626,
+      "line": 616,
       "anchor": "render_header",
       "risk": 4,
       "lines": 150
     },
-    "PAGE-034.31": {
+    "PAGE-034.29": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 777,
+      "line": 767,
       "anchor": "list_sort_page_off",
       "risk": 2,
       "lines": 8
     },
-    "PAGE-034.32": {
+    "PAGE-034.30": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 786,
+      "line": 776,
       "anchor": "inspection_food_reminder_markup",
       "risk": 0,
       "lines": 22
     },
-    "PAGE-034.33": {
+    "PAGE-034.31": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 809,
+      "line": 799,
       "anchor": "render_footer",
       "risk": 0,
       "lines": 32
     },
+    "PAGE-034.32": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 831,
+      "anchor": "بلوک رویه‌ای 831-836",
+      "risk": 2,
+      "lines": 6
+    },
+    "PAGE-034.33": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 837,
+      "anchor": "ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)",
+      "risk": 2,
+      "lines": 20
+    },
     "PAGE-034.34": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 841,
-      "anchor": "بلوک رویه‌ای 841-846",
+      "line": 857,
+      "anchor": "ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن",
       "risk": 2,
-      "lines": 6
+      "lines": 2
     },
     "PAGE-034.35": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 847,
-      "anchor": "ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)",
+      "line": 859,
+      "anchor": "۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌ف",
       "risk": 2,
-      "lines": 20
+      "lines": 8
     },
     "PAGE-034.36": {
       "path": "index.php",
       "area": "PAGE",
       "line": 867,
-      "anchor": "ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن",
-      "risk": 2,
-      "lines": 2
-    },
-    "PAGE-034.37": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 869,
-      "anchor": "۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌ف",
-      "risk": 2,
-      "lines": 8
-    },
-    "PAGE-034.38": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 877,
       "anchor": "مسیر: must_change_password|change-password",
       "risk": 2,
       "lines": 11
     },
-    "PAGE-034.39": {
+    "PAGE-034.37": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 888,
+      "line": 878,
       "anchor": "مسیر: REQUEST_METHOD|POST|organization",
       "risk": 0,
       "lines": 14
     },
-    "PAGE-034.40": {
+    "PAGE-034.38": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 902,
+      "line": 892,
       "anchor": "مسیر: food-ticket|food_api",
       "risk": 2,
       "lines": 14
     },
-    "PAGE-034.41": {
+    "PAGE-034.39": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 916,
+      "line": 906,
       "anchor": "مسیر: food-order|food_api",
       "risk": 2,
       "lines": 12
     },
-    "PAGE-034.42": {
+    "PAGE-034.40": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 928,
+      "line": 918,
       "anchor": "مسیر: traffic-control|traffic_api",
       "risk": 9,
       "lines": 146
     },
-    "PAGE-034.43": {
+    "PAGE-034.41": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1074,
+      "line": 1064,
       "anchor": "خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های هم",
       "risk": 7,
       "lines": 115
+    },
+    "PAGE-034.42": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1179,
+      "anchor": "مسیر: food-personnel-link",
+      "risk": 0,
+      "lines": 6
+    },
+    "PAGE-034.43": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1185,
+      "anchor": "ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با ب",
+      "risk": 2,
+      "lines": 4
     },
     "PAGE-034.44": {
       "path": "index.php",
       "area": "PAGE",
       "line": 1189,
-      "anchor": "مسیر: food-personnel-link",
-      "risk": 0,
-      "lines": 6
-    },
-    "PAGE-034.45": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1195,
-      "anchor": "ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با ب",
-      "risk": 2,
-      "lines": 4
-    },
-    "PAGE-034.46": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1199,
       "anchor": "مسیر: logging_begin_operation",
       "risk": 6,
       "lines": 115
     },
-    "PAGE-034.47": {
+    "PAGE-034.45": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1314,
+      "line": 1304,
       "anchor": "مسیر: settings|create_access_group|save_access_group",
       "risk": 2,
       "lines": 11
     },
-    "PAGE-034.48": {
+    "PAGE-034.46": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1325,
+      "line": 1315,
       "anchor": "مسیر: chatbot-api",
       "risk": 0,
       "lines": 53
     },
+    "PAGE-034.47": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1368,
+      "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
+      "risk": 0,
+      "lines": 1
+    },
+    "PAGE-034.48": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1369,
+      "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
+      "risk": 0,
+      "lines": 1
+    },
     "PAGE-034.49": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1378,
-      "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
+      "line": 1370,
+      "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
       "risk": 0,
       "lines": 1
     },
     "PAGE-034.50": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1379,
-      "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
-      "risk": 0,
-      "lines": 1
-    },
-    "PAGE-034.51": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1380,
-      "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
-      "risk": 0,
-      "lines": 1
-    },
-    "PAGE-034.52": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1381,
+      "line": 1371,
       "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
       "risk": 0,
       "lines": 8
     },
-    "PAGE-034.53": {
+    "PAGE-034.51": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1389,
+      "line": 1379,
       "anchor": "شرط مسیریابی",
       "risk": 0,
       "lines": 8
     },
-    "PAGE-034.54": {
+    "PAGE-034.52": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1397,
+      "line": 1387,
       "anchor": "مسیر: settings|settings.general|settings.domain",
       "risk": 0,
       "lines": 9
     },
-    "PAGE-034.55": {
+    "PAGE-034.53": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1406,
+      "line": 1396,
       "anchor": "مسیر: change-password",
       "risk": 0,
       "lines": 3
     },
-    "PAGE-034.56": {
+    "PAGE-034.54": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1409,
+      "line": 1399,
       "anchor": "مسیر: local-accounts",
       "risk": 0,
       "lines": 3
     },
-    "PAGE-034.57": {
+    "PAGE-034.55": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1412,
+      "line": 1402,
       "anchor": "مسیر: profile",
       "risk": 0,
       "lines": 18
     },
-    "PAGE-034.58": {
+    "PAGE-034.56": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1430,
+      "line": 1420,
       "anchor": "مسیر: governance",
       "risk": 0,
       "lines": 4
     },
-    "PAGE-034.59": {
+    "PAGE-034.57": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1434,
+      "line": 1424,
       "anchor": "مسیر: food-ticket",
       "risk": 0,
       "lines": 5
     },
-    "PAGE-034.60": {
+    "PAGE-034.58": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1439,
+      "line": 1429,
       "anchor": "مسیر: food-order|foodorder.self",
       "risk": 0,
       "lines": 8
     },
+    "PAGE-034.59": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1437,
+      "anchor": "مسیر: food-order",
+      "risk": 0,
+      "lines": 4
+    },
+    "PAGE-034.60": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1441,
+      "anchor": "مسیر: cd-dvd",
+      "risk": 0,
+      "lines": 4
+    },
     "PAGE-034.61": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1447,
-      "anchor": "مسیر: food-order",
+      "line": 1445,
+      "anchor": "مسیر: cd-dvd-history",
       "risk": 0,
       "lines": 4
     },
     "PAGE-034.62": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1451,
-      "anchor": "مسیر: cd-dvd",
-      "risk": 0,
-      "lines": 4
-    },
-    "PAGE-034.63": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1455,
-      "anchor": "مسیر: cd-dvd-history",
-      "risk": 0,
-      "lines": 4
-    },
-    "PAGE-034.64": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1459,
+      "line": 1449,
       "anchor": "مسیر: traffic-control",
       "risk": 0,
       "lines": 3
     },
-    "PAGE-034.65": {
+    "PAGE-034.63": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1462,
+      "line": 1452,
       "anchor": "مسیر: traffic-control-print",
       "risk": 2,
       "lines": 5
     },
+    "PAGE-034.64": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1457,
+      "anchor": "مسیر: help",
+      "risk": 0,
+      "lines": 8
+    },
+    "PAGE-034.65": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1465,
+      "anchor": "مسیر: knowledge",
+      "risk": 2,
+      "lines": 37
+    },
     "PAGE-034.66": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1467,
-      "anchor": "مسیر: help",
+      "line": 1502,
+      "anchor": "مسیر: notifications|notif.view",
       "risk": 0,
       "lines": 8
     },
     "PAGE-034.67": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1475,
-      "anchor": "مسیر: knowledge",
-      "risk": 2,
-      "lines": 37
-    },
-    "PAGE-034.68": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1512,
-      "anchor": "مسیر: notifications|notif.view",
-      "risk": 0,
-      "lines": 8
-    },
-    "PAGE-034.69": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1520,
+      "line": 1510,
       "anchor": "مسیر: notifications",
       "risk": 5,
       "lines": 18
     },
-    "PAGE-034.70": {
+    "PAGE-034.68": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1538,
+      "line": 1528,
       "anchor": "مسیر: audit",
       "risk": 0,
       "lines": 9
     },
-    "PAGE-034.71": {
+    "PAGE-034.69": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1547,
+      "line": 1537,
       "anchor": "مسیر: logging-dashboard",
       "risk": 0,
       "lines": 4
+    },
+    "PAGE-034.70": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1541,
+      "anchor": "مسیر: system-health",
+      "risk": 0,
+      "lines": 4
+    },
+    "PAGE-034.71": {
+      "path": "index.php",
+      "area": "PAGE",
+      "line": 1545,
+      "anchor": "مسیر: logs",
+      "risk": 0,
+      "lines": 6
     },
     "PAGE-034.72": {
       "path": "index.php",
       "area": "PAGE",
       "line": 1551,
-      "anchor": "مسیر: system-health",
-      "risk": 0,
-      "lines": 4
-    },
-    "PAGE-034.73": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1555,
-      "anchor": "مسیر: logs",
-      "risk": 0,
-      "lines": 6
-    },
-    "PAGE-034.74": {
-      "path": "index.php",
-      "area": "PAGE",
-      "line": 1561,
       "anchor": "مسیر: activity-log",
       "risk": 8,
       "lines": 143
     },
-    "PAGE-034.75": {
+    "PAGE-034.73": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1704,
+      "line": 1694,
       "anchor": "مسیر: backup",
       "risk": 6,
       "lines": 39
     },
-    "PAGE-034.76": {
+    "PAGE-034.74": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1743,
+      "line": 1733,
       "anchor": "مسیر: search|search.global",
       "risk": 0,
       "lines": 8
     },
-    "PAGE-034.77": {
+    "PAGE-034.75": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1751,
+      "line": 1741,
       "anchor": "مسیر: search",
       "risk": 7,
       "lines": 92
     },
-    "PAGE-034.78": {
+    "PAGE-034.76": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1843,
+      "line": 1833,
       "anchor": "مسیر: chatbot-admin",
       "risk": 5,
       "lines": 103
     },
-    "PAGE-034.79": {
+    "PAGE-034.77": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1946,
+      "line": 1936,
       "anchor": "مسیر: holidays",
       "risk": 0,
       "lines": 11
     },
-    "PAGE-034.80": {
+    "PAGE-034.78": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1957,
+      "line": 1947,
       "anchor": "مسیر: new-ticket|ticket.create",
       "risk": 0,
       "lines": 13
     },
-    "PAGE-034.81": {
+    "PAGE-034.79": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1970,
+      "line": 1960,
       "anchor": "مسیر: inventory",
       "risk": 7,
       "lines": 101
     },
-    "PAGE-034.82": {
+    "PAGE-034.80": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2071,
+      "line": 2061,
       "anchor": "مسیر: inventory-diagnostics",
       "risk": 2,
       "lines": 32
     },
-    "PAGE-034.83": {
+    "PAGE-034.81": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2103,
+      "line": 2093,
       "anchor": "مسیر: asset-history",
       "risk": 7,
       "lines": 18
     },
-    "PAGE-034.84": {
+    "PAGE-034.82": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2121,
+      "line": 2111,
       "anchor": "مسیر: domain-scan",
       "risk": 2,
       "lines": 78
     },
-    "PAGE-034.85": {
+    "PAGE-034.83": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2199,
+      "line": 2189,
       "anchor": "مسیر: assets",
       "risk": 7,
       "lines": 45
     },
-    "PAGE-034.86": {
+    "PAGE-034.84": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2244,
+      "line": 2234,
       "anchor": "مسیر: asset",
       "risk": 7,
       "lines": 34
     },
-    "PAGE-034.87": {
+    "PAGE-034.85": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2278,
+      "line": 2268,
       "anchor": "مسیر: organization",
       "risk": 3,
       "lines": 191
     },
-    "PAGE-034.88": {
+    "PAGE-034.86": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2469,
+      "line": 2459,
       "anchor": "مسیر: settings",
       "risk": 11,
       "lines": 470
     },
-    "PAGE-034.89": {
+    "PAGE-034.87": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2939,
+      "line": 2929,
       "anchor": "مسیر: logs",
       "risk": 2,
       "lines": 22
     },
-    "PAGE-034.90": {
+    "PAGE-034.88": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2961,
+      "line": 2951,
       "anchor": "مسیر: dashboard",
       "risk": 5,
       "lines": 40
@@ -25870,6 +25862,46 @@
       "lines": 14
     },
     "CORE-005.01": {
+      "path": "lib/http-input.php",
+      "area": "CORE",
+      "line": 1,
+      "anchor": "بلوک رویه‌ای 1-12",
+      "risk": 0,
+      "lines": 12
+    },
+    "CORE-005.02": {
+      "path": "lib/http-input.php",
+      "area": "CORE",
+      "line": 13,
+      "anchor": "post_value",
+      "risk": 2,
+      "lines": 4
+    },
+    "CORE-005.03": {
+      "path": "lib/http-input.php",
+      "area": "CORE",
+      "line": 17,
+      "anchor": "بلوک رویه‌ای 17-19",
+      "risk": 0,
+      "lines": 3
+    },
+    "CORE-005.04": {
+      "path": "lib/http-input.php",
+      "area": "CORE",
+      "line": 20,
+      "anchor": "valid_choice",
+      "risk": 0,
+      "lines": 4
+    },
+    "CORE-005.05": {
+      "path": "lib/http-input.php",
+      "area": "CORE",
+      "line": 24,
+      "anchor": "بلوک رویه‌ای 24-25",
+      "risk": 0,
+      "lines": 2
+    },
+    "CORE-006.01": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 1,
@@ -25877,7 +25909,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-005.02": {
+    "CORE-006.02": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 14,
@@ -25885,7 +25917,7 @@
       "risk": 0,
       "lines": 19
     },
-    "CORE-005.03": {
+    "CORE-006.03": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 34,
@@ -25893,7 +25925,7 @@
       "risk": 0,
       "lines": 18
     },
-    "CORE-005.04": {
+    "CORE-006.04": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 53,
@@ -25901,7 +25933,7 @@
       "risk": 0,
       "lines": 38
     },
-    "CORE-005.05": {
+    "CORE-006.05": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 92,
@@ -25909,7 +25941,7 @@
       "risk": 0,
       "lines": 25
     },
-    "CORE-005.06": {
+    "CORE-006.06": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 118,
@@ -25917,7 +25949,7 @@
       "risk": 0,
       "lines": 16
     },
-    "CORE-005.07": {
+    "CORE-006.07": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 135,
@@ -25925,7 +25957,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-005.08": {
+    "CORE-006.08": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 147,
@@ -25933,7 +25965,7 @@
       "risk": 1,
       "lines": 16
     },
-    "CORE-005.09": {
+    "CORE-006.09": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 164,
@@ -25941,7 +25973,7 @@
       "risk": 3,
       "lines": 77
     },
-    "CORE-005.10": {
+    "CORE-006.10": {
       "path": "lib/ldap.php",
       "area": "CORE",
       "line": 242,
@@ -25949,7 +25981,7 @@
       "risk": 5,
       "lines": 169
     },
-    "CORE-006.01": {
+    "CORE-007.01": {
       "path": "lib/log-catalog.php",
       "area": "CORE",
       "line": 1,
@@ -25957,7 +25989,7 @@
       "risk": 0,
       "lines": 3
     },
-    "CORE-006.02": {
+    "CORE-007.02": {
       "path": "lib/log-catalog.php",
       "area": "CORE",
       "line": 4,
@@ -25965,7 +25997,7 @@
       "risk": 0,
       "lines": 45
     },
-    "CORE-007.01": {
+    "CORE-008.01": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 1,
@@ -25973,7 +26005,7 @@
       "risk": 1,
       "lines": 45
     },
-    "CORE-007.02": {
+    "CORE-008.02": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 46,
@@ -25981,7 +26013,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-007.03": {
+    "CORE-008.03": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 52,
@@ -25989,7 +26021,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-007.04": {
+    "CORE-008.04": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 61,
@@ -25997,7 +26029,7 @@
       "risk": 0,
       "lines": 22
     },
-    "CORE-007.05": {
+    "CORE-008.05": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 84,
@@ -26005,7 +26037,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-007.06": {
+    "CORE-008.06": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 102,
@@ -26013,7 +26045,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-007.07": {
+    "CORE-008.07": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 108,
@@ -26021,7 +26053,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-007.08": {
+    "CORE-008.08": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 126,
@@ -26029,7 +26061,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-007.09": {
+    "CORE-008.09": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 138,
@@ -26037,7 +26069,7 @@
       "risk": 0,
       "lines": 1
     },
-    "CORE-007.10": {
+    "CORE-008.10": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 139,
@@ -26045,7 +26077,7 @@
       "risk": 0,
       "lines": 1
     },
-    "CORE-007.11": {
+    "CORE-008.11": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 140,
@@ -26053,7 +26085,7 @@
       "risk": 0,
       "lines": 2
     },
-    "CORE-007.12": {
+    "CORE-008.12": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 142,
@@ -26061,7 +26093,7 @@
       "risk": 0,
       "lines": 16
     },
-    "CORE-007.13": {
+    "CORE-008.13": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 159,
@@ -26069,7 +26101,7 @@
       "risk": 0,
       "lines": 22
     },
-    "CORE-007.14": {
+    "CORE-008.14": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 182,
@@ -26077,7 +26109,7 @@
       "risk": 0,
       "lines": 42
     },
-    "CORE-007.15": {
+    "CORE-008.15": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 225,
@@ -26085,7 +26117,7 @@
       "risk": 1,
       "lines": 24
     },
-    "CORE-007.16": {
+    "CORE-008.16": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 250,
@@ -26093,7 +26125,7 @@
       "risk": 0,
       "lines": 1
     },
-    "CORE-007.17": {
+    "CORE-008.17": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 251,
@@ -26101,7 +26133,7 @@
       "risk": 0,
       "lines": 1
     },
-    "CORE-007.18": {
+    "CORE-008.18": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 252,
@@ -26109,7 +26141,7 @@
       "risk": 0,
       "lines": 2
     },
-    "CORE-007.19": {
+    "CORE-008.19": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 254,
@@ -26117,7 +26149,7 @@
       "risk": 0,
       "lines": 23
     },
-    "CORE-007.20": {
+    "CORE-008.20": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 278,
@@ -26125,7 +26157,7 @@
       "risk": 0,
       "lines": 40
     },
-    "CORE-007.21": {
+    "CORE-008.21": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 319,
@@ -26133,7 +26165,7 @@
       "risk": 1,
       "lines": 24
     },
-    "CORE-007.22": {
+    "CORE-008.22": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 344,
@@ -26141,7 +26173,7 @@
       "risk": 0,
       "lines": 1
     },
-    "CORE-007.23": {
+    "CORE-008.23": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 345,
@@ -26149,7 +26181,7 @@
       "risk": 0,
       "lines": 1
     },
-    "CORE-007.24": {
+    "CORE-008.24": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 346,
@@ -26157,7 +26189,7 @@
       "risk": 0,
       "lines": 2
     },
-    "CORE-007.25": {
+    "CORE-008.25": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 348,
@@ -26165,7 +26197,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-007.26": {
+    "CORE-008.26": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 354,
@@ -26173,7 +26205,7 @@
       "risk": 1,
       "lines": 29
     },
-    "CORE-007.27": {
+    "CORE-008.27": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 384,
@@ -26181,7 +26213,7 @@
       "risk": 2,
       "lines": 15
     },
-    "CORE-007.28": {
+    "CORE-008.28": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 400,
@@ -26189,7 +26221,7 @@
       "risk": 0,
       "lines": 33
     },
-    "CORE-007.29": {
+    "CORE-008.29": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 434,
@@ -26197,7 +26229,7 @@
       "risk": 0,
       "lines": 14
     },
-    "CORE-007.30": {
+    "CORE-008.30": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 449,
@@ -26205,7 +26237,7 @@
       "risk": 1,
       "lines": 9
     },
-    "CORE-007.31": {
+    "CORE-008.31": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 459,
@@ -26213,7 +26245,7 @@
       "risk": 2,
       "lines": 14
     },
-    "CORE-007.32": {
+    "CORE-008.32": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 474,
@@ -26221,7 +26253,7 @@
       "risk": 0,
       "lines": 33
     },
-    "CORE-007.33": {
+    "CORE-008.33": {
       "path": "lib/logging-audit.php",
       "area": "CORE",
       "line": 508,
@@ -26229,7 +26261,7 @@
       "risk": 7,
       "lines": 135
     },
-    "CORE-008.01": {
+    "CORE-009.01": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1,
@@ -26237,7 +26269,7 @@
       "risk": 0,
       "lines": 15
     },
-    "CORE-008.02": {
+    "CORE-009.02": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 16,
@@ -26245,7 +26277,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.03": {
+    "CORE-009.03": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 21,
@@ -26253,7 +26285,7 @@
       "risk": 0,
       "lines": 16
     },
-    "CORE-008.04": {
+    "CORE-009.04": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 38,
@@ -26261,7 +26293,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-008.05": {
+    "CORE-009.05": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 47,
@@ -26269,7 +26301,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-008.06": {
+    "CORE-009.06": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 52,
@@ -26277,7 +26309,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-008.07": {
+    "CORE-009.07": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 57,
@@ -26285,7 +26317,7 @@
       "risk": 0,
       "lines": 7
     },
-    "CORE-008.08": {
+    "CORE-009.08": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 65,
@@ -26293,7 +26325,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.09": {
+    "CORE-009.09": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 71,
@@ -26301,7 +26333,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.10": {
+    "CORE-009.10": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 77,
@@ -26309,7 +26341,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-008.11": {
+    "CORE-009.11": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 89,
@@ -26317,7 +26349,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-008.12": {
+    "CORE-009.12": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 98,
@@ -26325,7 +26357,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-008.13": {
+    "CORE-009.13": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 103,
@@ -26333,7 +26365,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-008.14": {
+    "CORE-009.14": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 115,
@@ -26341,7 +26373,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.15": {
+    "CORE-009.15": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 121,
@@ -26349,7 +26381,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-008.16": {
+    "CORE-009.16": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 133,
@@ -26357,7 +26389,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-008.17": {
+    "CORE-009.17": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 143,
@@ -26365,7 +26397,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-008.18": {
+    "CORE-009.18": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 153,
@@ -26373,7 +26405,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-008.19": {
+    "CORE-009.19": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 175,
@@ -26381,7 +26413,7 @@
       "risk": 1,
       "lines": 145
     },
-    "CORE-008.20": {
+    "CORE-009.20": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 321,
@@ -26389,7 +26421,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-008.21": {
+    "CORE-009.21": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 330,
@@ -26397,7 +26429,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-008.22": {
+    "CORE-009.22": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 342,
@@ -26405,7 +26437,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-008.23": {
+    "CORE-009.23": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 347,
@@ -26413,7 +26445,7 @@
       "risk": 0,
       "lines": 22
     },
-    "CORE-008.24": {
+    "CORE-009.24": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 370,
@@ -26421,7 +26453,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-008.25": {
+    "CORE-009.25": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 380,
@@ -26429,7 +26461,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-008.26": {
+    "CORE-009.26": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 390,
@@ -26437,7 +26469,7 @@
       "risk": 0,
       "lines": 19
     },
-    "CORE-008.27": {
+    "CORE-009.27": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 410,
@@ -26445,7 +26477,7 @@
       "risk": 0,
       "lines": 7
     },
-    "CORE-008.28": {
+    "CORE-009.28": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 417,
@@ -26453,7 +26485,7 @@
       "risk": 0,
       "lines": 2
     },
-    "CORE-008.29": {
+    "CORE-009.29": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 419,
@@ -26461,7 +26493,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-008.30": {
+    "CORE-009.30": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 430,
@@ -26469,7 +26501,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-008.31": {
+    "CORE-009.31": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 437,
@@ -26477,7 +26509,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-008.32": {
+    "CORE-009.32": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 444,
@@ -26485,7 +26517,7 @@
       "risk": 0,
       "lines": 25
     },
-    "CORE-008.33": {
+    "CORE-009.33": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 470,
@@ -26493,7 +26525,7 @@
       "risk": 1,
       "lines": 162
     },
-    "CORE-008.34": {
+    "CORE-009.34": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 633,
@@ -26501,7 +26533,7 @@
       "risk": 0,
       "lines": 39
     },
-    "CORE-008.35": {
+    "CORE-009.35": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 673,
@@ -26509,7 +26541,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-008.36": {
+    "CORE-009.36": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 683,
@@ -26517,7 +26549,7 @@
       "risk": 3,
       "lines": 97
     },
-    "CORE-008.37": {
+    "CORE-009.37": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 781,
@@ -26525,7 +26557,7 @@
       "risk": 5,
       "lines": 5
     },
-    "CORE-008.38": {
+    "CORE-009.38": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 787,
@@ -26533,7 +26565,7 @@
       "risk": 3,
       "lines": 19
     },
-    "CORE-008.39": {
+    "CORE-009.39": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 807,
@@ -26541,7 +26573,7 @@
       "risk": 3,
       "lines": 62
     },
-    "CORE-008.40": {
+    "CORE-009.40": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 870,
@@ -26549,7 +26581,7 @@
       "risk": 3,
       "lines": 55
     },
-    "CORE-008.41": {
+    "CORE-009.41": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 926,
@@ -26557,7 +26589,7 @@
       "risk": 1,
       "lines": 33
     },
-    "CORE-008.42": {
+    "CORE-009.42": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 960,
@@ -26565,7 +26597,7 @@
       "risk": 7,
       "lines": 22
     },
-    "CORE-008.43": {
+    "CORE-009.43": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 983,
@@ -26573,7 +26605,7 @@
       "risk": 7,
       "lines": 41
     },
-    "CORE-008.44": {
+    "CORE-009.44": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1025,
@@ -26581,7 +26613,7 @@
       "risk": 11,
       "lines": 48
     },
-    "CORE-008.45": {
+    "CORE-009.45": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1074,
@@ -26589,7 +26621,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-008.46": {
+    "CORE-009.46": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1079,
@@ -26597,7 +26629,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.47": {
+    "CORE-009.47": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1085,
@@ -26605,7 +26637,7 @@
       "risk": 0,
       "lines": 18
     },
-    "CORE-008.48": {
+    "CORE-009.48": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1104,
@@ -26613,7 +26645,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.49": {
+    "CORE-009.49": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1111,
@@ -26621,7 +26653,7 @@
       "risk": 7,
       "lines": 43
     },
-    "CORE-008.50": {
+    "CORE-009.50": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1155,
@@ -26629,7 +26661,7 @@
       "risk": 6,
       "lines": 19
     },
-    "CORE-008.51": {
+    "CORE-009.51": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1175,
@@ -26637,7 +26669,7 @@
       "risk": 8,
       "lines": 62
     },
-    "CORE-008.52": {
+    "CORE-009.52": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1238,
@@ -26645,7 +26677,7 @@
       "risk": 0,
       "lines": 14
     },
-    "CORE-008.53": {
+    "CORE-009.53": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1253,
@@ -26653,7 +26685,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-008.54": {
+    "CORE-009.54": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1271,
@@ -26661,7 +26693,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-008.55": {
+    "CORE-009.55": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1277,
@@ -26669,7 +26701,7 @@
       "risk": 2,
       "lines": 6
     },
-    "CORE-008.56": {
+    "CORE-009.56": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1284,
@@ -26677,7 +26709,7 @@
       "risk": 3,
       "lines": 13
     },
-    "CORE-008.57": {
+    "CORE-009.57": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1298,
@@ -26685,7 +26717,7 @@
       "risk": 3,
       "lines": 22
     },
-    "CORE-008.58": {
+    "CORE-009.58": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1321,
@@ -26693,7 +26725,7 @@
       "risk": 7,
       "lines": 16
     },
-    "CORE-008.59": {
+    "CORE-009.59": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1338,
@@ -26701,7 +26733,7 @@
       "risk": 9,
       "lines": 7
     },
-    "CORE-008.60": {
+    "CORE-009.60": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1346,
@@ -26709,7 +26741,7 @@
       "risk": 5,
       "lines": 17
     },
-    "CORE-008.61": {
+    "CORE-009.61": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1364,
@@ -26717,7 +26749,7 @@
       "risk": 1,
       "lines": 48
     },
-    "CORE-008.62": {
+    "CORE-009.62": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1413,
@@ -26725,7 +26757,7 @@
       "risk": 0,
       "lines": 32
     },
-    "CORE-008.63": {
+    "CORE-009.63": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1446,
@@ -26733,7 +26765,7 @@
       "risk": 1,
       "lines": 69
     },
-    "CORE-008.64": {
+    "CORE-009.64": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1516,
@@ -26741,7 +26773,7 @@
       "risk": 0,
       "lines": 15
     },
-    "CORE-008.65": {
+    "CORE-009.65": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1531,
@@ -26749,7 +26781,7 @@
       "risk": 0,
       "lines": 3
     },
-    "CORE-008.66": {
+    "CORE-009.66": {
       "path": "lib/logging-core.php",
       "area": "CORE",
       "line": 1534,
@@ -26757,7 +26789,7 @@
       "risk": 4,
       "lines": 26
     },
-    "CORE-009.01": {
+    "CORE-010.01": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 1,
@@ -26765,7 +26797,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-009.02": {
+    "CORE-010.02": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 14,
@@ -26773,7 +26805,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-009.03": {
+    "CORE-010.03": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 19,
@@ -26781,7 +26813,7 @@
       "risk": 5,
       "lines": 36
     },
-    "CORE-009.04": {
+    "CORE-010.04": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 56,
@@ -26789,7 +26821,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-009.05": {
+    "CORE-010.05": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 78,
@@ -26797,7 +26829,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-009.06": {
+    "CORE-010.06": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 100,
@@ -26805,7 +26837,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-009.07": {
+    "CORE-010.07": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 114,
@@ -26813,7 +26845,7 @@
       "risk": 0,
       "lines": 44
     },
-    "CORE-009.08": {
+    "CORE-010.08": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 159,
@@ -26821,7 +26853,7 @@
       "risk": 0,
       "lines": 48
     },
-    "CORE-009.09": {
+    "CORE-010.09": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 208,
@@ -26829,7 +26861,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-009.10": {
+    "CORE-010.10": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 214,
@@ -26837,7 +26869,7 @@
       "risk": 0,
       "lines": 45
     },
-    "CORE-009.11": {
+    "CORE-010.11": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 260,
@@ -26845,7 +26877,7 @@
       "risk": 2,
       "lines": 89
     },
-    "CORE-009.12": {
+    "CORE-010.12": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 349,
@@ -26853,7 +26885,7 @@
       "risk": 0,
       "lines": 20
     },
-    "CORE-009.13": {
+    "CORE-010.13": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 370,
@@ -26861,7 +26893,7 @@
       "risk": 0,
       "lines": 27
     },
-    "CORE-009.14": {
+    "CORE-010.14": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 398,
@@ -26869,7 +26901,7 @@
       "risk": 6,
       "lines": 24
     },
-    "CORE-009.15": {
+    "CORE-010.15": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 423,
@@ -26877,7 +26909,7 @@
       "risk": 0,
       "lines": 25
     },
-    "CORE-009.16": {
+    "CORE-010.16": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 449,
@@ -26885,7 +26917,7 @@
       "risk": 5,
       "lines": 22
     },
-    "CORE-009.17": {
+    "CORE-010.17": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 472,
@@ -26893,7 +26925,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-009.18": {
+    "CORE-010.18": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 479,
@@ -26901,7 +26933,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-009.19": {
+    "CORE-010.19": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 484,
@@ -26909,7 +26941,7 @@
       "risk": 0,
       "lines": 27
     },
-    "CORE-009.20": {
+    "CORE-010.20": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 512,
@@ -26917,7 +26949,7 @@
       "risk": 2,
       "lines": 18
     },
-    "CORE-009.21": {
+    "CORE-010.21": {
       "path": "lib/logging-csrf.php",
       "area": "CORE",
       "line": 531,
@@ -26925,7 +26957,7 @@
       "risk": 6,
       "lines": 12
     },
-    "CORE-010.01": {
+    "CORE-011.01": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 1,
@@ -26933,7 +26965,7 @@
       "risk": 0,
       "lines": 3
     },
-    "CORE-010.02": {
+    "CORE-011.02": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 4,
@@ -26941,7 +26973,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-010.03": {
+    "CORE-011.03": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 18,
@@ -26949,7 +26981,7 @@
       "risk": 0,
       "lines": 34
     },
-    "CORE-010.04": {
+    "CORE-011.04": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 53,
@@ -26957,7 +26989,7 @@
       "risk": 1,
       "lines": 11
     },
-    "CORE-010.05": {
+    "CORE-011.05": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 65,
@@ -26965,7 +26997,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-010.06": {
+    "CORE-011.06": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 79,
@@ -26973,7 +27005,7 @@
       "risk": 0,
       "lines": 18
     },
-    "CORE-010.07": {
+    "CORE-011.07": {
       "path": "lib/logging-diagnostics.php",
       "area": "CORE",
       "line": 98,
@@ -26981,7 +27013,7 @@
       "risk": 0,
       "lines": 20
     },
-    "CORE-011.01": {
+    "CORE-012.01": {
       "path": "lib/logging-escalation.php",
       "area": "CORE",
       "line": 1,
@@ -26989,7 +27021,7 @@
       "risk": 0,
       "lines": 18
     },
-    "CORE-011.02": {
+    "CORE-012.02": {
       "path": "lib/logging-escalation.php",
       "area": "CORE",
       "line": 19,
@@ -26997,7 +27029,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-011.03": {
+    "CORE-012.03": {
       "path": "lib/logging-escalation.php",
       "area": "CORE",
       "line": 29,
@@ -27005,7 +27037,7 @@
       "risk": 4,
       "lines": 29
     },
-    "CORE-011.04": {
+    "CORE-012.04": {
       "path": "lib/logging-escalation.php",
       "area": "CORE",
       "line": 59,
@@ -27013,7 +27045,7 @@
       "risk": 0,
       "lines": 7
     },
-    "CORE-011.05": {
+    "CORE-012.05": {
       "path": "lib/logging-escalation.php",
       "area": "CORE",
       "line": 67,
@@ -27021,7 +27053,7 @@
       "risk": 4,
       "lines": 34
     },
-    "CORE-012.01": {
+    "CORE-013.01": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 1,
@@ -27029,7 +27061,7 @@
       "risk": 0,
       "lines": 3
     },
-    "CORE-012.02": {
+    "CORE-013.02": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 4,
@@ -27037,7 +27069,7 @@
       "risk": 0,
       "lines": 28
     },
-    "CORE-012.03": {
+    "CORE-013.03": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 33,
@@ -27045,7 +27077,7 @@
       "risk": 1,
       "lines": 23
     },
-    "CORE-012.04": {
+    "CORE-013.04": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 57,
@@ -27053,7 +27085,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-012.05": {
+    "CORE-013.05": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 66,
@@ -27061,7 +27093,7 @@
       "risk": 1,
       "lines": 34
     },
-    "CORE-012.06": {
+    "CORE-013.06": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 101,
@@ -27069,7 +27101,7 @@
       "risk": 0,
       "lines": 14
     },
-    "CORE-012.07": {
+    "CORE-013.07": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 116,
@@ -27077,7 +27109,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-012.08": {
+    "CORE-013.08": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 121,
@@ -27085,7 +27117,7 @@
       "risk": 1,
       "lines": 39
     },
-    "CORE-012.09": {
+    "CORE-013.09": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 161,
@@ -27093,7 +27125,7 @@
       "risk": 0,
       "lines": 18
     },
-    "CORE-012.10": {
+    "CORE-013.10": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 180,
@@ -27101,7 +27133,7 @@
       "risk": 0,
       "lines": 19
     },
-    "CORE-012.11": {
+    "CORE-013.11": {
       "path": "lib/logging-integrity.php",
       "area": "CORE",
       "line": 200,
@@ -27109,7 +27141,7 @@
       "risk": 2,
       "lines": 38
     },
-    "CORE-013.01": {
+    "CORE-014.01": {
       "path": "lib/logging-replay.php",
       "area": "CORE",
       "line": 1,
@@ -27117,7 +27149,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-013.02": {
+    "CORE-014.02": {
       "path": "lib/logging-replay.php",
       "area": "CORE",
       "line": 6,
@@ -27125,7 +27157,7 @@
       "risk": 7,
       "lines": 38
     },
-    "CORE-013.03": {
+    "CORE-014.03": {
       "path": "lib/logging-replay.php",
       "area": "CORE",
       "line": 45,
@@ -27133,168 +27165,8 @@
       "risk": 9,
       "lines": 216
     },
-    "CORE-014.01": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 1,
-      "anchor": "بلوک رویه‌ای 1-13",
-      "risk": 0,
-      "lines": 13
-    },
-    "CORE-014.02": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 14,
-      "anchor": "notify_user",
-      "risk": 1,
-      "lines": 21
-    },
-    "CORE-014.03": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 36,
-      "anchor": "notification_target_url",
-      "risk": 0,
-      "lines": 13
-    },
-    "CORE-014.04": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 50,
-      "anchor": "ticket_notification_user_can",
-      "risk": 0,
-      "lines": 24
-    },
-    "CORE-014.05": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 75,
-      "anchor": "ticket_notification_recipients",
-      "risk": 5,
-      "lines": 21
-    },
-    "CORE-014.06": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 97,
-      "anchor": "ticket_unassigned_notify_candidates",
-      "risk": 0,
-      "lines": 6
-    },
-    "CORE-014.07": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 104,
-      "anchor": "notify_ticket_parties",
-      "risk": 0,
-      "lines": 21
-    },
-    "CORE-014.08": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 126,
-      "anchor": "notify_ticket_staff",
-      "risk": 0,
-      "lines": 20
-    },
-    "CORE-014.09": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 147,
-      "anchor": "notification_user_sees_food_cancel",
-      "risk": 0,
-      "lines": 26
-    },
-    "CORE-014.10": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 174,
-      "anchor": "notification_visibility_sql",
-      "risk": 0,
-      "lines": 8
-    },
-    "CORE-014.11": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 183,
-      "anchor": "notification_ticket_visibility",
-      "risk": 5,
-      "lines": 9
-    },
-    "CORE-014.12": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 193,
-      "anchor": "notification_header_summary",
-      "risk": 5,
-      "lines": 22
-    },
-    "CORE-014.13": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 216,
-      "anchor": "is_sla_holiday",
-      "risk": 0,
-      "lines": 6
-    },
-    "CORE-014.14": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 223,
-      "anchor": "ldap_authenticate",
-      "risk": 0,
-      "lines": 29
-    },
-    "CORE-014.15": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 253,
-      "anchor": "ldap_authenticate_measured",
-      "risk": 4,
-      "lines": 173
-    },
-    "CORE-014.16": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 427,
-      "anchor": "normalize_employee_number",
-      "risk": 0,
-      "lines": 6
-    },
-    "CORE-014.17": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 434,
-      "anchor": "شناسه کاربری که این کد پرسنلی را دارد (۰ یعنی آزاد است). $ex",
-      "risk": 0,
-      "lines": 1
-    },
-    "CORE-014.18": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 435,
-      "anchor": "employee_number_owner",
-      "risk": 0,
-      "lines": 9
-    },
-    "CORE-014.19": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 445,
-      "anchor": "upsert_domain_user",
-      "risk": 1,
-      "lines": 67
-    },
-    "CORE-014.20": {
-      "path": "lib/notify-users.php",
-      "area": "CORE",
-      "line": 513,
-      "anchor": "link_agent_assets_to_user",
-      "risk": 1,
-      "lines": 10
-    },
     "CORE-015.01": {
-      "path": "lib/settings-effects.php",
+      "path": "lib/notify-users.php",
       "area": "CORE",
       "line": 1,
       "anchor": "بلوک رویه‌ای 1-13",
@@ -27302,6 +27174,166 @@
       "lines": 13
     },
     "CORE-015.02": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 14,
+      "anchor": "notify_user",
+      "risk": 1,
+      "lines": 21
+    },
+    "CORE-015.03": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 36,
+      "anchor": "notification_target_url",
+      "risk": 0,
+      "lines": 13
+    },
+    "CORE-015.04": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 50,
+      "anchor": "ticket_notification_user_can",
+      "risk": 0,
+      "lines": 24
+    },
+    "CORE-015.05": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 75,
+      "anchor": "ticket_notification_recipients",
+      "risk": 5,
+      "lines": 21
+    },
+    "CORE-015.06": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 97,
+      "anchor": "ticket_unassigned_notify_candidates",
+      "risk": 0,
+      "lines": 6
+    },
+    "CORE-015.07": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 104,
+      "anchor": "notify_ticket_parties",
+      "risk": 0,
+      "lines": 21
+    },
+    "CORE-015.08": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 126,
+      "anchor": "notify_ticket_staff",
+      "risk": 0,
+      "lines": 20
+    },
+    "CORE-015.09": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 147,
+      "anchor": "notification_user_sees_food_cancel",
+      "risk": 0,
+      "lines": 26
+    },
+    "CORE-015.10": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 174,
+      "anchor": "notification_visibility_sql",
+      "risk": 0,
+      "lines": 8
+    },
+    "CORE-015.11": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 183,
+      "anchor": "notification_ticket_visibility",
+      "risk": 5,
+      "lines": 9
+    },
+    "CORE-015.12": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 193,
+      "anchor": "notification_header_summary",
+      "risk": 5,
+      "lines": 22
+    },
+    "CORE-015.13": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 216,
+      "anchor": "is_sla_holiday",
+      "risk": 0,
+      "lines": 6
+    },
+    "CORE-015.14": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 223,
+      "anchor": "ldap_authenticate",
+      "risk": 0,
+      "lines": 29
+    },
+    "CORE-015.15": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 253,
+      "anchor": "ldap_authenticate_measured",
+      "risk": 4,
+      "lines": 173
+    },
+    "CORE-015.16": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 427,
+      "anchor": "normalize_employee_number",
+      "risk": 0,
+      "lines": 6
+    },
+    "CORE-015.17": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 434,
+      "anchor": "شناسه کاربری که این کد پرسنلی را دارد (۰ یعنی آزاد است). $ex",
+      "risk": 0,
+      "lines": 1
+    },
+    "CORE-015.18": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 435,
+      "anchor": "employee_number_owner",
+      "risk": 0,
+      "lines": 9
+    },
+    "CORE-015.19": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 445,
+      "anchor": "upsert_domain_user",
+      "risk": 1,
+      "lines": 67
+    },
+    "CORE-015.20": {
+      "path": "lib/notify-users.php",
+      "area": "CORE",
+      "line": 513,
+      "anchor": "link_agent_assets_to_user",
+      "risk": 1,
+      "lines": 10
+    },
+    "CORE-016.01": {
+      "path": "lib/settings-effects.php",
+      "area": "CORE",
+      "line": 1,
+      "anchor": "بلوک رویه‌ای 1-13",
+      "risk": 0,
+      "lines": 13
+    },
+    "CORE-016.02": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 14,
@@ -27309,7 +27341,7 @@
       "risk": 0,
       "lines": 23
     },
-    "CORE-015.03": {
+    "CORE-016.03": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 38,
@@ -27317,7 +27349,7 @@
       "risk": 0,
       "lines": 7
     },
-    "CORE-015.04": {
+    "CORE-016.04": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 46,
@@ -27325,7 +27357,7 @@
       "risk": 1,
       "lines": 10
     },
-    "CORE-015.05": {
+    "CORE-016.05": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 57,
@@ -27333,7 +27365,7 @@
       "risk": 0,
       "lines": 57
     },
-    "CORE-015.06": {
+    "CORE-016.06": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 115,
@@ -27341,7 +27373,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-015.07": {
+    "CORE-016.07": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 126,
@@ -27349,7 +27381,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-015.08": {
+    "CORE-016.08": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 144,
@@ -27357,7 +27389,7 @@
       "risk": 0,
       "lines": 32
     },
-    "CORE-015.09": {
+    "CORE-016.09": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 177,
@@ -27365,7 +27397,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-015.10": {
+    "CORE-016.10": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 183,
@@ -27373,7 +27405,7 @@
       "risk": 0,
       "lines": 14
     },
-    "CORE-015.11": {
+    "CORE-016.11": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 198,
@@ -27381,7 +27413,7 @@
       "risk": 0,
       "lines": 30
     },
-    "CORE-015.12": {
+    "CORE-016.12": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 229,
@@ -27389,7 +27421,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-015.13": {
+    "CORE-016.13": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 236,
@@ -27397,7 +27429,7 @@
       "risk": 0,
       "lines": 9
     },
-    "CORE-015.14": {
+    "CORE-016.14": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 246,
@@ -27405,7 +27437,7 @@
       "risk": 0,
       "lines": 6
     },
-    "CORE-015.15": {
+    "CORE-016.15": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 253,
@@ -27413,7 +27445,7 @@
       "risk": 0,
       "lines": 23
     },
-    "CORE-015.16": {
+    "CORE-016.16": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 277,
@@ -27421,7 +27453,7 @@
       "risk": 2,
       "lines": 13
     },
-    "CORE-015.17": {
+    "CORE-016.17": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 291,
@@ -27429,7 +27461,7 @@
       "risk": 0,
       "lines": 31
     },
-    "CORE-015.18": {
+    "CORE-016.18": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 323,
@@ -27437,7 +27469,7 @@
       "risk": 0,
       "lines": 31
     },
-    "CORE-015.19": {
+    "CORE-016.19": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 355,
@@ -27445,7 +27477,7 @@
       "risk": 0,
       "lines": 8
     },
-    "CORE-015.20": {
+    "CORE-016.20": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 364,
@@ -27453,7 +27485,7 @@
       "risk": 0,
       "lines": 16
     },
-    "CORE-015.21": {
+    "CORE-016.21": {
       "path": "lib/settings-effects.php",
       "area": "CORE",
       "line": 381,
@@ -27461,7 +27493,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-016.01": {
+    "CORE-017.01": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 1,
@@ -27469,7 +27501,7 @@
       "risk": 0,
       "lines": 19
     },
-    "CORE-016.02": {
+    "CORE-017.02": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 20,
@@ -27477,7 +27509,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-016.03": {
+    "CORE-017.03": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 26,
@@ -27485,7 +27517,7 @@
       "risk": 0,
       "lines": 25
     },
-    "CORE-016.04": {
+    "CORE-017.04": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 52,
@@ -27493,7 +27525,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-016.05": {
+    "CORE-017.05": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 74,
@@ -27501,7 +27533,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-016.06": {
+    "CORE-017.06": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 85,
@@ -27509,7 +27541,7 @@
       "risk": 0,
       "lines": 22
     },
-    "CORE-016.07": {
+    "CORE-017.07": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 108,
@@ -27517,7 +27549,7 @@
       "risk": 4,
       "lines": 98
     },
-    "CORE-016.08": {
+    "CORE-017.08": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 207,
@@ -27525,7 +27557,7 @@
       "risk": 8,
       "lines": 55
     },
-    "CORE-016.09": {
+    "CORE-017.09": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 263,
@@ -27533,7 +27565,7 @@
       "risk": 0,
       "lines": 37
     },
-    "CORE-016.10": {
+    "CORE-017.10": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 301,
@@ -27541,7 +27573,7 @@
       "risk": 0,
       "lines": 13
     },
-    "CORE-016.11": {
+    "CORE-017.11": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 315,
@@ -27549,7 +27581,7 @@
       "risk": 4,
       "lines": 26
     },
-    "CORE-016.12": {
+    "CORE-017.12": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 342,
@@ -27557,7 +27589,7 @@
       "risk": 5,
       "lines": 19
     },
-    "CORE-016.13": {
+    "CORE-017.13": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 362,
@@ -27565,7 +27597,7 @@
       "risk": 10,
       "lines": 95
     },
-    "CORE-016.14": {
+    "CORE-017.14": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 458,
@@ -27573,7 +27605,7 @@
       "risk": 0,
       "lines": 5
     },
-    "CORE-016.15": {
+    "CORE-017.15": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 464,
@@ -27581,7 +27613,7 @@
       "risk": 0,
       "lines": 29
     },
-    "CORE-016.16": {
+    "CORE-017.16": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 494,
@@ -27589,7 +27621,7 @@
       "risk": 0,
       "lines": 27
     },
-    "CORE-016.17": {
+    "CORE-017.17": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 522,
@@ -27597,7 +27629,7 @@
       "risk": 0,
       "lines": 10
     },
-    "CORE-016.18": {
+    "CORE-017.18": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 533,
@@ -27605,7 +27637,7 @@
       "risk": 0,
       "lines": 20
     },
-    "CORE-016.19": {
+    "CORE-017.19": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 554,
@@ -27613,7 +27645,7 @@
       "risk": 1,
       "lines": 16
     },
-    "CORE-016.20": {
+    "CORE-017.20": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 571,
@@ -27621,7 +27653,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-016.21": {
+    "CORE-017.21": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 576,
@@ -27629,7 +27661,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-016.22": {
+    "CORE-017.22": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 581,
@@ -27637,7 +27669,7 @@
       "risk": 5,
       "lines": 24
     },
-    "CORE-016.23": {
+    "CORE-017.23": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 606,
@@ -27645,7 +27677,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-016.24": {
+    "CORE-017.24": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 618,
@@ -27653,7 +27685,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-016.25": {
+    "CORE-017.25": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 636,
@@ -27661,7 +27693,7 @@
       "risk": 0,
       "lines": 54
     },
-    "CORE-016.26": {
+    "CORE-017.26": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 691,
@@ -27669,7 +27701,7 @@
       "risk": 0,
       "lines": 11
     },
-    "CORE-016.27": {
+    "CORE-017.27": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 703,
@@ -27677,7 +27709,7 @@
       "risk": 0,
       "lines": 15
     },
-    "CORE-016.28": {
+    "CORE-017.28": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 719,
@@ -27685,7 +27717,7 @@
       "risk": 0,
       "lines": 21
     },
-    "CORE-016.29": {
+    "CORE-017.29": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 741,
@@ -27693,7 +27725,7 @@
       "risk": 0,
       "lines": 24
     },
-    "CORE-016.30": {
+    "CORE-017.30": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 766,
@@ -27701,7 +27733,7 @@
       "risk": 0,
       "lines": 17
     },
-    "CORE-016.31": {
+    "CORE-017.31": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 784,
@@ -27709,7 +27741,7 @@
       "risk": 5,
       "lines": 33
     },
-    "CORE-016.32": {
+    "CORE-017.32": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 818,
@@ -27717,7 +27749,7 @@
       "risk": 0,
       "lines": 48
     },
-    "CORE-016.33": {
+    "CORE-017.33": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 867,
@@ -27725,7 +27757,7 @@
       "risk": 1,
       "lines": 8
     },
-    "CORE-016.34": {
+    "CORE-017.34": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 876,
@@ -27733,7 +27765,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-016.35": {
+    "CORE-017.35": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 881,
@@ -27741,7 +27773,7 @@
       "risk": 0,
       "lines": 4
     },
-    "CORE-016.36": {
+    "CORE-017.36": {
       "path": "lib/tickets-sla.php",
       "area": "CORE",
       "line": 886,

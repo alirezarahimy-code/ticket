@@ -178,7 +178,7 @@ benchmark-results/management-report-operations-fa.md	benchmark	75	8205
 benchmark-results/operations-container-stats.txt	benchmark	1	86
 benchmark-results/system-resilience.json	benchmark	651	15154
 benchmark-results/system-resilience.md	benchmark	85	6581
-bootstrap.php	core	81	4673
+bootstrap.php	core	84	4790
 calendar-template.csv	root-misc	4	119
 calendar-template.ics	root-misc	14	297
 cd-dvd.php	core	894	71859
@@ -372,7 +372,7 @@ global-search.php	core	121	12295
 governance.php	core	545	48255
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
-index.php	core	2999	283638
+index.php	core	2989	283366
 install-empty-db.sql	sql-root	1612	82181
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -382,6 +382,7 @@ lib/activity-audit.php	lib	599	34995
 lib/asset-identity.php	lib	3	163
 lib/auth-scope.php	lib	442	21662
 lib/db-core.php	lib	611	26637
+lib/http-input.php	lib	24	671
 lib/ldap.php	lib	411	20350
 lib/log-catalog.php	lib	48	20811
 lib/logging-audit.php	lib	642	30185

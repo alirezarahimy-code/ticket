@@ -13059,8 +13059,8 @@
             "id": "PAGE-008",
             "path": "bootstrap.php",
             "area": "PAGE",
-            "lines": 82,
-            "file_fingerprint": "ba7ecec15484",
+            "lines": 85,
+            "file_fingerprint": "ec2244ec629e",
             "blocks": [
                 {
                     "kind": "region",
@@ -13274,14 +13274,27 @@
                     "kind": "region",
                     "anchor": "ثبت فعالیت، حسابرسی و رویداد درخواست‌ها (شرح در سرآیند همان ",
                     "line_start": 79,
-                    "line_end": 82,
-                    "lines": 4,
+                    "line_end": 81,
+                    "lines": 3,
                     "fingerprint": "12a005f7a0d7",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "PAGE-008.17"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "Shared request input normalization and allowlisted choice he",
+                    "line_start": 82,
+                    "line_end": 85,
+                    "lines": 4,
+                    "fingerprint": "e2267f6fe777",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-008.18"
                 }
             ]
         },
@@ -31800,8 +31813,8 @@
             "id": "PAGE-034",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 3000,
-            "file_fingerprint": "8fb0127f434b",
+            "lines": 2990,
+            "file_fingerprint": "0175ae969489",
             "blocks": [
                 {
                     "kind": "region",
@@ -31848,26 +31861,24 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "post_value",
+                    "anchor": "csv_cell",
                     "line_start": 39,
-                    "line_end": 42,
-                    "lines": 4,
-                    "fingerprint": "839a47923e04",
+                    "line_end": 43,
+                    "lines": 5,
+                    "fingerprint": "f94b47eaaec8",
                     "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "PAGE-034.04"
                 },
                 {
                     "kind": "function",
-                    "anchor": "csv_cell",
-                    "line_start": 44,
+                    "anchor": "excel_cell",
+                    "line_start": 45,
                     "line_end": 48,
-                    "lines": 5,
-                    "fingerprint": "f94b47eaaec8",
+                    "lines": 4,
+                    "fingerprint": "3516b67eb706",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -31876,22 +31887,9 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "excel_cell",
-                    "line_start": 50,
-                    "line_end": 53,
-                    "lines": 4,
-                    "fingerprint": "3516b67eb706",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.06"
-                },
-                {
-                    "kind": "function",
                     "anchor": "excel_download",
-                    "line_start": 55,
-                    "line_end": 116,
+                    "line_start": 50,
+                    "line_end": 111,
                     "lines": 62,
                     "fingerprint": "fee434783b2b",
                     "risk": {
@@ -31900,15 +31898,28 @@
                             "silent_catch": 4
                         }
                     },
+                    "id": "PAGE-034.06"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "log_sort_order",
+                    "line_start": 113,
+                    "line_end": 121,
+                    "lines": 9,
+                    "fingerprint": "bcc68c998050",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
                     "id": "PAGE-034.07"
                 },
                 {
                     "kind": "function",
-                    "anchor": "valid_choice",
-                    "line_start": 118,
-                    "line_end": 121,
-                    "lines": 4,
-                    "fingerprint": "ec1c48dd070f",
+                    "anchor": "log_sort_header_row",
+                    "line_start": 123,
+                    "line_end": 142,
+                    "lines": 20,
+                    "fingerprint": "c02e21315045",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -31917,11 +31928,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "log_sort_order",
-                    "line_start": 123,
-                    "line_end": 131,
-                    "lines": 9,
-                    "fingerprint": "bcc68c998050",
+                    "anchor": "log_bounded_date_range",
+                    "line_start": 144,
+                    "line_end": 163,
+                    "lines": 20,
+                    "fingerprint": "befe1c18ce56",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -31930,35 +31941,9 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "log_sort_header_row",
-                    "line_start": 133,
-                    "line_end": 152,
-                    "lines": 20,
-                    "fingerprint": "c02e21315045",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.10"
-                },
-                {
-                    "kind": "function",
-                    "anchor": "log_bounded_date_range",
-                    "line_start": 154,
-                    "line_end": 173,
-                    "lines": 20,
-                    "fingerprint": "befe1c18ce56",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.11"
-                },
-                {
-                    "kind": "function",
                     "anchor": "activity_log_filters",
-                    "line_start": 175,
-                    "line_end": 240,
+                    "line_start": 165,
+                    "line_end": 230,
                     "lines": 66,
                     "fingerprint": "2b944d4837bc",
                     "risk": {
@@ -31967,15 +31952,41 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.12"
+                    "id": "PAGE-034.10"
                 },
                 {
                     "kind": "function",
                     "anchor": "activity_log_meta_lines",
-                    "line_start": 242,
-                    "line_end": 262,
+                    "line_start": 232,
+                    "line_end": 252,
                     "lines": 21,
                     "fingerprint": "6df5a6289eb4",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.11"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "imported_calendar_date",
+                    "line_start": 254,
+                    "line_end": 268,
+                    "lines": 15,
+                    "fingerprint": "093a0ec4575c",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.12"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "calendar_unescape",
+                    "line_start": 270,
+                    "line_end": 273,
+                    "lines": 4,
+                    "fingerprint": "28bce79c207d",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -31984,11 +31995,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "imported_calendar_date",
-                    "line_start": 264,
-                    "line_end": 278,
-                    "lines": 15,
-                    "fingerprint": "093a0ec4575c",
+                    "anchor": "parse_calendar_import",
+                    "line_start": 275,
+                    "line_end": 346,
+                    "lines": 72,
+                    "fingerprint": "75c03bd1abf6",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -31997,35 +32008,9 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "calendar_unescape",
-                    "line_start": 280,
-                    "line_end": 283,
-                    "lines": 4,
-                    "fingerprint": "28bce79c207d",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.15"
-                },
-                {
-                    "kind": "function",
-                    "anchor": "parse_calendar_import",
-                    "line_start": 285,
-                    "line_end": 356,
-                    "lines": 72,
-                    "fingerprint": "75c03bd1abf6",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.16"
-                },
-                {
-                    "kind": "function",
                     "anchor": "store_attachment",
-                    "line_start": 358,
-                    "line_end": 411,
+                    "line_start": 348,
+                    "line_end": 401,
                     "lines": 54,
                     "fingerprint": "aefad6e63bff",
                     "risk": {
@@ -32036,13 +32021,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-034.17"
+                    "id": "PAGE-034.15"
                 },
                 {
                     "kind": "function",
                     "anchor": "store_profile_photo",
-                    "line_start": 413,
-                    "line_end": 436,
+                    "line_start": 403,
+                    "line_end": 426,
                     "lines": 24,
                     "fingerprint": "fccc34dfbe14",
                     "risk": {
@@ -32051,15 +32036,41 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "PAGE-034.18"
+                    "id": "PAGE-034.16"
                 },
                 {
                     "kind": "function",
                     "anchor": "valid_iranian_national_code",
-                    "line_start": 438,
-                    "line_end": 450,
+                    "line_start": 428,
+                    "line_end": 440,
                     "lines": 13,
                     "fingerprint": "711d16c1e7ce",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.17"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "fetch_ticket",
+                    "line_start": 442,
+                    "line_end": 447,
+                    "lines": 6,
+                    "fingerprint": "0666886407a9",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.18"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "can_view_ticket",
+                    "line_start": 449,
+                    "line_end": 452,
+                    "lines": 4,
+                    "fingerprint": "97f02a9d6662",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32068,11 +32079,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "fetch_ticket",
-                    "line_start": 452,
-                    "line_end": 457,
-                    "lines": 6,
-                    "fingerprint": "0666886407a9",
+                    "anchor": "ticket_org_manager_rank_sql",
+                    "line_start": 454,
+                    "line_end": 473,
+                    "lines": 20,
+                    "fingerprint": "c6b3b2a91df7",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32081,35 +32092,9 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "can_view_ticket",
-                    "line_start": 459,
-                    "line_end": 462,
-                    "lines": 4,
-                    "fingerprint": "97f02a9d6662",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.21"
-                },
-                {
-                    "kind": "function",
-                    "anchor": "ticket_org_manager_rank_sql",
-                    "line_start": 464,
-                    "line_end": 483,
-                    "lines": 20,
-                    "fingerprint": "c6b3b2a91df7",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.22"
-                },
-                {
-                    "kind": "function",
                     "anchor": "choose_handling_agent",
-                    "line_start": 485,
-                    "line_end": 527,
+                    "line_start": 475,
+                    "line_end": 517,
                     "lines": 43,
                     "fingerprint": "15d895992750",
                     "risk": {
@@ -32118,15 +32103,41 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-034.23"
+                    "id": "PAGE-034.21"
                 },
                 {
                     "kind": "function",
                     "anchor": "ticket_allowed_transitions",
-                    "line_start": 529,
-                    "line_end": 537,
+                    "line_start": 519,
+                    "line_end": 527,
                     "lines": 9,
                     "fingerprint": "65ec4fe6a1e2",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.22"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "ticket_requester_cancelable_statuses",
+                    "line_start": 528,
+                    "line_end": 532,
+                    "lines": 5,
+                    "fingerprint": "a2aefafb7d6a",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.23"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "ticket_requester_can_cancel_directly",
+                    "line_start": 534,
+                    "line_end": 540,
+                    "lines": 7,
+                    "fingerprint": "b6f46425e521",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32135,11 +32146,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_requester_cancelable_statuses",
-                    "line_start": 538,
-                    "line_end": 542,
-                    "lines": 5,
-                    "fingerprint": "a2aefafb7d6a",
+                    "anchor": "ticket_requester_can_cancel",
+                    "line_start": 542,
+                    "line_end": 548,
+                    "lines": 7,
+                    "fingerprint": "89c240333435",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32148,11 +32159,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_requester_can_cancel_directly",
-                    "line_start": 544,
-                    "line_end": 550,
-                    "lines": 7,
-                    "fingerprint": "b6f46425e521",
+                    "anchor": "notify_ticket_resolved",
+                    "line_start": 550,
+                    "line_end": 559,
+                    "lines": 10,
+                    "fingerprint": "cb4564b667e5",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32161,35 +32172,9 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_requester_can_cancel",
-                    "line_start": 552,
-                    "line_end": 558,
-                    "lines": 7,
-                    "fingerprint": "89c240333435",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.27"
-                },
-                {
-                    "kind": "function",
-                    "anchor": "notify_ticket_resolved",
-                    "line_start": 560,
-                    "line_end": 569,
-                    "lines": 10,
-                    "fingerprint": "cb4564b667e5",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.28"
-                },
-                {
-                    "kind": "function",
                     "anchor": "report_query_filters",
-                    "line_start": 570,
-                    "line_end": 624,
+                    "line_start": 560,
+                    "line_end": 614,
                     "lines": 55,
                     "fingerprint": "84439a30370d",
                     "risk": {
@@ -32198,13 +32183,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.29"
+                    "id": "PAGE-034.27"
                 },
                 {
                     "kind": "function",
                     "anchor": "render_header",
-                    "line_start": 626,
-                    "line_end": 775,
+                    "line_start": 616,
+                    "line_end": 765,
                     "lines": 150,
                     "fingerprint": "112647300de0",
                     "risk": {
@@ -32215,13 +32200,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-034.30"
+                    "id": "PAGE-034.28"
                 },
                 {
                     "kind": "function",
                     "anchor": "list_sort_page_off",
-                    "line_start": 777,
-                    "line_end": 784,
+                    "line_start": 767,
+                    "line_end": 774,
                     "lines": 8,
                     "fingerprint": "58c426e3031d",
                     "risk": {
@@ -32230,41 +32215,71 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.31"
+                    "id": "PAGE-034.29"
                 },
                 {
                     "kind": "function",
                     "anchor": "inspection_food_reminder_markup",
-                    "line_start": 786,
-                    "line_end": 807,
+                    "line_start": 776,
+                    "line_end": 797,
                     "lines": 22,
                     "fingerprint": "c1606ff28c22",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.32"
+                    "id": "PAGE-034.30"
                 },
                 {
                     "kind": "function",
                     "anchor": "render_footer",
-                    "line_start": 809,
-                    "line_end": 840,
+                    "line_start": 799,
+                    "line_end": 830,
                     "lines": 32,
                     "fingerprint": "c2afef9b43e2",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
+                    "id": "PAGE-034.31"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 831-836",
+                    "line_start": 831,
+                    "line_end": 836,
+                    "lines": 6,
+                    "fingerprint": "3840c6886ca8",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.32"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)",
+                    "line_start": 837,
+                    "line_end": 856,
+                    "lines": 20,
+                    "fingerprint": "b66b35a0e3c5",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
                     "id": "PAGE-034.33"
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 841-846",
-                    "line_start": 841,
-                    "line_end": 846,
-                    "lines": 6,
-                    "fingerprint": "3840c6886ca8",
+                    "anchor": "ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن",
+                    "line_start": 857,
+                    "line_end": 858,
+                    "lines": 2,
+                    "fingerprint": "38510fecda69",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32275,11 +32290,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)",
-                    "line_start": 847,
+                    "anchor": "۱.۵۰: کاربر محلی\/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌ف",
+                    "line_start": 859,
                     "line_end": 866,
-                    "lines": 20,
-                    "fingerprint": "b66b35a0e3c5",
+                    "lines": 8,
+                    "fingerprint": "717ff456bd9c",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32290,11 +32305,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن",
+                    "anchor": "مسیر: must_change_password|change-password",
                     "line_start": 867,
-                    "line_end": 868,
-                    "lines": 2,
-                    "fingerprint": "38510fecda69",
+                    "line_end": 877,
+                    "lines": 11,
+                    "fingerprint": "e722ae2b9213",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32305,26 +32320,24 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "۱.۵۰: کاربر محلی\/بازرسی به سفارش غذا هدایت می‌شود؛ رمز پیش‌ف",
-                    "line_start": 869,
-                    "line_end": 876,
-                    "lines": 8,
-                    "fingerprint": "717ff456bd9c",
+                    "anchor": "مسیر: REQUEST_METHOD|POST|organization",
+                    "line_start": 878,
+                    "line_end": 891,
+                    "lines": 14,
+                    "fingerprint": "f2106fcdd212",
                     "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "PAGE-034.37"
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: must_change_password|change-password",
-                    "line_start": 877,
-                    "line_end": 887,
-                    "lines": 11,
-                    "fingerprint": "e722ae2b9213",
+                    "anchor": "مسیر: food-ticket|food_api",
+                    "line_start": 892,
+                    "line_end": 905,
+                    "lines": 14,
+                    "fingerprint": "cca8025393d0",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32335,37 +32348,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: REQUEST_METHOD|POST|organization",
-                    "line_start": 888,
-                    "line_end": 901,
-                    "lines": 14,
-                    "fingerprint": "f2106fcdd212",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.39"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: food-ticket|food_api",
-                    "line_start": 902,
-                    "line_end": 915,
-                    "lines": 14,
-                    "fingerprint": "cca8025393d0",
-                    "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.40"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: food-order|food_api",
-                    "line_start": 916,
-                    "line_end": 927,
+                    "line_start": 906,
+                    "line_end": 917,
                     "lines": 12,
                     "fingerprint": "274532b07a3d",
                     "risk": {
@@ -32374,13 +32359,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.41"
+                    "id": "PAGE-034.39"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control|traffic_api",
-                    "line_start": 928,
-                    "line_end": 1073,
+                    "line_start": 918,
+                    "line_end": 1063,
                     "lines": 146,
                     "fingerprint": "0844eeb96485",
                     "risk": {
@@ -32392,13 +32377,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-034.42"
+                    "id": "PAGE-034.40"
                 },
                 {
                     "kind": "region",
                     "anchor": "خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط داده‌های هم",
-                    "line_start": 1074,
-                    "line_end": 1188,
+                    "line_start": 1064,
+                    "line_end": 1178,
                     "lines": 115,
                     "fingerprint": "627d7bec6dfe",
                     "risk": {
@@ -32408,28 +32393,59 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.43"
+                    "id": "PAGE-034.41"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-personnel-link",
-                    "line_start": 1189,
-                    "line_end": 1194,
+                    "line_start": 1179,
+                    "line_end": 1184,
                     "lines": 6,
                     "fingerprint": "19cd1122ddcd",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.44"
+                    "id": "PAGE-034.42"
                 },
                 {
                     "kind": "region",
                     "anchor": "ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه‌بندی با ب",
-                    "line_start": 1195,
-                    "line_end": 1198,
+                    "line_start": 1185,
+                    "line_end": 1188,
                     "lines": 4,
                     "fingerprint": "c8585701f829",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.43"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: logging_begin_operation",
+                    "line_start": 1189,
+                    "line_end": 1303,
+                    "lines": 115,
+                    "fingerprint": "5fbaff80d937",
+                    "risk": {
+                        "score": 6,
+                        "flags": {
+                            "silent_catch": 4,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.44"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: settings|create_access_group|save_access_group",
+                    "line_start": 1304,
+                    "line_end": 1314,
+                    "lines": 11,
+                    "fingerprint": "4718e06c3f86",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32440,42 +32456,37 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: logging_begin_operation",
-                    "line_start": 1199,
-                    "line_end": 1313,
-                    "lines": 115,
-                    "fingerprint": "5fbaff80d937",
+                    "anchor": "مسیر: chatbot-api",
+                    "line_start": 1315,
+                    "line_end": 1367,
+                    "lines": 53,
+                    "fingerprint": "318a5024ad97",
                     "risk": {
-                        "score": 6,
-                        "flags": {
-                            "silent_catch": 4,
-                            "raw_input": 2
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "PAGE-034.46"
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: settings|create_access_group|save_access_group",
-                    "line_start": 1314,
-                    "line_end": 1324,
-                    "lines": 11,
-                    "fingerprint": "4718e06c3f86",
+                    "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
+                    "line_start": 1368,
+                    "line_end": 1368,
+                    "lines": 1,
+                    "fingerprint": "dc537f6d8cd4",
                     "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "PAGE-034.47"
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: chatbot-api",
-                    "line_start": 1325,
-                    "line_end": 1377,
-                    "lines": 53,
-                    "fingerprint": "318a5024ad97",
+                    "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
+                    "line_start": 1369,
+                    "line_end": 1369,
+                    "lines": 1,
+                    "fingerprint": "ded263ea996a",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32484,11 +32495,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
-                    "line_start": 1378,
-                    "line_end": 1378,
+                    "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
+                    "line_start": 1370,
+                    "line_end": 1370,
                     "lines": 1,
-                    "fingerprint": "dc537f6d8cd4",
+                    "fingerprint": "127c6305eea4",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32497,11 +32508,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
-                    "line_start": 1379,
-                    "line_end": 1379,
-                    "lines": 1,
-                    "fingerprint": "ded263ea996a",
+                    "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
+                    "line_start": 1371,
+                    "line_end": 1378,
+                    "lines": 8,
+                    "fingerprint": "9a2638f68caf",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32510,11 +32521,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
-                    "line_start": 1380,
-                    "line_end": 1380,
-                    "lines": 1,
-                    "fingerprint": "127c6305eea4",
+                    "anchor": "شرط مسیریابی",
+                    "line_start": 1379,
+                    "line_end": 1386,
+                    "lines": 8,
+                    "fingerprint": "f0442e04b38a",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32523,11 +32534,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
-                    "line_start": 1381,
-                    "line_end": 1388,
-                    "lines": 8,
-                    "fingerprint": "9a2638f68caf",
+                    "anchor": "مسیر: settings|settings.general|settings.domain",
+                    "line_start": 1387,
+                    "line_end": 1395,
+                    "lines": 9,
+                    "fingerprint": "6104a36b9f4a",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32536,11 +32547,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "شرط مسیریابی",
-                    "line_start": 1389,
-                    "line_end": 1396,
-                    "lines": 8,
-                    "fingerprint": "f0442e04b38a",
+                    "anchor": "مسیر: change-password",
+                    "line_start": 1396,
+                    "line_end": 1398,
+                    "lines": 3,
+                    "fingerprint": "124bfe57a669",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32549,11 +32560,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: settings|settings.general|settings.domain",
-                    "line_start": 1397,
-                    "line_end": 1405,
-                    "lines": 9,
-                    "fingerprint": "6104a36b9f4a",
+                    "anchor": "مسیر: local-accounts",
+                    "line_start": 1399,
+                    "line_end": 1401,
+                    "lines": 3,
+                    "fingerprint": "b29f0eab1a78",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32562,11 +32573,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: change-password",
-                    "line_start": 1406,
-                    "line_end": 1408,
-                    "lines": 3,
-                    "fingerprint": "124bfe57a669",
+                    "anchor": "مسیر: profile",
+                    "line_start": 1402,
+                    "line_end": 1419,
+                    "lines": 18,
+                    "fingerprint": "17fcefba2ed2",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32575,11 +32586,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: local-accounts",
-                    "line_start": 1409,
-                    "line_end": 1411,
-                    "lines": 3,
-                    "fingerprint": "b29f0eab1a78",
+                    "anchor": "مسیر: governance",
+                    "line_start": 1420,
+                    "line_end": 1423,
+                    "lines": 4,
+                    "fingerprint": "f648535c873c",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32588,11 +32599,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: profile",
-                    "line_start": 1412,
-                    "line_end": 1429,
-                    "lines": 18,
-                    "fingerprint": "17fcefba2ed2",
+                    "anchor": "مسیر: food-ticket",
+                    "line_start": 1424,
+                    "line_end": 1428,
+                    "lines": 5,
+                    "fingerprint": "ae9f68a9cd0b",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32601,11 +32612,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: governance",
-                    "line_start": 1430,
-                    "line_end": 1433,
-                    "lines": 4,
-                    "fingerprint": "f648535c873c",
+                    "anchor": "مسیر: food-order|foodorder.self",
+                    "line_start": 1429,
+                    "line_end": 1436,
+                    "lines": 8,
+                    "fingerprint": "04d0caca12c5",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32614,11 +32625,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: food-ticket",
-                    "line_start": 1434,
-                    "line_end": 1438,
-                    "lines": 5,
-                    "fingerprint": "ae9f68a9cd0b",
+                    "anchor": "مسیر: food-order",
+                    "line_start": 1437,
+                    "line_end": 1440,
+                    "lines": 4,
+                    "fingerprint": "bc897f4ac2b2",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32627,11 +32638,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: food-order|foodorder.self",
-                    "line_start": 1439,
-                    "line_end": 1446,
-                    "lines": 8,
-                    "fingerprint": "04d0caca12c5",
+                    "anchor": "مسیر: cd-dvd",
+                    "line_start": 1441,
+                    "line_end": 1444,
+                    "lines": 4,
+                    "fingerprint": "787561b508a4",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32640,11 +32651,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: food-order",
-                    "line_start": 1447,
-                    "line_end": 1450,
+                    "anchor": "مسیر: cd-dvd-history",
+                    "line_start": 1445,
+                    "line_end": 1448,
                     "lines": 4,
-                    "fingerprint": "bc897f4ac2b2",
+                    "fingerprint": "382f96759a4b",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32653,11 +32664,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: cd-dvd",
-                    "line_start": 1451,
-                    "line_end": 1454,
-                    "lines": 4,
-                    "fingerprint": "787561b508a4",
+                    "anchor": "مسیر: traffic-control",
+                    "line_start": 1449,
+                    "line_end": 1451,
+                    "lines": 3,
+                    "fingerprint": "4d764e6a405e",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32666,24 +32677,26 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: cd-dvd-history",
-                    "line_start": 1455,
-                    "line_end": 1458,
-                    "lines": 4,
-                    "fingerprint": "382f96759a4b",
+                    "anchor": "مسیر: traffic-control-print",
+                    "line_start": 1452,
+                    "line_end": 1456,
+                    "lines": 5,
+                    "fingerprint": "41ceb636d97c",
                     "risk": {
-                        "score": 0,
-                        "flags": []
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
                     },
                     "id": "PAGE-034.63"
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: traffic-control",
-                    "line_start": 1459,
-                    "line_end": 1461,
-                    "lines": 3,
-                    "fingerprint": "4d764e6a405e",
+                    "anchor": "مسیر: help",
+                    "line_start": 1457,
+                    "line_end": 1464,
+                    "lines": 8,
+                    "fingerprint": "f98b5e6182d3",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32692,11 +32705,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: traffic-control-print",
-                    "line_start": 1462,
-                    "line_end": 1466,
-                    "lines": 5,
-                    "fingerprint": "41ceb636d97c",
+                    "anchor": "مسیر: knowledge",
+                    "line_start": 1465,
+                    "line_end": 1501,
+                    "lines": 37,
+                    "fingerprint": "a678358f57c8",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32707,11 +32720,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: help",
-                    "line_start": 1467,
-                    "line_end": 1474,
+                    "anchor": "مسیر: notifications|notif.view",
+                    "line_start": 1502,
+                    "line_end": 1509,
                     "lines": 8,
-                    "fingerprint": "f98b5e6182d3",
+                    "fingerprint": "dc86bc55d5b1",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32720,37 +32733,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: knowledge",
-                    "line_start": 1475,
-                    "line_end": 1511,
-                    "lines": 37,
-                    "fingerprint": "a678358f57c8",
-                    "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.67"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: notifications|notif.view",
-                    "line_start": 1512,
-                    "line_end": 1519,
-                    "lines": 8,
-                    "fingerprint": "dc86bc55d5b1",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.68"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: notifications",
-                    "line_start": 1520,
-                    "line_end": 1537,
+                    "line_start": 1510,
+                    "line_end": 1527,
                     "lines": 18,
                     "fingerprint": "3f21cd6d56c6",
                     "risk": {
@@ -32759,15 +32744,41 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-034.69"
+                    "id": "PAGE-034.67"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: audit",
-                    "line_start": 1538,
-                    "line_end": 1546,
+                    "line_start": 1528,
+                    "line_end": 1536,
                     "lines": 9,
                     "fingerprint": "87a567f11e96",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.68"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: logging-dashboard",
+                    "line_start": 1537,
+                    "line_end": 1540,
+                    "lines": 4,
+                    "fingerprint": "54e47224bef5",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.69"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: system-health",
+                    "line_start": 1541,
+                    "line_end": 1544,
+                    "lines": 4,
+                    "fingerprint": "be1344b02adc",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32776,11 +32787,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: logging-dashboard",
-                    "line_start": 1547,
+                    "anchor": "مسیر: logs",
+                    "line_start": 1545,
                     "line_end": 1550,
-                    "lines": 4,
-                    "fingerprint": "54e47224bef5",
+                    "lines": 6,
+                    "fingerprint": "c65f22cdca8f",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -32789,35 +32800,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: system-health",
-                    "line_start": 1551,
-                    "line_end": 1554,
-                    "lines": 4,
-                    "fingerprint": "be1344b02adc",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.72"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: logs",
-                    "line_start": 1555,
-                    "line_end": 1560,
-                    "lines": 6,
-                    "fingerprint": "c65f22cdca8f",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.73"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: activity-log",
-                    "line_start": 1561,
-                    "line_end": 1703,
+                    "line_start": 1551,
+                    "line_end": 1693,
                     "lines": 143,
                     "fingerprint": "84d1643d662a",
                     "risk": {
@@ -32828,13 +32813,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-034.74"
+                    "id": "PAGE-034.72"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: backup",
-                    "line_start": 1704,
-                    "line_end": 1742,
+                    "line_start": 1694,
+                    "line_end": 1732,
                     "lines": 39,
                     "fingerprint": "fe4ec71b0d1e",
                     "risk": {
@@ -32844,26 +32829,26 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-034.75"
+                    "id": "PAGE-034.73"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: search|search.global",
-                    "line_start": 1743,
-                    "line_end": 1750,
+                    "line_start": 1733,
+                    "line_end": 1740,
                     "lines": 8,
                     "fingerprint": "08b9308aa266",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.76"
+                    "id": "PAGE-034.74"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: search",
-                    "line_start": 1751,
-                    "line_end": 1842,
+                    "line_start": 1741,
+                    "line_end": 1832,
                     "lines": 92,
                     "fingerprint": "b49318a35b2b",
                     "risk": {
@@ -32873,13 +32858,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.77"
+                    "id": "PAGE-034.75"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-admin",
-                    "line_start": 1843,
-                    "line_end": 1945,
+                    "line_start": 1833,
+                    "line_end": 1935,
                     "lines": 103,
                     "fingerprint": "bada5e1b1cb6",
                     "risk": {
@@ -32889,41 +32874,72 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "PAGE-034.78"
+                    "id": "PAGE-034.76"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: holidays",
-                    "line_start": 1946,
-                    "line_end": 1956,
+                    "line_start": 1936,
+                    "line_end": 1946,
                     "lines": 11,
                     "fingerprint": "a1479fd7dd66",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.79"
+                    "id": "PAGE-034.77"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: new-ticket|ticket.create",
-                    "line_start": 1957,
-                    "line_end": 1969,
+                    "line_start": 1947,
+                    "line_end": 1959,
                     "lines": 13,
                     "fingerprint": "ad7ff55168a7",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.80"
+                    "id": "PAGE-034.78"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory",
-                    "line_start": 1970,
-                    "line_end": 2070,
+                    "line_start": 1960,
+                    "line_end": 2060,
                     "lines": 101,
                     "fingerprint": "f107c7c13c1c",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.79"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: inventory-diagnostics",
+                    "line_start": 2061,
+                    "line_end": 2092,
+                    "lines": 32,
+                    "fingerprint": "31f6b97d664f",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.80"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: asset-history",
+                    "line_start": 2093,
+                    "line_end": 2110,
+                    "lines": 18,
+                    "fingerprint": "f05d04d150f3",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -32935,11 +32951,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: inventory-diagnostics",
-                    "line_start": 2071,
-                    "line_end": 2102,
-                    "lines": 32,
-                    "fingerprint": "31f6b97d664f",
+                    "anchor": "مسیر: domain-scan",
+                    "line_start": 2111,
+                    "line_end": 2188,
+                    "lines": 78,
+                    "fingerprint": "383375bbfd1a",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32950,11 +32966,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: asset-history",
-                    "line_start": 2103,
-                    "line_end": 2120,
-                    "lines": 18,
-                    "fingerprint": "f05d04d150f3",
+                    "anchor": "مسیر: assets",
+                    "line_start": 2189,
+                    "line_end": 2233,
+                    "lines": 45,
+                    "fingerprint": "53502350682a",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -32966,40 +32982,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: domain-scan",
-                    "line_start": 2121,
-                    "line_end": 2198,
-                    "lines": 78,
-                    "fingerprint": "383375bbfd1a",
-                    "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.84"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: assets",
-                    "line_start": 2199,
-                    "line_end": 2243,
-                    "lines": 45,
-                    "fingerprint": "53502350682a",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.85"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: asset",
-                    "line_start": 2244,
-                    "line_end": 2277,
+                    "line_start": 2234,
+                    "line_end": 2267,
                     "lines": 34,
                     "fingerprint": "59179257a2c4",
                     "risk": {
@@ -33009,13 +32994,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.86"
+                    "id": "PAGE-034.84"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: organization",
-                    "line_start": 2278,
-                    "line_end": 2468,
+                    "line_start": 2268,
+                    "line_end": 2458,
                     "lines": 191,
                     "fingerprint": "5afc13d6b768",
                     "risk": {
@@ -33025,13 +33010,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-034.87"
+                    "id": "PAGE-034.85"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings",
-                    "line_start": 2469,
-                    "line_end": 2938,
+                    "line_start": 2459,
+                    "line_end": 2928,
                     "lines": 470,
                     "fingerprint": "eaf775ca9627",
                     "risk": {
@@ -33043,13 +33028,13 @@
                             "very_long": 3
                         }
                     },
-                    "id": "PAGE-034.88"
+                    "id": "PAGE-034.86"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 2939,
-                    "line_end": 2960,
+                    "line_start": 2929,
+                    "line_end": 2950,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -33058,13 +33043,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.89"
+                    "id": "PAGE-034.87"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: dashboard",
-                    "line_start": 2961,
-                    "line_end": 3000,
+                    "line_start": 2951,
+                    "line_end": 2990,
                     "lines": 40,
                     "fingerprint": "a018b81df29a",
                     "risk": {
@@ -33073,7 +33058,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-034.90"
+                    "id": "PAGE-034.88"
                 }
             ]
         },
@@ -36554,6 +36539,82 @@
         },
         {
             "id": "CORE-005",
+            "path": "lib\/http-input.php",
+            "area": "CORE",
+            "lines": 25,
+            "file_fingerprint": "7e13a6856d3d",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-12",
+                    "line_start": 1,
+                    "line_end": 12,
+                    "lines": 12,
+                    "fingerprint": "5386e4a8eac6",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-005.01"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "post_value",
+                    "line_start": 13,
+                    "line_end": 16,
+                    "lines": 4,
+                    "fingerprint": "839a47923e04",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "CORE-005.02"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 17-19",
+                    "line_start": 17,
+                    "line_end": 19,
+                    "lines": 3,
+                    "fingerprint": "970abc9a04f9",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-005.03"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "valid_choice",
+                    "line_start": 20,
+                    "line_end": 23,
+                    "lines": 4,
+                    "fingerprint": "ec1c48dd070f",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-005.04"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 24-25",
+                    "line_start": 24,
+                    "line_end": 25,
+                    "lines": 2,
+                    "fingerprint": "d10b36aa74a5",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-005.05"
+                }
+            ]
+        },
+        {
+            "id": "CORE-006",
             "path": "lib\/ldap.php",
             "area": "CORE",
             "lines": 412,
@@ -36570,7 +36631,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.01"
+                    "id": "CORE-006.01"
                 },
                 {
                     "kind": "function",
@@ -36583,7 +36644,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.02"
+                    "id": "CORE-006.02"
                 },
                 {
                     "kind": "function",
@@ -36596,7 +36657,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.03"
+                    "id": "CORE-006.03"
                 },
                 {
                     "kind": "function",
@@ -36609,7 +36670,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.04"
+                    "id": "CORE-006.04"
                 },
                 {
                     "kind": "function",
@@ -36622,7 +36683,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.05"
+                    "id": "CORE-006.05"
                 },
                 {
                     "kind": "function",
@@ -36635,7 +36696,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.06"
+                    "id": "CORE-006.06"
                 },
                 {
                     "kind": "function",
@@ -36648,7 +36709,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-005.07"
+                    "id": "CORE-006.07"
                 },
                 {
                     "kind": "function",
@@ -36663,7 +36724,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-005.08"
+                    "id": "CORE-006.08"
                 },
                 {
                     "kind": "function",
@@ -36678,7 +36739,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-005.09"
+                    "id": "CORE-006.09"
                 },
                 {
                     "kind": "function",
@@ -36695,12 +36756,12 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-005.10"
+                    "id": "CORE-006.10"
                 }
             ]
         },
         {
-            "id": "CORE-006",
+            "id": "CORE-007",
             "path": "lib\/log-catalog.php",
             "area": "CORE",
             "lines": 49,
@@ -36717,7 +36778,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-006.01"
+                    "id": "CORE-007.01"
                 },
                 {
                     "kind": "function",
@@ -36730,12 +36791,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-006.02"
+                    "id": "CORE-007.02"
                 }
             ]
         },
         {
-            "id": "CORE-007",
+            "id": "CORE-008",
             "path": "lib\/logging-audit.php",
             "area": "CORE",
             "lines": 643,
@@ -36754,7 +36815,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-007.01"
+                    "id": "CORE-008.01"
                 },
                 {
                     "kind": "function",
@@ -36767,7 +36828,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.02"
+                    "id": "CORE-008.02"
                 },
                 {
                     "kind": "function",
@@ -36780,7 +36841,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.03"
+                    "id": "CORE-008.03"
                 },
                 {
                     "kind": "function",
@@ -36793,7 +36854,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.04"
+                    "id": "CORE-008.04"
                 },
                 {
                     "kind": "function",
@@ -36806,7 +36867,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.05"
+                    "id": "CORE-008.05"
                 },
                 {
                     "kind": "function",
@@ -36819,7 +36880,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.06"
+                    "id": "CORE-008.06"
                 },
                 {
                     "kind": "function",
@@ -36832,7 +36893,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.07"
+                    "id": "CORE-008.07"
                 },
                 {
                     "kind": "function",
@@ -36845,7 +36906,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.08"
+                    "id": "CORE-008.08"
                 },
                 {
                     "kind": "region",
@@ -36858,7 +36919,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.09"
+                    "id": "CORE-008.09"
                 },
                 {
                     "kind": "region",
@@ -36871,7 +36932,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.10"
+                    "id": "CORE-008.10"
                 },
                 {
                     "kind": "region",
@@ -36884,7 +36945,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.11"
+                    "id": "CORE-008.11"
                 },
                 {
                     "kind": "function",
@@ -36897,7 +36958,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.12"
+                    "id": "CORE-008.12"
                 },
                 {
                     "kind": "function",
@@ -36910,7 +36971,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.13"
+                    "id": "CORE-008.13"
                 },
                 {
                     "kind": "function",
@@ -36923,7 +36984,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.14"
+                    "id": "CORE-008.14"
                 },
                 {
                     "kind": "function",
@@ -36938,7 +36999,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-007.15"
+                    "id": "CORE-008.15"
                 },
                 {
                     "kind": "region",
@@ -36951,7 +37012,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.16"
+                    "id": "CORE-008.16"
                 },
                 {
                     "kind": "region",
@@ -36964,7 +37025,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.17"
+                    "id": "CORE-008.17"
                 },
                 {
                     "kind": "region",
@@ -36977,7 +37038,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.18"
+                    "id": "CORE-008.18"
                 },
                 {
                     "kind": "function",
@@ -36990,7 +37051,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.19"
+                    "id": "CORE-008.19"
                 },
                 {
                     "kind": "function",
@@ -37003,7 +37064,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.20"
+                    "id": "CORE-008.20"
                 },
                 {
                     "kind": "function",
@@ -37018,7 +37079,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-007.21"
+                    "id": "CORE-008.21"
                 },
                 {
                     "kind": "region",
@@ -37031,7 +37092,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.22"
+                    "id": "CORE-008.22"
                 },
                 {
                     "kind": "region",
@@ -37044,7 +37105,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.23"
+                    "id": "CORE-008.23"
                 },
                 {
                     "kind": "region",
@@ -37057,7 +37118,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.24"
+                    "id": "CORE-008.24"
                 },
                 {
                     "kind": "function",
@@ -37070,7 +37131,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.25"
+                    "id": "CORE-008.25"
                 },
                 {
                     "kind": "function",
@@ -37085,7 +37146,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-007.26"
+                    "id": "CORE-008.26"
                 },
                 {
                     "kind": "function",
@@ -37100,7 +37161,7 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "CORE-007.27"
+                    "id": "CORE-008.27"
                 },
                 {
                     "kind": "function",
@@ -37113,7 +37174,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.28"
+                    "id": "CORE-008.28"
                 },
                 {
                     "kind": "function",
@@ -37126,7 +37187,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.29"
+                    "id": "CORE-008.29"
                 },
                 {
                     "kind": "function",
@@ -37141,7 +37202,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-007.30"
+                    "id": "CORE-008.30"
                 },
                 {
                     "kind": "function",
@@ -37156,7 +37217,7 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "CORE-007.31"
+                    "id": "CORE-008.31"
                 },
                 {
                     "kind": "function",
@@ -37169,7 +37230,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-007.32"
+                    "id": "CORE-008.32"
                 },
                 {
                     "kind": "function",
@@ -37186,12 +37247,12 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-007.33"
+                    "id": "CORE-008.33"
                 }
             ]
         },
         {
-            "id": "CORE-008",
+            "id": "CORE-009",
             "path": "lib\/logging-core.php",
             "area": "CORE",
             "lines": 1560,
@@ -37208,7 +37269,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.01"
+                    "id": "CORE-009.01"
                 },
                 {
                     "kind": "region",
@@ -37221,7 +37282,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.02"
+                    "id": "CORE-009.02"
                 },
                 {
                     "kind": "function",
@@ -37234,7 +37295,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.03"
+                    "id": "CORE-009.03"
                 },
                 {
                     "kind": "function",
@@ -37247,7 +37308,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.04"
+                    "id": "CORE-009.04"
                 },
                 {
                     "kind": "function",
@@ -37260,7 +37321,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.05"
+                    "id": "CORE-009.05"
                 },
                 {
                     "kind": "function",
@@ -37273,7 +37334,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.06"
+                    "id": "CORE-009.06"
                 },
                 {
                     "kind": "function",
@@ -37286,7 +37347,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.07"
+                    "id": "CORE-009.07"
                 },
                 {
                     "kind": "function",
@@ -37299,7 +37360,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.08"
+                    "id": "CORE-009.08"
                 },
                 {
                     "kind": "function",
@@ -37312,7 +37373,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.09"
+                    "id": "CORE-009.09"
                 },
                 {
                     "kind": "function",
@@ -37325,7 +37386,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.10"
+                    "id": "CORE-009.10"
                 },
                 {
                     "kind": "function",
@@ -37338,7 +37399,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.11"
+                    "id": "CORE-009.11"
                 },
                 {
                     "kind": "function",
@@ -37351,7 +37412,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.12"
+                    "id": "CORE-009.12"
                 },
                 {
                     "kind": "function",
@@ -37364,7 +37425,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.13"
+                    "id": "CORE-009.13"
                 },
                 {
                     "kind": "function",
@@ -37377,7 +37438,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.14"
+                    "id": "CORE-009.14"
                 },
                 {
                     "kind": "function",
@@ -37390,7 +37451,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.15"
+                    "id": "CORE-009.15"
                 },
                 {
                     "kind": "function",
@@ -37403,7 +37464,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.16"
+                    "id": "CORE-009.16"
                 },
                 {
                     "kind": "function",
@@ -37416,7 +37477,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.17"
+                    "id": "CORE-009.17"
                 },
                 {
                     "kind": "function",
@@ -37429,7 +37490,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.18"
+                    "id": "CORE-009.18"
                 },
                 {
                     "kind": "function",
@@ -37444,7 +37505,7 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-008.19"
+                    "id": "CORE-009.19"
                 },
                 {
                     "kind": "function",
@@ -37457,7 +37518,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.20"
+                    "id": "CORE-009.20"
                 },
                 {
                     "kind": "function",
@@ -37470,7 +37531,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.21"
+                    "id": "CORE-009.21"
                 },
                 {
                     "kind": "function",
@@ -37483,7 +37544,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.22"
+                    "id": "CORE-009.22"
                 },
                 {
                     "kind": "function",
@@ -37496,7 +37557,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.23"
+                    "id": "CORE-009.23"
                 },
                 {
                     "kind": "function",
@@ -37509,7 +37570,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.24"
+                    "id": "CORE-009.24"
                 },
                 {
                     "kind": "function",
@@ -37522,7 +37583,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.25"
+                    "id": "CORE-009.25"
                 },
                 {
                     "kind": "function",
@@ -37535,7 +37596,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.26"
+                    "id": "CORE-009.26"
                 },
                 {
                     "kind": "function",
@@ -37548,7 +37609,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.27"
+                    "id": "CORE-009.27"
                 },
                 {
                     "kind": "region",
@@ -37561,7 +37622,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.28"
+                    "id": "CORE-009.28"
                 },
                 {
                     "kind": "function",
@@ -37574,7 +37635,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.29"
+                    "id": "CORE-009.29"
                 },
                 {
                     "kind": "function",
@@ -37587,7 +37648,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.30"
+                    "id": "CORE-009.30"
                 },
                 {
                     "kind": "function",
@@ -37600,7 +37661,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.31"
+                    "id": "CORE-009.31"
                 },
                 {
                     "kind": "function",
@@ -37613,7 +37674,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.32"
+                    "id": "CORE-009.32"
                 },
                 {
                     "kind": "function",
@@ -37628,7 +37689,7 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-008.33"
+                    "id": "CORE-009.33"
                 },
                 {
                     "kind": "function",
@@ -37641,7 +37702,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.34"
+                    "id": "CORE-009.34"
                 },
                 {
                     "kind": "function",
@@ -37654,7 +37715,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.35"
+                    "id": "CORE-009.35"
                 },
                 {
                     "kind": "function",
@@ -37669,7 +37730,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.36"
+                    "id": "CORE-009.36"
                 },
                 {
                     "kind": "function",
@@ -37685,7 +37746,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.37"
+                    "id": "CORE-009.37"
                 },
                 {
                     "kind": "function",
@@ -37700,7 +37761,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.38"
+                    "id": "CORE-009.38"
                 },
                 {
                     "kind": "function",
@@ -37715,7 +37776,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.39"
+                    "id": "CORE-009.39"
                 },
                 {
                     "kind": "function",
@@ -37730,7 +37791,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.40"
+                    "id": "CORE-009.40"
                 },
                 {
                     "kind": "function",
@@ -37745,7 +37806,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-008.41"
+                    "id": "CORE-009.41"
                 },
                 {
                     "kind": "function",
@@ -37761,7 +37822,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.42"
+                    "id": "CORE-009.42"
                 },
                 {
                     "kind": "function",
@@ -37777,7 +37838,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.43"
+                    "id": "CORE-009.43"
                 },
                 {
                     "kind": "function",
@@ -37794,7 +37855,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.44"
+                    "id": "CORE-009.44"
                 },
                 {
                     "kind": "function",
@@ -37807,7 +37868,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.45"
+                    "id": "CORE-009.45"
                 },
                 {
                     "kind": "function",
@@ -37820,7 +37881,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.46"
+                    "id": "CORE-009.46"
                 },
                 {
                     "kind": "function",
@@ -37833,7 +37894,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.47"
+                    "id": "CORE-009.47"
                 },
                 {
                     "kind": "function",
@@ -37846,7 +37907,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.48"
+                    "id": "CORE-009.48"
                 },
                 {
                     "kind": "function",
@@ -37862,7 +37923,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.49"
+                    "id": "CORE-009.49"
                 },
                 {
                     "kind": "function",
@@ -37878,7 +37939,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-008.50"
+                    "id": "CORE-009.50"
                 },
                 {
                     "kind": "function",
@@ -37894,7 +37955,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.51"
+                    "id": "CORE-009.51"
                 },
                 {
                     "kind": "function",
@@ -37907,7 +37968,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.52"
+                    "id": "CORE-009.52"
                 },
                 {
                     "kind": "function",
@@ -37920,7 +37981,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.53"
+                    "id": "CORE-009.53"
                 },
                 {
                     "kind": "function",
@@ -37933,7 +37994,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.54"
+                    "id": "CORE-009.54"
                 },
                 {
                     "kind": "function",
@@ -37948,7 +38009,7 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "CORE-008.55"
+                    "id": "CORE-009.55"
                 },
                 {
                     "kind": "function",
@@ -37963,7 +38024,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.56"
+                    "id": "CORE-009.56"
                 },
                 {
                     "kind": "function",
@@ -37978,7 +38039,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.57"
+                    "id": "CORE-009.57"
                 },
                 {
                     "kind": "function",
@@ -37994,7 +38055,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "CORE-008.58"
+                    "id": "CORE-009.58"
                 },
                 {
                     "kind": "function",
@@ -38011,7 +38072,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-008.59"
+                    "id": "CORE-009.59"
                 },
                 {
                     "kind": "function",
@@ -38026,7 +38087,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-008.60"
+                    "id": "CORE-009.60"
                 },
                 {
                     "kind": "function",
@@ -38041,7 +38102,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-008.61"
+                    "id": "CORE-009.61"
                 },
                 {
                     "kind": "function",
@@ -38054,7 +38115,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.62"
+                    "id": "CORE-009.62"
                 },
                 {
                     "kind": "function",
@@ -38069,7 +38130,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-008.63"
+                    "id": "CORE-009.63"
                 },
                 {
                     "kind": "function",
@@ -38082,7 +38143,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.64"
+                    "id": "CORE-009.64"
                 },
                 {
                     "kind": "region",
@@ -38095,7 +38156,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-008.65"
+                    "id": "CORE-009.65"
                 },
                 {
                     "kind": "function",
@@ -38110,12 +38171,12 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-008.66"
+                    "id": "CORE-009.66"
                 }
             ]
         },
         {
-            "id": "CORE-009",
+            "id": "CORE-010",
             "path": "lib\/logging-csrf.php",
             "area": "CORE",
             "lines": 544,
@@ -38132,7 +38193,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.01"
+                    "id": "CORE-010.01"
                 },
                 {
                     "kind": "function",
@@ -38145,7 +38206,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.02"
+                    "id": "CORE-010.02"
                 },
                 {
                     "kind": "function",
@@ -38161,7 +38222,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-009.03"
+                    "id": "CORE-010.03"
                 },
                 {
                     "kind": "function",
@@ -38174,7 +38235,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.04"
+                    "id": "CORE-010.04"
                 },
                 {
                     "kind": "function",
@@ -38187,7 +38248,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.05"
+                    "id": "CORE-010.05"
                 },
                 {
                     "kind": "function",
@@ -38200,7 +38261,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.06"
+                    "id": "CORE-010.06"
                 },
                 {
                     "kind": "function",
@@ -38213,7 +38274,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.07"
+                    "id": "CORE-010.07"
                 },
                 {
                     "kind": "function",
@@ -38226,7 +38287,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.08"
+                    "id": "CORE-010.08"
                 },
                 {
                     "kind": "function",
@@ -38239,7 +38300,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.09"
+                    "id": "CORE-010.09"
                 },
                 {
                     "kind": "function",
@@ -38252,7 +38313,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.10"
+                    "id": "CORE-010.10"
                 },
                 {
                     "kind": "region",
@@ -38267,7 +38328,7 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "CORE-009.11"
+                    "id": "CORE-010.11"
                 },
                 {
                     "kind": "function",
@@ -38280,7 +38341,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.12"
+                    "id": "CORE-010.12"
                 },
                 {
                     "kind": "function",
@@ -38293,7 +38354,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.13"
+                    "id": "CORE-010.13"
                 },
                 {
                     "kind": "function",
@@ -38309,7 +38370,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-009.14"
+                    "id": "CORE-010.14"
                 },
                 {
                     "kind": "function",
@@ -38322,7 +38383,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.15"
+                    "id": "CORE-010.15"
                 },
                 {
                     "kind": "function",
@@ -38337,7 +38398,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-009.16"
+                    "id": "CORE-010.16"
                 },
                 {
                     "kind": "function",
@@ -38350,7 +38411,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.17"
+                    "id": "CORE-010.17"
                 },
                 {
                     "kind": "function",
@@ -38363,7 +38424,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.18"
+                    "id": "CORE-010.18"
                 },
                 {
                     "kind": "function",
@@ -38376,7 +38437,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-009.19"
+                    "id": "CORE-010.19"
                 },
                 {
                     "kind": "function",
@@ -38391,7 +38452,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "CORE-009.20"
+                    "id": "CORE-010.20"
                 },
                 {
                     "kind": "function",
@@ -38407,12 +38468,12 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "CORE-009.21"
+                    "id": "CORE-010.21"
                 }
             ]
         },
         {
-            "id": "CORE-010",
+            "id": "CORE-011",
             "path": "lib\/logging-diagnostics.php",
             "area": "CORE",
             "lines": 118,
@@ -38429,7 +38490,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-010.01"
+                    "id": "CORE-011.01"
                 },
                 {
                     "kind": "function",
@@ -38442,7 +38503,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-010.02"
+                    "id": "CORE-011.02"
                 },
                 {
                     "kind": "function",
@@ -38455,7 +38516,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-010.03"
+                    "id": "CORE-011.03"
                 },
                 {
                     "kind": "function",
@@ -38470,7 +38531,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-010.04"
+                    "id": "CORE-011.04"
                 },
                 {
                     "kind": "function",
@@ -38483,7 +38544,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-010.05"
+                    "id": "CORE-011.05"
                 },
                 {
                     "kind": "function",
@@ -38496,7 +38557,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-010.06"
+                    "id": "CORE-011.06"
                 },
                 {
                     "kind": "function",
@@ -38509,12 +38570,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-010.07"
+                    "id": "CORE-011.07"
                 }
             ]
         },
         {
-            "id": "CORE-011",
+            "id": "CORE-012",
             "path": "lib\/logging-escalation.php",
             "area": "CORE",
             "lines": 100,
@@ -38531,7 +38592,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.01"
+                    "id": "CORE-012.01"
                 },
                 {
                     "kind": "function",
@@ -38544,7 +38605,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.02"
+                    "id": "CORE-012.02"
                 },
                 {
                     "kind": "function",
@@ -38559,7 +38620,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-011.03"
+                    "id": "CORE-012.03"
                 },
                 {
                     "kind": "function",
@@ -38572,7 +38633,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.04"
+                    "id": "CORE-012.04"
                 },
                 {
                     "kind": "function",
@@ -38587,12 +38648,12 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-011.05"
+                    "id": "CORE-012.05"
                 }
             ]
         },
         {
-            "id": "CORE-012",
+            "id": "CORE-013",
             "path": "lib\/logging-integrity.php",
             "area": "CORE",
             "lines": 238,
@@ -38609,7 +38670,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.01"
+                    "id": "CORE-013.01"
                 },
                 {
                     "kind": "function",
@@ -38622,7 +38683,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.02"
+                    "id": "CORE-013.02"
                 },
                 {
                     "kind": "function",
@@ -38637,7 +38698,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-012.03"
+                    "id": "CORE-013.03"
                 },
                 {
                     "kind": "function",
@@ -38650,7 +38711,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.04"
+                    "id": "CORE-013.04"
                 },
                 {
                     "kind": "function",
@@ -38665,7 +38726,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-012.05"
+                    "id": "CORE-013.05"
                 },
                 {
                     "kind": "function",
@@ -38678,7 +38739,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.06"
+                    "id": "CORE-013.06"
                 },
                 {
                     "kind": "function",
@@ -38691,7 +38752,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.07"
+                    "id": "CORE-013.07"
                 },
                 {
                     "kind": "function",
@@ -38706,7 +38767,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-012.08"
+                    "id": "CORE-013.08"
                 },
                 {
                     "kind": "function",
@@ -38719,7 +38780,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.09"
+                    "id": "CORE-013.09"
                 },
                 {
                     "kind": "function",
@@ -38732,7 +38793,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.10"
+                    "id": "CORE-013.10"
                 },
                 {
                     "kind": "function",
@@ -38747,12 +38808,12 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "CORE-012.11"
+                    "id": "CORE-013.11"
                 }
             ]
         },
         {
-            "id": "CORE-013",
+            "id": "CORE-014",
             "path": "lib\/logging-replay.php",
             "area": "CORE",
             "lines": 261,
@@ -38769,7 +38830,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.01"
+                    "id": "CORE-014.01"
                 },
                 {
                     "kind": "function",
@@ -38785,7 +38846,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-013.02"
+                    "id": "CORE-014.02"
                 },
                 {
                     "kind": "function",
@@ -38803,12 +38864,12 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-013.03"
+                    "id": "CORE-014.03"
                 }
             ]
         },
         {
-            "id": "CORE-014",
+            "id": "CORE-015",
             "path": "lib\/notify-users.php",
             "area": "CORE",
             "lines": 524,
@@ -38825,7 +38886,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.01"
+                    "id": "CORE-015.01"
                 },
                 {
                     "kind": "function",
@@ -38840,7 +38901,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-014.02"
+                    "id": "CORE-015.02"
                 },
                 {
                     "kind": "function",
@@ -38853,7 +38914,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.03"
+                    "id": "CORE-015.03"
                 },
                 {
                     "kind": "function",
@@ -38866,7 +38927,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.04"
+                    "id": "CORE-015.04"
                 },
                 {
                     "kind": "function",
@@ -38881,7 +38942,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-014.05"
+                    "id": "CORE-015.05"
                 },
                 {
                     "kind": "function",
@@ -38894,7 +38955,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.06"
+                    "id": "CORE-015.06"
                 },
                 {
                     "kind": "function",
@@ -38907,7 +38968,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.07"
+                    "id": "CORE-015.07"
                 },
                 {
                     "kind": "function",
@@ -38920,7 +38981,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.08"
+                    "id": "CORE-015.08"
                 },
                 {
                     "kind": "function",
@@ -38933,7 +38994,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.09"
+                    "id": "CORE-015.09"
                 },
                 {
                     "kind": "function",
@@ -38946,7 +39007,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.10"
+                    "id": "CORE-015.10"
                 },
                 {
                     "kind": "function",
@@ -38961,7 +39022,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-014.11"
+                    "id": "CORE-015.11"
                 },
                 {
                     "kind": "function",
@@ -38976,7 +39037,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-014.12"
+                    "id": "CORE-015.12"
                 },
                 {
                     "kind": "function",
@@ -38989,7 +39050,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.13"
+                    "id": "CORE-015.13"
                 },
                 {
                     "kind": "function",
@@ -39002,7 +39063,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.14"
+                    "id": "CORE-015.14"
                 },
                 {
                     "kind": "function",
@@ -39018,7 +39079,7 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-014.15"
+                    "id": "CORE-015.15"
                 },
                 {
                     "kind": "function",
@@ -39031,7 +39092,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.16"
+                    "id": "CORE-015.16"
                 },
                 {
                     "kind": "region",
@@ -39044,7 +39105,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.17"
+                    "id": "CORE-015.17"
                 },
                 {
                     "kind": "function",
@@ -39057,7 +39118,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.18"
+                    "id": "CORE-015.18"
                 },
                 {
                     "kind": "function",
@@ -39072,7 +39133,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-014.19"
+                    "id": "CORE-015.19"
                 },
                 {
                     "kind": "function",
@@ -39087,12 +39148,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-014.20"
+                    "id": "CORE-015.20"
                 }
             ]
         },
         {
-            "id": "CORE-015",
+            "id": "CORE-016",
             "path": "lib\/settings-effects.php",
             "area": "CORE",
             "lines": 386,
@@ -39109,7 +39170,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.01"
+                    "id": "CORE-016.01"
                 },
                 {
                     "kind": "function",
@@ -39122,7 +39183,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.02"
+                    "id": "CORE-016.02"
                 },
                 {
                     "kind": "function",
@@ -39135,7 +39196,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.03"
+                    "id": "CORE-016.03"
                 },
                 {
                     "kind": "function",
@@ -39150,7 +39211,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-015.04"
+                    "id": "CORE-016.04"
                 },
                 {
                     "kind": "function",
@@ -39163,7 +39224,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.05"
+                    "id": "CORE-016.05"
                 },
                 {
                     "kind": "function",
@@ -39176,7 +39237,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.06"
+                    "id": "CORE-016.06"
                 },
                 {
                     "kind": "function",
@@ -39189,7 +39250,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.07"
+                    "id": "CORE-016.07"
                 },
                 {
                     "kind": "function",
@@ -39202,7 +39263,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.08"
+                    "id": "CORE-016.08"
                 },
                 {
                     "kind": "function",
@@ -39215,7 +39276,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.09"
+                    "id": "CORE-016.09"
                 },
                 {
                     "kind": "function",
@@ -39228,7 +39289,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.10"
+                    "id": "CORE-016.10"
                 },
                 {
                     "kind": "function",
@@ -39241,7 +39302,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.11"
+                    "id": "CORE-016.11"
                 },
                 {
                     "kind": "function",
@@ -39254,7 +39315,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.12"
+                    "id": "CORE-016.12"
                 },
                 {
                     "kind": "function",
@@ -39267,7 +39328,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.13"
+                    "id": "CORE-016.13"
                 },
                 {
                     "kind": "function",
@@ -39280,7 +39341,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.14"
+                    "id": "CORE-016.14"
                 },
                 {
                     "kind": "function",
@@ -39293,7 +39354,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.15"
+                    "id": "CORE-016.15"
                 },
                 {
                     "kind": "function",
@@ -39308,7 +39369,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "CORE-015.16"
+                    "id": "CORE-016.16"
                 },
                 {
                     "kind": "function",
@@ -39321,7 +39382,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.17"
+                    "id": "CORE-016.17"
                 },
                 {
                     "kind": "function",
@@ -39334,7 +39395,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.18"
+                    "id": "CORE-016.18"
                 },
                 {
                     "kind": "function",
@@ -39347,7 +39408,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.19"
+                    "id": "CORE-016.19"
                 },
                 {
                     "kind": "function",
@@ -39360,7 +39421,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.20"
+                    "id": "CORE-016.20"
                 },
                 {
                     "kind": "function",
@@ -39373,12 +39434,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.21"
+                    "id": "CORE-016.21"
                 }
             ]
         },
         {
-            "id": "CORE-016",
+            "id": "CORE-017",
             "path": "lib\/tickets-sla.php",
             "area": "CORE",
             "lines": 891,
@@ -39395,7 +39456,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.01"
+                    "id": "CORE-017.01"
                 },
                 {
                     "kind": "function",
@@ -39408,7 +39469,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.02"
+                    "id": "CORE-017.02"
                 },
                 {
                     "kind": "function",
@@ -39421,7 +39482,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.03"
+                    "id": "CORE-017.03"
                 },
                 {
                     "kind": "function",
@@ -39434,7 +39495,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.04"
+                    "id": "CORE-017.04"
                 },
                 {
                     "kind": "function",
@@ -39447,7 +39508,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.05"
+                    "id": "CORE-017.05"
                 },
                 {
                     "kind": "function",
@@ -39460,7 +39521,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.06"
+                    "id": "CORE-017.06"
                 },
                 {
                     "kind": "function",
@@ -39475,7 +39536,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-016.07"
+                    "id": "CORE-017.07"
                 },
                 {
                     "kind": "function",
@@ -39491,7 +39552,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-016.08"
+                    "id": "CORE-017.08"
                 },
                 {
                     "kind": "function",
@@ -39504,7 +39565,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.09"
+                    "id": "CORE-017.09"
                 },
                 {
                     "kind": "function",
@@ -39517,7 +39578,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.10"
+                    "id": "CORE-017.10"
                 },
                 {
                     "kind": "function",
@@ -39532,7 +39593,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-016.11"
+                    "id": "CORE-017.11"
                 },
                 {
                     "kind": "function",
@@ -39548,7 +39609,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-016.12"
+                    "id": "CORE-017.12"
                 },
                 {
                     "kind": "function",
@@ -39565,7 +39626,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-016.13"
+                    "id": "CORE-017.13"
                 },
                 {
                     "kind": "function",
@@ -39578,7 +39639,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.14"
+                    "id": "CORE-017.14"
                 },
                 {
                     "kind": "function",
@@ -39591,7 +39652,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.15"
+                    "id": "CORE-017.15"
                 },
                 {
                     "kind": "function",
@@ -39604,7 +39665,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.16"
+                    "id": "CORE-017.16"
                 },
                 {
                     "kind": "function",
@@ -39617,7 +39678,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.17"
+                    "id": "CORE-017.17"
                 },
                 {
                     "kind": "function",
@@ -39630,7 +39691,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.18"
+                    "id": "CORE-017.18"
                 },
                 {
                     "kind": "function",
@@ -39645,7 +39706,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-016.19"
+                    "id": "CORE-017.19"
                 },
                 {
                     "kind": "function",
@@ -39658,7 +39719,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.20"
+                    "id": "CORE-017.20"
                 },
                 {
                     "kind": "function",
@@ -39671,7 +39732,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.21"
+                    "id": "CORE-017.21"
                 },
                 {
                     "kind": "function",
@@ -39687,7 +39748,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-016.22"
+                    "id": "CORE-017.22"
                 },
                 {
                     "kind": "function",
@@ -39700,7 +39761,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.23"
+                    "id": "CORE-017.23"
                 },
                 {
                     "kind": "function",
@@ -39713,7 +39774,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.24"
+                    "id": "CORE-017.24"
                 },
                 {
                     "kind": "function",
@@ -39726,7 +39787,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.25"
+                    "id": "CORE-017.25"
                 },
                 {
                     "kind": "function",
@@ -39739,7 +39800,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.26"
+                    "id": "CORE-017.26"
                 },
                 {
                     "kind": "function",
@@ -39752,7 +39813,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.27"
+                    "id": "CORE-017.27"
                 },
                 {
                     "kind": "function",
@@ -39765,7 +39826,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.28"
+                    "id": "CORE-017.28"
                 },
                 {
                     "kind": "function",
@@ -39778,7 +39839,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.29"
+                    "id": "CORE-017.29"
                 },
                 {
                     "kind": "function",
@@ -39791,7 +39852,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.30"
+                    "id": "CORE-017.30"
                 },
                 {
                     "kind": "function",
@@ -39806,7 +39867,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-016.31"
+                    "id": "CORE-017.31"
                 },
                 {
                     "kind": "function",
@@ -39819,7 +39880,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.32"
+                    "id": "CORE-017.32"
                 },
                 {
                     "kind": "function",
@@ -39834,7 +39895,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-016.33"
+                    "id": "CORE-017.33"
                 },
                 {
                     "kind": "function",
@@ -39847,7 +39908,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.34"
+                    "id": "CORE-017.34"
                 },
                 {
                     "kind": "function",
@@ -39860,7 +39921,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.35"
+                    "id": "CORE-017.35"
                 },
                 {
                     "kind": "function",
@@ -39873,7 +39934,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-016.36"
+                    "id": "CORE-017.36"
                 }
             ]
         },
