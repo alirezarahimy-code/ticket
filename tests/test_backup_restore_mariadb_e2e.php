@@ -118,6 +118,7 @@ try {
     t08_check($target->query('SELECT keep_value FROM t08_target_only WHERE id = 7')->fetchColumn() === 'preserve', 'restore leaves unrelated target tables untouched');
 
     $GLOBALS['rcT08Config']['database.name'] = $sourceDb;
+    @unlink($appRoot . '/storage/uploads/department/attachment.txt');
     $restoredUploads = restore_upload_archive([
         'error' => UPLOAD_ERR_OK,
         'name' => 'uploads.zip',
@@ -147,6 +148,8 @@ try {
     echo 'PASS: T08 actual DB/uploads/system-files backup and restore on MariaDB ' .
         $admin->query('SELECT VERSION()')->fetchColumn() . PHP_EOL;
 } finally {
+    if (isset($source)) { $source = null; }
+    if (isset($target)) { $target = null; }
     try { $admin->exec("DROP DATABASE IF EXISTS `{$sourceDb}`"); } catch (Throwable) {}
     try { $admin->exec("DROP DATABASE IF EXISTS `{$targetDb}`"); } catch (Throwable) {}
     t08_remove_tree($appRoot);
