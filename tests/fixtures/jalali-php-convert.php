@@ -26,4 +26,25 @@ foreach ($dates as $date) {
         'end_of_day' => $end,
     ];
 }
-echo json_encode($result, JSON_THROW_ON_ERROR);
+$invalidCases = [
+    'bad-month-zero' => '1402/00/01',
+    'bad-month-thirteen' => '1402/13/01',
+    'bad-day-zero' => '1402/01/00',
+    'bad-day-32' => '1402/01/32',
+    'bad-month-seven-day-31' => '1402/07/31',
+    'bad-non-leap-esfand-30' => '1402/12/30',
+    'bad-text' => '1402/ab/01',
+];
+$invalid = [];
+foreach ($invalidCases as $key => $value) {
+    $invalid[$key] = jalali_input_to_gregorian($value);
+}
+$validPersianDigits = jalali_input_to_gregorian('۱۴۰۳/۰۱/۰۱');
+$validHyphen = jalali_input_to_gregorian('1403-01-01');
+
+echo json_encode([
+    'dates' => $result,
+    'invalid' => $invalid,
+    'valid_persian_digits' => $validPersianDigits,
+    'valid_hyphen' => $validHyphen,
+], JSON_THROW_ON_ERROR);
