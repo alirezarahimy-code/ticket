@@ -3334,6 +3334,7 @@ check_request_center	function	tests/test_request_center_repository_sqlite.php	15
 ticket_scope	function	tests/test_request_center_schema_preflight_mariadb.php	3	tests
 ticket_user_can_view	function	tests/test_request_center_schema_preflight_mariadb.php	8	tests
 check_request_center	function	tests/test_request_center_schema_preflight_mariadb.php	13	tests
+mariadb_workflow_check	function	tests/test_request_center_workflow_service_mariadb.php	29	tests
 workflow_check	function	tests/test_request_center_workflow_service_sqlite.php	5	tests
 read	def	tests/test_role_permissions_ui_static.py	4	tests
 check	def	tests/test_role_permissions_ui_static.py	8	tests

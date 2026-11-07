@@ -11,7 +11,7 @@ path	category	lines	bytes
 .github/workflows/logging-acceptance.yml	workflows	138	5159
 .github/workflows/logging-contract.yml	workflows	35	1359
 .github/workflows/refresh-request-center-map.yml	workflows	69	2536
-.github/workflows/request-center-contract.yml	workflows	115	4742
+.github/workflows/request-center-contract.yml	workflows	124	5160
 .github/workflows/request-center-package-preview.yml	workflows	203	8661
 .gitignore	config	27	447
 .htaccess	config	24	788
@@ -245,6 +245,7 @@ docs/aggregate-report-preview.html	docs	85	7297
 docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	673	89043
 docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md	docs	193	18080
 docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
+docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	57	4757
 docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	92	10739
 domain-scan.php	core	1280	68450
 download-r34/index.html	other	21	1739
@@ -621,6 +622,7 @@ tests/test_request_center_first_slice_static.py	tests	100	4763
 tests/test_request_center_mariadb_ddl_gates.php	tests	107	4352
 tests/test_request_center_repository_sqlite.php	tests	103	6271
 tests/test_request_center_schema_preflight_mariadb.php	tests	145	7137
+tests/test_request_center_workflow_service_mariadb.php	tests	150	5334
 tests/test_request_center_workflow_service_sqlite.php	tests	189	7055
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
