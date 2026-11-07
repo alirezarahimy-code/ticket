@@ -46,9 +46,9 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("$isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== ''", reply)
         self.assertIn("if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester))", reply)
         self.assertIn("$lockedReply['assigned_to']", reply)
-        self.assertIn('$requesterView = $isRequester;', source('index.php'))
+        self.assertIn('$requesterView = $isRequester;', source('modules/request-center/Pages/detail.php'))
         self.assertIn("!user_can($user, 'ticket.edit') || ticket_handler_level($ticket, $user) === ''", reply)
-        self.assertIn("$requiresRating && !user_can($user, 'ticket.rate')", source('index.php'))
+        self.assertIn("$requiresRating && !user_can($user, 'ticket.rate')", source('modules/request-center/Pages/detail.php'))
 
     def test_concurrent_rating_and_auto_close_revalidate_under_lock(self):
         actions = source('modules/request-center/Actions/supervisor-actions.php')
@@ -67,7 +67,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         action = source('modules/request-center/Actions/ticket-actions.php')
         claim = section(action, "if ($action === 'claim_ticket')", "if ($action === 'reopen_ticket')")
         self.assertIn("ticket_assignee_is_eligible($ticket, $claimUser", claim)
-        self.assertIn("ticket_assignee_is_eligible($ticket, $user", source('index.php'))
+        self.assertIn("ticket_assignee_is_eligible($ticket, $user", source('modules/request-center/Pages/detail.php'))
 
     def test_supervisor_actions_check_ticket_visibility(self):
         actions = source('modules/request-center/Actions/supervisor-actions.php')

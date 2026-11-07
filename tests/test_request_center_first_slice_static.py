@@ -13,7 +13,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         entry = read("request-center.php")
         page = read("modules/request-center/Pages/index.php")
         self.assertIn("require __DIR__ . '/modules/request-center/Pages/index.php';", entry)
-        self.assertIn("require dirname(__DIR__, 2) . '/bootstrap.php';", page)
+        self.assertIn("require dirname(__DIR__, 3) . '/bootstrap.php';", page)
         self.assertIn("$user = require_login();", page)
         self.assertIn("RequestCenterRepository", page)
         self.assertIn("$schemaProblems = $repo->schemaProblems();", page)
@@ -70,9 +70,10 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
             self.assertIn("WorkflowService", source, f"workflow service is not loaded/used in {path}")
         self.assertIn("require_once __DIR__ . '/modules/request-center/WorkflowService.php';", read("index.php"))
         index = read("index.php")
-        self.assertIn("require __DIR__ . '/modules/request-center/Actions/ticket-actions.php';", index)
-        self.assertIn("require __DIR__ . '/modules/request-center/Actions/supervisor-actions.php';", index)
-        self.assertIn("require __DIR__ . '/modules/request-center/Actions/bulk-actions.php';", index)
+        self.assertIn("require __DIR__ . '/modules/request-center/Actions/dispatch.php';", index)
+        dispatch = read("modules/request-center/Actions/dispatch.php")
+        for moved in ("ticket-actions.php", "supervisor-actions.php", "bulk-actions.php", "service-actions.php"):
+            self.assertIn("/" + moved, dispatch, f"module dispatcher must load {moved}")
         bridges = {
             "actions/ticket-actions.php": "ticket-actions.php",
             "actions/supervisor-actions.php": "supervisor-actions.php",

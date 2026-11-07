@@ -99,7 +99,7 @@ def test_a_single_function_answers_which_view_to_render():
 
 
 def test_the_ticket_page_uses_the_single_view_function():
-    source = read("index.php")
+    source = read("modules/request-center/Pages/detail.php")
     assert "ticket_view_mode($ticket, $user)" in source, (
         "صفحهٔ درخواست باید نما را از تابع مرجع بگیرد"
     )
