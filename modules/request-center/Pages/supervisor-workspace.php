@@ -42,7 +42,7 @@ header('Cache-Control: private, no-store');
 <?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'supervisor' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeSupervisor($key) ?>"><?= $escapeSupervisor($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 </header>
 <main>
-<section class="heading"><div><h1>فضای کاری سوپروایزر</h1><p>پایش درخواست‌های حوزهٔ نظارت، موارد خارج از تعهد و درخواست‌های منتظر تصمیم.</p></div><a class="button" href="index.php?page=supervisor">ورود به صف تصمیم‌ها</a></section>
+<section class="heading"><div><h1>فضای کاری سوپروایزر</h1><p>پایش درخواست‌های حوزهٔ نظارت، موارد خارج از تعهد و درخواست‌های منتظر تصمیم.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="button secondary" href="request-center.php?workspace=supervisor&amp;calendar=1">تقویم موعدها</a><a class="button" href="request-center.php?page=supervisor">ورود به صف تصمیم‌ها</a></div></section>
 <section class="rc-supervisor-grid">
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['total']) ?></strong><span>کل درخواست‌های تحت نظارت</span></div>
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['active']) ?></strong><span>در گردش</span></div>
