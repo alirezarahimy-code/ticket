@@ -150,7 +150,7 @@ try {
         ],
         'food_ticket' => ['odbc_driver' => '', 'web_url' => '', 'sso_key' => ''],
     ];
-    $config = "<?php\\nreturn " . var_export($configArray, true) . ";\\n";
+    $config = "<?php\nreturn " . var_export($configArray, true) . ";\n";
     if (file_put_contents($configPath, $config) === false) {
         throw new RuntimeException('Could not write temporary CI config');
     }
