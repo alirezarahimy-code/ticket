@@ -225,7 +225,7 @@ final class RequestCenterRepository
      *
      * @return array{total:int,page:int,pages:int,offset:int,rows:array<int,array<string,mixed>>}
      */
-    public function listQueue(array $user, string $queue = 'all', int $page = 1, int $perPage = 100): array
+    public function listQueue(array $user, string $queue = 'all', int $page = 1, int $perPage = 100, array $filters = []): array
     {
         $allowedQueues = ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled'];
         if (!in_array($queue, $allowedQueues, true)) {
@@ -261,6 +261,29 @@ final class RequestCenterRepository
             $conditions[] = 't.status = "cancelled"';
         } else {
             $conditions[] = 't.status <> "cancelled"';
+        }
+
+        $status = (string) ($filters['status'] ?? '');
+        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled'], true)) {
+            $conditions[] = 't.status = ?';
+            $params[] = $status;
+        }
+        $priority = (string) ($filters['priority'] ?? '');
+        if (in_array($priority, ['normal', 'urgent', 'critical'], true)) {
+            $conditions[] = 't.priority = ?';
+            $params[] = $priority;
+        }
+        $serviceGroup = (string) ($filters['service_group'] ?? '');
+        if (in_array($serviceGroup, ['it', 'support'], true)) {
+            $conditions[] = 't.service_group = ?';
+            $params[] = $serviceGroup;
+        }
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $search = function_exists('mb_substr') ? mb_substr($search, 0, 100, 'UTF-8') : substr($search, 0, 100);
+            $conditions[] = '(t.subject LIKE ? OR t.ticket_no LIKE ?)';
+            $params[] = '%' . $search . '%';
+            $params[] = '%' . $search . '%';
         }
 
         $where = $conditions !== [] ? ' WHERE ' . implode(' AND ', $conditions) : '';
