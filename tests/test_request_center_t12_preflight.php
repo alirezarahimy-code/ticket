@@ -243,9 +243,9 @@ try {
         t12_mysql_file($mysql, $host, $port, $rootUser, $rootPass, $db, $schemaFile);
 
         $webUser = $app['web_user'];
-        $admin->exec("DROP USER IF EXISTS '" . $webUser . "'@'127.0.0.1'");
-        $admin->exec("CREATE USER '" . $webUser . "'@'127.0.0.1' IDENTIFIED BY '" . $webPass . "'");
-        $admin->exec('GRANT ALL PRIVILEGES ON ' . t12_ident($db) . ".* TO '" . $webUser . "'@'127.0.0.1'");
+        $admin->exec("DROP USER IF EXISTS '" . $webUser . "'@'%'");
+        $admin->exec("CREATE USER '" . $webUser . "'@'%' IDENTIFIED BY '" . $webPass . "'");
+        $admin->exec('GRANT ALL PRIVILEGES ON ' . t12_ident($db) . ".* TO '" . $webUser . "'@'%'");
         $admin->exec('FLUSH PRIVILEGES');
 
         $pdo = new PDO(
@@ -310,7 +310,7 @@ try {
         }
         foreach ($apps as $app) {
             try {
-                $admin->exec("DROP USER IF EXISTS '" . $app['web_user'] . "'@'127.0.0.1'");
+                $admin->exec("DROP USER IF EXISTS '" . $app['web_user'] . "'@'%'");
             } catch (Throwable) {
             }
         }
