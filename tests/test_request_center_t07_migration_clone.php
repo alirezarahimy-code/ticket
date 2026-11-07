@@ -113,16 +113,29 @@ function t07_fingerprint(PDO $pdo): array
         $order = implode(', ', array_map('t07_ident', $names));
         $stmt = $pdo->query('SELECT * FROM ' . $quoted . ($order !== '' ? ' ORDER BY ' . $order : ''));
         $ctx = hash_init('sha256');
+        $columnContexts = [];
+        foreach ($names as $columnName) {
+            $columnContexts[$columnName] = hash_init('sha256');
+        }
         $rowCount = 0;
         while (($row = $stmt->fetch(PDO::FETCH_NUM)) !== false) {
             $serialized = serialize($row);
             hash_update($ctx, pack('N', strlen($serialized)) . $serialized);
+            foreach ($names as $index => $columnName) {
+                $cell = serialize($row[$index] ?? null);
+                hash_update($columnContexts[$columnName], pack('N', strlen($cell)) . $cell);
+            }
             $rowCount++;
+        }
+        $columnHashes = [];
+        foreach ($columnContexts as $columnName => $columnContext) {
+            $columnHashes[$columnName] = hash_final($columnContext);
         }
         $result[$table] = [
             'schema' => $schemaHash,
             'data' => hash_final($ctx),
             'rows' => $rowCount,
+            'columns' => $columnHashes,
         ];
     }
     ksort($result);
@@ -260,7 +273,14 @@ foreach ($byNumber as $number => $file) {
         }
         if ($table !== 'schema_updates'
             && ($stepBefore[$table]['data'] !== $stepAfter[$table]['data'] || $stepBefore[$table]['rows'] !== $stepAfter[$table]['rows'])) {
-            $stepData[] = $table . ' (rows=' . $stepBefore[$table]['rows'] . '->' . $stepAfter[$table]['rows'] . ')';
+            $changedColumns = [];
+            foreach (($stepBefore[$table]['columns'] ?? []) as $columnName => $columnHash) {
+                if (($stepAfter[$table]['columns'][$columnName] ?? null) !== $columnHash) {
+                    $changedColumns[] = $columnName;
+                }
+            }
+            $stepData[] = $table . ' (rows=' . $stepBefore[$table]['rows'] . '->' . $stepAfter[$table]['rows'] .
+                '; columns=' . implode(',', $changedColumns) . ')';
         }
     }
     if ($stepSchema !== [] || $stepData !== []) {
@@ -293,7 +313,14 @@ foreach (array_unique(array_merge(array_keys($before), array_keys($after))) as $
     }
     if ($table !== 'schema_updates'
         && ($before[$table]['data'] !== $after[$table]['data'] || $before[$table]['rows'] !== $after[$table]['rows'])) {
-        $dataChanges[] = $table . ' (rows=' . $before[$table]['rows'] . '->' . $after[$table]['rows'] . ')';
+        $changedColumns = [];
+        foreach (($before[$table]['columns'] ?? []) as $columnName => $columnHash) {
+            if (($after[$table]['columns'][$columnName] ?? null) !== $columnHash) {
+                $changedColumns[] = $columnName;
+            }
+        }
+        $dataChanges[] = $table . ' (rows=' . $before[$table]['rows'] . '->' . $after[$table]['rows'] .
+            '; columns=' . implode(',', $changedColumns) . ')';
     }
 }
 
