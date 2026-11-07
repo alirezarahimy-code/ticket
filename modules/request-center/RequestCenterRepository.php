@@ -244,6 +244,7 @@ final class RequestCenterRepository
             $whereParts[] = preg_replace('/^\\s*WHERE\\s+/i', '', trim($scopeSql));
         }
         $whereParts[] = "t.status NOT IN ('resolved', 'closed', 'cancelled')";
+        $whereParts[] = 't.assigned_to IS NOT NULL';
         $whereParts[] = "(
             (t.due_at >= ? AND t.due_at < DATE_ADD(?, INTERVAL 1 DAY))
             OR (t.ola_response_due_at >= ? AND t.ola_response_due_at < DATE_ADD(?, INTERVAL 1 DAY))
