@@ -90,3 +90,21 @@
 - معیار حاکم: بخش ۱۷.۴ سند `REQUEST-CENTER-ARCHITECTURE.md` نسخهٔ ۱٫۱۴.
 
 این برگه هیچ تغییر اجرایی، DDL، Migration یا مجوز نصب/ادغام ایجاد نمی‌کند.
+
+
+## نتیجهٔ Preflight زیرساخت T12 — 2026-11-07
+
+<badge>PASS — فقط زیرساخت</badge>
+
+Run `42352805129` روی MariaDB 10.4.32 و 10.11 موفق شد:
+
+- کد Legacy از commit ثابت `2176d2aa57758a0fbef426636c9943879646b165` در Worktree مستقل اجرا شد؛ کد Feature از شاخهٔ `feature/request-center-module-1.62.88` اجرا شد.
+- دو دیتابیس مستقل `rc_t12_legacy` و `rc_t12_feature` از Schema مرجع `install-empty-db.sql` ساخته شدند.
+- هر دو وب‌سرور PHP مستقل بالا آمدند؛ fixture نشست، کاربر مورد انتظار، CSRF token و نام دیتابیس متصل‌شده را برای هر برنامه تأیید کرد.
+- شناسهٔ نشست Legacy و Feature مستقل بود؛ fingerprint ساختار پس از bootstrap در دو Clone یکسان بود و هر دو ۸۲ جدول داشتند.
+
+**محدودیت قطعی:** این اجرا هیچ‌یک از ده سناریوی رفتاری را اجرا نکرده است (۰ از ۱۰). بنابراین T12 هنوز **BLOCKED / OPEN** است و این PASS فقط آمادگی محیط، جداسازی Cloneها و مسیر HTTP/Session را تأیید می‌کند.
+
+### گام بعدی T12
+
+در همین Harness باید ده سناریوی مصوب با ورودی یکسان روی هر دو نسخه اجرا و side effectهای `tickets`، `ticket_messages`، `ticket_events`، `activity_logs`، `notifications`، `ticket_attachments` و فایل‌های `storage/uploads`، روابط دارایی و اجرای Cron مقایسه شوند. هر اختلاف باید با نام جدول/فیلد و اثر قابل بازتولید ثبت شود؛ تا آن زمان هیچ ادعای برابری رفتاری یا PASS برای T12 مجاز نیست.
