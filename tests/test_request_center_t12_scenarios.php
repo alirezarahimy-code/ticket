@@ -163,7 +163,7 @@ function t12s_session(string $baseUrl, int $userId, string $expectedDb): array
 function t12s_post(string $baseUrl, array $session, string $action, array $fields = []): array
 {
     $fields['action'] = $action;
-    $fields['csrf_token'] = $session['csrf'];
+    $fields['csrf'] = $session['csrf'];
     $body = http_build_query($fields, '', '&');
     return t12s_http($baseUrl, 'POST', ['Cookie: ' . $session['cookie'], 'Content-Type: application/x-www-form-urlencoded'], $body);
 }
