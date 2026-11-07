@@ -15,6 +15,7 @@ on:
       - 'tests/test_request_center_*.py'
       - 'tests/test_ticket_*static.py'
       - 'tests/test_ldap_secret_and_legacy_status_static.py'
+      - 'tools/build_system_map.py'
       - '.github/workflows/*.yml'
       - '.github/workflows/*.yaml'
   workflow_dispatch:
