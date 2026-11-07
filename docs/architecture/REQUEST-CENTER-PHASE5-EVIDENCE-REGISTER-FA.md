@@ -26,7 +26,7 @@
 |---|-------|-------|--|
 | ۱ | قرارداد ایستای نمودار دسترسی (محلی) | `python3 tests/test_request_center_access_matrix_static.py` | **ALL-ACCESS-MATRIX-STATIC-CHECKS-PASSED (11)** |
 | ۲ | همان قرارداد زیر pytest | `python3 -m pytest -q tests/test_request_center_access_matrix_static.py` | **11 passed** |
-| ۳ | ساخت بستهٔ کاندید | `python3 tools/build_rc_update.py` | **OK … 61 files · 1 migration · 332318 bytes · SHA-256 25961ed0…** |
+| ۳ | ساخت بستهٔ کاندید | `python3 tools/build_rc_update.py` | **OK … 61 files · 1 migration · 334777 bytes · SHA-256 25961ed0…** |
 | ۴ | بازشماری محتویات ZIP |`zipfile` خودبازبین: مسیرهای امن، یکتایی، CRC، تطبیق manifest↔files↔SHA256 | **بدون خطا**؛ `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`؛ `tests/`، `ci-diagnostics/`، `.github/`، `downloads/` در بسته نیستند |
 | ۵ | شبیه‌سازی گام «Assemble isolated QA overlay» (محلی؛ PHP 8.2 WASM به‌جای real PHP) | کپی `find … sort` + اجرای قراردادهای overlay (۲ فایل pytest + ۳ تست PHP) + `sha256sum -c` | **OK · 20 passed · ۳۸ فایل overlay؛ `sha256sum -c` همه OK** (T07 و MariaDB در این شبیه‌سازی نبودند) |
 | ۶ | نحو PHP کلیهٔ فایل‌های لمس‌شده | `php-cli` lint (wasm 8.2) | **بدون خطا** برای `appointment-actions.php`, `dispatch.php` و غیره |
@@ -56,7 +56,7 @@
 ## ۴) بستهٔ کاندیدی ساخته‌شده (هرگز بدون اجازهٔ مالک نصب نمی‌شود)
 
 - فایل: `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip`
-- SHA-256: `25961ed02cddf53b51c387b2f20a57cd7abde56d1d6c2a70f64b935940c30720` (فایل `.sha256` کنار آن)
+- SHA-256: `afa55f38a0999fb4817ee1aec9e6b6854edf830cba3d06766a681cc845f5484a` (فایل `.sha256` کنار آن)
 - نام‌گذاری عامدانه با `rc-candidate`؛ manifest: `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `requires_version=1.62.90`، `migrations=[035]`، ۶۱ فایل، بدون tests/CI.
 - ساخت: `tools/build_rc_update.py` (بازتولید قطعی با تاریخ ثابت؛ checksum آرشیو پس از بستن، CRC، path-traversal و یکتایی مسیرها بررسی می‌شود)
 
@@ -99,10 +99,30 @@
 | RC-A5 کد مرده | حذف `$completionRate`؛ `listUpcoming()` علامت `@internal` (مصرف‌کننده: تست SQLite) |
 | RC-A11 README بدون بخش نوبت‌های فاز ۴ | افزودن زیربخش «نوبت‌های رسیدگی» (پنجرهٔ ثبت، محافظ تعطیلات، چند روزه فقط روز شروع، اولویت PR) |
 
-**بازسازی قطعی بستهٔ کاندید:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۳۲٬۳۱۸ بایت، SHA-256 `25961ed02cddf53b51c387b2f20a57cd7abde56d1d6c2a70f64b935940c30720`** (قبلی: ۵۶ فایل / ۳۱۷٬۳۱۵ بایت / `ad836f3f…`). گیت‌های محلی پس از تغییر مجدد اجرا و سبز شدند: access-matrix ۱۱/۱۱ (CLI و pytest)؛ سه Suite SQLite (appointments/repository/workflow)؛ `php -l` همهٔ فایل‌های لمس‌شده.
+**بازسازی قطعی بستهٔ کاندید:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۳۴٬۷۷۷ بایت، SHA-256 `afa55f38a0999fb4817ee1aec9e6b6854edf830cba3d06766a681cc845f5484a`** (قبلی: ۵۶ فایل / ۳۱۷٬۳۱۵ بایت / `ad836f3f…`). گیت‌های محلی پس از تغییر مجدد اجرا و سبز شدند: access-matrix ۱۱/۱۱ (CLI و pytest)؛ سه Suite SQLite (appointments/repository/workflow)؛ `php -l` همهٔ فایل‌های لمس‌شده.
 
 **نکته‌های صادقانه:**
 - صفحهٔ `Pages/index.php` عمداً گارد `APP_ROOT` ندارد — این فایل نقطهٔ ورود خودکفایی است و خودش bootstrap را بارگذاری می‌کند؛ زیر Apache همهٔ زیرپوشه‌های ماژول با `.htaccess` بسته‌اند و مسیر ورود تنها `request-center.php`/`index.php` معتبر است.
 - نسخهٔ بستهٔ اسناد معماری داخل ZIP مربوط به بایت‌های سرساخت است (سند خودمرجع)؛ منبع حقیقت سندها در همین شاخه است.
 - یافته‌های موج ۲ (fail-closed تعطیلات، چند روزه، allowlist staff، اعلان به requester، RC-A6…A10) عمداً اعمال نشدند و تصمیم هرکدام با مالک است.
 - **اصلاحیهٔ پس از اجرا (push `dbca9b6`):** `Request Center QA Package Preview` ✅ (پوشش خودبررسی overlay از commit trigger: access-matrix با ۱۱ گیت)، `Request Center T12` ✅، `Request Center Contract` ❌ **فقط** در گام `T07 full-database clone migration replay and fingerprint` روی هر دو MariaDB (۱۰.۴.۳۲ و ۱۰.۱۱) — همان قرمز مصوب D1؛ هیچ گام دیگری قرمز نشد، از جمله gate استاتیک یازدهم. `Logging contract` ❌ همچنان قرمزِ پیشین (D3؛ این فاز به Logging دست نزد). `ci.yml` روی این شاخه اجرا نمی‌شود (trigger فقط main/develop یا PR به main).
+## ۹) موج ۲-کوچک پس از بازبینی ایجنت دیگر (۱۴۰۵/۰۸/۱۶) — بازسازی دوم بستهٔ کاندید
+
+**مبنا:** مالک خواست همهٔ یافته‌های رفع‌پذیر گزارش بازبینی (که روی شاخه `feature/…` بدون فازهای ۴/۵ نوشته شده بود) روی این شاخه اعمال شود. اصلاحات در کامیت `03a6796` ثبت شدند:
+
+| یافتهٔ بازبین | وضعیت پس از این بسته |
+|---|---|
+| `normalizeDateTime()` بدون `getLastErrors()`/حتی `checkdate()` — ۳۱ فوریه تبدیل می‌شد | ✅ رفع شد (`checkdate` + ۹ بررسی مرزی؛ ۳۵ قلم تست SQLite نوبت‌ها) |
+| نگهبان تعطیلات fail-open | ✅ در موج ۱ «fail-loud» شد (log + بنر)؛ تصمیم fail-closed مالک موج ۲ اصلی است |
+| «Start in past prohibited per Phase 4 doc» | ❌ ادعا نادرست بود — هیچ‌سند حاکم چنین ممنوعیتی ندارد؛ پنجرهٔ ۶۰ دقیقه‌ای طراحی بوده و اکنون مستند است |
+| تضاد درونی دفتر فاز ۱ + Commit pin قدیمی | ✅ رفع شد (سربرگ ↔ جدول هم‌تراز + یادداشت شاخهٔ کار/PR) |
+| README «برش اجرایی نخست» | ✅ اصلاح شد |
+| ادعاهای stale در `REQUEST-CENTER-TEST-BUILD-1.62.92-FA.md` (T12 اجرا نشده/CI فقط 10.11) | ✅ اصلاح شد (T12 روی هر دو MariaDB موفق) |
+| اختلاف شاخهٔ arena (کار) در برابر feature (PR هدف) | ✅ یادداشت در رجیسترهای فاز ۴/۵ |
+| تداخل نوبت در MariaDB واقعی (نه SQLite) | 🟡 هنوز اثبات نشده؛ منوط به تصمیم مالک/اجرای MariaDB واقعی (T10 پنجاه‌کارگر موجود است) |
+| ثبت Audit/اعلان بلعیده‌شده | 🟡 آگاهانه؛ بسته به افق UX مالک |
+
+**بازسازی دوم قطعی:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۳۴٬۷۷۷ بایت، SHA-256 `afa55f38a0999fb4817ee1aec9e6b6854edf830cba3d06766a681cc845f5484a`** (قبلی: ۳۳۲٬۳۱۸ / `25961ed0…`). گیت‌های محلی پس از تغییر دوباره سبز شد: access-matrix ۱۱/۱۱، سه Suite SQLite (۳۵/ـ/ـ)، `php -l`.
+
+> توضیح همانند §۸: این سند درون ZIP می‌ماند اما از بایت‌های مرحلهٔ ساخت پیروی می‌کند؛ منبع حقیقت سندها در این شاخه است.
+> **نتیجهٔ CI پس از این push در انتهای همین بخش (اصلاحیهٔ پس از اجرا) ثبت می‌شود؛ تا آن زمان ادعای سبز CI برای این بازسازی مجاز نیست.**
