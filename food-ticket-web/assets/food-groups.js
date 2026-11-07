@@ -251,7 +251,13 @@
   }
 
   function personLine(u) {
+    // غذای سفارشی امروزِ این عضو. اگر سرویس سفارش پاسخ داد و سفارشی ثبت نشده بود،
+    // «بدون سفارش» واقعی نمایش داده می‌شود؛ اگر سرویس سفارش در دسترس نبود، چیزی نشان نمی‌دهیم.
+    var foodChip = u.food
+      ? ' <span class="status info" title="غذای سفارش‌داده‌شدهٔ امروز">غذای امروز: ' + esc(u.food) + '</span>'
+      : (u.food_known ? ' <span class="status none" title="سفارشی برای امروز ثبت نشده است">بدون سفارش</span>' : '');
     return esc(u.name || '—') + (u.pc ? ' <small>(' + esc(u.pc) + ')</small>' : '')
+      + foodChip
       + (u.active ? '' : ' <span class="status bad">غیرفعال</span>');
   }
 

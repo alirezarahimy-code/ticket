@@ -2402,13 +2402,28 @@ function food_ticket_api_groups(string $overviewDate = '', ?array $actor = null)
     }
     food_ticket_absence_ensure();
     $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $overviewDate) ? $overviewDate : date('Y-m-d');
-    $userOut = static function (array $r): array {
+    // غذای سفارشیِ هر نفر برای همین روز؛ کنار نام عضو در «لیست اعضا» نمایش داده می‌شود.
+    // خطای خواندن سفارش نباید خروجی لیست گروه را بشکند؛ در آن صورت فقط غذای سفارشی نمایش داده نمی‌شود.
+    $memberOrderMaps = [];
+    $memberFoodOf = null;
+    try {
+        $memberOrderMaps[$date] = food_ticket_group_order_map($memberOrderMaps, $date);
+        $memberFoodOf = food_ticket_group_food_lookup($memberOrderMaps[$date] ?? null);
+    } catch (Throwable $foodErr) {
+        app_error_log('[food-groups] member food lookup unavailable: ' . $foodErr->getMessage());
+        $memberFoodOf = null;
+    }
+    // اگر سرویس سفارش پاسخ داد، «بدون سفارش» واقعی است؛ وگرنه اصلاً نمایش داده نمی‌شود.
+    $foodMapAvailable = ($memberOrderMaps[$date] ?? null) !== null;
+    $userOut = static function (array $r) use ($memberFoodOf, $foodMapAvailable): array {
         return [
             'id' => (int) $r['id'],
             'pc' => (string) ($r['employee_number'] ?? ''),
             'name' => (string) ($r['full_name'] ?? ''),
             'nat' => (string) ($r['national_code'] ?? ''),
             'active' => (bool) ($r['is_active'] ?? false),
+            'food' => $memberFoodOf ? $memberFoodOf($r) : null,
+            'food_known' => $foodMapAvailable,
         ];
     };
     $groups = db()->query('SELECT id, title, l_uid, rfid_card, description, visit_change_until, status, created_at FROM food_ticket_groups ORDER BY status ASC, id DESC')->fetchAll();
