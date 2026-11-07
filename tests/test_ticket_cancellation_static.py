@@ -2,7 +2,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 index = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
-    "index.php", "modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/supervisor-actions.php", "actions/service-actions.php", "modules/request-center/Actions/bulk-actions.php", "actions/settings-actions.php"
+    "index.php", "modules/request-center/lib/functions.php", "modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/supervisor-actions.php", "actions/service-actions.php", "modules/request-center/Actions/bulk-actions.php", "actions/settings-actions.php"
 ))
 bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
     "bootstrap.php", "lib/tickets-sla.php", "lib/db-core.php", "lib/auth-scope.php"

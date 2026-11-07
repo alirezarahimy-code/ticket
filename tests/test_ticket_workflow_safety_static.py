@@ -33,7 +33,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("'assigned_to' => $ticket['assigned_to'] ?? null", update)
         self.assertIn("'priority' => $ticket['priority']", update)
         self.assertIn("new RequestCenterWorkflowService(db())", update)
-        chooser = section(source('index.php'), 'function choose_handling_agent(', 'function ticket_allowed_transitions(')
+        chooser = section(source('modules/request-center/lib/functions.php'), 'function choose_handling_agent(', 'function ticket_allowed_transitions(')
         self.assertIn('u.role IN ("agent", "manager") AND hu.code = ?', chooser)
         self.assertEqual(chooser.count("ticket_assignee_is_eligible($routingTicket, $candidate"), 2)
         self.assertIn("ticket_assignee_is_eligible($ticket, $assigneeRow", update)

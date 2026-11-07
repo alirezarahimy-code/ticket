@@ -51,7 +51,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("public static function allowedTransitions(", service)
         self.assertIn("public function transition(", service)
         self.assertIn("FOR UPDATE", service)
-        self.assertIn("RequestCenterWorkflowService::allowedTransitions($from)", index)
+        self.assertIn("RequestCenterWorkflowService::allowedTransitions($from)", read("modules/request-center/lib/functions.php"))
 
     def test_migrated_status_writes_use_the_central_workflow_service(self):
         paths = (
