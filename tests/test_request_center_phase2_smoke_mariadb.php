@@ -168,11 +168,25 @@ try {
     }
     smoke_wait_server($portHttp);
 
-    // Deterministic RC reference rows (support service) for the create_ticket round trip.
-    $pdo->exec("INSERT IGNORE INTO handling_units (id, code, name, is_active) VALUES (1, 'it', 'واحد فناوری', 1), (2, 'support', 'واحد پشتیبانی', 1)");
-    $pdo->exec("INSERT IGNORE INTO departments (id, name, code, is_active) VALUES (1, 'پشتیبانی کل', 'sup', 1), (2, 'فناوری اطلاعات', 'it', 1)");
-    $pdo->exec("INSERT IGNORE INTO categories (id, name, code, service_group, is_active) VALUES (1, 'درخواست عمومی', 'gen', 'support', 1)");
-    $pdo->exec("INSERT IGNORE INTO service_catalog (id, name, code, service_group, default_priority, department_id, category_id, handling_unit_id, requires_asset, default_ticket_type, is_active) VALUES (1, 'خدمت عمومی Smoke', 'smoke-support', 'support', 'normal', 1, 1, 2, 0, 'request', 1)");
+    // Deterministic RC reference rows for the create_ticket round trip.
+    // NOTE: contract CI preflight runs BEFORE this smoke test and already owns service_catalog id=1 ('RC Support', service_group 'it').
+    // INSERT IGNORE with hard-coded id=1 was therefore silently dropped; use captured ids instead — provider independent of CI seed order.
+    $unitInsert = $pdo->prepare("INSERT IGNORE INTO handling_units (code, name, is_active) VALUES ('support', 'واحد پشتیبانی', 1)");
+    $unitInsert->execute();
+    $supportHandlingUnitId = (int) $pdo->query("SELECT id FROM handling_units WHERE code = 'support' ORDER BY id LIMIT 1")->fetchColumn();
+    $departmentInsert = $pdo->prepare("INSERT INTO departments (name, code, is_active) VALUES ('Smoke Support Department', 'smoke-sup', 1)");
+    $departmentInsert->execute();
+    $smokeDepartmentId = (int) $pdo->lastInsertId();
+    $categoryInsert = $pdo->prepare("INSERT INTO categories (name, code, service_group, is_active) VALUES ('Smoke Support Category', CONCAT('smoke-cat-', REPLACE(UUID(), '-', '')), 'support', 1)");
+    $categoryInsert->execute();
+    $smokeCategoryId = (int) $pdo->lastInsertId();
+    $serviceInsert = $pdo->prepare(
+        "INSERT INTO service_catalog (name, code, service_group, default_priority, department_id, category_id, handling_unit_id, requires_asset, default_ticket_type, is_active)
+         VALUES ('Smoke Support Service', CONCAT('smoke-svc-', REPLACE(UUID(), '-', '')), 'support', 'normal', ?, ?, ?, 0, 'request', 1)"
+    );
+    $serviceInsert->execute([$smokeDepartmentId, $smokeCategoryId, $supportHandlingUnitId]);
+    $supportServiceId = (int) $pdo->lastInsertId();
+    echo 'smoke fixtures: handling_unit=' . $supportHandlingUnitId . ' department=' . $smokeDepartmentId . ' category=' . $smokeCategoryId . ' service=' . $supportServiceId . PHP_EOL;
 
     $seedUser = $pdo->prepare(
         "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active)
@@ -219,12 +233,13 @@ try {
         'action' => 'create_ticket',
         'subject' => 'RC phase-3 independent POST smoke',
         'description' => 'Created via request-center.php POST path (same protocol as legacy)',
-        'category_id' => 1,
-        'service_id' => 1,
+        'category_id' => $smokeCategoryId,
+        'service_id' => $supportServiceId,
         'service_group' => 'support',
         'ticket_type' => 'request',
         'priority' => 'normal',
         'support_location' => 'smoke-lab',
+        'department_id' => $smokeDepartmentId,
         'csrf' => $csrf,
     ], ['Cookie: ' . $cookie]);
     if ($create['status'] !== 302) {
