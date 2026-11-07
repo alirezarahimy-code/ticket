@@ -12,6 +12,7 @@ $_SESSION['user_id'] = $userId;
 $payload = [
     'cookie_name' => session_name(),
     'session_id' => session_id(),
+    'csrf' => csrf_token(),
 ];
 session_write_close();
 
