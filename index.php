@@ -1239,7 +1239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require __DIR__ . '/actions/notification-actions.php';
 
         // ───── گروه اکشن: تصمیم‌های سرپرست و امتیازدهی — ۴ اکشن از ۱.۶۲.۱۷ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/supervisor-actions.php';
+        require __DIR__ . '/modules/request-center/Actions/supervisor-actions.php';
 
 
         // ───── گروه اکشن: اموال، دارایی‌ها و اسکن دامین — ۱۰ اکشن از ۱.۶۲.۱۳ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
@@ -1247,7 +1247,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         // ───── گروه اکشن: چرخهٔ کامل درخواست‌ها — ۷ اکشن از ۱.۶۲.۱۳ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/ticket-actions.php';
+        require __DIR__ . '/modules/request-center/Actions/ticket-actions.php';
 
 
         // ───── گروه اکشن: خدمات، دسته‌ها و پایگاه دانش — ۷ اکشن از ۱.۶۲.۱۴ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
@@ -1260,7 +1260,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         // ───── گروه اکشن: ارتباط دارایی و عملیات گروهی درخواست‌ها — ۲ اکشن از ۱.۶۲.۱۹ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/bulk-actions.php';
+        require __DIR__ . '/modules/request-center/Actions/bulk-actions.php';
 
 
         // ───── گروه اکشن: ساختارهای پایه و کاربران — ۶ اکشن از ۱.۶۲.۱۹ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
