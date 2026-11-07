@@ -6,7 +6,7 @@
 | تاریخ ثبت | 2026-11-07 |
 | مخزن | `alirezarahimy-code/ticket` |
 | شاخه اجرایی | `feature/request-center-module-1.62.88` |
-| Commit فعلی شاخه اجرایی/شواهد | `16217e9e5597d64f4357df9bdc6711fcf9ed2083` |
+| Commit فعلی شاخه اجرایی/شواهد | `3dac5e8949953473abee9d59cff0fac993bd235d` |
 | مبنای As-Is | `ab073ee9fffc56ccd1a2093d02725b95891e0d63` |
 | سند معماری حاکم | `docs/architecture/REQUEST-CENTER-ARCHITECTURE.md` نسخه 1.14 |
 | PR | #30 — Open / Draft |
@@ -44,7 +44,7 @@
 
 - Commit مبنای As-Is یعنی `ab073ee9fffc56ccd1a2093d02725b95891e0d63` ancestor شاخه `main` است؛ `main` در مقایسه ۱۳ commit جلوتر و صفر commit عقب‌تر است.
 - فهرست تغییرات این ۱۳ commit فقط شامل workflow/AGENTS، مستندات، system-map، تست fresh-install و ابزارهای ساخت نقشه است؛ فایل اجرایی PHP برنامه در این فاصله تغییر نکرده است. بنابراین مبنای As-Is از نظر سورس اجرایی همچنان با main هم‌خوان است.
-- اجرای کامل‌تر Request Center Contract روی commit آزمون `82ef7c1978c53a86ac31a5568d5e46417c42ede2` و سپس تکرار آن روی HEAD مستنداتی `16217e9e5597d64f4357df9bdc6711fcf9ed2083` با Workflow `42343952546` روی MariaDB 10.4.32 و 10.11 موفق شد. تغییرات اجرایی این پیگیری فقط در فایل آزمون `tests/test_request_center_jalali_parity.mjs` بوده‌اند؛ هیچ کد اجرایی PHP، Schema یا Migration تغییر نکرده است.
+- اجرای کامل‌تر Request Center Contract روی commit آزمون `82ef7c1978c53a86ac31a5568d5e46417c42ede2` و سپس تکرار آن روی HEAD مستنداتی `16217e9e5597d64f4357df9bdc6711fcf9ed2083` با Workflow `42344188512` روی MariaDB 10.4.32 و 10.11 موفق شد. تغییرات اجرایی این پیگیری فقط در فایل آزمون `tests/test_request_center_jalali_parity.mjs` بوده‌اند؛ هیچ کد اجرایی PHP، Schema یا Migration تغییر نکرده است.
 
 ## ۳. یافته‌های قطعی ممیزی فنی
 
@@ -196,9 +196,9 @@ Dump موجود مستقیماً از Git blob خوانده و فقط ساختا
 | Workflow | نتیجه | جزئیات |
 |---|---|---|
 | Request Center Contract | **PASS** | Run `42343952546`: هر دو Job MariaDB 10.4.32 و 10.11؛ T01–T06، T08–T11 موفق (T04 diagnostic موفق است اما سیاست صفر DDL در Legacy همچنان FAIL است) |
-| Logging contract | **PASS** | Run `42343952567` موفق |
-| CI | **FAIL** | Run `42343952575`: `tools/test_access_coverage_offline.php` پوشه `modules/request-center/Actions` را نمی‌پیماید و مجوزها/guardهای ماژول را به‌اشتباه بی‌استفاده یا بدون guard گزارش می‌کند |
-| Logging 1.62.88 Acceptance | **FAIL** | Run `42343952561`: `tools/test_ticket_txn_offline.php` و `tests/test_logging_trace_coverage.php` هنوز بدنهٔ Ticket را فقط در مسیر Legacy می‌جویند؛ فایل‌های Logging/سایر ماژول‌ها برای رفع آن تغییر داده نشده‌اند |
+| Logging contract | **PASS** | Run `42344188597` موفق |
+| CI | **FAIL** | Run `42344188568`: `tools/test_access_coverage_offline.php` پوشه `modules/request-center/Actions` را نمی‌پیماید و مجوزها/guardهای ماژول را به‌اشتباه بی‌استفاده یا بدون guard گزارش می‌کند |
+| Logging 1.62.88 Acceptance | **FAIL** | Run `42344188563`: `tools/test_ticket_txn_offline.php` و `tests/test_logging_trace_coverage.php` هنوز بدنهٔ Ticket را فقط در مسیر Legacy می‌جویند؛ فایل‌های Logging/سایر ماژول‌ها برای رفع آن تغییر داده نشده‌اند |
 | Refresh Request Center system map | FAIL | اکشن‌های `create_ticket` و `supervisor_decision` در index تولیدی ثبت نشده‌اند |
 | Request Center QA Package Preview | FAIL | دو تست، فایل‌های `modules/request-center/Actions/*.php` را در overlay بسته پیدا نمی‌کنند |
 
