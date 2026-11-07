@@ -14,6 +14,8 @@ on:
       - 'tests/test_request_center_web_ddl_runtime.php'
       - 'tests/test_system_update_migration_failure_gates.php'
       - 'tests/test_request_center_metadata_lock_mariadb.php'
+      - 'tests/test_request_center_claim_concurrency_mariadb.php'
+      - 'tests/fixtures/request-center-claim-worker.php'
       - 'tests/fixtures/request-center-ddl-probe.php'
       - 'tests/fixtures/request-center-session-seed.php'
       - 'tests/test_ticket_workflow_safety_static.py'
@@ -147,6 +149,15 @@ jobs:
 
       - name: Request Center T09 MariaDB metadata lock timeout
         run: php tests/test_request_center_metadata_lock_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T10 50-worker Claim concurrency
+        run: php tests/test_request_center_claim_concurrency_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
