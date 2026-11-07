@@ -71,15 +71,16 @@ function t04_log_window(PDO $pdo, string $start, string $user): array
     return ['queries' => $queries, 'ddl' => $ddl, 'dml' => $dml];
 }
 
-function t04_http(string $url): array
+function t04_http(string $url, array $extraHeaders = []): array
 {
+    $extraHeaders[] = 'Connection: close';
     $context = stream_context_create([
         'http' => [
             'method' => 'GET',
             'timeout' => 20,
             'ignore_errors' => true,
             'follow_location' => 0,
-            'header' => "Connection: close\r\n",
+            'header' => implode("\r\n", $extraHeaders) . "\r\n",
         ],
     ]);
     $body = @file_get_contents($url, false, $context);
