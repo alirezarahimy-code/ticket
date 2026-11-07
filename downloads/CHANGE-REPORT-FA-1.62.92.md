@@ -20,9 +20,10 @@
 | ۱ | ورودی مستقل، پوستهٔ چهار Workspace، خروجی خواندنی co-موروثی محدودشده از `index.php` | `request-center.php` + `Pages/index.php` |
 | ۲ | WorkflowService، تصمیم‌های انتقال وضعیت، هم‌زمانی، صف‌های کارشناس | `WorkflowService.php` + آزمون‌های SQLite/MariaDB |
 | ۳ | بازاستخراج پروتکل مشترک POST + اجرای رجیستری RC در مرز ماژول (`lib/http-post.php`)، رفع Bridgeها | POST مستقل RC + «forward درجا» برای بقیه |
-| ۴ | تقویم شمسی کارشناسان، نوبت‌های رسیدگی (create/cancel/complete تراکنشی + قفل)، تعطیلات از جدول `holidays`، ظرفیت تیم، KPI، اعلان `notify_user` با idempotency، `ApppointmentRepository` کامل | صفحهٔ `Pages/calendar.php` + طراحی کامل `.rc-shell` |
+| ۴ | تقویم شمسی کارشناسان، نوبت‌های رسیدگی (create/cancel/complete تراکنشی + قفل)، تعطیلات از جدول `holidays`، ظرفیت تیم، KPI، اعلان `notify_user` با idempotencyy، `ApppointmentRepository` کامل | صفحهٔ `Pages/calendar.php` + طراحی کامل `.rc-shell` |
 | ۵ | بستهٔ ارتقا (همین سند و ZIP)، راهنمای نصب/بازگشت، ثبت گیت‌های Contract، ممیزی نمودار دسترسی (آزمـون ایستا `test_request_center_access_matrix_static.py`)، تکمیل overlay بستهٔ پیش‌نمایش | این سند + `tools/build_rc_update.py` |
 | ۵.۲ | موج دوم-کوچک پس از بازبینی ایجنت دیگر (۱۴۰۵/۰۸/۱۶): رفع `normalizeDateTime()` با اعتبارسنجی تقویم `checkdate()` (تاریخ‌های ناممکن دیگر silent پذیرفته نمی‌شوند + ۹ بررسی مرزی در تست SQLite)؛ رفع تضاد درونی دفتر فاز ۱ (سربرگ «بسته‌شده» در برابر «باز» + یادداشت شفاف‌سازی شاخهٔ کار/PR)؛ عنوان قدیمی README ماژول؛ به‌روزرسانی ادعاهای stale در سند بستهٔ تست مالک (T12 روی هر دو MariaDB موفق است)؛ یادداشت اختلاف شاخهٔ arena/feature در رجیسترهای فازهای ۴/۵ | `AppointmentRepository.php` + تست نوبت‌ها + ۴ سند |
+| ۵.۳ | موج ۲ اصلی (تکمیل تقویم، ۱۴۰۵/۰۸/۱۶): `ASSIGNABLE_ROLES` واحد در `AppointmentRepository` (فرم مدیر و اعتبارسنجی POST از یک فهرست)؛ شکست کوئری `holidays` هنگام **ثبت نوبت** اکنون fail-closed است (مدیر با override+log)؛ اعلان نوبت برای ثبت‌کنندهٔ درخواست در مسیرهای create/cancel/complete؛ همگام‌سازی ثبت شواهد T12 با سند بسته‌شدن (بدون اجرای مجدد آزمون) | `appointment-actions.php` + ثبت‌کننده/Repository |
 | ۵.۱ | موج اول اصلاحات ممیزی (پس از بازبینی ماژول در ۱۴۰۵/۰۸/۱۶): گاردهای `APP_ROOT` در تمام صفحات include-only + ۳ فایل `.htaccess` منع مستقیم (Pages/Actions/lib) + ۱ گیت جدید در نمودار دسترسی؛ تعطیلی‌های «fail-open خاموش» اکنون fail-loud هستند (رویداد `rc_holidays_lookup_failed` در `activity_log` + بنر هشدار)؛ hint پنجرهٔ ثبت معوق و مستندسازی نوبت‌ها در README؛ حذف کد مرده (`$completionRate`) و علامت‌گذاری `@internal` روی `listUpcoming()` | `.htaccess`ها + `Pages/*.php` + `appointment-actions.php` + `calendar.php` + رجیستر فاز ۵.۱ |
 
 ## فایل‌های مشترک که تغییر داده شده‌اند (با توجیه)
@@ -71,6 +72,13 @@
 - **رفع باگ واقعی:** `AppointmentRepository::normalizeDateTime()` به‌جای `createFromFormat` بدون کنترل خطا، با `checkdate()` تاریخ‌های ناممکن را reject می‌کند؛ ۹ بررسی مرزی (۳۱ فوریه، ۲۹/۳۰ فوریه ۲۰۲۶ کبیسه نیست / ۲۰۲۸ هست، ماه ۰ و ۱۳، ساعت ۲۴، دقیقه ۶۰، ورودی بدون دقیقه/ثانیه) به `tests/test_request_center_appointments_sqlite.php` افزوده شد (۳۵ قلم).
 - **رفع ناهم‌خوانی مستندات:** دفتر شواهد فاز ۱ (سربرگ «بسته‌شده» ↔ جدول «باز» — هم‌تراز + یادداشت شاخهٔ کار/feature)، عنوان «برش اجرایی نخست» در README ماژول، ادعاهای نادرست در `REQUEST-CENTER-TEST-BUILD-1.62.92-FA.md` (T12 اکنون روی هر دو MariaDB موفق گزارش شده؛ «Gate اجرایی» بودن آن منوط به تأیید مالک است؛ ۶۰ دقیقهٔ retro اصلاح شد)، یادداشت اختلاف شاخهٔ `arena/22d4eba7-ticket` (کار) در برابر `feature/…` (هدف PR #30) در رجیسترهای فازهای ۴/۵.
 - **عمداً تغییر نکرد:** T07 (D1)، Logging (D3)، SecurityTest قدیمی، sync شاخهٔ feature/خروج Draft PR #30 — همه منوط به دستور مالک.
+## موج ۲ اصلی (۱۴۰۵/۰۸/۱۶) — تکمیل ظرفیت‌های تقویم رسیدگی
+
+- **Fail-closed تعطیلات (ثبت):** اگر کوئری `holidays` خطا بدهد، دیگر ثبت نوبت ادامه نمی‌یابد؛ مدیر سامانه می‌تواند با گزینهٔ موجودِ «ثبت حتی بیرون از تقویم کاری/تعطیلات» ثبت کند (log با `rc_holidays_lookup_failed`)؛ عرضهٔ نمایش ماهانه همچنان با بنر هشدار فعال می‌ماند.
+- **فهرست کارشناسان مجاز:** ثابت واحد `ASSIGNABLE_ROLES` در `AppointmentRepository` (superset از `staff_role_codes()` هسته + `admin`/`department_manager` مطابق رفتار قبلی UI)؛ هم `assignableStaff()` و هم اعتبارسنجی POST از آن می‌خوانند؛ `is_active = 1` همچنان لازم است.
+- **اعلان ثبت‌کننده:** در سه مسیر create/cancel/complete علاوه بر کارشناس هدف، ثبت‌کنندهٔ درخواست (اگر عامل متفاوت است) با کلید idempotency مطلع می‌شود.
+- **ثبت شواهد T12:** دفتر فاز ۱ و برگهٔ T12 با نتیجهٔ واقعی CI (SUCCESS روی هر دو MariaDB) هم‌تراز شدند؛ هیچ سناریوی جدیدی اجرا نشد (دستور مالک).
+- **عمداً بازماند:** پنجرهٔ ساعت آغاز/پایان کار در بازهٔ مجاز روز، رندر چند روزه، تکمیل ظرفیت تیمی و نمایش، اثبات هم‌زمانی روی MariaDB واقعی، استقلال عملیاتی فرم‌ها و انتقالشان به ورودی مستقل، تکمیل Workspaceها و انتشار — اولویت‌های ۲ تا ۶ مالک.
 ## معلوم‌های به‌صراحت باز
 
 ۱. T07 (بازپخش کامل Migration روی کلون + fingerprint) با تصمیم مالکی (D1) قرمز باقی می‌ماند.

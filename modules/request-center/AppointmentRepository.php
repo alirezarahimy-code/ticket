@@ -24,6 +24,24 @@ final class AppointmentRepository
     public const STATUS_DONE = 'done';
     public const STATUS_CANCELLED = 'cancelled';
 
+    /**
+     * Roles allowed to be chosen as appointment assignee (module policy).
+     * Single source of truth for both the interactive staff list
+     * (assignableStaff) and the POST-side validation in the calendar handler.
+     * Superset of core staff_role_codes() (adds 'admin' and 'department_manager')
+     * to keep the historical module list visible; primary_admin already covers
+     * administrators.
+     */
+    public const ASSIGNABLE_ROLES = [
+        'agent', 'manager', 'support_manager', 'supervisor', 'admin', 'primary_admin', 'department_manager', 'inspector',
+    ];
+
+    /** @return string[] */
+    public static function assignableRoleCodes(): array
+    {
+        return self::ASSIGNABLE_ROLES;
+    }
+
     public function __construct(private PDO $pdo)
     {
     }
@@ -361,14 +379,16 @@ final class AppointmentRepository
     {
         // No module ownership of the users table; read-only via existing columns.
         try {
+            $roles = self::assignableRoleCodes();
+            $placeholders = implode(',', array_fill(0, count($roles), '?'));
             $st = $this->pdo->prepare(
                 "SELECT id, full_name, role FROM users
                  WHERE is_active = 1
-                   AND role IN ('agent','manager','support_manager','supervisor','admin','primary_admin','department_manager')
+                   AND role IN ($placeholders)
                  ORDER BY full_name ASC, id ASC
                  LIMIT " . max(1, min(500, $limit))
             );
-            $st->execute();
+            $st->execute($roles);
             return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
         } catch (Throwable) {
             return [];
