@@ -101,6 +101,9 @@ jobs:
             cron/ticket_auto_close.php \
             modules/request-center/RequestCenterRepository.php \
             modules/request-center/WorkflowService.php \
+            modules/request-center/Actions/ticket-actions.php \
+            modules/request-center/Actions/supervisor-actions.php \
+            modules/request-center/Actions/bulk-actions.php \
             docs/architecture/REQUEST-CENTER-ARCHITECTURE.md
           do
             test -s "$file"
@@ -122,6 +125,9 @@ jobs:
             cron/ticket_auto_close.php
             modules/request-center/RequestCenterRepository.php
             modules/request-center/WorkflowService.php
+            modules/request-center/Actions/ticket-actions.php
+            modules/request-center/Actions/supervisor-actions.php
+            modules/request-center/Actions/bulk-actions.php
           )
           for file in "${files[@]}"; do
             mkdir -p "$ROOT/overlay/$(dirname "$file")"
