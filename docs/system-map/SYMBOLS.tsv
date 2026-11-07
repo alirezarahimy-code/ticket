@@ -3350,6 +3350,7 @@ t07_mysql_file	function	tests/test_request_center_t07_migration_clone.php	42	tes
 t07_tables	function	tests/test_request_center_t07_migration_clone.php	84	tests
 t07_fingerprint	function	tests/test_request_center_t07_migration_clone.php	94	tests
 t07_registry_rows	function	tests/test_request_center_t07_migration_clone.php	144	tests
+t07_service_catalog_distribution	function	tests/test_request_center_t07_migration_clone.php	155	tests
 t04_check	function	tests/test_request_center_web_ddl_runtime.php	34	tests
 t04_reset_log	function	tests/test_request_center_web_ddl_runtime.php	42	tests
 t04_log_window	function	tests/test_request_center_web_ddl_runtime.php	50	tests

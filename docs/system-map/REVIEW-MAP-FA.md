@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 557 |
-| خطوط | 127,779 |
-| آدرس‌ها (بلوک) | 6,749 |
+| خطوط | 127,801 |
+| آدرس‌ها (بلوک) | 6,750 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,749 آدرس |
+| باقی‌مانده | 6,750 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -245,7 +245,7 @@
 | `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:876</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-039.50` <sub>schema.sql:855</sub> | 14 |
 | `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:435</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-039.26` <sub>schema.sql:414</sub> | 21 |
 | `schema_updates` | `DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`DB-039.110` <sub>schema.sql:1520</sub><br>`CORE-007.04` <sub>lib/logging-audit.php:61</sub> | 21 |
-| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-039.19` <sub>schema.sql:232</sub> | 56 |
+| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-039.19` <sub>schema.sql:232</sub> | 57 |
 | `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-039.20` <sub>schema.sql:258</sub> | 16 |
 | `settings` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-034.47` <sub>index.php:1310</sub><br>`PAGE-034.54` <sub>index.php:1393</sub> | 61 |
 | `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1367</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-039.65` <sub>schema.sql:1132</sub> | 9 |
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 229 | 1,649 | 21,919 |
+| `TEST` | TEST | 229 | 1,650 | 21,941 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 56 | 1,387 | 45,702 |
@@ -2937,7 +2937,7 @@
 </details>
 
 <details>
-<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (377 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (399 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -2949,11 +2949,12 @@
 | `TEST-176.06` | 85–91 | تابع | `t07_tables` | 0 | ⬜ |
 | `TEST-176.07` | 93–143 | تابع | `t07_fingerprint` | 5 | ⬜ |
 | `TEST-176.08` | 145–154 | تابع | `t07_registry_rows` | 0 | ⬜ |
-| `TEST-176.09` | 155–172 | ناحیه | `بلوک رویه‌ای 155-172` | 4 | ⬜ |
-| `TEST-176.10` | 173–173 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
-| `TEST-176.11` | 174–345 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
-| `TEST-176.12` | 346–346 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
-| `TEST-176.13` | 347–377 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
+| `TEST-176.09` | 156–169 | تابع | `t07_service_catalog_distribution` | 0 | ⬜ |
+| `TEST-176.10` | 170–187 | ناحیه | `بلوک رویه‌ای 170-187` | 4 | ⬜ |
+| `TEST-176.11` | 188–188 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
+| `TEST-176.12` | 189–367 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
+| `TEST-176.13` | 368–368 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
+| `TEST-176.14` | 369–399 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
 
 </details>
 

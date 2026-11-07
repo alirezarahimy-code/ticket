@@ -73730,8 +73730,8 @@
             "id": "TEST-176",
             "path": "tests\/test_request_center_t07_migration_clone.php",
             "area": "TEST",
-            "lines": 377,
-            "file_fingerprint": "b5eeefe7e866",
+            "lines": 399,
+            "file_fingerprint": "24b2962b5504",
             "blocks": [
                 {
                     "kind": "region",
@@ -73842,10 +73842,23 @@
                     "id": "TEST-176.08"
                 },
                 {
+                    "kind": "function",
+                    "anchor": "t07_service_catalog_distribution",
+                    "line_start": 156,
+                    "line_end": 169,
+                    "lines": 14,
+                    "fingerprint": "717311d681fb",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-176.09"
+                },
+                {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 155-172",
-                    "line_start": 155,
-                    "line_end": 172,
+                    "anchor": "بلوک رویه‌ای 170-187",
+                    "line_start": 170,
+                    "line_end": 187,
                     "lines": 18,
                     "fingerprint": "227d88545943",
                     "risk": {
@@ -73854,28 +73867,28 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TEST-176.09"
+                    "id": "TEST-176.10"
                 },
                 {
                     "kind": "region",
                     "anchor": "Strip only database-selection statements from the trusted du",
-                    "line_start": 173,
-                    "line_end": 173,
+                    "line_start": 188,
+                    "line_end": 188,
                     "lines": 1,
                     "fingerprint": "434ae3b1b084",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.10"
+                    "id": "TEST-176.11"
                 },
                 {
                     "kind": "region",
                     "anchor": "is forced into the disposable clone regardless of the source",
-                    "line_start": 174,
-                    "line_end": 345,
-                    "lines": 172,
-                    "fingerprint": "d6cae894188d",
+                    "line_start": 189,
+                    "line_end": 367,
+                    "lines": 179,
+                    "fingerprint": "b136758b45be",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -73885,26 +73898,26 @@
                             "long": 1
                         }
                     },
-                    "id": "TEST-176.11"
+                    "id": "TEST-176.12"
                 },
                 {
                     "kind": "region",
                     "anchor": "Cross-check the actual 1.62.88 release manifest. The release",
-                    "line_start": 346,
-                    "line_end": 346,
+                    "line_start": 368,
+                    "line_end": 368,
                     "lines": 1,
                     "fingerprint": "b8cff03f6dce",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-176.12"
+                    "id": "TEST-176.13"
                 },
                 {
                     "kind": "region",
                     "anchor": "excludes migration 032; all manifest migrations must already",
-                    "line_start": 347,
-                    "line_end": 377,
+                    "line_start": 369,
+                    "line_end": 399,
                     "lines": 31,
                     "fingerprint": "07e7d3c1fe54",
                     "risk": {
@@ -73913,7 +73926,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "TEST-176.13"
+                    "id": "TEST-176.14"
                 }
             ]
         },
