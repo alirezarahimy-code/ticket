@@ -76,16 +76,10 @@ if (!defined('APP_ROOT')) {
                     $bulkSkipped++;
                     continue;
                 }
+                // وضعیت اولیه از رکورد مجازشده خوانده می‌شود؛ قفل و بازبینی نهایی
+                // وضعیت/مسئول/اولویت/درخواست لغو فقط در WorkflowService انجام می‌شود.
+                // این کار از قفل‌گیری تکراری و دو مرجع متفاوت برای کنترل هم‌زمانی جلوگیری می‌کند.
                 $bulkOld = (string) $bulkTicket['status'];
-                $bulkLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority FROM tickets WHERE id = ? FOR UPDATE');
-                $bulkLock->execute([$ticketId]);
-                $lockedBulkTicket = $bulkLock->fetch();
-                if (!$lockedBulkTicket || (string) $lockedBulkTicket['status'] !== $bulkOld || !empty($lockedBulkTicket['cancel_requested_at'])
-                    || (int) ($lockedBulkTicket['assigned_to'] ?? 0) !== (int) ($bulkTicket['assigned_to'] ?? 0)
-                    || (string) $lockedBulkTicket['priority'] !== (string) $bulkTicket['priority']) {
-                    $bulkSkipped++;
-                    continue;
-                }
                 if ($bulkOld === $status) {
                     // از قبل در همین وضعیت بود: جداگانه شمرده می‌شود تا در گزارش گم نشود
                     // (رفتار قبلی نه «تغییر یافته» می‌شمرد نه «تغییر نکرده»، و مجموع جور درنمی‌آمد).
