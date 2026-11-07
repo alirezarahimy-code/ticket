@@ -11,6 +11,8 @@ on:
       - 'tests/test_request_center_workflow_service_sqlite.php'
       - 'tests/test_request_center_workflow_service_mariadb.php'
       - 'tests/test_request_center_schema_preflight_mariadb.php'
+      - 'tests/test_request_center_web_ddl_runtime.php'
+      - 'tests/fixtures/request-center-ddl-probe.php'
       - 'tests/test_ticket_workflow_safety_static.py'
       - 'tests/test_ticket_cancellation_static.py'
       - 'tests/test_ticket_three_views_static.py'
@@ -116,6 +118,15 @@ jobs:
 
       - name: Request Center T01-T03 MariaDB DDL transaction gates
         run: php tests/test_request_center_mariadb_ddl_gates.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T04 web DDL runtime diagnostic
+        run: php tests/test_request_center_web_ddl_runtime.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
