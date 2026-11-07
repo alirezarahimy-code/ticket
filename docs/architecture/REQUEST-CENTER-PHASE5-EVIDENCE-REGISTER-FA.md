@@ -125,4 +125,4 @@
 **بازسازی دوم قطعی:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۳۴٬۷۷۷ بایت، SHA-256 `afa55f38a0999fb4817ee1aec9e6b6854edf830cba3d06766a681cc845f5484a`** (قبلی: ۳۳۲٬۳۱۸ / `25961ed0…`). گیت‌های محلی پس از تغییر دوباره سبز شد: access-matrix ۱۱/۱۱، سه Suite SQLite (۳۵/ـ/ـ)، `php -l`.
 
 > توضیح همانند §۸: این سند درون ZIP می‌ماند اما از بایت‌های مرحلهٔ ساخت پیروی می‌کند؛ منبع حقیقت سندها در این شاخه است.
-> **نتیجهٔ CI پس از این push در انتهای همین بخش (اصلاحیهٔ پس از اجرا) ثبت می‌شود؛ تا آن زمان ادعای سبز CI برای این بازسازی مجاز نیست.**
+> **اصلاحیهٔ پس از اجرا (push `f9dc870`):** `Request Center QA Package Preview` ✅، `Request Center T12 Scenario Characterization` ✅، `Request Center Contract` ❌ **فقط** در گام `T07 full-database clone migration replay and fingerprint` روی هر دو MariaDB (۱۰.۴.۳۲/۱۰.۱۱) — همان قرمز مصوب D1؛ هیچ گام دیگری قرمز نشد (شامل گیت استاتیک یازدهم و تست نوبت‌های SQLite با بررسی‌های جدید). `Logging contract` ❌ همان قرمز دیرینهٔ D3.
