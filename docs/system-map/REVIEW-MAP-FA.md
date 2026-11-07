@@ -8,12 +8,12 @@
 
 | سنجه | مقدار |
 |---|---|
-| فایل‌های کد تولیدی | 577 |
-| خطوط | 129,175 |
-| آدرس‌ها (بلوک) | 6,797 |
-| موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
+| فایل‌های کد تولیدی | 588 |
+| خطوط | 130,697 |
+| آدرس‌ها (بلوک) | 6,857 |
+| موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,797 آدرس |
+| باقی‌مانده | 6,857 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -23,46 +23,46 @@
 
 | بخش | نام فنی | مجوز لازم | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
-| **audit** | `audit` | — | `PAGE-034.68` <sub>index.php:1528</sub><br>`CORE-008.33` <sub>lib/logging-audit.php:508</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:456</sub><br>`CORE-014.03` <sub>lib/logging-replay.php:45</sub> | 28 |
-| **chatbot api** | `chatbot-api` | — | `PAGE-034.46` <sub>index.php:1315</sub> | 2 |
-| **domain scan** | `domain-scan` | `domain.scan` | `PAGE-034.82` <sub>index.php:2111</sub><br>`PAGE-013.37` <sub>domain-scan.php:1157</sub><br>`PAGE-013.19` <sub>domain-scan.php:390</sub><br>`PAGE-013.16` <sub>domain-scan.php:311</sub> | 48 |
-| **food personnel link** | `food-personnel-link` | — | `PAGE-034.42` <sub>index.php:1179</sub><br>`PAGE-016.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-016.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-016.10` <sub>food-personnel-link.php:317</sub> | 30 |
-| **food ticket** | `food-ticket` | — | `PAGE-034.38` <sub>index.php:892</sub><br>`PAGE-034.50` <sub>index.php:1371</sub><br>`PAGE-034.57` <sub>index.php:1424</sub><br>`TOOL-029.04` <sub>tools/food_system_router.php:21</sub> | 147 |
-| **governance** | `governance` | — | `PAGE-031.32` <sub>governance.php:402</sub><br>`PAGE-034.56` <sub>index.php:1420</sub><br>`PAGE-031.29` <sub>governance.php:317</sub><br>`PAGE-031.10` <sub>governance.php:54</sub> | 42 |
-| **help** | `help` | — | `PAGE-034.64` <sub>index.php:1457</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 4 |
-| **local accounts** | `local-accounts` | — | `PAGE-034.54` <sub>index.php:1399</sub><br>`PAGE-037.03` <sub>local-accounts.php:25</sub><br>`PAGE-037.05` <sub>local-accounts.php:81</sub><br>`PAGE-037.06` <sub>local-accounts.php:138</sub> | 10 |
-| **logging dashboard** | `logging-dashboard` | — | `PAGE-034.69` <sub>index.php:1537</sub><br>`ASSET-016.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-038.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-038.02` <sub>logging-dashboard.php:4</sub> | 10 |
-| **system health** | `system-health` | — | `PAGE-034.70` <sub>index.php:1541</sub><br>`PAGE-065.28` <sub>system-health.php:947</sub><br>`PAGE-065.03` <sub>system-health.php:25</sub><br>`PAGE-065.04` <sub>system-health.php:43</sub> | 35 |
-| **اعلان‌ها** | `notifications` | — | `PAGE-034.67` <sub>index.php:1510</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.66` <sub>index.php:1502</sub><br>`DB-002.30` <sub>install-empty-db.sql:442</sub> | 41 |
+| **audit** | `audit` | — | `PAGE-034.52` <sub>index.php:994</sub><br>`CORE-009.33` <sub>lib/logging-audit.php:508</sub><br>`CORE-001.14` <sub>lib/activity-audit.php:456</sub><br>`CORE-015.03` <sub>lib/logging-replay.php:45</sub> | 28 |
+| **chatbot api** | `chatbot-api` | — | `PAGE-034.30` <sub>index.php:781</sub> | 2 |
+| **domain scan** | `domain-scan` | `domain.scan` | `PAGE-034.66` <sub>index.php:1573</sub><br>`PAGE-013.37` <sub>domain-scan.php:1157</sub><br>`PAGE-013.19` <sub>domain-scan.php:390</sub><br>`PAGE-013.16` <sub>domain-scan.php:311</sub> | 48 |
+| **food personnel link** | `food-personnel-link` | — | `PAGE-034.28` <sub>index.php:699</sub><br>`PAGE-016.09` <sub>food-personnel-link.php:205</sub><br>`PAGE-016.04` <sub>food-personnel-link.php:39</sub><br>`PAGE-016.10` <sub>food-personnel-link.php:317</sub> | 30 |
+| **food ticket** | `food-ticket` | — | `PAGE-034.24` <sub>index.php:452</sub><br>`PAGE-034.34` <sub>index.php:837</sub><br>`PAGE-034.41` <sub>index.php:890</sub><br>`TOOL-029.04` <sub>tools/food_system_router.php:21</sub> | 147 |
+| **governance** | `governance` | — | `PAGE-031.32` <sub>governance.php:402</sub><br>`PAGE-034.40` <sub>index.php:886</sub><br>`PAGE-031.29` <sub>governance.php:317</sub><br>`PAGE-031.10` <sub>governance.php:54</sub> | 42 |
+| **help** | `help` | — | `PAGE-034.48` <sub>index.php:923</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 4 |
+| **local accounts** | `local-accounts` | — | `PAGE-034.38` <sub>index.php:865</sub><br>`PAGE-037.03` <sub>local-accounts.php:25</sub><br>`PAGE-037.05` <sub>local-accounts.php:81</sub><br>`PAGE-037.06` <sub>local-accounts.php:138</sub> | 10 |
+| **logging dashboard** | `logging-dashboard` | — | `PAGE-034.53` <sub>index.php:1003</sub><br>`ASSET-016.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-038.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-038.02` <sub>logging-dashboard.php:4</sub> | 10 |
+| **system health** | `system-health` | — | `PAGE-034.54` <sub>index.php:1007</sub><br>`PAGE-070.28` <sub>system-health.php:947</sub><br>`PAGE-070.03` <sub>system-health.php:25</sub><br>`PAGE-070.04` <sub>system-health.php:43</sub> | 35 |
+| **اعلان‌ها** | `notifications` | — | `PAGE-034.51` <sub>index.php:976</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.50` <sub>index.php:968</sub><br>`DB-002.30` <sub>install-empty-db.sql:442</sub> | 43 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-007.04` <sub>backup.php:32</sub><br>`PAGE-007.02` <sub>backup.php:6</sub><br>`PAGE-007.03` <sub>backup.php:12</sub><br>`PAGE-007.05` <sub>backup.php:78</sub> | 42 |
-| **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-034.61` <sub>index.php:1445</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 11 |
-| **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-034.81` <sub>index.php:2093</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 4 |
-| **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-046.02` <sub>modules/request-center/Pages/analytics.php:6</sub><br>`PAGE-046.01` <sub>modules/request-center/Pages/analytics.php:1</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-034.80` <sub>index.php:2061</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تغییر رمز عبور** | `change-password` | — | `PAGE-034.36` <sub>index.php:867</sub><br>`PAGE-034.53` <sub>index.php:1396</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.77` <sub>index.php:1936</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 34 |
-| **تنظیمات سامانه** | `settings` | — | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-034.45` <sub>index.php:1304</sub><br>`PAGE-034.52` <sub>index.php:1387</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 61 |
-| **ثبت درخواست** | `new-ticket` | — | `PAGE-048.02` <sub>modules/request-center/Pages/create.php:12</sub><br>`PAGE-034.78` <sub>index.php:1947</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 10 |
-| **جزئیات درخواست** | `ticket` | — | `PAGE-049.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
-| **جست‌وجو** | `search` | — | `PAGE-034.75` <sub>index.php:1741</sub><br>`PAGE-034.74` <sub>index.php:1733</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 44 |
-| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.83` <sub>index.php:2189</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 177 |
-| **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.88` <sub>index.php:2951</sub><br>`CORE-016.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 27 |
-| **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.65` <sub>index.php:1465</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 8 |
-| **سفارش غذا** | `food-order` | — | `PAGE-034.39` <sub>index.php:906</sub><br>`PAGE-034.58` <sub>index.php:1429</sub><br>`PAGE-034.59` <sub>index.php:1437</sub><br>`TOOL-029.03` <sub>tools/food_system_router.php:18</sub> | 196 |
-| **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-034.84` <sub>index.php:2234</sub><br>`PAGE-004.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 11 |
+| **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-034.45` <sub>index.php:911</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 11 |
+| **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-034.65` <sub>index.php:1555</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 4 |
+| **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-048.02` <sub>modules/request-center/Pages/analytics.php:6</sub><br>`PAGE-048.01` <sub>modules/request-center/Pages/analytics.php:1</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 8 |
+| **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-034.64` <sub>index.php:1523</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **تغییر رمز عبور** | `change-password` | — | `PAGE-034.22` <sub>index.php:427</sub><br>`PAGE-034.37` <sub>index.php:862</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 34 |
+| **تنظیمات سامانه** | `settings` | — | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub><br>`DB-005.02` <sub>migrations/003-sync-schema-151.sql:5</sub> | 62 |
+| **ثبت درخواست** | `new-ticket` | — | `PAGE-050.02` <sub>modules/request-center/Pages/create.php:12</sub><br>`PAGE-034.62` <sub>index.php:1409</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 10 |
+| **جزئیات درخواست** | `ticket` | — | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
+| **جست‌وجو** | `search` | — | `PAGE-034.59` <sub>index.php:1207</sub><br>`PAGE-034.58` <sub>index.php:1199</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 44 |
+| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 177 |
+| **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.72` <sub>index.php:2413</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub><br>`CORE-018.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 27 |
+| **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.49` <sub>index.php:931</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 8 |
+| **سفارش غذا** | `food-order` | — | `PAGE-034.25` <sub>index.php:466</sub><br>`PAGE-034.42` <sub>index.php:895</sub><br>`PAGE-034.43` <sub>index.php:903</sub><br>`TOOL-029.03` <sub>tools/food_system_router.php:18</sub> | 196 |
+| **شناسنامه دارایی** | `asset` | `asset.view` | `PAGE-034.68` <sub>index.php:1696</sub><br>`PAGE-004.02` <sub>asset-inventory-page.php:4</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **شناسنامه سیستم‌ها** | `inventory` | `inventory.view` | `PAGE-036.31` <sub>inventory.php:704</sub><br>`PAGE-036.29` <sub>inventory.php:636</sub><br>`PAGE-036.02` <sub>inventory.php:7</sub><br>`PAGE-036.20` <sub>inventory.php:346</sub> | 56 |
-| **صف کاری** | `queue` | `queue.view` | `PAGE-051.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`PAGE-051.01` <sub>modules/request-center/Pages/queue.php:1</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 19 |
-| **لاگ سامانه** | `activity-log` | — | `PAGE-034.72` <sub>index.php:1551</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 12 |
-| **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-034.76` <sub>index.php:1833</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **مدیریت سازمان** | `organization` | `org.view` | `PAGE-059.39` <sub>organization.php:486</sub><br>`PAGE-034.85` <sub>index.php:2268</sub><br>`PAGE-034.37` <sub>index.php:878</sub><br>`PAGE-059.02` <sub>organization.php:4</sub> | 193 |
-| **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-034.55` <sub>index.php:1402</sub><br>`PAGE-006.16` <sub>asset-profile.php:494</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 12 |
-| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-055.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-055.01` <sub>modules/request-center/Pages/supervisor.php:1</sub><br>`PAGE-054.01` <sub>modules/request-center/Pages/supervisor-workspace.php:1</sub><br>`CORE-003.08` <sub>lib/auth-scope.php:88</sub> | 70 |
-| **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-034.63` <sub>index.php:1452</sub> | 6 |
-| **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-053.02` <sub>modules/request-center/Pages/services.php:6</sub><br>`PAGE-053.05` <sub>modules/request-center/Pages/services.php:111</sub><br>`PAGE-053.06` <sub>modules/request-center/Pages/services.php:135</sub><br>`PAGE-053.07` <sub>modules/request-center/Pages/services.php:149</sub> | 16 |
-| **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-034.60` <sub>index.php:1441</sub><br>`PAGE-009.43` <sub>cd-dvd.php:735</sub><br>`PAGE-009.33` <sub>cd-dvd.php:403</sub><br>`PAGE-009.19` <sub>cd-dvd.php:153</sub> | 68 |
-| **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-034.40` <sub>index.php:918</sub><br>`PAGE-034.62` <sub>index.php:1449</sub><br>`PAGE-067.63` <sub>traffic-control.php:981</sub><br>`PAGE-067.16` <sub>traffic-control.php:119</sub> | 102 |
-| **گزارش خطا** | `logs` | — | `PAGE-034.87` <sub>index.php:2929</sub><br>`PAGE-034.71` <sub>index.php:1545</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 16 |
-| **گزارش‌ها** | `reports` | `reports.view` | `PAGE-052.02` <sub>modules/request-center/Pages/reports.php:6</sub><br>`PAGE-052.01` <sub>modules/request-center/Pages/reports.php:1</sub><br>`CORE-016.05` <sub>lib/settings-effects.php:57</sub> | 16 |
+| **صف کاری** | `queue` | `queue.view` | `PAGE-053.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`PAGE-053.01` <sub>modules/request-center/Pages/queue.php:1</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 19 |
+| **لاگ سامانه** | `activity-log` | — | `PAGE-034.56` <sub>index.php:1017</sub><br>`CORE-017.03` <sub>lib/render.php:163</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 12 |
+| **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-034.60` <sub>index.php:1295</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
+| **مدیریت سازمان** | `organization` | `org.view` | `PAGE-064.39` <sub>organization.php:486</sub><br>`PAGE-034.69` <sub>index.php:1730</sub><br>`PAGE-034.23` <sub>index.php:438</sub><br>`PAGE-064.02` <sub>organization.php:4</sub> | 193 |
+| **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-034.39` <sub>index.php:868</sub><br>`PAGE-006.16` <sub>asset-profile.php:494</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 12 |
+| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-057.01` <sub>modules/request-center/Pages/supervisor.php:1</sub><br>`PAGE-056.01` <sub>modules/request-center/Pages/supervisor-workspace.php:1</sub><br>`CORE-003.08` <sub>lib/auth-scope.php:88</sub> | 74 |
+| **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-034.47` <sub>index.php:918</sub> | 6 |
+| **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-055.02` <sub>modules/request-center/Pages/services.php:6</sub><br>`PAGE-055.05` <sub>modules/request-center/Pages/services.php:111</sub><br>`PAGE-055.06` <sub>modules/request-center/Pages/services.php:135</sub><br>`PAGE-055.07` <sub>modules/request-center/Pages/services.php:149</sub> | 16 |
+| **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-034.44` <sub>index.php:907</sub><br>`PAGE-009.43` <sub>cd-dvd.php:735</sub><br>`PAGE-009.33` <sub>cd-dvd.php:403</sub><br>`PAGE-009.19` <sub>cd-dvd.php:153</sub> | 68 |
+| **کنترل تردد** | `traffic-control` | `traffic.view` | `PAGE-034.26` <sub>index.php:478</sub><br>`PAGE-034.46` <sub>index.php:915</sub><br>`PAGE-072.63` <sub>traffic-control.php:981</sub><br>`PAGE-072.16` <sub>traffic-control.php:119</sub> | 102 |
+| **گزارش خطا** | `logs` | — | `PAGE-034.71` <sub>index.php:2391</sub><br>`PAGE-034.55` <sub>index.php:1011</sub><br>`CORE-017.03` <sub>lib/render.php:163</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 16 |
+| **گزارش‌ها** | `reports` | `reports.view` | `PAGE-054.02` <sub>modules/request-center/Pages/reports.php:6</sub><br>`PAGE-054.01` <sub>modules/request-center/Pages/reports.php:1</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 16 |
 
 ### مجوزها و دسترسی‌ها
 
@@ -71,64 +71,64 @@
 
 | گروه | مجوز | کد | آدرس‌های اصلی | کل |
 |---|---|---|---|---|
-| داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-060.26` <sub>permissions.php:487</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub><br>`TOOL-049.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
-| داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-034.74` <sub>index.php:1733</sub> | 3 |
-| داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-034.66` <sub>index.php:1502</sub> | 6 |
-| داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-034.46` <sub>index.php:1315</sub><br>`PAGE-060.16` <sub>permissions.php:350</sub> | 3 |
+| داشبورد و پایه | **مشاهدهٔ داشبورد** | `dash.view` | `PAGE-065.26` <sub>permissions.php:487</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub><br>`TOOL-049.12` <sub>tools/test_access_coverage_offline.php:108</sub> | 10 |
+| داشبورد و پایه | **جست‌وجوی سراسری** | `search.global` | `PAGE-034.58` <sub>index.php:1199</sub> | 3 |
+| داشبورد و پایه | **اعلان‌های من** | `notif.view` | `PAGE-034.50` <sub>index.php:968</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 6 |
+| داشبورد و پایه | **ویرایش پروفایل خودم** | `profile.edit` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-034.30` <sub>index.php:781</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
 | داشبورد و پایه | **استفاده از بات پاسخ‌گو** | `chatbot.use` | `PAGE-011.27` <sub>chatbot.php:700</sub><br>`PAGE-011.123` <sub>chatbot.php:3206</sub> | 5 |
-| درخواست | **ثبت درخواست جدید** | `ticket.create` | `PAGE-043.03` <sub>modules/request-center/Actions/ticket-actions.php:30</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/ticket-actions.php:222</sub><br>`PAGE-048.02` <sub>modules/request-center/Pages/create.php:12</sub> | 16 |
+| درخواست | **ثبت درخواست جدید** | `ticket.create` | `PAGE-044.03` <sub>modules/request-center/Actions/ticket-actions.php:30</sub><br>`PAGE-044.04` <sub>modules/request-center/Actions/ticket-actions.php:222</sub><br>`PAGE-050.02` <sub>modules/request-center/Pages/create.php:12</sub> | 16 |
 | درخواست | **مشاهدهٔ درخواست‌های خودم** | `ticket.view_own` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 8 |
-| درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 9 |
-| درخواست | **مشاهدهٔ همهٔ درخواست‌ها** | `ticket.view_all` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 6 |
-| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `PAGE-043.07` <sub>modules/request-center/Actions/ticket-actions.php:406</sub><br>`PAGE-049.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 7 |
-| درخواست | **ویرایش** | `ticket.edit` | `PAGE-043.09` <sub>modules/request-center/Actions/ticket-actions.php:605</sub><br>`PAGE-049.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 13 |
+| درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 10 |
+| درخواست | **مشاهدهٔ همهٔ درخواست‌ها** | `ticket.view_all` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 7 |
+| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `PAGE-044.07` <sub>modules/request-center/Actions/ticket-actions.php:406</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 7 |
+| درخواست | **ویرایش** | `ticket.edit` | `PAGE-044.09` <sub>modules/request-center/Actions/ticket-actions.php:605</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 14 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
-| درخواست | **ویرایش** | `ticket.bulk` | `PAGE-039.04` <sub>modules/request-center/Actions/bulk-actions.php:44</sub> | 4 |
-| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-049.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-042.05` <sub>modules/request-center/Actions/supervisor-actions.php:149</sub> | 6 |
-| درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `PAGE-039.03` <sub>modules/request-center/Actions/bulk-actions.php:24</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-060.16` <sub>permissions.php:350</sub> | 3 |
-| درخواست | **صف کاری** | `queue.view` | `PAGE-051.02` <sub>modules/request-center/Pages/queue.php:6</sub> | 12 |
-| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-055.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-042.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-042.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 13 |
-| درخواست | **ویرایش** | `supervisor.decide` | `PAGE-042.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub> | 4 |
-| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-042.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 3 |
-| خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.46` <sub>index.php:1315</sub> | 5 |
-| خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `PAGE-041.03` <sub>modules/request-center/Actions/service-actions.php:29</sub><br>`PAGE-041.07` <sub>modules/request-center/Actions/service-actions.php:155</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub> | 8 |
-| خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`ACT-017.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-060.16` <sub>permissions.php:350</sub> | 3 |
-| خدمات و دسته‌بندی | **مدیریت فیلدهای خدمت** | `service_field.manage` | `PAGE-041.04` <sub>modules/request-center/Actions/service-actions.php:69</sub> | 3 |
-| دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.46` <sub>index.php:1315</sub> | 5 |
-| دانش‌نامه | **ویرایش** | `knowledge.manage` | `PAGE-041.09` <sub>modules/request-center/Actions/service-actions.php:206</sub> | 4 |
-| کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `PAGE-034.75` <sub>index.php:1741</sub><br>`PAGE-034.28` <sub>index.php:616</sub><br>`TEST-023.01` <sub>tests/smoke.php:1</sub> | 10 |
-| کنترل CD/DVD | **ثبت خروج رسانه** | `cddvd.submit_out` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-009.17` <sub>cd-dvd.php:128</sub><br>`PAGE-060.15` <sub>permissions.php:344</sub> | 4 |
-| کنترل CD/DVD | **ثبت ورود رسانه (بازرسی)** | `cddvd.submit_in` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`TEST-142.05` <sub>tests/test_permissions_followup_static.py:30</sub><br>`PAGE-009.16` <sub>cd-dvd.php:120</sub> | 4 |
-| کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-060.26` <sub>permissions.php:487</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub> | 9 |
-| کنترل CD/DVD | **مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)** | `cddvd.view_all` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-009.11` <sub>cd-dvd.php:65</sub><br>`PAGE-060.16` <sub>permissions.php:350</sub> | 3 |
-| کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.46` <sub>index.php:1315</sub> | 4 |
-| کنترل CD/DVD | **خروجی Excel/CSV** | `cddvd.export` | `PAGE-034.41` <sub>index.php:1064</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-009.13` <sub>cd-dvd.php:87</sub> | 4 |
-| کنترل تردد مراجعین | **مشاهدهٔ کنترل تردد** | `traffic.view` | `PAGE-067.63` <sub>traffic-control.php:981</sub><br>`PAGE-067.59` <sub>traffic-control.php:888</sub><br>`PAGE-068.23` <sub>traffic-import.php:853</sub> | 18 |
-| کنترل تردد مراجعین | **ثبت، ویرایش و ورود گروهی سوابق** | `traffic.manage` | `PAGE-067.63` <sub>traffic-control.php:981</sub><br>`PAGE-067.54` <sub>traffic-control.php:786</sub><br>`PAGE-068.23` <sub>traffic-import.php:853</sub> | 10 |
-| کنترل تردد مراجعین | **مقصدهای ملاقات** | `traffic.destinations` | `PAGE-067.63` <sub>traffic-control.php:981</sub><br>`PAGE-067.05` <sub>traffic-control.php:16</sub><br>`TEST-142.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 6 |
-| کنترل تردد مراجعین | **ویرایش** | `traffic.destinations_edit` | `PAGE-067.06` <sub>traffic-control.php:21</sub><br>`TEST-142.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 4 |
-| دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-034.83` <sub>index.php:2189</sub> | 9 |
+| درخواست | **ویرایش** | `ticket.bulk` | `PAGE-040.04` <sub>modules/request-center/Actions/bulk-actions.php:44</sub> | 4 |
+| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:149</sub> | 6 |
+| درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `PAGE-040.03` <sub>modules/request-center/Actions/bulk-actions.php:24</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
+| درخواست | **صف کاری** | `queue.view` | `PAGE-053.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 13 |
+| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 15 |
+| درخواست | **ویرایش** | `supervisor.decide` | `PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub> | 4 |
+| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 3 |
+| خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.30` <sub>index.php:781</sub> | 5 |
+| خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `PAGE-042.03` <sub>modules/request-center/Actions/service-actions.php:29</sub><br>`PAGE-042.07` <sub>modules/request-center/Actions/service-actions.php:155</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub> | 8 |
+| خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`ACT-017.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
+| خدمات و دسته‌بندی | **مدیریت فیلدهای خدمت** | `service_field.manage` | `PAGE-042.04` <sub>modules/request-center/Actions/service-actions.php:69</sub> | 3 |
+| دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.30` <sub>index.php:781</sub> | 5 |
+| دانش‌نامه | **ویرایش** | `knowledge.manage` | `PAGE-042.09` <sub>modules/request-center/Actions/service-actions.php:206</sub> | 4 |
+| کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `CORE-017.02` <sub>lib/render.php:4</sub> | 10 |
+| کنترل CD/DVD | **ثبت خروج رسانه** | `cddvd.submit_out` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-009.17` <sub>cd-dvd.php:128</sub><br>`PAGE-065.15` <sub>permissions.php:344</sub> | 4 |
+| کنترل CD/DVD | **ثبت ورود رسانه (بازرسی)** | `cddvd.submit_in` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`TEST-142.05` <sub>tests/test_permissions_followup_static.py:30</sub><br>`PAGE-009.16` <sub>cd-dvd.php:120</sub> | 4 |
+| کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-065.26` <sub>permissions.php:487</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub> | 9 |
+| کنترل CD/DVD | **مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)** | `cddvd.view_all` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-009.11` <sub>cd-dvd.php:65</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
+| کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.30` <sub>index.php:781</sub> | 4 |
+| کنترل CD/DVD | **خروجی Excel/CSV** | `cddvd.export` | `PAGE-034.27` <sub>index.php:606</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-009.13` <sub>cd-dvd.php:87</sub> | 4 |
+| کنترل تردد مراجعین | **مشاهدهٔ کنترل تردد** | `traffic.view` | `PAGE-072.63` <sub>traffic-control.php:981</sub><br>`PAGE-072.59` <sub>traffic-control.php:888</sub><br>`PAGE-073.23` <sub>traffic-import.php:853</sub> | 18 |
+| کنترل تردد مراجعین | **ثبت، ویرایش و ورود گروهی سوابق** | `traffic.manage` | `PAGE-072.63` <sub>traffic-control.php:981</sub><br>`PAGE-072.54` <sub>traffic-control.php:786</sub><br>`PAGE-073.23` <sub>traffic-import.php:853</sub> | 10 |
+| کنترل تردد مراجعین | **مقصدهای ملاقات** | `traffic.destinations` | `PAGE-072.63` <sub>traffic-control.php:981</sub><br>`PAGE-072.05` <sub>traffic-control.php:16</sub><br>`TEST-142.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 6 |
+| کنترل تردد مراجعین | **ویرایش** | `traffic.destinations_edit` | `PAGE-072.06` <sub>traffic-control.php:21</sub><br>`TEST-142.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 4 |
+| دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-034.67` <sub>index.php:1651</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 9 |
 | دارایی و شناسنامه فنی | **فقط دارایی‌های واحد خودم** | `assets.own_unit` | `CORE-003.22` <sub>lib/auth-scope.php:405</sub> | 4 |
-| دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-060.03` <sub>permissions.php:28</sub><br>`PAGE-034.46` <sub>index.php:1315</sub><br>`PAGE-060.08` <sub>permissions.php:246</sub> | 4 |
+| دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-034.30` <sub>index.php:781</sub><br>`PAGE-065.08` <sub>permissions.php:246</sub> | 4 |
 | دارایی و شناسنامه فنی | **ویرایش** | `asset.edit` | `ACT-003.12` <sub>actions/asset-actions.php:361</sub> | 4 |
-| دارایی و شناسنامه فنی | **استخراج سخت‌افزار (همین سرور)** | `asset.extract` | `PAGE-034.83` <sub>index.php:2189</sub><br>`PAGE-034.84` <sub>index.php:2234</sub><br>`ACT-003.03` <sub>actions/asset-actions.php:33</sub> | 6 |
+| دارایی و شناسنامه فنی | **استخراج سخت‌افزار (همین سرور)** | `asset.extract` | `PAGE-034.67` <sub>index.php:1651</sub><br>`PAGE-034.68` <sub>index.php:1696</sub><br>`ACT-003.03` <sub>actions/asset-actions.php:33</sub> | 6 |
 | دارایی و شناسنامه فنی | **ویرایش** | `asset.remote_extract` | `ACT-003.10` <sub>actions/asset-actions.php:285</sub><br>`ACT-003.06` <sub>actions/asset-actions.php:131</sub><br>`ACT-003.07` <sub>actions/asset-actions.php:148</sub> | 10 |
-| دارایی و شناسنامه فنی | **تاریخچهٔ دارایی** | `asset.history` | `PAGE-034.81` <sub>index.php:2093</sub> | 4 |
-| دارایی و شناسنامه فنی | **پینگ سیستم‌های انتخابی** | `asset.ping` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.83` <sub>index.php:2189</sub> | 4 |
-| دارایی و شناسنامه فنی | **فهرست موجودی** | `inventory.view` | `ACT-003.12` <sub>actions/asset-actions.php:361</sub><br>`PAGE-034.79` <sub>index.php:1960</sub> | 6 |
-| دارایی و شناسنامه فنی | **تشخیص موجودی** | `inventory.diagnostics` | `PAGE-034.80` <sub>index.php:2061</sub> | 6 |
+| دارایی و شناسنامه فنی | **تاریخچهٔ دارایی** | `asset.history` | `PAGE-034.65` <sub>index.php:1555</sub> | 4 |
+| دارایی و شناسنامه فنی | **پینگ سیستم‌های انتخابی** | `asset.ping` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub> | 4 |
+| دارایی و شناسنامه فنی | **فهرست موجودی** | `inventory.view` | `ACT-003.12` <sub>actions/asset-actions.php:361</sub><br>`PAGE-034.63` <sub>index.php:1422</sub> | 6 |
+| دارایی و شناسنامه فنی | **تشخیص موجودی** | `inventory.diagnostics` | `PAGE-034.64` <sub>index.php:1523</sub> | 6 |
 | دارایی و شناسنامه فنی | **ورود کامپیوترهای دامنه** | `domain.import` | `ACT-003.05` <sub>actions/asset-actions.php:123</sub> | 6 |
-| دارایی و شناسنامه فنی | **اسکن دامنه** | `domain.scan` | `PAGE-034.82` <sub>index.php:2111</sub> | 10 |
-| گزارش و تحلیل | **گزارش‌ها** | `reports.view` | `PAGE-052.02` <sub>modules/request-center/Pages/reports.php:6</sub> | 7 |
-| گزارش و تحلیل | **چارت‌ها** | `analytics.view` | `PAGE-046.02` <sub>modules/request-center/Pages/analytics.php:6</sub> | 6 |
-| گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-034.68` <sub>index.php:1528</sub> | 7 |
-| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-034.87` <sub>index.php:2929</sub><br>`PAGE-034.71` <sub>index.php:1545</sub> | 12 |
-| گزارش و تحلیل | **سلامت سامانه و خطاهای فنی** | `system.health` | `PAGE-065.28` <sub>system-health.php:947</sub><br>`PAGE-065.30` <sub>system-health.php:1118</sub> | 11 |
-| گزارش و تحلیل | **ویرایش وضعیت و نگهداری لاگ** | `system.health_edit` | `PAGE-065.30` <sub>system-health.php:1118</sub><br>`PAGE-065.25` <sub>system-health.php:787</sub> | 5 |
-| گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-034.71` <sub>index.php:1545</sub> | 7 |
-| گزارش و تحلیل | **خروجی فعالیت کاربران** | `logs.activity_export` | `PAGE-034.40` <sub>index.php:918</sub><br>`PAGE-034.72` <sub>index.php:1551</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub> | 5 |
+| دارایی و شناسنامه فنی | **اسکن دامنه** | `domain.scan` | `PAGE-034.66` <sub>index.php:1573</sub> | 10 |
+| گزارش و تحلیل | **گزارش‌ها** | `reports.view` | `PAGE-054.02` <sub>modules/request-center/Pages/reports.php:6</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 7 |
+| گزارش و تحلیل | **چارت‌ها** | `analytics.view` | `PAGE-048.02` <sub>modules/request-center/Pages/analytics.php:6</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 6 |
+| گزارش و تحلیل | **ممیزی** | `audit.view` | `PAGE-034.52` <sub>index.php:994</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 7 |
+| گزارش و تحلیل | **گزارش خطا** | `logs.view` | `PAGE-034.71` <sub>index.php:2391</sub><br>`PAGE-034.55` <sub>index.php:1011</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 12 |
+| گزارش و تحلیل | **سلامت سامانه و خطاهای فنی** | `system.health` | `PAGE-070.28` <sub>system-health.php:947</sub><br>`PAGE-070.30` <sub>system-health.php:1118</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 11 |
+| گزارش و تحلیل | **ویرایش وضعیت و نگهداری لاگ** | `system.health_edit` | `PAGE-070.30` <sub>system-health.php:1118</sub><br>`PAGE-070.25` <sub>system-health.php:787</sub> | 5 |
+| گزارش و تحلیل | **فعالیت کاربران** | `logs.activity` | `PAGE-034.55` <sub>index.php:1011</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 7 |
+| گزارش و تحلیل | **خروجی فعالیت کاربران** | `logs.activity_export` | `PAGE-034.26` <sub>index.php:478</sub><br>`PAGE-034.56` <sub>index.php:1017</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub> | 5 |
 | سامانه مدیریت غذا | **داشبورد** | `food.dashboard` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub><br>`PAGE-029.07` <sub>food-ticket.php:70</sub> | 9 |
-| سامانه مدیریت غذا | **پایش لحظه‌ای** | `food.monitor` | `PAGE-034.50` <sub>index.php:1371</sub><br>`PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 11 |
+| سامانه مدیریت غذا | **پایش لحظه‌ای** | `food.monitor` | `PAGE-034.34` <sub>index.php:837</sub><br>`PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 11 |
 | سامانه مدیریت غذا | **کارکنان** | `food.employees` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub><br>`PAGE-029.07` <sub>food-ticket.php:70</sub> | 8 |
 | سامانه مدیریت غذا | **ویرایش** | `food.employees_edit` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.08` <sub>food-ticket.php:78</sub> | 5 |
 | سامانه مدیریت غذا | **برنامه غذایی** | `food.menu` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-015.100` <sub>food-order.php:3422</sub><br>`PAGE-015.96` <sub>food-order.php:3133</sub> | 16 |
@@ -150,27 +150,27 @@
 | تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.manual_attendance_edit` | `PAGE-021.61` <sub>food-ticket-groups.php:2320</sub><br>`PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 8 |
 | تنظیمات سیستم مدیریت غذا | **مدیریت مهلت اضطراری سفارش غذا** | `food.emergency_window` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-015.100` <sub>food-order.php:3422</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub> | 8 |
 | تنظیمات سیستم مدیریت غذا | **ویرایش** | `food.emergency_window_edit` | `PAGE-029.132` <sub>food-ticket.php:5499</sub><br>`PAGE-029.10` <sub>food-ticket.php:125</sub><br>`PAGE-015.46` <sub>food-order.php:1284</sub> | 9 |
-| سفارش غذای کارکنان | **ثبت و مشاهدهٔ سفارش خود** | `foodorder.self` | `PAGE-034.58` <sub>index.php:1429</sub> | 11 |
-| سازمان | **مشاهدهٔ چارت سازمانی** | `org.view` | `PAGE-034.85` <sub>index.php:2268</sub> | 7 |
+| سفارش غذای کارکنان | **ثبت و مشاهدهٔ سفارش خود** | `foodorder.self` | `PAGE-034.42` <sub>index.php:895</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 11 |
+| سازمان | **مشاهدهٔ چارت سازمانی** | `org.view` | `PAGE-034.69` <sub>index.php:1730</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 7 |
 | سازمان | **ویرایش** | `org.manage` | `ACT-011.13` <sub>actions/org-actions.php:382</sub><br>`ACT-011.18` <sub>actions/org-actions.php:617</sub><br>`ACT-011.14` <sub>actions/org-actions.php:409</sub> | 17 |
-| تنظیمات و سیستم | **تنظیمات عمومی و افکت نمایشی** | `settings.general` | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-034.52` <sub>index.php:1387</sub><br>`CORE-016.17` <sub>lib/settings-effects.php:291</sub> | 11 |
-| تنظیمات و سیستم | **ویرایش تنظیمات عمومی و افکت نمایشی** | `settings.general_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.86` <sub>index.php:2459</sub><br>`ACT-014.07` <sub>actions/settings-actions.php:91</sub> | 6 |
-| تنظیمات و سیستم | **اتصال دامین و اسکن دامنه** | `settings.domain` | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-034.52` <sub>index.php:1387</sub> | 10 |
-| تنظیمات و سیستم | **ویرایش** | `settings.domain_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.86` <sub>index.php:2459</sub><br>`ACT-014.06` <sub>actions/settings-actions.php:77</sub> | 5 |
-| تنظیمات و سیستم | **مدیریت کاربران و دسترسی‌ها** | `settings.users` | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-034.52` <sub>index.php:1387</sub> | 7 |
-| تنظیمات و سیستم | **ویرایش** | `settings.users_edit` | `PAGE-034.86` <sub>index.php:2459</sub><br>`ACT-017.08` <sub>actions/user-structure-actions.php:358</sub><br>`ACT-014.05` <sub>actions/settings-actions.php:69</sub> | 6 |
-| تنظیمات و سیستم | **نقش‌های کلیدی** | `settings.key_roles` | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-034.52` <sub>index.php:1387</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `settings.key_roles_edit` | `PAGE-034.86` <sub>index.php:2459</sub> | 4 |
-| تنظیمات و سیستم | **پشتیبان‌گیری/بازگردانی** | `backup.view` | `PAGE-034.73` <sub>index.php:1694</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `backup.manage` | `ACT-004.02` <sub>actions/backup-actions.php:18</sub><br>`ACT-004.03` <sub>actions/backup-actions.php:25</sub><br>`PAGE-034.73` <sub>index.php:1694</sub> | 7 |
-| تنظیمات و سیستم | **مشاهدهٔ به‌روزرسانی سامانه** | `update.view` | `PAGE-034.73` <sub>index.php:1694</sub><br>`PAGE-060.03` <sub>permissions.php:28</sub> | 2 |
+| تنظیمات و سیستم | **تنظیمات عمومی و افکت نمایشی** | `settings.general` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`CORE-018.17` <sub>lib/settings-effects.php:291</sub> | 11 |
+| تنظیمات و سیستم | **ویرایش تنظیمات عمومی و افکت نمایشی** | `settings.general_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.70` <sub>index.php:1921</sub><br>`ACT-014.07` <sub>actions/settings-actions.php:91</sub> | 6 |
+| تنظیمات و سیستم | **اتصال دامین و اسکن دامنه** | `settings.domain` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 10 |
+| تنظیمات و سیستم | **ویرایش** | `settings.domain_edit` | `ACT-014.08` <sub>actions/settings-actions.php:165</sub><br>`PAGE-034.70` <sub>index.php:1921</sub><br>`ACT-014.06` <sub>actions/settings-actions.php:77</sub> | 5 |
+| تنظیمات و سیستم | **مدیریت کاربران و دسترسی‌ها** | `settings.users` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 7 |
+| تنظیمات و سیستم | **ویرایش** | `settings.users_edit` | `PAGE-034.70` <sub>index.php:1921</sub><br>`ACT-017.08` <sub>actions/user-structure-actions.php:358</sub><br>`ACT-014.05` <sub>actions/settings-actions.php:69</sub> | 6 |
+| تنظیمات و سیستم | **نقش‌های کلیدی** | `settings.key_roles` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `settings.key_roles_edit` | `PAGE-034.70` <sub>index.php:1921</sub> | 4 |
+| تنظیمات و سیستم | **پشتیبان‌گیری/بازگردانی** | `backup.view` | `PAGE-034.57` <sub>index.php:1160</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `backup.manage` | `ACT-004.02` <sub>actions/backup-actions.php:18</sub><br>`ACT-004.03` <sub>actions/backup-actions.php:25</sub><br>`PAGE-034.57` <sub>index.php:1160</sub> | 7 |
+| تنظیمات و سیستم | **مشاهدهٔ به‌روزرسانی سامانه** | `update.view` | `PAGE-034.57` <sub>index.php:1160</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub> | 2 |
 | تنظیمات و سیستم | **اجرای به‌روزرسانی سامانه** | `update.apply` | `ACT-004.04` <sub>actions/backup-actions.php:41</sub> | 3 |
-| تنظیمات و سیستم | **مدیریت پرسش‌ها و پاسخ‌های بات** | `chatbot.manage` | `PAGE-034.76` <sub>index.php:1833</sub><br>`PAGE-034.46` <sub>index.php:1315</sub> | 4 |
-| تنظیمات و سیستم | **تنظیمات OLA/SLA** | `ola.view` | `PAGE-058.07` <sub>ola.php:32</sub> | 5 |
-| تنظیمات و سیستم | **ویرایش** | `ola.manage` | `PAGE-058.07` <sub>ola.php:32</sub> | 5 |
-| تنظیمات و سیستم | **تغییر و مشکل** | `governance.view` | `PAGE-031.24` <sub>governance.php:174</sub> | 6 |
+| تنظیمات و سیستم | **مدیریت پرسش‌ها و پاسخ‌های بات** | `chatbot.manage` | `PAGE-034.60` <sub>index.php:1295</sub><br>`PAGE-034.30` <sub>index.php:781</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 4 |
+| تنظیمات و سیستم | **تنظیمات OLA/SLA** | `ola.view` | `PAGE-063.07` <sub>ola.php:32</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 5 |
+| تنظیمات و سیستم | **ویرایش** | `ola.manage` | `PAGE-063.07` <sub>ola.php:32</sub> | 5 |
+| تنظیمات و سیستم | **تغییر و مشکل** | `governance.view` | `PAGE-031.24` <sub>governance.php:174</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `governance.manage` | `PAGE-031.24` <sub>governance.php:174</sub> | 8 |
-| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-034.77` <sub>index.php:1936</sub><br>`TEST-082.33` <sub>tests/test_food_worker_window_static.py:306</sub> | 6 |
+| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-034.61` <sub>index.php:1398</sub><br>`TEST-082.33` <sub>tests/test_food_worker_window_static.py:306</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `holidays.manage` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub> | 13 |
 
 </details>
@@ -182,90 +182,91 @@
 
 | جدول | آدرس‌های اصلی | کل |
 |---|---|---|
-| `activity_logs` | `DB-002.28` <sub>install-empty-db.sql:396</sub><br>`DB-005.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-040.25` <sub>schema.sql:375</sub> | 61 |
-| `api_rate_limits` | `DB-002.67` <sub>install-empty-db.sql:1134</sub><br>`DB-005.58` <sub>migrations/003-sync-schema-151.sql:949</sub><br>`DB-040.67` <sub>schema.sql:1147</sub> | 8 |
+| `activity_logs` | `DB-002.28` <sub>install-empty-db.sql:396</sub><br>`DB-005.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-041.25` <sub>schema.sql:375</sub> | 63 |
+| `api_rate_limits` | `DB-002.67` <sub>install-empty-db.sql:1134</sub><br>`DB-005.58` <sub>migrations/003-sync-schema-151.sql:949</sub><br>`DB-041.67` <sub>schema.sql:1147</sub> | 8 |
 | `asset_dedupe_backup_016` | `DB-018.20` <sub>migrations/016-auto-asset-finish.sql:53</sub><br>`DB-018.22` <sub>migrations/016-auto-asset-finish.sql:57</sub><br>`DB-018.19` <sub>migrations/016-auto-asset-finish.sql:52</sub> | 4 |
-| `asset_graphics_adapters` | `DB-002.40` <sub>install-empty-db.sql:615</sub><br>`DB-005.30` <sub>migrations/003-sync-schema-151.sql:475</sub><br>`DB-040.37` <sub>schema.sql:594</sub> | 13 |
-| `asset_history_events` | `DB-002.43` <sub>install-empty-db.sql:657</sub><br>`DB-005.33` <sub>migrations/003-sync-schema-151.sql:514</sub><br>`DB-040.40` <sub>schema.sql:636</sub> | 16 |
-| `asset_inventory_history` | `DB-002.42` <sub>install-empty-db.sql:646</sub><br>`DB-005.32` <sub>migrations/003-sync-schema-151.sql:504</sub><br>`DB-040.39` <sub>schema.sql:625</sub> | 12 |
-| `asset_memory_modules` | `DB-002.38` <sub>install-empty-db.sql:584</sub><br>`DB-005.28` <sub>migrations/003-sync-schema-151.sql:446</sub><br>`DB-040.35` <sub>schema.sql:563</sub> | 16 |
-| `asset_peripherals` | `DB-002.41` <sub>install-empty-db.sql:628</sub><br>`DB-005.31` <sub>migrations/003-sync-schema-151.sql:487</sub><br>`DB-040.38` <sub>schema.sql:607</sub> | 19 |
-| `asset_profiles` | `DB-002.45` <sub>install-empty-db.sql:688</sub><br>`DB-005.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-040.42` <sub>schema.sql:667</sub> | 96 |
-| `asset_relations` | `DB-002.44` <sub>install-empty-db.sql:675</sub><br>`DB-005.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-040.41` <sub>schema.sql:654</sub> | 12 |
-| `asset_storage_devices` | `DB-002.39` <sub>install-empty-db.sql:599</sub><br>`DB-005.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-040.36` <sub>schema.sql:578</sub> | 17 |
-| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.83` <sub>index.php:2189</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 177 |
-| `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-040.18` <sub>schema.sql:223</sub> | 31 |
-| `cd_dvd_records` | `DB-002.16` <sub>install-empty-db.sql:144</sub><br>`DB-005.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-040.13` <sub>schema.sql:123</sub> | 40 |
-| `cd_dvd_types` | `DB-002.15` <sub>install-empty-db.sql:136</sub><br>`DB-040.12` <sub>schema.sql:115</sub><br>`DB-075.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
-| `change_approvals` | `DB-002.50` <sub>install-empty-db.sql:829</sub><br>`DB-005.39` <sub>migrations/003-sync-schema-151.sql:678</sub><br>`DB-040.47` <sub>schema.sql:808</sub> | 15 |
-| `change_records` | `DB-002.49` <sub>install-empty-db.sql:800</sub><br>`DB-005.38` <sub>migrations/003-sync-schema-151.sql:650</sub><br>`DB-040.46` <sub>schema.sql:779</sub> | 31 |
-| `change_ticket_links` | `DB-002.51` <sub>install-empty-db.sql:841</sub><br>`DB-005.40` <sub>migrations/003-sync-schema-151.sql:689</sub><br>`DB-040.48` <sub>schema.sql:820</sub> | 15 |
-| `chatbot_faq` | `DB-002.107` <sub>install-empty-db.sql:1342</sub><br>`DB-005.54` <sub>migrations/003-sync-schema-151.sql:914</sub><br>`DB-040.63` <sub>schema.sql:1107</sub> | 13 |
-| `chatbot_logs` | `DB-002.108` <sub>install-empty-db.sql:1354</sub><br>`DB-005.55` <sub>migrations/003-sync-schema-151.sql:925</sub><br>`DB-040.64` <sub>schema.sql:1119</sub> | 14 |
-| `departments` | `DB-002.05` <sub>install-empty-db.sql:27</sub><br>`DB-005.03` <sub>migrations/003-sync-schema-151.sql:9</sub><br>`DB-040.02` <sub>schema.sql:6</sub> | 65 |
-| `domain_scan_queue` | `DB-002.69` <sub>install-empty-db.sql:1156</sub><br>`DB-005.60` <sub>migrations/003-sync-schema-151.sql:968</sub><br>`DB-040.69` <sub>schema.sql:1169</sub> | 19 |
-| `domain_scan_runs` | `DB-002.68` <sub>install-empty-db.sql:1143</sub><br>`DB-005.59` <sub>migrations/003-sync-schema-151.sql:956</sub><br>`DB-040.68` <sub>schema.sql:1156</sub> | 22 |
-| `food_calendar` | `DB-002.100` <sub>install-empty-db.sql:1254</sub><br>`DB-005.65` <sub>migrations/003-sync-schema-151.sql:1029</sub><br>`DB-040.95` <sub>schema.sql:1265</sub> | 39 |
-| `food_calendar_items` | `DB-002.101` <sub>install-empty-db.sql:1269</sub><br>`DB-005.66` <sub>migrations/003-sync-schema-151.sql:1042</sub><br>`DB-040.96` <sub>schema.sql:1280</sub> | 46 |
-| `food_catalog` | `DB-002.99` <sub>install-empty-db.sql:1242</sub><br>`DB-005.63` <sub>migrations/003-sync-schema-151.sql:1000</sub><br>`DB-040.93` <sub>schema.sql:1233</sub> | 50 |
-| `food_guest_requests` | `DB-002.110` <sub>install-empty-db.sql:1376</sub><br>`DB-005.64` <sub>migrations/003-sync-schema-151.sql:1011</sub><br>`DB-040.94` <sub>schema.sql:1245</sub> | 39 |
-| `food_meal_reconciliations` | `DB-002.111` <sub>install-empty-db.sql:1400</sub><br>`DB-025.02` <sub>migrations/022-food-meal-reconciliation-invoices.sql:4</sub><br>`DB-040.100` <sub>schema.sql:1351</sub> | 6 |
-| `food_monthly_invoices` | `DB-002.112` <sub>install-empty-db.sql:1427</sub><br>`DB-025.03` <sub>migrations/022-food-meal-reconciliation-invoices.sql:31</sub><br>`DB-040.101` <sub>schema.sql:1378</sub> | 7 |
-| `food_order_cancel_requests` | `DB-002.104` <sub>install-empty-db.sql:1318</sub><br>`DB-040.99` <sub>schema.sql:1329</sub> | 10 |
-| `food_order_logs` | `DB-002.103` <sub>install-empty-db.sql:1300</sub><br>`DB-005.68` <sub>migrations/003-sync-schema-151.sql:1070</sub><br>`DB-040.98` <sub>schema.sql:1311</sub> | 28 |
-| `food_orders` | `DB-002.102` <sub>install-empty-db.sql:1284</sub><br>`DB-005.67` <sub>migrations/003-sync-schema-151.sql:1056</sub><br>`DB-040.97` <sub>schema.sql:1295</sub> | 76 |
-| `food_ticket_card_map` | `DB-002.89` <sub>install-empty-db.sql:1191</sub><br>`DB-005.61` <sub>migrations/003-sync-schema-151.sql:980</sub><br>`DB-040.89` <sub>schema.sql:1204</sub> | 14 |
-| `food_ticket_config` | `DB-002.54` <sub>install-empty-db.sql:887</sub><br>`DB-005.43` <sub>migrations/003-sync-schema-151.sql:732</sub><br>`DB-040.51` <sub>schema.sql:866</sub> | 46 |
+| `asset_graphics_adapters` | `DB-002.40` <sub>install-empty-db.sql:615</sub><br>`DB-005.30` <sub>migrations/003-sync-schema-151.sql:475</sub><br>`DB-041.37` <sub>schema.sql:594</sub> | 13 |
+| `asset_history_events` | `DB-002.43` <sub>install-empty-db.sql:657</sub><br>`DB-005.33` <sub>migrations/003-sync-schema-151.sql:514</sub><br>`DB-041.40` <sub>schema.sql:636</sub> | 16 |
+| `asset_inventory_history` | `DB-002.42` <sub>install-empty-db.sql:646</sub><br>`DB-005.32` <sub>migrations/003-sync-schema-151.sql:504</sub><br>`DB-041.39` <sub>schema.sql:625</sub> | 12 |
+| `asset_memory_modules` | `DB-002.38` <sub>install-empty-db.sql:584</sub><br>`DB-005.28` <sub>migrations/003-sync-schema-151.sql:446</sub><br>`DB-041.35` <sub>schema.sql:563</sub> | 16 |
+| `asset_peripherals` | `DB-002.41` <sub>install-empty-db.sql:628</sub><br>`DB-005.31` <sub>migrations/003-sync-schema-151.sql:487</sub><br>`DB-041.38` <sub>schema.sql:607</sub> | 19 |
+| `asset_profiles` | `DB-002.45` <sub>install-empty-db.sql:688</sub><br>`DB-005.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-041.42` <sub>schema.sql:667</sub> | 96 |
+| `asset_relations` | `DB-002.44` <sub>install-empty-db.sql:675</sub><br>`DB-005.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-041.41` <sub>schema.sql:654</sub> | 12 |
+| `asset_storage_devices` | `DB-002.39` <sub>install-empty-db.sql:599</sub><br>`DB-005.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-041.36` <sub>schema.sql:578</sub> | 17 |
+| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 177 |
+| `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-041.18` <sub>schema.sql:223</sub> | 33 |
+| `cd_dvd_records` | `DB-002.16` <sub>install-empty-db.sql:144</sub><br>`DB-005.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-041.13` <sub>schema.sql:123</sub> | 40 |
+| `cd_dvd_types` | `DB-002.15` <sub>install-empty-db.sql:136</sub><br>`DB-041.12` <sub>schema.sql:115</sub><br>`DB-076.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
+| `change_approvals` | `DB-002.50` <sub>install-empty-db.sql:829</sub><br>`DB-005.39` <sub>migrations/003-sync-schema-151.sql:678</sub><br>`DB-041.47` <sub>schema.sql:808</sub> | 15 |
+| `change_records` | `DB-002.49` <sub>install-empty-db.sql:800</sub><br>`DB-005.38` <sub>migrations/003-sync-schema-151.sql:650</sub><br>`DB-041.46` <sub>schema.sql:779</sub> | 31 |
+| `change_ticket_links` | `DB-002.51` <sub>install-empty-db.sql:841</sub><br>`DB-005.40` <sub>migrations/003-sync-schema-151.sql:689</sub><br>`DB-041.48` <sub>schema.sql:820</sub> | 15 |
+| `chatbot_faq` | `DB-002.107` <sub>install-empty-db.sql:1342</sub><br>`DB-005.54` <sub>migrations/003-sync-schema-151.sql:914</sub><br>`DB-041.63` <sub>schema.sql:1107</sub> | 13 |
+| `chatbot_logs` | `DB-002.108` <sub>install-empty-db.sql:1354</sub><br>`DB-005.55` <sub>migrations/003-sync-schema-151.sql:925</sub><br>`DB-041.64` <sub>schema.sql:1119</sub> | 14 |
+| `departments` | `DB-002.05` <sub>install-empty-db.sql:27</sub><br>`DB-005.03` <sub>migrations/003-sync-schema-151.sql:9</sub><br>`DB-041.02` <sub>schema.sql:6</sub> | 68 |
+| `domain_scan_queue` | `DB-002.69` <sub>install-empty-db.sql:1156</sub><br>`DB-005.60` <sub>migrations/003-sync-schema-151.sql:968</sub><br>`DB-041.69` <sub>schema.sql:1169</sub> | 19 |
+| `domain_scan_runs` | `DB-002.68` <sub>install-empty-db.sql:1143</sub><br>`DB-005.59` <sub>migrations/003-sync-schema-151.sql:956</sub><br>`DB-041.68` <sub>schema.sql:1156</sub> | 22 |
+| `food_calendar` | `DB-002.100` <sub>install-empty-db.sql:1254</sub><br>`DB-005.65` <sub>migrations/003-sync-schema-151.sql:1029</sub><br>`DB-041.95` <sub>schema.sql:1265</sub> | 39 |
+| `food_calendar_items` | `DB-002.101` <sub>install-empty-db.sql:1269</sub><br>`DB-005.66` <sub>migrations/003-sync-schema-151.sql:1042</sub><br>`DB-041.96` <sub>schema.sql:1280</sub> | 46 |
+| `food_catalog` | `DB-002.99` <sub>install-empty-db.sql:1242</sub><br>`DB-005.63` <sub>migrations/003-sync-schema-151.sql:1000</sub><br>`DB-041.93` <sub>schema.sql:1233</sub> | 50 |
+| `food_guest_requests` | `DB-002.110` <sub>install-empty-db.sql:1376</sub><br>`DB-005.64` <sub>migrations/003-sync-schema-151.sql:1011</sub><br>`DB-041.94` <sub>schema.sql:1245</sub> | 39 |
+| `food_meal_reconciliations` | `DB-002.111` <sub>install-empty-db.sql:1400</sub><br>`DB-025.02` <sub>migrations/022-food-meal-reconciliation-invoices.sql:4</sub><br>`DB-041.100` <sub>schema.sql:1351</sub> | 6 |
+| `food_monthly_invoices` | `DB-002.112` <sub>install-empty-db.sql:1427</sub><br>`DB-025.03` <sub>migrations/022-food-meal-reconciliation-invoices.sql:31</sub><br>`DB-041.101` <sub>schema.sql:1378</sub> | 7 |
+| `food_order_cancel_requests` | `DB-002.104` <sub>install-empty-db.sql:1318</sub><br>`DB-041.99` <sub>schema.sql:1329</sub> | 10 |
+| `food_order_logs` | `DB-002.103` <sub>install-empty-db.sql:1300</sub><br>`DB-005.68` <sub>migrations/003-sync-schema-151.sql:1070</sub><br>`DB-041.98` <sub>schema.sql:1311</sub> | 28 |
+| `food_orders` | `DB-002.102` <sub>install-empty-db.sql:1284</sub><br>`DB-005.67` <sub>migrations/003-sync-schema-151.sql:1056</sub><br>`DB-041.97` <sub>schema.sql:1295</sub> | 76 |
+| `food_ticket_card_map` | `DB-002.89` <sub>install-empty-db.sql:1191</sub><br>`DB-005.61` <sub>migrations/003-sync-schema-151.sql:980</sub><br>`DB-041.89` <sub>schema.sql:1204</sub> | 14 |
+| `food_ticket_config` | `DB-002.54` <sub>install-empty-db.sql:887</sub><br>`DB-005.43` <sub>migrations/003-sync-schema-151.sql:732</sub><br>`DB-041.51` <sub>schema.sql:866</sub> | 46 |
 | `food_ticket_daily_absence` | `DB-002.61` <sub>install-empty-db.sql:1045</sub><br>`DB-005.50` <sub>migrations/003-sync-schema-151.sql:863</sub><br>`DB-014.02` <sub>migrations/012-manual-attendance-clears-absences.sql:4</sub> | 33 |
-| `food_ticket_day_visits` | `DB-002.62` <sub>install-empty-db.sql:1061</sub><br>`DB-040.59` <sub>schema.sql:1040</sub> | 16 |
-| `food_ticket_events` | `DB-002.55` <sub>install-empty-db.sql:918</sub><br>`DB-005.44` <sub>migrations/003-sync-schema-151.sql:750</sub><br>`DB-040.52` <sub>schema.sql:897</sub> | 139 |
-| `food_ticket_group_members` | `DB-002.59` <sub>install-empty-db.sql:1006</sub><br>`DB-005.48` <sub>migrations/003-sync-schema-151.sql:829</sub><br>`DB-040.56` <sub>schema.sql:985</sub> | 21 |
-| `food_ticket_group_runs` | `DB-002.60` <sub>install-empty-db.sql:1018</sub><br>`DB-005.49` <sub>migrations/003-sync-schema-151.sql:839</sub><br>`DB-040.57` <sub>schema.sql:997</sub> | 38 |
-| `food_ticket_group_uid_history` | `DB-002.63` <sub>install-empty-db.sql:1074</sub><br>`DB-005.51` <sub>migrations/003-sync-schema-151.sql:877</sub><br>`DB-040.60` <sub>schema.sql:1053</sub> | 16 |
-| `food_ticket_groups` | `DB-002.58` <sub>install-empty-db.sql:987</sub><br>`DB-005.47` <sub>migrations/003-sync-schema-151.sql:813</sub><br>`DB-040.55` <sub>schema.sql:966</sub> | 37 |
-| `food_ticket_guest_cards` | `DB-002.57` <sub>install-empty-db.sql:973</sub><br>`DB-005.46` <sub>migrations/003-sync-schema-151.sql:800</sub><br>`DB-040.54` <sub>schema.sql:952</sub> | 24 |
-| `food_ticket_print_log` | `DB-002.64` <sub>install-empty-db.sql:1085</sub><br>`DB-005.52` <sub>migrations/003-sync-schema-151.sql:887</sub><br>`DB-040.61` <sub>schema.sql:1064</sub> | 19 |
-| `food_ticket_templates` | `DB-002.90` <sub>install-empty-db.sql:1201</sub><br>`DB-005.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-040.90` <sub>schema.sql:1214</sub> | 21 |
-| `food_ticket_worker_status` | `DB-002.56` <sub>install-empty-db.sql:957</sub><br>`DB-005.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-040.53` <sub>schema.sql:936</sub> | 17 |
-| `handling_units` | `DB-002.13` <sub>install-empty-db.sql:123</sub><br>`DB-005.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-040.10` <sub>schema.sql:102</sub> | 40 |
-| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.77` <sub>index.php:1936</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 34 |
-| `knowledge_articles` | `DB-002.34` <sub>install-empty-db.sql:502</sub><br>`DB-005.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-040.31` <sub>schema.sql:481</sub> | 17 |
-| `log_issue_events` | `DB-029.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-002.119` <sub>install-empty-db.sql:1543</sub><br>`DB-040.108` <sub>schema.sql:1494</sub> | 15 |
-| `log_issue_history` | `DB-002.118` <sub>install-empty-db.sql:1527</sub><br>`DB-029.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-040.107` <sub>schema.sql:1478</sub> | 12 |
-| `log_issue_notifications` | `DB-002.120` <sub>install-empty-db.sql:1550</sub><br>`DB-029.06` <sub>migrations/026-logging-legacy-result-unknown.sql:56</sub><br>`DB-040.109` <sub>schema.sql:1501</sub> | 14 |
-| `log_issues` | `DB-002.116` <sub>install-empty-db.sql:1491</sub><br>`DB-028.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-040.105` <sub>schema.sql:1442</sub> | 28 |
-| `logging_health_alerts` | `DB-002.117` <sub>install-empty-db.sql:1517</sub><br>`DB-028.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-040.106` <sub>schema.sql:1468</sub> | 13 |
-| `login_attempts` | `DB-002.31` <sub>install-empty-db.sql:460</sub><br>`DB-005.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-040.28` <sub>schema.sql:439</sub> | 14 |
-| `notifications` | `PAGE-034.67` <sub>index.php:1510</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.66` <sub>index.php:1502</sub> | 41 |
-| `ola_policies` | `DB-002.46` <sub>install-empty-db.sql:770</sub><br>`DB-005.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-040.43` <sub>schema.sql:749</sub> | 24 |
-| `org_companies` | `DB-002.06` <sub>install-empty-db.sql:37</sub><br>`DB-021.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-040.03` <sub>schema.sql:16</sub> | 11 |
-| `org_unit_managers` | `DB-002.10` <sub>install-empty-db.sql:77</sub><br>`DB-005.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-040.07` <sub>schema.sql:56</sub> | 36 |
-| `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-040.04` <sub>schema.sql:30</sub> | 89 |
-| `problem_records` | `DB-002.52` <sub>install-empty-db.sql:852</sub><br>`DB-005.41` <sub>migrations/003-sync-schema-151.sql:699</sub><br>`DB-040.49` <sub>schema.sql:831</sub> | 26 |
-| `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:876</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-040.50` <sub>schema.sql:855</sub> | 14 |
-| `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:435</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-040.26` <sub>schema.sql:414</sub> | 21 |
-| `schema_updates` | `DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`DB-040.110` <sub>schema.sql:1520</sub><br>`CORE-008.04` <sub>lib/logging-audit.php:61</sub> | 21 |
-| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-040.19` <sub>schema.sql:232</sub> | 57 |
-| `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-040.20` <sub>schema.sql:258</sub> | 16 |
-| `settings` | `PAGE-034.86` <sub>index.php:2459</sub><br>`PAGE-034.45` <sub>index.php:1304</sub><br>`PAGE-034.52` <sub>index.php:1387</sub> | 61 |
-| `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1367</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-040.65` <sub>schema.sql:1132</sub> | 9 |
-| `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1101</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-040.62` <sub>schema.sql:1080</sub> | 65 |
-| `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-040.24` <sub>schema.sql:364</sub> | 16 |
-| `ticket_events` | `DB-002.33` <sub>install-empty-db.sql:478</sub><br>`DB-005.24` <sub>migrations/003-sync-schema-151.sql:359</sub><br>`DB-040.30` <sub>schema.sql:457</sub> | 40 |
-| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-040.22` <sub>schema.sql:338</sub> | 29 |
-| `ticket_number_seq` | `DB-002.66` <sub>install-empty-db.sql:1128</sub><br>`DB-005.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-040.66` <sub>schema.sql:1141</sub> | 19 |
-| `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-040.44` <sub>schema.sql:767</sub> | 12 |
-| `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-040.23` <sub>schema.sql:350</sub> | 18 |
-| `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-040.29` <sub>schema.sql:447</sub> | 13 |
-| `tickets` | `DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-040.21` <sub>schema.sql:271</sub> | 184 |
+| `food_ticket_day_visits` | `DB-002.62` <sub>install-empty-db.sql:1061</sub><br>`DB-041.59` <sub>schema.sql:1040</sub> | 16 |
+| `food_ticket_events` | `DB-002.55` <sub>install-empty-db.sql:918</sub><br>`DB-005.44` <sub>migrations/003-sync-schema-151.sql:750</sub><br>`DB-041.52` <sub>schema.sql:897</sub> | 139 |
+| `food_ticket_group_members` | `DB-002.59` <sub>install-empty-db.sql:1006</sub><br>`DB-005.48` <sub>migrations/003-sync-schema-151.sql:829</sub><br>`DB-041.56` <sub>schema.sql:985</sub> | 21 |
+| `food_ticket_group_runs` | `DB-002.60` <sub>install-empty-db.sql:1018</sub><br>`DB-005.49` <sub>migrations/003-sync-schema-151.sql:839</sub><br>`DB-041.57` <sub>schema.sql:997</sub> | 38 |
+| `food_ticket_group_uid_history` | `DB-002.63` <sub>install-empty-db.sql:1074</sub><br>`DB-005.51` <sub>migrations/003-sync-schema-151.sql:877</sub><br>`DB-041.60` <sub>schema.sql:1053</sub> | 16 |
+| `food_ticket_groups` | `DB-002.58` <sub>install-empty-db.sql:987</sub><br>`DB-005.47` <sub>migrations/003-sync-schema-151.sql:813</sub><br>`DB-041.55` <sub>schema.sql:966</sub> | 37 |
+| `food_ticket_guest_cards` | `DB-002.57` <sub>install-empty-db.sql:973</sub><br>`DB-005.46` <sub>migrations/003-sync-schema-151.sql:800</sub><br>`DB-041.54` <sub>schema.sql:952</sub> | 24 |
+| `food_ticket_print_log` | `DB-002.64` <sub>install-empty-db.sql:1085</sub><br>`DB-005.52` <sub>migrations/003-sync-schema-151.sql:887</sub><br>`DB-041.61` <sub>schema.sql:1064</sub> | 19 |
+| `food_ticket_templates` | `DB-002.90` <sub>install-empty-db.sql:1201</sub><br>`DB-005.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-041.90` <sub>schema.sql:1214</sub> | 21 |
+| `food_ticket_worker_status` | `DB-002.56` <sub>install-empty-db.sql:957</sub><br>`DB-005.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-041.53` <sub>schema.sql:936</sub> | 17 |
+| `handling_units` | `DB-002.13` <sub>install-empty-db.sql:123</sub><br>`DB-005.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-041.10` <sub>schema.sql:102</sub> | 42 |
+| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 34 |
+| `knowledge_articles` | `DB-002.34` <sub>install-empty-db.sql:502</sub><br>`DB-005.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-041.31` <sub>schema.sql:481</sub> | 17 |
+| `log_issue_events` | `DB-029.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-002.119` <sub>install-empty-db.sql:1543</sub><br>`DB-041.108` <sub>schema.sql:1494</sub> | 15 |
+| `log_issue_history` | `DB-002.118` <sub>install-empty-db.sql:1527</sub><br>`DB-029.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-041.107` <sub>schema.sql:1478</sub> | 12 |
+| `log_issue_notifications` | `DB-002.120` <sub>install-empty-db.sql:1550</sub><br>`DB-029.06` <sub>migrations/026-logging-legacy-result-unknown.sql:56</sub><br>`DB-041.109` <sub>schema.sql:1501</sub> | 14 |
+| `log_issues` | `DB-002.116` <sub>install-empty-db.sql:1491</sub><br>`DB-028.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-041.105` <sub>schema.sql:1442</sub> | 28 |
+| `logging_health_alerts` | `DB-002.117` <sub>install-empty-db.sql:1517</sub><br>`DB-028.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-041.106` <sub>schema.sql:1468</sub> | 13 |
+| `login_attempts` | `DB-002.31` <sub>install-empty-db.sql:460</sub><br>`DB-005.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-041.28` <sub>schema.sql:439</sub> | 14 |
+| `notifications` | `PAGE-034.51` <sub>index.php:976</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.50` <sub>index.php:968</sub> | 43 |
+| `ola_policies` | `DB-002.46` <sub>install-empty-db.sql:770</sub><br>`DB-005.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-041.43` <sub>schema.sql:749</sub> | 24 |
+| `org_companies` | `DB-002.06` <sub>install-empty-db.sql:37</sub><br>`DB-021.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-041.03` <sub>schema.sql:16</sub> | 11 |
+| `org_unit_managers` | `DB-002.10` <sub>install-empty-db.sql:77</sub><br>`DB-005.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-041.07` <sub>schema.sql:56</sub> | 36 |
+| `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-041.04` <sub>schema.sql:30</sub> | 90 |
+| `problem_records` | `DB-002.52` <sub>install-empty-db.sql:852</sub><br>`DB-005.41` <sub>migrations/003-sync-schema-151.sql:699</sub><br>`DB-041.49` <sub>schema.sql:831</sub> | 26 |
+| `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:876</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-041.50` <sub>schema.sql:855</sub> | 14 |
+| `request_center_appointments` | `DB-038.02` <sub>migrations/035-request-center-appointments.sql:6</sub> | 3 |
+| `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:435</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-041.26` <sub>schema.sql:414</sub> | 21 |
+| `schema_updates` | `DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`DB-041.110` <sub>schema.sql:1520</sub><br>`CORE-009.04` <sub>lib/logging-audit.php:61</sub> | 21 |
+| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-041.19` <sub>schema.sql:232</sub> | 59 |
+| `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-041.20` <sub>schema.sql:258</sub> | 16 |
+| `settings` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 62 |
+| `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1367</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-041.65` <sub>schema.sql:1132</sub> | 9 |
+| `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1101</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-041.62` <sub>schema.sql:1080</sub> | 65 |
+| `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-041.24` <sub>schema.sql:364</sub> | 16 |
+| `ticket_events` | `DB-002.33` <sub>install-empty-db.sql:478</sub><br>`DB-005.24` <sub>migrations/003-sync-schema-151.sql:359</sub><br>`DB-041.30` <sub>schema.sql:457</sub> | 41 |
+| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-041.22` <sub>schema.sql:338</sub> | 30 |
+| `ticket_number_seq` | `DB-002.66` <sub>install-empty-db.sql:1128</sub><br>`DB-005.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-041.66` <sub>schema.sql:1141</sub> | 19 |
+| `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-041.44` <sub>schema.sql:767</sub> | 12 |
+| `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-041.23` <sub>schema.sql:350</sub> | 21 |
+| `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-041.29` <sub>schema.sql:447</sub> | 13 |
+| `tickets` | `DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-041.21` <sub>schema.sql:271</sub> | 193 |
 | `tmp_asset_dedupe_map` | `DB-018.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-018.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-018.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
-| `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-040.14` <sub>schema.sql:156</sub> | 31 |
-| `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-040.16` <sub>schema.sql:196</sub> | 10 |
-| `traffic_visits` | `DB-002.18` <sub>install-empty-db.sql:188</sub><br>`DB-005.11` <sub>migrations/003-sync-schema-151.sql:127</sub><br>`DB-040.15` <sub>schema.sql:167</sub> | 59 |
-| `user_access_group_members` | `DB-002.114` <sub>install-empty-db.sql:1463</sub><br>`DB-026.03` <sub>migrations/023-user-access-groups.sql:17</sub><br>`DB-040.103` <sub>schema.sql:1414</sub> | 12 |
-| `user_access_group_permissions` | `DB-002.115` <sub>install-empty-db.sql:1475</sub><br>`DB-026.04` <sub>migrations/023-user-access-groups.sql:29</sub><br>`DB-040.104` <sub>schema.sql:1426</sub> | 12 |
-| `user_access_groups` | `DB-002.113` <sub>install-empty-db.sql:1449</sub><br>`DB-026.02` <sub>migrations/023-user-access-groups.sql:3</sub><br>`DB-040.102` <sub>schema.sql:1400</sub> | 10 |
-| `users` | `ACT-011.14` <sub>actions/org-actions.php:409</sub><br>`DB-002.11` <sub>install-empty-db.sql:85</sub><br>`DB-005.06` <sub>migrations/003-sync-schema-151.sql:39</sub> | 282 |
+| `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-041.14` <sub>schema.sql:156</sub> | 31 |
+| `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-041.16` <sub>schema.sql:196</sub> | 10 |
+| `traffic_visits` | `DB-002.18` <sub>install-empty-db.sql:188</sub><br>`DB-005.11` <sub>migrations/003-sync-schema-151.sql:127</sub><br>`DB-041.15` <sub>schema.sql:167</sub> | 59 |
+| `user_access_group_members` | `DB-002.114` <sub>install-empty-db.sql:1463</sub><br>`DB-026.03` <sub>migrations/023-user-access-groups.sql:17</sub><br>`DB-041.103` <sub>schema.sql:1414</sub> | 12 |
+| `user_access_group_permissions` | `DB-002.115` <sub>install-empty-db.sql:1475</sub><br>`DB-026.04` <sub>migrations/023-user-access-groups.sql:29</sub><br>`DB-041.104` <sub>schema.sql:1426</sub> | 12 |
+| `user_access_groups` | `DB-002.113` <sub>install-empty-db.sql:1449</sub><br>`DB-026.02` <sub>migrations/023-user-access-groups.sql:3</sub><br>`DB-041.102` <sub>schema.sql:1400</sub> | 10 |
+| `users` | `ACT-011.14` <sub>actions/org-actions.php:409</sub><br>`DB-002.11` <sub>install-empty-db.sql:85</sub><br>`DB-005.06` <sub>migrations/003-sync-schema-151.sql:39</sub> | 287 |
 
 </details>
 
@@ -285,14 +286,14 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 231 | 1,662 | 22,298 |
+| `TEST` | TEST | 234 | 1,704 | 23,249 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
-| `DB` | DB | 82 | 1,373 | 7,929 |
-| `PAGE` | صفحات (ریشه) | 70 | 1,411 | 46,630 |
+| `DB` | DB | 83 | 1,375 | 7,952 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,419 | 46,860 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
+| `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
 | `ACT` | کنش‌ها (actions/) | 17 | 96 | 2,834 |
-| `CORE` | موتور مشترک (lib/) | 17 | 316 | 7,410 |
 | `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,459 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
 
@@ -302,14 +303,14 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 836 |
-| `error_suppression` | سرکوب @ | 287 |
-| `dangerous_call` | فراخوانی خطرناک | 211 |
-| `sql_concat` | الحاق در SQL | 186 |
-| `raw_input` | ورودی خام | 181 |
-| `silent_catch` | catch بی‌صدا | 131 |
-| `long` | >۱۲۰ خط | 127 |
-| `unescaped_echo` | چاپ بدون فرار | 36 |
+| `write_no_tx` | نوشتن بدون تراکنش | 842 |
+| `error_suppression` | سرکوب @ | 298 |
+| `dangerous_call` | فراخوانی خطرناک | 221 |
+| `sql_concat` | الحاق در SQL | 196 |
+| `raw_input` | ورودی خام | 186 |
+| `silent_catch` | catch بی‌صدا | 133 |
+| `long` | >۱۲۰ خط | 131 |
+| `unescaped_echo` | چاپ بدون فرار | 37 |
 | `very_long` | >۳۰۰ خط | 8 |
 
 ## ترتیب بازبینی — ۴۰ آدرس پرخطر
@@ -317,45 +318,45 @@
 | # | آدرس | مسیر:خط | لنگر | ریسک | نشانه‌ها | وضعیت |
 |---|---|---|---|---|---|---|
 | 1 | `TOOL-018.01` | `tools/diag_connection.php:1` | بلوک رویه‌ای 1-258 | 20 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 2 | `TEST-198.13` | `tests/test_system_update_migration_failure_gates.php:147` | بلوک رویه‌ای 147-232 | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 3 | `TOOL-060.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 4 | `PAGE-025.29` | `food-ticket-runtime.php:1193` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 5 | `PAGE-029.84` | `food-ticket.php:2379` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 6 | `PAGE-029.129` | `food-ticket.php:4737` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 7 | `PAGE-029.130` | `food-ticket.php:4807` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 8 | `TEST-171.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 9 | `TOOL-057.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 10 | `PAGE-025.22` | `food-ticket-runtime.php:815` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 11 | `PAGE-029.39` | `food-ticket.php:795` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 12 | `PAGE-029.41` | `food-ticket.php:1013` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 13 | `PAGE-029.85` | `food-ticket.php:2583` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 14 | `TEST-111.08` | `tests/test_logging_mysql_integration.php:227` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 15 | `TOOL-001.01` | `tools/asset_dedupe.php:1` | بلوک رویه‌ای 1-230 | 13 | الحاق در SQL، چاپ بدون فرار، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 16 | `PAGE-011.27` | `chatbot.php:700` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 17 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 18 | `TEST-111.06` | `tests/test_logging_mysql_integration.php:135` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 19 | `TEST-178.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 20 | `TOOL-024.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 21 | `PAGE-025.18` | `food-ticket-runtime.php:539` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 22 | `WEB-003.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 23 | `WEB-005.01` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 24 | `WEB-005.04` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 25 | `WEB-007.01` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 26 | `WEB-007.04` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 27 | `WEB-009.01` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 28 | `WEB-009.04` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 29 | `WEB-012.01` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 30 | `WEB-012.04` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 31 | `WEB-014.01` | `food-ticket-web/assets/food-capitalio-dashboard-r42.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 32 | `WEB-014.04` | `food-ticket-web/assets/food-capitalio-dashboard-r42.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
-| 33 | `PAGE-034.86` | `index.php:2459` | مسیر: settings | 11 | الحاق در SQL، ورودی خام، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 34 | `CORE-009.44` | `lib/logging-core.php:1025` | logging_emergency_failure | 11 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 35 | `PAGE-021.03` | `food-ticket-groups.php:62` | food_ticket_groups_ensure | 10 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 36 | `PAGE-021.52` | `food-ticket-groups.php:1737` | food_ticket_group_try_unknown | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 37 | `PAGE-035.13` | `install.php:152` | مسیر: test_ldap | 10 | ورودی خام، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 38 | `CORE-017.13` | `lib/tickets-sla.php:362` | ticket_number_autofill | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 39 | `TEST-029.05` | `tests/test_backup_restore_mariadb_e2e.php:62` | بلوک رویه‌ای 62-159 | 10 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 40 | `TOOL-008.02` | `tools/benchmark_seed.php:36` | Match the filesystem prerequisite crea | 10 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 2 | `TEST-181.33` | `tests/test_request_center_t12_scenarios.php:549` | مسیر: rated | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 3 | `TEST-201.13` | `tests/test_system_update_migration_failure_gates.php:147` | بلوک رویه‌ای 147-232 | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 4 | `TOOL-060.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 5 | `PAGE-025.29` | `food-ticket-runtime.php:1193` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 6 | `PAGE-029.84` | `food-ticket.php:2379` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 7 | `PAGE-029.129` | `food-ticket.php:4737` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 8 | `PAGE-029.130` | `food-ticket.php:4807` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 9 | `TEST-172.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 10 | `TEST-176.06` | `tests/test_request_center_phase2_smoke_mariadb.php:100` | بلوک رویه‌ای 100-284 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 11 | `TOOL-057.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 12 | `PAGE-025.22` | `food-ticket-runtime.php:815` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 13 | `PAGE-029.39` | `food-ticket.php:795` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 14 | `PAGE-029.41` | `food-ticket.php:1013` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 15 | `PAGE-029.85` | `food-ticket.php:2583` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 16 | `TEST-111.08` | `tests/test_logging_mysql_integration.php:227` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 17 | `TOOL-001.01` | `tools/asset_dedupe.php:1` | بلوک رویه‌ای 1-230 | 13 | الحاق در SQL، چاپ بدون فرار، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
+| 18 | `PAGE-011.27` | `chatbot.php:700` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 19 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 20 | `TEST-111.06` | `tests/test_logging_mysql_integration.php:135` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 21 | `TEST-180.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 22 | `TOOL-024.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 23 | `PAGE-025.18` | `food-ticket-runtime.php:539` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 24 | `WEB-003.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 25 | `WEB-005.01` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 26 | `WEB-005.04` | `food-ticket-web/assets/food-capitalio-dashboard-r37.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 27 | `WEB-007.01` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 28 | `WEB-007.04` | `food-ticket-web/assets/food-capitalio-dashboard-r38.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 29 | `WEB-009.01` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 30 | `WEB-009.04` | `food-ticket-web/assets/food-capitalio-dashboard-r39.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 31 | `WEB-012.01` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 32 | `WEB-012.04` | `food-ticket-web/assets/food-capitalio-dashboard-r41.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 33 | `WEB-014.01` | `food-ticket-web/assets/food-capitalio-dashboard-r42.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 34 | `WEB-014.04` | `food-ticket-web/assets/food-capitalio-dashboard-r42.js:187` | assert on the output | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 35 | `PAGE-034.70` | `index.php:1921` | مسیر: settings | 11 | الحاق در SQL، ورودی خام، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
+| 36 | `CORE-010.44` | `lib/logging-core.php:1025` | logging_emergency_failure | 11 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 37 | `TEST-181.32` | `tests/test_request_center_t12_scenarios.php:412` | while a clone database is absent. | 11 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 38 | `PAGE-021.03` | `food-ticket-groups.php:62` | food_ticket_groups_ensure | 10 | الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 39 | `PAGE-021.52` | `food-ticket-groups.php:1737` | food_ticket_group_try_unknown | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 40 | `PAGE-035.13` | `install.php:152` | مسیر: test_ldap | 10 | ورودی خام، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 
 ## فهرست کامل آدرس‌ها
 
@@ -2864,1012 +2865,1078 @@
 </details>
 
 <details>
-<summary><b>TEST-171</b> — <code>tests/test_request_center_claim_concurrency_mariadb.php</code> (198 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-171</b> — <code>tests/test_request_center_appointments_sqlite.php</code> (69 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-171.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
-| `TEST-171.02` | 31–37 | تابع | `t10_check` | 0 | ⬜ |
-| `TEST-171.03` | 38–198 | ناحیه | `بلوک رویه‌ای 38-198` | **14** | ⬜ |
+| `TEST-171.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-171.02` | 6–12 | تابع | `check_request_center` | 0 | ⬜ |
+| `TEST-171.03` | 13–69 | ناحیه | `بلوک رویه‌ای 13-69` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-172</b> — <code>tests/test_request_center_first_slice_static.py</code> (131 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-172</b> — <code>tests/test_request_center_claim_concurrency_mariadb.php</code> (198 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-172.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-172.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-172.03` | 11–11 | بلوک | `RequestCenterFirstSliceTests` | 0 | ⬜ |
-| `TEST-172.04` | 12–21 | بلوک | `test_independent_entrypoint_bootstraps_and_authent` | 0 | ⬜ |
-| `TEST-172.05` | 22–27 | بلوک | `test_repository_uses_existing_visibility_contracts` | 0 | ⬜ |
-| `TEST-172.06` | 28–32 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
-| `TEST-172.07` | 33–47 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
-| `TEST-172.08` | 48–55 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
-| `TEST-172.09` | 56–89 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
-| `TEST-172.10` | 90–96 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
-| `TEST-172.11` | 97–109 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
-| `TEST-172.12` | 110–120 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
-| `TEST-172.13` | 121–131 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
+| `TEST-172.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
+| `TEST-172.02` | 31–37 | تابع | `t10_check` | 0 | ⬜ |
+| `TEST-172.03` | 38–198 | ناحیه | `بلوک رویه‌ای 38-198` | **14** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-173</b> — <code>tests/test_request_center_mariadb_ddl_gates.php</code> (108 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-173</b> — <code>tests/test_request_center_first_slice_static.py</code> (132 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-173.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TEST-173.02` | 22–28 | تابع | `tcheck` | 0 | ⬜ |
-| `TEST-173.03` | 30–37 | تابع | `tableExists` | 0 | ⬜ |
-| `TEST-173.04` | 38–108 | ناحیه | `بلوک رویه‌ای 38-108` | 4 | ⬜ |
+| `TEST-173.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-173.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-173.03` | 11–11 | بلوک | `RequestCenterFirstSliceTests` | 0 | ⬜ |
+| `TEST-173.04` | 12–21 | بلوک | `test_independent_entrypoint_bootstraps_and_authent` | 0 | ⬜ |
+| `TEST-173.05` | 22–27 | بلوک | `test_repository_uses_existing_visibility_contracts` | 0 | ⬜ |
+| `TEST-173.06` | 28–32 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
+| `TEST-173.07` | 33–47 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
+| `TEST-173.08` | 48–55 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
+| `TEST-173.09` | 56–90 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
+| `TEST-173.10` | 91–97 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
+| `TEST-173.11` | 98–110 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
+| `TEST-173.12` | 111–121 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
+| `TEST-173.13` | 122–132 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-174</b> — <code>tests/test_request_center_metadata_lock_mariadb.php</code> (83 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-174</b> — <code>tests/test_request_center_mariadb_ddl_gates.php</code> (108 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-174.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
-| `TEST-174.02` | 21–27 | تابع | `t09_check` | 0 | ⬜ |
-| `TEST-174.03` | 29–36 | تابع | `t09_column_exists` | 0 | ⬜ |
-| `TEST-174.04` | 37–83 | ناحیه | `بلوک رویه‌ای 37-83` | 4 | ⬜ |
+| `TEST-174.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TEST-174.02` | 22–28 | تابع | `tcheck` | 0 | ⬜ |
+| `TEST-174.03` | 30–37 | تابع | `tableExists` | 0 | ⬜ |
+| `TEST-174.04` | 38–108 | ناحیه | `بلوک رویه‌ای 38-108` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-175</b> — <code>tests/test_request_center_repository_sqlite.php</code> (104 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-175</b> — <code>tests/test_request_center_metadata_lock_mariadb.php</code> (83 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-175.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-175.02` | 6–9 | تابع | `ticket_scope` | 5 | ⬜ |
-| `TEST-175.03` | 11–14 | تابع | `ticket_user_can_view` | 0 | ⬜ |
-| `TEST-175.04` | 16–22 | تابع | `check_request_center` | 0 | ⬜ |
-| `TEST-175.05` | 23–104 | ناحیه | `بلوک رویه‌ای 23-104` | 5 | ⬜ |
+| `TEST-175.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
+| `TEST-175.02` | 21–27 | تابع | `t09_check` | 0 | ⬜ |
+| `TEST-175.03` | 29–36 | تابع | `t09_column_exists` | 0 | ⬜ |
+| `TEST-175.04` | 37–83 | ناحیه | `بلوک رویه‌ای 37-83` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-176</b> — <code>tests/test_request_center_schema_preflight_mariadb.php</code> (146 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-176</b> — <code>tests/test_request_center_phase2_smoke_mariadb.php</code> (284 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-176.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-176.02` | 4–7 | تابع | `ticket_scope` | 5 | ⬜ |
-| `TEST-176.03` | 9–12 | تابع | `ticket_user_can_view` | 0 | ⬜ |
-| `TEST-176.04` | 14–20 | تابع | `check_request_center` | 0 | ⬜ |
-| `TEST-176.05` | 21–146 | ناحیه | `بلوک رویه‌ای 21-146` | 1 | ⬜ |
+| `TEST-176.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 0 | ⬜ |
+| `TEST-176.02` | 32–38 | تابع | `smoke_check` | 0 | ⬜ |
+| `TEST-176.03` | 40–65 | تابع | `smoke_http_post` | 6 | ⬜ |
+| `TEST-176.04` | 67–78 | تابع | `smoke_wait_server` | 1 | ⬜ |
+| `TEST-176.05` | 80–99 | تابع | `smoke_http` | 6 | ⬜ |
+| `TEST-176.06` | 100–284 | ناحیه | `بلوک رویه‌ای 100-284` | **14** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-177</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (399 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TEST-177</b> — <code>tests/test_request_center_repository_sqlite.php</code> (104 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-177.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TEST-177.02` | 22–26 | تابع | `t07_fail` | 0 | ⬜ |
-| `TEST-177.03` | 28–34 | تابع | `t07_check` | 0 | ⬜ |
-| `TEST-177.04` | 36–39 | تابع | `t07_ident` | 0 | ⬜ |
-| `TEST-177.05` | 41–83 | تابع | `t07_mysql_file` | 4 | ⬜ |
-| `TEST-177.06` | 85–91 | تابع | `t07_tables` | 0 | ⬜ |
-| `TEST-177.07` | 93–143 | تابع | `t07_fingerprint` | 5 | ⬜ |
-| `TEST-177.08` | 145–154 | تابع | `t07_registry_rows` | 0 | ⬜ |
-| `TEST-177.09` | 156–169 | تابع | `t07_service_catalog_distribution` | 0 | ⬜ |
-| `TEST-177.10` | 170–187 | ناحیه | `بلوک رویه‌ای 170-187` | 4 | ⬜ |
-| `TEST-177.11` | 188–188 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
-| `TEST-177.12` | 189–367 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
-| `TEST-177.13` | 368–368 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
-| `TEST-177.14` | 369–399 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
+| `TEST-177.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-177.02` | 6–9 | تابع | `ticket_scope` | 5 | ⬜ |
+| `TEST-177.03` | 11–14 | تابع | `ticket_user_can_view` | 0 | ⬜ |
+| `TEST-177.04` | 16–22 | تابع | `check_request_center` | 0 | ⬜ |
+| `TEST-177.05` | 23–104 | ناحیه | `بلوک رویه‌ای 23-104` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-178</b> — <code>tests/test_request_center_t12_preflight.php</code> (322 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-178</b> — <code>tests/test_request_center_schema_preflight_mariadb.php</code> (146 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-178.01` | 1–33 | ناحیه | `بلوک رویه‌ای 1-33` | 0 | ⬜ |
-| `TEST-178.02` | 34–37 | تابع | `t12_fail` | 0 | ⬜ |
-| `TEST-178.03` | 39–45 | تابع | `t12_check` | 0 | ⬜ |
-| `TEST-178.04` | 47–50 | تابع | `t12_ident` | 0 | ⬜ |
-| `TEST-178.05` | 52–88 | تابع | `t12_mysql_file` | 4 | ⬜ |
-| `TEST-178.06` | 90–109 | تابع | `t12_http` | 1 | ⬜ |
-| `TEST-178.07` | 111–144 | تابع | `t12_start_server` | 4 | ⬜ |
-| `TEST-178.08` | 146–161 | تابع | `t12_schema_fingerprint` | 0 | ⬜ |
-| `TEST-178.09` | 163–181 | تابع | `t12_session` | 0 | ⬜ |
-| `TEST-178.10` | 183–209 | تابع | `t12_config` | 0 | ⬜ |
-| `TEST-178.11` | 210–322 | ناحیه | `بلوک رویه‌ای 210-322` | **12** | ⬜ |
+| `TEST-178.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-178.02` | 4–7 | تابع | `ticket_scope` | 5 | ⬜ |
+| `TEST-178.03` | 9–12 | تابع | `ticket_user_can_view` | 0 | ⬜ |
+| `TEST-178.04` | 14–20 | تابع | `check_request_center` | 0 | ⬜ |
+| `TEST-178.05` | 21–146 | ناحیه | `بلوک رویه‌ای 21-146` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-179</b> — <code>tests/test_request_center_web_ddl_runtime.php</code> (282 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-179</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (399 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-179.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 0 | ⬜ |
-| `TEST-179.02` | 35–41 | تابع | `t04_check` | 0 | ⬜ |
-| `TEST-179.03` | 43–49 | تابع | `t04_reset_log` | 4 | ⬜ |
-| `TEST-179.04` | 51–72 | تابع | `t04_log_window` | 1 | ⬜ |
-| `TEST-179.05` | 74–93 | تابع | `t04_http` | 6 | ⬜ |
-| `TEST-179.06` | 95–106 | تابع | `t04_wait_server` | 1 | ⬜ |
-| `TEST-179.07` | 107–282 | ناحیه | `بلوک رویه‌ای 107-282` | 7 | ⬜ |
+| `TEST-179.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TEST-179.02` | 22–26 | تابع | `t07_fail` | 0 | ⬜ |
+| `TEST-179.03` | 28–34 | تابع | `t07_check` | 0 | ⬜ |
+| `TEST-179.04` | 36–39 | تابع | `t07_ident` | 0 | ⬜ |
+| `TEST-179.05` | 41–83 | تابع | `t07_mysql_file` | 4 | ⬜ |
+| `TEST-179.06` | 85–91 | تابع | `t07_tables` | 0 | ⬜ |
+| `TEST-179.07` | 93–143 | تابع | `t07_fingerprint` | 5 | ⬜ |
+| `TEST-179.08` | 145–154 | تابع | `t07_registry_rows` | 0 | ⬜ |
+| `TEST-179.09` | 156–169 | تابع | `t07_service_catalog_distribution` | 0 | ⬜ |
+| `TEST-179.10` | 170–187 | ناحیه | `بلوک رویه‌ای 170-187` | 4 | ⬜ |
+| `TEST-179.11` | 188–188 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
+| `TEST-179.12` | 189–367 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
+| `TEST-179.13` | 368–368 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
+| `TEST-179.14` | 369–399 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-180</b> — <code>tests/test_request_center_workflow_service_mariadb.php</code> (151 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-180</b> — <code>tests/test_request_center_t12_preflight.php</code> (322 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-180.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
-| `TEST-180.02` | 30–36 | تابع | `mariadb_workflow_check` | 0 | ⬜ |
-| `TEST-180.03` | 37–74 | ناحیه | `بلوک رویه‌ای 37-74` | 5 | ⬜ |
-| `TEST-180.04` | 75–75 | ناحیه | `The MySQL driver branch appends FOR UPDATE; succes` | 1 | ⬜ |
-| `TEST-180.05` | 76–92 | ناحیه | `that the production locking query is accepted by t` | 0 | ⬜ |
-| `TEST-180.06` | 93–109 | ناحیه | `A caller-owned rollback must undo both the status ` | 0 | ⬜ |
-| `TEST-180.07` | 110–127 | ناحیه | `A stale status and a stale optimistic field must b` | 0 | ⬜ |
-| `TEST-180.08` | 128–138 | ناحیه | `Cancellation-pending blocks ordinary transitions e` | 0 | ⬜ |
-| `TEST-180.09` | 139–151 | ناحیه | `Column names are never accepted from untrusted cal` | 5 | ⬜ |
+| `TEST-180.01` | 1–33 | ناحیه | `بلوک رویه‌ای 1-33` | 0 | ⬜ |
+| `TEST-180.02` | 34–37 | تابع | `t12_fail` | 0 | ⬜ |
+| `TEST-180.03` | 39–45 | تابع | `t12_check` | 0 | ⬜ |
+| `TEST-180.04` | 47–50 | تابع | `t12_ident` | 0 | ⬜ |
+| `TEST-180.05` | 52–88 | تابع | `t12_mysql_file` | 4 | ⬜ |
+| `TEST-180.06` | 90–109 | تابع | `t12_http` | 1 | ⬜ |
+| `TEST-180.07` | 111–144 | تابع | `t12_start_server` | 4 | ⬜ |
+| `TEST-180.08` | 146–161 | تابع | `t12_schema_fingerprint` | 0 | ⬜ |
+| `TEST-180.09` | 163–181 | تابع | `t12_session` | 0 | ⬜ |
+| `TEST-180.10` | 183–209 | تابع | `t12_config` | 0 | ⬜ |
+| `TEST-180.11` | 210–322 | ناحیه | `بلوک رویه‌ای 210-322` | **12** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-181</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (190 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-181</b> — <code>tests/test_request_center_t12_scenarios.php</code> (582 خط، 33 آدرس، بازبینی‌شده 0/33)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-181.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-181.02` | 6–12 | تابع | `workflow_check` | 0 | ⬜ |
-| `TEST-181.03` | 13–190 | ناحیه | `بلوک رویه‌ای 13-190` | 5 | ⬜ |
+| `TEST-181.01` | 1–35 | ناحیه | `بلوک رویه‌ای 1-35` | 0 | ⬜ |
+| `TEST-181.02` | 36–36 | تابع | `t12s_fail` | 0 | ⬜ |
+| `TEST-181.03` | 37–37 | تابع | `t12s_check` | 0 | ⬜ |
+| `TEST-181.04` | 38–38 | تابع | `t12s_ident` | 0 | ⬜ |
+| `TEST-181.05` | 39–39 | تابع | `t12s_log` | 0 | ⬜ |
+| `TEST-181.06` | 41–55 | تابع | `t12s_mysql_file` | 4 | ⬜ |
+| `TEST-181.07` | 57–65 | تابع | `t12s_http` | 1 | ⬜ |
+| `TEST-181.08` | 67–88 | تابع | `t12s_start_server` | 5 | ⬜ |
+| `TEST-181.09` | 90–102 | تابع | `t12s_config` | 0 | ⬜ |
+| `TEST-181.10` | 104–108 | تابع | `t12s_db` | 0 | ⬜ |
+| `TEST-181.11` | 110–128 | تابع | `t12s_seed` | 5 | ⬜ |
+| `TEST-181.12` | 130–142 | تابع | `t12s_web_users` | 4 | ⬜ |
+| `TEST-181.13` | 144–152 | تابع | `t12s_rebuild` | **9** | ⬜ |
+| `TEST-181.14` | 154–161 | تابع | `t12s_session` | 0 | ⬜ |
+| `TEST-181.15` | 163–169 | تابع | `t12s_post` | 0 | ⬜ |
+| `TEST-181.16` | 171–198 | تابع | `t12s_snapshot_tickets` | 5 | ⬜ |
+| `TEST-181.17` | 200–212 | تابع | `t12s_snapshot_table` | 5 | ⬜ |
+| `TEST-181.18` | 214–227 | تابع | `t12s_snapshot` | 0 | ⬜ |
+| `TEST-181.19` | 229–234 | تابع | `t12s_ts_diff_tol` | 0 | ⬜ |
+| `TEST-181.20` | 236–270 | تابع | `t12s_compare` | 0 | ⬜ |
+| `TEST-181.21` | 272–286 | تابع | `t12s_rebuild_all` | 4 | ⬜ |
+| `TEST-181.22` | 288–299 | تابع | `t12s_sessions` | 0 | ⬜ |
+| `TEST-181.23` | 301–301 | تابع | `t12s_clone_log_tail` | 1 | ⬜ |
+| `TEST-181.24` | 303–329 | تابع | `t12s_create_ticket` | 0 | ⬜ |
+| `TEST-181.25` | 331–334 | تابع | `t12s_pdo` | 0 | ⬜ |
+| `TEST-181.26` | 336–341 | تابع | `t12s_expect_redirect` | 0 | ⬜ |
+| `TEST-181.27` | 343–363 | تابع | `t12s_run_pair` | 0 | ⬜ |
+| `TEST-181.28` | 365–391 | تابع | `t12s_finish` | 1 | ⬜ |
+| `TEST-181.29` | 392–409 | ناحیه | `بلوک رویه‌ای 392-409` | 1 | ⬜ |
+| `TEST-181.30` | 410–410 | ناحیه | `Both databases must exist BEFORE the web servers s` | 0 | ⬜ |
+| `TEST-181.31` | 411–411 | ناحیه | `bootstrap performs a schema check on EVERY request` | 0 | ⬜ |
+| `TEST-181.32` | 412–548 | ناحیه | `while a clone database is absent.` | **11** | ⬜ |
+| `TEST-181.33` | 549–582 | ناحیه | `مسیر: rated` | **17** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-182</b> — <code>tests/test_role_permissions_ui_static.py</code> (31 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-182</b> — <code>tests/test_request_center_web_ddl_runtime.php</code> (285 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-182.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-182.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-182.03` | 10–31 | بلوک | `check` | 0 | ⬜ |
+| `TEST-182.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 0 | ⬜ |
+| `TEST-182.02` | 35–41 | تابع | `t04_check` | 0 | ⬜ |
+| `TEST-182.03` | 43–49 | تابع | `t04_reset_log` | 4 | ⬜ |
+| `TEST-182.04` | 51–72 | تابع | `t04_log_window` | 1 | ⬜ |
+| `TEST-182.05` | 74–93 | تابع | `t04_http` | 6 | ⬜ |
+| `TEST-182.06` | 95–106 | تابع | `t04_wait_server` | 1 | ⬜ |
+| `TEST-182.07` | 107–285 | ناحیه | `بلوک رویه‌ای 107-285` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-183</b> — <code>tests/test_route_security_static.py</code> (116 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TEST-183</b> — <code>tests/test_request_center_workflow_service_mariadb.php</code> (151 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-183.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-183.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-183.03` | 12–17 | بلوک | `section` | 0 | ⬜ |
-| `TEST-183.04` | 18–23 | بلوک | `test_new_ticket_page_requires_ticket_create_permis` | 0 | ⬜ |
-| `TEST-183.05` | 24–30 | بلوک | `test_post_action_dispatch_enforces_csrf_before_han` | 2 | ⬜ |
-| `TEST-183.06` | 31–38 | بلوک | `test_food_ticket_api_requires_login_and_csrf_for_p` | 0 | ⬜ |
-| `TEST-183.07` | 39–47 | بلوک | `test_food_order_api_requires_authenticated_user_an` | 0 | ⬜ |
-| `TEST-183.08` | 48–55 | بلوک | `test_sensitive_download_and_export_actions_have_ex` | 2 | ⬜ |
-| `TEST-183.09` | 56–79 | بلوک | `test_action_handlers_refuse_direct_http_access` | 0 | ⬜ |
-| `TEST-183.10` | 80–88 | بلوک | `test_self_service_password_change_is_audited_atomi` | 0 | ⬜ |
-| `TEST-183.11` | 89–109 | بلوک | `test_internal_modules_refuse_direct_http_access` | 1 | ⬜ |
-| `TEST-183.12` | 110–116 | بلوک | `test_it_ticket_asset_reference_obeys_asset_own_uni` | 2 | ⬜ |
+| `TEST-183.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
+| `TEST-183.02` | 30–36 | تابع | `mariadb_workflow_check` | 0 | ⬜ |
+| `TEST-183.03` | 37–74 | ناحیه | `بلوک رویه‌ای 37-74` | 5 | ⬜ |
+| `TEST-183.04` | 75–75 | ناحیه | `The MySQL driver branch appends FOR UPDATE; succes` | 1 | ⬜ |
+| `TEST-183.05` | 76–92 | ناحیه | `that the production locking query is accepted by t` | 0 | ⬜ |
+| `TEST-183.06` | 93–109 | ناحیه | `A caller-owned rollback must undo both the status ` | 0 | ⬜ |
+| `TEST-183.07` | 110–127 | ناحیه | `A stale status and a stale optimistic field must b` | 0 | ⬜ |
+| `TEST-183.08` | 128–138 | ناحیه | `Cancellation-pending blocks ordinary transitions e` | 0 | ⬜ |
+| `TEST-183.09` | 139–151 | ناحیه | `Column names are never accepted from untrusted cal` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-184</b> — <code>tests/test_schema_heal_static.py</code> (46 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-184</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (190 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-184.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-184.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-184.03` | 12–46 | بلوک | `check` | 0 | ⬜ |
+| `TEST-184.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-184.02` | 6–12 | تابع | `workflow_check` | 0 | ⬜ |
+| `TEST-184.03` | 13–190 | ناحیه | `بلوک رویه‌ای 13-190` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-185</b> — <code>tests/test_session_boot_static.py</code> (143 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-185</b> — <code>tests/test_role_permissions_ui_static.py</code> (31 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-185.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-185.02` | 50–53 | بلوک | `main` | 0 | ⬜ |
-| `TEST-185.03` | 54–143 | بلوک | `check` | 0 | ⬜ |
+| `TEST-185.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-185.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-185.03` | 10–31 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-186</b> — <code>tests/test_session_csrf_hardening_static.py</code> (189 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-186</b> — <code>tests/test_route_security_static.py</code> (116 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-186.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-186.02` | 26–30 | بلوک | `read` | 0 | ⬜ |
-| `TEST-186.03` | 31–42 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-186.04` | 43–51 | بلوک | `csrf_token_code` | 0 | ⬜ |
-| `TEST-186.05` | 52–63 | بلوک | `test_csrf_token_never_adopts_a_value_supplied_by_t` | 0 | ⬜ |
-| `TEST-186.06` | 64–71 | بلوک | `test_csrf_token_is_generated_with_a_cryptographic_` | 0 | ⬜ |
-| `TEST-186.07` | 72–91 | بلوک | `test_csrf_token_is_seeded_while_the_session_is_sti` | 0 | ⬜ |
-| `TEST-186.08` | 92–98 | بلوک | `test_legacy_csrf_cookie_is_actively_cleared` | 0 | ⬜ |
-| `TEST-186.09` | 99–108 | بلوک | `test_require_csrf_still_compares_in_constant_time` | 0 | ⬜ |
-| `TEST-186.10` | 109–122 | بلوک | `test_session_idle_timeout_exists_and_is_configurab` | 0 | ⬜ |
-| `TEST-186.11` | 123–136 | بلوک | `test_idle_timeout_is_wired_into_bootstrap_after_co` | 0 | ⬜ |
-| `TEST-186.12` | 137–146 | بلوک | `test_idle_timeout_only_affects_logged_in_sessions` | 0 | ⬜ |
-| `TEST-186.13` | 147–155 | بلوک | `test_idle_timeout_can_be_switched_off_without_edit` | 0 | ⬜ |
-| `TEST-186.14` | 156–167 | بلوک | `test_session_cookie_keeps_its_hardening_flags` | 0 | ⬜ |
-| `TEST-186.15` | 168–173 | بلوک | `test_dead_duplicate_auth_layer_is_gone` | 0 | ⬜ |
-| `TEST-186.16` | 174–189 | بلوک | `test_no_php_file_references_the_removed_app_namesp` | 0 | ⬜ |
+| `TEST-186.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-186.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
+| `TEST-186.03` | 12–17 | بلوک | `section` | 0 | ⬜ |
+| `TEST-186.04` | 18–23 | بلوک | `test_new_ticket_page_requires_ticket_create_permis` | 0 | ⬜ |
+| `TEST-186.05` | 24–30 | بلوک | `test_post_action_dispatch_enforces_csrf_before_han` | 2 | ⬜ |
+| `TEST-186.06` | 31–38 | بلوک | `test_food_ticket_api_requires_login_and_csrf_for_p` | 0 | ⬜ |
+| `TEST-186.07` | 39–47 | بلوک | `test_food_order_api_requires_authenticated_user_an` | 0 | ⬜ |
+| `TEST-186.08` | 48–55 | بلوک | `test_sensitive_download_and_export_actions_have_ex` | 2 | ⬜ |
+| `TEST-186.09` | 56–79 | بلوک | `test_action_handlers_refuse_direct_http_access` | 0 | ⬜ |
+| `TEST-186.10` | 80–88 | بلوک | `test_self_service_password_change_is_audited_atomi` | 0 | ⬜ |
+| `TEST-186.11` | 89–109 | بلوک | `test_internal_modules_refuse_direct_http_access` | 1 | ⬜ |
+| `TEST-186.12` | 110–116 | بلوک | `test_it_ticket_asset_reference_obeys_asset_own_uni` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-187</b> — <code>tests/test_skill_manifest_static.py</code> (196 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TEST-187</b> — <code>tests/test_schema_heal_static.py</code> (46 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-187.01` | 1–51 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-187.02` | 52–67 | بلوک | `sections` | 0 | ⬜ |
-| `TEST-187.03` | 68–79 | بلوک | `foreign_characters` | 0 | ⬜ |
-| `TEST-187.04` | 80–83 | بلوک | `main` | 0 | ⬜ |
-| `TEST-187.05` | 84–89 | بلوک | `check` | 0 | ⬜ |
-| `TEST-187.06` | 90–103 | بلوک | `وجود فایلها` | 0 | ⬜ |
-| `TEST-187.07` | 104–118 | بلوک | `شمارش و پیوستگی شناسهها` | 0 | ⬜ |
-| `TEST-187.08` | 119–132 | بلوک | `ساختار تکتک مهارتها` | 0 | ⬜ |
-| `TEST-187.09` | 133–143 | بلوک | `جدول مانیفست` | 0 | ⬜ |
-| `TEST-187.10` | 144–157 | بلوک | `صداقت دربارهٔ حافظه` | 0 | ⬜ |
-| `TEST-187.11` | 158–166 | بلوک | `گردشکار` | 0 | ⬜ |
-| `TEST-187.12` | 167–170 | بلوک | `خودآزمون، گزارش و قواعد` | 0 | ⬜ |
-| `TEST-187.13` | 171–176 | بلوک | `پیوند AGENTS.md` | 0 | ⬜ |
-| `TEST-187.14` | 177–181 | بلوک | `آلودگی خط نوشتاری` | 0 | ⬜ |
-| `TEST-187.15` | 182–196 | بلوک | `نتیجه` | 0 | ⬜ |
+| `TEST-187.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-187.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
+| `TEST-187.03` | 12–46 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-188</b> — <code>tests/test_startup_performance_static.py</code> (51 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-188</b> — <code>tests/test_session_boot_static.py</code> (143 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-188.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-188.02` | 6–51 | بلوک | `read` | 0 | ⬜ |
+| `TEST-188.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-188.02` | 50–53 | بلوک | `main` | 0 | ⬜ |
+| `TEST-188.03` | 54–143 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-189</b> — <code>tests/test_system_health_accuracy_static.py</code> (99 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-189</b> — <code>tests/test_session_csrf_hardening_static.py</code> (189 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-189.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-189.02` | 16–33 | بلوک | `test_event_totals_are_independent_of_the_display_l` | 0 | ⬜ |
-| `TEST-189.03` | 34–47 | بلوک | `test_export_reports_full_counts_and_discloses_trun` | 0 | ⬜ |
-| `TEST-189.04` | 48–58 | بلوک | `test_safe_reference_uses_only_class_basename_line_` | 0 | ⬜ |
-| `TEST-189.05` | 59–72 | بلوک | `test_future_exception_logs_include_a_validated_err` | 0 | ⬜ |
-| `TEST-189.06` | 73–99 | بلوک | `test_hotfix_package_is_a_valid_upgrade_from_16224` | 0 | ⬜ |
+| `TEST-189.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-189.02` | 26–30 | بلوک | `read` | 0 | ⬜ |
+| `TEST-189.03` | 31–42 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-189.04` | 43–51 | بلوک | `csrf_token_code` | 0 | ⬜ |
+| `TEST-189.05` | 52–63 | بلوک | `test_csrf_token_never_adopts_a_value_supplied_by_t` | 0 | ⬜ |
+| `TEST-189.06` | 64–71 | بلوک | `test_csrf_token_is_generated_with_a_cryptographic_` | 0 | ⬜ |
+| `TEST-189.07` | 72–91 | بلوک | `test_csrf_token_is_seeded_while_the_session_is_sti` | 0 | ⬜ |
+| `TEST-189.08` | 92–98 | بلوک | `test_legacy_csrf_cookie_is_actively_cleared` | 0 | ⬜ |
+| `TEST-189.09` | 99–108 | بلوک | `test_require_csrf_still_compares_in_constant_time` | 0 | ⬜ |
+| `TEST-189.10` | 109–122 | بلوک | `test_session_idle_timeout_exists_and_is_configurab` | 0 | ⬜ |
+| `TEST-189.11` | 123–136 | بلوک | `test_idle_timeout_is_wired_into_bootstrap_after_co` | 0 | ⬜ |
+| `TEST-189.12` | 137–146 | بلوک | `test_idle_timeout_only_affects_logged_in_sessions` | 0 | ⬜ |
+| `TEST-189.13` | 147–155 | بلوک | `test_idle_timeout_can_be_switched_off_without_edit` | 0 | ⬜ |
+| `TEST-189.14` | 156–167 | بلوک | `test_session_cookie_keeps_its_hardening_flags` | 0 | ⬜ |
+| `TEST-189.15` | 168–173 | بلوک | `test_dead_duplicate_auth_layer_is_gone` | 0 | ⬜ |
+| `TEST-189.16` | 174–189 | بلوک | `test_no_php_file_references_the_removed_app_namesp` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-190</b> — <code>tests/test_system_health_audit_visibility_static.py</code> (81 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-190</b> — <code>tests/test_skill_manifest_static.py</code> (196 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-190.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-190.02` | 16–20 | بلوک | `_checks_body` | 0 | ⬜ |
-| `TEST-190.03` | 21–26 | بلوک | `test_audit_status_is_reported_on_the_health_page` | 0 | ⬜ |
-| `TEST-190.04` | 27–32 | بلوک | `test_health_page_loads_the_audit_module` | 0 | ⬜ |
-| `TEST-190.05` | 33–44 | بلوک | `test_missing_heartbeat_is_not_reported_as_healthy` | 0 | ⬜ |
-| `TEST-190.06` | 45–53 | بلوک | `test_stale_audit_is_a_failure_not_a_warning` | 0 | ⬜ |
-| `TEST-190.07` | 54–62 | بلوک | `test_structural_problems_outrank_regressions` | 0 | ⬜ |
-| `TEST-190.08` | 63–71 | بلوک | `test_probe_failure_is_surfaced_not_swallowed` | 0 | ⬜ |
-| `TEST-190.09` | 72–81 | بلوک | `test_baseline_message_does_not_demand_server_acces` | 1 | ⬜ |
+| `TEST-190.01` | 1–51 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-190.02` | 52–67 | بلوک | `sections` | 0 | ⬜ |
+| `TEST-190.03` | 68–79 | بلوک | `foreign_characters` | 0 | ⬜ |
+| `TEST-190.04` | 80–83 | بلوک | `main` | 0 | ⬜ |
+| `TEST-190.05` | 84–89 | بلوک | `check` | 0 | ⬜ |
+| `TEST-190.06` | 90–103 | بلوک | `وجود فایلها` | 0 | ⬜ |
+| `TEST-190.07` | 104–118 | بلوک | `شمارش و پیوستگی شناسهها` | 0 | ⬜ |
+| `TEST-190.08` | 119–132 | بلوک | `ساختار تکتک مهارتها` | 0 | ⬜ |
+| `TEST-190.09` | 133–143 | بلوک | `جدول مانیفست` | 0 | ⬜ |
+| `TEST-190.10` | 144–157 | بلوک | `صداقت دربارهٔ حافظه` | 0 | ⬜ |
+| `TEST-190.11` | 158–166 | بلوک | `گردشکار` | 0 | ⬜ |
+| `TEST-190.12` | 167–170 | بلوک | `خودآزمون، گزارش و قواعد` | 0 | ⬜ |
+| `TEST-190.13` | 171–176 | بلوک | `پیوند AGENTS.md` | 0 | ⬜ |
+| `TEST-190.14` | 177–181 | بلوک | `آلودگی خط نوشتاری` | 0 | ⬜ |
+| `TEST-190.15` | 182–196 | بلوک | `نتیجه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-191</b> — <code>tests/test_system_health_log_button_static.py</code> (39 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-191</b> — <code>tests/test_startup_performance_static.py</code> (51 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-191.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-191.02` | 10–22 | بلوک | `test_current_system_logs_page_shows_safe_export_an` | 0 | ⬜ |
-| `TEST-191.03` | 23–39 | بلوک | `test_update_zip_contains_button_in_the_actual_unif` | 1 | ⬜ |
+| `TEST-191.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-191.02` | 6–51 | بلوک | `read` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-192</b> — <code>tests/test_system_health_readability_static.py</code> (63 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-192</b> — <code>tests/test_system_health_accuracy_static.py</code> (99 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-192.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-192.02` | 11–24 | بلوک | `test_health_status_rules_include_warnings_and_basi` | 0 | ⬜ |
-| `TEST-192.03` | 25–40 | بلوک | `test_health_ui_and_export_use_plain_language_witho` | 0 | ⬜ |
-| `TEST-192.04` | 41–48 | بلوک | `test_system_logs_page_displays_safe_export_and_fri` | 0 | ⬜ |
-| `TEST-192.05` | 49–63 | بلوک | `test_16224_package_contains_the_readable_health_an` | 0 | ⬜ |
+| `TEST-192.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-192.02` | 16–33 | بلوک | `test_event_totals_are_independent_of_the_display_l` | 0 | ⬜ |
+| `TEST-192.03` | 34–47 | بلوک | `test_export_reports_full_counts_and_discloses_trun` | 0 | ⬜ |
+| `TEST-192.04` | 48–58 | بلوک | `test_safe_reference_uses_only_class_basename_line_` | 0 | ⬜ |
+| `TEST-192.05` | 59–72 | بلوک | `test_future_exception_logs_include_a_validated_err` | 0 | ⬜ |
+| `TEST-192.06` | 73–99 | بلوک | `test_hotfix_package_is_a_valid_upgrade_from_16224` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-193</b> — <code>tests/test_system_health_safe_export_static.py</code> (63 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-193</b> — <code>tests/test_system_health_audit_visibility_static.py</code> (81 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-193.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-193.02` | 9–15 | بلوک | `test_safe_export_is_reachable_and_labelled_for_peo` | 0 | ⬜ |
-| `TEST-193.03` | 16–28 | بلوک | `test_export_omits_user_linked_and_raw_log_fields` | 0 | ⬜ |
-| `TEST-193.04` | 29–42 | بلوک | `test_humanizer_uses_safe_categories_and_common_mas` | 0 | ⬜ |
-| `TEST-193.05` | 43–48 | بلوک | `test_health_warning_is_explained_without_claiming_` | 0 | ⬜ |
-| `TEST-193.06` | 49–63 | بلوک | `test_published_update_contains_the_readable_safe_e` | 1 | ⬜ |
+| `TEST-193.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-193.02` | 16–20 | بلوک | `_checks_body` | 0 | ⬜ |
+| `TEST-193.03` | 21–26 | بلوک | `test_audit_status_is_reported_on_the_health_page` | 0 | ⬜ |
+| `TEST-193.04` | 27–32 | بلوک | `test_health_page_loads_the_audit_module` | 0 | ⬜ |
+| `TEST-193.05` | 33–44 | بلوک | `test_missing_heartbeat_is_not_reported_as_healthy` | 0 | ⬜ |
+| `TEST-193.06` | 45–53 | بلوک | `test_stale_audit_is_a_failure_not_a_warning` | 0 | ⬜ |
+| `TEST-193.07` | 54–62 | بلوک | `test_structural_problems_outrank_regressions` | 0 | ⬜ |
+| `TEST-193.08` | 63–71 | بلوک | `test_probe_failure_is_surfaced_not_swallowed` | 0 | ⬜ |
+| `TEST-193.09` | 72–81 | بلوک | `test_baseline_message_does_not_demand_server_acces` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-194</b> — <code>tests/test_system_map_blocks.py</code> (347 خط، 34 آدرس، بازبینی‌شده 0/34)</summary>
+<summary><b>TEST-194</b> — <code>tests/test_system_health_log_button_static.py</code> (39 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-194.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-194.02` | 33–43 | بلوک | `_tracked_production_files` | 0 | ⬜ |
-| `TEST-194.03` | 44–59 | بلوک | `fingerprint` | 0 | ⬜ |
-| `TEST-194.04` | 60–67 | بلوک | `index` | 0 | ⬜ |
-| `TEST-194.05` | 68–74 | بلوک | `sources` | 0 | ⬜ |
-| `TEST-194.06` | 75–76 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.07` | 77–79 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.08` | 80–89 | بلوک | `test_every_production_file_is_indexed` | 0 | ⬜ |
-| `TEST-194.09` | 90–96 | بلوک | `test_index_has_no_phantom_files` | 0 | ⬜ |
-| `TEST-194.10` | 97–102 | بلوک | `test_file_ids_are_unique` | 0 | ⬜ |
-| `TEST-194.11` | 103–113 | بلوک | `test_block_ids_are_unique` | 0 | ⬜ |
-| `TEST-194.12` | 114–115 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.13` | 116–118 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.14` | 119–132 | بلوک | `test_file_fingerprints_are_current` | 0 | ⬜ |
-| `TEST-194.15` | 133–149 | بلوک | `test_block_fingerprints_are_current` | 0 | ⬜ |
-| `TEST-194.16` | 150–161 | بلوک | `test_block_ranges_are_inside_the_file` | 0 | ⬜ |
-| `TEST-194.17` | 162–163 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.18` | 164–166 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.19` | 167–210 | بلوک | `test_every_nonblank_line_is_covered_exactly_once` | 0 | ⬜ |
-| `TEST-194.20` | 211–233 | بلوک | `test_symbol_blocks_end_on_a_closing_brace` | 0 | ⬜ |
-| `TEST-194.21` | 234–235 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.22` | 236–238 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.23` | 239–244 | بلوک | `test_ledger_exists_and_is_valid_json` | 0 | ⬜ |
-| `TEST-194.24` | 245–254 | بلوک | `test_ledger_entries_point_at_real_addresses` | 0 | ⬜ |
-| `TEST-194.25` | 255–271 | بلوک | `test_ledger_flags_blocks_changed_since_review` | 0 | ⬜ |
-| `TEST-194.26` | 272–286 | بلوک | `test_human_readable_map_is_in_sync` | 0 | ⬜ |
-| `TEST-194.27` | 287–288 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.28` | 289–294 | بلوک | `-` | 0 | ⬜ |
-| `TEST-194.29` | 295–299 | بلوک | `topics` | 0 | ⬜ |
-| `TEST-194.30` | 300–312 | بلوک | `test_every_page_of_the_system_has_a_topic` | 0 | ⬜ |
-| `TEST-194.31` | 313–320 | بلوک | `test_every_permission_has_a_topic` | 0 | ⬜ |
-| `TEST-194.32` | 321–328 | بلوک | `test_every_topic_resolves_to_at_least_one_address` | 0 | ⬜ |
-| `TEST-194.33` | 329–339 | بلوک | `test_topic_addresses_exist_in_the_block_index` | 0 | ⬜ |
-| `TEST-194.34` | 340–347 | بلوک | `test_boot_file_points_agents_at_the_map` | 0 | ⬜ |
+| `TEST-194.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-194.02` | 10–22 | بلوک | `test_current_system_logs_page_shows_safe_export_an` | 0 | ⬜ |
+| `TEST-194.03` | 23–39 | بلوک | `test_update_zip_contains_button_in_the_actual_unif` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-195</b> — <code>tests/test_system_map_static.py</code> (172 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-195</b> — <code>tests/test_system_health_readability_static.py</code> (63 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-195.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-195.02` | 34–38 | بلوک | `load` | 0 | ⬜ |
-| `TEST-195.03` | 39–42 | بلوک | `main` | 0 | ⬜ |
-| `TEST-195.04` | 43–156 | بلوک | `check` | 0 | ⬜ |
-| `TEST-195.05` | 157–172 | بلوک | `نتیجه` | 0 | ⬜ |
+| `TEST-195.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-195.02` | 11–24 | بلوک | `test_health_status_rules_include_warnings_and_basi` | 0 | ⬜ |
+| `TEST-195.03` | 25–40 | بلوک | `test_health_ui_and_export_use_plain_language_witho` | 0 | ⬜ |
+| `TEST-195.04` | 41–48 | بلوک | `test_system_logs_page_displays_safe_export_and_fri` | 0 | ⬜ |
+| `TEST-195.05` | 49–63 | بلوک | `test_16224_package_contains_the_readable_health_an` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-196</b> — <code>tests/test_system_update_archive_paths.php</code> (41 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-196</b> — <code>tests/test_system_health_safe_export_static.py</code> (63 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-196.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 1 | ⬜ |
-| `TEST-196.02` | 6–6 | تابع | `db` | 0 | ⬜ |
-| `TEST-196.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-196.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-196.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-196.06` | 10–41 | ناحیه | `بلوک رویه‌ای 10-41` | 4 | ⬜ |
+| `TEST-196.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-196.02` | 9–15 | بلوک | `test_safe_export_is_reachable_and_labelled_for_peo` | 0 | ⬜ |
+| `TEST-196.03` | 16–28 | بلوک | `test_export_omits_user_linked_and_raw_log_fields` | 0 | ⬜ |
+| `TEST-196.04` | 29–42 | بلوک | `test_humanizer_uses_safe_categories_and_common_mas` | 0 | ⬜ |
+| `TEST-196.05` | 43–48 | بلوک | `test_health_warning_is_explained_without_claiming_` | 0 | ⬜ |
+| `TEST-196.06` | 49–63 | بلوک | `test_published_update_contains_the_readable_safe_e` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-197</b> — <code>tests/test_system_update_archive_zip.php</code> (156 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-197</b> — <code>tests/test_system_map_blocks.py</code> (347 خط، 34 آدرس، بازبینی‌شده 0/34)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-197.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-197.02` | 6–6 | تابع | `db` | 0 | ⬜ |
-| `TEST-197.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-197.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-197.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-197.06` | 10–16 | ناحیه | `بلوک رویه‌ای 10-16` | 1 | ⬜ |
-| `TEST-197.07` | 17–39 | تابع | `make_test_zip` | 5 | ⬜ |
-| `TEST-197.08` | 41–59 | تابع | `assert_zip_rejected` | 5 | ⬜ |
-| `TEST-197.09` | 60–82 | ناحیه | `بلوک رویه‌ای 60-82` | 5 | ⬜ |
-| `TEST-197.10` | 83–92 | تابع | `package_test_rejects` | 0 | ⬜ |
-| `TEST-197.11` | 93–156 | ناحیه | `بلوک رویه‌ای 93-156` | **8** | ⬜ |
+| `TEST-197.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-197.02` | 33–43 | بلوک | `_tracked_production_files` | 0 | ⬜ |
+| `TEST-197.03` | 44–59 | بلوک | `fingerprint` | 0 | ⬜ |
+| `TEST-197.04` | 60–67 | بلوک | `index` | 0 | ⬜ |
+| `TEST-197.05` | 68–74 | بلوک | `sources` | 0 | ⬜ |
+| `TEST-197.06` | 75–76 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.07` | 77–79 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.08` | 80–89 | بلوک | `test_every_production_file_is_indexed` | 0 | ⬜ |
+| `TEST-197.09` | 90–96 | بلوک | `test_index_has_no_phantom_files` | 0 | ⬜ |
+| `TEST-197.10` | 97–102 | بلوک | `test_file_ids_are_unique` | 0 | ⬜ |
+| `TEST-197.11` | 103–113 | بلوک | `test_block_ids_are_unique` | 0 | ⬜ |
+| `TEST-197.12` | 114–115 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.13` | 116–118 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.14` | 119–132 | بلوک | `test_file_fingerprints_are_current` | 0 | ⬜ |
+| `TEST-197.15` | 133–149 | بلوک | `test_block_fingerprints_are_current` | 0 | ⬜ |
+| `TEST-197.16` | 150–161 | بلوک | `test_block_ranges_are_inside_the_file` | 0 | ⬜ |
+| `TEST-197.17` | 162–163 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.18` | 164–166 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.19` | 167–210 | بلوک | `test_every_nonblank_line_is_covered_exactly_once` | 0 | ⬜ |
+| `TEST-197.20` | 211–233 | بلوک | `test_symbol_blocks_end_on_a_closing_brace` | 0 | ⬜ |
+| `TEST-197.21` | 234–235 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.22` | 236–238 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.23` | 239–244 | بلوک | `test_ledger_exists_and_is_valid_json` | 0 | ⬜ |
+| `TEST-197.24` | 245–254 | بلوک | `test_ledger_entries_point_at_real_addresses` | 0 | ⬜ |
+| `TEST-197.25` | 255–271 | بلوک | `test_ledger_flags_blocks_changed_since_review` | 0 | ⬜ |
+| `TEST-197.26` | 272–286 | بلوک | `test_human_readable_map_is_in_sync` | 0 | ⬜ |
+| `TEST-197.27` | 287–288 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.28` | 289–294 | بلوک | `-` | 0 | ⬜ |
+| `TEST-197.29` | 295–299 | بلوک | `topics` | 0 | ⬜ |
+| `TEST-197.30` | 300–312 | بلوک | `test_every_page_of_the_system_has_a_topic` | 0 | ⬜ |
+| `TEST-197.31` | 313–320 | بلوک | `test_every_permission_has_a_topic` | 0 | ⬜ |
+| `TEST-197.32` | 321–328 | بلوک | `test_every_topic_resolves_to_at_least_one_address` | 0 | ⬜ |
+| `TEST-197.33` | 329–339 | بلوک | `test_topic_addresses_exist_in_the_block_index` | 0 | ⬜ |
+| `TEST-197.34` | 340–347 | بلوک | `test_boot_file_points_agents_at_the_map` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-198</b> — <code>tests/test_system_update_migration_failure_gates.php</code> (232 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-198</b> — <code>tests/test_system_map_static.py</code> (172 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-198.01` | 1–47 | ناحیه | `بلوک رویه‌ای 1-47` | 5 | ⬜ |
-| `TEST-198.02` | 48–51 | تابع | `db` | 0 | ⬜ |
-| `TEST-198.03` | 53–56 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-198.04` | 58–61 | تابع | `backup_mysql_binary` | 0 | ⬜ |
-| `TEST-198.05` | 63–66 | تابع | `create_backup_bundle` | 0 | ⬜ |
-| `TEST-198.06` | 68–86 | تابع | `backup_run_process` | 4 | ⬜ |
-| `TEST-198.07` | 88–91 | تابع | `save_audit_required` | 0 | ⬜ |
-| `TEST-198.08` | 92–95 | ناحیه | `بلوک رویه‌ای 92-95` | 1 | ⬜ |
-| `TEST-198.09` | 96–102 | تابع | `rc_update_check` | 0 | ⬜ |
-| `TEST-198.10` | 104–127 | تابع | `rc_update_package` | 1 | ⬜ |
-| `TEST-198.11` | 129–137 | تابع | `rc_update_upload` | 0 | ⬜ |
-| `TEST-198.12` | 139–146 | تابع | `rc_update_table_exists` | 0 | ⬜ |
-| `TEST-198.13` | 147–232 | ناحیه | `بلوک رویه‌ای 147-232` | **17** | ⬜ |
+| `TEST-198.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-198.02` | 34–38 | بلوک | `load` | 0 | ⬜ |
+| `TEST-198.03` | 39–42 | بلوک | `main` | 0 | ⬜ |
+| `TEST-198.04` | 43–156 | بلوک | `check` | 0 | ⬜ |
+| `TEST-198.05` | 157–172 | بلوک | `نتیجه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-199</b> — <code>tests/test_system_update_migration_registry.php</code> (68 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-199</b> — <code>tests/test_system_update_archive_paths.php</code> (41 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-199.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
-| `TEST-199.02` | 7–30 | کلاس | `MigrationRegistryFakeStatement` | 0 | ⬜ |
-| `TEST-199.03` | 32–41 | کلاس | `MigrationRegistryFakeDb` | 0 | ⬜ |
-| `TEST-199.04` | 42–44 | ناحیه | `بلوک رویه‌ای 42-44` | 0 | ⬜ |
-| `TEST-199.05` | 45–48 | تابع | `db` | 0 | ⬜ |
-| `TEST-199.06` | 49–49 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-199.07` | 50–50 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-199.08` | 51–51 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-199.09` | 52–68 | ناحیه | `بلوک رویه‌ای 52-68` | 1 | ⬜ |
+| `TEST-199.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 1 | ⬜ |
+| `TEST-199.02` | 6–6 | تابع | `db` | 0 | ⬜ |
+| `TEST-199.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-199.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-199.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-199.06` | 10–41 | ناحیه | `بلوک رویه‌ای 10-41` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-200</b> — <code>tests/test_system_update_requires_version.php</code> (96 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-200</b> — <code>tests/test_system_update_archive_zip.php</code> (156 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-200.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
-| `TEST-200.02` | 20–20 | ناحیه | `system-update.php در سطح فایل فقط تابع تعریف می‌کن` | 1 | ⬜ |
-| `TEST-200.03` | 21–24 | تابع | `db` | 0 | ⬜ |
-| `TEST-200.04` | 25–27 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-200.05` | 28–31 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-200.06` | 32–35 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-200.07` | 36–39 | ناحیه | `بلوک رویه‌ای 36-39` | 1 | ⬜ |
-| `TEST-200.08` | 40–47 | تابع | `expect` | 0 | ⬜ |
-| `TEST-200.09` | 49–53 | تابع | `allowed` | 0 | ⬜ |
-| `TEST-200.10` | 55–59 | ناحیه | `پیش‌نیاز برآورده` | 0 | ⬜ |
-| `TEST-200.11` | 60–64 | ناحیه | `پیش‌نیاز برآورده نیست` | 0 | ⬜ |
-| `TEST-200.12` | 65–71 | ناحیه | `متن خطا باید قابل اقدام باشد` | 0 | ⬜ |
-| `TEST-200.13` | 72–78 | ناحیه | `سازگاری با بسته‌های قدیمی` | 0 | ⬜ |
-| `TEST-200.14` | 79–83 | ناحیه | `درهای خروج` | 0 | ⬜ |
-| `TEST-200.15` | 84–87 | ناحیه | `نسخه‌های با تعداد جزء متفاوت` | 0 | ⬜ |
-| `TEST-200.16` | 88–96 | ناحیه | `بستهٔ واقعی این نسخه` | 3 | ⬜ |
+| `TEST-200.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-200.02` | 6–6 | تابع | `db` | 0 | ⬜ |
+| `TEST-200.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-200.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-200.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-200.06` | 10–16 | ناحیه | `بلوک رویه‌ای 10-16` | 1 | ⬜ |
+| `TEST-200.07` | 17–39 | تابع | `make_test_zip` | 5 | ⬜ |
+| `TEST-200.08` | 41–59 | تابع | `assert_zip_rejected` | 5 | ⬜ |
+| `TEST-200.09` | 60–82 | ناحیه | `بلوک رویه‌ای 60-82` | 5 | ⬜ |
+| `TEST-200.10` | 83–92 | تابع | `package_test_rejects` | 0 | ⬜ |
+| `TEST-200.11` | 93–156 | ناحیه | `بلوک رویه‌ای 93-156` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-201</b> — <code>tests/test_technical_profile_form_refresh_static.py</code> (68 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-201</b> — <code>tests/test_system_update_migration_failure_gates.php</code> (232 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-201.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-201.02` | 16–37 | بلوک | `test_current_profile_module_has_complete_form_and_` | 0 | ⬜ |
-| `TEST-201.03` | 38–68 | بلوک | `test_form_hotfix_packages_the_renderer_styles_and_` | 0 | ⬜ |
+| `TEST-201.01` | 1–47 | ناحیه | `بلوک رویه‌ای 1-47` | 5 | ⬜ |
+| `TEST-201.02` | 48–51 | تابع | `db` | 0 | ⬜ |
+| `TEST-201.03` | 53–56 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-201.04` | 58–61 | تابع | `backup_mysql_binary` | 0 | ⬜ |
+| `TEST-201.05` | 63–66 | تابع | `create_backup_bundle` | 0 | ⬜ |
+| `TEST-201.06` | 68–86 | تابع | `backup_run_process` | 4 | ⬜ |
+| `TEST-201.07` | 88–91 | تابع | `save_audit_required` | 0 | ⬜ |
+| `TEST-201.08` | 92–95 | ناحیه | `بلوک رویه‌ای 92-95` | 1 | ⬜ |
+| `TEST-201.09` | 96–102 | تابع | `rc_update_check` | 0 | ⬜ |
+| `TEST-201.10` | 104–127 | تابع | `rc_update_package` | 1 | ⬜ |
+| `TEST-201.11` | 129–137 | تابع | `rc_update_upload` | 0 | ⬜ |
+| `TEST-201.12` | 139–146 | تابع | `rc_update_table_exists` | 0 | ⬜ |
+| `TEST-201.13` | 147–232 | ناحیه | `بلوک رویه‌ای 147-232` | **17** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-202</b> — <code>tests/test_ticket_auto_assignment_static.py</code> (26 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-202</b> — <code>tests/test_system_update_migration_registry.php</code> (68 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-202.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-202.02` | 7–7 | بلوک | `TicketAutoAssignmentStaticTests` | 0 | ⬜ |
-| `TEST-202.03` | 8–17 | بلوک | `test_regular_managers_are_limited_to_the_ticket_de` | 0 | ⬜ |
-| `TEST-202.04` | 18–26 | بلوک | `test_ticket_creation_passes_its_resolved_departmen` | 0 | ⬜ |
+| `TEST-202.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
+| `TEST-202.02` | 7–30 | کلاس | `MigrationRegistryFakeStatement` | 0 | ⬜ |
+| `TEST-202.03` | 32–41 | کلاس | `MigrationRegistryFakeDb` | 0 | ⬜ |
+| `TEST-202.04` | 42–44 | ناحیه | `بلوک رویه‌ای 42-44` | 0 | ⬜ |
+| `TEST-202.05` | 45–48 | تابع | `db` | 0 | ⬜ |
+| `TEST-202.06` | 49–49 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-202.07` | 50–50 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-202.08` | 51–51 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-202.09` | 52–68 | ناحیه | `بلوک رویه‌ای 52-68` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-203</b> — <code>tests/test_ticket_cancellation_static.py</code> (140 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-203</b> — <code>tests/test_system_update_requires_version.php</code> (96 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-203.01` | 1–22 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-203.02` | 23–140 | بلوک | `check` | 1 | ⬜ |
+| `TEST-203.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
+| `TEST-203.02` | 20–20 | ناحیه | `system-update.php در سطح فایل فقط تابع تعریف می‌کن` | 1 | ⬜ |
+| `TEST-203.03` | 21–24 | تابع | `db` | 0 | ⬜ |
+| `TEST-203.04` | 25–27 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-203.05` | 28–31 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-203.06` | 32–35 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-203.07` | 36–39 | ناحیه | `بلوک رویه‌ای 36-39` | 1 | ⬜ |
+| `TEST-203.08` | 40–47 | تابع | `expect` | 0 | ⬜ |
+| `TEST-203.09` | 49–53 | تابع | `allowed` | 0 | ⬜ |
+| `TEST-203.10` | 55–59 | ناحیه | `پیش‌نیاز برآورده` | 0 | ⬜ |
+| `TEST-203.11` | 60–64 | ناحیه | `پیش‌نیاز برآورده نیست` | 0 | ⬜ |
+| `TEST-203.12` | 65–71 | ناحیه | `متن خطا باید قابل اقدام باشد` | 0 | ⬜ |
+| `TEST-203.13` | 72–78 | ناحیه | `سازگاری با بسته‌های قدیمی` | 0 | ⬜ |
+| `TEST-203.14` | 79–83 | ناحیه | `درهای خروج` | 0 | ⬜ |
+| `TEST-203.15` | 84–87 | ناحیه | `نسخه‌های با تعداد جزء متفاوت` | 0 | ⬜ |
+| `TEST-203.16` | 88–96 | ناحیه | `بستهٔ واقعی این نسخه` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-204</b> — <code>tests/test_ticket_lifecycle_guide_static.py</code> (42 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-204</b> — <code>tests/test_technical_profile_form_refresh_static.py</code> (68 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-204.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-204.02` | 7–8 | بلوک | `TicketLifecycleGuideStaticTests` | 0 | ⬜ |
-| `TEST-204.03` | 9–11 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-204.04` | 12–16 | بلوک | `test_role_guide_is_linked_from_the_toc` | 0 | ⬜ |
-| `TEST-204.05` | 17–34 | بلوک | `test_lifecycle_explains_roles_and_closure_path` | 0 | ⬜ |
-| `TEST-204.06` | 35–42 | بلوک | `test_resolved_ticket_instructions_use_the_actual_r` | 0 | ⬜ |
+| `TEST-204.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-204.02` | 16–37 | بلوک | `test_current_profile_module_has_complete_form_and_` | 0 | ⬜ |
+| `TEST-204.03` | 38–68 | بلوک | `test_form_hotfix_packages_the_renderer_styles_and_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-205</b> — <code>tests/test_ticket_number_autofill_unit.php</code> (159 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-205</b> — <code>tests/test_ticket_auto_assignment_static.py</code> (26 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-205.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
-| `TEST-205.02` | 30–40 | تابع | `tn_missing_rows` | 0 | ⬜ |
-| `TEST-205.03` | 42–105 | کلاس | `TnStatement` | 1 | ⬜ |
-| `TEST-205.04` | 107–113 | کلاس | `TnDb` | 4 | ⬜ |
-| `TEST-205.05` | 115–115 | تابع | `db` | 0 | ⬜ |
-| `TEST-205.06` | 116–116 | تابع | `setting` | 0 | ⬜ |
-| `TEST-205.07` | 117–117 | تابع | `save_setting` | 0 | ⬜ |
-| `TEST-205.08` | 118–118 | تابع | `db_in_transaction` | 0 | ⬜ |
-| `TEST-205.09` | 119–119 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-205.10` | 120–122 | ناحیه | `بلوک رویه‌ای 120-122` | 0 | ⬜ |
-| `TEST-205.11` | 123–127 | تابع | `tn_check` | 0 | ⬜ |
-| `TEST-205.12` | 129–132 | ناحیه | `۱) کف شمارنده از بزرگ‌ترین شمارهٔ موجود خوانده می‌` | 0 | ⬜ |
-| `TEST-205.13` | 133–147 | ناحیه | `۲) ترمیم کامل بدون برخورد یکتایی` | 0 | ⬜ |
-| `TEST-205.14` | 148–150 | ناحیه | `۳) هر ردیف دقیقاً یک تلاش: یعنی هیچ برخوردی رخ ندا` | 1 | ⬜ |
-| `TEST-205.15` | 151–153 | ناحیه | `۴) نشانگر ثبت می‌شود تا اسکن در هر بارگذاری صفحه ت` | 0 | ⬜ |
-| `TEST-205.16` | 154–159 | ناحیه | `۵) شمارنده برای تولید شمارهٔ بعدی به‌روز می‌شود` | 0 | ⬜ |
+| `TEST-205.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-205.02` | 7–7 | بلوک | `TicketAutoAssignmentStaticTests` | 0 | ⬜ |
+| `TEST-205.03` | 8–17 | بلوک | `test_regular_managers_are_limited_to_the_ticket_de` | 0 | ⬜ |
+| `TEST-205.04` | 18–26 | بلوک | `test_ticket_creation_passes_its_resolved_departmen` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-206</b> — <code>tests/test_ticket_number_repair_static.py</code> (146 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TEST-206</b> — <code>tests/test_ticket_cancellation_static.py</code> (150 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-206.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-206.02` | 17–21 | بلوک | `read` | 0 | ⬜ |
-| `TEST-206.03` | 22–28 | بلوک | `autofill_body` | 0 | ⬜ |
-| `TEST-206.04` | 29–39 | بلوک | `test_autofill_seeds_counter_from_existing_maximum` | 0 | ⬜ |
-| `TEST-206.05` | 40–51 | بلوک | `test_sequence_floor_consults_both_counter_and_exis` | 0 | ⬜ |
-| `TEST-206.06` | 52–59 | بلوک | `test_autofill_isolates_each_row_so_one_failure_doe` | 0 | ⬜ |
-| `TEST-206.07` | 60–65 | بلوک | `test_autofill_reads_in_batches_and_cannot_loop_for` | 0 | ⬜ |
-| `TEST-206.08` | 66–76 | بلوک | `test_completion_marker_is_not_trapped_in_the_empty` | 0 | ⬜ |
-| `TEST-206.09` | 77–85 | بلوک | `test_counter_is_persisted_back_to_the_sequence_tab` | 0 | ⬜ |
-| `TEST-206.10` | 86–98 | بلوک | `test_fallback_number_is_not_a_fake_lookalike` | 0 | ⬜ |
-| `TEST-206.11` | 99–109 | بلوک | `test_chatbot_still_recognises_the_internal_referen` | 0 | ⬜ |
-| `TEST-206.12` | 110–121 | بلوک | `test_list_pages_prime_the_number_cache_instead_of_` | 0 | ⬜ |
-| `TEST-206.13` | 122–132 | بلوک | `test_cache_prime_helper_exists_and_tolerates_bad_r` | 0 | ⬜ |
-| `TEST-206.14` | 133–139 | بلوک | `test_bulk_update_has_a_selection_cap` | 0 | ⬜ |
-| `TEST-206.15` | 140–146 | بلوک | `test_bulk_update_reports_tickets_that_were_already` | 0 | ⬜ |
+| `TEST-206.01` | 1–22 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-206.02` | 23–150 | بلوک | `check` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-207</b> — <code>tests/test_ticket_routing_unit.php</code> (182 خط، 38 آدرس، بازبینی‌شده 0/38)</summary>
+<summary><b>TEST-207</b> — <code>tests/test_ticket_lifecycle_guide_static.py</code> (42 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-207.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-207.02` | 4–5 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
-| `TEST-207.03` | 6–9 | تابع | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-207.04` | 10–10 | تابع | `is_staff_role` | 0 | ⬜ |
-| `TEST-207.05` | 11–11 | تابع | `is_assignable_role` | 0 | ⬜ |
-| `TEST-207.06` | 12–12 | تابع | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-207.07` | 13–13 | تابع | `is_it_agent` | 0 | ⬜ |
-| `TEST-207.08` | 14–16 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-207.09` | 17–17 | تابع | `permission_roles` | 0 | ⬜ |
-| `TEST-207.10` | 18–18 | تابع | `permission_table_ready` | 0 | ⬜ |
-| `TEST-207.11` | 19–19 | تابع | `role_permissions_custom` | 0 | ⬜ |
-| `TEST-207.12` | 20–20 | تابع | `role_permission_effective_codes` | 0 | ⬜ |
-| `TEST-207.13` | 21–34 | کلاس | `FakeTicketStatement` | 0 | ⬜ |
-| `TEST-207.14` | 35–38 | کلاس | `FakeTicketDatabase` | 0 | ⬜ |
-| `TEST-207.15` | 39–39 | تابع | `db` | 0 | ⬜ |
-| `TEST-207.16` | 40–41 | ناحیه | `بلوک رویه‌ای 40-41` | 0 | ⬜ |
-| `TEST-207.17` | 42–45 | تابع | `check_ticket` | 0 | ⬜ |
-| `TEST-207.18` | 46–102 | ناحیه | `بلوک رویه‌ای 46-102` | 0 | ⬜ |
-| `TEST-207.19` | 103–103 | ناحیه | `تفکیک وظایف و سه نما (۱.۶۲.۸۴)` | 0 | ⬜ |
-| `TEST-207.20` | 104–108 | ناحیه | `سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه` | 0 | ⬜ |
-| `TEST-207.21` | 109–111 | ناحیه | `همان مدیر روی درخواست دیگران همچنان سرپرست است.` | 0 | ⬜ |
-| `TEST-207.22` | 112–114 | ناحیه | `کارشناس مسئول: نمای کارشناس، نه سرپرست.` | 0 | ⬜ |
-| `TEST-207.23` | 115–117 | ناحیه | `ثبت‌کنندهٔ عادی.` | 0 | ⬜ |
-| `TEST-207.24` | 118–134 | ناحیه | `استثنای مهم: کسی که هم ثبت‌کننده و هم کارشناس مسئو` | 0 | ⬜ |
-| `TEST-207.25` | 135–135 | ناحیه | `تفکیک وظایف در لحظهٔ ارجاع و تقویم کاری (بستهٔ ۶ —` | 0 | ⬜ |
-| `TEST-207.26` | 136–136 | ناحیه | `بستهٔ ۵ نمای پس از ارجاع را بست؛ اینجا خودِ لحظهٔ ` | 0 | ⬜ |
-| `TEST-207.27` | 137–138 | ناحیه | `$users[2] کارشناس پشتیبانی فعال و واجد شرایط است (` | 0 | ⬜ |
-| `TEST-207.28` | 139–142 | ناحیه | `۱) کارشناس روی درخواست دیگری همچنان واجد شرایط است` | 0 | ⬜ |
-| `TEST-207.29` | 143–146 | ناحیه | `۲) همان کارشناس روی درخواستی که خودش ثبت کرده، دیگ` | 0 | ⬜ |
-| `TEST-207.30` | 147–158 | ناحیه | `۳) ادمین اصلی هم مستثنا نیست؛ میان‌بُر نقش نباید گ` | 0 | ⬜ |
-| `TEST-207.31` | 159–159 | ناحیه | `۴) درخواست بدون ثبت‌کنندهٔ مشخص (requester_id = 0)` | 0 | ⬜ |
-| `TEST-207.32` | 160–163 | ناحیه | `choose_handling_agent() در حالت پیش‌فرض دقیقاً همی` | 0 | ⬜ |
-| `TEST-207.33` | 164–164 | ناحیه | `۵) سازگاری با بستهٔ ۵: کسی که هم ثبت‌کننده و هم مس` | 0 | ⬜ |
-| `TEST-207.34` | 165–169 | ناحیه | `از دست نمی‌دهد. گارد تازه فقط ارجاعِ تازه را می‌بن` | 0 | ⬜ |
-| `TEST-207.35` | 170–170 | ناحیه | `۶) دریچهٔ اضطراری واحد تک‌نفره: وقتی security.allo` | 0 | ⬜ |
-| `TEST-207.36` | 171–171 | ناحیه | `همان کاربر دوباره واجد شرایط می‌شود. cfg() از پیکر` | 0 | ⬜ |
-| `TEST-207.37` | 172–177 | ناحیه | `چون کلید پیش‌فرض تعریف نشده، همهٔ بررسی‌های بالاتر` | 0 | ⬜ |
-| `TEST-207.38` | 178–181 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-207.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-207.02` | 7–8 | بلوک | `TicketLifecycleGuideStaticTests` | 0 | ⬜ |
+| `TEST-207.03` | 9–11 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-207.04` | 12–16 | بلوک | `test_role_guide_is_linked_from_the_toc` | 0 | ⬜ |
+| `TEST-207.05` | 17–34 | بلوک | `test_lifecycle_explains_roles_and_closure_path` | 0 | ⬜ |
+| `TEST-207.06` | 35–42 | بلوک | `test_resolved_ticket_instructions_use_the_actual_r` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-208</b> — <code>tests/test_ticket_scope_sql_node.js</code> (22 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-208</b> — <code>tests/test_ticket_number_autofill_unit.php</code> (159 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-208.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-208.02` | 6–6 | بلوک | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-208.03` | 7–7 | بلوک | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-208.04` | 8–8 | بلوک | `user_can` | 0 | ⬜ |
-| `TEST-208.05` | 9–9 | بلوک | `is_it_agent` | 0 | ⬜ |
-| `TEST-208.06` | 10–10 | بلوک | `S` | 0 | ⬜ |
-| `TEST-208.07` | 11–11 | بلوک | `D` | 0 | ⬜ |
-| `TEST-208.08` | 12–22 | بلوک | `db` | 1 | ⬜ |
+| `TEST-208.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
+| `TEST-208.02` | 30–40 | تابع | `tn_missing_rows` | 0 | ⬜ |
+| `TEST-208.03` | 42–105 | کلاس | `TnStatement` | 1 | ⬜ |
+| `TEST-208.04` | 107–113 | کلاس | `TnDb` | 4 | ⬜ |
+| `TEST-208.05` | 115–115 | تابع | `db` | 0 | ⬜ |
+| `TEST-208.06` | 116–116 | تابع | `setting` | 0 | ⬜ |
+| `TEST-208.07` | 117–117 | تابع | `save_setting` | 0 | ⬜ |
+| `TEST-208.08` | 118–118 | تابع | `db_in_transaction` | 0 | ⬜ |
+| `TEST-208.09` | 119–119 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-208.10` | 120–122 | ناحیه | `بلوک رویه‌ای 120-122` | 0 | ⬜ |
+| `TEST-208.11` | 123–127 | تابع | `tn_check` | 0 | ⬜ |
+| `TEST-208.12` | 129–132 | ناحیه | `۱) کف شمارنده از بزرگ‌ترین شمارهٔ موجود خوانده می‌` | 0 | ⬜ |
+| `TEST-208.13` | 133–147 | ناحیه | `۲) ترمیم کامل بدون برخورد یکتایی` | 0 | ⬜ |
+| `TEST-208.14` | 148–150 | ناحیه | `۳) هر ردیف دقیقاً یک تلاش: یعنی هیچ برخوردی رخ ندا` | 1 | ⬜ |
+| `TEST-208.15` | 151–153 | ناحیه | `۴) نشانگر ثبت می‌شود تا اسکن در هر بارگذاری صفحه ت` | 0 | ⬜ |
+| `TEST-208.16` | 154–159 | ناحیه | `۵) شمارنده برای تولید شمارهٔ بعدی به‌روز می‌شود` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-209</b> — <code>tests/test_ticket_sla_unit.php</code> (52 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-209</b> — <code>tests/test_ticket_number_repair_static.py</code> (146 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-209.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-209.02` | 4–5 | ناحیه | `Tests use an in-memory event stub, never the produ` | 0 | ⬜ |
-| `TEST-209.03` | 6–6 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-209.04` | 7–7 | تابع | `ticket_is_waiting_status` | 0 | ⬜ |
-| `TEST-209.05` | 8–8 | تابع | `is_sla_holiday` | 0 | ⬜ |
-| `TEST-209.06` | 9–12 | کلاس | `SlaFakeStatement` | 0 | ⬜ |
-| `TEST-209.07` | 13–15 | کلاس | `SlaFakeDb` | 0 | ⬜ |
-| `TEST-209.08` | 16–16 | تابع | `db` | 0 | ⬜ |
-| `TEST-209.09` | 17–17 | ناحیه | `بلوک رویه‌ای 17-17` | 0 | ⬜ |
-| `TEST-209.10` | 18–21 | تابع | `sla_check` | 0 | ⬜ |
-| `TEST-209.11` | 22–52 | ناحیه | `بلوک رویه‌ای 22-52` | 0 | ⬜ |
+| `TEST-209.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-209.02` | 17–21 | بلوک | `read` | 0 | ⬜ |
+| `TEST-209.03` | 22–28 | بلوک | `autofill_body` | 0 | ⬜ |
+| `TEST-209.04` | 29–39 | بلوک | `test_autofill_seeds_counter_from_existing_maximum` | 0 | ⬜ |
+| `TEST-209.05` | 40–51 | بلوک | `test_sequence_floor_consults_both_counter_and_exis` | 0 | ⬜ |
+| `TEST-209.06` | 52–59 | بلوک | `test_autofill_isolates_each_row_so_one_failure_doe` | 0 | ⬜ |
+| `TEST-209.07` | 60–65 | بلوک | `test_autofill_reads_in_batches_and_cannot_loop_for` | 0 | ⬜ |
+| `TEST-209.08` | 66–76 | بلوک | `test_completion_marker_is_not_trapped_in_the_empty` | 0 | ⬜ |
+| `TEST-209.09` | 77–85 | بلوک | `test_counter_is_persisted_back_to_the_sequence_tab` | 0 | ⬜ |
+| `TEST-209.10` | 86–98 | بلوک | `test_fallback_number_is_not_a_fake_lookalike` | 0 | ⬜ |
+| `TEST-209.11` | 99–109 | بلوک | `test_chatbot_still_recognises_the_internal_referen` | 0 | ⬜ |
+| `TEST-209.12` | 110–121 | بلوک | `test_list_pages_prime_the_number_cache_instead_of_` | 0 | ⬜ |
+| `TEST-209.13` | 122–132 | بلوک | `test_cache_prime_helper_exists_and_tolerates_bad_r` | 0 | ⬜ |
+| `TEST-209.14` | 133–139 | بلوک | `test_bulk_update_has_a_selection_cap` | 0 | ⬜ |
+| `TEST-209.15` | 140–146 | بلوک | `test_bulk_update_reports_tickets_that_were_already` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-210</b> — <code>tests/test_ticket_three_views_static.py</code> (155 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-210</b> — <code>tests/test_ticket_routing_unit.php</code> (182 خط، 38 آدرس، بازبینی‌شده 0/38)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-210.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-210.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
-| `TEST-210.03` | 36–42 | بلوک | `php_function` | 0 | ⬜ |
-| `TEST-210.04` | 43–50 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-210.05` | 51–64 | بلوک | `test_handler_level_denies_supervisor_authority_ove` | 0 | ⬜ |
-| `TEST-210.06` | 65–76 | بلوک | `test_a_requester_who_is_also_the_assigned_agent_ca` | 0 | ⬜ |
-| `TEST-210.07` | 77–87 | بلوک | `test_reply_guard_keeps_its_explicit_requester_chec` | 0 | ⬜ |
-| `TEST-210.08` | 88–100 | بلوک | `test_a_single_function_answers_which_view_to_rende` | 0 | ⬜ |
-| `TEST-210.09` | 101–112 | بلوک | `test_the_ticket_page_uses_the_single_view_function` | 0 | ⬜ |
-| `TEST-210.10` | 113–125 | بلوک | `test_internal_notes_are_hidden_from_the_requester_` | 0 | ⬜ |
-| `TEST-210.11` | 126–133 | بلوک | `test_message_list_no_longer_decides_by_global_role` | 0 | ⬜ |
-| `TEST-210.12` | 134–146 | بلوک | `test_internal_attachment_download_uses_the_same_ru` | 0 | ⬜ |
-| `TEST-210.13` | 147–155 | بلوک | `test_scope_isolation_rules_are_untouched` | 0 | ⬜ |
+| `TEST-210.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-210.02` | 4–5 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
+| `TEST-210.03` | 6–9 | تابع | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-210.04` | 10–10 | تابع | `is_staff_role` | 0 | ⬜ |
+| `TEST-210.05` | 11–11 | تابع | `is_assignable_role` | 0 | ⬜ |
+| `TEST-210.06` | 12–12 | تابع | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-210.07` | 13–13 | تابع | `is_it_agent` | 0 | ⬜ |
+| `TEST-210.08` | 14–16 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-210.09` | 17–17 | تابع | `permission_roles` | 0 | ⬜ |
+| `TEST-210.10` | 18–18 | تابع | `permission_table_ready` | 0 | ⬜ |
+| `TEST-210.11` | 19–19 | تابع | `role_permissions_custom` | 0 | ⬜ |
+| `TEST-210.12` | 20–20 | تابع | `role_permission_effective_codes` | 0 | ⬜ |
+| `TEST-210.13` | 21–34 | کلاس | `FakeTicketStatement` | 0 | ⬜ |
+| `TEST-210.14` | 35–38 | کلاس | `FakeTicketDatabase` | 0 | ⬜ |
+| `TEST-210.15` | 39–39 | تابع | `db` | 0 | ⬜ |
+| `TEST-210.16` | 40–41 | ناحیه | `بلوک رویه‌ای 40-41` | 0 | ⬜ |
+| `TEST-210.17` | 42–45 | تابع | `check_ticket` | 0 | ⬜ |
+| `TEST-210.18` | 46–102 | ناحیه | `بلوک رویه‌ای 46-102` | 0 | ⬜ |
+| `TEST-210.19` | 103–103 | ناحیه | `تفکیک وظایف و سه نما (۱.۶۲.۸۴)` | 0 | ⬜ |
+| `TEST-210.20` | 104–108 | ناحیه | `سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه` | 0 | ⬜ |
+| `TEST-210.21` | 109–111 | ناحیه | `همان مدیر روی درخواست دیگران همچنان سرپرست است.` | 0 | ⬜ |
+| `TEST-210.22` | 112–114 | ناحیه | `کارشناس مسئول: نمای کارشناس، نه سرپرست.` | 0 | ⬜ |
+| `TEST-210.23` | 115–117 | ناحیه | `ثبت‌کنندهٔ عادی.` | 0 | ⬜ |
+| `TEST-210.24` | 118–134 | ناحیه | `استثنای مهم: کسی که هم ثبت‌کننده و هم کارشناس مسئو` | 0 | ⬜ |
+| `TEST-210.25` | 135–135 | ناحیه | `تفکیک وظایف در لحظهٔ ارجاع و تقویم کاری (بستهٔ ۶ —` | 0 | ⬜ |
+| `TEST-210.26` | 136–136 | ناحیه | `بستهٔ ۵ نمای پس از ارجاع را بست؛ اینجا خودِ لحظهٔ ` | 0 | ⬜ |
+| `TEST-210.27` | 137–138 | ناحیه | `$users[2] کارشناس پشتیبانی فعال و واجد شرایط است (` | 0 | ⬜ |
+| `TEST-210.28` | 139–142 | ناحیه | `۱) کارشناس روی درخواست دیگری همچنان واجد شرایط است` | 0 | ⬜ |
+| `TEST-210.29` | 143–146 | ناحیه | `۲) همان کارشناس روی درخواستی که خودش ثبت کرده، دیگ` | 0 | ⬜ |
+| `TEST-210.30` | 147–158 | ناحیه | `۳) ادمین اصلی هم مستثنا نیست؛ میان‌بُر نقش نباید گ` | 0 | ⬜ |
+| `TEST-210.31` | 159–159 | ناحیه | `۴) درخواست بدون ثبت‌کنندهٔ مشخص (requester_id = 0)` | 0 | ⬜ |
+| `TEST-210.32` | 160–163 | ناحیه | `choose_handling_agent() در حالت پیش‌فرض دقیقاً همی` | 0 | ⬜ |
+| `TEST-210.33` | 164–164 | ناحیه | `۵) سازگاری با بستهٔ ۵: کسی که هم ثبت‌کننده و هم مس` | 0 | ⬜ |
+| `TEST-210.34` | 165–169 | ناحیه | `از دست نمی‌دهد. گارد تازه فقط ارجاعِ تازه را می‌بن` | 0 | ⬜ |
+| `TEST-210.35` | 170–170 | ناحیه | `۶) دریچهٔ اضطراری واحد تک‌نفره: وقتی security.allo` | 0 | ⬜ |
+| `TEST-210.36` | 171–171 | ناحیه | `همان کاربر دوباره واجد شرایط می‌شود. cfg() از پیکر` | 0 | ⬜ |
+| `TEST-210.37` | 172–177 | ناحیه | `چون کلید پیش‌فرض تعریف نشده، همهٔ بررسی‌های بالاتر` | 0 | ⬜ |
+| `TEST-210.38` | 178–181 | تابع | `cfg` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-211</b> — <code>tests/test_ticket_tree_visibility_unit.php</code> (41 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-211</b> — <code>tests/test_ticket_scope_sql_node.js</code> (22 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-211.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-211.02` | 4–4 | تابع | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-211.03` | 5–5 | تابع | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-211.04` | 6–6 | تابع | `is_it_agent` | 0 | ⬜ |
-| `TEST-211.05` | 7–7 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-211.06` | 8–17 | کلاس | `ScopeStmt` | 0 | ⬜ |
-| `TEST-211.07` | 18–21 | کلاس | `ScopeDB` | 0 | ⬜ |
-| `TEST-211.08` | 22–22 | تابع | `db` | 0 | ⬜ |
-| `TEST-211.09` | 23–23 | ناحیه | `بلوک رویه‌ای 23-23` | 0 | ⬜ |
-| `TEST-211.10` | 24–24 | تابع | `ok` | 0 | ⬜ |
-| `TEST-211.11` | 25–41 | ناحیه | `بلوک رویه‌ای 25-41` | 0 | ⬜ |
+| `TEST-211.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-211.02` | 6–6 | بلوک | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-211.03` | 7–7 | بلوک | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-211.04` | 8–8 | بلوک | `user_can` | 0 | ⬜ |
+| `TEST-211.05` | 9–9 | بلوک | `is_it_agent` | 0 | ⬜ |
+| `TEST-211.06` | 10–10 | بلوک | `S` | 0 | ⬜ |
+| `TEST-211.07` | 11–11 | بلوک | `D` | 0 | ⬜ |
+| `TEST-211.08` | 12–22 | بلوک | `db` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-212</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (109 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-212</b> — <code>tests/test_ticket_sla_unit.php</code> (52 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-212.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-212.02` | 7–10 | بلوک | `source` | 0 | ⬜ |
-| `TEST-212.03` | 11–14 | بلوک | `section` | 0 | ⬜ |
-| `TEST-212.04` | 15–15 | بلوک | `TicketWorkflowSafetyTests` | 0 | ⬜ |
-| `TEST-212.05` | 16–26 | بلوک | `test_notification_candidates_are_checked_for_actua` | 0 | ⬜ |
-| `TEST-212.06` | 27–40 | بلوک | `test_assignment_checks_existing_assignee_and_role_` | 1 | ⬜ |
-| `TEST-212.07` | 41–52 | بلوک | `test_requester_and_nonhandler_reply_guards` | 2 | ⬜ |
-| `TEST-212.08` | 53–65 | بلوک | `test_concurrent_rating_and_auto_close_revalidate_u` | 1 | ⬜ |
-| `TEST-212.09` | 66–71 | بلوک | `test_claim_uses_full_assignee_eligibility` | 0 | ⬜ |
-| `TEST-212.10` | 72–78 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
-| `TEST-212.11` | 79–86 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
-| `TEST-212.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
-| `TEST-212.13` | 93–109 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
+| `TEST-212.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-212.02` | 4–5 | ناحیه | `Tests use an in-memory event stub, never the produ` | 0 | ⬜ |
+| `TEST-212.03` | 6–6 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-212.04` | 7–7 | تابع | `ticket_is_waiting_status` | 0 | ⬜ |
+| `TEST-212.05` | 8–8 | تابع | `is_sla_holiday` | 0 | ⬜ |
+| `TEST-212.06` | 9–12 | کلاس | `SlaFakeStatement` | 0 | ⬜ |
+| `TEST-212.07` | 13–15 | کلاس | `SlaFakeDb` | 0 | ⬜ |
+| `TEST-212.08` | 16–16 | تابع | `db` | 0 | ⬜ |
+| `TEST-212.09` | 17–17 | ناحیه | `بلوک رویه‌ای 17-17` | 0 | ⬜ |
+| `TEST-212.10` | 18–21 | تابع | `sla_check` | 0 | ⬜ |
+| `TEST-212.11` | 22–52 | ناحیه | `بلوک رویه‌ای 22-52` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-213</b> — <code>tests/test_traffic_69_link_static.py</code> (25 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-213</b> — <code>tests/test_ticket_three_views_static.py</code> (157 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-213.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-213.02` | 5–14 | بلوک | `test_migration_is_additive_idempotent_and_does_not` | 0 | ⬜ |
-| `TEST-213.03` | 15–25 | بلوک | `test_shared_preview_export_and_real_destination_so` | 0 | ⬜ |
+| `TEST-213.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-213.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
+| `TEST-213.03` | 36–42 | بلوک | `php_function` | 0 | ⬜ |
+| `TEST-213.04` | 43–50 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-213.05` | 51–64 | بلوک | `test_handler_level_denies_supervisor_authority_ove` | 0 | ⬜ |
+| `TEST-213.06` | 65–76 | بلوک | `test_a_requester_who_is_also_the_assigned_agent_ca` | 0 | ⬜ |
+| `TEST-213.07` | 77–87 | بلوک | `test_reply_guard_keeps_its_explicit_requester_chec` | 0 | ⬜ |
+| `TEST-213.08` | 88–100 | بلوک | `test_a_single_function_answers_which_view_to_rende` | 0 | ⬜ |
+| `TEST-213.09` | 101–112 | بلوک | `test_the_ticket_page_uses_the_single_view_function` | 0 | ⬜ |
+| `TEST-213.10` | 113–125 | بلوک | `test_internal_notes_are_hidden_from_the_requester_` | 0 | ⬜ |
+| `TEST-213.11` | 126–134 | بلوک | `test_message_list_no_longer_decides_by_global_role` | 0 | ⬜ |
+| `TEST-213.12` | 135–148 | بلوک | `test_internal_attachment_download_uses_the_same_ru` | 0 | ⬜ |
+| `TEST-213.13` | 149–157 | بلوک | `test_scope_isolation_rules_are_untouched` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-214</b> — <code>tests/test_traffic_70_upgrade_static.py</code> (20 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-214</b> — <code>tests/test_ticket_tree_visibility_unit.php</code> (41 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-214.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-214.02` | 5–12 | بلوک | `test_cumulative_migration_only_backfills_when_019_` | 0 | ⬜ |
-| `TEST-214.03` | 13–20 | بلوک | `test_report_has_cache_busted_popup_assets` | 0 | ⬜ |
+| `TEST-214.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-214.02` | 4–4 | تابع | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-214.03` | 5–5 | تابع | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-214.04` | 6–6 | تابع | `is_it_agent` | 0 | ⬜ |
+| `TEST-214.05` | 7–7 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-214.06` | 8–17 | کلاس | `ScopeStmt` | 0 | ⬜ |
+| `TEST-214.07` | 18–21 | کلاس | `ScopeDB` | 0 | ⬜ |
+| `TEST-214.08` | 22–22 | تابع | `db` | 0 | ⬜ |
+| `TEST-214.09` | 23–23 | ناحیه | `بلوک رویه‌ای 23-23` | 0 | ⬜ |
+| `TEST-214.10` | 24–24 | تابع | `ok` | 0 | ⬜ |
+| `TEST-214.11` | 25–41 | ناحیه | `بلوک رویه‌ای 25-41` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-215</b> — <code>tests/test_traffic_destination_approver_static.py</code> (54 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-215</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (109 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-215.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-215.02` | 7–13 | بلوک | `test_destination_approver_is_stored_in_all_schema_` | 0 | ⬜ |
-| `TEST-215.03` | 14–31 | بلوک | `test_destination_admin_can_create_edit_and_resolve` | 2 | ⬜ |
-| `TEST-215.04` | 32–44 | بلوک | `test_approver_autofills_for_new_and_edit_forms_and` | 0 | ⬜ |
-| `TEST-215.05` | 45–54 | بلوک | `test_release_manifest_and_download_page_list_new_d` | 1 | ⬜ |
+| `TEST-215.02` | 7–10 | بلوک | `source` | 0 | ⬜ |
+| `TEST-215.03` | 11–14 | بلوک | `section` | 0 | ⬜ |
+| `TEST-215.04` | 15–15 | بلوک | `TicketWorkflowSafetyTests` | 0 | ⬜ |
+| `TEST-215.05` | 16–26 | بلوک | `test_notification_candidates_are_checked_for_actua` | 0 | ⬜ |
+| `TEST-215.06` | 27–40 | بلوک | `test_assignment_checks_existing_assignee_and_role_` | 1 | ⬜ |
+| `TEST-215.07` | 41–52 | بلوک | `test_requester_and_nonhandler_reply_guards` | 2 | ⬜ |
+| `TEST-215.08` | 53–65 | بلوک | `test_concurrent_rating_and_auto_close_revalidate_u` | 1 | ⬜ |
+| `TEST-215.09` | 66–71 | بلوک | `test_claim_uses_full_assignee_eligibility` | 0 | ⬜ |
+| `TEST-215.10` | 72–78 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
+| `TEST-215.11` | 79–86 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
+| `TEST-215.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
+| `TEST-215.13` | 93–109 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-216</b> — <code>tests/test_traffic_destination_popup_browser.js</code> (66 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-216</b> — <code>tests/test_traffic_69_link_static.py</code> (25 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-216.01` | 1–28 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-216.02` | 29–66 | بلوک | `geometry` | 0 | ⬜ |
+| `TEST-216.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-216.02` | 5–14 | بلوک | `test_migration_is_additive_idempotent_and_does_not` | 0 | ⬜ |
+| `TEST-216.03` | 15–25 | بلوک | `test_shared_preview_export_and_real_destination_so` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-217</b> — <code>tests/test_traffic_edit_history_static.py</code> (70 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-217</b> — <code>tests/test_traffic_70_upgrade_static.py</code> (20 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-217.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-217.02` | 6–14 | بلوک | `test_traffic_edit_form_includes_visit_date_and_bot` | 0 | ⬜ |
-| `TEST-217.03` | 15–25 | بلوک | `test_update_and_exit_changes_are_written_transacti` | 0 | ⬜ |
-| `TEST-217.04` | 26–35 | بلوک | `test_history_schema_exists_in_migration_and_fresh_` | 0 | ⬜ |
-| `TEST-217.05` | 36–42 | بلوک | `test_food_print_page_treats_layout_design_as_optio` | 0 | ⬜ |
-| `TEST-217.06` | 43–49 | بلوک | `test_shared_header_does_not_fail_when_layout_desig` | 0 | ⬜ |
-| `TEST-217.07` | 50–57 | بلوک | `test_food_panel_skips_invalid_empty_search_replace` | 0 | ⬜ |
-| `TEST-217.08` | 58–70 | بلوک | `test_traffic_edit_times_use_unambiguous_24_hour_te` | 0 | ⬜ |
+| `TEST-217.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-217.02` | 5–12 | بلوک | `test_cumulative_migration_only_backfills_when_019_` | 0 | ⬜ |
+| `TEST-217.03` | 13–20 | بلوک | `test_report_has_cache_busted_popup_assets` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-218</b> — <code>tests/test_traffic_form_render_node.js</code> (16 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-218</b> — <code>tests/test_traffic_destination_approver_static.py</code> (54 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-218.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-218.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-218.02` | 7–13 | بلوک | `test_destination_approver_is_stored_in_all_schema_` | 0 | ⬜ |
+| `TEST-218.03` | 14–31 | بلوک | `test_destination_admin_can_create_edit_and_resolve` | 2 | ⬜ |
+| `TEST-218.04` | 32–44 | بلوک | `test_approver_autofills_for_new_and_edit_forms_and` | 0 | ⬜ |
+| `TEST-218.05` | 45–54 | بلوک | `test_release_manifest_and_download_page_list_new_d` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-219</b> — <code>tests/test_traffic_import_static.py</code> (68 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-219</b> — <code>tests/test_traffic_destination_popup_browser.js</code> (66 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-219.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-219.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-219.03` | 11–11 | بلوک | `TrafficImportStaticTest` | 0 | ⬜ |
-| `TEST-219.04` | 12–25 | بلوک | `test_import_page_is_direct_only_and_requires_exist` | 0 | ⬜ |
-| `TEST-219.05` | 26–39 | بلوک | `test_post_import_is_csrf_protected_and_confirmatio` | 0 | ⬜ |
-| `TEST-219.06` | 40–54 | بلوک | `test_parser_limits_duplicate_protection_and_privac` | 0 | ⬜ |
-| `TEST-219.07` | 55–68 | بلوک | `test_help_and_chatbot_surface_the_hidden_workflow` | 0 | ⬜ |
+| `TEST-219.01` | 1–28 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-219.02` | 29–66 | بلوک | `geometry` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-220</b> — <code>tests/test_traffic_live_node.js</code> (41 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-220</b> — <code>tests/test_traffic_edit_history_static.py</code> (70 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-220.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-220.02` | 14–41 | بلوک | `reply` | 4 | ⬜ |
+| `TEST-220.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-220.02` | 6–14 | بلوک | `test_traffic_edit_form_includes_visit_date_and_bot` | 0 | ⬜ |
+| `TEST-220.03` | 15–25 | بلوک | `test_update_and_exit_changes_are_written_transacti` | 0 | ⬜ |
+| `TEST-220.04` | 26–35 | بلوک | `test_history_schema_exists_in_migration_and_fresh_` | 0 | ⬜ |
+| `TEST-220.05` | 36–42 | بلوک | `test_food_print_page_treats_layout_design_as_optio` | 0 | ⬜ |
+| `TEST-220.06` | 43–49 | بلوک | `test_shared_header_does_not_fail_when_layout_desig` | 0 | ⬜ |
+| `TEST-220.07` | 50–57 | بلوک | `test_food_panel_skips_invalid_empty_search_replace` | 0 | ⬜ |
+| `TEST-220.08` | 58–70 | بلوک | `test_traffic_edit_times_use_unambiguous_24_hour_te` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-221</b> — <code>tests/test_traffic_live_report_unit.php</code> (74 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TEST-221</b> — <code>tests/test_traffic_form_render_node.js</code> (16 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-221.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
-| `TEST-221.02` | 9–9 | تابع | `db` | 0 | ⬜ |
-| `TEST-221.03` | 10–10 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-221.04` | 11–11 | تابع | `save_audit_required` | 0 | ⬜ |
-| `TEST-221.05` | 12–12 | تابع | `log_sort_order` | 0 | ⬜ |
-| `TEST-221.06` | 13–13 | تابع | `e` | 0 | ⬜ |
-| `TEST-221.07` | 14–14 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-221.08` | 15–15 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
-| `TEST-221.09` | 16–16 | تابع | `csrf_field` | 0 | ⬜ |
-| `TEST-221.10` | 17–17 | کلاس | `ExportDone` | 0 | ⬜ |
-| `TEST-221.11` | 18–18 | تابع | `excel_download` | 0 | ⬜ |
-| `TEST-221.12` | 19–20 | ناحیه | `بلوک رویه‌ای 19-20` | 0 | ⬜ |
-| `TEST-221.13` | 21–21 | تابع | `check` | 0 | ⬜ |
-| `TEST-221.14` | 22–74 | ناحیه | `بلوک رویه‌ای 22-74` | **8** | ⬜ |
+| `TEST-221.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-222</b> — <code>tests/test_traffic_phone_and_inspection_reminder_static.py</code> (55 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-222</b> — <code>tests/test_traffic_import_static.py</code> (68 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-222.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-222.02` | 6–20 | بلوک | `test_traffic_phone_has_fixed_09_and_requires_exact` | 0 | ⬜ |
-| `TEST-222.03` | 21–33 | بلوک | `test_inspection_only_reminder_is_scheduled_daily_a` | 0 | ⬜ |
-| `TEST-222.04` | 34–41 | بلوک | `test_reminder_visual_is_centered_and_alarm_styled` | 0 | ⬜ |
-| `TEST-222.05` | 42–55 | بلوک | `test_only_primary_admin_can_toggle_reminder_below_` | 0 | ⬜ |
+| `TEST-222.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-222.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-222.03` | 11–11 | بلوک | `TrafficImportStaticTest` | 0 | ⬜ |
+| `TEST-222.04` | 12–25 | بلوک | `test_import_page_is_direct_only_and_requires_exist` | 0 | ⬜ |
+| `TEST-222.05` | 26–39 | بلوک | `test_post_import_is_csrf_protected_and_confirmatio` | 0 | ⬜ |
+| `TEST-222.06` | 40–54 | بلوک | `test_parser_limits_duplicate_protection_and_privac` | 0 | ⬜ |
+| `TEST-222.07` | 55–68 | بلوک | `test_help_and_chatbot_surface_the_hidden_workflow` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-223</b> — <code>tests/test_traffic_report_fields_node.js</code> (35 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-223</b> — <code>tests/test_traffic_live_node.js</code> (41 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-223.01` | 1–35 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-223.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-223.02` | 14–41 | بلوک | `reply` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-224</b> — <code>tests/test_transaction_truthfulness_static.py</code> (162 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-224</b> — <code>tests/test_traffic_live_report_unit.php</code> (74 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-224.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-224.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
-| `TEST-224.03` | 36–46 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-224.04` | 47–53 | بلوک | `function_body` | 0 | ⬜ |
-| `TEST-224.05` | 54–59 | بلوک | `function_code` | 0 | ⬜ |
-| `TEST-224.06` | 60–80 | بلوک | `test_commit_returns_true_when_the_work_is_already_` | 0 | ⬜ |
-| `TEST-224.07` | 81–87 | بلوک | `test_commit_still_reports_a_genuine_failure_as_fal` | 0 | ⬜ |
-| `TEST-224.08` | 88–109 | بلوک | `test_a_strict_commit_helper_exists_and_raises_a_pe` | 0 | ⬜ |
-| `TEST-224.09` | 110–118 | بلوک | `test_every_ticket_write_path_uses_the_strict_commi` | 0 | ⬜ |
-| `TEST-224.10` | 119–131 | بلوک | `test_strict_commit_calls_name_the_action_for_diagn` | 0 | ⬜ |
-| `TEST-224.11` | 132–141 | بلوک | `test_other_modules_keep_their_existing_commit_cont` | 0 | ⬜ |
-| `TEST-224.12` | 142–156 | بلوک | `test_auto_assignment_does_not_invent_a_state_the_t` | 0 | ⬜ |
-| `TEST-224.13` | 157–162 | بلوک | `test_creation_event_records_the_real_initial_statu` | 0 | ⬜ |
+| `TEST-224.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
+| `TEST-224.02` | 9–9 | تابع | `db` | 0 | ⬜ |
+| `TEST-224.03` | 10–10 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-224.04` | 11–11 | تابع | `save_audit_required` | 0 | ⬜ |
+| `TEST-224.05` | 12–12 | تابع | `log_sort_order` | 0 | ⬜ |
+| `TEST-224.06` | 13–13 | تابع | `e` | 0 | ⬜ |
+| `TEST-224.07` | 14–14 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-224.08` | 15–15 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
+| `TEST-224.09` | 16–16 | تابع | `csrf_field` | 0 | ⬜ |
+| `TEST-224.10` | 17–17 | کلاس | `ExportDone` | 0 | ⬜ |
+| `TEST-224.11` | 18–18 | تابع | `excel_download` | 0 | ⬜ |
+| `TEST-224.12` | 19–20 | ناحیه | `بلوک رویه‌ای 19-20` | 0 | ⬜ |
+| `TEST-224.13` | 21–21 | تابع | `check` | 0 | ⬜ |
+| `TEST-224.14` | 22–74 | ناحیه | `بلوک رویه‌ای 22-74` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-225</b> — <code>tests/test_triangle_effect_static.py</code> (102 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-225</b> — <code>tests/test_traffic_phone_and_inspection_reminder_static.py</code> (55 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-225.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-225.02` | 9–10 | بلوک | `TriangleEffectReleaseTests` | 0 | ⬜ |
-| `TEST-225.03` | 11–20 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-225.04` | 21–33 | بلوک | `test_catalog_has_37_valid_non_print_routes` | 0 | ⬜ |
-| `TEST-225.05` | 34–51 | بلوک | `test_configuration_keys_match_the_engine` | 0 | ⬜ |
-| `TEST-225.06` | 52–59 | بلوک | `test_settings_are_saved_with_existing_permission_a` | 0 | ⬜ |
-| `TEST-225.07` | 60–68 | بلوک | `test_engine_respects_reduced_motion_and_has_explic` | 0 | ⬜ |
-| `TEST-225.08` | 69–81 | بلوک | `test_interaction_controls_are_wired` | 1 | ⬜ |
-| `TEST-225.09` | 82–90 | بلوک | `test_help_and_chatbot_cover_the_feature` | 0 | ⬜ |
-| `TEST-225.10` | 91–102 | بلوک | `test_release_manifest_is_migration_free` | 0 | ⬜ |
+| `TEST-225.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-225.02` | 6–20 | بلوک | `test_traffic_phone_has_fixed_09_and_requires_exact` | 0 | ⬜ |
+| `TEST-225.03` | 21–33 | بلوک | `test_inspection_only_reminder_is_scheduled_daily_a` | 0 | ⬜ |
+| `TEST-225.04` | 34–41 | بلوک | `test_reminder_visual_is_centered_and_alarm_styled` | 0 | ⬜ |
+| `TEST-225.05` | 42–55 | بلوک | `test_only_primary_admin_can_toggle_reminder_below_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-226</b> — <code>tests/test_tts_normalize_static.py</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-226</b> — <code>tests/test_traffic_report_fields_node.js</code> (35 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-226.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-226.02` | 13–56 | بلوک | `check` | 0 | ⬜ |
+| `TEST-226.01` | 1–35 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-227</b> — <code>tests/test_update_manifest_guard_static.py</code> (59 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-227</b> — <code>tests/test_transaction_truthfulness_static.py</code> (162 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-227.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-227.02` | 6–13 | بلوک | `test_update_installer_checks_zip_open_and_extracti` | 1 | ⬜ |
-| `TEST-227.03` | 14–22 | بلوک | `test_update_installer_rejects_traversal_duplicates` | 1 | ⬜ |
-| `TEST-227.04` | 23–29 | بلوک | `test_manifest_file_list_and_optional_sha256_are_ve` | 1 | ⬜ |
-| `TEST-227.05` | 30–42 | بلوک | `test_cumulative_update_contains_security_scope_run` | 0 | ⬜ |
-| `TEST-227.06` | 43–59 | بلوک | `test_cumulative_update_includes_all_logging_migrat` | 1 | ⬜ |
+| `TEST-227.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-227.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
+| `TEST-227.03` | 36–46 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-227.04` | 47–53 | بلوک | `function_body` | 0 | ⬜ |
+| `TEST-227.05` | 54–59 | بلوک | `function_code` | 0 | ⬜ |
+| `TEST-227.06` | 60–80 | بلوک | `test_commit_returns_true_when_the_work_is_already_` | 0 | ⬜ |
+| `TEST-227.07` | 81–87 | بلوک | `test_commit_still_reports_a_genuine_failure_as_fal` | 0 | ⬜ |
+| `TEST-227.08` | 88–109 | بلوک | `test_a_strict_commit_helper_exists_and_raises_a_pe` | 0 | ⬜ |
+| `TEST-227.09` | 110–118 | بلوک | `test_every_ticket_write_path_uses_the_strict_commi` | 0 | ⬜ |
+| `TEST-227.10` | 119–131 | بلوک | `test_strict_commit_calls_name_the_action_for_diagn` | 0 | ⬜ |
+| `TEST-227.11` | 132–141 | بلوک | `test_other_modules_keep_their_existing_commit_cont` | 0 | ⬜ |
+| `TEST-227.12` | 142–156 | بلوک | `test_auto_assignment_does_not_invent_a_state_the_t` | 0 | ⬜ |
+| `TEST-227.13` | 157–162 | بلوک | `test_creation_event_records_the_real_initial_statu` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-228</b> — <code>tests/test_user_access_groups_static.py</code> (90 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-228</b> — <code>tests/test_triangle_effect_static.py</code> (102 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-228.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-228.02` | 7–8 | بلوک | `UserAccessGroupStaticTests` | 0 | ⬜ |
-| `TEST-228.03` | 9–16 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-228.04` | 17–30 | بلوک | `test_group_permissions_are_additive_and_primary_ad` | 0 | ⬜ |
-| `TEST-228.05` | 31–42 | بلوک | `test_schema_supports_many_groups_per_user_and_casc` | 1 | ⬜ |
-| `TEST-228.06` | 43–59 | بلوک | `test_create_update_and_delete_are_primary_admin_on` | 0 | ⬜ |
-| `TEST-228.07` | 60–80 | بلوک | `test_settings_ui_reuses_permission_catalog_and_mem` | 0 | ⬜ |
-| `TEST-228.08` | 81–90 | بلوک | `test_special_role_constraints_and_documentation_ar` | 0 | ⬜ |
+| `TEST-228.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-228.02` | 9–10 | بلوک | `TriangleEffectReleaseTests` | 0 | ⬜ |
+| `TEST-228.03` | 11–20 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-228.04` | 21–33 | بلوک | `test_catalog_has_37_valid_non_print_routes` | 0 | ⬜ |
+| `TEST-228.05` | 34–51 | بلوک | `test_configuration_keys_match_the_engine` | 0 | ⬜ |
+| `TEST-228.06` | 52–59 | بلوک | `test_settings_are_saved_with_existing_permission_a` | 0 | ⬜ |
+| `TEST-228.07` | 60–68 | بلوک | `test_engine_respects_reduced_motion_and_has_explic` | 0 | ⬜ |
+| `TEST-228.08` | 69–81 | بلوک | `test_interaction_controls_are_wired` | 1 | ⬜ |
+| `TEST-228.09` | 82–90 | بلوک | `test_help_and_chatbot_cover_the_feature` | 0 | ⬜ |
+| `TEST-228.10` | 91–102 | بلوک | `test_release_manifest_is_migration_free` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-229</b> — <code>tests/test_version_source_of_truth_static.py</code> (208 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-229</b> — <code>tests/test_tts_normalize_static.py</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-229.01` | 1–48 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-229.02` | 49–53 | بلوک | `version_tuple` | 0 | ⬜ |
-| `TEST-229.03` | 54–57 | بلوک | `repo_version` | 0 | ⬜ |
-| `TEST-229.04` | 58–90 | بلوک | `scan_packages` | 0 | ⬜ |
-| `TEST-229.05` | 91–105 | بلوک | `resolve_repo_path` | 0 | ⬜ |
-| `TEST-229.06` | 106–110 | بلوک | `newest_package_for` | 0 | ⬜ |
-| `TEST-229.07` | 111–111 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
-| `TEST-229.08` | 112–126 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
-| `TEST-229.09` | 127–164 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
-| `TEST-229.10` | 165–193 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
-| `TEST-229.11` | 194–208 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
+| `TEST-229.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-229.02` | 13–56 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-230</b> — <code>tests/test_windows_logging_static.py</code> (78 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-230</b> — <code>tests/test_update_manifest_guard_static.py</code> (59 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-230.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-230.02` | 6–18 | بلوک | `test_windows_logging_acceptance_assets_exist` | 0 | ⬜ |
-| `TEST-230.03` | 19–26 | بلوک | `test_acl_verifier_is_read_only_and_strict_mode_is_` | 0 | ⬜ |
-| `TEST-230.04` | 27–32 | بلوک | `test_acl_verifier_detects_interactive_and_guest_pr` | 0 | ⬜ |
-| `TEST-230.05` | 33–39 | بلوک | `test_web_protection_verifier_preserves_application` | 0 | ⬜ |
-| `TEST-230.06` | 40–46 | بلوک | `test_acl_setter_uses_least_privilege_for_service_a` | 0 | ⬜ |
-| `TEST-230.07` | 47–53 | بلوک | `test_acl_setter_handles_script_whatif_without_null` | 0 | ⬜ |
-| `TEST-230.08` | 54–61 | بلوک | `test_installed_acceptance_script_is_version_pinned` | 0 | ⬜ |
-| `TEST-230.09` | 62–78 | بلوک | `test_installed_acceptance_checks_complete_logging_` | 0 | ⬜ |
+| `TEST-230.02` | 6–13 | بلوک | `test_update_installer_checks_zip_open_and_extracti` | 1 | ⬜ |
+| `TEST-230.03` | 14–22 | بلوک | `test_update_installer_rejects_traversal_duplicates` | 1 | ⬜ |
+| `TEST-230.04` | 23–29 | بلوک | `test_manifest_file_list_and_optional_sha256_are_ve` | 1 | ⬜ |
+| `TEST-230.05` | 30–42 | بلوک | `test_cumulative_update_contains_security_scope_run` | 0 | ⬜ |
+| `TEST-230.06` | 43–59 | بلوک | `test_cumulative_update_includes_all_logging_migrat` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-231</b> — <code>tests/tts_normalize_test.php</code> (189 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-231</b> — <code>tests/test_user_access_groups_static.py</code> (90 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-231.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `TEST-231.02` | 14–17 | تابع | `setting` | 0 | ⬜ |
-| `TEST-231.03` | 18–19 | ناحیه | `بلوک رویه‌ای 18-19` | 0 | ⬜ |
-| `TEST-231.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
-| `TEST-231.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
-| `TEST-231.06` | 26–28 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-231.07` | 29–30 | ناحیه | `بلوک رویه‌ای 29-30` | 0 | ⬜ |
-| `TEST-231.08` | 31–34 | تابع | `e` | 0 | ⬜ |
-| `TEST-231.09` | 35–36 | ناحیه | `بلوک رویه‌ای 35-36` | 0 | ⬜ |
-| `TEST-231.10` | 37–40 | تابع | `csrf_field` | 0 | ⬜ |
-| `TEST-231.11` | 41–52 | ناحیه | `بلوک رویه‌ای 41-52` | 0 | ⬜ |
-| `TEST-231.12` | 53–58 | تابع | `tts_bare` | 0 | ⬜ |
-| `TEST-231.13` | 60–70 | تابع | `expect_true` | 0 | ⬜ |
-| `TEST-231.14` | 72–75 | تابع | `expect_eq` | 0 | ⬜ |
-| `TEST-231.15` | 77–80 | تابع | `expect_contains` | 0 | ⬜ |
-| `TEST-231.16` | 82–85 | تابع | `expect_not_contains` | 0 | ⬜ |
-| `TEST-231.17` | 86–189 | ناحیه | `بلوک رویه‌ای 86-189` | 0 | ⬜ |
+| `TEST-231.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-231.02` | 7–8 | بلوک | `UserAccessGroupStaticTests` | 0 | ⬜ |
+| `TEST-231.03` | 9–16 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-231.04` | 17–30 | بلوک | `test_group_permissions_are_additive_and_primary_ad` | 0 | ⬜ |
+| `TEST-231.05` | 31–42 | بلوک | `test_schema_supports_many_groups_per_user_and_casc` | 1 | ⬜ |
+| `TEST-231.06` | 43–59 | بلوک | `test_create_update_and_delete_are_primary_admin_on` | 0 | ⬜ |
+| `TEST-231.07` | 60–80 | بلوک | `test_settings_ui_reuses_permission_catalog_and_mem` | 0 | ⬜ |
+| `TEST-231.08` | 81–90 | بلوک | `test_special_role_constraints_and_documentation_ar` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TEST-232</b> — <code>tests/test_version_source_of_truth_static.py</code> (208 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TEST-232.01` | 1–48 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-232.02` | 49–53 | بلوک | `version_tuple` | 0 | ⬜ |
+| `TEST-232.03` | 54–57 | بلوک | `repo_version` | 0 | ⬜ |
+| `TEST-232.04` | 58–90 | بلوک | `scan_packages` | 0 | ⬜ |
+| `TEST-232.05` | 91–105 | بلوک | `resolve_repo_path` | 0 | ⬜ |
+| `TEST-232.06` | 106–110 | بلوک | `newest_package_for` | 0 | ⬜ |
+| `TEST-232.07` | 111–111 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
+| `TEST-232.08` | 112–126 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
+| `TEST-232.09` | 127–164 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
+| `TEST-232.10` | 165–193 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
+| `TEST-232.11` | 194–208 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TEST-233</b> — <code>tests/test_windows_logging_static.py</code> (78 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TEST-233.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-233.02` | 6–18 | بلوک | `test_windows_logging_acceptance_assets_exist` | 0 | ⬜ |
+| `TEST-233.03` | 19–26 | بلوک | `test_acl_verifier_is_read_only_and_strict_mode_is_` | 0 | ⬜ |
+| `TEST-233.04` | 27–32 | بلوک | `test_acl_verifier_detects_interactive_and_guest_pr` | 0 | ⬜ |
+| `TEST-233.05` | 33–39 | بلوک | `test_web_protection_verifier_preserves_application` | 0 | ⬜ |
+| `TEST-233.06` | 40–46 | بلوک | `test_acl_setter_uses_least_privilege_for_service_a` | 0 | ⬜ |
+| `TEST-233.07` | 47–53 | بلوک | `test_acl_setter_handles_script_whatif_without_null` | 0 | ⬜ |
+| `TEST-233.08` | 54–61 | بلوک | `test_installed_acceptance_script_is_version_pinned` | 0 | ⬜ |
+| `TEST-233.09` | 62–78 | بلوک | `test_installed_acceptance_checks_complete_logging_` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TEST-234</b> — <code>tests/tts_normalize_test.php</code> (189 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TEST-234.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `TEST-234.02` | 14–17 | تابع | `setting` | 0 | ⬜ |
+| `TEST-234.03` | 18–19 | ناحیه | `بلوک رویه‌ای 18-19` | 0 | ⬜ |
+| `TEST-234.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
+| `TEST-234.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
+| `TEST-234.06` | 26–28 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-234.07` | 29–30 | ناحیه | `بلوک رویه‌ای 29-30` | 0 | ⬜ |
+| `TEST-234.08` | 31–34 | تابع | `e` | 0 | ⬜ |
+| `TEST-234.09` | 35–36 | ناحیه | `بلوک رویه‌ای 35-36` | 0 | ⬜ |
+| `TEST-234.10` | 37–40 | تابع | `csrf_field` | 0 | ⬜ |
+| `TEST-234.11` | 41–52 | ناحیه | `بلوک رویه‌ای 41-52` | 0 | ⬜ |
+| `TEST-234.12` | 53–58 | تابع | `tts_bare` | 0 | ⬜ |
+| `TEST-234.13` | 60–70 | تابع | `expect_true` | 0 | ⬜ |
+| `TEST-234.14` | 72–75 | تابع | `expect_eq` | 0 | ⬜ |
+| `TEST-234.15` | 77–80 | تابع | `expect_contains` | 0 | ⬜ |
+| `TEST-234.16` | 82–85 | تابع | `expect_not_contains` | 0 | ⬜ |
+| `TEST-234.17` | 86–189 | ناحیه | `بلوک رویه‌ای 86-189` | 0 | ⬜ |
 
 </details>
 
@@ -6563,738 +6630,748 @@
 </details>
 
 <details>
-<summary><b>DB-038</b> — <code>rebuild-final.sql</code> (97 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-038</b> — <code>migrations/035-request-center-appointments.sql</code> (23 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-038.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-038.02` | 10–97 | بلوک | `DROP TABLE IF` | 0 | ⬜ |
+| `DB-038.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-038.02` | 6–23 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-039</b> — <code>rollback-1.38-food-orders.sql</code> (10 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-039</b> — <code>rebuild-final.sql</code> (97 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-039.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-039.02` | 5–5 | بلوک | `DROP TABLE IF EXISTS food_order_logs` | 0 | ⬜ |
-| `DB-039.03` | 6–6 | بلوک | `DROP TABLE IF EXISTS food_orders` | 0 | ⬜ |
-| `DB-039.04` | 7–7 | بلوک | `DROP TABLE IF EXISTS food_calendar_items` | 0 | ⬜ |
-| `DB-039.05` | 8–8 | بلوک | `DROP TABLE IF EXISTS food_calendar` | 0 | ⬜ |
-| `DB-039.06` | 9–10 | بلوک | `DROP TABLE IF EXISTS food_catalog` | 0 | ⬜ |
+| `DB-039.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-039.02` | 10–97 | بلوک | `DROP TABLE IF` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-040</b> — <code>schema.sql</code> (1,564 خط، 110 آدرس، بازبینی‌شده 0/110)</summary>
+<summary><b>DB-040</b> — <code>rollback-1.38-food-orders.sql</code> (10 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-040.01` | 1–5 | بلوک | `CREATE TABLE settings` | 0 | ⬜ |
-| `DB-040.02` | 6–15 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
-| `DB-040.03` | 16–29 | بلوک | `CREATE TABLE org_companies` | 1 | ⬜ |
-| `DB-040.04` | 30–48 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
-| `DB-040.05` | 49–51 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-040.06` | 52–55 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-040.07` | 56–63 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
-| `DB-040.08` | 64–99 | بلوک | `CREATE TABLE users` | 1 | ⬜ |
-| `DB-040.09` | 100–101 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
-| `DB-040.10` | 102–112 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
-| `DB-040.11` | 113–114 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
-| `DB-040.12` | 115–122 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
-| `DB-040.13` | 123–155 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
-| `DB-040.14` | 156–166 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
-| `DB-040.15` | 167–195 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
-| `DB-040.16` | 196–212 | بلوک | `CREATE TABLE traffic_visit_history` | 1 | ⬜ |
-| `DB-040.17` | 213–222 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
-| `DB-040.18` | 223–231 | بلوک | `CREATE TABLE categories` | 0 | ⬜ |
-| `DB-040.19` | 232–257 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
-| `DB-040.20` | 258–270 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
-| `DB-040.21` | 271–337 | بلوک | `CREATE TABLE tickets` | 1 | ⬜ |
-| `DB-040.22` | 338–349 | بلوک | `CREATE TABLE ticket_messages` | 1 | ⬜ |
-| `DB-040.23` | 350–363 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
-| `DB-040.24` | 364–374 | بلوک | `CREATE TABLE ticket_attachments` | 1 | ⬜ |
-| `DB-040.25` | 375–413 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
-| `DB-040.26` | 414–420 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
-| `DB-040.27` | 421–438 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
-| `DB-040.28` | 439–446 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-040.29` | 447–456 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
-| `DB-040.30` | 457–480 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
-| `DB-040.31` | 481–494 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
-| `DB-040.32` | 495–504 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
-| `DB-040.33` | 505–560 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
-| `DB-040.34` | 561–562 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-040.35` | 563–577 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
-| `DB-040.36` | 578–593 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
-| `DB-040.37` | 594–606 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
-| `DB-040.38` | 607–624 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
-| `DB-040.39` | 625–635 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
-| `DB-040.40` | 636–653 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
-| `DB-040.41` | 654–666 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
-| `DB-040.42` | 667–748 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
-| `DB-040.43` | 749–766 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
-| `DB-040.44` | 767–776 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
-| `DB-040.45` | 777–778 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-040.46` | 779–807 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
-| `DB-040.47` | 808–819 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
-| `DB-040.48` | 820–830 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
-| `DB-040.49` | 831–854 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
-| `DB-040.50` | 855–865 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
-| `DB-040.51` | 866–896 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
-| `DB-040.52` | 897–935 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
-| `DB-040.53` | 936–951 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
-| `DB-040.54` | 952–965 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
-| `DB-040.55` | 966–984 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
-| `DB-040.56` | 985–996 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
-| `DB-040.57` | 997–1023 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
-| `DB-040.58` | 1024–1039 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
-| `DB-040.59` | 1040–1052 | بلوک | `CREATE TABLE food_ticket_day_visits` | 1 | ⬜ |
-| `DB-040.60` | 1053–1063 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
-| `DB-040.61` | 1064–1079 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
-| `DB-040.62` | 1080–1106 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
-| `DB-040.63` | 1107–1118 | بلوک | `CREATE TABLE chatbot_faq` | 0 | ⬜ |
-| `DB-040.64` | 1119–1131 | بلوک | `CREATE TABLE chatbot_logs` | 0 | ⬜ |
-| `DB-040.65` | 1132–1140 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
-| `DB-040.66` | 1141–1146 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
-| `DB-040.67` | 1147–1155 | بلوک | `CREATE TABLE api_rate_limits` | 1 | ⬜ |
-| `DB-040.68` | 1156–1168 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
-| `DB-040.69` | 1169–1182 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
-| `DB-040.70` | 1183–1183 | بلوک | `CREATE INDEX idx_tickets_status_priority` | 0 | ⬜ |
-| `DB-040.71` | 1184–1184 | بلوک | `CREATE INDEX idx_users_is_active` | 0 | ⬜ |
-| `DB-040.72` | 1185–1185 | بلوک | `CREATE INDEX idx_assets_lifecycle_status` | 0 | ⬜ |
-| `DB-040.73` | 1186–1186 | بلوک | `CREATE INDEX idx_ola_priority_active` | 0 | ⬜ |
-| `DB-040.74` | 1187–1187 | بلوک | `CREATE INDEX idx_food_ticket_events_event_type` | 0 | ⬜ |
-| `DB-040.75` | 1188–1188 | بلوک | `CREATE INDEX idx_login_attempts_locked_until` | 0 | ⬜ |
-| `DB-040.76` | 1189–1189 | بلوک | `CREATE INDEX idx_ticket_sla_alerts_alert_type` | 0 | ⬜ |
-| `DB-040.77` | 1190–1190 | بلوک | `CREATE INDEX idx_ticket_ola_alerts_alert_type` | 0 | ⬜ |
-| `DB-040.78` | 1191–1191 | بلوک | `CREATE INDEX idx_ticket_events_event_type` | 0 | ⬜ |
-| `DB-040.79` | 1192–1192 | بلوک | `CREATE INDEX idx_knowledge_articles_is_published` | 0 | ⬜ |
-| `DB-040.80` | 1193–1193 | بلوک | `CREATE INDEX idx_holidays_is_active` | 0 | ⬜ |
-| `DB-040.81` | 1194–1194 | بلوک | `CREATE INDEX idx_departments_is_active` | 0 | ⬜ |
-| `DB-040.82` | 1195–1195 | بلوک | `CREATE INDEX idx_handling_units_is_active` | 0 | ⬜ |
-| `DB-040.83` | 1196–1196 | بلوک | `CREATE INDEX idx_categories_group_active` | 0 | ⬜ |
-| `DB-040.84` | 1197–1197 | بلوک | `CREATE INDEX idx_service_catalog_group_active` | 0 | ⬜ |
-| `DB-040.85` | 1198–1198 | بلوک | `CREATE INDEX idx_cd_dvd_records_media` | 0 | ⬜ |
-| `DB-040.86` | 1199–1199 | بلوک | `CREATE INDEX idx_traffic_destinations_is_active` | 0 | ⬜ |
-| `DB-040.87` | 1200–1200 | بلوک | `CREATE INDEX idx_domain_scan_runs_status` | 0 | ⬜ |
-| `DB-040.88` | 1201–1203 | بلوک | `CREATE INDEX idx_domain_scan_queue_status` | 0 | ⬜ |
-| `DB-040.89` | 1204–1213 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
-| `DB-040.90` | 1214–1225 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
-| `DB-040.91` | 1226–1227 | بلوک | `=` | 0 | ⬜ |
-| `DB-040.92` | 1228–1232 | بلوک | `=` | 0 | ⬜ |
-| `DB-040.93` | 1233–1244 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
-| `DB-040.94` | 1245–1264 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
-| `DB-040.95` | 1265–1279 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
-| `DB-040.96` | 1280–1294 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
-| `DB-040.97` | 1295–1310 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
-| `DB-040.98` | 1311–1328 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
-| `DB-040.99` | 1329–1350 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
-| `DB-040.100` | 1351–1377 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
-| `DB-040.101` | 1378–1399 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
-| `DB-040.102` | 1400–1413 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
-| `DB-040.103` | 1414–1425 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
-| `DB-040.104` | 1426–1441 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
-| `DB-040.105` | 1442–1467 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
-| `DB-040.106` | 1468–1477 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
-| `DB-040.107` | 1478–1493 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
-| `DB-040.108` | 1494–1500 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
-| `DB-040.109` | 1501–1519 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
-| `DB-040.110` | 1520–1564 | بلوک | `CREATE TABLE schema_updates` | 1 | ⬜ |
+| `DB-040.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-040.02` | 5–5 | بلوک | `DROP TABLE IF EXISTS food_order_logs` | 0 | ⬜ |
+| `DB-040.03` | 6–6 | بلوک | `DROP TABLE IF EXISTS food_orders` | 0 | ⬜ |
+| `DB-040.04` | 7–7 | بلوک | `DROP TABLE IF EXISTS food_calendar_items` | 0 | ⬜ |
+| `DB-040.05` | 8–8 | بلوک | `DROP TABLE IF EXISTS food_calendar` | 0 | ⬜ |
+| `DB-040.06` | 9–10 | بلوک | `DROP TABLE IF EXISTS food_catalog` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-041</b> — <code>upgrade-1.1-departments.sql</code> (16 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>DB-041</b> — <code>schema.sql</code> (1,564 خط، 110 آدرس، بازبینی‌شده 0/110)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-041.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-041.02` | 2–9 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
-| `DB-041.03` | 10–10 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-041.04` | 11–11 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-041.05` | 12–12 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
-| `DB-041.06` | 13–13 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-041.07` | 14–14 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-041.08` | 15–16 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-041.01` | 1–5 | بلوک | `CREATE TABLE settings` | 0 | ⬜ |
+| `DB-041.02` | 6–15 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
+| `DB-041.03` | 16–29 | بلوک | `CREATE TABLE org_companies` | 1 | ⬜ |
+| `DB-041.04` | 30–48 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
+| `DB-041.05` | 49–51 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-041.06` | 52–55 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-041.07` | 56–63 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
+| `DB-041.08` | 64–99 | بلوک | `CREATE TABLE users` | 1 | ⬜ |
+| `DB-041.09` | 100–101 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
+| `DB-041.10` | 102–112 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
+| `DB-041.11` | 113–114 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
+| `DB-041.12` | 115–122 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
+| `DB-041.13` | 123–155 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
+| `DB-041.14` | 156–166 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
+| `DB-041.15` | 167–195 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
+| `DB-041.16` | 196–212 | بلوک | `CREATE TABLE traffic_visit_history` | 1 | ⬜ |
+| `DB-041.17` | 213–222 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
+| `DB-041.18` | 223–231 | بلوک | `CREATE TABLE categories` | 0 | ⬜ |
+| `DB-041.19` | 232–257 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
+| `DB-041.20` | 258–270 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
+| `DB-041.21` | 271–337 | بلوک | `CREATE TABLE tickets` | 1 | ⬜ |
+| `DB-041.22` | 338–349 | بلوک | `CREATE TABLE ticket_messages` | 1 | ⬜ |
+| `DB-041.23` | 350–363 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
+| `DB-041.24` | 364–374 | بلوک | `CREATE TABLE ticket_attachments` | 1 | ⬜ |
+| `DB-041.25` | 375–413 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
+| `DB-041.26` | 414–420 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
+| `DB-041.27` | 421–438 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
+| `DB-041.28` | 439–446 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-041.29` | 447–456 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-041.30` | 457–480 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
+| `DB-041.31` | 481–494 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
+| `DB-041.32` | 495–504 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
+| `DB-041.33` | 505–560 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
+| `DB-041.34` | 561–562 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-041.35` | 563–577 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
+| `DB-041.36` | 578–593 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
+| `DB-041.37` | 594–606 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
+| `DB-041.38` | 607–624 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
+| `DB-041.39` | 625–635 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
+| `DB-041.40` | 636–653 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
+| `DB-041.41` | 654–666 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
+| `DB-041.42` | 667–748 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
+| `DB-041.43` | 749–766 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
+| `DB-041.44` | 767–776 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
+| `DB-041.45` | 777–778 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-041.46` | 779–807 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
+| `DB-041.47` | 808–819 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
+| `DB-041.48` | 820–830 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
+| `DB-041.49` | 831–854 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
+| `DB-041.50` | 855–865 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
+| `DB-041.51` | 866–896 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
+| `DB-041.52` | 897–935 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
+| `DB-041.53` | 936–951 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
+| `DB-041.54` | 952–965 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
+| `DB-041.55` | 966–984 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
+| `DB-041.56` | 985–996 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
+| `DB-041.57` | 997–1023 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
+| `DB-041.58` | 1024–1039 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
+| `DB-041.59` | 1040–1052 | بلوک | `CREATE TABLE food_ticket_day_visits` | 1 | ⬜ |
+| `DB-041.60` | 1053–1063 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
+| `DB-041.61` | 1064–1079 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
+| `DB-041.62` | 1080–1106 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
+| `DB-041.63` | 1107–1118 | بلوک | `CREATE TABLE chatbot_faq` | 0 | ⬜ |
+| `DB-041.64` | 1119–1131 | بلوک | `CREATE TABLE chatbot_logs` | 0 | ⬜ |
+| `DB-041.65` | 1132–1140 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
+| `DB-041.66` | 1141–1146 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
+| `DB-041.67` | 1147–1155 | بلوک | `CREATE TABLE api_rate_limits` | 1 | ⬜ |
+| `DB-041.68` | 1156–1168 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
+| `DB-041.69` | 1169–1182 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
+| `DB-041.70` | 1183–1183 | بلوک | `CREATE INDEX idx_tickets_status_priority` | 0 | ⬜ |
+| `DB-041.71` | 1184–1184 | بلوک | `CREATE INDEX idx_users_is_active` | 0 | ⬜ |
+| `DB-041.72` | 1185–1185 | بلوک | `CREATE INDEX idx_assets_lifecycle_status` | 0 | ⬜ |
+| `DB-041.73` | 1186–1186 | بلوک | `CREATE INDEX idx_ola_priority_active` | 0 | ⬜ |
+| `DB-041.74` | 1187–1187 | بلوک | `CREATE INDEX idx_food_ticket_events_event_type` | 0 | ⬜ |
+| `DB-041.75` | 1188–1188 | بلوک | `CREATE INDEX idx_login_attempts_locked_until` | 0 | ⬜ |
+| `DB-041.76` | 1189–1189 | بلوک | `CREATE INDEX idx_ticket_sla_alerts_alert_type` | 0 | ⬜ |
+| `DB-041.77` | 1190–1190 | بلوک | `CREATE INDEX idx_ticket_ola_alerts_alert_type` | 0 | ⬜ |
+| `DB-041.78` | 1191–1191 | بلوک | `CREATE INDEX idx_ticket_events_event_type` | 0 | ⬜ |
+| `DB-041.79` | 1192–1192 | بلوک | `CREATE INDEX idx_knowledge_articles_is_published` | 0 | ⬜ |
+| `DB-041.80` | 1193–1193 | بلوک | `CREATE INDEX idx_holidays_is_active` | 0 | ⬜ |
+| `DB-041.81` | 1194–1194 | بلوک | `CREATE INDEX idx_departments_is_active` | 0 | ⬜ |
+| `DB-041.82` | 1195–1195 | بلوک | `CREATE INDEX idx_handling_units_is_active` | 0 | ⬜ |
+| `DB-041.83` | 1196–1196 | بلوک | `CREATE INDEX idx_categories_group_active` | 0 | ⬜ |
+| `DB-041.84` | 1197–1197 | بلوک | `CREATE INDEX idx_service_catalog_group_active` | 0 | ⬜ |
+| `DB-041.85` | 1198–1198 | بلوک | `CREATE INDEX idx_cd_dvd_records_media` | 0 | ⬜ |
+| `DB-041.86` | 1199–1199 | بلوک | `CREATE INDEX idx_traffic_destinations_is_active` | 0 | ⬜ |
+| `DB-041.87` | 1200–1200 | بلوک | `CREATE INDEX idx_domain_scan_runs_status` | 0 | ⬜ |
+| `DB-041.88` | 1201–1203 | بلوک | `CREATE INDEX idx_domain_scan_queue_status` | 0 | ⬜ |
+| `DB-041.89` | 1204–1213 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
+| `DB-041.90` | 1214–1225 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
+| `DB-041.91` | 1226–1227 | بلوک | `=` | 0 | ⬜ |
+| `DB-041.92` | 1228–1232 | بلوک | `=` | 0 | ⬜ |
+| `DB-041.93` | 1233–1244 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
+| `DB-041.94` | 1245–1264 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
+| `DB-041.95` | 1265–1279 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
+| `DB-041.96` | 1280–1294 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
+| `DB-041.97` | 1295–1310 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
+| `DB-041.98` | 1311–1328 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
+| `DB-041.99` | 1329–1350 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
+| `DB-041.100` | 1351–1377 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
+| `DB-041.101` | 1378–1399 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
+| `DB-041.102` | 1400–1413 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
+| `DB-041.103` | 1414–1425 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
+| `DB-041.104` | 1426–1441 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
+| `DB-041.105` | 1442–1467 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
+| `DB-041.106` | 1468–1477 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
+| `DB-041.107` | 1478–1493 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
+| `DB-041.108` | 1494–1500 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
+| `DB-041.109` | 1501–1519 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
+| `DB-041.110` | 1520–1564 | بلوک | `CREATE TABLE schema_updates` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-042</b> — <code>upgrade-1.10-priority.sql</code> (11 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>DB-042</b> — <code>upgrade-1.1-departments.sql</code> (16 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-042.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-042.02` | 2–2 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
-| `DB-042.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-042.04` | 4–4 | بلوک | `UPDATE ola_policies` | 1 | ⬜ |
-| `DB-042.05` | 5–6 | بلوک | `UPDATE problem_records` | 1 | ⬜ |
-| `DB-042.06` | 7–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-042.07` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-042.08` | 9–9 | بلوک | `ALTER TABLE ola_policies` | 0 | ⬜ |
-| `DB-042.09` | 10–11 | بلوک | `ALTER TABLE problem_records` | 0 | ⬜ |
+| `DB-042.02` | 2–9 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
+| `DB-042.03` | 10–10 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-042.04` | 11–11 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-042.05` | 12–12 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
+| `DB-042.06` | 13–13 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-042.07` | 14–14 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-042.08` | 15–16 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-043</b> — <code>upgrade-1.11-user-profile.sql</code> (5 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-043</b> — <code>upgrade-1.10-priority.sql</code> (11 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-043.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-043.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-043.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-043.04` | 4–5 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-043.02` | 2–2 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
+| `DB-043.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-043.04` | 4–4 | بلوک | `UPDATE ola_policies` | 1 | ⬜ |
+| `DB-043.05` | 5–6 | بلوک | `UPDATE problem_records` | 1 | ⬜ |
+| `DB-043.06` | 7–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-043.07` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-043.08` | 9–9 | بلوک | `ALTER TABLE ola_policies` | 0 | ⬜ |
+| `DB-043.09` | 10–11 | بلوک | `ALTER TABLE problem_records` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-044</b> — <code>upgrade-1.12-food-ticket-management.sql</code> (16 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-044</b> — <code>upgrade-1.11-user-profile.sql</code> (5 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-044.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-044.02` | 3–16 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
+| `DB-044.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-044.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-044.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-044.04` | 4–5 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-045</b> — <code>upgrade-1.13-asset-profile.sql</code> (93 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-045</b> — <code>upgrade-1.12-food-ticket-management.sql</code> (16 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-045.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-045.02` | 4–10 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-045.03` | 11–93 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
+| `DB-045.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-045.02` | 3–16 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-046</b> — <code>upgrade-1.13-food-groups.sql</code> (50 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-046</b> — <code>upgrade-1.13-asset-profile.sql</code> (93 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-046.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-046.02` | 4–16 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
-| `DB-046.03` | 17–28 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
-| `DB-046.04` | 29–50 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
+| `DB-046.02` | 4–10 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-046.03` | 11–93 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-047</b> — <code>upgrade-1.14-system-logs.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-047</b> — <code>upgrade-1.13-food-groups.sql</code> (50 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-047.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-047.02` | 2–14 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
+| `DB-047.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-047.02` | 4–16 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
+| `DB-047.03` | 17–28 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
+| `DB-047.04` | 29–50 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-048</b> — <code>upgrade-1.15-plaque-fields.sql</code> (13 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-048</b> — <code>upgrade-1.14-system-logs.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-048.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-048.02` | 7–13 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
+| `DB-048.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-048.02` | 2–14 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-049</b> — <code>upgrade-1.16-ticket-number.sql</code> (12 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-049</b> — <code>upgrade-1.15-plaque-fields.sql</code> (13 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-049.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-049.02` | 6–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-049.03` | 8–12 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
+| `DB-049.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-049.02` | 7–13 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-050</b> — <code>upgrade-1.17-service-catalog.sql</code> (45 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-050</b> — <code>upgrade-1.16-ticket-number.sql</code> (12 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-050.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-050.02` | 5–45 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-050.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-050.02` | 6–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-050.03` | 8–12 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-051</b> — <code>upgrade-1.18-service-categories.sql</code> (61 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-051</b> — <code>upgrade-1.17-service-catalog.sql</code> (45 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-051.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-051.02` | 4–4 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
-| `DB-051.03` | 5–5 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-051.04` | 6–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-051.05` | 8–27 | بلوک | `INSERT INTO categories` | 1 | ⬜ |
-| `DB-051.06` | 28–61 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
+| `DB-051.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-051.02` | 5–45 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-052</b> — <code>upgrade-1.19-food-ticket-queue.sql</code> (60 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-052</b> — <code>upgrade-1.18-service-categories.sql</code> (61 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-052.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-052.02` | 2–44 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-052.03` | 45–60 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
+| `DB-052.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-052.02` | 4–4 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
+| `DB-052.03` | 5–5 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-052.04` | 6–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-052.05` | 8–27 | بلوک | `INSERT INTO categories` | 1 | ⬜ |
+| `DB-052.06` | 28–61 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-053</b> — <code>upgrade-1.2-itsm.sql</code> (63 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>DB-053</b> — <code>upgrade-1.19-food-ticket-queue.sql</code> (60 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-053.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-053.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-053.03` | 3–3 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-053.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-053.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.11` | 11–12 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-053.12` | 13–27 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
-| `DB-053.13` | 28–52 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
-| `DB-053.14` | 53–63 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
+| `DB-053.02` | 2–44 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-053.03` | 45–60 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-054</b> — <code>upgrade-1.20-domain-scan.sql</code> (37 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-054</b> — <code>upgrade-1.2-itsm.sql</code> (63 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-054.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-054.02` | 2–14 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
-| `DB-054.03` | 15–27 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
-| `DB-054.04` | 28–37 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
+| `DB-054.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-054.03` | 3–3 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-054.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-054.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.11` | 11–12 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-054.12` | 13–27 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
+| `DB-054.13` | 28–52 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
+| `DB-054.14` | 53–63 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-055</b> — <code>upgrade-1.21-organization.sql</code> (49 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>DB-055</b> — <code>upgrade-1.20-domain-scan.sql</code> (37 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-055.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-055.02` | 2–16 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
-| `DB-055.03` | 17–24 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
-| `DB-055.04` | 25–29 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-055.05` | 30–34 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-055.06` | 35–42 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-055.07` | 43–49 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-055.02` | 2–14 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
+| `DB-055.03` | 15–27 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
+| `DB-055.04` | 28–37 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-056</b> — <code>upgrade-1.22-permissions.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-056</b> — <code>upgrade-1.21-organization.sql</code> (49 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-056.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-056.02` | 4–7 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-056.03` | 8–9 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-056.04` | 10–16 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
+| `DB-056.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-056.02` | 2–16 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
+| `DB-056.03` | 17–24 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
+| `DB-056.04` | 25–29 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-056.05` | 30–34 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-056.06` | 35–42 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-056.07` | 43–49 | بلوک | `UPDATE users` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-057</b> — <code>upgrade-1.23-activity-log.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-057</b> — <code>upgrade-1.22-permissions.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-057.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-057.02` | 5–32 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
-| `DB-057.03` | 33–44 | بلوک | `INSERT INTO activity_logs` | 1 | ⬜ |
-| `DB-057.04` | 45–47 | بلوک | `DROP TABLE IF EXISTS audit_logs` | 0 | ⬜ |
-| `DB-057.05` | 48–51 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
-| `DB-057.06` | 52–55 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
+| `DB-057.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-057.02` | 4–7 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-057.03` | 8–9 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-057.04` | 10–16 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-058</b> — <code>upgrade-1.24-traffic-control.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-058</b> — <code>upgrade-1.23-activity-log.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-058.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-058.02` | 10–10 | بلوک | `DROP TABLE IF EXISTS traffic_visits` | 0 | ⬜ |
-| `DB-058.03` | 11–12 | بلوک | `DROP TABLE IF EXISTS traffic_destinations` | 0 | ⬜ |
-| `DB-058.04` | 13–20 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
-| `DB-058.05` | 21–46 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
-| `DB-058.06` | 47–55 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
+| `DB-058.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-058.02` | 5–32 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
+| `DB-058.03` | 33–44 | بلوک | `INSERT INTO activity_logs` | 1 | ⬜ |
+| `DB-058.04` | 45–47 | بلوک | `DROP TABLE IF EXISTS audit_logs` | 0 | ⬜ |
+| `DB-058.05` | 48–51 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
+| `DB-058.06` | 52–55 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-059</b> — <code>upgrade-1.25-performance-indexes.sql</code> (36 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-059</b> — <code>upgrade-1.24-traffic-control.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-059.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-059.02` | 8–36 | بلوک | `CREATE PROCEDURE itsm_add_index` | 0 | ⬜ |
+| `DB-059.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-059.02` | 10–10 | بلوک | `DROP TABLE IF EXISTS traffic_visits` | 0 | ⬜ |
+| `DB-059.03` | 11–12 | بلوک | `DROP TABLE IF EXISTS traffic_destinations` | 0 | ⬜ |
+| `DB-059.04` | 13–20 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
+| `DB-059.05` | 21–46 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
+| `DB-059.06` | 47–55 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-060</b> — <code>upgrade-1.26-ticket-requesting-unit.sql</code> (28 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-060</b> — <code>upgrade-1.25-performance-indexes.sql</code> (36 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-060.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-060.02` | 9–14 | بلوک | `CREATE PROCEDURE itsm_ensure_req_unit` | 0 | ⬜ |
-| `DB-060.03` | 15–20 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-060.04` | 21–28 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-060.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-060.02` | 8–36 | بلوک | `CREATE PROCEDURE itsm_add_index` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-061</b> — <code>upgrade-1.27-food-ticket-fixes.sql</code> (17 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-061</b> — <code>upgrade-1.26-ticket-requesting-unit.sql</code> (28 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-061.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-061.02` | 5–11 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
-| `DB-061.03` | 12–17 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
+| `DB-061.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-061.02` | 9–14 | بلوک | `CREATE PROCEDURE itsm_ensure_req_unit` | 0 | ⬜ |
+| `DB-061.03` | 15–20 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-061.04` | 21–28 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-062</b> — <code>upgrade-1.3-supervisor-inventory.sql</code> (14 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>DB-062</b> — <code>upgrade-1.27-food-ticket-fixes.sql</code> (17 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-062.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-062.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-062.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-062.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-062.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-062.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-062.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-062.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-062.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-062.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-062.11` | 11–11 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-062.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-062.13` | 13–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-062.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-062.02` | 5–11 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
+| `DB-062.03` | 12–17 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-063</b> — <code>upgrade-1.30-food-ticket-card-map.sql</code> (11 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-063</b> — <code>upgrade-1.3-supervisor-inventory.sql</code> (14 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-063.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-063.02` | 2–11 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
+| `DB-063.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-063.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-063.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-063.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-063.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-063.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-063.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-063.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-063.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-063.11` | 11–11 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-063.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-063.13` | 13–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-064</b> — <code>upgrade-1.31-food-ticket-templates.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-064</b> — <code>upgrade-1.30-food-ticket-card-map.sql</code> (11 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-064.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-064.02` | 2–14 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
+| `DB-064.02` | 2–11 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-065</b> — <code>upgrade-1.32-food-group-representative-absence.sql</code> (90 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>DB-065</b> — <code>upgrade-1.31-food-ticket-templates.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-065.01` | 1–2 | بلوک | `=` | 0 | ⬜ |
-| `DB-065.02` | 3–8 | بلوک | `=` | 0 | ⬜ |
-| `DB-065.03` | 9–13 | بلوک | `=` | 0 | ⬜ |
-| `DB-065.04` | 14–21 | بلوک | `ALTER TABLE food_ticket_groups` | 0 | ⬜ |
-| `DB-065.05` | 22–28 | بلوک | `ALTER TABLE food_ticket_group_runs` | 0 | ⬜ |
-| `DB-065.06` | 29–46 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
-| `DB-065.07` | 47–60 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
-| `DB-065.08` | 61–66 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-065.09` | 67–71 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-065.10` | 72–73 | بلوک | `=` | 0 | ⬜ |
-| `DB-065.11` | 74–88 | بلوک | `=` | 1 | ⬜ |
-| `DB-065.12` | 89–90 | بلوک | `=` | 0 | ⬜ |
+| `DB-065.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-065.02` | 2–14 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-066</b> — <code>upgrade-1.33-source-delete-truth.sql</code> (46 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>DB-066</b> — <code>upgrade-1.32-food-group-representative-absence.sql</code> (90 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-066.01` | 1–16 | بلوک | `=` | 1 | ⬜ |
-| `DB-066.02` | 17–18 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.03` | 19–23 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-066.04` | 24–25 | بلوک | `CREATE INDEX idx_food_events_src_deleted` | 0 | ⬜ |
-| `DB-066.05` | 26–27 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.06` | 28–38 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.07` | 39–40 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.08` | 41–44 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.09` | 45–46 | بلوک | `=` | 0 | ⬜ |
+| `DB-066.01` | 1–2 | بلوک | `=` | 0 | ⬜ |
+| `DB-066.02` | 3–8 | بلوک | `=` | 0 | ⬜ |
+| `DB-066.03` | 9–13 | بلوک | `=` | 0 | ⬜ |
+| `DB-066.04` | 14–21 | بلوک | `ALTER TABLE food_ticket_groups` | 0 | ⬜ |
+| `DB-066.05` | 22–28 | بلوک | `ALTER TABLE food_ticket_group_runs` | 0 | ⬜ |
+| `DB-066.06` | 29–46 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
+| `DB-066.07` | 47–60 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
+| `DB-066.08` | 61–66 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-066.09` | 67–71 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-066.10` | 72–73 | بلوک | `=` | 0 | ⬜ |
+| `DB-066.11` | 74–88 | بلوک | `=` | 1 | ⬜ |
+| `DB-066.12` | 89–90 | بلوک | `=` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-067</b> — <code>upgrade-1.38-food-orders.sql</code> (78 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-067</b> — <code>upgrade-1.33-source-delete-truth.sql</code> (46 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-067.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-067.02` | 5–15 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
-| `DB-067.03` | 16–30 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
-| `DB-067.04` | 31–45 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
-| `DB-067.05` | 46–61 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
-| `DB-067.06` | 62–78 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
+| `DB-067.01` | 1–16 | بلوک | `=` | 1 | ⬜ |
+| `DB-067.02` | 17–18 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.03` | 19–23 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-067.04` | 24–25 | بلوک | `CREATE INDEX idx_food_events_src_deleted` | 0 | ⬜ |
+| `DB-067.05` | 26–27 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.06` | 28–38 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.07` | 39–40 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.08` | 41–44 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.09` | 45–46 | بلوک | `=` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-068</b> — <code>upgrade-1.39-food-guest-requests.sql</code> (19 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-068</b> — <code>upgrade-1.38-food-orders.sql</code> (78 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-068.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-068.02` | 3–19 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
+| `DB-068.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-068.02` | 5–15 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
+| `DB-068.03` | 16–30 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
+| `DB-068.04` | 31–45 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
+| `DB-068.05` | 46–61 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
+| `DB-068.06` | 62–78 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-069</b> — <code>upgrade-1.4-final.sql</code> (113 خط، 30 آدرس، بازبینی‌شده 0/30)</summary>
+<summary><b>DB-069</b> — <code>upgrade-1.39-food-guest-requests.sql</code> (19 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-069.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-069.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-069.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-069.04` | 4–4 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-069.05` | 5–5 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-069.06` | 6–6 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
-| `DB-069.07` | 7–7 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
-| `DB-069.08` | 8–8 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
-| `DB-069.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-069.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-069.11` | 11–11 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-069.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.13` | 13–13 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.14` | 14–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.15` | 15–15 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.16` | 16–16 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.17` | 17–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.18` | 18–18 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.19` | 19–19 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.20` | 20–20 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.21` | 21–21 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.22` | 22–22 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.23` | 23–23 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.24` | 24–24 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-069.25` | 25–37 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
-| `DB-069.26` | 38–51 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
-| `DB-069.27` | 52–66 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
-| `DB-069.28` | 67–78 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
-| `DB-069.29` | 79–95 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
-| `DB-069.30` | 96–113 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
+| `DB-069.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-069.02` | 3–19 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-070</b> — <code>upgrade-1.40-food-guest-deputy.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-070</b> — <code>upgrade-1.4-final.sql</code> (113 خط، 30 آدرس، بازبینی‌شده 0/30)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-070.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-070.02` | 3–6 | بلوک | `ALTER TABLE food_guest_requests` | 0 | ⬜ |
+| `DB-070.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-070.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-070.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-070.04` | 4–4 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-070.05` | 5–5 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-070.06` | 6–6 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
+| `DB-070.07` | 7–7 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
+| `DB-070.08` | 8–8 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
+| `DB-070.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-070.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-070.11` | 11–11 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-070.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.13` | 13–13 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.14` | 14–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.15` | 15–15 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.16` | 16–16 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.17` | 17–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.18` | 18–18 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.19` | 19–19 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.20` | 20–20 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.21` | 21–21 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.22` | 22–22 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.23` | 23–23 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.24` | 24–24 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-070.25` | 25–37 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
+| `DB-070.26` | 38–51 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
+| `DB-070.27` | 52–66 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
+| `DB-070.28` | 67–78 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
+| `DB-070.29` | 79–95 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
+| `DB-070.30` | 96–113 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-071</b> — <code>upgrade-1.5-offline-operations.sql</code> (112 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
+<summary><b>DB-071</b> — <code>upgrade-1.40-food-guest-deputy.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-071.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-071.02` | 2–17 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
-| `DB-071.03` | 18–30 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
-| `DB-071.04` | 31–31 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.05` | 32–32 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.06` | 33–33 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.07` | 34–34 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.08` | 35–35 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.09` | 36–36 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.10` | 37–37 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.11` | 38–38 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.12` | 39–39 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-071.13` | 40–40 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-071.14` | 41–42 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-071.15` | 43–57 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
-| `DB-071.16` | 58–65 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-071.17` | 66–75 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
-| `DB-071.18` | 76–89 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
-| `DB-071.19` | 90–99 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
-| `DB-071.20` | 100–112 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
+| `DB-071.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-071.02` | 3–6 | بلوک | `ALTER TABLE food_guest_requests` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-072</b> — <code>upgrade-1.6-hardening.sql</code> (19 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-072</b> — <code>upgrade-1.5-offline-operations.sql</code> (112 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-072.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-072.02` | 2–9 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-072.03` | 10–19 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-072.02` | 2–17 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
+| `DB-072.03` | 18–30 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
+| `DB-072.04` | 31–31 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.05` | 32–32 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.06` | 33–33 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.07` | 34–34 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.08` | 35–35 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.09` | 36–36 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.10` | 37–37 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.11` | 38–38 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.12` | 39–39 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-072.13` | 40–40 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-072.14` | 41–42 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-072.15` | 43–57 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
+| `DB-072.16` | 58–65 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-072.17` | 66–75 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-072.18` | 76–89 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
+| `DB-072.19` | 90–99 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
+| `DB-072.20` | 100–112 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-073</b> — <code>upgrade-1.7-governance.sql</code> (88 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-073</b> — <code>upgrade-1.6-hardening.sql</code> (19 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-073.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-073.02` | 2–30 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
-| `DB-073.03` | 31–42 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
-| `DB-073.04` | 43–53 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
-| `DB-073.05` | 54–77 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
-| `DB-073.06` | 78–88 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
+| `DB-073.02` | 2–9 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-073.03` | 10–19 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-074</b> — <code>upgrade-1.8-cd-dvd-identity.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-074</b> — <code>upgrade-1.7-governance.sql</code> (88 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-074.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-074.02` | 2–6 | بلوک | `ALTER TABLE cd_dvd_records` | 1 | ⬜ |
+| `DB-074.02` | 2–30 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
+| `DB-074.03` | 31–42 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
+| `DB-074.04` | 43–53 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
+| `DB-074.05` | 54–77 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
+| `DB-074.06` | 78–88 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-075</b> — <code>upgrade-1.8-cd-dvd.sql</code> (44 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-075</b> — <code>upgrade-1.8-cd-dvd-identity.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-075.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-075.02` | 2–9 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
-| `DB-075.03` | 10–44 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
+| `DB-075.02` | 2–6 | بلوک | `ALTER TABLE cd_dvd_records` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-076</b> — <code>upgrade-1.8-final.sql</code> (47 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-076</b> — <code>upgrade-1.8-cd-dvd.sql</code> (44 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-076.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-076.02` | 2–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-076.03` | 9–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-076.04` | 18–35 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
-| `DB-076.05` | 36–45 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
-| `DB-076.06` | 46–47 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-076.02` | 2–9 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
+| `DB-076.03` | 10–44 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-077</b> — <code>upgrade-1.8-routing.sql</code> (46 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
+<summary><b>DB-077</b> — <code>upgrade-1.8-final.sql</code> (47 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-077.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-077.02` | 2–12 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
-| `DB-077.03` | 13–13 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-077.04` | 14–15 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
-| `DB-077.05` | 16–16 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
-| `DB-077.06` | 17–17 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-077.07` | 18–18 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-077.08` | 19–19 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-077.09` | 20–20 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-077.10` | 21–21 | بلوک | `ALTER TABLE service_catalog` | 1 | ⬜ |
-| `DB-077.11` | 22–22 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-077.12` | 23–23 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-077.13` | 24–24 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-077.14` | 25–25 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-077.15` | 26–27 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-077.16` | 28–29 | بلوک | `INSERT INTO handling_units` | 1 | ⬜ |
-| `DB-077.17` | 30–30 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-077.18` | 31–31 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
-| `DB-077.19` | 32–33 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-077.20` | 34–35 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-077.21` | 36–37 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-077.22` | 38–39 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-077.23` | 40–41 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-077.24` | 42–43 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-077.25` | 44–46 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-077.02` | 2–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-077.03` | 9–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-077.04` | 18–35 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
+| `DB-077.05` | 36–45 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
+| `DB-077.06` | 46–47 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-078</b> — <code>upgrade-1.9-food-ticket.sql</code> (80 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-078</b> — <code>upgrade-1.8-routing.sql</code> (46 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-078.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-078.02` | 15–37 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
-| `DB-078.03` | 38–64 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
-| `DB-078.04` | 65–80 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
+| `DB-078.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-078.02` | 2–12 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
+| `DB-078.03` | 13–13 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-078.04` | 14–15 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
+| `DB-078.05` | 16–16 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
+| `DB-078.06` | 17–17 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-078.07` | 18–18 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-078.08` | 19–19 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-078.09` | 20–20 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-078.10` | 21–21 | بلوک | `ALTER TABLE service_catalog` | 1 | ⬜ |
+| `DB-078.11` | 22–22 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-078.12` | 23–23 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-078.13` | 24–24 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-078.14` | 25–25 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-078.15` | 26–27 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-078.16` | 28–29 | بلوک | `INSERT INTO handling_units` | 1 | ⬜ |
+| `DB-078.17` | 30–30 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-078.18` | 31–31 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
+| `DB-078.19` | 32–33 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-078.20` | 34–35 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-078.21` | 36–37 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-078.22` | 38–39 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-078.23` | 40–41 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-078.24` | 42–43 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-078.25` | 44–46 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-079</b> — <code>upgrade-food-drop-legacy-orders-columns.sql</code> (6 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-079</b> — <code>upgrade-1.9-food-ticket.sql</code> (80 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-079.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-079.02` | 4–4 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
-| `DB-079.03` | 5–6 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
+| `DB-079.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-079.02` | 15–37 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
+| `DB-079.03` | 38–64 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
+| `DB-079.04` | 65–80 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-080</b> — <code>upgrade-food-employee-auth-source.sql</code> (14 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-080</b> — <code>upgrade-food-drop-legacy-orders-columns.sql</code> (6 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-080.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-080.02` | 6–8 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-080.03` | 9–14 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-080.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-080.02` | 4–4 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
+| `DB-080.03` | 5–6 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-081</b> — <code>upgrade-remove-legacy-admin-role.sql</code> (11 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-081</b> — <code>upgrade-food-employee-auth-source.sql</code> (14 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-081.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-081.02` | 6–8 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-081.03` | 9–11 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-081.02` | 6–8 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-081.03` | 9–14 | بلوک | `UPDATE users` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-082</b> — <code>upgrade-unique-employee-number.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-082</b> — <code>upgrade-remove-legacy-admin-role.sql</code> (11 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-082.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-082.02` | 11–11 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-082.03` | 12–14 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-082.04` | 15–16 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-082.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-082.02` | 6–8 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-082.03` | 9–11 | بلوک | `UPDATE users` | 1 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>DB-083</b> — <code>upgrade-unique-employee-number.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `DB-083.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-083.02` | 11–11 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-083.03` | 12–14 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-083.04` | 15–16 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
 
 </details>
 
@@ -8493,7 +8570,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-034</b> — <code>index.php</code> (2,990 خط، 88 آدرس، بازبینی‌شده 0/88)</summary>
+<summary><b>PAGE-034</b> — <code>index.php</code> (2,442 خط، 72 آدرس، بازبینی‌شده 0/72)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -8511,80 +8588,64 @@
 | `PAGE-034.12` | 254–268 | تابع | `imported_calendar_date` | 0 | ⬜ |
 | `PAGE-034.13` | 270–273 | تابع | `calendar_unescape` | 0 | ⬜ |
 | `PAGE-034.14` | 275–346 | تابع | `parse_calendar_import` | 0 | ⬜ |
-| `PAGE-034.15` | 348–401 | تابع | `store_attachment` | 6 | ⬜ |
-| `PAGE-034.16` | 403–426 | تابع | `store_profile_photo` | 1 | ⬜ |
-| `PAGE-034.17` | 428–440 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
-| `PAGE-034.18` | 442–447 | تابع | `fetch_ticket` | 0 | ⬜ |
-| `PAGE-034.19` | 449–452 | تابع | `can_view_ticket` | 0 | ⬜ |
-| `PAGE-034.20` | 454–473 | تابع | `ticket_org_manager_rank_sql` | 0 | ⬜ |
-| `PAGE-034.21` | 475–517 | تابع | `choose_handling_agent` | 5 | ⬜ |
-| `PAGE-034.22` | 519–527 | تابع | `ticket_allowed_transitions` | 0 | ⬜ |
-| `PAGE-034.23` | 528–532 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
-| `PAGE-034.24` | 534–540 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
-| `PAGE-034.25` | 542–548 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
-| `PAGE-034.26` | 550–559 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
-| `PAGE-034.27` | 560–614 | تابع | `report_query_filters` | 2 | ⬜ |
-| `PAGE-034.28` | 616–765 | تابع | `render_header` | 4 | ⬜ |
-| `PAGE-034.29` | 767–774 | تابع | `list_sort_page_off` | 2 | ⬜ |
-| `PAGE-034.30` | 776–797 | تابع | `inspection_food_reminder_markup` | 0 | ⬜ |
-| `PAGE-034.31` | 799–830 | تابع | `render_footer` | 0 | ⬜ |
-| `PAGE-034.32` | 831–836 | ناحیه | `بلوک رویه‌ای 831-836` | 2 | ⬜ |
-| `PAGE-034.33` | 837–856 | ناحیه | `ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)` | 2 | ⬜ |
-| `PAGE-034.34` | 857–858 | ناحیه | `ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن` | 2 | ⬜ |
-| `PAGE-034.35` | 859–866 | ناحیه | `۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛` | 2 | ⬜ |
-| `PAGE-034.36` | 867–877 | ناحیه | `مسیر: must_change_password\|change-password` | 2 | ⬜ |
-| `PAGE-034.37` | 878–891 | ناحیه | `مسیر: REQUEST_METHOD\|POST\|organization` | 0 | ⬜ |
-| `PAGE-034.38` | 892–905 | ناحیه | `مسیر: food-ticket\|food_api` | 2 | ⬜ |
-| `PAGE-034.39` | 906–917 | ناحیه | `مسیر: food-order\|food_api` | 2 | ⬜ |
-| `PAGE-034.40` | 918–1063 | ناحیه | `مسیر: traffic-control\|traffic_api` | **9** | ⬜ |
-| `PAGE-034.41` | 1064–1178 | ناحیه | `خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط د` | 7 | ⬜ |
-| `PAGE-034.42` | 1179–1184 | ناحیه | `مسیر: food-personnel-link` | 0 | ⬜ |
-| `PAGE-034.43` | 1185–1188 | ناحیه | `ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه` | 2 | ⬜ |
-| `PAGE-034.44` | 1189–1303 | ناحیه | `مسیر: logging_begin_operation` | 6 | ⬜ |
-| `PAGE-034.45` | 1304–1314 | ناحیه | `مسیر: settings\|create_access_group\|save_access_g` | 2 | ⬜ |
-| `PAGE-034.46` | 1315–1367 | ناحیه | `مسیر: chatbot-api` | 0 | ⬜ |
-| `PAGE-034.47` | 1368–1368 | ناحیه | `۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدها` | 0 | ⬜ |
-| `PAGE-034.48` | 1369–1369 | ناحیه | `food_ticket_is_allowed() (هر کد food.*) نمایش داده` | 0 | ⬜ |
-| `PAGE-034.49` | 1370–1370 | ناحیه | `می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لی` | 0 | ⬜ |
-| `PAGE-034.50` | 1371–1378 | ناحیه | `مسیر: food-ticket\|food_ticket_is_allowed\|food.mo` | 0 | ⬜ |
-| `PAGE-034.51` | 1379–1386 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
-| `PAGE-034.52` | 1387–1395 | ناحیه | `مسیر: settings\|settings.general\|settings.domain` | 0 | ⬜ |
-| `PAGE-034.53` | 1396–1398 | ناحیه | `مسیر: change-password` | 0 | ⬜ |
-| `PAGE-034.54` | 1399–1401 | ناحیه | `مسیر: local-accounts` | 0 | ⬜ |
-| `PAGE-034.55` | 1402–1419 | ناحیه | `مسیر: profile` | 0 | ⬜ |
-| `PAGE-034.56` | 1420–1423 | ناحیه | `مسیر: governance` | 0 | ⬜ |
-| `PAGE-034.57` | 1424–1428 | ناحیه | `مسیر: food-ticket` | 0 | ⬜ |
-| `PAGE-034.58` | 1429–1436 | ناحیه | `مسیر: food-order\|foodorder.self` | 0 | ⬜ |
-| `PAGE-034.59` | 1437–1440 | ناحیه | `مسیر: food-order` | 0 | ⬜ |
-| `PAGE-034.60` | 1441–1444 | ناحیه | `مسیر: cd-dvd` | 0 | ⬜ |
-| `PAGE-034.61` | 1445–1448 | ناحیه | `مسیر: cd-dvd-history` | 0 | ⬜ |
-| `PAGE-034.62` | 1449–1451 | ناحیه | `مسیر: traffic-control` | 0 | ⬜ |
-| `PAGE-034.63` | 1452–1456 | ناحیه | `مسیر: traffic-control-print` | 2 | ⬜ |
-| `PAGE-034.64` | 1457–1464 | ناحیه | `مسیر: help` | 0 | ⬜ |
-| `PAGE-034.65` | 1465–1501 | ناحیه | `مسیر: knowledge` | 2 | ⬜ |
-| `PAGE-034.66` | 1502–1509 | ناحیه | `مسیر: notifications\|notif.view` | 0 | ⬜ |
-| `PAGE-034.67` | 1510–1527 | ناحیه | `مسیر: notifications` | 5 | ⬜ |
-| `PAGE-034.68` | 1528–1536 | ناحیه | `مسیر: audit` | 0 | ⬜ |
-| `PAGE-034.69` | 1537–1540 | ناحیه | `مسیر: logging-dashboard` | 0 | ⬜ |
-| `PAGE-034.70` | 1541–1544 | ناحیه | `مسیر: system-health` | 0 | ⬜ |
-| `PAGE-034.71` | 1545–1550 | ناحیه | `مسیر: logs` | 0 | ⬜ |
-| `PAGE-034.72` | 1551–1693 | ناحیه | `مسیر: activity-log` | **8** | ⬜ |
-| `PAGE-034.73` | 1694–1732 | ناحیه | `مسیر: backup` | 6 | ⬜ |
-| `PAGE-034.74` | 1733–1740 | ناحیه | `مسیر: search\|search.global` | 0 | ⬜ |
-| `PAGE-034.75` | 1741–1832 | ناحیه | `مسیر: search` | 7 | ⬜ |
-| `PAGE-034.76` | 1833–1935 | ناحیه | `مسیر: chatbot-admin` | 5 | ⬜ |
-| `PAGE-034.77` | 1936–1946 | ناحیه | `مسیر: holidays` | 0 | ⬜ |
-| `PAGE-034.78` | 1947–1959 | ناحیه | `مسیر: new-ticket\|ticket.create` | 0 | ⬜ |
-| `PAGE-034.79` | 1960–2060 | ناحیه | `مسیر: inventory` | 7 | ⬜ |
-| `PAGE-034.80` | 2061–2092 | ناحیه | `مسیر: inventory-diagnostics` | 2 | ⬜ |
-| `PAGE-034.81` | 2093–2110 | ناحیه | `مسیر: asset-history` | 7 | ⬜ |
-| `PAGE-034.82` | 2111–2188 | ناحیه | `مسیر: domain-scan` | 2 | ⬜ |
-| `PAGE-034.83` | 2189–2233 | ناحیه | `مسیر: assets` | 7 | ⬜ |
-| `PAGE-034.84` | 2234–2267 | ناحیه | `مسیر: asset` | 7 | ⬜ |
-| `PAGE-034.85` | 2268–2458 | ناحیه | `مسیر: organization` | 3 | ⬜ |
-| `PAGE-034.86` | 2459–2928 | ناحیه | `مسیر: settings` | **11** | ⬜ |
-| `PAGE-034.87` | 2929–2950 | ناحیه | `مسیر: logs` | 2 | ⬜ |
-| `PAGE-034.88` | 2951–2990 | ناحیه | `مسیر: dashboard` | 5 | ⬜ |
+| `PAGE-034.15` | 347–349 | ناحیه | `بلوک رویه‌ای 347-349` | 0 | ⬜ |
+| `PAGE-034.16` | 350–373 | تابع | `store_profile_photo` | 1 | ⬜ |
+| `PAGE-034.17` | 375–387 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
+| `PAGE-034.18` | 388–396 | ناحیه | `بلوک رویه‌ای 388-396` | 2 | ⬜ |
+| `PAGE-034.19` | 397–416 | ناحیه | `ناحیهٔ ۱: خروج از حساب (قبل از هر چیز)` | 2 | ⬜ |
+| `PAGE-034.20` | 417–418 | ناحیه | `ناحیهٔ ۲: تعیین صفحهٔ جاری و پیش‌شرط‌های آن` | 2 | ⬜ |
+| `PAGE-034.21` | 419–426 | ناحیه | `۱.۵۰: کاربر محلی/بازرسی به سفارش غذا هدایت می‌شود؛` | 2 | ⬜ |
+| `PAGE-034.22` | 427–437 | ناحیه | `مسیر: must_change_password\|change-password` | 2 | ⬜ |
+| `PAGE-034.23` | 438–451 | ناحیه | `مسیر: REQUEST_METHOD\|POST\|organization` | 0 | ⬜ |
+| `PAGE-034.24` | 452–465 | ناحیه | `مسیر: food-ticket\|food_api` | 2 | ⬜ |
+| `PAGE-034.25` | 466–477 | ناحیه | `مسیر: food-order\|food_api` | 2 | ⬜ |
+| `PAGE-034.26` | 478–605 | ناحیه | `مسیر: traffic-control\|traffic_api` | **9** | ⬜ |
+| `PAGE-034.27` | 606–698 | ناحیه | `خروجی XLSX از نمای مرتب‌شدهٔ لیست در مرورگر (فقط د` | 7 | ⬜ |
+| `PAGE-034.28` | 699–704 | ناحیه | `مسیر: food-personnel-link` | 0 | ⬜ |
+| `PAGE-034.29` | 705–780 | ناحیه | `ناحیهٔ ۴: پردازش همهٔ اکشن‌های POST (74 اکشن، گروه` | 2 | ⬜ |
+| `PAGE-034.30` | 781–833 | ناحیه | `مسیر: chatbot-api` | 0 | ⬜ |
+| `PAGE-034.31` | 834–834 | ناحیه | `۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدها` | 0 | ⬜ |
+| `PAGE-034.32` | 835–835 | ناحیه | `food_ticket_is_allowed() (هر کد food.*) نمایش داده` | 0 | ⬜ |
+| `PAGE-034.33` | 836–836 | ناحیه | `می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لی` | 0 | ⬜ |
+| `PAGE-034.34` | 837–844 | ناحیه | `مسیر: food-ticket\|food_ticket_is_allowed\|food.mo` | 0 | ⬜ |
+| `PAGE-034.35` | 845–852 | ناحیه | `شرط مسیریابی` | 0 | ⬜ |
+| `PAGE-034.36` | 853–861 | ناحیه | `مسیر: settings\|settings.general\|settings.domain` | 0 | ⬜ |
+| `PAGE-034.37` | 862–864 | ناحیه | `مسیر: change-password` | 0 | ⬜ |
+| `PAGE-034.38` | 865–867 | ناحیه | `مسیر: local-accounts` | 0 | ⬜ |
+| `PAGE-034.39` | 868–885 | ناحیه | `مسیر: profile` | 0 | ⬜ |
+| `PAGE-034.40` | 886–889 | ناحیه | `مسیر: governance` | 0 | ⬜ |
+| `PAGE-034.41` | 890–894 | ناحیه | `مسیر: food-ticket` | 0 | ⬜ |
+| `PAGE-034.42` | 895–902 | ناحیه | `مسیر: food-order\|foodorder.self` | 0 | ⬜ |
+| `PAGE-034.43` | 903–906 | ناحیه | `مسیر: food-order` | 0 | ⬜ |
+| `PAGE-034.44` | 907–910 | ناحیه | `مسیر: cd-dvd` | 0 | ⬜ |
+| `PAGE-034.45` | 911–914 | ناحیه | `مسیر: cd-dvd-history` | 0 | ⬜ |
+| `PAGE-034.46` | 915–917 | ناحیه | `مسیر: traffic-control` | 0 | ⬜ |
+| `PAGE-034.47` | 918–922 | ناحیه | `مسیر: traffic-control-print` | 2 | ⬜ |
+| `PAGE-034.48` | 923–930 | ناحیه | `مسیر: help` | 0 | ⬜ |
+| `PAGE-034.49` | 931–967 | ناحیه | `مسیر: knowledge` | 2 | ⬜ |
+| `PAGE-034.50` | 968–975 | ناحیه | `مسیر: notifications\|notif.view` | 0 | ⬜ |
+| `PAGE-034.51` | 976–993 | ناحیه | `مسیر: notifications` | 5 | ⬜ |
+| `PAGE-034.52` | 994–1002 | ناحیه | `مسیر: audit` | 0 | ⬜ |
+| `PAGE-034.53` | 1003–1006 | ناحیه | `مسیر: logging-dashboard` | 0 | ⬜ |
+| `PAGE-034.54` | 1007–1010 | ناحیه | `مسیر: system-health` | 0 | ⬜ |
+| `PAGE-034.55` | 1011–1016 | ناحیه | `مسیر: logs` | 0 | ⬜ |
+| `PAGE-034.56` | 1017–1159 | ناحیه | `مسیر: activity-log` | **8** | ⬜ |
+| `PAGE-034.57` | 1160–1198 | ناحیه | `مسیر: backup` | 6 | ⬜ |
+| `PAGE-034.58` | 1199–1206 | ناحیه | `مسیر: search\|search.global` | 0 | ⬜ |
+| `PAGE-034.59` | 1207–1294 | ناحیه | `مسیر: search` | 7 | ⬜ |
+| `PAGE-034.60` | 1295–1397 | ناحیه | `مسیر: chatbot-admin` | 5 | ⬜ |
+| `PAGE-034.61` | 1398–1408 | ناحیه | `مسیر: holidays` | 0 | ⬜ |
+| `PAGE-034.62` | 1409–1421 | ناحیه | `مسیر: new-ticket\|ticket.create` | 0 | ⬜ |
+| `PAGE-034.63` | 1422–1522 | ناحیه | `مسیر: inventory` | 7 | ⬜ |
+| `PAGE-034.64` | 1523–1554 | ناحیه | `مسیر: inventory-diagnostics` | 2 | ⬜ |
+| `PAGE-034.65` | 1555–1572 | ناحیه | `مسیر: asset-history` | 7 | ⬜ |
+| `PAGE-034.66` | 1573–1650 | ناحیه | `مسیر: domain-scan` | 2 | ⬜ |
+| `PAGE-034.67` | 1651–1695 | ناحیه | `مسیر: assets` | 7 | ⬜ |
+| `PAGE-034.68` | 1696–1729 | ناحیه | `مسیر: asset` | 7 | ⬜ |
+| `PAGE-034.69` | 1730–1920 | ناحیه | `مسیر: organization` | 3 | ⬜ |
+| `PAGE-034.70` | 1921–2390 | ناحیه | `مسیر: settings` | **11** | ⬜ |
+| `PAGE-034.71` | 2391–2412 | ناحیه | `مسیر: logs` | 2 | ⬜ |
+| `PAGE-034.72` | 2413–2442 | ناحیه | `مسیر: dashboard` | 0 | ⬜ |
 
 </details>
 
@@ -8679,596 +8740,660 @@
 </details>
 
 <details>
-<summary><b>PAGE-039</b> — <code>modules/request-center/Actions/bulk-actions.php</code> (141 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>PAGE-039</b> — <code>modules/request-center/Actions/appointment-actions.php</code> (90 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-039.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
-| `PAGE-039.02` | 17–23 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `PAGE-039.03` | 24–43 | ناحیه | `مسیر: add_asset_relation` | **8** | ⬜ |
-| `PAGE-039.04` | 44–141 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
+| `PAGE-039.01` | 1–90 | ناحیه | `بلوک رویه‌ای 1-90` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-040</b> — <code>modules/request-center/Actions/dispatch.php</code> (19 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-040</b> — <code>modules/request-center/Actions/bulk-actions.php</code> (141 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-040.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
+| `PAGE-040.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
+| `PAGE-040.02` | 17–23 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
+| `PAGE-040.03` | 24–43 | ناحیه | `مسیر: add_asset_relation` | **8** | ⬜ |
+| `PAGE-040.04` | 44–141 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-041</b> — <code>modules/request-center/Actions/service-actions.php</code> (229 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>PAGE-041</b> — <code>modules/request-center/Actions/dispatch.php</code> (19 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-041.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `PAGE-041.02` | 22–28 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `PAGE-041.03` | 29–68 | ناحیه | `مسیر: add_service` | 2 | ⬜ |
-| `PAGE-041.04` | 69–93 | ناحیه | `مسیر: add_service_field` | 2 | ⬜ |
-| `PAGE-041.05` | 94–132 | ناحیه | `مسیر: edit_service` | 0 | ⬜ |
-| `PAGE-041.06` | 133–154 | ناحیه | `مسیر: delete_service` | 0 | ⬜ |
-| `PAGE-041.07` | 155–185 | ناحیه | `مسیر: save_service_category` | 2 | ⬜ |
-| `PAGE-041.08` | 186–205 | ناحیه | `مسیر: delete_service_category` | 0 | ⬜ |
-| `PAGE-041.09` | 206–229 | ناحیه | `مسیر: add_knowledge` | 2 | ⬜ |
+| `PAGE-041.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-042</b> — <code>modules/request-center/Actions/supervisor-actions.php</code> (190 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>PAGE-042</b> — <code>modules/request-center/Actions/service-actions.php</code> (229 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-042.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
-| `PAGE-042.02` | 18–24 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `PAGE-042.03` | 25–98 | ناحیه | `مسیر: supervisor_decision` | 7 | ⬜ |
-| `PAGE-042.04` | 99–148 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
-| `PAGE-042.05` | 149–190 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
+| `PAGE-042.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `PAGE-042.02` | 22–28 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
+| `PAGE-042.03` | 29–68 | ناحیه | `مسیر: add_service` | 2 | ⬜ |
+| `PAGE-042.04` | 69–93 | ناحیه | `مسیر: add_service_field` | 2 | ⬜ |
+| `PAGE-042.05` | 94–132 | ناحیه | `مسیر: edit_service` | 0 | ⬜ |
+| `PAGE-042.06` | 133–154 | ناحیه | `مسیر: delete_service` | 0 | ⬜ |
+| `PAGE-042.07` | 155–185 | ناحیه | `مسیر: save_service_category` | 2 | ⬜ |
+| `PAGE-042.08` | 186–205 | ناحیه | `مسیر: delete_service_category` | 0 | ⬜ |
+| `PAGE-042.09` | 206–229 | ناحیه | `مسیر: add_knowledge` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-043</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (753 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>PAGE-043</b> — <code>modules/request-center/Actions/supervisor-actions.php</code> (190 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-043.01` | 1–22 | ناحیه | `بلوک رویه‌ای 1-22` | 0 | ⬜ |
-| `PAGE-043.02` | 23–29 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `PAGE-043.03` | 30–221 | ناحیه | `مسیر: create_ticket` | **8** | ⬜ |
-| `PAGE-043.04` | 222–283 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
-| `PAGE-043.05` | 284–365 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
-| `PAGE-043.06` | 366–405 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
-| `PAGE-043.07` | 406–455 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
-| `PAGE-043.08` | 456–604 | ناحیه | `مسیر: reply` | 3 | ⬜ |
-| `PAGE-043.09` | 605–753 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
+| `PAGE-043.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
+| `PAGE-043.02` | 18–24 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
+| `PAGE-043.03` | 25–98 | ناحیه | `مسیر: supervisor_decision` | 7 | ⬜ |
+| `PAGE-043.04` | 99–148 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
+| `PAGE-043.05` | 149–190 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-044</b> — <code>modules/request-center/Assets/request-center.css</code> (2 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-044</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (753 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-044.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `PAGE-044.01` | 1–22 | ناحیه | `بلوک رویه‌ای 1-22` | 0 | ⬜ |
+| `PAGE-044.02` | 23–29 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
+| `PAGE-044.03` | 30–221 | ناحیه | `مسیر: create_ticket` | **8** | ⬜ |
+| `PAGE-044.04` | 222–283 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
+| `PAGE-044.05` | 284–365 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
+| `PAGE-044.06` | 366–405 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
+| `PAGE-044.07` | 406–455 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
+| `PAGE-044.08` | 456–604 | ناحیه | `مسیر: reply` | 3 | ⬜ |
+| `PAGE-044.09` | 605–753 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-045</b> — <code>modules/request-center/Pages/admin.php</code> (83 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-045</b> — <code>modules/request-center/AppointmentRepository.php</code> (191 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-045.01` | 1–83 | ناحیه | `بلوک رویه‌ای 1-83` | 2 | ⬜ |
+| `PAGE-045.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `PAGE-045.02` | 4–190 | کلاس | `AppointmentRepository` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-046</b> — <code>modules/request-center/Pages/analytics.php</code> (49 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-046</b> — <code>modules/request-center/Assets/request-center.css</code> (2 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-046.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `PAGE-046.02` | 6–49 | ناحیه | `مسیر: analytics` | 5 | ⬜ |
+| `PAGE-046.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-047</b> — <code>modules/request-center/Pages/calendar.php</code> (130 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-047</b> — <code>modules/request-center/Pages/admin.php</code> (83 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-047.01` | 1–130 | ناحیه | `بلوک رویه‌ای 1-130` | **8** | ⬜ |
+| `PAGE-047.01` | 1–83 | ناحیه | `بلوک رویه‌ای 1-83` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-048</b> — <code>modules/request-center/Pages/create.php</code> (147 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-048</b> — <code>modules/request-center/Pages/analytics.php</code> (49 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-048.01` | 1–11 | ناحیه | `بلوک رویه‌ای 1-11` | 0 | ⬜ |
-| `PAGE-048.02` | 12–147 | ناحیه | `مسیر: new-ticket` | **8** | ⬜ |
+| `PAGE-048.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `PAGE-048.02` | 6–49 | ناحیه | `مسیر: analytics` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-049</b> — <code>modules/request-center/Pages/detail.php</code> (246 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-049</b> — <code>modules/request-center/Pages/calendar.php</code> (189 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-049.01` | 1–10 | ناحیه | `بلوک رویه‌ای 1-10` | 0 | ⬜ |
-| `PAGE-049.02` | 11–246 | ناحیه | `مسیر: ticket` | **8** | ⬜ |
+| `PAGE-049.01` | 1–129 | ناحیه | `بلوک رویه‌ای 1-129` | **8** | ⬜ |
+| `PAGE-049.02` | 130–189 | ناحیه | `نوبت‌های رسیدگی کارشناسان (فاز سه)` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-050</b> — <code>modules/request-center/Pages/index.php</code> (342 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-050</b> — <code>modules/request-center/Pages/create.php</code> (147 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-050.01` | 1–94 | ناحیه | `بلوک رویه‌ای 1-94` | 2 | ⬜ |
-| `PAGE-050.02` | 95–342 | ناحیه | `Dedicated role workspaces are routed before the ge` | **8** | ⬜ |
+| `PAGE-050.01` | 1–11 | ناحیه | `بلوک رویه‌ای 1-11` | 0 | ⬜ |
+| `PAGE-050.02` | 12–147 | ناحیه | `مسیر: new-ticket` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-051</b> — <code>modules/request-center/Pages/queue.php</code> (39 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-051</b> — <code>modules/request-center/Pages/detail.php</code> (246 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-051.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `PAGE-051.02` | 6–39 | ناحیه | `مسیر: queue` | 2 | ⬜ |
+| `PAGE-051.01` | 1–10 | ناحیه | `بلوک رویه‌ای 1-10` | 0 | ⬜ |
+| `PAGE-051.02` | 11–246 | ناحیه | `مسیر: ticket` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-052</b> — <code>modules/request-center/Pages/reports.php</code> (67 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-052</b> — <code>modules/request-center/Pages/index.php</code> (346 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-052.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `PAGE-052.02` | 6–67 | ناحیه | `مسیر: reports` | 7 | ⬜ |
+| `PAGE-052.01` | 1–98 | ناحیه | `بلوک رویه‌ای 1-98` | 2 | ⬜ |
+| `PAGE-052.02` | 99–346 | ناحیه | `Dedicated role workspaces are routed before the ge` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-053</b> — <code>modules/request-center/Pages/services.php</code> (176 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>PAGE-053</b> — <code>modules/request-center/Pages/queue.php</code> (39 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-053.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `PAGE-053.02` | 6–91 | ناحیه | `مسیر: services` | 7 | ⬜ |
-| `PAGE-053.03` | 92–100 | ناحیه | `سربرگ‌ها (تب‌ها)` | 0 | ⬜ |
-| `PAGE-053.04` | 101–110 | ناحیه | `تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)` | 0 | ⬜ |
-| `PAGE-053.05` | 111–134 | ناحیه | `تب ۲: لیست خدمات + فیلتر` | 6 | ⬜ |
-| `PAGE-053.06` | 135–148 | ناحیه | `تب ۳: دسته‌بندی‌ها` | 6 | ⬜ |
-| `PAGE-053.07` | 149–176 | ناحیه | `پنجره‌های ویرایش/فیلد (rendered outside the tab pa` | 5 | ⬜ |
+| `PAGE-053.02` | 6–39 | ناحیه | `مسیر: queue` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-054</b> — <code>modules/request-center/Pages/supervisor-workspace.php</code> (66 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-054</b> — <code>modules/request-center/Pages/reports.php</code> (67 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-054.01` | 1–66 | ناحیه | `بلوک رویه‌ای 1-66` | 1 | ⬜ |
+| `PAGE-054.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `PAGE-054.02` | 6–67 | ناحیه | `مسیر: reports` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-055</b> — <code>modules/request-center/Pages/supervisor.php</code> (53 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-055</b> — <code>modules/request-center/Pages/services.php</code> (176 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-055.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
-| `PAGE-055.02` | 9–53 | ناحیه | `مسیر: supervisor` | 7 | ⬜ |
+| `PAGE-055.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `PAGE-055.02` | 6–91 | ناحیه | `مسیر: services` | 7 | ⬜ |
+| `PAGE-055.03` | 92–100 | ناحیه | `سربرگ‌ها (تب‌ها)` | 0 | ⬜ |
+| `PAGE-055.04` | 101–110 | ناحیه | `تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)` | 0 | ⬜ |
+| `PAGE-055.05` | 111–134 | ناحیه | `تب ۲: لیست خدمات + فیلتر` | 6 | ⬜ |
+| `PAGE-055.06` | 135–148 | ناحیه | `تب ۳: دسته‌بندی‌ها` | 6 | ⬜ |
+| `PAGE-055.07` | 149–176 | ناحیه | `پنجره‌های ویرایش/فیلد (rendered outside the tab pa` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-056</b> — <code>modules/request-center/RequestCenterRepository.php</code> (444 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-056</b> — <code>modules/request-center/Pages/supervisor-workspace.php</code> (66 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-056.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-056.02` | 4–443 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
+| `PAGE-056.01` | 1–66 | ناحیه | `بلوک رویه‌ای 1-66` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-057</b> — <code>modules/request-center/WorkflowService.php</code> (257 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-057</b> — <code>modules/request-center/Pages/supervisor.php</code> (53 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-057.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-057.02` | 4–34 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
-| `PAGE-057.03` | 36–256 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
+| `PAGE-057.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
+| `PAGE-057.02` | 9–53 | ناحیه | `مسیر: supervisor` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-058</b> — <code>ola.php</code> (112 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>PAGE-058</b> — <code>modules/request-center/RequestCenterRepository.php</code> (444 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-058.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `PAGE-058.02` | 6–9 | تابع | `ola_post` | 2 | ⬜ |
-| `PAGE-058.03` | 11–22 | تابع | `ola_header` | 0 | ⬜ |
-| `PAGE-058.04` | 24–28 | تابع | `ola_footer` | 0 | ⬜ |
-| `PAGE-058.05` | 30–30 | ناحیه | `۱.۳۷.۷ — این صفحه با require_admin() باز می‌شد، ام` | 0 | ⬜ |
-| `PAGE-058.06` | 31–31 | ناحیه | `کد «ola.manage» بود؛ هر دو یکی شد (ادمین اصلی همهٔ` | 0 | ⬜ |
-| `PAGE-058.07` | 32–50 | ناحیه | `قابل دادن/گرفتن است).` | 0 | ⬜ |
-| `PAGE-058.08` | 51–72 | ناحیه | `مسیر: save_ola_policy` | 3 | ⬜ |
-| `PAGE-058.09` | 73–112 | ناحیه | `مسیر: toggle_ola_policy` | **8** | ⬜ |
+| `PAGE-058.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `PAGE-058.02` | 4–443 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-059</b> — <code>organization.php</code> (787 خط، 52 آدرس، بازبینی‌شده 0/52)</summary>
+<summary><b>PAGE-059</b> — <code>modules/request-center/WorkflowService.php</code> (257 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-059.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-059.02` | 4–66 | تابع | `org_ensure_schema` | **9** | ⬜ |
-| `PAGE-059.03` | 69–90 | تابع | `org_ticket_schema_ensure` | 4 | ⬜ |
-| `PAGE-059.04` | 92–103 | تابع | `org_has_company_schema` | 0 | ⬜ |
-| `PAGE-059.05` | 105–114 | تابع | `org_companies_all` | 0 | ⬜ |
-| `PAGE-059.06` | 116–125 | تابع | `org_company_display_name` | 0 | ⬜ |
-| `PAGE-059.07` | 127–134 | تابع | `org_company_user_label` | 0 | ⬜ |
-| `PAGE-059.08` | 136–144 | تابع | `org_company_by_id` | 0 | ⬜ |
-| `PAGE-059.09` | 146–152 | تابع | `org_user_company_memberships` | 0 | ⬜ |
-| `PAGE-059.10` | 154–158 | تابع | `org_user_company_id` | 0 | ⬜ |
-| `PAGE-059.11` | 160–164 | تابع | `org_user_available_for_company` | 0 | ⬜ |
-| `PAGE-059.12` | 166–171 | تابع | `org_user_company_membership_join_sql` | 5 | ⬜ |
-| `PAGE-059.13` | 173–178 | تابع | `org_company_member_user_ids` | 5 | ⬜ |
-| `PAGE-059.14` | 180–195 | تابع | `org_company_context_id` | 0 | ⬜ |
-| `PAGE-059.15` | 197–206 | تابع | `org_current_company_id` | 0 | ⬜ |
-| `PAGE-059.16` | 208–212 | تابع | `org_company_root_type` | 0 | ⬜ |
-| `PAGE-059.17` | 214–218 | تابع | `org_company_root_title` | 0 | ⬜ |
-| `PAGE-059.18` | 220–233 | تابع | `org_has_sort_order` | 0 | ⬜ |
-| `PAGE-059.19` | 235–243 | تابع | `org_next_sort_order` | 0 | ⬜ |
-| `PAGE-059.20` | 245–254 | تابع | `org_units_all` | 0 | ⬜ |
-| `PAGE-059.21` | 256–272 | تابع | `org_deputy_units` | 5 | ⬜ |
-| `PAGE-059.22` | 274–299 | تابع | `org_liaison_units` | 4 | ⬜ |
-| `PAGE-059.23` | 301–334 | تابع | `org_unit_routing_department_id` | 1 | ⬜ |
-| `PAGE-059.24` | 336–349 | تابع | `org_ceo_unit_id` | 0 | ⬜ |
-| `PAGE-059.25` | 351–359 | تابع | `org_unit_accepts_experts` | 0 | ⬜ |
-| `PAGE-059.26` | 361–367 | تابع | `org_unit_by_id` | 0 | ⬜ |
-| `PAGE-059.27` | 369–375 | تابع | `org_unit_by_company` | 0 | ⬜ |
-| `PAGE-059.28` | 377–381 | تابع | `org_company_redirect_url` | 0 | ⬜ |
-| `PAGE-059.29` | 383–389 | تابع | `org_unit_children` | 5 | ⬜ |
-| `PAGE-059.30` | 391–406 | تابع | `org_unit_subtree_ids` | 0 | ⬜ |
-| `PAGE-059.31` | 408–422 | تابع | `org_unit_path_names` | 0 | ⬜ |
-| `PAGE-059.32` | 424–429 | تابع | `org_unit_manager_ids` | 0 | ⬜ |
-| `PAGE-059.33` | 431–435 | تابع | `org_unit_is_primary_admin` | 0 | ⬜ |
-| `PAGE-059.34` | 437–440 | تابع | `user_org_unit_id` | 0 | ⬜ |
-| `PAGE-059.35` | 442–447 | تابع | `user_is_unit_manager` | 0 | ⬜ |
-| `PAGE-059.36` | 449–465 | تابع | `user_managed_unit_ids` | 0 | ⬜ |
-| `PAGE-059.37` | 467–476 | تابع | `user_org_scope_unit_ids` | 0 | ⬜ |
-| `PAGE-059.38` | 478–484 | تابع | `user_is_org_manager_of` | 0 | ⬜ |
-| `PAGE-059.39` | 486–492 | تابع | `user_can_manage_organization` | 0 | ⬜ |
-| `PAGE-059.40` | 494–517 | تابع | `org_snapshot` | 5 | ⬜ |
-| `PAGE-059.41` | 519–526 | تابع | `org_snapshot_maps` | 0 | ⬜ |
-| `PAGE-059.42` | 528–549 | تابع | `org_snapshot_row_signature` | 0 | ⬜ |
-| `PAGE-059.43` | 551–568 | تابع | `org_snapshot_delta` | 0 | ⬜ |
-| `PAGE-059.44` | 570–583 | تابع | `org_record_undo` | 0 | ⬜ |
-| `PAGE-059.45` | 585–591 | تابع | `org_undo_state` | 0 | ⬜ |
-| `PAGE-059.46` | 593–668 | تابع | `org_restore_snapshot` | 5 | ⬜ |
-| `PAGE-059.47` | 670–679 | تابع | `org_position_unit_types` | 0 | ⬜ |
-| `PAGE-059.48` | 681–684 | تابع | `org_exempt_roles` | 0 | ⬜ |
-| `PAGE-059.49` | 686–704 | تابع | `org_ensure_role_sync_columns` | **8** | ⬜ |
-| `PAGE-059.50` | 706–722 | تابع | `org_position_user_ids` | 4 | ⬜ |
-| `PAGE-059.51` | 724–729 | تابع | `org_expert_user_ids` | 0 | ⬜ |
-| `PAGE-059.52` | 731–786 | تابع | `org_sync_position_roles` | 1 | ⬜ |
+| `PAGE-059.02` | 4–34 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
+| `PAGE-059.03` | 36–256 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-060</b> — <code>permissions.php</code> (912 خط، 50 آدرس، بازبینی‌شده 0/50)</summary>
+<summary><b>PAGE-060</b> — <code>modules/request-center/lib/endpoints.php</code> (96 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-060.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-060.02` | 4–26 | تابع | `permission_roles` | 0 | ⬜ |
-| `PAGE-060.03` | 28–214 | تابع | `permission_catalog` | 2 | ⬜ |
-| `PAGE-060.04` | 216–225 | تابع | `permission_all_codes` | 0 | ⬜ |
-| `PAGE-060.05` | 226–230 | ناحیه | `بلوک رویه‌ای 226-230` | 0 | ⬜ |
-| `PAGE-060.06` | 231–235 | تابع | `permission_cddvd_direct_edit_roles` | 1 | ⬜ |
-| `PAGE-060.07` | 237–244 | تابع | `permission_filter_role_codes` | 0 | ⬜ |
-| `PAGE-060.08` | 246–279 | تابع | `permission_edit_map` | 0 | ⬜ |
-| `PAGE-060.09` | 281–291 | تابع | `role_permissions_add_parents` | 0 | ⬜ |
-| `PAGE-060.10` | 292–295 | ناحیه | `بلوک رویه‌ای 292-295` | 0 | ⬜ |
-| `PAGE-060.11` | 296–300 | تابع | `print_fish_allowed_roles` | 0 | ⬜ |
-| `PAGE-060.12` | 302–311 | تابع | `print_fish_role_targets` | 0 | ⬜ |
-| `PAGE-060.13` | 313–323 | تابع | `print_fish_role_codes` | 0 | ⬜ |
-| `PAGE-060.14` | 325–342 | تابع | `permission_defaults` | 0 | ⬜ |
-| `PAGE-060.15` | 344–348 | تابع | `user_default_removed_codes` | 0 | ⬜ |
-| `PAGE-060.16` | 350–370 | تابع | `permission_defaults_raw` | 0 | ⬜ |
-| `PAGE-060.17` | 372–385 | تابع | `permission_table_ready` | 0 | ⬜ |
-| `PAGE-060.18` | 386–389 | ناحیه | `بلوک رویه‌ای 386-389` | 0 | ⬜ |
-| `PAGE-060.19` | 390–406 | تابع | `role_permissions_custom` | 0 | ⬜ |
-| `PAGE-060.20` | 408–414 | تابع | `role_permissions_mark_custom` | 0 | ⬜ |
-| `PAGE-060.21` | 416–420 | تابع | `role_permissions_normalize_codes` | 0 | ⬜ |
-| `PAGE-060.22` | 422–448 | تابع | `permission_food_legacy_codes` | 0 | ⬜ |
-| `PAGE-060.23` | 450–464 | تابع | `role_permission_effective_codes` | 0 | ⬜ |
-| `PAGE-060.24` | 466–474 | تابع | `role_permissions_same_set` | 0 | ⬜ |
-| `PAGE-060.25` | 476–485 | تابع | `role_permissions_flush_cache` | 0 | ⬜ |
-| `PAGE-060.26` | 487–573 | تابع | `role_permissions_migrate_once` | **9** | ⬜ |
-| `PAGE-060.27` | 575–596 | تابع | `role_permission_codes` | 0 | ⬜ |
-| `PAGE-060.28` | 598–611 | تابع | `role_permission_set` | 0 | ⬜ |
-| `PAGE-060.29` | 613–655 | تابع | `user_access_group_permission_set` | 0 | ⬜ |
-| `PAGE-060.30` | 657–668 | تابع | `user_access_group_permissions_flush_cache` | 1 | ⬜ |
-| `PAGE-060.31` | 670–680 | تابع | `role_permissions_seeded` | 0 | ⬜ |
-| `PAGE-060.32` | 682–716 | تابع | `role_permissions_seed` | 0 | ⬜ |
-| `PAGE-060.33` | 718–751 | تابع | `role_permissions_save` | 1 | ⬜ |
-| `PAGE-060.34` | 753–772 | تابع | `role_permissions_reset` | 1 | ⬜ |
-| `PAGE-060.35` | 774–777 | تابع | `user_role_code` | 0 | ⬜ |
-| `PAGE-060.36` | 779–783 | تابع | `user_is_primary_admin` | 0 | ⬜ |
-| `PAGE-060.37` | 785–799 | تابع | `user_can` | 0 | ⬜ |
-| `PAGE-060.38` | 801–809 | تابع | `user_can_any` | 0 | ⬜ |
-| `PAGE-060.39` | 811–820 | تابع | `require_permission` | 0 | ⬜ |
-| `PAGE-060.40` | 822–830 | تابع | `require_any_permission` | 0 | ⬜ |
-| `PAGE-060.41` | 832–859 | تابع | `permission_icon` | 0 | ⬜ |
-| `PAGE-060.42` | 861–865 | تابع | `staff_role_codes` | 0 | ⬜ |
-| `PAGE-060.43` | 867–870 | تابع | `is_staff_role` | 0 | ⬜ |
-| `PAGE-060.44` | 872–876 | تابع | `admin_role_codes` | 0 | ⬜ |
-| `PAGE-060.45` | 878–881 | تابع | `is_admin_role` | 0 | ⬜ |
-| `PAGE-060.46` | 883–888 | تابع | `global_ticket_role_codes` | 0 | ⬜ |
-| `PAGE-060.47` | 890–893 | تابع | `is_global_ticket_role` | 0 | ⬜ |
-| `PAGE-060.48` | 895–900 | تابع | `is_department_scoped_role` | 0 | ⬜ |
-| `PAGE-060.49` | 902–906 | تابع | `assignable_role_codes` | 0 | ⬜ |
-| `PAGE-060.50` | 908–911 | تابع | `is_assignable_role` | 0 | ⬜ |
+| `PAGE-060.02` | 4–33 | تابع | `request_center_export_report` | 7 | ⬜ |
+| `PAGE-060.03` | 36–61 | تابع | `request_center_download_attachment` | 2 | ⬜ |
+| `PAGE-060.04` | 63–82 | تابع | `request_center_dashboard_rows` | 5 | ⬜ |
+| `PAGE-060.05` | 84–95 | تابع | `request_center_global_search` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-061</b> — <code>preview/food-release-download/vite.config.js</code> (57 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-061</b> — <code>modules/request-center/lib/functions.php</code> (240 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-061.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `PAGE-061.02` | 14–57 | بلوک | `pathname` | 1 | ⬜ |
+| `PAGE-061.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `PAGE-061.02` | 4–64 | تابع | `store_attachment` | 6 | ⬜ |
+| `PAGE-061.03` | 66–71 | تابع | `fetch_ticket` | 0 | ⬜ |
+| `PAGE-061.04` | 73–76 | تابع | `can_view_ticket` | 0 | ⬜ |
+| `PAGE-061.05` | 78–97 | تابع | `ticket_org_manager_rank_sql` | 0 | ⬜ |
+| `PAGE-061.06` | 99–141 | تابع | `choose_handling_agent` | 5 | ⬜ |
+| `PAGE-061.07` | 143–151 | تابع | `ticket_allowed_transitions` | 0 | ⬜ |
+| `PAGE-061.08` | 152–156 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
+| `PAGE-061.09` | 158–164 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
+| `PAGE-061.10` | 166–172 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
+| `PAGE-061.11` | 174–183 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
+| `PAGE-061.12` | 185–239 | تابع | `report_query_filters` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-062</b> — <code>request-center.php</code> (14 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-062</b> — <code>modules/request-center/post-handler.php</code> (84 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-062.01` | 1–14 | ناحیه | `بلوک رویه‌ای 1-14` | 2 | ⬜ |
+| `PAGE-062.01` | 1–24 | ناحیه | `بلوک رویه‌ای 1-24` | 0 | ⬜ |
+| `PAGE-062.02` | 25–28 | تابع | `request_center_is_post_action` | 0 | ⬜ |
+| `PAGE-062.03` | 30–83 | تابع | `request_center_handle_post` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-063</b> — <code>routes/web.php</code> (36 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>PAGE-063</b> — <code>ola.php</code> (112 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-063.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
-| `PAGE-063.02` | 8–11 | ناحیه | `Dashboard` | 0 | ⬜ |
-| `PAGE-063.03` | 12–17 | ناحیه | `Tickets` | 0 | ⬜ |
-| `PAGE-063.04` | 18–22 | ناحیه | `Users` | 0 | ⬜ |
-| `PAGE-063.05` | 23–26 | ناحیه | `Settings` | 0 | ⬜ |
-| `PAGE-063.06` | 27–30 | ناحیه | `Reports` | 0 | ⬜ |
-| `PAGE-063.07` | 31–36 | ناحیه | `API` | 0 | ⬜ |
+| `PAGE-063.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `PAGE-063.02` | 6–9 | تابع | `ola_post` | 2 | ⬜ |
+| `PAGE-063.03` | 11–22 | تابع | `ola_header` | 0 | ⬜ |
+| `PAGE-063.04` | 24–28 | تابع | `ola_footer` | 0 | ⬜ |
+| `PAGE-063.05` | 30–30 | ناحیه | `۱.۳۷.۷ — این صفحه با require_admin() باز می‌شد، ام` | 0 | ⬜ |
+| `PAGE-063.06` | 31–31 | ناحیه | `کد «ola.manage» بود؛ هر دو یکی شد (ادمین اصلی همهٔ` | 0 | ⬜ |
+| `PAGE-063.07` | 32–50 | ناحیه | `قابل دادن/گرفتن است).` | 0 | ⬜ |
+| `PAGE-063.08` | 51–72 | ناحیه | `مسیر: save_ola_policy` | 3 | ⬜ |
+| `PAGE-063.09` | 73–112 | ناحیه | `مسیر: toggle_ola_policy` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-064</b> — <code>session_bootstrap.php</code> (112 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-064</b> — <code>organization.php</code> (787 خط، 52 آدرس، بازبینی‌شده 0/52)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-064.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-064.02` | 4–67 | تابع | `app_session_start` | 3 | ⬜ |
-| `PAGE-064.03` | 69–111 | تابع | `app_session_enforce_idle` | 0 | ⬜ |
+| `PAGE-064.02` | 4–66 | تابع | `org_ensure_schema` | **9** | ⬜ |
+| `PAGE-064.03` | 69–90 | تابع | `org_ticket_schema_ensure` | 4 | ⬜ |
+| `PAGE-064.04` | 92–103 | تابع | `org_has_company_schema` | 0 | ⬜ |
+| `PAGE-064.05` | 105–114 | تابع | `org_companies_all` | 0 | ⬜ |
+| `PAGE-064.06` | 116–125 | تابع | `org_company_display_name` | 0 | ⬜ |
+| `PAGE-064.07` | 127–134 | تابع | `org_company_user_label` | 0 | ⬜ |
+| `PAGE-064.08` | 136–144 | تابع | `org_company_by_id` | 0 | ⬜ |
+| `PAGE-064.09` | 146–152 | تابع | `org_user_company_memberships` | 0 | ⬜ |
+| `PAGE-064.10` | 154–158 | تابع | `org_user_company_id` | 0 | ⬜ |
+| `PAGE-064.11` | 160–164 | تابع | `org_user_available_for_company` | 0 | ⬜ |
+| `PAGE-064.12` | 166–171 | تابع | `org_user_company_membership_join_sql` | 5 | ⬜ |
+| `PAGE-064.13` | 173–178 | تابع | `org_company_member_user_ids` | 5 | ⬜ |
+| `PAGE-064.14` | 180–195 | تابع | `org_company_context_id` | 0 | ⬜ |
+| `PAGE-064.15` | 197–206 | تابع | `org_current_company_id` | 0 | ⬜ |
+| `PAGE-064.16` | 208–212 | تابع | `org_company_root_type` | 0 | ⬜ |
+| `PAGE-064.17` | 214–218 | تابع | `org_company_root_title` | 0 | ⬜ |
+| `PAGE-064.18` | 220–233 | تابع | `org_has_sort_order` | 0 | ⬜ |
+| `PAGE-064.19` | 235–243 | تابع | `org_next_sort_order` | 0 | ⬜ |
+| `PAGE-064.20` | 245–254 | تابع | `org_units_all` | 0 | ⬜ |
+| `PAGE-064.21` | 256–272 | تابع | `org_deputy_units` | 5 | ⬜ |
+| `PAGE-064.22` | 274–299 | تابع | `org_liaison_units` | 4 | ⬜ |
+| `PAGE-064.23` | 301–334 | تابع | `org_unit_routing_department_id` | 1 | ⬜ |
+| `PAGE-064.24` | 336–349 | تابع | `org_ceo_unit_id` | 0 | ⬜ |
+| `PAGE-064.25` | 351–359 | تابع | `org_unit_accepts_experts` | 0 | ⬜ |
+| `PAGE-064.26` | 361–367 | تابع | `org_unit_by_id` | 0 | ⬜ |
+| `PAGE-064.27` | 369–375 | تابع | `org_unit_by_company` | 0 | ⬜ |
+| `PAGE-064.28` | 377–381 | تابع | `org_company_redirect_url` | 0 | ⬜ |
+| `PAGE-064.29` | 383–389 | تابع | `org_unit_children` | 5 | ⬜ |
+| `PAGE-064.30` | 391–406 | تابع | `org_unit_subtree_ids` | 0 | ⬜ |
+| `PAGE-064.31` | 408–422 | تابع | `org_unit_path_names` | 0 | ⬜ |
+| `PAGE-064.32` | 424–429 | تابع | `org_unit_manager_ids` | 0 | ⬜ |
+| `PAGE-064.33` | 431–435 | تابع | `org_unit_is_primary_admin` | 0 | ⬜ |
+| `PAGE-064.34` | 437–440 | تابع | `user_org_unit_id` | 0 | ⬜ |
+| `PAGE-064.35` | 442–447 | تابع | `user_is_unit_manager` | 0 | ⬜ |
+| `PAGE-064.36` | 449–465 | تابع | `user_managed_unit_ids` | 0 | ⬜ |
+| `PAGE-064.37` | 467–476 | تابع | `user_org_scope_unit_ids` | 0 | ⬜ |
+| `PAGE-064.38` | 478–484 | تابع | `user_is_org_manager_of` | 0 | ⬜ |
+| `PAGE-064.39` | 486–492 | تابع | `user_can_manage_organization` | 0 | ⬜ |
+| `PAGE-064.40` | 494–517 | تابع | `org_snapshot` | 5 | ⬜ |
+| `PAGE-064.41` | 519–526 | تابع | `org_snapshot_maps` | 0 | ⬜ |
+| `PAGE-064.42` | 528–549 | تابع | `org_snapshot_row_signature` | 0 | ⬜ |
+| `PAGE-064.43` | 551–568 | تابع | `org_snapshot_delta` | 0 | ⬜ |
+| `PAGE-064.44` | 570–583 | تابع | `org_record_undo` | 0 | ⬜ |
+| `PAGE-064.45` | 585–591 | تابع | `org_undo_state` | 0 | ⬜ |
+| `PAGE-064.46` | 593–668 | تابع | `org_restore_snapshot` | 5 | ⬜ |
+| `PAGE-064.47` | 670–679 | تابع | `org_position_unit_types` | 0 | ⬜ |
+| `PAGE-064.48` | 681–684 | تابع | `org_exempt_roles` | 0 | ⬜ |
+| `PAGE-064.49` | 686–704 | تابع | `org_ensure_role_sync_columns` | **8** | ⬜ |
+| `PAGE-064.50` | 706–722 | تابع | `org_position_user_ids` | 4 | ⬜ |
+| `PAGE-064.51` | 724–729 | تابع | `org_expert_user_ids` | 0 | ⬜ |
+| `PAGE-064.52` | 731–786 | تابع | `org_sync_position_roles` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-065</b> — <code>system-health.php</code> (1,340 خط، 30 آدرس، بازبینی‌شده 0/30)</summary>
+<summary><b>PAGE-065</b> — <code>permissions.php</code> (912 خط، 50 آدرس، بازبینی‌شده 0/50)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-065.01` | 1–12 | ناحیه | `بلوک رویه‌ای 1-12` | 0 | ⬜ |
-| `PAGE-065.02` | 13–23 | تابع | `system_health_ensure` | 0 | ⬜ |
-| `PAGE-065.03` | 25–41 | تابع | `system_health_issue_filter` | 5 | ⬜ |
-| `PAGE-065.04` | 43–57 | تابع | `system_health_issue_rows` | 5 | ⬜ |
-| `PAGE-065.05` | 59–69 | تابع | `system_health_issue_total` | 0 | ⬜ |
-| `PAGE-065.06` | 71–84 | تابع | `system_health_issue_history` | 5 | ⬜ |
-| `PAGE-065.07` | 86–94 | تابع | `system_health_issue_history_total` | 0 | ⬜ |
-| `PAGE-065.08` | 96–99 | تابع | `system_health_fingerprint` | 0 | ⬜ |
-| `PAGE-065.09` | 101–121 | تابع | `system_health_table_label` | 0 | ⬜ |
-| `PAGE-065.10` | 123–162 | تابع | `system_health_human_module` | 0 | ⬜ |
-| `PAGE-065.11` | 164–174 | تابع | `system_health_human_level` | 0 | ⬜ |
-| `PAGE-065.12` | 176–225 | تابع | `system_health_humanize_event` | 0 | ⬜ |
-| `PAGE-065.13` | 227–250 | تابع | `system_health_event_reference` | 0 | ⬜ |
-| `PAGE-065.14` | 252–270 | تابع | `system_health_request_label` | 0 | ⬜ |
-| `PAGE-065.15` | 272–319 | تابع | `system_health_summary` | 0 | ⬜ |
-| `PAGE-065.16` | 321–338 | تابع | `system_health_apply_check_state` | 0 | ⬜ |
-| `PAGE-065.17` | 340–403 | تابع | `system_health_groups` | 0 | ⬜ |
-| `PAGE-065.18` | 405–430 | تابع | `system_health_event_totals` | 0 | ⬜ |
-| `PAGE-065.19` | 432–700 | تابع | `system_health_checks` | 4 | ⬜ |
-| `PAGE-065.20` | 701–706 | ناحیه | `بلوک رویه‌ای 701-706` | 0 | ⬜ |
-| `PAGE-065.21` | 707–737 | تابع | `sys_maint_cache_candidates` | 0 | ⬜ |
-| `PAGE-065.22` | 739–755 | تابع | `sys_maint_cache_purge` | 5 | ⬜ |
-| `PAGE-065.23` | 757–775 | تابع | `sys_maint_analyze_tables` | 0 | ⬜ |
-| `PAGE-065.24` | 777–785 | تابع | `sys_maint_table_overview` | 0 | ⬜ |
-| `PAGE-065.25` | 787–866 | تابع | `system_health_handle_post` | 2 | ⬜ |
-| `PAGE-065.26` | 868–884 | تابع | `system_health_export_safe_text` | 0 | ⬜ |
-| `PAGE-065.27` | 886–944 | تابع | `system_health_export_technical_xlsx` | 4 | ⬜ |
-| `PAGE-065.28` | 947–1091 | تابع | `system_health_export_safe_xlsx` | 7 | ⬜ |
-| `PAGE-065.29` | 1094–1116 | تابع | `system_health_request_timeline` | 0 | ⬜ |
-| `PAGE-065.30` | 1118–1339 | تابع | `system_health_render` | 3 | ⬜ |
+| `PAGE-065.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `PAGE-065.02` | 4–26 | تابع | `permission_roles` | 0 | ⬜ |
+| `PAGE-065.03` | 28–214 | تابع | `permission_catalog` | 2 | ⬜ |
+| `PAGE-065.04` | 216–225 | تابع | `permission_all_codes` | 0 | ⬜ |
+| `PAGE-065.05` | 226–230 | ناحیه | `بلوک رویه‌ای 226-230` | 0 | ⬜ |
+| `PAGE-065.06` | 231–235 | تابع | `permission_cddvd_direct_edit_roles` | 1 | ⬜ |
+| `PAGE-065.07` | 237–244 | تابع | `permission_filter_role_codes` | 0 | ⬜ |
+| `PAGE-065.08` | 246–279 | تابع | `permission_edit_map` | 0 | ⬜ |
+| `PAGE-065.09` | 281–291 | تابع | `role_permissions_add_parents` | 0 | ⬜ |
+| `PAGE-065.10` | 292–295 | ناحیه | `بلوک رویه‌ای 292-295` | 0 | ⬜ |
+| `PAGE-065.11` | 296–300 | تابع | `print_fish_allowed_roles` | 0 | ⬜ |
+| `PAGE-065.12` | 302–311 | تابع | `print_fish_role_targets` | 0 | ⬜ |
+| `PAGE-065.13` | 313–323 | تابع | `print_fish_role_codes` | 0 | ⬜ |
+| `PAGE-065.14` | 325–342 | تابع | `permission_defaults` | 0 | ⬜ |
+| `PAGE-065.15` | 344–348 | تابع | `user_default_removed_codes` | 0 | ⬜ |
+| `PAGE-065.16` | 350–370 | تابع | `permission_defaults_raw` | 0 | ⬜ |
+| `PAGE-065.17` | 372–385 | تابع | `permission_table_ready` | 0 | ⬜ |
+| `PAGE-065.18` | 386–389 | ناحیه | `بلوک رویه‌ای 386-389` | 0 | ⬜ |
+| `PAGE-065.19` | 390–406 | تابع | `role_permissions_custom` | 0 | ⬜ |
+| `PAGE-065.20` | 408–414 | تابع | `role_permissions_mark_custom` | 0 | ⬜ |
+| `PAGE-065.21` | 416–420 | تابع | `role_permissions_normalize_codes` | 0 | ⬜ |
+| `PAGE-065.22` | 422–448 | تابع | `permission_food_legacy_codes` | 0 | ⬜ |
+| `PAGE-065.23` | 450–464 | تابع | `role_permission_effective_codes` | 0 | ⬜ |
+| `PAGE-065.24` | 466–474 | تابع | `role_permissions_same_set` | 0 | ⬜ |
+| `PAGE-065.25` | 476–485 | تابع | `role_permissions_flush_cache` | 0 | ⬜ |
+| `PAGE-065.26` | 487–573 | تابع | `role_permissions_migrate_once` | **9** | ⬜ |
+| `PAGE-065.27` | 575–596 | تابع | `role_permission_codes` | 0 | ⬜ |
+| `PAGE-065.28` | 598–611 | تابع | `role_permission_set` | 0 | ⬜ |
+| `PAGE-065.29` | 613–655 | تابع | `user_access_group_permission_set` | 0 | ⬜ |
+| `PAGE-065.30` | 657–668 | تابع | `user_access_group_permissions_flush_cache` | 1 | ⬜ |
+| `PAGE-065.31` | 670–680 | تابع | `role_permissions_seeded` | 0 | ⬜ |
+| `PAGE-065.32` | 682–716 | تابع | `role_permissions_seed` | 0 | ⬜ |
+| `PAGE-065.33` | 718–751 | تابع | `role_permissions_save` | 1 | ⬜ |
+| `PAGE-065.34` | 753–772 | تابع | `role_permissions_reset` | 1 | ⬜ |
+| `PAGE-065.35` | 774–777 | تابع | `user_role_code` | 0 | ⬜ |
+| `PAGE-065.36` | 779–783 | تابع | `user_is_primary_admin` | 0 | ⬜ |
+| `PAGE-065.37` | 785–799 | تابع | `user_can` | 0 | ⬜ |
+| `PAGE-065.38` | 801–809 | تابع | `user_can_any` | 0 | ⬜ |
+| `PAGE-065.39` | 811–820 | تابع | `require_permission` | 0 | ⬜ |
+| `PAGE-065.40` | 822–830 | تابع | `require_any_permission` | 0 | ⬜ |
+| `PAGE-065.41` | 832–859 | تابع | `permission_icon` | 0 | ⬜ |
+| `PAGE-065.42` | 861–865 | تابع | `staff_role_codes` | 0 | ⬜ |
+| `PAGE-065.43` | 867–870 | تابع | `is_staff_role` | 0 | ⬜ |
+| `PAGE-065.44` | 872–876 | تابع | `admin_role_codes` | 0 | ⬜ |
+| `PAGE-065.45` | 878–881 | تابع | `is_admin_role` | 0 | ⬜ |
+| `PAGE-065.46` | 883–888 | تابع | `global_ticket_role_codes` | 0 | ⬜ |
+| `PAGE-065.47` | 890–893 | تابع | `is_global_ticket_role` | 0 | ⬜ |
+| `PAGE-065.48` | 895–900 | تابع | `is_department_scoped_role` | 0 | ⬜ |
+| `PAGE-065.49` | 902–906 | تابع | `assignable_role_codes` | 0 | ⬜ |
+| `PAGE-065.50` | 908–911 | تابع | `is_assignable_role` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-066</b> — <code>system-update.php</code> (415 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>PAGE-066</b> — <code>preview/food-release-download/vite.config.js</code> (57 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-066.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
-| `PAGE-066.02` | 18–23 | تابع | `system_update_current_version` | 0 | ⬜ |
-| `PAGE-066.03` | 25–34 | تابع | `system_update_ensure_table` | 4 | ⬜ |
-| `PAGE-066.04` | 36–44 | تابع | `system_update_migration_applied` | 0 | ⬜ |
-| `PAGE-066.05` | 46–77 | تابع | `system_update_requires_violation` | 0 | ⬜ |
-| `PAGE-066.06` | 79–102 | تابع | `system_update_archive_path_is_safe` | 0 | ⬜ |
-| `PAGE-066.07` | 104–150 | تابع | `system_update_validate_zip_entries` | 0 | ⬜ |
-| `PAGE-066.08` | 152–191 | تابع | `system_update_verify_staged_package` | 0 | ⬜ |
-| `PAGE-066.09` | 193–205 | تابع | `system_update_extract_package` | 0 | ⬜ |
-| `PAGE-066.10` | 207–294 | تابع | `system_update_read_package` | 0 | ⬜ |
-| `PAGE-066.11` | 295–297 | ناحیه | `بلوک رویه‌ای 295-297` | 0 | ⬜ |
-| `PAGE-066.12` | 298–322 | تابع | `system_update_files_snapshot` | 1 | ⬜ |
-| `PAGE-066.13` | 324–414 | تابع | `system_update_apply` | 1 | ⬜ |
+| `PAGE-066.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `PAGE-066.02` | 14–57 | بلوک | `pathname` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-067</b> — <code>traffic-control.php</code> (1,445 خط، 67 آدرس، بازبینی‌شده 0/67)</summary>
+<summary><b>PAGE-067</b> — <code>request-center.php</code> (28 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-067.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
-| `PAGE-067.02` | 8–8 | ناحیه | `کنترل تردد مراجعین و میهمانان — پورت‌شده از کنترل_` | 0 | ⬜ |
-| `PAGE-067.03` | 9–10 | ناحیه | `همه‌ی توابع با پیشوند traffic_ برای جلوگیری از تدا` | 0 | ⬜ |
-| `PAGE-067.04` | 11–14 | تابع | `traffic_can_manage` | 0 | ⬜ |
-| `PAGE-067.05` | 16–19 | تابع | `traffic_can_view_destinations` | 0 | ⬜ |
-| `PAGE-067.06` | 21–24 | تابع | `traffic_can_manage_destinations` | 0 | ⬜ |
-| `PAGE-067.07` | 26–30 | تابع | `traffic_destinations` | 0 | ⬜ |
-| `PAGE-067.08` | 32–35 | تابع | `traffic_approvers` | 0 | ⬜ |
-| `PAGE-067.09` | 37–48 | تابع | `traffic_destination_row_approvers` | 0 | ⬜ |
-| `PAGE-067.10` | 50–75 | تابع | `traffic_destination_approvers` | 0 | ⬜ |
-| `PAGE-067.11` | 77–85 | تابع | `traffic_destination_id` | 0 | ⬜ |
-| `PAGE-067.12` | 87–101 | تابع | `traffic_destination_approver` | 0 | ⬜ |
-| `PAGE-067.13` | 103–103 | ناحیه | `شماره برگ به‌صورت تاریخ‌شمسی+شماره‌ترتیبی روزانه، ` | 0 | ⬜ |
-| `PAGE-067.14` | 104–112 | تابع | `traffic_next_serial` | 0 | ⬜ |
-| `PAGE-067.15` | 114–117 | تابع | `traffic_find_last_visit` | 0 | ⬜ |
-| `PAGE-067.16` | 119–129 | تابع | `traffic_find_last_visit_by` | 5 | ⬜ |
-| `PAGE-067.17` | 131–137 | تابع | `traffic_fetch_record` | 0 | ⬜ |
-| `PAGE-067.18` | 139–155 | تابع | `traffic_search_condition` | 0 | ⬜ |
-| `PAGE-067.19` | 157–171 | تابع | `traffic_query_records` | 5 | ⬜ |
-| `PAGE-067.20` | 173–191 | تابع | `traffic_stats` | 0 | ⬜ |
-| `PAGE-067.21` | 193–201 | تابع | `traffic_empty_stats` | 0 | ⬜ |
-| `PAGE-067.22` | 203–226 | تابع | `traffic_report_criteria` | 0 | ⬜ |
-| `PAGE-067.23` | 228–241 | تابع | `traffic_report_records` | 0 | ⬜ |
-| `PAGE-067.24` | 243–250 | تابع | `traffic_report_columns` | 0 | ⬜ |
-| `PAGE-067.25` | 252–260 | تابع | `traffic_report_selected_fields` | 0 | ⬜ |
-| `PAGE-067.26` | 262–275 | تابع | `traffic_report_item` | 0 | ⬜ |
-| `PAGE-067.27` | 277–301 | تابع | `traffic_export_report` | 0 | ⬜ |
-| `PAGE-067.28` | 303–313 | کلاس | `TrafficInputException` | 0 | ⬜ |
-| `PAGE-067.29` | 315–323 | تابع | `traffic_phone_normalized` | 0 | ⬜ |
-| `PAGE-067.30` | 325–328 | تابع | `traffic_phone_digits` | 0 | ⬜ |
-| `PAGE-067.31` | 330–343 | تابع | `traffic_phone_tail` | 0 | ⬜ |
-| `PAGE-067.32` | 345–373 | تابع | `traffic_validate_payload` | 0 | ⬜ |
-| `PAGE-067.33` | 375–383 | تابع | `traffic_visit_snapshot` | 0 | ⬜ |
-| `PAGE-067.34` | 385–407 | تابع | `traffic_record_history` | 1 | ⬜ |
-| `PAGE-067.35` | 409–419 | تابع | `traffic_history_records` | 5 | ⬜ |
-| `PAGE-067.36` | 421–424 | تابع | `traffic_history_count` | 0 | ⬜ |
-| `PAGE-067.37` | 426–435 | تابع | `traffic_history_field_label` | 0 | ⬜ |
-| `PAGE-067.38` | 437–446 | تابع | `traffic_normalize_time_input` | 0 | ⬜ |
-| `PAGE-067.39` | 448–466 | تابع | `traffic_history_value` | 0 | ⬜ |
-| `PAGE-067.40` | 468–488 | تابع | `traffic_create_record` | 2 | ⬜ |
-| `PAGE-067.41` | 490–544 | تابع | `traffic_update_record` | 2 | ⬜ |
-| `PAGE-067.42` | 546–569 | تابع | `traffic_delete_record` | 2 | ⬜ |
-| `PAGE-067.43` | 571–620 | تابع | `traffic_set_exit` | 2 | ⬜ |
-| `PAGE-067.44` | 622–648 | تابع | `traffic_ensure_notice_schema` | 4 | ⬜ |
-| `PAGE-067.45` | 649–651 | ناحیه | `بلوک رویه‌ای 649-651` | 0 | ⬜ |
-| `PAGE-067.46` | 652–681 | تابع | `traffic_notice_create` | 2 | ⬜ |
-| `PAGE-067.47` | 683–694 | تابع | `traffic_destination_posted_approvers` | 2 | ⬜ |
-| `PAGE-067.48` | 696–714 | تابع | `traffic_save_destination` | 3 | ⬜ |
-| `PAGE-067.49` | 716–742 | تابع | `traffic_update_destination` | 3 | ⬜ |
-| `PAGE-067.50` | 744–752 | تابع | `traffic_delete_destination` | 3 | ⬜ |
-| `PAGE-067.51` | 754–763 | تابع | `traffic_form_old_values` | 2 | ⬜ |
-| `PAGE-067.52` | 765–778 | تابع | `traffic_remember_form_error` | 2 | ⬜ |
-| `PAGE-067.53` | 780–784 | تابع | `traffic_open_visits` | 0 | ⬜ |
-| `PAGE-067.54` | 786–857 | تابع | `traffic_handle_post` | 2 | ⬜ |
-| `PAGE-067.55` | 859–859 | ناحیه | `-` | 0 | ⬜ |
-| `PAGE-067.56` | 860–860 | ناحیه | `جست‌وجوی زنده با کد ملی (AJAX) — معادل txtNational` | 0 | ⬜ |
-| `PAGE-067.57` | 861–861 | ناحیه | `-` | 0 | ⬜ |
-| `PAGE-067.58` | 862–886 | تابع | `traffic_history_rows_html` | 0 | ⬜ |
-| `PAGE-067.59` | 888–976 | تابع | `traffic_api_handle` | 2 | ⬜ |
-| `PAGE-067.60` | 978–978 | ناحیه | `-` | 0 | ⬜ |
-| `PAGE-067.61` | 979–979 | ناحیه | `صفحه‌ی اصلی: زیرفرم‌های داشبورد / ثبت تردد / سوابق` | 0 | ⬜ |
-| `PAGE-067.62` | 980–980 | ناحیه | `-` | 0 | ⬜ |
-| `PAGE-067.63` | 981–1377 | تابع | `traffic_render_page` | 6 | ⬜ |
-| `PAGE-067.64` | 1379–1379 | ناحیه | `-` | 0 | ⬜ |
-| `PAGE-067.65` | 1380–1380 | ناحیه | `چاپ برگ ملاقات — معادل PrintTemplate + cmdPrintPas` | 0 | ⬜ |
-| `PAGE-067.66` | 1381–1381 | ناحیه | `-` | 0 | ⬜ |
-| `PAGE-067.67` | 1382–1444 | تابع | `traffic_render_print` | 0 | ⬜ |
+| `PAGE-067.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-068</b> — <code>traffic-import.php</code> (1,032 خط، 27 آدرس، بازبینی‌شده 0/27)</summary>
+<summary><b>PAGE-068</b> — <code>routes/web.php</code> (36 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-068.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
-| `PAGE-068.02` | 18–41 | تابع | `traffic_import_column_aliases` | 0 | ⬜ |
-| `PAGE-068.03` | 43–82 | تابع | `traffic_import_detect_header` | 0 | ⬜ |
-| `PAGE-068.04` | 84–100 | تابع | `traffic_import_date_from_parts` | 0 | ⬜ |
-| `PAGE-068.05` | 102–107 | تابع | `traffic_import_seconds_to_time` | 0 | ⬜ |
-| `PAGE-068.06` | 109–166 | تابع | `traffic_import_parse_date_value` | 0 | ⬜ |
-| `PAGE-068.07` | 168–220 | تابع | `traffic_import_parse_time` | 0 | ⬜ |
-| `PAGE-068.08` | 222–251 | تابع | `traffic_import_parse_bool` | 0 | ⬜ |
-| `PAGE-068.09` | 253–256 | تابع | `traffic_import_text_length` | 0 | ⬜ |
-| `PAGE-068.10` | 258–264 | تابع | `traffic_import_optional_marker` | 0 | ⬜ |
-| `PAGE-068.11` | 266–419 | تابع | `traffic_import_parse_sheet` | 1 | ⬜ |
-| `PAGE-068.12` | 421–453 | تابع | `traffic_import_xlsx_archive_error` | 0 | ⬜ |
-| `PAGE-068.13` | 455–521 | تابع | `traffic_import_csv_shape_error` | 1 | ⬜ |
-| `PAGE-068.14` | 523–588 | تابع | `traffic_import_read_upload` | 0 | ⬜ |
-| `PAGE-068.15` | 590–598 | تابع | `traffic_import_identity` | 0 | ⬜ |
-| `PAGE-068.16` | 600–603 | تابع | `traffic_import_serial_key` | 0 | ⬜ |
-| `PAGE-068.17` | 605–612 | تابع | `traffic_import_generated_serial` | 0 | ⬜ |
-| `PAGE-068.18` | 614–618 | تابع | `traffic_import_generated_serial_prefix` | 0 | ⬜ |
-| `PAGE-068.19` | 620–730 | تابع | `traffic_import_build_plan` | 1 | ⬜ |
-| `PAGE-068.20` | 732–801 | تابع | `traffic_import_plan_from_database` | 6 | ⬜ |
-| `PAGE-068.21` | 803–836 | تابع | `traffic_import_preview_session_data` | 0 | ⬜ |
-| `PAGE-068.22` | 838–851 | تابع | `traffic_import_current_preview` | 0 | ⬜ |
-| `PAGE-068.23` | 853–942 | تابع | `traffic_import_handle_post` | 2 | ⬜ |
-| `PAGE-068.24` | 944–985 | تابع | `traffic_import_apply_plan_in_transaction` | 1 | ⬜ |
-| `PAGE-068.25` | 987–993 | تابع | `traffic_import_template_headers` | 0 | ⬜ |
-| `PAGE-068.26` | 995–1006 | تابع | `traffic_import_template_csv_bytes` | 0 | ⬜ |
-| `PAGE-068.27` | 1008–1031 | تابع | `traffic_import_download_template` | 3 | ⬜ |
+| `PAGE-068.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
+| `PAGE-068.02` | 8–11 | ناحیه | `Dashboard` | 0 | ⬜ |
+| `PAGE-068.03` | 12–17 | ناحیه | `Tickets` | 0 | ⬜ |
+| `PAGE-068.04` | 18–22 | ناحیه | `Users` | 0 | ⬜ |
+| `PAGE-068.05` | 23–26 | ناحیه | `Settings` | 0 | ⬜ |
+| `PAGE-068.06` | 27–30 | ناحیه | `Reports` | 0 | ⬜ |
+| `PAGE-068.07` | 31–36 | ناحیه | `API` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-069</b> — <code>user-access-groups.php</code> (209 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>PAGE-069</b> — <code>session_bootstrap.php</code> (112 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-069.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-069.02` | 4–28 | تابع | `user_access_groups_schema_ready` | 0 | ⬜ |
-| `PAGE-069.03` | 30–49 | تابع | `user_access_groups_all` | 0 | ⬜ |
-| `PAGE-069.04` | 51–60 | تابع | `user_access_groups_admin_users` | 0 | ⬜ |
-| `PAGE-069.05` | 62–76 | تابع | `user_access_group_member_set` | 0 | ⬜ |
-| `PAGE-069.06` | 78–96 | تابع | `user_access_groups_member_sets` | 0 | ⬜ |
-| `PAGE-069.07` | 98–117 | تابع | `user_access_groups_permission_sets` | 0 | ⬜ |
-| `PAGE-069.08` | 119–133 | تابع | `user_access_group_permission_set_for_group` | 0 | ⬜ |
-| `PAGE-069.09` | 135–138 | تابع | `user_access_group_role_label` | 0 | ⬜ |
-| `PAGE-069.10` | 140–199 | تابع | `user_access_group_permission_matrix_markup` | 0 | ⬜ |
-| `PAGE-069.11` | 201–208 | تابع | `user_access_groups_redirect` | 0 | ⬜ |
+| `PAGE-069.02` | 4–67 | تابع | `app_session_start` | 3 | ⬜ |
+| `PAGE-069.03` | 69–111 | تابع | `app_session_enforce_idle` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-070</b> — <code>xlsx-writer.php</code> (221 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>PAGE-070</b> — <code>system-health.php</code> (1,340 خط، 30 آدرس، بازبینی‌شده 0/30)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-070.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-070.02` | 4–27 | تابع | `xlsx_col_name` | 0 | ⬜ |
-| `PAGE-070.03` | 29–33 | تابع | `xlsx_clean_text` | 0 | ⬜ |
-| `PAGE-070.04` | 35–42 | تابع | `xlsx_sheet_name` | 0 | ⬜ |
-| `PAGE-070.05` | 44–137 | تابع | `xlsx_build` | 6 | ⬜ |
-| `PAGE-070.06` | 139–142 | تابع | `xlsx_xml` | 0 | ⬜ |
-| `PAGE-070.07` | 144–207 | تابع | `xlsx_sheet_xml` | 0 | ⬜ |
-| `PAGE-070.08` | 209–220 | تابع | `xlsx_send` | 3 | ⬜ |
+| `PAGE-070.01` | 1–12 | ناحیه | `بلوک رویه‌ای 1-12` | 0 | ⬜ |
+| `PAGE-070.02` | 13–23 | تابع | `system_health_ensure` | 0 | ⬜ |
+| `PAGE-070.03` | 25–41 | تابع | `system_health_issue_filter` | 5 | ⬜ |
+| `PAGE-070.04` | 43–57 | تابع | `system_health_issue_rows` | 5 | ⬜ |
+| `PAGE-070.05` | 59–69 | تابع | `system_health_issue_total` | 0 | ⬜ |
+| `PAGE-070.06` | 71–84 | تابع | `system_health_issue_history` | 5 | ⬜ |
+| `PAGE-070.07` | 86–94 | تابع | `system_health_issue_history_total` | 0 | ⬜ |
+| `PAGE-070.08` | 96–99 | تابع | `system_health_fingerprint` | 0 | ⬜ |
+| `PAGE-070.09` | 101–121 | تابع | `system_health_table_label` | 0 | ⬜ |
+| `PAGE-070.10` | 123–162 | تابع | `system_health_human_module` | 0 | ⬜ |
+| `PAGE-070.11` | 164–174 | تابع | `system_health_human_level` | 0 | ⬜ |
+| `PAGE-070.12` | 176–225 | تابع | `system_health_humanize_event` | 0 | ⬜ |
+| `PAGE-070.13` | 227–250 | تابع | `system_health_event_reference` | 0 | ⬜ |
+| `PAGE-070.14` | 252–270 | تابع | `system_health_request_label` | 0 | ⬜ |
+| `PAGE-070.15` | 272–319 | تابع | `system_health_summary` | 0 | ⬜ |
+| `PAGE-070.16` | 321–338 | تابع | `system_health_apply_check_state` | 0 | ⬜ |
+| `PAGE-070.17` | 340–403 | تابع | `system_health_groups` | 0 | ⬜ |
+| `PAGE-070.18` | 405–430 | تابع | `system_health_event_totals` | 0 | ⬜ |
+| `PAGE-070.19` | 432–700 | تابع | `system_health_checks` | 4 | ⬜ |
+| `PAGE-070.20` | 701–706 | ناحیه | `بلوک رویه‌ای 701-706` | 0 | ⬜ |
+| `PAGE-070.21` | 707–737 | تابع | `sys_maint_cache_candidates` | 0 | ⬜ |
+| `PAGE-070.22` | 739–755 | تابع | `sys_maint_cache_purge` | 5 | ⬜ |
+| `PAGE-070.23` | 757–775 | تابع | `sys_maint_analyze_tables` | 0 | ⬜ |
+| `PAGE-070.24` | 777–785 | تابع | `sys_maint_table_overview` | 0 | ⬜ |
+| `PAGE-070.25` | 787–866 | تابع | `system_health_handle_post` | 2 | ⬜ |
+| `PAGE-070.26` | 868–884 | تابع | `system_health_export_safe_text` | 0 | ⬜ |
+| `PAGE-070.27` | 886–944 | تابع | `system_health_export_technical_xlsx` | 4 | ⬜ |
+| `PAGE-070.28` | 947–1091 | تابع | `system_health_export_safe_xlsx` | 7 | ⬜ |
+| `PAGE-070.29` | 1094–1116 | تابع | `system_health_request_timeline` | 0 | ⬜ |
+| `PAGE-070.30` | 1118–1339 | تابع | `system_health_render` | 3 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>PAGE-071</b> — <code>system-update.php</code> (415 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `PAGE-071.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
+| `PAGE-071.02` | 18–23 | تابع | `system_update_current_version` | 0 | ⬜ |
+| `PAGE-071.03` | 25–34 | تابع | `system_update_ensure_table` | 4 | ⬜ |
+| `PAGE-071.04` | 36–44 | تابع | `system_update_migration_applied` | 0 | ⬜ |
+| `PAGE-071.05` | 46–77 | تابع | `system_update_requires_violation` | 0 | ⬜ |
+| `PAGE-071.06` | 79–102 | تابع | `system_update_archive_path_is_safe` | 0 | ⬜ |
+| `PAGE-071.07` | 104–150 | تابع | `system_update_validate_zip_entries` | 0 | ⬜ |
+| `PAGE-071.08` | 152–191 | تابع | `system_update_verify_staged_package` | 0 | ⬜ |
+| `PAGE-071.09` | 193–205 | تابع | `system_update_extract_package` | 0 | ⬜ |
+| `PAGE-071.10` | 207–294 | تابع | `system_update_read_package` | 0 | ⬜ |
+| `PAGE-071.11` | 295–297 | ناحیه | `بلوک رویه‌ای 295-297` | 0 | ⬜ |
+| `PAGE-071.12` | 298–322 | تابع | `system_update_files_snapshot` | 1 | ⬜ |
+| `PAGE-071.13` | 324–414 | تابع | `system_update_apply` | 1 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>PAGE-072</b> — <code>traffic-control.php</code> (1,445 خط، 67 آدرس، بازبینی‌شده 0/67)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `PAGE-072.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
+| `PAGE-072.02` | 8–8 | ناحیه | `کنترل تردد مراجعین و میهمانان — پورت‌شده از کنترل_` | 0 | ⬜ |
+| `PAGE-072.03` | 9–10 | ناحیه | `همه‌ی توابع با پیشوند traffic_ برای جلوگیری از تدا` | 0 | ⬜ |
+| `PAGE-072.04` | 11–14 | تابع | `traffic_can_manage` | 0 | ⬜ |
+| `PAGE-072.05` | 16–19 | تابع | `traffic_can_view_destinations` | 0 | ⬜ |
+| `PAGE-072.06` | 21–24 | تابع | `traffic_can_manage_destinations` | 0 | ⬜ |
+| `PAGE-072.07` | 26–30 | تابع | `traffic_destinations` | 0 | ⬜ |
+| `PAGE-072.08` | 32–35 | تابع | `traffic_approvers` | 0 | ⬜ |
+| `PAGE-072.09` | 37–48 | تابع | `traffic_destination_row_approvers` | 0 | ⬜ |
+| `PAGE-072.10` | 50–75 | تابع | `traffic_destination_approvers` | 0 | ⬜ |
+| `PAGE-072.11` | 77–85 | تابع | `traffic_destination_id` | 0 | ⬜ |
+| `PAGE-072.12` | 87–101 | تابع | `traffic_destination_approver` | 0 | ⬜ |
+| `PAGE-072.13` | 103–103 | ناحیه | `شماره برگ به‌صورت تاریخ‌شمسی+شماره‌ترتیبی روزانه، ` | 0 | ⬜ |
+| `PAGE-072.14` | 104–112 | تابع | `traffic_next_serial` | 0 | ⬜ |
+| `PAGE-072.15` | 114–117 | تابع | `traffic_find_last_visit` | 0 | ⬜ |
+| `PAGE-072.16` | 119–129 | تابع | `traffic_find_last_visit_by` | 5 | ⬜ |
+| `PAGE-072.17` | 131–137 | تابع | `traffic_fetch_record` | 0 | ⬜ |
+| `PAGE-072.18` | 139–155 | تابع | `traffic_search_condition` | 0 | ⬜ |
+| `PAGE-072.19` | 157–171 | تابع | `traffic_query_records` | 5 | ⬜ |
+| `PAGE-072.20` | 173–191 | تابع | `traffic_stats` | 0 | ⬜ |
+| `PAGE-072.21` | 193–201 | تابع | `traffic_empty_stats` | 0 | ⬜ |
+| `PAGE-072.22` | 203–226 | تابع | `traffic_report_criteria` | 0 | ⬜ |
+| `PAGE-072.23` | 228–241 | تابع | `traffic_report_records` | 0 | ⬜ |
+| `PAGE-072.24` | 243–250 | تابع | `traffic_report_columns` | 0 | ⬜ |
+| `PAGE-072.25` | 252–260 | تابع | `traffic_report_selected_fields` | 0 | ⬜ |
+| `PAGE-072.26` | 262–275 | تابع | `traffic_report_item` | 0 | ⬜ |
+| `PAGE-072.27` | 277–301 | تابع | `traffic_export_report` | 0 | ⬜ |
+| `PAGE-072.28` | 303–313 | کلاس | `TrafficInputException` | 0 | ⬜ |
+| `PAGE-072.29` | 315–323 | تابع | `traffic_phone_normalized` | 0 | ⬜ |
+| `PAGE-072.30` | 325–328 | تابع | `traffic_phone_digits` | 0 | ⬜ |
+| `PAGE-072.31` | 330–343 | تابع | `traffic_phone_tail` | 0 | ⬜ |
+| `PAGE-072.32` | 345–373 | تابع | `traffic_validate_payload` | 0 | ⬜ |
+| `PAGE-072.33` | 375–383 | تابع | `traffic_visit_snapshot` | 0 | ⬜ |
+| `PAGE-072.34` | 385–407 | تابع | `traffic_record_history` | 1 | ⬜ |
+| `PAGE-072.35` | 409–419 | تابع | `traffic_history_records` | 5 | ⬜ |
+| `PAGE-072.36` | 421–424 | تابع | `traffic_history_count` | 0 | ⬜ |
+| `PAGE-072.37` | 426–435 | تابع | `traffic_history_field_label` | 0 | ⬜ |
+| `PAGE-072.38` | 437–446 | تابع | `traffic_normalize_time_input` | 0 | ⬜ |
+| `PAGE-072.39` | 448–466 | تابع | `traffic_history_value` | 0 | ⬜ |
+| `PAGE-072.40` | 468–488 | تابع | `traffic_create_record` | 2 | ⬜ |
+| `PAGE-072.41` | 490–544 | تابع | `traffic_update_record` | 2 | ⬜ |
+| `PAGE-072.42` | 546–569 | تابع | `traffic_delete_record` | 2 | ⬜ |
+| `PAGE-072.43` | 571–620 | تابع | `traffic_set_exit` | 2 | ⬜ |
+| `PAGE-072.44` | 622–648 | تابع | `traffic_ensure_notice_schema` | 4 | ⬜ |
+| `PAGE-072.45` | 649–651 | ناحیه | `بلوک رویه‌ای 649-651` | 0 | ⬜ |
+| `PAGE-072.46` | 652–681 | تابع | `traffic_notice_create` | 2 | ⬜ |
+| `PAGE-072.47` | 683–694 | تابع | `traffic_destination_posted_approvers` | 2 | ⬜ |
+| `PAGE-072.48` | 696–714 | تابع | `traffic_save_destination` | 3 | ⬜ |
+| `PAGE-072.49` | 716–742 | تابع | `traffic_update_destination` | 3 | ⬜ |
+| `PAGE-072.50` | 744–752 | تابع | `traffic_delete_destination` | 3 | ⬜ |
+| `PAGE-072.51` | 754–763 | تابع | `traffic_form_old_values` | 2 | ⬜ |
+| `PAGE-072.52` | 765–778 | تابع | `traffic_remember_form_error` | 2 | ⬜ |
+| `PAGE-072.53` | 780–784 | تابع | `traffic_open_visits` | 0 | ⬜ |
+| `PAGE-072.54` | 786–857 | تابع | `traffic_handle_post` | 2 | ⬜ |
+| `PAGE-072.55` | 859–859 | ناحیه | `-` | 0 | ⬜ |
+| `PAGE-072.56` | 860–860 | ناحیه | `جست‌وجوی زنده با کد ملی (AJAX) — معادل txtNational` | 0 | ⬜ |
+| `PAGE-072.57` | 861–861 | ناحیه | `-` | 0 | ⬜ |
+| `PAGE-072.58` | 862–886 | تابع | `traffic_history_rows_html` | 0 | ⬜ |
+| `PAGE-072.59` | 888–976 | تابع | `traffic_api_handle` | 2 | ⬜ |
+| `PAGE-072.60` | 978–978 | ناحیه | `-` | 0 | ⬜ |
+| `PAGE-072.61` | 979–979 | ناحیه | `صفحه‌ی اصلی: زیرفرم‌های داشبورد / ثبت تردد / سوابق` | 0 | ⬜ |
+| `PAGE-072.62` | 980–980 | ناحیه | `-` | 0 | ⬜ |
+| `PAGE-072.63` | 981–1377 | تابع | `traffic_render_page` | 6 | ⬜ |
+| `PAGE-072.64` | 1379–1379 | ناحیه | `-` | 0 | ⬜ |
+| `PAGE-072.65` | 1380–1380 | ناحیه | `چاپ برگ ملاقات — معادل PrintTemplate + cmdPrintPas` | 0 | ⬜ |
+| `PAGE-072.66` | 1381–1381 | ناحیه | `-` | 0 | ⬜ |
+| `PAGE-072.67` | 1382–1444 | تابع | `traffic_render_print` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>PAGE-073</b> — <code>traffic-import.php</code> (1,032 خط، 27 آدرس، بازبینی‌شده 0/27)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `PAGE-073.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
+| `PAGE-073.02` | 18–41 | تابع | `traffic_import_column_aliases` | 0 | ⬜ |
+| `PAGE-073.03` | 43–82 | تابع | `traffic_import_detect_header` | 0 | ⬜ |
+| `PAGE-073.04` | 84–100 | تابع | `traffic_import_date_from_parts` | 0 | ⬜ |
+| `PAGE-073.05` | 102–107 | تابع | `traffic_import_seconds_to_time` | 0 | ⬜ |
+| `PAGE-073.06` | 109–166 | تابع | `traffic_import_parse_date_value` | 0 | ⬜ |
+| `PAGE-073.07` | 168–220 | تابع | `traffic_import_parse_time` | 0 | ⬜ |
+| `PAGE-073.08` | 222–251 | تابع | `traffic_import_parse_bool` | 0 | ⬜ |
+| `PAGE-073.09` | 253–256 | تابع | `traffic_import_text_length` | 0 | ⬜ |
+| `PAGE-073.10` | 258–264 | تابع | `traffic_import_optional_marker` | 0 | ⬜ |
+| `PAGE-073.11` | 266–419 | تابع | `traffic_import_parse_sheet` | 1 | ⬜ |
+| `PAGE-073.12` | 421–453 | تابع | `traffic_import_xlsx_archive_error` | 0 | ⬜ |
+| `PAGE-073.13` | 455–521 | تابع | `traffic_import_csv_shape_error` | 1 | ⬜ |
+| `PAGE-073.14` | 523–588 | تابع | `traffic_import_read_upload` | 0 | ⬜ |
+| `PAGE-073.15` | 590–598 | تابع | `traffic_import_identity` | 0 | ⬜ |
+| `PAGE-073.16` | 600–603 | تابع | `traffic_import_serial_key` | 0 | ⬜ |
+| `PAGE-073.17` | 605–612 | تابع | `traffic_import_generated_serial` | 0 | ⬜ |
+| `PAGE-073.18` | 614–618 | تابع | `traffic_import_generated_serial_prefix` | 0 | ⬜ |
+| `PAGE-073.19` | 620–730 | تابع | `traffic_import_build_plan` | 1 | ⬜ |
+| `PAGE-073.20` | 732–801 | تابع | `traffic_import_plan_from_database` | 6 | ⬜ |
+| `PAGE-073.21` | 803–836 | تابع | `traffic_import_preview_session_data` | 0 | ⬜ |
+| `PAGE-073.22` | 838–851 | تابع | `traffic_import_current_preview` | 0 | ⬜ |
+| `PAGE-073.23` | 853–942 | تابع | `traffic_import_handle_post` | 2 | ⬜ |
+| `PAGE-073.24` | 944–985 | تابع | `traffic_import_apply_plan_in_transaction` | 1 | ⬜ |
+| `PAGE-073.25` | 987–993 | تابع | `traffic_import_template_headers` | 0 | ⬜ |
+| `PAGE-073.26` | 995–1006 | تابع | `traffic_import_template_csv_bytes` | 0 | ⬜ |
+| `PAGE-073.27` | 1008–1031 | تابع | `traffic_import_download_template` | 3 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>PAGE-074</b> — <code>user-access-groups.php</code> (209 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `PAGE-074.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `PAGE-074.02` | 4–28 | تابع | `user_access_groups_schema_ready` | 0 | ⬜ |
+| `PAGE-074.03` | 30–49 | تابع | `user_access_groups_all` | 0 | ⬜ |
+| `PAGE-074.04` | 51–60 | تابع | `user_access_groups_admin_users` | 0 | ⬜ |
+| `PAGE-074.05` | 62–76 | تابع | `user_access_group_member_set` | 0 | ⬜ |
+| `PAGE-074.06` | 78–96 | تابع | `user_access_groups_member_sets` | 0 | ⬜ |
+| `PAGE-074.07` | 98–117 | تابع | `user_access_groups_permission_sets` | 0 | ⬜ |
+| `PAGE-074.08` | 119–133 | تابع | `user_access_group_permission_set_for_group` | 0 | ⬜ |
+| `PAGE-074.09` | 135–138 | تابع | `user_access_group_role_label` | 0 | ⬜ |
+| `PAGE-074.10` | 140–199 | تابع | `user_access_group_permission_matrix_markup` | 0 | ⬜ |
+| `PAGE-074.11` | 201–208 | تابع | `user_access_groups_redirect` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>PAGE-075</b> — <code>xlsx-writer.php</code> (221 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `PAGE-075.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `PAGE-075.02` | 4–27 | تابع | `xlsx_col_name` | 0 | ⬜ |
+| `PAGE-075.03` | 29–33 | تابع | `xlsx_clean_text` | 0 | ⬜ |
+| `PAGE-075.04` | 35–42 | تابع | `xlsx_sheet_name` | 0 | ⬜ |
+| `PAGE-075.05` | 44–137 | تابع | `xlsx_build` | 6 | ⬜ |
+| `PAGE-075.06` | 139–142 | تابع | `xlsx_xml` | 0 | ⬜ |
+| `PAGE-075.07` | 144–207 | تابع | `xlsx_sheet_xml` | 0 | ⬜ |
+| `PAGE-075.08` | 209–220 | تابع | `xlsx_send` | 3 | ⬜ |
 
 </details>
 
@@ -10945,6 +11070,485 @@
 
 </details>
 
+### موتور مشترک (lib/) — `CORE`
+
+
+<details>
+<summary><b>CORE-001</b> — <code>lib/activity-audit.php</code> (600 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-001.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-001.02` | 14–27 | تابع | `activity_logs_ensure` | 0 | ⬜ |
+| `CORE-001.03` | 29–58 | تابع | `activity_client_ip` | 0 | ⬜ |
+| `CORE-001.04` | 60–88 | تابع | `activity_computer_name` | 1 | ⬜ |
+| `CORE-001.05` | 90–299 | تابع | `activity_action_label` | 1 | ⬜ |
+| `CORE-001.06` | 301–309 | تابع | `activity_default_result` | 0 | ⬜ |
+| `CORE-001.07` | 311–353 | تابع | `activity_log` | 0 | ⬜ |
+| `CORE-001.08` | 354–360 | ناحیه | `بلوک رویه‌ای 354-360` | 0 | ⬜ |
+| `CORE-001.09` | 361–395 | تابع | `activity_log_view` | 2 | ⬜ |
+| `CORE-001.10` | 397–409 | تابع | `activity_logs_prune` | 0 | ⬜ |
+| `CORE-001.11` | 410–416 | ناحیه | `بلوک رویه‌ای 410-416` | 0 | ⬜ |
+| `CORE-001.12` | 417–448 | تابع | `ops_low_value_tables_prune` | 0 | ⬜ |
+| `CORE-001.13` | 450–454 | تابع | `activity_log_retention_days` | 0 | ⬜ |
+| `CORE-001.14` | 456–508 | تابع | `activity_audit_context` | 0 | ⬜ |
+| `CORE-001.15` | 510–525 | تابع | `save_audit` | 0 | ⬜ |
+| `CORE-001.16` | 527–548 | تابع | `save_audit_required` | 0 | ⬜ |
+| `CORE-001.17` | 550–599 | تابع | `log_ticket_event` | 1 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-002</b> — <code>lib/asset-identity.php</code> (4 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-002.01` | 1–4 | ناحیه | `بلوک رویه‌ای 1-4` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-003</b> — <code>lib/auth-scope.php</code> (443 خط، 22 آدرس، بازبینی‌شده 0/22)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-003.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-003.02` | 14–28 | تابع | `current_user` | 0 | ⬜ |
+| `CORE-003.03` | 30–44 | تابع | `login_user` | 0 | ⬜ |
+| `CORE-003.04` | 46–53 | تابع | `require_login` | 0 | ⬜ |
+| `CORE-003.05` | 55–63 | تابع | `require_admin` | 0 | ⬜ |
+| `CORE-003.06` | 65–76 | تابع | `require_primary_admin` | 0 | ⬜ |
+| `CORE-003.07` | 78–86 | تابع | `require_staff` | 0 | ⬜ |
+| `CORE-003.08` | 88–96 | تابع | `require_supervisor` | 0 | ⬜ |
+| `CORE-003.09` | 98–132 | تابع | `ticket_manager_scope_unit_ids` | 0 | ⬜ |
+| `CORE-003.10` | 134–143 | تابع | `ticket_requester_tree_predicate` | 5 | ⬜ |
+| `CORE-003.11` | 145–193 | تابع | `ticket_user_can_view` | 5 | ⬜ |
+| `CORE-003.12` | 196–238 | تابع | `ticket_handler_level` | 0 | ⬜ |
+| `CORE-003.13` | 240–257 | تابع | `ticket_view_mode` | 0 | ⬜ |
+| `CORE-003.14` | 259–276 | تابع | `ticket_can_see_internal` | 0 | ⬜ |
+| `CORE-003.15` | 278–321 | تابع | `ticket_assignee_is_eligible` | 0 | ⬜ |
+| `CORE-003.16` | 323–352 | تابع | `ticket_rating_is_current` | 4 | ⬜ |
+| `CORE-003.17` | 354–358 | تابع | `ticket_user_is_requester` | 0 | ⬜ |
+| `CORE-003.18` | 360–368 | تابع | `ticket_reply_starts_work` | 0 | ⬜ |
+| `CORE-003.19` | 370–390 | تابع | `ticket_scope` | 5 | ⬜ |
+| `CORE-003.20` | 392–396 | تابع | `ticket_is_waiting_status` | 0 | ⬜ |
+| `CORE-003.21` | 398–403 | تابع | `user_service_group` | 0 | ⬜ |
+| `CORE-003.22` | 405–441 | تابع | `asset_scope` | 5 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-004</b> — <code>lib/db-core.php</code> (612 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-004.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-004.02` | 14–18 | تابع | `csp_nonce` | 0 | ⬜ |
+| `CORE-004.03` | 20–44 | ناحیه | `Enforce HTTPS in production` | 0 | ⬜ |
+| `CORE-004.04` | 45–56 | تابع | `cfg` | 0 | ⬜ |
+| `CORE-004.05` | 57–59 | ناحیه | `بلوک رویه‌ای 57-59` | 0 | ⬜ |
+| `CORE-004.06` | 60–86 | کلاس | `AppPDO` | 4 | ⬜ |
+| `CORE-004.07` | 88–115 | کلاس | `AppSlowStatement` | 4 | ⬜ |
+| `CORE-004.08` | 117–165 | تابع | `db` | **8** | ⬜ |
+| `CORE-004.09` | 167–193 | تابع | `db_table_exists` | 0 | ⬜ |
+| `CORE-004.10` | 195–214 | تابع | `db_table_columns` | 0 | ⬜ |
+| `CORE-004.11` | 216–220 | تابع | `db_missing_columns` | 0 | ⬜ |
+| `CORE-004.12` | 222–230 | تابع | `db_column_present` | 0 | ⬜ |
+| `CORE-004.13` | 232–248 | تابع | `db_add_missing_column` | 4 | ⬜ |
+| `CORE-004.14` | 250–292 | تابع | `db_ensure_enum_values` | **8** | ⬜ |
+| `CORE-004.15` | 294–297 | تابع | `client_ip` | 0 | ⬜ |
+| `CORE-004.16` | 299–299 | ناحیه | `Rate limiting for API endpoints` | 0 | ⬜ |
+| `CORE-004.17` | 300–300 | ناحیه | `بازمی‌گرداند true اگر مجاز باشد. اگر $retryAfter د` | 0 | ⬜ |
+| `CORE-004.18` | 301–328 | تابع | `api_rate_limit` | 1 | ⬜ |
+| `CORE-004.19` | 330–343 | تابع | `check_api_rate_limit` | 0 | ⬜ |
+| `CORE-004.20` | 345–348 | تابع | `login_rate_key` | 0 | ⬜ |
+| `CORE-004.21` | 350–369 | تابع | `login_rate_allowed` | 1 | ⬜ |
+| `CORE-004.22` | 371–399 | تابع | `record_login_failure` | 1 | ⬜ |
+| `CORE-004.23` | 401–408 | تابع | `clear_login_failures` | 1 | ⬜ |
+| `CORE-004.24` | 410–419 | تابع | `app_version` | 1 | ⬜ |
+| `CORE-004.25` | 421–424 | تابع | `e` | 0 | ⬜ |
+| `CORE-004.26` | 426–431 | تابع | `app_theme_mode` | 2 | ⬜ |
+| `CORE-004.27` | 433–439 | تابع | `app_theme_toggle_markup` | 0 | ⬜ |
+| `CORE-004.28` | 441–445 | تابع | `redirect` | 0 | ⬜ |
+| `CORE-004.29` | 447–475 | تابع | `db_install_token` | 4 | ⬜ |
+| `CORE-004.30` | 477–481 | تابع | `db_install_token_forget` | 0 | ⬜ |
+| `CORE-004.31` | 483–488 | تابع | `db_install_fresh_tables` | 0 | ⬜ |
+| `CORE-004.32` | 490–527 | تابع | `db_install_state` | 5 | ⬜ |
+| `CORE-004.33` | 529–544 | تابع | `db_in_transaction` | 0 | ⬜ |
+| `CORE-004.34` | 546–576 | تابع | `db_commit` | 0 | ⬜ |
+| `CORE-004.35` | 578–595 | تابع | `db_commit_or_fail` | 0 | ⬜ |
+| `CORE-004.36` | 597–610 | تابع | `db_rollback` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-005</b> — <code>lib/http-input.php</code> (25 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-005.01` | 1–12 | ناحیه | `بلوک رویه‌ای 1-12` | 0 | ⬜ |
+| `CORE-005.02` | 13–16 | تابع | `post_value` | 2 | ⬜ |
+| `CORE-005.03` | 17–19 | ناحیه | `بلوک رویه‌ای 17-19` | 0 | ⬜ |
+| `CORE-005.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
+| `CORE-005.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-006</b> — <code>lib/http-post.php</code> (91 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-006.01` | 1–14 | ناحیه | `بلوک رویه‌ای 1-14` | 0 | ⬜ |
+| `CORE-006.02` | 15–47 | تابع | `post_context_begin` | 2 | ⬜ |
+| `CORE-006.03` | 49–90 | تابع | `post_context_on_error` | 6 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-007</b> — <code>lib/ldap.php</code> (412 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-007.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-007.02` | 14–32 | تابع | `ldap_secret_key` | 0 | ⬜ |
+| `CORE-007.03` | 34–51 | تابع | `ldap_secret_encrypt` | 0 | ⬜ |
+| `CORE-007.04` | 53–90 | تابع | `ldap_secret_decrypt` | 0 | ⬜ |
+| `CORE-007.05` | 92–116 | تابع | `ldap_cfg` | 0 | ⬜ |
+| `CORE-007.06` | 118–133 | تابع | `ldap_role_for_groups` | 0 | ⬜ |
+| `CORE-007.07` | 135–145 | تابع | `ldap_person_filter` | 0 | ⬜ |
+| `CORE-007.08` | 147–162 | تابع | `ldap_auth_log` | 1 | ⬜ |
+| `CORE-007.09` | 164–240 | تابع | `ldap_diagnose` | 3 | ⬜ |
+| `CORE-007.10` | 242–410 | تابع | `ldap_sync_all_users` | 5 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-008</b> — <code>lib/log-catalog.php</code> (49 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-008.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `CORE-008.02` | 4–48 | تابع | `logging_catalog_definitions` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-009</b> — <code>lib/logging-audit.php</code> (643 خط، 33 آدرس، بازبینی‌شده 0/33)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-009.01` | 1–45 | ناحیه | `بلوک رویه‌ای 1-45` | 1 | ⬜ |
+| `CORE-009.02` | 46–50 | تابع | `logging_audit_baseline_path` | 0 | ⬜ |
+| `CORE-009.03` | 52–59 | تابع | `logging_audit_structural_checks` | 0 | ⬜ |
+| `CORE-009.04` | 61–82 | تابع | `logging_audit_required_tables` | 0 | ⬜ |
+| `CORE-009.05` | 84–100 | تابع | `logging_audit_required_columns` | 0 | ⬜ |
+| `CORE-009.06` | 102–106 | تابع | `logging_audit_finding` | 0 | ⬜ |
+| `CORE-009.07` | 108–124 | تابع | `logging_audit_table_exists` | 0 | ⬜ |
+| `CORE-009.08` | 126–136 | تابع | `logging_audit_table_columns` | 0 | ⬜ |
+| `CORE-009.09` | 138–138 | ناحیه | `-` | 0 | ⬜ |
+| `CORE-009.10` | 139–139 | ناحیه | `بررسی‌های ساختاری — روی پایگاه دادهٔ زندهٔ همین نص` | 0 | ⬜ |
+| `CORE-009.11` | 140–141 | ناحیه | `-` | 0 | ⬜ |
+| `CORE-009.12` | 142–157 | تابع | `logging_audit_check_db_schema_tables` | 0 | ⬜ |
+| `CORE-009.13` | 159–180 | تابع | `logging_audit_check_db_schema_columns` | 0 | ⬜ |
+| `CORE-009.14` | 182–223 | تابع | `logging_audit_check_db_pending_migrations` | 0 | ⬜ |
+| `CORE-009.15` | 225–248 | تابع | `logging_audit_check_filesystem_writable` | 1 | ⬜ |
+| `CORE-009.16` | 250–250 | ناحیه | `-` | 0 | ⬜ |
+| `CORE-009.17` | 251–251 | ناحیه | `بررسی‌های رفتاری — سلامت کد در حال اجرا` | 0 | ⬜ |
+| `CORE-009.18` | 252–253 | ناحیه | `-` | 0 | ⬜ |
+| `CORE-009.19` | 254–276 | تابع | `logging_audit_check_spool_backlog` | 0 | ⬜ |
+| `CORE-009.20` | 278–317 | تابع | `logging_audit_check_unresolved_issues` | 0 | ⬜ |
+| `CORE-009.21` | 319–342 | تابع | `logging_audit_check_worker_heartbeats` | 1 | ⬜ |
+| `CORE-009.22` | 344–344 | ناحیه | `-` | 0 | ⬜ |
+| `CORE-009.23` | 345–345 | ناحیه | `اجرا` | 0 | ⬜ |
+| `CORE-009.24` | 346–347 | ناحیه | `-` | 0 | ⬜ |
+| `CORE-009.25` | 348–352 | تابع | `logging_audit_heartbeat_path` | 0 | ⬜ |
+| `CORE-009.26` | 354–382 | تابع | `logging_audit_check_audit_continuity` | 1 | ⬜ |
+| `CORE-009.27` | 384–398 | تابع | `logging_audit_write_heartbeat` | 2 | ⬜ |
+| `CORE-009.28` | 400–432 | تابع | `logging_audit_summarize` | 0 | ⬜ |
+| `CORE-009.29` | 434–447 | تابع | `logging_audit_checks` | 0 | ⬜ |
+| `CORE-009.30` | 449–457 | تابع | `logging_audit_load_baseline` | 1 | ⬜ |
+| `CORE-009.31` | 459–472 | تابع | `logging_audit_save_baseline` | 2 | ⬜ |
+| `CORE-009.32` | 474–506 | تابع | `logging_audit_run` | 0 | ⬜ |
+| `CORE-009.33` | 508–642 | تابع | `logging_audit_run_and_record` | 7 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-010</b> — <code>lib/logging-core.php</code> (1,560 خط، 66 آدرس، بازبینی‌شده 0/66)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-010.01` | 1–15 | ناحیه | `بلوک رویه‌ای 1-15` | 0 | ⬜ |
+| `CORE-010.02` | 16–20 | ناحیه | `سقف سخت صف اضطراری؛ فقط هنگام اختلال دیتابیس استفا` | 0 | ⬜ |
+| `CORE-010.03` | 21–36 | تابع | `logging_uuid` | 0 | ⬜ |
+| `CORE-010.04` | 38–45 | تابع | `logging_deterministic_uuid` | 0 | ⬜ |
+| `CORE-010.05` | 47–50 | تابع | `logging_is_uuid_v4` | 0 | ⬜ |
+| `CORE-010.06` | 52–55 | تابع | `logging_is_uuid` | 0 | ⬜ |
+| `CORE-010.07` | 57–63 | تابع | `logging_request_id` | 0 | ⬜ |
+| `CORE-010.08` | 65–69 | تابع | `logging_trace_id` | 0 | ⬜ |
+| `CORE-010.09` | 71–75 | تابع | `logging_operation_id` | 0 | ⬜ |
+| `CORE-010.10` | 77–87 | تابع | `logging_begin_execution` | 0 | ⬜ |
+| `CORE-010.11` | 89–96 | تابع | `logging_begin_operation` | 0 | ⬜ |
+| `CORE-010.12` | 98–101 | تابع | `logging_operation_name` | 0 | ⬜ |
+| `CORE-010.13` | 103–113 | تابع | `logging_correlation_context` | 0 | ⬜ |
+| `CORE-010.14` | 115–119 | تابع | `logging_parent_event_id` | 0 | ⬜ |
+| `CORE-010.15` | 121–131 | تابع | `logging_bootstrap` | 0 | ⬜ |
+| `CORE-010.16` | 133–141 | تابع | `logging_catalog_aliases` | 0 | ⬜ |
+| `CORE-010.17` | 143–151 | تابع | `logging_event_catalog` | 0 | ⬜ |
+| `CORE-010.18` | 153–173 | تابع | `logging_catalog_resolve` | 0 | ⬜ |
+| `CORE-010.19` | 175–319 | تابع | `logging_action_event_definition` | 1 | ⬜ |
+| `CORE-010.20` | 321–328 | تابع | `logging_normalize_digits` | 0 | ⬜ |
+| `CORE-010.21` | 330–340 | تابع | `logging_is_valid_iranian_national_code` | 0 | ⬜ |
+| `CORE-010.22` | 342–345 | تابع | `logging_strict_national_code_enabled` | 0 | ⬜ |
+| `CORE-010.23` | 347–368 | تابع | `logging_sensitive_key` | 0 | ⬜ |
+| `CORE-010.24` | 370–378 | تابع | `logging_utf8_substr` | 0 | ⬜ |
+| `CORE-010.25` | 380–388 | تابع | `logging_utf8_strlen` | 0 | ⬜ |
+| `CORE-010.26` | 390–408 | تابع | `logging_sanitize_text` | 0 | ⬜ |
+| `CORE-010.27` | 410–416 | تابع | `logging_sanitize_single_line` | 0 | ⬜ |
+| `CORE-010.28` | 417–418 | ناحیه | `بلوک رویه‌ای 417-418` | 0 | ⬜ |
+| `CORE-010.29` | 419–428 | تابع | `logging_fingerprint_v2` | 0 | ⬜ |
+| `CORE-010.30` | 430–435 | تابع | `logging_fingerprint_v3` | 0 | ⬜ |
+| `CORE-010.31` | 437–442 | تابع | `logging_fingerprint_current` | 0 | ⬜ |
+| `CORE-010.32` | 444–468 | تابع | `logging_exception_trace` | 0 | ⬜ |
+| `CORE-010.33` | 470–631 | تابع | `logging_sanitize_event_meta` | 1 | ⬜ |
+| `CORE-010.34` | 633–671 | تابع | `logging_sanitize_value` | 0 | ⬜ |
+| `CORE-010.35` | 673–681 | تابع | `logging_safe_request_uri` | 0 | ⬜ |
+| `CORE-010.36` | 683–779 | تابع | `logging_spool_write` | 3 | ⬜ |
+| `CORE-010.37` | 781–785 | تابع | `logging_spool_stats_cache_invalidate` | 5 | ⬜ |
+| `CORE-010.38` | 787–805 | تابع | `logging_spool_stats` | 3 | ⬜ |
+| `CORE-010.39` | 807–868 | تابع | `logging_spool_stats_uncached` | 3 | ⬜ |
+| `CORE-010.40` | 870–924 | تابع | `logging_increment_counter` | 3 | ⬜ |
+| `CORE-010.41` | 926–958 | تابع | `logging_health_counters` | 1 | ⬜ |
+| `CORE-010.42` | 960–981 | تابع | `logging_atomic_replace_file` | 7 | ⬜ |
+| `CORE-010.43` | 983–1023 | تابع | `logging_worker_heartbeat` | 7 | ⬜ |
+| `CORE-010.44` | 1025–1072 | تابع | `logging_emergency_failure` | **11** | ⬜ |
+| `CORE-010.45` | 1074–1077 | تابع | `logging_emergency_failure_rotation_warning` | 0 | ⬜ |
+| `CORE-010.46` | 1079–1083 | تابع | `logging_persistence_status` | 0 | ⬜ |
+| `CORE-010.47` | 1085–1102 | تابع | `logging_record_failure` | 0 | ⬜ |
+| `CORE-010.48` | 1104–1108 | تابع | `logging_json` | 0 | ⬜ |
+| `CORE-010.49` | 1111–1153 | تابع | `logging_append_legacy_file` | 7 | ⬜ |
+| `CORE-010.50` | 1155–1173 | تابع | `logging_replay_insert` | 6 | ⬜ |
+| `CORE-010.51` | 1175–1236 | تابع | `logging_issue_upsert` | **8** | ⬜ |
+| `CORE-010.52` | 1238–1251 | تابع | `logging_db_error_is_transient` | 0 | ⬜ |
+| `CORE-010.53` | 1253–1269 | تابع | `logging_replay_error_classify` | 0 | ⬜ |
+| `CORE-010.54` | 1271–1275 | تابع | `logging_db_circuit_path` | 0 | ⬜ |
+| `CORE-010.55` | 1277–1282 | تابع | `logging_db_circuit_release_probe` | 2 | ⬜ |
+| `CORE-010.56` | 1284–1296 | تابع | `logging_db_circuit_with_lock` | 3 | ⬜ |
+| `CORE-010.57` | 1298–1319 | تابع | `logging_db_circuit_should_skip` | 3 | ⬜ |
+| `CORE-010.58` | 1321–1336 | تابع | `logging_db_circuit_failure` | 7 | ⬜ |
+| `CORE-010.59` | 1338–1344 | تابع | `logging_db_circuit_success` | **9** | ⬜ |
+| `CORE-010.60` | 1346–1362 | تابع | `logging_duplicate_event_already_stored` | 5 | ⬜ |
+| `CORE-010.61` | 1364–1411 | تابع | `logging_store_system` | 1 | ⬜ |
+| `CORE-010.62` | 1413–1444 | تابع | `logging_normalize_activity_event` | 0 | ⬜ |
+| `CORE-010.63` | 1446–1514 | تابع | `logging_store_activity` | 1 | ⬜ |
+| `CORE-010.64` | 1516–1530 | تابع | `log_event` | 0 | ⬜ |
+| `CORE-010.65` | 1531–1533 | ناحیه | `بلوک رویه‌ای 1531-1533` | 0 | ⬜ |
+| `CORE-010.66` | 1534–1559 | تابع | `security_log_access_denied` | 4 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-011</b> — <code>lib/logging-csrf.php</code> (544 خط، 21 آدرس، بازبینی‌شده 0/21)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-011.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-011.02` | 14–17 | تابع | `flash` | 0 | ⬜ |
+| `CORE-011.03` | 19–54 | تابع | `ticket_service_ensure_schema` | 5 | ⬜ |
+| `CORE-011.04` | 56–76 | تابع | `ticket_service_categories` | 0 | ⬜ |
+| `CORE-011.05` | 78–98 | تابع | `ticket_service_category_map` | 0 | ⬜ |
+| `CORE-011.06` | 100–112 | تابع | `system_logs_ensure` | 0 | ⬜ |
+| `CORE-011.07` | 114–157 | تابع | `system_log` | 0 | ⬜ |
+| `CORE-011.08` | 159–206 | تابع | `system_error_explain` | 0 | ⬜ |
+| `CORE-011.09` | 208–212 | تابع | `system_error_mask` | 0 | ⬜ |
+| `CORE-011.10` | 214–258 | تابع | `system_error_record` | 0 | ⬜ |
+| `CORE-011.11` | 260–348 | ناحیه | `هندلرهای سراسری برای HTTP و CLI؛ خروجی هر محیط مست` | 2 | ⬜ |
+| `CORE-011.12` | 349–368 | تابع | `app_error_log` | 0 | ⬜ |
+| `CORE-011.13` | 370–396 | تابع | `system_log_meta_html` | 0 | ⬜ |
+| `CORE-011.14` | 398–421 | تابع | `db_delete_in_batches` | 6 | ⬜ |
+| `CORE-011.15` | 423–447 | تابع | `system_logs_prune` | 0 | ⬜ |
+| `CORE-011.16` | 449–470 | تابع | `system_logs_recent` | 5 | ⬜ |
+| `CORE-011.17` | 472–477 | تابع | `take_flash` | 0 | ⬜ |
+| `CORE-011.18` | 479–482 | تابع | `csrf_field` | 0 | ⬜ |
+| `CORE-011.19` | 484–510 | تابع | `csrf_token` | 0 | ⬜ |
+| `CORE-011.20` | 512–529 | تابع | `csrf_discard_legacy_cookie` | 2 | ⬜ |
+| `CORE-011.21` | 531–542 | تابع | `require_csrf` | 6 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-012</b> — <code>lib/logging-diagnostics.php</code> (118 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-012.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `CORE-012.02` | 4–16 | تابع | `logging_diagnostic_rules` | 0 | ⬜ |
+| `CORE-012.03` | 18–51 | تابع | `logging_diagnostic_analyze` | 0 | ⬜ |
+| `CORE-012.04` | 53–63 | تابع | `logging_diagnostic_safe_value` | 1 | ⬜ |
+| `CORE-012.05` | 65–77 | تابع | `logging_diagnostic_safe_stack` | 0 | ⬜ |
+| `CORE-012.06` | 79–96 | تابع | `logging_diagnostic_similarity` | 0 | ⬜ |
+| `CORE-012.07` | 98–117 | تابع | `logging_diagnostic_redact_event` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-013</b> — <code>lib/logging-escalation.php</code> (100 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-013.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
+| `CORE-013.02` | 19–27 | تابع | `logging_escalation_thresholds` | 0 | ⬜ |
+| `CORE-013.03` | 29–57 | تابع | `logging_escalation_count` | 4 | ⬜ |
+| `CORE-013.04` | 59–65 | تابع | `logging_escalation_is_critical` | 0 | ⬜ |
+| `CORE-013.05` | 67–100 | تابع | `logging_smart_summary` | 4 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-014</b> — <code>lib/logging-integrity.php</code> (238 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-014.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `CORE-014.02` | 4–31 | تابع | `logging_integrity_manifest_hmac` | 0 | ⬜ |
+| `CORE-014.03` | 33–55 | تابع | `logging_integrity_verify_archive_file` | 1 | ⬜ |
+| `CORE-014.04` | 57–64 | تابع | `logging_integrity_has_older_snapshot` | 0 | ⬜ |
+| `CORE-014.05` | 66–99 | تابع | `logging_integrity_verify_predecessor_chain` | 1 | ⬜ |
+| `CORE-014.06` | 101–114 | تابع | `logging_integrity_verify_daily_manifest_error` | 0 | ⬜ |
+| `CORE-014.07` | 116–119 | تابع | `logging_integrity_verify_daily_manifest` | 0 | ⬜ |
+| `CORE-014.08` | 121–159 | تابع | `logging_integrity_read_archive_index` | 1 | ⬜ |
+| `CORE-014.09` | 161–178 | تابع | `logging_integrity_merge_archive_indexes` | 0 | ⬜ |
+| `CORE-014.10` | 180–198 | تابع | `logging_integrity_row_is_late` | 0 | ⬜ |
+| `CORE-014.11` | 200–237 | تابع | `logging_integrity_verify_supplement_chain` | 2 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-015</b> — <code>lib/logging-replay.php</code> (261 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-015.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `CORE-015.02` | 6–43 | تابع | `logging_replay_poison_attempts` | 7 | ⬜ |
+| `CORE-015.03` | 45–260 | تابع | `logging_replay_process_directory` | **9** | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-016</b> — <code>lib/notify-users.php</code> (524 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-016.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-016.02` | 14–34 | تابع | `notify_user` | 1 | ⬜ |
+| `CORE-016.03` | 36–48 | تابع | `notification_target_url` | 0 | ⬜ |
+| `CORE-016.04` | 50–73 | تابع | `ticket_notification_user_can` | 0 | ⬜ |
+| `CORE-016.05` | 75–95 | تابع | `ticket_notification_recipients` | 5 | ⬜ |
+| `CORE-016.06` | 97–102 | تابع | `ticket_unassigned_notify_candidates` | 0 | ⬜ |
+| `CORE-016.07` | 104–124 | تابع | `notify_ticket_parties` | 0 | ⬜ |
+| `CORE-016.08` | 126–145 | تابع | `notify_ticket_staff` | 0 | ⬜ |
+| `CORE-016.09` | 147–172 | تابع | `notification_user_sees_food_cancel` | 0 | ⬜ |
+| `CORE-016.10` | 174–181 | تابع | `notification_visibility_sql` | 0 | ⬜ |
+| `CORE-016.11` | 183–191 | تابع | `notification_ticket_visibility` | 5 | ⬜ |
+| `CORE-016.12` | 193–214 | تابع | `notification_header_summary` | 5 | ⬜ |
+| `CORE-016.13` | 216–221 | تابع | `is_sla_holiday` | 0 | ⬜ |
+| `CORE-016.14` | 223–251 | تابع | `ldap_authenticate` | 0 | ⬜ |
+| `CORE-016.15` | 253–425 | تابع | `ldap_authenticate_measured` | 4 | ⬜ |
+| `CORE-016.16` | 427–432 | تابع | `normalize_employee_number` | 0 | ⬜ |
+| `CORE-016.17` | 434–434 | ناحیه | `شناسه کاربری که این کد پرسنلی را دارد (۰ یعنی آزاد` | 0 | ⬜ |
+| `CORE-016.18` | 435–443 | تابع | `employee_number_owner` | 0 | ⬜ |
+| `CORE-016.19` | 445–511 | تابع | `upsert_domain_user` | 1 | ⬜ |
+| `CORE-016.20` | 513–522 | تابع | `link_agent_assets_to_user` | 1 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-017</b> — <code>lib/render.php</code> (227 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-017.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `CORE-017.02` | 4–161 | تابع | `render_header` | 4 | ⬜ |
+| `CORE-017.03` | 163–170 | تابع | `list_sort_page_off` | 2 | ⬜ |
+| `CORE-017.04` | 172–193 | تابع | `inspection_food_reminder_markup` | 0 | ⬜ |
+| `CORE-017.05` | 195–226 | تابع | `render_footer` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-018</b> — <code>lib/settings-effects.php</code> (386 خط، 21 آدرس، بازبینی‌شده 0/21)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-018.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `CORE-018.02` | 14–36 | تابع | `setting` | 0 | ⬜ |
+| `CORE-018.03` | 38–44 | تابع | `setting_forget_cache` | 0 | ⬜ |
+| `CORE-018.04` | 46–55 | تابع | `save_setting` | 1 | ⬜ |
+| `CORE-018.05` | 57–113 | تابع | `triangle_effect_page_catalog` | 0 | ⬜ |
+| `CORE-018.06` | 115–124 | تابع | `triangle_effect_valid_keys` | 0 | ⬜ |
+| `CORE-018.07` | 126–142 | تابع | `triangle_effect_config_spec` | 0 | ⬜ |
+| `CORE-018.08` | 144–175 | تابع | `triangle_effect_sanitize_config` | 0 | ⬜ |
+| `CORE-018.09` | 177–181 | تابع | `display_effect_type` | 0 | ⬜ |
+| `CORE-018.10` | 183–196 | تابع | `particle_effect_config_spec` | 0 | ⬜ |
+| `CORE-018.11` | 198–227 | تابع | `particle_effect_sanitize_config` | 0 | ⬜ |
+| `CORE-018.12` | 229–234 | تابع | `particle_effect_config` | 0 | ⬜ |
+| `CORE-018.13` | 236–244 | تابع | `particle_effect_enabled_for_current_page` | 0 | ⬜ |
+| `CORE-018.14` | 246–251 | تابع | `triangle_effect_config` | 0 | ⬜ |
+| `CORE-018.15` | 253–275 | تابع | `triangle_effect_enabled_pages` | 0 | ⬜ |
+| `CORE-018.16` | 277–289 | تابع | `triangle_effect_current_page_key` | 2 | ⬜ |
+| `CORE-018.17` | 291–321 | تابع | `triangle_effect_script_tag` | 0 | ⬜ |
+| `CORE-018.18` | 323–353 | تابع | `particle_effect_script_tag` | 0 | ⬜ |
+| `CORE-018.19` | 355–362 | تابع | `key_role_setting_map` | 0 | ⬜ |
+| `CORE-018.20` | 364–379 | تابع | `key_role_user_ids` | 0 | ⬜ |
+| `CORE-018.21` | 381–384 | تابع | `user_is_key_role` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>CORE-019</b> — <code>lib/tickets-sla.php</code> (891 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `CORE-019.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
+| `CORE-019.02` | 20–24 | تابع | `ticket_number_cache_set` | 0 | ⬜ |
+| `CORE-019.03` | 26–50 | تابع | `ticket_number` | 0 | ⬜ |
+| `CORE-019.04` | 52–72 | تابع | `ticket_number_cache_prime` | 0 | ⬜ |
+| `CORE-019.05` | 74–83 | تابع | `ticket_number_prefix` | 0 | ⬜ |
+| `CORE-019.06` | 85–106 | تابع | `ticket_number_ensure_schema` | 0 | ⬜ |
+| `CORE-019.07` | 108–205 | تابع | `ticket_hot_schema_ensure` | 4 | ⬜ |
+| `CORE-019.08` | 207–261 | تابع | `ticket_number_ensure_schema_run` | **8** | ⬜ |
+| `CORE-019.09` | 263–299 | تابع | `ticket_number_next` | 0 | ⬜ |
+| `CORE-019.10` | 301–313 | تابع | `ticket_number_peek` | 0 | ⬜ |
+| `CORE-019.11` | 315–340 | تابع | `ticket_number_sequence_floor` | 4 | ⬜ |
+| `CORE-019.12` | 342–360 | تابع | `ticket_number_sequence_persist` | 5 | ⬜ |
+| `CORE-019.13` | 362–456 | تابع | `ticket_number_autofill` | **10** | ⬜ |
+| `CORE-019.14` | 458–462 | تابع | `is_it_agent` | 0 | ⬜ |
+| `CORE-019.15` | 464–492 | تابع | `jalali_to_gregorian` | 0 | ⬜ |
+| `CORE-019.16` | 494–520 | تابع | `gregorian_to_jalali` | 0 | ⬜ |
+| `CORE-019.17` | 522–531 | تابع | `jalali_date` | 0 | ⬜ |
+| `CORE-019.18` | 533–552 | تابع | `jalali_input_to_gregorian` | 0 | ⬜ |
+| `CORE-019.19` | 554–569 | تابع | `find_or_create_department` | 1 | ⬜ |
+| `CORE-019.20` | 571–574 | تابع | `persian_date` | 0 | ⬜ |
+| `CORE-019.21` | 576–579 | تابع | `priority_sla_minutes` | 0 | ⬜ |
+| `CORE-019.22` | 581–604 | تابع | `ensure_default_ola_policies` | 5 | ⬜ |
+| `CORE-019.23` | 606–616 | تابع | `ola_policy_for` | 0 | ⬜ |
+| `CORE-019.24` | 618–634 | تابع | `ola_deadlines` | 0 | ⬜ |
+| `CORE-019.25` | 636–689 | تابع | `sla_business_hours` | 0 | ⬜ |
+| `CORE-019.26` | 691–701 | تابع | `sla_business_hours_forget_cache` | 0 | ⬜ |
+| `CORE-019.27` | 703–717 | تابع | `next_business_start` | 0 | ⬜ |
+| `CORE-019.28` | 719–739 | تابع | `business_due_at` | 0 | ⬜ |
+| `CORE-019.29` | 741–764 | تابع | `business_elapsed_minutes` | 0 | ⬜ |
+| `CORE-019.30` | 766–782 | تابع | `ticket_sla_cycle_start` | 0 | ⬜ |
+| `CORE-019.31` | 784–816 | تابع | `ticket_sla_transition` | 5 | ⬜ |
+| `CORE-019.32` | 818–865 | تابع | `ticket_ola_transition` | 0 | ⬜ |
+| `CORE-019.33` | 867–874 | تابع | `record_asset_history` | 1 | ⬜ |
+| `CORE-019.34` | 876–879 | تابع | `status_label` | 0 | ⬜ |
+| `CORE-019.35` | 881–884 | تابع | `priority_label` | 0 | ⬜ |
+| `CORE-019.36` | 886–889 | تابع | `ticket_type_label` | 0 | ⬜ |
+
+</details>
+
 ### کنش‌ها (actions/) — `ACT`
 
 
@@ -11177,461 +11781,6 @@
 | `ACT-017.06` | 160–318 | ناحیه | `مسیر: update_user_role` | 3 | ⬜ |
 | `ACT-017.07` | 319–357 | ناحیه | `مسیر: save_department_members` | 7 | ⬜ |
 | `ACT-017.08` | 358–373 | ناحیه | `مسیر: save_cd_dvd_settings` | 2 | ⬜ |
-
-</details>
-
-### موتور مشترک (lib/) — `CORE`
-
-
-<details>
-<summary><b>CORE-001</b> — <code>lib/activity-audit.php</code> (600 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-001.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-001.02` | 14–27 | تابع | `activity_logs_ensure` | 0 | ⬜ |
-| `CORE-001.03` | 29–58 | تابع | `activity_client_ip` | 0 | ⬜ |
-| `CORE-001.04` | 60–88 | تابع | `activity_computer_name` | 1 | ⬜ |
-| `CORE-001.05` | 90–299 | تابع | `activity_action_label` | 1 | ⬜ |
-| `CORE-001.06` | 301–309 | تابع | `activity_default_result` | 0 | ⬜ |
-| `CORE-001.07` | 311–353 | تابع | `activity_log` | 0 | ⬜ |
-| `CORE-001.08` | 354–360 | ناحیه | `بلوک رویه‌ای 354-360` | 0 | ⬜ |
-| `CORE-001.09` | 361–395 | تابع | `activity_log_view` | 2 | ⬜ |
-| `CORE-001.10` | 397–409 | تابع | `activity_logs_prune` | 0 | ⬜ |
-| `CORE-001.11` | 410–416 | ناحیه | `بلوک رویه‌ای 410-416` | 0 | ⬜ |
-| `CORE-001.12` | 417–448 | تابع | `ops_low_value_tables_prune` | 0 | ⬜ |
-| `CORE-001.13` | 450–454 | تابع | `activity_log_retention_days` | 0 | ⬜ |
-| `CORE-001.14` | 456–508 | تابع | `activity_audit_context` | 0 | ⬜ |
-| `CORE-001.15` | 510–525 | تابع | `save_audit` | 0 | ⬜ |
-| `CORE-001.16` | 527–548 | تابع | `save_audit_required` | 0 | ⬜ |
-| `CORE-001.17` | 550–599 | تابع | `log_ticket_event` | 1 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-002</b> — <code>lib/asset-identity.php</code> (4 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-002.01` | 1–4 | ناحیه | `بلوک رویه‌ای 1-4` | 0 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-003</b> — <code>lib/auth-scope.php</code> (443 خط، 22 آدرس، بازبینی‌شده 0/22)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-003.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-003.02` | 14–28 | تابع | `current_user` | 0 | ⬜ |
-| `CORE-003.03` | 30–44 | تابع | `login_user` | 0 | ⬜ |
-| `CORE-003.04` | 46–53 | تابع | `require_login` | 0 | ⬜ |
-| `CORE-003.05` | 55–63 | تابع | `require_admin` | 0 | ⬜ |
-| `CORE-003.06` | 65–76 | تابع | `require_primary_admin` | 0 | ⬜ |
-| `CORE-003.07` | 78–86 | تابع | `require_staff` | 0 | ⬜ |
-| `CORE-003.08` | 88–96 | تابع | `require_supervisor` | 0 | ⬜ |
-| `CORE-003.09` | 98–132 | تابع | `ticket_manager_scope_unit_ids` | 0 | ⬜ |
-| `CORE-003.10` | 134–143 | تابع | `ticket_requester_tree_predicate` | 5 | ⬜ |
-| `CORE-003.11` | 145–193 | تابع | `ticket_user_can_view` | 5 | ⬜ |
-| `CORE-003.12` | 196–238 | تابع | `ticket_handler_level` | 0 | ⬜ |
-| `CORE-003.13` | 240–257 | تابع | `ticket_view_mode` | 0 | ⬜ |
-| `CORE-003.14` | 259–276 | تابع | `ticket_can_see_internal` | 0 | ⬜ |
-| `CORE-003.15` | 278–321 | تابع | `ticket_assignee_is_eligible` | 0 | ⬜ |
-| `CORE-003.16` | 323–352 | تابع | `ticket_rating_is_current` | 4 | ⬜ |
-| `CORE-003.17` | 354–358 | تابع | `ticket_user_is_requester` | 0 | ⬜ |
-| `CORE-003.18` | 360–368 | تابع | `ticket_reply_starts_work` | 0 | ⬜ |
-| `CORE-003.19` | 370–390 | تابع | `ticket_scope` | 5 | ⬜ |
-| `CORE-003.20` | 392–396 | تابع | `ticket_is_waiting_status` | 0 | ⬜ |
-| `CORE-003.21` | 398–403 | تابع | `user_service_group` | 0 | ⬜ |
-| `CORE-003.22` | 405–441 | تابع | `asset_scope` | 5 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-004</b> — <code>lib/db-core.php</code> (612 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-004.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-004.02` | 14–18 | تابع | `csp_nonce` | 0 | ⬜ |
-| `CORE-004.03` | 20–44 | ناحیه | `Enforce HTTPS in production` | 0 | ⬜ |
-| `CORE-004.04` | 45–56 | تابع | `cfg` | 0 | ⬜ |
-| `CORE-004.05` | 57–59 | ناحیه | `بلوک رویه‌ای 57-59` | 0 | ⬜ |
-| `CORE-004.06` | 60–86 | کلاس | `AppPDO` | 4 | ⬜ |
-| `CORE-004.07` | 88–115 | کلاس | `AppSlowStatement` | 4 | ⬜ |
-| `CORE-004.08` | 117–165 | تابع | `db` | **8** | ⬜ |
-| `CORE-004.09` | 167–193 | تابع | `db_table_exists` | 0 | ⬜ |
-| `CORE-004.10` | 195–214 | تابع | `db_table_columns` | 0 | ⬜ |
-| `CORE-004.11` | 216–220 | تابع | `db_missing_columns` | 0 | ⬜ |
-| `CORE-004.12` | 222–230 | تابع | `db_column_present` | 0 | ⬜ |
-| `CORE-004.13` | 232–248 | تابع | `db_add_missing_column` | 4 | ⬜ |
-| `CORE-004.14` | 250–292 | تابع | `db_ensure_enum_values` | **8** | ⬜ |
-| `CORE-004.15` | 294–297 | تابع | `client_ip` | 0 | ⬜ |
-| `CORE-004.16` | 299–299 | ناحیه | `Rate limiting for API endpoints` | 0 | ⬜ |
-| `CORE-004.17` | 300–300 | ناحیه | `بازمی‌گرداند true اگر مجاز باشد. اگر $retryAfter د` | 0 | ⬜ |
-| `CORE-004.18` | 301–328 | تابع | `api_rate_limit` | 1 | ⬜ |
-| `CORE-004.19` | 330–343 | تابع | `check_api_rate_limit` | 0 | ⬜ |
-| `CORE-004.20` | 345–348 | تابع | `login_rate_key` | 0 | ⬜ |
-| `CORE-004.21` | 350–369 | تابع | `login_rate_allowed` | 1 | ⬜ |
-| `CORE-004.22` | 371–399 | تابع | `record_login_failure` | 1 | ⬜ |
-| `CORE-004.23` | 401–408 | تابع | `clear_login_failures` | 1 | ⬜ |
-| `CORE-004.24` | 410–419 | تابع | `app_version` | 1 | ⬜ |
-| `CORE-004.25` | 421–424 | تابع | `e` | 0 | ⬜ |
-| `CORE-004.26` | 426–431 | تابع | `app_theme_mode` | 2 | ⬜ |
-| `CORE-004.27` | 433–439 | تابع | `app_theme_toggle_markup` | 0 | ⬜ |
-| `CORE-004.28` | 441–445 | تابع | `redirect` | 0 | ⬜ |
-| `CORE-004.29` | 447–475 | تابع | `db_install_token` | 4 | ⬜ |
-| `CORE-004.30` | 477–481 | تابع | `db_install_token_forget` | 0 | ⬜ |
-| `CORE-004.31` | 483–488 | تابع | `db_install_fresh_tables` | 0 | ⬜ |
-| `CORE-004.32` | 490–527 | تابع | `db_install_state` | 5 | ⬜ |
-| `CORE-004.33` | 529–544 | تابع | `db_in_transaction` | 0 | ⬜ |
-| `CORE-004.34` | 546–576 | تابع | `db_commit` | 0 | ⬜ |
-| `CORE-004.35` | 578–595 | تابع | `db_commit_or_fail` | 0 | ⬜ |
-| `CORE-004.36` | 597–610 | تابع | `db_rollback` | 0 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-005</b> — <code>lib/http-input.php</code> (25 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-005.01` | 1–12 | ناحیه | `بلوک رویه‌ای 1-12` | 0 | ⬜ |
-| `CORE-005.02` | 13–16 | تابع | `post_value` | 2 | ⬜ |
-| `CORE-005.03` | 17–19 | ناحیه | `بلوک رویه‌ای 17-19` | 0 | ⬜ |
-| `CORE-005.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
-| `CORE-005.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-006</b> — <code>lib/ldap.php</code> (412 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-006.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-006.02` | 14–32 | تابع | `ldap_secret_key` | 0 | ⬜ |
-| `CORE-006.03` | 34–51 | تابع | `ldap_secret_encrypt` | 0 | ⬜ |
-| `CORE-006.04` | 53–90 | تابع | `ldap_secret_decrypt` | 0 | ⬜ |
-| `CORE-006.05` | 92–116 | تابع | `ldap_cfg` | 0 | ⬜ |
-| `CORE-006.06` | 118–133 | تابع | `ldap_role_for_groups` | 0 | ⬜ |
-| `CORE-006.07` | 135–145 | تابع | `ldap_person_filter` | 0 | ⬜ |
-| `CORE-006.08` | 147–162 | تابع | `ldap_auth_log` | 1 | ⬜ |
-| `CORE-006.09` | 164–240 | تابع | `ldap_diagnose` | 3 | ⬜ |
-| `CORE-006.10` | 242–410 | تابع | `ldap_sync_all_users` | 5 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-007</b> — <code>lib/log-catalog.php</code> (49 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-007.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `CORE-007.02` | 4–48 | تابع | `logging_catalog_definitions` | 0 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-008</b> — <code>lib/logging-audit.php</code> (643 خط، 33 آدرس، بازبینی‌شده 0/33)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-008.01` | 1–45 | ناحیه | `بلوک رویه‌ای 1-45` | 1 | ⬜ |
-| `CORE-008.02` | 46–50 | تابع | `logging_audit_baseline_path` | 0 | ⬜ |
-| `CORE-008.03` | 52–59 | تابع | `logging_audit_structural_checks` | 0 | ⬜ |
-| `CORE-008.04` | 61–82 | تابع | `logging_audit_required_tables` | 0 | ⬜ |
-| `CORE-008.05` | 84–100 | تابع | `logging_audit_required_columns` | 0 | ⬜ |
-| `CORE-008.06` | 102–106 | تابع | `logging_audit_finding` | 0 | ⬜ |
-| `CORE-008.07` | 108–124 | تابع | `logging_audit_table_exists` | 0 | ⬜ |
-| `CORE-008.08` | 126–136 | تابع | `logging_audit_table_columns` | 0 | ⬜ |
-| `CORE-008.09` | 138–138 | ناحیه | `-` | 0 | ⬜ |
-| `CORE-008.10` | 139–139 | ناحیه | `بررسی‌های ساختاری — روی پایگاه دادهٔ زندهٔ همین نص` | 0 | ⬜ |
-| `CORE-008.11` | 140–141 | ناحیه | `-` | 0 | ⬜ |
-| `CORE-008.12` | 142–157 | تابع | `logging_audit_check_db_schema_tables` | 0 | ⬜ |
-| `CORE-008.13` | 159–180 | تابع | `logging_audit_check_db_schema_columns` | 0 | ⬜ |
-| `CORE-008.14` | 182–223 | تابع | `logging_audit_check_db_pending_migrations` | 0 | ⬜ |
-| `CORE-008.15` | 225–248 | تابع | `logging_audit_check_filesystem_writable` | 1 | ⬜ |
-| `CORE-008.16` | 250–250 | ناحیه | `-` | 0 | ⬜ |
-| `CORE-008.17` | 251–251 | ناحیه | `بررسی‌های رفتاری — سلامت کد در حال اجرا` | 0 | ⬜ |
-| `CORE-008.18` | 252–253 | ناحیه | `-` | 0 | ⬜ |
-| `CORE-008.19` | 254–276 | تابع | `logging_audit_check_spool_backlog` | 0 | ⬜ |
-| `CORE-008.20` | 278–317 | تابع | `logging_audit_check_unresolved_issues` | 0 | ⬜ |
-| `CORE-008.21` | 319–342 | تابع | `logging_audit_check_worker_heartbeats` | 1 | ⬜ |
-| `CORE-008.22` | 344–344 | ناحیه | `-` | 0 | ⬜ |
-| `CORE-008.23` | 345–345 | ناحیه | `اجرا` | 0 | ⬜ |
-| `CORE-008.24` | 346–347 | ناحیه | `-` | 0 | ⬜ |
-| `CORE-008.25` | 348–352 | تابع | `logging_audit_heartbeat_path` | 0 | ⬜ |
-| `CORE-008.26` | 354–382 | تابع | `logging_audit_check_audit_continuity` | 1 | ⬜ |
-| `CORE-008.27` | 384–398 | تابع | `logging_audit_write_heartbeat` | 2 | ⬜ |
-| `CORE-008.28` | 400–432 | تابع | `logging_audit_summarize` | 0 | ⬜ |
-| `CORE-008.29` | 434–447 | تابع | `logging_audit_checks` | 0 | ⬜ |
-| `CORE-008.30` | 449–457 | تابع | `logging_audit_load_baseline` | 1 | ⬜ |
-| `CORE-008.31` | 459–472 | تابع | `logging_audit_save_baseline` | 2 | ⬜ |
-| `CORE-008.32` | 474–506 | تابع | `logging_audit_run` | 0 | ⬜ |
-| `CORE-008.33` | 508–642 | تابع | `logging_audit_run_and_record` | 7 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-009</b> — <code>lib/logging-core.php</code> (1,560 خط، 66 آدرس، بازبینی‌شده 0/66)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-009.01` | 1–15 | ناحیه | `بلوک رویه‌ای 1-15` | 0 | ⬜ |
-| `CORE-009.02` | 16–20 | ناحیه | `سقف سخت صف اضطراری؛ فقط هنگام اختلال دیتابیس استفا` | 0 | ⬜ |
-| `CORE-009.03` | 21–36 | تابع | `logging_uuid` | 0 | ⬜ |
-| `CORE-009.04` | 38–45 | تابع | `logging_deterministic_uuid` | 0 | ⬜ |
-| `CORE-009.05` | 47–50 | تابع | `logging_is_uuid_v4` | 0 | ⬜ |
-| `CORE-009.06` | 52–55 | تابع | `logging_is_uuid` | 0 | ⬜ |
-| `CORE-009.07` | 57–63 | تابع | `logging_request_id` | 0 | ⬜ |
-| `CORE-009.08` | 65–69 | تابع | `logging_trace_id` | 0 | ⬜ |
-| `CORE-009.09` | 71–75 | تابع | `logging_operation_id` | 0 | ⬜ |
-| `CORE-009.10` | 77–87 | تابع | `logging_begin_execution` | 0 | ⬜ |
-| `CORE-009.11` | 89–96 | تابع | `logging_begin_operation` | 0 | ⬜ |
-| `CORE-009.12` | 98–101 | تابع | `logging_operation_name` | 0 | ⬜ |
-| `CORE-009.13` | 103–113 | تابع | `logging_correlation_context` | 0 | ⬜ |
-| `CORE-009.14` | 115–119 | تابع | `logging_parent_event_id` | 0 | ⬜ |
-| `CORE-009.15` | 121–131 | تابع | `logging_bootstrap` | 0 | ⬜ |
-| `CORE-009.16` | 133–141 | تابع | `logging_catalog_aliases` | 0 | ⬜ |
-| `CORE-009.17` | 143–151 | تابع | `logging_event_catalog` | 0 | ⬜ |
-| `CORE-009.18` | 153–173 | تابع | `logging_catalog_resolve` | 0 | ⬜ |
-| `CORE-009.19` | 175–319 | تابع | `logging_action_event_definition` | 1 | ⬜ |
-| `CORE-009.20` | 321–328 | تابع | `logging_normalize_digits` | 0 | ⬜ |
-| `CORE-009.21` | 330–340 | تابع | `logging_is_valid_iranian_national_code` | 0 | ⬜ |
-| `CORE-009.22` | 342–345 | تابع | `logging_strict_national_code_enabled` | 0 | ⬜ |
-| `CORE-009.23` | 347–368 | تابع | `logging_sensitive_key` | 0 | ⬜ |
-| `CORE-009.24` | 370–378 | تابع | `logging_utf8_substr` | 0 | ⬜ |
-| `CORE-009.25` | 380–388 | تابع | `logging_utf8_strlen` | 0 | ⬜ |
-| `CORE-009.26` | 390–408 | تابع | `logging_sanitize_text` | 0 | ⬜ |
-| `CORE-009.27` | 410–416 | تابع | `logging_sanitize_single_line` | 0 | ⬜ |
-| `CORE-009.28` | 417–418 | ناحیه | `بلوک رویه‌ای 417-418` | 0 | ⬜ |
-| `CORE-009.29` | 419–428 | تابع | `logging_fingerprint_v2` | 0 | ⬜ |
-| `CORE-009.30` | 430–435 | تابع | `logging_fingerprint_v3` | 0 | ⬜ |
-| `CORE-009.31` | 437–442 | تابع | `logging_fingerprint_current` | 0 | ⬜ |
-| `CORE-009.32` | 444–468 | تابع | `logging_exception_trace` | 0 | ⬜ |
-| `CORE-009.33` | 470–631 | تابع | `logging_sanitize_event_meta` | 1 | ⬜ |
-| `CORE-009.34` | 633–671 | تابع | `logging_sanitize_value` | 0 | ⬜ |
-| `CORE-009.35` | 673–681 | تابع | `logging_safe_request_uri` | 0 | ⬜ |
-| `CORE-009.36` | 683–779 | تابع | `logging_spool_write` | 3 | ⬜ |
-| `CORE-009.37` | 781–785 | تابع | `logging_spool_stats_cache_invalidate` | 5 | ⬜ |
-| `CORE-009.38` | 787–805 | تابع | `logging_spool_stats` | 3 | ⬜ |
-| `CORE-009.39` | 807–868 | تابع | `logging_spool_stats_uncached` | 3 | ⬜ |
-| `CORE-009.40` | 870–924 | تابع | `logging_increment_counter` | 3 | ⬜ |
-| `CORE-009.41` | 926–958 | تابع | `logging_health_counters` | 1 | ⬜ |
-| `CORE-009.42` | 960–981 | تابع | `logging_atomic_replace_file` | 7 | ⬜ |
-| `CORE-009.43` | 983–1023 | تابع | `logging_worker_heartbeat` | 7 | ⬜ |
-| `CORE-009.44` | 1025–1072 | تابع | `logging_emergency_failure` | **11** | ⬜ |
-| `CORE-009.45` | 1074–1077 | تابع | `logging_emergency_failure_rotation_warning` | 0 | ⬜ |
-| `CORE-009.46` | 1079–1083 | تابع | `logging_persistence_status` | 0 | ⬜ |
-| `CORE-009.47` | 1085–1102 | تابع | `logging_record_failure` | 0 | ⬜ |
-| `CORE-009.48` | 1104–1108 | تابع | `logging_json` | 0 | ⬜ |
-| `CORE-009.49` | 1111–1153 | تابع | `logging_append_legacy_file` | 7 | ⬜ |
-| `CORE-009.50` | 1155–1173 | تابع | `logging_replay_insert` | 6 | ⬜ |
-| `CORE-009.51` | 1175–1236 | تابع | `logging_issue_upsert` | **8** | ⬜ |
-| `CORE-009.52` | 1238–1251 | تابع | `logging_db_error_is_transient` | 0 | ⬜ |
-| `CORE-009.53` | 1253–1269 | تابع | `logging_replay_error_classify` | 0 | ⬜ |
-| `CORE-009.54` | 1271–1275 | تابع | `logging_db_circuit_path` | 0 | ⬜ |
-| `CORE-009.55` | 1277–1282 | تابع | `logging_db_circuit_release_probe` | 2 | ⬜ |
-| `CORE-009.56` | 1284–1296 | تابع | `logging_db_circuit_with_lock` | 3 | ⬜ |
-| `CORE-009.57` | 1298–1319 | تابع | `logging_db_circuit_should_skip` | 3 | ⬜ |
-| `CORE-009.58` | 1321–1336 | تابع | `logging_db_circuit_failure` | 7 | ⬜ |
-| `CORE-009.59` | 1338–1344 | تابع | `logging_db_circuit_success` | **9** | ⬜ |
-| `CORE-009.60` | 1346–1362 | تابع | `logging_duplicate_event_already_stored` | 5 | ⬜ |
-| `CORE-009.61` | 1364–1411 | تابع | `logging_store_system` | 1 | ⬜ |
-| `CORE-009.62` | 1413–1444 | تابع | `logging_normalize_activity_event` | 0 | ⬜ |
-| `CORE-009.63` | 1446–1514 | تابع | `logging_store_activity` | 1 | ⬜ |
-| `CORE-009.64` | 1516–1530 | تابع | `log_event` | 0 | ⬜ |
-| `CORE-009.65` | 1531–1533 | ناحیه | `بلوک رویه‌ای 1531-1533` | 0 | ⬜ |
-| `CORE-009.66` | 1534–1559 | تابع | `security_log_access_denied` | 4 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-010</b> — <code>lib/logging-csrf.php</code> (544 خط، 21 آدرس، بازبینی‌شده 0/21)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-010.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-010.02` | 14–17 | تابع | `flash` | 0 | ⬜ |
-| `CORE-010.03` | 19–54 | تابع | `ticket_service_ensure_schema` | 5 | ⬜ |
-| `CORE-010.04` | 56–76 | تابع | `ticket_service_categories` | 0 | ⬜ |
-| `CORE-010.05` | 78–98 | تابع | `ticket_service_category_map` | 0 | ⬜ |
-| `CORE-010.06` | 100–112 | تابع | `system_logs_ensure` | 0 | ⬜ |
-| `CORE-010.07` | 114–157 | تابع | `system_log` | 0 | ⬜ |
-| `CORE-010.08` | 159–206 | تابع | `system_error_explain` | 0 | ⬜ |
-| `CORE-010.09` | 208–212 | تابع | `system_error_mask` | 0 | ⬜ |
-| `CORE-010.10` | 214–258 | تابع | `system_error_record` | 0 | ⬜ |
-| `CORE-010.11` | 260–348 | ناحیه | `هندلرهای سراسری برای HTTP و CLI؛ خروجی هر محیط مست` | 2 | ⬜ |
-| `CORE-010.12` | 349–368 | تابع | `app_error_log` | 0 | ⬜ |
-| `CORE-010.13` | 370–396 | تابع | `system_log_meta_html` | 0 | ⬜ |
-| `CORE-010.14` | 398–421 | تابع | `db_delete_in_batches` | 6 | ⬜ |
-| `CORE-010.15` | 423–447 | تابع | `system_logs_prune` | 0 | ⬜ |
-| `CORE-010.16` | 449–470 | تابع | `system_logs_recent` | 5 | ⬜ |
-| `CORE-010.17` | 472–477 | تابع | `take_flash` | 0 | ⬜ |
-| `CORE-010.18` | 479–482 | تابع | `csrf_field` | 0 | ⬜ |
-| `CORE-010.19` | 484–510 | تابع | `csrf_token` | 0 | ⬜ |
-| `CORE-010.20` | 512–529 | تابع | `csrf_discard_legacy_cookie` | 2 | ⬜ |
-| `CORE-010.21` | 531–542 | تابع | `require_csrf` | 6 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-011</b> — <code>lib/logging-diagnostics.php</code> (118 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-011.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `CORE-011.02` | 4–16 | تابع | `logging_diagnostic_rules` | 0 | ⬜ |
-| `CORE-011.03` | 18–51 | تابع | `logging_diagnostic_analyze` | 0 | ⬜ |
-| `CORE-011.04` | 53–63 | تابع | `logging_diagnostic_safe_value` | 1 | ⬜ |
-| `CORE-011.05` | 65–77 | تابع | `logging_diagnostic_safe_stack` | 0 | ⬜ |
-| `CORE-011.06` | 79–96 | تابع | `logging_diagnostic_similarity` | 0 | ⬜ |
-| `CORE-011.07` | 98–117 | تابع | `logging_diagnostic_redact_event` | 0 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-012</b> — <code>lib/logging-escalation.php</code> (100 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-012.01` | 1–18 | ناحیه | `بلوک رویه‌ای 1-18` | 0 | ⬜ |
-| `CORE-012.02` | 19–27 | تابع | `logging_escalation_thresholds` | 0 | ⬜ |
-| `CORE-012.03` | 29–57 | تابع | `logging_escalation_count` | 4 | ⬜ |
-| `CORE-012.04` | 59–65 | تابع | `logging_escalation_is_critical` | 0 | ⬜ |
-| `CORE-012.05` | 67–100 | تابع | `logging_smart_summary` | 4 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-013</b> — <code>lib/logging-integrity.php</code> (238 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-013.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `CORE-013.02` | 4–31 | تابع | `logging_integrity_manifest_hmac` | 0 | ⬜ |
-| `CORE-013.03` | 33–55 | تابع | `logging_integrity_verify_archive_file` | 1 | ⬜ |
-| `CORE-013.04` | 57–64 | تابع | `logging_integrity_has_older_snapshot` | 0 | ⬜ |
-| `CORE-013.05` | 66–99 | تابع | `logging_integrity_verify_predecessor_chain` | 1 | ⬜ |
-| `CORE-013.06` | 101–114 | تابع | `logging_integrity_verify_daily_manifest_error` | 0 | ⬜ |
-| `CORE-013.07` | 116–119 | تابع | `logging_integrity_verify_daily_manifest` | 0 | ⬜ |
-| `CORE-013.08` | 121–159 | تابع | `logging_integrity_read_archive_index` | 1 | ⬜ |
-| `CORE-013.09` | 161–178 | تابع | `logging_integrity_merge_archive_indexes` | 0 | ⬜ |
-| `CORE-013.10` | 180–198 | تابع | `logging_integrity_row_is_late` | 0 | ⬜ |
-| `CORE-013.11` | 200–237 | تابع | `logging_integrity_verify_supplement_chain` | 2 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-014</b> — <code>lib/logging-replay.php</code> (261 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-014.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `CORE-014.02` | 6–43 | تابع | `logging_replay_poison_attempts` | 7 | ⬜ |
-| `CORE-014.03` | 45–260 | تابع | `logging_replay_process_directory` | **9** | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-015</b> — <code>lib/notify-users.php</code> (524 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-015.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-015.02` | 14–34 | تابع | `notify_user` | 1 | ⬜ |
-| `CORE-015.03` | 36–48 | تابع | `notification_target_url` | 0 | ⬜ |
-| `CORE-015.04` | 50–73 | تابع | `ticket_notification_user_can` | 0 | ⬜ |
-| `CORE-015.05` | 75–95 | تابع | `ticket_notification_recipients` | 5 | ⬜ |
-| `CORE-015.06` | 97–102 | تابع | `ticket_unassigned_notify_candidates` | 0 | ⬜ |
-| `CORE-015.07` | 104–124 | تابع | `notify_ticket_parties` | 0 | ⬜ |
-| `CORE-015.08` | 126–145 | تابع | `notify_ticket_staff` | 0 | ⬜ |
-| `CORE-015.09` | 147–172 | تابع | `notification_user_sees_food_cancel` | 0 | ⬜ |
-| `CORE-015.10` | 174–181 | تابع | `notification_visibility_sql` | 0 | ⬜ |
-| `CORE-015.11` | 183–191 | تابع | `notification_ticket_visibility` | 5 | ⬜ |
-| `CORE-015.12` | 193–214 | تابع | `notification_header_summary` | 5 | ⬜ |
-| `CORE-015.13` | 216–221 | تابع | `is_sla_holiday` | 0 | ⬜ |
-| `CORE-015.14` | 223–251 | تابع | `ldap_authenticate` | 0 | ⬜ |
-| `CORE-015.15` | 253–425 | تابع | `ldap_authenticate_measured` | 4 | ⬜ |
-| `CORE-015.16` | 427–432 | تابع | `normalize_employee_number` | 0 | ⬜ |
-| `CORE-015.17` | 434–434 | ناحیه | `شناسه کاربری که این کد پرسنلی را دارد (۰ یعنی آزاد` | 0 | ⬜ |
-| `CORE-015.18` | 435–443 | تابع | `employee_number_owner` | 0 | ⬜ |
-| `CORE-015.19` | 445–511 | تابع | `upsert_domain_user` | 1 | ⬜ |
-| `CORE-015.20` | 513–522 | تابع | `link_agent_assets_to_user` | 1 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-016</b> — <code>lib/settings-effects.php</code> (386 خط، 21 آدرس، بازبینی‌شده 0/21)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-016.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `CORE-016.02` | 14–36 | تابع | `setting` | 0 | ⬜ |
-| `CORE-016.03` | 38–44 | تابع | `setting_forget_cache` | 0 | ⬜ |
-| `CORE-016.04` | 46–55 | تابع | `save_setting` | 1 | ⬜ |
-| `CORE-016.05` | 57–113 | تابع | `triangle_effect_page_catalog` | 0 | ⬜ |
-| `CORE-016.06` | 115–124 | تابع | `triangle_effect_valid_keys` | 0 | ⬜ |
-| `CORE-016.07` | 126–142 | تابع | `triangle_effect_config_spec` | 0 | ⬜ |
-| `CORE-016.08` | 144–175 | تابع | `triangle_effect_sanitize_config` | 0 | ⬜ |
-| `CORE-016.09` | 177–181 | تابع | `display_effect_type` | 0 | ⬜ |
-| `CORE-016.10` | 183–196 | تابع | `particle_effect_config_spec` | 0 | ⬜ |
-| `CORE-016.11` | 198–227 | تابع | `particle_effect_sanitize_config` | 0 | ⬜ |
-| `CORE-016.12` | 229–234 | تابع | `particle_effect_config` | 0 | ⬜ |
-| `CORE-016.13` | 236–244 | تابع | `particle_effect_enabled_for_current_page` | 0 | ⬜ |
-| `CORE-016.14` | 246–251 | تابع | `triangle_effect_config` | 0 | ⬜ |
-| `CORE-016.15` | 253–275 | تابع | `triangle_effect_enabled_pages` | 0 | ⬜ |
-| `CORE-016.16` | 277–289 | تابع | `triangle_effect_current_page_key` | 2 | ⬜ |
-| `CORE-016.17` | 291–321 | تابع | `triangle_effect_script_tag` | 0 | ⬜ |
-| `CORE-016.18` | 323–353 | تابع | `particle_effect_script_tag` | 0 | ⬜ |
-| `CORE-016.19` | 355–362 | تابع | `key_role_setting_map` | 0 | ⬜ |
-| `CORE-016.20` | 364–379 | تابع | `key_role_user_ids` | 0 | ⬜ |
-| `CORE-016.21` | 381–384 | تابع | `user_is_key_role` | 0 | ⬜ |
-
-</details>
-
-<details>
-<summary><b>CORE-017</b> — <code>lib/tickets-sla.php</code> (891 خط، 36 آدرس، بازبینی‌شده 0/36)</summary>
-
-| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
-|---|---|---|---|---|---|
-| `CORE-017.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
-| `CORE-017.02` | 20–24 | تابع | `ticket_number_cache_set` | 0 | ⬜ |
-| `CORE-017.03` | 26–50 | تابع | `ticket_number` | 0 | ⬜ |
-| `CORE-017.04` | 52–72 | تابع | `ticket_number_cache_prime` | 0 | ⬜ |
-| `CORE-017.05` | 74–83 | تابع | `ticket_number_prefix` | 0 | ⬜ |
-| `CORE-017.06` | 85–106 | تابع | `ticket_number_ensure_schema` | 0 | ⬜ |
-| `CORE-017.07` | 108–205 | تابع | `ticket_hot_schema_ensure` | 4 | ⬜ |
-| `CORE-017.08` | 207–261 | تابع | `ticket_number_ensure_schema_run` | **8** | ⬜ |
-| `CORE-017.09` | 263–299 | تابع | `ticket_number_next` | 0 | ⬜ |
-| `CORE-017.10` | 301–313 | تابع | `ticket_number_peek` | 0 | ⬜ |
-| `CORE-017.11` | 315–340 | تابع | `ticket_number_sequence_floor` | 4 | ⬜ |
-| `CORE-017.12` | 342–360 | تابع | `ticket_number_sequence_persist` | 5 | ⬜ |
-| `CORE-017.13` | 362–456 | تابع | `ticket_number_autofill` | **10** | ⬜ |
-| `CORE-017.14` | 458–462 | تابع | `is_it_agent` | 0 | ⬜ |
-| `CORE-017.15` | 464–492 | تابع | `jalali_to_gregorian` | 0 | ⬜ |
-| `CORE-017.16` | 494–520 | تابع | `gregorian_to_jalali` | 0 | ⬜ |
-| `CORE-017.17` | 522–531 | تابع | `jalali_date` | 0 | ⬜ |
-| `CORE-017.18` | 533–552 | تابع | `jalali_input_to_gregorian` | 0 | ⬜ |
-| `CORE-017.19` | 554–569 | تابع | `find_or_create_department` | 1 | ⬜ |
-| `CORE-017.20` | 571–574 | تابع | `persian_date` | 0 | ⬜ |
-| `CORE-017.21` | 576–579 | تابع | `priority_sla_minutes` | 0 | ⬜ |
-| `CORE-017.22` | 581–604 | تابع | `ensure_default_ola_policies` | 5 | ⬜ |
-| `CORE-017.23` | 606–616 | تابع | `ola_policy_for` | 0 | ⬜ |
-| `CORE-017.24` | 618–634 | تابع | `ola_deadlines` | 0 | ⬜ |
-| `CORE-017.25` | 636–689 | تابع | `sla_business_hours` | 0 | ⬜ |
-| `CORE-017.26` | 691–701 | تابع | `sla_business_hours_forget_cache` | 0 | ⬜ |
-| `CORE-017.27` | 703–717 | تابع | `next_business_start` | 0 | ⬜ |
-| `CORE-017.28` | 719–739 | تابع | `business_due_at` | 0 | ⬜ |
-| `CORE-017.29` | 741–764 | تابع | `business_elapsed_minutes` | 0 | ⬜ |
-| `CORE-017.30` | 766–782 | تابع | `ticket_sla_cycle_start` | 0 | ⬜ |
-| `CORE-017.31` | 784–816 | تابع | `ticket_sla_transition` | 5 | ⬜ |
-| `CORE-017.32` | 818–865 | تابع | `ticket_ola_transition` | 0 | ⬜ |
-| `CORE-017.33` | 867–874 | تابع | `record_asset_history` | 1 | ⬜ |
-| `CORE-017.34` | 876–879 | تابع | `status_label` | 0 | ⬜ |
-| `CORE-017.35` | 881–884 | تابع | `priority_label` | 0 | ⬜ |
-| `CORE-017.36` | 886–889 | تابع | `ticket_type_label` | 0 | ⬜ |
 
 </details>
 
