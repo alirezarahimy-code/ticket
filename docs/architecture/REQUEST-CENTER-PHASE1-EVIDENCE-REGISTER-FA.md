@@ -66,6 +66,33 @@
 
 برگه T12 ده گروه سناریو دارد؛ برخی گروه‌ها چند عملیات مستقل را پوشش می‌دهند. در نتیجه شمارش گروه‌های سناریو با تعداد Action/نقطه نوشتن برابر نیست. دفتر نهایی باید برای هر فرمان واقعی یک شناسه مستقل داشته باشد و هیچ مسیر نوشتن/تغییر status را صرفاً به‌دلیل قرارگرفتن در یک ردیف تجمیعی حذف نکند.
 
+### ۳.۳. پیمایش اولیه همه فایل‌های PHP اجرایی
+
+درخت Git شاخه بررسی شد و ۱۰۱ فایل PHP اجرایی (ریشه، Actions، API، Cron، Library و Module؛ بدون پوشه‌های tests/tools و آرشیو updates) از نظر ارجاع SQL به جدول‌های چرخه درخواست و فراخوانی توابع ensure پیمایش شدند. این یک جست‌وجوی ایستای متنی است؛ برای queryهای چندخطی/پویا و مسیرهای ساخته‌شده در زمان اجرا هنوز بازبینی معنایی لازم است.
+
+یافته‌های مستقیم:
+
+- تنها INSERT مستقیم به جدول `tickets` در مسیر `create_ticket` داخل `modules/request-center/Actions/ticket-actions.php` است.
+- UPDATEهای metadata مستقیم در همان Handler برای ثبت درخواست لغو و رد درخواست لغو باقی مانده‌اند؛ این‌ها status را تغییر نمی‌دهند.
+- UPDATE متمرکز status در `modules/request-center/WorkflowService.php:174` انجام می‌شود.
+- UPDATE مستقیم `ticket_no` در `lib/tickets-sla.php:393` متعلق به شماره‌گذاری/تکمیل داده قدیمی است، نه transition وضعیت.
+- `lib/activity-audit.php` و `lib/logging-replay.php` در جدول مشترک `ticket_events` رویداد درج می‌کنند؛ این مسیرها مالک تغییر status در `tickets` نیستند.
+- `cron/sla_maintenance.php` فقط درخواست‌ها را برای هشدار SLA/OLA می‌خواند و در جداول هشدار درج می‌کند؛ با این حال قبل از کنترل CLI، `ticket_hot_schema_ensure()` را فراخوانی می‌کند.
+- مصرف‌کنندگان خواندنی مهم شامل `governance.php`، `chatbot.php`، `lib/auth-scope.php`، `lib/notify-users.php`، `system-health.php` و `modules/request-center/RequestCenterRepository.php` هستند. این مصرف‌کنندگان باید در رگرسیون visibility، scope و side effect پوشش داده شوند.
+
+**نتیجهٔ این پیمایش:** در جست‌وجوی ایستای ۱۰۱ فایل، نویسندهٔ مستقیم دیگری برای ستون `tickets.status` بیرون از WorkflowService و مسیرهای metadata/شماره‌گذاری فوق مشاهده نشد. این نتیجه جایگزین بازبینی queryهای چندخطی/پویا، SQL داخل داده‌ها، consumerهای غیر-PHP یا اجرای runtime نیست.
+
+### ۳.۴. اثر جانبی داده‌ای در مسیر وب و ریسک پنهان DDL
+
+دو مسیر مهم فراتر از صرفاً وجود DDL شناسایی شد:
+
+1. `index.php:29-30` در هر درخواست ابتدا `ticket_number_ensure_schema()` و سپس `ticket_number_autofill()` را صدا می‌زند. اگر نشانگر `ticket_autofill_done` ثبت نشده باشد، `ticket_number_autofill()` می‌تواند در همان درخواست وب تا ۵۰ batch با حداکثر ۵۰۰ ردیف در هر batch را برای پرکردن `tickets.ticket_no` به‌روزرسانی کند. این یک backfill داده‌ای در مسیر وب است و باید از نظر حجم، زمان اجرا، رقابت با ثبت هم‌زمان و اثر بر درخواست ورود/صف مشخصه‌نگاری شود.
+2. در `lib/tickets-sla.php`، `ticket_hot_schema_ensure()` پرچم static `$ready` را پیش از اجرای ALTERها true می‌کند و خطاهای داخل بلوک DDL را با `catch (Throwable) { }` بی‌صدا می‌بلعد. در نتیجه یک اجرای ناقص می‌تواند در همان درخواست به‌عنوان آماده علامت بخورد، بدون اینکه نتیجهٔ post-check ثبت شود. این مورد ریسک partial schema و observability است؛ در فاز ممیزی فقط ثبت می‌شود و اصلاح اجرایی آن منوط به طراحی/مجوز و آزمون است.
+3. `ticket_service_ensure_schema()` در `lib/logging-csrf.php` علاوه بر ALTER روی `categories` و `service_catalog`، seed دسته‌ها و backfill `service_catalog.category_id` انجام می‌دهد. این تابع از مسیر Legacy ایجاد/فرم درخواست فراخوانی می‌شود؛ پس باید به‌عنوان DDL + DML زمان اجرا در خط مبنا ثبت شود.
+4. در `cron/ticket_auto_close.php` و `cron/sla_maintenance.php`، `ticket_hot_schema_ensure()` پیش از شرط `PHP_SAPI === 'cli'` فراخوانی می‌شود. اگر وب‌سرور دسترسی HTTP به مسیر Cron را مسدود نکرده باشد، درخواست HTTP می‌تواند قبل از پاسخ 404 به مسیر ensure برسد. وجود/عدم وجود deny rule در تنظیمات واقعی Apache باید آزموده شود؛ از روی سورس PHP به‌تنهایی دسترسی‌پذیری وب قطعی اعلام نمی‌شود.
+
+این یافته‌ها نشان می‌دهد T04 صرفاً «تعداد ALTERها» نیست: backfill شماره‌گذاری، seed/backfill کاتالوگ و بلع خطای DDL نیز باید در سناریوهای آزمون ثبت شوند. هیچ‌کدام در این مرحله تغییر داده نشده‌اند.
+
 ## ۴. وضعیت T01 تا T12 در زمان ثبت
 
 | گیت | موضوع | وضعیت مستند فعلی |
