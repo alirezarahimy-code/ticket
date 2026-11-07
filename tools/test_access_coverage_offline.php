@@ -149,7 +149,7 @@ foreach (['*.php' => true] as $pattern => $_) {
         $sourceFiles[] = $file;
     }
 }
-foreach (['actions', 'api', 'cron', 'lib', 'tools'] as $dir) {
+foreach (['actions', 'api', 'cron', 'lib', 'tools', 'modules/request-center/Actions'] as $dir) {
     foreach (glob($root . '/' . $dir . '/*.php') ?: [] as $file) {
         // فایل‌های آزمون، دادهٔ آزمایشی دارند (نام کدها را برای سنجش می‌نویسند) و شمرده نمی‌شوند.
         if ($dir === 'tools' && str_starts_with(basename($file), 'test_')) {
@@ -199,11 +199,25 @@ $actionFiles = glob(APP_ROOT . '/actions/*.php') ?: [];
 $ungatedActionFiles = [];
 foreach ($actionFiles as $actionFile) {
     $actionSource = (string) file_get_contents($actionFile);
+    // فایل‌های Bridge فقط Handler ماژول RC را بارگذاری می‌کنند؛ گارد واقعی در Handler مقصد سنجیده می‌شود.
+    if (str_contains($actionSource, '/modules/request-center/Actions/')) {
+        continue;
+    }
     if (preg_match('/require_(?:login|permission|primary_admin|staff)\\s*\\(/', $actionSource) !== 1) {
         $ungatedActionFiles[] = basename($actionFile);
     }
 }
-check('تمام ماژول‌های اکشن POST دارای گارد ورود یا مجوز هستند', $ungatedActionFiles === [], 'بدون گارد: ' . implode(', ', $ungatedActionFiles));
+check('اکشن‌های Legacy غیر Bridge دارای گارد ورود یا مجوز هستند', $ungatedActionFiles === [], 'بدون گارد: ' . implode(', ', $ungatedActionFiles));
+
+$requestCenterActionFiles = glob(APP_ROOT . '/modules/request-center/Actions/*.php') ?: [];
+$ungatedRequestCenterActionFiles = [];
+foreach ($requestCenterActionFiles as $actionFile) {
+    $actionSource = (string) file_get_contents($actionFile);
+    if (preg_match('/require_(?:login|permission|primary_admin|staff)\\s*\\(/', $actionSource) !== 1) {
+        $ungatedRequestCenterActionFiles[] = basename($actionFile);
+    }
+}
+check('تمام Handlerهای POST ماژول Request Center دارای گارد ورود یا مجوز هستند', $ungatedRequestCenterActionFiles === [], 'بدون گارد: ' . implode(', ', $ungatedRequestCenterActionFiles));
 
 $governance = (string) file_get_contents(APP_ROOT . '/governance.php');
 check('governance.php: require_staff()', str_contains($governance, '$user = require_staff();'));

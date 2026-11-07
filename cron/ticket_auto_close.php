@@ -13,6 +13,7 @@ declare(strict_types=1);
  *   C:\xampp\php\php.exe C:\xampp\htdocs\ticket\cron\ticket_auto_close.php
  */
 require dirname(__DIR__) . '/bootstrap.php';
+require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';
 if (function_exists('ticket_hot_schema_ensure')) {
     ticket_hot_schema_ensure();
 }
@@ -29,7 +30,6 @@ if ($days < 1) {
 }
 
 $candidates = db()->query('SELECT t.id, t.requester_id, t.asset_id FROM tickets t LEFT JOIN ticket_ratings tr ON tr.ticket_id = t.id WHERE t.status = "resolved" AND t.cancel_requested_at IS NULL AND COALESCE(t.resolved_at, t.updated_at) <= DATE_SUB(NOW(), INTERVAL ' . $days . ' DAY) AND (tr.id IS NULL OR tr.created_at < t.resolved_at OR (tr.created_at = t.resolved_at AND (SELECT MAX(e.id) FROM ticket_events e WHERE e.ticket_id = t.id AND e.event_type = "rated") < (SELECT MAX(e.id) FROM ticket_events e WHERE e.ticket_id = t.id AND e.to_status = "resolved" AND (e.from_status IS NULL OR e.from_status <> "resolved")))) ORDER BY t.id LIMIT 500')->fetchAll();
-$closeQuery = db()->prepare('UPDATE tickets SET status = "closed", closed_at = NOW(), supervisor_note = ?, updated_at = NOW() WHERE id = ? AND status = "resolved" AND cancel_requested_at IS NULL');
 $closed = 0;
 
 foreach ($candidates as $row) {
@@ -55,8 +55,15 @@ foreach ($candidates as $row) {
             continue;
         }
         $row = $current;
-        $closeQuery->execute(['بسته‌شدن خودکار: کاربر ظرف ' . $days . ' روز پس از حل‌شدن امتیاز ثبت نکرد.', $ticketId]);
-        if ($closeQuery->rowCount() < 1) {
+        $workflow = new RequestCenterWorkflowService(db());
+        $closedByPolicy = $workflow->transition($ticketId, 'resolved', 'closed', [
+            'closed_at' => RequestCenterSqlExpression::now(),
+            'supervisor_note' => 'بسته‌شدن خودکار: کاربر ظرف ' . $days . ' روز پس از حل‌شدن امتیاز ثبت نکرد.',
+        ], 'auto_close', [
+            'cancel_requested_at' => null,
+            'resolved_at' => $current['resolved_at'] ?? null,
+        ]);
+        if (!$closedByPolicy) {
             db()->rollBack();
             continue;
         }

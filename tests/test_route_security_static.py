@@ -1,3 +1,5 @@
+import re
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,8 +60,20 @@ def test_action_handlers_refuse_direct_http_access():
     for path in action_files:
         source = path.read_text(encoding="utf-8")
         head = source[:2500]
-        if "defined('APP_ROOT')" not in head and 'defined("APP_ROOT")' not in head:
-            unguarded.append(path.relative_to(ROOT).as_posix())
+        if "defined('APP_ROOT')" in head or 'defined("APP_ROOT")' in head:
+            continue
+
+        # Request Center legacy files are compatibility bridges. Their target handler,
+        # not the bridge stub, owns the APP_ROOT direct-access guard.
+        match = re.search(r"modules/request-center/Actions/([A-Za-z0-9_-]+\.php)", source)
+        if match:
+            target = ROOT / "modules" / "request-center" / "Actions" / match.group(1)
+            target_source = target.read_text(encoding="utf-8") if target.is_file() else ""
+            target_head = target_source[:2500]
+            if "defined('APP_ROOT')" in target_head or 'defined("APP_ROOT")' in target_head:
+                continue
+
+        unguarded.append(path.relative_to(ROOT).as_posix())
     assert not unguarded, "Action handlers missing front-controller guard: " + ", ".join(unguarded)
 
 
@@ -94,7 +108,7 @@ def test_internal_modules_refuse_direct_http_access():
 
 
 def test_it_ticket_asset_reference_obeys_asset_own_unit_scope():
-    source = read("actions/ticket-actions.php")
+    source = read("modules/request-center/Actions/ticket-actions.php")
     handler = section(source, "$assetId = (int) ($_POST['asset_id']", "$supportLocation = post_value")
     assert "user_service_group($user) === 'it'" in handler
     assert "asset_scope($user, 'a')" in handler

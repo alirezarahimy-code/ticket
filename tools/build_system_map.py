@@ -307,7 +307,7 @@ def extract_routes(rel: Path, text: str) -> list[tuple[str, str, int, str]]:
         seen.add(key)
         out.append((kind, name, text.count("\n", 0, pos) + 1, str_rel))
 
-    if str_rel == "index.php" or str_rel.startswith("actions/") or str_rel in {
+    if str_rel == "index.php" or str_rel.startswith("actions/") or str_rel.startswith("modules/request-center/Actions/") or str_rel in {
         "food-ticket.php", "food-order.php", "traffic-control.php", "governance.php", "ola.php"
     }:
         for m in PAGE_RE.finditer(text):
