@@ -8,12 +8,12 @@
 
 | سنجه | مقدار |
 |---|---|
-| فایل‌های کد تولیدی | 560 |
-| خطوط | 128,145 |
-| آدرس‌ها (بلوک) | 6,763 |
+| فایل‌های کد تولیدی | 561 |
+| خطوط | 128,171 |
+| آدرس‌ها (بلوک) | 6,764 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,763 آدرس |
+| باقی‌مانده | 6,764 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -96,17 +96,17 @@
 | خدمات و دسته‌بندی | **مدیریت فیلدهای خدمت** | `service_field.manage` | `ACT-012.04` <sub>actions/service-actions.php:69</sub> | 3 |
 | دانش‌نامه | **مشاهدهٔ دانش‌نامه** | `knowledge.view` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 5 |
 | دانش‌نامه | **ویرایش** | `knowledge.manage` | `ACT-012.09` <sub>actions/service-actions.php:206</sub> | 4 |
-| کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `PAGE-034.83` <sub>index.php:1917</sub><br>`PAGE-034.30` <sub>index.php:626</sub><br>`TEST-022.01` <sub>tests/smoke.php:1</sub> | 10 |
+| کنترل CD/DVD | **مشاهدهٔ فرم کنترل CD/DVD** | `cddvd.view` | `PAGE-034.83` <sub>index.php:1917</sub><br>`PAGE-034.30` <sub>index.php:626</sub><br>`TEST-023.01` <sub>tests/smoke.php:1</sub> | 10 |
 | کنترل CD/DVD | **ثبت خروج رسانه** | `cddvd.submit_out` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`PAGE-009.17` <sub>cd-dvd.php:128</sub><br>`PAGE-048.15` <sub>permissions.php:344</sub> | 4 |
-| کنترل CD/DVD | **ثبت ورود رسانه (بازرسی)** | `cddvd.submit_in` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`TEST-141.05` <sub>tests/test_permissions_followup_static.py:30</sub><br>`PAGE-009.16` <sub>cd-dvd.php:120</sub> | 4 |
+| کنترل CD/DVD | **ثبت ورود رسانه (بازرسی)** | `cddvd.submit_in` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`TEST-142.05` <sub>tests/test_permissions_followup_static.py:30</sub><br>`PAGE-009.16` <sub>cd-dvd.php:120</sub> | 4 |
 | کنترل CD/DVD | **ویرایش** | `cddvd.edit` | `PAGE-034.100` <sub>index.php:3199</sub><br>`PAGE-048.26` <sub>permissions.php:487</sub><br>`PAGE-048.03` <sub>permissions.php:28</sub> | 9 |
 | کنترل CD/DVD | **مشاهدهٔ همهٔ ثبت‌ها (نه فقط واحد خود)** | `cddvd.view_all` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`PAGE-009.11` <sub>cd-dvd.php:65</sub><br>`PAGE-048.16` <sub>permissions.php:350</sub> | 3 |
 | کنترل CD/DVD | **تاریخچهٔ سریال** | `cddvd.history` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.48` <sub>index.php:1321</sub> | 4 |
 | کنترل CD/DVD | **خروجی Excel/CSV** | `cddvd.export` | `PAGE-034.43` <sub>index.php:1074</sub><br>`PAGE-048.03` <sub>permissions.php:28</sub><br>`PAGE-009.13` <sub>cd-dvd.php:87</sub> | 4 |
 | کنترل تردد مراجعین | **مشاهدهٔ کنترل تردد** | `traffic.view` | `PAGE-055.63` <sub>traffic-control.php:981</sub><br>`PAGE-055.59` <sub>traffic-control.php:888</sub><br>`PAGE-056.23` <sub>traffic-import.php:853</sub> | 18 |
 | کنترل تردد مراجعین | **ثبت، ویرایش و ورود گروهی سوابق** | `traffic.manage` | `PAGE-055.63` <sub>traffic-control.php:981</sub><br>`PAGE-055.54` <sub>traffic-control.php:786</sub><br>`PAGE-056.23` <sub>traffic-import.php:853</sub> | 10 |
-| کنترل تردد مراجعین | **مقصدهای ملاقات** | `traffic.destinations` | `PAGE-055.63` <sub>traffic-control.php:981</sub><br>`PAGE-055.05` <sub>traffic-control.php:16</sub><br>`TEST-141.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 6 |
-| کنترل تردد مراجعین | **ویرایش** | `traffic.destinations_edit` | `PAGE-055.06` <sub>traffic-control.php:21</sub><br>`TEST-141.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 4 |
+| کنترل تردد مراجعین | **مقصدهای ملاقات** | `traffic.destinations` | `PAGE-055.63` <sub>traffic-control.php:981</sub><br>`PAGE-055.05` <sub>traffic-control.php:16</sub><br>`TEST-142.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 6 |
+| کنترل تردد مراجعین | **ویرایش** | `traffic.destinations_edit` | `PAGE-055.06` <sub>traffic-control.php:21</sub><br>`TEST-142.04` <sub>tests/test_permissions_followup_static.py:12</sub> | 4 |
 | دارایی و شناسنامه فنی | **فهرست شناسنامه‌ها** | `assets.view` | `PAGE-034.97` <sub>index.php:2929</sub> | 9 |
 | دارایی و شناسنامه فنی | **فقط دارایی‌های واحد خودم** | `assets.own_unit` | `CORE-003.22` <sub>lib/auth-scope.php:405</sub> | 4 |
 | دارایی و شناسنامه فنی | **مشاهدهٔ شناسنامهٔ دارایی** | `asset.view` | `PAGE-048.03` <sub>permissions.php:28</sub><br>`PAGE-034.48` <sub>index.php:1321</sub><br>`PAGE-048.08` <sub>permissions.php:246</sub> | 4 |
@@ -170,7 +170,7 @@
 | تنظیمات و سیستم | **ویرایش** | `ola.manage` | `PAGE-046.07` <sub>ola.php:32</sub> | 5 |
 | تنظیمات و سیستم | **تغییر و مشکل** | `governance.view` | `PAGE-031.24` <sub>governance.php:174</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `governance.manage` | `PAGE-031.24` <sub>governance.php:174</sub> | 8 |
-| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-034.86` <sub>index.php:2158</sub><br>`TEST-081.33` <sub>tests/test_food_worker_window_static.py:306</sub> | 6 |
+| تنظیمات و سیستم | **مدیریت تعطیلات** | `holidays.view` | `PAGE-034.86` <sub>index.php:2158</sub><br>`TEST-082.33` <sub>tests/test_food_worker_window_static.py:306</sub> | 6 |
 | تنظیمات و سیستم | **ویرایش** | `holidays.manage` | `ACT-008.07` <sub>actions/holiday-actions.php:102</sub> | 13 |
 
 </details>
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 230 | 1,661 | 22,272 |
+| `TEST` | TEST | 231 | 1,662 | 22,298 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 58 | 1,389 | 45,715 |
@@ -306,7 +306,7 @@
 | `error_suppression` | سرکوب @ | 284 |
 | `dangerous_call` | فراخوانی خطرناک | 211 |
 | `sql_concat` | الحاق در SQL | 187 |
-| `raw_input` | ورودی خام | 177 |
+| `raw_input` | ورودی خام | 178 |
 | `long` | >۱۲۰ خط | 127 |
 | `silent_catch` | catch بی‌صدا | 125 |
 | `unescaped_echo` | چاپ بدون فرار | 34 |
@@ -317,24 +317,24 @@
 | # | آدرس | مسیر:خط | لنگر | ریسک | نشانه‌ها | وضعیت |
 |---|---|---|---|---|---|---|
 | 1 | `TOOL-018.01` | `tools/diag_connection.php:1` | بلوک رویه‌ای 1-258 | 20 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
-| 2 | `TEST-197.13` | `tests/test_system_update_migration_failure_gates.php:147` | بلوک رویه‌ای 147-232 | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 2 | `TEST-198.13` | `tests/test_system_update_migration_failure_gates.php:147` | بلوک رویه‌ای 147-232 | 17 | catch بی‌صدا، الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 3 | `TOOL-060.01` | `tools/test_food_group_representative.php:1` | بلوک رویه‌ای 1-517 | 16 | catch بی‌صدا، الحاق در SQL، چاپ بدون فرار، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
 | 4 | `PAGE-025.29` | `food-ticket-runtime.php:1193` | food_ticket_events_ensure_source_delet | 14 | catch بی‌صدا، الحاق در SQL، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 5 | `PAGE-029.84` | `food-ticket.php:2379` | food_ticket_cleanup_source_rows | 14 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 6 | `PAGE-029.129` | `food-ticket.php:4737` | food_ticket_api_upload_access_file | 14 | الحاق در SQL، ورودی خام، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 | 7 | `PAGE-029.130` | `food-ticket.php:4807` | food_ticket_api_handle | 14 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۳۰۰ خط | ⬜ در نوبت |
-| 8 | `TEST-170.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
+| 8 | `TEST-171.03` | `tests/test_request_center_claim_concurrency_mariadb.php:38` | بلوک رویه‌ای 38-198 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 9 | `TOOL-057.10` | `tools/test_employees_import_offline.php:121` | بلوک رویه‌ای 121-276 | 14 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 10 | `PAGE-025.22` | `food-ticket-runtime.php:815` | food_ticket_send_windows_graphic | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 11 | `PAGE-029.39` | `food-ticket.php:795` | food_ticket_access_rows_powershell | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 12 | `PAGE-029.41` | `food-ticket.php:1013` | food_ticket_access_delete_powershell_e | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 13 | `PAGE-029.85` | `food-ticket.php:2583` | food_ticket_retry_failed | 13 | catch بی‌صدا، الحاق در SQL، سرکوب @، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 14 | `TEST-110.08` | `tests/test_logging_mysql_integration.php:227` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 14 | `TEST-111.08` | `tests/test_logging_mysql_integration.php:227` | Verify migration 025 changes the live  | 13 | الحاق در SQL، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 15 | `TOOL-001.01` | `tools/asset_dedupe.php:1` | بلوک رویه‌ای 1-230 | 13 | الحاق در SQL، چاپ بدون فرار، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 16 | `PAGE-011.27` | `chatbot.php:700` | chatbot_api_handle | 12 | ورودی خام، چاپ بدون فرار، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 17 | `CRON-009.01` | `cron/rebuild_logging_issues.php:1` | بلوک رویه‌ای 1-53 | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 18 | `TEST-110.06` | `tests/test_logging_mysql_integration.php:135` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
-| 19 | `TEST-177.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 18 | `TEST-111.06` | `tests/test_logging_mysql_integration.php:135` | Migration 025 must remain safe when th | 12 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
+| 19 | `TEST-178.11` | `tests/test_request_center_t12_preflight.php:210` | بلوک رویه‌ای 210-322 | 12 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 20 | `TOOL-024.01` | `tools/diag_source_row_delete.php:1` | بلوک رویه‌ای 1-128 | 12 | الحاق در SQL، ورودی خام، سرکوب @، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 21 | `PAGE-025.18` | `food-ticket-runtime.php:539` | food_ticket_process_print_queue | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
 | 22 | `WEB-003.01` | `food-ticket-web/assets/food-capitalio-dashboard-4179.js:1` | مقدمهٔ فایل | 11 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش، >۱۲۰ خط | ⬜ در نوبت |
@@ -354,7 +354,7 @@
 | 36 | `PAGE-021.52` | `food-ticket-groups.php:1737` | food_ticket_group_try_unknown | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 37 | `PAGE-035.13` | `install.php:152` | مسیر: test_ldap | 10 | ورودی خام، سرکوب @، فراخوانی خطرناک، >۱۲۰ خط | ⬜ در نوبت |
 | 38 | `CORE-015.13` | `lib/tickets-sla.php:362` | ticket_number_autofill | 10 | catch بی‌صدا، الحاق در SQL، نوشتن بدون تراکنش | ⬜ در نوبت |
-| 39 | `TEST-028.05` | `tests/test_backup_restore_mariadb_e2e.php:62` | بلوک رویه‌ای 62-159 | 10 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
+| 39 | `TEST-029.05` | `tests/test_backup_restore_mariadb_e2e.php:62` | بلوک رویه‌ای 62-159 | 10 | catch بی‌صدا، سرکوب @، فراخوانی خطرناک، نوشتن بدون تراکنش | ⬜ در نوبت |
 | 40 | `TOOL-008.02` | `tools/benchmark_seed.php:36` | Match the filesystem prerequisite crea | 10 | الحاق در SQL، سرکوب @، فراخوانی خطرناک | ⬜ در نوبت |
 
 ## فهرست کامل آدرس‌ها
@@ -478,3389 +478,3398 @@
 </details>
 
 <details>
-<summary><b>TEST-010</b> — <code>tests/fixtures/request-center-session-seed.php</code> (25 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-010</b> — <code>tests/fixtures/request-center-session-seed.php</code> (21 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-010.01` | 1–25 | ناحیه | `بلوک رویه‌ای 1-25` | 2 | ⬜ |
+| `TEST-010.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-011</b> — <code>tests/js/food-aggregate-report.test.js</code> (189 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-011</b> — <code>tests/fixtures/request-center-t12-session-seed.php</code> (30 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-011.01` | 1–72 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-011.02` | 73–189 | بلوک | `fire` | 1 | ⬜ |
+| `TEST-011.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-012</b> — <code>tests/js/food-bulk-past-window.test.js</code> (33 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-012</b> — <code>tests/js/food-aggregate-report.test.js</code> (189 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-012.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-012.02` | 10–33 | بلوک | `canSelect` | 0 | ⬜ |
+| `TEST-012.01` | 1–72 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-012.02` | 73–189 | بلوک | `fire` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-013</b> — <code>tests/js/food-calendar-order-count.test.js</code> (95 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-013</b> — <code>tests/js/food-bulk-past-window.test.js</code> (33 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-013.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-013.02` | 8–26 | بلوک | `R` | 0 | ⬜ |
-| `TEST-013.03` | 27–46 | بلوک | `canViewCounts` | 0 | ⬜ |
-| `TEST-013.04` | 47–47 | بلوک | `esc` | 0 | ⬜ |
-| `TEST-013.05` | 48–95 | بلوک | `faDigits` | 0 | ⬜ |
+| `TEST-013.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-013.02` | 10–33 | بلوک | `canSelect` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-014</b> — <code>tests/js/food-dashboard-count.test.js</code> (27 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-014</b> — <code>tests/js/food-calendar-order-count.test.js</code> (95 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-014.01` | 1–27 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-014.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-014.02` | 8–26 | بلوک | `R` | 0 | ⬜ |
+| `TEST-014.03` | 27–46 | بلوک | `canViewCounts` | 0 | ⬜ |
+| `TEST-014.04` | 47–47 | بلوک | `esc` | 0 | ⬜ |
+| `TEST-014.05` | 48–95 | بلوک | `faDigits` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-015</b> — <code>tests/js/food-menu-by-menu.test.js</code> (44 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-015</b> — <code>tests/js/food-dashboard-count.test.js</code> (27 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-015.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-015.02` | 14–14 | بلوک | `esc` | 0 | ⬜ |
-| `TEST-015.03` | 15–44 | بلوک | `faDigits` | 0 | ⬜ |
+| `TEST-015.01` | 1–27 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-016</b> — <code>tests/js/food-order-name-sort.test.js</code> (33 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-016</b> — <code>tests/js/food-menu-by-menu.test.js</code> (44 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-016.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-016.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-016.02` | 14–14 | بلوک | `esc` | 0 | ⬜ |
+| `TEST-016.03` | 15–44 | بلوک | `faDigits` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-017</b> — <code>tests/js/food-report-fixes.test.js</code> (32 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-017</b> — <code>tests/js/food-order-name-sort.test.js</code> (33 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-017.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-017.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-018</b> — <code>tests/js/food-report-relocation.test.js</code> (36 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-018</b> — <code>tests/js/food-report-fixes.test.js</code> (32 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-018.01` | 1–36 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-018.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-019</b> — <code>tests/js/list-sort-export.test.js</code> (63 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-019</b> — <code>tests/js/food-report-relocation.test.js</code> (36 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-019.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
-| `TEST-019.02` | 31–31 | بلوک | `click` | 0 | ⬜ |
-| `TEST-019.03` | 32–63 | بلوک | `sortBtn` | 0 | ⬜ |
+| `TEST-019.01` | 1–36 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-020</b> — <code>tests/js/list-sort-rowclasses.test.js</code> (39 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-020</b> — <code>tests/js/list-sort-export.test.js</code> (63 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-020.01` | 1–39 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-020.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-020.02` | 31–31 | بلوک | `click` | 0 | ⬜ |
+| `TEST-020.03` | 32–63 | بلوک | `sortBtn` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-021</b> — <code>tests/js/list-sort.test.js</code> (111 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-021</b> — <code>tests/js/list-sort-rowclasses.test.js</code> (39 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-021.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
-| `TEST-021.02` | 33–35 | بلوک | `rowTexts` | 0 | ⬜ |
-| `TEST-021.03` | 36–41 | بلوک | `clickHeader` | 0 | ⬜ |
-| `TEST-021.04` | 42–111 | بلوک | `headerBtns` | 0 | ⬜ |
+| `TEST-021.01` | 1–39 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-022</b> — <code>tests/smoke.php</code> (271 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-022</b> — <code>tests/js/list-sort.test.js</code> (111 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-022.01` | 1–271 | ناحیه | `بلوک رویه‌ای 1-271` | 3 | ⬜ |
+| `TEST-022.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-022.02` | 33–35 | بلوک | `rowTexts` | 0 | ⬜ |
+| `TEST-022.03` | 36–41 | بلوک | `clickHeader` | 0 | ⬜ |
+| `TEST-022.04` | 42–111 | بلوک | `headerBtns` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-023</b> — <code>tests/test_admin_layout_design_static.py</code> (99 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-023</b> — <code>tests/smoke.php</code> (271 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-023.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-023.02` | 7–7 | بلوک | `AdminLayoutDesignStaticTests` | 0 | ⬜ |
-| `TEST-023.03` | 8–18 | بلوک | `test_layout_editor_is_admin_only_and_saves_validat` | 0 | ⬜ |
-| `TEST-023.04` | 19–30 | بلوک | `test_design_view_is_available_in_shared_pages_and_` | 0 | ⬜ |
-| `TEST-023.05` | 31–77 | بلوک | `test_elements_support_pixel_drag_keyboard_offsets_` | 0 | ⬜ |
-| `TEST-023.06` | 78–90 | بلوک | `test_pixel_offsets_are_not_capped_at_five_hundred` | 0 | ⬜ |
-| `TEST-023.07` | 91–99 | بلوک | `test_order_table_has_ninth_action_track_and_keeps_` | 0 | ⬜ |
+| `TEST-023.01` | 1–271 | ناحیه | `بلوک رویه‌ای 1-271` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-024</b> — <code>tests/test_asset_inventory_form_compat_static.py</code> (71 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-024</b> — <code>tests/test_admin_layout_design_static.py</code> (99 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-024.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-024.02` | 16–29 | بلوک | `test_renderer_normalizes_legacy_and_current_argume` | 0 | ⬜ |
-| `TEST-024.03` | 30–39 | بلوک | `test_current_index_call_uses_the_12_argument_layou` | 0 | ⬜ |
-| `TEST-024.04` | 40–48 | بلوک | `test_16224_archive_has_the_legacy_argument_that_ca` | 1 | ⬜ |
-| `TEST-024.05` | 49–71 | بلوک | `test_form_hotfix_is_a_valid_incremental_upgrade_fr` | 0 | ⬜ |
+| `TEST-024.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-024.02` | 7–7 | بلوک | `AdminLayoutDesignStaticTests` | 0 | ⬜ |
+| `TEST-024.03` | 8–18 | بلوک | `test_layout_editor_is_admin_only_and_saves_validat` | 0 | ⬜ |
+| `TEST-024.04` | 19–30 | بلوک | `test_design_view_is_available_in_shared_pages_and_` | 0 | ⬜ |
+| `TEST-024.05` | 31–77 | بلوک | `test_elements_support_pixel_drag_keyboard_offsets_` | 0 | ⬜ |
+| `TEST-024.06` | 78–90 | بلوک | `test_pixel_offsets_are_not_capped_at_five_hundred` | 0 | ⬜ |
+| `TEST-024.07` | 91–99 | بلوک | `test_order_table_has_ninth_action_track_and_keeps_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-025</b> — <code>tests/test_asset_profile_mapping_static.py</code> (67 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-025</b> — <code>tests/test_asset_inventory_form_compat_static.py</code> (71 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-025.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-025.02` | 7–67 | بلوک | `read` | 0 | ⬜ |
+| `TEST-025.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-025.02` | 16–29 | بلوک | `test_renderer_normalizes_legacy_and_current_argume` | 0 | ⬜ |
+| `TEST-025.03` | 30–39 | بلوک | `test_current_index_call_uses_the_12_argument_layou` | 0 | ⬜ |
+| `TEST-025.04` | 40–48 | بلوک | `test_16224_archive_has_the_legacy_argument_that_ca` | 1 | ⬜ |
+| `TEST-025.05` | 49–71 | بلوک | `test_form_hotfix_is_a_valid_incremental_upgrade_fr` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-026</b> — <code>tests/test_asset_scope_permissions.php</code> (75 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-026</b> — <code>tests/test_asset_profile_mapping_static.py</code> (67 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-026.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
-| `TEST-026.02` | 7–10 | تابع | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-026.03` | 11–14 | تابع | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-026.04` | 15–18 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-026.05` | 19–75 | ناحیه | `بلوک رویه‌ای 19-75` | 3 | ⬜ |
+| `TEST-026.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-026.02` | 7–67 | بلوک | `read` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-027</b> — <code>tests/test_backup_restore_archive.php</code> (120 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-027</b> — <code>tests/test_asset_scope_permissions.php</code> (75 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-027.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
-| `TEST-027.02` | 17–21 | تابع | `restore_test_assert` | 0 | ⬜ |
-| `TEST-027.03` | 23–40 | تابع | `restore_test_zip` | 0 | ⬜ |
-| `TEST-027.04` | 42–49 | تابع | `restore_test_call` | 0 | ⬜ |
-| `TEST-027.05` | 51–60 | تابع | `restore_test_reject` | 0 | ⬜ |
-| `TEST-027.06` | 61–120 | ناحیه | `بلوک رویه‌ای 61-120` | 7 | ⬜ |
+| `TEST-027.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
+| `TEST-027.02` | 7–10 | تابع | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-027.03` | 11–14 | تابع | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-027.04` | 15–18 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-027.05` | 19–75 | ناحیه | `بلوک رویه‌ای 19-75` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-028</b> — <code>tests/test_backup_restore_mariadb_e2e.php</code> (159 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-028</b> — <code>tests/test_backup_restore_archive.php</code> (120 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-028.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 0 | ⬜ |
-| `TEST-028.02` | 35–38 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-028.03` | 40–46 | تابع | `t08_check` | 0 | ⬜ |
-| `TEST-028.04` | 48–61 | تابع | `t08_remove_tree` | 7 | ⬜ |
-| `TEST-028.05` | 62–159 | ناحیه | `بلوک رویه‌ای 62-159` | **10** | ⬜ |
+| `TEST-028.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
+| `TEST-028.02` | 17–21 | تابع | `restore_test_assert` | 0 | ⬜ |
+| `TEST-028.03` | 23–40 | تابع | `restore_test_zip` | 0 | ⬜ |
+| `TEST-028.04` | 42–49 | تابع | `restore_test_call` | 0 | ⬜ |
+| `TEST-028.05` | 51–60 | تابع | `restore_test_reject` | 0 | ⬜ |
+| `TEST-028.06` | 61–120 | ناحیه | `بلوک رویه‌ای 61-120` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-029</b> — <code>tests/test_backup_restore_static.py</code> (36 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-029</b> — <code>tests/test_backup_restore_mariadb_e2e.php</code> (159 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-029.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-029.02` | 6–16 | بلوک | `test_destructive_restore_requires_primary_admin_an` | 0 | ⬜ |
-| `TEST-029.03` | 17–29 | بلوک | `test_upload_restore_preflights_paths_sizes_collisi` | 0 | ⬜ |
-| `TEST-029.04` | 30–36 | بلوک | `test_backup_download_path_is_confined_to_backup_ro` | 0 | ⬜ |
+| `TEST-029.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 0 | ⬜ |
+| `TEST-029.02` | 35–38 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-029.03` | 40–46 | تابع | `t08_check` | 0 | ⬜ |
+| `TEST-029.04` | 48–61 | تابع | `t08_remove_tree` | 7 | ⬜ |
+| `TEST-029.05` | 62–159 | ناحیه | `بلوک رویه‌ای 62-159` | **10** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-030</b> — <code>tests/test_cache_pin_consistency_static.py</code> (118 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-030</b> — <code>tests/test_backup_restore_static.py</code> (36 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-030.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-030.02` | 50–67 | بلوک | `live_versions` | 0 | ⬜ |
-| `TEST-030.03` | 68–118 | بلوک | `main` | 0 | ⬜ |
+| `TEST-030.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-030.02` | 6–16 | بلوک | `test_destructive_restore_requires_primary_admin_an` | 0 | ⬜ |
+| `TEST-030.03` | 17–29 | بلوک | `test_upload_restore_preflights_paths_sizes_collisi` | 0 | ⬜ |
+| `TEST-030.04` | 30–36 | بلوک | `test_backup_download_path_is_confined_to_backup_ro` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-031</b> — <code>tests/test_cd_dashboard_report_browser.js</code> (24 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-031</b> — <code>tests/test_cache_pin_consistency_static.py</code> (118 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-031.01` | 1–24 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-031.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-031.02` | 50–67 | بلوک | `live_versions` | 0 | ⬜ |
+| `TEST-031.03` | 68–118 | بلوک | `main` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-032</b> — <code>tests/test_cd_dvd_incoming_and_permissions_static.py</code> (46 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-032</b> — <code>tests/test_cd_dashboard_report_browser.js</code> (24 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-032.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-032.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-032.03` | 11–11 | بلوک | `CdDvdIncomingAndPermissionTests` | 0 | ⬜ |
-| `TEST-032.04` | 12–22 | بلوک | `test_outgoing_choice_and_default_follow_role_permi` | 0 | ⬜ |
-| `TEST-032.05` | 23–36 | بلوک | `test_incoming_form_has_internal_external_selection` | 0 | ⬜ |
-| `TEST-032.06` | 37–46 | بلوک | `test_external_person_is_required_and_internal_iden` | 0 | ⬜ |
+| `TEST-032.01` | 1–24 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-033</b> — <code>tests/test_cd_traffic_browser.js</code> (37 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-033</b> — <code>tests/test_cd_dvd_incoming_and_permissions_static.py</code> (46 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-033.01` | 1–37 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-033.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-033.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-033.03` | 11–11 | بلوک | `CdDvdIncomingAndPermissionTests` | 0 | ⬜ |
+| `TEST-033.04` | 12–22 | بلوک | `test_outgoing_choice_and_default_follow_role_permi` | 0 | ⬜ |
+| `TEST-033.05` | 23–36 | بلوک | `test_incoming_form_has_internal_external_selection` | 0 | ⬜ |
+| `TEST-033.06` | 37–46 | بلوک | `test_external_person_is_required_and_internal_iden` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-034</b> — <code>tests/test_change_history_through_16259.py</code> (84 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-034</b> — <code>tests/test_cd_traffic_browser.js</code> (37 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-034.01` | 1–11 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-034.02` | 12–15 | بلوک | `git` | 0 | ⬜ |
-| `TEST-034.03` | 16–33 | بلوک | `expected_paths` | 0 | ⬜ |
-| `TEST-034.04` | 34–35 | بلوک | `HistoricalIndexTest` | 0 | ⬜ |
-| `TEST-034.05` | 36–38 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-034.06` | 39–44 | بلوک | `test_version_boundary_and_future_session_pointer` | 0 | ⬜ |
-| `TEST-034.07` | 45–55 | بلوک | `test_complete_tree_inventory_without_opening_zip` | 0 | ⬜ |
-| `TEST-034.08` | 56–73 | بلوک | `test_all_reachable_commits_if_full_history_availab` | 0 | ⬜ |
-| `TEST-034.09` | 74–84 | بلوک | `test_pull_requests_and_comment_scope` | 0 | ⬜ |
+| `TEST-034.01` | 1–37 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-035</b> — <code>tests/test_chatbot_relevance.py</code> (124 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-035</b> — <code>tests/test_change_history_through_16259.py</code> (84 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-035.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-035.02` | 24–30 | بلوک | `normalize` | 0 | ⬜ |
-| `TEST-035.03` | 31–39 | بلوک | `tokens` | 0 | ⬜ |
-| `TEST-035.04` | 40–43 | بلوک | `contains_word` | 0 | ⬜ |
-| `TEST-035.05` | 44–79 | بلوک | `guide_index` | 0 | ⬜ |
-| `TEST-035.06` | 80–100 | بلوک | `search` | 0 | ⬜ |
-| `TEST-035.07` | 101–124 | بلوک | `check` | 0 | ⬜ |
+| `TEST-035.01` | 1–11 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-035.02` | 12–15 | بلوک | `git` | 0 | ⬜ |
+| `TEST-035.03` | 16–33 | بلوک | `expected_paths` | 0 | ⬜ |
+| `TEST-035.04` | 34–35 | بلوک | `HistoricalIndexTest` | 0 | ⬜ |
+| `TEST-035.05` | 36–38 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-035.06` | 39–44 | بلوک | `test_version_boundary_and_future_session_pointer` | 0 | ⬜ |
+| `TEST-035.07` | 45–55 | بلوک | `test_complete_tree_inventory_without_opening_zip` | 0 | ⬜ |
+| `TEST-035.08` | 56–73 | بلوک | `test_all_reachable_commits_if_full_history_availab` | 0 | ⬜ |
+| `TEST-035.09` | 74–84 | بلوک | `test_pull_requests_and_comment_scope` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-036</b> — <code>tests/test_chatbot_tts_static.py</code> (145 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-036</b> — <code>tests/test_chatbot_relevance.py</code> (124 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-036.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-036.02` | 9–145 | بلوک | `check` | 5 | ⬜ |
+| `TEST-036.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-036.02` | 24–30 | بلوک | `normalize` | 0 | ⬜ |
+| `TEST-036.03` | 31–39 | بلوک | `tokens` | 0 | ⬜ |
+| `TEST-036.04` | 40–43 | بلوک | `contains_word` | 0 | ⬜ |
+| `TEST-036.05` | 44–79 | بلوک | `guide_index` | 0 | ⬜ |
+| `TEST-036.06` | 80–100 | بلوک | `search` | 0 | ⬜ |
+| `TEST-036.07` | 101–124 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-037</b> — <code>tests/test_chatbot_widget_static.py</code> (77 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-037</b> — <code>tests/test_chatbot_tts_static.py</code> (145 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-037.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-037.02` | 9–77 | بلوک | `check` | 5 | ⬜ |
+| `TEST-037.02` | 9–145 | بلوک | `check` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-038</b> — <code>tests/test_duty_split_and_work_hours_static.py</code> (247 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-038</b> — <code>tests/test_chatbot_widget_static.py</code> (77 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-038.01` | 1–52 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-038.02` | 53–57 | بلوک | `read` | 0 | ⬜ |
-| `TEST-038.03` | 58–65 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-038.04` | 66–75 | بلوک | `php_function` | 0 | ⬜ |
-| `TEST-038.05` | 76–93 | بلوک | `test_requester_guard_runs_before_primary_admin_sho` | 0 | ⬜ |
-| `TEST-038.06` | 94–104 | بلوک | `test_eligibility_gate_compares_candidate_against_r` | 0 | ⬜ |
-| `TEST-038.07` | 105–115 | بلوک | `test_self_assignment_has_configurable_escape_hatch` | 0 | ⬜ |
-| `TEST-038.08` | 116–130 | بلوک | `test_escape_hatch_defaults_to_closed` | 0 | ⬜ |
-| `TEST-038.09` | 131–150 | بلوک | `test_escape_hatch_tolerates_missing_config_layer` | 0 | ⬜ |
-| `TEST-038.10` | 151–159 | بلوک | `test_business_hours_have_single_source` | 0 | ⬜ |
-| `TEST-038.11` | 160–171 | بلوک | `test_no_hardcoded_clock_hours_remain` | 0 | ⬜ |
-| `TEST-038.12` | 172–183 | بلوک | `test_no_hardcoded_weekend_days_remain` | 0 | ⬜ |
-| `TEST-038.13` | 184–194 | بلوک | `test_work_hours_guard_against_inverted_range` | 0 | ⬜ |
-| `TEST-038.14` | 195–205 | بلوک | `test_work_hours_guard_against_full_week_closure` | 0 | ⬜ |
-| `TEST-038.15` | 206–226 | بلوک | `test_work_hours_are_editable_from_calendar_page` | 0 | ⬜ |
-| `TEST-038.16` | 227–239 | بلوک | `test_work_hours_action_is_permission_guarded` | 0 | ⬜ |
-| `TEST-038.17` | 240–247 | بلوک | `test_calendar_page_text_is_not_stale` | 0 | ⬜ |
+| `TEST-038.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-038.02` | 9–77 | بلوک | `check` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-039</b> — <code>tests/test_food_aggregate_report_static.py</code> (149 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-039</b> — <code>tests/test_duty_split_and_work_hours_static.py</code> (247 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-039.01` | 1–24 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-039.02` | 25–28 | بلوک | `main` | 0 | ⬜ |
-| `TEST-039.03` | 29–149 | بلوک | `check` | 2 | ⬜ |
+| `TEST-039.01` | 1–52 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-039.02` | 53–57 | بلوک | `read` | 0 | ⬜ |
+| `TEST-039.03` | 58–65 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-039.04` | 66–75 | بلوک | `php_function` | 0 | ⬜ |
+| `TEST-039.05` | 76–93 | بلوک | `test_requester_guard_runs_before_primary_admin_sho` | 0 | ⬜ |
+| `TEST-039.06` | 94–104 | بلوک | `test_eligibility_gate_compares_candidate_against_r` | 0 | ⬜ |
+| `TEST-039.07` | 105–115 | بلوک | `test_self_assignment_has_configurable_escape_hatch` | 0 | ⬜ |
+| `TEST-039.08` | 116–130 | بلوک | `test_escape_hatch_defaults_to_closed` | 0 | ⬜ |
+| `TEST-039.09` | 131–150 | بلوک | `test_escape_hatch_tolerates_missing_config_layer` | 0 | ⬜ |
+| `TEST-039.10` | 151–159 | بلوک | `test_business_hours_have_single_source` | 0 | ⬜ |
+| `TEST-039.11` | 160–171 | بلوک | `test_no_hardcoded_clock_hours_remain` | 0 | ⬜ |
+| `TEST-039.12` | 172–183 | بلوک | `test_no_hardcoded_weekend_days_remain` | 0 | ⬜ |
+| `TEST-039.13` | 184–194 | بلوک | `test_work_hours_guard_against_inverted_range` | 0 | ⬜ |
+| `TEST-039.14` | 195–205 | بلوک | `test_work_hours_guard_against_full_week_closure` | 0 | ⬜ |
+| `TEST-039.15` | 206–226 | بلوک | `test_work_hours_are_editable_from_calendar_page` | 0 | ⬜ |
+| `TEST-039.16` | 227–239 | بلوک | `test_work_hours_action_is_permission_guarded` | 0 | ⬜ |
+| `TEST-039.17` | 240–247 | بلوک | `test_calendar_page_text_is_not_stale` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-040</b> — <code>tests/test_food_bulk_operations_static.py</code> (105 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-040</b> — <code>tests/test_food_aggregate_report_static.py</code> (149 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-040.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-040.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-040.03` | 11–11 | بلوک | `FoodBulkOperationsStaticTests` | 0 | ⬜ |
-| `TEST-040.04` | 12–29 | بلوک | `test_bulk_api_and_food_menu_view_are_restricted_to` | 0 | ⬜ |
-| `TEST-040.05` | 30–42 | بلوک | `test_snapshot_includes_active_local_or_domain_staf` | 0 | ⬜ |
-| `TEST-040.06` | 43–69 | بلوک | `test_past_bulk_order_and_cancel_require_active_eme` | 0 | ⬜ |
-| `TEST-040.07` | 70–77 | بلوک | `test_past_bulk_ui_is_enabled_only_for_order_or_can` | 0 | ⬜ |
-| `TEST-040.08` | 78–88 | بلوک | `test_canteen_change_uses_manager_override_but_keep` | 0 | ⬜ |
-| `TEST-040.09` | 89–105 | بلوک | `test_bulk_tab_date_picker_and_removed_calendar_eme` | 0 | ⬜ |
+| `TEST-040.01` | 1–24 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-040.02` | 25–28 | بلوک | `main` | 0 | ⬜ |
+| `TEST-040.03` | 29–149 | بلوک | `check` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-041</b> — <code>tests/test_food_cancel_request_timestamp.py</code> (33 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-041</b> — <code>tests/test_food_bulk_operations_static.py</code> (105 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-041.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 | `TEST-041.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-041.03` | 11–11 | بلوک | `FoodCancelRequestTimestampTests` | 0 | ⬜ |
-| `TEST-041.04` | 12–17 | بلوک | `test_request_time_is_saved_and_included_in_audit_a` | 5 | ⬜ |
-| `TEST-041.05` | 18–33 | بلوک | `test_dashboard_and_manager_request_report_show_req` | 0 | ⬜ |
+| `TEST-041.03` | 11–11 | بلوک | `FoodBulkOperationsStaticTests` | 0 | ⬜ |
+| `TEST-041.04` | 12–29 | بلوک | `test_bulk_api_and_food_menu_view_are_restricted_to` | 0 | ⬜ |
+| `TEST-041.05` | 30–42 | بلوک | `test_snapshot_includes_active_local_or_domain_staf` | 0 | ⬜ |
+| `TEST-041.06` | 43–69 | بلوک | `test_past_bulk_order_and_cancel_require_active_eme` | 0 | ⬜ |
+| `TEST-041.07` | 70–77 | بلوک | `test_past_bulk_ui_is_enabled_only_for_order_or_can` | 0 | ⬜ |
+| `TEST-041.08` | 78–88 | بلوک | `test_canteen_change_uses_manager_override_but_keep` | 0 | ⬜ |
+| `TEST-041.09` | 89–105 | بلوک | `test_bulk_tab_date_picker_and_removed_calendar_eme` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-042</b> — <code>tests/test_food_cap_and_receipt_unit.php</code> (73 خط، 28 آدرس، بازبینی‌شده 0/28)</summary>
+<summary><b>TEST-042</b> — <code>tests/test_food_cancel_request_timestamp.py</code> (33 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-042.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
-| `TEST-042.02` | 3–4 | ناحیه | `Behavioural tests of the real engine/order source ` | 0 | ⬜ |
-| `TEST-042.03` | 5–5 | تابع | `food_ticket_source_table` | 0 | ⬜ |
-| `TEST-042.04` | 6–6 | تابع | `food_order_schema_ensure` | 0 | ⬜ |
-| `TEST-042.05` | 7–7 | تابع | `food_order_mode` | 0 | ⬜ |
-| `TEST-042.06` | 8–8 | تابع | `food_order_iso_date` | 0 | ⬜ |
-| `TEST-042.07` | 9–9 | تابع | `food_order_digits` | 0 | ⬜ |
-| `TEST-042.08` | 10–10 | تابع | `food_ticket_digits` | 0 | ⬜ |
-| `TEST-042.09` | 11–11 | تابع | `food_ticket_code` | 0 | ⬜ |
-| `TEST-042.10` | 12–12 | تابع | `food_ticket_card_key` | 0 | ⬜ |
-| `TEST-042.11` | 13–13 | تابع | `food_ticket_parse_date` | 0 | ⬜ |
-| `TEST-042.12` | 14–14 | تابع | `food_ticket_parse_time` | 0 | ⬜ |
-| `TEST-042.13` | 15–15 | تابع | `food_ticket_source_key` | 0 | ⬜ |
-| `TEST-042.14` | 16–16 | تابع | `food_ticket_existing_source` | 0 | ⬜ |
-| `TEST-042.15` | 17–17 | تابع | `food_ticket_existing_ticket` | 0 | ⬜ |
-| `TEST-042.16` | 18–18 | تابع | `food_ticket_card_equals` | 0 | ⬜ |
-| `TEST-042.17` | 19–19 | تابع | `food_ticket_guest_card` | 0 | ⬜ |
-| `TEST-042.18` | 20–20 | تابع | `food_guest_requested_total` | 0 | ⬜ |
-| `TEST-042.19` | 21–21 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-042.20` | 22–22 | تابع | `food_ticket_config` | 0 | ⬜ |
-| `TEST-042.21` | 23–23 | تابع | `setting` | 0 | ⬜ |
-| `TEST-042.22` | 24–24 | تابع | `setting_forget_cache` | 0 | ⬜ |
-| `TEST-042.23` | 25–36 | کلاس | `ReceiptStmt` | 0 | ⬜ |
-| `TEST-042.24` | 37–40 | کلاس | `ReceiptDB` | 0 | ⬜ |
-| `TEST-042.25` | 41–41 | تابع | `db` | 0 | ⬜ |
-| `TEST-042.26` | 42–43 | ناحیه | `بلوک رویه‌ای 42-43` | 0 | ⬜ |
-| `TEST-042.27` | 44–44 | تابع | `chk` | 0 | ⬜ |
-| `TEST-042.28` | 45–73 | ناحیه | `بلوک رویه‌ای 45-73` | 0 | ⬜ |
+| `TEST-042.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-042.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-042.03` | 11–11 | بلوک | `FoodCancelRequestTimestampTests` | 0 | ⬜ |
+| `TEST-042.04` | 12–17 | بلوک | `test_request_time_is_saved_and_included_in_audit_a` | 5 | ⬜ |
+| `TEST-042.05` | 18–33 | بلوک | `test_dashboard_and_manager_request_report_show_req` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-043</b> — <code>tests/test_food_dashboard_bulk_theme_fix_package.py</code> (48 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-043</b> — <code>tests/test_food_cap_and_receipt_unit.php</code> (73 خط، 28 آدرس، بازبینی‌شده 0/28)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-043.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-043.02` | 11–48 | بلوک | `test_food_dashboard_bulk_theme_package_is_cumulati` | 0 | ⬜ |
+| `TEST-043.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
+| `TEST-043.02` | 3–4 | ناحیه | `Behavioural tests of the real engine/order source ` | 0 | ⬜ |
+| `TEST-043.03` | 5–5 | تابع | `food_ticket_source_table` | 0 | ⬜ |
+| `TEST-043.04` | 6–6 | تابع | `food_order_schema_ensure` | 0 | ⬜ |
+| `TEST-043.05` | 7–7 | تابع | `food_order_mode` | 0 | ⬜ |
+| `TEST-043.06` | 8–8 | تابع | `food_order_iso_date` | 0 | ⬜ |
+| `TEST-043.07` | 9–9 | تابع | `food_order_digits` | 0 | ⬜ |
+| `TEST-043.08` | 10–10 | تابع | `food_ticket_digits` | 0 | ⬜ |
+| `TEST-043.09` | 11–11 | تابع | `food_ticket_code` | 0 | ⬜ |
+| `TEST-043.10` | 12–12 | تابع | `food_ticket_card_key` | 0 | ⬜ |
+| `TEST-043.11` | 13–13 | تابع | `food_ticket_parse_date` | 0 | ⬜ |
+| `TEST-043.12` | 14–14 | تابع | `food_ticket_parse_time` | 0 | ⬜ |
+| `TEST-043.13` | 15–15 | تابع | `food_ticket_source_key` | 0 | ⬜ |
+| `TEST-043.14` | 16–16 | تابع | `food_ticket_existing_source` | 0 | ⬜ |
+| `TEST-043.15` | 17–17 | تابع | `food_ticket_existing_ticket` | 0 | ⬜ |
+| `TEST-043.16` | 18–18 | تابع | `food_ticket_card_equals` | 0 | ⬜ |
+| `TEST-043.17` | 19–19 | تابع | `food_ticket_guest_card` | 0 | ⬜ |
+| `TEST-043.18` | 20–20 | تابع | `food_guest_requested_total` | 0 | ⬜ |
+| `TEST-043.19` | 21–21 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-043.20` | 22–22 | تابع | `food_ticket_config` | 0 | ⬜ |
+| `TEST-043.21` | 23–23 | تابع | `setting` | 0 | ⬜ |
+| `TEST-043.22` | 24–24 | تابع | `setting_forget_cache` | 0 | ⬜ |
+| `TEST-043.23` | 25–36 | کلاس | `ReceiptStmt` | 0 | ⬜ |
+| `TEST-043.24` | 37–40 | کلاس | `ReceiptDB` | 0 | ⬜ |
+| `TEST-043.25` | 41–41 | تابع | `db` | 0 | ⬜ |
+| `TEST-043.26` | 42–43 | ناحیه | `بلوک رویه‌ای 42-43` | 0 | ⬜ |
+| `TEST-043.27` | 44–44 | تابع | `chk` | 0 | ⬜ |
+| `TEST-043.28` | 45–73 | ناحیه | `بلوک رویه‌ای 45-73` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-044</b> — <code>tests/test_food_dashboard_css_isolation.py</code> (42 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-044</b> — <code>tests/test_food_dashboard_bulk_theme_fix_package.py</code> (48 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-044.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-044.02` | 11–42 | بلوک | `test_r40_dashboard_grids_are_isolated_from_legacy_` | 0 | ⬜ |
+| `TEST-044.02` | 11–48 | بلوک | `test_food_dashboard_bulk_theme_package_is_cumulati` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-045</b> — <code>tests/test_food_dashboard_r41_features.py</code> (59 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-045</b> — <code>tests/test_food_dashboard_css_isolation.py</code> (42 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-045.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-045.02` | 13–47 | بلوک | `test_r41_is_integrated_and_self_contained` | 0 | ⬜ |
-| `TEST-045.03` | 48–59 | بلوک | `test_r41_theme_reveal_respects_reduced_motion_fall` | 0 | ⬜ |
+| `TEST-045.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-045.02` | 11–42 | بلوک | `test_r40_dashboard_grids_are_isolated_from_legacy_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-046</b> — <code>tests/test_food_dashboard_update_package.py</code> (58 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-046</b> — <code>tests/test_food_dashboard_r41_features.py</code> (59 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-046.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-046.02` | 11–58 | بلوک | `test_r34_food_dashboard_is_integrated_and_uses_foo` | 1 | ⬜ |
+| `TEST-046.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-046.02` | 13–47 | بلوک | `test_r41_is_integrated_and_self_contained` | 0 | ⬜ |
+| `TEST-046.03` | 48–59 | بلوک | `test_r41_theme_reveal_respects_reduced_motion_fall` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-047</b> — <code>tests/test_food_day_visit_static.py</code> (105 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-047</b> — <code>tests/test_food_dashboard_update_package.py</code> (58 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-047.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-047.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-047.03` | 10–105 | بلوک | `check` | 0 | ⬜ |
+| `TEST-047.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-047.02` | 11–58 | بلوک | `test_r34_food_dashboard_is_integrated_and_uses_foo` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-048</b> — <code>tests/test_food_delivery_comparison_node.js</code> (12 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-048</b> — <code>tests/test_food_day_visit_static.py</code> (105 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-048.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-048.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-048.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-048.03` | 10–105 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-049</b> — <code>tests/test_food_delivery_comparison_unit.php</code> (25 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-049</b> — <code>tests/test_food_delivery_comparison_node.js</code> (12 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-049.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
-| `TEST-049.02` | 3–13 | کلاس | `DeliveryStmt` | 0 | ⬜ |
-| `TEST-049.03` | 14–14 | کلاس | `DeliveryDB` | 0 | ⬜ |
-| `TEST-049.04` | 15–15 | تابع | `db` | 0 | ⬜ |
-| `TEST-049.05` | 16–16 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-049.06` | 17–17 | ناحیه | `بلوک رویه‌ای 17-17` | 0 | ⬜ |
-| `TEST-049.07` | 18–18 | تابع | `chk` | 0 | ⬜ |
-| `TEST-049.08` | 19–25 | ناحیه | `بلوک رویه‌ای 19-25` | 0 | ⬜ |
+| `TEST-049.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-050</b> — <code>tests/test_food_emergency_order_package.py</code> (43 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-050</b> — <code>tests/test_food_delivery_comparison_unit.php</code> (25 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-050.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-050.02` | 11–43 | بلوک | `test_r43_package_is_limited_and_integral` | 0 | ⬜ |
+| `TEST-050.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
+| `TEST-050.02` | 3–13 | کلاس | `DeliveryStmt` | 0 | ⬜ |
+| `TEST-050.03` | 14–14 | کلاس | `DeliveryDB` | 0 | ⬜ |
+| `TEST-050.04` | 15–15 | تابع | `db` | 0 | ⬜ |
+| `TEST-050.05` | 16–16 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-050.06` | 17–17 | ناحیه | `بلوک رویه‌ای 17-17` | 0 | ⬜ |
+| `TEST-050.07` | 18–18 | تابع | `chk` | 0 | ⬜ |
+| `TEST-050.08` | 19–25 | ناحیه | `بلوک رویه‌ای 19-25` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-051</b> — <code>tests/test_food_emergency_order_window_static.py</code> (68 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-051</b> — <code>tests/test_food_emergency_order_package.py</code> (43 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-051.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-051.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-051.03` | 11–11 | بلوک | `EmergencyOrderWindowTests` | 0 | ⬜ |
-| `TEST-051.04` | 12–24 | بلوک | `test_grant_is_single_day_bounded_and_reasoned` | 0 | ⬜ |
-| `TEST-051.05` | 25–35 | بلوک | `test_only_active_window_bypasses_past_or_closed_da` | 0 | ⬜ |
-| `TEST-051.06` | 36–47 | بلوک | `test_manager_api_and_calendar_controls_are_permiss` | 0 | ⬜ |
-| `TEST-051.07` | 48–55 | بلوک | `test_employee_ui_requires_backend_window_for_late_` | 0 | ⬜ |
-| `TEST-051.08` | 56–68 | بلوک | `test_order_sort_uses_surname_then_first_name` | 0 | ⬜ |
+| `TEST-051.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-051.02` | 11–43 | بلوک | `test_r43_package_is_limited_and_integral` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-052</b> — <code>tests/test_food_employee_local_static.py</code> (40 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-052</b> — <code>tests/test_food_emergency_order_window_static.py</code> (68 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-052.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-052.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-052.03` | 10–40 | بلوک | `check` | 0 | ⬜ |
+| `TEST-052.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-052.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-052.03` | 11–11 | بلوک | `EmergencyOrderWindowTests` | 0 | ⬜ |
+| `TEST-052.04` | 12–24 | بلوک | `test_grant_is_single_day_bounded_and_reasoned` | 0 | ⬜ |
+| `TEST-052.05` | 25–35 | بلوک | `test_only_active_window_bypasses_past_or_closed_da` | 0 | ⬜ |
+| `TEST-052.06` | 36–47 | بلوک | `test_manager_api_and_calendar_controls_are_permiss` | 0 | ⬜ |
+| `TEST-052.07` | 48–55 | بلوک | `test_employee_ui_requires_backend_window_for_late_` | 0 | ⬜ |
+| `TEST-052.08` | 56–68 | بلوک | `test_order_sort_uses_surname_then_first_name` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-053</b> — <code>tests/test_food_group_typography_static.py</code> (47 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-053</b> — <code>tests/test_food_employee_local_static.py</code> (40 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-053.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-053.02` | 7–7 | بلوک | `FoodGroupTypographyStaticTests` | 0 | ⬜ |
-| `TEST-053.03` | 8–19 | بلوک | `test_group_print_model_uses_separate_menu_and_memb` | 0 | ⬜ |
-| `TEST-053.04` | 20–30 | بلوک | `test_group_menu_counts_and_menu_to_member_spacing_` | 0 | ⬜ |
-| `TEST-053.05` | 31–47 | بلوک | `test_group_designer_exposes_per_style_font_control` | 0 | ⬜ |
+| `TEST-053.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-053.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-053.03` | 10–40 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-054</b> — <code>tests/test_food_guest_browser.js</code> (17 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-054</b> — <code>tests/test_food_group_typography_static.py</code> (47 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-054.01` | 1–17 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-054.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-054.02` | 7–7 | بلوک | `FoodGroupTypographyStaticTests` | 0 | ⬜ |
+| `TEST-054.03` | 8–19 | بلوک | `test_group_print_model_uses_separate_menu_and_memb` | 0 | ⬜ |
+| `TEST-054.04` | 20–30 | بلوک | `test_group_menu_counts_and_menu_to_member_spacing_` | 0 | ⬜ |
+| `TEST-054.05` | 31–47 | بلوک | `test_group_designer_exposes_per_style_font_control` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-055</b> — <code>tests/test_food_guest_cap_path_unit.php</code> (44 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-055</b> — <code>tests/test_food_guest_browser.js</code> (17 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-055.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-055.02` | 4–4 | تابع | `db_table_exists` | 0 | ⬜ |
-| `TEST-055.03` | 5–5 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-055.04` | 6–6 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-055.05` | 7–21 | کلاس | `CapStatement` | 1 | ⬜ |
-| `TEST-055.06` | 22–22 | کلاس | `CapDatabase` | 4 | ⬜ |
-| `TEST-055.07` | 23–23 | تابع | `db` | 0 | ⬜ |
-| `TEST-055.08` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
-| `TEST-055.09` | 26–26 | تابع | `chk` | 0 | ⬜ |
-| `TEST-055.10` | 27–44 | ناحیه | `بلوک رویه‌ای 27-44` | 0 | ⬜ |
+| `TEST-055.01` | 1–17 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-056</b> — <code>tests/test_food_guest_cap_race_node.js</code> (14 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-056</b> — <code>tests/test_food_guest_cap_path_unit.php</code> (44 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-056.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-056.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-056.02` | 4–4 | تابع | `db_table_exists` | 0 | ⬜ |
+| `TEST-056.03` | 5–5 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-056.04` | 6–6 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-056.05` | 7–21 | کلاس | `CapStatement` | 1 | ⬜ |
+| `TEST-056.06` | 22–22 | کلاس | `CapDatabase` | 4 | ⬜ |
+| `TEST-056.07` | 23–23 | تابع | `db` | 0 | ⬜ |
+| `TEST-056.08` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
+| `TEST-056.09` | 26–26 | تابع | `chk` | 0 | ⬜ |
+| `TEST-056.10` | 27–44 | ناحیه | `بلوک رویه‌ای 27-44` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-057</b> — <code>tests/test_food_guest_cap_ui_node.js</code> (25 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-057</b> — <code>tests/test_food_guest_cap_race_node.js</code> (14 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-057.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-057.02` | 7–7 | بلوک | `wait` | 0 | ⬜ |
-| `TEST-057.03` | 8–20 | بلوک | `run` | 4 | ⬜ |
-| `TEST-057.04` | 21–25 | بلوک | `testCardLimit` | 4 | ⬜ |
+| `TEST-057.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-058</b> — <code>tests/test_food_guest_manager_bulk_tab.py</code> (58 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-058</b> — <code>tests/test_food_guest_cap_ui_node.js</code> (25 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-058.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-058.02` | 7–8 | بلوک | `FoodGuestManagerBulkTabTests` | 0 | ⬜ |
-| `TEST-058.03` | 9–15 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-058.04` | 16–29 | بلوک | `test_guest_manager_routes_require_emergency_permis` | 1 | ⬜ |
-| `TEST-058.05` | 30–37 | بلوک | `test_support_view_includes_historical_requests_but` | 0 | ⬜ |
-| `TEST-058.06` | 38–50 | بلوک | `test_guest_manager_tab_and_actions_are_inside_grou` | 1 | ⬜ |
-| `TEST-058.07` | 51–58 | بلوک | `test_served_asset_copy_and_cache_buster_match` | 0 | ⬜ |
+| `TEST-058.02` | 7–7 | بلوک | `wait` | 0 | ⬜ |
+| `TEST-058.03` | 8–20 | بلوک | `run` | 4 | ⬜ |
+| `TEST-058.04` | 21–25 | بلوک | `testCardLimit` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-059</b> — <code>tests/test_food_guest_personal_scope.php</code> (78 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TEST-059</b> — <code>tests/test_food_guest_manager_bulk_tab.py</code> (58 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-059.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
-| `TEST-059.02` | 3–3 | ناحیه | `Behavioural test of the real functions with an in-` | 0 | ⬜ |
-| `TEST-059.03` | 4–4 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-059.04` | 5–5 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-059.05` | 7–42 | کلاس | `GuestStatement` | 0 | ⬜ |
-| `TEST-059.06` | 43–51 | کلاس | `GuestDatabase` | 0 | ⬜ |
-| `TEST-059.07` | 52–52 | تابع | `db` | 0 | ⬜ |
-| `TEST-059.08` | 53–53 | ناحیه | `بلوک رویه‌ای 53-53` | 0 | ⬜ |
-| `TEST-059.09` | 54–54 | تابع | `check_guest` | 0 | ⬜ |
-| `TEST-059.10` | 55–55 | تابع | `denied` | 0 | ⬜ |
-| `TEST-059.11` | 56–59 | ناحیه | `بلوک رویه‌ای 56-59` | 0 | ⬜ |
-| `TEST-059.12` | 60–78 | ناحیه | `Many other people's rows before our own prove that` | 1 | ⬜ |
+| `TEST-059.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-059.02` | 7–8 | بلوک | `FoodGuestManagerBulkTabTests` | 0 | ⬜ |
+| `TEST-059.03` | 9–15 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-059.04` | 16–29 | بلوک | `test_guest_manager_routes_require_emergency_permis` | 1 | ⬜ |
+| `TEST-059.05` | 30–37 | بلوک | `test_support_view_includes_historical_requests_but` | 0 | ⬜ |
+| `TEST-059.06` | 38–50 | بلوک | `test_guest_manager_tab_and_actions_are_inside_grou` | 1 | ⬜ |
+| `TEST-059.07` | 51–58 | بلوک | `test_served_asset_copy_and_cache_buster_match` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-060</b> — <code>tests/test_food_guest_personal_scope_static.py</code> (27 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-060</b> — <code>tests/test_food_guest_personal_scope.php</code> (78 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-060.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-060.02` | 6–21 | بلوک | `test_personal_and_privileged_guest_routes_are_isol` | 1 | ⬜ |
-| `TEST-060.03` | 22–27 | بلوک | `test_guest_assets_cache_busted_and_css_mirrored` | 0 | ⬜ |
+| `TEST-060.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
+| `TEST-060.02` | 3–3 | ناحیه | `Behavioural test of the real functions with an in-` | 0 | ⬜ |
+| `TEST-060.03` | 4–4 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-060.04` | 5–5 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-060.05` | 7–42 | کلاس | `GuestStatement` | 0 | ⬜ |
+| `TEST-060.06` | 43–51 | کلاس | `GuestDatabase` | 0 | ⬜ |
+| `TEST-060.07` | 52–52 | تابع | `db` | 0 | ⬜ |
+| `TEST-060.08` | 53–53 | ناحیه | `بلوک رویه‌ای 53-53` | 0 | ⬜ |
+| `TEST-060.09` | 54–54 | تابع | `check_guest` | 0 | ⬜ |
+| `TEST-060.10` | 55–55 | تابع | `denied` | 0 | ⬜ |
+| `TEST-060.11` | 56–59 | ناحیه | `بلوک رویه‌ای 56-59` | 0 | ⬜ |
+| `TEST-060.12` | 60–78 | ناحیه | `Many other people's rows before our own prove that` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-061</b> — <code>tests/test_food_guest_personal_ui_node.js</code> (51 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-061</b> — <code>tests/test_food_guest_personal_scope_static.py</code> (27 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-061.01` | 1–51 | بلوک | `مقدمهٔ فایل` | 5 | ⬜ |
+| `TEST-061.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-061.02` | 6–21 | بلوک | `test_personal_and_privileged_guest_routes_are_isol` | 1 | ⬜ |
+| `TEST-061.03` | 22–27 | بلوک | `test_guest_assets_cache_busted_and_css_mirrored` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-062</b> — <code>tests/test_food_guest_request_manager_actions.py</code> (61 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-062</b> — <code>tests/test_food_guest_personal_ui_node.js</code> (51 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-062.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-062.02` | 7–8 | بلوک | `FoodGuestRequestManagerActionTests` | 0 | ⬜ |
-| `TEST-062.03` | 9–12 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-062.04` | 13–19 | بلوک | `test_owner_and_support_manager_permissions_are_enf` | 0 | ⬜ |
-| `TEST-062.05` | 20–28 | بلوک | `test_update_delete_and_cancel_have_separate_api_ro` | 1 | ⬜ |
-| `TEST-062.06` | 29–37 | بلوک | `test_ui_renders_authorized_edit_cancel_delete_acti` | 1 | ⬜ |
-| `TEST-062.07` | 38–42 | بلوک | `test_current_day_deadline_and_past_date_are_guarde` | 0 | ⬜ |
-| `TEST-062.08` | 43–61 | بلوک | `test_past_guest_requests_can_be_deleted_without_by` | 1 | ⬜ |
+| `TEST-062.01` | 1–51 | بلوک | `مقدمهٔ فایل` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-063</b> — <code>tests/test_food_manual_attendance_static.py</code> (96 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-063</b> — <code>tests/test_food_guest_request_manager_actions.py</code> (61 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-063.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-063.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-063.03` | 11–11 | بلوک | `FoodManualAttendanceStaticTests` | 0 | ⬜ |
-| `TEST-063.04` | 12–25 | بلوک | `test_manual_attendance_is_in_settings_and_removed_` | 0 | ⬜ |
-| `TEST-063.05` | 26–35 | بلوک | `test_manual_write_requires_group_edit_permission_a` | 0 | ⬜ |
-| `TEST-063.06` | 36–50 | بلوک | `test_list_contains_only_active_people_with_the_sam` | 0 | ⬜ |
-| `TEST-063.07` | 51–72 | بلوک | `test_single_and_bulk_save_support_ticket_and_no_ti` | 0 | ⬜ |
-| `TEST-063.08` | 73–84 | بلوک | `test_ui_has_live_search_selection_results_and_inde` | 0 | ⬜ |
-| `TEST-063.09` | 85–96 | بلوک | `test_monitoring_distinguishes_no_ticket_from_ticke` | 0 | ⬜ |
+| `TEST-063.02` | 7–8 | بلوک | `FoodGuestRequestManagerActionTests` | 0 | ⬜ |
+| `TEST-063.03` | 9–12 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-063.04` | 13–19 | بلوک | `test_owner_and_support_manager_permissions_are_enf` | 0 | ⬜ |
+| `TEST-063.05` | 20–28 | بلوک | `test_update_delete_and_cancel_have_separate_api_ro` | 1 | ⬜ |
+| `TEST-063.06` | 29–37 | بلوک | `test_ui_renders_authorized_edit_cancel_delete_acti` | 1 | ⬜ |
+| `TEST-063.07` | 38–42 | بلوک | `test_current_day_deadline_and_past_date_are_guarde` | 0 | ⬜ |
+| `TEST-063.08` | 43–61 | بلوک | `test_past_guest_requests_can_be_deleted_without_by` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-064</b> — <code>tests/test_food_meals_static.py</code> (55 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-064</b> — <code>tests/test_food_manual_attendance_static.py</code> (96 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-064.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-064.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-064.03` | 12–12 | بلوک | `FoodMealSeparationTests` | 0 | ⬜ |
-| `TEST-064.04` | 13–19 | بلوک | `test_fresh_schemas_keep_legacy_rows_as_lunch_and_a` | 0 | ⬜ |
-| `TEST-064.05` | 20–29 | بلوک | `test_upgrade_migration_adds_lunch_defaults_and_rep` | 0 | ⬜ |
-| `TEST-064.06` | 30–37 | بلوک | `test_api_filters_calendar_orders_and_statistics_by` | 2 | ⬜ |
-| `TEST-064.07` | 38–47 | بلوک | `test_order_ui_and_manager_expose_meal_switch_and_s` | 0 | ⬜ |
-| `TEST-064.08` | 48–55 | بلوک | `test_receipt_order_sources_are_explicitly_lunch_on` | 0 | ⬜ |
+| `TEST-064.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-064.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-064.03` | 11–11 | بلوک | `FoodManualAttendanceStaticTests` | 0 | ⬜ |
+| `TEST-064.04` | 12–25 | بلوک | `test_manual_attendance_is_in_settings_and_removed_` | 0 | ⬜ |
+| `TEST-064.05` | 26–35 | بلوک | `test_manual_write_requires_group_edit_permission_a` | 0 | ⬜ |
+| `TEST-064.06` | 36–50 | بلوک | `test_list_contains_only_active_people_with_the_sam` | 0 | ⬜ |
+| `TEST-064.07` | 51–72 | بلوک | `test_single_and_bulk_save_support_ticket_and_no_ti` | 0 | ⬜ |
+| `TEST-064.08` | 73–84 | بلوک | `test_ui_has_live_search_selection_results_and_inde` | 0 | ⬜ |
+| `TEST-064.09` | 85–96 | بلوک | `test_monitoring_distinguishes_no_ticket_from_ticke` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-065</b> — <code>tests/test_food_monitoring_order_comparison_unit.php</code> (21 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-065</b> — <code>tests/test_food_meals_static.py</code> (55 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-065.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
-| `TEST-065.02` | 3–3 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-065.03` | 4–8 | کلاس | `MonitorStmt` | 0 | ⬜ |
-| `TEST-065.04` | 9–9 | کلاس | `MonitorDB` | 0 | ⬜ |
-| `TEST-065.05` | 10–10 | تابع | `db` | 0 | ⬜ |
-| `TEST-065.06` | 11–12 | ناحیه | `بلوک رویه‌ای 11-12` | 0 | ⬜ |
-| `TEST-065.07` | 13–13 | تابع | `chk` | 0 | ⬜ |
-| `TEST-065.08` | 14–21 | ناحیه | `بلوک رویه‌ای 14-21` | 0 | ⬜ |
+| `TEST-065.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-065.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
+| `TEST-065.03` | 12–12 | بلوک | `FoodMealSeparationTests` | 0 | ⬜ |
+| `TEST-065.04` | 13–19 | بلوک | `test_fresh_schemas_keep_legacy_rows_as_lunch_and_a` | 0 | ⬜ |
+| `TEST-065.05` | 20–29 | بلوک | `test_upgrade_migration_adds_lunch_defaults_and_rep` | 0 | ⬜ |
+| `TEST-065.06` | 30–37 | بلوک | `test_api_filters_calendar_orders_and_statistics_by` | 2 | ⬜ |
+| `TEST-065.07` | 38–47 | بلوک | `test_order_ui_and_manager_expose_meal_switch_and_s` | 0 | ⬜ |
+| `TEST-065.08` | 48–55 | بلوک | `test_receipt_order_sources_are_explicitly_lunch_on` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-066</b> — <code>tests/test_food_order_calendar_node.js</code> (28 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-066</b> — <code>tests/test_food_monitoring_order_comparison_unit.php</code> (21 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-066.01` | 1–28 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-066.01` | 1–2 | ناحیه | `بلوک رویه‌ای 1-2` | 0 | ⬜ |
+| `TEST-066.02` | 3–3 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-066.03` | 4–8 | کلاس | `MonitorStmt` | 0 | ⬜ |
+| `TEST-066.04` | 9–9 | کلاس | `MonitorDB` | 0 | ⬜ |
+| `TEST-066.05` | 10–10 | تابع | `db` | 0 | ⬜ |
+| `TEST-066.06` | 11–12 | ناحیه | `بلوک رویه‌ای 11-12` | 0 | ⬜ |
+| `TEST-066.07` | 13–13 | تابع | `chk` | 0 | ⬜ |
+| `TEST-066.08` | 14–21 | ناحیه | `بلوک رویه‌ای 14-21` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-067</b> — <code>tests/test_food_order_selection_rerender_node.js</code> (12 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-067</b> — <code>tests/test_food_order_calendar_node.js</code> (28 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-067.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-067.01` | 1–28 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-068</b> — <code>tests/test_food_orders_static.py</code> (859 خط، 46 آدرس، بازبینی‌شده 0/46)</summary>
+<summary><b>TEST-068</b> — <code>tests/test_food_order_selection_rerender_node.js</code> (12 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-068.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-068.02` | 17–20 | بلوک | `read` | 0 | ⬜ |
-| `TEST-068.03` | 21–24 | بلوک | `strip_sql_comments` | 0 | ⬜ |
-| `TEST-068.04` | 25–32 | بلوک | `create_tables` | 0 | ⬜ |
-| `TEST-068.05` | 33–33 | بلوک | `FoodOrdersStaticTests` | 0 | ⬜ |
-| `TEST-068.06` | 34–41 | بلوک | `test_upgrade_creates_exactly_five_new_tables_only` | 0 | ⬜ |
-| `TEST-068.07` | 42–53 | بلوک | `test_rollback_drops_only_the_five_module_tables` | 0 | ⬜ |
-| `TEST-068.08` | 54–60 | بلوک | `test_fresh_install_schemas_include_same_five_table` | 0 | ⬜ |
-| `TEST-068.09` | 61–88 | بلوک | `test_table_definitions_match_across_upgrade_and_fr` | 0 | ⬜ |
-| `TEST-068.10` | 89–97 | بلوک | `test_runtime_schema_helper_is_read_only` | 0 | ⬜ |
-| `TEST-068.11` | 98–127 | بلوک | `test_guest_requests_allow_today_only_through_a_con` | 0 | ⬜ |
-| `TEST-068.12` | 128–140 | بلوک | `test_worker_has_one_internal_order_map_and_no_acce` | 0 | ⬜ |
-| `TEST-068.13` | 141–156 | بلوک | `test_legacy_access_order_fields_are_not_live_confi` | 0 | ⬜ |
-| `TEST-068.14` | 157–165 | بلوک | `test_legacy_order_mode_cannot_be_changed_through_t` | 0 | ⬜ |
-| `TEST-068.15` | 166–180 | بلوک | `test_employee_search_and_order_visibility_are_scop` | 0 | ⬜ |
-| `TEST-068.16` | 181–191 | بلوک | `test_proxy_order_is_gated_by_national_code_and_rat` | 0 | ⬜ |
-| `TEST-068.17` | 192–231 | بلوک | `test_panel_and_employee_assets_are_present_and_loc` | 0 | ⬜ |
-| `TEST-068.18` | 232–241 | بلوک | `test_daily_report_fields_and_repeated_compact_reco` | 0 | ⬜ |
-| `TEST-068.19` | 242–251 | بلوک | `test_food_group_daily_order_report_uses_dated_memb` | 0 | ⬜ |
-| `TEST-068.20` | 252–262 | بلوک | `test_food_statistics_are_grouped_by_day_with_jalal` | 0 | ⬜ |
-| `TEST-068.21` | 263–271 | بلوک | `test_food_dashboard_prints_each_printed_event_once` | 0 | ⬜ |
-| `TEST-068.22` | 272–280 | بلوک | `test_food_panel_theme_toggle_updates_global_mode` | 0 | ⬜ |
-| `TEST-068.23` | 281–295 | بلوک | `test_selected_staff_report_loads_a_checklist_and_p` | 0 | ⬜ |
-| `TEST-068.24` | 296–305 | بلوک | `test_global_dark_theme_covers_food_forms_and_sched` | 0 | ⬜ |
-| `TEST-068.25` | 306–309 | بلوک | `test_panel_assets_are_synchronized` | 0 | ⬜ |
-| `TEST-068.26` | 310–316 | بلوک | `test_day_impact_confirmation_locks_and_reuses_the_` | 0 | ⬜ |
-| `TEST-068.27` | 317–333 | بلوک | `test_selected_employee_orders_report_has_search_da` | 0 | ⬜ |
-| `TEST-068.28` | 334–374 | بلوک | `test_emergency_order_window_is_under_system_settin` | 0 | ⬜ |
-| `TEST-068.29` | 375–448 | بلوک | `test_daily_orders_and_statistics_modes_are_separat` | 0 | ⬜ |
-| `TEST-068.30` | 449–469 | بلوک | `test_day_status_form_drops_reason_but_backend_stil` | 0 | ⬜ |
-| `TEST-068.31` | 470–496 | بلوک | `test_proxy_calendar_reads_only_the_verified_recipi` | 0 | ⬜ |
-| `TEST-068.32` | 497–536 | بلوک | `test_proxy_order_list_uses_only_the_verified_recip` | 5 | ⬜ |
-| `TEST-068.33` | 537–558 | بلوک | `test_proxy_cancel_is_server_scoped_and_reverifies_` | 1 | ⬜ |
-| `TEST-068.34` | 559–577 | بلوک | `test_proxy_cancellation_has_visible_confirmation_a` | 0 | ⬜ |
-| `TEST-068.35` | 578–614 | بلوک | `test_excel_date_range_metadata_and_print_scope_are` | 2 | ⬜ |
-| `TEST-068.36` | 615–623 | بلوک | `test_personal_order_table_uses_row_number_instead_` | 0 | ⬜ |
-| `TEST-068.37` | 624–635 | بلوک | `test_order_source_explanations_are_not_rendered_in` | 0 | ⬜ |
-| `TEST-068.38` | 636–664 | بلوک | `test_admin_order_edit_route_and_controls_are_remov` | 0 | ⬜ |
-| `TEST-068.39` | 665–681 | بلوک | `test_order_highlight_colors_and_both_datepicker_ar` | 0 | ⬜ |
-| `TEST-068.40` | 682–705 | بلوک | `test_employee_onboarding_is_initial_gate_and_day_d` | 0 | ⬜ |
-| `TEST-068.41` | 706–729 | بلوک | `test_proxy_order_submission_targets_selected_emplo` | 1 | ⬜ |
-| `TEST-068.42` | 730–748 | بلوک | `test_proxy_recipient_is_verified_server_side_and_e` | 0 | ⬜ |
-| `TEST-068.43` | 749–763 | بلوک | `test_adjacent_calendar_days_are_disabled_and_manag` | 0 | ⬜ |
-| `TEST-068.44` | 764–829 | بلوک | `test_closed_day_cancel_request_and_masked_national` | 0 | ⬜ |
-| `TEST-068.45` | 830–839 | بلوک | `test_proxy_order_rate_allows_many_people` | 0 | ⬜ |
-| `TEST-068.46` | 840–859 | بلوک | `test_order_list_default_range_includes_next_jalali` | 0 | ⬜ |
+| `TEST-068.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-069</b> — <code>tests/test_food_panel_full_node.js</code> (5 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-069</b> — <code>tests/test_food_orders_static.py</code> (859 خط، 46 آدرس، بازبینی‌شده 0/46)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-069.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-069.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-069.02` | 17–20 | بلوک | `read` | 0 | ⬜ |
+| `TEST-069.03` | 21–24 | بلوک | `strip_sql_comments` | 0 | ⬜ |
+| `TEST-069.04` | 25–32 | بلوک | `create_tables` | 0 | ⬜ |
+| `TEST-069.05` | 33–33 | بلوک | `FoodOrdersStaticTests` | 0 | ⬜ |
+| `TEST-069.06` | 34–41 | بلوک | `test_upgrade_creates_exactly_five_new_tables_only` | 0 | ⬜ |
+| `TEST-069.07` | 42–53 | بلوک | `test_rollback_drops_only_the_five_module_tables` | 0 | ⬜ |
+| `TEST-069.08` | 54–60 | بلوک | `test_fresh_install_schemas_include_same_five_table` | 0 | ⬜ |
+| `TEST-069.09` | 61–88 | بلوک | `test_table_definitions_match_across_upgrade_and_fr` | 0 | ⬜ |
+| `TEST-069.10` | 89–97 | بلوک | `test_runtime_schema_helper_is_read_only` | 0 | ⬜ |
+| `TEST-069.11` | 98–127 | بلوک | `test_guest_requests_allow_today_only_through_a_con` | 0 | ⬜ |
+| `TEST-069.12` | 128–140 | بلوک | `test_worker_has_one_internal_order_map_and_no_acce` | 0 | ⬜ |
+| `TEST-069.13` | 141–156 | بلوک | `test_legacy_access_order_fields_are_not_live_confi` | 0 | ⬜ |
+| `TEST-069.14` | 157–165 | بلوک | `test_legacy_order_mode_cannot_be_changed_through_t` | 0 | ⬜ |
+| `TEST-069.15` | 166–180 | بلوک | `test_employee_search_and_order_visibility_are_scop` | 0 | ⬜ |
+| `TEST-069.16` | 181–191 | بلوک | `test_proxy_order_is_gated_by_national_code_and_rat` | 0 | ⬜ |
+| `TEST-069.17` | 192–231 | بلوک | `test_panel_and_employee_assets_are_present_and_loc` | 0 | ⬜ |
+| `TEST-069.18` | 232–241 | بلوک | `test_daily_report_fields_and_repeated_compact_reco` | 0 | ⬜ |
+| `TEST-069.19` | 242–251 | بلوک | `test_food_group_daily_order_report_uses_dated_memb` | 0 | ⬜ |
+| `TEST-069.20` | 252–262 | بلوک | `test_food_statistics_are_grouped_by_day_with_jalal` | 0 | ⬜ |
+| `TEST-069.21` | 263–271 | بلوک | `test_food_dashboard_prints_each_printed_event_once` | 0 | ⬜ |
+| `TEST-069.22` | 272–280 | بلوک | `test_food_panel_theme_toggle_updates_global_mode` | 0 | ⬜ |
+| `TEST-069.23` | 281–295 | بلوک | `test_selected_staff_report_loads_a_checklist_and_p` | 0 | ⬜ |
+| `TEST-069.24` | 296–305 | بلوک | `test_global_dark_theme_covers_food_forms_and_sched` | 0 | ⬜ |
+| `TEST-069.25` | 306–309 | بلوک | `test_panel_assets_are_synchronized` | 0 | ⬜ |
+| `TEST-069.26` | 310–316 | بلوک | `test_day_impact_confirmation_locks_and_reuses_the_` | 0 | ⬜ |
+| `TEST-069.27` | 317–333 | بلوک | `test_selected_employee_orders_report_has_search_da` | 0 | ⬜ |
+| `TEST-069.28` | 334–374 | بلوک | `test_emergency_order_window_is_under_system_settin` | 0 | ⬜ |
+| `TEST-069.29` | 375–448 | بلوک | `test_daily_orders_and_statistics_modes_are_separat` | 0 | ⬜ |
+| `TEST-069.30` | 449–469 | بلوک | `test_day_status_form_drops_reason_but_backend_stil` | 0 | ⬜ |
+| `TEST-069.31` | 470–496 | بلوک | `test_proxy_calendar_reads_only_the_verified_recipi` | 0 | ⬜ |
+| `TEST-069.32` | 497–536 | بلوک | `test_proxy_order_list_uses_only_the_verified_recip` | 5 | ⬜ |
+| `TEST-069.33` | 537–558 | بلوک | `test_proxy_cancel_is_server_scoped_and_reverifies_` | 1 | ⬜ |
+| `TEST-069.34` | 559–577 | بلوک | `test_proxy_cancellation_has_visible_confirmation_a` | 0 | ⬜ |
+| `TEST-069.35` | 578–614 | بلوک | `test_excel_date_range_metadata_and_print_scope_are` | 2 | ⬜ |
+| `TEST-069.36` | 615–623 | بلوک | `test_personal_order_table_uses_row_number_instead_` | 0 | ⬜ |
+| `TEST-069.37` | 624–635 | بلوک | `test_order_source_explanations_are_not_rendered_in` | 0 | ⬜ |
+| `TEST-069.38` | 636–664 | بلوک | `test_admin_order_edit_route_and_controls_are_remov` | 0 | ⬜ |
+| `TEST-069.39` | 665–681 | بلوک | `test_order_highlight_colors_and_both_datepicker_ar` | 0 | ⬜ |
+| `TEST-069.40` | 682–705 | بلوک | `test_employee_onboarding_is_initial_gate_and_day_d` | 0 | ⬜ |
+| `TEST-069.41` | 706–729 | بلوک | `test_proxy_order_submission_targets_selected_emplo` | 1 | ⬜ |
+| `TEST-069.42` | 730–748 | بلوک | `test_proxy_recipient_is_verified_server_side_and_e` | 0 | ⬜ |
+| `TEST-069.43` | 749–763 | بلوک | `test_adjacent_calendar_days_are_disabled_and_manag` | 0 | ⬜ |
+| `TEST-069.44` | 764–829 | بلوک | `test_closed_day_cancel_request_and_masked_national` | 0 | ⬜ |
+| `TEST-069.45` | 830–839 | بلوک | `test_proxy_order_rate_allows_many_people` | 0 | ⬜ |
+| `TEST-069.46` | 840–859 | بلوک | `test_order_list_default_range_includes_next_jalali` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-070</b> — <code>tests/test_food_permissions_all_roles_static.py</code> (48 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-070</b> — <code>tests/test_food_panel_full_node.js</code> (5 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-070.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-070.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-070.03` | 11–11 | بلوک | `FoodPermissionsAllRolesTests` | 0 | ⬜ |
-| `TEST-070.04` | 12–19 | بلوک | `test_food_permission_catalog_is_rendered_for_every` | 0 | ⬜ |
-| `TEST-070.05` | 20–28 | بلوک | `test_food_grants_are_not_stripped_when_saving_cust` | 0 | ⬜ |
-| `TEST-070.06` | 29–37 | بلوک | `test_old_restriction_migration_no_longer_deletes_f` | 1 | ⬜ |
-| `TEST-070.07` | 38–48 | بلوک | `test_domain_and_local_users_share_role_permission_` | 0 | ⬜ |
+| `TEST-070.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-071</b> — <code>tests/test_food_personnel_link_local_accounts_static.py</code> (75 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-071</b> — <code>tests/test_food_permissions_all_roles_static.py</code> (48 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-071.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-071.02` | 9–10 | بلوک | `FoodPersonnelLocalLinkStaticTests` | 0 | ⬜ |
-| `TEST-071.03` | 11–15 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-071.04` | 16–21 | بلوک | `test_candidates_include_local_food_staff_not_admin` | 0 | ⬜ |
-| `TEST-071.05` | 22–29 | بلوک | `test_merge_accepts_local_staff_account_and_keeps_b` | 1 | ⬜ |
-| `TEST-071.06` | 30–38 | بلوک | `test_manual_code_lookup_supports_335_after_ad_code` | 0 | ⬜ |
-| `TEST-071.07` | 39–66 | بلوک | `test_domain_entered_employee_code_is_authoritative` | 0 | ⬜ |
-| `TEST-071.08` | 67–75 | بلوک | `test_offline_merge_covers_references_and_report` | 0 | ⬜ |
+| `TEST-071.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-071.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-071.03` | 11–11 | بلوک | `FoodPermissionsAllRolesTests` | 0 | ⬜ |
+| `TEST-071.04` | 12–19 | بلوک | `test_food_permission_catalog_is_rendered_for_every` | 0 | ⬜ |
+| `TEST-071.05` | 20–28 | بلوک | `test_food_grants_are_not_stripped_when_saving_cust` | 0 | ⬜ |
+| `TEST-071.06` | 29–37 | بلوک | `test_old_restriction_migration_no_longer_deletes_f` | 1 | ⬜ |
+| `TEST-071.07` | 38–48 | بلوک | `test_domain_and_local_users_share_role_permission_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-072</b> — <code>tests/test_food_printed_delivery_report_static.py</code> (68 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-072</b> — <code>tests/test_food_personnel_link_local_accounts_static.py</code> (75 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-072.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-072.02` | 9–12 | بلوک | `read` | 0 | ⬜ |
-| `TEST-072.03` | 13–13 | بلوک | `PrintedDeliveryReportStaticTests` | 0 | ⬜ |
-| `TEST-072.04` | 14–33 | بلوک | `test_report_uses_printed_delivered_employee_events` | 0 | ⬜ |
-| `TEST-072.05` | 34–44 | بلوک | `test_report_api_is_restricted_to_food_order_close` | 0 | ⬜ |
-| `TEST-072.06` | 45–57 | بلوک | `test_report_is_appended_after_statistics_and_match` | 0 | ⬜ |
-| `TEST-072.07` | 58–68 | بلوک | `test_mirrored_assets_and_cache_versions_are_update` | 0 | ⬜ |
+| `TEST-072.02` | 9–10 | بلوک | `FoodPersonnelLocalLinkStaticTests` | 0 | ⬜ |
+| `TEST-072.03` | 11–15 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-072.04` | 16–21 | بلوک | `test_candidates_include_local_food_staff_not_admin` | 0 | ⬜ |
+| `TEST-072.05` | 22–29 | بلوک | `test_merge_accepts_local_staff_account_and_keeps_b` | 1 | ⬜ |
+| `TEST-072.06` | 30–38 | بلوک | `test_manual_code_lookup_supports_335_after_ad_code` | 0 | ⬜ |
+| `TEST-072.07` | 39–66 | بلوک | `test_domain_entered_employee_code_is_authoritative` | 0 | ⬜ |
+| `TEST-072.08` | 67–75 | بلوک | `test_offline_merge_covers_references_and_report` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-073</b> — <code>tests/test_food_queue_reconciliation_unit.php</code> (64 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-073</b> — <code>tests/test_food_printed_delivery_report_static.py</code> (68 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-073.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-073.02` | 4–4 | تابع | `food_order_internal_food_for_employee` | 0 | ⬜ |
-| `TEST-073.03` | 5–5 | تابع | `food_ticket_group_event_ids_for_run` | 0 | ⬜ |
-| `TEST-073.04` | 6–6 | تابع | `food_ticket_group_print_mode` | 0 | ⬜ |
-| `TEST-073.05` | 7–7 | تابع | `db_table_exists` | 0 | ⬜ |
-| `TEST-073.06` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-073.07` | 9–9 | تابع | `food_ticket_tpl_print_network` | 0 | ⬜ |
-| `TEST-073.08` | 10–33 | کلاس | `QueueStmt` | 1 | ⬜ |
-| `TEST-073.09` | 34–37 | کلاس | `QueueDB` | 0 | ⬜ |
-| `TEST-073.10` | 38–38 | تابع | `db` | 0 | ⬜ |
-| `TEST-073.11` | 39–40 | ناحیه | `بلوک رویه‌ای 39-40` | 0 | ⬜ |
-| `TEST-073.12` | 41–41 | تابع | `chk` | 0 | ⬜ |
-| `TEST-073.13` | 42–42 | تابع | `event` | 0 | ⬜ |
-| `TEST-073.14` | 43–43 | تابع | `reset_test` | 0 | ⬜ |
-| `TEST-073.15` | 44–44 | تابع | `process` | 0 | ⬜ |
-| `TEST-073.16` | 45–64 | ناحیه | `بلوک رویه‌ای 45-64` | 0 | ⬜ |
+| `TEST-073.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-073.02` | 9–12 | بلوک | `read` | 0 | ⬜ |
+| `TEST-073.03` | 13–13 | بلوک | `PrintedDeliveryReportStaticTests` | 0 | ⬜ |
+| `TEST-073.04` | 14–33 | بلوک | `test_report_uses_printed_delivered_employee_events` | 0 | ⬜ |
+| `TEST-073.05` | 34–44 | بلوک | `test_report_api_is_restricted_to_food_order_close` | 0 | ⬜ |
+| `TEST-073.06` | 45–57 | بلوک | `test_report_is_appended_after_statistics_and_match` | 0 | ⬜ |
+| `TEST-073.07` | 58–68 | بلوک | `test_mirrored_assets_and_cache_versions_are_update` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-074</b> — <code>tests/test_food_report_ui_static.py</code> (115 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-074</b> — <code>tests/test_food_queue_reconciliation_unit.php</code> (64 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-074.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-074.02` | 9–12 | بلوک | `read` | 0 | ⬜ |
-| `TEST-074.03` | 13–13 | بلوک | `FoodReportUiStaticTests` | 0 | ⬜ |
-| `TEST-074.04` | 14–24 | بلوک | `test_all_groups_are_available_and_group_report_sup` | 0 | ⬜ |
-| `TEST-074.05` | 25–33 | بلوک | `test_daily_order_field_choices_persist_per_user_in` | 0 | ⬜ |
-| `TEST-074.06` | 34–44 | بلوک | `test_food_report_prints_clone_only_result_lists` | 0 | ⬜ |
-| `TEST-074.07` | 45–63 | بلوک | `test_multicolumn_reports_have_dividers_and_larger_` | 0 | ⬜ |
-| `TEST-074.08` | 64–79 | بلوک | `test_employee_statistics_serials_run_down_each_col` | 0 | ⬜ |
-| `TEST-074.09` | 80–90 | بلوک | `test_food_statistics_layout_depends_on_the_selecte` | 0 | ⬜ |
-| `TEST-074.10` | 91–98 | بلوک | `test_repeated_report_blocks_keep_only_their_bounda` | 0 | ⬜ |
-| `TEST-074.11` | 99–115 | بلوک | `test_settings_code_link_is_modal_not_an_inline_sec` | 0 | ⬜ |
+| `TEST-074.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-074.02` | 4–4 | تابع | `food_order_internal_food_for_employee` | 0 | ⬜ |
+| `TEST-074.03` | 5–5 | تابع | `food_ticket_group_event_ids_for_run` | 0 | ⬜ |
+| `TEST-074.04` | 6–6 | تابع | `food_ticket_group_print_mode` | 0 | ⬜ |
+| `TEST-074.05` | 7–7 | تابع | `db_table_exists` | 0 | ⬜ |
+| `TEST-074.06` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-074.07` | 9–9 | تابع | `food_ticket_tpl_print_network` | 0 | ⬜ |
+| `TEST-074.08` | 10–33 | کلاس | `QueueStmt` | 1 | ⬜ |
+| `TEST-074.09` | 34–37 | کلاس | `QueueDB` | 0 | ⬜ |
+| `TEST-074.10` | 38–38 | تابع | `db` | 0 | ⬜ |
+| `TEST-074.11` | 39–40 | ناحیه | `بلوک رویه‌ای 39-40` | 0 | ⬜ |
+| `TEST-074.12` | 41–41 | تابع | `chk` | 0 | ⬜ |
+| `TEST-074.13` | 42–42 | تابع | `event` | 0 | ⬜ |
+| `TEST-074.14` | 43–43 | تابع | `reset_test` | 0 | ⬜ |
+| `TEST-074.15` | 44–44 | تابع | `process` | 0 | ⬜ |
+| `TEST-074.16` | 45–64 | ناحیه | `بلوک رویه‌ای 45-64` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-075</b> — <code>tests/test_food_temporary_group_transfer_static.py</code> (71 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-075</b> — <code>tests/test_food_report_ui_static.py</code> (115 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-075.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-075.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-075.03` | 11–11 | بلوک | `FoodTemporaryGroupTransferStaticTests` | 0 | ⬜ |
-| `TEST-075.04` | 12–25 | بلوک | `test_manager_transfer_uses_day_visit_record_and_ne` | 1 | ⬜ |
-| `TEST-075.05` | 26–35 | بلوک | `test_moved_permanent_member_is_excluded_from_home_` | 0 | ⬜ |
-| `TEST-075.06` | 36–45 | بلوک | `test_absence_and_group_views_mark_temporary_member` | 0 | ⬜ |
-| `TEST-075.07` | 46–57 | بلوک | `test_bulk_ui_allows_temporary_transfer_and_return_` | 0 | ⬜ |
-| `TEST-075.08` | 58–71 | بلوک | `test_return_removes_daily_transfer_with_audit_and_` | 1 | ⬜ |
+| `TEST-075.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-075.02` | 9–12 | بلوک | `read` | 0 | ⬜ |
+| `TEST-075.03` | 13–13 | بلوک | `FoodReportUiStaticTests` | 0 | ⬜ |
+| `TEST-075.04` | 14–24 | بلوک | `test_all_groups_are_available_and_group_report_sup` | 0 | ⬜ |
+| `TEST-075.05` | 25–33 | بلوک | `test_daily_order_field_choices_persist_per_user_in` | 0 | ⬜ |
+| `TEST-075.06` | 34–44 | بلوک | `test_food_report_prints_clone_only_result_lists` | 0 | ⬜ |
+| `TEST-075.07` | 45–63 | بلوک | `test_multicolumn_reports_have_dividers_and_larger_` | 0 | ⬜ |
+| `TEST-075.08` | 64–79 | بلوک | `test_employee_statistics_serials_run_down_each_col` | 0 | ⬜ |
+| `TEST-075.09` | 80–90 | بلوک | `test_food_statistics_layout_depends_on_the_selecte` | 0 | ⬜ |
+| `TEST-075.10` | 91–98 | بلوک | `test_repeated_report_blocks_keep_only_their_bounda` | 0 | ⬜ |
+| `TEST-075.11` | 99–115 | بلوک | `test_settings_code_link_is_modal_not_an_inline_sec` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-076</b> — <code>tests/test_food_ticket_config_paths.php</code> (39 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-076</b> — <code>tests/test_food_temporary_group_transfer_static.py</code> (71 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-076.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-076.02` | 6–10 | کلاس | `FoodTicketFakeStatement` | 0 | ⬜ |
-| `TEST-076.03` | 12–16 | کلاس | `FoodTicketFakeDb` | 0 | ⬜ |
-| `TEST-076.04` | 17–24 | ناحیه | `بلوک رویه‌ای 17-24` | 0 | ⬜ |
-| `TEST-076.05` | 25–25 | تابع | `db` | 0 | ⬜ |
-| `TEST-076.06` | 26–26 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-076.07` | 27–39 | ناحیه | `بلوک رویه‌ای 27-39` | 0 | ⬜ |
+| `TEST-076.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-076.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-076.03` | 11–11 | بلوک | `FoodTemporaryGroupTransferStaticTests` | 0 | ⬜ |
+| `TEST-076.04` | 12–25 | بلوک | `test_manager_transfer_uses_day_visit_record_and_ne` | 1 | ⬜ |
+| `TEST-076.05` | 26–35 | بلوک | `test_moved_permanent_member_is_excluded_from_home_` | 0 | ⬜ |
+| `TEST-076.06` | 36–45 | بلوک | `test_absence_and_group_views_mark_temporary_member` | 0 | ⬜ |
+| `TEST-076.07` | 46–57 | بلوک | `test_bulk_ui_allows_temporary_transfer_and_return_` | 0 | ⬜ |
+| `TEST-076.08` | 58–71 | بلوک | `test_return_removes_daily_transfer_with_audit_and_` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-077</b> — <code>tests/test_food_ticket_diagnostic_log_levels_static.py</code> (63 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-077</b> — <code>tests/test_food_ticket_config_paths.php</code> (39 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-077.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-077.02` | 15–28 | بلوک | `test_successful_print_diagnostics_are_debug_not_er` | 0 | ⬜ |
-| `TEST-077.03` | 29–37 | بلوک | `test_template_adjustment_is_debug_and_render_const` | 0 | ⬜ |
-| `TEST-077.04` | 38–63 | بلوک | `test_combined_hotfix_includes_inventory_compatibil` | 0 | ⬜ |
+| `TEST-077.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-077.02` | 6–10 | کلاس | `FoodTicketFakeStatement` | 0 | ⬜ |
+| `TEST-077.03` | 12–16 | کلاس | `FoodTicketFakeDb` | 0 | ⬜ |
+| `TEST-077.04` | 17–24 | ناحیه | `بلوک رویه‌ای 17-24` | 0 | ⬜ |
+| `TEST-077.05` | 25–25 | تابع | `db` | 0 | ⬜ |
+| `TEST-077.06` | 26–26 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-077.07` | 27–39 | ناحیه | `بلوک رویه‌ای 27-39` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-078</b> — <code>tests/test_food_ticket_logic.php</code> (52 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-078</b> — <code>tests/test_food_ticket_diagnostic_log_levels_static.py</code> (63 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-078.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-078.02` | 4–4 | تابع | `db` | 0 | ⬜ |
-| `TEST-078.03` | 5–5 | تابع | `db_table_exists` | 0 | ⬜ |
-| `TEST-078.04` | 6–6 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-078.05` | 7–7 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-078.06` | 8–13 | ناحیه | `بلوک رویه‌ای 8-13` | 0 | ⬜ |
-| `TEST-078.07` | 14–18 | تابع | `expect` | 0 | ⬜ |
-| `TEST-078.08` | 19–52 | ناحیه | `بلوک رویه‌ای 19-52` | 3 | ⬜ |
+| `TEST-078.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-078.02` | 15–28 | بلوک | `test_successful_print_diagnostics_are_debug_not_er` | 0 | ⬜ |
+| `TEST-078.03` | 29–37 | بلوک | `test_template_adjustment_is_debug_and_render_const` | 0 | ⬜ |
+| `TEST-078.04` | 38–63 | بلوک | `test_combined_hotfix_includes_inventory_compatibil` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-079</b> — <code>tests/test_food_update_package_assets.py</code> (70 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-079</b> — <code>tests/test_food_ticket_logic.php</code> (52 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-079.01` | 1–41 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-079.02` | 42–60 | بلوک | `test_food_runtime_recovery_bundle_is_complete_and_` | 0 | ⬜ |
-| `TEST-079.03` | 61–70 | بلوک | `test_hotfix_package_is_intact_and_panel_is_mirrore` | 0 | ⬜ |
+| `TEST-079.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-079.02` | 4–4 | تابع | `db` | 0 | ⬜ |
+| `TEST-079.03` | 5–5 | تابع | `db_table_exists` | 0 | ⬜ |
+| `TEST-079.04` | 6–6 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-079.05` | 7–7 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-079.06` | 8–13 | ناحیه | `بلوک رویه‌ای 8-13` | 0 | ⬜ |
+| `TEST-079.07` | 14–18 | تابع | `expect` | 0 | ⬜ |
+| `TEST-079.08` | 19–52 | ناحیه | `بلوک رویه‌ای 19-52` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-080</b> — <code>tests/test_food_worker_window.php</code> (141 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-080</b> — <code>tests/test_food_update_package_assets.py</code> (70 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-080.01` | 1–15 | ناحیه | `بلوک رویه‌ای 1-15` | 0 | ⬜ |
-| `TEST-080.02` | 16–19 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-080.03` | 20–23 | ناحیه | `بلوک رویه‌ای 20-23` | 0 | ⬜ |
-| `TEST-080.04` | 24–31 | تابع | `food_ticket_auto_receipt_holiday` | 0 | ⬜ |
-| `TEST-080.05` | 32–35 | ناحیه | `بلوک رویه‌ای 32-35` | 0 | ⬜ |
-| `TEST-080.06` | 36–43 | تابع | `expect` | 0 | ⬜ |
-| `TEST-080.07` | 45–52 | تابع | `state_at` | 0 | ⬜ |
-| `TEST-080.08` | 54–60 | ناحیه | `۱) پارس روزهای هفته` | 0 | ⬜ |
-| `TEST-080.09` | 61–66 | ناحیه | `۲) پارس ساعت` | 0 | ⬜ |
-| `TEST-080.10` | 67–81 | ناحیه | `۳) مرزهای پنجره: ۱۱:۰۰–۱۴:۰۰ با حاشیهٔ ۳۰ و ۱۵ ⇒ م` | 0 | ⬜ |
-| `TEST-080.11` | 82–91 | ناحیه | `۴) حاشیهٔ صفر هم باید کار کند (کاربر می‌تواند «تا ` | 0 | ⬜ |
-| `TEST-080.12` | 92–98 | ناحیه | `۵) روزهای غیرکاری و تعطیلات` | 0 | ⬜ |
-| `TEST-080.13` | 99–104 | ناحیه | `۶) خاموش بودن پنجره = رفتار نسخهٔ قبلی (۲۴/۷)` | 0 | ⬜ |
-| `TEST-080.14` | 105–112 | ناحیه | `۷) شروع بعدی` | 0 | ⬜ |
-| `TEST-080.15` | 113–124 | ناحیه | `۸) ریتم پایش` | 0 | ⬜ |
-| `TEST-080.16` | 125–141 | ناحیه | `۹) پایداری: تنظیمات ناقص نباید fatal بدهد` | 3 | ⬜ |
+| `TEST-080.01` | 1–41 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-080.02` | 42–60 | بلوک | `test_food_runtime_recovery_bundle_is_complete_and_` | 0 | ⬜ |
+| `TEST-080.03` | 61–70 | بلوک | `test_hotfix_package_is_intact_and_panel_is_mirrore` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-081</b> — <code>tests/test_food_worker_window_static.py</code> (452 خط، 50 آدرس، بازبینی‌شده 0/50)</summary>
+<summary><b>TEST-081</b> — <code>tests/test_food_worker_window.php</code> (141 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-081.01` | 1–42 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-081.02` | 43–50 | بلوک | `_css_rule` | 0 | ⬜ |
-| `TEST-081.03` | 51–59 | بلوک | `test_migration_031_is_the_only_new_file` | 0 | ⬜ |
-| `TEST-081.04` | 60–64 | بلوک | `test_migration_adds_every_window_column` | 0 | ⬜ |
-| `TEST-081.05` | 65–72 | بلوک | `test_migration_is_idempotent_for_every_column` | 0 | ⬜ |
-| `TEST-081.06` | 73–90 | بلوک | `test_migration_defaults_match_php_defaults` | 0 | ⬜ |
-| `TEST-081.07` | 91–100 | بلوک | `test_fresh_install_schema_has_every_window_column` | 0 | ⬜ |
-| `TEST-081.08` | 101–119 | بلوک | `test_fresh_install_defaults_match_the_migration` | 0 | ⬜ |
-| `TEST-081.09` | 120–126 | بلوک | `test_updater_enforces_the_incremental_prerequisite` | 0 | ⬜ |
-| `TEST-081.10` | 127–137 | بلوک | `test_updater_prerequisite_has_an_explicit_escape_h` | 2 | ⬜ |
-| `TEST-081.11` | 138–146 | بلوک | `test_window_disabled_by_default_so_upgrades_keep_o` | 0 | ⬜ |
-| `TEST-081.12` | 147–159 | بلوک | `test_window_module_exposes_the_public_helpers` | 0 | ⬜ |
-| `TEST-081.13` | 160–165 | بلوک | `test_window_module_is_loaded_before_config_default` | 0 | ⬜ |
-| `TEST-081.14` | 166–172 | بلوک | `test_config_reads_window_columns_defensively` | 0 | ⬜ |
-| `TEST-081.15` | 173–180 | بلوک | `test_window_reuses_the_single_holiday_calendar` | 0 | ⬜ |
-| `TEST-081.16` | 181–185 | بلوک | `test_window_save_only_writes_existing_columns` | 1 | ⬜ |
-| `TEST-081.17` | 186–194 | بلوک | `test_save_config_persists_window_without_breaking_` | 0 | ⬜ |
-| `TEST-081.18` | 195–200 | بلوک | `test_worker_gates_access_behind_the_window` | 0 | ⬜ |
-| `TEST-081.19` | 201–208 | بلوک | `test_worker_never_kills_itself_outside_the_window` | 0 | ⬜ |
-| `TEST-081.20` | 209–215 | بلوک | `test_worker_still_drains_the_print_queue_outside_t` | 0 | ⬜ |
-| `TEST-081.21` | 216–221 | بلوک | `test_queue_only_mode_never_touches_access` | 0 | ⬜ |
-| `TEST-081.22` | 222–227 | بلوک | `test_worker_sweeps_once_after_every_restart` | 0 | ⬜ |
-| `TEST-081.23` | 228–234 | بلوک | `test_worker_runs_a_final_sweep_when_the_window_clo` | 0 | ⬜ |
-| `TEST-081.24` | 235–244 | بلوک | `test_auto_receipts_are_not_blocked_by_the_window` | 0 | ⬜ |
-| `TEST-081.25` | 245–254 | بلوک | `test_worker_no_longer_reconnects_mysql_every_cycle` | 0 | ⬜ |
-| `TEST-081.26` | 255–262 | بلوک | `test_worker_caches_settings_with_a_ttl` | 0 | ⬜ |
-| `TEST-081.27` | 263–270 | بلوک | `test_odbc_handle_is_pooled_and_releasable` | 0 | ⬜ |
-| `TEST-081.28` | 271–276 | بلوک | `test_pool_is_released_on_error_and_when_the_window` | 0 | ⬜ |
-| `TEST-081.29` | 277–280 | بلوک | `test_pool_handle_expires_so_a_dead_connection_cann` | 0 | ⬜ |
-| `TEST-081.30` | 281–287 | بلوک | `test_worker_has_three_distinct_poll_rhythms` | 0 | ⬜ |
-| `TEST-081.31` | 288–296 | بلوک | `test_idle_sleep_is_chunked_so_max_minutes_still_wo` | 0 | ⬜ |
-| `TEST-081.32` | 297–305 | بلوک | `test_holiday_board_markup_lives_in_one_place` | 0 | ⬜ |
-| `TEST-081.33` | 306–312 | بلوک | `test_settings_page_has_a_holidays_tab` | 0 | ⬜ |
-| `TEST-081.34` | 313–318 | بلوک | `test_holiday_tab_respects_the_view_permission` | 0 | ⬜ |
-| `TEST-081.35` | 319–325 | بلوک | `test_holiday_actions_return_to_the_originating_tab` | 0 | ⬜ |
-| `TEST-081.36` | 326–331 | بلوک | `test_every_holiday_form_carries_return_to` | 0 | ⬜ |
-| `TEST-081.37` | 332–343 | بلوک | `test_year_board_select_attribute_is_not_broken` | 0 | ⬜ |
-| `TEST-081.38` | 344–357 | بلوک | `test_panel_exposes_window_fields` | 0 | ⬜ |
-| `TEST-081.39` | 358–368 | بلوک | `test_week_days_render_on_one_row_not_stacked` | 0 | ⬜ |
-| `TEST-081.40` | 369–377 | بلوک | `test_every_week_day_is_still_rendered` | 0 | ⬜ |
-| `TEST-081.41` | 378–387 | بلوک | `test_six_window_fields_sit_in_two_rows_of_three` | 0 | ⬜ |
-| `TEST-081.42` | 388–397 | بلوک | `test_time_inputs_are_forced_to_24_hour` | 0 | ⬜ |
-| `TEST-081.43` | 398–402 | بلوک | `test_time_picker_icon_stays_attached_to_its_field` | 0 | ⬜ |
-| `TEST-081.44` | 403–410 | بلوک | `test_database_time_value_is_trimmed_for_the_time_i` | 0 | ⬜ |
-| `TEST-081.45` | 411–418 | بلوک | `test_panel_version_was_bumped_with_the_panel_marku` | 0 | ⬜ |
-| `TEST-081.46` | 419–429 | بلوک | `test_help_guide_explains_which_package_to_install` | 1 | ⬜ |
-| `TEST-081.47` | 430–436 | بلوک | `test_panel_sends_window_payload_on_save` | 0 | ⬜ |
-| `TEST-081.48` | 437–441 | بلوک | `test_panel_reads_window_state_from_the_api` | 0 | ⬜ |
-| `TEST-081.49` | 442–446 | بلوک | `test_panel_warns_when_the_migration_has_not_run` | 0 | ⬜ |
-| `TEST-081.50` | 447–452 | بلوک | `test_window_api_fields_require_the_db_edit_permiss` | 0 | ⬜ |
+| `TEST-081.01` | 1–15 | ناحیه | `بلوک رویه‌ای 1-15` | 0 | ⬜ |
+| `TEST-081.02` | 16–19 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-081.03` | 20–23 | ناحیه | `بلوک رویه‌ای 20-23` | 0 | ⬜ |
+| `TEST-081.04` | 24–31 | تابع | `food_ticket_auto_receipt_holiday` | 0 | ⬜ |
+| `TEST-081.05` | 32–35 | ناحیه | `بلوک رویه‌ای 32-35` | 0 | ⬜ |
+| `TEST-081.06` | 36–43 | تابع | `expect` | 0 | ⬜ |
+| `TEST-081.07` | 45–52 | تابع | `state_at` | 0 | ⬜ |
+| `TEST-081.08` | 54–60 | ناحیه | `۱) پارس روزهای هفته` | 0 | ⬜ |
+| `TEST-081.09` | 61–66 | ناحیه | `۲) پارس ساعت` | 0 | ⬜ |
+| `TEST-081.10` | 67–81 | ناحیه | `۳) مرزهای پنجره: ۱۱:۰۰–۱۴:۰۰ با حاشیهٔ ۳۰ و ۱۵ ⇒ م` | 0 | ⬜ |
+| `TEST-081.11` | 82–91 | ناحیه | `۴) حاشیهٔ صفر هم باید کار کند (کاربر می‌تواند «تا ` | 0 | ⬜ |
+| `TEST-081.12` | 92–98 | ناحیه | `۵) روزهای غیرکاری و تعطیلات` | 0 | ⬜ |
+| `TEST-081.13` | 99–104 | ناحیه | `۶) خاموش بودن پنجره = رفتار نسخهٔ قبلی (۲۴/۷)` | 0 | ⬜ |
+| `TEST-081.14` | 105–112 | ناحیه | `۷) شروع بعدی` | 0 | ⬜ |
+| `TEST-081.15` | 113–124 | ناحیه | `۸) ریتم پایش` | 0 | ⬜ |
+| `TEST-081.16` | 125–141 | ناحیه | `۹) پایداری: تنظیمات ناقص نباید fatal بدهد` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-082</b> — <code>tests/test_fresh_install_schema_parity.py</code> (315 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
+<summary><b>TEST-082</b> — <code>tests/test_food_worker_window_static.py</code> (452 خط، 50 آدرس، بازبینی‌شده 0/50)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-082.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-082.02` | 31–39 | بلوک | `_migration_files` | 0 | ⬜ |
-| `TEST-082.03` | 40–46 | بلوک | `_strip_sql_comments` | 0 | ⬜ |
-| `TEST-082.04` | 47–50 | بلوک | `_schema_text` | 0 | ⬜ |
-| `TEST-082.05` | 51–59 | بلوک | `_created_tables` | 0 | ⬜ |
-| `TEST-082.06` | 60–93 | بلوک | `_table_bodies` | 0 | ⬜ |
-| `TEST-082.07` | 94–115 | بلوک | `_added_columns` | 0 | ⬜ |
-| `TEST-082.08` | 116–139 | بلوک | `_added_indexes` | 0 | ⬜ |
-| `TEST-082.09` | 140–145 | بلوک | `_migration_corpus` | 0 | ⬜ |
-| `TEST-082.10` | 146–147 | بلوک | `-` | 0 | ⬜ |
-| `TEST-082.11` | 148–150 | بلوک | `-` | 0 | ⬜ |
-| `TEST-082.12` | 151–155 | بلوک | `test_migration_files_exist` | 0 | ⬜ |
-| `TEST-082.13` | 156–167 | بلوک | `test_every_migration_table_exists_in_both_schema_f` | 0 | ⬜ |
-| `TEST-082.14` | 168–187 | بلوک | `test_every_migration_column_exists_in_both_schema_` | 0 | ⬜ |
-| `TEST-082.15` | 188–206 | بلوک | `test_every_migration_index_exists_in_both_schema_f` | 0 | ⬜ |
-| `TEST-082.16` | 207–215 | بلوک | `test_both_schema_files_define_the_same_tables` | 0 | ⬜ |
-| `TEST-082.17` | 216–237 | بلوک | `test_both_schema_files_define_identical_table_bodi` | 0 | ⬜ |
-| `TEST-082.18` | 238–266 | بلوک | `test_schema_executes_in_order_without_forward_fore` | 0 | ⬜ |
-| `TEST-082.19` | 267–305 | بلوک | `test_both_schema_files_seed_the_same_structural_ro` | 1 | ⬜ |
-| `TEST-082.20` | 306–315 | بلوک | `test_full_rebuild_drops_every_table_in_both_schema` | 0 | ⬜ |
+| `TEST-082.01` | 1–42 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-082.02` | 43–50 | بلوک | `_css_rule` | 0 | ⬜ |
+| `TEST-082.03` | 51–59 | بلوک | `test_migration_031_is_the_only_new_file` | 0 | ⬜ |
+| `TEST-082.04` | 60–64 | بلوک | `test_migration_adds_every_window_column` | 0 | ⬜ |
+| `TEST-082.05` | 65–72 | بلوک | `test_migration_is_idempotent_for_every_column` | 0 | ⬜ |
+| `TEST-082.06` | 73–90 | بلوک | `test_migration_defaults_match_php_defaults` | 0 | ⬜ |
+| `TEST-082.07` | 91–100 | بلوک | `test_fresh_install_schema_has_every_window_column` | 0 | ⬜ |
+| `TEST-082.08` | 101–119 | بلوک | `test_fresh_install_defaults_match_the_migration` | 0 | ⬜ |
+| `TEST-082.09` | 120–126 | بلوک | `test_updater_enforces_the_incremental_prerequisite` | 0 | ⬜ |
+| `TEST-082.10` | 127–137 | بلوک | `test_updater_prerequisite_has_an_explicit_escape_h` | 2 | ⬜ |
+| `TEST-082.11` | 138–146 | بلوک | `test_window_disabled_by_default_so_upgrades_keep_o` | 0 | ⬜ |
+| `TEST-082.12` | 147–159 | بلوک | `test_window_module_exposes_the_public_helpers` | 0 | ⬜ |
+| `TEST-082.13` | 160–165 | بلوک | `test_window_module_is_loaded_before_config_default` | 0 | ⬜ |
+| `TEST-082.14` | 166–172 | بلوک | `test_config_reads_window_columns_defensively` | 0 | ⬜ |
+| `TEST-082.15` | 173–180 | بلوک | `test_window_reuses_the_single_holiday_calendar` | 0 | ⬜ |
+| `TEST-082.16` | 181–185 | بلوک | `test_window_save_only_writes_existing_columns` | 1 | ⬜ |
+| `TEST-082.17` | 186–194 | بلوک | `test_save_config_persists_window_without_breaking_` | 0 | ⬜ |
+| `TEST-082.18` | 195–200 | بلوک | `test_worker_gates_access_behind_the_window` | 0 | ⬜ |
+| `TEST-082.19` | 201–208 | بلوک | `test_worker_never_kills_itself_outside_the_window` | 0 | ⬜ |
+| `TEST-082.20` | 209–215 | بلوک | `test_worker_still_drains_the_print_queue_outside_t` | 0 | ⬜ |
+| `TEST-082.21` | 216–221 | بلوک | `test_queue_only_mode_never_touches_access` | 0 | ⬜ |
+| `TEST-082.22` | 222–227 | بلوک | `test_worker_sweeps_once_after_every_restart` | 0 | ⬜ |
+| `TEST-082.23` | 228–234 | بلوک | `test_worker_runs_a_final_sweep_when_the_window_clo` | 0 | ⬜ |
+| `TEST-082.24` | 235–244 | بلوک | `test_auto_receipts_are_not_blocked_by_the_window` | 0 | ⬜ |
+| `TEST-082.25` | 245–254 | بلوک | `test_worker_no_longer_reconnects_mysql_every_cycle` | 0 | ⬜ |
+| `TEST-082.26` | 255–262 | بلوک | `test_worker_caches_settings_with_a_ttl` | 0 | ⬜ |
+| `TEST-082.27` | 263–270 | بلوک | `test_odbc_handle_is_pooled_and_releasable` | 0 | ⬜ |
+| `TEST-082.28` | 271–276 | بلوک | `test_pool_is_released_on_error_and_when_the_window` | 0 | ⬜ |
+| `TEST-082.29` | 277–280 | بلوک | `test_pool_handle_expires_so_a_dead_connection_cann` | 0 | ⬜ |
+| `TEST-082.30` | 281–287 | بلوک | `test_worker_has_three_distinct_poll_rhythms` | 0 | ⬜ |
+| `TEST-082.31` | 288–296 | بلوک | `test_idle_sleep_is_chunked_so_max_minutes_still_wo` | 0 | ⬜ |
+| `TEST-082.32` | 297–305 | بلوک | `test_holiday_board_markup_lives_in_one_place` | 0 | ⬜ |
+| `TEST-082.33` | 306–312 | بلوک | `test_settings_page_has_a_holidays_tab` | 0 | ⬜ |
+| `TEST-082.34` | 313–318 | بلوک | `test_holiday_tab_respects_the_view_permission` | 0 | ⬜ |
+| `TEST-082.35` | 319–325 | بلوک | `test_holiday_actions_return_to_the_originating_tab` | 0 | ⬜ |
+| `TEST-082.36` | 326–331 | بلوک | `test_every_holiday_form_carries_return_to` | 0 | ⬜ |
+| `TEST-082.37` | 332–343 | بلوک | `test_year_board_select_attribute_is_not_broken` | 0 | ⬜ |
+| `TEST-082.38` | 344–357 | بلوک | `test_panel_exposes_window_fields` | 0 | ⬜ |
+| `TEST-082.39` | 358–368 | بلوک | `test_week_days_render_on_one_row_not_stacked` | 0 | ⬜ |
+| `TEST-082.40` | 369–377 | بلوک | `test_every_week_day_is_still_rendered` | 0 | ⬜ |
+| `TEST-082.41` | 378–387 | بلوک | `test_six_window_fields_sit_in_two_rows_of_three` | 0 | ⬜ |
+| `TEST-082.42` | 388–397 | بلوک | `test_time_inputs_are_forced_to_24_hour` | 0 | ⬜ |
+| `TEST-082.43` | 398–402 | بلوک | `test_time_picker_icon_stays_attached_to_its_field` | 0 | ⬜ |
+| `TEST-082.44` | 403–410 | بلوک | `test_database_time_value_is_trimmed_for_the_time_i` | 0 | ⬜ |
+| `TEST-082.45` | 411–418 | بلوک | `test_panel_version_was_bumped_with_the_panel_marku` | 0 | ⬜ |
+| `TEST-082.46` | 419–429 | بلوک | `test_help_guide_explains_which_package_to_install` | 1 | ⬜ |
+| `TEST-082.47` | 430–436 | بلوک | `test_panel_sends_window_payload_on_save` | 0 | ⬜ |
+| `TEST-082.48` | 437–441 | بلوک | `test_panel_reads_window_state_from_the_api` | 0 | ⬜ |
+| `TEST-082.49` | 442–446 | بلوک | `test_panel_warns_when_the_migration_has_not_run` | 0 | ⬜ |
+| `TEST-082.50` | 447–452 | بلوک | `test_window_api_fields_require_the_db_edit_permiss` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-083</b> — <code>tests/test_global_theme_mode.py</code> (63 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-083</b> — <code>tests/test_fresh_install_schema_parity.py</code> (315 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-083.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-083.02` | 6–26 | بلوک | `test_global_theme_is_attached_to_all_main_shells` | 1 | ⬜ |
-| `TEST-083.03` | 27–46 | بلوک | `test_food_panel_and_standalone_modules_follow_the_` | 0 | ⬜ |
-| `TEST-083.04` | 47–63 | بلوک | `test_independent_php_renderers_use_shared_mode` | 0 | ⬜ |
+| `TEST-083.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-083.02` | 31–39 | بلوک | `_migration_files` | 0 | ⬜ |
+| `TEST-083.03` | 40–46 | بلوک | `_strip_sql_comments` | 0 | ⬜ |
+| `TEST-083.04` | 47–50 | بلوک | `_schema_text` | 0 | ⬜ |
+| `TEST-083.05` | 51–59 | بلوک | `_created_tables` | 0 | ⬜ |
+| `TEST-083.06` | 60–93 | بلوک | `_table_bodies` | 0 | ⬜ |
+| `TEST-083.07` | 94–115 | بلوک | `_added_columns` | 0 | ⬜ |
+| `TEST-083.08` | 116–139 | بلوک | `_added_indexes` | 0 | ⬜ |
+| `TEST-083.09` | 140–145 | بلوک | `_migration_corpus` | 0 | ⬜ |
+| `TEST-083.10` | 146–147 | بلوک | `-` | 0 | ⬜ |
+| `TEST-083.11` | 148–150 | بلوک | `-` | 0 | ⬜ |
+| `TEST-083.12` | 151–155 | بلوک | `test_migration_files_exist` | 0 | ⬜ |
+| `TEST-083.13` | 156–167 | بلوک | `test_every_migration_table_exists_in_both_schema_f` | 0 | ⬜ |
+| `TEST-083.14` | 168–187 | بلوک | `test_every_migration_column_exists_in_both_schema_` | 0 | ⬜ |
+| `TEST-083.15` | 188–206 | بلوک | `test_every_migration_index_exists_in_both_schema_f` | 0 | ⬜ |
+| `TEST-083.16` | 207–215 | بلوک | `test_both_schema_files_define_the_same_tables` | 0 | ⬜ |
+| `TEST-083.17` | 216–237 | بلوک | `test_both_schema_files_define_identical_table_bodi` | 0 | ⬜ |
+| `TEST-083.18` | 238–266 | بلوک | `test_schema_executes_in_order_without_forward_fore` | 0 | ⬜ |
+| `TEST-083.19` | 267–305 | بلوک | `test_both_schema_files_seed_the_same_structural_ro` | 1 | ⬜ |
+| `TEST-083.20` | 306–315 | بلوک | `test_full_rebuild_drops_every_table_in_both_schema` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-084</b> — <code>tests/test_group_ticket_design_repair_static.py</code> (39 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-084</b> — <code>tests/test_global_theme_mode.py</code> (63 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-084.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-084.02` | 6–14 | بلوک | `test_group_design_is_saved_and_read_back` | 0 | ⬜ |
-| `TEST-084.03` | 15–25 | بلوک | `test_group_preview_and_physical_print_share_group_` | 0 | ⬜ |
-| `TEST-084.04` | 26–39 | بلوک | `test_main_page_routes_group_save_to_integrated_api` | 2 | ⬜ |
+| `TEST-084.02` | 6–26 | بلوک | `test_global_theme_is_attached_to_all_main_shells` | 1 | ⬜ |
+| `TEST-084.03` | 27–46 | بلوک | `test_food_panel_and_standalone_modules_follow_the_` | 0 | ⬜ |
+| `TEST-084.04` | 47–63 | بلوک | `test_independent_php_renderers_use_shared_mode` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-085</b> — <code>tests/test_hot_schema_guard_unit.php</code> (66 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
+<summary><b>TEST-085</b> — <code>tests/test_group_ticket_design_repair_static.py</code> (39 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-085.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-085.02` | 4–4 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
-| `TEST-085.03` | 5–5 | ناحیه | `تابع ticket_hot_schema_ensure() از متن فایل بیرون ` | 0 | ⬜ |
-| `TEST-085.04` | 6–6 | ناحیه | `ساختگی اجرا می‌شود؛ هدف این است که «ترتیب $ready ن` | 0 | ⬜ |
-| `TEST-085.05` | 7–10 | ناحیه | `واقعی سنجیده شود، نه با خواندن متن.` | 0 | ⬜ |
-| `TEST-085.06` | 11–15 | تابع | `check_hot` | 0 | ⬜ |
-| `TEST-085.07` | 16–21 | ناحیه | `بلوک رویه‌ای 16-21` | 0 | ⬜ |
-| `TEST-085.08` | 22–22 | تابع | `db_in_transaction` | 0 | ⬜ |
-| `TEST-085.09` | 23–23 | تابع | `db_add_missing_column` | 0 | ⬜ |
-| `TEST-085.10` | 24–24 | تابع | `db_ensure_enum_values` | 0 | ⬜ |
-| `TEST-085.11` | 25–25 | تابع | `system_log` | 0 | ⬜ |
-| `TEST-085.12` | 26–26 | تابع | `register_shutdown_function_stub` | 0 | ⬜ |
-| `TEST-085.13` | 28–32 | ناحیه | `تابع هدف را از فایل واقعی بیرون می‌کشیم تا نسخهٔ د` | 0 | ⬜ |
-| `TEST-085.14` | 33–36 | ناحیه | `فقط ثبت shutdown به نسخهٔ قابل‌مشاهده تغییر می‌کند` | 4 | ⬜ |
-| `TEST-085.15` | 37–44 | ناحیه | `۱) داخل تراکنش: هیچ DDL نباید اجرا شود` | 0 | ⬜ |
-| `TEST-085.16` | 45–50 | ناحیه | `۲) فراخوانی دوبارهٔ داخل تراکنش: ثبت تکراری ممنوع` | 0 | ⬜ |
-| `TEST-085.17` | 51–58 | ناحیه | `۳) دام اصلی: پس از پایان تراکنش مهاجرت باید واقعاً` | 0 | ⬜ |
-| `TEST-085.18` | 59–66 | ناحیه | `۴) پس از موفقیت، دوباره اجرا نمی‌شود` | 3 | ⬜ |
+| `TEST-085.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-085.02` | 6–14 | بلوک | `test_group_design_is_saved_and_read_back` | 0 | ⬜ |
+| `TEST-085.03` | 15–25 | بلوک | `test_group_preview_and_physical_print_share_group_` | 0 | ⬜ |
+| `TEST-085.04` | 26–39 | بلوک | `test_main_page_routes_group_save_to_integrated_api` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-086</b> — <code>tests/test_hot_schema_transaction_guard_static.py</code> (174 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TEST-086</b> — <code>tests/test_hot_schema_guard_unit.php</code> (66 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-086.01` | 1–45 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-086.02` | 46–50 | بلوک | `read` | 0 | ⬜ |
-| `TEST-086.03` | 51–57 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-086.04` | 58–67 | بلوک | `php_function` | 0 | ⬜ |
-| `TEST-086.05` | 68–71 | بلوک | `hot_body` | 0 | ⬜ |
-| `TEST-086.06` | 72–79 | بلوک | `test_hot_schema_checks_for_an_open_transaction` | 0 | ⬜ |
-| `TEST-086.07` | 80–93 | بلوک | `test_transaction_check_comes_before_any_ddl` | 0 | ⬜ |
-| `TEST-086.08` | 94–111 | بلوک | `test_ready_flag_is_not_set_while_deferring` | 0 | ⬜ |
-| `TEST-086.09` | 112–119 | بلوک | `test_deferred_migration_is_scheduled` | 0 | ⬜ |
-| `TEST-086.10` | 120–128 | بلوک | `test_shutdown_handler_is_registered_only_once` | 0 | ⬜ |
-| `TEST-086.11` | 129–135 | بلوک | `test_deferral_is_logged` | 0 | ⬜ |
-| `TEST-086.12` | 136–148 | بلوک | `test_existing_guard_is_not_regressed` | 0 | ⬜ |
-| `TEST-086.13` | 149–159 | بلوک | `test_guarded_helper_stays_free_of_static_state` | 0 | ⬜ |
-| `TEST-086.14` | 160–174 | بلوک | `test_bootstrap_still_runs_migration_outside_any_tr` | 0 | ⬜ |
+| `TEST-086.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-086.02` | 4–4 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
+| `TEST-086.03` | 5–5 | ناحیه | `تابع ticket_hot_schema_ensure() از متن فایل بیرون ` | 0 | ⬜ |
+| `TEST-086.04` | 6–6 | ناحیه | `ساختگی اجرا می‌شود؛ هدف این است که «ترتیب $ready ن` | 0 | ⬜ |
+| `TEST-086.05` | 7–10 | ناحیه | `واقعی سنجیده شود، نه با خواندن متن.` | 0 | ⬜ |
+| `TEST-086.06` | 11–15 | تابع | `check_hot` | 0 | ⬜ |
+| `TEST-086.07` | 16–21 | ناحیه | `بلوک رویه‌ای 16-21` | 0 | ⬜ |
+| `TEST-086.08` | 22–22 | تابع | `db_in_transaction` | 0 | ⬜ |
+| `TEST-086.09` | 23–23 | تابع | `db_add_missing_column` | 0 | ⬜ |
+| `TEST-086.10` | 24–24 | تابع | `db_ensure_enum_values` | 0 | ⬜ |
+| `TEST-086.11` | 25–25 | تابع | `system_log` | 0 | ⬜ |
+| `TEST-086.12` | 26–26 | تابع | `register_shutdown_function_stub` | 0 | ⬜ |
+| `TEST-086.13` | 28–32 | ناحیه | `تابع هدف را از فایل واقعی بیرون می‌کشیم تا نسخهٔ د` | 0 | ⬜ |
+| `TEST-086.14` | 33–36 | ناحیه | `فقط ثبت shutdown به نسخهٔ قابل‌مشاهده تغییر می‌کند` | 4 | ⬜ |
+| `TEST-086.15` | 37–44 | ناحیه | `۱) داخل تراکنش: هیچ DDL نباید اجرا شود` | 0 | ⬜ |
+| `TEST-086.16` | 45–50 | ناحیه | `۲) فراخوانی دوبارهٔ داخل تراکنش: ثبت تکراری ممنوع` | 0 | ⬜ |
+| `TEST-086.17` | 51–58 | ناحیه | `۳) دام اصلی: پس از پایان تراکنش مهاجرت باید واقعاً` | 0 | ⬜ |
+| `TEST-086.18` | 59–66 | ناحیه | `۴) پس از موفقیت، دوباره اجرا نمی‌شود` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-087</b> — <code>tests/test_inventory_truth_static.py</code> (198 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
+<summary><b>TEST-087</b> — <code>tests/test_hot_schema_transaction_guard_static.py</code> (174 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-087.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-087.02` | 9–12 | بلوک | `read` | 0 | ⬜ |
-| `TEST-087.03` | 13–13 | بلوک | `InventoryTruthStaticTests` | 0 | ⬜ |
-| `TEST-087.04` | 14–25 | بلوک | `test_login_identity_does_not_claim_hardware_collec` | 1 | ⬜ |
-| `TEST-087.05` | 26–32 | بلوک | `test_agent_api_rejects_payload_without_hardware_ro` | 0 | ⬜ |
-| `TEST-087.06` | 33–39 | بلوک | `test_domain_scan_does_not_save_identity_only_respo` | 0 | ⬜ |
-| `TEST-087.07` | 40–46 | بلوک | `test_diagnostics_report_hardware_score_and_local_a` | 0 | ⬜ |
-| `TEST-087.08` | 47–63 | بلوک | `test_local_extraction_button_uses_php_host_and_onl` | 0 | ⬜ |
-| `TEST-087.09` | 64–70 | بلوک | `test_winrm_only_targets_are_detected_when_icmp_is_` | 0 | ⬜ |
-| `TEST-087.10` | 71–85 | بلوک | `test_one_host_credential_test_does_not_write_inven` | 0 | ⬜ |
-| `TEST-087.11` | 86–93 | بلوک | `test_winrm_guidance_configures_targets_not_only_th` | 0 | ⬜ |
-| `TEST-087.12` | 94–110 | بلوک | `test_scan_credentials_are_per_run_encrypted_and_no` | 0 | ⬜ |
-| `TEST-087.13` | 111–120 | بلوک | `test_full_domain_scan_is_not_limited_to_a_single_h` | 0 | ⬜ |
-| `TEST-087.14` | 121–137 | بلوک | `test_extended_windows_inventory_is_collected_and_p` | 0 | ⬜ |
-| `TEST-087.15` | 138–147 | بلوک | `test_domain_reinventory_refreshes_only_machine_der` | 0 | ⬜ |
-| `TEST-087.16` | 148–157 | بلوک | `test_internet_access_is_not_inferred_from_a_defaul` | 0 | ⬜ |
-| `TEST-087.17` | 158–185 | بلوک | `test_successful_empty_categories_clear_but_failed_` | 0 | ⬜ |
-| `TEST-087.18` | 186–198 | بلوک | `test_food_panel_and_ldap_slow_paths_emit_stage_tim` | 0 | ⬜ |
+| `TEST-087.01` | 1–45 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-087.02` | 46–50 | بلوک | `read` | 0 | ⬜ |
+| `TEST-087.03` | 51–57 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-087.04` | 58–67 | بلوک | `php_function` | 0 | ⬜ |
+| `TEST-087.05` | 68–71 | بلوک | `hot_body` | 0 | ⬜ |
+| `TEST-087.06` | 72–79 | بلوک | `test_hot_schema_checks_for_an_open_transaction` | 0 | ⬜ |
+| `TEST-087.07` | 80–93 | بلوک | `test_transaction_check_comes_before_any_ddl` | 0 | ⬜ |
+| `TEST-087.08` | 94–111 | بلوک | `test_ready_flag_is_not_set_while_deferring` | 0 | ⬜ |
+| `TEST-087.09` | 112–119 | بلوک | `test_deferred_migration_is_scheduled` | 0 | ⬜ |
+| `TEST-087.10` | 120–128 | بلوک | `test_shutdown_handler_is_registered_only_once` | 0 | ⬜ |
+| `TEST-087.11` | 129–135 | بلوک | `test_deferral_is_logged` | 0 | ⬜ |
+| `TEST-087.12` | 136–148 | بلوک | `test_existing_guard_is_not_regressed` | 0 | ⬜ |
+| `TEST-087.13` | 149–159 | بلوک | `test_guarded_helper_stays_free_of_static_state` | 0 | ⬜ |
+| `TEST-087.14` | 160–174 | بلوک | `test_bootstrap_still_runs_migration_outside_any_tr` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-088</b> — <code>tests/test_ldap_secret_and_legacy_status_static.py</code> (213 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-088</b> — <code>tests/test_inventory_truth_static.py</code> (198 خط، 18 آدرس، بازبینی‌شده 0/18)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-088.01` | 1–50 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-088.02` | 51–55 | بلوک | `read` | 0 | ⬜ |
-| `TEST-088.03` | 56–62 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-088.04` | 63–72 | بلوک | `php_function` | 0 | ⬜ |
-| `TEST-088.05` | 73–78 | بلوک | `test_ldap_secret_helpers_exist` | 0 | ⬜ |
-| `TEST-088.06` | 79–89 | بلوک | `test_settings_action_never_saves_the_raw_password` | 0 | ⬜ |
-| `TEST-088.07` | 90–98 | بلوک | `test_single_read_point_decrypts` | 0 | ⬜ |
-| `TEST-088.08` | 99–109 | بلوک | `test_encryption_reuses_the_repository_pattern` | 0 | ⬜ |
-| `TEST-088.09` | 110–122 | بلوک | `test_missing_app_key_keeps_todays_behaviour` | 0 | ⬜ |
-| `TEST-088.10` | 123–130 | بلوک | `test_legacy_plaintext_values_still_readable` | 0 | ⬜ |
-| `TEST-088.11` | 131–139 | بلوک | `test_failed_decryption_fails_closed` | 0 | ⬜ |
-| `TEST-088.12` | 140–160 | بلوک | `test_envelope_layout_offsets_are_consistent` | 0 | ⬜ |
-| `TEST-088.13` | 161–171 | بلوک | `test_failed_decryption_is_logged` | 0 | ⬜ |
-| `TEST-088.14` | 172–182 | بلوک | `transition_map` | 0 | ⬜ |
-| `TEST-088.15` | 183–193 | بلوک | `test_nothing_transitions_into_pending` | 0 | ⬜ |
-| `TEST-088.16` | 194–205 | بلوک | `test_pending_always_has_a_way_out` | 0 | ⬜ |
-| `TEST-088.17` | 206–213 | بلوک | `test_pending_is_documented_as_legacy` | 0 | ⬜ |
+| `TEST-088.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-088.02` | 9–12 | بلوک | `read` | 0 | ⬜ |
+| `TEST-088.03` | 13–13 | بلوک | `InventoryTruthStaticTests` | 0 | ⬜ |
+| `TEST-088.04` | 14–25 | بلوک | `test_login_identity_does_not_claim_hardware_collec` | 1 | ⬜ |
+| `TEST-088.05` | 26–32 | بلوک | `test_agent_api_rejects_payload_without_hardware_ro` | 0 | ⬜ |
+| `TEST-088.06` | 33–39 | بلوک | `test_domain_scan_does_not_save_identity_only_respo` | 0 | ⬜ |
+| `TEST-088.07` | 40–46 | بلوک | `test_diagnostics_report_hardware_score_and_local_a` | 0 | ⬜ |
+| `TEST-088.08` | 47–63 | بلوک | `test_local_extraction_button_uses_php_host_and_onl` | 0 | ⬜ |
+| `TEST-088.09` | 64–70 | بلوک | `test_winrm_only_targets_are_detected_when_icmp_is_` | 0 | ⬜ |
+| `TEST-088.10` | 71–85 | بلوک | `test_one_host_credential_test_does_not_write_inven` | 0 | ⬜ |
+| `TEST-088.11` | 86–93 | بلوک | `test_winrm_guidance_configures_targets_not_only_th` | 0 | ⬜ |
+| `TEST-088.12` | 94–110 | بلوک | `test_scan_credentials_are_per_run_encrypted_and_no` | 0 | ⬜ |
+| `TEST-088.13` | 111–120 | بلوک | `test_full_domain_scan_is_not_limited_to_a_single_h` | 0 | ⬜ |
+| `TEST-088.14` | 121–137 | بلوک | `test_extended_windows_inventory_is_collected_and_p` | 0 | ⬜ |
+| `TEST-088.15` | 138–147 | بلوک | `test_domain_reinventory_refreshes_only_machine_der` | 0 | ⬜ |
+| `TEST-088.16` | 148–157 | بلوک | `test_internet_access_is_not_inferred_from_a_defaul` | 0 | ⬜ |
+| `TEST-088.17` | 158–185 | بلوک | `test_successful_empty_categories_clear_but_failed_` | 0 | ⬜ |
+| `TEST-088.18` | 186–198 | بلوک | `test_food_panel_and_ldap_slow_paths_emit_stage_tim` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-089</b> — <code>tests/test_ldap_secret_unit.php</code> (54 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-089</b> — <code>tests/test_ldap_secret_and_legacy_status_static.py</code> (213 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-089.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-089.02` | 4–4 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
-| `TEST-089.03` | 5–5 | ناحیه | `توجه: در این محیط افزونهٔ openssl در دسترس نیست، پ` | 0 | ⬜ |
-| `TEST-089.04` | 6–6 | ناحیه | `مسیر «کلید موجود نیست» را می‌رود. دقیقاً همان مسیر` | 0 | ⬜ |
-| `TEST-089.05` | 7–10 | ناحیه | `app.key اجرا می‌شود و شکستنش یعنی از کار افتادن ور` | 0 | ⬜ |
-| `TEST-089.06` | 11–15 | تابع | `check_ldap` | 0 | ⬜ |
-| `TEST-089.07` | 16–17 | ناحیه | `بلوک رویه‌ای 16-17` | 0 | ⬜ |
-| `TEST-089.08` | 18–18 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-089.09` | 19–19 | ناحیه | `بلوک رویه‌ای 19-19` | 0 | ⬜ |
-| `TEST-089.10` | 20–20 | تابع | `system_log` | 0 | ⬜ |
-| `TEST-089.11` | 21–21 | تابع | `setting` | 0 | ⬜ |
-| `TEST-089.12` | 22–24 | ناحیه | `بلوک رویه‌ای 22-24` | 0 | ⬜ |
-| `TEST-089.13` | 25–29 | ناحیه | `سازگاری رو به عقب: نصبی که app.key ندارد` | 0 | ⬜ |
-| `TEST-089.14` | 30–35 | ناحیه | `مقدار قدیمیِ متن ساده باید همچنان خوانده شود` | 0 | ⬜ |
-| `TEST-089.15` | 36–43 | ناحیه | `شکست بسته: پاکت غیرقابل رمزگشایی هرگز به سرور دامی` | 0 | ⬜ |
-| `TEST-089.16` | 44–54 | ناحیه | `نقطهٔ خواندن: ldap_cfg باید از همین مسیر رد شود` | 3 | ⬜ |
+| `TEST-089.01` | 1–50 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-089.02` | 51–55 | بلوک | `read` | 0 | ⬜ |
+| `TEST-089.03` | 56–62 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-089.04` | 63–72 | بلوک | `php_function` | 0 | ⬜ |
+| `TEST-089.05` | 73–78 | بلوک | `test_ldap_secret_helpers_exist` | 0 | ⬜ |
+| `TEST-089.06` | 79–89 | بلوک | `test_settings_action_never_saves_the_raw_password` | 0 | ⬜ |
+| `TEST-089.07` | 90–98 | بلوک | `test_single_read_point_decrypts` | 0 | ⬜ |
+| `TEST-089.08` | 99–109 | بلوک | `test_encryption_reuses_the_repository_pattern` | 0 | ⬜ |
+| `TEST-089.09` | 110–122 | بلوک | `test_missing_app_key_keeps_todays_behaviour` | 0 | ⬜ |
+| `TEST-089.10` | 123–130 | بلوک | `test_legacy_plaintext_values_still_readable` | 0 | ⬜ |
+| `TEST-089.11` | 131–139 | بلوک | `test_failed_decryption_fails_closed` | 0 | ⬜ |
+| `TEST-089.12` | 140–160 | بلوک | `test_envelope_layout_offsets_are_consistent` | 0 | ⬜ |
+| `TEST-089.13` | 161–171 | بلوک | `test_failed_decryption_is_logged` | 0 | ⬜ |
+| `TEST-089.14` | 172–182 | بلوک | `transition_map` | 0 | ⬜ |
+| `TEST-089.15` | 183–193 | بلوک | `test_nothing_transitions_into_pending` | 0 | ⬜ |
+| `TEST-089.16` | 194–205 | بلوک | `test_pending_always_has_a_way_out` | 0 | ⬜ |
+| `TEST-089.17` | 206–213 | بلوک | `test_pending_is_documented_as_legacy` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-090</b> — <code>tests/test_logging_acceptance_harness_static.py</code> (39 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-090</b> — <code>tests/test_ldap_secret_unit.php</code> (54 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-090.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-090.02` | 6–14 | بلوک | `test_ci_provisions_disposable_mariadb_and_windows_` | 0 | ⬜ |
-| `TEST-090.03` | 15–24 | بلوک | `test_local_database_harness_is_ephemeral_and_clean` | 0 | ⬜ |
-| `TEST-090.04` | 25–33 | بلوک | `test_windows_acl_harness_has_positive_negative_and` | 0 | ⬜ |
-| `TEST-090.05` | 34–39 | بلوک | `test_acceptance_docs_do_not_equate_ci_with_target_` | 0 | ⬜ |
+| `TEST-090.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-090.02` | 4–4 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
+| `TEST-090.03` | 5–5 | ناحیه | `توجه: در این محیط افزونهٔ openssl در دسترس نیست، پ` | 0 | ⬜ |
+| `TEST-090.04` | 6–6 | ناحیه | `مسیر «کلید موجود نیست» را می‌رود. دقیقاً همان مسیر` | 0 | ⬜ |
+| `TEST-090.05` | 7–10 | ناحیه | `app.key اجرا می‌شود و شکستنش یعنی از کار افتادن ور` | 0 | ⬜ |
+| `TEST-090.06` | 11–15 | تابع | `check_ldap` | 0 | ⬜ |
+| `TEST-090.07` | 16–17 | ناحیه | `بلوک رویه‌ای 16-17` | 0 | ⬜ |
+| `TEST-090.08` | 18–18 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-090.09` | 19–19 | ناحیه | `بلوک رویه‌ای 19-19` | 0 | ⬜ |
+| `TEST-090.10` | 20–20 | تابع | `system_log` | 0 | ⬜ |
+| `TEST-090.11` | 21–21 | تابع | `setting` | 0 | ⬜ |
+| `TEST-090.12` | 22–24 | ناحیه | `بلوک رویه‌ای 22-24` | 0 | ⬜ |
+| `TEST-090.13` | 25–29 | ناحیه | `سازگاری رو به عقب: نصبی که app.key ندارد` | 0 | ⬜ |
+| `TEST-090.14` | 30–35 | ناحیه | `مقدار قدیمیِ متن ساده باید همچنان خوانده شود` | 0 | ⬜ |
+| `TEST-090.15` | 36–43 | ناحیه | `شکست بسته: پاکت غیرقابل رمزگشایی هرگز به سرور دامی` | 0 | ⬜ |
+| `TEST-090.16` | 44–54 | ناحیه | `نقطهٔ خواندن: ldap_cfg باید از همین مسیر رد شود` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-091</b> — <code>tests/test_logging_architecture_static.py</code> (53 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-091</b> — <code>tests/test_logging_acceptance_harness_static.py</code> (39 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-091.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-091.02` | 6–13 | بلوک | `test_central_core_is_loaded_before_legacy_logging_` | 0 | ⬜ |
-| `TEST-091.03` | 14–21 | بلوک | `test_database_migration_adds_correlation_to_all_ev` | 0 | ⬜ |
-| `TEST-091.04` | 22–34 | بلوک | `test_spool_worker_is_cli_only_and_replay_is_idempo` | 1 | ⬜ |
-| `TEST-091.05` | 35–43 | بلوک | `test_request_timeline_combines_system_activity_and` | 0 | ⬜ |
-| `TEST-091.06` | 44–53 | بلوک | `test_untrusted_forwarded_headers_are_not_used_as_c` | 0 | ⬜ |
+| `TEST-091.02` | 6–14 | بلوک | `test_ci_provisions_disposable_mariadb_and_windows_` | 0 | ⬜ |
+| `TEST-091.03` | 15–24 | بلوک | `test_local_database_harness_is_ephemeral_and_clean` | 0 | ⬜ |
+| `TEST-091.04` | 25–33 | بلوک | `test_windows_acl_harness_has_positive_negative_and` | 0 | ⬜ |
+| `TEST-091.05` | 34–39 | بلوک | `test_acceptance_docs_do_not_equate_ci_with_target_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-092</b> — <code>tests/test_logging_audit_migration_registry.php</code> (72 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-092</b> — <code>tests/test_logging_architecture_static.py</code> (53 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-092.01` | 1–9 | ناحیه | `بلوک رویه‌ای 1-9` | 0 | ⬜ |
-| `TEST-092.02` | 10–13 | تابع | `db_table_exists` | 0 | ⬜ |
-| `TEST-092.03` | 15–21 | کلاس | `AuditMigrationStatement` | 0 | ⬜ |
-| `TEST-092.04` | 22–32 | کلاس | `AuditMigrationDatabase` | 5 | ⬜ |
-| `TEST-092.05` | 33–37 | تابع | `db` | 0 | ⬜ |
-| `TEST-092.06` | 38–40 | ناحیه | `بلوک رویه‌ای 38-40` | 0 | ⬜ |
-| `TEST-092.07` | 41–48 | تابع | `audit_assert` | 0 | ⬜ |
-| `TEST-092.08` | 49–72 | ناحیه | `بلوک رویه‌ای 49-72` | 0 | ⬜ |
+| `TEST-092.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-092.02` | 6–13 | بلوک | `test_central_core_is_loaded_before_legacy_logging_` | 0 | ⬜ |
+| `TEST-092.03` | 14–21 | بلوک | `test_database_migration_adds_correlation_to_all_ev` | 0 | ⬜ |
+| `TEST-092.04` | 22–34 | بلوک | `test_spool_worker_is_cli_only_and_replay_is_idempo` | 1 | ⬜ |
+| `TEST-092.05` | 35–43 | بلوک | `test_request_timeline_combines_system_activity_and` | 0 | ⬜ |
+| `TEST-092.06` | 44–53 | بلوک | `test_untrusted_forwarded_headers_are_not_used_as_c` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-093</b> — <code>tests/test_logging_audit_outage_spool.php</code> (40 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-093</b> — <code>tests/test_logging_audit_migration_registry.php</code> (72 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-093.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-093.02` | 6–6 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-093.03` | 7–7 | تابع | `db` | 0 | ⬜ |
-| `TEST-093.04` | 8–40 | ناحیه | `بلوک رویه‌ای 8-40` | 7 | ⬜ |
+| `TEST-093.01` | 1–9 | ناحیه | `بلوک رویه‌ای 1-9` | 0 | ⬜ |
+| `TEST-093.02` | 10–13 | تابع | `db_table_exists` | 0 | ⬜ |
+| `TEST-093.03` | 15–21 | کلاس | `AuditMigrationStatement` | 0 | ⬜ |
+| `TEST-093.04` | 22–32 | کلاس | `AuditMigrationDatabase` | 5 | ⬜ |
+| `TEST-093.05` | 33–37 | تابع | `db` | 0 | ⬜ |
+| `TEST-093.06` | 38–40 | ناحیه | `بلوک رویه‌ای 38-40` | 0 | ⬜ |
+| `TEST-093.07` | 41–48 | تابع | `audit_assert` | 0 | ⬜ |
+| `TEST-093.08` | 49–72 | ناحیه | `بلوک رویه‌ای 49-72` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-094</b> — <code>tests/test_logging_audit_regressions.php</code> (48 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-094</b> — <code>tests/test_logging_audit_outage_spool.php</code> (40 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-094.01` | 1–48 | ناحیه | `بلوک رویه‌ای 1-48` | 7 | ⬜ |
+| `TEST-094.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-094.02` | 6–6 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-094.03` | 7–7 | تابع | `db` | 0 | ⬜ |
+| `TEST-094.04` | 8–40 | ناحیه | `بلوک رویه‌ای 8-40` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-095</b> — <code>tests/test_logging_audit_required_transaction.php</code> (87 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-095</b> — <code>tests/test_logging_audit_regressions.php</code> (48 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-095.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-095.02` | 6–17 | کلاس | `AtomicAuditPDO` | 0 | ⬜ |
-| `TEST-095.03` | 18–30 | کلاس | `AtomicAuditStatement` | 1 | ⬜ |
-| `TEST-095.04` | 31–33 | ناحیه | `بلوک رویه‌ای 31-33` | 0 | ⬜ |
-| `TEST-095.05` | 34–34 | تابع | `db` | 0 | ⬜ |
-| `TEST-095.06` | 35–87 | ناحیه | `بلوک رویه‌ای 35-87` | 7 | ⬜ |
+| `TEST-095.01` | 1–48 | ناحیه | `بلوک رویه‌ای 1-48` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-096</b> — <code>tests/test_logging_audit_static.py</code> (271 خط، 33 آدرس، بازبینی‌شده 0/33)</summary>
+<summary><b>TEST-096</b> — <code>tests/test_logging_audit_required_transaction.php</code> (87 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-096.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-096.02` | 24–27 | بلوک | `read` | 0 | ⬜ |
-| `TEST-096.03` | 28–29 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.04` | 30–32 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.05` | 33–39 | بلوک | `test_audit_module_exists_inside_the_logging_librar` | 0 | ⬜ |
-| `TEST-096.06` | 40–47 | بلوک | `test_audit_records_through_the_standard_logging_en` | 0 | ⬜ |
-| `TEST-096.07` | 48–59 | بلوک | `test_audit_feeds_the_existing_health_alert_channel` | 0 | ⬜ |
-| `TEST-096.08` | 60–66 | بلوک | `test_health_cron_runs_the_audit` | 0 | ⬜ |
-| `TEST-096.09` | 67–77 | بلوک | `test_audit_failure_is_never_silent` | 0 | ⬜ |
-| `TEST-096.10` | 78–87 | بلوک | `test_no_parallel_audit_tool_remains` | 0 | ⬜ |
-| `TEST-096.11` | 88–95 | بلوک | `test_cli_is_a_thin_wrapper_not_a_second_implementa` | 0 | ⬜ |
-| `TEST-096.12` | 96–97 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.13` | 98–100 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.14` | 101–107 | بلوک | `test_audit_event_codes_are_registered_in_the_catal` | 0 | ⬜ |
-| `TEST-096.15` | 108–117 | بلوک | `test_audit_catalog_entries_are_complete` | 0 | ⬜ |
-| `TEST-096.16` | 118–128 | بلوک | `test_structural_problems_are_critical_and_regressi` | 0 | ⬜ |
-| `TEST-096.17` | 129–134 | بلوک | `test_audit_codes_are_used_by_the_module` | 0 | ⬜ |
-| `TEST-096.18` | 135–136 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.19` | 137–139 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.20` | 140–148 | بلوک | `test_structural_checks_cover_the_defect_that_went_` | 0 | ⬜ |
-| `TEST-096.21` | 149–155 | بلوک | `test_checks_inspect_the_live_database_not_just_fil` | 0 | ⬜ |
-| `TEST-096.22` | 156–165 | بلوک | `test_every_check_explains_why_it_matters` | 0 | ⬜ |
-| `TEST-096.23` | 166–174 | بلوک | `test_structural_checks_have_no_budget` | 0 | ⬜ |
-| `TEST-096.24` | 175–183 | بلوک | `test_baseline_lives_in_storage_not_in_the_reposito` | 0 | ⬜ |
-| `TEST-096.25` | 184–191 | بلوک | `test_ci_runs_the_audit_without_a_database` | 0 | ⬜ |
-| `TEST-096.26` | 192–193 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.27` | 194–196 | بلوک | `-` | 0 | ⬜ |
-| `TEST-096.28` | 197–211 | بلوک | `test_cli_check_mode_can_actually_fail` | 0 | ⬜ |
-| `TEST-096.29` | 212–218 | بلوک | `test_summarize_is_shared_by_both_paths` | 0 | ⬜ |
-| `TEST-096.30` | 219–227 | بلوک | `test_empty_baseline_is_not_a_silent_no_op` | 0 | ⬜ |
-| `TEST-096.31` | 228–252 | بلوک | `test_audit_writes_its_own_heartbeat` | 0 | ⬜ |
-| `TEST-096.32` | 253–261 | بلوک | `test_audit_detects_its_own_outage_after_recovery` | 0 | ⬜ |
-| `TEST-096.33` | 262–271 | بلوک | `test_every_defined_check_is_registered` | 0 | ⬜ |
+| `TEST-096.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-096.02` | 6–17 | کلاس | `AtomicAuditPDO` | 0 | ⬜ |
+| `TEST-096.03` | 18–30 | کلاس | `AtomicAuditStatement` | 1 | ⬜ |
+| `TEST-096.04` | 31–33 | ناحیه | `بلوک رویه‌ای 31-33` | 0 | ⬜ |
+| `TEST-096.05` | 34–34 | تابع | `db` | 0 | ⬜ |
+| `TEST-096.06` | 35–87 | ناحیه | `بلوک رویه‌ای 35-87` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-097</b> — <code>tests/test_logging_audit_transaction_status.php</code> (46 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-097</b> — <code>tests/test_logging_audit_static.py</code> (271 خط، 33 آدرس، بازبینی‌شده 0/33)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-097.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-097.02` | 6–13 | کلاس | `AuditStatusPDO` | 0 | ⬜ |
-| `TEST-097.03` | 14–18 | کلاس | `AuditStatusStatement` | 0 | ⬜ |
-| `TEST-097.04` | 19–20 | ناحیه | `بلوک رویه‌ای 19-20` | 0 | ⬜ |
-| `TEST-097.05` | 21–21 | تابع | `db` | 0 | ⬜ |
-| `TEST-097.06` | 22–46 | ناحیه | `بلوک رویه‌ای 22-46` | **8** | ⬜ |
+| `TEST-097.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-097.02` | 24–27 | بلوک | `read` | 0 | ⬜ |
+| `TEST-097.03` | 28–29 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.04` | 30–32 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.05` | 33–39 | بلوک | `test_audit_module_exists_inside_the_logging_librar` | 0 | ⬜ |
+| `TEST-097.06` | 40–47 | بلوک | `test_audit_records_through_the_standard_logging_en` | 0 | ⬜ |
+| `TEST-097.07` | 48–59 | بلوک | `test_audit_feeds_the_existing_health_alert_channel` | 0 | ⬜ |
+| `TEST-097.08` | 60–66 | بلوک | `test_health_cron_runs_the_audit` | 0 | ⬜ |
+| `TEST-097.09` | 67–77 | بلوک | `test_audit_failure_is_never_silent` | 0 | ⬜ |
+| `TEST-097.10` | 78–87 | بلوک | `test_no_parallel_audit_tool_remains` | 0 | ⬜ |
+| `TEST-097.11` | 88–95 | بلوک | `test_cli_is_a_thin_wrapper_not_a_second_implementa` | 0 | ⬜ |
+| `TEST-097.12` | 96–97 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.13` | 98–100 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.14` | 101–107 | بلوک | `test_audit_event_codes_are_registered_in_the_catal` | 0 | ⬜ |
+| `TEST-097.15` | 108–117 | بلوک | `test_audit_catalog_entries_are_complete` | 0 | ⬜ |
+| `TEST-097.16` | 118–128 | بلوک | `test_structural_problems_are_critical_and_regressi` | 0 | ⬜ |
+| `TEST-097.17` | 129–134 | بلوک | `test_audit_codes_are_used_by_the_module` | 0 | ⬜ |
+| `TEST-097.18` | 135–136 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.19` | 137–139 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.20` | 140–148 | بلوک | `test_structural_checks_cover_the_defect_that_went_` | 0 | ⬜ |
+| `TEST-097.21` | 149–155 | بلوک | `test_checks_inspect_the_live_database_not_just_fil` | 0 | ⬜ |
+| `TEST-097.22` | 156–165 | بلوک | `test_every_check_explains_why_it_matters` | 0 | ⬜ |
+| `TEST-097.23` | 166–174 | بلوک | `test_structural_checks_have_no_budget` | 0 | ⬜ |
+| `TEST-097.24` | 175–183 | بلوک | `test_baseline_lives_in_storage_not_in_the_reposito` | 0 | ⬜ |
+| `TEST-097.25` | 184–191 | بلوک | `test_ci_runs_the_audit_without_a_database` | 0 | ⬜ |
+| `TEST-097.26` | 192–193 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.27` | 194–196 | بلوک | `-` | 0 | ⬜ |
+| `TEST-097.28` | 197–211 | بلوک | `test_cli_check_mode_can_actually_fail` | 0 | ⬜ |
+| `TEST-097.29` | 212–218 | بلوک | `test_summarize_is_shared_by_both_paths` | 0 | ⬜ |
+| `TEST-097.30` | 219–227 | بلوک | `test_empty_baseline_is_not_a_silent_no_op` | 0 | ⬜ |
+| `TEST-097.31` | 228–252 | بلوک | `test_audit_writes_its_own_heartbeat` | 0 | ⬜ |
+| `TEST-097.32` | 253–261 | بلوک | `test_audit_detects_its_own_outage_after_recovery` | 0 | ⬜ |
+| `TEST-097.33` | 262–271 | بلوک | `test_every_defined_check_is_registered` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-098</b> — <code>tests/test_logging_completion_static.py</code> (73 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-098</b> — <code>tests/test_logging_audit_transaction_status.php</code> (46 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-098.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-098.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
-| `TEST-098.03` | 8–14 | بلوک | `test_catalog_contains_user_admin_and_technical_gui` | 0 | ⬜ |
-| `TEST-098.04` | 15–22 | بلوک | `test_issue_aggregator_is_integrated_and_idempotent` | 0 | ⬜ |
-| `TEST-098.05` | 23–30 | بلوک | `test_runtime_logging_does_not_execute_ddl_for_log_` | 0 | ⬜ |
-| `TEST-098.06` | 31–37 | بلوک | `test_health_dashboard_has_issue_filters_and_health` | 0 | ⬜ |
-| `TEST-098.07` | 38–45 | بلوک | `test_windows_scheduled_jobs_and_retention_classes_` | 0 | ⬜ |
-| `TEST-098.08` | 46–49 | بلوک | `test_program_version_is_user_requested_value` | 0 | ⬜ |
-| `TEST-098.09` | 50–60 | بلوک | `test_alerts_are_rate_limited_and_delivered_to_prim` | 0 | ⬜ |
-| `TEST-098.10` | 61–66 | بلوک | `test_user_facing_error_text_and_fatal_output_are_s` | 0 | ⬜ |
-| `TEST-098.11` | 67–73 | بلوک | `test_replay_is_streamed_and_writer_lock_is_shared` | 0 | ⬜ |
+| `TEST-098.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-098.02` | 6–13 | کلاس | `AuditStatusPDO` | 0 | ⬜ |
+| `TEST-098.03` | 14–18 | کلاس | `AuditStatusStatement` | 0 | ⬜ |
+| `TEST-098.04` | 19–20 | ناحیه | `بلوک رویه‌ای 19-20` | 0 | ⬜ |
+| `TEST-098.05` | 21–21 | تابع | `db` | 0 | ⬜ |
+| `TEST-098.06` | 22–46 | ناحیه | `بلوک رویه‌ای 22-46` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-099</b> — <code>tests/test_logging_core_offline.php</code> (95 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-099</b> — <code>tests/test_logging_completion_static.py</code> (73 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-099.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
-| `TEST-099.02` | 8–14 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-099.03` | 15–95 | ناحیه | `بلوک رویه‌ای 15-95` | **8** | ⬜ |
+| `TEST-099.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-099.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
+| `TEST-099.03` | 8–14 | بلوک | `test_catalog_contains_user_admin_and_technical_gui` | 0 | ⬜ |
+| `TEST-099.04` | 15–22 | بلوک | `test_issue_aggregator_is_integrated_and_idempotent` | 0 | ⬜ |
+| `TEST-099.05` | 23–30 | بلوک | `test_runtime_logging_does_not_execute_ddl_for_log_` | 0 | ⬜ |
+| `TEST-099.06` | 31–37 | بلوک | `test_health_dashboard_has_issue_filters_and_health` | 0 | ⬜ |
+| `TEST-099.07` | 38–45 | بلوک | `test_windows_scheduled_jobs_and_retention_classes_` | 0 | ⬜ |
+| `TEST-099.08` | 46–49 | بلوک | `test_program_version_is_user_requested_value` | 0 | ⬜ |
+| `TEST-099.09` | 50–60 | بلوک | `test_alerts_are_rate_limited_and_delivered_to_prim` | 0 | ⬜ |
+| `TEST-099.10` | 61–66 | بلوک | `test_user_facing_error_text_and_fatal_output_are_s` | 0 | ⬜ |
+| `TEST-099.11` | 67–73 | بلوک | `test_replay_is_streamed_and_writer_lock_is_shared` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-100</b> — <code>tests/test_logging_correlation_pipeline.php</code> (90 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-100</b> — <code>tests/test_logging_core_offline.php</code> (95 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-100.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
-| `TEST-100.02` | 9–16 | کلاس | `LoggingCorrelationFakeStatement` | 0 | ⬜ |
-| `TEST-100.03` | 17–25 | کلاس | `LoggingCorrelationFakePDO` | 0 | ⬜ |
-| `TEST-100.04` | 26–26 | ناحیه | `بلوک رویه‌ای 26-26` | 0 | ⬜ |
-| `TEST-100.05` | 27–30 | تابع | `db` | 0 | ⬜ |
-| `TEST-100.06` | 31–90 | ناحیه | `بلوک رویه‌ای 31-90` | 7 | ⬜ |
+| `TEST-100.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
+| `TEST-100.02` | 8–14 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-100.03` | 15–95 | ناحیه | `بلوک رویه‌ای 15-95` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-101</b> — <code>tests/test_logging_dashboard_offline.php</code> (24 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-101</b> — <code>tests/test_logging_correlation_pipeline.php</code> (90 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-101.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-101.02` | 4–4 | تابع | `e` | 0 | ⬜ |
-| `TEST-101.03` | 5–5 | تابع | `db` | 0 | ⬜ |
-| `TEST-101.04` | 6–6 | تابع | `logging_emergency_failure` | 0 | ⬜ |
-| `TEST-101.05` | 7–7 | تابع | `logging_spool_stats` | 0 | ⬜ |
-| `TEST-101.06` | 8–8 | تابع | `system_health_checks` | 0 | ⬜ |
-| `TEST-101.07` | 9–24 | ناحیه | `بلوک رویه‌ای 9-24` | 0 | ⬜ |
+| `TEST-101.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
+| `TEST-101.02` | 9–16 | کلاس | `LoggingCorrelationFakeStatement` | 0 | ⬜ |
+| `TEST-101.03` | 17–25 | کلاس | `LoggingCorrelationFakePDO` | 0 | ⬜ |
+| `TEST-101.04` | 26–26 | ناحیه | `بلوک رویه‌ای 26-26` | 0 | ⬜ |
+| `TEST-101.05` | 27–30 | تابع | `db` | 0 | ⬜ |
+| `TEST-101.06` | 31–90 | ناحیه | `بلوک رویه‌ای 31-90` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-102</b> — <code>tests/test_logging_dashboard_static.py</code> (34 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-102</b> — <code>tests/test_logging_dashboard_offline.php</code> (24 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-102.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-102.02` | 10–16 | بلوک | `test_dashboard_is_permission_gated_and_routed` | 0 | ⬜ |
-| `TEST-102.03` | 17–22 | بلوک | `test_dashboard_uses_real_logging_sources_and_local` | 0 | ⬜ |
-| `TEST-102.04` | 23–30 | بلوک | `test_dashboard_handles_unknown_database_state_and_` | 0 | ⬜ |
-| `TEST-102.05` | 31–34 | بلوک | `test_dashboard_auto_refresh_is_bounded_and_visibil` | 0 | ⬜ |
+| `TEST-102.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-102.02` | 4–4 | تابع | `e` | 0 | ⬜ |
+| `TEST-102.03` | 5–5 | تابع | `db` | 0 | ⬜ |
+| `TEST-102.04` | 6–6 | تابع | `logging_emergency_failure` | 0 | ⬜ |
+| `TEST-102.05` | 7–7 | تابع | `logging_spool_stats` | 0 | ⬜ |
+| `TEST-102.06` | 8–8 | تابع | `system_health_checks` | 0 | ⬜ |
+| `TEST-102.07` | 9–24 | ناحیه | `بلوک رویه‌ای 9-24` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-103</b> — <code>tests/test_logging_diagnostics_offline.php</code> (27 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-103</b> — <code>tests/test_logging_dashboard_static.py</code> (34 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-103.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 3 | ⬜ |
+| `TEST-103.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-103.02` | 10–16 | بلوک | `test_dashboard_is_permission_gated_and_routed` | 0 | ⬜ |
+| `TEST-103.03` | 17–22 | بلوک | `test_dashboard_uses_real_logging_sources_and_local` | 0 | ⬜ |
+| `TEST-103.04` | 23–30 | بلوک | `test_dashboard_handles_unknown_database_state_and_` | 0 | ⬜ |
+| `TEST-103.05` | 31–34 | بلوک | `test_dashboard_auto_refresh_is_bounded_and_visibil` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-104</b> — <code>tests/test_logging_hardening_static.py</code> (67 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-104</b> — <code>tests/test_logging_diagnostics_offline.php</code> (27 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-104.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-104.02` | 6–16 | بلوک | `test_spool_stream_is_allowlisted_and_partial_write` | 0 | ⬜ |
-| `TEST-104.03` | 17–29 | بلوک | `test_activity_normalization_keeps_safe_values_and_` | 0 | ⬜ |
-| `TEST-104.04` | 30–43 | بلوک | `test_logging_transaction_contracts_are_preserved` | 0 | ⬜ |
-| `TEST-104.05` | 44–52 | بلوک | `test_retention_and_migration_remain_conservative_a` | 0 | ⬜ |
-| `TEST-104.06` | 53–57 | بلوک | `test_unknown_error_title_has_mbstring_fallback` | 0 | ⬜ |
-| `TEST-104.07` | 58–67 | بلوک | `test_full_rebuild_drops_every_schema_table` | 0 | ⬜ |
+| `TEST-104.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-105</b> — <code>tests/test_logging_integrity_chain.py</code> (138 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-105</b> — <code>tests/test_logging_hardening_static.py</code> (67 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-105.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-105.02` | 17–32 | بلوک | `_write_snapshot` | 0 | ⬜ |
-| `TEST-105.03` | 33–36 | بلوک | `_verify` | 0 | ⬜ |
-| `TEST-105.04` | 37–44 | بلوک | `test_consecutive_daily_exports_verify_as_a_chain` | 0 | ⬜ |
-| `TEST-105.05` | 45–53 | بلوک | `test_missing_previous_day_is_rejected` | 0 | ⬜ |
-| `TEST-105.06` | 54–63 | بلوک | `test_tampered_intermediate_archive_breaks_the_enti` | 0 | ⬜ |
-| `TEST-105.07` | 64–78 | بلوک | `test_legacy_format_one_archive_remains_verifiable` | 0 | ⬜ |
-| `TEST-105.08` | 79–103 | بلوک | `_write_supplement` | 0 | ⬜ |
-| `TEST-105.09` | 104–115 | بلوک | `test_late_arrival_supplements_verify_against_immut` | 0 | ⬜ |
-| `TEST-105.10` | 116–128 | بلوک | `test_late_arrival_supplement_detects_missing_prede` | 4 | ⬜ |
-| `TEST-105.11` | 129–138 | بلوک | `test_late_arrival_supplement_detects_tampering` | 0 | ⬜ |
+| `TEST-105.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-105.02` | 6–16 | بلوک | `test_spool_stream_is_allowlisted_and_partial_write` | 0 | ⬜ |
+| `TEST-105.03` | 17–29 | بلوک | `test_activity_normalization_keeps_safe_values_and_` | 0 | ⬜ |
+| `TEST-105.04` | 30–43 | بلوک | `test_logging_transaction_contracts_are_preserved` | 0 | ⬜ |
+| `TEST-105.05` | 44–52 | بلوک | `test_retention_and_migration_remain_conservative_a` | 0 | ⬜ |
+| `TEST-105.06` | 53–57 | بلوک | `test_unknown_error_title_has_mbstring_fallback` | 0 | ⬜ |
+| `TEST-105.07` | 58–67 | بلوک | `test_full_rebuild_drops_every_schema_table` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-106</b> — <code>tests/test_logging_integrity_late_arrival.php</code> (27 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-106</b> — <code>tests/test_logging_integrity_chain.py</code> (138 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-106.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 5 | ⬜ |
+| `TEST-106.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-106.02` | 17–32 | بلوک | `_write_snapshot` | 0 | ⬜ |
+| `TEST-106.03` | 33–36 | بلوک | `_verify` | 0 | ⬜ |
+| `TEST-106.04` | 37–44 | بلوک | `test_consecutive_daily_exports_verify_as_a_chain` | 0 | ⬜ |
+| `TEST-106.05` | 45–53 | بلوک | `test_missing_previous_day_is_rejected` | 0 | ⬜ |
+| `TEST-106.06` | 54–63 | بلوک | `test_tampered_intermediate_archive_breaks_the_enti` | 0 | ⬜ |
+| `TEST-106.07` | 64–78 | بلوک | `test_legacy_format_one_archive_remains_verifiable` | 0 | ⬜ |
+| `TEST-106.08` | 79–103 | بلوک | `_write_supplement` | 0 | ⬜ |
+| `TEST-106.09` | 104–115 | بلوک | `test_late_arrival_supplements_verify_against_immut` | 0 | ⬜ |
+| `TEST-106.10` | 116–128 | بلوک | `test_late_arrival_supplement_detects_missing_prede` | 4 | ⬜ |
+| `TEST-106.11` | 129–138 | بلوک | `test_late_arrival_supplement_detects_tampering` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-107</b> — <code>tests/test_logging_integrity_offline.php</code> (36 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-107</b> — <code>tests/test_logging_integrity_late_arrival.php</code> (27 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-107.01` | 1–36 | ناحیه | `بلوک رویه‌ای 1-36` | 6 | ⬜ |
+| `TEST-107.01` | 1–27 | ناحیه | `بلوک رویه‌ای 1-27` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-108</b> — <code>tests/test_logging_integrity_static.py</code> (33 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-108</b> — <code>tests/test_logging_integrity_offline.php</code> (36 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-108.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-108.02` | 8–19 | بلوک | `test_integrity_export_and_verification_contracts` | 0 | ⬜ |
-| `TEST-108.03` | 20–27 | بلوک | `test_integrity_supplement_is_linked_to_base_and_or` | 0 | ⬜ |
-| `TEST-108.04` | 28–33 | بلوک | `test_integrity_export_scheduled_job_reconciles_sev` | 0 | ⬜ |
+| `TEST-108.01` | 1–36 | ناحیه | `بلوک رویه‌ای 1-36` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-109</b> — <code>tests/test_logging_issue_aggregator.php</code> (109 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-109</b> — <code>tests/test_logging_integrity_static.py</code> (33 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-109.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
-| `TEST-109.02` | 8–24 | کلاس | `LoggingTestPDO` | 4 | ⬜ |
-| `TEST-109.03` | 26–36 | کلاس | `LoggingTestStatement` | 0 | ⬜ |
-| `TEST-109.04` | 37–38 | ناحیه | `بلوک رویه‌ای 37-38` | 0 | ⬜ |
-| `TEST-109.05` | 39–39 | تابع | `db` | 0 | ⬜ |
-| `TEST-109.06` | 40–109 | ناحیه | `بلوک رویه‌ای 40-109` | **8** | ⬜ |
+| `TEST-109.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-109.02` | 8–19 | بلوک | `test_integrity_export_and_verification_contracts` | 0 | ⬜ |
+| `TEST-109.03` | 20–27 | بلوک | `test_integrity_supplement_is_linked_to_base_and_or` | 0 | ⬜ |
+| `TEST-109.04` | 28–33 | بلوک | `test_integrity_export_scheduled_job_reconciles_sev` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-110</b> — <code>tests/test_logging_mysql_integration.php</code> (256 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-110</b> — <code>tests/test_logging_issue_aggregator.php</code> (109 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-110.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 5 | ⬜ |
-| `TEST-110.02` | 35–35 | تابع | `db` | 0 | ⬜ |
-| `TEST-110.03` | 36–45 | تابع | `execute_migration_statement` | 0 | ⬜ |
-| `TEST-110.04` | 46–116 | تابع | `split_sql_statements` | 0 | ⬜ |
-| `TEST-110.05` | 117–134 | ناحیه | `بلوک رویه‌ای 117-134` | 0 | ⬜ |
-| `TEST-110.06` | 135–213 | ناحیه | `Migration 025 must remain safe when the updater re` | **12** | ⬜ |
-| `TEST-110.07` | 214–226 | ناحیه | `The replay worker atomically renames the source fi` | 1 | ⬜ |
-| `TEST-110.08` | 227–256 | ناحیه | `Verify migration 025 changes the live notification` | **13** | ⬜ |
+| `TEST-110.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
+| `TEST-110.02` | 8–24 | کلاس | `LoggingTestPDO` | 4 | ⬜ |
+| `TEST-110.03` | 26–36 | کلاس | `LoggingTestStatement` | 0 | ⬜ |
+| `TEST-110.04` | 37–38 | ناحیه | `بلوک رویه‌ای 37-38` | 0 | ⬜ |
+| `TEST-110.05` | 39–39 | تابع | `db` | 0 | ⬜ |
+| `TEST-110.06` | 40–109 | ناحیه | `بلوک رویه‌ای 40-109` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-111</b> — <code>tests/test_logging_phase56_static.py</code> (30 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-111</b> — <code>tests/test_logging_mysql_integration.php</code> (256 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-111.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-111.02` | 3–5 | بلوک | `test_diagnostics_engine_is_loaded_after_logging_co` | 0 | ⬜ |
-| `TEST-111.03` | 6–11 | بلوک | `test_diagnostic_engine_has_stable_rules_and_confid` | 0 | ⬜ |
-| `TEST-111.04` | 12–18 | بلوک | `test_agent_bundle_is_cli_only_and_redacted` | 0 | ⬜ |
-| `TEST-111.05` | 19–24 | بلوک | `test_release_preflight_is_read_only_and_reports_de` | 1 | ⬜ |
-| `TEST-111.06` | 25–30 | بلوک | `test_health_dashboard_displays_diagnostic_advice` | 0 | ⬜ |
+| `TEST-111.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 5 | ⬜ |
+| `TEST-111.02` | 35–35 | تابع | `db` | 0 | ⬜ |
+| `TEST-111.03` | 36–45 | تابع | `execute_migration_statement` | 0 | ⬜ |
+| `TEST-111.04` | 46–116 | تابع | `split_sql_statements` | 0 | ⬜ |
+| `TEST-111.05` | 117–134 | ناحیه | `بلوک رویه‌ای 117-134` | 0 | ⬜ |
+| `TEST-111.06` | 135–213 | ناحیه | `Migration 025 must remain safe when the updater re` | **12** | ⬜ |
+| `TEST-111.07` | 214–226 | ناحیه | `The replay worker atomically renames the source fi` | 1 | ⬜ |
+| `TEST-111.08` | 227–256 | ناحیه | `Verify migration 025 changes the live notification` | **13** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-112</b> — <code>tests/test_logging_phase73_regressions.php</code> (34 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-112</b> — <code>tests/test_logging_phase56_static.py</code> (30 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-112.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 7 | ⬜ |
+| `TEST-112.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-112.02` | 3–5 | بلوک | `test_diagnostics_engine_is_loaded_after_logging_co` | 0 | ⬜ |
+| `TEST-112.03` | 6–11 | بلوک | `test_diagnostic_engine_has_stable_rules_and_confid` | 0 | ⬜ |
+| `TEST-112.04` | 12–18 | بلوک | `test_agent_bundle_is_cli_only_and_redacted` | 0 | ⬜ |
+| `TEST-112.05` | 19–24 | بلوک | `test_release_preflight_is_read_only_and_reports_de` | 1 | ⬜ |
+| `TEST-112.06` | 25–30 | بلوک | `test_health_dashboard_displays_diagnostic_advice` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-113</b> — <code>tests/test_logging_phase74_features.php</code> (31 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-113</b> — <code>tests/test_logging_phase73_regressions.php</code> (34 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-113.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
-| `TEST-113.02` | 7–7 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-113.03` | 8–31 | ناحیه | `بلوک رویه‌ای 8-31` | 7 | ⬜ |
+| `TEST-113.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-114</b> — <code>tests/test_logging_phase74_package.py</code> (19 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-114</b> — <code>tests/test_logging_phase74_features.php</code> (31 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-114.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-114.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
-| `TEST-114.03` | 8–19 | بلوک | `test_full_source_package_is_complete_and_versioned` | 1 | ⬜ |
+| `TEST-114.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
+| `TEST-114.02` | 7–7 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-114.03` | 8–31 | ناحیه | `بلوک رویه‌ای 8-31` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-115</b> — <code>tests/test_logging_phase76_static.py</code> (74 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-115</b> — <code>tests/test_logging_phase74_package.py</code> (19 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-115.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-115.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-115.03` | 10–18 | بلوک | `test_required_audit_derives_module_and_target_cont` | 0 | ⬜ |
-| `TEST-115.04` | 19–29 | بلوک | `test_holiday_mutations_are_audited_in_the_same_tra` | 1 | ⬜ |
-| `TEST-115.05` | 30–38 | بلوک | `test_cddvd_governance_ldap_and_profile_events_have` | 0 | ⬜ |
-| `TEST-115.06` | 39–45 | بلوک | `test_metadata_allowlists_preserve_operational_cont` | 0 | ⬜ |
-| `TEST-115.07` | 46–52 | بلوک | `test_admin_category_no_longer_uses_null_module_as_` | 0 | ⬜ |
-| `TEST-115.08` | 53–62 | بلوک | `test_ticket_timeline_supports_search_and_safe_deta` | 2 | ⬜ |
-| `TEST-115.09` | 63–69 | بلوک | `test_circuit_open_does_not_spool_success_audit_out` | 0 | ⬜ |
-| `TEST-115.10` | 70–74 | بلوک | `test_new_event_codes_have_catalog_definitions` | 0 | ⬜ |
+| `TEST-115.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-115.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
+| `TEST-115.03` | 8–19 | بلوک | `test_full_source_package_is_complete_and_versioned` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-116</b> — <code>tests/test_logging_replay_attempts.php</code> (101 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-116</b> — <code>tests/test_logging_phase76_static.py</code> (74 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-116.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
-| `TEST-116.02` | 7–14 | کلاس | `ReplayAttemptsPDO` | 0 | ⬜ |
-| `TEST-116.03` | 15–32 | کلاس | `ReplayAttemptsStatement` | 1 | ⬜ |
-| `TEST-116.04` | 33–33 | ناحیه | `بلوک رویه‌ای 33-33` | 0 | ⬜ |
-| `TEST-116.05` | 34–34 | تابع | `db` | 0 | ⬜ |
-| `TEST-116.06` | 35–56 | ناحیه | `بلوک رویه‌ای 35-56` | 0 | ⬜ |
-| `TEST-116.07` | 57–62 | ناحیه | `Seven additional real permanent-data failures reac` | 0 | ⬜ |
-| `TEST-116.08` | 63–73 | ناحیه | `Unparseable JSON cannot carry an attempts field; i` | 0 | ⬜ |
-| `TEST-116.09` | 74–101 | ناحیه | `Schema errors must stay active and must not consum` | 7 | ⬜ |
+| `TEST-116.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-116.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-116.03` | 10–18 | بلوک | `test_required_audit_derives_module_and_target_cont` | 0 | ⬜ |
+| `TEST-116.04` | 19–29 | بلوک | `test_holiday_mutations_are_audited_in_the_same_tra` | 1 | ⬜ |
+| `TEST-116.05` | 30–38 | بلوک | `test_cddvd_governance_ldap_and_profile_events_have` | 0 | ⬜ |
+| `TEST-116.06` | 39–45 | بلوک | `test_metadata_allowlists_preserve_operational_cont` | 0 | ⬜ |
+| `TEST-116.07` | 46–52 | بلوک | `test_admin_category_no_longer_uses_null_module_as_` | 0 | ⬜ |
+| `TEST-116.08` | 53–62 | بلوک | `test_ticket_timeline_supports_search_and_safe_deta` | 2 | ⬜ |
+| `TEST-116.09` | 63–69 | بلوک | `test_circuit_open_does_not_spool_success_audit_out` | 0 | ⬜ |
+| `TEST-116.10` | 70–74 | بلوک | `test_new_event_codes_have_catalog_definitions` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-117</b> — <code>tests/test_logging_replay_offline.php</code> (180 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-117</b> — <code>tests/test_logging_replay_attempts.php</code> (101 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-117.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
-| `TEST-117.02` | 8–23 | کلاس | `ReplayFakePDO` | 0 | ⬜ |
-| `TEST-117.03` | 24–64 | کلاس | `ReplayFakeStatement` | 1 | ⬜ |
-| `TEST-117.04` | 65–65 | ناحیه | `بلوک رویه‌ای 65-65` | 0 | ⬜ |
-| `TEST-117.05` | 66–66 | تابع | `db` | 0 | ⬜ |
-| `TEST-117.06` | 67–98 | ناحیه | `بلوک رویه‌ای 67-98` | 1 | ⬜ |
-| `TEST-117.07` | 99–112 | ناحیه | `رکورد poison با هفت retry قبلی باید به Dead Letter` | 1 | ⬜ |
-| `TEST-117.08` | 113–128 | ناحیه | `قطع دیتابیس در Worker باید رکورد را در retry نگه د` | 5 | ⬜ |
-| `TEST-117.09` | 129–149 | ناحیه | `خط معتبر با خطای DB حتی پس از بیش از ۸ تلاش نباید ` | 7 | ⬜ |
-| `TEST-117.10` | 150–158 | ناحیه | `فایل .processing باقی‌مانده از Crash بدون نیاز به ` | 0 | ⬜ |
-| `TEST-117.11` | 159–180 | ناحیه | `حین پردازش فایل .processing، writer باید بتواند فا` | 7 | ⬜ |
+| `TEST-117.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
+| `TEST-117.02` | 7–14 | کلاس | `ReplayAttemptsPDO` | 0 | ⬜ |
+| `TEST-117.03` | 15–32 | کلاس | `ReplayAttemptsStatement` | 1 | ⬜ |
+| `TEST-117.04` | 33–33 | ناحیه | `بلوک رویه‌ای 33-33` | 0 | ⬜ |
+| `TEST-117.05` | 34–34 | تابع | `db` | 0 | ⬜ |
+| `TEST-117.06` | 35–56 | ناحیه | `بلوک رویه‌ای 35-56` | 0 | ⬜ |
+| `TEST-117.07` | 57–62 | ناحیه | `Seven additional real permanent-data failures reac` | 0 | ⬜ |
+| `TEST-117.08` | 63–73 | ناحیه | `Unparseable JSON cannot carry an attempts field; i` | 0 | ⬜ |
+| `TEST-117.09` | 74–101 | ناحیه | `Schema errors must stay active and must not consum` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-118</b> — <code>tests/test_logging_sanitizers.php</code> (36 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-118</b> — <code>tests/test_logging_replay_offline.php</code> (180 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-118.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
-| `TEST-118.02` | 7–7 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-118.03` | 8–36 | ناحیه | `بلوک رویه‌ای 8-36` | 7 | ⬜ |
+| `TEST-118.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
+| `TEST-118.02` | 8–23 | کلاس | `ReplayFakePDO` | 0 | ⬜ |
+| `TEST-118.03` | 24–64 | کلاس | `ReplayFakeStatement` | 1 | ⬜ |
+| `TEST-118.04` | 65–65 | ناحیه | `بلوک رویه‌ای 65-65` | 0 | ⬜ |
+| `TEST-118.05` | 66–66 | تابع | `db` | 0 | ⬜ |
+| `TEST-118.06` | 67–98 | ناحیه | `بلوک رویه‌ای 67-98` | 1 | ⬜ |
+| `TEST-118.07` | 99–112 | ناحیه | `رکورد poison با هفت retry قبلی باید به Dead Letter` | 1 | ⬜ |
+| `TEST-118.08` | 113–128 | ناحیه | `قطع دیتابیس در Worker باید رکورد را در retry نگه د` | 5 | ⬜ |
+| `TEST-118.09` | 129–149 | ناحیه | `خط معتبر با خطای DB حتی پس از بیش از ۸ تلاش نباید ` | 7 | ⬜ |
+| `TEST-118.10` | 150–158 | ناحیه | `فایل .processing باقی‌مانده از Crash بدون نیاز به ` | 0 | ⬜ |
+| `TEST-118.11` | 159–180 | ناحیه | `حین پردازش فایل .processing، writer باید بتواند فا` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-119</b> — <code>tests/test_logging_spool_capacity.php</code> (29 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-119</b> — <code>tests/test_logging_sanitizers.php</code> (36 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-119.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 7 | ⬜ |
+| `TEST-119.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
+| `TEST-119.02` | 7–7 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-119.03` | 8–36 | ناحیه | `بلوک رویه‌ای 8-36` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-120</b> — <code>tests/test_logging_spool_concurrency.php</code> (48 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-120</b> — <code>tests/test_logging_spool_capacity.php</code> (29 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-120.01` | 1–48 | ناحیه | `بلوک رویه‌ای 1-48` | 7 | ⬜ |
+| `TEST-120.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-121</b> — <code>tests/test_logging_system_contract.py</code> (275 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TEST-121</b> — <code>tests/test_logging_spool_concurrency.php</code> (48 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-121.01` | 1–90 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-121.02` | 91–94 | بلوک | `read` | 0 | ⬜ |
-| `TEST-121.03` | 95–101 | بلوک | `app_php_files` | 0 | ⬜ |
-| `TEST-121.04` | 102–108 | بلوک | `all_php_files` | 0 | ⬜ |
-| `TEST-121.05` | 109–116 | بلوک | `test_every_logging_runtime_file_is_present` | 0 | ⬜ |
-| `TEST-121.06` | 117–139 | بلوک | `test_logging_migrations_exist_and_numbers_are_uniq` | 0 | ⬜ |
-| `TEST-121.07` | 140–144 | بلوک | `test_bootstrap_loads_the_logging_core_before_its_d` | 0 | ⬜ |
-| `TEST-121.08` | 145–162 | بلوک | `require_line` | 0 | ⬜ |
-| `TEST-121.09` | 163–175 | بلوک | `test_no_php_file_requires_a_file_that_does_not_exi` | 0 | ⬜ |
-| `TEST-121.10` | 176–199 | بلوک | `test_every_logging_function_called_is_defined_or_g` | 0 | ⬜ |
-| `TEST-121.11` | 200–211 | بلوک | `test_security_log_access_denied_is_available_where` | 0 | ⬜ |
-| `TEST-121.12` | 212–222 | بلوک | `test_logging_update_must_not_delete_1_62_75_featur` | 0 | ⬜ |
-| `TEST-121.13` | 223–229 | بلوک | `test_logging_dashboard_is_reachable_from_the_repor` | 0 | ⬜ |
-| `TEST-121.14` | 230–243 | بلوک | `test_columns_written_by_the_logging_core_exist_aft` | 0 | ⬜ |
-| `TEST-121.15` | 244–275 | بلوک | `schema_columns` | 1 | ⬜ |
+| `TEST-121.01` | 1–48 | ناحیه | `بلوک رویه‌ای 1-48` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-122</b> — <code>tests/test_logging_ticket_event_replay.php</code> (72 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-122</b> — <code>tests/test_logging_system_contract.py</code> (275 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-122.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
-| `TEST-122.02` | 8–19 | کلاس | `TicketReplayFakePDO` | 0 | ⬜ |
-| `TEST-122.03` | 20–38 | کلاس | `TicketReplayFakeStatement` | 1 | ⬜ |
-| `TEST-122.04` | 39–39 | ناحیه | `بلوک رویه‌ای 39-39` | 0 | ⬜ |
-| `TEST-122.05` | 40–40 | تابع | `db` | 0 | ⬜ |
-| `TEST-122.06` | 41–72 | ناحیه | `بلوک رویه‌ای 41-72` | 7 | ⬜ |
+| `TEST-122.01` | 1–90 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-122.02` | 91–94 | بلوک | `read` | 0 | ⬜ |
+| `TEST-122.03` | 95–101 | بلوک | `app_php_files` | 0 | ⬜ |
+| `TEST-122.04` | 102–108 | بلوک | `all_php_files` | 0 | ⬜ |
+| `TEST-122.05` | 109–116 | بلوک | `test_every_logging_runtime_file_is_present` | 0 | ⬜ |
+| `TEST-122.06` | 117–139 | بلوک | `test_logging_migrations_exist_and_numbers_are_uniq` | 0 | ⬜ |
+| `TEST-122.07` | 140–144 | بلوک | `test_bootstrap_loads_the_logging_core_before_its_d` | 0 | ⬜ |
+| `TEST-122.08` | 145–162 | بلوک | `require_line` | 0 | ⬜ |
+| `TEST-122.09` | 163–175 | بلوک | `test_no_php_file_requires_a_file_that_does_not_exi` | 0 | ⬜ |
+| `TEST-122.10` | 176–199 | بلوک | `test_every_logging_function_called_is_defined_or_g` | 0 | ⬜ |
+| `TEST-122.11` | 200–211 | بلوک | `test_security_log_access_denied_is_available_where` | 0 | ⬜ |
+| `TEST-122.12` | 212–222 | بلوک | `test_logging_update_must_not_delete_1_62_75_featur` | 0 | ⬜ |
+| `TEST-122.13` | 223–229 | بلوک | `test_logging_dashboard_is_reachable_from_the_repor` | 0 | ⬜ |
+| `TEST-122.14` | 230–243 | بلوک | `test_columns_written_by_the_logging_core_exist_aft` | 0 | ⬜ |
+| `TEST-122.15` | 244–275 | بلوک | `schema_columns` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-123</b> — <code>tests/test_logging_trace_coverage.php</code> (50 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-123</b> — <code>tests/test_logging_ticket_event_replay.php</code> (72 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-123.01` | 1–50 | ناحیه | `بلوک رویه‌ای 1-50` | 2 | ⬜ |
+| `TEST-123.01` | 1–7 | ناحیه | `بلوک رویه‌ای 1-7` | 0 | ⬜ |
+| `TEST-123.02` | 8–19 | کلاس | `TicketReplayFakePDO` | 0 | ⬜ |
+| `TEST-123.03` | 20–38 | کلاس | `TicketReplayFakeStatement` | 1 | ⬜ |
+| `TEST-123.04` | 39–39 | ناحیه | `بلوک رویه‌ای 39-39` | 0 | ⬜ |
+| `TEST-123.05` | 40–40 | تابع | `db` | 0 | ⬜ |
+| `TEST-123.06` | 41–72 | ناحیه | `بلوک رویه‌ای 41-72` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-124</b> — <code>tests/test_manual_no_print_food_ticket_static.py</code> (131 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-124</b> — <code>tests/test_logging_trace_coverage.php</code> (50 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-124.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-124.02` | 14–24 | بلوک | `test_wrong_emergency_implementation_is_removed_fro` | 0 | ⬜ |
-| `TEST-124.03` | 25–131 | بلوک | `test_existing_settings_manual_attendance_bug_fix_p` | 1 | ⬜ |
+| `TEST-124.01` | 1–50 | ناحیه | `بلوک رویه‌ای 1-50` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-125</b> — <code>tests/test_mariadb_fresh_install.php</code> (134 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-125</b> — <code>tests/test_manual_no_print_food_ticket_static.py</code> (131 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-125.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
-| `TEST-125.02` | 21–35 | ناحیه | `مسیر: fresh-install\|migrations-applied` | 0 | ⬜ |
-| `TEST-125.03` | 36–46 | تابع | `check` | 0 | ⬜ |
-| `TEST-125.04` | 47–73 | ناحیه | `بلوک رویه‌ای 47-73` | 4 | ⬜ |
-| `TEST-125.05` | 74–98 | ناحیه | `مسیر: fresh-install` | 5 | ⬜ |
-| `TEST-125.06` | 99–134 | ناحیه | `مسیر: migrations-applied` | 0 | ⬜ |
+| `TEST-125.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-125.02` | 14–24 | بلوک | `test_wrong_emergency_implementation_is_removed_fro` | 0 | ⬜ |
+| `TEST-125.03` | 25–131 | بلوک | `test_existing_settings_manual_attendance_bug_fix_p` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-126</b> — <code>tests/test_migration_registry_seed.py</code> (40 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-126</b> — <code>tests/test_mariadb_fresh_install.php</code> (134 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-126.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-126.02` | 14–40 | بلوک | `test_fresh_install_schemas_seed_every_forward_migr` | 1 | ⬜ |
+| `TEST-126.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
+| `TEST-126.02` | 21–35 | ناحیه | `مسیر: fresh-install\|migrations-applied` | 0 | ⬜ |
+| `TEST-126.03` | 36–46 | تابع | `check` | 0 | ⬜ |
+| `TEST-126.04` | 47–73 | ناحیه | `بلوک رویه‌ای 47-73` | 4 | ⬜ |
+| `TEST-126.05` | 74–98 | ناحیه | `مسیر: fresh-install` | 5 | ⬜ |
+| `TEST-126.06` | 99–134 | ناحیه | `مسیر: migrations-applied` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-127</b> — <code>tests/test_migration_retention_1_62_76.py</code> (29 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-127</b> — <code>tests/test_migration_registry_seed.py</code> (40 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-127.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-127.02` | 16–20 | بلوک | `test_historical_logging_migrations_are_retained_in` | 0 | ⬜ |
-| `TEST-127.03` | 21–29 | بلوک | `test_update_migration_policy_is_explicit_and_non_e` | 0 | ⬜ |
+| `TEST-127.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-127.02` | 14–40 | بلوک | `test_fresh_install_schemas_seed_every_forward_migr` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-128</b> — <code>tests/test_no_duplicate_php_functions.py</code> (73 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-128</b> — <code>tests/test_migration_retention_1_62_76.py</code> (29 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-128.01` | 1–24 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-128.02` | 25–25 | بلوک | `NoDuplicatePhpFunctionsTest` | 0 | ⬜ |
-| `TEST-128.03` | 26–41 | بلوک | `test_no_duplicate_function_declarations` | 0 | ⬜ |
-| `TEST-128.04` | 42–50 | بلوک | `test_identity_file_has_redeclare_guard` | 0 | ⬜ |
-| `TEST-128.05` | 51–59 | بلوک | `test_asset_profile_has_reload_guard` | 0 | ⬜ |
-| `TEST-128.06` | 60–73 | بلوک | `test_index_uses_require_once_for_sensitive_modules` | 0 | ⬜ |
+| `TEST-128.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-128.02` | 16–20 | بلوک | `test_historical_logging_migrations_are_retained_in` | 0 | ⬜ |
+| `TEST-128.03` | 21–29 | بلوک | `test_update_migration_policy_is_explicit_and_non_e` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-129</b> — <code>tests/test_org_chart_browser.js</code> (59 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-129</b> — <code>tests/test_no_duplicate_php_functions.py</code> (73 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-129.01` | 1–31 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-129.02` | 32–36 | بلوک | `verifyTop` | 0 | ⬜ |
-| `TEST-129.03` | 37–49 | بلوک | `verifyBottom` | 0 | ⬜ |
-| `TEST-129.04` | 50–59 | بلوک | `verifyEdge` | 0 | ⬜ |
+| `TEST-129.01` | 1–24 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-129.02` | 25–25 | بلوک | `NoDuplicatePhpFunctionsTest` | 0 | ⬜ |
+| `TEST-129.03` | 26–41 | بلوک | `test_no_duplicate_function_declarations` | 0 | ⬜ |
+| `TEST-129.04` | 42–50 | بلوک | `test_identity_file_has_redeclare_guard` | 0 | ⬜ |
+| `TEST-129.05` | 51–59 | بلوک | `test_asset_profile_has_reload_guard` | 0 | ⬜ |
+| `TEST-129.06` | 60–73 | بلوک | `test_index_uses_require_once_for_sensitive_modules` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-130</b> — <code>tests/test_org_chart_experts_static.py</code> (147 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-130</b> — <code>tests/test_org_chart_browser.js</code> (59 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-130.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-130.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-130.03` | 12–147 | بلوک | `check` | 2 | ⬜ |
+| `TEST-130.01` | 1–31 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-130.02` | 32–36 | بلوک | `verifyTop` | 0 | ⬜ |
+| `TEST-130.03` | 37–49 | بلوک | `verifyBottom` | 0 | ⬜ |
+| `TEST-130.04` | 50–59 | بلوک | `verifyEdge` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-131</b> — <code>tests/test_org_chart_five_fixes_static.py</code> (105 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-131</b> — <code>tests/test_org_chart_experts_static.py</code> (147 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-131.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-131.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-131.03` | 10–19 | بلوک | `test_space_drag_is_local_and_uses_immediate_scroll` | 0 | ⬜ |
-| `TEST-131.04` | 20–25 | بلوک | `test_empty_expert_cards_are_not_rendered_by_defaul` | 0 | ⬜ |
-| `TEST-131.05` | 26–39 | بلوک | `test_role_repairs_and_routing_diagnostics_live_in_` | 0 | ⬜ |
-| `TEST-131.06` | 40–50 | بلوک | `test_each_top_level_branch_has_an_inherited_distin` | 0 | ⬜ |
-| `TEST-131.07` | 51–60 | بلوک | `test_add_submission_is_locked_in_ui_and_replay_tok` | 0 | ⬜ |
-| `TEST-131.08` | 61–77 | بلوک | `test_exports_cover_full_chart_and_include_print_pr` | 0 | ⬜ |
-| `TEST-131.09` | 78–87 | بلوک | `test_server_actions_refresh_chart_data_without_rel` | 0 | ⬜ |
-| `TEST-131.10` | 88–96 | بلوک | `test_ceo_peer_units_accept_and_display_experts_ins` | 0 | ⬜ |
-| `TEST-131.11` | 97–105 | بلوک | `test_space_repeats_are_prevented_and_wires_use_mea` | 0 | ⬜ |
+| `TEST-131.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-131.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
+| `TEST-131.03` | 12–147 | بلوک | `check` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-132</b> — <code>tests/test_org_chart_user_report_fixes_static.py</code> (63 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-132</b> — <code>tests/test_org_chart_five_fixes_static.py</code> (105 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-132.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-132.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
-| `TEST-132.03` | 8–18 | بلوک | `test_print_fits_the_complete_tree_and_hides_screen` | 0 | ⬜ |
-| `TEST-132.04` | 19–25 | بلوک | `test_search_matches_units_managers_and_experts_the` | 0 | ⬜ |
-| `TEST-132.05` | 26–34 | بلوک | `test_toolbar_is_outside_the_horizontal_scroller_an` | 0 | ⬜ |
-| `TEST-132.06` | 35–41 | بلوک | `test_company_switch_uses_csp_safe_change_handler_a` | 0 | ⬜ |
-| `TEST-132.07` | 42–49 | بلوک | `test_restore_input_stays_hidden_until_restore_butt` | 0 | ⬜ |
-| `TEST-132.08` | 50–63 | بلوک | `test_action_request_has_explicit_company_url_and_e` | 0 | ⬜ |
+| `TEST-132.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-132.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-132.03` | 10–19 | بلوک | `test_space_drag_is_local_and_uses_immediate_scroll` | 0 | ⬜ |
+| `TEST-132.04` | 20–25 | بلوک | `test_empty_expert_cards_are_not_rendered_by_defaul` | 0 | ⬜ |
+| `TEST-132.05` | 26–39 | بلوک | `test_role_repairs_and_routing_diagnostics_live_in_` | 0 | ⬜ |
+| `TEST-132.06` | 40–50 | بلوک | `test_each_top_level_branch_has_an_inherited_distin` | 0 | ⬜ |
+| `TEST-132.07` | 51–60 | بلوک | `test_add_submission_is_locked_in_ui_and_replay_tok` | 0 | ⬜ |
+| `TEST-132.08` | 61–77 | بلوک | `test_exports_cover_full_chart_and_include_print_pr` | 0 | ⬜ |
+| `TEST-132.09` | 78–87 | بلوک | `test_server_actions_refresh_chart_data_without_rel` | 0 | ⬜ |
+| `TEST-132.10` | 88–96 | بلوک | `test_ceo_peer_units_accept_and_display_experts_ins` | 0 | ⬜ |
+| `TEST-132.11` | 97–105 | بلوک | `test_space_repeats_are_prevented_and_wires_use_mea` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-133</b> — <code>tests/test_org_company_separation_static.py</code> (104 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-133</b> — <code>tests/test_org_chart_user_report_fixes_static.py</code> (63 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-133.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 | `TEST-133.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
-| `TEST-133.03` | 8–18 | بلوک | `test_company_migration_is_separate_from_page_load_` | 0 | ⬜ |
-| `TEST-133.04` | 19–35 | بلوک | `test_org_chart_is_filtered_to_selected_company_and` | 0 | ⬜ |
-| `TEST-133.05` | 36–53 | بلوک | `test_company_status_is_derived_from_tree_membershi` | 1 | ⬜ |
-| `TEST-133.06` | 54–68 | بلوک | `test_primary_admin_can_edit_display_only_company_n` | 1 | ⬜ |
-| `TEST-133.07` | 69–77 | بلوک | `test_manager_positions_map_to_existing_global_mana` | 0 | ⬜ |
-| `TEST-133.08` | 78–91 | بلوک | `test_backup_restore_and_reset_are_scoped_to_one_co` | 1 | ⬜ |
-| `TEST-133.09` | 92–104 | بلوک | `test_shared_service_department_model_is_not_compan` | 0 | ⬜ |
+| `TEST-133.03` | 8–18 | بلوک | `test_print_fits_the_complete_tree_and_hides_screen` | 0 | ⬜ |
+| `TEST-133.04` | 19–25 | بلوک | `test_search_matches_units_managers_and_experts_the` | 0 | ⬜ |
+| `TEST-133.05` | 26–34 | بلوک | `test_toolbar_is_outside_the_horizontal_scroller_an` | 0 | ⬜ |
+| `TEST-133.06` | 35–41 | بلوک | `test_company_switch_uses_csp_safe_change_handler_a` | 0 | ⬜ |
+| `TEST-133.07` | 42–49 | بلوک | `test_restore_input_stays_hidden_until_restore_butt` | 0 | ⬜ |
+| `TEST-133.08` | 50–63 | بلوک | `test_action_request_has_explicit_company_url_and_e` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-134</b> — <code>tests/test_org_latest_chart_requests_static.py</code> (76 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-134</b> — <code>tests/test_org_company_separation_static.py</code> (104 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-134.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-134.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-134.03` | 10–17 | بلوک | `test_export_menu_stacks_above_search_toolbar` | 0 | ⬜ |
-| `TEST-134.04` | 18–33 | بلوک | `test_pdf_print_uses_full_chart_image_and_single_la` | 0 | ⬜ |
-| `TEST-134.05` | 34–45 | بلوک | `test_deputy_and_department_cards_have_only_request` | 0 | ⬜ |
-| `TEST-134.06` | 46–51 | بلوک | `test_partner_company_tree_suppresses_independent_u` | 0 | ⬜ |
-| `TEST-134.07` | 52–76 | بلوک | `test_fixed_company_labels_show_in_selector_and_roo` | 0 | ⬜ |
+| `TEST-134.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-134.02` | 5–7 | بلوک | `read` | 0 | ⬜ |
+| `TEST-134.03` | 8–18 | بلوک | `test_company_migration_is_separate_from_page_load_` | 0 | ⬜ |
+| `TEST-134.04` | 19–35 | بلوک | `test_org_chart_is_filtered_to_selected_company_and` | 0 | ⬜ |
+| `TEST-134.05` | 36–53 | بلوک | `test_company_status_is_derived_from_tree_membershi` | 1 | ⬜ |
+| `TEST-134.06` | 54–68 | بلوک | `test_primary_admin_can_edit_display_only_company_n` | 1 | ⬜ |
+| `TEST-134.07` | 69–77 | بلوک | `test_manager_positions_map_to_existing_global_mana` | 0 | ⬜ |
+| `TEST-134.08` | 78–91 | بلوک | `test_backup_restore_and_reset_are_scoped_to_one_co` | 1 | ⬜ |
+| `TEST-134.09` | 92–104 | بلوک | `test_shared_service_department_model_is_not_compan` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-135</b> — <code>tests/test_org_root_sort_static.py</code> (20 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-135</b> — <code>tests/test_org_latest_chart_requests_static.py</code> (76 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-135.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-135.02` | 7–20 | بلوک | `test_root_sort_includes_management_and_company_and` | 1 | ⬜ |
+| `TEST-135.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-135.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-135.03` | 10–17 | بلوک | `test_export_menu_stacks_above_search_toolbar` | 0 | ⬜ |
+| `TEST-135.04` | 18–33 | بلوک | `test_pdf_print_uses_full_chart_image_and_single_la` | 0 | ⬜ |
+| `TEST-135.05` | 34–45 | بلوک | `test_deputy_and_department_cards_have_only_request` | 0 | ⬜ |
+| `TEST-135.06` | 46–51 | بلوک | `test_partner_company_tree_suppresses_independent_u` | 0 | ⬜ |
+| `TEST-135.07` | 52–76 | بلوک | `test_fixed_company_labels_show_in_selector_and_roo` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-136</b> — <code>tests/test_org_root_sort_unit.php</code> (37 خط، 24 آدرس، بازبینی‌شده 0/24)</summary>
+<summary><b>TEST-136</b> — <code>tests/test_org_root_sort_static.py</code> (20 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-136.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-136.02` | 4–4 | کلاس | `DoneRedirect` | 0 | ⬜ |
-| `TEST-136.03` | 5–9 | کلاس | `SortStmt` | 1 | ⬜ |
-| `TEST-136.04` | 10–17 | کلاس | `SortDB` | 0 | ⬜ |
-| `TEST-136.05` | 18–18 | تابع | `db` | 0 | ⬜ |
-| `TEST-136.06` | 19–19 | تابع | `org_has_company_schema` | 0 | ⬜ |
-| `TEST-136.07` | 19–19 | تابع | `org_company_context_id` | 0 | ⬜ |
-| `TEST-136.08` | 20–20 | تابع | `org_company_root_title` | 2 | ⬜ |
-| `TEST-136.09` | 20–20 | تابع | `post_value` | 2 | ⬜ |
-| `TEST-136.10` | 21–21 | تابع | `org_unit_by_id` | 0 | ⬜ |
-| `TEST-136.11` | 22–22 | تابع | `require_permission` | 0 | ⬜ |
-| `TEST-136.12` | 22–22 | تابع | `user_can_manage_organization` | 0 | ⬜ |
-| `TEST-136.13` | 23–23 | تابع | `org_has_sort_order` | 0 | ⬜ |
-| `TEST-136.14` | 23–23 | تابع | `org_ceo_unit_id` | 0 | ⬜ |
-| `TEST-136.15` | 24–24 | تابع | `org_snapshot` | 0 | ⬜ |
-| `TEST-136.16` | 24–24 | تابع | `org_record_undo` | 0 | ⬜ |
-| `TEST-136.17` | 24–24 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-136.18` | 24–24 | تابع | `save_audit_required` | 0 | ⬜ |
-| `TEST-136.19` | 24–24 | تابع | `flash` | 0 | ⬜ |
-| `TEST-136.20` | 25–25 | تابع | `org_company_redirect_url` | 0 | ⬜ |
-| `TEST-136.21` | 25–25 | تابع | `redirect` | 0 | ⬜ |
-| `TEST-136.22` | 26–29 | تابع | `runSort` | 0 | ⬜ |
-| `TEST-136.23` | 30–30 | تابع | `chk` | 0 | ⬜ |
-| `TEST-136.24` | 31–37 | ناحیه | `بلوک رویه‌ای 31-37` | 0 | ⬜ |
+| `TEST-136.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-136.02` | 7–20 | بلوک | `test_root_sort_includes_management_and_company_and` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-137</b> — <code>tests/test_org_tree_dynamic_static.py</code> (79 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-137</b> — <code>tests/test_org_root_sort_unit.php</code> (37 خط، 24 آدرس، بازبینی‌شده 0/24)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-137.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-137.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-137.03` | 11–19 | بلوک | `test_additive_sort_migration_is_not_run_on_page_lo` | 1 | ⬜ |
-| `TEST-137.04` | 20–31 | بلوک | `test_recursive_tree_and_nested_department_validati` | 0 | ⬜ |
-| `TEST-137.05` | 32–45 | بلوک | `test_undo_redo_is_delta_scoped_and_does_not_restor` | 0 | ⬜ |
-| `TEST-137.06` | 46–57 | بلوک | `test_existing_data_fields_and_privacy_boundary_are` | 0 | ⬜ |
-| `TEST-137.07` | 58–70 | بلوک | `test_ui_keeps_fixed_sidebars_focus_pan_and_four_de` | 0 | ⬜ |
-| `TEST-137.08` | 71–79 | بلوک | `test_soft_delete_and_shared_food_users_are_protect` | 1 | ⬜ |
+| `TEST-137.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-137.02` | 4–4 | کلاس | `DoneRedirect` | 0 | ⬜ |
+| `TEST-137.03` | 5–9 | کلاس | `SortStmt` | 1 | ⬜ |
+| `TEST-137.04` | 10–17 | کلاس | `SortDB` | 0 | ⬜ |
+| `TEST-137.05` | 18–18 | تابع | `db` | 0 | ⬜ |
+| `TEST-137.06` | 19–19 | تابع | `org_has_company_schema` | 0 | ⬜ |
+| `TEST-137.07` | 19–19 | تابع | `org_company_context_id` | 0 | ⬜ |
+| `TEST-137.08` | 20–20 | تابع | `org_company_root_title` | 2 | ⬜ |
+| `TEST-137.09` | 20–20 | تابع | `post_value` | 2 | ⬜ |
+| `TEST-137.10` | 21–21 | تابع | `org_unit_by_id` | 0 | ⬜ |
+| `TEST-137.11` | 22–22 | تابع | `require_permission` | 0 | ⬜ |
+| `TEST-137.12` | 22–22 | تابع | `user_can_manage_organization` | 0 | ⬜ |
+| `TEST-137.13` | 23–23 | تابع | `org_has_sort_order` | 0 | ⬜ |
+| `TEST-137.14` | 23–23 | تابع | `org_ceo_unit_id` | 0 | ⬜ |
+| `TEST-137.15` | 24–24 | تابع | `org_snapshot` | 0 | ⬜ |
+| `TEST-137.16` | 24–24 | تابع | `org_record_undo` | 0 | ⬜ |
+| `TEST-137.17` | 24–24 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-137.18` | 24–24 | تابع | `save_audit_required` | 0 | ⬜ |
+| `TEST-137.19` | 24–24 | تابع | `flash` | 0 | ⬜ |
+| `TEST-137.20` | 25–25 | تابع | `org_company_redirect_url` | 0 | ⬜ |
+| `TEST-137.21` | 25–25 | تابع | `redirect` | 0 | ⬜ |
+| `TEST-137.22` | 26–29 | تابع | `runSort` | 0 | ⬜ |
+| `TEST-137.23` | 30–30 | تابع | `chk` | 0 | ⬜ |
+| `TEST-137.24` | 31–37 | ناحیه | `بلوک رویه‌ای 31-37` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-138</b> — <code>tests/test_org_wires_node.js</code> (30 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-138</b> — <code>tests/test_org_tree_dynamic_static.py</code> (79 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-138.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-138.02` | 9–9 | بلوک | `box` | 0 | ⬜ |
-| `TEST-138.03` | 10–30 | بلوک | `node` | 0 | ⬜ |
+| `TEST-138.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-138.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-138.03` | 11–19 | بلوک | `test_additive_sort_migration_is_not_run_on_page_lo` | 1 | ⬜ |
+| `TEST-138.04` | 20–31 | بلوک | `test_recursive_tree_and_nested_department_validati` | 0 | ⬜ |
+| `TEST-138.05` | 32–45 | بلوک | `test_undo_redo_is_delta_scoped_and_does_not_restor` | 0 | ⬜ |
+| `TEST-138.06` | 46–57 | بلوک | `test_existing_data_fields_and_privacy_boundary_are` | 0 | ⬜ |
+| `TEST-138.07` | 58–70 | بلوک | `test_ui_keeps_fixed_sidebars_focus_pan_and_four_de` | 0 | ⬜ |
+| `TEST-138.08` | 71–79 | بلوک | `test_soft_delete_and_shared_food_users_are_protect` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-139</b> — <code>tests/test_particle_effect_runtime_node.js</code> (172 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-139</b> — <code>tests/test_org_wires_node.js</code> (30 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-139.01` | 1–8 | بلوک | `Runtime smoke test for the standalone particle can` | 0 | ⬜ |
-| `TEST-139.02` | 9–66 | بلوک | `FakeElement` | 0 | ⬜ |
-| `TEST-139.03` | 67–172 | بلوک | `makeEnvironment` | 1 | ⬜ |
+| `TEST-139.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-139.02` | 9–9 | بلوک | `box` | 0 | ⬜ |
+| `TEST-139.03` | 10–30 | بلوک | `node` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-140</b> — <code>tests/test_particle_effect_static.py</code> (96 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-140</b> — <code>tests/test_particle_effect_runtime_node.js</code> (172 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-140.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-140.02` | 9–10 | بلوک | `ParticleEffectReleaseTests` | 0 | ⬜ |
-| `TEST-140.03` | 11–16 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-140.04` | 17–25 | بلوک | `test_automatic_login_and_dashboard_particle_loader` | 0 | ⬜ |
-| `TEST-140.05` | 26–44 | بلوک | `test_particle_settings_are_sanitized_and_match_eng` | 0 | ⬜ |
-| `TEST-140.06` | 45–62 | بلوک | `test_two_accessible_tabs_use_the_existing_shared_3` | 0 | ⬜ |
-| `TEST-140.07` | 63–78 | بلوک | `test_active_effect_and_both_configs_are_saved_with` | 0 | ⬜ |
-| `TEST-140.08` | 79–85 | بلوک | `test_particle_preview_controller_has_live_controls` | 1 | ⬜ |
-| `TEST-140.09` | 86–96 | بلوک | `test_login_dashboard_and_usage_guidance_are_explic` | 0 | ⬜ |
+| `TEST-140.01` | 1–8 | بلوک | `Runtime smoke test for the standalone particle can` | 0 | ⬜ |
+| `TEST-140.02` | 9–66 | بلوک | `FakeElement` | 0 | ⬜ |
+| `TEST-140.03` | 67–172 | بلوک | `makeEnvironment` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-141</b> — <code>tests/test_permissions_followup_static.py</code> (58 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-141</b> — <code>tests/test_particle_effect_static.py</code> (96 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-141.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-141.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-141.03` | 11–11 | بلوک | `PermissionFollowupStaticTests` | 0 | ⬜ |
-| `TEST-141.04` | 12–29 | بلوک | `test_health_and_traffic_destinations_have_view_edi` | 0 | ⬜ |
-| `TEST-141.05` | 30–45 | بلوک | `test_cd_dvd_incoming_defaults_and_direct_edit_allo` | 1 | ⬜ |
-| `TEST-141.06` | 46–50 | بلوک | `test_primary_admin_promotion_is_not_delegated` | 0 | ⬜ |
-| `TEST-141.07` | 51–58 | بلوک | `test_proxy_permission_is_not_listed_as_an_independ` | 0 | ⬜ |
+| `TEST-141.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-141.02` | 9–10 | بلوک | `ParticleEffectReleaseTests` | 0 | ⬜ |
+| `TEST-141.03` | 11–16 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-141.04` | 17–25 | بلوک | `test_automatic_login_and_dashboard_particle_loader` | 0 | ⬜ |
+| `TEST-141.05` | 26–44 | بلوک | `test_particle_settings_are_sanitized_and_match_eng` | 0 | ⬜ |
+| `TEST-141.06` | 45–62 | بلوک | `test_two_accessible_tabs_use_the_existing_shared_3` | 0 | ⬜ |
+| `TEST-141.07` | 63–78 | بلوک | `test_active_effect_and_both_configs_are_saved_with` | 0 | ⬜ |
+| `TEST-141.08` | 79–85 | بلوک | `test_particle_preview_controller_has_live_controls` | 1 | ⬜ |
+| `TEST-141.09` | 86–96 | بلوک | `test_login_dashboard_and_usage_guidance_are_explic` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-142</b> — <code>tests/test_release_1_62_10_org_liaison_static.py</code> (120 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-142</b> — <code>tests/test_permissions_followup_static.py</code> (58 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-142.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-142.02` | 14–17 | بلوک | `read` | 0 | ⬜ |
-| `TEST-142.03` | 18–31 | بلوک | `test_migration_adds_chart_side_idempotently` | 1 | ⬜ |
-| `TEST-142.04` | 32–49 | بلوک | `test_index_php_supports_liaison_node` | 0 | ⬜ |
-| `TEST-142.05` | 50–63 | بلوک | `test_organization_js_renders_liaison_band` | 0 | ⬜ |
-| `TEST-142.06` | 64–77 | بلوک | `test_css_positions_liaisons_without_connectors` | 0 | ⬜ |
-| `TEST-142.07` | 78–84 | بلوک | `test_help_guide_covers_liaison_units` | 0 | ⬜ |
-| `TEST-142.08` | 85–114 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-142.09` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-142.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-142.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-142.03` | 11–11 | بلوک | `PermissionFollowupStaticTests` | 0 | ⬜ |
+| `TEST-142.04` | 12–29 | بلوک | `test_health_and_traffic_destinations_have_view_edi` | 0 | ⬜ |
+| `TEST-142.05` | 30–45 | بلوک | `test_cd_dvd_incoming_defaults_and_direct_edit_allo` | 1 | ⬜ |
+| `TEST-142.06` | 46–50 | بلوک | `test_primary_admin_promotion_is_not_delegated` | 0 | ⬜ |
+| `TEST-142.07` | 51–58 | بلوک | `test_proxy_permission_is_not_listed_as_an_independ` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-143</b> — <code>tests/test_release_1_62_11_code_navigation_static.py</code> (95 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-143</b> — <code>tests/test_release_1_62_10_org_liaison_static.py</code> (120 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-143.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
 | `TEST-143.02` | 14–17 | بلوک | `read` | 0 | ⬜ |
-| `TEST-143.03` | 18–32 | بلوک | `test_index_has_navigation_banners` | 0 | ⬜ |
-| `TEST-143.04` | 33–39 | بلوک | `test_bootstrap_has_function_family_toc` | 0 | ⬜ |
-| `TEST-143.05` | 40–48 | بلوک | `test_architecture_and_audit_docs_exist` | 0 | ⬜ |
-| `TEST-143.06` | 49–53 | بلوک | `test_safety_snapshot_documented_in_handoff` | 0 | ⬜ |
-| `TEST-143.07` | 54–89 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-143.08` | 90–95 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-143.03` | 18–31 | بلوک | `test_migration_adds_chart_side_idempotently` | 1 | ⬜ |
+| `TEST-143.04` | 32–49 | بلوک | `test_index_php_supports_liaison_node` | 0 | ⬜ |
+| `TEST-143.05` | 50–63 | بلوک | `test_organization_js_renders_liaison_band` | 0 | ⬜ |
+| `TEST-143.06` | 64–77 | بلوک | `test_css_positions_liaisons_without_connectors` | 0 | ⬜ |
+| `TEST-143.07` | 78–84 | بلوک | `test_help_guide_covers_liaison_units` | 0 | ⬜ |
+| `TEST-143.08` | 85–114 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-143.09` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-144</b> — <code>tests/test_release_1_62_12_org_actions_split_static.py</code> (107 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-144</b> — <code>tests/test_release_1_62_11_code_navigation_static.py</code> (95 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-144.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-144.02` | 24–27 | بلوک | `read` | 0 | ⬜ |
-| `TEST-144.03` | 28–38 | بلوک | `test_index_requires_org_actions_file_in_place` | 0 | ⬜ |
-| `TEST-144.04` | 39–52 | بلوک | `test_org_actions_file_contains_all_thirteen_action` | 0 | ⬜ |
-| `TEST-144.05` | 53–63 | بلوک | `test_no_include_semantics_traps_in_moved_block` | 0 | ⬜ |
-| `TEST-144.06` | 64–71 | بلوک | `test_liaison_behavior_strings_survived_the_move` | 0 | ⬜ |
-| `TEST-144.07` | 72–101 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-144.08` | 102–107 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-144.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-144.02` | 14–17 | بلوک | `read` | 0 | ⬜ |
+| `TEST-144.03` | 18–32 | بلوک | `test_index_has_navigation_banners` | 0 | ⬜ |
+| `TEST-144.04` | 33–39 | بلوک | `test_bootstrap_has_function_family_toc` | 0 | ⬜ |
+| `TEST-144.05` | 40–48 | بلوک | `test_architecture_and_audit_docs_exist` | 0 | ⬜ |
+| `TEST-144.06` | 49–53 | بلوک | `test_safety_snapshot_documented_in_handoff` | 0 | ⬜ |
+| `TEST-144.07` | 54–89 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-144.08` | 90–95 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-145</b> — <code>tests/test_release_1_62_13_ticket_asset_actions_static.py</code> (135 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-145</b> — <code>tests/test_release_1_62_12_org_actions_split_static.py</code> (107 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-145.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
 | `TEST-145.02` | 24–27 | بلوک | `read` | 0 | ⬜ |
-| `TEST-145.03` | 28–33 | بلوک | `body_of` | 0 | ⬜ |
-| `TEST-145.04` | 34–45 | بلوک | `test_index_requires_both_files_in_place_and_in_ord` | 0 | ⬜ |
-| `TEST-145.05` | 46–64 | بلوک | `test_ticket_actions_file_sections_and_persian_desc` | 1 | ⬜ |
-| `TEST-145.06` | 65–81 | بلوک | `test_asset_actions_file_sections_and_persian_descr` | 0 | ⬜ |
-| `TEST-145.07` | 82–114 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-145.08` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
-| `TEST-145.09` | 121–135 | بلوک | `test_fix1_dashboard_files_and_all_panel_asset_refs` | 0 | ⬜ |
+| `TEST-145.03` | 28–38 | بلوک | `test_index_requires_org_actions_file_in_place` | 0 | ⬜ |
+| `TEST-145.04` | 39–52 | بلوک | `test_org_actions_file_contains_all_thirteen_action` | 0 | ⬜ |
+| `TEST-145.05` | 53–63 | بلوک | `test_no_include_semantics_traps_in_moved_block` | 0 | ⬜ |
+| `TEST-145.06` | 64–71 | بلوک | `test_liaison_behavior_strings_survived_the_move` | 0 | ⬜ |
+| `TEST-145.07` | 72–101 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-145.08` | 102–107 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-146</b> — <code>tests/test_release_1_62_14_service_actions_static.py</code> (120 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-146</b> — <code>tests/test_release_1_62_13_ticket_asset_actions_static.py</code> (135 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-146.01` | 1–31 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-146.02` | 32–35 | بلوک | `read` | 0 | ⬜ |
-| `TEST-146.03` | 36–50 | بلوک | `test_index_requires_service_actions_in_original_or` | 0 | ⬜ |
-| `TEST-146.04` | 51–67 | بلوک | `test_service_actions_file_structure_and_persian_de` | 0 | ⬜ |
-| `TEST-146.05` | 68–105 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-146.06` | 106–114 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-146.07` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-146.01` | 1–23 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-146.02` | 24–27 | بلوک | `read` | 0 | ⬜ |
+| `TEST-146.03` | 28–33 | بلوک | `body_of` | 0 | ⬜ |
+| `TEST-146.04` | 34–45 | بلوک | `test_index_requires_both_files_in_place_and_in_ord` | 0 | ⬜ |
+| `TEST-146.05` | 46–64 | بلوک | `test_ticket_actions_file_sections_and_persian_desc` | 1 | ⬜ |
+| `TEST-146.06` | 65–81 | بلوک | `test_asset_actions_file_sections_and_persian_descr` | 0 | ⬜ |
+| `TEST-146.07` | 82–114 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-146.08` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-146.09` | 121–135 | بلوک | `test_fix1_dashboard_files_and_all_panel_asset_refs` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-147</b> — <code>tests/test_release_1_62_15_service_modal_fix_static.py</code> (105 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-147</b> — <code>tests/test_release_1_62_14_service_actions_static.py</code> (120 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-147.01` | 1–18 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-147.02` | 19–22 | بلوک | `read` | 0 | ⬜ |
-| `TEST-147.03` | 23–34 | بلوک | `test_modal_layer_keeps_high_z_index_against_generi` | 0 | ⬜ |
-| `TEST-147.04` | 35–43 | بلوک | `test_backdrop_click_closes_service_modal_like_othe` | 0 | ⬜ |
-| `TEST-147.05` | 44–52 | بلوک | `test_cache_bust_versions_bumped` | 0 | ⬜ |
-| `TEST-147.06` | 53–90 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-147.07` | 91–99 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-147.08` | 100–105 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-147.01` | 1–31 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-147.02` | 32–35 | بلوک | `read` | 0 | ⬜ |
+| `TEST-147.03` | 36–50 | بلوک | `test_index_requires_service_actions_in_original_or` | 0 | ⬜ |
+| `TEST-147.04` | 51–67 | بلوک | `test_service_actions_file_structure_and_persian_de` | 0 | ⬜ |
+| `TEST-147.05` | 68–105 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-147.06` | 106–114 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-147.07` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-148</b> — <code>tests/test_release_1_62_16_role_settings_actions_static.py</code> (123 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-148</b> — <code>tests/test_release_1_62_15_service_modal_fix_static.py</code> (105 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-148.01` | 1–39 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-148.02` | 40–43 | بلوک | `read` | 0 | ⬜ |
-| `TEST-148.03` | 44–56 | بلوک | `test_index_requires_both_files_in_original_order` | 0 | ⬜ |
-| `TEST-148.04` | 57–73 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
-| `TEST-148.05` | 74–108 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-148.06` | 109–117 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-148.07` | 118–123 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-148.01` | 1–18 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-148.02` | 19–22 | بلوک | `read` | 0 | ⬜ |
+| `TEST-148.03` | 23–34 | بلوک | `test_modal_layer_keeps_high_z_index_against_generi` | 0 | ⬜ |
+| `TEST-148.04` | 35–43 | بلوک | `test_backdrop_click_closes_service_modal_like_othe` | 0 | ⬜ |
+| `TEST-148.05` | 44–52 | بلوک | `test_cache_bust_versions_bumped` | 0 | ⬜ |
+| `TEST-148.06` | 53–90 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-148.07` | 91–99 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-148.08` | 100–105 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-149</b> — <code>tests/test_release_1_62_17_supervisor_holiday_actions_static.py</code> (119 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-149</b> — <code>tests/test_release_1_62_16_role_settings_actions_static.py</code> (123 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-149.01` | 1–34 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-149.02` | 35–38 | بلوک | `read` | 0 | ⬜ |
-| `TEST-149.03` | 39–53 | بلوک | `test_index_requires_both_files_in_original_order` | 0 | ⬜ |
-| `TEST-149.04` | 54–69 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
-| `TEST-149.05` | 70–104 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-149.06` | 105–113 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-149.07` | 114–119 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-149.01` | 1–39 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-149.02` | 40–43 | بلوک | `read` | 0 | ⬜ |
+| `TEST-149.03` | 44–56 | بلوک | `test_index_requires_both_files_in_original_order` | 0 | ⬜ |
+| `TEST-149.04` | 57–73 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
+| `TEST-149.05` | 74–108 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-149.06` | 109–117 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-149.07` | 118–123 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-150</b> — <code>tests/test_release_1_62_18_account_misc_actions_static.py</code> (211 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-150</b> — <code>tests/test_release_1_62_17_supervisor_holiday_actions_static.py</code> (119 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-150.01` | 1–26 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-150.02` | 27–30 | بلوک | `read` | 0 | ⬜ |
-| `TEST-150.03` | 31–49 | بلوک | `test_index_requires_all_four_files_in_original_ord` | 0 | ⬜ |
-| `TEST-150.04` | 50–64 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
-| `TEST-150.05` | 65–196 | بلوک | `test_version_manifest_and_package` | 2 | ⬜ |
-| `TEST-150.06` | 197–205 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-150.07` | 206–211 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-150.01` | 1–34 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-150.02` | 35–38 | بلوک | `read` | 0 | ⬜ |
+| `TEST-150.03` | 39–53 | بلوک | `test_index_requires_both_files_in_original_order` | 0 | ⬜ |
+| `TEST-150.04` | 54–69 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
+| `TEST-150.05` | 70–104 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-150.06` | 105–113 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-150.07` | 114–119 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-151</b> — <code>tests/test_release_1_62_19_bulk_user_structure_actions_static.py</code> (120 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-151</b> — <code>tests/test_release_1_62_18_account_misc_actions_static.py</code> (211 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-151.01` | 1–27 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-151.02` | 28–31 | بلوک | `read` | 0 | ⬜ |
-| `TEST-151.03` | 32–45 | بلوک | `test_index_requires_both_files_in_original_order` | 0 | ⬜ |
-| `TEST-151.04` | 46–60 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
-| `TEST-151.05` | 61–95 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-151.06` | 96–105 | بلوک | `test_backup_group_moved_in_1_62_20` | 0 | ⬜ |
-| `TEST-151.07` | 106–114 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-151.08` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-151.01` | 1–26 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-151.02` | 27–30 | بلوک | `read` | 0 | ⬜ |
+| `TEST-151.03` | 31–49 | بلوک | `test_index_requires_all_four_files_in_original_ord` | 0 | ⬜ |
+| `TEST-151.04` | 50–64 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
+| `TEST-151.05` | 65–196 | بلوک | `test_version_manifest_and_package` | 2 | ⬜ |
+| `TEST-151.06` | 197–205 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-151.07` | 206–211 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-152</b> — <code>tests/test_release_1_62_20_backup_split_bootstrap_lib_static.py</code> (183 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-152</b> — <code>tests/test_release_1_62_19_bulk_user_structure_actions_static.py</code> (120 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-152.01` | 1–44 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-152.02` | 45–48 | بلوک | `read` | 0 | ⬜ |
-| `TEST-152.03` | 49–65 | بلوک | `test_backup_actions_moved_out_of_index` | 0 | ⬜ |
-| `TEST-152.04` | 66–77 | بلوک | `test_index_require_order_keeps_backup_group_positi` | 0 | ⬜ |
-| `TEST-152.05` | 78–91 | بلوک | `test_bootstrap_is_loader_and_lib_order_is_preserve` | 0 | ⬜ |
-| `TEST-152.06` | 92–105 | بلوک | `test_lib_files_structure_and_strictness` | 0 | ⬜ |
-| `TEST-152.07` | 106–122 | بلوک | `test_key_function_families_live_in_expected_lib_mo` | 0 | ⬜ |
-| `TEST-152.08` | 123–134 | بلوک | `test_dead_functions_are_fully_removed` | 0 | ⬜ |
-| `TEST-152.09` | 135–170 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-152.10` | 171–179 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
-| `TEST-152.11` | 180–183 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-152.01` | 1–27 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-152.02` | 28–31 | بلوک | `read` | 0 | ⬜ |
+| `TEST-152.03` | 32–45 | بلوک | `test_index_requires_both_files_in_original_order` | 0 | ⬜ |
+| `TEST-152.04` | 46–60 | بلوک | `test_action_files_structure_and_persian_descriptio` | 0 | ⬜ |
+| `TEST-152.05` | 61–95 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-152.06` | 96–105 | بلوک | `test_backup_group_moved_in_1_62_20` | 0 | ⬜ |
+| `TEST-152.07` | 106–114 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-152.08` | 115–120 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-153</b> — <code>tests/test_release_1_62_21_food_printed_delivery_static.py</code> (95 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-153</b> — <code>tests/test_release_1_62_20_backup_split_bootstrap_lib_static.py</code> (183 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-153.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-153.02` | 14–41 | بلوک | `test_release_package_is_cumulative_from_16220_and_` | 0 | ⬜ |
-| `TEST-153.03` | 42–61 | بلوک | `test_api_reads_event_records_with_the_requested_st` | 0 | ⬜ |
-| `TEST-153.04` | 62–84 | بلوک | `test_report_is_after_statistics_with_selectable_fi` | 0 | ⬜ |
-| `TEST-153.05` | 85–95 | بلوک | `test_packaged_panel_refs_resolve_and_assets_are_mi` | 0 | ⬜ |
+| `TEST-153.01` | 1–44 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-153.02` | 45–48 | بلوک | `read` | 0 | ⬜ |
+| `TEST-153.03` | 49–65 | بلوک | `test_backup_actions_moved_out_of_index` | 0 | ⬜ |
+| `TEST-153.04` | 66–77 | بلوک | `test_index_require_order_keeps_backup_group_positi` | 0 | ⬜ |
+| `TEST-153.05` | 78–91 | بلوک | `test_bootstrap_is_loader_and_lib_order_is_preserve` | 0 | ⬜ |
+| `TEST-153.06` | 92–105 | بلوک | `test_lib_files_structure_and_strictness` | 0 | ⬜ |
+| `TEST-153.07` | 106–122 | بلوک | `test_key_function_families_live_in_expected_lib_mo` | 0 | ⬜ |
+| `TEST-153.08` | 123–134 | بلوک | `test_dead_functions_are_fully_removed` | 0 | ⬜ |
+| `TEST-153.09` | 135–170 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-153.10` | 171–179 | بلوک | `test_panel_asset_refs_are_all_packaged` | 0 | ⬜ |
+| `TEST-153.11` | 180–183 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-154</b> — <code>tests/test_release_1_62_24_cumulative_static.py</code> (116 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-154</b> — <code>tests/test_release_1_62_21_food_printed_delivery_static.py</code> (95 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-154.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-154.02` | 15–43 | بلوک | `test_cumulative_package_is_valid_and_targets_16220` | 0 | ⬜ |
-| `TEST-154.03` | 44–58 | بلوک | `test_cumulative_bundle_contains_the_complete_16224` | 0 | ⬜ |
-| `TEST-154.04` | 59–91 | بلوک | `test_cumulative_bundle_contains_16221_food_report_` | 0 | ⬜ |
-| `TEST-154.05` | 92–104 | بلوک | `test_cumulative_bundle_contains_16222_through_1622` | 0 | ⬜ |
-| `TEST-154.06` | 105–113 | بلوک | `test_update_manifest_paths_are_safe_for_the_app_up` | 0 | ⬜ |
-| `TEST-154.07` | 114–116 | بلوک | `test_download_page_points_to_log_based_profile_and` | 0 | ⬜ |
+| `TEST-154.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-154.02` | 14–41 | بلوک | `test_release_package_is_cumulative_from_16220_and_` | 0 | ⬜ |
+| `TEST-154.03` | 42–61 | بلوک | `test_api_reads_event_records_with_the_requested_st` | 0 | ⬜ |
+| `TEST-154.04` | 62–84 | بلوک | `test_report_is_after_statistics_with_selectable_fi` | 0 | ⬜ |
+| `TEST-154.05` | 85–95 | بلوک | `test_packaged_panel_refs_resolve_and_assets_are_mi` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-155</b> — <code>tests/test_release_1_62_36_manual_attendance_reconciliation.py</code> (87 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-155</b> — <code>tests/test_release_1_62_24_cumulative_static.py</code> (116 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-155.01` | 1–19 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-155.02` | 20–41 | بلوک | `test_16236_package_and_checksum_are_integral` | 0 | ⬜ |
-| `TEST-155.03` | 42–57 | بلوک | `test_migration_backfills_delivery_and_clears_same_` | 0 | ⬜ |
-| `TEST-155.04` | 58–73 | بلوک | `test_runtime_reconciliation_updates_stored_rows_wh` | 1 | ⬜ |
-| `TEST-155.05` | 74–77 | بلوک | `test_download_page_points_to_16236` | 0 | ⬜ |
-| `TEST-155.06` | 78–87 | بلوک | `test_system_updater_executes_manifest_migrations_f` | 6 | ⬜ |
+| `TEST-155.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-155.02` | 15–43 | بلوک | `test_cumulative_package_is_valid_and_targets_16220` | 0 | ⬜ |
+| `TEST-155.03` | 44–58 | بلوک | `test_cumulative_bundle_contains_the_complete_16224` | 0 | ⬜ |
+| `TEST-155.04` | 59–91 | بلوک | `test_cumulative_bundle_contains_16221_food_report_` | 0 | ⬜ |
+| `TEST-155.05` | 92–104 | بلوک | `test_cumulative_bundle_contains_16222_through_1622` | 0 | ⬜ |
+| `TEST-155.06` | 105–113 | بلوک | `test_update_manifest_paths_are_safe_for_the_app_up` | 0 | ⬜ |
+| `TEST-155.07` | 114–116 | بلوک | `test_download_page_points_to_log_based_profile_and` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-156</b> — <code>tests/test_release_1_62_4_fixes_static.py</code> (72 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-156</b> — <code>tests/test_release_1_62_36_manual_attendance_reconciliation.py</code> (87 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-156.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-156.02` | 10–13 | بلوک | `read` | 0 | ⬜ |
-| `TEST-156.03` | 14–24 | بلوک | `test_dark_mode_covers_food_planning_forms_in_both_` | 0 | ⬜ |
-| `TEST-156.04` | 25–35 | بلوک | `test_theme_css_cache_versions_are_bumped` | 0 | ⬜ |
-| `TEST-156.05` | 36–44 | بلوک | `test_traffic_edit_history_lists_only_real_updates` | 0 | ⬜ |
-| `TEST-156.06` | 45–55 | بلوک | `test_food_dashboard_host_keeps_full_width_and_no_s` | 0 | ⬜ |
-| `TEST-156.07` | 56–72 | بلوک | `test_manual_ticket_list_has_select_all_and_no_defa` | 0 | ⬜ |
+| `TEST-156.01` | 1–19 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-156.02` | 20–41 | بلوک | `test_16236_package_and_checksum_are_integral` | 0 | ⬜ |
+| `TEST-156.03` | 42–57 | بلوک | `test_migration_backfills_delivery_and_clears_same_` | 0 | ⬜ |
+| `TEST-156.04` | 58–73 | بلوک | `test_runtime_reconciliation_updates_stored_rows_wh` | 1 | ⬜ |
+| `TEST-156.05` | 74–77 | بلوک | `test_download_page_points_to_16236` | 0 | ⬜ |
+| `TEST-156.06` | 78–87 | بلوک | `test_system_updater_executes_manifest_migrations_f` | 6 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-157</b> — <code>tests/test_release_1_62_5_theme_toggle_static.py</code> (40 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-157</b> — <code>tests/test_release_1_62_4_fixes_static.py</code> (72 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-157.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-157.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-157.03` | 12–22 | بلوک | `test_app_js_theme_toggle_is_robust` | 0 | ⬜ |
-| `TEST-157.04` | 23–27 | بلوک | `test_all_host_shells_load_the_new_app_js` | 0 | ⬜ |
-| `TEST-157.05` | 28–40 | بلوک | `test_release_package_ships_app_js` | 0 | ⬜ |
+| `TEST-157.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-157.02` | 10–13 | بلوک | `read` | 0 | ⬜ |
+| `TEST-157.03` | 14–24 | بلوک | `test_dark_mode_covers_food_planning_forms_in_both_` | 0 | ⬜ |
+| `TEST-157.04` | 25–35 | بلوک | `test_theme_css_cache_versions_are_bumped` | 0 | ⬜ |
+| `TEST-157.05` | 36–44 | بلوک | `test_traffic_edit_history_lists_only_real_updates` | 0 | ⬜ |
+| `TEST-157.06` | 45–55 | بلوک | `test_food_dashboard_host_keeps_full_width_and_no_s` | 0 | ⬜ |
+| `TEST-157.07` | 56–72 | بلوک | `test_manual_ticket_list_has_select_all_and_no_defa` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-158</b> — <code>tests/test_release_1_62_60_package.py</code> (42 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-158</b> — <code>tests/test_release_1_62_5_theme_toggle_static.py</code> (40 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-158.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-158.02` | 13–13 | بلوک | `ReleasePackageTest` | 0 | ⬜ |
-| `TEST-158.03` | 14–42 | بلوک | `test_manifest_cumulative_files_and_hash` | 0 | ⬜ |
+| `TEST-158.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-158.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
+| `TEST-158.03` | 12–22 | بلوک | `test_app_js_theme_toggle_is_robust` | 0 | ⬜ |
+| `TEST-158.04` | 23–27 | بلوک | `test_all_host_shells_load_the_new_app_js` | 0 | ⬜ |
+| `TEST-158.05` | 28–40 | بلوک | `test_release_package_ships_app_js` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-159</b> — <code>tests/test_release_1_62_61_package.py</code> (29 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-159</b> — <code>tests/test_release_1_62_60_package.py</code> (42 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-159.01` | 1–11 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-159.02` | 12–29 | بلوک | `test_cumulative_guest_fix_and_immutable_baseline` | 0 | ⬜ |
+| `TEST-159.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-159.02` | 13–13 | بلوک | `ReleasePackageTest` | 0 | ⬜ |
+| `TEST-159.03` | 14–42 | بلوک | `test_manifest_cumulative_files_and_hash` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-160</b> — <code>tests/test_release_1_62_6_auto_assign_static.py</code> (47 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-160</b> — <code>tests/test_release_1_62_61_package.py</code> (29 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-160.01` | 1–11 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-160.02` | 12–19 | بلوک | `test_org_managers_are_deprioritized_in_auto_assign` | 0 | ⬜ |
-| `TEST-160.03` | 20–27 | بلوک | `test_support_manager_repair_action_exists` | 0 | ⬜ |
-| `TEST-160.04` | 28–34 | بلوک | `test_auto_assign_diagnostics_card_is_rendered` | 0 | ⬜ |
-| `TEST-160.05` | 35–47 | بلوک | `test_help_guide_explains_ticket_assignee` | 0 | ⬜ |
+| `TEST-160.01` | 1–11 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-160.02` | 12–29 | بلوک | `test_cumulative_guest_fix_and_immutable_baseline` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-161</b> — <code>tests/test_release_1_62_73_dashboard_r2_package.py</code> (102 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-161</b> — <code>tests/test_release_1_62_6_auto_assign_static.py</code> (47 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-161.01` | 1–29 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-161.02` | 30–30 | بلوک | `DashboardR2ReleasePackageTest` | 0 | ⬜ |
-| `TEST-161.03` | 31–81 | بلوک | `test_cumulative_package_contents_checksum_and_hist` | 0 | ⬜ |
-| `TEST-161.04` | 82–102 | بلوک | `test_dashboard_r2_archive_stays_intact` | 0 | ⬜ |
+| `TEST-161.01` | 1–11 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-161.02` | 12–19 | بلوک | `test_org_managers_are_deprioritized_in_auto_assign` | 0 | ⬜ |
+| `TEST-161.03` | 20–27 | بلوک | `test_support_manager_repair_action_exists` | 0 | ⬜ |
+| `TEST-161.04` | 28–34 | بلوک | `test_auto_assign_diagnostics_card_is_rendered` | 0 | ⬜ |
+| `TEST-161.05` | 35–47 | بلوک | `test_help_guide_explains_ticket_assignee` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-162</b> — <code>tests/test_release_1_62_73_package.py</code> (145 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-162</b> — <code>tests/test_release_1_62_73_dashboard_r2_package.py</code> (102 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-162.01` | 1–57 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-162.02` | 58–58 | بلوک | `ReleasePackageTest` | 0 | ⬜ |
-| `TEST-162.03` | 59–121 | بلوک | `test_cumulative_manifest_contents_and_immutable_ba` | 0 | ⬜ |
-| `TEST-162.04` | 122–145 | بلوک | `test_dashboard_cleanup_archive_stays_intact` | 1 | ⬜ |
+| `TEST-162.01` | 1–29 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-162.02` | 30–30 | بلوک | `DashboardR2ReleasePackageTest` | 0 | ⬜ |
+| `TEST-162.03` | 31–81 | بلوک | `test_cumulative_package_contents_checksum_and_hist` | 0 | ⬜ |
+| `TEST-162.04` | 82–102 | بلوک | `test_dashboard_r2_archive_stays_intact` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-163</b> — <code>tests/test_release_1_62_74_package.py</code> (231 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-163</b> — <code>tests/test_release_1_62_73_package.py</code> (145 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-163.01` | 1–148 | بلوک | `مقدمهٔ فایل` | 2 | ⬜ |
-| `TEST-163.02` | 149–149 | بلوک | `FoodReconciliationReleasePackageTest` | 0 | ⬜ |
-| `TEST-163.03` | 150–210 | بلوک | `test_cumulative_package_manifest_payload_and_check` | 0 | ⬜ |
-| `TEST-163.04` | 211–231 | بلوک | `test_meal_reconciliation_archive_stays_intact` | 0 | ⬜ |
+| `TEST-163.01` | 1–57 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-163.02` | 58–58 | بلوک | `ReleasePackageTest` | 0 | ⬜ |
+| `TEST-163.03` | 59–121 | بلوک | `test_cumulative_manifest_contents_and_immutable_ba` | 0 | ⬜ |
+| `TEST-163.04` | 122–145 | بلوک | `test_dashboard_cleanup_archive_stays_intact` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-164</b> — <code>tests/test_release_1_62_75_package.py</code> (234 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-164</b> — <code>tests/test_release_1_62_74_package.py</code> (231 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-164.01` | 1–154 | بلوک | `مقدمهٔ فایل` | 2 | ⬜ |
-| `TEST-164.02` | 155–155 | بلوک | `PublicAccessGroupsReleasePackageTest` | 0 | ⬜ |
-| `TEST-164.03` | 156–213 | بلوک | `test_cumulative_payload_migration_and_checksum` | 0 | ⬜ |
-| `TEST-164.04` | 214–234 | بلوک | `test_public_access_groups_archive_stays_intact` | 0 | ⬜ |
+| `TEST-164.01` | 1–148 | بلوک | `مقدمهٔ فایل` | 2 | ⬜ |
+| `TEST-164.02` | 149–149 | بلوک | `FoodReconciliationReleasePackageTest` | 0 | ⬜ |
+| `TEST-164.03` | 150–210 | بلوک | `test_cumulative_package_manifest_payload_and_check` | 0 | ⬜ |
+| `TEST-164.04` | 211–231 | بلوک | `test_meal_reconciliation_archive_stays_intact` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-165</b> — <code>tests/test_release_1_62_7_traffic_history_events_static.py</code> (73 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-165</b> — <code>tests/test_release_1_62_75_package.py</code> (234 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-165.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-165.02` | 11–14 | بلوک | `read` | 0 | ⬜ |
-| `TEST-165.03` | 15–20 | بلوک | `test_release_1_62_7_manifest_version` | 0 | ⬜ |
-| `TEST-165.04` | 21–31 | بلوک | `test_history_helpers_accept_all_events_flag` | 0 | ⬜ |
-| `TEST-165.05` | 32–38 | بلوک | `test_changes_tab_reads_events_param_and_passes_it_` | 2 | ⬜ |
-| `TEST-165.06` | 39–49 | بلوک | `test_changes_tab_has_filter_toggle_and_pagination_` | 3 | ⬜ |
-| `TEST-165.07` | 50–55 | بلوک | `test_notes_promise_no_data_is_deleted` | 0 | ⬜ |
-| `TEST-165.08` | 56–61 | بلوک | `test_help_guide_documents_the_toggle` | 0 | ⬜ |
-| `TEST-165.09` | 62–66 | بلوک | `test_filter_buttons_have_styles` | 0 | ⬜ |
-| `TEST-165.10` | 67–73 | بلوک | `test_update_manifest_is_present_and_consistent` | 0 | ⬜ |
+| `TEST-165.01` | 1–154 | بلوک | `مقدمهٔ فایل` | 2 | ⬜ |
+| `TEST-165.02` | 155–155 | بلوک | `PublicAccessGroupsReleasePackageTest` | 0 | ⬜ |
+| `TEST-165.03` | 156–213 | بلوک | `test_cumulative_payload_migration_and_checksum` | 0 | ⬜ |
+| `TEST-165.04` | 214–234 | بلوک | `test_public_access_groups_archive_stays_intact` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-166</b> — <code>tests/test_release_1_62_88_package_integrity.py</code> (48 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-166</b> — <code>tests/test_release_1_62_7_traffic_history_events_static.py</code> (73 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-166.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-166.02` | 8–14 | بلوک | `test_builder_requires_exact_base_and_versions` | 0 | ⬜ |
-| `TEST-166.03` | 15–26 | بلوک | `test_manifest_and_archive_are_checked_bidirectiona` | 0 | ⬜ |
-| `TEST-166.04` | 27–32 | بلوک | `test_checksum_is_created_from_closed_final_archive` | 0 | ⬜ |
-| `TEST-166.05` | 33–38 | بلوک | `test_032_is_excluded_from_executable_migrations` | 0 | ⬜ |
-| `TEST-166.06` | 39–43 | بلوک | `test_report_does_not_claim_all_migrations_are_addi` | 0 | ⬜ |
-| `TEST-166.07` | 44–48 | بلوک | `test_package_excludes_obsolete_release_helpers` | 0 | ⬜ |
+| `TEST-166.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-166.02` | 11–14 | بلوک | `read` | 0 | ⬜ |
+| `TEST-166.03` | 15–20 | بلوک | `test_release_1_62_7_manifest_version` | 0 | ⬜ |
+| `TEST-166.04` | 21–31 | بلوک | `test_history_helpers_accept_all_events_flag` | 0 | ⬜ |
+| `TEST-166.05` | 32–38 | بلوک | `test_changes_tab_reads_events_param_and_passes_it_` | 2 | ⬜ |
+| `TEST-166.06` | 39–49 | بلوک | `test_changes_tab_has_filter_toggle_and_pagination_` | 3 | ⬜ |
+| `TEST-166.07` | 50–55 | بلوک | `test_notes_promise_no_data_is_deleted` | 0 | ⬜ |
+| `TEST-166.08` | 56–61 | بلوک | `test_help_guide_documents_the_toggle` | 0 | ⬜ |
+| `TEST-166.09` | 62–66 | بلوک | `test_filter_buttons_have_styles` | 0 | ⬜ |
+| `TEST-166.10` | 67–73 | بلوک | `test_update_manifest_is_present_and_consistent` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-167</b> — <code>tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py</code> (127 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TEST-167</b> — <code>tests/test_release_1_62_88_package_integrity.py</code> (48 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-167.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-167.02` | 11–14 | بلوک | `read` | 0 | ⬜ |
-| `TEST-167.03` | 15–21 | بلوک | `test_version_is_1_62_8` | 0 | ⬜ |
-| `TEST-167.04` | 22–23 | بلوک | `بخش ۱: تکمیل خودکار با کد ملی / نام / تلفن` | 0 | ⬜ |
-| `TEST-167.05` | 24–34 | بلوک | `test_lookup_api_accepts_code_phone_and_name` | 0 | ⬜ |
-| `TEST-167.06` | 35–43 | بلوک | `test_lookup_javascript_triggers_on_name_and_phone` | 0 | ⬜ |
-| `TEST-167.07` | 44–45 | بلوک | `بخش ۲: ۱ تا ۳ تأییدکننده برای هر مقصد` | 0 | ⬜ |
-| `TEST-167.08` | 46–55 | بلوک | `test_multi_approver_columns_exist_in_schema_and_mi` | 0 | ⬜ |
-| `TEST-167.09` | 56–67 | بلوک | `test_destination_forms_accept_three_approvers` | 1 | ⬜ |
-| `TEST-167.10` | 68–76 | بلوک | `test_server_validates_approver_against_destination` | 0 | ⬜ |
-| `TEST-167.11` | 77–87 | بلوک | `test_forms_render_approver_select_with_data_approv` | 0 | ⬜ |
-| `TEST-167.12` | 88–99 | بلوک | `test_bulk_preview_button_moved_next_to_clear_selec` | 0 | ⬜ |
-| `TEST-167.13` | 100–105 | بلوک | `test_help_guide_documents_both_features` | 0 | ⬜ |
-| `TEST-167.14` | 106–111 | بلوک | `test_update_manifest_lists_migration` | 0 | ⬜ |
-| `TEST-167.15` | 112–127 | بلوک | `test_current_package_passes_system_update_rules` | 1 | ⬜ |
+| `TEST-167.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-167.02` | 8–14 | بلوک | `test_builder_requires_exact_base_and_versions` | 0 | ⬜ |
+| `TEST-167.03` | 15–26 | بلوک | `test_manifest_and_archive_are_checked_bidirectiona` | 0 | ⬜ |
+| `TEST-167.04` | 27–32 | بلوک | `test_checksum_is_created_from_closed_final_archive` | 0 | ⬜ |
+| `TEST-167.05` | 33–38 | بلوک | `test_032_is_excluded_from_executable_migrations` | 0 | ⬜ |
+| `TEST-167.06` | 39–43 | بلوک | `test_report_does_not_claim_all_migrations_are_addi` | 0 | ⬜ |
+| `TEST-167.07` | 44–48 | بلوک | `test_package_excludes_obsolete_release_helpers` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-168</b> — <code>tests/test_release_1_62_9_manual_ticket_date_guest_static.py</code> (171 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TEST-168</b> — <code>tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py</code> (127 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-168.01` | 1–17 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-168.02` | 18–23 | بلوک | `read` | 0 | ⬜ |
-| `TEST-168.03` | 24–35 | بلوک | `test_backend_accepts_past_dates_and_rejects_future` | 0 | ⬜ |
-| `TEST-168.04` | 36–42 | بلوک | `test_route_passes_selected_date_instead_of_today_g` | 0 | ⬜ |
-| `TEST-168.05` | 43–48 | بلوک | `test_save_many_forwards_date_to_each_save` | 0 | ⬜ |
-| `TEST-168.06` | 49–62 | بلوک | `test_ui_has_jalali_date_field_with_calendar` | 0 | ⬜ |
-| `TEST-168.07` | 63–80 | بلوک | `test_guest_row_is_first_and_guest_save_path_exists` | 0 | ⬜ |
-| `TEST-168.08` | 81–88 | بلوک | `test_save_many_accepts_guest_id_zero` | 0 | ⬜ |
-| `TEST-168.09` | 89–97 | بلوک | `test_ui_pins_guest_row_and_sends_id_zero` | 0 | ⬜ |
-| `TEST-168.10` | 98–105 | بلوک | `test_guest_event_schema_support_already_exists` | 0 | ⬜ |
-| `TEST-168.11` | 106–115 | بلوک | `test_destination_forms_fit_four_fields_on_one_line` | 0 | ⬜ |
-| `TEST-168.12` | 116–122 | بلوک | `test_help_guide_documents_new_manual_ticket_featur` | 0 | ⬜ |
-| `TEST-168.13` | 123–165 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
-| `TEST-168.14` | 166–171 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
+| `TEST-168.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-168.02` | 11–14 | بلوک | `read` | 0 | ⬜ |
+| `TEST-168.03` | 15–21 | بلوک | `test_version_is_1_62_8` | 0 | ⬜ |
+| `TEST-168.04` | 22–23 | بلوک | `بخش ۱: تکمیل خودکار با کد ملی / نام / تلفن` | 0 | ⬜ |
+| `TEST-168.05` | 24–34 | بلوک | `test_lookup_api_accepts_code_phone_and_name` | 0 | ⬜ |
+| `TEST-168.06` | 35–43 | بلوک | `test_lookup_javascript_triggers_on_name_and_phone` | 0 | ⬜ |
+| `TEST-168.07` | 44–45 | بلوک | `بخش ۲: ۱ تا ۳ تأییدکننده برای هر مقصد` | 0 | ⬜ |
+| `TEST-168.08` | 46–55 | بلوک | `test_multi_approver_columns_exist_in_schema_and_mi` | 0 | ⬜ |
+| `TEST-168.09` | 56–67 | بلوک | `test_destination_forms_accept_three_approvers` | 1 | ⬜ |
+| `TEST-168.10` | 68–76 | بلوک | `test_server_validates_approver_against_destination` | 0 | ⬜ |
+| `TEST-168.11` | 77–87 | بلوک | `test_forms_render_approver_select_with_data_approv` | 0 | ⬜ |
+| `TEST-168.12` | 88–99 | بلوک | `test_bulk_preview_button_moved_next_to_clear_selec` | 0 | ⬜ |
+| `TEST-168.13` | 100–105 | بلوک | `test_help_guide_documents_both_features` | 0 | ⬜ |
+| `TEST-168.14` | 106–111 | بلوک | `test_update_manifest_lists_migration` | 0 | ⬜ |
+| `TEST-168.15` | 112–127 | بلوک | `test_current_package_passes_system_update_rules` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-169</b> — <code>tests/test_repair_16236_full_source_restore.py</code> (163 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-169</b> — <code>tests/test_release_1_62_9_manual_ticket_date_guest_static.py</code> (171 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-169.01` | 1–34 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-169.02` | 35–44 | بلوک | `reconstructed_release_files` | 0 | ⬜ |
-| `TEST-169.03` | 45–54 | بلوک | `reconstructed_migrations` | 0 | ⬜ |
-| `TEST-169.04` | 55–80 | بلوک | `test_repair_package_rebuilds_the_release_overlay_n` | 0 | ⬜ |
-| `TEST-169.05` | 81–90 | بلوک | `test_repair_package_carries_all_idempotent_migrati` | 0 | ⬜ |
-| `TEST-169.06` | 91–127 | بلوک | `test_restored_package_has_the_missing_ui_and_serve` | 0 | ⬜ |
-| `TEST-169.07` | 128–140 | بلوک | `test_download_pages_point_to_corrected_package_and` | 0 | ⬜ |
-| `TEST-169.08` | 141–158 | بلوک | `test_repo_snapshot_matches_the_reconstructed_16236` | 0 | ⬜ |
-| `TEST-169.09` | 159–163 | بلوک | `test_restore_package_checksum_matches` | 0 | ⬜ |
+| `TEST-169.01` | 1–17 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-169.02` | 18–23 | بلوک | `read` | 0 | ⬜ |
+| `TEST-169.03` | 24–35 | بلوک | `test_backend_accepts_past_dates_and_rejects_future` | 0 | ⬜ |
+| `TEST-169.04` | 36–42 | بلوک | `test_route_passes_selected_date_instead_of_today_g` | 0 | ⬜ |
+| `TEST-169.05` | 43–48 | بلوک | `test_save_many_forwards_date_to_each_save` | 0 | ⬜ |
+| `TEST-169.06` | 49–62 | بلوک | `test_ui_has_jalali_date_field_with_calendar` | 0 | ⬜ |
+| `TEST-169.07` | 63–80 | بلوک | `test_guest_row_is_first_and_guest_save_path_exists` | 0 | ⬜ |
+| `TEST-169.08` | 81–88 | بلوک | `test_save_many_accepts_guest_id_zero` | 0 | ⬜ |
+| `TEST-169.09` | 89–97 | بلوک | `test_ui_pins_guest_row_and_sends_id_zero` | 0 | ⬜ |
+| `TEST-169.10` | 98–105 | بلوک | `test_guest_event_schema_support_already_exists` | 0 | ⬜ |
+| `TEST-169.11` | 106–115 | بلوک | `test_destination_forms_fit_four_fields_on_one_line` | 0 | ⬜ |
+| `TEST-169.12` | 116–122 | بلوک | `test_help_guide_documents_new_manual_ticket_featur` | 0 | ⬜ |
+| `TEST-169.13` | 123–165 | بلوک | `test_version_manifest_and_package` | 0 | ⬜ |
+| `TEST-169.14` | 166–171 | بلوک | `test_download_page_lists_only_latest_package` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-170</b> — <code>tests/test_request_center_claim_concurrency_mariadb.php</code> (198 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-170</b> — <code>tests/test_repair_16236_full_source_restore.py</code> (163 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-170.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
-| `TEST-170.02` | 31–37 | تابع | `t10_check` | 0 | ⬜ |
-| `TEST-170.03` | 38–198 | ناحیه | `بلوک رویه‌ای 38-198` | **14** | ⬜ |
+| `TEST-170.01` | 1–34 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-170.02` | 35–44 | بلوک | `reconstructed_release_files` | 0 | ⬜ |
+| `TEST-170.03` | 45–54 | بلوک | `reconstructed_migrations` | 0 | ⬜ |
+| `TEST-170.04` | 55–80 | بلوک | `test_repair_package_rebuilds_the_release_overlay_n` | 0 | ⬜ |
+| `TEST-170.05` | 81–90 | بلوک | `test_repair_package_carries_all_idempotent_migrati` | 0 | ⬜ |
+| `TEST-170.06` | 91–127 | بلوک | `test_restored_package_has_the_missing_ui_and_serve` | 0 | ⬜ |
+| `TEST-170.07` | 128–140 | بلوک | `test_download_pages_point_to_corrected_package_and` | 0 | ⬜ |
+| `TEST-170.08` | 141–158 | بلوک | `test_repo_snapshot_matches_the_reconstructed_16236` | 0 | ⬜ |
+| `TEST-170.09` | 159–163 | بلوک | `test_restore_package_checksum_matches` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-171</b> — <code>tests/test_request_center_first_slice_static.py</code> (131 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-171</b> — <code>tests/test_request_center_claim_concurrency_mariadb.php</code> (198 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-171.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-171.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-171.03` | 11–11 | بلوک | `RequestCenterFirstSliceTests` | 0 | ⬜ |
-| `TEST-171.04` | 12–21 | بلوک | `test_independent_entrypoint_bootstraps_and_authent` | 0 | ⬜ |
-| `TEST-171.05` | 22–27 | بلوک | `test_repository_uses_existing_visibility_contracts` | 0 | ⬜ |
-| `TEST-171.06` | 28–32 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
-| `TEST-171.07` | 33–47 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
-| `TEST-171.08` | 48–55 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
-| `TEST-171.09` | 56–89 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
-| `TEST-171.10` | 90–96 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
-| `TEST-171.11` | 97–109 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
-| `TEST-171.12` | 110–120 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
-| `TEST-171.13` | 121–131 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
+| `TEST-171.01` | 1–30 | ناحیه | `بلوک رویه‌ای 1-30` | 0 | ⬜ |
+| `TEST-171.02` | 31–37 | تابع | `t10_check` | 0 | ⬜ |
+| `TEST-171.03` | 38–198 | ناحیه | `بلوک رویه‌ای 38-198` | **14** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-172</b> — <code>tests/test_request_center_mariadb_ddl_gates.php</code> (108 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-172</b> — <code>tests/test_request_center_first_slice_static.py</code> (131 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-172.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TEST-172.02` | 22–28 | تابع | `tcheck` | 0 | ⬜ |
-| `TEST-172.03` | 30–37 | تابع | `tableExists` | 0 | ⬜ |
-| `TEST-172.04` | 38–108 | ناحیه | `بلوک رویه‌ای 38-108` | 4 | ⬜ |
+| `TEST-172.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-172.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-172.03` | 11–11 | بلوک | `RequestCenterFirstSliceTests` | 0 | ⬜ |
+| `TEST-172.04` | 12–21 | بلوک | `test_independent_entrypoint_bootstraps_and_authent` | 0 | ⬜ |
+| `TEST-172.05` | 22–27 | بلوک | `test_repository_uses_existing_visibility_contracts` | 0 | ⬜ |
+| `TEST-172.06` | 28–32 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
+| `TEST-172.07` | 33–47 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
+| `TEST-172.08` | 48–55 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
+| `TEST-172.09` | 56–89 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
+| `TEST-172.10` | 90–96 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
+| `TEST-172.11` | 97–109 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
+| `TEST-172.12` | 110–120 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
+| `TEST-172.13` | 121–131 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-173</b> — <code>tests/test_request_center_metadata_lock_mariadb.php</code> (83 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-173</b> — <code>tests/test_request_center_mariadb_ddl_gates.php</code> (108 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-173.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
-| `TEST-173.02` | 21–27 | تابع | `t09_check` | 0 | ⬜ |
-| `TEST-173.03` | 29–36 | تابع | `t09_column_exists` | 0 | ⬜ |
-| `TEST-173.04` | 37–83 | ناحیه | `بلوک رویه‌ای 37-83` | 4 | ⬜ |
+| `TEST-173.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TEST-173.02` | 22–28 | تابع | `tcheck` | 0 | ⬜ |
+| `TEST-173.03` | 30–37 | تابع | `tableExists` | 0 | ⬜ |
+| `TEST-173.04` | 38–108 | ناحیه | `بلوک رویه‌ای 38-108` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-174</b> — <code>tests/test_request_center_repository_sqlite.php</code> (104 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-174</b> — <code>tests/test_request_center_metadata_lock_mariadb.php</code> (83 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-174.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-174.02` | 6–9 | تابع | `ticket_scope` | 5 | ⬜ |
-| `TEST-174.03` | 11–14 | تابع | `ticket_user_can_view` | 0 | ⬜ |
-| `TEST-174.04` | 16–22 | تابع | `check_request_center` | 0 | ⬜ |
-| `TEST-174.05` | 23–104 | ناحیه | `بلوک رویه‌ای 23-104` | 5 | ⬜ |
+| `TEST-174.01` | 1–20 | ناحیه | `بلوک رویه‌ای 1-20` | 0 | ⬜ |
+| `TEST-174.02` | 21–27 | تابع | `t09_check` | 0 | ⬜ |
+| `TEST-174.03` | 29–36 | تابع | `t09_column_exists` | 0 | ⬜ |
+| `TEST-174.04` | 37–83 | ناحیه | `بلوک رویه‌ای 37-83` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-175</b> — <code>tests/test_request_center_schema_preflight_mariadb.php</code> (146 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-175</b> — <code>tests/test_request_center_repository_sqlite.php</code> (104 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-175.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-175.02` | 4–7 | تابع | `ticket_scope` | 5 | ⬜ |
-| `TEST-175.03` | 9–12 | تابع | `ticket_user_can_view` | 0 | ⬜ |
-| `TEST-175.04` | 14–20 | تابع | `check_request_center` | 0 | ⬜ |
-| `TEST-175.05` | 21–146 | ناحیه | `بلوک رویه‌ای 21-146` | 1 | ⬜ |
+| `TEST-175.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-175.02` | 6–9 | تابع | `ticket_scope` | 5 | ⬜ |
+| `TEST-175.03` | 11–14 | تابع | `ticket_user_can_view` | 0 | ⬜ |
+| `TEST-175.04` | 16–22 | تابع | `check_request_center` | 0 | ⬜ |
+| `TEST-175.05` | 23–104 | ناحیه | `بلوک رویه‌ای 23-104` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-176</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (399 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TEST-176</b> — <code>tests/test_request_center_schema_preflight_mariadb.php</code> (146 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-176.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
-| `TEST-176.02` | 22–26 | تابع | `t07_fail` | 0 | ⬜ |
-| `TEST-176.03` | 28–34 | تابع | `t07_check` | 0 | ⬜ |
-| `TEST-176.04` | 36–39 | تابع | `t07_ident` | 0 | ⬜ |
-| `TEST-176.05` | 41–83 | تابع | `t07_mysql_file` | 4 | ⬜ |
-| `TEST-176.06` | 85–91 | تابع | `t07_tables` | 0 | ⬜ |
-| `TEST-176.07` | 93–143 | تابع | `t07_fingerprint` | 5 | ⬜ |
-| `TEST-176.08` | 145–154 | تابع | `t07_registry_rows` | 0 | ⬜ |
-| `TEST-176.09` | 156–169 | تابع | `t07_service_catalog_distribution` | 0 | ⬜ |
-| `TEST-176.10` | 170–187 | ناحیه | `بلوک رویه‌ای 170-187` | 4 | ⬜ |
-| `TEST-176.11` | 188–188 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
-| `TEST-176.12` | 189–367 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
-| `TEST-176.13` | 368–368 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
-| `TEST-176.14` | 369–399 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
+| `TEST-176.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-176.02` | 4–7 | تابع | `ticket_scope` | 5 | ⬜ |
+| `TEST-176.03` | 9–12 | تابع | `ticket_user_can_view` | 0 | ⬜ |
+| `TEST-176.04` | 14–20 | تابع | `check_request_center` | 0 | ⬜ |
+| `TEST-176.05` | 21–146 | ناحیه | `بلوک رویه‌ای 21-146` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-177</b> — <code>tests/test_request_center_t12_preflight.php</code> (322 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-177</b> — <code>tests/test_request_center_t07_migration_clone.php</code> (399 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-177.01` | 1–33 | ناحیه | `بلوک رویه‌ای 1-33` | 0 | ⬜ |
-| `TEST-177.02` | 34–37 | تابع | `t12_fail` | 0 | ⬜ |
-| `TEST-177.03` | 39–45 | تابع | `t12_check` | 0 | ⬜ |
-| `TEST-177.04` | 47–50 | تابع | `t12_ident` | 0 | ⬜ |
-| `TEST-177.05` | 52–88 | تابع | `t12_mysql_file` | 4 | ⬜ |
-| `TEST-177.06` | 90–109 | تابع | `t12_http` | 1 | ⬜ |
-| `TEST-177.07` | 111–144 | تابع | `t12_start_server` | 4 | ⬜ |
-| `TEST-177.08` | 146–161 | تابع | `t12_schema_fingerprint` | 0 | ⬜ |
-| `TEST-177.09` | 163–181 | تابع | `t12_session` | 0 | ⬜ |
-| `TEST-177.10` | 183–209 | تابع | `t12_config` | 0 | ⬜ |
-| `TEST-177.11` | 210–322 | ناحیه | `بلوک رویه‌ای 210-322` | **12** | ⬜ |
+| `TEST-177.01` | 1–21 | ناحیه | `بلوک رویه‌ای 1-21` | 0 | ⬜ |
+| `TEST-177.02` | 22–26 | تابع | `t07_fail` | 0 | ⬜ |
+| `TEST-177.03` | 28–34 | تابع | `t07_check` | 0 | ⬜ |
+| `TEST-177.04` | 36–39 | تابع | `t07_ident` | 0 | ⬜ |
+| `TEST-177.05` | 41–83 | تابع | `t07_mysql_file` | 4 | ⬜ |
+| `TEST-177.06` | 85–91 | تابع | `t07_tables` | 0 | ⬜ |
+| `TEST-177.07` | 93–143 | تابع | `t07_fingerprint` | 5 | ⬜ |
+| `TEST-177.08` | 145–154 | تابع | `t07_registry_rows` | 0 | ⬜ |
+| `TEST-177.09` | 156–169 | تابع | `t07_service_catalog_distribution` | 0 | ⬜ |
+| `TEST-177.10` | 170–187 | ناحیه | `بلوک رویه‌ای 170-187` | 4 | ⬜ |
+| `TEST-177.11` | 188–188 | ناحیه | `Strip only database-selection statements from the ` | 0 | ⬜ |
+| `TEST-177.12` | 189–367 | ناحیه | `is forced into the disposable clone regardless of ` | 7 | ⬜ |
+| `TEST-177.13` | 368–368 | ناحیه | `Cross-check the actual 1.62.88 release manifest. T` | 0 | ⬜ |
+| `TEST-177.14` | 369–399 | ناحیه | `excludes migration 032; all manifest migrations mu` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-178</b> — <code>tests/test_request_center_web_ddl_runtime.php</code> (282 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-178</b> — <code>tests/test_request_center_t12_preflight.php</code> (322 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-178.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 0 | ⬜ |
-| `TEST-178.02` | 35–41 | تابع | `t04_check` | 0 | ⬜ |
-| `TEST-178.03` | 43–49 | تابع | `t04_reset_log` | 4 | ⬜ |
-| `TEST-178.04` | 51–72 | تابع | `t04_log_window` | 1 | ⬜ |
-| `TEST-178.05` | 74–93 | تابع | `t04_http` | 6 | ⬜ |
-| `TEST-178.06` | 95–106 | تابع | `t04_wait_server` | 1 | ⬜ |
-| `TEST-178.07` | 107–282 | ناحیه | `بلوک رویه‌ای 107-282` | 7 | ⬜ |
+| `TEST-178.01` | 1–33 | ناحیه | `بلوک رویه‌ای 1-33` | 0 | ⬜ |
+| `TEST-178.02` | 34–37 | تابع | `t12_fail` | 0 | ⬜ |
+| `TEST-178.03` | 39–45 | تابع | `t12_check` | 0 | ⬜ |
+| `TEST-178.04` | 47–50 | تابع | `t12_ident` | 0 | ⬜ |
+| `TEST-178.05` | 52–88 | تابع | `t12_mysql_file` | 4 | ⬜ |
+| `TEST-178.06` | 90–109 | تابع | `t12_http` | 1 | ⬜ |
+| `TEST-178.07` | 111–144 | تابع | `t12_start_server` | 4 | ⬜ |
+| `TEST-178.08` | 146–161 | تابع | `t12_schema_fingerprint` | 0 | ⬜ |
+| `TEST-178.09` | 163–181 | تابع | `t12_session` | 0 | ⬜ |
+| `TEST-178.10` | 183–209 | تابع | `t12_config` | 0 | ⬜ |
+| `TEST-178.11` | 210–322 | ناحیه | `بلوک رویه‌ای 210-322` | **12** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-179</b> — <code>tests/test_request_center_workflow_service_mariadb.php</code> (151 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-179</b> — <code>tests/test_request_center_web_ddl_runtime.php</code> (282 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-179.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
-| `TEST-179.02` | 30–36 | تابع | `mariadb_workflow_check` | 0 | ⬜ |
-| `TEST-179.03` | 37–74 | ناحیه | `بلوک رویه‌ای 37-74` | 5 | ⬜ |
-| `TEST-179.04` | 75–75 | ناحیه | `The MySQL driver branch appends FOR UPDATE; succes` | 1 | ⬜ |
-| `TEST-179.05` | 76–92 | ناحیه | `that the production locking query is accepted by t` | 0 | ⬜ |
-| `TEST-179.06` | 93–109 | ناحیه | `A caller-owned rollback must undo both the status ` | 0 | ⬜ |
-| `TEST-179.07` | 110–127 | ناحیه | `A stale status and a stale optimistic field must b` | 0 | ⬜ |
-| `TEST-179.08` | 128–138 | ناحیه | `Cancellation-pending blocks ordinary transitions e` | 0 | ⬜ |
-| `TEST-179.09` | 139–151 | ناحیه | `Column names are never accepted from untrusted cal` | 5 | ⬜ |
+| `TEST-179.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 0 | ⬜ |
+| `TEST-179.02` | 35–41 | تابع | `t04_check` | 0 | ⬜ |
+| `TEST-179.03` | 43–49 | تابع | `t04_reset_log` | 4 | ⬜ |
+| `TEST-179.04` | 51–72 | تابع | `t04_log_window` | 1 | ⬜ |
+| `TEST-179.05` | 74–93 | تابع | `t04_http` | 6 | ⬜ |
+| `TEST-179.06` | 95–106 | تابع | `t04_wait_server` | 1 | ⬜ |
+| `TEST-179.07` | 107–282 | ناحیه | `بلوک رویه‌ای 107-282` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-180</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (190 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-180</b> — <code>tests/test_request_center_workflow_service_mariadb.php</code> (151 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-180.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
-| `TEST-180.02` | 6–12 | تابع | `workflow_check` | 0 | ⬜ |
-| `TEST-180.03` | 13–190 | ناحیه | `بلوک رویه‌ای 13-190` | 5 | ⬜ |
+| `TEST-180.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
+| `TEST-180.02` | 30–36 | تابع | `mariadb_workflow_check` | 0 | ⬜ |
+| `TEST-180.03` | 37–74 | ناحیه | `بلوک رویه‌ای 37-74` | 5 | ⬜ |
+| `TEST-180.04` | 75–75 | ناحیه | `The MySQL driver branch appends FOR UPDATE; succes` | 1 | ⬜ |
+| `TEST-180.05` | 76–92 | ناحیه | `that the production locking query is accepted by t` | 0 | ⬜ |
+| `TEST-180.06` | 93–109 | ناحیه | `A caller-owned rollback must undo both the status ` | 0 | ⬜ |
+| `TEST-180.07` | 110–127 | ناحیه | `A stale status and a stale optimistic field must b` | 0 | ⬜ |
+| `TEST-180.08` | 128–138 | ناحیه | `Cancellation-pending blocks ordinary transitions e` | 0 | ⬜ |
+| `TEST-180.09` | 139–151 | ناحیه | `Column names are never accepted from untrusted cal` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-181</b> — <code>tests/test_role_permissions_ui_static.py</code> (31 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-181</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (190 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-181.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-181.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
-| `TEST-181.03` | 10–31 | بلوک | `check` | 0 | ⬜ |
+| `TEST-181.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-181.02` | 6–12 | تابع | `workflow_check` | 0 | ⬜ |
+| `TEST-181.03` | 13–190 | ناحیه | `بلوک رویه‌ای 13-190` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-182</b> — <code>tests/test_route_security_static.py</code> (116 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TEST-182</b> — <code>tests/test_role_permissions_ui_static.py</code> (31 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-182.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-182.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-182.03` | 12–17 | بلوک | `section` | 0 | ⬜ |
-| `TEST-182.04` | 18–23 | بلوک | `test_new_ticket_page_requires_ticket_create_permis` | 0 | ⬜ |
-| `TEST-182.05` | 24–30 | بلوک | `test_post_action_dispatch_enforces_csrf_before_han` | 2 | ⬜ |
-| `TEST-182.06` | 31–38 | بلوک | `test_food_ticket_api_requires_login_and_csrf_for_p` | 0 | ⬜ |
-| `TEST-182.07` | 39–47 | بلوک | `test_food_order_api_requires_authenticated_user_an` | 0 | ⬜ |
-| `TEST-182.08` | 48–55 | بلوک | `test_sensitive_download_and_export_actions_have_ex` | 2 | ⬜ |
-| `TEST-182.09` | 56–79 | بلوک | `test_action_handlers_refuse_direct_http_access` | 0 | ⬜ |
-| `TEST-182.10` | 80–88 | بلوک | `test_self_service_password_change_is_audited_atomi` | 0 | ⬜ |
-| `TEST-182.11` | 89–109 | بلوک | `test_internal_modules_refuse_direct_http_access` | 1 | ⬜ |
-| `TEST-182.12` | 110–116 | بلوک | `test_it_ticket_asset_reference_obeys_asset_own_uni` | 2 | ⬜ |
+| `TEST-182.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-182.02` | 6–9 | بلوک | `read` | 0 | ⬜ |
+| `TEST-182.03` | 10–31 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-183</b> — <code>tests/test_schema_heal_static.py</code> (46 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-183</b> — <code>tests/test_route_security_static.py</code> (116 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-183.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 | `TEST-183.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
-| `TEST-183.03` | 12–46 | بلوک | `check` | 0 | ⬜ |
+| `TEST-183.03` | 12–17 | بلوک | `section` | 0 | ⬜ |
+| `TEST-183.04` | 18–23 | بلوک | `test_new_ticket_page_requires_ticket_create_permis` | 0 | ⬜ |
+| `TEST-183.05` | 24–30 | بلوک | `test_post_action_dispatch_enforces_csrf_before_han` | 2 | ⬜ |
+| `TEST-183.06` | 31–38 | بلوک | `test_food_ticket_api_requires_login_and_csrf_for_p` | 0 | ⬜ |
+| `TEST-183.07` | 39–47 | بلوک | `test_food_order_api_requires_authenticated_user_an` | 0 | ⬜ |
+| `TEST-183.08` | 48–55 | بلوک | `test_sensitive_download_and_export_actions_have_ex` | 2 | ⬜ |
+| `TEST-183.09` | 56–79 | بلوک | `test_action_handlers_refuse_direct_http_access` | 0 | ⬜ |
+| `TEST-183.10` | 80–88 | بلوک | `test_self_service_password_change_is_audited_atomi` | 0 | ⬜ |
+| `TEST-183.11` | 89–109 | بلوک | `test_internal_modules_refuse_direct_http_access` | 1 | ⬜ |
+| `TEST-183.12` | 110–116 | بلوک | `test_it_ticket_asset_reference_obeys_asset_own_uni` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-184</b> — <code>tests/test_session_boot_static.py</code> (143 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-184</b> — <code>tests/test_schema_heal_static.py</code> (46 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-184.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-184.02` | 50–53 | بلوک | `main` | 0 | ⬜ |
-| `TEST-184.03` | 54–143 | بلوک | `check` | 0 | ⬜ |
+| `TEST-184.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-184.02` | 8–11 | بلوک | `read` | 0 | ⬜ |
+| `TEST-184.03` | 12–46 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-185</b> — <code>tests/test_session_csrf_hardening_static.py</code> (189 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-185</b> — <code>tests/test_session_boot_static.py</code> (143 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-185.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-185.02` | 26–30 | بلوک | `read` | 0 | ⬜ |
-| `TEST-185.03` | 31–42 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-185.04` | 43–51 | بلوک | `csrf_token_code` | 0 | ⬜ |
-| `TEST-185.05` | 52–63 | بلوک | `test_csrf_token_never_adopts_a_value_supplied_by_t` | 0 | ⬜ |
-| `TEST-185.06` | 64–71 | بلوک | `test_csrf_token_is_generated_with_a_cryptographic_` | 0 | ⬜ |
-| `TEST-185.07` | 72–91 | بلوک | `test_csrf_token_is_seeded_while_the_session_is_sti` | 0 | ⬜ |
-| `TEST-185.08` | 92–98 | بلوک | `test_legacy_csrf_cookie_is_actively_cleared` | 0 | ⬜ |
-| `TEST-185.09` | 99–108 | بلوک | `test_require_csrf_still_compares_in_constant_time` | 0 | ⬜ |
-| `TEST-185.10` | 109–122 | بلوک | `test_session_idle_timeout_exists_and_is_configurab` | 0 | ⬜ |
-| `TEST-185.11` | 123–136 | بلوک | `test_idle_timeout_is_wired_into_bootstrap_after_co` | 0 | ⬜ |
-| `TEST-185.12` | 137–146 | بلوک | `test_idle_timeout_only_affects_logged_in_sessions` | 0 | ⬜ |
-| `TEST-185.13` | 147–155 | بلوک | `test_idle_timeout_can_be_switched_off_without_edit` | 0 | ⬜ |
-| `TEST-185.14` | 156–167 | بلوک | `test_session_cookie_keeps_its_hardening_flags` | 0 | ⬜ |
-| `TEST-185.15` | 168–173 | بلوک | `test_dead_duplicate_auth_layer_is_gone` | 0 | ⬜ |
-| `TEST-185.16` | 174–189 | بلوک | `test_no_php_file_references_the_removed_app_namesp` | 0 | ⬜ |
+| `TEST-185.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-185.02` | 50–53 | بلوک | `main` | 0 | ⬜ |
+| `TEST-185.03` | 54–143 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-186</b> — <code>tests/test_skill_manifest_static.py</code> (196 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TEST-186</b> — <code>tests/test_session_csrf_hardening_static.py</code> (189 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-186.01` | 1–51 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-186.02` | 52–67 | بلوک | `sections` | 0 | ⬜ |
-| `TEST-186.03` | 68–79 | بلوک | `foreign_characters` | 0 | ⬜ |
-| `TEST-186.04` | 80–83 | بلوک | `main` | 0 | ⬜ |
-| `TEST-186.05` | 84–89 | بلوک | `check` | 0 | ⬜ |
-| `TEST-186.06` | 90–103 | بلوک | `وجود فایلها` | 0 | ⬜ |
-| `TEST-186.07` | 104–118 | بلوک | `شمارش و پیوستگی شناسهها` | 0 | ⬜ |
-| `TEST-186.08` | 119–132 | بلوک | `ساختار تکتک مهارتها` | 0 | ⬜ |
-| `TEST-186.09` | 133–143 | بلوک | `جدول مانیفست` | 0 | ⬜ |
-| `TEST-186.10` | 144–157 | بلوک | `صداقت دربارهٔ حافظه` | 0 | ⬜ |
-| `TEST-186.11` | 158–166 | بلوک | `گردشکار` | 0 | ⬜ |
-| `TEST-186.12` | 167–170 | بلوک | `خودآزمون، گزارش و قواعد` | 0 | ⬜ |
-| `TEST-186.13` | 171–176 | بلوک | `پیوند AGENTS.md` | 0 | ⬜ |
-| `TEST-186.14` | 177–181 | بلوک | `آلودگی خط نوشتاری` | 0 | ⬜ |
-| `TEST-186.15` | 182–196 | بلوک | `نتیجه` | 0 | ⬜ |
+| `TEST-186.01` | 1–25 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-186.02` | 26–30 | بلوک | `read` | 0 | ⬜ |
+| `TEST-186.03` | 31–42 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-186.04` | 43–51 | بلوک | `csrf_token_code` | 0 | ⬜ |
+| `TEST-186.05` | 52–63 | بلوک | `test_csrf_token_never_adopts_a_value_supplied_by_t` | 0 | ⬜ |
+| `TEST-186.06` | 64–71 | بلوک | `test_csrf_token_is_generated_with_a_cryptographic_` | 0 | ⬜ |
+| `TEST-186.07` | 72–91 | بلوک | `test_csrf_token_is_seeded_while_the_session_is_sti` | 0 | ⬜ |
+| `TEST-186.08` | 92–98 | بلوک | `test_legacy_csrf_cookie_is_actively_cleared` | 0 | ⬜ |
+| `TEST-186.09` | 99–108 | بلوک | `test_require_csrf_still_compares_in_constant_time` | 0 | ⬜ |
+| `TEST-186.10` | 109–122 | بلوک | `test_session_idle_timeout_exists_and_is_configurab` | 0 | ⬜ |
+| `TEST-186.11` | 123–136 | بلوک | `test_idle_timeout_is_wired_into_bootstrap_after_co` | 0 | ⬜ |
+| `TEST-186.12` | 137–146 | بلوک | `test_idle_timeout_only_affects_logged_in_sessions` | 0 | ⬜ |
+| `TEST-186.13` | 147–155 | بلوک | `test_idle_timeout_can_be_switched_off_without_edit` | 0 | ⬜ |
+| `TEST-186.14` | 156–167 | بلوک | `test_session_cookie_keeps_its_hardening_flags` | 0 | ⬜ |
+| `TEST-186.15` | 168–173 | بلوک | `test_dead_duplicate_auth_layer_is_gone` | 0 | ⬜ |
+| `TEST-186.16` | 174–189 | بلوک | `test_no_php_file_references_the_removed_app_namesp` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-187</b> — <code>tests/test_startup_performance_static.py</code> (51 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-187</b> — <code>tests/test_skill_manifest_static.py</code> (196 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-187.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-187.02` | 6–51 | بلوک | `read` | 0 | ⬜ |
+| `TEST-187.01` | 1–51 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-187.02` | 52–67 | بلوک | `sections` | 0 | ⬜ |
+| `TEST-187.03` | 68–79 | بلوک | `foreign_characters` | 0 | ⬜ |
+| `TEST-187.04` | 80–83 | بلوک | `main` | 0 | ⬜ |
+| `TEST-187.05` | 84–89 | بلوک | `check` | 0 | ⬜ |
+| `TEST-187.06` | 90–103 | بلوک | `وجود فایلها` | 0 | ⬜ |
+| `TEST-187.07` | 104–118 | بلوک | `شمارش و پیوستگی شناسهها` | 0 | ⬜ |
+| `TEST-187.08` | 119–132 | بلوک | `ساختار تکتک مهارتها` | 0 | ⬜ |
+| `TEST-187.09` | 133–143 | بلوک | `جدول مانیفست` | 0 | ⬜ |
+| `TEST-187.10` | 144–157 | بلوک | `صداقت دربارهٔ حافظه` | 0 | ⬜ |
+| `TEST-187.11` | 158–166 | بلوک | `گردشکار` | 0 | ⬜ |
+| `TEST-187.12` | 167–170 | بلوک | `خودآزمون، گزارش و قواعد` | 0 | ⬜ |
+| `TEST-187.13` | 171–176 | بلوک | `پیوند AGENTS.md` | 0 | ⬜ |
+| `TEST-187.14` | 177–181 | بلوک | `آلودگی خط نوشتاری` | 0 | ⬜ |
+| `TEST-187.15` | 182–196 | بلوک | `نتیجه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-188</b> — <code>tests/test_system_health_accuracy_static.py</code> (99 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-188</b> — <code>tests/test_startup_performance_static.py</code> (51 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-188.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-188.02` | 16–33 | بلوک | `test_event_totals_are_independent_of_the_display_l` | 0 | ⬜ |
-| `TEST-188.03` | 34–47 | بلوک | `test_export_reports_full_counts_and_discloses_trun` | 0 | ⬜ |
-| `TEST-188.04` | 48–58 | بلوک | `test_safe_reference_uses_only_class_basename_line_` | 0 | ⬜ |
-| `TEST-188.05` | 59–72 | بلوک | `test_future_exception_logs_include_a_validated_err` | 0 | ⬜ |
-| `TEST-188.06` | 73–99 | بلوک | `test_hotfix_package_is_a_valid_upgrade_from_16224` | 0 | ⬜ |
+| `TEST-188.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-188.02` | 6–51 | بلوک | `read` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-189</b> — <code>tests/test_system_health_audit_visibility_static.py</code> (81 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-189</b> — <code>tests/test_system_health_accuracy_static.py</code> (99 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-189.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-189.02` | 16–20 | بلوک | `_checks_body` | 0 | ⬜ |
-| `TEST-189.03` | 21–26 | بلوک | `test_audit_status_is_reported_on_the_health_page` | 0 | ⬜ |
-| `TEST-189.04` | 27–32 | بلوک | `test_health_page_loads_the_audit_module` | 0 | ⬜ |
-| `TEST-189.05` | 33–44 | بلوک | `test_missing_heartbeat_is_not_reported_as_healthy` | 0 | ⬜ |
-| `TEST-189.06` | 45–53 | بلوک | `test_stale_audit_is_a_failure_not_a_warning` | 0 | ⬜ |
-| `TEST-189.07` | 54–62 | بلوک | `test_structural_problems_outrank_regressions` | 0 | ⬜ |
-| `TEST-189.08` | 63–71 | بلوک | `test_probe_failure_is_surfaced_not_swallowed` | 0 | ⬜ |
-| `TEST-189.09` | 72–81 | بلوک | `test_baseline_message_does_not_demand_server_acces` | 1 | ⬜ |
+| `TEST-189.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-189.02` | 16–33 | بلوک | `test_event_totals_are_independent_of_the_display_l` | 0 | ⬜ |
+| `TEST-189.03` | 34–47 | بلوک | `test_export_reports_full_counts_and_discloses_trun` | 0 | ⬜ |
+| `TEST-189.04` | 48–58 | بلوک | `test_safe_reference_uses_only_class_basename_line_` | 0 | ⬜ |
+| `TEST-189.05` | 59–72 | بلوک | `test_future_exception_logs_include_a_validated_err` | 0 | ⬜ |
+| `TEST-189.06` | 73–99 | بلوک | `test_hotfix_package_is_a_valid_upgrade_from_16224` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-190</b> — <code>tests/test_system_health_log_button_static.py</code> (39 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-190</b> — <code>tests/test_system_health_audit_visibility_static.py</code> (81 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-190.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-190.02` | 10–22 | بلوک | `test_current_system_logs_page_shows_safe_export_an` | 0 | ⬜ |
-| `TEST-190.03` | 23–39 | بلوک | `test_update_zip_contains_button_in_the_actual_unif` | 1 | ⬜ |
+| `TEST-190.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-190.02` | 16–20 | بلوک | `_checks_body` | 0 | ⬜ |
+| `TEST-190.03` | 21–26 | بلوک | `test_audit_status_is_reported_on_the_health_page` | 0 | ⬜ |
+| `TEST-190.04` | 27–32 | بلوک | `test_health_page_loads_the_audit_module` | 0 | ⬜ |
+| `TEST-190.05` | 33–44 | بلوک | `test_missing_heartbeat_is_not_reported_as_healthy` | 0 | ⬜ |
+| `TEST-190.06` | 45–53 | بلوک | `test_stale_audit_is_a_failure_not_a_warning` | 0 | ⬜ |
+| `TEST-190.07` | 54–62 | بلوک | `test_structural_problems_outrank_regressions` | 0 | ⬜ |
+| `TEST-190.08` | 63–71 | بلوک | `test_probe_failure_is_surfaced_not_swallowed` | 0 | ⬜ |
+| `TEST-190.09` | 72–81 | بلوک | `test_baseline_message_does_not_demand_server_acces` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-191</b> — <code>tests/test_system_health_readability_static.py</code> (63 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-191</b> — <code>tests/test_system_health_log_button_static.py</code> (39 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-191.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-191.02` | 11–24 | بلوک | `test_health_status_rules_include_warnings_and_basi` | 0 | ⬜ |
-| `TEST-191.03` | 25–40 | بلوک | `test_health_ui_and_export_use_plain_language_witho` | 0 | ⬜ |
-| `TEST-191.04` | 41–48 | بلوک | `test_system_logs_page_displays_safe_export_and_fri` | 0 | ⬜ |
-| `TEST-191.05` | 49–63 | بلوک | `test_16224_package_contains_the_readable_health_an` | 0 | ⬜ |
+| `TEST-191.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-191.02` | 10–22 | بلوک | `test_current_system_logs_page_shows_safe_export_an` | 0 | ⬜ |
+| `TEST-191.03` | 23–39 | بلوک | `test_update_zip_contains_button_in_the_actual_unif` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-192</b> — <code>tests/test_system_health_safe_export_static.py</code> (63 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-192</b> — <code>tests/test_system_health_readability_static.py</code> (63 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-192.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-192.02` | 9–15 | بلوک | `test_safe_export_is_reachable_and_labelled_for_peo` | 0 | ⬜ |
-| `TEST-192.03` | 16–28 | بلوک | `test_export_omits_user_linked_and_raw_log_fields` | 0 | ⬜ |
-| `TEST-192.04` | 29–42 | بلوک | `test_humanizer_uses_safe_categories_and_common_mas` | 0 | ⬜ |
-| `TEST-192.05` | 43–48 | بلوک | `test_health_warning_is_explained_without_claiming_` | 0 | ⬜ |
-| `TEST-192.06` | 49–63 | بلوک | `test_published_update_contains_the_readable_safe_e` | 1 | ⬜ |
+| `TEST-192.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-192.02` | 11–24 | بلوک | `test_health_status_rules_include_warnings_and_basi` | 0 | ⬜ |
+| `TEST-192.03` | 25–40 | بلوک | `test_health_ui_and_export_use_plain_language_witho` | 0 | ⬜ |
+| `TEST-192.04` | 41–48 | بلوک | `test_system_logs_page_displays_safe_export_and_fri` | 0 | ⬜ |
+| `TEST-192.05` | 49–63 | بلوک | `test_16224_package_contains_the_readable_health_an` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-193</b> — <code>tests/test_system_map_blocks.py</code> (347 خط، 34 آدرس، بازبینی‌شده 0/34)</summary>
+<summary><b>TEST-193</b> — <code>tests/test_system_health_safe_export_static.py</code> (63 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-193.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-193.02` | 33–43 | بلوک | `_tracked_production_files` | 0 | ⬜ |
-| `TEST-193.03` | 44–59 | بلوک | `fingerprint` | 0 | ⬜ |
-| `TEST-193.04` | 60–67 | بلوک | `index` | 0 | ⬜ |
-| `TEST-193.05` | 68–74 | بلوک | `sources` | 0 | ⬜ |
-| `TEST-193.06` | 75–76 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.07` | 77–79 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.08` | 80–89 | بلوک | `test_every_production_file_is_indexed` | 0 | ⬜ |
-| `TEST-193.09` | 90–96 | بلوک | `test_index_has_no_phantom_files` | 0 | ⬜ |
-| `TEST-193.10` | 97–102 | بلوک | `test_file_ids_are_unique` | 0 | ⬜ |
-| `TEST-193.11` | 103–113 | بلوک | `test_block_ids_are_unique` | 0 | ⬜ |
-| `TEST-193.12` | 114–115 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.13` | 116–118 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.14` | 119–132 | بلوک | `test_file_fingerprints_are_current` | 0 | ⬜ |
-| `TEST-193.15` | 133–149 | بلوک | `test_block_fingerprints_are_current` | 0 | ⬜ |
-| `TEST-193.16` | 150–161 | بلوک | `test_block_ranges_are_inside_the_file` | 0 | ⬜ |
-| `TEST-193.17` | 162–163 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.18` | 164–166 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.19` | 167–210 | بلوک | `test_every_nonblank_line_is_covered_exactly_once` | 0 | ⬜ |
-| `TEST-193.20` | 211–233 | بلوک | `test_symbol_blocks_end_on_a_closing_brace` | 0 | ⬜ |
-| `TEST-193.21` | 234–235 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.22` | 236–238 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.23` | 239–244 | بلوک | `test_ledger_exists_and_is_valid_json` | 0 | ⬜ |
-| `TEST-193.24` | 245–254 | بلوک | `test_ledger_entries_point_at_real_addresses` | 0 | ⬜ |
-| `TEST-193.25` | 255–271 | بلوک | `test_ledger_flags_blocks_changed_since_review` | 0 | ⬜ |
-| `TEST-193.26` | 272–286 | بلوک | `test_human_readable_map_is_in_sync` | 0 | ⬜ |
-| `TEST-193.27` | 287–288 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.28` | 289–294 | بلوک | `-` | 0 | ⬜ |
-| `TEST-193.29` | 295–299 | بلوک | `topics` | 0 | ⬜ |
-| `TEST-193.30` | 300–312 | بلوک | `test_every_page_of_the_system_has_a_topic` | 0 | ⬜ |
-| `TEST-193.31` | 313–320 | بلوک | `test_every_permission_has_a_topic` | 0 | ⬜ |
-| `TEST-193.32` | 321–328 | بلوک | `test_every_topic_resolves_to_at_least_one_address` | 0 | ⬜ |
-| `TEST-193.33` | 329–339 | بلوک | `test_topic_addresses_exist_in_the_block_index` | 0 | ⬜ |
-| `TEST-193.34` | 340–347 | بلوک | `test_boot_file_points_agents_at_the_map` | 0 | ⬜ |
+| `TEST-193.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-193.02` | 9–15 | بلوک | `test_safe_export_is_reachable_and_labelled_for_peo` | 0 | ⬜ |
+| `TEST-193.03` | 16–28 | بلوک | `test_export_omits_user_linked_and_raw_log_fields` | 0 | ⬜ |
+| `TEST-193.04` | 29–42 | بلوک | `test_humanizer_uses_safe_categories_and_common_mas` | 0 | ⬜ |
+| `TEST-193.05` | 43–48 | بلوک | `test_health_warning_is_explained_without_claiming_` | 0 | ⬜ |
+| `TEST-193.06` | 49–63 | بلوک | `test_published_update_contains_the_readable_safe_e` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-194</b> — <code>tests/test_system_map_static.py</code> (172 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-194</b> — <code>tests/test_system_map_blocks.py</code> (347 خط، 34 آدرس، بازبینی‌شده 0/34)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-194.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-194.02` | 34–38 | بلوک | `load` | 0 | ⬜ |
-| `TEST-194.03` | 39–42 | بلوک | `main` | 0 | ⬜ |
-| `TEST-194.04` | 43–156 | بلوک | `check` | 0 | ⬜ |
-| `TEST-194.05` | 157–172 | بلوک | `نتیجه` | 0 | ⬜ |
+| `TEST-194.01` | 1–32 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-194.02` | 33–43 | بلوک | `_tracked_production_files` | 0 | ⬜ |
+| `TEST-194.03` | 44–59 | بلوک | `fingerprint` | 0 | ⬜ |
+| `TEST-194.04` | 60–67 | بلوک | `index` | 0 | ⬜ |
+| `TEST-194.05` | 68–74 | بلوک | `sources` | 0 | ⬜ |
+| `TEST-194.06` | 75–76 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.07` | 77–79 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.08` | 80–89 | بلوک | `test_every_production_file_is_indexed` | 0 | ⬜ |
+| `TEST-194.09` | 90–96 | بلوک | `test_index_has_no_phantom_files` | 0 | ⬜ |
+| `TEST-194.10` | 97–102 | بلوک | `test_file_ids_are_unique` | 0 | ⬜ |
+| `TEST-194.11` | 103–113 | بلوک | `test_block_ids_are_unique` | 0 | ⬜ |
+| `TEST-194.12` | 114–115 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.13` | 116–118 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.14` | 119–132 | بلوک | `test_file_fingerprints_are_current` | 0 | ⬜ |
+| `TEST-194.15` | 133–149 | بلوک | `test_block_fingerprints_are_current` | 0 | ⬜ |
+| `TEST-194.16` | 150–161 | بلوک | `test_block_ranges_are_inside_the_file` | 0 | ⬜ |
+| `TEST-194.17` | 162–163 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.18` | 164–166 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.19` | 167–210 | بلوک | `test_every_nonblank_line_is_covered_exactly_once` | 0 | ⬜ |
+| `TEST-194.20` | 211–233 | بلوک | `test_symbol_blocks_end_on_a_closing_brace` | 0 | ⬜ |
+| `TEST-194.21` | 234–235 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.22` | 236–238 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.23` | 239–244 | بلوک | `test_ledger_exists_and_is_valid_json` | 0 | ⬜ |
+| `TEST-194.24` | 245–254 | بلوک | `test_ledger_entries_point_at_real_addresses` | 0 | ⬜ |
+| `TEST-194.25` | 255–271 | بلوک | `test_ledger_flags_blocks_changed_since_review` | 0 | ⬜ |
+| `TEST-194.26` | 272–286 | بلوک | `test_human_readable_map_is_in_sync` | 0 | ⬜ |
+| `TEST-194.27` | 287–288 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.28` | 289–294 | بلوک | `-` | 0 | ⬜ |
+| `TEST-194.29` | 295–299 | بلوک | `topics` | 0 | ⬜ |
+| `TEST-194.30` | 300–312 | بلوک | `test_every_page_of_the_system_has_a_topic` | 0 | ⬜ |
+| `TEST-194.31` | 313–320 | بلوک | `test_every_permission_has_a_topic` | 0 | ⬜ |
+| `TEST-194.32` | 321–328 | بلوک | `test_every_topic_resolves_to_at_least_one_address` | 0 | ⬜ |
+| `TEST-194.33` | 329–339 | بلوک | `test_topic_addresses_exist_in_the_block_index` | 0 | ⬜ |
+| `TEST-194.34` | 340–347 | بلوک | `test_boot_file_points_agents_at_the_map` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-195</b> — <code>tests/test_system_update_archive_paths.php</code> (41 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-195</b> — <code>tests/test_system_map_static.py</code> (172 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-195.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 1 | ⬜ |
-| `TEST-195.02` | 6–6 | تابع | `db` | 0 | ⬜ |
-| `TEST-195.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-195.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-195.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-195.06` | 10–41 | ناحیه | `بلوک رویه‌ای 10-41` | 4 | ⬜ |
+| `TEST-195.01` | 1–33 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-195.02` | 34–38 | بلوک | `load` | 0 | ⬜ |
+| `TEST-195.03` | 39–42 | بلوک | `main` | 0 | ⬜ |
+| `TEST-195.04` | 43–156 | بلوک | `check` | 0 | ⬜ |
+| `TEST-195.05` | 157–172 | بلوک | `نتیجه` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-196</b> — <code>tests/test_system_update_archive_zip.php</code> (156 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-196</b> — <code>tests/test_system_update_archive_paths.php</code> (41 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-196.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-196.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 1 | ⬜ |
 | `TEST-196.02` | 6–6 | تابع | `db` | 0 | ⬜ |
 | `TEST-196.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
 | `TEST-196.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
 | `TEST-196.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-196.06` | 10–16 | ناحیه | `بلوک رویه‌ای 10-16` | 1 | ⬜ |
-| `TEST-196.07` | 17–39 | تابع | `make_test_zip` | 5 | ⬜ |
-| `TEST-196.08` | 41–59 | تابع | `assert_zip_rejected` | 5 | ⬜ |
-| `TEST-196.09` | 60–82 | ناحیه | `بلوک رویه‌ای 60-82` | 5 | ⬜ |
-| `TEST-196.10` | 83–92 | تابع | `package_test_rejects` | 0 | ⬜ |
-| `TEST-196.11` | 93–156 | ناحیه | `بلوک رویه‌ای 93-156` | **8** | ⬜ |
+| `TEST-196.06` | 10–41 | ناحیه | `بلوک رویه‌ای 10-41` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-197</b> — <code>tests/test_system_update_migration_failure_gates.php</code> (232 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-197</b> — <code>tests/test_system_update_archive_zip.php</code> (156 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-197.01` | 1–47 | ناحیه | `بلوک رویه‌ای 1-47` | 5 | ⬜ |
-| `TEST-197.02` | 48–51 | تابع | `db` | 0 | ⬜ |
-| `TEST-197.03` | 53–56 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-197.04` | 58–61 | تابع | `backup_mysql_binary` | 0 | ⬜ |
-| `TEST-197.05` | 63–66 | تابع | `create_backup_bundle` | 0 | ⬜ |
-| `TEST-197.06` | 68–86 | تابع | `backup_run_process` | 4 | ⬜ |
-| `TEST-197.07` | 88–91 | تابع | `save_audit_required` | 0 | ⬜ |
-| `TEST-197.08` | 92–95 | ناحیه | `بلوک رویه‌ای 92-95` | 1 | ⬜ |
-| `TEST-197.09` | 96–102 | تابع | `rc_update_check` | 0 | ⬜ |
-| `TEST-197.10` | 104–127 | تابع | `rc_update_package` | 1 | ⬜ |
-| `TEST-197.11` | 129–137 | تابع | `rc_update_upload` | 0 | ⬜ |
-| `TEST-197.12` | 139–146 | تابع | `rc_update_table_exists` | 0 | ⬜ |
-| `TEST-197.13` | 147–232 | ناحیه | `بلوک رویه‌ای 147-232` | **17** | ⬜ |
+| `TEST-197.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
+| `TEST-197.02` | 6–6 | تابع | `db` | 0 | ⬜ |
+| `TEST-197.03` | 7–7 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-197.04` | 8–8 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-197.05` | 9–9 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-197.06` | 10–16 | ناحیه | `بلوک رویه‌ای 10-16` | 1 | ⬜ |
+| `TEST-197.07` | 17–39 | تابع | `make_test_zip` | 5 | ⬜ |
+| `TEST-197.08` | 41–59 | تابع | `assert_zip_rejected` | 5 | ⬜ |
+| `TEST-197.09` | 60–82 | ناحیه | `بلوک رویه‌ای 60-82` | 5 | ⬜ |
+| `TEST-197.10` | 83–92 | تابع | `package_test_rejects` | 0 | ⬜ |
+| `TEST-197.11` | 93–156 | ناحیه | `بلوک رویه‌ای 93-156` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-198</b> — <code>tests/test_system_update_migration_registry.php</code> (68 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-198</b> — <code>tests/test_system_update_migration_failure_gates.php</code> (232 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-198.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
-| `TEST-198.02` | 7–30 | کلاس | `MigrationRegistryFakeStatement` | 0 | ⬜ |
-| `TEST-198.03` | 32–41 | کلاس | `MigrationRegistryFakeDb` | 0 | ⬜ |
-| `TEST-198.04` | 42–44 | ناحیه | `بلوک رویه‌ای 42-44` | 0 | ⬜ |
-| `TEST-198.05` | 45–48 | تابع | `db` | 0 | ⬜ |
-| `TEST-198.06` | 49–49 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-198.07` | 50–50 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-198.08` | 51–51 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-198.09` | 52–68 | ناحیه | `بلوک رویه‌ای 52-68` | 1 | ⬜ |
+| `TEST-198.01` | 1–47 | ناحیه | `بلوک رویه‌ای 1-47` | 5 | ⬜ |
+| `TEST-198.02` | 48–51 | تابع | `db` | 0 | ⬜ |
+| `TEST-198.03` | 53–56 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-198.04` | 58–61 | تابع | `backup_mysql_binary` | 0 | ⬜ |
+| `TEST-198.05` | 63–66 | تابع | `create_backup_bundle` | 0 | ⬜ |
+| `TEST-198.06` | 68–86 | تابع | `backup_run_process` | 4 | ⬜ |
+| `TEST-198.07` | 88–91 | تابع | `save_audit_required` | 0 | ⬜ |
+| `TEST-198.08` | 92–95 | ناحیه | `بلوک رویه‌ای 92-95` | 1 | ⬜ |
+| `TEST-198.09` | 96–102 | تابع | `rc_update_check` | 0 | ⬜ |
+| `TEST-198.10` | 104–127 | تابع | `rc_update_package` | 1 | ⬜ |
+| `TEST-198.11` | 129–137 | تابع | `rc_update_upload` | 0 | ⬜ |
+| `TEST-198.12` | 139–146 | تابع | `rc_update_table_exists` | 0 | ⬜ |
+| `TEST-198.13` | 147–232 | ناحیه | `بلوک رویه‌ای 147-232` | **17** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-199</b> — <code>tests/test_system_update_requires_version.php</code> (96 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-199</b> — <code>tests/test_system_update_migration_registry.php</code> (68 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-199.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
-| `TEST-199.02` | 20–20 | ناحیه | `system-update.php در سطح فایل فقط تابع تعریف می‌کن` | 1 | ⬜ |
-| `TEST-199.03` | 21–24 | تابع | `db` | 0 | ⬜ |
-| `TEST-199.04` | 25–27 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-199.05` | 28–31 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-199.06` | 32–35 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-199.07` | 36–39 | ناحیه | `بلوک رویه‌ای 36-39` | 1 | ⬜ |
-| `TEST-199.08` | 40–47 | تابع | `expect` | 0 | ⬜ |
-| `TEST-199.09` | 49–53 | تابع | `allowed` | 0 | ⬜ |
-| `TEST-199.10` | 55–59 | ناحیه | `پیش‌نیاز برآورده` | 0 | ⬜ |
-| `TEST-199.11` | 60–64 | ناحیه | `پیش‌نیاز برآورده نیست` | 0 | ⬜ |
-| `TEST-199.12` | 65–71 | ناحیه | `متن خطا باید قابل اقدام باشد` | 0 | ⬜ |
-| `TEST-199.13` | 72–78 | ناحیه | `سازگاری با بسته‌های قدیمی` | 0 | ⬜ |
-| `TEST-199.14` | 79–83 | ناحیه | `درهای خروج` | 0 | ⬜ |
-| `TEST-199.15` | 84–87 | ناحیه | `نسخه‌های با تعداد جزء متفاوت` | 0 | ⬜ |
-| `TEST-199.16` | 88–96 | ناحیه | `بستهٔ واقعی این نسخه` | 3 | ⬜ |
+| `TEST-199.01` | 1–6 | ناحیه | `بلوک رویه‌ای 1-6` | 0 | ⬜ |
+| `TEST-199.02` | 7–30 | کلاس | `MigrationRegistryFakeStatement` | 0 | ⬜ |
+| `TEST-199.03` | 32–41 | کلاس | `MigrationRegistryFakeDb` | 0 | ⬜ |
+| `TEST-199.04` | 42–44 | ناحیه | `بلوک رویه‌ای 42-44` | 0 | ⬜ |
+| `TEST-199.05` | 45–48 | تابع | `db` | 0 | ⬜ |
+| `TEST-199.06` | 49–49 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-199.07` | 50–50 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-199.08` | 51–51 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-199.09` | 52–68 | ناحیه | `بلوک رویه‌ای 52-68` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-200</b> — <code>tests/test_technical_profile_form_refresh_static.py</code> (68 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-200</b> — <code>tests/test_system_update_requires_version.php</code> (96 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-200.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-200.02` | 16–37 | بلوک | `test_current_profile_module_has_complete_form_and_` | 0 | ⬜ |
-| `TEST-200.03` | 38–68 | بلوک | `test_form_hotfix_packages_the_renderer_styles_and_` | 0 | ⬜ |
+| `TEST-200.01` | 1–19 | ناحیه | `بلوک رویه‌ای 1-19` | 0 | ⬜ |
+| `TEST-200.02` | 20–20 | ناحیه | `system-update.php در سطح فایل فقط تابع تعریف می‌کن` | 1 | ⬜ |
+| `TEST-200.03` | 21–24 | تابع | `db` | 0 | ⬜ |
+| `TEST-200.04` | 25–27 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-200.05` | 28–31 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-200.06` | 32–35 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-200.07` | 36–39 | ناحیه | `بلوک رویه‌ای 36-39` | 1 | ⬜ |
+| `TEST-200.08` | 40–47 | تابع | `expect` | 0 | ⬜ |
+| `TEST-200.09` | 49–53 | تابع | `allowed` | 0 | ⬜ |
+| `TEST-200.10` | 55–59 | ناحیه | `پیش‌نیاز برآورده` | 0 | ⬜ |
+| `TEST-200.11` | 60–64 | ناحیه | `پیش‌نیاز برآورده نیست` | 0 | ⬜ |
+| `TEST-200.12` | 65–71 | ناحیه | `متن خطا باید قابل اقدام باشد` | 0 | ⬜ |
+| `TEST-200.13` | 72–78 | ناحیه | `سازگاری با بسته‌های قدیمی` | 0 | ⬜ |
+| `TEST-200.14` | 79–83 | ناحیه | `درهای خروج` | 0 | ⬜ |
+| `TEST-200.15` | 84–87 | ناحیه | `نسخه‌های با تعداد جزء متفاوت` | 0 | ⬜ |
+| `TEST-200.16` | 88–96 | ناحیه | `بستهٔ واقعی این نسخه` | 3 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-201</b> — <code>tests/test_ticket_auto_assignment_static.py</code> (26 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>TEST-201</b> — <code>tests/test_technical_profile_form_refresh_static.py</code> (68 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-201.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-201.02` | 7–7 | بلوک | `TicketAutoAssignmentStaticTests` | 0 | ⬜ |
-| `TEST-201.03` | 8–17 | بلوک | `test_regular_managers_are_limited_to_the_ticket_de` | 0 | ⬜ |
-| `TEST-201.04` | 18–26 | بلوک | `test_ticket_creation_passes_its_resolved_departmen` | 0 | ⬜ |
+| `TEST-201.01` | 1–15 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-201.02` | 16–37 | بلوک | `test_current_profile_module_has_complete_form_and_` | 0 | ⬜ |
+| `TEST-201.03` | 38–68 | بلوک | `test_form_hotfix_packages_the_renderer_styles_and_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-202</b> — <code>tests/test_ticket_cancellation_static.py</code> (140 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-202</b> — <code>tests/test_ticket_auto_assignment_static.py</code> (26 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-202.01` | 1–22 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-202.02` | 23–140 | بلوک | `check` | 1 | ⬜ |
+| `TEST-202.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-202.02` | 7–7 | بلوک | `TicketAutoAssignmentStaticTests` | 0 | ⬜ |
+| `TEST-202.03` | 8–17 | بلوک | `test_regular_managers_are_limited_to_the_ticket_de` | 0 | ⬜ |
+| `TEST-202.04` | 18–26 | بلوک | `test_ticket_creation_passes_its_resolved_departmen` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-203</b> — <code>tests/test_ticket_lifecycle_guide_static.py</code> (42 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-203</b> — <code>tests/test_ticket_cancellation_static.py</code> (140 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-203.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-203.02` | 7–8 | بلوک | `TicketLifecycleGuideStaticTests` | 0 | ⬜ |
-| `TEST-203.03` | 9–11 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-203.04` | 12–16 | بلوک | `test_role_guide_is_linked_from_the_toc` | 0 | ⬜ |
-| `TEST-203.05` | 17–34 | بلوک | `test_lifecycle_explains_roles_and_closure_path` | 0 | ⬜ |
-| `TEST-203.06` | 35–42 | بلوک | `test_resolved_ticket_instructions_use_the_actual_r` | 0 | ⬜ |
+| `TEST-203.01` | 1–22 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-203.02` | 23–140 | بلوک | `check` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-204</b> — <code>tests/test_ticket_number_autofill_unit.php</code> (159 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
+<summary><b>TEST-204</b> — <code>tests/test_ticket_lifecycle_guide_static.py</code> (42 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-204.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
-| `TEST-204.02` | 30–40 | تابع | `tn_missing_rows` | 0 | ⬜ |
-| `TEST-204.03` | 42–105 | کلاس | `TnStatement` | 1 | ⬜ |
-| `TEST-204.04` | 107–113 | کلاس | `TnDb` | 4 | ⬜ |
-| `TEST-204.05` | 115–115 | تابع | `db` | 0 | ⬜ |
-| `TEST-204.06` | 116–116 | تابع | `setting` | 0 | ⬜ |
-| `TEST-204.07` | 117–117 | تابع | `save_setting` | 0 | ⬜ |
-| `TEST-204.08` | 118–118 | تابع | `db_in_transaction` | 0 | ⬜ |
-| `TEST-204.09` | 119–119 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-204.10` | 120–122 | ناحیه | `بلوک رویه‌ای 120-122` | 0 | ⬜ |
-| `TEST-204.11` | 123–127 | تابع | `tn_check` | 0 | ⬜ |
-| `TEST-204.12` | 129–132 | ناحیه | `۱) کف شمارنده از بزرگ‌ترین شمارهٔ موجود خوانده می‌` | 0 | ⬜ |
-| `TEST-204.13` | 133–147 | ناحیه | `۲) ترمیم کامل بدون برخورد یکتایی` | 0 | ⬜ |
-| `TEST-204.14` | 148–150 | ناحیه | `۳) هر ردیف دقیقاً یک تلاش: یعنی هیچ برخوردی رخ ندا` | 1 | ⬜ |
-| `TEST-204.15` | 151–153 | ناحیه | `۴) نشانگر ثبت می‌شود تا اسکن در هر بارگذاری صفحه ت` | 0 | ⬜ |
-| `TEST-204.16` | 154–159 | ناحیه | `۵) شمارنده برای تولید شمارهٔ بعدی به‌روز می‌شود` | 0 | ⬜ |
+| `TEST-204.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-204.02` | 7–8 | بلوک | `TicketLifecycleGuideStaticTests` | 0 | ⬜ |
+| `TEST-204.03` | 9–11 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-204.04` | 12–16 | بلوک | `test_role_guide_is_linked_from_the_toc` | 0 | ⬜ |
+| `TEST-204.05` | 17–34 | بلوک | `test_lifecycle_explains_roles_and_closure_path` | 0 | ⬜ |
+| `TEST-204.06` | 35–42 | بلوک | `test_resolved_ticket_instructions_use_the_actual_r` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-205</b> — <code>tests/test_ticket_number_repair_static.py</code> (146 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
+<summary><b>TEST-205</b> — <code>tests/test_ticket_number_autofill_unit.php</code> (159 خط، 16 آدرس، بازبینی‌شده 0/16)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-205.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-205.02` | 17–21 | بلوک | `read` | 0 | ⬜ |
-| `TEST-205.03` | 22–28 | بلوک | `autofill_body` | 0 | ⬜ |
-| `TEST-205.04` | 29–39 | بلوک | `test_autofill_seeds_counter_from_existing_maximum` | 0 | ⬜ |
-| `TEST-205.05` | 40–51 | بلوک | `test_sequence_floor_consults_both_counter_and_exis` | 0 | ⬜ |
-| `TEST-205.06` | 52–59 | بلوک | `test_autofill_isolates_each_row_so_one_failure_doe` | 0 | ⬜ |
-| `TEST-205.07` | 60–65 | بلوک | `test_autofill_reads_in_batches_and_cannot_loop_for` | 0 | ⬜ |
-| `TEST-205.08` | 66–76 | بلوک | `test_completion_marker_is_not_trapped_in_the_empty` | 0 | ⬜ |
-| `TEST-205.09` | 77–85 | بلوک | `test_counter_is_persisted_back_to_the_sequence_tab` | 0 | ⬜ |
-| `TEST-205.10` | 86–98 | بلوک | `test_fallback_number_is_not_a_fake_lookalike` | 0 | ⬜ |
-| `TEST-205.11` | 99–109 | بلوک | `test_chatbot_still_recognises_the_internal_referen` | 0 | ⬜ |
-| `TEST-205.12` | 110–121 | بلوک | `test_list_pages_prime_the_number_cache_instead_of_` | 0 | ⬜ |
-| `TEST-205.13` | 122–132 | بلوک | `test_cache_prime_helper_exists_and_tolerates_bad_r` | 0 | ⬜ |
-| `TEST-205.14` | 133–139 | بلوک | `test_bulk_update_has_a_selection_cap` | 0 | ⬜ |
-| `TEST-205.15` | 140–146 | بلوک | `test_bulk_update_reports_tickets_that_were_already` | 0 | ⬜ |
+| `TEST-205.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
+| `TEST-205.02` | 30–40 | تابع | `tn_missing_rows` | 0 | ⬜ |
+| `TEST-205.03` | 42–105 | کلاس | `TnStatement` | 1 | ⬜ |
+| `TEST-205.04` | 107–113 | کلاس | `TnDb` | 4 | ⬜ |
+| `TEST-205.05` | 115–115 | تابع | `db` | 0 | ⬜ |
+| `TEST-205.06` | 116–116 | تابع | `setting` | 0 | ⬜ |
+| `TEST-205.07` | 117–117 | تابع | `save_setting` | 0 | ⬜ |
+| `TEST-205.08` | 118–118 | تابع | `db_in_transaction` | 0 | ⬜ |
+| `TEST-205.09` | 119–119 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-205.10` | 120–122 | ناحیه | `بلوک رویه‌ای 120-122` | 0 | ⬜ |
+| `TEST-205.11` | 123–127 | تابع | `tn_check` | 0 | ⬜ |
+| `TEST-205.12` | 129–132 | ناحیه | `۱) کف شمارنده از بزرگ‌ترین شمارهٔ موجود خوانده می‌` | 0 | ⬜ |
+| `TEST-205.13` | 133–147 | ناحیه | `۲) ترمیم کامل بدون برخورد یکتایی` | 0 | ⬜ |
+| `TEST-205.14` | 148–150 | ناحیه | `۳) هر ردیف دقیقاً یک تلاش: یعنی هیچ برخوردی رخ ندا` | 1 | ⬜ |
+| `TEST-205.15` | 151–153 | ناحیه | `۴) نشانگر ثبت می‌شود تا اسکن در هر بارگذاری صفحه ت` | 0 | ⬜ |
+| `TEST-205.16` | 154–159 | ناحیه | `۵) شمارنده برای تولید شمارهٔ بعدی به‌روز می‌شود` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-206</b> — <code>tests/test_ticket_routing_unit.php</code> (182 خط، 38 آدرس، بازبینی‌شده 0/38)</summary>
+<summary><b>TEST-206</b> — <code>tests/test_ticket_number_repair_static.py</code> (146 خط، 15 آدرس، بازبینی‌شده 0/15)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-206.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-206.02` | 4–5 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
-| `TEST-206.03` | 6–9 | تابع | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-206.04` | 10–10 | تابع | `is_staff_role` | 0 | ⬜ |
-| `TEST-206.05` | 11–11 | تابع | `is_assignable_role` | 0 | ⬜ |
-| `TEST-206.06` | 12–12 | تابع | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-206.07` | 13–13 | تابع | `is_it_agent` | 0 | ⬜ |
-| `TEST-206.08` | 14–16 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-206.09` | 17–17 | تابع | `permission_roles` | 0 | ⬜ |
-| `TEST-206.10` | 18–18 | تابع | `permission_table_ready` | 0 | ⬜ |
-| `TEST-206.11` | 19–19 | تابع | `role_permissions_custom` | 0 | ⬜ |
-| `TEST-206.12` | 20–20 | تابع | `role_permission_effective_codes` | 0 | ⬜ |
-| `TEST-206.13` | 21–34 | کلاس | `FakeTicketStatement` | 0 | ⬜ |
-| `TEST-206.14` | 35–38 | کلاس | `FakeTicketDatabase` | 0 | ⬜ |
-| `TEST-206.15` | 39–39 | تابع | `db` | 0 | ⬜ |
-| `TEST-206.16` | 40–41 | ناحیه | `بلوک رویه‌ای 40-41` | 0 | ⬜ |
-| `TEST-206.17` | 42–45 | تابع | `check_ticket` | 0 | ⬜ |
-| `TEST-206.18` | 46–102 | ناحیه | `بلوک رویه‌ای 46-102` | 0 | ⬜ |
-| `TEST-206.19` | 103–103 | ناحیه | `تفکیک وظایف و سه نما (۱.۶۲.۸۴)` | 0 | ⬜ |
-| `TEST-206.20` | 104–108 | ناحیه | `سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه` | 0 | ⬜ |
-| `TEST-206.21` | 109–111 | ناحیه | `همان مدیر روی درخواست دیگران همچنان سرپرست است.` | 0 | ⬜ |
-| `TEST-206.22` | 112–114 | ناحیه | `کارشناس مسئول: نمای کارشناس، نه سرپرست.` | 0 | ⬜ |
-| `TEST-206.23` | 115–117 | ناحیه | `ثبت‌کنندهٔ عادی.` | 0 | ⬜ |
-| `TEST-206.24` | 118–134 | ناحیه | `استثنای مهم: کسی که هم ثبت‌کننده و هم کارشناس مسئو` | 0 | ⬜ |
-| `TEST-206.25` | 135–135 | ناحیه | `تفکیک وظایف در لحظهٔ ارجاع و تقویم کاری (بستهٔ ۶ —` | 0 | ⬜ |
-| `TEST-206.26` | 136–136 | ناحیه | `بستهٔ ۵ نمای پس از ارجاع را بست؛ اینجا خودِ لحظهٔ ` | 0 | ⬜ |
-| `TEST-206.27` | 137–138 | ناحیه | `$users[2] کارشناس پشتیبانی فعال و واجد شرایط است (` | 0 | ⬜ |
-| `TEST-206.28` | 139–142 | ناحیه | `۱) کارشناس روی درخواست دیگری همچنان واجد شرایط است` | 0 | ⬜ |
-| `TEST-206.29` | 143–146 | ناحیه | `۲) همان کارشناس روی درخواستی که خودش ثبت کرده، دیگ` | 0 | ⬜ |
-| `TEST-206.30` | 147–158 | ناحیه | `۳) ادمین اصلی هم مستثنا نیست؛ میان‌بُر نقش نباید گ` | 0 | ⬜ |
-| `TEST-206.31` | 159–159 | ناحیه | `۴) درخواست بدون ثبت‌کنندهٔ مشخص (requester_id = 0)` | 0 | ⬜ |
-| `TEST-206.32` | 160–163 | ناحیه | `choose_handling_agent() در حالت پیش‌فرض دقیقاً همی` | 0 | ⬜ |
-| `TEST-206.33` | 164–164 | ناحیه | `۵) سازگاری با بستهٔ ۵: کسی که هم ثبت‌کننده و هم مس` | 0 | ⬜ |
-| `TEST-206.34` | 165–169 | ناحیه | `از دست نمی‌دهد. گارد تازه فقط ارجاعِ تازه را می‌بن` | 0 | ⬜ |
-| `TEST-206.35` | 170–170 | ناحیه | `۶) دریچهٔ اضطراری واحد تک‌نفره: وقتی security.allo` | 0 | ⬜ |
-| `TEST-206.36` | 171–171 | ناحیه | `همان کاربر دوباره واجد شرایط می‌شود. cfg() از پیکر` | 0 | ⬜ |
-| `TEST-206.37` | 172–177 | ناحیه | `چون کلید پیش‌فرض تعریف نشده، همهٔ بررسی‌های بالاتر` | 0 | ⬜ |
-| `TEST-206.38` | 178–181 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-206.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-206.02` | 17–21 | بلوک | `read` | 0 | ⬜ |
+| `TEST-206.03` | 22–28 | بلوک | `autofill_body` | 0 | ⬜ |
+| `TEST-206.04` | 29–39 | بلوک | `test_autofill_seeds_counter_from_existing_maximum` | 0 | ⬜ |
+| `TEST-206.05` | 40–51 | بلوک | `test_sequence_floor_consults_both_counter_and_exis` | 0 | ⬜ |
+| `TEST-206.06` | 52–59 | بلوک | `test_autofill_isolates_each_row_so_one_failure_doe` | 0 | ⬜ |
+| `TEST-206.07` | 60–65 | بلوک | `test_autofill_reads_in_batches_and_cannot_loop_for` | 0 | ⬜ |
+| `TEST-206.08` | 66–76 | بلوک | `test_completion_marker_is_not_trapped_in_the_empty` | 0 | ⬜ |
+| `TEST-206.09` | 77–85 | بلوک | `test_counter_is_persisted_back_to_the_sequence_tab` | 0 | ⬜ |
+| `TEST-206.10` | 86–98 | بلوک | `test_fallback_number_is_not_a_fake_lookalike` | 0 | ⬜ |
+| `TEST-206.11` | 99–109 | بلوک | `test_chatbot_still_recognises_the_internal_referen` | 0 | ⬜ |
+| `TEST-206.12` | 110–121 | بلوک | `test_list_pages_prime_the_number_cache_instead_of_` | 0 | ⬜ |
+| `TEST-206.13` | 122–132 | بلوک | `test_cache_prime_helper_exists_and_tolerates_bad_r` | 0 | ⬜ |
+| `TEST-206.14` | 133–139 | بلوک | `test_bulk_update_has_a_selection_cap` | 0 | ⬜ |
+| `TEST-206.15` | 140–146 | بلوک | `test_bulk_update_reports_tickets_that_were_already` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-207</b> — <code>tests/test_ticket_scope_sql_node.js</code> (22 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-207</b> — <code>tests/test_ticket_routing_unit.php</code> (182 خط، 38 آدرس، بازبینی‌شده 0/38)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-207.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-207.02` | 6–6 | بلوک | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-207.03` | 7–7 | بلوک | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-207.04` | 8–8 | بلوک | `user_can` | 0 | ⬜ |
-| `TEST-207.05` | 9–9 | بلوک | `is_it_agent` | 0 | ⬜ |
-| `TEST-207.06` | 10–10 | بلوک | `S` | 0 | ⬜ |
-| `TEST-207.07` | 11–11 | بلوک | `D` | 0 | ⬜ |
-| `TEST-207.08` | 12–22 | بلوک | `db` | 1 | ⬜ |
+| `TEST-207.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-207.02` | 4–5 | ناحیه | `Offline behavioural tests: no real configuration, ` | 0 | ⬜ |
+| `TEST-207.03` | 6–9 | تابع | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-207.04` | 10–10 | تابع | `is_staff_role` | 0 | ⬜ |
+| `TEST-207.05` | 11–11 | تابع | `is_assignable_role` | 0 | ⬜ |
+| `TEST-207.06` | 12–12 | تابع | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-207.07` | 13–13 | تابع | `is_it_agent` | 0 | ⬜ |
+| `TEST-207.08` | 14–16 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-207.09` | 17–17 | تابع | `permission_roles` | 0 | ⬜ |
+| `TEST-207.10` | 18–18 | تابع | `permission_table_ready` | 0 | ⬜ |
+| `TEST-207.11` | 19–19 | تابع | `role_permissions_custom` | 0 | ⬜ |
+| `TEST-207.12` | 20–20 | تابع | `role_permission_effective_codes` | 0 | ⬜ |
+| `TEST-207.13` | 21–34 | کلاس | `FakeTicketStatement` | 0 | ⬜ |
+| `TEST-207.14` | 35–38 | کلاس | `FakeTicketDatabase` | 0 | ⬜ |
+| `TEST-207.15` | 39–39 | تابع | `db` | 0 | ⬜ |
+| `TEST-207.16` | 40–41 | ناحیه | `بلوک رویه‌ای 40-41` | 0 | ⬜ |
+| `TEST-207.17` | 42–45 | تابع | `check_ticket` | 0 | ⬜ |
+| `TEST-207.18` | 46–102 | ناحیه | `بلوک رویه‌ای 46-102` | 0 | ⬜ |
+| `TEST-207.19` | 103–103 | ناحیه | `تفکیک وظایف و سه نما (۱.۶۲.۸۴)` | 0 | ⬜ |
+| `TEST-207.20` | 104–108 | ناحیه | `سناریو: مدیر حوزه (کاربر ۴، نقش manager، همان گروه` | 0 | ⬜ |
+| `TEST-207.21` | 109–111 | ناحیه | `همان مدیر روی درخواست دیگران همچنان سرپرست است.` | 0 | ⬜ |
+| `TEST-207.22` | 112–114 | ناحیه | `کارشناس مسئول: نمای کارشناس، نه سرپرست.` | 0 | ⬜ |
+| `TEST-207.23` | 115–117 | ناحیه | `ثبت‌کنندهٔ عادی.` | 0 | ⬜ |
+| `TEST-207.24` | 118–134 | ناحیه | `استثنای مهم: کسی که هم ثبت‌کننده و هم کارشناس مسئو` | 0 | ⬜ |
+| `TEST-207.25` | 135–135 | ناحیه | `تفکیک وظایف در لحظهٔ ارجاع و تقویم کاری (بستهٔ ۶ —` | 0 | ⬜ |
+| `TEST-207.26` | 136–136 | ناحیه | `بستهٔ ۵ نمای پس از ارجاع را بست؛ اینجا خودِ لحظهٔ ` | 0 | ⬜ |
+| `TEST-207.27` | 137–138 | ناحیه | `$users[2] کارشناس پشتیبانی فعال و واجد شرایط است (` | 0 | ⬜ |
+| `TEST-207.28` | 139–142 | ناحیه | `۱) کارشناس روی درخواست دیگری همچنان واجد شرایط است` | 0 | ⬜ |
+| `TEST-207.29` | 143–146 | ناحیه | `۲) همان کارشناس روی درخواستی که خودش ثبت کرده، دیگ` | 0 | ⬜ |
+| `TEST-207.30` | 147–158 | ناحیه | `۳) ادمین اصلی هم مستثنا نیست؛ میان‌بُر نقش نباید گ` | 0 | ⬜ |
+| `TEST-207.31` | 159–159 | ناحیه | `۴) درخواست بدون ثبت‌کنندهٔ مشخص (requester_id = 0)` | 0 | ⬜ |
+| `TEST-207.32` | 160–163 | ناحیه | `choose_handling_agent() در حالت پیش‌فرض دقیقاً همی` | 0 | ⬜ |
+| `TEST-207.33` | 164–164 | ناحیه | `۵) سازگاری با بستهٔ ۵: کسی که هم ثبت‌کننده و هم مس` | 0 | ⬜ |
+| `TEST-207.34` | 165–169 | ناحیه | `از دست نمی‌دهد. گارد تازه فقط ارجاعِ تازه را می‌بن` | 0 | ⬜ |
+| `TEST-207.35` | 170–170 | ناحیه | `۶) دریچهٔ اضطراری واحد تک‌نفره: وقتی security.allo` | 0 | ⬜ |
+| `TEST-207.36` | 171–171 | ناحیه | `همان کاربر دوباره واجد شرایط می‌شود. cfg() از پیکر` | 0 | ⬜ |
+| `TEST-207.37` | 172–177 | ناحیه | `چون کلید پیش‌فرض تعریف نشده، همهٔ بررسی‌های بالاتر` | 0 | ⬜ |
+| `TEST-207.38` | 178–181 | تابع | `cfg` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-208</b> — <code>tests/test_ticket_sla_unit.php</code> (52 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-208</b> — <code>tests/test_ticket_scope_sql_node.js</code> (22 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-208.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-208.02` | 4–5 | ناحیه | `Tests use an in-memory event stub, never the produ` | 0 | ⬜ |
-| `TEST-208.03` | 6–6 | تابع | `cfg` | 0 | ⬜ |
-| `TEST-208.04` | 7–7 | تابع | `ticket_is_waiting_status` | 0 | ⬜ |
-| `TEST-208.05` | 8–8 | تابع | `is_sla_holiday` | 0 | ⬜ |
-| `TEST-208.06` | 9–12 | کلاس | `SlaFakeStatement` | 0 | ⬜ |
-| `TEST-208.07` | 13–15 | کلاس | `SlaFakeDb` | 0 | ⬜ |
-| `TEST-208.08` | 16–16 | تابع | `db` | 0 | ⬜ |
-| `TEST-208.09` | 17–17 | ناحیه | `بلوک رویه‌ای 17-17` | 0 | ⬜ |
-| `TEST-208.10` | 18–21 | تابع | `sla_check` | 0 | ⬜ |
-| `TEST-208.11` | 22–52 | ناحیه | `بلوک رویه‌ای 22-52` | 0 | ⬜ |
+| `TEST-208.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-208.02` | 6–6 | بلوک | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-208.03` | 7–7 | بلوک | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-208.04` | 8–8 | بلوک | `user_can` | 0 | ⬜ |
+| `TEST-208.05` | 9–9 | بلوک | `is_it_agent` | 0 | ⬜ |
+| `TEST-208.06` | 10–10 | بلوک | `S` | 0 | ⬜ |
+| `TEST-208.07` | 11–11 | بلوک | `D` | 0 | ⬜ |
+| `TEST-208.08` | 12–22 | بلوک | `db` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-209</b> — <code>tests/test_ticket_three_views_static.py</code> (155 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-209</b> — <code>tests/test_ticket_sla_unit.php</code> (52 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-209.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-209.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
-| `TEST-209.03` | 36–42 | بلوک | `php_function` | 0 | ⬜ |
-| `TEST-209.04` | 43–50 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-209.05` | 51–64 | بلوک | `test_handler_level_denies_supervisor_authority_ove` | 0 | ⬜ |
-| `TEST-209.06` | 65–76 | بلوک | `test_a_requester_who_is_also_the_assigned_agent_ca` | 0 | ⬜ |
-| `TEST-209.07` | 77–87 | بلوک | `test_reply_guard_keeps_its_explicit_requester_chec` | 0 | ⬜ |
-| `TEST-209.08` | 88–100 | بلوک | `test_a_single_function_answers_which_view_to_rende` | 0 | ⬜ |
-| `TEST-209.09` | 101–112 | بلوک | `test_the_ticket_page_uses_the_single_view_function` | 0 | ⬜ |
-| `TEST-209.10` | 113–125 | بلوک | `test_internal_notes_are_hidden_from_the_requester_` | 0 | ⬜ |
-| `TEST-209.11` | 126–133 | بلوک | `test_message_list_no_longer_decides_by_global_role` | 0 | ⬜ |
-| `TEST-209.12` | 134–146 | بلوک | `test_internal_attachment_download_uses_the_same_ru` | 0 | ⬜ |
-| `TEST-209.13` | 147–155 | بلوک | `test_scope_isolation_rules_are_untouched` | 0 | ⬜ |
+| `TEST-209.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-209.02` | 4–5 | ناحیه | `Tests use an in-memory event stub, never the produ` | 0 | ⬜ |
+| `TEST-209.03` | 6–6 | تابع | `cfg` | 0 | ⬜ |
+| `TEST-209.04` | 7–7 | تابع | `ticket_is_waiting_status` | 0 | ⬜ |
+| `TEST-209.05` | 8–8 | تابع | `is_sla_holiday` | 0 | ⬜ |
+| `TEST-209.06` | 9–12 | کلاس | `SlaFakeStatement` | 0 | ⬜ |
+| `TEST-209.07` | 13–15 | کلاس | `SlaFakeDb` | 0 | ⬜ |
+| `TEST-209.08` | 16–16 | تابع | `db` | 0 | ⬜ |
+| `TEST-209.09` | 17–17 | ناحیه | `بلوک رویه‌ای 17-17` | 0 | ⬜ |
+| `TEST-209.10` | 18–21 | تابع | `sla_check` | 0 | ⬜ |
+| `TEST-209.11` | 22–52 | ناحیه | `بلوک رویه‌ای 22-52` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-210</b> — <code>tests/test_ticket_tree_visibility_unit.php</code> (41 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-210</b> — <code>tests/test_ticket_three_views_static.py</code> (155 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-210.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `TEST-210.02` | 4–4 | تابع | `user_is_primary_admin` | 0 | ⬜ |
-| `TEST-210.03` | 5–5 | تابع | `is_global_ticket_role` | 0 | ⬜ |
-| `TEST-210.04` | 6–6 | تابع | `is_it_agent` | 0 | ⬜ |
-| `TEST-210.05` | 7–7 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-210.06` | 8–17 | کلاس | `ScopeStmt` | 0 | ⬜ |
-| `TEST-210.07` | 18–21 | کلاس | `ScopeDB` | 0 | ⬜ |
-| `TEST-210.08` | 22–22 | تابع | `db` | 0 | ⬜ |
-| `TEST-210.09` | 23–23 | ناحیه | `بلوک رویه‌ای 23-23` | 0 | ⬜ |
-| `TEST-210.10` | 24–24 | تابع | `ok` | 0 | ⬜ |
-| `TEST-210.11` | 25–41 | ناحیه | `بلوک رویه‌ای 25-41` | 0 | ⬜ |
+| `TEST-210.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-210.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
+| `TEST-210.03` | 36–42 | بلوک | `php_function` | 0 | ⬜ |
+| `TEST-210.04` | 43–50 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-210.05` | 51–64 | بلوک | `test_handler_level_denies_supervisor_authority_ove` | 0 | ⬜ |
+| `TEST-210.06` | 65–76 | بلوک | `test_a_requester_who_is_also_the_assigned_agent_ca` | 0 | ⬜ |
+| `TEST-210.07` | 77–87 | بلوک | `test_reply_guard_keeps_its_explicit_requester_chec` | 0 | ⬜ |
+| `TEST-210.08` | 88–100 | بلوک | `test_a_single_function_answers_which_view_to_rende` | 0 | ⬜ |
+| `TEST-210.09` | 101–112 | بلوک | `test_the_ticket_page_uses_the_single_view_function` | 0 | ⬜ |
+| `TEST-210.10` | 113–125 | بلوک | `test_internal_notes_are_hidden_from_the_requester_` | 0 | ⬜ |
+| `TEST-210.11` | 126–133 | بلوک | `test_message_list_no_longer_decides_by_global_role` | 0 | ⬜ |
+| `TEST-210.12` | 134–146 | بلوک | `test_internal_attachment_download_uses_the_same_ru` | 0 | ⬜ |
+| `TEST-210.13` | 147–155 | بلوک | `test_scope_isolation_rules_are_untouched` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-211</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (109 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-211</b> — <code>tests/test_ticket_tree_visibility_unit.php</code> (41 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-211.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-211.02` | 7–10 | بلوک | `source` | 0 | ⬜ |
-| `TEST-211.03` | 11–14 | بلوک | `section` | 0 | ⬜ |
-| `TEST-211.04` | 15–15 | بلوک | `TicketWorkflowSafetyTests` | 0 | ⬜ |
-| `TEST-211.05` | 16–26 | بلوک | `test_notification_candidates_are_checked_for_actua` | 0 | ⬜ |
-| `TEST-211.06` | 27–40 | بلوک | `test_assignment_checks_existing_assignee_and_role_` | 1 | ⬜ |
-| `TEST-211.07` | 41–52 | بلوک | `test_requester_and_nonhandler_reply_guards` | 2 | ⬜ |
-| `TEST-211.08` | 53–65 | بلوک | `test_concurrent_rating_and_auto_close_revalidate_u` | 1 | ⬜ |
-| `TEST-211.09` | 66–71 | بلوک | `test_claim_uses_full_assignee_eligibility` | 0 | ⬜ |
-| `TEST-211.10` | 72–78 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
-| `TEST-211.11` | 79–86 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
-| `TEST-211.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
-| `TEST-211.13` | 93–109 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
+| `TEST-211.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
+| `TEST-211.02` | 4–4 | تابع | `user_is_primary_admin` | 0 | ⬜ |
+| `TEST-211.03` | 5–5 | تابع | `is_global_ticket_role` | 0 | ⬜ |
+| `TEST-211.04` | 6–6 | تابع | `is_it_agent` | 0 | ⬜ |
+| `TEST-211.05` | 7–7 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-211.06` | 8–17 | کلاس | `ScopeStmt` | 0 | ⬜ |
+| `TEST-211.07` | 18–21 | کلاس | `ScopeDB` | 0 | ⬜ |
+| `TEST-211.08` | 22–22 | تابع | `db` | 0 | ⬜ |
+| `TEST-211.09` | 23–23 | ناحیه | `بلوک رویه‌ای 23-23` | 0 | ⬜ |
+| `TEST-211.10` | 24–24 | تابع | `ok` | 0 | ⬜ |
+| `TEST-211.11` | 25–41 | ناحیه | `بلوک رویه‌ای 25-41` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-212</b> — <code>tests/test_traffic_69_link_static.py</code> (25 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-212</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (109 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-212.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-212.02` | 5–14 | بلوک | `test_migration_is_additive_idempotent_and_does_not` | 0 | ⬜ |
-| `TEST-212.03` | 15–25 | بلوک | `test_shared_preview_export_and_real_destination_so` | 0 | ⬜ |
+| `TEST-212.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-212.02` | 7–10 | بلوک | `source` | 0 | ⬜ |
+| `TEST-212.03` | 11–14 | بلوک | `section` | 0 | ⬜ |
+| `TEST-212.04` | 15–15 | بلوک | `TicketWorkflowSafetyTests` | 0 | ⬜ |
+| `TEST-212.05` | 16–26 | بلوک | `test_notification_candidates_are_checked_for_actua` | 0 | ⬜ |
+| `TEST-212.06` | 27–40 | بلوک | `test_assignment_checks_existing_assignee_and_role_` | 1 | ⬜ |
+| `TEST-212.07` | 41–52 | بلوک | `test_requester_and_nonhandler_reply_guards` | 2 | ⬜ |
+| `TEST-212.08` | 53–65 | بلوک | `test_concurrent_rating_and_auto_close_revalidate_u` | 1 | ⬜ |
+| `TEST-212.09` | 66–71 | بلوک | `test_claim_uses_full_assignee_eligibility` | 0 | ⬜ |
+| `TEST-212.10` | 72–78 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
+| `TEST-212.11` | 79–86 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
+| `TEST-212.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
+| `TEST-212.13` | 93–109 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-213</b> — <code>tests/test_traffic_70_upgrade_static.py</code> (20 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-213</b> — <code>tests/test_traffic_69_link_static.py</code> (25 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-213.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-213.02` | 5–12 | بلوک | `test_cumulative_migration_only_backfills_when_019_` | 0 | ⬜ |
-| `TEST-213.03` | 13–20 | بلوک | `test_report_has_cache_busted_popup_assets` | 0 | ⬜ |
+| `TEST-213.02` | 5–14 | بلوک | `test_migration_is_additive_idempotent_and_does_not` | 0 | ⬜ |
+| `TEST-213.03` | 15–25 | بلوک | `test_shared_preview_export_and_real_destination_so` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-214</b> — <code>tests/test_traffic_destination_approver_static.py</code> (54 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-214</b> — <code>tests/test_traffic_70_upgrade_static.py</code> (20 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-214.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-214.02` | 7–13 | بلوک | `test_destination_approver_is_stored_in_all_schema_` | 0 | ⬜ |
-| `TEST-214.03` | 14–31 | بلوک | `test_destination_admin_can_create_edit_and_resolve` | 2 | ⬜ |
-| `TEST-214.04` | 32–44 | بلوک | `test_approver_autofills_for_new_and_edit_forms_and` | 0 | ⬜ |
-| `TEST-214.05` | 45–54 | بلوک | `test_release_manifest_and_download_page_list_new_d` | 1 | ⬜ |
+| `TEST-214.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-214.02` | 5–12 | بلوک | `test_cumulative_migration_only_backfills_when_019_` | 0 | ⬜ |
+| `TEST-214.03` | 13–20 | بلوک | `test_report_has_cache_busted_popup_assets` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-215</b> — <code>tests/test_traffic_destination_popup_browser.js</code> (66 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-215</b> — <code>tests/test_traffic_destination_approver_static.py</code> (54 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-215.01` | 1–28 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-215.02` | 29–66 | بلوک | `geometry` | 0 | ⬜ |
+| `TEST-215.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-215.02` | 7–13 | بلوک | `test_destination_approver_is_stored_in_all_schema_` | 0 | ⬜ |
+| `TEST-215.03` | 14–31 | بلوک | `test_destination_admin_can_create_edit_and_resolve` | 2 | ⬜ |
+| `TEST-215.04` | 32–44 | بلوک | `test_approver_autofills_for_new_and_edit_forms_and` | 0 | ⬜ |
+| `TEST-215.05` | 45–54 | بلوک | `test_release_manifest_and_download_page_list_new_d` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-216</b> — <code>tests/test_traffic_edit_history_static.py</code> (70 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-216</b> — <code>tests/test_traffic_destination_popup_browser.js</code> (66 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-216.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-216.02` | 6–14 | بلوک | `test_traffic_edit_form_includes_visit_date_and_bot` | 0 | ⬜ |
-| `TEST-216.03` | 15–25 | بلوک | `test_update_and_exit_changes_are_written_transacti` | 0 | ⬜ |
-| `TEST-216.04` | 26–35 | بلوک | `test_history_schema_exists_in_migration_and_fresh_` | 0 | ⬜ |
-| `TEST-216.05` | 36–42 | بلوک | `test_food_print_page_treats_layout_design_as_optio` | 0 | ⬜ |
-| `TEST-216.06` | 43–49 | بلوک | `test_shared_header_does_not_fail_when_layout_desig` | 0 | ⬜ |
-| `TEST-216.07` | 50–57 | بلوک | `test_food_panel_skips_invalid_empty_search_replace` | 0 | ⬜ |
-| `TEST-216.08` | 58–70 | بلوک | `test_traffic_edit_times_use_unambiguous_24_hour_te` | 0 | ⬜ |
+| `TEST-216.01` | 1–28 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-216.02` | 29–66 | بلوک | `geometry` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-217</b> — <code>tests/test_traffic_form_render_node.js</code> (16 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-217</b> — <code>tests/test_traffic_edit_history_static.py</code> (70 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-217.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-217.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-217.02` | 6–14 | بلوک | `test_traffic_edit_form_includes_visit_date_and_bot` | 0 | ⬜ |
+| `TEST-217.03` | 15–25 | بلوک | `test_update_and_exit_changes_are_written_transacti` | 0 | ⬜ |
+| `TEST-217.04` | 26–35 | بلوک | `test_history_schema_exists_in_migration_and_fresh_` | 0 | ⬜ |
+| `TEST-217.05` | 36–42 | بلوک | `test_food_print_page_treats_layout_design_as_optio` | 0 | ⬜ |
+| `TEST-217.06` | 43–49 | بلوک | `test_shared_header_does_not_fail_when_layout_desig` | 0 | ⬜ |
+| `TEST-217.07` | 50–57 | بلوک | `test_food_panel_skips_invalid_empty_search_replace` | 0 | ⬜ |
+| `TEST-217.08` | 58–70 | بلوک | `test_traffic_edit_times_use_unambiguous_24_hour_te` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-218</b> — <code>tests/test_traffic_import_static.py</code> (68 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>TEST-218</b> — <code>tests/test_traffic_form_render_node.js</code> (16 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-218.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-218.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
-| `TEST-218.03` | 11–11 | بلوک | `TrafficImportStaticTest` | 0 | ⬜ |
-| `TEST-218.04` | 12–25 | بلوک | `test_import_page_is_direct_only_and_requires_exist` | 0 | ⬜ |
-| `TEST-218.05` | 26–39 | بلوک | `test_post_import_is_csrf_protected_and_confirmatio` | 0 | ⬜ |
-| `TEST-218.06` | 40–54 | بلوک | `test_parser_limits_duplicate_protection_and_privac` | 0 | ⬜ |
-| `TEST-218.07` | 55–68 | بلوک | `test_help_and_chatbot_surface_the_hidden_workflow` | 0 | ⬜ |
+| `TEST-218.01` | 1–16 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-219</b> — <code>tests/test_traffic_live_node.js</code> (41 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-219</b> — <code>tests/test_traffic_import_static.py</code> (68 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-219.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-219.02` | 14–41 | بلوک | `reply` | 4 | ⬜ |
+| `TEST-219.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-219.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
+| `TEST-219.03` | 11–11 | بلوک | `TrafficImportStaticTest` | 0 | ⬜ |
+| `TEST-219.04` | 12–25 | بلوک | `test_import_page_is_direct_only_and_requires_exist` | 0 | ⬜ |
+| `TEST-219.05` | 26–39 | بلوک | `test_post_import_is_csrf_protected_and_confirmatio` | 0 | ⬜ |
+| `TEST-219.06` | 40–54 | بلوک | `test_parser_limits_duplicate_protection_and_privac` | 0 | ⬜ |
+| `TEST-219.07` | 55–68 | بلوک | `test_help_and_chatbot_surface_the_hidden_workflow` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-220</b> — <code>tests/test_traffic_live_report_unit.php</code> (74 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>TEST-220</b> — <code>tests/test_traffic_live_node.js</code> (41 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-220.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
-| `TEST-220.02` | 9–9 | تابع | `db` | 0 | ⬜ |
-| `TEST-220.03` | 10–10 | تابع | `save_audit` | 0 | ⬜ |
-| `TEST-220.04` | 11–11 | تابع | `save_audit_required` | 0 | ⬜ |
-| `TEST-220.05` | 12–12 | تابع | `log_sort_order` | 0 | ⬜ |
-| `TEST-220.06` | 13–13 | تابع | `e` | 0 | ⬜ |
-| `TEST-220.07` | 14–14 | تابع | `user_can` | 0 | ⬜ |
-| `TEST-220.08` | 15–15 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
-| `TEST-220.09` | 16–16 | تابع | `csrf_field` | 0 | ⬜ |
-| `TEST-220.10` | 17–17 | کلاس | `ExportDone` | 0 | ⬜ |
-| `TEST-220.11` | 18–18 | تابع | `excel_download` | 0 | ⬜ |
-| `TEST-220.12` | 19–20 | ناحیه | `بلوک رویه‌ای 19-20` | 0 | ⬜ |
-| `TEST-220.13` | 21–21 | تابع | `check` | 0 | ⬜ |
-| `TEST-220.14` | 22–74 | ناحیه | `بلوک رویه‌ای 22-74` | **8** | ⬜ |
+| `TEST-220.01` | 1–13 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-220.02` | 14–41 | بلوک | `reply` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-221</b> — <code>tests/test_traffic_phone_and_inspection_reminder_static.py</code> (55 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>TEST-221</b> — <code>tests/test_traffic_live_report_unit.php</code> (74 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-221.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-221.02` | 6–20 | بلوک | `test_traffic_phone_has_fixed_09_and_requires_exact` | 0 | ⬜ |
-| `TEST-221.03` | 21–33 | بلوک | `test_inspection_only_reminder_is_scheduled_daily_a` | 0 | ⬜ |
-| `TEST-221.04` | 34–41 | بلوک | `test_reminder_visual_is_centered_and_alarm_styled` | 0 | ⬜ |
-| `TEST-221.05` | 42–55 | بلوک | `test_only_primary_admin_can_toggle_reminder_below_` | 0 | ⬜ |
+| `TEST-221.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
+| `TEST-221.02` | 9–9 | تابع | `db` | 0 | ⬜ |
+| `TEST-221.03` | 10–10 | تابع | `save_audit` | 0 | ⬜ |
+| `TEST-221.04` | 11–11 | تابع | `save_audit_required` | 0 | ⬜ |
+| `TEST-221.05` | 12–12 | تابع | `log_sort_order` | 0 | ⬜ |
+| `TEST-221.06` | 13–13 | تابع | `e` | 0 | ⬜ |
+| `TEST-221.07` | 14–14 | تابع | `user_can` | 0 | ⬜ |
+| `TEST-221.08` | 15–15 | تابع | `valid_iranian_national_code` | 0 | ⬜ |
+| `TEST-221.09` | 16–16 | تابع | `csrf_field` | 0 | ⬜ |
+| `TEST-221.10` | 17–17 | کلاس | `ExportDone` | 0 | ⬜ |
+| `TEST-221.11` | 18–18 | تابع | `excel_download` | 0 | ⬜ |
+| `TEST-221.12` | 19–20 | ناحیه | `بلوک رویه‌ای 19-20` | 0 | ⬜ |
+| `TEST-221.13` | 21–21 | تابع | `check` | 0 | ⬜ |
+| `TEST-221.14` | 22–74 | ناحیه | `بلوک رویه‌ای 22-74` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-222</b> — <code>tests/test_traffic_report_fields_node.js</code> (35 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>TEST-222</b> — <code>tests/test_traffic_phone_and_inspection_reminder_static.py</code> (55 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-222.01` | 1–35 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
+| `TEST-222.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-222.02` | 6–20 | بلوک | `test_traffic_phone_has_fixed_09_and_requires_exact` | 0 | ⬜ |
+| `TEST-222.03` | 21–33 | بلوک | `test_inspection_only_reminder_is_scheduled_daily_a` | 0 | ⬜ |
+| `TEST-222.04` | 34–41 | بلوک | `test_reminder_visual_is_centered_and_alarm_styled` | 0 | ⬜ |
+| `TEST-222.05` | 42–55 | بلوک | `test_only_primary_admin_can_toggle_reminder_below_` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-223</b> — <code>tests/test_transaction_truthfulness_static.py</code> (162 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-223</b> — <code>tests/test_traffic_report_fields_node.js</code> (35 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-223.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-223.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
-| `TEST-223.03` | 36–46 | بلوک | `strip_php_comments` | 0 | ⬜ |
-| `TEST-223.04` | 47–53 | بلوک | `function_body` | 0 | ⬜ |
-| `TEST-223.05` | 54–59 | بلوک | `function_code` | 0 | ⬜ |
-| `TEST-223.06` | 60–80 | بلوک | `test_commit_returns_true_when_the_work_is_already_` | 0 | ⬜ |
-| `TEST-223.07` | 81–87 | بلوک | `test_commit_still_reports_a_genuine_failure_as_fal` | 0 | ⬜ |
-| `TEST-223.08` | 88–109 | بلوک | `test_a_strict_commit_helper_exists_and_raises_a_pe` | 0 | ⬜ |
-| `TEST-223.09` | 110–118 | بلوک | `test_every_ticket_write_path_uses_the_strict_commi` | 0 | ⬜ |
-| `TEST-223.10` | 119–131 | بلوک | `test_strict_commit_calls_name_the_action_for_diagn` | 0 | ⬜ |
-| `TEST-223.11` | 132–141 | بلوک | `test_other_modules_keep_their_existing_commit_cont` | 0 | ⬜ |
-| `TEST-223.12` | 142–156 | بلوک | `test_auto_assignment_does_not_invent_a_state_the_t` | 0 | ⬜ |
-| `TEST-223.13` | 157–162 | بلوک | `test_creation_event_records_the_real_initial_statu` | 0 | ⬜ |
+| `TEST-223.01` | 1–35 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-224</b> — <code>tests/test_triangle_effect_static.py</code> (102 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
+<summary><b>TEST-224</b> — <code>tests/test_transaction_truthfulness_static.py</code> (162 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-224.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-224.02` | 9–10 | بلوک | `TriangleEffectReleaseTests` | 0 | ⬜ |
-| `TEST-224.03` | 11–20 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-224.04` | 21–33 | بلوک | `test_catalog_has_37_valid_non_print_routes` | 0 | ⬜ |
-| `TEST-224.05` | 34–51 | بلوک | `test_configuration_keys_match_the_engine` | 0 | ⬜ |
-| `TEST-224.06` | 52–59 | بلوک | `test_settings_are_saved_with_existing_permission_a` | 0 | ⬜ |
-| `TEST-224.07` | 60–68 | بلوک | `test_engine_respects_reduced_motion_and_has_explic` | 0 | ⬜ |
-| `TEST-224.08` | 69–81 | بلوک | `test_interaction_controls_are_wired` | 1 | ⬜ |
-| `TEST-224.09` | 82–90 | بلوک | `test_help_and_chatbot_cover_the_feature` | 0 | ⬜ |
-| `TEST-224.10` | 91–102 | بلوک | `test_release_manifest_is_migration_free` | 0 | ⬜ |
+| `TEST-224.01` | 1–30 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-224.02` | 31–35 | بلوک | `read` | 0 | ⬜ |
+| `TEST-224.03` | 36–46 | بلوک | `strip_php_comments` | 0 | ⬜ |
+| `TEST-224.04` | 47–53 | بلوک | `function_body` | 0 | ⬜ |
+| `TEST-224.05` | 54–59 | بلوک | `function_code` | 0 | ⬜ |
+| `TEST-224.06` | 60–80 | بلوک | `test_commit_returns_true_when_the_work_is_already_` | 0 | ⬜ |
+| `TEST-224.07` | 81–87 | بلوک | `test_commit_still_reports_a_genuine_failure_as_fal` | 0 | ⬜ |
+| `TEST-224.08` | 88–109 | بلوک | `test_a_strict_commit_helper_exists_and_raises_a_pe` | 0 | ⬜ |
+| `TEST-224.09` | 110–118 | بلوک | `test_every_ticket_write_path_uses_the_strict_commi` | 0 | ⬜ |
+| `TEST-224.10` | 119–131 | بلوک | `test_strict_commit_calls_name_the_action_for_diagn` | 0 | ⬜ |
+| `TEST-224.11` | 132–141 | بلوک | `test_other_modules_keep_their_existing_commit_cont` | 0 | ⬜ |
+| `TEST-224.12` | 142–156 | بلوک | `test_auto_assignment_does_not_invent_a_state_the_t` | 0 | ⬜ |
+| `TEST-224.13` | 157–162 | بلوک | `test_creation_event_records_the_real_initial_statu` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-225</b> — <code>tests/test_tts_normalize_static.py</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>TEST-225</b> — <code>tests/test_triangle_effect_static.py</code> (102 خط، 10 آدرس، بازبینی‌شده 0/10)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-225.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-225.02` | 13–56 | بلوک | `check` | 0 | ⬜ |
+| `TEST-225.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-225.02` | 9–10 | بلوک | `TriangleEffectReleaseTests` | 0 | ⬜ |
+| `TEST-225.03` | 11–20 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-225.04` | 21–33 | بلوک | `test_catalog_has_37_valid_non_print_routes` | 0 | ⬜ |
+| `TEST-225.05` | 34–51 | بلوک | `test_configuration_keys_match_the_engine` | 0 | ⬜ |
+| `TEST-225.06` | 52–59 | بلوک | `test_settings_are_saved_with_existing_permission_a` | 0 | ⬜ |
+| `TEST-225.07` | 60–68 | بلوک | `test_engine_respects_reduced_motion_and_has_explic` | 0 | ⬜ |
+| `TEST-225.08` | 69–81 | بلوک | `test_interaction_controls_are_wired` | 1 | ⬜ |
+| `TEST-225.09` | 82–90 | بلوک | `test_help_and_chatbot_cover_the_feature` | 0 | ⬜ |
+| `TEST-225.10` | 91–102 | بلوک | `test_release_manifest_is_migration_free` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-226</b> — <code>tests/test_update_manifest_guard_static.py</code> (59 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>TEST-226</b> — <code>tests/test_tts_normalize_static.py</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-226.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-226.02` | 6–13 | بلوک | `test_update_installer_checks_zip_open_and_extracti` | 1 | ⬜ |
-| `TEST-226.03` | 14–22 | بلوک | `test_update_installer_rejects_traversal_duplicates` | 1 | ⬜ |
-| `TEST-226.04` | 23–29 | بلوک | `test_manifest_file_list_and_optional_sha256_are_ve` | 1 | ⬜ |
-| `TEST-226.05` | 30–42 | بلوک | `test_cumulative_update_contains_security_scope_run` | 0 | ⬜ |
-| `TEST-226.06` | 43–59 | بلوک | `test_cumulative_update_includes_all_logging_migrat` | 1 | ⬜ |
+| `TEST-226.01` | 1–12 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-226.02` | 13–56 | بلوک | `check` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-227</b> — <code>tests/test_user_access_groups_static.py</code> (90 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>TEST-227</b> — <code>tests/test_update_manifest_guard_static.py</code> (59 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-227.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-227.02` | 7–8 | بلوک | `UserAccessGroupStaticTests` | 0 | ⬜ |
-| `TEST-227.03` | 9–16 | بلوک | `setUpClass` | 0 | ⬜ |
-| `TEST-227.04` | 17–30 | بلوک | `test_group_permissions_are_additive_and_primary_ad` | 0 | ⬜ |
-| `TEST-227.05` | 31–42 | بلوک | `test_schema_supports_many_groups_per_user_and_casc` | 1 | ⬜ |
-| `TEST-227.06` | 43–59 | بلوک | `test_create_update_and_delete_are_primary_admin_on` | 0 | ⬜ |
-| `TEST-227.07` | 60–80 | بلوک | `test_settings_ui_reuses_permission_catalog_and_mem` | 0 | ⬜ |
-| `TEST-227.08` | 81–90 | بلوک | `test_special_role_constraints_and_documentation_ar` | 0 | ⬜ |
+| `TEST-227.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-227.02` | 6–13 | بلوک | `test_update_installer_checks_zip_open_and_extracti` | 1 | ⬜ |
+| `TEST-227.03` | 14–22 | بلوک | `test_update_installer_rejects_traversal_duplicates` | 1 | ⬜ |
+| `TEST-227.04` | 23–29 | بلوک | `test_manifest_file_list_and_optional_sha256_are_ve` | 1 | ⬜ |
+| `TEST-227.05` | 30–42 | بلوک | `test_cumulative_update_contains_security_scope_run` | 0 | ⬜ |
+| `TEST-227.06` | 43–59 | بلوک | `test_cumulative_update_includes_all_logging_migrat` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-228</b> — <code>tests/test_version_source_of_truth_static.py</code> (208 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
+<summary><b>TEST-228</b> — <code>tests/test_user_access_groups_static.py</code> (90 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-228.01` | 1–48 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
-| `TEST-228.02` | 49–53 | بلوک | `version_tuple` | 0 | ⬜ |
-| `TEST-228.03` | 54–57 | بلوک | `repo_version` | 0 | ⬜ |
-| `TEST-228.04` | 58–90 | بلوک | `scan_packages` | 0 | ⬜ |
-| `TEST-228.05` | 91–105 | بلوک | `resolve_repo_path` | 0 | ⬜ |
-| `TEST-228.06` | 106–110 | بلوک | `newest_package_for` | 0 | ⬜ |
-| `TEST-228.07` | 111–111 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
-| `TEST-228.08` | 112–126 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
-| `TEST-228.09` | 127–164 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
-| `TEST-228.10` | 165–193 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
-| `TEST-228.11` | 194–208 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
+| `TEST-228.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-228.02` | 7–8 | بلوک | `UserAccessGroupStaticTests` | 0 | ⬜ |
+| `TEST-228.03` | 9–16 | بلوک | `setUpClass` | 0 | ⬜ |
+| `TEST-228.04` | 17–30 | بلوک | `test_group_permissions_are_additive_and_primary_ad` | 0 | ⬜ |
+| `TEST-228.05` | 31–42 | بلوک | `test_schema_supports_many_groups_per_user_and_casc` | 1 | ⬜ |
+| `TEST-228.06` | 43–59 | بلوک | `test_create_update_and_delete_are_primary_admin_on` | 0 | ⬜ |
+| `TEST-228.07` | 60–80 | بلوک | `test_settings_ui_reuses_permission_catalog_and_mem` | 0 | ⬜ |
+| `TEST-228.08` | 81–90 | بلوک | `test_special_role_constraints_and_documentation_ar` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-229</b> — <code>tests/test_windows_logging_static.py</code> (78 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-229</b> — <code>tests/test_version_source_of_truth_static.py</code> (208 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-229.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `TEST-229.02` | 6–18 | بلوک | `test_windows_logging_acceptance_assets_exist` | 0 | ⬜ |
-| `TEST-229.03` | 19–26 | بلوک | `test_acl_verifier_is_read_only_and_strict_mode_is_` | 0 | ⬜ |
-| `TEST-229.04` | 27–32 | بلوک | `test_acl_verifier_detects_interactive_and_guest_pr` | 0 | ⬜ |
-| `TEST-229.05` | 33–39 | بلوک | `test_web_protection_verifier_preserves_application` | 0 | ⬜ |
-| `TEST-229.06` | 40–46 | بلوک | `test_acl_setter_uses_least_privilege_for_service_a` | 0 | ⬜ |
-| `TEST-229.07` | 47–53 | بلوک | `test_acl_setter_handles_script_whatif_without_null` | 0 | ⬜ |
-| `TEST-229.08` | 54–61 | بلوک | `test_installed_acceptance_script_is_version_pinned` | 0 | ⬜ |
-| `TEST-229.09` | 62–78 | بلوک | `test_installed_acceptance_checks_complete_logging_` | 0 | ⬜ |
+| `TEST-229.01` | 1–48 | بلوک | `مقدمهٔ فایل` | 1 | ⬜ |
+| `TEST-229.02` | 49–53 | بلوک | `version_tuple` | 0 | ⬜ |
+| `TEST-229.03` | 54–57 | بلوک | `repo_version` | 0 | ⬜ |
+| `TEST-229.04` | 58–90 | بلوک | `scan_packages` | 0 | ⬜ |
+| `TEST-229.05` | 91–105 | بلوک | `resolve_repo_path` | 0 | ⬜ |
+| `TEST-229.06` | 106–110 | بلوک | `newest_package_for` | 0 | ⬜ |
+| `TEST-229.07` | 111–111 | بلوک | `VersionSourceOfTruthTests` | 0 | ⬜ |
+| `TEST-229.08` | 112–126 | بلوک | `test_repo_version_is_not_behind_the_newest_publish` | 0 | ⬜ |
+| `TEST-229.09` | 127–164 | بلوک | `test_repo_matches_the_newest_package_of_the_curren` | 0 | ⬜ |
+| `TEST-229.10` | 165–193 | بلوک | `test_package_manifest_version_matches_its_own_vers` | 0 | ⬜ |
+| `TEST-229.11` | 194–208 | بلوک | `test_docs_do_not_advertise_an_older_version_than_v` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-230</b> — <code>tests/tts_normalize_test.php</code> (189 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-230</b> — <code>tests/test_windows_logging_static.py</code> (78 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `TEST-230.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
-| `TEST-230.02` | 14–17 | تابع | `setting` | 0 | ⬜ |
-| `TEST-230.03` | 18–19 | ناحیه | `بلوک رویه‌ای 18-19` | 0 | ⬜ |
-| `TEST-230.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
-| `TEST-230.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
-| `TEST-230.06` | 26–28 | تابع | `app_error_log` | 0 | ⬜ |
-| `TEST-230.07` | 29–30 | ناحیه | `بلوک رویه‌ای 29-30` | 0 | ⬜ |
-| `TEST-230.08` | 31–34 | تابع | `e` | 0 | ⬜ |
-| `TEST-230.09` | 35–36 | ناحیه | `بلوک رویه‌ای 35-36` | 0 | ⬜ |
-| `TEST-230.10` | 37–40 | تابع | `csrf_field` | 0 | ⬜ |
-| `TEST-230.11` | 41–52 | ناحیه | `بلوک رویه‌ای 41-52` | 0 | ⬜ |
-| `TEST-230.12` | 53–58 | تابع | `tts_bare` | 0 | ⬜ |
-| `TEST-230.13` | 60–70 | تابع | `expect_true` | 0 | ⬜ |
-| `TEST-230.14` | 72–75 | تابع | `expect_eq` | 0 | ⬜ |
-| `TEST-230.15` | 77–80 | تابع | `expect_contains` | 0 | ⬜ |
-| `TEST-230.16` | 82–85 | تابع | `expect_not_contains` | 0 | ⬜ |
-| `TEST-230.17` | 86–189 | ناحیه | `بلوک رویه‌ای 86-189` | 0 | ⬜ |
+| `TEST-230.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `TEST-230.02` | 6–18 | بلوک | `test_windows_logging_acceptance_assets_exist` | 0 | ⬜ |
+| `TEST-230.03` | 19–26 | بلوک | `test_acl_verifier_is_read_only_and_strict_mode_is_` | 0 | ⬜ |
+| `TEST-230.04` | 27–32 | بلوک | `test_acl_verifier_detects_interactive_and_guest_pr` | 0 | ⬜ |
+| `TEST-230.05` | 33–39 | بلوک | `test_web_protection_verifier_preserves_application` | 0 | ⬜ |
+| `TEST-230.06` | 40–46 | بلوک | `test_acl_setter_uses_least_privilege_for_service_a` | 0 | ⬜ |
+| `TEST-230.07` | 47–53 | بلوک | `test_acl_setter_handles_script_whatif_without_null` | 0 | ⬜ |
+| `TEST-230.08` | 54–61 | بلوک | `test_installed_acceptance_script_is_version_pinned` | 0 | ⬜ |
+| `TEST-230.09` | 62–78 | بلوک | `test_installed_acceptance_checks_complete_logging_` | 0 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>TEST-231</b> — <code>tests/tts_normalize_test.php</code> (189 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `TEST-231.01` | 1–13 | ناحیه | `بلوک رویه‌ای 1-13` | 0 | ⬜ |
+| `TEST-231.02` | 14–17 | تابع | `setting` | 0 | ⬜ |
+| `TEST-231.03` | 18–19 | ناحیه | `بلوک رویه‌ای 18-19` | 0 | ⬜ |
+| `TEST-231.04` | 20–23 | تابع | `valid_choice` | 0 | ⬜ |
+| `TEST-231.05` | 24–25 | ناحیه | `بلوک رویه‌ای 24-25` | 0 | ⬜ |
+| `TEST-231.06` | 26–28 | تابع | `app_error_log` | 0 | ⬜ |
+| `TEST-231.07` | 29–30 | ناحیه | `بلوک رویه‌ای 29-30` | 0 | ⬜ |
+| `TEST-231.08` | 31–34 | تابع | `e` | 0 | ⬜ |
+| `TEST-231.09` | 35–36 | ناحیه | `بلوک رویه‌ای 35-36` | 0 | ⬜ |
+| `TEST-231.10` | 37–40 | تابع | `csrf_field` | 0 | ⬜ |
+| `TEST-231.11` | 41–52 | ناحیه | `بلوک رویه‌ای 41-52` | 0 | ⬜ |
+| `TEST-231.12` | 53–58 | تابع | `tts_bare` | 0 | ⬜ |
+| `TEST-231.13` | 60–70 | تابع | `expect_true` | 0 | ⬜ |
+| `TEST-231.14` | 72–75 | تابع | `expect_eq` | 0 | ⬜ |
+| `TEST-231.15` | 77–80 | تابع | `expect_contains` | 0 | ⬜ |
+| `TEST-231.16` | 82–85 | تابع | `expect_not_contains` | 0 | ⬜ |
+| `TEST-231.17` | 86–189 | ناحیه | `بلوک رویه‌ای 86-189` | 0 | ⬜ |
 
 </details>
 
