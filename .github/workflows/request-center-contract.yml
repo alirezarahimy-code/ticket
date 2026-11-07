@@ -26,10 +26,15 @@ on:
 
 jobs:
   request-center-contract:
+    name: Request Center Contract (MariaDB ${{ matrix.mariadb-version }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mariadb-version: ['10.4.32', '10.11']
     services:
       mariadb:
-        image: mariadb:10.11
+        image: mariadb:${{ matrix.mariadb-version }}
         env:
           MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
           MARIADB_DATABASE: persian_ticketing_ci
@@ -76,6 +81,16 @@ jobs:
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
+      - name: Verify exact MariaDB service version
+        run: |
+          actual=$(mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password -Nse 'SELECT VERSION()')
+          echo "MariaDB server version: ${actual}"
+          case "${actual}" in
+            "${EXPECTED_MARIADB_VERSION}"*) ;;
+            *) echo "Expected MariaDB ${EXPECTED_MARIADB_VERSION}, got ${actual}"; exit 1 ;;
+          esac
+        env:
+          EXPECTED_MARIADB_VERSION: ${{ matrix.mariadb-version }}
       - name: Request Center schema preflight on MariaDB
         run: php tests/test_request_center_schema_preflight_mariadb.php
         env:
