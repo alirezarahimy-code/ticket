@@ -123,49 +123,50 @@ try {
     $pdo->exec("CREATE USER '{$webUser}'@'%' IDENTIFIED BY '{$webPass}'");
     $pdo->exec("GRANT ALL PRIVILEGES ON `{$name}`.* TO '{$webUser}'@'%'");
 
-    $config = <<<'PHP'
-<?php
-return [
-    'app' => [
-        'name' => 'Request Center T04 CI',
-        'timezone' => 'Asia/Tehran',
-        'base_url' => 'http://127.0.0.1:18765',
-        'key' => str_repeat('a', 64),
-    ],
-    'database' => [
-        'host' => getenv('CI_DB_HOST') ?: '127.0.0.1',
-        'port' => (int) (getenv('CI_DB_PORT') ?: 3306),
-        'name' => getenv('CI_DB_NAME') ?: 'persian_ticketing_ci',
-        'user' => getenv('CI_WEB_DB_USER') ?: 'rc_web_ci',
-        'password' => getenv('CI_WEB_DB_PASS') ?: '',
-        'charset' => 'utf8mb4',
-    ],
-    'ldap' => [
-        'enabled' => false, 'host' => '', 'port' => 389, 'ssl' => false,
-        'base_dn' => '', 'bind_dn' => '', 'bind_password' => '',
-        'domain_suffix' => '', 'default_role' => 'user',
-        'group_map' => ['agent' => [], 'manager' => [], 'supervisor' => [], 'admin' => []],
-    ],
-    'security' => [
-        'session_idle_days' => 0, 'max_upload_mb' => 8,
-        'allowed_uploads' => ['pdf', 'png', 'jpg'], 'inventory_token' => '',
-    ],
-    'food_ticket' => ['odbc_driver' => '', 'web_url' => '', 'sso_key' => ''],
-];
-PHP;
+    $configArray = [
+        'app' => [
+            'name' => 'Request Center T04 CI',
+            'timezone' => 'Asia/Tehran',
+            'base_url' => 'http://' . $address,
+            'key' => str_repeat('a', 64),
+        ],
+        'database' => [
+            'host' => $host,
+            'port' => (int) $port,
+            'name' => $name,
+            'user' => $webUser,
+            'password' => $webPass,
+            'charset' => 'utf8mb4',
+        ],
+        'ldap' => [
+            'enabled' => false, 'host' => '', 'port' => 389, 'ssl' => false,
+            'base_dn' => '', 'bind_dn' => '', 'bind_password' => '',
+            'domain_suffix' => '', 'default_role' => 'user',
+            'group_map' => ['agent' => [], 'manager' => [], 'supervisor' => [], 'admin' => []],
+        ],
+        'security' => [
+            'session_idle_days' => 0, 'max_upload_mb' => 8,
+            'allowed_uploads' => ['pdf', 'png', 'jpg'], 'inventory_token' => '',
+        ],
+        'food_ticket' => ['odbc_driver' => '', 'web_url' => '', 'sso_key' => ''],
+    ];
+    $config = "<?php\\nreturn " . var_export($configArray, true) . ";\\n";
     if (file_put_contents($configPath, $config) === false) {
         throw new RuntimeException('Could not write temporary CI config');
     }
     putenv('ITSM_CONFIG_PATH=' . $configPath);
-    putenv('CI_WEB_DB_USER=' . $webUser);
-    putenv('CI_WEB_DB_PASS=' . $webPass);
 
     $descriptors = [
         0 => ['pipe', 'r'],
         1 => ['file', '/dev/null', 'a'],
         2 => ['file', '/dev/null', 'a'],
     ];
-    $server = proc_open([PHP_BINARY, '-S', $address, '-t', $root], $descriptors, $pipes, $root);
+    $serverEnv = getenv();
+    if (!is_array($serverEnv)) {
+        $serverEnv = [];
+    }
+    $serverEnv['ITSM_CONFIG_PATH'] = $configPath;
+    $server = proc_open([PHP_BINARY, '-S', $address, '-t', $root], $descriptors, $pipes, $root, $serverEnv);
     if (!is_resource($server)) {
         throw new RuntimeException('Could not start PHP built-in server');
     }
