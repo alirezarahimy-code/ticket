@@ -65,7 +65,7 @@ for (let i = 0; i < dates.length; i++) {
     `PHP/JS Gregorian mismatch at Jalali ${jy}/${jm}/${jd}: PHP=${phpRow.gregorian}, JS=${expectedGregorian}`);
   assert.deepEqual(phpRow.round_trip, expectedRoundTrip,
     `PHP round-trip mismatch at Jalali ${jy}/${jm}/${jd}: ${phpRow.round_trip}`);
-  assert.deepEqual(jsRoundTrip, expectedRoundTrip,
+  assert.deepEqual(Array.from(jsRoundTrip), expectedRoundTrip,
     `JS round-trip mismatch at Jalali ${jy}/${jm}/${jd}`);
 
   const expectedInput = `${pad(jsGregorian[0], 4)}-${pad(jsGregorian[1])}-${pad(jsGregorian[2])} 00:00:00`;
@@ -81,7 +81,7 @@ assert.ok(php.valid_persian_digits, 'Persian digit input must be accepted');
 assert.equal(php.valid_persian_digits, php.valid_hyphen, 'Persian digits and hyphen separators must normalize consistently');
 
 const nowruz1403 = api.j2g(1403, 1, 1);
-assert.deepEqual(nowruz1403, [2024, 3, 20],
+assert.deepEqual(Array.from(nowruz1403), [2024, 3, 20],
   'known Nowruz 1403 reference must remain 2024-03-20');
 
 console.log(`PASS T11: ${dates.length} valid Jalali dates across 1300–1500 match PHP and ItsmJalali JS; invalid inputs rejected.`);
