@@ -12,6 +12,14 @@
 - جریان Contract (`.github/workflows/request-center-contract.yml`): قید استاتیک جدید به گام «First-slice security and architecture contract» افزوده شد
 - ساخت بستهٔ کاندید ارتقا + راهنمای نصب/بازگشت (این سند + `REQUEST-CENTER-INSTALL-UPGRADE-FA.md` + `downloads/…zip` با SHA-256)
 
+> **نتیجهٔ CI پس از push فاز ۵ (head `20b99c5`):**
+> - `Request Center QA Package Preview`: **SUCCESS** — artifact `request-center-qa-preview` (۲۲۶٬۹۰۶ بایت). ریشهٔ قرمزیِ دیرینهٔ این ورک‌فلو پیدا و رفع شد: checkout آن هاردکد به `feature/request-center-module-1.62.88` بود و به‌جای commitِ trigger، درخت قدیمی را تست می‌کرد. حالا `ref: ${{ github.sha }}` و branch در manifest پویا است.
+> - `Request Center Contract`: فقط گام «T07 full-database clone migration replay and fingerprint (both MariaDB versions)» قرمز (تصمیم D1 مالک). همهٔ گام‌های دیگر از جمله استاتیک نمودار دسترسی سبز روی هر دو MariaDB.
+> - `Request Center T12 Scenario Characterization`: **success**.
+> - `Logging contract`: failure — پیشینهٔ ثابت شاخه/main (لاگ‌لاین به D3 وابسته است؛ این فاز به Logging دست نزد).
+> - `ci.yml` (test/linux-mariadb-integration/windows-acl-and-runtime) روی push شاخۀ arena اجرا نمی‌شود (trigger فقط main/develop و PR به main)؛ داوری آن به پس از تصمیم R6/merge موکول است.
+> نکتهٔ صادقانه: `PR #30` (feature→main، Draft) هنوز commitهای این فاز را ندارد؛ شاخهٔ کاری arena اکنون `20b99c5` است و feature روی `ab9b432` مانده است. همگام‌سازی feature با arena (بر اساس سیاست مخزن) تصمیم مالک/روال Arena است؛ این فاز فقط arena را به‌روز نگه داشته است.
+
 ## ۲) کنترل‌های اجرایی و نتایج (شواهد قابل بازتولید)
 
 | # | کنترل | دستور
@@ -39,7 +47,7 @@
 | ۶ | مجوزها سمت سرور در تمام مسیرها | ✅ با آزمون ایستا + ممیزی صفحات (403/404) | RC `access_matrix` ۱۰/۱۰؛ Workspaceهای asset admin/supervisor/agent/requester همه `require_permission`/`user_is_primary_admin`/chain دارند |
 | ۷ | SLA/OLA جدا از زمان‌بندی تقویمی | ✅ | ۰ بازنویسی ستون مهلت در مسیر نوبت‌ها (کنترل‌های جدول ۲)؛ تغییر نوبت، مهلت را تغییر نمی‌دهد |
 | ۸ | تقویم کارشناس مستقل از مدیریت غذا | ✅ | جدول اختصاصی `request_center_appointments`؛ ۰ ارجاع به دادهٔ غذا (کنترل ۹ جدول ۲)؛ تعطیلات از تقویم کاری مشترک `holidays` |
-| ۹ | آزمون‌های بحرانی با MariaDB واقعی پذیرفته شوند | 🟡 اکثرش در CI (T12، T08، T10، preflight، smoke، DDL gates) تکرارپذیر است؛ T07 قرمز مصوب | آخرین push قبل از این سند fail بود؛ نتیجهٔ post-push این فاز داوری کند |
+| ۹ | آزمون‌های بحرانی با MariaDB واقعی پذیرفته شوند | 🟡 اکثرش در CI (T12، T08، T10، preflight، smoke، DDL gates) تکرارپذیر است؛ T07 قرمز مصوب (D1) | پس از push فاز ۵ (۲۰b99c5): Contract فقط در گام T07 قرمز؛ همهٔ گام‌های دیگر سبز روی هر دو MariaDB (۱۰.۴.۳۲ و ۱۰.۱۱) |
 | ۱۰ | بدون DDL در مسیر عادی کاربران | ✅ | کنترل ۸ جدول ۲ + ArchitectureTest |
 | ۱۱ | بستهٔ ارتقا + راهنمای نصب + پیش‌نیاز + Backup/Restore + برنامهٔ بازگشت | ✅ مصنوع؛ Restore-drill واقعی بر عهدهٔ محیط غیرعملیاتی مالک | `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip` + SHA256 + راهنمای کامل `REQUEST-CENTER-INSTALL-UPGRADE-FA.md`؛ آزمون T08 (backup/restore اِندتواند) در Contract CI موجود است |
 | ۱۲ | چهار Workspace مستقل+آزموده‌شده با دسترسی چندنقشی | ✅ ممیزی + آزمون ایستا؛ تأیید نهایی با پذیرش دستی مالک | Server-side guards ✓؛ سوییچر فقط در count>1 ✓؛ `Pages/*` ممیزی شد؛ ده‌ها اینترسکشن snapshot در فاز ۴ ثبت شد |
@@ -74,7 +82,7 @@
 - `modules/request-center/Actions/appointment-actions.php` — گارد APP_ROOT + ۴۰۴ (پیش از هر بارگذاری)
 - `modules/request-center/Actions/dispatch.php` — گارد APP_ROOT + ۴۰۴ روی رجیستری
 - `.github/workflows/request-center-contract.yml` — اجرای استاتیک جدید در گام قرارداد
-- `.github/workflows/request-center-package-preview.yml` — overlay با `find` کامل؛ تست نوبت‌ها + نمودار دسترسی؛ README توسعه‌یافته
+- `.github/workflows/request-center-package-preview.yml` — overlay با `find` کامل؛ تست نوبت‌ها + نمودار دسترسی؛ README توسعه‌یافته؛ checkout هاردکد `feature/…` → `github.sha`؛ trigger اضافه `arena/22d4eba7-ticket`
 - `tools/build_rc_update.py` (جدید)، `downloads/CHANGE-REPORT-FA-1.62.92.md` (جدید)، `downloads/…rc-candidate-20261107.zip[.sha256]` (جدید)
 - `docs/architecture/REQUEST-CENTER-INSTALL-UPGRADE-FA.md`، این سند
 
