@@ -8,7 +8,7 @@ declare(strict_types=1);
  * handlers during the first migration slice. No schema DDL or schema healing
  * is allowed from this entry point.
  */
-require dirname(__DIR__, 2) . '/bootstrap.php';
+require dirname(__DIR__, 3) . '/bootstrap.php';
 
 $user = require_login();
 require_once dirname(__DIR__) . '/RequestCenterRepository.php';
