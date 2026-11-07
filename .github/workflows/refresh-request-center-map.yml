@@ -12,6 +12,7 @@ on:
       - 'actions/bulk-actions.php'
       - 'cron/ticket_auto_close.php'
       - 'tests/test_request_center_*.php'
+      - 'tests/fixtures/request-center-session-seed.php'
       - 'tests/test_request_center_*.py'
       - 'tests/test_ticket_*static.py'
       - 'tests/test_ldap_secret_and_legacy_status_static.py'
