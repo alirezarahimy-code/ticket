@@ -298,6 +298,8 @@ function t12s_sessions(array $apps): array
     return $out;
 }
 
+function t12s_clone_log_tail(array $app, int $maxLines = 25): string { $logFile = $app['root'] . '/storage/logs/app.log'; if (!is_file($logFile)) { return '(app.log missing)'; } $lines = @file($logFile, FILE_IGNORE_NEW_LINES) ?: []; $lines = array_slice(array_filter($lines, static fn($l) => trim($l) !== ''), -$maxLines); return implode("\n", $lines); }
+
 function t12s_create_ticket(string $side, array $app, array $sess, array $extra = []): int
 {
     $fields = [
@@ -319,7 +321,10 @@ function t12s_create_ticket(string $side, array $app, array $sess, array $extra 
     $cnt = (int) $pdo->query('SELECT COUNT(*) FROM tickets')->fetchColumn();
     $mx = $pdo->query('SELECT MAX(id) FROM tickets')->fetchColumn();
     t12s_log('    [probe] tid_check: HTTP ' . $r['status'] . ' location=' . $location . ' tickets_count=' . $cnt . ' max_id=' . var_export($mx, true));
-    return (int) ($mx ?? 0);
+    if (!str_starts_with($location, 'index.php?page=ticket&id=')) {
+        throw new RuntimeException("create_ticket for {$side} did not produce a ticket (location={$location}); app.log tail:\n" . t12s_clone_log_tail($app));
+    }
+    return (int) ($mx ?? (int) explode('=', $location)[count(explode('=', $location)) - 1]);
 }
 
 function t12s_pdo(array $app): PDO
