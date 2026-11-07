@@ -197,9 +197,11 @@ if ($workspace === 'requester') {
 }
 $agentQueueName = 'mine';
 if ($workspace === 'agent') {
-    $allowedAgentQueues = user_can($user, 'queue.view')
-        ? ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled']
-        : ['mine'];
+    $allowedAgentQueues = $agentView === 'mine'
+        ? ['mine']
+        : (user_can($user, 'queue.view')
+            ? ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled']
+            : ['mine']);
     $requestedQueue = (string) ($_GET['queue'] ?? ($agentView === 'mine' ? 'mine' : 'all'));
     $agentQueueName = in_array($requestedQueue, $allowedAgentQueues, true)
         ? $requestedQueue
