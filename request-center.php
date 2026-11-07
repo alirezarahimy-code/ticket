@@ -128,7 +128,13 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:v
 $ticket = $repo->findVisible($ticketId, $user);
 if ($ticket === null) {
     http_response_code(404);
-    echo '<section class="card empty"><h2>درخواست پیدا نشد</h2><p>درخواست وجود ندارد یا در حوزهٔ دسترسی حساب شما نیست.</p><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a></section>';
+    ?>
+    <section class="card empty">
+      <h2>درخواست پیدا نشد</h2>
+      <p>درخواست وجود ندارد یا در حوزهٔ دسترسی حساب شما نیست.</p>
+      <a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>
+    </section>
+    <?php
 } else {
     $includeInternal = ticket_can_see_internal($ticket, $user);
     $messages = $repo->messages($ticketId, $includeInternal);
@@ -136,7 +142,7 @@ if ($ticket === null) {
     $status = $statusLabels[(string) ($ticket['status'] ?? '')] ?? (string) ($ticket['status'] ?? '—');
     $priority = $priorityLabels[(string) ($ticket['priority'] ?? '')] ?? (string) ($ticket['priority'] ?? '—');
     ?>
-    <section class="heading"><div><h1><?= $escape($ticket['subject']) ?></h1><p><?= $escape($ticket['ticket_no'] ?: ('#' . $ticketId)) ?> · <?= $escape($typeLabels[(string) ($ticket['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape($status) ?></p></div><a class="button secondary" href="request-center.php">فهرست درخواست‌ها</a></section>
+    <section class="heading"><div><h1><?= $escape($ticket['subject']) ?></h1><p><?= $escape($ticket['ticket_no'] ?: ('#' . $ticketId)) ?> · <?= $escape($typeLabels[(string) ($ticket['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape($status) ?></p></div><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a></section>
     <div class="notice">این نما در مرحلهٔ انتقال تدریجی، برای مشاهدهٔ مستقل فعال است. عملیات ثبت پاسخ، ارجاع، تغییر وضعیت، لغو و تأیید نهایی فعلاً از صفحهٔ سازگار فعلی انجام می‌شود.</div>
     <div class="detail-grid">
       <section class="card conversation">
