@@ -185,8 +185,7 @@ jobs:
           ITSM_MYSQLDUMP_PATH: /usr/bin/mariadb-dump
           ITSM_MYSQL_PATH: /usr/bin/mariadb
 
-      - name: T07 full-database clone migration replay and fingerprint (MariaDB 10.4.32)
-        if: matrix.mariadb-version == '10.4.32'
+      - name: T07 full-database clone migration replay and fingerprint (both MariaDB versions)
         run: |
           git fetch --no-tags --depth=1 origin 465833587b28edb260412073131265e2724f8812
           git show 465833587b28edb260412073131265e2724f8812:persian_ticketing.sql > "$RUNNER_TEMP/persian_ticketing.sql"
