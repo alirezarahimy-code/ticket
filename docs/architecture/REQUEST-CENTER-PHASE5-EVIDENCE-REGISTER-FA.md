@@ -141,4 +141,4 @@
 **بازسازی سوم قطعی:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۳۸٬۸۱۰ بایت، SHA-256 `55013c7601004b9bc49cffe41a7890cd4200e1a8639f0e4c24a31266464bae06`**. گیت محلی دوباره اجرا شد: access-matrix ۱۱/۱۱؛ سه Suite SQLite (appointments/repository/workflow) سبز؛ `php -l` سبز.
 
 > همچون §۸/§۹: سندهای معماری درون ZIP از بایت‌های سرساخت پیروی می‌کنند؛ منبع حقیقت سندها در همین شاخه است.
-> **نتیجهٔ CI پس از این push در انتهای همین بخش (اصلاحیهٔ پس از اجرا) ثبت می‌شود.**
+> **اصلاحیهٔ پس از اجرا (push `6c2e8fe`):** `Request Center QA Package Preview` ✅، `Request Center T12 Scenario Characterization` ✅، `Request Center Contract` ❌ **فقط** در گام `T07 full-database clone migration replay and fingerprint` روی هر دو MariaDB (۱۰.۴.۳۲/۱۰.۱۱) — همان قرمز مصوب D1؛ هیچ گام دیگری قرمز نشد. `Logging contract` ❌ همان قرمز دیرینهٔ D3.
