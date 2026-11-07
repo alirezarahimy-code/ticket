@@ -87,6 +87,10 @@ if ($schemaProblems !== []) {
     <p class="muted">برای جلوگیری از تغییر ناخواسته، ادامهٔ درخواست متوقف شد.</p><a href="index.php">بازگشت به سامانه</a></section></body></html><?php
     exit;
 }
+if ((string) ($_GET['calendar'] ?? '') === '1' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    require __DIR__ . '/../Actions/appointment-actions.php';
+    exit; // appointment-actions redirects back to the calendar
+}
 if ((string) ($_GET['calendar'] ?? '') === '1') {
     require __DIR__ . '/calendar.php';
     exit;
