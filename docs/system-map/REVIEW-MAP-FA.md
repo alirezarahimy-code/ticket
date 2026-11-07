@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 568 |
-| خطوط | 128,457 |
+| خطوط | 128,451 |
 | آدرس‌ها (بلوک) | 6,777 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -257,7 +257,7 @@
 | `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-039.44` <sub>schema.sql:767</sub> | 12 |
 | `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-039.23` <sub>schema.sql:350</sub> | 18 |
 | `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-039.29` <sub>schema.sql:447</sub> | 13 |
-| `tickets` | `PAGE-039.04` <sub>modules/request-center/Actions/bulk-actions.php:44</sub><br>`DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub> | 185 |
+| `tickets` | `DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-039.21` <sub>schema.sql:271</sub> | 184 |
 | `tmp_asset_dedupe_map` | `DB-018.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-018.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-018.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
 | `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-039.14` <sub>schema.sql:156</sub> | 31 |
 | `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-039.16` <sub>schema.sql:196</sub> | 10 |
@@ -288,7 +288,7 @@
 | `TEST` | TEST | 231 | 1,662 | 22,298 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 65 | 1,396 | 45,913 |
+| `PAGE` | صفحات (ریشه) | 65 | 1,396 | 45,907 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,933 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `ACT` | کنش‌ها (actions/) | 16 | 102 | 3,026 |
@@ -8668,14 +8668,14 @@
 </details>
 
 <details>
-<summary><b>PAGE-039</b> — <code>modules/request-center/Actions/bulk-actions.php</code> (147 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>PAGE-039</b> — <code>modules/request-center/Actions/bulk-actions.php</code> (141 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-039.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
 | `PAGE-039.02` | 17–23 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `PAGE-039.03` | 24–43 | ناحیه | `مسیر: add_asset_relation` | **8** | ⬜ |
-| `PAGE-039.04` | 44–147 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
+| `PAGE-039.04` | 44–141 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
 
 </details>
 

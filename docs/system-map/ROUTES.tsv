@@ -367,7 +367,7 @@ page	inventory-diagnostics	index.php	2067
 page	domain-scan	index.php	2117
 page	asset	index.php	2240
 page	inventory	modules/request-center/Actions/bulk-actions.php	41
-page	queue	modules/request-center/Actions/bulk-actions.php	145
+page	queue	modules/request-center/Actions/bulk-actions.php	139
 action	add_asset_relation	modules/request-center/Actions/bulk-actions.php	24
 action	bulk_update_tickets	modules/request-center/Actions/bulk-actions.php	44
 page	dashboard	modules/request-center/Actions/supervisor-actions.php	38

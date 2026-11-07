@@ -51967,8 +51967,8 @@
             "id": "PAGE-039",
             "path": "modules\/request-center\/Actions\/bulk-actions.php",
             "area": "PAGE",
-            "lines": 147,
-            "file_fingerprint": "d96b40c20ece",
+            "lines": 141,
+            "file_fingerprint": "73288179546c",
             "blocks": [
                 {
                     "kind": "region",
@@ -52017,9 +52017,9 @@
                     "kind": "region",
                     "anchor": "مسیر: bulk_update_tickets",
                     "line_start": 44,
-                    "line_end": 147,
-                    "lines": 104,
-                    "fingerprint": "d7720e40a4bb",
+                    "line_end": 141,
+                    "lines": 98,
+                    "fingerprint": "cd3585199197",
                     "risk": {
                         "score": 2,
                         "flags": {

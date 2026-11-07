@@ -4839,7 +4839,6 @@
       "fa": "tickets",
       "key": "tickets",
       "primary": [
-        "PAGE-039.04",
         "DB-002.24",
         "DB-005.15",
         "DB-039.21",
@@ -4848,7 +4847,8 @@
         "CORE-015.07",
         "CORE-015.11",
         "CORE-015.03",
-        "CORE-015.09"
+        "CORE-015.09",
+        "DB-002.37"
       ],
       "related": [
         "TEST-171.03",
@@ -4858,7 +4858,7 @@
         "TOOL-008.02",
         "PAGE-034.42"
       ],
-      "total": 185
+      "total": 184
     },
     {
       "id": "table:tmp_asset_dedupe_map",
@@ -34833,7 +34833,7 @@
       "line": 44,
       "anchor": "مسیر: bulk_update_tickets",
       "risk": 2,
-      "lines": 104
+      "lines": 98
     },
     "PAGE-040.01": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
