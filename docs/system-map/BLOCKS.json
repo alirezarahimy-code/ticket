@@ -52893,8 +52893,8 @@
             "id": "PAGE-054",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
-            "lines": 443,
-            "file_fingerprint": "d1f70ef2ec38",
+            "lines": 444,
+            "file_fingerprint": "44f80256ddfb",
             "blocks": [
                 {
                     "kind": "region",
@@ -52913,9 +52913,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterRepository",
                     "line_start": 4,
-                    "line_end": 442,
-                    "lines": 439,
-                    "fingerprint": "3c4d117520ec",
+                    "line_end": 443,
+                    "lines": 440,
+                    "fingerprint": "8ab917223c5f",
                     "risk": {
                         "score": 8,
                         "flags": {

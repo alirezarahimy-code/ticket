@@ -2154,8 +2154,8 @@ findVisible	function	modules/request-center/RequestCenterRepository.php	149	othe
 messages	function	modules/request-center/RequestCenterRepository.php	180	other
 attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	199	other
 calendarItems	function	modules/request-center/RequestCenterRepository.php	231	other
-workspaceSummary	function	modules/request-center/RequestCenterRepository.php	278	other
-listQueue	function	modules/request-center/RequestCenterRepository.php	341	other
+workspaceSummary	function	modules/request-center/RequestCenterRepository.php	279	other
+listQueue	function	modules/request-center/RequestCenterRepository.php	342	other
 RequestCenterSqlExpression	class	modules/request-center/WorkflowService.php	11	other
 __construct	function	modules/request-center/WorkflowService.php	14	other
 kind	function	modules/request-center/WorkflowService.php	19	other
