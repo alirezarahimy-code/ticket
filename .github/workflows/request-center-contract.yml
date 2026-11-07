@@ -16,6 +16,7 @@ on:
       - 'tests/test_request_center_metadata_lock_mariadb.php'
       - 'tests/test_backup_restore_mariadb_e2e.php'
       - 'tests/test_request_center_claim_concurrency_mariadb.php'
+      - 'tests/test_request_center_t07_migration_clone.php'
       - 'tests/test_request_center_jalali_parity.mjs'
       - 'tests/fixtures/jalali-php-convert.php'
       - 'tests/fixtures/request-center-claim-worker.php'
@@ -183,3 +184,21 @@ jobs:
           CI_DB_PASS: ci-ephemeral-root-password
           ITSM_MYSQLDUMP_PATH: /usr/bin/mariadb-dump
           ITSM_MYSQL_PATH: /usr/bin/mariadb
+
+      - name: T07 full-database clone migration replay and fingerprint (MariaDB 10.4.32)
+        if: matrix.mariadb-version == '10.4.32'
+        run: |
+          git fetch --no-tags --depth=1 origin work/hardening-audit-1.62.82
+          git show FETCH_HEAD:persian_ticketing.sql > "$RUNNER_TEMP/persian_ticketing.sql"
+          test -s "$RUNNER_TEMP/persian_ticketing.sql"
+          echo "T07 dump bytes: $(wc -c < "$RUNNER_TEMP/persian_ticketing.sql")"
+          sha256sum "$RUNNER_TEMP/persian_ticketing.sql"
+          php tests/test_request_center_t07_migration_clone.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+          CI_DB_DUMP_PATH: ${{ runner.temp }}/persian_ticketing.sql
+          ITSM_MYSQL_PATH: mariadb
