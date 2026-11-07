@@ -2473,17 +2473,7 @@ if ($page !== 'dashboard') {
 }
 
     $isStaff = is_staff_role($user['role']);
-[$ticketWhere, $ticketParams] = ticket_scope($user);
-$countQuery = db()->prepare('SELECT status, COUNT(*) AS total FROM tickets t ' . $ticketWhere . ' GROUP BY status');
-$countQuery->execute($ticketParams);
-$counts = ['new' => 0, 'manager_review' => 0, 'assigned' => 0, 'in_progress' => 0, 'waiting_user' => 0, 'open' => 0, 'pending' => 0, 'resolved' => 0, 'closed' => 0, 'cancelled' => 0];
-foreach ($countQuery->fetchAll() as $count) {
-    $counts[$count['status']] = (int) $count['total'];
-}
-$listQuery = db()->prepare('SELECT t.*, c.name AS category_name, d.name AS department_name, r.full_name AS requester_name, a.full_name AS assignee_name FROM tickets t LEFT JOIN categories c ON c.id = t.category_id LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id LEFT JOIN users a ON a.id = t.assigned_to ' . $ticketWhere . ' ORDER BY t.updated_at DESC LIMIT 50');
-$listQuery->execute($ticketParams);
-$tickets = $listQuery->fetchAll();
-ticket_number_cache_prime($tickets); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
+[$counts, $tickets] = request_center_dashboard_rows($user); // برش استقلال فاز ۲: دادهٔ داشبورد در ماژول
 render_header('داشبورد', $user);
 $activeCount = $counts['new'] + $counts['manager_review'] + $counts['assigned'] + $counts['in_progress'] + $counts['waiting_user'] + $counts['pending'];
 $cdDvdReady = cd_dvd_available();
