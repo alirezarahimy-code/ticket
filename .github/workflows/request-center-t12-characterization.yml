@@ -1,0 +1,93 @@
+name: Request Center T12 Characterization Preflight
+
+on:
+  push:
+    branches:
+      - feature/request-center-module-1.62.88
+    paths:
+      - '.github/workflows/request-center-t12-characterization.yml'
+      - 'install-empty-db.sql'
+      - 'bootstrap.php'
+      - 'session_bootstrap.php'
+      - 'index.php'
+      - 'lib/**'
+      - 'actions/**'
+      - 'modules/request-center/**'
+      - 'tests/fixtures/request-center-session-seed.php'
+      - 'tests/test_request_center_t12_preflight.php'
+  pull_request:
+    paths:
+      - '.github/workflows/request-center-t12-characterization.yml'
+      - 'install-empty-db.sql'
+      - 'bootstrap.php'
+      - 'session_bootstrap.php'
+      - 'index.php'
+      - 'lib/**'
+      - 'actions/**'
+      - 'modules/request-center/**'
+      - 'tests/fixtures/request-center-session-seed.php'
+      - 'tests/test_request_center_t12_preflight.php'
+
+permissions:
+  contents: read
+
+jobs:
+  t12-preflight:
+    name: T12 preflight / MariaDB ${{ matrix.mariadb-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mariadb-version: ['10.4.32', '10.11']
+    services:
+      mariadb:
+        image: mariadb:${{ matrix.mariadb-version }}
+        env:
+          MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
+          MARIADB_DATABASE: persian_ticketing_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - name: Checkout Feature branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mysqli, fileinfo
+          coverage: none
+
+      - name: Install MariaDB client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client
+
+      - name: Prepare pinned Legacy worktree
+        run: |
+          git fetch --no-tags origin 2176d2aa57758a0fbef426636c9943879646b165
+          git worktree add --detach "$RUNNER_TEMP/ticket-legacy" 2176d2aa57758a0fbef426636c9943879646b165
+          git -C "$RUNNER_TEMP/ticket-legacy" rev-parse HEAD
+
+      - name: Lint T12 preflight
+        run: php -l tests/test_request_center_t12_preflight.php
+
+      - name: Verify two-clone HTTP/session preflight
+        run: php tests/test_request_center_t12_preflight.php
+        env:
+          GITHUB_ACTIONS: 'true'
+          T12_LEGACY_ROOT: ${{ runner.temp }}/ticket-legacy
+          T12_FEATURE_ROOT: ${{ github.workspace }}
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+          ITSM_MYSQL_PATH: /usr/bin/mariadb
