@@ -73730,8 +73730,8 @@
             "id": "TEST-176",
             "path": "tests\/test_request_center_t07_migration_clone.php",
             "area": "TEST",
-            "lines": 334,
-            "file_fingerprint": "6f5a820f8443",
+            "lines": 350,
+            "file_fingerprint": "808a692de677",
             "blocks": [
                 {
                     "kind": "region",
@@ -73873,9 +73873,9 @@
                     "kind": "region",
                     "anchor": "is forced into the disposable clone regardless of the source",
                     "line_start": 161,
-                    "line_end": 302,
-                    "lines": 142,
-                    "fingerprint": "7631ccd0e3c0",
+                    "line_end": 318,
+                    "lines": 158,
+                    "fingerprint": "f78a281e905d",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -73890,8 +73890,8 @@
                 {
                     "kind": "region",
                     "anchor": "Cross-check the actual 1.62.88 release manifest. The release",
-                    "line_start": 303,
-                    "line_end": 303,
+                    "line_start": 319,
+                    "line_end": 319,
                     "lines": 1,
                     "fingerprint": "b8cff03f6dce",
                     "risk": {
@@ -73903,8 +73903,8 @@
                 {
                     "kind": "region",
                     "anchor": "excludes migration 032; all manifest migrations must already",
-                    "line_start": 304,
-                    "line_end": 334,
+                    "line_start": 320,
+                    "line_end": 350,
                     "lines": 31,
                     "fingerprint": "07e7d3c1fe54",
                     "risk": {

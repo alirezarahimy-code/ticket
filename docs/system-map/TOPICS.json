@@ -46784,12 +46784,12 @@
       "line": 161,
       "anchor": "is forced into the disposable clone regardless of the source",
       "risk": 7,
-      "lines": 142
+      "lines": 158
     },
     "TEST-176.12": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 303,
+      "line": 319,
       "anchor": "Cross-check the actual 1.62.88 release manifest. The release",
       "risk": 0,
       "lines": 1
@@ -46797,7 +46797,7 @@
     "TEST-176.13": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 304,
+      "line": 320,
       "anchor": "excludes migration 032; all manifest migrations must already",
       "risk": 4,
       "lines": 31

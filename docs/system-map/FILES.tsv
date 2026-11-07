@@ -635,7 +635,7 @@ tests/test_request_center_mariadb_ddl_gates.php	tests	107	4352
 tests/test_request_center_metadata_lock_mariadb.php	tests	82	3468
 tests/test_request_center_repository_sqlite.php	tests	103	6271
 tests/test_request_center_schema_preflight_mariadb.php	tests	145	7137
-tests/test_request_center_t07_migration_clone.php	tests	333	12977
+tests/test_request_center_t07_migration_clone.php	tests	349	13868
 tests/test_request_center_web_ddl_runtime.php	tests	280	12798
 tests/test_request_center_workflow_service_mariadb.php	tests	150	5334
 tests/test_request_center_workflow_service_sqlite.php	tests	189	7055
