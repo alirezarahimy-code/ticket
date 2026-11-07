@@ -246,9 +246,9 @@ docs/aggregate-report-preview.html	docs	85	7297
 docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	673	89043
 docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md	docs	195	18894
 docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
-docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	300	48982
+docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	307	50233
 docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	114	10112
-docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	92	10742
+docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	110	12576
 docs/architecture/REQUEST-CENTER-T12-SOURCE-MAPPING-FA.md	docs	84	9169
 domain-scan.php	core	1280	68450
 download-r34/index.html	other	21	1739
@@ -632,7 +632,7 @@ tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	66
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_request_center_claim_concurrency_mariadb.php	tests	197	7612
-tests/test_request_center_first_slice_static.py	tests	127	6795
+tests/test_request_center_first_slice_static.py	tests	130	7098
 tests/test_request_center_jalali_parity.mjs	tests	87	3728
 tests/test_request_center_mariadb_ddl_gates.php	tests	107	4352
 tests/test_request_center_metadata_lock_mariadb.php	tests	82	3468

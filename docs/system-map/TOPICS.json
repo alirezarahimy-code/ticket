@@ -46496,12 +46496,12 @@
       "line": 12,
       "anchor": "test_independent_entrypoint_bootstraps_and_authenticates",
       "risk": 0,
-      "lines": 8
+      "lines": 10
     },
     "TEST-171.05": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 20,
+      "line": 22,
       "anchor": "test_repository_uses_existing_visibility_contracts",
       "risk": 0,
       "lines": 6
@@ -46509,7 +46509,7 @@
     "TEST-171.06": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 26,
+      "line": 28,
       "anchor": "test_internal_messages_are_filtered_in_sql",
       "risk": 0,
       "lines": 5
@@ -46517,15 +46517,15 @@
     "TEST-171.07": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 31,
+      "line": 33,
       "anchor": "test_read_slice_has_no_schema_or_write_operations",
       "risk": 0,
-      "lines": 14
+      "lines": 15
     },
     "TEST-171.08": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 45,
+      "line": 48,
       "anchor": "test_transition_policy_is_owned_by_module_service",
       "risk": 1,
       "lines": 8
@@ -46533,7 +46533,7 @@
     "TEST-171.09": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 53,
+      "line": 56,
       "anchor": "test_migrated_status_writes_use_the_central_workflow_service",
       "risk": 1,
       "lines": 34
@@ -46541,7 +46541,7 @@
     "TEST-171.10": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 87,
+      "line": 90,
       "anchor": "test_user_supplied_text_is_escaped_and_attachment_download_is_delegated",
       "risk": 0,
       "lines": 7
@@ -46549,7 +46549,7 @@
     "TEST-171.11": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 94,
+      "line": 97,
       "anchor": "test_workspace_views_are_permission_gated_and_scope_bound",
       "risk": 3,
       "lines": 13
@@ -46557,7 +46557,7 @@
     "TEST-171.12": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 107,
+      "line": 110,
       "anchor": "test_not_found_and_detail_navigation_preserve_workspace",
       "risk": 3,
       "lines": 11
@@ -46565,7 +46565,7 @@
     "TEST-171.13": {
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
-      "line": 118,
+      "line": 121,
       "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
       "risk": 0,
       "lines": 11

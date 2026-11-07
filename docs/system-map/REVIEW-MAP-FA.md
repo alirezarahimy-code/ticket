@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 560 |
-| خطوط | 128,141 |
+| خطوط | 128,144 |
 | آدرس‌ها (بلوک) | 6,763 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -285,7 +285,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 230 | 1,661 | 22,268 |
+| `TEST` | TEST | 230 | 1,661 | 22,271 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
 | `PAGE` | صفحات (ریشه) | 58 | 1,389 | 45,715 |
@@ -2866,23 +2866,23 @@
 </details>
 
 <details>
-<summary><b>TEST-171</b> — <code>tests/test_request_center_first_slice_static.py</code> (128 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-171</b> — <code>tests/test_request_center_first_slice_static.py</code> (131 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-171.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 | `TEST-171.02` | 7–10 | بلوک | `read` | 0 | ⬜ |
 | `TEST-171.03` | 11–11 | بلوک | `RequestCenterFirstSliceTests` | 0 | ⬜ |
-| `TEST-171.04` | 12–19 | بلوک | `test_independent_entrypoint_bootstraps_and_authent` | 0 | ⬜ |
-| `TEST-171.05` | 20–25 | بلوک | `test_repository_uses_existing_visibility_contracts` | 0 | ⬜ |
-| `TEST-171.06` | 26–30 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
-| `TEST-171.07` | 31–44 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
-| `TEST-171.08` | 45–52 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
-| `TEST-171.09` | 53–86 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
-| `TEST-171.10` | 87–93 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
-| `TEST-171.11` | 94–106 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
-| `TEST-171.12` | 107–117 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
-| `TEST-171.13` | 118–128 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
+| `TEST-171.04` | 12–21 | بلوک | `test_independent_entrypoint_bootstraps_and_authent` | 0 | ⬜ |
+| `TEST-171.05` | 22–27 | بلوک | `test_repository_uses_existing_visibility_contracts` | 0 | ⬜ |
+| `TEST-171.06` | 28–32 | بلوک | `test_internal_messages_are_filtered_in_sql` | 0 | ⬜ |
+| `TEST-171.07` | 33–47 | بلوک | `test_read_slice_has_no_schema_or_write_operations` | 0 | ⬜ |
+| `TEST-171.08` | 48–55 | بلوک | `test_transition_policy_is_owned_by_module_service` | 1 | ⬜ |
+| `TEST-171.09` | 56–89 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
+| `TEST-171.10` | 90–96 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
+| `TEST-171.11` | 97–109 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
+| `TEST-171.12` | 110–120 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
+| `TEST-171.13` | 121–131 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
 
 </details>
 

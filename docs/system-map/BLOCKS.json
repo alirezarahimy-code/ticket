@@ -73305,8 +73305,8 @@
             "id": "TEST-171",
             "path": "tests\/test_request_center_first_slice_static.py",
             "area": "TEST",
-            "lines": 128,
-            "file_fingerprint": "4a525042efb8",
+            "lines": 131,
+            "file_fingerprint": "cf312ce588ba",
             "blocks": [
                 {
                     "kind": "block",
@@ -73351,9 +73351,9 @@
                     "kind": "block",
                     "anchor": "test_independent_entrypoint_bootstraps_and_authenticates",
                     "line_start": 12,
-                    "line_end": 19,
-                    "lines": 8,
-                    "fingerprint": "943d69657b35",
+                    "line_end": 21,
+                    "lines": 10,
+                    "fingerprint": "fefebcdc0e3d",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -73363,10 +73363,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_repository_uses_existing_visibility_contracts",
-                    "line_start": 20,
-                    "line_end": 25,
+                    "line_start": 22,
+                    "line_end": 27,
                     "lines": 6,
-                    "fingerprint": "626b743f858d",
+                    "fingerprint": "6c9c3b067370",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -73376,8 +73376,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_internal_messages_are_filtered_in_sql",
-                    "line_start": 26,
-                    "line_end": 30,
+                    "line_start": 28,
+                    "line_end": 32,
                     "lines": 5,
                     "fingerprint": "723b5d2bc5bb",
                     "risk": {
@@ -73389,10 +73389,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_read_slice_has_no_schema_or_write_operations",
-                    "line_start": 31,
-                    "line_end": 44,
-                    "lines": 14,
-                    "fingerprint": "59658790d12d",
+                    "line_start": 33,
+                    "line_end": 47,
+                    "lines": 15,
+                    "fingerprint": "0a4b866d2316",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -73402,8 +73402,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_transition_policy_is_owned_by_module_service",
-                    "line_start": 45,
-                    "line_end": 52,
+                    "line_start": 48,
+                    "line_end": 55,
                     "lines": 8,
                     "fingerprint": "d8f10756d3c6",
                     "risk": {
@@ -73417,8 +73417,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_migrated_status_writes_use_the_central_workflow_service",
-                    "line_start": 53,
-                    "line_end": 86,
+                    "line_start": 56,
+                    "line_end": 89,
                     "lines": 34,
                     "fingerprint": "85ad47d24c1c",
                     "risk": {
@@ -73432,10 +73432,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_user_supplied_text_is_escaped_and_attachment_download_is_delegated",
-                    "line_start": 87,
-                    "line_end": 93,
+                    "line_start": 90,
+                    "line_end": 96,
                     "lines": 7,
-                    "fingerprint": "49a40ad8ae7d",
+                    "fingerprint": "4227a7c1c7fe",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -73445,10 +73445,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_workspace_views_are_permission_gated_and_scope_bound",
-                    "line_start": 94,
-                    "line_end": 106,
+                    "line_start": 97,
+                    "line_end": 109,
                     "lines": 13,
-                    "fingerprint": "432e57d7e77d",
+                    "fingerprint": "5ff38a3f1d9e",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -73460,10 +73460,10 @@
                 {
                     "kind": "block",
                     "anchor": "test_not_found_and_detail_navigation_preserve_workspace",
-                    "line_start": 107,
-                    "line_end": 117,
+                    "line_start": 110,
+                    "line_end": 120,
                     "lines": 11,
-                    "fingerprint": "ed84e05383f8",
+                    "fingerprint": "f8ce3bafaab3",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -73475,8 +73475,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
-                    "line_start": 118,
-                    "line_end": 128,
+                    "line_start": 121,
+                    "line_end": 131,
                     "lines": 11,
                     "fingerprint": "bd1d6157fbe4",
                     "risk": {
