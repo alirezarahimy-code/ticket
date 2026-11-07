@@ -2,12 +2,8 @@
 declare(strict_types=1);
 
 /**
- * Independent Request Center entry point.
- * Legacy page rendering is routed inside the module; old POST actions remain
- * compatible through index.php until their approved migration is complete.
+ * Stable Request Center URL entry point.
+ * Keep the complete legacy bootstrap and page/action dispatch intact while
+ * module page handlers are extracted incrementally.
  */
-if (isset($_GET['page'])) {
-    require __DIR__ . '/modules/request-center/Pages/legacy-router.php';
-    exit;
-}
-require __DIR__ . '/modules/request-center/Pages/index.php';
+require __DIR__ . '/index.php';
