@@ -1288,11 +1288,7 @@ if ($page === 'search') {
     echo '<section class="page-heading"><div><span class="eyebrow">جست‌وجوی سراسری</span><h1>نتایج جست‌وجو</h1><p>در صفحه‌ها، درخواست‌ها، شناسنامه‌ها، تردد، رسانه‌ها و دانش‌نامه جست‌وجو کنید.</p></div></section><form class="card filter-card global-search-page" method="get"><input type="hidden" name="page" value="search"><input name="q" required value="' . e($searchTerm) . '" placeholder="مثلاً تردد، فیش غذا، پشتیبان‌گیری ..."><button class="button" type="submit">جست‌وجو</button></form>';
     if ($searchTerm !== '') {
         $needles = array_values(array_unique(array_filter([$searchTerm, global_search_normalize($searchTerm)], static fn(string $v): bool => $v !== '')));
-        [$searchScope, $searchParams] = ticket_scope($searchUser);
-        $ticketGroups=[]; $ticketTerms=[];
-        foreach($needles as $needle){$like='%'.$needle.'%';$ticketGroups[]='(t.subject LIKE ? OR t.description LIKE ? OR r.full_name LIKE ?)';array_push($ticketTerms,$like,$like,$like);}
-        $ticketSql = 'SELECT t.id, t.subject, t.status, t.ticket_type, d.name AS department_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id ' . ($searchScope ?: 'WHERE 1 = 1') . ' AND (' . implode(' OR ', $ticketGroups) . ') ORDER BY t.updated_at DESC LIMIT 30';
-        $ticketQuery = db()->prepare($ticketSql); $ticketQuery->execute(array_merge($searchParams,$ticketTerms)); $ticketRows=$ticketQuery->fetchAll();
+        $ticketRows = request_center_global_search($searchUser, $needles); // برش استقلال فاز ۲: slice جست‌وجوی RC در ماژول
         [$assetSearchScope, $assetSearchParams] = asset_scope($searchUser);
         $assetProfileColumns = db_table_columns('asset_profiles');
         $assetProfileJoin = $assetProfileColumns ? ' LEFT JOIN asset_profiles p ON p.asset_id = a.id ' : ' ';

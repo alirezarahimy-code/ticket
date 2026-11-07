@@ -80,3 +80,16 @@ $tickets = $listQuery->fetchAll();
     ticket_number_cache_prime($tickets); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
     return [$counts, $tickets];
 }
+
+/**
+ * برش فاز استقلال فاز ۲ — slice جست‌وجوی Request Center برای صفحهٔ جست‌وجوی سراسری.
+ * بدنهٔ SQL بایت‌به‌بایت از index.php برداشته شد.
+ */
+function request_center_global_search(array $user, array $needles): array
+{
+    [$searchScope, $searchParams] = ticket_scope($user);
+    $ticketGroups=[]; $ticketTerms=[];
+    foreach($needles as $needle){$like='%'.$needle.'%';$ticketGroups[]='(t.subject LIKE ? OR t.description LIKE ? OR r.full_name LIKE ?)';array_push($ticketTerms,$like,$like,$like);}
+    $ticketSql = 'SELECT t.id, t.subject, t.status, t.ticket_type, d.name AS department_name FROM tickets t LEFT JOIN departments d ON d.id = t.department_id JOIN users r ON r.id = t.requester_id ' . ($searchScope ?: 'WHERE 1 = 1') . ' AND (' . implode(' OR ', $ticketGroups) . ') ORDER BY t.updated_at DESC LIMIT 30';
+    $ticketQuery = db()->prepare($ticketSql); $ticketQuery->execute(array_merge($searchParams,$ticketTerms)); return $ticketQuery->fetchAll();
+}
