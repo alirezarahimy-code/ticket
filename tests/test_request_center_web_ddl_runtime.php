@@ -200,9 +200,8 @@ try {
     t04_check($userId > 0, 'created disposable primary-admin account for request-center.php probe');
     $seed = t04_http('http://' . $address . '/tests/fixtures/request-center-session-seed.php?user_id=' . rawurlencode((string) $userId));
     t04_check($seed['status'] === 200, 'session seed endpoint returned HTTP 200 (status ' . $seed['status'] . ')');
-    if (json_validate($seed['body'])) {
-        $session = json_decode($seed['body'], true, 512, JSON_THROW_ON_ERROR);
-    } else {
+    $session = json_decode($seed['body'], true);
+    if (!is_array($session) || json_last_error() !== JSON_ERROR_NONE) {
         throw new RuntimeException('session seed body is not JSON (status ' . $seed['status'] . '): ' . substr((string) $seed['body'], 0, 800));
     }
     $cookie = (string) $session['cookie_name'] . '=' . (string) $session['session_id'];
