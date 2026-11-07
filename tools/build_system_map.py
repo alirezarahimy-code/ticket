@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT_DIR = ROOT / "docs" / "system-map"
 
 # پوشههایی که محتوایشان تاریخچه/خروجی است و وارد ایندکس کد نمیشوند.
-EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", "node_modules", "Unselected files"}
+EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", "node_modules", "Unselected files", ".local-php-toolchain"}
 HISTORY_DIRS = {"updates", "downloads", "benchmark-results", "preview", "storage"}
 
 TEXT_EXT = {".php", ".js", ".css", ".py", ".sql", ".md", ".txt", ".json", ".yml", ".yaml",
