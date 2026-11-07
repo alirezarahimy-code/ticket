@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 588 |
-| خطوط | 130,697 |
-| آدرس‌ها (بلوک) | 6,857 |
+| خطوط | 131,668 |
+| آدرس‌ها (بلوک) | 6,869 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,857 آدرس |
+| باقی‌مانده | 6,869 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -40,7 +40,7 @@
 | **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-048.02` <sub>modules/request-center/Pages/analytics.php:6</sub><br>`PAGE-048.01` <sub>modules/request-center/Pages/analytics.php:1</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 8 |
 | **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-034.64` <sub>index.php:1523</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
 | **تغییر رمز عبور** | `change-password` | — | `PAGE-034.22` <sub>index.php:427</sub><br>`PAGE-034.37` <sub>index.php:862</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 34 |
+| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 36 |
 | **تنظیمات سامانه** | `settings` | — | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub><br>`DB-005.02` <sub>migrations/003-sync-schema-151.sql:5</sub> | 62 |
 | **ثبت درخواست** | `new-ticket` | — | `PAGE-050.02` <sub>modules/request-center/Pages/create.php:12</sub><br>`PAGE-034.62` <sub>index.php:1409</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 10 |
 | **جزئیات درخواست** | `ticket` | — | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
@@ -56,7 +56,7 @@
 | **مدیریت بات** | `chatbot-admin` | `chatbot.manage` | `PAGE-034.60` <sub>index.php:1295</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
 | **مدیریت سازمان** | `organization` | `org.view` | `PAGE-064.39` <sub>organization.php:486</sub><br>`PAGE-034.69` <sub>index.php:1730</sub><br>`PAGE-034.23` <sub>index.php:438</sub><br>`PAGE-064.02` <sub>organization.php:4</sub> | 193 |
 | **پروفایل کاربری** | `profile` | `profile.edit` | `PAGE-034.39` <sub>index.php:868</sub><br>`PAGE-006.16` <sub>asset-profile.php:494</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 12 |
-| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-057.01` <sub>modules/request-center/Pages/supervisor.php:1</sub><br>`PAGE-056.01` <sub>modules/request-center/Pages/supervisor-workspace.php:1</sub><br>`CORE-003.08` <sub>lib/auth-scope.php:88</sub> | 74 |
+| **پنل سوپروایزر** | `supervisor` | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-057.01` <sub>modules/request-center/Pages/supervisor.php:1</sub><br>`PAGE-056.01` <sub>modules/request-center/Pages/supervisor-workspace.php:1</sub><br>`CORE-003.08` <sub>lib/auth-scope.php:88</sub> | 75 |
 | **چاپ کنترل تردد** | `traffic-control-print` | `traffic.view` | `PAGE-034.47` <sub>index.php:918</sub> | 6 |
 | **کاتالوگ خدمات** | `services` | `services.view` | `PAGE-055.02` <sub>modules/request-center/Pages/services.php:6</sub><br>`PAGE-055.05` <sub>modules/request-center/Pages/services.php:111</sub><br>`PAGE-055.06` <sub>modules/request-center/Pages/services.php:135</sub><br>`PAGE-055.07` <sub>modules/request-center/Pages/services.php:149</sub> | 16 |
 | **کنترل CD/DVD** | `cd-dvd` | `cddvd.view` | `PAGE-034.44` <sub>index.php:907</sub><br>`PAGE-009.43` <sub>cd-dvd.php:735</sub><br>`PAGE-009.33` <sub>cd-dvd.php:403</sub><br>`PAGE-009.19` <sub>cd-dvd.php:153</sub> | 68 |
@@ -87,7 +87,7 @@
 | درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:149</sub> | 6 |
 | درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `PAGE-040.03` <sub>modules/request-center/Actions/bulk-actions.php:24</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
 | درخواست | **صف کاری** | `queue.view` | `PAGE-053.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 13 |
-| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 15 |
+| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 14 |
 | درخواست | **ویرایش** | `supervisor.decide` | `PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub> | 4 |
 | درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 3 |
 | خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.30` <sub>index.php:781</sub> | 5 |
@@ -228,7 +228,7 @@
 | `food_ticket_templates` | `DB-002.90` <sub>install-empty-db.sql:1201</sub><br>`DB-005.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-041.90` <sub>schema.sql:1214</sub> | 21 |
 | `food_ticket_worker_status` | `DB-002.56` <sub>install-empty-db.sql:957</sub><br>`DB-005.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-041.53` <sub>schema.sql:936</sub> | 17 |
 | `handling_units` | `DB-002.13` <sub>install-empty-db.sql:123</sub><br>`DB-005.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-041.10` <sub>schema.sql:102</sub> | 42 |
-| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 34 |
+| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 36 |
 | `knowledge_articles` | `DB-002.34` <sub>install-empty-db.sql:502</sub><br>`DB-005.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-041.31` <sub>schema.sql:481</sub> | 17 |
 | `log_issue_events` | `DB-029.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-002.119` <sub>install-empty-db.sql:1543</sub><br>`DB-041.108` <sub>schema.sql:1494</sub> | 15 |
 | `log_issue_history` | `DB-002.118` <sub>install-empty-db.sql:1527</sub><br>`DB-029.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-041.107` <sub>schema.sql:1478</sub> | 12 |
@@ -243,9 +243,9 @@
 | `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-041.04` <sub>schema.sql:30</sub> | 90 |
 | `problem_records` | `DB-002.52` <sub>install-empty-db.sql:852</sub><br>`DB-005.41` <sub>migrations/003-sync-schema-151.sql:699</sub><br>`DB-041.49` <sub>schema.sql:831</sub> | 26 |
 | `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:876</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-041.50` <sub>schema.sql:855</sub> | 14 |
-| `request_center_appointments` | `DB-038.02` <sub>migrations/035-request-center-appointments.sql:6</sub> | 3 |
+| `request_center_appointments` | `DB-002.122` <sub>install-empty-db.sql:1579</sub><br>`DB-038.02` <sub>migrations/035-request-center-appointments.sql:6</sub> | 5 |
 | `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:435</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-041.26` <sub>schema.sql:414</sub> | 21 |
-| `schema_updates` | `DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`DB-041.110` <sub>schema.sql:1520</sub><br>`CORE-009.04` <sub>lib/logging-audit.php:61</sub> | 21 |
+| `schema_updates` | `DB-041.110` <sub>schema.sql:1520</sub><br>`DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`CORE-009.04` <sub>lib/logging-audit.php:61</sub> | 22 |
 | `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-041.19` <sub>schema.sql:232</sub> | 59 |
 | `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-041.20` <sub>schema.sql:258</sub> | 16 |
 | `settings` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 62 |
@@ -286,10 +286,10 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 234 | 1,704 | 23,249 |
+| `TEST` | TEST | 234 | 1,705 | 23,298 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
-| `DB` | DB | 83 | 1,375 | 7,952 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,419 | 46,860 |
+| `DB` | DB | 83 | 1,376 | 7,972 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,762 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -304,14 +304,14 @@
 | نشانه | معنی | بلوک |
 |---|---|---|
 | `write_no_tx` | نوشتن بدون تراکنش | 842 |
-| `error_suppression` | سرکوب @ | 298 |
+| `error_suppression` | سرکوب @ | 297 |
 | `dangerous_call` | فراخوانی خطرناک | 221 |
-| `sql_concat` | الحاق در SQL | 196 |
-| `raw_input` | ورودی خام | 186 |
-| `silent_catch` | catch بی‌صدا | 133 |
+| `sql_concat` | الحاق در SQL | 197 |
+| `raw_input` | ورودی خام | 187 |
+| `silent_catch` | catch بی‌صدا | 134 |
 | `long` | >۱۲۰ خط | 131 |
-| `unescaped_echo` | چاپ بدون فرار | 37 |
-| `very_long` | >۳۰۰ خط | 8 |
+| `unescaped_echo` | چاپ بدون فرار | 36 |
+| `very_long` | >۳۰۰ خط | 10 |
 
 ## ترتیب بازبینی — ۴۰ آدرس پرخطر
 
@@ -2865,13 +2865,14 @@
 </details>
 
 <details>
-<summary><b>TEST-171</b> — <code>tests/test_request_center_appointments_sqlite.php</code> (69 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-171</b> — <code>tests/test_request_center_appointments_sqlite.php</code> (118 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-171.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
 | `TEST-171.02` | 6–12 | تابع | `check_request_center` | 0 | ⬜ |
-| `TEST-171.03` | 13–69 | ناحیه | `بلوک رویه‌ای 13-69` | 5 | ⬜ |
+| `TEST-171.03` | 13–68 | ناحیه | `بلوک رویه‌ای 13-68` | 5 | ⬜ |
+| `TEST-171.04` | 69–118 | ناحیه | `——— فاز ۴: اتمام، محدوده، ظرفیت و شمارشگرها ———` | 0 | ⬜ |
 
 </details>
 
@@ -5346,7 +5347,7 @@
 </details>
 
 <details>
-<summary><b>DB-002</b> — <code>install-empty-db.sql</code> (1,613 خط، 121 آدرس، بازبینی‌شده 0/121)</summary>
+<summary><b>DB-002</b> — <code>install-empty-db.sql</code> (1,633 خط، 122 آدرس، بازبینی‌شده 0/122)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -5470,7 +5471,8 @@
 | `DB-002.118` | 1527–1542 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
 | `DB-002.119` | 1543–1549 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
 | `DB-002.120` | 1550–1568 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
-| `DB-002.121` | 1569–1613 | بلوک | `CREATE TABLE schema_updates` | 1 | ⬜ |
+| `DB-002.121` | 1569–1578 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
+| `DB-002.122` | 1579–1633 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
 
 </details>
 
@@ -8740,11 +8742,12 @@
 </details>
 
 <details>
-<summary><b>PAGE-039</b> — <code>modules/request-center/Actions/appointment-actions.php</code> (90 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-039</b> — <code>modules/request-center/Actions/appointment-actions.php</code> (214 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-039.01` | 1–90 | ناحیه | `بلوک رویه‌ای 1-90` | 6 | ⬜ |
+| `PAGE-039.01` | 1–164 | ناحیه | `بلوک رویه‌ای 1-164` | 7 | ⬜ |
+| `PAGE-039.02` | 165–214 | ناحیه | `—— نگهبان تعطیلات و روزهای تعطیل هفتگی (از تقویم ک` | 6 | ⬜ |
 
 </details>
 
@@ -8817,21 +8820,21 @@
 </details>
 
 <details>
-<summary><b>PAGE-045</b> — <code>modules/request-center/AppointmentRepository.php</code> (191 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-045</b> — <code>modules/request-center/AppointmentRepository.php</code> (373 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-045.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-045.02` | 4–190 | کلاس | `AppointmentRepository` | 6 | ⬜ |
+| `PAGE-045.02` | 4–372 | کلاس | `AppointmentRepository` | **8** | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-046</b> — <code>modules/request-center/Assets/request-center.css</code> (2 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-046</b> — <code>modules/request-center/Assets/request-center.css</code> (157 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-046.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `PAGE-046.01` | 1–157 | بلوک | `مقدمهٔ فایل` | 4 | ⬜ |
 
 </details>
 
@@ -8855,12 +8858,21 @@
 </details>
 
 <details>
-<summary><b>PAGE-049</b> — <code>modules/request-center/Pages/calendar.php</code> (189 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-049</b> — <code>modules/request-center/Pages/calendar.php</code> (624 خط، 11 آدرس، بازبینی‌شده 0/11)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-049.01` | 1–129 | ناحیه | `بلوک رویه‌ای 1-129` | **8** | ⬜ |
-| `PAGE-049.02` | 130–189 | ناحیه | `نوبت‌های رسیدگی کارشناسان (فاز سه)` | 6 | ⬜ |
+| `PAGE-049.01` | 1–31 | ناحیه | `بلوک رویه‌ای 1-31` | 0 | ⬜ |
+| `PAGE-049.02` | 32–36 | ناحیه | `——— امروز (شمسی + میلادی) ———` | 0 | ⬜ |
+| `PAGE-049.03` | 37–98 | ناحیه | `——— پارامتر ماه شمسی ———` | 7 | ⬜ |
+| `PAGE-049.04` | 99–139 | ناحیه | `——— بارگذاری رویدادهای موعد (خواندنی) ———` | 0 | ⬜ |
+| `PAGE-049.05` | 140–185 | ناحیه | `——— بارگذاری نوبت‌های رسیدگی (کنشی) ———` | 0 | ⬜ |
+| `PAGE-049.06` | 186–197 | ناحیه | `——— تعطیلات رسمی در این بازه ———` | 0 | ⬜ |
+| `PAGE-049.07` | 198–201 | ناحیه | `——— ساعت کاری/تعطیل هفتگی (ISO-8601: ۵شنبه و جمعه ` | 0 | ⬜ |
+| `PAGE-049.08` | 202–212 | ناحیه | `——— ظرفیت تیم (فقط مدیر) یا خلاصهٔ شخصی ———` | 0 | ⬜ |
+| `PAGE-049.09` | 213–215 | ناحیه | `——— نوبت‌های امروز برای تایم‌لاین کوچک ———` | 0 | ⬜ |
+| `PAGE-049.10` | 216–224 | ناحیه | `——— ظرفیت تکمیل (برای جای‌ خالی‌ها) ———` | 0 | ⬜ |
+| `PAGE-049.11` | 225–624 | ناحیه | `——— کمک‌گرهای نمایش ———` | **8** | ⬜ |
 
 </details>
 
@@ -9159,11 +9171,11 @@
 </details>
 
 <details>
-<summary><b>PAGE-067</b> — <code>request-center.php</code> (28 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-067</b> — <code>request-center.php</code> (34 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-067.01` | 1–28 | ناحیه | `بلوک رویه‌ای 1-28` | 2 | ⬜ |
+| `PAGE-067.01` | 1–34 | ناحیه | `بلوک رویه‌ای 1-34` | 2 | ⬜ |
 
 </details>
 

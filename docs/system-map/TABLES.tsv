@@ -81,6 +81,7 @@ log_issue_history	install-empty-db.sql	1527
 log_issue_events	install-empty-db.sql	1543
 log_issue_notifications	install-empty-db.sql	1550
 schema_updates	install-empty-db.sql	1569
+request_center_appointments	install-empty-db.sql	1579
 settings	migrations/003-sync-schema-151.sql	5
 departments	migrations/003-sync-schema-151.sql	9
 org_units	migrations/003-sync-schema-151.sql	18

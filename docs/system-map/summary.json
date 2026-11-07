@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/build_system_map.py",
-  "total_files_indexed": 1235,
-  "total_lines_indexed": 218933,
+  "total_files_indexed": 1236,
+  "total_lines_indexed": 220049,
   "categories": {
     "actions": 17,
     "api": 1,
@@ -12,7 +12,7 @@
     "config": 7,
     "core": 46,
     "cron": 19,
-    "docs": 50,
+    "docs": 51,
     "food-web": 33,
     "history-downloads": 63,
     "history-updates": 356,
@@ -27,12 +27,12 @@
     "tools": 101,
     "workflows": 13
   },
-  "symbols": 5671,
+  "symbols": 5676,
   "routes": 410,
-  "table_definitions": 456,
+  "table_definitions": 457,
   "unique_tables": 85,
   "update_packages": 120,
   "features": 36,
   "schema_sql_tables": 82,
-  "install_empty_db_tables": 82
+  "install_empty_db_tables": 83
 }

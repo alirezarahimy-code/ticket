@@ -32837,8 +32837,8 @@
             "id": "DB-002",
             "path": "install-empty-db.sql",
             "area": "DB",
-            "lines": 1613,
-            "file_fingerprint": "a1b9459657af",
+            "lines": 1633,
+            "file_fingerprint": "ad1f95aaf577",
             "blocks": [
                 {
                     "kind": "block",
@@ -34552,16 +34552,29 @@
                     "kind": "block",
                     "anchor": "CREATE TABLE schema_updates",
                     "line_start": 1569,
-                    "line_end": 1613,
-                    "lines": 45,
-                    "fingerprint": "7a13032432b0",
+                    "line_end": 1578,
+                    "lines": 10,
+                    "fingerprint": "80081ca293f5",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "DB-002.121"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "CREATE TABLE request_center_appointments",
+                    "line_start": 1579,
+                    "line_end": 1633,
+                    "lines": 55,
+                    "fingerprint": "9a71307c9b40",
                     "risk": {
                         "score": 1,
                         "flags": {
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-002.121"
+                    "id": "DB-002.122"
                 }
             ]
         },
@@ -52033,16 +52046,33 @@
             "id": "PAGE-039",
             "path": "modules\/request-center\/Actions\/appointment-actions.php",
             "area": "PAGE",
-            "lines": 90,
-            "file_fingerprint": "96d2a2916c11",
+            "lines": 214,
+            "file_fingerprint": "1b3c3e4d73e5",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-90",
+                    "anchor": "بلوک رویه‌ای 1-164",
                     "line_start": 1,
-                    "line_end": 90,
-                    "lines": 90,
-                    "fingerprint": "96d2a2916c11",
+                    "line_end": 164,
+                    "lines": 164,
+                    "fingerprint": "47dd9ead43e3",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "silent_catch": 4,
+                            "raw_input": 2,
+                            "long": 1
+                        }
+                    },
+                    "id": "PAGE-039.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "—— نگهبان تعطیلات و روزهای تعطیل هفتگی (از تقویم کاری\/تعطیلا",
+                    "line_start": 165,
+                    "line_end": 214,
+                    "lines": 50,
+                    "fingerprint": "32f9c5c9996e",
                     "risk": {
                         "score": 6,
                         "flags": {
@@ -52050,7 +52080,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-039.01"
+                    "id": "PAGE-039.02"
                 }
             ]
         },
@@ -52508,8 +52538,8 @@
             "id": "PAGE-045",
             "path": "modules\/request-center\/AppointmentRepository.php",
             "area": "PAGE",
-            "lines": 191,
-            "file_fingerprint": "d93a5ec30a3d",
+            "lines": 373,
+            "file_fingerprint": "2f097d1003f0",
             "blocks": [
                 {
                     "kind": "region",
@@ -52528,14 +52558,14 @@
                     "kind": "class",
                     "anchor": "AppointmentRepository",
                     "line_start": 4,
-                    "line_end": 190,
-                    "lines": 187,
-                    "fingerprint": "f7a248a64fa9",
+                    "line_end": 372,
+                    "lines": 369,
+                    "fingerprint": "f91549724ffd",
                     "risk": {
-                        "score": 6,
+                        "score": 8,
                         "flags": {
                             "sql_concat": 5,
-                            "long": 1
+                            "very_long": 3
                         }
                     },
                     "id": "PAGE-045.02"
@@ -52546,19 +52576,22 @@
             "id": "PAGE-046",
             "path": "modules\/request-center\/Assets\/request-center.css",
             "area": "PAGE",
-            "lines": 2,
-            "file_fingerprint": "fb14ffde7a5b",
+            "lines": 157,
+            "file_fingerprint": "cd713fbe26f1",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 2,
-                    "lines": 2,
-                    "fingerprint": "fb14ffde7a5b",
+                    "line_end": 157,
+                    "lines": 157,
+                    "fingerprint": "cd713fbe26f1",
                     "risk": {
-                        "score": 0,
-                        "flags": []
+                        "score": 4,
+                        "flags": {
+                            "error_suppression": 3,
+                            "long": 1
+                        }
                     },
                     "id": "PAGE-046.01"
                 }
@@ -52629,43 +52662,158 @@
             "id": "PAGE-049",
             "path": "modules\/request-center\/Pages\/calendar.php",
             "area": "PAGE",
-            "lines": 189,
-            "file_fingerprint": "56046920e999",
+            "lines": 624,
+            "file_fingerprint": "31b498b4741f",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-129",
+                    "anchor": "بلوک رویه‌ای 1-31",
                     "line_start": 1,
-                    "line_end": 129,
-                    "lines": 129,
-                    "fingerprint": "cbc2383a85b0",
+                    "line_end": 31,
+                    "lines": 31,
+                    "fingerprint": "88e870041b05",
                     "risk": {
-                        "score": 8,
-                        "flags": {
-                            "raw_input": 2,
-                            "unescaped_echo": 3,
-                            "error_suppression": 2,
-                            "long": 1
-                        }
+                        "score": 0,
+                        "flags": []
                     },
                     "id": "PAGE-049.01"
                 },
                 {
                     "kind": "region",
-                    "anchor": "نوبت‌های رسیدگی کارشناسان (فاز سه)",
-                    "line_start": 130,
-                    "line_end": 189,
-                    "lines": 60,
-                    "fingerprint": "3048814bf36a",
+                    "anchor": "——— امروز (شمسی + میلادی) ———",
+                    "line_start": 32,
+                    "line_end": 36,
+                    "lines": 5,
+                    "fingerprint": "9695f4defedc",
                     "risk": {
-                        "score": 6,
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.02"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— پارامتر ماه شمسی ———",
+                    "line_start": 37,
+                    "line_end": 98,
+                    "lines": 62,
+                    "fingerprint": "68091d1a671b",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-049.03"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— بارگذاری رویدادهای موعد (خواندنی) ———",
+                    "line_start": 99,
+                    "line_end": 139,
+                    "lines": 41,
+                    "fingerprint": "9f6edda6727e",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.04"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— بارگذاری نوبت‌های رسیدگی (کنشی) ———",
+                    "line_start": 140,
+                    "line_end": 185,
+                    "lines": 46,
+                    "fingerprint": "a4d1014b7efe",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.05"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— تعطیلات رسمی در این بازه ———",
+                    "line_start": 186,
+                    "line_end": 197,
+                    "lines": 12,
+                    "fingerprint": "962da58353cd",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.06"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— ساعت کاری\/تعطیل هفتگی (ISO-8601: ۵شنبه و جمعه = ۴ و ۵) —",
+                    "line_start": 198,
+                    "line_end": 201,
+                    "lines": 4,
+                    "fingerprint": "86873287e24d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.07"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— ظرفیت تیم (فقط مدیر) یا خلاصهٔ شخصی ———",
+                    "line_start": 202,
+                    "line_end": 212,
+                    "lines": 11,
+                    "fingerprint": "e0b04b623546",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.08"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— نوبت‌های امروز برای تایم‌لاین کوچک ———",
+                    "line_start": 213,
+                    "line_end": 215,
+                    "lines": 3,
+                    "fingerprint": "9d25382af08a",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.09"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— ظرفیت تکمیل (برای جای‌ خالی‌ها) ———",
+                    "line_start": 216,
+                    "line_end": 224,
+                    "lines": 9,
+                    "fingerprint": "28e7a8804ca0",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.10"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— کمک‌گرهای نمایش ———",
+                    "line_start": 225,
+                    "line_end": 624,
+                    "lines": 400,
+                    "fingerprint": "3f9cf57044cf",
+                    "risk": {
+                        "score": 8,
                         "flags": {
                             "raw_input": 2,
                             "unescaped_echo": 3,
-                            "error_suppression": 1
+                            "very_long": 3
                         }
                     },
-                    "id": "PAGE-049.02"
+                    "id": "PAGE-049.11"
                 }
             ]
         },
@@ -55031,16 +55179,16 @@
             "id": "PAGE-067",
             "path": "request-center.php",
             "area": "PAGE",
-            "lines": 28,
-            "file_fingerprint": "4baac4e1deee",
+            "lines": 34,
+            "file_fingerprint": "d452054a3fae",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-28",
+                    "anchor": "بلوک رویه‌ای 1-34",
                     "line_start": 1,
-                    "line_end": 28,
-                    "lines": 28,
-                    "fingerprint": "4baac4e1deee",
+                    "line_end": 34,
+                    "lines": 34,
+                    "fingerprint": "d452054a3fae",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -74198,8 +74346,8 @@
             "id": "TEST-171",
             "path": "tests\/test_request_center_appointments_sqlite.php",
             "area": "TEST",
-            "lines": 69,
-            "file_fingerprint": "0c234546ff44",
+            "lines": 118,
+            "file_fingerprint": "649b43737ca0",
             "blocks": [
                 {
                     "kind": "region",
@@ -74229,11 +74377,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 13-69",
+                    "anchor": "بلوک رویه‌ای 13-68",
                     "line_start": 13,
-                    "line_end": 69,
-                    "lines": 57,
-                    "fingerprint": "3761aee63174",
+                    "line_end": 68,
+                    "lines": 56,
+                    "fingerprint": "d942545a4443",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -74242,6 +74390,19 @@
                         }
                     },
                     "id": "TEST-171.03"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "——— فاز ۴: اتمام، محدوده، ظرفیت و شمارشگرها ———",
+                    "line_start": 69,
+                    "line_end": 118,
+                    "lines": 50,
+                    "fingerprint": "23d54626c999",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-171.04"
                 }
             ]
         },

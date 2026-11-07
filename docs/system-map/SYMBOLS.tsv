@@ -2148,6 +2148,11 @@ normalizeDateTime	function	modules/request-center/AppointmentRepository.php	53	o
 create	function	modules/request-center/AppointmentRepository.php	77	other
 listUpcoming	function	modules/request-center/AppointmentRepository.php	141	other
 cancel	function	modules/request-center/AppointmentRepository.php	165	other
+listRange	function	modules/request-center/AppointmentRepository.php	214	other
+capacitySummary	function	modules/request-center/AppointmentRepository.php	251	other
+countsForRange	function	modules/request-center/AppointmentRepository.php	277	other
+complete	function	modules/request-center/AppointmentRepository.php	310	other
+assignableStaff	function	modules/request-center/AppointmentRepository.php	355	other
 RequestCenterRepository	class	modules/request-center/RequestCenterRepository.php	11	other
 __construct	function	modules/request-center/RequestCenterRepository.php	13	other
 schemaProblems	function	modules/request-center/RequestCenterRepository.php	23	other
