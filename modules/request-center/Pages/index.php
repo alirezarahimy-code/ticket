@@ -209,7 +209,7 @@ if ($workspace === 'agent') {
     if ($agentView === 'mine' && !user_can($user, 'queue.view')) {
         $agentQueueName = 'mine';
     }
-    $queueData = $repo->listQueue($user, $agentQueueName, $page, 50);
+    $queueData = $repo->listQueue($user, $agentQueueName, $page, 50, $filters);
     $result = ['total' => $queueData['total'], 'rows' => $queueData['rows']];
     $pages = $queueData['pages'];
     $page = $queueData['page'];
