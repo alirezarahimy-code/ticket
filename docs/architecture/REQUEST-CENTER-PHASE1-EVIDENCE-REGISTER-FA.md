@@ -97,7 +97,14 @@
 3. `ticket_service_ensure_schema()` در `lib/logging-csrf.php` علاوه بر ALTER روی `categories` و `service_catalog`، seed دسته‌ها و backfill `service_catalog.category_id` انجام می‌دهد. این تابع از مسیر Legacy ایجاد/فرم درخواست فراخوانی می‌شود؛ پس باید به‌عنوان DDL + DML زمان اجرا در خط مبنا ثبت شود.
 4. در `cron/ticket_auto_close.php` و `cron/sla_maintenance.php`، `ticket_hot_schema_ensure()` پیش از شرط `PHP_SAPI === 'cli'` فراخوانی می‌شود. مخزن برای این مسیر `cron/.htaccess` با دستور `Require all denied` دارد؛ بنابراین در Apacheی که `AllowOverride` و مجوزهای این فایل را اعمال می‌کند، مسیر HTTP مسدود می‌شود. مؤثر بودن این حفاظت روی XAMPP نصب‌شده هنوز با درخواست HTTP واقعی آزموده نشده است؛ تا آن زمان وضعیت «نیازمند آزمون تنظیم Apache» است، نه اثبات دسترسی‌پذیری یا مسدودبودن.
 
-این یافته‌ها نشان می‌دهد T04 صرفاً «تعداد ALTERها» نیست: backfill شماره‌گذاری، seed/backfill کاتالوگ و بلع خطای DDL نیز باید در سناریوهای آزمون ثبت شوند. هیچ‌کدام در این مرحله تغییر داده نشده‌اند.
+آزمون runtime در Workflow `42342168721` روی MariaDB 10.4.32 و 10.11 این موارد را اثبات کرد:
+- `index.php` روی Schema نصب تازه: پنج دستور DDL و پنج DML؛ DDLها شامل دو CREATE TABLE IF NOT EXISTS و سه ALTER ... ADD COLUMN IF NOT EXISTS برای سازمان هستند.
+- همان درخواست، یک `UPDATE tickets.ticket_no` روی ردیف fixture و درج `ticket_number_seq` و نشانگر `ticket_autofill_done` انجام داد؛ پس backfill شماره‌گذاری واقعاً در درخواست وب اجرا می‌شود.
+- ورودی مستقل `request-center.php` با نشست مدیر اصلی روی Schema سالم HTTP 200 و صفر DDL داد.
+- پس از حذف `tickets.requesting_unit_id`، ورودی مستقل HTTP 503 و صفر DDL داد و ستون را دست‌نخورده گذاشت؛ Legacy `index.php` همان ستون را با ALTER بازسازی کرد.
+- فراخوانی HTTP تابع `ticket_service_ensure_schema()`، صفر DDL و ۴۵ DML ثبت کرد: ۱۷ UPSERT دسته و ۲۸ UPDATE روی `service_catalog.category_id`.
+
+بنابراین T04 برای ورودی مستقل RC به‌صورت runtime محدود PASS است؛ مسیر Legacy به‌صورت runtime FAIL است. آزمون Apache واقعی برای اثربخشی `cron/.htaccess` هنوز انجام نشده است. هیچ‌کدام از این مسیرها در این مرحله اصلاح نشده‌اند.
 
 ## ۴. وضعیت T01 تا T12 در زمان ثبت
 
@@ -184,14 +191,16 @@ Dump موجود مستقیماً از Git blob خوانده و فقط ساختا
 
 ## ۵. خط مبنای CI و رگرسیون شاخه فعلی
 
-وضعیت‌ها در commit `e1f7f9b581a9005f3a6e08a8dbf5ad9244a5b3b1` بررسی شده‌اند:
+وضعیت‌ها در commit کد/تست `0466b7c585f83fd0db0707d2bc4bd3172aa7df27` بررسی شده‌اند؛ پس از آن فقط مستندات تغییر کرده‌اند:
 
 | Workflow | نتیجه | جزئیات |
 |---|---|---|
-| Request Center Contract | PASS | اجرای قرارداد اختصاصی موفق |
+| Request Center Contract | PASS | Run `42342168721`: هر دو Job MariaDB 10.4.32 و 10.11، شامل T01–T04 diagnostic، موفق |
 | Logging contract | PASS | اجرای قرارداد اختصاصی موفق |
-| CI | FAIL | `tools/test_access_coverage_offline.php`: دو شکست |
-| Logging 1.62.88 Acceptance | FAIL | یک شکست در job ویندوز و یک شکست در job لینوکس |
+| CI | FAIL | `tools/test_access_coverage_offline.php`: دو شکست در پوشش مسیر ماژول |
+| Logging 1.62.88 Acceptance | FAIL | تست‌های قدیمی هنوز مسیرهای `actions/*.php` را برای کد منتقل‌شده بررسی می‌کنند |
+| Refresh Request Center system map | FAIL | اکشن‌های `create_ticket` و `supervisor_decision` در index تولیدی ثبت نشده‌اند |
+| Request Center QA Package Preview | FAIL | دو تست، فایل‌های `modules/request-center/Actions/*.php` را در overlay بسته پیدا نمی‌کنند |
 
 جزئیات شکست‌های ثبت‌شده:
 
@@ -200,7 +209,7 @@ Dump موجود مستقیماً از Git blob خوانده و فقط ساختا
 3. تست ویندوز `tools/test_ticket_txn_offline.php` هنوز بدنه `create_ticket` را از `actions/ticket-actions.php` می‌خواند؛ پس از انتقال پیاده‌سازی به `modules/request-center/Actions/ticket-actions.php` دو assertion مربوط به `db_commit_or_fail` و ساخت `ticketNo` شکست خورده‌اند.
 4. تست `tests/test_logging_trace_coverage.php` مسیر `actions/ticket-actions.php` را برای وجود `log_ticket_event()` و `save_audit_required()` بررسی می‌کند و در شاخه فعلی شکست می‌خورد، چون پیاده‌سازی به مسیر ماژول منتقل شده است.
 
-این شکست‌ها به تغییرات جابه‌جایی فیزیکی Actionها در شاخه فعلی مرتبط‌اند و باید در مسیر مجاز پروژه/آزمون‌های مصرف‌کننده تعیین تکلیف شوند. هیچ فایل Logging یا ماژول نامرتبطی نباید برای سبزکردن CI در این پروژه تغییر کند. سبز بودن دو workflow اختصاصی RC، جایگزین سبز بودن CI کامل نیست.
+این شکست‌ها به جابه‌جایی فیزیکی Actionها در شاخه فعلی مرتبط‌اند: پیمایش access coverage و system-map پوشه ماژول را نمی‌خوانند؛ تست‌های transaction/trace هنوز مسیر قدیمی را فرض می‌کنند؛ QA overlay نیز فایل‌های ماژول را بسته‌بندی نمی‌کند. این‌ها نقص‌های واقعی خط مبنای شاخه‌اند، اما از روی شکست تست استاتیک به‌تنهایی نقص مجوز runtime اثبات نمی‌شود. تعیین تکلیف اصلاحات بسته‌بندی و system-map باید در دامنه مجاز Request Center انجام شود؛ هیچ فایل Logging یا ماژول نامرتبطی نباید برای سبزکردن CI تغییر کند. سبز بودن Request Center Contract جایگزین سبز بودن CI کامل و QA Package Preview نیست.
 
 ## ۶. موانع واقعی برای بستن فاز اول
 
