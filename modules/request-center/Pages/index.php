@@ -219,6 +219,7 @@ if ($workspace === 'agent') {
 $queryParams = ['workspace' => $workspace];
 if ($workspace === 'agent') {
     $queryParams['agent_view'] = $agentView;
+    $queryParams['queue'] = $agentQueueName;
 }
 $queryString = http_build_query(array_merge($queryParams, array_filter($filters, static fn ($value): bool => $value !== '')));
 ?>
