@@ -20,7 +20,8 @@ $adminLinks = [
     ['title' => 'کاتالوگ خدمات و فرم‌ها', 'description' => 'خدمات، دسته‌بندی‌ها، فیلدهای تکمیلی و مسیر رسیدگی', 'url' => 'index.php?page=services'],
     ['title' => 'سیاست‌ها و گزارش SLA/OLA', 'description' => 'گزارش درخواست‌ها، موعدها و موارد خارج از تعهد', 'url' => 'index.php?page=reports'],
     ['title' => 'تحلیل عملکرد', 'description' => 'توزیع وضعیت، اولویت، واحدها و رضایت کارشناسان', 'url' => 'index.php?page=analytics'],
-    ['title' => 'صف عملیاتی', 'description' => 'درخواست‌های جاری، بدون مسئول و خارج از SLA/OLA', 'url' => 'index.php?page=queue'],
+    ['title' => 'تقویم موعد کارشناسان', 'description' => 'نمای ماهانهٔ موعد SLA، پاسخ OLA و حل OLA در محدودهٔ دسترسی', 'url' => 'request-center.php?workspace=admin&calendar=1'],
+    ['title' => 'صف عملیاتی', 'description' => 'درخواست‌های جاری، بدون مسئول و خارج از SLA/OLA', 'url' => 'request-center.php?page=queue'],
     ['title' => 'پنل نظارت', 'description' => 'بررسی درخواست‌های حل‌شده و تصمیم‌های مدیریتی', 'url' => 'index.php?page=supervisor'],
 ];
 header('X-Content-Type-Options: nosniff');
