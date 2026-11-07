@@ -29,7 +29,10 @@ final class RequestCenterRepository
             $tables = array_fill_keys(array_map('strtolower', $tableRows), true);
             $required = [
                 'tickets' => ['id', 'ticket_no', 'subject', 'status', 'priority', 'service_group', 'ticket_type',
-                    'created_at', 'updated_at', 'due_at', 'requester_id', 'assigned_to', 'department_id',
+                    'created_at', 'updated_at', 'due_at', 'sla_paused_at', 'sla_pause_minutes',
+                    'first_response_at', 'ola_response_due_at', 'ola_due_at',
+                    'ola_escalation_1_at', 'ola_escalation_2_at',
+                    'requester_id', 'assigned_to', 'department_id',
                     'category_id', 'service_id', 'asset_id', 'requesting_unit_id'],
                 'users' => ['id', 'full_name', 'role'],
                 'departments' => ['id', 'name'],
