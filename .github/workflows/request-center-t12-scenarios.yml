@@ -1,0 +1,106 @@
+name: Request Center T12 Scenario Characterization
+
+on:
+  workflow_dispatch:
+    inputs:
+      scenarios:
+        description: 'Comma-separated scenario numbers (default all: 1..10)'
+        required: false
+        default: '1,2,3,4,5,6,7,8,9,10'
+  pull_request:
+    paths:
+      - '.github/workflows/request-center-t12-scenarios.yml'
+      - 'install-empty-db.sql'
+      - 'bootstrap.php'
+      - 'session_bootstrap.php'
+      - 'index.php'
+      - 'request-center.php'
+      - 'lib/**'
+      - 'actions/**'
+      - 'modules/request-center/**'
+      - 'cron/ticket_auto_close.php'
+      - 'tests/test_request_center_t12_scenarios.php'
+      - 'tests/fixtures/request-center-t12-session-seed.php'
+  push:
+    branches: [arena/22d4eba7-ticket, feature/request-center-module-1.62.88]
+    paths:
+      - '.github/workflows/request-center-t12-scenarios.yml'
+      - 'tests/test_request_center_t12_scenarios.php'
+      - 'modules/request-center/**'
+      - 'lib/**'
+      - 'index.php'
+
+permissions:
+  contents: read
+
+jobs:
+  t12-scenarios:
+    name: T12 scenarios / MariaDB ${{ matrix.mariadb-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mariadb-version: ['10.4.32', '10.11']
+    services:
+      mariadb:
+        image: mariadb:${{ matrix.mariadb-version }}
+        env:
+          MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
+          MARIADB_DATABASE: persian_ticketing_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, mysqli, fileinfo, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Install MariaDB client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client
+
+      - name: Prepare pinned Legacy worktree
+        run: |
+          git fetch --no-tags origin 2176d2aa57758a0fbef426636c9943879646b165
+          git worktree add --detach "$RUNNER_TEMP/ticket-legacy" 2176d2aa57758a0fbef426636c9943879646b165
+          git -C "$RUNNER_TEMP/ticket-legacy" rev-parse HEAD
+
+      - name: Lint T12 scenario harness
+        run: php -l tests/test_request_center_t12_scenarios.php
+
+      - name: Run T12 scenario characterization
+        id: scenarios
+        env:
+          GITHUB_ACTIONS: 'true'
+          T12_LEGACY_ROOT: ${{ runner.temp }}/ticket-legacy
+          T12_FEATURE_ROOT: ${{ github.workspace }}
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+          ITSM_MYSQL_PATH: /usr/bin/mariadb
+          T12_SCENARIOS: ${{ inputs.scenarios || '1,2,3,4,5,6,7,8,9,10' }}
+          T12_EVIDENCE_DIR: ${{ runner.temp }}/t12-evidence
+        run: php tests/test_request_center_t12_scenarios.php
+
+      - name: Upload T12 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t12-evidence-${{ matrix.mariadb-version }}
+          path: ${{ runner.temp }}/t12-evidence
+          if-no-files-found: warn
+          retention-days: 14
