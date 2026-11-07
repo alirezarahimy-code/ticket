@@ -275,7 +275,7 @@
       "permission": null,
       "primary": [
         "PAGE-034.69",
-        "ACT-009.03",
+        "ACT-010.03",
         "PAGE-034.68",
         "DB-002.30",
         "DB-005.21",
@@ -296,7 +296,7 @@
         "PAGE-034.42",
         "TEST-111.01",
         "CRON-014.01",
-        "ACT-009.04",
+        "ACT-010.04",
         "TEST-023.01",
         "PAGE-038.04",
         "TOOL-011.01"
@@ -327,9 +327,9 @@
       ],
       "related": [
         "TEST-111.08",
-        "ACT-016.05",
+        "ACT-017.05",
         "PAGE-032.01",
-        "ACT-016.06",
+        "ACT-017.06",
         "PAGE-022.16",
         "PAGE-034.87",
         "TEST-023.01",
@@ -443,7 +443,7 @@
       "key": "holidays",
       "permission": "holidays.view",
       "primary": [
-        "ACT-008.07",
+        "ACT-009.07",
         "PAGE-034.79",
         "DB-002.35",
         "DB-005.26",
@@ -464,10 +464,10 @@
         "PAGE-029.132",
         "PAGE-033.03",
         "TEST-023.01",
-        "ACT-008.09",
+        "ACT-009.09",
         "TOOL-009.01",
-        "ACT-008.05",
-        "ACT-008.06",
+        "ACT-009.05",
+        "ACT-009.06",
         "PAGE-001.12"
       ],
       "total": 34
@@ -552,7 +552,7 @@
         "CRON-005.04",
         "WEB-016.60",
         "PAGE-032.01",
-        "ACT-013.08",
+        "ACT-014.08",
         "WEB-016.59",
         "PAGE-034.30",
         "PAGE-064.30",
@@ -854,13 +854,13 @@
         "ASSET-018.88"
       ],
       "related": [
-        "ACT-016.07",
+        "ACT-017.07",
         "PAGE-018.09",
         "TEST-062.01",
         "PAGE-034.30",
-        "ACT-016.06",
+        "ACT-017.06",
         "TEST-131.03",
-        "ACT-016.04",
+        "ACT-017.04",
         "ASSET-008.109",
         "ASSET-008.113",
         "ASSET-010.10"
@@ -919,8 +919,8 @@
         "PAGE-046.01",
         "PAGE-048.02",
         "PAGE-049.02",
-        "ACT-011.03",
-        "ACT-016.07",
+        "ACT-012.03",
+        "ACT-017.07",
         "TEST-179.07"
       ],
       "total": 70
@@ -1345,7 +1345,7 @@
       "key": "ticket.rate",
       "primary": [
         "PAGE-048.02",
-        "PAGE-041.06"
+        "PAGE-041.05"
       ],
       "related": [
         "PAGE-059.26",
@@ -1396,8 +1396,8 @@
       "key": "supervisor.panel",
       "primary": [
         "PAGE-054.02",
+        "PAGE-041.03",
         "PAGE-041.04",
-        "PAGE-041.05",
         "PAGE-053.01"
       ],
       "related": [
@@ -1417,7 +1417,7 @@
       "group": "درخواست",
       "key": "supervisor.decide",
       "primary": [
-        "PAGE-041.04"
+        "PAGE-041.03"
       ],
       "related": [
         "PAGE-059.03",
@@ -1433,7 +1433,7 @@
       "group": "درخواست",
       "key": "supervisor.reopen",
       "primary": [
-        "PAGE-041.05"
+        "PAGE-041.04"
       ],
       "related": [
         "PAGE-059.03",
@@ -1486,7 +1486,7 @@
       "key": "service_cat.manage",
       "primary": [
         "PAGE-059.03",
-        "ACT-016.03",
+        "ACT-017.03",
         "PAGE-059.16"
       ],
       "related": [],
@@ -2627,16 +2627,16 @@
       "group": "سازمان",
       "key": "org.manage",
       "primary": [
-        "ACT-010.13",
-        "ACT-010.18",
-        "ACT-010.14",
-        "ACT-010.15",
-        "ACT-010.16",
-        "ACT-010.19",
-        "ACT-010.06",
-        "ACT-010.09",
-        "ACT-010.10",
-        "ACT-010.17"
+        "ACT-011.13",
+        "ACT-011.18",
+        "ACT-011.14",
+        "ACT-011.15",
+        "ACT-011.16",
+        "ACT-011.19",
+        "ACT-011.06",
+        "ACT-011.09",
+        "ACT-011.10",
+        "ACT-011.17"
       ],
       "related": [
         "PAGE-059.03",
@@ -2673,9 +2673,9 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.general_edit",
       "primary": [
-        "ACT-013.08",
+        "ACT-014.08",
         "PAGE-034.88",
-        "ACT-013.07",
+        "ACT-014.07",
         "TEST-225.06"
       ],
       "related": [
@@ -2711,9 +2711,9 @@
       "group": "تنظیمات و سیستم",
       "key": "settings.domain_edit",
       "primary": [
-        "ACT-013.08",
+        "ACT-014.08",
         "PAGE-034.88",
-        "ACT-013.06"
+        "ACT-014.06"
       ],
       "related": [
         "PAGE-059.03",
@@ -2748,8 +2748,8 @@
       "key": "settings.users_edit",
       "primary": [
         "PAGE-034.88",
-        "ACT-016.08",
-        "ACT-013.05"
+        "ACT-017.08",
+        "ACT-014.05"
       ],
       "related": [
         "PAGE-059.03",
@@ -2785,7 +2785,7 @@
         "PAGE-034.88"
       ],
       "related": [
-        "ACT-011.03",
+        "ACT-012.03",
         "PAGE-059.03",
         "PAGE-059.08"
       ],
@@ -2967,15 +2967,15 @@
       "group": "تنظیمات و سیستم",
       "key": "holidays.manage",
       "primary": [
-        "ACT-008.07"
+        "ACT-009.07"
       ],
       "related": [
         "PAGE-033.03",
-        "ACT-008.08",
-        "ACT-008.09",
+        "ACT-009.08",
+        "ACT-009.09",
         "PAGE-059.03",
-        "ACT-008.05",
-        "ACT-008.06"
+        "ACT-009.05",
+        "ACT-009.06"
       ],
       "total": 13
     }
@@ -4119,7 +4119,7 @@
       "fa": "holidays",
       "key": "holidays",
       "primary": [
-        "ACT-008.07",
+        "ACT-009.07",
         "PAGE-034.79",
         "DB-002.35",
         "DB-005.26",
@@ -4136,7 +4136,7 @@
         "PAGE-029.132",
         "PAGE-033.03",
         "TEST-023.01",
-        "ACT-008.09"
+        "ACT-009.09"
       ],
       "total": 34
     },
@@ -4307,7 +4307,7 @@
       "key": "notifications",
       "primary": [
         "PAGE-034.69",
-        "ACT-009.03",
+        "ACT-010.03",
         "PAGE-034.68",
         "DB-002.30",
         "DB-005.21",
@@ -4366,7 +4366,7 @@
         "CORE-003.09"
       ],
       "related": [
-        "ACT-013.03",
+        "ACT-014.03",
         "TEST-134.06",
         "PAGE-058.04",
         "PAGE-058.08",
@@ -4394,9 +4394,9 @@
       "related": [
         "PAGE-034.88",
         "PAGE-058.02",
-        "ACT-010.18",
-        "ACT-010.21",
-        "ACT-010.22",
+        "ACT-011.18",
+        "ACT-011.21",
+        "ACT-011.22",
         "TOOL-074.07"
       ],
       "total": 36
@@ -4421,10 +4421,10 @@
       "related": [
         "PAGE-034.88",
         "PAGE-058.02",
-        "ACT-010.18",
+        "ACT-011.18",
         "PAGE-055.02",
-        "ACT-010.21",
-        "ACT-010.22"
+        "ACT-011.21",
+        "ACT-011.22"
       ],
       "total": 89
     },
@@ -4730,7 +4730,7 @@
         "PAGE-048.02",
         "PAGE-055.02",
         "PAGE-034.43",
-        "PAGE-041.04"
+        "PAGE-041.03"
       ],
       "total": 29
     },
@@ -4807,7 +4807,7 @@
         "CRON-012.01",
         "PAGE-045.02",
         "TEST-023.01",
-        "PAGE-041.06"
+        "PAGE-041.05"
       ],
       "total": 18
     },
@@ -5022,7 +5022,7 @@
       "fa": "users",
       "key": "users",
       "primary": [
-        "ACT-010.14",
+        "ACT-011.14",
         "DB-002.11",
         "DB-005.06",
         "DB-040.08",
@@ -5326,6 +5326,22 @@
       "lines": 25
     },
     "ACT-008.01": {
+      "path": "actions/food-order-actions.php",
+      "area": "ACT",
+      "line": 1,
+      "anchor": "بلوک رویه‌ای 1-16",
+      "risk": 0,
+      "lines": 16
+    },
+    "ACT-008.02": {
+      "path": "actions/food-order-actions.php",
+      "area": "ACT",
+      "line": 17,
+      "anchor": "مسیر: food_order_cancel_decide",
+      "risk": 2,
+      "lines": 15
+    },
+    "ACT-009.01": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5333,7 +5349,7 @@
       "risk": 0,
       "lines": 19
     },
-    "ACT-008.02": {
+    "ACT-009.02": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 20,
@@ -5341,7 +5357,7 @@
       "risk": 0,
       "lines": 6
     },
-    "ACT-008.03": {
+    "ACT-009.03": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 26,
@@ -5349,7 +5365,7 @@
       "risk": 0,
       "lines": 1
     },
-    "ACT-008.04": {
+    "ACT-009.04": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 27,
@@ -5357,7 +5373,7 @@
       "risk": 2,
       "lines": 8
     },
-    "ACT-008.05": {
+    "ACT-009.05": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 35,
@@ -5365,7 +5381,7 @@
       "risk": 0,
       "lines": 41
     },
-    "ACT-008.06": {
+    "ACT-009.06": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 76,
@@ -5373,7 +5389,7 @@
       "risk": 0,
       "lines": 26
     },
-    "ACT-008.07": {
+    "ACT-009.07": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 102,
@@ -5381,7 +5397,7 @@
       "risk": 0,
       "lines": 30
     },
-    "ACT-008.08": {
+    "ACT-009.08": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 132,
@@ -5389,7 +5405,7 @@
       "risk": 2,
       "lines": 42
     },
-    "ACT-008.09": {
+    "ACT-009.09": {
       "path": "actions/holiday-actions.php",
       "area": "ACT",
       "line": 174,
@@ -5397,7 +5413,7 @@
       "risk": 2,
       "lines": 21
     },
-    "ACT-009.01": {
+    "ACT-010.01": {
       "path": "actions/notification-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5405,7 +5421,7 @@
       "risk": 0,
       "lines": 15
     },
-    "ACT-009.02": {
+    "ACT-010.02": {
       "path": "actions/notification-actions.php",
       "area": "ACT",
       "line": 16,
@@ -5413,7 +5429,7 @@
       "risk": 0,
       "lines": 7
     },
-    "ACT-009.03": {
+    "ACT-010.03": {
       "path": "actions/notification-actions.php",
       "area": "ACT",
       "line": 23,
@@ -5421,7 +5437,7 @@
       "risk": 1,
       "lines": 6
     },
-    "ACT-009.04": {
+    "ACT-010.04": {
       "path": "actions/notification-actions.php",
       "area": "ACT",
       "line": 29,
@@ -5429,7 +5445,7 @@
       "risk": 3,
       "lines": 7
     },
-    "ACT-010.01": {
+    "ACT-011.01": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5437,7 +5453,7 @@
       "risk": 0,
       "lines": 16
     },
-    "ACT-010.02": {
+    "ACT-011.02": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 17,
@@ -5445,7 +5461,7 @@
       "risk": 0,
       "lines": 6
     },
-    "ACT-010.03": {
+    "ACT-011.03": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 23,
@@ -5453,7 +5469,7 @@
       "risk": 0,
       "lines": 2
     },
-    "ACT-010.04": {
+    "ACT-011.04": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 25,
@@ -5461,7 +5477,7 @@
       "risk": 2,
       "lines": 22
     },
-    "ACT-010.05": {
+    "ACT-011.05": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 47,
@@ -5469,7 +5485,7 @@
       "risk": 7,
       "lines": 22
     },
-    "ACT-010.06": {
+    "ACT-011.06": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 69,
@@ -5477,7 +5493,7 @@
       "risk": 4,
       "lines": 137
     },
-    "ACT-010.07": {
+    "ACT-011.07": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 206,
@@ -5485,7 +5501,7 @@
       "risk": 0,
       "lines": 18
     },
-    "ACT-010.08": {
+    "ACT-011.08": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 224,
@@ -5493,7 +5509,7 @@
       "risk": 0,
       "lines": 19
     },
-    "ACT-010.09": {
+    "ACT-011.09": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 243,
@@ -5501,7 +5517,7 @@
       "risk": 2,
       "lines": 30
     },
-    "ACT-010.10": {
+    "ACT-011.10": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 273,
@@ -5509,7 +5525,7 @@
       "risk": 2,
       "lines": 37
     },
-    "ACT-010.11": {
+    "ACT-011.11": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 310,
@@ -5517,7 +5533,7 @@
       "risk": 0,
       "lines": 45
     },
-    "ACT-010.12": {
+    "ACT-011.12": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 355,
@@ -5525,7 +5541,7 @@
       "risk": 0,
       "lines": 27
     },
-    "ACT-010.13": {
+    "ACT-011.13": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 382,
@@ -5533,7 +5549,7 @@
       "risk": 8,
       "lines": 27
     },
-    "ACT-010.14": {
+    "ACT-011.14": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 409,
@@ -5541,7 +5557,7 @@
       "risk": 7,
       "lines": 37
     },
-    "ACT-010.15": {
+    "ACT-011.15": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 446,
@@ -5549,7 +5565,7 @@
       "risk": 5,
       "lines": 119
     },
-    "ACT-010.16": {
+    "ACT-011.16": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 565,
@@ -5557,7 +5573,7 @@
       "risk": 5,
       "lines": 24
     },
-    "ACT-010.17": {
+    "ACT-011.17": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 589,
@@ -5565,7 +5581,7 @@
       "risk": 1,
       "lines": 28
     },
-    "ACT-010.18": {
+    "ACT-011.18": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 617,
@@ -5573,7 +5589,7 @@
       "risk": 8,
       "lines": 79
     },
-    "ACT-010.19": {
+    "ACT-011.19": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 696,
@@ -5581,7 +5597,7 @@
       "risk": 5,
       "lines": 36
     },
-    "ACT-010.20": {
+    "ACT-011.20": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 732,
@@ -5589,7 +5605,7 @@
       "risk": 1,
       "lines": 34
     },
-    "ACT-010.21": {
+    "ACT-011.21": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 766,
@@ -5597,7 +5613,7 @@
       "risk": 7,
       "lines": 40
     },
-    "ACT-010.22": {
+    "ACT-011.22": {
       "path": "actions/org-actions.php",
       "area": "ACT",
       "line": 806,
@@ -5605,7 +5621,7 @@
       "risk": 7,
       "lines": 38
     },
-    "ACT-011.01": {
+    "ACT-012.01": {
       "path": "actions/role-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5613,7 +5629,7 @@
       "risk": 0,
       "lines": 18
     },
-    "ACT-011.02": {
+    "ACT-012.02": {
       "path": "actions/role-actions.php",
       "area": "ACT",
       "line": 19,
@@ -5621,7 +5637,7 @@
       "risk": 0,
       "lines": 7
     },
-    "ACT-011.03": {
+    "ACT-012.03": {
       "path": "actions/role-actions.php",
       "area": "ACT",
       "line": 26,
@@ -5629,7 +5645,7 @@
       "risk": 7,
       "lines": 74
     },
-    "ACT-011.04": {
+    "ACT-012.04": {
       "path": "actions/role-actions.php",
       "area": "ACT",
       "line": 100,
@@ -5637,7 +5653,7 @@
       "risk": 2,
       "lines": 24
     },
-    "ACT-011.05": {
+    "ACT-012.05": {
       "path": "actions/role-actions.php",
       "area": "ACT",
       "line": 124,
@@ -5645,7 +5661,7 @@
       "risk": 0,
       "lines": 20
     },
-    "ACT-011.06": {
+    "ACT-012.06": {
       "path": "actions/role-actions.php",
       "area": "ACT",
       "line": 144,
@@ -5653,7 +5669,7 @@
       "risk": 0,
       "lines": 19
     },
-    "ACT-012.01": {
+    "ACT-013.01": {
       "path": "actions/service-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5661,7 +5677,7 @@
       "risk": 0,
       "lines": 6
     },
-    "ACT-013.01": {
+    "ACT-014.01": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5669,7 +5685,7 @@
       "risk": 0,
       "lines": 20
     },
-    "ACT-013.02": {
+    "ACT-014.02": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 21,
@@ -5677,7 +5693,7 @@
       "risk": 0,
       "lines": 7
     },
-    "ACT-013.03": {
+    "ACT-014.03": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 28,
@@ -5685,7 +5701,7 @@
       "risk": 2,
       "lines": 27
     },
-    "ACT-013.04": {
+    "ACT-014.04": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 55,
@@ -5693,7 +5709,7 @@
       "risk": 0,
       "lines": 14
     },
-    "ACT-013.05": {
+    "ACT-014.05": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 69,
@@ -5701,7 +5717,7 @@
       "risk": 0,
       "lines": 8
     },
-    "ACT-013.06": {
+    "ACT-014.06": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 77,
@@ -5709,7 +5725,7 @@
       "risk": 0,
       "lines": 14
     },
-    "ACT-013.07": {
+    "ACT-014.07": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 91,
@@ -5717,7 +5733,7 @@
       "risk": 2,
       "lines": 74
     },
-    "ACT-013.08": {
+    "ACT-014.08": {
       "path": "actions/settings-actions.php",
       "area": "ACT",
       "line": 165,
@@ -5725,7 +5741,7 @@
       "risk": 4,
       "lines": 111
     },
-    "ACT-014.01": {
+    "ACT-015.01": {
       "path": "actions/supervisor-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5733,7 +5749,7 @@
       "risk": 0,
       "lines": 6
     },
-    "ACT-015.01": {
+    "ACT-016.01": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5741,7 +5757,7 @@
       "risk": 0,
       "lines": 6
     },
-    "ACT-016.01": {
+    "ACT-017.01": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 1,
@@ -5749,7 +5765,7 @@
       "risk": 0,
       "lines": 21
     },
-    "ACT-016.02": {
+    "ACT-017.02": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 22,
@@ -5757,7 +5773,7 @@
       "risk": 0,
       "lines": 7
     },
-    "ACT-016.03": {
+    "ACT-017.03": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 29,
@@ -5765,7 +5781,7 @@
       "risk": 1,
       "lines": 11
     },
-    "ACT-016.04": {
+    "ACT-017.04": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 40,
@@ -5773,7 +5789,7 @@
       "risk": 1,
       "lines": 14
     },
-    "ACT-016.05": {
+    "ACT-017.05": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 54,
@@ -5781,7 +5797,7 @@
       "risk": 7,
       "lines": 106
     },
-    "ACT-016.06": {
+    "ACT-017.06": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 160,
@@ -5789,7 +5805,7 @@
       "risk": 3,
       "lines": 159
     },
-    "ACT-016.07": {
+    "ACT-017.07": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 319,
@@ -5797,7 +5813,7 @@
       "risk": 7,
       "lines": 39
     },
-    "ACT-016.08": {
+    "ACT-017.08": {
       "path": "actions/user-structure-actions.php",
       "area": "ACT",
       "line": 358,
@@ -23539,12 +23555,12 @@
       "line": 1199,
       "anchor": "مسیر: logging_begin_operation",
       "risk": 6,
-      "lines": 111
+      "lines": 114
     },
     "PAGE-034.47": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1310,
+      "line": 1313,
       "anchor": "مسیر: settings|create_access_group|save_access_group",
       "risk": 2,
       "lines": 11
@@ -23552,7 +23568,7 @@
     "PAGE-034.48": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1321,
+      "line": 1324,
       "anchor": "مسیر: chatbot-api",
       "risk": 0,
       "lines": 53
@@ -23560,7 +23576,7 @@
     "PAGE-034.49": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1374,
+      "line": 1377,
       "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
       "risk": 0,
       "lines": 1
@@ -23568,7 +23584,7 @@
     "PAGE-034.50": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1375,
+      "line": 1378,
       "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
       "risk": 0,
       "lines": 1
@@ -23576,7 +23592,7 @@
     "PAGE-034.51": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1376,
+      "line": 1379,
       "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
       "risk": 0,
       "lines": 1
@@ -23584,7 +23600,7 @@
     "PAGE-034.52": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1377,
+      "line": 1380,
       "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
       "risk": 0,
       "lines": 8
@@ -23592,7 +23608,7 @@
     "PAGE-034.53": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1385,
+      "line": 1388,
       "anchor": "شرط مسیریابی",
       "risk": 0,
       "lines": 8
@@ -23600,7 +23616,7 @@
     "PAGE-034.54": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1393,
+      "line": 1396,
       "anchor": "مسیر: settings|settings.general|settings.domain",
       "risk": 0,
       "lines": 9
@@ -23608,7 +23624,7 @@
     "PAGE-034.55": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1402,
+      "line": 1405,
       "anchor": "مسیر: change-password",
       "risk": 0,
       "lines": 3
@@ -23616,7 +23632,7 @@
     "PAGE-034.56": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1405,
+      "line": 1408,
       "anchor": "مسیر: local-accounts",
       "risk": 0,
       "lines": 3
@@ -23624,7 +23640,7 @@
     "PAGE-034.57": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1408,
+      "line": 1411,
       "anchor": "مسیر: profile",
       "risk": 0,
       "lines": 18
@@ -23632,7 +23648,7 @@
     "PAGE-034.58": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1426,
+      "line": 1429,
       "anchor": "مسیر: governance",
       "risk": 0,
       "lines": 4
@@ -23640,7 +23656,7 @@
     "PAGE-034.59": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1430,
+      "line": 1433,
       "anchor": "مسیر: food-ticket",
       "risk": 0,
       "lines": 5
@@ -23648,7 +23664,7 @@
     "PAGE-034.60": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1435,
+      "line": 1438,
       "anchor": "مسیر: food-order|foodorder.self",
       "risk": 0,
       "lines": 8
@@ -23656,7 +23672,7 @@
     "PAGE-034.61": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1443,
+      "line": 1446,
       "anchor": "مسیر: food-order",
       "risk": 0,
       "lines": 4
@@ -23664,7 +23680,7 @@
     "PAGE-034.62": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1447,
+      "line": 1450,
       "anchor": "مسیر: cd-dvd",
       "risk": 0,
       "lines": 4
@@ -23672,7 +23688,7 @@
     "PAGE-034.63": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1451,
+      "line": 1454,
       "anchor": "مسیر: cd-dvd-history",
       "risk": 0,
       "lines": 4
@@ -23680,7 +23696,7 @@
     "PAGE-034.64": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1455,
+      "line": 1458,
       "anchor": "مسیر: traffic-control",
       "risk": 0,
       "lines": 3
@@ -23688,7 +23704,7 @@
     "PAGE-034.65": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1458,
+      "line": 1461,
       "anchor": "مسیر: traffic-control-print",
       "risk": 2,
       "lines": 5
@@ -23696,7 +23712,7 @@
     "PAGE-034.66": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1463,
+      "line": 1466,
       "anchor": "مسیر: help",
       "risk": 0,
       "lines": 8
@@ -23704,7 +23720,7 @@
     "PAGE-034.67": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1471,
+      "line": 1474,
       "anchor": "مسیر: knowledge",
       "risk": 2,
       "lines": 37
@@ -23712,7 +23728,7 @@
     "PAGE-034.68": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1508,
+      "line": 1511,
       "anchor": "مسیر: notifications|notif.view",
       "risk": 0,
       "lines": 8
@@ -23720,7 +23736,7 @@
     "PAGE-034.69": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1516,
+      "line": 1519,
       "anchor": "مسیر: notifications",
       "risk": 5,
       "lines": 18
@@ -23728,7 +23744,7 @@
     "PAGE-034.70": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1534,
+      "line": 1537,
       "anchor": "مسیر: audit",
       "risk": 0,
       "lines": 9
@@ -23736,7 +23752,7 @@
     "PAGE-034.71": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1543,
+      "line": 1546,
       "anchor": "مسیر: logging-dashboard",
       "risk": 0,
       "lines": 4
@@ -23744,7 +23760,7 @@
     "PAGE-034.72": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1547,
+      "line": 1550,
       "anchor": "مسیر: system-health",
       "risk": 0,
       "lines": 4
@@ -23752,7 +23768,7 @@
     "PAGE-034.73": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1551,
+      "line": 1554,
       "anchor": "مسیر: logs",
       "risk": 0,
       "lines": 6
@@ -23760,7 +23776,7 @@
     "PAGE-034.74": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1557,
+      "line": 1560,
       "anchor": "مسیر: activity-log",
       "risk": 8,
       "lines": 143
@@ -23768,7 +23784,7 @@
     "PAGE-034.75": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1700,
+      "line": 1703,
       "anchor": "مسیر: backup",
       "risk": 6,
       "lines": 39
@@ -23776,7 +23792,7 @@
     "PAGE-034.76": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1739,
+      "line": 1742,
       "anchor": "مسیر: search|search.global",
       "risk": 0,
       "lines": 8
@@ -23784,7 +23800,7 @@
     "PAGE-034.77": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1747,
+      "line": 1750,
       "anchor": "مسیر: search",
       "risk": 7,
       "lines": 92
@@ -23792,7 +23808,7 @@
     "PAGE-034.78": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1839,
+      "line": 1842,
       "anchor": "مسیر: chatbot-admin",
       "risk": 5,
       "lines": 103
@@ -23800,7 +23816,7 @@
     "PAGE-034.79": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1942,
+      "line": 1945,
       "anchor": "مسیر: holidays",
       "risk": 0,
       "lines": 11
@@ -23808,7 +23824,7 @@
     "PAGE-034.80": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1953,
+      "line": 1956,
       "anchor": "مسیر: new-ticket|ticket.create",
       "risk": 0,
       "lines": 13
@@ -23816,7 +23832,7 @@
     "PAGE-034.81": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 1966,
+      "line": 1969,
       "anchor": "مسیر: inventory",
       "risk": 7,
       "lines": 101
@@ -23824,7 +23840,7 @@
     "PAGE-034.82": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2067,
+      "line": 2070,
       "anchor": "مسیر: inventory-diagnostics",
       "risk": 2,
       "lines": 32
@@ -23832,7 +23848,7 @@
     "PAGE-034.83": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2099,
+      "line": 2102,
       "anchor": "مسیر: asset-history",
       "risk": 7,
       "lines": 18
@@ -23840,7 +23856,7 @@
     "PAGE-034.84": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2117,
+      "line": 2120,
       "anchor": "مسیر: domain-scan",
       "risk": 2,
       "lines": 78
@@ -23848,7 +23864,7 @@
     "PAGE-034.85": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2195,
+      "line": 2198,
       "anchor": "مسیر: assets",
       "risk": 7,
       "lines": 45
@@ -23856,7 +23872,7 @@
     "PAGE-034.86": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2240,
+      "line": 2243,
       "anchor": "مسیر: asset",
       "risk": 7,
       "lines": 34
@@ -23864,7 +23880,7 @@
     "PAGE-034.87": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2274,
+      "line": 2277,
       "anchor": "مسیر: organization",
       "risk": 3,
       "lines": 191
@@ -23872,7 +23888,7 @@
     "PAGE-034.88": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2465,
+      "line": 2468,
       "anchor": "مسیر: settings",
       "risk": 11,
       "lines": 470
@@ -23880,7 +23896,7 @@
     "PAGE-034.89": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2935,
+      "line": 2938,
       "anchor": "مسیر: logs",
       "risk": 2,
       "lines": 22
@@ -23888,7 +23904,7 @@
     "PAGE-034.90": {
       "path": "index.php",
       "area": "PAGE",
-      "line": 2957,
+      "line": 2960,
       "anchor": "مسیر: dashboard",
       "risk": 5,
       "lines": 40
@@ -34921,14 +34937,14 @@
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-18",
+      "anchor": "بلوک رویه‌ای 1-17",
       "risk": 0,
-      "lines": 18
+      "lines": 17
     },
     "PAGE-041.02": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 19,
+      "line": 18,
       "anchor": "محافظ: این فایل فقط از طریق index.php بارگذاری می‌شود؛ دسترس",
       "risk": 0,
       "lines": 7
@@ -34936,31 +34952,23 @@
     "PAGE-041.03": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 26,
-      "anchor": "مسیر: food_order_cancel_decide",
-      "risk": 2,
-      "lines": 14
-    },
-    "PAGE-041.04": {
-      "path": "modules/request-center/Actions/supervisor-actions.php",
-      "area": "PAGE",
-      "line": 40,
+      "line": 25,
       "anchor": "مسیر: supervisor_decision",
       "risk": 7,
       "lines": 74
     },
-    "PAGE-041.05": {
+    "PAGE-041.04": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 114,
+      "line": 99,
       "anchor": "مسیر: supervisor_reopen",
       "risk": 2,
       "lines": 50
     },
-    "PAGE-041.06": {
+    "PAGE-041.05": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 164,
+      "line": 149,
       "anchor": "مسیر: rate_ticket",
       "risk": 2,
       "lines": 42

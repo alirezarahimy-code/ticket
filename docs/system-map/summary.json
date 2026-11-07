@@ -1,9 +1,9 @@
 {
   "generated_by": "tools/build_system_map.py",
-  "total_files_indexed": 1217,
-  "total_lines_indexed": 216666,
+  "total_files_indexed": 1218,
+  "total_lines_indexed": 216695,
   "categories": {
-    "actions": 16,
+    "actions": 17,
     "api": 1,
     "app-mvc": 2,
     "assets": 31,

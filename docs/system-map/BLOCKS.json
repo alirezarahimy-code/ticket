@@ -576,6 +576,43 @@
         },
         {
             "id": "ACT-008",
+            "path": "actions\/food-order-actions.php",
+            "area": "ACT",
+            "lines": 31,
+            "file_fingerprint": "ab1e649b5b30",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-16",
+                    "line_start": 1,
+                    "line_end": 16,
+                    "lines": 16,
+                    "fingerprint": "6b16ce5df003",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "ACT-008.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: food_order_cancel_decide",
+                    "line_start": 17,
+                    "line_end": 31,
+                    "lines": 15,
+                    "fingerprint": "993f0ae56997",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "ACT-008.02"
+                }
+            ]
+        },
+        {
+            "id": "ACT-009",
             "path": "actions\/holiday-actions.php",
             "area": "ACT",
             "lines": 194,
@@ -592,7 +629,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-008.01"
+                    "id": "ACT-009.01"
                 },
                 {
                     "kind": "region",
@@ -605,7 +642,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-008.02"
+                    "id": "ACT-009.02"
                 },
                 {
                     "kind": "region",
@@ -618,7 +655,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-008.03"
+                    "id": "ACT-009.03"
                 },
                 {
                     "kind": "region",
@@ -633,7 +670,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-008.04"
+                    "id": "ACT-009.04"
                 },
                 {
                     "kind": "region",
@@ -646,7 +683,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-008.05"
+                    "id": "ACT-009.05"
                 },
                 {
                     "kind": "region",
@@ -659,7 +696,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-008.06"
+                    "id": "ACT-009.06"
                 },
                 {
                     "kind": "region",
@@ -672,7 +709,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-008.07"
+                    "id": "ACT-009.07"
                 },
                 {
                     "kind": "region",
@@ -687,7 +724,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-008.08"
+                    "id": "ACT-009.08"
                 },
                 {
                     "kind": "region",
@@ -702,12 +739,12 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-008.09"
+                    "id": "ACT-009.09"
                 }
             ]
         },
         {
-            "id": "ACT-009",
+            "id": "ACT-010",
             "path": "actions\/notification-actions.php",
             "area": "ACT",
             "lines": 35,
@@ -724,7 +761,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-009.01"
+                    "id": "ACT-010.01"
                 },
                 {
                     "kind": "region",
@@ -737,7 +774,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-009.02"
+                    "id": "ACT-010.02"
                 },
                 {
                     "kind": "region",
@@ -752,7 +789,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-009.03"
+                    "id": "ACT-010.03"
                 },
                 {
                     "kind": "region",
@@ -768,12 +805,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-009.04"
+                    "id": "ACT-010.04"
                 }
             ]
         },
         {
-            "id": "ACT-010",
+            "id": "ACT-011",
             "path": "actions\/org-actions.php",
             "area": "ACT",
             "lines": 843,
@@ -790,7 +827,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.01"
+                    "id": "ACT-011.01"
                 },
                 {
                     "kind": "region",
@@ -803,7 +840,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.02"
+                    "id": "ACT-011.02"
                 },
                 {
                     "kind": "region",
@@ -816,7 +853,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.03"
+                    "id": "ACT-011.03"
                 },
                 {
                     "kind": "region",
@@ -831,7 +868,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.04"
+                    "id": "ACT-011.04"
                 },
                 {
                     "kind": "region",
@@ -847,7 +884,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.05"
+                    "id": "ACT-011.05"
                 },
                 {
                     "kind": "region",
@@ -864,7 +901,7 @@
                             "long": 1
                         }
                     },
-                    "id": "ACT-010.06"
+                    "id": "ACT-011.06"
                 },
                 {
                     "kind": "region",
@@ -877,7 +914,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.07"
+                    "id": "ACT-011.07"
                 },
                 {
                     "kind": "region",
@@ -890,7 +927,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.08"
+                    "id": "ACT-011.08"
                 },
                 {
                     "kind": "region",
@@ -905,7 +942,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.09"
+                    "id": "ACT-011.09"
                 },
                 {
                     "kind": "region",
@@ -920,7 +957,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.10"
+                    "id": "ACT-011.10"
                 },
                 {
                     "kind": "region",
@@ -933,7 +970,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.11"
+                    "id": "ACT-011.11"
                 },
                 {
                     "kind": "region",
@@ -946,7 +983,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-010.12"
+                    "id": "ACT-011.12"
                 },
                 {
                     "kind": "region",
@@ -963,7 +1000,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-010.13"
+                    "id": "ACT-011.13"
                 },
                 {
                     "kind": "region",
@@ -979,7 +1016,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.14"
+                    "id": "ACT-011.14"
                 },
                 {
                     "kind": "region",
@@ -994,7 +1031,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "ACT-010.15"
+                    "id": "ACT-011.15"
                 },
                 {
                     "kind": "region",
@@ -1009,7 +1046,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "ACT-010.16"
+                    "id": "ACT-011.16"
                 },
                 {
                     "kind": "region",
@@ -1024,7 +1061,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-010.17"
+                    "id": "ACT-011.17"
                 },
                 {
                     "kind": "region",
@@ -1041,7 +1078,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-010.18"
+                    "id": "ACT-011.18"
                 },
                 {
                     "kind": "region",
@@ -1056,7 +1093,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "ACT-010.19"
+                    "id": "ACT-011.19"
                 },
                 {
                     "kind": "region",
@@ -1071,7 +1108,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-010.20"
+                    "id": "ACT-011.20"
                 },
                 {
                     "kind": "region",
@@ -1087,7 +1124,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.21"
+                    "id": "ACT-011.21"
                 },
                 {
                     "kind": "region",
@@ -1103,12 +1140,12 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-010.22"
+                    "id": "ACT-011.22"
                 }
             ]
         },
         {
-            "id": "ACT-011",
+            "id": "ACT-012",
             "path": "actions\/role-actions.php",
             "area": "ACT",
             "lines": 162,
@@ -1125,7 +1162,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-011.01"
+                    "id": "ACT-012.01"
                 },
                 {
                     "kind": "region",
@@ -1138,7 +1175,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-011.02"
+                    "id": "ACT-012.02"
                 },
                 {
                     "kind": "region",
@@ -1154,7 +1191,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-011.03"
+                    "id": "ACT-012.03"
                 },
                 {
                     "kind": "region",
@@ -1169,7 +1206,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-011.04"
+                    "id": "ACT-012.04"
                 },
                 {
                     "kind": "region",
@@ -1182,7 +1219,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-011.05"
+                    "id": "ACT-012.05"
                 },
                 {
                     "kind": "region",
@@ -1195,12 +1232,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-011.06"
+                    "id": "ACT-012.06"
                 }
             ]
         },
         {
-            "id": "ACT-012",
+            "id": "ACT-013",
             "path": "actions\/service-actions.php",
             "area": "ACT",
             "lines": 6,
@@ -1217,12 +1254,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-012.01"
+                    "id": "ACT-013.01"
                 }
             ]
         },
         {
-            "id": "ACT-013",
+            "id": "ACT-014",
             "path": "actions\/settings-actions.php",
             "area": "ACT",
             "lines": 275,
@@ -1239,7 +1276,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-013.01"
+                    "id": "ACT-014.01"
                 },
                 {
                     "kind": "region",
@@ -1252,7 +1289,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-013.02"
+                    "id": "ACT-014.02"
                 },
                 {
                     "kind": "region",
@@ -1267,7 +1304,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-013.03"
+                    "id": "ACT-014.03"
                 },
                 {
                     "kind": "region",
@@ -1280,7 +1317,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-013.04"
+                    "id": "ACT-014.04"
                 },
                 {
                     "kind": "region",
@@ -1293,7 +1330,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-013.05"
+                    "id": "ACT-014.05"
                 },
                 {
                     "kind": "region",
@@ -1306,7 +1343,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-013.06"
+                    "id": "ACT-014.06"
                 },
                 {
                     "kind": "region",
@@ -1321,7 +1358,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-013.07"
+                    "id": "ACT-014.07"
                 },
                 {
                     "kind": "region",
@@ -1337,12 +1374,12 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "ACT-013.08"
+                    "id": "ACT-014.08"
                 }
             ]
         },
         {
-            "id": "ACT-014",
+            "id": "ACT-015",
             "path": "actions\/supervisor-actions.php",
             "area": "ACT",
             "lines": 6,
@@ -1359,12 +1396,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-014.01"
+                    "id": "ACT-015.01"
                 }
             ]
         },
         {
-            "id": "ACT-015",
+            "id": "ACT-016",
             "path": "actions\/ticket-actions.php",
             "area": "ACT",
             "lines": 6,
@@ -1381,12 +1418,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-015.01"
+                    "id": "ACT-016.01"
                 }
             ]
         },
         {
-            "id": "ACT-016",
+            "id": "ACT-017",
             "path": "actions\/user-structure-actions.php",
             "area": "ACT",
             "lines": 373,
@@ -1403,7 +1440,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-016.01"
+                    "id": "ACT-017.01"
                 },
                 {
                     "kind": "region",
@@ -1416,7 +1453,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "ACT-016.02"
+                    "id": "ACT-017.02"
                 },
                 {
                     "kind": "region",
@@ -1431,7 +1468,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-016.03"
+                    "id": "ACT-017.03"
                 },
                 {
                     "kind": "region",
@@ -1446,7 +1483,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "ACT-016.04"
+                    "id": "ACT-017.04"
                 },
                 {
                     "kind": "region",
@@ -1462,7 +1499,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-016.05"
+                    "id": "ACT-017.05"
                 },
                 {
                     "kind": "region",
@@ -1478,7 +1515,7 @@
                             "long": 1
                         }
                     },
-                    "id": "ACT-016.06"
+                    "id": "ACT-017.06"
                 },
                 {
                     "kind": "region",
@@ -1494,7 +1531,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-016.07"
+                    "id": "ACT-017.07"
                 },
                 {
                     "kind": "region",
@@ -1509,7 +1546,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "ACT-016.08"
+                    "id": "ACT-017.08"
                 }
             ]
         },
@@ -31763,8 +31800,8 @@
             "id": "PAGE-034",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 2996,
-            "file_fingerprint": "0b8150ffae44",
+            "lines": 2999,
+            "file_fingerprint": "9842776baa4d",
             "blocks": [
                 {
                     "kind": "region",
@@ -32405,9 +32442,9 @@
                     "kind": "region",
                     "anchor": "مسیر: logging_begin_operation",
                     "line_start": 1199,
-                    "line_end": 1309,
-                    "lines": 111,
-                    "fingerprint": "4be5cc931607",
+                    "line_end": 1312,
+                    "lines": 114,
+                    "fingerprint": "d3ac3e62421e",
                     "risk": {
                         "score": 6,
                         "flags": {
@@ -32420,8 +32457,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings|create_access_group|save_access_group",
-                    "line_start": 1310,
-                    "line_end": 1320,
+                    "line_start": 1313,
+                    "line_end": 1323,
                     "lines": 11,
                     "fingerprint": "4718e06c3f86",
                     "risk": {
@@ -32435,8 +32472,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-api",
-                    "line_start": 1321,
-                    "line_end": 1373,
+                    "line_start": 1324,
+                    "line_end": 1376,
                     "lines": 53,
                     "fingerprint": "318a5024ad97",
                     "risk": {
@@ -32448,8 +32485,8 @@
                 {
                     "kind": "region",
                     "anchor": "۱.۳۷.۷ — دروازهٔ «سامانه مدیریت غذا» با فهرست کدهای food.* ی",
-                    "line_start": 1374,
-                    "line_end": 1374,
+                    "line_start": 1377,
+                    "line_end": 1377,
                     "lines": 1,
                     "fingerprint": "dc537f6d8cd4",
                     "risk": {
@@ -32461,8 +32498,8 @@
                 {
                     "kind": "region",
                     "anchor": "food_ticket_is_allowed() (هر کد food.*) نمایش داده می‌شد ولی",
-                    "line_start": 1375,
-                    "line_end": 1375,
+                    "line_start": 1378,
+                    "line_end": 1378,
                     "lines": 1,
                     "fingerprint": "ded263ea996a",
                     "risk": {
@@ -32474,8 +32511,8 @@
                 {
                     "kind": "region",
                     "anchor": "می‌شد؛ یعنی نقشی که مثلاً فقط food.orders داشت، لینک را می‌د",
-                    "line_start": 1376,
-                    "line_end": 1376,
+                    "line_start": 1379,
+                    "line_end": 1379,
                     "lines": 1,
                     "fingerprint": "127c6305eea4",
                     "risk": {
@@ -32487,8 +32524,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket|food_ticket_is_allowed|food.monitor",
-                    "line_start": 1377,
-                    "line_end": 1384,
+                    "line_start": 1380,
+                    "line_end": 1387,
                     "lines": 8,
                     "fingerprint": "9a2638f68caf",
                     "risk": {
@@ -32500,8 +32537,8 @@
                 {
                     "kind": "region",
                     "anchor": "شرط مسیریابی",
-                    "line_start": 1385,
-                    "line_end": 1392,
+                    "line_start": 1388,
+                    "line_end": 1395,
                     "lines": 8,
                     "fingerprint": "f0442e04b38a",
                     "risk": {
@@ -32513,8 +32550,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings|settings.general|settings.domain",
-                    "line_start": 1393,
-                    "line_end": 1401,
+                    "line_start": 1396,
+                    "line_end": 1404,
                     "lines": 9,
                     "fingerprint": "6104a36b9f4a",
                     "risk": {
@@ -32526,8 +32563,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: change-password",
-                    "line_start": 1402,
-                    "line_end": 1404,
+                    "line_start": 1405,
+                    "line_end": 1407,
                     "lines": 3,
                     "fingerprint": "124bfe57a669",
                     "risk": {
@@ -32539,8 +32576,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: local-accounts",
-                    "line_start": 1405,
-                    "line_end": 1407,
+                    "line_start": 1408,
+                    "line_end": 1410,
                     "lines": 3,
                     "fingerprint": "b29f0eab1a78",
                     "risk": {
@@ -32552,8 +32589,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: profile",
-                    "line_start": 1408,
-                    "line_end": 1425,
+                    "line_start": 1411,
+                    "line_end": 1428,
                     "lines": 18,
                     "fingerprint": "17fcefba2ed2",
                     "risk": {
@@ -32565,8 +32602,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: governance",
-                    "line_start": 1426,
-                    "line_end": 1429,
+                    "line_start": 1429,
+                    "line_end": 1432,
                     "lines": 4,
                     "fingerprint": "f648535c873c",
                     "risk": {
@@ -32578,8 +32615,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-ticket",
-                    "line_start": 1430,
-                    "line_end": 1434,
+                    "line_start": 1433,
+                    "line_end": 1437,
                     "lines": 5,
                     "fingerprint": "ae9f68a9cd0b",
                     "risk": {
@@ -32591,8 +32628,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order|foodorder.self",
-                    "line_start": 1435,
-                    "line_end": 1442,
+                    "line_start": 1438,
+                    "line_end": 1445,
                     "lines": 8,
                     "fingerprint": "04d0caca12c5",
                     "risk": {
@@ -32604,8 +32641,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: food-order",
-                    "line_start": 1443,
-                    "line_end": 1446,
+                    "line_start": 1446,
+                    "line_end": 1449,
                     "lines": 4,
                     "fingerprint": "bc897f4ac2b2",
                     "risk": {
@@ -32617,8 +32654,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cd-dvd",
-                    "line_start": 1447,
-                    "line_end": 1450,
+                    "line_start": 1450,
+                    "line_end": 1453,
                     "lines": 4,
                     "fingerprint": "787561b508a4",
                     "risk": {
@@ -32630,8 +32667,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: cd-dvd-history",
-                    "line_start": 1451,
-                    "line_end": 1454,
+                    "line_start": 1454,
+                    "line_end": 1457,
                     "lines": 4,
                     "fingerprint": "382f96759a4b",
                     "risk": {
@@ -32643,8 +32680,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control",
-                    "line_start": 1455,
-                    "line_end": 1457,
+                    "line_start": 1458,
+                    "line_end": 1460,
                     "lines": 3,
                     "fingerprint": "4d764e6a405e",
                     "risk": {
@@ -32656,8 +32693,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: traffic-control-print",
-                    "line_start": 1458,
-                    "line_end": 1462,
+                    "line_start": 1461,
+                    "line_end": 1465,
                     "lines": 5,
                     "fingerprint": "41ceb636d97c",
                     "risk": {
@@ -32671,8 +32708,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: help",
-                    "line_start": 1463,
-                    "line_end": 1470,
+                    "line_start": 1466,
+                    "line_end": 1473,
                     "lines": 8,
                     "fingerprint": "f98b5e6182d3",
                     "risk": {
@@ -32684,8 +32721,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: knowledge",
-                    "line_start": 1471,
-                    "line_end": 1507,
+                    "line_start": 1474,
+                    "line_end": 1510,
                     "lines": 37,
                     "fingerprint": "a678358f57c8",
                     "risk": {
@@ -32699,8 +32736,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications|notif.view",
-                    "line_start": 1508,
-                    "line_end": 1515,
+                    "line_start": 1511,
+                    "line_end": 1518,
                     "lines": 8,
                     "fingerprint": "dc86bc55d5b1",
                     "risk": {
@@ -32712,8 +32749,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications",
-                    "line_start": 1516,
-                    "line_end": 1533,
+                    "line_start": 1519,
+                    "line_end": 1536,
                     "lines": 18,
                     "fingerprint": "3f21cd6d56c6",
                     "risk": {
@@ -32727,8 +32764,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: audit",
-                    "line_start": 1534,
-                    "line_end": 1542,
+                    "line_start": 1537,
+                    "line_end": 1545,
                     "lines": 9,
                     "fingerprint": "87a567f11e96",
                     "risk": {
@@ -32740,8 +32777,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logging-dashboard",
-                    "line_start": 1543,
-                    "line_end": 1546,
+                    "line_start": 1546,
+                    "line_end": 1549,
                     "lines": 4,
                     "fingerprint": "54e47224bef5",
                     "risk": {
@@ -32753,8 +32790,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: system-health",
-                    "line_start": 1547,
-                    "line_end": 1550,
+                    "line_start": 1550,
+                    "line_end": 1553,
                     "lines": 4,
                     "fingerprint": "be1344b02adc",
                     "risk": {
@@ -32766,8 +32803,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 1551,
-                    "line_end": 1556,
+                    "line_start": 1554,
+                    "line_end": 1559,
                     "lines": 6,
                     "fingerprint": "c65f22cdca8f",
                     "risk": {
@@ -32779,8 +32816,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: activity-log",
-                    "line_start": 1557,
-                    "line_end": 1699,
+                    "line_start": 1560,
+                    "line_end": 1702,
                     "lines": 143,
                     "fingerprint": "84d1643d662a",
                     "risk": {
@@ -32796,8 +32833,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: backup",
-                    "line_start": 1700,
-                    "line_end": 1738,
+                    "line_start": 1703,
+                    "line_end": 1741,
                     "lines": 39,
                     "fingerprint": "fe4ec71b0d1e",
                     "risk": {
@@ -32812,8 +32849,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: search|search.global",
-                    "line_start": 1739,
-                    "line_end": 1746,
+                    "line_start": 1742,
+                    "line_end": 1749,
                     "lines": 8,
                     "fingerprint": "08b9308aa266",
                     "risk": {
@@ -32825,8 +32862,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: search",
-                    "line_start": 1747,
-                    "line_end": 1838,
+                    "line_start": 1750,
+                    "line_end": 1841,
                     "lines": 92,
                     "fingerprint": "b49318a35b2b",
                     "risk": {
@@ -32841,8 +32878,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: chatbot-admin",
-                    "line_start": 1839,
-                    "line_end": 1941,
+                    "line_start": 1842,
+                    "line_end": 1944,
                     "lines": 103,
                     "fingerprint": "bada5e1b1cb6",
                     "risk": {
@@ -32857,8 +32894,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: holidays",
-                    "line_start": 1942,
-                    "line_end": 1952,
+                    "line_start": 1945,
+                    "line_end": 1955,
                     "lines": 11,
                     "fingerprint": "a1479fd7dd66",
                     "risk": {
@@ -32870,8 +32907,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: new-ticket|ticket.create",
-                    "line_start": 1953,
-                    "line_end": 1965,
+                    "line_start": 1956,
+                    "line_end": 1968,
                     "lines": 13,
                     "fingerprint": "ad7ff55168a7",
                     "risk": {
@@ -32883,8 +32920,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory",
-                    "line_start": 1966,
-                    "line_end": 2066,
+                    "line_start": 1969,
+                    "line_end": 2069,
                     "lines": 101,
                     "fingerprint": "f107c7c13c1c",
                     "risk": {
@@ -32899,8 +32936,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: inventory-diagnostics",
-                    "line_start": 2067,
-                    "line_end": 2098,
+                    "line_start": 2070,
+                    "line_end": 2101,
                     "lines": 32,
                     "fingerprint": "31f6b97d664f",
                     "risk": {
@@ -32914,8 +32951,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset-history",
-                    "line_start": 2099,
-                    "line_end": 2116,
+                    "line_start": 2102,
+                    "line_end": 2119,
                     "lines": 18,
                     "fingerprint": "f05d04d150f3",
                     "risk": {
@@ -32930,8 +32967,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: domain-scan",
-                    "line_start": 2117,
-                    "line_end": 2194,
+                    "line_start": 2120,
+                    "line_end": 2197,
                     "lines": 78,
                     "fingerprint": "383375bbfd1a",
                     "risk": {
@@ -32945,8 +32982,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: assets",
-                    "line_start": 2195,
-                    "line_end": 2239,
+                    "line_start": 2198,
+                    "line_end": 2242,
                     "lines": 45,
                     "fingerprint": "53502350682a",
                     "risk": {
@@ -32961,8 +32998,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset",
-                    "line_start": 2240,
-                    "line_end": 2273,
+                    "line_start": 2243,
+                    "line_end": 2276,
                     "lines": 34,
                     "fingerprint": "59179257a2c4",
                     "risk": {
@@ -32977,8 +33014,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: organization",
-                    "line_start": 2274,
-                    "line_end": 2464,
+                    "line_start": 2277,
+                    "line_end": 2467,
                     "lines": 191,
                     "fingerprint": "5afc13d6b768",
                     "risk": {
@@ -32993,8 +33030,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings",
-                    "line_start": 2465,
-                    "line_end": 2934,
+                    "line_start": 2468,
+                    "line_end": 2937,
                     "lines": 470,
                     "fingerprint": "eaf775ca9627",
                     "risk": {
@@ -33011,8 +33048,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 2935,
-                    "line_end": 2956,
+                    "line_start": 2938,
+                    "line_end": 2959,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -33026,8 +33063,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: dashboard",
-                    "line_start": 2957,
-                    "line_end": 2996,
+                    "line_start": 2960,
+                    "line_end": 2999,
                     "lines": 40,
                     "fingerprint": "a018b81df29a",
                     "risk": {
@@ -52195,16 +52232,16 @@
             "id": "PAGE-041",
             "path": "modules\/request-center\/Actions\/supervisor-actions.php",
             "area": "PAGE",
-            "lines": 205,
-            "file_fingerprint": "5bd40133bfed",
+            "lines": 190,
+            "file_fingerprint": "f7297f9d8c90",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-18",
+                    "anchor": "بلوک رویه‌ای 1-17",
                     "line_start": 1,
-                    "line_end": 18,
-                    "lines": 18,
-                    "fingerprint": "a87cadf96902",
+                    "line_end": 17,
+                    "lines": 17,
+                    "fingerprint": "c40d09ddaa0c",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -52214,8 +52251,8 @@
                 {
                     "kind": "region",
                     "anchor": "محافظ: این فایل فقط از طریق index.php بارگذاری می‌شود؛ دسترس",
-                    "line_start": 19,
-                    "line_end": 25,
+                    "line_start": 18,
+                    "line_end": 24,
                     "lines": 7,
                     "fingerprint": "4f28e28caf51",
                     "risk": {
@@ -52226,24 +52263,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: food_order_cancel_decide",
-                    "line_start": 26,
-                    "line_end": 39,
-                    "lines": 14,
-                    "fingerprint": "993f0ae56997",
-                    "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-041.03"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: supervisor_decision",
-                    "line_start": 40,
-                    "line_end": 113,
+                    "line_start": 25,
+                    "line_end": 98,
                     "lines": 74,
                     "fingerprint": "491a13d46829",
                     "risk": {
@@ -52253,13 +52275,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-041.04"
+                    "id": "PAGE-041.03"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: supervisor_reopen",
-                    "line_start": 114,
-                    "line_end": 163,
+                    "line_start": 99,
+                    "line_end": 148,
                     "lines": 50,
                     "fingerprint": "c60bdcd5863a",
                     "risk": {
@@ -52268,13 +52290,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-041.05"
+                    "id": "PAGE-041.04"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: rate_ticket",
-                    "line_start": 164,
-                    "line_end": 205,
+                    "line_start": 149,
+                    "line_end": 190,
                     "lines": 42,
                     "fingerprint": "8d51d29d754e",
                     "risk": {
@@ -52283,7 +52305,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-041.06"
+                    "id": "PAGE-041.05"
                 }
             ]
         },
