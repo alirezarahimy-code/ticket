@@ -73730,8 +73730,8 @@
             "id": "TEST-176",
             "path": "tests\/test_request_center_t07_migration_clone.php",
             "area": "TEST",
-            "lines": 350,
-            "file_fingerprint": "808a692de677",
+            "lines": 377,
+            "file_fingerprint": "b5eeefe7e866",
             "blocks": [
                 {
                     "kind": "region",
@@ -73817,9 +73817,9 @@
                     "kind": "function",
                     "anchor": "t07_fingerprint",
                     "line_start": 93,
-                    "line_end": 130,
-                    "lines": 38,
-                    "fingerprint": "656b6e50aa06",
+                    "line_end": 143,
+                    "lines": 51,
+                    "fingerprint": "88b0d8fde0b8",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -73831,8 +73831,8 @@
                 {
                     "kind": "function",
                     "anchor": "t07_registry_rows",
-                    "line_start": 132,
-                    "line_end": 141,
+                    "line_start": 145,
+                    "line_end": 154,
                     "lines": 10,
                     "fingerprint": "d1d024fea6fb",
                     "risk": {
@@ -73843,9 +73843,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 142-159",
-                    "line_start": 142,
-                    "line_end": 159,
+                    "anchor": "بلوک رویه‌ای 155-172",
+                    "line_start": 155,
+                    "line_end": 172,
                     "lines": 18,
                     "fingerprint": "227d88545943",
                     "risk": {
@@ -73859,8 +73859,8 @@
                 {
                     "kind": "region",
                     "anchor": "Strip only database-selection statements from the trusted du",
-                    "line_start": 160,
-                    "line_end": 160,
+                    "line_start": 173,
+                    "line_end": 173,
                     "lines": 1,
                     "fingerprint": "434ae3b1b084",
                     "risk": {
@@ -73872,10 +73872,10 @@
                 {
                     "kind": "region",
                     "anchor": "is forced into the disposable clone regardless of the source",
-                    "line_start": 161,
-                    "line_end": 318,
-                    "lines": 158,
-                    "fingerprint": "f78a281e905d",
+                    "line_start": 174,
+                    "line_end": 345,
+                    "lines": 172,
+                    "fingerprint": "d6cae894188d",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -73890,8 +73890,8 @@
                 {
                     "kind": "region",
                     "anchor": "Cross-check the actual 1.62.88 release manifest. The release",
-                    "line_start": 319,
-                    "line_end": 319,
+                    "line_start": 346,
+                    "line_end": 346,
                     "lines": 1,
                     "fingerprint": "b8cff03f6dce",
                     "risk": {
@@ -73903,8 +73903,8 @@
                 {
                     "kind": "region",
                     "anchor": "excludes migration 032; all manifest migrations must already",
-                    "line_start": 320,
-                    "line_end": 350,
+                    "line_start": 347,
+                    "line_end": 377,
                     "lines": 31,
                     "fingerprint": "07e7d3c1fe54",
                     "risk": {

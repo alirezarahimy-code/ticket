@@ -46752,12 +46752,12 @@
       "line": 93,
       "anchor": "t07_fingerprint",
       "risk": 5,
-      "lines": 38
+      "lines": 51
     },
     "TEST-176.08": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 132,
+      "line": 145,
       "anchor": "t07_registry_rows",
       "risk": 0,
       "lines": 10
@@ -46765,15 +46765,15 @@
     "TEST-176.09": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 142,
-      "anchor": "بلوک رویه‌ای 142-159",
+      "line": 155,
+      "anchor": "بلوک رویه‌ای 155-172",
       "risk": 4,
       "lines": 18
     },
     "TEST-176.10": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 160,
+      "line": 173,
       "anchor": "Strip only database-selection statements from the trusted du",
       "risk": 0,
       "lines": 1
@@ -46781,15 +46781,15 @@
     "TEST-176.11": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 161,
+      "line": 174,
       "anchor": "is forced into the disposable clone regardless of the source",
       "risk": 7,
-      "lines": 158
+      "lines": 172
     },
     "TEST-176.12": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 319,
+      "line": 346,
       "anchor": "Cross-check the actual 1.62.88 release manifest. The release",
       "risk": 0,
       "lines": 1
@@ -46797,7 +46797,7 @@
     "TEST-176.13": {
       "path": "tests/test_request_center_t07_migration_clone.php",
       "area": "TEST",
-      "line": 320,
+      "line": 347,
       "anchor": "excludes migration 032; all manifest migrations must already",
       "risk": 4,
       "lines": 31
