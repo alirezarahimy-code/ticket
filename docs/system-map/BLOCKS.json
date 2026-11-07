@@ -73270,7 +73270,7 @@
             "path": "tests\/test_request_center_workflow_service_sqlite.php",
             "area": "TEST",
             "lines": 190,
-            "file_fingerprint": "4267c7e3128b",
+            "file_fingerprint": "6640bbacdc1d",
             "blocks": [
                 {
                     "kind": "region",
@@ -73304,7 +73304,7 @@
                     "line_start": 13,
                     "line_end": 190,
                     "lines": 178,
-                    "fingerprint": "015d098cfb54",
+                    "fingerprint": "9dd50b4eb335",
                     "risk": {
                         "score": 5,
                         "flags": {

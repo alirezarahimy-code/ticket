@@ -618,7 +618,7 @@ tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_request_center_first_slice_static.py	tests	100	4763
 tests/test_request_center_repository_sqlite.php	tests	103	6271
 tests/test_request_center_schema_preflight_mariadb.php	tests	145	7137
-tests/test_request_center_workflow_service_sqlite.php	tests	189	7027
+tests/test_request_center_workflow_service_sqlite.php	tests	189	7055
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
 tests/test_schema_heal_static.py	tests	45	2290
