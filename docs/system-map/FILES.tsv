@@ -418,7 +418,7 @@ migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 modules/request-center/README.md	other	53	6407
 modules/request-center/RequestCenterRepository.php	other	221	9196
-modules/request-center/WorkflowService.php	other	256	11532
+modules/request-center/WorkflowService.php	other	256	11564
 ola.php	core	111	11934
 organization.php	core	786	39767
 permissions.php	core	911	47450
@@ -615,7 +615,7 @@ tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_request_center_first_slice_static.py	tests	100	4763
 tests/test_request_center_repository_sqlite.php	tests	103	6271
 tests/test_request_center_schema_preflight_mariadb.php	tests	145	7137
-tests/test_request_center_workflow_service_sqlite.php	tests	184	6769
+tests/test_request_center_workflow_service_sqlite.php	tests	189	7027
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
 tests/test_schema_heal_static.py	tests	45	2290
