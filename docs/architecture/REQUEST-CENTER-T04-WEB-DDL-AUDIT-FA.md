@@ -97,8 +97,10 @@ Workflow اختصاصی Request Center با PHP 8.2، PHP built-in HTTP server �
 
 - این آزمون PHP built-in HTTP server است؛ رفتار واقعی Apache/XAMPP و اعمال `cron/.htaccess` هنوز جداگانه آزموده نشده است.
 - نتیجه پنج DDL روی index.php متعلق به مسیر Legacy/سازمان است و مجوز تغییر ماژول سازمان یا سایر بخش‌های خارج از RC ایجاد نمی‌کند.
-- آزمون مستقل `request-center.php` با نشست احراز‌شده و Schema ناقص در نسخهٔ بعدی همین harness اضافه شده و نتیجه آن هنوز در این سند ثبت نشده است.
-- نتیجه فعلی: Legacy FAIL runtime؛ RC مستقل PASS ایستای محدود؛ runtime RC مستقل در انتظار نتیجهٔ harness تکمیلی.
+- آزمون تکمیلی مستقل `request-center.php` با نشست احراز‌شده در Workflow `42342168721` روی هر دو نسخهٔ MariaDB 10.4.32 و 10.11 موفق شد: Schema سالم → HTTP 200 و صفر DDL؛ حذف `tickets.requesting_unit_id` → HTTP 503 و صفر DDL، و ستون مفقود بدون تغییر باقی ماند.
+- در همان اجرا، Legacy `index.php` پس از حذف `requesting_unit_id` با HTTP 200 ستون را با `ALTER TABLE tickets ADD COLUMN requesting_unit_id INT UNSIGNED NULL` بازسازی کرد. بنابراین جداسازی DDL در ورودی مستقل RC به‌صورت runtime اثبات شد، اما Legacy هنوز self-healing انجام می‌دهد.
+- Jobهای اجرای T04: MariaDB 10.11 با شناسه `128312027932` و MariaDB 10.4.32 با شناسه `128312028170`.
+- نتیجه نهایی T04: **ورودی مستقل RC = PASS محدود runtime؛ مسیر Legacy/index.php = FAIL runtime؛ T04 کل سامانه = باز/FAIL**. آزمون مؤثر Apache/XAMPP برای `cron/.htaccess` هنوز انجام نشده است.
 
 ## ۵. وضعیت T04
 
