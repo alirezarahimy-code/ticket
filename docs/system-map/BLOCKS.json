@@ -31750,8 +31750,8 @@
             "id": "PAGE-034",
             "path": "index.php",
             "area": "PAGE",
-            "lines": 3730,
-            "file_fingerprint": "42d972543d43",
+            "lines": 3042,
+            "file_fingerprint": "aa97d3303db2",
             "blocks": [
                 {
                     "kind": "region",
@@ -32644,9 +32644,9 @@
                     "kind": "region",
                     "anchor": "مسیر: traffic-control-print",
                     "line_start": 1458,
-                    "line_end": 1461,
-                    "lines": 4,
-                    "fingerprint": "87cc679fbb4c",
+                    "line_end": 1462,
+                    "lines": 5,
+                    "fingerprint": "41ceb636d97c",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -32657,111 +32657,22 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: services",
-                    "line_start": 1462,
-                    "line_end": 1547,
-                    "lines": 86,
-                    "fingerprint": "ae4d1f91e883",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.66"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "سربرگ‌ها (تب‌ها)",
-                    "line_start": 1548,
-                    "line_end": 1556,
-                    "lines": 9,
-                    "fingerprint": "6bc7b8fb4e4f",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.67"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)",
-                    "line_start": 1557,
-                    "line_end": 1566,
-                    "lines": 10,
-                    "fingerprint": "ee159520f9f2",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.68"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "تب ۲: لیست خدمات + فیلتر",
-                    "line_start": 1567,
-                    "line_end": 1590,
-                    "lines": 24,
-                    "fingerprint": "80ad3ce2d717",
-                    "risk": {
-                        "score": 6,
-                        "flags": {
-                            "sql_concat": 5,
-                            "write_no_tx": 1
-                        }
-                    },
-                    "id": "PAGE-034.69"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "تب ۳: دسته‌بندی‌ها",
-                    "line_start": 1591,
-                    "line_end": 1604,
-                    "lines": 14,
-                    "fingerprint": "de14feab019b",
-                    "risk": {
-                        "score": 6,
-                        "flags": {
-                            "sql_concat": 5,
-                            "write_no_tx": 1
-                        }
-                    },
-                    "id": "PAGE-034.70"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "پنجره‌های ویرایش\/فیلد (rendered outside the tab panels, fixed overlay)",
-                    "line_start": 1605,
-                    "line_end": 1632,
-                    "lines": 28,
-                    "fingerprint": "846f21e22ee9",
-                    "risk": {
-                        "score": 5,
-                        "flags": {
-                            "sql_concat": 5
-                        }
-                    },
-                    "id": "PAGE-034.71"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: help",
-                    "line_start": 1633,
-                    "line_end": 1640,
+                    "line_start": 1463,
+                    "line_end": 1470,
                     "lines": 8,
                     "fingerprint": "f98b5e6182d3",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.72"
+                    "id": "PAGE-034.66"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: knowledge",
-                    "line_start": 1641,
-                    "line_end": 1677,
+                    "line_start": 1471,
+                    "line_end": 1507,
                     "lines": 37,
                     "fingerprint": "a678358f57c8",
                     "risk": {
@@ -32770,26 +32681,26 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.73"
+                    "id": "PAGE-034.67"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications|notif.view",
-                    "line_start": 1678,
-                    "line_end": 1685,
+                    "line_start": 1508,
+                    "line_end": 1515,
                     "lines": 8,
                     "fingerprint": "dc86bc55d5b1",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.74"
+                    "id": "PAGE-034.68"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: notifications",
-                    "line_start": 1686,
-                    "line_end": 1703,
+                    "line_start": 1516,
+                    "line_end": 1533,
                     "lines": 18,
                     "fingerprint": "3f21cd6d56c6",
                     "risk": {
@@ -32798,65 +32709,65 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-034.75"
+                    "id": "PAGE-034.69"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: audit",
-                    "line_start": 1704,
-                    "line_end": 1712,
+                    "line_start": 1534,
+                    "line_end": 1542,
                     "lines": 9,
                     "fingerprint": "87a567f11e96",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.76"
+                    "id": "PAGE-034.70"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: logging-dashboard",
-                    "line_start": 1713,
-                    "line_end": 1716,
+                    "line_start": 1543,
+                    "line_end": 1546,
                     "lines": 4,
                     "fingerprint": "54e47224bef5",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.77"
+                    "id": "PAGE-034.71"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: system-health",
-                    "line_start": 1717,
-                    "line_end": 1720,
+                    "line_start": 1547,
+                    "line_end": 1550,
                     "lines": 4,
                     "fingerprint": "be1344b02adc",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.78"
+                    "id": "PAGE-034.72"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 1721,
-                    "line_end": 1726,
+                    "line_start": 1551,
+                    "line_end": 1556,
                     "lines": 6,
                     "fingerprint": "c65f22cdca8f",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.79"
+                    "id": "PAGE-034.73"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: activity-log",
-                    "line_start": 1727,
-                    "line_end": 1869,
+                    "line_start": 1557,
+                    "line_end": 1699,
                     "lines": 143,
                     "fingerprint": "84d1643d662a",
                     "risk": {
@@ -32867,13 +32778,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-034.80"
+                    "id": "PAGE-034.74"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: backup",
-                    "line_start": 1870,
-                    "line_end": 1908,
+                    "line_start": 1700,
+                    "line_end": 1738,
                     "lines": 39,
                     "fingerprint": "fe4ec71b0d1e",
                     "risk": {
@@ -32883,26 +32794,26 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-034.81"
+                    "id": "PAGE-034.75"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: search|search.global",
-                    "line_start": 1909,
-                    "line_end": 1916,
+                    "line_start": 1739,
+                    "line_end": 1746,
                     "lines": 8,
                     "fingerprint": "08b9308aa266",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-034.82"
+                    "id": "PAGE-034.76"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: search",
-                    "line_start": 1917,
-                    "line_end": 2007,
+                    "line_start": 1747,
+                    "line_end": 1837,
                     "lines": 91,
                     "fingerprint": "a630c183e8ff",
                     "risk": {
@@ -32912,15 +32823,104 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.83"
+                    "id": "PAGE-034.77"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: queue",
-                    "line_start": 2008,
-                    "line_end": 2054,
+                    "line_start": 1838,
+                    "line_end": 1884,
                     "lines": 47,
                     "fingerprint": "c3620fcd5906",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.78"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: chatbot-admin",
+                    "line_start": 1885,
+                    "line_end": 1987,
+                    "lines": 103,
+                    "fingerprint": "bada5e1b1cb6",
+                    "risk": {
+                        "score": 5,
+                        "flags": {
+                            "raw_input": 2,
+                            "unescaped_echo": 3
+                        }
+                    },
+                    "id": "PAGE-034.79"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: holidays",
+                    "line_start": 1988,
+                    "line_end": 1998,
+                    "lines": 11,
+                    "fingerprint": "a1479fd7dd66",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.80"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: new-ticket|ticket.create",
+                    "line_start": 1999,
+                    "line_end": 2011,
+                    "lines": 13,
+                    "fingerprint": "ad7ff55168a7",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-034.81"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: inventory",
+                    "line_start": 2012,
+                    "line_end": 2112,
+                    "lines": 101,
+                    "fingerprint": "f107c7c13c1c",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.82"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: inventory-diagnostics",
+                    "line_start": 2113,
+                    "line_end": 2144,
+                    "lines": 32,
+                    "fingerprint": "31f6b97d664f",
+                    "risk": {
+                        "score": 2,
+                        "flags": {
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-034.83"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: asset-history",
+                    "line_start": 2145,
+                    "line_end": 2162,
+                    "lines": 18,
+                    "fingerprint": "f05d04d150f3",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -32932,179 +32932,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "مسیر: chatbot-admin",
-                    "line_start": 2055,
-                    "line_end": 2157,
-                    "lines": 103,
-                    "fingerprint": "bada5e1b1cb6",
-                    "risk": {
-                        "score": 5,
-                        "flags": {
-                            "raw_input": 2,
-                            "unescaped_echo": 3
-                        }
-                    },
-                    "id": "PAGE-034.85"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: holidays",
-                    "line_start": 2158,
-                    "line_end": 2168,
-                    "lines": 11,
-                    "fingerprint": "a1479fd7dd66",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.86"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: new-ticket|ticket.create",
-                    "line_start": 2169,
-                    "line_end": 2176,
-                    "lines": 8,
-                    "fingerprint": "79353460e294",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
-                    "id": "PAGE-034.87"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: new-ticket",
-                    "line_start": 2177,
-                    "line_end": 2312,
-                    "lines": 136,
-                    "fingerprint": "eae79b38d9c9",
-                    "risk": {
-                        "score": 8,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2,
-                            "long": 1
-                        }
-                    },
-                    "id": "PAGE-034.88"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: ticket",
-                    "line_start": 2313,
-                    "line_end": 2548,
-                    "lines": 236,
-                    "fingerprint": "866fb1abb851",
-                    "risk": {
-                        "score": 8,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2,
-                            "long": 1
-                        }
-                    },
-                    "id": "PAGE-034.89"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: analytics",
-                    "line_start": 2549,
-                    "line_end": 2592,
-                    "lines": 44,
-                    "fingerprint": "5e9e7788ad46",
-                    "risk": {
-                        "score": 5,
-                        "flags": {
-                            "sql_concat": 5
-                        }
-                    },
-                    "id": "PAGE-034.90"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: reports",
-                    "line_start": 2593,
-                    "line_end": 2654,
-                    "lines": 62,
-                    "fingerprint": "1c94f6eec606",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.91"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: supervisor",
-                    "line_start": 2655,
-                    "line_end": 2699,
-                    "lines": 45,
-                    "fingerprint": "1b46fe01c59d",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.92"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: inventory",
-                    "line_start": 2700,
-                    "line_end": 2800,
-                    "lines": 101,
-                    "fingerprint": "f107c7c13c1c",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.93"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: inventory-diagnostics",
-                    "line_start": 2801,
-                    "line_end": 2832,
-                    "lines": 32,
-                    "fingerprint": "31f6b97d664f",
-                    "risk": {
-                        "score": 2,
-                        "flags": {
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.94"
-                },
-                {
-                    "kind": "region",
-                    "anchor": "مسیر: asset-history",
-                    "line_start": 2833,
-                    "line_end": 2850,
-                    "lines": 18,
-                    "fingerprint": "f05d04d150f3",
-                    "risk": {
-                        "score": 7,
-                        "flags": {
-                            "sql_concat": 5,
-                            "raw_input": 2
-                        }
-                    },
-                    "id": "PAGE-034.95"
-                },
-                {
-                    "kind": "region",
                     "anchor": "مسیر: domain-scan",
-                    "line_start": 2851,
-                    "line_end": 2928,
+                    "line_start": 2163,
+                    "line_end": 2240,
                     "lines": 78,
                     "fingerprint": "383375bbfd1a",
                     "risk": {
@@ -33113,13 +32943,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.96"
+                    "id": "PAGE-034.85"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: assets",
-                    "line_start": 2929,
-                    "line_end": 2973,
+                    "line_start": 2241,
+                    "line_end": 2285,
                     "lines": 45,
                     "fingerprint": "53502350682a",
                     "risk": {
@@ -33129,13 +32959,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.97"
+                    "id": "PAGE-034.86"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: asset",
-                    "line_start": 2974,
-                    "line_end": 3007,
+                    "line_start": 2286,
+                    "line_end": 2319,
                     "lines": 34,
                     "fingerprint": "59179257a2c4",
                     "risk": {
@@ -33145,13 +32975,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.98"
+                    "id": "PAGE-034.87"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: organization",
-                    "line_start": 3008,
-                    "line_end": 3198,
+                    "line_start": 2320,
+                    "line_end": 2510,
                     "lines": 191,
                     "fingerprint": "5afc13d6b768",
                     "risk": {
@@ -33161,13 +32991,13 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-034.99"
+                    "id": "PAGE-034.88"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: settings",
-                    "line_start": 3199,
-                    "line_end": 3668,
+                    "line_start": 2511,
+                    "line_end": 2980,
                     "lines": 470,
                     "fingerprint": "eaf775ca9627",
                     "risk": {
@@ -33179,13 +33009,13 @@
                             "very_long": 3
                         }
                     },
-                    "id": "PAGE-034.100"
+                    "id": "PAGE-034.89"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: logs",
-                    "line_start": 3669,
-                    "line_end": 3690,
+                    "line_start": 2981,
+                    "line_end": 3002,
                     "lines": 22,
                     "fingerprint": "ead8507b92ee",
                     "risk": {
@@ -33194,13 +33024,13 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-034.101"
+                    "id": "PAGE-034.90"
                 },
                 {
                     "kind": "region",
                     "anchor": "مسیر: dashboard",
-                    "line_start": 3691,
-                    "line_end": 3730,
+                    "line_start": 3003,
+                    "line_end": 3042,
                     "lines": 40,
                     "fingerprint": "a018b81df29a",
                     "risk": {
@@ -33209,7 +33039,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-034.102"
+                    "id": "PAGE-034.91"
                 }
             ]
         },
@@ -52396,6 +52226,121 @@
         },
         {
             "id": "PAGE-043",
+            "path": "modules\/request-center\/Pages\/analytics.php",
+            "area": "PAGE",
+            "lines": 49,
+            "file_fingerprint": "2658e2d185af",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-5",
+                    "line_start": 1,
+                    "line_end": 5,
+                    "lines": 5,
+                    "fingerprint": "b4805ed4ec15",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-043.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: analytics",
+                    "line_start": 6,
+                    "line_end": 49,
+                    "lines": 44,
+                    "fingerprint": "5e9e7788ad46",
+                    "risk": {
+                        "score": 5,
+                        "flags": {
+                            "sql_concat": 5
+                        }
+                    },
+                    "id": "PAGE-043.02"
+                }
+            ]
+        },
+        {
+            "id": "PAGE-044",
+            "path": "modules\/request-center\/Pages\/create.php",
+            "area": "PAGE",
+            "lines": 147,
+            "file_fingerprint": "860670c6eccd",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-11",
+                    "line_start": 1,
+                    "line_end": 11,
+                    "lines": 11,
+                    "fingerprint": "f2d4b8fde6a8",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-044.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: new-ticket",
+                    "line_start": 12,
+                    "line_end": 147,
+                    "lines": 136,
+                    "fingerprint": "eae79b38d9c9",
+                    "risk": {
+                        "score": 8,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2,
+                            "long": 1
+                        }
+                    },
+                    "id": "PAGE-044.02"
+                }
+            ]
+        },
+        {
+            "id": "PAGE-045",
+            "path": "modules\/request-center\/Pages\/detail.php",
+            "area": "PAGE",
+            "lines": 246,
+            "file_fingerprint": "c8eb8a7e85b0",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-10",
+                    "line_start": 1,
+                    "line_end": 10,
+                    "lines": 10,
+                    "fingerprint": "b848b3e064c4",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-045.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: ticket",
+                    "line_start": 11,
+                    "line_end": 246,
+                    "lines": 236,
+                    "fingerprint": "866fb1abb851",
+                    "risk": {
+                        "score": 8,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2,
+                            "long": 1
+                        }
+                    },
+                    "id": "PAGE-045.02"
+                }
+            ]
+        },
+        {
+            "id": "PAGE-046",
             "path": "modules\/request-center\/Pages\/index.php",
             "area": "PAGE",
             "lines": 245,
@@ -52416,12 +52361,199 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-043.01"
+                    "id": "PAGE-046.01"
                 }
             ]
         },
         {
-            "id": "PAGE-044",
+            "id": "PAGE-047",
+            "path": "modules\/request-center\/Pages\/reports.php",
+            "area": "PAGE",
+            "lines": 67,
+            "file_fingerprint": "cb84cd4e241c",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-5",
+                    "line_start": 1,
+                    "line_end": 5,
+                    "lines": 5,
+                    "fingerprint": "d1ced75e6d3b",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-047.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: reports",
+                    "line_start": 6,
+                    "line_end": 67,
+                    "lines": 62,
+                    "fingerprint": "1c94f6eec606",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-047.02"
+                }
+            ]
+        },
+        {
+            "id": "PAGE-048",
+            "path": "modules\/request-center\/Pages\/services.php",
+            "area": "PAGE",
+            "lines": 176,
+            "file_fingerprint": "22c99afb638f",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-5",
+                    "line_start": 1,
+                    "line_end": 5,
+                    "lines": 5,
+                    "fingerprint": "d7fdbb68f986",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-048.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: services",
+                    "line_start": 6,
+                    "line_end": 91,
+                    "lines": 86,
+                    "fingerprint": "ae4d1f91e883",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-048.02"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "سربرگ‌ها (تب‌ها)",
+                    "line_start": 92,
+                    "line_end": 100,
+                    "lines": 9,
+                    "fingerprint": "6bc7b8fb4e4f",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-048.03"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "تب ۱: تعریف خدمت (فقط فرم ایجاد خدمت)",
+                    "line_start": 101,
+                    "line_end": 110,
+                    "lines": 10,
+                    "fingerprint": "ee159520f9f2",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-048.04"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "تب ۲: لیست خدمات + فیلتر",
+                    "line_start": 111,
+                    "line_end": 134,
+                    "lines": 24,
+                    "fingerprint": "80ad3ce2d717",
+                    "risk": {
+                        "score": 6,
+                        "flags": {
+                            "sql_concat": 5,
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "PAGE-048.05"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "تب ۳: دسته‌بندی‌ها",
+                    "line_start": 135,
+                    "line_end": 148,
+                    "lines": 14,
+                    "fingerprint": "de14feab019b",
+                    "risk": {
+                        "score": 6,
+                        "flags": {
+                            "sql_concat": 5,
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "PAGE-048.06"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "پنجره‌های ویرایش\/فیلد (rendered outside the tab panels, fixed overlay)",
+                    "line_start": 149,
+                    "line_end": 176,
+                    "lines": 28,
+                    "fingerprint": "846f21e22ee9",
+                    "risk": {
+                        "score": 5,
+                        "flags": {
+                            "sql_concat": 5
+                        }
+                    },
+                    "id": "PAGE-048.07"
+                }
+            ]
+        },
+        {
+            "id": "PAGE-049",
+            "path": "modules\/request-center\/Pages\/supervisor.php",
+            "area": "PAGE",
+            "lines": 53,
+            "file_fingerprint": "99d47d4182cb",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-8",
+                    "line_start": 1,
+                    "line_end": 8,
+                    "lines": 8,
+                    "fingerprint": "ae2945648fa7",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-049.01"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "مسیر: supervisor",
+                    "line_start": 9,
+                    "line_end": 53,
+                    "lines": 45,
+                    "fingerprint": "1b46fe01c59d",
+                    "risk": {
+                        "score": 7,
+                        "flags": {
+                            "sql_concat": 5,
+                            "raw_input": 2
+                        }
+                    },
+                    "id": "PAGE-049.02"
+                }
+            ]
+        },
+        {
+            "id": "PAGE-050",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
             "lines": 222,
@@ -52438,7 +52570,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-044.01"
+                    "id": "PAGE-050.01"
                 },
                 {
                     "kind": "class",
@@ -52454,12 +52586,12 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-044.02"
+                    "id": "PAGE-050.02"
                 }
             ]
         },
         {
-            "id": "PAGE-045",
+            "id": "PAGE-051",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
             "lines": 257,
@@ -52476,7 +52608,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-045.01"
+                    "id": "PAGE-051.01"
                 },
                 {
                     "kind": "class",
@@ -52489,7 +52621,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-045.02"
+                    "id": "PAGE-051.02"
                 },
                 {
                     "kind": "class",
@@ -52505,12 +52637,12 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-045.03"
+                    "id": "PAGE-051.03"
                 }
             ]
         },
         {
-            "id": "PAGE-046",
+            "id": "PAGE-052",
             "path": "ola.php",
             "area": "PAGE",
             "lines": 112,
@@ -52527,7 +52659,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-046.01"
+                    "id": "PAGE-052.01"
                 },
                 {
                     "kind": "function",
@@ -52542,7 +52674,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-046.02"
+                    "id": "PAGE-052.02"
                 },
                 {
                     "kind": "function",
@@ -52555,7 +52687,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-046.03"
+                    "id": "PAGE-052.03"
                 },
                 {
                     "kind": "function",
@@ -52568,7 +52700,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-046.04"
+                    "id": "PAGE-052.04"
                 },
                 {
                     "kind": "region",
@@ -52581,7 +52713,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-046.05"
+                    "id": "PAGE-052.05"
                 },
                 {
                     "kind": "region",
@@ -52594,7 +52726,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-046.06"
+                    "id": "PAGE-052.06"
                 },
                 {
                     "kind": "region",
@@ -52607,7 +52739,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-046.07"
+                    "id": "PAGE-052.07"
                 },
                 {
                     "kind": "region",
@@ -52623,7 +52755,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-046.08"
+                    "id": "PAGE-052.08"
                 },
                 {
                     "kind": "region",
@@ -52640,12 +52772,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-046.09"
+                    "id": "PAGE-052.09"
                 }
             ]
         },
         {
-            "id": "PAGE-047",
+            "id": "PAGE-053",
             "path": "organization.php",
             "area": "PAGE",
             "lines": 787,
@@ -52662,7 +52794,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.01"
+                    "id": "PAGE-053.01"
                 },
                 {
                     "kind": "function",
@@ -52679,7 +52811,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-047.02"
+                    "id": "PAGE-053.02"
                 },
                 {
                     "kind": "function",
@@ -52694,7 +52826,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "PAGE-047.03"
+                    "id": "PAGE-053.03"
                 },
                 {
                     "kind": "function",
@@ -52707,7 +52839,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.04"
+                    "id": "PAGE-053.04"
                 },
                 {
                     "kind": "function",
@@ -52720,7 +52852,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.05"
+                    "id": "PAGE-053.05"
                 },
                 {
                     "kind": "function",
@@ -52733,7 +52865,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.06"
+                    "id": "PAGE-053.06"
                 },
                 {
                     "kind": "function",
@@ -52746,7 +52878,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.07"
+                    "id": "PAGE-053.07"
                 },
                 {
                     "kind": "function",
@@ -52759,7 +52891,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.08"
+                    "id": "PAGE-053.08"
                 },
                 {
                     "kind": "function",
@@ -52772,7 +52904,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.09"
+                    "id": "PAGE-053.09"
                 },
                 {
                     "kind": "function",
@@ -52785,7 +52917,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.10"
+                    "id": "PAGE-053.10"
                 },
                 {
                     "kind": "function",
@@ -52798,7 +52930,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.11"
+                    "id": "PAGE-053.11"
                 },
                 {
                     "kind": "function",
@@ -52813,7 +52945,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-047.12"
+                    "id": "PAGE-053.12"
                 },
                 {
                     "kind": "function",
@@ -52828,7 +52960,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-047.13"
+                    "id": "PAGE-053.13"
                 },
                 {
                     "kind": "function",
@@ -52841,7 +52973,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.14"
+                    "id": "PAGE-053.14"
                 },
                 {
                     "kind": "function",
@@ -52854,7 +52986,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.15"
+                    "id": "PAGE-053.15"
                 },
                 {
                     "kind": "function",
@@ -52867,7 +52999,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.16"
+                    "id": "PAGE-053.16"
                 },
                 {
                     "kind": "function",
@@ -52880,7 +53012,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.17"
+                    "id": "PAGE-053.17"
                 },
                 {
                     "kind": "function",
@@ -52893,7 +53025,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.18"
+                    "id": "PAGE-053.18"
                 },
                 {
                     "kind": "function",
@@ -52906,7 +53038,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.19"
+                    "id": "PAGE-053.19"
                 },
                 {
                     "kind": "function",
@@ -52919,7 +53051,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.20"
+                    "id": "PAGE-053.20"
                 },
                 {
                     "kind": "function",
@@ -52934,7 +53066,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-047.21"
+                    "id": "PAGE-053.21"
                 },
                 {
                     "kind": "function",
@@ -52949,7 +53081,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "PAGE-047.22"
+                    "id": "PAGE-053.22"
                 },
                 {
                     "kind": "function",
@@ -52964,7 +53096,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-047.23"
+                    "id": "PAGE-053.23"
                 },
                 {
                     "kind": "function",
@@ -52977,7 +53109,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.24"
+                    "id": "PAGE-053.24"
                 },
                 {
                     "kind": "function",
@@ -52990,7 +53122,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.25"
+                    "id": "PAGE-053.25"
                 },
                 {
                     "kind": "function",
@@ -53003,7 +53135,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.26"
+                    "id": "PAGE-053.26"
                 },
                 {
                     "kind": "function",
@@ -53016,7 +53148,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.27"
+                    "id": "PAGE-053.27"
                 },
                 {
                     "kind": "function",
@@ -53029,7 +53161,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.28"
+                    "id": "PAGE-053.28"
                 },
                 {
                     "kind": "function",
@@ -53044,7 +53176,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-047.29"
+                    "id": "PAGE-053.29"
                 },
                 {
                     "kind": "function",
@@ -53057,7 +53189,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.30"
+                    "id": "PAGE-053.30"
                 },
                 {
                     "kind": "function",
@@ -53070,7 +53202,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.31"
+                    "id": "PAGE-053.31"
                 },
                 {
                     "kind": "function",
@@ -53083,7 +53215,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.32"
+                    "id": "PAGE-053.32"
                 },
                 {
                     "kind": "function",
@@ -53096,7 +53228,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.33"
+                    "id": "PAGE-053.33"
                 },
                 {
                     "kind": "function",
@@ -53109,7 +53241,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.34"
+                    "id": "PAGE-053.34"
                 },
                 {
                     "kind": "function",
@@ -53122,7 +53254,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.35"
+                    "id": "PAGE-053.35"
                 },
                 {
                     "kind": "function",
@@ -53135,7 +53267,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.36"
+                    "id": "PAGE-053.36"
                 },
                 {
                     "kind": "function",
@@ -53148,7 +53280,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.37"
+                    "id": "PAGE-053.37"
                 },
                 {
                     "kind": "function",
@@ -53161,7 +53293,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.38"
+                    "id": "PAGE-053.38"
                 },
                 {
                     "kind": "function",
@@ -53174,7 +53306,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.39"
+                    "id": "PAGE-053.39"
                 },
                 {
                     "kind": "function",
@@ -53189,7 +53321,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-047.40"
+                    "id": "PAGE-053.40"
                 },
                 {
                     "kind": "function",
@@ -53202,7 +53334,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.41"
+                    "id": "PAGE-053.41"
                 },
                 {
                     "kind": "function",
@@ -53215,7 +53347,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.42"
+                    "id": "PAGE-053.42"
                 },
                 {
                     "kind": "function",
@@ -53228,7 +53360,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.43"
+                    "id": "PAGE-053.43"
                 },
                 {
                     "kind": "function",
@@ -53241,7 +53373,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.44"
+                    "id": "PAGE-053.44"
                 },
                 {
                     "kind": "function",
@@ -53254,7 +53386,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.45"
+                    "id": "PAGE-053.45"
                 },
                 {
                     "kind": "function",
@@ -53269,7 +53401,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-047.46"
+                    "id": "PAGE-053.46"
                 },
                 {
                     "kind": "function",
@@ -53282,7 +53414,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.47"
+                    "id": "PAGE-053.47"
                 },
                 {
                     "kind": "function",
@@ -53295,7 +53427,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.48"
+                    "id": "PAGE-053.48"
                 },
                 {
                     "kind": "function",
@@ -53311,7 +53443,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "PAGE-047.49"
+                    "id": "PAGE-053.49"
                 },
                 {
                     "kind": "function",
@@ -53326,7 +53458,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "PAGE-047.50"
+                    "id": "PAGE-053.50"
                 },
                 {
                     "kind": "function",
@@ -53339,7 +53471,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-047.51"
+                    "id": "PAGE-053.51"
                 },
                 {
                     "kind": "function",
@@ -53354,12 +53486,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-047.52"
+                    "id": "PAGE-053.52"
                 }
             ]
         },
         {
-            "id": "PAGE-048",
+            "id": "PAGE-054",
             "path": "permissions.php",
             "area": "PAGE",
             "lines": 912,
@@ -53376,7 +53508,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.01"
+                    "id": "PAGE-054.01"
                 },
                 {
                     "kind": "function",
@@ -53389,7 +53521,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.02"
+                    "id": "PAGE-054.02"
                 },
                 {
                     "kind": "function",
@@ -53405,7 +53537,7 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-048.03"
+                    "id": "PAGE-054.03"
                 },
                 {
                     "kind": "function",
@@ -53418,7 +53550,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.04"
+                    "id": "PAGE-054.04"
                 },
                 {
                     "kind": "region",
@@ -53431,7 +53563,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.05"
+                    "id": "PAGE-054.05"
                 },
                 {
                     "kind": "function",
@@ -53446,7 +53578,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-048.06"
+                    "id": "PAGE-054.06"
                 },
                 {
                     "kind": "function",
@@ -53459,7 +53591,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.07"
+                    "id": "PAGE-054.07"
                 },
                 {
                     "kind": "function",
@@ -53472,7 +53604,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.08"
+                    "id": "PAGE-054.08"
                 },
                 {
                     "kind": "function",
@@ -53485,7 +53617,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.09"
+                    "id": "PAGE-054.09"
                 },
                 {
                     "kind": "region",
@@ -53498,7 +53630,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.10"
+                    "id": "PAGE-054.10"
                 },
                 {
                     "kind": "function",
@@ -53511,7 +53643,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.11"
+                    "id": "PAGE-054.11"
                 },
                 {
                     "kind": "function",
@@ -53524,7 +53656,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.12"
+                    "id": "PAGE-054.12"
                 },
                 {
                     "kind": "function",
@@ -53537,7 +53669,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.13"
+                    "id": "PAGE-054.13"
                 },
                 {
                     "kind": "function",
@@ -53550,7 +53682,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.14"
+                    "id": "PAGE-054.14"
                 },
                 {
                     "kind": "function",
@@ -53563,7 +53695,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.15"
+                    "id": "PAGE-054.15"
                 },
                 {
                     "kind": "function",
@@ -53576,7 +53708,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.16"
+                    "id": "PAGE-054.16"
                 },
                 {
                     "kind": "function",
@@ -53589,7 +53721,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.17"
+                    "id": "PAGE-054.17"
                 },
                 {
                     "kind": "region",
@@ -53602,7 +53734,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.18"
+                    "id": "PAGE-054.18"
                 },
                 {
                     "kind": "function",
@@ -53615,7 +53747,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.19"
+                    "id": "PAGE-054.19"
                 },
                 {
                     "kind": "function",
@@ -53628,7 +53760,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.20"
+                    "id": "PAGE-054.20"
                 },
                 {
                     "kind": "function",
@@ -53641,7 +53773,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.21"
+                    "id": "PAGE-054.21"
                 },
                 {
                     "kind": "function",
@@ -53654,7 +53786,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.22"
+                    "id": "PAGE-054.22"
                 },
                 {
                     "kind": "function",
@@ -53667,7 +53799,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.23"
+                    "id": "PAGE-054.23"
                 },
                 {
                     "kind": "function",
@@ -53680,7 +53812,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.24"
+                    "id": "PAGE-054.24"
                 },
                 {
                     "kind": "function",
@@ -53693,7 +53825,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.25"
+                    "id": "PAGE-054.25"
                 },
                 {
                     "kind": "function",
@@ -53710,7 +53842,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-048.26"
+                    "id": "PAGE-054.26"
                 },
                 {
                     "kind": "function",
@@ -53723,7 +53855,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.27"
+                    "id": "PAGE-054.27"
                 },
                 {
                     "kind": "function",
@@ -53736,7 +53868,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.28"
+                    "id": "PAGE-054.28"
                 },
                 {
                     "kind": "function",
@@ -53749,7 +53881,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.29"
+                    "id": "PAGE-054.29"
                 },
                 {
                     "kind": "function",
@@ -53764,7 +53896,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-048.30"
+                    "id": "PAGE-054.30"
                 },
                 {
                     "kind": "function",
@@ -53777,7 +53909,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.31"
+                    "id": "PAGE-054.31"
                 },
                 {
                     "kind": "function",
@@ -53790,7 +53922,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.32"
+                    "id": "PAGE-054.32"
                 },
                 {
                     "kind": "function",
@@ -53805,7 +53937,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-048.33"
+                    "id": "PAGE-054.33"
                 },
                 {
                     "kind": "function",
@@ -53820,7 +53952,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-048.34"
+                    "id": "PAGE-054.34"
                 },
                 {
                     "kind": "function",
@@ -53833,7 +53965,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.35"
+                    "id": "PAGE-054.35"
                 },
                 {
                     "kind": "function",
@@ -53846,7 +53978,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.36"
+                    "id": "PAGE-054.36"
                 },
                 {
                     "kind": "function",
@@ -53859,7 +53991,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.37"
+                    "id": "PAGE-054.37"
                 },
                 {
                     "kind": "function",
@@ -53872,7 +54004,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.38"
+                    "id": "PAGE-054.38"
                 },
                 {
                     "kind": "function",
@@ -53885,7 +54017,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.39"
+                    "id": "PAGE-054.39"
                 },
                 {
                     "kind": "function",
@@ -53898,7 +54030,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.40"
+                    "id": "PAGE-054.40"
                 },
                 {
                     "kind": "function",
@@ -53911,7 +54043,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.41"
+                    "id": "PAGE-054.41"
                 },
                 {
                     "kind": "function",
@@ -53924,7 +54056,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.42"
+                    "id": "PAGE-054.42"
                 },
                 {
                     "kind": "function",
@@ -53937,7 +54069,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.43"
+                    "id": "PAGE-054.43"
                 },
                 {
                     "kind": "function",
@@ -53950,7 +54082,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.44"
+                    "id": "PAGE-054.44"
                 },
                 {
                     "kind": "function",
@@ -53963,7 +54095,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.45"
+                    "id": "PAGE-054.45"
                 },
                 {
                     "kind": "function",
@@ -53976,7 +54108,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.46"
+                    "id": "PAGE-054.46"
                 },
                 {
                     "kind": "function",
@@ -53989,7 +54121,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.47"
+                    "id": "PAGE-054.47"
                 },
                 {
                     "kind": "function",
@@ -54002,7 +54134,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.48"
+                    "id": "PAGE-054.48"
                 },
                 {
                     "kind": "function",
@@ -54015,7 +54147,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.49"
+                    "id": "PAGE-054.49"
                 },
                 {
                     "kind": "function",
@@ -54028,12 +54160,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-048.50"
+                    "id": "PAGE-054.50"
                 }
             ]
         },
         {
-            "id": "PAGE-049",
+            "id": "PAGE-055",
             "path": "preview\/food-release-download\/vite.config.js",
             "area": "PAGE",
             "lines": 57,
@@ -54052,7 +54184,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-049.01"
+                    "id": "PAGE-055.01"
                 },
                 {
                     "kind": "block",
@@ -54067,7 +54199,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-049.02"
+                    "id": "PAGE-055.02"
                 }
             ]
         },
@@ -54107,7 +54239,7 @@
             ]
         },
         {
-            "id": "PAGE-050",
+            "id": "PAGE-056",
             "path": "request-center.php",
             "area": "PAGE",
             "lines": 11,
@@ -54124,7 +54256,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-050.01"
+                    "id": "PAGE-056.01"
                 }
             ]
         },
@@ -54216,7 +54348,7 @@
             ]
         },
         {
-            "id": "PAGE-051",
+            "id": "PAGE-057",
             "path": "routes\/web.php",
             "area": "PAGE",
             "lines": 36,
@@ -54233,7 +54365,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.01"
+                    "id": "PAGE-057.01"
                 },
                 {
                     "kind": "region",
@@ -54246,7 +54378,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.02"
+                    "id": "PAGE-057.02"
                 },
                 {
                     "kind": "region",
@@ -54259,7 +54391,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.03"
+                    "id": "PAGE-057.03"
                 },
                 {
                     "kind": "region",
@@ -54272,7 +54404,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.04"
+                    "id": "PAGE-057.04"
                 },
                 {
                     "kind": "region",
@@ -54285,7 +54417,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.05"
+                    "id": "PAGE-057.05"
                 },
                 {
                     "kind": "region",
@@ -54298,7 +54430,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.06"
+                    "id": "PAGE-057.06"
                 },
                 {
                     "kind": "region",
@@ -54311,7 +54443,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-051.07"
+                    "id": "PAGE-057.07"
                 }
             ]
         },
@@ -55901,7 +56033,7 @@
             ]
         },
         {
-            "id": "PAGE-052",
+            "id": "PAGE-058",
             "path": "session_bootstrap.php",
             "area": "PAGE",
             "lines": 112,
@@ -55918,7 +56050,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-052.01"
+                    "id": "PAGE-058.01"
                 },
                 {
                     "kind": "function",
@@ -55933,7 +56065,7 @@
                             "error_suppression": 3
                         }
                     },
-                    "id": "PAGE-052.02"
+                    "id": "PAGE-058.02"
                 },
                 {
                     "kind": "function",
@@ -55946,12 +56078,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-052.03"
+                    "id": "PAGE-058.03"
                 }
             ]
         },
         {
-            "id": "PAGE-053",
+            "id": "PAGE-059",
             "path": "system-health.php",
             "area": "PAGE",
             "lines": 1340,
@@ -55968,7 +56100,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.01"
+                    "id": "PAGE-059.01"
                 },
                 {
                     "kind": "function",
@@ -55981,7 +56113,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.02"
+                    "id": "PAGE-059.02"
                 },
                 {
                     "kind": "function",
@@ -55996,7 +56128,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-053.03"
+                    "id": "PAGE-059.03"
                 },
                 {
                     "kind": "function",
@@ -56011,7 +56143,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-053.04"
+                    "id": "PAGE-059.04"
                 },
                 {
                     "kind": "function",
@@ -56024,7 +56156,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.05"
+                    "id": "PAGE-059.05"
                 },
                 {
                     "kind": "function",
@@ -56039,7 +56171,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-053.06"
+                    "id": "PAGE-059.06"
                 },
                 {
                     "kind": "function",
@@ -56052,7 +56184,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.07"
+                    "id": "PAGE-059.07"
                 },
                 {
                     "kind": "function",
@@ -56065,7 +56197,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.08"
+                    "id": "PAGE-059.08"
                 },
                 {
                     "kind": "function",
@@ -56078,7 +56210,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.09"
+                    "id": "PAGE-059.09"
                 },
                 {
                     "kind": "function",
@@ -56091,7 +56223,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.10"
+                    "id": "PAGE-059.10"
                 },
                 {
                     "kind": "function",
@@ -56104,7 +56236,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.11"
+                    "id": "PAGE-059.11"
                 },
                 {
                     "kind": "function",
@@ -56117,7 +56249,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.12"
+                    "id": "PAGE-059.12"
                 },
                 {
                     "kind": "function",
@@ -56130,7 +56262,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.13"
+                    "id": "PAGE-059.13"
                 },
                 {
                     "kind": "function",
@@ -56143,7 +56275,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.14"
+                    "id": "PAGE-059.14"
                 },
                 {
                     "kind": "function",
@@ -56156,7 +56288,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.15"
+                    "id": "PAGE-059.15"
                 },
                 {
                     "kind": "function",
@@ -56169,7 +56301,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.16"
+                    "id": "PAGE-059.16"
                 },
                 {
                     "kind": "function",
@@ -56182,7 +56314,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.17"
+                    "id": "PAGE-059.17"
                 },
                 {
                     "kind": "function",
@@ -56195,7 +56327,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.18"
+                    "id": "PAGE-059.18"
                 },
                 {
                     "kind": "function",
@@ -56211,7 +56343,7 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-053.19"
+                    "id": "PAGE-059.19"
                 },
                 {
                     "kind": "region",
@@ -56224,7 +56356,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.20"
+                    "id": "PAGE-059.20"
                 },
                 {
                     "kind": "function",
@@ -56237,7 +56369,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.21"
+                    "id": "PAGE-059.21"
                 },
                 {
                     "kind": "function",
@@ -56253,7 +56385,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "PAGE-053.22"
+                    "id": "PAGE-059.22"
                 },
                 {
                     "kind": "function",
@@ -56266,7 +56398,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.23"
+                    "id": "PAGE-059.23"
                 },
                 {
                     "kind": "function",
@@ -56279,7 +56411,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.24"
+                    "id": "PAGE-059.24"
                 },
                 {
                     "kind": "function",
@@ -56294,7 +56426,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-053.25"
+                    "id": "PAGE-059.25"
                 },
                 {
                     "kind": "function",
@@ -56307,7 +56439,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.26"
+                    "id": "PAGE-059.26"
                 },
                 {
                     "kind": "function",
@@ -56322,7 +56454,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "PAGE-053.27"
+                    "id": "PAGE-059.27"
                 },
                 {
                     "kind": "function",
@@ -56339,7 +56471,7 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-053.28"
+                    "id": "PAGE-059.28"
                 },
                 {
                     "kind": "function",
@@ -56352,7 +56484,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-053.29"
+                    "id": "PAGE-059.29"
                 },
                 {
                     "kind": "function",
@@ -56368,12 +56500,12 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-053.30"
+                    "id": "PAGE-059.30"
                 }
             ]
         },
         {
-            "id": "PAGE-054",
+            "id": "PAGE-060",
             "path": "system-update.php",
             "area": "PAGE",
             "lines": 415,
@@ -56390,7 +56522,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.01"
+                    "id": "PAGE-060.01"
                 },
                 {
                     "kind": "function",
@@ -56403,7 +56535,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.02"
+                    "id": "PAGE-060.02"
                 },
                 {
                     "kind": "function",
@@ -56418,7 +56550,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "PAGE-054.03"
+                    "id": "PAGE-060.03"
                 },
                 {
                     "kind": "function",
@@ -56431,7 +56563,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.04"
+                    "id": "PAGE-060.04"
                 },
                 {
                     "kind": "function",
@@ -56444,7 +56576,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.05"
+                    "id": "PAGE-060.05"
                 },
                 {
                     "kind": "function",
@@ -56457,7 +56589,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.06"
+                    "id": "PAGE-060.06"
                 },
                 {
                     "kind": "function",
@@ -56470,7 +56602,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.07"
+                    "id": "PAGE-060.07"
                 },
                 {
                     "kind": "function",
@@ -56483,7 +56615,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.08"
+                    "id": "PAGE-060.08"
                 },
                 {
                     "kind": "function",
@@ -56496,7 +56628,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.09"
+                    "id": "PAGE-060.09"
                 },
                 {
                     "kind": "function",
@@ -56509,7 +56641,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.10"
+                    "id": "PAGE-060.10"
                 },
                 {
                     "kind": "region",
@@ -56522,7 +56654,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-054.11"
+                    "id": "PAGE-060.11"
                 },
                 {
                     "kind": "function",
@@ -56537,7 +56669,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-054.12"
+                    "id": "PAGE-060.12"
                 },
                 {
                     "kind": "function",
@@ -56552,7 +56684,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-054.13"
+                    "id": "PAGE-060.13"
                 }
             ]
         },
@@ -90988,7 +91120,7 @@
             ]
         },
         {
-            "id": "PAGE-055",
+            "id": "PAGE-061",
             "path": "traffic-control.php",
             "area": "PAGE",
             "lines": 1445,
@@ -91005,7 +91137,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.01"
+                    "id": "PAGE-061.01"
                 },
                 {
                     "kind": "region",
@@ -91018,7 +91150,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.02"
+                    "id": "PAGE-061.02"
                 },
                 {
                     "kind": "region",
@@ -91031,7 +91163,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.03"
+                    "id": "PAGE-061.03"
                 },
                 {
                     "kind": "function",
@@ -91044,7 +91176,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.04"
+                    "id": "PAGE-061.04"
                 },
                 {
                     "kind": "function",
@@ -91057,7 +91189,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.05"
+                    "id": "PAGE-061.05"
                 },
                 {
                     "kind": "function",
@@ -91070,7 +91202,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.06"
+                    "id": "PAGE-061.06"
                 },
                 {
                     "kind": "function",
@@ -91083,7 +91215,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.07"
+                    "id": "PAGE-061.07"
                 },
                 {
                     "kind": "function",
@@ -91096,7 +91228,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.08"
+                    "id": "PAGE-061.08"
                 },
                 {
                     "kind": "function",
@@ -91109,7 +91241,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.09"
+                    "id": "PAGE-061.09"
                 },
                 {
                     "kind": "function",
@@ -91122,7 +91254,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.10"
+                    "id": "PAGE-061.10"
                 },
                 {
                     "kind": "function",
@@ -91135,7 +91267,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.11"
+                    "id": "PAGE-061.11"
                 },
                 {
                     "kind": "function",
@@ -91148,7 +91280,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.12"
+                    "id": "PAGE-061.12"
                 },
                 {
                     "kind": "region",
@@ -91161,7 +91293,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.13"
+                    "id": "PAGE-061.13"
                 },
                 {
                     "kind": "function",
@@ -91174,7 +91306,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.14"
+                    "id": "PAGE-061.14"
                 },
                 {
                     "kind": "function",
@@ -91187,7 +91319,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.15"
+                    "id": "PAGE-061.15"
                 },
                 {
                     "kind": "function",
@@ -91202,7 +91334,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-055.16"
+                    "id": "PAGE-061.16"
                 },
                 {
                     "kind": "function",
@@ -91215,7 +91347,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.17"
+                    "id": "PAGE-061.17"
                 },
                 {
                     "kind": "function",
@@ -91228,7 +91360,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.18"
+                    "id": "PAGE-061.18"
                 },
                 {
                     "kind": "function",
@@ -91243,7 +91375,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-055.19"
+                    "id": "PAGE-061.19"
                 },
                 {
                     "kind": "function",
@@ -91256,7 +91388,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.20"
+                    "id": "PAGE-061.20"
                 },
                 {
                     "kind": "function",
@@ -91269,7 +91401,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.21"
+                    "id": "PAGE-061.21"
                 },
                 {
                     "kind": "function",
@@ -91282,7 +91414,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.22"
+                    "id": "PAGE-061.22"
                 },
                 {
                     "kind": "function",
@@ -91295,7 +91427,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.23"
+                    "id": "PAGE-061.23"
                 },
                 {
                     "kind": "function",
@@ -91308,7 +91440,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.24"
+                    "id": "PAGE-061.24"
                 },
                 {
                     "kind": "function",
@@ -91321,7 +91453,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.25"
+                    "id": "PAGE-061.25"
                 },
                 {
                     "kind": "function",
@@ -91334,7 +91466,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.26"
+                    "id": "PAGE-061.26"
                 },
                 {
                     "kind": "function",
@@ -91347,7 +91479,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.27"
+                    "id": "PAGE-061.27"
                 },
                 {
                     "kind": "class",
@@ -91360,7 +91492,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.28"
+                    "id": "PAGE-061.28"
                 },
                 {
                     "kind": "function",
@@ -91373,7 +91505,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.29"
+                    "id": "PAGE-061.29"
                 },
                 {
                     "kind": "function",
@@ -91386,7 +91518,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.30"
+                    "id": "PAGE-061.30"
                 },
                 {
                     "kind": "function",
@@ -91399,7 +91531,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.31"
+                    "id": "PAGE-061.31"
                 },
                 {
                     "kind": "function",
@@ -91412,7 +91544,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.32"
+                    "id": "PAGE-061.32"
                 },
                 {
                     "kind": "function",
@@ -91425,7 +91557,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.33"
+                    "id": "PAGE-061.33"
                 },
                 {
                     "kind": "function",
@@ -91440,7 +91572,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-055.34"
+                    "id": "PAGE-061.34"
                 },
                 {
                     "kind": "function",
@@ -91455,7 +91587,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-055.35"
+                    "id": "PAGE-061.35"
                 },
                 {
                     "kind": "function",
@@ -91468,7 +91600,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.36"
+                    "id": "PAGE-061.36"
                 },
                 {
                     "kind": "function",
@@ -91481,7 +91613,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.37"
+                    "id": "PAGE-061.37"
                 },
                 {
                     "kind": "function",
@@ -91494,7 +91626,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.38"
+                    "id": "PAGE-061.38"
                 },
                 {
                     "kind": "function",
@@ -91507,7 +91639,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.39"
+                    "id": "PAGE-061.39"
                 },
                 {
                     "kind": "function",
@@ -91522,7 +91654,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.40"
+                    "id": "PAGE-061.40"
                 },
                 {
                     "kind": "function",
@@ -91537,7 +91669,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.41"
+                    "id": "PAGE-061.41"
                 },
                 {
                     "kind": "function",
@@ -91552,7 +91684,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.42"
+                    "id": "PAGE-061.42"
                 },
                 {
                     "kind": "function",
@@ -91567,7 +91699,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.43"
+                    "id": "PAGE-061.43"
                 },
                 {
                     "kind": "function",
@@ -91582,7 +91714,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "PAGE-055.44"
+                    "id": "PAGE-061.44"
                 },
                 {
                     "kind": "region",
@@ -91595,7 +91727,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.45"
+                    "id": "PAGE-061.45"
                 },
                 {
                     "kind": "function",
@@ -91610,7 +91742,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.46"
+                    "id": "PAGE-061.46"
                 },
                 {
                     "kind": "function",
@@ -91625,7 +91757,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.47"
+                    "id": "PAGE-061.47"
                 },
                 {
                     "kind": "function",
@@ -91641,7 +91773,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-055.48"
+                    "id": "PAGE-061.48"
                 },
                 {
                     "kind": "function",
@@ -91657,7 +91789,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-055.49"
+                    "id": "PAGE-061.49"
                 },
                 {
                     "kind": "function",
@@ -91673,7 +91805,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-055.50"
+                    "id": "PAGE-061.50"
                 },
                 {
                     "kind": "function",
@@ -91688,7 +91820,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.51"
+                    "id": "PAGE-061.51"
                 },
                 {
                     "kind": "function",
@@ -91703,7 +91835,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.52"
+                    "id": "PAGE-061.52"
                 },
                 {
                     "kind": "function",
@@ -91716,7 +91848,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.53"
+                    "id": "PAGE-061.53"
                 },
                 {
                     "kind": "function",
@@ -91731,7 +91863,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.54"
+                    "id": "PAGE-061.54"
                 },
                 {
                     "kind": "region",
@@ -91744,7 +91876,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.55"
+                    "id": "PAGE-061.55"
                 },
                 {
                     "kind": "region",
@@ -91757,7 +91889,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.56"
+                    "id": "PAGE-061.56"
                 },
                 {
                     "kind": "region",
@@ -91770,7 +91902,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.57"
+                    "id": "PAGE-061.57"
                 },
                 {
                     "kind": "function",
@@ -91783,7 +91915,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.58"
+                    "id": "PAGE-061.58"
                 },
                 {
                     "kind": "function",
@@ -91798,7 +91930,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-055.59"
+                    "id": "PAGE-061.59"
                 },
                 {
                     "kind": "region",
@@ -91811,7 +91943,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.60"
+                    "id": "PAGE-061.60"
                 },
                 {
                     "kind": "region",
@@ -91824,7 +91956,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.61"
+                    "id": "PAGE-061.61"
                 },
                 {
                     "kind": "region",
@@ -91837,7 +91969,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.62"
+                    "id": "PAGE-061.62"
                 },
                 {
                     "kind": "function",
@@ -91854,7 +91986,7 @@
                             "very_long": 3
                         }
                     },
-                    "id": "PAGE-055.63"
+                    "id": "PAGE-061.63"
                 },
                 {
                     "kind": "region",
@@ -91867,7 +91999,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.64"
+                    "id": "PAGE-061.64"
                 },
                 {
                     "kind": "region",
@@ -91880,7 +92012,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.65"
+                    "id": "PAGE-061.65"
                 },
                 {
                     "kind": "region",
@@ -91893,7 +92025,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.66"
+                    "id": "PAGE-061.66"
                 },
                 {
                     "kind": "function",
@@ -91906,12 +92038,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-055.67"
+                    "id": "PAGE-061.67"
                 }
             ]
         },
         {
-            "id": "PAGE-056",
+            "id": "PAGE-062",
             "path": "traffic-import.php",
             "area": "PAGE",
             "lines": 1032,
@@ -91928,7 +92060,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.01"
+                    "id": "PAGE-062.01"
                 },
                 {
                     "kind": "function",
@@ -91941,7 +92073,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.02"
+                    "id": "PAGE-062.02"
                 },
                 {
                     "kind": "function",
@@ -91954,7 +92086,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.03"
+                    "id": "PAGE-062.03"
                 },
                 {
                     "kind": "function",
@@ -91967,7 +92099,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.04"
+                    "id": "PAGE-062.04"
                 },
                 {
                     "kind": "function",
@@ -91980,7 +92112,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.05"
+                    "id": "PAGE-062.05"
                 },
                 {
                     "kind": "function",
@@ -91993,7 +92125,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.06"
+                    "id": "PAGE-062.06"
                 },
                 {
                     "kind": "function",
@@ -92006,7 +92138,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.07"
+                    "id": "PAGE-062.07"
                 },
                 {
                     "kind": "function",
@@ -92019,7 +92151,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.08"
+                    "id": "PAGE-062.08"
                 },
                 {
                     "kind": "function",
@@ -92032,7 +92164,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.09"
+                    "id": "PAGE-062.09"
                 },
                 {
                     "kind": "function",
@@ -92045,7 +92177,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.10"
+                    "id": "PAGE-062.10"
                 },
                 {
                     "kind": "function",
@@ -92060,7 +92192,7 @@
                             "long": 1
                         }
                     },
-                    "id": "PAGE-056.11"
+                    "id": "PAGE-062.11"
                 },
                 {
                     "kind": "function",
@@ -92073,7 +92205,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.12"
+                    "id": "PAGE-062.12"
                 },
                 {
                     "kind": "function",
@@ -92088,7 +92220,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "PAGE-056.13"
+                    "id": "PAGE-062.13"
                 },
                 {
                     "kind": "function",
@@ -92101,7 +92233,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.14"
+                    "id": "PAGE-062.14"
                 },
                 {
                     "kind": "function",
@@ -92114,7 +92246,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.15"
+                    "id": "PAGE-062.15"
                 },
                 {
                     "kind": "function",
@@ -92127,7 +92259,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.16"
+                    "id": "PAGE-062.16"
                 },
                 {
                     "kind": "function",
@@ -92140,7 +92272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.17"
+                    "id": "PAGE-062.17"
                 },
                 {
                     "kind": "function",
@@ -92153,7 +92285,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.18"
+                    "id": "PAGE-062.18"
                 },
                 {
                     "kind": "function",
@@ -92168,7 +92300,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-056.19"
+                    "id": "PAGE-062.19"
                 },
                 {
                     "kind": "function",
@@ -92184,7 +92316,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-056.20"
+                    "id": "PAGE-062.20"
                 },
                 {
                     "kind": "function",
@@ -92197,7 +92329,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.21"
+                    "id": "PAGE-062.21"
                 },
                 {
                     "kind": "function",
@@ -92210,7 +92342,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.22"
+                    "id": "PAGE-062.22"
                 },
                 {
                     "kind": "function",
@@ -92225,7 +92357,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-056.23"
+                    "id": "PAGE-062.23"
                 },
                 {
                     "kind": "function",
@@ -92240,7 +92372,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-056.24"
+                    "id": "PAGE-062.24"
                 },
                 {
                     "kind": "function",
@@ -92253,7 +92385,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.25"
+                    "id": "PAGE-062.25"
                 },
                 {
                     "kind": "function",
@@ -92266,7 +92398,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-056.26"
+                    "id": "PAGE-062.26"
                 },
                 {
                     "kind": "function",
@@ -92281,7 +92413,7 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "PAGE-056.27"
+                    "id": "PAGE-062.27"
                 }
             ]
         },
@@ -96222,7 +96354,7 @@
             ]
         },
         {
-            "id": "PAGE-057",
+            "id": "PAGE-063",
             "path": "user-access-groups.php",
             "area": "PAGE",
             "lines": 209,
@@ -96239,7 +96371,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.01"
+                    "id": "PAGE-063.01"
                 },
                 {
                     "kind": "function",
@@ -96252,7 +96384,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.02"
+                    "id": "PAGE-063.02"
                 },
                 {
                     "kind": "function",
@@ -96265,7 +96397,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.03"
+                    "id": "PAGE-063.03"
                 },
                 {
                     "kind": "function",
@@ -96278,7 +96410,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.04"
+                    "id": "PAGE-063.04"
                 },
                 {
                     "kind": "function",
@@ -96291,7 +96423,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.05"
+                    "id": "PAGE-063.05"
                 },
                 {
                     "kind": "function",
@@ -96304,7 +96436,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.06"
+                    "id": "PAGE-063.06"
                 },
                 {
                     "kind": "function",
@@ -96317,7 +96449,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.07"
+                    "id": "PAGE-063.07"
                 },
                 {
                     "kind": "function",
@@ -96330,7 +96462,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.08"
+                    "id": "PAGE-063.08"
                 },
                 {
                     "kind": "function",
@@ -96343,7 +96475,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.09"
+                    "id": "PAGE-063.09"
                 },
                 {
                     "kind": "function",
@@ -96356,7 +96488,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.10"
+                    "id": "PAGE-063.10"
                 },
                 {
                     "kind": "function",
@@ -96369,12 +96501,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-057.11"
+                    "id": "PAGE-063.11"
                 }
             ]
         },
         {
-            "id": "PAGE-058",
+            "id": "PAGE-064",
             "path": "xlsx-writer.php",
             "area": "PAGE",
             "lines": 221,
@@ -96391,7 +96523,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-058.01"
+                    "id": "PAGE-064.01"
                 },
                 {
                     "kind": "function",
@@ -96404,7 +96536,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-058.02"
+                    "id": "PAGE-064.02"
                 },
                 {
                     "kind": "function",
@@ -96417,7 +96549,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-058.03"
+                    "id": "PAGE-064.03"
                 },
                 {
                     "kind": "function",
@@ -96430,7 +96562,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-058.04"
+                    "id": "PAGE-064.04"
                 },
                 {
                     "kind": "function",
@@ -96446,7 +96578,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "PAGE-058.05"
+                    "id": "PAGE-064.05"
                 },
                 {
                     "kind": "function",
@@ -96459,7 +96591,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-058.06"
+                    "id": "PAGE-064.06"
                 },
                 {
                     "kind": "function",
@@ -96472,7 +96604,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-058.07"
+                    "id": "PAGE-064.07"
                 },
                 {
                     "kind": "function",
@@ -96487,7 +96619,7 @@
                             "unescaped_echo": 3
                         }
                     },
-                    "id": "PAGE-058.08"
+                    "id": "PAGE-064.08"
                 }
             ]
         }

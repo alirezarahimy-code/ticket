@@ -367,7 +367,7 @@ global-search.php	core	121	12295
 governance.php	core	545	48255
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
-index.php	core	3729	374210
+index.php	core	3041	291262
 install-empty-db.sql	sql-root	1612	82181
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
@@ -428,8 +428,14 @@ modules/request-center/Actions/bulk-actions.php	other	146	10682
 modules/request-center/Actions/supervisor-actions.php	other	204	15442
 modules/request-center/Actions/ticket-actions.php	other	752	59624
 modules/request-center/Assets/request-center.css	other	1	255
+modules/request-center/Pages/analytics.php	other	48	4880
+modules/request-center/Pages/create.php	other	146	14098
+modules/request-center/Pages/detail.php	other	245	29497
 modules/request-center/Pages/index.php	other	244	18574
-modules/request-center/README.md	other	84	10307
+modules/request-center/Pages/reports.php	other	66	9694
+modules/request-center/Pages/services.php	other	175	19749
+modules/request-center/Pages/supervisor.php	other	52	6589
+modules/request-center/README.md	other	146	15186
 modules/request-center/RequestCenterRepository.php	other	221	9196
 modules/request-center/WorkflowService.php	other	256	11564
 ola.php	core	111	11934
