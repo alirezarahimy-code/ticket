@@ -296,13 +296,33 @@ echo 'T07 clone: ' . $targetDb . PHP_EOL;
 echo 'MariaDB: ' . $pdo->query('SELECT VERSION()')->fetchColumn() . PHP_EOL;
 echo 'Migrations applied: ' . count($applied) . '; skipped as already recorded: ' . count($skipped) . PHP_EOL;
 echo 'Applied migration names: ' . implode(', ', $applied) . PHP_EOL;
+echo 'Skipped migration names: ' . implode(', ', $skipped) . PHP_EOL;
 echo 'Registry rows added: ' . count($registryAdded) . ' (bookkeeping only)' . PHP_EOL;
 echo 'Application schema tables fingerprinted: ' . count($tables) . PHP_EOL;
 
+// Cross-check the actual 1.62.88 release manifest. The release builder deliberately
+// excludes migration 032; all manifest migrations must already be recorded in this dump.
+$builder = (string) file_get_contents(dirname(__DIR__) . '/tools/build_update_1_62_88.py');
+$releaseMigrations = [];
+if (preg_match('/^MIGRATIONS\\s*=\\s*\\[(.*?)^\\]/ms', $builder, $manifestBlock)) {
+    preg_match_all('/"([^"]+\\.sql)"/', $manifestBlock[1], $manifestNames);
+    $releaseMigrations = $manifestNames[1] ?? [];
+}
+$releaseNotRecorded = array_values(array_diff($releaseMigrations, $skipped));
+$releaseUnexpectedlyApplied = array_values(array_intersect($releaseMigrations, $applied));
+echo '1.62.88 manifest migrations: ' . implode(', ', $releaseMigrations) . PHP_EOL;
+if ($releaseMigrations === [] || $releaseNotRecorded !== [] || $releaseUnexpectedlyApplied !== []) {
+    t07_fail(
+        'release manifest registry mismatch; not skipped=[' . implode(', ', $releaseNotRecorded) .
+        '], unexpectedly applied=[' . implode(', ', $releaseUnexpectedlyApplied) . ']'
+    );
+}
+t07_check(true, 'all actual 1.62.88 manifest migrations are already recorded and skipped');
+
 if ($schemaChanges !== [] || $dataChanges !== [] || $missingRegistry !== []) {
     t07_fail(
-        'unexpected schema changes=[' . implode(', ', $schemaChanges) .
-        '], application data changes=[' . implode(', ', $dataChanges) .
+        'historical replay 001..033 changed schema=[' . implode(', ', $schemaChanges) .
+        '], application data=[' . implode(', ', $dataChanges) .
         '], missing registry=[' . implode(', ', $missingRegistry) .
         '], per-migration effects=' . json_encode($migrationEffects, JSON_UNESCAPED_SLASHES)
     );
