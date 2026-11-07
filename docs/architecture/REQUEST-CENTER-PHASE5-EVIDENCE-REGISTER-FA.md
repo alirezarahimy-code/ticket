@@ -56,7 +56,7 @@
 ## ۴) بستهٔ کاندیدی ساخته‌شده (هرگز بدون اجازهٔ مالک نصب نمی‌شود)
 
 - فایل: `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip`
-- SHA-256: `fe98b36938d640bae018be217f3b3d5ec459f290056772f135dc002fd9f8b13d` (فایل `.sha256` کنار آن)
+- SHA-256: `bc5207913788af502138997037e359070e6a3ba41e11e8e69e176b123a3bcff4` (فایل `.sha256` کنار آن)
 - نام‌گذاری عامدانه با `rc-candidate`؛ manifest: `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `requires_version=1.62.90`، `migrations=[035]`، ۶۱ فایل، بدون tests/CI.
 - ساخت: `tools/build_rc_update.py` (بازتولید قطعی با تاریخ ثابت؛ checksum آرشیو پس از بستن، CRC، path-traversal و یکتایی مسیرها بررسی می‌شود)
 
@@ -98,7 +98,7 @@
 
 **تغییرات فایل‌ها:** `AppointmentRepository.php` (workingWindow/dailyLimits/rcSetting/dailyLoadSnapshot/teamDailyCapacity + اعمال ساعت/ظرفیت در create؛ پارامتر `allowOutsideBusinessHours` با پیش‌فرض false)؛ `appointment-actions.php` (پاس‌دهی override مدیر برای ساعت)؛ `calendar.php` (پنل «ظرفیت امروز (سقف روزانه)» برای مدیر + متن عناوین)؛ `Pages/calendar.php` و SQLite suite (+۱۳ چک) و T13 (سناریوی D: ۱۲ کارگر، سقف ۱ ⇒ ۱ برنده + ۱۱ «ظرفیت»).
 
-**بازسازی پنجم قطعی:** `python3 tools/build_rc_update.py` ⇒ نتیجهٔ دقیق (۶۱ فایل/بایت‌ها/SHA) در بخش پایهٔ همین سند (§۴) و اسناد نصب ثبت می‌شود. گیت‌های محلی: access-matrix ۱۱/۱۱؛ سه Suite SQLite سبز؛ Suite نوبت‌ها شامل ۱۳ چک جدید P3؛ `php -l` سبز.
+**بازسازی پنجم قطعی:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۴۷٬۹۲۱ بایت، SHA-256 `bc5207913788af502138997037e359070e6a3ba41e11e8e69e176b123a3bcff4`**؛ اسناد نصب (§۸/پیوست این سند) و §۴ به آن اشارهٔ صریح می‌کنند. SHA قبلی `fe98b369…` (بازسازی چهارم، P2). گیت‌های محلی: access-matrix ۱۱/۱۱؛ سه Suite SQLite سبز؛ Suite نوبت‌ها شامل ۱۳ چک جدید P3؛ `php -l` سبز.
 
 > **محدودیت صریح:** SQLite محلی رفتار تک‌نخی/منطقی را می‌سنجد؛ اثبات هم‌زمانی سقف روی MariaDB واقعی توسط CI انجام و در «وضعیت پس‌CI» ثبت می‌شود.
 > **وضعیت پس‌CI:** (پس از اجرای هر دو MariaDB روی همین بخش ثبت می‌شود — قرمزی T13 یا سناریوی D، اگر رخ دهد، صریح ثبت می‌شود.)
