@@ -368,3 +368,39 @@ redirect در بدنهٔ منتقل‌شده تغییر داده نشده است
 تغییر VERSION، تغییر در main یا آزمون تکراری در این برش انجام نشد.
 اجرای Runtime روی نصب محلی کاربر هنوز تأیید نشده است؛ بنابراین این ثبت
 به‌عنوان شواهد PASS آزمون یا تکمیل فاز اول محسوب نمی‌شود.
+
+---
+
+## پیگیری تکمیل فاز اول — ۲۰۲۶-۱۱-۰۷ (شاخهٔ کار `arena/22d4eba7-ticket`، commit پایه `649cb61`)
+
+> این الحاقیه، شواهد امروز را ثبت می‌کند. **تکمیل فاز اول هنوز اعلام نمی‌شود.**
+
+### ۱. ریشهٔ قرمزی CI شاخهٔ ارتقا پیدا و در همین branch رفع شد (مورد ۷ از بخش ۶)
+
+- شکست «First-slice security and architecture contract» روی MariaDB 10.4.32 و ۱۰٫۱۱ (هم روی push ادغام main در feature و هم روی pull_request شمارهٔ ۳۰، همان commitهای ناکارا) **ربطی به رفتار runtime نداشت**: چهار آزمون اِستاتیک، سیم‌کشی قدیمی را گارد می‌کردند — انتظار include مستقیم handlerهای ماژول در `index.php`، مسیر bootstrap دوسطحی صفحهٔ ورودی ماژول و نشانه‌های SLA/OLA/note/pagination/view-mode در `index.php`؛ در حالی‌که معماری مصوب «Registry/Dispatcher ماژول» این مالکیت را به `modules/request-center/Actions/dispatch.php` و صفحات ماژول منتقل کرده بود.
+- اصلاح‌ها صرفاً به سمت ownerِ واقعی منتقل شد؛ هیچ assertion تضعیف یا حذف نشد. محلی پتگریده شد:
+  `python3 -m pytest -q tests/test_request_center_first_slice_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_workflow_safety_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py` → **۴۳ passed، ۷ subtests** و هر سه سوییت SQLite ماژول (Repository، WorkflowService، نوبت‌ها) → PASS.
+- **دامنه و اثر:** QA Package Preview به‌خاطر همین گارد قرمز می‌شد → باید سبز شود. خطای Logging contract/Acceptance و شکست T04/T07/T12 با این رفع **برطرف نمی‌شوند**. چون push مستقیم به `feature/request-center-module-1.62.88` ممنوع است، Contract آن branch تا پس از merge این branch در main و همگام‌سازی از طریق `update-branch` در PR #30 بازمی‌گردد؛ تا آن زمان قرمزی آن branch متوقع و منسوب به همین رفع است.
+
+### ۲. اعتبارسنجی ایستا As-Is روی HEAD (بدون اجرای runtime)
+
+علامت‌های مرجع جدول §۲ و بندهای §۴ ممیزی As-Is روی درخت HEAD حاضر و دارای ارجاع‌اند؛ تعداد ارجاع‌ها: `ticket_number_ensure_schema` ۱۶، `ticket_group_number` فاقد نام قدیمی (با `ticket_number_*` جایگزین شده)، `ticket_scope` ۲۵، `ticket_handler_level` ۲۳، `ticket_user_can_view` ۱۷، `ticket_assignee_is_eligible` ۱۹–۲۰، `ticket_allowed_transitions` ۶، `store_attachment` ۲، `download_attachment` ۴، `notify_ticket_parties` ۱۳، `save_audit_required` ۱۲۰، `log_ticket_event` ۲۸، `ticket_hot_schema_ensure` ۱۵، `ticket_service_ensure_schema` ۸، `org_ticket_schema_ensure` ۶. فایل‌های مصرفی §۲ (actions/* bridge، dispatcher ماژول، `cron/ticket_auto_close.php`، `help-guide.php`، permissions.php، lib/tickets-sla.php، lib/auth-scope.php، ola.php، chatbot.php) موجودند. **این بررسی فقط ایستا است و جواز ادعای رفتاری/عملیاتی صادر نمی‌کند.**
+
+### ۳. فهرست قطعیِ ناقصی‌های باقی‌ماندهٔ فاز اول (برای اعلام تکمیل لازم است)
+
+| # | ناقصی/بلیطی باز | شواهد/مالک | تنها راهِ معتبر بسته‌شدن |
+|---|---|---|---|
+| R1 | **T12 = ۰ از ۱۰** سناریوی رفتاری روی دو Clone هم‌ساخت (`2176d2aa…` در برابر HEAD شاخه) | برگهٔ T12، بخش ۶ | بسط harness با fixtureهای نقش/مجوز/درخواست، اجرای HTTP+Cron برای هر ۱۰ سناریو، Snapshot مقایسه‌ای `tickets/messages/events/notifications/ratings/asset_history` و ثبت Diff و تصمیم به‌ازای هر اختلاف (هر دو MariaDB 10.4.32 و 10.11) در CI یا روی Clone غیرعملیاتی شما |
+| R2 | **T07 FAIL** — بازاجرای کامل 001–033 روی clone | دفتر §۶.۱ | **تصمیم شما:** (الف) ردّ صریح back-fill از نسخه‌های خیلی قدیمی و پشتیبانی فقط از baseline دارای بستهٔ واقعی (manifest 1.62.88 که PASS است)؛ یا (ب) تأیید تشکیل Change Request برای اصلاح رفتاری مهاجرت‌های 003/014/016 — که خارج از ساختار «ارتقای RC» است) |
+| R3 | **T04 — مسیر legacy سامانه runtime FAIL** (RC-runtime محدود PASS) | دفتر §۶.۱؛ T04-WEB-DD audit | **تصمیم شما:** (الف) محدود کردن دروازهٔ T04 به زبان RC و ثبت استثناء مصوب برای مسیر legacy با تاریخ بازنگری؛ یا (ب) Change Request جداگانه برای اصلاح `ticket_hot_schema_ensure()` (پرچم static `$ready` پیش از post-check + catch بی‌صدا) — نیازمند مجوز صریح چون تغییر فایل خارج از مالکیت RC است |
+| R4 | **نبود دادهٔ عملیاتی** در dump ⇒ تمام اجرای سناریوها باید synthetic باشد (`install-empty-db.sql` + fixtures)؛ هیچ import از DB عملیاتی مجاز نیست | دفتر §۶.۳ | همین روش مصوب نگه داشته شود؛ fixtureها و scriptها باید owner و commit داشته باشند |
+| R5 | **قرمزی Logging contract/acceptance** روی هر دو شاخه — خارج از دامنهٔ RC | Implementation note؛ Status گیتنش | **تصمیم شما:** این گیت مسدودکنندهٔ merge RC باشد یا صرفاً گزارش خارج از دامنه باشد (راه‌حل در ماژول Logging است) |
+| R6 | تأیید رفتاری خودت از عملکرد 1.62.92 تست (از جمله «نوبت‌های رسیدگی») | — | تست دستی روی محیط TEST شما + گزارش باگ؛ این تأیید ربطی به gate فنی فاز اول ندارد ولی شرط تحویل بستهٔ نهایی است |
+| R7 | کد بیرون‌فاز در شاخه: «نوبت‌های رسیدگی» (فاز ۴ رسمی پروژه: 035 + `AppointmentRepository` + `Actions/appointment-actions.php` + بخش تقویم + تست‌ها) | این branch، commitهای ۸۶bc۸۶d | از شواهد **فاز اول حذف** است؛ روی فاز ۲ تا ۴ فقط می‌نشیند پس از عبور ترتیب، و در نهایت بستهٔ ۱٫۶۲٫۹۲ نمی‌تواند پیش از پایان فاز ۵ مدعی «تکمیل ارتقا» باشد |
+
+### ۴. آنچه این الحاقیه اثبات یا صدور اختیار نمی‌کند
+
+- تکمیل **هیچ** فازی (از جمله فاز اول) اعلام نشده است.
+- T01–T03/T05/T06/T08–T11 اخیر همچنان «PASS در اجرای‌های ثبت‌شده»‌اند و تکرار نشده‌اند.
+- ادغام main، انتشار عملیاتی، merge PR #30، نصب روی سامانهٔ شما و ادعای «Mainده نیست» یا «به‌روزرسانی آماده است» **همگی ممنوع و منتفی‌اند**.
+- این شاخه باید فقط با PR و تأیید شما به main برسد؛ main با هیچ بخشی از ارتقا همگام نشده است.
