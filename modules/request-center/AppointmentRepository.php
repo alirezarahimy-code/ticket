@@ -57,15 +57,16 @@ final class AppointmentRepository
         if (preg_match('/^(\d{4})-(\d{2})-(\d{2})[ ]?(\d{2}):(\d{2})(:(\d{2}))?$/', $value, $m) !== 1) {
             return null;
         }
+        $y = (int) $m[1]; $mo = (int) $m[2]; $d = (int) $m[3];
         $h = (int) $m[4]; $i = (int) $m[5]; $s = isset($m[7]) ? (int) $m[7] : 0;
+        if (!checkdate($mo, $d, $y)) {
+            // تاریخ نامعتبر (مثل ۳۱ فوریه) را reject کن؛ createFromFormat آن را silent می‌کرد.
+            return null;
+        }
         if ($h > 23 || $i > 59 || $s > 59) {
             return null;
         }
-        $dt = DateTimeImmutable::createFromFormat('!Y-m-d H:i:s', sprintf('%04d-%02d-%02d %02d:%02d:%02d', (int) $m[1], (int) $m[2], (int) $m[3], $h, $i, $s));
-        if (!$dt) {
-            return null;
-        }
-        return $dt->format('Y-m-d H:i:s');
+        return sprintf('%04d-%02d-%02d %02d:%02d:%02d', $y, $mo, $d, $h, $i, $s);
     }
 
     /**

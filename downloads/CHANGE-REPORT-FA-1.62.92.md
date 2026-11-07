@@ -22,6 +22,7 @@
 | ۳ | بازاستخراج پروتکل مشترک POST + اجرای رجیستری RC در مرز ماژول (`lib/http-post.php`)، رفع Bridgeها | POST مستقل RC + «forward درجا» برای بقیه |
 | ۴ | تقویم شمسی کارشناسان، نوبت‌های رسیدگی (create/cancel/complete تراکنشی + قفل)، تعطیلات از جدول `holidays`، ظرفیت تیم، KPI، اعلان `notify_user` با idempotency، `ApppointmentRepository` کامل | صفحهٔ `Pages/calendar.php` + طراحی کامل `.rc-shell` |
 | ۵ | بستهٔ ارتقا (همین سند و ZIP)، راهنمای نصب/بازگشت، ثبت گیت‌های Contract، ممیزی نمودار دسترسی (آزمـون ایستا `test_request_center_access_matrix_static.py`)، تکمیل overlay بستهٔ پیش‌نمایش | این سند + `tools/build_rc_update.py` |
+| ۵.۲ | موج دوم-کوچک پس از بازبینی ایجنت دیگر (۱۴۰۵/۰۸/۱۶): رفع `normalizeDateTime()` با اعتبارسنجی تقویم `checkdate()` (تاریخ‌های ناممکن دیگر silent پذیرفته نمی‌شوند + ۹ بررسی مرزی در تست SQLite)؛ رفع تضاد درونی دفتر فاز ۱ (سربرگ «بسته‌شده» در برابر «باز» + یادداشت شفاف‌سازی شاخهٔ کار/PR)؛ عنوان قدیمی README ماژول؛ به‌روزرسانی ادعاهای stale در سند بستهٔ تست مالک (T12 روی هر دو MariaDB موفق است)؛ یادداشت اختلاف شاخهٔ arena/feature در رجیسترهای فازهای ۴/۵ | `AppointmentRepository.php` + تست نوبت‌ها + ۴ سند |
 | ۵.۱ | موج اول اصلاحات ممیزی (پس از بازبینی ماژول در ۱۴۰۵/۰۸/۱۶): گاردهای `APP_ROOT` در تمام صفحات include-only + ۳ فایل `.htaccess` منع مستقیم (Pages/Actions/lib) + ۱ گیت جدید در نمودار دسترسی؛ تعطیلی‌های «fail-open خاموش» اکنون fail-loud هستند (رویداد `rc_holidays_lookup_failed` در `activity_log` + بنر هشدار)؛ hint پنجرهٔ ثبت معوق و مستندسازی نوبت‌ها در README؛ حذف کد مرده (`$completionRate`) و علامت‌گذاری `@internal` روی `listUpcoming()` | `.htaccess`ها + `Pages/*.php` + `appointment-actions.php` + `calendar.php` + رجیستر فاز ۵.۱ |
 
 ## فایل‌های مشترک که تغییر داده شده‌اند (با توجیه)
@@ -47,7 +48,7 @@
 
 ## گیت‌های عبور و شواهد
 
-- `Request Center Contract` روی PR #30: موفق در نصب schema تازه‌نصب + پیش‌فرضاردی Schema + SQLite نوبت‌ها (۲۴ قلم)؛ **فقط T07 (D1، مصوب) قرمز است**.
+- `Request Center Contract` روی PR #30: موفق در نصب schema تازه‌نصب + پیش‌فرضاردی Schema + SQLite نوبت‌ها (۳۵ قلم)؛ **فقط T07 (D1، مصوب) قرمز است**.
 - `T12 Scenarios`/`Preflight`: موفق.
 - `ArchitectureTest`: ۵/۵ سبز. `test_request_center_access_matrix_static.py`: ۱۱/۱۱ سبز.
 - نمونهٔ آفلاین تطبیق شمسی JS↔PHP روی ۱٬۶۹۵ تاریخ مرزی/کبیسه: صفر خطا.
@@ -65,6 +66,11 @@
 | RC-A11: README ماژول بخش نوبت‌ها/فاز ۴ را نداشت | کم — مستندات | افزودن زیربخش «نوبت‌های رسیدگی» |
 
 **عمداً اصلاح نشدند (موج ۲، با تصمیم مالک):** fail-closed نگهبان تعطیلات برای غیر elevated (RC-A2 سخت)؛ رندر نوبت چندروزه (RC-A4)؛ allowlist فقط staff برای assignee مدیر (RC-A5b)؛ اعلان به requester پس از complete (RC-A8)؛ قرارداد scope بدون `WHERE ` (RC-A6)؛ ریسک فقط-ANSI_QUOTES (RC-A7)؛ هم‌پوستهٔ لینک‌های RC→legacy (RC-A10). جزئیات در سند ممیزی ارائه‌شده به مالک آمده است.
+## موج ۲-کوچک پس از بازبینی ایجنت دیگر (۱۴۰۵/۰۸/۱۶) — بدون تغییر روی feature/main
+
+- **رفع باگ واقعی:** `AppointmentRepository::normalizeDateTime()` به‌جای `createFromFormat` بدون کنترل خطا، با `checkdate()` تاریخ‌های ناممکن را reject می‌کند؛ ۹ بررسی مرزی (۳۱ فوریه، ۲۹/۳۰ فوریه ۲۰۲۶ کبیسه نیست / ۲۰۲۸ هست، ماه ۰ و ۱۳، ساعت ۲۴، دقیقه ۶۰، ورودی بدون دقیقه/ثانیه) به `tests/test_request_center_appointments_sqlite.php` افزوده شد (۳۵ قلم).
+- **رفع ناهم‌خوانی مستندات:** دفتر شواهد فاز ۱ (سربرگ «بسته‌شده» ↔ جدول «باز» — هم‌تراز + یادداشت شاخهٔ کار/feature)، عنوان «برش اجرایی نخست» در README ماژول، ادعاهای نادرست در `REQUEST-CENTER-TEST-BUILD-1.62.92-FA.md` (T12 اکنون روی هر دو MariaDB موفق گزارش شده؛ «Gate اجرایی» بودن آن منوط به تأیید مالک است؛ ۶۰ دقیقهٔ retro اصلاح شد)، یادداشت اختلاف شاخهٔ `arena/22d4eba7-ticket` (کار) در برابر `feature/…` (هدف PR #30) در رجیسترهای فازهای ۴/۵.
+- **عمداً تغییر نکرد:** T07 (D1)، Logging (D3)، SecurityTest قدیمی، sync شاخهٔ feature/خروج Draft PR #30 — همه منوط به دستور مالک.
 ## معلوم‌های به‌صراحت باز
 
 ۱. T07 (بازپخش کامل Migration روی کلون + fingerprint) با تصمیم مالکی (D1) قرمز باقی می‌ماند.

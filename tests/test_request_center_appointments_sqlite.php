@@ -114,4 +114,15 @@ foreach ($capacityAfterCancel as $capRow) {
 }
 check_request_center(($byAssigneeAfter[1] ?? 0) === (($byAssignee[1] ?? 0) - 1), 'cancelled appointments leave the capacity window');
 
+// ——— تاریخ/ساعت نامعتبر باید reject شود (رفع شکاف createFromFormat بدون getLastErrors) ———
+check_request_center(AppointmentRepository::normalizeDateTime('2026-02-31T10:00') === null, 'invalid calendar date (2026-02-31) is rejected, not coerced');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-13-10T10:00') === null, 'invalid month (13) is rejected');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-00-10T10:00') === null, 'month 00 is rejected');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-04-31T10:00') === null, 'April 31st is rejected');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-02-29T10:00') === null, 'non-leap 2026-02-29 is rejected');
+check_request_center(AppointmentRepository::normalizeDateTime('2028-02-29T10:00') !== null, 'leap 2028-02-29 is accepted');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-11-07T24:00') === null, 'hour 24 is rejected');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-11-07') === null, 'missing time component is rejected');
+check_request_center(AppointmentRepository::normalizeDateTime('2026-11-07T10:60') === null, 'minute 60 is rejected');
+
 echo "ALL-PHASE4-APPOINTMENT-TESTS-PASSED\n";
