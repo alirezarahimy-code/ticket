@@ -65,7 +65,7 @@ def test_action_handlers_refuse_direct_http_access():
 
         # Request Center legacy files are compatibility bridges. Their target handler,
         # not the bridge stub, owns the APP_ROOT direct-access guard.
-        match = re.search(r"modules/request-center/Actions/([A-Za-z0-9_-]+\\.php)", source)
+        match = re.search(r"modules/request-center/Actions/([A-Za-z0-9_-]+\.php)", source)
         if match:
             target = ROOT / "modules" / "request-center" / "Actions" / match.group(1)
             target_source = target.read_text(encoding="utf-8") if target.is_file() else ""
