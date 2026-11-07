@@ -97,9 +97,9 @@
 
 | گیت | موضوع | وضعیت مستند فعلی |
 |---|---|---|
-| T01 | DDL داخل تراکنش و ROLLBACK | نیازمند اجرای واقعی روی MariaDB 10.4.32 |
-| T02 | CREATE TABLE IF NOT EXISTS داخل تراکنش | نیازمند اجرای واقعی روی MariaDB 10.4.32 |
-| T03 | ALTER ... ADD COLUMN IF NOT EXISTS | نیازمند آزمون syntax/behavior روی MariaDB 10.4.32 |
+| T01 | DDL داخل تراکنش و ROLLBACK | **PASS در CI روی MariaDB 10.4.32 و 10.11**؛ اجرای Probe روی DB دورریختنی |
+| T02 | CREATE TABLE IF NOT EXISTS داخل تراکنش | **PASS در CI روی MariaDB 10.4.32 و 10.11**؛ implicit commit اثبات شد |
+| T03 | ALTER ... ADD COLUMN IF NOT EXISTS | **PASS در CI روی MariaDB 10.4.32 و 10.11**؛ syntax، تکرارپذیری و حفظ داده Probe تأیید شد |
 | T04 | DDL در درخواست وب | **FAIL ایستای مسیر Legacy؛ runtime count انجام نشده؛ باز** |
 | T05 | شکست عمدی وسط Migration از CLI | نیازمند Clone، تزریق خطا و post-check |
 | T06 | قطع فرایند بین SQL و ثبت رجیستری | نیازمند آزمون قطع/بازیابی و reconciliation |
@@ -109,6 +109,16 @@
 | T10 | 50 Claim هم‌زمان | آزمون هم‌زمانی واقعی ثبت نشده |
 | T11 | تطبیق تاریخ PHP و ItsmJalali | نتیجه آزمون دامنه سال‌های 1300 تا 1500 در شواهد فعلی ثبت نشده |
 | T12 | Characterization رفتار Legacy در برابر شاخه هدف | **BLOCKED؛ دو Clone هم‌ساخت، fixture و Snapshot مقایسه‌ای موجود نیست** |
+
+### ۴.۱. شاهد جدید T01 تا T03
+
+اجرای موفق Workflow با شناسه `42340253824` و Job شناسه `128306122728` روی سرویس دورریختنی `mariadb:10.4.32` ثبت شد. خروجی `SELECT VERSION()` برابر `10.4.32-MariaDB-1:10.4.32+maria~ubu2004` بود. هر سه آزمون زیر PASS شدند:
+
+- T01: ایجاد جدول داخل تراکنش، DML قبلی را implicit commit می‌کند و ROLLBACK آن را برنمی‌گرداند.
+- T02: `CREATE TABLE IF NOT EXISTS` نیز implicit commit دارد؛ عبارت IF NOT EXISTS آن را transactional نمی‌کند.
+- T03: `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` روی این نسخه parse و دوباره اجرا شد و داده Probe حفظ شد.
+
+Job متناظر MariaDB 10.11 نیز موفق شد. این آزمون‌ها فقط جدول‌های Probe در دیتابیس disposable را ایجاد/حذف کردند و روی Dump یا DB عملیاتی اجرا نشدند. نتیجه، T01–T03 را می‌بندد؛ نه T04 یا آزمون‌های Migration/Restore/Workflow را.
 
 ### ۴.۱. الزامات آزمون Migration که هنوز باید بسته شوند
 
@@ -136,7 +146,7 @@
 
 ## ۶. موانع واقعی برای بستن فاز اول
 
-1. اجرای T01 تا T11 روی نسخه دقیق MariaDB 10.4.32 با گزارش قابل تکرار؛ CI فعلی MariaDB 10.11 را اجرا می‌کند و معادل نسخه هدف نیست.
+1. T01 تا T03 در CI روی MariaDB 10.4.32 و 10.11 موفق‌اند. گیت‌های T04 تا T11 که نیازمند آزمون‌های جداگانه‌اند هنوز باید اجرا و مستند شوند؛ آزمون‌های CI فعلی جای آن‌ها را نمی‌گیرند.
 2. اجرای T12 روی دو Clone مستقل Legacy/feature با Schema و تنظیمات یکسان، fixtureهای نقش/مجوز/درخواست و Snapshot کامل status، تخصیص، SLA/OLA، پیام، Event، Audit، notification و asset history.
 3. Dump موجود داده عملیاتی ticket ندارد. برای T12 باید fixture کنترل‌شده ساخته شود یا Clone نماینده‌ای که داده مجاز و غیرعملیاتی دارد فراهم شود. هیچ import یا تغییری روی DB عملیاتی انجام نمی‌شود.
 4. تکمیل نگاشت As-Is به To-Be: هر صفحه، route، Action، consumer، تابع، جدول، مجوز، Cron و side effect باید شناسه و شاهد داشته باشد؛ هر ابهام باید آزمون پیشنهادی و مالک مشخص داشته باشد.
