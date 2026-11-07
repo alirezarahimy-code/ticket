@@ -140,6 +140,9 @@ function t07_registry_rows(PDO $pdo): array
     );
 }
 
+t07_check(getenv('GITHUB_ACTIONS') === 'true', 'test is running inside GitHub Actions');
+t07_check(in_array($host, ['127.0.0.1', 'localhost'], true), 'database host is the local ephemeral CI service');
+t07_check((string) (getenv('CI_DB_NAME') ?: '') === 'persian_ticketing_ci', 'workflow database has the expected disposable name');
 t07_check($dumpPath !== '' && is_file($dumpPath), 'supplied database dump exists');
 t07_check(filesize($dumpPath) >= 1_000_000, 'supplied database dump is full-sized');
 t07_check($version !== '', 'application VERSION is readable');
