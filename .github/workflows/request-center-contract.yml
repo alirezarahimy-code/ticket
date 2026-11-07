@@ -104,3 +104,12 @@ jobs:
         run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py
       - name: Existing ticket routing unit tests
         run: php tests/test_ticket_routing_unit.php
+
+      - name: Request Center T01-T03 MariaDB DDL transaction gates
+        run: php tests/test_request_center_mariadb_ddl_gates.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
