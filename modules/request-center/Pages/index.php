@@ -87,6 +87,16 @@ if ($schemaProblems !== []) {
     <p class="muted">برای جلوگیری از تغییر ناخواسته، ادامهٔ درخواست متوقف شد.</p><a href="index.php">بازگشت به سامانه</a></section></body></html><?php
     exit;
 }
+// Dedicated role workspaces are routed before the generic requester/agent list.
+if ($workspace === 'admin') {
+    require __DIR__ . '/admin.php';
+    exit;
+}
+if ($workspace === 'supervisor') {
+    require __DIR__ . '/supervisor-workspace.php';
+    exit;
+}
+
 $ticketId = max(0, (int) ($_GET['id'] ?? 0));
 $page = max(1, (int) ($_GET['p'] ?? 1));
 
