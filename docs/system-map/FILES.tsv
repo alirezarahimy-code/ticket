@@ -10,7 +10,7 @@ path	category	lines	bytes
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	138	5159
 .github/workflows/logging-contract.yml	workflows	35	1359
-.github/workflows/refresh-request-center-map.yml	workflows	87	3467
+.github/workflows/refresh-request-center-map.yml	workflows	88	3524
 .github/workflows/request-center-contract.yml	workflows	204	8661
 .github/workflows/request-center-package-preview.yml	workflows	209	9043
 .github/workflows/request-center-t12-characterization.yml	workflows	93	2889
