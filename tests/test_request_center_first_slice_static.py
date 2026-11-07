@@ -88,6 +88,12 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("$clauses[] = 't.assigned_to = ?';", repo)
         self.assertIn("ticket_scope($user, 't')", repo)
 
+    def test_not_found_and_detail_navigation_preserve_workspace(self):
+        entry = read("request-center.php")
+        self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', entry)
+        self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a>', entry)
+        self.assertNotIn('href="<?= $escape($workspaceUrl) ?>"', entry.split("echo '<section class=\"card empty\"")[0] if "echo '<section class=\"card empty\"" in entry else "")
+
     def test_legacy_workflow_is_not_removed_by_first_slice(self):
         action = read("actions/ticket-actions.php")
         self.assertIn("if ($action === 'create_ticket')", action)
