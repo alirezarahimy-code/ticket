@@ -220,6 +220,53 @@ final class RequestCenterRepository
     }
 
     /**
+     * Read assigned requests whose SLA or OLA deadline falls in a date window.
+     * The core visibility predicate is always applied before optional filters.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public function calendarItems(array $user, string $from, string $to, array $filters = []): array
+    {
+        $fromDate = DateTimeImmutable::createFromFormat('!Y-m-d', $from);
+        $toDate = DateTimeImmutable::createFromFormat('!Y-m-d', $to);
+        if (!$fromDate || !$toDate || $fromDate->format('Y-m-d') !== $from
+            || $toDate->format('Y-m-d') !== $to || $toDate < $fromDate
+            || $toDate->diff($fromDate)->days > 62) {
+            throw new InvalidArgumentException('بازهٔ تقویم نامعتبر است.');
+        }
+
+        [$scopeSql, $params] = ticket_scope($user, 't');
+        $whereParts = [];
+        if ($scopeSql !== '') {
+            $whereParts[] = preg_replace('/^\\s*WHERE\\s+/i', '', trim($scopeSql));
+        }
+        $whereParts[] = "t.status NOT IN ('resolved', 'closed', 'cancelled')";
+        $whereParts[] = "(
+            (t.due_at >= ? AND t.due_at < DATE_ADD(?, INTERVAL 1 DAY))
+            OR (t.ola_response_due_at >= ? AND t.ola_response_due_at < DATE_ADD(?, INTERVAL 1 DAY))
+            OR (t.ola_due_at >= ? AND t.ola_due_at < DATE_ADD(?, INTERVAL 1 DAY))
+        )";
+        array_push($params, $from, $to, $from, $to, $from, $to);
+
+        $assigneeId = (int) ($filters['assigned_to'] ?? 0);
+        if ($assigneeId > 0) {
+            $whereParts[] = 't.assigned_to = ?';
+            $params[] = $assigneeId;
+        }
+        $sql = 'SELECT t.id, t.ticket_no, t.subject, t.status, t.priority,
+                       t.assigned_to, t.due_at, t.ola_response_due_at, t.ola_due_at,
+                       t.sla_paused_at, a.full_name AS assignee_name
+                FROM tickets t
+                LEFT JOIN users a ON a.id = t.assigned_to
+                WHERE ' . implode(' AND ', $whereParts) . '
+                ORDER BY COALESCE(t.due_at, t.ola_due_at, t.ola_response_due_at), t.id
+                LIMIT 300';
+        $query = $this->pdo->prepare($sql);
+        $query->execute($params);
+        return $query->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
      * Return scoped operational counters shared by supervisor/admin workspaces.
      * Every aggregate is constrained by the core ticket_scope() predicate.
      *
