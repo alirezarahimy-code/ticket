@@ -24,9 +24,9 @@
 
 | # | کنترل | دستور
 |---|-------|-------|--|
-| ۱ | قرارداد ایستای نمودار دسترسی (محلی) | `python3 tests/test_request_center_access_matrix_static.py` | **ALL-ACCESS-MATRIX-STATIC-CHECKS-PASSED (10)** |
-| ۲ | همان قرارداد زیر pytest | `python3 -m pytest -q tests/test_request_center_access_matrix_static.py` | **10 passed** |
-| ۳ | ساخت بستهٔ کاندید | `python3 tools/build_rc_update.py` | **OK … 56 files · 1 migration · 317315 bytes · SHA-256 ad836f3f…** |
+| ۱ | قرارداد ایستای نمودار دسترسی (محلی) | `python3 tests/test_request_center_access_matrix_static.py` | **ALL-ACCESS-MATRIX-STATIC-CHECKS-PASSED (11)** |
+| ۲ | همان قرارداد زیر pytest | `python3 -m pytest -q tests/test_request_center_access_matrix_static.py` | **11 passed** |
+| ۳ | ساخت بستهٔ کاندید | `python3 tools/build_rc_update.py` | **OK … 61 files · 1 migration · 332318 bytes · SHA-256 25961ed0…** |
 | ۴ | بازشماری محتویات ZIP |`zipfile` خودبازبین: مسیرهای امن، یکتایی، CRC، تطبیق manifest↔files↔SHA256 | **بدون خطا**؛ `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`؛ `tests/`، `ci-diagnostics/`، `.github/`، `downloads/` در بسته نیستند |
 | ۵ | شبیه‌سازی گام «Assemble isolated QA overlay» (محلی؛ PHP 8.2 WASM به‌جای real PHP) | کپی `find … sort` + اجرای قراردادهای overlay (۲ فایل pytest + ۳ تست PHP) + `sha256sum -c` | **OK · 20 passed · ۳۸ فایل overlay؛ `sha256sum -c` همه OK** (T07 و MariaDB در این شبیه‌سازی نبودند) |
 | ۶ | نحو PHP کلیهٔ فایل‌های لمس‌شده | `php-cli` lint (wasm 8.2) | **بدون خطا** برای `appointment-actions.php`, `dispatch.php` و غیره |
@@ -44,7 +44,7 @@
 | ۳ | مصرف خدمات هسته از طریق قرارداد مشخص | ✅ اثبات‌شده | `lib/http-post.php`، Bootstrap مشترک، `post-handler.php` با همان پروتکل CSRF/log/redirect |
 | ۴ | گردش‌کار مطابق To-Be با آزمون | ✅ Suite کامل قراردادی (SQLite + MariaDB + static) | WorkflowService + MariaDB contract؛ **اما** T07 (replay کل دیتابیس) به‌تصمیم D1 مالک قرمز می‌ماند؛ T12/T08/T10 در CI تعبیه شده‌اند |
 | ۵ | حفظ و نگاشت دادهٔ قبلی | 🟡 طراحی و ایزولاسیون کامل؛ اجرای «روی بیگ‌دام واقعی» بر عهدهٔ اپراتور مالک (T07/D1) | هیچ DDL مخرب؛ نگاشت در install-empty-db برای نصب تازه؛ رجیسترهای T12 |
-| ۶ | مجوزها سمت سرور در تمام مسیرها | ✅ با آزمون ایستا + ممیزی صفحات (403/404) | RC `access_matrix` ۱۰/۱۰؛ Workspaceهای asset admin/supervisor/agent/requester همه `require_permission`/`user_is_primary_admin`/chain دارند |
+| ۶ | مجوزها سمت سرور در تمام مسیرها | ✅ با آزمون ایستا + ممیزی صفحات (403/404) | RC `access_matrix` ۱۱/۱۱؛ Workspaceهای asset admin/supervisor/agent/requester همه `require_permission`/`user_is_primary_admin`/chain دارند |
 | ۷ | SLA/OLA جدا از زمان‌بندی تقویمی | ✅ | ۰ بازنویسی ستون مهلت در مسیر نوبت‌ها (کنترل‌های جدول ۲)؛ تغییر نوبت، مهلت را تغییر نمی‌دهد |
 | ۸ | تقویم کارشناس مستقل از مدیریت غذا | ✅ | جدول اختصاصی `request_center_appointments`؛ ۰ ارجاع به دادهٔ غذا (کنترل ۹ جدول ۲)؛ تعطیلات از تقویم کاری مشترک `holidays` |
 | ۹ | آزمون‌های بحرانی با MariaDB واقعی پذیرفته شوند | 🟡 اکثرش در CI (T12، T08، T10، preflight، smoke، DDL gates) تکرارپذیر است؛ T07 قرمز مصوب (D1) | پس از push فاز ۵ (۲۰b99c5): Contract فقط در گام T07 قرمز؛ همهٔ گام‌های دیگر سبز روی هر دو MariaDB (۱۰.۴.۳۲ و ۱۰.۱۱) |
@@ -56,8 +56,8 @@
 ## ۴) بستهٔ کاندیدی ساخته‌شده (هرگز بدون اجازهٔ مالک نصب نمی‌شود)
 
 - فایل: `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip`
-- SHA-256: `ad836f3fe7274a028e6f86b738066b9a36bd8ecc728ccfe2fb0f0357bb11eb35` (فایل `.sha256` کنار آن)
-- نام‌گذاری عامدانه با `rc-candidate`؛ manifest: `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `requires_version=1.62.90`، `migrations=[035]`، ۵۶ فایل، بدون tests/CI.
+- SHA-256: `25961ed02cddf53b51c387b2f20a57cd7abde56d1d6c2a70f64b935940c30720` (فایل `.sha256` کنار آن)
+- نام‌گذاری عامدانه با `rc-candidate`؛ manifest: `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `requires_version=1.62.90`، `migrations=[035]`، ۶۱ فایل، بدون tests/CI.
 - ساخت: `tools/build_rc_update.py` (بازتولید قطعی با تاریخ ثابت؛ checksum آرشیو پس از بستن، CRC، path-traversal و یکتایی مسیرها بررسی می‌شود)
 
 ## ۵) محدودیت‌های صریح این فاز (چیزی را «تمام‌شده» اعلام نکنید)
@@ -86,3 +86,23 @@
 - `tools/build_rc_update.py` (جدید)، `downloads/CHANGE-REPORT-FA-1.62.92.md` (جدید)، `downloads/…rc-candidate-20261107.zip[.sha256]` (جدید)
 - `docs/architecture/REQUEST-CENTER-INSTALL-UPGRADE-FA.md`، این سند
 
+
+## ۸) موج ۱ پس از ممیزی ماژول (۱۴۰۵/۰۸/۱۶) — بازسازی بستهٔ کاندید
+
+**مبنا:** ممیزی دقیق فنی ماژول (گزارش ارائه‌شده به مالک: `RC-AUDIT-FA-2026-11-07`)؛ مالک صریحاً «موج ۱ کامل + rebuild + push» را تصویب کرد. اصلاحات در کامیت `8277477` روی همین شاخه ثبت شدند و هیچ‌کدام به رفتاری خارج از ممیزی دست نمی‌زنند.
+
+| یافته | اصلاح در این بسته |
+|-------|-------------------|
+| RC-A1 صفحات include-only بدون ایمنی دسترسی مستقیم وب | گارد `APP_ROOT` (۴۰۴ صریح) در ۱۰ صفحهٔ Pages؛ سه `.htaccess` با `Require all denied` در `Pages/`، `Actions/`، `lib/` (`Assets/` برای CSS آزاد)؛ گیت استاتیک یازدهم `test_pages_include_only_modules_are_guarded_and_htaccess_denies` |
+| RC-A2 نگهبان تعطیلات fail-open خاموش | رویداد `activity_log` با `action_code=rc_holidays_lookup_failed` در دو مسیر (رندر تقویم و ثبت نوبت)؛ بنر هشدار در پنل «تعطیلات رسمی این ماه»؛ پیام «تعطیلی ثبت‌شده‌ای وجود ندارد» اکنون فقط وقتی نمایش داده می‌شود که کوئری واقعاً موفق و خالی بوده باشد |
+| RC-A3 پنجرهٔ ثبت معوق بدون مستند | hint زیر فیلد «شروع» (حداکثر ۶۰ دقیقه گذشته) + مستندسازی کامل بخش نوبت‌ها در `modules/request-center/README.md` |
+| RC-A5 کد مرده | حذف `$completionRate`؛ `listUpcoming()` علامت `@internal` (مصرف‌کننده: تست SQLite) |
+| RC-A11 README بدون بخش نوبت‌های فاز ۴ | افزودن زیربخش «نوبت‌های رسیدگی» (پنجرهٔ ثبت، محافظ تعطیلات، چند روزه فقط روز شروع، اولویت PR) |
+
+**بازسازی قطعی بستهٔ کاندید:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۳۲٬۳۱۸ بایت، SHA-256 `25961ed02cddf53b51c387b2f20a57cd7abde56d1d6c2a70f64b935940c30720`** (قبلی: ۵۶ فایل / ۳۱۷٬۳۱۵ بایت / `ad836f3f…`). گیت‌های محلی پس از تغییر مجدد اجرا و سبز شدند: access-matrix ۱۱/۱۱ (CLI و pytest)؛ سه Suite SQLite (appointments/repository/workflow)؛ `php -l` همهٔ فایل‌های لمس‌شده.
+
+**نکته‌های صادقانه:**
+- صفحهٔ `Pages/index.php` عمداً گارد `APP_ROOT` ندارد — این فایل نقطهٔ ورود خودکفایی است و خودش bootstrap را بارگذاری می‌کند؛ زیر Apache همهٔ زیرپوشه‌های ماژول با `.htaccess` بسته‌اند و مسیر ورود تنها `request-center.php`/`index.php` معتبر است.
+- نسخهٔ بستهٔ اسناد معماری داخل ZIP مربوط به بایت‌های سرساخت است (سند خودمرجع)؛ منبع حقیقت سندها در همین شاخه است.
+- یافته‌های موج ۲ (fail-closed تعطیلات، چند روزه، allowlist staff، اعلان به requester، RC-A6…A10) عمداً اعمال نشدند و تصمیم هرکدام با مالک است.
+- نتیجهٔ CI پس از این push در انتهای همین بخش (اصلاحیهٔ پس از اجرا) ثبت می‌شود؛ تا آن زمان ادعای «Contract/QA برای این بازسازی سبز است» مجاز نیست.
