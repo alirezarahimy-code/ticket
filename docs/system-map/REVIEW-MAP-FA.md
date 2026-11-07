@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 540 |
-| خطوط | 125,704 |
+| خطوط | 125,719 |
 | آدرس‌ها (بلوک) | 6,671 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -80,8 +80,8 @@
 | درخواست | **مشاهدهٔ درخواست‌های خودم** | `ticket.view_own` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 8 |
 | درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 9 |
 | درخواست | **مشاهدهٔ همهٔ درخواست‌ها** | `ticket.view_all` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 6 |
-| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `ACT-015.07` <sub>actions/ticket-actions.php:398</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:443</sub> | 7 |
-| درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:591</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:443</sub> | 13 |
+| درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `ACT-015.07` <sub>actions/ticket-actions.php:406</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:456</sub> | 7 |
+| درخواست | **ویرایش** | `ticket.edit` | `ACT-015.09` <sub>actions/ticket-actions.php:605</sub><br>`PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-015.08` <sub>actions/ticket-actions.php:456</sub> | 13 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
 | درخواست | **ویرایش** | `ticket.bulk` | `ACT-005.04` <sub>actions/bulk-actions.php:44</sub> | 4 |
 | درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-034.89` <sub>index.php:2313</sub><br>`ACT-014.06` <sub>actions/supervisor-actions.php:164</sub> | 6 |
@@ -291,7 +291,7 @@
 | `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,591 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
-| `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,098 |
+| `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,113 |
 | `CORE` | موتور مشترک (lib/) | 15 | 306 | 7,264 |
 | `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,459 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
@@ -10752,19 +10752,19 @@
 </details>
 
 <details>
-<summary><b>ACT-015</b> — <code>actions/ticket-actions.php</code> (738 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>ACT-015</b> — <code>actions/ticket-actions.php</code> (753 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `ACT-015.01` | 1–22 | ناحیه | `بلوک رویه‌ای 1-22` | 0 | ⬜ |
 | `ACT-015.02` | 23–29 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `ACT-015.03` | 30–221 | ناحیه | `مسیر: create_ticket` | **8** | ⬜ |
-| `ACT-015.04` | 222–279 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
-| `ACT-015.05` | 280–357 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
-| `ACT-015.06` | 358–397 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
-| `ACT-015.07` | 398–442 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
-| `ACT-015.08` | 443–590 | ناحیه | `مسیر: reply` | 3 | ⬜ |
-| `ACT-015.09` | 591–738 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
+| `ACT-015.04` | 222–283 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
+| `ACT-015.05` | 284–365 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
+| `ACT-015.06` | 366–405 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
+| `ACT-015.07` | 406–455 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
+| `ACT-015.08` | 456–604 | ناحیه | `مسیر: reply` | 3 | ⬜ |
+| `ACT-015.09` | 605–753 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
 
 </details>
 

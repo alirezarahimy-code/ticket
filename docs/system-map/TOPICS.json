@@ -5880,20 +5880,20 @@
       "line": 222,
       "anchor": "مسیر: cancel_ticket",
       "risk": 7,
-      "lines": 58
+      "lines": 62
     },
     "ACT-015.05": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 280,
+      "line": 284,
       "anchor": "مسیر: decide_ticket_cancellation",
       "risk": 2,
-      "lines": 78
+      "lines": 82
     },
     "ACT-015.06": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 358,
+      "line": 366,
       "anchor": "مسیر: claim_ticket",
       "risk": 2,
       "lines": 40
@@ -5901,26 +5901,26 @@
     "ACT-015.07": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 398,
+      "line": 406,
       "anchor": "مسیر: reopen_ticket",
       "risk": 7,
-      "lines": 45
+      "lines": 50
     },
     "ACT-015.08": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 443,
+      "line": 456,
       "anchor": "مسیر: reply",
       "risk": 3,
-      "lines": 148
+      "lines": 149
     },
     "ACT-015.09": {
       "path": "actions/ticket-actions.php",
       "area": "ACT",
-      "line": 591,
+      "line": 605,
       "anchor": "مسیر: update_ticket",
       "risk": 3,
-      "lines": 148
+      "lines": 149
     },
     "ACT-016.01": {
       "path": "actions/user-structure-actions.php",
