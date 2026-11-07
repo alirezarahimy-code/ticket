@@ -66,6 +66,10 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
             )
             self.assertIn("WorkflowService", source, f"workflow service is not loaded/used in {path}")
         self.assertIn("require_once __DIR__ . '/modules/request-center/WorkflowService.php';", read("index.php"))
+        index = read("index.php")
+        self.assertIn("require __DIR__ . '/modules/request-center/Actions/ticket-actions.php';", index)
+        self.assertIn("require __DIR__ . '/modules/request-center/Actions/supervisor-actions.php';", index)
+        self.assertIn("require __DIR__ . '/modules/request-center/Actions/bulk-actions.php';", index)
         for legacy in ("actions/ticket-actions.php", "actions/supervisor-actions.php", "actions/bulk-actions.php"):
             self.assertIn("modules/request-center/Actions/", read(legacy))
         for module in ("modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/supervisor-actions.php", "modules/request-center/Actions/bulk-actions.php"):
