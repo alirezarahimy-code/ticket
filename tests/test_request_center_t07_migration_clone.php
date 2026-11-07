@@ -194,7 +194,6 @@ t07_check(in_array('schema_updates', $tables, true), 'clone contains the migrati
 
 $before = t07_fingerprint($pdo);
 $registryBefore = t07_registry_rows($pdo);
-$registrySetBefore = array_fill_keys($registryBefore, true);
 
 $migrationDir = dirname(__DIR__) . '/migrations';
 $files = glob($migrationDir . '/*.sql') ?: [];
