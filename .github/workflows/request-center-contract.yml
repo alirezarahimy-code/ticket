@@ -152,6 +152,16 @@ jobs:
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
 
+      - name: Phase-2 smoke — moved RC handler code paths through real HTTP
+        id: phase2_smoke
+        run: php tests/test_request_center_phase2_smoke_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
       - name: Commit T04 diagnostic log on failure (workbench branch only)
         if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
         run: |
