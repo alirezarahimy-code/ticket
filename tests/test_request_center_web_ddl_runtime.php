@@ -213,19 +213,19 @@ PHP;
 
     // A required column is removed on the disposable DB. The independent RC entry point must fail closed.
     $pdo->exec('SET GLOBAL general_log = OFF');
-    $pdo->exec('ALTER TABLE tickets DROP COLUMN first_response_at');
+    $pdo->exec('ALTER TABLE tickets DROP COLUMN requesting_unit_id');
     t04_reset_log($pdo);
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
     $rcIncomplete = t04_http('http://' . $address . '/request-center.php', ['Cookie: ' . $cookie]);
     $rcIncompleteLog = t04_log_window($pdo, $start, $webUser);
-    t04_check($rcIncomplete['status'] === 503, 'independent request-center.php fails closed on missing tickets.first_response_at (status ' . $rcIncomplete['status'] . ')');
+    t04_check($rcIncomplete['status'] === 503, 'independent request-center.php fails closed on missing tickets.requesting_unit_id (status ' . $rcIncomplete['status'] . ')');
     t04_check(count($rcIncompleteLog['ddl']) === 0, 'independent request-center.php executes zero DDL on incomplete schema');
     $column = $pdo->prepare(
         "SELECT COUNT(*) FROM information_schema.COLUMNS
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'first_response_at'"
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'requesting_unit_id'"
     );
     $column->execute();
-    t04_check((int) $column->fetchColumn() === 0, 'independent Request Center leaves missing first_response_at untouched');
+    t04_check((int) $column->fetchColumn() === 0, 'independent Request Center leaves missing requesting_unit_id untouched');
 
     // Legacy index.php is still allowed to heal the same incomplete schema during an HTTP request.
     t04_reset_log($pdo);
@@ -235,10 +235,21 @@ PHP;
     $drift = t04_log_window($pdo, $start, $webUser);
     $column->execute();
     $restored = (int) $column->fetchColumn() === 1;
-    t04_check($restored, 'legacy index.php restored the missing tickets.first_response_at column');
+    t04_check($restored, 'legacy index.php restored the missing tickets.requesting_unit_id column');
     t04_check(count($drift['ddl']) >= 1, 'legacy index.php executed DDL when the schema was incomplete');
     foreach ($drift['ddl'] as $sql) {
         echo 'T04 drift DDL: ' . substr($sql, 0, 500) . PHP_EOL;
+    }
+    // The dropped column has a supporting index in the fresh schema; restore it
+    // after the observed web self-heal so the disposable DB is structurally tidy.
+    $pdo->exec('SET GLOBAL general_log = OFF');
+    $indexCount = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.STATISTICS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets'
+           AND INDEX_NAME = 'idx_tickets_requesting_unit'"
+    )->fetchColumn();
+    if ($indexCount === 0) {
+        $pdo->exec('CREATE INDEX idx_tickets_requesting_unit ON tickets (requesting_unit_id)');
     }
 
     // Exercise the service-catalog schema helper through an HTTP request and record its data side effects.
