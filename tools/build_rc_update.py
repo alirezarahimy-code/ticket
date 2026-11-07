@@ -16,7 +16,7 @@ import zipfile
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent.parent
-RELEASE_VERSION = "1.62.92"
+RELEASE_VERSION = "1.63"
 REQUIRES_VERSION = "1.62.90"
 BASE_COMMIT = "d30d7dfa031173535bd750b4e8a7af35593db244"
 RELEASE_DATE = "2026-11-07"
@@ -134,14 +134,14 @@ def build() -> tuple[Path, Path]:
         "name": "request-center-rc-candidate",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (۱.۶۲.۹۰ ← ۱.۶۲.۹۲)",
+        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (۱.۶۲.۹۰ ← ۱.۶۳)",
         "requires_version": REQUIRES_VERSION,
         "migrations": list(MIGRATIONS),
         "files": sorted(files),
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.62.92. Install only after owner sign-off; requires migration 035 via the official runner.",
+        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package.",
     }
 
     out_dir = ROOT / "downloads"

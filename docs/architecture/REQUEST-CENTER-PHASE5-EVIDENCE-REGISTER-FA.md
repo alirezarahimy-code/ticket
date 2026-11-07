@@ -49,14 +49,14 @@
 | ۸ | تقویم کارشناس مستقل از مدیریت غذا | ✅ | جدول اختصاصی `request_center_appointments`؛ ۰ ارجاع به دادهٔ غذا (کنترل ۹ جدول ۲)؛ تعطیلات از تقویم کاری مشترک `holidays` |
 | ۹ | آزمون‌های بحرانی با MariaDB واقعی پذیرفته شوند | 🟡 اکثرش در CI (T12، T08، T10، preflight، smoke، DDL gates) تکرارپذیر است؛ T07 قرمز مصوب (D1) | پس از push فاز ۵ (۲۰b99c5): Contract فقط در گام T07 قرمز؛ همهٔ گام‌های دیگر سبز روی هر دو MariaDB (۱۰.۴.۳۲ و ۱۰.۱۱) |
 | ۱۰ | بدون DDL در مسیر عادی کاربران | ✅ | کنترل ۸ جدول ۲ + ArchitectureTest |
-| ۱۱ | بستهٔ ارتقا + راهنمای نصب + پیش‌نیاز + Backup/Restore + برنامهٔ بازگشت | ✅ مصنوع؛ Restore-drill واقعی بر عهدهٔ محیط غیرعملیاتی مالک | `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip` + SHA256 + راهنمای کامل `REQUEST-CENTER-INSTALL-UPGRADE-FA.md`؛ آزمون T08 (backup/restore اِندتواند) در Contract CI موجود است |
+| ۱۱ | بستهٔ ارتقا + راهنمای نصب + پیش‌نیاز + Backup/Restore + برنامهٔ بازگشت | ✅ مصنوع؛ Restore-drill واقعی بر عهدهٔ محیط غیرعملیاتی مالک | `downloads/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261107.zip` + SHA256 + راهنمای کامل `REQUEST-CENTER-INSTALL-UPGRADE-FA.md`؛ آزمون T08 (backup/restore اِندتواند) در Contract CI موجود است |
 | ۱۲ | چهار Workspace مستقل+آزموده‌شده با دسترسی چندنقشی | ✅ ممیزی + آزمون ایستا؛ تأیید نهایی با پذیرش دستی مالک | Server-side guards ✓؛ سوییچر فقط در count>1 ✓؛ `Pages/*` ممیزی شد؛ ده‌ها اینترسکشن snapshot در فاز ۴ ثبت شد |
 | ۱۳ | پیش‌نمایش نهایی + گزارش آزمون به تأیید کاربر | 🟡 بسته شد؛ **منتظر تأیید مالک** | این سند + Live Preview + PR #30 |
 
 ## ۴) بستهٔ کاندیدی ساخته‌شده (هرگز بدون اجازهٔ مالک نصب نمی‌شود)
 
-- فایل: `downloads/ticket-update-1.62.90-to-1.62.92-request-center-rc-candidate-20261107.zip`
-- SHA-256: `bc5207913788af502138997037e359070e6a3ba41e11e8e69e176b123a3bcff4` (فایل `.sha256` کنار آن)
+- فایل: `downloads/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261107.zip` (بازسازی ششم با نام‌گذاری ۱.۶۳؛ کاندید `…-1.62.92-…` منسوخ ولی نگهداری شد)
+- SHA-256: `1217ec266e504e3f9b2399dfc98e43b0d25c50b6ab6b7ee8207a2de2e49d8dd4` (فایل `.sha256` کنار آن)
 - نام‌گذاری عامدانه با `rc-candidate`؛ manifest: `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `requires_version=1.62.90`، `migrations=[035]`، ۶۱ فایل، بدون tests/CI.
 - ساخت: `tools/build_rc_update.py` (بازتولید قطعی با تاریخ ثابت؛ checksum آرشیو پس از بستن، CRC، path-traversal و یکتایی مسیرها بررسی می‌شود)
 
@@ -98,7 +98,9 @@
 
 **تغییرات فایل‌ها:** `AppointmentRepository.php` (workingWindow/dailyLimits/rcSetting/dailyLoadSnapshot/teamDailyCapacity + اعمال ساعت/ظرفیت در create؛ پارامتر `allowOutsideBusinessHours` با پیش‌فرض false)؛ `appointment-actions.php` (پاس‌دهی override مدیر برای ساعت)؛ `calendar.php` (پنل «ظرفیت امروز (سقف روزانه)» برای مدیر + متن عناوین)؛ `Pages/calendar.php` و SQLite suite (+۱۳ چک) و T13 (سناریوی D: ۱۲ کارگر، سقف ۱ ⇒ ۱ برنده + ۱۱ «ظرفیت»).
 
-**بازسازی پنجم قطعی:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۴۷٬۹۲۱ بایت، SHA-256 `bc5207913788af502138997037e359070e6a3ba41e11e8e69e176b123a3bcff4`**؛ اسناد نصب (§۸/پیوست این سند) و §۴ به آن اشارهٔ صریح می‌کنند. SHA قبلی `fe98b369…` (بازسازی چهارم، P2). گیت‌های محلی: access-matrix ۱۱/۱۱؛ سه Suite SQLite سبز؛ Suite نوبت‌ها شامل ۱۳ چک جدید P3؛ `php -l` سبز.
+**بازسازی پنجم قطعی:** `python3 tools/build_rc_update.py` ⇒ **۶۱ فایل، ۱ مهاجرت، ۳۴۷٬۹۲۱ بایت، SHA-256 `bc5207913788af502138997037e359070e6a3ba41e11e8e69e176b123a3bcff4`**؛ اسناد نصب (§۸/پیوست این سند) و §۴ به آن اشارهٔ صریح می‌کنند. SHA قبلی `fe98b369…` (بازسازی چهارم، P2).
+
+**بازسازی ششم قطعی (نام‌گذاری ۱.۶۳):** `python3 tools/build_rc_update.py` ⇒ نسخهٔ `VERSION=1.63`، فایلهای داخلی `VERSION` و گزارش `CHANGE-REPORT-FA-1.63.md` به‌روز؛ ۱ مهاجرت (`035` فقط — بدون `034`)؛ نتیجه در §۱۳ ثبت می‌شود. گیت‌های محلی: access-matrix ۱۱/۱۱؛ سه Suite SQLite سبز؛ Suite نوبت‌ها شامل ۱۳ چک جدید P3؛ `php -l` سبز.
 
 > **محدودیت صریح:** SQLite محلی رفتار تک‌نخی/منطقی را می‌سنجد؛ اثبات هم‌زمانی سقف روی MariaDB واقعی توسط CI انجام و در «وضعیت پس‌CI» ثبت می‌شود.
 > **وضعیت پس‌CI (ثبت صریح و بی‌کم‌وکاست):**
@@ -117,7 +119,7 @@
 
 - T07 (بازپخش کامل dump روی MariaDB + fingerprint) قرمز عمداً/به‌تصمیم مالک (D1) — **به همان دلیل، ادعای «Migration روی دیتابیس واقعی تست شد» مجاز نیست.**
 - `SecurityTest` دو assertion قدیمی از پیش روی base قرمز (توابع `valid_choice`/`store_attachment` به `lib/` منتقل شده‌اند) — همان‌قدر که روی base قرمز است؛ اینجا رفع نشده (خارج از دامنهٔ RC).
-- بستهٔ عملیاتی و تگ: هنوز انجام نشده و **فقط مالک** آن را انجام می‌دهد؛ VERSION شاخه (`1.62.92`) تصمیم مالک را انتظار می‌کشد (شاخه جلوتر از main ۱.۶۲.۹۰ است).
+- بستهٔ عملیاتی و تگ: هنوز انجام نشده و **فقط مالک** آن را انجام می‌دهد؛ VERSION شاخه (`1.63`) طبق تصمیم مالک در ۱۴۰۵/۰۸/۱۶ نهایی است (شاخه جلوتر از main ۱.۶۲.۹۰ است).
 - بار واقعی و تست استرس SLA/OLA با ترافیک تولیدی: در این سندباکس ممکن نبود؛ ابزار طراحی شده در Contract CI (T10، fifty-worker) و به مالک در محیط غیرعملیاتی توصیه می‌شود.
 - Logging به تصمیمات موجود مقید می‌ماند؛ هیچ تغییری در D3 داده نشد.
 
@@ -136,7 +138,7 @@
 - `modules/request-center/Actions/dispatch.php` — گارد APP_ROOT + ۴۰۴ روی رجیستری
 - `.github/workflows/request-center-contract.yml` — اجرای استاتیک جدید در گام قرارداد
 - `.github/workflows/request-center-package-preview.yml` — overlay با `find` کامل؛ تست نوبت‌ها + نمودار دسترسی؛ README توسعه‌یافته؛ checkout هاردکد `feature/…` → `github.sha`؛ trigger اضافه `arena/22d4eba7-ticket`
-- `tools/build_rc_update.py` (جدید)، `downloads/CHANGE-REPORT-FA-1.62.92.md` (جدید)، `downloads/…rc-candidate-20261107.zip[.sha256]` (جدید)
+- `tools/build_rc_update.py` (جدید)، `downloads/CHANGE-REPORT-FA-1.62.92.md` و `downloads/CHANGE-REPORT-FA-1.63.md` (جدید)، `downloads/…rc-candidate-20261107.zip[.sha256]` (جدید؛ نسخهٔ ۱.۶۳)
 - `docs/architecture/REQUEST-CENTER-INSTALL-UPGRADE-FA.md`، این سند
 
 
@@ -195,3 +197,25 @@
 
 > همچون §۸/§۹: سندهای معماری درون ZIP از بایت‌های سرساخت پیروی می‌کنند؛ منبع حقیقت سندها در همین شاخه است.
 > **اصلاحیهٔ پس از اجرا (push `6c2e8fe`):** `Request Center QA Package Preview` ✅، `Request Center T12 Scenario Characterization` ✅، `Request Center Contract` ❌ **فقط** در گام `T07 full-database clone migration replay and fingerprint` روی هر دو MariaDB (۱۰.۴.۳۲/۱۰.۱۱) — همان قرمز مصوب D1؛ هیچ گام دیگری قرمز نشد. `Logging contract` ❌ همان قرمز دیرینهٔ D3.
+
+## ۱۳) تصمیم مالک: نام‌گذاری انتشار ۱.۶۳ و وضعیت مهاجرت ۰۳۴ (۱۴۰۵/۰۸/۱۶)
+
+**دستورات صریح مالک در این تاریخ:**
+1. «مهاجرت 034 مربوط به ورژن 1.62.89 هست = 034-logging-escalation.sql» — این مهاجرت **هم‌اکنون روی سامانهٔ عملیاتی نصب است**؛ برای این ارتقاء، **۰۳۴ به کار برده نشود** (صریح: «برای این ارتقاء 034 رو به کار نبر»).
+2. «ببسته هم باید 1.63 نام گذاری بشه» — بسته و شاخه با نام **۱.۶۳** نام‌گذاری می‌شوند (سبک برچسب‌های موجود مخزن مثل `v1.62.9` → تگ انتشار آتی `v1.63`؛ `VERSION=1.63`).
+3. جریان تحویل: مالک **ابتدا بسته را روی سامانهٔ تست امتحان می‌کند**؛ سپس (با دستور صریح) به مخزن اصلی pushes/merge/tag می‌شود. هیچ merge/tag به `main` بدون دستور مالک انجام نشود.
+
+**راستی‌آزمایی ۰۳۴ در بستهٔ ۱.۶۳ (همه صریح):**
+- بسته ریشهٔ `migrations/034-logging-escalation.sql` را شامل نمی‌شود؛ تنها مهاجرت داخل ZIP = `035-request-center-appointments.sql` (همان `MIGRATIONS` در `tools/build_rc_update.py`).
+- در گزارش همراه (`files/CHANGE-REPORT-FA-1.63.md`) تصریح شده که ۰۳۴ دارندۀ انتشار ۱.۶۲.۸۹ است و روی سامانه نصب است؛ این بسته فقط `035` را اجرا می‌کند.
+- `install-empty-db.sql` (نصب تازه) تغییرات ۰۳۴ را **ندارد**؛ این بسته مسیر «نصب تازه» را پشتیبانی نمی‌کند و تنها روی هدف ۱.۶۲.۹۰ با ۱.۶۲.۸۹ (بیلد لاگینگ) نصب‌شده معنا دارد. جزئیات مشاهدهٔ نصب تازه در پایان همین بخش ثبت شده است.
+- دو ستون `escalation_count/escalation_label` و ایندکس `idx_system_logs_level_time` تنها در مهاجرت ۱.۶۲.۸۹ حاضرند؛ کد logging با `try/catch` و `function_exists` تدهور نرم‌انگیز دارد.
+
+**بازسازی ششم (نام‌گذاری ۱.۶۳) — ثبت نتیجه:**
+- `VERSION`: `1.62.92` → `1.63`؛ `tools/build_rc_update.py`: `RELEASE_VERSION=1.63` (نام zip/manifest/گزارش خودکار مشتق می‌شود) + توضیح manifest با تصریح «مهاجرت ۰۳۴ متعلق به ۱.۶۲.۸۹ و نصب‌شده روی سامانه؛ جزئی از این بسته نیست».
+- گزارش همراه ساخته شد: `downloads/CHANGE-REPORT-FA-1.63.md`.
+- **نتیجهٔ build ششم:** **۶۱ فایل، ۱ مهاجرت (`035` صرفاً — بدون `034`)، ۳۵۰٬۶۷۵ بایت، SHA-256 `1217ec266e504e3f9b2399dfc98e43b0d25c50b6ab6b7ee8207a2de2e49d8dd4`** (فایل `.sha256` کنار آن). اجزاء: `manifest.json` با `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `requires_version=1.62.90`، `version=1.63` و تصریح «۰۳۴ دارایی ۱.۶۲.۸۹ و نصب‌شده روی سامانه است؛ جزئی از این بسته نیست»؛ `files/VERSION` برابر `1.63`؛ `files/CHANGE-REPORT-FA-1.63.md`.
+- کاندید `…-1.62.92-…zip` و `CHANGE-REPORT-FA-1.62.92.md` به‌عنوان مصنوعات منسوخ در `downloads/` باقی ماندند (حذف نشدند).
+- اثر محتوایی ماژول نسبت به کاندید ۱.۶۲.۹۲ صفر است؛ فقط نسخه/نام/مستند شده‌اند. شواهد CI برای محتوای یکسان معتبر باقی می‌ماند و اجراهای CI روی کامیت این بازسازی در «وضعیت پس‌CI» این سند ثبت می‌شود.
+
+**مشاهدهٔ ثبت‌شده (بدون اصلاح؛ خارج از دامنهٔ این فرمان):** اسکیمای نصب تازهٔ `install-empty-db.sql` دو ستون ۰۳۴ و ایندکس آن را ندارد و رجیستری `schema_updates` فقط تا `032` پر است؛ نصب تازه در نسخهٔ ۱.۶۳ به‌جای نصب ۱.۶۲.۸۹ جداگانه انجام شود یا اصلاحِ جداگانهٔ این اسکیما با تأیید مالک انجام شود (هم‌ترازی نصب تازه با ارتقا). این مشاهده برای ثبت است و اقدامی روی آن انجام نشد.
