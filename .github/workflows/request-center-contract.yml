@@ -13,6 +13,7 @@ on:
       - 'tests/test_request_center_schema_preflight_mariadb.php'
       - 'tests/test_request_center_web_ddl_runtime.php'
       - 'tests/fixtures/request-center-ddl-probe.php'
+      - 'tests/fixtures/request-center-session-seed.php'
       - 'tests/test_ticket_workflow_safety_static.py'
       - 'tests/test_ticket_cancellation_static.py'
       - 'tests/test_ticket_three_views_static.py'
