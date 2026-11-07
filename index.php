@@ -36,11 +36,6 @@ if (isset($_GET['installed'])) {
     flash('success', 'سامانه با موفقیت نصب شد.');
 }
 
-function post_value(string $key, string $default = ''): string
-{
-    return trim((string) ($_POST[$key] ?? $default));
-}
-
 function csv_cell(mixed $value): string
 {
     $value = (string) $value;
@@ -113,11 +108,6 @@ function excel_download(string $filename, string $title, array $headers, array $
         'widths' => array_fill(0, $columnCount, 20),
     ]]);
     xlsx_send($filename, $bytes);
-}
-
-function valid_choice(string $value, array $allowed, string $fallback): string
-{
-    return in_array($value, $allowed, true) ? $value : $fallback;
 }
 
 /** مرتب‌سازی سمت سرور لاگ‌ها: فقط کلیدهای مجاز از فهرست سفید می‌شوند. */
