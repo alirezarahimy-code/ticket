@@ -2,14 +2,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 index = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
-    "index.php", "actions/ticket-actions.php", "actions/supervisor-actions.php", "actions/service-actions.php", "actions/bulk-actions.php", "actions/settings-actions.php"
+    "index.php", "modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/supervisor-actions.php", "actions/service-actions.php", "modules/request-center/Actions/bulk-actions.php", "actions/settings-actions.php"
 ))
 bootstrap = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
     "bootstrap.php", "lib/tickets-sla.php", "lib/db-core.php", "lib/auth-scope.php"
 ))
 permissions = (ROOT / "permissions.php").read_text(encoding="utf-8")
 workflow_service = (ROOT / "modules/request-center/WorkflowService.php").read_text(encoding="utf-8")
-ticket_actions = (ROOT / "actions/ticket-actions.php").read_text(encoding="utf-8")
+ticket_actions = (ROOT / "modules/request-center/Actions/ticket-actions.php").read_text(encoding="utf-8")
 cron = (ROOT / "cron/sla_maintenance.php").read_text(encoding="utf-8")
 auto_close = (ROOT / "cron/ticket_auto_close.php").read_text(encoding="utf-8")
 chatbot = (ROOT / "chatbot.php").read_text(encoding="utf-8")
