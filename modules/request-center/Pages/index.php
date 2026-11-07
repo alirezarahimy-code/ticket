@@ -125,6 +125,7 @@ header{background:#fff;border-bottom:1px solid var(--line)}.bar{max-width:1180px
 .detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px}.conversation,.sidebar{padding:18px}.message{padding:14px 0;border-bottom:1px solid var(--line)}.message:last-child{border-bottom:0}.message-head{display:flex;justify-content:space-between;gap:12px}.message-head small,.muted{color:var(--muted)}.message-body{white-space:pre-wrap;overflow-wrap:anywhere}.internal{background:#fff9e9;border-radius:9px;padding:12px;margin:8px 0}
 dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:var(--muted)}dd{margin:0;font-weight:600;overflow-wrap:anywhere}
 .notice{padding:13px 16px;margin-bottom:16px;background:#eef5ff;border:1px solid #d7e6fb;border-radius:10px;color:#27476f}
+ .workspace-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.workspace-metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.workspace-metric strong{display:block;font-size:23px}.workspace-metric span{font-size:12px;color:var(--muted)}@media(max-width:700px){.workspace-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:780px){.heading{align-items:flex-start;flex-direction:column}.detail-grid{grid-template-columns:1fr}.table th:nth-child(3),.table td:nth-child(3){display:none}.table th,.table td{padding:10px 8px;font-size:12px}}
 </style>
 </head>
@@ -228,6 +229,13 @@ if ($workspace === 'agent') {
     $pages = max(1, (int) ceil($result['total'] / 50));
     $page = min($page, $pages);
 }
+$workspaceSummary = null;
+if ($workspace === 'requester') {
+    $workspaceSummary = $repo->workspaceSummary($user, ['requester_id' => (int) $user['id']]);
+} elseif ($workspace === 'agent') {
+    $workspaceSummaryFilters = $agentView === 'mine' ? ['assigned_to' => (int) $user['id']] : [];
+    $workspaceSummary = $repo->workspaceSummary($user, $workspaceSummaryFilters);
+}
 $queryParams = ['workspace' => $workspace];
 if ($workspace === 'agent') {
     $queryParams['agent_view'] = $agentView;
@@ -251,6 +259,28 @@ foreach ($agentQueueLabels as $queueKey => $queueLabel):
 <a class="<?= $agentQueueName === $queueKey ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=<?= $escape($agentView) ?>&amp;queue=<?= $escape($queueKey) ?>"><?= $escape($queueLabel) ?></a>
 <?php endforeach; ?>
 </nav>
+<?php endif; ?>
+<?php if (is_array($workspaceSummary)): ?>
+<?php
+$metricItems = $workspace === 'requester'
+    ? [
+        ['total', 'کل درخواست‌های من'],
+        ['active', 'در حال پیگیری'],
+        ['waiting_user', 'منتظر پاسخ من'],
+        ['awaiting_supervisor', 'منتظر بررسی نهایی'],
+    ]
+    : [
+        ['total', 'کل درخواست‌های قابل مشاهده'],
+        ['active', 'در گردش'],
+        ['overdue', 'خارج از SLA/OLA'],
+        ['due_soon', 'موعد در ۲۴ ساعت آینده'],
+    ];
+?>
+<section class="workspace-metrics" aria-label="خلاصه وضعیت فضای کاری">
+<?php foreach ($metricItems as [$metricKey, $metricLabel]): ?>
+<div class="workspace-metric"><strong><?= number_format($workspaceSummary[$metricKey] ?? 0) ?></strong><span><?= $escape($metricLabel) ?></span></div>
+<?php endforeach; ?>
+</section>
 <?php endif; ?>
 <section class="heading"><div><h1><?= $escape($workspaceTitle) ?></h1><p><?= number_format($result['total']) ?> درخواست در محدودهٔ دسترسی این حساب</p></div>
 <?php if (user_can($user, 'ticket.create')): ?><a class="button" href="index.php?page=new-ticket">ثبت درخواست جدید</a><?php endif; ?>
