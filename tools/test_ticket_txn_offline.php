@@ -210,7 +210,7 @@ check('۶: commit روی تراکنش باز → true و commit واقعی', db_
 
 /* ───────── ۷) بررسی خود فایل create_ticket ───────── */
 $index = (string) file_get_contents(dirname(__DIR__) . '/index.php');
-$ticketActions = (string) file_get_contents(dirname(__DIR__) . '/actions/ticket-actions.php');
+$ticketActions = (string) file_get_contents(dirname(__DIR__) . '/modules/request-center/Actions/ticket-actions.php');
 $createStart = strpos($ticketActions, "if (\$action === 'create_ticket') {");
 // ۱.۳۷.۲: مرز بدنه با «اکشن بعدی» تعیین می‌شود، نه با عدد ثابت — تا افزودن چند خط
 // کامنت/اعتبارسنجی در create_ticket این آزمون را بی‌دلیل قرمز نکند.
