@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/build_system_map.py",
-  "total_files_indexed": 1213,
-  "total_lines_indexed": 216153,
+  "total_files_indexed": 1215,
+  "total_lines_indexed": 216321,
   "categories": {
     "actions": 16,
     "api": 1,
@@ -18,7 +18,7 @@
     "history-updates": 356,
     "lib": 16,
     "migrations": 35,
-    "other": 17,
+    "other": 19,
     "preview": 5,
     "root-misc": 105,
     "routes": 1,
