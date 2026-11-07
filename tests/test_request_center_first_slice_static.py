@@ -52,9 +52,9 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
 
     def test_migrated_status_writes_use_the_central_workflow_service(self):
         paths = (
-            "actions/ticket-actions.php",
-            "actions/supervisor-actions.php",
-            "actions/bulk-actions.php",
+            "modules/request-center/Actions/ticket-actions.php",
+            "modules/request-center/Actions/supervisor-actions.php",
+            "modules/request-center/Actions/bulk-actions.php",
             "cron/ticket_auto_close.php",
         )
         for path in paths:
@@ -66,6 +66,10 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
             )
             self.assertIn("WorkflowService", source, f"workflow service is not loaded/used in {path}")
         self.assertIn("require_once __DIR__ . '/modules/request-center/WorkflowService.php';", read("index.php"))
+        for legacy in ("actions/ticket-actions.php", "actions/supervisor-actions.php", "actions/bulk-actions.php"):
+            self.assertIn("modules/request-center/Actions/", read(legacy))
+        for module in ("modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/supervisor-actions.php", "modules/request-center/Actions/bulk-actions.php"):
+            self.assertIn("APP_ROOT", read(module))
         self.assertIn("require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';", read("cron/ticket_auto_close.php"))
 
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
@@ -100,7 +104,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         ))
 
     def test_legacy_workflow_is_not_removed_by_first_slice(self):
-        action = read("actions/ticket-actions.php")
+        action = read("modules/request-center/Actions/ticket-actions.php")
         self.assertIn("if ($action === 'create_ticket')", action)
         self.assertIn("if ($action === 'reply')", action)
         self.assertIn("if ($action === 'update_ticket')", action)
