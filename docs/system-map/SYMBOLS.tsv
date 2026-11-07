@@ -3359,7 +3359,7 @@ t12_http	function	tests/test_request_center_t12_preflight.php	89	tests
 t12_start_server	function	tests/test_request_center_t12_preflight.php	110	tests
 t12_schema_fingerprint	function	tests/test_request_center_t12_preflight.php	145	tests
 t12_session	function	tests/test_request_center_t12_preflight.php	162	tests
-t12_config	function	tests/test_request_center_t12_preflight.php	180	tests
+t12_config	function	tests/test_request_center_t12_preflight.php	182	tests
 t04_check	function	tests/test_request_center_web_ddl_runtime.php	34	tests
 t04_reset_log	function	tests/test_request_center_web_ddl_runtime.php	42	tests
 t04_log_window	function	tests/test_request_center_web_ddl_runtime.php	50	tests

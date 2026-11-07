@@ -37670,9 +37670,9 @@
       "path": "tests/fixtures/request-center-session-seed.php",
       "area": "TEST",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-21",
+      "anchor": "بلوک رویه‌ای 1-25",
       "risk": 2,
-      "lines": 21
+      "lines": 25
     },
     "TEST-011.01": {
       "path": "tests/js/food-aggregate-report.test.js",
@@ -46896,12 +46896,12 @@
       "line": 163,
       "anchor": "t12_session",
       "risk": 0,
-      "lines": 17
+      "lines": 19
     },
     "TEST-177.10": {
       "path": "tests/test_request_center_t12_preflight.php",
       "area": "TEST",
-      "line": 181,
+      "line": 183,
       "anchor": "t12_config",
       "risk": 0,
       "lines": 27
@@ -46909,8 +46909,8 @@
     "TEST-177.11": {
       "path": "tests/test_request_center_t12_preflight.php",
       "area": "TEST",
-      "line": 208,
-      "anchor": "بلوک رویه‌ای 208-320",
+      "line": 210,
+      "anchor": "بلوک رویه‌ای 210-322",
       "risk": 12,
       "lines": 113
     },

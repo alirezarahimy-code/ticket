@@ -13,6 +13,7 @@ path	category	lines	bytes
 .github/workflows/refresh-request-center-map.yml	workflows	87	3467
 .github/workflows/request-center-contract.yml	workflows	204	8661
 .github/workflows/request-center-package-preview.yml	workflows	209	9043
+.github/workflows/request-center-t12-characterization.yml	workflows	93	2889
 .gitignore	config	27	447
 .htaccess	config	24	788
 00-FULL-PACKAGE-1.62.73-FA.md	root-misc	27	3236
@@ -465,7 +466,7 @@ tests/fixture_traffic_render.php	tests	18	1313
 tests/fixtures/jalali-php-convert.php	tests	50	1690
 tests/fixtures/request-center-claim-worker.php	tests	67	1966
 tests/fixtures/request-center-ddl-probe.php	tests	11	372
-tests/fixtures/request-center-session-seed.php	tests	20	486
+tests/fixtures/request-center-session-seed.php	tests	24	728
 tests/food-engine-checklist.md	tests	59	4865
 tests/js/food-aggregate-report.test.js	tests	188	12454
 tests/js/food-bulk-past-window.test.js	tests	32	1683
@@ -638,7 +639,7 @@ tests/test_request_center_metadata_lock_mariadb.php	tests	82	3468
 tests/test_request_center_repository_sqlite.php	tests	103	6271
 tests/test_request_center_schema_preflight_mariadb.php	tests	145	7137
 tests/test_request_center_t07_migration_clone.php	tests	398	16210
-tests/test_request_center_t12_preflight.php	tests	319	13095
+tests/test_request_center_t12_preflight.php	tests	321	13368
 tests/test_request_center_web_ddl_runtime.php	tests	280	12798
 tests/test_request_center_workflow_service_mariadb.php	tests	150	5334
 tests/test_request_center_workflow_service_sqlite.php	tests	189	7055

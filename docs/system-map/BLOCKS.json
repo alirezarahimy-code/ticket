@@ -57202,16 +57202,16 @@
             "id": "TEST-010",
             "path": "tests\/fixtures\/request-center-session-seed.php",
             "area": "TEST",
-            "lines": 21,
-            "file_fingerprint": "bc155469e095",
+            "lines": 25,
+            "file_fingerprint": "982ebed2eedc",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-21",
+                    "anchor": "بلوک رویه‌ای 1-25",
                     "line_start": 1,
-                    "line_end": 21,
-                    "lines": 21,
-                    "fingerprint": "bc155469e095",
+                    "line_end": 25,
+                    "lines": 25,
+                    "fingerprint": "982ebed2eedc",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -73978,8 +73978,8 @@
             "id": "TEST-177",
             "path": "tests\/test_request_center_t12_preflight.php",
             "area": "TEST",
-            "lines": 320,
-            "file_fingerprint": "97b486eda062",
+            "lines": 322,
+            "file_fingerprint": "582e85c9b0fe",
             "blocks": [
                 {
                     "kind": "region",
@@ -74095,9 +74095,9 @@
                     "kind": "function",
                     "anchor": "t12_session",
                     "line_start": 163,
-                    "line_end": 179,
-                    "lines": 17,
-                    "fingerprint": "a341cce6ba5b",
+                    "line_end": 181,
+                    "lines": 19,
+                    "fingerprint": "d9b785cda438",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -74107,8 +74107,8 @@
                 {
                     "kind": "function",
                     "anchor": "t12_config",
-                    "line_start": 181,
-                    "line_end": 207,
+                    "line_start": 183,
+                    "line_end": 209,
                     "lines": 27,
                     "fingerprint": "c1ad9977ee3f",
                     "risk": {
@@ -74119,11 +74119,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 208-320",
-                    "line_start": 208,
-                    "line_end": 320,
+                    "anchor": "بلوک رویه‌ای 210-322",
+                    "line_start": 210,
+                    "line_end": 322,
                     "lines": 113,
-                    "fingerprint": "29a35299574f",
+                    "fingerprint": "3dc561ac89e4",
                     "risk": {
                         "score": 12,
                         "flags": {
