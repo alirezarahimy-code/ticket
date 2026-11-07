@@ -25,3 +25,6 @@ __pycache__/
 # Tool/dependency build output
 /node_modules/
 /vendor/
+
+# stale dashboard: not for git
+/tools/progress-dashboard/
