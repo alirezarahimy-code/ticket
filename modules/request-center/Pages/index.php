@@ -87,6 +87,11 @@ if ($schemaProblems !== []) {
     <p class="muted">برای جلوگیری از تغییر ناخواسته، ادامهٔ درخواست متوقف شد.</p><a href="index.php">بازگشت به سامانه</a></section></body></html><?php
     exit;
 }
+if ((string) ($_GET['calendar'] ?? '') === '1') {
+    require __DIR__ . '/calendar.php';
+    exit;
+}
+
 // Dedicated role workspaces are routed before the generic requester/agent list.
 if ($workspace === 'admin') {
     require __DIR__ . '/admin.php';
