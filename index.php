@@ -1251,7 +1251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         // ───── گروه اکشن: خدمات، دسته‌ها و پایگاه دانش — ۷ اکشن از ۱.۶۲.۱۴ در فایل جدا (شرح فارسی در سرآیند همان فایل) ─────
-        require __DIR__ . '/actions/service-actions.php';
+        require __DIR__ . '/modules/request-center/Actions/service-actions.php';
 
         
 
