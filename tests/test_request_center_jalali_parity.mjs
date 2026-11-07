@@ -57,7 +57,7 @@ const pad = (n, width = 2) => String(n).padStart(width, '0');
 for (let i = 0; i < dates.length; i++) {
   const [jy, jm, jd] = dates[i];
   const jsGregorian = api.j2g(jy, jm, jd);
-  const jsRoundTrip = api.g2j(jsGregorian.gy, jsGregorian.gm, jsGregorian.gd);
+  const jsRoundTrip = api.g2j(jsGregorian[0], jsGregorian[1], jsGregorian[2]);
   const phpRow = php.dates[i];
   const expectedGregorian = [jsGregorian[0], jsGregorian[1], jsGregorian[2]];
   const expectedRoundTrip = [jy, jm, jd];
