@@ -100,7 +100,8 @@ jobs:
             actions/bulk-actions.php \
             cron/ticket_auto_close.php \
             modules/request-center/RequestCenterRepository.php \
-            modules/request-center/WorkflowService.php
+            modules/request-center/WorkflowService.php \
+            docs/architecture/REQUEST-CENTER-ARCHITECTURE.md
           do
             test -s "$file"
           done
@@ -142,6 +143,7 @@ jobs:
             cp "$file" "$ROOT/qa/tests/"
           done
           cp modules/request-center/README.md "$ROOT/qa/docs/REQUEST-CENTER-IMPLEMENTATION.md"
+          cp docs/architecture/REQUEST-CENTER-ARCHITECTURE.md "$ROOT/qa/docs/REQUEST-CENTER-ARCHITECTURE.md"
           cat > "$ROOT/README-FA.txt" <<'EOF'
           بستهٔ آزمایشی مرکز درخواست‌ها (Request Center)
           ==============================================
@@ -168,17 +170,24 @@ jobs:
             echo "database_ddl_included=no"
             echo "installer_included=no"
             echo "rollback_script_included=no"
+            echo "architecture_reference=docs/architecture/REQUEST-CENTER-ARCHITECTURE.md"
+            echo "architecture_version=1.14"
             echo "runtime_files:"
             printf ' - %s\n' "${files[@]}"
           } > "$ROOT/PACKAGE-MANIFEST.txt"
-          find "$ROOT" -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > "$ROOT/SHA256SUMS"
-          cd dist
-          zip -qr request-center-qa-preview.zip request-center-qa
+          (
+            cd "$ROOT"
+            find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum
+          ) > "$ROOT/SHA256SUMS"
+          (
+            cd "$ROOT"
+            sha256sum -c SHA256SUMS
+          )
 
       - name: Upload QA package preview
         uses: actions/upload-artifact@v4
         with:
           name: request-center-qa-preview
-          path: dist/request-center-qa-preview.zip
+          path: dist/request-center-qa/
           if-no-files-found: error
           retention-days: 14
