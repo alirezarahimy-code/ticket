@@ -12,7 +12,8 @@
 - یادداشت داخلی فقط در صورت ticket_can_see_internal() دریافت/نمایش داده می‌شود.
 - هیچ جدول، ستون، index، role، permission یا تنظیم جدید ساخته نمی‌شود.
 - هیچ Migration یا DDL در مسیر درخواست جدید اجرا نمی‌شود.
-- فرم‌های ایجاد درخواست و UIهای کامل هنوز روی مسیرهای سازگار فعلی هستند؛ اما مسیرهای اصلی تغییر وضعیت به WorkflowService متمرکز منتقل شده‌اند.
+- فرم‌های ایجاد درخواست و UIهای کامل هنوز روی مسیرهای سازگار فعلی هستند؛ مسیرهای اصلی تغییر وضعیت به WorkflowService متمرکز منتقل شده‌اند.
+- Handlerهای POST مربوط به درخواست، تصمیم سوپروایزر و عملیات گروهی اکنون در `modules/request-center/Actions/` مالکیت فیزیکی دارند؛ فایل‌های `actions/*.php` فقط Bridge سازگاری‌اند و همان کد ماژول را در scope قبلی اجرا می‌کنند.
 
 ## قراردادها
 
@@ -27,9 +28,9 @@
 
 1. تست‌های مشخصه‌نگاری برای ثبت، لغو، تصمیم لغو، claim، reopen، reply، update، supervisor decision/reopen/rating، bulk update و auto-close.
 2. استخراج قراردادهای وابستگی به db، permission، scope، SLA/OLA، notification، audit، attachment و asset history.
-3. تکمیل انتقال فرمان‌ها و تمام مصرف‌کنندگان با تراکنش/قفل و کنترل وضعیت پس از lock؛ تمام گذارهای status فقط از WorkflowService.
-4. انتقال UIهای Requester، Agent، Supervisor و Admin به ماژول؛ حفظ URLهای قدیمی با bridge.
-5. حذف کد قدیمی فقط پس از برابری رفتاری و تست رگرسیون کامل.
+3. انتقال UIهای Requester، Agent، Supervisor و Admin به ماژول؛ حفظ URLهای قدیمی با bridge.
+4. تکمیل مرز اجرایی Actionها و وابستگی‌ها، به‌نحوی که اجرای مستقیم منطق درخواست به context پراکنده `index.php` وابسته نماند؛ تا عبور T12، جابه‌جایی فیزیکی با Bridge مجاز است اما تغییر رفتاری مسیرهای نوشتن مجاز نیست.
+5. حذف Bridgeها و کد قدیمی فقط پس از برابری رفتاری و تست رگرسیون کامل.
 
 این فایل ادعای تکمیل انتقال را ندارد؛ برش خواندنی مستقل و نخستین انتقال مسیرهای تغییر وضعیت پیاده‌سازی شده‌اند، اما استخراج کامل UI/routeها و تمام workflowها هنوز ادامه دارد.
 
@@ -54,3 +55,13 @@
 
 ## مرجع معماری مصوب
 سند مرجع مصوب این پیاده‌سازی در `docs/architecture/REQUEST-CENTER-ARCHITECTURE.md` نسخه ۱٫۱۴ است. این سند بر مبنای commit `ab073ee9fffc56ccd1a2093d02725b95891e0d63` تدوین شده و دروازه‌های T01 تا T12 و محدودیت‌های دامنه را تعیین می‌کند. وضعیت «مصوب معماری» به معنی تأیید نصب یا انتشار نیست؛ آزمون‌های ثبت‌نشده همچنان نیازمند اجرا هستند.
+
+
+## انتقال فیزیکی Actionها به مرز ماژول
+
+سه handler اصلی در مسیرهای زیر مالکیت ماژول را دارند:
+- `modules/request-center/Actions/ticket-actions.php`
+- `modules/request-center/Actions/supervisor-actions.php`
+- `modules/request-center/Actions/bulk-actions.php`
+
+مسیرهای قدیمی `actions/ticket-actions.php`، `actions/supervisor-actions.php` و `actions/bulk-actions.php` حذف نشده‌اند؛ هرکدام فقط فایل پیاده‌سازی متناظر در ماژول را require می‌کنند تا قرارداد بارگذاری و scope فعلی `index.php` در دورهٔ گذار حفظ شود. این انتقال مالکیت فایل را به ماژول می‌دهد، اما هنوز استقلال کامل runtime را اثبات نمی‌کند؛ handlerها همچنان از متغیرها و توابع bootstrap‌شده در درخواست اصلی استفاده می‌کنند. جداسازی این وابستگی‌ها باید با characterization و adapterهای آزموده‌شده انجام شود.
