@@ -52576,8 +52576,8 @@
             "id": "PAGE-047",
             "path": "modules\/request-center\/Pages\/index.php",
             "area": "PAGE",
-            "lines": 287,
-            "file_fingerprint": "572b16a67c73",
+            "lines": 317,
+            "file_fingerprint": "1ff8ed0a0d54",
             "blocks": [
                 {
                     "kind": "region",
@@ -52598,15 +52598,15 @@
                     "kind": "region",
                     "anchor": "Dedicated role workspaces are routed before the generic requ",
                     "line_start": 90,
-                    "line_end": 287,
-                    "lines": 198,
-                    "fingerprint": "5c0de8bc40ad",
+                    "line_end": 317,
+                    "lines": 228,
+                    "fingerprint": "a6736d2a67d4",
                     "risk": {
-                        "score": 7,
+                        "score": 8,
                         "flags": {
                             "raw_input": 2,
                             "unescaped_echo": 3,
-                            "error_suppression": 1,
+                            "error_suppression": 2,
                             "long": 1
                         }
                     },
@@ -52866,8 +52866,8 @@
             "id": "PAGE-053",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
-            "lines": 369,
-            "file_fingerprint": "2799405d0490",
+            "lines": 393,
+            "file_fingerprint": "8277d72958ad",
             "blocks": [
                 {
                     "kind": "region",
@@ -52886,9 +52886,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterRepository",
                     "line_start": 4,
-                    "line_end": 368,
-                    "lines": 365,
-                    "fingerprint": "555eb856c44e",
+                    "line_end": 392,
+                    "lines": 389,
+                    "fingerprint": "b446f2a7c376",
                     "risk": {
                         "score": 8,
                         "flags": {
