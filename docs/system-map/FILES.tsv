@@ -149,7 +149,7 @@ assets/food-order.js	assets	1114	68278
 assets/inspection-food-reminder.js	assets	113	4124
 assets/jalali-calendar.js	assets	346	13976
 assets/list-sort.js	assets	322	15241
-assets/logging-dashboard.css	assets	5	6692
+assets/logging-dashboard.css	assets	18	7707
 assets/logging-dashboard.js	assets	19	645
 assets/organization.js	assets	1035	108132
 assets/particle-network.js	assets	479	17819
@@ -177,7 +177,7 @@ benchmark-results/management-report-operations-fa.md	benchmark	75	8205
 benchmark-results/operations-container-stats.txt	benchmark	1	86
 benchmark-results/system-resilience.json	benchmark	651	15154
 benchmark-results/system-resilience.md	benchmark	85	6581
-bootstrap.php	core	73	4069
+bootstrap.php	core	81	4673
 calendar-template.csv	root-misc	4	119
 calendar-template.ics	root-misc	14	297
 cd-dvd.php	core	894	71859
@@ -233,6 +233,7 @@ docs/RELEASE-MANIFEST-1.62.76-FA.md	docs	14	795
 docs/REPORT-FA.md	docs	43	4702
 docs/ROLLBACK-RUNBOOK-1.62.76-FA.md	docs	19	1572
 docs/SESSION-BOOT-FA.md	docs	137	6866
+docs/SKILL-LOGGING-ESCALATION-FA.md	docs	162	8977
 docs/SKILL-MANIFEST-FA.md	docs	485	45831
 docs/STAGING-ACCEPTANCE-REPORT-1.62.76-FA.md	docs	21	1419
 docs/SYSTEM-DETAILS-FA.txt	docs	96	14158
@@ -246,7 +247,7 @@ docs/aggregate-report-preview.html	docs	85	7297
 docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	673	89043
 docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md	docs	195	18894
 docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
-docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	314	51337
+docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	330	54615
 docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	114	10112
 docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	110	12576
 docs/architecture/REQUEST-CENTER-T12-SOURCE-MAPPING-FA.md	docs	84	9169
@@ -280,7 +281,9 @@ downloads/CHANGE-REPORT-FA-1.62.74.md	history-downloads	36	6293
 downloads/CHANGE-REPORT-FA-1.62.75.md	history-downloads	29	4446
 downloads/CHANGE-REPORT-FA-1.62.83.md	history-downloads	58	7326
 downloads/CHANGE-REPORT-FA-1.62.88.md	history-downloads	59	5539
+downloads/CHANGE-REPORT-FA-1.62.89.md	history-downloads	88	7352
 downloads/CHANGE-REPORT-FA-1.62.90.md	history-downloads	51	8305
+downloads/CHANGE-REPORT-FA-1.62.91.md	history-downloads	33	4004
 downloads/FOOD-WORKER-WINDOW-1.62.78-REPORT-fa.md	history-downloads	164	10645
 downloads/FOOD-WORKER-WINDOW-1.62.78-UPDATE-NOTE-fa.txt	history-downloads	32	2151
 downloads/FOOD-WORKER-WINDOW-1.62.79-REPORT-fa.md	history-downloads	220	12897
@@ -381,16 +384,17 @@ lib/db-core.php	lib	611	26637
 lib/ldap.php	lib	411	20350
 lib/log-catalog.php	lib	48	20811
 lib/logging-audit.php	lib	642	30185
-lib/logging-core.php	lib	1558	84664
-lib/logging-csrf.php	lib	523	33351
+lib/logging-core.php	lib	1559	84795
+lib/logging-csrf.php	lib	543	34308
 lib/logging-diagnostics.php	lib	117	11944
+lib/logging-escalation.php	lib	100	4402
 lib/logging-integrity.php	lib	237	15084
 lib/logging-replay.php	lib	260	18905
 lib/notify-users.php	lib	523	26101
 lib/settings-effects.php	lib	385	14247
 lib/tickets-sla.php	lib	890	42426
 local-accounts.php	core	242	13440
-logging-dashboard.php	core	162	19905
+logging-dashboard.php	core	186	21725
 migrations/001-local-accounts.sql	migrations	6	545
 migrations/002-traffic-notices.sql	migrations	5	522
 migrations/003-sync-schema-151.sql	migrations	1770	120798
@@ -425,6 +429,7 @@ migrations/030-logging-notification-idempotency-and-ticket-history.sql	migration
 migrations/031-food-worker-window.sql	migrations	99	5449
 migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
+migrations/034-logging-escalation.sql	migrations	34	1915
 modules/request-center/Actions/bulk-actions.php	other	140	10427
 modules/request-center/Actions/supervisor-actions.php	other	204	15442
 modules/request-center/Actions/ticket-actions.php	other	752	59624
@@ -438,7 +443,7 @@ modules/request-center/Pages/reports.php	other	66	9694
 modules/request-center/Pages/services.php	other	175	19749
 modules/request-center/Pages/supervisor.php	other	52	6589
 modules/request-center/README.md	other	182	18880
-modules/request-center/RequestCenterRepository.php	other	329	14529
+modules/request-center/RequestCenterRepository.php	other	368	16581
 modules/request-center/WorkflowService.php	other	256	11564
 ola.php	core	111	11934
 organization.php	core	786	39767

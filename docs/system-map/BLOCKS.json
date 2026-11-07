@@ -9059,16 +9059,16 @@
             "id": "ASSET-016",
             "path": "assets\/logging-dashboard.css",
             "area": "ASSET",
-            "lines": 6,
-            "file_fingerprint": "4322b42c3d0d",
+            "lines": 19,
+            "file_fingerprint": "9622bc2392b2",
             "blocks": [
                 {
                     "kind": "block",
                     "anchor": "مقدمهٔ فایل",
                     "line_start": 1,
-                    "line_end": 6,
-                    "lines": 6,
-                    "fingerprint": "4322b42c3d0d",
+                    "line_end": 19,
+                    "lines": 19,
+                    "fingerprint": "9622bc2392b2",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -13134,8 +13134,8 @@
             "id": "PAGE-008",
             "path": "bootstrap.php",
             "area": "PAGE",
-            "lines": 74,
-            "file_fingerprint": "dd5a9c31bb88",
+            "lines": 82,
+            "file_fingerprint": "ba7ecec15484",
             "blocks": [
                 {
                     "kind": "region",
@@ -13180,8 +13180,8 @@
                     "kind": "region",
                     "anchor": "پیام‌های فلش، لاگ سیستمی و CSRF (شرح در سرآیند همان فایل)",
                     "line_start": 46,
-                    "line_end": 48,
-                    "lines": 3,
+                    "line_end": 47,
+                    "lines": 2,
                     "fingerprint": "08e820e38055",
                     "risk": {
                         "score": 0,
@@ -13191,11 +13191,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "سخت‌سازی نشست",
-                    "line_start": 49,
-                    "line_end": 49,
+                    "anchor": "ماژول تشدید شدت (افزوده‌شده در 1.62.89) — طبق قواعد ۳ و ۴ مخ",
+                    "line_start": 48,
+                    "line_end": 48,
                     "lines": 1,
-                    "fingerprint": "a739bd4cf27e",
+                    "fingerprint": "e07935b09261",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13204,11 +13204,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "اینجا اجرا می‌شود چون cfg() در lib\/db-core.php تعریف شده و ب",
-                    "line_start": 50,
-                    "line_end": 50,
+                    "anchor": "اگر فایل موجود نباشد سامانه بدون آن اجرا می‌شود؛ system_log ",
+                    "line_start": 49,
+                    "line_end": 49,
                     "lines": 1,
-                    "fingerprint": "b0c4e7ce77f1",
+                    "fingerprint": "be7523cc22df",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13217,11 +13217,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "lib\/auth-scope.php باشد تا نشستِ منقضی اصلاً به لایهٔ احراز ",
-                    "line_start": 51,
-                    "line_end": 51,
-                    "lines": 1,
-                    "fingerprint": "4f1f704734f2",
+                    "anchor": "این ماژول را با function_exists گارد می‌کند و هیچ require بی",
+                    "line_start": 50,
+                    "line_end": 56,
+                    "lines": 7,
+                    "fingerprint": "c7a5f4b95df8",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13230,11 +13230,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "security.session_idle_days: روزهای بی‌فعالیت تا خروج خودکار ",
-                    "line_start": 52,
-                    "line_end": 55,
-                    "lines": 4,
-                    "fingerprint": "84f2e9d20fa5",
+                    "anchor": "سخت‌سازی نشست",
+                    "line_start": 57,
+                    "line_end": 57,
+                    "lines": 1,
+                    "fingerprint": "a739bd4cf27e",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13243,11 +13243,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "نشست کاربر، سطوح دسترسی و دامنهٔ دید (شرح در سرآیند همان فای",
-                    "line_start": 56,
+                    "anchor": "اینجا اجرا می‌شود چون cfg() در lib\/db-core.php تعریف شده و ب",
+                    "line_start": 58,
                     "line_end": 58,
-                    "lines": 3,
-                    "fingerprint": "63b2f3cec77f",
+                    "lines": 1,
+                    "fingerprint": "b0c4e7ce77f1",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13256,11 +13256,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "تنظیمات، افکت‌های نمایشی و نقش‌های کلیدی (شرح در سرآیند همان",
+                    "anchor": "lib\/auth-scope.php باشد تا نشستِ منقضی اصلاً به لایهٔ احراز ",
                     "line_start": 59,
-                    "line_end": 61,
-                    "lines": 3,
-                    "fingerprint": "b7394b633ac3",
+                    "line_end": 59,
+                    "lines": 1,
+                    "fingerprint": "4f1f704734f2",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13269,11 +13269,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "پیکربندی و همگام‌سازی دامین (LDAP) (شرح در سرآیند همان فایل)",
-                    "line_start": 62,
-                    "line_end": 64,
-                    "lines": 3,
-                    "fingerprint": "14de4f69366d",
+                    "anchor": "security.session_idle_days: روزهای بی‌فعالیت تا خروج خودکار ",
+                    "line_start": 60,
+                    "line_end": 63,
+                    "lines": 4,
+                    "fingerprint": "84f2e9d20fa5",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13282,11 +13282,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "شمارهٔ درخواست، تقویم شمسی و SLA\/OLA (شرح در سرآیند همان فای",
-                    "line_start": 65,
-                    "line_end": 67,
+                    "anchor": "نشست کاربر، سطوح دسترسی و دامنهٔ دید (شرح در سرآیند همان فای",
+                    "line_start": 64,
+                    "line_end": 66,
                     "lines": 3,
-                    "fingerprint": "4efc20053a15",
+                    "fingerprint": "63b2f3cec77f",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13295,11 +13295,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "اعلان‌ها، ورود دامین و کاربران (شرح در سرآیند همان فایل)",
-                    "line_start": 68,
-                    "line_end": 70,
+                    "anchor": "تنظیمات، افکت‌های نمایشی و نقش‌های کلیدی (شرح در سرآیند همان",
+                    "line_start": 67,
+                    "line_end": 69,
                     "lines": 3,
-                    "fingerprint": "f5c4528d379f",
+                    "fingerprint": "b7394b633ac3",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -13308,16 +13308,55 @@
                 },
                 {
                     "kind": "region",
+                    "anchor": "پیکربندی و همگام‌سازی دامین (LDAP) (شرح در سرآیند همان فایل)",
+                    "line_start": 70,
+                    "line_end": 72,
+                    "lines": 3,
+                    "fingerprint": "14de4f69366d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-008.14"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "شمارهٔ درخواست، تقویم شمسی و SLA\/OLA (شرح در سرآیند همان فای",
+                    "line_start": 73,
+                    "line_end": 75,
+                    "lines": 3,
+                    "fingerprint": "4efc20053a15",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-008.15"
+                },
+                {
+                    "kind": "region",
+                    "anchor": "اعلان‌ها، ورود دامین و کاربران (شرح در سرآیند همان فایل)",
+                    "line_start": 76,
+                    "line_end": 78,
+                    "lines": 3,
+                    "fingerprint": "f5c4528d379f",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-008.16"
+                },
+                {
+                    "kind": "region",
                     "anchor": "ثبت فعالیت، حسابرسی و رویداد درخواست‌ها (شرح در سرآیند همان ",
-                    "line_start": 71,
-                    "line_end": 74,
+                    "line_start": 79,
+                    "line_end": 82,
                     "lines": 4,
                     "fingerprint": "12a005f7a0d7",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "PAGE-008.14"
+                    "id": "PAGE-008.17"
                 }
             ]
         },
@@ -37230,8 +37269,8 @@
             "id": "CORE-008",
             "path": "lib\/logging-core.php",
             "area": "CORE",
-            "lines": 1559,
-            "file_fingerprint": "b1dc701f360b",
+            "lines": 1560,
+            "file_fingerprint": "04d42d78c918",
             "blocks": [
                 {
                     "kind": "region",
@@ -38068,9 +38107,9 @@
                     "kind": "function",
                     "anchor": "logging_store_system",
                     "line_start": 1364,
-                    "line_end": 1410,
-                    "lines": 47,
-                    "fingerprint": "f1f9f878e99c",
+                    "line_end": 1411,
+                    "lines": 48,
+                    "fingerprint": "0a2f35af5b80",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -38082,8 +38121,8 @@
                 {
                     "kind": "function",
                     "anchor": "logging_normalize_activity_event",
-                    "line_start": 1412,
-                    "line_end": 1443,
+                    "line_start": 1413,
+                    "line_end": 1444,
                     "lines": 32,
                     "fingerprint": "e00d6c34ab24",
                     "risk": {
@@ -38095,8 +38134,8 @@
                 {
                     "kind": "function",
                     "anchor": "logging_store_activity",
-                    "line_start": 1445,
-                    "line_end": 1513,
+                    "line_start": 1446,
+                    "line_end": 1514,
                     "lines": 69,
                     "fingerprint": "50054025ae03",
                     "risk": {
@@ -38110,8 +38149,8 @@
                 {
                     "kind": "function",
                     "anchor": "log_event",
-                    "line_start": 1515,
-                    "line_end": 1529,
+                    "line_start": 1516,
+                    "line_end": 1530,
                     "lines": 15,
                     "fingerprint": "dbc27af9dafc",
                     "risk": {
@@ -38122,9 +38161,9 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1530-1532",
-                    "line_start": 1530,
-                    "line_end": 1532,
+                    "anchor": "بلوک رویه‌ای 1531-1533",
+                    "line_start": 1531,
+                    "line_end": 1533,
                     "lines": 3,
                     "fingerprint": "c17cf4304a9a",
                     "risk": {
@@ -38136,8 +38175,8 @@
                 {
                     "kind": "function",
                     "anchor": "security_log_access_denied",
-                    "line_start": 1533,
-                    "line_end": 1558,
+                    "line_start": 1534,
+                    "line_end": 1559,
                     "lines": 26,
                     "fingerprint": "3dab7165e7c5",
                     "risk": {
@@ -38154,8 +38193,8 @@
             "id": "CORE-009",
             "path": "lib\/logging-csrf.php",
             "area": "CORE",
-            "lines": 524,
-            "file_fingerprint": "5dff453ac277",
+            "lines": 544,
+            "file_fingerprint": "066c284e9fad",
             "blocks": [
                 {
                     "kind": "region",
@@ -38242,9 +38281,9 @@
                     "kind": "function",
                     "anchor": "system_log",
                     "line_start": 114,
-                    "line_end": 137,
-                    "lines": 24,
-                    "fingerprint": "00a1bec08bec",
+                    "line_end": 157,
+                    "lines": 44,
+                    "fingerprint": "714aa474ad27",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -38254,8 +38293,8 @@
                 {
                     "kind": "function",
                     "anchor": "system_error_explain",
-                    "line_start": 139,
-                    "line_end": 186,
+                    "line_start": 159,
+                    "line_end": 206,
                     "lines": 48,
                     "fingerprint": "9d3689c7350b",
                     "risk": {
@@ -38267,8 +38306,8 @@
                 {
                     "kind": "function",
                     "anchor": "system_error_mask",
-                    "line_start": 188,
-                    "line_end": 192,
+                    "line_start": 208,
+                    "line_end": 212,
                     "lines": 5,
                     "fingerprint": "e9b5ca9011cf",
                     "risk": {
@@ -38280,8 +38319,8 @@
                 {
                     "kind": "function",
                     "anchor": "system_error_record",
-                    "line_start": 194,
-                    "line_end": 238,
+                    "line_start": 214,
+                    "line_end": 258,
                     "lines": 45,
                     "fingerprint": "e994659cf0df",
                     "risk": {
@@ -38293,8 +38332,8 @@
                 {
                     "kind": "region",
                     "anchor": "هندلرهای سراسری برای HTTP و CLI؛ خروجی هر محیط مستقل است و خ",
-                    "line_start": 240,
-                    "line_end": 328,
+                    "line_start": 260,
+                    "line_end": 348,
                     "lines": 89,
                     "fingerprint": "a49762a56a93",
                     "risk": {
@@ -38308,8 +38347,8 @@
                 {
                     "kind": "function",
                     "anchor": "app_error_log",
-                    "line_start": 329,
-                    "line_end": 348,
+                    "line_start": 349,
+                    "line_end": 368,
                     "lines": 20,
                     "fingerprint": "31b1b4589bde",
                     "risk": {
@@ -38321,8 +38360,8 @@
                 {
                     "kind": "function",
                     "anchor": "system_log_meta_html",
-                    "line_start": 350,
-                    "line_end": 376,
+                    "line_start": 370,
+                    "line_end": 396,
                     "lines": 27,
                     "fingerprint": "cacd63b26987",
                     "risk": {
@@ -38334,8 +38373,8 @@
                 {
                     "kind": "function",
                     "anchor": "db_delete_in_batches",
-                    "line_start": 378,
-                    "line_end": 401,
+                    "line_start": 398,
+                    "line_end": 421,
                     "lines": 24,
                     "fingerprint": "577393cc7f23",
                     "risk": {
@@ -38350,8 +38389,8 @@
                 {
                     "kind": "function",
                     "anchor": "system_logs_prune",
-                    "line_start": 403,
-                    "line_end": 427,
+                    "line_start": 423,
+                    "line_end": 447,
                     "lines": 25,
                     "fingerprint": "c06c15769188",
                     "risk": {
@@ -38363,8 +38402,8 @@
                 {
                     "kind": "function",
                     "anchor": "system_logs_recent",
-                    "line_start": 429,
-                    "line_end": 450,
+                    "line_start": 449,
+                    "line_end": 470,
                     "lines": 22,
                     "fingerprint": "575cf42653c2",
                     "risk": {
@@ -38378,8 +38417,8 @@
                 {
                     "kind": "function",
                     "anchor": "take_flash",
-                    "line_start": 452,
-                    "line_end": 457,
+                    "line_start": 472,
+                    "line_end": 477,
                     "lines": 6,
                     "fingerprint": "1c31dc18c910",
                     "risk": {
@@ -38391,8 +38430,8 @@
                 {
                     "kind": "function",
                     "anchor": "csrf_field",
-                    "line_start": 459,
-                    "line_end": 462,
+                    "line_start": 479,
+                    "line_end": 482,
                     "lines": 4,
                     "fingerprint": "b4ddb13d65cf",
                     "risk": {
@@ -38404,8 +38443,8 @@
                 {
                     "kind": "function",
                     "anchor": "csrf_token",
-                    "line_start": 464,
-                    "line_end": 490,
+                    "line_start": 484,
+                    "line_end": 510,
                     "lines": 27,
                     "fingerprint": "15a9c46e2f97",
                     "risk": {
@@ -38417,8 +38456,8 @@
                 {
                     "kind": "function",
                     "anchor": "csrf_discard_legacy_cookie",
-                    "line_start": 492,
-                    "line_end": 509,
+                    "line_start": 512,
+                    "line_end": 529,
                     "lines": 18,
                     "fingerprint": "0df2c115ae01",
                     "risk": {
@@ -38432,8 +38471,8 @@
                 {
                     "kind": "function",
                     "anchor": "require_csrf",
-                    "line_start": 511,
-                    "line_end": 522,
+                    "line_start": 531,
+                    "line_end": 542,
                     "lines": 12,
                     "fingerprint": "1f9574c88fda",
                     "risk": {
@@ -38551,6 +38590,84 @@
         },
         {
             "id": "CORE-011",
+            "path": "lib\/logging-escalation.php",
+            "area": "CORE",
+            "lines": 100,
+            "file_fingerprint": "89e94982a39d",
+            "blocks": [
+                {
+                    "kind": "region",
+                    "anchor": "بلوک رویه‌ای 1-18",
+                    "line_start": 1,
+                    "line_end": 18,
+                    "lines": 18,
+                    "fingerprint": "d80fd4c2fac5",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-011.01"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "logging_escalation_thresholds",
+                    "line_start": 19,
+                    "line_end": 27,
+                    "lines": 9,
+                    "fingerprint": "5ecfe3efc44a",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-011.02"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "logging_escalation_count",
+                    "line_start": 29,
+                    "line_end": 57,
+                    "lines": 29,
+                    "fingerprint": "002a975b5d78",
+                    "risk": {
+                        "score": 4,
+                        "flags": {
+                            "silent_catch": 4
+                        }
+                    },
+                    "id": "CORE-011.03"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "logging_escalation_is_critical",
+                    "line_start": 59,
+                    "line_end": 65,
+                    "lines": 7,
+                    "fingerprint": "c8d6631a34aa",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "CORE-011.04"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "logging_smart_summary",
+                    "line_start": 67,
+                    "line_end": 100,
+                    "lines": 34,
+                    "fingerprint": "e30e679da7ea",
+                    "risk": {
+                        "score": 4,
+                        "flags": {
+                            "silent_catch": 4
+                        }
+                    },
+                    "id": "CORE-011.05"
+                }
+            ]
+        },
+        {
+            "id": "CORE-012",
             "path": "lib\/logging-integrity.php",
             "area": "CORE",
             "lines": 238,
@@ -38567,7 +38684,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.01"
+                    "id": "CORE-012.01"
                 },
                 {
                     "kind": "function",
@@ -38580,7 +38697,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.02"
+                    "id": "CORE-012.02"
                 },
                 {
                     "kind": "function",
@@ -38595,7 +38712,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-011.03"
+                    "id": "CORE-012.03"
                 },
                 {
                     "kind": "function",
@@ -38608,7 +38725,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.04"
+                    "id": "CORE-012.04"
                 },
                 {
                     "kind": "function",
@@ -38623,7 +38740,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-011.05"
+                    "id": "CORE-012.05"
                 },
                 {
                     "kind": "function",
@@ -38636,7 +38753,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.06"
+                    "id": "CORE-012.06"
                 },
                 {
                     "kind": "function",
@@ -38649,7 +38766,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.07"
+                    "id": "CORE-012.07"
                 },
                 {
                     "kind": "function",
@@ -38664,7 +38781,7 @@
                             "error_suppression": 1
                         }
                     },
-                    "id": "CORE-011.08"
+                    "id": "CORE-012.08"
                 },
                 {
                     "kind": "function",
@@ -38677,7 +38794,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.09"
+                    "id": "CORE-012.09"
                 },
                 {
                     "kind": "function",
@@ -38690,7 +38807,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-011.10"
+                    "id": "CORE-012.10"
                 },
                 {
                     "kind": "function",
@@ -38705,12 +38822,12 @@
                             "error_suppression": 2
                         }
                     },
-                    "id": "CORE-011.11"
+                    "id": "CORE-012.11"
                 }
             ]
         },
         {
-            "id": "CORE-012",
+            "id": "CORE-013",
             "path": "lib\/logging-replay.php",
             "area": "CORE",
             "lines": 261,
@@ -38727,7 +38844,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-012.01"
+                    "id": "CORE-013.01"
                 },
                 {
                     "kind": "function",
@@ -38743,7 +38860,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-012.02"
+                    "id": "CORE-013.02"
                 },
                 {
                     "kind": "function",
@@ -38761,12 +38878,12 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-012.03"
+                    "id": "CORE-013.03"
                 }
             ]
         },
         {
-            "id": "CORE-013",
+            "id": "CORE-014",
             "path": "lib\/notify-users.php",
             "area": "CORE",
             "lines": 524,
@@ -38783,7 +38900,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.01"
+                    "id": "CORE-014.01"
                 },
                 {
                     "kind": "function",
@@ -38798,7 +38915,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-013.02"
+                    "id": "CORE-014.02"
                 },
                 {
                     "kind": "function",
@@ -38811,7 +38928,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.03"
+                    "id": "CORE-014.03"
                 },
                 {
                     "kind": "function",
@@ -38824,7 +38941,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.04"
+                    "id": "CORE-014.04"
                 },
                 {
                     "kind": "function",
@@ -38839,7 +38956,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-013.05"
+                    "id": "CORE-014.05"
                 },
                 {
                     "kind": "function",
@@ -38852,7 +38969,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.06"
+                    "id": "CORE-014.06"
                 },
                 {
                     "kind": "function",
@@ -38865,7 +38982,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.07"
+                    "id": "CORE-014.07"
                 },
                 {
                     "kind": "function",
@@ -38878,7 +38995,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.08"
+                    "id": "CORE-014.08"
                 },
                 {
                     "kind": "function",
@@ -38891,7 +39008,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.09"
+                    "id": "CORE-014.09"
                 },
                 {
                     "kind": "function",
@@ -38904,7 +39021,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.10"
+                    "id": "CORE-014.10"
                 },
                 {
                     "kind": "function",
@@ -38919,7 +39036,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-013.11"
+                    "id": "CORE-014.11"
                 },
                 {
                     "kind": "function",
@@ -38934,7 +39051,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-013.12"
+                    "id": "CORE-014.12"
                 },
                 {
                     "kind": "function",
@@ -38947,7 +39064,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.13"
+                    "id": "CORE-014.13"
                 },
                 {
                     "kind": "function",
@@ -38960,7 +39077,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.14"
+                    "id": "CORE-014.14"
                 },
                 {
                     "kind": "function",
@@ -38976,7 +39093,7 @@
                             "long": 1
                         }
                     },
-                    "id": "CORE-013.15"
+                    "id": "CORE-014.15"
                 },
                 {
                     "kind": "function",
@@ -38989,7 +39106,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.16"
+                    "id": "CORE-014.16"
                 },
                 {
                     "kind": "region",
@@ -39002,7 +39119,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.17"
+                    "id": "CORE-014.17"
                 },
                 {
                     "kind": "function",
@@ -39015,7 +39132,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-013.18"
+                    "id": "CORE-014.18"
                 },
                 {
                     "kind": "function",
@@ -39030,7 +39147,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-013.19"
+                    "id": "CORE-014.19"
                 },
                 {
                     "kind": "function",
@@ -39045,12 +39162,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-013.20"
+                    "id": "CORE-014.20"
                 }
             ]
         },
         {
-            "id": "CORE-014",
+            "id": "CORE-015",
             "path": "lib\/settings-effects.php",
             "area": "CORE",
             "lines": 386,
@@ -39067,7 +39184,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.01"
+                    "id": "CORE-015.01"
                 },
                 {
                     "kind": "function",
@@ -39080,7 +39197,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.02"
+                    "id": "CORE-015.02"
                 },
                 {
                     "kind": "function",
@@ -39093,7 +39210,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.03"
+                    "id": "CORE-015.03"
                 },
                 {
                     "kind": "function",
@@ -39108,7 +39225,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-014.04"
+                    "id": "CORE-015.04"
                 },
                 {
                     "kind": "function",
@@ -39121,7 +39238,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.05"
+                    "id": "CORE-015.05"
                 },
                 {
                     "kind": "function",
@@ -39134,7 +39251,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.06"
+                    "id": "CORE-015.06"
                 },
                 {
                     "kind": "function",
@@ -39147,7 +39264,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.07"
+                    "id": "CORE-015.07"
                 },
                 {
                     "kind": "function",
@@ -39160,7 +39277,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.08"
+                    "id": "CORE-015.08"
                 },
                 {
                     "kind": "function",
@@ -39173,7 +39290,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.09"
+                    "id": "CORE-015.09"
                 },
                 {
                     "kind": "function",
@@ -39186,7 +39303,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.10"
+                    "id": "CORE-015.10"
                 },
                 {
                     "kind": "function",
@@ -39199,7 +39316,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.11"
+                    "id": "CORE-015.11"
                 },
                 {
                     "kind": "function",
@@ -39212,7 +39329,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.12"
+                    "id": "CORE-015.12"
                 },
                 {
                     "kind": "function",
@@ -39225,7 +39342,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.13"
+                    "id": "CORE-015.13"
                 },
                 {
                     "kind": "function",
@@ -39238,7 +39355,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.14"
+                    "id": "CORE-015.14"
                 },
                 {
                     "kind": "function",
@@ -39251,7 +39368,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.15"
+                    "id": "CORE-015.15"
                 },
                 {
                     "kind": "function",
@@ -39266,7 +39383,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "CORE-014.16"
+                    "id": "CORE-015.16"
                 },
                 {
                     "kind": "function",
@@ -39279,7 +39396,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.17"
+                    "id": "CORE-015.17"
                 },
                 {
                     "kind": "function",
@@ -39292,7 +39409,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.18"
+                    "id": "CORE-015.18"
                 },
                 {
                     "kind": "function",
@@ -39305,7 +39422,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.19"
+                    "id": "CORE-015.19"
                 },
                 {
                     "kind": "function",
@@ -39318,7 +39435,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.20"
+                    "id": "CORE-015.20"
                 },
                 {
                     "kind": "function",
@@ -39331,12 +39448,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-014.21"
+                    "id": "CORE-015.21"
                 }
             ]
         },
         {
-            "id": "CORE-015",
+            "id": "CORE-016",
             "path": "lib\/tickets-sla.php",
             "area": "CORE",
             "lines": 891,
@@ -39353,7 +39470,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.01"
+                    "id": "CORE-016.01"
                 },
                 {
                     "kind": "function",
@@ -39366,7 +39483,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.02"
+                    "id": "CORE-016.02"
                 },
                 {
                     "kind": "function",
@@ -39379,7 +39496,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.03"
+                    "id": "CORE-016.03"
                 },
                 {
                     "kind": "function",
@@ -39392,7 +39509,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.04"
+                    "id": "CORE-016.04"
                 },
                 {
                     "kind": "function",
@@ -39405,7 +39522,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.05"
+                    "id": "CORE-016.05"
                 },
                 {
                     "kind": "function",
@@ -39418,7 +39535,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.06"
+                    "id": "CORE-016.06"
                 },
                 {
                     "kind": "function",
@@ -39433,7 +39550,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-015.07"
+                    "id": "CORE-016.07"
                 },
                 {
                     "kind": "function",
@@ -39449,7 +39566,7 @@
                             "dangerous_call": 4
                         }
                     },
-                    "id": "CORE-015.08"
+                    "id": "CORE-016.08"
                 },
                 {
                     "kind": "function",
@@ -39462,7 +39579,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.09"
+                    "id": "CORE-016.09"
                 },
                 {
                     "kind": "function",
@@ -39475,7 +39592,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.10"
+                    "id": "CORE-016.10"
                 },
                 {
                     "kind": "function",
@@ -39490,7 +39607,7 @@
                             "silent_catch": 4
                         }
                     },
-                    "id": "CORE-015.11"
+                    "id": "CORE-016.11"
                 },
                 {
                     "kind": "function",
@@ -39506,7 +39623,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-015.12"
+                    "id": "CORE-016.12"
                 },
                 {
                     "kind": "function",
@@ -39523,7 +39640,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-015.13"
+                    "id": "CORE-016.13"
                 },
                 {
                     "kind": "function",
@@ -39536,7 +39653,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.14"
+                    "id": "CORE-016.14"
                 },
                 {
                     "kind": "function",
@@ -39549,7 +39666,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.15"
+                    "id": "CORE-016.15"
                 },
                 {
                     "kind": "function",
@@ -39562,7 +39679,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.16"
+                    "id": "CORE-016.16"
                 },
                 {
                     "kind": "function",
@@ -39575,7 +39692,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.17"
+                    "id": "CORE-016.17"
                 },
                 {
                     "kind": "function",
@@ -39588,7 +39705,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.18"
+                    "id": "CORE-016.18"
                 },
                 {
                     "kind": "function",
@@ -39603,7 +39720,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-015.19"
+                    "id": "CORE-016.19"
                 },
                 {
                     "kind": "function",
@@ -39616,7 +39733,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.20"
+                    "id": "CORE-016.20"
                 },
                 {
                     "kind": "function",
@@ -39629,7 +39746,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.21"
+                    "id": "CORE-016.21"
                 },
                 {
                     "kind": "function",
@@ -39645,7 +39762,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-015.22"
+                    "id": "CORE-016.22"
                 },
                 {
                     "kind": "function",
@@ -39658,7 +39775,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.23"
+                    "id": "CORE-016.23"
                 },
                 {
                     "kind": "function",
@@ -39671,7 +39788,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.24"
+                    "id": "CORE-016.24"
                 },
                 {
                     "kind": "function",
@@ -39684,7 +39801,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.25"
+                    "id": "CORE-016.25"
                 },
                 {
                     "kind": "function",
@@ -39697,7 +39814,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.26"
+                    "id": "CORE-016.26"
                 },
                 {
                     "kind": "function",
@@ -39710,7 +39827,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.27"
+                    "id": "CORE-016.27"
                 },
                 {
                     "kind": "function",
@@ -39723,7 +39840,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.28"
+                    "id": "CORE-016.28"
                 },
                 {
                     "kind": "function",
@@ -39736,7 +39853,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.29"
+                    "id": "CORE-016.29"
                 },
                 {
                     "kind": "function",
@@ -39749,7 +39866,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.30"
+                    "id": "CORE-016.30"
                 },
                 {
                     "kind": "function",
@@ -39764,7 +39881,7 @@
                             "sql_concat": 5
                         }
                     },
-                    "id": "CORE-015.31"
+                    "id": "CORE-016.31"
                 },
                 {
                     "kind": "function",
@@ -39777,7 +39894,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.32"
+                    "id": "CORE-016.32"
                 },
                 {
                     "kind": "function",
@@ -39792,7 +39909,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "CORE-015.33"
+                    "id": "CORE-016.33"
                 },
                 {
                     "kind": "function",
@@ -39805,7 +39922,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.34"
+                    "id": "CORE-016.34"
                 },
                 {
                     "kind": "function",
@@ -39818,7 +39935,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.35"
+                    "id": "CORE-016.35"
                 },
                 {
                     "kind": "function",
@@ -39831,7 +39948,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "CORE-015.36"
+                    "id": "CORE-016.36"
                 }
             ]
         },
@@ -39932,8 +40049,8 @@
             "id": "PAGE-038",
             "path": "logging-dashboard.php",
             "area": "PAGE",
-            "lines": 163,
-            "file_fingerprint": "5a453263d403",
+            "lines": 187,
+            "file_fingerprint": "bc8fc4417c91",
             "blocks": [
                 {
                     "kind": "region",
@@ -39952,9 +40069,9 @@
                     "kind": "function",
                     "anchor": "logging_dashboard_fetch",
                     "line_start": 4,
-                    "line_end": 93,
-                    "lines": 90,
-                    "fingerprint": "86a524246aed",
+                    "line_end": 95,
+                    "lines": 92,
+                    "fingerprint": "ffffc90e0fd3",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -39966,8 +40083,8 @@
                 {
                     "kind": "function",
                     "anchor": "logging_dashboard_svg_trend",
-                    "line_start": 95,
-                    "line_end": 110,
+                    "line_start": 97,
+                    "line_end": 112,
                     "lines": 16,
                     "fingerprint": "cb315227d4e7",
                     "risk": {
@@ -39979,10 +40096,10 @@
                 {
                     "kind": "function",
                     "anchor": "logging_dashboard_render",
-                    "line_start": 112,
-                    "line_end": 162,
-                    "lines": 51,
-                    "fingerprint": "90e290275890",
+                    "line_start": 114,
+                    "line_end": 186,
+                    "lines": 73,
+                    "fingerprint": "a22baf7024c5",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -51964,6 +52081,28 @@
             ]
         },
         {
+            "id": "DB-037",
+            "path": "migrations\/034-logging-escalation.sql",
+            "area": "DB",
+            "lines": 34,
+            "file_fingerprint": "e0dbd01baeb4",
+            "blocks": [
+                {
+                    "kind": "block",
+                    "anchor": "مقدمهٔ فایل",
+                    "line_start": 1,
+                    "line_end": 34,
+                    "lines": 34,
+                    "fingerprint": "e0dbd01baeb4",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "DB-037.01"
+                }
+            ]
+        },
+        {
             "id": "PAGE-039",
             "path": "modules\/request-center\/Actions\/bulk-actions.php",
             "area": "PAGE",
@@ -52663,8 +52802,8 @@
             "id": "PAGE-051",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
-            "lines": 330,
-            "file_fingerprint": "a417fdbe799b",
+            "lines": 369,
+            "file_fingerprint": "2799405d0490",
             "blocks": [
                 {
                     "kind": "region",
@@ -52683,9 +52822,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterRepository",
                     "line_start": 4,
-                    "line_end": 329,
-                    "lines": 326,
-                    "fingerprint": "e586d7a42a1b",
+                    "line_end": 368,
+                    "lines": 365,
+                    "fingerprint": "555eb856c44e",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -54311,7 +54450,7 @@
             ]
         },
         {
-            "id": "DB-037",
+            "id": "DB-038",
             "path": "rebuild-final.sql",
             "area": "DB",
             "lines": 97,
@@ -54328,7 +54467,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-037.01"
+                    "id": "DB-038.01"
                 },
                 {
                     "kind": "block",
@@ -54341,7 +54480,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-037.02"
+                    "id": "DB-038.02"
                 }
             ]
         },
@@ -54368,7 +54507,7 @@
             ]
         },
         {
-            "id": "DB-038",
+            "id": "DB-039",
             "path": "rollback-1.38-food-orders.sql",
             "area": "DB",
             "lines": 10,
@@ -54385,7 +54524,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-038.01"
+                    "id": "DB-039.01"
                 },
                 {
                     "kind": "block",
@@ -54398,7 +54537,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-038.02"
+                    "id": "DB-039.02"
                 },
                 {
                     "kind": "block",
@@ -54411,7 +54550,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-038.03"
+                    "id": "DB-039.03"
                 },
                 {
                     "kind": "block",
@@ -54424,7 +54563,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-038.04"
+                    "id": "DB-039.04"
                 },
                 {
                     "kind": "block",
@@ -54437,7 +54576,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-038.05"
+                    "id": "DB-039.05"
                 },
                 {
                     "kind": "block",
@@ -54450,7 +54589,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-038.06"
+                    "id": "DB-039.06"
                 }
             ]
         },
@@ -54555,7 +54694,7 @@
             ]
         },
         {
-            "id": "DB-039",
+            "id": "DB-040",
             "path": "schema.sql",
             "area": "DB",
             "lines": 1564,
@@ -54572,7 +54711,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.01"
+                    "id": "DB-040.01"
                 },
                 {
                     "kind": "block",
@@ -54585,7 +54724,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.02"
+                    "id": "DB-040.02"
                 },
                 {
                     "kind": "block",
@@ -54600,7 +54739,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.03"
+                    "id": "DB-040.03"
                 },
                 {
                     "kind": "block",
@@ -54613,7 +54752,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.04"
+                    "id": "DB-040.04"
                 },
                 {
                     "kind": "block",
@@ -54628,7 +54767,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.05"
+                    "id": "DB-040.05"
                 },
                 {
                     "kind": "block",
@@ -54643,7 +54782,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.06"
+                    "id": "DB-040.06"
                 },
                 {
                     "kind": "block",
@@ -54656,7 +54795,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.07"
+                    "id": "DB-040.07"
                 },
                 {
                     "kind": "block",
@@ -54671,7 +54810,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.08"
+                    "id": "DB-040.08"
                 },
                 {
                     "kind": "block",
@@ -54686,7 +54825,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.09"
+                    "id": "DB-040.09"
                 },
                 {
                     "kind": "block",
@@ -54701,7 +54840,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.10"
+                    "id": "DB-040.10"
                 },
                 {
                     "kind": "block",
@@ -54716,7 +54855,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.11"
+                    "id": "DB-040.11"
                 },
                 {
                     "kind": "block",
@@ -54731,7 +54870,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.12"
+                    "id": "DB-040.12"
                 },
                 {
                     "kind": "block",
@@ -54746,7 +54885,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.13"
+                    "id": "DB-040.13"
                 },
                 {
                     "kind": "block",
@@ -54759,7 +54898,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.14"
+                    "id": "DB-040.14"
                 },
                 {
                     "kind": "block",
@@ -54774,7 +54913,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.15"
+                    "id": "DB-040.15"
                 },
                 {
                     "kind": "block",
@@ -54789,7 +54928,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.16"
+                    "id": "DB-040.16"
                 },
                 {
                     "kind": "block",
@@ -54804,7 +54943,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.17"
+                    "id": "DB-040.17"
                 },
                 {
                     "kind": "block",
@@ -54817,7 +54956,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.18"
+                    "id": "DB-040.18"
                 },
                 {
                     "kind": "block",
@@ -54832,7 +54971,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.19"
+                    "id": "DB-040.19"
                 },
                 {
                     "kind": "block",
@@ -54847,7 +54986,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.20"
+                    "id": "DB-040.20"
                 },
                 {
                     "kind": "block",
@@ -54862,7 +55001,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.21"
+                    "id": "DB-040.21"
                 },
                 {
                     "kind": "block",
@@ -54877,7 +55016,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.22"
+                    "id": "DB-040.22"
                 },
                 {
                     "kind": "block",
@@ -54892,7 +55031,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.23"
+                    "id": "DB-040.23"
                 },
                 {
                     "kind": "block",
@@ -54907,7 +55046,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.24"
+                    "id": "DB-040.24"
                 },
                 {
                     "kind": "block",
@@ -54922,7 +55061,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.25"
+                    "id": "DB-040.25"
                 },
                 {
                     "kind": "block",
@@ -54935,7 +55074,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.26"
+                    "id": "DB-040.26"
                 },
                 {
                     "kind": "block",
@@ -54950,7 +55089,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.27"
+                    "id": "DB-040.27"
                 },
                 {
                     "kind": "block",
@@ -54965,7 +55104,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.28"
+                    "id": "DB-040.28"
                 },
                 {
                     "kind": "block",
@@ -54980,7 +55119,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.29"
+                    "id": "DB-040.29"
                 },
                 {
                     "kind": "block",
@@ -54995,7 +55134,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.30"
+                    "id": "DB-040.30"
                 },
                 {
                     "kind": "block",
@@ -55010,7 +55149,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.31"
+                    "id": "DB-040.31"
                 },
                 {
                     "kind": "block",
@@ -55025,7 +55164,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.32"
+                    "id": "DB-040.32"
                 },
                 {
                     "kind": "block",
@@ -55040,7 +55179,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.33"
+                    "id": "DB-040.33"
                 },
                 {
                     "kind": "block",
@@ -55055,7 +55194,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.34"
+                    "id": "DB-040.34"
                 },
                 {
                     "kind": "block",
@@ -55070,7 +55209,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.35"
+                    "id": "DB-040.35"
                 },
                 {
                     "kind": "block",
@@ -55085,7 +55224,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.36"
+                    "id": "DB-040.36"
                 },
                 {
                     "kind": "block",
@@ -55100,7 +55239,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.37"
+                    "id": "DB-040.37"
                 },
                 {
                     "kind": "block",
@@ -55115,7 +55254,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.38"
+                    "id": "DB-040.38"
                 },
                 {
                     "kind": "block",
@@ -55130,7 +55269,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.39"
+                    "id": "DB-040.39"
                 },
                 {
                     "kind": "block",
@@ -55145,7 +55284,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.40"
+                    "id": "DB-040.40"
                 },
                 {
                     "kind": "block",
@@ -55160,7 +55299,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.41"
+                    "id": "DB-040.41"
                 },
                 {
                     "kind": "block",
@@ -55175,7 +55314,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.42"
+                    "id": "DB-040.42"
                 },
                 {
                     "kind": "block",
@@ -55190,7 +55329,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.43"
+                    "id": "DB-040.43"
                 },
                 {
                     "kind": "block",
@@ -55205,7 +55344,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.44"
+                    "id": "DB-040.44"
                 },
                 {
                     "kind": "block",
@@ -55220,7 +55359,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.45"
+                    "id": "DB-040.45"
                 },
                 {
                     "kind": "block",
@@ -55235,7 +55374,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.46"
+                    "id": "DB-040.46"
                 },
                 {
                     "kind": "block",
@@ -55250,7 +55389,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.47"
+                    "id": "DB-040.47"
                 },
                 {
                     "kind": "block",
@@ -55265,7 +55404,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.48"
+                    "id": "DB-040.48"
                 },
                 {
                     "kind": "block",
@@ -55280,7 +55419,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.49"
+                    "id": "DB-040.49"
                 },
                 {
                     "kind": "block",
@@ -55295,7 +55434,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.50"
+                    "id": "DB-040.50"
                 },
                 {
                     "kind": "block",
@@ -55310,7 +55449,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.51"
+                    "id": "DB-040.51"
                 },
                 {
                     "kind": "block",
@@ -55325,7 +55464,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.52"
+                    "id": "DB-040.52"
                 },
                 {
                     "kind": "block",
@@ -55340,7 +55479,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.53"
+                    "id": "DB-040.53"
                 },
                 {
                     "kind": "block",
@@ -55355,7 +55494,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.54"
+                    "id": "DB-040.54"
                 },
                 {
                     "kind": "block",
@@ -55370,7 +55509,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.55"
+                    "id": "DB-040.55"
                 },
                 {
                     "kind": "block",
@@ -55385,7 +55524,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.56"
+                    "id": "DB-040.56"
                 },
                 {
                     "kind": "block",
@@ -55400,7 +55539,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.57"
+                    "id": "DB-040.57"
                 },
                 {
                     "kind": "block",
@@ -55415,7 +55554,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.58"
+                    "id": "DB-040.58"
                 },
                 {
                     "kind": "block",
@@ -55430,7 +55569,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.59"
+                    "id": "DB-040.59"
                 },
                 {
                     "kind": "block",
@@ -55443,7 +55582,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.60"
+                    "id": "DB-040.60"
                 },
                 {
                     "kind": "block",
@@ -55456,7 +55595,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.61"
+                    "id": "DB-040.61"
                 },
                 {
                     "kind": "block",
@@ -55469,7 +55608,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.62"
+                    "id": "DB-040.62"
                 },
                 {
                     "kind": "block",
@@ -55482,7 +55621,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.63"
+                    "id": "DB-040.63"
                 },
                 {
                     "kind": "block",
@@ -55495,7 +55634,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.64"
+                    "id": "DB-040.64"
                 },
                 {
                     "kind": "block",
@@ -55510,7 +55649,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.65"
+                    "id": "DB-040.65"
                 },
                 {
                     "kind": "block",
@@ -55523,7 +55662,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.66"
+                    "id": "DB-040.66"
                 },
                 {
                     "kind": "block",
@@ -55538,7 +55677,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.67"
+                    "id": "DB-040.67"
                 },
                 {
                     "kind": "block",
@@ -55553,7 +55692,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.68"
+                    "id": "DB-040.68"
                 },
                 {
                     "kind": "block",
@@ -55568,7 +55707,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.69"
+                    "id": "DB-040.69"
                 },
                 {
                     "kind": "block",
@@ -55581,7 +55720,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.70"
+                    "id": "DB-040.70"
                 },
                 {
                     "kind": "block",
@@ -55594,7 +55733,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.71"
+                    "id": "DB-040.71"
                 },
                 {
                     "kind": "block",
@@ -55607,7 +55746,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.72"
+                    "id": "DB-040.72"
                 },
                 {
                     "kind": "block",
@@ -55620,7 +55759,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.73"
+                    "id": "DB-040.73"
                 },
                 {
                     "kind": "block",
@@ -55633,7 +55772,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.74"
+                    "id": "DB-040.74"
                 },
                 {
                     "kind": "block",
@@ -55646,7 +55785,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.75"
+                    "id": "DB-040.75"
                 },
                 {
                     "kind": "block",
@@ -55659,7 +55798,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.76"
+                    "id": "DB-040.76"
                 },
                 {
                     "kind": "block",
@@ -55672,7 +55811,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.77"
+                    "id": "DB-040.77"
                 },
                 {
                     "kind": "block",
@@ -55685,7 +55824,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.78"
+                    "id": "DB-040.78"
                 },
                 {
                     "kind": "block",
@@ -55698,7 +55837,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.79"
+                    "id": "DB-040.79"
                 },
                 {
                     "kind": "block",
@@ -55711,7 +55850,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.80"
+                    "id": "DB-040.80"
                 },
                 {
                     "kind": "block",
@@ -55724,7 +55863,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.81"
+                    "id": "DB-040.81"
                 },
                 {
                     "kind": "block",
@@ -55737,7 +55876,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.82"
+                    "id": "DB-040.82"
                 },
                 {
                     "kind": "block",
@@ -55750,7 +55889,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.83"
+                    "id": "DB-040.83"
                 },
                 {
                     "kind": "block",
@@ -55763,7 +55902,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.84"
+                    "id": "DB-040.84"
                 },
                 {
                     "kind": "block",
@@ -55776,7 +55915,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.85"
+                    "id": "DB-040.85"
                 },
                 {
                     "kind": "block",
@@ -55789,7 +55928,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.86"
+                    "id": "DB-040.86"
                 },
                 {
                     "kind": "block",
@@ -55802,7 +55941,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.87"
+                    "id": "DB-040.87"
                 },
                 {
                     "kind": "block",
@@ -55815,7 +55954,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.88"
+                    "id": "DB-040.88"
                 },
                 {
                     "kind": "block",
@@ -55830,7 +55969,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.89"
+                    "id": "DB-040.89"
                 },
                 {
                     "kind": "block",
@@ -55845,7 +55984,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.90"
+                    "id": "DB-040.90"
                 },
                 {
                     "kind": "block",
@@ -55858,7 +55997,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.91"
+                    "id": "DB-040.91"
                 },
                 {
                     "kind": "block",
@@ -55871,7 +56010,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.92"
+                    "id": "DB-040.92"
                 },
                 {
                     "kind": "block",
@@ -55886,7 +56025,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.93"
+                    "id": "DB-040.93"
                 },
                 {
                     "kind": "block",
@@ -55901,7 +56040,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.94"
+                    "id": "DB-040.94"
                 },
                 {
                     "kind": "block",
@@ -55916,7 +56055,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.95"
+                    "id": "DB-040.95"
                 },
                 {
                     "kind": "block",
@@ -55931,7 +56070,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.96"
+                    "id": "DB-040.96"
                 },
                 {
                     "kind": "block",
@@ -55946,7 +56085,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.97"
+                    "id": "DB-040.97"
                 },
                 {
                     "kind": "block",
@@ -55961,7 +56100,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.98"
+                    "id": "DB-040.98"
                 },
                 {
                     "kind": "block",
@@ -55976,7 +56115,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.99"
+                    "id": "DB-040.99"
                 },
                 {
                     "kind": "block",
@@ -55991,7 +56130,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.100"
+                    "id": "DB-040.100"
                 },
                 {
                     "kind": "block",
@@ -56004,7 +56143,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.101"
+                    "id": "DB-040.101"
                 },
                 {
                     "kind": "block",
@@ -56019,7 +56158,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.102"
+                    "id": "DB-040.102"
                 },
                 {
                     "kind": "block",
@@ -56034,7 +56173,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.103"
+                    "id": "DB-040.103"
                 },
                 {
                     "kind": "block",
@@ -56049,7 +56188,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.104"
+                    "id": "DB-040.104"
                 },
                 {
                     "kind": "block",
@@ -56064,7 +56203,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.105"
+                    "id": "DB-040.105"
                 },
                 {
                     "kind": "block",
@@ -56079,7 +56218,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.106"
+                    "id": "DB-040.106"
                 },
                 {
                     "kind": "block",
@@ -56092,7 +56231,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.107"
+                    "id": "DB-040.107"
                 },
                 {
                     "kind": "block",
@@ -56105,7 +56244,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.108"
+                    "id": "DB-040.108"
                 },
                 {
                     "kind": "block",
@@ -56120,7 +56259,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.109"
+                    "id": "DB-040.109"
                 },
                 {
                     "kind": "block",
@@ -56135,7 +56274,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-039.110"
+                    "id": "DB-040.110"
                 }
             ]
         },
@@ -92525,7 +92664,7 @@
             ]
         },
         {
-            "id": "DB-040",
+            "id": "DB-041",
             "path": "upgrade-1.1-departments.sql",
             "area": "DB",
             "lines": 16,
@@ -92542,7 +92681,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.01"
+                    "id": "DB-041.01"
                 },
                 {
                     "kind": "block",
@@ -92555,7 +92694,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.02"
+                    "id": "DB-041.02"
                 },
                 {
                     "kind": "block",
@@ -92568,7 +92707,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.03"
+                    "id": "DB-041.03"
                 },
                 {
                     "kind": "block",
@@ -92581,7 +92720,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.04"
+                    "id": "DB-041.04"
                 },
                 {
                     "kind": "block",
@@ -92596,7 +92735,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-040.05"
+                    "id": "DB-041.05"
                 },
                 {
                     "kind": "block",
@@ -92609,7 +92748,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.06"
+                    "id": "DB-041.06"
                 },
                 {
                     "kind": "block",
@@ -92622,7 +92761,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.07"
+                    "id": "DB-041.07"
                 },
                 {
                     "kind": "block",
@@ -92637,12 +92776,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-040.08"
+                    "id": "DB-041.08"
                 }
             ]
         },
         {
-            "id": "DB-041",
+            "id": "DB-042",
             "path": "upgrade-1.10-priority.sql",
             "area": "DB",
             "lines": 11,
@@ -92659,7 +92798,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.01"
+                    "id": "DB-042.01"
                 },
                 {
                     "kind": "block",
@@ -92674,7 +92813,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.02"
+                    "id": "DB-042.02"
                 },
                 {
                     "kind": "block",
@@ -92689,7 +92828,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.03"
+                    "id": "DB-042.03"
                 },
                 {
                     "kind": "block",
@@ -92704,7 +92843,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.04"
+                    "id": "DB-042.04"
                 },
                 {
                     "kind": "block",
@@ -92719,7 +92858,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.05"
+                    "id": "DB-042.05"
                 },
                 {
                     "kind": "block",
@@ -92732,7 +92871,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.06"
+                    "id": "DB-042.06"
                 },
                 {
                     "kind": "block",
@@ -92745,7 +92884,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.07"
+                    "id": "DB-042.07"
                 },
                 {
                     "kind": "block",
@@ -92758,7 +92897,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.08"
+                    "id": "DB-042.08"
                 },
                 {
                     "kind": "block",
@@ -92771,12 +92910,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.09"
+                    "id": "DB-042.09"
                 }
             ]
         },
         {
-            "id": "DB-042",
+            "id": "DB-043",
             "path": "upgrade-1.11-user-profile.sql",
             "area": "DB",
             "lines": 5,
@@ -92793,7 +92932,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.01"
+                    "id": "DB-043.01"
                 },
                 {
                     "kind": "block",
@@ -92806,7 +92945,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.02"
+                    "id": "DB-043.02"
                 },
                 {
                     "kind": "block",
@@ -92819,7 +92958,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.03"
+                    "id": "DB-043.03"
                 },
                 {
                     "kind": "block",
@@ -92832,12 +92971,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.04"
+                    "id": "DB-043.04"
                 }
             ]
         },
         {
-            "id": "DB-043",
+            "id": "DB-044",
             "path": "upgrade-1.12-food-ticket-management.sql",
             "area": "DB",
             "lines": 16,
@@ -92854,7 +92993,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-043.01"
+                    "id": "DB-044.01"
                 },
                 {
                     "kind": "block",
@@ -92869,12 +93008,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-043.02"
+                    "id": "DB-044.02"
                 }
             ]
         },
         {
-            "id": "DB-044",
+            "id": "DB-045",
             "path": "upgrade-1.13-asset-profile.sql",
             "area": "DB",
             "lines": 93,
@@ -92891,7 +93030,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-044.01"
+                    "id": "DB-045.01"
                 },
                 {
                     "kind": "block",
@@ -92904,7 +93043,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-044.02"
+                    "id": "DB-045.02"
                 },
                 {
                     "kind": "block",
@@ -92919,12 +93058,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-044.03"
+                    "id": "DB-045.03"
                 }
             ]
         },
         {
-            "id": "DB-045",
+            "id": "DB-046",
             "path": "upgrade-1.13-food-groups.sql",
             "area": "DB",
             "lines": 50,
@@ -92941,7 +93080,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-045.01"
+                    "id": "DB-046.01"
                 },
                 {
                     "kind": "block",
@@ -92956,7 +93095,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-045.02"
+                    "id": "DB-046.02"
                 },
                 {
                     "kind": "block",
@@ -92971,7 +93110,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-045.03"
+                    "id": "DB-046.03"
                 },
                 {
                     "kind": "block",
@@ -92986,12 +93125,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-045.04"
+                    "id": "DB-046.04"
                 }
             ]
         },
         {
-            "id": "DB-046",
+            "id": "DB-047",
             "path": "upgrade-1.14-system-logs.sql",
             "area": "DB",
             "lines": 14,
@@ -93008,7 +93147,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-046.01"
+                    "id": "DB-047.01"
                 },
                 {
                     "kind": "block",
@@ -93021,12 +93160,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-046.02"
+                    "id": "DB-047.02"
                 }
             ]
         },
         {
-            "id": "DB-047",
+            "id": "DB-048",
             "path": "upgrade-1.15-plaque-fields.sql",
             "area": "DB",
             "lines": 13,
@@ -93043,7 +93182,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-047.01"
+                    "id": "DB-048.01"
                 },
                 {
                     "kind": "block",
@@ -93056,12 +93195,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-047.02"
+                    "id": "DB-048.02"
                 }
             ]
         },
         {
-            "id": "DB-048",
+            "id": "DB-049",
             "path": "upgrade-1.16-ticket-number.sql",
             "area": "DB",
             "lines": 12,
@@ -93078,7 +93217,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-048.01"
+                    "id": "DB-049.01"
                 },
                 {
                     "kind": "block",
@@ -93091,7 +93230,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-048.02"
+                    "id": "DB-049.02"
                 },
                 {
                     "kind": "block",
@@ -93104,12 +93243,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-048.03"
+                    "id": "DB-049.03"
                 }
             ]
         },
         {
-            "id": "DB-049",
+            "id": "DB-050",
             "path": "upgrade-1.17-service-catalog.sql",
             "area": "DB",
             "lines": 45,
@@ -93126,7 +93265,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-049.01"
+                    "id": "DB-050.01"
                 },
                 {
                     "kind": "block",
@@ -93141,12 +93280,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-049.02"
+                    "id": "DB-050.02"
                 }
             ]
         },
         {
-            "id": "DB-050",
+            "id": "DB-051",
             "path": "upgrade-1.18-service-categories.sql",
             "area": "DB",
             "lines": 61,
@@ -93163,7 +93302,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.01"
+                    "id": "DB-051.01"
                 },
                 {
                     "kind": "block",
@@ -93176,7 +93315,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.02"
+                    "id": "DB-051.02"
                 },
                 {
                     "kind": "block",
@@ -93189,7 +93328,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.03"
+                    "id": "DB-051.03"
                 },
                 {
                     "kind": "block",
@@ -93202,7 +93341,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.04"
+                    "id": "DB-051.04"
                 },
                 {
                     "kind": "block",
@@ -93217,7 +93356,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-050.05"
+                    "id": "DB-051.05"
                 },
                 {
                     "kind": "block",
@@ -93232,12 +93371,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-050.06"
+                    "id": "DB-051.06"
                 }
             ]
         },
         {
-            "id": "DB-051",
+            "id": "DB-052",
             "path": "upgrade-1.19-food-ticket-queue.sql",
             "area": "DB",
             "lines": 60,
@@ -93254,7 +93393,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-051.01"
+                    "id": "DB-052.01"
                 },
                 {
                     "kind": "block",
@@ -93267,7 +93406,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-051.02"
+                    "id": "DB-052.02"
                 },
                 {
                     "kind": "block",
@@ -93280,12 +93419,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-051.03"
+                    "id": "DB-052.03"
                 }
             ]
         },
         {
-            "id": "DB-052",
+            "id": "DB-053",
             "path": "upgrade-1.2-itsm.sql",
             "area": "DB",
             "lines": 63,
@@ -93302,7 +93441,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.01"
+                    "id": "DB-053.01"
                 },
                 {
                     "kind": "block",
@@ -93315,7 +93454,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.02"
+                    "id": "DB-053.02"
                 },
                 {
                     "kind": "block",
@@ -93328,7 +93467,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.03"
+                    "id": "DB-053.03"
                 },
                 {
                     "kind": "block",
@@ -93343,7 +93482,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.04"
+                    "id": "DB-053.04"
                 },
                 {
                     "kind": "block",
@@ -93358,7 +93497,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.05"
+                    "id": "DB-053.05"
                 },
                 {
                     "kind": "block",
@@ -93371,7 +93510,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.06"
+                    "id": "DB-053.06"
                 },
                 {
                     "kind": "block",
@@ -93384,7 +93523,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.07"
+                    "id": "DB-053.07"
                 },
                 {
                     "kind": "block",
@@ -93397,7 +93536,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.08"
+                    "id": "DB-053.08"
                 },
                 {
                     "kind": "block",
@@ -93410,7 +93549,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.09"
+                    "id": "DB-053.09"
                 },
                 {
                     "kind": "block",
@@ -93423,7 +93562,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.10"
+                    "id": "DB-053.10"
                 },
                 {
                     "kind": "block",
@@ -93436,7 +93575,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.11"
+                    "id": "DB-053.11"
                 },
                 {
                     "kind": "block",
@@ -93451,7 +93590,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.12"
+                    "id": "DB-053.12"
                 },
                 {
                     "kind": "block",
@@ -93466,7 +93605,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.13"
+                    "id": "DB-053.13"
                 },
                 {
                     "kind": "block",
@@ -93481,12 +93620,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.14"
+                    "id": "DB-053.14"
                 }
             ]
         },
         {
-            "id": "DB-053",
+            "id": "DB-054",
             "path": "upgrade-1.20-domain-scan.sql",
             "area": "DB",
             "lines": 37,
@@ -93503,7 +93642,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-053.01"
+                    "id": "DB-054.01"
                 },
                 {
                     "kind": "block",
@@ -93518,7 +93657,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-053.02"
+                    "id": "DB-054.02"
                 },
                 {
                     "kind": "block",
@@ -93533,7 +93672,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-053.03"
+                    "id": "DB-054.03"
                 },
                 {
                     "kind": "block",
@@ -93546,12 +93685,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-053.04"
+                    "id": "DB-054.04"
                 }
             ]
         },
         {
-            "id": "DB-054",
+            "id": "DB-055",
             "path": "upgrade-1.21-organization.sql",
             "area": "DB",
             "lines": 49,
@@ -93568,7 +93707,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.01"
+                    "id": "DB-055.01"
                 },
                 {
                     "kind": "block",
@@ -93581,7 +93720,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.02"
+                    "id": "DB-055.02"
                 },
                 {
                     "kind": "block",
@@ -93594,7 +93733,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.03"
+                    "id": "DB-055.03"
                 },
                 {
                     "kind": "block",
@@ -93607,7 +93746,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.04"
+                    "id": "DB-055.04"
                 },
                 {
                     "kind": "block",
@@ -93622,7 +93761,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.05"
+                    "id": "DB-055.05"
                 },
                 {
                     "kind": "block",
@@ -93637,7 +93776,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.06"
+                    "id": "DB-055.06"
                 },
                 {
                     "kind": "block",
@@ -93652,12 +93791,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.07"
+                    "id": "DB-055.07"
                 }
             ]
         },
         {
-            "id": "DB-055",
+            "id": "DB-056",
             "path": "upgrade-1.22-permissions.sql",
             "area": "DB",
             "lines": 16,
@@ -93674,7 +93813,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-055.01"
+                    "id": "DB-056.01"
                 },
                 {
                     "kind": "block",
@@ -93687,7 +93826,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-055.02"
+                    "id": "DB-056.02"
                 },
                 {
                     "kind": "block",
@@ -93702,7 +93841,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-055.03"
+                    "id": "DB-056.03"
                 },
                 {
                     "kind": "block",
@@ -93715,12 +93854,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-055.04"
+                    "id": "DB-056.04"
                 }
             ]
         },
         {
-            "id": "DB-056",
+            "id": "DB-057",
             "path": "upgrade-1.23-activity-log.sql",
             "area": "DB",
             "lines": 55,
@@ -93737,7 +93876,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-056.01"
+                    "id": "DB-057.01"
                 },
                 {
                     "kind": "block",
@@ -93752,7 +93891,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.02"
+                    "id": "DB-057.02"
                 },
                 {
                     "kind": "block",
@@ -93767,7 +93906,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.03"
+                    "id": "DB-057.03"
                 },
                 {
                     "kind": "block",
@@ -93780,7 +93919,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-056.04"
+                    "id": "DB-057.04"
                 },
                 {
                     "kind": "block",
@@ -93795,7 +93934,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.05"
+                    "id": "DB-057.05"
                 },
                 {
                     "kind": "block",
@@ -93810,12 +93949,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.06"
+                    "id": "DB-057.06"
                 }
             ]
         },
         {
-            "id": "DB-057",
+            "id": "DB-058",
             "path": "upgrade-1.24-traffic-control.sql",
             "area": "DB",
             "lines": 55,
@@ -93832,7 +93971,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.01"
+                    "id": "DB-058.01"
                 },
                 {
                     "kind": "block",
@@ -93845,7 +93984,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.02"
+                    "id": "DB-058.02"
                 },
                 {
                     "kind": "block",
@@ -93858,7 +93997,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.03"
+                    "id": "DB-058.03"
                 },
                 {
                     "kind": "block",
@@ -93871,7 +94010,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.04"
+                    "id": "DB-058.04"
                 },
                 {
                     "kind": "block",
@@ -93886,7 +94025,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-057.05"
+                    "id": "DB-058.05"
                 },
                 {
                     "kind": "block",
@@ -93901,12 +94040,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-057.06"
+                    "id": "DB-058.06"
                 }
             ]
         },
         {
-            "id": "DB-058",
+            "id": "DB-059",
             "path": "upgrade-1.25-performance-indexes.sql",
             "area": "DB",
             "lines": 36,
@@ -93923,7 +94062,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-058.01"
+                    "id": "DB-059.01"
                 },
                 {
                     "kind": "block",
@@ -93936,12 +94075,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-058.02"
+                    "id": "DB-059.02"
                 }
             ]
         },
         {
-            "id": "DB-059",
+            "id": "DB-060",
             "path": "upgrade-1.26-ticket-requesting-unit.sql",
             "area": "DB",
             "lines": 28,
@@ -93958,7 +94097,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.01"
+                    "id": "DB-060.01"
                 },
                 {
                     "kind": "block",
@@ -93971,7 +94110,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.02"
+                    "id": "DB-060.02"
                 },
                 {
                     "kind": "block",
@@ -93984,7 +94123,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.03"
+                    "id": "DB-060.03"
                 },
                 {
                     "kind": "block",
@@ -93997,12 +94136,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.04"
+                    "id": "DB-060.04"
                 }
             ]
         },
         {
-            "id": "DB-060",
+            "id": "DB-061",
             "path": "upgrade-1.27-food-ticket-fixes.sql",
             "area": "DB",
             "lines": 17,
@@ -94019,7 +94158,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-060.01"
+                    "id": "DB-061.01"
                 },
                 {
                     "kind": "block",
@@ -94034,7 +94173,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-060.02"
+                    "id": "DB-061.02"
                 },
                 {
                     "kind": "block",
@@ -94049,12 +94188,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-060.03"
+                    "id": "DB-061.03"
                 }
             ]
         },
         {
-            "id": "DB-061",
+            "id": "DB-062",
             "path": "upgrade-1.3-supervisor-inventory.sql",
             "area": "DB",
             "lines": 14,
@@ -94071,7 +94210,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.01"
+                    "id": "DB-062.01"
                 },
                 {
                     "kind": "block",
@@ -94084,7 +94223,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.02"
+                    "id": "DB-062.02"
                 },
                 {
                     "kind": "block",
@@ -94099,7 +94238,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-061.03"
+                    "id": "DB-062.03"
                 },
                 {
                     "kind": "block",
@@ -94114,7 +94253,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-061.04"
+                    "id": "DB-062.04"
                 },
                 {
                     "kind": "block",
@@ -94129,7 +94268,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-061.05"
+                    "id": "DB-062.05"
                 },
                 {
                     "kind": "block",
@@ -94142,7 +94281,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.06"
+                    "id": "DB-062.06"
                 },
                 {
                     "kind": "block",
@@ -94155,7 +94294,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.07"
+                    "id": "DB-062.07"
                 },
                 {
                     "kind": "block",
@@ -94168,7 +94307,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.08"
+                    "id": "DB-062.08"
                 },
                 {
                     "kind": "block",
@@ -94181,7 +94320,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.09"
+                    "id": "DB-062.09"
                 },
                 {
                     "kind": "block",
@@ -94196,7 +94335,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-061.10"
+                    "id": "DB-062.10"
                 },
                 {
                     "kind": "block",
@@ -94209,7 +94348,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.11"
+                    "id": "DB-062.11"
                 },
                 {
                     "kind": "block",
@@ -94222,7 +94361,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.12"
+                    "id": "DB-062.12"
                 },
                 {
                     "kind": "block",
@@ -94235,12 +94374,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.13"
+                    "id": "DB-062.13"
                 }
             ]
         },
         {
-            "id": "DB-062",
+            "id": "DB-063",
             "path": "upgrade-1.30-food-ticket-card-map.sql",
             "area": "DB",
             "lines": 11,
@@ -94257,7 +94396,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-062.01"
+                    "id": "DB-063.01"
                 },
                 {
                     "kind": "block",
@@ -94272,12 +94411,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-062.02"
+                    "id": "DB-063.02"
                 }
             ]
         },
         {
-            "id": "DB-063",
+            "id": "DB-064",
             "path": "upgrade-1.31-food-ticket-templates.sql",
             "area": "DB",
             "lines": 14,
@@ -94294,7 +94433,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.01"
+                    "id": "DB-064.01"
                 },
                 {
                     "kind": "block",
@@ -94309,12 +94448,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-063.02"
+                    "id": "DB-064.02"
                 }
             ]
         },
         {
-            "id": "DB-064",
+            "id": "DB-065",
             "path": "upgrade-1.32-food-group-representative-absence.sql",
             "area": "DB",
             "lines": 90,
@@ -94331,7 +94470,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.01"
+                    "id": "DB-065.01"
                 },
                 {
                     "kind": "block",
@@ -94344,7 +94483,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.02"
+                    "id": "DB-065.02"
                 },
                 {
                     "kind": "block",
@@ -94357,7 +94496,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.03"
+                    "id": "DB-065.03"
                 },
                 {
                     "kind": "block",
@@ -94370,7 +94509,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.04"
+                    "id": "DB-065.04"
                 },
                 {
                     "kind": "block",
@@ -94383,7 +94522,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.05"
+                    "id": "DB-065.05"
                 },
                 {
                     "kind": "block",
@@ -94398,7 +94537,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-064.06"
+                    "id": "DB-065.06"
                 },
                 {
                     "kind": "block",
@@ -94411,7 +94550,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.07"
+                    "id": "DB-065.07"
                 },
                 {
                     "kind": "block",
@@ -94424,7 +94563,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.08"
+                    "id": "DB-065.08"
                 },
                 {
                     "kind": "block",
@@ -94437,7 +94576,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.09"
+                    "id": "DB-065.09"
                 },
                 {
                     "kind": "block",
@@ -94450,7 +94589,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.10"
+                    "id": "DB-065.10"
                 },
                 {
                     "kind": "block",
@@ -94465,7 +94604,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-064.11"
+                    "id": "DB-065.11"
                 },
                 {
                     "kind": "block",
@@ -94478,12 +94617,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.12"
+                    "id": "DB-065.12"
                 }
             ]
         },
         {
-            "id": "DB-065",
+            "id": "DB-066",
             "path": "upgrade-1.33-source-delete-truth.sql",
             "area": "DB",
             "lines": 46,
@@ -94502,7 +94641,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-065.01"
+                    "id": "DB-066.01"
                 },
                 {
                     "kind": "block",
@@ -94515,7 +94654,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.02"
+                    "id": "DB-066.02"
                 },
                 {
                     "kind": "block",
@@ -94528,7 +94667,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.03"
+                    "id": "DB-066.03"
                 },
                 {
                     "kind": "block",
@@ -94541,7 +94680,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.04"
+                    "id": "DB-066.04"
                 },
                 {
                     "kind": "block",
@@ -94554,7 +94693,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.05"
+                    "id": "DB-066.05"
                 },
                 {
                     "kind": "block",
@@ -94567,7 +94706,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.06"
+                    "id": "DB-066.06"
                 },
                 {
                     "kind": "block",
@@ -94580,7 +94719,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.07"
+                    "id": "DB-066.07"
                 },
                 {
                     "kind": "block",
@@ -94593,7 +94732,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.08"
+                    "id": "DB-066.08"
                 },
                 {
                     "kind": "block",
@@ -94606,12 +94745,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.09"
+                    "id": "DB-066.09"
                 }
             ]
         },
         {
-            "id": "DB-066",
+            "id": "DB-067",
             "path": "upgrade-1.38-food-orders.sql",
             "area": "DB",
             "lines": 78,
@@ -94628,7 +94767,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.01"
+                    "id": "DB-067.01"
                 },
                 {
                     "kind": "block",
@@ -94643,7 +94782,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.02"
+                    "id": "DB-067.02"
                 },
                 {
                     "kind": "block",
@@ -94658,7 +94797,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.03"
+                    "id": "DB-067.03"
                 },
                 {
                     "kind": "block",
@@ -94673,7 +94812,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.04"
+                    "id": "DB-067.04"
                 },
                 {
                     "kind": "block",
@@ -94688,7 +94827,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.05"
+                    "id": "DB-067.05"
                 },
                 {
                     "kind": "block",
@@ -94703,12 +94842,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.06"
+                    "id": "DB-067.06"
                 }
             ]
         },
         {
-            "id": "DB-067",
+            "id": "DB-068",
             "path": "upgrade-1.39-food-guest-requests.sql",
             "area": "DB",
             "lines": 19,
@@ -94725,7 +94864,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.01"
+                    "id": "DB-068.01"
                 },
                 {
                     "kind": "block",
@@ -94740,12 +94879,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-067.02"
+                    "id": "DB-068.02"
                 }
             ]
         },
         {
-            "id": "DB-068",
+            "id": "DB-069",
             "path": "upgrade-1.4-final.sql",
             "area": "DB",
             "lines": 113,
@@ -94762,7 +94901,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.01"
+                    "id": "DB-069.01"
                 },
                 {
                     "kind": "block",
@@ -94775,7 +94914,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.02"
+                    "id": "DB-069.02"
                 },
                 {
                     "kind": "block",
@@ -94788,7 +94927,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.03"
+                    "id": "DB-069.03"
                 },
                 {
                     "kind": "block",
@@ -94801,7 +94940,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.04"
+                    "id": "DB-069.04"
                 },
                 {
                     "kind": "block",
@@ -94816,7 +94955,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.05"
+                    "id": "DB-069.05"
                 },
                 {
                     "kind": "block",
@@ -94829,7 +94968,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.06"
+                    "id": "DB-069.06"
                 },
                 {
                     "kind": "block",
@@ -94842,7 +94981,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.07"
+                    "id": "DB-069.07"
                 },
                 {
                     "kind": "block",
@@ -94857,7 +94996,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.08"
+                    "id": "DB-069.08"
                 },
                 {
                     "kind": "block",
@@ -94870,7 +95009,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.09"
+                    "id": "DB-069.09"
                 },
                 {
                     "kind": "block",
@@ -94883,7 +95022,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.10"
+                    "id": "DB-069.10"
                 },
                 {
                     "kind": "block",
@@ -94898,7 +95037,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.11"
+                    "id": "DB-069.11"
                 },
                 {
                     "kind": "block",
@@ -94911,7 +95050,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.12"
+                    "id": "DB-069.12"
                 },
                 {
                     "kind": "block",
@@ -94924,7 +95063,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.13"
+                    "id": "DB-069.13"
                 },
                 {
                     "kind": "block",
@@ -94937,7 +95076,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.14"
+                    "id": "DB-069.14"
                 },
                 {
                     "kind": "block",
@@ -94950,7 +95089,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.15"
+                    "id": "DB-069.15"
                 },
                 {
                     "kind": "block",
@@ -94963,7 +95102,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.16"
+                    "id": "DB-069.16"
                 },
                 {
                     "kind": "block",
@@ -94976,7 +95115,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.17"
+                    "id": "DB-069.17"
                 },
                 {
                     "kind": "block",
@@ -94989,7 +95128,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.18"
+                    "id": "DB-069.18"
                 },
                 {
                     "kind": "block",
@@ -95002,7 +95141,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.19"
+                    "id": "DB-069.19"
                 },
                 {
                     "kind": "block",
@@ -95015,7 +95154,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.20"
+                    "id": "DB-069.20"
                 },
                 {
                     "kind": "block",
@@ -95028,7 +95167,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.21"
+                    "id": "DB-069.21"
                 },
                 {
                     "kind": "block",
@@ -95041,7 +95180,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.22"
+                    "id": "DB-069.22"
                 },
                 {
                     "kind": "block",
@@ -95054,7 +95193,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.23"
+                    "id": "DB-069.23"
                 },
                 {
                     "kind": "block",
@@ -95067,7 +95206,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.24"
+                    "id": "DB-069.24"
                 },
                 {
                     "kind": "block",
@@ -95082,7 +95221,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.25"
+                    "id": "DB-069.25"
                 },
                 {
                     "kind": "block",
@@ -95097,7 +95236,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.26"
+                    "id": "DB-069.26"
                 },
                 {
                     "kind": "block",
@@ -95112,7 +95251,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.27"
+                    "id": "DB-069.27"
                 },
                 {
                     "kind": "block",
@@ -95127,7 +95266,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.28"
+                    "id": "DB-069.28"
                 },
                 {
                     "kind": "block",
@@ -95142,7 +95281,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.29"
+                    "id": "DB-069.29"
                 },
                 {
                     "kind": "block",
@@ -95157,12 +95296,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.30"
+                    "id": "DB-069.30"
                 }
             ]
         },
         {
-            "id": "DB-069",
+            "id": "DB-070",
             "path": "upgrade-1.40-food-guest-deputy.sql",
             "area": "DB",
             "lines": 6,
@@ -95179,7 +95318,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-069.01"
+                    "id": "DB-070.01"
                 },
                 {
                     "kind": "block",
@@ -95192,12 +95331,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-069.02"
+                    "id": "DB-070.02"
                 }
             ]
         },
         {
-            "id": "DB-070",
+            "id": "DB-071",
             "path": "upgrade-1.5-offline-operations.sql",
             "area": "DB",
             "lines": 112,
@@ -95214,7 +95353,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.01"
+                    "id": "DB-071.01"
                 },
                 {
                     "kind": "block",
@@ -95229,7 +95368,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.02"
+                    "id": "DB-071.02"
                 },
                 {
                     "kind": "block",
@@ -95244,7 +95383,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.03"
+                    "id": "DB-071.03"
                 },
                 {
                     "kind": "block",
@@ -95257,7 +95396,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.04"
+                    "id": "DB-071.04"
                 },
                 {
                     "kind": "block",
@@ -95270,7 +95409,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.05"
+                    "id": "DB-071.05"
                 },
                 {
                     "kind": "block",
@@ -95283,7 +95422,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.06"
+                    "id": "DB-071.06"
                 },
                 {
                     "kind": "block",
@@ -95296,7 +95435,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.07"
+                    "id": "DB-071.07"
                 },
                 {
                     "kind": "block",
@@ -95309,7 +95448,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.08"
+                    "id": "DB-071.08"
                 },
                 {
                     "kind": "block",
@@ -95322,7 +95461,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.09"
+                    "id": "DB-071.09"
                 },
                 {
                     "kind": "block",
@@ -95335,7 +95474,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.10"
+                    "id": "DB-071.10"
                 },
                 {
                     "kind": "block",
@@ -95348,7 +95487,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.11"
+                    "id": "DB-071.11"
                 },
                 {
                     "kind": "block",
@@ -95361,7 +95500,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.12"
+                    "id": "DB-071.12"
                 },
                 {
                     "kind": "block",
@@ -95376,7 +95515,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.13"
+                    "id": "DB-071.13"
                 },
                 {
                     "kind": "block",
@@ -95391,7 +95530,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.14"
+                    "id": "DB-071.14"
                 },
                 {
                     "kind": "block",
@@ -95406,7 +95545,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.15"
+                    "id": "DB-071.15"
                 },
                 {
                     "kind": "block",
@@ -95421,7 +95560,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.16"
+                    "id": "DB-071.16"
                 },
                 {
                     "kind": "block",
@@ -95436,7 +95575,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.17"
+                    "id": "DB-071.17"
                 },
                 {
                     "kind": "block",
@@ -95451,7 +95590,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.18"
+                    "id": "DB-071.18"
                 },
                 {
                     "kind": "block",
@@ -95466,7 +95605,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.19"
+                    "id": "DB-071.19"
                 },
                 {
                     "kind": "block",
@@ -95481,12 +95620,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.20"
+                    "id": "DB-071.20"
                 }
             ]
         },
         {
-            "id": "DB-071",
+            "id": "DB-072",
             "path": "upgrade-1.6-hardening.sql",
             "area": "DB",
             "lines": 19,
@@ -95503,7 +95642,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-071.01"
+                    "id": "DB-072.01"
                 },
                 {
                     "kind": "block",
@@ -95518,7 +95657,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-071.02"
+                    "id": "DB-072.02"
                 },
                 {
                     "kind": "block",
@@ -95533,12 +95672,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-071.03"
+                    "id": "DB-072.03"
                 }
             ]
         },
         {
-            "id": "DB-072",
+            "id": "DB-073",
             "path": "upgrade-1.7-governance.sql",
             "area": "DB",
             "lines": 88,
@@ -95555,7 +95694,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.01"
+                    "id": "DB-073.01"
                 },
                 {
                     "kind": "block",
@@ -95570,7 +95709,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.02"
+                    "id": "DB-073.02"
                 },
                 {
                     "kind": "block",
@@ -95585,7 +95724,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.03"
+                    "id": "DB-073.03"
                 },
                 {
                     "kind": "block",
@@ -95600,7 +95739,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.04"
+                    "id": "DB-073.04"
                 },
                 {
                     "kind": "block",
@@ -95615,7 +95754,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.05"
+                    "id": "DB-073.05"
                 },
                 {
                     "kind": "block",
@@ -95630,12 +95769,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.06"
+                    "id": "DB-073.06"
                 }
             ]
         },
         {
-            "id": "DB-073",
+            "id": "DB-074",
             "path": "upgrade-1.8-cd-dvd-identity.sql",
             "area": "DB",
             "lines": 6,
@@ -95652,7 +95791,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-073.01"
+                    "id": "DB-074.01"
                 },
                 {
                     "kind": "block",
@@ -95667,12 +95806,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-073.02"
+                    "id": "DB-074.02"
                 }
             ]
         },
         {
-            "id": "DB-074",
+            "id": "DB-075",
             "path": "upgrade-1.8-cd-dvd.sql",
             "area": "DB",
             "lines": 44,
@@ -95689,7 +95828,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-074.01"
+                    "id": "DB-075.01"
                 },
                 {
                     "kind": "block",
@@ -95704,7 +95843,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.02"
+                    "id": "DB-075.02"
                 },
                 {
                     "kind": "block",
@@ -95719,12 +95858,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.03"
+                    "id": "DB-075.03"
                 }
             ]
         },
         {
-            "id": "DB-075",
+            "id": "DB-076",
             "path": "upgrade-1.8-final.sql",
             "area": "DB",
             "lines": 47,
@@ -95741,7 +95880,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-075.01"
+                    "id": "DB-076.01"
                 },
                 {
                     "kind": "block",
@@ -95754,7 +95893,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-075.02"
+                    "id": "DB-076.02"
                 },
                 {
                     "kind": "block",
@@ -95767,7 +95906,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-075.03"
+                    "id": "DB-076.03"
                 },
                 {
                     "kind": "block",
@@ -95782,7 +95921,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-075.04"
+                    "id": "DB-076.04"
                 },
                 {
                     "kind": "block",
@@ -95797,7 +95936,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-075.05"
+                    "id": "DB-076.05"
                 },
                 {
                     "kind": "block",
@@ -95812,12 +95951,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-075.06"
+                    "id": "DB-076.06"
                 }
             ]
         },
         {
-            "id": "DB-076",
+            "id": "DB-077",
             "path": "upgrade-1.8-routing.sql",
             "area": "DB",
             "lines": 46,
@@ -95834,7 +95973,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.01"
+                    "id": "DB-077.01"
                 },
                 {
                     "kind": "block",
@@ -95849,7 +95988,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.02"
+                    "id": "DB-077.02"
                 },
                 {
                     "kind": "block",
@@ -95862,7 +96001,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.03"
+                    "id": "DB-077.03"
                 },
                 {
                     "kind": "block",
@@ -95877,7 +96016,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.04"
+                    "id": "DB-077.04"
                 },
                 {
                     "kind": "block",
@@ -95890,7 +96029,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.05"
+                    "id": "DB-077.05"
                 },
                 {
                     "kind": "block",
@@ -95903,7 +96042,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.06"
+                    "id": "DB-077.06"
                 },
                 {
                     "kind": "block",
@@ -95916,7 +96055,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.07"
+                    "id": "DB-077.07"
                 },
                 {
                     "kind": "block",
@@ -95929,7 +96068,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.08"
+                    "id": "DB-077.08"
                 },
                 {
                     "kind": "block",
@@ -95942,7 +96081,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.09"
+                    "id": "DB-077.09"
                 },
                 {
                     "kind": "block",
@@ -95957,7 +96096,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.10"
+                    "id": "DB-077.10"
                 },
                 {
                     "kind": "block",
@@ -95970,7 +96109,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.11"
+                    "id": "DB-077.11"
                 },
                 {
                     "kind": "block",
@@ -95983,7 +96122,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.12"
+                    "id": "DB-077.12"
                 },
                 {
                     "kind": "block",
@@ -95996,7 +96135,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.13"
+                    "id": "DB-077.13"
                 },
                 {
                     "kind": "block",
@@ -96009,7 +96148,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.14"
+                    "id": "DB-077.14"
                 },
                 {
                     "kind": "block",
@@ -96024,7 +96163,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.15"
+                    "id": "DB-077.15"
                 },
                 {
                     "kind": "block",
@@ -96039,7 +96178,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.16"
+                    "id": "DB-077.16"
                 },
                 {
                     "kind": "block",
@@ -96054,7 +96193,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.17"
+                    "id": "DB-077.17"
                 },
                 {
                     "kind": "block",
@@ -96069,7 +96208,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.18"
+                    "id": "DB-077.18"
                 },
                 {
                     "kind": "block",
@@ -96084,7 +96223,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.19"
+                    "id": "DB-077.19"
                 },
                 {
                     "kind": "block",
@@ -96099,7 +96238,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.20"
+                    "id": "DB-077.20"
                 },
                 {
                     "kind": "block",
@@ -96114,7 +96253,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.21"
+                    "id": "DB-077.21"
                 },
                 {
                     "kind": "block",
@@ -96129,7 +96268,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.22"
+                    "id": "DB-077.22"
                 },
                 {
                     "kind": "block",
@@ -96144,7 +96283,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.23"
+                    "id": "DB-077.23"
                 },
                 {
                     "kind": "block",
@@ -96159,7 +96298,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.24"
+                    "id": "DB-077.24"
                 },
                 {
                     "kind": "block",
@@ -96174,12 +96313,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.25"
+                    "id": "DB-077.25"
                 }
             ]
         },
         {
-            "id": "DB-077",
+            "id": "DB-078",
             "path": "upgrade-1.9-food-ticket.sql",
             "area": "DB",
             "lines": 80,
@@ -96196,7 +96335,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-077.01"
+                    "id": "DB-078.01"
                 },
                 {
                     "kind": "block",
@@ -96211,7 +96350,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-077.02"
+                    "id": "DB-078.02"
                 },
                 {
                     "kind": "block",
@@ -96226,7 +96365,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-077.03"
+                    "id": "DB-078.03"
                 },
                 {
                     "kind": "block",
@@ -96241,12 +96380,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-077.04"
+                    "id": "DB-078.04"
                 }
             ]
         },
         {
-            "id": "DB-078",
+            "id": "DB-079",
             "path": "upgrade-food-drop-legacy-orders-columns.sql",
             "area": "DB",
             "lines": 6,
@@ -96263,7 +96402,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.01"
+                    "id": "DB-079.01"
                 },
                 {
                     "kind": "block",
@@ -96276,7 +96415,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.02"
+                    "id": "DB-079.02"
                 },
                 {
                     "kind": "block",
@@ -96289,12 +96428,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.03"
+                    "id": "DB-079.03"
                 }
             ]
         },
         {
-            "id": "DB-079",
+            "id": "DB-080",
             "path": "upgrade-food-employee-auth-source.sql",
             "area": "DB",
             "lines": 14,
@@ -96311,7 +96450,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-079.01"
+                    "id": "DB-080.01"
                 },
                 {
                     "kind": "block",
@@ -96324,7 +96463,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-079.02"
+                    "id": "DB-080.02"
                 },
                 {
                     "kind": "block",
@@ -96339,12 +96478,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-079.03"
+                    "id": "DB-080.03"
                 }
             ]
         },
         {
-            "id": "DB-080",
+            "id": "DB-081",
             "path": "upgrade-remove-legacy-admin-role.sql",
             "area": "DB",
             "lines": 11,
@@ -96361,7 +96500,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-080.01"
+                    "id": "DB-081.01"
                 },
                 {
                     "kind": "block",
@@ -96376,7 +96515,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-080.02"
+                    "id": "DB-081.02"
                 },
                 {
                     "kind": "block",
@@ -96391,12 +96530,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-080.03"
+                    "id": "DB-081.03"
                 }
             ]
         },
         {
-            "id": "DB-081",
+            "id": "DB-082",
             "path": "upgrade-unique-employee-number.sql",
             "area": "DB",
             "lines": 16,
@@ -96413,7 +96552,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-081.01"
+                    "id": "DB-082.01"
                 },
                 {
                     "kind": "block",
@@ -96428,7 +96567,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-081.02"
+                    "id": "DB-082.02"
                 },
                 {
                     "kind": "block",
@@ -96443,7 +96582,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-081.03"
+                    "id": "DB-082.03"
                 },
                 {
                     "kind": "block",
@@ -96456,7 +96595,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-081.04"
+                    "id": "DB-082.04"
                 }
             ]
         },
