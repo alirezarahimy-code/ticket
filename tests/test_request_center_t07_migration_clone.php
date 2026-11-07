@@ -224,6 +224,7 @@ t07_check($missing === [], 'forward migration set 001..033 is complete');
 ksort($byNumber);
 $applied = [];
 $skipped = [];
+$migrationEffects = [];
 foreach ($byNumber as $number => $file) {
     $name = basename($file);
     $check = $pdo->prepare('SELECT COUNT(*) FROM schema_updates WHERE migration = ?');
@@ -233,9 +234,32 @@ foreach ($byNumber as $number => $file) {
         continue;
     }
 
+    $stepBefore = t07_fingerprint($pdo);
     t07_mysql_file($mysql, $host, $port, $user, $pass, $targetDb, $file);
     $register = $pdo->prepare('INSERT INTO schema_updates (version, migration) VALUES (?, ?)');
     $register->execute([$version, $name]);
+    $stepAfter = t07_fingerprint($pdo);
+
+    $stepSchema = [];
+    $stepData = [];
+    foreach (array_unique(array_merge(array_keys($stepBefore), array_keys($stepAfter))) as $table) {
+        if (!isset($stepBefore[$table], $stepAfter[$table])) {
+            $stepSchema[] = $table . ' (table added/removed)';
+            continue;
+        }
+        if ($stepBefore[$table]['schema'] !== $stepAfter[$table]['schema']) {
+            $stepSchema[] = $table;
+        }
+        if ($table !== 'schema_updates'
+            && ($stepBefore[$table]['data'] !== $stepAfter[$table]['data'] || $stepBefore[$table]['rows'] !== $stepAfter[$table]['rows'])) {
+            $stepData[] = $table;
+        }
+    }
+    if ($stepSchema !== [] || $stepData !== []) {
+        $migrationEffects[$name] = ['schema' => $stepSchema, 'data' => $stepData];
+        echo 'MIGRATION EFFECT ' . $name . ': schema=[' . implode(', ', $stepSchema) .
+            '], data=[' . implode(', ', $stepData) . ']' . PHP_EOL;
+    }
     $applied[] = $name;
 }
 
@@ -271,6 +295,7 @@ foreach ($byNumber as $file) {
 echo 'T07 clone: ' . $targetDb . PHP_EOL;
 echo 'MariaDB: ' . $pdo->query('SELECT VERSION()')->fetchColumn() . PHP_EOL;
 echo 'Migrations applied: ' . count($applied) . '; skipped as already recorded: ' . count($skipped) . PHP_EOL;
+echo 'Applied migration names: ' . implode(', ', $applied) . PHP_EOL;
 echo 'Registry rows added: ' . count($registryAdded) . ' (bookkeeping only)' . PHP_EOL;
 echo 'Application schema tables fingerprinted: ' . count($tables) . PHP_EOL;
 
@@ -278,7 +303,8 @@ if ($schemaChanges !== [] || $dataChanges !== [] || $missingRegistry !== []) {
     t07_fail(
         'unexpected schema changes=[' . implode(', ', $schemaChanges) .
         '], application data changes=[' . implode(', ', $dataChanges) .
-        '], missing registry=[' . implode(', ', $missingRegistry) . ']'
+        '], missing registry=[' . implode(', ', $missingRegistry) .
+        '], per-migration effects=' . json_encode($migrationEffects, JSON_UNESCAPED_SLASHES)
     );
 }
 
