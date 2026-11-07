@@ -162,7 +162,7 @@ function t12_schema_fingerprint(PDO $pdo): array
 
 function t12_session(string $baseUrl, int $userId, string $expectedDb): array
 {
-    $response = t12_http($baseUrl . '/tests/fixtures/request-center-session-seed.php?user_id=' . $userId);
+    $response = t12_http($baseUrl . '/tests/fixtures/request-center-t12-session-seed.php?user_id=' . $userId);
     t12_check($response['status'] === 200, 'session fixture responds over HTTP');
     $payload = json_decode($response['body'], true);
     t12_check(is_array($payload), 'session fixture returns JSON');
@@ -217,8 +217,8 @@ try {
     t12_check(is_dir($featureRoot) && realpath($legacyRoot) !== realpath($featureRoot), 'Legacy and Feature source roots are independent');
     t12_check(is_file($legacyRoot . '/index.php') && is_file($featureRoot . '/index.php'), 'both application entry points exist');
 
-    $fixtureSource = $featureRoot . '/tests/fixtures/request-center-session-seed.php';
-    $legacyFixture = $legacyRoot . '/tests/fixtures/request-center-session-seed.php';
+    $fixtureSource = $featureRoot . '/tests/fixtures/request-center-t12-session-seed.php';
+    $legacyFixture = $legacyRoot . '/tests/fixtures/request-center-t12-session-seed.php';
     if (!is_dir(dirname($legacyFixture))) {
         mkdir(dirname($legacyFixture), 0775, true);
     }
