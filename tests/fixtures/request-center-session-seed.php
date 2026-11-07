@@ -9,14 +9,10 @@ if ($userId <= 0) {
     exit('missing CI_T04_USER_ID');
 }
 $_SESSION['user_id'] = $userId;
-$currentUser = function_exists('current_user') ? current_user() : null;
-$databaseName = (string) db()->query('SELECT DATABASE()')->fetchColumn();
 $payload = [
     'cookie_name' => session_name(),
     'session_id' => session_id(),
     'csrf' => csrf_token(),
-    'current_user_id' => (int) ($currentUser['id'] ?? 0),
-    'database_name' => $databaseName,
 ];
 session_write_close();
 
