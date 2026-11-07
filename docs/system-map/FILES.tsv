@@ -247,7 +247,7 @@ docs/aggregate-report-preview.html	docs	85	7297
 docs/architecture/REQUEST-CENTER-ARCHITECTURE.md	docs	673	89043
 docs/architecture/REQUEST-CENTER-AS-IS-AUDIT-FA.md	docs	195	18894
 docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
-docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	330	54615
+docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	341	56058
 docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	114	10112
 docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	110	12576
 docs/architecture/REQUEST-CENTER-T12-SOURCE-MAPPING-FA.md	docs	84	9169
@@ -434,11 +434,12 @@ modules/request-center/Actions/bulk-actions.php	other	140	10427
 modules/request-center/Actions/supervisor-actions.php	other	204	15442
 modules/request-center/Actions/ticket-actions.php	other	752	59624
 modules/request-center/Assets/request-center.css	other	1	255
-modules/request-center/Pages/admin.php	other	81	6849
+modules/request-center/Pages/admin.php	other	81	6858
 modules/request-center/Pages/analytics.php	other	48	4880
 modules/request-center/Pages/create.php	other	146	14098
 modules/request-center/Pages/detail.php	other	245	29497
-modules/request-center/Pages/index.php	other	335	23773
+modules/request-center/Pages/index.php	other	335	23791
+modules/request-center/Pages/legacy-router.php	other	33	1091
 modules/request-center/Pages/queue.php	other	38	5428
 modules/request-center/Pages/reports.php	other	66	9694
 modules/request-center/Pages/services.php	other	175	19749
@@ -457,7 +458,7 @@ preview/food-release-download/package.json	preview	13	232
 preview/food-release-download/public/food-update-1.62.3.html	preview	35	4501
 preview/food-release-download/vite.config.js	preview	56	1969
 rebuild-final.sql	sql-root	96	2188
-request-center.php	core	10	325
+request-center.php	core	13	411
 restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
