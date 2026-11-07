@@ -1,0 +1,65 @@
+<?php
+declare(strict_types=1);
+
+/** Supervisor workspace dashboard. All records are restricted by ticket_scope(). */
+if (!user_can($user, 'supervisor.panel')) {
+    http_response_code(403);
+    exit('دسترسی به فضای کاری سوپروایزر مجاز نیست.');
+}
+
+$summary = $repo->workspaceSummary($user);
+$recent = $repo->listVisible($user, 1, 8);
+$overdue = $repo->listQueue($user, 'overdue', 1, 8);
+$escapeSupervisor = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+$supervisorStatusLabels = [
+    'new' => 'جدید', 'manager_review' => 'در انتظار ارجاع', 'assigned' => 'ارجاع‌شده',
+    'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر',
+    'pending' => 'در انتظار پاسخ کاربر', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده',
+    'cancelled' => 'لغوشده',
+];
+header('X-Content-Type-Options: nosniff');
+header('Referrer-Policy: same-origin');
+header('Cache-Control: private, no-store');
+?>
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فضای کاری سوپروایزر</title>
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css">
+<style>
+.rc-supervisor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.rc-supervisor-stat{background:#fff;border:1px solid #e4eaf1;border-radius:13px;padding:16px}
+.rc-supervisor-stat strong{display:block;font-size:27px}.rc-supervisor-stat span{font-size:12px;color:#66758b}
+.rc-supervisor-columns{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rc-supervisor-list{padding:16px}.rc-supervisor-item{padding:12px 0;border-bottom:1px solid #e4eaf1}
+.rc-supervisor-item:last-child{border-bottom:0}.rc-supervisor-item b{display:block}.rc-supervisor-item small{color:#66758b}
+@media(max-width:800px){.rc-supervisor-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rc-supervisor-columns{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escapeSupervisor($user['full_name'] ?? $user['username'] ?? '') ?> · نظارت بر درخواست‌ها</small></div><a class="button secondary" href="index.php">بازگشت به سامانه</a></div>
+<?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'supervisor' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeSupervisor($key) ?>"><?= $escapeSupervisor($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
+</header>
+<main>
+<section class="heading"><div><h1>فضای کاری سوپروایزر</h1><p>پایش درخواست‌های حوزهٔ نظارت، موارد خارج از تعهد و درخواست‌های منتظر تصمیم.</p></div><a class="button" href="index.php?page=supervisor">ورود به صف تصمیم‌ها</a></section>
+<section class="rc-supervisor-grid">
+<div class="rc-supervisor-stat"><strong><?= number_format($summary['total']) ?></strong><span>کل درخواست‌های تحت نظارت</span></div>
+<div class="rc-supervisor-stat"><strong><?= number_format($summary['active']) ?></strong><span>در گردش</span></div>
+<div class="rc-supervisor-stat"><strong><?= number_format($summary['overdue']) ?></strong><span>خارج از SLA/OLA</span></div>
+<div class="rc-supervisor-stat"><strong><?= number_format($summary['awaiting_supervisor']) ?></strong><span>منتظر تصمیم نهایی</span></div>
+</section>
+<div class="rc-supervisor-columns">
+<section class="card rc-supervisor-list"><h2>موارد خارج از SLA/OLA</h2>
+<?php if (!$overdue['rows']): ?><p class="muted">در حال حاضر موردی در محدودهٔ دسترسی شما خارج از تعهد نیست.</p><?php else: ?>
+<?php foreach ($overdue['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · موعد <?= $escapeSupervisor($row['due_at'] ?: 'ثبت نشده') ?></small></article><?php endforeach; ?>
+<?php endif; ?>
+<a class="button secondary" href="index.php?page=queue&amp;queue=overdue">مشاهده صف کامل موارد معوق</a>
+</section>
+<section class="card rc-supervisor-list"><h2>آخرین تغییرات درخواست‌ها</h2>
+<?php if (!$recent['rows']): ?><p class="muted">درخواستی برای نمایش وجود ندارد.</p><?php else: ?>
+<?php foreach ($recent['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · <?= $escapeSupervisor($row['updated_at']) ?></small></article><?php endforeach; ?>
+<?php endif; ?>
+</section>
+</div>
+</main></body></html>
