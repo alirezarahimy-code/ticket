@@ -434,7 +434,7 @@ preview/food-release-download/package.json	preview	13	232
 preview/food-release-download/public/food-update-1.62.3.html	preview	35	4501
 preview/food-release-download/vite.config.js	preview	56	1969
 rebuild-final.sql	sql-root	96	2188
-request-center.php	core	238	18720
+request-center.php	core	244	18766
 restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
@@ -618,7 +618,7 @@ tests/test_release_1_62_88_package_integrity.py	tests	47	1904
 tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	6687
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
-tests/test_request_center_first_slice_static.py	tests	100	4763
+tests/test_request_center_first_slice_static.py	tests	106	5320
 tests/test_request_center_mariadb_ddl_gates.php	tests	107	4352
 tests/test_request_center_repository_sqlite.php	tests	103	6271
 tests/test_request_center_schema_preflight_mariadb.php	tests	145	7137

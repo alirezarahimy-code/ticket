@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 544 |
-| خطوط | 126,219 |
-| آدرس‌ها (بلوک) | 6,694 |
+| خطوط | 126,231 |
+| آدرس‌ها (بلوک) | 6,695 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 84 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,694 آدرس |
+| باقی‌مانده | 6,695 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -285,10 +285,10 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 219 | 1,597 | 20,397 |
+| `TEST` | TEST | 219 | 1,598 | 20,403 |
 | `TOOL` | TOOL | 87 | 694 | 17,389 |
 | `DB` | DB | 81 | 1,372 | 7,895 |
-| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,591 |
+| `PAGE` | صفحات (ریشه) | 53 | 1,368 | 44,597 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 764 | 13,891 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 433 | 9,014 |
 | `ACT` | کنش‌ها (actions/) | 16 | 118 | 4,113 |
@@ -309,7 +309,7 @@
 | `raw_input` | ورودی خام | 176 |
 | `long` | >۱۲۰ خط | 124 |
 | `silent_catch` | catch بی‌صدا | 122 |
-| `unescaped_echo` | چاپ بدون فرار | 33 |
+| `unescaped_echo` | چاپ بدون فرار | 34 |
 | `very_long` | >۳۰۰ خط | 7 |
 
 ## ترتیب بازبینی — ۴۰ آدرس پرخطر
@@ -2804,7 +2804,7 @@
 </details>
 
 <details>
-<summary><b>TEST-165</b> — <code>tests/test_request_center_first_slice_static.py</code> (101 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>TEST-165</b> — <code>tests/test_request_center_first_slice_static.py</code> (107 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -2819,7 +2819,8 @@
 | `TEST-165.09` | 53–70 | بلوک | `test_migrated_status_writes_use_the_central_workfl` | 1 | ⬜ |
 | `TEST-165.10` | 71–77 | بلوک | `test_user_supplied_text_is_escaped_and_attachment_` | 0 | ⬜ |
 | `TEST-165.11` | 78–90 | بلوک | `test_workspace_views_are_permission_gated_and_scop` | 3 | ⬜ |
-| `TEST-165.12` | 91–101 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
+| `TEST-165.12` | 91–96 | بلوک | `test_not_found_and_detail_navigation_preserve_work` | 3 | ⬜ |
+| `TEST-165.13` | 97–107 | بلوک | `test_legacy_workflow_is_not_removed_by_first_slice` | 0 | ⬜ |
 
 </details>
 
@@ -8685,11 +8686,11 @@
 </details>
 
 <details>
-<summary><b>PAGE-045</b> — <code>request-center.php</code> (239 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>PAGE-045</b> — <code>request-center.php</code> (245 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-045.01` | 1–239 | ناحیه | `بلوک رویه‌ای 1-239` | 4 | ⬜ |
+| `PAGE-045.01` | 1–245 | ناحیه | `بلوک رویه‌ای 1-245` | 4 | ⬜ |
 
 </details>
 

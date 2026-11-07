@@ -53996,16 +53996,16 @@
             "id": "PAGE-045",
             "path": "request-center.php",
             "area": "PAGE",
-            "lines": 239,
-            "file_fingerprint": "1b36f2da9e41",
+            "lines": 245,
+            "file_fingerprint": "095453e38d57",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-239",
+                    "anchor": "بلوک رویه‌ای 1-245",
                     "line_start": 1,
-                    "line_end": 239,
-                    "lines": 239,
-                    "fingerprint": "1b36f2da9e41",
+                    "line_end": 245,
+                    "lines": 245,
+                    "fingerprint": "095453e38d57",
                     "risk": {
                         "score": 4,
                         "flags": {
@@ -72941,8 +72941,8 @@
             "id": "TEST-165",
             "path": "tests\/test_request_center_first_slice_static.py",
             "area": "TEST",
-            "lines": 101,
-            "file_fingerprint": "841c3fce12cb",
+            "lines": 107,
+            "file_fingerprint": "44fc6101d049",
             "blocks": [
                 {
                     "kind": "block",
@@ -73095,16 +73095,31 @@
                 },
                 {
                     "kind": "block",
-                    "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
+                    "anchor": "test_not_found_and_detail_navigation_preserve_workspace",
                     "line_start": 91,
-                    "line_end": 101,
+                    "line_end": 96,
+                    "lines": 6,
+                    "fingerprint": "069c61314803",
+                    "risk": {
+                        "score": 3,
+                        "flags": {
+                            "unescaped_echo": 3
+                        }
+                    },
+                    "id": "TEST-165.12"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
+                    "line_start": 97,
+                    "line_end": 107,
                     "lines": 11,
                     "fingerprint": "b79420b129d3",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "TEST-165.12"
+                    "id": "TEST-165.13"
                 }
             ]
         },

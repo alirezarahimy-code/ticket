@@ -35934,9 +35934,9 @@
       "path": "request-center.php",
       "area": "PAGE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-239",
+      "anchor": "بلوک رویه‌ای 1-245",
       "risk": 4,
-      "lines": 239
+      "lines": 245
     },
     "DB-038.01": {
       "path": "rollback-1.38-food-orders.sql",
@@ -46406,6 +46406,14 @@
       "path": "tests/test_request_center_first_slice_static.py",
       "area": "TEST",
       "line": 91,
+      "anchor": "test_not_found_and_detail_navigation_preserve_workspace",
+      "risk": 3,
+      "lines": 6
+    },
+    "TEST-165.13": {
+      "path": "tests/test_request_center_first_slice_static.py",
+      "area": "TEST",
+      "line": 97,
       "anchor": "test_legacy_workflow_is_not_removed_by_first_slice",
       "risk": 0,
       "lines": 11
