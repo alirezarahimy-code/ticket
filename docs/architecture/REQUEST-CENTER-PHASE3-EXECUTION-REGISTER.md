@@ -210,3 +210,8 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - لینک درخواست‌ها در `Pages/reports.php` اکنون Workspace مبدأ، شماره صفحه و فیلترهای گزارش را به جزئیات مستقل منتقل می‌کند.
 - `Pages/detail.php` و `request_center_ticket_return_url()` اکنون فیلترهای `ticket_type`, `department_id`, `assigned_to`, `from`, `to` را نیز در بازگشت پس از عملیات حفظ می‌کنند؛ نوع درخواست allowlist شده و شناسه‌های فیلتر عددی‌اند. این context از طریق فیلدهای POST صفحه جزئیات به helper مشترک منتقل می‌شود.
 - آزمون ایستای `test_report_to_detail_navigation_preserves_report_workspace_and_filters` اضافه شد. نتیجهٔ CI این تغییر پس از اجرای Contract اعلام می‌شود.
+
+### حفظ context تقویم در ورود به جزئیات درخواست — ۲۰۲۶-۱۱-۰۸
+- لینک تمام رخدادهای درخواست در تقویم SLA/OLA و نوبت‌های رسیدگی به helper یکتای `calendarTicketUrl()` منتقل شدند؛ لینک، Workspace، ماه شمسی، نمای ماهانه/فهرست و نوع رخداد را حمل می‌کند.
+- `Pages/detail.php` context تقویم را فقط برای Workspaceهای مجاز و با اعتبارسنجی ماه/نما/نوع رخداد به مقصد بازگشت اضافه می‌کند. helper مشترک POST نیز همان context را از فیلدهای hidden صفحه جزئیات دریافت و محدودسازی می‌کند؛ پس از عملیات، کاربر از جزئیات به همان تقویم مبدأ برمی‌گردد.
+- آزمون ایستای `test_calendar_ticket_links_return_to_originating_calendar_context` برای پوشش لینک‌های تقویم و قرارداد بازگشت اضافه شد. نتیجهٔ CI این snapshot هنوز در انتظار است.
