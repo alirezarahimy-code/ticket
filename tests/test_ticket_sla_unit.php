@@ -9,6 +9,7 @@ function is_sla_holiday(DateTimeImmutable $date): bool { return false; }
 class SlaFakeStatement {
     public function execute(array $parameters): void {}
     public function fetchColumn(): mixed { return $GLOBALS['fake_reopened_at'] ?? false; }
+    public function fetch(): array|false { return ['id' => 9, 'response_minutes' => 60, 'resolution_minutes' => 120, 'escalation_1_minutes' => 120, 'escalation_2_minutes' => 180]; }
 }
 class SlaFakeDb {
     public function prepare(string $sql): SlaFakeStatement { return new SlaFakeStatement(); }
@@ -49,3 +50,40 @@ $expectedPause = business_elapsed_minutes(new DateTimeImmutable($ticket['sla_pau
 [$due, $pauseAt, $pause] = ticket_sla_transition($ticket, 'in_progress', 'normal');
 $expectedDue = $expectedPause > 0 ? business_due_at($expectedPause, new DateTimeImmutable($ticket['due_at'], $zone))->format('Y-m-d H:i:s') : $ticket['due_at'];
 sla_check($due === $expectedDue && $pauseAt === null && $pause === $expectedPause, 'resuming adds only the new business-time pause to the existing deadline');
+
+$olaTicket = [
+    'id' => 1, 'created_at' => '2026-11-01 09:00:00', 'priority' => 'normal',
+    'status' => 'in_progress', 'sla_pause_minutes' => 0, 'sla_paused_at' => null,
+    'ola_policy_id' => 9,
+    'ola_response_due_at' => '2026-11-10 10:00:00',
+    'ola_due_at' => '2026-11-11 10:00:00',
+    'ola_escalation_1_at' => '2026-11-11 10:00:00',
+    'ola_escalation_2_at' => '2026-11-12 10:00:00',
+];
+$olaSame = ticket_ola_transition($olaTicket, 'in_progress', 'normal');
+sla_check($olaSame['response_due_at'] === $olaTicket['ola_response_due_at']
+    && $olaSame['due_at'] === $olaTicket['ola_due_at'], 'ordinary reply preserves existing OLA deadlines');
+$olaWaiting = ticket_ola_transition($olaTicket, 'waiting_user', 'normal');
+sla_check($olaWaiting['response_due_at'] === $olaTicket['ola_response_due_at']
+    && $olaWaiting['due_at'] === $olaTicket['ola_due_at'], 'entering waiting_user does not reset OLA deadlines');
+$olaTicket['status'] = 'waiting_user';
+$olaTicket['sla_paused_at'] = (new DateTimeImmutable('now', $zone))->modify('-90 minutes')->format('Y-m-d H:i:s');
+$olaElapsed = business_elapsed_minutes(new DateTimeImmutable($olaTicket['sla_paused_at'], $zone), new DateTimeImmutable('now', $zone));
+$olaResumed = ticket_ola_transition($olaTicket, 'in_progress', 'normal');
+$olaExpectedResponse = $olaElapsed > 0
+    ? business_due_at($olaElapsed, new DateTimeImmutable($olaTicket['ola_response_due_at'], $zone))->format('Y-m-d H:i:s')
+    : $olaTicket['ola_response_due_at'];
+$olaExpectedResolution = $olaElapsed > 0
+    ? business_due_at($olaElapsed, new DateTimeImmutable($olaTicket['ola_due_at'], $zone))->format('Y-m-d H:i:s')
+    : $olaTicket['ola_due_at'];
+sla_check($olaResumed['response_due_at'] === $olaExpectedResponse
+    && $olaResumed['due_at'] === $olaExpectedResolution, 'resuming from waiting_user extends OLA response and resolution deadlines by business pause only');
+$olaTicket['status'] = 'in_progress';
+$olaTicket['sla_paused_at'] = null;
+$olaTicket['sla_pause_minutes'] = 30;
+$GLOBALS['fake_reopened_at'] = '2026-11-04 09:00:00';
+$olaReprioritized = ticket_ola_transition($olaTicket, 'in_progress', 'critical');
+$olaBase = ola_deadlines((int) $olaTicket['department_id'] ?? 0, 'critical', $GLOBALS['fake_reopened_at']);
+$olaPriorityExpected = business_due_at(30, new DateTimeImmutable((string) $olaBase['due_at'], $zone))->format('Y-m-d H:i:s');
+sla_check($olaReprioritized['policy_id'] === 9
+    && $olaReprioritized['due_at'] === $olaPriorityExpected, 'priority change recalculates OLA from latest reopen cycle and preserves accumulated pause');
