@@ -112,8 +112,8 @@ def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
     assert "Required audit persistence failed" in cron
     assert "request_center_notify_user(" in cron
     assert "request_center_notify_ticket_staff(" in cron
-    assert not re.search(r"(?<!request_center_)notify_user\\(", cron)
-    assert not re.search(r"(?<!request_center_)notify_ticket_staff\\(", cron)
+    assert "notify_user(" not in cron.replace("request_center_notify_user(", "")
+    assert "notify_ticket_staff(" not in cron.replace("request_center_notify_ticket_staff(", "")
 
 
 def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch():
