@@ -1,0 +1,72 @@
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 01-create: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 02-direct-cancel: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 03a-cancel-request-reject: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 03b-cancel-request-approve: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 04-claim-ordering: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 05-reopen: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 06a-reply-to-requester ACCEPTED: events[2].from_status: additive locked-state context for reply
+T12-SCENARIO 06a-reply-to-requester ACCEPTED: events[2].to_status: additive locked-state context for reply
+T12-SCENARIO 06a-reply-to-requester: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 06b-internal-note ACCEPTED: events[2].from_status: additive locked-state context for internal_note
+T12-SCENARIO 06b-internal-note ACCEPTED: events[2].to_status: additive locked-state context for internal_note
+T12-SCENARIO 06b-internal-note: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 07a-status-with-note DIFF: ticket[0].ts[3]: null-ness differs (legacy=NULL, feature='2026-11-08 19:57:38')
+T12-SCENARIO 07a-status-with-note: FAIL (1 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 07b-priority-by-manager ACCEPTED: 07b: out-of-group support manager could not change the IT ticket; status, assignee and priority remained unchanged
+T12-SCENARIO 07b-priority-by-manager: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [fixture] tid=1 update_rows=1 row={"id":1,"status":"resolved","assigned_to":102,"resolved_at":"2026-11-08 15:27:40"}
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [fixture] tid=1 update_rows=1 row={"id":1,"status":"resolved","assigned_to":102,"resolved_at":"2026-11-08 15:27:40"}
+T12-SCENARIO 08a-supervisor-approve ACCEPTED: activity_logs[1].action_code: supervisor_decision -> ticket_supervisor_approved (more specific RC audit code)
+T12-SCENARIO 08a-supervisor-approve: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 08b-supervisor-rework ACCEPTED: activity_logs[1].action_code: supervisor_decision -> ticket_supervisor_rework (more specific RC audit code)
+T12-SCENARIO 08b-supervisor-rework: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 08c-supervisor-reopen ACCEPTED: activity_logs[1].action_code: supervisor_decision -> ticket_supervisor_approved (more specific RC audit code)
+T12-SCENARIO 08c-supervisor-reopen ACCEPTED: activity_logs[2].action_code: ticket_reopened -> ticket_reopened_by_supervisor (more specific RC audit code)
+T12-SCENARIO 08c-supervisor-reopen: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=2 tickets_count=2 max_id=2
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=2 tickets_count=2 max_id=2
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[4].from_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[4].to_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[6].from_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[6].to_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve DIFF: ticket[0].ts[3]: null-ness differs (legacy=NULL, feature='2026-11-08 19:57:43')
+T12-SCENARIO 09-bulk-resolve DIFF: ticket[1].ts[3]: null-ness differs (legacy=NULL, feature='2026-11-08 19:57:43')
+T12-SCENARIO 09-bulk-resolve: FAIL (2 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 10a-auto-close-rated: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 10b-auto-close-unrated: PASS
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 11-supervisor-assignment: PASS (feature-only MariaDB HTTP integration)
+T12 SUMMARY: ["01-create:PASS","02-direct-cancel:PASS","03a-cancel-request-reject:PASS","03b-cancel-request-approve:PASS","04-claim-ordering:PASS","05-reopen:PASS","06a-reply-to-requester:PASS","06b-internal-note:PASS","07a-status-with-note:FAIL","07b-priority-by-manager:PASS","08a-supervisor-approve:PASS","08b-supervisor-rework:PASS","08c-supervisor-reopen:PASS","09-bulk-resolve:FAIL","10a-auto-close-rated:PASS","10b-auto-close-unrated:PASS","11-supervisor-assignment:PASS"]
+T12 RESULT: 2 SCENARIO(S) FAILED
