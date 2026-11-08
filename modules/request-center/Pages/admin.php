@@ -56,7 +56,7 @@ header('Cache-Control: private, no-store');
 </style>
 </head>
 <body>
-<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escapeAdmin($user['full_name'] ?? $user['username'] ?? '') ?> · مدیریت اصلی ماژول</small></div><a class="button secondary" href="index.php">بازگشت به سامانه</a></div>
+<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escapeAdmin($user['full_name'] ?? $user['username'] ?? '') ?> · مدیریت اصلی ماژول</small></div><a class="button secondary" href="request-center.php">بازگشت به سامانه</a></div>
 <?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'admin' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeAdmin($key) ?>"><?= $escapeAdmin($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 </header>
 <main>
