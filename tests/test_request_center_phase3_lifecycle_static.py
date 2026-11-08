@@ -256,6 +256,22 @@ def test_public_management_and_bulk_replies_start_first_response_clock():
     assert "$lockedReply['first_response_at']" in ticket_action
 
 
+def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshots():
+    workflow = source("modules/request-center/WorkflowService.php")
+    assert "service_group FROM tickets WHERE id = ? LIMIT 1" in workflow
+    assert "'service_group'], true" in workflow
+    for path in (
+        "modules/request-center/Actions/ticket-actions.php",
+        "modules/request-center/Actions/supervisor-actions.php",
+        "modules/request-center/Actions/bulk-actions.php",
+    ):
+        action = source(path)
+        transition_count = action.count("->transition(")
+        assert transition_count > 0
+        assert action.count("'requester_id' =>") >= transition_count
+        assert action.count("'service_group' =>") >= transition_count
+
+
 def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
     workflow = source("modules/request-center/WorkflowService.php")
     assert "function appendMessage(" in workflow
