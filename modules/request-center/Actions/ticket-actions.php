@@ -257,7 +257,7 @@ if (!defined('APP_ROOT')) {
             }
             db_commit_or_fail('ticket:create_ticket');
             flash('success', 'درخواست ' . ticket_number($ticketId) . ' ثبت شد.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'cancel_ticket') {
@@ -348,7 +348,7 @@ if (!defined('APP_ROOT')) {
                 db_commit_or_fail('ticket:cancel_request_submitted');
                 flash('info', 'درخواست لغو ثبت شد؛ تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.');
             }
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'decide_ticket_cancellation') {
@@ -463,7 +463,7 @@ if (!defined('APP_ROOT')) {
                 db_commit_or_fail('ticket:cancel_request_rejected');
                 flash('info', $isStaleClosed ? 'درخواست لغو قدیمی پاک‌سازی شد.' : 'درخواست لغو رد شد و درخواست برای ادامهٔ رسیدگی فعال ماند.');
             }
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'claim_ticket') {
@@ -519,7 +519,7 @@ if (!defined('APP_ROOT')) {
             request_center_notify_ticket_parties($ticketId, 'ticket_updated', 'درخواست به کارشناس ارجاع شد', 'درخواست ' . ticket_number($ticketId) . ' توسط ' . ($claimUser['full_name'] ?? 'کارشناس') . ' برای رسیدگی برداشته شد.', (int) $claimUser['id']);
             db_commit_or_fail('ticket:claim_ticket');
             flash('success', 'درخواست به شما ارجاع شد.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'reopen_ticket') {
@@ -593,7 +593,7 @@ if (!defined('APP_ROOT')) {
             request_center_notify_ticket_staff($ticketId, 'ticket_reopened', 'کاربر اعلام کرد مشکل حل نشده است', 'درخواست ' . ticket_number($ticketId) . ' توسط ثبت‌کننده بازگشایی شد: ' . $reason, (int) $user['id']);
             db_commit_or_fail('ticket:reopen_ticket');
             flash('info', 'درخواست دوباره برای رسیدگی ارسال شد.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'reply') {
@@ -784,7 +784,7 @@ if (!defined('APP_ROOT')) {
             }
             db_commit_or_fail('ticket:reply');
             flash('success', 'پاسخ شما ثبت شد.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'update_ticket') {
@@ -1015,5 +1015,5 @@ if (!defined('APP_ROOT')) {
             }
             db_commit_or_fail('ticket:update_ticket');
             flash('success', 'تغییرات درخواست ذخیره شد.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
