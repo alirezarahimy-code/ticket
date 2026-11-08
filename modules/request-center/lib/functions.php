@@ -178,7 +178,11 @@ function notify_ticket_resolved(int $ticketId, int $actorId): void
     if (!$resolvedTicket) {
         return;
     }
-    notify_user((int) $resolvedTicket['requester_id'], 'ticket_resolved', 'درخواست شما انجام شد', 'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.', $ticketId);
+    $autoCloseDays = max(0, (int) (setting('ticket_auto_close_days', '3') ?? '3'));
+    $autoCloseNotice = $autoCloseDays > 0
+        ? ' طبق سیاست سامانه، اگر ظرف ' . $autoCloseDays . ' روز امتیاز رضایت ثبت نکنید، درخواست به‌صورت خودکار بسته می‌شود.'
+        : '';
+    notify_user((int) $resolvedTicket['requester_id'], 'ticket_resolved', 'درخواست شما انجام شد', 'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.' . $autoCloseNotice, $ticketId);
     notify_ticket_staff($ticketId, 'ticket_resolved', 'درخواست حل شد و منتظر امتیاز کاربر است', 'درخواست ' . ticket_number($ticketId) . ' حل‌شده است و پس از ثبت امتیاز کاربر قابل تأیید نهایی است.', $actorId);
 }
 
@@ -187,7 +191,7 @@ function report_query_filters(array $user): array
     [$scope, $params] = ticket_scope($user);
     $conditions = $scope !== '' ? [substr($scope, 6)] : [];
     $ticketColumns = db_table_columns('tickets');
-    $status = valid_choice((string) ($_GET['status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'active', 'all'], '');
+    $status = valid_choice((string) ($_GET['status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected', 'active', 'all'], '');
     if ($status === 'active') {
         // «در حال پیگیری» = همهٔ وضعیت‌های باز (کارت داشبورد)
         $conditions[] = 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")';
