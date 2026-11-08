@@ -196,7 +196,7 @@ if ($page === 'ticket') {
     $eventParams = [(int) $ticket['id']];
     if (!$canSeeInternal) {
         // Internal notes are not part of the requester-visible activity stream.
-        $eventConditions[] = "e.event_type <> 'internal_note'";
+        $eventConditions[] = "e.event_type NOT IN ('internal_note', 'sla_alert', 'ola_alert')";
     }
     if ($eventSearch !== '') {
         $needle = '%' . logging_utf8_substr($eventSearch, 0, 100) . '%';
@@ -227,7 +227,7 @@ if ($page === 'ticket') {
     echo '<section class="card event-log"><div class="section-title"><div><h3>ردگیری و سوابق انجام کار</h3><p class="muted">' . number_format($eventTotal) . ' رخداد مطابق فیلتر؛ صفحه ' . number_format($eventPage) . ' از ' . number_format($eventPages) . '. جزئیات قابل‌مشاهده بر اساس سطح دسترسی پالایش می‌شود.</p></div></div>';
     echo '<form method="get" class="inline-form"><input type="hidden" name="page" value="ticket"><input type="hidden" name="id" value="' . (int) $ticket['id'] . '"><label>جست‌وجوی رویداد<input type="search" name="event_q" maxlength="100" value="' . e($eventSearch) . '" placeholder="نوع رویداد، وضعیت، توضیحات یا عامل"></label><button class="button secondary" type="submit">جست‌وجو</button>' . ($eventSearch !== '' ? '<a class="button secondary" href="request-center.php?page=ticket&amp;id=' . (int) $ticket['id'] . '">پاک‌کردن</a>' : '') . '</form><div class="event-list">';
     foreach ($ticketEvents as $event) {
-        $eventText = ['created' => 'درخواست ثبت شد', 'assigned' => 'درخواست به کارشناس ارجاع شد', 'status_changed' => 'وضعیت درخواست تغییر کرد', 'reply' => 'پاسخ ثبت شد', 'internal_note' => 'یادداشت داخلی ثبت شد', 'claimed' => 'درخواست توسط کارشناس برداشته شد', 'rated' => 'امتیاز رضایت کاربر ثبت شد', 'reopened_by_user' => 'کاربر اعلام کرد مشکل حل نشده است', 'supervisor_approved' => 'تأیید نهایی و بسته‌شدن', 'supervisor_rework' => 'برگشت برای اصلاح توسط سوپروایزر', 'supervisor_reopened' => 'بازگشایی رسمی توسط سوپروایزر', 'cancelled_by_requester' => 'لغو مستقیم توسط ثبت‌کننده پیش از ارجاع', 'ticket_rejected' => 'رد درخواست پس از ارزیابی اولیه', 'cancellation_requested' => 'درخواست لغو در انتظار تصمیم مسئول', 'cancellation_approved' => 'تأیید لغو توسط مسئول رسیدگی', 'cancellation_rejected' => 'رد درخواست لغو و ادامهٔ رسیدگی', 'auto_assigned' => 'ارجاع خودکار به مسئول حوزه', 'auto_closed' => 'بسته‌شدن خودکار (بدون امتیاز کاربر)', 'bulk_status_changed' => 'تغییر وضعیت گروهی', 'priority_changed' => 'اولویت تغییر کرد'][$event['event_type']] ?? $event['event_type'];
+        $eventText = ['created' => 'درخواست ثبت شد', 'assigned' => 'درخواست به کارشناس ارجاع شد', 'status_changed' => 'وضعیت درخواست تغییر کرد', 'reply' => 'پاسخ ثبت شد', 'internal_note' => 'یادداشت داخلی ثبت شد', 'claimed' => 'درخواست توسط کارشناس برداشته شد', 'rated' => 'امتیاز رضایت کاربر ثبت شد', 'reopened_by_user' => 'کاربر اعلام کرد مشکل حل نشده است', 'supervisor_approved' => 'تأیید نهایی و بسته‌شدن', 'supervisor_rework' => 'برگشت برای اصلاح توسط سوپروایزر', 'supervisor_reopened' => 'بازگشایی رسمی توسط سوپروایزر', 'cancelled_by_requester' => 'لغو مستقیم توسط ثبت‌کننده پیش از ارجاع', 'ticket_rejected' => 'رد درخواست پس از ارزیابی اولیه', 'cancellation_requested' => 'درخواست لغو در انتظار تصمیم مسئول', 'cancellation_approved' => 'تأیید لغو توسط مسئول رسیدگی', 'cancellation_rejected' => 'رد درخواست لغو و ادامهٔ رسیدگی', 'auto_assigned' => 'ارجاع خودکار به مسئول حوزه', 'auto_closed' => 'بسته‌شدن خودکار (بدون امتیاز کاربر)', 'sla_alert' => 'هشدار SLA ثبت شد', 'ola_alert' => 'هشدار OLA ثبت شد', 'bulk_status_changed' => 'تغییر وضعیت گروهی', 'priority_changed' => 'اولویت تغییر کرد'][$event['event_type']] ?? $event['event_type'];
         $eventDetails = json_decode((string) ($event['details'] ?? ''), true);
         $eventDetails = is_array($eventDetails) ? $eventDetails : [];
         $visibleDetails = [];
@@ -237,7 +237,7 @@ if ($page === 'ticket') {
                 'note', 'assigned_to', 'requested_at', 'actor_id', 'message_id', 'is_internal',
                 'due_at', 'sla_paused_at', 'sla_pause_minutes', 'ola_policy_id',
                 'ola_response_due_at', 'ola_due_at', 'ola_escalation_1_at', 'ola_escalation_2_at',
-                'first_response_set',
+                'first_response_set', 'alert_type',
             ]);
         }
         foreach ($eventDetails as $detailKey => $detailValue) {
