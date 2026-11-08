@@ -65,6 +65,51 @@ function smoke_http_post(string $url, array $form, array $headers = []): array
     return ['status' => (int) $match[1], 'body' => (string) $body, 'headers' => $headersOut, 'location' => $location];
 }
 
+function smoke_http_multipart_post(string $url, array $form, string $fileField, string $filePath, string $filename, string $mime, array $headers = []): array
+{
+    $boundary = '---------------------------' . bin2hex(random_bytes(12));
+    $body = '';
+    foreach ($form as $name => $value) {
+        $body .= '--' . $boundary . "\r\n";
+        $body .= 'Content-Disposition: form-data; name="' . addcslashes((string) $name, "\\\"") . '"' . "\r\n\r\n";
+        $body .= (string) $value . "\r\n";
+    }
+    $contents = file_get_contents($filePath);
+    if ($contents === false) {
+        throw new RuntimeException('Could not read multipart smoke upload.');
+    }
+    $body .= '--' . $boundary . "\r\n";
+    $body .= 'Content-Disposition: form-data; name="' . addcslashes($fileField, "\\\"") . '"; filename="' . addcslashes($filename, "\\\"") . '"' . "\r\n";
+    $body .= 'Content-Type: ' . $mime . "\r\n\r\n" . $contents . "\r\n";
+    $body .= '--' . $boundary . "--\r\n";
+    $headers[] = 'Content-Type: multipart/form-data; boundary=' . $boundary;
+    $headers[] = 'Content-Length: ' . strlen($body);
+    $headers[] = 'Connection: close';
+    $context = stream_context_create([
+        'http' => [
+            'method' => 'POST',
+            'timeout' => 20,
+            'ignore_errors' => true,
+            'follow_location' => 0,
+            'header' => implode("\r\n", $headers) . "\r\n",
+            'content' => $body,
+        ],
+    ]);
+    $responseBody = @file_get_contents($url, false, $context);
+    $responseHeaders = $http_response_header ?? [];
+    $first = (string) ($responseHeaders[0] ?? '');
+    if (!preg_match('/\\s([0-9]{3})\\s/', $first, $match)) {
+        throw new RuntimeException('No HTTP status from multipart POST ' . $url . '; body=' . substr((string) $responseBody, 0, 300));
+    }
+    $location = '';
+    foreach ($responseHeaders as $header) {
+        if (stripos((string) $header, 'location:') === 0) {
+            $location = trim(substr((string) $header, 9));
+        }
+    }
+    return ['status' => (int) $match[1], 'body' => (string) $responseBody, 'headers' => $responseHeaders, 'location' => $location];
+}
+
 function smoke_wait_server(int $port): void
 {
     for ($i = 0; $i < 60; $i++) {
@@ -269,7 +314,10 @@ try {
     }
     smoke_check($csrf !== '', 'independent creation form exposes a session-bound CSRF token');
     smoke_check($requestToken !== '', 'independent creation form exposes a one-time submission token');
-    $create = smoke_http_post('http://' . $address . '/request-center.php', [
+    $uploadContents = 'Request Center phase-3 attachment smoke';
+    $uploadPath = tempnam(sys_get_temp_dir(), 'rc-upload-');
+    file_put_contents($uploadPath, $uploadContents);
+    $create = smoke_http_multipart_post('http://' . $address . '/request-center.php', [
         'action' => 'create_ticket',
         'subject' => 'RC phase-3 independent POST smoke',
         'description' => 'Created via request-center.php POST path (same protocol as legacy)',
@@ -282,7 +330,8 @@ try {
         'department_id' => $smokeDepartmentId,
         'csrf' => $csrf,
         'request_token' => $requestToken,
-    ], ['Cookie: ' . $cookie]);
+    ], 'attachment', $uploadPath, 'rc-phase3-attachment.txt', 'text/plain', ['Cookie: ' . $cookie]);
+    @unlink($uploadPath);
     if ($create['status'] !== 302) {
         $logTail = '';
         $logFile = $root . '/storage/logs/app.log';
@@ -306,6 +355,18 @@ try {
     $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase-3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
     smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');
     smoke_check((string) ($ticketRow['ticket_type'] ?? '') === 'request', 'independent create_ticket stored the requested ticket type');
+    $attachmentQuery = $pdo->prepare('SELECT a.id, a.stored_name FROM ticket_attachments a JOIN ticket_messages m ON m.id = a.message_id WHERE m.ticket_id = ? ORDER BY a.id DESC LIMIT 1');
+    $attachmentQuery->execute([(int) $ticketRow['id']]);
+    $attachmentRow = $attachmentQuery->fetch(PDO::FETCH_ASSOC);
+    smoke_check(is_array($attachmentRow), 'independent create_ticket persisted the uploaded attachment');
+    if (is_array($attachmentRow)) {
+        $attachmentDownload = smoke_http('http://' . $address . '/request-center.php?action=download_attachment&id=' . (int) $attachmentRow['id'], ['Cookie: ' . $cookie]);
+        smoke_check($attachmentDownload['status'] === 200 && $attachmentDownload['body'] === $uploadContents, 'authorized independent attachment download returns the original bytes (status ' . $attachmentDownload['status'] . ')');
+        $storedPath = $root . '/storage/uploads/' . basename((string) $attachmentRow['stored_name']);
+        if (is_file($storedPath)) {
+            @unlink($storedPath);
+        }
+    }
 
     // 7) Phase 3 — exercise all four independent workspaces and their operational pages.
     $createdTicketId = (int) ($ticketRow['id'] ?? 0);
