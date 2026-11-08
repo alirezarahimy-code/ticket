@@ -63,7 +63,8 @@ def test_lifecycle_actions_return_to_independent_workspaces():
     assert "function request_center_ticket_return_url(int $ticketId): string" in shared
     assert "'page' => 'ticket'" in shared
     assert "rc_return_workspace" in shared
-    assert "request-center.php?page=supervisor" in source(paths[1])
+    assert "redirect(request_center_ticket_return_url($ticketId))" in source(paths[1])
+    assert "'request-center.php?workspace=supervisor'" in source("modules/request-center/post-handler.php")
     assert "request-center.php?page=queue" in source(paths[2])
     assert "request-center.php?page=services" in source(paths[3])
 
@@ -468,7 +469,7 @@ def test_lifecycle_post_errors_preserve_supervisor_and_agent_queue_context():
     handler = source("modules/request-center/post-handler.php")
     assert "'supervisor_decision', 'supervisor_reopen' => $ticketId > 0" in handler
     assert "? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor'" in handler
-    assert "'rc_return_queue' ?? 'all'" in handler
+    assert "'rc_return_queue'] ?? 'all'" in handler
     assert "'rc_return_p' ?? 1" in handler
     assert "rawurlencode(" in handler
     supervisor_actions = source("modules/request-center/Actions/supervisor-actions.php")
