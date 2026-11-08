@@ -498,7 +498,7 @@ def test_calendar_ticket_links_return_to_originating_calendar_context():
     assert calendar.count("$calendarTicketUrl((int) $event[") >= 6
     assert "$calendarTicketUrl((int) $upcoming['ticket_id'])" in calendar
     assert "'calendar' => 1" in calendar
-    assert "'rc_return_calendar' ?? ''" in helpers
+    assert "$_POST['rc_return_calendar'] ?? ''" in helpers
     assert "'calendar'] = 1" in helpers
     assert "'calendar'] = 1" in detail
     assert "rc_return_jmonth" in helpers and "rc_return_view" in helpers and "rc_return_kind" in helpers
