@@ -832,7 +832,10 @@ try {
         $agentMessage = $independentPdo->query('SELECT is_internal, body FROM ticket_messages WHERE ticket_id = ' . (int) $agentTicket . ' ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
         if ($agentResponse['status'] !== 302 || !$agentMessage || (int) $agentMessage['is_internal'] !== 0
             || (string) $agentMessage['body'] !== 'پاسخ عمومی کارشناس از ورودی مستقل T12') {
-            t12s_fail('13-independent-post agent public reply failed: HTTP ' . $agentResponse['status']);
+            t12s_fail('13-independent-post agent public reply failed: HTTP ' . $agentResponse['status']
+                . ', message=' . json_encode($agentMessage, JSON_UNESCAPED_UNICODE)
+                . ', ticket=' . json_encode($independentPdo->query('SELECT id, status, assigned_to, first_response_at FROM tickets WHERE id = ' . (int) $agentTicket)->fetch(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE)
+                . ', app_log=' . t12s_clone_log_tail($independentApp, 12));
         }
         $independentEvidence[] = 'agent:public-reply:PASS';
         t12s_log('T12-SCENARIO 13-independent-post agent: PASS');
