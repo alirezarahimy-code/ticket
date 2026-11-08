@@ -397,3 +397,135 @@ function request_center_ticket_number_next(string $prefix): string
         throw $exception;
     }
 }
+
+/**
+ * Idempotent, failure-isolated notification for Request Center lifecycle work.
+ * A unique POST operation ID makes repeated delivery of the same event safe.
+ */
+function request_center_notify_user(int $userId, string $type, string $title, string $body, int $ticketId): void
+{
+    if ($userId <= 0) {
+        return;
+    }
+    try {
+        $operationId = function_exists('logging_operation_id') ? (string) logging_operation_id() : '';
+        if ($operationId === '') {
+            $operationId = (string) ($GLOBALS['__logging_parent_event_id'] ?? '');
+        }
+        if ($operationId === '') {
+            $query = db()->prepare('SELECT updated_at FROM tickets WHERE id = ? LIMIT 1');
+            $query->execute([$ticketId]);
+            $operationId = (string) ($query->fetchColumn() ?: 'ticket-' . $ticketId);
+        }
+        $key = hash('sha256', implode('|', ['request-center', $ticketId, $type, $operationId, $userId]));
+        notify_user($userId, $type, $title, $body, $ticketId, $key);
+    } catch (Throwable $exception) {
+        try {
+            app_error_log('Request Center notification skipped: ticket=' . $ticketId . '; type=' . $type . '; recipient=' . $userId . '; error=' . get_class($exception));
+        } catch (Throwable) {
+        }
+    }
+}
+
+/** Notify all permitted parties without allowing notification failure to roll back the lifecycle transition. */
+function request_center_notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
+{
+    try {
+        $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
+        $query->execute([$ticketId]);
+        $ticket = $query->fetch(PDO::FETCH_ASSOC);
+        if (!$ticket) {
+            return;
+        }
+        $supervisorQuery = db()->query('SELECT id FROM users WHERE role = "supervisor" AND is_active = 1');
+        $supervisorIds = array_map('intval', $supervisorQuery->fetchAll(PDO::FETCH_COLUMN));
+        $unassignedAgentIds = [];
+        if ($type === 'ticket_created' && empty($ticket['assigned_to'])) {
+            $unassignedAgentIds = ticket_unassigned_notify_candidates();
+        }
+        $recipients = ticket_notification_recipients(
+            $ticket,
+            array_merge(
+                [(int) $ticket['requester_id'], (int) $ticket['assigned_to'], (int) $ticket['manager_user_id'], (int) $ticket['handling_manager_id']],
+                $supervisorIds,
+                $unassignedAgentIds
+            )
+        );
+        foreach ($recipients as $recipientId) {
+            if ($excludeUserId === null || $recipientId !== $excludeUserId) {
+                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId);
+            }
+        }
+    } catch (Throwable $exception) {
+        try {
+            app_error_log('Request Center party notification lookup failed: ticket=' . $ticketId . '; type=' . $type . '; error=' . get_class($exception));
+        } catch (Throwable) {
+        }
+    }
+}
+
+/** Notify only permitted staff; the requester is deliberately excluded. */
+function request_center_notify_ticket_staff(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
+{
+    try {
+        $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
+        $query->execute([$ticketId]);
+        $ticket = $query->fetch(PDO::FETCH_ASSOC);
+        if (!$ticket) {
+            return;
+        }
+        $supervisorQuery = db()->query('SELECT id FROM users WHERE role = "supervisor" AND is_active = 1');
+        $supervisorIds = array_map('intval', $supervisorQuery->fetchAll(PDO::FETCH_COLUMN));
+        $unassignedAgentIds = empty($ticket['assigned_to']) ? ticket_unassigned_notify_candidates() : [];
+        $recipients = ticket_notification_recipients(
+            $ticket,
+            array_merge(
+                [(int) $ticket['assigned_to'], (int) $ticket['manager_user_id'], (int) $ticket['handling_manager_id']],
+                $supervisorIds,
+                $unassignedAgentIds
+            ),
+            null,
+            true
+        );
+        foreach ($recipients as $recipientId) {
+            if ($excludeUserId === null || $recipientId !== $excludeUserId) {
+                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId);
+            }
+        }
+    } catch (Throwable $exception) {
+        try {
+            app_error_log('Request Center staff notification lookup failed: ticket=' . $ticketId . '; type=' . $type . '; error=' . get_class($exception));
+        } catch (Throwable) {
+        }
+    }
+}
+
+/** Resolution notice split between requester and staff, with isolated delivery failures. */
+function request_center_notify_ticket_resolved(int $ticketId, int $actorId): void
+{
+    try {
+        $ticket = fetch_ticket($ticketId);
+        if (!$ticket) {
+            return;
+        }
+        request_center_notify_user(
+            (int) $ticket['requester_id'],
+            'ticket_resolved',
+            'درخواست شما انجام شد',
+            'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.',
+            $ticketId
+        );
+        request_center_notify_ticket_staff(
+            $ticketId,
+            'ticket_resolved',
+            'درخواست حل شد و منتظر امتیاز کاربر است',
+            'درخواست ' . ticket_number($ticketId) . ' حل‌شده است و پس از ثبت امتیاز کاربر قابل تأیید نهایی است.',
+            $actorId
+        );
+    } catch (Throwable $exception) {
+        try {
+            app_error_log('Request Center resolved notification failed: ticket=' . $ticketId . '; error=' . get_class($exception));
+        } catch (Throwable) {
+        }
+    }
+}
