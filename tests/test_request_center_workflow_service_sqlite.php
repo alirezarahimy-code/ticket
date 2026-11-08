@@ -17,7 +17,7 @@ $pdo->exec('CREATE TABLE tickets (
     id INTEGER PRIMARY KEY, status TEXT NOT NULL, requester_id INTEGER NOT NULL,
     assigned_to INTEGER NULL, first_response_at TEXT NULL, resolved_at TEXT NULL,
     cancel_requested_at TEXT NULL, cancel_requested_by INTEGER NULL, cancel_request_reason TEXT NULL,
-    priority TEXT NOT NULL, department_id INTEGER NULL, due_at TEXT NULL,
+    priority TEXT NOT NULL, department_id INTEGER NULL, service_group TEXT NULL, due_at TEXT NULL,
     assigned_at TEXT NULL, closed_at TEXT NULL, rejected_at TEXT NULL, supervisor_id INTEGER NULL,
     supervisor_approved_at TEXT NULL, supervisor_note TEXT NULL,
     sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
@@ -46,6 +46,7 @@ $insert->execute([15, 'assigned', 24, 34, 'normal', null]);
 $insert->execute([16, 'closed', 25, 26, 'normal', null]);
 $insert->execute([17, 'cancelled', 27, null, 'normal', null]);
 $insert->execute([18, 'rejected', 28, null, 'normal', '2026-11-01 14:00:00']);
+$pdo->exec("UPDATE tickets SET service_group = 'it' WHERE id = 6");
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
@@ -127,6 +128,14 @@ $cleared = $pdo->query('SELECT cancel_requested_at, cancel_requested_by, cancel_
 workflow_check($cleared['cancel_requested_at'] === null && $cleared['cancel_requested_by'] === null
     && $cleared['cancel_request_reason'] === null,
     'rejected cancellation metadata is cleared atomically');
+$pdo->beginTransaction();
+$scopeGuardRejected = !$service->transition(6, 'assigned', 'in_progress', [], 'standard', [
+    'service_group' => 'support',
+]);
+workflow_check($scopeGuardRejected,
+    'lifecycle transition refuses a stale service-group scope snapshot');
+$pdo->rollBack();
+
 workflow_check(
     RequestCenterWorkflowService::allowedTransitions('pending') === ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
     'legacy pending has exit paths'
