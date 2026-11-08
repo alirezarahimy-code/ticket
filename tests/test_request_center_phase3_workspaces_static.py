@@ -58,4 +58,9 @@ def test_admin_workspace_has_scoped_audit_and_separate_configuration_destination
     assert "SELECT id, name, department_id, priority" in admin_action
     assert "save_audit_required" in admin_action
     assert "'update_ola_policy'" in source("modules/request-center/post-handler.php")
+    assert 'name="action" value="save_rc_work_hours"' in admin
+    assert "sla.work_start_hour" in admin_action
+    assert "sla.work_end_hour" in admin_action
+    assert "count($weekendDays) >= 7" in admin_action
+    assert "'save_rc_work_hours'" in source("modules/request-center/post-handler.php")
     assert "name=\"action\" value=\"add_service\"" in services
