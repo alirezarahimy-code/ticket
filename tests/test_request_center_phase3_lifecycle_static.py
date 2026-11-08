@@ -22,6 +22,30 @@ def test_lifecycle_pages_are_routed_inside_request_center():
     assert legacy.index("Early compatibility bridge") < legacy.index("ticket_number_ensure_schema()")
 
 
+def test_attachment_and_report_endpoints_are_independent():
+    router = source("request-center.php")
+    assert "request_center_download_attachment(require_login())" in router
+    assert "request_center_export_report(require_permission('reports.view'))" in router
+    legacy = source("index.php")
+    assert "request-center.php?action=download_attachment" in legacy
+    assert "request-center.php?action=export_report" in legacy
+    assert legacy.index("action') ?? '') === 'download_attachment'") < legacy.index("ticket_number_ensure_schema()")
+    assert legacy.index("action') ?? '') === 'export_report'") < legacy.index("ticket_number_ensure_schema()")
+    for path in (
+        "modules/request-center/Pages/detail.php",
+        "modules/request-center/Pages/index.php",
+    ):
+        page = source(path)
+        assert "request-center.php?action=download_attachment" in page
+        assert "index.php?action=download_attachment" not in page
+    for path in (
+        "modules/request-center/Pages/admin.php",
+        "modules/request-center/Pages/supervisor-workspace.php",
+    ):
+        assert 'href="index.php"' not in source(path)
+    assert 'href="request-center.php?action=export_report' in source("modules/request-center/Pages/reports.php")
+
+
 def test_lifecycle_actions_return_to_independent_workspaces():
     paths = (
         "modules/request-center/Actions/ticket-actions.php",
