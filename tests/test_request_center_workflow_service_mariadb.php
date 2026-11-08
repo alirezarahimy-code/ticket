@@ -152,6 +152,14 @@ $pdo->rollBack();
 mariadb_workflow_check(!$staleDeadline, 'SLA deadline guard rejects stale computed data under MariaDB row lock');
 
 $pdo->beginTransaction();
+$pdo->exec("UPDATE tickets SET ola_due_at = '2026-11-13 10:00:00' WHERE id = 4");
+$staleOla = $service->transition(4, 'assigned', 'in_progress', [], 'standard', [
+    'ola_due_at' => '2026-11-12 10:00:00',
+]);
+$pdo->rollBack();
+mariadb_workflow_check(!$staleOla, 'OLA deadline guard rejects stale computed data under MariaDB row lock');
+
+$pdo->beginTransaction();
 $staleStatus = $service->transition(1, 'assigned', 'resolved');
 $pdo->rollBack();
 mariadb_workflow_check(!$staleStatus, 'stale expected status is rejected');
