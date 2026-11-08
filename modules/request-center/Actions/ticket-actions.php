@@ -300,8 +300,27 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $cancelUser['id'], 'درخواست پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason]);
-                save_audit_required((int) $cancelUser['id'], 'ticket_cancelled_by_requester', $ticketId, ['reason' => $reason]);
-                log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancelled_by_requester', $oldStatus, 'cancelled', ['reason' => $reason, 'mode' => 'direct_before_assignment']);
+                $cancelSlaOlaAudit = [
+                    'due_at' => $cancelDueAt,
+                    'sla_paused_at' => $cancelPauseAt,
+                    'sla_pause_minutes' => $cancelPauseMinutes,
+                    'ola_policy_id' => $cancelOla['policy_id'],
+                    'ola_response_due_at' => $cancelOla['response_due_at'],
+                    'ola_due_at' => $cancelOla['due_at'],
+                    'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
+                ];
+                save_audit_required((int) $cancelUser['id'], 'ticket_cancelled_by_requester', $ticketId, [
+                    'reason' => $reason,
+                    'from_status' => $oldStatus,
+                    'to_status' => 'cancelled',
+                    'sla_ola' => $cancelSlaOlaAudit,
+                ]);
+                log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancelled_by_requester', $oldStatus, 'cancelled', [
+                    'reason' => $reason,
+                    'mode' => 'direct_before_assignment',
+                    'sla_ola' => $cancelSlaOlaAudit,
+                ]);
                 request_center_notify_ticket_parties($ticketId, 'ticket_cancelled', 'درخواست لغو شد', 'درخواست ' . ticket_number($ticketId) . ' پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason, (int) $cancelUser['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_cancelled', 'لغو درخواست ' . ticket_number($ticketId), (int) $cancelUser['id'], $ticketId, $reason);
                 db_commit_or_fail('ticket:cancelled_by_requester');
