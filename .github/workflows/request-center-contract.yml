@@ -41,6 +41,7 @@ on:
       - 'actions/supervisor-actions.php'
       - 'actions/bulk-actions.php'
       - 'cron/ticket_auto_close.php'
+      - 'cron/sla_maintenance.php'
       - 'lib/tickets-sla.php'
       - 'index.php'
       - 'lib/http-input.php'
