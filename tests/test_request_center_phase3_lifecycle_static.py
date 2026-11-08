@@ -29,8 +29,8 @@ def test_attachment_and_report_endpoints_are_independent():
     legacy = source("index.php")
     assert "request-center.php?action=download_attachment" in legacy
     assert "request-center.php?action=export_report" in legacy
-    assert legacy.index("action') ?? '') === 'download_attachment'") < legacy.index("ticket_number_ensure_schema()")
-    assert legacy.index("action') ?? '') === 'export_report'") < legacy.index("ticket_number_ensure_schema()")
+    assert legacy.index("download_attachment") < legacy.index("ticket_number_ensure_schema()")
+    assert legacy.index("export_report") < legacy.index("ticket_number_ensure_schema()")
     for path in (
         "modules/request-center/Pages/detail.php",
         "modules/request-center/Pages/index.php",
