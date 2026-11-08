@@ -353,6 +353,28 @@ try {
         smoke_check(false, 'independent create_ticket redirects to the ticket page. Location: ' . $create['location'] . $logTail);
     }
     smoke_check(str_starts_with($create['location'], 'request-center.php?page=ticket&id='), 'independent create_ticket redirects to the independent ticket page (Location: ' . $create['location'] . ')');
+    $legacyLifecycleRoutes = [
+        'new-ticket' => 'index.php?page=new-ticket',
+        'ticket' => 'index.php?page=ticket&id=' . (int) (preg_match('/[?&]id=([0-9]+)/', $create['location'], $createdIdMatch) ? $createdIdMatch[1] : 0),
+        'queue' => 'index.php?page=queue&queue=overdue',
+        'supervisor' => 'index.php?page=supervisor',
+        'services' => 'index.php?page=services',
+        'reports' => 'index.php?page=reports',
+        'analytics' => 'index.php?page=analytics',
+    ];
+    foreach ($legacyLifecycleRoutes as $legacyLabel => $legacyPath) {
+        $legacyResponse = smoke_http('http://' . $address . '/' . $legacyPath, ['Cookie: ' . $cookie]);
+        $legacyLocation = '';
+        foreach ($legacyResponse['headers'] as $header) {
+            if (stripos((string) $header, 'location:') === 0) {
+                $legacyLocation = trim(substr((string) $header, 9));
+                break;
+            }
+        }
+        smoke_check($legacyResponse['status'] === 302 && str_starts_with($legacyLocation, 'request-center.php?')
+            && str_contains($legacyLocation, 'page=' . $legacyLabel),
+            'legacy ' . $legacyLabel . ' URL is bridged to the independent Request Center entry (status ' . $legacyResponse['status'] . ')');
+    }
     $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase-3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
     smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');
     smoke_check((string) ($ticketRow['ticket_type'] ?? '') === 'request', 'independent create_ticket stored the requested ticket type');
