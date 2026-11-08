@@ -1414,6 +1414,14 @@ if ($page === 'new-ticket' && $user && !user_can($user, 'ticket.create')) {
     render_footer();
     exit;
 }
+// Request Center lifecycle GET routes are served by the independent module entry.
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && in_array((string) $page, ['new-ticket', 'ticket', 'queue', 'supervisor', 'services', 'reports', 'analytics'], true)) {
+    $requestCenterQuery = $_GET;
+    header('Location: request-center.php?' . http_build_query($requestCenterQuery), true, 302);
+    exit;
+}
+
 require __DIR__ . '/modules/request-center/Pages/create.php';
 require __DIR__ . '/modules/request-center/Pages/detail.php';
 require __DIR__ . '/modules/request-center/Pages/analytics.php';
