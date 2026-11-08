@@ -184,7 +184,10 @@ if (!defined('APP_ROOT')) {
             if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'closed') {
                 throw new RuntimeException('فقط درخواست بسته‌شده قابل بازگشایی رسمی است.');
             }
-            $note = post_value('supervisor_note', 'بازگشایی رسمی برای ادامه رسیدگی');
+            $note = post_value('supervisor_note');
+            if ($note === '' || mb_strlen($note, 'UTF-8') > 1000) {
+                throw new RuntimeException('برای بازگشایی رسمی، دلیل روشن حداکثر ۱۰۰۰ نویسه‌ای الزامی است.');
+            }
             $reopenStatus = !empty($ticket['assigned_to']) ? 'in_progress' : 'manager_review';
             $dueAt = business_due_at(priority_sla_minutes((string) $ticket['priority']))->format('Y-m-d H:i:s');
             $reopenOla = ola_deadlines((int) ($ticket['department_id'] ?? 0), (string) $ticket['priority'], (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('Y-m-d H:i:s'));
@@ -207,16 +210,26 @@ if (!defined('APP_ROOT')) {
                 'cancel_requested_at' => null,
                 'cancel_requested_by' => null,
                 'cancel_request_reason' => null,
-            ], 'supervisor_reopen');
+            ], 'supervisor_reopen', [
+                'requester_id' => $ticket['requester_id'],
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+                'cancel_requested_at' => $ticket['cancel_requested_at'] ?? null,
+            ]);
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
-            log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_reopened', 'closed', $reopenStatus, ['note' => $note]);
+            log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_reopened', 'closed', $reopenStatus, ['reason' => $note, 'note' => $note]);
             if ($hadStaleCancel) {
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'cancellation_rejected', 'closed', $reopenStatus, ['note' => 'پاک‌سازی خودکار درخواست لغو قدیمی هنگام بازگشایی رسمی']);
             }
-            save_audit((int) $supervisor['id'], 'ticket_reopened', $ticketId, ['note' => $note]);
-            notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد.', (int) $supervisor['id']);
+            save_audit_required((int) $supervisor['id'], 'ticket_reopened_by_supervisor', $ticketId, [
+                'reason' => $note,
+                'from_status' => 'closed',
+                'to_status' => $reopenStatus,
+            ]);
+            notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد. دلیل: ' . $note, (int) $supervisor['id']);
             db_commit('index.php');
             flash('info', $hadStaleCancel ? 'درخواست بازگشایی شد؛ درخواست لغو قدیمی هم پاک‌سازی شد.' : 'درخواست با تصمیم سوپروایزر بازگشایی شد.');
             redirect('index.php?page=supervisor');
