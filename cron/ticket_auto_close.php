@@ -67,7 +67,7 @@ foreach ($candidates as $row) {
             db()->rollBack();
             continue;
         }
-        log_ticket_event($ticketId, null, 'auto_closed', 'resolved', 'closed', ['days' => $days]);
+        log_ticket_event($ticketId, null, 'auto_closed', 'resolved', 'closed', ['reason' => 'بسته‌شدن خودکار: کاربر ظرف ' . $days . ' روز پس از حل‌شدن امتیاز ثبت نکرد.', 'days' => $days]);
         notify_user((int) $row['requester_id'], 'ticket_closed', 'درخواست شما بسته شد', 'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون پاسخ بسته شد. هنوز می‌توانید امتیاز رضایت خود را ثبت کنید.', $ticketId);
         notify_ticket_staff($ticketId, 'ticket_closed', 'درخواست به‌صورت خودکار بسته شد', 'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون امتیاز کاربر بسته شد.', null);
         record_asset_history((int) ($row['asset_id'] ?? 0), 'ticket_closed', 'بسته‌شدن خودکار درخواست ' . ticket_number($ticketId), null, $ticketId, 'بدون امتیاز کاربر');
