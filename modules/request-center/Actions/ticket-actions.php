@@ -394,6 +394,8 @@ if (!defined('APP_ROOT')) {
                     'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
                     'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
                 ], 'cancellation_approved', [
+                    'requester_id' => $ticket['requester_id'],
+                    'assigned_to' => $ticket['assigned_to'] ?? null,
                     'cancel_requested_at' => $requestAt,
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
@@ -421,7 +423,12 @@ if (!defined('APP_ROOT')) {
                 flash('success', 'درخواست لغو تأیید شد؛ تاریخچهٔ درخواست حفظ شده است.');
             } else {
                 $workflow = new RequestCenterWorkflowService(db());
-                $requestRejected = $workflow->rejectCancellation($ticketId, $oldStatus, $requestAt);
+                $requestRejected = $workflow->rejectCancellation($ticketId, $oldStatus, $requestAt, [
+                    'requester_id' => $ticket['requester_id'],
+                    'assigned_to' => $ticket['assigned_to'] ?? null,
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                ]);
                 if (!$requestRejected) {
                     throw new RuntimeException('درخواست لغو هم‌زمان بررسی شده است؛ صفحه را تازه کنید.');
                 }
