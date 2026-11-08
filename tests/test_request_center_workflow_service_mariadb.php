@@ -80,6 +80,7 @@ $insert->execute([2, 'in_progress', 102, 202, 'urgent', null]);
 $insert->execute([3, 'assigned', 103, 203, 'normal', '2026-11-01 10:00:00']);
 $insert->execute([4, 'assigned', 104, 204, 'normal', null]);
 $insert->execute([5, 'assigned', 105, 205, 'normal', null]);
+$insert->execute([6, 'closed', 106, 206, 'normal', null]);
 
 $service = new RequestCenterWorkflowService($pdo);
 
@@ -135,6 +136,26 @@ $stalePriority = $service->transition(
 );
 $pdo->rollBack();
 mariadb_workflow_check(!$stalePriority, 'optimistic priority guard rejects stale input');
+
+$pdo->beginTransaction();
+$staleReopen = $service->transition(
+    6,
+    'closed',
+    'in_progress',
+    ['closed_at' => null, 'resolved_at' => null, 'due_at' => '2026-11-09 10:00:00'],
+    'supervisor_reopen',
+    [
+        'requester_id' => 106,
+        'assigned_to' => 206,
+        'priority' => 'urgent',
+        'department_id' => null,
+        'cancel_requested_at' => null,
+    ]
+);
+$pdo->rollBack();
+mariadb_workflow_check(!$staleReopen, 'supervisor reopen rejects a stale priority snapshot under MariaDB row lock');
+$row = $pdo->query('SELECT status FROM tickets WHERE id = 6')->fetch();
+mariadb_workflow_check($row['status'] === 'closed', 'stale supervisor reopen leaves the closed ticket unchanged');
 
 // Cancellation-pending blocks ordinary transitions even after the row is locked.
 $blockedCancellation = false;
