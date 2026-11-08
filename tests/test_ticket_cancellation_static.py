@@ -111,7 +111,8 @@ module_ui = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
     "modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/bulk-actions.php"
 ))
 check("post_value('update_note')" in module_ui
-      and "پیام همراه تغییر" in module_ui
+      and 'name="update_note"' in module_ui
+      and "برای هر تغییر وضعیت، تخصیص و تغییر اولویت الزامی" in module_ui
       and "post_value('bulk_note')" in module_ui
       and "bulk_note" in module_ui,
       "waiting_user/resolved transitions require a visible note, including a shared bulk note")
