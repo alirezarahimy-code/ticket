@@ -44,7 +44,7 @@ if ($page === 'ticket') {
     $cancelDecidable = $cancelHasRequest
         && in_array((string) $ticket['status'], ticket_requester_cancelable_statuses(), true);
     $cancelStaleClosed = $cancelHasRequest
-        && in_array((string) $ticket['status'], ['closed', 'cancelled'], true);
+        && in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true);
     $cancelRequestPending = $cancelDecidable || $cancelStaleClosed;
     $canDecideCancellation = $cancelRequestPending
         && $handlerLevel !== ''
@@ -70,7 +70,7 @@ if ($page === 'ticket') {
     }
      if ($cancelRequestPending) {
         $pendingNote = $cancelStaleClosed
-            ? 'این درخواست مربوط به پیش از بسته‌شدن است و باید پاک‌سازی شود.'
+            ? ((string) $ticket['status'] === 'rejected' ? 'درخواست به‌صورت نهایی رد شده است و فقط پاک‌سازی درخواست لغو قدیمی مجاز است.' : 'این درخواست مربوط به پیش از بسته‌شدن است و باید پاک‌سازی شود.')
             : 'تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.';
         echo '<div class="card cancellation-pending"><h3>درخواست لغو در انتظار بررسی مسئول است</h3><p><strong>دلیل ثبت‌شده:</strong> ' . nl2br(e((string) ($ticket['cancel_request_reason'] ?? ''))) . '</p><small class="muted">درخواست در ' . e(persian_date((string) $ticket['cancel_requested_at'])) . ' ثبت شده است. ' . $pendingNote . '</small></div>';
     } elseif ($canCancelOwnTicket) {
@@ -100,7 +100,9 @@ if ($page === 'ticket') {
          }
          echo '</div><label>نظر اختیاری<textarea name="rating_comment" rows="3" placeholder="اگر توضیحی دارید بنویسید..."></textarea></label><button class="button" type="submit">ثبت امتیاز</button></form>';
      }
-     if ($ticket['status'] === 'cancelled') {
+     if ($ticket['status'] === 'rejected') {
+          echo '<div class="card rejection-notice"><h3>این درخواست پس از ارزیابی اولیه رد شده است</h3><p><strong>دلیل تصمیم:</strong></p><p>' . nl2br(e((string) ($ticket['supervisor_note'] ?? 'دلیل ثبت نشده'))) . '</p><small class="muted">زمان تصمیم: ' . e(persian_date((string) ($ticket['rejected_at'] ?? $ticket['updated_at']))) . '</small></div>';
+      } elseif ($ticket['status'] === 'cancelled') {
          echo '<div class="card"><p class="muted">این درخواست به درخواست ثبت‌کننده لغو شده است. سابقه برای پیگیری حفظ می‌شود؛ برای نیاز جدید، درخواست تازه ثبت کنید.</p></div>';
      } elseif ($requesterView && $ticket['status'] === 'resolved') {
          if (!$requiresRating) {
@@ -134,7 +136,7 @@ if ($page === 'ticket') {
     if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && ticket_assignee_is_eligible($ticket, $user, 'ticket_notification_user_can') && !$cancelHasRequest) {
         echo '<div class="card detail-card"><h3>برداشتن درخواست</h3><p class="muted">این درخواست هنوز کارشناس مسئول ندارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="claim_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><button class="button wide" type="submit">برداشتن و شروع رسیدگی</button></form></div>';
     }
-    if ($canManageTicket && $handlerLevel !== '' && $cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
+    if ($canManageTicket && $handlerLevel !== '' && $cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
         echo '<div class="card detail-card"><h3>مدیریت درخواست</h3><p class="muted">تا تصمیم دربارهٔ درخواست لغو، تغییر وضعیت، اولویت و ارجاع متوقف است. گفت‌وگو از ستون مکالمه ادامه دارد.</p></div>';
     }
     if ($canManageTicket && $handlerLevel !== '' && !$cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
