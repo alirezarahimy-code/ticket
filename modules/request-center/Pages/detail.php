@@ -15,11 +15,34 @@ if (!defined('APP_ROOT')) {
  */
 
 if ($page === 'ticket') {
+    // Preserve the originating Request Center workspace when returning from a
+    // detail view. Only known workspace names and server-authorized views are
+    // accepted; arbitrary return URLs are never trusted.
+    $detailReturnWorkspace = (string) ($_GET['workspace'] ?? '');
+    $detailReturnAllowed = [
+        'requester' => user_can($user, 'ticket.create') || user_can($user, 'ticket.view_own'),
+        'agent' => user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
+            || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all'),
+        'supervisor' => user_can($user, 'supervisor.panel'),
+        'admin' => user_is_primary_admin($user),
+    ];
+    $detailReturnParams = [];
+    if (isset($detailReturnAllowed[$detailReturnWorkspace]) && $detailReturnAllowed[$detailReturnWorkspace]) {
+        $detailReturnParams['workspace'] = $detailReturnWorkspace;
+        if ($detailReturnWorkspace === 'agent') {
+            $requestedReturnAgentView = (string) ($_GET['agent_view'] ?? 'mine');
+            $detailReturnParams['agent_view'] = $requestedReturnAgentView === 'team'
+                && user_can($user, 'queue.view') ? 'team' : 'mine';
+        }
+    }
+    $detailReturnUrl = 'request-center.php' . ($detailReturnParams !== []
+        ? '?' . http_build_query($detailReturnParams)
+        : '');
     $ticket = fetch_ticket((int) ($_GET['id'] ?? 0));
     if (!$ticket || !can_view_ticket($ticket, $user)) {
         http_response_code(404);
         render_header('درخواست پیدا نشد', $user);
-        echo '<section class="empty-state"><div class="empty-icon">؟</div><h2>درخواست پیدا نشد</h2><a class="button" href="request-center.php">بازگشت</a></section>';
+        echo '<section class="empty-state"><div class="empty-icon">؟</div><h2>درخواست پیدا نشد</h2><a class="button" href="' . e($detailReturnUrl) . '">بازگشت</a></section>';
         render_footer();
         exit;
     }
@@ -80,7 +103,7 @@ if ($page === 'ticket') {
     }
     $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
     render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
-     echo '<section class="page-heading"><div><a class="back-link" href="request-center.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(request_center_status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
+     echo '<section class="page-heading"><div><a class="back-link" href="' . e($detailReturnUrl) . '">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(request_center_status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
     foreach ($messages as $message) {
         if ((int) $message['is_internal'] === 1 && !$canSeeInternal) {
             continue;
