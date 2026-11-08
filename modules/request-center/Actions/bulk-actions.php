@@ -79,6 +79,10 @@ if (!defined('APP_ROOT')) {
                 // وضعیت اولیه از رکورد مجازشده خوانده می‌شود؛ قفل و بازبینی نهایی
                 // وضعیت/مسئول/اولویت/درخواست لغو فقط در WorkflowService انجام می‌شود.
                 // این کار از قفل‌گیری تکراری و دو مرجع متفاوت برای کنترل هم‌زمانی جلوگیری می‌کند.
+                if (!empty($bulkTicket['cancel_requested_at'])) {
+                    $bulkSkipped++;
+                    continue;
+                }
                 $bulkOld = (string) $bulkTicket['status'];
                 if ($bulkOld === $status) {
                     // از قبل در همین وضعیت بود: جداگانه شمرده می‌شود تا در گزارش گم نشود
