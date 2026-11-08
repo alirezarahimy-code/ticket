@@ -336,6 +336,8 @@ def test_supervisor_decisions_cannot_be_made_on_own_requests():
     assert "!ticket_user_is_requester($ticket, $supervisor)" in page
     assert "if ($decision === 'approve' && $note === '')" in action
     assert 'name="supervisor_note" required maxlength="500" placeholder="دلیل تأیید و بستن درخواست"' in page
+    assert "'reason' => $note" in action
+    assert "دلیل: ' . $note" in action
 
 
 def test_bulk_status_changes_require_and_audit_a_requester_visible_reason():
