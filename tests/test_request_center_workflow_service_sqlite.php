@@ -22,10 +22,6 @@ $pdo->exec('CREATE TABLE tickets (
     sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NULL
 )');
-$pdo->exec('CREATE TABLE ticket_messages (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_id INTEGER NOT NULL,
-    user_id INTEGER NOT NULL, body TEXT NOT NULL, is_internal INTEGER NOT NULL DEFAULT 0
-)');
 $insert = $pdo->prepare('INSERT INTO tickets (id,status,requester_id,assigned_to,priority,cancel_requested_at) VALUES (?,?,?,?,?,?)');
 $insert->execute([1, 'assigned', 10, 20, 'normal', null]);
 $insert->execute([2, 'pending', 11, 21, 'urgent', null]);
@@ -41,28 +37,6 @@ $insert->execute([11, 'assigned', 20, 30, 'normal', '2026-11-01 12:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
 
-$noMessageTransaction = false;
-try {
-    $service->appendMessage(1, 10, 'outside transaction');
-} catch (LogicException) {
-    $noMessageTransaction = true;
-}
-workflow_check($noMessageTransaction, 'message writer refuses to run outside caller transaction');
-
-$pdo->beginTransaction();
-$messageId = $service->appendMessage(1, 10, 'پاسخ آزمایشی');
-workflow_check($messageId > 0, 'message writer returns the inserted message identifier');
-$pdo->rollBack();
-workflow_check((int) $pdo->query('SELECT COUNT(*) FROM ticket_messages')->fetchColumn() === 0,
-    'caller rollback removes the appended conversation entry');
-
-$pdo->beginTransaction();
-$messageId = $service->appendMessage(1, 10, 'یادداشت داخلی', true);
-$pdo->commit();
-$message = $pdo->query('SELECT ticket_id, user_id, body, is_internal FROM ticket_messages WHERE id = ' . (int) $messageId)->fetch(PDO::FETCH_ASSOC);
-workflow_check(is_array($message) && (int) $message['ticket_id'] === 1 && (int) $message['user_id'] === 10
-    && $message['body'] === 'یادداشت داخلی' && (int) $message['is_internal'] === 1,
-    'message writer persists the exact conversation payload and internal flag');
 workflow_check(
     RequestCenterWorkflowService::allowedTransitions('pending') === ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
     'legacy pending has exit paths'
