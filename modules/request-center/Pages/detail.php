@@ -228,9 +228,22 @@ if ($page === 'ticket') {
         $eventDetails = is_array($eventDetails) ? $eventDetails : [];
         $visibleDetails = [];
         $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'];
-        if ($staff) $safeKeys = array_merge($safeKeys, ['note','assigned_to','requested_at','actor_id']);
+        if ($staff) {
+            $safeKeys = array_merge($safeKeys, [
+                'note', 'assigned_to', 'requested_at', 'actor_id', 'message_id', 'is_internal',
+                'due_at', 'sla_paused_at', 'sla_pause_minutes', 'ola_policy_id',
+                'ola_response_due_at', 'ola_due_at', 'ola_escalation_1_at', 'ola_escalation_2_at',
+                'first_response_set',
+            ]);
+        }
         foreach ($eventDetails as $detailKey => $detailValue) {
-            if (in_array((string) $detailKey, $safeKeys, true)) $visibleDetails[$detailKey] = $detailValue;
+            if (in_array((string) $detailKey, $safeKeys, true)) {
+                $visibleDetails[$detailKey] = $detailValue;
+            } elseif ($staff && $detailKey === 'sla_ola' && is_array($detailValue)) {
+                foreach ($detailValue as $slaKey => $slaValue) {
+                    $visibleDetails['sla_ola_' . (string) $slaKey] = $slaValue;
+                }
+            }
         }
         $detailLines = $visibleDetails ? activity_log_meta_lines(json_encode($visibleDetails, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) : [];
         $detailHtml = $detailLines ? '<details class="log-details"><summary>جزئیات (' . count($detailLines) . ')</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $detailLines)) . '</dl></details>' : '';
