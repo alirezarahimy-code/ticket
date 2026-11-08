@@ -197,6 +197,9 @@ if (!defined('APP_ROOT')) {
             if ($isPreServiceRejection && $note === '') {
                 throw new RuntimeException('برای رد درخواست، دلیل روشن و قابل مشاهده برای درخواست‌کننده الزامی است.');
             }
+            if ($decision === 'approve' && $note === '') {
+                throw new RuntimeException('برای تأیید نهایی و بستن درخواست، دلیل تصمیم را ثبت کنید.');
+            }
             if ($decision === 'approve' && !ticket_rating_is_current($ticket)) {
                 throw new RuntimeException('بستن نهایی پس از ثبت امتیاز رضایت کاربر امکان‌پذیر است.');
             }
