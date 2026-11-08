@@ -22,7 +22,14 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attach
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
     require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
-    request_center_download_attachment(require_login());
+    $downloadUser = require_login();
+    require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
+    $downloadSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
+    if ($downloadSchemaProblems !== []) {
+        http_response_code(503);
+        exit('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست.');
+    }
+    request_center_download_attachment($downloadUser);
 }
 
 if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report') {
@@ -30,7 +37,14 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report')
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
     require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
-    request_center_export_report(require_permission('reports.view'));
+    $reportUser = require_permission('reports.view');
+    require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
+    $reportSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
+    if ($reportSchemaProblems !== []) {
+        http_response_code(503);
+        exit('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست.');
+    }
+    request_center_export_report($reportUser);
 }
 
 // The existing appointment endpoint remains on its established contract.
@@ -72,7 +86,7 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
         foreach ($rcSchemaProblems as $problem) {
             echo '<li>' . e($problem) . '</li>';
         }
-        echo '</ul><a class="button secondary" href="index.php">بازگشت به سامانه</a></section></main>';
+        echo '</ul><a class="button secondary" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section></main>';
         render_footer();
         exit;
     }
