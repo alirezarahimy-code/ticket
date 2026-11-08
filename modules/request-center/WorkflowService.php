@@ -232,7 +232,7 @@ final class RequestCenterWorkflowService
         }
 
         $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $lockSql = 'SELECT id, status, requester_id, assigned_to, first_response_at, resolved_at, cancel_requested_at, priority, department_id FROM tickets WHERE id = ? LIMIT 1';
+        $lockSql = 'SELECT id, status, requester_id, assigned_to, first_response_at, resolved_at, cancel_requested_at, priority, department_id, service_group FROM tickets WHERE id = ? LIMIT 1';
         if ($driver === 'mysql') {
             $lockSql .= ' FOR UPDATE';
         }
@@ -244,7 +244,7 @@ final class RequestCenterWorkflowService
         }
 
         foreach ($expectedFields as $field => $expectedValue) {
-            if (!in_array($field, ['requester_id', 'assigned_to', 'first_response_at', 'resolved_at', 'cancel_requested_at', 'priority', 'department_id'], true)) {
+            if (!in_array($field, ['requester_id', 'assigned_to', 'first_response_at', 'resolved_at', 'cancel_requested_at', 'priority', 'department_id', 'service_group'], true)) {
                 throw new InvalidArgumentException('فیلد شرط هم‌زمانی مجاز نیست: ' . $field);
             }
             $actual = $current[$field] ?? null;
