@@ -39360,7 +39360,7 @@
             "path": "lib\/tickets-sla.php",
             "area": "CORE",
             "lines": 891,
-            "file_fingerprint": "95cdfbbe9178",
+            "file_fingerprint": "d9c0a79a88ca",
             "blocks": [
                 {
                     "kind": "region",
@@ -39820,7 +39820,7 @@
                     "line_start": 876,
                     "line_end": 879,
                     "lines": 4,
-                    "fingerprint": "3f80ef80df40",
+                    "fingerprint": "4d50c12437e1",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -52649,7 +52649,7 @@
             "path": "modules\/request-center\/Pages\/analytics.php",
             "area": "PAGE",
             "lines": 49,
-            "file_fingerprint": "2658e2d185af",
+            "file_fingerprint": "8763786bb428",
             "blocks": [
                 {
                     "kind": "region",
@@ -52670,7 +52670,7 @@
                     "line_start": 6,
                     "line_end": 49,
                     "lines": 44,
-                    "fingerprint": "5e9e7788ad46",
+                    "fingerprint": "3dadd3e44ea8",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -52884,7 +52884,7 @@
             "path": "modules\/request-center\/Pages\/detail.php",
             "area": "PAGE",
             "lines": 248,
-            "file_fingerprint": "dda68df90f57",
+            "file_fingerprint": "8c5fd297a736",
             "blocks": [
                 {
                     "kind": "region",
@@ -52905,7 +52905,7 @@
                     "line_start": 11,
                     "line_end": 248,
                     "lines": 238,
-                    "fingerprint": "8cb2ed5a2814",
+                    "fingerprint": "18352ee6ad06",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -52965,7 +52965,7 @@
             "path": "modules\/request-center\/Pages\/queue.php",
             "area": "PAGE",
             "lines": 39,
-            "file_fingerprint": "c0a0509b71f2",
+            "file_fingerprint": "a452600bf57c",
             "blocks": [
                 {
                     "kind": "region",
@@ -52986,7 +52986,7 @@
                     "line_start": 6,
                     "line_end": 39,
                     "lines": 34,
-                    "fingerprint": "b496923c3ae0",
+                    "fingerprint": "33d0102c06aa",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -53002,7 +53002,7 @@
             "path": "modules\/request-center\/Pages\/reports.php",
             "area": "PAGE",
             "lines": 67,
-            "file_fingerprint": "cb84cd4e241c",
+            "file_fingerprint": "1510cd421b31",
             "blocks": [
                 {
                     "kind": "region",
@@ -53023,7 +53023,7 @@
                     "line_start": 6,
                     "line_end": 67,
                     "lines": 62,
-                    "fingerprint": "1c94f6eec606",
+                    "fingerprint": "0d785ad6e4d5",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -53175,7 +53175,7 @@
             "path": "modules\/request-center\/Pages\/supervisor.php",
             "area": "PAGE",
             "lines": 56,
-            "file_fingerprint": "379bb02b425f",
+            "file_fingerprint": "45d7b48dd718",
             "blocks": [
                 {
                     "kind": "region",
@@ -53196,7 +53196,7 @@
                     "line_start": 9,
                     "line_end": 56,
                     "lines": 48,
-                    "fingerprint": "49555419b058",
+                    "fingerprint": "072c92c342aa",
                     "risk": {
                         "score": 7,
                         "flags": {
@@ -53382,8 +53382,8 @@
             "id": "PAGE-061",
             "path": "modules\/request-center\/lib\/functions.php",
             "area": "PAGE",
-            "lines": 244,
-            "file_fingerprint": "1af705df1e3c",
+            "lines": 251,
+            "file_fingerprint": "4ab62184ec5a",
             "blocks": [
                 {
                     "kind": "region",
@@ -53400,11 +53400,24 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "store_attachment",
+                    "anchor": "request_center_status_label",
                     "line_start": 4,
-                    "line_end": 64,
-                    "lines": 61,
-                    "fingerprint": "258774b656f9",
+                    "line_end": 16,
+                    "lines": 13,
+                    "fingerprint": "fd379e3c71d3",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-061.02"
+                },
+                {
+                    "kind": "function",
+                    "anchor": "store_attachment",
+                    "line_start": 18,
+                    "line_end": 71,
+                    "lines": 54,
+                    "fingerprint": "aefad6e63bff",
                     "risk": {
                         "score": 6,
                         "flags": {
@@ -53413,28 +53426,15 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "PAGE-061.02"
-                },
-                {
-                    "kind": "function",
-                    "anchor": "fetch_ticket",
-                    "line_start": 66,
-                    "line_end": 71,
-                    "lines": 6,
-                    "fingerprint": "0666886407a9",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
                     "id": "PAGE-061.03"
                 },
                 {
                     "kind": "function",
-                    "anchor": "can_view_ticket",
+                    "anchor": "fetch_ticket",
                     "line_start": 73,
-                    "line_end": 76,
-                    "lines": 4,
-                    "fingerprint": "97f02a9d6662",
+                    "line_end": 78,
+                    "lines": 6,
+                    "fingerprint": "0666886407a9",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -53443,11 +53443,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_org_manager_rank_sql",
-                    "line_start": 78,
-                    "line_end": 97,
-                    "lines": 20,
-                    "fingerprint": "c6b3b2a91df7",
+                    "anchor": "can_view_ticket",
+                    "line_start": 80,
+                    "line_end": 83,
+                    "lines": 4,
+                    "fingerprint": "97f02a9d6662",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -53456,39 +53456,39 @@
                 },
                 {
                     "kind": "function",
+                    "anchor": "ticket_org_manager_rank_sql",
+                    "line_start": 85,
+                    "line_end": 104,
+                    "lines": 20,
+                    "fingerprint": "c6b3b2a91df7",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-061.06"
+                },
+                {
+                    "kind": "function",
                     "anchor": "choose_handling_agent",
-                    "line_start": 99,
-                    "line_end": 141,
+                    "line_start": 106,
+                    "line_end": 148,
                     "lines": 43,
-                    "fingerprint": "15d895992750",
+                    "fingerprint": "0c54319159d7",
                     "risk": {
                         "score": 5,
                         "flags": {
                             "sql_concat": 5
                         }
                     },
-                    "id": "PAGE-061.06"
-                },
-                {
-                    "kind": "function",
-                    "anchor": "ticket_allowed_transitions",
-                    "line_start": 143,
-                    "line_end": 151,
-                    "lines": 9,
-                    "fingerprint": "65ec4fe6a1e2",
-                    "risk": {
-                        "score": 0,
-                        "flags": []
-                    },
                     "id": "PAGE-061.07"
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_requester_cancelable_statuses",
-                    "line_start": 152,
-                    "line_end": 156,
-                    "lines": 5,
-                    "fingerprint": "a2aefafb7d6a",
+                    "anchor": "ticket_allowed_transitions",
+                    "line_start": 150,
+                    "line_end": 158,
+                    "lines": 9,
+                    "fingerprint": "65ec4fe6a1e2",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -53497,11 +53497,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_requester_can_cancel_directly",
-                    "line_start": 158,
-                    "line_end": 164,
-                    "lines": 7,
-                    "fingerprint": "b6f46425e521",
+                    "anchor": "ticket_requester_cancelable_statuses",
+                    "line_start": 159,
+                    "line_end": 163,
+                    "lines": 5,
+                    "fingerprint": "a2aefafb7d6a",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -53510,11 +53510,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "ticket_requester_can_cancel",
-                    "line_start": 166,
-                    "line_end": 172,
+                    "anchor": "ticket_requester_can_cancel_directly",
+                    "line_start": 165,
+                    "line_end": 171,
                     "lines": 7,
-                    "fingerprint": "89c240333435",
+                    "fingerprint": "b6f46425e521",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -53523,11 +53523,11 @@
                 },
                 {
                     "kind": "function",
-                    "anchor": "notify_ticket_resolved",
-                    "line_start": 174,
-                    "line_end": 187,
-                    "lines": 14,
-                    "fingerprint": "cb65ecdbf3c3",
+                    "anchor": "ticket_requester_can_cancel",
+                    "line_start": 173,
+                    "line_end": 179,
+                    "lines": 7,
+                    "fingerprint": "89c240333435",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -53536,9 +53536,22 @@
                 },
                 {
                     "kind": "function",
+                    "anchor": "notify_ticket_resolved",
+                    "line_start": 181,
+                    "line_end": 194,
+                    "lines": 14,
+                    "fingerprint": "cb65ecdbf3c3",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "PAGE-061.12"
+                },
+                {
+                    "kind": "function",
                     "anchor": "report_query_filters",
-                    "line_start": 189,
-                    "line_end": 243,
+                    "line_start": 196,
+                    "line_end": 250,
                     "lines": 55,
                     "fingerprint": "9aca5250f135",
                     "risk": {
@@ -53547,7 +53560,7 @@
                             "raw_input": 2
                         }
                     },
-                    "id": "PAGE-061.12"
+                    "id": "PAGE-061.13"
                 }
             ]
         },
@@ -80493,8 +80506,8 @@
             "id": "TEST-215",
             "path": "tests\/test_ticket_workflow_safety_static.py",
             "area": "TEST",
-            "lines": 161,
-            "file_fingerprint": "8ecdc24ccc3a",
+            "lines": 162,
+            "file_fingerprint": "86f9909eae7c",
             "blocks": [
                 {
                     "kind": "block",
@@ -80688,9 +80701,9 @@
                     "kind": "block",
                     "anchor": "test_rejected_status_is_migration_owned_and_visible_as_terminal",
                     "line_start": 119,
-                    "line_end": 135,
-                    "lines": 17,
-                    "fingerprint": "d9b56e8b0cfc",
+                    "line_end": 136,
+                    "lines": 18,
+                    "fingerprint": "682032946251",
                     "risk": {
                         "score": 0,
                         "flags": []
@@ -80700,8 +80713,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_sla_and_ola_alerts_revalidate_the_active_deadline_under_lock",
-                    "line_start": 136,
-                    "line_end": 144,
+                    "line_start": 137,
+                    "line_end": 145,
                     "lines": 9,
                     "fingerprint": "a376b7989def",
                     "risk": {
@@ -80716,8 +80729,8 @@
                 {
                     "kind": "block",
                     "anchor": "test_manual_lifecycle_decisions_keep_requester_visible_reasons",
-                    "line_start": 145,
-                    "line_end": 161,
+                    "line_start": 146,
+                    "line_end": 162,
                     "lines": 17,
                     "fingerprint": "6b8e37e96ed2",
                     "risk": {

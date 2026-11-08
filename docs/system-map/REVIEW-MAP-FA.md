@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 589 |
-| خطوط | 132,040 |
-| آدرس‌ها (بلوک) | 6,874 |
+| خطوط | 132,048 |
+| آدرس‌ها (بلوک) | 6,875 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,874 آدرس |
+| باقی‌مانده | 6,875 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -286,10 +286,10 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 234 | 1,709 | 23,425 |
+| `TEST` | TEST | 234 | 1,709 | 23,426 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 84 | 1,377 | 8,023 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,939 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,430 | 47,946 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -3642,7 +3642,7 @@
 </details>
 
 <details>
-<summary><b>TEST-215</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (161 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
+<summary><b>TEST-215</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (162 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -3660,9 +3660,9 @@
 | `TEST-215.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
 | `TEST-215.13` | 93–106 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
 | `TEST-215.14` | 107–118 | بلوک | `test_pre_service_rejection_is_a_terminal_workflow_` | 0 | ⬜ |
-| `TEST-215.15` | 119–135 | بلوک | `test_rejected_status_is_migration_owned_and_visibl` | 0 | ⬜ |
-| `TEST-215.16` | 136–144 | بلوک | `test_sla_and_ola_alerts_revalidate_the_active_dead` | 6 | ⬜ |
-| `TEST-215.17` | 145–161 | بلوک | `test_manual_lifecycle_decisions_keep_requester_vis` | 0 | ⬜ |
+| `TEST-215.15` | 119–136 | بلوک | `test_rejected_status_is_migration_owned_and_visibl` | 0 | ⬜ |
+| `TEST-215.16` | 137–145 | بلوک | `test_sla_and_ola_alerts_revalidate_the_active_dead` | 6 | ⬜ |
+| `TEST-215.17` | 146–162 | بلوک | `test_manual_lifecycle_decisions_keep_requester_vis` | 0 | ⬜ |
 
 </details>
 
@@ -9008,22 +9008,23 @@
 </details>
 
 <details>
-<summary><b>PAGE-061</b> — <code>modules/request-center/lib/functions.php</code> (244 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>PAGE-061</b> — <code>modules/request-center/lib/functions.php</code> (251 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-061.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-061.02` | 4–64 | تابع | `store_attachment` | 6 | ⬜ |
-| `PAGE-061.03` | 66–71 | تابع | `fetch_ticket` | 0 | ⬜ |
-| `PAGE-061.04` | 73–76 | تابع | `can_view_ticket` | 0 | ⬜ |
-| `PAGE-061.05` | 78–97 | تابع | `ticket_org_manager_rank_sql` | 0 | ⬜ |
-| `PAGE-061.06` | 99–141 | تابع | `choose_handling_agent` | 5 | ⬜ |
-| `PAGE-061.07` | 143–151 | تابع | `ticket_allowed_transitions` | 0 | ⬜ |
-| `PAGE-061.08` | 152–156 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
-| `PAGE-061.09` | 158–164 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
-| `PAGE-061.10` | 166–172 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
-| `PAGE-061.11` | 174–187 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
-| `PAGE-061.12` | 189–243 | تابع | `report_query_filters` | 2 | ⬜ |
+| `PAGE-061.02` | 4–16 | تابع | `request_center_status_label` | 0 | ⬜ |
+| `PAGE-061.03` | 18–71 | تابع | `store_attachment` | 6 | ⬜ |
+| `PAGE-061.04` | 73–78 | تابع | `fetch_ticket` | 0 | ⬜ |
+| `PAGE-061.05` | 80–83 | تابع | `can_view_ticket` | 0 | ⬜ |
+| `PAGE-061.06` | 85–104 | تابع | `ticket_org_manager_rank_sql` | 0 | ⬜ |
+| `PAGE-061.07` | 106–148 | تابع | `choose_handling_agent` | 5 | ⬜ |
+| `PAGE-061.08` | 150–158 | تابع | `ticket_allowed_transitions` | 0 | ⬜ |
+| `PAGE-061.09` | 159–163 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
+| `PAGE-061.10` | 165–171 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
+| `PAGE-061.11` | 173–179 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
+| `PAGE-061.12` | 181–194 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
+| `PAGE-061.13` | 196–250 | تابع | `report_query_filters` | 2 | ⬜ |
 
 </details>
 

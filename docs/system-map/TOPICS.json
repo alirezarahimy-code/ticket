@@ -1193,7 +1193,7 @@
         "PAGE-044.04",
         "PAGE-050.02",
         "PAGE-034.62",
-        "PAGE-061.10",
+        "PAGE-061.11",
         "TEST-186.04",
         "CORE-017.02"
       ],
@@ -4703,7 +4703,7 @@
       "related": [
         "PAGE-051.02",
         "PAGE-058.02",
-        "PAGE-061.02",
+        "PAGE-061.03",
         "TEST-177.05",
         "PAGE-060.03",
         "TEST-178.05"
@@ -35486,86 +35486,94 @@
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
       "line": 4,
-      "anchor": "store_attachment",
-      "risk": 6,
-      "lines": 61
+      "anchor": "request_center_status_label",
+      "risk": 0,
+      "lines": 13
     },
     "PAGE-061.03": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 66,
-      "anchor": "fetch_ticket",
-      "risk": 0,
-      "lines": 6
+      "line": 18,
+      "anchor": "store_attachment",
+      "risk": 6,
+      "lines": 54
     },
     "PAGE-061.04": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
       "line": 73,
-      "anchor": "can_view_ticket",
+      "anchor": "fetch_ticket",
       "risk": 0,
-      "lines": 4
+      "lines": 6
     },
     "PAGE-061.05": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 78,
-      "anchor": "ticket_org_manager_rank_sql",
+      "line": 80,
+      "anchor": "can_view_ticket",
       "risk": 0,
-      "lines": 20
+      "lines": 4
     },
     "PAGE-061.06": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 99,
-      "anchor": "choose_handling_agent",
-      "risk": 5,
-      "lines": 43
+      "line": 85,
+      "anchor": "ticket_org_manager_rank_sql",
+      "risk": 0,
+      "lines": 20
     },
     "PAGE-061.07": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 143,
-      "anchor": "ticket_allowed_transitions",
-      "risk": 0,
-      "lines": 9
+      "line": 106,
+      "anchor": "choose_handling_agent",
+      "risk": 5,
+      "lines": 43
     },
     "PAGE-061.08": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 152,
-      "anchor": "ticket_requester_cancelable_statuses",
+      "line": 150,
+      "anchor": "ticket_allowed_transitions",
       "risk": 0,
-      "lines": 5
+      "lines": 9
     },
     "PAGE-061.09": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 158,
-      "anchor": "ticket_requester_can_cancel_directly",
+      "line": 159,
+      "anchor": "ticket_requester_cancelable_statuses",
       "risk": 0,
-      "lines": 7
+      "lines": 5
     },
     "PAGE-061.10": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 166,
-      "anchor": "ticket_requester_can_cancel",
+      "line": 165,
+      "anchor": "ticket_requester_can_cancel_directly",
       "risk": 0,
       "lines": 7
     },
     "PAGE-061.11": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 174,
-      "anchor": "notify_ticket_resolved",
+      "line": 173,
+      "anchor": "ticket_requester_can_cancel",
       "risk": 0,
-      "lines": 14
+      "lines": 7
     },
     "PAGE-061.12": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 189,
+      "line": 181,
+      "anchor": "notify_ticket_resolved",
+      "risk": 0,
+      "lines": 14
+    },
+    "PAGE-061.13": {
+      "path": "modules/request-center/lib/functions.php",
+      "area": "PAGE",
+      "line": 196,
       "anchor": "report_query_filters",
       "risk": 2,
       "lines": 55
@@ -50512,12 +50520,12 @@
       "line": 119,
       "anchor": "test_rejected_status_is_migration_owned_and_visible_as_terminal",
       "risk": 0,
-      "lines": 17
+      "lines": 18
     },
     "TEST-215.16": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 136,
+      "line": 137,
       "anchor": "test_sla_and_ola_alerts_revalidate_the_active_deadline_under_lock",
       "risk": 6,
       "lines": 9
@@ -50525,7 +50533,7 @@
     "TEST-215.17": {
       "path": "tests/test_ticket_workflow_safety_static.py",
       "area": "TEST",
-      "line": 145,
+      "line": 146,
       "anchor": "test_manual_lifecycle_decisions_keep_requester_visible_reasons",
       "risk": 0,
       "lines": 17
