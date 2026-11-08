@@ -185,6 +185,31 @@ def test_supervisor_reopen_requires_a_reason_server_side():
     assert "برای بازگشایی رسمی" in block
 
 
+def test_supervisor_reopen_ui_requires_an_explicit_reason():
+    page = source("modules/request-center/Pages/supervisor.php")
+    assert 'name="supervisor_note" required maxlength="1000"' in page
+    assert 'type="hidden" name="supervisor_note"' not in page
+
+
+def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
+    workflow = source("modules/request-center/WorkflowService.php")
+    assert "function appendMessage(" in workflow
+    assert "function requestCancellation(" in workflow
+    assert "function rejectCancellation(" in workflow
+    for path in (
+        "modules/request-center/Actions/ticket-actions.php",
+        "modules/request-center/Actions/supervisor-actions.php",
+        "modules/request-center/Actions/bulk-actions.php",
+    ):
+        action = source(path)
+        assert "INSERT INTO ticket_messages" not in action
+        assert "UPDATE tickets SET cancel_requested" not in action
+    ticket_action = source("modules/request-center/Actions/ticket-actions.php")
+    assert "->requestCancellation(" in ticket_action
+    assert "->rejectCancellation(" in ticket_action
+    assert "->appendMessage(" in ticket_action
+
+
 def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     workflow = source("modules/request-center/WorkflowService.php")
     action = source("modules/request-center/Actions/supervisor-actions.php")
