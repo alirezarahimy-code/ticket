@@ -113,6 +113,7 @@ jobs:
           php -l tests/test_request_center_schema_preflight_mariadb.php
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
+          php -l cron/sla_maintenance.php
           php -l modules/request-center/Pages/calendar.php
       - name: First-slice and Phase-3 lifecycle architecture contracts
         run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py
