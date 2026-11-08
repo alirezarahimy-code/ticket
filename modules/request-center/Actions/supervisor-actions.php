@@ -37,9 +37,10 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('تخصیص فقط برای درخواست فعال و بدون درخواست لغوِ درانتظار مجاز است.');
             }
             $newAssigneeId = max(0, (int) ($_POST['assigned_to'] ?? 0));
+            $reason = post_value('assignment_reason');
             $note = post_value('assignment_note');
-            if (mb_strlen($note, 'UTF-8') > 500) {
-                throw new RuntimeException('یادداشت داخلی تخصیص نباید بیشتر از ۵۰۰ نویسه باشد.');
+            if (mb_strlen($reason, 'UTF-8') > 500 || mb_strlen($note, 'UTF-8') > 500) {
+                throw new RuntimeException('دلیل تخصیص و یادداشت داخلی هرکدام نباید بیشتر از ۵۰۰ نویسه باشند.');
             }
 
             db()->beginTransaction();
@@ -61,6 +62,9 @@ if (!defined('APP_ROOT')) {
                 db()->rollBack();
                 flash('info', 'مسئول رسیدگی تغییری نکرد.');
                 redirect('request-center.php?page=ticket&id=' . $ticketId);
+            }
+            if ($reason === '') {
+                throw new RuntimeException('برای تخصیص، بازتخصیص یا برداشتن مسئول، ثبت دلیل قابل مشاهده در تاریخچه الزامی است.');
             }
 
             $assignee = null;
@@ -139,6 +143,7 @@ if (!defined('APP_ROOT')) {
                 'to_assigned_to' => $newAssigneeId ?: null,
                 'from_assignee_name' => (string) ($ticket['assignee_name'] ?? ''),
                 'to_assignee_name' => (string) ($assignee['full_name'] ?? ''),
+                'reason' => $reason,
                 'from_status' => $oldStatus,
                 'to_status' => $targetStatus,
                 'note' => $note,
