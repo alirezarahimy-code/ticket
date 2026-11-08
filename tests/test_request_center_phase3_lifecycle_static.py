@@ -209,6 +209,18 @@ def test_supervisor_reopen_ui_requires_an_explicit_reason_and_permission():
     assert "empty($ticket['cancel_requested_at']) && user_can($supervisor, 'supervisor.decide')" in page
 
 
+def test_attachment_files_follow_database_transaction_outcome():
+    helpers = source("modules/request-center/lib/functions.php")
+    start = helpers.index("function store_attachment(")
+    end = helpers.index("\ndef ", start + 10)
+    attachment = helpers[start:end]
+    assert "register_shutdown_function" in attachment
+    assert "$connection->inTransaction()" in attachment
+    assert "$connection->rollBack()" in attachment
+    assert "SELECT 1 FROM ticket_attachments WHERE stored_name = ? LIMIT 1" in attachment
+    assert "if (!$exists->fetchColumn())" in attachment
+
+
 def test_public_management_and_bulk_replies_start_first_response_clock():
     ticket_action = source("modules/request-center/Actions/ticket-actions.php")
     bulk_action = source("modules/request-center/Actions/bulk-actions.php")
