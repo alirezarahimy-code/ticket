@@ -570,3 +570,16 @@ function request_center_notify_ticket_resolved(int $ticketId, int $actorId): voi
         }
     }
 }
+
+/**
+ * Request Center supervisor authority for lifecycle operations outside the
+ * ordinary handler hierarchy (e.g. queue assignment and cancellation review).
+ * Reuses existing permissions and preserves separation of duties.
+ */
+function request_center_can_supervise_ticket(array $ticket, array $user): bool
+{
+    return user_can($user, 'supervisor.panel')
+        && user_can($user, 'ticket.edit')
+        && ticket_user_can_view($ticket, $user)
+        && !ticket_user_is_requester($ticket, $user);
+}
