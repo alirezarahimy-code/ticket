@@ -317,3 +317,9 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - writerهای runtime مربوط به چرخهٔ عمر: `cron/ticket_auto_close.php`، handlerهای RC در `modules/request-center/Actions/*.php` و در نهایت `modules/request-center/WorkflowService.php`. سه فایل `actions/ticket-actions.php`، `actions/supervisor-actions.php` و `actions/bulk-actions.php` فقط compatibility wrapper هستند و منطق مستقل ندارند.
 - `lib/tickets-sla.php` فقط شمارهٔ درخواست خالی را با `ticket_no` پر می‌کند و status را نمی‌نویسد. `tools/test_cron_synthetic.php` و ابزارهای benchmark/test writerهای fixture هستند و مسیر محصول محسوب نمی‌شوند. نتیجهٔ search هیچ writer چرخهٔ عمر دیگری در خارج از WorkflowService و cron خودکار RC نشان نداد.
 - نتیجه: پوشش مرکزی writerهای وضعیت برای کد runtime فعلی تأیید شد؛ این بررسی جایگزین ممیزی triggerهای DB یا اتصال‌های خارجی/نسخه‌های قدیمی نصب‌شده نیست. گیت P3-05 هنوز به‌خاطر ماتریس کامل actor/permission و آزمون رفتاری تمام گذارها باز است.
+
+### اعتبارسنجی آخرین snapshot ماتریس و ممیزی writerها — ۲۰۲۶-۱۱-۰۹
+- Contract run `42531493669` روی commit `55308c1a827be7d18ab530ab7ed8418f1f4c8456`: هر دو job MariaDB 10.4.32 و 10.11.19 تکمیل شدند؛ Phase-3 architecture contracts و Phase-2 HTTP smoke در هر دو PASS. QA Package Preview run `42531493617`: PASS.
+- لاگ MariaDB 10.11 علاوه بر موارد قبلی، PASS صریح برای retry هشدار SLA/OLA، rollback بستن خودکار هنگام شکست اعلان، retry بستن خودکار پس از بازیابی اعلان، و تمام سناریوهای concurrency نوبت‌ها را ثبت کرد.
+- تنها شکست هر دو job، T07 بازپخش migrationهای تاریخی 001..033 روی clone کامل است؛ fingerprint تغییرات خارج از RC را برای `service_catalog` در migration 003 و `assets`/`asset_dedupe_backup_016` در 014/016 گزارش کرد. این نتیجه با تصمیم عدم تغییر حوزه‌های بیرون RC سازگار است.
+- این اجرا صحت ماتریس مستندشده را به‌صورت static/contract و HTTP smoke تأیید می‌کند؛ هنوز جای آزمون رفتاری جامع تمام actor × transition × SLA/OLA را نمی‌گیرد. P3-05/P3-06 و فاز ۳ باز هستند.
