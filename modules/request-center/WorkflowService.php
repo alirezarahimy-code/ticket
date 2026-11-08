@@ -179,9 +179,9 @@ final class RequestCenterWorkflowService
     public static function allowedTransitions(string $from): array
     {
         $map = [
-            'new' => ['manager_review', 'assigned', 'in_progress', 'rejected'],
-            'manager_review' => ['assigned', 'in_progress', 'rejected'],
-            'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review', 'rejected'],
+            'new' => ['manager_review', 'assigned', 'in_progress'],
+            'manager_review' => ['assigned', 'in_progress'],
+            'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review'],
             'in_progress' => ['waiting_user', 'resolved', 'assigned', 'manager_review'],
             'waiting_user' => ['in_progress', 'resolved', 'assigned', 'manager_review'],
             // pending یک وضعیت میراثی است: خروج باز می‌ماند، اما ورود جدید ممنوع است.
