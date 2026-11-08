@@ -71,6 +71,7 @@ foreach ($candidates as $row) {
         $autoCloseMeta = [
             'from_status' => 'resolved',
             'to_status' => 'closed',
+            'reason' => 'بسته‌شدن خودکار: کاربر ظرف ' . $days . ' روز پس از حل‌شدن امتیاز ثبت نکرد.',
             'days_without_rating' => $days,
             'resolved_at' => $current['resolved_at'] ?? null,
             'closed_at' => date('Y-m-d H:i:s'),
