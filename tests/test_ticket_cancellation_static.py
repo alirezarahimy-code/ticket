@@ -35,9 +35,15 @@ check("function ticket_requester_can_cancel_directly" in index
       and "empty($ticket['assigned_to'])" in index
       and "empty($ticket['first_response_at'])" in index,
       "direct cancellation is limited to unassigned tickets with no first response")
-check("cancel_requested_at = NOW()" in index and "cancel_request_reason = ?" in index
-      and "تغییر وضعیت و ارجاع متوقف" in index,
-      "later cancellation is recorded as a request; conversation continues while status/assignment is frozen")
+check("function requestCancellation(" in workflow_service
+      and "UPDATE tickets SET cancel_requested_at = ' . $now" in workflow_service
+      and "cancel_request_reason = ?" in workflow_service
+      and "$workflow->requestCancellation(" in ticket_actions
+      and "appendMessage($ticketId" in ticket_actions
+      and "تغییر وضعیت و ارجاع متوقف" in ticket_actions
+      and "if ($kind === 'same_state' && !empty($current['cancel_requested_at']))" in workflow_service
+      and "CANCELLATION_PENDING_SAME_STATE_COLUMNS" in workflow_service,
+      "later cancellation is centrally recorded; conversation continues while lifecycle transitions and reassignment are frozen")
 check("decide_ticket_cancellation" in index
       and "ticket_handler_level($ticket, $decisionUser) === ''" in index
       and "cancel_requested_by" in index
