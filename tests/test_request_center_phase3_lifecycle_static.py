@@ -58,6 +58,17 @@ def test_create_request_uses_one_time_session_token_and_read_only_schema_preflig
     assert "if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY'))" in handler
 
 
+def test_independent_runtime_has_no_schema_ensure_or_autofill_calls():
+    router = source("request-center.php")
+    post = source("modules/request-center/post-handler.php")
+    assert "schemaProblems()" in router
+    assert "schemaProblems()" in post
+    assert "ticket_number_ensure_schema" not in post
+    assert "ticket_number_autofill" not in post
+    assert "org_ensure_schema()" not in post
+    assert "org_ticket_schema_ensure()" not in post
+
+
 def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     workflow = source("modules/request-center/WorkflowService.php")
     action = source("modules/request-center/Actions/supervisor-actions.php")
