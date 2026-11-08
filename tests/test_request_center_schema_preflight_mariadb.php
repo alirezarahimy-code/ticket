@@ -86,13 +86,16 @@ $ticket->execute([
 ]);
 $ticketId = (int) $pdo->lastInsertId();
 
+$userInsert->execute(['rc-rejection-requester-' . bin2hex(random_bytes(4)), 'RC Rejection Requester', 'user', $departmentId]);
+$rejectionRequesterId = (int) $pdo->lastInsertId();
+
 $rejectionTicket = $pdo->prepare(
     'INSERT INTO tickets (subject, description, requester_id, assigned_to, department_id,
                           category_id, service_id, asset_id, requesting_unit_id, service_group, status)
      VALUES (?, ?, ?, NULL, ?, ?, ?, NULL, NULL, ?, ?)'
 );
 $rejectionTicket->execute([
-    'RC Invalid Request', 'Invalid service scope fixture', $requesterId,
+    'RC Invalid Request', 'Invalid service scope fixture', $rejectionRequesterId,
     $departmentId, $categoryId, $serviceId, 'it', 'manager_review',
 ]);
 $rejectionTicketId = (int) $pdo->lastInsertId();
