@@ -175,7 +175,7 @@ if ($ticket === null) {
             <div class="message-head"><strong><?= $escape($message['full_name'] ?: 'کاربر') ?></strong><small><?= $escape($message['created_at']) ?><?= (int) ($message['is_internal'] ?? 0) === 1 ? ' · یادداشت داخلی' : '' ?></small></div>
             <div class="message-body"><?= $escape($message['body']) ?></div>
             <?php foreach ($attachments[(int) $message['id']] ?? [] as $attachment): ?>
-              <p><a href="index.php?action=download_attachment&amp;id=<?= (int) $attachment['id'] ?>">پیوست: <?= $escape($attachment['original_name']) ?></a></p>
+              <p><a href="request-center.php?action=download_attachment&amp;id=<?= (int) $attachment['id'] ?>">پیوست: <?= $escape($attachment['original_name']) ?></a></p>
             <?php endforeach; ?>
           </article>
         <?php endforeach; ?>
