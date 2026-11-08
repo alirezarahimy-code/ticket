@@ -52,6 +52,20 @@ foreach ($indexes->fetchAll() as $row) {
 migration_check(isset($unique['tickets']['ticket_no']), 'ticket number uniqueness is restored');
 migration_check(isset($unique['categories']['code']), 'category code uniqueness is restored');
 
+$categoryForeignKey = $pdo->prepare(
+    "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'service_catalog'
+       AND COLUMN_NAME = 'category_id' AND REFERENCED_TABLE_NAME = 'categories'"
+);
+$categoryForeignKey->execute();
+migration_check((int) $categoryForeignKey->fetchColumn() === 1, 'service category foreign key is restored');
+
+$orphanCategories = (int) $pdo->query(
+    'SELECT COUNT(*) FROM service_catalog s LEFT JOIN categories c ON c.id = s.category_id
+     WHERE s.category_id IS NOT NULL AND c.id IS NULL'
+)->fetchColumn();
+migration_check($orphanCategories === 0, 'service catalog has no orphan category references');
+
 $seedCount = (int) $pdo->query(
     "SELECT COUNT(*) FROM categories WHERE code LIKE 'IT-CAT-%' OR code LIKE 'SUP-CAT-%'"
 )->fetchColumn();
