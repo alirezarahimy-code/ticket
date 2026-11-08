@@ -8,6 +8,69 @@ declare(strict_types=1);
  * قبل از فراخوانی اعمال شود. هیچ منطق ردیف‌ها، گزارش، مجوز پیوست یا هدر HTTP تغییر نکرده است.
  */
 
+function request_center_excel_download(string $filename, string $title, array $headers, array $rows, array $dateRange = []): never
+{
+    $from = trim((string) ($dateRange['from'] ?? $dateRange['start'] ?? ''));
+    $to = trim((string) ($dateRange['to'] ?? $dateRange['end'] ?? ''));
+    $singleDate = trim((string) ($dateRange['date'] ?? ''));
+    if ($singleDate !== '') {
+        $from = $singleDate;
+        $to = $singleDate;
+    }
+    if ($from === '' && $to === '') {
+        $from = $to = 'بدون فیلتر تاریخی';
+    } elseif ($from === '') {
+        $from = 'بدون محدودیت شروع';
+    } elseif ($to === '') {
+        $to = 'بدون محدودیت پایان';
+    }
+    $jalaliLabel = static function (string $value): string {
+        $value = trim($value);
+        $digits = strtr($value, [
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4', '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4', '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+        ]);
+        if (preg_match('/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})$/', $digits, $parts) === 1) {
+            $year = (int) $parts[1];
+            $month = (int) $parts[2];
+            $day = (int) $parts[3];
+            if ($year >= 1300 && $year <= 1600) {
+                return sprintf('%04d/%02d/%02d', $year, $month, $day);
+            }
+            if ($year >= 1900 && $year <= 2200 && function_exists('gregorian_to_jalali')) {
+                try {
+                    [$jy, $jm, $jd] = gregorian_to_jalali($year, $month, $day);
+                    return sprintf('%04d/%02d/%02d', $jy, $jm, $jd);
+                } catch (Throwable) {
+                    // Preserve the original label if the supplied date is invalid.
+                }
+            }
+        }
+        return $value;
+    };
+    $from = $jalaliLabel($from);
+    $to = $jalaliLabel($to);
+    $from = $jalaliLabel($from);
+    $to = $jalaliLabel($to);
+    $columnCount = max(2, count($headers));
+    $sheetRows = [];
+    $sheetRows[] = [['v' => $title, 's' => 'title']];
+    $sheetRows[] = [['v' => 'تاریخ شروع', 's' => 'header'], ['v' => $from, 's' => 'body']];
+    $sheetRows[] = [['v' => 'تاریخ پایان', 's' => 'header'], ['v' => $to, 's' => 'body']];
+    $sheetRows[] = array_map(static fn ($header): array => ['v' => (string) $header, 's' => 'header'], array_values($headers));
+    foreach ($rows as $row) {
+        // همهٔ مقادیر رشته‌ای می‌شوند تا صفرهای ابتدای کدها (مثل کد ملی) حفظ شود
+        $sheetRows[] = array_map(static fn ($value): array => ['v' => is_scalar($value) ? (string) $value : '', 's' => 'body'], array_values((array) $row));
+    }
+    $bytes = xlsx_build([[
+        'name' => 'گزارش',
+        'rows' => $sheetRows,
+        'merges' => ['A1:' . xlsx_col_name($columnCount - 1) . '1'],
+        'widths' => array_fill(0, $columnCount, 20),
+    ]]);
+    xlsx_send($filename, $bytes);
+}
+
 function request_center_export_report(array $user): never
 {
     $reportUser = $user;
@@ -29,7 +92,7 @@ function request_center_export_report(array $user): never
     }
     $excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
     $excelTo = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
-    excel_download('ticket-report-' . date('Y-m-d') . '.xlsx', $exportTruncated ? 'گزارش درخواست‌ها (۵۰۰۰ ردیف اول؛ فیلتر را محدودتر کنید)' : 'گزارش کامل درخواست‌ها', ['شماره', 'عنوان', 'نوع', 'واحد', 'ثبت‌کننده', 'کارشناس', 'وضعیت', 'اولویت', 'ثبت', 'آخرین تغییر', 'ارجاع', 'اولین پاسخ', 'حل', 'بسته‌شدن', 'مهلت SLA', 'دقیقه SLA'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
+    request_center_excel_download('ticket-report-' . date('Y-m-d') . '.xlsx', $exportTruncated ? 'گزارش درخواست‌ها (۵۰۰۰ ردیف اول؛ فیلتر را محدودتر کنید)' : 'گزارش کامل درخواست‌ها', ['شماره', 'عنوان', 'نوع', 'واحد', 'ثبت‌کننده', 'کارشناس', 'وضعیت', 'اولویت', 'ثبت', 'آخرین تغییر', 'ارجاع', 'اولین پاسخ', 'حل', 'بسته‌شدن', 'مهلت SLA', 'دقیقه SLA'], $rows, ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']);
 }
 
 
