@@ -161,7 +161,7 @@ function chatbot_flow_step(array $flow, array $user, string $question): array
     $subject = (string) ($flow['subject'] ?? '');
     unset($_SESSION['chatbot_flow']);
     $link = [
-        'url' => 'request-center.php?page=new-ticket& . http_build_query(['subject' => $subject, 'description' => mb_substr($question, 0, 5000, 'UTF-8')]),
+        'url' => 'request-center.php?page=new-ticket&' . http_build_query(['subject' => $subject, 'description' => mb_substr($question, 0, 5000, 'UTF-8')]),
         'label' => 'ادامه و ثبت نهایی درخواست',
     ];
     return chatbot_reply($user, $question, 'متن درخواست آماده شد. با دکمهٔ زیر فرم ثبت درخواست باز می‌شود؛ نوع خدمت را انتخاب کنید و ثبت نهایی را بزنید.', true, null, 'ticket_create', 0.0, $link);
