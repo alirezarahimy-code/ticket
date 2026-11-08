@@ -35,7 +35,7 @@ if ($page === 'supervisor') {
         if ($ticket['status'] === 'resolved' && empty($ticket['cancel_requested_at']) && !ticket_user_is_requester($ticket, $supervisor)) {
             if (user_can($supervisor, 'supervisor.decide')) {
                 if (ticket_rating_is_current($ticket)) {
-                    echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="approve"><button class="button" type="submit">تأیید و بستن</button></form>';
+                    echo '<form method="post" class="supervisor-approve-form">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="approve"><label>دلیل تأیید نهایی<input type="text" name="supervisor_note" required maxlength="500" placeholder="دلیل تأیید و بستن درخواست"></label><button class="button" type="submit">تأیید و بستن</button></form>';
                 } else {
                     echo '<small class="muted">در انتظار امتیاز کاربر</small>';
                 }
