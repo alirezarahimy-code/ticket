@@ -821,6 +821,10 @@ if (!defined('APP_ROOT')) {
                 'sla_paused_at' => $newPauseAt,
                 'sla_pause_minutes' => $newPauseMinutes,
             ];
+            $firstResponseRecorded = $updateNote !== '' && empty($ticket['first_response_at']);
+            if ($firstResponseRecorded) {
+                $workflowUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();
+            }
             db()->beginTransaction();
             $workflow = new RequestCenterWorkflowService(db());
             $workflowKind = $status === $oldStatus ? 'same_state' : 'standard';
@@ -849,6 +853,7 @@ if (!defined('APP_ROOT')) {
                 'from_priority' => (string) $ticket['priority'],
                 'to_priority' => $priority,
                 'assigned_to' => $assignee,
+                'first_response_recorded' => $firstResponseRecorded,
                 'sla_ola' => $slaOlaAudit,
             ]);
             if ($updateNote !== '') {
@@ -857,7 +862,7 @@ if (!defined('APP_ROOT')) {
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_reply', 'پیام مدیریت در درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, $updateNote);
             }
             if ($status !== $oldStatus) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], $assignee && $assigneeChanged ? 'assigned' : 'status_changed', $oldStatus, $status, ['assigned_to' => $assignee, 'sla_ola' => $slaOlaAudit]);
+                log_ticket_event($ticketId, (int) $staffUser['id'], $assignee && $assigneeChanged ? 'assigned' : 'status_changed', $oldStatus, $status, ['assigned_to' => $assignee, 'first_response_recorded' => $firstResponseRecorded, 'sla_ola' => $slaOlaAudit]);
                 if ($status === 'resolved') {
                     record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, 'وضعیت به ' . request_center_status_label($status) . ' تغییر کرد.');
                 }
