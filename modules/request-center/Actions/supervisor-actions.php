@@ -93,7 +93,7 @@ if (!defined('APP_ROOT')) {
                 flash('info', 'درخواست برای اصلاح و ادامه کار برگشت داده شد.');
             }
             db_commit('index.php');
-            redirect('index.php?page=supervisor');
+            redirect('request-center.php?page=supervisor');
         }
 
         if ($action === 'supervisor_reopen') {
@@ -141,7 +141,7 @@ if (!defined('APP_ROOT')) {
             notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد.', (int) $supervisor['id']);
             db_commit('index.php');
             flash('info', $hadStaleCancel ? 'درخواست بازگشایی شد؛ درخواست لغو قدیمی هم پاک‌سازی شد.' : 'درخواست با تصمیم سوپروایزر بازگشایی شد.');
-            redirect('index.php?page=supervisor');
+            redirect('request-center.php?page=supervisor');
         }
 
 
@@ -185,5 +185,5 @@ if (!defined('APP_ROOT')) {
             record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_rated', 'ثبت رضایت برای درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, 'امتیاز: ' . $score . ' از ۵');
             db_commit('index.php');
             flash('success', 'امتیاز رضایت شما با موفقیت ثبت شد.');
-            redirect('index.php?page=ticket&id=' . $ticketId);
+            redirect('request-center.php?page=ticket&id=' . $ticketId);
         }
