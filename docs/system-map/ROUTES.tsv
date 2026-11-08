@@ -356,7 +356,7 @@ page	asset	index.php	1696
 page	organization	index.php	1730
 page	reports	index.php	2422
 page	inventory	modules/request-center/Actions/bulk-actions.php	41
-page	queue	modules/request-center/Actions/bulk-actions.php	139
+page	queue	modules/request-center/Actions/bulk-actions.php	148
 action	add_asset_relation	modules/request-center/Actions/bulk-actions.php	24
 action	bulk_update_tickets	modules/request-center/Actions/bulk-actions.php	44
 page	services	modules/request-center/Actions/service-actions.php	66

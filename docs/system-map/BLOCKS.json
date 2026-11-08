@@ -52110,8 +52110,8 @@
             "id": "PAGE-040",
             "path": "modules\/request-center\/Actions\/bulk-actions.php",
             "area": "PAGE",
-            "lines": 141,
-            "file_fingerprint": "73288179546c",
+            "lines": 150,
+            "file_fingerprint": "e2b3f3890410",
             "blocks": [
                 {
                     "kind": "region",
@@ -52160,9 +52160,9 @@
                     "kind": "region",
                     "anchor": "مسیر: bulk_update_tickets",
                     "line_start": 44,
-                    "line_end": 141,
-                    "lines": 98,
-                    "fingerprint": "cd3585199197",
+                    "line_end": 150,
+                    "lines": 107,
+                    "fingerprint": "9d45fd7fd49c",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -52415,8 +52415,8 @@
             "id": "PAGE-044",
             "path": "modules\/request-center\/Actions\/ticket-actions.php",
             "area": "PAGE",
-            "lines": 753,
-            "file_fingerprint": "33a6ad5f2a71",
+            "lines": 797,
+            "file_fingerprint": "bd635b117804",
             "blocks": [
                 {
                     "kind": "region",
@@ -52543,9 +52543,9 @@
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
                     "line_start": 605,
-                    "line_end": 753,
-                    "lines": 149,
-                    "fingerprint": "7b9a2dc6ea96",
+                    "line_end": 797,
+                    "lines": 193,
+                    "fingerprint": "18db9eba2da6",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -52884,7 +52884,7 @@
             "path": "modules\/request-center\/Pages\/detail.php",
             "area": "PAGE",
             "lines": 248,
-            "file_fingerprint": "34d46fdc25ae",
+            "file_fingerprint": "dda68df90f57",
             "blocks": [
                 {
                     "kind": "region",
@@ -52905,7 +52905,7 @@
                     "line_start": 11,
                     "line_end": 248,
                     "lines": 238,
-                    "fingerprint": "cce3585a609f",
+                    "fingerprint": "8cb2ed5a2814",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -52922,16 +52922,16 @@
             "id": "PAGE-052",
             "path": "modules\/request-center\/Pages\/index.php",
             "area": "PAGE",
-            "lines": 346,
-            "file_fingerprint": "51999d300d67",
+            "lines": 347,
+            "file_fingerprint": "9fa51a8b6042",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-98",
+                    "anchor": "بلوک رویه‌ای 1-99",
                     "line_start": 1,
-                    "line_end": 98,
-                    "lines": 98,
-                    "fingerprint": "e4b4076eea65",
+                    "line_end": 99,
+                    "lines": 99,
+                    "fingerprint": "621ca8f7ddd2",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -52943,8 +52943,8 @@
                 {
                     "kind": "region",
                     "anchor": "Dedicated role workspaces are routed before the generic requ",
-                    "line_start": 99,
-                    "line_end": 346,
+                    "line_start": 100,
+                    "line_end": 347,
                     "lines": 248,
                     "fingerprint": "4cd160a930e2",
                     "risk": {
@@ -52965,7 +52965,7 @@
             "path": "modules\/request-center\/Pages\/queue.php",
             "area": "PAGE",
             "lines": 39,
-            "file_fingerprint": "a6eaf0401368",
+            "file_fingerprint": "c0a0509b71f2",
             "blocks": [
                 {
                     "kind": "region",
@@ -52986,7 +52986,7 @@
                     "line_start": 6,
                     "line_end": 39,
                     "lines": 34,
-                    "fingerprint": "b6c20e2e2ae8",
+                    "fingerprint": "b496923c3ae0",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -78842,7 +78842,7 @@
             "path": "tests\/test_ticket_cancellation_static.py",
             "area": "TEST",
             "lines": 150,
-            "file_fingerprint": "dd1ac45586ba",
+            "file_fingerprint": "0a420793d09a",
             "blocks": [
                 {
                     "kind": "block",
@@ -78863,7 +78863,7 @@
                     "line_start": 23,
                     "line_end": 150,
                     "lines": 128,
-                    "fingerprint": "6293a600be7a",
+                    "fingerprint": "d47fd9d6e0b2",
                     "risk": {
                         "score": 2,
                         "flags": {

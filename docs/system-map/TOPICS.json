@@ -34904,7 +34904,7 @@
       "line": 44,
       "anchor": "مسیر: bulk_update_tickets",
       "risk": 2,
-      "lines": 98
+      "lines": 107
     },
     "PAGE-041.01": {
       "path": "modules/request-center/Actions/dispatch.php",
@@ -35096,7 +35096,7 @@
       "line": 605,
       "anchor": "مسیر: update_ticket",
       "risk": 3,
-      "lines": 149
+      "lines": 193
     },
     "PAGE-045.01": {
       "path": "modules/request-center/AppointmentRepository.php",
@@ -35270,14 +35270,14 @@
       "path": "modules/request-center/Pages/index.php",
       "area": "PAGE",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-98",
+      "anchor": "بلوک رویه‌ای 1-99",
       "risk": 2,
-      "lines": 98
+      "lines": 99
     },
     "PAGE-052.02": {
       "path": "modules/request-center/Pages/index.php",
       "area": "PAGE",
-      "line": 99,
+      "line": 100,
       "anchor": "Dedicated role workspaces are routed before the generic requ",
       "risk": 8,
       "lines": 248

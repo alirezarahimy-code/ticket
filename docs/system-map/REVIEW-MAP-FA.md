@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 589 |
-| خطوط | 131,986 |
+| خطوط | 132,040 |
 | آدرس‌ها (بلوک) | 6,874 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -289,7 +289,7 @@
 | `TEST` | TEST | 234 | 1,709 | 23,425 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 84 | 1,377 | 8,023 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,885 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,939 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -8765,14 +8765,14 @@
 </details>
 
 <details>
-<summary><b>PAGE-040</b> — <code>modules/request-center/Actions/bulk-actions.php</code> (141 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>PAGE-040</b> — <code>modules/request-center/Actions/bulk-actions.php</code> (150 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-040.01` | 1–16 | ناحیه | `بلوک رویه‌ای 1-16` | 0 | ⬜ |
 | `PAGE-040.02` | 17–23 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `PAGE-040.03` | 24–43 | ناحیه | `مسیر: add_asset_relation` | **8** | ⬜ |
-| `PAGE-040.04` | 44–141 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
+| `PAGE-040.04` | 44–150 | ناحیه | `مسیر: bulk_update_tickets` | 2 | ⬜ |
 
 </details>
 
@@ -8816,7 +8816,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-044</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (753 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>PAGE-044</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (797 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -8828,7 +8828,7 @@
 | `PAGE-044.06` | 366–405 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
 | `PAGE-044.07` | 406–455 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
 | `PAGE-044.08` | 456–604 | ناحیه | `مسیر: reply` | 3 | ⬜ |
-| `PAGE-044.09` | 605–753 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
+| `PAGE-044.09` | 605–797 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
 
 </details>
 
@@ -8910,12 +8910,12 @@
 </details>
 
 <details>
-<summary><b>PAGE-052</b> — <code>modules/request-center/Pages/index.php</code> (346 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-052</b> — <code>modules/request-center/Pages/index.php</code> (347 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `PAGE-052.01` | 1–98 | ناحیه | `بلوک رویه‌ای 1-98` | 2 | ⬜ |
-| `PAGE-052.02` | 99–346 | ناحیه | `Dedicated role workspaces are routed before the ge` | **8** | ⬜ |
+| `PAGE-052.01` | 1–99 | ناحیه | `بلوک رویه‌ای 1-99` | 2 | ⬜ |
+| `PAGE-052.02` | 100–347 | ناحیه | `Dedicated role workspaces are routed before the ge` | **8** | ⬜ |
 
 </details>
 
