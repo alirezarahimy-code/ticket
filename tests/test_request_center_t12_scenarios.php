@@ -20,7 +20,7 @@ $rootUser = (string) (getenv('CI_DB_USER') ?: 'root');
 $rootPass = (string) (getenv('CI_DB_PASS') ?: '');
 $mysql = (string) (getenv('ITSM_MYSQL_PATH') ?: 'mariadb');
 $schemaFile = dirname(__DIR__) . '/install-empty-db.sql';
-$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11,12'))));
+$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11,12,13'))));
 $evidenceDir = (string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'));
 
 $portBase = 18100 + (getmypid() % 4000);
@@ -775,6 +775,88 @@ try {
             'name' => '12-independent-four-workspaces-http',
             'result' => 'PASS',
             'evidence' => $workspaceEvidence,
+        ];
+    }
+
+    if (in_array(13, $scenarioFilter, true)) {
+        // Execute one write operation from each role through the independent
+        // Request Center POST boundary (not index.php's compatibility bridge).
+        t12s_rebuild_all($apps, $rootUser, $rootPass, $host, $port, $mysql);
+        foreach ($apps as &$independentApp) {
+            $independentApp['base_url'] = 'http://127.0.0.1:' . (int) $independentApp['port'];
+        }
+        unset($independentApp);
+        $independentSessions = t12s_sessions($apps);
+        $independentApp = $apps['feature'];
+        $independentPdo = t12s_pdo($independentApp);
+        $independentUrl = $independentApp['base_url'] . '/request-center.php';
+        $independentEvidence = [];
+
+        // Requester: direct cancellation before assignment.
+        $requesterTicket = t12s_create_ticket('feature', $independentApp, $independentSessions);
+        $requesterResponse = t12s_post($independentUrl, $independentSessions['requester']['feature'], 'cancel_ticket', [
+            'ticket_id' => $requesterTicket,
+            'cancel_reason' => 'لغو مستقل درخواست‌دهنده در T12',
+        ]);
+        $requesterStatus = (string) $independentPdo->query('SELECT status FROM tickets WHERE id = ' . (int) $requesterTicket)->fetchColumn();
+        if ($requesterResponse['status'] !== 302 || $requesterStatus !== 'cancelled') {
+            t12s_fail('13-independent-post requester cancellation failed: HTTP ' . $requesterResponse['status'] . ', status=' . $requesterStatus);
+        }
+        $independentEvidence[] = 'requester:cancel_ticket:PASS';
+        t12s_log('T12-SCENARIO 13-independent-post requester: PASS');
+
+        // Agent: public reply against a ticket explicitly assigned to this agent.
+        $agentTicket = t12s_create_ticket('feature', $independentApp, $independentSessions);
+        $independentPdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, first_response_at = NOW() - INTERVAL 30 MINUTE WHERE id = " . (int) $agentTicket);
+        $agentResponse = t12s_post($independentUrl, $independentSessions['agent']['feature'], 'reply', [
+            'ticket_id' => $agentTicket,
+            'body' => 'پاسخ عمومی کارشناس از ورودی مستقل T12',
+            'is_internal' => '0',
+        ]);
+        $agentMessage = $independentPdo->query('SELECT is_internal, body FROM ticket_messages WHERE ticket_id = ' . (int) $agentTicket . ' ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+        if ($agentResponse['status'] !== 302 || !$agentMessage || (int) $agentMessage['is_internal'] !== 0
+            || (string) $agentMessage['body'] !== 'پاسخ عمومی کارشناس از ورودی مستقل T12') {
+            t12s_fail('13-independent-post agent public reply failed: HTTP ' . $agentResponse['status']);
+        }
+        $independentEvidence[] = 'agent:public-reply:PASS';
+        t12s_log('T12-SCENARIO 13-independent-post agent: PASS');
+
+        // Supervisor: approve a resolved ticket with a current requester rating.
+        $supervisorTicket = t12s_create_ticket('feature', $independentApp, $independentSessions);
+        $independentPdo->exec("UPDATE tickets SET status = 'resolved', assigned_to = 102, assigned_at = NOW() - INTERVAL 2 HOUR, first_response_at = NOW() - INTERVAL 90 MINUTE, resolved_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $supervisorTicket);
+        $independentPdo->exec("INSERT INTO ticket_ratings (ticket_id, requester_id, agent_id, score, created_at) SELECT " . (int) $supervisorTicket . ", 101, 102, 5, resolved_at FROM tickets WHERE id = " . (int) $supervisorTicket);
+        $supervisorResponse = t12s_post($independentUrl, $independentSessions['supervisor']['feature'], 'supervisor_decision', [
+            'ticket_id' => $supervisorTicket,
+            'decision' => 'approve',
+            'supervisor_note' => 'تأیید مستقل سوپروایزر در T12',
+        ]);
+        $supervisorStatus = (string) $independentPdo->query('SELECT status FROM tickets WHERE id = ' . (int) $supervisorTicket)->fetchColumn();
+        if ($supervisorResponse['status'] !== 302 || $supervisorStatus !== 'closed') {
+            t12s_fail('13-independent-post supervisor decision failed: HTTP ' . $supervisorResponse['status'] . ', status=' . $supervisorStatus);
+        }
+        $independentEvidence[] = 'supervisor:approve-close:PASS';
+        t12s_log('T12-SCENARIO 13-independent-post supervisor: PASS');
+
+        // Primary admin: scoped bulk transition through the module-owned POST runner.
+        $adminTicketA = t12s_create_ticket('feature', $independentApp, $independentSessions);
+        $adminTicketB = t12s_create_ticket('feature', $independentApp, $independentSessions);
+        $independentPdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, first_response_at = NOW() - INTERVAL 30 MINUTE WHERE id IN (" . (int) $adminTicketA . ", " . (int) $adminTicketB . ")");
+        $adminResponse = t12s_post($independentUrl, $independentSessions['admin']['feature'], 'bulk_update_tickets', [
+            'ticket_ids' => [$adminTicketA, $adminTicketB],
+            'bulk_status' => 'resolved',
+            'bulk_note' => 'عملیات گروهی مدیر از ورودی مستقل T12',
+        ]);
+        $adminStatuses = $independentPdo->query('SELECT status FROM tickets WHERE id IN (' . (int) $adminTicketA . ', ' . (int) $adminTicketB . ') ORDER BY id')->fetchAll(PDO::FETCH_COLUMN);
+        if ($adminResponse['status'] !== 302 || $adminStatuses !== ['resolved', 'resolved']) {
+            t12s_fail('13-independent-post admin bulk update failed: HTTP ' . $adminResponse['status'] . ', statuses=' . json_encode($adminStatuses));
+        }
+        $independentEvidence[] = 'admin:bulk-update:PASS';
+        t12s_log('T12-SCENARIO 13-independent-post admin: PASS');
+
+        $results[] = [
+            'name' => '13-independent-post-four-workspaces',
+            'result' => 'PASS',
+            'evidence' => $independentEvidence,
         ];
     }
 
