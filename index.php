@@ -12,6 +12,14 @@ if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
     exit;
 }
 
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && (string) ($_GET['action'] ?? '') === 'export_report') {
+    $query = $_GET;
+    unset($query['action']);
+    header('Location: request-center.php?action=export_report&' . http_build_query($query), true, 302);
+    exit;
+}
+
 // Early compatibility bridge: serve Request Center lifecycle GETs from its
 // independent entry before loading legacy modules or running their schema setup.
 $legacyRequestCenterPage = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
