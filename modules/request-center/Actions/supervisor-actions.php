@@ -87,7 +87,7 @@ if (!defined('APP_ROOT')) {
                 if (!$reworked) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
-                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note);
+                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note]);
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_rework', $ticket['status'], $reworkStatus, ['note' => $note]);
                 notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id']);
                 flash('info', 'درخواست برای اصلاح و ادامه کار برگشت داده شد.');
