@@ -42,7 +42,7 @@ function notification_target_url(array $notification): string
             : 'index.php?page=dashboard#food-cancel-requests';
     }
     if (!empty($notification['ticket_id'])) {
-        return 'index.php?page=ticket&id=' . (int) $notification['ticket_id'];
+        return 'request-center.php?page=ticket&id=' . (int) $notification['ticket_id'];
     }
     return 'index.php?page=notifications';
 }
