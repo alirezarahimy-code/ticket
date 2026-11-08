@@ -3303,6 +3303,7 @@ sha256_file	def	tests/test_release_chain_integrity.py	27	tests
 read_manifest	def	tests/test_release_chain_integrity.py	35	tests
 test_every_existing_zip_sha256_sidecar_matches_its_archive	def	tests/test_release_chain_integrity.py	41	tests
 test_documented_upgrade_chain_is_compatible_with_installed_1_62_77	def	tests/test_release_chain_integrity.py	72	tests
+test_1_62_90_report_requires_logging_package_first	def	tests/test_release_chain_integrity.py	134	tests
 reconstructed_release_files	def	tests/test_repair_16236_full_source_restore.py	33	tests
 reconstructed_migrations	def	tests/test_repair_16236_full_source_restore.py	43	tests
 test_repair_package_rebuilds_the_release_overlay_not_the_old_snapshot	def	tests/test_repair_16236_full_source_restore.py	53	tests
@@ -3792,6 +3793,8 @@ Invoke-Php	invoke-php	tools/install_food_ticket_worker.ps1	25	tools
 grabFunction	function	tools/preview_asset_names.php	21	tools
 setting	function	tools/preview_asset_names.php	45	tools
 e	function	tools/preview_asset_names.php	49	tools
+sha256	def	tools/rebuild_1_62_90_package.py	19	tools
+main	def	tools/rebuild_1_62_90_package.py	23	tools
 addr_cell	def	tools/render_code_map.py	57	tools
 read	def	tools/session-boot.py	48	tools
 run	def	tools/session-boot.py	55	tools
