@@ -250,8 +250,15 @@ try {
     $noCsrf = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'create_ticket', 'subject' => 'should-be-rejected'], ['Cookie: ' . $cookie]);
     smoke_check($noCsrf['status'] === 419, 'independent POST without CSRF is rejected with HTTP 419 (status ' . $noCsrf['status'] . ')');
 
-    // 6) Phase 3 — full create_ticket round trip through the INDEPENDENT entry.
-    $csrf = (string) $session['csrf'];
+    // 6) Phase 3 — obtain the token from the actual independent creation form,
+    // then exercise the complete create_ticket round trip through that entry.
+    $createForm = smoke_http('http://' . $address . '/request-center.php?page=new-ticket', ['Cookie: ' . $cookie]);
+    smoke_check($createForm['status'] === 200, 'independent creation form returns HTTP 200 (status ' . $createForm['status'] . ')');
+    $csrf = '';
+    if (preg_match('/name="csrf"\\s+value="([a-f0-9]{64})"/i', $createForm['body'], $csrfMatch) === 1) {
+        $csrf = $csrfMatch[1];
+    }
+    smoke_check($csrf !== '', 'independent creation form exposes a session-bound CSRF token');
     $create = smoke_http_post('http://' . $address . '/request-center.php', [
         'action' => 'create_ticket',
         'subject' => 'RC phase-3 independent POST smoke',
@@ -275,7 +282,7 @@ try {
         smoke_check(false, 'independent create_ticket returns HTTP 302 (status ' . $create['status'] . '). Body snippet: ' . substr(strip_tags($create['body']), 0, 300) . $logTail);
     }
     smoke_check($create['status'] === 302, 'independent create_ticket returns HTTP 302 (status ' . $create['status'] . ')');
-    if (!str_starts_with($create['location'], 'index.php?page=ticket&id=')) {
+    if (!str_starts_with($create['location'], 'request-center.php?page=ticket&id=')) {
         $logTail = '';
         $logFile = $root . '/storage/logs/app.log';
         if (is_file($logFile)) {
@@ -284,7 +291,7 @@ try {
         }
         smoke_check(false, 'independent create_ticket redirects to the ticket page. Location: ' . $create['location'] . $logTail);
     }
-    smoke_check(str_starts_with($create['location'], 'index.php?page=ticket&id='), 'independent create_ticket redirects to the ticket page (Location: ' . $create['location'] . ')');
+    smoke_check(str_starts_with($create['location'], 'request-center.php?page=ticket&id='), 'independent create_ticket redirects to the independent ticket page (Location: ' . $create['location'] . ')');
     $ticketRow = $pdo->query("SELECT id, subject, ticket_type FROM tickets WHERE subject = 'RC phase-3 independent POST smoke' ORDER BY id DESC LIMIT 1")->fetch();
     smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');
     smoke_check((string) ($ticketRow['ticket_type'] ?? '') === 'request', 'independent create_ticket stored the requested ticket type');
