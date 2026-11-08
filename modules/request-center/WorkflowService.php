@@ -40,6 +40,10 @@ final class RequestCenterWorkflowService
         'pending', 'resolved', 'closed', 'cancelled', 'rejected',
     ];
 
+    private const REQUESTER_CANCELLABLE_STATUSES = [
+        'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved',
+    ];
+
     private const CANCELLATION_PENDING_SAME_STATE_COLUMNS = [
         'due_at', 'sla_paused_at', 'sla_pause_minutes', 'first_response_at',
         'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
@@ -83,7 +87,7 @@ final class RequestCenterWorkflowService
     {
         $this->assertTransaction();
         if ($ticketId <= 0 || $requesterId <= 0 || trim($reason) === ''
-            || !in_array($expectedStatus, self::STATUSES, true)) {
+            || !in_array($expectedStatus, self::REQUESTER_CANCELLABLE_STATUSES, true)) {
             throw new InvalidArgumentException('اطلاعات درخواست لغو معتبر نیست.');
         }
         $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
