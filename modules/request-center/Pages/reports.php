@@ -39,8 +39,7 @@ if ($page === 'reports') {
                 || user_can($reportUser, 'ticket.view_unit') || user_can($reportUser, 'ticket.view_all'))
                 ? 'agent' : 'requester'));
     $reportReturnParams = ['workspace' => $reportReturnWorkspace, 'p' => $reportPage];
-    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16,
-        'ticket_type' => 16, 'from' => 24, 'to' => 24] as $returnKey => $maxLength) {
+    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16, 'from' => 24, 'to' => 24] as $returnKey => $maxLength) {
         $returnValue = trim((string) ($_GET[$returnKey] ?? ''));
         if ($returnValue !== '' && strlen($returnValue) <= $maxLength) {
             $reportReturnParams[$returnKey] = $returnValue;
