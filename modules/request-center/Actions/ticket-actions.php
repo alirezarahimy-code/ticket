@@ -357,8 +357,18 @@ if (!defined('APP_ROOT')) {
                 }
                 $decisionBody = 'درخواست لغو درخواست تأیید شد: ' . $requestReason . ($note !== '' ? "\nیادداشت مسئول: " . $note : '');
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $decisionBody]);
-                save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_approved', $ticketId, ['reason' => $requestReason, 'note' => $note]);
-                log_ticket_event($ticketId, (int) $decisionUser['id'], 'cancellation_approved', $oldStatus, 'cancelled', ['reason' => $requestReason, 'note' => $note, 'requested_at' => $requestAt]);
+                $cancelSlaOlaAudit = [
+                    'due_at' => $cancelDueAt,
+                    'sla_paused_at' => $cancelPauseAt,
+                    'sla_pause_minutes' => $cancelPauseMinutes,
+                    'ola_policy_id' => $cancelOla['policy_id'],
+                    'ola_response_due_at' => $cancelOla['response_due_at'],
+                    'ola_due_at' => $cancelOla['due_at'],
+                    'ola_escalation_1_at' => $cancelOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $cancelOla['escalation_2_at'],
+                ];
+                save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_approved', $ticketId, ['reason' => $requestReason, 'note' => $note, 'sla_ola' => $cancelSlaOlaAudit]);
+                log_ticket_event($ticketId, (int) $decisionUser['id'], 'cancellation_approved', $oldStatus, 'cancelled', ['reason' => $requestReason, 'note' => $note, 'requested_at' => $requestAt, 'sla_ola' => $cancelSlaOlaAudit]);
                 request_center_notify_ticket_parties($ticketId, 'ticket_cancelled', 'درخواست لغو تأیید شد', 'درخواست لغو درخواست ' . ticket_number($ticketId) . ' توسط مسئول رسیدگی تأیید شد.', (int) $decisionUser['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_cancelled', 'تأیید لغو درخواست ' . ticket_number($ticketId), (int) $decisionUser['id'], $ticketId, $requestReason . ($note !== '' ? "\n" . $note : ''));
                 db_commit_or_fail('ticket:cancel_request_approved');
@@ -465,8 +475,18 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
             db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $user['id'], 'مشکل حل نشده است (بازگشایی توسط کاربر): ' . $reason]);
-            save_audit_required((int) $user['id'], 'ticket_reopened_by_user', $ticketId, ['reason' => $reason]);
-            log_ticket_event($ticketId, (int) $user['id'], 'reopened_by_user', 'resolved', $reopenStatus, ['reason' => $reason]);
+            $reopenSlaOlaAudit = [
+                'due_at' => $reopenDue,
+                'sla_paused_at' => null,
+                'sla_pause_minutes' => 0,
+                'ola_policy_id' => $reopenOla['policy_id'],
+                'ola_response_due_at' => $reopenOla['response_due_at'],
+                'ola_due_at' => $reopenOla['due_at'],
+                'ola_escalation_1_at' => $reopenOla['escalation_1_at'],
+                'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
+            ];
+            save_audit_required((int) $user['id'], 'ticket_reopened_by_user', $ticketId, ['reason' => $reason, 'sla_ola' => $reopenSlaOlaAudit]);
+            log_ticket_event($ticketId, (int) $user['id'], 'reopened_by_user', 'resolved', $reopenStatus, ['reason' => $reason, 'sla_ola' => $reopenSlaOlaAudit]);
             request_center_notify_ticket_staff($ticketId, 'ticket_reopened', 'کاربر اعلام کرد مشکل حل نشده است', 'درخواست ' . ticket_number($ticketId) . ' توسط ثبت‌کننده بازگشایی شد: ' . $reason, (int) $user['id']);
             db_commit_or_fail('ticket:reopen_ticket');
             flash('info', 'درخواست دوباره برای رسیدگی ارسال شد.');
