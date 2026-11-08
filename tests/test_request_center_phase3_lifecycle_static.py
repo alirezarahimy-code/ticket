@@ -266,6 +266,10 @@ def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
     ticket_action = source("modules/request-center/Actions/ticket-actions.php")
     assert "->requestCancellation(" in ticket_action
     assert "->rejectCancellation(" in ticket_action
+    assert "'requester_id' => $ticket['requester_id']" in ticket_action
+    assert "'assigned_to' => $ticket['assigned_to'] ?? null" in ticket_action
+    assert "rejectCancellation($ticketId, $oldStatus, $requestAt, [" in ticket_action
+    assert "array $expectedFields = []" in workflow
     assert "->appendMessage(" in ticket_action
 
 
