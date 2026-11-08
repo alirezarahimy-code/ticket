@@ -68,7 +68,7 @@ if ($page === 'ticket') {
         if (!empty($attachments[(int) $message['id']])) {
             echo '<div class="attachments">';
             foreach ($attachments[(int) $message['id']] as $attachment) {
-                 echo '<a class="attachment" href="index.php?action=download_attachment&id=' . (int) $attachment['id'] . '">📎 ' . e($attachment['original_name']) . '</a>';
+                 echo '<a class="attachment" href="request-center.php?action=download_attachment&id=' . (int) $attachment['id'] . '">📎 ' . e($attachment['original_name']) . '</a>';
             }
             echo '</div>';
         }
