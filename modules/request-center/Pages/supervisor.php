@@ -8,8 +8,9 @@ if (!defined('APP_ROOT')) {
 }
 
 /**
- * Request Center supervisor workspace, retained in the legacy front-controller scope.
- * Existing permission checks, scope predicate, POST contracts and pagination are preserved.
+ * Request Center supervisor decision queue.
+ * Permission checks, ticket scope, POST contracts and pagination are shared by the
+ * independent Request Center entry and the legacy compatibility route.
  */
 
 if ($page === 'supervisor') {
