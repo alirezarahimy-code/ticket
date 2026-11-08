@@ -194,7 +194,7 @@ if ($page === 'ticket') {
     $eventSearch = trim((string) ($_GET['event_q'] ?? ''));
     $eventConditions = ['e.ticket_id = ?'];
     $eventParams = [(int) $ticket['id']];
-    if (!$staff) {
+    if (!$canSeeInternal) {
         // Internal notes are not part of the requester-visible activity stream.
         $eventConditions[] = "e.event_type <> 'internal_note'";
     }
@@ -202,7 +202,7 @@ if ($page === 'ticket') {
         $needle = '%' . logging_utf8_substr($eventSearch, 0, 100) . '%';
         $searchParts = ['e.event_type LIKE ?', 'e.from_status LIKE ?', 'e.to_status LIKE ?', 'u.full_name LIKE ?'];
         array_push($eventParams, $needle, $needle, $needle, $needle);
-        if ($staff) {
+        if ($canSeeInternal) {
             $searchParts[] = 'CAST(e.details AS CHAR) LIKE ?';
             $eventParams[] = $needle;
         } else {
@@ -232,7 +232,7 @@ if ($page === 'ticket') {
         $eventDetails = is_array($eventDetails) ? $eventDetails : [];
         $visibleDetails = [];
         $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'];
-        if ($staff) {
+        if ($canSeeInternal) {
             $safeKeys = array_merge($safeKeys, [
                 'note', 'assigned_to', 'requested_at', 'actor_id', 'message_id', 'is_internal',
                 'due_at', 'sla_paused_at', 'sla_pause_minutes', 'ola_policy_id',
@@ -243,7 +243,7 @@ if ($page === 'ticket') {
         foreach ($eventDetails as $detailKey => $detailValue) {
             if (in_array((string) $detailKey, $safeKeys, true)) {
                 $visibleDetails[$detailKey] = $detailValue;
-            } elseif ($staff && $detailKey === 'sla_ola' && is_array($detailValue)) {
+            } elseif ($canSeeInternal && $detailKey === 'sla_ola' && is_array($detailValue)) {
                 foreach ($detailValue as $slaKey => $slaValue) {
                     $visibleDetails['sla_ola_' . (string) $slaKey] = $slaValue;
                 }
