@@ -99,7 +99,7 @@ FRESH-INSTALL-SCHEMA-1.62.82-CHANGE-REPORT-fa.md	root-misc	43	2733
 FRESH-INSTALL-SCHEMA-1.62.82-UPDATE-NOTE-fa.txt	root-misc	47	3132
 OPTIMIZATION_SUMMARY.md	root-misc	111	3409
 README-FA.txt	root-misc	10	1666
-README.md	root-misc	279	47872
+README.md	root-misc	281	48652
 START-FOOD-WORKER.txt	root-misc	33	2858
 START-HERE.txt	root-misc	85	9823
 TICKET-NUMBER-REPAIR-1.62.83-CHANGE-REPORT-fa.md	root-misc	172	10838
@@ -611,7 +611,7 @@ tests/test_release_1_62_7_traffic_history_events_static.py	tests	72	3393
 tests/test_release_1_62_88_package_integrity.py	tests	47	1904
 tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	6687
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
-tests/test_release_chain_integrity.py	tests	147	6688
+tests/test_release_chain_integrity.py	tests	160	7374
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
