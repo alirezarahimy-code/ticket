@@ -302,7 +302,18 @@ function request_center_ticket_number_peek(string $prefix): string
     $query = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? LIMIT 1');
     $query->execute([$prefix]);
     $current = (int) ($query->fetchColumn() ?: 0);
-    $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+
+    $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+$';
+    $maxQuery = db()->prepare(
+        'SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED))
+         FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?'
+    );
+    $maxQuery->execute([$prefix . '-%', $pattern]);
+    $existing = (int) ($maxQuery->fetchColumn() ?: 0);
+    return $prefix . '-' . str_pad((string) (max($current, $existing) + 1), 5, '0', STR_PAD_LEFT);
+}
+
+/**
+ * Read-only equivalent of org_deputy_units() for the independent Request
  * Center entry. The provider helper calls org_ensure_schema() and therefore
  * is intentionally not used on this path.
  *
@@ -343,15 +354,6 @@ function request_center_status_label(string $status): string
         'rejected' => 'ردشده',
     ];
     return $labels[$status] ?? (function_exists('status_label') ? status_label($status) : $status);
-}
-;
-    $maxQuery = db()->prepare(
-        'SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED))
-         FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?'
-    );
-    $maxQuery->execute([$prefix . '-%', $pattern]);
-    $existing = (int) ($maxQuery->fetchColumn() ?: 0);
-    return $prefix . '-' . str_pad((string) (max($current, $existing) + 1), 5, '0', STR_PAD_LEFT);
 }
 
 /**
