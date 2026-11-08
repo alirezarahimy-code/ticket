@@ -286,6 +286,9 @@ def test_supervisor_workspace_owns_assignment_and_cancellation_review():
     assert "if ($action === 'supervisor_assign_ticket')" in supervisor_action
     assert "ticket_assignee_is_eligible($ticket, $assignee, 'ticket_notification_user_can')" in supervisor_action
     assert "if ($note !== '' && !ticket_can_see_internal($ticket, $supervisor))" in supervisor_action
+    assert "if ($reason === '')" in supervisor_action
+    assert "'reason' => $reason" in supervisor_action
+    assert 'name="assignment_reason" required maxlength="500"' in detail
     assert "if (ticket_can_see_internal($ticket, $user))" in detail
     assert "$workflow->transition(" in supervisor_action
     assert "'supervisor_assign_ticket'" in post_handler
