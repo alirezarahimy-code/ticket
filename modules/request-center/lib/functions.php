@@ -91,7 +91,10 @@ function store_attachment(int $messageId, array $file): void
             } catch (Throwable $exception) {
                 // Preserve the file if the database cannot be checked safely.
                 if (function_exists('app_error_log')) {
-                    app_error_log('Request Center attachment cleanup deferred: ' . $exception->getMessage());
+                    try {
+                        app_error_log('Request Center attachment cleanup deferred: ' . $exception->getMessage());
+                    } catch (Throwable) {
+                    }
                 }
             }
         });
