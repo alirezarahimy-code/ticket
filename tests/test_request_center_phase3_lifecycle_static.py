@@ -470,7 +470,7 @@ def test_lifecycle_post_errors_preserve_supervisor_and_agent_queue_context():
     assert "'supervisor_decision', 'supervisor_reopen' => $ticketId > 0" in handler
     assert "? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor'" in handler
     assert "'rc_return_queue'] ?? 'all'" in handler
-    assert "'rc_return_p' ?? 1" in handler
+    assert "'rc_return_p'] ?? 1" in handler
     assert "rawurlencode(" in handler
     supervisor_actions = source("modules/request-center/Actions/supervisor-actions.php")
     assert supervisor_actions.count("redirect(request_center_ticket_return_url($ticketId));") >= 5
