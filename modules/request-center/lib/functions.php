@@ -633,6 +633,19 @@ function request_center_ticket_return_url(int $ticketId): string
             $params[$returnIdKey] = $returnId;
         }
     }
+    if ((string) ($_POST['rc_return_calendar'] ?? '') === '1'
+        && in_array($workspace, ['agent', 'supervisor', 'admin'], true)) {
+        $params['calendar'] = 1;
+        $calendarMonth = (string) ($_POST['rc_return_jmonth'] ?? '');
+        if (preg_match('/^\\d{4}-(0[1-9]|1[0-2])$/', $calendarMonth)) {
+            $params['jmonth'] = $calendarMonth;
+        }
+        $params['view'] = (string) ($_POST['rc_return_view'] ?? '') === 'agenda' ? 'agenda' : 'month';
+        $calendarKind = (string) ($_POST['rc_return_kind'] ?? '');
+        if (in_array($calendarKind, ['sla', 'work', 'visit', 'await', 'followup'], true)) {
+            $params['kind'] = $calendarKind;
+        }
+    }
     $params['p'] = max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1)));
     return 'request-center.php?' . http_build_query($params);
 }
