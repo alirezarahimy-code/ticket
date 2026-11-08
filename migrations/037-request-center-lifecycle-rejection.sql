@@ -38,7 +38,7 @@ SET @rc_status_ddl = CASE
         'ALTER TABLE `tickets` MODIFY COLUMN `status` ',
         LEFT(@rc_status_type, CHAR_LENGTH(@rc_status_type) - 1),
         ',''rejected'') NOT NULL DEFAULT ',
-        QUOTE(COALESCE(@rc_status_default, 'manager_review'))
+        QUOTE(TRIM(BOTH CHAR(39) FROM COALESCE(@rc_status_default, 'manager_review')))
     )
     ELSE 'SELECT 1'
 END;
