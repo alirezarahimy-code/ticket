@@ -455,6 +455,15 @@ try {
     $slaEvents->execute([$maintenanceTicketId]);
     smoke_check((int) $slaEvents->fetchColumn() === 5, 'SLA/OLA alert events are recorded exactly once for the ticket');
     $maintenanceDetail = smoke_http('http://' . $address . '/request-center.php?page=ticket&id=' . $maintenanceTicketId, ['Cookie: ' . $cookie]);
+    if ($maintenanceDetail['status'] !== 200 || !str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') || !str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد')) {
+        $visibleEventRows = $pdo->prepare("SELECT event_type, ticket_id, user_id FROM ticket_events WHERE ticket_id = ? AND event_type IN ('sla_alert','ola_alert') ORDER BY id");
+        $visibleEventRows->execute([$maintenanceTicketId]);
+        echo 'detail event diagnostic: rows=' . json_encode($visibleEventRows->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE)
+            . ' canary=' . (str_contains($maintenanceDetail['body'], 'ردگیری و سوابق انجام کار') ? 'event-section-present' : 'event-section-missing')
+            . ' sla-label=' . (str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') ? 'yes' : 'no')
+            . ' ola-label=' . (str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد') ? 'yes' : 'no')
+            . ' body-tail=' . substr($maintenanceDetail['body'], -5000) . PHP_EOL;
+    }
     smoke_check($maintenanceDetail['status'] === 200 && str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') && str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد'), 'independent detail renders SLA/OLA event metadata without Logging UI dependencies (status ' . $maintenanceDetail['status'] . ')');
     $maintenanceNotifications = $pdo->prepare("SELECT COUNT(DISTINCT notification_type) FROM notifications WHERE ticket_id = ? AND notification_type IN ('sla_due_soon','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')");
     $maintenanceNotifications->execute([$maintenanceTicketId]);
