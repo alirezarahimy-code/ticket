@@ -15,6 +15,16 @@ if (!defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
 $rcMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $rcPage = trim((string) ($_GET['page'] ?? ''));
 
+// Attachment downloads are Request Center-owned reads; serve them before the
+// legacy front controller's global schema setup.
+if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attachment') {
+    require_once __DIR__ . '/bootstrap.php';
+    require_once __DIR__ . '/modules/request-center/WorkflowService.php';
+    require_once __DIR__ . '/modules/request-center/lib/functions.php';
+    require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
+    request_center_download_attachment(require_login());
+}
+
 // The existing appointment endpoint remains on its established contract.
 // It is intentionally not expanded as part of lifecycle phase 3.
 if ($rcMethod === 'POST' && (string) ($_GET['calendar'] ?? '') === '1') {
