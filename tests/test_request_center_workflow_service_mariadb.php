@@ -88,7 +88,7 @@ $insert->execute([3, 'assigned', 103, 203, 'normal', '2026-11-01 10:00:00']);
 $insert->execute([4, 'assigned', 104, 204, 'normal', null]);
 $insert->execute([5, 'assigned', 105, 205, 'normal', null]);
 $insert->execute([6, 'closed', 106, 206, 'normal', null]);
-$pdo->exec("UPDATE tickets SET service_group = 'it' WHERE id = 4");
+$pdo->exec("UPDATE tickets SET service_group = 'it', due_at = '2026-11-10 10:00:00' WHERE id = 4");
 
 $service = new RequestCenterWorkflowService($pdo);
 
