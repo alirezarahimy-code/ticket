@@ -260,10 +260,15 @@ try {
     }
     smoke_check($createForm['status'] === 200, 'independent creation form returns HTTP 200 (status ' . $createForm['status'] . ')');
     $csrf = '';
+    $requestToken = '';
     if (preg_match('/name="csrf"\\s+value="([a-f0-9]{64})"/i', $createForm['body'], $csrfMatch) === 1) {
         $csrf = $csrfMatch[1];
     }
+    if (preg_match('/name="request_token"\\s+value="([a-f0-9]{64})"/i', $createForm['body'], $requestTokenMatch) === 1) {
+        $requestToken = $requestTokenMatch[1];
+    }
     smoke_check($csrf !== '', 'independent creation form exposes a session-bound CSRF token');
+    smoke_check($requestToken !== '', 'independent creation form exposes a one-time submission token');
     $create = smoke_http_post('http://' . $address . '/request-center.php', [
         'action' => 'create_ticket',
         'subject' => 'RC phase-3 independent POST smoke',
@@ -276,6 +281,7 @@ try {
         'support_location' => 'smoke-lab',
         'department_id' => $smokeDepartmentId,
         'csrf' => $csrf,
+        'request_token' => $requestToken,
     ], ['Cookie: ' . $cookie]);
     if ($create['status'] !== 302) {
         $logTail = '';
