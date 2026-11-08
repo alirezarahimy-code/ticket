@@ -94,6 +94,16 @@ def test_independent_runtime_has_no_schema_ensure_or_autofill_calls():
     assert "org_ticket_schema_ensure()" not in post
 
 
+def test_internal_note_content_is_not_copied_to_asset_history_or_requester_notifications():
+    action = source("modules/request-center/Actions/ticket-actions.php")
+    internal_branch = action.index("} elseif ($internal) {")
+    requester_notify = action.index("request_center_notify_user(", internal_branch)
+    asset_history = action.index("record_asset_history(", requester_notify)
+    assert "request_center_notify_ticket_staff" in action[internal_branch:requester_notify]
+    assert "request_center_notify_user" not in action[internal_branch:requester_notify]
+    assert "if (!$internal)" in action[asset_history - 250:asset_history + 100]
+
+
 def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
     cron = source("cron/ticket_auto_close.php")
     assert "activity_log([" in cron
