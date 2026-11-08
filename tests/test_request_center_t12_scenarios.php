@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 /**
  * T12 characterization runner: eleven behavioral scenarios for the Request Center
- * lifecycle, executed identically against the pinned Legacy worktree and the
- * Feature branch, then compared with a documented tolerance.
+ * lifecycle. Ten compare the pinned Legacy worktree with the Feature branch;
+ * one feature-only MariaDB HTTP scenario covers the new supervisor assignment action.
  *
  * THIS IS NOT A PASS GATE YET. Every scenario must run, every difference must
  * be recorded and every FAIL must be dispositioned (matching the sheet).
