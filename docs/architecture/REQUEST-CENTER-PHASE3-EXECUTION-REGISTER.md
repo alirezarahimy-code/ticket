@@ -276,3 +276,10 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - Contract run 42530233779: Phase-2 HTTP smoke روی هر دو MariaDB 10.4.32 و 10.11.19 PASS؛ لاگ صریح PASS برای rollback بستن خودکار و retry اعلان‌های درخواست‌دهنده و کارکنان دارد. Phase-3 architecture contracts نیز در همین اجرا PASS بود.
 - QA Package Preview run 42530233766: PASS. تنها شکست Contract هر دو MariaDB، T07 بازپخش مهاجرت‌های تاریخی 001–033 و اثرات شناخته‌شدهٔ خارج از RC است.
 - رفتار اعلان در سایر عملیات تعاملی همچنان best-effort و بدون rollback عملیات اصلی است؛ این تصمیم حفظ شده و نیازمند ارزیابی جداگانه برای retry خارج از cron است. فاز ۳ همچنان باز است.
+
+### پذیرش Bridge مسیرهای قدیمی Workspace و جزئیات — ۲۰۲۶-۱۱-۰۹
+- ممیزی مصرف‌کنندگان بیرون ماژول نشان داد برخی لینک‌های قدیمی در governance.php، chatbot.php و assets/app.js همچنان index.php?page=ticket را می‌سازند. این لینک‌ها عمداً برای سازگاری نگه داشته می‌شوند؛ index.php باید پیش از بارگذاری صفحات Legacy آن‌ها را به request-center.php هدایت کند.
+- آزمون HTTP واقعی در tests/test_request_center_phase2_smoke_mariadb.php برای هفت مسیر legacy شامل new-ticket، ticket، queue، supervisor، services، reports و analytics اضافه شد؛ هر مسیر باید HTTP 302 به ورودی مستقل RC بدهد.
+- لاگ Contract run 42530626341 روی MariaDB 10.11.19 برای هر هفت مسیر PASS صریح ثبت کرد؛ Phase-2 HTTP smoke روی هر دو MariaDB 10.4.32 و 10.11.19 PASS شد.
+- QA Package Preview run 42530626419: PASS. تنها شکست Contract هر دو MariaDB، T07 بازپخش مهاجرت‌های تاریخی 001–033 روی Clone کامل است.
+- این آزمون Bridge مسیرهای قدیمی را اثبات می‌کند، اما هنوز ممیزی تمام مصرف‌کنندگان و پارامترهای bookmark در کل مخزن نیازمند تکمیل است؛ P3-08 و فاز ۳ باز می‌مانند.
