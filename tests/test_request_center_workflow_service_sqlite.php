@@ -65,8 +65,23 @@ workflow_check((int) $pdo->query('SELECT COUNT(*) FROM ticket_messages')->fetchC
     'conversation entries roll back with the caller transaction');
 
 $pdo->beginTransaction();
+$internalMessageId = $service->appendMessage(1, 10, 'یادداشت داخلی', true);
+$pdo->commit();
+$internalMessage = $pdo->query('SELECT is_internal, body FROM ticket_messages WHERE id = ' . (int) $internalMessageId)->fetch(PDO::FETCH_ASSOC);
+workflow_check(is_array($internalMessage) && (int) $internalMessage['is_internal'] === 1
+    && $internalMessage['body'] === 'یادداشت داخلی',
+    'conversation writer preserves internal-note visibility metadata');
+
+$pdo->beginTransaction();
 workflow_check($service->requestCancellation(15, 24, 'assigned', 'نیاز به لغو'),
     'requester cancellation request is recorded under a locked status snapshot');
+$pdo->rollBack();
+$cancelRollback = $pdo->query('SELECT cancel_requested_at FROM tickets WHERE id = 15')->fetchColumn();
+workflow_check($cancelRollback === null, 'cancellation metadata rolls back with the caller transaction');
+
+$pdo->beginTransaction();
+workflow_check($service->requestCancellation(15, 24, 'assigned', 'نیاز به لغو'),
+    'requester cancellation request can be committed after rollback');
 $pdo->commit();
 $cancelSnapshot = $pdo->query('SELECT status, cancel_requested_by, cancel_request_reason, cancel_requested_at FROM tickets WHERE id = 15')->fetch(PDO::FETCH_ASSOC);
 workflow_check($cancelSnapshot['status'] === 'assigned' && (int) $cancelSnapshot['cancel_requested_by'] === 24
