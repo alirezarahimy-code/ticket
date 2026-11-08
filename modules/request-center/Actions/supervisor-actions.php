@@ -124,8 +124,16 @@ if (!defined('APP_ROOT')) {
                 if (!$closed) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
-                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', ['note' => $note]);
-                notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تایید و بسته شد.', (int) $supervisor['id']);
+                save_audit_required((int) $supervisor['id'], 'ticket_supervisor_approved', $ticketId, [
+                    'reason' => $note,
+                    'from_status' => 'resolved',
+                    'to_status' => 'closed',
+                ]);
+                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', [
+                    'reason' => $note,
+                    'note' => $note,
+                ]);
+                notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد. دلیل: ' . $note, (int) $supervisor['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_closed', 'تأیید و بستن درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
                 flash('success', 'انجام کار تأیید شد و درخواست بسته شد.');
             } else {
@@ -150,7 +158,15 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note]);
-                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_rework', $ticket['status'], $reworkStatus, ['note' => $note]);
+                save_audit_required((int) $supervisor['id'], 'ticket_supervisor_rework', $ticketId, [
+                    'reason' => $note,
+                    'from_status' => 'resolved',
+                    'to_status' => $reworkStatus,
+                ]);
+                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_rework', $ticket['status'], $reworkStatus, [
+                    'reason' => $note,
+                    'note' => $note,
+                ]);
                 notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id']);
                 flash('info', 'درخواست برای اصلاح و ادامه کار برگشت داده شد.');
             }
