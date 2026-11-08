@@ -91,7 +91,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
         entry = read("modules/request-center/Pages/index.php")
         self.assertIn("htmlspecialchars(", entry)
-        self.assertIn("index.php?action=download_attachment", entry)
+        self.assertIn("request-center.php?action=download_attachment", entry)
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertNotIn("stored_name", repo)
 
