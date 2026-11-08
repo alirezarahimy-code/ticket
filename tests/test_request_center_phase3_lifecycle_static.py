@@ -94,6 +94,14 @@ def test_independent_runtime_has_no_schema_ensure_or_autofill_calls():
     assert "org_ticket_schema_ensure()" not in post
 
 
+def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch():
+    bulk = source("modules/request-center/Actions/bulk-actions.php")
+    guard = bulk.index("if (!empty($bulkTicket['cancel_requested_at']))")
+    transition = bulk.index("$workflow->transition($ticketId, $bulkOld")
+    assert guard < transition
+    assert "$bulkSkipped++;" in bulk[guard:transition]
+
+
 def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     workflow = source("modules/request-center/WorkflowService.php")
     action = source("modules/request-center/Actions/supervisor-actions.php")
