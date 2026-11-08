@@ -11,7 +11,7 @@ if (!defined('APP_ROOT')) {
 
 if ($page === 'reports') {
     $reportUser = require_permission('reports.view');
-    $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'due_at', 'sla_minutes']);
+    $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'rejected_at', 'due_at', 'sla_minutes']);
     if ($reportMissingColumns) {
         render_header('گزارش‌ها', $reportUser);
         echo '<section class="card empty-state"><h2>ساختار گزارش‌ها کامل نیست.</h2><p>این نسخه به ستون‌های جدید درخواست نیاز دارد. فایل‌های Migration را به‌ترتیب روی همان دیتابیس اجرا کنید، سپس صفحه را تازه‌سازی کنید.</p><p><code>upgrade-1.2-itsm.sql</code> و در صورت نیاز <code>upgrade-1.8-routing.sql</code></p><p class="muted">ستون‌های ناقص: ' . e(implode(', ', $reportMissingColumns)) . '</p><a class="button" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section>';
@@ -19,9 +19,9 @@ if ($page === 'reports') {
         exit;
     }
     [$where, $params] = report_query_filters($reportUser);
-    $summaryQuery = db()->prepare('SELECT COUNT(*) AS total, COALESCE(SUM(t.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")), 0) AS active, COALESCE(SUM(t.status = "resolved"), 0) AS resolved, COALESCE(SUM(t.status = "closed"), 0) AS closed, COALESCE(SUM(t.status = "cancelled"), 0) AS cancelled, COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.due_at IS NOT NULL AND t.due_at < NOW()), 0) AS overdue, AVG(CASE WHEN t.resolved_at IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, t.created_at, t.resolved_at) END) AS avg_resolution FROM tickets t LEFT JOIN users r ON r.id = t.requester_id ' . $where);
+    $summaryQuery = db()->prepare('SELECT COUNT(*) AS total, COALESCE(SUM(t.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")), 0) AS active, COALESCE(SUM(t.status = "resolved"), 0) AS resolved, COALESCE(SUM(t.status = "closed"), 0) AS closed, COALESCE(SUM(t.status = "cancelled"), 0) AS cancelled, COALESCE(SUM(t.status = "rejected"), 0) AS rejected, COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.due_at IS NOT NULL AND t.due_at < NOW()), 0) AS overdue, AVG(CASE WHEN t.resolved_at IS NOT NULL THEN TIMESTAMPDIFF(MINUTE, t.created_at, t.resolved_at) END) AS avg_resolution FROM tickets t LEFT JOIN users r ON r.id = t.requester_id ' . $where);
     $summaryQuery->execute($params);
-    $summary = $summaryQuery->fetch() ?: ['total' => 0, 'active' => 0, 'resolved' => 0, 'closed' => 0, 'cancelled' => 0, 'overdue' => 0, 'avg_resolution' => 0];
+    $summary = $summaryQuery->fetch() ?: ['total' => 0, 'active' => 0, 'resolved' => 0, 'closed' => 0, 'cancelled' => 0, 'rejected' => 0, 'overdue' => 0, 'avg_resolution' => 0];
     $reportPerPage = 100;
     $reportPage = max(1, (int) ($_GET['p'] ?? 1));
     $reportPages = max(1, (int) ceil(((int) $summary['total']) / $reportPerPage));
@@ -36,7 +36,7 @@ if ($page === 'reports') {
     render_header('گزارش‌ها', $reportUser);
      echo '<section class="page-heading"><div><span class="eyebrow">کنترل عملکرد پشتیبانی</span><h1>گزارش و پیگیری</h1><p>گزارش‌ها را فیلتر کنید و خروجی قابل استفاده در Excel بگیرید.</p></div><a class="button secondary" href="index.php?action=export_report' . ($queryString ? '&' . e($queryString) : '') . '">خروجی Excel</a></section><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="reports"><div class="filter-grid"><label>از تاریخ جلالی<input type="text" name="from" placeholder="۱۴۰۵/۰۱/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ جلالی<input type="text" name="to" placeholder="۱۴۰۵/۰۱/۳۱" value="' . e($_GET['to'] ?? '') . '"></label><label>وضعیت<select name="status"><option value="">همه وضعیت‌ها</option>';
     // گزینه‌های گروهی هم اضافه شدند تا کارت‌های داشبورد (?status=active/resolved/all) در فرم دیده شوند
-    foreach (['all' => 'همهٔ درخواست‌ها', 'active' => 'باز و در حال پیگیری', 'new' => 'جدید', 'manager_review' => null, 'assigned' => null, 'in_progress' => null, 'waiting_user' => null, 'pending' => null, 'resolved' => null, 'closed' => null, 'cancelled' => null, 'rejected' => null] as $status => $customLabel) {
+    foreach (['all' => 'همهٔ درخواست‌ها', 'active' => 'باز و در حال پیگیری', 'new' => 'جدید', 'manager_review' => null, 'assigned' => null, 'in_progress' => null, 'waiting_user' => null, 'pending' => null, 'resolved' => null, 'closed' => null, 'cancelled' => null, 'rejected' => null, 'rejected' => null] as $status => $customLabel) {
         echo '<option value="' . $status . '" ' . ((string) ($_GET['status'] ?? '') === $status ? 'selected' : '') . '>' . e($customLabel ?? request_center_status_label($status)) . '</option>';
     }
     echo '</select></label>';
