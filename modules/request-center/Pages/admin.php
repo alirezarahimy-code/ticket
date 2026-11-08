@@ -7,7 +7,7 @@ if (!defined('APP_ROOT')) {
     exit;
 }
 
-/** Primary-admin workspace dashboard. Read-only and scoped through the core policy. */
+/** Primary-admin workspace for module configuration, scoped audit and operations. */
 if (!user_is_primary_admin($user)) {
     http_response_code(403);
     exit('دسترسی به مدیریت مرکز درخواست‌ها مجاز نیست.');
@@ -27,6 +27,9 @@ $adminAuditQuery = db()->prepare(
 );
 $adminAuditQuery->execute($adminAuditParams);
 $adminAuditRows = $adminAuditQuery->fetchAll();
+$businessHours = function_exists('sla_business_hours')
+    ? sla_business_hours()
+    : ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
 $olaPolicies = [];
 $olaPolicyAvailable = false;
 try {
@@ -149,6 +152,21 @@ header('Cache-Control: private, no-store');
 <?php foreach ($adminLinks as $link): ?><a class="rc-admin-link" href="<?= $escapeAdmin($link['url']) ?>"><b><?= $escapeAdmin($link['title']) ?></b><small><?= $escapeAdmin($link['description']) ?></small></a><?php endforeach; ?>
 </aside>
 </div>
+<section class="card" id="sla-work-hours" style="padding:16px;margin-top:18px">
+<h2>تقویم کاری محاسبه SLA/OLA</h2>
+<p class="muted">این ساعت‌ها و روزهای تعطیل مبنای محاسبهٔ مهلت‌های کاری هستند. تغییر آن‌ها موعدهای ذخیره‌شدهٔ درخواست‌های موجود را بازنویسی نمی‌کند.</p>
+<form method="post" class="rc-admin-link" style="display:flex;gap:14px;flex-wrap:wrap;align-items:end">
+<?= csrf_field() ?><input type="hidden" name="action" value="save_rc_work_hours">
+<label>ساعت شروع<input type="number" min="0" max="23" name="work_start_hour" required value="<?= (int) $businessHours['start'] ?>"></label>
+<label>ساعت پایان<input type="number" min="1" max="24" name="work_end_hour" required value="<?= (int) $businessHours['end'] ?>"></label>
+<fieldset style="border:1px solid #e4eaf1;border-radius:9px;padding:8px 12px"><legend>روزهای تعطیل هفتگی</legend>
+<?php foreach ([1 => 'دوشنبه', 2 => 'سه‌شنبه', 3 => 'چهارشنبه', 4 => 'پنجشنبه', 5 => 'جمعه', 6 => 'شنبه', 7 => 'یکشنبه'] as $day => $label): ?>
+<label style="display:inline-flex;gap:5px;align-items:center;margin:4px 8px"><input type="checkbox" name="weekend_days[]" value="<?= $day ?>" <?= in_array($day, $businessHours['weekend'], true) ? 'checked' : '' ?>><?= $label ?></label>
+<?php endforeach; ?>
+</fieldset>
+<button class="button" type="submit">ذخیره تقویم کاری</button>
+</form>
+</section>
 <section class="card" id="ola-policies" style="padding:16px;margin-top:18px">
 <h2>سیاست‌های OLA</h2>
 <p class="muted">این تنظیمات مهلت پاسخ، حل و پله‌های ارجاع را برای درخواست‌های جدید و محاسبه‌های مجدد بعدی تعیین می‌کند؛ تغییر سیاست، موعد ثبت‌شدهٔ درخواست‌های موجود را بی‌صدا بازنویسی نمی‌کند.</p>
