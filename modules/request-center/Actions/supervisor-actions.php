@@ -22,6 +22,140 @@ if (!defined('APP_ROOT')) {
 }
 
         // ───── گروه اکشن: تصمیم‌های سرپرست (غذا و درخواست‌ها) ─────
+        if ($action === 'supervisor_assign_ticket') {
+            $supervisor = require_permission('supervisor.panel');
+            if (!user_can($supervisor, 'ticket.edit')) {
+                throw new RuntimeException('دسترسی تخصیص درخواست برای نقش شما فعال نیست.');
+            }
+            $ticketId = (int) ($_POST['ticket_id'] ?? 0);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || !request_center_can_supervise_ticket($ticket, $supervisor)) {
+                throw new RuntimeException('فقط سوپروایزر مجاز و غیر از ثبت‌کننده می‌تواند تخصیص این درخواست را مدیریت کند.');
+            }
+            $activeStatuses = ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'];
+            if (!in_array((string) $ticket['status'], $activeStatuses, true) || !empty($ticket['cancel_requested_at'])) {
+                throw new RuntimeException('تخصیص فقط برای درخواست فعال و بدون درخواست لغوِ درانتظار مجاز است.');
+            }
+            $newAssigneeId = max(0, (int) ($_POST['assigned_to'] ?? 0));
+            $note = post_value('assignment_note');
+            if (mb_strlen($note, 'UTF-8') > 500) {
+                throw new RuntimeException('یادداشت داخلی تخصیص نباید بیشتر از ۵۰۰ نویسه باشد.');
+            }
+
+            db()->beginTransaction();
+            $ticketLock = db()->prepare('SELECT id FROM tickets WHERE id = ? FOR UPDATE');
+            $ticketLock->execute([$ticketId]);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || !request_center_can_supervise_ticket($ticket, $supervisor)
+                || !in_array((string) $ticket['status'], $activeStatuses, true)
+                || !empty($ticket['cancel_requested_at'])) {
+                throw new RuntimeException('وضعیت یا مجوز تخصیص درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+            }
+
+            $oldStatus = (string) $ticket['status'];
+            $oldAssigneeId = (int) ($ticket['assigned_to'] ?? 0);
+            if ($newAssigneeId === $oldAssigneeId) {
+                db()->rollBack();
+                flash('info', 'مسئول رسیدگی تغییری نکرد.');
+                redirect('request-center.php?page=ticket&id=' . $ticketId);
+            }
+
+            $assignee = null;
+            if ($newAssigneeId > 0) {
+                $assigneeQuery = db()->prepare(
+                    'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, '
+                    . 'u.department_id, u.is_it_agent, hu.code AS handling_unit_code '
+                    . 'FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id '
+                    . 'WHERE u.id = ? AND u.is_active = 1 LIMIT 1 FOR UPDATE'
+                );
+                $assigneeQuery->execute([$newAssigneeId]);
+                $assignee = $assigneeQuery->fetch(PDO::FETCH_ASSOC) ?: null;
+                if (!$assignee || !ticket_assignee_is_eligible($ticket, $assignee, 'ticket_notification_user_can')) {
+                    throw new RuntimeException('کارشناس انتخاب‌شده فعال یا واجد شرایط این حوزه و معاونت نیست.');
+                }
+            }
+
+            $targetStatus = $oldStatus;
+            if ($newAssigneeId > 0 && in_array($oldStatus, ['new', 'manager_review'], true)) {
+                $targetStatus = 'assigned';
+            } elseif ($newAssigneeId === 0 && $oldAssigneeId > 0
+                && in_array($oldStatus, ['assigned', 'in_progress', 'waiting_user', 'pending'], true)) {
+                $targetStatus = 'manager_review';
+            }
+
+            $priority = (string) $ticket['priority'];
+            [$dueAt, $pauseAt, $pauseMinutes] = ticket_sla_transition($ticket, $targetStatus, $priority);
+            $ola = ticket_ola_transition($ticket, $targetStatus, $priority);
+            $workflow = new RequestCenterWorkflowService(db());
+            $updated = $workflow->transition(
+                $ticketId,
+                $oldStatus,
+                $targetStatus,
+                [
+                    'assigned_to' => $newAssigneeId > 0 ? $newAssigneeId : null,
+                    'assigned_at' => $newAssigneeId > 0 ? RequestCenterSqlExpression::now() : null,
+                    'due_at' => $dueAt,
+                    'sla_paused_at' => $pauseAt,
+                    'sla_pause_minutes' => $pauseMinutes,
+                    'ola_policy_id' => $ola['policy_id'],
+                    'ola_response_due_at' => $ola['response_due_at'],
+                    'ola_due_at' => $ola['due_at'],
+                    'ola_escalation_1_at' => $ola['escalation_1_at'],
+                    'ola_escalation_2_at' => $ola['escalation_2_at'],
+                ],
+                $targetStatus === $oldStatus ? 'same_state' : 'standard',
+                [
+                    'requester_id' => $ticket['requester_id'],
+                    'assigned_to' => $ticket['assigned_to'] ?? null,
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                    'cancel_requested_at' => null,
+                ]
+            );
+            if (!$updated) {
+                throw new RuntimeException('وضعیت یا مسئول درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+            }
+
+            $assignmentBody = $newAssigneeId > 0
+                ? (($oldAssigneeId > 0 ? 'مسئول رسیدگی درخواست ' : 'درخواست ') . ticket_number($ticketId)
+                    . ' به ' . (string) $assignee['full_name'] . ' ارجاع شد.')
+                : 'مسئول رسیدگی درخواست ' . ticket_number($ticketId) . ' برداشته شد و درخواست به صف ارجاع برگشت.';
+            $slaOlaMeta = [
+                'due_at' => $dueAt,
+                'sla_paused_at' => $pauseAt,
+                'sla_pause_minutes' => $pauseMinutes,
+                'ola_policy_id' => $ola['policy_id'],
+                'ola_response_due_at' => $ola['response_due_at'],
+                'ola_due_at' => $ola['due_at'],
+                'ola_escalation_1_at' => $ola['escalation_1_at'],
+                'ola_escalation_2_at' => $ola['escalation_2_at'],
+            ];
+            $assignmentMeta = [
+                'assignment_source' => 'supervisor',
+                'from_assigned_to' => $oldAssigneeId ?: null,
+                'to_assigned_to' => $newAssigneeId ?: null,
+                'from_status' => $oldStatus,
+                'to_status' => $targetStatus,
+                'note' => $note,
+                'sla_ola' => $slaOlaMeta,
+            ];
+            if ($note !== '') {
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $supervisor['id'], $note, true);
+            }
+            save_audit_required((int) $supervisor['id'], 'ticket_updated', $ticketId, $assignmentMeta);
+            log_ticket_event($ticketId, (int) $supervisor['id'], 'assignment_changed', $oldStatus, $targetStatus, $assignmentMeta);
+            request_center_notify_ticket_parties(
+                $ticketId,
+                'ticket_assignment_changed',
+                'تخصیص درخواست به‌روزرسانی شد',
+                $assignmentBody,
+                (int) $supervisor['id']
+            );
+            db_commit_or_fail('request-center:supervisor_assign_ticket');
+            flash('success', $newAssigneeId > 0 ? 'مسئول رسیدگی درخواست به‌روزرسانی شد.' : 'درخواست به صف ارجاع برگشت.');
+            redirect('request-center.php?page=ticket&id=' . $ticketId);
+        }
+
         if ($action === 'supervisor_decision') {
             $supervisor = require_permission('supervisor.panel');
             if (!user_can($supervisor, 'supervisor.decide')) {
