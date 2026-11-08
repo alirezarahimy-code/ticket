@@ -366,7 +366,7 @@ if (!defined('APP_ROOT')) {
                 }
                 $isStaleClosed = in_array($oldStatus, ['closed', 'cancelled'], true);
                 $rejectBody = $isStaleClosed
-                    ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . request_center_request_center_status_label($oldStatus) . ' شده بود): ' . $note
+                    ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . request_center_status_label($oldStatus) . ' شده بود): ' . $note
                     : 'درخواست لغو رد شد و رسیدگی ادامه می‌یابد: ' . $note;
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $rejectBody]);
                 save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_rejected', $ticketId, ['reason' => $requestReason, 'note' => $note]);
