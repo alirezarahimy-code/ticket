@@ -49,6 +49,10 @@ def test_create_request_uses_one_time_session_token_and_read_only_schema_preflig
     assert "request_center_assert_create_schema();" in handler
     assert "information_schema.COLUMNS" in helper
     assert "ticket_service_ensure_schema();" in handler  # retained only for the legacy bridge branch
+    assert "request_center_ticket_number_next(" in handler
+    assert "ticket_number_next(" not in handler
+    assert "request_center_ticket_number_peek(" in page
+    assert "ticket_number_peek(" not in page
     assert "if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY'))" in handler
 
 
@@ -73,6 +77,7 @@ def test_rejection_schema_is_migration_owned_not_runtime_ddl():
     assert "'rejected'" in migration
     assert "rejected_at" in migration
     assert "requesting_unit_id" in migration
+    assert "CREATE TABLE IF NOT EXISTS ticket_number_seq" in migration
     assert "'rejected'" in fresh
     assert "'rejected'" in schema
     assert "rejected_at DATETIME NULL" in fresh
