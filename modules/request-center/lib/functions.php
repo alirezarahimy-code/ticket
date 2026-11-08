@@ -251,9 +251,10 @@ function request_center_assert_create_schema(): void
         'tickets' => ['requesting_unit_id', 'rejected_at', 'ticket_no'],
         'ticket_number_seq' => ['prefix', 'seq'],
         'categories' => ['id', 'name', 'code', 'service_group', 'is_active'],
-        'service_catalog' => ['id', 'name', 'code', 'service_group', 'default_priority', 'default_ticket_type', 'category_id', 'handling_unit_id', 'requires_asset', 'is_active'],
+        'service_catalog' => ['id', 'name', 'code', 'service_group', 'default_priority', 'default_ticket_type', 'department_id', 'category_id', 'handling_unit_id', 'requires_asset', 'is_active'],
         'service_catalog_fields' => ['id', 'service_id', 'field_key', 'label', 'field_type', 'options_json', 'is_required', 'sort_order'],
         'org_units' => ['id', 'name', 'code', 'parent_id', 'is_active', 'unit_type', 'manager_user_id'],
+        'users' => ['id', 'full_name'],
         'assets' => ['id', 'asset_tag', 'hostname', 'owner_user_id', 'ip_address', 'department_id'],
         'departments' => ['id', 'name'],
         'handling_units' => ['id', 'code', 'is_active'],
@@ -262,8 +263,7 @@ function request_center_assert_create_schema(): void
         $required['org_companies'] = ['id', 'code', 'name', 'company_type', 'is_active'];
         $required['org_unit_managers'] = ['unit_id', 'user_id'];
         $required['org_units'][] = 'company_id';
-        $required['users'][] = 'company_id';
-        $required['users'][] = 'org_unit_id';
+        $required['users'] = ['id', 'full_name', 'company_id', 'org_unit_id'];
     }
     $statement = db()->query(
         'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
