@@ -169,15 +169,11 @@ jobs:
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/037-request-center-lifecycle-rejection.sql
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/037-request-center-lifecycle-rejection.sql
       - name: Verify migration 037 upgrade path
-        env:
-          CI_DB_NAME: rc_migration_upgrade_ci
-          CI_DB_USER: root
-          CI_DB_PASS: ci-ephemeral-root-password
         run: php tests/test_request_center_migration_037_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
-          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_NAME: rc_migration_upgrade_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
       - name: Existing workflow safety contracts
