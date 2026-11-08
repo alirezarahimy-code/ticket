@@ -15,6 +15,28 @@ if (!user_is_primary_admin($user)) {
 
 $summary = $repo->workspaceSummary($user);
 $recent = $repo->listVisible($user, 1, 8);
+// The primary-admin workspace exposes a scoped operational audit trail.
+// Never render event details here: they may contain internal-note or private payloads.
+[$adminAuditWhere, $adminAuditParams] = ticket_scope($user);
+$adminAuditQuery = db()->prepare(
+    'SELECT e.id, e.event_type, e.from_status, e.to_status, e.created_at, '
+    . 'u.full_name AS actor_name, t.id AS ticket_id, t.ticket_no, t.subject '
+    . 'FROM ticket_events e JOIN tickets t ON t.id = e.ticket_id '
+    . 'LEFT JOIN users u ON u.id = e.user_id ' . $adminAuditWhere
+    . ' ORDER BY e.created_at DESC, e.id DESC LIMIT 20'
+);
+$adminAuditQuery->execute($adminAuditParams);
+$adminAuditRows = $adminAuditQuery->fetchAll();
+$adminAuditLabels = [
+    'created' => 'ثبت درخواست', 'assigned' => 'ارجاع', 'assignment_changed' => 'تغییر مسئول',
+    'status_changed' => 'تغییر وضعیت', 'reply' => 'پاسخ', 'internal_note' => 'یادداشت داخلی',
+    'claimed' => 'دریافت توسط کارشناس', 'rated' => 'ثبت رضایت',
+    'supervisor_approved' => 'تأیید سوپروایزر', 'supervisor_rework' => 'بازگشت برای اصلاح',
+    'supervisor_reopened' => 'بازگشایی سوپروایزر', 'ticket_rejected' => 'رد درخواست',
+    'cancellation_requested' => 'درخواست لغو', 'cancellation_approved' => 'تأیید لغو',
+    'cancellation_rejected' => 'رد درخواست لغو', 'auto_closed' => 'بستن خودکار',
+    'bulk_status_changed' => 'تغییر گروهی وضعیت', 'priority_changed' => 'تغییر اولویت',
+];
 $escapeAdmin = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $adminStatusLabels = [
     'new' => 'جدید', 'manager_review' => 'در انتظار ارجاع', 'assigned' => 'ارجاع‌شده',
@@ -109,4 +131,21 @@ header('Cache-Control: private, no-store');
 <?php foreach ($adminLinks as $link): ?><a class="rc-admin-link" href="<?= $escapeAdmin($link['url']) ?>"><b><?= $escapeAdmin($link['title']) ?></b><small><?= $escapeAdmin($link['description']) ?></small></a><?php endforeach; ?>
 </aside>
 </div>
+<section class="card" style="padding:16px;margin-top:18px" aria-labelledby="rc-admin-audit-title">
+<h2 id="rc-admin-audit-title">آخرین رویدادهای عملیاتی</h2>
+<p class="muted">فقط رخدادهای درخواست‌های قابل مشاهده در دامنهٔ دسترسی این حساب نمایش داده می‌شود. محتوای پیام‌ها و جزئیات یادداشت‌های داخلی در این فهرست بارگذاری یا افشا نمی‌شود.</p>
+<?php if (!$adminAuditRows): ?><p class="muted">رخداد قابل نمایشی وجود ندارد.</p><?php else: ?>
+<div style="overflow-x:auto"><table class="rc-admin-table"><thead><tr><th>زمان</th><th>درخواست</th><th>رخداد</th><th>عامل</th><th>تغییر وضعیت</th></tr></thead><tbody>
+<?php foreach ($adminAuditRows as $event): ?>
+<tr>
+<td><?= $escapeAdmin($event['created_at']) ?></td>
+<td><a href="request-center.php?id=<?= (int) $event['ticket_id'] ?>&amp;workspace=admin"><?= $escapeAdmin($event['ticket_no'] ?: ('#' . $event['ticket_id'])) ?> · <?= $escapeAdmin($event['subject']) ?></a></td>
+<td><?= $escapeAdmin($adminAuditLabels[(string) $event['event_type']] ?? $event['event_type']) ?></td>
+<td><?= $escapeAdmin($event['actor_name'] ?: 'سامانه') ?></td>
+<td><?= $escapeAdmin($event['from_status'] ?: '—') ?> ← <?= $escapeAdmin($event['to_status'] ?: '—') ?></td>
+</tr>
+<?php endforeach; ?>
+</tbody></table></div>
+<?php endif; ?>
+</section>
 </main></body></html>
