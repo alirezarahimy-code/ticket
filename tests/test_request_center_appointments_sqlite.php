@@ -14,10 +14,10 @@ function check_request_center(bool $condition, string $message): void
 $pdo = new PDO('sqlite::memory:');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY, full_name TEXT, role TEXT, is_active INTEGER DEFAULT 1, department_id INTEGER NULL)');
-$pdo->exec('CREATE TABLE tickets (id INTEGER PRIMARY KEY, ticket_no TEXT, subject TEXT)');
+$pdo->exec('CREATE TABLE tickets (id INTEGER PRIMARY KEY, ticket_no TEXT, subject TEXT, status TEXT, due_at TEXT, sla_paused_at TEXT, ola_due_at TEXT)');
 $pdo->exec('CREATE TABLE settings (`key` TEXT PRIMARY KEY, `value` TEXT NOT NULL)');
 $pdo->exec("INSERT INTO users (id, full_name, role, is_active) VALUES (1, 'Agent One', 'agent', 1), (2, 'Agent Two', 'agent', 1)");
-$pdo->exec("INSERT INTO tickets VALUES (101, 'RC-00101', 'Test request')");
+$pdo->exec("INSERT INTO tickets VALUES (101, 'RC-00101', 'Test request', 'in_progress', '2026-11-20 12:00:00', NULL, '2026-11-21 12:00:00')");
 $pdo->exec('CREATE TABLE request_center_appointments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     ticket_id INTEGER NOT NULL, assignee_id INTEGER NOT NULL,
@@ -38,6 +38,11 @@ $end = date('Y-m-d H:i:s', strtotime('+1 day 11:30'));
 $first = $repo->create(101, 1, $start, $end, 'work', 'یادداشت', 1);
 check_request_center($first['ok'] === true, 'first appointment is created');
 check_request_center(isset($first['id']), 'created appointment exposes id');
+$ticketClocks = $pdo->query('SELECT status, due_at, sla_paused_at, ola_due_at FROM tickets WHERE id = 101')->fetch(PDO::FETCH_ASSOC);
+check_request_center(
+    $ticketClocks === ['status' => 'in_progress', 'due_at' => '2026-11-20 12:00:00', 'sla_paused_at' => null, 'ola_due_at' => '2026-11-21 12:00:00'],
+    'creating an appointment never changes ticket status or SLA/OLA clocks'
+);
 
 $overlap = $repo->create(101, 1, date('Y-m-d H:i:s', strtotime('+1 day 11:00')), date('Y-m-d H:i:s', strtotime('+1 day 12:00')), 'visit', null, 1);
 check_request_center($overlap['ok'] === false, 'overlapping interval for the same assignee is rejected');
@@ -62,6 +67,11 @@ check_request_center($notOwner['ok'] === false, 'cancel by another ordinary agen
 
 $elevated = $repo->cancel((int) $first['id'], 2, true);
 check_request_center($elevated['ok'] === true, 'elevated user can cancel any appointment');
+$ticketClocksAfterCancel = $pdo->query('SELECT status, due_at, sla_paused_at, ola_due_at FROM tickets WHERE id = 101')->fetch(PDO::FETCH_ASSOC);
+check_request_center(
+    $ticketClocksAfterCancel === $ticketClocks,
+    'cancelling an appointment never changes ticket status or SLA/OLA clocks'
+);
 
 $cancelledTwice = $repo->cancel((int) $first['id'], 1, false);
 check_request_center($cancelledTwice['ok'] === false, 'already cancelled appointment cannot be cancelled again');
@@ -78,6 +88,11 @@ check_request_center($completeByStranger['ok'] === false, 'complete by another o
 
 $completeByOwner = $repo->complete((int) $otherAssignee['id'], 2, false); // owner is assignee 2
 check_request_center($completeByOwner['ok'] === true, 'owner can complete their own appointment');
+$ticketClocksAfterComplete = $pdo->query('SELECT status, due_at, sla_paused_at, ola_due_at FROM tickets WHERE id = 101')->fetch(PDO::FETCH_ASSOC);
+check_request_center(
+    $ticketClocksAfterComplete === $ticketClocks,
+    'completing an appointment never changes ticket status or SLA/OLA clocks'
+);
 
 $completeTwice = $repo->complete((int) $otherAssignee['id'], 2, false);
 check_request_center($completeTwice['ok'] === false, 'already completed appointment cannot be completed again');
