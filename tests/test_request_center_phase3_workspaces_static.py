@@ -51,4 +51,11 @@ def test_admin_workspace_has_scoped_audit_and_separate_configuration_destination
     assert "e.details" not in admin
     assert "m.body" not in admin
     assert "request-center.php?page=services" in admin
+    assert "id=\"ola-policies\"" in admin
+    assert 'name="action" value="update_ola_policy"' in admin
+    admin_action = source("modules/request-center/Actions/admin-actions.php")
+    assert "user_is_primary_admin($admin)" in admin_action
+    assert "SELECT id, name, department_id, priority" in admin_action
+    assert "save_audit_required" in admin_action
+    assert "'update_ola_policy'" in source("modules/request-center/post-handler.php")
     assert "name=\"action\" value=\"add_service\"" in services
