@@ -250,6 +250,9 @@ function request_center_assert_create_schema(): void
     $required = [
         'tickets' => ['requesting_unit_id', 'rejected_at', 'ticket_no'],
         'ticket_number_seq' => ['prefix', 'seq'],
+        'notifications' => ['id', 'user_id', 'ticket_id', 'notification_type', 'title', 'body', 'idempotency_key'],
+        'ticket_events' => ['id', 'event_id', 'ticket_id', 'user_id', 'event_type', 'from_status', 'to_status', 'details', 'created_at'],
+        'activity_logs' => ['id', 'event_id', 'action_code', 'module', 'target_type', 'target_id', 'result', 'created_at'],
         'categories' => ['id', 'name', 'code', 'service_group', 'is_active'],
         'service_catalog' => ['id', 'name', 'code', 'service_group', 'default_priority', 'default_ticket_type', 'department_id', 'category_id', 'handling_unit_id', 'requires_asset', 'is_active'],
         'service_catalog_fields' => ['id', 'service_id', 'field_key', 'label', 'field_type', 'options_json', 'is_required', 'sort_order'],
