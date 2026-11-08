@@ -17,6 +17,9 @@ if (!defined('APP_ROOT')) {
 
 if ($page === 'new-ticket') {
     $user = require_permission('ticket.create');
+    if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
+        request_center_assert_create_schema();
+    }
     $cdDvdRequestRecord = null;
     $subjectDefault = '';
     $descriptionDefault = '';
@@ -69,7 +72,6 @@ if ($page === 'new-ticket') {
     // معاونت‌های سازمانی از چارت سازمانی (org_units) خوانده می‌شوند و برای همهٔ نقش‌ها
     // نمایش داده می‌شوند تا درخواست به معاونت انتخاب‌شده مسیردهی شود.
     if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
-        request_center_assert_create_schema();
         $departments = request_center_org_deputy_units($user);
     } else {
         org_ensure_schema();
