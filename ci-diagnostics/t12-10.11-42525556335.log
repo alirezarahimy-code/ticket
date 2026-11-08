@@ -1,0 +1,84 @@
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 01-create: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 02-direct-cancel: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 03a-cancel-request-reject: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 03b-cancel-request-approve: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 04-claim-ordering: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 05-reopen: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 06a-reply-to-requester ACCEPTED: events[2].from_status: additive locked-state context for reply
+T12-SCENARIO 06a-reply-to-requester ACCEPTED: events[2].to_status: additive locked-state context for reply
+T12-SCENARIO 06a-reply-to-requester: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 06b-internal-note ACCEPTED: events[2].from_status: additive locked-state context for internal_note
+T12-SCENARIO 06b-internal-note ACCEPTED: events[2].to_status: additive locked-state context for internal_note
+T12-SCENARIO 06b-internal-note: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 07a-status-with-note ACCEPTED: 07a-status-with-note: public status-change note correctly records the first-response timestamp
+T12-SCENARIO 07a-status-with-note: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 07b-priority-by-manager ACCEPTED: 07b: out-of-group support manager could not change the IT ticket; status, assignee and priority remained unchanged
+T12-SCENARIO 07b-priority-by-manager: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [fixture] tid=1 update_rows=1 row={"id":1,"status":"resolved","assigned_to":102,"resolved_at":"2026-11-08 20:31:49"}
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+    [fixture] tid=1 update_rows=1 row={"id":1,"status":"resolved","assigned_to":102,"resolved_at":"2026-11-08 20:31:50"}
+T12-SCENARIO 08a-supervisor-approve ACCEPTED: activity_logs[1].action_code: supervisor_decision -> ticket_supervisor_approved (more specific RC audit code)
+T12-SCENARIO 08a-supervisor-approve: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 08b-supervisor-rework ACCEPTED: activity_logs[1].action_code: supervisor_decision -> ticket_supervisor_rework (more specific RC audit code)
+T12-SCENARIO 08b-supervisor-rework: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 08c-supervisor-reopen ACCEPTED: activity_logs[1].action_code: supervisor_decision -> ticket_supervisor_approved (more specific RC audit code)
+T12-SCENARIO 08c-supervisor-reopen ACCEPTED: activity_logs[2].action_code: ticket_reopened -> ticket_reopened_by_supervisor (more specific RC audit code)
+T12-SCENARIO 08c-supervisor-reopen: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=2 tickets_count=2 max_id=2
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=2&workspace=requester&p=1 tickets_count=2 max_id=2
+T12-SCENARIO 09-bulk-resolve ACCEPTED: 09-bulk-resolve: public status-change note correctly records the first-response timestamp
+T12-SCENARIO 09-bulk-resolve ACCEPTED: 09-bulk-resolve: public status-change note correctly records the first-response timestamp
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[4].from_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[4].to_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[6].from_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve ACCEPTED: events[6].to_status: additive locked-state context for reply
+T12-SCENARIO 09-bulk-resolve: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 10a-auto-close-rated: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 10b-auto-close-unrated: PASS
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 11-supervisor-assignment: PASS (feature-only MariaDB HTTP integration)
+T12-SCENARIO 12-independent-four-workspaces-http requester: PASS
+T12-SCENARIO 12-independent-four-workspaces-http agent: PASS
+T12-SCENARIO 12-independent-four-workspaces-http supervisor: PASS
+T12-SCENARIO 12-independent-four-workspaces-http admin: PASS
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1&workspace=requester&p=1 tickets_count=1 max_id=1
+T12-SCENARIO 13-independent-post requester: PASS
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=2&workspace=requester&p=1 tickets_count=2 max_id=2
+T12 SCENARIOS ERROR: 13-independent-post agent public reply failed: HTTP 302, location=request-center.php?page=ticket&id=2&workspace=requester&p=1, follow=جزئیات SUP-00002 | Request Center T12 ScenariosپRequest Center T12 Scenariosمرکز خدمات و پشتیبانی🌙حالت شب🎨 انتخاب تمپروفایل: rc_t12s_agentداشبوردمرکز درخواست‌هاکنترل CD/DVDکنترل ترددسفارش غذاپشتیبانیخدماتدانش‌نامهصف کاریشناسنامه‌های فنیتغییر و مشکلگزارش‌هاگزارش درخواست‌هامدیریتسازمانراهنمااعلان‌ها1خروجدرخواست لغو تأیید شد؛ تاریخچهٔ درخواست حفظ شده است.عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.← باز, message={"is_internal":0,"body":"T12 characterization body\\nخط دوم برای مقایسهٔ بدنه"}, ticket={"id":2,"status":"in_progress","assigned_to":102,"first_response_at":"2026-11-08 21:02:02"}, app_log=2026-11-09T01:01:38+03:30 [error] خطای برنامه — خطای ناشناخته: ITSM request failed: این درخواست قبلاً به کارشناس ارجاع شده است. | /index.php [مشکل جزئی ×0] {"cause":"علت دقیق از روی متن خطا مشخص نیست.","action":"جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.","technical":"ITSM request failed: این درخواست قبلاً به کارشناس ارجاع شده است. | /index.php","location":"http-post.php:78","code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"}
+2026-11-09T01:01:38+03:30 [error] خطای برنامه — خطای ناشناخته: ITSM request failed: این درخواست قبلاً به کارشناس ارجاع شده است. | /index.php [مشکل جزئی ×0] {"cause":"علت دقیق از روی متن خطا مشخص نیست.","action":"جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.","technical":"ITSM request failed: این درخواست قبلاً به کارشناس ارجاع شده است. | /index.php","location":"http-post.php:78","code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"}
+2026-11-09T01:01:48+03:30 [error] خطای برنامه — خطای ناشناخته: ITSM request failed: درخواست پیدا نشد یا به واحد شما تعلق ندارد. | /index.php [مشکل جزئی ×0] {"cause":"علت دقیق از روی متن خطا مشخص نیست.","action":"جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.","technical":"ITSM request failed: درخواست پیدا نشد یا به واحد شما تعلق ندارد. | /index.php","location":"http-post.php:78","code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"}
+2026-11-09T01:02:02+03:30 [warning] PHP E_WARNING — متغیر تعریف‌نشده در کد برنامه (باگ) [مشکل جزئی ×0] {"cause":"بر اساس متن خطا؛ برای تأیید جزئیات فنی را ببینید.","action":"این خطای برنامه است؛ متن فنی و مکان خطا را برای توسعه‌دهنده بفرستید.","technical":"Undefined variable $user","location":"ticket-actions.php:600","error_type":"E_WARNING","code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"}
+2026-11-09T01:02:02+03:30 [error] خطای برنامه — خطای ناشناخته: Request Center POST failed: user_can(): Argument #1 ($user) must be of type array, null given, called in /home/runner/work/ticket/ticket/mod [مشکل جزئی ×0] {"cause":"علت دقیق از روی متن خطا مشخص نیست.","action":"جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.","technical":"Request Center POST failed: user_can(): Argument #1 ($user) must be of type array, null given, called in /home/runner/work/ticket/ticket/modules/request-center/Actions/ticket-actions.php on line 600 | /request-center.php","location":"post-handler.php:64","code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"}
+#0 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(849): t12s_fail()
+#1 {main}
