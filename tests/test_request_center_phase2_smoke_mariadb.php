@@ -467,7 +467,16 @@ try {
     smoke_check($maintenanceDetail['status'] === 200 && str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') && str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد'), 'independent detail renders SLA/OLA event metadata without Logging UI dependencies (status ' . $maintenanceDetail['status'] . ')');
     $maintenanceNotifications = $pdo->prepare("SELECT COUNT(DISTINCT notification_type) FROM notifications WHERE ticket_id = ? AND notification_type IN ('sla_due_soon','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')");
     $maintenanceNotifications->execute([$maintenanceTicketId]);
-    smoke_check((int) $maintenanceNotifications->fetchColumn() === 5, 'SLA/OLA notifications reach the assigned staff member exactly by alert type');
+    $notificationTypeCount = (int) $maintenanceNotifications->fetchColumn();
+    if ($notificationTypeCount !== 5) {
+        $notificationRows = $pdo->query('SELECT user_id, notification_type FROM notifications WHERE ticket_id = ' . $maintenanceTicketId . ' ORDER BY id')->fetchAll(PDO::FETCH_ASSOC);
+        $ticketRecipients = $pdo->query('SELECT requester_id, assigned_to, department_id, service_group FROM tickets WHERE id = ' . $maintenanceTicketId)->fetch(PDO::FETCH_ASSOC);
+        $assigneeInfo = $pdo->query('SELECT id, role, is_active, is_primary_admin FROM users WHERE id = ' . $maintenanceAssignee)->fetch(PDO::FETCH_ASSOC);
+        echo 'SLA/OLA notification diagnostic: expectedTypes=5 actual=' . $notificationTypeCount
+            . ' rows=' . json_encode($notificationRows) . ' ticket=' . json_encode($ticketRecipients)
+            . ' assignee=' . json_encode($assigneeInfo) . PHP_EOL;
+    }
+    smoke_check($notificationTypeCount === 5, 'SLA/OLA notifications reach the assigned staff member exactly by alert type');
 
     // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
