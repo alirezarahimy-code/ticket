@@ -214,14 +214,32 @@ try {
     smoke_check($search['status'] === 200, 'global search returns HTTP 200 (status ' . $search['status'] . ')');
     smoke_check(str_contains($search['body'], 'درخواست'), 'global search page renders (ticket slice executed)');
 
-    // 3) Excel export (exercises request_center_export_report). Export permission reports.view is implicit for primary_admin.
-    $export = smoke_http('http://' . $address . '/index.php?action=export_report&from=' . urlencode('1405/01/01') . '&to=' . urlencode('1405/01/30'), ['Cookie: ' . $cookie]);
-    smoke_check($export['status'] === 200, 'export_report returns HTTP 200 (status ' . $export['status'] . ')');
-    smoke_check(str_starts_with($export['body'], 'PK' . "\x03\x04"), 'export_report returns a valid XLSX package (PK magic)');
+    // 3) Legacy export URLs are compatibility redirects; the independent RC endpoint owns the response.
+    $legacyExport = smoke_http('http://' . $address . '/index.php?action=export_report&from=' . urlencode('1405/01/01') . '&to=' . urlencode('1405/01/30'), ['Cookie: ' . $cookie]);
+    $legacyExportLocation = '';
+    foreach ($legacyExport['headers'] as $header) {
+        if (stripos((string) $header, 'location:') === 0) {
+            $legacyExportLocation = trim(substr((string) $header, 9));
+            break;
+        }
+    }
+    smoke_check($legacyExport['status'] === 302 && str_starts_with($legacyExportLocation, 'request-center.php?action=export_report'), 'legacy export URL redirects to the independent Request Center endpoint (status ' . $legacyExport['status'] . ')');
+    $export = smoke_http('http://' . $address . '/request-center.php?action=export_report&from=' . urlencode('1405/01/01') . '&to=' . urlencode('1405/01/30'), ['Cookie: ' . $cookie]);
+    smoke_check($export['status'] === 200, 'independent export_report returns HTTP 200 (status ' . $export['status'] . ')');
+    smoke_check(str_starts_with($export['body'], 'PK' . "\x03\x04"), 'independent export_report returns a valid XLSX package (PK magic)');
 
-    // 4) Attachment download with an unknown id (exercises request_center_download_attachment tail path).
-    $download = smoke_http('http://' . $address . '/index.php?action=download_attachment&id=99999', ['Cookie: ' . $cookie]);
-    smoke_check($download['status'] === 404, 'download_attachment with unknown id returns HTTP 404 (status ' . $download['status'] . ')');
+    // 4) Legacy attachment URLs redirect; the independent endpoint enforces the 404 for an unknown id.
+    $legacyDownload = smoke_http('http://' . $address . '/index.php?action=download_attachment&id=99999', ['Cookie: ' . $cookie]);
+    $legacyDownloadLocation = '';
+    foreach ($legacyDownload['headers'] as $header) {
+        if (stripos((string) $header, 'location:') === 0) {
+            $legacyDownloadLocation = trim(substr((string) $header, 9));
+            break;
+        }
+    }
+    smoke_check($legacyDownload['status'] === 302 && str_starts_with($legacyDownloadLocation, 'request-center.php?action=download_attachment'), 'legacy attachment URL redirects to the independent Request Center endpoint (status ' . $legacyDownload['status'] . ')');
+    $download = smoke_http('http://' . $address . '/request-center.php?action=download_attachment&id=99999', ['Cookie: ' . $cookie]);
+    smoke_check($download['status'] === 404, 'independent download_attachment with unknown id returns HTTP 404 (status ' . $download['status'] . ')');
 
     // 5) Phase 3 — POST through the INDEPENDENT entry: no CSRF must yield 419 (legacy contract).
     $noCsrf = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'create_ticket', 'subject' => 'should-be-rejected'], ['Cookie: ' . $cookie]);
