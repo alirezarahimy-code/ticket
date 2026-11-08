@@ -214,9 +214,9 @@ if (!defined('APP_ROOT')) {
             if ($ticketId > 0) {
                 ticket_number_cache_set($ticketId, $ticketNo);
             }
-            $message = db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body) VALUES (?, ?, ?)');
-            $message->execute([$ticketId, $user['id'], $description]);
-            store_attachment((int) db()->lastInsertId(), $_FILES['attachment'] ?? []);
+            $workflow = new RequestCenterWorkflowService(db());
+            $messageId = $workflow->appendMessage($ticketId, (int) $user['id'], $description);
+            store_attachment($messageId, $_FILES['attachment'] ?? []);
              $ticketAuditMeta = [
                  'subject' => $subject,
                  'priority' => $priority,
