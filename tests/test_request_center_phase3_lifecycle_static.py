@@ -199,6 +199,16 @@ def test_supervisor_reopen_requires_a_reason_server_side():
     assert "برای بازگشایی رسمی" in block
 
 
+def test_supervisor_reopen_guards_snapshot_fields_used_for_sla_recalculation():
+    action = source("modules/request-center/Actions/supervisor-actions.php")
+    start = action.index("if ($action === 'supervisor_reopen')")
+    end = action.index("if ($action === 'rate_ticket')", start)
+    block = action[start:end]
+    assert "], 'supervisor_reopen', [" in block
+    for field in ("requester_id", "assigned_to", "priority", "department_id", "cancel_requested_at"):
+        assert f"'{field}' =>" in block
+
+
 def test_supervisor_reopen_ui_requires_an_explicit_reason_and_permission():
     page = source("modules/request-center/Pages/supervisor.php")
     assert 'name="supervisor_note" required maxlength="1000"' in page
