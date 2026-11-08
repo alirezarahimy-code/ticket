@@ -82,7 +82,7 @@ final class RequestCenterWorkflowService
     public function requestCancellation(int $ticketId, int $requesterId, string $expectedStatus, string $reason): bool
     {
         $this->assertTransaction();
-        if ($ticketId <= 0 || $requesterId <= 0 || $reason === ''
+        if ($ticketId <= 0 || $requesterId <= 0 || trim($reason) === ''
             || !in_array($expectedStatus, self::STATUSES, true)) {
             throw new InvalidArgumentException('اطلاعات درخواست لغو معتبر نیست.');
         }
