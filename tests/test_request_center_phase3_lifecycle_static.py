@@ -250,6 +250,7 @@ def test_public_management_and_bulk_replies_start_first_response_clock():
     assert "$bulkUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();" in bulk_action
     assert "'first_response_at' => $ticket['first_response_at'] ?? null" in ticket_action
     assert "'first_response_at' => $bulkTicket['first_response_at'] ?? null" in bulk_action
+    assert "'department_id' => $bulkTicket['department_id'] ?? null" in bulk_action
     assert "SELECT status, cancel_requested_at, assigned_to, priority, first_response_at FROM tickets" in ticket_action
     assert "$lockedReply['first_response_at']" in ticket_action
 
