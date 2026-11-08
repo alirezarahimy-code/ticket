@@ -149,6 +149,15 @@ workflow_check($scopeGuardRejected,
     'lifecycle transition refuses a stale service-group scope snapshot');
 $pdo->rollBack();
 
+$pdo->beginTransaction();
+$pdo->exec("UPDATE tickets SET due_at = '2026-11-11 10:00:00' WHERE id = 6");
+$staleDeadlineRejected = !$service->transition(6, 'assigned', 'in_progress', [], 'standard', [
+    'due_at' => '2026-11-10 10:00:00',
+]);
+workflow_check($staleDeadlineRejected,
+    'lifecycle transition refuses a stale SLA deadline snapshot');
+$pdo->rollBack();
+
 workflow_check(
     RequestCenterWorkflowService::allowedTransitions('pending') === ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
     'legacy pending has exit paths'
