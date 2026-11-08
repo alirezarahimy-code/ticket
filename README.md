@@ -167,7 +167,7 @@ PHP باید برای نوشتن فایل تنظیمات و قفل نصب در �
 
 ## ارتقا از نسخه قبلی
 
-> **ترتیب بسته‌های مسیر 1.62.77 به 1.62.90 اجباری است:**
+> **ترتیب بسته‌های مسیر 1.62.77 به 1.62.90 الزامی است:**
 > 1. `downloads/ticket-update-1.62.77-to-1.62.82-audit-visibility-20261105.zip`
 > 2. `downloads/ticket-update-1.62.82-to-1.62.88-merged-20261105.zip`
 > 3. `downloads/ticket-update-1.62.88-to-1.62.89-logging-escalation-20261107.zip`
