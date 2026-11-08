@@ -7,6 +7,63 @@ if (!defined('APP_ROOT')) {
     exit;
 }
 
+if ($action === 'save_rc_work_hours') {
+    $admin = require_login();
+    if (!user_is_primary_admin($admin)) {
+        throw new RuntimeException('فقط ادمین اصلی مرکز درخواست‌ها می‌تواند تقویم کاری SLA را تغییر دهد.');
+    }
+
+    $startRaw = post_value('work_start_hour', '8');
+    $endRaw = post_value('work_end_hour', '16');
+    if (!preg_match('/^(?:[0-9]|1[0-9]|2[0-3])$/', $startRaw)) {
+        throw new RuntimeException('ساعت شروع کار باید عدد صحیح بین ۰ تا ۲۳ باشد.');
+    }
+    if (!preg_match('/^(?:[1-9]|1[0-9]|2[0-4])$/', $endRaw) || (int) $endRaw <= (int) $startRaw) {
+        throw new RuntimeException('ساعت پایان باید عدد صحیح، بزرگ‌تر از شروع و حداکثر ۲۴ باشد.');
+    }
+    $weekendDays = [];
+    foreach ((array) ($_POST['weekend_days'] ?? []) as $rawDay) {
+        if (!is_scalar($rawDay) || !preg_match('/^[1-7]$/', (string) $rawDay)) {
+            throw new RuntimeException('روز تعطیل هفتگی معتبر نیست.');
+        }
+        $day = (int) $rawDay;
+        if (!in_array($day, $weekendDays, true)) {
+            $weekendDays[] = $day;
+        }
+    }
+    sort($weekendDays);
+    if (count($weekendDays) >= 7) {
+        throw new RuntimeException('دست‌کم یک روز هفته باید روز کاری بماند.');
+    }
+
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        save_setting('sla.work_start_hour', $startRaw);
+        save_setting('sla.work_end_hour', $endRaw);
+        save_setting('sla.weekend_days', implode(',', $weekendDays));
+        save_audit_required((int) $admin['id'], 'request_center_work_hours_updated', null, [
+            'work_start_hour' => (int) $startRaw,
+            'work_end_hour' => (int) $endRaw,
+            'weekend_days' => implode(',', $weekendDays),
+        ]);
+        db_commit_or_fail('request-center:save_work_hours');
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $exception;
+    }
+    if (function_exists('setting_forget_cache')) {
+        setting_forget_cache();
+    }
+    if (function_exists('sla_business_hours_forget_cache')) {
+        sla_business_hours_forget_cache();
+    }
+    flash('success', 'تقویم کاری ذخیره شد. موعدهای ذخیره‌شدهٔ درخواست‌های موجود تغییر نکردند.');
+    redirect('request-center.php?workspace=admin#sla-work-hours');
+}
+
 if ($action === 'update_ola_policy') {
     $admin = require_login();
     if (!user_is_primary_admin($admin)) {
