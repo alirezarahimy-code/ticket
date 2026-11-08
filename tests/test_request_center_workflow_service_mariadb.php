@@ -144,6 +144,14 @@ $pdo->rollBack();
 mariadb_workflow_check(!$staleServiceGroup, 'routing-scope guard rejects a stale service group under MariaDB row lock');
 
 $pdo->beginTransaction();
+$pdo->exec("UPDATE tickets SET due_at = '2026-11-11 10:00:00' WHERE id = 4");
+$staleDeadline = $service->transition(4, 'assigned', 'in_progress', [], 'standard', [
+    'due_at' => '2026-11-10 10:00:00',
+]);
+$pdo->rollBack();
+mariadb_workflow_check(!$staleDeadline, 'SLA deadline guard rejects stale computed data under MariaDB row lock');
+
+$pdo->beginTransaction();
 $staleStatus = $service->transition(1, 'assigned', 'resolved');
 $pdo->rollBack();
 mariadb_workflow_check(!$staleStatus, 'stale expected status is rejected');
