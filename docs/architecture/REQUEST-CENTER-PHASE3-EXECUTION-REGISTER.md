@@ -205,3 +205,8 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - T12 Scenario Characterization run `42521069624` پس از تغییر redirectهای موفق و خطای POST، روی MariaDB 10.4.32 و 10.11 PASS شد.
 - QA Package Preview run `42521419346`: PASS.
 - این شواهد، حفظ context در مسیر موفق و ناموفق تصمیم‌های سوپروایزر و عملیات گروهی صف را در سطح قرارداد/HTTP تأیید می‌کند؛ P3-08 و فاز ۳ همچنان باز هستند تا ممیزی باقیماندهٔ همهٔ مسیرهای legacy و معیارهای P3 تکمیل شود.
+
+### حفظ context گزارش‌ها هنگام ورود به جزئیات — ۲۰۲۶-۱۱-۰۸
+- لینک درخواست‌ها در `Pages/reports.php` اکنون Workspace مبدأ، شماره صفحه و فیلترهای گزارش را به جزئیات مستقل منتقل می‌کند.
+- `Pages/detail.php` و `request_center_ticket_return_url()` اکنون فیلترهای `ticket_type`, `department_id`, `assigned_to`, `from`, `to` را نیز در بازگشت پس از عملیات حفظ می‌کنند؛ نوع درخواست allowlist شده و شناسه‌های فیلتر عددی‌اند. این context از طریق فیلدهای POST صفحه جزئیات به helper مشترک منتقل می‌شود.
+- آزمون ایستای `test_report_to_detail_navigation_preserves_report_workspace_and_filters` اضافه شد. نتیجهٔ CI این تغییر پس از اجرای Contract اعلام می‌شود.
