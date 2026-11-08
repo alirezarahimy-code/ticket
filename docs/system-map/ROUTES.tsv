@@ -380,7 +380,7 @@ action	decide_ticket_cancellation	modules/request-center/Actions/ticket-actions.
 action	claim_ticket	modules/request-center/Actions/ticket-actions.php	366
 action	reopen_ticket	modules/request-center/Actions/ticket-actions.php	406
 action	reply	modules/request-center/Actions/ticket-actions.php	456
-action	update_ticket	modules/request-center/Actions/ticket-actions.php	605
+action	update_ticket	modules/request-center/Actions/ticket-actions.php	604
 page	queue	ola.php	18
 page	notifications	ola.php	18
 page	reports	ola.php	98

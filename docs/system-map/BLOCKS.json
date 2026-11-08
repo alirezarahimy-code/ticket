@@ -52089,7 +52089,7 @@
             "path": "modules\/request-center\/Actions\/bulk-actions.php",
             "area": "PAGE",
             "lines": 141,
-            "file_fingerprint": "73288179546c",
+            "file_fingerprint": "9b45c4fb4726",
             "blocks": [
                 {
                     "kind": "region",
@@ -52140,7 +52140,7 @@
                     "line_start": 44,
                     "line_end": 141,
                     "lines": 98,
-                    "fingerprint": "cd3585199197",
+                    "fingerprint": "9785e65dfb0b",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -52312,7 +52312,7 @@
             "path": "modules\/request-center\/Actions\/supervisor-actions.php",
             "area": "PAGE",
             "lines": 190,
-            "file_fingerprint": "f7297f9d8c90",
+            "file_fingerprint": "597fa9fb6bc8",
             "blocks": [
                 {
                     "kind": "region",
@@ -52346,11 +52346,10 @@
                     "line_start": 25,
                     "line_end": 98,
                     "lines": 74,
-                    "fingerprint": "491a13d46829",
+                    "fingerprint": "82ed59bb590f",
                     "risk": {
-                        "score": 7,
+                        "score": 2,
                         "flags": {
-                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -52392,8 +52391,8 @@
             "id": "PAGE-044",
             "path": "modules\/request-center\/Actions\/ticket-actions.php",
             "area": "PAGE",
-            "lines": 753,
-            "file_fingerprint": "33a6ad5f2a71",
+            "lines": 752,
+            "file_fingerprint": "6258e4089daa",
             "blocks": [
                 {
                     "kind": "region",
@@ -52427,7 +52426,7 @@
                     "line_start": 30,
                     "line_end": 221,
                     "lines": 192,
-                    "fingerprint": "984fdd9bf856",
+                    "fingerprint": "d9cda3d7444d",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -52444,11 +52443,10 @@
                     "line_start": 222,
                     "line_end": 283,
                     "lines": 62,
-                    "fingerprint": "5efc736cf40f",
+                    "fingerprint": "2825c206d38f",
                     "risk": {
-                        "score": 7,
+                        "score": 2,
                         "flags": {
-                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -52460,7 +52458,7 @@
                     "line_start": 284,
                     "line_end": 365,
                     "lines": 82,
-                    "fingerprint": "80bcbcad26b4",
+                    "fingerprint": "c811ee0b9b2c",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -52490,11 +52488,10 @@
                     "line_start": 406,
                     "line_end": 455,
                     "lines": 50,
-                    "fingerprint": "7b8c957054de",
+                    "fingerprint": "0abbf9bb5c0d",
                     "risk": {
-                        "score": 7,
+                        "score": 2,
                         "flags": {
-                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -52504,9 +52501,9 @@
                     "kind": "region",
                     "anchor": "مسیر: reply",
                     "line_start": 456,
-                    "line_end": 604,
-                    "lines": 149,
-                    "fingerprint": "e4b703a04633",
+                    "line_end": 603,
+                    "lines": 148,
+                    "fingerprint": "5f8a658bdbda",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -52519,10 +52516,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
-                    "line_start": 605,
-                    "line_end": 753,
+                    "line_start": 604,
+                    "line_end": 752,
                     "lines": 149,
-                    "fingerprint": "7b9a2dc6ea96",
+                    "fingerprint": "d412e310dd47",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -53227,8 +53224,8 @@
             "id": "PAGE-059",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
-            "lines": 257,
-            "file_fingerprint": "e59869001e04",
+            "lines": 277,
+            "file_fingerprint": "0cf536224342",
             "blocks": [
                 {
                     "kind": "region",
@@ -53260,9 +53257,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterWorkflowService",
                     "line_start": 36,
-                    "line_end": 256,
-                    "lines": 221,
-                    "fingerprint": "a5c696b49509",
+                    "line_end": 276,
+                    "lines": 241,
+                    "fingerprint": "2b2e369690b8",
                     "risk": {
                         "score": 2,
                         "flags": {

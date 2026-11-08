@@ -252,7 +252,7 @@ docs/architecture/REQUEST-CENTER-DATABASE-DUMP-ASSESSMENT-FA.md	docs	74	7308
 docs/architecture/REQUEST-CENTER-PHASE1-EVIDENCE-REGISTER-FA.md	docs	460	75165
 docs/architecture/REQUEST-CENTER-PHASE2-EVIDENCE-REGISTER-FA.md	docs	68	7779
 docs/architecture/REQUEST-CENTER-PHASE3-BRIDGE-LIFECYCLE-FA.md	docs	135	12572
-docs/architecture/REQUEST-CENTER-PHASE4-EVIDENCE-REGISTER-FA.md	docs	139	18459
+docs/architecture/REQUEST-CENTER-PHASE4-EVIDENCE-REGISTER-FA.md	docs	155	20328
 docs/architecture/REQUEST-CENTER-PHASES-1-3-CLOSURE-FA.md	docs	148	15213
 docs/architecture/REQUEST-CENTER-T04-WEB-DDL-AUDIT-FA.md	docs	114	10112
 docs/architecture/REQUEST-CENTER-T12-CHARACTERIZATION-WORKSHEET-FA.md	docs	110	12576
@@ -441,11 +441,11 @@ migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 migrations/034-logging-escalation.sql	migrations	34	1915
 migrations/035-request-center-appointments.sql	migrations	22	1432
 modules/request-center/Actions/appointment-actions.php	other	213	9484
-modules/request-center/Actions/bulk-actions.php	other	140	10427
+modules/request-center/Actions/bulk-actions.php	other	140	10367
 modules/request-center/Actions/dispatch.php	other	18	695
 modules/request-center/Actions/service-actions.php	other	228	14500
-modules/request-center/Actions/supervisor-actions.php	other	189	14636
-modules/request-center/Actions/ticket-actions.php	other	752	59624
+modules/request-center/Actions/supervisor-actions.php	other	189	14582
+modules/request-center/Actions/ticket-actions.php	other	751	59149
 modules/request-center/AppointmentRepository.php	other	372	16638
 modules/request-center/Assets/request-center.css	other	156	13457
 modules/request-center/Pages/admin.php	other	82	7101
@@ -461,7 +461,7 @@ modules/request-center/Pages/supervisor-workspace.php	other	65	5777
 modules/request-center/Pages/supervisor.php	other	52	6589
 modules/request-center/README.md	other	286	30697
 modules/request-center/RequestCenterRepository.php	other	443	20179
-modules/request-center/WorkflowService.php	other	256	11564
+modules/request-center/WorkflowService.php	other	276	12537
 modules/request-center/lib/endpoints.php	other	95	7621
 modules/request-center/lib/functions.php	other	239	13840
 modules/request-center/post-handler.php	other	83	3709

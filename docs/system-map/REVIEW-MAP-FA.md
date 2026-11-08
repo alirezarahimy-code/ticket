@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 588 |
-| خطوط | 131,668 |
+| خطوط | 131,687 |
 | آدرس‌ها (بلوک) | 6,869 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -81,7 +81,7 @@
 | درخواست | **مشاهدهٔ درخواست‌های واحد/زیرمجموعه** | `ticket.view_unit` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 10 |
 | درخواست | **مشاهدهٔ همهٔ درخواست‌ها** | `ticket.view_all` | `CORE-003.11` <sub>lib/auth-scope.php:145</sub><br>`CORE-003.19` <sub>lib/auth-scope.php:370</sub> | 7 |
 | درخواست | **پاسخ/مکالمه در درخواست** | `ticket.reply` | `PAGE-044.07` <sub>modules/request-center/Actions/ticket-actions.php:406</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 7 |
-| درخواست | **ویرایش** | `ticket.edit` | `PAGE-044.09` <sub>modules/request-center/Actions/ticket-actions.php:605</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 14 |
+| درخواست | **ویرایش** | `ticket.edit` | `PAGE-044.09` <sub>modules/request-center/Actions/ticket-actions.php:604</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 14 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
 | درخواست | **ویرایش** | `ticket.bulk` | `PAGE-040.04` <sub>modules/request-center/Actions/bulk-actions.php:44</sub> | 4 |
 | درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:149</sub> | 6 |
@@ -253,7 +253,7 @@
 | `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1101</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-041.62` <sub>schema.sql:1080</sub> | 65 |
 | `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-041.24` <sub>schema.sql:364</sub> | 16 |
 | `ticket_events` | `DB-002.33` <sub>install-empty-db.sql:478</sub><br>`DB-005.24` <sub>migrations/003-sync-schema-151.sql:359</sub><br>`DB-041.30` <sub>schema.sql:457</sub> | 41 |
-| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-041.22` <sub>schema.sql:338</sub> | 30 |
+| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-041.22` <sub>schema.sql:338</sub> | 23 |
 | `ticket_number_seq` | `DB-002.66` <sub>install-empty-db.sql:1128</sub><br>`DB-005.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-041.66` <sub>schema.sql:1141</sub> | 19 |
 | `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-041.44` <sub>schema.sql:767</sub> | 12 |
 | `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-041.23` <sub>schema.sql:350</sub> | 21 |
@@ -289,7 +289,7 @@
 | `TEST` | TEST | 234 | 1,705 | 23,298 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 83 | 1,376 | 7,972 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,762 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,781 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -306,7 +306,7 @@
 | `write_no_tx` | نوشتن بدون تراکنش | 842 |
 | `error_suppression` | سرکوب @ | 297 |
 | `dangerous_call` | فراخوانی خطرناک | 221 |
-| `sql_concat` | الحاق در SQL | 197 |
+| `sql_concat` | الحاق در SQL | 194 |
 | `raw_input` | ورودی خام | 187 |
 | `silent_catch` | catch بی‌صدا | 134 |
 | `long` | >۱۲۰ خط | 131 |
@@ -8796,26 +8796,26 @@
 |---|---|---|---|---|---|
 | `PAGE-043.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
 | `PAGE-043.02` | 18–24 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `PAGE-043.03` | 25–98 | ناحیه | `مسیر: supervisor_decision` | 7 | ⬜ |
+| `PAGE-043.03` | 25–98 | ناحیه | `مسیر: supervisor_decision` | 2 | ⬜ |
 | `PAGE-043.04` | 99–148 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
 | `PAGE-043.05` | 149–190 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-044</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (753 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>PAGE-044</b> — <code>modules/request-center/Actions/ticket-actions.php</code> (752 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-044.01` | 1–22 | ناحیه | `بلوک رویه‌ای 1-22` | 0 | ⬜ |
 | `PAGE-044.02` | 23–29 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `PAGE-044.03` | 30–221 | ناحیه | `مسیر: create_ticket` | **8** | ⬜ |
-| `PAGE-044.04` | 222–283 | ناحیه | `مسیر: cancel_ticket` | 7 | ⬜ |
+| `PAGE-044.04` | 222–283 | ناحیه | `مسیر: cancel_ticket` | 2 | ⬜ |
 | `PAGE-044.05` | 284–365 | ناحیه | `مسیر: decide_ticket_cancellation` | 2 | ⬜ |
 | `PAGE-044.06` | 366–405 | ناحیه | `مسیر: claim_ticket` | 2 | ⬜ |
-| `PAGE-044.07` | 406–455 | ناحیه | `مسیر: reopen_ticket` | 7 | ⬜ |
-| `PAGE-044.08` | 456–604 | ناحیه | `مسیر: reply` | 3 | ⬜ |
-| `PAGE-044.09` | 605–753 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
+| `PAGE-044.07` | 406–455 | ناحیه | `مسیر: reopen_ticket` | 2 | ⬜ |
+| `PAGE-044.08` | 456–603 | ناحیه | `مسیر: reply` | 3 | ⬜ |
+| `PAGE-044.09` | 604–752 | ناحیه | `مسیر: update_ticket` | 3 | ⬜ |
 
 </details>
 
@@ -8971,13 +8971,13 @@
 </details>
 
 <details>
-<summary><b>PAGE-059</b> — <code>modules/request-center/WorkflowService.php</code> (257 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-059</b> — <code>modules/request-center/WorkflowService.php</code> (277 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-059.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
 | `PAGE-059.02` | 4–34 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
-| `PAGE-059.03` | 36–256 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
+| `PAGE-059.03` | 36–276 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
 
 </details>
 
