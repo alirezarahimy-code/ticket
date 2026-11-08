@@ -361,7 +361,7 @@ governance.php	core	545	48255
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
 index.php	core	3743	375047
-install-empty-db.sql	sql-root	1612	82181
+install-empty-db.sql	sql-root	1616	82379
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
 install.php	core	367	33296
@@ -433,7 +433,7 @@ restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
 run-food-worker-service.cmd	root-misc	21	999
-schema.sql	sql-root	1563	78585
+schema.sql	sql-root	1567	78783
 session_bootstrap.php	core	111	5473
 status-food-worker-SERVICE.bat	root-misc	9	214
 status-food-worker-SERVICE.ps1	root-misc	107	4918
@@ -567,7 +567,7 @@ tests/test_logging_system_contract.py	tests	274	13734
 tests/test_logging_ticket_event_replay.php	tests	71	3670
 tests/test_logging_trace_coverage.php	tests	49	3359
 tests/test_manual_no_print_food_ticket_static.py	tests	130	8517
-tests/test_mariadb_fresh_install.php	tests	166	8432
+tests/test_mariadb_fresh_install.php	tests	177	9368
 tests/test_migration_registry_seed.py	tests	39	1587
 tests/test_migration_retention_1_62_76.py	tests	28	1045
 tests/test_no_duplicate_php_functions.py	tests	72	3343
