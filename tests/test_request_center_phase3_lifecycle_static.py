@@ -258,7 +258,7 @@ def test_public_management_and_bulk_replies_start_first_response_clock():
 
 def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshots():
     workflow = source("modules/request-center/WorkflowService.php")
-    assert "service_group FROM tickets WHERE id = ? LIMIT 1" in workflow
+    assert "service_group, due_at, sla_minutes, sla_paused_at" in workflow
     assert "'service_group'], true" in workflow
     for path in (
         "modules/request-center/Actions/ticket-actions.php",
@@ -270,6 +270,7 @@ def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshot
         assert transition_count > 0
         assert action.count("'requester_id' =>") >= transition_count
         assert action.count("'service_group' =>") >= transition_count
+        assert action.count("'ola_escalation_2_at' =>") >= transition_count
 
 
 def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
