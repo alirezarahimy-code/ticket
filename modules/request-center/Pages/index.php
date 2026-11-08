@@ -2,11 +2,12 @@
 declare(strict_types=1);
 
 /**
- * Independent Request Center read interface.
+ * Request Center home and workspace router.
  *
- * Write operations deliberately remain on the established index.php POST
- * handlers during the first migration slice. No schema DDL or schema healing
- * is allowed from this entry point.
+ * Lifecycle POST actions are dispatched by request-center.php through the
+ * module-owned POST runner before page routing. This file owns the home,
+ * requester/agent list, and dedicated admin/supervisor/calendar workspaces.
+ * No schema DDL or schema healing is allowed from this entry point.
  */
 require dirname(__DIR__, 3) . '/bootstrap.php';
 
