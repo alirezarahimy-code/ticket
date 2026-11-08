@@ -50,13 +50,14 @@ final class RequestCenterRepository
                 'ticket_attachments' => ['id', 'message_id', 'original_name', 'mime', 'size_bytes'],
             ];
             $columnRows = $this->pdo->query(
-                'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
+                'SELECT TABLE_NAME, COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
             )->fetchAll(PDO::FETCH_ASSOC);
             $columns = [];
             foreach ($columnRows as $row) {
                 $table = strtolower((string) $row['TABLE_NAME']);
                 $column = strtolower((string) $row['COLUMN_NAME']);
                 $columns[$table][$column] = true;
+                $columnTypes[$table][$column] = strtolower((string) ($row['COLUMN_TYPE'] ?? ''));
             }
 
             // Company-aware organization scope is an optional provider capability on
@@ -83,6 +84,10 @@ final class RequestCenterRepository
                         $problems[] = 'ستون ' . $table . '.' . $name . ' وجود ندارد.';
                     }
                 }
+            }
+            $ticketStatusType = (string) ($columnTypes['tickets']['status'] ?? '');
+            if (str_starts_with($ticketStatusType, 'enum(') && !str_contains($ticketStatusType, "'rejected'")) {
+                $problems[] = 'ستون tickets.status هنوز مقدار نهایی rejected را ندارد؛ Migration 037 باید اجرا شود.';
             }
             return $problems;
         } catch (Throwable $exception) {
