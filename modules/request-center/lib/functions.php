@@ -448,7 +448,7 @@ function request_center_ticket_number_next(string $prefix): string
  * Idempotent, failure-isolated notification for Request Center lifecycle work.
  * A unique POST operation ID makes repeated delivery of the same event safe.
  */
-function request_center_notify_user(int $userId, string $type, string $title, string $body, int $ticketId): void
+function request_center_notify_user(int $userId, string $type, string $title, string $body, int $ticketId, bool $required = false): void
 {
     if ($userId <= 0) {
         return;
@@ -469,6 +469,9 @@ function request_center_notify_user(int $userId, string $type, string $title, st
         try {
             app_error_log('Request Center notification skipped: ticket=' . $ticketId . '; type=' . $type . '; recipient=' . $userId . '; error=' . get_class($exception));
         } catch (Throwable) {
+        }
+        if ($required) {
+            throw $exception;
         }
     }
 }
@@ -499,7 +502,7 @@ function request_center_notify_ticket_parties(int $ticketId, string $type, strin
         );
         foreach ($recipients as $recipientId) {
             if ($excludeUserId === null || $recipientId !== $excludeUserId) {
-                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId);
+                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId, $required);
             }
         }
     } catch (Throwable $exception) {
@@ -511,7 +514,7 @@ function request_center_notify_ticket_parties(int $ticketId, string $type, strin
 }
 
 /** Notify only permitted staff; the requester is deliberately excluded. */
-function request_center_notify_ticket_staff(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
+function request_center_notify_ticket_staff(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null, bool $required = false): void
 {
     try {
         $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
@@ -542,6 +545,9 @@ function request_center_notify_ticket_staff(int $ticketId, string $type, string 
         try {
             app_error_log('Request Center staff notification lookup failed: ticket=' . $ticketId . '; type=' . $type . '; error=' . get_class($exception));
         } catch (Throwable) {
+        }
+        if ($required) {
+            throw $exception;
         }
     }
 }
