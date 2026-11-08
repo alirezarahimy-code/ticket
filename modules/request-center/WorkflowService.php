@@ -44,7 +44,7 @@ final class RequestCenterWorkflowService
         'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved',
     ];
 
-    private const CANCELLATION_DECISION_STATUSES = [
+    public const CANCELLATION_DECISION_STATUSES = [
         'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled',
     ];
 
