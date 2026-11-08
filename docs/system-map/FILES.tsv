@@ -8,7 +8,7 @@ path	category	lines	bytes
 .github/workflows/ci.yml	workflows	212	8822
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
-.github/workflows/logging-acceptance.yml	workflows	138	5159
+.github/workflows/logging-acceptance.yml	workflows	93	3303
 .github/workflows/logging-contract.yml	workflows	37	1429
 .gitignore	config	27	447
 .htaccess	config	24	788
@@ -463,7 +463,7 @@ tests/js/list-sort-rowclasses.test.js	tests	38	2145
 tests/js/list-sort.test.js	tests	110	5679
 tests/logging-acceptance/compose.yaml	tests	16	394
 tests/logging-acceptance/run-mysql-integration.sh	tests	14	816
-tests/run_logging_staging_checks.ps1	tests	113	7243
+tests/run_logging_staging_checks.ps1	tests	113	7235
 tests/smoke.php	tests	270	42639
 tests/test_admin_layout_design_static.py	tests	98	5621
 tests/test_asset_inventory_form_compat_static.py	tests	70	3439
@@ -659,7 +659,7 @@ tests/test_tts_normalize_static.py	tests	55	3543
 tests/test_update_manifest_guard_static.py	tests	58	2426
 tests/test_user_access_groups_static.py	tests	89	5944
 tests/test_version_source_of_truth_static.py	tests	207	9882
-tests/test_windows_logging_static.py	tests	77	3319
+tests/test_windows_logging_static.py	tests	87	3812
 tests/tts_listen_checklist_fa.md	tests	34	1616
 tests/tts_normalize_test.php	tests	188	7738
 tools/.htaccess	tools	1	19
@@ -667,6 +667,7 @@ tools/README-LOADTEST-FA.md	tools	95	4051
 tools/README.md	tools	19	3057
 tools/Run-Logging-Acceptance-1.62.83.ps1	tools	98	4026
 tools/Run-Logging-Acceptance-1.62.88.ps1	tools	97	3976
+tools/Run-Logging-Acceptance.ps1	tools	111	4704
 tools/Run-Logging-Stress-1.62.88.ps1	tools	277	13638
 tools/asset_dedupe.php	tools	229	12621
 tools/backup-files.php	tools	105	4527
