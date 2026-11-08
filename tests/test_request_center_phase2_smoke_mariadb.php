@@ -465,6 +465,124 @@ try {
         smoke_check($workspaceResponse['status'] === 200, 'independent ' . $workspaceLabel . ' page returns HTTP 200 (status ' . $workspaceResponse['status'] . ')');
     }
 
+    // Admin Workspace: verify the actual configuration forms and execute their POST commands.
+    $adminWorkspace = smoke_http('http://' . $address . '/request-center.php?workspace=admin', ['Cookie: ' . $cookie]);
+    smoke_check($adminWorkspace['status'] === 200
+        && str_contains($adminWorkspace['body'], 'id="sla-work-hours"')
+        && str_contains($adminWorkspace['body'], 'id="ola-policies"')
+        && str_contains($adminWorkspace['body'], 'rc-admin-audit-title'),
+        'primary-admin workspace renders SLA calendar, OLA policy editor and scoped audit trail');
+    smoke_check(!str_contains($adminWorkspace['body'], 'RC internal attachment privacy fixture'),
+        'admin audit list does not disclose internal message content');
+
+    $oldWorkSettings = [];
+    foreach (['sla.work_start_hour', 'sla.work_end_hour', 'sla.weekend_days'] as $settingKey) {
+        $settingQuery = $pdo->prepare('SELECT value FROM settings WHERE `key` = ? LIMIT 1');
+        $settingQuery->execute([$settingKey]);
+        $oldWorkSettings[$settingKey] = $settingQuery->fetchColumn();
+    }
+    $workHoursUpdate = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'save_rc_work_hours',
+        'work_start_hour' => '9',
+        'work_end_hour' => '17',
+        'weekend_days' => ['4', '5'],
+        'csrf' => $csrf,
+    ], ['Cookie: ' . $cookie]);
+    $workStartSaved = (string) $pdo->query("SELECT value FROM settings WHERE `key` = 'sla.work_start_hour'")->fetchColumn();
+    $workEndSaved = (string) $pdo->query("SELECT value FROM settings WHERE `key` = 'sla.work_end_hour'")->fetchColumn();
+    $weekendSaved = (string) $pdo->query("SELECT value FROM settings WHERE `key` = 'sla.weekend_days'")->fetchColumn();
+    smoke_check($workHoursUpdate['status'] === 302
+        && $workStartSaved === '9' && $workEndSaved === '17' && $weekendSaved === '4,5',
+        'admin can update SLA business hours through the independent RC POST boundary');
+
+    $invalidWorkHours = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'save_rc_work_hours',
+        'work_start_hour' => '9',
+        'work_end_hour' => '17',
+        'weekend_days' => ['1', '2', '3', '4', '5', '6', '7'],
+        'csrf' => $csrf,
+    ], ['Cookie: ' . $cookie]);
+    $weekendAfterInvalid = (string) $pdo->query("SELECT value FROM settings WHERE `key` = 'sla.weekend_days'")->fetchColumn();
+    smoke_check($invalidWorkHours['status'] === 302 && $weekendAfterInvalid === '4,5',
+        'admin SLA calendar rejects a seven-day weekend without persisting invalid settings');
+
+    if (isset($requesterCookie)) {
+        $forbiddenWorkHours = smoke_http_post('http://' . $address . '/request-center.php', [
+            'action' => 'save_rc_work_hours',
+            'work_start_hour' => '10',
+            'work_end_hour' => '18',
+            'weekend_days' => ['4', '5'],
+            'csrf' => (string) ($requesterSessionData['csrf'] ?? $csrf),
+        ], ['Cookie: ' . $requesterCookie]);
+        $weekendAfterForbidden = (string) $pdo->query("SELECT value FROM settings WHERE `key` = 'sla.weekend_days'")->fetchColumn();
+        smoke_check($forbiddenWorkHours['status'] === 302 && $weekendAfterForbidden === '4,5',
+            'requester cannot change admin-only SLA calendar settings');
+    }
+
+    if (function_exists('ensure_default_ola_policies')) {
+        ensure_default_ola_policies();
+    }
+    $olaPolicy = $pdo->query(
+        'SELECT id, name, department_id, priority, response_minutes, resolution_minutes, escalation_1_minutes, escalation_2_minutes, is_active '
+        . 'FROM ola_policies WHERE is_active = 1 ORDER BY department_id IS NULL DESC, id LIMIT 1'
+    )->fetch(PDO::FETCH_ASSOC);
+    smoke_check(is_array($olaPolicy), 'disposable database has an active OLA policy for admin configuration smoke');
+    if (is_array($olaPolicy)) {
+        $updatedPolicyName = mb_substr((string) $olaPolicy['name'], 0, 130, 'UTF-8') . ' smoke';
+        $olaPolicyUpdate = smoke_http_post('http://' . $address . '/request-center.php', [
+            'action' => 'update_ola_policy',
+            'policy_id' => (string) $olaPolicy['id'],
+            'policy_name' => $updatedPolicyName,
+            'department_id' => (string) ((int) ($olaPolicy['department_id'] ?? 0)),
+            'priority' => (string) $olaPolicy['priority'],
+            'response_minutes' => (string) $olaPolicy['response_minutes'],
+            'resolution_minutes' => (string) $olaPolicy['resolution_minutes'],
+            'escalation_1_minutes' => (string) $olaPolicy['escalation_1_minutes'],
+            'escalation_2_minutes' => (string) $olaPolicy['escalation_2_minutes'],
+            'is_active' => (string) $olaPolicy['is_active'],
+            'csrf' => $csrf,
+        ], ['Cookie: ' . $cookie]);
+        $policyNameSaved = $pdo->prepare('SELECT name FROM ola_policies WHERE id = ?');
+        $policyNameSaved->execute([(int) $olaPolicy['id']]);
+        $policyAudit = $pdo->prepare("SELECT COUNT(*) FROM activity_logs WHERE action_code = 'ola_policy_updated' AND target_id IS NULL");
+        $policyAudit->execute();
+        smoke_check($olaPolicyUpdate['status'] === 302
+            && (string) $policyNameSaved->fetchColumn() === $updatedPolicyName
+            && (int) $policyAudit->fetchColumn() > 0,
+            'primary admin can update an OLA policy and the change is audited');
+        if (isset($requesterCookie)) {
+            $forbiddenOlaUpdate = smoke_http_post('http://' . $address . '/request-center.php', [
+                'action' => 'update_ola_policy',
+                'policy_id' => (string) $olaPolicy['id'],
+                'policy_name' => 'forbidden requester edit',
+                'department_id' => (string) ((int) ($olaPolicy['department_id'] ?? 0)),
+                'priority' => (string) $olaPolicy['priority'],
+                'response_minutes' => (string) $olaPolicy['response_minutes'],
+                'resolution_minutes' => (string) $olaPolicy['resolution_minutes'],
+                'escalation_1_minutes' => (string) $olaPolicy['escalation_1_minutes'],
+                'escalation_2_minutes' => (string) $olaPolicy['escalation_2_minutes'],
+                'is_active' => (string) $olaPolicy['is_active'],
+                'csrf' => (string) ($requesterSessionData['csrf'] ?? $csrf),
+            ], ['Cookie: ' . $requesterCookie]);
+            $policyNameAfterForbidden = $pdo->prepare('SELECT name FROM ola_policies WHERE id = ?');
+            $policyNameAfterForbidden->execute([(int) $olaPolicy['id']]);
+            smoke_check($forbiddenOlaUpdate['status'] === 302
+                && (string) $policyNameAfterForbidden->fetchColumn() === $updatedPolicyName,
+                'requester cannot modify an admin-only OLA policy');
+        }
+    }
+
+    // Restore the original business-hours fixture to avoid affecting later smoke scenarios.
+    $restoreSetting = $pdo->prepare('INSERT INTO settings (`key`, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)');
+    $deleteSetting = $pdo->prepare('DELETE FROM settings WHERE `key` = ?');
+    foreach ($oldWorkSettings as $settingKey => $settingValue) {
+        if ($settingValue === false || $settingValue === null) {
+            $deleteSetting->execute([$settingKey]);
+        } else {
+            $restoreSetting->execute([$settingKey, (string) $settingValue]);
+        }
+    }
+
     // Run the real SLA/OLA maintenance command twice against a disposable ticket.
     $requesterQuery = $pdo->prepare("SELECT id FROM users WHERE role = 'user' AND id <> ? ORDER BY id LIMIT 1");
     $requesterQuery->execute([$userId]);
