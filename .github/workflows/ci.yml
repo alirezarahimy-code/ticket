@@ -58,6 +58,12 @@ jobs:
     - name: Guard — system map freshness
       run: python tests/test_system_map_static.py
 
+    - name: Diagnose stale system map diff
+      if: failure()
+      run: |
+        python tools/build_system_map.py
+        git diff -- docs/system-map/FILES.tsv docs/system-map/SYMBOLS.tsv docs/system-map/summary.json
+
     - name: Guard — session boot
       run: python tests/test_session_boot_static.py
 
