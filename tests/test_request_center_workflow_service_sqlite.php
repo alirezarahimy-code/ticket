@@ -48,7 +48,7 @@ $insert->execute([15, 'assigned', 24, 34, 'normal', null]);
 $insert->execute([16, 'closed', 25, 26, 'normal', null]);
 $insert->execute([17, 'cancelled', 27, null, 'normal', null]);
 $insert->execute([18, 'rejected', 28, null, 'normal', '2026-11-01 14:00:00']);
-$pdo->exec("UPDATE tickets SET service_group = 'it', due_at = '2026-11-10 10:00:00' WHERE id = 6");
+$pdo->exec("UPDATE tickets SET service_group = 'it', due_at = '2026-11-10 10:00:00', ola_due_at = '2026-11-12 10:00:00' WHERE id = 6");
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
