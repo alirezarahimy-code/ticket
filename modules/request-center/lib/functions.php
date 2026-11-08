@@ -248,7 +248,7 @@ function report_query_filters(array $user): array
 function request_center_assert_create_schema(): void
 {
     $required = [
-        'tickets' => ['requesting_unit_id'],
+        'tickets' => ['requesting_unit_id', 'rejected_at'],
         'categories' => ['id', 'name', 'code', 'service_group', 'is_active'],
         'service_catalog' => ['id', 'name', 'code', 'service_group', 'default_priority', 'default_ticket_type', 'category_id', 'handling_unit_id', 'requires_asset', 'is_active'],
         'service_catalog_fields' => ['id', 'service_id', 'field_key', 'label', 'field_type', 'options_json', 'is_required', 'sort_order'],
