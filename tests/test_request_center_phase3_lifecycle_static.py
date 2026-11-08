@@ -357,7 +357,7 @@ def test_assignment_and_priority_changes_notify_ticket_parties():
     assert "'assignment_source' => 'manager'" in action
     assert "'from_assignee_name' =>" in action and "'to_assignee_name' =>" in action
     detail = source("modules/request-center/Pages/detail.php")
-    assert "برای تخصیص/تغییر اولویت" in detail
+    assert "برای هر تغییر وضعیت، تخصیص و تغییر اولویت الزامی" in detail
     assert "اولویت به «' . priority_label($priority)" in action
 
 
