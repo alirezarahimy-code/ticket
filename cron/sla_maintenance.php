@@ -28,6 +28,11 @@ foreach ($query->fetchAll() as $ticket) {
                 ? 'درخواست ' . ticket_number((int) $ticket['id']) . ' از مهلت SLA عبور کرده است.'
                 : 'مهلت درخواست ' . ticket_number((int) $ticket['id']) . ' در کمتر از یک ساعت آینده است.';
             notify_ticket_staff((int) $ticket['id'], 'sla_' . $type, $title, $body);
+            log_ticket_event((int) $ticket['id'], null, 'sla_alert', null, null, [
+                'alert_type' => $type,
+                'due_at' => $ticket['due_at'],
+                'actor_type' => 'system',
+            ]);
             $auditSaved = activity_log([
                 'user_id' => null,
                 'action_code' => 'ticket_sla_alert',
@@ -81,6 +86,11 @@ try {
                     $number = ticket_number((int) $ticket['id']);
                     $labels = [$olaLabels[$type][0], sprintf($olaLabels[$type][1], $number)];
                     notify_ticket_staff((int) $ticket['id'], 'ola_' . $type, $labels[0], $labels[1]);
+                    log_ticket_event((int) $ticket['id'], null, 'ola_alert', null, null, [
+                        'alert_type' => $type,
+                        'due_at' => $dueAtText,
+                        'actor_type' => 'system',
+                    ]);
                     $auditSaved = activity_log([
                         'user_id' => null,
                         'action_code' => 'ticket_ola_alert',
