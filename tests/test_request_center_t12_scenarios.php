@@ -127,7 +127,8 @@ function t12s_seed(PDO $pdo): void
         (102, 1, 'rc_t12s_agent', 'RC T12s Agent', 'agent', 1, 'local', 1, 2, 0, 0, 'x'),
         (103, 1, 'rc_t12s_agent2', 'RC T12s Agent Two', 'agent', 1, 'local', 1, 2, 0, 0, 'x'),
         (104, 1, 'rc_t12s_supmgr', 'RC T12s Support Manager', 'support_manager', 1, 'local', 1, 2, 0, 0, 'x'),
-        (105, 1, 'rc_t12s_supervisor', 'RC T12s Supervisor', 'supervisor', 1, 'local', NULL, NULL, 0, 0, 'x')
+        (105, 1, 'rc_t12s_supervisor', 'RC T12s Supervisor', 'supervisor', 1, 'local', NULL, NULL, 0, 0, 'x'),
+        (106, 1, 'rc_t12s_it_agent', 'RC T12s IT Agent', 'agent', 1, 'local', 2, 1, 0, 1, 'x')
         ON DUPLICATE KEY UPDATE username = username");
     $pdo->exec("INSERT INTO assets (id, asset_tag, hostname, owner_user_id, department_id) VALUES (1, 'T12-IT-01', 't12-it-01', 101, 2)");
 }
@@ -552,7 +553,7 @@ try {
                 'asset_id' => 1,
             ]);
             $pdo = t12s_pdo($app);
-            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
+            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 106, assigned_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
             $r = t12s_post($app['base_url'] . '/index.php', $sess['supmgr'][$side], 'update_ticket', ['ticket_id' => $tid, 'priority' => 'urgent']);
             return [t12s_snapshot($pdo), ['priority_status' => $r['status']]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
