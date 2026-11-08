@@ -734,7 +734,7 @@ try {
     file_put_contents($evidenceDir . '/summary.json', json_encode(['results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     $failed = array_filter($results, fn($r) => $r['result'] !== 'PASS');
     t12s_log('T12 SUMMARY: ' . ($results === [] ? 'no scenarios selected' : json_encode(array_map(fn($r) => $r['name'] . ':' . $r['result'], $results), JSON_UNESCAPED_UNICODE)));
-    t12s_log('T12 RESULT: ' . ($failed === [] ? 'ALL SELECTED SCENARIOS MATCH BETWEEN LEGACY AND FEATURE' : count($failed) . ' SCENARIO(S) DIFFER'));
+    t12s_log('T12 RESULT: ' . ($failed === [] ? 'ALL SELECTED SCENARIO CONTRACTS PASSED' : count($failed) . ' SCENARIO(S) FAILED'));
     if ($failed !== []) { $failure = true; }
 } catch (Throwable $e) {
     fwrite(STDERR, 'T12 SCENARIOS ERROR: ' . $e->getMessage() . PHP_EOL . $e->getTraceAsString() . PHP_EOL);
