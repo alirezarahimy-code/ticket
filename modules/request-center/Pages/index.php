@@ -28,6 +28,7 @@ $statusLabels = [
     'resolved' => 'حل‌شده',
     'closed' => 'بسته‌شده',
     'cancelled' => 'لغوشده',
+    'rejected' => 'ردشده پس از ارزیابی اولیه',
 ];
 $priorityLabels = ['normal' => 'عادی', 'urgent' => 'فوری', 'critical' => 'بحرانی'];
 $typeLabels = ['incident' => 'رخداد', 'request' => 'درخواست خدمت', 'problem' => 'مشکل', 'change' => 'تغییر'];
