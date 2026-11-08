@@ -346,7 +346,9 @@ if (!defined('APP_ROOT')) {
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
             $decisionHandlerLevel = $ticket ? ticket_handler_level($ticket, $decisionUser) : '';
-            $supervisorCanDecideCancellation = $ticket && request_center_can_supervise_ticket($ticket, $decisionUser);
+            $supervisorCanDecideCancellation = $ticket
+                && request_center_can_supervise_ticket($ticket, $decisionUser)
+                && user_can($decisionUser, 'supervisor.decide');
             if (!$ticket || !can_view_ticket($ticket, $decisionUser)
                 || ($decisionHandlerLevel === '' && !$supervisorCanDecideCancellation)
                 || (int) ($ticket['cancel_requested_by'] ?? 0) === (int) $decisionUser['id']) {
