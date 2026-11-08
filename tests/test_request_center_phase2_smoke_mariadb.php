@@ -307,7 +307,28 @@ try {
     smoke_check(is_array($ticketRow), 'independent create_ticket persisted the ticket row');
     smoke_check((string) ($ticketRow['ticket_type'] ?? '') === 'request', 'independent create_ticket stored the requested ticket type');
 
-    // 7) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
+    // 7) Phase 3 — exercise all four independent workspaces and their operational pages.
+    $createdTicketId = (int) ($ticketRow['id'] ?? 0);
+    $detail = smoke_http('http://' . $address . '/request-center.php?id=' . $createdTicketId, ['Cookie: ' . $cookie]);
+    smoke_check($detail['status'] === 200 && str_contains($detail['body'], 'RC phase-3 independent POST smoke'), 'independent ticket detail renders the created request (status ' . $detail['status'] . ')');
+    smoke_check(str_contains($detail['body'], 'name="action" value="reply"'), 'independent ticket detail exposes the reply operation');
+    $workspaceProbes = [
+        ['requester', 'request-center.php?workspace=requester'],
+        ['agent', 'request-center.php?workspace=agent'],
+        ['supervisor', 'request-center.php?workspace=supervisor'],
+        ['admin', 'request-center.php?workspace=admin'],
+        ['agent queue', 'request-center.php?page=queue'],
+        ['supervisor decisions', 'request-center.php?page=supervisor'],
+        ['service catalog', 'request-center.php?page=services'],
+        ['reports', 'request-center.php?page=reports'],
+        ['analytics', 'request-center.php?page=analytics'],
+    ];
+    foreach ($workspaceProbes as [$workspaceLabel, $workspacePath]) {
+        $workspaceResponse = smoke_http('http://' . $address . '/' . $workspacePath, ['Cookie: ' . $cookie]);
+        smoke_check($workspaceResponse['status'] === 200, 'independent ' . $workspaceLabel . ' page returns HTTP 200 (status ' . $workspaceResponse['status'] . ')');
+    }
+
+    // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
     smoke_check($forwarded['status'] === 200 && str_contains($forwarded['body'], 'داشبورد'), 'non-RC POST action is forwarded in-process and renders the dashboard (status ' . $forwarded['status'] . ')');
 
