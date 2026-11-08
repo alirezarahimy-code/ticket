@@ -38,7 +38,7 @@ if (!defined('APP_ROOT')) {
             $validDecisionState = $ticket && ($isPreServiceRejection
                 ? $rejectionEligible
                 : (string) $ticket['status'] === 'resolved');
-            if (!$ticket || !can_view_ticket($ticket, $supervisor) || !$validDecisionState) {
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || ticket_user_is_requester($ticket, $supervisor) || !$validDecisionState) {
                 throw new RuntimeException($isPreServiceRejection
                     ? 'رد درخواست فقط پیش از شروع رسیدگی و در مرحلهٔ ارزیابی اولیه مجاز است.'
                     : 'فقط درخواست حل‌شده و بسته‌نشده قابل تأیید یا برگشت برای اصلاح است.');
@@ -71,7 +71,7 @@ if (!defined('APP_ROOT')) {
             $validDecisionState = $ticket && ($isPreServiceRejection
                 ? $rejectionEligible
                 : (string) $ticket['status'] === 'resolved');
-            if (!$ticket || !can_view_ticket($ticket, $supervisor) || !$validDecisionState
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || ticket_user_is_requester($ticket, $supervisor) || !$validDecisionState
                 || !empty($ticket['cancel_requested_at'])
                 || ($decision === 'approve' && !ticket_rating_is_current($ticket))) {
                 throw new RuntimeException('وضعیت درخواست یا مجوز تصمیم هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
@@ -208,7 +208,7 @@ if (!defined('APP_ROOT')) {
             }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
             $ticket = fetch_ticket($ticketId);
-            if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'closed') {
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || ticket_user_is_requester($ticket, $supervisor) || $ticket['status'] !== 'closed') {
                 throw new RuntimeException('فقط درخواست بسته‌شده قابل بازگشایی رسمی است.');
             }
             $note = post_value('supervisor_note');
