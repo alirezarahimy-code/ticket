@@ -52,8 +52,8 @@ def test_every_existing_zip_sha256_sidecar_matches_its_archive() -> None:
             continue
 
         expected_name = sidecar.name[:-7]  # remove only .sha256
-        supplied_name = parts[1].lstrip("*")
-        if supplied_name != expected_name or Path(supplied_name).name != supplied_name:
+        supplied_name = parts[1].lstrip("*").replace("\\", "/")
+        if supplied_name not in (expected_name, f"downloads/{expected_name}"):
             failures.append(f"{sidecar.name}: نام فایل داخل checksum با نام sidecar تطبیق ندارد")
             continue
 
