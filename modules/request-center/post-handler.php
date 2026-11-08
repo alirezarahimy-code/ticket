@@ -98,6 +98,11 @@ function request_center_handle_post(): bool
         require_once dirname(__DIR__, 2) . '/bootstrap.php';
     }
 
+    // The legacy front controller populated $user before including its action
+    // registry. The independent runner must establish the same authenticated
+    // execution context explicitly; lifecycle handlers such as reply rely on it.
+    $user = require_login();
+
     // Load only the established provider contracts required by this action.
     // These files define adapters; no provider schema-ensure routine is called here.
     $rootDir = dirname(__DIR__, 2);
