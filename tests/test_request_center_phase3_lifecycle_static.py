@@ -584,3 +584,11 @@ def test_new_internal_request_center_navigation_uses_the_independent_entry():
     assert "request-center.php?page=new-ticket" in chatbot
     assert "request-center.php?page=ticket&id=" in chatbot
     assert "request-center.php?page=ticket&id=' + encodeURIComponent(item.ticket_id)" in app_js
+
+
+def test_request_center_schema_preflight_runs_before_optional_chatbot_provider():
+    entry = source("request-center.php")
+    preflight = entry.index("(new RequestCenterRepository(db()))->schemaProblems()")
+    chatbot = entry.index("require_once $rcChatbotProvider")
+    page_dispatch = entry.index("require __DIR__ . '/modules/request-center/Pages/create.php'")
+    assert preflight < chatbot < page_dispatch
