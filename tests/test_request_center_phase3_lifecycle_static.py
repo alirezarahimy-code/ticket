@@ -569,3 +569,18 @@ def test_ticket_notification_targets_use_the_independent_request_center_entry():
     notifications = source("lib/notify-users.php")
     assert "return 'request-center.php?page=ticket&id=' . (int) $notification['ticket_id'];" in notifications
     assert "return 'index.php?page=ticket&id=' . (int) $notification['ticket_id'];" not in notifications
+
+
+def test_new_internal_request_center_navigation_uses_the_independent_entry():
+    global_search = source("global-search.php")
+    governance = source("governance.php")
+    chatbot = source("chatbot.php")
+    app_js = source("assets/app.js")
+    for page in ("new-ticket", "queue", "supervisor", "services", "reports", "analytics"):
+        assert f"'url' => 'request-center.php?page={page}'" in global_search
+    assert "href=\\"request-center.php?page=queue\\"" in governance
+    assert "href=\\"request-center.php?page=supervisor\\"" in governance
+    assert "request-center.php?page=ticket&id=" in governance
+    assert "request-center.php?page=new-ticket" in chatbot
+    assert "request-center.php?page=ticket&id=" in chatbot
+    assert "request-center.php?page=ticket&id=' + encodeURIComponent(item.ticket_id)" in app_js
