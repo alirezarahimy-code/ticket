@@ -117,6 +117,7 @@ if (!defined('APP_ROOT')) {
                     'assigned_to' => $bulkTicket['assigned_to'] ?? null,
                     'first_response_at' => $bulkTicket['first_response_at'] ?? null,
                     'priority' => $bulkTicket['priority'],
+                    'department_id' => $bulkTicket['department_id'] ?? null,
                     'cancel_requested_at' => null,
                 ]);
                 if (!$bulkUpdated) {
