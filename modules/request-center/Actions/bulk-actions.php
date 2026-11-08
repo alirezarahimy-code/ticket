@@ -113,12 +113,32 @@ if (!defined('APP_ROOT')) {
                     $bulkSkipped++;
                     continue;
                 }
+                $bulkSlaOlaAudit = [
+                    'due_at' => $bulkDue,
+                    'sla_paused_at' => $bulkPauseAt,
+                    'sla_pause_minutes' => $bulkPauseMinutes,
+                    'ola_policy_id' => $bulkOla['policy_id'],
+                    'ola_response_due_at' => $bulkOla['response_due_at'],
+                    'ola_due_at' => $bulkOla['due_at'],
+                    'ola_escalation_1_at' => $bulkOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $bulkOla['escalation_2_at'],
+                ];
                 if ($bulkNote !== '') {
                     db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $queueUser['id'], $bulkNote]);
-                    log_ticket_event($ticketId, (int) $queueUser['id'], 'reply');
+                    log_ticket_event($ticketId, (int) $queueUser['id'], 'reply', $bulkOld, $status, [
+                        'is_internal' => false,
+                        'sla_ola' => $bulkSlaOlaAudit,
+                    ]);
                 }
-                log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status);
-                save_audit_required((int) $queueUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'bulk' => true]);
+                log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status, [
+                    'sla_ola' => $bulkSlaOlaAudit,
+                ]);
+                save_audit_required((int) $queueUser['id'], 'ticket_updated', $ticketId, [
+                    'from_status' => $bulkOld,
+                    'to_status' => $status,
+                    'bulk' => true,
+                    'sla_ola' => $bulkSlaOlaAudit,
+                ]);
                 if ($status === 'resolved') {
                     request_center_notify_ticket_resolved($ticketId, (int) $queueUser['id']);
                     record_asset_history((int) ($bulkTicket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $queueUser['id'], $ticketId, 'وضعیت به حل‌شده تغییر کرد.');
