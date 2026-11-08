@@ -112,10 +112,12 @@ if (!defined('APP_ROOT')) {
                     $bulkUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();
                 }
                 $bulkUpdated = $workflow->transition($ticketId, $bulkOld, $status, $bulkUpdates, 'standard', [
+                    'requester_id' => $bulkTicket['requester_id'],
                     'assigned_to' => $bulkTicket['assigned_to'] ?? null,
                     'first_response_at' => $bulkTicket['first_response_at'] ?? null,
                     'priority' => $bulkTicket['priority'],
                     'department_id' => $bulkTicket['department_id'] ?? null,
+                    'service_group' => $bulkTicket['service_group'] ?? null,
                     'cancel_requested_at' => null,
                 ]);
                 if (!$bulkUpdated) {
