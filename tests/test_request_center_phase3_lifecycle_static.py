@@ -558,3 +558,8 @@ def test_independent_post_runner_establishes_authenticated_user_context():
     dispatch = handler.index("require __DIR__ . '/Actions/dispatch.php';")
     assert bootstrap < authenticated_user < provider_load < dispatch
     assert "Request Center POST failed [action=" in handler
+
+def test_ticket_notification_targets_use_the_independent_request_center_entry():
+    notifications = source("lib/notify-users.php")
+    assert "return 'request-center.php?page=ticket&id=' . (int) $notification['ticket_id'];" in notifications
+    assert "return 'index.php?page=ticket&id=' . (int) $notification['ticket_id'];" not in notifications
