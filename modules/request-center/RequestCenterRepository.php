@@ -38,16 +38,14 @@ final class RequestCenterRepository
                     'ola_escalation_1_at', 'ola_escalation_2_at', 'rejected_at',
                     'requester_id', 'assigned_to', 'department_id',
                     'category_id', 'service_id', 'asset_id', 'requesting_unit_id'],
-                'users' => ['id', 'full_name', 'role', 'is_active', 'is_primary_admin', 'department_id', 'handling_unit_id', 'is_it_agent', 'company_id', 'org_unit_id'],
+                'users' => ['id', 'full_name', 'role', 'is_active', 'is_primary_admin', 'department_id', 'handling_unit_id', 'is_it_agent', 'org_unit_id'],
                 'departments' => ['id', 'name', 'manager_user_id'],
                 'handling_units' => ['id', 'code', 'is_active', 'manager_user_id'],
                 'categories' => ['id', 'name'],
                 'service_catalog' => ['id', 'name', 'code', 'category_id', 'service_group', 'handling_unit_id', 'is_active'],
                 'service_catalog_fields' => ['id', 'service_id', 'field_key', 'label', 'field_type', 'options_json', 'is_required', 'sort_order'],
                 'assets' => ['id', 'hostname', 'asset_tag', 'owner_user_id', 'ip_address', 'department_id'],
-                'org_units' => ['id', 'name', 'code', 'parent_id', 'is_active', 'unit_type', 'manager_user_id', 'company_id'],
-                'org_companies' => ['id', 'code', 'name', 'company_type', 'is_active'],
-                'org_unit_managers' => ['unit_id', 'user_id'],
+                'org_units' => ['id', 'name', 'code', 'parent_id', 'is_active', 'unit_type', 'manager_user_id'],
                 'ticket_messages' => ['id', 'ticket_id', 'user_id', 'body', 'is_internal', 'created_at'],
                 'ticket_attachments' => ['id', 'message_id', 'original_name', 'mime', 'size_bytes'],
             ];
@@ -59,6 +57,19 @@ final class RequestCenterRepository
                 $table = strtolower((string) $row['TABLE_NAME']);
                 $column = strtolower((string) $row['COLUMN_NAME']);
                 $columns[$table][$column] = true;
+            }
+
+            // Company-aware organization scope is an optional provider capability on
+            // older installations. Require its full shape only when all three
+            // capability markers are present; a partial/legacy org chart remains
+            // usable through the existing non-company scope adapter.
+            $companyAwareOrg = isset($tables['org_companies'])
+                && isset($columns['org_units']['company_id'])
+                && isset($columns['users']['company_id']);
+            if ($companyAwareOrg) {
+                $required['org_companies'] = ['id', 'code', 'name', 'company_type', 'is_active'];
+                $required['org_units'][] = 'company_id';
+                $required['users'][] = 'company_id';
             }
 
             $problems = [];
