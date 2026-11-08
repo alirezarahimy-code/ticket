@@ -549,11 +549,15 @@ function request_center_notify_ticket_resolved(int $ticketId, int $actorId): voi
         if (!$ticket) {
             return;
         }
+        $autoCloseDays = max(0, (int) (setting('ticket_auto_close_days', '3') ?? '3'));
+        $autoCloseNotice = $autoCloseDays > 0
+            ? ' طبق سیاست سامانه، اگر ظرف ' . $autoCloseDays . ' روز امتیاز رضایت ثبت نکنید، درخواست به‌صورت خودکار بسته می‌شود.'
+            : '';
         request_center_notify_user(
             (int) $ticket['requester_id'],
             'ticket_resolved',
             'درخواست شما انجام شد',
-            'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.',
+            'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.' . $autoCloseNotice,
             $ticketId
         );
         request_center_notify_ticket_staff(
