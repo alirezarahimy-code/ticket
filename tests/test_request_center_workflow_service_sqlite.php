@@ -20,7 +20,9 @@ $pdo->exec('CREATE TABLE tickets (
     priority TEXT NOT NULL, department_id INTEGER NULL, service_group TEXT NULL, due_at TEXT NULL,
     assigned_at TEXT NULL, closed_at TEXT NULL, rejected_at TEXT NULL, supervisor_id INTEGER NULL,
     supervisor_approved_at TEXT NULL, supervisor_note TEXT NULL,
-    sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
+    sla_minutes INTEGER NULL, sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
+    ola_policy_id INTEGER NULL, ola_response_due_at TEXT NULL, ola_due_at TEXT NULL,
+    ola_escalation_1_at TEXT NULL, ola_escalation_2_at TEXT NULL,
     updated_at TEXT NULL
 )');
 $pdo->exec('CREATE TABLE ticket_messages (
