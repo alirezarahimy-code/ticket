@@ -73,6 +73,19 @@ final class RequestCenterRepository
                 $required['users'][] = 'company_id';
             }
 
+            $uniqueIndexRows = $this->pdo->query(
+                'SELECT TABLE_NAME, INDEX_NAME, NON_UNIQUE, COLUMN_NAME, SEQ_IN_INDEX
+                 FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE()
+                 ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX'
+            )->fetchAll(PDO::FETCH_ASSOC);
+            $uniqueIndexes = [];
+            foreach ($uniqueIndexRows as $row) {
+                $table = strtolower((string) $row['TABLE_NAME']);
+                $index = (string) $row['INDEX_NAME'];
+                $uniqueIndexes[$table][$index]['non_unique'] = (int) $row['NON_UNIQUE'];
+                $uniqueIndexes[$table][$index]['columns'][] = strtolower((string) $row['COLUMN_NAME']);
+            }
+
             $problems = [];
             foreach ($required as $table => $names) {
                 if (!isset($tables[$table])) {
@@ -88,6 +101,24 @@ final class RequestCenterRepository
             $ticketStatusType = (string) ($columnTypes['tickets']['status'] ?? '');
             if (str_starts_with($ticketStatusType, 'enum(') && !str_contains($ticketStatusType, "'rejected'")) {
                 $problems[] = 'ستون tickets.status هنوز مقدار نهایی rejected را ندارد؛ Migration 037 باید اجرا شود.';
+            }
+            foreach ([
+                'tickets' => 'ticket_no',
+                'notifications' => 'idempotency_key',
+                'ticket_events' => 'event_id',
+                'activity_logs' => 'event_id',
+                'categories' => 'code',
+            ] as $table => $column) {
+                $hasSingleColumnUnique = false;
+                foreach ($uniqueIndexes[$table] ?? [] as $index) {
+                    if (($index['non_unique'] ?? 1) === 0 && ($index['columns'] ?? []) === [$column]) {
+                        $hasSingleColumnUnique = true;
+                        break;
+                    }
+                }
+                if (!$hasSingleColumnUnique) {
+                    $problems[] = 'قید یکتای ' . $table . '.' . $column . ' وجود ندارد؛ مهاجرت مربوط باید تکمیل شود.';
+                }
             }
             return $problems;
         } catch (Throwable $exception) {
