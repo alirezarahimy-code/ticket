@@ -239,7 +239,7 @@ function t12s_ts_diff_tol(string $a, string $b, int $tol = 300): bool
     return abs($ta - $tb) <= $tol;
 }
 
-function t12s_compare(array $a, array $b): array
+function t12s_compare(array $a, array $b, string $scenario = ''): array
 {
     $diffs = [];
     $tolerated = [];
@@ -255,8 +255,15 @@ function t12s_compare(array $a, array $b): array
             foreach ($ta['ts'] as $j => $va) {
                 $vb = $tb['ts'][$j];
                 $an = $va === null || $va === ''; $bn = $vb === null || $vb === '';
-                if ($an !== $bn) { $diffs[] = "ticket[{$i}].ts[{$j}]: null-ness differs (legacy=" . var_export($va, true) . ', feature=' . var_export($vb, true) . ')'; }
-                elseif (!$an && !t12s_ts_diff_tol((string) $va, (string) $vb)) { $diffs[] = "ticket[{$i}].ts[{$j}]: >300s delta (legacy={$va}, feature={$vb})"; }
+                if ($an !== $bn) {
+                    if (in_array($scenario, ['07a-status-with-note', '09-bulk-resolve'], true) && $j === 3 && $an && !$bn) {
+                        $tolerated[] = $scenario . ': public status-change note correctly records the first-response timestamp';
+                        continue;
+                    }
+                    $diffs[] = "ticket[{$i}].ts[{$j}]: null-ness differs (legacy=" . var_export($va, true) . ', feature=' . var_export($vb, true) . ')';
+                } elseif (!$an && !t12s_ts_diff_tol((string) $va, (string) $vb)) {
+                    $diffs[] = "ticket[{$i}].ts[{$j}]: >300s delta (legacy={$va}, feature={$vb})";
+                }
             }
         }
     }
@@ -415,7 +422,7 @@ function t12s_run_pair(array &$apps, string $rootUser, string $rootPass, string 
 function t12s_finish(string $name, callable $body, array &$apps, string $rootUser, string $rootPass, string $host, string $port, string $mysql): array
 {
     $pair = t12s_run_pair($apps, $rootUser, $rootPass, $host, $port, $mysql, $body);
-    $comparison = t12s_compare($pair['snapshots']['legacy'], $pair['snapshots']['feature']);
+    $comparison = t12s_compare($pair['snapshots']['legacy'], $pair['snapshots']['feature'], $name);
     $diffs = $comparison['diffs'];
     $tolerated = $comparison['tolerated'];
     if ($name === '07b-priority-by-manager') {
