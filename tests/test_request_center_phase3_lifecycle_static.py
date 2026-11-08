@@ -100,7 +100,9 @@ def test_sla_ola_history_is_visible_to_staff_without_exposing_internal_fields_to
     assert "'ola_response_due_at'" in detail
     assert "$detailKey === 'sla_ola' && is_array($detailValue)" in detail
     assert "if ($canSeeInternal)" in detail
-    requester_keys = detail[detail.index("$safeKeys = ['reason'"):detail.index("if ($canSeeInternal) {")]
+    requester_start = detail.index("$safeKeys = ['reason'")
+    requester_end = detail.index("if ($canSeeInternal) {", requester_start)
+    requester_keys = detail[requester_start:requester_end]
     assert "'ola_response_due_at'" not in requester_keys
     assert "'sla_ola'" not in requester_keys
     assert 'if (!$canSeeInternal)' in detail
