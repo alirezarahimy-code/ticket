@@ -53,6 +53,7 @@ $pdo->exec('CREATE TEMPORARY TABLE tickets (
     cancel_request_reason VARCHAR(1000) NULL,
     priority VARCHAR(20) NOT NULL,
     department_id BIGINT UNSIGNED NULL,
+    service_group VARCHAR(20) NULL,
     due_at DATETIME NULL,
     assigned_at DATETIME NULL,
     closed_at DATETIME NULL,
@@ -81,6 +82,7 @@ $insert->execute([3, 'assigned', 103, 203, 'normal', '2026-11-01 10:00:00']);
 $insert->execute([4, 'assigned', 104, 204, 'normal', null]);
 $insert->execute([5, 'assigned', 105, 205, 'normal', null]);
 $insert->execute([6, 'closed', 106, 206, 'normal', null]);
+$pdo->exec("UPDATE tickets SET service_group = 'it' WHERE id = 4");
 
 $service = new RequestCenterWorkflowService($pdo);
 
@@ -128,6 +130,13 @@ mariadb_workflow_check(
 );
 
 // A stale status and a stale optimistic field must both be non-mutating.
+$pdo->beginTransaction();
+$staleServiceGroup = $service->transition(4, 'assigned', 'in_progress', [], 'standard', [
+    'service_group' => 'support',
+]);
+$pdo->rollBack();
+mariadb_workflow_check(!$staleServiceGroup, 'routing-scope guard rejects a stale service group under MariaDB row lock');
+
 $pdo->beginTransaction();
 $staleStatus = $service->transition(1, 'assigned', 'resolved');
 $pdo->rollBack();
@@ -211,6 +220,7 @@ $staleClear = $service->rejectCancellation(5, 'assigned', (string) $cancel['canc
     'assigned_to' => 205,
     'priority' => 'normal',
     'department_id' => null,
+    'service_group' => null,
 ]);
 mariadb_workflow_check(!$staleClear, 'cancellation rejection refuses stale ownership snapshot under InnoDB row lock');
 $pdo->rollBack();
@@ -221,6 +231,7 @@ $cleared = $service->rejectCancellation(5, 'assigned', (string) $cancel['cancel_
     'assigned_to' => 205,
     'priority' => 'normal',
     'department_id' => null,
+    'service_group' => null,
 ]);
 mariadb_workflow_check($cleared, 'cancellation rejection matches exact timestamp and ownership snapshot');
 $pdo->commit();
