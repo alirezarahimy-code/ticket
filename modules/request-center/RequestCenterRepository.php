@@ -31,7 +31,7 @@ final class RequestCenterRepository
                 'tickets' => ['id', 'ticket_no', 'subject', 'status', 'priority', 'service_group', 'ticket_type',
                     'created_at', 'updated_at', 'due_at', 'sla_paused_at', 'sla_pause_minutes',
                     'first_response_at', 'ola_response_due_at', 'ola_due_at',
-                    'ola_escalation_1_at', 'ola_escalation_2_at',
+                    'ola_escalation_1_at', 'ola_escalation_2_at', 'rejected_at',
                     'requester_id', 'assigned_to', 'department_id',
                     'category_id', 'service_id', 'asset_id', 'requesting_unit_id'],
                 'users' => ['id', 'full_name', 'role'],
