@@ -63,7 +63,7 @@ if ($page === 'reports') {
         echo '<nav class="pagination" aria-label="صفحه‌بندی گزارش">';
         for ($reportNav = max(1, $reportPage - 3); $reportNav <= min($reportPages, $reportPage + 3); $reportNav++) {
             $reportArgs = array_merge(['page' => 'reports'], $reportBaseArgs, ['p' => $reportNav]);
-            echo '<a class="' . ($reportNav === $reportPage ? 'active' : '') . '" href="index.php?' . e(http_build_query($reportArgs)) . '">' . number_format($reportNav) . '</a>';
+            echo '<a class="' . ($reportNav === $reportPage ? 'active' : '') . '" href="request-center.php?' . e(http_build_query($reportArgs)) . '">' . number_format($reportNav) . '</a>';
         }
         echo '</nav>';
     }
