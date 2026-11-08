@@ -51,6 +51,9 @@ if (!defined('APP_ROOT')) {
                 || !empty($ticket['cancel_requested_at'])) {
                 throw new RuntimeException('وضعیت یا مجوز تخصیص درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
+            if ($note !== '' && !ticket_can_see_internal($ticket, $supervisor)) {
+                throw new RuntimeException('برای ثبت یادداشت داخلی، دسترسی مشاهدهٔ یادداشت‌های داخلی لازم است.');
+            }
 
             $oldStatus = (string) $ticket['status'];
             $oldAssigneeId = (int) ($ticket['assigned_to'] ?? 0);
