@@ -578,8 +578,8 @@ def test_new_internal_request_center_navigation_uses_the_independent_entry():
     app_js = source("assets/app.js")
     for page in ("new-ticket", "queue", "supervisor", "services", "reports", "analytics"):
         assert f"'url' => 'request-center.php?page={page}'" in global_search
-    assert "href=\\"request-center.php?page=queue\\"" in governance
-    assert "href=\\"request-center.php?page=supervisor\\"" in governance
+    assert 'href="request-center.php?page=queue"' in governance
+    assert 'href="request-center.php?page=supervisor"' in governance
     assert "request-center.php?page=ticket&id=" in governance
     assert "request-center.php?page=new-ticket" in chatbot
     assert "request-center.php?page=ticket&id=" in chatbot
