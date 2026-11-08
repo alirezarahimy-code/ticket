@@ -26,6 +26,7 @@ $root = dirname(__DIR__);
 $portHttp = 18766;
 $address = '127.0.0.1:' . $portHttp;
 $configPath = tempnam(sys_get_temp_dir(), 'rc-smoke-config-');
+$serverLogPath = tempnam(sys_get_temp_dir(), 'rc-smoke-server-');
 $server = null;
 $pipes = [];
 
@@ -152,7 +153,7 @@ try {
     $descriptors = [
         0 => ['pipe', 'r'],
         1 => ['file', '/dev/null', 'a'],
-        2 => ['file', '/dev/null', 'a'],
+        2 => ['file', $serverLogPath, 'a'],
     ];
     $serverEnv = getenv();
     if (!is_array($serverEnv)) {
@@ -225,6 +226,10 @@ try {
     }
     smoke_check($legacyExport['status'] === 302 && str_starts_with($legacyExportLocation, 'request-center.php?action=export_report'), 'legacy export URL redirects to the independent Request Center endpoint (status ' . $legacyExport['status'] . ')');
     $export = smoke_http('http://' . $address . '/request-center.php?action=export_report&from=' . urlencode('1405/01/01') . '&to=' . urlencode('1405/01/30'), ['Cookie: ' . $cookie]);
+    if ($export['status'] !== 200) {
+        $serverDiagnostic = is_file($serverLogPath) ? (string) file_get_contents($serverLogPath) : '';
+        echo "export_report server diagnostic: " . substr($serverDiagnostic, -6000) . PHP_EOL;
+    }
     smoke_check($export['status'] === 200, 'independent export_report returns HTTP 200 (status ' . $export['status'] . ')');
     smoke_check(str_starts_with($export['body'], 'PK' . "\x03\x04"), 'independent export_report returns a valid XLSX package (PK magic)');
 
