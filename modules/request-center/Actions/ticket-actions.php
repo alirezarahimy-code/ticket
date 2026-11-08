@@ -877,8 +877,26 @@ if (!defined('APP_ROOT')) {
             }
             if ($status === 'resolved' && $oldStatus !== 'resolved') {
                 request_center_notify_ticket_resolved($ticketId, (int) $staffUser['id']);
-            } elseif ($status !== $oldStatus || $assigneeChanged) {
-                request_center_notify_ticket_parties($ticketId, 'ticket_updated', 'درخواست به‌روزرسانی شد', 'وضعیت درخواست ' . ticket_number($ticketId) . ' به «' . request_center_status_label($status) . '» تغییر کرد.', (int) $staffUser['id']);
+            } elseif ($status !== $oldStatus || $assigneeChanged || (string) $ticket['priority'] !== $priority) {
+                $changeSummary = [];
+                if ($status !== $oldStatus) {
+                    $changeSummary[] = 'وضعیت به «' . request_center_status_label($status) . '» تغییر کرد';
+                }
+                if ($assigneeChanged) {
+                    $changeSummary[] = $assignee
+                        ? 'مسئول رسیدگی تغییر کرد'
+                        : 'درخواست از مسئول قبلی پس گرفته و به صف ارجاع برگشت';
+                }
+                if ((string) $ticket['priority'] !== $priority) {
+                    $changeSummary[] = 'اولویت به «' . priority_label($priority) . '» تغییر کرد';
+                }
+                request_center_notify_ticket_parties(
+                    $ticketId,
+                    'ticket_updated',
+                    'درخواست به‌روزرسانی شد',
+                    'درخواست ' . ticket_number($ticketId) . ': ' . implode('؛ ', $changeSummary) . '.',
+                    (int) $staffUser['id']
+                );
             }
             db_commit_or_fail('ticket:update_ticket');
             flash('success', 'تغییرات درخواست ذخیره شد.');
