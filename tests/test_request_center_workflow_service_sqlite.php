@@ -45,6 +45,7 @@ $insert->execute([14, 'new', 23, null, 'normal', null]);
 $insert->execute([15, 'assigned', 24, 34, 'normal', null]);
 $insert->execute([16, 'closed', 25, 26, 'normal', null]);
 $insert->execute([17, 'cancelled', 27, null, 'normal', null]);
+$insert->execute([18, 'rejected', 28, null, 'normal', '2026-11-01 14:00:00']);
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
@@ -79,6 +80,8 @@ workflow_check(!$service->requestCancellation(14, 14, 'closed', 'لغو درخو
     'cancellation request rejects a closed ticket even when its owner matches');
 workflow_check(!$service->requestCancellation(17, 27, 'cancelled', 'لغو درخواست لغوشده'),
     'cancellation request rejects a terminal cancelled ticket');
+workflow_check(!$service->rejectCancellation(18, 'rejected', '2026-11-01 14:00:00'),
+    'cancellation decision rejects a rejected ticket outside its allowed lifecycle states');
 $pdo->rollBack();
 
 $pdo->beginTransaction();
