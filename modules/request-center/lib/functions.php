@@ -502,7 +502,7 @@ function request_center_notify_ticket_parties(int $ticketId, string $type, strin
         );
         foreach ($recipients as $recipientId) {
             if ($excludeUserId === null || $recipientId !== $excludeUserId) {
-                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId, $required);
+                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId);
             }
         }
     } catch (Throwable $exception) {
@@ -538,7 +538,7 @@ function request_center_notify_ticket_staff(int $ticketId, string $type, string 
         );
         foreach ($recipients as $recipientId) {
             if ($excludeUserId === null || $recipientId !== $excludeUserId) {
-                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId);
+                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId, $required);
             }
         }
     } catch (Throwable $exception) {
