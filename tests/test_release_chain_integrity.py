@@ -131,3 +131,17 @@ def test_documented_upgrade_chain_is_compatible_with_installed_1_62_77() -> None
     assert positions == sorted(positions), (
         "ترتیب بسته‌ها در README با زنجیرهٔ نصب 1.62.77 تا 1.62.90 هم‌خوان نیست"
     )
+
+def test_1_62_90_report_requires_logging_package_first() -> None:
+    report_path = DOWNLOADS / "CHANGE-REPORT-FA-1.62.90.md"
+    report = report_path.read_text(encoding="utf-8")
+    assert "ابتدا بستهٔ ۱.۶۲.۸۹" in report
+    assert "ترتیب با بستهٔ ۱.۶۲.۸۹ (لاگینگ) مهم نیست" not in report
+
+    package_path = DOWNLOADS / UPGRADE_CHAIN[3][0]
+    with zipfile.ZipFile(package_path) as archive:
+        embedded_report = "files/CHANGE-REPORT-FA-1.62.90.md"
+        if embedded_report in archive.namelist():
+            embedded = archive.read(embedded_report).decode("utf-8", "replace")
+            assert embedded == report, "گزارش داخل ZIP با گزارش انتشار مخزن متفاوت است"
+
