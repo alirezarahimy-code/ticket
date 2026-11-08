@@ -224,3 +224,13 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - Commitهای این مرحله: 1bc3b5a5 (اصلاح داشبورد مدیر) و a42f0377 (قرارداد آزمون عملیات چهار Workspace).
 - Contract run 42524061157 برای commit a42f0377 و QA Preview run 42524061021 هنگام ثبت این یادداشت در حال اجرا هستند. T12 Scenario Characterization run 42524025398 مربوط به commit 1bc3b5a5 نیز در حال اجراست؛ تا دریافت نتایج، پذیرش رفتاری چهار Workspace قطعی اعلام نمی‌شود.
 - دامنهٔ تغییر: فقط modules/request-center/Pages/admin.php، آزمون اختصاصی فاز ۳ و همین رجیستر RC. main، سامانهٔ زنده و فایل‌های خارج از RC تغییر نکرده‌اند.
+
+### پذیرش رفتاری چهار Workspace از ورودی مستقل و رفع نقص POST — ۲۰۲۶-۱۱-۰۹
+- آزمون T12 به‌صورت توسعه‌یافته دو سناریوی مستقل اضافه کرد: 12-independent-four-workspaces-http برای GET واقعی هر چهار Workspace با نشست نقش مربوط، و 13-independent-post-four-workspaces برای اجرای عملیات نوشتنی از مرز request-center.php (نه از index.php).
+- در اجرای نخست سناریوی نوشتنی، پاسخ کارشناس ذخیره نمی‌شد. لاگ دقیق نشان داد handler مستقل متغیر $user را مانند front controller قدیمی مقداردهی نکرده بود؛ در نتیجه user_can() با null فراخوانی می‌شد. این نقص واقعی مرز اجرایی RC بود، نه دادهٔ آزمایش.
+- در modules/request-center/post-handler.php پس از bootstrap و پیش از dispatch، $user = require_login() اضافه شد تا زمینهٔ احراز هویت مستقل با قرارداد handlerهای قدیمی همسان شود. لاگ شکست POST نیز اکنون action واقعی را کنار خطا ثبت می‌کند.
+- آزمون ایستای test_independent_post_runner_establishes_authenticated_user_context اضافه شد تا ترتیب bootstrap → require_login → provider load → dispatch و ثبت action در خطا را تثبیت کند.
+- نتیجهٔ T12 run 42526478566 روی هر دو MariaDB 10.4.32 و 10.11: PASS. هر ۱۹ سناریو PASS شدند؛ شامل چهار GET مستقل و چهار عملیات POST واقعی: لغو درخواستی توسط requester، تصمیم کارشناس دربارهٔ لغو، پاسخ عمومی کارشناس، تصمیم بستن توسط supervisor و عملیات گروهی مدیر اصلی. پیام‌ها/وضعیت‌های ذخیره‌شده مستقیماً از MariaDB بررسی شدند.
+- Contract run 42526561836 برای commit ce3c5b5153590d3e60658114a83eb906d5582d87: قراردادهای ایستا/معماری Phase 3 در هر دو MariaDB PASS؛ jobها هنگام ثبت این یادداشت هنوز در گام‌های بعدی (از جمله T07 تاریخی) در حال اجرا بودند. QA Package Preview run 42526561895: PASS.
+- دامنهٔ اصلاح محصول: فقط runner مستقل POST در RC؛ آزمون‌های T12/ایستا و رجیستر. main، سامانهٔ زنده و حوزه‌های خارج از RC تغییر نکردند.
+- وضعیت: پذیرش نمونه‌ای چهار Workspace و عملیات نمایندهٔ هر نقش از ورودی مستقل تأیید شد. این نتیجه جایگزین ممیزی تمام transitionها، مجوزها، SLA/OLA، اعلان‌ها، Audit، فایل‌ها و redirectهای legacy در P3-01 تا P3-08 نیست؛ فاز ۳ همچنان باز است.
