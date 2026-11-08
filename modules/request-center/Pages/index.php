@@ -165,7 +165,7 @@ if ($ticket === null) {
     $priority = $priorityLabels[(string) ($ticket['priority'] ?? '')] ?? (string) ($ticket['priority'] ?? '—');
     ?>
     <section class="heading"><div><h1><?= $escape($ticket['subject']) ?></h1><p><?= $escape($ticket['ticket_no'] ?: ('#' . $ticketId)) ?> · <?= $escape($typeLabels[(string) ($ticket['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape($status) ?></p></div><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a></section>
-    <div class="notice">این نما در مرحلهٔ انتقال تدریجی، برای مشاهدهٔ مستقل فعال است. عملیات ثبت پاسخ، ارجاع، تغییر وضعیت، لغو و تأیید نهایی فعلاً از صفحهٔ سازگار فعلی انجام می‌شود.</div>
+    <div class="notice">برای انجام عملیات، ثبت پاسخ یا یادداشت داخلی، ارجاع، تغییر وضعیت، لغو و تصمیم مدیریتی، وارد صفحهٔ جزئیات و گردش‌کار مستقل همین درخواست شوید.</div>
     <div class="detail-grid">
       <section class="card conversation">
         <h2>گفت‌وگو و پیوست‌ها</h2>
