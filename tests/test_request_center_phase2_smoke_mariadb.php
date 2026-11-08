@@ -255,8 +255,10 @@ try {
     if ($dashboard['status'] !== 200) {
         $dashboardServerDiagnostic = is_file($serverLogPath) ? (string) file_get_contents($serverLogPath) : '';
         $dashboardErrors = $pdo->query('SELECT request_id, context, message, meta_json FROM system_logs ORDER BY id DESC LIMIT 8')->fetchAll(PDO::FETCH_ASSOC);
+        $dashboardAppLog = is_file($root . '/storage/logs/app.log') ? implode(" | ", array_slice(@file($root . '/storage/logs/app.log', FILE_IGNORE_NEW_LINES) ?: [], -20)) : '';
         echo 'dashboard HTTP diagnostic: body=' . substr((string) $dashboard['body'], 0, 1200)
             . ' system_logs=' . json_encode($dashboardErrors, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            . ' app_log=' . $dashboardAppLog
             . ' server=' . substr($dashboardServerDiagnostic, -10000) . PHP_EOL;
     }
     smoke_check($dashboard['status'] === 200, 'dashboard returns HTTP 200 (status ' . $dashboard['status'] . ')');
