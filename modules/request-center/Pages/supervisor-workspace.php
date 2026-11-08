@@ -54,6 +54,7 @@ header('Cache-Control: private, no-store');
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['active']) ?></strong><span>در گردش</span></div>
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['overdue']) ?></strong><span>خارج از SLA/OLA</span></div>
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['awaiting_supervisor']) ?></strong><span>منتظر تصمیم نهایی</span></div>
+<div class="rc-supervisor-stat"><strong><?= number_format($summary['rejected']) ?></strong><span>ردشده</span></div>
 </section>
 <div class="rc-supervisor-columns">
 <section class="card rc-supervisor-list"><h2>موارد خارج از SLA/OLA</h2>
