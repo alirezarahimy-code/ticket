@@ -17,7 +17,7 @@ $pdo->exec('CREATE TABLE tickets (
     id INTEGER PRIMARY KEY, status TEXT NOT NULL, requester_id INTEGER NOT NULL,
     assigned_to INTEGER NULL, first_response_at TEXT NULL, resolved_at TEXT NULL,
     cancel_requested_at TEXT NULL, priority TEXT NOT NULL, department_id INTEGER NULL, due_at TEXT NULL,
-    assigned_at TEXT NULL, closed_at TEXT NULL, supervisor_id INTEGER NULL,
+    assigned_at TEXT NULL, closed_at TEXT NULL, rejected_at TEXT NULL, supervisor_id INTEGER NULL,
     supervisor_approved_at TEXT NULL, supervisor_note TEXT NULL,
     sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NULL
@@ -34,6 +34,9 @@ $insert->execute([8, 'resolved', 17, 27, 'normal', null]);
 $insert->execute([9, 'resolved', 18, 28, 'normal', null]);
 $insert->execute([10, 'resolved', 19, 29, 'normal', null]);
 $insert->execute([11, 'assigned', 20, 30, 'normal', '2026-11-01 12:00:00']);
+$insert->execute([12, 'manager_review', 21, null, 'normal', null]);
+$insert->execute([13, 'assigned', 22, 32, 'normal', null]);
+$pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
 workflow_check(
@@ -44,6 +47,49 @@ workflow_check(
     !in_array('pending', RequestCenterWorkflowService::allowedTransitions('in_progress'), true),
     'no new transition enters legacy pending'
 );
+workflow_check(
+    RequestCenterWorkflowService::allowedTransitions('rejected') === [],
+    'rejected is a terminal lifecycle state'
+);
+
+$pdo->beginTransaction();
+workflow_check(
+    $service->transition(12, 'manager_review', 'rejected', [
+        'rejected_at' => RequestCenterSqlExpression::now(),
+        'supervisor_id' => 99,
+        'supervisor_note' => 'درخواست خارج از دامنه خدمت است',
+    ], 'supervisor_reject', [
+        'cancel_requested_at' => null,
+        'first_response_at' => null,
+        'resolved_at' => null,
+    ]),
+    'supervisor may reject an invalid request before work starts'
+);
+$pdo->commit();
+workflow_check(
+    $pdo->query('SELECT status FROM tickets WHERE id = 12')->fetchColumn() === 'rejected',
+    'rejection persists as a state distinct from cancellation'
+);
+workflow_check(
+    $pdo->query('SELECT rejected_at FROM tickets WHERE id = 12')->fetchColumn() !== false,
+    'rejection timestamp is persisted'
+);
+
+$rejectAfterWorkBlocked = false;
+$pdo->beginTransaction();
+try {
+    $service->transition(13, 'assigned', 'rejected', [
+        'rejected_at' => RequestCenterSqlExpression::now(),
+    ], 'supervisor_reject', [
+        'cancel_requested_at' => null,
+        'first_response_at' => null,
+        'resolved_at' => null,
+    ]);
+} catch (RuntimeException) {
+    $rejectAfterWorkBlocked = true;
+}
+$pdo->rollBack();
+workflow_check($rejectAfterWorkBlocked, 'supervisor cannot reject after first response has started');
 
 $pdo->beginTransaction();
 workflow_check(
