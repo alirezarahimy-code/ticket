@@ -295,6 +295,7 @@ if (!defined('APP_ROOT')) {
                     'requester_id' => (int) $cancelUser['id'],
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
+                    'service_group' => $ticket['service_group'] ?? null,
                 ]);
                 if (!$cancelApplied) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
@@ -399,6 +400,7 @@ if (!defined('APP_ROOT')) {
                     'cancel_requested_at' => $requestAt,
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
+                    'service_group' => $ticket['service_group'] ?? null,
                 ]);
                 if (!$approved) {
                     throw new RuntimeException('درخواست لغو یا وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
@@ -526,6 +528,7 @@ if (!defined('APP_ROOT')) {
                 'assigned_to' => $ticket['assigned_to'] ?? null,
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
             ]);
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
@@ -673,6 +676,7 @@ if (!defined('APP_ROOT')) {
                 'first_response_at' => $ticket['first_response_at'] ?? null,
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
                 'cancel_requested_at' => $lockedReply['cancel_requested_at'] ?? null,
             ]);
             if (!$replySaved) {
@@ -859,6 +863,7 @@ if (!defined('APP_ROOT')) {
                 'first_response_at' => $ticket['first_response_at'] ?? null,
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
                 'cancel_requested_at' => null,
             ]);
             if (!$updated) {
