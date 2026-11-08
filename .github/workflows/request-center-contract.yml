@@ -120,9 +120,9 @@ jobs:
         run: php tests/test_request_center_repository_sqlite.php
       - name: Appointment lifecycle, conflict and capacity contract (SQLite)
         run: php tests/test_request_center_appointments_sqlite.php
-      - name: WorkflowService transition policy and concurrency guards (SQLite)
+      - name: WorkflowService lifecycle commands and concurrency guards (SQLite)
         run: php tests/test_request_center_workflow_service_sqlite.php
-      - name: WorkflowService real MariaDB locking and transaction integration
+      - name: WorkflowService lifecycle commands, locking and transaction integration (MariaDB)
         run: php tests/test_request_center_workflow_service_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1
