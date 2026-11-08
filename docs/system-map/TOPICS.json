@@ -4755,13 +4755,13 @@
       ],
       "related": [
         "TOOL-048.24",
+        "PAGE-044.03",
         "PAGE-051.02",
         "PAGE-058.02",
-        "TOOL-006.01",
-        "TEST-177.05",
-        "TOOL-048.16"
+        "PAGE-043.03",
+        "PAGE-044.04"
       ],
-      "total": 23
+      "total": 30
     },
     {
       "id": "table:ticket_number_seq",
@@ -34999,7 +34999,7 @@
       "area": "PAGE",
       "line": 25,
       "anchor": "مسیر: supervisor_decision",
-      "risk": 2,
+      "risk": 7,
       "lines": 74
     },
     "PAGE-043.04": {
@@ -35047,7 +35047,7 @@
       "area": "PAGE",
       "line": 222,
       "anchor": "مسیر: cancel_ticket",
-      "risk": 2,
+      "risk": 7,
       "lines": 62
     },
     "PAGE-044.05": {
@@ -35071,7 +35071,7 @@
       "area": "PAGE",
       "line": 406,
       "anchor": "مسیر: reopen_ticket",
-      "risk": 2,
+      "risk": 7,
       "lines": 50
     },
     "PAGE-044.08": {
@@ -35080,12 +35080,12 @@
       "line": 456,
       "anchor": "مسیر: reply",
       "risk": 3,
-      "lines": 148
+      "lines": 149
     },
     "PAGE-044.09": {
       "path": "modules/request-center/Actions/ticket-actions.php",
       "area": "PAGE",
-      "line": 604,
+      "line": 605,
       "anchor": "مسیر: update_ticket",
       "risk": 3,
       "lines": 149
@@ -35424,7 +35424,7 @@
       "line": 36,
       "anchor": "RequestCenterWorkflowService",
       "risk": 2,
-      "lines": 241
+      "lines": 221
     },
     "PAGE-060.01": {
       "path": "modules/request-center/lib/endpoints.php",
@@ -47950,9 +47950,9 @@
       "path": "tests/test_request_center_workflow_service_sqlite.php",
       "area": "TEST",
       "line": 13,
-      "anchor": "بلوک رویه‌ای 13-190",
+      "anchor": "بلوک رویه‌ای 13-191",
       "risk": 5,
-      "lines": 178
+      "lines": 179
     },
     "TEST-185.01": {
       "path": "tests/test_role_permissions_ui_static.py",

@@ -52089,7 +52089,7 @@
             "path": "modules\/request-center\/Actions\/bulk-actions.php",
             "area": "PAGE",
             "lines": 141,
-            "file_fingerprint": "9b45c4fb4726",
+            "file_fingerprint": "73288179546c",
             "blocks": [
                 {
                     "kind": "region",
@@ -52140,7 +52140,7 @@
                     "line_start": 44,
                     "line_end": 141,
                     "lines": 98,
-                    "fingerprint": "9785e65dfb0b",
+                    "fingerprint": "cd3585199197",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -52312,7 +52312,7 @@
             "path": "modules\/request-center\/Actions\/supervisor-actions.php",
             "area": "PAGE",
             "lines": 190,
-            "file_fingerprint": "597fa9fb6bc8",
+            "file_fingerprint": "f7297f9d8c90",
             "blocks": [
                 {
                     "kind": "region",
@@ -52346,10 +52346,11 @@
                     "line_start": 25,
                     "line_end": 98,
                     "lines": 74,
-                    "fingerprint": "82ed59bb590f",
+                    "fingerprint": "491a13d46829",
                     "risk": {
-                        "score": 2,
+                        "score": 7,
                         "flags": {
+                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -52391,8 +52392,8 @@
             "id": "PAGE-044",
             "path": "modules\/request-center\/Actions\/ticket-actions.php",
             "area": "PAGE",
-            "lines": 752,
-            "file_fingerprint": "6258e4089daa",
+            "lines": 753,
+            "file_fingerprint": "33a6ad5f2a71",
             "blocks": [
                 {
                     "kind": "region",
@@ -52426,7 +52427,7 @@
                     "line_start": 30,
                     "line_end": 221,
                     "lines": 192,
-                    "fingerprint": "d9cda3d7444d",
+                    "fingerprint": "984fdd9bf856",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -52443,10 +52444,11 @@
                     "line_start": 222,
                     "line_end": 283,
                     "lines": 62,
-                    "fingerprint": "2825c206d38f",
+                    "fingerprint": "5efc736cf40f",
                     "risk": {
-                        "score": 2,
+                        "score": 7,
                         "flags": {
+                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -52458,7 +52460,7 @@
                     "line_start": 284,
                     "line_end": 365,
                     "lines": 82,
-                    "fingerprint": "c811ee0b9b2c",
+                    "fingerprint": "80bcbcad26b4",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -52488,10 +52490,11 @@
                     "line_start": 406,
                     "line_end": 455,
                     "lines": 50,
-                    "fingerprint": "0abbf9bb5c0d",
+                    "fingerprint": "7b8c957054de",
                     "risk": {
-                        "score": 2,
+                        "score": 7,
                         "flags": {
+                            "sql_concat": 5,
                             "raw_input": 2
                         }
                     },
@@ -52501,9 +52504,9 @@
                     "kind": "region",
                     "anchor": "مسیر: reply",
                     "line_start": 456,
-                    "line_end": 603,
-                    "lines": 148,
-                    "fingerprint": "5f8a658bdbda",
+                    "line_end": 604,
+                    "lines": 149,
+                    "fingerprint": "e4b703a04633",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -52516,10 +52519,10 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: update_ticket",
-                    "line_start": 604,
-                    "line_end": 752,
+                    "line_start": 605,
+                    "line_end": 753,
                     "lines": 149,
-                    "fingerprint": "d412e310dd47",
+                    "fingerprint": "7b9a2dc6ea96",
                     "risk": {
                         "score": 3,
                         "flags": {
@@ -53224,8 +53227,8 @@
             "id": "PAGE-059",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
-            "lines": 277,
-            "file_fingerprint": "0cf536224342",
+            "lines": 257,
+            "file_fingerprint": "e59869001e04",
             "blocks": [
                 {
                     "kind": "region",
@@ -53257,9 +53260,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterWorkflowService",
                     "line_start": 36,
-                    "line_end": 276,
-                    "lines": 241,
-                    "fingerprint": "2b2e369690b8",
+                    "line_end": 256,
+                    "lines": 221,
+                    "fingerprint": "a5c696b49509",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -76121,8 +76124,8 @@
             "id": "TEST-184",
             "path": "tests\/test_request_center_workflow_service_sqlite.php",
             "area": "TEST",
-            "lines": 190,
-            "file_fingerprint": "6640bbacdc1d",
+            "lines": 191,
+            "file_fingerprint": "e507b4f842bc",
             "blocks": [
                 {
                     "kind": "region",
@@ -76152,11 +76155,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 13-190",
+                    "anchor": "بلوک رویه‌ای 13-191",
                     "line_start": 13,
-                    "line_end": 190,
-                    "lines": 178,
-                    "fingerprint": "9dd50b4eb335",
+                    "line_end": 191,
+                    "lines": 179,
+                    "fingerprint": "eb51187746b2",
                     "risk": {
                         "score": 5,
                         "flags": {

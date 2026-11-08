@@ -441,11 +441,11 @@ migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 migrations/034-logging-escalation.sql	migrations	34	1915
 migrations/035-request-center-appointments.sql	migrations	22	1432
 modules/request-center/Actions/appointment-actions.php	other	213	9484
-modules/request-center/Actions/bulk-actions.php	other	140	10367
+modules/request-center/Actions/bulk-actions.php	other	140	10427
 modules/request-center/Actions/dispatch.php	other	18	695
 modules/request-center/Actions/service-actions.php	other	228	14500
-modules/request-center/Actions/supervisor-actions.php	other	189	14582
-modules/request-center/Actions/ticket-actions.php	other	751	59149
+modules/request-center/Actions/supervisor-actions.php	other	189	14636
+modules/request-center/Actions/ticket-actions.php	other	752	59624
 modules/request-center/AppointmentRepository.php	other	372	16638
 modules/request-center/Assets/request-center.css	other	156	13457
 modules/request-center/Pages/admin.php	other	82	7101
@@ -461,7 +461,7 @@ modules/request-center/Pages/supervisor-workspace.php	other	65	5777
 modules/request-center/Pages/supervisor.php	other	52	6589
 modules/request-center/README.md	other	286	30697
 modules/request-center/RequestCenterRepository.php	other	443	20179
-modules/request-center/WorkflowService.php	other	276	12537
+modules/request-center/WorkflowService.php	other	256	11564
 modules/request-center/lib/endpoints.php	other	95	7621
 modules/request-center/lib/functions.php	other	239	13840
 modules/request-center/post-handler.php	other	83	3709
@@ -679,7 +679,7 @@ tests/test_request_center_t12_preflight.php	tests	321	13348
 tests/test_request_center_t12_scenarios.php	tests	581	37559
 tests/test_request_center_web_ddl_runtime.php	tests	284	13133
 tests/test_request_center_workflow_service_mariadb.php	tests	150	5334
-tests/test_request_center_workflow_service_sqlite.php	tests	189	7055
+tests/test_request_center_workflow_service_sqlite.php	tests	190	7056
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	115	4609
 tests/test_schema_heal_static.py	tests	45	2290
