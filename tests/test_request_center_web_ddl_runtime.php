@@ -31,6 +31,8 @@ $address = '127.0.0.1:' . $portHttp;
 $configPath = tempnam(sys_get_temp_dir(), 'rc-t04-config-');
 $server = null;
 $pipes = [];
+$serverLogPath = sys_get_temp_dir() . '/rc-t04-php-server-' . getmypid() . '.log';
+@unlink($serverLogPath);
 
 function t04_check(bool $ok, string $message): void
 {
@@ -158,8 +160,8 @@ try {
 
     $descriptors = [
         0 => ['pipe', 'r'],
-        1 => ['file', '/dev/null', 'a'],
-        2 => ['file', '/dev/null', 'a'],
+        1 => ['file', $serverLogPath, 'a'],
+        2 => ['file', $serverLogPath, 'a'],
     ];
     $serverEnv = getenv();
     if (!is_array($serverEnv)) {
@@ -179,7 +181,8 @@ try {
     t04_reset_log($pdo);
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
     $response = t04_http('http://' . $address . '/index.php');
-    t04_check($response['status'] >= 200 && $response['status'] < 400, 'index.php completed HTTP request (status ' . $response['status'] . ')');
+    $serverLogTail = is_file($serverLogPath) ? substr((string) file_get_contents($serverLogPath), -5000) : '(server log missing)';
+    t04_check($response['status'] >= 200 && $response['status'] < 400, 'index.php completed HTTP request (status ' . $response['status'] . '); server log: ' . preg_replace('/\\s+/', ' ', $serverLogTail));
     $healthy = t04_log_window($pdo, $start, $webUser);
     echo 'T04 healthy-schema HTTP request: DDL=' . count($healthy['ddl']) . ', DML=' . count($healthy['dml']) . PHP_EOL;
     foreach ($healthy['ddl'] as $sql) {
@@ -280,5 +283,8 @@ try {
     $pdo->exec("DROP USER IF EXISTS '{$webUser}'@'%'");
     if (is_file($configPath)) {
         @unlink($configPath);
+    }
+    if (is_file($serverLogPath)) {
+        @unlink($serverLogPath);
     }
 }
