@@ -185,10 +185,12 @@ def test_supervisor_reopen_requires_a_reason_server_side():
     assert "برای بازگشایی رسمی" in block
 
 
-def test_supervisor_reopen_ui_requires_an_explicit_reason():
+def test_supervisor_reopen_ui_requires_an_explicit_reason_and_permission():
     page = source("modules/request-center/Pages/supervisor.php")
     assert 'name="supervisor_note" required maxlength="1000"' in page
     assert 'type="hidden" name="supervisor_note"' not in page
+    assert "if (user_can($supervisor, 'supervisor.reopen'))" in page
+    assert "if (user_can($supervisor, 'supervisor.decide'))" in page
 
 
 def test_public_management_and_bulk_replies_start_first_response_clock():
