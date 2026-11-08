@@ -832,7 +832,23 @@ try {
         $agentMessage = $independentPdo->query('SELECT is_internal, body FROM ticket_messages WHERE ticket_id = ' . (int) $agentTicket . ' ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
         if ($agentResponse['status'] !== 302 || !$agentMessage || (int) $agentMessage['is_internal'] !== 0
             || (string) $agentMessage['body'] !== 'پاسخ عمومی کارشناس از ورودی مستقل T12') {
+            $agentLocation = '';
+            foreach ($agentResponse['headers'] as $agentHeader) {
+                if (stripos((string) $agentHeader, 'location:') === 0) {
+                    $agentLocation = trim(substr((string) $agentHeader, 9));
+                }
+            }
+            $agentFollowBody = '';
+            if ($agentLocation !== '') {
+                $agentFollowUrl = str_starts_with($agentLocation, 'http')
+                    ? $agentLocation
+                    : $independentApp['base_url'] . '/' . ltrim($agentLocation, '/');
+                $agentFollow = t12s_http($agentFollowUrl, 'GET', ['Cookie: ' . $independentSessions['agent']['feature']['cookie']]);
+                $agentFollowBody = substr(strip_tags($agentFollow['body']), 0, 700);
+            }
             t12s_fail('13-independent-post agent public reply failed: HTTP ' . $agentResponse['status']
+                . ', location=' . $agentLocation
+                . ', follow=' . $agentFollowBody
                 . ', message=' . json_encode($agentMessage, JSON_UNESCAPED_UNICODE)
                 . ', ticket=' . json_encode($independentPdo->query('SELECT id, status, assigned_to, first_response_at FROM tickets WHERE id = ' . (int) $agentTicket)->fetch(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE)
                 . ', app_log=' . t12s_clone_log_tail($independentApp, 12));
