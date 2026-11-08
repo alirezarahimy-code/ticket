@@ -283,3 +283,31 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - لاگ Contract run 42530626341 روی MariaDB 10.11.19 برای هر هفت مسیر PASS صریح ثبت کرد؛ Phase-2 HTTP smoke روی هر دو MariaDB 10.4.32 و 10.11.19 PASS شد.
 - QA Package Preview run 42530626419: PASS. تنها شکست Contract هر دو MariaDB، T07 بازپخش مهاجرت‌های تاریخی 001–033 روی Clone کامل است.
 - این آزمون Bridge مسیرهای قدیمی را اثبات می‌کند، اما هنوز ممیزی تمام مصرف‌کنندگان و پارامترهای bookmark در کل مخزن نیازمند تکمیل است؛ P3-08 و فاز ۳ باز می‌مانند.
+
+### استخراج ماتریس وضعیت و اثر SLA/OLA از writerهای واقعی — ۲۰۲۶-۱۱-۰۹
+این ماتریس از کد اجرایی فعلی استخراج شده است؛ فهرست وضعیت‌های عادی را نباید با فرمان‌های ویژه یا مجوز actor یکی دانست.
+
+| مبدأ | مقصد/فرمان | عامل/شرط اثبات‌شده در کد | دلیل | اثر SLA/OLA ثبت‌شده |
+|---|---|---|---|---|
+| new / manager_review | assigned (Claim) | کارشناس/مدیر مجاز در حوزهٔ خدمت؛ بدون مسئول قبلی و بدون لغو در انتظار | در کد Claim دلیل اجباری ندارد | ثبت assigned_at؛ محاسبهٔ موعد با helperهای SLA/OLA؛ قفل ردیف و snapshot هم‌زمانی |
+| new / manager_review / assigned | rejected (فقط supervisor_reject) | سوپروایزر دارای مجوز؛ قبل از first_response و resolved؛ بدون لغو در انتظار | یادداشت تصمیم اجباری در handler | ثبت rejected_at؛ وضعیت terminal از محاسبه‌های جاری SLA/OLA مستثنا؛ Audit و اعلان ticket_rejected |
+| assigned / in_progress / waiting_user | in_progress / waiting_user / resolved (standard) | عملیات پاسخ/ویرایش کارشناس؛ scope و مجوز سمت سرور در handler | متن پاسخ/یادداشت طبق نوع عملیات | ورود waiting_user ساعت SLA را متوقف می‌کند؛ خروج از آن زمان کاری مکث را به موعد SLA/OLA می‌افزاید؛ resolved زمان حل را ثبت می‌کند |
+| waiting_user / pending | in_progress / resolved / assigned / manager_review | وضعیت pending فقط میراثی است؛ ورود جدید به pending در ماتریس مجاز نیست | دلیل وابسته به عملیات؛ پاسخ/ارجاع طبق handler | خروج از waiting مکث تجمیع‌شده را به موعدها می‌افزاید |
+| resolved | in_progress / manager_review (requester_reopen یا supervisor_rework) | درخواست‌دهنده برای بازگشایی خودش؛ سوپروایزر برای بازکاری؛ بدون لغو در انتظار | دلیل بازگشایی/بازکاری اجباری | چرخهٔ تازه SLA/OLA از زمان بازگشایی محاسبه و pause قبلی صفر می‌شود |
+| resolved | closed (supervisor_close) | تصمیم تأیید سوپروایزر؛ وضعیت resolved، بدون لغو در انتظار و با شروط rating در handler | یادداشت تصمیم در handler | closed_at و اطلاعات تأیید ثبت می‌شود؛ ساعت جدیدی آغاز نمی‌شود |
+| resolved | closed (auto_close) | cron؛ بدون لغو در انتظار و بدون rating جاری، پس از مهلت پیکربندی | دلیل سیستمی خودکار ثبت می‌شود | status/event/audit و اعلان‌های ضروری در تراکنش؛ در خطای اعلان rollback و retry |
+| closed | in_progress / manager_review (supervisor_reopen) | سوپروایزر مجاز | دلیل رسمی اجباری | reset چرخهٔ SLA/OLA؛ پاک‌سازی metadata بستن/تأیید و لغو مانده |
+| new / manager_review | cancelled (requester_cancel) | درخواست‌دهنده؛ پیش از تخصیص/اولین پاسخ/حل | دلیل لغو اجباری | توقف چرخه و ثبت زمان‌های SLA/OLA متناسب با cancelled |
+| active / resolved | cancelled (cancellation_approved) | تصمیم مجاز دربارهٔ درخواست لغو ثبت‌شده؛ snapshot درخواست لغو باید ثابت باشد | دلیل اولیهٔ درخواست + یادداشت تصمیم | توقف چرخه؛ پاک‌سازی resolved_at و metadata درخواست لغو |
+| هر وضعیت غیرترمینال با لغو در انتظار | همان وضعیت (same_state) | فقط عملیات محدود مجاز؛ تغییر وضعیت مسدود است | برحسب عملیات | فقط ستون‌های محدود پاسخ/زمان‌های مرتبط؛ تغییرات دیگر ممنوع |
+
+**قواعد مرکزی تأییدشده در WorkflowService و helperهای SLA/OLA:**
+- گذار عادی فقط از `allowedTransitions()` می‌گذرد؛ `rejected` از آن حذف شده و تنها `supervisor_reject` می‌تواند آن را ایجاد کند. `closed`, `cancelled`, `rejected` مقصد گذار عادی ندارند؛ `pending` فقط مبدأ میراثی است.
+- هر گذار در تراکنش caller اجرا می‌شود، ردیف را با `FOR UPDATE` قفل می‌کند، وضعیت جاری و snapshot فیلدهای requester/assignee/priority/department/service group/SLA/OLA را دوباره می‌سنجد و فقط ستون‌های allowlist شده را می‌نویسد.
+- ورود به `waiting_user` زمان مکث SLA را ثبت می‌کند؛ خروج از waiting، فقط زمان کاری سپری‌شده را به موعد اضافه می‌کند. تغییر اولویت یا شروع چرخهٔ reopen، موعدها را از مبنای چرخهٔ جاری دوباره محاسبه می‌کند.
+- رزرو/لغو/تکمیل نوبت فقط جدول نوبت را تغییر می‌دهد و به‌تنهایی status/SLA/OLA را تغییر نمی‌دهد (آزمون SQLite مستقل).
+- اعلان و Audit مسئولیت caller است، نه WorkflowService؛ در نتیجه وجود transition مرکزی به‌تنهایی تضمین یکسانی اعلان/Audit برای همهٔ handlerها نیست.
+
+**منابع کد برای این استخراج:** `modules/request-center/WorkflowService.php` (allowedTransitions، transition، assertTransitionAllowed)، `modules/request-center/Actions/ticket-actions.php` (cancel/claim/reopen/reply/update)، `modules/request-center/Actions/supervisor-actions.php` (assignment/reject/close/rework/reopen)، `modules/request-center/Actions/bulk-actions.php`، `cron/ticket_auto_close.php`، `lib/tickets-sla.php` (ticket_sla_transition و ticket_ola_transition)، `modules/request-center/AppointmentRepository.php`.
+
+**مواردی که هنوز برای بستن P3-05/P3-06 اثبات نشده‌اند:** ماتریس کامل همهٔ role/permission و scopeها برای هر action؛ اجباری‌بودن reason در تمام عملیات تغییر مسئول/اولویت و bulk؛ مقایسهٔ دقیق Audit/notification برای هر ردیف؛ تست رفتاری همهٔ زوج‌های مبدأ/مقصد روی MariaDB؛ و پوشش همهٔ writerهای خارج از RC. این سند استخراج سیاست موجود است، نه اعلام تکمیل این گیت‌ها.
