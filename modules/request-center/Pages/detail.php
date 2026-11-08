@@ -259,7 +259,7 @@ if ($page === 'ticket') {
         $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'];
         if ($canSeeInternal) {
             $safeKeys = array_merge($safeKeys, [
-                'note', 'assigned_to', 'requested_at', 'actor_id', 'message_id', 'is_internal',
+                'note', 'assigned_to', 'from_assigned_to', 'to_assigned_to', 'from_assignee_name', 'to_assignee_name', 'assignment_source', 'requested_at', 'actor_id', 'message_id', 'is_internal',
                 'due_at', 'sla_paused_at', 'sla_pause_minutes', 'ola_policy_id',
                 'ola_response_due_at', 'ola_due_at', 'ola_escalation_1_at', 'ola_escalation_2_at',
                 'first_response_set', 'alert_type',
