@@ -411,12 +411,16 @@ try {
     }
 
     // Run the real SLA/OLA maintenance command twice against a disposable ticket.
-    $staffIdQuery = $pdo->prepare("SELECT id FROM users WHERE is_active = 1 AND id <> ? AND (role IN ('agent','supervisor','support_manager') OR is_it_agent = 1) ORDER BY id LIMIT 1");
-    $staffIdQuery->execute([$userId]);
-    $maintenanceAssignee = (int) ($staffIdQuery->fetchColumn() ?: $userId);
+    $requesterQuery = $pdo->prepare("SELECT id FROM users WHERE role = 'user' AND id <> ? ORDER BY id LIMIT 1");
+    $requesterQuery->execute([$userId]);
+    $maintenanceRequester = (int) $requesterQuery->fetchColumn();
+    if ($maintenanceRequester <= 0) {
+        throw new RuntimeException('SLA/OLA smoke requires a separate requester account.');
+    }
+    $maintenanceAssignee = $userId;
     $maintenanceTicketId = (int) $ticketRow['id'];
-    $maintenanceFixture = $pdo->prepare('UPDATE tickets SET status = "in_progress", assigned_to = ?, first_response_at = NULL, resolved_at = NULL, cancel_requested_at = NULL, sla_paused_at = NULL, due_at = DATE_ADD(NOW(), INTERVAL 30 MINUTE), ola_response_due_at = DATE_SUB(NOW(), INTERVAL 5 MINUTE), ola_due_at = DATE_SUB(NOW(), INTERVAL 10 MINUTE), ola_escalation_1_at = DATE_SUB(NOW(), INTERVAL 15 MINUTE), ola_escalation_2_at = DATE_SUB(NOW(), INTERVAL 20 MINUTE) WHERE id = ?');
-    $maintenanceFixture->execute([$maintenanceAssignee, $maintenanceTicketId]);
+    $maintenanceFixture = $pdo->prepare('UPDATE tickets SET requester_id = ?, status = "in_progress", assigned_to = ?, first_response_at = NULL, resolved_at = NULL, cancel_requested_at = NULL, sla_paused_at = NULL, due_at = DATE_ADD(NOW(), INTERVAL 30 MINUTE), ola_response_due_at = DATE_SUB(NOW(), INTERVAL 5 MINUTE), ola_due_at = DATE_SUB(NOW(), INTERVAL 10 MINUTE), ola_escalation_1_at = DATE_SUB(NOW(), INTERVAL 15 MINUTE), ola_escalation_2_at = DATE_SUB(NOW(), INTERVAL 20 MINUTE) WHERE id = ?');
+    $maintenanceFixture->execute([$maintenanceRequester, $maintenanceAssignee, $maintenanceTicketId]);
     $runMaintenance = static function () use ($root, $serverEnv): array {
         $pipes = [];
         $process = proc_open([PHP_BINARY, $root . '/cron/sla_maintenance.php'], [
@@ -452,6 +456,9 @@ try {
     smoke_check((int) $slaEvents->fetchColumn() === 5, 'SLA/OLA alert events are recorded exactly once for the ticket');
     $maintenanceDetail = smoke_http('http://' . $address . '/request-center.php?page=ticket&id=' . $maintenanceTicketId, ['Cookie: ' . $cookie]);
     smoke_check($maintenanceDetail['status'] === 200 && str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') && str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد'), 'independent detail renders SLA/OLA event metadata without Logging UI dependencies (status ' . $maintenanceDetail['status'] . ')');
+    $maintenanceNotifications = $pdo->prepare("SELECT COUNT(DISTINCT notification_type) FROM notifications WHERE ticket_id = ? AND notification_type IN ('sla_due_soon','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')");
+    $maintenanceNotifications->execute([$maintenanceTicketId]);
+    smoke_check((int) $maintenanceNotifications->fetchColumn() === 5, 'SLA/OLA notifications reach the assigned staff member exactly by alert type');
 
     // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
