@@ -210,7 +210,13 @@ if (!defined('APP_ROOT')) {
             if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'closed') {
                 throw new RuntimeException('فقط درخواست بسته‌شده قابل بازگشایی رسمی است.');
             }
-            $note = post_value('supervisor_note', 'بازگشایی رسمی برای ادامه رسیدگی');
+            $note = post_value('supervisor_note');
+            if ($note === '') {
+                throw new RuntimeException('برای بازگشایی رسمی، دلیل و هدف بازگشت به رسیدگی را بنویسید.');
+            }
+            if (mb_strlen($note, 'UTF-8') > 1000) {
+                throw new RuntimeException('دلیل بازگشایی نباید بیشتر از ۱۰۰۰ نویسه باشد.');
+            }
             $reopenStatus = !empty($ticket['assigned_to']) ? 'in_progress' : 'manager_review';
             $dueAt = business_due_at(priority_sla_minutes((string) $ticket['priority']))->format('Y-m-d H:i:s');
             $reopenOla = ola_deadlines((int) ($ticket['department_id'] ?? 0), (string) $ticket['priority'], (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('Y-m-d H:i:s'));
