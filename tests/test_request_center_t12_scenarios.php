@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * T12 characterization runner: ten behavioral scenarios for the Request Center
+ * T12 characterization runner: eleven behavioral scenarios for the Request Center
  * lifecycle, executed identically against the pinned Legacy worktree and the
  * Feature branch, then compared with a documented tolerance.
  *
@@ -20,7 +20,7 @@ $rootUser = (string) (getenv('CI_DB_USER') ?: 'root');
 $rootPass = (string) (getenv('CI_DB_PASS') ?: '');
 $mysql = (string) (getenv('ITSM_MYSQL_PATH') ?: 'mariadb');
 $schemaFile = dirname(__DIR__) . '/install-empty-db.sql';
-$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10'))));
+$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11'))));
 $evidenceDir = (string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'));
 
 $portBase = 18100 + (getmypid() % 4000);
@@ -461,6 +461,81 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
     return ['name' => $name, 'result' => 'FAIL', 'diffs' => count($diffs)];
 }
 
+
+function t12s_finish_feature_only(string $name, callable $body, array &$apps, string $rootUser, string $rootPass, string $host, string $port, string $mysql): array
+{
+    t12s_rebuild_all($apps, $rootUser, $rootPass, $host, $port, $mysql);
+    foreach ($apps as &$app) {
+        $app['base_url'] = 'http://127.0.0.1:' . (int) $app['port'];
+    }
+    unset($app);
+    $sessions = t12s_sessions($apps);
+    [$snapshot, $extra] = $body($apps['feature'], $sessions['supervisor']['feature'], $sessions);
+    $diffs = [];
+    $ticket = $snapshot['tickets'][0] ?? [];
+    if (($ticket['status'] ?? '') !== 'assigned' || (int) ($ticket['assigned_to'] ?? 0) !== 102 || empty($ticket['ts'][2])) {
+        $diffs[] = 'supervisor assignment did not persist assigned status, eligible assignee and assigned_at';
+    }
+    $eventFound = false;
+    foreach ($snapshot['events'] as $event) {
+        if (($event['event_type'] ?? '') === 'assignment_changed'
+            && ($event['from_status'] ?? '') === 'manager_review'
+            && ($event['to_status'] ?? '') === 'assigned') {
+            $eventFound = true;
+            break;
+        }
+    }
+    if (!$eventFound) {
+        $diffs[] = 'assignment_changed lifecycle event was not recorded';
+    }
+    $auditActions = array_column($snapshot['activity_logs'], 'action_code');
+    if (!in_array('ticket_updated', $auditActions, true)) {
+        $diffs[] = 'required audit record for supervisor assignment is missing';
+    }
+    $notificationFound = false;
+    foreach ($snapshot['notifications'] as $notification) {
+        if (($notification['type'] ?? $notification['notification_type'] ?? '') === 'ticket_assignment_changed') {
+            $notificationFound = true;
+            break;
+        }
+    }
+    if (!$notificationFound) {
+        $diffs[] = 'ticket_assignment_changed notification was not emitted';
+    }
+    $internalMessageFound = false;
+    foreach ($snapshot['messages'] as $message) {
+        if ((int) ($message['is_internal'] ?? 0) === 1) {
+            $internalMessageFound = true;
+            break;
+        }
+    }
+    if (!$internalMessageFound) {
+        $diffs[] = 'supervisor internal assignment note was not persisted as internal';
+    }
+    $evidence = [
+        'scenario' => $name,
+        'mode' => 'feature-only integration (no legacy equivalent action exists)',
+        'feature_snapshot' => $snapshot,
+        'extra' => $extra,
+        'diffs' => $diffs,
+        'result' => $diffs === [] ? 'PASS' : 'FAIL',
+    ];
+    if (!is_dir((string) getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'))) {
+        @mkdir((string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence')), 0775, true);
+    }
+    file_put_contents(((string) getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence')) . '/scenario-' . $name . '.json',
+        json_encode($evidence, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    if ($diffs === []) {
+        t12s_log("T12-SCENARIO {$name}: PASS (feature-only MariaDB HTTP integration)");
+        return ['name' => $name, 'result' => 'PASS', 'diffs' => 0];
+    }
+    foreach ($diffs as $diff) {
+        t12s_log("T12-SCENARIO {$name} DIFF: {$diff}");
+    }
+    t12s_log("T12-SCENARIO {$name}: FAIL (" . count($diffs) . " diffs)");
+    return ['name' => $name, 'result' => 'FAIL', 'diffs' => count($diffs)];
+}
+
 /* ════════ Main ════════ */
 
 $evidenceDir = (string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'));
@@ -635,6 +710,22 @@ try {
         };
         $results[] = t12s_finish('10a-auto-close-rated', $mkCron('rated'), $apps, $rootUser, $rootPass, $host, $port, $mysql);
         $results[] = t12s_finish('10b-auto-close-unrated', $mkCron('unrated'), $apps, $rootUser, $rootPass, $host, $port, $mysql);
+    }
+
+
+    if (in_array(11, $scenarioFilter, true)) {
+        $results[] = t12s_finish_feature_only('11-supervisor-assignment', function (array $app, array $supervisorSession, array $sessions) {
+            $tid = t12s_create_ticket('feature', $app, $sessions);
+            $pdo = t12s_pdo($app);
+            $pdo->exec("UPDATE tickets SET status = 'manager_review', assigned_to = NULL, assigned_at = NULL WHERE id = " . (int) $tid);
+            $response = t12s_post($app['base_url'] . '/request-center.php', $supervisorSession, 'supervisor_assign_ticket', [
+                'ticket_id' => $tid,
+                'assigned_to' => 102,
+                'assignment_reason' => 'تخصیص کنترل‌شدهٔ T12',
+                'assignment_note' => 'یادداشت داخلی آزمون تخصیص T12',
+            ]);
+            return [t12s_snapshot($pdo), ['http_status' => $response['status'], 'ticket_id' => $tid]];
+        }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
     }
 
     file_put_contents($evidenceDir . '/summary.json', json_encode(['results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
