@@ -33,6 +33,16 @@ $pdo = new PDO($dsn, $user, $pass, [
     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
 ]);
+// Mirror the organization provider's install-time schema setup in this disposable CI database.
+$pdo->exec('ALTER TABLE users ADD COLUMN IF NOT EXISTS org_unit_id INT UNSIGNED NULL');
+$pdo->exec('CREATE TABLE IF NOT EXISTS org_unit_managers (
+    unit_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    is_primary TINYINT(1) NOT NULL DEFAULT 0,
+    PRIMARY KEY (unit_id, user_id),
+    INDEX idx_org_mgr_user (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+
 $repository = new RequestCenterRepository($pdo);
 $problems = $repository->schemaProblems();
 if ($problems !== []) {
