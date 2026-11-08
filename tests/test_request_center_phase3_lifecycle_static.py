@@ -164,6 +164,7 @@ def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch(
     transition = bulk.index("$workflow->transition($ticketId, $bulkOld")
     assert guard < transition
     assert "$bulkSkipped++;" in bulk[guard:transition]
+    assert "sort($ticketIds, SORT_NUMERIC);" in bulk
 
 
 def test_rejected_state_is_preflighted_and_excluded_from_terminal_workloads():
