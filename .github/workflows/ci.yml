@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main, develop ]
@@ -8,7 +11,36 @@ on:
     branches: [ main ]
 
 jobs:
+  rebuild_release_16290:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/main-ci-release-1.62.90-clean' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild embedded 1.62.90 report and ZIP checksum
+        run: python tools/rebuild_1_62_90_package.py
+      - name: Commit refreshed archive only on the maintenance branch
+        run: |
+          if git diff --quiet -- downloads/ticket-update-1.62.88-to-1.62.90-food-fixes-20261107.zip downloads/ticket-update-1.62.88-to-1.62.90-food-fixes-20261107.zip.sha256; then
+            echo "Release archive already matches its report."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add downloads/ticket-update-1.62.88-to-1.62.90-food-fixes-20261107.zip downloads/ticket-update-1.62.88-to-1.62.90-food-fixes-20261107.zip.sha256
+          git commit -m "build(release): refresh 1.62.90 archive and checksum"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
   test:
+    needs: rebuild_release_16290
+    if: ${{ always() && (needs.rebuild_release_16290.result == 'success' || needs.rebuild_release_16290.result == 'skipped') }}
     runs-on: ubuntu-latest
 
     services:
@@ -34,6 +66,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'fix/main-ci-release-1.62.90-clean' && github.event.pull_request.head.ref || github.sha }}
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
