@@ -379,7 +379,13 @@ if (!defined('APP_ROOT')) {
                 'cancel_requested_at' => null,
                 'cancel_requested_by' => null,
                 'cancel_request_reason' => null,
-            ], 'supervisor_reopen');
+            ], 'supervisor_reopen', [
+                'requester_id' => $ticket['requester_id'],
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+                'cancel_requested_at' => $ticket['cancel_requested_at'] ?? null,
+            ]);
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
