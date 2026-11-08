@@ -8,6 +8,7 @@ on:
       - 'modules/request-center/**'
       - 'migrations/037-request-center-lifecycle-rejection.sql'
       - 'tests/test_request_center_phase3_lifecycle_static.py'
+      - 'tests/test_request_center_phase3_workspaces_static.py'
       - 'tests/test_request_center_workflow_service_sqlite.php'
       - 'tests/test_request_center_migration_037_mariadb.php'
       - 'tests/test_request_center_schema_preflight_mariadb.php'
@@ -102,6 +103,7 @@ jobs:
           php -l modules/request-center/Pages/detail.php
           php -l modules/request-center/Pages/queue.php
           php -l modules/request-center/Pages/supervisor.php
+          php -l modules/request-center/Pages/admin.php
           php -l modules/request-center/Pages/services.php
           php -l modules/request-center/Pages/reports.php
           php -l modules/request-center/Pages/analytics.php
@@ -109,6 +111,7 @@ jobs:
           php -l modules/request-center/Actions/supervisor-actions.php
           php -l modules/request-center/Actions/bulk-actions.php
           php -l modules/request-center/Actions/service-actions.php
+          php -l modules/request-center/Actions/admin-actions.php
           php -l tests/test_request_center_workflow_service_sqlite.php
           php -l tests/test_request_center_migration_037_mariadb.php
           php -l tests/test_request_center_schema_preflight_mariadb.php
@@ -117,7 +120,7 @@ jobs:
           php -l cron/sla_maintenance.php
           php -l modules/request-center/Pages/calendar.php
       - name: First-slice and Phase-3 lifecycle architecture contracts
-        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py
+        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py tests/test_request_center_phase3_workspaces_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
       - name: Appointment lifecycle, conflict and capacity contract (SQLite)
