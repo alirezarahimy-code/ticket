@@ -52,7 +52,7 @@ $expectedDue = $expectedPause > 0 ? business_due_at($expectedPause, new DateTime
 sla_check($due === $expectedDue && $pauseAt === null && $pause === $expectedPause, 'resuming adds only the new business-time pause to the existing deadline');
 
 $olaTicket = [
-    'id' => 1, 'created_at' => '2026-11-01 09:00:00', 'priority' => 'normal',
+    'id' => 1, 'created_at' => '2026-11-01 09:00:00', 'department_id' => 2, 'priority' => 'normal',
     'status' => 'in_progress', 'sla_pause_minutes' => 0, 'sla_paused_at' => null,
     'ola_policy_id' => 9,
     'ola_response_due_at' => '2026-11-10 10:00:00',
