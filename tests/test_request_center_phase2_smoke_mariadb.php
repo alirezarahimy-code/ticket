@@ -583,6 +583,160 @@ try {
         }
     }
 
+    // Agent Workspace: claim, public response, internal note, waiting-user and resolution.
+    $agentSeed = $pdo->prepare(
+        "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active, department_id, handling_unit_id, is_it_agent)
+         VALUES ('rc_smoke_agent', 'not-used', 'RC Smoke Agent', 0, 'agent', 1, ?, ?, 0)
+         ON DUPLICATE KEY UPDATE is_primary_admin = 0, role = 'agent', is_active = 1, department_id = VALUES(department_id), handling_unit_id = VALUES(handling_unit_id), is_it_agent = 0"
+    );
+    $agentSeed->execute([$smokeDepartmentId, $supportHandlingUnitId]);
+    $agentId = (int) $pdo->query("SELECT id FROM users WHERE username = 'rc_smoke_agent' LIMIT 1")->fetchColumn();
+    $agentSession = smoke_http('http://' . $address . '/tests/fixtures/request-center-session-seed.php?user_id=' . rawurlencode((string) $agentId));
+    $agentSessionData = json_decode($agentSession['body'], true);
+    smoke_check($agentSession['status'] === 200 && is_array($agentSessionData), 'agent session is seeded for operational workspace smoke');
+    $agentCookie = (string) ($agentSessionData['cookie_name'] ?? '') . '=' . (string) ($agentSessionData['session_id'] ?? '');
+    $agentCsrf = (string) ($agentSessionData['csrf'] ?? '');
+
+    $pdo->prepare(
+        "UPDATE tickets SET status = 'manager_review', assigned_to = NULL, assigned_at = NULL, first_response_at = NULL,
+         resolved_at = NULL, closed_at = NULL, supervisor_approved_at = NULL, supervisor_id = NULL,
+         cancel_requested_at = NULL, cancel_requested_by = NULL, cancel_request_reason = NULL,
+         department_id = ?, service_group = 'support' WHERE id = ?"
+    )->execute([$smokeDepartmentId, (int) $ticketRow['id']]);
+    $agentDetailBeforeClaim = smoke_http(
+        'http://' . $address . '/request-center.php?page=ticket&id=' . (int) $ticketRow['id'] . '&workspace=agent&agent_view=team',
+        ['Cookie: ' . $agentCookie]
+    );
+    smoke_check($agentDetailBeforeClaim['status'] === 200
+        && str_contains($agentDetailBeforeClaim['body'], 'name="action" value="claim_ticket"'),
+        'eligible agent sees the Claim operation on an unassigned request');
+
+    $claimResponse = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'claim_ticket', 'ticket_id' => (string) $ticketRow['id'],
+        'rc_return_workspace' => 'agent', 'rc_return_agent_view' => 'team', 'csrf' => $agentCsrf,
+    ], ['Cookie: ' . $agentCookie]);
+    $claimedTicket = $pdo->prepare('SELECT status, assigned_to FROM tickets WHERE id = ?');
+    $claimedTicket->execute([(int) $ticketRow['id']]);
+    $claimedState = $claimedTicket->fetch(PDO::FETCH_ASSOC);
+    smoke_check($claimResponse['status'] === 302
+        && (string) ($claimedState['status'] ?? '') === 'assigned'
+        && (int) ($claimedState['assigned_to'] ?? 0) === $agentId,
+        'agent Claim operation assigns the request through the independent POST boundary');
+
+    $agentPublicReply = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'reply', 'ticket_id' => (string) $ticketRow['id'],
+        'body' => 'RC agent public first response', 'csrf' => $agentCsrf,
+        'rc_return_workspace' => 'agent', 'rc_return_agent_view' => 'mine',
+    ], ['Cookie: ' . $agentCookie]);
+    $statusAfterAgentReply = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($agentPublicReply['status'] === 302 && $statusAfterAgentReply === 'in_progress',
+        'agent public response records first response and starts active handling');
+
+    $internalNoteBody = 'RC agent internal note must remain private';
+    $agentInternalNote = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'reply', 'ticket_id' => (string) $ticketRow['id'],
+        'body' => $internalNoteBody, 'is_internal' => '1', 'csrf' => $agentCsrf,
+        'rc_return_workspace' => 'agent',
+    ], ['Cookie: ' . $agentCookie]);
+    $agentDetailWithInternal = smoke_http(
+        'http://' . $address . '/request-center.php?page=ticket&id=' . (int) $ticketRow['id'] . '&workspace=agent',
+        ['Cookie: ' . $agentCookie]
+    );
+    $requesterDetailWithInternal = smoke_http(
+        'http://' . $address . '/request-center.php?page=ticket&id=' . (int) $ticketRow['id'] . '&workspace=requester',
+        ['Cookie: ' . $requesterCookie]
+    );
+    smoke_check($agentInternalNote['status'] === 302
+        && str_contains($agentDetailWithInternal['body'], $internalNoteBody)
+        && !str_contains($requesterDetailWithInternal['body'], $internalNoteBody),
+        'internal note is available to the assigned agent and hidden from the requester');
+
+    $agentWait = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'reply', 'ticket_id' => (string) $ticketRow['id'],
+        'body' => 'RC agent requests additional information', 'after_status' => 'waiting_user',
+        'csrf' => $agentCsrf, 'rc_return_workspace' => 'agent',
+    ], ['Cookie: ' . $agentCookie]);
+    $statusAfterAgentWait = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($agentWait['status'] === 302 && $statusAfterAgentWait === 'waiting_user',
+        'agent can move the request to waiting_user with a public explanation');
+
+    $requesterReply = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'reply', 'ticket_id' => (string) $ticketRow['id'],
+        'body' => 'RC requester supplied the requested information',
+        'csrf' => (string) ($requesterSessionData['csrf'] ?? ''), 'rc_return_workspace' => 'requester',
+    ], ['Cookie: ' . $requesterCookie]);
+    $statusAfterRequesterReply = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($requesterReply['status'] === 302 && $statusAfterRequesterReply === 'in_progress',
+        'requester reply resumes a request waiting for user information');
+
+    $agentResolve = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'reply', 'ticket_id' => (string) $ticketRow['id'],
+        'body' => 'RC agent completed the requested work', 'after_status' => 'resolved',
+        'csrf' => $agentCsrf, 'rc_return_workspace' => 'agent',
+    ], ['Cookie: ' . $agentCookie]);
+    $statusAfterAgentResolve = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($agentResolve['status'] === 302 && $statusAfterAgentResolve === 'resolved',
+        'agent can resolve the request after requester response');
+
+    // Requester Workspace: submit a real satisfaction rating after resolution.
+    $requesterRating = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'rate_ticket', 'ticket_id' => (string) $ticketRow['id'],
+        'score' => '5', 'rating_comment' => 'RC requester rating smoke',
+        'csrf' => (string) ($requesterSessionData['csrf'] ?? ''), 'rc_return_workspace' => 'requester',
+    ], ['Cookie: ' . $requesterCookie]);
+    $ratingCount = $pdo->prepare('SELECT COUNT(*) FROM ticket_ratings WHERE ticket_id = ? AND requester_id = ? AND score = 5');
+    $ratingCount->execute([(int) $ticketRow['id'], $requesterId]);
+    smoke_check($requesterRating['status'] === 302 && (int) $ratingCount->fetchColumn() === 1,
+        'requester can submit a satisfaction rating through the independent workspace');
+
+    // Supervisor Workspace: approve, reopen and reassign through real POST commands.
+    $supervisorSeed = $pdo->prepare(
+        "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active, department_id)
+         VALUES ('rc_smoke_supervisor', 'not-used', 'RC Smoke Supervisor', 0, 'supervisor', 1, ?)
+         ON DUPLICATE KEY UPDATE is_primary_admin = 0, role = 'supervisor', is_active = 1, department_id = VALUES(department_id)"
+    );
+    $supervisorSeed->execute([$smokeDepartmentId]);
+    $supervisorId = (int) $pdo->query("SELECT id FROM users WHERE username = 'rc_smoke_supervisor' LIMIT 1")->fetchColumn();
+    $supervisorSession = smoke_http('http://' . $address . '/tests/fixtures/request-center-session-seed.php?user_id=' . rawurlencode((string) $supervisorId));
+    $supervisorSessionData = json_decode($supervisorSession['body'], true);
+    smoke_check($supervisorSession['status'] === 200 && is_array($supervisorSessionData), 'supervisor session is seeded for decision workspace smoke');
+    $supervisorCookie = (string) ($supervisorSessionData['cookie_name'] ?? '') . '=' . (string) ($supervisorSessionData['session_id'] ?? '');
+    $supervisorCsrf = (string) ($supervisorSessionData['csrf'] ?? '');
+
+    $supervisorDecision = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'supervisor_decision', 'ticket_id' => (string) $ticketRow['id'],
+        'decision' => 'approve', 'supervisor_note' => 'RC supervisor approved after requester rating',
+        'rc_return_workspace' => 'supervisor', 'csrf' => $supervisorCsrf,
+    ], ['Cookie: ' . $supervisorCookie]);
+    $statusAfterSupervisorApproval = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($supervisorDecision['status'] === 302 && $statusAfterSupervisorApproval === 'closed',
+        'supervisor can approve and close a resolved, rated request');
+
+    $supervisorReopen = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'supervisor_reopen', 'ticket_id' => (string) $ticketRow['id'],
+        'supervisor_note' => 'RC supervisor reopened for verification',
+        'rc_return_workspace' => 'supervisor', 'csrf' => $supervisorCsrf,
+    ], ['Cookie: ' . $supervisorCookie]);
+    $statusAfterSupervisorReopen = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($supervisorReopen['status'] === 302 && $statusAfterSupervisorReopen === 'in_progress',
+        'supervisor can reopen a closed request with a recorded reason');
+
+    $secondAgentSeed = $pdo->prepare(
+        "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active, department_id, handling_unit_id, is_it_agent)
+         VALUES ('rc_smoke_agent_two', 'not-used', 'RC Smoke Agent Two', 0, 'agent', 1, ?, ?, 0)
+         ON DUPLICATE KEY UPDATE is_primary_admin = 0, role = 'agent', is_active = 1, department_id = VALUES(department_id), handling_unit_id = VALUES(handling_unit_id), is_it_agent = 0"
+    );
+    $secondAgentSeed->execute([$smokeDepartmentId, $supportHandlingUnitId]);
+    $secondAgentId = (int) $pdo->query("SELECT id FROM users WHERE username = 'rc_smoke_agent_two' LIMIT 1")->fetchColumn();
+    $supervisorAssign = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'supervisor_assign_ticket', 'ticket_id' => (string) $ticketRow['id'],
+        'assigned_to' => (string) $secondAgentId, 'assignment_reason' => 'RC supervisor workload balancing',
+        'assignment_note' => '', 'rc_return_workspace' => 'supervisor', 'csrf' => $supervisorCsrf,
+    ], ['Cookie: ' . $supervisorCookie]);
+    $assigneeAfterSupervisorReassign = (int) $pdo->query('SELECT assigned_to FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    smoke_check($supervisorAssign['status'] === 302 && $assigneeAfterSupervisorReassign === $secondAgentId,
+        'supervisor can reassign an active request to another eligible agent with a reason');
+
     // Run the real SLA/OLA maintenance command twice against a disposable ticket.
     $requesterQuery = $pdo->prepare("SELECT id FROM users WHERE role = 'user' AND id <> ? ORDER BY id LIMIT 1");
     $requesterQuery->execute([$userId]);
