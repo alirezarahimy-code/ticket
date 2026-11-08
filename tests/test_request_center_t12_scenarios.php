@@ -113,9 +113,13 @@ function t12s_seed(PDO $pdo): void
     $pdo->exec("DELETE FROM org_units"); // no deputy selection requirement in this characterization
     $pdo->exec("INSERT INTO handling_units (id, code, name, is_active) VALUES (1, 'it', 'واحد فناوری', 1), (2, 'support', 'واحد پشتیبانی', 1)");
     $pdo->exec("INSERT INTO departments (id, name, code, is_active) VALUES (1, 'پشتیبانی کل', 'sup', 1), (2, 'فناوری اطلاعات', 'it', 1)");
-    $pdo->exec("INSERT INTO categories (id, name, code, service_group, is_active) VALUES (1, 'درخواست عمومی', 'gen', 'support', 1)");
+    $pdo->exec("INSERT INTO categories (id, name, code, service_group, is_active) VALUES
+        (1, 'درخواست عمومی', 'gen', 'support', 1),
+        (2, 'خدمات فناوری', 'it-gen', 'it', 1)");
     $pdo->exec("INSERT INTO service_catalog (id, name, code, service_group, default_priority, department_id, category_id, handling_unit_id, requires_asset, default_ticket_type, is_active)
-        VALUES (1, 'خدمت عمومی T12', 't12-support', 'support', 'normal', 1, 1, 2, 0, 'request', 1)");
+        VALUES
+        (1, 'خدمت عمومی T12', 't12-support', 'support', 'normal', 1, 1, 2, 0, 'request', 1),
+        (2, 'خدمت فناوری T12', 't12-it', 'it', 'normal', 2, 2, 1, 0, 'request', 1)");
     $pdo->exec("INSERT INTO users (id, company_id, username, full_name, role, is_active, auth_source, department_id, handling_unit_id, is_primary_admin, is_it_agent, password_hash)
         VALUES
         (100, 1, 'rc_t12s_admin', 'RC T12s Admin', 'primary_admin', 1, 'local', NULL, NULL, 1, 0, 'x'),
@@ -343,7 +347,7 @@ function t12s_clone_log_tail(array $app, int $maxLines = 25): string { $logFile 
 
 function t12s_create_ticket(string $side, array $app, array $sess, array $extra = []): int
 {
-    $fields = [
+    $fields = array_replace([
         'subject' => 'T12 characterization subject',
         'description' => 'T12 characterization body\nخط دوم برای مقایسهٔ بدنه',
         'category_id' => 1,
@@ -352,7 +356,7 @@ function t12s_create_ticket(string $side, array $app, array $sess, array $extra 
         'ticket_type' => 'request',
         'priority' => 'normal',
         'support_location' => 'ساختمان ۱ — اتاق ۱۰۱',
-    ] + $extra;
+    ], $extra);
     $r = t12s_post($app['base_url'] . '/index.php', $sess['requester'][$side], 'create_ticket', $fields);
     if ($r['status'] !== 302) {
         throw new RuntimeException("S1 create_ticket failed for {$side}: HTTP {$r['status']} body=" . substr(strip_tags($r['body']), 0, 160));
@@ -540,9 +544,13 @@ try {
             return [t12s_snapshot($pdo), ['update_status' => $r['status']]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
         $results[] = t12s_finish('07b-priority-by-manager', function (string $side, array $app, array $sess) {
-            $tid = t12s_create_ticket($side, $app, $sess);
+            $tid = t12s_create_ticket($side, $app, $sess, [
+                'category_id' => 2,
+                'service_id' => 2,
+                'service_group' => 'it',
+            ]);
             $pdo = t12s_pdo($app);
-            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, service_group = 'it' WHERE id = " . (int) $tid);
+            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
             $r = t12s_post($app['base_url'] . '/index.php', $sess['supmgr'][$side], 'update_ticket', ['ticket_id' => $tid, 'priority' => 'urgent']);
             return [t12s_snapshot($pdo), ['priority_status' => $r['status']]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
