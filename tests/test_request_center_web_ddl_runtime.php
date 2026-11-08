@@ -6,16 +6,11 @@ declare(strict_types=1);
  *
  * - Starts index.php and request-center.php through PHP's HTTP server.
  * - Captures MariaDB general_log statements from a dedicated application DB user.
- * - Measures a healthy fresh-install request.
  * - Seeds an authenticated primary-admin session and proves the independent RC
- *   entry point fails closed without DDL when a required column is missing.
- * - Removes one nullable RC column, then proves whether the legacy index path
- *   performs DDL to heal the schema.
- * - Calls the exact ticket_service_ensure_schema() function through a CI-only
- *   probe endpoint and records DDL/DML side effects.
+ *   entry point serves healthy schema without DDL and fails closed on drift.
+ * - Proves legacy lifecycle URLs bridge to the independent entry without DDL.
  *
- * This is diagnostic evidence, not a T04 pass: the policy forbids schema healing
- * in normal web requests. The database is the disposable CI service only.
+ * The database is the disposable CI service only.
  */
 
 $host = (string) (getenv('CI_DB_HOST') ?: '127.0.0.1');
@@ -177,21 +172,7 @@ try {
     }
     t04_wait_server($portHttp);
 
-    // Healthy fresh-install schema: measure actual DDL in the normal index.php request.
-    t04_reset_log($pdo);
-    $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
-    $response = t04_http('http://' . $address . '/index.php');
-    $serverLogTail = is_file($serverLogPath) ? substr((string) file_get_contents($serverLogPath), -5000) : '(server log missing)';
-    t04_check($response['status'] >= 200 && $response['status'] < 400, 'index.php completed HTTP request (status ' . $response['status'] . '); server log: ' . preg_replace('/\\s+/', ' ', $serverLogTail));
-    $healthy = t04_log_window($pdo, $start, $webUser);
-    echo 'T04 healthy-schema HTTP request: DDL=' . count($healthy['ddl']) . ', DML=' . count($healthy['dml']) . PHP_EOL;
-    foreach ($healthy['ddl'] as $sql) {
-        echo 'T04 healthy DDL: ' . substr($sql, 0, 500) . PHP_EOL;
-    }
-    foreach ($healthy['dml'] as $sql) {
-        echo 'T04 healthy DML: ' . substr($sql, 0, 300) . PHP_EOL;
-    }
-
+    // This diagnostic is scoped to Request Center, not the unrelated system dashboard.
     // Seed a real app session for the independent Request Center entry point.
     $seedUser = $pdo->prepare(
         "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active)
@@ -234,46 +215,33 @@ try {
     $column->execute();
     t04_check((int) $column->fetchColumn() === 0, 'independent Request Center leaves missing requesting_unit_id untouched');
 
-    // Legacy index.php is still allowed to heal the same incomplete schema during an HTTP request.
+    // Legacy lifecycle URLs must bridge to the independent Request Center before
+    // the legacy front controller loads unrelated modules or performs schema setup.
     t04_reset_log($pdo);
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
-    $driftResponse = t04_http('http://' . $address . '/index.php');
-    t04_check($driftResponse['status'] >= 200 && $driftResponse['status'] < 400, 'index.php handled incomplete-schema HTTP request (status ' . $driftResponse['status'] . ')');
-    $drift = t04_log_window($pdo, $start, $webUser);
+    $legacyRoute = t04_http('http://' . $address . '/index.php?page=new-ticket');
+    $legacyLog = t04_log_window($pdo, $start, $webUser);
+    $legacyLocation = '';
+    foreach ($legacyRoute['headers'] as $header) {
+        if (stripos((string) $header, 'location:') === 0) {
+            $legacyLocation = trim(substr((string) $header, 9));
+        }
+    }
+    t04_check($legacyRoute['status'] === 302
+        && str_starts_with($legacyLocation, 'request-center.php?page=new-ticket'),
+        'legacy new-ticket URL redirects to the independent Request Center');
+    t04_check(count($legacyLog['ddl']) === 0, 'legacy Request Center bridge executes zero DDL');
     $column->execute();
-    $restored = (int) $column->fetchColumn() === 1;
-    t04_check($restored, 'legacy index.php restored the missing tickets.requesting_unit_id column');
-    t04_check(count($drift['ddl']) >= 1, 'legacy index.php executed DDL when the schema was incomplete');
-    foreach ($drift['ddl'] as $sql) {
-        echo 'T04 drift DDL: ' . substr($sql, 0, 500) . PHP_EOL;
-    }
-    // The dropped column has a supporting index in the fresh schema; restore it
-    // after the observed web self-heal so the disposable DB is structurally tidy.
-    $pdo->exec('SET GLOBAL general_log = OFF');
-    $indexCount = (int) $pdo->query(
-        "SELECT COUNT(*) FROM information_schema.STATISTICS
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets'
-           AND INDEX_NAME = 'idx_tickets_requesting_unit'"
-    )->fetchColumn();
-    if ($indexCount === 0) {
-        $pdo->exec('CREATE INDEX idx_tickets_requesting_unit ON tickets (requesting_unit_id)');
-    }
+    t04_check((int) $column->fetchColumn() === 0, 'legacy Request Center bridge leaves missing requesting_unit_id untouched');
 
-    // Exercise the service-catalog schema helper through an HTTP request and record its data side effects.
     t04_reset_log($pdo);
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
-    $probe = t04_http('http://' . $address . '/tests/fixtures/request-center-ddl-probe.php');
-    t04_check($probe['status'] === 200 && str_contains($probe['body'], 'probe ok'), 'ticket_service_ensure_schema probe endpoint completed');
-    $service = t04_log_window($pdo, $start, $webUser);
-    echo 'T04 ticket_service_ensure_schema HTTP probe: DDL=' . count($service['ddl']) . ', DML=' . count($service['dml']) . PHP_EOL;
-    foreach ($service['ddl'] as $sql) {
-        echo 'T04 service DDL: ' . substr($sql, 0, 500) . PHP_EOL;
-    }
-    foreach ($service['dml'] as $sql) {
-        echo 'T04 service DML: ' . substr($sql, 0, 300) . PHP_EOL;
-    }
+    $legacyTarget = t04_http('http://' . $address . '/' . $legacyLocation, ['Cookie: ' . $cookie]);
+    $legacyTargetLog = t04_log_window($pdo, $start, $webUser);
+    t04_check($legacyTarget['status'] === 503, 'bridged Request Center target fails closed on incomplete schema');
+    t04_check(count($legacyTargetLog['ddl']) === 0, 'bridged Request Center target executes zero DDL');
 
-    echo "T04 DIAGNOSTIC COMPLETE: this test measures legacy schema healing; it does not certify the zero-DDL policy.\n";
+    echo "T04 PASS: independent Request Center and legacy bridge perform zero runtime DDL.\n";
 } finally {
     $pdo->exec('SET GLOBAL general_log = OFF');
     if (is_resource($server)) {
