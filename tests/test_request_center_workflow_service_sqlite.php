@@ -44,6 +44,7 @@ $insert->execute([13, 'assigned', 22, 32, 'normal', null]);
 $insert->execute([14, 'new', 23, null, 'normal', null]);
 $insert->execute([15, 'assigned', 24, 34, 'normal', null]);
 $insert->execute([16, 'closed', 25, 26, 'normal', null]);
+$insert->execute([17, 'cancelled', 27, null, 'normal', null]);
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
@@ -72,6 +73,13 @@ $internalMessage = $pdo->query('SELECT is_internal, body FROM ticket_messages WH
 workflow_check(is_array($internalMessage) && (int) $internalMessage['is_internal'] === 1
     && $internalMessage['body'] === 'یادداشت داخلی',
     'conversation writer preserves internal-note visibility metadata');
+
+$pdo->beginTransaction();
+workflow_check(!$service->requestCancellation(14, 14, 'closed', 'لغو درخواست بسته‌شده'),
+    'cancellation request rejects a closed ticket even when its owner matches');
+workflow_check(!$service->requestCancellation(17, 27, 'cancelled', 'لغو درخواست لغوشده'),
+    'cancellation request rejects a terminal cancelled ticket');
+$pdo->rollBack();
 
 $pdo->beginTransaction();
 workflow_check($service->requestCancellation(15, 24, 'assigned', 'نیاز به لغو'),
