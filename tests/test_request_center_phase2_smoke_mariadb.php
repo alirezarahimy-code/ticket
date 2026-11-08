@@ -252,6 +252,11 @@ try {
 
     // 1) Dashboard (exercises request_center_dashboard_rows + the shared shell render_header/render_footer).
     $dashboard = smoke_http('http://' . $address . '/index.php?page=dashboard', ['Cookie: ' . $cookie]);
+    if ($dashboard['status'] !== 200) {
+        $dashboardServerDiagnostic = is_file($serverLogPath) ? (string) file_get_contents($serverLogPath) : '';
+        echo 'dashboard HTTP diagnostic: body=' . substr((string) $dashboard['body'], 0, 1200)
+            . ' server=' . substr($dashboardServerDiagnostic, -10000) . PHP_EOL;
+    }
     smoke_check($dashboard['status'] === 200, 'dashboard returns HTTP 200 (status ' . $dashboard['status'] . ')');
     smoke_check(str_contains($dashboard['body'], 'داشبورد'), 'dashboard renders the dashboard page heading');
 
