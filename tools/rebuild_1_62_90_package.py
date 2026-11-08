@@ -55,69 +55,94 @@ def main() -> None:
             for info in infos
             if not info.is_dir() and info.filename != "manifest.json"
         }
-        old_report = payloads[embedded_report]
-        if old_report == report_bytes:
-            # Still verify the existing package and sidecar before exiting.
-            for relative, expected in (manifest.get("sha256") or {}).items():
-                entry = "files/" + relative
-                if entry not in payloads or sha256(payloads[entry]) != str(expected).lower():
-                    raise SystemExit(f"SHA-256 فعلی نامعتبر است: {relative}")
-            current_hash = sha256(package.read_bytes())
-            if sidecar.is_file():
-                fields = sidecar.read_text(encoding="ascii").strip().split()
-                if len(fields) != 2 or fields[0].lower() != current_hash:
-                    raise SystemExit("sidecar فعلی با ZIP تطبیق ندارد.")
-            print("PACKAGE_REBUILT=0")
-            print(f"SHA256={current_hash}")
-            return
 
-        # Refuse to mask any pre-existing payload corruption.
+    # If the report is already current, verify the complete archive and sidecar
+    # without rewriting ZIP bytes or changing the checksum.
+    if payloads[embedded_report] == report_bytes:
         for relative, expected in (manifest.get("sha256") or {}).items():
-            if relative == REPORT_NAME:
-                continue
             entry = "files/" + relative
             if entry not in payloads or sha256(payloads[entry]) != str(expected).lower():
-                raise SystemExit(f"فایل غیرمرتبط با گزارش، hash نامعتبر دارد: {relative}")
+                raise SystemExit(f"SHA-256 فعلی نامعتبر است: {relative}")
+        current_hash = sha256(package.read_bytes())
+        if sidecar.is_file():
+            fields = sidecar.read_text(encoding="ascii").strip().split()
+            if len(fields) != 2 or fields[0].lower() != current_hash:
+                raise SystemExit("sidecar فعلی با ZIP تطبیق ندارد.")
+        print("PACKAGE_REBUILT=0")
+        print(f"SHA256={current_hash}")
+        return
 
-        payloads[embedded_report] = report_bytes
-        manifest.setdefault("sha256", {})[REPORT_NAME] = sha256(report_bytes)
-        manifest_bytes = (
-            json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
-        ).encode("utf-8")
+    # Refuse to mask any pre-existing payload corruption.
+    for relative, expected in (manifest.get("sha256") or {}).items():
+        if relative == REPORT_NAME:
+            continue
+        entry = "files/" + relative
+        if entry not in payloads or sha256(payloads[entry]) != str(expected).lower():
+            raise SystemExit(f"فایل غیرمرتبط با گزارش، hash نامعتبر دارد: {relative}")
 
-        fd, temp_name = tempfile.mkstemp(prefix=PACKAGE_NAME + ".", suffix=".tmp", dir=DOWNLOADS)
-        os.close(fd)
-        temp_path = Path(temp_name)
-        try:
-            with zipfile.ZipFile(temp_path, "w") as target:
-                for info in infos:
-                    if info.is_dir():
-                        target.writestr(info, b"")
-                    elif info.filename == "manifest.json":
-                        target.writestr(info, manifest_bytes)
-                    else:
-                        target.writestr(info, payloads[info.filename])
+    payloads[embedded_report] = report_bytes
+    manifest.setdefault("sha256", {})[REPORT_NAME] = sha256(report_bytes)
+    manifest_bytes = (
+        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n"
+    ).encode("utf-8")
 
-            with zipfile.ZipFile(temp_path, "r") as rebuilt:
-                if rebuilt.testzip() is not None:
-                    raise SystemExit("CRC بستهٔ بازسازی‌شده نامعتبر است.")
-                rebuilt_names = [info.filename for info in rebuilt.infolist()]
-                if len(rebuilt_names) != len({name.casefold() for name in rebuilt_names}):
-                    raise SystemExit("بستهٔ بازسازی‌شده مسیر تکراری دارد.")
-                checked = json.loads(rebuilt.read("manifest.json"))
-                if checked.get("version") != TARGET_VERSION:
-                    raise SystemExit("نسخهٔ manifest پس از بازسازی تغییر کرده است.")
-                for relative, expected in checked["sha256"].items():
-                    actual = sha256(rebuilt.read("files/" + relative))
-                    if actual != str(expected).lower():
-                        raise SystemExit(f"SHA-256 پس از بازسازی نامعتبر است: {relative}")
-                if rebuilt.read(embedded_report) != report_bytes:
-                    raise SystemExit("گزارش تعبیه‌شده پس از بازسازی با گزارش مخزن برابر نیست.")
+    fd, temp_name = tempfile.mkstemp(
+        prefix=PACKAGE_NAME + ".", suffix=".tmp", dir=DOWNLOADS
+    )
+    os.close(fd)
+    temp_path = Path(temp_name)
+    try:
+        with zipfile.ZipFile(temp_path, "w") as target:
+            for info in infos:
+                if info.is_dir():
+                    target.writestr(info, b"")
+                elif info.filename == "manifest.json":
+                    target.writestr(info, manifest_bytes)
+                else:
+                    target.writestr(info, payloads[info.filename])
 
-            os.replace(temp_path, package)
-        finally:
-            if temp_path.exists():
-                temp_path.unlink()
+        with zipfile.ZipFile(temp_path, "r") as rebuilt:
+            if rebuilt.testzip() is not None:
+                raise SystemExit("CRC بستهٔ بازسازی‌شده نامعتبر است.")
+            rebuilt_infos = rebuilt.infolist()
+            rebuilt_names = [info.filename for info in rebuilt_infos]
+            if len(rebuilt_names) != len({name.casefold() for name in rebuilt_names}):
+                raise SystemExit("بستهٔ بازسازی‌شده مسیر تکراری دارد.")
+            checked = json.loads(rebuilt.read("manifest.json"))
+            if checked.get("version") != TARGET_VERSION:
+                raise SystemExit("نسخهٔ manifest پس از بازسازی تغییر کرده است.")
+            if checked.get("requires_version") != REQUIRES_VERSION:
+                raise SystemExit("requires_version پس از بازسازی تغییر کرده است.")
+
+            file_inventory = {
+                name[len("files/"):]
+                for name in rebuilt_names
+                if name.startswith("files/")
+            }
+            if file_inventory != set(checked.get("files", [])):
+                raise SystemExit("inventory فایل‌ها پس از بازسازی با manifest برابر نیست.")
+            migration_inventory = {
+                name[len("migrations/"):]
+                for name in rebuilt_names
+                if name.startswith("migrations/")
+            }
+            if migration_inventory != set(checked.get("migrations", [])):
+                raise SystemExit("inventory مهاجرت‌ها پس از بازسازی با manifest برابر نیست.")
+
+            for relative, expected in checked["sha256"].items():
+                actual = sha256(rebuilt.read("files/" + relative))
+                if actual != str(expected).lower():
+                    raise SystemExit(f"SHA-256 پس از بازسازی نامعتبر است: {relative}")
+            if rebuilt.read("files/VERSION").decode("utf-8", "replace").strip() != TARGET_VERSION:
+                raise SystemExit("files/VERSION پس از بازسازی معتبر نیست.")
+            if rebuilt.read(embedded_report) != report_bytes:
+                raise SystemExit("گزارش تعبیه‌شده پس از بازسازی با گزارش مخزن برابر نیست.")
+
+        # The source ZIP is closed before replacement; this also works on Windows.
+        os.replace(temp_path, package)
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
 
     checksum = sha256(package.read_bytes())
     sidecar.write_text(f"{checksum}  {PACKAGE_NAME}\n", encoding="ascii")
