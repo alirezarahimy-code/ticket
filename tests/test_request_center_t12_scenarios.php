@@ -236,6 +236,7 @@ function t12s_ts_diff_tol(string $a, string $b, int $tol = 300): bool
 function t12s_compare(array $a, array $b): array
 {
     $diffs = [];
+    $tolerated = [];
     // tickets: same count, per row strict minus tol keys
     if (count($a['tickets']) !== count($b['tickets'])) {
         $diffs[] = 'tickets count differs: legacy=' . count($a['tickets']) . ' feature=' . count($b['tickets']);
@@ -260,13 +261,41 @@ function t12s_compare(array $a, array $b): array
         foreach ($a[$key] as $i => $ra) {
             $rb = $b[$key][$i];
             foreach ($cols as $c) {
-                if ((string) ($ra[$c] ?? '') !== (string) ($rb[$c] ?? '')) {
-                    $diffs[] = "{$key}[{$i}].{$c}: legacy=" . json_encode($ra[$c]) . ' feature=' . json_encode($rb[$c]);
+                $legacyValue = (string) ($ra[$c] ?? '');
+                $featureValue = (string) ($rb[$c] ?? '');
+                if ($legacyValue === $featureValue) {
+                    continue;
                 }
+
+                // Phase 3 enriches event context without changing the event itself:
+                // legacy reply/internal-note/bulk events omitted status columns,
+                // while RC records the locked from/to state for reconstruction.
+                if ($key === 'events' && in_array((string) ($ra['event_type'] ?? ''), ['reply', 'internal_note', 'bulk_status_changed'], true)
+                    && in_array($c, ['from_status', 'to_status'], true)
+                    && $legacyValue === '' && $featureValue !== '') {
+                    $tolerated[] = "{$key}[{$i}].{$c}: additive locked-state context for " . (string) $ra['event_type'];
+                    continue;
+                }
+
+                // More specific RC audit action codes intentionally replace the
+                // legacy generic supervisor_decision/ticket_reopened labels.
+                if ($key === 'activity_logs' && $c === 'action_code') {
+                    $auditAliases = [
+                        'ticket_supervisor_approved' => 'supervisor_decision',
+                        'ticket_supervisor_rework' => 'supervisor_decision',
+                        'ticket_reopened_by_supervisor' => 'ticket_reopened',
+                    ];
+                    if (($auditAliases[$featureValue] ?? null) === $legacyValue) {
+                        $tolerated[] = "{$key}[{$i}].action_code: {$legacyValue} -> {$featureValue} (more specific RC audit code)";
+                        continue;
+                    }
+                }
+
+                $diffs[] = "{$key}[{$i}].{$c}: legacy=" . json_encode($ra[$c]) . ' feature=' . json_encode($rb[$c]);
             }
         }
     }
-    return $diffs;
+    return ['diffs' => $diffs, 'tolerated' => $tolerated];
 }
 
 /* ══════════ Scenario harness ══════════ */
@@ -368,7 +397,9 @@ function t12s_run_pair(array &$apps, string $rootUser, string $rootPass, string 
 function t12s_finish(string $name, callable $body, array &$apps, string $rootUser, string $rootPass, string $host, string $port, string $mysql): array
 {
     $pair = t12s_run_pair($apps, $rootUser, $rootPass, $host, $port, $mysql, $body);
-    $diffs = t12s_compare($pair['snapshots']['legacy'], $pair['snapshots']['feature']);
+    $comparison = t12s_compare($pair['snapshots']['legacy'], $pair['snapshots']['feature']);
+    $diffs = $comparison['diffs'];
+    $tolerated = $comparison['tolerated'];
     $evidence = [
         'scenario' => $name,
         'legacy_commit' => '2176d2aa57758a0fbef426636c9943879646b165',
@@ -376,6 +407,7 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
         'snapshots' => $pair['snapshots'],
         'extras' => $pair['extras'],
         'diffs' => $diffs,
+        'tolerated_differences' => $tolerated,
         'result' => $diffs === [] ? 'PASS' : 'DIFF',
     ];
     if (!is_dir((string) getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'))) {
@@ -383,6 +415,9 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
     }
     file_put_contents(((string) getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence')) . '/scenario-' . $name . '.json',
         json_encode($evidence, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    foreach ($tolerated as $t) {
+        t12s_log("T12-SCENARIO {$name} ACCEPTED: {$t}");
+    }
     if ($diffs === []) {
         t12s_log("T12-SCENARIO {$name}: PASS");
         return ['name' => $name, 'result' => 'PASS', 'diffs' => 0];
