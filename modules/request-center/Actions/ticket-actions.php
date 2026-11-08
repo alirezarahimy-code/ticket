@@ -532,6 +532,7 @@ if (!defined('APP_ROOT')) {
                 'sla_paused_at' => null,
                 'sla_pause_minutes' => 0,
             ], 'requester_reopen', [
+                'requester_id' => $ticket['requester_id'],
                 'cancel_requested_at' => null,
                 'assigned_to' => $ticket['assigned_to'] ?? null,
                 'priority' => $ticket['priority'],
@@ -680,6 +681,7 @@ if (!defined('APP_ROOT')) {
                 : 'standard';
             $workflow = new RequestCenterWorkflowService(db());
             $replySaved = $workflow->transition($ticketId, $oldStatus, $newStatus, $replyUpdates, $replyTransitionKind, [
+                'requester_id' => $ticket['requester_id'],
                 'assigned_to' => $ticket['assigned_to'] ?? null,
                 'first_response_at' => $ticket['first_response_at'] ?? null,
                 'priority' => $ticket['priority'],
@@ -867,6 +869,7 @@ if (!defined('APP_ROOT')) {
             $workflow = new RequestCenterWorkflowService(db());
             $workflowKind = $status === $oldStatus ? 'same_state' : 'standard';
             $updated = $workflow->transition($ticketId, $oldStatus, $status, $workflowUpdates, $workflowKind, [
+                'requester_id' => $ticket['requester_id'],
                 'assigned_to' => $ticket['assigned_to'] ?? null,
                 'first_response_at' => $ticket['first_response_at'] ?? null,
                 'priority' => $ticket['priority'],
