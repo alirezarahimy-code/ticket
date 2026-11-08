@@ -289,7 +289,15 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
                 return true;
             }));
         }
-        if (count($a[$key]) !== count($featureRows)) { $diffs[] = "{$key} count differs: legacy=" . count($a[$key]) . ' feature=' . count($featureRows); continue; }
+        if (count($a[$key]) !== count($featureRows)) {
+            if ($scenario === '07b-priority-by-manager' && in_array($key, ['events', 'notifications'], true)
+                && count($a[$key]) > count($featureRows)) {
+                $tolerated[] = "07b: {$key} were not emitted because the out-of-scope support-manager edit was denied";
+                continue;
+            }
+            $diffs[] = "{$key} count differs: legacy=" . count($a[$key]) . ' feature=' . count($featureRows);
+            continue;
+        }
         foreach ($a[$key] as $i => $ra) {
             $rb = $featureRows[$i];
             foreach ($cols as $c) {
@@ -311,6 +319,12 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
 
                 // More specific RC audit action codes intentionally replace the
                 // legacy generic supervisor_decision/ticket_reopened labels.
+                if ($key === 'activity_logs' && $c === 'action_code'
+                    && $scenario === '07b-priority-by-manager'
+                    && $legacyValue === 'ticket_updated' && $featureValue === 'post_action_failed') {
+                    $tolerated[] = '07b: rejected out-of-scope write was recorded as a failed action instead of a ticket update';
+                    continue;
+                }
                 if ($key === 'activity_logs' && $c === 'action_code') {
                     $auditAliases = [
                         'ticket_supervisor_approved' => 'supervisor_decision',
@@ -562,7 +576,7 @@ try {
         $results[] = t12s_finish('07b-priority-by-manager', function (string $side, array $app, array $sess) {
             $tid = t12s_create_ticket($side, $app, $sess);
             $pdo = t12s_pdo($app);
-            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
+            $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, service_group = 'it' WHERE id = " . (int) $tid);
             $r = t12s_post($app['base_url'] . '/index.php', $sess['supmgr'][$side], 'update_ticket', ['ticket_id' => $tid, 'priority' => 'urgent']);
             return [t12s_snapshot($pdo), ['priority_status' => $r['status']]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
