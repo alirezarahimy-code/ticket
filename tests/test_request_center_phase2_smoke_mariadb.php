@@ -410,6 +410,41 @@ try {
         smoke_check($workspaceResponse['status'] === 200, 'independent ' . $workspaceLabel . ' page returns HTTP 200 (status ' . $workspaceResponse['status'] . ')');
     }
 
+    // Run the real SLA/OLA maintenance command twice against a disposable ticket.
+    $staffIdQuery = $pdo->prepare("SELECT id FROM users WHERE is_active = 1 AND id <> ? AND (role IN ('agent','supervisor','support_manager') OR is_it_agent = 1) ORDER BY id LIMIT 1");
+    $staffIdQuery->execute([$userId]);
+    $maintenanceAssignee = (int) ($staffIdQuery->fetchColumn() ?: $userId);
+    $maintenanceTicketId = (int) $ticketRow['id'];
+    $maintenanceFixture = $pdo->prepare('UPDATE tickets SET status = "in_progress", assigned_to = ?, first_response_at = NULL, resolved_at = NULL, cancel_requested_at = NULL, sla_paused_at = NULL, due_at = DATE_ADD(NOW(), INTERVAL 30 MINUTE), ola_response_due_at = DATE_SUB(NOW(), INTERVAL 5 MINUTE), ola_due_at = DATE_SUB(NOW(), INTERVAL 10 MINUTE), ola_escalation_1_at = DATE_SUB(NOW(), INTERVAL 15 MINUTE), ola_escalation_2_at = DATE_SUB(NOW(), INTERVAL 20 MINUTE) WHERE id = ?');
+    $maintenanceFixture->execute([$maintenanceAssignee, $maintenanceTicketId]);
+    $runMaintenance = static function () use ($root, $serverEnv): array {
+        $pipes = [];
+        $process = proc_open([PHP_BINARY, $root . '/cron/sla_maintenance.php'], [
+            0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w'],
+        ], $pipes, $root, $serverEnv);
+        if (!is_resource($process)) {
+            throw new RuntimeException('Could not start SLA/OLA maintenance process.');
+        }
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        return ['exit' => proc_close($process), 'stdout' => (string) $stdout, 'stderr' => (string) $stderr];
+    };
+    $maintenanceFirst = $runMaintenance();
+    smoke_check($maintenanceFirst['exit'] === 0, 'SLA/OLA maintenance command executes successfully (exit ' . $maintenanceFirst['exit'] . ')');
+    $slaAlerts = (int) $pdo->query('SELECT COUNT(*) FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
+    $olaAlerts = (int) $pdo->query('SELECT COUNT(*) FROM ticket_ola_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
+    smoke_check($slaAlerts === 1 && $olaAlerts === 4, 'SLA due-soon and all four overdue/escalation OLA alerts are persisted');
+    $maintenanceSecond = $runMaintenance();
+    $slaAlertsAfter = (int) $pdo->query('SELECT COUNT(*) FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
+    $olaAlertsAfter = (int) $pdo->query('SELECT COUNT(*) FROM ticket_ola_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
+    smoke_check($maintenanceSecond['exit'] === 0 && $slaAlertsAfter === $slaAlerts && $olaAlertsAfter === $olaAlerts, 'repeated SLA/OLA maintenance is idempotent and emits no duplicate alert rows');
+    $slaEvents = $pdo->prepare("SELECT COUNT(*) FROM ticket_events WHERE ticket_id = ? AND event_type IN ('sla_alert','ola_alert')");
+    $slaEvents->execute([$maintenanceTicketId]);
+    smoke_check((int) $slaEvents->fetchColumn() === 5, 'SLA/OLA alert events are recorded exactly once for the ticket');
+
     // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
     smoke_check($forwarded['status'] === 200 && str_contains($forwarded['body'], 'داشبورد'), 'non-RC POST action is forwarded in-process and renders the dashboard (status ' . $forwarded['status'] . ')');
