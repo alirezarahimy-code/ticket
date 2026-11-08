@@ -227,6 +227,12 @@ try {
 }
 $pdo->rollBack();
 workflow_check($standardRejectBlocked, 'standard workflow cannot bypass supervisor rejection authorization');
+workflow_check(
+    !in_array('rejected', RequestCenterWorkflowService::allowedTransitions('new'), true)
+    && !in_array('rejected', RequestCenterWorkflowService::allowedTransitions('manager_review'), true)
+    && !in_array('rejected', RequestCenterWorkflowService::allowedTransitions('assigned'), true),
+    'supervisor-only rejection is excluded from the standard transition matrix'
+);
 
 $pdo->beginTransaction();
 workflow_check(
