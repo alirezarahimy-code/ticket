@@ -292,6 +292,152 @@ function request_center_assert_create_schema(): void
 }
 
 /**
+ * Request Center-only ticket number preview. This intentionally never invokes
+ * ticket_number_ensure_schema(); migration 037 owns the sequence table/column.
+ */
+function request_center_ticket_number_peek(string $prefix): string
+{
+    $prefix = strtoupper(substr(trim($prefix) !== '' ? trim($prefix) : 'TK', 0, 12));
+    $query = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? LIMIT 1');
+    $query->execute([$prefix]);
+    $current = (int) ($query->fetchColumn() ?: 0);
+    $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+
+ * Center entry. The provider helper calls org_ensure_schema() and therefore
+ * is intentionally not used on this path.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function request_center_org_deputy_units(array $user): array
+{
+    $companyAware = function_exists('org_has_company_schema') && org_has_company_schema();
+    $companyId = function_exists('org_current_company_id') ? org_current_company_id() : 0;
+    if ($companyAware && $companyId <= 0) {
+        return [];
+    }
+    $companyFilter = $companyAware ? ' AND ou.company_id = ?' : '';
+    $query = db()->prepare(
+        'SELECT ou.id, ou.name, ou.code, ou.parent_id, m.full_name AS manager_name
+         FROM org_units ou
+         LEFT JOIN users m ON m.id = ou.manager_user_id
+         WHERE ou.is_active = 1 AND ou.unit_type = "deputy"' . $companyFilter . '
+         ORDER BY ou.name'
+    );
+    $query->execute($companyAware ? [$companyId] : []);
+    return $query->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/** Request Center status labels, including the module-owned rejected terminal state. */
+function request_center_status_label(string $status): string
+{
+    $labels = [
+        'new' => 'جدید',
+        'manager_review' => 'در انتظار ارزیابی و ارجاع',
+        'assigned' => 'ارجاع‌شده',
+        'in_progress' => 'در حال رسیدگی',
+        'waiting_user' => 'در انتظار پاسخ کاربر',
+        'pending' => 'در انتظار پاسخ کاربر',
+        'resolved' => 'حل‌شده',
+        'closed' => 'بسته‌شده',
+        'cancelled' => 'لغوشده',
+        'rejected' => 'ردشده',
+    ];
+    return $labels[$status] ?? (function_exists('status_label') ? status_label($status) : $status);
+}
+;
+    $maxQuery = db()->prepare(
+        'SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED))
+         FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?'
+    );
+    $maxQuery->execute([$prefix . '-%', $pattern]);
+    $existing = (int) ($maxQuery->fetchColumn() ?: 0);
+    return $prefix . '-' . str_pad((string) (max($current, $existing) + 1), 5, '0', STR_PAD_LEFT);
+}
+
+/**
+ * Transactional sequence allocation for the independent Request Center.
+ * It mirrors the established global sequence contract but performs no schema
+ * repair or DDL in the request path.
+ */
+function request_center_ticket_number_next(string $prefix): string
+{
+    $prefix = strtoupper(substr(trim($prefix) !== '' ? trim($prefix) : 'TK', 0, 12));
+    $ownsTransaction = !db()->inTransaction();
+    if ($ownsTransaction) {
+        db()->beginTransaction();
+    }
+    try {
+        db()->prepare(
+            'INSERT INTO ticket_number_seq (prefix, seq) VALUES (?, 0)
+             ON DUPLICATE KEY UPDATE prefix = VALUES(prefix)'
+        )->execute([$prefix]);
+        $read = db()->prepare('SELECT seq FROM ticket_number_seq WHERE prefix = ? FOR UPDATE');
+        $read->execute([$prefix]);
+        $current = (int) ($read->fetchColumn() ?: 0);
+        $pattern = '^' . preg_quote($prefix, '/') . '-[0-9]+
+ * Center entry. The provider helper calls org_ensure_schema() and therefore
+ * is intentionally not used on this path.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function request_center_org_deputy_units(array $user): array
+{
+    $companyAware = function_exists('org_has_company_schema') && org_has_company_schema();
+    $companyId = function_exists('org_current_company_id') ? org_current_company_id() : 0;
+    if ($companyAware && $companyId <= 0) {
+        return [];
+    }
+    $companyFilter = $companyAware ? ' AND ou.company_id = ?' : '';
+    $query = db()->prepare(
+        'SELECT ou.id, ou.name, ou.code, ou.parent_id, m.full_name AS manager_name
+         FROM org_units ou
+         LEFT JOIN users m ON m.id = ou.manager_user_id
+         WHERE ou.is_active = 1 AND ou.unit_type = "deputy"' . $companyFilter . '
+         ORDER BY ou.name'
+    );
+    $query->execute($companyAware ? [$companyId] : []);
+    return $query->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/** Request Center status labels, including the module-owned rejected terminal state. */
+function request_center_status_label(string $status): string
+{
+    $labels = [
+        'new' => 'جدید',
+        'manager_review' => 'در انتظار ارزیابی و ارجاع',
+        'assigned' => 'ارجاع‌شده',
+        'in_progress' => 'در حال رسیدگی',
+        'waiting_user' => 'در انتظار پاسخ کاربر',
+        'pending' => 'در انتظار پاسخ کاربر',
+        'resolved' => 'حل‌شده',
+        'closed' => 'بسته‌شده',
+        'cancelled' => 'لغوشده',
+        'rejected' => 'ردشده',
+    ];
+    return $labels[$status] ?? (function_exists('status_label') ? status_label($status) : $status);
+}
+;
+        $maxQuery = db()->prepare(
+            'SELECT MAX(CAST(SUBSTRING_INDEX(ticket_no, "-", -1) AS UNSIGNED))
+             FROM tickets WHERE ticket_no LIKE ? AND ticket_no REGEXP ?'
+        );
+        $maxQuery->execute([$prefix . '-%', $pattern]);
+        $existing = (int) ($maxQuery->fetchColumn() ?: 0);
+        $sequence = max($current, $existing) + 1;
+        db()->prepare('UPDATE ticket_number_seq SET seq = ? WHERE prefix = ?')
+            ->execute([$sequence, $prefix]);
+        if ($ownsTransaction) {
+            db()->commit();
+        }
+        return $prefix . '-' . str_pad((string) $sequence, 5, '0', STR_PAD_LEFT);
+    } catch (Throwable $exception) {
+        if ($ownsTransaction && db()->inTransaction()) {
+            db()->rollBack();
+        }
+        throw $exception;
+    }
+}
+
+/**
  * Read-only equivalent of org_deputy_units() for the independent Request
  * Center entry. The provider helper calls org_ensure_schema() and therefore
  * is intentionally not used on this path.
