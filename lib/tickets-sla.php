@@ -875,7 +875,7 @@ function record_asset_history(int $assetId, string $eventType, string $title, ?i
 
 function status_label(string $status): string
 {
-    return ['new' => 'جدید', 'manager_review' => 'در انتظار بررسی مدیر واحد', 'assigned' => 'ارجاع‌شده به کارشناس', 'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر', 'open' => 'در حال بررسی', 'pending' => 'در انتظار پاسخ', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده', 'cancelled' => 'لغوشده به درخواست ثبت‌کننده'][$status] ?? $status;
+    return ['new' => 'جدید', 'manager_review' => 'در انتظار بررسی مدیر واحد', 'assigned' => 'ارجاع‌شده به کارشناس', 'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر', 'open' => 'در حال بررسی', 'pending' => 'در انتظار پاسخ', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده', 'cancelled' => 'لغوشده به درخواست ثبت‌کننده', 'rejected' => 'ردشده پس از ارزیابی اولیه'][$status] ?? $status;
 }
 
 function priority_label(string $priority): string
