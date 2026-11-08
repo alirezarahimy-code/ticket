@@ -259,7 +259,7 @@ def test_public_management_and_bulk_replies_start_first_response_clock():
 def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshots():
     workflow = source("modules/request-center/WorkflowService.php")
     assert "service_group, due_at, sla_minutes, sla_paused_at" in workflow
-    assert "'service_group'], true" in workflow
+    assert "'service_group', 'due_at', 'sla_minutes'" in workflow
     for path in (
         "modules/request-center/Actions/ticket-actions.php",
         "modules/request-center/Actions/supervisor-actions.php",
