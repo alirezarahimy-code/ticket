@@ -203,7 +203,7 @@ cron/run_logging_integrity_export.bat	cron	20	1605
 cron/run_logging_maintenance.bat	cron	40	1970
 cron/run_logging_retention.bat	cron	12	508
 cron/sla_maintenance.php	cron	110	6957
-cron/ticket_auto_close.php	cron	84	4966
+cron/ticket_auto_close.php	cron	84	5106
 cron/verify_logging_integrity.php	cron	26	1365
 cron/verify_logging_release.php	cron	25	4981
 docs/ARCHITECTURE-FA.md	docs	167	17142
@@ -461,7 +461,7 @@ modules/request-center/Pages/services.php	other	175	19749
 modules/request-center/Pages/supervisor-workspace.php	other	65	5777
 modules/request-center/Pages/supervisor.php	other	55	7801
 modules/request-center/README.md	other	286	30697
-modules/request-center/RequestCenterRepository.php	other	446	20526
+modules/request-center/RequestCenterRepository.php	other	454	21129
 modules/request-center/WorkflowService.php	other	268	12352
 modules/request-center/lib/endpoints.php	other	95	7621
 modules/request-center/lib/functions.php	other	243	14213
@@ -679,8 +679,8 @@ tests/test_request_center_t07_migration_clone.php	tests	398	16210
 tests/test_request_center_t12_preflight.php	tests	321	13348
 tests/test_request_center_t12_scenarios.php	tests	581	37559
 tests/test_request_center_web_ddl_runtime.php	tests	284	13133
-tests/test_request_center_workflow_service_mariadb.php	tests	150	5334
-tests/test_request_center_workflow_service_sqlite.php	tests	190	7056
+tests/test_request_center_workflow_service_mariadb.php	tests	179	6613
+tests/test_request_center_workflow_service_sqlite.php	tests	231	8545
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	115	4609
 tests/test_schema_heal_static.py	tests	45	2290

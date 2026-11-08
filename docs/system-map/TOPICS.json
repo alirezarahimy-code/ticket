@@ -35408,7 +35408,7 @@
       "line": 4,
       "anchor": "RequestCenterRepository",
       "risk": 8,
-      "lines": 443
+      "lines": 451
     },
     "PAGE-059.01": {
       "path": "modules/request-center/WorkflowService.php",
@@ -47886,14 +47886,14 @@
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
       "line": 37,
-      "anchor": "بلوک رویه‌ای 37-74",
-      "risk": 5,
-      "lines": 38
+      "anchor": "بلوک رویه‌ای 37-103",
+      "risk": 4,
+      "lines": 67
     },
     "TEST-183.04": {
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
-      "line": 75,
+      "line": 104,
       "anchor": "The MySQL driver branch appends FOR UPDATE; successful execu",
       "risk": 1,
       "lines": 1
@@ -47901,7 +47901,7 @@
     "TEST-183.05": {
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
-      "line": 76,
+      "line": 105,
       "anchor": "that the production locking query is accepted by the target ",
       "risk": 0,
       "lines": 17
@@ -47909,7 +47909,7 @@
     "TEST-183.06": {
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
-      "line": 93,
+      "line": 122,
       "anchor": "A caller-owned rollback must undo both the status and associ",
       "risk": 0,
       "lines": 17
@@ -47917,7 +47917,7 @@
     "TEST-183.07": {
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
-      "line": 110,
+      "line": 139,
       "anchor": "A stale status and a stale optimistic field must both be non",
       "risk": 0,
       "lines": 18
@@ -47925,7 +47925,7 @@
     "TEST-183.08": {
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
-      "line": 128,
+      "line": 157,
       "anchor": "Cancellation-pending blocks ordinary transitions even after ",
       "risk": 0,
       "lines": 11
@@ -47933,7 +47933,7 @@
     "TEST-183.09": {
       "path": "tests/test_request_center_workflow_service_mariadb.php",
       "area": "TEST",
-      "line": 139,
+      "line": 168,
       "anchor": "Column names are never accepted from untrusted caller input.",
       "risk": 5,
       "lines": 13
@@ -47958,9 +47958,9 @@
       "path": "tests/test_request_center_workflow_service_sqlite.php",
       "area": "TEST",
       "line": 13,
-      "anchor": "بلوک رویه‌ای 13-191",
+      "anchor": "بلوک رویه‌ای 13-232",
       "risk": 5,
-      "lines": 179
+      "lines": 220
     },
     "TEST-185.01": {
       "path": "tests/test_role_permissions_ui_static.py",

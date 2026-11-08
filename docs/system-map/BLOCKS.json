@@ -16185,7 +16185,7 @@
             "path": "cron\/ticket_auto_close.php",
             "area": "CRON",
             "lines": 85,
-            "file_fingerprint": "55001947619b",
+            "file_fingerprint": "8972ab881abe",
             "blocks": [
                 {
                     "kind": "region",
@@ -16193,7 +16193,7 @@
                     "line_start": 1,
                     "line_end": 85,
                     "lines": 85,
-                    "fingerprint": "55001947619b",
+                    "fingerprint": "8972ab881abe",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -53212,8 +53212,8 @@
             "id": "PAGE-058",
             "path": "modules\/request-center\/RequestCenterRepository.php",
             "area": "PAGE",
-            "lines": 447,
-            "file_fingerprint": "f87b4588679b",
+            "lines": 455,
+            "file_fingerprint": "0daf6768dc9d",
             "blocks": [
                 {
                     "kind": "region",
@@ -53232,9 +53232,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterRepository",
                     "line_start": 4,
-                    "line_end": 446,
-                    "lines": 443,
-                    "fingerprint": "ea94866c0fee",
+                    "line_end": 454,
+                    "lines": 451,
+                    "fingerprint": "6f1e56678646",
                     "risk": {
                         "score": 8,
                         "flags": {
@@ -76014,8 +76014,8 @@
             "id": "TEST-183",
             "path": "tests\/test_request_center_workflow_service_mariadb.php",
             "area": "TEST",
-            "lines": 151,
-            "file_fingerprint": "f1504b7a85e0",
+            "lines": 180,
+            "file_fingerprint": "d592a80ebef4",
             "blocks": [
                 {
                     "kind": "region",
@@ -76045,16 +76045,15 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 37-74",
+                    "anchor": "بلوک رویه‌ای 37-103",
                     "line_start": 37,
-                    "line_end": 74,
-                    "lines": 38,
-                    "fingerprint": "7b6e6a64c62f",
+                    "line_end": 103,
+                    "lines": 67,
+                    "fingerprint": "50d0ab0f6d52",
                     "risk": {
-                        "score": 5,
+                        "score": 4,
                         "flags": {
-                            "dangerous_call": 4,
-                            "write_no_tx": 1
+                            "dangerous_call": 4
                         }
                     },
                     "id": "TEST-183.03"
@@ -76062,8 +76061,8 @@
                 {
                     "kind": "region",
                     "anchor": "The MySQL driver branch appends FOR UPDATE; successful execu",
-                    "line_start": 75,
-                    "line_end": 75,
+                    "line_start": 104,
+                    "line_end": 104,
                     "lines": 1,
                     "fingerprint": "e80570cbba95",
                     "risk": {
@@ -76077,8 +76076,8 @@
                 {
                     "kind": "region",
                     "anchor": "that the production locking query is accepted by the target ",
-                    "line_start": 76,
-                    "line_end": 92,
+                    "line_start": 105,
+                    "line_end": 121,
                     "lines": 17,
                     "fingerprint": "24f13ff06321",
                     "risk": {
@@ -76090,8 +76089,8 @@
                 {
                     "kind": "region",
                     "anchor": "A caller-owned rollback must undo both the status and associ",
-                    "line_start": 93,
-                    "line_end": 109,
+                    "line_start": 122,
+                    "line_end": 138,
                     "lines": 17,
                     "fingerprint": "b82b35e92f32",
                     "risk": {
@@ -76103,8 +76102,8 @@
                 {
                     "kind": "region",
                     "anchor": "A stale status and a stale optimistic field must both be non",
-                    "line_start": 110,
-                    "line_end": 127,
+                    "line_start": 139,
+                    "line_end": 156,
                     "lines": 18,
                     "fingerprint": "fac58e429917",
                     "risk": {
@@ -76116,8 +76115,8 @@
                 {
                     "kind": "region",
                     "anchor": "Cancellation-pending blocks ordinary transitions even after ",
-                    "line_start": 128,
-                    "line_end": 138,
+                    "line_start": 157,
+                    "line_end": 167,
                     "lines": 11,
                     "fingerprint": "100a3a81d7bf",
                     "risk": {
@@ -76129,8 +76128,8 @@
                 {
                     "kind": "region",
                     "anchor": "Column names are never accepted from untrusted caller input.",
-                    "line_start": 139,
-                    "line_end": 151,
+                    "line_start": 168,
+                    "line_end": 180,
                     "lines": 13,
                     "fingerprint": "8d7424465477",
                     "risk": {
@@ -76147,8 +76146,8 @@
             "id": "TEST-184",
             "path": "tests\/test_request_center_workflow_service_sqlite.php",
             "area": "TEST",
-            "lines": 191,
-            "file_fingerprint": "e507b4f842bc",
+            "lines": 232,
+            "file_fingerprint": "9d9e5abbb9b0",
             "blocks": [
                 {
                     "kind": "region",
@@ -76178,11 +76177,11 @@
                 },
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 13-191",
+                    "anchor": "بلوک رویه‌ای 13-232",
                     "line_start": 13,
-                    "line_end": 191,
-                    "lines": 179,
-                    "fingerprint": "eb51187746b2",
+                    "line_end": 232,
+                    "lines": 220,
+                    "fingerprint": "eef2f14307ef",
                     "risk": {
                         "score": 5,
                         "flags": {

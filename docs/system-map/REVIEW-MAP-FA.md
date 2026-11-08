@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 589 |
-| خطوط | 131,904 |
+| خطوط | 131,982 |
 | آدرس‌ها (بلوک) | 6,874 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -286,10 +286,10 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 234 | 1,709 | 23,351 |
+| `TEST` | TEST | 234 | 1,709 | 23,421 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 84 | 1,377 | 8,023 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,877 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,885 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -303,7 +303,7 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 843 |
+| `write_no_tx` | نوشتن بدون تراکنش | 842 |
 | `error_suppression` | سرکوب @ | 297 |
 | `dangerous_call` | فراخوانی خطرناک | 221 |
 | `sql_concat` | الحاق در SQL | 198 |
@@ -3070,30 +3070,30 @@
 </details>
 
 <details>
-<summary><b>TEST-183</b> — <code>tests/test_request_center_workflow_service_mariadb.php</code> (151 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>TEST-183</b> — <code>tests/test_request_center_workflow_service_mariadb.php</code> (180 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-183.01` | 1–29 | ناحیه | `بلوک رویه‌ای 1-29` | 0 | ⬜ |
 | `TEST-183.02` | 30–36 | تابع | `mariadb_workflow_check` | 0 | ⬜ |
-| `TEST-183.03` | 37–74 | ناحیه | `بلوک رویه‌ای 37-74` | 5 | ⬜ |
-| `TEST-183.04` | 75–75 | ناحیه | `The MySQL driver branch appends FOR UPDATE; succes` | 1 | ⬜ |
-| `TEST-183.05` | 76–92 | ناحیه | `that the production locking query is accepted by t` | 0 | ⬜ |
-| `TEST-183.06` | 93–109 | ناحیه | `A caller-owned rollback must undo both the status ` | 0 | ⬜ |
-| `TEST-183.07` | 110–127 | ناحیه | `A stale status and a stale optimistic field must b` | 0 | ⬜ |
-| `TEST-183.08` | 128–138 | ناحیه | `Cancellation-pending blocks ordinary transitions e` | 0 | ⬜ |
-| `TEST-183.09` | 139–151 | ناحیه | `Column names are never accepted from untrusted cal` | 5 | ⬜ |
+| `TEST-183.03` | 37–103 | ناحیه | `بلوک رویه‌ای 37-103` | 4 | ⬜ |
+| `TEST-183.04` | 104–104 | ناحیه | `The MySQL driver branch appends FOR UPDATE; succes` | 1 | ⬜ |
+| `TEST-183.05` | 105–121 | ناحیه | `that the production locking query is accepted by t` | 0 | ⬜ |
+| `TEST-183.06` | 122–138 | ناحیه | `A caller-owned rollback must undo both the status ` | 0 | ⬜ |
+| `TEST-183.07` | 139–156 | ناحیه | `A stale status and a stale optimistic field must b` | 0 | ⬜ |
+| `TEST-183.08` | 157–167 | ناحیه | `Cancellation-pending blocks ordinary transitions e` | 0 | ⬜ |
+| `TEST-183.09` | 168–180 | ناحیه | `Column names are never accepted from untrusted cal` | 5 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>TEST-184</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (191 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>TEST-184</b> — <code>tests/test_request_center_workflow_service_sqlite.php</code> (232 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `TEST-184.01` | 1–5 | ناحیه | `بلوک رویه‌ای 1-5` | 0 | ⬜ |
 | `TEST-184.02` | 6–12 | تابع | `workflow_check` | 0 | ⬜ |
-| `TEST-184.03` | 13–191 | ناحیه | `بلوک رویه‌ای 13-191` | 5 | ⬜ |
+| `TEST-184.03` | 13–232 | ناحیه | `بلوک رویه‌ای 13-232` | 5 | ⬜ |
 
 </details>
 
@@ -8974,12 +8974,12 @@
 </details>
 
 <details>
-<summary><b>PAGE-058</b> — <code>modules/request-center/RequestCenterRepository.php</code> (447 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-058</b> — <code>modules/request-center/RequestCenterRepository.php</code> (455 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-058.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-058.02` | 4–446 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
+| `PAGE-058.02` | 4–454 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
 
 </details>
 
