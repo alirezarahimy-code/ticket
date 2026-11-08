@@ -27,6 +27,24 @@ $adminAuditQuery = db()->prepare(
 );
 $adminAuditQuery->execute($adminAuditParams);
 $adminAuditRows = $adminAuditQuery->fetchAll();
+$olaPolicies = [];
+$olaPolicyAvailable = false;
+try {
+    $olaPolicyAvailable = (bool) db()->query("SHOW TABLES LIKE 'ola_policies'")->fetchColumn();
+    if ($olaPolicyAvailable) {
+        $olaPolicies = db()->query(
+            'SELECT p.id, p.name, p.department_id, p.priority, p.response_minutes, '
+            . 'p.resolution_minutes, p.escalation_1_minutes, p.escalation_2_minutes, p.is_active, '
+            . 'd.name AS department_name FROM ola_policies p '
+            . 'LEFT JOIN departments d ON d.id = p.department_id '
+            . 'ORDER BY p.department_id IS NULL DESC, p.department_id, p.priority, p.id'
+        )->fetchAll();
+    }
+} catch (Throwable) {
+    // The OLA policy table is optional on pre-migration installations.
+    $olaPolicyAvailable = false;
+    $olaPolicies = [];
+}
 $adminAuditLabels = [
     'created' => 'ثبت درخواست', 'assigned' => 'ارجاع', 'assignment_changed' => 'تغییر مسئول',
     'status_changed' => 'تغییر وضعیت', 'reply' => 'پاسخ', 'internal_note' => 'یادداشت داخلی',
@@ -131,6 +149,30 @@ header('Cache-Control: private, no-store');
 <?php foreach ($adminLinks as $link): ?><a class="rc-admin-link" href="<?= $escapeAdmin($link['url']) ?>"><b><?= $escapeAdmin($link['title']) ?></b><small><?= $escapeAdmin($link['description']) ?></small></a><?php endforeach; ?>
 </aside>
 </div>
+<section class="card" id="ola-policies" style="padding:16px;margin-top:18px">
+<h2>سیاست‌های OLA</h2>
+<p class="muted">این تنظیمات مهلت پاسخ، حل و پله‌های ارجاع را برای درخواست‌های جدید و محاسبه‌های مجدد بعدی تعیین می‌کند؛ تغییر سیاست، موعد ثبت‌شدهٔ درخواست‌های موجود را بی‌صدا بازنویسی نمی‌کند.</p>
+<?php if (!$olaPolicyAvailable): ?><p class="muted">جدول سیاست OLA در این نصب موجود نیست؛ این بخش بدون تغییر Schema غیرفعال است.</p>
+<?php elseif (!$olaPolicies): ?><p class="muted">سیاستی ثبت نشده است. برای جلوگیری از ساخت خودکار یا حدس‌زدن مقادیر سازمان، سیاست جدید در این صفحه ایجاد نمی‌شود.</p>
+<?php else: ?>
+<div class="rc-admin-links">
+<?php foreach ($olaPolicies as $policy): ?>
+<form method="post" class="rc-admin-link" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end">
+<?= csrf_field() ?><input type="hidden" name="action" value="update_ola_policy"><input type="hidden" name="policy_id" value="<?= (int) $policy['id'] ?>">
+<label>نام سیاست<input name="policy_name" required maxlength="150" value="<?= $escapeAdmin($policy['name']) ?>"></label>
+<label>حوزه سازمانی<input type="number" min="0" name="department_id" value="<?= (int) ($policy['department_id'] ?? 0) ?>" placeholder="۰ = سراسری"></label>
+<label>اولویت<select name="priority"><?php foreach (['critical' => 'بحرانی', 'urgent' => 'فوری', 'normal' => 'عادی'] as $key => $label): ?><option value="<?= $key ?>" <?= $policy['priority'] === $key ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?></select></label>
+<label>مهلت پاسخ (دقیقه)<input type="number" min="1" max="525600" name="response_minutes" required value="<?= (int) $policy['response_minutes'] ?>"></label>
+<label>مهلت حل (دقیقه)<input type="number" min="1" max="525600" name="resolution_minutes" required value="<?= (int) $policy['resolution_minutes'] ?>"></label>
+<label>ارجاع اول (دقیقه)<input type="number" min="1" max="525600" name="escalation_1_minutes" required value="<?= (int) $policy['escalation_1_minutes'] ?>"></label>
+<label>ارجاع دوم (دقیقه)<input type="number" min="1" max="525600" name="escalation_2_minutes" required value="<?= (int) $policy['escalation_2_minutes'] ?>"></label>
+<label class="check-label"><input type="checkbox" name="is_active" value="1" <?= (int) $policy['is_active'] === 1 ? 'checked' : '' ?>> فعال</label>
+<button class="button" type="submit">ذخیره سیاست</button>
+</form>
+<?php endforeach; ?>
+</div>
+<?php endif; ?>
+</section>
 <section class="card" style="padding:16px;margin-top:18px" aria-labelledby="rc-admin-audit-title">
 <h2 id="rc-admin-audit-title">آخرین رویدادهای عملیاتی</h2>
 <p class="muted">فقط رخدادهای درخواست‌های قابل مشاهده در دامنهٔ دسترسی این حساب نمایش داده می‌شود. محتوای پیام‌ها و جزئیات یادداشت‌های داخلی در این فهرست بارگذاری یا افشا نمی‌شود.</p>
