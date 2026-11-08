@@ -20,7 +20,7 @@ $rootUser = (string) (getenv('CI_DB_USER') ?: 'root');
 $rootPass = (string) (getenv('CI_DB_PASS') ?: '');
 $mysql = (string) (getenv('ITSM_MYSQL_PATH') ?: 'mariadb');
 $schemaFile = dirname(__DIR__) . '/install-empty-db.sql';
-$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11'))));
+$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11,12'))));
 $evidenceDir = (string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'));
 
 $portBase = 18100 + (getmypid() % 4000);
@@ -738,6 +738,44 @@ try {
             ]);
             return [t12s_snapshot($pdo), ['http_status' => $response['status'], 'ticket_id' => $tid]];
         }, $apps, $rootUser, $rootPass, $host, $port, $mysql);
+    }
+
+    if (in_array(12, $scenarioFilter, true)) {
+        // Exercise the four independent Workspace entry routes with real role sessions.
+        // This complements the lifecycle POST characterization above; it does not
+        // infer UI availability from a successful legacy POST.
+        t12s_rebuild_all($apps, $rootUser, $rootPass, $host, $port, $mysql);
+        foreach ($apps as &$workspaceApp) {
+            $workspaceApp['base_url'] = 'http://127.0.0.1:' . (int) $workspaceApp['port'];
+        }
+        unset($workspaceApp);
+        $workspaceSessions = t12s_sessions($apps);
+        $workspaceCases = [
+            ['requester', 'requester', 'درخواست‌دهنده'],
+            ['agent', 'agent', 'صف شخصی'],
+            ['supervisor', 'supervisor', 'فضای کاری سوپروایزر'],
+            ['admin', 'admin', 'مدیریت مرکز درخواست‌ها'],
+        ];
+        $workspaceEvidence = [];
+        foreach ($workspaceCases as [$workspace, $sessionKey, $expectedText]) {
+            $response = t12s_http(
+                $apps['feature']['base_url'] . '/request-center.php?workspace=' . rawurlencode($workspace),
+                'GET',
+                ['Cookie: ' . $workspaceSessions[$sessionKey]['feature']['cookie']]
+            );
+            if ($response['status'] !== 200 || !str_contains($response['body'], $expectedText)) {
+                t12s_fail('12-independent-four-workspaces-http: ' . $workspace
+                    . ' expected HTTP 200 and marker "' . $expectedText . '", got HTTP '
+                    . $response['status'] . '; body=' . substr($response['body'], 0, 500));
+            }
+            $workspaceEvidence[] = $workspace . ':HTTP-' . $response['status'] . ':PASS';
+            t12s_log('T12-SCENARIO 12-independent-four-workspaces-http ' . $workspace . ': PASS');
+        }
+        $results[] = [
+            'name' => '12-independent-four-workspaces-http',
+            'result' => 'PASS',
+            'evidence' => $workspaceEvidence,
+        ];
     }
 
     file_put_contents($evidenceDir . '/summary.json', json_encode(['results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
