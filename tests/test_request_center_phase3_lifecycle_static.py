@@ -475,3 +475,17 @@ def test_lifecycle_post_errors_preserve_supervisor_and_agent_queue_context():
     supervisor_actions = source("modules/request-center/Actions/supervisor-actions.php")
     assert supervisor_actions.count("redirect(request_center_ticket_return_url($ticketId));") >= 5
     assert "redirect('request-center.php?page=supervisor');" not in supervisor_actions
+
+def test_report_to_detail_navigation_preserves_report_workspace_and_filters():
+    reports = source("modules/request-center/Pages/reports.php")
+    detail = source("modules/request-center/Pages/detail.php")
+    helpers = source("modules/request-center/lib/functions.php")
+    assert "$reportReturnParams = ['workspace' => $reportReturnWorkspace, 'p' => $reportPage]" in reports
+    assert "$reportDetailContext = http_build_query($reportReturnParams)" in reports
+    assert "e($reportDetailContext)" in reports
+    for key in ("ticket_type", "department_id", "assigned_to", "from", "to"):
+        assert key in reports
+        assert key in detail
+        assert key in helpers
+    assert "valid_choice((string) ($_GET['ticket_type'] ?? '')" in detail
+    assert "valid_choice((string) ($_POST['rc_return_ticket_type'] ?? '')" in helpers
