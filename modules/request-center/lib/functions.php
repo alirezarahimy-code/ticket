@@ -187,7 +187,7 @@ function report_query_filters(array $user): array
     [$scope, $params] = ticket_scope($user);
     $conditions = $scope !== '' ? [substr($scope, 6)] : [];
     $ticketColumns = db_table_columns('tickets');
-    $status = valid_choice((string) ($_GET['status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'active', 'all'], '');
+    $status = valid_choice((string) ($_GET['status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected', 'active', 'all'], '');
     if ($status === 'active') {
         // «در حال پیگیری» = همهٔ وضعیت‌های باز (کارت داشبورد)
         $conditions[] = 't.status IN ("new", "manager_review", "assigned", "in_progress", "waiting_user", "pending")';
