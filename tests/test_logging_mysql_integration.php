@@ -124,7 +124,7 @@ foreach (split_sql_statements($migration) as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
     if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
-foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql', '033-logging-legacy-context-collation.sql'] as $migrationName) {
+foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.sql', '028-logging-fingerprint-v2.sql', '029-activity-result-default-unknown.sql', '030-logging-notification-idempotency-and-ticket-history.sql', '033-logging-legacy-context-collation.sql', '034-logging-escalation.sql'] as $migrationName) {
     $migration = file_get_contents(dirname(__DIR__) . '/migrations/' . $migrationName);
     if (!is_string($migration)) throw new RuntimeException($migrationName . ' could not be read.');
     foreach (split_sql_statements($migration) as $statement) {
@@ -132,9 +132,9 @@ foreach (['026-logging-legacy-result-unknown.sql', '027-logging-correlation-ids.
         if ($statement !== '') execute_migration_statement($pdo, $statement);
     }
 }
-// Migration 025 must remain safe when the updater retries a migration after an interrupted release.
-$migration025 = file_get_contents(dirname(__DIR__) . '/migrations/030-logging-notification-idempotency-and-ticket-history.sql');
-foreach (split_sql_statements((string) $migration025) as $statement) {
+// Migration 030 must remain safe when the updater retries a migration after an interrupted release.
+$migration030 = file_get_contents(dirname(__DIR__) . '/migrations/030-logging-notification-idempotency-and-ticket-history.sql');
+foreach (split_sql_statements((string) $migration030) as $statement) {
     $statement = preg_replace('/^\s*--.*$/m', '', trim($statement));
     if ($statement !== '') execute_migration_statement($pdo, $statement);
 }
@@ -153,9 +153,9 @@ $checks['new occurrence reopens resolved issue'] = logging_store_system($event)
     && (string) $pdo->query('SELECT status FROM log_issues')->fetchColumn() === 'open';
 $dedupeRow = $pdo->query('SELECT event_id, request_id, code, category, level, context, message, created_at FROM system_logs ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
 $beforeDedupeCount = (int) $pdo->query('SELECT occurrences FROM log_issues')->fetchColumn();
-$dedupeOk = logging_issue_upsert($dedupeRow, false);
+$dedupeOk = is_array($dedupeRow) && logging_issue_upsert($dedupeRow, false);
 $afterDedupeCount = (int) $pdo->query('SELECT occurrences FROM log_issues')->fetchColumn();
-$checks['issue aggregation is idempotent for an already processed Event ID'] = $dedupeOk && $beforeDedupeCount === $afterDedupeCount;
+$checks['issue aggregation is idempotent for an already processed Event ID'] = is_array($dedupeRow) && $dedupeOk && $beforeDedupeCount === $afterDedupeCount;
 
 $replayId = logging_uuid();
 $insertSql = 'INSERT INTO system_logs (event_id, level, context, message) VALUES (?, ?, ?, ?)';
