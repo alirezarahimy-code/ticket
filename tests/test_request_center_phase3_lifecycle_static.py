@@ -19,6 +19,7 @@ def test_lifecycle_pages_are_routed_inside_request_center():
     assert "require __DIR__ . '/index.php';" in router  # compatibility bridge remains for non-RC routes
     legacy = source("index.php")
     assert "request-center.php?' . http_build_query($requestCenterQuery)" in legacy
+    assert legacy.index("Early compatibility bridge") < legacy.index("ticket_number_ensure_schema()")
 
 
 def test_lifecycle_actions_return_to_independent_workspaces():
