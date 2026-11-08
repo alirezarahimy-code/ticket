@@ -84,9 +84,9 @@ def test_lifecycle_notifications_are_idempotent_and_failure_isolated():
         "modules/request-center/Actions/bulk-actions.php",
     ):
         text = source(path)
-        assert "notify_ticket_parties(" not in text
-        assert "notify_ticket_staff(" not in text
-        assert "notify_ticket_resolved(" not in text
+        assert not re.search(r"(?<!request_center_)notify_ticket_parties\\(", text)
+        assert not re.search(r"(?<!request_center_)notify_ticket_staff\\(", text)
+        assert not re.search(r"(?<!request_center_)notify_ticket_resolved\\(", text)
 
 
 def test_rejection_schema_is_migration_owned_not_runtime_ddl():
