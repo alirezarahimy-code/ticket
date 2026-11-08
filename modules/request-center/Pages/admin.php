@@ -22,14 +22,37 @@ $adminStatusLabels = [
     'pending' => 'در انتظار پاسخ کاربر', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده',
     'cancelled' => 'لغوشده', 'rejected' => 'ردشده',
 ];
+// فقط مقصدهایی را نشان بده که همین حساب مجوز ورود به آن‌ها را دارد؛
+ // وجود نقش primary_admin به‌تنهایی جایگزین مجوزهای مستقل صف/نظارت/گزارش نیست.
 $adminLinks = [
-    ['title' => 'کاتالوگ خدمات و فرم‌ها', 'description' => 'خدمات، دسته‌بندی‌ها، فیلدهای تکمیلی و مسیر رسیدگی', 'url' => 'request-center.php?page=services'],
-    ['title' => 'سیاست‌ها و گزارش SLA/OLA', 'description' => 'گزارش درخواست‌ها، موعدها و موارد خارج از تعهد', 'url' => 'request-center.php?page=reports'],
-    ['title' => 'تحلیل عملکرد', 'description' => 'توزیع وضعیت، اولویت، واحدها و رضایت کارشناسان', 'url' => 'request-center.php?page=analytics'],
-    ['title' => 'تقویم موعد کارشناسان', 'description' => 'نمای ماهانهٔ موعد SLA، پاسخ OLA و حل OLA در محدودهٔ دسترسی', 'url' => 'request-center.php?workspace=admin&calendar=1'],
-    ['title' => 'صف عملیاتی', 'description' => 'درخواست‌های جاری، بدون مسئول و خارج از SLA/OLA', 'url' => 'request-center.php?page=queue'],
-    ['title' => 'پنل نظارت', 'description' => 'بررسی درخواست‌های حل‌شده و تصمیم‌های مدیریتی', 'url' => 'request-center.php?page=supervisor'],
+    ['title' => 'کاتالوگ خدمات و فرم‌ها', 'description' => 'خدمات، دسته‌بندی‌ها و فیلدهای تکمیلی فرم ثبت درخواست', 'url' => 'request-center.php?page=services'],
 ];
+if (user_can($user, 'reports.view')) {
+    $adminLinks[] = ['title' => 'گزارش‌های SLA/OLA', 'description' => 'گزارش درخواست‌ها، موعدها و موارد خارج از تعهد در محدودهٔ مجاز', 'url' => 'request-center.php?page=reports'];
+}
+if (user_can($user, 'analytics.view')) {
+    $adminLinks[] = ['title' => 'تحلیل عملکرد', 'description' => 'توزیع وضعیت، اولویت، واحدها و رضایت کارشناسان', 'url' => 'request-center.php?page=analytics'];
+}
+$adminLinks[] = ['title' => 'تقویم موعد کارشناسان', 'description' => 'نمای ماهانهٔ موعد SLA، پاسخ OLA و حل OLA در محدودهٔ دسترسی مدیر اصلی', 'url' => 'request-center.php?workspace=admin&calendar=1'];
+if (user_can($user, 'queue.view')) {
+    $adminLinks[] = ['title' => 'صف عملیاتی همه درخواست‌ها', 'description' => 'ورود به صف مجاز برای ارجاع، پیگیری و عملیات گروهی', 'url' => 'request-center.php?page=queue'];
+    foreach ([
+        'unassigned' => 'درخواست‌های بدون مسئول',
+        'overdue' => 'درخواست‌های خارج از SLA/OLA',
+        'waiting_user' => 'درخواست‌های منتظر پاسخ کاربر',
+        'cancellation_requested' => 'درخواست‌های منتظر تصمیم لغو',
+        'resolved' => 'درخواست‌های حل‌شده',
+    ] as $queue => $label) {
+        $adminLinks[] = [
+            'title' => $label,
+            'description' => 'بازکردن صف عملیاتی با حفظ کنترل دامنه و مجوز سمت سرور',
+            'url' => 'request-center.php?page=queue&queue=' . $queue,
+        ];
+    }
+}
+if (user_can($user, 'supervisor.panel')) {
+    $adminLinks[] = ['title' => 'پنل نظارت', 'description' => 'بررسی درخواست‌های حل‌شده و تصمیم‌های مدیریتی با مجوز سوپروایزر', 'url' => 'request-center.php?page=supervisor'];
+}
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Cache-Control: private, no-store');
