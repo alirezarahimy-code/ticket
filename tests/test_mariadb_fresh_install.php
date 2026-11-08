@@ -91,7 +91,18 @@ if ($mode === 'fresh-install') {
         check((int) $stmt->fetchColumn() === 1, "جدول «{$table}» وجود دارد");
     }
 
-    // ۴) یک پرس‌وجوی واقعی روی settings (ستون‌های utf8mb4)
+    // ۴) شِمای نصب تازه باید با migration 034 و Logging فعلی هم‌تراز باشد.
+    $systemLogColumns = $pdo->query(
+        "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = {$quotedDb} AND TABLE_NAME = 'system_logs'"
+    )->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('escalation_count', $systemLogColumns, true), 'system_logs.escalation_count در نصب تازه وجود دارد');
+    check(in_array('escalation_label', $systemLogColumns, true), 'system_logs.escalation_label در نصب تازه وجود دارد');
+    $escalationIndex = (int) $pdo->query(
+        "SELECT COUNT(DISTINCT INDEX_NAME) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = {$quotedDb} AND TABLE_NAME = 'system_logs' AND INDEX_NAME = 'idx_system_logs_level_time'"
+    )->fetchColumn();
+    check($escalationIndex === 1, 'ایندکس تشدید شدت Logging در نصب تازه وجود دارد');
+
+    // ۵) یک پرس‌وجوی واقعی روی settings (ستون‌های utf8mb4)
     $pdo->query('SELECT COUNT(*) FROM settings')->fetchColumn();
     check(true, 'SELECT روی settings بدون خطا اجرا شد');
 }
@@ -122,6 +133,39 @@ if ($mode === 'migrations-applied') {
         $stmt->execute([$base]);
         check((int) $stmt->fetchColumn() >= 1, "مهاجرت {$base} در رجیستری ثبت شده");
     }
+    
+    // ۴) migration 032 نباید پیش از updater، رکورد خودش را درج کند.
+    // system-update.php پس از اجرای SQL همان رکورد را با INSERT عادی ثبت می‌کند؛
+    // درج دوباره در migration باعث Duplicate Key روی uq_schema_update می‌شود.
+    $baselinePath = dirname(__DIR__) . '/migrations/032-schema-updates-baseline.sql';
+    $baselineSql = file_get_contents($baselinePath);
+    check($baselineSql !== false, 'خواندن migration 032 برای آزمون ثبت نصب‌کننده');
+    if ($baselineSql !== false) {
+        $probeSql = str_replace('schema_updates', 'schema_updates_probe', $baselineSql);
+        $pdo->exec('CREATE TEMPORARY TABLE schema_updates_probe (
+            version VARCHAR(32) NOT NULL,
+            migration VARCHAR(190) NOT NULL,
+            UNIQUE KEY uq_schema_update_probe (version, migration)
+        ) ENGINE=InnoDB');
+        $pdo->exec($probeSql);
+        $selfRecord = (int) $pdo->query(
+            "SELECT COUNT(*) FROM schema_updates_probe WHERE version = '1.62.83' AND migration = '032-schema-updates-baseline.sql'"
+        )->fetchColumn();
+        check($selfRecord === 0, 'migration 032 رجیستری خودش را پیش از updater درج نمی‌کند');
+
+        try {
+            $insert = $pdo->prepare('INSERT INTO schema_updates_probe (version, migration) VALUES (?, ?)');
+            $insert->execute(['1.62.83', '032-schema-updates-baseline.sql']);
+            $registered = (int) $pdo->query(
+                "SELECT COUNT(*) FROM schema_updates_probe WHERE version = '1.62.83' AND migration = '032-schema-updates-baseline.sql'"
+            )->fetchColumn();
+            check($registered === 1, 'ثبت migration 032 توسط updater بدون Duplicate Key موفق است');
+        } catch (Throwable $e) {
+            check(false, 'ثبت migration 032 توسط updater شکست خورد: ' . $e->getMessage());
+        }
+        $pdo->exec('DROP TEMPORARY TABLE schema_updates_probe');
+    }
+
 }
 
 echo "──────────────────────────────────────\n";

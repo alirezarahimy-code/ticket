@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
+    tags: [ 'v1.62.88' ]
   pull_request:
     branches: [ main ]
 
@@ -193,6 +194,7 @@ jobs:
       run: python -m pytest -q tests/test_release_1_62_88_package_integrity.py
 
     - name: Build and verify 1.62.88 update archive
+      if: github.ref == 'refs/tags/v1.62.88'
       run: |
         python tools/build_update_1_62_88.py
         cd downloads
@@ -200,6 +202,7 @@ jobs:
         unzip -t ticket-update-1.62.82-to-1.62.88-merged-20261105.zip
 
     - name: Upload verified 1.62.88 update archive
+      if: github.ref == 'refs/tags/v1.62.88'
       uses: actions/upload-artifact@v4
       with:
         name: ticket-update-1.62.82-to-1.62.88-verified
