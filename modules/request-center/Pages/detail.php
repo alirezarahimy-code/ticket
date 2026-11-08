@@ -36,11 +36,21 @@ if ($page === 'ticket') {
             $requestedQueue = (string) ($_GET['queue'] ?? 'all');
             $detailReturnParams['queue'] = in_array($requestedQueue, ['all','unassigned','overdue','mine','waiting_user','resolved','cancellation_requested','cancelled','rejected'], true) ? $requestedQueue : 'all';
         }
-        foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16] as $contextKey => $maxLength) {
+        foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16, 'ticket_type' => 16, 'from' => 24, 'to' => 24] as $contextKey => $maxLength) {
             $contextValue = trim((string) ($_GET[$contextKey] ?? ''));
             if ($contextValue !== '' && strlen($contextValue) <= $maxLength) {
                 $detailReturnParams[$contextKey] = $contextValue;
             }
+        }
+        foreach (['department_id', 'assigned_to'] as $returnIdKey) {
+            $returnId = (int) ($_GET[$returnIdKey] ?? 0);
+            if ($returnId > 0) {
+                $detailReturnParams[$returnIdKey] = $returnId;
+            }
+        }
+        $requestedTicketType = valid_choice((string) ($_GET['ticket_type'] ?? ''), ['incident', 'request', 'problem', 'change'], '');
+        if ($requestedTicketType !== '') {
+            $detailReturnParams['ticket_type'] = $requestedTicketType;
         }
         $detailReturnParams['p'] = max(1, min(100000, (int) ($_GET['p'] ?? 1)));
     }
