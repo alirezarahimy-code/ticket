@@ -88,8 +88,7 @@ if (!defined('APP_ROOT')) {
                 if (!$rejected) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')
-                    ->execute([$ticketId, (int) $supervisor['id'], 'درخواست توسط سوپروایزر رد شد: ' . $note]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $supervisor['id'], 'درخواست توسط سوپروایزر رد شد: ' . $note);
                 save_audit_required((int) $supervisor['id'], 'ticket_rejected', $ticketId, [
                     'reason' => $note,
                     'from_status' => (string) $ticket['status'],
@@ -166,8 +165,7 @@ if (!defined('APP_ROOT')) {
                 if (!$reworked) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')
-                    ->execute([$ticketId, (int) $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note);
                 save_audit_required((int) $supervisor['id'], 'ticket_supervisor_rework', $ticketId, [
                     'note' => $note,
                     'from_status' => 'resolved',
