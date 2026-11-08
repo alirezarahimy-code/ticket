@@ -28,6 +28,7 @@ final class RequestCenterRepository
             )->fetchAll(PDO::FETCH_COLUMN);
             $tables = array_fill_keys(array_map('strtolower', $tableRows), true);
             $required = [
+                'ticket_number_seq' => ['prefix', 'seq'],
                 'tickets' => ['id', 'ticket_no', 'subject', 'status', 'priority', 'service_group', 'ticket_type',
                     'created_at', 'updated_at', 'due_at', 'sla_paused_at', 'sla_pause_minutes',
                     'first_response_at', 'ola_response_due_at', 'ola_due_at',
