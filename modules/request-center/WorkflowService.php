@@ -61,6 +61,26 @@ final class RequestCenterWorkflowService
     {
     }
 
+    /**
+     * Append a conversation entry inside the caller-owned lifecycle transaction.
+     * Attachments, audit, events and notifications remain caller-owned side effects.
+     */
+    public function appendMessage(int $ticketId, int $userId, string $body, bool $internal = false): int
+    {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException('ثبت پیام درخواست باید داخل تراکنش گردش‌کار اجرا شود.');
+        }
+        if ($ticketId <= 0 || $userId <= 0 || trim($body) === '') {
+            throw new InvalidArgumentException('شناسه یا متن پیام درخواست معتبر نیست.');
+        }
+
+        $statement = $this->pdo->prepare(
+            'INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, ?)'
+        );
+        $statement->execute([$ticketId, $userId, $body, $internal ? 1 : 0]);
+        return (int) $this->pdo->lastInsertId();
+    }
+
     public static function allowedTransitions(string $from): array
     {
         $map = [
