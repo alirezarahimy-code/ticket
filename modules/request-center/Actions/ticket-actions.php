@@ -753,12 +753,14 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('این وضعیت فقط توسط مدیر واحد قابل تنظیم است.');
             }
             $assigneeChanged = (int) $assignee !== (int) ($ticket['assigned_to'] ?? 0);
+            $priorityChanged = (string) $ticket['priority'] !== $priority;
             if ($oldStatus === 'resolved' && $status === 'resolved' && $assigneeChanged) {
                 throw new RuntimeException('برای تغییر مسئول درخواست حل‌شده، ابتدا وضعیت را برای ادامهٔ رسیدگی تغییر دهید.');
             }
             $ticketGroupForAssign = (string) ($ticket['service_group'] ?? 'it');
+            $assigneeRow = null;
             if ($assignee) {
-                 $assigneeQuery = db()->prepare('SELECT u.id, u.department_id, u.role, u.is_active, u.is_it_agent, u.is_primary_admin, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
+                 $assigneeQuery = db()->prepare('SELECT u.id, u.full_name, u.department_id, u.role, u.is_active, u.is_it_agent, u.is_primary_admin, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
                  $assigneeQuery->execute([$assignee]);
                  $assigneeRow = $assigneeQuery->fetch();
                  $assigneeRole = (string) ($assigneeRow['role'] ?? '');
@@ -804,6 +806,9 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException($status === 'waiting_user'
                     ? 'برای «در انتظار پاسخ کاربر»، سؤال یا اطلاعات لازم را در پیام بنویسید تا کاربر بداند چه چیزی ارسال کند.'
                     : 'برای «حل‌شده»، شرح راه‌حل یا نتیجهٔ کار را در پیام بنویسید.');
+            }
+            if (($assigneeChanged || $priorityChanged) && $updateNote === '') {
+                throw new RuntimeException('برای تغییر مسئول یا اولویت، ثبت دلیل قابل مشاهده برای درخواست‌کننده الزامی است.');
             }
             if (mb_strlen($updateNote, 'UTF-8') > 5000) {
                 throw new RuntimeException('پیام مدیریت درخواست نباید بیشتر از ۵۰۰۰ نویسه باشد.');
@@ -862,6 +867,12 @@ if (!defined('APP_ROOT')) {
                 'from_priority' => (string) $ticket['priority'],
                 'to_priority' => $priority,
                 'assigned_to' => $assignee,
+                'from_assigned_to' => $assigneeChanged ? ($ticket['assigned_to'] ?? null) : null,
+                'to_assigned_to' => $assigneeChanged ? $assignee : null,
+                'from_assignee_name' => $assigneeChanged ? (string) ($ticket['assignee_name'] ?? '') : '',
+                'to_assignee_name' => $assigneeChanged ? (string) ($assigneeRow['full_name'] ?? '') : '',
+                'assignment_source' => $assigneeChanged ? 'manager' : null,
+                'reason' => ($assigneeChanged || $priorityChanged) ? $updateNote : '',
                 'first_response_recorded' => $firstResponseRecorded,
                 'sla_ola' => $slaOlaAudit,
             ]);
@@ -870,16 +881,32 @@ if (!defined('APP_ROOT')) {
                 log_ticket_event($ticketId, (int) $staffUser['id'], 'reply');
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_reply', 'پیام مدیریت در درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, $updateNote);
             }
+            if ($assigneeChanged) {
+                log_ticket_event($ticketId, (int) $staffUser['id'], 'assignment_changed', $oldStatus, $status, [
+                    'assignment_source' => 'manager',
+                    'from_assigned_to' => $ticket['assigned_to'] ?? null,
+                    'to_assigned_to' => $assignee,
+                    'from_assignee_name' => (string) ($ticket['assignee_name'] ?? ''),
+                    'to_assignee_name' => (string) ($assigneeRow['full_name'] ?? ''),
+                    'reason' => $updateNote,
+                    'first_response_recorded' => $firstResponseRecorded,
+                    'sla_ola' => $slaOlaAudit,
+                ]);
+            } elseif ($status !== $oldStatus) {
+                log_ticket_event($ticketId, (int) $staffUser['id'], 'status_changed', $oldStatus, $status, ['first_response_recorded' => $firstResponseRecorded, 'sla_ola' => $slaOlaAudit]);
+            }
             if ($status !== $oldStatus) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], $assignee && $assigneeChanged ? 'assigned' : 'status_changed', $oldStatus, $status, ['assigned_to' => $assignee, 'first_response_recorded' => $firstResponseRecorded, 'sla_ola' => $slaOlaAudit]);
                 if ($status === 'resolved') {
                     record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, 'وضعیت به ' . request_center_status_label($status) . ' تغییر کرد.');
                 }
-            } elseif ($assigneeChanged) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], 'assigned', $oldStatus, $status, ['assigned_to' => $assignee]);
             }
-            if ((string) $ticket['priority'] !== $priority) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], 'priority_changed', $status, $status, ['from' => (string) $ticket['priority'], 'to' => $priority, 'sla_ola' => $slaOlaAudit]);
+            if ($priorityChanged) {
+                log_ticket_event($ticketId, (int) $staffUser['id'], 'priority_changed', $status, $status, [
+                    'from' => (string) $ticket['priority'],
+                    'to' => $priority,
+                    'reason' => $updateNote,
+                    'sla_ola' => $slaOlaAudit,
+                ]);
             }
             if ($status === 'resolved' && $oldStatus !== 'resolved') {
                 request_center_notify_ticket_resolved($ticketId, (int) $staffUser['id']);
