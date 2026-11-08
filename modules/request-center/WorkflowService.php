@@ -109,15 +109,19 @@ final class RequestCenterWorkflowService
     }
 
     /** Clear a cancellation request only when the exact request snapshot still matches. */
-    public function rejectCancellation(int $ticketId, string $expectedStatus, string $expectedRequestedAt): bool
-    {
+    public function rejectCancellation(
+        int $ticketId,
+        string $expectedStatus,
+        string $expectedRequestedAt,
+        array $expectedFields = []
+    ): bool {
         $this->assertTransaction();
         if ($ticketId <= 0 || $expectedRequestedAt === ''
             || !in_array($expectedStatus, self::STATUSES, true)) {
             throw new InvalidArgumentException('اطلاعات تصمیم لغو معتبر نیست.');
         }
         $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $lockSql = 'SELECT status, cancel_requested_at FROM tickets WHERE id = ? LIMIT 1';
+        $lockSql = 'SELECT status, cancel_requested_at, requester_id, assigned_to, priority, department_id FROM tickets WHERE id = ? LIMIT 1';
         if ($driver === 'mysql') {
             $lockSql .= ' FOR UPDATE';
         }
@@ -127,6 +131,19 @@ final class RequestCenterWorkflowService
         if (!is_array($current) || (string) $current['status'] !== $expectedStatus
             || (string) ($current['cancel_requested_at'] ?? '') !== $expectedRequestedAt) {
             return false;
+        }
+        foreach ($expectedFields as $field => $expectedValue) {
+            if (!in_array($field, ['requester_id', 'assigned_to', 'priority', 'department_id'], true)) {
+                throw new InvalidArgumentException('فیلد شرط هم‌زمانی تصمیم لغو مجاز نیست: ' . $field);
+            }
+            $actual = $current[$field] ?? null;
+            if ($actual === null || $expectedValue === null) {
+                if ($actual !== $expectedValue) {
+                    return false;
+                }
+            } elseif ((string) $actual !== (string) $expectedValue) {
+                return false;
+            }
         }
         $now = $driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()';
         $update = $this->pdo->prepare(
