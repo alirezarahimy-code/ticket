@@ -61,6 +61,41 @@ function store_attachment(int $messageId, array $file): void
         @unlink($directory . '/' . $stored);
         throw $exception;
     }
+
+    // Remove the physical upload if the caller later rolls back its lifecycle transaction.
+    $GLOBALS['request_center_pending_attachment_cleanup'][] = [
+        'path' => $directory . '/' . $stored,
+        'stored_name' => $stored,
+    ];
+    if (empty($GLOBALS['request_center_attachment_cleanup_registered'])) {
+        $GLOBALS['request_center_attachment_cleanup_registered'] = true;
+        register_shutdown_function(static function (): void {
+            $pending = $GLOBALS['request_center_pending_attachment_cleanup'] ?? [];
+            if ($pending === []) {
+                return;
+            }
+            try {
+                $connection = db();
+                if ($connection->inTransaction()) {
+                    $connection->rollBack();
+                }
+                $exists = $connection->prepare(
+                    'SELECT 1 FROM ticket_attachments WHERE stored_name = ? LIMIT 1'
+                );
+                foreach ($pending as $attachment) {
+                    $exists->execute([(string) $attachment['stored_name']]);
+                    if (!$exists->fetchColumn()) {
+                        @unlink((string) $attachment['path']);
+                    }
+                }
+            } catch (Throwable $exception) {
+                // Preserve the file if the database cannot be checked safely.
+                if (function_exists('app_error_log')) {
+                    app_error_log('Request Center attachment cleanup deferred: ' . $exception->getMessage());
+                }
+            }
+        });
+    }
 }
 
 function fetch_ticket(int $id): ?array
