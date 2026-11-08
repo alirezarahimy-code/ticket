@@ -151,6 +151,7 @@ def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
     assert "'user_id' => null" in cron
     assert "'action_code' => 'ticket_auto_closed'" in cron
     assert "Required audit persistence failed" in cron
+    assert "'reason' => 'بسته‌شدن خودکار:" in cron
     assert "request_center_notify_user(" in cron
     assert "request_center_notify_ticket_staff(" in cron
     assert "notify_user(" not in cron.replace("request_center_notify_user(", "")
