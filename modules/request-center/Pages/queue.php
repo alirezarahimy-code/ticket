@@ -11,7 +11,7 @@ if (!defined('APP_ROOT')) {
 
 if ($page === 'queue') {
     $queueUser = require_permission('queue.view');
-    $queueName = valid_choice((string) ($_GET['queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled'], 'all');
+    $queueName = valid_choice((string) ($_GET['queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], 'all');
     require_once dirname(__DIR__) . '/RequestCenterRepository.php';
     $queuePerPage = 100;
     $queuePage = max(1, (int) ($_GET['p'] ?? 1));
