@@ -489,3 +489,16 @@ def test_report_to_detail_navigation_preserves_report_workspace_and_filters():
         assert key in helpers
     assert "valid_choice((string) ($_GET['ticket_type'] ?? '')" in detail
     assert "valid_choice((string) ($_POST['rc_return_ticket_type'] ?? '')" in helpers
+
+def test_calendar_ticket_links_return_to_originating_calendar_context():
+    calendar = source("modules/request-center/Pages/calendar.php")
+    detail = source("modules/request-center/Pages/detail.php")
+    helpers = source("modules/request-center/lib/functions.php")
+    assert "function (int $ticketId) use ($workspace, $agentView, $jmonthParam, $view, $kindFilter)" in calendar
+    assert calendar.count("$calendarTicketUrl((int) $event[") >= 6
+    assert "$calendarTicketUrl((int) $upcoming['ticket_id'])" in calendar
+    assert "'calendar' => 1" in calendar
+    assert "'rc_return_calendar' ?? ''" in helpers
+    assert "'calendar'] = 1" in helpers
+    assert "'calendar'] = 1" in detail
+    assert "rc_return_jmonth" in helpers and "rc_return_view" in helpers and "rc_return_kind" in helpers
