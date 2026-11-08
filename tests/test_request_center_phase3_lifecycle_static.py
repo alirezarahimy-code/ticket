@@ -147,6 +147,9 @@ def test_resolution_notification_warns_about_automatic_close_policy_in_advance()
 
 def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
     cron = source("cron/ticket_auto_close.php")
+    assert "new RequestCenterWorkflowService(db())" in cron
+    assert "->transition(" in cron
+    assert "UPDATE tickets" not in cron
     assert "activity_log([" in cron
     assert "'user_id' => null" in cron
     assert "'action_code' => 'ticket_auto_closed'" in cron
@@ -287,7 +290,7 @@ def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
     ):
         action = source(path)
         assert "INSERT INTO ticket_messages" not in action
-        assert "UPDATE tickets SET cancel_requested" not in action
+        assert "UPDATE tickets" not in action
     ticket_action = source("modules/request-center/Actions/ticket-actions.php")
     assert "->requestCancellation(" in ticket_action
     assert "->rejectCancellation(" in ticket_action
