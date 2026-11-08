@@ -403,13 +403,13 @@ final class RequestCenterRepository
             $conditions[] = preg_replace('/^\\s*WHERE\\s+/i', '', trim($scopeSql));
         }
         $conditions[] = 't.assigned_to IS NOT NULL';
-        $conditions[] = 't.status NOT IN ("resolved", "closed", "cancelled", "rejected")';
+        $conditions[] = "t.status NOT IN ('resolved', 'closed', 'cancelled', 'rejected')";
         $where = ' WHERE ' . implode(' AND ', $conditions);
 
-        $sql = 'SELECT t.assigned_to, u.full_name,
+        $sql = "SELECT t.assigned_to, u.full_name,
                        COUNT(*) AS active_count,
-                       COALESCE(SUM(t.status IN ("waiting_user", "pending")), 0) AS waiting_user_count,
-                       COALESCE(SUM(t.priority IN ("urgent", "critical")), 0) AS high_priority_count,
+                       COALESCE(SUM(t.status IN ('waiting_user', 'pending')), 0) AS waiting_user_count,
+                       COALESCE(SUM(t.priority IN ('urgent', 'critical')), 0) AS high_priority_count,
                        COALESCE(SUM(
                            t.sla_paused_at IS NULL AND (
                                (t.due_at IS NOT NULL AND t.due_at < NOW())
@@ -421,10 +421,10 @@ final class RequestCenterRepository
                        ), 0) AS overdue_count
                 FROM tickets t
                 JOIN users u ON u.id = t.assigned_to
-                ' . $where . '
+                " . $where . "
                 GROUP BY t.assigned_to, u.full_name
                 ORDER BY active_count DESC, overdue_count DESC, high_priority_count DESC, u.full_name
-                LIMIT ' . $limit;
+                LIMIT " . $limit;
         $query = $this->pdo->prepare($sql);
         $query->execute($params);
         return $query->fetchAll(PDO::FETCH_ASSOC);
