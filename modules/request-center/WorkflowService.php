@@ -61,6 +61,90 @@ final class RequestCenterWorkflowService
     {
     }
 
+    /**
+     * Append a public or internal conversation entry in the caller-owned transaction.
+     * Attachment storage and notification/audit side effects remain with the caller.
+     */
+    public function appendMessage(int $ticketId, int $userId, string $body, bool $internal = false): int
+    {
+        $this->assertTransaction();
+        if ($ticketId <= 0 || $userId <= 0 || trim($body) === '') {
+            throw new InvalidArgumentException('شناسه یا متن پیام درخواست معتبر نیست.');
+        }
+        $statement = $this->pdo->prepare(
+            'INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, ?)'
+        );
+        $statement->execute([$ticketId, $userId, $body, $internal ? 1 : 0]);
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /** Register a cancellation request without changing the ticket's lifecycle status. */
+    public function requestCancellation(int $ticketId, int $requesterId, string $expectedStatus, string $reason): bool
+    {
+        $this->assertTransaction();
+        if ($ticketId <= 0 || $requesterId <= 0 || trim($reason) === ''
+            || !in_array($expectedStatus, self::STATUSES, true)) {
+            throw new InvalidArgumentException('اطلاعات درخواست لغو معتبر نیست.');
+        }
+        $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $lockSql = 'SELECT status, requester_id, cancel_requested_at FROM tickets WHERE id = ? LIMIT 1';
+        if ($driver === 'mysql') {
+            $lockSql .= ' FOR UPDATE';
+        }
+        $lock = $this->pdo->prepare($lockSql);
+        $lock->execute([$ticketId]);
+        $current = $lock->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($current) || (string) $current['status'] !== $expectedStatus
+            || (int) $current['requester_id'] !== $requesterId || !empty($current['cancel_requested_at'])) {
+            return false;
+        }
+        $now = $driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()';
+        $update = $this->pdo->prepare(
+            'UPDATE tickets SET cancel_requested_at = ' . $now . ', cancel_requested_by = ?, '
+            . 'cancel_request_reason = ?, updated_at = ' . $now
+            . ' WHERE id = ? AND requester_id = ? AND status = ? AND cancel_requested_at IS NULL'
+        );
+        $update->execute([$requesterId, $reason, $ticketId, $requesterId, $expectedStatus]);
+        return $update->rowCount() > 0;
+    }
+
+    /** Clear a cancellation request only when the exact request snapshot still matches. */
+    public function rejectCancellation(int $ticketId, string $expectedStatus, string $expectedRequestedAt): bool
+    {
+        $this->assertTransaction();
+        if ($ticketId <= 0 || $expectedRequestedAt === ''
+            || !in_array($expectedStatus, self::STATUSES, true)) {
+            throw new InvalidArgumentException('اطلاعات تصمیم لغو معتبر نیست.');
+        }
+        $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $lockSql = 'SELECT status, cancel_requested_at FROM tickets WHERE id = ? LIMIT 1';
+        if ($driver === 'mysql') {
+            $lockSql .= ' FOR UPDATE';
+        }
+        $lock = $this->pdo->prepare($lockSql);
+        $lock->execute([$ticketId]);
+        $current = $lock->fetch(PDO::FETCH_ASSOC);
+        if (!is_array($current) || (string) $current['status'] !== $expectedStatus
+            || (string) ($current['cancel_requested_at'] ?? '') !== $expectedRequestedAt) {
+            return false;
+        }
+        $now = $driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()';
+        $update = $this->pdo->prepare(
+            'UPDATE tickets SET cancel_requested_at = NULL, cancel_requested_by = NULL, '
+            . 'cancel_request_reason = NULL, updated_at = ' . $now
+            . ' WHERE id = ? AND status = ? AND cancel_requested_at = ?'
+        );
+        $update->execute([$ticketId, $expectedStatus, $expectedRequestedAt]);
+        return $update->rowCount() > 0;
+    }
+
+    private function assertTransaction(): void
+    {
+        if (!$this->pdo->inTransaction()) {
+            throw new LogicException('عملیات گردش‌کار باید داخل تراکنش فراخواننده اجرا شود.');
+        }
+    }
+
     public static function allowedTransitions(string $from): array
     {
         $map = [
