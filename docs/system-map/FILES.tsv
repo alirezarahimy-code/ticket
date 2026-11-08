@@ -445,7 +445,7 @@ modules/request-center/Actions/appointment-actions.php	other	213	9484
 modules/request-center/Actions/bulk-actions.php	other	140	10427
 modules/request-center/Actions/dispatch.php	other	18	695
 modules/request-center/Actions/service-actions.php	other	228	14500
-modules/request-center/Actions/supervisor-actions.php	other	267	19497
+modules/request-center/Actions/supervisor-actions.php	other	280	20205
 modules/request-center/Actions/ticket-actions.php	other	752	59624
 modules/request-center/AppointmentRepository.php	other	372	16638
 modules/request-center/Assets/request-center.css	other	156	13457
@@ -453,7 +453,7 @@ modules/request-center/Pages/admin.php	other	82	7101
 modules/request-center/Pages/analytics.php	other	48	4880
 modules/request-center/Pages/calendar.php	other	623	43156
 modules/request-center/Pages/create.php	other	146	14098
-modules/request-center/Pages/detail.php	other	247	30176
+modules/request-center/Pages/detail.php	other	247	30256
 modules/request-center/Pages/index.php	other	345	24420
 modules/request-center/Pages/queue.php	other	38	5428
 modules/request-center/Pages/reports.php	other	66	9694

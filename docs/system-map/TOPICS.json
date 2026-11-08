@@ -35016,12 +35016,12 @@
       "line": 177,
       "anchor": "مسیر: supervisor_reopen",
       "risk": 2,
-      "lines": 50
+      "lines": 63
     },
     "PAGE-043.05": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 227,
+      "line": 240,
       "anchor": "مسیر: rate_ticket",
       "risk": 2,
       "lines": 42

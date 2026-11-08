@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 589 |
-| خطوط | 131,822 |
+| خطوط | 131,835 |
 | آدرس‌ها (بلوک) | 6,870 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -84,7 +84,7 @@
 | درخواست | **ویرایش** | `ticket.edit` | `PAGE-044.09` <sub>modules/request-center/Actions/ticket-actions.php:605</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 14 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
 | درخواست | **ویرایش** | `ticket.bulk` | `PAGE-040.04` <sub>modules/request-center/Actions/bulk-actions.php:44</sub> | 4 |
-| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:227</sub> | 6 |
+| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:240</sub> | 6 |
 | درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `PAGE-040.03` <sub>modules/request-center/Actions/bulk-actions.php:24</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
 | درخواست | **صف کاری** | `queue.view` | `PAGE-053.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 13 |
 | درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:177</sub> | 14 |
@@ -289,7 +289,7 @@
 | `TEST` | TEST | 234 | 1,705 | 23,299 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 84 | 1,377 | 8,023 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,864 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,877 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -8799,15 +8799,15 @@
 </details>
 
 <details>
-<summary><b>PAGE-043</b> — <code>modules/request-center/Actions/supervisor-actions.php</code> (268 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>PAGE-043</b> — <code>modules/request-center/Actions/supervisor-actions.php</code> (281 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-043.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
 | `PAGE-043.02` | 18–24 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
 | `PAGE-043.03` | 25–176 | ناحیه | `مسیر: supervisor_decision` | **8** | ⬜ |
-| `PAGE-043.04` | 177–226 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
-| `PAGE-043.05` | 227–268 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
+| `PAGE-043.04` | 177–239 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
+| `PAGE-043.05` | 240–281 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
 
 </details>
 
