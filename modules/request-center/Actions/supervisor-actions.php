@@ -97,7 +97,7 @@ if (!defined('APP_ROOT')) {
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'ticket_rejected', (string) $ticket['status'], 'rejected', [
                     'reason' => $note,
                 ]);
-                notify_ticket_parties(
+                request_center_notify_ticket_parties(
                     $ticketId,
                     'ticket_rejected',
                     'درخواست شما رد شد',
@@ -117,7 +117,7 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', ['note' => $note]);
-                notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد.', (int) $supervisor['id']);
+                request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد.', (int) $supervisor['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_closed', 'تأیید و بستن درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
                 flash('success', 'انجام کار تأیید شد و درخواست بسته شد.');
             } else {
@@ -144,7 +144,7 @@ if (!defined('APP_ROOT')) {
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')
                     ->execute([$ticketId, (int) $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note]);
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_rework', $ticket['status'], $reworkStatus, ['note' => $note]);
-                notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id']);
+                request_center_notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id']);
                 flash('info', 'درخواست برای اصلاح و ادامه کار برگشت داده شد.');
             }
             db_commit('request-center.php');
@@ -193,7 +193,7 @@ if (!defined('APP_ROOT')) {
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'cancellation_rejected', 'closed', $reopenStatus, ['note' => 'پاک‌سازی خودکار درخواست لغو قدیمی هنگام بازگشایی رسمی']);
             }
             save_audit((int) $supervisor['id'], 'ticket_reopened', $ticketId, ['note' => $note]);
-            notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد.', (int) $supervisor['id']);
+            request_center_notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد.', (int) $supervisor['id']);
             db_commit('index.php');
             flash('info', $hadStaleCancel ? 'درخواست بازگشایی شد؛ درخواست لغو قدیمی هم پاک‌سازی شد.' : 'درخواست با تصمیم سوپروایزر بازگشایی شد.');
             redirect('request-center.php?page=supervisor');
@@ -236,7 +236,7 @@ if (!defined('APP_ROOT')) {
             db()->prepare('INSERT INTO ticket_ratings (ticket_id, agent_id, requester_id, score, comment) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE agent_id = VALUES(agent_id), score = VALUES(score), comment = VALUES(comment), created_at = NOW()')->execute([$ticketId, $ticket['assigned_to'] ?: null, $user['id'], $score, $comment !== '' ? $comment : null]);
             save_audit((int) $user['id'], 'ticket_rated', $ticketId, ['score' => $score]);
             log_ticket_event($ticketId, (int) $user['id'], 'rated', (string) $ticket['status'], (string) $ticket['status'], ['score' => $score]);
-            notify_ticket_staff($ticketId, 'ticket_rated', 'رضایت کاربر ثبت شد', 'برای درخواست ' . ticket_number($ticketId) . ' امتیاز ' . $score . ' از ۵ ثبت شد.' . ($ticket['status'] === 'resolved' ? ' درخواست آمادهٔ تأیید نهایی است.' : ''), (int) $user['id']);
+            request_center_notify_ticket_staff($ticketId, 'ticket_rated', 'رضایت کاربر ثبت شد', 'برای درخواست ' . ticket_number($ticketId) . ' امتیاز ' . $score . ' از ۵ ثبت شد.' . ($ticket['status'] === 'resolved' ? ' درخواست آمادهٔ تأیید نهایی است.' : ''), (int) $user['id']);
             record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_rated', 'ثبت رضایت برای درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, 'امتیاز: ' . $score . ' از ۵');
             db_commit('index.php');
             flash('success', 'امتیاز رضایت شما با موفقیت ثبت شد.');
