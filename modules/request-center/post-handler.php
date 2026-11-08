@@ -19,7 +19,7 @@ const REQUEST_CENTER_POST_ACTIONS = [
     'bulk_update_tickets', 'cancel_ticket', 'claim_ticket', 'create_ticket',
     'decide_ticket_cancellation', 'delete_service', 'delete_service_category',
     'edit_service', 'rate_ticket', 'reopen_ticket', 'reply', 'save_service_category',
-    'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ticket',
+    'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ola_policy', 'update_ticket',
 ];
 
 function request_center_is_post_action(string $action): bool
@@ -76,6 +76,7 @@ function request_center_post_error(Throwable $exception, string $page): never
             . '&p=' . max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1))),
         'supervisor_decision', 'supervisor_reopen' => $ticketId > 0
             ? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor',
+        'update_ola_policy' => 'request-center.php?workspace=admin#ola-policies',
         'add_service', 'edit_service', 'delete_service', 'add_service_field',
         'save_service_category', 'delete_service_category' => 'request-center.php?page=services',
         'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_id'] ?? 0)),
