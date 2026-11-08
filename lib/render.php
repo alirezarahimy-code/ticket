@@ -219,8 +219,13 @@ function render_footer(): void
     } catch (Throwable) {
         echo "[]";
     }
-    $inspectionReminder = inspection_food_reminder_markup($layoutUser);
-    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . particle_effect_script_tag() . triangle_effect_script_tag() . chatbot_render_widget($layoutUser) . $inspectionReminder;
+    // Optional feature modules are not loaded by the independent Request Center entry.
+    // Keep the shared shell usable without importing food, chatbot or visual-effects modules.
+    $inspectionReminder = function_exists('inspection_food_reminder_markup') ? inspection_food_reminder_markup($layoutUser) : '';
+    $particleScript = function_exists('particle_effect_script_tag') ? particle_effect_script_tag() : '';
+    $triangleScript = function_exists('triangle_effect_script_tag') ? triangle_effect_script_tag() : '';
+    $chatbotWidget = function_exists('chatbot_render_widget') ? chatbot_render_widget($layoutUser) : '';
+    echo ';</script><script src="assets/jalali-calendar.js?v=3.4.7"></script><script src="assets/app.js?v=3.4.28&theme-mode=2"></script>' . $particleScript . $triangleScript . $chatbotWidget . $inspectionReminder;
     if ($inspectionReminder !== '') {
         echo '<script defer src="assets/inspection-food-reminder.js?v=1"></script>';
     }
