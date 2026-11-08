@@ -200,7 +200,7 @@ jobs:
 
       - name: Request Center T04 web DDL runtime diagnostic
         id: t04
-        if: always()
+        if: success()
         run: php tests/test_request_center_web_ddl_runtime.php > "$RUNNER_TEMP/t04.log" 2>&1; code=$?; cat "$RUNNER_TEMP/t04.log"; exit $code
         env:
           CI_DB_HOST: 127.0.0.1
