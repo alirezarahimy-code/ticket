@@ -193,6 +193,11 @@ function ticket_requester_cancelable_statuses(): array
     return RequestCenterWorkflowService::REQUESTER_CANCELLABLE_STATUSES;
 }
 
+function ticket_cancellation_decision_statuses(): array
+{
+    return RequestCenterWorkflowService::CANCELLATION_DECISION_STATUSES;
+}
+
 function ticket_requester_can_cancel_directly(array $ticket): bool
 {
     return in_array((string) ($ticket['status'] ?? ''), ['new', 'manager_review'], true)
