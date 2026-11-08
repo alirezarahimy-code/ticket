@@ -158,6 +158,15 @@ workflow_check($staleDeadlineRejected,
     'lifecycle transition refuses a stale SLA deadline snapshot');
 $pdo->rollBack();
 
+$pdo->beginTransaction();
+$pdo->exec("UPDATE tickets SET ola_due_at = '2026-11-13 10:00:00' WHERE id = 6");
+$staleOlaRejected = !$service->transition(6, 'assigned', 'in_progress', [], 'standard', [
+    'ola_due_at' => '2026-11-12 10:00:00',
+]);
+workflow_check($staleOlaRejected,
+    'lifecycle transition refuses a stale OLA deadline snapshot');
+$pdo->rollBack();
+
 workflow_check(
     RequestCenterWorkflowService::allowedTransitions('pending') === ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
     'legacy pending has exit paths'
