@@ -72,6 +72,23 @@ def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     assert "رد شده است" in detail or "رد شده" in detail
 
 
+def test_lifecycle_notifications_are_idempotent_and_failure_isolated():
+    helpers = source("modules/request-center/lib/functions.php")
+    assert "function request_center_notify_user" in helpers
+    assert "hash('sha256'" in helpers
+    assert "notify_user($userId, $type, $title, $body, $ticketId, $key)" in helpers
+    assert "function request_center_notify_ticket_resolved" in helpers
+    for path in (
+        "modules/request-center/Actions/ticket-actions.php",
+        "modules/request-center/Actions/supervisor-actions.php",
+        "modules/request-center/Actions/bulk-actions.php",
+    ):
+        text = source(path)
+        assert "notify_ticket_parties(" not in text
+        assert "notify_ticket_staff(" not in text
+        assert "notify_ticket_resolved(" not in text
+
+
 def test_rejection_schema_is_migration_owned_not_runtime_ddl():
     migration = source("migrations/037-request-center-lifecycle-rejection.sql")
     fresh = source("install-empty-db.sql")
