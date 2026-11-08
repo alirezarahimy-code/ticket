@@ -472,6 +472,9 @@ function t12s_finish_feature_only(string $name, callable $body, array &$apps, st
     $sessions = t12s_sessions($apps);
     [$snapshot, $extra] = $body($apps['feature'], $sessions['supervisor']['feature'], $sessions);
     $diffs = [];
+    if ((int) ($extra['http_status'] ?? 0) !== 302) {
+        $diffs[] = 'supervisor assignment HTTP request did not complete with the expected redirect';
+    }
     $ticket = $snapshot['tickets'][0] ?? [];
     if (($ticket['status'] ?? '') !== 'assigned' || (int) ($ticket['assigned_to'] ?? 0) !== 102 || empty($ticket['ts'][2])) {
         $diffs[] = 'supervisor assignment did not persist assigned status, eligible assignee and assigned_at';
