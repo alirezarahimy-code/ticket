@@ -1,0 +1,6 @@
+T04 database: 10.11.19-MariaDB-ubu2204
+PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'persian_ticketing_ci.users' doesn't exist in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php:182
+Stack trace:
+#0 /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php(182): PDOStatement->execute()
+#1 {main}
+  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php on line 182
