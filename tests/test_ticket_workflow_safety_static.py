@@ -104,5 +104,57 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn("new RequestCenterWorkflowService(db())", bulk)
 
 
+    def test_pre_service_rejection_is_a_terminal_workflow_command(self):
+        workflow = source('modules/request-center/WorkflowService.php')
+        action = source('modules/request-center/Actions/supervisor-actions.php')
+        self.assertIn("'rejected'", workflow)
+        self.assertIn("case 'supervisor_reject':", workflow)
+        self.assertIn("$to !== 'rejected'", workflow)
+        self.assertIn("['new', 'manager_review', 'assigned']", action)
+        self.assertIn("'supervisor_reject'", action)
+        self.assertIn("save_audit_required((int) $supervisor['id'], 'ticket_rejected'", action)
+        self.assertIn("'reason' => $note", action)
+        self.assertIn("'ticket_rejected'", action)
+
+    def test_rejected_status_is_migration_owned_and_visible_as_terminal(self):
+        migration = source('migrations/037-request-center-lifecycle-rejection.sql')
+        fresh = source('install-empty-db.sql')
+        schema = source('schema.sql')
+        repository = source('modules/request-center/RequestCenterRepository.php')
+        detail = source('modules/request-center/Pages/detail.php')
+        labels = source('lib/tickets-sla.php')
+        self.assertIn("'''rejected'''", migration)
+        self.assertIn('rejected_at', migration)
+        self.assertIn("'rejected')", fresh)
+        self.assertIn("'rejected')", schema)
+        self.assertIn('rejected_at DATETIME NULL', fresh)
+        self.assertIn('rejected_at DATETIME NULL', schema)
+        self.assertIn("'rejected'", repository)
+        self.assertIn("status'] === 'rejected'", detail)
+        self.assertIn("'rejected' => 'ردشده پس از ارزیابی اولیه'", labels)
+
+    def test_sla_and_ola_alerts_revalidate_the_active_deadline_under_lock(self):
+        cron = source('cron/sla_maintenance.php')
+        self.assertIn('FOR UPDATE', cron)
+        self.assertIn('current_alert_type', cron)
+        self.assertIn('a.due_at = t.due_at', cron)
+        self.assertIn("a.due_at = t.' . $column", cron)
+        self.assertIn('sla_paused_at IS NULL', cron)
+        self.assertIn('"rejected"', cron)
+
+    def test_manual_lifecycle_decisions_keep_requester_visible_reasons(self):
+        supervisor = source('modules/request-center/Actions/supervisor-actions.php')
+        page = source('modules/request-center/Pages/supervisor.php')
+        bulk = source('modules/request-center/Actions/bulk-actions.php')
+        queue = source('modules/request-center/Pages/queue.php')
+        self.assertIn("if ($decision === 'approve' && $note === '')", supervisor)
+        self.assertIn("'reason' => $note", supervisor)
+        self.assertIn("دلیل: ' . $note", supervisor)
+        self.assertIn('name="supervisor_note" required maxlength="500"', page)
+        self.assertIn("if ($bulkNote === '')", bulk)
+        self.assertIn("'reason' => $bulkNote", bulk)
+        self.assertIn('name="bulk_note" rows="2" maxlength="5000" required', queue)
+
+
 if __name__ == '__main__':
     unittest.main()
