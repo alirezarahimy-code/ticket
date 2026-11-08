@@ -98,7 +98,7 @@ if (!defined('APP_ROOT')) {
                 [$bulkDue, $bulkPauseAt, $bulkPauseMinutes] = ticket_sla_transition($bulkTicket, $status, (string) $bulkTicket['priority']);
                 $bulkOla = ticket_ola_transition($bulkTicket, $status, (string) $bulkTicket['priority']);
                 $workflow = new RequestCenterWorkflowService(db());
-                $bulkUpdated = $workflow->transition($ticketId, $bulkOld, $status, [
+                $bulkUpdates = [
                     'due_at' => $bulkDue,
                     'sla_paused_at' => $bulkPauseAt,
                     'sla_pause_minutes' => $bulkPauseMinutes,
@@ -108,7 +108,12 @@ if (!defined('APP_ROOT')) {
                     'ola_escalation_1_at' => $bulkOla['escalation_1_at'],
                     'ola_escalation_2_at' => $bulkOla['escalation_2_at'],
                     'resolved_at' => $status === 'resolved' ? RequestCenterSqlExpression::coalesceNow() : null,
-                ], 'standard', [
+                ];
+                $bulkFirstResponseRecorded = $bulkNote !== '' && empty($bulkTicket['first_response_at']);
+                if ($bulkFirstResponseRecorded) {
+                    $bulkUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();
+                }
+                $bulkUpdated = $workflow->transition($ticketId, $bulkOld, $status, $bulkUpdates, 'standard', [
                     'assigned_to' => $bulkTicket['assigned_to'] ?? null,
                     'priority' => $bulkTicket['priority'],
                     'cancel_requested_at' => null,
@@ -126,6 +131,7 @@ if (!defined('APP_ROOT')) {
                     'ola_due_at' => $bulkOla['due_at'],
                     'ola_escalation_1_at' => $bulkOla['escalation_1_at'],
                     'ola_escalation_2_at' => $bulkOla['escalation_2_at'],
+                    'first_response_recorded' => $bulkFirstResponseRecorded,
                 ];
                 if ($bulkNote !== '') {
                     (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $queueUser['id'], $bulkNote);
@@ -141,6 +147,7 @@ if (!defined('APP_ROOT')) {
                     'from_status' => $bulkOld,
                     'to_status' => $status,
                     'bulk' => true,
+                    'first_response_recorded' => $bulkFirstResponseRecorded,
                     'sla_ola' => $bulkSlaOlaAudit,
                 ]);
                 if ($status === 'resolved') {
