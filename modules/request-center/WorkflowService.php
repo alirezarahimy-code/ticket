@@ -68,7 +68,7 @@ final class RequestCenterWorkflowService
     public function appendMessage(int $ticketId, int $userId, string $body, bool $internal = false): int
     {
         $this->assertTransaction();
-        if ($ticketId <= 0 || $userId <= 0 || trim($body) === '') {
+        if ($ticketId <= 0 || $userId <= 0 || $body === '') {
             throw new InvalidArgumentException('شناسه یا متن پیام درخواست معتبر نیست.');
         }
         $statement = $this->pdo->prepare(
@@ -82,7 +82,7 @@ final class RequestCenterWorkflowService
     public function requestCancellation(int $ticketId, int $requesterId, string $expectedStatus, string $reason): bool
     {
         $this->assertTransaction();
-        if ($ticketId <= 0 || $requesterId <= 0 || trim($reason) === ''
+        if ($ticketId <= 0 || $requesterId <= 0 || $reason === ''
             || !in_array($expectedStatus, self::STATUSES, true)) {
             throw new InvalidArgumentException('اطلاعات درخواست لغو معتبر نیست.');
         }
