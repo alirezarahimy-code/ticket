@@ -115,6 +115,7 @@ if (!defined('APP_ROOT')) {
                 }
                 $bulkUpdated = $workflow->transition($ticketId, $bulkOld, $status, $bulkUpdates, 'standard', [
                     'assigned_to' => $bulkTicket['assigned_to'] ?? null,
+                    'first_response_at' => $bulkTicket['first_response_at'] ?? null,
                     'priority' => $bulkTicket['priority'],
                     'cancel_requested_at' => null,
                 ]);
