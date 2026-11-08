@@ -238,12 +238,9 @@ try {
     $start = (string) $pdo->query('SELECT NOW(6)')->fetchColumn();
     $legacyTarget = t04_http('http://' . $address . '/' . $legacyLocation, ['Cookie: ' . $cookie]);
     $legacyTargetLog = t04_log_window($pdo, $start, $webUser);
-    $legacyTargetDiagnostic = '';
-    if (preg_match('/کد پیگیری:\\s*([a-f0-9-]{36})/i', strip_tags($legacyTarget['body']), $requestMatch)) {
-        $errorRecord = $pdo->prepare('SELECT message, meta_json FROM system_logs WHERE request_id = ? ORDER BY id DESC LIMIT 1');
-        $errorRecord->execute([$requestMatch[1]]);
-        $legacyTargetDiagnostic = json_encode($errorRecord->fetch(PDO::FETCH_ASSOC) ?: [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
+    $errorRecord = $pdo->prepare('SELECT request_id, context, message, meta_json FROM system_logs WHERE created_at >= ? ORDER BY id DESC LIMIT 5');
+    $errorRecord->execute([$start]);
+    $legacyTargetDiagnostic = json_encode($errorRecord->fetchAll(PDO::FETCH_ASSOC), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     t04_check($legacyTarget['status'] === 503, 'bridged Request Center target fails closed on incomplete schema (HTTP ' . $legacyTarget['status'] . '; body=' . substr(trim(strip_tags($legacyTarget['body'])), 0, 240) . '; system_error=' . $legacyTargetDiagnostic . '; server=' . substr((string) @file_get_contents($serverLogPath), -5000) . ')');
     t04_check(count($legacyTargetLog['ddl']) === 0, 'bridged Request Center target executes zero DDL');
 
