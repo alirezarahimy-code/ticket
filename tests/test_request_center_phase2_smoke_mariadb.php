@@ -369,6 +369,26 @@ try {
         }
     }
 
+    // Failed creation must also return to the independent form, not to the legacy front controller.
+    $retryForm = smoke_http('http://' . $address . '/request-center.php?page=new-ticket', ['Cookie: ' . $cookie]);
+    $retryToken = '';
+    if (preg_match('/name="request_token"\\s+value="([a-f0-9]{64})"/i', $retryForm['body'], $retryMatch) === 1) {
+        $retryToken = $retryMatch[1];
+    }
+    smoke_check($retryForm['status'] === 200 && $retryToken !== '', 'independent form issues a fresh token for the failure-path check');
+    $invalidCreate = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'create_ticket',
+        'subject' => 'invalid service request smoke',
+        'description' => 'Must be rejected because no active service was selected.',
+        'service_id' => '0',
+        'service_group' => 'support',
+        'ticket_type' => 'request',
+        'support_location' => 'smoke-lab',
+        'csrf' => $csrf,
+        'request_token' => $retryToken,
+    ], ['Cookie: ' . $cookie]);
+    smoke_check($invalidCreate['status'] === 302 && str_starts_with($invalidCreate['location'], 'request-center.php?page=new-ticket'), 'failed independent creation returns to the independent creation form (status ' . $invalidCreate['status'] . ')');
+
     // 7) Phase 3 — exercise all four independent workspaces and their operational pages.
     $createdTicketId = (int) ($ticketRow['id'] ?? 0);
     $detail = smoke_http('http://' . $address . '/request-center.php?id=' . $createdTicketId, ['Cookie: ' . $cookie]);
