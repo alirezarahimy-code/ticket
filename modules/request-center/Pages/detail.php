@@ -56,6 +56,10 @@ if ($page === 'ticket') {
         && ($handlerLevel !== '' || request_center_can_supervise_ticket($ticket, $user))
         && (int) ($ticket['cancel_requested_by'] ?? 0) !== (int) $user['id'];
     $canAssignTicket = $handlerLevel === 'manager';
+    $canSupervisorAssign = $handlerLevel === ''
+        && request_center_can_supervise_ticket($ticket, $user)
+        && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)
+        && !$cancelHasRequest;
     $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
     render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
      echo '<section class="page-heading"><div><a class="back-link" href="request-center.php">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(request_center_status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
@@ -142,11 +146,28 @@ if ($page === 'ticket') {
     if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && ticket_assignee_is_eligible($ticket, $user, 'ticket_notification_user_can') && !$cancelHasRequest) {
         echo '<div class="card detail-card"><h3>برداشتن درخواست</h3><p class="muted">این درخواست هنوز کارشناس مسئول ندارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="claim_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><button class="button wide" type="submit">برداشتن و شروع رسیدگی</button></form></div>';
     }
+    if ($canSupervisorAssign) {
+        $currentAssigneeId = (int) ($ticket['assigned_to'] ?? 0);
+        $eligibleAssigneeIds = array_map('intval', array_column($agents ?? [], 'id'));
+        echo '<div class="card detail-card supervisor-assignment-card"><h3>تخصیص و بازتخصیص</h3><p class="muted">سوپروایزر می‌تواند مسئول رسیدگی را در همین حوزه و معاونت تعیین یا تغییر دهد. این عملیات در زمان درخواست لغو غیرفعال است.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_assign_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>کارشناس مسئول<select name="assigned_to"><option value=""' . ($currentAssigneeId === 0 ? ' selected' : '') . '>بدون مسئول (بازگشت به صف)</option>';
+        if ($currentAssigneeId > 0 && !in_array($currentAssigneeId, $eligibleAssigneeIds, true)) {
+            echo '<option value="' . $currentAssigneeId . '" selected>' . e((string) ($ticket['assignee_name'] ?: 'مسئول فعلی')) . ' (مسئول فعلی)</option>';
+        }
+        foreach (($agents ?? []) as $agent) {
+            $agentId = (int) $agent['id'];
+            echo '<option value="' . $agentId . '"' . ($agentId === $currentAssigneeId ? ' selected' : '') . '>' . e((string) $agent['full_name']) . '</option>';
+        }
+        echo '</select></label><label>یادداشت داخلی ارجاع (اختیاری)<input type="text" name="assignment_note" maxlength="500" placeholder="توضیح کوتاه برای تیم رسیدگی"></label><button class="button wide" type="submit">ثبت تخصیص / بازتخصیص</button></form>';
+        if (empty($agents)) {
+            echo '<small class="muted">در حال حاضر کارشناس فعال و واجد شرایطی برای این حوزه پیدا نشد.</small>';
+        }
+        echo '</div>';
+    }
     if ($canManageTicket && $handlerLevel !== '' && $cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
         echo '<div class="card detail-card"><h3>مدیریت درخواست</h3><p class="muted">تا تصمیم دربارهٔ درخواست لغو، تغییر وضعیت، اولویت و ارجاع متوقف است. گفت‌وگو از ستون مکالمه ادامه دارد.</p></div>';
     }
     if ($canManageTicket && $handlerLevel !== '' && !$cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
-         if ($canAssignTicket) {
+         if ($canAssignTicket || $canSupervisorAssign) {
               $ticketGroupForList = (string) ($ticket['service_group'] ?? 'it');
               $agentSql = 'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (((u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR (u.role IN ("agent", "manager") AND hu.code = ?)) AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))';
               $ticketDepartmentForList = (int) ($ticket['department_id'] ?? 0);
