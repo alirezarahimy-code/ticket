@@ -20,7 +20,7 @@ $rootUser = (string) (getenv('CI_DB_USER') ?: 'root');
 $rootPass = (string) (getenv('CI_DB_PASS') ?: '');
 $mysql = (string) (getenv('ITSM_MYSQL_PATH') ?: 'mariadb');
 $schemaFile = dirname(__DIR__) . '/install-empty-db.sql';
-$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11,12,13'))));
+$scenarioFilter = array_filter(array_map('intval', explode(',', (string) (getenv('T12_SCENARIOS') ?: '1,2,3,4,5,6,7,8,9,10,11,12,13,14'))));
 $evidenceDir = (string) (getenv('T12_EVIDENCE_DIR') ?: (sys_get_temp_dir() . '/t12-evidence'));
 
 $portBase = 18100 + (getmypid() % 4000);
@@ -893,6 +893,102 @@ try {
             'result' => 'PASS',
             'evidence' => $independentEvidence,
         ];
+    }
+
+    if (in_array(14, $scenarioFilter, true)) {
+        // Internal-note content and attachments must remain invisible to the
+        // requester, while the assigned handler can read and download them.
+        t12s_rebuild_all($apps, $rootUser, $rootPass, $host, $port, $mysql);
+        foreach ($apps as &$privacyApp) {
+            $privacyApp['base_url'] = 'http://127.0.0.1:' . (int) $privacyApp['port'];
+        }
+        unset($privacyApp);
+        $privacySessions = t12s_sessions($apps);
+        $privacyApp = $apps['feature'];
+        $privacyPdo = t12s_pdo($privacyApp);
+        $privacyTicket = t12s_create_ticket('feature', $privacyApp, $privacySessions);
+        $privacyPdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, first_response_at = NOW() - INTERVAL 30 MINUTE WHERE id = " . (int) $privacyTicket);
+        $internalBody = 'محرمانه T12 — فقط برای تیم رسیدگی';
+        $internalResponse = t12s_post($privacyApp['base_url'] . '/request-center.php', $privacySessions['agent']['feature'], 'reply', [
+            'ticket_id' => $privacyTicket,
+            'body' => $internalBody,
+            'is_internal' => '1',
+        ]);
+        $internalMessage = $privacyPdo->query('SELECT id, is_internal, body FROM ticket_messages WHERE ticket_id = ' . (int) $privacyTicket . ' ORDER BY id DESC LIMIT 1')->fetch(PDO::FETCH_ASSOC);
+        if ($internalResponse['status'] !== 302 || !$internalMessage || (int) $internalMessage['is_internal'] !== 1
+            || (string) $internalMessage['body'] !== $internalBody) {
+            t12s_fail('14-internal-note message persistence failed: HTTP ' . $internalResponse['status']
+                . ', message=' . json_encode($internalMessage, JSON_UNESCAPED_UNICODE));
+        }
+
+        $uploadsDir = $privacyApp['root'] . '/storage/uploads';
+        if (!is_dir($uploadsDir) && !mkdir($uploadsDir, 0775, true) && !is_dir($uploadsDir)) {
+            t12s_fail('14-internal-note could not create isolated upload directory');
+        }
+        $storedName = 't12-internal-' . (int) $privacyTicket . '.txt';
+        $fileContents = 'internal attachment fixture ' . (int) $privacyTicket;
+        if (file_put_contents($uploadsDir . '/' . $storedName, $fileContents) === false) {
+            t12s_fail('14-internal-note could not write isolated attachment fixture');
+        }
+        $attachmentInsert = $privacyPdo->prepare('INSERT INTO ticket_attachments (message_id, original_name, stored_name, mime, size_bytes) VALUES (?, ?, ?, ?, ?)');
+        $attachmentInsert->execute([(int) $internalMessage['id'], 'internal-note.txt', $storedName, 'text/plain', strlen($fileContents)]);
+        $internalAttachmentId = (int) $privacyPdo->lastInsertId();
+
+        $requesterDetail = t12s_http(
+            $privacyApp['base_url'] . '/request-center.php?page=ticket&id=' . (int) $privacyTicket . '&workspace=requester',
+            'GET',
+            ['Cookie: ' . $privacySessions['requester']['feature']['cookie']]
+        );
+        $agentDetail = t12s_http(
+            $privacyApp['base_url'] . '/request-center.php?page=ticket&id=' . (int) $privacyTicket . '&workspace=agent',
+            'GET',
+            ['Cookie: ' . $privacySessions['agent']['feature']['cookie']]
+        );
+        if ($requesterDetail['status'] !== 200 || str_contains($requesterDetail['body'], $internalBody)) {
+            t12s_fail('14-internal-note leaked into requester detail: HTTP ' . $requesterDetail['status']);
+        }
+        if ($agentDetail['status'] !== 200 || !str_contains($agentDetail['body'], $internalBody)) {
+            t12s_fail('14-internal-note missing from assigned agent detail: HTTP ' . $agentDetail['status']);
+        }
+
+        $requesterDownload = t12s_http(
+            $privacyApp['base_url'] . '/request-center.php?action=download_attachment&id=' . $internalAttachmentId,
+            'GET',
+            ['Cookie: ' . $privacySessions['requester']['feature']['cookie']]
+        );
+        $agentDownload = t12s_http(
+            $privacyApp['base_url'] . '/request-center.php?action=download_attachment&id=' . $internalAttachmentId,
+            'GET',
+            ['Cookie: ' . $privacySessions['agent']['feature']['cookie']]
+        );
+        if ($requesterDownload['status'] !== 404) {
+            t12s_fail('14-internal-note requester downloaded internal attachment: HTTP ' . $requesterDownload['status']);
+        }
+        if ($agentDownload['status'] !== 200 || $agentDownload['body'] !== $fileContents) {
+            t12s_fail('14-internal-note assigned agent cannot download internal attachment: HTTP ' . $agentDownload['status']);
+        }
+
+        $requesterInternalNotifications = (int) $privacyPdo->query(
+            "SELECT COUNT(*) FROM notifications WHERE ticket_id = " . (int) $privacyTicket
+            . " AND user_id = 101 AND notification_type = 'internal_note'"
+        )->fetchColumn();
+        if ($requesterInternalNotifications !== 0) {
+            t12s_fail('14-internal-note requester received an internal-note notification');
+        }
+        @unlink($uploadsDir . '/' . $storedName);
+        $results[] = [
+            'name' => '14-internal-note-privacy-and-attachment',
+            'result' => 'PASS',
+            'evidence' => [
+                'agent-post-internal-note:PASS',
+                'requester-detail-hidden:PASS',
+                'agent-detail-visible:PASS',
+                'requester-internal-attachment-404:PASS',
+                'agent-internal-attachment-download:PASS',
+                'requester-internal-note-notification-absent:PASS',
+            ],
+        ];
+        t12s_log('T12-SCENARIO 14-internal-note-privacy-and-attachment: PASS');
     }
 
     file_put_contents($evidenceDir . '/summary.json', json_encode(['results' => $results], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
