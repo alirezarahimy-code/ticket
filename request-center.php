@@ -75,6 +75,20 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     require_once __DIR__ . '/bootstrap.php';
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
+    // The shared footer can render the optional chatbot widget. Load its
+    // provider when installed; keep the independent RC entry safe when the
+    // optional chatbot module is absent.
+    $rcChatbotProvider = __DIR__ . '/chatbot.php';
+    if (!function_exists('chatbot_render_widget') && is_file($rcChatbotProvider)) {
+        require_once $rcChatbotProvider;
+    }
+    if (!function_exists('chatbot_render_widget')) {
+        function chatbot_render_widget(?array $user): string
+        {
+            return '';
+        }
+    }
+
     // The lifecycle pages use the shared site chrome, which was extracted from
     // index.php into lib/render.php during Phase 2. Load that contract directly
     // instead of pulling the legacy front controller into the RC runtime.
