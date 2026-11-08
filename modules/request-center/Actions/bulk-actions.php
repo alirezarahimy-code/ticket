@@ -64,6 +64,9 @@ if (!defined('APP_ROOT')) {
             if (count($ticketIds) > 200) {
                 throw new RuntimeException('در هر عملیات گروهی حداکثر ۲۰۰ درخواست قابل انتخاب است؛ انتخاب را کوچک‌تر کنید.');
             }
+            // All bulk handlers acquire ticket row locks in the same order to
+            // reduce deadlocks when concurrent batches overlap.
+            sort($ticketIds, SORT_NUMERIC);
             $bulkChanged = 0;
             $bulkSkipped = 0;
             $bulkAlready = 0;
