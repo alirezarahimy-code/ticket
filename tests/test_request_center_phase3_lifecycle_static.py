@@ -260,6 +260,7 @@ def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshot
     workflow = source("modules/request-center/WorkflowService.php")
     assert "service_group, due_at, sla_minutes, sla_paused_at" in workflow
     assert "'service_group', 'due_at', 'sla_minutes'" in workflow
+    assert "'ola_escalation_2_at'], true" in workflow
     for path in (
         "modules/request-center/Actions/ticket-actions.php",
         "modules/request-center/Actions/supervisor-actions.php",
