@@ -62,7 +62,7 @@ jobs:
       if: failure()
       run: |
         python tools/build_system_map.py
-        git diff -- docs/system-map/FILES.tsv docs/system-map/SYMBOLS.tsv docs/system-map/summary.json
+        git diff -- docs/system-map/
 
     - name: Guard — session boot
       run: python tests/test_session_boot_static.py
