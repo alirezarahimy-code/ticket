@@ -465,7 +465,7 @@ try {
             . ' body-tail=' . substr($maintenanceDetail['body'], -5000) . PHP_EOL;
     }
     smoke_check($maintenanceDetail['status'] === 200 && str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') && str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد'), 'independent detail renders SLA/OLA event metadata without Logging UI dependencies (status ' . $maintenanceDetail['status'] . ')');
-    $maintenanceNotifications = $pdo->prepare("SELECT COUNT(DISTINCT notification_type) FROM notifications WHERE ticket_id = ? AND notification_type IN ('sla_due_soon','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')");
+    $maintenanceNotifications = $pdo->prepare("SELECT COUNT(DISTINCT notification_type) FROM notifications WHERE ticket_id = ? AND notification_type IN ('sla_due_soon','sla_overdue','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')");
     $maintenanceNotifications->execute([$maintenanceTicketId]);
     $notificationTypeCount = (int) $maintenanceNotifications->fetchColumn();
     if ($notificationTypeCount !== 5) {
