@@ -21,7 +21,7 @@ PREPARE rc_category_code_stmt FROM @rc_category_code_ddl;
 EXECUTE rc_category_code_stmt;
 DEALLOCATE PREPARE rc_category_code_stmt;
 
-SET @rc_category_code_index_exists = (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'categories' AND INDEX_NAME = 'uq_categories_code');
+SET @rc_category_code_index_exists = (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'categories' AND COLUMN_NAME = 'code' AND NON_UNIQUE = 0);
 SET @rc_category_code_index_ddl = IF(@rc_category_code_index_exists > 0, 'SELECT 1', 'CREATE UNIQUE INDEX `uq_categories_code` ON `categories` (`code`)');
 PREPARE rc_category_code_index_stmt FROM @rc_category_code_index_ddl;
 EXECUTE rc_category_code_index_stmt;
