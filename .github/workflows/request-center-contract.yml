@@ -90,6 +90,7 @@ jobs:
       - name: PHP syntax for independent entry point and repository
         run: |
           php -l request-center.php
+          php -l index.php
           php -l modules/request-center/RequestCenterRepository.php
           php -l modules/request-center/WorkflowService.php
           php -l modules/request-center/lib/functions.php
@@ -105,6 +106,7 @@ jobs:
           php -l modules/request-center/Actions/supervisor-actions.php
           php -l modules/request-center/Actions/bulk-actions.php
           php -l modules/request-center/Actions/service-actions.php
+          php -l tests/test_request_center_workflow_service_sqlite.php
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
           php -l modules/request-center/Pages/calendar.php
