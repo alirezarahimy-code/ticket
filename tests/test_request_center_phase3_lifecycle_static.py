@@ -58,7 +58,11 @@ def test_lifecycle_actions_return_to_independent_workspaces():
         assert "redirect('index.php?page=ticket&id='" not in text
         assert "redirect('index.php?page=supervisor')" not in text
         assert "redirect('index.php?page=queue')" not in text
-    assert "request-center.php?page=ticket&id=" in source(paths[0])
+    assert "request_center_ticket_return_url($ticketId)" in source(paths[0])
+    shared = source("modules/request-center/lib/functions.php")
+    assert "function request_center_ticket_return_url(int $ticketId): string" in shared
+    assert "'page' => 'ticket'" in shared
+    assert "rc_return_workspace" in shared
     assert "request-center.php?page=supervisor" in source(paths[1])
     assert "request-center.php?page=queue" in source(paths[2])
     assert "request-center.php?page=services" in source(paths[3])
