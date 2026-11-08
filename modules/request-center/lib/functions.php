@@ -251,6 +251,7 @@ function request_center_assert_create_schema(): void
         'tickets' => ['requesting_unit_id'],
         'categories' => ['code'],
         'service_catalog' => ['category_id'],
+        'org_units' => ['id', 'name', 'code', 'parent_id', 'is_active', 'unit_type', 'manager_user_id'],
     ];
     $statement = db()->query(
         'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
@@ -277,6 +278,32 @@ function request_center_assert_create_schema(): void
             . implode(', ', $missing)
         );
     }
+}
+
+/**
+ * Read-only equivalent of org_deputy_units() for the independent Request
+ * Center entry. The provider helper calls org_ensure_schema() and therefore
+ * is intentionally not used on this path.
+ *
+ * @return array<int,array<string,mixed>>
+ */
+function request_center_org_deputy_units(array $user): array
+{
+    $companyAware = function_exists('org_has_company_schema') && org_has_company_schema();
+    $companyId = function_exists('org_current_company_id') ? org_current_company_id() : 0;
+    if ($companyAware && $companyId <= 0) {
+        return [];
+    }
+    $companyFilter = $companyAware ? ' AND ou.company_id = ?' : '';
+    $query = db()->prepare(
+        'SELECT ou.id, ou.name, ou.code, ou.parent_id, m.full_name AS manager_name
+         FROM org_units ou
+         LEFT JOIN users m ON m.id = ou.manager_user_id
+         WHERE ou.is_active = 1 AND ou.unit_type = "deputy"' . $companyFilter . '
+         ORDER BY ou.name'
+    );
+    $query->execute($companyAware ? [$companyId] : []);
+    return $query->fetchAll(PDO::FETCH_ASSOC);
 }
 
 /** Request Center status labels, including the module-owned rejected terminal state. */
