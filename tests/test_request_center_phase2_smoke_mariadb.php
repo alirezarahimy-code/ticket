@@ -502,6 +502,27 @@ try {
     }
     smoke_check($notificationTypeCount === 5, 'SLA/OLA notifications reach the assigned staff member exactly by alert type');
 
+    // Inject a notification persistence failure. Alert claims, ticket events and
+    // audit rows must roll back together so the next maintenance run can retry.
+    $pdo->exec('DELETE FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId);
+    $pdo->exec('DELETE FROM ticket_ola_alerts WHERE ticket_id = ' . $maintenanceTicketId);
+    $pdo->exec("DELETE FROM ticket_events WHERE ticket_id = " . $maintenanceTicketId . " AND event_type IN ('sla_alert','ola_alert')");
+    $pdo->exec("DELETE FROM notifications WHERE ticket_id = " . $maintenanceTicketId . " AND notification_type IN ('sla_due_soon','sla_overdue','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')");
+    $pdo->exec('CREATE TRIGGER rc_smoke_fail_notification_insert BEFORE INSERT ON notifications FOR EACH ROW BEGIN IF NEW.ticket_id = '
+        . $maintenanceTicketId . " THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'RC smoke injected notification outage'; END IF; END");
+    $maintenanceFailure = $runMaintenance();
+    $failedClaims = (int) $pdo->query('SELECT (SELECT COUNT(*) FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId . ') + (SELECT COUNT(*) FROM ticket_ola_alerts WHERE ticket_id = ' . $maintenanceTicketId . ')')->fetchColumn();
+    $failedEvents = (int) $pdo->query("SELECT COUNT(*) FROM ticket_events WHERE ticket_id = " . $maintenanceTicketId . " AND event_type IN ('sla_alert','ola_alert')")->fetchColumn();
+    $failedNotifications = (int) $pdo->query("SELECT COUNT(*) FROM notifications WHERE ticket_id = " . $maintenanceTicketId . " AND notification_type IN ('sla_due_soon','sla_overdue','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')")->fetchColumn();
+    $pdo->exec('DROP TRIGGER rc_smoke_fail_notification_insert');
+    smoke_check($maintenanceFailure['exit'] === 0 && $failedClaims === 0 && $failedEvents === 0 && $failedNotifications === 0,
+        'notification outage rolls back SLA/OLA alert claims and events instead of losing a retry');
+    $maintenanceRetry = $runMaintenance();
+    $retryClaims = (int) $pdo->query('SELECT (SELECT COUNT(*) FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId . ') + (SELECT COUNT(*) FROM ticket_ola_alerts WHERE ticket_id = ' . $maintenanceTicketId . ')')->fetchColumn();
+    $retryNotifications = (int) $pdo->query("SELECT COUNT(DISTINCT notification_type) FROM notifications WHERE ticket_id = " . $maintenanceTicketId . " AND notification_type IN ('sla_due_soon','sla_overdue','ola_response_overdue','ola_resolution_overdue','ola_escalation_1','ola_escalation_2')")->fetchColumn();
+    smoke_check($maintenanceRetry['exit'] === 0 && $retryClaims === 5 && $retryNotifications === 5,
+        'SLA/OLA maintenance retries and delivers all five alert types after notification storage recovers');
+
     // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
     smoke_check($forwarded['status'] === 200 && str_contains($forwarded['body'], 'داشبورد'), 'non-RC POST action is forwarded in-process and renders the dashboard (status ' . $forwarded['status'] . ')');
