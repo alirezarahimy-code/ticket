@@ -36,7 +36,7 @@ if ($page === 'ticket') {
             $requestedQueue = (string) ($_GET['queue'] ?? 'all');
             $detailReturnParams['queue'] = in_array($requestedQueue, ['all','unassigned','overdue','mine','waiting_user','resolved','cancellation_requested','cancelled','rejected'], true) ? $requestedQueue : 'all';
         }
-        foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16, 'ticket_type' => 16, 'from' => 24, 'to' => 24] as $contextKey => $maxLength) {
+        foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16, 'from' => 24, 'to' => 24] as $contextKey => $maxLength) {
             $contextValue = trim((string) ($_GET[$contextKey] ?? ''));
             if ($contextValue !== '' && strlen($contextValue) <= $maxLength) {
                 $detailReturnParams[$contextKey] = $contextValue;
