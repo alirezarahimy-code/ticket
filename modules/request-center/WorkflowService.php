@@ -68,7 +68,7 @@ final class RequestCenterWorkflowService
     public function appendMessage(int $ticketId, int $userId, string $body, bool $internal = false): int
     {
         $this->assertTransaction();
-        if ($ticketId <= 0 || $userId <= 0 || $body === '') {
+        if ($ticketId <= 0 || $userId <= 0 || trim($body) === '') {
             throw new InvalidArgumentException('شناسه یا متن پیام درخواست معتبر نیست.');
         }
         $statement = $this->pdo->prepare(
