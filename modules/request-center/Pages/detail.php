@@ -314,7 +314,45 @@ if ($page === 'ticket') {
                 }
             }
         }
-        $detailLines = $visibleDetails ? activity_log_meta_lines(json_encode($visibleDetails, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) : [];
+        $detailLines = [];
+        if ($visibleDetails) {
+            $visibleJson = json_encode($visibleDetails, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if (function_exists('activity_log_meta_lines')) {
+                $detailLines = activity_log_meta_lines((string) $visibleJson);
+            } else {
+                // The independent RC entry does not load Logging's presentation layer.
+                // Render only the already allowlisted RC event fields without that optional helper.
+                $detailLabels = [
+                    'reason' => 'دلیل', 'score' => 'امتیاز', 'from' => 'از', 'to' => 'به',
+                    'mode' => 'نوع عملیات', 'department_id' => 'شناسه حوزه', 'sla_minutes' => 'مهلت SLA',
+                    'ticket_type' => 'نوع درخواست', 'service_id' => 'شناسه خدمت',
+                    'from_status' => 'وضعیت قبلی', 'to_status' => 'وضعیت جدید', 'status' => 'وضعیت',
+                    'priority' => 'اولویت', 'from_assignee_name' => 'مسئول قبلی',
+                    'to_assignee_name' => 'مسئول جدید', 'note' => 'یادداشت',
+                    'assigned_to' => 'شناسه مسئول', 'from_assigned_to' => 'مسئول قبلی',
+                    'to_assigned_to' => 'مسئول جدید', 'assignment_source' => 'منبع ارجاع',
+                    'requested_at' => 'زمان درخواست', 'actor_id' => 'شناسه عامل',
+                    'message_id' => 'شناسه پیام', 'is_internal' => 'یادداشت داخلی',
+                    'due_at' => 'موعد SLA', 'sla_paused_at' => 'شروع مکث SLA',
+                    'sla_pause_minutes' => 'مدت مکث SLA', 'ola_policy_id' => 'سیاست OLA',
+                    'ola_response_due_at' => 'موعد پاسخ OLA', 'ola_due_at' => 'موعد حل OLA',
+                    'ola_escalation_1_at' => 'موعد تشدید اول', 'ola_escalation_2_at' => 'موعد تشدید دوم',
+                    'first_response_set' => 'ثبت اولین پاسخ', 'alert_type' => 'نوع هشدار',
+                ];
+                foreach ($visibleDetails as $detailKey => $detailValue) {
+                    if (is_array($detailValue)) {
+                        $detailValue = json_encode($detailValue, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    }
+                    if ($detailValue === null) {
+                        continue;
+                    }
+                    $detailLines[] = [
+                        $detailLabels[(string) $detailKey] ?? (string) $detailKey,
+                        is_bool($detailValue) ? ($detailValue ? 'بله' : 'خیر') : (string) $detailValue,
+                    ];
+                }
+            }
+        }
         $detailHtml = $detailLines ? '<details class="log-details"><summary>جزئیات (' . count($detailLines) . ')</summary><dl>' . implode('', array_map(static fn (array $line): string => '<div><dt>' . e((string) $line[0]) . '</dt><dd>' . e((string) $line[1]) . '</dd></div>', $detailLines)) . '</dl></details>' : '';
         $fromStatus = trim((string) ($event['from_status'] ?? ''));
         $toStatus = trim((string) ($event['to_status'] ?? ''));
