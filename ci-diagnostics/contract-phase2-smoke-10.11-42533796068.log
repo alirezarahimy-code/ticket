@@ -1,0 +1,20 @@
+Phase-2 smoke on database: 10.11.19-MariaDB-ubu2204
+smoke fixtures: handling_unit=1 department=2 category=18 service=2
+PASS seeded disposable primary-admin account
+PASS session seed endpoint returned HTTP 200 (status 200)
+dashboard HTTP diagnostic: body=<!doctype html><meta charset="utf-8"><body style="font-family:sans-serif;direction:rtl;padding:24px"><h2>عملیات انجام نشد</h2><p>در اجرای این عملیات مشکلی پیش آمد. دوباره تلاش کنید؛ اگر تکرار شد کد پیگیری را به پشتیبانی بدهید.</p><p>کد پیگیری: <b dir="ltr">e110ac36-6394-4369-903d-f131986c80fb</b></p></body> system_logs=[] app_log=2026-11-09T02:40:14+03:30 [error] خطای نهایی‌نشده — خطای ناشناخته: syntax error, unexpected identifier "subject", expecting "]" [مشکل جزئی ×0] {"cause":"علت دقیق از روی متن خطا مشخص نیست.","action":"جزئیات فنی را بخوانید؛ اگر تکرار شد، آن را برای پشتیبانی فنی بفرستید.","technical":"syntax error, unexpected identifier \"subject\", expecting \"]\"","location":"chatbot.php:164","error_type":"ParseError","stack_trace":[{"type":"ParseError","message":"syntax error, unexpected identifier \"subject\", expecting \"]\"","frames":[{"file":"chatbot.php","line":164,"class":"ParseError","function":"{throw}"}]}],"code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"} server=[Sun Nov  8 23:10:14 2026] PHP 8.2.35 Development Server (http://127.0.0.1:18766) started
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37770 Accepted
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37770 Closed without sending a request; it was probably just an unused speculative preconnection
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37770 Closing
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37784 Accepted
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37784 [200]: GET /tests/fixtures/request-center-session-seed.php?user_id=5
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37784 Closing
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37794 Accepted
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37794 [500]: GET /index.php?page=dashboard
+[Sun Nov  8 23:10:14 2026] 127.0.0.1:37794 Closing
+
+PHP Fatal error:  Uncaught RuntimeException: Phase-2 smoke failed: dashboard returns HTTP 200 (status 500) in /home/runner/work/ticket/ticket/tests/test_request_center_phase2_smoke_mariadb.php:36
+Stack trace:
+#0 /home/runner/work/ticket/ticket/tests/test_request_center_phase2_smoke_mariadb.php(264): smoke_check()
+#1 {main}
+  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_phase2_smoke_mariadb.php on line 36
