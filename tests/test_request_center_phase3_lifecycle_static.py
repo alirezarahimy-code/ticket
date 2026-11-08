@@ -124,6 +124,17 @@ def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch(
     assert "$bulkSkipped++;" in bulk[guard:transition]
 
 
+def test_rejected_state_is_preflighted_and_excluded_from_terminal_workloads():
+    repository = source("modules/request-center/RequestCenterRepository.php")
+    assert "COLUMN_TYPE" in repository
+    assert "Migration 037" in repository
+    assert "str_contains($ticketStatusType, \"'rejected'\")" in repository
+    sla_cron = source("cron/sla_maintenance.php")
+    assert sla_cron.count('"resolved", "closed", "cancelled", "rejected"') >= 2
+    sla_lib = source("lib/tickets-sla.php")
+    assert "'rejected' => 'ردشده'" in sla_lib
+
+
 def test_ticket_maintenance_jobs_reject_web_before_schema_setup():
     for path in ("cron/ticket_auto_close.php", "cron/sla_maintenance.php"):
         cron = source(path)
