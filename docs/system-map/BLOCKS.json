@@ -32837,8 +32837,8 @@
             "id": "DB-002",
             "path": "install-empty-db.sql",
             "area": "DB",
-            "lines": 1633,
-            "file_fingerprint": "ad1f95aaf577",
+            "lines": 1634,
+            "file_fingerprint": "c38d868263d2",
             "blocks": [
                 {
                     "kind": "block",
@@ -33171,9 +33171,9 @@
                     "kind": "block",
                     "anchor": "CREATE TABLE tickets",
                     "line_start": 292,
-                    "line_end": 358,
-                    "lines": 67,
-                    "fingerprint": "e839131c05a2",
+                    "line_end": 359,
+                    "lines": 68,
+                    "fingerprint": "4fbd74839e70",
                     "risk": {
                         "score": 1,
                         "flags": {
@@ -33185,8 +33185,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_messages",
-                    "line_start": 359,
-                    "line_end": 370,
+                    "line_start": 360,
+                    "line_end": 371,
                     "lines": 12,
                     "fingerprint": "0f4c22278d2f",
                     "risk": {
@@ -33200,8 +33200,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_ratings",
-                    "line_start": 371,
-                    "line_end": 384,
+                    "line_start": 372,
+                    "line_end": 385,
                     "lines": 14,
                     "fingerprint": "6eccf1a89746",
                     "risk": {
@@ -33215,8 +33215,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_attachments",
-                    "line_start": 385,
-                    "line_end": 395,
+                    "line_start": 386,
+                    "line_end": 396,
                     "lines": 11,
                     "fingerprint": "c972e52781b0",
                     "risk": {
@@ -33230,8 +33230,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE activity_logs",
-                    "line_start": 396,
-                    "line_end": 434,
+                    "line_start": 397,
+                    "line_end": 435,
                     "lines": 39,
                     "fingerprint": "2f34b798ff90",
                     "risk": {
@@ -33245,8 +33245,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE role_permissions",
-                    "line_start": 435,
-                    "line_end": 441,
+                    "line_start": 436,
+                    "line_end": 442,
                     "lines": 7,
                     "fingerprint": "215589b8279d",
                     "risk": {
@@ -33258,8 +33258,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE notifications",
-                    "line_start": 442,
-                    "line_end": 459,
+                    "line_start": 443,
+                    "line_end": 460,
                     "lines": 18,
                     "fingerprint": "c9687bcd90ae",
                     "risk": {
@@ -33273,8 +33273,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE login_attempts",
-                    "line_start": 460,
-                    "line_end": 467,
+                    "line_start": 461,
+                    "line_end": 468,
                     "lines": 8,
                     "fingerprint": "552c2f977c72",
                     "risk": {
@@ -33288,8 +33288,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_sla_alerts",
-                    "line_start": 468,
-                    "line_end": 477,
+                    "line_start": 469,
+                    "line_end": 478,
                     "lines": 10,
                     "fingerprint": "bba720902a18",
                     "risk": {
@@ -33303,8 +33303,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_events",
-                    "line_start": 478,
-                    "line_end": 501,
+                    "line_start": 479,
+                    "line_end": 502,
                     "lines": 24,
                     "fingerprint": "8a5d40d12aa7",
                     "risk": {
@@ -33318,8 +33318,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE knowledge_articles",
-                    "line_start": 502,
-                    "line_end": 515,
+                    "line_start": 503,
+                    "line_end": 516,
                     "lines": 14,
                     "fingerprint": "3d148c51bd77",
                     "risk": {
@@ -33333,8 +33333,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE holidays",
-                    "line_start": 516,
-                    "line_end": 525,
+                    "line_start": 517,
+                    "line_end": 526,
                     "lines": 10,
                     "fingerprint": "941c04f7bd5a",
                     "risk": {
@@ -33348,8 +33348,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE assets",
-                    "line_start": 526,
-                    "line_end": 581,
+                    "line_start": 527,
+                    "line_end": 582,
                     "lines": 56,
                     "fingerprint": "833898bfa4c1",
                     "risk": {
@@ -33363,8 +33363,8 @@
                 {
                     "kind": "block",
                     "anchor": "ALTER TABLE tickets",
-                    "line_start": 582,
-                    "line_end": 583,
+                    "line_start": 583,
+                    "line_end": 584,
                     "lines": 2,
                     "fingerprint": "b0cecf20192f",
                     "risk": {
@@ -33378,8 +33378,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_memory_modules",
-                    "line_start": 584,
-                    "line_end": 598,
+                    "line_start": 585,
+                    "line_end": 599,
                     "lines": 15,
                     "fingerprint": "214046a0103d",
                     "risk": {
@@ -33393,8 +33393,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_storage_devices",
-                    "line_start": 599,
-                    "line_end": 614,
+                    "line_start": 600,
+                    "line_end": 615,
                     "lines": 16,
                     "fingerprint": "41fe593b8c5b",
                     "risk": {
@@ -33408,8 +33408,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_graphics_adapters",
-                    "line_start": 615,
-                    "line_end": 627,
+                    "line_start": 616,
+                    "line_end": 628,
                     "lines": 13,
                     "fingerprint": "d9c2da534a5a",
                     "risk": {
@@ -33423,8 +33423,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_peripherals",
-                    "line_start": 628,
-                    "line_end": 645,
+                    "line_start": 629,
+                    "line_end": 646,
                     "lines": 18,
                     "fingerprint": "57da64759859",
                     "risk": {
@@ -33438,8 +33438,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_inventory_history",
-                    "line_start": 646,
-                    "line_end": 656,
+                    "line_start": 647,
+                    "line_end": 657,
                     "lines": 11,
                     "fingerprint": "5638004f22b7",
                     "risk": {
@@ -33453,8 +33453,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_history_events",
-                    "line_start": 657,
-                    "line_end": 674,
+                    "line_start": 658,
+                    "line_end": 675,
                     "lines": 18,
                     "fingerprint": "bfc39204b391",
                     "risk": {
@@ -33468,8 +33468,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_relations",
-                    "line_start": 675,
-                    "line_end": 687,
+                    "line_start": 676,
+                    "line_end": 688,
                     "lines": 13,
                     "fingerprint": "c7f270eaf430",
                     "risk": {
@@ -33483,8 +33483,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_profiles",
-                    "line_start": 688,
-                    "line_end": 769,
+                    "line_start": 689,
+                    "line_end": 770,
                     "lines": 82,
                     "fingerprint": "72b44093b30b",
                     "risk": {
@@ -33498,8 +33498,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ola_policies",
-                    "line_start": 770,
-                    "line_end": 787,
+                    "line_start": 771,
+                    "line_end": 788,
                     "lines": 18,
                     "fingerprint": "d60d6f43162d",
                     "risk": {
@@ -33513,8 +33513,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_ola_alerts",
-                    "line_start": 788,
-                    "line_end": 797,
+                    "line_start": 789,
+                    "line_end": 798,
                     "lines": 10,
                     "fingerprint": "9004e4d7cb8c",
                     "risk": {
@@ -33528,8 +33528,8 @@
                 {
                     "kind": "block",
                     "anchor": "ALTER TABLE tickets",
-                    "line_start": 798,
-                    "line_end": 799,
+                    "line_start": 799,
+                    "line_end": 800,
                     "lines": 2,
                     "fingerprint": "59d34e854bee",
                     "risk": {
@@ -33543,8 +33543,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE change_records",
-                    "line_start": 800,
-                    "line_end": 828,
+                    "line_start": 801,
+                    "line_end": 829,
                     "lines": 29,
                     "fingerprint": "758f08a3a5e5",
                     "risk": {
@@ -33558,8 +33558,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE change_approvals",
-                    "line_start": 829,
-                    "line_end": 840,
+                    "line_start": 830,
+                    "line_end": 841,
                     "lines": 12,
                     "fingerprint": "e9c6d91715b7",
                     "risk": {
@@ -33573,8 +33573,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE change_ticket_links",
-                    "line_start": 841,
-                    "line_end": 851,
+                    "line_start": 842,
+                    "line_end": 852,
                     "lines": 11,
                     "fingerprint": "8c615c419815",
                     "risk": {
@@ -33588,8 +33588,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE problem_records",
-                    "line_start": 852,
-                    "line_end": 875,
+                    "line_start": 853,
+                    "line_end": 876,
                     "lines": 24,
                     "fingerprint": "dd2446097f13",
                     "risk": {
@@ -33603,8 +33603,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE problem_ticket_links",
-                    "line_start": 876,
-                    "line_end": 886,
+                    "line_start": 877,
+                    "line_end": 887,
                     "lines": 11,
                     "fingerprint": "958d64d1f530",
                     "risk": {
@@ -33618,8 +33618,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_config",
-                    "line_start": 887,
-                    "line_end": 917,
+                    "line_start": 888,
+                    "line_end": 918,
                     "lines": 31,
                     "fingerprint": "f379f9a7ea11",
                     "risk": {
@@ -33633,8 +33633,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_events",
-                    "line_start": 918,
-                    "line_end": 956,
+                    "line_start": 919,
+                    "line_end": 957,
                     "lines": 39,
                     "fingerprint": "889671079e06",
                     "risk": {
@@ -33648,8 +33648,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_worker_status",
-                    "line_start": 957,
-                    "line_end": 972,
+                    "line_start": 958,
+                    "line_end": 973,
                     "lines": 16,
                     "fingerprint": "d03dd8fdd5fa",
                     "risk": {
@@ -33663,8 +33663,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_guest_cards",
-                    "line_start": 973,
-                    "line_end": 986,
+                    "line_start": 974,
+                    "line_end": 987,
                     "lines": 14,
                     "fingerprint": "bb68019ca7f8",
                     "risk": {
@@ -33678,8 +33678,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_groups",
-                    "line_start": 987,
-                    "line_end": 1005,
+                    "line_start": 988,
+                    "line_end": 1006,
                     "lines": 19,
                     "fingerprint": "437f78ae2e7d",
                     "risk": {
@@ -33693,8 +33693,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_group_members",
-                    "line_start": 1006,
-                    "line_end": 1017,
+                    "line_start": 1007,
+                    "line_end": 1018,
                     "lines": 12,
                     "fingerprint": "8c4bfddc3f9d",
                     "risk": {
@@ -33708,8 +33708,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_group_runs",
-                    "line_start": 1018,
-                    "line_end": 1044,
+                    "line_start": 1019,
+                    "line_end": 1045,
                     "lines": 27,
                     "fingerprint": "b2bc5805969d",
                     "risk": {
@@ -33723,8 +33723,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_daily_absence",
-                    "line_start": 1045,
-                    "line_end": 1060,
+                    "line_start": 1046,
+                    "line_end": 1061,
                     "lines": 16,
                     "fingerprint": "97994d1ebd06",
                     "risk": {
@@ -33738,8 +33738,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_day_visits",
-                    "line_start": 1061,
-                    "line_end": 1073,
+                    "line_start": 1062,
+                    "line_end": 1074,
                     "lines": 13,
                     "fingerprint": "416ad989f079",
                     "risk": {
@@ -33753,8 +33753,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_group_uid_history",
-                    "line_start": 1074,
-                    "line_end": 1084,
+                    "line_start": 1075,
+                    "line_end": 1085,
                     "lines": 11,
                     "fingerprint": "bb783a691fbd",
                     "risk": {
@@ -33766,8 +33766,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_print_log",
-                    "line_start": 1085,
-                    "line_end": 1100,
+                    "line_start": 1086,
+                    "line_end": 1101,
                     "lines": 16,
                     "fingerprint": "55c99a9fbc84",
                     "risk": {
@@ -33779,8 +33779,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE system_logs",
-                    "line_start": 1101,
-                    "line_end": 1127,
+                    "line_start": 1102,
+                    "line_end": 1128,
                     "lines": 27,
                     "fingerprint": "b0bffcaea046",
                     "risk": {
@@ -33792,8 +33792,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_number_seq",
-                    "line_start": 1128,
-                    "line_end": 1133,
+                    "line_start": 1129,
+                    "line_end": 1134,
                     "lines": 6,
                     "fingerprint": "3564d65bb28e",
                     "risk": {
@@ -33805,8 +33805,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE api_rate_limits",
-                    "line_start": 1134,
-                    "line_end": 1142,
+                    "line_start": 1135,
+                    "line_end": 1143,
                     "lines": 9,
                     "fingerprint": "fece5201be49",
                     "risk": {
@@ -33820,8 +33820,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE domain_scan_runs",
-                    "line_start": 1143,
-                    "line_end": 1155,
+                    "line_start": 1144,
+                    "line_end": 1156,
                     "lines": 13,
                     "fingerprint": "0df2f1cd59d6",
                     "risk": {
@@ -33835,8 +33835,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE domain_scan_queue",
-                    "line_start": 1156,
-                    "line_end": 1169,
+                    "line_start": 1157,
+                    "line_end": 1170,
                     "lines": 14,
                     "fingerprint": "addb6fe63691",
                     "risk": {
@@ -33850,8 +33850,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_tickets_status_priority",
-                    "line_start": 1170,
-                    "line_end": 1170,
+                    "line_start": 1171,
+                    "line_end": 1171,
                     "lines": 1,
                     "fingerprint": "b58b6fce3d9b",
                     "risk": {
@@ -33863,8 +33863,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_users_is_active",
-                    "line_start": 1171,
-                    "line_end": 1171,
+                    "line_start": 1172,
+                    "line_end": 1172,
                     "lines": 1,
                     "fingerprint": "7d45e22a9dad",
                     "risk": {
@@ -33876,8 +33876,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_assets_lifecycle_status",
-                    "line_start": 1172,
-                    "line_end": 1172,
+                    "line_start": 1173,
+                    "line_end": 1173,
                     "lines": 1,
                     "fingerprint": "24cd955d4478",
                     "risk": {
@@ -33889,8 +33889,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ola_priority_active",
-                    "line_start": 1173,
-                    "line_end": 1173,
+                    "line_start": 1174,
+                    "line_end": 1174,
                     "lines": 1,
                     "fingerprint": "25e56691609f",
                     "risk": {
@@ -33902,8 +33902,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_food_ticket_events_event_type",
-                    "line_start": 1174,
-                    "line_end": 1174,
+                    "line_start": 1175,
+                    "line_end": 1175,
                     "lines": 1,
                     "fingerprint": "3084ec3599ca",
                     "risk": {
@@ -33915,8 +33915,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_login_attempts_locked_until",
-                    "line_start": 1175,
-                    "line_end": 1175,
+                    "line_start": 1176,
+                    "line_end": 1176,
                     "lines": 1,
                     "fingerprint": "ddc98822c48f",
                     "risk": {
@@ -33928,8 +33928,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ticket_sla_alerts_alert_type",
-                    "line_start": 1176,
-                    "line_end": 1176,
+                    "line_start": 1177,
+                    "line_end": 1177,
                     "lines": 1,
                     "fingerprint": "b9543766885c",
                     "risk": {
@@ -33941,8 +33941,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ticket_ola_alerts_alert_type",
-                    "line_start": 1177,
-                    "line_end": 1177,
+                    "line_start": 1178,
+                    "line_end": 1178,
                     "lines": 1,
                     "fingerprint": "f362b97443bf",
                     "risk": {
@@ -33954,8 +33954,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ticket_events_event_type",
-                    "line_start": 1178,
-                    "line_end": 1178,
+                    "line_start": 1179,
+                    "line_end": 1179,
                     "lines": 1,
                     "fingerprint": "441bb3c443ba",
                     "risk": {
@@ -33967,8 +33967,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_knowledge_articles_is_published",
-                    "line_start": 1179,
-                    "line_end": 1179,
+                    "line_start": 1180,
+                    "line_end": 1180,
                     "lines": 1,
                     "fingerprint": "19c117255f74",
                     "risk": {
@@ -33980,8 +33980,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_holidays_is_active",
-                    "line_start": 1180,
-                    "line_end": 1180,
+                    "line_start": 1181,
+                    "line_end": 1181,
                     "lines": 1,
                     "fingerprint": "a8163ff05ac2",
                     "risk": {
@@ -33993,8 +33993,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_departments_is_active",
-                    "line_start": 1181,
-                    "line_end": 1181,
+                    "line_start": 1182,
+                    "line_end": 1182,
                     "lines": 1,
                     "fingerprint": "43621cf82225",
                     "risk": {
@@ -34006,8 +34006,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_handling_units_is_active",
-                    "line_start": 1182,
-                    "line_end": 1182,
+                    "line_start": 1183,
+                    "line_end": 1183,
                     "lines": 1,
                     "fingerprint": "fa2a18157c43",
                     "risk": {
@@ -34019,8 +34019,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_categories_group_active",
-                    "line_start": 1183,
-                    "line_end": 1183,
+                    "line_start": 1184,
+                    "line_end": 1184,
                     "lines": 1,
                     "fingerprint": "2c6094e8448d",
                     "risk": {
@@ -34032,8 +34032,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_service_catalog_group_active",
-                    "line_start": 1184,
-                    "line_end": 1184,
+                    "line_start": 1185,
+                    "line_end": 1185,
                     "lines": 1,
                     "fingerprint": "cf1210057bbc",
                     "risk": {
@@ -34045,8 +34045,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_cd_dvd_records_media",
-                    "line_start": 1185,
-                    "line_end": 1185,
+                    "line_start": 1186,
+                    "line_end": 1186,
                     "lines": 1,
                     "fingerprint": "cc2a23eb4dbb",
                     "risk": {
@@ -34058,8 +34058,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_traffic_destinations_is_active",
-                    "line_start": 1186,
-                    "line_end": 1186,
+                    "line_start": 1187,
+                    "line_end": 1187,
                     "lines": 1,
                     "fingerprint": "a00642e7f423",
                     "risk": {
@@ -34071,8 +34071,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_domain_scan_runs_status",
-                    "line_start": 1187,
-                    "line_end": 1187,
+                    "line_start": 1188,
+                    "line_end": 1188,
                     "lines": 1,
                     "fingerprint": "b794cd5d9bab",
                     "risk": {
@@ -34084,8 +34084,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_domain_scan_queue_status",
-                    "line_start": 1188,
-                    "line_end": 1190,
+                    "line_start": 1189,
+                    "line_end": 1191,
                     "lines": 3,
                     "fingerprint": "9b27bcae90ca",
                     "risk": {
@@ -34097,8 +34097,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_card_map",
-                    "line_start": 1191,
-                    "line_end": 1200,
+                    "line_start": 1192,
+                    "line_end": 1201,
                     "lines": 10,
                     "fingerprint": "31a7d8c8ef11",
                     "risk": {
@@ -34112,8 +34112,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_templates",
-                    "line_start": 1201,
-                    "line_end": 1213,
+                    "line_start": 1202,
+                    "line_end": 1214,
                     "lines": 13,
                     "fingerprint": "58ffee09d276",
                     "risk": {
@@ -34127,8 +34127,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1214,
-                    "line_end": 1215,
+                    "line_start": 1215,
+                    "line_end": 1216,
                     "lines": 2,
                     "fingerprint": "201b69876fbf",
                     "risk": {
@@ -34140,8 +34140,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1216,
-                    "line_end": 1216,
+                    "line_start": 1217,
+                    "line_end": 1217,
                     "lines": 1,
                     "fingerprint": "03c3c377ddbc",
                     "risk": {
@@ -34153,8 +34153,8 @@
                 {
                     "kind": "block",
                     "anchor": "INSERT INTO settings",
-                    "line_start": 1217,
-                    "line_end": 1221,
+                    "line_start": 1218,
+                    "line_end": 1222,
                     "lines": 5,
                     "fingerprint": "910668c07f2d",
                     "risk": {
@@ -34168,8 +34168,8 @@
                 {
                     "kind": "block",
                     "anchor": "INSERT INTO settings",
-                    "line_start": 1222,
-                    "line_end": 1224,
+                    "line_start": 1223,
+                    "line_end": 1225,
                     "lines": 3,
                     "fingerprint": "921b82f7046b",
                     "risk": {
@@ -34183,8 +34183,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1225,
-                    "line_end": 1226,
+                    "line_start": 1226,
+                    "line_end": 1227,
                     "lines": 2,
                     "fingerprint": "a0a014f6ed6b",
                     "risk": {
@@ -34196,8 +34196,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1227,
-                    "line_end": 1234,
+                    "line_start": 1228,
+                    "line_end": 1235,
                     "lines": 8,
                     "fingerprint": "2eea4a444206",
                     "risk": {
@@ -34209,8 +34209,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1235,
-                    "line_end": 1236,
+                    "line_start": 1236,
+                    "line_end": 1237,
                     "lines": 2,
                     "fingerprint": "08ba51b491e5",
                     "risk": {
@@ -34222,8 +34222,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1237,
-                    "line_end": 1241,
+                    "line_start": 1238,
+                    "line_end": 1242,
                     "lines": 5,
                     "fingerprint": "cbadb6f7ec14",
                     "risk": {
@@ -34235,8 +34235,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_catalog",
-                    "line_start": 1242,
-                    "line_end": 1253,
+                    "line_start": 1243,
+                    "line_end": 1254,
                     "lines": 12,
                     "fingerprint": "09bf79fc139a",
                     "risk": {
@@ -34250,8 +34250,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_calendar",
-                    "line_start": 1254,
-                    "line_end": 1268,
+                    "line_start": 1255,
+                    "line_end": 1269,
                     "lines": 15,
                     "fingerprint": "883df7b78cc1",
                     "risk": {
@@ -34265,8 +34265,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_calendar_items",
-                    "line_start": 1269,
-                    "line_end": 1283,
+                    "line_start": 1270,
+                    "line_end": 1284,
                     "lines": 15,
                     "fingerprint": "2a253da02d74",
                     "risk": {
@@ -34280,8 +34280,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_orders",
-                    "line_start": 1284,
-                    "line_end": 1299,
+                    "line_start": 1285,
+                    "line_end": 1300,
                     "lines": 16,
                     "fingerprint": "78cdee940acc",
                     "risk": {
@@ -34295,8 +34295,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_order_logs",
-                    "line_start": 1300,
-                    "line_end": 1317,
+                    "line_start": 1301,
+                    "line_end": 1318,
                     "lines": 18,
                     "fingerprint": "d4659ff03fa7",
                     "risk": {
@@ -34310,8 +34310,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_order_cancel_requests",
-                    "line_start": 1318,
-                    "line_end": 1335,
+                    "line_start": 1319,
+                    "line_end": 1336,
                     "lines": 18,
                     "fingerprint": "150b2ea96ac0",
                     "risk": {
@@ -34325,8 +34325,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1336,
-                    "line_end": 1339,
+                    "line_start": 1337,
+                    "line_end": 1340,
                     "lines": 4,
                     "fingerprint": "157fddabd3bd",
                     "risk": {
@@ -34338,8 +34338,8 @@
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1340,
-                    "line_end": 1341,
+                    "line_start": 1341,
+                    "line_end": 1342,
                     "lines": 2,
                     "fingerprint": "03c3c377ddbc",
                     "risk": {
@@ -34351,8 +34351,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE chatbot_faq",
-                    "line_start": 1342,
-                    "line_end": 1353,
+                    "line_start": 1343,
+                    "line_end": 1354,
                     "lines": 12,
                     "fingerprint": "eba55486f4d9",
                     "risk": {
@@ -34364,8 +34364,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE chatbot_logs",
-                    "line_start": 1354,
-                    "line_end": 1366,
+                    "line_start": 1355,
+                    "line_end": 1367,
                     "lines": 13,
                     "fingerprint": "ca6315b42ba4",
                     "risk": {
@@ -34377,8 +34377,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE system_incidents",
-                    "line_start": 1367,
-                    "line_end": 1375,
+                    "line_start": 1368,
+                    "line_end": 1376,
                     "lines": 9,
                     "fingerprint": "3690f66025c5",
                     "risk": {
@@ -34392,8 +34392,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_guest_requests",
-                    "line_start": 1376,
-                    "line_end": 1399,
+                    "line_start": 1377,
+                    "line_end": 1400,
                     "lines": 24,
                     "fingerprint": "17d0285ad881",
                     "risk": {
@@ -34407,8 +34407,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_meal_reconciliations",
-                    "line_start": 1400,
-                    "line_end": 1426,
+                    "line_start": 1401,
+                    "line_end": 1427,
                     "lines": 27,
                     "fingerprint": "bcc8577a1d89",
                     "risk": {
@@ -34422,8 +34422,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_monthly_invoices",
-                    "line_start": 1427,
-                    "line_end": 1448,
+                    "line_start": 1428,
+                    "line_end": 1449,
                     "lines": 22,
                     "fingerprint": "a56033a1d36a",
                     "risk": {
@@ -34435,8 +34435,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE user_access_groups",
-                    "line_start": 1449,
-                    "line_end": 1462,
+                    "line_start": 1450,
+                    "line_end": 1463,
                     "lines": 14,
                     "fingerprint": "8d18923fdd7f",
                     "risk": {
@@ -34450,8 +34450,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE user_access_group_members",
-                    "line_start": 1463,
-                    "line_end": 1474,
+                    "line_start": 1464,
+                    "line_end": 1475,
                     "lines": 12,
                     "fingerprint": "b433475de020",
                     "risk": {
@@ -34465,8 +34465,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE user_access_group_permissions",
-                    "line_start": 1475,
-                    "line_end": 1490,
+                    "line_start": 1476,
+                    "line_end": 1491,
                     "lines": 16,
                     "fingerprint": "972f819274be",
                     "risk": {
@@ -34480,8 +34480,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issues",
-                    "line_start": 1491,
-                    "line_end": 1516,
+                    "line_start": 1492,
+                    "line_end": 1517,
                     "lines": 26,
                     "fingerprint": "8b03edacb21e",
                     "risk": {
@@ -34495,8 +34495,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE logging_health_alerts",
-                    "line_start": 1517,
-                    "line_end": 1526,
+                    "line_start": 1518,
+                    "line_end": 1527,
                     "lines": 10,
                     "fingerprint": "c14d7d57f818",
                     "risk": {
@@ -34510,8 +34510,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issue_history",
-                    "line_start": 1527,
-                    "line_end": 1542,
+                    "line_start": 1528,
+                    "line_end": 1543,
                     "lines": 16,
                     "fingerprint": "32302b8c3810",
                     "risk": {
@@ -34523,8 +34523,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issue_events",
-                    "line_start": 1543,
-                    "line_end": 1549,
+                    "line_start": 1544,
+                    "line_end": 1550,
                     "lines": 7,
                     "fingerprint": "152b56f11c56",
                     "risk": {
@@ -34536,8 +34536,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issue_notifications",
-                    "line_start": 1550,
-                    "line_end": 1568,
+                    "line_start": 1551,
+                    "line_end": 1569,
                     "lines": 19,
                     "fingerprint": "4b60a8cd5e33",
                     "risk": {
@@ -34551,8 +34551,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE schema_updates",
-                    "line_start": 1569,
-                    "line_end": 1578,
+                    "line_start": 1570,
+                    "line_end": 1579,
                     "lines": 10,
                     "fingerprint": "80081ca293f5",
                     "risk": {
@@ -34564,8 +34564,8 @@
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE request_center_appointments",
-                    "line_start": 1579,
-                    "line_end": 1633,
+                    "line_start": 1580,
+                    "line_end": 1634,
                     "lines": 55,
                     "fingerprint": "9a71307c9b40",
                     "risk": {
@@ -52043,6 +52043,28 @@
             ]
         },
         {
+            "id": "DB-039",
+            "path": "migrations\/037-request-center-lifecycle-rejection.sql",
+            "area": "DB",
+            "lines": 49,
+            "file_fingerprint": "06d408dcba11",
+            "blocks": [
+                {
+                    "kind": "block",
+                    "anchor": "مقدمهٔ فایل",
+                    "line_start": 1,
+                    "line_end": 49,
+                    "lines": 49,
+                    "fingerprint": "06d408dcba11",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "DB-039.01"
+                }
+            ]
+        },
+        {
             "id": "PAGE-039",
             "path": "modules\/request-center\/Actions\/appointment-actions.php",
             "area": "PAGE",
@@ -52311,8 +52333,8 @@
             "id": "PAGE-043",
             "path": "modules\/request-center\/Actions\/supervisor-actions.php",
             "area": "PAGE",
-            "lines": 190,
-            "file_fingerprint": "f7297f9d8c90",
+            "lines": 268,
+            "file_fingerprint": "6cd4c7228a9c",
             "blocks": [
                 {
                     "kind": "region",
@@ -52344,14 +52366,15 @@
                     "kind": "region",
                     "anchor": "مسیر: supervisor_decision",
                     "line_start": 25,
-                    "line_end": 98,
-                    "lines": 74,
-                    "fingerprint": "491a13d46829",
+                    "line_end": 176,
+                    "lines": 152,
+                    "fingerprint": "1458503871c6",
                     "risk": {
-                        "score": 7,
+                        "score": 8,
                         "flags": {
                             "sql_concat": 5,
-                            "raw_input": 2
+                            "raw_input": 2,
+                            "long": 1
                         }
                     },
                     "id": "PAGE-043.03"
@@ -52359,8 +52382,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: supervisor_reopen",
-                    "line_start": 99,
-                    "line_end": 148,
+                    "line_start": 177,
+                    "line_end": 226,
                     "lines": 50,
                     "fingerprint": "c60bdcd5863a",
                     "risk": {
@@ -52374,8 +52397,8 @@
                 {
                     "kind": "region",
                     "anchor": "مسیر: rate_ticket",
-                    "line_start": 149,
-                    "line_end": 190,
+                    "line_start": 227,
+                    "line_end": 268,
                     "lines": 42,
                     "fingerprint": "8d51d29d754e",
                     "risk": {
@@ -53227,8 +53250,8 @@
             "id": "PAGE-059",
             "path": "modules\/request-center\/WorkflowService.php",
             "area": "PAGE",
-            "lines": 257,
-            "file_fingerprint": "e59869001e04",
+            "lines": 269,
+            "file_fingerprint": "dc289ba78c5e",
             "blocks": [
                 {
                     "kind": "region",
@@ -53260,9 +53283,9 @@
                     "kind": "class",
                     "anchor": "RequestCenterWorkflowService",
                     "line_start": 36,
-                    "line_end": 256,
-                    "lines": 221,
-                    "fingerprint": "a5c696b49509",
+                    "line_end": 268,
+                    "lines": 233,
+                    "fingerprint": "3872825ebce7",
                     "risk": {
                         "score": 2,
                         "flags": {
@@ -55141,7 +55164,7 @@
             ]
         },
         {
-            "id": "DB-039",
+            "id": "DB-040",
             "path": "rebuild-final.sql",
             "area": "DB",
             "lines": 97,
@@ -55158,7 +55181,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.01"
+                    "id": "DB-040.01"
                 },
                 {
                     "kind": "block",
@@ -55171,7 +55194,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-039.02"
+                    "id": "DB-040.02"
                 }
             ]
         },
@@ -55200,7 +55223,7 @@
             ]
         },
         {
-            "id": "DB-040",
+            "id": "DB-041",
             "path": "rollback-1.38-food-orders.sql",
             "area": "DB",
             "lines": 10,
@@ -55217,7 +55240,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.01"
+                    "id": "DB-041.01"
                 },
                 {
                     "kind": "block",
@@ -55230,7 +55253,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.02"
+                    "id": "DB-041.02"
                 },
                 {
                     "kind": "block",
@@ -55243,7 +55266,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.03"
+                    "id": "DB-041.03"
                 },
                 {
                     "kind": "block",
@@ -55256,7 +55279,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.04"
+                    "id": "DB-041.04"
                 },
                 {
                     "kind": "block",
@@ -55269,7 +55292,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.05"
+                    "id": "DB-041.05"
                 },
                 {
                     "kind": "block",
@@ -55282,7 +55305,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-040.06"
+                    "id": "DB-041.06"
                 }
             ]
         },
@@ -55387,11 +55410,11 @@
             ]
         },
         {
-            "id": "DB-041",
+            "id": "DB-042",
             "path": "schema.sql",
             "area": "DB",
-            "lines": 1564,
-            "file_fingerprint": "693beffbe990",
+            "lines": 1565,
+            "file_fingerprint": "fc3473a68e4f",
             "blocks": [
                 {
                     "kind": "block",
@@ -55404,7 +55427,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.01"
+                    "id": "DB-042.01"
                 },
                 {
                     "kind": "block",
@@ -55417,7 +55440,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.02"
+                    "id": "DB-042.02"
                 },
                 {
                     "kind": "block",
@@ -55432,7 +55455,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.03"
+                    "id": "DB-042.03"
                 },
                 {
                     "kind": "block",
@@ -55445,7 +55468,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.04"
+                    "id": "DB-042.04"
                 },
                 {
                     "kind": "block",
@@ -55460,7 +55483,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.05"
+                    "id": "DB-042.05"
                 },
                 {
                     "kind": "block",
@@ -55475,7 +55498,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.06"
+                    "id": "DB-042.06"
                 },
                 {
                     "kind": "block",
@@ -55488,7 +55511,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.07"
+                    "id": "DB-042.07"
                 },
                 {
                     "kind": "block",
@@ -55503,7 +55526,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.08"
+                    "id": "DB-042.08"
                 },
                 {
                     "kind": "block",
@@ -55518,7 +55541,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.09"
+                    "id": "DB-042.09"
                 },
                 {
                     "kind": "block",
@@ -55533,7 +55556,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.10"
+                    "id": "DB-042.10"
                 },
                 {
                     "kind": "block",
@@ -55548,7 +55571,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.11"
+                    "id": "DB-042.11"
                 },
                 {
                     "kind": "block",
@@ -55563,7 +55586,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.12"
+                    "id": "DB-042.12"
                 },
                 {
                     "kind": "block",
@@ -55578,7 +55601,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.13"
+                    "id": "DB-042.13"
                 },
                 {
                     "kind": "block",
@@ -55591,7 +55614,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.14"
+                    "id": "DB-042.14"
                 },
                 {
                     "kind": "block",
@@ -55606,7 +55629,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.15"
+                    "id": "DB-042.15"
                 },
                 {
                     "kind": "block",
@@ -55621,7 +55644,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.16"
+                    "id": "DB-042.16"
                 },
                 {
                     "kind": "block",
@@ -55636,7 +55659,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.17"
+                    "id": "DB-042.17"
                 },
                 {
                     "kind": "block",
@@ -55649,7 +55672,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.18"
+                    "id": "DB-042.18"
                 },
                 {
                     "kind": "block",
@@ -55664,7 +55687,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.19"
+                    "id": "DB-042.19"
                 },
                 {
                     "kind": "block",
@@ -55679,28 +55702,28 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.20"
+                    "id": "DB-042.20"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE tickets",
                     "line_start": 271,
-                    "line_end": 337,
-                    "lines": 67,
-                    "fingerprint": "e839131c05a2",
+                    "line_end": 338,
+                    "lines": 68,
+                    "fingerprint": "4fbd74839e70",
                     "risk": {
                         "score": 1,
                         "flags": {
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.21"
+                    "id": "DB-042.21"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_messages",
-                    "line_start": 338,
-                    "line_end": 349,
+                    "line_start": 339,
+                    "line_end": 350,
                     "lines": 12,
                     "fingerprint": "0f4c22278d2f",
                     "risk": {
@@ -55709,13 +55732,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.22"
+                    "id": "DB-042.22"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_ratings",
-                    "line_start": 350,
-                    "line_end": 363,
+                    "line_start": 351,
+                    "line_end": 364,
                     "lines": 14,
                     "fingerprint": "6eccf1a89746",
                     "risk": {
@@ -55724,13 +55747,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.23"
+                    "id": "DB-042.23"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_attachments",
-                    "line_start": 364,
-                    "line_end": 374,
+                    "line_start": 365,
+                    "line_end": 375,
                     "lines": 11,
                     "fingerprint": "c972e52781b0",
                     "risk": {
@@ -55739,13 +55762,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.24"
+                    "id": "DB-042.24"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE activity_logs",
-                    "line_start": 375,
-                    "line_end": 413,
+                    "line_start": 376,
+                    "line_end": 414,
                     "lines": 39,
                     "fingerprint": "2f34b798ff90",
                     "risk": {
@@ -55754,26 +55777,26 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.25"
+                    "id": "DB-042.25"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE role_permissions",
-                    "line_start": 414,
-                    "line_end": 420,
+                    "line_start": 415,
+                    "line_end": 421,
                     "lines": 7,
                     "fingerprint": "215589b8279d",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.26"
+                    "id": "DB-042.26"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE notifications",
-                    "line_start": 421,
-                    "line_end": 438,
+                    "line_start": 422,
+                    "line_end": 439,
                     "lines": 18,
                     "fingerprint": "c9687bcd90ae",
                     "risk": {
@@ -55782,13 +55805,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.27"
+                    "id": "DB-042.27"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE login_attempts",
-                    "line_start": 439,
-                    "line_end": 446,
+                    "line_start": 440,
+                    "line_end": 447,
                     "lines": 8,
                     "fingerprint": "552c2f977c72",
                     "risk": {
@@ -55797,13 +55820,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.28"
+                    "id": "DB-042.28"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_sla_alerts",
-                    "line_start": 447,
-                    "line_end": 456,
+                    "line_start": 448,
+                    "line_end": 457,
                     "lines": 10,
                     "fingerprint": "bba720902a18",
                     "risk": {
@@ -55812,13 +55835,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.29"
+                    "id": "DB-042.29"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_events",
-                    "line_start": 457,
-                    "line_end": 480,
+                    "line_start": 458,
+                    "line_end": 481,
                     "lines": 24,
                     "fingerprint": "8a5d40d12aa7",
                     "risk": {
@@ -55827,13 +55850,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.30"
+                    "id": "DB-042.30"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE knowledge_articles",
-                    "line_start": 481,
-                    "line_end": 494,
+                    "line_start": 482,
+                    "line_end": 495,
                     "lines": 14,
                     "fingerprint": "3d148c51bd77",
                     "risk": {
@@ -55842,13 +55865,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.31"
+                    "id": "DB-042.31"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE holidays",
-                    "line_start": 495,
-                    "line_end": 504,
+                    "line_start": 496,
+                    "line_end": 505,
                     "lines": 10,
                     "fingerprint": "941c04f7bd5a",
                     "risk": {
@@ -55857,13 +55880,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.32"
+                    "id": "DB-042.32"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE assets",
-                    "line_start": 505,
-                    "line_end": 560,
+                    "line_start": 506,
+                    "line_end": 561,
                     "lines": 56,
                     "fingerprint": "833898bfa4c1",
                     "risk": {
@@ -55872,13 +55895,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.33"
+                    "id": "DB-042.33"
                 },
                 {
                     "kind": "block",
                     "anchor": "ALTER TABLE tickets",
-                    "line_start": 561,
-                    "line_end": 562,
+                    "line_start": 562,
+                    "line_end": 563,
                     "lines": 2,
                     "fingerprint": "b0cecf20192f",
                     "risk": {
@@ -55887,13 +55910,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.34"
+                    "id": "DB-042.34"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_memory_modules",
-                    "line_start": 563,
-                    "line_end": 577,
+                    "line_start": 564,
+                    "line_end": 578,
                     "lines": 15,
                     "fingerprint": "214046a0103d",
                     "risk": {
@@ -55902,13 +55925,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.35"
+                    "id": "DB-042.35"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_storage_devices",
-                    "line_start": 578,
-                    "line_end": 593,
+                    "line_start": 579,
+                    "line_end": 594,
                     "lines": 16,
                     "fingerprint": "41fe593b8c5b",
                     "risk": {
@@ -55917,13 +55940,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.36"
+                    "id": "DB-042.36"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_graphics_adapters",
-                    "line_start": 594,
-                    "line_end": 606,
+                    "line_start": 595,
+                    "line_end": 607,
                     "lines": 13,
                     "fingerprint": "d9c2da534a5a",
                     "risk": {
@@ -55932,13 +55955,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.37"
+                    "id": "DB-042.37"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_peripherals",
-                    "line_start": 607,
-                    "line_end": 624,
+                    "line_start": 608,
+                    "line_end": 625,
                     "lines": 18,
                     "fingerprint": "57da64759859",
                     "risk": {
@@ -55947,13 +55970,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.38"
+                    "id": "DB-042.38"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_inventory_history",
-                    "line_start": 625,
-                    "line_end": 635,
+                    "line_start": 626,
+                    "line_end": 636,
                     "lines": 11,
                     "fingerprint": "5638004f22b7",
                     "risk": {
@@ -55962,13 +55985,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.39"
+                    "id": "DB-042.39"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_history_events",
-                    "line_start": 636,
-                    "line_end": 653,
+                    "line_start": 637,
+                    "line_end": 654,
                     "lines": 18,
                     "fingerprint": "bfc39204b391",
                     "risk": {
@@ -55977,13 +56000,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.40"
+                    "id": "DB-042.40"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_relations",
-                    "line_start": 654,
-                    "line_end": 666,
+                    "line_start": 655,
+                    "line_end": 667,
                     "lines": 13,
                     "fingerprint": "c7f270eaf430",
                     "risk": {
@@ -55992,13 +56015,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.41"
+                    "id": "DB-042.41"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE asset_profiles",
-                    "line_start": 667,
-                    "line_end": 748,
+                    "line_start": 668,
+                    "line_end": 749,
                     "lines": 82,
                     "fingerprint": "72b44093b30b",
                     "risk": {
@@ -56007,13 +56030,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.42"
+                    "id": "DB-042.42"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ola_policies",
-                    "line_start": 749,
-                    "line_end": 766,
+                    "line_start": 750,
+                    "line_end": 767,
                     "lines": 18,
                     "fingerprint": "d60d6f43162d",
                     "risk": {
@@ -56022,13 +56045,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.43"
+                    "id": "DB-042.43"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_ola_alerts",
-                    "line_start": 767,
-                    "line_end": 776,
+                    "line_start": 768,
+                    "line_end": 777,
                     "lines": 10,
                     "fingerprint": "9004e4d7cb8c",
                     "risk": {
@@ -56037,13 +56060,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.44"
+                    "id": "DB-042.44"
                 },
                 {
                     "kind": "block",
                     "anchor": "ALTER TABLE tickets",
-                    "line_start": 777,
-                    "line_end": 778,
+                    "line_start": 778,
+                    "line_end": 779,
                     "lines": 2,
                     "fingerprint": "59d34e854bee",
                     "risk": {
@@ -56052,13 +56075,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.45"
+                    "id": "DB-042.45"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE change_records",
-                    "line_start": 779,
-                    "line_end": 807,
+                    "line_start": 780,
+                    "line_end": 808,
                     "lines": 29,
                     "fingerprint": "758f08a3a5e5",
                     "risk": {
@@ -56067,13 +56090,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.46"
+                    "id": "DB-042.46"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE change_approvals",
-                    "line_start": 808,
-                    "line_end": 819,
+                    "line_start": 809,
+                    "line_end": 820,
                     "lines": 12,
                     "fingerprint": "e9c6d91715b7",
                     "risk": {
@@ -56082,13 +56105,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.47"
+                    "id": "DB-042.47"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE change_ticket_links",
-                    "line_start": 820,
-                    "line_end": 830,
+                    "line_start": 821,
+                    "line_end": 831,
                     "lines": 11,
                     "fingerprint": "8c615c419815",
                     "risk": {
@@ -56097,13 +56120,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.48"
+                    "id": "DB-042.48"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE problem_records",
-                    "line_start": 831,
-                    "line_end": 854,
+                    "line_start": 832,
+                    "line_end": 855,
                     "lines": 24,
                     "fingerprint": "dd2446097f13",
                     "risk": {
@@ -56112,13 +56135,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.49"
+                    "id": "DB-042.49"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE problem_ticket_links",
-                    "line_start": 855,
-                    "line_end": 865,
+                    "line_start": 856,
+                    "line_end": 866,
                     "lines": 11,
                     "fingerprint": "958d64d1f530",
                     "risk": {
@@ -56127,13 +56150,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.50"
+                    "id": "DB-042.50"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_config",
-                    "line_start": 866,
-                    "line_end": 896,
+                    "line_start": 867,
+                    "line_end": 897,
                     "lines": 31,
                     "fingerprint": "f379f9a7ea11",
                     "risk": {
@@ -56142,13 +56165,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.51"
+                    "id": "DB-042.51"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_events",
-                    "line_start": 897,
-                    "line_end": 935,
+                    "line_start": 898,
+                    "line_end": 936,
                     "lines": 39,
                     "fingerprint": "889671079e06",
                     "risk": {
@@ -56157,13 +56180,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.52"
+                    "id": "DB-042.52"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_worker_status",
-                    "line_start": 936,
-                    "line_end": 951,
+                    "line_start": 937,
+                    "line_end": 952,
                     "lines": 16,
                     "fingerprint": "d03dd8fdd5fa",
                     "risk": {
@@ -56172,13 +56195,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.53"
+                    "id": "DB-042.53"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_guest_cards",
-                    "line_start": 952,
-                    "line_end": 965,
+                    "line_start": 953,
+                    "line_end": 966,
                     "lines": 14,
                     "fingerprint": "bb68019ca7f8",
                     "risk": {
@@ -56187,13 +56210,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.54"
+                    "id": "DB-042.54"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_groups",
-                    "line_start": 966,
-                    "line_end": 984,
+                    "line_start": 967,
+                    "line_end": 985,
                     "lines": 19,
                     "fingerprint": "437f78ae2e7d",
                     "risk": {
@@ -56202,13 +56225,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.55"
+                    "id": "DB-042.55"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_group_members",
-                    "line_start": 985,
-                    "line_end": 996,
+                    "line_start": 986,
+                    "line_end": 997,
                     "lines": 12,
                     "fingerprint": "8c4bfddc3f9d",
                     "risk": {
@@ -56217,13 +56240,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.56"
+                    "id": "DB-042.56"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_group_runs",
-                    "line_start": 997,
-                    "line_end": 1023,
+                    "line_start": 998,
+                    "line_end": 1024,
                     "lines": 27,
                     "fingerprint": "b2bc5805969d",
                     "risk": {
@@ -56232,13 +56255,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.57"
+                    "id": "DB-042.57"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_daily_absence",
-                    "line_start": 1024,
-                    "line_end": 1039,
+                    "line_start": 1025,
+                    "line_end": 1040,
                     "lines": 16,
                     "fingerprint": "97994d1ebd06",
                     "risk": {
@@ -56247,13 +56270,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.58"
+                    "id": "DB-042.58"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_day_visits",
-                    "line_start": 1040,
-                    "line_end": 1052,
+                    "line_start": 1041,
+                    "line_end": 1053,
                     "lines": 13,
                     "fingerprint": "416ad989f079",
                     "risk": {
@@ -56262,78 +56285,78 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.59"
+                    "id": "DB-042.59"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_group_uid_history",
-                    "line_start": 1053,
-                    "line_end": 1063,
+                    "line_start": 1054,
+                    "line_end": 1064,
                     "lines": 11,
                     "fingerprint": "bb783a691fbd",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.60"
+                    "id": "DB-042.60"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_print_log",
-                    "line_start": 1064,
-                    "line_end": 1079,
+                    "line_start": 1065,
+                    "line_end": 1080,
                     "lines": 16,
                     "fingerprint": "55c99a9fbc84",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.61"
+                    "id": "DB-042.61"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE system_logs",
-                    "line_start": 1080,
-                    "line_end": 1106,
+                    "line_start": 1081,
+                    "line_end": 1107,
                     "lines": 27,
                     "fingerprint": "b0bffcaea046",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.62"
+                    "id": "DB-042.62"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE chatbot_faq",
-                    "line_start": 1107,
-                    "line_end": 1118,
+                    "line_start": 1108,
+                    "line_end": 1119,
                     "lines": 12,
                     "fingerprint": "eba55486f4d9",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.63"
+                    "id": "DB-042.63"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE chatbot_logs",
-                    "line_start": 1119,
-                    "line_end": 1131,
+                    "line_start": 1120,
+                    "line_end": 1132,
                     "lines": 13,
                     "fingerprint": "ca6315b42ba4",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.64"
+                    "id": "DB-042.64"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE system_incidents",
-                    "line_start": 1132,
-                    "line_end": 1140,
+                    "line_start": 1133,
+                    "line_end": 1141,
                     "lines": 9,
                     "fingerprint": "3690f66025c5",
                     "risk": {
@@ -56342,26 +56365,26 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.65"
+                    "id": "DB-042.65"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE ticket_number_seq",
-                    "line_start": 1141,
-                    "line_end": 1146,
+                    "line_start": 1142,
+                    "line_end": 1147,
                     "lines": 6,
                     "fingerprint": "3564d65bb28e",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.66"
+                    "id": "DB-042.66"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE api_rate_limits",
-                    "line_start": 1147,
-                    "line_end": 1155,
+                    "line_start": 1148,
+                    "line_end": 1156,
                     "lines": 9,
                     "fingerprint": "fece5201be49",
                     "risk": {
@@ -56370,13 +56393,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.67"
+                    "id": "DB-042.67"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE domain_scan_runs",
-                    "line_start": 1156,
-                    "line_end": 1168,
+                    "line_start": 1157,
+                    "line_end": 1169,
                     "lines": 13,
                     "fingerprint": "0df2f1cd59d6",
                     "risk": {
@@ -56385,13 +56408,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.68"
+                    "id": "DB-042.68"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE domain_scan_queue",
-                    "line_start": 1169,
-                    "line_end": 1182,
+                    "line_start": 1170,
+                    "line_end": 1183,
                     "lines": 14,
                     "fingerprint": "addb6fe63691",
                     "risk": {
@@ -56400,260 +56423,260 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.69"
+                    "id": "DB-042.69"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_tickets_status_priority",
-                    "line_start": 1183,
-                    "line_end": 1183,
+                    "line_start": 1184,
+                    "line_end": 1184,
                     "lines": 1,
                     "fingerprint": "b58b6fce3d9b",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.70"
+                    "id": "DB-042.70"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_users_is_active",
-                    "line_start": 1184,
-                    "line_end": 1184,
+                    "line_start": 1185,
+                    "line_end": 1185,
                     "lines": 1,
                     "fingerprint": "7d45e22a9dad",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.71"
+                    "id": "DB-042.71"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_assets_lifecycle_status",
-                    "line_start": 1185,
-                    "line_end": 1185,
+                    "line_start": 1186,
+                    "line_end": 1186,
                     "lines": 1,
                     "fingerprint": "24cd955d4478",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.72"
+                    "id": "DB-042.72"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ola_priority_active",
-                    "line_start": 1186,
-                    "line_end": 1186,
+                    "line_start": 1187,
+                    "line_end": 1187,
                     "lines": 1,
                     "fingerprint": "25e56691609f",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.73"
+                    "id": "DB-042.73"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_food_ticket_events_event_type",
-                    "line_start": 1187,
-                    "line_end": 1187,
+                    "line_start": 1188,
+                    "line_end": 1188,
                     "lines": 1,
                     "fingerprint": "3084ec3599ca",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.74"
+                    "id": "DB-042.74"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_login_attempts_locked_until",
-                    "line_start": 1188,
-                    "line_end": 1188,
+                    "line_start": 1189,
+                    "line_end": 1189,
                     "lines": 1,
                     "fingerprint": "ddc98822c48f",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.75"
+                    "id": "DB-042.75"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ticket_sla_alerts_alert_type",
-                    "line_start": 1189,
-                    "line_end": 1189,
+                    "line_start": 1190,
+                    "line_end": 1190,
                     "lines": 1,
                     "fingerprint": "b9543766885c",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.76"
+                    "id": "DB-042.76"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ticket_ola_alerts_alert_type",
-                    "line_start": 1190,
-                    "line_end": 1190,
+                    "line_start": 1191,
+                    "line_end": 1191,
                     "lines": 1,
                     "fingerprint": "f362b97443bf",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.77"
+                    "id": "DB-042.77"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_ticket_events_event_type",
-                    "line_start": 1191,
-                    "line_end": 1191,
+                    "line_start": 1192,
+                    "line_end": 1192,
                     "lines": 1,
                     "fingerprint": "441bb3c443ba",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.78"
+                    "id": "DB-042.78"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_knowledge_articles_is_published",
-                    "line_start": 1192,
-                    "line_end": 1192,
+                    "line_start": 1193,
+                    "line_end": 1193,
                     "lines": 1,
                     "fingerprint": "19c117255f74",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.79"
+                    "id": "DB-042.79"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_holidays_is_active",
-                    "line_start": 1193,
-                    "line_end": 1193,
+                    "line_start": 1194,
+                    "line_end": 1194,
                     "lines": 1,
                     "fingerprint": "a8163ff05ac2",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.80"
+                    "id": "DB-042.80"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_departments_is_active",
-                    "line_start": 1194,
-                    "line_end": 1194,
+                    "line_start": 1195,
+                    "line_end": 1195,
                     "lines": 1,
                     "fingerprint": "43621cf82225",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.81"
+                    "id": "DB-042.81"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_handling_units_is_active",
-                    "line_start": 1195,
-                    "line_end": 1195,
+                    "line_start": 1196,
+                    "line_end": 1196,
                     "lines": 1,
                     "fingerprint": "fa2a18157c43",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.82"
+                    "id": "DB-042.82"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_categories_group_active",
-                    "line_start": 1196,
-                    "line_end": 1196,
+                    "line_start": 1197,
+                    "line_end": 1197,
                     "lines": 1,
                     "fingerprint": "2c6094e8448d",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.83"
+                    "id": "DB-042.83"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_service_catalog_group_active",
-                    "line_start": 1197,
-                    "line_end": 1197,
+                    "line_start": 1198,
+                    "line_end": 1198,
                     "lines": 1,
                     "fingerprint": "cf1210057bbc",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.84"
+                    "id": "DB-042.84"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_cd_dvd_records_media",
-                    "line_start": 1198,
-                    "line_end": 1198,
+                    "line_start": 1199,
+                    "line_end": 1199,
                     "lines": 1,
                     "fingerprint": "cc2a23eb4dbb",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.85"
+                    "id": "DB-042.85"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_traffic_destinations_is_active",
-                    "line_start": 1199,
-                    "line_end": 1199,
+                    "line_start": 1200,
+                    "line_end": 1200,
                     "lines": 1,
                     "fingerprint": "a00642e7f423",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.86"
+                    "id": "DB-042.86"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_domain_scan_runs_status",
-                    "line_start": 1200,
-                    "line_end": 1200,
+                    "line_start": 1201,
+                    "line_end": 1201,
                     "lines": 1,
                     "fingerprint": "b794cd5d9bab",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.87"
+                    "id": "DB-042.87"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE INDEX idx_domain_scan_queue_status",
-                    "line_start": 1201,
-                    "line_end": 1203,
+                    "line_start": 1202,
+                    "line_end": 1204,
                     "lines": 3,
                     "fingerprint": "9b27bcae90ca",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.88"
+                    "id": "DB-042.88"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_card_map",
-                    "line_start": 1204,
-                    "line_end": 1213,
+                    "line_start": 1205,
+                    "line_end": 1214,
                     "lines": 10,
                     "fingerprint": "31a7d8c8ef11",
                     "risk": {
@@ -56662,13 +56685,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.89"
+                    "id": "DB-042.89"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_ticket_templates",
-                    "line_start": 1214,
-                    "line_end": 1225,
+                    "line_start": 1215,
+                    "line_end": 1226,
                     "lines": 12,
                     "fingerprint": "58ffee09d276",
                     "risk": {
@@ -56677,39 +56700,39 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.90"
+                    "id": "DB-042.90"
                 },
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1226,
-                    "line_end": 1227,
+                    "line_start": 1227,
+                    "line_end": 1228,
                     "lines": 2,
                     "fingerprint": "08ba51b491e5",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.91"
+                    "id": "DB-042.91"
                 },
                 {
                     "kind": "block",
                     "anchor": "=",
-                    "line_start": 1228,
-                    "line_end": 1232,
+                    "line_start": 1229,
+                    "line_end": 1233,
                     "lines": 5,
                     "fingerprint": "cbadb6f7ec14",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.92"
+                    "id": "DB-042.92"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_catalog",
-                    "line_start": 1233,
-                    "line_end": 1244,
+                    "line_start": 1234,
+                    "line_end": 1245,
                     "lines": 12,
                     "fingerprint": "09bf79fc139a",
                     "risk": {
@@ -56718,13 +56741,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.93"
+                    "id": "DB-042.93"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_guest_requests",
-                    "line_start": 1245,
-                    "line_end": 1264,
+                    "line_start": 1246,
+                    "line_end": 1265,
                     "lines": 20,
                     "fingerprint": "26fabeb131d3",
                     "risk": {
@@ -56733,13 +56756,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.94"
+                    "id": "DB-042.94"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_calendar",
-                    "line_start": 1265,
-                    "line_end": 1279,
+                    "line_start": 1266,
+                    "line_end": 1280,
                     "lines": 15,
                     "fingerprint": "883df7b78cc1",
                     "risk": {
@@ -56748,13 +56771,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.95"
+                    "id": "DB-042.95"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_calendar_items",
-                    "line_start": 1280,
-                    "line_end": 1294,
+                    "line_start": 1281,
+                    "line_end": 1295,
                     "lines": 15,
                     "fingerprint": "2a253da02d74",
                     "risk": {
@@ -56763,13 +56786,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.96"
+                    "id": "DB-042.96"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_orders",
-                    "line_start": 1295,
-                    "line_end": 1310,
+                    "line_start": 1296,
+                    "line_end": 1311,
                     "lines": 16,
                     "fingerprint": "78cdee940acc",
                     "risk": {
@@ -56778,13 +56801,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.97"
+                    "id": "DB-042.97"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_order_logs",
-                    "line_start": 1311,
-                    "line_end": 1328,
+                    "line_start": 1312,
+                    "line_end": 1329,
                     "lines": 18,
                     "fingerprint": "d4659ff03fa7",
                     "risk": {
@@ -56793,13 +56816,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.98"
+                    "id": "DB-042.98"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_order_cancel_requests",
-                    "line_start": 1329,
-                    "line_end": 1350,
+                    "line_start": 1330,
+                    "line_end": 1351,
                     "lines": 22,
                     "fingerprint": "37a4eb8392ec",
                     "risk": {
@@ -56808,13 +56831,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.99"
+                    "id": "DB-042.99"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_meal_reconciliations",
-                    "line_start": 1351,
-                    "line_end": 1377,
+                    "line_start": 1352,
+                    "line_end": 1378,
                     "lines": 27,
                     "fingerprint": "bcc8577a1d89",
                     "risk": {
@@ -56823,26 +56846,26 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.100"
+                    "id": "DB-042.100"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE food_monthly_invoices",
-                    "line_start": 1378,
-                    "line_end": 1399,
+                    "line_start": 1379,
+                    "line_end": 1400,
                     "lines": 22,
                     "fingerprint": "a56033a1d36a",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.101"
+                    "id": "DB-042.101"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE user_access_groups",
-                    "line_start": 1400,
-                    "line_end": 1413,
+                    "line_start": 1401,
+                    "line_end": 1414,
                     "lines": 14,
                     "fingerprint": "8d18923fdd7f",
                     "risk": {
@@ -56851,13 +56874,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.102"
+                    "id": "DB-042.102"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE user_access_group_members",
-                    "line_start": 1414,
-                    "line_end": 1425,
+                    "line_start": 1415,
+                    "line_end": 1426,
                     "lines": 12,
                     "fingerprint": "b433475de020",
                     "risk": {
@@ -56866,13 +56889,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.103"
+                    "id": "DB-042.103"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE user_access_group_permissions",
-                    "line_start": 1426,
-                    "line_end": 1441,
+                    "line_start": 1427,
+                    "line_end": 1442,
                     "lines": 16,
                     "fingerprint": "972f819274be",
                     "risk": {
@@ -56881,13 +56904,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.104"
+                    "id": "DB-042.104"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issues",
-                    "line_start": 1442,
-                    "line_end": 1467,
+                    "line_start": 1443,
+                    "line_end": 1468,
                     "lines": 26,
                     "fingerprint": "8b03edacb21e",
                     "risk": {
@@ -56896,13 +56919,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.105"
+                    "id": "DB-042.105"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE logging_health_alerts",
-                    "line_start": 1468,
-                    "line_end": 1477,
+                    "line_start": 1469,
+                    "line_end": 1478,
                     "lines": 10,
                     "fingerprint": "c14d7d57f818",
                     "risk": {
@@ -56911,39 +56934,39 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.106"
+                    "id": "DB-042.106"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issue_history",
-                    "line_start": 1478,
-                    "line_end": 1493,
+                    "line_start": 1479,
+                    "line_end": 1494,
                     "lines": 16,
                     "fingerprint": "32302b8c3810",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.107"
+                    "id": "DB-042.107"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issue_events",
-                    "line_start": 1494,
-                    "line_end": 1500,
+                    "line_start": 1495,
+                    "line_end": 1501,
                     "lines": 7,
                     "fingerprint": "152b56f11c56",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-041.108"
+                    "id": "DB-042.108"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE log_issue_notifications",
-                    "line_start": 1501,
-                    "line_end": 1519,
+                    "line_start": 1502,
+                    "line_end": 1520,
                     "lines": 19,
                     "fingerprint": "4b60a8cd5e33",
                     "risk": {
@@ -56952,13 +56975,13 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.109"
+                    "id": "DB-042.109"
                 },
                 {
                     "kind": "block",
                     "anchor": "CREATE TABLE schema_updates",
-                    "line_start": 1520,
-                    "line_end": 1564,
+                    "line_start": 1521,
+                    "line_end": 1565,
                     "lines": 45,
                     "fingerprint": "7a13032432b0",
                     "risk": {
@@ -56967,7 +56990,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-041.110"
+                    "id": "DB-042.110"
                 }
             ]
         },
@@ -93999,7 +94022,7 @@
             ]
         },
         {
-            "id": "DB-042",
+            "id": "DB-043",
             "path": "upgrade-1.1-departments.sql",
             "area": "DB",
             "lines": 16,
@@ -94016,7 +94039,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.01"
+                    "id": "DB-043.01"
                 },
                 {
                     "kind": "block",
@@ -94029,7 +94052,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.02"
+                    "id": "DB-043.02"
                 },
                 {
                     "kind": "block",
@@ -94042,7 +94065,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.03"
+                    "id": "DB-043.03"
                 },
                 {
                     "kind": "block",
@@ -94055,7 +94078,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.04"
+                    "id": "DB-043.04"
                 },
                 {
                     "kind": "block",
@@ -94070,7 +94093,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-042.05"
+                    "id": "DB-043.05"
                 },
                 {
                     "kind": "block",
@@ -94083,7 +94106,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.06"
+                    "id": "DB-043.06"
                 },
                 {
                     "kind": "block",
@@ -94096,7 +94119,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-042.07"
+                    "id": "DB-043.07"
                 },
                 {
                     "kind": "block",
@@ -94111,12 +94134,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-042.08"
+                    "id": "DB-043.08"
                 }
             ]
         },
         {
-            "id": "DB-043",
+            "id": "DB-044",
             "path": "upgrade-1.10-priority.sql",
             "area": "DB",
             "lines": 11,
@@ -94133,7 +94156,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-043.01"
+                    "id": "DB-044.01"
                 },
                 {
                     "kind": "block",
@@ -94148,7 +94171,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-043.02"
+                    "id": "DB-044.02"
                 },
                 {
                     "kind": "block",
@@ -94163,7 +94186,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-043.03"
+                    "id": "DB-044.03"
                 },
                 {
                     "kind": "block",
@@ -94178,7 +94201,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-043.04"
+                    "id": "DB-044.04"
                 },
                 {
                     "kind": "block",
@@ -94193,7 +94216,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-043.05"
+                    "id": "DB-044.05"
                 },
                 {
                     "kind": "block",
@@ -94206,7 +94229,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-043.06"
+                    "id": "DB-044.06"
                 },
                 {
                     "kind": "block",
@@ -94219,7 +94242,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-043.07"
+                    "id": "DB-044.07"
                 },
                 {
                     "kind": "block",
@@ -94232,7 +94255,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-043.08"
+                    "id": "DB-044.08"
                 },
                 {
                     "kind": "block",
@@ -94245,12 +94268,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-043.09"
+                    "id": "DB-044.09"
                 }
             ]
         },
         {
-            "id": "DB-044",
+            "id": "DB-045",
             "path": "upgrade-1.11-user-profile.sql",
             "area": "DB",
             "lines": 5,
@@ -94267,7 +94290,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-044.01"
+                    "id": "DB-045.01"
                 },
                 {
                     "kind": "block",
@@ -94280,7 +94303,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-044.02"
+                    "id": "DB-045.02"
                 },
                 {
                     "kind": "block",
@@ -94293,7 +94316,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-044.03"
+                    "id": "DB-045.03"
                 },
                 {
                     "kind": "block",
@@ -94306,12 +94329,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-044.04"
+                    "id": "DB-045.04"
                 }
             ]
         },
         {
-            "id": "DB-045",
+            "id": "DB-046",
             "path": "upgrade-1.12-food-ticket-management.sql",
             "area": "DB",
             "lines": 16,
@@ -94328,7 +94351,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-045.01"
+                    "id": "DB-046.01"
                 },
                 {
                     "kind": "block",
@@ -94343,12 +94366,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-045.02"
+                    "id": "DB-046.02"
                 }
             ]
         },
         {
-            "id": "DB-046",
+            "id": "DB-047",
             "path": "upgrade-1.13-asset-profile.sql",
             "area": "DB",
             "lines": 93,
@@ -94365,7 +94388,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-046.01"
+                    "id": "DB-047.01"
                 },
                 {
                     "kind": "block",
@@ -94378,7 +94401,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-046.02"
+                    "id": "DB-047.02"
                 },
                 {
                     "kind": "block",
@@ -94393,12 +94416,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-046.03"
+                    "id": "DB-047.03"
                 }
             ]
         },
         {
-            "id": "DB-047",
+            "id": "DB-048",
             "path": "upgrade-1.13-food-groups.sql",
             "area": "DB",
             "lines": 50,
@@ -94415,7 +94438,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-047.01"
+                    "id": "DB-048.01"
                 },
                 {
                     "kind": "block",
@@ -94430,7 +94453,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-047.02"
+                    "id": "DB-048.02"
                 },
                 {
                     "kind": "block",
@@ -94445,7 +94468,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-047.03"
+                    "id": "DB-048.03"
                 },
                 {
                     "kind": "block",
@@ -94460,12 +94483,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-047.04"
+                    "id": "DB-048.04"
                 }
             ]
         },
         {
-            "id": "DB-048",
+            "id": "DB-049",
             "path": "upgrade-1.14-system-logs.sql",
             "area": "DB",
             "lines": 14,
@@ -94482,7 +94505,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-048.01"
+                    "id": "DB-049.01"
                 },
                 {
                     "kind": "block",
@@ -94495,12 +94518,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-048.02"
+                    "id": "DB-049.02"
                 }
             ]
         },
         {
-            "id": "DB-049",
+            "id": "DB-050",
             "path": "upgrade-1.15-plaque-fields.sql",
             "area": "DB",
             "lines": 13,
@@ -94517,7 +94540,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-049.01"
+                    "id": "DB-050.01"
                 },
                 {
                     "kind": "block",
@@ -94530,12 +94553,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-049.02"
+                    "id": "DB-050.02"
                 }
             ]
         },
         {
-            "id": "DB-050",
+            "id": "DB-051",
             "path": "upgrade-1.16-ticket-number.sql",
             "area": "DB",
             "lines": 12,
@@ -94552,7 +94575,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.01"
+                    "id": "DB-051.01"
                 },
                 {
                     "kind": "block",
@@ -94565,7 +94588,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.02"
+                    "id": "DB-051.02"
                 },
                 {
                     "kind": "block",
@@ -94578,12 +94601,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-050.03"
+                    "id": "DB-051.03"
                 }
             ]
         },
         {
-            "id": "DB-051",
+            "id": "DB-052",
             "path": "upgrade-1.17-service-catalog.sql",
             "area": "DB",
             "lines": 45,
@@ -94600,7 +94623,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-051.01"
+                    "id": "DB-052.01"
                 },
                 {
                     "kind": "block",
@@ -94615,12 +94638,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-051.02"
+                    "id": "DB-052.02"
                 }
             ]
         },
         {
-            "id": "DB-052",
+            "id": "DB-053",
             "path": "upgrade-1.18-service-categories.sql",
             "area": "DB",
             "lines": 61,
@@ -94637,7 +94660,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.01"
+                    "id": "DB-053.01"
                 },
                 {
                     "kind": "block",
@@ -94650,7 +94673,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.02"
+                    "id": "DB-053.02"
                 },
                 {
                     "kind": "block",
@@ -94663,7 +94686,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.03"
+                    "id": "DB-053.03"
                 },
                 {
                     "kind": "block",
@@ -94676,7 +94699,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-052.04"
+                    "id": "DB-053.04"
                 },
                 {
                     "kind": "block",
@@ -94691,7 +94714,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.05"
+                    "id": "DB-053.05"
                 },
                 {
                     "kind": "block",
@@ -94706,12 +94729,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-052.06"
+                    "id": "DB-053.06"
                 }
             ]
         },
         {
-            "id": "DB-053",
+            "id": "DB-054",
             "path": "upgrade-1.19-food-ticket-queue.sql",
             "area": "DB",
             "lines": 60,
@@ -94728,7 +94751,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-053.01"
+                    "id": "DB-054.01"
                 },
                 {
                     "kind": "block",
@@ -94741,7 +94764,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-053.02"
+                    "id": "DB-054.02"
                 },
                 {
                     "kind": "block",
@@ -94754,12 +94777,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-053.03"
+                    "id": "DB-054.03"
                 }
             ]
         },
         {
-            "id": "DB-054",
+            "id": "DB-055",
             "path": "upgrade-1.2-itsm.sql",
             "area": "DB",
             "lines": 63,
@@ -94776,7 +94799,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.01"
+                    "id": "DB-055.01"
                 },
                 {
                     "kind": "block",
@@ -94789,7 +94812,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.02"
+                    "id": "DB-055.02"
                 },
                 {
                     "kind": "block",
@@ -94802,7 +94825,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.03"
+                    "id": "DB-055.03"
                 },
                 {
                     "kind": "block",
@@ -94817,7 +94840,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.04"
+                    "id": "DB-055.04"
                 },
                 {
                     "kind": "block",
@@ -94832,7 +94855,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.05"
+                    "id": "DB-055.05"
                 },
                 {
                     "kind": "block",
@@ -94845,7 +94868,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.06"
+                    "id": "DB-055.06"
                 },
                 {
                     "kind": "block",
@@ -94858,7 +94881,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.07"
+                    "id": "DB-055.07"
                 },
                 {
                     "kind": "block",
@@ -94871,7 +94894,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.08"
+                    "id": "DB-055.08"
                 },
                 {
                     "kind": "block",
@@ -94884,7 +94907,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.09"
+                    "id": "DB-055.09"
                 },
                 {
                     "kind": "block",
@@ -94897,7 +94920,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.10"
+                    "id": "DB-055.10"
                 },
                 {
                     "kind": "block",
@@ -94910,7 +94933,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-054.11"
+                    "id": "DB-055.11"
                 },
                 {
                     "kind": "block",
@@ -94925,7 +94948,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.12"
+                    "id": "DB-055.12"
                 },
                 {
                     "kind": "block",
@@ -94940,7 +94963,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.13"
+                    "id": "DB-055.13"
                 },
                 {
                     "kind": "block",
@@ -94955,12 +94978,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-054.14"
+                    "id": "DB-055.14"
                 }
             ]
         },
         {
-            "id": "DB-055",
+            "id": "DB-056",
             "path": "upgrade-1.20-domain-scan.sql",
             "area": "DB",
             "lines": 37,
@@ -94977,7 +95000,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-055.01"
+                    "id": "DB-056.01"
                 },
                 {
                     "kind": "block",
@@ -94992,7 +95015,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-055.02"
+                    "id": "DB-056.02"
                 },
                 {
                     "kind": "block",
@@ -95007,7 +95030,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-055.03"
+                    "id": "DB-056.03"
                 },
                 {
                     "kind": "block",
@@ -95020,12 +95043,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-055.04"
+                    "id": "DB-056.04"
                 }
             ]
         },
         {
-            "id": "DB-056",
+            "id": "DB-057",
             "path": "upgrade-1.21-organization.sql",
             "area": "DB",
             "lines": 49,
@@ -95042,7 +95065,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-056.01"
+                    "id": "DB-057.01"
                 },
                 {
                     "kind": "block",
@@ -95055,7 +95078,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-056.02"
+                    "id": "DB-057.02"
                 },
                 {
                     "kind": "block",
@@ -95068,7 +95091,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-056.03"
+                    "id": "DB-057.03"
                 },
                 {
                     "kind": "block",
@@ -95081,7 +95104,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-056.04"
+                    "id": "DB-057.04"
                 },
                 {
                     "kind": "block",
@@ -95096,7 +95119,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.05"
+                    "id": "DB-057.05"
                 },
                 {
                     "kind": "block",
@@ -95111,7 +95134,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.06"
+                    "id": "DB-057.06"
                 },
                 {
                     "kind": "block",
@@ -95126,12 +95149,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-056.07"
+                    "id": "DB-057.07"
                 }
             ]
         },
         {
-            "id": "DB-057",
+            "id": "DB-058",
             "path": "upgrade-1.22-permissions.sql",
             "area": "DB",
             "lines": 16,
@@ -95148,7 +95171,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.01"
+                    "id": "DB-058.01"
                 },
                 {
                     "kind": "block",
@@ -95161,7 +95184,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.02"
+                    "id": "DB-058.02"
                 },
                 {
                     "kind": "block",
@@ -95176,7 +95199,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-057.03"
+                    "id": "DB-058.03"
                 },
                 {
                     "kind": "block",
@@ -95189,12 +95212,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-057.04"
+                    "id": "DB-058.04"
                 }
             ]
         },
         {
-            "id": "DB-058",
+            "id": "DB-059",
             "path": "upgrade-1.23-activity-log.sql",
             "area": "DB",
             "lines": 55,
@@ -95211,7 +95234,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-058.01"
+                    "id": "DB-059.01"
                 },
                 {
                     "kind": "block",
@@ -95226,7 +95249,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-058.02"
+                    "id": "DB-059.02"
                 },
                 {
                     "kind": "block",
@@ -95241,7 +95264,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-058.03"
+                    "id": "DB-059.03"
                 },
                 {
                     "kind": "block",
@@ -95254,7 +95277,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-058.04"
+                    "id": "DB-059.04"
                 },
                 {
                     "kind": "block",
@@ -95269,7 +95292,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-058.05"
+                    "id": "DB-059.05"
                 },
                 {
                     "kind": "block",
@@ -95284,12 +95307,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-058.06"
+                    "id": "DB-059.06"
                 }
             ]
         },
         {
-            "id": "DB-059",
+            "id": "DB-060",
             "path": "upgrade-1.24-traffic-control.sql",
             "area": "DB",
             "lines": 55,
@@ -95306,7 +95329,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.01"
+                    "id": "DB-060.01"
                 },
                 {
                     "kind": "block",
@@ -95319,7 +95342,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.02"
+                    "id": "DB-060.02"
                 },
                 {
                     "kind": "block",
@@ -95332,7 +95355,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.03"
+                    "id": "DB-060.03"
                 },
                 {
                     "kind": "block",
@@ -95345,7 +95368,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-059.04"
+                    "id": "DB-060.04"
                 },
                 {
                     "kind": "block",
@@ -95360,7 +95383,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-059.05"
+                    "id": "DB-060.05"
                 },
                 {
                     "kind": "block",
@@ -95375,12 +95398,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-059.06"
+                    "id": "DB-060.06"
                 }
             ]
         },
         {
-            "id": "DB-060",
+            "id": "DB-061",
             "path": "upgrade-1.25-performance-indexes.sql",
             "area": "DB",
             "lines": 36,
@@ -95397,7 +95420,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-060.01"
+                    "id": "DB-061.01"
                 },
                 {
                     "kind": "block",
@@ -95410,12 +95433,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-060.02"
+                    "id": "DB-061.02"
                 }
             ]
         },
         {
-            "id": "DB-061",
+            "id": "DB-062",
             "path": "upgrade-1.26-ticket-requesting-unit.sql",
             "area": "DB",
             "lines": 28,
@@ -95432,7 +95455,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.01"
+                    "id": "DB-062.01"
                 },
                 {
                     "kind": "block",
@@ -95445,7 +95468,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.02"
+                    "id": "DB-062.02"
                 },
                 {
                     "kind": "block",
@@ -95458,7 +95481,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.03"
+                    "id": "DB-062.03"
                 },
                 {
                     "kind": "block",
@@ -95471,12 +95494,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-061.04"
+                    "id": "DB-062.04"
                 }
             ]
         },
         {
-            "id": "DB-062",
+            "id": "DB-063",
             "path": "upgrade-1.27-food-ticket-fixes.sql",
             "area": "DB",
             "lines": 17,
@@ -95493,7 +95516,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-062.01"
+                    "id": "DB-063.01"
                 },
                 {
                     "kind": "block",
@@ -95508,7 +95531,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-062.02"
+                    "id": "DB-063.02"
                 },
                 {
                     "kind": "block",
@@ -95523,12 +95546,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-062.03"
+                    "id": "DB-063.03"
                 }
             ]
         },
         {
-            "id": "DB-063",
+            "id": "DB-064",
             "path": "upgrade-1.3-supervisor-inventory.sql",
             "area": "DB",
             "lines": 14,
@@ -95545,7 +95568,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.01"
+                    "id": "DB-064.01"
                 },
                 {
                     "kind": "block",
@@ -95558,7 +95581,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.02"
+                    "id": "DB-064.02"
                 },
                 {
                     "kind": "block",
@@ -95573,7 +95596,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-063.03"
+                    "id": "DB-064.03"
                 },
                 {
                     "kind": "block",
@@ -95588,7 +95611,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-063.04"
+                    "id": "DB-064.04"
                 },
                 {
                     "kind": "block",
@@ -95603,7 +95626,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-063.05"
+                    "id": "DB-064.05"
                 },
                 {
                     "kind": "block",
@@ -95616,7 +95639,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.06"
+                    "id": "DB-064.06"
                 },
                 {
                     "kind": "block",
@@ -95629,7 +95652,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.07"
+                    "id": "DB-064.07"
                 },
                 {
                     "kind": "block",
@@ -95642,7 +95665,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.08"
+                    "id": "DB-064.08"
                 },
                 {
                     "kind": "block",
@@ -95655,7 +95678,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.09"
+                    "id": "DB-064.09"
                 },
                 {
                     "kind": "block",
@@ -95670,7 +95693,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-063.10"
+                    "id": "DB-064.10"
                 },
                 {
                     "kind": "block",
@@ -95683,7 +95706,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.11"
+                    "id": "DB-064.11"
                 },
                 {
                     "kind": "block",
@@ -95696,7 +95719,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.12"
+                    "id": "DB-064.12"
                 },
                 {
                     "kind": "block",
@@ -95709,12 +95732,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-063.13"
+                    "id": "DB-064.13"
                 }
             ]
         },
         {
-            "id": "DB-064",
+            "id": "DB-065",
             "path": "upgrade-1.30-food-ticket-card-map.sql",
             "area": "DB",
             "lines": 11,
@@ -95731,7 +95754,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-064.01"
+                    "id": "DB-065.01"
                 },
                 {
                     "kind": "block",
@@ -95746,12 +95769,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-064.02"
+                    "id": "DB-065.02"
                 }
             ]
         },
         {
-            "id": "DB-065",
+            "id": "DB-066",
             "path": "upgrade-1.31-food-ticket-templates.sql",
             "area": "DB",
             "lines": 14,
@@ -95768,7 +95791,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-065.01"
+                    "id": "DB-066.01"
                 },
                 {
                     "kind": "block",
@@ -95783,12 +95806,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-065.02"
+                    "id": "DB-066.02"
                 }
             ]
         },
         {
-            "id": "DB-066",
+            "id": "DB-067",
             "path": "upgrade-1.32-food-group-representative-absence.sql",
             "area": "DB",
             "lines": 90,
@@ -95805,7 +95828,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.01"
+                    "id": "DB-067.01"
                 },
                 {
                     "kind": "block",
@@ -95818,7 +95841,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.02"
+                    "id": "DB-067.02"
                 },
                 {
                     "kind": "block",
@@ -95831,7 +95854,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.03"
+                    "id": "DB-067.03"
                 },
                 {
                     "kind": "block",
@@ -95844,7 +95867,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.04"
+                    "id": "DB-067.04"
                 },
                 {
                     "kind": "block",
@@ -95857,7 +95880,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.05"
+                    "id": "DB-067.05"
                 },
                 {
                     "kind": "block",
@@ -95872,7 +95895,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.06"
+                    "id": "DB-067.06"
                 },
                 {
                     "kind": "block",
@@ -95885,7 +95908,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.07"
+                    "id": "DB-067.07"
                 },
                 {
                     "kind": "block",
@@ -95898,7 +95921,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.08"
+                    "id": "DB-067.08"
                 },
                 {
                     "kind": "block",
@@ -95911,7 +95934,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.09"
+                    "id": "DB-067.09"
                 },
                 {
                     "kind": "block",
@@ -95924,7 +95947,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.10"
+                    "id": "DB-067.10"
                 },
                 {
                     "kind": "block",
@@ -95939,7 +95962,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-066.11"
+                    "id": "DB-067.11"
                 },
                 {
                     "kind": "block",
@@ -95952,12 +95975,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-066.12"
+                    "id": "DB-067.12"
                 }
             ]
         },
         {
-            "id": "DB-067",
+            "id": "DB-068",
             "path": "upgrade-1.33-source-delete-truth.sql",
             "area": "DB",
             "lines": 46,
@@ -95976,7 +95999,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-067.01"
+                    "id": "DB-068.01"
                 },
                 {
                     "kind": "block",
@@ -95989,7 +96012,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.02"
+                    "id": "DB-068.02"
                 },
                 {
                     "kind": "block",
@@ -96002,7 +96025,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.03"
+                    "id": "DB-068.03"
                 },
                 {
                     "kind": "block",
@@ -96015,7 +96038,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.04"
+                    "id": "DB-068.04"
                 },
                 {
                     "kind": "block",
@@ -96028,7 +96051,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.05"
+                    "id": "DB-068.05"
                 },
                 {
                     "kind": "block",
@@ -96041,7 +96064,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.06"
+                    "id": "DB-068.06"
                 },
                 {
                     "kind": "block",
@@ -96054,7 +96077,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.07"
+                    "id": "DB-068.07"
                 },
                 {
                     "kind": "block",
@@ -96067,7 +96090,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.08"
+                    "id": "DB-068.08"
                 },
                 {
                     "kind": "block",
@@ -96080,12 +96103,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-067.09"
+                    "id": "DB-068.09"
                 }
             ]
         },
         {
-            "id": "DB-068",
+            "id": "DB-069",
             "path": "upgrade-1.38-food-orders.sql",
             "area": "DB",
             "lines": 78,
@@ -96102,7 +96125,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-068.01"
+                    "id": "DB-069.01"
                 },
                 {
                     "kind": "block",
@@ -96117,7 +96140,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.02"
+                    "id": "DB-069.02"
                 },
                 {
                     "kind": "block",
@@ -96132,7 +96155,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.03"
+                    "id": "DB-069.03"
                 },
                 {
                     "kind": "block",
@@ -96147,7 +96170,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.04"
+                    "id": "DB-069.04"
                 },
                 {
                     "kind": "block",
@@ -96162,7 +96185,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.05"
+                    "id": "DB-069.05"
                 },
                 {
                     "kind": "block",
@@ -96177,12 +96200,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-068.06"
+                    "id": "DB-069.06"
                 }
             ]
         },
         {
-            "id": "DB-069",
+            "id": "DB-070",
             "path": "upgrade-1.39-food-guest-requests.sql",
             "area": "DB",
             "lines": 19,
@@ -96199,7 +96222,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-069.01"
+                    "id": "DB-070.01"
                 },
                 {
                     "kind": "block",
@@ -96214,12 +96237,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-069.02"
+                    "id": "DB-070.02"
                 }
             ]
         },
         {
-            "id": "DB-070",
+            "id": "DB-071",
             "path": "upgrade-1.4-final.sql",
             "area": "DB",
             "lines": 113,
@@ -96236,7 +96259,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.01"
+                    "id": "DB-071.01"
                 },
                 {
                     "kind": "block",
@@ -96249,7 +96272,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.02"
+                    "id": "DB-071.02"
                 },
                 {
                     "kind": "block",
@@ -96262,7 +96285,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.03"
+                    "id": "DB-071.03"
                 },
                 {
                     "kind": "block",
@@ -96275,7 +96298,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.04"
+                    "id": "DB-071.04"
                 },
                 {
                     "kind": "block",
@@ -96290,7 +96313,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.05"
+                    "id": "DB-071.05"
                 },
                 {
                     "kind": "block",
@@ -96303,7 +96326,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.06"
+                    "id": "DB-071.06"
                 },
                 {
                     "kind": "block",
@@ -96316,7 +96339,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.07"
+                    "id": "DB-071.07"
                 },
                 {
                     "kind": "block",
@@ -96331,7 +96354,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.08"
+                    "id": "DB-071.08"
                 },
                 {
                     "kind": "block",
@@ -96344,7 +96367,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.09"
+                    "id": "DB-071.09"
                 },
                 {
                     "kind": "block",
@@ -96357,7 +96380,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.10"
+                    "id": "DB-071.10"
                 },
                 {
                     "kind": "block",
@@ -96372,7 +96395,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.11"
+                    "id": "DB-071.11"
                 },
                 {
                     "kind": "block",
@@ -96385,7 +96408,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.12"
+                    "id": "DB-071.12"
                 },
                 {
                     "kind": "block",
@@ -96398,7 +96421,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.13"
+                    "id": "DB-071.13"
                 },
                 {
                     "kind": "block",
@@ -96411,7 +96434,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.14"
+                    "id": "DB-071.14"
                 },
                 {
                     "kind": "block",
@@ -96424,7 +96447,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.15"
+                    "id": "DB-071.15"
                 },
                 {
                     "kind": "block",
@@ -96437,7 +96460,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.16"
+                    "id": "DB-071.16"
                 },
                 {
                     "kind": "block",
@@ -96450,7 +96473,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.17"
+                    "id": "DB-071.17"
                 },
                 {
                     "kind": "block",
@@ -96463,7 +96486,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.18"
+                    "id": "DB-071.18"
                 },
                 {
                     "kind": "block",
@@ -96476,7 +96499,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.19"
+                    "id": "DB-071.19"
                 },
                 {
                     "kind": "block",
@@ -96489,7 +96512,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.20"
+                    "id": "DB-071.20"
                 },
                 {
                     "kind": "block",
@@ -96502,7 +96525,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.21"
+                    "id": "DB-071.21"
                 },
                 {
                     "kind": "block",
@@ -96515,7 +96538,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.22"
+                    "id": "DB-071.22"
                 },
                 {
                     "kind": "block",
@@ -96528,7 +96551,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.23"
+                    "id": "DB-071.23"
                 },
                 {
                     "kind": "block",
@@ -96541,7 +96564,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-070.24"
+                    "id": "DB-071.24"
                 },
                 {
                     "kind": "block",
@@ -96556,7 +96579,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.25"
+                    "id": "DB-071.25"
                 },
                 {
                     "kind": "block",
@@ -96571,7 +96594,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.26"
+                    "id": "DB-071.26"
                 },
                 {
                     "kind": "block",
@@ -96586,7 +96609,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.27"
+                    "id": "DB-071.27"
                 },
                 {
                     "kind": "block",
@@ -96601,7 +96624,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.28"
+                    "id": "DB-071.28"
                 },
                 {
                     "kind": "block",
@@ -96616,7 +96639,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.29"
+                    "id": "DB-071.29"
                 },
                 {
                     "kind": "block",
@@ -96631,12 +96654,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-070.30"
+                    "id": "DB-071.30"
                 }
             ]
         },
         {
-            "id": "DB-071",
+            "id": "DB-072",
             "path": "upgrade-1.40-food-guest-deputy.sql",
             "area": "DB",
             "lines": 6,
@@ -96653,7 +96676,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-071.01"
+                    "id": "DB-072.01"
                 },
                 {
                     "kind": "block",
@@ -96666,12 +96689,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-071.02"
+                    "id": "DB-072.02"
                 }
             ]
         },
         {
-            "id": "DB-072",
+            "id": "DB-073",
             "path": "upgrade-1.5-offline-operations.sql",
             "area": "DB",
             "lines": 112,
@@ -96688,7 +96711,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.01"
+                    "id": "DB-073.01"
                 },
                 {
                     "kind": "block",
@@ -96703,7 +96726,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.02"
+                    "id": "DB-073.02"
                 },
                 {
                     "kind": "block",
@@ -96718,7 +96741,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.03"
+                    "id": "DB-073.03"
                 },
                 {
                     "kind": "block",
@@ -96731,7 +96754,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.04"
+                    "id": "DB-073.04"
                 },
                 {
                     "kind": "block",
@@ -96744,7 +96767,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.05"
+                    "id": "DB-073.05"
                 },
                 {
                     "kind": "block",
@@ -96757,7 +96780,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.06"
+                    "id": "DB-073.06"
                 },
                 {
                     "kind": "block",
@@ -96770,7 +96793,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.07"
+                    "id": "DB-073.07"
                 },
                 {
                     "kind": "block",
@@ -96783,7 +96806,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.08"
+                    "id": "DB-073.08"
                 },
                 {
                     "kind": "block",
@@ -96796,7 +96819,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.09"
+                    "id": "DB-073.09"
                 },
                 {
                     "kind": "block",
@@ -96809,7 +96832,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.10"
+                    "id": "DB-073.10"
                 },
                 {
                     "kind": "block",
@@ -96822,7 +96845,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.11"
+                    "id": "DB-073.11"
                 },
                 {
                     "kind": "block",
@@ -96835,7 +96858,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-072.12"
+                    "id": "DB-073.12"
                 },
                 {
                     "kind": "block",
@@ -96850,7 +96873,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.13"
+                    "id": "DB-073.13"
                 },
                 {
                     "kind": "block",
@@ -96865,7 +96888,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.14"
+                    "id": "DB-073.14"
                 },
                 {
                     "kind": "block",
@@ -96880,7 +96903,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.15"
+                    "id": "DB-073.15"
                 },
                 {
                     "kind": "block",
@@ -96895,7 +96918,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.16"
+                    "id": "DB-073.16"
                 },
                 {
                     "kind": "block",
@@ -96910,7 +96933,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.17"
+                    "id": "DB-073.17"
                 },
                 {
                     "kind": "block",
@@ -96925,7 +96948,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.18"
+                    "id": "DB-073.18"
                 },
                 {
                     "kind": "block",
@@ -96940,7 +96963,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.19"
+                    "id": "DB-073.19"
                 },
                 {
                     "kind": "block",
@@ -96955,12 +96978,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-072.20"
+                    "id": "DB-073.20"
                 }
             ]
         },
         {
-            "id": "DB-073",
+            "id": "DB-074",
             "path": "upgrade-1.6-hardening.sql",
             "area": "DB",
             "lines": 19,
@@ -96977,7 +97000,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-073.01"
+                    "id": "DB-074.01"
                 },
                 {
                     "kind": "block",
@@ -96992,7 +97015,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-073.02"
+                    "id": "DB-074.02"
                 },
                 {
                     "kind": "block",
@@ -97007,12 +97030,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-073.03"
+                    "id": "DB-074.03"
                 }
             ]
         },
         {
-            "id": "DB-074",
+            "id": "DB-075",
             "path": "upgrade-1.7-governance.sql",
             "area": "DB",
             "lines": 88,
@@ -97029,7 +97052,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-074.01"
+                    "id": "DB-075.01"
                 },
                 {
                     "kind": "block",
@@ -97044,7 +97067,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.02"
+                    "id": "DB-075.02"
                 },
                 {
                     "kind": "block",
@@ -97059,7 +97082,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.03"
+                    "id": "DB-075.03"
                 },
                 {
                     "kind": "block",
@@ -97074,7 +97097,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.04"
+                    "id": "DB-075.04"
                 },
                 {
                     "kind": "block",
@@ -97089,7 +97112,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.05"
+                    "id": "DB-075.05"
                 },
                 {
                     "kind": "block",
@@ -97104,12 +97127,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-074.06"
+                    "id": "DB-075.06"
                 }
             ]
         },
         {
-            "id": "DB-075",
+            "id": "DB-076",
             "path": "upgrade-1.8-cd-dvd-identity.sql",
             "area": "DB",
             "lines": 6,
@@ -97126,7 +97149,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-075.01"
+                    "id": "DB-076.01"
                 },
                 {
                     "kind": "block",
@@ -97141,12 +97164,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-075.02"
+                    "id": "DB-076.02"
                 }
             ]
         },
         {
-            "id": "DB-076",
+            "id": "DB-077",
             "path": "upgrade-1.8-cd-dvd.sql",
             "area": "DB",
             "lines": 44,
@@ -97163,7 +97186,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-076.01"
+                    "id": "DB-077.01"
                 },
                 {
                     "kind": "block",
@@ -97178,7 +97201,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.02"
+                    "id": "DB-077.02"
                 },
                 {
                     "kind": "block",
@@ -97193,12 +97216,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-076.03"
+                    "id": "DB-077.03"
                 }
             ]
         },
         {
-            "id": "DB-077",
+            "id": "DB-078",
             "path": "upgrade-1.8-final.sql",
             "area": "DB",
             "lines": 47,
@@ -97215,7 +97238,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-077.01"
+                    "id": "DB-078.01"
                 },
                 {
                     "kind": "block",
@@ -97228,7 +97251,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-077.02"
+                    "id": "DB-078.02"
                 },
                 {
                     "kind": "block",
@@ -97241,7 +97264,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-077.03"
+                    "id": "DB-078.03"
                 },
                 {
                     "kind": "block",
@@ -97256,7 +97279,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-077.04"
+                    "id": "DB-078.04"
                 },
                 {
                     "kind": "block",
@@ -97271,7 +97294,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-077.05"
+                    "id": "DB-078.05"
                 },
                 {
                     "kind": "block",
@@ -97286,12 +97309,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-077.06"
+                    "id": "DB-078.06"
                 }
             ]
         },
         {
-            "id": "DB-078",
+            "id": "DB-079",
             "path": "upgrade-1.8-routing.sql",
             "area": "DB",
             "lines": 46,
@@ -97308,7 +97331,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.01"
+                    "id": "DB-079.01"
                 },
                 {
                     "kind": "block",
@@ -97323,7 +97346,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.02"
+                    "id": "DB-079.02"
                 },
                 {
                     "kind": "block",
@@ -97336,7 +97359,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.03"
+                    "id": "DB-079.03"
                 },
                 {
                     "kind": "block",
@@ -97351,7 +97374,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.04"
+                    "id": "DB-079.04"
                 },
                 {
                     "kind": "block",
@@ -97364,7 +97387,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.05"
+                    "id": "DB-079.05"
                 },
                 {
                     "kind": "block",
@@ -97377,7 +97400,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.06"
+                    "id": "DB-079.06"
                 },
                 {
                     "kind": "block",
@@ -97390,7 +97413,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.07"
+                    "id": "DB-079.07"
                 },
                 {
                     "kind": "block",
@@ -97403,7 +97426,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.08"
+                    "id": "DB-079.08"
                 },
                 {
                     "kind": "block",
@@ -97416,7 +97439,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.09"
+                    "id": "DB-079.09"
                 },
                 {
                     "kind": "block",
@@ -97431,7 +97454,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.10"
+                    "id": "DB-079.10"
                 },
                 {
                     "kind": "block",
@@ -97444,7 +97467,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.11"
+                    "id": "DB-079.11"
                 },
                 {
                     "kind": "block",
@@ -97457,7 +97480,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.12"
+                    "id": "DB-079.12"
                 },
                 {
                     "kind": "block",
@@ -97470,7 +97493,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.13"
+                    "id": "DB-079.13"
                 },
                 {
                     "kind": "block",
@@ -97483,7 +97506,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-078.14"
+                    "id": "DB-079.14"
                 },
                 {
                     "kind": "block",
@@ -97498,7 +97521,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.15"
+                    "id": "DB-079.15"
                 },
                 {
                     "kind": "block",
@@ -97513,7 +97536,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.16"
+                    "id": "DB-079.16"
                 },
                 {
                     "kind": "block",
@@ -97528,7 +97551,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.17"
+                    "id": "DB-079.17"
                 },
                 {
                     "kind": "block",
@@ -97543,7 +97566,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.18"
+                    "id": "DB-079.18"
                 },
                 {
                     "kind": "block",
@@ -97558,7 +97581,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.19"
+                    "id": "DB-079.19"
                 },
                 {
                     "kind": "block",
@@ -97573,7 +97596,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.20"
+                    "id": "DB-079.20"
                 },
                 {
                     "kind": "block",
@@ -97588,7 +97611,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.21"
+                    "id": "DB-079.21"
                 },
                 {
                     "kind": "block",
@@ -97603,7 +97626,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.22"
+                    "id": "DB-079.22"
                 },
                 {
                     "kind": "block",
@@ -97618,7 +97641,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.23"
+                    "id": "DB-079.23"
                 },
                 {
                     "kind": "block",
@@ -97633,7 +97656,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.24"
+                    "id": "DB-079.24"
                 },
                 {
                     "kind": "block",
@@ -97648,12 +97671,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-078.25"
+                    "id": "DB-079.25"
                 }
             ]
         },
         {
-            "id": "DB-079",
+            "id": "DB-080",
             "path": "upgrade-1.9-food-ticket.sql",
             "area": "DB",
             "lines": 80,
@@ -97670,7 +97693,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-079.01"
+                    "id": "DB-080.01"
                 },
                 {
                     "kind": "block",
@@ -97685,7 +97708,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-079.02"
+                    "id": "DB-080.02"
                 },
                 {
                     "kind": "block",
@@ -97700,7 +97723,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-079.03"
+                    "id": "DB-080.03"
                 },
                 {
                     "kind": "block",
@@ -97715,12 +97738,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-079.04"
+                    "id": "DB-080.04"
                 }
             ]
         },
         {
-            "id": "DB-080",
+            "id": "DB-081",
             "path": "upgrade-food-drop-legacy-orders-columns.sql",
             "area": "DB",
             "lines": 6,
@@ -97737,7 +97760,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-080.01"
+                    "id": "DB-081.01"
                 },
                 {
                     "kind": "block",
@@ -97750,7 +97773,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-080.02"
+                    "id": "DB-081.02"
                 },
                 {
                     "kind": "block",
@@ -97763,12 +97786,12 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-080.03"
+                    "id": "DB-081.03"
                 }
             ]
         },
         {
-            "id": "DB-081",
+            "id": "DB-082",
             "path": "upgrade-food-employee-auth-source.sql",
             "area": "DB",
             "lines": 14,
@@ -97785,7 +97808,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-081.01"
+                    "id": "DB-082.01"
                 },
                 {
                     "kind": "block",
@@ -97798,7 +97821,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-081.02"
+                    "id": "DB-082.02"
                 },
                 {
                     "kind": "block",
@@ -97813,12 +97836,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-081.03"
+                    "id": "DB-082.03"
                 }
             ]
         },
         {
-            "id": "DB-082",
+            "id": "DB-083",
             "path": "upgrade-remove-legacy-admin-role.sql",
             "area": "DB",
             "lines": 11,
@@ -97835,7 +97858,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-082.01"
+                    "id": "DB-083.01"
                 },
                 {
                     "kind": "block",
@@ -97850,7 +97873,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-082.02"
+                    "id": "DB-083.02"
                 },
                 {
                     "kind": "block",
@@ -97865,12 +97888,12 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-082.03"
+                    "id": "DB-083.03"
                 }
             ]
         },
         {
-            "id": "DB-083",
+            "id": "DB-084",
             "path": "upgrade-unique-employee-number.sql",
             "area": "DB",
             "lines": 16,
@@ -97887,7 +97910,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-083.01"
+                    "id": "DB-084.01"
                 },
                 {
                     "kind": "block",
@@ -97902,7 +97925,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-083.02"
+                    "id": "DB-084.02"
                 },
                 {
                     "kind": "block",
@@ -97917,7 +97940,7 @@
                             "write_no_tx": 1
                         }
                     },
-                    "id": "DB-083.03"
+                    "id": "DB-084.03"
                 },
                 {
                     "kind": "block",
@@ -97930,7 +97953,7 @@
                         "score": 0,
                         "flags": []
                     },
-                    "id": "DB-083.04"
+                    "id": "DB-084.04"
                 }
             ]
         },

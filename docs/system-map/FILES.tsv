@@ -378,7 +378,7 @@ governance.php	core	545	48255
 help-guide.php	core	721	135663
 holiday-board.php	core	75	8205
 index.php	core	2441	244102
-install-empty-db.sql	sql-root	1632	83448
+install-empty-db.sql	sql-root	1633	83490
 install-food-worker-SERVICE.bat	root-misc	40	857
 install-food-worker-SERVICE.ps1	root-misc	352	18384
 install.php	core	367	33296
@@ -440,11 +440,12 @@ migrations/032-schema-updates-baseline.sql	migrations	35	1992
 migrations/033-logging-legacy-context-collation.sql	migrations	8	420
 migrations/034-logging-escalation.sql	migrations	34	1915
 migrations/035-request-center-appointments.sql	migrations	22	1432
+migrations/037-request-center-lifecycle-rejection.sql	migrations	48	1671
 modules/request-center/Actions/appointment-actions.php	other	213	9484
 modules/request-center/Actions/bulk-actions.php	other	140	10427
 modules/request-center/Actions/dispatch.php	other	18	695
 modules/request-center/Actions/service-actions.php	other	228	14500
-modules/request-center/Actions/supervisor-actions.php	other	189	14636
+modules/request-center/Actions/supervisor-actions.php	other	267	19497
 modules/request-center/Actions/ticket-actions.php	other	752	59624
 modules/request-center/AppointmentRepository.php	other	372	16638
 modules/request-center/Assets/request-center.css	other	156	13457
@@ -461,7 +462,7 @@ modules/request-center/Pages/supervisor-workspace.php	other	65	5777
 modules/request-center/Pages/supervisor.php	other	52	6589
 modules/request-center/README.md	other	286	30697
 modules/request-center/RequestCenterRepository.php	other	443	20179
-modules/request-center/WorkflowService.php	other	256	11564
+modules/request-center/WorkflowService.php	other	268	12352
 modules/request-center/lib/endpoints.php	other	95	7621
 modules/request-center/lib/functions.php	other	239	13840
 modules/request-center/post-handler.php	other	83	3709
@@ -480,7 +481,7 @@ restart-food-worker-SERVICE.bat	root-misc	25	741
 rollback-1.38-food-orders.sql	sql-root	9	584
 routes/web.php	routes	35	1344
 run-food-worker-service.cmd	root-misc	21	999
-schema.sql	sql-root	1563	78585
+schema.sql	sql-root	1564	78627
 session_bootstrap.php	core	111	5473
 status-food-worker-SERVICE.bat	root-misc	9	214
 status-food-worker-SERVICE.ps1	root-misc	107	4918

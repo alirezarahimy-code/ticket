@@ -278,8 +278,8 @@
         "PAGE-034.50",
         "DB-002.30",
         "DB-005.21",
-        "DB-041.27",
-        "DB-072.15",
+        "DB-042.27",
+        "DB-073.15",
         "DB-005.263",
         "DB-005.264",
         "DB-005.265",
@@ -446,8 +446,8 @@
         "PAGE-034.61",
         "DB-002.35",
         "DB-005.26",
-        "DB-041.32",
-        "DB-072.19",
+        "DB-042.32",
+        "DB-073.19",
         "DB-005.294",
         "DB-005.295",
         "DB-005.296",
@@ -482,7 +482,7 @@
         "PAGE-034.36",
         "DB-002.04",
         "DB-005.02",
-        "DB-041.01",
+        "DB-042.01",
         "CORE-018.04",
         "CORE-018.02",
         "CORE-018.05",
@@ -490,8 +490,8 @@
         "CORE-018.18",
         "DB-002.93",
         "DB-002.94",
-        "DB-058.05",
-        "DB-058.06"
+        "DB-059.05",
+        "DB-059.06"
       ],
       "related": [
         "TEST-181.33",
@@ -557,7 +557,7 @@
         "PAGE-070.30",
         "PAGE-065.03",
         "TEST-206.02",
-        "DB-058.03"
+        "DB-059.03"
       ],
       "total": 26
     },
@@ -599,8 +599,8 @@
         "PAGE-034.67",
         "DB-002.36",
         "DB-005.27",
-        "DB-041.33",
-        "DB-054.13",
+        "DB-042.33",
+        "DB-055.13",
         "CORE-016.20",
         "DB-005.342",
         "DB-016.03",
@@ -3002,13 +3002,13 @@
       "primary": [
         "DB-002.28",
         "DB-005.19",
-        "DB-041.25",
-        "DB-058.02",
+        "DB-042.25",
+        "DB-059.02",
         "CORE-001.02",
         "CORE-001.10",
         "DB-029.02",
         "DB-030.03",
-        "DB-058.03",
+        "DB-059.03",
         "DB-005.245"
       ],
       "related": [
@@ -3029,7 +3029,7 @@
       "primary": [
         "DB-002.67",
         "DB-005.58",
-        "DB-041.67",
+        "DB-042.67",
         "DB-005.673",
         "DB-005.671",
         "DB-005.672",
@@ -3061,8 +3061,8 @@
       "primary": [
         "DB-002.40",
         "DB-005.30",
-        "DB-041.37",
-        "DB-070.28",
+        "DB-042.37",
+        "DB-071.28",
         "DB-005.362",
         "DB-005.363",
         "DB-005.364",
@@ -3084,8 +3084,8 @@
       "primary": [
         "DB-002.43",
         "DB-005.33",
-        "DB-041.40",
-        "DB-070.30",
+        "DB-042.40",
+        "DB-071.30",
         "DB-005.385",
         "DB-005.386",
         "DB-005.387",
@@ -3107,8 +3107,8 @@
       "primary": [
         "DB-002.42",
         "DB-005.32",
-        "DB-041.39",
-        "DB-054.14",
+        "DB-042.39",
+        "DB-055.14",
         "DB-005.381",
         "DB-005.382",
         "DB-005.383",
@@ -3130,8 +3130,8 @@
       "primary": [
         "DB-002.38",
         "DB-005.28",
-        "DB-041.35",
-        "DB-070.26",
+        "DB-042.35",
+        "DB-071.26",
         "DB-005.343",
         "DB-005.344",
         "DB-005.345",
@@ -3154,8 +3154,8 @@
       "primary": [
         "DB-002.41",
         "DB-005.31",
-        "DB-041.38",
-        "DB-070.29",
+        "DB-042.38",
+        "DB-071.29",
         "DB-005.369",
         "DB-005.370",
         "DB-005.371",
@@ -3178,8 +3178,8 @@
       "primary": [
         "DB-002.45",
         "DB-005.35",
-        "DB-041.42",
-        "DB-046.03",
+        "DB-042.42",
+        "DB-047.03",
         "DB-005.473",
         "DB-005.399",
         "DB-005.400",
@@ -3205,8 +3205,8 @@
       "primary": [
         "DB-002.44",
         "DB-005.34",
-        "DB-041.41",
-        "DB-072.20",
+        "DB-042.41",
+        "DB-073.20",
         "DB-005.394",
         "DB-005.395",
         "DB-005.396",
@@ -3228,8 +3228,8 @@
       "primary": [
         "DB-002.39",
         "DB-005.29",
-        "DB-041.36",
-        "DB-070.27",
+        "DB-042.36",
+        "DB-071.27",
         "DB-005.352",
         "DB-005.353",
         "DB-005.354",
@@ -3254,8 +3254,8 @@
         "PAGE-034.67",
         "DB-002.36",
         "DB-005.27",
-        "DB-041.33",
-        "DB-054.13",
+        "DB-042.33",
+        "DB-055.13",
         "CORE-016.20",
         "DB-005.342",
         "DB-016.03",
@@ -3279,14 +3279,14 @@
       "primary": [
         "DB-002.21",
         "DB-005.12",
-        "DB-041.18",
-        "DB-052.05",
+        "DB-042.18",
+        "DB-053.05",
         "DB-005.160",
         "DB-005.161",
         "DB-005.162",
         "DB-005.163",
         "DB-005.164",
-        "DB-052.02"
+        "DB-053.02"
       ],
       "related": [
         "TEST-172.03",
@@ -3306,10 +3306,10 @@
       "primary": [
         "DB-002.16",
         "DB-005.09",
-        "DB-041.13",
-        "DB-076.03",
+        "DB-042.13",
+        "DB-077.03",
         "DB-005.137",
-        "DB-075.02",
+        "DB-076.02",
         "DB-005.117",
         "DB-005.118",
         "DB-005.119",
@@ -3332,8 +3332,8 @@
       "key": "cd_dvd_types",
       "primary": [
         "DB-002.15",
-        "DB-041.12",
-        "DB-076.02",
+        "DB-042.12",
+        "DB-077.02",
         "DB-005.08",
         "DB-005.115",
         "DB-005.116",
@@ -3352,8 +3352,8 @@
       "primary": [
         "DB-002.50",
         "DB-005.39",
-        "DB-041.47",
-        "DB-074.03",
+        "DB-042.47",
+        "DB-075.03",
         "DB-005.507",
         "DB-005.508",
         "DB-005.509",
@@ -3378,8 +3378,8 @@
       "primary": [
         "DB-002.49",
         "DB-005.38",
-        "DB-041.46",
-        "DB-074.02",
+        "DB-042.46",
+        "DB-075.02",
         "DB-005.506",
         "DB-005.489",
         "DB-005.490",
@@ -3405,8 +3405,8 @@
       "primary": [
         "DB-002.51",
         "DB-005.40",
-        "DB-041.48",
-        "DB-074.04",
+        "DB-042.48",
+        "DB-075.04",
         "DB-005.512",
         "DB-005.513",
         "DB-005.514",
@@ -3430,7 +3430,7 @@
       "primary": [
         "DB-002.107",
         "DB-005.54",
-        "DB-041.63",
+        "DB-042.63",
         "DB-005.652",
         "DB-005.653",
         "DB-005.654",
@@ -3454,7 +3454,7 @@
       "primary": [
         "DB-002.108",
         "DB-005.55",
-        "DB-041.64",
+        "DB-042.64",
         "DB-005.658",
         "DB-005.659",
         "DB-005.660",
@@ -3478,11 +3478,11 @@
       "primary": [
         "DB-002.05",
         "DB-005.03",
-        "DB-041.02",
         "DB-042.02",
+        "DB-043.02",
         "DB-002.12",
-        "DB-041.09",
-        "DB-070.08",
+        "DB-042.09",
+        "DB-071.08",
         "DB-005.70",
         "DB-005.71",
         "DB-005.72"
@@ -3505,8 +3505,8 @@
       "primary": [
         "DB-002.69",
         "DB-005.60",
-        "DB-041.69",
-        "DB-055.03",
+        "DB-042.69",
+        "DB-056.03",
         "DB-005.690",
         "DB-005.683",
         "DB-005.684",
@@ -3532,8 +3532,8 @@
       "primary": [
         "DB-002.68",
         "DB-005.59",
-        "DB-041.68",
-        "DB-055.02",
+        "DB-042.68",
+        "DB-056.02",
         "DB-005.682",
         "DB-005.674",
         "DB-005.675",
@@ -3559,8 +3559,8 @@
       "primary": [
         "DB-002.100",
         "DB-005.65",
-        "DB-041.95",
-        "DB-068.03",
+        "DB-042.95",
+        "DB-069.03",
         "DB-005.728",
         "DB-005.721",
         "DB-005.722",
@@ -3586,8 +3586,8 @@
       "primary": [
         "DB-002.101",
         "DB-005.66",
-        "DB-041.96",
-        "DB-068.04",
+        "DB-042.96",
+        "DB-069.04",
         "DB-005.734",
         "DB-005.729",
         "DB-005.730",
@@ -3613,8 +3613,8 @@
       "primary": [
         "DB-002.99",
         "DB-005.63",
-        "DB-041.93",
-        "DB-068.02",
+        "DB-042.93",
+        "DB-069.02",
         "DB-005.708",
         "DB-005.703",
         "DB-005.704",
@@ -3640,8 +3640,8 @@
       "primary": [
         "DB-002.110",
         "DB-005.64",
-        "DB-041.94",
-        "DB-069.02",
+        "DB-042.94",
+        "DB-070.02",
         "DB-005.709",
         "DB-005.710",
         "DB-005.711",
@@ -3667,7 +3667,7 @@
       "primary": [
         "DB-002.111",
         "DB-025.02",
-        "DB-041.100"
+        "DB-042.100"
       ],
       "related": [
         "PAGE-017.02",
@@ -3684,7 +3684,7 @@
       "primary": [
         "DB-002.112",
         "DB-025.03",
-        "DB-041.101"
+        "DB-042.101"
       ],
       "related": [
         "PAGE-017.18",
@@ -3701,7 +3701,7 @@
       "key": "food_order_cancel_requests",
       "primary": [
         "DB-002.104",
-        "DB-041.99"
+        "DB-042.99"
       ],
       "related": [
         "PAGE-015.54",
@@ -3721,8 +3721,8 @@
       "primary": [
         "DB-002.103",
         "DB-005.68",
-        "DB-041.98",
-        "DB-068.06",
+        "DB-042.98",
+        "DB-069.06",
         "DB-005.742",
         "DB-005.743",
         "DB-005.744",
@@ -3748,8 +3748,8 @@
       "primary": [
         "DB-002.102",
         "DB-005.67",
-        "DB-041.97",
-        "DB-068.05",
+        "DB-042.97",
+        "DB-069.05",
         "DB-005.741",
         "DB-005.735",
         "DB-005.736",
@@ -3775,8 +3775,8 @@
       "primary": [
         "DB-002.89",
         "DB-005.61",
-        "DB-041.89",
-        "DB-064.02",
+        "DB-042.89",
+        "DB-065.02",
         "DB-005.695",
         "DB-005.691",
         "DB-005.692",
@@ -3798,11 +3798,11 @@
       "primary": [
         "DB-002.54",
         "DB-005.43",
-        "DB-041.51",
-        "DB-079.02",
+        "DB-042.51",
+        "DB-080.02",
         "DB-005.547",
-        "DB-062.02",
-        "DB-062.03",
+        "DB-063.02",
+        "DB-063.03",
         "DB-005.534",
         "DB-005.535",
         "DB-005.536"
@@ -3827,8 +3827,8 @@
         "DB-005.50",
         "DB-014.02",
         "DB-015.05",
-        "DB-041.58",
-        "DB-066.06",
+        "DB-042.58",
+        "DB-067.06",
         "DB-005.630",
         "DB-005.624",
         "DB-005.625",
@@ -3851,7 +3851,7 @@
       "key": "food_ticket_day_visits",
       "primary": [
         "DB-002.62",
-        "DB-041.59"
+        "DB-042.59"
       ],
       "related": [
         "PAGE-021.03",
@@ -3871,8 +3871,8 @@
       "primary": [
         "DB-002.55",
         "DB-005.44",
-        "DB-041.52",
-        "DB-079.03",
+        "DB-042.52",
+        "DB-080.03",
         "DB-005.576",
         "DB-013.02",
         "DB-015.06",
@@ -3898,8 +3898,8 @@
       "primary": [
         "DB-002.59",
         "DB-005.48",
-        "DB-041.56",
-        "DB-047.03",
+        "DB-042.56",
+        "DB-048.03",
         "DB-005.602",
         "DB-005.603",
         "DB-005.604",
@@ -3923,8 +3923,8 @@
       "primary": [
         "DB-002.60",
         "DB-005.49",
-        "DB-041.57",
-        "DB-047.04",
+        "DB-042.57",
+        "DB-048.04",
         "DB-005.623",
         "DB-005.605",
         "DB-005.606",
@@ -3950,8 +3950,8 @@
       "primary": [
         "DB-002.63",
         "DB-005.51",
-        "DB-041.60",
-        "DB-066.07",
+        "DB-042.60",
+        "DB-067.07",
         "DB-005.631",
         "DB-005.632",
         "DB-005.633",
@@ -3963,7 +3963,7 @@
         "TOOL-060.01",
         "PAGE-021.03",
         "TOOL-070.35",
-        "DB-066.11",
+        "DB-067.11",
         "PAGE-016.05"
       ],
       "total": 16
@@ -3976,8 +3976,8 @@
       "primary": [
         "DB-002.58",
         "DB-005.47",
-        "DB-041.55",
-        "DB-047.02",
+        "DB-042.55",
+        "DB-048.02",
         "DB-005.601",
         "DB-005.594",
         "DB-005.595",
@@ -4003,8 +4003,8 @@
       "primary": [
         "DB-002.57",
         "DB-005.46",
-        "DB-041.54",
-        "DB-045.02",
+        "DB-042.54",
+        "DB-046.02",
         "DB-005.593",
         "DB-005.587",
         "DB-005.588",
@@ -4030,8 +4030,8 @@
       "primary": [
         "DB-002.64",
         "DB-005.52",
-        "DB-041.61",
-        "DB-053.03",
+        "DB-042.61",
+        "DB-054.03",
         "DB-005.636",
         "DB-005.637",
         "DB-005.638",
@@ -4056,8 +4056,8 @@
       "primary": [
         "DB-002.90",
         "DB-005.62",
-        "DB-041.90",
-        "DB-065.02",
+        "DB-042.90",
+        "DB-066.02",
         "DB-005.702",
         "DB-005.696",
         "DB-005.697",
@@ -4083,8 +4083,8 @@
       "primary": [
         "DB-002.56",
         "DB-005.45",
-        "DB-041.53",
-        "DB-079.04",
+        "DB-042.53",
+        "DB-080.04",
         "DB-005.586",
         "DB-005.577",
         "DB-005.578",
@@ -4107,9 +4107,9 @@
       "primary": [
         "DB-002.13",
         "DB-005.07",
-        "DB-041.10",
-        "DB-078.02",
-        "DB-078.16",
+        "DB-042.10",
+        "DB-079.02",
+        "DB-079.16",
         "DB-005.110",
         "DB-005.111",
         "DB-005.112",
@@ -4136,8 +4136,8 @@
         "PAGE-034.61",
         "DB-002.35",
         "DB-005.26",
-        "DB-041.32",
-        "DB-072.19",
+        "DB-042.32",
+        "DB-073.19",
         "DB-005.294",
         "DB-005.295",
         "DB-005.296",
@@ -4161,8 +4161,8 @@
       "primary": [
         "DB-002.34",
         "DB-005.25",
-        "DB-041.31",
-        "DB-072.18",
+        "DB-042.31",
+        "DB-073.18",
         "DB-005.293",
         "DB-005.286",
         "DB-005.287",
@@ -4187,7 +4187,7 @@
       "primary": [
         "DB-029.05",
         "DB-002.119",
-        "DB-041.108",
+        "DB-042.108",
         "CORE-010.51",
         "CORE-009.04"
       ],
@@ -4209,7 +4209,7 @@
       "primary": [
         "DB-002.118",
         "DB-029.04",
-        "DB-041.107",
+        "DB-042.107",
         "CORE-009.04"
       ],
       "related": [
@@ -4230,7 +4230,7 @@
       "primary": [
         "DB-002.120",
         "DB-029.06",
-        "DB-041.109",
+        "DB-042.109",
         "CORE-009.04"
       ],
       "related": [
@@ -4251,7 +4251,7 @@
       "primary": [
         "DB-002.116",
         "DB-028.02",
-        "DB-041.105",
+        "DB-042.105",
         "DB-029.03",
         "DB-036.02",
         "CORE-010.51",
@@ -4278,7 +4278,7 @@
       "primary": [
         "DB-002.117",
         "DB-028.03",
-        "DB-041.106",
+        "DB-042.106",
         "CORE-009.04"
       ],
       "related": [
@@ -4299,9 +4299,9 @@
       "primary": [
         "DB-002.31",
         "DB-005.22",
-        "DB-041.28",
-        "DB-072.16",
-        "DB-073.02",
+        "DB-042.28",
+        "DB-073.16",
+        "DB-074.02",
         "DB-005.274",
         "DB-005.271",
         "DB-005.272",
@@ -4324,8 +4324,8 @@
         "PAGE-034.50",
         "DB-002.30",
         "DB-005.21",
-        "DB-041.27",
-        "DB-072.15",
+        "DB-042.27",
+        "DB-073.15",
         "DB-005.263",
         "DB-005.264",
         "DB-005.265"
@@ -4348,11 +4348,11 @@
       "primary": [
         "DB-002.46",
         "DB-005.36",
-        "DB-041.43",
-        "DB-077.04",
+        "DB-042.43",
+        "DB-078.04",
         "CORE-019.22",
         "DB-005.484",
-        "DB-043.04",
+        "DB-044.04",
         "DB-005.474",
         "DB-005.475",
         "DB-005.476"
@@ -4374,7 +4374,7 @@
       "primary": [
         "DB-002.06",
         "DB-021.02",
-        "DB-041.03",
+        "DB-042.03",
         "PAGE-064.05",
         "CORE-003.09"
       ],
@@ -4396,8 +4396,8 @@
       "primary": [
         "DB-002.10",
         "DB-005.05",
-        "DB-041.07",
-        "DB-056.03",
+        "DB-042.07",
+        "DB-057.03",
         "DB-005.83",
         "DB-005.84",
         "DB-005.85",
@@ -4422,14 +4422,14 @@
       "primary": [
         "DB-002.07",
         "DB-005.04",
-        "DB-041.04",
-        "DB-056.02",
+        "DB-042.04",
+        "DB-057.02",
         "DB-002.08",
         "DB-002.09",
         "DB-021.07",
         "DB-021.09",
         "DB-021.10",
-        "DB-041.05"
+        "DB-042.05"
       ],
       "related": [
         "PAGE-034.70",
@@ -4449,10 +4449,10 @@
       "primary": [
         "DB-002.52",
         "DB-005.41",
-        "DB-041.49",
-        "DB-074.05",
+        "DB-042.49",
+        "DB-075.05",
         "DB-005.529",
-        "DB-043.05",
+        "DB-044.05",
         "DB-005.516",
         "DB-005.517",
         "DB-005.518",
@@ -4476,8 +4476,8 @@
       "primary": [
         "DB-002.53",
         "DB-005.42",
-        "DB-041.50",
-        "DB-074.06",
+        "DB-042.50",
+        "DB-075.06",
         "DB-005.530",
         "DB-005.531",
         "DB-005.532",
@@ -4517,8 +4517,8 @@
       "primary": [
         "DB-002.29",
         "DB-005.20",
-        "DB-041.26",
-        "DB-057.04",
+        "DB-042.26",
+        "DB-058.04",
         "DB-005.261",
         "DB-005.262",
         "PAGE-065.26",
@@ -4542,7 +4542,7 @@
       "fa": "schema_updates",
       "key": "schema_updates",
       "primary": [
-        "DB-041.110",
+        "DB-042.110",
         "DB-002.121",
         "CORE-009.04",
         "CORE-009.14"
@@ -4565,14 +4565,14 @@
       "primary": [
         "DB-002.22",
         "DB-005.13",
-        "DB-041.19",
-        "DB-072.02",
+        "DB-042.19",
+        "DB-073.02",
         "DB-005.174",
         "DB-005.179",
         "DB-006.03",
-        "DB-043.02",
-        "DB-051.02",
-        "DB-052.06"
+        "DB-044.02",
+        "DB-052.02",
+        "DB-053.06"
       ],
       "related": [
         "TEST-172.03",
@@ -4592,8 +4592,8 @@
       "primary": [
         "DB-002.23",
         "DB-005.14",
-        "DB-041.20",
-        "DB-072.03",
+        "DB-042.20",
+        "DB-073.03",
         "DB-005.180",
         "DB-005.181",
         "DB-005.182",
@@ -4620,7 +4620,7 @@
         "PAGE-034.36",
         "DB-002.04",
         "DB-005.02",
-        "DB-041.01",
+        "DB-042.01",
         "CORE-018.04",
         "CORE-018.02",
         "CORE-018.05",
@@ -4645,7 +4645,7 @@
       "primary": [
         "DB-002.109",
         "DB-005.56",
-        "DB-041.65",
+        "DB-042.65",
         "DB-005.669",
         "DB-005.665",
         "DB-005.666",
@@ -4665,8 +4665,8 @@
       "primary": [
         "DB-002.65",
         "DB-005.53",
-        "DB-041.62",
-        "DB-048.02",
+        "DB-042.62",
+        "DB-049.02",
         "CORE-011.16",
         "CORE-011.06",
         "CORE-011.15",
@@ -4692,7 +4692,7 @@
       "primary": [
         "DB-002.27",
         "DB-005.18",
-        "DB-041.24",
+        "DB-042.24",
         "DB-005.239",
         "DB-005.240",
         "DB-005.241",
@@ -4718,8 +4718,8 @@
       "primary": [
         "DB-002.33",
         "DB-005.24",
-        "DB-041.30",
-        "DB-054.12",
+        "DB-042.30",
+        "DB-055.12",
         "DB-030.04",
         "DB-005.279",
         "DB-005.280",
@@ -4745,7 +4745,7 @@
       "primary": [
         "DB-002.25",
         "DB-005.16",
-        "DB-041.22",
+        "DB-042.22",
         "DB-005.228",
         "DB-005.229",
         "DB-005.230",
@@ -4755,10 +4755,10 @@
       ],
       "related": [
         "TOOL-048.24",
+        "PAGE-043.03",
         "PAGE-044.03",
         "PAGE-051.02",
         "PAGE-058.02",
-        "PAGE-043.03",
         "PAGE-044.04"
       ],
       "total": 30
@@ -4771,8 +4771,8 @@
       "primary": [
         "DB-002.66",
         "DB-005.57",
-        "DB-041.66",
-        "DB-050.03",
+        "DB-042.66",
+        "DB-051.03",
         "CORE-019.12",
         "CORE-019.11",
         "DB-005.670",
@@ -4798,8 +4798,8 @@
       "primary": [
         "DB-002.47",
         "DB-005.37",
-        "DB-041.44",
-        "DB-077.05",
+        "DB-042.44",
+        "DB-078.05",
         "DB-005.485",
         "DB-005.486",
         "DB-005.487",
@@ -4821,8 +4821,8 @@
       "primary": [
         "DB-002.26",
         "DB-005.17",
-        "DB-041.23",
-        "DB-070.25",
+        "DB-042.23",
+        "DB-071.25",
         "DB-005.233",
         "DB-005.234",
         "DB-005.235",
@@ -4848,9 +4848,9 @@
       "primary": [
         "DB-002.32",
         "DB-005.23",
-        "DB-041.29",
-        "DB-072.17",
-        "DB-073.03",
+        "DB-042.29",
+        "DB-073.17",
+        "DB-074.03",
         "DB-005.275",
         "DB-005.276",
         "DB-005.277",
@@ -4872,7 +4872,7 @@
       "primary": [
         "DB-002.24",
         "DB-005.15",
-        "DB-041.21",
+        "DB-042.21",
         "CORE-019.13",
         "CORE-019.08",
         "CORE-019.07",
@@ -4889,7 +4889,7 @@
         "TOOL-001.01",
         "PAGE-034.70"
       ],
-      "total": 193
+      "total": 194
     },
     {
       "id": "table:tmp_asset_dedupe_map",
@@ -4918,11 +4918,11 @@
       "primary": [
         "DB-002.17",
         "DB-005.10",
-        "DB-041.14",
-        "DB-059.04",
+        "DB-042.14",
+        "DB-060.04",
         "DB-002.20",
-        "DB-041.17",
-        "DB-059.06",
+        "DB-042.17",
+        "DB-060.06",
         "DB-005.138",
         "DB-005.139",
         "DB-005.140"
@@ -4945,7 +4945,7 @@
       "primary": [
         "DB-002.19",
         "DB-009.02",
-        "DB-041.16"
+        "DB-042.16"
       ],
       "related": [
         "TEST-224.14",
@@ -4965,8 +4965,8 @@
       "primary": [
         "DB-002.18",
         "DB-005.11",
-        "DB-041.15",
-        "DB-059.05",
+        "DB-042.15",
+        "DB-060.05",
         "DB-005.159",
         "DB-022.02",
         "DB-004.02",
@@ -4992,7 +4992,7 @@
       "primary": [
         "DB-002.114",
         "DB-026.03",
-        "DB-041.103"
+        "DB-042.103"
       ],
       "related": [
         "ACT-001.03",
@@ -5012,13 +5012,13 @@
       "primary": [
         "DB-002.115",
         "DB-026.04",
-        "DB-041.104"
+        "DB-042.104"
       ],
       "related": [
         "ACT-001.03",
         "TEST-231.05",
         "PAGE-065.29",
-        "DB-039.02",
+        "DB-040.02",
         "TEST-231.04",
         "PAGE-074.02"
       ],
@@ -5032,7 +5032,7 @@
       "primary": [
         "DB-002.113",
         "DB-026.02",
-        "DB-041.102",
+        "DB-042.102",
         "PAGE-074.02",
         "PAGE-074.03"
       ],
@@ -5054,13 +5054,13 @@
         "ACT-011.14",
         "DB-002.11",
         "DB-005.06",
-        "DB-041.08",
+        "DB-042.08",
         "CORE-007.10",
         "DB-002.14",
         "DB-021.08",
-        "DB-041.11",
-        "DB-042.05",
-        "DB-056.07"
+        "DB-042.11",
+        "DB-043.05",
+        "DB-057.07"
       ],
       "related": [
         "TOOL-018.01",
@@ -23992,12 +23992,12 @@
       "line": 292,
       "anchor": "CREATE TABLE tickets",
       "risk": 1,
-      "lines": 67
+      "lines": 68
     },
     "DB-002.25": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 359,
+      "line": 360,
       "anchor": "CREATE TABLE ticket_messages",
       "risk": 1,
       "lines": 12
@@ -24005,7 +24005,7 @@
     "DB-002.26": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 371,
+      "line": 372,
       "anchor": "CREATE TABLE ticket_ratings",
       "risk": 1,
       "lines": 14
@@ -24013,7 +24013,7 @@
     "DB-002.27": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 385,
+      "line": 386,
       "anchor": "CREATE TABLE ticket_attachments",
       "risk": 1,
       "lines": 11
@@ -24021,7 +24021,7 @@
     "DB-002.28": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 396,
+      "line": 397,
       "anchor": "CREATE TABLE activity_logs",
       "risk": 1,
       "lines": 39
@@ -24029,7 +24029,7 @@
     "DB-002.29": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 435,
+      "line": 436,
       "anchor": "CREATE TABLE role_permissions",
       "risk": 0,
       "lines": 7
@@ -24037,7 +24037,7 @@
     "DB-002.30": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 442,
+      "line": 443,
       "anchor": "CREATE TABLE notifications",
       "risk": 1,
       "lines": 18
@@ -24045,7 +24045,7 @@
     "DB-002.31": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 460,
+      "line": 461,
       "anchor": "CREATE TABLE login_attempts",
       "risk": 1,
       "lines": 8
@@ -24053,7 +24053,7 @@
     "DB-002.32": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 468,
+      "line": 469,
       "anchor": "CREATE TABLE ticket_sla_alerts",
       "risk": 1,
       "lines": 10
@@ -24061,7 +24061,7 @@
     "DB-002.33": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 478,
+      "line": 479,
       "anchor": "CREATE TABLE ticket_events",
       "risk": 1,
       "lines": 24
@@ -24069,7 +24069,7 @@
     "DB-002.34": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 502,
+      "line": 503,
       "anchor": "CREATE TABLE knowledge_articles",
       "risk": 1,
       "lines": 14
@@ -24077,7 +24077,7 @@
     "DB-002.35": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 516,
+      "line": 517,
       "anchor": "CREATE TABLE holidays",
       "risk": 1,
       "lines": 10
@@ -24085,7 +24085,7 @@
     "DB-002.36": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 526,
+      "line": 527,
       "anchor": "CREATE TABLE assets",
       "risk": 1,
       "lines": 56
@@ -24093,7 +24093,7 @@
     "DB-002.37": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 582,
+      "line": 583,
       "anchor": "ALTER TABLE tickets",
       "risk": 1,
       "lines": 2
@@ -24101,7 +24101,7 @@
     "DB-002.38": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 584,
+      "line": 585,
       "anchor": "CREATE TABLE asset_memory_modules",
       "risk": 1,
       "lines": 15
@@ -24109,7 +24109,7 @@
     "DB-002.39": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 599,
+      "line": 600,
       "anchor": "CREATE TABLE asset_storage_devices",
       "risk": 1,
       "lines": 16
@@ -24117,7 +24117,7 @@
     "DB-002.40": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 615,
+      "line": 616,
       "anchor": "CREATE TABLE asset_graphics_adapters",
       "risk": 1,
       "lines": 13
@@ -24125,7 +24125,7 @@
     "DB-002.41": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 628,
+      "line": 629,
       "anchor": "CREATE TABLE asset_peripherals",
       "risk": 1,
       "lines": 18
@@ -24133,7 +24133,7 @@
     "DB-002.42": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 646,
+      "line": 647,
       "anchor": "CREATE TABLE asset_inventory_history",
       "risk": 1,
       "lines": 11
@@ -24141,7 +24141,7 @@
     "DB-002.43": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 657,
+      "line": 658,
       "anchor": "CREATE TABLE asset_history_events",
       "risk": 1,
       "lines": 18
@@ -24149,7 +24149,7 @@
     "DB-002.44": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 675,
+      "line": 676,
       "anchor": "CREATE TABLE asset_relations",
       "risk": 1,
       "lines": 13
@@ -24157,7 +24157,7 @@
     "DB-002.45": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 688,
+      "line": 689,
       "anchor": "CREATE TABLE asset_profiles",
       "risk": 1,
       "lines": 82
@@ -24165,7 +24165,7 @@
     "DB-002.46": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 770,
+      "line": 771,
       "anchor": "CREATE TABLE ola_policies",
       "risk": 1,
       "lines": 18
@@ -24173,7 +24173,7 @@
     "DB-002.47": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 788,
+      "line": 789,
       "anchor": "CREATE TABLE ticket_ola_alerts",
       "risk": 1,
       "lines": 10
@@ -24181,7 +24181,7 @@
     "DB-002.48": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 798,
+      "line": 799,
       "anchor": "ALTER TABLE tickets",
       "risk": 1,
       "lines": 2
@@ -24189,7 +24189,7 @@
     "DB-002.49": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 800,
+      "line": 801,
       "anchor": "CREATE TABLE change_records",
       "risk": 1,
       "lines": 29
@@ -24197,7 +24197,7 @@
     "DB-002.50": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 829,
+      "line": 830,
       "anchor": "CREATE TABLE change_approvals",
       "risk": 1,
       "lines": 12
@@ -24205,7 +24205,7 @@
     "DB-002.51": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 841,
+      "line": 842,
       "anchor": "CREATE TABLE change_ticket_links",
       "risk": 1,
       "lines": 11
@@ -24213,7 +24213,7 @@
     "DB-002.52": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 852,
+      "line": 853,
       "anchor": "CREATE TABLE problem_records",
       "risk": 1,
       "lines": 24
@@ -24221,7 +24221,7 @@
     "DB-002.53": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 876,
+      "line": 877,
       "anchor": "CREATE TABLE problem_ticket_links",
       "risk": 1,
       "lines": 11
@@ -24229,7 +24229,7 @@
     "DB-002.54": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 887,
+      "line": 888,
       "anchor": "CREATE TABLE food_ticket_config",
       "risk": 1,
       "lines": 31
@@ -24237,7 +24237,7 @@
     "DB-002.55": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 918,
+      "line": 919,
       "anchor": "CREATE TABLE food_ticket_events",
       "risk": 1,
       "lines": 39
@@ -24245,7 +24245,7 @@
     "DB-002.56": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 957,
+      "line": 958,
       "anchor": "CREATE TABLE food_ticket_worker_status",
       "risk": 1,
       "lines": 16
@@ -24253,7 +24253,7 @@
     "DB-002.57": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 973,
+      "line": 974,
       "anchor": "CREATE TABLE food_ticket_guest_cards",
       "risk": 1,
       "lines": 14
@@ -24261,7 +24261,7 @@
     "DB-002.58": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 987,
+      "line": 988,
       "anchor": "CREATE TABLE food_ticket_groups",
       "risk": 1,
       "lines": 19
@@ -24269,7 +24269,7 @@
     "DB-002.59": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1006,
+      "line": 1007,
       "anchor": "CREATE TABLE food_ticket_group_members",
       "risk": 1,
       "lines": 12
@@ -24277,7 +24277,7 @@
     "DB-002.60": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1018,
+      "line": 1019,
       "anchor": "CREATE TABLE food_ticket_group_runs",
       "risk": 1,
       "lines": 27
@@ -24285,7 +24285,7 @@
     "DB-002.61": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1045,
+      "line": 1046,
       "anchor": "CREATE TABLE food_ticket_daily_absence",
       "risk": 1,
       "lines": 16
@@ -24293,7 +24293,7 @@
     "DB-002.62": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1061,
+      "line": 1062,
       "anchor": "CREATE TABLE food_ticket_day_visits",
       "risk": 1,
       "lines": 13
@@ -24301,7 +24301,7 @@
     "DB-002.63": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1074,
+      "line": 1075,
       "anchor": "CREATE TABLE food_ticket_group_uid_history",
       "risk": 0,
       "lines": 11
@@ -24309,7 +24309,7 @@
     "DB-002.64": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1085,
+      "line": 1086,
       "anchor": "CREATE TABLE food_ticket_print_log",
       "risk": 0,
       "lines": 16
@@ -24317,7 +24317,7 @@
     "DB-002.65": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1101,
+      "line": 1102,
       "anchor": "CREATE TABLE system_logs",
       "risk": 0,
       "lines": 27
@@ -24325,7 +24325,7 @@
     "DB-002.66": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1128,
+      "line": 1129,
       "anchor": "CREATE TABLE ticket_number_seq",
       "risk": 0,
       "lines": 6
@@ -24333,7 +24333,7 @@
     "DB-002.67": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1134,
+      "line": 1135,
       "anchor": "CREATE TABLE api_rate_limits",
       "risk": 1,
       "lines": 9
@@ -24341,7 +24341,7 @@
     "DB-002.68": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1143,
+      "line": 1144,
       "anchor": "CREATE TABLE domain_scan_runs",
       "risk": 1,
       "lines": 13
@@ -24349,7 +24349,7 @@
     "DB-002.69": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1156,
+      "line": 1157,
       "anchor": "CREATE TABLE domain_scan_queue",
       "risk": 1,
       "lines": 14
@@ -24357,7 +24357,7 @@
     "DB-002.70": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1170,
+      "line": 1171,
       "anchor": "CREATE INDEX idx_tickets_status_priority",
       "risk": 0,
       "lines": 1
@@ -24365,7 +24365,7 @@
     "DB-002.71": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1171,
+      "line": 1172,
       "anchor": "CREATE INDEX idx_users_is_active",
       "risk": 0,
       "lines": 1
@@ -24373,7 +24373,7 @@
     "DB-002.72": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1172,
+      "line": 1173,
       "anchor": "CREATE INDEX idx_assets_lifecycle_status",
       "risk": 0,
       "lines": 1
@@ -24381,7 +24381,7 @@
     "DB-002.73": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1173,
+      "line": 1174,
       "anchor": "CREATE INDEX idx_ola_priority_active",
       "risk": 0,
       "lines": 1
@@ -24389,7 +24389,7 @@
     "DB-002.74": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1174,
+      "line": 1175,
       "anchor": "CREATE INDEX idx_food_ticket_events_event_type",
       "risk": 0,
       "lines": 1
@@ -24397,7 +24397,7 @@
     "DB-002.75": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1175,
+      "line": 1176,
       "anchor": "CREATE INDEX idx_login_attempts_locked_until",
       "risk": 0,
       "lines": 1
@@ -24405,7 +24405,7 @@
     "DB-002.76": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1176,
+      "line": 1177,
       "anchor": "CREATE INDEX idx_ticket_sla_alerts_alert_type",
       "risk": 0,
       "lines": 1
@@ -24413,7 +24413,7 @@
     "DB-002.77": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1177,
+      "line": 1178,
       "anchor": "CREATE INDEX idx_ticket_ola_alerts_alert_type",
       "risk": 0,
       "lines": 1
@@ -24421,7 +24421,7 @@
     "DB-002.78": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1178,
+      "line": 1179,
       "anchor": "CREATE INDEX idx_ticket_events_event_type",
       "risk": 0,
       "lines": 1
@@ -24429,7 +24429,7 @@
     "DB-002.79": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1179,
+      "line": 1180,
       "anchor": "CREATE INDEX idx_knowledge_articles_is_published",
       "risk": 0,
       "lines": 1
@@ -24437,7 +24437,7 @@
     "DB-002.80": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1180,
+      "line": 1181,
       "anchor": "CREATE INDEX idx_holidays_is_active",
       "risk": 0,
       "lines": 1
@@ -24445,7 +24445,7 @@
     "DB-002.81": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1181,
+      "line": 1182,
       "anchor": "CREATE INDEX idx_departments_is_active",
       "risk": 0,
       "lines": 1
@@ -24453,7 +24453,7 @@
     "DB-002.82": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1182,
+      "line": 1183,
       "anchor": "CREATE INDEX idx_handling_units_is_active",
       "risk": 0,
       "lines": 1
@@ -24461,7 +24461,7 @@
     "DB-002.83": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1183,
+      "line": 1184,
       "anchor": "CREATE INDEX idx_categories_group_active",
       "risk": 0,
       "lines": 1
@@ -24469,7 +24469,7 @@
     "DB-002.84": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1184,
+      "line": 1185,
       "anchor": "CREATE INDEX idx_service_catalog_group_active",
       "risk": 0,
       "lines": 1
@@ -24477,7 +24477,7 @@
     "DB-002.85": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1185,
+      "line": 1186,
       "anchor": "CREATE INDEX idx_cd_dvd_records_media",
       "risk": 0,
       "lines": 1
@@ -24485,7 +24485,7 @@
     "DB-002.86": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1186,
+      "line": 1187,
       "anchor": "CREATE INDEX idx_traffic_destinations_is_active",
       "risk": 0,
       "lines": 1
@@ -24493,7 +24493,7 @@
     "DB-002.87": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1187,
+      "line": 1188,
       "anchor": "CREATE INDEX idx_domain_scan_runs_status",
       "risk": 0,
       "lines": 1
@@ -24501,7 +24501,7 @@
     "DB-002.88": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1188,
+      "line": 1189,
       "anchor": "CREATE INDEX idx_domain_scan_queue_status",
       "risk": 0,
       "lines": 3
@@ -24509,7 +24509,7 @@
     "DB-002.89": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1191,
+      "line": 1192,
       "anchor": "CREATE TABLE food_ticket_card_map",
       "risk": 1,
       "lines": 10
@@ -24517,7 +24517,7 @@
     "DB-002.90": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1201,
+      "line": 1202,
       "anchor": "CREATE TABLE food_ticket_templates",
       "risk": 1,
       "lines": 13
@@ -24525,7 +24525,7 @@
     "DB-002.91": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1214,
+      "line": 1215,
       "anchor": "=",
       "risk": 0,
       "lines": 2
@@ -24533,7 +24533,7 @@
     "DB-002.92": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1216,
+      "line": 1217,
       "anchor": "=",
       "risk": 0,
       "lines": 1
@@ -24541,7 +24541,7 @@
     "DB-002.93": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1217,
+      "line": 1218,
       "anchor": "INSERT INTO settings",
       "risk": 1,
       "lines": 5
@@ -24549,7 +24549,7 @@
     "DB-002.94": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1222,
+      "line": 1223,
       "anchor": "INSERT INTO settings",
       "risk": 1,
       "lines": 3
@@ -24557,7 +24557,7 @@
     "DB-002.95": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1225,
+      "line": 1226,
       "anchor": "=",
       "risk": 0,
       "lines": 2
@@ -24565,7 +24565,7 @@
     "DB-002.96": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1227,
+      "line": 1228,
       "anchor": "=",
       "risk": 0,
       "lines": 8
@@ -24573,7 +24573,7 @@
     "DB-002.97": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1235,
+      "line": 1236,
       "anchor": "=",
       "risk": 0,
       "lines": 2
@@ -24581,7 +24581,7 @@
     "DB-002.98": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1237,
+      "line": 1238,
       "anchor": "=",
       "risk": 0,
       "lines": 5
@@ -24589,7 +24589,7 @@
     "DB-002.99": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1242,
+      "line": 1243,
       "anchor": "CREATE TABLE food_catalog",
       "risk": 1,
       "lines": 12
@@ -24597,7 +24597,7 @@
     "DB-002.100": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1254,
+      "line": 1255,
       "anchor": "CREATE TABLE food_calendar",
       "risk": 1,
       "lines": 15
@@ -24605,7 +24605,7 @@
     "DB-002.101": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1269,
+      "line": 1270,
       "anchor": "CREATE TABLE food_calendar_items",
       "risk": 1,
       "lines": 15
@@ -24613,7 +24613,7 @@
     "DB-002.102": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1284,
+      "line": 1285,
       "anchor": "CREATE TABLE food_orders",
       "risk": 1,
       "lines": 16
@@ -24621,7 +24621,7 @@
     "DB-002.103": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1300,
+      "line": 1301,
       "anchor": "CREATE TABLE food_order_logs",
       "risk": 1,
       "lines": 18
@@ -24629,7 +24629,7 @@
     "DB-002.104": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1318,
+      "line": 1319,
       "anchor": "CREATE TABLE food_order_cancel_requests",
       "risk": 1,
       "lines": 18
@@ -24637,7 +24637,7 @@
     "DB-002.105": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1336,
+      "line": 1337,
       "anchor": "=",
       "risk": 0,
       "lines": 4
@@ -24645,7 +24645,7 @@
     "DB-002.106": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1340,
+      "line": 1341,
       "anchor": "=",
       "risk": 0,
       "lines": 2
@@ -24653,7 +24653,7 @@
     "DB-002.107": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1342,
+      "line": 1343,
       "anchor": "CREATE TABLE chatbot_faq",
       "risk": 0,
       "lines": 12
@@ -24661,7 +24661,7 @@
     "DB-002.108": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1354,
+      "line": 1355,
       "anchor": "CREATE TABLE chatbot_logs",
       "risk": 0,
       "lines": 13
@@ -24669,7 +24669,7 @@
     "DB-002.109": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1367,
+      "line": 1368,
       "anchor": "CREATE TABLE system_incidents",
       "risk": 1,
       "lines": 9
@@ -24677,7 +24677,7 @@
     "DB-002.110": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1376,
+      "line": 1377,
       "anchor": "CREATE TABLE food_guest_requests",
       "risk": 1,
       "lines": 24
@@ -24685,7 +24685,7 @@
     "DB-002.111": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1400,
+      "line": 1401,
       "anchor": "CREATE TABLE food_meal_reconciliations",
       "risk": 1,
       "lines": 27
@@ -24693,7 +24693,7 @@
     "DB-002.112": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1427,
+      "line": 1428,
       "anchor": "CREATE TABLE food_monthly_invoices",
       "risk": 0,
       "lines": 22
@@ -24701,7 +24701,7 @@
     "DB-002.113": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1449,
+      "line": 1450,
       "anchor": "CREATE TABLE user_access_groups",
       "risk": 1,
       "lines": 14
@@ -24709,7 +24709,7 @@
     "DB-002.114": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1463,
+      "line": 1464,
       "anchor": "CREATE TABLE user_access_group_members",
       "risk": 1,
       "lines": 12
@@ -24717,7 +24717,7 @@
     "DB-002.115": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1475,
+      "line": 1476,
       "anchor": "CREATE TABLE user_access_group_permissions",
       "risk": 1,
       "lines": 16
@@ -24725,7 +24725,7 @@
     "DB-002.116": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1491,
+      "line": 1492,
       "anchor": "CREATE TABLE log_issues",
       "risk": 1,
       "lines": 26
@@ -24733,7 +24733,7 @@
     "DB-002.117": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1517,
+      "line": 1518,
       "anchor": "CREATE TABLE logging_health_alerts",
       "risk": 1,
       "lines": 10
@@ -24741,7 +24741,7 @@
     "DB-002.118": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1527,
+      "line": 1528,
       "anchor": "CREATE TABLE log_issue_history",
       "risk": 0,
       "lines": 16
@@ -24749,7 +24749,7 @@
     "DB-002.119": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1543,
+      "line": 1544,
       "anchor": "CREATE TABLE log_issue_events",
       "risk": 0,
       "lines": 7
@@ -24757,7 +24757,7 @@
     "DB-002.120": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1550,
+      "line": 1551,
       "anchor": "CREATE TABLE log_issue_notifications",
       "risk": 1,
       "lines": 19
@@ -24765,7 +24765,7 @@
     "DB-002.121": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1569,
+      "line": 1570,
       "anchor": "CREATE TABLE schema_updates",
       "risk": 0,
       "lines": 10
@@ -24773,7 +24773,7 @@
     "DB-002.122": {
       "path": "install-empty-db.sql",
       "area": "DB",
-      "line": 1579,
+      "line": 1580,
       "anchor": "CREATE TABLE request_center_appointments",
       "risk": 1,
       "lines": 55
@@ -34850,6 +34850,14 @@
       "risk": 1,
       "lines": 18
     },
+    "DB-039.01": {
+      "path": "migrations/037-request-center-lifecycle-rejection.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 49
+    },
     "PAGE-039.01": {
       "path": "modules/request-center/Actions/appointment-actions.php",
       "area": "PAGE",
@@ -34999,13 +35007,13 @@
       "area": "PAGE",
       "line": 25,
       "anchor": "مسیر: supervisor_decision",
-      "risk": 7,
-      "lines": 74
+      "risk": 8,
+      "lines": 152
     },
     "PAGE-043.04": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 99,
+      "line": 177,
       "anchor": "مسیر: supervisor_reopen",
       "risk": 2,
       "lines": 50
@@ -35013,7 +35021,7 @@
     "PAGE-043.05": {
       "path": "modules/request-center/Actions/supervisor-actions.php",
       "area": "PAGE",
-      "line": 149,
+      "line": 227,
       "anchor": "مسیر: rate_ticket",
       "risk": 2,
       "lines": 42
@@ -35424,7 +35432,7 @@
       "line": 36,
       "anchor": "RequestCenterWorkflowService",
       "risk": 2,
-      "lines": 221
+      "lines": 233
     },
     "PAGE-060.01": {
       "path": "modules/request-center/lib/endpoints.php",
@@ -36490,7 +36498,7 @@
       "risk": 1,
       "lines": 44
     },
-    "DB-039.01": {
+    "DB-040.01": {
       "path": "rebuild-final.sql",
       "area": "DB",
       "line": 1,
@@ -36498,7 +36506,7 @@
       "risk": 0,
       "lines": 9
     },
-    "DB-039.02": {
+    "DB-040.02": {
       "path": "rebuild-final.sql",
       "area": "DB",
       "line": 10,
@@ -36514,7 +36522,7 @@
       "risk": 2,
       "lines": 34
     },
-    "DB-040.01": {
+    "DB-041.01": {
       "path": "rollback-1.38-food-orders.sql",
       "area": "DB",
       "line": 1,
@@ -36522,7 +36530,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-040.02": {
+    "DB-041.02": {
       "path": "rollback-1.38-food-orders.sql",
       "area": "DB",
       "line": 5,
@@ -36530,7 +36538,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-040.03": {
+    "DB-041.03": {
       "path": "rollback-1.38-food-orders.sql",
       "area": "DB",
       "line": 6,
@@ -36538,7 +36546,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-040.04": {
+    "DB-041.04": {
       "path": "rollback-1.38-food-orders.sql",
       "area": "DB",
       "line": 7,
@@ -36546,7 +36554,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-040.05": {
+    "DB-041.05": {
       "path": "rollback-1.38-food-orders.sql",
       "area": "DB",
       "line": 8,
@@ -36554,7 +36562,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-040.06": {
+    "DB-041.06": {
       "path": "rollback-1.38-food-orders.sql",
       "area": "DB",
       "line": 9,
@@ -36618,7 +36626,7 @@
       "risk": 0,
       "lines": 6
     },
-    "DB-041.01": {
+    "DB-042.01": {
       "path": "schema.sql",
       "area": "DB",
       "line": 1,
@@ -36626,7 +36634,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-041.02": {
+    "DB-042.02": {
       "path": "schema.sql",
       "area": "DB",
       "line": 6,
@@ -36634,7 +36642,7 @@
       "risk": 0,
       "lines": 10
     },
-    "DB-041.03": {
+    "DB-042.03": {
       "path": "schema.sql",
       "area": "DB",
       "line": 16,
@@ -36642,7 +36650,7 @@
       "risk": 1,
       "lines": 14
     },
-    "DB-041.04": {
+    "DB-042.04": {
       "path": "schema.sql",
       "area": "DB",
       "line": 30,
@@ -36650,7 +36658,7 @@
       "risk": 0,
       "lines": 19
     },
-    "DB-041.05": {
+    "DB-042.05": {
       "path": "schema.sql",
       "area": "DB",
       "line": 49,
@@ -36658,7 +36666,7 @@
       "risk": 1,
       "lines": 3
     },
-    "DB-041.06": {
+    "DB-042.06": {
       "path": "schema.sql",
       "area": "DB",
       "line": 52,
@@ -36666,7 +36674,7 @@
       "risk": 1,
       "lines": 4
     },
-    "DB-041.07": {
+    "DB-042.07": {
       "path": "schema.sql",
       "area": "DB",
       "line": 56,
@@ -36674,7 +36682,7 @@
       "risk": 0,
       "lines": 8
     },
-    "DB-041.08": {
+    "DB-042.08": {
       "path": "schema.sql",
       "area": "DB",
       "line": 64,
@@ -36682,7 +36690,7 @@
       "risk": 1,
       "lines": 36
     },
-    "DB-041.09": {
+    "DB-042.09": {
       "path": "schema.sql",
       "area": "DB",
       "line": 100,
@@ -36690,7 +36698,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-041.10": {
+    "DB-042.10": {
       "path": "schema.sql",
       "area": "DB",
       "line": 102,
@@ -36698,7 +36706,7 @@
       "risk": 1,
       "lines": 11
     },
-    "DB-041.11": {
+    "DB-042.11": {
       "path": "schema.sql",
       "area": "DB",
       "line": 113,
@@ -36706,7 +36714,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-041.12": {
+    "DB-042.12": {
       "path": "schema.sql",
       "area": "DB",
       "line": 115,
@@ -36714,7 +36722,7 @@
       "risk": 1,
       "lines": 8
     },
-    "DB-041.13": {
+    "DB-042.13": {
       "path": "schema.sql",
       "area": "DB",
       "line": 123,
@@ -36722,7 +36730,7 @@
       "risk": 1,
       "lines": 33
     },
-    "DB-041.14": {
+    "DB-042.14": {
       "path": "schema.sql",
       "area": "DB",
       "line": 156,
@@ -36730,7 +36738,7 @@
       "risk": 0,
       "lines": 11
     },
-    "DB-041.15": {
+    "DB-042.15": {
       "path": "schema.sql",
       "area": "DB",
       "line": 167,
@@ -36738,7 +36746,7 @@
       "risk": 1,
       "lines": 29
     },
-    "DB-041.16": {
+    "DB-042.16": {
       "path": "schema.sql",
       "area": "DB",
       "line": 196,
@@ -36746,7 +36754,7 @@
       "risk": 1,
       "lines": 17
     },
-    "DB-041.17": {
+    "DB-042.17": {
       "path": "schema.sql",
       "area": "DB",
       "line": 213,
@@ -36754,7 +36762,7 @@
       "risk": 1,
       "lines": 10
     },
-    "DB-041.18": {
+    "DB-042.18": {
       "path": "schema.sql",
       "area": "DB",
       "line": 223,
@@ -36762,7 +36770,7 @@
       "risk": 0,
       "lines": 9
     },
-    "DB-041.19": {
+    "DB-042.19": {
       "path": "schema.sql",
       "area": "DB",
       "line": 232,
@@ -36770,7 +36778,7 @@
       "risk": 1,
       "lines": 26
     },
-    "DB-041.20": {
+    "DB-042.20": {
       "path": "schema.sql",
       "area": "DB",
       "line": 258,
@@ -36778,722 +36786,722 @@
       "risk": 1,
       "lines": 13
     },
-    "DB-041.21": {
+    "DB-042.21": {
       "path": "schema.sql",
       "area": "DB",
       "line": 271,
       "anchor": "CREATE TABLE tickets",
       "risk": 1,
-      "lines": 67
+      "lines": 68
     },
-    "DB-041.22": {
+    "DB-042.22": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 338,
+      "line": 339,
       "anchor": "CREATE TABLE ticket_messages",
       "risk": 1,
       "lines": 12
     },
-    "DB-041.23": {
+    "DB-042.23": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 350,
+      "line": 351,
       "anchor": "CREATE TABLE ticket_ratings",
       "risk": 1,
       "lines": 14
     },
-    "DB-041.24": {
+    "DB-042.24": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 364,
+      "line": 365,
       "anchor": "CREATE TABLE ticket_attachments",
       "risk": 1,
       "lines": 11
     },
-    "DB-041.25": {
+    "DB-042.25": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 375,
+      "line": 376,
       "anchor": "CREATE TABLE activity_logs",
       "risk": 1,
       "lines": 39
     },
-    "DB-041.26": {
+    "DB-042.26": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 414,
+      "line": 415,
       "anchor": "CREATE TABLE role_permissions",
       "risk": 0,
       "lines": 7
     },
-    "DB-041.27": {
+    "DB-042.27": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 421,
+      "line": 422,
       "anchor": "CREATE TABLE notifications",
       "risk": 1,
       "lines": 18
     },
-    "DB-041.28": {
+    "DB-042.28": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 439,
+      "line": 440,
       "anchor": "CREATE TABLE login_attempts",
       "risk": 1,
       "lines": 8
     },
-    "DB-041.29": {
+    "DB-042.29": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 447,
+      "line": 448,
       "anchor": "CREATE TABLE ticket_sla_alerts",
       "risk": 1,
       "lines": 10
     },
-    "DB-041.30": {
+    "DB-042.30": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 457,
+      "line": 458,
       "anchor": "CREATE TABLE ticket_events",
       "risk": 1,
       "lines": 24
     },
-    "DB-041.31": {
+    "DB-042.31": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 481,
+      "line": 482,
       "anchor": "CREATE TABLE knowledge_articles",
       "risk": 1,
       "lines": 14
     },
-    "DB-041.32": {
+    "DB-042.32": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 495,
+      "line": 496,
       "anchor": "CREATE TABLE holidays",
       "risk": 1,
       "lines": 10
     },
-    "DB-041.33": {
+    "DB-042.33": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 505,
+      "line": 506,
       "anchor": "CREATE TABLE assets",
       "risk": 1,
       "lines": 56
     },
-    "DB-041.34": {
+    "DB-042.34": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 561,
+      "line": 562,
       "anchor": "ALTER TABLE tickets",
       "risk": 1,
       "lines": 2
     },
-    "DB-041.35": {
+    "DB-042.35": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 563,
+      "line": 564,
       "anchor": "CREATE TABLE asset_memory_modules",
       "risk": 1,
       "lines": 15
     },
-    "DB-041.36": {
+    "DB-042.36": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 578,
+      "line": 579,
       "anchor": "CREATE TABLE asset_storage_devices",
       "risk": 1,
       "lines": 16
     },
-    "DB-041.37": {
+    "DB-042.37": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 594,
+      "line": 595,
       "anchor": "CREATE TABLE asset_graphics_adapters",
       "risk": 1,
       "lines": 13
     },
-    "DB-041.38": {
+    "DB-042.38": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 607,
+      "line": 608,
       "anchor": "CREATE TABLE asset_peripherals",
       "risk": 1,
       "lines": 18
     },
-    "DB-041.39": {
+    "DB-042.39": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 625,
+      "line": 626,
       "anchor": "CREATE TABLE asset_inventory_history",
       "risk": 1,
       "lines": 11
     },
-    "DB-041.40": {
+    "DB-042.40": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 636,
+      "line": 637,
       "anchor": "CREATE TABLE asset_history_events",
       "risk": 1,
       "lines": 18
     },
-    "DB-041.41": {
+    "DB-042.41": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 654,
+      "line": 655,
       "anchor": "CREATE TABLE asset_relations",
       "risk": 1,
       "lines": 13
     },
-    "DB-041.42": {
+    "DB-042.42": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 667,
+      "line": 668,
       "anchor": "CREATE TABLE asset_profiles",
       "risk": 1,
       "lines": 82
     },
-    "DB-041.43": {
+    "DB-042.43": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 749,
+      "line": 750,
       "anchor": "CREATE TABLE ola_policies",
       "risk": 1,
       "lines": 18
     },
-    "DB-041.44": {
+    "DB-042.44": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 767,
+      "line": 768,
       "anchor": "CREATE TABLE ticket_ola_alerts",
       "risk": 1,
       "lines": 10
     },
-    "DB-041.45": {
+    "DB-042.45": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 777,
+      "line": 778,
       "anchor": "ALTER TABLE tickets",
       "risk": 1,
       "lines": 2
     },
-    "DB-041.46": {
+    "DB-042.46": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 779,
+      "line": 780,
       "anchor": "CREATE TABLE change_records",
       "risk": 1,
       "lines": 29
     },
-    "DB-041.47": {
+    "DB-042.47": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 808,
+      "line": 809,
       "anchor": "CREATE TABLE change_approvals",
       "risk": 1,
       "lines": 12
     },
-    "DB-041.48": {
+    "DB-042.48": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 820,
+      "line": 821,
       "anchor": "CREATE TABLE change_ticket_links",
       "risk": 1,
       "lines": 11
     },
-    "DB-041.49": {
+    "DB-042.49": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 831,
+      "line": 832,
       "anchor": "CREATE TABLE problem_records",
       "risk": 1,
       "lines": 24
     },
-    "DB-041.50": {
+    "DB-042.50": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 855,
+      "line": 856,
       "anchor": "CREATE TABLE problem_ticket_links",
       "risk": 1,
       "lines": 11
     },
-    "DB-041.51": {
+    "DB-042.51": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 866,
+      "line": 867,
       "anchor": "CREATE TABLE food_ticket_config",
       "risk": 1,
       "lines": 31
     },
-    "DB-041.52": {
+    "DB-042.52": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 897,
+      "line": 898,
       "anchor": "CREATE TABLE food_ticket_events",
       "risk": 1,
       "lines": 39
     },
-    "DB-041.53": {
+    "DB-042.53": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 936,
+      "line": 937,
       "anchor": "CREATE TABLE food_ticket_worker_status",
       "risk": 1,
       "lines": 16
     },
-    "DB-041.54": {
+    "DB-042.54": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 952,
+      "line": 953,
       "anchor": "CREATE TABLE food_ticket_guest_cards",
       "risk": 1,
       "lines": 14
     },
-    "DB-041.55": {
+    "DB-042.55": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 966,
+      "line": 967,
       "anchor": "CREATE TABLE food_ticket_groups",
       "risk": 1,
       "lines": 19
     },
-    "DB-041.56": {
+    "DB-042.56": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 985,
+      "line": 986,
       "anchor": "CREATE TABLE food_ticket_group_members",
       "risk": 1,
       "lines": 12
     },
-    "DB-041.57": {
+    "DB-042.57": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 997,
+      "line": 998,
       "anchor": "CREATE TABLE food_ticket_group_runs",
       "risk": 1,
       "lines": 27
     },
-    "DB-041.58": {
+    "DB-042.58": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1024,
+      "line": 1025,
       "anchor": "CREATE TABLE food_ticket_daily_absence",
       "risk": 1,
       "lines": 16
     },
-    "DB-041.59": {
+    "DB-042.59": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1040,
+      "line": 1041,
       "anchor": "CREATE TABLE food_ticket_day_visits",
       "risk": 1,
       "lines": 13
     },
-    "DB-041.60": {
+    "DB-042.60": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1053,
+      "line": 1054,
       "anchor": "CREATE TABLE food_ticket_group_uid_history",
       "risk": 0,
       "lines": 11
     },
-    "DB-041.61": {
+    "DB-042.61": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1064,
+      "line": 1065,
       "anchor": "CREATE TABLE food_ticket_print_log",
       "risk": 0,
       "lines": 16
     },
-    "DB-041.62": {
+    "DB-042.62": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1080,
+      "line": 1081,
       "anchor": "CREATE TABLE system_logs",
       "risk": 0,
       "lines": 27
     },
-    "DB-041.63": {
+    "DB-042.63": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1107,
+      "line": 1108,
       "anchor": "CREATE TABLE chatbot_faq",
       "risk": 0,
       "lines": 12
     },
-    "DB-041.64": {
+    "DB-042.64": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1119,
+      "line": 1120,
       "anchor": "CREATE TABLE chatbot_logs",
       "risk": 0,
       "lines": 13
     },
-    "DB-041.65": {
+    "DB-042.65": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1132,
+      "line": 1133,
       "anchor": "CREATE TABLE system_incidents",
       "risk": 1,
       "lines": 9
     },
-    "DB-041.66": {
+    "DB-042.66": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1141,
+      "line": 1142,
       "anchor": "CREATE TABLE ticket_number_seq",
       "risk": 0,
       "lines": 6
     },
-    "DB-041.67": {
+    "DB-042.67": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1147,
+      "line": 1148,
       "anchor": "CREATE TABLE api_rate_limits",
       "risk": 1,
       "lines": 9
     },
-    "DB-041.68": {
+    "DB-042.68": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1156,
+      "line": 1157,
       "anchor": "CREATE TABLE domain_scan_runs",
       "risk": 1,
       "lines": 13
     },
-    "DB-041.69": {
+    "DB-042.69": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1169,
+      "line": 1170,
       "anchor": "CREATE TABLE domain_scan_queue",
       "risk": 1,
       "lines": 14
     },
-    "DB-041.70": {
+    "DB-042.70": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1183,
+      "line": 1184,
       "anchor": "CREATE INDEX idx_tickets_status_priority",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.71": {
+    "DB-042.71": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1184,
+      "line": 1185,
       "anchor": "CREATE INDEX idx_users_is_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.72": {
+    "DB-042.72": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1185,
+      "line": 1186,
       "anchor": "CREATE INDEX idx_assets_lifecycle_status",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.73": {
+    "DB-042.73": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1186,
+      "line": 1187,
       "anchor": "CREATE INDEX idx_ola_priority_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.74": {
+    "DB-042.74": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1187,
+      "line": 1188,
       "anchor": "CREATE INDEX idx_food_ticket_events_event_type",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.75": {
+    "DB-042.75": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1188,
+      "line": 1189,
       "anchor": "CREATE INDEX idx_login_attempts_locked_until",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.76": {
+    "DB-042.76": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1189,
+      "line": 1190,
       "anchor": "CREATE INDEX idx_ticket_sla_alerts_alert_type",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.77": {
+    "DB-042.77": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1190,
+      "line": 1191,
       "anchor": "CREATE INDEX idx_ticket_ola_alerts_alert_type",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.78": {
+    "DB-042.78": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1191,
+      "line": 1192,
       "anchor": "CREATE INDEX idx_ticket_events_event_type",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.79": {
+    "DB-042.79": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1192,
+      "line": 1193,
       "anchor": "CREATE INDEX idx_knowledge_articles_is_published",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.80": {
+    "DB-042.80": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1193,
+      "line": 1194,
       "anchor": "CREATE INDEX idx_holidays_is_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.81": {
+    "DB-042.81": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1194,
+      "line": 1195,
       "anchor": "CREATE INDEX idx_departments_is_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.82": {
+    "DB-042.82": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1195,
+      "line": 1196,
       "anchor": "CREATE INDEX idx_handling_units_is_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.83": {
+    "DB-042.83": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1196,
+      "line": 1197,
       "anchor": "CREATE INDEX idx_categories_group_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.84": {
+    "DB-042.84": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1197,
+      "line": 1198,
       "anchor": "CREATE INDEX idx_service_catalog_group_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.85": {
+    "DB-042.85": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1198,
+      "line": 1199,
       "anchor": "CREATE INDEX idx_cd_dvd_records_media",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.86": {
+    "DB-042.86": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1199,
+      "line": 1200,
       "anchor": "CREATE INDEX idx_traffic_destinations_is_active",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.87": {
+    "DB-042.87": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1200,
+      "line": 1201,
       "anchor": "CREATE INDEX idx_domain_scan_runs_status",
       "risk": 0,
       "lines": 1
     },
-    "DB-041.88": {
+    "DB-042.88": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1201,
+      "line": 1202,
       "anchor": "CREATE INDEX idx_domain_scan_queue_status",
       "risk": 0,
       "lines": 3
     },
-    "DB-041.89": {
+    "DB-042.89": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1204,
+      "line": 1205,
       "anchor": "CREATE TABLE food_ticket_card_map",
       "risk": 1,
       "lines": 10
     },
-    "DB-041.90": {
+    "DB-042.90": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1214,
+      "line": 1215,
       "anchor": "CREATE TABLE food_ticket_templates",
       "risk": 1,
       "lines": 12
     },
-    "DB-041.91": {
+    "DB-042.91": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1226,
+      "line": 1227,
       "anchor": "=",
       "risk": 0,
       "lines": 2
     },
-    "DB-041.92": {
+    "DB-042.92": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1228,
+      "line": 1229,
       "anchor": "=",
       "risk": 0,
       "lines": 5
     },
-    "DB-041.93": {
+    "DB-042.93": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1233,
+      "line": 1234,
       "anchor": "CREATE TABLE food_catalog",
       "risk": 1,
       "lines": 12
     },
-    "DB-041.94": {
+    "DB-042.94": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1245,
+      "line": 1246,
       "anchor": "CREATE TABLE food_guest_requests",
       "risk": 1,
       "lines": 20
     },
-    "DB-041.95": {
+    "DB-042.95": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1265,
+      "line": 1266,
       "anchor": "CREATE TABLE food_calendar",
       "risk": 1,
       "lines": 15
     },
-    "DB-041.96": {
+    "DB-042.96": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1280,
+      "line": 1281,
       "anchor": "CREATE TABLE food_calendar_items",
       "risk": 1,
       "lines": 15
     },
-    "DB-041.97": {
+    "DB-042.97": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1295,
+      "line": 1296,
       "anchor": "CREATE TABLE food_orders",
       "risk": 1,
       "lines": 16
     },
-    "DB-041.98": {
+    "DB-042.98": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1311,
+      "line": 1312,
       "anchor": "CREATE TABLE food_order_logs",
       "risk": 1,
       "lines": 18
     },
-    "DB-041.99": {
+    "DB-042.99": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1329,
+      "line": 1330,
       "anchor": "CREATE TABLE food_order_cancel_requests",
       "risk": 1,
       "lines": 22
     },
-    "DB-041.100": {
+    "DB-042.100": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1351,
+      "line": 1352,
       "anchor": "CREATE TABLE food_meal_reconciliations",
       "risk": 1,
       "lines": 27
     },
-    "DB-041.101": {
+    "DB-042.101": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1378,
+      "line": 1379,
       "anchor": "CREATE TABLE food_monthly_invoices",
       "risk": 0,
       "lines": 22
     },
-    "DB-041.102": {
+    "DB-042.102": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1400,
+      "line": 1401,
       "anchor": "CREATE TABLE user_access_groups",
       "risk": 1,
       "lines": 14
     },
-    "DB-041.103": {
+    "DB-042.103": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1414,
+      "line": 1415,
       "anchor": "CREATE TABLE user_access_group_members",
       "risk": 1,
       "lines": 12
     },
-    "DB-041.104": {
+    "DB-042.104": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1426,
+      "line": 1427,
       "anchor": "CREATE TABLE user_access_group_permissions",
       "risk": 1,
       "lines": 16
     },
-    "DB-041.105": {
+    "DB-042.105": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1442,
+      "line": 1443,
       "anchor": "CREATE TABLE log_issues",
       "risk": 1,
       "lines": 26
     },
-    "DB-041.106": {
+    "DB-042.106": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1468,
+      "line": 1469,
       "anchor": "CREATE TABLE logging_health_alerts",
       "risk": 1,
       "lines": 10
     },
-    "DB-041.107": {
+    "DB-042.107": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1478,
+      "line": 1479,
       "anchor": "CREATE TABLE log_issue_history",
       "risk": 0,
       "lines": 16
     },
-    "DB-041.108": {
+    "DB-042.108": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1494,
+      "line": 1495,
       "anchor": "CREATE TABLE log_issue_events",
       "risk": 0,
       "lines": 7
     },
-    "DB-041.109": {
+    "DB-042.109": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1501,
+      "line": 1502,
       "anchor": "CREATE TABLE log_issue_notifications",
       "risk": 1,
       "lines": 19
     },
-    "DB-041.110": {
+    "DB-042.110": {
       "path": "schema.sql",
       "area": "DB",
-      "line": 1520,
+      "line": 1521,
       "anchor": "CREATE TABLE schema_updates",
       "risk": 1,
       "lines": 45
@@ -57810,72 +57818,8 @@
       "risk": 3,
       "lines": 24
     },
-    "DB-042.01": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 1,
-      "anchor": "مقدمهٔ فایل",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-042.02": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 2,
-      "anchor": "CREATE TABLE departments",
-      "risk": 0,
-      "lines": 8
-    },
-    "DB-042.03": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 10,
-      "anchor": "ALTER TABLE users",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-042.04": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 11,
-      "anchor": "ALTER TABLE users",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-042.05": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 12,
-      "anchor": "ALTER TABLE users",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-042.06": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 13,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-042.07": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 14,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-042.08": {
-      "path": "upgrade-1.1-departments.sql",
-      "area": "DB",
-      "line": 15,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 1,
-      "lines": 2
-    },
     "DB-043.01": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -57883,71 +57827,63 @@
       "lines": 1
     },
     "DB-043.02": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "UPDATE service_catalog",
-      "risk": 1,
-      "lines": 1
+      "anchor": "CREATE TABLE departments",
+      "risk": 0,
+      "lines": 8
     },
     "DB-043.03": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
-      "line": 3,
-      "anchor": "UPDATE tickets",
-      "risk": 1,
+      "line": 10,
+      "anchor": "ALTER TABLE users",
+      "risk": 0,
       "lines": 1
     },
     "DB-043.04": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
-      "line": 4,
-      "anchor": "UPDATE ola_policies",
-      "risk": 1,
+      "line": 11,
+      "anchor": "ALTER TABLE users",
+      "risk": 0,
       "lines": 1
     },
     "DB-043.05": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
-      "line": 5,
-      "anchor": "UPDATE problem_records",
+      "line": 12,
+      "anchor": "ALTER TABLE users",
       "risk": 1,
-      "lines": 2
+      "lines": 1
     },
     "DB-043.06": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
-      "line": 7,
-      "anchor": "ALTER TABLE service_catalog",
+      "line": 13,
+      "anchor": "ALTER TABLE tickets",
       "risk": 0,
       "lines": 1
     },
     "DB-043.07": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
-      "line": 8,
+      "line": 14,
       "anchor": "ALTER TABLE tickets",
       "risk": 0,
       "lines": 1
     },
     "DB-043.08": {
-      "path": "upgrade-1.10-priority.sql",
+      "path": "upgrade-1.1-departments.sql",
       "area": "DB",
-      "line": 9,
-      "anchor": "ALTER TABLE ola_policies",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-043.09": {
-      "path": "upgrade-1.10-priority.sql",
-      "area": "DB",
-      "line": 10,
-      "anchor": "ALTER TABLE problem_records",
-      "risk": 0,
+      "line": 15,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 1,
       "lines": 2
     },
     "DB-044.01": {
-      "path": "upgrade-1.11-user-profile.sql",
+      "path": "upgrade-1.10-priority.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -57955,6 +57891,78 @@
       "lines": 1
     },
     "DB-044.02": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 2,
+      "anchor": "UPDATE service_catalog",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-044.03": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 3,
+      "anchor": "UPDATE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-044.04": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 4,
+      "anchor": "UPDATE ola_policies",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-044.05": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 5,
+      "anchor": "UPDATE problem_records",
+      "risk": 1,
+      "lines": 2
+    },
+    "DB-044.06": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 7,
+      "anchor": "ALTER TABLE service_catalog",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-044.07": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 8,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-044.08": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 9,
+      "anchor": "ALTER TABLE ola_policies",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-044.09": {
+      "path": "upgrade-1.10-priority.sql",
+      "area": "DB",
+      "line": 10,
+      "anchor": "ALTER TABLE problem_records",
+      "risk": 0,
+      "lines": 2
+    },
+    "DB-045.01": {
+      "path": "upgrade-1.11-user-profile.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-045.02": {
       "path": "upgrade-1.11-user-profile.sql",
       "area": "DB",
       "line": 2,
@@ -57962,7 +57970,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-044.03": {
+    "DB-045.03": {
       "path": "upgrade-1.11-user-profile.sql",
       "area": "DB",
       "line": 3,
@@ -57970,7 +57978,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-044.04": {
+    "DB-045.04": {
       "path": "upgrade-1.11-user-profile.sql",
       "area": "DB",
       "line": 4,
@@ -57978,7 +57986,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-045.01": {
+    "DB-046.01": {
       "path": "upgrade-1.12-food-ticket-management.sql",
       "area": "DB",
       "line": 1,
@@ -57986,7 +57994,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-045.02": {
+    "DB-046.02": {
       "path": "upgrade-1.12-food-ticket-management.sql",
       "area": "DB",
       "line": 3,
@@ -57994,32 +58002,8 @@
       "risk": 1,
       "lines": 14
     },
-    "DB-046.01": {
-      "path": "upgrade-1.13-asset-profile.sql",
-      "area": "DB",
-      "line": 1,
-      "anchor": "مقدمهٔ فایل",
-      "risk": 0,
-      "lines": 3
-    },
-    "DB-046.02": {
-      "path": "upgrade-1.13-asset-profile.sql",
-      "area": "DB",
-      "line": 4,
-      "anchor": "ALTER TABLE assets",
-      "risk": 0,
-      "lines": 7
-    },
-    "DB-046.03": {
-      "path": "upgrade-1.13-asset-profile.sql",
-      "area": "DB",
-      "line": 11,
-      "anchor": "CREATE TABLE asset_profiles",
-      "risk": 1,
-      "lines": 83
-    },
     "DB-047.01": {
-      "path": "upgrade-1.13-food-groups.sql",
+      "path": "upgrade-1.13-asset-profile.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -58027,6 +58011,30 @@
       "lines": 3
     },
     "DB-047.02": {
+      "path": "upgrade-1.13-asset-profile.sql",
+      "area": "DB",
+      "line": 4,
+      "anchor": "ALTER TABLE assets",
+      "risk": 0,
+      "lines": 7
+    },
+    "DB-047.03": {
+      "path": "upgrade-1.13-asset-profile.sql",
+      "area": "DB",
+      "line": 11,
+      "anchor": "CREATE TABLE asset_profiles",
+      "risk": 1,
+      "lines": 83
+    },
+    "DB-048.01": {
+      "path": "upgrade-1.13-food-groups.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 3
+    },
+    "DB-048.02": {
       "path": "upgrade-1.13-food-groups.sql",
       "area": "DB",
       "line": 4,
@@ -58034,7 +58042,7 @@
       "risk": 1,
       "lines": 13
     },
-    "DB-047.03": {
+    "DB-048.03": {
       "path": "upgrade-1.13-food-groups.sql",
       "area": "DB",
       "line": 17,
@@ -58042,7 +58050,7 @@
       "risk": 1,
       "lines": 12
     },
-    "DB-047.04": {
+    "DB-048.04": {
       "path": "upgrade-1.13-food-groups.sql",
       "area": "DB",
       "line": 29,
@@ -58050,7 +58058,7 @@
       "risk": 1,
       "lines": 22
     },
-    "DB-048.01": {
+    "DB-049.01": {
       "path": "upgrade-1.14-system-logs.sql",
       "area": "DB",
       "line": 1,
@@ -58058,7 +58066,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-048.02": {
+    "DB-049.02": {
       "path": "upgrade-1.14-system-logs.sql",
       "area": "DB",
       "line": 2,
@@ -58066,7 +58074,7 @@
       "risk": 0,
       "lines": 13
     },
-    "DB-049.01": {
+    "DB-050.01": {
       "path": "upgrade-1.15-plaque-fields.sql",
       "area": "DB",
       "line": 1,
@@ -58074,7 +58082,7 @@
       "risk": 0,
       "lines": 6
     },
-    "DB-049.02": {
+    "DB-050.02": {
       "path": "upgrade-1.15-plaque-fields.sql",
       "area": "DB",
       "line": 7,
@@ -58082,7 +58090,7 @@
       "risk": 0,
       "lines": 7
     },
-    "DB-050.01": {
+    "DB-051.01": {
       "path": "upgrade-1.16-ticket-number.sql",
       "area": "DB",
       "line": 1,
@@ -58090,7 +58098,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-050.02": {
+    "DB-051.02": {
       "path": "upgrade-1.16-ticket-number.sql",
       "area": "DB",
       "line": 6,
@@ -58098,7 +58106,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-050.03": {
+    "DB-051.03": {
       "path": "upgrade-1.16-ticket-number.sql",
       "area": "DB",
       "line": 8,
@@ -58106,7 +58114,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-051.01": {
+    "DB-052.01": {
       "path": "upgrade-1.17-service-catalog.sql",
       "area": "DB",
       "line": 1,
@@ -58114,7 +58122,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-051.02": {
+    "DB-052.02": {
       "path": "upgrade-1.17-service-catalog.sql",
       "area": "DB",
       "line": 5,
@@ -58122,7 +58130,7 @@
       "risk": 1,
       "lines": 41
     },
-    "DB-052.01": {
+    "DB-053.01": {
       "path": "upgrade-1.18-service-categories.sql",
       "area": "DB",
       "line": 1,
@@ -58130,7 +58138,7 @@
       "risk": 0,
       "lines": 3
     },
-    "DB-052.02": {
+    "DB-053.02": {
       "path": "upgrade-1.18-service-categories.sql",
       "area": "DB",
       "line": 4,
@@ -58138,7 +58146,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-052.03": {
+    "DB-053.03": {
       "path": "upgrade-1.18-service-categories.sql",
       "area": "DB",
       "line": 5,
@@ -58146,7 +58154,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-052.04": {
+    "DB-053.04": {
       "path": "upgrade-1.18-service-categories.sql",
       "area": "DB",
       "line": 6,
@@ -58154,7 +58162,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-052.05": {
+    "DB-053.05": {
       "path": "upgrade-1.18-service-categories.sql",
       "area": "DB",
       "line": 8,
@@ -58162,7 +58170,7 @@
       "risk": 1,
       "lines": 20
     },
-    "DB-052.06": {
+    "DB-053.06": {
       "path": "upgrade-1.18-service-categories.sql",
       "area": "DB",
       "line": 28,
@@ -58170,32 +58178,8 @@
       "risk": 1,
       "lines": 34
     },
-    "DB-053.01": {
-      "path": "upgrade-1.19-food-ticket-queue.sql",
-      "area": "DB",
-      "line": 1,
-      "anchor": "مقدمهٔ فایل",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-053.02": {
-      "path": "upgrade-1.19-food-ticket-queue.sql",
-      "area": "DB",
-      "line": 2,
-      "anchor": "ALTER TABLE food_ticket_events",
-      "risk": 0,
-      "lines": 43
-    },
-    "DB-053.03": {
-      "path": "upgrade-1.19-food-ticket-queue.sql",
-      "area": "DB",
-      "line": 45,
-      "anchor": "CREATE TABLE food_ticket_print_log",
-      "risk": 0,
-      "lines": 16
-    },
     "DB-054.01": {
-      "path": "upgrade-1.2-itsm.sql",
+      "path": "upgrade-1.19-food-ticket-queue.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -58203,111 +58187,23 @@
       "lines": 1
     },
     "DB-054.02": {
-      "path": "upgrade-1.2-itsm.sql",
+      "path": "upgrade-1.19-food-ticket-queue.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "ALTER TABLE users",
+      "anchor": "ALTER TABLE food_ticket_events",
       "risk": 0,
-      "lines": 1
+      "lines": 43
     },
     "DB-054.03": {
-      "path": "upgrade-1.2-itsm.sql",
+      "path": "upgrade-1.19-food-ticket-queue.sql",
       "area": "DB",
-      "line": 3,
-      "anchor": "ALTER TABLE tickets",
+      "line": 45,
+      "anchor": "CREATE TABLE food_ticket_print_log",
       "risk": 0,
-      "lines": 1
-    },
-    "DB-054.04": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 4,
-      "anchor": "UPDATE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-054.05": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 5,
-      "anchor": "UPDATE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-054.06": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 6,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-054.07": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 7,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-054.08": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 8,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-054.09": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 9,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-054.10": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 10,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-054.11": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 11,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 2
-    },
-    "DB-054.12": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 13,
-      "anchor": "CREATE TABLE ticket_events",
-      "risk": 1,
-      "lines": 15
-    },
-    "DB-054.13": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 28,
-      "anchor": "CREATE TABLE assets",
-      "risk": 1,
-      "lines": 25
-    },
-    "DB-054.14": {
-      "path": "upgrade-1.2-itsm.sql",
-      "area": "DB",
-      "line": 53,
-      "anchor": "CREATE TABLE asset_inventory_history",
-      "risk": 1,
-      "lines": 11
+      "lines": 16
     },
     "DB-055.01": {
-      "path": "upgrade-1.20-domain-scan.sql",
+      "path": "upgrade-1.2-itsm.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -58315,31 +58211,111 @@
       "lines": 1
     },
     "DB-055.02": {
-      "path": "upgrade-1.20-domain-scan.sql",
+      "path": "upgrade-1.2-itsm.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "CREATE TABLE domain_scan_runs",
-      "risk": 1,
-      "lines": 13
+      "anchor": "ALTER TABLE users",
+      "risk": 0,
+      "lines": 1
     },
     "DB-055.03": {
-      "path": "upgrade-1.20-domain-scan.sql",
+      "path": "upgrade-1.2-itsm.sql",
       "area": "DB",
-      "line": 15,
-      "anchor": "CREATE TABLE domain_scan_queue",
-      "risk": 1,
-      "lines": 13
+      "line": 3,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
     },
     "DB-055.04": {
-      "path": "upgrade-1.20-domain-scan.sql",
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 4,
+      "anchor": "UPDATE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-055.05": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 5,
+      "anchor": "UPDATE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-055.06": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 6,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-055.07": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 7,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-055.08": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 8,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-055.09": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 9,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-055.10": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 10,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-055.11": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 11,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 2
+    },
+    "DB-055.12": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 13,
+      "anchor": "CREATE TABLE ticket_events",
+      "risk": 1,
+      "lines": 15
+    },
+    "DB-055.13": {
+      "path": "upgrade-1.2-itsm.sql",
       "area": "DB",
       "line": 28,
-      "anchor": "ALTER TABLE asset_profiles",
-      "risk": 0,
-      "lines": 10
+      "anchor": "CREATE TABLE assets",
+      "risk": 1,
+      "lines": 25
+    },
+    "DB-055.14": {
+      "path": "upgrade-1.2-itsm.sql",
+      "area": "DB",
+      "line": 53,
+      "anchor": "CREATE TABLE asset_inventory_history",
+      "risk": 1,
+      "lines": 11
     },
     "DB-056.01": {
-      "path": "upgrade-1.21-organization.sql",
+      "path": "upgrade-1.20-domain-scan.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -58347,6 +58323,38 @@
       "lines": 1
     },
     "DB-056.02": {
+      "path": "upgrade-1.20-domain-scan.sql",
+      "area": "DB",
+      "line": 2,
+      "anchor": "CREATE TABLE domain_scan_runs",
+      "risk": 1,
+      "lines": 13
+    },
+    "DB-056.03": {
+      "path": "upgrade-1.20-domain-scan.sql",
+      "area": "DB",
+      "line": 15,
+      "anchor": "CREATE TABLE domain_scan_queue",
+      "risk": 1,
+      "lines": 13
+    },
+    "DB-056.04": {
+      "path": "upgrade-1.20-domain-scan.sql",
+      "area": "DB",
+      "line": 28,
+      "anchor": "ALTER TABLE asset_profiles",
+      "risk": 0,
+      "lines": 10
+    },
+    "DB-057.01": {
+      "path": "upgrade-1.21-organization.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-057.02": {
       "path": "upgrade-1.21-organization.sql",
       "area": "DB",
       "line": 2,
@@ -58354,7 +58362,7 @@
       "risk": 0,
       "lines": 15
     },
-    "DB-056.03": {
+    "DB-057.03": {
       "path": "upgrade-1.21-organization.sql",
       "area": "DB",
       "line": 17,
@@ -58362,7 +58370,7 @@
       "risk": 0,
       "lines": 8
     },
-    "DB-056.04": {
+    "DB-057.04": {
       "path": "upgrade-1.21-organization.sql",
       "area": "DB",
       "line": 25,
@@ -58370,7 +58378,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-056.05": {
+    "DB-057.05": {
       "path": "upgrade-1.21-organization.sql",
       "area": "DB",
       "line": 30,
@@ -58378,7 +58386,7 @@
       "risk": 1,
       "lines": 5
     },
-    "DB-056.06": {
+    "DB-057.06": {
       "path": "upgrade-1.21-organization.sql",
       "area": "DB",
       "line": 35,
@@ -58386,7 +58394,7 @@
       "risk": 1,
       "lines": 8
     },
-    "DB-056.07": {
+    "DB-057.07": {
       "path": "upgrade-1.21-organization.sql",
       "area": "DB",
       "line": 43,
@@ -58394,7 +58402,7 @@
       "risk": 1,
       "lines": 7
     },
-    "DB-057.01": {
+    "DB-058.01": {
       "path": "upgrade-1.22-permissions.sql",
       "area": "DB",
       "line": 1,
@@ -58402,7 +58410,7 @@
       "risk": 0,
       "lines": 3
     },
-    "DB-057.02": {
+    "DB-058.02": {
       "path": "upgrade-1.22-permissions.sql",
       "area": "DB",
       "line": 4,
@@ -58410,7 +58418,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-057.03": {
+    "DB-058.03": {
       "path": "upgrade-1.22-permissions.sql",
       "area": "DB",
       "line": 8,
@@ -58418,7 +58426,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-057.04": {
+    "DB-058.04": {
       "path": "upgrade-1.22-permissions.sql",
       "area": "DB",
       "line": 10,
@@ -58426,7 +58434,7 @@
       "risk": 0,
       "lines": 7
     },
-    "DB-058.01": {
+    "DB-059.01": {
       "path": "upgrade-1.23-activity-log.sql",
       "area": "DB",
       "line": 1,
@@ -58434,7 +58442,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-058.02": {
+    "DB-059.02": {
       "path": "upgrade-1.23-activity-log.sql",
       "area": "DB",
       "line": 5,
@@ -58442,7 +58450,7 @@
       "risk": 1,
       "lines": 28
     },
-    "DB-058.03": {
+    "DB-059.03": {
       "path": "upgrade-1.23-activity-log.sql",
       "area": "DB",
       "line": 33,
@@ -58450,7 +58458,7 @@
       "risk": 1,
       "lines": 12
     },
-    "DB-058.04": {
+    "DB-059.04": {
       "path": "upgrade-1.23-activity-log.sql",
       "area": "DB",
       "line": 45,
@@ -58458,7 +58466,7 @@
       "risk": 0,
       "lines": 3
     },
-    "DB-058.05": {
+    "DB-059.05": {
       "path": "upgrade-1.23-activity-log.sql",
       "area": "DB",
       "line": 48,
@@ -58466,7 +58474,7 @@
       "risk": 1,
       "lines": 4
     },
-    "DB-058.06": {
+    "DB-059.06": {
       "path": "upgrade-1.23-activity-log.sql",
       "area": "DB",
       "line": 52,
@@ -58474,7 +58482,7 @@
       "risk": 1,
       "lines": 4
     },
-    "DB-059.01": {
+    "DB-060.01": {
       "path": "upgrade-1.24-traffic-control.sql",
       "area": "DB",
       "line": 1,
@@ -58482,7 +58490,7 @@
       "risk": 0,
       "lines": 9
     },
-    "DB-059.02": {
+    "DB-060.02": {
       "path": "upgrade-1.24-traffic-control.sql",
       "area": "DB",
       "line": 10,
@@ -58490,7 +58498,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-059.03": {
+    "DB-060.03": {
       "path": "upgrade-1.24-traffic-control.sql",
       "area": "DB",
       "line": 11,
@@ -58498,7 +58506,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-059.04": {
+    "DB-060.04": {
       "path": "upgrade-1.24-traffic-control.sql",
       "area": "DB",
       "line": 13,
@@ -58506,7 +58514,7 @@
       "risk": 0,
       "lines": 8
     },
-    "DB-059.05": {
+    "DB-060.05": {
       "path": "upgrade-1.24-traffic-control.sql",
       "area": "DB",
       "line": 21,
@@ -58514,7 +58522,7 @@
       "risk": 1,
       "lines": 26
     },
-    "DB-059.06": {
+    "DB-060.06": {
       "path": "upgrade-1.24-traffic-control.sql",
       "area": "DB",
       "line": 47,
@@ -58522,7 +58530,7 @@
       "risk": 1,
       "lines": 9
     },
-    "DB-060.01": {
+    "DB-061.01": {
       "path": "upgrade-1.25-performance-indexes.sql",
       "area": "DB",
       "line": 1,
@@ -58530,7 +58538,7 @@
       "risk": 0,
       "lines": 7
     },
-    "DB-060.02": {
+    "DB-061.02": {
       "path": "upgrade-1.25-performance-indexes.sql",
       "area": "DB",
       "line": 8,
@@ -58538,7 +58546,7 @@
       "risk": 0,
       "lines": 29
     },
-    "DB-061.01": {
+    "DB-062.01": {
       "path": "upgrade-1.26-ticket-requesting-unit.sql",
       "area": "DB",
       "line": 1,
@@ -58546,7 +58554,7 @@
       "risk": 0,
       "lines": 8
     },
-    "DB-061.02": {
+    "DB-062.02": {
       "path": "upgrade-1.26-ticket-requesting-unit.sql",
       "area": "DB",
       "line": 9,
@@ -58554,7 +58562,7 @@
       "risk": 0,
       "lines": 6
     },
-    "DB-061.03": {
+    "DB-062.03": {
       "path": "upgrade-1.26-ticket-requesting-unit.sql",
       "area": "DB",
       "line": 15,
@@ -58562,7 +58570,7 @@
       "risk": 0,
       "lines": 6
     },
-    "DB-061.04": {
+    "DB-062.04": {
       "path": "upgrade-1.26-ticket-requesting-unit.sql",
       "area": "DB",
       "line": 21,
@@ -58570,7 +58578,7 @@
       "risk": 0,
       "lines": 8
     },
-    "DB-062.01": {
+    "DB-063.01": {
       "path": "upgrade-1.27-food-ticket-fixes.sql",
       "area": "DB",
       "line": 1,
@@ -58578,7 +58586,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-062.02": {
+    "DB-063.02": {
       "path": "upgrade-1.27-food-ticket-fixes.sql",
       "area": "DB",
       "line": 5,
@@ -58586,7 +58594,7 @@
       "risk": 1,
       "lines": 7
     },
-    "DB-062.03": {
+    "DB-063.03": {
       "path": "upgrade-1.27-food-ticket-fixes.sql",
       "area": "DB",
       "line": 12,
@@ -58594,112 +58602,8 @@
       "risk": 1,
       "lines": 6
     },
-    "DB-063.01": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 1,
-      "anchor": "مقدمهٔ فایل",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.02": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 2,
-      "anchor": "ALTER TABLE users",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.03": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 3,
-      "anchor": "UPDATE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-063.04": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 4,
-      "anchor": "UPDATE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-063.05": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 5,
-      "anchor": "UPDATE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-063.06": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 6,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.07": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 7,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.08": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 8,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.09": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 9,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.10": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 10,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-063.11": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 11,
-      "anchor": "ALTER TABLE assets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.12": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 12,
-      "anchor": "ALTER TABLE assets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-063.13": {
-      "path": "upgrade-1.3-supervisor-inventory.sql",
-      "area": "DB",
-      "line": 13,
-      "anchor": "ALTER TABLE assets",
-      "risk": 0,
-      "lines": 2
-    },
     "DB-064.01": {
-      "path": "upgrade-1.30-food-ticket-card-map.sql",
+      "path": "upgrade-1.3-supervisor-inventory.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -58707,15 +58611,103 @@
       "lines": 1
     },
     "DB-064.02": {
-      "path": "upgrade-1.30-food-ticket-card-map.sql",
+      "path": "upgrade-1.3-supervisor-inventory.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "CREATE TABLE food_ticket_card_map",
+      "anchor": "ALTER TABLE users",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.03": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 3,
+      "anchor": "UPDATE tickets",
       "risk": 1,
-      "lines": 10
+      "lines": 1
+    },
+    "DB-064.04": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 4,
+      "anchor": "UPDATE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-064.05": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 5,
+      "anchor": "UPDATE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-064.06": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 6,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.07": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 7,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.08": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 8,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.09": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 9,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.10": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 10,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-064.11": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 11,
+      "anchor": "ALTER TABLE assets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.12": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 12,
+      "anchor": "ALTER TABLE assets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-064.13": {
+      "path": "upgrade-1.3-supervisor-inventory.sql",
+      "area": "DB",
+      "line": 13,
+      "anchor": "ALTER TABLE assets",
+      "risk": 0,
+      "lines": 2
     },
     "DB-065.01": {
-      "path": "upgrade-1.31-food-ticket-templates.sql",
+      "path": "upgrade-1.30-food-ticket-card-map.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -58723,6 +58715,22 @@
       "lines": 1
     },
     "DB-065.02": {
+      "path": "upgrade-1.30-food-ticket-card-map.sql",
+      "area": "DB",
+      "line": 2,
+      "anchor": "CREATE TABLE food_ticket_card_map",
+      "risk": 1,
+      "lines": 10
+    },
+    "DB-066.01": {
+      "path": "upgrade-1.31-food-ticket-templates.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-066.02": {
       "path": "upgrade-1.31-food-ticket-templates.sql",
       "area": "DB",
       "line": 2,
@@ -58730,7 +58738,7 @@
       "risk": 1,
       "lines": 13
     },
-    "DB-066.01": {
+    "DB-067.01": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 1,
@@ -58738,7 +58746,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-066.02": {
+    "DB-067.02": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 3,
@@ -58746,7 +58754,7 @@
       "risk": 0,
       "lines": 6
     },
-    "DB-066.03": {
+    "DB-067.03": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 9,
@@ -58754,7 +58762,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-066.04": {
+    "DB-067.04": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 14,
@@ -58762,7 +58770,7 @@
       "risk": 0,
       "lines": 8
     },
-    "DB-066.05": {
+    "DB-067.05": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 22,
@@ -58770,7 +58778,7 @@
       "risk": 0,
       "lines": 7
     },
-    "DB-066.06": {
+    "DB-067.06": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 29,
@@ -58778,7 +58786,7 @@
       "risk": 1,
       "lines": 18
     },
-    "DB-066.07": {
+    "DB-067.07": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 47,
@@ -58786,7 +58794,7 @@
       "risk": 0,
       "lines": 14
     },
-    "DB-066.08": {
+    "DB-067.08": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 61,
@@ -58794,7 +58802,7 @@
       "risk": 0,
       "lines": 6
     },
-    "DB-066.09": {
+    "DB-067.09": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 67,
@@ -58802,7 +58810,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-066.10": {
+    "DB-067.10": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 72,
@@ -58810,7 +58818,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-066.11": {
+    "DB-067.11": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 74,
@@ -58818,7 +58826,7 @@
       "risk": 1,
       "lines": 15
     },
-    "DB-066.12": {
+    "DB-067.12": {
       "path": "upgrade-1.32-food-group-representative-absence.sql",
       "area": "DB",
       "line": 89,
@@ -58826,7 +58834,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-067.01": {
+    "DB-068.01": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 1,
@@ -58834,7 +58842,7 @@
       "risk": 1,
       "lines": 16
     },
-    "DB-067.02": {
+    "DB-068.02": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 17,
@@ -58842,7 +58850,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-067.03": {
+    "DB-068.03": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 19,
@@ -58850,7 +58858,7 @@
       "risk": 0,
       "lines": 5
     },
-    "DB-067.04": {
+    "DB-068.04": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 24,
@@ -58858,7 +58866,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-067.05": {
+    "DB-068.05": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 26,
@@ -58866,7 +58874,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-067.06": {
+    "DB-068.06": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 28,
@@ -58874,7 +58882,7 @@
       "risk": 0,
       "lines": 11
     },
-    "DB-067.07": {
+    "DB-068.07": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 39,
@@ -58882,7 +58890,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-067.08": {
+    "DB-068.08": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 41,
@@ -58890,7 +58898,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-067.09": {
+    "DB-068.09": {
       "path": "upgrade-1.33-source-delete-truth.sql",
       "area": "DB",
       "line": 45,
@@ -58898,7 +58906,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-068.01": {
+    "DB-069.01": {
       "path": "upgrade-1.38-food-orders.sql",
       "area": "DB",
       "line": 1,
@@ -58906,7 +58914,7 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-068.02": {
+    "DB-069.02": {
       "path": "upgrade-1.38-food-orders.sql",
       "area": "DB",
       "line": 5,
@@ -58914,7 +58922,7 @@
       "risk": 1,
       "lines": 11
     },
-    "DB-068.03": {
+    "DB-069.03": {
       "path": "upgrade-1.38-food-orders.sql",
       "area": "DB",
       "line": 16,
@@ -58922,7 +58930,7 @@
       "risk": 1,
       "lines": 15
     },
-    "DB-068.04": {
+    "DB-069.04": {
       "path": "upgrade-1.38-food-orders.sql",
       "area": "DB",
       "line": 31,
@@ -58930,7 +58938,7 @@
       "risk": 1,
       "lines": 15
     },
-    "DB-068.05": {
+    "DB-069.05": {
       "path": "upgrade-1.38-food-orders.sql",
       "area": "DB",
       "line": 46,
@@ -58938,7 +58946,7 @@
       "risk": 1,
       "lines": 16
     },
-    "DB-068.06": {
+    "DB-069.06": {
       "path": "upgrade-1.38-food-orders.sql",
       "area": "DB",
       "line": 62,
@@ -58946,7 +58954,7 @@
       "risk": 1,
       "lines": 17
     },
-    "DB-069.01": {
+    "DB-070.01": {
       "path": "upgrade-1.39-food-guest-requests.sql",
       "area": "DB",
       "line": 1,
@@ -58954,7 +58962,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-069.02": {
+    "DB-070.02": {
       "path": "upgrade-1.39-food-guest-requests.sql",
       "area": "DB",
       "line": 3,
@@ -58962,7 +58970,7 @@
       "risk": 1,
       "lines": 17
     },
-    "DB-070.01": {
+    "DB-071.01": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 1,
@@ -58970,7 +58978,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.02": {
+    "DB-071.02": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 2,
@@ -58978,7 +58986,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.03": {
+    "DB-071.03": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 3,
@@ -58986,7 +58994,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.04": {
+    "DB-071.04": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 4,
@@ -58994,7 +59002,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.05": {
+    "DB-071.05": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 5,
@@ -59002,7 +59010,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-070.06": {
+    "DB-071.06": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 6,
@@ -59010,7 +59018,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.07": {
+    "DB-071.07": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 7,
@@ -59018,7 +59026,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.08": {
+    "DB-071.08": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 8,
@@ -59026,7 +59034,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-070.09": {
+    "DB-071.09": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 9,
@@ -59034,7 +59042,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.10": {
+    "DB-071.10": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 10,
@@ -59042,7 +59050,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.11": {
+    "DB-071.11": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 11,
@@ -59050,7 +59058,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-070.12": {
+    "DB-071.12": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 12,
@@ -59058,7 +59066,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.13": {
+    "DB-071.13": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 13,
@@ -59066,7 +59074,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.14": {
+    "DB-071.14": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 14,
@@ -59074,7 +59082,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.15": {
+    "DB-071.15": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 15,
@@ -59082,7 +59090,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.16": {
+    "DB-071.16": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 16,
@@ -59090,7 +59098,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.17": {
+    "DB-071.17": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 17,
@@ -59098,7 +59106,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.18": {
+    "DB-071.18": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 18,
@@ -59106,7 +59114,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.19": {
+    "DB-071.19": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 19,
@@ -59114,7 +59122,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.20": {
+    "DB-071.20": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 20,
@@ -59122,7 +59130,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.21": {
+    "DB-071.21": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 21,
@@ -59130,7 +59138,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.22": {
+    "DB-071.22": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 22,
@@ -59138,7 +59146,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.23": {
+    "DB-071.23": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 23,
@@ -59146,7 +59154,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.24": {
+    "DB-071.24": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 24,
@@ -59154,7 +59162,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-070.25": {
+    "DB-071.25": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 25,
@@ -59162,7 +59170,7 @@
       "risk": 1,
       "lines": 13
     },
-    "DB-070.26": {
+    "DB-071.26": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 38,
@@ -59170,7 +59178,7 @@
       "risk": 1,
       "lines": 14
     },
-    "DB-070.27": {
+    "DB-071.27": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 52,
@@ -59178,7 +59186,7 @@
       "risk": 1,
       "lines": 15
     },
-    "DB-070.28": {
+    "DB-071.28": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 67,
@@ -59186,7 +59194,7 @@
       "risk": 1,
       "lines": 12
     },
-    "DB-070.29": {
+    "DB-071.29": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 79,
@@ -59194,7 +59202,7 @@
       "risk": 1,
       "lines": 17
     },
-    "DB-070.30": {
+    "DB-071.30": {
       "path": "upgrade-1.4-final.sql",
       "area": "DB",
       "line": 96,
@@ -59202,7 +59210,7 @@
       "risk": 1,
       "lines": 18
     },
-    "DB-071.01": {
+    "DB-072.01": {
       "path": "upgrade-1.40-food-guest-deputy.sql",
       "area": "DB",
       "line": 1,
@@ -59210,7 +59218,7 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-071.02": {
+    "DB-072.02": {
       "path": "upgrade-1.40-food-guest-deputy.sql",
       "area": "DB",
       "line": 3,
@@ -59218,168 +59226,8 @@
       "risk": 0,
       "lines": 4
     },
-    "DB-072.01": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 1,
-      "anchor": "مقدمهٔ فایل",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.02": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 2,
-      "anchor": "CREATE TABLE service_catalog",
-      "risk": 1,
-      "lines": 16
-    },
-    "DB-072.03": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 18,
-      "anchor": "CREATE TABLE service_catalog_fields",
-      "risk": 1,
-      "lines": 13
-    },
-    "DB-072.04": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 31,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.05": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 32,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.06": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 33,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.07": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 34,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.08": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 35,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.09": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 36,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.10": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 37,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.11": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 38,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.12": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 39,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 1
-    },
-    "DB-072.13": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 40,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 1,
-      "lines": 1
-    },
-    "DB-072.14": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 41,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 1,
-      "lines": 2
-    },
-    "DB-072.15": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 43,
-      "anchor": "CREATE TABLE notifications",
-      "risk": 1,
-      "lines": 15
-    },
-    "DB-072.16": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 58,
-      "anchor": "CREATE TABLE login_attempts",
-      "risk": 1,
-      "lines": 8
-    },
-    "DB-072.17": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 66,
-      "anchor": "CREATE TABLE ticket_sla_alerts",
-      "risk": 1,
-      "lines": 10
-    },
-    "DB-072.18": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 76,
-      "anchor": "CREATE TABLE knowledge_articles",
-      "risk": 1,
-      "lines": 14
-    },
-    "DB-072.19": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 90,
-      "anchor": "CREATE TABLE holidays",
-      "risk": 1,
-      "lines": 10
-    },
-    "DB-072.20": {
-      "path": "upgrade-1.5-offline-operations.sql",
-      "area": "DB",
-      "line": 100,
-      "anchor": "CREATE TABLE asset_relations",
-      "risk": 1,
-      "lines": 13
-    },
     "DB-073.01": {
-      "path": "upgrade-1.6-hardening.sql",
+      "path": "upgrade-1.5-offline-operations.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59387,23 +59235,159 @@
       "lines": 1
     },
     "DB-073.02": {
-      "path": "upgrade-1.6-hardening.sql",
+      "path": "upgrade-1.5-offline-operations.sql",
       "area": "DB",
       "line": 2,
+      "anchor": "CREATE TABLE service_catalog",
+      "risk": 1,
+      "lines": 16
+    },
+    "DB-073.03": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 18,
+      "anchor": "CREATE TABLE service_catalog_fields",
+      "risk": 1,
+      "lines": 13
+    },
+    "DB-073.04": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 31,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.05": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 32,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.06": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 33,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.07": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 34,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.08": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 35,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.09": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 36,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.10": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 37,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.11": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 38,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.12": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 39,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-073.13": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 40,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 1,
+      "lines": 1
+    },
+    "DB-073.14": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 41,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 1,
+      "lines": 2
+    },
+    "DB-073.15": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 43,
+      "anchor": "CREATE TABLE notifications",
+      "risk": 1,
+      "lines": 15
+    },
+    "DB-073.16": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 58,
       "anchor": "CREATE TABLE login_attempts",
       "risk": 1,
       "lines": 8
     },
-    "DB-073.03": {
-      "path": "upgrade-1.6-hardening.sql",
+    "DB-073.17": {
+      "path": "upgrade-1.5-offline-operations.sql",
       "area": "DB",
-      "line": 10,
+      "line": 66,
       "anchor": "CREATE TABLE ticket_sla_alerts",
       "risk": 1,
       "lines": 10
     },
+    "DB-073.18": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 76,
+      "anchor": "CREATE TABLE knowledge_articles",
+      "risk": 1,
+      "lines": 14
+    },
+    "DB-073.19": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 90,
+      "anchor": "CREATE TABLE holidays",
+      "risk": 1,
+      "lines": 10
+    },
+    "DB-073.20": {
+      "path": "upgrade-1.5-offline-operations.sql",
+      "area": "DB",
+      "line": 100,
+      "anchor": "CREATE TABLE asset_relations",
+      "risk": 1,
+      "lines": 13
+    },
     "DB-074.01": {
-      "path": "upgrade-1.7-governance.sql",
+      "path": "upgrade-1.6-hardening.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59411,47 +59395,23 @@
       "lines": 1
     },
     "DB-074.02": {
-      "path": "upgrade-1.7-governance.sql",
+      "path": "upgrade-1.6-hardening.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "CREATE TABLE change_records",
+      "anchor": "CREATE TABLE login_attempts",
       "risk": 1,
-      "lines": 29
+      "lines": 8
     },
     "DB-074.03": {
-      "path": "upgrade-1.7-governance.sql",
+      "path": "upgrade-1.6-hardening.sql",
       "area": "DB",
-      "line": 31,
-      "anchor": "CREATE TABLE change_approvals",
+      "line": 10,
+      "anchor": "CREATE TABLE ticket_sla_alerts",
       "risk": 1,
-      "lines": 12
-    },
-    "DB-074.04": {
-      "path": "upgrade-1.7-governance.sql",
-      "area": "DB",
-      "line": 43,
-      "anchor": "CREATE TABLE change_ticket_links",
-      "risk": 1,
-      "lines": 11
-    },
-    "DB-074.05": {
-      "path": "upgrade-1.7-governance.sql",
-      "area": "DB",
-      "line": 54,
-      "anchor": "CREATE TABLE problem_records",
-      "risk": 1,
-      "lines": 24
-    },
-    "DB-074.06": {
-      "path": "upgrade-1.7-governance.sql",
-      "area": "DB",
-      "line": 78,
-      "anchor": "CREATE TABLE problem_ticket_links",
-      "risk": 1,
-      "lines": 11
+      "lines": 10
     },
     "DB-075.01": {
-      "path": "upgrade-1.8-cd-dvd-identity.sql",
+      "path": "upgrade-1.7-governance.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59459,15 +59419,47 @@
       "lines": 1
     },
     "DB-075.02": {
-      "path": "upgrade-1.8-cd-dvd-identity.sql",
+      "path": "upgrade-1.7-governance.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "ALTER TABLE cd_dvd_records",
+      "anchor": "CREATE TABLE change_records",
       "risk": 1,
-      "lines": 5
+      "lines": 29
+    },
+    "DB-075.03": {
+      "path": "upgrade-1.7-governance.sql",
+      "area": "DB",
+      "line": 31,
+      "anchor": "CREATE TABLE change_approvals",
+      "risk": 1,
+      "lines": 12
+    },
+    "DB-075.04": {
+      "path": "upgrade-1.7-governance.sql",
+      "area": "DB",
+      "line": 43,
+      "anchor": "CREATE TABLE change_ticket_links",
+      "risk": 1,
+      "lines": 11
+    },
+    "DB-075.05": {
+      "path": "upgrade-1.7-governance.sql",
+      "area": "DB",
+      "line": 54,
+      "anchor": "CREATE TABLE problem_records",
+      "risk": 1,
+      "lines": 24
+    },
+    "DB-075.06": {
+      "path": "upgrade-1.7-governance.sql",
+      "area": "DB",
+      "line": 78,
+      "anchor": "CREATE TABLE problem_ticket_links",
+      "risk": 1,
+      "lines": 11
     },
     "DB-076.01": {
-      "path": "upgrade-1.8-cd-dvd.sql",
+      "path": "upgrade-1.8-cd-dvd-identity.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59475,23 +59467,15 @@
       "lines": 1
     },
     "DB-076.02": {
-      "path": "upgrade-1.8-cd-dvd.sql",
+      "path": "upgrade-1.8-cd-dvd-identity.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "CREATE TABLE cd_dvd_types",
+      "anchor": "ALTER TABLE cd_dvd_records",
       "risk": 1,
-      "lines": 8
-    },
-    "DB-076.03": {
-      "path": "upgrade-1.8-cd-dvd.sql",
-      "area": "DB",
-      "line": 10,
-      "anchor": "CREATE TABLE cd_dvd_records",
-      "risk": 1,
-      "lines": 35
+      "lines": 5
     },
     "DB-077.01": {
-      "path": "upgrade-1.8-final.sql",
+      "path": "upgrade-1.8-cd-dvd.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59499,47 +59483,23 @@
       "lines": 1
     },
     "DB-077.02": {
-      "path": "upgrade-1.8-final.sql",
+      "path": "upgrade-1.8-cd-dvd.sql",
       "area": "DB",
       "line": 2,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 0,
-      "lines": 7
+      "anchor": "CREATE TABLE cd_dvd_types",
+      "risk": 1,
+      "lines": 8
     },
     "DB-077.03": {
-      "path": "upgrade-1.8-final.sql",
+      "path": "upgrade-1.8-cd-dvd.sql",
       "area": "DB",
-      "line": 9,
-      "anchor": "ALTER TABLE assets",
-      "risk": 0,
-      "lines": 9
-    },
-    "DB-077.04": {
-      "path": "upgrade-1.8-final.sql",
-      "area": "DB",
-      "line": 18,
-      "anchor": "CREATE TABLE ola_policies",
+      "line": 10,
+      "anchor": "CREATE TABLE cd_dvd_records",
       "risk": 1,
-      "lines": 18
-    },
-    "DB-077.05": {
-      "path": "upgrade-1.8-final.sql",
-      "area": "DB",
-      "line": 36,
-      "anchor": "CREATE TABLE ticket_ola_alerts",
-      "risk": 1,
-      "lines": 10
-    },
-    "DB-077.06": {
-      "path": "upgrade-1.8-final.sql",
-      "area": "DB",
-      "line": 46,
-      "anchor": "ALTER TABLE tickets",
-      "risk": 1,
-      "lines": 2
+      "lines": 35
     },
     "DB-078.01": {
-      "path": "upgrade-1.8-routing.sql",
+      "path": "upgrade-1.8-final.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59547,6 +59507,54 @@
       "lines": 1
     },
     "DB-078.02": {
+      "path": "upgrade-1.8-final.sql",
+      "area": "DB",
+      "line": 2,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 0,
+      "lines": 7
+    },
+    "DB-078.03": {
+      "path": "upgrade-1.8-final.sql",
+      "area": "DB",
+      "line": 9,
+      "anchor": "ALTER TABLE assets",
+      "risk": 0,
+      "lines": 9
+    },
+    "DB-078.04": {
+      "path": "upgrade-1.8-final.sql",
+      "area": "DB",
+      "line": 18,
+      "anchor": "CREATE TABLE ola_policies",
+      "risk": 1,
+      "lines": 18
+    },
+    "DB-078.05": {
+      "path": "upgrade-1.8-final.sql",
+      "area": "DB",
+      "line": 36,
+      "anchor": "CREATE TABLE ticket_ola_alerts",
+      "risk": 1,
+      "lines": 10
+    },
+    "DB-078.06": {
+      "path": "upgrade-1.8-final.sql",
+      "area": "DB",
+      "line": 46,
+      "anchor": "ALTER TABLE tickets",
+      "risk": 1,
+      "lines": 2
+    },
+    "DB-079.01": {
+      "path": "upgrade-1.8-routing.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 1
+    },
+    "DB-079.02": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 2,
@@ -59554,7 +59562,7 @@
       "risk": 1,
       "lines": 11
     },
-    "DB-078.03": {
+    "DB-079.03": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 13,
@@ -59562,7 +59570,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.04": {
+    "DB-079.04": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 14,
@@ -59570,7 +59578,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.05": {
+    "DB-079.05": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 16,
@@ -59578,7 +59586,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.06": {
+    "DB-079.06": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 17,
@@ -59586,7 +59594,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.07": {
+    "DB-079.07": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 18,
@@ -59594,7 +59602,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.08": {
+    "DB-079.08": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 19,
@@ -59602,7 +59610,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.09": {
+    "DB-079.09": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 20,
@@ -59610,7 +59618,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.10": {
+    "DB-079.10": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 21,
@@ -59618,7 +59626,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-078.11": {
+    "DB-079.11": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 22,
@@ -59626,7 +59634,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.12": {
+    "DB-079.12": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 23,
@@ -59634,7 +59642,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.13": {
+    "DB-079.13": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 24,
@@ -59642,7 +59650,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.14": {
+    "DB-079.14": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 25,
@@ -59650,7 +59658,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-078.15": {
+    "DB-079.15": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 26,
@@ -59658,7 +59666,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.16": {
+    "DB-079.16": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 28,
@@ -59666,7 +59674,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.17": {
+    "DB-079.17": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 30,
@@ -59674,7 +59682,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-078.18": {
+    "DB-079.18": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 31,
@@ -59682,7 +59690,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-078.19": {
+    "DB-079.19": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 32,
@@ -59690,7 +59698,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.20": {
+    "DB-079.20": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 34,
@@ -59698,7 +59706,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.21": {
+    "DB-079.21": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 36,
@@ -59706,7 +59714,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.22": {
+    "DB-079.22": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 38,
@@ -59714,7 +59722,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.23": {
+    "DB-079.23": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 40,
@@ -59722,7 +59730,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.24": {
+    "DB-079.24": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 42,
@@ -59730,7 +59738,7 @@
       "risk": 1,
       "lines": 2
     },
-    "DB-078.25": {
+    "DB-079.25": {
       "path": "upgrade-1.8-routing.sql",
       "area": "DB",
       "line": 44,
@@ -59738,7 +59746,7 @@
       "risk": 1,
       "lines": 3
     },
-    "DB-079.01": {
+    "DB-080.01": {
       "path": "upgrade-1.9-food-ticket.sql",
       "area": "DB",
       "line": 1,
@@ -59746,7 +59754,7 @@
       "risk": 0,
       "lines": 14
     },
-    "DB-079.02": {
+    "DB-080.02": {
       "path": "upgrade-1.9-food-ticket.sql",
       "area": "DB",
       "line": 15,
@@ -59754,7 +59762,7 @@
       "risk": 1,
       "lines": 23
     },
-    "DB-079.03": {
+    "DB-080.03": {
       "path": "upgrade-1.9-food-ticket.sql",
       "area": "DB",
       "line": 38,
@@ -59762,7 +59770,7 @@
       "risk": 1,
       "lines": 27
     },
-    "DB-079.04": {
+    "DB-080.04": {
       "path": "upgrade-1.9-food-ticket.sql",
       "area": "DB",
       "line": 65,
@@ -59770,7 +59778,7 @@
       "risk": 1,
       "lines": 16
     },
-    "DB-080.01": {
+    "DB-081.01": {
       "path": "upgrade-food-drop-legacy-orders-columns.sql",
       "area": "DB",
       "line": 1,
@@ -59778,7 +59786,7 @@
       "risk": 0,
       "lines": 3
     },
-    "DB-080.02": {
+    "DB-081.02": {
       "path": "upgrade-food-drop-legacy-orders-columns.sql",
       "area": "DB",
       "line": 4,
@@ -59786,7 +59794,7 @@
       "risk": 0,
       "lines": 1
     },
-    "DB-080.03": {
+    "DB-081.03": {
       "path": "upgrade-food-drop-legacy-orders-columns.sql",
       "area": "DB",
       "line": 5,
@@ -59794,32 +59802,8 @@
       "risk": 0,
       "lines": 2
     },
-    "DB-081.01": {
-      "path": "upgrade-food-employee-auth-source.sql",
-      "area": "DB",
-      "line": 1,
-      "anchor": "مقدمهٔ فایل",
-      "risk": 0,
-      "lines": 5
-    },
-    "DB-081.02": {
-      "path": "upgrade-food-employee-auth-source.sql",
-      "area": "DB",
-      "line": 6,
-      "anchor": "ALTER TABLE users",
-      "risk": 0,
-      "lines": 3
-    },
-    "DB-081.03": {
-      "path": "upgrade-food-employee-auth-source.sql",
-      "area": "DB",
-      "line": 9,
-      "anchor": "UPDATE users",
-      "risk": 1,
-      "lines": 6
-    },
     "DB-082.01": {
-      "path": "upgrade-remove-legacy-admin-role.sql",
+      "path": "upgrade-food-employee-auth-source.sql",
       "area": "DB",
       "line": 1,
       "anchor": "مقدمهٔ فایل",
@@ -59827,6 +59811,30 @@
       "lines": 5
     },
     "DB-082.02": {
+      "path": "upgrade-food-employee-auth-source.sql",
+      "area": "DB",
+      "line": 6,
+      "anchor": "ALTER TABLE users",
+      "risk": 0,
+      "lines": 3
+    },
+    "DB-082.03": {
+      "path": "upgrade-food-employee-auth-source.sql",
+      "area": "DB",
+      "line": 9,
+      "anchor": "UPDATE users",
+      "risk": 1,
+      "lines": 6
+    },
+    "DB-083.01": {
+      "path": "upgrade-remove-legacy-admin-role.sql",
+      "area": "DB",
+      "line": 1,
+      "anchor": "مقدمهٔ فایل",
+      "risk": 0,
+      "lines": 5
+    },
+    "DB-083.02": {
       "path": "upgrade-remove-legacy-admin-role.sql",
       "area": "DB",
       "line": 6,
@@ -59834,7 +59842,7 @@
       "risk": 1,
       "lines": 3
     },
-    "DB-082.03": {
+    "DB-083.03": {
       "path": "upgrade-remove-legacy-admin-role.sql",
       "area": "DB",
       "line": 9,
@@ -59842,7 +59850,7 @@
       "risk": 1,
       "lines": 3
     },
-    "DB-083.01": {
+    "DB-084.01": {
       "path": "upgrade-unique-employee-number.sql",
       "area": "DB",
       "line": 1,
@@ -59850,7 +59858,7 @@
       "risk": 0,
       "lines": 10
     },
-    "DB-083.02": {
+    "DB-084.02": {
       "path": "upgrade-unique-employee-number.sql",
       "area": "DB",
       "line": 11,
@@ -59858,7 +59866,7 @@
       "risk": 1,
       "lines": 1
     },
-    "DB-083.03": {
+    "DB-084.03": {
       "path": "upgrade-unique-employee-number.sql",
       "area": "DB",
       "line": 12,
@@ -59866,7 +59874,7 @@
       "risk": 1,
       "lines": 3
     },
-    "DB-083.04": {
+    "DB-084.04": {
       "path": "upgrade-unique-employee-number.sql",
       "area": "DB",
       "line": 15,

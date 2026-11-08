@@ -2174,8 +2174,8 @@ CANCELLATION_PENDING_SAME_STATE_COLUMNS	const	modules/request-center/WorkflowSer
 UPDATE_COLUMNS	const	modules/request-center/WorkflowService.php	48	other
 __construct	function	modules/request-center/WorkflowService.php	59	other
 allowedTransitions	function	modules/request-center/WorkflowService.php	63	other
-transition	function	modules/request-center/WorkflowService.php	95	other
-assertTransitionAllowed	function	modules/request-center/WorkflowService.php	184	other
+transition	function	modules/request-center/WorkflowService.php	96	other
+assertTransitionAllowed	function	modules/request-center/WorkflowService.php	185	other
 request_center_export_report	function	modules/request-center/lib/endpoints.php	10	other
 request_center_download_attachment	function	modules/request-center/lib/endpoints.php	34	other
 request_center_dashboard_rows	function	modules/request-center/lib/endpoints.php	68	other

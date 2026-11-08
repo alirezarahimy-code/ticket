@@ -8,12 +8,12 @@
 
 | سنجه | مقدار |
 |---|---|
-| فایل‌های کد تولیدی | 588 |
-| خطوط | 131,669 |
-| آدرس‌ها (بلوک) | 6,869 |
+| فایل‌های کد تولیدی | 589 |
+| خطوط | 131,810 |
+| آدرس‌ها (بلوک) | 6,870 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,869 آدرس |
+| باقی‌مانده | 6,870 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -33,19 +33,19 @@
 | **local accounts** | `local-accounts` | — | `PAGE-034.38` <sub>index.php:865</sub><br>`PAGE-037.03` <sub>local-accounts.php:25</sub><br>`PAGE-037.05` <sub>local-accounts.php:81</sub><br>`PAGE-037.06` <sub>local-accounts.php:138</sub> | 10 |
 | **logging dashboard** | `logging-dashboard` | — | `PAGE-034.53` <sub>index.php:1003</sub><br>`ASSET-016.01` <sub>assets/logging-dashboard.css:1</sub><br>`PAGE-038.04` <sub>logging-dashboard.php:114</sub><br>`PAGE-038.02` <sub>logging-dashboard.php:4</sub> | 10 |
 | **system health** | `system-health` | — | `PAGE-034.54` <sub>index.php:1007</sub><br>`PAGE-070.28` <sub>system-health.php:947</sub><br>`PAGE-070.03` <sub>system-health.php:25</sub><br>`PAGE-070.04` <sub>system-health.php:43</sub> | 35 |
-| **اعلان‌ها** | `notifications` | — | `PAGE-034.51` <sub>index.php:976</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.50` <sub>index.php:968</sub><br>`DB-002.30` <sub>install-empty-db.sql:442</sub> | 43 |
+| **اعلان‌ها** | `notifications` | — | `PAGE-034.51` <sub>index.php:976</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.50` <sub>index.php:968</sub><br>`DB-002.30` <sub>install-empty-db.sql:443</sub> | 43 |
 | **به‌روزرسانی و پشتیبان‌گیری** | `backup` | `backup.view` | `PAGE-007.04` <sub>backup.php:32</sub><br>`PAGE-007.02` <sub>backup.php:6</sub><br>`PAGE-007.03` <sub>backup.php:12</sub><br>`PAGE-007.05` <sub>backup.php:78</sub> | 42 |
 | **تاریخچه CD/DVD** | `cd-dvd-history` | `cddvd.history` | `PAGE-034.45` <sub>index.php:911</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 11 |
 | **تاریخچه دارایی** | `asset-history` | `asset.history` | `PAGE-034.65` <sub>index.php:1555</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 4 |
 | **تحلیل و چارت‌ها** | `analytics` | `analytics.view` | `PAGE-048.02` <sub>modules/request-center/Pages/analytics.php:6</sub><br>`PAGE-048.01` <sub>modules/request-center/Pages/analytics.php:1</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 8 |
 | **تست جمع‌آوری اطلاعات** | `inventory-diagnostics` | `inventory.diagnostics` | `PAGE-034.64` <sub>index.php:1523</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
 | **تغییر رمز عبور** | `change-password` | — | `PAGE-034.22` <sub>index.php:427</sub><br>`PAGE-034.37` <sub>index.php:862</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 7 |
-| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 36 |
+| **تقویم SLA** | `holidays` | `holidays.view` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:517</sub><br>`DB-005.26` <sub>migrations/003-sync-schema-151.sql:386</sub> | 36 |
 | **تنظیمات سامانه** | `settings` | — | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub><br>`DB-005.02` <sub>migrations/003-sync-schema-151.sql:5</sub> | 62 |
 | **ثبت درخواست** | `new-ticket` | — | `PAGE-050.02` <sub>modules/request-center/Pages/create.php:12</sub><br>`PAGE-034.62` <sub>index.php:1409</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 10 |
 | **جزئیات درخواست** | `ticket` | — | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-026.09` <sub>food-ticket-templates.php:153</sub><br>`PAGE-026.24` <sub>food-ticket-templates.php:502</sub><br>`PAGE-026.56` <sub>food-ticket-templates.php:2059</sub> | 26 |
 | **جست‌وجو** | `search` | — | `PAGE-034.59` <sub>index.php:1207</sub><br>`PAGE-034.58` <sub>index.php:1199</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 44 |
-| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 177 |
+| **دارایی‌ها** | `assets` | `assets.view` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub><br>`DB-002.36` <sub>install-empty-db.sql:527</sub><br>`DB-005.27` <sub>migrations/003-sync-schema-151.sql:395</sub> | 177 |
 | **داشبورد** | `dashboard` | `dash.view` | `PAGE-034.72` <sub>index.php:2413</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub><br>`CORE-018.16` <sub>lib/settings-effects.php:277</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 27 |
 | **دانش‌نامه** | `knowledge` | `knowledge.view` | `PAGE-034.49` <sub>index.php:931</sub><br>`CORE-018.05` <sub>lib/settings-effects.php:57</sub> | 8 |
 | **سفارش غذا** | `food-order` | — | `PAGE-034.25` <sub>index.php:466</sub><br>`PAGE-034.42` <sub>index.php:895</sub><br>`PAGE-034.43` <sub>index.php:903</sub><br>`TOOL-029.03` <sub>tools/food_system_router.php:18</sub> | 196 |
@@ -84,12 +84,12 @@
 | درخواست | **ویرایش** | `ticket.edit` | `PAGE-044.09` <sub>modules/request-center/Actions/ticket-actions.php:605</sub><br>`PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-044.08` <sub>modules/request-center/Actions/ticket-actions.php:456</sub> | 14 |
 | درخواست | **ارجاع درخواست به کارشناس** | `ticket.assign` | `CORE-003.12` <sub>lib/auth-scope.php:196</sub> | 7 |
 | درخواست | **ویرایش** | `ticket.bulk` | `PAGE-040.04` <sub>modules/request-center/Actions/bulk-actions.php:44</sub> | 4 |
-| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:149</sub> | 6 |
+| درخواست | **امتیازدهی به درخواست** | `ticket.rate` | `PAGE-051.02` <sub>modules/request-center/Pages/detail.php:11</sub><br>`PAGE-043.05` <sub>modules/request-center/Actions/supervisor-actions.php:227</sub> | 6 |
 | درخواست | **اتصال دارایی به درخواست** | `ticket.attach_asset` | `PAGE-040.03` <sub>modules/request-center/Actions/bulk-actions.php:24</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
 | درخواست | **صف کاری** | `queue.view` | `PAGE-053.02` <sub>modules/request-center/Pages/queue.php:6</sub><br>`CORE-017.02` <sub>lib/render.php:4</sub> | 13 |
-| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 14 |
+| درخواست | **پنل سوپروایزر** | `supervisor.panel` | `PAGE-057.02` <sub>modules/request-center/Pages/supervisor.php:9</sub><br>`PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub><br>`PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:177</sub> | 14 |
 | درخواست | **ویرایش** | `supervisor.decide` | `PAGE-043.03` <sub>modules/request-center/Actions/supervisor-actions.php:25</sub> | 4 |
-| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:99</sub> | 3 |
+| درخواست | **بازگشایی/برگشت درخواست** | `supervisor.reopen` | `PAGE-043.04` <sub>modules/request-center/Actions/supervisor-actions.php:177</sub> | 3 |
 | خدمات و دسته‌بندی | **مشاهدهٔ خدمات** | `services.view` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`PAGE-030.03` <sub>global-search.php:31</sub><br>`PAGE-034.30` <sub>index.php:781</sub> | 5 |
 | خدمات و دسته‌بندی | **ویرایش** | `services.manage` | `PAGE-042.03` <sub>modules/request-center/Actions/service-actions.php:29</sub><br>`PAGE-042.07` <sub>modules/request-center/Actions/service-actions.php:155</sub><br>`PAGE-065.03` <sub>permissions.php:28</sub> | 8 |
 | خدمات و دسته‌بندی | **مدیریت دسته‌بندی خدمات** | `service_cat.manage` | `PAGE-065.03` <sub>permissions.php:28</sub><br>`ACT-017.03` <sub>actions/user-structure-actions.php:29</sub><br>`PAGE-065.16` <sub>permissions.php:350</sub> | 3 |
@@ -182,90 +182,90 @@
 
 | جدول | آدرس‌های اصلی | کل |
 |---|---|---|
-| `activity_logs` | `DB-002.28` <sub>install-empty-db.sql:396</sub><br>`DB-005.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-041.25` <sub>schema.sql:375</sub> | 63 |
-| `api_rate_limits` | `DB-002.67` <sub>install-empty-db.sql:1134</sub><br>`DB-005.58` <sub>migrations/003-sync-schema-151.sql:949</sub><br>`DB-041.67` <sub>schema.sql:1147</sub> | 8 |
+| `activity_logs` | `DB-002.28` <sub>install-empty-db.sql:397</sub><br>`DB-005.19` <sub>migrations/003-sync-schema-151.sql:298</sub><br>`DB-042.25` <sub>schema.sql:376</sub> | 63 |
+| `api_rate_limits` | `DB-002.67` <sub>install-empty-db.sql:1135</sub><br>`DB-005.58` <sub>migrations/003-sync-schema-151.sql:949</sub><br>`DB-042.67` <sub>schema.sql:1148</sub> | 8 |
 | `asset_dedupe_backup_016` | `DB-018.20` <sub>migrations/016-auto-asset-finish.sql:53</sub><br>`DB-018.22` <sub>migrations/016-auto-asset-finish.sql:57</sub><br>`DB-018.19` <sub>migrations/016-auto-asset-finish.sql:52</sub> | 4 |
-| `asset_graphics_adapters` | `DB-002.40` <sub>install-empty-db.sql:615</sub><br>`DB-005.30` <sub>migrations/003-sync-schema-151.sql:475</sub><br>`DB-041.37` <sub>schema.sql:594</sub> | 13 |
-| `asset_history_events` | `DB-002.43` <sub>install-empty-db.sql:657</sub><br>`DB-005.33` <sub>migrations/003-sync-schema-151.sql:514</sub><br>`DB-041.40` <sub>schema.sql:636</sub> | 16 |
-| `asset_inventory_history` | `DB-002.42` <sub>install-empty-db.sql:646</sub><br>`DB-005.32` <sub>migrations/003-sync-schema-151.sql:504</sub><br>`DB-041.39` <sub>schema.sql:625</sub> | 12 |
-| `asset_memory_modules` | `DB-002.38` <sub>install-empty-db.sql:584</sub><br>`DB-005.28` <sub>migrations/003-sync-schema-151.sql:446</sub><br>`DB-041.35` <sub>schema.sql:563</sub> | 16 |
-| `asset_peripherals` | `DB-002.41` <sub>install-empty-db.sql:628</sub><br>`DB-005.31` <sub>migrations/003-sync-schema-151.sql:487</sub><br>`DB-041.38` <sub>schema.sql:607</sub> | 19 |
-| `asset_profiles` | `DB-002.45` <sub>install-empty-db.sql:688</sub><br>`DB-005.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-041.42` <sub>schema.sql:667</sub> | 96 |
-| `asset_relations` | `DB-002.44` <sub>install-empty-db.sql:675</sub><br>`DB-005.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-041.41` <sub>schema.sql:654</sub> | 12 |
-| `asset_storage_devices` | `DB-002.39` <sub>install-empty-db.sql:599</sub><br>`DB-005.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-041.36` <sub>schema.sql:578</sub> | 17 |
-| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub><br>`DB-002.36` <sub>install-empty-db.sql:526</sub> | 177 |
-| `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-041.18` <sub>schema.sql:223</sub> | 33 |
-| `cd_dvd_records` | `DB-002.16` <sub>install-empty-db.sql:144</sub><br>`DB-005.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-041.13` <sub>schema.sql:123</sub> | 40 |
-| `cd_dvd_types` | `DB-002.15` <sub>install-empty-db.sql:136</sub><br>`DB-041.12` <sub>schema.sql:115</sub><br>`DB-076.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
-| `change_approvals` | `DB-002.50` <sub>install-empty-db.sql:829</sub><br>`DB-005.39` <sub>migrations/003-sync-schema-151.sql:678</sub><br>`DB-041.47` <sub>schema.sql:808</sub> | 15 |
-| `change_records` | `DB-002.49` <sub>install-empty-db.sql:800</sub><br>`DB-005.38` <sub>migrations/003-sync-schema-151.sql:650</sub><br>`DB-041.46` <sub>schema.sql:779</sub> | 31 |
-| `change_ticket_links` | `DB-002.51` <sub>install-empty-db.sql:841</sub><br>`DB-005.40` <sub>migrations/003-sync-schema-151.sql:689</sub><br>`DB-041.48` <sub>schema.sql:820</sub> | 15 |
-| `chatbot_faq` | `DB-002.107` <sub>install-empty-db.sql:1342</sub><br>`DB-005.54` <sub>migrations/003-sync-schema-151.sql:914</sub><br>`DB-041.63` <sub>schema.sql:1107</sub> | 13 |
-| `chatbot_logs` | `DB-002.108` <sub>install-empty-db.sql:1354</sub><br>`DB-005.55` <sub>migrations/003-sync-schema-151.sql:925</sub><br>`DB-041.64` <sub>schema.sql:1119</sub> | 14 |
-| `departments` | `DB-002.05` <sub>install-empty-db.sql:27</sub><br>`DB-005.03` <sub>migrations/003-sync-schema-151.sql:9</sub><br>`DB-041.02` <sub>schema.sql:6</sub> | 68 |
-| `domain_scan_queue` | `DB-002.69` <sub>install-empty-db.sql:1156</sub><br>`DB-005.60` <sub>migrations/003-sync-schema-151.sql:968</sub><br>`DB-041.69` <sub>schema.sql:1169</sub> | 19 |
-| `domain_scan_runs` | `DB-002.68` <sub>install-empty-db.sql:1143</sub><br>`DB-005.59` <sub>migrations/003-sync-schema-151.sql:956</sub><br>`DB-041.68` <sub>schema.sql:1156</sub> | 22 |
-| `food_calendar` | `DB-002.100` <sub>install-empty-db.sql:1254</sub><br>`DB-005.65` <sub>migrations/003-sync-schema-151.sql:1029</sub><br>`DB-041.95` <sub>schema.sql:1265</sub> | 39 |
-| `food_calendar_items` | `DB-002.101` <sub>install-empty-db.sql:1269</sub><br>`DB-005.66` <sub>migrations/003-sync-schema-151.sql:1042</sub><br>`DB-041.96` <sub>schema.sql:1280</sub> | 46 |
-| `food_catalog` | `DB-002.99` <sub>install-empty-db.sql:1242</sub><br>`DB-005.63` <sub>migrations/003-sync-schema-151.sql:1000</sub><br>`DB-041.93` <sub>schema.sql:1233</sub> | 50 |
-| `food_guest_requests` | `DB-002.110` <sub>install-empty-db.sql:1376</sub><br>`DB-005.64` <sub>migrations/003-sync-schema-151.sql:1011</sub><br>`DB-041.94` <sub>schema.sql:1245</sub> | 39 |
-| `food_meal_reconciliations` | `DB-002.111` <sub>install-empty-db.sql:1400</sub><br>`DB-025.02` <sub>migrations/022-food-meal-reconciliation-invoices.sql:4</sub><br>`DB-041.100` <sub>schema.sql:1351</sub> | 6 |
-| `food_monthly_invoices` | `DB-002.112` <sub>install-empty-db.sql:1427</sub><br>`DB-025.03` <sub>migrations/022-food-meal-reconciliation-invoices.sql:31</sub><br>`DB-041.101` <sub>schema.sql:1378</sub> | 7 |
-| `food_order_cancel_requests` | `DB-002.104` <sub>install-empty-db.sql:1318</sub><br>`DB-041.99` <sub>schema.sql:1329</sub> | 10 |
-| `food_order_logs` | `DB-002.103` <sub>install-empty-db.sql:1300</sub><br>`DB-005.68` <sub>migrations/003-sync-schema-151.sql:1070</sub><br>`DB-041.98` <sub>schema.sql:1311</sub> | 28 |
-| `food_orders` | `DB-002.102` <sub>install-empty-db.sql:1284</sub><br>`DB-005.67` <sub>migrations/003-sync-schema-151.sql:1056</sub><br>`DB-041.97` <sub>schema.sql:1295</sub> | 76 |
-| `food_ticket_card_map` | `DB-002.89` <sub>install-empty-db.sql:1191</sub><br>`DB-005.61` <sub>migrations/003-sync-schema-151.sql:980</sub><br>`DB-041.89` <sub>schema.sql:1204</sub> | 14 |
-| `food_ticket_config` | `DB-002.54` <sub>install-empty-db.sql:887</sub><br>`DB-005.43` <sub>migrations/003-sync-schema-151.sql:732</sub><br>`DB-041.51` <sub>schema.sql:866</sub> | 46 |
-| `food_ticket_daily_absence` | `DB-002.61` <sub>install-empty-db.sql:1045</sub><br>`DB-005.50` <sub>migrations/003-sync-schema-151.sql:863</sub><br>`DB-014.02` <sub>migrations/012-manual-attendance-clears-absences.sql:4</sub> | 33 |
-| `food_ticket_day_visits` | `DB-002.62` <sub>install-empty-db.sql:1061</sub><br>`DB-041.59` <sub>schema.sql:1040</sub> | 16 |
-| `food_ticket_events` | `DB-002.55` <sub>install-empty-db.sql:918</sub><br>`DB-005.44` <sub>migrations/003-sync-schema-151.sql:750</sub><br>`DB-041.52` <sub>schema.sql:897</sub> | 139 |
-| `food_ticket_group_members` | `DB-002.59` <sub>install-empty-db.sql:1006</sub><br>`DB-005.48` <sub>migrations/003-sync-schema-151.sql:829</sub><br>`DB-041.56` <sub>schema.sql:985</sub> | 21 |
-| `food_ticket_group_runs` | `DB-002.60` <sub>install-empty-db.sql:1018</sub><br>`DB-005.49` <sub>migrations/003-sync-schema-151.sql:839</sub><br>`DB-041.57` <sub>schema.sql:997</sub> | 38 |
-| `food_ticket_group_uid_history` | `DB-002.63` <sub>install-empty-db.sql:1074</sub><br>`DB-005.51` <sub>migrations/003-sync-schema-151.sql:877</sub><br>`DB-041.60` <sub>schema.sql:1053</sub> | 16 |
-| `food_ticket_groups` | `DB-002.58` <sub>install-empty-db.sql:987</sub><br>`DB-005.47` <sub>migrations/003-sync-schema-151.sql:813</sub><br>`DB-041.55` <sub>schema.sql:966</sub> | 37 |
-| `food_ticket_guest_cards` | `DB-002.57` <sub>install-empty-db.sql:973</sub><br>`DB-005.46` <sub>migrations/003-sync-schema-151.sql:800</sub><br>`DB-041.54` <sub>schema.sql:952</sub> | 24 |
-| `food_ticket_print_log` | `DB-002.64` <sub>install-empty-db.sql:1085</sub><br>`DB-005.52` <sub>migrations/003-sync-schema-151.sql:887</sub><br>`DB-041.61` <sub>schema.sql:1064</sub> | 19 |
-| `food_ticket_templates` | `DB-002.90` <sub>install-empty-db.sql:1201</sub><br>`DB-005.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-041.90` <sub>schema.sql:1214</sub> | 21 |
-| `food_ticket_worker_status` | `DB-002.56` <sub>install-empty-db.sql:957</sub><br>`DB-005.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-041.53` <sub>schema.sql:936</sub> | 17 |
-| `handling_units` | `DB-002.13` <sub>install-empty-db.sql:123</sub><br>`DB-005.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-041.10` <sub>schema.sql:102</sub> | 42 |
-| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:516</sub> | 36 |
-| `knowledge_articles` | `DB-002.34` <sub>install-empty-db.sql:502</sub><br>`DB-005.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-041.31` <sub>schema.sql:481</sub> | 17 |
-| `log_issue_events` | `DB-029.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-002.119` <sub>install-empty-db.sql:1543</sub><br>`DB-041.108` <sub>schema.sql:1494</sub> | 15 |
-| `log_issue_history` | `DB-002.118` <sub>install-empty-db.sql:1527</sub><br>`DB-029.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-041.107` <sub>schema.sql:1478</sub> | 12 |
-| `log_issue_notifications` | `DB-002.120` <sub>install-empty-db.sql:1550</sub><br>`DB-029.06` <sub>migrations/026-logging-legacy-result-unknown.sql:56</sub><br>`DB-041.109` <sub>schema.sql:1501</sub> | 14 |
-| `log_issues` | `DB-002.116` <sub>install-empty-db.sql:1491</sub><br>`DB-028.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-041.105` <sub>schema.sql:1442</sub> | 28 |
-| `logging_health_alerts` | `DB-002.117` <sub>install-empty-db.sql:1517</sub><br>`DB-028.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-041.106` <sub>schema.sql:1468</sub> | 13 |
-| `login_attempts` | `DB-002.31` <sub>install-empty-db.sql:460</sub><br>`DB-005.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-041.28` <sub>schema.sql:439</sub> | 14 |
+| `asset_graphics_adapters` | `DB-002.40` <sub>install-empty-db.sql:616</sub><br>`DB-005.30` <sub>migrations/003-sync-schema-151.sql:475</sub><br>`DB-042.37` <sub>schema.sql:595</sub> | 13 |
+| `asset_history_events` | `DB-002.43` <sub>install-empty-db.sql:658</sub><br>`DB-005.33` <sub>migrations/003-sync-schema-151.sql:514</sub><br>`DB-042.40` <sub>schema.sql:637</sub> | 16 |
+| `asset_inventory_history` | `DB-002.42` <sub>install-empty-db.sql:647</sub><br>`DB-005.32` <sub>migrations/003-sync-schema-151.sql:504</sub><br>`DB-042.39` <sub>schema.sql:626</sub> | 12 |
+| `asset_memory_modules` | `DB-002.38` <sub>install-empty-db.sql:585</sub><br>`DB-005.28` <sub>migrations/003-sync-schema-151.sql:446</sub><br>`DB-042.35` <sub>schema.sql:564</sub> | 16 |
+| `asset_peripherals` | `DB-002.41` <sub>install-empty-db.sql:629</sub><br>`DB-005.31` <sub>migrations/003-sync-schema-151.sql:487</sub><br>`DB-042.38` <sub>schema.sql:608</sub> | 19 |
+| `asset_profiles` | `DB-002.45` <sub>install-empty-db.sql:689</sub><br>`DB-005.35` <sub>migrations/003-sync-schema-151.sql:543</sub><br>`DB-042.42` <sub>schema.sql:668</sub> | 96 |
+| `asset_relations` | `DB-002.44` <sub>install-empty-db.sql:676</sub><br>`DB-005.34` <sub>migrations/003-sync-schema-151.sql:531</sub><br>`DB-042.41` <sub>schema.sql:655</sub> | 12 |
+| `asset_storage_devices` | `DB-002.39` <sub>install-empty-db.sql:600</sub><br>`DB-005.29` <sub>migrations/003-sync-schema-151.sql:460</sub><br>`DB-042.36` <sub>schema.sql:579</sub> | 17 |
+| `assets` | `ACT-003.08` <sub>actions/asset-actions.php:190</sub><br>`PAGE-034.67` <sub>index.php:1651</sub><br>`DB-002.36` <sub>install-empty-db.sql:527</sub> | 177 |
+| `categories` | `DB-002.21` <sub>install-empty-db.sql:244</sub><br>`DB-005.12` <sub>migrations/003-sync-schema-151.sql:153</sub><br>`DB-042.18` <sub>schema.sql:223</sub> | 33 |
+| `cd_dvd_records` | `DB-002.16` <sub>install-empty-db.sql:144</sub><br>`DB-005.09` <sub>migrations/003-sync-schema-151.sql:87</sub><br>`DB-042.13` <sub>schema.sql:123</sub> | 40 |
+| `cd_dvd_types` | `DB-002.15` <sub>install-empty-db.sql:136</sub><br>`DB-042.12` <sub>schema.sql:115</sub><br>`DB-077.02` <sub>upgrade-1.8-cd-dvd.sql:2</sub> | 8 |
+| `change_approvals` | `DB-002.50` <sub>install-empty-db.sql:830</sub><br>`DB-005.39` <sub>migrations/003-sync-schema-151.sql:678</sub><br>`DB-042.47` <sub>schema.sql:809</sub> | 15 |
+| `change_records` | `DB-002.49` <sub>install-empty-db.sql:801</sub><br>`DB-005.38` <sub>migrations/003-sync-schema-151.sql:650</sub><br>`DB-042.46` <sub>schema.sql:780</sub> | 31 |
+| `change_ticket_links` | `DB-002.51` <sub>install-empty-db.sql:842</sub><br>`DB-005.40` <sub>migrations/003-sync-schema-151.sql:689</sub><br>`DB-042.48` <sub>schema.sql:821</sub> | 15 |
+| `chatbot_faq` | `DB-002.107` <sub>install-empty-db.sql:1343</sub><br>`DB-005.54` <sub>migrations/003-sync-schema-151.sql:914</sub><br>`DB-042.63` <sub>schema.sql:1108</sub> | 13 |
+| `chatbot_logs` | `DB-002.108` <sub>install-empty-db.sql:1355</sub><br>`DB-005.55` <sub>migrations/003-sync-schema-151.sql:925</sub><br>`DB-042.64` <sub>schema.sql:1120</sub> | 14 |
+| `departments` | `DB-002.05` <sub>install-empty-db.sql:27</sub><br>`DB-005.03` <sub>migrations/003-sync-schema-151.sql:9</sub><br>`DB-042.02` <sub>schema.sql:6</sub> | 68 |
+| `domain_scan_queue` | `DB-002.69` <sub>install-empty-db.sql:1157</sub><br>`DB-005.60` <sub>migrations/003-sync-schema-151.sql:968</sub><br>`DB-042.69` <sub>schema.sql:1170</sub> | 19 |
+| `domain_scan_runs` | `DB-002.68` <sub>install-empty-db.sql:1144</sub><br>`DB-005.59` <sub>migrations/003-sync-schema-151.sql:956</sub><br>`DB-042.68` <sub>schema.sql:1157</sub> | 22 |
+| `food_calendar` | `DB-002.100` <sub>install-empty-db.sql:1255</sub><br>`DB-005.65` <sub>migrations/003-sync-schema-151.sql:1029</sub><br>`DB-042.95` <sub>schema.sql:1266</sub> | 39 |
+| `food_calendar_items` | `DB-002.101` <sub>install-empty-db.sql:1270</sub><br>`DB-005.66` <sub>migrations/003-sync-schema-151.sql:1042</sub><br>`DB-042.96` <sub>schema.sql:1281</sub> | 46 |
+| `food_catalog` | `DB-002.99` <sub>install-empty-db.sql:1243</sub><br>`DB-005.63` <sub>migrations/003-sync-schema-151.sql:1000</sub><br>`DB-042.93` <sub>schema.sql:1234</sub> | 50 |
+| `food_guest_requests` | `DB-002.110` <sub>install-empty-db.sql:1377</sub><br>`DB-005.64` <sub>migrations/003-sync-schema-151.sql:1011</sub><br>`DB-042.94` <sub>schema.sql:1246</sub> | 39 |
+| `food_meal_reconciliations` | `DB-002.111` <sub>install-empty-db.sql:1401</sub><br>`DB-025.02` <sub>migrations/022-food-meal-reconciliation-invoices.sql:4</sub><br>`DB-042.100` <sub>schema.sql:1352</sub> | 6 |
+| `food_monthly_invoices` | `DB-002.112` <sub>install-empty-db.sql:1428</sub><br>`DB-025.03` <sub>migrations/022-food-meal-reconciliation-invoices.sql:31</sub><br>`DB-042.101` <sub>schema.sql:1379</sub> | 7 |
+| `food_order_cancel_requests` | `DB-002.104` <sub>install-empty-db.sql:1319</sub><br>`DB-042.99` <sub>schema.sql:1330</sub> | 10 |
+| `food_order_logs` | `DB-002.103` <sub>install-empty-db.sql:1301</sub><br>`DB-005.68` <sub>migrations/003-sync-schema-151.sql:1070</sub><br>`DB-042.98` <sub>schema.sql:1312</sub> | 28 |
+| `food_orders` | `DB-002.102` <sub>install-empty-db.sql:1285</sub><br>`DB-005.67` <sub>migrations/003-sync-schema-151.sql:1056</sub><br>`DB-042.97` <sub>schema.sql:1296</sub> | 76 |
+| `food_ticket_card_map` | `DB-002.89` <sub>install-empty-db.sql:1192</sub><br>`DB-005.61` <sub>migrations/003-sync-schema-151.sql:980</sub><br>`DB-042.89` <sub>schema.sql:1205</sub> | 14 |
+| `food_ticket_config` | `DB-002.54` <sub>install-empty-db.sql:888</sub><br>`DB-005.43` <sub>migrations/003-sync-schema-151.sql:732</sub><br>`DB-042.51` <sub>schema.sql:867</sub> | 46 |
+| `food_ticket_daily_absence` | `DB-002.61` <sub>install-empty-db.sql:1046</sub><br>`DB-005.50` <sub>migrations/003-sync-schema-151.sql:863</sub><br>`DB-014.02` <sub>migrations/012-manual-attendance-clears-absences.sql:4</sub> | 33 |
+| `food_ticket_day_visits` | `DB-002.62` <sub>install-empty-db.sql:1062</sub><br>`DB-042.59` <sub>schema.sql:1041</sub> | 16 |
+| `food_ticket_events` | `DB-002.55` <sub>install-empty-db.sql:919</sub><br>`DB-005.44` <sub>migrations/003-sync-schema-151.sql:750</sub><br>`DB-042.52` <sub>schema.sql:898</sub> | 139 |
+| `food_ticket_group_members` | `DB-002.59` <sub>install-empty-db.sql:1007</sub><br>`DB-005.48` <sub>migrations/003-sync-schema-151.sql:829</sub><br>`DB-042.56` <sub>schema.sql:986</sub> | 21 |
+| `food_ticket_group_runs` | `DB-002.60` <sub>install-empty-db.sql:1019</sub><br>`DB-005.49` <sub>migrations/003-sync-schema-151.sql:839</sub><br>`DB-042.57` <sub>schema.sql:998</sub> | 38 |
+| `food_ticket_group_uid_history` | `DB-002.63` <sub>install-empty-db.sql:1075</sub><br>`DB-005.51` <sub>migrations/003-sync-schema-151.sql:877</sub><br>`DB-042.60` <sub>schema.sql:1054</sub> | 16 |
+| `food_ticket_groups` | `DB-002.58` <sub>install-empty-db.sql:988</sub><br>`DB-005.47` <sub>migrations/003-sync-schema-151.sql:813</sub><br>`DB-042.55` <sub>schema.sql:967</sub> | 37 |
+| `food_ticket_guest_cards` | `DB-002.57` <sub>install-empty-db.sql:974</sub><br>`DB-005.46` <sub>migrations/003-sync-schema-151.sql:800</sub><br>`DB-042.54` <sub>schema.sql:953</sub> | 24 |
+| `food_ticket_print_log` | `DB-002.64` <sub>install-empty-db.sql:1086</sub><br>`DB-005.52` <sub>migrations/003-sync-schema-151.sql:887</sub><br>`DB-042.61` <sub>schema.sql:1065</sub> | 19 |
+| `food_ticket_templates` | `DB-002.90` <sub>install-empty-db.sql:1202</sub><br>`DB-005.62` <sub>migrations/003-sync-schema-151.sql:989</sub><br>`DB-042.90` <sub>schema.sql:1215</sub> | 21 |
+| `food_ticket_worker_status` | `DB-002.56` <sub>install-empty-db.sql:958</sub><br>`DB-005.45` <sub>migrations/003-sync-schema-151.sql:787</sub><br>`DB-042.53` <sub>schema.sql:937</sub> | 17 |
+| `handling_units` | `DB-002.13` <sub>install-empty-db.sql:123</sub><br>`DB-005.07` <sub>migrations/003-sync-schema-151.sql:72</sub><br>`DB-042.10` <sub>schema.sql:102</sub> | 42 |
+| `holidays` | `ACT-009.07` <sub>actions/holiday-actions.php:102</sub><br>`PAGE-034.61` <sub>index.php:1398</sub><br>`DB-002.35` <sub>install-empty-db.sql:517</sub> | 36 |
+| `knowledge_articles` | `DB-002.34` <sub>install-empty-db.sql:503</sub><br>`DB-005.25` <sub>migrations/003-sync-schema-151.sql:373</sub><br>`DB-042.31` <sub>schema.sql:482</sub> | 17 |
+| `log_issue_events` | `DB-029.05` <sub>migrations/026-logging-legacy-result-unknown.sql:38</sub><br>`DB-002.119` <sub>install-empty-db.sql:1544</sub><br>`DB-042.108` <sub>schema.sql:1495</sub> | 15 |
+| `log_issue_history` | `DB-002.118` <sub>install-empty-db.sql:1528</sub><br>`DB-029.04` <sub>migrations/026-logging-legacy-result-unknown.sql:20</sub><br>`DB-042.107` <sub>schema.sql:1479</sub> | 12 |
+| `log_issue_notifications` | `DB-002.120` <sub>install-empty-db.sql:1551</sub><br>`DB-029.06` <sub>migrations/026-logging-legacy-result-unknown.sql:56</sub><br>`DB-042.109` <sub>schema.sql:1502</sub> | 14 |
+| `log_issues` | `DB-002.116` <sub>install-empty-db.sql:1492</sub><br>`DB-028.02` <sub>migrations/025-logging-issues-alerts.sql:4</sub><br>`DB-042.105` <sub>schema.sql:1443</sub> | 28 |
+| `logging_health_alerts` | `DB-002.117` <sub>install-empty-db.sql:1518</sub><br>`DB-028.03` <sub>migrations/025-logging-issues-alerts.sql:29</sub><br>`DB-042.106` <sub>schema.sql:1469</sub> | 13 |
+| `login_attempts` | `DB-002.31` <sub>install-empty-db.sql:461</sub><br>`DB-005.22` <sub>migrations/003-sync-schema-151.sql:343</sub><br>`DB-042.28` <sub>schema.sql:440</sub> | 14 |
 | `notifications` | `PAGE-034.51` <sub>index.php:976</sub><br>`ACT-010.03` <sub>actions/notification-actions.php:23</sub><br>`PAGE-034.50` <sub>index.php:968</sub> | 43 |
-| `ola_policies` | `DB-002.46` <sub>install-empty-db.sql:770</sub><br>`DB-005.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-041.43` <sub>schema.sql:749</sub> | 24 |
-| `org_companies` | `DB-002.06` <sub>install-empty-db.sql:37</sub><br>`DB-021.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-041.03` <sub>schema.sql:16</sub> | 11 |
-| `org_unit_managers` | `DB-002.10` <sub>install-empty-db.sql:77</sub><br>`DB-005.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-041.07` <sub>schema.sql:56</sub> | 36 |
-| `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-041.04` <sub>schema.sql:30</sub> | 90 |
-| `problem_records` | `DB-002.52` <sub>install-empty-db.sql:852</sub><br>`DB-005.41` <sub>migrations/003-sync-schema-151.sql:699</sub><br>`DB-041.49` <sub>schema.sql:831</sub> | 26 |
-| `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:876</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-041.50` <sub>schema.sql:855</sub> | 14 |
-| `request_center_appointments` | `DB-002.122` <sub>install-empty-db.sql:1579</sub><br>`DB-038.02` <sub>migrations/035-request-center-appointments.sql:6</sub> | 5 |
-| `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:435</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-041.26` <sub>schema.sql:414</sub> | 21 |
-| `schema_updates` | `DB-041.110` <sub>schema.sql:1520</sub><br>`DB-002.121` <sub>install-empty-db.sql:1569</sub><br>`CORE-009.04` <sub>lib/logging-audit.php:61</sub> | 22 |
-| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-041.19` <sub>schema.sql:232</sub> | 59 |
-| `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-041.20` <sub>schema.sql:258</sub> | 16 |
+| `ola_policies` | `DB-002.46` <sub>install-empty-db.sql:771</sub><br>`DB-005.36` <sub>migrations/003-sync-schema-151.sql:624</sub><br>`DB-042.43` <sub>schema.sql:750</sub> | 24 |
+| `org_companies` | `DB-002.06` <sub>install-empty-db.sql:37</sub><br>`DB-021.02` <sub>migrations/018-org-company-separation.sql:3</sub><br>`DB-042.03` <sub>schema.sql:16</sub> | 11 |
+| `org_unit_managers` | `DB-002.10` <sub>install-empty-db.sql:77</sub><br>`DB-005.05` <sub>migrations/003-sync-schema-151.sql:32</sub><br>`DB-042.07` <sub>schema.sql:56</sub> | 36 |
+| `org_units` | `DB-002.07` <sub>install-empty-db.sql:51</sub><br>`DB-005.04` <sub>migrations/003-sync-schema-151.sql:18</sub><br>`DB-042.04` <sub>schema.sql:30</sub> | 90 |
+| `problem_records` | `DB-002.52` <sub>install-empty-db.sql:853</sub><br>`DB-005.41` <sub>migrations/003-sync-schema-151.sql:699</sub><br>`DB-042.49` <sub>schema.sql:832</sub> | 26 |
+| `problem_ticket_links` | `DB-002.53` <sub>install-empty-db.sql:877</sub><br>`DB-005.42` <sub>migrations/003-sync-schema-151.sql:722</sub><br>`DB-042.50` <sub>schema.sql:856</sub> | 14 |
+| `request_center_appointments` | `DB-002.122` <sub>install-empty-db.sql:1580</sub><br>`DB-038.02` <sub>migrations/035-request-center-appointments.sql:6</sub> | 5 |
+| `role_permissions` | `DB-002.29` <sub>install-empty-db.sql:436</sub><br>`DB-005.20` <sub>migrations/003-sync-schema-151.sql:323</sub><br>`DB-042.26` <sub>schema.sql:415</sub> | 21 |
+| `schema_updates` | `DB-042.110` <sub>schema.sql:1521</sub><br>`DB-002.121` <sub>install-empty-db.sql:1570</sub><br>`CORE-009.04` <sub>lib/logging-audit.php:61</sub> | 22 |
+| `service_catalog` | `DB-002.22` <sub>install-empty-db.sql:253</sub><br>`DB-005.13` <sub>migrations/003-sync-schema-151.sql:161</sub><br>`DB-042.19` <sub>schema.sql:232</sub> | 59 |
+| `service_catalog_fields` | `DB-002.23` <sub>install-empty-db.sql:279</sub><br>`DB-005.14` <sub>migrations/003-sync-schema-151.sql:186</sub><br>`DB-042.20` <sub>schema.sql:258</sub> | 16 |
 | `settings` | `PAGE-034.70` <sub>index.php:1921</sub><br>`PAGE-034.36` <sub>index.php:853</sub><br>`DB-002.04` <sub>install-empty-db.sql:22</sub> | 62 |
-| `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1367</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-041.65` <sub>schema.sql:1132</sub> | 9 |
-| `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1101</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-041.62` <sub>schema.sql:1080</sub> | 65 |
-| `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:385</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-041.24` <sub>schema.sql:364</sub> | 16 |
-| `ticket_events` | `DB-002.33` <sub>install-empty-db.sql:478</sub><br>`DB-005.24` <sub>migrations/003-sync-schema-151.sql:359</sub><br>`DB-041.30` <sub>schema.sql:457</sub> | 41 |
-| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:359</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-041.22` <sub>schema.sql:338</sub> | 30 |
-| `ticket_number_seq` | `DB-002.66` <sub>install-empty-db.sql:1128</sub><br>`DB-005.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-041.66` <sub>schema.sql:1141</sub> | 19 |
-| `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:788</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-041.44` <sub>schema.sql:767</sub> | 12 |
-| `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:371</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-041.23` <sub>schema.sql:350</sub> | 21 |
-| `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:468</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-041.29` <sub>schema.sql:447</sub> | 13 |
-| `tickets` | `DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-041.21` <sub>schema.sql:271</sub> | 193 |
+| `system_incidents` | `DB-002.109` <sub>install-empty-db.sql:1368</sub><br>`DB-005.56` <sub>migrations/003-sync-schema-151.sql:937</sub><br>`DB-042.65` <sub>schema.sql:1133</sub> | 9 |
+| `system_logs` | `DB-002.65` <sub>install-empty-db.sql:1102</sub><br>`DB-005.53` <sub>migrations/003-sync-schema-151.sql:902</sub><br>`DB-042.62` <sub>schema.sql:1081</sub> | 65 |
+| `ticket_attachments` | `DB-002.27` <sub>install-empty-db.sql:386</sub><br>`DB-005.18` <sub>migrations/003-sync-schema-151.sql:288</sub><br>`DB-042.24` <sub>schema.sql:365</sub> | 16 |
+| `ticket_events` | `DB-002.33` <sub>install-empty-db.sql:479</sub><br>`DB-005.24` <sub>migrations/003-sync-schema-151.sql:359</sub><br>`DB-042.30` <sub>schema.sql:458</sub> | 41 |
+| `ticket_messages` | `DB-002.25` <sub>install-empty-db.sql:360</sub><br>`DB-005.16` <sub>migrations/003-sync-schema-151.sql:264</sub><br>`DB-042.22` <sub>schema.sql:339</sub> | 30 |
+| `ticket_number_seq` | `DB-002.66` <sub>install-empty-db.sql:1129</sub><br>`DB-005.57` <sub>migrations/003-sync-schema-151.sql:945</sub><br>`DB-042.66` <sub>schema.sql:1142</sub> | 19 |
+| `ticket_ola_alerts` | `DB-002.47` <sub>install-empty-db.sql:789</sub><br>`DB-005.37` <sub>migrations/003-sync-schema-151.sql:641</sub><br>`DB-042.44` <sub>schema.sql:768</sub> | 12 |
+| `ticket_ratings` | `DB-002.26` <sub>install-empty-db.sql:372</sub><br>`DB-005.17` <sub>migrations/003-sync-schema-151.sql:275</sub><br>`DB-042.23` <sub>schema.sql:351</sub> | 21 |
+| `ticket_sla_alerts` | `DB-002.32` <sub>install-empty-db.sql:469</sub><br>`DB-005.23` <sub>migrations/003-sync-schema-151.sql:350</sub><br>`DB-042.29` <sub>schema.sql:448</sub> | 13 |
+| `tickets` | `DB-002.24` <sub>install-empty-db.sql:292</sub><br>`DB-005.15` <sub>migrations/003-sync-schema-151.sql:198</sub><br>`DB-042.21` <sub>schema.sql:271</sub> | 194 |
 | `tmp_asset_dedupe_map` | `DB-018.17` <sub>migrations/016-auto-asset-finish.sql:39</sub><br>`DB-018.18` <sub>migrations/016-auto-asset-finish.sql:45</sub><br>`DB-018.16` <sub>migrations/016-auto-asset-finish.sql:38</sub> | 8 |
-| `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-041.14` <sub>schema.sql:156</sub> | 31 |
-| `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-041.16` <sub>schema.sql:196</sub> | 10 |
-| `traffic_visits` | `DB-002.18` <sub>install-empty-db.sql:188</sub><br>`DB-005.11` <sub>migrations/003-sync-schema-151.sql:127</sub><br>`DB-041.15` <sub>schema.sql:167</sub> | 59 |
-| `user_access_group_members` | `DB-002.114` <sub>install-empty-db.sql:1463</sub><br>`DB-026.03` <sub>migrations/023-user-access-groups.sql:17</sub><br>`DB-041.103` <sub>schema.sql:1414</sub> | 12 |
-| `user_access_group_permissions` | `DB-002.115` <sub>install-empty-db.sql:1475</sub><br>`DB-026.04` <sub>migrations/023-user-access-groups.sql:29</sub><br>`DB-041.104` <sub>schema.sql:1426</sub> | 12 |
-| `user_access_groups` | `DB-002.113` <sub>install-empty-db.sql:1449</sub><br>`DB-026.02` <sub>migrations/023-user-access-groups.sql:3</sub><br>`DB-041.102` <sub>schema.sql:1400</sub> | 10 |
+| `traffic_destinations` | `DB-002.17` <sub>install-empty-db.sql:177</sub><br>`DB-005.10` <sub>migrations/003-sync-schema-151.sql:119</sub><br>`DB-042.14` <sub>schema.sql:156</sub> | 31 |
+| `traffic_visit_history` | `DB-002.19` <sub>install-empty-db.sql:217</sub><br>`DB-009.02` <sub>migrations/007-traffic-visit-history.sql:2</sub><br>`DB-042.16` <sub>schema.sql:196</sub> | 10 |
+| `traffic_visits` | `DB-002.18` <sub>install-empty-db.sql:188</sub><br>`DB-005.11` <sub>migrations/003-sync-schema-151.sql:127</sub><br>`DB-042.15` <sub>schema.sql:167</sub> | 59 |
+| `user_access_group_members` | `DB-002.114` <sub>install-empty-db.sql:1464</sub><br>`DB-026.03` <sub>migrations/023-user-access-groups.sql:17</sub><br>`DB-042.103` <sub>schema.sql:1415</sub> | 12 |
+| `user_access_group_permissions` | `DB-002.115` <sub>install-empty-db.sql:1476</sub><br>`DB-026.04` <sub>migrations/023-user-access-groups.sql:29</sub><br>`DB-042.104` <sub>schema.sql:1427</sub> | 12 |
+| `user_access_groups` | `DB-002.113` <sub>install-empty-db.sql:1450</sub><br>`DB-026.02` <sub>migrations/023-user-access-groups.sql:3</sub><br>`DB-042.102` <sub>schema.sql:1401</sub> | 10 |
 | `users` | `ACT-011.14` <sub>actions/org-actions.php:409</sub><br>`DB-002.11` <sub>install-empty-db.sql:85</sub><br>`DB-005.06` <sub>migrations/003-sync-schema-151.sql:39</sub> | 287 |
 
 </details>
@@ -288,8 +288,8 @@
 |---|---|---|---|---|
 | `TEST` | TEST | 234 | 1,705 | 23,299 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
-| `DB` | DB | 83 | 1,376 | 7,972 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,762 |
+| `DB` | DB | 84 | 1,377 | 8,023 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,852 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -309,7 +309,7 @@
 | `sql_concat` | الحاق در SQL | 197 |
 | `raw_input` | ورودی خام | 187 |
 | `silent_catch` | catch بی‌صدا | 134 |
-| `long` | >۱۲۰ خط | 131 |
+| `long` | >۱۲۰ خط | 132 |
 | `unescaped_echo` | چاپ بدون فرار | 36 |
 | `very_long` | >۳۰۰ خط | 10 |
 
@@ -5347,7 +5347,7 @@
 </details>
 
 <details>
-<summary><b>DB-002</b> — <code>install-empty-db.sql</code> (1,633 خط، 122 آدرس، بازبینی‌شده 0/122)</summary>
+<summary><b>DB-002</b> — <code>install-empty-db.sql</code> (1,634 خط، 122 آدرس، بازبینی‌شده 0/122)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -5374,105 +5374,105 @@
 | `DB-002.21` | 244–252 | بلوک | `CREATE TABLE categories` | 0 | ⬜ |
 | `DB-002.22` | 253–278 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
 | `DB-002.23` | 279–291 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
-| `DB-002.24` | 292–358 | بلوک | `CREATE TABLE tickets` | 1 | ⬜ |
-| `DB-002.25` | 359–370 | بلوک | `CREATE TABLE ticket_messages` | 1 | ⬜ |
-| `DB-002.26` | 371–384 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
-| `DB-002.27` | 385–395 | بلوک | `CREATE TABLE ticket_attachments` | 1 | ⬜ |
-| `DB-002.28` | 396–434 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
-| `DB-002.29` | 435–441 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
-| `DB-002.30` | 442–459 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
-| `DB-002.31` | 460–467 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-002.32` | 468–477 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
-| `DB-002.33` | 478–501 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
-| `DB-002.34` | 502–515 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
-| `DB-002.35` | 516–525 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
-| `DB-002.36` | 526–581 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
-| `DB-002.37` | 582–583 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-002.38` | 584–598 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
-| `DB-002.39` | 599–614 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
-| `DB-002.40` | 615–627 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
-| `DB-002.41` | 628–645 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
-| `DB-002.42` | 646–656 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
-| `DB-002.43` | 657–674 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
-| `DB-002.44` | 675–687 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
-| `DB-002.45` | 688–769 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
-| `DB-002.46` | 770–787 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
-| `DB-002.47` | 788–797 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
-| `DB-002.48` | 798–799 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-002.49` | 800–828 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
-| `DB-002.50` | 829–840 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
-| `DB-002.51` | 841–851 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
-| `DB-002.52` | 852–875 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
-| `DB-002.53` | 876–886 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
-| `DB-002.54` | 887–917 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
-| `DB-002.55` | 918–956 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
-| `DB-002.56` | 957–972 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
-| `DB-002.57` | 973–986 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
-| `DB-002.58` | 987–1005 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
-| `DB-002.59` | 1006–1017 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
-| `DB-002.60` | 1018–1044 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
-| `DB-002.61` | 1045–1060 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
-| `DB-002.62` | 1061–1073 | بلوک | `CREATE TABLE food_ticket_day_visits` | 1 | ⬜ |
-| `DB-002.63` | 1074–1084 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
-| `DB-002.64` | 1085–1100 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
-| `DB-002.65` | 1101–1127 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
-| `DB-002.66` | 1128–1133 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
-| `DB-002.67` | 1134–1142 | بلوک | `CREATE TABLE api_rate_limits` | 1 | ⬜ |
-| `DB-002.68` | 1143–1155 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
-| `DB-002.69` | 1156–1169 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
-| `DB-002.70` | 1170–1170 | بلوک | `CREATE INDEX idx_tickets_status_priority` | 0 | ⬜ |
-| `DB-002.71` | 1171–1171 | بلوک | `CREATE INDEX idx_users_is_active` | 0 | ⬜ |
-| `DB-002.72` | 1172–1172 | بلوک | `CREATE INDEX idx_assets_lifecycle_status` | 0 | ⬜ |
-| `DB-002.73` | 1173–1173 | بلوک | `CREATE INDEX idx_ola_priority_active` | 0 | ⬜ |
-| `DB-002.74` | 1174–1174 | بلوک | `CREATE INDEX idx_food_ticket_events_event_type` | 0 | ⬜ |
-| `DB-002.75` | 1175–1175 | بلوک | `CREATE INDEX idx_login_attempts_locked_until` | 0 | ⬜ |
-| `DB-002.76` | 1176–1176 | بلوک | `CREATE INDEX idx_ticket_sla_alerts_alert_type` | 0 | ⬜ |
-| `DB-002.77` | 1177–1177 | بلوک | `CREATE INDEX idx_ticket_ola_alerts_alert_type` | 0 | ⬜ |
-| `DB-002.78` | 1178–1178 | بلوک | `CREATE INDEX idx_ticket_events_event_type` | 0 | ⬜ |
-| `DB-002.79` | 1179–1179 | بلوک | `CREATE INDEX idx_knowledge_articles_is_published` | 0 | ⬜ |
-| `DB-002.80` | 1180–1180 | بلوک | `CREATE INDEX idx_holidays_is_active` | 0 | ⬜ |
-| `DB-002.81` | 1181–1181 | بلوک | `CREATE INDEX idx_departments_is_active` | 0 | ⬜ |
-| `DB-002.82` | 1182–1182 | بلوک | `CREATE INDEX idx_handling_units_is_active` | 0 | ⬜ |
-| `DB-002.83` | 1183–1183 | بلوک | `CREATE INDEX idx_categories_group_active` | 0 | ⬜ |
-| `DB-002.84` | 1184–1184 | بلوک | `CREATE INDEX idx_service_catalog_group_active` | 0 | ⬜ |
-| `DB-002.85` | 1185–1185 | بلوک | `CREATE INDEX idx_cd_dvd_records_media` | 0 | ⬜ |
-| `DB-002.86` | 1186–1186 | بلوک | `CREATE INDEX idx_traffic_destinations_is_active` | 0 | ⬜ |
-| `DB-002.87` | 1187–1187 | بلوک | `CREATE INDEX idx_domain_scan_runs_status` | 0 | ⬜ |
-| `DB-002.88` | 1188–1190 | بلوک | `CREATE INDEX idx_domain_scan_queue_status` | 0 | ⬜ |
-| `DB-002.89` | 1191–1200 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
-| `DB-002.90` | 1201–1213 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
-| `DB-002.91` | 1214–1215 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.92` | 1216–1216 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.93` | 1217–1221 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
-| `DB-002.94` | 1222–1224 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
-| `DB-002.95` | 1225–1226 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.96` | 1227–1234 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.97` | 1235–1236 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.98` | 1237–1241 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.99` | 1242–1253 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
-| `DB-002.100` | 1254–1268 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
-| `DB-002.101` | 1269–1283 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
-| `DB-002.102` | 1284–1299 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
-| `DB-002.103` | 1300–1317 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
-| `DB-002.104` | 1318–1335 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
-| `DB-002.105` | 1336–1339 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.106` | 1340–1341 | بلوک | `=` | 0 | ⬜ |
-| `DB-002.107` | 1342–1353 | بلوک | `CREATE TABLE chatbot_faq` | 0 | ⬜ |
-| `DB-002.108` | 1354–1366 | بلوک | `CREATE TABLE chatbot_logs` | 0 | ⬜ |
-| `DB-002.109` | 1367–1375 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
-| `DB-002.110` | 1376–1399 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
-| `DB-002.111` | 1400–1426 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
-| `DB-002.112` | 1427–1448 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
-| `DB-002.113` | 1449–1462 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
-| `DB-002.114` | 1463–1474 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
-| `DB-002.115` | 1475–1490 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
-| `DB-002.116` | 1491–1516 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
-| `DB-002.117` | 1517–1526 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
-| `DB-002.118` | 1527–1542 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
-| `DB-002.119` | 1543–1549 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
-| `DB-002.120` | 1550–1568 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
-| `DB-002.121` | 1569–1578 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
-| `DB-002.122` | 1579–1633 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
+| `DB-002.24` | 292–359 | بلوک | `CREATE TABLE tickets` | 1 | ⬜ |
+| `DB-002.25` | 360–371 | بلوک | `CREATE TABLE ticket_messages` | 1 | ⬜ |
+| `DB-002.26` | 372–385 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
+| `DB-002.27` | 386–396 | بلوک | `CREATE TABLE ticket_attachments` | 1 | ⬜ |
+| `DB-002.28` | 397–435 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
+| `DB-002.29` | 436–442 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
+| `DB-002.30` | 443–460 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
+| `DB-002.31` | 461–468 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-002.32` | 469–478 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-002.33` | 479–502 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
+| `DB-002.34` | 503–516 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
+| `DB-002.35` | 517–526 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
+| `DB-002.36` | 527–582 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
+| `DB-002.37` | 583–584 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-002.38` | 585–599 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
+| `DB-002.39` | 600–615 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
+| `DB-002.40` | 616–628 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
+| `DB-002.41` | 629–646 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
+| `DB-002.42` | 647–657 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
+| `DB-002.43` | 658–675 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
+| `DB-002.44` | 676–688 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
+| `DB-002.45` | 689–770 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
+| `DB-002.46` | 771–788 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
+| `DB-002.47` | 789–798 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
+| `DB-002.48` | 799–800 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-002.49` | 801–829 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
+| `DB-002.50` | 830–841 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
+| `DB-002.51` | 842–852 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
+| `DB-002.52` | 853–876 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
+| `DB-002.53` | 877–887 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
+| `DB-002.54` | 888–918 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
+| `DB-002.55` | 919–957 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
+| `DB-002.56` | 958–973 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
+| `DB-002.57` | 974–987 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
+| `DB-002.58` | 988–1006 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
+| `DB-002.59` | 1007–1018 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
+| `DB-002.60` | 1019–1045 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
+| `DB-002.61` | 1046–1061 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
+| `DB-002.62` | 1062–1074 | بلوک | `CREATE TABLE food_ticket_day_visits` | 1 | ⬜ |
+| `DB-002.63` | 1075–1085 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
+| `DB-002.64` | 1086–1101 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
+| `DB-002.65` | 1102–1128 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
+| `DB-002.66` | 1129–1134 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
+| `DB-002.67` | 1135–1143 | بلوک | `CREATE TABLE api_rate_limits` | 1 | ⬜ |
+| `DB-002.68` | 1144–1156 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
+| `DB-002.69` | 1157–1170 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
+| `DB-002.70` | 1171–1171 | بلوک | `CREATE INDEX idx_tickets_status_priority` | 0 | ⬜ |
+| `DB-002.71` | 1172–1172 | بلوک | `CREATE INDEX idx_users_is_active` | 0 | ⬜ |
+| `DB-002.72` | 1173–1173 | بلوک | `CREATE INDEX idx_assets_lifecycle_status` | 0 | ⬜ |
+| `DB-002.73` | 1174–1174 | بلوک | `CREATE INDEX idx_ola_priority_active` | 0 | ⬜ |
+| `DB-002.74` | 1175–1175 | بلوک | `CREATE INDEX idx_food_ticket_events_event_type` | 0 | ⬜ |
+| `DB-002.75` | 1176–1176 | بلوک | `CREATE INDEX idx_login_attempts_locked_until` | 0 | ⬜ |
+| `DB-002.76` | 1177–1177 | بلوک | `CREATE INDEX idx_ticket_sla_alerts_alert_type` | 0 | ⬜ |
+| `DB-002.77` | 1178–1178 | بلوک | `CREATE INDEX idx_ticket_ola_alerts_alert_type` | 0 | ⬜ |
+| `DB-002.78` | 1179–1179 | بلوک | `CREATE INDEX idx_ticket_events_event_type` | 0 | ⬜ |
+| `DB-002.79` | 1180–1180 | بلوک | `CREATE INDEX idx_knowledge_articles_is_published` | 0 | ⬜ |
+| `DB-002.80` | 1181–1181 | بلوک | `CREATE INDEX idx_holidays_is_active` | 0 | ⬜ |
+| `DB-002.81` | 1182–1182 | بلوک | `CREATE INDEX idx_departments_is_active` | 0 | ⬜ |
+| `DB-002.82` | 1183–1183 | بلوک | `CREATE INDEX idx_handling_units_is_active` | 0 | ⬜ |
+| `DB-002.83` | 1184–1184 | بلوک | `CREATE INDEX idx_categories_group_active` | 0 | ⬜ |
+| `DB-002.84` | 1185–1185 | بلوک | `CREATE INDEX idx_service_catalog_group_active` | 0 | ⬜ |
+| `DB-002.85` | 1186–1186 | بلوک | `CREATE INDEX idx_cd_dvd_records_media` | 0 | ⬜ |
+| `DB-002.86` | 1187–1187 | بلوک | `CREATE INDEX idx_traffic_destinations_is_active` | 0 | ⬜ |
+| `DB-002.87` | 1188–1188 | بلوک | `CREATE INDEX idx_domain_scan_runs_status` | 0 | ⬜ |
+| `DB-002.88` | 1189–1191 | بلوک | `CREATE INDEX idx_domain_scan_queue_status` | 0 | ⬜ |
+| `DB-002.89` | 1192–1201 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
+| `DB-002.90` | 1202–1214 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
+| `DB-002.91` | 1215–1216 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.92` | 1217–1217 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.93` | 1218–1222 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
+| `DB-002.94` | 1223–1225 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
+| `DB-002.95` | 1226–1227 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.96` | 1228–1235 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.97` | 1236–1237 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.98` | 1238–1242 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.99` | 1243–1254 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
+| `DB-002.100` | 1255–1269 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
+| `DB-002.101` | 1270–1284 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
+| `DB-002.102` | 1285–1300 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
+| `DB-002.103` | 1301–1318 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
+| `DB-002.104` | 1319–1336 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
+| `DB-002.105` | 1337–1340 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.106` | 1341–1342 | بلوک | `=` | 0 | ⬜ |
+| `DB-002.107` | 1343–1354 | بلوک | `CREATE TABLE chatbot_faq` | 0 | ⬜ |
+| `DB-002.108` | 1355–1367 | بلوک | `CREATE TABLE chatbot_logs` | 0 | ⬜ |
+| `DB-002.109` | 1368–1376 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
+| `DB-002.110` | 1377–1400 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
+| `DB-002.111` | 1401–1427 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
+| `DB-002.112` | 1428–1449 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
+| `DB-002.113` | 1450–1463 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
+| `DB-002.114` | 1464–1475 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
+| `DB-002.115` | 1476–1491 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
+| `DB-002.116` | 1492–1517 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
+| `DB-002.117` | 1518–1527 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
+| `DB-002.118` | 1528–1543 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
+| `DB-002.119` | 1544–1550 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
+| `DB-002.120` | 1551–1569 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
+| `DB-002.121` | 1570–1579 | بلوک | `CREATE TABLE schema_updates` | 0 | ⬜ |
+| `DB-002.122` | 1580–1634 | بلوک | `CREATE TABLE request_center_appointments` | 1 | ⬜ |
 
 </details>
 
@@ -6642,738 +6642,747 @@
 </details>
 
 <details>
-<summary><b>DB-039</b> — <code>rebuild-final.sql</code> (97 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-039</b> — <code>migrations/037-request-center-lifecycle-rejection.sql</code> (49 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-039.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-039.02` | 10–97 | بلوک | `DROP TABLE IF` | 0 | ⬜ |
+| `DB-039.01` | 1–49 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-040</b> — <code>rollback-1.38-food-orders.sql</code> (10 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-040</b> — <code>rebuild-final.sql</code> (97 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-040.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-040.02` | 5–5 | بلوک | `DROP TABLE IF EXISTS food_order_logs` | 0 | ⬜ |
-| `DB-040.03` | 6–6 | بلوک | `DROP TABLE IF EXISTS food_orders` | 0 | ⬜ |
-| `DB-040.04` | 7–7 | بلوک | `DROP TABLE IF EXISTS food_calendar_items` | 0 | ⬜ |
-| `DB-040.05` | 8–8 | بلوک | `DROP TABLE IF EXISTS food_calendar` | 0 | ⬜ |
-| `DB-040.06` | 9–10 | بلوک | `DROP TABLE IF EXISTS food_catalog` | 0 | ⬜ |
+| `DB-040.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-040.02` | 10–97 | بلوک | `DROP TABLE IF` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-041</b> — <code>schema.sql</code> (1,564 خط، 110 آدرس، بازبینی‌شده 0/110)</summary>
+<summary><b>DB-041</b> — <code>rollback-1.38-food-orders.sql</code> (10 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-041.01` | 1–5 | بلوک | `CREATE TABLE settings` | 0 | ⬜ |
-| `DB-041.02` | 6–15 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
-| `DB-041.03` | 16–29 | بلوک | `CREATE TABLE org_companies` | 1 | ⬜ |
-| `DB-041.04` | 30–48 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
-| `DB-041.05` | 49–51 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-041.06` | 52–55 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-041.07` | 56–63 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
-| `DB-041.08` | 64–99 | بلوک | `CREATE TABLE users` | 1 | ⬜ |
-| `DB-041.09` | 100–101 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
-| `DB-041.10` | 102–112 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
-| `DB-041.11` | 113–114 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
-| `DB-041.12` | 115–122 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
-| `DB-041.13` | 123–155 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
-| `DB-041.14` | 156–166 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
-| `DB-041.15` | 167–195 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
-| `DB-041.16` | 196–212 | بلوک | `CREATE TABLE traffic_visit_history` | 1 | ⬜ |
-| `DB-041.17` | 213–222 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
-| `DB-041.18` | 223–231 | بلوک | `CREATE TABLE categories` | 0 | ⬜ |
-| `DB-041.19` | 232–257 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
-| `DB-041.20` | 258–270 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
-| `DB-041.21` | 271–337 | بلوک | `CREATE TABLE tickets` | 1 | ⬜ |
-| `DB-041.22` | 338–349 | بلوک | `CREATE TABLE ticket_messages` | 1 | ⬜ |
-| `DB-041.23` | 350–363 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
-| `DB-041.24` | 364–374 | بلوک | `CREATE TABLE ticket_attachments` | 1 | ⬜ |
-| `DB-041.25` | 375–413 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
-| `DB-041.26` | 414–420 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
-| `DB-041.27` | 421–438 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
-| `DB-041.28` | 439–446 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-041.29` | 447–456 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
-| `DB-041.30` | 457–480 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
-| `DB-041.31` | 481–494 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
-| `DB-041.32` | 495–504 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
-| `DB-041.33` | 505–560 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
-| `DB-041.34` | 561–562 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-041.35` | 563–577 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
-| `DB-041.36` | 578–593 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
-| `DB-041.37` | 594–606 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
-| `DB-041.38` | 607–624 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
-| `DB-041.39` | 625–635 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
-| `DB-041.40` | 636–653 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
-| `DB-041.41` | 654–666 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
-| `DB-041.42` | 667–748 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
-| `DB-041.43` | 749–766 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
-| `DB-041.44` | 767–776 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
-| `DB-041.45` | 777–778 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-041.46` | 779–807 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
-| `DB-041.47` | 808–819 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
-| `DB-041.48` | 820–830 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
-| `DB-041.49` | 831–854 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
-| `DB-041.50` | 855–865 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
-| `DB-041.51` | 866–896 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
-| `DB-041.52` | 897–935 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
-| `DB-041.53` | 936–951 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
-| `DB-041.54` | 952–965 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
-| `DB-041.55` | 966–984 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
-| `DB-041.56` | 985–996 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
-| `DB-041.57` | 997–1023 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
-| `DB-041.58` | 1024–1039 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
-| `DB-041.59` | 1040–1052 | بلوک | `CREATE TABLE food_ticket_day_visits` | 1 | ⬜ |
-| `DB-041.60` | 1053–1063 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
-| `DB-041.61` | 1064–1079 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
-| `DB-041.62` | 1080–1106 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
-| `DB-041.63` | 1107–1118 | بلوک | `CREATE TABLE chatbot_faq` | 0 | ⬜ |
-| `DB-041.64` | 1119–1131 | بلوک | `CREATE TABLE chatbot_logs` | 0 | ⬜ |
-| `DB-041.65` | 1132–1140 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
-| `DB-041.66` | 1141–1146 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
-| `DB-041.67` | 1147–1155 | بلوک | `CREATE TABLE api_rate_limits` | 1 | ⬜ |
-| `DB-041.68` | 1156–1168 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
-| `DB-041.69` | 1169–1182 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
-| `DB-041.70` | 1183–1183 | بلوک | `CREATE INDEX idx_tickets_status_priority` | 0 | ⬜ |
-| `DB-041.71` | 1184–1184 | بلوک | `CREATE INDEX idx_users_is_active` | 0 | ⬜ |
-| `DB-041.72` | 1185–1185 | بلوک | `CREATE INDEX idx_assets_lifecycle_status` | 0 | ⬜ |
-| `DB-041.73` | 1186–1186 | بلوک | `CREATE INDEX idx_ola_priority_active` | 0 | ⬜ |
-| `DB-041.74` | 1187–1187 | بلوک | `CREATE INDEX idx_food_ticket_events_event_type` | 0 | ⬜ |
-| `DB-041.75` | 1188–1188 | بلوک | `CREATE INDEX idx_login_attempts_locked_until` | 0 | ⬜ |
-| `DB-041.76` | 1189–1189 | بلوک | `CREATE INDEX idx_ticket_sla_alerts_alert_type` | 0 | ⬜ |
-| `DB-041.77` | 1190–1190 | بلوک | `CREATE INDEX idx_ticket_ola_alerts_alert_type` | 0 | ⬜ |
-| `DB-041.78` | 1191–1191 | بلوک | `CREATE INDEX idx_ticket_events_event_type` | 0 | ⬜ |
-| `DB-041.79` | 1192–1192 | بلوک | `CREATE INDEX idx_knowledge_articles_is_published` | 0 | ⬜ |
-| `DB-041.80` | 1193–1193 | بلوک | `CREATE INDEX idx_holidays_is_active` | 0 | ⬜ |
-| `DB-041.81` | 1194–1194 | بلوک | `CREATE INDEX idx_departments_is_active` | 0 | ⬜ |
-| `DB-041.82` | 1195–1195 | بلوک | `CREATE INDEX idx_handling_units_is_active` | 0 | ⬜ |
-| `DB-041.83` | 1196–1196 | بلوک | `CREATE INDEX idx_categories_group_active` | 0 | ⬜ |
-| `DB-041.84` | 1197–1197 | بلوک | `CREATE INDEX idx_service_catalog_group_active` | 0 | ⬜ |
-| `DB-041.85` | 1198–1198 | بلوک | `CREATE INDEX idx_cd_dvd_records_media` | 0 | ⬜ |
-| `DB-041.86` | 1199–1199 | بلوک | `CREATE INDEX idx_traffic_destinations_is_active` | 0 | ⬜ |
-| `DB-041.87` | 1200–1200 | بلوک | `CREATE INDEX idx_domain_scan_runs_status` | 0 | ⬜ |
-| `DB-041.88` | 1201–1203 | بلوک | `CREATE INDEX idx_domain_scan_queue_status` | 0 | ⬜ |
-| `DB-041.89` | 1204–1213 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
-| `DB-041.90` | 1214–1225 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
-| `DB-041.91` | 1226–1227 | بلوک | `=` | 0 | ⬜ |
-| `DB-041.92` | 1228–1232 | بلوک | `=` | 0 | ⬜ |
-| `DB-041.93` | 1233–1244 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
-| `DB-041.94` | 1245–1264 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
-| `DB-041.95` | 1265–1279 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
-| `DB-041.96` | 1280–1294 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
-| `DB-041.97` | 1295–1310 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
-| `DB-041.98` | 1311–1328 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
-| `DB-041.99` | 1329–1350 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
-| `DB-041.100` | 1351–1377 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
-| `DB-041.101` | 1378–1399 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
-| `DB-041.102` | 1400–1413 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
-| `DB-041.103` | 1414–1425 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
-| `DB-041.104` | 1426–1441 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
-| `DB-041.105` | 1442–1467 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
-| `DB-041.106` | 1468–1477 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
-| `DB-041.107` | 1478–1493 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
-| `DB-041.108` | 1494–1500 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
-| `DB-041.109` | 1501–1519 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
-| `DB-041.110` | 1520–1564 | بلوک | `CREATE TABLE schema_updates` | 1 | ⬜ |
+| `DB-041.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-041.02` | 5–5 | بلوک | `DROP TABLE IF EXISTS food_order_logs` | 0 | ⬜ |
+| `DB-041.03` | 6–6 | بلوک | `DROP TABLE IF EXISTS food_orders` | 0 | ⬜ |
+| `DB-041.04` | 7–7 | بلوک | `DROP TABLE IF EXISTS food_calendar_items` | 0 | ⬜ |
+| `DB-041.05` | 8–8 | بلوک | `DROP TABLE IF EXISTS food_calendar` | 0 | ⬜ |
+| `DB-041.06` | 9–10 | بلوک | `DROP TABLE IF EXISTS food_catalog` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-042</b> — <code>upgrade-1.1-departments.sql</code> (16 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
+<summary><b>DB-042</b> — <code>schema.sql</code> (1,565 خط، 110 آدرس، بازبینی‌شده 0/110)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-042.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-042.02` | 2–9 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
-| `DB-042.03` | 10–10 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-042.04` | 11–11 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-042.05` | 12–12 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
-| `DB-042.06` | 13–13 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-042.07` | 14–14 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-042.08` | 15–16 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-042.01` | 1–5 | بلوک | `CREATE TABLE settings` | 0 | ⬜ |
+| `DB-042.02` | 6–15 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
+| `DB-042.03` | 16–29 | بلوک | `CREATE TABLE org_companies` | 1 | ⬜ |
+| `DB-042.04` | 30–48 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
+| `DB-042.05` | 49–51 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-042.06` | 52–55 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-042.07` | 56–63 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
+| `DB-042.08` | 64–99 | بلوک | `CREATE TABLE users` | 1 | ⬜ |
+| `DB-042.09` | 100–101 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
+| `DB-042.10` | 102–112 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
+| `DB-042.11` | 113–114 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
+| `DB-042.12` | 115–122 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
+| `DB-042.13` | 123–155 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
+| `DB-042.14` | 156–166 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
+| `DB-042.15` | 167–195 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
+| `DB-042.16` | 196–212 | بلوک | `CREATE TABLE traffic_visit_history` | 1 | ⬜ |
+| `DB-042.17` | 213–222 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
+| `DB-042.18` | 223–231 | بلوک | `CREATE TABLE categories` | 0 | ⬜ |
+| `DB-042.19` | 232–257 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
+| `DB-042.20` | 258–270 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
+| `DB-042.21` | 271–338 | بلوک | `CREATE TABLE tickets` | 1 | ⬜ |
+| `DB-042.22` | 339–350 | بلوک | `CREATE TABLE ticket_messages` | 1 | ⬜ |
+| `DB-042.23` | 351–364 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
+| `DB-042.24` | 365–375 | بلوک | `CREATE TABLE ticket_attachments` | 1 | ⬜ |
+| `DB-042.25` | 376–414 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
+| `DB-042.26` | 415–421 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
+| `DB-042.27` | 422–439 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
+| `DB-042.28` | 440–447 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-042.29` | 448–457 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-042.30` | 458–481 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
+| `DB-042.31` | 482–495 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
+| `DB-042.32` | 496–505 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
+| `DB-042.33` | 506–561 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
+| `DB-042.34` | 562–563 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-042.35` | 564–578 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
+| `DB-042.36` | 579–594 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
+| `DB-042.37` | 595–607 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
+| `DB-042.38` | 608–625 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
+| `DB-042.39` | 626–636 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
+| `DB-042.40` | 637–654 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
+| `DB-042.41` | 655–667 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
+| `DB-042.42` | 668–749 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
+| `DB-042.43` | 750–767 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
+| `DB-042.44` | 768–777 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
+| `DB-042.45` | 778–779 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-042.46` | 780–808 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
+| `DB-042.47` | 809–820 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
+| `DB-042.48` | 821–831 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
+| `DB-042.49` | 832–855 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
+| `DB-042.50` | 856–866 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
+| `DB-042.51` | 867–897 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
+| `DB-042.52` | 898–936 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
+| `DB-042.53` | 937–952 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
+| `DB-042.54` | 953–966 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
+| `DB-042.55` | 967–985 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
+| `DB-042.56` | 986–997 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
+| `DB-042.57` | 998–1024 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
+| `DB-042.58` | 1025–1040 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
+| `DB-042.59` | 1041–1053 | بلوک | `CREATE TABLE food_ticket_day_visits` | 1 | ⬜ |
+| `DB-042.60` | 1054–1064 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
+| `DB-042.61` | 1065–1080 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
+| `DB-042.62` | 1081–1107 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
+| `DB-042.63` | 1108–1119 | بلوک | `CREATE TABLE chatbot_faq` | 0 | ⬜ |
+| `DB-042.64` | 1120–1132 | بلوک | `CREATE TABLE chatbot_logs` | 0 | ⬜ |
+| `DB-042.65` | 1133–1141 | بلوک | `CREATE TABLE system_incidents` | 1 | ⬜ |
+| `DB-042.66` | 1142–1147 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
+| `DB-042.67` | 1148–1156 | بلوک | `CREATE TABLE api_rate_limits` | 1 | ⬜ |
+| `DB-042.68` | 1157–1169 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
+| `DB-042.69` | 1170–1183 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
+| `DB-042.70` | 1184–1184 | بلوک | `CREATE INDEX idx_tickets_status_priority` | 0 | ⬜ |
+| `DB-042.71` | 1185–1185 | بلوک | `CREATE INDEX idx_users_is_active` | 0 | ⬜ |
+| `DB-042.72` | 1186–1186 | بلوک | `CREATE INDEX idx_assets_lifecycle_status` | 0 | ⬜ |
+| `DB-042.73` | 1187–1187 | بلوک | `CREATE INDEX idx_ola_priority_active` | 0 | ⬜ |
+| `DB-042.74` | 1188–1188 | بلوک | `CREATE INDEX idx_food_ticket_events_event_type` | 0 | ⬜ |
+| `DB-042.75` | 1189–1189 | بلوک | `CREATE INDEX idx_login_attempts_locked_until` | 0 | ⬜ |
+| `DB-042.76` | 1190–1190 | بلوک | `CREATE INDEX idx_ticket_sla_alerts_alert_type` | 0 | ⬜ |
+| `DB-042.77` | 1191–1191 | بلوک | `CREATE INDEX idx_ticket_ola_alerts_alert_type` | 0 | ⬜ |
+| `DB-042.78` | 1192–1192 | بلوک | `CREATE INDEX idx_ticket_events_event_type` | 0 | ⬜ |
+| `DB-042.79` | 1193–1193 | بلوک | `CREATE INDEX idx_knowledge_articles_is_published` | 0 | ⬜ |
+| `DB-042.80` | 1194–1194 | بلوک | `CREATE INDEX idx_holidays_is_active` | 0 | ⬜ |
+| `DB-042.81` | 1195–1195 | بلوک | `CREATE INDEX idx_departments_is_active` | 0 | ⬜ |
+| `DB-042.82` | 1196–1196 | بلوک | `CREATE INDEX idx_handling_units_is_active` | 0 | ⬜ |
+| `DB-042.83` | 1197–1197 | بلوک | `CREATE INDEX idx_categories_group_active` | 0 | ⬜ |
+| `DB-042.84` | 1198–1198 | بلوک | `CREATE INDEX idx_service_catalog_group_active` | 0 | ⬜ |
+| `DB-042.85` | 1199–1199 | بلوک | `CREATE INDEX idx_cd_dvd_records_media` | 0 | ⬜ |
+| `DB-042.86` | 1200–1200 | بلوک | `CREATE INDEX idx_traffic_destinations_is_active` | 0 | ⬜ |
+| `DB-042.87` | 1201–1201 | بلوک | `CREATE INDEX idx_domain_scan_runs_status` | 0 | ⬜ |
+| `DB-042.88` | 1202–1204 | بلوک | `CREATE INDEX idx_domain_scan_queue_status` | 0 | ⬜ |
+| `DB-042.89` | 1205–1214 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
+| `DB-042.90` | 1215–1226 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
+| `DB-042.91` | 1227–1228 | بلوک | `=` | 0 | ⬜ |
+| `DB-042.92` | 1229–1233 | بلوک | `=` | 0 | ⬜ |
+| `DB-042.93` | 1234–1245 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
+| `DB-042.94` | 1246–1265 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
+| `DB-042.95` | 1266–1280 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
+| `DB-042.96` | 1281–1295 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
+| `DB-042.97` | 1296–1311 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
+| `DB-042.98` | 1312–1329 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
+| `DB-042.99` | 1330–1351 | بلوک | `CREATE TABLE food_order_cancel_requests` | 1 | ⬜ |
+| `DB-042.100` | 1352–1378 | بلوک | `CREATE TABLE food_meal_reconciliations` | 1 | ⬜ |
+| `DB-042.101` | 1379–1400 | بلوک | `CREATE TABLE food_monthly_invoices` | 0 | ⬜ |
+| `DB-042.102` | 1401–1414 | بلوک | `CREATE TABLE user_access_groups` | 1 | ⬜ |
+| `DB-042.103` | 1415–1426 | بلوک | `CREATE TABLE user_access_group_members` | 1 | ⬜ |
+| `DB-042.104` | 1427–1442 | بلوک | `CREATE TABLE user_access_group_permissions` | 1 | ⬜ |
+| `DB-042.105` | 1443–1468 | بلوک | `CREATE TABLE log_issues` | 1 | ⬜ |
+| `DB-042.106` | 1469–1478 | بلوک | `CREATE TABLE logging_health_alerts` | 1 | ⬜ |
+| `DB-042.107` | 1479–1494 | بلوک | `CREATE TABLE log_issue_history` | 0 | ⬜ |
+| `DB-042.108` | 1495–1501 | بلوک | `CREATE TABLE log_issue_events` | 0 | ⬜ |
+| `DB-042.109` | 1502–1520 | بلوک | `CREATE TABLE log_issue_notifications` | 1 | ⬜ |
+| `DB-042.110` | 1521–1565 | بلوک | `CREATE TABLE schema_updates` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-043</b> — <code>upgrade-1.10-priority.sql</code> (11 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>DB-043</b> — <code>upgrade-1.1-departments.sql</code> (16 خط، 8 آدرس، بازبینی‌شده 0/8)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-043.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-043.02` | 2–2 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
-| `DB-043.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-043.04` | 4–4 | بلوک | `UPDATE ola_policies` | 1 | ⬜ |
-| `DB-043.05` | 5–6 | بلوک | `UPDATE problem_records` | 1 | ⬜ |
-| `DB-043.06` | 7–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-043.07` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-043.08` | 9–9 | بلوک | `ALTER TABLE ola_policies` | 0 | ⬜ |
-| `DB-043.09` | 10–11 | بلوک | `ALTER TABLE problem_records` | 0 | ⬜ |
+| `DB-043.02` | 2–9 | بلوک | `CREATE TABLE departments` | 0 | ⬜ |
+| `DB-043.03` | 10–10 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-043.04` | 11–11 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-043.05` | 12–12 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
+| `DB-043.06` | 13–13 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-043.07` | 14–14 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-043.08` | 15–16 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-044</b> — <code>upgrade-1.11-user-profile.sql</code> (5 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-044</b> — <code>upgrade-1.10-priority.sql</code> (11 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-044.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-044.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-044.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-044.04` | 4–5 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-044.02` | 2–2 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
+| `DB-044.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-044.04` | 4–4 | بلوک | `UPDATE ola_policies` | 1 | ⬜ |
+| `DB-044.05` | 5–6 | بلوک | `UPDATE problem_records` | 1 | ⬜ |
+| `DB-044.06` | 7–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-044.07` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-044.08` | 9–9 | بلوک | `ALTER TABLE ola_policies` | 0 | ⬜ |
+| `DB-044.09` | 10–11 | بلوک | `ALTER TABLE problem_records` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-045</b> — <code>upgrade-1.12-food-ticket-management.sql</code> (16 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-045</b> — <code>upgrade-1.11-user-profile.sql</code> (5 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-045.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-045.02` | 3–16 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
+| `DB-045.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-045.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-045.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-045.04` | 4–5 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-046</b> — <code>upgrade-1.13-asset-profile.sql</code> (93 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-046</b> — <code>upgrade-1.12-food-ticket-management.sql</code> (16 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-046.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-046.02` | 4–10 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-046.03` | 11–93 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
+| `DB-046.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-046.02` | 3–16 | بلوک | `CREATE TABLE food_ticket_guest_cards` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-047</b> — <code>upgrade-1.13-food-groups.sql</code> (50 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-047</b> — <code>upgrade-1.13-asset-profile.sql</code> (93 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-047.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-047.02` | 4–16 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
-| `DB-047.03` | 17–28 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
-| `DB-047.04` | 29–50 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
+| `DB-047.02` | 4–10 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-047.03` | 11–93 | بلوک | `CREATE TABLE asset_profiles` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-048</b> — <code>upgrade-1.14-system-logs.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-048</b> — <code>upgrade-1.13-food-groups.sql</code> (50 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-048.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-048.02` | 2–14 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
+| `DB-048.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-048.02` | 4–16 | بلوک | `CREATE TABLE food_ticket_groups` | 1 | ⬜ |
+| `DB-048.03` | 17–28 | بلوک | `CREATE TABLE food_ticket_group_members` | 1 | ⬜ |
+| `DB-048.04` | 29–50 | بلوک | `CREATE TABLE food_ticket_group_runs` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-049</b> — <code>upgrade-1.15-plaque-fields.sql</code> (13 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-049</b> — <code>upgrade-1.14-system-logs.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-049.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-049.02` | 7–13 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
+| `DB-049.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-049.02` | 2–14 | بلوک | `CREATE TABLE system_logs` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-050</b> — <code>upgrade-1.16-ticket-number.sql</code> (12 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-050</b> — <code>upgrade-1.15-plaque-fields.sql</code> (13 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-050.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-050.02` | 6–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-050.03` | 8–12 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
+| `DB-050.01` | 1–6 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-050.02` | 7–13 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-051</b> — <code>upgrade-1.17-service-catalog.sql</code> (45 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-051</b> — <code>upgrade-1.16-ticket-number.sql</code> (12 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-051.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-051.02` | 5–45 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-051.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-051.02` | 6–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-051.03` | 8–12 | بلوک | `CREATE TABLE ticket_number_seq` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-052</b> — <code>upgrade-1.18-service-categories.sql</code> (61 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-052</b> — <code>upgrade-1.17-service-catalog.sql</code> (45 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-052.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-052.02` | 4–4 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
-| `DB-052.03` | 5–5 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-052.04` | 6–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-052.05` | 8–27 | بلوک | `INSERT INTO categories` | 1 | ⬜ |
-| `DB-052.06` | 28–61 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
+| `DB-052.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-052.02` | 5–45 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-053</b> — <code>upgrade-1.19-food-ticket-queue.sql</code> (60 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-053</b> — <code>upgrade-1.18-service-categories.sql</code> (61 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-053.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-053.02` | 2–44 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-053.03` | 45–60 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
+| `DB-053.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-053.02` | 4–4 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
+| `DB-053.03` | 5–5 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-053.04` | 6–7 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-053.05` | 8–27 | بلوک | `INSERT INTO categories` | 1 | ⬜ |
+| `DB-053.06` | 28–61 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-054</b> — <code>upgrade-1.2-itsm.sql</code> (63 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
+<summary><b>DB-054</b> — <code>upgrade-1.19-food-ticket-queue.sql</code> (60 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-054.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-054.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-054.03` | 3–3 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-054.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-054.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.11` | 11–12 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-054.12` | 13–27 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
-| `DB-054.13` | 28–52 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
-| `DB-054.14` | 53–63 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
+| `DB-054.02` | 2–44 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-054.03` | 45–60 | بلوک | `CREATE TABLE food_ticket_print_log` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-055</b> — <code>upgrade-1.20-domain-scan.sql</code> (37 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-055</b> — <code>upgrade-1.2-itsm.sql</code> (63 خط، 14 آدرس، بازبینی‌شده 0/14)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-055.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-055.02` | 2–14 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
-| `DB-055.03` | 15–27 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
-| `DB-055.04` | 28–37 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
+| `DB-055.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-055.03` | 3–3 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-055.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-055.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.11` | 11–12 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-055.12` | 13–27 | بلوک | `CREATE TABLE ticket_events` | 1 | ⬜ |
+| `DB-055.13` | 28–52 | بلوک | `CREATE TABLE assets` | 1 | ⬜ |
+| `DB-055.14` | 53–63 | بلوک | `CREATE TABLE asset_inventory_history` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-056</b> — <code>upgrade-1.21-organization.sql</code> (49 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
+<summary><b>DB-056</b> — <code>upgrade-1.20-domain-scan.sql</code> (37 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-056.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-056.02` | 2–16 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
-| `DB-056.03` | 17–24 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
-| `DB-056.04` | 25–29 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-056.05` | 30–34 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-056.06` | 35–42 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
-| `DB-056.07` | 43–49 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-056.02` | 2–14 | بلوک | `CREATE TABLE domain_scan_runs` | 1 | ⬜ |
+| `DB-056.03` | 15–27 | بلوک | `CREATE TABLE domain_scan_queue` | 1 | ⬜ |
+| `DB-056.04` | 28–37 | بلوک | `ALTER TABLE asset_profiles` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-057</b> — <code>upgrade-1.22-permissions.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-057</b> — <code>upgrade-1.21-organization.sql</code> (49 خط، 7 آدرس، بازبینی‌شده 0/7)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-057.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-057.02` | 4–7 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-057.03` | 8–9 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-057.04` | 10–16 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
+| `DB-057.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-057.02` | 2–16 | بلوک | `CREATE TABLE org_units` | 0 | ⬜ |
+| `DB-057.03` | 17–24 | بلوک | `CREATE TABLE org_unit_managers` | 0 | ⬜ |
+| `DB-057.04` | 25–29 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-057.05` | 30–34 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-057.06` | 35–42 | بلوک | `INSERT INTO org_units` | 1 | ⬜ |
+| `DB-057.07` | 43–49 | بلوک | `UPDATE users` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-058</b> — <code>upgrade-1.23-activity-log.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-058</b> — <code>upgrade-1.22-permissions.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-058.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-058.02` | 5–32 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
-| `DB-058.03` | 33–44 | بلوک | `INSERT INTO activity_logs` | 1 | ⬜ |
-| `DB-058.04` | 45–47 | بلوک | `DROP TABLE IF EXISTS audit_logs` | 0 | ⬜ |
-| `DB-058.05` | 48–51 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
-| `DB-058.06` | 52–55 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
+| `DB-058.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-058.02` | 4–7 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-058.03` | 8–9 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-058.04` | 10–16 | بلوک | `CREATE TABLE role_permissions` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-059</b> — <code>upgrade-1.24-traffic-control.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-059</b> — <code>upgrade-1.23-activity-log.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-059.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-059.02` | 10–10 | بلوک | `DROP TABLE IF EXISTS traffic_visits` | 0 | ⬜ |
-| `DB-059.03` | 11–12 | بلوک | `DROP TABLE IF EXISTS traffic_destinations` | 0 | ⬜ |
-| `DB-059.04` | 13–20 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
-| `DB-059.05` | 21–46 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
-| `DB-059.06` | 47–55 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
+| `DB-059.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-059.02` | 5–32 | بلوک | `CREATE TABLE activity_logs` | 1 | ⬜ |
+| `DB-059.03` | 33–44 | بلوک | `INSERT INTO activity_logs` | 1 | ⬜ |
+| `DB-059.04` | 45–47 | بلوک | `DROP TABLE IF EXISTS audit_logs` | 0 | ⬜ |
+| `DB-059.05` | 48–51 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
+| `DB-059.06` | 52–55 | بلوک | `INSERT INTO settings` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-060</b> — <code>upgrade-1.25-performance-indexes.sql</code> (36 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-060</b> — <code>upgrade-1.24-traffic-control.sql</code> (55 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-060.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-060.02` | 8–36 | بلوک | `CREATE PROCEDURE itsm_add_index` | 0 | ⬜ |
+| `DB-060.01` | 1–9 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-060.02` | 10–10 | بلوک | `DROP TABLE IF EXISTS traffic_visits` | 0 | ⬜ |
+| `DB-060.03` | 11–12 | بلوک | `DROP TABLE IF EXISTS traffic_destinations` | 0 | ⬜ |
+| `DB-060.04` | 13–20 | بلوک | `CREATE TABLE traffic_destinations` | 0 | ⬜ |
+| `DB-060.05` | 21–46 | بلوک | `CREATE TABLE traffic_visits` | 1 | ⬜ |
+| `DB-060.06` | 47–55 | بلوک | `INSERT INTO traffic_destinations` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-061</b> — <code>upgrade-1.26-ticket-requesting-unit.sql</code> (28 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-061</b> — <code>upgrade-1.25-performance-indexes.sql</code> (36 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-061.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-061.02` | 9–14 | بلوک | `CREATE PROCEDURE itsm_ensure_req_unit` | 0 | ⬜ |
-| `DB-061.03` | 15–20 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-061.04` | 21–28 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-061.01` | 1–7 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-061.02` | 8–36 | بلوک | `CREATE PROCEDURE itsm_add_index` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-062</b> — <code>upgrade-1.27-food-ticket-fixes.sql</code> (17 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-062</b> — <code>upgrade-1.26-ticket-requesting-unit.sql</code> (28 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-062.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-062.02` | 5–11 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
-| `DB-062.03` | 12–17 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
+| `DB-062.01` | 1–8 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-062.02` | 9–14 | بلوک | `CREATE PROCEDURE itsm_ensure_req_unit` | 0 | ⬜ |
+| `DB-062.03` | 15–20 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-062.04` | 21–28 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-063</b> — <code>upgrade-1.3-supervisor-inventory.sql</code> (14 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>DB-063</b> — <code>upgrade-1.27-food-ticket-fixes.sql</code> (17 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-063.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-063.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-063.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-063.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-063.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-063.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-063.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-063.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-063.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-063.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-063.11` | 11–11 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-063.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-063.13` | 13–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-063.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-063.02` | 5–11 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
+| `DB-063.03` | 12–17 | بلوک | `UPDATE food_ticket_config` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-064</b> — <code>upgrade-1.30-food-ticket-card-map.sql</code> (11 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-064</b> — <code>upgrade-1.3-supervisor-inventory.sql</code> (14 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-064.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-064.02` | 2–11 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
+| `DB-064.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-064.03` | 3–3 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-064.04` | 4–4 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-064.05` | 5–5 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-064.06` | 6–6 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-064.07` | 7–7 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-064.08` | 8–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-064.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-064.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-064.11` | 11–11 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-064.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-064.13` | 13–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-065</b> — <code>upgrade-1.31-food-ticket-templates.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-065</b> — <code>upgrade-1.30-food-ticket-card-map.sql</code> (11 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-065.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-065.02` | 2–14 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
+| `DB-065.02` | 2–11 | بلوک | `CREATE TABLE food_ticket_card_map` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-066</b> — <code>upgrade-1.32-food-group-representative-absence.sql</code> (90 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>DB-066</b> — <code>upgrade-1.31-food-ticket-templates.sql</code> (14 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-066.01` | 1–2 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.02` | 3–8 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.03` | 9–13 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.04` | 14–21 | بلوک | `ALTER TABLE food_ticket_groups` | 0 | ⬜ |
-| `DB-066.05` | 22–28 | بلوک | `ALTER TABLE food_ticket_group_runs` | 0 | ⬜ |
-| `DB-066.06` | 29–46 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
-| `DB-066.07` | 47–60 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
-| `DB-066.08` | 61–66 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-066.09` | 67–71 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-066.10` | 72–73 | بلوک | `=` | 0 | ⬜ |
-| `DB-066.11` | 74–88 | بلوک | `=` | 1 | ⬜ |
-| `DB-066.12` | 89–90 | بلوک | `=` | 0 | ⬜ |
+| `DB-066.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-066.02` | 2–14 | بلوک | `CREATE TABLE food_ticket_templates` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-067</b> — <code>upgrade-1.33-source-delete-truth.sql</code> (46 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
+<summary><b>DB-067</b> — <code>upgrade-1.32-food-group-representative-absence.sql</code> (90 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-067.01` | 1–16 | بلوک | `=` | 1 | ⬜ |
-| `DB-067.02` | 17–18 | بلوک | `=` | 0 | ⬜ |
-| `DB-067.03` | 19–23 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
-| `DB-067.04` | 24–25 | بلوک | `CREATE INDEX idx_food_events_src_deleted` | 0 | ⬜ |
-| `DB-067.05` | 26–27 | بلوک | `=` | 0 | ⬜ |
-| `DB-067.06` | 28–38 | بلوک | `=` | 0 | ⬜ |
-| `DB-067.07` | 39–40 | بلوک | `=` | 0 | ⬜ |
-| `DB-067.08` | 41–44 | بلوک | `=` | 0 | ⬜ |
-| `DB-067.09` | 45–46 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.01` | 1–2 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.02` | 3–8 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.03` | 9–13 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.04` | 14–21 | بلوک | `ALTER TABLE food_ticket_groups` | 0 | ⬜ |
+| `DB-067.05` | 22–28 | بلوک | `ALTER TABLE food_ticket_group_runs` | 0 | ⬜ |
+| `DB-067.06` | 29–46 | بلوک | `CREATE TABLE food_ticket_daily_absence` | 1 | ⬜ |
+| `DB-067.07` | 47–60 | بلوک | `CREATE TABLE food_ticket_group_uid_history` | 0 | ⬜ |
+| `DB-067.08` | 61–66 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-067.09` | 67–71 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-067.10` | 72–73 | بلوک | `=` | 0 | ⬜ |
+| `DB-067.11` | 74–88 | بلوک | `=` | 1 | ⬜ |
+| `DB-067.12` | 89–90 | بلوک | `=` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-068</b> — <code>upgrade-1.38-food-orders.sql</code> (78 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-068</b> — <code>upgrade-1.33-source-delete-truth.sql</code> (46 خط، 9 آدرس، بازبینی‌شده 0/9)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-068.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-068.02` | 5–15 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
-| `DB-068.03` | 16–30 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
-| `DB-068.04` | 31–45 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
-| `DB-068.05` | 46–61 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
-| `DB-068.06` | 62–78 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
+| `DB-068.01` | 1–16 | بلوک | `=` | 1 | ⬜ |
+| `DB-068.02` | 17–18 | بلوک | `=` | 0 | ⬜ |
+| `DB-068.03` | 19–23 | بلوک | `ALTER TABLE food_ticket_events` | 0 | ⬜ |
+| `DB-068.04` | 24–25 | بلوک | `CREATE INDEX idx_food_events_src_deleted` | 0 | ⬜ |
+| `DB-068.05` | 26–27 | بلوک | `=` | 0 | ⬜ |
+| `DB-068.06` | 28–38 | بلوک | `=` | 0 | ⬜ |
+| `DB-068.07` | 39–40 | بلوک | `=` | 0 | ⬜ |
+| `DB-068.08` | 41–44 | بلوک | `=` | 0 | ⬜ |
+| `DB-068.09` | 45–46 | بلوک | `=` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-069</b> — <code>upgrade-1.39-food-guest-requests.sql</code> (19 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-069</b> — <code>upgrade-1.38-food-orders.sql</code> (78 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-069.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-069.02` | 3–19 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
+| `DB-069.01` | 1–4 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-069.02` | 5–15 | بلوک | `CREATE TABLE food_catalog` | 1 | ⬜ |
+| `DB-069.03` | 16–30 | بلوک | `CREATE TABLE food_calendar` | 1 | ⬜ |
+| `DB-069.04` | 31–45 | بلوک | `CREATE TABLE food_calendar_items` | 1 | ⬜ |
+| `DB-069.05` | 46–61 | بلوک | `CREATE TABLE food_orders` | 1 | ⬜ |
+| `DB-069.06` | 62–78 | بلوک | `CREATE TABLE food_order_logs` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-070</b> — <code>upgrade-1.4-final.sql</code> (113 خط، 30 آدرس، بازبینی‌شده 0/30)</summary>
+<summary><b>DB-070</b> — <code>upgrade-1.39-food-guest-requests.sql</code> (19 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-070.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-070.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-070.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-070.04` | 4–4 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-070.05` | 5–5 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-070.06` | 6–6 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
-| `DB-070.07` | 7–7 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
-| `DB-070.08` | 8–8 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
-| `DB-070.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-070.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-070.11` | 11–11 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-070.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.13` | 13–13 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.14` | 14–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.15` | 15–15 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.16` | 16–16 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.17` | 17–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.18` | 18–18 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.19` | 19–19 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.20` | 20–20 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.21` | 21–21 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.22` | 22–22 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.23` | 23–23 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.24` | 24–24 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-070.25` | 25–37 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
-| `DB-070.26` | 38–51 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
-| `DB-070.27` | 52–66 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
-| `DB-070.28` | 67–78 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
-| `DB-070.29` | 79–95 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
-| `DB-070.30` | 96–113 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
+| `DB-070.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-070.02` | 3–19 | بلوک | `CREATE TABLE food_guest_requests` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-071</b> — <code>upgrade-1.40-food-guest-deputy.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-071</b> — <code>upgrade-1.4-final.sql</code> (113 خط، 30 آدرس، بازبینی‌شده 0/30)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-071.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-071.02` | 3–6 | بلوک | `ALTER TABLE food_guest_requests` | 0 | ⬜ |
+| `DB-071.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-071.02` | 2–2 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-071.03` | 3–3 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-071.04` | 4–4 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-071.05` | 5–5 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-071.06` | 6–6 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
+| `DB-071.07` | 7–7 | بلوک | `ALTER TABLE departments` | 0 | ⬜ |
+| `DB-071.08` | 8–8 | بلوک | `ALTER TABLE departments` | 1 | ⬜ |
+| `DB-071.09` | 9–9 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-071.10` | 10–10 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-071.11` | 11–11 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-071.12` | 12–12 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.13` | 13–13 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.14` | 14–14 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.15` | 15–15 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.16` | 16–16 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.17` | 17–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.18` | 18–18 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.19` | 19–19 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.20` | 20–20 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.21` | 21–21 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.22` | 22–22 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.23` | 23–23 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.24` | 24–24 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-071.25` | 25–37 | بلوک | `CREATE TABLE ticket_ratings` | 1 | ⬜ |
+| `DB-071.26` | 38–51 | بلوک | `CREATE TABLE asset_memory_modules` | 1 | ⬜ |
+| `DB-071.27` | 52–66 | بلوک | `CREATE TABLE asset_storage_devices` | 1 | ⬜ |
+| `DB-071.28` | 67–78 | بلوک | `CREATE TABLE asset_graphics_adapters` | 1 | ⬜ |
+| `DB-071.29` | 79–95 | بلوک | `CREATE TABLE asset_peripherals` | 1 | ⬜ |
+| `DB-071.30` | 96–113 | بلوک | `CREATE TABLE asset_history_events` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-072</b> — <code>upgrade-1.5-offline-operations.sql</code> (112 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
+<summary><b>DB-072</b> — <code>upgrade-1.40-food-guest-deputy.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-072.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-072.02` | 2–17 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
-| `DB-072.03` | 18–30 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
-| `DB-072.04` | 31–31 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.05` | 32–32 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.06` | 33–33 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.07` | 34–34 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.08` | 35–35 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.09` | 36–36 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.10` | 37–37 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.11` | 38–38 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.12` | 39–39 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-072.13` | 40–40 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-072.14` | 41–42 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-072.15` | 43–57 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
-| `DB-072.16` | 58–65 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-072.17` | 66–75 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
-| `DB-072.18` | 76–89 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
-| `DB-072.19` | 90–99 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
-| `DB-072.20` | 100–112 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
+| `DB-072.01` | 1–2 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-072.02` | 3–6 | بلوک | `ALTER TABLE food_guest_requests` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-073</b> — <code>upgrade-1.6-hardening.sql</code> (19 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-073</b> — <code>upgrade-1.5-offline-operations.sql</code> (112 خط، 20 آدرس، بازبینی‌شده 0/20)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-073.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-073.02` | 2–9 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
-| `DB-073.03` | 10–19 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-073.02` | 2–17 | بلوک | `CREATE TABLE service_catalog` | 1 | ⬜ |
+| `DB-073.03` | 18–30 | بلوک | `CREATE TABLE service_catalog_fields` | 1 | ⬜ |
+| `DB-073.04` | 31–31 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.05` | 32–32 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.06` | 33–33 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.07` | 34–34 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.08` | 35–35 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.09` | 36–36 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.10` | 37–37 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.11` | 38–38 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.12` | 39–39 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-073.13` | 40–40 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-073.14` | 41–42 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-073.15` | 43–57 | بلوک | `CREATE TABLE notifications` | 1 | ⬜ |
+| `DB-073.16` | 58–65 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-073.17` | 66–75 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
+| `DB-073.18` | 76–89 | بلوک | `CREATE TABLE knowledge_articles` | 1 | ⬜ |
+| `DB-073.19` | 90–99 | بلوک | `CREATE TABLE holidays` | 1 | ⬜ |
+| `DB-073.20` | 100–112 | بلوک | `CREATE TABLE asset_relations` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-074</b> — <code>upgrade-1.7-governance.sql</code> (88 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-074</b> — <code>upgrade-1.6-hardening.sql</code> (19 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-074.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-074.02` | 2–30 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
-| `DB-074.03` | 31–42 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
-| `DB-074.04` | 43–53 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
-| `DB-074.05` | 54–77 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
-| `DB-074.06` | 78–88 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
+| `DB-074.02` | 2–9 | بلوک | `CREATE TABLE login_attempts` | 1 | ⬜ |
+| `DB-074.03` | 10–19 | بلوک | `CREATE TABLE ticket_sla_alerts` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-075</b> — <code>upgrade-1.8-cd-dvd-identity.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>DB-075</b> — <code>upgrade-1.7-governance.sql</code> (88 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-075.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-075.02` | 2–6 | بلوک | `ALTER TABLE cd_dvd_records` | 1 | ⬜ |
+| `DB-075.02` | 2–30 | بلوک | `CREATE TABLE change_records` | 1 | ⬜ |
+| `DB-075.03` | 31–42 | بلوک | `CREATE TABLE change_approvals` | 1 | ⬜ |
+| `DB-075.04` | 43–53 | بلوک | `CREATE TABLE change_ticket_links` | 1 | ⬜ |
+| `DB-075.05` | 54–77 | بلوک | `CREATE TABLE problem_records` | 1 | ⬜ |
+| `DB-075.06` | 78–88 | بلوک | `CREATE TABLE problem_ticket_links` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-076</b> — <code>upgrade-1.8-cd-dvd.sql</code> (44 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-076</b> — <code>upgrade-1.8-cd-dvd-identity.sql</code> (6 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-076.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-076.02` | 2–9 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
-| `DB-076.03` | 10–44 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
+| `DB-076.02` | 2–6 | بلوک | `ALTER TABLE cd_dvd_records` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-077</b> — <code>upgrade-1.8-final.sql</code> (47 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
+<summary><b>DB-077</b> — <code>upgrade-1.8-cd-dvd.sql</code> (44 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-077.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-077.02` | 2–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-077.03` | 9–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
-| `DB-077.04` | 18–35 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
-| `DB-077.05` | 36–45 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
-| `DB-077.06` | 46–47 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-077.02` | 2–9 | بلوک | `CREATE TABLE cd_dvd_types` | 1 | ⬜ |
+| `DB-077.03` | 10–44 | بلوک | `CREATE TABLE cd_dvd_records` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-078</b> — <code>upgrade-1.8-routing.sql</code> (46 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
+<summary><b>DB-078</b> — <code>upgrade-1.8-final.sql</code> (47 خط، 6 آدرس، بازبینی‌شده 0/6)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-078.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-078.02` | 2–12 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
-| `DB-078.03` | 13–13 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-078.04` | 14–15 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
-| `DB-078.05` | 16–16 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
-| `DB-078.06` | 17–17 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-078.07` | 18–18 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-078.08` | 19–19 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-078.09` | 20–20 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
-| `DB-078.10` | 21–21 | بلوک | `ALTER TABLE service_catalog` | 1 | ⬜ |
-| `DB-078.11` | 22–22 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-078.12` | 23–23 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-078.13` | 24–24 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-078.14` | 25–25 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
-| `DB-078.15` | 26–27 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
-| `DB-078.16` | 28–29 | بلوک | `INSERT INTO handling_units` | 1 | ⬜ |
-| `DB-078.17` | 30–30 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-078.18` | 31–31 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
-| `DB-078.19` | 32–33 | بلوک | `UPDATE tickets` | 1 | ⬜ |
-| `DB-078.20` | 34–35 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-078.21` | 36–37 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-078.22` | 38–39 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-078.23` | 40–41 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-078.24` | 42–43 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
-| `DB-078.25` | 44–46 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-078.02` | 2–8 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-078.03` | 9–17 | بلوک | `ALTER TABLE assets` | 0 | ⬜ |
+| `DB-078.04` | 18–35 | بلوک | `CREATE TABLE ola_policies` | 1 | ⬜ |
+| `DB-078.05` | 36–45 | بلوک | `CREATE TABLE ticket_ola_alerts` | 1 | ⬜ |
+| `DB-078.06` | 46–47 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-079</b> — <code>upgrade-1.9-food-ticket.sql</code> (80 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-079</b> — <code>upgrade-1.8-routing.sql</code> (46 خط، 25 آدرس، بازبینی‌شده 0/25)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-079.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-079.02` | 15–37 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
-| `DB-079.03` | 38–64 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
-| `DB-079.04` | 65–80 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
+| `DB-079.01` | 1–1 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-079.02` | 2–12 | بلوک | `CREATE TABLE handling_units` | 1 | ⬜ |
+| `DB-079.03` | 13–13 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-079.04` | 14–15 | بلوک | `ALTER TABLE users` | 1 | ⬜ |
+| `DB-079.05` | 16–16 | بلوک | `ALTER TABLE categories` | 0 | ⬜ |
+| `DB-079.06` | 17–17 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-079.07` | 18–18 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-079.08` | 19–19 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-079.09` | 20–20 | بلوک | `ALTER TABLE service_catalog` | 0 | ⬜ |
+| `DB-079.10` | 21–21 | بلوک | `ALTER TABLE service_catalog` | 1 | ⬜ |
+| `DB-079.11` | 22–22 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-079.12` | 23–23 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-079.13` | 24–24 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-079.14` | 25–25 | بلوک | `ALTER TABLE tickets` | 0 | ⬜ |
+| `DB-079.15` | 26–27 | بلوک | `ALTER TABLE tickets` | 1 | ⬜ |
+| `DB-079.16` | 28–29 | بلوک | `INSERT INTO handling_units` | 1 | ⬜ |
+| `DB-079.17` | 30–30 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-079.18` | 31–31 | بلوک | `UPDATE service_catalog` | 1 | ⬜ |
+| `DB-079.19` | 32–33 | بلوک | `UPDATE tickets` | 1 | ⬜ |
+| `DB-079.20` | 34–35 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-079.21` | 36–37 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-079.22` | 38–39 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-079.23` | 40–41 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-079.24` | 42–43 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
+| `DB-079.25` | 44–46 | بلوک | `INSERT INTO service_catalog` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-080</b> — <code>upgrade-food-drop-legacy-orders-columns.sql</code> (6 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-080</b> — <code>upgrade-1.9-food-ticket.sql</code> (80 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-080.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-080.02` | 4–4 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
-| `DB-080.03` | 5–6 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
+| `DB-080.01` | 1–14 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-080.02` | 15–37 | بلوک | `CREATE TABLE food_ticket_config` | 1 | ⬜ |
+| `DB-080.03` | 38–64 | بلوک | `CREATE TABLE food_ticket_events` | 1 | ⬜ |
+| `DB-080.04` | 65–80 | بلوک | `CREATE TABLE food_ticket_worker_status` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-081</b> — <code>upgrade-food-employee-auth-source.sql</code> (14 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-081</b> — <code>upgrade-food-drop-legacy-orders-columns.sql</code> (6 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-081.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-081.02` | 6–8 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
-| `DB-081.03` | 9–14 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-081.01` | 1–3 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-081.02` | 4–4 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
+| `DB-081.03` | 5–6 | بلوک | `ALTER TABLE food_ticket_config` | 0 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-082</b> — <code>upgrade-remove-legacy-admin-role.sql</code> (11 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>DB-082</b> — <code>upgrade-food-employee-auth-source.sql</code> (14 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `DB-082.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-082.02` | 6–8 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-082.03` | 9–11 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-082.02` | 6–8 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-082.03` | 9–14 | بلوک | `UPDATE users` | 1 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>DB-083</b> — <code>upgrade-unique-employee-number.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+<summary><b>DB-083</b> — <code>upgrade-remove-legacy-admin-role.sql</code> (11 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `DB-083.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
-| `DB-083.02` | 11–11 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-083.03` | 12–14 | بلوک | `UPDATE users` | 1 | ⬜ |
-| `DB-083.04` | 15–16 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
+| `DB-083.01` | 1–5 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-083.02` | 6–8 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-083.03` | 9–11 | بلوک | `UPDATE users` | 1 | ⬜ |
+
+</details>
+
+<details>
+<summary><b>DB-084</b> — <code>upgrade-unique-employee-number.sql</code> (16 خط، 4 آدرس، بازبینی‌شده 0/4)</summary>
+
+| آدرس | خط | نوع | لنگر | ریسک | وضعیت |
+|---|---|---|---|---|---|
+| `DB-084.01` | 1–10 | بلوک | `مقدمهٔ فایل` | 0 | ⬜ |
+| `DB-084.02` | 11–11 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-084.03` | 12–14 | بلوک | `UPDATE users` | 1 | ⬜ |
+| `DB-084.04` | 15–16 | بلوک | `ALTER TABLE users` | 0 | ⬜ |
 
 </details>
 
@@ -8790,15 +8799,15 @@
 </details>
 
 <details>
-<summary><b>PAGE-043</b> — <code>modules/request-center/Actions/supervisor-actions.php</code> (190 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
+<summary><b>PAGE-043</b> — <code>modules/request-center/Actions/supervisor-actions.php</code> (268 خط، 5 آدرس، بازبینی‌شده 0/5)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-043.01` | 1–17 | ناحیه | `بلوک رویه‌ای 1-17` | 0 | ⬜ |
 | `PAGE-043.02` | 18–24 | ناحیه | `محافظ: این فایل فقط از طریق index.php بارگذاری می‌` | 0 | ⬜ |
-| `PAGE-043.03` | 25–98 | ناحیه | `مسیر: supervisor_decision` | 7 | ⬜ |
-| `PAGE-043.04` | 99–148 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
-| `PAGE-043.05` | 149–190 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
+| `PAGE-043.03` | 25–176 | ناحیه | `مسیر: supervisor_decision` | **8** | ⬜ |
+| `PAGE-043.04` | 177–226 | ناحیه | `مسیر: supervisor_reopen` | 2 | ⬜ |
+| `PAGE-043.05` | 227–268 | ناحیه | `مسیر: rate_ticket` | 2 | ⬜ |
 
 </details>
 
@@ -8971,13 +8980,13 @@
 </details>
 
 <details>
-<summary><b>PAGE-059</b> — <code>modules/request-center/WorkflowService.php</code> (257 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
+<summary><b>PAGE-059</b> — <code>modules/request-center/WorkflowService.php</code> (269 خط، 3 آدرس، بازبینی‌شده 0/3)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-059.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
 | `PAGE-059.02` | 4–34 | کلاس | `RequestCenterSqlExpression` | 0 | ⬜ |
-| `PAGE-059.03` | 36–256 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
+| `PAGE-059.03` | 36–268 | کلاس | `RequestCenterWorkflowService` | 2 | ⬜ |
 
 </details>
 

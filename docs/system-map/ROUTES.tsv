@@ -368,11 +368,11 @@ action	delete_service	modules/request-center/Actions/service-actions.php	133
 action	save_service_category	modules/request-center/Actions/service-actions.php	155
 action	delete_service_category	modules/request-center/Actions/service-actions.php	186
 action	add_knowledge	modules/request-center/Actions/service-actions.php	206
-page	supervisor	modules/request-center/Actions/supervisor-actions.php	96
-page	ticket	modules/request-center/Actions/supervisor-actions.php	188
+page	supervisor	modules/request-center/Actions/supervisor-actions.php	174
+page	ticket	modules/request-center/Actions/supervisor-actions.php	266
 action	supervisor_decision	modules/request-center/Actions/supervisor-actions.php	25
-action	supervisor_reopen	modules/request-center/Actions/supervisor-actions.php	99
-action	rate_ticket	modules/request-center/Actions/supervisor-actions.php	149
+action	supervisor_reopen	modules/request-center/Actions/supervisor-actions.php	177
+action	rate_ticket	modules/request-center/Actions/supervisor-actions.php	227
 page	ticket	modules/request-center/Actions/ticket-actions.php	219
 action	create_ticket	modules/request-center/Actions/ticket-actions.php	30
 action	cancel_ticket	modules/request-center/Actions/ticket-actions.php	222
