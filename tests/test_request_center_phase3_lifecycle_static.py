@@ -248,6 +248,8 @@ def test_public_management_and_bulk_replies_start_first_response_clock():
     assert "$workflowUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();" in ticket_action
     assert "$bulkFirstResponseRecorded = $bulkNote !== '' && empty($bulkTicket['first_response_at']);" in bulk_action
     assert "$bulkUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();" in bulk_action
+    assert "'first_response_at' => $ticket['first_response_at'] ?? null" in ticket_action
+    assert "'first_response_at' => $bulkTicket['first_response_at'] ?? null" in bulk_action
 
 
 def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
