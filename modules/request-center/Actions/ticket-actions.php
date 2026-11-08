@@ -623,7 +623,7 @@ if (!defined('APP_ROOT')) {
             if ($body === '') {
                 throw new RuntimeException('متن پاسخ را وارد کنید.');
             }
-            if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester)) {
+            if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester || !ticket_can_see_internal($ticket, $user))) {
                 throw new RuntimeException('یادداشت داخلی برای درخواست‌کننده مجاز نیست؛ پیام عمومی ارسال کنید.');
             }
             $internal = !empty($_POST['is_internal']) ? 1 : 0;
