@@ -175,6 +175,20 @@ def test_ticket_maintenance_jobs_reject_web_before_schema_setup():
         assert cron.index("if (PHP_SAPI !== 'cli')") < cron.index("ticket_hot_schema_ensure()")
 
 
+def test_requester_and_supervisor_reopen_reasons_are_validated_server_side():
+    ticket_action = source("modules/request-center/Actions/ticket-actions.php")
+    supervisor_action = source("modules/request-center/Actions/supervisor-actions.php")
+    requester_start = ticket_action.index("if ($action === 'reopen_ticket')")
+    requester_end = ticket_action.index("if ($action === 'reply')", requester_start)
+    requester_block = ticket_action[requester_start:requester_end]
+    assert "$reason = post_value('reopen_reason');" in requester_block
+    assert "mb_strlen($reason, 'UTF-8') > 1000" in requester_block
+    decision_start = supervisor_action.index("if ($action === 'supervisor_decision')")
+    decision_end = supervisor_action.index("if ($action === 'supervisor_reopen')", decision_start)
+    decision_block = supervisor_action[decision_start:decision_end]
+    assert "mb_strlen($note, 'UTF-8') > 500" in decision_block
+
+
 def test_supervisor_reopen_requires_a_reason_server_side():
     action = source("modules/request-center/Actions/supervisor-actions.php")
     start = action.index("if ($action === 'supervisor_reopen')")
