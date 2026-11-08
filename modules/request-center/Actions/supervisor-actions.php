@@ -93,6 +93,8 @@ if (!defined('APP_ROOT')) {
                 save_audit_required((int) $supervisor['id'], 'ticket_rejected', $ticketId, [
                     'reason' => $note,
                     'from_status' => (string) $ticket['status'],
+                    'to_status' => 'rejected',
+                    'first_response_at' => $ticket['first_response_at'] ?? null,
                 ]);
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'ticket_rejected', (string) $ticket['status'], 'rejected', [
                     'reason' => $note,
@@ -116,7 +118,19 @@ if (!defined('APP_ROOT')) {
                 if (!$closed) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
-                save_audit_required((int) $supervisor['id'], 'ticket_supervisor_approved', $ticketId, ['note' => $note, 'from_status' => 'resolved', 'to_status' => 'closed']);
+                save_audit_required((int) $supervisor['id'], 'ticket_supervisor_approved', $ticketId, [
+                    'note' => $note,
+                    'from_status' => 'resolved',
+                    'to_status' => 'closed',
+                    'sla_ola' => [
+                        'due_at' => $ticket['due_at'] ?? null,
+                        'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                        'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? 0,
+                        'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                        'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                        'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                    ],
+                ]);
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', ['note' => $note]);
                 request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد.', (int) $supervisor['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_closed', 'تأیید و بستن درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
@@ -144,8 +158,31 @@ if (!defined('APP_ROOT')) {
                 }
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')
                     ->execute([$ticketId, (int) $supervisor['id'], 'برگشت برای اصلاح توسط سوپروایزر: ' . $note]);
-                save_audit_required((int) $supervisor['id'], 'ticket_supervisor_rework', $ticketId, ['note' => $note, 'from_status' => 'resolved', 'to_status' => $reworkStatus]);
-                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_rework', $ticket['status'], $reworkStatus, ['note' => $note]);
+                save_audit_required((int) $supervisor['id'], 'ticket_supervisor_rework', $ticketId, [
+                    'note' => $note,
+                    'from_status' => 'resolved',
+                    'to_status' => $reworkStatus,
+                    'sla_ola' => [
+                        'due_at' => $reworkDue,
+                        'sla_paused_at' => null,
+                        'sla_pause_minutes' => 0,
+                        'ola_policy_id' => $reworkOla['policy_id'],
+                        'ola_response_due_at' => $reworkOla['response_due_at'],
+                        'ola_due_at' => $reworkOla['due_at'],
+                        'ola_escalation_1_at' => $reworkOla['escalation_1_at'],
+                        'ola_escalation_2_at' => $reworkOla['escalation_2_at'],
+                    ],
+                ]);
+                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_rework', $ticket['status'], $reworkStatus, [
+                    'note' => $note,
+                    'due_at' => $reworkDue,
+                    'ola_policy_id' => $reworkOla['policy_id'],
+                    'ola_response_due_at' => $reworkOla['response_due_at'],
+                    'ola_due_at' => $reworkOla['due_at'],
+                    'ola_escalation_1_at' => $reworkOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $reworkOla['escalation_2_at'],
+                    'sla_pause_minutes' => 0,
+                ]);
                 request_center_notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id']);
                 flash('info', 'درخواست برای اصلاح و ادامه کار برگشت داده شد.');
             }
@@ -194,9 +231,23 @@ if (!defined('APP_ROOT')) {
             if ($hadStaleCancel) {
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'cancellation_rejected', 'closed', $reopenStatus, ['note' => 'پاک‌سازی خودکار درخواست لغو قدیمی هنگام بازگشایی رسمی']);
             }
-            save_audit_required((int) $supervisor['id'], 'ticket_reopened_by_supervisor', $ticketId, ['note' => $note]);
+            save_audit_required((int) $supervisor['id'], 'ticket_reopened_by_supervisor', $ticketId, [
+                'note' => $note,
+                'from_status' => 'closed',
+                'to_status' => $reopenStatus,
+                'sla_ola' => [
+                    'due_at' => $dueAt,
+                    'sla_paused_at' => null,
+                    'sla_pause_minutes' => 0,
+                    'ola_policy_id' => $reopenOla['policy_id'],
+                    'ola_response_due_at' => $reopenOla['response_due_at'],
+                    'ola_due_at' => $reopenOla['due_at'],
+                    'ola_escalation_1_at' => $reopenOla['escalation_1_at'],
+                    'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
+                ],
+            ]);
             request_center_notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد.', (int) $supervisor['id']);
-            db_commit('index.php');
+            db_commit('request-center.php');
             flash('info', $hadStaleCancel ? 'درخواست بازگشایی شد؛ درخواست لغو قدیمی هم پاک‌سازی شد.' : 'درخواست با تصمیم سوپروایزر بازگشایی شد.');
             redirect('request-center.php?page=supervisor');
         }
