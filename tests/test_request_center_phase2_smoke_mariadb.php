@@ -314,7 +314,8 @@ try {
     }
     smoke_check($csrf !== '', 'independent creation form exposes a session-bound CSRF token');
     smoke_check($requestToken !== '', 'independent creation form exposes a one-time submission token');
-    $uploadContents = 'Request Center phase-3 attachment smoke';
+    $uploadContents = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j5ZkAAAAASUVORK5CYII=', true);
+    if (!is_string($uploadContents)) { throw new RuntimeException('Could not decode PNG attachment fixture.'); }
     $uploadPath = tempnam(sys_get_temp_dir(), 'rc-upload-');
     file_put_contents($uploadPath, $uploadContents);
     $create = smoke_http_multipart_post('http://' . $address . '/request-center.php', [
@@ -330,7 +331,7 @@ try {
         'department_id' => $smokeDepartmentId,
         'csrf' => $csrf,
         'request_token' => $requestToken,
-    ], 'attachment', $uploadPath, 'rc-phase3-attachment.txt', 'text/plain', ['Cookie: ' . $cookie]);
+    ], 'attachment', $uploadPath, 'rc-phase3-attachment.png', 'image/png', ['Cookie: ' . $cookie]);
     @unlink($uploadPath);
     if ($create['status'] !== 302) {
         $logTail = '';
