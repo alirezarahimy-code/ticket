@@ -73,7 +73,7 @@ function request_center_post_error(Throwable $exception, string $page): never
         'bulk_update_tickets' => 'request-center.php?page=queue',
         'supervisor_decision', 'supervisor_reopen' => 'request-center.php?page=supervisor',
         'add_service', 'edit_service', 'delete_service', 'add_service_field',
-        'save_service_category', 'delete_service_category' => 'index.php?page=services',
+        'save_service_category', 'delete_service_category' => 'request-center.php?page=services',
         'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_id'] ?? 0)),
         default => $ticketId > 0
             ? 'request-center.php?page=ticket&id=' . $ticketId
