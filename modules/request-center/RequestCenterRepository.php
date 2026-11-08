@@ -30,7 +30,7 @@ final class RequestCenterRepository
             $required = [
                 'tickets' => ['id', 'ticket_no', 'subject', 'status', 'priority', 'service_group', 'ticket_type',
                     'created_at', 'updated_at', 'due_at', 'sla_paused_at', 'sla_pause_minutes',
-                    'first_response_at', 'ola_response_due_at', 'ola_due_at',
+                    'first_response_at', 'rejected_at', 'ola_response_due_at', 'ola_due_at',
                     'ola_escalation_1_at', 'ola_escalation_2_at',
                     'requester_id', 'assigned_to', 'department_id',
                     'category_id', 'service_id', 'asset_id', 'requesting_unit_id'],
@@ -64,6 +64,14 @@ final class RequestCenterRepository
                         $problems[] = 'ستون ' . $table . '.' . $name . ' وجود ندارد.';
                     }
                 }
+            }
+            $statusTypeQuery = $this->pdo->prepare(
+                'SELECT COLUMN_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1'
+            );
+            $statusTypeQuery->execute(['tickets', 'status']);
+            $statusType = (string) ($statusTypeQuery->fetchColumn() ?: '');
+            if ($statusType === '' || !str_contains($statusType, "'rejected'")) {
+                $problems[] = 'مقدار وضعیت tickets.status شامل rejected نیست؛ Migration 037 را بررسی کنید.';
             }
             return $problems;
         } catch (Throwable $exception) {
