@@ -260,7 +260,7 @@ if ($page === 'ticket') {
         $eventDetails = json_decode((string) ($event['details'] ?? ''), true);
         $eventDetails = is_array($eventDetails) ? $eventDetails : [];
         $visibleDetails = [];
-        $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority'];
+        $safeKeys = ['reason','score','from','to','mode','department_id','sla_minutes','ticket_type','service_id','from_status','to_status','status','priority','from_assignee_name','to_assignee_name'];
         if ($canSeeInternal) {
             $safeKeys = array_merge($safeKeys, [
                 'note', 'assigned_to', 'from_assigned_to', 'to_assigned_to', 'from_assignee_name', 'to_assignee_name', 'assignment_source', 'requested_at', 'actor_id', 'message_id', 'is_internal',
