@@ -1,0 +1,9 @@
+T04 database: 10.4.32-MariaDB-1:10.4.32+maria~ubu2004
+PASS index.php completed HTTP request (status 200)
+T04 healthy-schema HTTP request: DDL=0, DML=0
+PASS created disposable primary-admin account for request-center.php probe
+PASS session seed endpoint returned HTTP 200 (status 200)
+PHP Fatal error:  Uncaught Error: Call to undefined function json_validate() in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php:203
+Stack trace:
+#0 {main}
+  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php on line 203

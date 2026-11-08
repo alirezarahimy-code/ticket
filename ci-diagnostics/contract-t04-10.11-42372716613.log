@@ -1,0 +1,43 @@
+T04 database: 10.11.19-MariaDB-ubu2204
+PASS index.php completed HTTP request (status 200)
+T04 healthy-schema HTTP request: DDL=0, DML=0
+PASS created disposable primary-admin account for request-center.php probe
+PASS session seed endpoint returned HTTP 200 (status 200)
+PHP Fatal error:  Uncaught RuntimeException: session seed body is not JSON (status 200): <?php\nreturn array (
+  'app' => 
+  array (
+    'name' => 'Request Center T04 CI',
+    'timezone' => 'Asia/Tehran',
+    'base_url' => 'http://127.0.0.1:18765',
+    'key' => 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  ),
+  'database' => 
+  array (
+    'host' => '127.0.0.1',
+    'port' => 3306,
+    'name' => 'persian_ticketing_ci',
+    'user' => 'rc_web_ci',
+    'password' => 'rc-web-e9ef75bc44a6d549421b9dd1',
+    'charset' => 'utf8mb4',
+  ),
+  'ldap' => 
+  array (
+    'enabled' => false,
+    'host' => '',
+    'port' => 389,
+    'ssl' => false,
+    'base_dn' => '',
+    'bind_dn' => '',
+    'bind_password' => '',
+    'domain_suffix' => '',
+    'default_role' => 'user',
+    'group_map' => 
+    array (
+      'agent' => 
+      array (
+      ),
+      'manager' => 
+       in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php:205
+Stack trace:
+#0 {main}
+  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php on line 205

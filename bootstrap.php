@@ -79,3 +79,6 @@ require __DIR__ . '/lib/notify-users.php';
 // ───── ثبت فعالیت، حسابرسی و رویداد درخواست‌ها (شرح در سرآیند همان فایل) ─────
 require __DIR__ . '/lib/activity-audit.php';
 
+// Shared request input normalization and allowlisted choice helpers.
+require_once __DIR__ . '/lib/http-input.php';
+

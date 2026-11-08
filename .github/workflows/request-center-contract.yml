@@ -1,0 +1,272 @@
+name: Request Center Contract
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'request-center.php'
+      - 'modules/request-center/**'
+      - 'tests/test_request_center_first_slice_static.py'
+      - 'tests/test_request_center_repository_sqlite.php'
+      - 'tests/test_request_center_workflow_service_sqlite.php'
+      - 'tests/test_request_center_workflow_service_mariadb.php'
+      - 'tests/test_request_center_schema_preflight_mariadb.php'
+      - 'tests/test_request_center_web_ddl_runtime.php'
+      - 'tests/test_system_update_migration_failure_gates.php'
+      - 'tests/test_request_center_metadata_lock_mariadb.php'
+      - 'tests/test_backup_restore_mariadb_e2e.php'
+      - 'tests/test_request_center_claim_concurrency_mariadb.php'
+      - 'tests/test_request_center_t07_migration_clone.php'
+      - 'tests/test_request_center_jalali_parity.mjs'
+      - 'tests/test_request_center_appointments_sqlite.php'
+      - 'tests/fixtures/jalali-php-convert.php'
+      - 'tests/fixtures/request-center-claim-worker.php'
+      - 'tests/fixtures/request-center-ddl-probe.php'
+      - 'tests/fixtures/request-center-session-seed.php'
+      - 'tests/test_ticket_workflow_safety_static.py'
+      - 'tests/test_ticket_cancellation_static.py'
+      - 'tests/test_ticket_three_views_static.py'
+      - 'tests/test_ticket_lifecycle_guide_static.py'
+      - 'tests/test_ldap_secret_and_legacy_status_static.py'
+      - 'lib/auth-scope.php'
+      - 'actions/ticket-actions.php'
+      - 'actions/supervisor-actions.php'
+      - 'actions/bulk-actions.php'
+      - 'cron/ticket_auto_close.php'
+      - 'cron/sla_maintenance.php'
+      - 'migrations/037-request-center-lifecycle-rejection.sql'
+      - 'install-empty-db.sql'
+      - 'schema.sql'
+      - 'lib/tickets-sla.php'
+      - 'index.php'
+      - 'lib/http-input.php'
+      - 'lib/render.php'
+  push:
+    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
+
+permissions:
+  contents: write
+
+jobs:
+  request-center-contract:
+    name: Request Center Contract (MariaDB ${{ matrix.mariadb-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mariadb-version: ['10.4.32', '10.11']
+    services:
+      mariadb:
+        image: mariadb:${{ matrix.mariadb-version }}
+        env:
+          MARIADB_ROOT_PASSWORD: ci-ephemeral-root-password
+          MARIADB_DATABASE: persian_ticketing_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo_mysql, pdo_sqlite, mbstring, xml, zip
+          coverage: none
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pytest and MariaDB client
+        run: |
+          python -m pip install --disable-pip-version-check pytest
+          sudo apt-get update
+          sudo apt-get install -y mariadb-client
+      - name: PHP syntax for independent entry point and repository
+        run: |
+          php -l request-center.php
+          php -l modules/request-center/RequestCenterRepository.php
+          php -l modules/request-center/WorkflowService.php
+          php -l modules/request-center/lib/functions.php
+          php -l modules/request-center/AppointmentRepository.php
+          php -l modules/request-center/Actions/appointment-actions.php
+          php -l modules/request-center/Pages/calendar.php
+          php -l modules/request-center/Actions/ticket-actions.php
+          php -l modules/request-center/Actions/supervisor-actions.php
+          php -l modules/request-center/Actions/bulk-actions.php
+          php -l modules/request-center/Pages/detail.php
+          php -l modules/request-center/Pages/supervisor.php
+          php -l cron/sla_maintenance.php
+          php -l cron/ticket_auto_close.php
+      - name: First-slice security and architecture contract
+        run: python -m pytest -q tests/test_request_center_first_slice_static.py
+      - name: Repository query and visibility integration tests
+        run: php tests/test_request_center_repository_sqlite.php
+      - name: Appointment lifecycle, conflict and capacity contract (SQLite)
+        run: php tests/test_request_center_appointments_sqlite.php
+      - name: WorkflowService transition policy and concurrency guards (SQLite)
+        run: php tests/test_request_center_workflow_service_sqlite.php
+      - name: WorkflowService real MariaDB locking and transaction integration
+        run: php tests/test_request_center_workflow_service_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+      - name: Verify exact MariaDB service version
+        run: |
+          actual=$(mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password -Nse 'SELECT VERSION()')
+          echo "MariaDB server version: ${actual}"
+          case "${actual}" in
+            "${EXPECTED_MARIADB_VERSION}"*) ;;
+            *) echo "Expected MariaDB ${EXPECTED_MARIADB_VERSION}, got ${actual}"; exit 1 ;;
+          esac
+        env:
+          EXPECTED_MARIADB_VERSION: ${{ matrix.mariadb-version }}
+
+      - name: Load fresh-install schema into disposable MariaDB
+        run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < install-empty-db.sql
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+      - name: Request Center schema preflight on MariaDB
+        run: php tests/test_request_center_schema_preflight_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+      - name: Existing workflow safety contracts
+        run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py
+      - name: Existing ticket routing unit tests
+        run: php tests/test_ticket_routing_unit.php
+
+      - name: Request Center T01-T03 MariaDB DDL transaction gates
+        run: php tests/test_request_center_mariadb_ddl_gates.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T04 web DDL runtime diagnostic
+        id: t04
+        if: always()
+        run: php tests/test_request_center_web_ddl_runtime.php > "$RUNNER_TEMP/t04.log" 2>&1; code=$?; cat "$RUNNER_TEMP/t04.log"; exit $code
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Phase-2 smoke — moved RC handler code paths through real HTTP
+        id: phase2_smoke
+        run: php tests/test_request_center_phase2_smoke_mariadb.php > "$RUNNER_TEMP/phase2-smoke.log" 2>&1; code=$?; cat "$RUNNER_TEMP/phase2-smoke.log"; exit $code
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Commit Phase-2 smoke log on failure (workbench branch only)
+        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
+        run: |
+          set +e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
+          mkdir -p ci-diagnostics
+          cp "$RUNNER_TEMP/phase2-smoke.log" "ci-diagnostics/contract-phase2-smoke-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
+          git add ci-diagnostics
+          git commit -m "ci diagnostics: contract Phase-2 smoke ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}" || true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Commit T04 diagnostic log on failure (workbench branch only)
+        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
+        run: |
+          set +e
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$GITHUB_REF_NAME"
+          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
+          mkdir -p ci-diagnostics
+          cp "$RUNNER_TEMP/t04.log" "ci-diagnostics/contract-t04-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
+          git add ci-diagnostics
+          git commit -m "ci diagnostics: contract T04 ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}" || true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: T05-T06 migration runner failure and registry fault injection
+        run: php tests/test_system_update_migration_failure_gates.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T09 MariaDB metadata lock timeout
+        run: php tests/test_request_center_metadata_lock_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T10 50-worker Claim concurrency
+        run: php tests/test_request_center_claim_concurrency_mariadb.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
+      - name: Request Center T11 PHP and ItsmJalali date parity
+        run: node tests/test_request_center_jalali_parity.mjs
+
+      - name: Install MariaDB client tools for T08 backup and restore
+        run: sudo apt-get update && sudo apt-get install -y mariadb-client
+
+      - name: T08 actual MariaDB, uploads and system-files backup/restore
+        run: php tests/test_backup_restore_mariadb_e2e.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+          ITSM_MYSQLDUMP_PATH: /usr/bin/mariadb-dump
+          ITSM_MYSQL_PATH: /usr/bin/mariadb
+
+      - name: T07 full-database clone migration replay and fingerprint (both MariaDB versions)
+        run: |
+          git fetch --no-tags --depth=1 origin 465833587b28edb260412073131265e2724f8812
+          git show 465833587b28edb260412073131265e2724f8812:persian_ticketing.sql > "$RUNNER_TEMP/persian_ticketing.sql"
+          echo "T07 source commit: 465833587b28edb260412073131265e2724f8812"
+          test -s "$RUNNER_TEMP/persian_ticketing.sql"
+          echo "T07 dump bytes: $(wc -c < "$RUNNER_TEMP/persian_ticketing.sql")"
+          sha256sum "$RUNNER_TEMP/persian_ticketing.sql"
+          php tests/test_request_center_t07_migration_clone.php
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: persian_ticketing_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+          CI_DB_DUMP_PATH: ${{ runner.temp }}/persian_ticketing.sql
+          ITSM_MYSQL_PATH: mariadb

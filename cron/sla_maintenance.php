@@ -11,7 +11,7 @@ if (PHP_SAPI !== 'cli') {
     exit("Not found\n");
 }
 
-$query = db()->query('SELECT t.id, t.subject, t.due_at FROM tickets t WHERE t.due_at IS NOT NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) AND NOT EXISTS (SELECT 1 FROM ticket_sla_alerts a WHERE a.ticket_id = t.id AND (a.alert_type = "overdue" OR (a.alert_type = "due_soon" AND t.due_at > NOW()))) ORDER BY t.due_at LIMIT 1000');
+$query = db()->query('SELECT t.id, t.subject, t.due_at FROM tickets t WHERE t.due_at IS NOT NULL AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) AND NOT EXISTS (SELECT 1 FROM ticket_sla_alerts a WHERE a.ticket_id = t.id AND a.due_at = t.due_at AND (a.alert_type = "overdue" OR (a.alert_type = "due_soon" AND t.due_at > NOW()))) ORDER BY t.due_at LIMIT 1000');
 $claim = db()->prepare('INSERT IGNORE INTO ticket_sla_alerts (ticket_id, alert_type, due_at) VALUES (?, ?, ?)');
 $alerts = 0;
 $now = new DateTimeImmutable('now');
@@ -21,6 +21,15 @@ foreach ($query->fetchAll() as $ticket) {
     $type = $dueAt <= $now ? 'overdue' : 'due_soon';
     db()->beginTransaction();
     try {
+        $currentQuery = db()->prepare('SELECT id, subject, due_at, CASE WHEN due_at <= NOW() THEN "overdue" ELSE "due_soon" END AS current_alert_type FROM tickets WHERE id = ? AND status NOT IN ("resolved", "closed", "cancelled", "rejected") AND sla_paused_at IS NULL AND due_at IS NOT NULL AND due_at = ? AND due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) FOR UPDATE');
+        $currentQuery->execute([(int) $ticket['id'], $ticket['due_at']]);
+        $currentTicket = $currentQuery->fetch();
+        if (!$currentTicket) {
+            db()->rollBack();
+            continue;
+        }
+        $ticket = $currentTicket;
+        $type = (string) $ticket['current_alert_type'];
         $claim->execute([(int) $ticket['id'], $type, $ticket['due_at']]);
         if ($claim->rowCount() === 1) {
             $title = $type === 'overdue' ? 'درخواست از SLA عبور کرد' : 'مهلت SLA درخواست نزدیک است';
@@ -59,11 +68,19 @@ try {
     $olaClaim = db()->prepare('INSERT IGNORE INTO ticket_ola_alerts (ticket_id, alert_type, due_at) VALUES (?, ?, ?)');
     foreach ($olaTypes as $type => $spec) {
         $column = $spec['column'];
-        $olaQuery = db()->query('SELECT t.id, t.' . $column . ' AS due_text FROM tickets t WHERE t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.' . $column . ' IS NOT NULL AND t.' . $column . ' <= NOW() ' . $spec['extra'] . ' AND NOT EXISTS (SELECT 1 FROM ticket_ola_alerts a WHERE a.ticket_id = t.id AND a.alert_type = "' . $type . '") ORDER BY t.' . $column . ' LIMIT 500');
+        $olaQuery = db()->query('SELECT t.id, t.' . $column . ' AS due_text FROM tickets t WHERE t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.' . $column . ' IS NOT NULL AND t.' . $column . ' <= NOW() ' . $spec['extra'] . ' AND NOT EXISTS (SELECT 1 FROM ticket_ola_alerts a WHERE a.ticket_id = t.id AND a.alert_type = "' . $type . '" AND a.due_at = t.' . $column . ') ORDER BY t.' . $column . ' LIMIT 500');
         foreach ($olaQuery->fetchAll() as $ticket) {
             $dueAtText = (string) $ticket['due_text'];
             db()->beginTransaction();
             try {
+                $currentOlaQuery = db()->prepare('SELECT id, ' . $column . ' AS due_text, first_response_at FROM tickets WHERE id = ? AND status NOT IN ("resolved", "closed", "cancelled", "rejected") AND sla_paused_at IS NULL AND ' . $column . ' IS NOT NULL AND ' . $column . ' = ? AND ' . $column . ' <= NOW() ' . $spec['extra'] . ' FOR UPDATE');
+                $currentOlaQuery->execute([(int) $ticket['id'], $dueAtText]);
+                $currentOla = $currentOlaQuery->fetch();
+                if (!$currentOla) {
+                    db()->rollBack();
+                    continue;
+                }
+                $dueAtText = (string) $currentOla['due_text'];
                 $olaClaim->execute([(int) $ticket['id'], $type, $dueAtText]);
                 if ($olaClaim->rowCount() === 1) {
                     $number = ticket_number((int) $ticket['id']);
