@@ -40,11 +40,9 @@ def test_attachment_and_report_endpoints_are_independent():
         page = source(path)
         assert "request-center.php?action=download_attachment" in page
         assert "index.php?action=download_attachment" not in page
-    for path in (
-        "modules/request-center/Pages/admin.php",
-        "modules/request-center/Pages/supervisor-workspace.php",
-    ):
-        assert 'href="index.php"' not in source(path)
+    # A system-home link is allowed; operational forms and data routes remain RC-owned.
+    assert 'href="index.php">بازگشت به سامانه' in source("modules/request-center/Pages/admin.php")
+    assert 'href="index.php">بازگشت به سامانه' in source("modules/request-center/Pages/supervisor-workspace.php")
     assert 'href="request-center.php?action=export_report' in source("modules/request-center/Pages/reports.php")
 
 
