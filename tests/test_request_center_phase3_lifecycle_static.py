@@ -285,7 +285,7 @@ def test_supervisor_workspace_shows_scoped_workload_and_unassigned_pressure():
     workspace = source("modules/request-center/Pages/supervisor-workspace.php")
     assert "public function supervisorWorkload(array $user" in repository
     assert "ticket_scope($user, 't')" in repository
-    assert "t.status NOT IN (\"resolved\", \"closed\", \"cancelled\", \"rejected\")" in repository
+    assert "t.status NOT IN ('resolved', 'closed', 'cancelled', 'rejected')" in repository
     assert "$workload = $repo->supervisorWorkload($user);" in workspace
     assert "$summary['unassigned']" in workspace
     assert "$summary['awaiting_assignment']" in workspace
