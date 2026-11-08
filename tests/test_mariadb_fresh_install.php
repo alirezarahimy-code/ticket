@@ -91,7 +91,18 @@ if ($mode === 'fresh-install') {
         check((int) $stmt->fetchColumn() === 1, "جدول «{$table}» وجود دارد");
     }
 
-    // ۴) یک پرس‌وجوی واقعی روی settings (ستون‌های utf8mb4)
+    // ۴) شِمای نصب تازه باید با migration 034 و Logging فعلی هم‌تراز باشد.
+    $systemLogColumns = $pdo->query(
+        "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = {$quotedDb} AND TABLE_NAME = 'system_logs'"
+    )->fetchAll(PDO::FETCH_COLUMN);
+    check(in_array('escalation_count', $systemLogColumns, true), 'system_logs.escalation_count در نصب تازه وجود دارد');
+    check(in_array('escalation_label', $systemLogColumns, true), 'system_logs.escalation_label در نصب تازه وجود دارد');
+    $escalationIndex = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = {$quotedDb} AND TABLE_NAME = 'system_logs' AND INDEX_NAME = 'idx_system_logs_level_time'"
+    )->fetchColumn();
+    check($escalationIndex === 1, 'ایندکس تشدید شدت Logging در نصب تازه وجود دارد');
+
+    // ۵) یک پرس‌وجوی واقعی روی settings (ستون‌های utf8mb4)
     $pdo->query('SELECT COUNT(*) FROM settings')->fetchColumn();
     check(true, 'SELECT روی settings بدون خطا اجرا شد');
 }
