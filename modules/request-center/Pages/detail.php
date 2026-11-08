@@ -194,6 +194,10 @@ if ($page === 'ticket') {
     $eventSearch = trim((string) ($_GET['event_q'] ?? ''));
     $eventConditions = ['e.ticket_id = ?'];
     $eventParams = [(int) $ticket['id']];
+    if (!$staff) {
+        // Internal notes are not part of the requester-visible activity stream.
+        $eventConditions[] = "e.event_type <> 'internal_note'";
+    }
     if ($eventSearch !== '') {
         $needle = '%' . logging_utf8_substr($eventSearch, 0, 100) . '%';
         $searchParts = ['e.event_type LIKE ?', 'e.from_status LIKE ?', 'e.to_status LIKE ?', 'u.full_name LIKE ?'];
