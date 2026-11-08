@@ -82,7 +82,6 @@ try {
         'rejected_at' => RequestCenterSqlExpression::now(),
     ], 'supervisor_reject', [
         'cancel_requested_at' => null,
-        'first_response_at' => null,
         'resolved_at' => null,
     ]);
 } catch (RuntimeException) {
