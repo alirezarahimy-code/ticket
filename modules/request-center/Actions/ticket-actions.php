@@ -217,8 +217,29 @@ if (!defined('APP_ROOT')) {
             $message = db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body) VALUES (?, ?, ?)');
             $message->execute([$ticketId, $user['id'], $description]);
             store_attachment((int) db()->lastInsertId(), $_FILES['attachment'] ?? []);
-             $ticketAuditMeta = ['subject' => $subject];
-             $ticketEventDetails = ['department_id' => $departmentId, 'sla_minutes' => $slaMinutes, 'ticket_type' => $ticketType, 'service_id' => $serviceId];
+             $ticketAuditMeta = [
+                 'subject' => $subject,
+                 'priority' => $priority,
+                 'initial_status' => $initialStatus,
+                 'due_at' => $dueAt,
+                 'ola_policy_id' => $ola['policy_id'],
+                 'ola_response_due_at' => $ola['response_due_at'],
+                 'ola_due_at' => $ola['due_at'],
+                 'ola_escalation_1_at' => $ola['escalation_1_at'],
+                 'ola_escalation_2_at' => $ola['escalation_2_at'],
+             ];
+             $ticketEventDetails = [
+                 'department_id' => $departmentId,
+                 'sla_minutes' => $slaMinutes,
+                 'due_at' => $dueAt,
+                 'ola_policy_id' => $ola['policy_id'],
+                 'ola_response_due_at' => $ola['response_due_at'],
+                 'ola_due_at' => $ola['due_at'],
+                 'ola_escalation_1_at' => $ola['escalation_1_at'],
+                 'ola_escalation_2_at' => $ola['escalation_2_at'],
+                 'ticket_type' => $ticketType,
+                 'service_id' => $serviceId,
+             ];
              if ($cdDvdRequestRecord) {
                  $ticketAuditMeta['cd_dvd_record_id'] = $cdDvdRequestId;
                  $ticketEventDetails['cd_dvd_record_id'] = $cdDvdRequestId;
