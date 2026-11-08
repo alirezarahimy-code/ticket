@@ -463,3 +463,14 @@ def test_supervisor_decision_queue_preserves_pagination_after_post_and_detail():
     assert page.count('name="rc_return_p" value="\' . $supervisorPage . \'"') == 4
     assert "&amp;workspace=supervisor&amp;p=' . $supervisorPage . '" in page
     assert "request_center_ticket_return_url($ticketId)" in source("modules/request-center/Actions/supervisor-actions.php")
+
+def test_lifecycle_post_errors_preserve_supervisor_and_agent_queue_context():
+    handler = source("modules/request-center/post-handler.php")
+    assert "'supervisor_decision', 'supervisor_reopen' => $ticketId > 0" in handler
+    assert "? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor'" in handler
+    assert "'rc_return_queue' ?? 'all'" in handler
+    assert "'rc_return_p' ?? 1" in handler
+    assert "rawurlencode(" in handler
+    supervisor_actions = source("modules/request-center/Actions/supervisor-actions.php")
+    assert supervisor_actions.count("redirect(request_center_ticket_return_url($ticketId));") >= 5
+    assert "redirect('request-center.php?page=supervisor');" not in supervisor_actions
