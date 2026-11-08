@@ -100,4 +100,8 @@ check_request_center(
     'attachment projection exposes metadata but never storage paths'
 );
 
+$pdo->exec("UPDATE tickets SET status = 'rejected' WHERE id = 101");
+$rejectedFilter = $repository->listVisible($user, 1, 50, ['status' => 'rejected']);
+check_request_center($rejectedFilter['total'] === 1, 'rejected terminal status remains explicitly filterable within scope');
+
 echo "PASS: Request Center repository SQLite contract tests\n";
