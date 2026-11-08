@@ -502,3 +502,50 @@ def test_calendar_ticket_links_return_to_originating_calendar_context():
     assert "'calendar'] = 1" in helpers
     assert "'calendar'] = 1" in detail
     assert "rc_return_jmonth" in helpers and "rc_return_view" in helpers and "rc_return_kind" in helpers
+
+def test_four_workspaces_expose_their_real_lifecycle_operations():
+    """Pin the user-visible operation surface to the existing server-side guards."""
+    detail = source("modules/request-center/Pages/detail.php")
+    requester_actions = (
+        'name="action" value="cancel_ticket"',
+        'name="action" value="rate_ticket"',
+        'name="action" value="reopen_ticket"',
+        'name="action" value="reply"',
+    )
+    for marker in requester_actions:
+        assert marker in detail
+    assert "$canCancelOwnTicket" in detail
+    assert "$requiresRating" in detail
+    assert "user_can($user, 'ticket.reply')" in detail
+
+    agent_actions = (
+        'name="action" value="claim_ticket"',
+        'name="action" value="update_ticket"',
+        'name="is_internal" value="1"',
+        'name="after_status"',
+    )
+    for marker in agent_actions:
+        assert marker in detail
+    assert "$canManageTicket" in detail
+    assert "$handlerLevel !== ''" in detail
+    assert "ticket_assignee_is_eligible($ticket, $user" in detail
+
+    supervisor = source("modules/request-center/Pages/supervisor.php")
+    supervisor_detail = detail
+    for marker in (
+        'name="action" value="supervisor_decision"',
+        'name="action" value="supervisor_reopen"',
+        'name="action" value="supervisor_assign_ticket"',
+        'name="action" value="decide_ticket_cancellation"',
+    ):
+        assert marker in supervisor + supervisor_detail
+    assert "user_can($supervisor, 'supervisor.decide')" in supervisor
+    assert "user_can($supervisor, 'supervisor.reopen')" in supervisor
+
+    admin = source("modules/request-center/Pages/admin.php")
+    assert "user_is_primary_admin($user)" in admin
+    assert "user_can($user, 'queue.view')" in admin
+    assert "user_can($user, 'supervisor.panel')" in admin
+    assert "user_can($user, 'reports.view')" in admin
+    assert "user_can($user, 'analytics.view')" in admin
+    assert "request-center.php?page=queue&queue=" in admin
