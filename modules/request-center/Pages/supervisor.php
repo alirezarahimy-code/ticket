@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-// محافظ: این فایل فقط از طریق نقاط ورود معتبر (index.php هسته یا request-center.php) بارگذاری می‌شود؛ دسترسی مستقیم قطعاً ممنوع.
+// محافظ: این صفحه فقط از طریق ورودی مستقل Request Center یا پل سازگاری معتبر بارگذاری می‌شود؛ دسترسی مستقیم ممنوع.
 if (!defined('APP_ROOT')) {
     http_response_code(404);
     exit;
