@@ -249,9 +249,13 @@ function request_center_assert_create_schema(): void
 {
     $required = [
         'tickets' => ['requesting_unit_id'],
-        'categories' => ['code'],
-        'service_catalog' => ['category_id'],
+        'categories' => ['id', 'name', 'code', 'service_group', 'is_active'],
+        'service_catalog' => ['id', 'name', 'code', 'service_group', 'default_priority', 'default_ticket_type', 'category_id', 'handling_unit_id', 'requires_asset', 'is_active'],
+        'service_catalog_fields' => ['id', 'service_id', 'field_key', 'label', 'field_type', 'options_json', 'is_required', 'sort_order'],
         'org_units' => ['id', 'name', 'code', 'parent_id', 'is_active', 'unit_type', 'manager_user_id'],
+        'assets' => ['id', 'asset_tag', 'hostname', 'owner_user_id', 'ip_address', 'department_id'],
+        'departments' => ['id', 'name'],
+        'handling_units' => ['id', 'code', 'is_active'],
     ];
     if (function_exists('org_has_company_schema') && org_has_company_schema()) {
         $required['org_companies'] = ['id', 'code', 'name', 'company_type', 'is_active'];
