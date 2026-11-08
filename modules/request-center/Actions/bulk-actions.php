@@ -120,10 +120,10 @@ if (!defined('APP_ROOT')) {
                 log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status);
                 save_audit((int) $queueUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'bulk' => true]);
                 if ($status === 'resolved') {
-                    notify_ticket_resolved($ticketId, (int) $queueUser['id']);
+                    request_center_notify_ticket_resolved($ticketId, (int) $queueUser['id']);
                     record_asset_history((int) ($bulkTicket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $queueUser['id'], $ticketId, 'وضعیت به حل‌شده تغییر کرد.');
                 } else {
-                    notify_ticket_parties($ticketId, 'bulk_status_changed', 'تغییر وضعیت درخواست', 'وضعیت درخواست ' . ticket_number($ticketId) . ' در عملیات گروهی به «' . request_center_status_label($status) . '» تغییر کرد.', (int) $queueUser['id']);
+                    request_center_notify_ticket_parties($ticketId, 'bulk_status_changed', 'تغییر وضعیت درخواست', 'وضعیت درخواست ' . ticket_number($ticketId) . ' در عملیات گروهی به «' . request_center_status_label($status) . '» تغییر کرد.', (int) $queueUser['id']);
                 }
                 $bulkChanged++;
             }
