@@ -189,8 +189,8 @@ function ticket_allowed_transitions(string $from): array
 }
 function ticket_requester_cancelable_statuses(): array
 {
-    // درخواست حل‌شده هم تا پیش از بسته‌شدن نهایی، با تأیید مسئول قابل لغو است.
-    return ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved'];
+    // UI and WorkflowService share one canonical cancellation status list.
+    return RequestCenterWorkflowService::REQUESTER_CANCELLABLE_STATUSES;
 }
 
 function ticket_requester_can_cancel_directly(array $ticket): bool
