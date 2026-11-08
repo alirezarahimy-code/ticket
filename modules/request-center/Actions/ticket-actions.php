@@ -697,7 +697,16 @@ if (!defined('APP_ROOT')) {
             } else {
                 request_center_notify_ticket_staff($ticketId, 'ticket_reply', 'پاسخ جدید کاربر', 'کاربر در درخواست ' . ticket_number($ticketId) . ' پاسخ جدید ثبت کرد.', (int) $user['id']);
             }
-            record_asset_history((int) ($ticket['asset_id'] ?? 0), $internal ? 'ticket_internal_note' : 'ticket_reply', $internal ? 'یادداشت داخلی درخواست ' . ticket_number($ticketId) : 'پاسخ جدید در درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, $body);
+            if (!$internal) {
+                record_asset_history(
+                    (int) ($ticket['asset_id'] ?? 0),
+                    'ticket_reply',
+                    'پاسخ جدید در درخواست ' . ticket_number($ticketId),
+                    (int) $user['id'],
+                    $ticketId,
+                    $body
+                );
+            }
             db_commit_or_fail('ticket:reply');
             flash('success', 'پاسخ شما ثبت شد.');
             redirect('request-center.php?page=ticket&id=' . $ticketId);
