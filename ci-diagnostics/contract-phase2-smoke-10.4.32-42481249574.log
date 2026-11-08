@@ -1,0 +1,13 @@
+Phase-2 smoke on database: 10.4.32-MariaDB-1:10.4.32+maria~ubu2004
+smoke fixtures: handling_unit=1 department=2 category=34 service=2
+PASS seeded disposable primary-admin account
+PASS session seed endpoint returned HTTP 200 (status 200)
+PASS dashboard returns HTTP 200 (status 200)
+PASS dashboard renders the dashboard page heading
+PASS global search returns HTTP 200 (status 200)
+PASS global search page renders (ticket slice executed)
+PHP Fatal error:  Uncaught RuntimeException: Phase-2 smoke failed: export_report returns HTTP 200 (status 302) in /home/runner/work/ticket/ticket/tests/test_request_center_phase2_smoke_mariadb.php:35
+Stack trace:
+#0 /home/runner/work/ticket/ticket/tests/test_request_center_phase2_smoke_mariadb.php(219): smoke_check()
+#1 {main}
+  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_phase2_smoke_mariadb.php on line 35
