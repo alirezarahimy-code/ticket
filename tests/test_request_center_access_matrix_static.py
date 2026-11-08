@@ -124,7 +124,7 @@ def test_appointment_actions_wire_complete_and_notifications():
 
 def test_entry_routes_calendar_post_regression_is_pinned():
     source = read(ROOT / "request-center.php")
-    method = re.search(r"REQUEST_METHOD.*?POST.*?\{", source)
+    method = re.search(r"REQUEST_METHOD.*?\$rcMethod\s*===\s*'POST'.*?\{", source, re.S)
     assert method, "POST branch missing in request-center.php"
     post_block = source[method.start():]
     calendar_branch = post_block.find("['calendar'] ?? '') === '1'")
