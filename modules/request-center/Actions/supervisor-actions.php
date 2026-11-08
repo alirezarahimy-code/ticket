@@ -47,6 +47,9 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا آن را تعیین تکلیف کنید.');
             }
             $note = post_value('supervisor_note');
+            if (mb_strlen($note, 'UTF-8') > 500) {
+                throw new RuntimeException('دلیل تصمیم سوپروایزر نباید بیشتر از ۵۰۰ نویسه باشد.');
+            }
             if ($isPreServiceRejection && $note === '') {
                 throw new RuntimeException('برای رد درخواست، دلیل روشن و قابل مشاهده برای درخواست‌کننده الزامی است.');
             }
