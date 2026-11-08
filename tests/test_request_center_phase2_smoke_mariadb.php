@@ -450,6 +450,8 @@ try {
     $slaEvents = $pdo->prepare("SELECT COUNT(*) FROM ticket_events WHERE ticket_id = ? AND event_type IN ('sla_alert','ola_alert')");
     $slaEvents->execute([$maintenanceTicketId]);
     smoke_check((int) $slaEvents->fetchColumn() === 5, 'SLA/OLA alert events are recorded exactly once for the ticket');
+    $maintenanceDetail = smoke_http('http://' . $address . '/request-center.php?page=ticket&id=' . $maintenanceTicketId, ['Cookie: ' . $cookie]);
+    smoke_check($maintenanceDetail['status'] === 200 && str_contains($maintenanceDetail['body'], 'هشدار SLA ثبت شد') && str_contains($maintenanceDetail['body'], 'هشدار OLA ثبت شد'), 'independent detail renders SLA/OLA event metadata without Logging UI dependencies (status ' . $maintenanceDetail['status'] . ')');
 
     // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
