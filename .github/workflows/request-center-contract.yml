@@ -33,6 +33,10 @@ on:
       - 'actions/supervisor-actions.php'
       - 'actions/bulk-actions.php'
       - 'cron/ticket_auto_close.php'
+      - 'cron/sla_maintenance.php'
+      - 'migrations/037-request-center-lifecycle-rejection.sql'
+      - 'install-empty-db.sql'
+      - 'schema.sql'
       - 'lib/tickets-sla.php'
       - 'index.php'
       - 'lib/http-input.php'
@@ -90,6 +94,13 @@ jobs:
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
           php -l modules/request-center/Pages/calendar.php
+          php -l modules/request-center/Actions/ticket-actions.php
+          php -l modules/request-center/Actions/supervisor-actions.php
+          php -l modules/request-center/Actions/bulk-actions.php
+          php -l modules/request-center/Pages/detail.php
+          php -l modules/request-center/Pages/supervisor.php
+          php -l cron/sla_maintenance.php
+          php -l cron/ticket_auto_close.php
       - name: First-slice security and architecture contract
         run: python -m pytest -q tests/test_request_center_first_slice_static.py
       - name: Repository query and visibility integration tests
