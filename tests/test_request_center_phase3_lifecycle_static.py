@@ -298,6 +298,7 @@ def test_supervisor_workspace_shows_scoped_workload_and_unassigned_pressure():
     assert "ticket_scope($user, 't')" in repository
     assert "t.status NOT IN ('resolved', 'closed', 'cancelled', 'rejected')" in repository
     assert "$workload = $repo->supervisorWorkload($user);" in workspace
+    assert "$driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()'" in repository
     assert "$summary['unassigned']" in workspace
     assert "$summary['awaiting_assignment']" in workspace
     assert "سهمیهٔ ظرفیت ثابت در Schema فعلی تعریف نشده است" in workspace
