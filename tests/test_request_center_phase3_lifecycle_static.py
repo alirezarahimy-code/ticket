@@ -280,6 +280,18 @@ def test_supervisor_workspace_owns_assignment_and_cancellation_review():
     assert "request_center_can_supervise_ticket($ticket, $decisionUser)" in ticket_action
 
 
+def test_supervisor_workspace_shows_scoped_workload_and_unassigned_pressure():
+    repository = source("modules/request-center/RequestCenterRepository.php")
+    workspace = source("modules/request-center/Pages/supervisor-workspace.php")
+    assert "public function supervisorWorkload(array $user" in repository
+    assert "ticket_scope($user, 't')" in repository
+    assert "t.status NOT IN (\"resolved\", \"closed\", \"cancelled\", \"rejected\")" in repository
+    assert "$workload = $repo->supervisorWorkload($user);" in workspace
+    assert "$summary['unassigned']" in workspace
+    assert "$summary['awaiting_assignment']" in workspace
+    assert "سهمیهٔ ظرفیت ثابت در Schema فعلی تعریف نشده است" in workspace
+
+
 def test_supervisor_decisions_cannot_be_made_on_own_requests():
     action = source("modules/request-center/Actions/supervisor-actions.php")
     assert "ticket_user_is_requester($ticket, $supervisor)" in action
