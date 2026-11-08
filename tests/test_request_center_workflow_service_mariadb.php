@@ -84,6 +84,14 @@ $insert->execute([6, 'closed', 106, 206, 'normal', null]);
 
 $service = new RequestCenterWorkflowService($pdo);
 
+$pdo->beginTransaction();
+$pdo->exec("UPDATE tickets SET first_response_at = '2026-11-08 09:00:00' WHERE id = 4");
+$staleFirstResponse = $service->transition(4, 'assigned', 'in_progress', [], 'standard', [
+    'first_response_at' => null,
+]);
+mariadb_workflow_check(!$staleFirstResponse, 'MariaDB optimistic guard rejects a stale first-response timestamp');
+$pdo->rollBack();
+
 // The MySQL driver branch appends FOR UPDATE; successful execution here proves
 // that the production locking query is accepted by the target database engine.
 $pdo->beginTransaction();
