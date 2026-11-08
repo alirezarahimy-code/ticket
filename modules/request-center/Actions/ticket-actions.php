@@ -202,7 +202,9 @@ if (!defined('APP_ROOT')) {
             }
             // Reserve and commit the sequential identifier before opening the ticket
             // transaction; a later rollback must not make an already observed number reusable.
-            $ticketNo = request_center_ticket_number_next(ticket_number_prefix($serviceGroup));
+            $ticketNo = defined('REQUEST_CENTER_INDEPENDENT_ENTRY')
+                ? request_center_ticket_number_next(ticket_number_prefix($serviceGroup))
+                : ticket_number_next(ticket_number_prefix($serviceGroup));
             db()->beginTransaction();
             $agentId = choose_handling_agent($serviceGroup, $departmentId, (int) $user['id']);
             $initialStatus = $agentId ? 'assigned' : 'manager_review';
