@@ -617,7 +617,7 @@ function request_center_ticket_return_url(int $ticketId): string
         $queue = (string) ($_POST['rc_return_queue'] ?? 'all');
         $params['queue'] = in_array($queue, ['all','unassigned','overdue','mine','waiting_user','resolved','cancellation_requested','cancelled','rejected'], true) ? $queue : 'all';
     }
-    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16, 'ticket_type' => 16, 'from' => 24, 'to' => 24] as $key => $maxLength) {
+    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16, 'from' => 24, 'to' => 24] as $key => $maxLength) {
         $value = trim((string) ($_POST['rc_return_' . $key] ?? ''));
         if ($value !== '' && strlen($value) <= $maxLength) {
             $params[$key] = $value;
