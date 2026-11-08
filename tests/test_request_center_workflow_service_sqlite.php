@@ -117,11 +117,22 @@ workflow_check(!$service->rejectCancellation(15, 'assigned', (string) $cancelSna
 $pdo->rollBack();
 
 $pdo->beginTransaction();
+workflow_check(!$service->rejectCancellation(15, 'assigned', (string) $cancelSnapshot['cancel_requested_at'], [
+    'requester_id' => 24,
+    'assigned_to' => 34,
+    'priority' => 'normal',
+    'department_id' => null,
+    'service_group' => 'support',
+]), 'cancellation rejection refuses a stale routing-scope snapshot');
+$pdo->rollBack();
+
+$pdo->beginTransaction();
 workflow_check($service->rejectCancellation(15, 'assigned', (string) $cancelSnapshot['cancel_requested_at'], [
     'requester_id' => 24,
     'assigned_to' => 34,
     'priority' => 'normal',
     'department_id' => null,
+    'service_group' => null,
 ]), 'cancellation rejection clears only the exact pending request under a matching snapshot');
 $pdo->commit();
 $cleared = $pdo->query('SELECT cancel_requested_at, cancel_requested_by, cancel_request_reason FROM tickets WHERE id = 15')->fetch(PDO::FETCH_ASSOC);
