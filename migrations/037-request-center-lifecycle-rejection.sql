@@ -107,6 +107,28 @@ INSERT INTO categories (name, code, service_group) VALUES
 ('سایر خدمات پشتیبانی', 'SUP-CAT-MISC', 'support')
 ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1;
 
+-- Restore the category relation when existing service data has no orphaned category IDs.
+-- If legacy data contains orphan references, preserve those rows and leave the FK absent;
+-- the migration verification reports that data condition instead of deleting it.
+SET @rc_service_category_fk_exists = (
+    SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'service_catalog'
+      AND COLUMN_NAME = 'category_id' AND REFERENCED_TABLE_NAME = 'categories'
+);
+SET @rc_service_category_orphans = (
+    SELECT COUNT(*) FROM service_catalog s
+    LEFT JOIN categories c ON c.id = s.category_id
+    WHERE s.category_id IS NOT NULL AND c.id IS NULL
+);
+SET @rc_service_category_fk_ddl = IF(
+    @rc_service_category_fk_exists > 0 OR @rc_service_category_orphans > 0,
+    'SELECT 1',
+    'ALTER TABLE `service_catalog` ADD CONSTRAINT `fk_services_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL'
+);
+PREPARE rc_service_category_fk_stmt FROM @rc_service_category_fk_ddl;
+EXECUTE rc_service_category_fk_stmt;
+DEALLOCATE PREPARE rc_service_category_fk_stmt;
+
 UPDATE service_catalog s
 JOIN categories c ON c.code = CASE s.code
     WHEN 'IT-COMPUTER' THEN 'IT-CAT-HW'
