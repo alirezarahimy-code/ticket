@@ -366,7 +366,7 @@ if (!defined('APP_ROOT')) {
                 }
                 $isStaleClosed = in_array($oldStatus, ['closed', 'cancelled'], true);
                 $rejectBody = $isStaleClosed
-                    ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . request_center_status_label($oldStatus) . ' شده بود): ' . $note
+                    ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . request_center_request_center_status_label($oldStatus) . ' شده بود): ' . $note
                     : 'درخواست لغو رد شد و رسیدگی ادامه می‌یابد: ' . $note;
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $rejectBody]);
                 save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_rejected', $ticketId, ['reason' => $requestReason, 'note' => $note]);
@@ -531,7 +531,7 @@ if (!defined('APP_ROOT')) {
                             throw new RuntimeException('برای تغییر وضعیت، ابتدا درخواست باید به کارشناس ارجاع شود.');
                         }
                         if (!in_array($afterStatus, ticket_allowed_transitions($oldStatus), true)) {
-                            throw new RuntimeException('تغییر وضعیت از «' . status_label($oldStatus) . '» به «' . status_label($afterStatus) . '» مجاز نیست.');
+                            throw new RuntimeException('تغییر وضعیت از «' . request_center_status_label($oldStatus) . '» به «' . request_center_status_label($afterStatus) . '» مجاز نیست.');
                         }
                         $newStatus = $afterStatus;
                     } elseif ($cancelPendingReply && $newStatus !== $oldStatus) {
@@ -694,7 +694,7 @@ if (!defined('APP_ROOT')) {
                 }
             }
             if ($status !== $oldStatus && !in_array($status, ticket_allowed_transitions($oldStatus), true)) {
-                throw new RuntimeException('تغییر وضعیت از «' . status_label($oldStatus) . '» به «' . status_label($status) . '» مجاز نیست.');
+                throw new RuntimeException('تغییر وضعیت از «' . request_center_status_label($oldStatus) . '» به «' . request_center_status_label($status) . '» مجاز نیست.');
             }
             $updateNote = post_value('update_note');
             if ($status !== $oldStatus && in_array($status, ['waiting_user', 'resolved'], true) && $updateNote === '') {
@@ -748,7 +748,7 @@ if (!defined('APP_ROOT')) {
             if ($status !== $oldStatus) {
                 log_ticket_event($ticketId, (int) $staffUser['id'], $assignee && $assigneeChanged ? 'assigned' : 'status_changed', $oldStatus, $status, ['assigned_to' => $assignee]);
                 if ($status === 'resolved') {
-                    record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, 'وضعیت به ' . status_label($status) . ' تغییر کرد.');
+                    record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, 'وضعیت به ' . request_center_status_label($status) . ' تغییر کرد.');
                 }
             } elseif ($assigneeChanged) {
                 log_ticket_event($ticketId, (int) $staffUser['id'], 'assigned', $oldStatus, $status, ['assigned_to' => $assignee]);
@@ -759,7 +759,7 @@ if (!defined('APP_ROOT')) {
             if ($status === 'resolved' && $oldStatus !== 'resolved') {
                 notify_ticket_resolved($ticketId, (int) $staffUser['id']);
             } elseif ($status !== $oldStatus || $assigneeChanged) {
-                notify_ticket_parties($ticketId, 'ticket_updated', 'درخواست به‌روزرسانی شد', 'وضعیت درخواست ' . ticket_number($ticketId) . ' به «' . status_label($status) . '» تغییر کرد.', (int) $staffUser['id']);
+                notify_ticket_parties($ticketId, 'ticket_updated', 'درخواست به‌روزرسانی شد', 'وضعیت درخواست ' . ticket_number($ticketId) . ' به «' . request_center_status_label($status) . '» تغییر کرد.', (int) $staffUser['id']);
             }
             db_commit_or_fail('ticket:update_ticket');
             flash('success', 'تغییرات درخواست ذخیره شد.');
