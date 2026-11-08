@@ -99,11 +99,11 @@ def test_sla_ola_history_is_visible_to_staff_without_exposing_internal_fields_to
     assert "'sla_pause_minutes'" in detail
     assert "'ola_response_due_at'" in detail
     assert "$detailKey === 'sla_ola' && is_array($detailValue)" in detail
-    assert "if ($staff)" in detail
+    assert "if ($canSeeInternal)" in detail
     requester_keys = detail[detail.index("$safeKeys = ['reason'"):detail.index("if ($staff) $safeKeys = array_merge")]
     assert "'ola_response_due_at'" not in requester_keys
     assert "'sla_ola'" not in requester_keys
-    assert 'if (!$staff)' in detail
+    assert 'if (!$canSeeInternal)' in detail
     assert "e.event_type <> 'internal_note'" in detail
 
 
