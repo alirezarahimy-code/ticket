@@ -28,15 +28,35 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('دسترسی تأیید یا برگشت درخواست برای نقش شما فعال نیست.');
             }
             $ticketId = (int) ($_POST['ticket_id'] ?? 0);
-            $decision = valid_choice(post_value('decision'), ['approve', 'rework'], 'rework');
+            $decision = valid_choice(post_value('decision'), ['approve', 'rework', 'reject'], 'rework');
             $ticket = fetch_ticket($ticketId);
-            if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'resolved') {
-                throw new RuntimeException('فقط درخواست حل‌شده و بسته‌نشده قابل تأیید یا برگشت برای اصلاح است.');
+            $isPreServiceRejection = $decision === 'reject';
+            $rejectionEligible = $ticket
+                && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned'], true)
+                && empty($ticket['first_response_at'])
+                && empty($ticket['resolved_at']);
+            $validDecisionState = $ticket && ($isPreServiceRejection
+                ? $rejectionEligible
+                : (string) $ticket['status'] === 'resolved');
+            if (!$ticket || !can_view_ticket($ticket, $supervisor)
+                || ticket_user_is_requester($ticket, $supervisor) || !$validDecisionState) {
+                throw new RuntimeException($isPreServiceRejection
+                    ? 'رد درخواست فقط پیش از شروع رسیدگی و در مرحلهٔ ارزیابی اولیه مجاز است.'
+                    : 'فقط درخواست حل‌شده و بسته‌نشده قابل تأیید یا برگشت برای اصلاح است.');
             }
             if (!empty($ticket['cancel_requested_at'])) {
                 throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا آن را تأیید یا رد کنید.');
             }
             $note = post_value('supervisor_note');
+            if (mb_strlen($note, 'UTF-8') > 500) {
+                throw new RuntimeException('دلیل تصمیم سوپروایزر نباید بیشتر از ۵۰۰ نویسه باشد.');
+            }
+            if ($isPreServiceRejection && $note === '') {
+                throw new RuntimeException('برای رد درخواست، دلیل روشن و قابل مشاهده برای درخواست‌کننده الزامی است.');
+            }
+            if ($decision === 'approve' && $note === '') {
+                throw new RuntimeException('برای تأیید نهایی و بستن درخواست، دلیل تصمیم را ثبت کنید.');
+            }
             if ($decision === 'approve' && !ticket_rating_is_current($ticket)) {
                 throw new RuntimeException('بستن نهایی پس از ثبت امتیاز رضایت کاربر امکان‌پذیر است.');
             }
@@ -47,11 +67,53 @@ if (!defined('APP_ROOT')) {
             $decisionLock = db()->prepare('SELECT id FROM tickets WHERE id = ? FOR UPDATE');
             $decisionLock->execute([$ticketId]);
             $ticket = fetch_ticket($ticketId);
-            if (!$ticket || !can_view_ticket($ticket, $supervisor) || $ticket['status'] !== 'resolved' || !empty($ticket['cancel_requested_at'])
+            $rejectionEligible = $ticket
+                && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned'], true)
+                && empty($ticket['first_response_at'])
+                && empty($ticket['resolved_at']);
+            $validDecisionState = $ticket && ($isPreServiceRejection
+                ? $rejectionEligible
+                : (string) $ticket['status'] === 'resolved');
+            if (!$ticket || !can_view_ticket($ticket, $supervisor) || ticket_user_is_requester($ticket, $supervisor)
+                || !$validDecisionState || !empty($ticket['cancel_requested_at'])
                 || ($decision === 'approve' && !ticket_rating_is_current($ticket))) {
-                throw new RuntimeException('وضعیت درخواست یا امتیاز آن هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
+                throw new RuntimeException('وضعیت درخواست یا مجوز تصمیم هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
-            if ($decision === 'approve') {
+            if ($isPreServiceRejection) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $rejected = $workflow->transition($ticketId, (string) $ticket['status'], 'rejected', [
+                    'rejected_at' => RequestCenterSqlExpression::now(),
+                    'supervisor_id' => (int) $supervisor['id'],
+                    'supervisor_note' => $note,
+                ], 'supervisor_reject', [
+                    'cancel_requested_at' => null,
+                    'first_response_at' => null,
+                    'resolved_at' => null,
+                ]);
+                if (!$rejected) {
+                    throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
+                }
+                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')
+                    ->execute([$ticketId, (int) $supervisor['id'], 'درخواست توسط سوپروایزر رد شد: ' . $note]);
+                save_audit_required((int) $supervisor['id'], 'ticket_rejected', $ticketId, [
+                    'reason' => $note,
+                    'from_status' => (string) $ticket['status'],
+                    'to_status' => 'rejected',
+                    'first_response_at' => $ticket['first_response_at'] ?? null,
+                ]);
+                log_ticket_event($ticketId, (int) $supervisor['id'], 'ticket_rejected', (string) $ticket['status'], 'rejected', [
+                    'reason' => $note,
+                ]);
+                notify_ticket_parties(
+                    $ticketId,
+                    'ticket_rejected',
+                    'درخواست شما رد شد',
+                    'درخواست ' . ticket_number($ticketId) . ' پس از ارزیابی اولیه رد شد. دلیل: ' . $note,
+                    (int) $supervisor['id']
+                );
+                record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_rejected', 'رد درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
+                flash('info', 'درخواست با ثبت دلیل و اطلاع‌رسانی به درخواست‌کننده رد شد.');
+            } elseif ($decision === 'approve') {
                 $workflow = new RequestCenterWorkflowService(db());
                 $closed = $workflow->transition($ticketId, 'resolved', 'closed', [
                     'closed_at' => RequestCenterSqlExpression::coalesceNow(),
