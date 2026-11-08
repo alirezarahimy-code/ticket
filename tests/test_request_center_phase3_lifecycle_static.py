@@ -130,6 +130,16 @@ def test_ticket_maintenance_jobs_reject_web_before_schema_setup():
         assert cron.index("if (PHP_SAPI !== 'cli')") < cron.index("ticket_hot_schema_ensure()")
 
 
+def test_supervisor_reopen_requires_a_reason_server_side():
+    action = source("modules/request-center/Actions/supervisor-actions.php")
+    start = action.index("if ($action === 'supervisor_reopen')")
+    end = action.index("if ($action === 'rate_ticket')", start)
+    block = action[start:end]
+    assert "$note = post_value('supervisor_note');" in block
+    assert "if ($note === '')" in block
+    assert "برای بازگشایی رسمی" in block
+
+
 def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     workflow = source("modules/request-center/WorkflowService.php")
     action = source("modules/request-center/Actions/supervisor-actions.php")
