@@ -165,3 +165,14 @@ Migrationهای 034 (Logging) و 036 (غذا) ممنوع‌اند. تغییرا�
 - QA Package Preview run `42517559692`: PASS.
 - T12 Scenario Characterization run `42516995099` روی هر دو MariaDB: PASS (Commit آزموده‌شده `14264d3505b59d4ca238caebe2eaeb27ded61d0f`).
 - نتیجه: خطای Phase-2 smoke مربوط به Footer/مسیر خطای ثبت در اجرای قبلی دیگر در اجرای `51c1b72` بازتولید نشد. T07 همچنان مانع مستقل Contract کلی است و از محاسبه پیشرفت P3 خارج می‌ماند؛ این شواهد به‌تنهایی P3-01 تا P3-08 را نمی‌بندد.
+
+
+### اصلاح یکپارچهٔ حفظ Workspace و فیلترها در چرخهٔ عملیات — ۲۰۲۶-۱۱-۰۸
+- در `Pages/index.php` لینک ورود به جزئیات اکنون context واقعی فهرست را حمل می‌کند: Workspace، صف کارشناس، فیلترهای جست‌وجو/وضعیت/اولویت/حوزه و شماره صفحه.
+- در `Pages/detail.php` مقصد بازگشت، لینک‌های جست‌وجو و صفحه‌بندی رخدادها همان context را حفظ می‌کنند. تمام فرم‌های POST صفحه، context را به‌صورت hidden field می‌فرستند.
+- helper مشترک `request_center_ticket_return_url()` در `modules/request-center/lib/functions.php` قرار گرفت تا هم ورودی مستقل و هم پل Legacy بتوانند پس از عملیات به همان جزئیات/Workspace برگردند. helper فقط Workspaceهای allowlist‌شده و مجاز را می‌پذیرد و مقادیر فیلتر را محدود/پاک‌سازی می‌کند.
+- handlerهای چرخه عمر تیکت و سوپروایزر از helper مشترک استفاده می‌کنند. صف گروهی، لینک جزئیات را با context صف می‌سازد و عملیات گروهی شماره صفحه و نوع صف را حفظ می‌کند. فهرست تصمیم‌های سوپروایزر نیز لینک جزئیات را به Workspace سوپروایزر متصل می‌کند.
+- فایل‌های تغییرکرده: `Pages/index.php`, `Pages/detail.php`, `Pages/queue.php`, `Pages/supervisor.php`, `post-handler.php`, `Actions/ticket-actions.php`, `Actions/supervisor-actions.php`, `Actions/bulk-actions.php`, `lib/functions.php`.
+- آزمون اولیه Contract یک assertion ایستا قدیمی را شکست داد؛ آن assertion اصلاح شد تا helper امن مشترک را بررسی کند.
+- آزمون HTTP واقعی، تا زمان ثبت این یادداشت، ایجاد درخواست، فرم مستقل، جزئیات عملیاتی، چهار Workspace، پیوست، SLA/OLA maintenance و نمایش رخدادهای SLA/OLA را PASS کرده است. assertion بعدی notification به‌علت تفاوت معتبر `sla_due_soon` و `sla_overdue` در دادهٔ تست اصلاح شد تا هر دو نوع هشدار SLA را بپذیرد. اجرای Contract جدید `42519549395` در انتظار نتیجهٔ نهایی است.
+- وضعیت P3-08: بخش عمدهٔ بازگشت از جزئیات/صف و حفظ context پیاده‌سازی شده؛ تا PASS آزمون‌های جدید و بررسی همهٔ مسیرهای Legacy، بسته اعلام نمی‌شود.
