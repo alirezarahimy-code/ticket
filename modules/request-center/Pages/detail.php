@@ -33,7 +33,16 @@ if ($page === 'ticket') {
             $requestedReturnAgentView = (string) ($_GET['agent_view'] ?? 'mine');
             $detailReturnParams['agent_view'] = $requestedReturnAgentView === 'team'
                 && user_can($user, 'queue.view') ? 'team' : 'mine';
+            $requestedQueue = (string) ($_GET['queue'] ?? 'all');
+            $detailReturnParams['queue'] = in_array($requestedQueue, ['all','unassigned','overdue','mine','waiting_user','resolved','cancellation_requested','cancelled','rejected'], true) ? $requestedQueue : 'all';
         }
+        foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16] as $contextKey => $maxLength) {
+            $contextValue = trim((string) ($_GET[$contextKey] ?? ''));
+            if ($contextValue !== '' && strlen($contextValue) <= $maxLength) {
+                $detailReturnParams[$contextKey] = $contextValue;
+            }
+        }
+        $detailReturnParams['p'] = max(1, min(100000, (int) ($_GET['p'] ?? 1)));
     }
     $detailReturnUrl = 'request-center.php' . ($detailReturnParams !== []
         ? '?' . http_build_query($detailReturnParams)
@@ -317,6 +326,11 @@ if ($page === 'ticket') {
         echo '<div class="actions">' . ($eventPage > 1 ? '<a class="button secondary" href="' . $eventBase . ($eventPage - 1) . '">رخدادهای قدیمی‌تر</a>' : '') . ($eventPage < $eventPages ? '<a class="button secondary" href="' . $eventBase . ($eventPage + 1) . '">رخدادهای جدیدتر</a>' : '') . '</div>';
     }
     echo '</div></section>';
+    // Preserve the originating workspace/filter context across every lifecycle POST.
+    // The POST handler re-validates all values and the workspace permission.
+    $postReturnContext = $detailReturnParams;
+    unset($postReturnContext['workspace']);
+    echo '<script>(function(){var context=' . json_encode($postReturnContext, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';document.querySelectorAll("form").forEach(function(form){if((form.method||"get").toLowerCase()!=="post")return;Object.keys(context).forEach(function(key){var input=document.createElement("input");input.type="hidden";input.name="rc_return_"+key;input.value=String(context[key]);form.appendChild(input);});var workspace=document.createElement("input");workspace.type="hidden";workspace.name="rc_return_workspace";workspace.value=' . json_encode($detailReturnWorkspace, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';form.appendChild(workspace);});})();</script>';
     render_footer();
     exit;
 }
