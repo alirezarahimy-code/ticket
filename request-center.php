@@ -8,6 +8,10 @@ declare(strict_types=1);
  * Legacy URLs remain available through the compatibility bridge below; the
  * module's own create/detail/queue/supervisor routes no longer include index.php.
  */
+if (!defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
+    define('REQUEST_CENTER_INDEPENDENT_ENTRY', true);
+}
+
 $rcMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $rcPage = trim((string) ($_GET['page'] ?? ''));
 
