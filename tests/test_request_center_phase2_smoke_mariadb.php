@@ -363,6 +363,30 @@ try {
     if (is_array($attachmentRow)) {
         $attachmentDownload = smoke_http('http://' . $address . '/request-center.php?action=download_attachment&id=' . (int) $attachmentRow['id'], ['Cookie: ' . $cookie]);
         smoke_check($attachmentDownload['status'] === 200 && $attachmentDownload['body'] === $uploadContents, 'authorized independent attachment download returns the original bytes (status ' . $attachmentDownload['status'] . ')');
+        // Rebind the same persisted file to an internal note, then verify the
+        // actual requester can still view the ticket but cannot fetch that file.
+        $requesterSeed = $pdo->prepare(
+            "INSERT INTO users (username, password_hash, full_name, is_primary_admin, role, is_active)
+             VALUES ('rc_smoke_requester', 'not-used', 'RC Smoke Requester', 0, 'user', 1)
+             ON DUPLICATE KEY UPDATE is_primary_admin = 0, role = 'user', is_active = 1"
+        );
+        $requesterSeed->execute();
+        $requesterId = (int) $pdo->query("SELECT id FROM users WHERE username = 'rc_smoke_requester' LIMIT 1")->fetchColumn();
+        smoke_check($requesterId > 0, 'seeded a non-staff requester for internal attachment privacy');
+        $requesterSession = smoke_http('http://' . $address . '/tests/fixtures/request-center-session-seed.php?user_id=' . rawurlencode((string) $requesterId));
+        $requesterSessionData = json_decode($requesterSession['body'], true);
+        smoke_check($requesterSession['status'] === 200 && is_array($requesterSessionData), 'requester session seed endpoint returned HTTP 200');
+        $requesterCookie = (string) ($requesterSessionData['cookie_name'] ?? '') . '=' . (string) ($requesterSessionData['session_id'] ?? '');
+        $pdo->prepare('UPDATE tickets SET requester_id = ? WHERE id = ?')->execute([$requesterId, (int) $ticketRow['id']]);
+        $internalMessage = $pdo->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 1)');
+        $internalMessage->execute([(int) $ticketRow['id'], $userId, 'RC internal attachment privacy fixture']);
+        $internalMessageId = (int) $pdo->lastInsertId();
+        $pdo->prepare('UPDATE ticket_attachments SET message_id = ? WHERE id = ?')->execute([$internalMessageId, (int) $attachmentRow['id']]);
+        $requesterDetail = smoke_http('http://' . $address . '/request-center.php?page=ticket&id=' . (int) $ticketRow['id'], ['Cookie: ' . $requesterCookie]);
+        smoke_check($requesterDetail['status'] === 200, 'requester can view the ticket containing an internal attachment');
+        smoke_check(!str_contains($requesterDetail['body'], 'RC internal attachment privacy fixture'), 'internal note body is not rendered to the requester');
+        $internalDownload = smoke_http('http://' . $address . '/request-center.php?action=download_attachment&id=' . (int) $attachmentRow['id'], ['Cookie: ' . $requesterCookie]);
+        smoke_check($internalDownload['status'] === 404, 'requester cannot download an attachment belonging to an internal note (status ' . $internalDownload['status'] . ')');
         $storedPath = $root . '/storage/uploads/' . basename((string) $attachmentRow['stored_name']);
         if (is_file($storedPath)) {
             @unlink($storedPath);
