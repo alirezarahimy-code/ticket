@@ -48,10 +48,8 @@ if (!defined('APP_ROOT')) {
             }
             $status = valid_choice(post_value('bulk_status'), ['in_progress', 'waiting_user', 'resolved'], 'in_progress');
             $bulkNote = post_value('bulk_note');
-            if (in_array($status, ['waiting_user', 'resolved'], true) && $bulkNote === '') {
-                throw new RuntimeException($status === 'waiting_user'
-                    ? 'برای عملیات گروهی «در انتظار پاسخ کاربر»، پیام مشترک (سؤال روشن) را بنویسید.'
-                    : 'برای عملیات گروهی «حل‌شده»، پیام مشترک (شرح راه‌حل) را بنویسید.');
+            if ($bulkNote === '') {
+                throw new RuntimeException('برای هر تغییر وضعیت گروهی، توضیح اقدام قابل مشاهده برای درخواست‌کننده الزامی است.');
             }
             if (mb_strlen($bulkNote, 'UTF-8') > 5000) {
                 throw new RuntimeException('پیام گروهی نباید بیشتر از ۵۰۰۰ نویسه باشد.');
@@ -139,16 +137,19 @@ if (!defined('APP_ROOT')) {
                     (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $queueUser['id'], $bulkNote);
                     log_ticket_event($ticketId, (int) $queueUser['id'], 'reply', $bulkOld, $status, [
                         'is_internal' => false,
+                        'reason' => $bulkNote,
                         'sla_ola' => $bulkSlaOlaAudit,
                     ]);
                 }
                 log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status, [
+                    'reason' => $bulkNote,
                     'sla_ola' => $bulkSlaOlaAudit,
                 ]);
                 save_audit_required((int) $queueUser['id'], 'ticket_updated', $ticketId, [
                     'from_status' => $bulkOld,
                     'to_status' => $status,
                     'bulk' => true,
+                    'reason' => $bulkNote,
                     'first_response_recorded' => $bulkFirstResponseRecorded,
                     'sla_ola' => $bulkSlaOlaAudit,
                 ]);
