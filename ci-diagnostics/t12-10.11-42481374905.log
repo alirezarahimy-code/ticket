@@ -1,0 +1,66 @@
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 01-create: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 02-direct-cancel: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 03a-cancel-request-reject: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 03b-cancel-request-approve: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 04-claim-ordering: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 05-reopen: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 06a-reply-to-requester DIFF: events[2].from_status: legacy=null feature="in_progress"
+T12-SCENARIO 06a-reply-to-requester DIFF: events[2].to_status: legacy=null feature="in_progress"
+T12-SCENARIO 06a-reply-to-requester: FAIL (2 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 06b-internal-note DIFF: events[2].from_status: legacy=null feature="in_progress"
+T12-SCENARIO 06b-internal-note DIFF: events[2].to_status: legacy=null feature="in_progress"
+T12-SCENARIO 06b-internal-note: FAIL (2 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 07a-status-with-note: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 07b-priority-by-manager: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [fixture] tid=1 update_rows=1 row={"id":1,"status":"resolved","assigned_to":102,"resolved_at":"2026-11-08 11:43:16"}
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [fixture] tid=1 update_rows=1 row={"id":1,"status":"resolved","assigned_to":102,"resolved_at":"2026-11-08 11:43:16"}
+T12-SCENARIO 08a-supervisor-approve DIFF: activity_logs[1].action_code: legacy="supervisor_decision" feature="ticket_supervisor_approved"
+T12-SCENARIO 08a-supervisor-approve: FAIL (1 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 08b-supervisor-rework DIFF: activity_logs[1].action_code: legacy="supervisor_decision" feature="ticket_supervisor_rework"
+T12-SCENARIO 08b-supervisor-rework: FAIL (1 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 08c-supervisor-reopen DIFF: activity_logs[1].action_code: legacy="supervisor_decision" feature="ticket_supervisor_approved"
+T12-SCENARIO 08c-supervisor-reopen DIFF: activity_logs[2].action_code: legacy="ticket_reopened" feature="ticket_reopened_by_supervisor"
+T12-SCENARIO 08c-supervisor-reopen: FAIL (2 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=2 tickets_count=2 max_id=2
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=2 tickets_count=2 max_id=2
+T12-SCENARIO 09-bulk-resolve DIFF: events[4].from_status: legacy=null feature="in_progress"
+T12-SCENARIO 09-bulk-resolve DIFF: events[4].to_status: legacy=null feature="resolved"
+T12-SCENARIO 09-bulk-resolve DIFF: events[6].from_status: legacy=null feature="in_progress"
+T12-SCENARIO 09-bulk-resolve DIFF: events[6].to_status: legacy=null feature="resolved"
+T12-SCENARIO 09-bulk-resolve: FAIL (4 diffs)
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 10a-auto-close-rated: PASS
+    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
+    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
+T12-SCENARIO 10b-auto-close-unrated: PASS
+T12 SUMMARY: ["01-create:PASS","02-direct-cancel:PASS","03a-cancel-request-reject:PASS","03b-cancel-request-approve:PASS","04-claim-ordering:PASS","05-reopen:PASS","06a-reply-to-requester:FAIL","06b-internal-note:FAIL","07a-status-with-note:PASS","07b-priority-by-manager:PASS","08a-supervisor-approve:FAIL","08b-supervisor-rework:FAIL","08c-supervisor-reopen:FAIL","09-bulk-resolve:FAIL","10a-auto-close-rated:PASS","10b-auto-close-unrated:PASS"]
+T12 RESULT: 6 SCENARIO(S) DIFFER
