@@ -64,9 +64,9 @@ final class RequestCenterWorkflowService
     public static function allowedTransitions(string $from): array
     {
         $map = [
-            'new' => ['manager_review', 'assigned', 'in_progress'],
-            'manager_review' => ['assigned', 'in_progress'],
-            'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review'],
+            'new' => ['manager_review', 'assigned', 'in_progress', 'rejected'],
+            'manager_review' => ['assigned', 'in_progress', 'rejected'],
+            'assigned' => ['in_progress', 'waiting_user', 'resolved', 'manager_review', 'rejected'],
             'in_progress' => ['waiting_user', 'resolved', 'assigned', 'manager_review'],
             'waiting_user' => ['in_progress', 'resolved', 'assigned', 'manager_review'],
             // pending یک وضعیت میراثی است: خروج باز می‌ماند، اما ورود جدید ممنوع است.
@@ -192,6 +192,9 @@ final class RequestCenterWorkflowService
         $cancelPending = !empty($current['cancel_requested_at']);
         switch ($kind) {
             case 'standard':
+                if ($to === 'rejected') {
+                    throw new RuntimeException('رد درخواست فقط با فرمان اختصاصی و مجوز سوپروایزر امکان‌پذیر است.');
+                }
                 if ($cancelPending) {
                     throw new RuntimeException('لغو درخواست در انتظار تصمیم است؛ تغییر وضعیت متوقف شده است.');
                 }
