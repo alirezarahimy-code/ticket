@@ -253,6 +253,13 @@ function request_center_assert_create_schema(): void
         'service_catalog' => ['category_id'],
         'org_units' => ['id', 'name', 'code', 'parent_id', 'is_active', 'unit_type', 'manager_user_id'],
     ];
+    if (function_exists('org_has_company_schema') && org_has_company_schema()) {
+        $required['org_companies'] = ['id', 'code', 'name', 'company_type', 'is_active'];
+        $required['org_unit_managers'] = ['unit_id', 'user_id'];
+        $required['org_units'][] = 'company_id';
+        $required['users'][] = 'company_id';
+        $required['users'][] = 'org_unit_id';
+    }
     $statement = db()->query(
         'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
     );
