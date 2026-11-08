@@ -24,8 +24,10 @@ def test_lifecycle_pages_are_routed_inside_request_center():
 
 def test_attachment_and_report_endpoints_are_independent():
     router = source("request-center.php")
-    assert "request_center_download_attachment(require_login())" in router
-    assert "request_center_export_report(require_permission('reports.view'))" in router
+    assert "request_center_download_attachment($downloadUser)" in router
+    assert "request_center_export_report($reportUser)" in router
+    assert "$downloadSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();" in router
+    assert "$reportSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();" in router
     legacy = source("index.php")
     assert "request-center.php?action=download_attachment" in legacy
     assert "request-center.php?action=export_report" in legacy
