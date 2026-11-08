@@ -82,7 +82,7 @@ final class RequestCenterRepository
         $params = $scopeParams;
 
         $status = (string) ($filters['status'] ?? '');
-        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled'], true)) {
+        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], true)) {
             $clauses[] = 't.status = ?';
             $params[] = $status;
         }
@@ -297,14 +297,15 @@ final class RequestCenterRepository
 
         $sql = 'SELECT
                     COUNT(*) AS total,
-                    COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled")), 0) AS active,
-                    COALESCE(SUM(t.assigned_to IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled")), 0) AS unassigned,
+                    COALESCE(SUM(t.status NOT IN ("resolved", "closed", "cancelled", "rejected")), 0) AS active,
+                    COALESCE(SUM(t.assigned_to IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected")), 0) AS unassigned,
                     COALESCE(SUM(t.status IN ("new", "manager_review")), 0) AS awaiting_assignment,
                     COALESCE(SUM(t.status IN ("waiting_user", "pending")), 0) AS waiting_user,
                     COALESCE(SUM(t.status = "resolved"), 0) AS awaiting_supervisor,
                     COALESCE(SUM(t.status = "closed"), 0) AS closed,
+                    COALESCE(SUM(t.status = "rejected"), 0) AS rejected,
                     COALESCE(SUM(
-                        t.status NOT IN ("resolved", "closed", "cancelled")
+                        t.status NOT IN ("resolved", "closed", "cancelled", "rejected")
                         AND t.sla_paused_at IS NULL
                         AND (
                             (t.due_at IS NOT NULL AND t.due_at < NOW())
@@ -315,7 +316,7 @@ final class RequestCenterRepository
                         )
                     ), 0) AS overdue,
                     COALESCE(SUM(
-                        t.status NOT IN ("resolved", "closed", "cancelled")
+                        t.status NOT IN ("resolved", "closed", "cancelled", "rejected")
                         AND t.sla_paused_at IS NULL
                         AND t.due_at IS NOT NULL
                         AND t.due_at >= NOW()
@@ -327,7 +328,7 @@ final class RequestCenterRepository
         $row = $query->fetch(PDO::FETCH_ASSOC) ?: [];
 
         $summary = [];
-        foreach (['total', 'active', 'unassigned', 'awaiting_assignment', 'waiting_user', 'awaiting_supervisor', 'closed', 'overdue', 'due_soon'] as $key) {
+        foreach (['total', 'active', 'unassigned', 'awaiting_assignment', 'waiting_user', 'awaiting_supervisor', 'closed', 'rejected', 'overdue', 'due_soon'] as $key) {
             $summary[$key] = (int) ($row[$key] ?? 0);
         }
         return $summary;
@@ -341,7 +342,7 @@ final class RequestCenterRepository
      */
     public function listQueue(array $user, string $queue = 'all', int $page = 1, int $perPage = 100, array $filters = []): array
     {
-        $allowedQueues = ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled'];
+        $allowedQueues = ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'];
         if (!in_array($queue, $allowedQueues, true)) {
             $queue = 'all';
         }
@@ -356,7 +357,7 @@ final class RequestCenterRepository
             $conditions[] = 't.assigned_to IS NULL';
         }
         if ($queue === 'overdue') {
-            $conditions[] = 't.sla_paused_at IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))';
+            $conditions[] = 't.sla_paused_at IS NULL AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND ((t.due_at IS NOT NULL AND t.due_at < NOW()) OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW()) OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW()) OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW()) OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW()))';
         }
         if ($queue === 'mine') {
             $conditions[] = 't.assigned_to = ?';
@@ -373,8 +374,10 @@ final class RequestCenterRepository
         }
         if ($queue === 'cancelled') {
             $conditions[] = 't.status = "cancelled"';
-        } elseif ((string) ($filters['status'] ?? '') !== 'cancelled') {
-            $conditions[] = 't.status <> "cancelled"';
+        } elseif ($queue === 'rejected') {
+            $conditions[] = 't.status = "rejected"';
+        } elseif (!in_array((string) ($filters['status'] ?? ''), ['cancelled', 'rejected'], true)) {
+            $conditions[] = 't.status NOT IN ("cancelled", "rejected")';
         }
 
         $status = (string) ($filters['status'] ?? '');
@@ -418,7 +421,7 @@ final class RequestCenterRepository
                 ' . $where . '
                 ORDER BY CASE
                     WHEN t.cancel_requested_at IS NOT NULL THEN 0
-                    WHEN (t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL
+                    WHEN (t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL
                         AND ((t.due_at IS NOT NULL AND t.due_at < NOW())
                             OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW())
                             OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW())
