@@ -25,6 +25,14 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attach
     request_center_download_attachment(require_login());
 }
 
+if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report') {
+    require_once __DIR__ . '/bootstrap.php';
+    require_once __DIR__ . '/modules/request-center/WorkflowService.php';
+    require_once __DIR__ . '/modules/request-center/lib/functions.php';
+    require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
+    request_center_export_report(require_permission('reports.view'));
+}
+
 // The existing appointment endpoint remains on its established contract.
 // It is intentionally not expanded as part of lifecycle phase 3.
 if ($rcMethod === 'POST' && (string) ($_GET['calendar'] ?? '') === '1') {
