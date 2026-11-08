@@ -60,8 +60,14 @@ $pdo->exec('CREATE TEMPORARY TABLE tickets (
     supervisor_id BIGINT UNSIGNED NULL,
     supervisor_approved_at DATETIME NULL,
     supervisor_note TEXT NULL,
+    sla_minutes INT NULL,
     sla_paused_at DATETIME NULL,
     sla_pause_minutes INT NOT NULL DEFAULT 0,
+    ola_policy_id BIGINT UNSIGNED NULL,
+    ola_response_due_at DATETIME NULL,
+    ola_due_at DATETIME NULL,
+    ola_escalation_1_at DATETIME NULL,
+    ola_escalation_2_at DATETIME NULL,
     updated_at DATETIME NULL
 ) ENGINE=InnoDB');
 
