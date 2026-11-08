@@ -351,3 +351,26 @@
 .fm-order-report-table.is-compact th,.fm-order-report-table.is-compact td{width:auto!important;min-width:0!important}
 .fm-order-report-table.is-compact{width:100%}
 .fm-order-report-table.is-compact td{max-width:0;overflow:hidden;text-overflow:ellipsis}
+
+/* تعیین تکلیف غذای باقیمانده (تطبیق روزانه) */
+.fm-leftover-backdrop{position:fixed;inset:0;background:#132b36a8;z-index:10000;display:grid;place-items:center;padding:18px}
+.fm-leftover-modal{width:min(520px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 22px 70px #132b3644}
+.fm-leftover-modal header{padding:18px 20px;border-bottom:1px solid #e9eeee}
+.fm-leftover-modal header h3{margin:0;font-size:16px;color:#203a43}
+.fm-leftover-modal header p{margin:7px 0 0;color:#7b8d92;font-size:11px;line-height:1.9}
+.fm-leftover-modal-body{padding:14px 20px 6px;color:#5f757c;font-size:11px;line-height:1.9}
+.fm-leftover-hint{margin:0 0 12px;padding:9px 12px;border:1px solid #e3ebeb;border-radius:10px;background:#f9fbfb;color:#637980}
+.fm-leftover-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #e3ebeb;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.fm-leftover-check{display:flex;align-items:center;gap:9px;cursor:pointer;min-width:0}
+.fm-leftover-check input[type=checkbox]{width:17px;height:17px;accent-color:#087e72;flex:0 0 auto}
+.fm-leftover-check b{font-size:12px;color:#24424b}
+.fm-leftover-count{width:92px;height:38px;border:1px solid #dce5e6;border-radius:8px;text-align:center;font:inherit;font-size:13px;flex:0 0 auto}
+.fm-leftover-count:disabled{background:#f2f5f5;color:#a8b6b9}
+.fm-leftover-note{display:block;margin:2px 0 10px;color:#637980;font-size:10px}
+.fm-leftover-note textarea{width:100%;box-sizing:border-box;border:1px solid #dce5e6;border-radius:8px;padding:8px 10px;font:inherit;font-size:11px;margin-top:5px;resize:vertical}
+.fm-leftover-error{display:none;margin:0 0 12px;padding:9px 12px;border:1px solid #f1c7c0;background:#fdf0ee;color:#a44a3a;border-radius:10px;font-size:11px;line-height:1.8}
+.fm-leftover-error.show{display:block}
+.fm-leftover-modal footer{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 16px}
+.fm-gap-extra b{color:#087e72;font-size:14px}
+.fm-reconciliation-auto-hint{margin:4px 0 0;padding:9px 12px;border:1px dashed #d3e4e1;border-radius:10px;background:#fbfdfc;color:#5f7a76}
+@media(max-width:520px){.fm-leftover-row{flex-wrap:wrap}.fm-leftover-count{margin-right:26px}}

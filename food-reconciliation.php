@@ -13,7 +13,7 @@ const FOOD_RECONCILIATION_MAX_INVOICE_BYTES = 8 * 1024 * 1024;
 function food_reconciliation_schema_ensure(): void
 {
     food_order_schema_ensure();
-    $required = ['food_ticket_daily_absence', 'food_meal_reconciliations', 'food_monthly_invoices'];
+    $required = ['food_meal_reconciliations', 'food_monthly_invoices'];
     $placeholders = implode(',', array_fill(0, count($required), '?'));
     $stmt = db()->prepare("SELECT TABLE_NAME FROM information_schema.TABLES
         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ({$placeholders})");
@@ -23,52 +23,125 @@ function food_reconciliation_schema_ensure(): void
     if ($missing !== []) {
         throw new RuntimeException('ثبت تطبیق غذا آماده نیست؛ ابتدا بستهٔ ۱.۶۲.۷۴ و مهاجرت ۰۲۲ را اجرا کنید.');
     }
+    $col = db()->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'food_meal_reconciliations' AND COLUMN_NAME = 'leftover_staff_quantity'");
+    $col->execute();
+    if ((int) $col->fetchColumn() !== 1) {
+        throw new RuntimeException('ثبت تطبیق غذا آماده نیست؛ ابتدا مهاجرت ۰۳۶ (سرنوشت غذای باقیمانده) را اجرا کنید.');
+    }
 }
 
-/** محاسبات بدون وابستگی به پایگاه‌داده؛ سفارش لغوشده از ورودی تقاضای فعال حذف می‌شود. */
+/**
+ * محاسبات خالص (بدون پایگاه‌داده) برای «تطبیق روزانه».
+ * - تقاضای فعال = سفارش فعال پرسنل + درخواست فعال مهمان
+ * - مانده = پرس تحویل واقعی − کل تحویل‌داده‌شده‌ها (توزیع پرسنل + توزیع مهمان)؛ می‌تواند منفی باشد
+ * - فاصلهٔ سفارش = تقاضای فعال − پرس سفارش‌داده‌شده از پیمانکار؛ مثبت = کسر سفارش، منفی = اضافه سفارش
+ */
 function food_reconciliation_calculate(
     int $activeEmployeeOrders,
     int $activeGuestMeals,
+    ?int $supplierOrderQuantity,
     ?int $receivedQuantity,
-    ?int $employeeServed,
-    ?int $guestServed,
-    int $registeredAbsences,
-    int $wasteQuantity = 0
+    int $employeeServed,
+    int $guestServed
 ): array {
     $activeEmployeeOrders = max(0, $activeEmployeeOrders);
     $activeGuestMeals = max(0, $activeGuestMeals);
-    $registeredAbsences = max(0, $registeredAbsences);
+    $employeeServed = max(0, $employeeServed);
+    $guestServed = max(0, $guestServed);
     $demand = $activeEmployeeOrders + $activeGuestMeals;
-    $served = ($employeeServed !== null && $guestServed !== null)
-        ? max(0, $employeeServed) + max(0, $guestServed)
-        : null;
-    $leftover = null;
-    $shortage = null;
-    $unserved = null;
-    $unservedEmployee = null;
-    $unservedGuest = null;
-    $unservedOutsideRegisteredAbsence = null;
-    if ($served !== null) {
-        $unservedEmployee = max(0, $activeEmployeeOrders - max(0, $employeeServed));
-        $unservedGuest = max(0, $activeGuestMeals - max(0, $guestServed));
-        $unserved = $unservedEmployee + $unservedGuest;
-        $absenceCredit = min($unservedEmployee, $registeredAbsences);
-        $unservedOutsideRegisteredAbsence = max(0, $unserved - $absenceCredit);
-        if ($receivedQuantity !== null) {
-            $leftover = max(0, $receivedQuantity - $served - max(0, $wasteQuantity));
-            $shortage = max(0, $served - $receivedQuantity);
-        }
-    }
+    $served = $employeeServed + $guestServed;
     return [
         'active_demand' => $demand,
+        'served_employee' => $employeeServed,
+        'served_guest' => $guestServed,
         'served_total' => $served,
-        'unserved_demand' => $unserved,
-        'unserved_employee_demand' => $unservedEmployee,
-        'unserved_guest_demand' => $unservedGuest,
-        'unserved_outside_registered_absence' => $unservedOutsideRegisteredAbsence,
-        'leftover_quantity' => $leftover,
-        'shortage_quantity' => $shortage,
+        'remaining_quantity' => $receivedQuantity === null ? null : $receivedQuantity - $served,
+        'order_gap' => $supplierOrderQuantity === null ? null : $demand - $supplierOrderQuantity,
     ];
+}
+
+/** شمارش زندهٔ تحویل‌گرفته‌ها از رویدادهای فیش (printed+delivered) به تفکیک تاریخ+وعده؛ همان تعریف «گزارش تحویل غذا». */
+function food_reconciliation_served_counts(string $from, string $to): array
+{
+    if (function_exists('food_ticket_manual_attendance_reconcile_range')) {
+        try {
+            food_ticket_manual_attendance_reconcile_range($from, $to);
+        } catch (Throwable $reconcileError) {
+            app_error_log('[food-reconciliation] manual-attendance reconcile failed: ' . $reconcileError->getMessage());
+        }
+    }
+    $map = [];
+    $staff = db()->prepare("SELECT punch_date, COALESCE(meal_type, 'lunch') AS meal,
+            COUNT(DISTINCT user_id) AS served
+        FROM food_ticket_events
+        WHERE punch_date BETWEEN ? AND ? AND user_id IS NOT NULL
+          AND event_type NOT IN ('guest', 'auto_guest')
+          AND ((print_status = 'printed' AND delivery_status = 'delivered')
+               OR (source_uid = 'manual-attendance' AND event_type = 'printed' AND delivery_status = 'delivered'))
+        GROUP BY punch_date, COALESCE(meal_type, 'lunch')");
+    $staff->execute([$from, $to]);
+    foreach ($staff->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $map[$row['punch_date'] . "\0" . $row['meal']]['employee'] = (int) $row['served'];
+    }
+    // مهمان‌ها عملاً «تحویل» ثبت‌شده‌ای ندارند؛ مانند «گزارش تحویل غذا»، فیش چاپی مهمان (دستی guest یا خودکار auto_guest) ملاک توزیع است.
+    $guest = db()->prepare("SELECT punch_date, COALESCE(meal_type, 'lunch') AS meal, COUNT(*) AS served
+        FROM food_ticket_events
+        WHERE punch_date BETWEEN ? AND ?
+          AND event_type IN ('guest', 'auto_guest')
+          AND print_status = 'printed'
+        GROUP BY punch_date, COALESCE(meal_type, 'lunch')");
+    $guest->execute([$from, $to]);
+    foreach ($guest->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $map[$row['punch_date'] . "\0" . $row['meal']]['guest'] = (int) $row['served'];
+    }
+    foreach ($map as $key => $parts) {
+        $map[$key] = ['employee' => (int) ($parts['employee'] ?? 0), 'guest' => (int) ($parts['guest'] ?? 0)];
+    }
+    return $map;
+}
+
+/** «غایبین»: سفارش‌دهندگان فعال وعده که فیش تحویل برایشان ثبت نشده است (شامل غیبت‌های ثبت‌شده در گروه غذایی). */
+function food_reconciliation_absentee_counts(string $from, string $to, array $servedMap): array
+{
+    $stmt = db()->prepare("SELECT food_date, meal_type, COUNT(DISTINCT employee_id) AS active_people
+        FROM food_orders WHERE status = 'active' AND food_date BETWEEN ? AND ?
+        GROUP BY food_date, meal_type");
+    $stmt->execute([$from, $to]);
+    $map = [];
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $key = $row['food_date'] . "\0" . $row['meal_type'];
+        $delivered = $servedMap[$key]['employee'] ?? 0;
+        $map[$key] = max(0, (int) $row['active_people'] - $delivered);
+    }
+    return $map;
+}
+
+/** خلاصهٔ فارسی فشردهٔ تعیین تکلیف باقیمانده برای نمایش در جدول و اکسل. */
+function food_reconciliation_disposition_summary(?int $staff, ?int $waste, ?int $keep, ?int $other, ?string $otherNote): ?string
+{
+    $parts = [];
+    if ($staff !== null && $staff > 0) {
+        $parts[] = 'توزیع پرسنل: ' . $staff;
+    }
+    if ($waste !== null && $waste > 0) {
+        $parts[] = 'دورریز: ' . $waste;
+    }
+    if ($keep !== null && $keep > 0) {
+        $parts[] = 'نگه‌داری: ' . $keep;
+    }
+    if ($other !== null && $other > 0) {
+        $parts[] = 'سایر: ' . $other;
+    }
+    if ($parts === []) {
+        return null;
+    }
+    $summary = implode(' · ', $parts);
+    $otherNote = trim((string) $otherNote);
+    if ($otherNote !== '') {
+        $summary .= ' (سایر: ' . $otherNote . ')';
+    }
+    return $summary;
 }
 
 function food_reconciliation_count(mixed $value, string $label, bool $nullable = false, int $max = 1000000): ?int
@@ -188,15 +261,17 @@ function food_reconciliation_order_counts(string $date, string $mealType): array
 function food_reconciliation_rows(string $from, string $to, string $mealFilter = 'all'): array
 {
     food_reconciliation_schema_ensure();
+    $servedMap = food_reconciliation_served_counts($from, $to);
+    $absentMap = food_reconciliation_absentee_counts($from, $to, $servedMap);
     $sql = "SELECT k.food_date, k.meal_type,
             COALESCE(o.active_count, 0) AS current_active_employee_orders,
             COALESCE(o.cancelled_count, 0) AS cancelled_employee_orders,
             COALESCE(g.active_meals, 0) AS current_active_guest_meals,
             COALESCE(g.cancelled_meals, 0) AS cancelled_guest_meals,
-            COALESCE(a.absent_count, 0) AS registered_absences,
-            r.id AS reconciliation_id, r.employee_orders_at_order, r.guest_meals_at_order,
-            r.supplier_order_quantity, r.received_quantity, r.employee_served_quantity,
-            r.guest_served_quantity, r.waste_quantity, r.status, r.note,
+            r.id AS reconciliation_id, r.supplier_order_quantity, r.received_quantity,
+            r.status, r.note,
+            r.leftover_staff_quantity, r.leftover_waste_quantity, r.leftover_keep_quantity,
+            r.leftover_other_quantity, r.leftover_other_note,
             r.snapshot_at, r.ordered_at, r.closed_at
         FROM (
             SELECT food_date, meal_type FROM food_orders WHERE food_date BETWEEN ? AND ?
@@ -217,64 +292,70 @@ function food_reconciliation_rows(string $from, string $to, string $mealFilter =
                 SUM(CASE WHEN status = 'cancelled' THEN guest_count ELSE 0 END) AS cancelled_meals
             FROM food_guest_requests WHERE request_date BETWEEN ? AND ? GROUP BY request_date, meal_type
         ) AS g ON g.request_date = k.food_date AND g.meal_type = k.meal_type
-        LEFT JOIN (
-            SELECT absence_date, COUNT(DISTINCT user_id) AS absent_count
-            FROM food_ticket_daily_absence WHERE absence_date BETWEEN ? AND ? GROUP BY absence_date
-        ) AS a ON a.absence_date = k.food_date
         LEFT JOIN food_meal_reconciliations AS r ON r.food_date = k.food_date AND r.meal_type = k.meal_type
         WHERE (? = 'all' OR k.meal_type = ?)
         ORDER BY k.food_date DESC, (k.meal_type = 'lunch') DESC";
     $params = [
         $from, $to, $from, $to, $from, $to,
-        $from, $to, $from, $to, $from, $to,
+        $from, $to, $from, $to,
         $mealFilter, $mealFilter,
     ];
     $stmt = db()->prepare($sql);
     $stmt->execute($params);
     $items = [];
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $date = (string) $row['food_date'];
+        $mealType = (string) $row['meal_type'];
+        $key = $date . "\0" . $mealType;
         $currentEmployees = (int) $row['current_active_employee_orders'];
         $currentGuests = (int) $row['current_active_guest_meals'];
-        $snapshotEmployees = $row['employee_orders_at_order'] === null ? null : (int) $row['employee_orders_at_order'];
-        $snapshotGuests = $row['guest_meals_at_order'] === null ? null : (int) $row['guest_meals_at_order'];
-        $hasSnapshot = $snapshotEmployees !== null && $snapshotGuests !== null;
-        $demandAtOrder = $hasSnapshot ? $snapshotEmployees + $snapshotGuests : null;
+        $served = $servedMap[$key] ?? ['employee' => 0, 'guest' => 0];
+        $isRegistered = $row['reconciliation_id'] !== null;
+        $supplierOrder = $isRegistered ? (int) $row['supplier_order_quantity'] : null;
+        $received = $row['received_quantity'] === null ? null : (int) $row['received_quantity'];
         $calc = food_reconciliation_calculate(
-            $hasSnapshot ? $snapshotEmployees : $currentEmployees,
-            $hasSnapshot ? $snapshotGuests : $currentGuests,
-            $row['received_quantity'] === null ? null : (int) $row['received_quantity'],
-            $row['employee_served_quantity'] === null ? null : (int) $row['employee_served_quantity'],
-            $row['guest_served_quantity'] === null ? null : (int) $row['guest_served_quantity'],
-            (int) $row['registered_absences'],
-            (int) ($row['waste_quantity'] ?? 0)
+            $currentEmployees,
+            $currentGuests,
+            $supplierOrder,
+            $received,
+            $served['employee'],
+            $served['guest']
         );
+        $orderGap = $calc['order_gap'];
+        $gapSide = $orderGap === null ? null : ($orderGap > 0 ? 'deficit' : ($orderGap < 0 ? 'surplus' : 'even'));
+        $leftoverStaff = $row['leftover_staff_quantity'] === null ? null : (int) $row['leftover_staff_quantity'];
+        $leftoverWaste = $row['leftover_waste_quantity'] === null ? null : (int) $row['leftover_waste_quantity'];
+        $leftoverKeep = $row['leftover_keep_quantity'] === null ? null : (int) $row['leftover_keep_quantity'];
+        $leftoverOther = $row['leftover_other_quantity'] === null ? null : (int) $row['leftover_other_quantity'];
+        $leftoverOtherNote = $row['leftover_other_note'] === null ? null : (string) $row['leftover_other_note'];
         $items[] = [
-            'date' => (string) $row['food_date'],
-            'date_jalali' => food_order_jalali_label((string) $row['food_date']),
-            'meal_type' => (string) $row['meal_type'],
+            'date' => $date,
+            'date_jalali' => food_order_jalali_label($date),
+            'meal_type' => $mealType,
             'active_employee_orders' => $currentEmployees,
             'active_guest_meals' => $currentGuests,
-            'active_demand' => $currentEmployees + $currentGuests,
+            'active_demand' => $calc['active_demand'],
             'cancelled_employee_orders' => (int) $row['cancelled_employee_orders'],
             'cancelled_guest_meals' => (int) $row['cancelled_guest_meals'],
-            'employee_orders_at_order' => $snapshotEmployees,
-            'guest_meals_at_order' => $snapshotGuests,
-            'demand_at_order' => $demandAtOrder,
-            'registered_absences' => (int) $row['registered_absences'],
-            'id' => $row['reconciliation_id'] === null ? null : (int) $row['reconciliation_id'],
-            'supplier_order_quantity' => $row['reconciliation_id'] === null ? null : (int) $row['supplier_order_quantity'],
-            'received_quantity' => $row['received_quantity'] === null ? null : (int) $row['received_quantity'],
-            'employee_served_quantity' => $row['employee_served_quantity'] === null ? null : (int) $row['employee_served_quantity'],
-            'guest_served_quantity' => $row['guest_served_quantity'] === null ? null : (int) $row['guest_served_quantity'],
+            'id' => $isRegistered ? (int) $row['reconciliation_id'] : null,
+            'supplier_order_quantity' => $supplierOrder,
+            'received_quantity' => $received,
+            'employee_served_quantity' => $calc['served_employee'],
+            'guest_served_quantity' => $calc['served_guest'],
             'served_total' => $calc['served_total'],
-            'leftover_quantity' => $calc['leftover_quantity'],
-            'shortage_quantity' => $calc['shortage_quantity'],
-            'unserved_demand' => $calc['unserved_demand'],
-            'unserved_employee_demand' => $calc['unserved_employee_demand'],
-            'unserved_guest_demand' => $calc['unserved_guest_demand'],
-            'unserved_outside_registered_absence' => $calc['unserved_outside_registered_absence'],
-            'waste_quantity' => $row['reconciliation_id'] === null ? null : (int) $row['waste_quantity'],
-            'status' => $row['reconciliation_id'] === null ? 'not_ordered' : (string) $row['status'],
+            'remaining_quantity' => $calc['remaining_quantity'],
+            'order_gap' => $orderGap,
+            'order_gap_side' => $gapSide,
+            'absentees' => (int) ($absentMap[$key] ?? 0),
+            'leftover_staff_quantity' => $leftoverStaff,
+            'leftover_waste_quantity' => $leftoverWaste,
+            'leftover_keep_quantity' => $leftoverKeep,
+            'leftover_other_quantity' => $leftoverOther,
+            'leftover_other_note' => $leftoverOtherNote,
+            'leftover_disposition_summary' => food_reconciliation_disposition_summary(
+                $leftoverStaff, $leftoverWaste, $leftoverKeep, $leftoverOther, $leftoverOtherNote
+            ),
+            'status' => $isRegistered ? (string) $row['status'] : 'not_ordered',
             'note' => (string) ($row['note'] ?? ''),
             'snapshot_at' => (string) ($row['snapshot_at'] ?? ''),
             'ordered_at' => (string) ($row['ordered_at'] ?? ''),
@@ -324,23 +405,20 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
         'current_active_employee_orders' => 0,
         'current_active_guest_meals' => 0,
         'current_active_demand' => 0,
-        'demand_at_order' => 0,
         'cancelled_employee_orders' => 0,
         'cancelled_guest_meals' => 0,
         'supplier_order_quantity' => 0,
         'received_quantity' => 0,
         'received_quantity_recorded_rows' => 0,
         'received_quantity_missing_rows' => 0,
-        'served_total' => 0,
-        'served_quantity_recorded_rows' => 0,
-        'leftover_quantity' => 0,
-        'shortage_quantity' => 0,
+        'served_settled_total' => 0,
+        'remaining_quantity' => 0,
+        'absentees' => 0,
     ];
     foreach ($items as $item) {
         $summary['current_active_employee_orders'] += $item['active_employee_orders'];
         $summary['current_active_guest_meals'] += $item['active_guest_meals'];
         $summary['current_active_demand'] += $item['active_demand'];
-        $summary['demand_at_order'] += $item['demand_at_order'] ?? $item['active_demand'];
         $summary['cancelled_employee_orders'] += $item['cancelled_employee_orders'];
         $summary['cancelled_guest_meals'] += $item['cancelled_guest_meals'];
         $summary['supplier_order_quantity'] += (int) ($item['supplier_order_quantity'] ?? 0);
@@ -352,17 +430,10 @@ function food_reconciliation_report(string $fromRaw, string $toRaw, string $meal
             $summary['received_quantity'] += $item['received_quantity'];
             $summary['received_quantity_recorded_rows']++;
         }
-        if ($item['served_total'] !== null) {
-            $summary['served_total'] += $item['served_total'];
-            $summary['served_quantity_recorded_rows']++;
-        }
-        $summary['leftover_quantity'] += (int) ($item['leftover_quantity'] ?? 0);
-        $summary['shortage_quantity'] += (int) ($item['shortage_quantity'] ?? 0);
+        $summary['served_settled_total'] = (int) $summary['served_settled_total'] + (int) ($item['served_total'] ?? 0);
+        $summary['remaining_quantity'] += (int) ($item['remaining_quantity'] ?? 0);
+        $summary['absentees'] += (int) $item['absentees'];
     }
-
-    $absenceStmt = db()->prepare('SELECT COUNT(*) FROM food_ticket_daily_absence WHERE absence_date BETWEEN ? AND ?');
-    $absenceStmt->execute([$from, $to]);
-    $summary['registered_absence_person_days'] = (int) $absenceStmt->fetchColumn();
 
     $monthSummary = [
         'month' => food_reconciliation_month_key($monthStart),
@@ -412,6 +483,44 @@ function food_reconciliation_audit(string $action, array $user, int $targetId, m
     }
 }
 
+/**
+ * اعتبارسنجی «تعیین تکلیف غذای باقیمانده».
+ * اگر مانده (پرس تحویل واقعی − کل تحویل‌داده‌شده‌ها) کمتر از ۱ باشد، تعیین تکلیف لازم نیست و همه‌چیز null می‌شود.
+ * اگر مانده ≥ ۱ باشد: حداقل یک گزینه الزامی است و مجموع تعدادها نباید از مانده بیشتر شود.
+ *
+ * @return array{leftover_staff_quantity: ?int, leftover_waste_quantity: ?int, leftover_keep_quantity: ?int, leftover_other_quantity: ?int, leftover_other_note: ?string}
+ */
+function food_reconciliation_disposition_parse(array $body, int $remaining): array
+{
+    if ($remaining < 1) {
+        return ['leftover_staff_quantity' => null, 'leftover_waste_quantity' => null, 'leftover_keep_quantity' => null, 'leftover_other_quantity' => null, 'leftover_other_note' => null];
+    }
+    $staff = food_reconciliation_count($body['leftover_staff_quantity'] ?? '0', 'تعداد توزیع بین پرسنل', true) ?? 0;
+    $waste = food_reconciliation_count($body['leftover_waste_quantity'] ?? '0', 'تعداد دورریز', true) ?? 0;
+    $keep = food_reconciliation_count($body['leftover_keep_quantity'] ?? '0', 'تعداد نگه‌داری برای وعدهٔ بعد', true) ?? 0;
+    $other = food_reconciliation_count($body['leftover_other_quantity'] ?? '0', 'تعداد سایر', true) ?? 0;
+    $otherNote = trim((string) ($body['leftover_other_note'] ?? ''));
+    if (function_exists('mb_substr')) {
+        $otherNote = mb_substr($otherNote, 0, 500, 'UTF-8');
+    } else {
+        $otherNote = substr($otherNote, 0, 500);
+    }
+    $sum = $staff + $waste + $keep + $other;
+    if ($sum > $remaining) {
+        throw new RuntimeException('مجموع تعیین تکلیف (' . $sum . ' پرس) از ماندهٔ امروز (' . $remaining . ' پرس) بیشتر است.');
+    }
+    if ($sum === 0) {
+        throw new RuntimeException('برای بستن این روز باید سرنوشت غذای باقیمانده را مشخص کنید؛ حداقل یک گزینه را با تعداد وارد کنید.');
+    }
+    return [
+        'leftover_staff_quantity' => $staff,
+        'leftover_waste_quantity' => $waste,
+        'leftover_keep_quantity' => $keep,
+        'leftover_other_quantity' => $other,
+        'leftover_other_note' => $otherNote !== '' ? $otherNote : null,
+    ];
+}
+
 function food_reconciliation_save(array $body, array $user): array
 {
     food_order_require_permission($user, 'food.menu_edit');
@@ -429,10 +538,7 @@ function food_reconciliation_save(array $body, array $user): array
         throw new RuntimeException('بستن آمار غذا برای تاریخ آینده مجاز نیست.');
     }
     $supplierOrder = food_reconciliation_count($body['supplier_order_quantity'] ?? '', 'تعداد پرس سفارش‌داده‌شده', $action === 'close');
-    $received = food_reconciliation_count($body['received_quantity'] ?? '', 'تعداد پرس تحویل‌شده', true);
-    $employeeServed = food_reconciliation_count($body['employee_served_quantity'] ?? '', 'توزیع به پرسنل', true);
-    $guestServed = food_reconciliation_count($body['guest_served_quantity'] ?? '', 'توزیع به مهمان‌ها', true);
-    $waste = food_reconciliation_count($body['waste_quantity'] ?? '0', 'تعداد دورریز', false);
+    $received = food_reconciliation_count($body['received_quantity'] ?? '', 'تعداد پرس تحویل واقعی', true);
     $note = trim((string) ($body['note'] ?? ''));
     $reason = trim((string) ($body['edit_reason'] ?? ''));
     if (function_exists('mb_substr')) {
@@ -442,14 +548,19 @@ function food_reconciliation_save(array $body, array $user): array
         $note = substr($note, 0, 1000);
         $reason = substr($reason, 0, 500);
     }
+    // «توزیع پرسنل» و «توزیع مهمان» از رویدادهای فیش (printed+delivered) محاسبهٔ زنده می‌شوند؛ ورودی دستی ندارند.
+    $servedMap = food_reconciliation_served_counts($date, $date);
+    $servedKey = $date . "\0" . $meal;
+    $employeeServed = (int) ($servedMap[$servedKey]['employee'] ?? 0);
+    $guestServed = (int) ($servedMap[$servedKey]['guest'] ?? 0);
+    $servedTotal = $employeeServed + $guestServed;
+    $remaining = $received === null ? null : $received - $servedTotal;
+    $disposition = ['leftover_staff_quantity' => null, 'leftover_waste_quantity' => null, 'leftover_keep_quantity' => null, 'leftover_other_quantity' => null, 'leftover_other_note' => null];
     if ($action === 'close') {
-        if ($received === null || $employeeServed === null || $guestServed === null) {
-            throw new RuntimeException('برای بستن آمار، مقدار تحویل واقعی و توزیع پرسنل و مهمان را وارد کنید؛ در صورت صفر بودن، عدد صفر را بنویسید.');
+        if ($received === null) {
+            throw new RuntimeException('برای بستن آمار، مقدار «پرس تحویل واقعی» را وارد کنید؛ در صورت صفر بودن، عدد صفر بنویسید.');
         }
-        $servedTotal = $employeeServed + $guestServed;
-        if ($waste > max(0, $received - $servedTotal)) {
-            throw new RuntimeException('دورریز نمی‌تواند از ماندهٔ واقعیِ پس از توزیع بیشتر باشد.');
-        }
+        $disposition = food_reconciliation_disposition_parse($body, (int) $remaining);
     }
 
     $pdo = db();
@@ -474,9 +585,6 @@ function food_reconciliation_save(array $body, array $user): array
         $oldValue = $existing;
         $nowAction = $action === 'close' ? 'closed' : ($wasClosed ? 'closed' : 'ordered');
         $receivedValue = $action === 'close' ? $received : ($existing['received_quantity'] ?? null);
-        $employeeValue = $action === 'close' ? $employeeServed : ($existing['employee_served_quantity'] ?? null);
-        $guestValue = $action === 'close' ? $guestServed : ($existing['guest_served_quantity'] ?? null);
-        $wasteValue = $action === 'close' ? $waste : (int) ($existing['waste_quantity'] ?? 0);
         $orderedBy = $existing !== null && $existing['ordered_by'] !== null ? (int) $existing['ordered_by'] : (int) ($user['id'] ?? 0);
         $orderedAt = $existing !== null && $existing['ordered_at'] !== null ? (string) $existing['ordered_at'] : null;
         $snapshotAt = $existing !== null && $existing['snapshot_at'] !== null ? (string) $existing['snapshot_at'] : null;
@@ -501,15 +609,34 @@ function food_reconciliation_save(array $body, array $user): array
                 $snapshotAt = $closedAt;
             }
         }
+        // تعیین تکلیف باقیمانده: فقط در مرحلهٔ «بستن» نوشته/پاک می‌شود؛ در مرحلهٔ «سفارش» دست‌نخورده می‌ماند.
+        if ($action === 'close') {
+            $leftoverStaff = $disposition['leftover_staff_quantity'];
+            $leftoverWaste = $disposition['leftover_waste_quantity'];
+            $leftoverKeep = $disposition['leftover_keep_quantity'];
+            $leftoverOther = $disposition['leftover_other_quantity'];
+            $leftoverOtherNote = $disposition['leftover_other_note'];
+        } else {
+            $leftoverStaff = $existing !== null && $existing['leftover_staff_quantity'] !== null ? (int) $existing['leftover_staff_quantity'] : null;
+            $leftoverWaste = $existing !== null && $existing['leftover_waste_quantity'] !== null ? (int) $existing['leftover_waste_quantity'] : null;
+            $leftoverKeep = $existing !== null && $existing['leftover_keep_quantity'] !== null ? (int) $existing['leftover_keep_quantity'] : null;
+            $leftoverOther = $existing !== null && $existing['leftover_other_quantity'] !== null ? (int) $existing['leftover_other_quantity'] : null;
+            $leftoverOtherNote = $existing !== null && $existing['leftover_other_note'] !== null ? (string) $existing['leftover_other_note'] : null;
+        }
+        $wasteValue = $existing !== null ? (int) ($existing['waste_quantity'] ?? 0) : 0;
         if ($existing === null) {
             $insert = $pdo->prepare('INSERT INTO food_meal_reconciliations
                 (food_date, meal_type, employee_orders_at_order, guest_meals_at_order, supplier_order_quantity,
-                 received_quantity, employee_served_quantity, guest_served_quantity, waste_quantity, status, note,
+                 received_quantity, employee_served_quantity, guest_served_quantity, waste_quantity,
+                 leftover_staff_quantity, leftover_waste_quantity, leftover_keep_quantity, leftover_other_quantity, leftover_other_note,
+                 status, note,
                  ordered_by, ordered_at, snapshot_at, closed_by, closed_at, created_by, updated_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $insert->execute([
                 $date, $meal, $snapshotEmployee, $snapshotGuest, $orderedQuantity,
-                $receivedValue, $employeeValue, $guestValue, $wasteValue, $nowAction, $note !== '' ? $note : null,
+                $receivedValue, $employeeServed, $guestServed, $wasteValue,
+                $leftoverStaff, $leftoverWaste, $leftoverKeep, $leftoverOther, $leftoverOtherNote,
+                $nowAction, $note !== '' ? $note : null,
                 $orderedBy, $orderedAt, $snapshotAt, $closedBy, $closedAt,
                 (int) ($user['id'] ?? 0), (int) ($user['id'] ?? 0),
             ]);
@@ -518,11 +645,14 @@ function food_reconciliation_save(array $body, array $user): array
             $update = $pdo->prepare('UPDATE food_meal_reconciliations SET
                 employee_orders_at_order = ?, guest_meals_at_order = ?, supplier_order_quantity = ?,
                 received_quantity = ?, employee_served_quantity = ?, guest_served_quantity = ?, waste_quantity = ?,
+                leftover_staff_quantity = ?, leftover_waste_quantity = ?, leftover_keep_quantity = ?,
+                leftover_other_quantity = ?, leftover_other_note = ?,
                 status = ?, note = ?, ordered_by = ?, ordered_at = ?, snapshot_at = ?, closed_by = ?, closed_at = ?,
                 updated_by = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
             $update->execute([
                 $snapshotEmployee, $snapshotGuest, $orderedQuantity,
-                $receivedValue, $employeeValue, $guestValue, $wasteValue,
+                $receivedValue, $employeeServed, $guestServed, $wasteValue,
+                $leftoverStaff, $leftoverWaste, $leftoverKeep, $leftoverOther, $leftoverOtherNote,
                 $nowAction, $note !== '' ? $note : null, $orderedBy,
                 $orderedAt, $snapshotAt, $closedBy, $closedAt,
                 (int) ($user['id'] ?? 0), (int) $existing['id'],
@@ -537,9 +667,13 @@ function food_reconciliation_save(array $body, array $user): array
             'guest_meals_at_order' => $snapshotGuest,
             'supplier_order_quantity' => $orderedQuantity,
             'received_quantity' => $receivedValue,
-            'employee_served_quantity' => $employeeValue,
-            'guest_served_quantity' => $guestValue,
-            'waste_quantity' => $wasteValue,
+            'employee_served_quantity' => $employeeServed,
+            'guest_served_quantity' => $guestServed,
+            'leftover_staff_quantity' => $leftoverStaff,
+            'leftover_waste_quantity' => $leftoverWaste,
+            'leftover_keep_quantity' => $leftoverKeep,
+            'leftover_other_quantity' => $leftoverOther,
+            'leftover_other_note' => $leftoverOtherNote,
             'status' => $nowAction,
         ];
         food_reconciliation_audit('food_meal_reconciliation_saved', $user, $id, $oldValue, $newValue, $reason !== '' ? $reason : null);
@@ -768,26 +902,37 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     $report = food_reconciliation_report($fromRaw, $toRaw, $mealRaw, $reportMonth);
     $headers = [
         'تاریخ', 'وعده', 'سفارش فعال پرسنل', 'درخواست فعال مهمان', 'تقاضای فعال',
-        'تقاضا هنگام ثبت خرید', 'لغوشدهٔ پرسنل (جدا)', 'لغوشدهٔ مهمان (جدا)',
-        'پرس سفارش‌داده‌شده', 'پرس تحویل‌شده', 'توزیع پرسنل', 'توزیع مهمان',
-        'کل توزیع', 'غیبت روز', 'تقاضای بی‌توزیع', 'بی‌توزیع پرسنل', 'بی‌توزیع مهمان',
-        'بی‌توزیع پس از کسر غیبت', 'مانده', 'دورریز', 'کمبود', 'وضعیت', 'یادداشت',
+        'لغوشدهٔ پرسنل', 'لغوشدهٔ مهمان',
+        'پرس سفارش‌داده‌شده', 'پرس تحویل واقعی', 'توزیع پرسنل', 'توزیع مهمان',
+        'کل توزیع', 'پرس باقیمانده', 'کسری/اضافهٔ سفارش', 'غایبین', 'سرنوشت باقیمانده',
+        'وضعیت', 'یادداشت',
         'ماه فاکتور', 'تعداد فاکتور ماه', 'پرس طبق فاکتور ماه', 'جمع تحویل واقعی روزانهٔ ماه',
         'اختلاف فاکتور − تحویل ماه', 'وضعیت مقایسهٔ ماهانه',
     ];
+    $gapText = static function (?int $gap): string {
+        if ($gap === null) {
+            return '—';
+        }
+        if ($gap > 0) {
+            return $gap . ' کسر سفارش';
+        }
+        if ($gap < 0) {
+            return abs($gap) . ' اضافه سفارش';
+        }
+        return '۰ هم‌سطح';
+    };
     $data = [];
     foreach ($report['items'] as $item) {
         $data[] = [
             $item['date_jalali'],
             $item['meal_type'] === 'dinner' ? 'شام' : 'ناهار',
             $item['active_employee_orders'], $item['active_guest_meals'], $item['active_demand'],
-            $item['demand_at_order'] ?? '—', $item['cancelled_employee_orders'], $item['cancelled_guest_meals'],
+            $item['cancelled_employee_orders'], $item['cancelled_guest_meals'],
             $item['supplier_order_quantity'] ?? '—', $item['received_quantity'] ?? '—',
             $item['employee_served_quantity'] ?? '—', $item['guest_served_quantity'] ?? '—',
-            $item['served_total'] ?? '—', $item['registered_absences'], $item['unserved_demand'] ?? '—',
-            $item['unserved_employee_demand'] ?? '—', $item['unserved_guest_demand'] ?? '—',
-            $item['unserved_outside_registered_absence'] ?? '—', $item['leftover_quantity'] ?? '—',
-            $item['waste_quantity'] ?? '—', $item['shortage_quantity'] ?? '—',
+            $item['served_total'] ?? '—', $item['remaining_quantity'] ?? '—',
+            $gapText($item['order_gap']), $item['absentees'],
+            $item['leftover_disposition_summary'] ?? '—',
             $item['status'] === 'closed' ? 'بسته' : ($item['status'] === 'ordered' ? 'سفارش ثبت شد' : 'بدون ثبت خرید'),
             $item['note'], '', '', '', '', '', '',
         ];
@@ -801,12 +946,12 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     $monthlyRow = array_fill(0, count($headers), '');
     $monthlyRow[0] = 'خلاصهٔ ماهانه';
     $monthlyRow[1] = 'فاکتور و تحویل مستقل‌اند و با هم جمع نمی‌شوند';
-    $monthlyRow[23] = $report['month'];
-    $monthlyRow[24] = $monthSummary['invoice_count'];
-    $monthlyRow[25] = $monthSummary['invoice_portions'];
-    $monthlyRow[26] = $monthSummary['daily_received_portions'];
-    $monthlyRow[27] = $monthSummary['invoice_difference'] ?? '—';
-    $monthlyRow[28] = $comparisonStatus;
+    $monthlyRow[18] = $report['month'];
+    $monthlyRow[19] = $monthSummary['invoice_count'];
+    $monthlyRow[20] = $monthSummary['invoice_portions'];
+    $monthlyRow[21] = $monthSummary['daily_received_portions'];
+    $monthlyRow[22] = $monthSummary['invoice_difference'] ?? '—';
+    $monthlyRow[23] = $comparisonStatus;
     $data[] = $monthlyRow;
     foreach ($data as &$row) {
         foreach ($row as &$value) {

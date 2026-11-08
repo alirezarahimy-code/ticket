@@ -195,7 +195,7 @@
 .fm-reconciliation-stat>strong{font-size:24px;color:var(--teal)}
 .fm-reconciliation-stat>small{font-size:11px;line-height:1.8;color:var(--muted)}
 .fm-reconciliation-stat .fm-alert{margin:0;padding:4px 0;background:transparent}
-.fm-reconciliation-table{min-width:1880px}
+.fm-reconciliation-table{min-width:1500px}
 .fm-reconciliation-table th,.fm-reconciliation-table td{white-space:nowrap}
 .fm-reconciliation-editor,.fm-monthly-invoice{margin-top:14px}
 .fm-reconciliation-form{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:10px 12px;align-items:end}
