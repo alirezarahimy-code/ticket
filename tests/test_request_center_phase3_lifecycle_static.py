@@ -191,6 +191,15 @@ def test_supervisor_reopen_ui_requires_an_explicit_reason():
     assert 'type="hidden" name="supervisor_note"' not in page
 
 
+def test_public_management_and_bulk_replies_start_first_response_clock():
+    ticket_action = source("modules/request-center/Actions/ticket-actions.php")
+    bulk_action = source("modules/request-center/Actions/bulk-actions.php")
+    assert "$firstResponseRecorded = $updateNote !== '' && empty($ticket['first_response_at']);" in ticket_action
+    assert "$workflowUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();" in ticket_action
+    assert "$bulkFirstResponseRecorded = $bulkNote !== '' && empty($bulkTicket['first_response_at']);" in bulk_action
+    assert "$bulkUpdates['first_response_at'] = RequestCenterSqlExpression::coalesceNow();" in bulk_action
+
+
 def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
     workflow = source("modules/request-center/WorkflowService.php")
     assert "function appendMessage(" in workflow
