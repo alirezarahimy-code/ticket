@@ -75,6 +75,10 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     require_once __DIR__ . '/bootstrap.php';
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
+    // The lifecycle pages use the shared site chrome, which was extracted from
+    // index.php into lib/render.php during Phase 2. Load that contract directly
+    // instead of pulling the legacy front controller into the RC runtime.
+    require_once __DIR__ . '/lib/render.php';
 
     $user = require_login();
 
