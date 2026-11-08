@@ -135,6 +135,16 @@ def test_sla_ola_alert_claims_are_audited_before_commit():
     assert "INSERT IGNORE INTO ticket_ola_alerts" in cron
 
 
+def test_resolution_notification_warns_about_automatic_close_policy_in_advance():
+    helpers = source("modules/request-center/lib/functions.php")
+    start = helpers.index("function request_center_notify_ticket_resolved")
+    end = helpers.index("\nfunction ", start + 10)
+    block = helpers[start:end]
+    assert "setting('ticket_auto_close_days', '3')" in block
+    assert "$autoCloseNotice" in block
+    assert "به‌صورت خودکار بسته می‌شود" in block
+
+
 def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
     cron = source("cron/ticket_auto_close.php")
     assert "activity_log([" in cron
