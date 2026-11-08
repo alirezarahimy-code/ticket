@@ -106,8 +106,10 @@ if ($page === 'ticket') {
          }
          echo '</div><label>نظر اختیاری<textarea name="rating_comment" rows="3" placeholder="اگر توضیحی دارید بنویسید..."></textarea></label><button class="button" type="submit">ثبت امتیاز</button></form>';
      }
-     if ($ticket['status'] === 'cancelled') {
-         echo '<div class="card"><p class="muted">این درخواست به درخواست ثبت‌کننده لغو شده است. سابقه برای پیگیری حفظ می‌شود؛ برای نیاز جدید، درخواست تازه ثبت کنید.</p></div>';
+     if ($ticket['status'] === 'rejected') {
+         echo '<div class="card rejection-notice"><h3>این درخواست پس از ارزیابی اولیه رد شده است</h3><p><strong>دلیل تصمیم:</strong></p><p>' . nl2br(e((string) ($ticket['supervisor_note'] ?? 'دلیل ثبت نشده'))) . '</p><small class="muted">زمان تصمیم: ' . e(persian_date((string) ($ticket['rejected_at'] ?? $ticket['updated_at']))) . '</small></div>';
+     } elseif ($ticket['status'] === 'cancelled') {
+         echo '<div class="card"><p class="muted">این درخواست به درخواست ثبت‌کننده یا با تأیید مسئول لغو شده است. سابقه برای پیگیری حفظ می‌شود؛ برای نیاز جدید، درخواست تازه ثبت کنید.</p></div>';
      } elseif ($requesterView && $ticket['status'] === 'resolved') {
          if (!$requiresRating) {
              echo '<div class="card"><p class="muted">امتیاز شما ثبت شد. درخواست در انتظار تأیید نهایی سوپروایزر است.</p></div>';
