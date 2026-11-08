@@ -336,6 +336,15 @@ def test_supervisor_decisions_cannot_be_made_on_own_requests():
     assert "!ticket_user_is_requester($ticket, $supervisor)" in page
 
 
+def test_bulk_status_changes_require_and_audit_a_requester_visible_reason():
+    action = source("modules/request-center/Actions/bulk-actions.php")
+    queue = source("modules/request-center/Pages/queue.php")
+    assert "if ($bulkNote === '')" in action
+    assert "'reason' => $bulkNote" in action
+    assert 'name="bulk_note" rows="2" maxlength="5000" required' in queue
+    assert "برای هر تغییر وضعیت الزامی" in queue
+
+
 def test_assignment_and_priority_changes_notify_ticket_parties():
     action = source("modules/request-center/Actions/ticket-actions.php")
     assert "$status !== $oldStatus || $assigneeChanged || (string) $ticket['priority'] !== $priority" in action
