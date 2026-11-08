@@ -222,7 +222,7 @@ if ($workspace === 'agent') {
     $allowedAgentQueues = $agentView === 'mine'
         ? ['mine']
         : (user_can($user, 'queue.view')
-            ? ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled']
+            ? ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'
             : ['mine']);
     $requestedQueue = (string) ($_GET['queue'] ?? ($agentView === 'mine' ? 'mine' : 'all'));
     $agentQueueName = in_array($requestedQueue, $allowedAgentQueues, true)
@@ -276,7 +276,7 @@ $queryString = http_build_query(array_merge($queryParams, array_filter($filters,
 <?php if ($workspace === 'agent'): ?>
 <nav class="workspace-nav" aria-label="فیلتر صف عملیاتی">
 <?php
-$agentQueueLabels = ['all' => 'همه', 'unassigned' => 'بدون مسئول', 'overdue' => 'خارج از SLA/OLA', 'mine' => 'مسئول من', 'waiting_user' => 'انتظار کاربر', 'resolved' => 'حل‌شده', 'cancellation_requested' => 'درخواست لغو', 'cancelled' => 'لغوشده'];
+$agentQueueLabels = ['all' => 'همه', 'unassigned' => 'بدون مسئول', 'overdue' => 'خارج از SLA/OLA', 'mine' => 'مسئول من', 'waiting_user' => 'انتظار کاربر', 'resolved' => 'حل‌شده', 'cancellation_requested' => 'درخواست لغو', 'cancelled' => 'لغوشده', 'rejected' => 'ردشده'];
 foreach ($agentQueueLabels as $queueKey => $queueLabel):
     if (!user_can($user, 'queue.view') && $queueKey !== 'mine') continue;
 ?>
