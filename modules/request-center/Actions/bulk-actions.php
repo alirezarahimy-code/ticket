@@ -118,6 +118,15 @@ if (!defined('APP_ROOT')) {
                     'priority' => $bulkTicket['priority'],
                     'department_id' => $bulkTicket['department_id'] ?? null,
                     'service_group' => $bulkTicket['service_group'] ?? null,
+                    'due_at' => $bulkTicket['due_at'] ?? null,
+                    'sla_minutes' => $bulkTicket['sla_minutes'] ?? null,
+                    'sla_paused_at' => $bulkTicket['sla_paused_at'] ?? null,
+                    'sla_pause_minutes' => $bulkTicket['sla_pause_minutes'] ?? null,
+                    'ola_policy_id' => $bulkTicket['ola_policy_id'] ?? null,
+                    'ola_response_due_at' => $bulkTicket['ola_response_due_at'] ?? null,
+                    'ola_due_at' => $bulkTicket['ola_due_at'] ?? null,
+                    'ola_escalation_1_at' => $bulkTicket['ola_escalation_1_at'] ?? null,
+                    'ola_escalation_2_at' => $bulkTicket['ola_escalation_2_at'] ?? null,
                     'cancel_requested_at' => null,
                 ]);
                 if (!$bulkUpdated) {
