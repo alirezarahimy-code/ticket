@@ -117,8 +117,10 @@ function render_header(string $title, ?array $user = null): void
         $menuItems = [
             '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
         ];
-        if (user_can($user, 'ticket.create')) {
-            $menuItems[] = '<li>' . $menuLink('index.php?page=new-ticket', 'درخواست', 'ticket') . '</li>';
+        // مرکز درخواست‌ها ورودی رسمی Workspaceهای RC است؛ مسیر قدیمی
+        // ثبت درخواست فقط به‌عنوان Bridge سازگاری حفظ می‌شود.
+        if (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user)) {
+            $menuItems[] = '<li>' . $menuLink('request-center.php', 'مرکز درخواست‌ها', 'ticket') . '</li>';
         }
         if (user_can($user, 'cddvd.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=cd-dvd', 'کنترل CD/DVD', 'disc') . '</li>';
