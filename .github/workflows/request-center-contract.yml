@@ -6,6 +6,9 @@ on:
     paths:
       - 'request-center.php'
       - 'modules/request-center/**'
+      - 'migrations/037-request-center-lifecycle-rejection.sql'
+      - 'tests/test_request_center_phase3_lifecycle_static.py'
+      - 'tests/test_request_center_workflow_service_sqlite.php'
       - 'tests/test_request_center_first_slice_static.py'
       - 'tests/test_request_center_access_matrix_static.py'
       - 'tests/test_request_center_repository_sqlite.php'
@@ -90,11 +93,23 @@ jobs:
           php -l modules/request-center/RequestCenterRepository.php
           php -l modules/request-center/WorkflowService.php
           php -l modules/request-center/lib/functions.php
+          php -l modules/request-center/post-handler.php
+          php -l modules/request-center/Pages/create.php
+          php -l modules/request-center/Pages/detail.php
+          php -l modules/request-center/Pages/queue.php
+          php -l modules/request-center/Pages/supervisor.php
+          php -l modules/request-center/Pages/services.php
+          php -l modules/request-center/Pages/reports.php
+          php -l modules/request-center/Pages/analytics.php
+          php -l modules/request-center/Actions/ticket-actions.php
+          php -l modules/request-center/Actions/supervisor-actions.php
+          php -l modules/request-center/Actions/bulk-actions.php
+          php -l modules/request-center/Actions/service-actions.php
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
           php -l modules/request-center/Pages/calendar.php
-      - name: First-slice security and architecture contract
-        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py
+      - name: First-slice and Phase-3 lifecycle architecture contracts
+        run: python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_lifecycle_static.py
       - name: Repository query and visibility integration tests
         run: php tests/test_request_center_repository_sqlite.php
       - name: Appointment lifecycle, conflict and capacity contract (SQLite)
@@ -128,6 +143,8 @@ jobs:
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
+      - name: Apply Request Center lifecycle migration 037 to disposable MariaDB
+        run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/037-request-center-lifecycle-rejection.sql
       - name: Request Center schema preflight on MariaDB
         run: php tests/test_request_center_schema_preflight_mariadb.php
         env:
