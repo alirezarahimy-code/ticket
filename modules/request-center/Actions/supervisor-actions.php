@@ -55,7 +55,7 @@ if (!defined('APP_ROOT')) {
             if ($newAssigneeId === $oldAssigneeId) {
                 db()->rollBack();
                 flash('info', 'مسئول رسیدگی تغییری نکرد.');
-                redirect('request-center.php?page=ticket&id=' . $ticketId);
+                redirect(request_center_ticket_return_url($ticketId));
             }
             if ($reason === '') {
                 throw new RuntimeException('برای تخصیص، بازتخصیص یا برداشتن مسئول، ثبت دلیل قابل مشاهده در تاریخچه الزامی است.');
@@ -167,7 +167,7 @@ if (!defined('APP_ROOT')) {
             );
             db_commit_or_fail('request-center:supervisor_assign_ticket');
             flash('success', $newAssigneeId > 0 ? 'مسئول رسیدگی درخواست به‌روزرسانی شد.' : 'درخواست به صف ارجاع برگشت.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
 
         if ($action === 'supervisor_decision') {
@@ -536,5 +536,5 @@ if (!defined('APP_ROOT')) {
             record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_rated', 'ثبت رضایت برای درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, 'امتیاز: ' . $score . ' از ۵');
             db_commit('request-center.php');
             flash('success', 'امتیاز رضایت شما با موفقیت ثبت شد.');
-            redirect('request-center.php?page=ticket&id=' . $ticketId);
+            redirect(request_center_ticket_return_url($ticketId));
         }
