@@ -5,7 +5,7 @@ path	category	lines	bytes
 .github/copilot-instructions.md	workflows	23	1566
 .github/workflows/benchmark-250.yml	workflows	116	4154
 .github/workflows/benchmark-operations.yml	workflows	367	15800
-.github/workflows/ci.yml	workflows	221	9182
+.github/workflows/ci.yml	workflows	254	10937
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	93	3303
@@ -272,7 +272,7 @@ downloads/CHANGE-REPORT-FA-1.62.75.md	history-downloads	29	4446
 downloads/CHANGE-REPORT-FA-1.62.83.md	history-downloads	58	7326
 downloads/CHANGE-REPORT-FA-1.62.88.md	history-downloads	59	5539
 downloads/CHANGE-REPORT-FA-1.62.89.md	history-downloads	88	7352
-downloads/CHANGE-REPORT-FA-1.62.90.md	history-downloads	51	8305
+downloads/CHANGE-REPORT-FA-1.62.90.md	history-downloads	51	8565
 downloads/FOOD-WORKER-WINDOW-1.62.78-REPORT-fa.md	history-downloads	164	10645
 downloads/FOOD-WORKER-WINDOW-1.62.78-UPDATE-NOTE-fa.txt	history-downloads	32	2151
 downloads/FOOD-WORKER-WINDOW-1.62.79-REPORT-fa.md	history-downloads	220	12897
@@ -611,7 +611,7 @@ tests/test_release_1_62_7_traffic_history_events_static.py	tests	72	3393
 tests/test_release_1_62_88_package_integrity.py	tests	47	1904
 tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	6687
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
-tests/test_release_chain_integrity.py	tests	133	5933
+tests/test_release_chain_integrity.py	tests	147	6688
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
@@ -716,6 +716,7 @@ tools/preview_asset_names.php	tools	125	7559
 tools/preview_food_import.php	tools	67	3059
 tools/print_calibration.php	tools	136	8005
 tools/print_test.php	tools	50	2103
+tools/rebuild_1_62_90_package.py	tools	156	7165
 tools/render_code_map.py	tools	152	8120
 tools/session-boot.py	tools	346	15761
 tools/set_attendance_password.php	tools	109	4625
