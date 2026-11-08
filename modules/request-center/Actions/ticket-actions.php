@@ -366,7 +366,7 @@ if (!defined('APP_ROOT')) {
                 }
                 $isStaleClosed = in_array($oldStatus, ['closed', 'cancelled'], true);
                 $rejectBody = $isStaleClosed
-                    ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . status_label($oldStatus) . ' شده بود): ' . $note
+                    ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . request_center_status_label($oldStatus) . ' شده بود): ' . $note
                     : 'درخواست لغو رد شد و رسیدگی ادامه می‌یابد: ' . $note;
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $rejectBody]);
                 save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_rejected', $ticketId, ['reason' => $requestReason, 'note' => $note]);
@@ -482,7 +482,7 @@ if (!defined('APP_ROOT')) {
             if ((int) $ticket['requester_id'] === (int) $user['id'] && $ticket['status'] === 'closed' && !ticket_rating_is_current($ticket)) {
                 throw new RuntimeException('ثبت امتیاز رضایت برای این درخواست الزامی است.');
             }
-            if ($ticket['status'] === 'cancelled') {
+            if (in_array((string) $ticket['status'], ['cancelled', 'rejected'], true)) {
                 throw new RuntimeException('درخواست لغوشده قابل ادامهٔ مکالمه نیست؛ برای نیاز جدید، درخواست تازه ثبت کنید.');
             }
             if ($ticket['status'] === 'closed') {
@@ -631,7 +631,7 @@ if (!defined('APP_ROOT')) {
             if ($handlerLevel === '') {
                 throw new RuntimeException('فقط مدیر واحد یا کارشناس مسئول همین درخواست می‌تواند آن را تغییر دهد.');
             }
-            if (in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
+            if (in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
                 throw new RuntimeException('درخواست بسته‌شده یا لغوشده از مسیر عادی قابل تغییر نیست.');
             }
             if (!empty($ticket['cancel_requested_at'])) {
