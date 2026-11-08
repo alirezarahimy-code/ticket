@@ -94,13 +94,15 @@ function request_center_handle_post(): bool
         require_once dirname(__DIR__, 2) . '/bootstrap.php';
     }
 
-    // همان لایه‌های ریشه‌ای که index.php در هر درخواست تولید به‌صورت تضمینی بارگذاری می‌کند.
-    // organization: read-only org context adapter used by create_ticket.
-    // inventory: inventory_client_ip (مسیر اعتبارسنجی دارایی در خدمات IT).
-    // cd-dvd: cd_dvd_fetch_record/cd_dvd_can_* (کنترل «درخواست اصلاح CD/DVD» در create_ticket).
-    // No provider schema ensure function is called from this independent route.
+    // Load only the established provider contracts required by this action.
+    // These files define adapters; no provider schema-ensure routine is called here.
     $rootDir = dirname(__DIR__, 2);
-    foreach (['/organization.php', '/inventory.php', '/cd-dvd.php'] as $stackFile) {
+    $providerFiles = match ($action) {
+        'create_ticket' => ['/organization.php', '/inventory.php', '/cd-dvd.php'],
+        'add_asset_relation' => ['/inventory.php'],
+        default => [],
+    };
+    foreach ($providerFiles as $stackFile) {
         $stackPath = $rootDir . $stackFile;
         if (is_file($stackPath)) {
             require_once $stackPath;
