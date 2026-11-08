@@ -34,6 +34,7 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attach
 
 if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report') {
     require_once __DIR__ . '/bootstrap.php';
+    require_once __DIR__ . '/xlsx-writer.php';
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
     require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
