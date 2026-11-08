@@ -58,8 +58,10 @@ check("decide_ticket_cancellation" in index
 check("$workflow->transition($ticketId, $oldStatus, 'cancelled'" in ticket_actions
       and "'requester_cancel'" in ticket_actions
       and "'cancellation_approved'" in ticket_actions
-      and "ticket_messages" in ticket_actions,
-      "cancellation is soft, reasoned, and retained in the conversation and event history")
+      and "appendMessage($ticketId" in ticket_actions
+      and "save_audit_required(" in ticket_actions
+      and "log_ticket_event(" in ticket_actions,
+      "cancellation is soft, reasoned, and retained through the centralized conversation writer, audit and event history")
 module_queue = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
     "modules/request-center/Pages/index.php", "modules/request-center/Pages/queue.php", "modules/request-center/RequestCenterRepository.php"
 ))
