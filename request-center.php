@@ -45,6 +45,20 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
 
     $user = require_login();
 
+    require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
+    $rcSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
+    if ($rcSchemaProblems !== []) {
+        http_response_code(503);
+        render_header('مرکز درخواست‌ها');
+        echo '<main class="container"><section class="card"><h2>ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست</h2><p>برای جلوگیری از اجرای ناقص عملیات، این Workspace تا رفع موارد زیر غیرفعال شد:</p><ul>';
+        foreach ($rcSchemaProblems as $problem) {
+            echo '<li>' . e($problem) . '</li>';
+        }
+        echo '</ul><a class="button secondary" href="index.php">بازگشت به سامانه</a></section></main>';
+        render_footer();
+        exit;
+    }
+
     // Only the creation form consumes these existing provider contracts.
     // Other lifecycle workspaces do not load unrelated modules.
     if ($rcPage === 'new-ticket') {
