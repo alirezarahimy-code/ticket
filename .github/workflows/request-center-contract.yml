@@ -1,14 +1,6 @@
 name: Request Center Contract
 
 on:
-  push:
-    branches: [ 'arena/22d4eba7-ticket' ]
-    paths:
-      - 'modules/request-center/**'
-      - 'tests/test_request_center_phase3_lifecycle_static.py'
-      - 'tests/test_request_center_workflow_service_sqlite.php'
-      - 'tests/test_request_center_workflow_service_mariadb.php'
-      - '.github/workflows/request-center-contract.yml'
   pull_request:
     branches: [ main ]
     paths:
