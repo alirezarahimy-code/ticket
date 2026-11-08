@@ -382,7 +382,7 @@ final class RequestCenterRepository
         }
 
         $status = (string) ($filters['status'] ?? '');
-        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled'], true)) {
+        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], true)) {
             $conditions[] = 't.status = ?';
             $params[] = $status;
         }
