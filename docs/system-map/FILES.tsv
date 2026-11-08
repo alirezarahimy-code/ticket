@@ -5,11 +5,11 @@ path	category	lines	bytes
 .github/copilot-instructions.md	workflows	23	1566
 .github/workflows/benchmark-250.yml	workflows	116	4154
 .github/workflows/benchmark-operations.yml	workflows	367	15800
-.github/workflows/ci.yml	workflows	212	8822
+.github/workflows/ci.yml	workflows	215	8961
 .github/workflows/critical-system-stress.yml	workflows	54	1926
 .github/workflows/food-system-stress.yml	workflows	223	10114
 .github/workflows/logging-acceptance.yml	workflows	93	3303
-.github/workflows/logging-contract.yml	workflows	37	1429
+.github/workflows/logging-contract.yml	workflows	37	1472
 .gitignore	config	27	447
 .htaccess	config	24	788
 00-FULL-PACKAGE-1.62.73-FA.md	root-misc	27	3236
@@ -611,6 +611,7 @@ tests/test_release_1_62_7_traffic_history_events_static.py	tests	72	3393
 tests/test_release_1_62_88_package_integrity.py	tests	47	1904
 tests/test_release_1_62_8_traffic_autofill_multi_approver_static.py	tests	126	6687
 tests/test_release_1_62_9_manual_ticket_date_guest_static.py	tests	170	8640
+tests/test_release_chain_integrity.py	tests	133	5933
 tests/test_repair_16236_full_source_restore.py	tests	162	7687
 tests/test_role_permissions_ui_static.py	tests	30	1532
 tests/test_route_security_static.py	tests	101	3957
