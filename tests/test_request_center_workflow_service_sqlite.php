@@ -36,6 +36,7 @@ $insert->execute([10, 'resolved', 19, 29, 'normal', null]);
 $insert->execute([11, 'assigned', 20, 30, 'normal', '2026-11-01 12:00:00']);
 $insert->execute([12, 'manager_review', 21, null, 'normal', null]);
 $insert->execute([13, 'assigned', 22, 32, 'normal', null]);
+$insert->execute([14, 'new', 23, null, 'normal', null]);
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
@@ -89,6 +90,16 @@ try {
 }
 $pdo->rollBack();
 workflow_check($rejectAfterWorkBlocked, 'supervisor cannot reject after first response has started');
+
+$standardRejectBlocked = false;
+$pdo->beginTransaction();
+try {
+    $service->transition(14, 'new', 'rejected', [], 'standard');
+} catch (RuntimeException) {
+    $standardRejectBlocked = true;
+}
+$pdo->rollBack();
+workflow_check($standardRejectBlocked, 'standard workflow cannot bypass supervisor rejection authorization');
 
 $pdo->beginTransaction();
 workflow_check(
