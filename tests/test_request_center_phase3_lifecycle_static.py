@@ -454,3 +454,12 @@ def test_rejection_schema_is_migration_owned_not_runtime_ddl():
     assert "rejected_at DATETIME NULL" in schema
     assert "migrations/034-logging-escalation.sql" not in migration
     assert "migrations/036-food-meal-leftover-disposition.sql" not in migration
+
+def test_supervisor_decision_queue_preserves_pagination_after_post_and_detail():
+    page = source("modules/request-center/Pages/supervisor.php")
+    # Every direct decision form (approve, rework, reject, reopen) must return
+    # to the same supervisor page instead of silently falling back to page 1.
+    assert page.count('name="rc_return_workspace" value="supervisor"') == 4
+    assert page.count('name="rc_return_p" value="\' . $supervisorPage . \'"') == 4
+    assert "&amp;workspace=supervisor&amp;p=' . $supervisorPage . '" in page
+    assert "request_center_ticket_return_url($ticketId)" in source("modules/request-center/Actions/supervisor-actions.php")
