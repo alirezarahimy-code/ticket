@@ -367,8 +367,7 @@ if (!defined('APP_ROOT')) {
             if (empty($ticket['cancel_requested_at'])) {
                 throw new RuntimeException('درخواست لغوِ درانتظاری برای این درخواست وجود ندارد.');
             }
-            $decidableStatuses = array_merge(ticket_requester_cancelable_statuses(), ['resolved']);
-            if (!in_array((string) $ticket['status'], $decidableStatuses, true) && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) {
+            if (!in_array((string) $ticket['status'], ticket_cancellation_decision_statuses(), true)) {
                 throw new RuntimeException('درخواست لغوِ درانتظاری برای این درخواست وجود ندارد.');
             }
             $decision = valid_choice(post_value('decision'), ['approve', 'reject'], 'reject');
