@@ -136,5 +136,5 @@ if (!defined('APP_ROOT')) {
                 $bulkMessage .= ' ' . $bulkSkipped . ' درخواست (بدون کارشناس مسئول، خارج از اختیار شما، درخواست لغو در انتظار یا مسیر وضعیت نامعتبر) تغییر نکرد.';
             }
             flash($bulkChanged > 0 ? 'success' : 'warning', $bulkMessage);
-            redirect('index.php?page=queue');
+            redirect('request-center.php?page=queue');
         }
