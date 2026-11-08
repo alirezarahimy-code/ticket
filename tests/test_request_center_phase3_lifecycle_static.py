@@ -278,6 +278,15 @@ def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshot
         assert action.count("'ola_escalation_2_at' =>") >= transition_count
 
 
+def test_supervisor_assignment_has_real_mariadb_http_coverage():
+    t12 = source("tests/test_request_center_t12_scenarios.php")
+    assert "11-supervisor-assignment" in t12
+    assert "'supervisor_assign_ticket'" in t12
+    assert "'ticket_assignment_changed'" in t12
+    workflow = source(".github/workflows/request-center-t12-scenarios.yml")
+    assert "1,2,3,4,5,6,7,8,9,10,11" in workflow
+
+
 def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
     workflow = source("modules/request-center/WorkflowService.php")
     assert "function appendMessage(" in workflow
