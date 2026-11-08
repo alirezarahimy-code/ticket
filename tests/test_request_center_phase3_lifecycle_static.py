@@ -278,6 +278,7 @@ def test_supervisor_workspace_owns_assignment_and_cancellation_review():
     assert "$workflow->transition(" in supervisor_action
     assert "'supervisor_assign_ticket'" in post_handler
     assert "request_center_can_supervise_ticket($ticket, $decisionUser)" in ticket_action
+    assert "user_can($decisionUser, 'supervisor.decide')" in ticket_action
 
 
 def test_supervisor_workspace_shows_scoped_workload_and_unassigned_pressure():
