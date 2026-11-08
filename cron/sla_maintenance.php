@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/bootstrap.php';
-if (function_exists('ticket_hot_schema_ensure')) {
-    ticket_hot_schema_ensure();
-}
-
 if (PHP_SAPI !== 'cli') {
     http_response_code(404);
     exit("Not found\n");
+}
+
+require dirname(__DIR__) . '/bootstrap.php';
+if (function_exists('ticket_hot_schema_ensure')) {
+    ticket_hot_schema_ensure();
 }
 
 $query = db()->query('SELECT t.id, t.subject, t.due_at FROM tickets t WHERE t.due_at IS NOT NULL AND t.status NOT IN ("resolved", "closed", "cancelled") AND t.sla_paused_at IS NULL AND t.due_at <= DATE_ADD(NOW(), INTERVAL 60 MINUTE) AND NOT EXISTS (SELECT 1 FROM ticket_sla_alerts a WHERE a.ticket_id = t.id AND (a.alert_type = "overdue" OR (a.alert_type = "due_soon" AND t.due_at > NOW()))) ORDER BY t.due_at LIMIT 1000');
