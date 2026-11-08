@@ -191,6 +191,8 @@ def test_supervisor_reopen_ui_requires_an_explicit_reason_and_permission():
     assert 'type="hidden" name="supervisor_note"' not in page
     assert "if (user_can($supervisor, 'supervisor.reopen'))" in page
     assert "if (user_can($supervisor, 'supervisor.decide'))" in page
+    assert "if ($ticket['status'] === 'resolved' && empty($ticket['cancel_requested_at']))" in page
+    assert "empty($ticket['cancel_requested_at']) && user_can($supervisor, 'supervisor.decide')" in page
 
 
 def test_public_management_and_bulk_replies_start_first_response_clock():
