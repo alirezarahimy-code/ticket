@@ -293,7 +293,7 @@ if (!defined('APP_ROOT')) {
                         'ola_due_at' => $ticket['ola_due_at'] ?? null,
                     ],
                 ]);
-                request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد.', (int) $supervisor['id']);
+                request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد. دلیل: ' . $note, (int) $supervisor['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_closed', 'تأیید و بستن درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
                 flash('success', 'انجام کار تأیید شد و درخواست بسته شد.');
             } else {
