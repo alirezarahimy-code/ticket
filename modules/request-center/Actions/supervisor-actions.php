@@ -43,15 +43,9 @@ if (!defined('APP_ROOT')) {
                 throw new RuntimeException('دلیل تخصیص و یادداشت داخلی هرکدام نباید بیشتر از ۵۰۰ نویسه باشند.');
             }
 
+            // The workflow service owns the single authoritative row lock and
+            // rechecks this snapshot (including routing scope) before writing.
             db()->beginTransaction();
-            $ticketLock = db()->prepare('SELECT id FROM tickets WHERE id = ? FOR UPDATE');
-            $ticketLock->execute([$ticketId]);
-            $ticket = fetch_ticket($ticketId);
-            if (!$ticket || !request_center_can_supervise_ticket($ticket, $supervisor)
-                || !in_array((string) $ticket['status'], $activeStatuses, true)
-                || !empty($ticket['cancel_requested_at'])) {
-                throw new RuntimeException('وضعیت یا مجوز تخصیص درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
-            }
             if ($note !== '' && !ticket_can_see_internal($ticket, $supervisor)) {
                 throw new RuntimeException('برای ثبت یادداشت داخلی، دسترسی مشاهدهٔ یادداشت‌های داخلی لازم است.');
             }
@@ -116,6 +110,7 @@ if (!defined('APP_ROOT')) {
                     'assigned_to' => $ticket['assigned_to'] ?? null,
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
+                    'service_group' => (string) ($ticket['service_group'] ?? ''),
                     'cancel_requested_at' => null,
                 ]
             );
