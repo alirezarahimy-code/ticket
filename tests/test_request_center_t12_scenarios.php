@@ -257,9 +257,21 @@ function t12s_compare(array $a, array $b): array
     foreach (['messages' => ['user_id', 'is_internal', 'body'], 'events' => ['event_type', 'from_status', 'to_status'],
               'notifications' => ['user_id', 'notification_type'], 'ratings' => ['requester_id', 'agent_id', 'score'],
               'activity_logs' => ['action_code']] as $key => $cols) {
-        if (count($a[$key]) !== count($b[$key])) { $diffs[] = "{$key} count differs: legacy=" . count($a[$key]) . ' feature=' . count($b[$key]); continue; }
+        $featureRows = $b[$key];
+        if ($key === 'activity_logs') {
+            // Phase 3 adds a durable system-actor audit row for automatic closure;
+            // the legacy implementation emitted the ticket event but no audit row.
+            $featureRows = array_values(array_filter($featureRows, static function (array $row) use (&$tolerated): bool {
+                if (($row['action_code'] ?? '') === 'ticket_auto_closed') {
+                    $tolerated[] = 'activity_logs: added system audit ticket_auto_closed';
+                    return false;
+                }
+                return true;
+            }));
+        }
+        if (count($a[$key]) !== count($featureRows)) { $diffs[] = "{$key} count differs: legacy=" . count($a[$key]) . ' feature=' . count($featureRows); continue; }
         foreach ($a[$key] as $i => $ra) {
-            $rb = $b[$key][$i];
+            $rb = $featureRows[$i];
             foreach ($cols as $c) {
                 $legacyValue = (string) ($ra[$c] ?? '');
                 $featureValue = (string) ($rb[$c] ?? '');
