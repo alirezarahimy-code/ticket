@@ -61,7 +61,7 @@ function request_center_post_error(Throwable $exception, string $page): never
         } catch (Throwable) {
         }
     }
-    app_error_log('Request Center POST failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+    app_error_log('Request Center POST failed [action=' . (string) ($GLOBALS['activity_post']['action'] ?? 'unknown') . ']: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
     flash('danger', $exception instanceof RuntimeException
         ? $exception->getMessage()
         : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
