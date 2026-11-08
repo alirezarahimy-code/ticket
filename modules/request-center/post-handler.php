@@ -32,6 +32,56 @@ function request_center_is_post_action(string $action): bool
  * returns. Otherwise returns false WITHOUT any side effect, so the caller can
  * forward the request elsewhere (in-process) intact.
  */
+/**
+ * Request Center-local error boundary. It preserves the shared POST failure
+ * contract while returning lifecycle failures to their independent workspace.
+ * Cross-module actions retain their original legacy destinations.
+ */
+function request_center_post_error(Throwable $exception, string $page): never
+{
+    if (isset($GLOBALS['activity_post'])) {
+        $GLOBALS['activity_post']['failed'] = true;
+    }
+    if (db()->inTransaction()) {
+        db_rollback('request-center.php');
+    }
+    if (function_exists('activity_log')) {
+        try {
+            activity_log([
+                'action_code' => 'post_action_failed',
+                'action_label' => 'عملیات POST ناموفق بود',
+                'module' => (string) ($_GET['page'] ?? 'request-center'),
+                'result' => 'failure',
+                'meta' => [
+                    'action' => (string) ($GLOBALS['activity_post']['action'] ?? 'unknown'),
+                    'page' => (string) ($_GET['page'] ?? ''),
+                    'error_type' => get_class($exception),
+                ],
+            ]);
+        } catch (Throwable) {
+        }
+    }
+    app_error_log('Request Center POST failed: ' . $exception->getMessage() . ' | ' . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+    flash('danger', $exception instanceof RuntimeException
+        ? $exception->getMessage()
+        : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
+
+    $action = (string) ($GLOBALS['activity_post']['action'] ?? '');
+    $ticketId = max(0, (int) ($_POST['ticket_id'] ?? 0));
+    $target = match ($action) {
+        'create_ticket' => 'request-center.php?page=new-ticket',
+        'bulk_update_tickets' => 'request-center.php?page=queue',
+        'supervisor_decision', 'supervisor_reopen' => 'request-center.php?page=supervisor',
+        'add_service', 'edit_service', 'delete_service', 'add_service_field',
+        'save_service_category', 'delete_service_category' => 'index.php?page=services',
+        'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_id'] ?? 0)),
+        default => $ticketId > 0
+            ? 'request-center.php?page=ticket&id=' . $ticketId
+            : 'request-center.php',
+    };
+    redirect($target);
+}
+
 function request_center_handle_post(): bool
 {
     $action = (string) ($_POST['action'] ?? '');
@@ -73,11 +123,11 @@ function request_center_handle_post(): bool
         require __DIR__ . '/Actions/dispatch.php';
     } catch (Throwable $exception) {
         // دقیقاً همان قرارداد خطای legacy: rollback + لاگ + فلش + redirect
-        post_context_on_error($exception, (string) ($_GET['page'] ?? ''));
+        request_center_post_error($exception, (string) ($_GET['page'] ?? ''));
     }
 
     // Defensive fallback: every name in the registry is handled inside the
     // dispatcher (they redirect on success). Reached only if the registry and
     // the dispatcher diverge — fail loudly through the shared error contract.
-    post_context_on_error(new RuntimeException('عملیات مرکز درخواست‌ها پیدا نشد.'), (string) ($_GET['page'] ?? ''));
+    request_center_post_error(new RuntimeException('عملیات مرکز درخواست‌ها پیدا نشد.'), (string) ($_GET['page'] ?? ''));
 }
