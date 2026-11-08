@@ -322,8 +322,11 @@ function t12s_create_ticket(string $side, array $app, array $sess, array $extra 
     $cnt = (int) $pdo->query('SELECT COUNT(*) FROM tickets')->fetchColumn();
     $mx = $pdo->query('SELECT MAX(id) FROM tickets')->fetchColumn();
     t12s_log('    [probe] tid_check: HTTP ' . $r['status'] . ' location=' . $location . ' tickets_count=' . $cnt . ' max_id=' . var_export($mx, true));
-    if (!str_starts_with($location, 'request-center.php?page=ticket&id=')) {
-        throw new RuntimeException("create_ticket for {$side} did not produce a ticket (location={$location}); app.log tail:\n" . t12s_clone_log_tail($app));
+    $expectedLocation = $side === 'legacy'
+        ? 'index.php?page=ticket&id='
+        : 'request-center.php?page=ticket&id=';
+    if (!str_starts_with($location, $expectedLocation)) {
+        throw new RuntimeException("create_ticket for {$side} did not produce its expected ticket route ({$expectedLocation}; location={$location}); app.log tail:\n" . t12s_clone_log_tail($app));
     }
     return (int) ($mx ?? (int) explode('=', $location)[count(explode('=', $location)) - 1]);
 }
