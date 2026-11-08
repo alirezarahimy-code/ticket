@@ -299,7 +299,7 @@ if (!defined('APP_ROOT')) {
                 if (!$cancelApplied) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $cancelUser['id'], 'درخواست پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $cancelUser['id'], 'درخواست پیش از ارجاع به کارشناس، به درخواست ثبت‌کننده لغو شد: ' . $reason);
                 $cancelSlaOlaAudit = [
                     'due_at' => $cancelDueAt,
                     'sla_paused_at' => $cancelPauseAt,
@@ -326,12 +326,12 @@ if (!defined('APP_ROOT')) {
                 db_commit_or_fail('ticket:cancelled_by_requester');
                 flash('success', 'درخواست لغو شد؛ سابقه و پیام‌های آن برای پیگیری حفظ می‌شوند.');
             } else {
-                $requestQuery = db()->prepare('UPDATE tickets SET cancel_requested_at = NOW(), cancel_requested_by = ?, cancel_request_reason = ?, updated_at = NOW() WHERE id = ? AND requester_id = ? AND status = ? AND cancel_requested_at IS NULL');
-                $requestQuery->execute([(int) $cancelUser['id'], $reason, $ticketId, (int) $cancelUser['id'], $oldStatus]);
-                if ($requestQuery->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $requestRecorded = $workflow->requestCancellation($ticketId, (int) $cancelUser['id'], $oldStatus, $reason);
+                if (!$requestRecorded) {
                     throw new RuntimeException('وضعیت درخواست یا درخواست لغو هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $cancelUser['id'], 'درخواست لغو درخواست ثبت شد: ' . $reason]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $cancelUser['id'], 'درخواست لغو درخواست ثبت شد: ' . $reason);
                 save_audit_required((int) $cancelUser['id'], 'ticket_cancellation_requested', $ticketId, ['reason' => $reason, 'status' => $oldStatus]);
                 log_ticket_event($ticketId, (int) $cancelUser['id'], 'cancellation_requested', $oldStatus, $oldStatus, ['reason' => $reason]);
                 request_center_notify_ticket_parties($ticketId, 'ticket_cancellation_requested', 'درخواست لغو درخواست ثبت شد', 'ثبت‌کننده درخواست لغو درخواست ' . ticket_number($ticketId) . ' را ثبت کرده است. تا تصمیم مسئول، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است.', (int) $cancelUser['id']);
@@ -396,7 +396,7 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('درخواست لغو یا وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
                 }
                 $decisionBody = 'درخواست لغو درخواست تأیید شد: ' . $requestReason . ($note !== '' ? "\nیادداشت مسئول: " . $note : '');
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $decisionBody]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $decisionUser['id'], $decisionBody);
                 $cancelSlaOlaAudit = [
                     'due_at' => $cancelDueAt,
                     'sla_paused_at' => $cancelPauseAt,
@@ -414,16 +414,16 @@ if (!defined('APP_ROOT')) {
                 db_commit_or_fail('ticket:cancel_request_approved');
                 flash('success', 'درخواست لغو تأیید شد؛ تاریخچهٔ درخواست حفظ شده است.');
             } else {
-                $rejectQuery = db()->prepare('UPDATE tickets SET cancel_requested_at = NULL, cancel_requested_by = NULL, cancel_request_reason = NULL, updated_at = NOW() WHERE id = ? AND status = ? AND cancel_requested_at = ?');
-                $rejectQuery->execute([$ticketId, $oldStatus, $requestAt]);
-                if ($rejectQuery->rowCount() < 1) {
+                $workflow = new RequestCenterWorkflowService(db());
+                $requestRejected = $workflow->rejectCancellation($ticketId, $oldStatus, $requestAt);
+                if (!$requestRejected) {
                     throw new RuntimeException('درخواست لغو هم‌زمان بررسی شده است؛ صفحه را تازه کنید.');
                 }
                 $isStaleClosed = in_array($oldStatus, ['closed', 'cancelled'], true);
                 $rejectBody = $isStaleClosed
                     ? 'درخواست لغو قدیمی پاک‌سازی شد (درخواست قبلاً ' . request_center_status_label($oldStatus) . ' شده بود): ' . $note
                     : 'درخواست لغو رد شد و رسیدگی ادامه می‌یابد: ' . $note;
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $decisionUser['id'], $rejectBody]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $decisionUser['id'], $rejectBody);
                 save_audit_required((int) $decisionUser['id'], 'ticket_cancellation_rejected', $ticketId, ['reason' => $requestReason, 'note' => $note]);
                 log_ticket_event($ticketId, (int) $decisionUser['id'], 'cancellation_rejected', $oldStatus, $oldStatus, ['reason' => $requestReason, 'note' => $note, 'requested_at' => $requestAt]);
                 request_center_notify_ticket_parties($ticketId, 'ticket_cancellation_rejected', 'درخواست لغو رد شد', $isStaleClosed ? 'درخواست لغو قدیمی درخواست ' . ticket_number($ticketId) . ' پاک‌سازی شد: ' . $note : 'مسئول رسیدگی درخواست لغو درخواست ' . ticket_number($ticketId) . ' را رد کرد. رسیدگی ادامه می‌یابد: ' . $note, (int) $decisionUser['id']);
@@ -514,7 +514,7 @@ if (!defined('APP_ROOT')) {
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
-            db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, $user['id'], 'مشکل حل نشده است (بازگشایی توسط کاربر): ' . $reason]);
+            (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $user['id'], 'مشکل حل نشده است (بازگشایی توسط کاربر): ' . $reason);
             $reopenSlaOlaAudit = [
                 'due_at' => $reopenDue,
                 'sla_paused_at' => null,
@@ -628,9 +628,8 @@ if (!defined('APP_ROOT')) {
                     throw new RuntimeException('درخواست لغو هم‌زمان ثبت شد؛ تغییر وضعیت متوقف است. بدون تغییر وضعیت دوباره ارسال کنید.');
                 }
             }
-            $query = db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, ?)');
-            $query->execute([$ticketId, $user['id'], $body, $internal]);
-            $messageId = (int) db()->lastInsertId();
+            $workflow = new RequestCenterWorkflowService(db());
+            $messageId = $workflow->appendMessage($ticketId, (int) $user['id'], $body, (bool) $internal);
             store_attachment($messageId, $_FILES['attachment'] ?? []);
             $replyUpdates = [
                 'due_at' => $replyDueAt,
@@ -853,7 +852,7 @@ if (!defined('APP_ROOT')) {
                 'sla_ola' => $slaOlaAudit,
             ]);
             if ($updateNote !== '') {
-                db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $staffUser['id'], $updateNote]);
+                (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $staffUser['id'], $updateNote);
                 log_ticket_event($ticketId, (int) $staffUser['id'], 'reply');
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_reply', 'پیام مدیریت در درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, $updateNote);
             }
