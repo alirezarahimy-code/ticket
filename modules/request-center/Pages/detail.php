@@ -19,7 +19,7 @@ if ($page === 'ticket') {
     if (!$ticket || !can_view_ticket($ticket, $user)) {
         http_response_code(404);
         render_header('درخواست پیدا نشد', $user);
-        echo '<section class="empty-state"><div class="empty-icon">؟</div><h2>درخواست پیدا نشد</h2><a class="button" href="index.php">بازگشت</a></section>';
+        echo '<section class="empty-state"><div class="empty-icon">؟</div><h2>درخواست پیدا نشد</h2><a class="button" href="request-center.php">بازگشت</a></section>';
         render_footer();
         exit;
     }
