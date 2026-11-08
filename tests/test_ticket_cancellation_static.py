@@ -57,7 +57,7 @@ check("queue=cancellation_requested" in module_queue and "queue=cancelled" in mo
 check("t.ola_response_due_at IS NOT NULL" in module_queue
       and "t.ola_escalation_2_at IS NOT NULL" in module_queue,
       "the SLA/OLA overdue queue filters and prioritizes internal response, resolution, and escalation deadlines")
-check("status NOT IN (\"resolved\", \"closed\", \"cancelled\")" in cron
+check("status NOT IN (\"resolved\", \"closed\", \"cancelled\", \"rejected\")" in cron
       and "sla_paused_at IS NULL" in cron,
       "SLA and OLA maintenance ignores cancelled tickets and pauses while waiting on the requester")
 check("'ola_policy_id' => $replyOla['policy_id']" in ticket_actions
@@ -72,7 +72,7 @@ check("$ownerCondition = $serviceGroup === 'it'" in index
       and "$fallback->execute([$serviceGroup, $departmentId, $departmentId]);" in index
       and "u.department_id = ?" in index,
       "automatic fallback stays within the requested handling unit and department")
-check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled')" in schema
+check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled','rejected')" in schema
       and "cancel_requested_at DATETIME NULL" in schema
       and "cancel_requested_by INT UNSIGNED NULL" in schema
       and "cancel_request_reason TEXT NULL" in schema,
@@ -97,10 +97,10 @@ module_ui = "\n".join((ROOT / name).read_text(encoding="utf-8") for name in (
     "modules/request-center/Actions/ticket-actions.php", "modules/request-center/Actions/bulk-actions.php"
 ))
 check("post_value('update_note')" in module_ui
-      and "پیام همراه تغییر" in module_ui
+      and "پیام و دلیل تغییر" in module_ui
       and "post_value('bulk_note')" in module_ui
       and "bulk_note" in module_ui,
-      "waiting_user/resolved transitions require a visible note, including a shared bulk note")
+      "manual and bulk lifecycle changes require a requester-visible explanation")
 check("case 'standard':" in workflow_service
       and "if ($cancelPending)" in workflow_service
       and "'cancel_requested_at' => null" in ticket_actions
