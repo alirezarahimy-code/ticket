@@ -3,6 +3,25 @@
 -- Scope: RC-owned tickets/categories/service_catalog only.
 -- Does not modify Logging migration 034 or Food migration 036.
 
+-- Ticket numbering is part of the Request Center create contract. Prepare
+-- its schema here so the module never invokes ticket_number_ensure_schema().
+CREATE TABLE IF NOT EXISTS ticket_number_seq (
+    prefix VARCHAR(20) NOT NULL PRIMARY KEY,
+    seq INT UNSIGNED NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET @rc_ticket_no_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'ticket_no');
+SET @rc_ticket_no_ddl = IF(@rc_ticket_no_exists > 0, 'SELECT 1', 'ALTER TABLE `tickets` ADD COLUMN `ticket_no` VARCHAR(40) NULL AFTER `id`');
+PREPARE rc_ticket_no_stmt FROM @rc_ticket_no_ddl;
+EXECUTE rc_ticket_no_stmt;
+DEALLOCATE PREPARE rc_ticket_no_stmt;
+
+SET @rc_ticket_no_unique = (SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tickets' AND COLUMN_NAME = 'ticket_no' AND NON_UNIQUE = 0);
+SET @rc_ticket_no_unique_ddl = IF(@rc_ticket_no_unique > 0, 'SELECT 1', 'CREATE UNIQUE INDEX `uq_tickets_no` ON `tickets` (`ticket_no`)');
+PREPARE rc_ticket_no_unique_stmt FROM @rc_ticket_no_unique_ddl;
+EXECUTE rc_ticket_no_unique_stmt;
+DEALLOCATE PREPARE rc_ticket_no_unique_stmt;
+
 -- Preserve any additional enum values already present in an installation.
 SET @rc_status_type = (
     SELECT COLUMN_TYPE FROM information_schema.COLUMNS
