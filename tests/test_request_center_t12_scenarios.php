@@ -256,6 +256,8 @@ function t12s_compare(array $a, array $b, string $scenario = ''): array
                 $vb = $tb['ts'][$j];
                 $an = $va === null || $va === ''; $bn = $vb === null || $vb === '';
                 if ($an !== $bn) {
+                    // RC starts first-response SLA on the first public status note;
+                    // the legacy path omitted this timestamp, so this exact delta is intentional.
                     if (in_array($scenario, ['07a-status-with-note', '09-bulk-resolve'], true) && $j === 3 && $an && !$bn) {
                         $tolerated[] = $scenario . ': public status-change note correctly records the first-response timestamp';
                         continue;
