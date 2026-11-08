@@ -477,7 +477,14 @@ if (!defined('APP_ROOT')) {
             $claimed = $workflow->transition($ticketId, (string) $ticket['status'], 'assigned', [
                 'assigned_to' => (int) $claimUser['id'],
                 'assigned_at' => RequestCenterSqlExpression::now(),
-            ], 'standard', ['assigned_to' => null, 'cancel_requested_at' => null]);
+            ], 'standard', [
+                'requester_id' => $ticket['requester_id'],
+                'assigned_to' => null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
+                'cancel_requested_at' => null,
+            ]);
             if (!$claimed) {
                 throw new RuntimeException('این درخواست هم‌زمان توسط شخص دیگری برداشته شد.');
             }
