@@ -54,6 +54,7 @@ $pdo->exec('CREATE TEMPORARY TABLE tickets (
     due_at DATETIME NULL,
     assigned_at DATETIME NULL,
     closed_at DATETIME NULL,
+    rejected_at DATETIME NULL,
     supervisor_id BIGINT UNSIGNED NULL,
     supervisor_approved_at DATETIME NULL,
     supervisor_note TEXT NULL,
@@ -69,8 +70,36 @@ $insert->execute([1, 'assigned', 101, 201, 'normal', null]);
 $insert->execute([2, 'in_progress', 102, 202, 'urgent', null]);
 $insert->execute([3, 'assigned', 103, 203, 'normal', '2026-11-01 10:00:00']);
 $insert->execute([4, 'assigned', 104, 204, 'normal', null]);
+$insert->execute([5, 'new', 105, null, 'normal', null]);
+$insert->execute([6, 'assigned', 106, 206, 'normal', null]);
+$pdo->exec("UPDATE tickets SET first_response_at = '2026-11-08 09:00:00' WHERE id = 6");
 
 $service = new RequestCenterWorkflowService($pdo);
+
+$pdo->beginTransaction();
+$rejected = $service->transition(5, 'new', 'rejected', [
+    'rejected_at' => RequestCenterSqlExpression::now(),
+    'supervisor_note' => 'invalid request',
+], 'supervisor_reject', [
+    'cancel_requested_at' => null,
+    'first_response_at' => null,
+    'resolved_at' => null,
+]);
+mariadb_workflow_check($rejected, 'MariaDB locks and permits explicit pre-service rejection');
+$pdo->commit();
+$row = $pdo->query('SELECT status, rejected_at FROM tickets WHERE id = 5')->fetch();
+mariadb_workflow_check($row['status'] === 'rejected' && $row['rejected_at'] !== null, 'MariaDB persists terminal rejection and timestamp');
+
+$pdo->beginTransaction();
+$lateRejection = $service->transition(6, 'assigned', 'rejected', [
+    'rejected_at' => RequestCenterSqlExpression::now(),
+], 'supervisor_reject', [
+    'cancel_requested_at' => null,
+    'first_response_at' => null,
+    'resolved_at' => null,
+]);
+$pdo->rollBack();
+mariadb_workflow_check(!$lateRejection, 'MariaDB rejects pre-service rejection after first response');
 
 // The MySQL driver branch appends FOR UPDATE; successful execution here proves
 // that the production locking query is accepted by the target database engine.
