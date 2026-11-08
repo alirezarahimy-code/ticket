@@ -270,6 +270,7 @@ def test_lifecycle_message_and_cancellation_writes_use_workflow_service():
     assert "'assigned_to' => $ticket['assigned_to'] ?? null" in ticket_action
     assert "rejectCancellation($ticketId, $oldStatus, $requestAt, [" in ticket_action
     assert "array $expectedFields = []" in workflow
+    assert "SELECT status, cancel_requested_at, requester_id, assigned_to, priority, department_id" in workflow
     assert "->appendMessage(" in ticket_action
 
 
