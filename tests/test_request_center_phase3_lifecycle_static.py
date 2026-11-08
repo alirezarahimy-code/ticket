@@ -549,3 +549,12 @@ def test_four_workspaces_expose_their_real_lifecycle_operations():
     assert "user_can($user, 'reports.view')" in admin
     assert "user_can($user, 'analytics.view')" in admin
     assert "request-center.php?page=queue&queue=" in admin
+
+def test_independent_post_runner_establishes_authenticated_user_context():
+    handler = source("modules/request-center/post-handler.php")
+    bootstrap = handler.index("require_once dirname(__DIR__, 2) . '/bootstrap.php';")
+    authenticated_user = handler.index("$user = require_login();")
+    provider_load = handler.index("// Load only the established provider contracts required by this action.")
+    dispatch = handler.index("require __DIR__ . '/Actions/dispatch.php';")
+    assert bootstrap < authenticated_user < provider_load < dispatch
+    assert "Request Center POST failed [action=" in handler
