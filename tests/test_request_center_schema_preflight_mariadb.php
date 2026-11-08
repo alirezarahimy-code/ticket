@@ -85,6 +85,18 @@ $ticket->execute([
     $departmentId, $categoryId, $serviceId, $assetId, $unitId, 'it', 'assigned',
 ]);
 $ticketId = (int) $pdo->lastInsertId();
+
+$rejectionTicket = $pdo->prepare(
+    'INSERT INTO tickets (subject, description, requester_id, assigned_to, department_id,
+                          category_id, service_id, asset_id, requesting_unit_id, service_group, status)
+     VALUES (?, ?, ?, NULL, ?, ?, ?, NULL, NULL, ?, ?)'
+);
+$rejectionTicket->execute([
+    'RC Invalid Request', 'Invalid service scope fixture', $requesterId,
+    $departmentId, $categoryId, $serviceId, 'it', 'manager_review',
+]);
+$rejectionTicketId = (int) $pdo->lastInsertId();
+
 $workflow = new RequestCenterWorkflowService($pdo);
 $pdo->beginTransaction();
 $transitioned = $workflow->transition(
@@ -106,6 +118,32 @@ $persistedState = $persisted->fetch();
 check_request_center(
     $persistedState['status'] === 'in_progress' && !empty($persistedState['first_response_at']),
     'MariaDB WorkflowService locks, validates and persists status with first-response metadata'
+);
+
+$pdo->beginTransaction();
+$rejected = $workflow->transition(
+    $rejectionTicketId,
+    'manager_review',
+    'rejected',
+    [
+        'rejected_at' => RequestCenterSqlExpression::now(),
+        'supervisor_id' => $agentId,
+        'supervisor_note' => 'درخواست خارج از دامنه خدمت است',
+    ],
+    'supervisor_reject',
+    ['cancel_requested_at' => null, 'first_response_at' => null, 'resolved_at' => null]
+);
+if (!$rejected) {
+    $pdo->rollBack();
+    throw new RuntimeException('MariaDB WorkflowService did not apply a valid supervisor rejection');
+}
+$pdo->commit();
+$rejectedState = $pdo->prepare('SELECT status, rejected_at FROM tickets WHERE id = ?');
+$rejectedState->execute([$rejectionTicketId]);
+$rejectedRow = $rejectedState->fetch();
+check_request_center(
+    $rejectedRow['status'] === 'rejected' && !empty($rejectedRow['rejected_at']),
+    'MariaDB persists rejected as a distinct terminal state with timestamp'
 );
 
 $pdo->beginTransaction();
