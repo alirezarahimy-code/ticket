@@ -95,8 +95,22 @@ workflow_check(!$service->requestCancellation(15, 99, 'assigned', 'درخواس�
 $pdo->rollBack();
 
 $pdo->beginTransaction();
-workflow_check($service->rejectCancellation(15, 'assigned', (string) $cancelSnapshot['cancel_requested_at']),
-    'cancellation rejection clears only the exact pending request');
+$pdo->exec('UPDATE tickets SET assigned_to = 999 WHERE id = 15');
+workflow_check(!$service->rejectCancellation(15, 'assigned', (string) $cancelSnapshot['cancel_requested_at'], [
+    'requester_id' => 24,
+    'assigned_to' => 34,
+    'priority' => 'normal',
+    'department_id' => null,
+]), 'cancellation rejection refuses a stale ownership snapshot');
+$pdo->rollBack();
+
+$pdo->beginTransaction();
+workflow_check($service->rejectCancellation(15, 'assigned', (string) $cancelSnapshot['cancel_requested_at'], [
+    'requester_id' => 24,
+    'assigned_to' => 34,
+    'priority' => 'normal',
+    'department_id' => null,
+]), 'cancellation rejection clears only the exact pending request under a matching snapshot');
 $pdo->commit();
 $cleared = $pdo->query('SELECT cancel_requested_at, cancel_requested_by, cancel_request_reason FROM tickets WHERE id = 15')->fetch(PDO::FETCH_ASSOC);
 workflow_check($cleared['cancel_requested_at'] === null && $cleared['cancel_requested_by'] === null
