@@ -265,6 +265,9 @@ def test_requester_cancellation_ui_and_service_share_one_status_policy():
     helpers = source("modules/request-center/lib/functions.php")
     assert "public const REQUESTER_CANCELLABLE_STATUSES" in workflow
     assert "return RequestCenterWorkflowService::REQUESTER_CANCELLABLE_STATUSES;" in helpers
+    assert "return RequestCenterWorkflowService::CANCELLATION_DECISION_STATUSES;" in helpers
+    actions = source("modules/request-center/Actions/ticket-actions.php")
+    assert "ticket_cancellation_decision_statuses()" in actions
 
 
 def test_every_lifecycle_transition_carries_requester_and_routing_scope_snapshots():
