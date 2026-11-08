@@ -854,6 +854,7 @@ if (!defined('APP_ROOT')) {
             $workflowKind = $status === $oldStatus ? 'same_state' : 'standard';
             $updated = $workflow->transition($ticketId, $oldStatus, $status, $workflowUpdates, $workflowKind, [
                 'assigned_to' => $ticket['assigned_to'] ?? null,
+                'first_response_at' => $ticket['first_response_at'] ?? null,
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
                 'cancel_requested_at' => null,
