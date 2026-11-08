@@ -51,11 +51,16 @@ if ($page === 'supervisor') {
              && empty($ticket['first_response_at']) && empty($ticket['cancel_requested_at']) && !ticket_user_is_requester($ticket, $supervisor) && user_can($supervisor, 'supervisor.decide')) {
              echo '<a class="button secondary" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a><form method="post" class="supervisor-reject-form">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="reject"><input type="text" name="supervisor_note" required maxlength="500" placeholder="دلیل رد درخواست"><button class="button danger-button" type="submit" data-confirm="درخواست با این دلیل رد و به درخواست‌کننده اطلاع داده می‌شود. ادامه می‌دهید؟">رد درخواست</button></form>';
          } else {
-             $viewLabel = in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)
+             $viewLabel = 'مشاهده';
+             if (!empty($ticket['cancel_requested_at']) && user_can($supervisor, 'supervisor.decide')
+                 && !ticket_user_is_requester($ticket, $supervisor)) {
+                 $viewLabel = 'مشاهده / تصمیم لغو';
+             } elseif (empty($ticket['cancel_requested_at'])
+                 && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)
                  && user_can($supervisor, 'ticket.edit')
-                 && !ticket_user_is_requester($ticket, $supervisor)
-                 ? 'مشاهده / تخصیص'
-                 : 'مشاهده';
+                 && !ticket_user_is_requester($ticket, $supervisor)) {
+                 $viewLabel = 'مشاهده / تخصیص';
+             }
              echo '<a class="button secondary" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '">' . $viewLabel . '</a>';
         }
         echo '</span></div>';
