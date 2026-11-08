@@ -30,8 +30,23 @@ if (!defined('APP_ROOT')) {
         if ($action === 'create_ticket') {
             // مجوز باید در handler سمت سرور هم کنترل شود؛ پنهان‌کردن فرم کافی نیست.
             $user = require_permission('ticket.create');
-            ticket_service_ensure_schema();
-            org_ticket_schema_ensure();
+            if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
+                $requestToken = trim((string) ($_POST['request_token'] ?? ''));
+                $issuedTokens = $_SESSION['rc_create_tokens'] ?? [];
+                $issuedAt = is_array($issuedTokens) ? ($issuedTokens[$requestToken] ?? null) : null;
+                if (!preg_match('/^[a-f0-9]{64}$/', $requestToken)
+                    || !is_numeric($issuedAt)
+                    || (int) $issuedAt < time() - 1800) {
+                    throw new RuntimeException('این فرم قبلاً ارسال شده یا اعتبار آن پایان یافته است؛ صفحه ثبت درخواست را تازه کنید.');
+                }
+                // Consume before any write. PHP's active session lock serializes
+                // duplicate submissions from the same authenticated session.
+                unset($_SESSION['rc_create_tokens'][$requestToken]);
+                request_center_assert_create_schema();
+            } else {
+                ticket_service_ensure_schema();
+                org_ticket_schema_ensure();
+            }
             $subject = post_value('subject');
             $description = post_value('description');
             $categoryId = (int) ($_POST['category_id'] ?? 0) ?: null;
