@@ -57,7 +57,7 @@ check("queue=cancellation_requested" in module_queue and "queue=cancelled" in mo
 check("t.ola_response_due_at IS NOT NULL" in module_queue
       and "t.ola_escalation_2_at IS NOT NULL" in module_queue,
       "the SLA/OLA overdue queue filters and prioritizes internal response, resolution, and escalation deadlines")
-check("status NOT IN (\"resolved\", \"closed\", \"cancelled\")" in cron
+check("status NOT IN (\"resolved\", \"closed\", \"cancelled\", \"rejected\")" in cron
       and "sla_paused_at IS NULL" in cron,
       "SLA and OLA maintenance ignores cancelled tickets and pauses while waiting on the requester")
 check("'ola_policy_id' => $replyOla['policy_id']" in ticket_actions
