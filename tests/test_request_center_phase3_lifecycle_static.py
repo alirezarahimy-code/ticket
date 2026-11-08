@@ -361,6 +361,17 @@ def test_lifecycle_notifications_are_idempotent_and_failure_isolated():
         assert not re.search(r"(?<!request_center_)notify_ticket_resolved\(", text)
 
 
+def test_sla_and_ola_alerts_revalidate_current_deadlines_under_ticket_lock():
+    maintenance = source("cron/sla_maintenance.php")
+    assert "FOR UPDATE" in maintenance
+    assert "due_at = ?" in maintenance
+    assert "sla_paused_at IS NULL" in maintenance
+    assert "a.due_at = t.due_at" in maintenance
+    assert "a.due_at = t.' . $column" in maintenance
+    assert "current_alert_type" in maintenance
+    assert "currentOlaQuery" in maintenance
+
+
 def test_rejection_schema_is_migration_owned_not_runtime_ddl():
     migration = source("migrations/037-request-center-lifecycle-rejection.sql")
     fresh = source("install-empty-db.sql")
