@@ -95,9 +95,10 @@ function request_center_handle_post(): bool
     }
 
     // همان لایه‌های ریشه‌ای که index.php در هر درخواست تولید به‌صورت تضمینی بارگذاری می‌کند.
-    // org: org_ticket_schema_ensure (فراخوان اول create_ticket — بدون آن، مسیر POST مستقل Fatal می‌داد)
-    // inventory: inventory_client_ip (مسیر اعتبارسنجی دارایی در خدمات IT)
-    // cd-dvd: cd_dvd_fetch_record/cd_dvd_can_* (کنترل «درخواست اصلاح CD/DVD» در create_ticket)
+    // organization: read-only org context adapter used by create_ticket.
+    // inventory: inventory_client_ip (مسیر اعتبارسنجی دارایی در خدمات IT).
+    // cd-dvd: cd_dvd_fetch_record/cd_dvd_can_* (کنترل «درخواست اصلاح CD/DVD» در create_ticket).
+    // No provider schema ensure function is called from this independent route.
     $rootDir = dirname(__DIR__, 2);
     foreach (['/organization.php', '/inventory.php', '/cd-dvd.php'] as $stackFile) {
         $stackPath = $rootDir . $stackFile;
@@ -113,13 +114,12 @@ function request_center_handle_post(): bool
     require_once dirname(__DIR__, 2) . '/lib/http-post.php';
     post_context_begin();
 
-    // همان پیش‌شرط‌های هر درخواست production: seq/autofill/loggerها آماده باشد.
-    if (function_exists('ticket_number_ensure_schema')) {
-        ticket_number_ensure_schema();
-        ticket_number_autofill();
-    }
-
     try {
+        require_once __DIR__ . '/RequestCenterRepository.php';
+        $schemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
+        if ($schemaProblems !== []) {
+            throw new RuntimeException('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست: ' . implode('؛ ', $schemaProblems));
+        }
         require __DIR__ . '/Actions/dispatch.php';
     } catch (Throwable $exception) {
         // دقیقاً همان قرارداد خطای legacy: rollback + لاگ + فلش + redirect
