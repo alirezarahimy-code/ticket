@@ -875,7 +875,7 @@ if (!defined('APP_ROOT')) {
                 'from_assignee_name' => $assigneeChanged ? (string) ($ticket['assignee_name'] ?? '') : '',
                 'to_assignee_name' => $assigneeChanged ? (string) ($assigneeRow['full_name'] ?? '') : '',
                 'assignment_source' => $assigneeChanged ? 'manager' : null,
-                'reason' => ($assigneeChanged || $priorityChanged) ? $updateNote : '',
+                'reason' => ($status !== $oldStatus || $assigneeChanged || $priorityChanged) ? $updateNote : '',
                 'first_response_recorded' => $firstResponseRecorded,
                 'sla_ola' => $slaOlaAudit,
             ]);
@@ -896,7 +896,7 @@ if (!defined('APP_ROOT')) {
                     'sla_ola' => $slaOlaAudit,
                 ]);
             } elseif ($status !== $oldStatus) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], 'status_changed', $oldStatus, $status, ['first_response_recorded' => $firstResponseRecorded, 'sla_ola' => $slaOlaAudit]);
+                log_ticket_event($ticketId, (int) $staffUser['id'], 'status_changed', $oldStatus, $status, ['reason' => $updateNote, 'first_response_recorded' => $firstResponseRecorded, 'sla_ola' => $slaOlaAudit]);
             }
             if ($status !== $oldStatus) {
                 if ($status === 'resolved') {
