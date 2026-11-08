@@ -37,6 +37,40 @@ function request_center_is_post_action(string $action): bool
  * contract while returning lifecycle failures to their independent workspace.
  * Cross-module actions retain their original legacy destinations.
  */
+function request_center_ticket_return_url(int $ticketId): string
+{
+    $user = $GLOBALS['user'] ?? [];
+    $workspace = (string) ($_POST['rc_return_workspace'] ?? '');
+    $allowed = [
+        'requester' => user_can($user, 'ticket.create') || user_can($user, 'ticket.view_own'),
+        'agent' => user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
+            || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all'),
+        'supervisor' => user_can($user, 'supervisor.panel'),
+        'admin' => user_is_primary_admin($user),
+    ];
+    if (!isset($allowed[$workspace]) || !$allowed[$workspace]) {
+        $action = (string) ($_POST['action'] ?? '');
+        $workspace = in_array($action, ['supervisor_decision', 'supervisor_reopen', 'supervisor_assign_ticket'], true)
+            && user_can($user, 'supervisor.panel') ? 'supervisor'
+            : ((user_can($user, 'ticket.edit') || user_can($user, 'queue.view')) ? 'agent' : 'requester');
+    }
+    $params = ['page' => 'ticket', 'id' => max(0, $ticketId), 'workspace' => $workspace];
+    if ($workspace === 'agent') {
+        $params['agent_view'] = (string) ($_POST['rc_return_agent_view'] ?? '') === 'team'
+            && user_can($user, 'queue.view') ? 'team' : 'mine';
+        $queue = (string) ($_POST['rc_return_queue'] ?? 'all');
+        $params['queue'] = in_array($queue, ['all','unassigned','overdue','mine','waiting_user','resolved','cancellation_requested','cancelled','rejected'], true) ? $queue : 'all';
+    }
+    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16] as $key => $maxLength) {
+        $value = trim((string) ($_POST['rc_return_' . $key] ?? ''));
+        if ($value !== '' && strlen($value) <= $maxLength) {
+            $params[$key] = $value;
+        }
+    }
+    $params['p'] = max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1)));
+    return 'request-center.php?' . http_build_query($params);
+}
+
 function request_center_post_error(Throwable $exception, string $page): never
 {
     if (isset($GLOBALS['activity_post'])) {
@@ -76,7 +110,7 @@ function request_center_post_error(Throwable $exception, string $page): never
         'save_service_category', 'delete_service_category' => 'request-center.php?page=services',
         'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_id'] ?? 0)),
         default => $ticketId > 0
-            ? 'request-center.php?page=ticket&id=' . $ticketId
+            ? request_center_ticket_return_url($ticketId)
             : 'request-center.php',
     };
     redirect($target);
