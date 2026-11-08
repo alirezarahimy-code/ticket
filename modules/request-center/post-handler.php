@@ -19,7 +19,7 @@ const REQUEST_CENTER_POST_ACTIONS = [
     'bulk_update_tickets', 'cancel_ticket', 'claim_ticket', 'create_ticket',
     'decide_ticket_cancellation', 'delete_service', 'delete_service_category',
     'edit_service', 'rate_ticket', 'reopen_ticket', 'reply', 'save_service_category',
-    'supervisor_decision', 'supervisor_reopen', 'update_ticket',
+    'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ticket',
 ];
 
 function request_center_is_post_action(string $action): bool
