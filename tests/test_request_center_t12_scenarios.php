@@ -418,6 +418,21 @@ function t12s_finish(string $name, callable $body, array &$apps, string $rootUse
     $comparison = t12s_compare($pair['snapshots']['legacy'], $pair['snapshots']['feature']);
     $diffs = $comparison['diffs'];
     $tolerated = $comparison['tolerated'];
+    if ($name === '07b-priority-by-manager') {
+        $featureTicket = $pair['snapshots']['feature']['tickets'][0] ?? [];
+        if (($featureTicket['service_group'] ?? '') !== 'it'
+            || ($featureTicket['status'] ?? '') !== 'in_progress'
+            || (int) ($featureTicket['assigned_to'] ?? 0) !== 106
+            || ($featureTicket['priority'] ?? '') !== 'normal') {
+            $diffs[] = '07b: cross-group support-manager edit changed an IT ticket that must remain untouched';
+        } else {
+            $tolerated[] = '07b: out-of-group support manager could not change the IT ticket; status, assignee and priority remained unchanged';
+        }
+        $featureActions = array_column($pair['snapshots']['feature']['activity_logs'], 'action_code');
+        if (!in_array('post_action_failed', $featureActions, true)) {
+            $diffs[] = '07b: denied cross-group write did not leave a failure audit record';
+        }
+    }
     $evidence = [
         'scenario' => $name,
         'legacy_commit' => '2176d2aa57758a0fbef426636c9943879646b165',
