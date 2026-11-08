@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       scenarios:
-        description: 'Comma-separated scenario numbers (default all: 1..10)'
+        description: 'Comma-separated scenario numbers (default all: 1..11)'
         required: false
-        default: '1,2,3,4,5,6,7,8,9,10'
+        default: '1,2,3,4,5,6,7,8,9,10,11'
   pull_request:
     paths:
       - '.github/workflows/request-center-t12-scenarios.yml'
