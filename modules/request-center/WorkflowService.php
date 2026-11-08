@@ -44,6 +44,10 @@ final class RequestCenterWorkflowService
         'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved',
     ];
 
+    private const CANCELLATION_DECISION_STATUSES = [
+        'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled',
+    ];
+
     private const CANCELLATION_PENDING_SAME_STATE_COLUMNS = [
         'due_at', 'sla_paused_at', 'sla_pause_minutes', 'first_response_at',
         'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
@@ -126,6 +130,9 @@ final class RequestCenterWorkflowService
         if ($ticketId <= 0 || $expectedRequestedAt === ''
             || !in_array($expectedStatus, self::STATUSES, true)) {
             throw new InvalidArgumentException('اطلاعات تصمیم لغو معتبر نیست.');
+        }
+        if (!in_array($expectedStatus, self::CANCELLATION_DECISION_STATUSES, true)) {
+            return false;
         }
         $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
         $lockSql = 'SELECT status, cancel_requested_at, requester_id, assigned_to, priority, department_id FROM tickets WHERE id = ? LIMIT 1';
