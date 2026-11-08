@@ -436,6 +436,7 @@ def test_sla_and_ola_alerts_revalidate_current_deadlines_under_ticket_lock():
     assert "a.due_at = t.' . $column" in maintenance
     assert "current_alert_type" in maintenance
     assert "currentOlaQuery" in maintenance
+    assert "FROM tickets t WHERE t.id = ?" in maintenance
     assert maintenance.count('"rejected"') >= 4
 
 
