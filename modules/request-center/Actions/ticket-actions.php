@@ -692,6 +692,7 @@ if (!defined('APP_ROOT')) {
             if (mb_strlen($updateNote, 'UTF-8') > 5000) {
                 throw new RuntimeException('پیام مدیریت درخواست نباید بیشتر از ۵۰۰۰ نویسه باشد.');
             }
+            $firstResponseRecorded = empty($ticket['first_response_at']) && $updateNote !== '';
             $slaMinutes = priority_sla_minutes($priority);
             [$newDueAt, $newPauseAt, $newPauseMinutes] = ticket_sla_transition($ticket, $status, $priority);
             $ola = ticket_ola_transition($ticket, $status, $priority);
@@ -704,6 +705,9 @@ if (!defined('APP_ROOT')) {
                 'resolved_at' => $status === 'resolved'
                     ? RequestCenterSqlExpression::coalesceNow()
                     : null,
+                'first_response_at' => $firstResponseRecorded
+                    ? RequestCenterSqlExpression::coalesceNow()
+                    : ($ticket['first_response_at'] ?? null),
                 'sla_minutes' => $slaMinutes,
                 'due_at' => $newDueAt,
                 'ola_policy_id' => $ola['policy_id'],
@@ -736,7 +740,7 @@ if (!defined('APP_ROOT')) {
                 'to_assignee_name' => $assigneeChanged ? (string) ($assigneeRow['full_name'] ?? '') : '',
                 'assignment_source' => $assigneeChanged ? 'manager' : null,
                 'reason' => ($status !== $oldStatus || $assigneeChanged || $priorityChanged) ? $updateNote : '',
-                'first_response_recorded' => empty($ticket['first_response_at']) && $updateNote !== '',
+                'first_response_recorded' => $firstResponseRecorded,
             ]);
             if ($updateNote !== '') {
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $staffUser['id'], $updateNote]);
@@ -753,7 +757,7 @@ if (!defined('APP_ROOT')) {
                     'reason' => $updateNote,
                 ]);
             } elseif ($status !== $oldStatus) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], 'status_changed', $oldStatus, $status, ['reason' => $updateNote]);
+                log_ticket_event($ticketId, (int) $staffUser['id'], 'status_changed', $oldStatus, $status, ['reason' => $updateNote, 'first_response_recorded' => $firstResponseRecorded]);
             }
             if ($status !== $oldStatus) {
                 if ($status === 'resolved') {
