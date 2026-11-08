@@ -567,7 +567,7 @@ tests/test_logging_system_contract.py	tests	274	13734
 tests/test_logging_ticket_event_replay.php	tests	71	3670
 tests/test_logging_trace_coverage.php	tests	49	3359
 tests/test_manual_no_print_food_ticket_static.py	tests	130	8517
-tests/test_mariadb_fresh_install.php	tests	177	9368
+tests/test_mariadb_fresh_install.php	tests	177	9386
 tests/test_migration_registry_seed.py	tests	39	1587
 tests/test_migration_retention_1_62_76.py	tests	28	1045
 tests/test_no_duplicate_php_functions.py	tests	72	3343
