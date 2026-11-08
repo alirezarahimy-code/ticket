@@ -37,7 +37,7 @@ final class RequestCenterWorkflowService
 {
     private const STATUSES = [
         'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user',
-        'pending', 'resolved', 'closed', 'cancelled',
+        'pending', 'resolved', 'closed', 'cancelled', 'rejected',
     ];
 
     private const CANCELLATION_PENDING_SAME_STATE_COLUMNS = [
@@ -49,7 +49,7 @@ final class RequestCenterWorkflowService
     private const UPDATE_COLUMNS = [
         'assigned_to', 'assigned_at', 'due_at', 'sla_minutes', 'sla_paused_at',
         'sla_pause_minutes', 'first_response_at', 'ola_policy_id', 'ola_response_due_at', 'ola_due_at',
-        'ola_escalation_1_at', 'ola_escalation_2_at', 'resolved_at', 'closed_at',
+        'ola_escalation_1_at', 'ola_escalation_2_at', 'resolved_at', 'closed_at', 'rejected_at',
         'supervisor_id', 'supervisor_approved_at', 'supervisor_note',
         'cancel_requested_at', 'cancel_requested_by', 'cancel_request_reason',
         'priority', 'department_id', 'service_group', 'support_location',
@@ -74,6 +74,7 @@ final class RequestCenterWorkflowService
             'resolved' => ['in_progress', 'assigned'],
             'closed' => [],
             'cancelled' => [],
+            'rejected' => [],
         ];
         return $map[$from] ?? [];
     }
@@ -86,6 +87,7 @@ final class RequestCenterWorkflowService
      * - requester_cancel: unassigned new/manager_review -> cancelled.
      * - cancellation_approved: an active cancellation request -> cancelled.
      * - supervisor_close: resolved -> closed.
+     * - supervisor_reject: pre-service active request -> rejected.
      * - supervisor_reopen: closed -> in_progress or manager_review.
      * - auto_close: resolved -> closed, only when no cancellation is pending.
      *
@@ -228,6 +230,14 @@ final class RequestCenterWorkflowService
             case 'same_state':
                 if ($from !== $to) {
                     throw new RuntimeException('فرمان بدون تغییر وضعیت نباید وضعیت مقصد متفاوت داشته باشد.');
+                }
+                return;
+
+            case 'supervisor_reject':
+                if (!in_array($from, ['new', 'manager_review', 'assigned'], true)
+                    || $to !== 'rejected' || $cancelPending
+                    || !empty($current['first_response_at']) || !empty($current['resolved_at'])) {
+                    throw new RuntimeException('رد درخواست فقط پیش از شروع رسیدگی و با تصمیم مقام مجاز امکان‌پذیر است.');
                 }
                 return;
 
