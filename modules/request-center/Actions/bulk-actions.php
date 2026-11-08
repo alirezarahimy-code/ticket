@@ -128,7 +128,7 @@ if (!defined('APP_ROOT')) {
                     'ola_escalation_2_at' => $bulkOla['escalation_2_at'],
                 ];
                 if ($bulkNote !== '') {
-                    db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $queueUser['id'], $bulkNote]);
+                    (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $queueUser['id'], $bulkNote);
                     log_ticket_event($ticketId, (int) $queueUser['id'], 'reply', $bulkOld, $status, [
                         'is_internal' => false,
                         'sla_ola' => $bulkSlaOlaAudit,
