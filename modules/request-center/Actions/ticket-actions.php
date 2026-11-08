@@ -490,6 +490,9 @@ if (!defined('APP_ROOT')) {
             if ($reason === '') {
                 throw new RuntimeException('توضیح دهید چه چیزی هنوز برطرف نشده است.');
             }
+            if (mb_strlen($reason, 'UTF-8') > 1000) {
+                throw new RuntimeException('دلیل بازگشایی نباید بیشتر از ۱۰۰۰ نویسه باشد.');
+            }
             $reopenStatus = !empty($ticket['assigned_to']) ? 'in_progress' : 'manager_review';
             $reopenDue = business_due_at(priority_sla_minutes((string) $ticket['priority']))->format('Y-m-d H:i:s');
             $reopenOla = ola_deadlines((int) ($ticket['department_id'] ?? 0), (string) $ticket['priority'], (new DateTimeImmutable('now', new DateTimeZone((string) cfg('app.timezone', 'Asia/Tehran'))))->format('Y-m-d H:i:s'));
