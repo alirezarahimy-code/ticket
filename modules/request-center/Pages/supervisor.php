@@ -32,14 +32,21 @@ if ($page === 'supervisor') {
     foreach ($supervisorRows as $ticket) {
         echo '<div class="table-row supervisor-row"><span class="ticket-title"><b>' . e(ticket_number((int) $ticket['id'])) . '</b><a href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '"><strong>' . e($ticket['subject']) . '</strong></a><small>' . e($ticket['requester_name']) . '</small>' . (!empty($ticket['cancel_requested_at']) ? '<small class="warning-text">درخواست لغو در انتظار بررسی</small>' : '') . '</span><span>' . e($ticket['department_name'] ?: 'بدون واحد') . '</span><span>' . e($ticket['assignee_name'] ?: 'بدون کارشناس') . '</span><span><em class="status ' . e($ticket['status']) . '">' . e(request_center_status_label((string) $ticket['status'])) . '</em></span><span class="supervisor-actions">';
         if ($ticket['status'] === 'resolved') {
-            if (ticket_rating_is_current($ticket)) {
-                echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="approve"><button class="button" type="submit">تأیید و بستن</button></form>';
+            if (user_can($supervisor, 'supervisor.decide')) {
+                if (ticket_rating_is_current($ticket)) {
+                    echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="approve"><button class="button" type="submit">تأیید و بستن</button></form>';
+                } else {
+                    echo '<small class="muted">در انتظار امتیاز کاربر</small>';
+                }
+                echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="rework"><input type="text" name="supervisor_note" required maxlength="500" placeholder="دلیل برگشت برای اصلاح"><button class="button secondary" type="submit">برگشت برای اصلاح</button></form>';
             } else {
-                echo '<small class="muted">در انتظار امتیاز کاربر</small>';
+                echo '<a class="button secondary" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a>';
             }
-            echo '<form method="post">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="rework"><input type="text" name="supervisor_note" required maxlength="500" placeholder="دلیل برگشت برای اصلاح"><button class="button secondary" type="submit">برگشت برای اصلاح</button></form>';
          } elseif ($ticket['status'] === 'closed') {
-             echo '<a class="button secondary" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a><form method="post" class="supervisor-reopen-form">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_reopen"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label class="sr-only" for="supervisor-reopen-note-' . (int) $ticket['id'] . '">دلیل بازگشایی رسمی</label><input id="supervisor-reopen-note-' . (int) $ticket['id'] . '" type="text" name="supervisor_note" required maxlength="1000" placeholder="دلیل بازگشایی رسمی"><button class="button secondary" type="submit">بازگشایی رسمی</button></form>';
+             echo '<a class="button secondary" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a>';
+             if (user_can($supervisor, 'supervisor.reopen')) {
+                 echo '<form method="post" class="supervisor-reopen-form">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_reopen"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label class="sr-only" for="supervisor-reopen-note-' . (int) $ticket['id'] . '">دلیل بازگشایی رسمی</label><input id="supervisor-reopen-note-' . (int) $ticket['id'] . '" type="text" name="supervisor_note" required maxlength="1000" placeholder="دلیل بازگشایی رسمی"><button class="button secondary" type="submit">بازگشایی رسمی</button></form>';
+             }
          } elseif (in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned'], true)
              && empty($ticket['first_response_at']) && user_can($supervisor, 'supervisor.decide')) {
              echo '<a class="button secondary" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '">مشاهده</a><form method="post" class="supervisor-reject-form">' . csrf_field() . '<input type="hidden" name="action" value="supervisor_decision"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><input type="hidden" name="decision" value="reject"><input type="text" name="supervisor_note" required maxlength="500" placeholder="دلیل رد درخواست"><button class="button danger-button" type="submit" data-confirm="درخواست با این دلیل رد و به درخواست‌کننده اطلاع داده می‌شود. ادامه می‌دهید؟">رد درخواست</button></form>';
