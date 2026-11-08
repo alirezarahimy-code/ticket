@@ -3,6 +3,15 @@ declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
 
+// Keep legacy attachment URLs, but execute the read through the RC-owned
+// endpoint before loading unrelated legacy modules or schema setup.
+if (strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET'
+    && (string) ($_GET['action'] ?? '') === 'download_attachment') {
+    $query = $_GET;
+    header('Location: request-center.php?action=download_attachment&id=' . max(0, (int) ($query['id'] ?? 0)), true, 302);
+    exit;
+}
+
 // Early compatibility bridge: serve Request Center lifecycle GETs from its
 // independent entry before loading legacy modules or running their schema setup.
 $legacyRequestCenterPage = is_string($_GET['page'] ?? null) ? (string) $_GET['page'] : '';
