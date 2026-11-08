@@ -263,6 +263,13 @@ def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     assert "رد شده است" in detail or "رد شده" in detail
 
 
+def test_assignment_and_priority_changes_notify_ticket_parties():
+    action = source("modules/request-center/Actions/ticket-actions.php")
+    assert "$status !== $oldStatus || $assigneeChanged || (string) $ticket['priority'] !== $priority" in action
+    assert "مسئول رسیدگی تغییر کرد" in action
+    assert "اولویت به «' . priority_label($priority)" in action
+
+
 def test_lifecycle_notifications_are_idempotent_and_failure_isolated():
     helpers = source("modules/request-center/lib/functions.php")
     assert "function request_center_notify_user" in helpers
