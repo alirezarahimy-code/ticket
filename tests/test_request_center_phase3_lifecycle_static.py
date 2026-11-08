@@ -263,6 +263,30 @@ def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     assert "رد شده است" in detail or "رد شده" in detail
 
 
+def test_supervisor_workspace_owns_assignment_and_cancellation_review():
+    helpers = source("modules/request-center/lib/functions.php")
+    detail = source("modules/request-center/Pages/detail.php")
+    supervisor_action = source("modules/request-center/Actions/supervisor-actions.php")
+    ticket_action = source("modules/request-center/Actions/ticket-actions.php")
+    post_handler = source("modules/request-center/post-handler.php")
+    assert "function request_center_can_supervise_ticket(" in helpers
+    assert "user_can($user, 'supervisor.panel')" in helpers
+    assert "user_can($user, 'ticket.edit')" in helpers
+    assert "value=\"supervisor_assign_ticket\"" in detail
+    assert "if ($action === 'supervisor_assign_ticket')" in supervisor_action
+    assert "ticket_assignee_is_eligible($ticket, $assignee, 'ticket_notification_user_can')" in supervisor_action
+    assert "$workflow->transition(" in supervisor_action
+    assert "'supervisor_assign_ticket'" in post_handler
+    assert "request_center_can_supervise_ticket($ticket, $decisionUser)" in ticket_action
+
+
+def test_supervisor_decisions_cannot_be_made_on_own_requests():
+    action = source("modules/request-center/Actions/supervisor-actions.php")
+    assert "ticket_user_is_requester($ticket, $supervisor)" in action
+    page = source("modules/request-center/Pages/supervisor.php")
+    assert "!ticket_user_is_requester($ticket, $supervisor)" in page
+
+
 def test_assignment_and_priority_changes_notify_ticket_parties():
     action = source("modules/request-center/Actions/ticket-actions.php")
     assert "$status !== $oldStatus || $assigneeChanged || (string) $ticket['priority'] !== $priority" in action
