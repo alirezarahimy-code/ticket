@@ -117,6 +117,16 @@ def test_internal_note_content_is_not_copied_to_asset_history_or_requester_notif
     assert "if (!$internal)" in action[asset_history - 250:asset_history + 100]
 
 
+def test_sla_ola_alert_claims_are_audited_before_commit():
+    cron = source("cron/sla_maintenance.php")
+    assert cron.count("activity_log([") >= 2
+    assert "'action_code' => 'ticket_sla_alert'" in cron
+    assert "'action_code' => 'ticket_ola_alert'" in cron
+    assert cron.count("Required audit persistence failed") >= 2
+    assert "INSERT IGNORE INTO ticket_sla_alerts" in cron
+    assert "INSERT IGNORE INTO ticket_ola_alerts" in cron
+
+
 def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
     cron = source("cron/ticket_auto_close.php")
     assert "activity_log([" in cron
