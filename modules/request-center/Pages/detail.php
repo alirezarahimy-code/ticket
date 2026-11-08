@@ -61,7 +61,7 @@ if ($page === 'ticket') {
         && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)
         && !$cancelHasRequest;
     $agents = [];
-    if (($canAssignTicket && !$cancelHasRequest && !in_array((string) $ticket['status'], ['closed', 'cancelled'], true)) || $canSupervisorAssign) {
+    if (($canAssignTicket && !$cancelHasRequest && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)) || $canSupervisorAssign) {
          if ($canAssignTicket || $canSupervisorAssign) {
               $ticketGroupForList = (string) ($ticket['service_group'] ?? 'it');
               $agentSql = 'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (((u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR (u.role IN ("agent", "manager") AND hu.code = ?)) AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))';
