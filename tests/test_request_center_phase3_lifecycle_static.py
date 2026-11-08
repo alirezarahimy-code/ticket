@@ -124,6 +124,12 @@ def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch(
     assert "$bulkSkipped++;" in bulk[guard:transition]
 
 
+def test_ticket_maintenance_jobs_reject_web_before_schema_setup():
+    for path in ("cron/ticket_auto_close.php", "cron/sla_maintenance.php"):
+        cron = source(path)
+        assert cron.index("if (PHP_SAPI !== 'cli')") < cron.index("ticket_hot_schema_ensure()")
+
+
 def test_rejection_is_distinct_terminal_state_with_audited_supervisor_path():
     workflow = source("modules/request-center/WorkflowService.php")
     action = source("modules/request-center/Actions/supervisor-actions.php")
