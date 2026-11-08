@@ -103,6 +103,8 @@ def test_sla_ola_history_is_visible_to_staff_without_exposing_internal_fields_to
     requester_keys = detail[detail.index("$safeKeys = ['reason'"):detail.index("if ($staff) $safeKeys = array_merge")]
     assert "'ola_response_due_at'" not in requester_keys
     assert "'sla_ola'" not in requester_keys
+    assert 'if (!$staff)' in detail
+    assert "e.event_type <> 'internal_note'" in detail
 
 
 def test_internal_note_content_is_not_copied_to_asset_history_or_requester_notifications():
