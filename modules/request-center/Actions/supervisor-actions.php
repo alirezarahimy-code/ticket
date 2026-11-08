@@ -226,6 +226,11 @@ if (!defined('APP_ROOT')) {
                     'supervisor_id' => (int) $supervisor['id'],
                     'supervisor_note' => $note,
                 ], 'supervisor_reject', [
+                    'requester_id' => $ticket['requester_id'],
+                    'assigned_to' => $ticket['assigned_to'] ?? null,
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                    'service_group' => $ticket['service_group'] ?? null,
                     'cancel_requested_at' => null,
                     'first_response_at' => null,
                     'resolved_at' => null,
@@ -258,7 +263,14 @@ if (!defined('APP_ROOT')) {
                     'supervisor_id' => (int) $supervisor['id'],
                     'supervisor_approved_at' => RequestCenterSqlExpression::now(),
                     'supervisor_note' => $note,
-                ], 'supervisor_close', ['cancel_requested_at' => null]);
+                ], 'supervisor_close', [
+                    'requester_id' => $ticket['requester_id'],
+                    'assigned_to' => $ticket['assigned_to'] ?? null,
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                    'service_group' => $ticket['service_group'] ?? null,
+                    'cancel_requested_at' => null,
+                ]);
                 if (!$closed) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
@@ -308,7 +320,14 @@ if (!defined('APP_ROOT')) {
                     'sla_pause_minutes' => 0,
                     'supervisor_id' => (int) $supervisor['id'],
                     'supervisor_note' => $note,
-                ], 'supervisor_rework', ['cancel_requested_at' => null]);
+                ], 'supervisor_rework', [
+                    'requester_id' => $ticket['requester_id'],
+                    'assigned_to' => $ticket['assigned_to'] ?? null,
+                    'priority' => $ticket['priority'],
+                    'department_id' => $ticket['department_id'] ?? null,
+                    'service_group' => $ticket['service_group'] ?? null,
+                    'cancel_requested_at' => null,
+                ]);
                 if (!$reworked) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
                 }
