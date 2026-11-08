@@ -99,9 +99,24 @@ if ($action === 'update_ola_policy') {
     $pdo = db();
     $pdo->beginTransaction();
     try {
-        $lock = $pdo->prepare('SELECT id, name, department_id, priority, response_minutes, resolution_minutes, escalation_1_minutes, escalation_2_minutes, is_active FROM ola_policies WHERE id = ? FOR UPDATE');
-        $lock->execute([$policyId]);
-        $before = $lock->fetch(PDO::FETCH_ASSOC);
+        // Serialize policy edits before checking the active (department, priority)
+        // uniqueness rule. Locking only the edited row allows two administrators
+        // editing different rows to activate duplicate policies concurrently.
+        // The policy catalogue is small and this action is infrequent, so a
+        // deterministic row lock is preferable to a schema/index change.
+        $lock = $pdo->query(
+            'SELECT id, name, department_id, priority, response_minutes, resolution_minutes, '
+            . 'escalation_1_minutes, escalation_2_minutes, is_active '
+            . 'FROM ola_policies ORDER BY id FOR UPDATE'
+        );
+        $lockedPolicies = $lock->fetchAll(PDO::FETCH_ASSOC);
+        $before = null;
+        foreach ($lockedPolicies as $lockedPolicy) {
+            if ((int) $lockedPolicy['id'] === $policyId) {
+                $before = $lockedPolicy;
+                break;
+            }
+        }
         if (!$before) {
             throw new RuntimeException('سیاست OLA موردنظر پیدا نشد.');
         }
