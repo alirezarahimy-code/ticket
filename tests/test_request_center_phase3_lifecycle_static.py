@@ -237,7 +237,7 @@ def test_supervisor_reopen_ui_requires_an_explicit_reason_and_permission():
 def test_attachment_files_follow_database_transaction_outcome():
     helpers = source("modules/request-center/lib/functions.php")
     start = helpers.index("function store_attachment(")
-    end = helpers.index("\ndef ", start + 10)
+    end = helpers.index("\nfunction ", start + 10)
     attachment = helpers[start:end]
     assert "register_shutdown_function" in attachment
     assert "$connection->inTransaction()" in attachment
