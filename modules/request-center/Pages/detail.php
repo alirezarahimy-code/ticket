@@ -53,7 +53,7 @@ if ($page === 'ticket') {
         && in_array((string) $ticket['status'], ['closed', 'cancelled'], true);
     $cancelRequestPending = $cancelDecidable || $cancelStaleClosed;
     $canDecideCancellation = $cancelRequestPending
-        && ($handlerLevel !== '' || request_center_can_supervise_ticket($ticket, $user))
+        && ($handlerLevel !== '' || (request_center_can_supervise_ticket($ticket, $user) && user_can($user, 'supervisor.decide')))
         && (int) ($ticket['cancel_requested_by'] ?? 0) !== (int) $user['id'];
     $canAssignTicket = $handlerLevel === 'manager';
     $canSupervisorAssign = $handlerLevel === ''
