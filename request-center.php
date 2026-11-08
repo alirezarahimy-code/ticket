@@ -39,24 +39,18 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     require_once __DIR__ . '/modules/request-center/WorkflowService.php';
     require_once __DIR__ . '/modules/request-center/lib/functions.php';
 
-    // These existing providers are consumed through their current public
-    // functions; no provider code or configuration is modified by Request Center.
-    foreach (['/organization.php', '/inventory.php', '/cd-dvd.php'] as $rcProvider) {
-        $rcProviderPath = __DIR__ . $rcProvider;
-        if (is_file($rcProviderPath)) {
-            require_once $rcProviderPath;
+    $user = require_login();
+
+    // Only the creation form consumes these existing provider contracts.
+    // Other lifecycle workspaces do not load unrelated modules.
+    if ($rcPage === 'new-ticket') {
+        foreach (['/organization.php', '/inventory.php', '/cd-dvd.php'] as $rcProvider) {
+            $rcProviderPath = __DIR__ . $rcProvider;
+            if (is_file($rcProviderPath)) {
+                require_once $rcProviderPath;
+            }
         }
     }
-
-    if (function_exists('ticket_number_ensure_schema')) {
-        ticket_number_ensure_schema();
-        ticket_number_autofill();
-    }
-    if (function_exists('role_permissions_seed')) {
-        role_permissions_seed();
-    }
-
-    $user = require_login();
     if ($rcPage === '' && (int) ($_GET['id'] ?? 0) > 0) {
         $rcPage = 'ticket';
     }
