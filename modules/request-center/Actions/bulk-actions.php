@@ -114,7 +114,7 @@ if (!defined('APP_ROOT')) {
                     continue;
                 }
                 if ($bulkNote !== '') {
-                    db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $queueUser['id'], $bulkNote]);
+                    (new RequestCenterWorkflowService(db()))->appendMessage($ticketId, (int) $queueUser['id'], $bulkNote);
                     log_ticket_event($ticketId, (int) $queueUser['id'], 'reply');
                 }
                 log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status);
