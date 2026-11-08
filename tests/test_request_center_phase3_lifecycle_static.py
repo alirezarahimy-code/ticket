@@ -129,6 +129,9 @@ def test_rejected_state_is_preflighted_and_excluded_from_terminal_workloads():
     assert "COLUMN_TYPE" in repository
     assert "Migration 037" in repository
     assert "str_contains($ticketStatusType, \"'rejected'\")" in repository
+    assert "'notifications' => 'idempotency_key'" in repository
+    assert "'ticket_events' => 'event_id'" in repository
+    assert "'activity_logs' => 'event_id'" in repository
     sla_cron = source("cron/sla_maintenance.php")
     assert sla_cron.count('"resolved", "closed", "cancelled", "rejected"') >= 2
     sla_lib = source("lib/tickets-sla.php")
