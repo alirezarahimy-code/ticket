@@ -38,7 +38,7 @@ if ($page === 'analytics') {
     };
     render_header('تحلیل و چارت‌ها', $analyticsUser);
      echo '<section class="page-heading"><div><span class="eyebrow">نمای تحلیلی مدیریتی</span><h1>تحلیل عملکرد سامانه</h1><p>توزیع وضعیت، اولویت، معاونت و رضایت از کارشناسان هر واحد.</p></div><a class="button secondary" href="index.php?page=reports">گزارش فیلترپذیر</a></section><section class="charts-grid">';
-    echo $chart('توزیع وضعیت درخواست‌ها', $statusRows, static fn (array $row): string => status_label((string) $row['status']), static fn (array $row): float => (float) $row['total']);
+    echo $chart('توزیع وضعیت درخواست‌ها', $statusRows, static fn (array $row): string => request_center_status_label((string) $row['status']), static fn (array $row): float => (float) $row['total']);
     echo $chart('توزیع اولویت‌ها', $priorityRows, static fn (array $row): string => priority_label((string) $row['priority']), static fn (array $row): float => (float) $row['total']);
     echo $chart('درخواست بر اساس معاونت', $departmentRows, static fn (array $row): string => (string) $row['label'], static fn (array $row): float => (float) $row['total']);
     echo $chart('میانگین رضایت کارشناسان', $agentRows, static fn (array $row): string => (string) $row['label'] . ' (' . (int) $row['ratings'] . ' نظر)', static fn (array $row): float => (float) $row['average'], ' از ۵');
