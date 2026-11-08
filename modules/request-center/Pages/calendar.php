@@ -98,6 +98,23 @@ $calendarLink = static function (string $jmonth, string $view, string $kind) use
     }
     return 'request-center.php?' . $qs;
 };
+$calendarTicketUrl = static function (int $ticketId) use ($workspace, $agentView, $jmonthParam, $view, $kindFilter): string {
+    $params = [
+        'page' => 'ticket',
+        'id' => max(0, $ticketId),
+        'workspace' => $workspace,
+        'calendar' => 1,
+        'jmonth' => $jmonthParam,
+        'view' => $view,
+    ];
+    if ($workspace === 'agent') {
+        $params['agent_view'] = $agentView;
+    }
+    if ($kindFilter !== '') {
+        $params['kind'] = $kindFilter;
+    }
+    return 'request-center.php?' . http_build_query($params);
+};
 $monthNavLink = static fn(string $jmonth): string => $calendarLink($jmonth, $view, $kindFilter);
 $viewLink = static fn(string $v): string => $calendarLink($jmonthParam, $v, $kindFilter);
 $kindLink = static fn(string $k): string => $calendarLink($jmonthParam, $view, $k);
@@ -412,12 +429,12 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                 <?php if ($holidayTitle !== null): ?><span class="rc-hol-tag"><?= $escape($holidayTitle) ?></span><?php endif; ?>
                 <?php foreach (array_slice($cellEvents, 0, 3) as $event): ?>
                   <?php if ($event['type'] === 'deadline'): ?>
-                    <a class="rc-event sla<?= $event['overdue'] ? ' overdue' : '' ?><?= $event['paused'] ? ' paused' : '' ?>" href="request-center.php?page=ticket&amp;id=<?= (int) $event['id'] ?>" title="<?= $escape($event['label']) ?> · <?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['id'])) ?> — <?= $escape($event['subject']) ?>">
+                    <a class="rc-event sla<?= $event['overdue'] ? ' overdue' : '' ?><?= $event['paused'] ? ' paused' : '' ?>" href="<?= $escape($calendarTicketUrl((int) $event['id'])) ?>" title="<?= $escape($event['label']) ?> · <?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['id'])) ?> — <?= $escape($event['subject']) ?>">
                       <b><?= $escape($event['time']) ?> · <?= $escape($event['label']) ?></b>
                       <?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['id'])) ?>
                     </a>
                   <?php else: ?>
-                    <a class="rc-event <?= $escape((string) $event['kind']) ?><?= $event['status'] === 'done' ? ' done' : ($event['status'] === 'cancelled' ? ' paused' : '') ?>" href="request-center.php?page=ticket&amp;id=<?= (int) $event['ticket_id'] ?>" title="<?= $escape($event['label']) ?> · <?= $escape($event['time']) ?> تا <?= $escape((string) $event['end_time']) ?> — <?= $escape($event['subject']) ?><?= $rcElevated && $event['assignee'] !== '' ? ' · ' . $escape($event['assignee']) : '' ?>">
+                    <a class="rc-event <?= $escape((string) $event['kind']) ?><?= $event['status'] === 'done' ? ' done' : ($event['status'] === 'cancelled' ? ' paused' : '') ?>" href="<?= $escape($calendarTicketUrl((int) $event['ticket_id'])) ?>" title="<?= $escape($event['label']) ?> · <?= $escape($event['time']) ?> تا <?= $escape((string) $event['end_time']) ?> — <?= $escape($event['subject']) ?><?= $rcElevated && $event['assignee'] !== '' ? ' · ' . $escape($event['assignee']) : '' ?>">
                       <b><?= $escape($event['time']) ?> · <?= $escape($event['label']) ?></b>
                       <?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('درخواست #' . $event['ticket_id'])) ?>
                     </a>
@@ -457,7 +474,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
             </div>
             <?php foreach ($dayEvents as $event): ?>
               <?php if ($event['type'] === 'deadline'): ?>
-                <a class="rc-event sla<?= $event['overdue'] ? ' overdue' : '' ?><?= $event['paused'] ? ' paused' : '' ?>" style="display:flex;justify-content:space-between;gap:10px;font-size:12px;-webkit-line-clamp:1;padding:7px 10px" href="request-center.php?page=ticket&amp;id=<?= (int) $event['id'] ?>">
+                <a class="rc-event sla<?= $event['overdue'] ? ' overdue' : '' ?><?= $event['paused'] ? ' paused' : '' ?>" style="display:flex;justify-content:space-between;gap:10px;font-size:12px;-webkit-line-clamp:1;padding:7px 10px" href="<?= $escape($calendarTicketUrl((int) $event['id'])) ?>">
                   <span><b><?= $escape($event['time']) ?> · <?= $escape($event['label']) ?></b><br><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['id'])) ?> — <?= $escape($event['subject']) ?></span>
                   <span style="color:var(--rc-muted);font-size:11px;white-space:nowrap"><?= $escape($event['assignee'] ?: 'بدون مسئول') ?></span>
                 </a>
@@ -465,7 +482,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                 <div class="rc-slot-card" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
                   <div style="min-width:0">
                     <b style="font-size:12.5px"><?= $escape($event['time']) ?> تا <?= $escape((string) $event['end_time']) ?> · <?= $escape($event['label']) ?></b><br>
-                    <a href="request-center.php?page=ticket&amp;id=<?= (int) $event['ticket_id'] ?>" style="color:var(--rc-brand-strong);font-weight:700"><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('درخواست #' . $event['ticket_id'])) ?></a>
+                    <a href="<?= $escape($calendarTicketUrl((int) $event['ticket_id'])) ?>" style="color:var(--rc-brand-strong);font-weight:700"><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('درخواست #' . $event['ticket_id'])) ?></a>
                     <span style="color:var(--rc-muted);font-size:11px"> · <?= $escape($event['subject']) ?></span>
                     <?php if ($rcElevated && $event['assignee'] !== ''): ?><span style="color:var(--rc-muted);font-size:11px"> · <?= $escape($event['assignee']) ?></span><?php endif; ?>
                     <?php if ($event['status'] === 'done'): ?><span style="color:var(--rc-green);font-size:11px;font-weight:700"> · انجام‌شده</span><?php endif; ?>
@@ -536,10 +553,10 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                     <time><?= $escape($event['time']) ?><?= isset($event['end_time']) ? ' – ' . $escape((string) $event['end_time']) : '' ?></time>
                     <div class="rc-slot-card">
                       <?php if ($event['type'] === 'deadline'): ?>
-                        <div style="font-size:12px"><strong><?= $escape($event['label']) ?></strong> — <a style="color:var(--rc-brand-strong);font-weight:700" href="request-center.php?page=ticket&amp;id=<?= (int) $event['id'] ?>"><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['id'])) ?></a></div>
+                        <div style="font-size:12px"><strong><?= $escape($event['label']) ?></strong> — <a style="color:var(--rc-brand-strong);font-weight:700" href="<?= $escape($calendarTicketUrl((int) $event['id'])) ?>"><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['id'])) ?></a></div>
                         <div style="font-size:11px;color:var(--rc-muted)"><?= $escape($event['subject']) ?> · <?= $escape($event['assignee'] ?: 'بدون مسئول') ?></div>
                       <?php else: ?>
-                        <div style="font-size:12px"><strong><?= $escape($event['label']) ?></strong> — <a style="color:var(--rc-brand-strong);font-weight:700" href="request-center.php?page=ticket&amp;id=<?= (int) $event['ticket_id'] ?>"><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['ticket_id'])) ?></a></div>
+                        <div style="font-size:12px"><strong><?= $escape($event['label']) ?></strong> — <a style="color:var(--rc-brand-strong);font-weight:700" href="<?= $escape($calendarTicketUrl((int) $event['ticket_id'])) ?>"><?= $escape($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . $event['ticket_id'])) ?></a></div>
                         <div style="font-size:11px;color:var(--rc-muted)"><?= $escape($event['subject']) ?></div>
                         <?php if ($event['status'] === 'planned'): ?>
                           <div class="rc-slot-actions">
@@ -581,7 +598,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
               <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;border:1px solid var(--rc-line-soft);border-radius:var(--rc-radius-sm);padding:7px 9px;margin:6px 0">
                 <div style="min-width:0">
                   <div style="font-size:12px;font-weight:800"><?= $escape($faDigits(jalali_date($upStart, false))) ?> · <?= $escape($faDigits(substr($upStart, 11, 5))) ?> تا <?= $escape($faDigits(substr($upEnd, 11, 5))) ?></div>
-                  <div style="font-size:11px;color:var(--rc-muted)"><?= $escape($upKind) ?> · <a style="color:var(--rc-brand-strong);font-weight:700" href="request-center.php?page=ticket&amp;id=<?= (int) $upcoming['ticket_id'] ?>"><?= $escape($upcoming['ticket_no'] !== '' ? (string) $upcoming['ticket_no'] : ('#' . (int) $upcoming['ticket_id'])) ?></a><?php if ($rcElevated && !empty($upcoming['assignee_name'])): ?> · <?= $escape((string) $upcoming['assignee_name']) ?><?php endif; ?></div>
+                  <div style="font-size:11px;color:var(--rc-muted)"><?= $escape($upKind) ?> · <a style="color:var(--rc-brand-strong);font-weight:700" href="<?= $escape($calendarTicketUrl((int) $upcoming['ticket_id'])) ?>"><?= $escape($upcoming['ticket_no'] !== '' ? (string) $upcoming['ticket_no'] : ('#' . (int) $upcoming['ticket_id'])) ?></a><?php if ($rcElevated && !empty($upcoming['assignee_name'])): ?> · <?= $escape((string) $upcoming['assignee_name']) ?><?php endif; ?></div>
                 </div>
                 <div class="rc-slot-actions" style="margin:0;flex:0 0 auto">
                   <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn" type="submit" title="ثبت اتمام">انجام شد</button></form>
