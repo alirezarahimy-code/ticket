@@ -104,7 +104,13 @@ def test_sla_ola_history_is_visible_to_staff_without_exposing_internal_fields_to
     assert "'ola_response_due_at'" not in requester_keys
     assert "'sla_ola'" not in requester_keys
     assert 'if (!$canSeeInternal)' in detail
-    assert "e.event_type <> 'internal_note'" in detail
+    assert "e.event_type NOT IN ('internal_note', 'sla_alert', 'ola_alert')" in detail
+    assert "'sla_alert' => 'هشدار SLA ثبت شد'" in detail
+    assert "'ola_alert' => 'هشدار OLA ثبت شد'" in detail
+    cron = source("cron/sla_maintenance.php")
+    assert "'sla_alert'" in cron and "'ola_alert'" in cron
+    assert "log_ticket_event((int) $ticket['id'], null, 'sla_alert'" in cron
+    assert "log_ticket_event((int) $ticket['id'], null, 'ola_alert'" in cron
 
 
 def test_internal_note_content_is_not_copied_to_asset_history_or_requester_notifications():
