@@ -94,6 +94,18 @@ def test_independent_runtime_has_no_schema_ensure_or_autofill_calls():
     assert "org_ticket_schema_ensure()" not in post
 
 
+def test_automatic_closure_uses_required_system_audit_and_rc_notifications():
+    cron = source("cron/ticket_auto_close.php")
+    assert "activity_log([" in cron
+    assert "'user_id' => null" in cron
+    assert "'action_code' => 'ticket_auto_closed'" in cron
+    assert "Required audit persistence failed" in cron
+    assert "request_center_notify_user(" in cron
+    assert "request_center_notify_ticket_staff(" in cron
+    assert "notify_user(" not in cron
+    assert "notify_ticket_staff(" not in cron
+
+
 def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch():
     bulk = source("modules/request-center/Actions/bulk-actions.php")
     guard = bulk.index("if (!empty($bulkTicket['cancel_requested_at']))")
