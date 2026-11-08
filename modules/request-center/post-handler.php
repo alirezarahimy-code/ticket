@@ -70,8 +70,12 @@ function request_center_post_error(Throwable $exception, string $page): never
     $ticketId = max(0, (int) ($_POST['ticket_id'] ?? 0));
     $target = match ($action) {
         'create_ticket' => 'request-center.php?page=new-ticket',
-        'bulk_update_tickets' => 'request-center.php?page=queue',
-        'supervisor_decision', 'supervisor_reopen' => 'request-center.php?page=supervisor',
+        'bulk_update_tickets' => 'request-center.php?page=queue&queue='
+            . rawurlencode(in_array((string) ($_POST['rc_return_queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], true)
+                ? (string) $_POST['rc_return_queue'] : 'all')
+            . '&p=' . max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1))),
+        'supervisor_decision', 'supervisor_reopen' => $ticketId > 0
+            ? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor',
         'add_service', 'edit_service', 'delete_service', 'add_service_field',
         'save_service_category', 'delete_service_category' => 'request-center.php?page=services',
         'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_id'] ?? 0)),
