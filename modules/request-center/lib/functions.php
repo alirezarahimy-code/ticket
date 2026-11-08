@@ -278,3 +278,21 @@ function request_center_assert_create_schema(): void
         );
     }
 }
+
+/** Request Center status labels, including the module-owned rejected terminal state. */
+function request_center_status_label(string $status): string
+{
+    $labels = [
+        'new' => 'جدید',
+        'manager_review' => 'در انتظار ارزیابی و ارجاع',
+        'assigned' => 'ارجاع‌شده',
+        'in_progress' => 'در حال رسیدگی',
+        'waiting_user' => 'در انتظار پاسخ کاربر',
+        'pending' => 'در انتظار پاسخ کاربر',
+        'resolved' => 'حل‌شده',
+        'closed' => 'بسته‌شده',
+        'cancelled' => 'لغوشده',
+        'rejected' => 'ردشده',
+    ];
+    return $labels[$status] ?? (function_exists('status_label') ? status_label($status) : $status);
+}
