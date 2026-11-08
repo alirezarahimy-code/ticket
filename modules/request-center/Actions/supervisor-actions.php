@@ -110,7 +110,7 @@ if (!defined('APP_ROOT')) {
                     'assigned_to' => $ticket['assigned_to'] ?? null,
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
-                    'service_group' => (string) ($ticket['service_group'] ?? ''),
+                    'service_group' => $ticket['service_group'] ?? null,
                     'cancel_requested_at' => null,
                 ]
             );
