@@ -40,7 +40,11 @@ if ($page === 'new-ticket') {
         $subjectDefault = mb_substr(trim((string) ($_GET['subject'] ?? '')), 0, 255, 'UTF-8');
         $descriptionDefault = mb_substr(trim((string) ($_GET['description'] ?? '')), 0, 5000, 'UTF-8');
     }
-    ticket_service_ensure_schema();
+    if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
+        request_center_assert_create_schema();
+    } else {
+        ticket_service_ensure_schema();
+    }
     $categories = db()->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
     $clientIp = inventory_client_ip();
     $limitedAssetScope = !is_staff_role((string) $user['role']) && !is_it_agent($user);
@@ -91,8 +95,30 @@ if ($page === 'new-ticket') {
     // ۱.۳۷.۲ (درخواست کاربر): فرم ثبت درخواست همیشه با حوزهٔ «خدمات کامپیوتری و IT» باز می‌شود.
     // تنها مسیر CD/DVD (که رسیدگی‌اش در پشتیبانی است) روی «پشتیبانی» می‌ماند.
     $ticketDefaultGroup = $cdDvdRequestRecord ? 'support' : 'it';
+    $creationToken = '';
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        $_SESSION['rc_create_tokens'] = is_array($_SESSION['rc_create_tokens'] ?? null)
+            ? $_SESSION['rc_create_tokens']
+            : [];
+        foreach ($_SESSION['rc_create_tokens'] as $issuedToken => $issuedAt) {
+            if (!is_string($issuedToken) || (int) $issuedAt < time() - 1800) {
+                unset($_SESSION['rc_create_tokens'][$issuedToken]);
+            }
+        }
+        $creationToken = bin2hex(random_bytes(32));
+        $_SESSION['rc_create_tokens'][$creationToken] = time();
+        // Keep the session bounded even if a user opens many create tabs.
+        if (count($_SESSION['rc_create_tokens']) > 12) {
+            asort($_SESSION['rc_create_tokens']);
+            $_SESSION['rc_create_tokens'] = array_slice($_SESSION['rc_create_tokens'], -12, null, true);
+        }
+    }
+    if ($creationToken === '') {
+        http_response_code(503);
+        exit('نشست کاربری برای صدور کلید ثبت امن در دسترس نیست؛ صفحه را دوباره باز کنید.');
+    }
     render_header('ثبت درخواست', $user);
-    echo '<section class="page-heading"><div><span class="eyebrow">درخواست جدید</span><h1>ثبت درخواست</h1><p>ابتدا حوزه خدمت را انتخاب کنید تا فرم و مسیر رسیدگی درست نمایش داده شود.</p></div><a class="button secondary" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section><section class="card form-card"><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="create_ticket">' . ($cdDvdRequestRecord ? '<input type="hidden" name="cd_dvd_record_id" value="' . (int) $cdDvdRequestRecord['id'] . '">' : '');
+    echo '<section class="page-heading"><div><span class="eyebrow">درخواست جدید</span><h1>ثبت درخواست</h1><p>ابتدا حوزه خدمت را انتخاب کنید تا فرم و مسیر رسیدگی درست نمایش داده شود.</p></div><a class="button secondary" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section><section class="card form-card"><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="create_ticket"><input type="hidden" name="request_token" value="' . e($creationToken) . '"> . ($cdDvdRequestRecord ? '<input type="hidden" name="cd_dvd_record_id" value="' . (int) $cdDvdRequestRecord['id'] . '">' : '');
     echo '<div class="ticket-number-box" data-next-it="' . e(ticket_number_peek('IT')) . '" data-next-support="' . e(ticket_number_peek('SUP')) . '"><span>شماره درخواست:</span><strong id="ticket-number-preview">' . e($ticketDefaultGroup === 'support' ? ticket_number_peek('SUP') : ticket_number_peek('IT')) . '</strong></div>';
     echo '<div class="form-grid"><label class="full">موضوع درخواست<input name="subject" required maxlength="255" value="' . e($subjectDefault) . '" placeholder="مثلاً: اختلال در اتصال به پرینتر واحد مالی"></label><label>حوزه خدمت<div class="group-combo"><label class="group-option"><input type="radio" name="service_group" value="it"' . ($ticketDefaultGroup === 'it' ? ' checked' : '') . '><span>خدمات کامپیوتری و IT</span></label><label class="group-option"><input type="radio" name="service_group" value="support"' . ($ticketDefaultGroup === 'support' ? ' checked' : '') . '><span>خدمات پشتیبانی</span></label></div></label><input type="hidden" name="category_id" id="category-selector" value=""><label>خدمت از کاتالوگ<select name="service_id" id="service-selector" required><option value="">انتخاب کنید…</option>';
     foreach ($services as $service) {
