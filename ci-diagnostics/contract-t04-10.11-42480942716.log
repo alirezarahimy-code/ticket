@@ -1,0 +1,108 @@
+T04 database: 10.11.19-MariaDB-ubu2204
+PASS index.php completed HTTP request (status 200); server log: [Sun Nov 8 12:35:46 2026] PHP 8.2.35 Development Server (http://127.0.0.1:18765) started [Sun Nov 8 12:35:46 2026] 127.0.0.1:39350 Accepted [Sun Nov 8 12:35:46 2026] 127.0.0.1:39350 Closed without sending a request; it was probably just an unused speculative preconnection [Sun Nov 8 12:35:46 2026] 127.0.0.1:39350 Closing [Sun Nov 8 12:35:46 2026] 127.0.0.1:39362 Accepted [Sun Nov 8 12:35:46 2026] 127.0.0.1:39362 [200]: GET /index.php [Sun Nov 8 12:35:46 2026] 127.0.0.1:39362 Closing 
+T04 healthy-schema HTTP request: DDL=5, DML=5
+T04 healthy DDL: CREATE TABLE IF NOT EXISTS org_units (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(190) NOT NULL,
+            code VARCHAR(60) NULL,
+            parent_id INT UNSIGNED NULL,
+            unit_type VARCHAR(20) NOT NULL DEFAULT "department",
+            manager_user_id INT UNSIGNED NULL,
+            is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTA
+T04 healthy DDL: CREATE TABLE IF NOT EXISTS org_unit_managers (
+            unit_id INT UNSIGNED NOT NULL,
+            user_id INT UNSIGNED NOT NULL,
+            is_primary TINYINT(1) NOT NULL DEFAULT 0,
+            PRIMARY KEY (unit_id, user_id),
+            INDEX idx_org_mgr_user (user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+T04 healthy DDL: ALTER TABLE users ADD COLUMN IF NOT EXISTS org_unit_id INT UNSIGNED NULL
+T04 healthy DDL: ALTER TABLE users ADD COLUMN IF NOT EXISTS manager_user_id INT UNSIGNED NULL
+T04 healthy DDL: ALTER TABLE org_units ADD COLUMN IF NOT EXISTS chart_side VARCHAR(10) NULL
+T04 healthy DML: UPDATE tickets SET ticket_no = 'IT-00001' WHERE id = '1' AND (ticket_no IS NULL OR ticket_no = '')
+T04 healthy DML: UPDATE tickets SET ticket_no = 'IT-00002' WHERE id = '2' AND (ticket_no IS NULL OR ticket_no = '')
+T04 healthy DML: INSERT INTO ticket_number_seq (prefix, seq) VALUES ('IT', '2') ON DUPLICATE KEY UPDATE seq = GREATEST(seq, VALUES(seq))
+T04 healthy DML: INSERT INTO settings (`key`, value) VALUES ('ticket_autofill_done', '1') ON DUPLICATE KEY UPDATE value = VALUES(value)
+T04 healthy DML: INSERT INTO settings (`key`, value) VALUES ('role_permissions_reconciled', '2026-10-07') ON DUPLICATE KEY UPDATE value = VALUES(value)
+PASS created disposable primary-admin account for request-center.php probe
+PASS session seed endpoint returned HTTP 200 (status 200)
+PASS created authenticated session for independent Request Center
+PASS independent request-center.php serves healthy schema (status 200)
+PASS independent request-center.php executes zero DDL on healthy schema
+PASS independent request-center.php fails closed on missing tickets.requesting_unit_id (status 503)
+PASS independent request-center.php executes zero DDL on incomplete schema
+PASS independent Request Center leaves missing requesting_unit_id untouched
+PASS index.php handled incomplete-schema HTTP request (status 200)
+PASS legacy index.php restored the missing tickets.requesting_unit_id column
+PASS legacy index.php executed DDL when the schema was incomplete
+T04 drift DDL: ALTER TABLE tickets ADD COLUMN requesting_unit_id INT UNSIGNED NULL
+T04 drift DDL: CREATE TABLE IF NOT EXISTS org_units (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(190) NOT NULL,
+            code VARCHAR(60) NULL,
+            parent_id INT UNSIGNED NULL,
+            unit_type VARCHAR(20) NOT NULL DEFAULT "department",
+            manager_user_id INT UNSIGNED NULL,
+            is_primary_admin TINYINT(1) NOT NULL DEFAULT 0,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTA
+T04 drift DDL: CREATE TABLE IF NOT EXISTS org_unit_managers (
+            unit_id INT UNSIGNED NOT NULL,
+            user_id INT UNSIGNED NOT NULL,
+            is_primary TINYINT(1) NOT NULL DEFAULT 0,
+            PRIMARY KEY (unit_id, user_id),
+            INDEX idx_org_mgr_user (user_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+T04 drift DDL: ALTER TABLE users ADD COLUMN IF NOT EXISTS org_unit_id INT UNSIGNED NULL
+T04 drift DDL: ALTER TABLE users ADD COLUMN IF NOT EXISTS manager_user_id INT UNSIGNED NULL
+T04 drift DDL: ALTER TABLE org_units ADD COLUMN IF NOT EXISTS chart_side VARCHAR(10) NULL
+PASS ticket_service_ensure_schema probe endpoint completed
+T04 ticket_service_ensure_schema HTTP probe: DDL=0, DML=45
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('سخت‌افزار', 'IT-CAT-HW', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('نرم‌افزار', 'IT-CAT-SW', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('شبکه و اینترنت', 'IT-CAT-NET', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('حساب کاربری و دسترسی', 'IT-CAT-ACC', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('چاپ و اسکن', 'IT-CAT-PRINT', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('تجهیزات جانبی', 'IT-CAT-PERIPH', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('پشتیبان‌گیری و بازیابی', 'IT-CAT-BACKUP', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('نصب و راه‌اندازی', 'IT-CAT-SETUP', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('سایر خدمات فناوری اطلاعات', 'IT-CAT-MISC', 'it') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('تجهیزات و فضای اداری', 'SUP-CAT-OFFICE', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('تأسیسات و انرژی', 'SUP-CAT-UTIL', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('اثاثیه', 'SUP-CAT-FURN', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('خدمات و نظافت', 'SUP-CAT-CLEAN', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('ملزومات اداری', 'SUP-CAT-STAT', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('خدمات عمومی', 'SUP-CAT-GEN', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: INSERT INTO categories (name, code, service_group) VALUES ('سایر خدمات پشتیبانی', 'SUP-CAT-MISC', 'support') ON DUPLICATE KEY UPDATE name = VALUES(name), service_group = VALUES(service_group), is_active = 1
+T04 service DML: UPDATE service_catalog SET category_id = '1' WHERE code = 'IT-COMPUTER' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '1' WHERE code = 'IT-BOOT' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '1' WHERE code = 'IT-BLUE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '1' WHERE code = 'IT-HARDWARE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '8' WHERE code = 'IT-PROFILE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '8' WHERE code = 'IT-DRIVER' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '8' WHERE code = 'IT-INSTALL-PC' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '8' WHERE code = 'IT-INVENTORY' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '2' WHERE code = 'IT-SOFTWARE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '2' WHERE code = 'IT-SOFT-ERROR' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '5' WHERE code = 'IT-PRINTER' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '6' WHERE code = 'IT-PERIPHERAL' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '6' WHERE code = 'IT-MOVE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '3' WHERE code = 'IT-NET' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '3' WHERE code = 'IT-SHARE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '4' WHERE code = 'IT-ACCOUNT' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '4' WHERE code = 'IT-ACCESS' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '4' WHERE code = 'IT-EMAIL' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '7' WHERE code = 'IT-BACKUP' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '9' WHERE code = 'IT-OTHER' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '10' WHERE code = 'SUP-OFFICE' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '11' WHERE code = 'SUP-ELEC' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '11' WHERE code = 'SUP-COOLING' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '12' WHERE code = 'SUP-FURN' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '13' WHERE code = 'SUP-CLEAN' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '14' WHERE code = 'SUP-STATIONERY' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '15' WHERE code = 'SUP-CDDVD' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '15' WHERE code = 'SUP-GENERAL' AND (category_id IS NULL OR category_id = 0)
+T04 service DML: UPDATE service_catalog SET category_id = '16' WHERE code = 'SUP-OTHER' AND (category_id IS NULL OR category_id = 0)
+T04 DIAGNOSTIC COMPLETE: this test measures legacy schema healing; it does not certify the zero-DDL policy.
