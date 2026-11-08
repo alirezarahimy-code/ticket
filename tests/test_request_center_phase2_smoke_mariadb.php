@@ -746,6 +746,8 @@ try {
     }
     $maintenanceAssignee = $userId;
     $maintenanceTicketId = (int) $ticketRow['id'];
+    // The preceding requester Workspace rating scenario must not contaminate the independent auto-close fixture.
+    $pdo->prepare('DELETE FROM ticket_ratings WHERE ticket_id = ?')->execute([$maintenanceTicketId]);
     $maintenanceFixture = $pdo->prepare('UPDATE tickets SET requester_id = ?, status = "in_progress", assigned_to = ?, first_response_at = NULL, resolved_at = NULL, cancel_requested_at = NULL, sla_paused_at = NULL, due_at = DATE_ADD(NOW(), INTERVAL 30 MINUTE), ola_response_due_at = DATE_SUB(NOW(), INTERVAL 5 MINUTE), ola_due_at = DATE_SUB(NOW(), INTERVAL 10 MINUTE), ola_escalation_1_at = DATE_SUB(NOW(), INTERVAL 15 MINUTE), ola_escalation_2_at = DATE_SUB(NOW(), INTERVAL 20 MINUTE) WHERE id = ?');
     $maintenanceFixture->execute([$maintenanceRequester, $maintenanceAssignee, $maintenanceTicketId]);
     $runMaintenance = static function () use ($root, $serverEnv): array {
