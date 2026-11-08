@@ -197,8 +197,24 @@ mariadb_workflow_check($cancel['status'] === 'assigned' && (int) $cancel['cancel
     'cancellation metadata persists without changing lifecycle status');
 
 $pdo->beginTransaction();
-$cleared = $service->rejectCancellation(5, 'assigned', (string) $cancel['cancel_requested_at']);
-mariadb_workflow_check($cleared, 'cancellation rejection matches the exact request timestamp');
+$pdo->exec('UPDATE tickets SET assigned_to = 999 WHERE id = 5');
+$staleClear = $service->rejectCancellation(5, 'assigned', (string) $cancel['cancel_requested_at'], [
+    'requester_id' => 105,
+    'assigned_to' => 205,
+    'priority' => 'normal',
+    'department_id' => null,
+]);
+mariadb_workflow_check(!$staleClear, 'cancellation rejection refuses stale ownership snapshot under InnoDB row lock');
+$pdo->rollBack();
+
+$pdo->beginTransaction();
+$cleared = $service->rejectCancellation(5, 'assigned', (string) $cancel['cancel_requested_at'], [
+    'requester_id' => 105,
+    'assigned_to' => 205,
+    'priority' => 'normal',
+    'department_id' => null,
+]);
+mariadb_workflow_check($cleared, 'cancellation rejection matches exact timestamp and ownership snapshot');
 $pdo->commit();
 $cancel = $pdo->query('SELECT cancel_requested_at, cancel_requested_by, cancel_request_reason FROM tickets WHERE id = 5')->fetch();
 mariadb_workflow_check($cancel['cancel_requested_at'] === null && $cancel['cancel_requested_by'] === null
