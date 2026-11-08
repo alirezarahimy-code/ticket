@@ -60,6 +60,8 @@ jobs:
         run: |
           php -l request-center.php
           php -l modules/request-center/Pages/index.php
+          php -l modules/request-center/Pages/admin.php
+          php -l modules/request-center/Actions/admin-actions.php
           php -l modules/request-center/Pages/calendar.php
           php -l modules/request-center/RequestCenterRepository.php
           php -l modules/request-center/WorkflowService.php
@@ -68,7 +70,7 @@ jobs:
 
       - name: Request Center static and SQLite contracts
         run: |
-          python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py
+          python -m pytest -q tests/test_request_center_first_slice_static.py tests/test_request_center_access_matrix_static.py tests/test_request_center_phase3_workspaces_static.py
           php tests/test_request_center_repository_sqlite.php
           php tests/test_request_center_workflow_service_sqlite.php
           php tests/test_request_center_appointments_sqlite.php
