@@ -267,6 +267,8 @@ if ($workspace === 'agent') {
     $queryParams['queue'] = $agentQueueName;
 }
 $queryString = http_build_query(array_merge($queryParams, array_filter($filters, static fn ($value): bool => $value !== '')));
+$detailContextParams = array_merge($queryParams, array_filter($filters, static fn ($value): bool => $value !== ''));
+$detailContextParams['p'] = $page;
 ?>
 <?php if ($workspace === 'agent' && user_can($user, 'queue.view')): ?>
 <nav class="workspace-nav" aria-label="نوع صف کارشناس">
@@ -325,7 +327,7 @@ $metricItems = $workspace === 'requester'
 <div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>مهلت SLA</th><?php if ($workspace === 'agent'): ?><th>موعد پاسخ OLA</th><th>موعد حل OLA</th><?php endif; ?><th>آخرین تغییر</th></tr></thead><tbody>
 <?php foreach ($result['rows'] as $row): ?>
 <tr>
-<td><a class="subject" href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=<?= $escape(rawurlencode($workspace)) ?><?= $workspace === 'agent' ? '&amp;agent_view=' . $escape(rawurlencode($agentView)) : '' ?>"><?= $escape($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escape($row['subject']) ?></a><small class="meta"><?= $escape($typeLabels[(string) ($row['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape(($row['service_group'] ?? '') === 'support' ? 'پشتیبانی' : 'فناوری اطلاعات') ?></small></td>
+<td><a class="subject" href="request-center.php?<?= $escape(http_build_query(array_merge($detailContextParams, ['id' => (int) $row['id']]))) ?>"><?= $escape($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escape($row['subject']) ?></a><small class="meta"><?= $escape($typeLabels[(string) ($row['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape(($row['service_group'] ?? '') === 'support' ? 'پشتیبانی' : 'فناوری اطلاعات') ?></small></td>
 <td><?= $escape($row['requester_name']) ?></td><td><?= $escape($row['assignee_name'] ?: 'بدون مسئول') ?></td>
 <td><span class="status"><?= $escape($statusLabels[(string) $row['status']] ?? $row['status']) ?></span></td>
 <td><span class="priority"><?= $escape($priorityLabels[(string) $row['priority']] ?? $row['priority']) ?></span></td>
