@@ -40,11 +40,6 @@ if ($page === 'new-ticket') {
         $subjectDefault = mb_substr(trim((string) ($_GET['subject'] ?? '')), 0, 255, 'UTF-8');
         $descriptionDefault = mb_substr(trim((string) ($_GET['description'] ?? '')), 0, 5000, 'UTF-8');
     }
-    if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
-        request_center_assert_create_schema();
-    } else {
-        ticket_service_ensure_schema();
-    }
     $categories = db()->query('SELECT * FROM categories WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
     $clientIp = inventory_client_ip();
     $limitedAssetScope = !is_staff_role((string) $user['role']) && !is_it_agent($user);
@@ -73,10 +68,15 @@ if ($page === 'new-ticket') {
     $departments = [];
     // معاونت‌های سازمانی از چارت سازمانی (org_units) خوانده می‌شوند و برای همهٔ نقش‌ها
     // نمایش داده می‌شوند تا درخواست به معاونت انتخاب‌شده مسیردهی شود.
-    org_ensure_schema();
-    org_ticket_schema_ensure();
-    $departments = org_deputy_units();
-    ticket_service_ensure_schema();
+    if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
+        request_center_assert_create_schema();
+        $departments = request_center_org_deputy_units($user);
+    } else {
+        org_ensure_schema();
+        org_ticket_schema_ensure();
+        $departments = org_deputy_units();
+        ticket_service_ensure_schema();
+    }
     $services = db()->query('SELECT id, name, code, service_group, requires_asset, default_priority, default_ticket_type, category_id FROM service_catalog WHERE is_active = 1 ORDER BY service_group, name')->fetchAll();
     $cdDvdServiceId = 0;
     if ($cdDvdRequestRecord) {
