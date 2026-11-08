@@ -11,10 +11,20 @@ def test_windows_logging_acceptance_assets_exist():
         "tools/set_logging_acl.ps1",
         "tools/verify_logging_web_protection.ps1",
         "tools/Run-Logging-Acceptance-1.62.83.ps1",
+        "tools/Run-Logging-Acceptance.ps1",
     ]
     missing = [name for name in required if not (ROOT / name).is_file()]
     assert not missing, f"Missing Windows Logging acceptance assets: {missing}"
 
+
+
+def test_current_acceptance_script_reads_source_version_and_checks_034():
+    source = (ROOT / "tools/Run-Logging-Acceptance.ps1").read_text(encoding="utf-8")
+    assert "$ExpectedVersion = (Get-Content -LiteralPath $sourceVersionFile -Raw).Trim()" in source
+    assert "migrations/034-logging-escalation.sql" in source
+    assert "Get-FileHash" in source
+    assert "-Strict -ReturnStatus -ScanFiles" in source
+    assert "Set-Acl" not in source
 
 def test_acl_verifier_is_read_only_and_strict_mode_is_available():
     source = (ROOT / "tools/verify_logging_acl.ps1").read_text(encoding="utf-8")
