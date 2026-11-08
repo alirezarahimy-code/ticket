@@ -626,12 +626,13 @@ if (!defined('APP_ROOT')) {
             [$replyDueAt, $replyPauseAt, $replyPauseMinutes] = ticket_sla_transition($ticket, $newStatus, (string) $ticket['priority']);
             $replyOla = ticket_ola_transition($ticket, $newStatus, (string) $ticket['priority']);
             db()->beginTransaction();
-            $replyLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority FROM tickets WHERE id = ? FOR UPDATE');
+            $replyLock = db()->prepare('SELECT status, cancel_requested_at, assigned_to, priority, first_response_at FROM tickets WHERE id = ? FOR UPDATE');
             $replyLock->execute([$ticketId]);
             $lockedReply = $replyLock->fetch();
             if (!$lockedReply || (string) $lockedReply['status'] !== $oldStatus
                 || (int) ($lockedReply['assigned_to'] ?? 0) !== (int) ($ticket['assigned_to'] ?? 0)
-                || (string) $lockedReply['priority'] !== (string) $ticket['priority']) {
+                || (string) $lockedReply['priority'] !== (string) $ticket['priority']
+                || (string) ($lockedReply['first_response_at'] ?? '') !== (string) ($ticket['first_response_at'] ?? '')) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ پیام شما ذخیره نشد. صفحه را تازه کنید.');
             }
             if (!empty($lockedReply['cancel_requested_at']) && $newStatus !== $oldStatus) {
@@ -669,6 +670,7 @@ if (!defined('APP_ROOT')) {
             $workflow = new RequestCenterWorkflowService(db());
             $replySaved = $workflow->transition($ticketId, $oldStatus, $newStatus, $replyUpdates, $replyTransitionKind, [
                 'assigned_to' => $ticket['assigned_to'] ?? null,
+                'first_response_at' => $ticket['first_response_at'] ?? null,
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
                 'cancel_requested_at' => $lockedReply['cancel_requested_at'] ?? null,
