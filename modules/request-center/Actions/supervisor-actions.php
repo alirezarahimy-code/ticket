@@ -134,6 +134,8 @@ if (!defined('APP_ROOT')) {
                 'assignment_source' => 'supervisor',
                 'from_assigned_to' => $oldAssigneeId ?: null,
                 'to_assigned_to' => $newAssigneeId ?: null,
+                'from_assignee_name' => (string) ($ticket['assignee_name'] ?? ''),
+                'to_assignee_name' => (string) ($assignee['full_name'] ?? ''),
                 'from_status' => $oldStatus,
                 'to_status' => $targetStatus,
                 'note' => $note,
