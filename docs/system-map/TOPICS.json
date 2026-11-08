@@ -35264,7 +35264,7 @@
       "line": 11,
       "anchor": "مسیر: ticket",
       "risk": 8,
-      "lines": 236
+      "lines": 238
     },
     "PAGE-052.01": {
       "path": "modules/request-center/Pages/index.php",
@@ -35392,7 +35392,7 @@
       "line": 9,
       "anchor": "مسیر: supervisor",
       "risk": 7,
-      "lines": 45
+      "lines": 48
     },
     "PAGE-058.01": {
       "path": "modules/request-center/RequestCenterRepository.php",
@@ -35408,7 +35408,7 @@
       "line": 4,
       "anchor": "RequestCenterRepository",
       "risk": 8,
-      "lines": 440
+      "lines": 443
     },
     "PAGE-059.01": {
       "path": "modules/request-center/WorkflowService.php",
@@ -35560,12 +35560,12 @@
       "line": 174,
       "anchor": "notify_ticket_resolved",
       "risk": 0,
-      "lines": 10
+      "lines": 14
     },
     "PAGE-061.12": {
       "path": "modules/request-center/lib/functions.php",
       "area": "PAGE",
-      "line": 185,
+      "line": 189,
       "anchor": "report_query_filters",
       "risk": 2,
       "lines": 55

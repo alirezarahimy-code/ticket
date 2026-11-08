@@ -2162,7 +2162,7 @@ messages	function	modules/request-center/RequestCenterRepository.php	180	other
 attachmentsForMessages	function	modules/request-center/RequestCenterRepository.php	199	other
 calendarItems	function	modules/request-center/RequestCenterRepository.php	231	other
 workspaceSummary	function	modules/request-center/RequestCenterRepository.php	279	other
-listQueue	function	modules/request-center/RequestCenterRepository.php	342	other
+listQueue	function	modules/request-center/RequestCenterRepository.php	343	other
 RequestCenterSqlExpression	class	modules/request-center/WorkflowService.php	11	other
 __construct	function	modules/request-center/WorkflowService.php	14	other
 kind	function	modules/request-center/WorkflowService.php	19	other
@@ -2190,7 +2190,7 @@ ticket_requester_cancelable_statuses	function	modules/request-center/lib/functio
 ticket_requester_can_cancel_directly	function	modules/request-center/lib/functions.php	157	other
 ticket_requester_can_cancel	function	modules/request-center/lib/functions.php	165	other
 notify_ticket_resolved	function	modules/request-center/lib/functions.php	175	other
-report_query_filters	function	modules/request-center/lib/functions.php	184	other
+report_query_filters	function	modules/request-center/lib/functions.php	188	other
 REQUEST_CENTER_POST_ACTIONS	const	modules/request-center/post-handler.php	16	other
 request_center_is_post_action	function	modules/request-center/post-handler.php	24	other
 request_center_handle_post	function	modules/request-center/post-handler.php	35	other

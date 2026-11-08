@@ -9,7 +9,7 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 589 |
-| خطوط | 131,810 |
+| خطوط | 131,822 |
 | آدرس‌ها (بلوک) | 6,870 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
@@ -289,7 +289,7 @@
 | `TEST` | TEST | 234 | 1,705 | 23,299 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 84 | 1,377 | 8,023 |
-| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,852 |
+| `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,864 |
 | `ASSET` | دارایی‌های ایستا (assets/) | 30 | 767 | 13,946 |
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
@@ -8896,12 +8896,12 @@
 </details>
 
 <details>
-<summary><b>PAGE-051</b> — <code>modules/request-center/Pages/detail.php</code> (246 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-051</b> — <code>modules/request-center/Pages/detail.php</code> (248 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-051.01` | 1–10 | ناحیه | `بلوک رویه‌ای 1-10` | 0 | ⬜ |
-| `PAGE-051.02` | 11–246 | ناحیه | `مسیر: ticket` | **8** | ⬜ |
+| `PAGE-051.02` | 11–248 | ناحیه | `مسیر: ticket` | **8** | ⬜ |
 
 </details>
 
@@ -8960,22 +8960,22 @@
 </details>
 
 <details>
-<summary><b>PAGE-057</b> — <code>modules/request-center/Pages/supervisor.php</code> (53 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-057</b> — <code>modules/request-center/Pages/supervisor.php</code> (56 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-057.01` | 1–8 | ناحیه | `بلوک رویه‌ای 1-8` | 0 | ⬜ |
-| `PAGE-057.02` | 9–53 | ناحیه | `مسیر: supervisor` | 7 | ⬜ |
+| `PAGE-057.02` | 9–56 | ناحیه | `مسیر: supervisor` | 7 | ⬜ |
 
 </details>
 
 <details>
-<summary><b>PAGE-058</b> — <code>modules/request-center/RequestCenterRepository.php</code> (444 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
+<summary><b>PAGE-058</b> — <code>modules/request-center/RequestCenterRepository.php</code> (447 خط، 2 آدرس، بازبینی‌شده 0/2)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
 | `PAGE-058.01` | 1–3 | ناحیه | `بلوک رویه‌ای 1-3` | 0 | ⬜ |
-| `PAGE-058.02` | 4–443 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
+| `PAGE-058.02` | 4–446 | کلاس | `RequestCenterRepository` | **8** | ⬜ |
 
 </details>
 
@@ -9004,7 +9004,7 @@
 </details>
 
 <details>
-<summary><b>PAGE-061</b> — <code>modules/request-center/lib/functions.php</code> (240 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
+<summary><b>PAGE-061</b> — <code>modules/request-center/lib/functions.php</code> (244 خط، 12 آدرس، بازبینی‌شده 0/12)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -9018,8 +9018,8 @@
 | `PAGE-061.08` | 152–156 | تابع | `ticket_requester_cancelable_statuses` | 0 | ⬜ |
 | `PAGE-061.09` | 158–164 | تابع | `ticket_requester_can_cancel_directly` | 0 | ⬜ |
 | `PAGE-061.10` | 166–172 | تابع | `ticket_requester_can_cancel` | 0 | ⬜ |
-| `PAGE-061.11` | 174–183 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
-| `PAGE-061.12` | 185–239 | تابع | `report_query_filters` | 2 | ⬜ |
+| `PAGE-061.11` | 174–187 | تابع | `notify_ticket_resolved` | 0 | ⬜ |
+| `PAGE-061.12` | 189–243 | تابع | `report_query_filters` | 2 | ⬜ |
 
 </details>
 
