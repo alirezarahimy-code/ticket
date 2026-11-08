@@ -16,11 +16,16 @@ $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $pdo->exec('CREATE TABLE tickets (
     id INTEGER PRIMARY KEY, status TEXT NOT NULL, requester_id INTEGER NOT NULL,
     assigned_to INTEGER NULL, first_response_at TEXT NULL, resolved_at TEXT NULL,
-    cancel_requested_at TEXT NULL, priority TEXT NOT NULL, department_id INTEGER NULL, due_at TEXT NULL,
+    cancel_requested_at TEXT NULL, cancel_requested_by INTEGER NULL, cancel_request_reason TEXT NULL,
+    priority TEXT NOT NULL, department_id INTEGER NULL, due_at TEXT NULL,
     assigned_at TEXT NULL, closed_at TEXT NULL, rejected_at TEXT NULL, supervisor_id INTEGER NULL,
     supervisor_approved_at TEXT NULL, supervisor_note TEXT NULL,
     sla_paused_at TEXT NULL, sla_pause_minutes INTEGER NOT NULL DEFAULT 0,
     updated_at TEXT NULL
+)');
+$pdo->exec('CREATE TABLE ticket_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, ticket_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL, body TEXT NOT NULL, is_internal INTEGER NOT NULL DEFAULT 0
 )');
 $insert = $pdo->prepare('INSERT INTO tickets (id,status,requester_id,assigned_to,priority,cancel_requested_at) VALUES (?,?,?,?,?,?)');
 $insert->execute([1, 'assigned', 10, 20, 'normal', null]);
@@ -37,9 +42,50 @@ $insert->execute([11, 'assigned', 20, 30, 'normal', '2026-11-01 12:00:00']);
 $insert->execute([12, 'manager_review', 21, null, 'normal', null]);
 $insert->execute([13, 'assigned', 22, 32, 'normal', null]);
 $insert->execute([14, 'new', 23, null, 'normal', null]);
+$insert->execute([15, 'assigned', 24, 34, 'normal', null]);
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
+
+$messageOutsideTransaction = false;
+try {
+    $service->appendMessage(1, 10, 'بدون تراکنش');
+} catch (LogicException) {
+    $messageOutsideTransaction = true;
+}
+workflow_check($messageOutsideTransaction, 'conversation writes require the caller transaction');
+
+$pdo->beginTransaction();
+$firstMessageId = $service->appendMessage(1, 10, 'پاسخ عمومی');
+$internalMessageId = $service->appendMessage(1, 10, 'یادداشت داخلی', true);
+workflow_check($firstMessageId > 0 && $internalMessageId > $firstMessageId,
+    'conversation writer returns ordered inserted identifiers');
+$pdo->rollBack();
+workflow_check((int) $pdo->query('SELECT COUNT(*) FROM ticket_messages')->fetchColumn() === 0,
+    'conversation entries roll back with the caller transaction');
+
+$pdo->beginTransaction();
+workflow_check($service->requestCancellation(15, 24, 'assigned', 'نیاز به لغو'),
+    'requester cancellation request is recorded under a locked status snapshot');
+$pdo->commit();
+$cancelSnapshot = $pdo->query('SELECT status, cancel_requested_by, cancel_request_reason, cancel_requested_at FROM tickets WHERE id = 15')->fetch(PDO::FETCH_ASSOC);
+workflow_check($cancelSnapshot['status'] === 'assigned' && (int) $cancelSnapshot['cancel_requested_by'] === 24
+    && $cancelSnapshot['cancel_request_reason'] === 'نیاز به لغو' && !empty($cancelSnapshot['cancel_requested_at']),
+    'cancellation request preserves lifecycle status and records its reason');
+
+$pdo->beginTransaction();
+workflow_check(!$service->requestCancellation(15, 99, 'assigned', 'درخواست نامعتبر'),
+    'cancellation request rejects a non-owner or duplicate request');
+$pdo->rollBack();
+
+$pdo->beginTransaction();
+workflow_check($service->rejectCancellation(15, 'assigned', (string) $cancelSnapshot['cancel_requested_at']),
+    'cancellation rejection clears only the exact pending request');
+$pdo->commit();
+$cleared = $pdo->query('SELECT cancel_requested_at, cancel_requested_by, cancel_request_reason FROM tickets WHERE id = 15')->fetch(PDO::FETCH_ASSOC);
+workflow_check($cleared['cancel_requested_at'] === null && $cleared['cancel_requested_by'] === null
+    && $cleared['cancel_request_reason'] === null,
+    'rejected cancellation metadata is cleared atomically');
 workflow_check(
     RequestCenterWorkflowService::allowedTransitions('pending') === ['in_progress', 'waiting_user', 'resolved', 'assigned', 'manager_review'],
     'legacy pending has exit paths'
