@@ -9,6 +9,8 @@ on:
       - 'migrations/037-request-center-lifecycle-rejection.sql'
       - 'tests/test_request_center_phase3_lifecycle_static.py'
       - 'tests/test_request_center_workflow_service_sqlite.php'
+      - 'tests/test_request_center_migration_037_mariadb.php'
+      - 'tests/test_request_center_schema_preflight_mariadb.php'
       - 'tests/test_request_center_first_slice_static.py'
       - 'tests/test_request_center_access_matrix_static.py'
       - 'tests/test_request_center_repository_sqlite.php'
@@ -107,6 +109,8 @@ jobs:
           php -l modules/request-center/Actions/bulk-actions.php
           php -l modules/request-center/Actions/service-actions.php
           php -l tests/test_request_center_workflow_service_sqlite.php
+          php -l tests/test_request_center_migration_037_mariadb.php
+          php -l tests/test_request_center_schema_preflight_mariadb.php
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
           php -l modules/request-center/Pages/calendar.php
