@@ -272,6 +272,13 @@ $pdo->rollBack();
 workflow_check(!$guarded, 'optimistic field guards reject changed priority');
 
 $pdo->beginTransaction();
+$staleFirstResponse = $service->transition(13, 'assigned', 'in_progress', [], 'standard', [
+    'first_response_at' => null,
+]);
+$pdo->rollBack();
+workflow_check(!$staleFirstResponse, 'optimistic field guards reject a changed first-response timestamp');
+
+$pdo->beginTransaction();
 workflow_check(
     $service->transition(7, 'new', 'cancelled', ['due_at' => null], 'requester_cancel', ['requester_id' => 16]),
     'requester can cancel an unassigned request before first response'
