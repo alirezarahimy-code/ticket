@@ -20,7 +20,7 @@ $adminStatusLabels = [
     'new' => 'جدید', 'manager_review' => 'در انتظار ارجاع', 'assigned' => 'ارجاع‌شده',
     'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر',
     'pending' => 'در انتظار پاسخ کاربر', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده',
-    'cancelled' => 'لغوشده',
+    'cancelled' => 'لغوشده', 'rejected' => 'ردشده',
 ];
 $adminLinks = [
     ['title' => 'کاتالوگ خدمات و فرم‌ها', 'description' => 'خدمات، دسته‌بندی‌ها، فیلدهای تکمیلی و مسیر رسیدگی', 'url' => 'request-center.php?page=services'],
