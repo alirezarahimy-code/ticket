@@ -43,6 +43,7 @@ $insert->execute([12, 'manager_review', 21, null, 'normal', null]);
 $insert->execute([13, 'assigned', 22, 32, 'normal', null]);
 $insert->execute([14, 'new', 23, null, 'normal', null]);
 $insert->execute([15, 'assigned', 24, 34, 'normal', null]);
+$insert->execute([16, 'closed', 25, 26, 'normal', null]);
 $pdo->prepare('UPDATE tickets SET first_response_at = ? WHERE id = 13')->execute(['2026-11-01 13:00:00']);
 
 $service = new RequestCenterWorkflowService($pdo);
@@ -216,13 +217,38 @@ workflow_check(
 $pdo->commit();
 
 $pdo->beginTransaction();
+$staleSupervisorReopen = $service->transition(16, 'closed', 'manager_review', [
+    'closed_at' => null,
+    'resolved_at' => null,
+    'due_at' => '2026-11-09 10:00:00',
+], 'supervisor_reopen', [
+    'requester_id' => 25,
+    'assigned_to' => 26,
+    'priority' => 'urgent',
+    'department_id' => null,
+    'cancel_requested_at' => null,
+]);
+$pdo->rollBack();
+workflow_check(!$staleSupervisorReopen, 'supervisor reopen refuses stale priority snapshot before recalculating SLA');
+workflow_check(
+    $pdo->query('SELECT status FROM tickets WHERE id = 16')->fetchColumn() === 'closed',
+    'stale supervisor reopen leaves the closed ticket unchanged'
+);
+
+$pdo->beginTransaction();
 workflow_check(
     $service->transition(5, 'closed', 'in_progress', [
         'closed_at' => null,
         'supervisor_approved_at' => null,
         'supervisor_note' => 'reopened',
-    ], 'supervisor_reopen'),
-    'supervisor reopen clears closure metadata'
+    ], 'supervisor_reopen', [
+        'requester_id' => 14,
+        'assigned_to' => 24,
+        'priority' => 'normal',
+        'department_id' => null,
+        'cancel_requested_at' => null,
+    ]),
+    'supervisor reopen clears closure metadata under a matching snapshot'
 );
 $pdo->commit();
 
