@@ -122,6 +122,39 @@ if ($mode === 'migrations-applied') {
         $stmt->execute([$base]);
         check((int) $stmt->fetchColumn() >= 1, "مهاجرت {$base} در رجیستری ثبت شده");
     }
+    
+    // ۴) migration 032 نباید پیش از updater، رکورد خودش را درج کند.
+    // system-update.php پس از اجرای SQL همان رکورد را با INSERT عادی ثبت می‌کند؛
+    // درج دوباره در migration باعث Duplicate Key روی uq_schema_update می‌شود.
+    $baselinePath = dirname(__DIR__) . '/migrations/032-schema-updates-baseline.sql';
+    $baselineSql = file_get_contents($baselinePath);
+    check($baselineSql !== false, 'خواندن migration 032 برای آزمون ثبت نصب‌کننده');
+    if ($baselineSql !== false) {
+        $probeSql = str_replace('schema_updates', 'schema_updates_probe', $baselineSql);
+        $pdo->exec('CREATE TEMPORARY TABLE schema_updates_probe (
+            version VARCHAR(32) NOT NULL,
+            migration VARCHAR(190) NOT NULL,
+            UNIQUE KEY uq_schema_update_probe (version, migration)
+        ) ENGINE=InnoDB');
+        $pdo->exec($probeSql);
+        $selfRecord = (int) $pdo->query(
+            "SELECT COUNT(*) FROM schema_updates_probe WHERE version = '1.62.83' AND migration = '032-schema-updates-baseline.sql'"
+        )->fetchColumn();
+        check($selfRecord === 0, 'migration 032 رجیستری خودش را پیش از updater درج نمی‌کند');
+
+        try {
+            $insert = $pdo->prepare('INSERT INTO schema_updates_probe (version, migration) VALUES (?, ?)');
+            $insert->execute(['1.62.83', '032-schema-updates-baseline.sql']);
+            $registered = (int) $pdo->query(
+                "SELECT COUNT(*) FROM schema_updates_probe WHERE version = '1.62.83' AND migration = '032-schema-updates-baseline.sql'"
+            )->fetchColumn();
+            check($registered === 1, 'ثبت migration 032 توسط updater بدون Duplicate Key موفق است');
+        } catch (Throwable $e) {
+            check(false, 'ثبت migration 032 توسط updater شکست خورد: ' . $e->getMessage());
+        }
+        $pdo->exec('DROP TEMPORARY TABLE schema_updates_probe');
+    }
+
 }
 
 echo "──────────────────────────────────────\n";
