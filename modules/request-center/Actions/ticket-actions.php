@@ -296,6 +296,15 @@ if (!defined('APP_ROOT')) {
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
                     'service_group' => $ticket['service_group'] ?? null,
+                    'due_at' => $ticket['due_at'] ?? null,
+                    'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                    'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                    'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                    'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                    'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                    'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                    'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                    'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
                 ]);
                 if (!$cancelApplied) {
                     throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
@@ -401,6 +410,15 @@ if (!defined('APP_ROOT')) {
                     'priority' => $ticket['priority'],
                     'department_id' => $ticket['department_id'] ?? null,
                     'service_group' => $ticket['service_group'] ?? null,
+                    'due_at' => $ticket['due_at'] ?? null,
+                    'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                    'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                    'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                    'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                    'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                    'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                    'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                    'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
                 ]);
                 if (!$approved) {
                     throw new RuntimeException('درخواست لغو یا وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
@@ -483,6 +501,15 @@ if (!defined('APP_ROOT')) {
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
                 'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
                 'cancel_requested_at' => null,
             ]);
             if (!$claimed) {
@@ -538,6 +565,15 @@ if (!defined('APP_ROOT')) {
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
                 'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
             ]);
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
@@ -687,6 +723,15 @@ if (!defined('APP_ROOT')) {
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
                 'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
                 'cancel_requested_at' => $lockedReply['cancel_requested_at'] ?? null,
             ]);
             if (!$replySaved) {
@@ -875,6 +920,15 @@ if (!defined('APP_ROOT')) {
                 'priority' => $ticket['priority'],
                 'department_id' => $ticket['department_id'] ?? null,
                 'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
                 'cancel_requested_at' => null,
             ]);
             if (!$updated) {
