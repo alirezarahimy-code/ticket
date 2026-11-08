@@ -321,6 +321,7 @@ def test_assignment_and_priority_changes_notify_ticket_parties():
     assert "$status !== $oldStatus || $assigneeChanged || (string) $ticket['priority'] !== $priority" in action
     assert "مسئول رسیدگی تغییر کرد" in action
     assert "($assigneeChanged || $priorityChanged) && $updateNote === ''" in action
+    assert "$status !== $oldStatus && $updateNote === ''" in action
     assert "'assignment_source' => 'manager'" in action
     assert "'from_assignee_name' =>" in action and "'to_assignee_name' =>" in action
     detail = source("modules/request-center/Pages/detail.php")
