@@ -374,3 +374,17 @@
 .fm-gap-extra b{color:#087e72;font-size:14px}
 .fm-reconciliation-auto-hint{margin:4px 0 0;padding:9px 12px;border:1px dashed #d3e4e1;border-radius:10px;background:#fbfdfc;color:#5f7a76}
 @media(max-width:520px){.fm-leftover-row{flex-wrap:wrap}.fm-leftover-count{margin-right:26px}}
+
+
+/* 1.62.93 follow-up: cancel-request cutoff + compact date/meal fields + wide single-line reason */
+.fm-field-sm .fm-input-sm { max-width: 132px; width: 100%; }
+.fm-cancel-cutoff .fm-cancel-cutoff-row { display: flex; gap: 6px; align-items: center; }
+.fm-cancel-cutoff input[data-cancel-cutoff] { width: 84px; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: .5px; }
+.fm-bulk-reason { grid-column: 1 / -1; }
+.fm-bulk-reason input { width: 100%; }
+.fm-bulk-table { min-width: 860px; }
+.fm-bulk-table td small.fm-bulk-secondary { display: inline-block; margin-top: 0; font-size: 9px; }
+.fm-cancel-cutoff .fm-cancel-cutoff-row .btn { white-space: nowrap; }
+@media (max-width: 760px) {
+  .fm-field-sm .fm-input-sm { max-width: none; }
+}

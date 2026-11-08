@@ -14,6 +14,7 @@
   var canProxy = root.dataset.canProxy === '1';
   var apiBase = (root.dataset.api || '').replace(/&amp;/g, '&');
   var csrf = root.dataset.csrf || '';
+  var cancelCutoff = root.dataset.cancelCutoff || '09:30';
   var current = todayJalali.match(/^(\d{4})\/(\d{2})\/(\d{2})$/);
   var state = {
     year: current ? Number(current[1]) : 1405,
@@ -45,6 +46,8 @@
     proxyCancelConfirmingOrderId: 0,
     cancelRequestBusyId: 0,
     cancelRequestConfirmingId: 0,
+    orderSort: { key: 'last_name', dir: 'asc' },
+    proxySort: { key: 'last_name', dir: 'asc' },
     employeeChoices: [],
     employeeChoicesLoaded: false,
     employeeChoicesLoading: false,
@@ -102,6 +105,58 @@
   }
   function isPast(iso) {
     try { return new Date(iso + 'T00:00:00Z') < new Date(today + 'T00:00:00Z'); } catch (e) { return false; }
+  }
+  function tehranNowMinutes() {
+    try {
+      var parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Tehran', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(new Date());
+      var h = 0, m = 0;
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i].type === 'hour') h = Number(parts[i].value);
+        if (parts[i].type === 'minute') m = Number(parts[i].value);
+      }
+      return h * 60 + m;
+    } catch (e) { return -1; }
+  }
+  function cancelCutoffMinutes() {
+    var match = /^(\d{1,2}):(\d{2})$/.exec(cancelCutoff);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : 9 * 60 + 30;
+  }
+  // مهلت «درخواست لغو» فقط برای سفارشِ همین امروز (۲۴ ساعته)؛ روزهای آینده آزاد هستند.
+  function todayCancelRequestClosed() {
+    var now = tehranNowMinutes();
+    return now >= 0 && now > cancelCutoffMinutes();
+  }
+  function personSplit(row) {
+    var first = String((row && row.first_name) || '').trim();
+    var last = String((row && row.last_name) || '').trim();
+    if (!first && !last) return { first: '', last: String((row && row.full_name) || '').trim() };
+    return { first: first, last: last };
+  }
+  function tableSortValue(row, key) {
+    if (key === 'first_name' || key === 'last_name') return personSplit(row)[key];
+    if (key === 'food_name') return String(row.food_name || '');
+    if (key === 'food_date') return String(row.food_date || '');
+    if (key === 'reserve_date') return String(row.reserve_date || '');
+    if (key === 'reserve_time') return String(row.reserve_time || '');
+    if (key === 'status') return String(row.status || '');
+    if (key === 'meal_type') return String(row.meal_type || '');
+    return '';
+  }
+  function sortedTableRows(rows, st) {
+    var list = rows.slice();
+    var dir = (st && st.dir) === 'desc' ? -1 : 1;
+    var key = (st && st.key) || 'last_name';
+    list.sort(function (a, b) {
+      var av = tableSortValue(a, key); var bv = tableSortValue(b, key);
+      var cmp = String(av).localeCompare(String(bv), 'fa', { numeric: true });
+      return (cmp || (Number(a.id) - Number(b.id))) * dir;
+    });
+    return list;
+  }
+  function foSortTh(label, table, key, st) {
+    var active = st && st.key === key;
+    var mark = active ? (st.dir === 'asc' ? ' ▲' : ' ▼') : '';
+    return '<th><button type="button" class="fo-sort-btn" data-fo-sort="' + table + ':' + key + '">' + esc(label + mark) + '</button></th>';
   }
   async function request(route, params, options) {
     var query = params ? new URLSearchParams(params).toString() : '';
@@ -383,15 +438,16 @@
   }
 
   function renderOrders() {
-    var rows = state.orders || [];
+    var rows = sortedTableRows(state.orders || [], state.orderSort);
     if (!rows.length) return '<div class="card fo-empty">هنوز سفارشی برای حساب شما ثبت نشده است.</div>';
-    return '<div class="card fo-my-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام و نام خانوادگی</th><th>نوع غذا</th><th>وعده</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
+    return '<div class="card fo-my-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th>' + foSortTh('نام', 'orderTable', 'first_name', state.orderSort) + foSortTh('نام خانوادگی', 'orderTable', 'last_name', state.orderSort) + foSortTh('نوع غذا', 'orderTable', 'food_name', state.orderSort) + foSortTh('وعده', 'orderTable', 'meal_type', state.orderSort) + foSortTh('تاریخ غذا', 'orderTable', 'food_date', state.orderSort) + foSortTh('تاریخ رزرو', 'orderTable', 'reserve_date', state.orderSort) + foSortTh('ساعت رزرو', 'orderTable', 'reserve_time', state.orderSort) + foSortTh('وضعیت', 'orderTable', 'status', state.orderSort) + '<th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
       var active = row.status === 'active';
+      var parts = personSplit(row);
       var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed';
       var action = canCancel
         ? '<button class="button secondary" type="button" data-fo-action="cancel" data-order-id="' + Number(row.id) + '">لغو سفارش</button>'
         : renderCancelRequestControl(row, false);
-      return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(row.full_name || selfName) + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(faDigits(isoToJalali(row.reserve_date))) + '</td><td>' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + action + '</td></tr>';
+      return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(parts.first || '—') + '</td><td><strong>' + esc(parts.last || '—') + '</strong></td><td>' + esc(row.food_name || '—') + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(faDigits(isoToJalali(row.reserve_date))) + '</td><td>' + esc(faDigits((row.reserve_time || '').slice(0, 5))) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + action + '</td></tr>';
     }).join('') + '</tbody></table></div></div>';
   }
 
@@ -404,6 +460,9 @@
       return '<span class="fo-order-state">در انتظار تأیید لغو</span>' + (requestedAt ? '<small class="fo-cancel-request-time">زمان ثبت درخواست: ' + esc(faDigits(requestedAt)) + '</small>' : '');
     }
     var id = Number(row.id);
+    if (String(row.food_date || state.modalDate) === today && todayCancelRequestClosed()) {
+      return '<button class="button secondary" type="button" disabled title="مهلت درخواست لغو برای سفارش امروز، ساعت «' + esc(faDigits(cancelCutoff)) + '» است.">درخواست لغو</button><small class="fo-cancel-request-time">مهلت امروز پایان یافت (ساعت «' + esc(faDigits(cancelCutoff)) + '»)</small>';
+    }
     var busy = Number(state.cancelRequestBusyId) === id;
     if (busy) return '<button class="button secondary" type="button" disabled>در حال ارسال…</button>';
     if (Number(state.cancelRequestConfirmingId) === id) {
@@ -438,6 +497,9 @@
         reserve_time: order.reserve_time || '',
         status: order.status || 'active',
         day_status: order.day_status || '',
+        first_name: order.first_name || '',
+        last_name: order.last_name || '',
+        full_name: order.full_name || state.targetName || '',
       };
     });
     var content = '';
@@ -448,13 +510,15 @@
     } else if (!rows.length) {
       content = '<div class="card fo-empty">در این بازه برای این شخص سفارشی ثبت نشده است.</div>';
     } else {
-      content = '<div class="card fo-my-orders fo-proxy-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th><th>نام پرسنل</th><th>نوع غذا</th><th>وعده</th><th>تاریخ غذا</th><th>تاریخ رزرو</th><th>ساعت رزرو</th><th>وضعیت</th><th>عملیات</th></tr></thead><tbody>' + rows.map(function (row, index) {
+      var sorted = sortedTableRows(rows, state.proxySort);
+      content = '<div class="card fo-my-orders fo-proxy-orders"><div class="table-wrap"><table class="ticket-table" style="width:100%;border-collapse:collapse"><thead><tr class="table-head"><th>ردیف</th>' + foSortTh('نام', 'proxyTable', 'first_name', state.proxySort) + foSortTh('نام خانوادگی', 'proxyTable', 'last_name', state.proxySort) + foSortTh('نوع غذا', 'proxyTable', 'food_name', state.proxySort) + foSortTh('وعده', 'proxyTable', 'meal_type', state.proxySort) + foSortTh('تاریخ غذا', 'proxyTable', 'food_date', state.proxySort) + foSortTh('تاریخ رزرو', 'proxyTable', 'reserve_date', state.proxySort) + foSortTh('ساعت رزرو', 'proxyTable', 'reserve_time', state.proxySort) + foSortTh('وضعیت', 'proxyTable', 'status', state.proxySort) + '<th>عملیات</th></tr></thead><tbody>' + sorted.map(function (row, index) {
         var reserveDate = row.reserve_date ? faDigits(isoToJalali(row.reserve_date)) : '—';
         var reserveTime = row.reserve_time ? faDigits(row.reserve_time.slice(0, 5)) : '—';
         var active = row.status === 'active';
         var canCancel = active && !isPast(row.food_date) && row.day_status !== 'closed' && row.id > 0;
         var cancelButton = canCancel ? renderProxyCancelControl(row.id, 'button secondary') : renderCancelRequestControl(row, true);
-        return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(state.targetName || '—') + '</td><td>' + esc(row.food_name || '—') + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(reserveDate) + '</td><td>' + esc(reserveTime) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + cancelButton + '</td></tr>';
+        var split = personSplit(row);
+        return '<tr class="table-row"><td>' + faDigits(index + 1) + '</td><td>' + esc(split.first || '—') + '</td><td><strong>' + esc(split.last || '—') + '</strong></td><td>' + esc(row.food_name || '—') + '</td><td>' + (row.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td><td>' + esc(faDigits(isoToJalali(row.food_date))) + '</td><td>' + esc(reserveDate) + '</td><td>' + esc(reserveTime) + '</td><td><span class="fo-order-state ' + (active ? '' : 'cancelled') + '">' + (active ? 'فعال' : 'لغوشده') + '</span></td><td>' + cancelButton + '</td></tr>';
       }).join('') + '</tbody></table></div></div>';
     }
     return '<div class="fo-section-title"><div><h2>سفارش‌های این ماه</h2></div></div>' + content;
@@ -995,6 +1059,17 @@
       return;
     }
     if (!state.recipientReady) return;
+    var sortButton = event.target.closest('[data-fo-sort]');
+    if (sortButton) {
+      var spec = String(sortButton.dataset.foSort || '').split(':');
+      var table = spec[0]; var key = spec[1];
+      var target = table === 'proxyTable' ? 'proxySort' : 'orderSort';
+      var current = state[target];
+      state[target] = (current && current.key === key) ? { key: key, dir: current.dir === 'asc' ? 'desc' : 'asc' } : { key: key, dir: 'asc' };
+      event.preventDefault();
+      render();
+      return;
+    }
     var action = event.target.closest('[data-fo-action]');
     if (action) {
       var act = action.dataset.foAction;

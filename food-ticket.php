@@ -140,6 +140,7 @@ function food_ticket_route_allowed(array $user, string $route): bool
         $writeMenu = [
             'food-menu/catalog', 'food-menu/day', 'food-menu/cancel-request-decide',
             'food-menu/emergency/order', 'food-menu/emergency/cancel', 'food-menu/bulk-apply',
+            'food-menu/cancel-request-cutoff',
             'food-menu/guest-request-update', 'food-menu/guest-request-cancel', 'food-menu/guest-request-delete',
             'food-menu/reconciliation-save', 'food-menu/invoice-upload',
         ];

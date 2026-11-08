@@ -23,6 +23,15 @@ ORDER_CSS_MIRROR = ROOT / "food-ticket-web/assets/food-order.css"
 PACKAGE = ROOT / "downloads/ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip"
 SHA_SIDECAR = ROOT / "downloads/ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip.sha256"
 REPORT = ROOT / "downloads/CHANGE-REPORT-FA-1.62.93.md"
+ORDER_JS = ROOT / "assets/food-order.js"
+ORDER_PHP = ROOT / "food-order.php"
+TICKET_PHP = ROOT / "food-ticket.php"
+GROUPS_PHP = ROOT / "food-ticket-groups.php"
+GROUPS_JS = ROOT / "food-ticket-web/assets/food-groups.js"
+TPL_PHP = ROOT / "food-ticket-templates.php"
+RUNTIME_PHP = ROOT / "food-ticket-runtime.php"
+DESIGNER_JS = ROOT / "food-ticket-web/assets/food-designer.js"
+THEME_CSS = ROOT / "food-ticket-web/assets/food-ticket-theme.css"
 
 
 class Migration036Tests(unittest.TestCase):
@@ -128,6 +137,75 @@ class ReconciliationJsTests(unittest.TestCase):
             self.assertNotIn("بی‌توزیع", text)
 
 
+class OwnerItemsTests(unittest.TestCase):
+    """پنج آیتم تأییدی مالک (۲۰۲۶-۱۱-۰۸) که داخل ۱.۶۲.۹۳ ادغام شدند."""
+
+    def test_every_food_list_splits_name_and_has_sortable_headers(self) -> None:
+        order_js = ORDER_JS.read_text(encoding="utf-8")
+        for needle in ("foSortTh('نام'", "foSortTh('نام خانوادگی'", "data-fo-sort=", "sortedTableRows("):
+            self.assertIn(needle, order_js)
+        menu_js = (ROOT / "assets/food-menu.js").read_text(encoding="utf-8")
+        for needle in ("first_name", "last_name", "data-fm-bulk-sort", "data-fm-cancel-sort", "data-fm-selected-sort", "data-fm-people-sort"):
+            self.assertIn(needle, menu_js)
+        order_php = ORDER_PHP.read_text(encoding="utf-8")
+        self.assertIn("function food_person_name_split(", order_php)
+        self.assertIn("'first_name' =>", order_php)
+        self.assertIn("'last_name' =>", order_php)
+        groups_php = GROUPS_PHP.read_text(encoding="utf-8")
+        self.assertIn("function food_person_name_split(", groups_php)
+
+    def test_same_day_cancel_request_cutoff_only_today_and_server_enforced(self) -> None:
+        order_php = ORDER_PHP.read_text(encoding="utf-8")
+        for needle in (
+            "function food_cancel_request_same_day_cutoff(",
+            "function food_cancel_request_same_day_is_open(",
+            "food_cancel_request_same_day_is_open()",
+            "'food-menu/cancel-request-cutoff'",
+            "food_order_save_cancel_request_cutoff",
+            "function_exists('system_log')",
+        ):
+            self.assertIn(needle, order_php)
+        self.assertIn("'food-menu/cancel-request-cutoff'", TICKET_PHP.read_text(encoding="utf-8"))
+        menu_js = (ROOT / "assets/food-menu.js").read_text(encoding="utf-8")
+        self.assertIn("data-cancel-cutoff", menu_js)
+        order_js = ORDER_JS.read_text(encoding="utf-8")
+        self.assertIn("todayCancelRequestClosed()", order_js)
+        self.assertIn("data-cancel-cutoff", open(ROOT / "food-order.php", encoding="utf-8").read())
+
+    def test_bulk_cancel_tab_fields_are_compact_single_line(self) -> None:
+        menu_js = (ROOT / "assets/food-menu.js").read_text(encoding="utf-8")
+        self.assertIn("data-bulk-reason", menu_js)
+        self.assertNotIn("دلیل برای سابقهٔ لغو ذخیره می‌شود.", menu_js)
+        css = (ROOT / "assets/food-menu.css").read_text(encoding="utf-8")
+        for needle in (".fm-field-sm", ".fm-cancel-cutoff", ".fm-bulk-reason", ".fm-sort-btn"):
+            self.assertIn(needle, css)
+
+    def test_group_ticket_double_copy_is_group_only(self) -> None:
+        tpl = TPL_PHP.read_text(encoding="utf-8")
+        for needle in (
+            "function food_ticket_group_double_copy_enabled(",
+            "'copy_label'",
+            "['kind' => 'copy'",
+            "food_ticket_group_double_copy",
+            "group_double_copy",
+        ):
+            self.assertIn(needle, tpl)
+        runtime = RUNTIME_PHP.read_text(encoding="utf-8")
+        for needle in ("'نسخهٔ سلف'", "'نسخهٔ نماینده'", "copy_label"):
+            self.assertIn(needle, runtime)
+        designer = DESIGNER_JS.read_text(encoding="utf-8")
+        self.assertIn("data-fd-double-copy", designer)
+        self.assertIn("group_double_copy", designer)
+
+    def test_group_visit_cancel_button_compact_and_single_line(self) -> None:
+        groups_js = GROUPS_JS.read_text(encoding="utf-8")
+        for needle in ("fg-visit-btn", "data-fg-sort", "membersSortList(", "fg-absence-table"):
+            self.assertIn(needle, groups_js)
+        theme = THEME_CSS.read_text(encoding="utf-8")
+        for needle in (".fg-visit-btn", ".fg-members-table", ".fg-ellipsis", ".fg-nowrap", ".fg-sort"):
+            self.assertIn(needle, theme)
+
+
 class PackageTests(unittest.TestCase):
     def test_package_exists_and_is_consistent(self) -> None:
         self.assertTrue(PACKAGE.exists(), f"missing package: {PACKAGE}")
@@ -146,12 +224,22 @@ class PackageTests(unittest.TestCase):
         self.assertEqual(manifest["migrations"], ["036-food-meal-leftover-disposition.sql"])
         for required in (
             "food-reconciliation.php",
+            "food-order.php",
+            "food-ticket.php",
+            "food-ticket-groups.php",
+            "food-ticket-templates.php",
+            "food-ticket-runtime.php",
             "assets/food-menu.js",
             "food-ticket-web/assets/food-menu.js",
             "assets/food-menu.css",
             "food-ticket-web/assets/food-menu.css",
+            "assets/food-order.js",
             "assets/food-order.css",
             "food-ticket-web/assets/food-order.css",
+            "food-ticket-web/assets/food-groups.js",
+            "food-ticket-web/assets/food-designer.js",
+            "food-ticket-web/assets/food-ticket-theme.css",
+            "food-ticket-web/index.html",
             "schema.sql",
             "install-empty-db.sql",
             "VERSION",

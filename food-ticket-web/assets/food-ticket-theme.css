@@ -418,3 +418,17 @@ input:focus, select:focus, textarea:focus { border-color: var(--food-teal) !impo
   .ft-week-day label { font-size: 8px; }
   .ft-latest-strip { align-items: flex-start; }
 }
+
+/* 1.62.93 follow-up: single-line member tables + compact «لغو تغییر سلف» button */
+.fg-members-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 0 0 8px; }
+.fg-members-table thead th { background: #f7f9f8; color: var(--muted); font-size: 10px; font-weight: 700; text-align: right; padding: 4px 6px; border-bottom: 1px solid #e5ecea; white-space: nowrap; }
+.fg-members-table tbody td { padding: 3px 6px; border-bottom: 1px solid #edf1f0; white-space: nowrap; vertical-align: middle; }
+.fg-members-table tbody tr:last-child td { border-bottom: 0; }
+.fg-members-table tbody tr:hover td { background: #fafcfa; }
+.fg-members-table .fg-sort { background: none; border: 0; padding: 2px 0; font: inherit; color: inherit; cursor: pointer; }
+.fg-members-table .fg-sort:hover { color: var(--teal); text-decoration: underline; }
+.fg-nowrap { white-space: nowrap; }
+.fg-ellipsis { display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.fg-absence-table th:first-child, .fg-absence-table td:first-child { width: 34px; text-align: center; }
+.fg-visit-btn { font-size: 10px !important; padding: 2px 8px !important; min-height: 0 !important; line-height: 1.6 !important; border-radius: 8px !important; white-space: nowrap; }
+.fg-members-dialog { width: min(720px, 100%) !important; }

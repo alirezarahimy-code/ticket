@@ -25,14 +25,25 @@ REPORT_NAME = f"CHANGE-REPORT-FA-{RELEASE_VERSION}.md"
 ZIP_DATE = (2026, 11, 6, 0, 0, 0)
 
 # فقط فایل‌های تولیدی این اصلاح؛ هیچ فایلی از «مرکز درخواست‌ها» نباید وارد شود.
+# (۱.۶۲.۹۳ ۲۰۲۶-۱۱-۰۸: پنج آیتم تأییدی مالک نیز داخل همین بسته اضافه شد؛ نام بسته/نسخه ثابت است.)
 WHITELIST = [
     "food-reconciliation.php",
+    "food-order.php",
+    "food-ticket.php",
+    "food-ticket-groups.php",
+    "food-ticket-templates.php",
+    "food-ticket-runtime.php",
     "assets/food-menu.js",
     "food-ticket-web/assets/food-menu.js",
     "assets/food-menu.css",
     "food-ticket-web/assets/food-menu.css",
+    "assets/food-order.js",
     "assets/food-order.css",
     "food-ticket-web/assets/food-order.css",
+    "food-ticket-web/assets/food-groups.js",
+    "food-ticket-web/assets/food-designer.js",
+    "food-ticket-web/assets/food-ticket-theme.css",
+    "food-ticket-web/index.html",
     "schema.sql",
     "install-empty-db.sql",
 ]
@@ -123,16 +134,20 @@ def build() -> tuple[Path, Path]:
         "name": "food-reconciliation-leftover-disposition",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "تعیین تکلیف غذای باقیمانده و اصلاحات «تطبیق روزانه» غذا (۱.۶۲.۹۰ ← ۱.۶۲.۹۳)",
+        "title": "تعیین تکلیف غذای باقیمانده، اصلاحات «تطبیق روزانه» غذا و پنج آیتم تأییدی مالک (۱.۶۲.۹۰ ← ۱.۶۲.۹۳)",
         "requires_version": REQUIRES_VERSION,
         "migrations": list(MIGRATIONS),
         "files": sorted(files),
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "INTERIM_UPDATE_TEST_ON_STAGING_FIRST",
         "description": (
-            "Interim food-module update for the daily food reconciliation report: leftover disposition popup at day close, "
-            "new automatic columns (remaining = received - served, dynamic کسر/اضافهٔ سفارش label, غایبین), monthly invoice untouched. "
-            "Migration 036 is additive and idempotent. Contains NO Request Center content and does NOT ship migration 035. "
+            "Interim food-module update: (1) daily food reconciliation report overhaul (leftover disposition popup at day close, "
+            "remaining = received - served, dynamic کسر/اضافهٔ سفارش label, غایبین); (2) owner-approved follow-up items: split "
+            "first/last name columns with clickable sortable headers across all food-management lists and reports, same-day "
+            "cancel-request cutoff (default 09:30, 24h, only food_date == today, server-enforced), smaller date/meal fields and a "
+            "wide single-line reason input in the bulk cancel tab, double-copy group ticket printing («نسخهٔ سلف» + «نسخهٔ نماینده») "
+            "next to the group print mode setting, compact single-line member records and a small «لغو تغییر سلف» button. "
+            "Monthly invoice untouched. Migration 036 is additive and idempotent. Contains NO Request Center content and does NOT ship migration 035. "
             "Install on staging first; production only with owner sign-off."
         ),
     }

@@ -15,6 +15,8 @@
     absence: null,   // {group_id, date, locked, editable, can_override, members:[], summary:{}}
     absenceLoading: false,
     membersPopup: 0,
+    membersSort: { key: 'last_name', dir: 'asc' },
+    absenceReasonDraft: '',
     canCancelVisit: window.FOOD_TICKET_CAN_CANCEL_VISIT === true,
   };
 
@@ -198,15 +200,20 @@
     const locked = !!a.locked;
     const editable = !!a.editable;
     const s = a.summary || {};
-    const rows = (a.members || []).map((m) => {
-      const disabled = (!editable || locked && !a.can_override) ? ' disabled' : '';
-      return '<label class="fg-person">'
-        + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + m.id + '"' + (m.absent ? ' checked' : '') + disabled + '>')
-        + '<span class="fg-person-name" title="' + esc(m.name) + ' (' + esc(m.pc) + ')">' + esc(m.name) + ' <small>(' + esc(m.pc) + ')</small>'
-        + (m.active ? '' : ' <span class="status bad">غیرفعال</span>')
-        + (m.visitor ? (m.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(m.home_group_title || 'گروه دائمی') + '»</span>' : ' <span class="status ok">مهمان امروز</span>') : '')
-        + (m.national_code ? '' : ' <span class="status warn">بدون کد ملی</span>') + '</span></label>';
-    }).join('') || '<p class="muted">این گروه عضوی ندارد.</p>';
+    const sortedMembers = membersSortList(a.members || []);
+    const rows = sortedMembers.length ? '<table class="fg-members-table fg-absence-table"><thead><tr><th></th>'
+      + sortHead('first_name', 'نام') + sortHead('last_name', 'نام خانوادگی') + sortHead('pc', 'کد پرسنلی')
+      + '<th>وضعیت</th></tr></thead><tbody>' + sortedMembers.map((m) => {
+        const parts = splitName(m);
+        const disabled = (!editable || locked && !a.can_override) ? ' disabled' : '';
+        const badges = (m.active ? '' : '<span class="status bad">غیرفعال</span>')
+          + (m.visitor ? (m.temporary_transfer ? '<span class="status warn">انتقال موقت از «' + esc(m.home_group_title || 'گروه دائمی') + '»</span>' : '<span class="status ok">مهمان امروز</span>') : '')
+          + (m.national_code ? '' : '<span class="status warn">بدون کد ملی</span>');
+        return '<tr><td class="fg-nowrap">' + (m.visitor ? '' : '<input type="checkbox" data-fg-absent value="' + Number(m.id) + '"' + (m.absent ? ' checked' : '') + disabled + ' aria-label="غایب ' + esc(m.name) + '">') + '</td>'
+          + '<td>' + esc(parts.first || '—') + '</td><td><strong>' + esc(parts.last || '—') + '</strong></td>'
+          + '<td dir="ltr">' + esc(m.pc || '—') + '</td>'
+          + '<td class="fg-nowrap">' + (badges || '<span class="status ok">عادی</span>') + '</td></tr>';
+      }).join('') + '</tbody></table>' : '<p class="muted">این گروه عضوی ندارد.</p>';
     return '<div class="card section-gap" id="fg-absence"><div class="form-section-head">'
       + '<h2>غیبت روزانه — ' + esc(a.group ? a.group.title : '') + (dateJalali ? ' <small style="color:var(--muted)">(' + esc(dateJalali) + ')</small>' : '') + '</h2>'
       + '<span class="status ' + (locked ? 'warn' : 'ok') + '">' + esc(a.lock_label || (locked ? '🔒 قفل شده' : 'قابل ویرایش')) + '</span>'
@@ -219,7 +226,7 @@
       + '</span>'
       + '<small class="muted">تاریخ شمسی؛ مثال: ۱۴۰۵/۰۷/۱۴ — معادل میلادیِ ذخیره‌شده: <span dir="ltr">' + esc(date) + '</span></small>'
       + '</label>'
-      + '<label class="field full">دلیل اصلاح (در صورت قفل بودن الزامی)<input id="fg-abs-reason" maxlength="300" placeholder="مثلاً: اصلاح اشتباه ثبت غیبت"></label>'
+      + '<label class="field full">دلیل اصلاح (در صورت قفل بودن الزامی)<input id="fg-abs-reason" maxlength="300" placeholder="مثلاً: اصلاح اشتباه ثبت غیبت" value="' + esc(S.absenceReasonDraft || '') + '"></label>'
       + '</div>'
       + '<div class="grid" style="margin:8px 0">'
       + '<div class="card stat"><span class="label">تاریخ</span><strong>' + esc(jalaliLabel(s.date || date) || s.date || date) + '</strong></div>'
@@ -250,15 +257,53 @@
       + '</tbody></table></div></div>';
   }
 
-  function personLine(u) {
-    // غذای سفارشی امروزِ این عضو. اگر سرویس سفارش پاسخ داد و سفارشی ثبت نشده بود،
-    // «بدون سفارش» واقعی نمایش داده می‌شود؛ اگر سرویس سفارش در دسترس نبود، چیزی نشان نمی‌دهیم.
+  // جداسازی نام/نام خانوادگی (سرور first_name/last_name می‌فرستد؛ رکورد قدیمی: کل نام در نام خانوادگی)
+  function splitName(u) {
+    u = u || {};
+    var first = String(u.first_name || '').trim();
+    var last = String(u.last_name || '').trim();
+    if (!first && !last) { first = ''; last = String(u.name || '').trim(); }
+    return { first: first, last: last };
+  }
+  function membersSortList(list) {
+    var sort = S.membersSort || { key: 'last_name', dir: 'asc' };
+    var dir = sort.dir === 'desc' ? -1 : 1;
+    return (list || []).map(function (u, index) {
+      var parts = splitName(u);
+      var value;
+      if (sort.key === 'first_name') value = parts.first.toLocaleLowerCase('fa');
+      else if (sort.key === 'pc') value = String(u.pc || '');
+      else value = parts.last.toLocaleLowerCase('fa');
+      return { u: u, index: index, value: value };
+    }).sort(function (a, b) {
+      var cmp = String(a.value).localeCompare(String(b.value), 'fa', { numeric: true });
+      return (cmp || a.index - b.index) * dir;
+    }).map(function (item) { return item.u; });
+  }
+  function sortHead(key, label, extra) {
+    var sort = S.membersSort || { key: 'last_name', dir: 'asc' };
+    var mark = sort.key === key ? (sort.dir === 'desc' ? ' ▼' : ' ▲') : '';
+    return '<th><button type="button" class="fg-sort" data-fg-sort="' + key + '">' + esc(label + mark) + '</button></th>';
+  }
+  function foodChipCell(u) {
     var foodChip = u.food
-      ? ' <span class="status info" title="غذای سفارش‌داده‌شدهٔ امروز">غذای امروز: ' + esc(u.food) + '</span>'
-      : (u.food_known ? ' <span class="status none" title="سفارشی برای امروز ثبت نشده است">بدون سفارش</span>' : '');
-    return esc(u.name || '—') + (u.pc ? ' <small>(' + esc(u.pc) + ')</small>' : '')
-      + foodChip
-      + (u.active ? '' : ' <span class="status bad">غیرفعال</span>');
+      ? '<span class="status info fg-ellipsis" title="غذای سفارش‌داده‌شدهٔ امروز">غذای امروز: ' + esc(u.food) + '</span>'
+      : (u.food_known ? '<span class="status none" title="سفارشی برای امروز ثبت نشده است">بدون سفارش</span>' : '<span class="muted">—</span>');
+    return '<td class="fg-nowrap">' + foodChip + '</td>';
+  }
+
+  function membersTable(permRows) {
+    var sorted = membersSortList(permRows);
+    return '<table class="fg-members-table"><thead><tr>'
+      + sortHead('first_name', 'نام') + sortHead('last_name', 'نام خانوادگی') + sortHead('pc', 'کد پرسنلی')
+      + '<th>غذای امروز</th><th>وضعیت</th></tr></thead><tbody>'
+      + (sorted.length ? sorted.map(function (u) {
+        var parts = splitName(u);
+        return '<tr><td>' + esc(parts.first || '—') + '</td><td><strong>' + esc(parts.last || '—') + '</strong></td>'
+          + '<td dir="ltr">' + esc(u.pc || '—') + '</td>' + foodChipCell(u)
+          + '<td>' + (u.active ? '<span class="status ok">فعال</span>' : '<span class="status bad">غیرفعال</span>') + '</td></tr>';
+      }).join('') : '<tr><td colspan="5" class="muted">عضو دائمی ثبت نشده است.</td></tr>')
+      + '</tbody></table>';
   }
 
   function membersPopup() {
@@ -268,18 +313,23 @@
     if (!g) return '';
     const perm = g.members || [];
     const guests = g.today_visitors || [];
-    const block = (title, rows, empty) => '<h3 style="margin:12px 0 6px;font-size:15px">' + title + '</h3>'
-      + (rows.length
-        ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + rows.map((u) => '<li>' + personLine(u) + '</li>').join('') + '</ol>'
-        : '<p class="muted">' + empty + '</p>');
+    const block = (title, rows, empty) => '<h3 style="margin:12px 0 6px;font-size:15px">' + title + '</h3>' + membersTable(rows);
+    const sortedGuests = membersSortList(guests);
     const guestItems = guests.length
-      ? '<ol class="fg-members-ol" style="margin:0;padding:0 22px 8px">' + guests.map((u) => {
+      ? '<table class="fg-members-table"><thead><tr>'
+        + sortHead('first_name', 'نام') + sortHead('last_name', 'نام خانوادگی') + sortHead('pc', 'کد پرسنلی')
+        + '<th>غذای امروز</th><th>نوع</th><th>عملیات</th></tr></thead><tbody>' + sortedGuests.map((u) => {
+          const parts = splitName(u);
           const btn = S.canCancelVisit
-            ? ' <button type="button" class="btn danger" data-fg="visit-cancel" data-user="' + Number(u.id) + '">' + (u.temporary_transfer ? 'بازگشت به گروه دائمی' : 'لغو تغییر سلف') + '</button>'
+            ? '<button type="button" class="btn danger fg-visit-btn" data-fg="visit-cancel" data-user="' + Number(u.id) + '">' + (u.temporary_transfer ? 'بازگشت به گروه دائمی' : 'لغو تغییر سلف') + '</button>'
             : '';
-          const transfer = u.temporary_transfer ? ' <span class="status warn">انتقال موقت از «' + esc(u.home_group_title || 'گروه دائمی') + '»؛ عضویت دائمی محفوظ است</span>' : ' <span class="status ok">مهمان/تغییر سلف روزانه</span>';
-          return '<li style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">' + personLine(u) + transfer + btn + '</li>';
-        }).join('') + '</ol>'
+          const transfer = u.temporary_transfer
+            ? '<span class="status warn fg-ellipsis" title="انتقال موقت از «' + esc(u.home_group_title || 'گروه دائمی') + '»؛ عضویت دائمی محفوظ است">انتقال موقت از «' + esc(u.home_group_title || 'گروه دائمی') + '»</span>'
+            : '<span class="status ok">مهمان/تغییر سلف روزانه</span>';
+          return '<tr><td>' + esc(parts.first || '—') + '</td><td><strong>' + esc(parts.last || '—') + '</strong></td>'
+            + '<td dir="ltr">' + esc(u.pc || '—') + '</td>' + foodChipCell(u)
+            + '<td>' + transfer + '</td><td class="fg-nowrap">' + btn + '</td></tr>';
+        }).join('') + '</tbody></table>'
       : '<p class="muted">برای امروز مهمان یا عضو موقتی ثبت نشده است.</p>';
     return '<div id="fg-members-overlay" class="fg-members-overlay">'
       + '<div class="card fg-members-dialog" data-fg-dialog role="dialog" aria-modal="true" aria-labelledby="fg-members-title" tabindex="-1">'
@@ -339,6 +389,7 @@
   }
 
   document.addEventListener('input', (e) => {
+    if (e.target && e.target.id === 'fg-abs-reason') { S.absenceReasonDraft = e.target.value; return; }
     if (e.target && e.target.id === 'fg-filter' && S.editing) {
       const keep = collect();
       S.editing = Object.assign({}, S.editing, keep, { members: keep.members.concat(((S.editing.members) || []).filter((id) => !document.querySelector('[data-fg-member][value="' + id + '"]'))) });
@@ -351,6 +402,11 @@
   });
 
   document.addEventListener('change', (e) => {
+    if (e.target && e.target.hasAttribute('data-fg-absent') && S.absence) {
+      const id = Number(e.target.getAttribute('value'));
+      S.absence.members = (S.absence.members || []).map((m) => (Number(m.id) === id ? Object.assign({}, m, { absent: !!e.target.checked }) : m));
+      return;
+    }
     if (e.target && e.target.id === 'fg-abs-date' && S.absence) {
       const iso = isoFromJalaliInput(e.target.value);
       if (!iso) {
@@ -382,6 +438,23 @@
   });
 
   document.addEventListener('click', (e) => {
+    const fgSort = e.target && e.target.closest ? e.target.closest('[data-fg-sort]') : null;
+    if (fgSort) {
+      const key = fgSort.getAttribute('data-fg-sort');
+      if (key) {
+        const current = S.membersSort || { key: 'last_name', dir: 'asc' };
+        S.membersSort = current.key === key ? { key: key, dir: current.dir === 'asc' ? 'desc' : 'asc' } : { key: key, dir: 'asc' };
+        // در حین مرتب‌سازی، تیک‌های غیبتِ ذخیره‌نشده را به مدل منتقل می‌کنیم تا از دست نروند
+        document.querySelectorAll('[data-fg-absent]').forEach((input) => {
+          const id = Number(input.getAttribute('value'));
+          if (S.absence && S.absence.members) {
+            S.absence.members = S.absence.members.map((m) => (Number(m.id) === id ? Object.assign({}, m, { absent: !!input.checked }) : m));
+          }
+        });
+        draw();
+      }
+      return;
+    }
     if (e.target && e.target.id === 'fg-members-overlay') {
       S.membersPopup = 0;
       draw();
