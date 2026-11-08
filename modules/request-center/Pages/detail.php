@@ -181,7 +181,7 @@ if ($page === 'ticket') {
         } else {
             echo '<input type="hidden" name="assigned_to" value="' . (int) $ticket['assigned_to'] . '"><p class="muted">ارجاع درخواست فقط توسط مدیر واحد انجام می‌شود.</p>';
         }
-        echo '<label>پیام همراه تغییر (برای «در انتظار پاسخ کاربر» و «حل‌شده» الزامی)<textarea name="update_note" rows="3" maxlength="5000" placeholder="برای انتظار: سؤال روشن؛ برای حل‌شده: شرح راه‌حل"></textarea><small class="field-help">این پیام برای ثبت‌کننده قابل مشاهده است و در مکالمه ذخیره می‌شود.</small></label>';
+        echo '<label>پیام و دلیل تغییر (برای هر تغییر وضعیت، تخصیص یا تغییر اولویت الزامی)<textarea name="update_note" rows="3" maxlength="5000" required placeholder="دلیل تغییر مسئول/اولویت؛ سؤال روشن برای انتظار؛ شرح راه‌حل برای حل‌شده"></textarea><small class="field-help">این پیام برای ثبت‌کننده قابل مشاهده است و در مکالمه و تاریخچه ثبت می‌شود.</small></label>';
         echo '<button class="button wide" type="submit">ذخیره تغییرات</button></form></div>';
     }
     echo '</aside></div>';
