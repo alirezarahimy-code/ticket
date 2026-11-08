@@ -1,0 +1,36 @@
+name: One-time system map refresh
+on:
+  push:
+    branches:
+      - fix/main-ci-release-1.62.90
+permissions:
+  contents: write
+jobs:
+  refresh:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/main-ci-release-1.62.90
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Remove this one-shot workflow before indexing
+        run: git rm .github/workflows/refresh-system-map-once.yml
+      - name: Regenerate system map
+        run: python tools/build_system_map.py
+      - name: Validate generated system map
+        run: python tests/test_system_map_static.py
+      - name: Commit generated indexes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/system-map
+          if git diff --cached --quiet; then
+            echo "No generated map changes"
+            exit 0
+          fi
+          git commit -m "chore: refresh system map after composite index assertion"
+          git push origin HEAD:refs/heads/fix/main-ci-release-1.62.90
