@@ -87,8 +87,11 @@ final class RequestCenterWorkflowService
     {
         $this->assertTransaction();
         if ($ticketId <= 0 || $requesterId <= 0 || trim($reason) === ''
-            || !in_array($expectedStatus, self::REQUESTER_CANCELLABLE_STATUSES, true)) {
+            || !in_array($expectedStatus, self::STATUSES, true)) {
             throw new InvalidArgumentException('اطلاعات درخواست لغو معتبر نیست.');
+        }
+        if (!in_array($expectedStatus, self::REQUESTER_CANCELLABLE_STATUSES, true)) {
+            return false;
         }
         $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
         $lockSql = 'SELECT status, requester_id, cancel_requested_at FROM tickets WHERE id = ? LIMIT 1';
