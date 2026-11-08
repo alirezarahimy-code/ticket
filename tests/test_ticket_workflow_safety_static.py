@@ -122,7 +122,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         schema = source('schema.sql')
         repository = source('modules/request-center/RequestCenterRepository.php')
         detail = source('modules/request-center/Pages/detail.php')
-        labels = source('lib/tickets-sla.php')
+        labels = source('modules/request-center/lib/functions.php')
         self.assertIn("'''rejected'''", migration)
         self.assertIn('rejected_at', migration)
         self.assertIn("'rejected')", fresh)
@@ -131,7 +131,8 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('rejected_at DATETIME NULL', schema)
         self.assertIn("'rejected'", repository)
         self.assertIn("status'] === 'rejected'", detail)
-        self.assertIn("'rejected' => 'ردشده پس از ارزیابی اولیه'", labels)
+        self.assertIn("function request_center_status_label", labels)
+        self.assertIn("'ردشده پس از ارزیابی اولیه'", labels)
 
     def test_sla_and_ola_alerts_revalidate_the_active_deadline_under_lock(self):
         cron = source('cron/sla_maintenance.php')
