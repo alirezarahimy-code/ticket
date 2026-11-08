@@ -405,6 +405,8 @@ final class RequestCenterRepository
         $conditions[] = 't.assigned_to IS NOT NULL';
         $conditions[] = "t.status NOT IN ('resolved', 'closed', 'cancelled', 'rejected')";
         $where = ' WHERE ' . implode(' AND ', $conditions);
+        $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
+        $nowExpression = $driver === 'sqlite' ? 'CURRENT_TIMESTAMP' : 'NOW()';
 
         $sql = "SELECT t.assigned_to, u.full_name,
                        COUNT(*) AS active_count,
@@ -412,11 +414,11 @@ final class RequestCenterRepository
                        COALESCE(SUM(t.priority IN ('urgent', 'critical')), 0) AS high_priority_count,
                        COALESCE(SUM(
                            t.sla_paused_at IS NULL AND (
-                               (t.due_at IS NOT NULL AND t.due_at < NOW())
-                               OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < NOW())
-                               OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < NOW())
-                               OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < NOW())
-                               OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < NOW())
+                               (t.due_at IS NOT NULL AND t.due_at < " . $nowExpression . ")
+                               OR (t.first_response_at IS NULL AND t.ola_response_due_at IS NOT NULL AND t.ola_response_due_at < " . $nowExpression . ")
+                               OR (t.ola_due_at IS NOT NULL AND t.ola_due_at < " . $nowExpression . ")
+                               OR (t.ola_escalation_1_at IS NOT NULL AND t.ola_escalation_1_at < " . $nowExpression . ")
+                               OR (t.ola_escalation_2_at IS NOT NULL AND t.ola_escalation_2_at < " . $nowExpression . ")
                            )
                        ), 0) AS overdue_count
                 FROM tickets t
