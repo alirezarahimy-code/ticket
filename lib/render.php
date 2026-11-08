@@ -131,7 +131,7 @@ function render_header(string $title, ?array $user = null): void
         if (user_can($user, 'foodorder.self')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-order', 'سفارش غذا', 'food') . '</li>';
         }
-        if (food_ticket_is_allowed($user)) {
+        if (function_exists('food_ticket_is_allowed') && food_ticket_is_allowed($user)) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=food-ticket', 'سامانه مدیریت غذا', 'food') . '</li>';
         }
         $menuItems[] = $submenu('menu-support', 'پشتیبانی', 'support', $supportLinks);
