@@ -131,7 +131,17 @@ if (!defined('APP_ROOT')) {
                         'ola_due_at' => $ticket['ola_due_at'] ?? null,
                     ],
                 ]);
-                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', ['note' => $note]);
+                log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_approved', $ticket['status'], 'closed', [
+                    'note' => $note,
+                    'sla_ola' => [
+                        'due_at' => $ticket['due_at'] ?? null,
+                        'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                        'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? 0,
+                        'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                        'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                        'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                    ],
+                ]);
                 request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد.', (int) $supervisor['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_closed', 'تأیید و بستن درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
                 flash('success', 'انجام کار تأیید شد و درخواست بسته شد.');
@@ -227,7 +237,16 @@ if (!defined('APP_ROOT')) {
             if (!$reopened) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد. صفحه را تازه کنید.');
             }
-            log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_reopened', 'closed', $reopenStatus, ['note' => $note]);
+            log_ticket_event($ticketId, (int) $supervisor['id'], 'supervisor_reopened', 'closed', $reopenStatus, [
+                'note' => $note,
+                'due_at' => $dueAt,
+                'ola_policy_id' => $reopenOla['policy_id'],
+                'ola_response_due_at' => $reopenOla['response_due_at'],
+                'ola_due_at' => $reopenOla['due_at'],
+                'ola_escalation_1_at' => $reopenOla['escalation_1_at'],
+                'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
+                'sla_pause_minutes' => 0,
+            ]);
             if ($hadStaleCancel) {
                 log_ticket_event($ticketId, (int) $supervisor['id'], 'cancellation_rejected', 'closed', $reopenStatus, ['note' => 'پاک‌سازی خودکار درخواست لغو قدیمی هنگام بازگشایی رسمی']);
             }
