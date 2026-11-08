@@ -40,7 +40,7 @@ final class RequestCenterWorkflowService
         'pending', 'resolved', 'closed', 'cancelled', 'rejected',
     ];
 
-    private const REQUESTER_CANCELLABLE_STATUSES = [
+    public const REQUESTER_CANCELLABLE_STATUSES = [
         'new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved',
     ];
 
