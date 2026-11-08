@@ -106,6 +106,7 @@ def test_sla_ola_history_is_visible_to_staff_without_exposing_internal_fields_to
     assert "'ola_response_due_at'" not in requester_keys
     assert "'sla_ola'" not in requester_keys
     assert 'if (!$canSeeInternal)' in detail
+    assert "function_exists('activity_log_meta_lines')" in detail
     assert "e.event_type NOT IN ('internal_note', 'sla_alert', 'ola_alert')" in detail
     assert "'sla_alert' => 'هشدار SLA ثبت شد'" in detail
     assert "'ola_alert' => 'هشدار OLA ثبت شد'" in detail
