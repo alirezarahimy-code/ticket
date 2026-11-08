@@ -48,10 +48,8 @@ if (!defined('APP_ROOT')) {
             }
             $status = valid_choice(post_value('bulk_status'), ['in_progress', 'waiting_user', 'resolved'], 'in_progress');
             $bulkNote = post_value('bulk_note');
-            if (in_array($status, ['waiting_user', 'resolved'], true) && $bulkNote === '') {
-                throw new RuntimeException($status === 'waiting_user'
-                    ? 'برای عملیات گروهی «در انتظار پاسخ کاربر»، پیام مشترک (سؤال روشن) را بنویسید.'
-                    : 'برای عملیات گروهی «حل‌شده»، پیام مشترک (شرح راه‌حل) را بنویسید.');
+            if ($bulkNote === '') {
+                throw new RuntimeException('برای هر تغییر وضعیت گروهی، توضیح اقدام قابل مشاهده برای درخواست‌کننده الزامی است.');
             }
             if (mb_strlen($bulkNote, 'UTF-8') > 5000) {
                 throw new RuntimeException('پیام گروهی نباید بیشتر از ۵۰۰۰ نویسه باشد.');
@@ -104,9 +102,12 @@ if (!defined('APP_ROOT')) {
                     'ola_escalation_1_at' => $bulkOla['escalation_1_at'],
                     'ola_escalation_2_at' => $bulkOla['escalation_2_at'],
                     'resolved_at' => $status === 'resolved' ? RequestCenterSqlExpression::coalesceNow() : null,
+                    'first_response_at' => empty($bulkTicket['first_response_at']) ? RequestCenterSqlExpression::coalesceNow() : $bulkTicket['first_response_at'],
                 ], 'standard', [
                     'assigned_to' => $bulkTicket['assigned_to'] ?? null,
+                    'first_response_at' => $bulkTicket['first_response_at'] ?? null,
                     'priority' => $bulkTicket['priority'],
+                    'department_id' => $bulkTicket['department_id'] ?? null,
                     'cancel_requested_at' => null,
                 ]);
                 if (!$bulkUpdated) {
@@ -117,13 +118,21 @@ if (!defined('APP_ROOT')) {
                     db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $queueUser['id'], $bulkNote]);
                     log_ticket_event($ticketId, (int) $queueUser['id'], 'reply');
                 }
-                log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status);
-                save_audit((int) $queueUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'bulk' => true]);
+                log_ticket_event($ticketId, (int) $queueUser['id'], 'bulk_status_changed', $bulkOld, $status, [
+                    'reason' => $bulkNote,
+                    'first_response_recorded' => empty($bulkTicket['first_response_at']),
+                ]);
+                save_audit_required((int) $queueUser['id'], 'ticket_updated', $ticketId, [
+                    'status' => $status,
+                    'bulk' => true,
+                    'reason' => $bulkNote,
+                    'first_response_recorded' => empty($bulkTicket['first_response_at']),
+                ]);
                 if ($status === 'resolved') {
                     notify_ticket_resolved($ticketId, (int) $queueUser['id']);
                     record_asset_history((int) ($bulkTicket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $queueUser['id'], $ticketId, 'وضعیت به حل‌شده تغییر کرد.');
                 } else {
-                    notify_ticket_parties($ticketId, 'bulk_status_changed', 'تغییر وضعیت درخواست', 'وضعیت درخواست ' . ticket_number($ticketId) . ' در عملیات گروهی به «' . status_label($status) . '» تغییر کرد.', (int) $queueUser['id']);
+                    notify_ticket_parties($ticketId, 'bulk_status_changed', 'تغییر وضعیت درخواست', 'وضعیت درخواست ' . ticket_number($ticketId) . ' در عملیات گروهی به «' . status_label($status) . '» تغییر کرد. دلیل: ' . $bulkNote, (int) $queueUser['id']);
                 }
                 $bulkChanged++;
             }
