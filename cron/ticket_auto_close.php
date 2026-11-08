@@ -12,16 +12,16 @@ declare(strict_types=1);
  * اجرا (روزی یک‌بار، مثلاً با Task Scheduler):
  *   C:\xampp\php\php.exe C:\xampp\htdocs\ticket\cron\ticket_auto_close.php
  */
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit("Not found\n");
+}
+
 require dirname(__DIR__) . '/bootstrap.php';
 require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';
 require_once dirname(__DIR__) . '/modules/request-center/lib/functions.php';
 if (function_exists('ticket_hot_schema_ensure')) {
     ticket_hot_schema_ensure();
-}
-
-if (PHP_SAPI !== 'cli') {
-    http_response_code(404);
-    exit("Not found\n");
 }
 
 $days = (int) (setting('ticket_auto_close_days', '3') ?? '3');
