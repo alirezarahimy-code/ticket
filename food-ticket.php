@@ -3279,6 +3279,10 @@ function food_ticket_api_guest_requests_report(string $from, string $to, string 
 /** نام خانوادگی برای مرتبسازی فهرست اشخاص (آخرین واژهٔ نام). */
 function food_ticket_aggregate_last_name($person): string
 {
+    $split = trim((string) ($person['last_name'] ?? ''));
+    if ($split !== '') {
+        return $split;
+    }
     $name = trim((string) preg_replace('/\s+/u', ' ', (string) ($person['name'] ?? '')));
     if ($name === '') { return ''; }
     $words = preg_split('/ /u', $name) ?: [];
@@ -3316,13 +3320,13 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
         if ($national === '') {
             $withoutNationalCount++;
             if (count($withoutNational) < 100) {
-                $withoutNational[] = ['date' => $date, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'pc' => $personnel];
+                $withoutNational[] = ['date' => $date, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'pc' => $personnel];
             }
             continue;
         }
         $key = $date . '|nat:' . $national;
         if (!isset($identities[$key])) {
-            $identities[$key] = ['date' => $date, 'nat' => $national, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'rows' => 0];
+            $identities[$key] = ['date' => $date, 'nat' => $national, 'pc' => $personnel, 'name' => trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? '')), 'first_name' => trim((string) ($row['first'] ?? '')), 'last_name' => trim((string) ($row['last'] ?? '')), 'rows' => 0];
         }
         $identities[$key]['rows']++;
         $byNational[$date . '|' . $national] = $key;
@@ -3365,11 +3369,11 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
         } else {
             $unmatchedPrintedCount++;
             if (count($unmatchedPrintedEvents) < 100) {
-                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => !empty($event['legacy_printed'])];
+                $unmatchedPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel, 'legacy_printed' => !empty($event['legacy_printed'])];
             }
         }
         if (!empty($event['legacy_printed']) && count($legacyPrintedEvents) < 100) {
-            $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'pc' => $personnel];
+            $legacyPrintedEvents[] = ['event_id' => (int) ($event['event_id'] ?? 0), 'date' => $date, 'name' => (string) ($event['name'] ?? ''), 'first_name' => (string) ($event['first_name'] ?? ''), 'last_name' => (string) ($event['last_name'] ?? ''), 'pc' => $personnel];
         }
     }
 
@@ -3388,6 +3392,7 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
         if ($unprintableCount > 0) {
             $rowsStmt = db()->prepare(
                 "SELECT o.id, o.food_date, o.employee_id, COALESCE(u.full_name, '') AS name,
+                        COALESCE(u.first_name, '') AS first_name, COALESCE(u.last_name, '') AS last_name,
                         COALESCE(u.employee_number, '') AS personnel_code,
                         CASE WHEN u.id IS NULL THEN 'کاربر سفارش پیدا نشد'
                              WHEN i.id IS NULL THEN 'آیتم تقویم غذا پیدا نشد'
@@ -3398,7 +3403,10 @@ function food_ticket_aggregate_diagnostics(string $fromDate, string $toDate, arr
             );
             $rowsStmt->execute([$fromDate, $toDate]);
             foreach ($rowsStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-                $unprintableOrders[] = ['id' => (int) $row['id'], 'date' => (string) $row['food_date'], 'name' => (string) $row['name'], 'pc' => (string) $row['personnel_code'], 'issue' => (string) $row['issue']];
+                $unprintableFirst = trim((string) ($row['first_name'] ?? ''));
+                $unprintableLast = trim((string) ($row['last_name'] ?? ''));
+                if ($unprintableFirst === '' && $unprintableLast === '') { $unprintableLast = (string) $row['name']; }
+                $unprintableOrders[] = ['id' => (int) $row['id'], 'date' => (string) $row['food_date'], 'name' => (string) $row['name'], 'first_name' => $unprintableFirst, 'last_name' => $unprintableLast, 'pc' => (string) $row['personnel_code'], 'issue' => (string) $row['issue']];
             }
         }
     } catch (Throwable $e) {
@@ -3496,12 +3504,14 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
 
     $printedPeople = [];
     try {
-        $stmt = db()->prepare("SELECT id, full_name, personnel_code, national_code, punch_date, punch_time,
-                food_type, event_type, COALESCE(meal_type, 'lunch') AS meal_type, source_uid
-            FROM food_ticket_events
-            WHERE punch_date BETWEEN ? AND ? AND print_status = 'printed'
-              AND event_type IN ('printed','print','guest','auto_printed','auto_guest')
-            ORDER BY punch_date, meal_type, punch_time, id");
+        $stmt = db()->prepare("SELECT e.id, e.full_name, e.personnel_code, e.national_code, e.punch_date, e.punch_time,
+                e.food_type, e.event_type, COALESCE(e.meal_type, 'lunch') AS meal_type, e.source_uid,
+                u.first_name AS user_first_name, u.last_name AS user_last_name
+            FROM food_ticket_events e
+            LEFT JOIN users u ON u.id = e.user_id
+            WHERE e.punch_date BETWEEN ? AND ? AND e.print_status = 'printed'
+              AND e.event_type IN ('printed','print','guest','auto_printed','auto_guest')
+            ORDER BY e.punch_date, e.meal_type, e.punch_time, e.id");
         $stmt->execute([$from, $to]);
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
             $eventType = (string) ($row['event_type'] ?? '');
@@ -3537,8 +3547,16 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
             $kind = $eventType === 'auto_printed' ? 'چاپ خودکار'
                 : ($eventType === 'auto_guest' ? 'چاپ خودکار مهمان'
                     : ($eventType === 'guest' ? 'مهمان' : 'پرسنل'));
+            $evFirst = trim((string) ($row['user_first_name'] ?? ''));
+            $evLast = trim((string) ($row['user_last_name'] ?? ''));
+            if ($evFirst === '' && $evLast === '') {
+                $evLast = trim((string) ($row['full_name'] ?? ''));
+                $evFirst = '';
+            }
             $printedPeople[] = [
                 'event_id' => (int) ($row['id'] ?? 0),
+                'first_name' => $evFirst,
+                'last_name' => $evLast,
                 'date' => (string) ($row['punch_date'] ?? ''),
                 'time' => (string) ($row['punch_time'] ?? ''),
                 'pc' => (string) ($row['personnel_code'] ?? ''),
@@ -3562,11 +3580,18 @@ function food_ticket_api_aggregate_report(string $fromDate, string $toDate): arr
     $absentPeople = [];
     try {
         foreach (food_ticket_api_absent($from, $to) as $row) {
+            $absFirst = trim((string) ($row['first'] ?? ''));
+            $absLast = trim((string) ($row['last'] ?? ''));
+            if ($absFirst === '' && $absLast === '') {
+                $absLast = trim((string) ($row['full_name'] ?? ''));
+            }
             $absentPeople[] = [
                 'date' => (string) ($row['foodDate'] ?? $from),
                 'time' => '',
                 'pc' => (string) ($row['pc'] ?? ''),
-                'name' => (string) ($row['full_name'] ?? trim((string) ($row['first'] ?? '') . ' ' . (string) ($row['last'] ?? ''))),
+                'first_name' => $absFirst,
+                'last_name' => $absLast,
+                'name' => (trim($absFirst . ' ' . $absLast) !== '' ? trim($absFirst . ' ' . $absLast) : trim((string) ($row['full_name'] ?? ''))),
                 'food' => (string) ($row['food'] ?? ''),
                 'kind' => !empty($row['declared_absent']) ? 'غیبت اعلام‌شده' : 'غایب',
                 'meal_type' => 'lunch',
@@ -3615,7 +3640,8 @@ function food_ticket_aggregate_columns(): array
         ['key' => 'date', 'label' => 'تاریخ'],
         ['key' => 'time', 'label' => 'ساعت'],
         ['key' => 'pc', 'label' => 'کد پرسنلی'],
-        ['key' => 'name', 'label' => 'نام و نام خانوادگی'],
+        ['key' => 'first_name', 'label' => 'نام'],
+        ['key' => 'last_name', 'label' => 'نام خانوادگی'],
         ['key' => 'food', 'label' => 'نوع غذا'],
         ['key' => 'meal_type', 'label' => 'وعده'],
         ['key' => 'kind', 'label' => 'نوع فیش'],
@@ -3631,7 +3657,7 @@ function food_ticket_aggregate_export(string $fromDate, string $toDate, string $
     $keys = array_values(array_unique(array_filter(array_map('trim', explode(',', $fieldsRaw)))));
     $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], $keys, true)));
     if ($selected === []) {
-        $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], ['row', 'pc', 'name', 'food'], true)));
+        $selected = array_values(array_filter($all, static fn (array $c): bool => in_array($c['key'], ['row', 'pc', 'first_name', 'last_name', 'food'], true)));
     }
     $headers = array_map(static fn (array $c): string => $c['label'], $selected);
     $rangeLabel = $report['from'] === $report['to']
