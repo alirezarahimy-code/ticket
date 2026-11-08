@@ -69,6 +69,7 @@ header('Cache-Control: private, no-store');
 <div class="rc-admin-stat"><strong><?= number_format($summary['awaiting_assignment']) ?></strong><span>در انتظار ارجاع</span></div>
 <div class="rc-admin-stat"><strong><?= number_format($summary['awaiting_supervisor']) ?></strong><span>در انتظار بررسی سوپروایزر</span></div>
 <div class="rc-admin-stat"><strong><?= number_format($summary['closed']) ?></strong><span>بسته‌شده</span></div>
+<div class="rc-admin-stat"><strong><?= number_format($summary['rejected']) ?></strong><span>ردشده</span></div>
 </section>
 <div class="rc-admin-layout">
 <section class="card" style="padding:16px">
