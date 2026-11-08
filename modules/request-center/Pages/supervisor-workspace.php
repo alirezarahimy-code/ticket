@@ -21,7 +21,7 @@ $supervisorStatusLabels = [
     'new' => 'جدید', 'manager_review' => 'در انتظار ارجاع', 'assigned' => 'ارجاع‌شده',
     'in_progress' => 'در حال انجام', 'waiting_user' => 'در انتظار پاسخ کاربر',
     'pending' => 'در انتظار پاسخ کاربر', 'resolved' => 'حل‌شده', 'closed' => 'بسته‌شده',
-    'cancelled' => 'لغوشده',
+    'cancelled' => 'لغوشده', 'rejected' => 'ردشده',
 ];
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
