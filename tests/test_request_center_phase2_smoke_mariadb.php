@@ -436,6 +436,12 @@ try {
     smoke_check($maintenanceFirst['exit'] === 0, 'SLA/OLA maintenance command executes successfully (exit ' . $maintenanceFirst['exit'] . ')');
     $slaAlerts = (int) $pdo->query('SELECT COUNT(*) FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
     $olaAlerts = (int) $pdo->query('SELECT COUNT(*) FROM ticket_ola_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
+    if ($slaAlerts !== 1 || $olaAlerts !== 4) {
+        $maintenanceRow = $pdo->query('SELECT id, status, due_at, sla_paused_at, first_response_at, ola_response_due_at, ola_due_at, ola_escalation_1_at, ola_escalation_2_at FROM tickets WHERE id = ' . $maintenanceTicketId)->fetch(PDO::FETCH_ASSOC);
+        $appLogTail = is_file($root . '/storage/logs/app.log') ? implode(" ⏎ ", array_slice(@file($root . '/storage/logs/app.log', FILE_IGNORE_NEW_LINES) ?: [], -10)) : '';
+        echo 'SLA/OLA diagnostic: stdout=' . $maintenanceFirst['stdout'] . ' stderr=' . $maintenanceFirst['stderr']
+            . ' sla=' . $slaAlerts . ' ola=' . $olaAlerts . ' row=' . json_encode($maintenanceRow) . ' app.log=' . $appLogTail . PHP_EOL;
+    }
     smoke_check($slaAlerts === 1 && $olaAlerts === 4, 'SLA due-soon and all four overdue/escalation OLA alerts are persisted');
     $maintenanceSecond = $runMaintenance();
     $slaAlertsAfter = (int) $pdo->query('SELECT COUNT(*) FROM ticket_sla_alerts WHERE ticket_id = ' . $maintenanceTicketId)->fetchColumn();
