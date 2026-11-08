@@ -145,3 +145,16 @@ def test_1_62_90_report_requires_logging_package_first() -> None:
             embedded = archive.read(embedded_report).decode("utf-8", "replace")
             assert embedded == report, "گزارش داخل ZIP با گزارش انتشار مخزن متفاوت است"
 
+
+
+def test_legacy_1_62_83_archive_is_explicitly_deprecated() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    legacy_archive = "ticket-update-1.62.77-to-1.62.83-hardening-20261105.zip"
+
+    assert legacy_archive not in {item[0] for item in UPGRADE_CHAIN}, (
+        "بستهٔ تاریخی 1.62.83 نباید بخشی از زنجیرهٔ پشتیبانی‌شده باشد"
+    )
+    assert legacy_archive in readme, "README باید بستهٔ قدیمی 1.62.83 را صریحاً شناسایی کند"
+    assert "این ZIP را نصب نکنید" in readme, (
+        "README باید نصب ZIP قدیمی 1.62.83 را صریحاً منع کند"
+    )
