@@ -244,7 +244,7 @@ try {
         $errorRecord->execute([$requestMatch[1]]);
         $legacyTargetDiagnostic = json_encode($errorRecord->fetch(PDO::FETCH_ASSOC) ?: [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
-    t04_check($legacyTarget['status'] === 503, 'bridged Request Center target fails closed on incomplete schema (HTTP ' . $legacyTarget['status'] . '; body=' . substr(trim(strip_tags($legacyTarget['body'])), 0, 240) . '; system_error=' . $legacyTargetDiagnostic . ')');
+    t04_check($legacyTarget['status'] === 503, 'bridged Request Center target fails closed on incomplete schema (HTTP ' . $legacyTarget['status'] . '; body=' . substr(trim(strip_tags($legacyTarget['body'])), 0, 240) . '; system_error=' . $legacyTargetDiagnostic . '; server=' . substr((string) @file_get_contents($serverLogPath), -5000) . ')');
     t04_check(count($legacyTargetLog['ddl']) === 0, 'bridged Request Center target executes zero DDL');
 
     echo "T04 PASS: independent Request Center and legacy bridge perform zero runtime DDL.\n";
