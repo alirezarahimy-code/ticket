@@ -232,7 +232,7 @@ final class RequestCenterWorkflowService
         }
 
         $driver = (string) $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-        $lockSql = 'SELECT id, status, requester_id, assigned_to, first_response_at, resolved_at, cancel_requested_at, priority, department_id, service_group FROM tickets WHERE id = ? LIMIT 1';
+        $lockSql = 'SELECT id, status, requester_id, assigned_to, first_response_at, resolved_at, cancel_requested_at, priority, department_id, service_group, due_at, sla_minutes, sla_paused_at, sla_pause_minutes, ola_policy_id, ola_response_due_at, ola_due_at, ola_escalation_1_at, ola_escalation_2_at FROM tickets WHERE id = ? LIMIT 1';
         if ($driver === 'mysql') {
             $lockSql .= ' FOR UPDATE';
         }
@@ -244,7 +244,7 @@ final class RequestCenterWorkflowService
         }
 
         foreach ($expectedFields as $field => $expectedValue) {
-            if (!in_array($field, ['requester_id', 'assigned_to', 'first_response_at', 'resolved_at', 'cancel_requested_at', 'priority', 'department_id', 'service_group'], true)) {
+            if (!in_array($field, ['requester_id', 'assigned_to', 'first_response_at', 'resolved_at', 'cancel_requested_at', 'priority', 'department_id', 'service_group', 'due_at', 'sla_minutes', 'sla_paused_at', 'sla_pause_minutes', 'ola_policy_id', 'ola_response_due_at', 'ola_due_at', 'ola_escalation_1_at', 'ola_escalation_2_at'], true)) {
                 throw new InvalidArgumentException('فیلد شرط هم‌زمانی مجاز نیست: ' . $field);
             }
             $actual = $current[$field] ?? null;
