@@ -237,3 +237,44 @@ function report_query_filters(array $user): array
     }
     return [$conditions ? 'WHERE ' . implode(' AND ', $conditions) : '', $params];
 }
+
+/**
+ * Read-only preflight for the independent create-request path.
+ *
+ * Legacy index.php historically repaired these fields and seeded categories
+ * during a web request. The independent Request Center must never run DDL or
+ * data backfills at request time; migration 037 owns that preparation.
+ */
+function request_center_assert_create_schema(): void
+{
+    $required = [
+        'tickets' => ['requesting_unit_id'],
+        'categories' => ['code'],
+        'service_catalog' => ['category_id'],
+    ];
+    $statement = db()->query(
+        'SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()'
+    );
+    $available = [];
+    foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $table = strtolower((string) ($row['TABLE_NAME'] ?? ''));
+        $column = strtolower((string) ($row['COLUMN_NAME'] ?? ''));
+        if ($table !== '' && $column !== '') {
+            $available[$table][$column] = true;
+        }
+    }
+    $missing = [];
+    foreach ($required as $table => $columns) {
+        foreach ($columns as $column) {
+            if (!isset($available[$table][$column])) {
+                $missing[] = $table . '.' . $column;
+            }
+        }
+    }
+    if ($missing !== []) {
+        throw new RuntimeException(
+            'ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست. Migrationهای RC را اجرا کنید؛ ستون‌های ناقص: '
+            . implode(', ', $missing)
+        );
+    }
+}
