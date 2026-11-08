@@ -129,6 +129,7 @@ function t12s_seed(PDO $pdo): void
         (104, 1, 'rc_t12s_supmgr', 'RC T12s Support Manager', 'support_manager', 1, 'local', 1, 2, 0, 0, 'x'),
         (105, 1, 'rc_t12s_supervisor', 'RC T12s Supervisor', 'supervisor', 1, 'local', NULL, NULL, 0, 0, 'x')
         ON DUPLICATE KEY UPDATE username = username");
+    $pdo->exec("INSERT INTO assets (id, asset_tag, hostname, owner_user_id, department_id) VALUES (1, 'T12-IT-01', 't12-it-01', 101, 2)");
 }
 
 /** One-time setup: dedicated web users + grants (persist across DB rebuilds). */
@@ -548,6 +549,7 @@ try {
                 'category_id' => 2,
                 'service_id' => 2,
                 'service_group' => 'it',
+                'asset_id' => 1,
             ]);
             $pdo = t12s_pdo($app);
             $pdo->exec("UPDATE tickets SET status = 'in_progress', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR WHERE id = " . (int) $tid);
