@@ -28,6 +28,18 @@ foreach ($query->fetchAll() as $ticket) {
                 ? 'درخواست ' . ticket_number((int) $ticket['id']) . ' از مهلت SLA عبور کرده است.'
                 : 'مهلت درخواست ' . ticket_number((int) $ticket['id']) . ' در کمتر از یک ساعت آینده است.';
             notify_ticket_staff((int) $ticket['id'], 'sla_' . $type, $title, $body);
+            $auditSaved = activity_log([
+                'user_id' => null,
+                'action_code' => 'ticket_sla_alert',
+                'module' => 'tickets',
+                'target_type' => 'ticket',
+                'target_id' => (int) $ticket['id'],
+                'meta' => ['alert_type' => $type, 'due_at' => $ticket['due_at'], 'actor_type' => 'system'],
+                'result' => 'success',
+            ]);
+            if (!$auditSaved) {
+                throw new RuntimeException('Required audit persistence failed for SLA alert.');
+            }
             $alerts++;
         }
         db()->commit();
@@ -69,6 +81,22 @@ try {
                     $number = ticket_number((int) $ticket['id']);
                     $labels = [$olaLabels[$type][0], sprintf($olaLabels[$type][1], $number)];
                     notify_ticket_staff((int) $ticket['id'], 'ola_' . $type, $labels[0], $labels[1]);
+                    $auditSaved = activity_log([
+                        'user_id' => null,
+                        'action_code' => 'ticket_ola_alert',
+                        'module' => 'tickets',
+                        'target_type' => 'ticket',
+                        'target_id' => (int) $ticket['id'],
+                        'meta' => [
+                            'alert_type' => $type,
+                            'due_at' => $dueAtText,
+                            'actor_type' => 'system',
+                        ],
+                        'result' => 'success',
+                    ]);
+                    if (!$auditSaved) {
+                        throw new RuntimeException('Required audit persistence failed for OLA alert.');
+                    }
                     if ($type === 'escalation_2') {
                         $admins = db()->query('SELECT id FROM users WHERE role = "primary_admin" AND is_active = 1')->fetchAll(PDO::FETCH_COLUMN);
                         foreach ($admins as $adminId) {
