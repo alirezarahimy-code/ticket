@@ -626,7 +626,7 @@ tests/test_system_health_log_button_static.py	tests	38	1890
 tests/test_system_health_readability_static.py	tests	62	3418
 tests/test_system_health_safe_export_static.py	tests	62	3003
 tests/test_system_map_blocks.py	tests	346	16106
-tests/test_system_map_static.py	tests	171	8387
+tests/test_system_map_static.py	tests	171	8422
 tests/test_system_update_archive_paths.php	tests	40	1775
 tests/test_system_update_archive_zip.php	tests	160	6892
 tests/test_system_update_migration_registry.php	tests	67	2242
