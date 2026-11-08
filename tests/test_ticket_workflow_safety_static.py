@@ -44,7 +44,7 @@ class TicketWorkflowSafetyTests(unittest.TestCase):
         self.assertIn('ticket_user_is_requester($ticket, $user)', reply)
         self.assertIn('ticket_reply_starts_work($ticket, $user)', reply)
         self.assertIn("$isStaffUser && !$asRequester && ticket_handler_level($ticket, $user) !== ''", reply)
-        self.assertIn("if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester))", reply)
+        self.assertIn("if (!empty($_POST['is_internal']) && (!$isStaffUser || $asRequester || !ticket_can_see_internal($ticket, $user)))", reply)
         self.assertIn("$lockedReply['assigned_to']", reply)
         self.assertIn('$requesterView = $isRequester;', source('modules/request-center/Pages/detail.php'))
         self.assertIn("!user_can($user, 'ticket.edit') || ticket_handler_level($ticket, $user) === ''", reply)
