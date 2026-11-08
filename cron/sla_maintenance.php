@@ -96,7 +96,7 @@ try {
                 // Lock and validate the exact OLA deadline again. The ticket may
                 // have been resolved, paused, or had its policy recalculated since
                 // the discovery query ran.
-                $currentOlaQuery = db()->prepare('SELECT id, ' . $column . ' AS due_text, first_response_at FROM tickets WHERE id = ? AND status NOT IN ("resolved", "closed", "cancelled", "rejected") AND sla_paused_at IS NULL AND ' . $column . ' IS NOT NULL AND ' . $column . ' = ? AND ' . $column . ' <= NOW() ' . $spec['extra'] . ' FOR UPDATE');
+                $currentOlaQuery = db()->prepare('SELECT t.id, t.' . $column . ' AS due_text, t.first_response_at FROM tickets t WHERE t.id = ? AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected") AND t.sla_paused_at IS NULL AND t.' . $column . ' IS NOT NULL AND t.' . $column . ' = ? AND t.' . $column . ' <= NOW() ' . $spec['extra'] . ' FOR UPDATE');
                 $currentOlaQuery->execute([(int) $ticket['id'], $dueAtText]);
                 $currentOla = $currentOlaQuery->fetch();
                 if (!$currentOla) {
