@@ -33,6 +33,26 @@ if ($page === 'reports') {
     ticket_number_cache_prime($reportRows); // ticket_no از همین SELECT آمده؛ جلوگیری از N+1
     $departments = is_global_ticket_role($reportUser['role']) ? db()->query('SELECT id, name FROM departments WHERE is_active = 1 ORDER BY name')->fetchAll() : [];
     $queryString = http_build_query(array_filter($_GET, static fn ($value, $key): bool => $key !== 'page' && $key !== 'action' && $value !== '', ARRAY_FILTER_USE_BOTH));
+    $reportReturnWorkspace = user_is_primary_admin($reportUser) ? 'admin'
+        : (user_can($reportUser, 'supervisor.panel') ? 'supervisor'
+            : ((user_can($reportUser, 'ticket.edit') || user_can($reportUser, 'queue.view')
+                || user_can($reportUser, 'ticket.view_unit') || user_can($reportUser, 'ticket.view_all'))
+                ? 'agent' : 'requester'));
+    $reportReturnParams = ['workspace' => $reportReturnWorkspace, 'p' => $reportPage];
+    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16,
+        'ticket_type' => 16, 'from' => 24, 'to' => 24] as $returnKey => $maxLength) {
+        $returnValue = trim((string) ($_GET[$returnKey] ?? ''));
+        if ($returnValue !== '' && strlen($returnValue) <= $maxLength) {
+            $reportReturnParams[$returnKey] = $returnValue;
+        }
+    }
+    foreach (['department_id', 'assigned_to'] as $returnIdKey) {
+        $returnId = (int) ($_GET[$returnIdKey] ?? 0);
+        if ($returnId > 0) {
+            $reportReturnParams[$returnIdKey] = $returnId;
+        }
+    }
+    $reportDetailContext = http_build_query($reportReturnParams);
     render_header('گزارش‌ها', $reportUser);
      echo '<section class="page-heading"><div><span class="eyebrow">کنترل عملکرد پشتیبانی</span><h1>گزارش و پیگیری</h1><p>گزارش‌ها را فیلتر کنید و خروجی قابل استفاده در Excel بگیرید.</p></div><a class="button secondary" href="request-center.php?action=export_report' . ($queryString ? '&' . e($queryString) : '') . '">خروجی Excel</a></section><section class="card filter-card"><form method="get"><input type="hidden" name="page" value="reports"><div class="filter-grid"><label>از تاریخ جلالی<input type="text" name="from" placeholder="۱۴۰۵/۰۱/۰۱" value="' . e($_GET['from'] ?? '') . '"></label><label>تا تاریخ جلالی<input type="text" name="to" placeholder="۱۴۰۵/۰۱/۳۱" value="' . e($_GET['to'] ?? '') . '"></label><label>وضعیت<select name="status"><option value="">همه وضعیت‌ها</option>';
     // گزینه‌های گروهی هم اضافه شدند تا کارت‌های داشبورد (?status=active/resolved/all) در فرم دیده شوند
@@ -55,7 +75,7 @@ if ($page === 'reports') {
      foreach (['incident','request','problem','change'] as $ticketType) { echo '<option value="' . $ticketType . '" ' . ((string) ($_GET['ticket_type'] ?? '') === $ticketType ? 'selected' : '') . '>' . ticket_type_label($ticketType) . '</option>'; }
      echo '</select></label><label class="filter-search">جست‌وجو<input name="q" value="' . e($_GET['q'] ?? '') . '" placeholder="عنوان، شرح یا ثبت‌کننده"></label><button class="button" type="submit">اعمال فیلتر</button></div></form></section><section class="stat-grid report-stats"><div class="stat-card accent"><span class="stat-icon">▣</span><div><strong>' . (int) $summary['total'] . '</strong><small>کل درخواست‌ها</small></div></div><div class="stat-card"><span class="stat-icon blue">◈</span><div><strong>' . (int) $summary['active'] . '</strong><small>باز و در حال انجام</small></div></div><div class="stat-card"><span class="stat-icon green">✓</span><div><strong>' . ((int) $summary['resolved'] + (int) $summary['closed']) . '</strong><small>حل‌شده یا بسته</small></div></div><div class="stat-card"><span class="stat-icon gray">×</span><div><strong>' . (int) $summary['cancelled'] . '</strong><small>لغوشده</small></div></div><div class="stat-card"><span class="stat-icon gray">!</span><div><strong>' . (int) $summary['rejected'] . '</strong><small>ردشده</small></div></div><div class="stat-card"><span class="stat-icon gray">◷</span><div><strong>' . ($summary['avg_resolution'] ? round((float) $summary['avg_resolution'] / 60, 1) . ' ساعت' : '-') . '</strong><small>میانگین زمان حل</small></div></div><div class="stat-card"><span class="stat-icon" style="background:#fef3f2;color:#b42318">!</span><div><strong>' . (int) $summary['overdue'] . '</strong><small>عبور از SLA</small></div></div></section><section class="card ticket-table report-table"><div class="table-head"><span>درخواست</span><span>واحد</span><span>ثبت‌کننده</span><span>وضعیت</span><span>زمان ثبت</span></div>';
     foreach ($reportRows as $row) {
-         echo '<a class="table-row" href="request-center.php?page=ticket&id=' . (int) $row['id'] . '"><span class="ticket-title"><b>' . e(ticket_number((int) $row['id'])) . '</b><strong>' . e($row['subject']) . '</strong><small>' . e(ticket_type_label($row['ticket_type'])) . ' • ' . e($row['assignee_name'] ?: 'بدون کارشناس') . '</small></span><span>' . e($row['department_name'] ?: 'بدون واحد') . '</span><span>' . e($row['requester_name']) . '</span><span><em class="status ' . e($row['status']) . '">' . e(request_center_status_label($row['status'])) . '</em></span><span class="date-cell">' . persian_date($row['created_at']) . '</span></a>';
+         echo '<a class="table-row" href="request-center.php?page=ticket&amp;id=' . (int) $row['id'] . '&amp;' . e($reportDetailContext) . '"><span class="ticket-title"><b>' . e(ticket_number((int) $row['id'])) . '</b><strong>' . e($row['subject']) . '</strong><small>' . e(ticket_type_label($row['ticket_type'])) . ' • ' . e($row['assignee_name'] ?: 'بدون کارشناس') . '</small></span><span>' . e($row['department_name'] ?: 'بدون واحد') . '</span><span>' . e($row['requester_name']) . '</span><span><em class="status ' . e($row['status']) . '">' . e(request_center_status_label($row['status'])) . '</em></span><span class="date-cell">' . persian_date($row['created_at']) . '</span></a>';
     }
     echo '</section>';
     if ($reportPages > 1) {
