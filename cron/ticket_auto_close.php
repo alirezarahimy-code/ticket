@@ -95,14 +95,16 @@ foreach ($candidates as $row) {
             'ticket_closed',
             'درخواست شما بسته شد',
             'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون پاسخ بسته شد. هنوز می‌توانید امتیاز رضایت خود را ثبت کنید.',
-            $ticketId
+            $ticketId,
+            true
         );
         request_center_notify_ticket_staff(
             $ticketId,
             'ticket_closed',
             'درخواست به‌صورت خودکار بسته شد',
             'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون امتیاز کاربر بسته شد.',
-            null
+            null,
+            true
         );
         record_asset_history((int) ($row['asset_id'] ?? 0), 'ticket_closed', 'بسته‌شدن خودکار درخواست ' . ticket_number($ticketId), null, $ticketId, 'بدون امتیاز کاربر');
         db()->commit();
