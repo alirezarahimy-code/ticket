@@ -792,18 +792,34 @@ try {
         $independentUrl = $independentApp['base_url'] . '/request-center.php';
         $independentEvidence = [];
 
-        // Requester: direct cancellation before assignment.
+        // Requester: ask to cancel an already assigned ticket; the assigned
+        // agent then decides the request through the independent POST boundary.
         $requesterTicket = t12s_create_ticket('feature', $independentApp, $independentSessions);
+        $independentPdo->exec("UPDATE tickets SET status = 'assigned', assigned_to = 102, assigned_at = NOW() - INTERVAL 1 HOUR, first_response_at = NOW() - INTERVAL 30 MINUTE WHERE id = " . (int) $requesterTicket);
         $requesterResponse = t12s_post($independentUrl, $independentSessions['requester']['feature'], 'cancel_ticket', [
             'ticket_id' => $requesterTicket,
-            'cancel_reason' => 'لغو مستقل درخواست‌دهنده در T12',
+            'cancel_reason' => 'درخواست لغو مستقل درخواست‌دهنده در T12',
         ]);
-        $requesterStatus = (string) $independentPdo->query('SELECT status FROM tickets WHERE id = ' . (int) $requesterTicket)->fetchColumn();
-        if ($requesterResponse['status'] !== 302 || $requesterStatus !== 'cancelled') {
-            t12s_fail('13-independent-post requester cancellation failed: HTTP ' . $requesterResponse['status'] . ', status=' . $requesterStatus);
+        $requesterCancel = $independentPdo->query('SELECT status, cancel_requested_at FROM tickets WHERE id = ' . (int) $requesterTicket)->fetch(PDO::FETCH_ASSOC);
+        if ($requesterResponse['status'] !== 302 || !$requesterCancel || empty($requesterCancel['cancel_requested_at'])
+            || (string) $requesterCancel['status'] !== 'assigned') {
+            t12s_fail('13-independent-post requester cancellation request failed: HTTP ' . $requesterResponse['status']
+                . ', ticket=' . json_encode($requesterCancel));
         }
-        $independentEvidence[] = 'requester:cancel_ticket:PASS';
+        $independentEvidence[] = 'requester:cancel-request:PASS';
         t12s_log('T12-SCENARIO 13-independent-post requester: PASS');
+
+        $agentCancellationResponse = t12s_post($independentUrl, $independentSessions['agent']['feature'], 'decide_ticket_cancellation', [
+            'ticket_id' => $requesterTicket,
+            'decision' => 'approve',
+            'decision_note' => 'تأیید لغو از مسیر مستقل T12',
+        ]);
+        $requesterFinalStatus = (string) $independentPdo->query('SELECT status FROM tickets WHERE id = ' . (int) $requesterTicket)->fetchColumn();
+        if ($agentCancellationResponse['status'] !== 302 || $requesterFinalStatus !== 'cancelled') {
+            t12s_fail('13-independent-post agent cancellation decision failed: HTTP ' . $agentCancellationResponse['status']
+                . ', status=' . $requesterFinalStatus);
+        }
+        $independentEvidence[] = 'agent:cancel-decision:PASS';
 
         // Agent: public reply against a ticket explicitly assigned to this agent.
         $agentTicket = t12s_create_ticket('feature', $independentApp, $independentSessions);
