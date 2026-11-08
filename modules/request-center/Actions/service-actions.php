@@ -63,7 +63,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'خدمت جدید به کاتالوگ اضافه شد.');
-            redirect('index.php?page=services#tab-list');
+            redirect('request-center.php?page=services#tab-list');
         }
 
         if ($action === 'add_service_field') {
@@ -88,7 +88,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'فیلد خدمت اضافه شد.');
-            redirect('index.php?page=services&tab=tab-list#tab-list');
+            redirect('request-center.php?page=services&tab=tab-list#tab-list');
         }
 
         if ($action === 'edit_service') {
@@ -127,7 +127,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'خدمت ویرایش شد.');
-            redirect('index.php?page=services#tab-list');
+            redirect('request-center.php?page=services#tab-list');
         }
 
         if ($action === 'delete_service') {
@@ -149,7 +149,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'خدمت از کاتالوگ حذف شد.');
-            redirect('index.php?page=services#tab-list');
+            redirect('request-center.php?page=services#tab-list');
         }
 
         if ($action === 'save_service_category') {
@@ -180,7 +180,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'دسته‌بندی ذخیره شد.');
-            redirect('index.php?page=services#tab-categories');
+            redirect('request-center.php?page=services#tab-categories');
         }
 
         if ($action === 'delete_service_category') {
@@ -200,7 +200,7 @@ if (!defined('APP_ROOT')) {
                 throw $exception;
             }
             flash('success', 'دسته‌بندی غیرفعال شد.');
-            redirect('index.php?page=services#tab-categories');
+            redirect('request-center.php?page=services#tab-categories');
         }
 
         if ($action === 'add_knowledge') {
