@@ -52,6 +52,19 @@ if ($page === 'ticket') {
         if ($requestedTicketType !== '') {
             $detailReturnParams['ticket_type'] = $requestedTicketType;
         }
+        if ((string) ($_GET['calendar'] ?? '') === '1'
+            && in_array($detailReturnWorkspace, ['agent', 'supervisor', 'admin'], true)) {
+            $detailReturnParams['calendar'] = 1;
+            $requestedCalendarMonth = (string) ($_GET['jmonth'] ?? '');
+            if (preg_match('/^\\d{4}-(0[1-9]|1[0-2])$/', $requestedCalendarMonth)) {
+                $detailReturnParams['jmonth'] = $requestedCalendarMonth;
+            }
+            $detailReturnParams['view'] = (string) ($_GET['view'] ?? '') === 'agenda' ? 'agenda' : 'month';
+            $requestedCalendarKind = (string) ($_GET['kind'] ?? '');
+            if (in_array($requestedCalendarKind, ['sla', 'work', 'visit', 'await', 'followup'], true)) {
+                $detailReturnParams['kind'] = $requestedCalendarKind;
+            }
+        }
         $detailReturnParams['p'] = max(1, min(100000, (int) ($_GET['p'] ?? 1)));
     }
     $detailReturnUrl = 'request-center.php' . ($detailReturnParams !== []
