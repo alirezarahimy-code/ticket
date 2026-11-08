@@ -49,6 +49,8 @@ $pdo->exec('CREATE TEMPORARY TABLE tickets (
     first_response_at DATETIME NULL,
     resolved_at DATETIME NULL,
     cancel_requested_at DATETIME NULL,
+    cancel_requested_by BIGINT UNSIGNED NULL,
+    cancel_request_reason VARCHAR(1000) NULL,
     priority VARCHAR(20) NOT NULL,
     department_id BIGINT UNSIGNED NULL,
     due_at DATETIME NULL,
@@ -62,6 +64,14 @@ $pdo->exec('CREATE TEMPORARY TABLE tickets (
     updated_at DATETIME NULL
 ) ENGINE=InnoDB');
 
+$pdo->exec('CREATE TEMPORARY TABLE ticket_messages (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    ticket_id BIGINT UNSIGNED NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    body TEXT NOT NULL,
+    is_internal TINYINT(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB');
+
 $insert = $pdo->prepare(
     'INSERT INTO tickets (id,status,requester_id,assigned_to,priority,cancel_requested_at) VALUES (?,?,?,?,?,?)'
 );
@@ -69,6 +79,7 @@ $insert->execute([1, 'assigned', 101, 201, 'normal', null]);
 $insert->execute([2, 'in_progress', 102, 202, 'urgent', null]);
 $insert->execute([3, 'assigned', 103, 203, 'normal', '2026-11-01 10:00:00']);
 $insert->execute([4, 'assigned', 104, 204, 'normal', null]);
+$insert->execute([5, 'assigned', 105, 205, 'normal', null]);
 
 $service = new RequestCenterWorkflowService($pdo);
 
@@ -146,5 +157,31 @@ try {
 }
 $pdo->rollBack();
 mariadb_workflow_check($blockedColumn, 'update allowlist rejects arbitrary SQL column input');
+
+// Conversation writes and cancellation metadata share the caller transaction.
+$pdo->beginTransaction();
+$messageId = $service->appendMessage(1, 101, 'MariaDB reply', false);
+mariadb_workflow_check($messageId > 0, 'message insert returns an identifier on MariaDB');
+$pdo->rollBack();
+$count = (int) $pdo->query('SELECT COUNT(*) FROM ticket_messages')->fetchColumn();
+mariadb_workflow_check($count === 0, 'caller rollback removes the conversation insert');
+
+$pdo->beginTransaction();
+$requested = $service->requestCancellation(5, 105, 'assigned', 'duplicate request');
+mariadb_workflow_check($requested, 'cancellation request locks and updates the expected owner/status row');
+$pdo->commit();
+$cancel = $pdo->query('SELECT status, cancel_requested_by, cancel_request_reason, cancel_requested_at FROM tickets WHERE id = 5')->fetch();
+mariadb_workflow_check($cancel['status'] === 'assigned' && (int) $cancel['cancel_requested_by'] === 105
+    && $cancel['cancel_request_reason'] === 'duplicate request' && $cancel['cancel_requested_at'] !== null,
+    'cancellation metadata persists without changing lifecycle status');
+
+$pdo->beginTransaction();
+$cleared = $service->rejectCancellation(5, 'assigned', (string) $cancel['cancel_requested_at']);
+mariadb_workflow_check($cleared, 'cancellation rejection matches the exact request timestamp');
+$pdo->commit();
+$cancel = $pdo->query('SELECT cancel_requested_at, cancel_requested_by, cancel_request_reason FROM tickets WHERE id = 5')->fetch();
+mariadb_workflow_check($cancel['cancel_requested_at'] === null && $cancel['cancel_requested_by'] === null
+    && $cancel['cancel_request_reason'] === null,
+    'cancellation rejection clears metadata atomically');
 
 echo 'PASS: MariaDB WorkflowService integration contract' . PHP_EOL;
