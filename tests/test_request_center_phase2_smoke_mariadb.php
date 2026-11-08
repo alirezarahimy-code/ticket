@@ -253,6 +253,11 @@ try {
     // 6) Phase 3 — obtain the token from the actual independent creation form,
     // then exercise the complete create_ticket round trip through that entry.
     $createForm = smoke_http('http://' . $address . '/request-center.php?page=new-ticket', ['Cookie: ' . $cookie]);
+    if ($createForm['status'] !== 200) {
+        $formLog = is_file($root . '/storage/logs/app.log') ? implode(" ⏎ ", array_slice(@file($root . '/storage/logs/app.log', FILE_IGNORE_NEW_LINES) ?: [], -15)) : '';
+        $serverDiagnostic = is_file($serverLogPath) ? (string) file_get_contents($serverLogPath) : '';
+        echo "creation form diagnostic: app.log=" . $formLog . " | server=" . substr($serverDiagnostic, -4000) . PHP_EOL;
+    }
     smoke_check($createForm['status'] === 200, 'independent creation form returns HTTP 200 (status ' . $createForm['status'] . ')');
     $csrf = '';
     if (preg_match('/name="csrf"\\s+value="([a-f0-9]{64})"/i', $createForm['body'], $csrfMatch) === 1) {
