@@ -175,7 +175,11 @@ if ($page === 'ticket') {
             $agentId = (int) $agent['id'];
             echo '<option value="' . $agentId . '"' . ($agentId === $currentAssigneeId ? ' selected' : '') . '>' . e((string) $agent['full_name']) . '</option>';
         }
-        echo '</select></label><label>یادداشت داخلی ارجاع (اختیاری)<input type="text" name="assignment_note" maxlength="500" placeholder="توضیح کوتاه برای تیم رسیدگی"></label><button class="button wide" type="submit">ثبت تخصیص / بازتخصیص</button></form>';
+        echo '</select></label>';
+        if (ticket_can_see_internal($ticket, $user)) {
+            echo '<label>یادداشت داخلی ارجاع (اختیاری)<input type="text" name="assignment_note" maxlength="500" placeholder="توضیح کوتاه برای تیم رسیدگی"></label>';
+        }
+        echo '<button class="button wide" type="submit">ثبت تخصیص / بازتخصیص</button></form>';
         if (empty($agents)) {
             echo '<small class="muted">در حال حاضر کارشناس فعال و واجد شرایطی برای این حوزه پیدا نشد.</small>';
         }
