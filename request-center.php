@@ -80,14 +80,18 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
     $rcSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($rcSchemaProblems !== []) {
+        // Do not render the system-wide layout while the RC schema is known to
+        // be incomplete: legacy header/footer helpers may query the very
+        // columns that failed preflight and turn this controlled 503 into 500.
         http_response_code(503);
-        render_header('مرکز درخواست‌ها');
-        echo '<main class="container"><section class="card"><h2>ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست</h2><p>برای جلوگیری از اجرای ناقص عملیات، این Workspace تا رفع موارد زیر غیرفعال شد:</p><ul>';
+        header('Content-Type: text/html; charset=UTF-8');
+        echo '<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>مرکز درخواست‌ها در دسترس نیست</title><body>';
+        echo '<main><h1>ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست</h1>';
+        echo '<p>برای جلوگیری از اجرای ناقص عملیات، این Workspace تا رفع موارد زیر غیرفعال شد:</p><ul>';
         foreach ($rcSchemaProblems as $problem) {
-            echo '<li>' . e($problem) . '</li>';
+            echo '<li>' . htmlspecialchars((string) $problem, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</li>';
         }
-        echo '</ul><a class="button secondary" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section></main>';
-        render_footer();
+        echo '</ul><a href="request-center.php">بازگشت به مرکز درخواست‌ها</a></main></body></html>';
         exit;
     }
 
