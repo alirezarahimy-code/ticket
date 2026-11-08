@@ -1,0 +1,34 @@
+T04 database: 10.11.19-MariaDB-ubu2204
+PASS created disposable primary-admin account for request-center.php probe
+PASS session seed endpoint returned HTTP 200 (status 200)
+PASS created authenticated session for independent Request Center
+PASS independent request-center.php serves healthy schema (status 200)
+PASS independent request-center.php executes zero DDL on healthy schema
+PASS independent request-center.php fails closed on missing tickets.requesting_unit_id (status 503)
+PASS independent request-center.php executes zero DDL on incomplete schema
+PASS independent Request Center leaves missing requesting_unit_id untouched
+PASS legacy new-ticket URL redirects to the independent Request Center
+PASS legacy Request Center bridge executes zero DDL
+PASS legacy Request Center bridge leaves missing requesting_unit_id untouched
+PASS bridged Request Center target fails closed on incomplete schema (HTTP 503; body=مرکز درخواست‌ها در دسترس نیستساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیستبرای جلوگیری از اجرای ناقص عملیات، این Workspace تا رفع م�; system_error=[]; server=[Sun Nov  8 19:16:26 2026] PHP 8.2.35 Development Server (http://127.0.0.1:18765) started
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47876 Accepted
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47876 Closed without sending a request; it was probably just an unused speculative preconnection
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47876 Closing
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47890 Accepted
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47890 [200]: GET /tests/fixtures/request-center-session-seed.php?user_id=4
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47890 Closing
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47900 Accepted
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47900 [200]: GET /request-center.php
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47900 Closing
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47902 Accepted
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47902 [503]: GET /request-center.php
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47902 Closing
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47918 Accepted
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47918 [302]: GET /index.php?page=new-ticket
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47918 Closing
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47930 Accepted
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47930 [503]: GET /request-center.php?page=new-ticket
+[Sun Nov  8 19:16:26 2026] 127.0.0.1:47930 Closing
+)
+PASS bridged Request Center target executes zero DDL
+T04 PASS: independent Request Center and legacy bridge perform zero runtime DDL.
