@@ -601,11 +601,32 @@ if (!defined('APP_ROOT')) {
             if (!$replySaved) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ پیام شما ذخیره نشد. صفحه را تازه کنید.');
             }
-            save_audit_required((int) $user['id'], 'ticket_replied', $ticketId);
+            $slaOlaAudit = [
+                'due_at' => $replyDueAt,
+                'sla_paused_at' => $replyPauseAt,
+                'sla_pause_minutes' => $replyPauseMinutes,
+                'ola_policy_id' => $replyOla['policy_id'],
+                'ola_response_due_at' => $replyOla['response_due_at'],
+                'ola_due_at' => $replyOla['due_at'],
+                'ola_escalation_1_at' => $replyOla['escalation_1_at'],
+                'ola_escalation_2_at' => $replyOla['escalation_2_at'],
+            ];
+            save_audit_required((int) $user['id'], 'ticket_replied', $ticketId, [
+                'from_status' => $oldStatus,
+                'to_status' => $newStatus,
+                'message_id' => $messageId,
+                'is_internal' => (bool) $internal,
+                'first_response_set' => $setFirstResponse,
+                'sla_ola' => $slaOlaAudit,
+            ]);
             if ($newStatus !== $oldStatus) {
-                log_ticket_event($ticketId, (int) $user['id'], 'status_changed', $oldStatus, $newStatus);
+                log_ticket_event($ticketId, (int) $user['id'], 'status_changed', $oldStatus, $newStatus, $slaOlaAudit);
             }
-            log_ticket_event($ticketId, (int) $user['id'], $internal ? 'internal_note' : 'reply');
+            log_ticket_event($ticketId, (int) $user['id'], $internal ? 'internal_note' : 'reply', $oldStatus, $newStatus, [
+                'message_id' => $messageId,
+                'is_internal' => (bool) $internal,
+                'sla_ola' => $slaOlaAudit,
+            ]);
             if ($newStatus === 'resolved' && $oldStatus !== 'resolved') {
                 request_center_notify_ticket_resolved($ticketId, (int) $user['id']);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, 'وضعیت به حل‌شده تغییر کرد.');
@@ -744,14 +765,31 @@ if (!defined('APP_ROOT')) {
             if (!$updated) {
                 throw new RuntimeException('وضعیت درخواست هم‌زمان تغییر کرد؛ صفحه را تازه کنید.');
             }
-            save_audit_required((int) $staffUser['id'], 'ticket_updated', $ticketId, ['status' => $status, 'priority' => $priority]);
+            $slaOlaAudit = [
+                'due_at' => $newDueAt,
+                'sla_paused_at' => $newPauseAt,
+                'sla_pause_minutes' => $newPauseMinutes,
+                'ola_policy_id' => $ola['policy_id'],
+                'ola_response_due_at' => $ola['response_due_at'],
+                'ola_due_at' => $ola['due_at'],
+                'ola_escalation_1_at' => $ola['escalation_1_at'],
+                'ola_escalation_2_at' => $ola['escalation_2_at'],
+            ];
+            save_audit_required((int) $staffUser['id'], 'ticket_updated', $ticketId, [
+                'from_status' => $oldStatus,
+                'to_status' => $status,
+                'from_priority' => (string) $ticket['priority'],
+                'to_priority' => $priority,
+                'assigned_to' => $assignee,
+                'sla_ola' => $slaOlaAudit,
+            ]);
             if ($updateNote !== '') {
                 db()->prepare('INSERT INTO ticket_messages (ticket_id, user_id, body, is_internal) VALUES (?, ?, ?, 0)')->execute([$ticketId, (int) $staffUser['id'], $updateNote]);
                 log_ticket_event($ticketId, (int) $staffUser['id'], 'reply');
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_reply', 'پیام مدیریت در درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, $updateNote);
             }
             if ($status !== $oldStatus) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], $assignee && $assigneeChanged ? 'assigned' : 'status_changed', $oldStatus, $status, ['assigned_to' => $assignee]);
+                log_ticket_event($ticketId, (int) $staffUser['id'], $assignee && $assigneeChanged ? 'assigned' : 'status_changed', $oldStatus, $status, ['assigned_to' => $assignee, 'sla_ola' => $slaOlaAudit]);
                 if ($status === 'resolved') {
                     record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $staffUser['id'], $ticketId, 'وضعیت به ' . request_center_status_label($status) . ' تغییر کرد.');
                 }
@@ -759,7 +797,7 @@ if (!defined('APP_ROOT')) {
                 log_ticket_event($ticketId, (int) $staffUser['id'], 'assigned', $oldStatus, $status, ['assigned_to' => $assignee]);
             }
             if ((string) $ticket['priority'] !== $priority) {
-                log_ticket_event($ticketId, (int) $staffUser['id'], 'priority_changed', $status, $status, ['from' => (string) $ticket['priority'], 'to' => $priority]);
+                log_ticket_event($ticketId, (int) $staffUser['id'], 'priority_changed', $status, $status, ['from' => (string) $ticket['priority'], 'to' => $priority, 'sla_ola' => $slaOlaAudit]);
             }
             if ($status === 'resolved' && $oldStatus !== 'resolved') {
                 request_center_notify_ticket_resolved($ticketId, (int) $staffUser['id']);
