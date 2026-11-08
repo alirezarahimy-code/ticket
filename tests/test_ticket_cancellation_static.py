@@ -72,7 +72,7 @@ check("$ownerCondition = $serviceGroup === 'it'" in index
       and "$fallback->execute([$serviceGroup, $departmentId, $departmentId]);" in index
       and "u.department_id = ?" in index,
       "automatic fallback stays within the requested handling unit and department")
-check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled')" in schema
+check("status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled','rejected')" in schema
       and "cancel_requested_at DATETIME NULL" in schema
       and "cancel_requested_by INT UNSIGNED NULL" in schema
       and "cancel_request_reason TEXT NULL" in schema,
