@@ -14318,9 +14318,9 @@
       "path": "cron/sla_maintenance.php",
       "area": "CRON",
       "line": 1,
-      "anchor": "بلوک رویه‌ای 1-94",
+      "anchor": "بلوک رویه‌ای 1-111",
       "risk": 5,
-      "lines": 94
+      "lines": 111
     },
     "CRON-012.01": {
       "path": "cron/ticket_auto_close.php",
@@ -50495,6 +50495,38 @@
       "area": "TEST",
       "line": 93,
       "anchor": "test_direct_cancel_and_bulk_defend_stale_assignment",
+      "risk": 0,
+      "lines": 14
+    },
+    "TEST-215.14": {
+      "path": "tests/test_ticket_workflow_safety_static.py",
+      "area": "TEST",
+      "line": 107,
+      "anchor": "test_pre_service_rejection_is_a_terminal_workflow_command",
+      "risk": 0,
+      "lines": 12
+    },
+    "TEST-215.15": {
+      "path": "tests/test_ticket_workflow_safety_static.py",
+      "area": "TEST",
+      "line": 119,
+      "anchor": "test_rejected_status_is_migration_owned_and_visible_as_terminal",
+      "risk": 0,
+      "lines": 17
+    },
+    "TEST-215.16": {
+      "path": "tests/test_ticket_workflow_safety_static.py",
+      "area": "TEST",
+      "line": 136,
+      "anchor": "test_sla_and_ola_alerts_revalidate_the_active_deadline_under_lock",
+      "risk": 6,
+      "lines": 9
+    },
+    "TEST-215.17": {
+      "path": "tests/test_ticket_workflow_safety_static.py",
+      "area": "TEST",
+      "line": 145,
+      "anchor": "test_manual_lifecycle_decisions_keep_requester_visible_reasons",
       "risk": 0,
       "lines": 17
     },

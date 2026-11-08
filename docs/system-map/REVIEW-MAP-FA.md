@@ -9,11 +9,11 @@
 | سنجه | مقدار |
 |---|---|
 | فایل‌های کد تولیدی | 589 |
-| خطوط | 131,835 |
-| آدرس‌ها (بلوک) | 6,870 |
+| خطوط | 131,904 |
+| آدرس‌ها (بلوک) | 6,874 |
 | موضوع‌های قابل جست‌وجو | 40 صفحه + 101 مجوز + 85 جدول |
 | بازبینی‌شده | 0 آدرس (0.0%) — 0 خط (0.0%) |
-| باقی‌مانده | 6,870 آدرس |
+| باقی‌مانده | 6,874 آدرس |
 
 ## 🔎 فهرست موضوعی — از اینجا شروع کنید
 
@@ -286,7 +286,7 @@
 
 | ناحیه | معنی | فایل | بلوک | خط |
 |---|---|---|---|---|
-| `TEST` | TEST | 234 | 1,705 | 23,299 |
+| `TEST` | TEST | 234 | 1,709 | 23,351 |
 | `TOOL` | TOOL | 87 | 694 | 17,403 |
 | `DB` | DB | 84 | 1,377 | 8,023 |
 | `PAGE` | صفحات (ریشه) | 75 | 1,429 | 47,877 |
@@ -294,7 +294,7 @@
 | `WEB` | پنل وب غذا (food-ticket-web/) | 28 | 436 | 9,060 |
 | `CORE` | موتور مشترک (lib/) | 19 | 324 | 7,728 |
 | `ACT` | کنش‌ها (actions/) | 17 | 96 | 2,834 |
-| `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,459 |
+| `CRON` | زمان‌بندها (cron/) | 14 | 35 | 1,476 |
 | `API` | رابط برنامه (api/) | 1 | 7 | 206 |
 
 ## نشانه‌های ریسک
@@ -303,10 +303,10 @@
 
 | نشانه | معنی | بلوک |
 |---|---|---|
-| `write_no_tx` | نوشتن بدون تراکنش | 842 |
+| `write_no_tx` | نوشتن بدون تراکنش | 843 |
 | `error_suppression` | سرکوب @ | 297 |
 | `dangerous_call` | فراخوانی خطرناک | 221 |
-| `sql_concat` | الحاق در SQL | 197 |
+| `sql_concat` | الحاق در SQL | 198 |
 | `raw_input` | ورودی خام | 187 |
 | `silent_catch` | catch بی‌صدا | 134 |
 | `long` | >۱۲۰ خط | 132 |
@@ -3642,7 +3642,7 @@
 </details>
 
 <details>
-<summary><b>TEST-215</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (109 خط، 13 آدرس، بازبینی‌شده 0/13)</summary>
+<summary><b>TEST-215</b> — <code>tests/test_ticket_workflow_safety_static.py</code> (161 خط، 17 آدرس، بازبینی‌شده 0/17)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
@@ -3658,7 +3658,11 @@
 | `TEST-215.10` | 72–78 | بلوک | `test_supervisor_actions_check_ticket_visibility` | 0 | ⬜ |
 | `TEST-215.11` | 79–86 | بلوک | `test_autoclose_candidates_do_not_starve_on_current` | 0 | ⬜ |
 | `TEST-215.12` | 87–92 | بلوک | `test_reopen_sla_cycle_is_used_on_priority_change` | 0 | ⬜ |
-| `TEST-215.13` | 93–109 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
+| `TEST-215.13` | 93–106 | بلوک | `test_direct_cancel_and_bulk_defend_stale_assignmen` | 0 | ⬜ |
+| `TEST-215.14` | 107–118 | بلوک | `test_pre_service_rejection_is_a_terminal_workflow_` | 0 | ⬜ |
+| `TEST-215.15` | 119–135 | بلوک | `test_rejected_status_is_migration_owned_and_visibl` | 0 | ⬜ |
+| `TEST-215.16` | 136–144 | بلوک | `test_sla_and_ola_alerts_revalidate_the_active_dead` | 6 | ⬜ |
+| `TEST-215.17` | 145–161 | بلوک | `test_manual_lifecycle_decisions_keep_requester_vis` | 0 | ⬜ |
 
 </details>
 
@@ -11920,11 +11924,11 @@
 </details>
 
 <details>
-<summary><b>CRON-011</b> — <code>cron/sla_maintenance.php</code> (94 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
+<summary><b>CRON-011</b> — <code>cron/sla_maintenance.php</code> (111 خط، 1 آدرس، بازبینی‌شده 0/1)</summary>
 
 | آدرس | خط | نوع | لنگر | ریسک | وضعیت |
 |---|---|---|---|---|---|
-| `CRON-011.01` | 1–94 | ناحیه | `بلوک رویه‌ای 1-94` | 5 | ⬜ |
+| `CRON-011.01` | 1–111 | ناحیه | `بلوک رویه‌ای 1-111` | 5 | ⬜ |
 
 </details>
 

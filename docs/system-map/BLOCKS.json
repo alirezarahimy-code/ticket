@@ -16160,16 +16160,16 @@
             "id": "CRON-011",
             "path": "cron\/sla_maintenance.php",
             "area": "CRON",
-            "lines": 94,
-            "file_fingerprint": "513e64ef36b9",
+            "lines": 111,
+            "file_fingerprint": "270a876de922",
             "blocks": [
                 {
                     "kind": "region",
-                    "anchor": "بلوک رویه‌ای 1-94",
+                    "anchor": "بلوک رویه‌ای 1-111",
                     "line_start": 1,
-                    "line_end": 94,
-                    "lines": 94,
-                    "fingerprint": "513e64ef36b9",
+                    "line_end": 111,
+                    "lines": 111,
+                    "fingerprint": "270a876de922",
                     "risk": {
                         "score": 5,
                         "flags": {
@@ -80494,8 +80494,8 @@
             "id": "TEST-215",
             "path": "tests\/test_ticket_workflow_safety_static.py",
             "area": "TEST",
-            "lines": 109,
-            "file_fingerprint": "015f36e3939a",
+            "lines": 161,
+            "file_fingerprint": "8ecdc24ccc3a",
             "blocks": [
                 {
                     "kind": "block",
@@ -80663,14 +80663,69 @@
                     "kind": "block",
                     "anchor": "test_direct_cancel_and_bulk_defend_stale_assignment",
                     "line_start": 93,
-                    "line_end": 109,
-                    "lines": 17,
-                    "fingerprint": "0075fd2ce686",
+                    "line_end": 106,
+                    "lines": 14,
+                    "fingerprint": "b0ef6eb8a692",
                     "risk": {
                         "score": 0,
                         "flags": []
                     },
                     "id": "TEST-215.13"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_pre_service_rejection_is_a_terminal_workflow_command",
+                    "line_start": 107,
+                    "line_end": 118,
+                    "lines": 12,
+                    "fingerprint": "370b0679564d",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-215.14"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_rejected_status_is_migration_owned_and_visible_as_terminal",
+                    "line_start": 119,
+                    "line_end": 135,
+                    "lines": 17,
+                    "fingerprint": "d9b56e8b0cfc",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-215.15"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_sla_and_ola_alerts_revalidate_the_active_deadline_under_lock",
+                    "line_start": 136,
+                    "line_end": 144,
+                    "lines": 9,
+                    "fingerprint": "a376b7989def",
+                    "risk": {
+                        "score": 6,
+                        "flags": {
+                            "sql_concat": 5,
+                            "write_no_tx": 1
+                        }
+                    },
+                    "id": "TEST-215.16"
+                },
+                {
+                    "kind": "block",
+                    "anchor": "test_manual_lifecycle_decisions_keep_requester_visible_reasons",
+                    "line_start": 145,
+                    "line_end": 161,
+                    "lines": 17,
+                    "fingerprint": "6b8e37e96ed2",
+                    "risk": {
+                        "score": 0,
+                        "flags": []
+                    },
+                    "id": "TEST-215.17"
                 }
             ]
         },
