@@ -53,6 +53,12 @@ $pdo->exec("INSERT INTO org_units VALUES (50, 'Deputy')");
 $pdo->exec("INSERT INTO tickets VALUES
     (101, 'IT-00101', 'Visible request', 'assigned', 'normal', 'it', 'incident', '2026-11-01', '2026-11-02', '2026-11-05', 1, 3, 10, 20, 30, 40, 50),
     (202, 'IT-00202', 'Private request', 'assigned', 'urgent', 'it', 'incident', '2026-11-01', '2026-11-02', '2026-11-04', 2, 3, 10, 20, 30, 40, 50)");
+$pdo->exec('ALTER TABLE tickets ADD COLUMN sla_paused_at TEXT');
+$pdo->exec('ALTER TABLE tickets ADD COLUMN first_response_at TEXT');
+$pdo->exec('ALTER TABLE tickets ADD COLUMN ola_response_due_at TEXT');
+$pdo->exec('ALTER TABLE tickets ADD COLUMN ola_due_at TEXT');
+$pdo->exec('ALTER TABLE tickets ADD COLUMN ola_escalation_1_at TEXT');
+$pdo->exec('ALTER TABLE tickets ADD COLUMN ola_escalation_2_at TEXT');
 $pdo->exec("INSERT INTO ticket_messages VALUES
     (1, 101, 1, 'Public message', 0, '2026-11-01 10:00:00'),
     (2, 101, 3, 'Internal note', 1, '2026-11-01 11:00:00')");
@@ -72,6 +78,14 @@ $filtered = $repository->listVisible($user, 1, 50, ['status' => 'assigned', 'pri
 check_request_center($filtered['total'] === 1, 'status, priority and service-group filters compose with the access scope');
 $assignedMine = $repository->listVisible($user, 1, 50, ['assigned_to' => 3]);
 check_request_center($assignedMine['total'] === 1, 'personal queue filter returns tickets assigned to the selected agent within scope');
+$workload = $repository->supervisorWorkload($user);
+check_request_center(
+    count($workload) === 1
+        && (int) $workload[0]['assigned_to'] === 3
+        && $workload[0]['full_name'] === 'Agent Three'
+        && (int) $workload[0]['active_count'] === 1,
+    'supervisor workload query uses the shared visibility scope and portable current-time expression'
+);
 $assignedOther = $repository->listVisible($user, 1, 50, ['assigned_to' => 2]);
 check_request_center($assignedOther['total'] === 0, 'personal queue filter excludes tickets assigned to another agent');
 $crossRequesterFilter = $repository->listVisible($user, 1, 50, ['requester_id' => 2]);
