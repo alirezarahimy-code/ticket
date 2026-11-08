@@ -50,6 +50,9 @@ check("decide_ticket_cancellation" in index
       and "function rejectCancellation(" in workflow_service
       and "WHERE id = ? AND status = ? AND cancel_requested_at = ?" in workflow_service
       and "$workflow->rejectCancellation(" in ticket_actions
+      and "'cancel_requested_at' => $requestAt" in ticket_actions
+      and "function transition(" in workflow_service
+      and "'cancellation_approved'" in ticket_actions
       and "'cancel_requested_at' => $requestAt" in ticket_actions,
       "only the scoped handler/manager (not the requester) can decide, with locked snapshot and compare-and-set protection")
 check("$workflow->transition($ticketId, $oldStatus, 'cancelled'" in ticket_actions
