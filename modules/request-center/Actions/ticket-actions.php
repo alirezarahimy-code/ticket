@@ -32,7 +32,10 @@ if (!defined('APP_ROOT')) {
             $user = require_permission('ticket.create');
             if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
                 $requestToken = trim((string) ($_POST['request_token'] ?? ''));
-                $issuedTokens = $_SESSION['rc_create_tokens'] ?? [];
+                if (!is_array($_SESSION['rc_create_tokens'] ?? null)) {
+                    $_SESSION['rc_create_tokens'] = [];
+                }
+                $issuedTokens = $_SESSION['rc_create_tokens'];
                 $issuedAt = is_array($issuedTokens) ? ($issuedTokens[$requestToken] ?? null) : null;
                 if (!preg_match('/^[a-f0-9]{64}$/', $requestToken)
                     || !is_numeric($issuedAt)
