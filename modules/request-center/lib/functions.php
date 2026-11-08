@@ -8,6 +8,13 @@ declare(strict_types=1);
  * (layout/HTTP نرمال‌ساز) جای جدا دارند.
  */
 
+function request_center_status_label(string $status): string
+{
+    return $status === 'rejected'
+        ? 'ردشده پس از ارزیابی اولیه'
+        : status_label($status);
+}
+
 function store_attachment(int $messageId, array $file): void
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
