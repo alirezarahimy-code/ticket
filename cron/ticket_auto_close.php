@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 require dirname(__DIR__) . '/bootstrap.php';
 require_once dirname(__DIR__) . '/modules/request-center/WorkflowService.php';
+require_once dirname(__DIR__) . '/modules/request-center/lib/functions.php';
 if (function_exists('ticket_hot_schema_ensure')) {
     ticket_hot_schema_ensure();
 }
@@ -67,9 +68,41 @@ foreach ($candidates as $row) {
             db()->rollBack();
             continue;
         }
-        log_ticket_event($ticketId, null, 'auto_closed', 'resolved', 'closed', ['days' => $days]);
-        notify_user((int) $row['requester_id'], 'ticket_closed', 'درخواست شما بسته شد', 'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون پاسخ بسته شد. هنوز می‌توانید امتیاز رضایت خود را ثبت کنید.', $ticketId);
-        notify_ticket_staff($ticketId, 'ticket_closed', 'درخواست به‌صورت خودکار بسته شد', 'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون امتیاز کاربر بسته شد.', null);
+        $autoCloseMeta = [
+            'from_status' => 'resolved',
+            'to_status' => 'closed',
+            'days_without_rating' => $days,
+            'resolved_at' => $current['resolved_at'] ?? null,
+            'closed_at' => date('Y-m-d H:i:s'),
+            'actor_type' => 'system',
+        ];
+        log_ticket_event($ticketId, null, 'auto_closed', 'resolved', 'closed', $autoCloseMeta);
+        $auditSaved = activity_log([
+            'user_id' => null,
+            'action_code' => 'ticket_auto_closed',
+            'module' => 'tickets',
+            'target_type' => 'ticket',
+            'target_id' => $ticketId,
+            'meta' => $autoCloseMeta,
+            'result' => 'success',
+        ]);
+        if (!$auditSaved) {
+            throw new RuntimeException('Required audit persistence failed for automatic ticket closure.');
+        }
+        request_center_notify_user(
+            (int) $row['requester_id'],
+            'ticket_closed',
+            'درخواست شما بسته شد',
+            'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون پاسخ بسته شد. هنوز می‌توانید امتیاز رضایت خود را ثبت کنید.',
+            $ticketId
+        );
+        request_center_notify_ticket_staff(
+            $ticketId,
+            'ticket_closed',
+            'درخواست به‌صورت خودکار بسته شد',
+            'درخواست ' . ticket_number($ticketId) . ' پس از ' . $days . ' روز بدون امتیاز کاربر بسته شد.',
+            null
+        );
         record_asset_history((int) ($row['asset_id'] ?? 0), 'ticket_closed', 'بسته‌شدن خودکار درخواست ' . ticket_number($ticketId), null, $ticketId, 'بدون امتیاز کاربر');
         db()->commit();
         $closed++;
