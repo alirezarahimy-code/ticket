@@ -627,7 +627,7 @@ tests/test_system_health_safe_export_static.py	tests	62	3003
 tests/test_system_map_blocks.py	tests	346	16106
 tests/test_system_map_static.py	tests	171	8387
 tests/test_system_update_archive_paths.php	tests	40	1775
-tests/test_system_update_archive_zip.php	tests	155	6515
+tests/test_system_update_archive_zip.php	tests	160	6892
 tests/test_system_update_migration_registry.php	tests	67	2242
 tests/test_system_update_requires_version.php	tests	95	5750
 tests/test_technical_profile_form_refresh_static.py	tests	67	3618

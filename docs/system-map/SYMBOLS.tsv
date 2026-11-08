@@ -3405,7 +3405,7 @@ app_error_log	function	tests/test_system_update_archive_zip.php	8	tests
 cfg	function	tests/test_system_update_archive_zip.php	9	tests
 make_test_zip	function	tests/test_system_update_archive_zip.php	16	tests
 assert_zip_rejected	function	tests/test_system_update_archive_zip.php	40	tests
-package_test_rejects	function	tests/test_system_update_archive_zip.php	81	tests
+package_test_rejects	function	tests/test_system_update_archive_zip.php	87	tests
 APP_ROOT	const	tests/test_system_update_migration_registry.php	5	tests
 MigrationRegistryFakeStatement	class	tests/test_system_update_migration_registry.php	6	tests
 __construct	function	tests/test_system_update_migration_registry.php	10	tests
