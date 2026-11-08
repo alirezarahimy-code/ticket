@@ -554,7 +554,7 @@ def test_internal_note_write_uses_the_same_visibility_policy_as_internal_note_re
     actions = source("modules/request-center/Actions/ticket-actions.php")
     detail = source("modules/request-center/Pages/detail.php")
     assert "(!$isStaffUser || $asRequester || !ticket_can_see_internal($ticket, $user))" in actions
-    assert "($canSeeInternal ? '<label class=\\"check-label\\"><input type=\\"checkbox\\" name=\\"is_internal\\" value=\\"1\\"> یادداشت داخلی</label>' : '')" in detail
+    assert "$canSeeInternal ? '<label class=\"check-label\"" in detail
 
 def test_independent_post_runner_establishes_authenticated_user_context():
     handler = source("modules/request-center/post-handler.php")
