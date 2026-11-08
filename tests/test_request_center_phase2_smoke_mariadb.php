@@ -523,6 +523,45 @@ try {
     smoke_check($maintenanceRetry['exit'] === 0 && $retryClaims === 5 && $retryNotifications === 5,
         'SLA/OLA maintenance retries and delivers all five alert types after notification storage recovers');
 
+    // Automatic close must not commit a terminal transition if its required
+    // requester/staff notifications cannot be persisted; the next run retries.
+    $pdo->prepare('UPDATE tickets SET status = "resolved", resolved_at = DATE_SUB(NOW(), INTERVAL 30 DAY), updated_at = DATE_SUB(NOW(), INTERVAL 30 DAY), cancel_requested_at = NULL, assigned_to = ? WHERE id = ?')
+        ->execute([$maintenanceAssignee, $maintenanceTicketId]);
+    $pdo->exec("DELETE FROM ticket_events WHERE ticket_id = " . $maintenanceTicketId . " AND event_type = 'auto_closed'");
+    $pdo->exec("DELETE FROM notifications WHERE ticket_id = " . $maintenanceTicketId . " AND notification_type = 'ticket_closed'");
+    $runAutoClose = static function () use ($root, $serverEnv): array {
+        $pipes = [];
+        $process = proc_open([PHP_BINARY, $root . '/cron/ticket_auto_close.php'], [
+            0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w'],
+        ], $pipes, $root, $serverEnv);
+        if (!is_resource($process)) {
+            throw new RuntimeException('Could not start automatic ticket-close process.');
+        }
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        return ['exit' => proc_close($process), 'stdout' => (string) $stdout, 'stderr' => (string) $stderr];
+    };
+    $pdo->exec('CREATE TRIGGER rc_smoke_fail_auto_close_notification BEFORE INSERT ON notifications FOR EACH ROW BEGIN IF NEW.ticket_id = '
+        . $maintenanceTicketId . " AND NEW.notification_type = 'ticket_closed' THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'RC smoke injected auto-close notification outage'; END IF; END");
+    $autoCloseFailure = $runAutoClose();
+    $statusAfterAutoCloseFailure = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . $maintenanceTicketId)->fetchColumn();
+    $autoCloseEventsAfterFailure = (int) $pdo->query("SELECT COUNT(*) FROM ticket_events WHERE ticket_id = " . $maintenanceTicketId . " AND event_type = 'auto_closed'")->fetchColumn();
+    $autoCloseNotificationsAfterFailure = (int) $pdo->query("SELECT COUNT(*) FROM notifications WHERE ticket_id = " . $maintenanceTicketId . " AND notification_type = 'ticket_closed'")->fetchColumn();
+    $pdo->exec('DROP TRIGGER rc_smoke_fail_auto_close_notification');
+    smoke_check($autoCloseFailure['exit'] === 0 && $statusAfterAutoCloseFailure === 'resolved'
+        && $autoCloseEventsAfterFailure === 0 && $autoCloseNotificationsAfterFailure === 0,
+        'automatic close rolls back its status and audit event when required notification persistence fails');
+    $autoCloseRetry = $runAutoClose();
+    $statusAfterAutoCloseRetry = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . $maintenanceTicketId)->fetchColumn();
+    $autoCloseEventsAfterRetry = (int) $pdo->query("SELECT COUNT(*) FROM ticket_events WHERE ticket_id = " . $maintenanceTicketId . " AND event_type = 'auto_closed'")->fetchColumn();
+    $autoCloseNotificationsAfterRetry = (int) $pdo->query("SELECT COUNT(*) FROM notifications WHERE ticket_id = " . $maintenanceTicketId . " AND notification_type = 'ticket_closed'")->fetchColumn();
+    smoke_check($autoCloseRetry['exit'] === 0 && $statusAfterAutoCloseRetry === 'closed'
+        && $autoCloseEventsAfterRetry === 1 && $autoCloseNotificationsAfterRetry >= 2,
+        'automatic close retries after notification storage recovers and persists requester plus staff notices');
+
     // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
     smoke_check($forwarded['status'] === 200 && str_contains($forwarded['body'], 'داشبورد'), 'non-RC POST action is forwarded in-process and renders the dashboard (status ' . $forwarded['status'] . ')');
