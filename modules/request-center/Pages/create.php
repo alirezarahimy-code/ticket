@@ -21,8 +21,15 @@ if ($page === 'new-ticket') {
         request_center_assert_create_schema();
     }
     $cdDvdRequestRecord = null;
-    $subjectDefault = '';
-    $descriptionDefault = '';
+    $retryDraft = is_array($_SESSION['rc_create_retry'] ?? null) ? $_SESSION['rc_create_retry'] : [];
+    if ($retryDraft !== [] && (int) ($retryDraft['saved_at'] ?? 0) < time() - 1800) {
+        $retryDraft = [];
+    }
+    // Consume the draft on page render so it cannot unexpectedly reappear in a
+    // later, unrelated request; the user can still submit this rendered form.
+    unset($_SESSION['rc_create_retry']);
+    $subjectDefault = (string) ($retryDraft['subject'] ?? '');
+    $descriptionDefault = (string) ($retryDraft['description'] ?? '');
     if (($_GET['request'] ?? '') === 'cd_dvd_edit') {
         $candidate = cd_dvd_fetch_record((int) ($_GET['record_id'] ?? 0));
         if ($candidate && !cd_dvd_can_edit_records($user) && cd_dvd_can_view_record($candidate, $user)) {
