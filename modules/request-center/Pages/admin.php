@@ -292,4 +292,40 @@ form input:focus,form select:focus,form textarea:focus{outline:0;border-color:#6
 </tbody></table></div>
 <?php endif; ?>
 </section>
+<script id="rc-admin-config-interactions">
+(function(){
+ var hours=document.querySelector('form input[name="action"][value="save_rc_work_hours"]');
+ if(hours){
+  var form=hours.closest("form"),start=form.querySelector("[name=work_start_hour]"),end=form.querySelector("[name=work_end_hour]");
+  form.addEventListener("submit",function(event){
+   var a=Number(start.value),b=Number(end.value);
+   if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||a>23||b<1||b>24||a>=b){
+    event.preventDefault();end.setCustomValidity("ساعت پایان باید از ساعت شروع بیشتر باشد.");end.reportValidity();end.focus();return;
+   }
+   end.setCustomValidity("");
+  });
+  [start,end].forEach(function(input){input.addEventListener("input",function(){end.setCustomValidity("");});});
+ }
+ document.querySelectorAll('form input[name="action"][value="create_ola_policy"],form input[name="action"][value="update_ola_policy"]').forEach(function(marker){
+  var form=marker.closest("form"),fields=["response_minutes","resolution_minutes","escalation_1_minutes","escalation_2_minutes"].map(function(name){return form.querySelector('[name="'+name+'"]');});
+  form.addEventListener("submit",function(event){
+   var values=fields.map(function(field){return Number(field.value);});
+   var valid=values.every(function(value){return Number.isInteger(value)&&value>0&&value<=525600;});
+   if(valid)valid=values[0]<=values[1]&&values[2]<values[3]&&values[3]<=values[1];
+   if(!valid){
+    event.preventDefault();
+    fields[0].setCustomValidity("مهلت‌ها باید معتبر باشند: پاسخ حداکثر تا حل، ارجاع اول پیش از ارجاع دوم و ارجاع دوم حداکثر تا مهلت حل.");
+    fields[0].reportValidity();fields[0].focus();return;
+   }
+   fields[0].setCustomValidity("");
+  });
+  fields.forEach(function(field){field.addEventListener("input",function(){fields[0].setCustomValidity("");});});
+ });
+ document.querySelectorAll('form[method="post"]').forEach(function(form){
+  if(form.classList.contains("rc-admin-link")&&form.querySelector('[name="action"][value^="save_rc_"],[name="action"][value^="create_ola"],[name="action"][value^="update_ola"]')){
+   form.addEventListener("submit",function(event){if(!form.reportValidity()){event.preventDefault();return;}var button=form.querySelector('button[type="submit"]');if(button){button.disabled=true;button.textContent="در حال ذخیره…";}});
+  }
+ });
+})();
+</script>
 </main></body></html>
