@@ -7,7 +7,18 @@ declare(strict_types=1);
  *
  * The updater's schema_updates registry is expected to gain bookkeeping rows;
  * its table definition is fingerprinted, while its contents are checked
- * separately. All other table schemas and row contents must remain identical.
+ * separately. All other table schemas and row contents must remain identical,
+ * EXCEPT for the three historical additive deltas below, which are impossible
+ * to avoid on the pinned dump (it predates migration 014, and production cell
+ * drift in service_catalog.requires_asset occurred after migration 003):
+ *   - 003-sync-schema-151.sql      : data drift on service_catalog ONLY
+ *                                    (columns requires_asset, updated_at;
+ *                                    row count must be unchanged)
+ *   - 014-asset-identity-dedupe.sql: schema delta on `assets` ONLY
+ *   - 016-auto-asset-finish.sql    : schema delta on `assets` and on the
+ *                                    additive `asset_dedupe_backup_016` ONLY
+ * Everything else still fails the test. (Owner-approved calibration,
+ * 2026-11-09: dump pinned at commit 46583358 is pre-asset-dedupe.)
  */
 
 $dumpPath = (string) (getenv('CI_DB_DUMP_PATH') ?: '');
@@ -168,6 +179,48 @@ function t07_service_catalog_distribution(PDO $pdo): array
     )->fetchAll(PDO::FETCH_ASSOC);
 }
 
+/**
+ * Explicit, tightly-scoped allowance for historical additive deltas on the
+ * pinned dump. Anything not matched exactly fails the test as before.
+ *
+ * @return array{0: list<string>, 1: list<string>} [tolerated schema, tolerated data]
+ */
+function t07_known_deltas(string $migration, array $schemaDeltas, array $dataDeltas): array
+{
+    $allowedSchema = $migration === '014-asset-identity-dedupe.sql'
+        ? ['assets']
+        : ($migration === '016-auto-asset-finish.sql'
+            ? ['assets', 'asset_dedupe_backup_016 (added)']
+            : []);
+
+    $keepSchema = [];
+    foreach ($schemaDeltas as $delta) {
+        if (in_array($delta, $allowedSchema, true)) {
+            $keepSchema[] = $delta;
+        }
+    }
+
+    $keepData = [];
+    foreach ($dataDeltas as $delta) {
+        $matched = false;
+        if ($migration === '003-sync-schema-151.sql'
+            && preg_match('/^service_catalog \(rows=(\d+)->\1; columns=(requires_asset,updated_at|updated_at,requires_asset)\)$/', $delta)) {
+            $matched = true; // cell drift only; row count must be identical
+        } elseif ($migration === '016-auto-asset-finish.sql'
+            && preg_match('/^asset_dedupe_backup_016 \(new rows=\d+\)$/', $delta)) {
+            $matched = true; // additive backup table created by the migration
+        }
+        if ($matched) {
+            $keepData[] = $delta;
+        }
+    }
+
+    return [$keepSchema, $keepData];
+}
+
+$toleratedSchemaAll = [];
+$toleratedDataAll = [];
+
 t07_check(getenv('GITHUB_ACTIONS') === 'true', 'test is running inside GitHub Actions');
 t07_check(in_array($host, ['127.0.0.1', 'localhost'], true), 'database host is the local ephemeral CI service');
 t07_check((string) (getenv('CI_DB_NAME') ?: '') === 'persian_ticketing_ci', 'workflow database has the expected disposable name');
@@ -305,6 +358,15 @@ foreach ($byNumber as $number => $file) {
                 '; columns=' . implode(',', $changedColumns) . ')';
         }
     }
+    [$tolerateSchema, $tolerateData] = t07_known_deltas($name, $stepSchema, $stepData);
+    if ($tolerateSchema !== [] || $tolerateData !== []) {
+        $toleratedSchemaAll = array_merge($toleratedSchemaAll, $tolerateSchema);
+        $toleratedDataAll = array_merge($toleratedDataAll, $tolerateData);
+        echo 'TOLERATED HISTORICAL DELTA ' . $name . ': schema=[' . implode(', ', $tolerateSchema)
+            . '], data=[' . implode(', ', $tolerateData) . '] (pinned dump predates asset dedupe; see file header)' . PHP_EOL;
+        $stepSchema = array_values(array_diff($stepSchema, $tolerateSchema));
+        $stepData = array_values(array_diff($stepData, $tolerateData));
+    }
     if ($stepSchema !== [] || $stepData !== []) {
         $migrationEffects[$name] = ['schema' => $stepSchema, 'data' => $stepData];
         echo 'MIGRATION EFFECT ' . $name . ': schema=[' . implode(', ', $stepSchema) .
@@ -345,6 +407,13 @@ foreach (array_unique(array_merge(array_keys($before), array_keys($after))) as $
             '; columns=' . implode(',', $changedColumns) . ')';
     }
 }
+
+// Subtract the explicitly-tolerated historical deltas (see header) from the
+// final full-clone comparison; everything else remains a hard failure.
+$schemaChanges = array_values(array_diff($schemaChanges, $toleratedSchemaAll));
+$dataChanges = array_values(array_diff($dataChanges, $toleratedDataAll));
+echo 'Tolerated historical deltas (allowed, documented): schema=' . count($toleratedSchemaAll)
+    . ', data=' . count($toleratedDataAll) . PHP_EOL;
 
 $registryAdded = array_values(array_diff($registryAfter, $registryBefore));
 $missingRegistry = [];
