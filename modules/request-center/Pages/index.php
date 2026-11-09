@@ -164,6 +164,28 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:v
  .workspace-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.workspace-metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.workspace-metric strong{display:block;font-size:23px}.workspace-metric span{font-size:12px;color:var(--muted)}@media(max-width:700px){.workspace-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
  .deadline{display:inline-flex;flex-direction:column;gap:1px;white-space:nowrap;font-size:11px}.deadline b{font-weight:700}.deadline small{font-size:10px}.deadline-late{color:#b42318}.deadline-soon{color:#9a6700}.deadline-paused,.deadline-empty{color:var(--muted)}.deadline-normal{color:#276749}
 @media(max-width:780px){.heading{align-items:flex-start;flex-direction:column}.detail-grid{grid-template-columns:1fr}.table th:nth-child(3),.table td:nth-child(3){display:none}.table th,.table td{padding:10px 8px;font-size:12px}}
+
+/* Requester and agent workspace refinements */
+header{position:sticky;top:0;z-index:15;box-shadow:0 3px 14px rgba(23,43,77,.045)}
+.workspace-nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
+.workspace-nav a{white-space:nowrap;text-decoration:none}
+.heading h1{line-height:1.45;letter-spacing:-.25px}
+.heading p{font-size:13px}
+.button{min-height:38px;border:1px solid var(--brand);font-size:12px;transition:background .15s,border-color .15s,transform .15s}
+.button:hover{background:#19477f;color:#fff;text-decoration:none;transform:translateY(-1px)}
+.button.secondary:hover{background:#f4f8fe;color:var(--brand);border-color:#c8d8ec}
+.workspace-metric{box-shadow:0 3px 12px rgba(23,43,77,.035);min-width:0}
+.workspace-metric strong{font-variant-numeric:tabular-nums}
+.card{min-width:0}
+.table{min-width:760px}
+.table th{white-space:nowrap}
+.table td{overflow-wrap:anywhere}
+.table tbody tr:hover{background:#f8fbff}
+.subject{display:inline-block;max-width:420px;line-height:1.7}
+.pagination{flex-wrap:wrap}
+@media(max-width:780px){main{margin:18px auto;padding:0 14px}.bar{padding:12px 14px}.workspace-nav{padding:0 14px 10px}.heading{gap:10px}.heading h1{font-size:21px}.table th,.table td{font-size:11px}.table th:nth-child(3),.table td:nth-child(3){display:table-cell}}
+@media(max-width:480px){.workspace-metrics{gap:7px}.workspace-metric{padding:10px}.workspace-metric strong{font-size:20px}.bar .button{padding:7px 10px;font-size:11px}.subject{max-width:260px}}
+
 </style>
 </head>
 <body>
