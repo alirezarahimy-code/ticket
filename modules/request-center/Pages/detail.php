@@ -145,10 +145,86 @@ if ($page === 'ticket') {
 
     }
     $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
+    // «مرحلهٔ جاری و گام بعدی» — راهنمای کوتاهِ دامنه‌دار برای همین بیننده.
+    // فقط خواندنی؛ هیچ وضعیتی را تغییر نمی‌دهد و از همان اختیاراتی می‌آید که
+    // فرم‌های همین صفحه را کنترل می‌کنند.
+    $guidanceStage = '';
+    $guidanceNext = '';
+    $guidanceActions = [];
+    $ticketStatus = (string) $ticket['status'];
+    if ($cancelRequestPending) {
+        $guidanceStage = 'لغو در انتظار تصمیم';
+        $guidanceNext = $isRequester
+            ? 'درخواست لغو شما ثبت شده و منتظر تصمیم مسئول رسیدگی است؛ تا آن زمان کاری بر عهدهٔ شما نیست.'
+            : 'ثبت‌کننده درخواست لغو داده است؛ نتیجه را در همین صفحه با ذکر دلیل ثبت کنید.';
+    } elseif ($isRequester) {
+        if (in_array($ticketStatus, ['new', 'manager_review'], true)) {
+            $guidanceStage = 'ثبت‌شده — در انتظار ارجاع';
+            $guidanceNext = 'واحد مربوطه درخواست را بررسی و کارشناس مسئول را مشخص می‌کند؛ به اقدام شما نیازی نیست.';
+            if ($canCancelOwnTicket) {
+                $guidanceActions[] = 'اگر دیگر به این درخواست نیاز ندارید، می‌توانید آن را لغو کنید.';
+            }
+        } elseif (in_array($ticketStatus, ['assigned', 'in_progress'], true)) {
+            $guidanceStage = 'در حال رسیدگی';
+            $guidanceNext = 'کارشناس مسئول روی درخواست کار می‌کند؛ اگر پاسخی از شما خواسته شود، در بخش پاسخ ثبت کنید.';
+            if ($canCancelOwnTicket) {
+                $guidanceActions[] = 'می‌توانید درخواست لغو را با ذکر دلیل ثبت کنید.';
+            }
+        } elseif (in_array($ticketStatus, ['waiting_user', 'pending'], true)) {
+            $guidanceStage = 'منتظر پاسخ شما';
+            $guidanceNext = 'رسیدگی تا پاسخ شما متوقف است؛ لطفاً پاسخ را در همین صفحه ثبت کنید.';
+        } elseif ($ticketStatus === 'resolved') {
+            $guidanceStage = 'حل‌شده — منتظر نظر شما';
+            $guidanceNext = 'اگر مشکل برطرف شده امتیاز رضایت خود را ثبت کنید؛ اگر هنوز ادامه دارد «بازگشایی» را انتخاب کنید.';
+            if (!ticket_rating_is_current($ticket)) {
+                $guidanceActions[] = 'ثبت امتیاز رضایت (برای بسته‌شدن نهایی لازم است).';
+            }
+        } elseif ($ticketStatus === 'closed') {
+            $guidanceStage = 'بسته شده';
+            $guidanceNext = 'پروندهٔ این درخواست بسته است؛ در صورت نیاز درخواست جدیدی ثبت کنید.';
+        } elseif ($ticketStatus === 'rejected') {
+            $guidanceStage = 'رد شده';
+            $guidanceNext = 'درخواست رد شده است؛ دلیل رد را در تاریخچهٔ رویدادها ببینید و در صورت نیاز درخواست جدیدی با توضیح کامل‌تر ثبت کنید.';
+        } elseif ($ticketStatus === 'cancelled') {
+            $guidanceStage = 'لغو شده';
+            $guidanceNext = 'این درخواست لغو شده است.';
+        }
+    } elseif ($staff) {
+        if (in_array($ticketStatus, ['new', 'manager_review'], true)) {
+            $guidanceStage = empty($ticket['assigned_to']) ? 'بدون مسئول' : 'ارجاع‌شده';
+            $guidanceNext = empty($ticket['assigned_to'])
+                ? 'این درخواست هنوز کارشناس مسئول ندارد؛ اگر مجاز باشید می‌توانید از همین صفحه آن را بردارید (یا منتظر ارجاع مدیر/سوپروایزر بمانید).'
+                : 'ارجاع انجام شده است؛ مسئول رسیدگی پیگیری می‌کند.';
+        } elseif (in_array($ticketStatus, ['assigned', 'in_progress'], true)) {
+            $guidanceStage = 'در حال رسیدگی';
+            $guidanceNext = $viewMode === 'supervisor'
+                ? 'کارشناس در حال رسیدگی است؛ پیشرفت را دنبال کنید و در صورت نیاز بازتخصیص یا تصمیم بگیرید.'
+                : 'پاسخ یا تغییر وضعیت را ثبت کنید؛ پس از رفع مشکل، وضعیت را به «حل شد» تغییر دهید.';
+        } elseif (in_array($ticketStatus, ['waiting_user', 'pending'], true)) {
+            $guidanceStage = 'منتظر پاسخ کاربر';
+            $guidanceNext = 'کاربر باید پاسخ دهد؛ در صورت عدم پاسخ پیگیری کنید یا یادداشت داخلی ثبت کنید.';
+        } elseif ($ticketStatus === 'resolved') {
+            $guidanceStage = 'حل‌شده — منتظر امتیاز کاربر';
+            $guidanceNext = 'پس از ثبت امتیاز یا بستن خودکار، سوپروایزر تأیید نهایی می‌کند (یا برای اصلاح بازمی‌گرداند).';
+        } elseif ($ticketStatus === 'closed') {
+            $guidanceStage = 'بسته شده';
+            $guidanceNext = 'پرونده بسته است؛ فقط تاریخچه در دسترس است.';
+        } elseif ($ticketStatus === 'rejected') {
+            $guidanceStage = 'رد شده';
+            $guidanceNext = 'درخواست رد شده است؛ پرونده بسته است.';
+        } elseif ($ticketStatus === 'cancelled') {
+            $guidanceStage = 'لغو شده';
+            $guidanceNext = 'درخواست لغو شده است؛ پرونده بسته است.';
+        }
+    }
+    if ($guidanceStage === '') {
+        $guidanceStage = request_center_status_label($ticketStatus);
+        $guidanceNext = 'جزئیات پرونده در همین صفحه در دسترس است.';
+    }
     render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
     echo '<style id="rc-ticket-detail-page">
 .page-heading{margin-bottom:16px}.page-heading h1{font-size:23px;line-height:1.7;overflow-wrap:anywhere}.back-link{display:inline-flex;margin-bottom:7px;color:#526f91;font-size:12px;text-decoration:none}.back-link:hover{color:#1f548f;text-decoration:underline}
-.ticket-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}.ticket-meta>span{padding:4px 9px;border:1px solid #e1e8f1;border-radius:999px;background:#fff;color:#5c6f87;font-size:10px}.ticket-meta .status,.ticket-meta .priority{font-style:normal;font-weight:700}
+.guidance-card{border-inline-start:3px solid #2459a6}.guidance-card ul{margin:10px 0 0;padding-inline-start:18px;color:#334b68;font-size:12px;line-height:2}.ticket-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}.ticket-meta>span{padding:4px 9px;border:1px solid #e1e8f1;border-radius:999px;background:#fff;color:#5c6f87;font-size:10px}.ticket-meta .status,.ticket-meta .priority{font-style:normal;font-weight:700}
 .ticket-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
 .conversation,.ticket-sidebar .card{min-width:0;border:1px solid #e2e9f2;border-radius:14px;background:#fff;box-shadow:0 5px 18px rgba(23,43,77,.04)}
 .conversation{padding:clamp(14px,2vw,22px)}
@@ -256,7 +332,11 @@ if ($page === 'ticket') {
          echo '<form class="card reply-box" method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="reply"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>پاسخ شما<textarea name="body" required rows="5" placeholder="پیام خود را بنویسید..."></textarea></label><div class="reply-actions"><label class="file-input compact">پیوست<input type="file" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt,.zip"><small class="field-help" data-reply-attachment-feedback aria-live="polite">حداکثر ۸ مگابایت</small></label>' . ($canSeeInternal ? '<label class="check-label"><input type="checkbox" name="is_internal" value="1"> یادداشت داخلی</label>' : '') . $afterSelect . '<button class="button" type="submit">ارسال پاسخ</button></div></form>';
      }
      echo '</section>';
-        echo '<aside class="ticket-sidebar"><div class="card detail-card"><h3>اطلاعات درخواست</h3><dl><dt>ثبت‌کننده</dt><dd>' . e($ticket['requester_name']) . '</dd><dt>حوزه</dt><dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? 'پشتیبانی' : 'IT') . '</dd><dt>نوع</dt><dd>' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</dd><dt>خدمت</dt><dd>' . e($ticket['service_name'] ?: 'بدون خدمت') . '</dd><dt>واحد رسیدگی</dt><dd>' . e(($ticket['service_group'] ?? 'it') === 'support' ? 'واحد پشتیبانی' : 'واحد فناوری اطلاعات') . '</dd><dt>معاونت سازمانی</dt><dd>' . e($ticket['requesting_unit_name'] ?: ($ticket['department_name'] ?: 'بدون معاونت')) . '</dd><dt>دسته‌بندی</dt><dd>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</dd><dt>کارشناس</dt><dd>' . e($ticket['assignee_name'] ?: 'تخصیص داده نشده') . '</dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? '<dt>محل خدمت</dt><dd>' . e($ticket['support_location'] ?: 'ثبت نشده') . '</dd><dt>تجهیز / مورد</dt><dd>' . e($ticket['support_equipment'] ?: 'ثبت نشده') . '</dd>' : '<dt>سیستم</dt><dd>' . e($ticket['hostname'] ? asset_display_name($ticket['hostname']) . (asset_is_auto_domain_tag($ticket['asset_tag']) ? '' : ' (' . $ticket['asset_tag'] . ')') : 'بدون سیستم مرتبط') . '</dd>') . '<dt>مهلت SLA</dt><dd>' . e($ticket['due_at'] ? persian_date($ticket['due_at']) : 'ثبت نشده') . '</dd><dt>مهلت پاسخ OLA</dt><dd>' . e($ticket['ola_response_due_at'] ? persian_date($ticket['ola_response_due_at']) : 'ثبت نشده') . '</dd><dt>مهلت حل OLA</dt><dd>' . e($ticket['ola_due_at'] ? persian_date($ticket['ola_due_at']) : 'ثبت نشده') . '</dd>' . (ticket_rating_is_current($ticket) ? '<dt>رضایت کاربر</dt><dd>' . e((string) $ticket['rating_score']) . ' از ۵</dd>' : '') . '</dl></div>';
+        echo '<aside class="ticket-sidebar"><div class="card detail-card guidance-card"><h3>مرحلهٔ جاری: ' . e($guidanceStage) . '</h3><p class="muted">' . e($guidanceNext) . '</p>';
+    if ($guidanceActions !== []) {
+        echo '<ul>' . implode('', array_map(static fn ($action): string => '<li>' . e((string) $action) . '</li>', $guidanceActions)) . '</ul>';
+    }
+    echo '</div><div class="card detail-card"><h3>اطلاعات درخواست</h3><dl><dt>ثبت‌کننده</dt><dd>' . e($ticket['requester_name']) . '</dd><dt>حوزه</dt><dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? 'پشتیبانی' : 'IT') . '</dd><dt>نوع</dt><dd>' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</dd><dt>خدمت</dt><dd>' . e($ticket['service_name'] ?: 'بدون خدمت') . '</dd><dt>واحد رسیدگی</dt><dd>' . e(($ticket['service_group'] ?? 'it') === 'support' ? 'واحد پشتیبانی' : 'واحد فناوری اطلاعات') . '</dd><dt>معاونت سازمانی</dt><dd>' . e($ticket['requesting_unit_name'] ?: ($ticket['department_name'] ?: 'بدون معاونت')) . '</dd><dt>دسته‌بندی</dt><dd>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</dd><dt>کارشناس</dt><dd>' . e($ticket['assignee_name'] ?: 'تخصیص داده نشده') . '</dd>' . (($ticket['service_group'] ?? 'it') === 'support' ? '<dt>محل خدمت</dt><dd>' . e($ticket['support_location'] ?: 'ثبت نشده') . '</dd><dt>تجهیز / مورد</dt><dd>' . e($ticket['support_equipment'] ?: 'ثبت نشده') . '</dd>' : '<dt>سیستم</dt><dd>' . e($ticket['hostname'] ? asset_display_name($ticket['hostname']) . (asset_is_auto_domain_tag($ticket['asset_tag']) ? '' : ' (' . $ticket['asset_tag'] . ')') : 'بدون سیستم مرتبط') . '</dd>') . '<dt>مهلت SLA</dt><dd>' . e($ticket['due_at'] ? persian_date($ticket['due_at']) : 'ثبت نشده') . '</dd><dt>مهلت پاسخ OLA</dt><dd>' . e($ticket['ola_response_due_at'] ? persian_date($ticket['ola_response_due_at']) : 'ثبت نشده') . '</dd><dt>مهلت حل OLA</dt><dd>' . e($ticket['ola_due_at'] ? persian_date($ticket['ola_due_at']) : 'ثبت نشده') . '</dd>' . (ticket_rating_is_current($ticket) ? '<dt>رضایت کاربر</dt><dd>' . e((string) $ticket['rating_score']) . ' از ۵</dd>' : '') . '</dl></div>';
     if ($staff && empty($ticket['assigned_to']) && in_array($ticket['status'], ['new', 'manager_review'], true) && ticket_assignee_is_eligible($ticket, $user, 'ticket_notification_user_can') && !$cancelHasRequest) {
         echo '<div class="card detail-card"><h3>برداشتن درخواست</h3><p class="muted">این درخواست هنوز کارشناس مسئول ندارد.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="claim_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><button class="button wide" type="submit">برداشتن و شروع رسیدگی</button></form></div>';
     }
