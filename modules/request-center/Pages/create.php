@@ -45,8 +45,8 @@ if ($page === 'new-ticket') {
                 . 'شرح اصلاح موردنیاز: ';
         }
     }
-    if ($cdDvdRequestRecord === null) {
-        // پیش‌پرکردن متن از آریا؛ خدمت و سایر فیلدها را کاربر خودش در همین فرم انتخاب می‌کند.
+    if ($cdDvdRequestRecord === null && $retryDraft === []) {
+        // پیش‌پرکردن متن از آریا؛ در صورت وجود پیش‌نویس بازیابی‌شده، متن ارسالی کاربر اولویت دارد.
         $subjectDefault = mb_substr(trim((string) ($_GET['subject'] ?? '')), 0, 255, 'UTF-8');
         $descriptionDefault = mb_substr(trim((string) ($_GET['description'] ?? '')), 0, 5000, 'UTF-8');
     }
