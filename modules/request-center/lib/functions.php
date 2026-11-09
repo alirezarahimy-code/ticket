@@ -451,6 +451,9 @@ function request_center_ticket_number_next(string $prefix): string
 function request_center_notify_user(int $userId, string $type, string $title, string $body, int $ticketId, bool $required = false): void
 {
     if ($userId <= 0) {
+        if ($required) {
+            throw new RuntimeException('گیرندهٔ اعلان درخواست معتبر نیست.');
+        }
         return;
     }
     try {
