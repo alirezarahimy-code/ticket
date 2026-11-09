@@ -184,5 +184,18 @@ if (!defined('APP_ROOT')) {
                 $bulkMessage .= ' ' . $bulkSkipped . ' درخواست (بدون کارشناس مسئول، خارج از اختیار شما، درخواست لغو در انتظار یا مسیر وضعیت نامعتبر) تغییر نکرد.';
             }
             flash($bulkChanged > 0 ? 'success' : 'warning', $bulkMessage);
-            redirect('request-center.php?page=queue&queue=' . rawurlencode((string) ($_POST['rc_return_queue'] ?? 'all')) . '&p=' . max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1))));
+            $returnQueue = in_array((string) ($_POST['rc_return_queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], true)
+                ? (string) $_POST['rc_return_queue'] : 'all';
+            $returnParams = [
+                'page' => 'queue',
+                'queue' => $returnQueue,
+                'p' => max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1))),
+            ];
+            foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16] as $filterKey => $maxLength) {
+                $filterValue = trim((string) ($_POST['rc_return_' . $filterKey] ?? ''));
+                if ($filterValue !== '' && strlen($filterValue) <= $maxLength) {
+                    $returnParams[$filterKey] = $filterValue;
+                }
+            }
+            redirect('request-center.php?' . http_build_query($returnParams));
         }
