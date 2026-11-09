@@ -67,6 +67,16 @@ function request_center_post_error(Throwable $exception, string $page): never
         : 'عملیات انجام نشد. گزارش خطا در لاگ سامانه ثبت شد.');
 
     $action = (string) ($GLOBALS['activity_post']['action'] ?? '');
+    if ($action === 'create_ticket' && session_status() === PHP_SESSION_ACTIVE) {
+        // Keep only the two core narrative fields after a rejected submission.
+        // Files, custom fields, identifiers and one-time request tokens are never
+        // copied into the retry session payload.
+        $_SESSION['rc_create_retry'] = [
+            'subject' => mb_substr(trim((string) ($_POST['subject'] ?? '')), 0, 255, 'UTF-8'),
+            'description' => mb_substr(trim((string) ($_POST['description'] ?? '')), 0, 5000, 'UTF-8'),
+            'saved_at' => time(),
+        ];
+    }
     $ticketId = max(0, (int) ($_POST['ticket_id'] ?? 0));
     $target = match ($action) {
         'create_ticket' => 'request-center.php?page=new-ticket',
