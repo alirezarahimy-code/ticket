@@ -12,11 +12,14 @@ declare(strict_types=1);
 function render_header(string $title, ?array $user = null): void
 {
     global $page;
+    $isRequestCenterEntry = defined('REQUEST_CENTER_INDEPENDENT_ENTRY') && REQUEST_CENTER_INDEPENDENT_ENTRY === true;
     $appName = setting('app_name', (string) cfg('app.name', 'سامانه درخواست پشتیبانی'));
     $logo = setting('app_logo', (string) cfg('app.logo', ''));
     $flashes = take_flash();
     $theme = $user ? valid_choice((string) setting('theme_user_' . (int) $user['id'], 'current'), ['current', 'ruby', 'indigo', 'copper'], 'current') : 'current';
-    $notificationSummary = $user ? notification_header_summary((int) $user['id'], $user) : ['unread' => 0, 'latest' => 0];
+    $notificationSummary = ($user && !$isRequestCenterEntry)
+        ? notification_header_summary((int) $user['id'], $user)
+        : ['unread' => 0, 'latest' => 0];
     $notificationCount = $notificationSummary['unread'];
     $layoutPage = 'dashboard';
     $layoutAdmin = false;
@@ -37,7 +40,7 @@ function render_header(string $title, ?array $user = null): void
     }
     $bodyPageClass = ($page ?? '') === 'organization' ? 'page-organization' : '';
     $themeMode = app_theme_mode();
-    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="index.php"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
+    echo '<!doctype html><html lang="fa" dir="rtl" data-theme="' . e($theme) . '" data-theme-mode="' . e($themeMode) . '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="' . ($themeMode === 'dark' ? '#101915' : '#174f43') . '"><title>' . e($title . ' | ' . $appName) . '</title><link rel="stylesheet" href="assets/style.css?v=3.4.60">' . ($layoutAdmin ? '<link rel="stylesheet" href="assets/admin-layout-design.css?v=9">' : '') . ($layoutCss !== '' ? '<style id="admin-page-layout-rules">' . $layoutCss . '</style>' : '') . '<link rel="stylesheet" href="assets/theme-mode.css?v=3">' . (($page ?? '') === 'logging-dashboard' ? '<link rel="stylesheet" href="assets/logging-dashboard.css?v=1">' : '') . '</head><body class="' . e($bodyPageClass) . '" data-theme-mode="' . e($themeMode) . '" data-layout-page="' . e($layoutPage) . '" data-layout-design-admin="' . ($layoutAdmin ? '1' : '0') . '" data-weekend-days="' . e(implode(',', sla_business_hours()['weekend'])) . '"><div class="app-shell"><header class="topbar"><div class="topbar-inner"><a class="brand" href="' . ($isRequestCenterEntry ? 'request-center.php' : 'index.php') . '"><span class="brand-mark">' . ($logo ? '<img src="' . e($logo) . '" alt="' . e($appName) . '">' : '<span class="brand-glyph">پ</span>') . '</span><span><strong>' . e($appName) . '</strong><small>مرکز خدمات و پشتیبانی</small></span></a>' . (!$user ? app_theme_toggle_markup() : '');
     if ($user) {
         $menuIcons = [
             'home' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
@@ -66,6 +69,43 @@ function render_header(string $title, ?array $user = null): void
             }
             return '<li class="has-submenu"><details class="nav-dropdown"><summary aria-controls="' . e($id) . '">' . $menuIcon($icon) . '<span>' . e($label) . '</span><span class="arrow" aria-hidden="true"></span></summary><ul class="submenu" id="' . e($id) . '">' . implode('', $links) . '</ul></details></li>';
         };
+        if ($isRequestCenterEntry) {
+            $menuItems = [
+                '<li>' . $menuLink('request-center.php', 'خانه مرکز درخواست‌ها', 'home') . '</li>',
+            ];
+            if (user_can($user, 'ticket.create') || user_can($user, 'ticket.view_own')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=requester', 'فضای درخواست‌دهنده', 'ticket') . '</li>';
+            }
+            if (user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
+                || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=agent', 'فضای کارشناس', 'support') . '</li>';
+            }
+            if (user_can($user, 'queue.view')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?page=queue', 'صف عملیاتی', 'ticket') . '</li>';
+            }
+            if (user_can($user, 'supervisor.panel')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=supervisor', 'فضای سوپروایزر', 'reports') . '</li>';
+                $menuItems[] = '<li>' . $menuLink('request-center.php?page=supervisor', 'صف تصمیم‌ها', 'settings') . '</li>';
+            }
+            if (user_is_primary_admin($user)) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=admin', 'مدیریت مرکز درخواست‌ها', 'settings') . '</li>';
+            }
+            if (user_can($user, 'ticket.create')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?page=new-ticket', 'ثبت درخواست', 'ticket') . '</li>';
+            }
+            if (user_can($user, 'reports.view')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?page=reports', 'گزارش‌ها', 'reports') . '</li>';
+            }
+            if (user_can($user, 'analytics.view')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?page=analytics', 'تحلیل عملکرد', 'reports') . '</li>';
+            }
+            if (is_admin_role((string) ($user['role'] ?? '')) || user_is_primary_admin($user)) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?page=services', 'کاتالوگ خدمات', 'support') . '</li>';
+            }
+            $menuItems[] = '<li class="logout"><form method="post" class="logout-form">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">' . $menuIcon('logout') . '<span>خروج</span></button></form></li>';
+            echo '<div class="header-tools">' . app_theme_toggle_markup() . '<span class="profile-shortcut">' . e((string) ($user['full_name'] ?? $user['username'] ?? '')) . '</span></div>';
+            echo '<nav class="navbar" aria-label="ناوبری مرکز درخواست‌ها"><ul class="menu">' . implode('', $menuItems) . '</ul></nav>';
+        } else {
         $supportLinks = [
             $submenuLink('index.php?page=services', 'خدمات'),
             $submenuLink('index.php?page=knowledge', 'دانش‌نامه'),
@@ -144,6 +184,7 @@ function render_header(string $title, ?array $user = null): void
         $menuItems[] = '<li class="logout"><form method="post" class="logout-form">' . csrf_field() . '<input type="hidden" name="action" value="logout"><button class="logout-link" type="submit">' . $menuIcon('logout') . '<span>خروج</span></button></form></li>';
         echo '<div class="header-tools"><form class="global-search header-search" method="get"><input type="hidden" name="page" value="search"><input name="q" placeholder="جست‌وجو در صفحه‌ها، درخواست، دارایی یا دانش‌نامه"></form>' . app_theme_toggle_markup() . ($layoutAdmin ? '<button class="layout-design-launch" type="button" data-layout-design-launch data-layout-page-title="' . e(admin_layout_design_page_label($layoutPage)) . '" aria-pressed="false">🎨 طراحی همین صفحه</button>' : '') . '<a class="profile-shortcut" href="index.php?page=profile#appearance">🎨 انتخاب تم</a><a class="profile-shortcut" href="index.php?page=profile">پروفایل: ' . e((string) $user['username']) . '</a></div>';
         echo '<nav class="navbar" aria-label="ناوبری اصلی"><ul class="menu">' . implode('', $menuItems) . '</ul></nav>';
+        }
     }
       echo '</div></header><div class="content-wrap">';
       echo '<div class="ambient-orbits" aria-hidden="true"><span class="orbit orbit-reusable orbit-reusable--top orbit-reusable--lg"></span><span class="orbit orbit-reusable orbit-reusable--ring orbit-reusable--md"></span><span class="orbit orbit-reusable orbit-reusable--bottom orbit-reusable--xl"></span><span class="orbit orbit-reusable orbit-reusable--side orbit-reusable--sm"></span><span class="orbit orbit-reusable orbit-reusable--corner orbit-reusable--md"></span></div>';
