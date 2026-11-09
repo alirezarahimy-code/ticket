@@ -141,6 +141,22 @@ if ($page === 'supervisor') {
         }
         echo '</nav>';
     }
+    echo '<script id="rc-supervisor-decision-interactions">
+(function(){
+ document.querySelectorAll(".supervisor-actions form").forEach(function(form){
+  form.addEventListener("submit",function(event){
+   var note=form.querySelector("[name=\"supervisor_note\"]");
+   if(note&&!note.value.trim()){event.preventDefault();note.setCustomValidity("ثبت دلیل تصمیم الزامی است.");note.reportValidity();note.focus();return;}
+   if(note)note.setCustomValidity("");
+   var button=event.submitter||form.querySelector("button[type=\"submit\"]");
+   if(button&&button.dataset.confirm&&!window.confirm(button.dataset.confirm)){event.preventDefault();return;}
+   if(button){button.disabled=true;button.textContent="در حال ثبت تصمیم…";}
+  });
+  var note=form.querySelector("[name=\"supervisor_note\"]");
+  if(note)note.addEventListener("input",function(){note.setCustomValidity("");});
+ });
+})();
+</script>'; 
     render_footer();
     exit;
 }
