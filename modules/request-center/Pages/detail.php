@@ -445,7 +445,7 @@ if ($page === 'ticket') {
 (function(){
  document.querySelectorAll(".cancel-ticket-card,.cancellation-decision,.rating-card,.reply-box").forEach(function(form){
   var textareas=Array.prototype.slice.call(form.querySelectorAll("textarea"));
-   var attachment=form.querySelector('[name="attachment"]'),attachmentFeedback=form.querySelector("[data-reply-attachment-feedback]");
+   var attachment=form.querySelector("[name=attachment]"),attachmentFeedback=form.querySelector("[data-reply-attachment-feedback]");
    if(attachment){attachment.addEventListener("change",function(){var file=attachment.files&&attachment.files[0];if(!file){attachment.setCustomValidity("");if(attachmentFeedback)attachmentFeedback.textContent="حداکثر ۸ مگابایت";return;}if(file.size>8*1024*1024){attachment.value="";attachment.setCustomValidity("حجم فایل پیوست نباید بیشتر از ۸ مگابایت باشد.");if(attachmentFeedback)attachmentFeedback.textContent="فایل انتخاب‌شده بیش از ۸ مگابایت است.";attachment.reportValidity();return;}attachment.setCustomValidity("");if(attachmentFeedback)attachmentFeedback.textContent=file.name+" · "+(file.size/1024/1024).toFixed(2)+" مگابایت";});}
 
   textareas.forEach(function(area){

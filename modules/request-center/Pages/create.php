@@ -234,7 +234,7 @@ if ($page === 'new-ticket') {
  var supportFields=Array.prototype.slice.call(form.querySelectorAll(".support-field"));
  var customFields=Array.prototype.slice.call(form.querySelectorAll("[data-service-fields]"));
  var submit=form.querySelector("button[type=\"submit\"]");
-  var attachment=form.querySelector('[name="attachment"]'),attachmentFeedback=form.querySelector("[data-attachment-feedback]");
+  var attachment=form.querySelector("[name=attachment]"),attachmentFeedback=form.querySelector("[data-attachment-feedback]");
  function group(){var selected=groupInputs.find(function(input){return input.checked;});return selected?selected.value:"it";}
  function selectedService(){return service&&service.selectedOptions.length?service.selectedOptions[0]:null;}
  function renderAssets(query){
@@ -255,7 +255,7 @@ if ($page === 'new-ticket') {
  var assetLive=document.createElement("div");assetLive.className="sr-only";assetLive.setAttribute("role","status");assetLive.setAttribute("aria-live","polite");
  if(assetResults&&assetResults.parentNode)assetResults.parentNode.insertBefore(assetLive,assetResults.nextSibling);
  if(assetSearch){assetSearch.setAttribute("role","combobox");assetSearch.setAttribute("aria-autocomplete","list");assetSearch.setAttribute("aria-controls","asset-results");assetSearch.setAttribute("aria-expanded","false");}
- function assetItems(){return assetResults?Array.prototype.slice.call(assetResults.querySelectorAll('[role="option"]')):[];}
+ function assetItems(){return assetResults?Array.prototype.slice.call(assetResults.querySelectorAll("[role=option]")):[];}
  function focusAsset(index){var options=assetItems();if(!options.length){assetActiveIndex=-1;return;}assetActiveIndex=(index+options.length)%options.length;options.forEach(function(item,i){item.setAttribute("aria-selected",i===assetActiveIndex?"true":"false");item.classList.toggle("active",i===assetActiveIndex);});var active=options[assetActiveIndex];active.scrollIntoView({block:"nearest"});assetSearch.setAttribute("aria-activedescendant",active.id);}
  function sync(){
   var g=group(),opt=selectedService();

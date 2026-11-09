@@ -243,7 +243,7 @@ if ($page === 'services') {
   if(event.key==="Escape"){event.preventDefault();closeModal();return;}
   if(event.key!=="Tab")return;
   var modal=layer.querySelector(".service-modal:not([hidden])");if(!modal)return;
-  var focusable=Array.prototype.slice.call(modal.querySelectorAll("a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1'])")).filter(function(el){return el.offsetParent!==null;});
+  var focusable=Array.prototype.slice.call(modal.querySelectorAll("a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex=-1])")).filter(function(el){return el.offsetParent!==null;});
   if(!focusable.length){event.preventDefault();return;}
   var first=focusable[0],last=focusable[focusable.length-1];
   if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
@@ -252,14 +252,14 @@ if ($page === 'services') {
  document.querySelectorAll(".service-delete").forEach(function(form){
   form.addEventListener("submit",function(event){var button=form.querySelector("button[type=submit]");if(button&&button.dataset.confirm&&!window.confirm(button.dataset.confirm)){event.preventDefault();return;}if(button){button.disabled=true;button.textContent="در حال ثبت…";}});
  });
- document.querySelectorAll('form[method="post"]:not(.service-delete)').forEach(function(form){
+ document.querySelectorAll("form[method=post]:not(.service-delete)").forEach(function(form){
   form.addEventListener("submit",function(event){
    if(form.dataset.submitting==="1"){event.preventDefault();return;}
    if(!form.reportValidity()){event.preventDefault();return;}
    var submitter=event.submitter;
    if(submitter&&submitter.dataset.confirm&&!window.confirm(submitter.dataset.confirm)){event.preventDefault();return;}
    form.dataset.submitting="1";
-   form.querySelectorAll('button[type="submit"],input[type="submit"]').forEach(function(button){
+   form.querySelectorAll("button[type=submit],input[type=submit]").forEach(function(button){
     button.disabled=true;
     if(button.tagName==="BUTTON"){button.dataset.originalText=button.textContent;button.textContent="در حال ذخیره…";}
     else{button.dataset.originalValue=button.value;button.value="در حال ذخیره…";}
