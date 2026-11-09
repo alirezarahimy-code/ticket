@@ -534,7 +534,7 @@ if (!defined('APP_ROOT')) {
             db()->prepare('INSERT INTO ticket_ratings (ticket_id, agent_id, requester_id, score, comment) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE agent_id = VALUES(agent_id), score = VALUES(score), comment = VALUES(comment), created_at = NOW()')->execute([$ticketId, $ticket['assigned_to'] ?: null, $user['id'], $score, $comment !== '' ? $comment : null]);
             save_audit_required((int) $user['id'], 'ticket_rated', $ticketId, ['score' => $score]);
             log_ticket_event($ticketId, (int) $user['id'], 'rated', (string) $ticket['status'], (string) $ticket['status'], ['score' => $score]);
-            request_center_notify_ticket_staff($ticketId, 'ticket_rated', 'رضایت کاربر ثبت شد', 'برای درخواست ' . ticket_number($ticketId) . ' امتیاز ' . $score . ' از ۵ ثبت شد.' . ($ticket['status'] === 'resolved' ? ' درخواست آمادهٔ تأیید نهایی است.' : ''), (int) $user['id']);
+            request_center_notify_ticket_staff($ticketId, 'ticket_rated', 'رضایت کاربر ثبت شد', 'برای درخواست ' . ticket_number($ticketId) . ' امتیاز ' . $score . ' از ۵ ثبت شد.' . ($ticket['status'] === 'resolved' ? ' درخواست آمادهٔ تأیید نهایی است.' : ''), (int) $user['id'], true);
             record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_rated', 'ثبت رضایت برای درخواست ' . ticket_number($ticketId), (int) $user['id'], $ticketId, 'امتیاز: ' . $score . ' از ۵');
             db_commit('request-center.php');
             flash('success', 'امتیاز رضایت شما با موفقیت ثبت شد.');
