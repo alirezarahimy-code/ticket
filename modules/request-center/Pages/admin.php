@@ -57,6 +57,8 @@ $adminAuditLabels = [
     'cancellation_requested' => 'درخواست لغو', 'cancellation_approved' => 'تأیید لغو',
     'cancellation_rejected' => 'رد درخواست لغو', 'auto_closed' => 'بستن خودکار',
     'bulk_status_changed' => 'تغییر گروهی وضعیت', 'priority_changed' => 'تغییر اولویت',
+    'ola_policy_created' => 'ایجاد سیاست OLA', 'ola_policy_updated' => 'ویرایش سیاست OLA',
+    'request_center_work_hours_updated' => 'تغییر تقویم کاری SLA/OLA',
 ];
 $escapeAdmin = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $adminStatusLabels = [
