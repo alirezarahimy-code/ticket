@@ -1099,3 +1099,121 @@ if (!defined('APP_ROOT')) {
             flash('success', 'مهلت رسیدگی به‌روزرسانی شد.');
             redirect(request_center_ticket_return_url($ticketId));
         }
+
+        if ($action === 'agent_transfer_ticket') {
+            $staffUser = require_login();
+            if (!user_can($staffUser, 'ticket.edit')) {
+                throw new RuntimeException('دسترسی ویرایش درخواست برای نقش شما مجاز نیست.');
+            }
+            $ticketId = (int) ($_POST['ticket_id'] ?? 0);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || !can_view_ticket($ticket, $staffUser)) {
+                throw new RuntimeException('درخواست پیدا نشد یا به واحد شما تعلق ندارد.');
+            }
+            $handlerLevel = ticket_handler_level($ticket, $staffUser);
+            if ($handlerLevel === 'manager') {
+                throw new RuntimeException('مدیر واحد می‌تواند مسئول رسیدگی را از فرم «مدیریت درخواست» تغییر دهد.');
+            }
+            if ($handlerLevel !== 'assignee') {
+                throw new RuntimeException('فقط کارشناس مسئول همین درخواست می‌تواند آن را منتقل کند.');
+            }
+            if (in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
+                throw new RuntimeException('درخواست بسته‌شده یا لغوشده قابل انتقال نیست.');
+            }
+            if (!empty($ticket['cancel_requested_at'])) {
+                throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ تا روشن شدن وضعیت، انتقال مجاز نیست.');
+            }
+            $toAssigneeId = (int) ($_POST['assigned_to'] ?? 0);
+            if ($toAssigneeId <= 0) {
+                throw new RuntimeException('کارشناس مقصد را انتخاب کنید. برداشتن مسئول از مسیر مدیر واحد انجام می‌شود.');
+            }
+            $oldAssigneeId = (int) ($ticket['assigned_to'] ?? 0);
+            if ($toAssigneeId === $oldAssigneeId) {
+                flash('info', 'مسئول رسیدگی تغییری نکرد.');
+                redirect(request_center_ticket_return_url($ticketId));
+            }
+            $transferReason = trim((string) post_value('transfer_reason', ''));
+            if (mb_strlen($transferReason, 'UTF-8') < 10) {
+                throw new RuntimeException('برای انتقال درخواست، ثبت دلیل با حداقل ۱۰ نویسه الزامی است.');
+            }
+            if (mb_strlen($transferReason, 'UTF-8') > 1000) {
+                throw new RuntimeException('دلیل انتقال نباید بیشتر از ۱۰۰۰ نویسه باشد.');
+            }
+            $ticketStatus = (string) $ticket['status'];
+            $ticketGroupForAssign = (string) ($ticket['service_group'] ?? 'it');
+            $assigneeQuery = db()->prepare('SELECT u.id, u.full_name, u.department_id, u.role, u.is_active, u.is_it_agent, u.is_primary_admin, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.id = ? AND u.is_active = 1 LIMIT 1');
+            $assigneeQuery->execute([$toAssigneeId]);
+            $assigneeRow = $assigneeQuery->fetch();
+            $assigneeRole = (string) ($assigneeRow['role'] ?? '');
+            $assigneeHu = (string) ($assigneeRow['handling_unit_code'] ?? '');
+            $assigneeGroupOk = $assigneeRow
+                && ((user_is_primary_admin($assigneeRow) && $ticketGroupForAssign === 'it')
+                    || ($assigneeRole === 'support_manager' && $ticketGroupForAssign === 'support')
+                    || (in_array($assigneeRole, ['agent', 'manager'], true) && $assigneeHu === $ticketGroupForAssign));
+            $assigneeDepartmentOk = $assigneeRole !== 'manager'
+                || ((int) ($ticket['department_id'] ?? 0) > 0 && (int) ($assigneeRow['department_id'] ?? 0) === (int) $ticket['department_id']);
+            if (!$assigneeRow || !ticket_assignee_is_eligible($ticket, $assigneeRow, 'ticket_notification_user_can') || !$assigneeGroupOk || !$assigneeDepartmentOk) {
+                throw new RuntimeException('کارشناس انتخاب‌شده به این حوزه و واحد تعلق ندارد یا واجد شرایط رسیدگی نیست.');
+            }
+            $oldAssigneeName = (string) ($ticket['assignee_name'] ?? '');
+            $newAssigneeName = (string) ($assigneeRow['full_name'] ?? '');
+            $expected = [
+                'requester_id' => $ticket['requester_id'],
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'first_response_at' => $ticket['first_response_at'] ?? null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
+                'cancel_requested_at' => null,
+            ];
+            db()->beginTransaction();
+            $workflow = new RequestCenterWorkflowService(db());
+            $transitioned = $workflow->transition(
+                $ticketId,
+                $ticketStatus,
+                $ticketStatus,
+                ['assigned_to' => $toAssigneeId, 'assigned_at' => RequestCenterSqlExpression::now()],
+                'same_state',
+                $expected
+            );
+            if (!$transitioned) {
+                throw new RuntimeException('درخواست هم‌زمان تغییر کرده است؛ صفحه را تازه‌سازی و دوباره تلاش کنید.');
+            }
+            $visibleNote = 'مسئول رسیدگی از «' . ($oldAssigneeName !== '' ? $oldAssigneeName : 'بدون مسئول') . '» به «' . $newAssigneeName . '» تغییر کرد — ' . $transferReason;
+            $workflow->appendMessage($ticketId, (int) $staffUser['id'], $visibleNote);
+            db_commit_or_fail('ticket:agent_transfer_ticket');
+            save_audit_required((int) $staffUser['id'], 'ticket_agent_transfer', $ticketId, [
+                'from_assigned_to' => $oldAssigneeId > 0 ? $oldAssigneeId : null,
+                'to_assigned_to' => $toAssigneeId,
+                'from_assignee_name' => $oldAssigneeName,
+                'to_assignee_name' => $newAssigneeName,
+                'reason' => $transferReason,
+            ]);
+            log_ticket_event($ticketId, (int) $staffUser['id'], 'assignment_changed', $ticketStatus, $ticketStatus, [
+                'assignment_source' => 'agent',
+                'from_assigned_to' => $oldAssigneeId > 0 ? $oldAssigneeId : null,
+                'to_assigned_to' => $toAssigneeId,
+                'from_assignee_name' => $oldAssigneeName,
+                'to_assignee_name' => $newAssigneeName,
+                'reason' => $transferReason,
+            ]);
+            request_center_notify_ticket_parties(
+                $ticketId,
+                'ticket_updated',
+                'مسئول رسیدگی تغییر کرد',
+                'درخواست ' . ticket_number($ticketId) . ' به «' . $newAssigneeName . '» منتقل شد.',
+                (int) $staffUser['id'],
+                true
+            );
+            flash('success', 'درخواست به کارشناس انتخاب‌شده منتقل شد. تاریخچهٔ تغییر در مکالمه ثبت شد.');
+            redirect(request_center_ticket_return_url($ticketId));
+        }

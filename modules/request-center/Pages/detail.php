@@ -126,9 +126,14 @@ if ($page === 'ticket') {
         && request_center_can_supervise_ticket($ticket, $user)
         && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)
         && !$cancelHasRequest;
+    // «انتقال درخواست»: کارشناس مسئول (غیر از مدیر) می‌تواند درخواست را با ثبت دلیل به کارشناس واجد شرایط دیگر منتقل کند؛ مدیر از فرم مدیریت درخواست استفاده می‌کند.
+    $canAgentTransfer = $canManageTicket
+        && $handlerLevel === 'assignee'
+        && !$cancelHasRequest
+        && in_array((string) $ticket['status'], ['assigned', 'in_progress', 'waiting_user', 'pending'], true);
     $agents = [];
-    if (($canAssignTicket && !$cancelHasRequest && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)) || $canSupervisorAssign) {
-         if ($canAssignTicket || $canSupervisorAssign) {
+    if (($canAssignTicket && !$cancelHasRequest && in_array((string) $ticket['status'], ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending'], true)) || $canSupervisorAssign || $canAgentTransfer) {
+         if ($canAssignTicket || $canSupervisorAssign || $canAgentTransfer) {
               $ticketGroupForList = (string) ($ticket['service_group'] ?? 'it');
               $agentSql = 'SELECT u.id, u.full_name, u.username, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code AS handling_unit_code FROM users u LEFT JOIN handling_units hu ON hu.id = u.handling_unit_id WHERE u.is_active = 1 AND (((u.role = "primary_admin" OR (u.role = "admin" AND u.is_primary_admin = 1)) AND ? = "it") OR (u.role = "support_manager" AND ? = "support") OR (u.role IN ("agent", "manager") AND hu.code = ?)) AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))';
               $ticketDepartmentForList = (int) ($ticket['department_id'] ?? 0);
@@ -399,6 +404,18 @@ if ($page === 'ticket') {
         && !in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
         $dueInputValue = !empty($ticket['due_at']) ? date('Y-m-d\TH:i', strtotime((string) $ticket['due_at'])) : '';
         echo '<div class="card detail-card"><h3>تغییر موعد پاسخ/حل</h3><p class="muted">مهلت فعلی: ' . e(!empty($ticket['due_at']) ? persian_date((string) $ticket['due_at']) : 'ثبت نشده') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="update_due_date"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>مهلت جدید<input type="datetime-local" name="due_at" required value="' . e($dueInputValue) . '"></label><label>دلیل تغییر (الزامی؛ برای ثبت‌کننده قابل مشاهده است)<textarea name="due_note" required maxlength="1000" rows="2" placeholder="مثلاً: منتظر تهیهٔ قطعات از انبار هستیم؛ پیمانکار ۱۲ آبان اعلام کرد"></textarea></label><button class="button secondary" type="submit">ذخیرهٔ مهلت</button></form></div>';
+    }
+    if ($canAgentTransfer) {
+        $transferCandidates = array_values(array_filter($agents ?? [], static fn ($candidate): bool => (int) $candidate['id'] !== (int) ($ticket['assigned_to'] ?? 0)));
+        echo '<div class="card detail-card" id="rc-agent-transfer"><h3>انتقال به کارشناس دیگر</h3><p class="muted">برای انتقال، دلیل روشن ثبت کنید؛ مسئول قبلی از تاریخچه حذف نمی‌شود.</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="agent_transfer_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>کارشناس جدید<select name="assigned_to" required><option value="">انتخاب کارشناس…</option>';
+        foreach ($transferCandidates as $transferCandidate) {
+            echo '<option value="' . (int) $transferCandidate['id'] . '">' . e((string) $transferCandidate['full_name']) . '</option>';
+        }
+        echo '</select></label><label>دلیل انتقال (الزامی؛ در تاریخچه و پیام عمومی ثبت می‌شود)<textarea name="transfer_reason" required rows="2" minlength="10" maxlength="1000" placeholder="مثلاً: این درخواست در حوزهٔ تخصصی کارشناس شبکه است؛ خودم در مرخصی و بازگشت ۲۱ آذر هستم"></textarea></label><button class="button secondary" type="submit">انتقال درخواست</button></form>';
+        if (empty($transferCandidates)) {
+            echo '<small class="muted">کارشناس واجد شرایط دیگری در این حوزه پیدا نشد.</small>';
+        }
+        echo '</div>';
     }
     echo '</aside></div>';
     $eventSearch = trim((string) ($_GET['event_q'] ?? ''));

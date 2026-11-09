@@ -239,6 +239,42 @@ if ($workspace === 'requester') {
     $workspaceSummaryFilters = $agentView === 'mine' ? ['assigned_to' => (int) $user['id']] : [];
     $workspaceSummary = $repo->workspaceSummary($user, $workspaceSummaryFilters);
 }
+// هشدارهای تخطی SLA/OLA (ثبت‌شده توسط cron) در محدودهٔ دسترسی همین کارشناس — فراتر از «لیست معوق»
+$agentBreachAlerts = [];
+$agentBreachCounts = ['sla_alert' => 0, 'ola_alert' => 0];
+if ($workspace === 'agent') {
+    try {
+        [$breachScopeWhere, $breachScopeParams] = ticket_scope($user, 't');
+        $breachConditions = [];
+        if ($breachScopeWhere !== '') {
+            $breachConditions[] = '(' . substr($breachScopeWhere, strlen('WHERE ')) . ')';
+        }
+        $breachParams = $breachScopeParams;
+        if ($agentView === 'mine') {
+            $breachConditions[] = 't.assigned_to = ?';
+            $breachParams[] = (int) $user['id'];
+        }
+        $breachWhere = $breachConditions !== [] ? 'WHERE ' . implode(' AND ', $breachConditions) . ' AND ' : 'WHERE ';
+        $breachSql = 'SELECT COUNT(*) AS c, e.event_type FROM ticket_events e JOIN tickets t ON t.id = e.ticket_id '
+            . $breachWhere
+            . "e.event_type IN ('sla_alert', 'ola_alert') GROUP BY e.event_type";
+        $breachCountQuery = db()->prepare($breachSql);
+        $breachCountQuery->execute($breachParams);
+        foreach ($breachCountQuery->fetchAll(PDO::FETCH_ASSOC) as $breachRow) {
+            $agentBreachCounts[(string) $breachRow['event_type']] = (int) $breachRow['c'];
+        }
+        $breachListSql = 'SELECT e.event_type, e.created_at, t.id AS ticket_id, t.ticket_no, t.subject, t.due_at, t.ola_due_at, t.status '
+            . 'FROM ticket_events e JOIN tickets t ON t.id = e.ticket_id '
+            . $breachWhere
+            . "e.event_type IN ('sla_alert', 'ola_alert') ORDER BY e.created_at DESC, e.id DESC LIMIT 6";
+        $breachListQuery = db()->prepare($breachListSql);
+        $breachListQuery->execute($breachParams);
+        $agentBreachAlerts = $breachListQuery->fetchAll();
+    } catch (Throwable) {
+        $agentBreachAlerts = [];
+        $agentBreachCounts = ['sla_alert' => 0, 'ola_alert' => 0];
+    }
+}
 $deadlineBadge = static function (mixed $value, bool $paused = false) use ($escape): string {
     $raw = trim((string) $value);
     if ($raw === '') {
@@ -324,6 +360,26 @@ $metricItems = $workspace === 'requester'
 <label>حوزه<select name="service_group" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><option value="it" <?= $filters['service_group'] === 'it' ? 'selected' : '' ?>>فناوری اطلاعات</option><option value="support" <?= $filters['service_group'] === 'support' ? 'selected' : '' ?>>پشتیبانی</option></select></label>
 <button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="<?= $escape($workspaceUrl . ($workspace === 'agent' ? '&queue=' . rawurlencode($agentQueueName) : '')) ?>">پاک‌کردن فیلترها</a>
 </form>
+<?php if ($workspace === 'agent' && (array_sum($agentBreachCounts) > 0 || $agentBreachAlerts)): ?>
+<section class="card" style="padding:14px 16px;margin-bottom:16px" aria-labelledby="rc-breach-alerts-title">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+<h2 id="rc-breach-alerts-title" style="margin:0;font-size:16px">هشدارهای تخطی SLA/OLA <span style="font-size:12px;color:#b91c1c;font-weight:400">(فراتر از لیست معوق)</span></h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<span class="deadline-badge danger" style="background:#fef2f2;color:#b91c1c;border-radius:999px;padding:3px 10px;font-size:12px">SLA: <?= number_format($agentBreachCounts['sla_alert']) ?></span>
+<span class="deadline-badge warn" style="background:#fffbeb;color:#b45309;border-radius:999px;padding:3px 10px;font-size:12px">OLA: <?= number_format($agentBreachCounts['ola_alert']) ?></span>
+<a class="button secondary" style="min-height:30px;padding:4px 10px;font-size:12px" href="request-center.php?workspace=agent&amp;agent_view=<?= $escape($agentView) ?>&amp;queue=overdue">لیست کامل تخطی‌ها</a>
+</div></div>
+<?php if (!$agentBreachAlerts): ?><p class="muted" style="margin:0">هشدار ثبت‌شدهٔ فعالی وجود ندارد.</p><?php else: ?>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<?php foreach ($agentBreachAlerts as $breachAlert): ?>
+<a class="rc-breach-alert-item" href="request-center.php?page=ticket&amp;id=<?= (int) $breachAlert['ticket_id'] ?>&amp;workspace=agent&amp;agent_view=<?= $escape($agentView) ?>" style="display:block;border:1px solid #fcd34d;background:#fffbeb;border-radius:10px;padding:8px 12px;text-decoration:none;color:inherit;max-width:340px">
+<b><?= $escape($breachAlert['ticket_no'] ?: ('#' . (int) $breachAlert['ticket_id'])) ?> · <?= $escape($breachAlert['subject']) ?></b>
+<small style="display:block;color:#92400e"><?= $escape($breachAlert['event_type'] === 'sla_alert' ? 'هشدار SLA' : 'هشدار OLA') ?> · <?= $escape((string) $breachAlert['created_at']) ?><br>موعد: SLA <?= $escape($breachAlert['due_at'] ?: '—') ?> · OLA <?= $escape($breachAlert['ola_due_at'] ?: '—') ?></small>
+</a>
+<?php endforeach; ?>
+</div><?php endif; ?>
+</section>
+<?php endif; ?>
 <section class="card">
 <?php if (!$result['rows']): ?><div class="empty"><strong>درخواستی مطابق شرایط فعلی پیدا نشد.</strong><p>فیلترهای جست‌وجو یا وضعیت را تغییر دهید؛ برای مشاهدهٔ دوبارهٔ کل موارد مجاز می‌توانید فیلترها را پاک کنید.</p><a class="button secondary" href="request-center.php?<?= $escape(http_build_query($queryParams)) ?>">پاک‌کردن فیلترها و نمایش همه</a></div><?php else: ?>
 <div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>مهلت SLA</th><?php if ($workspace === 'agent'): ?><th>موعد پاسخ OLA</th><th>موعد حل OLA</th><?php endif; ?><th>آخرین تغییر</th></tr></thead><tbody>
