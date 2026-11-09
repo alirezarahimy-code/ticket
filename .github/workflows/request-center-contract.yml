@@ -6,7 +6,7 @@ on:
     paths:
       - 'request-center.php'
       - 'modules/request-center/**'
-      - 'migrations/037-request-center-lifecycle-rejection.sql'
+      - 'migrations/035-request-center-appointments.sql'
       - 'tests/test_request_center_phase3_lifecycle_static.py'
       - 'tests/test_request_center_phase3_workspaces_static.py'
       - 'tests/test_request_center_workflow_service_sqlite.php'
@@ -154,8 +154,8 @@ jobs:
           CI_DB_NAME: persian_ticketing_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
-      - name: Apply Request Center lifecycle migration 037 to disposable MariaDB
-        run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/037-request-center-lifecycle-rejection.sql
+      - name: Apply Request Center merged migration 035 (lifecycle) to disposable MariaDB
+        run: mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password persian_ticketing_ci < migrations/035-request-center-appointments.sql
       - name: Request Center schema preflight on MariaDB
         run: php tests/test_request_center_schema_preflight_mariadb.php
         env:
@@ -175,11 +175,11 @@ jobs:
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "DROP TABLE ticket_number_seq"
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "ALTER TABLE categories DROP INDEX code, DROP COLUMN code"
           mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci -e "ALTER TABLE service_catalog DROP FOREIGN KEY fk_services_category, DROP INDEX idx_services_category, DROP COLUMN category_id"
-      - name: Apply migration 037 twice to prove upgrade and idempotency
+      - name: Apply migration 035 (merged) twice to prove upgrade and idempotency
         run: |
-          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/037-request-center-lifecycle-rejection.sql
-          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/037-request-center-lifecycle-rejection.sql
-      - name: Verify migration 037 upgrade path
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/035-request-center-appointments.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_upgrade_ci < migrations/035-request-center-appointments.sql
+      - name: Verify migration 035 (merged) upgrade path
         run: php tests/test_request_center_migration_037_mariadb.php
         env:
           CI_DB_HOST: 127.0.0.1

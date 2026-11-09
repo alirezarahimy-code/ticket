@@ -71,5 +71,5 @@ $seedCount = (int) $pdo->query(
 )->fetchColumn();
 migration_check($seedCount >= 16, 'Request Center category seed is idempotently populated');
 
-echo "PASS: Request Center migration 037 upgrade path on MariaDB " .
+echo "PASS: Request Center migration 035 (merged lifecycle) upgrade path on MariaDB " .
     $pdo->query('SELECT VERSION()')->fetchColumn() . "\n";

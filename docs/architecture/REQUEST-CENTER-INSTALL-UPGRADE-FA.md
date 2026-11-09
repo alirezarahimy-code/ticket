@@ -44,8 +44,14 @@ git -C <target> log --oneline -1   # باید کامیت دقیق ۱.۶۲.۹۰ �
 ### مرحلهٔ ۲ — اعمال بستهٔ ارتقا
 دو مسیر، هر دو معتبر؛ یکی را انتخاب کنید:
 
-- **مسیر رسمی (پیشنهادی):** از شمارهٔ کاربر Admin → «به‌روزرسانی سامانه» → بارگذاری `…rc-candidate-20261107.zip`.
+- **مسیر رسمی (پیشنهادی):** از شمارهٔ کاربر Admin → «به‌روزرسانی سامانه» → بارگذاری `…rc-candidate-20261109.zip`.
   `system-update.php` به‌صورت خودکار ایمن‌زدایی مسیرها، بررسی `requires_version >= 1.62.90`، اعمال مهاجرت `035` (در صورت عدم ثبت در `schema_updates`) و ثبت نسخهٔ جدید را انجام می‌دهد. ساختار ZIP: `manifest.json` + `migrations/035-request-center-appointments.sql` + `files/…`.
+  **هشدار «۰۳۵ ثبت‌شدهٔ قدیمی»:** نسخهٔ فعلی `035-request-center-appointments.sql` یک فایل **ادغام‌شده** است (محتوای پیشین `037-request-center-lifecycle-rejection.sql` عیناً داخل آن است). ثبت مهاجرت در `schema_updates` فقط با «نام فایل» انجام می‌شود؛ اگر هدفِ شما قبلاً نسخهٔ قدیمی ۰۳۵ را اجرا/ثبت کرده باشد، `system-update.php` کل فایل ادغام‌شده را **رد می‌کند** و ستون‌های lifecycle (مثل `tickets.rejected_at`) هرگز ساخته نمی‌شوند و همهٔ صفحات RC با 503 متوقف می‌شوند. در این حالت **باید یک‌بار** فایل ادغام‌شده را دستی اعمال کنید:
+  ```bash
+  mariadb <dbname> < migrations/035-request-center-appointments.sql   # idempotent؛ تکرار امن است
+  # یا: DELETE FROM schema_updates WHERE migration = '035-request-center-appointments.sql';  -- سپس بارگذاری مجدد بسته
+  ```
+  برای یک ۱.۶۲.۹۰ تازه که هرگز RC نصب نکرده، همین مسیر عادی کافی است.
 - **مسیر دستی (فقط برای کارشناسان ارشد):**
   ```bash
   cd <target>
@@ -86,7 +92,7 @@ gunzip -c rc-upgrade-backup-YYYY-MM-DD.sql.gz | mariadb <dbname>   # روی هد
 git -C <target> checkout <previous-release-tag-or-commit> && <redeploy/restart>
 ```
 نکته‌های عملی:
-- مهاجرت ۰۳۵ فقط `request_center_appointments` را می‌سازد؛ بازگشت کد بدون restore هم سامانه را خراب نمی‌کند (جدول به حال خود رها می‌شود) ولی **برای بهره‌برداری پیش‌فرض restore کامل + checkout قبلی است.**
+- مهاجرت ۰۳۵ ادغام‌شده علاوه‌بر `request_center_appointments`، enumِ `tickets.status` را با `rejected` کامل می‌کند، `rejected_at`، `ticket_number_seq`، `tickets.ticket_no` و یکتایی آن، `categories.code` و بذرهای دسته‌بندی و `service_catalog.category_id` (+FK در صورت نبود orphan) را نیز آماده می‌کند؛ بازگشت کد بدون restore هم سامانه را خراب نمی‌کند (ستون/ENUM افزوده برگشت‌ناپذیر نیستند ولی بی‌اثر می‌مانند) ولی **برای بهره‌برداری پیش‌فرض restore کامل + checkout قبلی است.**
 - اگر نوبت‌های واقعی روی نسخهٔ جدید ثبت شده‌اند، آن‌ها را قبل از restore استخراج (`SELECT * …` یا خروجی اکسل) کنید؛restore آن‌ها را حذف می‌کند.
 - پس از rollback، همان smoke بخش ۴-مطابق نسخهٔ قبلی را تکرار کنید تا ثِبات تأیید شود.
 
@@ -99,8 +105,9 @@ git -C <target> checkout <previous-release-tag-or-commit> && <redeploy/restart>
 
 ## ۸) پیوست: شواهد ساخت بستهٔ کاندید
 
-- مسیر: `downloads/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261107.zip`
-- SHA-256: `1217ec266e504e3f9b2399dfc98e43b0d25c50b6ab6b7ee8207a2de2e49d8dd4` (فایل کناری `.sha256` در همان پوشه) — بازسازی با نام/نسخهٔ ۱.۶۳ پس از تصمیم مالک برای نام‌گذاری (ساعات کاری روز + ظرفیت تیمی؛ مهاجرت `035` فقط؛ بدون `034`)
-- اجزاء: `manifest.json` با `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `migrations/035-…`، ۶۱ فایل به‌همراه `VERSION` (۱.۶۳) و مستندات معماری
+- مسیر: `downloads/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261109.zip`
+- SHA-256: (ثبت در فایل کناری `.sha256`؛ مقدار جدید پس از ساخت بستهٔ ادغام‌شده در پیوست change-report ثبت می‌شود)
+- اجزاء: `manifest.json` با `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `migrations/035-request-center-appointments.sql` (واحد، ادغام‌شده؛ فایل ۰۳۷ جدا وجود ندارد)، VERSION (۱.۶۳) و مستندات معماری
+- توجه: `034` (Logging) و `036` (غذا) عمداً بیرون بسته‌اند.
 - ساخت و اعتبارسنجی لوکال: `python3 tools/build_rc_update.py` (CRC، مسیرهای امن، یکتایی مسیرها، تطبیق بایت‌به‌بایت manifest و sha256 هر فایل)
 

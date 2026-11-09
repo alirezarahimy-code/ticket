@@ -179,7 +179,7 @@ def test_bulk_updates_skip_cancellation_pending_requests_without_aborting_batch(
 def test_rejected_state_is_preflighted_and_excluded_from_terminal_workloads():
     repository = source("modules/request-center/RequestCenterRepository.php")
     assert "COLUMN_TYPE" in repository
-    assert "Migration 037" in repository
+    assert "Migration 035" in repository
     assert "str_contains($ticketStatusType, \"'rejected'\")" in repository
     assert "'notifications' => 'idempotency_key'" in repository
     assert "'ticket_events' => 'event_id'" in repository
@@ -442,7 +442,7 @@ def test_sla_and_ola_alerts_revalidate_current_deadlines_under_ticket_lock():
 
 
 def test_rejection_schema_is_migration_owned_not_runtime_ddl():
-    migration = source("migrations/037-request-center-lifecycle-rejection.sql")
+    migration = source("migrations/035-request-center-appointments.sql")
     fresh = source("install-empty-db.sql")
     schema = source("schema.sql")
     assert "'rejected'" in migration

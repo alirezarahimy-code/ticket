@@ -286,7 +286,7 @@ function report_query_filters(array $user): array
  *
  * Legacy index.php historically repaired these fields and seeded categories
  * during a web request. The independent Request Center must never run DDL or
- * data backfills at request time; migration 037 owns that preparation.
+ * data backfills at request time; migration 035 (merged lifecycle schema) owns that preparation.
  */
 function request_center_assert_create_schema(): void
 {
@@ -340,7 +340,7 @@ function request_center_assert_create_schema(): void
 
 /**
  * Request Center-only ticket number preview. This intentionally never invokes
- * ticket_number_ensure_schema(); migration 037 owns the sequence table/column.
+ * ticket_number_ensure_schema(); migration 035 (merged lifecycle schema) owns the sequence table/column.
  */
 function request_center_ticket_number_peek(string $prefix): string
 {

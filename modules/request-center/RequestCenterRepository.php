@@ -100,7 +100,7 @@ final class RequestCenterRepository
             }
             $ticketStatusType = (string) ($columnTypes['tickets']['status'] ?? '');
             if (str_starts_with($ticketStatusType, 'enum(') && !str_contains($ticketStatusType, "'rejected'")) {
-                $problems[] = 'ستون tickets.status هنوز مقدار نهایی rejected را ندارد؛ Migration 037 باید اجرا شود.';
+                $problems[] = 'ستون tickets.status هنوز مقدار نهایی rejected را ندارد؛ Migration 035 (ادغام‌شده) باید اجرا شود.';
             }
             foreach ([
                 'tickets' => 'ticket_no',
