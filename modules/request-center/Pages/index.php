@@ -345,6 +345,46 @@ $metricItems = $workspace === 'requester'
 <?php endif; ?>
 <?php if ($pages > 1): ?><nav class="pagination" aria-label="صفحه‌بندی"><?php for ($i=max(1,$page-3);$i<=min($pages,$page+3);$i++): ?><?php if ($i === $page): ?><span class="current"><?= $i ?></span><?php else: ?><a href="request-center.php?<?= $escape($queryString) ?><?= $queryString !== "" ? "&amp;" : "" ?>p=<?= $i ?>"><?= $i ?></a><?php endif; ?><?php endfor; ?></nav><?php endif; ?>
 </section>
+
+<script id="rc-workspace-filter-interactions">
+(function(){
+ var form=document.querySelector('form[action="request-center.php"][method="get"]');
+ if(!form)return;
+ var fields=['q','status','priority','service_group'];
+ var labels={q:'عبارت جست‌وجو',status:'وضعیت',priority:'اولویت',service_group:'حوزه'};
+ var values={};
+ fields.forEach(function(name){
+  var field=form.elements.namedItem(name);
+  if(!field)return;
+  var option=field.tagName==='SELECT'&&field.selectedOptions?field.selectedOptions[0]:null;
+  var value=field.value;
+  if(value)values[name]=name==='status'||name==='priority'||name==='service_group'?(option?option.textContent.trim():value):value;
+ });
+ var active=Object.keys(values);
+ if(!active.length)return;
+ var summary=document.createElement('div');
+ summary.className='rc-filter-summary';
+ summary.setAttribute('aria-label','فیلترهای فعال');
+ summary.style.cssText='display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:-5px 0 14px;color:#66758b;font-size:12px';
+ var caption=document.createElement('span');caption.textContent='فیلترهای فعال:';summary.appendChild(caption);
+ active.forEach(function(name){
+  var chip=document.createElement('button');chip.type='button';chip.className='button secondary';
+  chip.style.cssText='min-height:30px;padding:4px 9px;font-size:11px';
+  chip.textContent=labels[name]+': '+values[name]+' ×';
+  chip.setAttribute('aria-label','حذف فیلتر '+labels[name]);
+  chip.addEventListener('click',function(){
+   var field=form.elements.namedItem(name);if(!field)return;
+   field.value='';
+   form.submit();
+  });
+  summary.appendChild(chip);
+ });
+ var reset=document.createElement('a');reset.className='button secondary';reset.style.cssText='min-height:30px;padding:4px 9px;font-size:11px';
+ reset.href='request-center.php?'+new URLSearchParams(Array.from(form.elements).filter(function(el){return el.name&&el.type==='hidden'&&el.value;}).map(function(el){return [el.name,el.value];})).toString();
+ reset.textContent='حذف همه فیلترها';summary.appendChild(reset);
+ form.insertAdjacentElement('afterend',summary);
+})();
+</script>
 </main>
 </body>
 </html>
