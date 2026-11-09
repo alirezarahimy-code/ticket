@@ -220,7 +220,7 @@ if ($page === 'new-ticket') {
           }
           echo '</div></fieldset>';
       }
-      echo '<label class="full file-input">پیوست اختیاری<input type="file" name="attachment"><small>حداکثر ۸ مگابایت؛ PDF، تصویر، Word، Excel، TXT و ZIP</small></label></div><div class="actions"><button class="button" type="submit">ثبت درخواست</button></div></form></section>';
+      echo '<label class="full file-input">پیوست اختیاری<input type="file" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt,.zip"><small>حداکثر ۸ مگابایت؛ PDF، تصویر، Word، Excel، TXT و ZIP</small><small class="field-help" data-attachment-feedback aria-live="polite">در صورت نیاز یک فایل پیوست کنید.</small></label></div><div class="actions"><button class="button" type="submit">ثبت درخواست</button></div></form></section>';
     echo '<script id="rc-create-form-interactions">
 (function(){
  var form=document.querySelector(".form-card form");if(!form)return;
@@ -234,6 +234,7 @@ if ($page === 'new-ticket') {
  var supportFields=Array.prototype.slice.call(form.querySelectorAll(".support-field"));
  var customFields=Array.prototype.slice.call(form.querySelectorAll("[data-service-fields]"));
  var submit=form.querySelector("button[type=\"submit\"]");
+  var attachment=form.querySelector('[name="attachment"]'),attachmentFeedback=form.querySelector("[data-attachment-feedback]");
  function group(){var selected=groupInputs.find(function(input){return input.checked;});return selected?selected.value:"it";}
  function selectedService(){return service&&service.selectedOptions.length?service.selectedOptions[0]:null;}
  function renderAssets(query){
@@ -274,7 +275,16 @@ if ($page === 'new-ticket') {
   if(numberBox&&numberPreview){numberPreview.textContent=g==="support"?numberBox.dataset.nextSupport:numberBox.dataset.nextIt;}
   if(submit)submit.disabled=false;
  }
- if(service)service.addEventListener("change",sync);
+ if(attachment){
+   attachment.addEventListener("change",function(){
+    var file=attachment.files&&attachment.files[0];
+    if(!file){if(attachmentFeedback)attachmentFeedback.textContent="در صورت نیاز یک فایل پیوست کنید.";attachment.setCustomValidity("");return;}
+    if(file.size>8*1024*1024){attachment.value="";attachment.setCustomValidity("حجم فایل پیوست نباید بیشتر از ۸ مگابایت باشد.");if(attachmentFeedback)attachmentFeedback.textContent="حجم فایل بیش از ۸ مگابایت است؛ فایل کوچک‌تری انتخاب کنید.";attachment.reportValidity();return;}
+    attachment.setCustomValidity("");
+    if(attachmentFeedback)attachmentFeedback.textContent=file.name+" · "+(file.size/1024/1024).toFixed(2)+" مگابایت";
+   });
+  }
+  if(service)service.addEventListener("change",sync);
  groupInputs.forEach(function(input){input.addEventListener("change",function(){if(service)service.value="";if(assetSelect)assetSelect.value="";if(assetSearch)assetSearch.value="";sync();});});
  if(assetSearch){
   assetSearch.addEventListener("input",function(){if(assetSelect)assetSelect.value="";renderAssets(assetSearch.value);});
@@ -292,6 +302,7 @@ if ($page === 'new-ticket') {
     event.preventDefault();assetSearch.setCustomValidity("برای این خدمت، سیستم مرتبط را از فهرست انتخاب کنید.");assetSearch.reportValidity();assetSearch.focus();if(assetError){assetError.textContent="انتخاب سیستم مرتبط الزامی است.";assetError.hidden=false;}return;
    }
    if(assetSearch)assetSearch.setCustomValidity("");
+    if(attachment&&attachment.files&&attachment.files[0]&&attachment.files[0].size>8*1024*1024){event.preventDefault();attachment.setCustomValidity("حجم فایل پیوست نباید بیشتر از ۸ مگابایت باشد.");attachment.reportValidity();return;}
    if(submit){submit.disabled=true;submit.textContent="در حال ثبت درخواست…";}
   });
  }
