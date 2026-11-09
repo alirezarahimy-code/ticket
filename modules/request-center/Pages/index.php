@@ -317,12 +317,12 @@ $metricItems = $workspace === 'requester'
 </div></section>
 <form method="get" action="request-center.php" class="card" style="padding:14px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end">
 <input type="hidden" name="workspace" value="<?= $escape($workspace) ?>">
-<?php if ($workspace === 'agent'): ?><input type="hidden" name="agent_view" value="<?= $escape($agentView) ?>"><?php endif; ?>
+<?php if ($workspace === 'agent'): ?><input type="hidden" name="agent_view" value="<?= $escape($agentView) ?>"><input type="hidden" name="queue" value="<?= $escape($agentQueueName) ?>"><?php endif; ?>
 <label>جست‌وجو<input type="search" name="q" maxlength="100" value="<?= $escape($filters['q']) ?>" placeholder="شماره یا عنوان" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"></label>
 <label>وضعیت<select name="status" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($statusLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['status'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
 <label>اولویت<select name="priority" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><?php foreach ($priorityLabels as $key => $label): ?><option value="<?= $escape($key) ?>" <?= $filters['priority'] === $key ? 'selected' : '' ?>><?= $escape($label) ?></option><?php endforeach; ?></select></label>
 <label>حوزه<select name="service_group" style="display:block;padding:9px;border:1px solid var(--line);border-radius:8px"><option value="">همه</option><option value="it" <?= $filters['service_group'] === 'it' ? 'selected' : '' ?>>فناوری اطلاعات</option><option value="support" <?= $filters['service_group'] === 'support' ? 'selected' : '' ?>>پشتیبانی</option></select></label>
-<button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">پاک‌کردن</a>
+<button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="<?= $escape($workspaceUrl . ($workspace === 'agent' ? '&queue=' . rawurlencode($agentQueueName) : '')) ?>">پاک‌کردن فیلترها</a>
 </form>
 <section class="card">
 <?php if (!$result['rows']): ?><div class="empty">درخواستی در محدودهٔ دسترسی شما وجود ندارد.</div><?php else: ?>
