@@ -93,7 +93,7 @@ if ($page === 'services') {
             . '</div>';
     };
     render_header('کاتالوگ خدمات', $serviceUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">Service Catalog</span><h1>کاتالوگ خدمات سازمان</h1><p>هر خدمت فرم تکمیلی، اولویت پیش‌فرض و مسیر رسیدگی مستقل دارد. با سربرگ‌ها بین بخش‌ها جابه‌جا شوید.</p></div><a class="button" href="request-center.php?page=new-ticket">ثبت درخواست</a></section>';
+    echo '<section class="page-heading"><div><span class="eyebrow">Service Catalog</span><h1>کاتالوگ خدمات سازمان</h1><p>هر خدمت فرم تکمیلی، اولویت پیش‌فرض و مسیر رسیدگی مستقل دارد. با سربرگ‌ها بین بخش‌ها جابه‌جا شوید.</p></div><div class="actions"><a class="button secondary" href="request-center.php">خانه مرکز درخواست‌ها</a>' . (user_is_primary_admin($serviceUser) ? '<a class="button secondary" href="request-center.php?workspace=admin">مدیریت مرکز درخواست‌ها</a>' : '') . '<a class="button" href="request-center.php?page=new-ticket">ثبت درخواست</a></div></section>';
 
     // --- سربرگ‌ها (تب‌ها) ---
     echo '<div class="settings-tabs service-tabs" data-service-tabs>';
