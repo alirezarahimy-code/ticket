@@ -307,13 +307,14 @@ jobs:
 
       - name: T07 full-database clone migration replay and fingerprint (both MariaDB versions)
         run: |
+          set -o pipefail
           git fetch --no-tags --depth=1 origin 465833587b28edb260412073131265e2724f8812
           git show 465833587b28edb260412073131265e2724f8812:persian_ticketing.sql > "$RUNNER_TEMP/persian_ticketing.sql"
           echo "T07 source commit: 465833587b28edb260412073131265e2724f8812"
           test -s "$RUNNER_TEMP/persian_ticketing.sql"
           echo "T07 dump bytes: $(wc -c < "$RUNNER_TEMP/persian_ticketing.sql")"
           sha256sum "$RUNNER_TEMP/persian_ticketing.sql"
-          php tests/test_request_center_t07_migration_clone.php
+          php tests/test_request_center_t07_migration_clone.php 2>&1 | tee "$RUNNER_TEMP/t07-diagnostic.log"
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
@@ -322,3 +323,11 @@ jobs:
           CI_DB_PASS: ci-ephemeral-root-password
           CI_DB_DUMP_PATH: ${{ runner.temp }}/persian_ticketing.sql
           ITSM_MYSQL_PATH: mariadb
+
+      - name: Upload T07 diagnostic log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: t07-diagnostic-mariadb-${{ matrix.mariadb-version }}
+          path: ${{ runner.temp }}/t07-diagnostic.log
+          retention-days: 7
