@@ -484,6 +484,9 @@ function request_center_notify_ticket_parties(int $ticketId, string $type, strin
         $query->execute([$ticketId]);
         $ticket = $query->fetch(PDO::FETCH_ASSOC);
         if (!$ticket) {
+            if ($required) {
+                throw new RuntimeException('درخواست برای ثبت اعلان پیدا نشد.');
+            }
             return;
         }
         $supervisorQuery = db()->query('SELECT id FROM users WHERE role = "supervisor" AND is_active = 1');
@@ -500,6 +503,9 @@ function request_center_notify_ticket_parties(int $ticketId, string $type, strin
                 $unassignedAgentIds
             )
         );
+        if ($required && $recipients === []) {
+            throw new RuntimeException('هیچ گیرندهٔ مجاز و فعالی برای اعلان درخواست پیدا نشد.');
+        }
         foreach ($recipients as $recipientId) {
             if ($excludeUserId === null || $recipientId !== $excludeUserId) {
                 request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId, $required);
@@ -524,6 +530,9 @@ function request_center_notify_ticket_staff(int $ticketId, string $type, string 
         $query->execute([$ticketId]);
         $ticket = $query->fetch(PDO::FETCH_ASSOC);
         if (!$ticket) {
+            if ($required) {
+                throw new RuntimeException('درخواست برای ثبت اعلان پیدا نشد.');
+            }
             return;
         }
         $supervisorQuery = db()->query('SELECT id FROM users WHERE role = "supervisor" AND is_active = 1');
@@ -539,6 +548,9 @@ function request_center_notify_ticket_staff(int $ticketId, string $type, string 
             null,
             true
         );
+        if ($required && $recipients === []) {
+            throw new RuntimeException('هیچ گیرندهٔ مجاز و فعالی از کارکنان برای اعلان درخواست پیدا نشد.');
+        }
         foreach ($recipients as $recipientId) {
             if ($excludeUserId === null || $recipientId !== $excludeUserId) {
                 request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId, $required);
