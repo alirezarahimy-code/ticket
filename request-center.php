@@ -32,6 +32,26 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attach
     request_center_download_attachment($downloadUser);
 }
 
+if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_decisions') {
+    require_once __DIR__ . '/bootstrap.php';
+    require_once __DIR__ . '/xlsx-writer.php';
+    require_once __DIR__ . '/modules/request-center/WorkflowService.php';
+    require_once __DIR__ . '/modules/request-center/lib/functions.php';
+    require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
+    $decisionsUser = require_login();
+    if (!user_can($decisionsUser, 'supervisor.panel') && !user_is_primary_admin($decisionsUser)) {
+        http_response_code(403);
+        exit('دسترسی به خروجی تصمیمات سوپروایزر مجاز نیست.');
+    }
+    require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
+    $decisionsSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
+    if ($decisionsSchemaProblems !== []) {
+        http_response_code(503);
+        exit('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست.');
+    }
+    request_center_export_decisions($decisionsUser);
+}
+
 if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report') {
     require_once __DIR__ . '/bootstrap.php';
     require_once __DIR__ . '/xlsx-writer.php';

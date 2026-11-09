@@ -96,6 +96,75 @@ function request_center_export_report(array $user): never
 }
 
 
+/**
+ * خروجی Excel تصمیمات سوپروایزر (تأیید نهایی / برگشت برای اصلاح / بازگشایی رسمی / رد)
+ * در محدودهٔ دسترسی همان کاربر. سقف ۵۰۰۰ ردیف؛ از/تا اختیاری (جلالی).
+ */
+function request_center_export_decisions(array $user): never
+{
+    [$where, $params] = ticket_scope($user, 't');
+    $wherePart = $where !== '' ? $where . ' AND ' : 'WHERE ';
+    $wherePart .= "e.event_type IN ('supervisor_approved', 'supervisor_rework', 'supervisor_reopened', 'ticket_rejected')";
+
+    $from = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
+    if ($from !== null && $from !== '') {
+        $wherePart .= ' AND e.created_at >= ?';
+        $params[] = $from;
+    }
+    $to = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
+    if ($to !== null && $to !== '') {
+        $wherePart .= ' AND e.created_at <= ?';
+        $params[] = $to;
+    }
+
+    $query = db()->prepare(
+        'SELECT e.event_type, e.from_status, e.to_status, e.created_at, e.details, '
+        . 't.id AS ticket_id, t.ticket_no, t.subject, u.full_name AS actor_name '
+        . 'FROM ticket_events e JOIN tickets t ON t.id = e.ticket_id '
+        . 'LEFT JOIN users u ON u.id = e.user_id ' . $wherePart
+        . ' ORDER BY e.created_at DESC, e.id DESC LIMIT 5001'
+    );
+    $query->execute($params);
+    $decisionLabels = [
+        'supervisor_approved' => 'تأیید نهایی (بسته شد)',
+        'supervisor_rework' => 'برگشت برای اصلاح',
+        'supervisor_reopened' => 'بازگشایی رسمی',
+        'ticket_rejected' => 'رد درخواست',
+    ];
+    $rows = [];
+    while ($row = $query->fetch()) {
+        $details = json_decode((string) ($row['details'] ?? ''), true);
+        $note = '';
+        if (is_array($details)) {
+            $note = (string) ($details['reason'] ?? $details['note'] ?? '');
+        }
+        $rows[] = [
+            $row['ticket_no'] ?: ('#' . (int) $row['ticket_id']),
+            $row['subject'],
+            $decisionLabels[(string) $row['event_type']] ?? (string) $row['event_type'],
+            $row['actor_name'] ?: 'سامانه',
+            request_center_status_label((string) ($row['from_status'] ?? '')) ?: '—',
+            request_center_status_label((string) ($row['to_status'] ?? '')) ?: '—',
+            persian_date((string) $row['created_at']),
+            $note,
+        ];
+    }
+    $exportTruncated = count($rows) > 5000;
+    if ($exportTruncated) {
+        $rows = array_slice($rows, 0, 5000);
+    }
+    $excelFrom = jalali_input_to_gregorian((string) ($_GET['from'] ?? ''));
+    $excelTo = jalali_input_to_gregorian((string) ($_GET['to'] ?? ''), true);
+    request_center_excel_download(
+        'supervisor-decisions-' . date('Y-m-d') . '.xlsx',
+        $exportTruncated ? 'خروجی تصمیمات سوپروایزر (۵۰۰۰ ردیف اول؛ فیلتر را محدودتر کنید)' : 'خروجی تصمیمات سوپروایزر',
+        ['شماره', 'عنوان درخواست', 'تصمیم', 'تصمیم‌گیرنده', 'وضعیت قبلی', 'وضعیت بعدی', 'زمان', 'دلیل/یادداشت'],
+        $rows,
+        ['from' => $excelFrom !== null ? substr($excelFrom, 0, 10) : '', 'to' => $excelTo !== null ? substr($excelTo, 0, 10) : '']
+    );
+}
+
+
 function request_center_download_attachment(array $user): never
 {
     $downloadUser = $user;

@@ -16,6 +16,20 @@ if (!user_can($user, 'supervisor.panel')) {
 $summary = $repo->workspaceSummary($user);
 $recent = $repo->listVisible($user, 1, 8);
 $overdue = $repo->listQueue($user, 'overdue', 1, 8);
+// هشدارهای فعال SLA/OLA که cron ثبت کرده (محدود به محدودهٔ دسترسی همین کاربر)
+$activeAlerts = [];
+try {
+    [$alertWhere, $alertParams] = ticket_scope($user, 't');
+    $alertSql = 'SELECT e.event_type, e.created_at, t.id AS ticket_id, t.ticket_no, t.subject, t.due_at '
+        . 'FROM ticket_events e JOIN tickets t ON t.id = e.ticket_id '
+        . ($alertWhere !== '' ? $alertWhere . ' AND ' : 'WHERE ')
+        . "e.event_type IN ('sla_alert', 'ola_alert') ORDER BY e.created_at DESC, e.id DESC LIMIT 8";
+    $alertQuery = db()->prepare($alertSql);
+    $alertQuery->execute($alertParams);
+    $activeAlerts = $alertQuery->fetchAll();
+} catch (Throwable) {
+    $activeAlerts = [];
+}
 $workload = $repo->supervisorWorkload($user);
 $escapeSupervisor = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $supervisorStatusLabels = [
@@ -87,7 +101,7 @@ body>main{max-width:1280px;margin:0 auto;padding:28px 24px 48px}
 <?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'supervisor' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeSupervisor($key) ?>"><?= $escapeSupervisor($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 </header>
 <main>
-<section class="heading"><div><h1>فضای کاری سوپروایزر</h1><p>پایش درخواست‌های حوزهٔ نظارت، موارد خارج از تعهد و درخواست‌های منتظر تصمیم.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="button secondary" href="request-center.php?workspace=supervisor&amp;calendar=1">تقویم موعدها</a><a class="button" href="request-center.php?page=supervisor">ورود به صف تصمیم‌ها</a><?php if (user_can($user, 'queue.view')): ?><a class="button secondary" href="request-center.php?page=queue&amp;queue=overdue">پیگیری موارد معوق</a><a class="button secondary" href="request-center.php?page=queue&amp;queue=unassigned">درخواست‌های بدون مسئول</a><?php endif; ?></div></section>
+<section class="heading"><div><h1>فضای کاری سوپروایزر</h1><p>پایش درخواست‌های حوزهٔ نظارت، موارد خارج از تعهد و درخواست‌های منتظر تصمیم.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="button secondary" href="request-center.php?workspace=supervisor&amp;calendar=1">تقویم موعدها</a><a class="button" href="request-center.php?page=supervisor">ورود به صف تصمیم‌ها</a><a class="button secondary" href="request-center.php?action=export_decisions">خروجی Excel تصمیمات</a><?php if (user_can($user, 'queue.view')): ?><a class="button secondary" href="request-center.php?page=queue&amp;queue=overdue">پیگیری موارد معوق</a><a class="button secondary" href="request-center.php?page=queue&amp;queue=unassigned">درخواست‌های بدون مسئول</a><?php endif; ?></div></section>
 <section class="rc-supervisor-grid">
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['total']) ?></strong><span>کل درخواست‌های تحت نظارت</span></div>
 <div class="rc-supervisor-stat"><strong><?= number_format($summary['active']) ?></strong><span>در گردش</span></div>
@@ -114,6 +128,11 @@ body>main{max-width:1280px;margin:0 auto;padding:28px 24px 48px}
 <?php foreach ($overdue['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?page=ticket&amp;id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · موعد <?= $escapeSupervisor($row['due_at'] ?: 'ثبت نشده') ?></small></article><?php endforeach; ?>
 <?php endif; ?>
 <?php if (user_can($user, 'queue.view')): ?><a class="button secondary" href="request-center.php?page=queue&amp;queue=overdue">مشاهده صف کامل موارد معوق</a><?php endif; ?>
+</section>
+<section class="card rc-supervisor-list" style="grid-column:1/-1"><h2>هشدارهای فعال SLA/OLA (cron)</h2>
+<?php if (!$activeAlerts): ?><p class="muted">هشدار فعالی در محدودهٔ دسترسی شما ثبت نشده است.</p><?php else: ?>
+<?php foreach ($activeAlerts as $alert): ?><article class="rc-supervisor-item"><b><a href="request-center.php?page=ticket&amp;id=<?= (int) $alert['ticket_id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($alert['ticket_no'] ?: ('#' . (int) $alert['ticket_id'])) ?> · <?= $escapeSupervisor($alert['subject']) ?></a></b><small><?= $escapeSupervisor($alert['event_type'] === 'sla_alert' ? 'هشدار SLA' : 'هشدار OLA') ?> · <?= $escapeSupervisor((string) $alert['created_at']) ?> · موعد <?= $escapeSupervisor($alert['due_at'] ?: 'ثبت نشده') ?></small></article><?php endforeach; ?>
+<?php endif; ?>
 </section>
 <section class="card rc-supervisor-list"><h2>آخرین تغییرات درخواست‌ها</h2>
 <?php if (!$recent['rows']): ?><p class="muted">درخواستی برای نمایش وجود ندارد.</p><?php else: ?>
