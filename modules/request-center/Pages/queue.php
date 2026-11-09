@@ -24,6 +24,8 @@ if ($page === 'queue') {
     $queueQueryParams = array_filter($queueFilters, static fn ($value): bool => $value !== '');
     $queueQueryParams = ['page' => 'queue', 'queue' => $queueName] + $queueQueryParams;
     $queueBaseUrl = 'request-center.php?' . http_build_query($queueQueryParams);
+    $queueFilterQuery = http_build_query(array_filter($queueFilters, static fn ($value): bool => $value !== ''));
+    $queueFilterSuffix = $queueFilterQuery !== '' ? '&amp;' . e($queueFilterQuery) : '';
     require_once dirname(__DIR__) . '/RequestCenterRepository.php';
     $queuePerPage = 100;
     $queuePage = max(1, (int) ($_GET['p'] ?? 1));
