@@ -37,6 +37,9 @@ if ($page === 'ticket') {
             && user_can($user, 'supervisor.panel')) {
             $detailReturnParams['page'] = 'supervisor';
         }
+        if (isset($detailReturnParams['page'])) {
+            $detailReturnParams['return_page'] = $requestedReturnPage;
+        }
         if ($detailReturnWorkspace === 'agent') {
             $requestedReturnAgentView = (string) ($_GET['agent_view'] ?? 'mine');
             $detailReturnParams['agent_view'] = $requestedReturnAgentView === 'team'
