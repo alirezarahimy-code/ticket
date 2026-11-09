@@ -19,10 +19,10 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63"
 REQUIRES_VERSION = "1.62.90"
 BASE_COMMIT = "d30d7dfa031173535bd750b4e8a7af35593db244"
-RELEASE_DATE = "2026-11-07"
+RELEASE_DATE = "2026-11-09"
 PACKAGE_NAME = f"ticket-update-{REQUIRES_VERSION}-to-{RELEASE_VERSION}-request-center-rc-candidate-{RELEASE_DATE.replace('-', '')}.zip"
 REPORT_NAME = f"CHANGE-REPORT-FA-{RELEASE_VERSION}.md"
-ZIP_DATE = (2026, 11, 7, 13, 0, 0)
+ZIP_DATE = (2026, 11, 9, 15, 30, 0)
 
 EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/")
 MIGRATIONS = [
