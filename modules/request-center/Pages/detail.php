@@ -459,7 +459,13 @@ if ($page === 'ticket') {
    var requiredText=Array.prototype.slice.call(form.querySelectorAll("textarea[required],input[required]"));
    for(var i=0;i<requiredText.length;i++){if(!requiredText[i].value.trim()){event.preventDefault();requiredText[i].focus();return;}}
    if(form.classList.contains("rating-card")&&!form.querySelector("[name=score]:checked")){event.preventDefault();var first=form.querySelector("[name=score]");if(first)first.focus();return;}
-   if(submitter&&submitter.type==="submit"){submitter.disabled=true;submitter.textContent="در حال ثبت…";}
+   if(form.dataset.submitting==="1"){event.preventDefault();return;}
+   form.dataset.submitting="1";
+   form.querySelectorAll("button[type=\"submit\"],input[type=\"submit\"]").forEach(function(button){
+    button.disabled=true;
+    if(button.tagName==="BUTTON"){button.dataset.originalText=button.textContent;button.textContent="در حال ثبت…";}
+    else{button.dataset.originalValue=button.value;button.value="در حال ثبت…";}
+   });
   });
  });
  document.querySelectorAll(".rating-options input[type=radio]").forEach(function(input){
