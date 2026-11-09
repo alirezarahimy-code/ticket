@@ -71,9 +71,26 @@ function request_center_post_error(Throwable $exception, string $page): never
         // Keep only the two core narrative fields after a rejected submission.
         // Files, custom fields, identifiers and one-time request tokens are never
         // copied into the retry session payload.
+        $retryCustom = [];
+        $postedCustom = is_array($_POST['custom'] ?? null) ? $_POST['custom'] : [];
+        foreach ($postedCustom as $fieldKey => $fieldValue) {
+            $fieldKey = (string) $fieldKey;
+            if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/', $fieldKey) || is_array($fieldValue) || is_object($fieldValue)) {
+                continue;
+            }
+            $retryCustom[$fieldKey] = mb_substr(trim((string) $fieldValue), 0, 2000, 'UTF-8');
+        }
         $_SESSION['rc_create_retry'] = [
             'subject' => mb_substr(trim((string) ($_POST['subject'] ?? '')), 0, 255, 'UTF-8'),
             'description' => mb_substr(trim((string) ($_POST['description'] ?? '')), 0, 5000, 'UTF-8'),
+            'service_group' => in_array((string) ($_POST['service_group'] ?? ''), ['it', 'support'], true) ? (string) $_POST['service_group'] : '',
+            'service_id' => max(0, (int) ($_POST['service_id'] ?? 0)),
+            'requesting_unit_id' => max(0, (int) ($_POST['requesting_unit_id'] ?? 0)),
+            'priority' => in_array((string) ($_POST['priority'] ?? ''), ['normal', 'urgent', 'critical'], true) ? (string) $_POST['priority'] : '',
+            'asset_id' => max(0, (int) ($_POST['asset_id'] ?? 0)),
+            'support_location' => mb_substr(trim((string) ($_POST['support_location'] ?? '')), 0, 255, 'UTF-8'),
+            'support_equipment' => mb_substr(trim((string) ($_POST['support_equipment'] ?? '')), 0, 2000, 'UTF-8'),
+            'custom' => $retryCustom,
             'saved_at' => time(),
         ];
     }
