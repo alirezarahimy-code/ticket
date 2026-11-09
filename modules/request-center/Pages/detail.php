@@ -235,7 +235,7 @@ if ($page === 'ticket') {
          if ($cancelHasRequest) {
              echo '<div class="card"><p class="muted">لغو این درخواست در انتظار تصمیم مسئول است؛ بازگشایی پس از تصمیم او امکان‌پذیر می‌شود.</p></div>';
          } elseif (user_can($user, 'ticket.reply')) {
-             echo '<form class="card reply-box" method="post">' . csrf_field() . '<input type="hidden" name="action" value="reopen_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>مشکل برطرف نشده است؟</h3><label>توضیح دهید چه چیزی هنوز برطرف نشده<textarea name="reopen_reason" required rows="3" placeholder="مثلاً: همچنان خطا می‌دهد..."></textarea></label><button class="button secondary" type="submit">مشکل حل نشده، بازگشایی درخواست</button></form>';
+             echo '<form class="card reply-box" method="post" data-confirm="با بازگشایی، درخواست دوباره وارد چرخهٔ رسیدگی می‌شود و توضیح شما در تاریخچه ثبت خواهد شد.">' . csrf_field() . '<input type="hidden" name="action" value="reopen_ticket"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><h3>مشکل برطرف نشده است؟</h3><label>توضیح دهید چه چیزی هنوز برطرف نشده<textarea name="reopen_reason" required rows="3" placeholder="مثلاً: همچنان خطا می‌دهد..."></textarea></label><button class="button secondary" type="submit">مشکل حل نشده، بازگشایی درخواست</button></form>';
          }
      } elseif ($ticket['status'] === 'closed') {
          if (!$requiresRating) {
