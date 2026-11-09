@@ -136,6 +136,10 @@ function request_center_handle_post(): bool
     // registry. The independent runner must establish the same authenticated
     // execution context explicitly; lifecycle handlers such as reply rely on it.
     $user = require_login();
+    // Module helpers resolve the active actor through the shared request scope.
+    // The independent runner is a function boundary, unlike the legacy global
+    // controller, so explicitly publish the authenticated actor for that contract.
+    $GLOBALS['user'] = $user;
 
     // Load only the established provider contracts required by this action.
     // These files define adapters; no provider schema-ensure routine is called here.
