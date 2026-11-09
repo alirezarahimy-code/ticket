@@ -945,8 +945,12 @@ try {
             ['Cookie: ' . $privacySessions['agent']['feature']['cookie']]
         );
         if ($requesterDetail['status'] !== 200 || str_contains($requesterDetail['body'], $internalBody)) {
+            $serverLog = sys_get_temp_dir() . '/t12s-server-' . (int) $privacyApp['port'] . '.log';
+            $serverTail = is_file($serverLog) ? substr((string) file_get_contents($serverLog), -2000) : '(server log missing)';
             t12s_fail('14-internal-note leaked into requester detail: HTTP ' . $requesterDetail['status']
-                . ', feature app.log tail:\n' . t12s_clone_log_tail($privacyApp));
+                . ', body snippet:\n' . substr((string) $requesterDetail['body'], 0, 1500)
+                . '\n, feature app.log tail:\n' . t12s_clone_log_tail($privacyApp)
+                . '\n, feature server log tail:\n' . $serverTail);
         }
         if ($agentDetail['status'] !== 200 || !str_contains($agentDetail['body'], $internalBody)) {
             t12s_fail('14-internal-note missing from assigned agent detail: HTTP ' . $agentDetail['status']
