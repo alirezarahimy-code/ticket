@@ -168,10 +168,10 @@ if (!defined('APP_ROOT')) {
                     'sla_ola' => $bulkSlaOlaAudit,
                 ]);
                 if ($status === 'resolved') {
-                    request_center_notify_ticket_resolved($ticketId, (int) $queueUser['id']);
+                    request_center_notify_ticket_resolved($ticketId, (int) $queueUser['id'], true);
                     record_asset_history((int) ($bulkTicket['asset_id'] ?? 0), 'ticket_resolved', 'حل مشکل درخواست ' . ticket_number($ticketId), (int) $queueUser['id'], $ticketId, 'وضعیت به حل‌شده تغییر کرد.');
                 } else {
-                    request_center_notify_ticket_parties($ticketId, 'bulk_status_changed', 'تغییر وضعیت درخواست', 'وضعیت درخواست ' . ticket_number($ticketId) . ' در عملیات گروهی به «' . request_center_status_label($status) . '» تغییر کرد.', (int) $queueUser['id']);
+                    request_center_notify_ticket_parties($ticketId, 'bulk_status_changed', 'تغییر وضعیت درخواست', 'وضعیت درخواست ' . ticket_number($ticketId) . ' در عملیات گروهی به «' . request_center_status_label($status) . '» تغییر کرد.', (int) $queueUser['id'], true);
                 }
                 $bulkChanged++;
             }
