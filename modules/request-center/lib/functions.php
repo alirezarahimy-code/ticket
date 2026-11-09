@@ -573,6 +573,9 @@ function request_center_notify_ticket_resolved(int $ticketId, int $actorId, bool
     try {
         $ticket = fetch_ticket($ticketId);
         if (!$ticket) {
+            if ($required) {
+                throw new RuntimeException('درخواست برای ثبت اعلان حل‌شدن پیدا نشد.');
+            }
             return;
         }
         $autoCloseDays = max(0, (int) (setting('ticket_auto_close_days', '3') ?? '3'));
