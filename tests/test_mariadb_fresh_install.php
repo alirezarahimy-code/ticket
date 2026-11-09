@@ -102,6 +102,28 @@ if ($mode === 'fresh-install') {
     )->fetchColumn();
     check($escalationIndex === 1, 'ایندکس تشدید شدت Logging در نصب تازه وجود دارد');
 
+    // ۴-۱) INSERT واقعی با همان ستون‌هایی که logging_store_system در کد تولیدی می‌نویسد.
+    // این آزمون فقط وجود ستون‌ها را نمی‌سنجد؛ سازگاری عملی مسیر ثبت پایدار لاگ را هم می‌سنجد.
+    $eventId = (string) $pdo->query('SELECT UUID()')->fetchColumn();
+    $loggingInsert = $pdo->prepare(
+        'INSERT INTO system_logs (event_id, request_id, trace_id, operation_id, parent_event_id, code, category, fingerprint, level, context, message, meta_json, user_id, request_uri, escalation_count, escalation_label, created_at) '
+        . 'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)'
+    );
+    $loggingInsert->execute([
+        $eventId, null, null, null, null, 'SYS-TEST-001', 'system', str_repeat('a', 64),
+        'error', 'fresh-install-test', 'logging schema regression', json_encode(['source' => 'fresh-install'], JSON_THROW_ON_ERROR),
+        null, '/ci/fresh-install', 3, 'آزمون',
+    ]);
+    $loggingRow = $pdo->prepare('SELECT escalation_count, escalation_label FROM system_logs WHERE event_id = ?');
+    $loggingRow->execute([$eventId]);
+    $storedLog = $loggingRow->fetch(PDO::FETCH_ASSOC);
+    check(
+        is_array($storedLog)
+        && (int) $storedLog['escalation_count'] === 3
+        && (string) $storedLog['escalation_label'] === 'آزمون',
+        'INSERT واقعی Logging با ستون‌های escalation در نصب تازه موفق است'
+    );
+
     // ۵) یک پرس‌وجوی واقعی روی settings (ستون‌های utf8mb4)
     $pdo->query('SELECT COUNT(*) FROM settings')->fetchColumn();
     check(true, 'SELECT روی settings بدون خطا اجرا شد');
