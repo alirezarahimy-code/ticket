@@ -590,7 +590,7 @@ if (!defined('APP_ROOT')) {
             ];
             save_audit_required((int) $user['id'], 'ticket_reopened_by_user', $ticketId, ['reason' => $reason, 'sla_ola' => $reopenSlaOlaAudit]);
             log_ticket_event($ticketId, (int) $user['id'], 'reopened_by_user', 'resolved', $reopenStatus, ['reason' => $reason, 'sla_ola' => $reopenSlaOlaAudit]);
-            request_center_notify_ticket_staff($ticketId, 'ticket_reopened', 'کاربر اعلام کرد مشکل حل نشده است', 'درخواست ' . ticket_number($ticketId) . ' توسط ثبت‌کننده بازگشایی شد: ' . $reason, (int) $user['id']);
+            request_center_notify_ticket_staff($ticketId, 'ticket_reopened', 'کاربر اعلام کرد مشکل حل نشده است', 'درخواست ' . ticket_number($ticketId) . ' توسط ثبت‌کننده بازگشایی شد: ' . $reason, (int) $user['id'], true);
             db_commit_or_fail('ticket:reopen_ticket');
             flash('info', 'درخواست دوباره برای رسیدگی ارسال شد.');
             redirect(request_center_ticket_return_url($ticketId));
