@@ -68,12 +68,12 @@ function request_center_post_error(Throwable $exception, string $page): never
 
     $action = (string) ($GLOBALS['activity_post']['action'] ?? '');
     if ($action === 'create_ticket' && session_status() === PHP_SESSION_ACTIVE) {
-        // Keep only the two core narrative fields after a rejected submission.
-        // Files, custom fields, identifiers and one-time request tokens are never
-        // copied into the retry session payload.
+        // Preserve bounded, non-file form values so a rejected submission can be
+        // corrected without retyping. Uploads and one-time request tokens are
+        // deliberately excluded from the session payload.
         $retryCustom = [];
         $postedCustom = is_array($_POST['custom'] ?? null) ? $_POST['custom'] : [];
-        foreach ($postedCustom as $fieldKey => $fieldValue) {
+        foreach (array_slice($postedCustom, 0, 50, true) as $fieldKey => $fieldValue) {
             $fieldKey = (string) $fieldKey;
             if (!preg_match('/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/', $fieldKey) || is_array($fieldValue) || is_object($fieldValue)) {
                 continue;
@@ -90,6 +90,7 @@ function request_center_post_error(Throwable $exception, string $page): never
             'asset_id' => max(0, (int) ($_POST['asset_id'] ?? 0)),
             'support_location' => mb_substr(trim((string) ($_POST['support_location'] ?? '')), 0, 255, 'UTF-8'),
             'support_equipment' => mb_substr(trim((string) ($_POST['support_equipment'] ?? '')), 0, 2000, 'UTF-8'),
+            'parent_ticket_id' => max(0, (int) ($_POST['parent_ticket_id'] ?? 0)),
             'custom' => $retryCustom,
             'saved_at' => time(),
         ];
