@@ -288,7 +288,7 @@ if (isset($_POST['rc_appointment_create_batch'])) {
     $starts = $_POST['starts'] ?? [];
     $ends = $_POST['ends'] ?? [];
     if (!is_array($picks) || $picks === []) {
-        $rcRedirect('batch', null, ['ok' => 0, 'failed' => 0, 'empty' => 1]);
+        $rcRedirect('batch', null, ['ok' => 0, 'failed' => 0, 'empty' => 1, 'view' => 'day', 'date' => $date]);
     }
     $pickIds = array_slice(array_keys($picks), 0, 50); // سقف سخت ۵۰ نوبت در یک بازهٔ ارسال
     $okCount = 0;
@@ -319,7 +319,7 @@ if (isset($_POST['rc_appointment_create_batch'])) {
             $rcLog('rc_appointment_create_batch', 'denied', ['ticket_id' => $ticketId, 'reason' => (string) ($result['error'] ?? '')]);
         }
     }
-    $rcRedirect('batch', null, ['ok' => $okCount, 'failed' => $failedCount]);
+    $rcRedirect('batch', null, ['ok' => $okCount, 'failed' => $failedCount, 'view' => 'day', 'date' => $date]);
 }
 
 // ——— ثبت تکی نوبت (فرم کلاسیک) ———
