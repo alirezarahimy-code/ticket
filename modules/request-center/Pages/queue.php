@@ -50,6 +50,7 @@ if ($page === 'queue') {
 .queue-tabs a:hover,.queue-tabs a.active{border-color:#b9cfe9;background:#edf5ff;color:#1e4f87}
 .queue-table{overflow:hidden;border:1px solid #e2e9f2;border-radius:14px}
 .queue-table .table-head,.queue-table .table-row{display:grid;grid-template-columns:minmax(280px,2.2fr) minmax(110px,.8fr) minmax(120px,.9fr) minmax(120px,.9fr) minmax(100px,.7fr);gap:12px;align-items:center}
+.queue-select-all{display:inline-flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap}.queue-select-all input,.queue-table .ticket-title input{width:16px;height:16px;accent-color:#2459a6}.bulk-actions button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .queue-table .table-head{padding:12px 16px;background:#f6f9fd;color:#61738b;font-size:11px;font-weight:800;border-bottom:1px solid #e7edf5}
 .queue-table .table-row{padding:13px 16px;border-bottom:1px solid #edf1f6;font-size:12px}
 .queue-table .table-row:last-child{border-bottom:0}
