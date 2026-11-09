@@ -118,6 +118,7 @@ $adminLinks = [
 if (user_can($user, 'reports.view')) {
     $adminLinks[] = ['title' => 'گزارش‌های SLA/OLA', 'description' => 'گزارش درخواست‌ها، موعدها و موارد خارج از تعهد در محدودهٔ مجاز', 'url' => 'request-center.php?page=reports'];
 }
+$adminLinks[] = ['title' => 'خروجی Excel تصمیمات سوپروایزر', 'description' => 'صورت‌جلسهٔ تصمیمات (تأیید نهایی، برگشت برای اصلاح، بازگشایی، رد درخواست) با فیلتر جلالی', 'url' => 'request-center.php?action=export_decisions'];
 if (user_can($user, 'analytics.view')) {
     $adminLinks[] = ['title' => 'تحلیل عملکرد', 'description' => 'توزیع وضعیت، اولویت، واحدها و رضایت کارشناسان', 'url' => 'request-center.php?page=analytics'];
 }
