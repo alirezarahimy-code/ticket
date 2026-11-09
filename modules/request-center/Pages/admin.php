@@ -267,7 +267,7 @@ form input:focus,form select:focus,form textarea:focus{outline:0;border-color:#6
 <?php foreach ($adminAuditRows as $event): ?>
 <tr>
 <td><?= $escapeAdmin($event['created_at']) ?></td>
-<td><a href="request-center.php?id=<?= (int) $event['ticket_id'] ?>&amp;workspace=admin"><?= $escapeAdmin($event['ticket_no'] ?: ('#' . $event['ticket_id'])) ?> · <?= $escapeAdmin($event['subject']) ?></a></td>
+<td><a href="request-center.php?page=ticket&amp;id=<?= (int) $event['ticket_id'] ?>&amp;workspace=admin"><?= $escapeAdmin($event['ticket_no'] ?: ('#' . $event['ticket_id'])) ?> · <?= $escapeAdmin($event['subject']) ?></a></td>
 <td><?= $escapeAdmin($adminAuditLabels[(string) $event['event_type']] ?? $event['event_type']) ?></td>
 <td><?= $escapeAdmin($event['actor_name'] ?: 'سامانه') ?></td>
 <td><?= $escapeAdmin($event['from_status'] ?: '—') ?> ← <?= $escapeAdmin($event['to_status'] ?: '—') ?></td>
