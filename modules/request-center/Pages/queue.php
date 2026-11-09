@@ -106,10 +106,14 @@ if ($page === 'queue') {
  if(master){master.addEventListener("change",function(){items.forEach(function(item){item.checked=master.checked;});update();});}
  items.forEach(function(item){item.addEventListener("change",update);});
  if(form){form.addEventListener("submit",function(event){
+  if(form.dataset.submitting==="1"){event.preventDefault();return;}
   var selected=items.filter(function(item){return item.checked;});
   if(!selected.length){event.preventDefault();window.alert("حداقل یک درخواست را انتخاب کنید.");return;}
   if(note&&!note.value.trim()){event.preventDefault();note.focus();window.alert("برای عملیات گروهی، دلیل اقدام را بنویسید.");return;}
-  if(status&&status.value==="resolved"&&!window.confirm("درخواست‌های انتخاب‌شده به وضعیت «حل‌شده» منتقل می‌شوند. ادامه می‌دهید؟")){event.preventDefault();return;}
+  var labels={in_progress:"در حال انجام",waiting_user:"در انتظار پاسخ کاربر",resolved:"حل‌شده"};
+  var target=status&&labels[status.value]?labels[status.value]:"وضعیت انتخاب‌شده";
+  if(!window.confirm(selected.length+" درخواست به وضعیت «"+target+"» منتقل می‌شوند. دلیل اقدام نیز برای درخواست‌کنندگان ثبت خواهد شد. ادامه می‌دهید؟")){event.preventDefault();return;}
+  form.dataset.submitting="1";
   if(submit){submit.disabled=true;submit.textContent="در حال اعمال روی "+selected.length+" درخواست…";}
  });}
  update();
