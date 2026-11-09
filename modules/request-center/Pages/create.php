@@ -243,13 +243,20 @@ if ($page === 'new-ticket') {
   var matches=assetOptions.filter(function(option){return !q||option.text.toLocaleLowerCase().indexOf(q)!==-1;}).slice(0,40);
   assetResults.innerHTML="";
   matches.forEach(function(option){
-   var item=document.createElement("div");item.setAttribute("role","option");item.tabIndex=0;item.dataset.value=option.value;item.textContent=option.text;
-   function choose(){assetSelect.value=option.value;assetSearch.value=option.text;assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");assetSearch.setCustomValidity("");if(assetError)assetError.hidden=true;}
+   var item=document.createElement("div");item.setAttribute("role","option");item.tabIndex=-1;item.id="asset-option-"+matches.indexOf(option);item.dataset.value=option.value;item.textContent=option.text;item.setAttribute("aria-selected","false");
+   function choose(){assetSelect.value=option.value;assetSearch.value=option.text;assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");assetSearch.removeAttribute("aria-activedescendant");assetSearch.setCustomValidity("");assetActiveIndex=-1;if(assetLive)assetLive.textContent="سیستم "+option.text+" انتخاب شد.";if(assetError)assetError.hidden=true;}
    item.addEventListener("click",choose);item.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();choose();}});
    assetResults.appendChild(item);
   });
   assetResults.hidden=matches.length===0;assetSearch.setAttribute("aria-expanded",matches.length?"true":"false");
  }
+
+ var assetActiveIndex=-1;
+ var assetLive=document.createElement("div");assetLive.className="sr-only";assetLive.setAttribute("role","status");assetLive.setAttribute("aria-live","polite");
+ if(assetResults&&assetResults.parentNode)assetResults.parentNode.insertBefore(assetLive,assetResults.nextSibling);
+ if(assetSearch){assetSearch.setAttribute("role","combobox");assetSearch.setAttribute("aria-autocomplete","list");assetSearch.setAttribute("aria-controls","asset-results");assetSearch.setAttribute("aria-expanded","false");}
+ function assetItems(){return assetResults?Array.prototype.slice.call(assetResults.querySelectorAll('[role="option"]')):[];}
+ function focusAsset(index){var options=assetItems();if(!options.length){assetActiveIndex=-1;return;}assetActiveIndex=(index+options.length)%options.length;options.forEach(function(item,i){item.setAttribute("aria-selected",i===assetActiveIndex?"true":"false");item.classList.toggle("active",i===assetActiveIndex);});var active=options[assetActiveIndex];active.scrollIntoView({block:"nearest"});assetSearch.setAttribute("aria-activedescendant",active.id);}
  function sync(){
   var g=group(),opt=selectedService();
   Array.prototype.forEach.call(service.options,function(option){
@@ -287,13 +294,17 @@ if ($page === 'new-ticket') {
   if(service)service.addEventListener("change",sync);
  groupInputs.forEach(function(input){input.addEventListener("change",function(){if(service)service.value="";if(assetSelect)assetSelect.value="";if(assetSearch)assetSearch.value="";sync();});});
  if(assetSearch){
-  assetSearch.addEventListener("input",function(){if(assetSelect)assetSelect.value="";renderAssets(assetSearch.value);});
+  assetSearch.addEventListener("input",function(){if(assetSelect)assetSelect.value="";assetActiveIndex=-1;assetSearch.removeAttribute("aria-activedescendant");renderAssets(assetSearch.value);if(assetLive){var count=assetItems().length;assetLive.textContent=count?count+" سیستم در فهرست؛ با کلیدهای جهت‌دار انتخاب کنید.":"سیستمی با این عبارت پیدا نشد.";}});
   assetSearch.addEventListener("focus",function(){renderAssets(assetSearch.value);});
   assetSearch.addEventListener("keydown",function(event){
-   if(event.key==="ArrowDown"&&!assetResults.hidden){event.preventDefault();var first=assetResults.querySelector("[role=option]");if(first)first.focus();}
-   if(event.key==="Escape"){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");}
+   if(event.key==="ArrowDown"&&!assetResults.hidden){event.preventDefault();focusAsset(assetActiveIndex+1);}
+   if(event.key==="ArrowUp"&&!assetResults.hidden){event.preventDefault();focusAsset(assetActiveIndex<0?assetItems().length-1:assetActiveIndex-1);}
+   if(event.key==="Home"&&!assetResults.hidden){event.preventDefault();focusAsset(0);}
+   if(event.key==="End"&&!assetResults.hidden){event.preventDefault();focusAsset(assetItems().length-1);}
+   if(event.key==="Enter"&&!assetResults.hidden&&assetActiveIndex>=0){event.preventDefault();var active=assetItems()[assetActiveIndex];if(active)active.click();}
+   if(event.key==="Escape"){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");assetSearch.removeAttribute("aria-activedescendant");assetActiveIndex=-1;}
   });
-  assetSearch.addEventListener("blur",function(){window.setTimeout(function(){if(assetResults&&!assetResults.contains(document.activeElement)){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");}},120);});
+  assetSearch.addEventListener("blur",function(){window.setTimeout(function(){if(assetResults&&!assetResults.contains(document.activeElement)){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");assetSearch.removeAttribute("aria-activedescendant");assetActiveIndex=-1;}},120);});
  }
  if(form){
   form.addEventListener("submit",function(event){
