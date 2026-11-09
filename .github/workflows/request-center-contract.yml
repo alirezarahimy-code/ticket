@@ -314,7 +314,10 @@ jobs:
           test -s "$RUNNER_TEMP/persian_ticketing.sql"
           echo "T07 dump bytes: $(wc -c < "$RUNNER_TEMP/persian_ticketing.sql")"
           sha256sum "$RUNNER_TEMP/persian_ticketing.sql"
-          php tests/test_request_center_t07_migration_clone.php 2>&1 | tee "$RUNNER_TEMP/t07-diagnostic.log"
+          if ! php tests/test_request_center_t07_migration_clone.php 2>&1 | tee "$RUNNER_TEMP/t07-diagnostic.log"; then
+            echo "::error title=T07 failure (MariaDB ${{ matrix.mariadb-version }})::$(tail -c 2500 "$RUNNER_TEMP/t07-diagnostic.log" | sed 's/%/%25/g' | tr '\n\r' '  ')"
+            exit 1
+          fi
         env:
           CI_DB_HOST: 127.0.0.1
           CI_DB_PORT: '3306'
