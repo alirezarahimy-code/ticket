@@ -66,7 +66,7 @@ if ($page === 'queue') {
 .bulk-actions{display:grid;grid-template-columns:minmax(170px,.7fr) minmax(260px,2fr) auto;gap:12px;align-items:end;margin:14px 0;padding:16px;border:1px solid #e1e8f1;border-radius:13px;background:#fff;box-shadow:0 4px 15px rgba(23,43,77,.035)}
 .bulk-actions .bulk-note{display:grid;gap:6px;color:#536780;font-size:11px;font-weight:700}
 .bulk-actions textarea{min-height:72px;resize:vertical}
-.bulk-actions .button{min-height:40px;white-space:nowrap}
+.bulk-actions .button{min-height:40px;white-space:nowrap}.bulk-actions .bulk-submit{display:grid;gap:6px;justify-items:stretch}.bulk-actions .bulk-submit small{color:#687990;font-size:11px;text-align:center}
 .pagination{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding:18px}
 .pagination a,.pagination .active{min-width:34px;padding:6px 10px;border:1px solid #dfe7f0;border-radius:8px;background:#fff;text-align:center;color:#526780;text-decoration:none}
 .pagination .active{background:#2459a6;color:#fff;border-color:#2459a6}
@@ -77,7 +77,7 @@ if ($page === 'queue') {
     foreach ($queueRows as $queueTicket) {
         echo '<label class="table-row queue-row"><span class="ticket-title"><input type="checkbox" name="ticket_ids[]" value="' . (int) $queueTicket['id'] . '"><b>' . e(ticket_number((int) $queueTicket['id'])) . '</b><a href="request-center.php?page=ticket&amp;id=' . (int) $queueTicket['id'] . '&amp;workspace=agent&amp;agent_view=team&amp;return_page=queue&amp;queue=' . rawurlencode($queueName) . '&amp;q=' . rawurlencode($queueFilters['q']) . '&amp;status=' . rawurlencode($queueFilters['status']) . '&amp;priority=' . rawurlencode($queueFilters['priority']) . '&amp;service_group=' . rawurlencode($queueFilters['service_group']) . '&amp;p=' . $queuePage . '"><strong>' . e($queueTicket['subject']) . '</strong></a><small>' . e(ticket_type_label($queueTicket['ticket_type'])) . ' • ' . e(priority_label($queueTicket['priority'])) . (!empty($queueTicket['cancel_requested_at']) ? ' • درخواست لغو در انتظار بررسی' : '') . '</small></span><span>' . e($queueTicket['department_name'] ?: 'بدون معاونت') . '</span><span>' . e($queueTicket['requester_name']) . '</span><span>' . e($queueTicket['assignee_name'] ?: 'بدون مسئول') . '</span><span><em class="status ' . e($queueTicket['status']) . '">' . e(request_center_status_label($queueTicket['status'])) . '</em></span></label>';
         }
-    echo '</section><div class="bulk-actions"><input type="hidden" name="rc_return_queue" value="' . e($queueName) . '"><input type="hidden" name="rc_return_p" value="' . $queuePage . '"><input type="hidden" name="rc_return_q" value="' . e($queueFilters['q']) . '"><input type="hidden" name="rc_return_status" value="' . e($queueFilters['status']) . '"><input type="hidden" name="rc_return_priority" value="' . e($queueFilters['priority']) . '"><input type="hidden" name="rc_return_service_group" value="' . e($queueFilters['service_group']) . '"><input type="hidden" name="action" value="bulk_update_tickets">' . csrf_field() . '<select name="bulk_status"><option value="in_progress">در حال انجام</option><option value="waiting_user">در انتظار پاسخ کاربر</option><option value="resolved">حل‌شده</option></select><label class="bulk-note">دلیل و پیام مشترک (برای هر تغییر وضعیت الزامی)<textarea name="bulk_note" rows="2" maxlength="5000" required placeholder="دلیل اقدام را بنویسید؛ این پیام برای ثبت‌کنندهٔ همهٔ درخواست‌های انتخاب‌شده قابل مشاهده است"></textarea></label><button class="button" type="submit">اعمال روی انتخاب‌ها</button></div></form>';
+    echo '</section><div class="bulk-actions"><input type="hidden" name="rc_return_queue" value="' . e($queueName) . '"><input type="hidden" name="rc_return_p" value="' . $queuePage . '"><input type="hidden" name="rc_return_q" value="' . e($queueFilters['q']) . '"><input type="hidden" name="rc_return_status" value="' . e($queueFilters['status']) . '"><input type="hidden" name="rc_return_priority" value="' . e($queueFilters['priority']) . '"><input type="hidden" name="rc_return_service_group" value="' . e($queueFilters['service_group']) . '"><input type="hidden" name="action" value="bulk_update_tickets">' . csrf_field() . '<select name="bulk_status"><option value="in_progress">در حال انجام</option><option value="waiting_user">در انتظار پاسخ کاربر</option><option value="resolved">حل‌شده</option></select><label class="bulk-note">دلیل و پیام مشترک (برای هر تغییر وضعیت الزامی)<textarea name="bulk_note" rows="2" maxlength="5000" required placeholder="دلیل اقدام را بنویسید؛ این پیام برای ثبت‌کنندهٔ همهٔ درخواست‌های انتخاب‌شده قابل مشاهده است"></textarea></label><div class="bulk-submit"><small data-queue-selection-count aria-live="polite">۰ درخواست انتخاب شده</small><button class="button" type="submit">اعمال روی انتخاب‌ها</button></div></div></form>';
     if ($queuePages > 1) {
         echo '<nav class="pagination" aria-label="صفحه‌بندی صف">';
         for ($queueNav = max(1, $queuePage - 3); $queueNav <= min($queuePages, $queuePage + 3); $queueNav++) {
@@ -91,21 +91,26 @@ if ($page === 'queue') {
 (function(){
  var root=document.querySelector(".queue-table");if(!root)return;
  var master=root.querySelector("[data-queue-select-all]");
- var items=Array.prototype.slice.call(root.querySelectorAll("input[name=\"ticket_ids[]\"]"));
+ var items=Array.prototype.slice.call(root.querySelectorAll("input[name=\\"ticket_ids[]\\"]"));
  var form=root.closest("form");
- var submit=form?form.querySelector(".bulk-actions button[type=\"submit\"]"):null;
+ var submit=form?form.querySelector(".bulk-actions button[type=\\"submit\\"]"):null;
+ var status=form?form.querySelector("[name=\\"bulk_status\\"]"):null;
+ var note=form?form.querySelector("[name=\\"bulk_note\\"]"):null;
+ var count=form?form.querySelector("[data-queue-selection-count]"):null;
  var update=function(){
   var selected=items.filter(function(item){return item.checked;}).length;
   if(master){master.checked=items.length>0&&selected===items.length;master.indeterminate=selected>0&&selected<items.length;}
   if(submit){submit.disabled=selected===0;submit.textContent=selected?("اعمال روی "+selected+" درخواست"):"ابتدا درخواست انتخاب کنید";}
+  if(count){count.textContent=selected+" درخواست انتخاب شده";count.setAttribute("aria-live","polite");}
  };
  if(master){master.addEventListener("change",function(){items.forEach(function(item){item.checked=master.checked;});update();});}
  items.forEach(function(item){item.addEventListener("change",update);});
  if(form){form.addEventListener("submit",function(event){
   var selected=items.filter(function(item){return item.checked;});
-  var note=form.querySelector("[name=\"bulk_note\"]");
   if(!selected.length){event.preventDefault();window.alert("حداقل یک درخواست را انتخاب کنید.");return;}
-  if(note&&!note.value.trim()){event.preventDefault();note.focus();window.alert("برای عملیات گروهی، دلیل اقدام را بنویسید.");}
+  if(note&&!note.value.trim()){event.preventDefault();note.focus();window.alert("برای عملیات گروهی، دلیل اقدام را بنویسید.");return;}
+  if(status&&status.value==="resolved"&&!window.confirm("درخواست‌های انتخاب‌شده به وضعیت «حل‌شده» منتقل می‌شوند. ادامه می‌دهید؟")){event.preventDefault();return;}
+  if(submit){submit.disabled=true;submit.textContent="در حال اعمال روی "+selected.length+" درخواست…";}
  });}
  update();
 })();
