@@ -89,6 +89,11 @@ function render_header(string $title, ?array $user = null): void
             }
             if (user_is_primary_admin($user)) {
                 $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=admin', 'مدیریت مرکز درخواست‌ها', 'settings') . '</li>';
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=admin&calendar=1', 'تقویم موعدها', 'reports') . '</li>';
+            } elseif (user_can($user, 'supervisor.panel')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=supervisor&calendar=1', 'تقویم موعدها', 'reports') . '</li>';
+            } elseif (user_can($user, 'queue.view')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=agent&calendar=1&agent_view=team', 'تقویم موعدها', 'reports') . '</li>';
             }
             if (user_can($user, 'ticket.create')) {
                 $menuItems[] = '<li>' . $menuLink('request-center.php?page=new-ticket', 'ثبت درخواست', 'ticket') . '</li>';
