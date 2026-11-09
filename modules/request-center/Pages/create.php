@@ -220,6 +220,85 @@ if ($page === 'new-ticket') {
           echo '</div></fieldset>';
       }
       echo '<label class="full file-input">پیوست اختیاری<input type="file" name="attachment"><small>حداکثر ۸ مگابایت؛ PDF، تصویر، Word، Excel، TXT و ZIP</small></label></div><div class="actions"><button class="button" type="submit">ثبت درخواست</button></div></form></section>';
+    echo '<script id="rc-create-form-interactions">
+(function(){
+ var form=document.querySelector(".form-card form");if(!form)return;
+ var service=document.getElementById("service-selector"),category=document.getElementById("category-selector");
+ var groupInputs=Array.prototype.slice.call(form.querySelectorAll("[name=\"service_group\"]"));
+ var assetWrap=form.querySelector("[data-asset-combo]"),assetSearch=document.getElementById("asset-search");
+ var assetSelect=document.getElementById("asset-selector"),assetResults=document.getElementById("asset-results");
+ var assetError=form.querySelector("[data-asset-error]"),numberBox=form.querySelector(".ticket-number-box");
+ var numberPreview=document.getElementById("ticket-number-preview");
+ var assetOptions=assetSelect?Array.prototype.slice.call(assetSelect.options).slice(1):[];
+ var supportFields=Array.prototype.slice.call(form.querySelectorAll(".support-field"));
+ var customFields=Array.prototype.slice.call(form.querySelectorAll("[data-service-fields]"));
+ var submit=form.querySelector("button[type=\"submit\"]");
+ function group(){var selected=groupInputs.find(function(input){return input.checked;});return selected?selected.value:"it";}
+ function selectedService(){return service&&service.selectedOptions.length?service.selectedOptions[0]:null;}
+ function renderAssets(query){
+  if(!assetResults||!assetSearch)return;
+  var q=(query||"").trim().toLocaleLowerCase();
+  var matches=assetOptions.filter(function(option){return !q||option.text.toLocaleLowerCase().indexOf(q)!==-1;}).slice(0,40);
+  assetResults.innerHTML="";
+  matches.forEach(function(option){
+   var item=document.createElement("div");item.setAttribute("role","option");item.tabIndex=0;item.dataset.value=option.value;item.textContent=option.text;
+   function choose(){assetSelect.value=option.value;assetSearch.value=option.text;assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");assetSearch.setCustomValidity("");if(assetError)assetError.hidden=true;}
+   item.addEventListener("click",choose);item.addEventListener("keydown",function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();choose();}});
+   assetResults.appendChild(item);
+  });
+  assetResults.hidden=matches.length===0;assetSearch.setAttribute("aria-expanded",matches.length?"true":"false");
+ }
+ function sync(){
+  var g=group(),opt=selectedService();
+  Array.prototype.forEach.call(service.options,function(option){
+   if(!option.value)return;
+   var allowed=option.dataset.serviceGroup===g;
+   option.hidden=!allowed;option.disabled=!allowed;
+  });
+  if(opt&&opt.value&&opt.dataset.serviceGroup!==g){service.value="";opt=null;}
+  if(category)category.value=opt?(opt.dataset.categoryId||""):"";
+  customFields.forEach(function(fieldset){
+   var active=!!opt&&fieldset.dataset.serviceFields===opt.value;
+   fieldset.hidden=!active;
+   Array.prototype.forEach.call(fieldset.querySelectorAll("input,select,textarea"),function(input){input.disabled=!active;});
+  });
+  supportFields.forEach(function(label){
+   var active=g==="support";label.hidden=!active;
+   Array.prototype.forEach.call(label.querySelectorAll("input,textarea,select"),function(input){input.disabled=!active;input.required=active&&input.name==="support_location";});
+  });
+  var requiresAsset=!!opt&&g==="it"&&opt.dataset.requiresAsset==="1";
+  if(assetWrap){assetWrap.hidden=g!=="it";assetSearch.disabled=g!=="it";assetSearch.required=requiresAsset;assetSearch.setAttribute("aria-required",requiresAsset?"true":"false");}
+  if(assetSelect){assetSelect.disabled=g!=="it";assetSelect.required=false;}
+  if(!requiresAsset&&assetSearch){assetSearch.setCustomValidity("");if(assetError)assetError.hidden=true;}
+  if(numberBox&&numberPreview){numberPreview.textContent=g==="support"?numberBox.dataset.nextSupport:numberBox.dataset.nextIt;}
+  if(submit)submit.disabled=false;
+ }
+ if(service)service.addEventListener("change",sync);
+ groupInputs.forEach(function(input){input.addEventListener("change",function(){if(service)service.value="";if(assetSelect)assetSelect.value="";if(assetSearch)assetSearch.value="";sync();});});
+ if(assetSearch){
+  assetSearch.addEventListener("input",function(){if(assetSelect)assetSelect.value="";renderAssets(assetSearch.value);});
+  assetSearch.addEventListener("focus",function(){renderAssets(assetSearch.value);});
+  assetSearch.addEventListener("keydown",function(event){
+   if(event.key==="ArrowDown"&&!assetResults.hidden){event.preventDefault();var first=assetResults.querySelector("[role=option]");if(first)first.focus();}
+   if(event.key==="Escape"){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");}
+  });
+  assetSearch.addEventListener("blur",function(){window.setTimeout(function(){if(assetResults&&!assetResults.contains(document.activeElement)){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");}},120);});
+ }
+ if(form){
+  form.addEventListener("submit",function(event){
+   var opt=selectedService(),requires=!!opt&&group()==="it"&&opt.dataset.requiresAsset==="1";
+   if(requires&&(!assetSelect||!assetSelect.value)){
+    event.preventDefault();assetSearch.setCustomValidity("برای این خدمت، سیستم مرتبط را از فهرست انتخاب کنید.");assetSearch.reportValidity();assetSearch.focus();if(assetError){assetError.textContent="انتخاب سیستم مرتبط الزامی است.";assetError.hidden=false;}return;
+   }
+   if(assetSearch)assetSearch.setCustomValidity("");
+   if(submit){submit.disabled=true;submit.textContent="در حال ثبت درخواست…";}
+  });
+ }
+ document.addEventListener("click",function(event){if(assetResults&&assetSearch&&!assetWrap.contains(event.target)){assetResults.hidden=true;assetSearch.setAttribute("aria-expanded","false");}});
+ sync();
+ if(assetSelect&&assetSelect.value&&assetSearch){var current=assetOptions.find(function(option){return option.value===assetSelect.value;});if(current)assetSearch.value=current.text;}
+})();
+</script>'; 
     render_footer();
     exit;
 }
