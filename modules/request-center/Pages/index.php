@@ -111,6 +111,31 @@ if ($workspace === 'supervisor') {
 $ticketId = max(0, (int) ($_GET['id'] ?? 0));
 $page = max(1, (int) ($_GET['p'] ?? 1));
 
+// One canonical operational detail page serves every workspace.
+// Forward older workspace links/bookmarks containing ?id= here, preserving
+// validated list context instead of rendering a duplicate read-only detail view.
+if ($ticketId > 0) {
+    $detailParams = [
+        'page' => 'ticket',
+        'id' => $ticketId,
+        'workspace' => $workspace,
+        'p' => $page,
+    ];
+    if ($workspace === 'agent') {
+        $detailParams['agent_view'] = $agentView;
+        $queueNames = ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'];
+        $requestedQueue = (string) ($_GET['queue'] ?? ($agentView === 'mine' ? 'mine' : 'all'));
+        $detailParams['queue'] = in_array($requestedQueue, $queueNames, true) ? $requestedQueue : 'all';
+    }
+    foreach (['q' => 100, 'status' => 32, 'priority' => 16, 'service_group' => 16] as $key => $maxLength) {
+        $value = trim((string) ($_GET[$key] ?? ''));
+        if ($value !== '' && strlen($value) <= $maxLength) {
+            $detailParams[$key] = $value;
+        }
+    }
+    redirect('request-center.php?' . http_build_query($detailParams));
+}
+
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Cache-Control: private, no-store');
