@@ -23,7 +23,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertIn("ticket_scope($user, 't')", repo)
         self.assertIn("ticket_user_can_view($ticket, $user)", repo)
-        self.assertIn("ticket_can_see_internal", read("modules/request-center/Pages/index.php"))
+        self.assertIn("ticket_can_see_internal", read("modules/request-center/Pages/detail.php"))
 
     def test_internal_messages_are_filtered_in_sql(self):
         repo = read("modules/request-center/RequestCenterRepository.php")
@@ -91,7 +91,7 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
     def test_user_supplied_text_is_escaped_and_attachment_download_is_delegated(self):
         entry = read("modules/request-center/Pages/index.php")
         self.assertIn("htmlspecialchars(", entry)
-        self.assertIn("request-center.php?action=download_attachment", entry)
+        self.assertIn("request-center.php?action=download_attachment", read("modules/request-center/Pages/detail.php"))
         repo = read("modules/request-center/RequestCenterRepository.php")
         self.assertNotIn("stored_name", repo)
 
@@ -103,21 +103,21 @@ class RequestCenterFirstSliceTests(unittest.TestCase):
         self.assertIn("$filters['requester_id'] = (int) $user['id'];", entry)
         self.assertIn("$filters['assigned_to'] = (int) $user['id'];", entry)
         self.assertIn("$workspaceUrl .= '&agent_view='", entry)
-        self.assertIn('href="<?= $escape($workspaceUrl) ?>"', entry)
+        self.assertIn('href="<?= $escape($workspaceUrl', entry)
         self.assertIn("user_can($user, 'queue.view')", entry)
         self.assertIn("$clauses[] = 't.assigned_to = ?';", repo)
         self.assertIn("ticket_scope($user, 't')", repo)
 
     def test_not_found_and_detail_navigation_preserve_workspace(self):
         entry = read("modules/request-center/Pages/index.php")
-        self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', entry)
-        self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a>', entry)
-        not_found_branch = entry.split("if ($ticket === null)", 1)[1].split("} else {", 1)[0]
-        self.assertIn('<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', not_found_branch)
-        self.assertNotIn("echo '<section", not_found_branch)
-        self.assertNotIn('<?= $escape($workspaceUrl) ?>', not_found_branch.replace(
-            '<a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>', ''
-        ))
+        # Since the workspace-shell redesign, deep links (?id>0) forward to the
+        # canonical operational detail route while preserving workspace context.
+        forward_branch = entry.split("if ($ticketId > 0)", 1)[1].split("header('X-Content-Type-Options'", 1)[0]
+        self.assertIn("'page' => 'ticket'", forward_branch)
+        self.assertIn("'id' => $ticketId", forward_branch)
+        self.assertIn("'workspace' => $workspace", forward_branch)
+        self.assertIn("redirect('request-center.php?' . http_build_query($detailParams))", forward_branch)
+        self.assertNotIn("echo '<section", forward_branch)
 
     def test_legacy_workflow_is_not_removed_by_first_slice(self):
         action = read("modules/request-center/Actions/ticket-actions.php")

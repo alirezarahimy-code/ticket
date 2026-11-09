@@ -35,7 +35,6 @@ def test_attachment_and_report_endpoints_are_independent():
     assert legacy.index("export_report") < legacy.index("ticket_number_ensure_schema()")
     for path in (
         "modules/request-center/Pages/detail.php",
-        "modules/request-center/Pages/index.php",
     ):
         page = source(path)
         assert "request-center.php?action=download_attachment" in page
@@ -65,7 +64,11 @@ def test_lifecycle_actions_return_to_independent_workspaces():
     assert "rc_return_workspace" in shared
     assert "redirect(request_center_ticket_return_url($ticketId))" in source(paths[1])
     assert "'request-center.php?workspace=supervisor'" in source("modules/request-center/post-handler.php")
-    assert "request-center.php?page=queue" in source(paths[2])
+    bulk = source(paths[2])
+    assert "redirect('request-center.php?' . http_build_query($returnParams))" in bulk
+    assert "'page' => 'queue'" in bulk
+    assert "'queue' => $returnQueue" in bulk
+    assert "'p' => max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1)))" in bulk
     assert "request-center.php?page=services" in source(paths[3])
 
 
@@ -462,12 +465,13 @@ def test_supervisor_decision_queue_preserves_pagination_after_post_and_detail():
     # to the same supervisor page instead of silently falling back to page 1.
     assert page.count('name="rc_return_workspace" value="supervisor"') == 4
     assert page.count('name="rc_return_p" value="\' . $supervisorPage . \'"') == 4
-    assert "&amp;workspace=supervisor&amp;p=' . $supervisorPage . '" in page
+    assert "workspace=supervisor" in page
+    assert page.count("&amp;p=' . $supervisorPage . '") >= 4
     assert "request_center_ticket_return_url($ticketId)" in source("modules/request-center/Actions/supervisor-actions.php")
 
 def test_lifecycle_post_errors_preserve_supervisor_and_agent_queue_context():
     handler = source("modules/request-center/post-handler.php")
-    assert "'supervisor_decision', 'supervisor_reopen' => $ticketId > 0" in handler
+    assert "'supervisor_decision', 'supervisor_reopen', 'supervisor_assign_ticket' => $ticketId > 0" in handler
     assert "? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor'" in handler
     assert "'rc_return_queue'] ?? 'all'" in handler
     assert "'rc_return_p'] ?? 1" in handler
