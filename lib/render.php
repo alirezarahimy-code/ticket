@@ -78,7 +78,10 @@ function render_header(string $title, ?array $user = null): void
             }
             if (user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
                 || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all')) {
-                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=agent', 'فضای کارشناس', 'support') . '</li>';
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=agent', 'صف شخصی کارشناس', 'support') . '</li>';
+            }
+            if (user_can($user, 'queue.view')) {
+                $menuItems[] = '<li>' . $menuLink('request-center.php?workspace=agent&agent_view=team', 'صف گروهی مجاز', 'support') . '</li>';
             }
             if (user_can($user, 'queue.view')) {
                 $menuItems[] = '<li>' . $menuLink('request-center.php?page=queue', 'صف عملیاتی', 'ticket') . '</li>';
