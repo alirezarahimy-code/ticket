@@ -479,7 +479,7 @@ function request_center_notify_user(int $userId, string $type, string $title, st
     }
 }
 
-/** Notify all permitted parties without allowing notification failure to roll back the lifecycle transition. */
+/** Notify permitted parties; failures are best-effort by default and propagate when the caller requires transactional delivery. */
 function request_center_notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null, bool $required = false): void
 {
     try {
@@ -570,7 +570,7 @@ function request_center_notify_ticket_staff(int $ticketId, string $type, string 
     }
 }
 
-/** Resolution notice split between requester and staff, with isolated delivery failures. */
+/** Resolution notice for requester and staff; required mode propagates failures to the lifecycle transaction. */
 function request_center_notify_ticket_resolved(int $ticketId, int $actorId, bool $required = false): void
 {
     try {
