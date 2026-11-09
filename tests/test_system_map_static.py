@@ -89,7 +89,7 @@ def main() -> int:
         [sys.executable, str(BUILDER), "--check"],
         cwd=ROOT, capture_output=True, text=True, timeout=120,
     )
-    check(result.returncode == 0, "ایندکسها کهنهاند — python3 tools/build_system_map.py را اجرا کن")
+    check(result.returncode == 0, "ایندکسها کهنهاند — python3 tools/build_system_map.py را اجرا کن\n" + result.stdout + result.stderr)
 
     # ۴. پوشش فایلها ---------------------------------------------------------
     paths = {row["path"] for row in files}
