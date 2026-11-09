@@ -195,7 +195,7 @@ header('Cache-Control: private, no-store');
 <?php foreach ($olaPolicies as $policy): ?>
 <form method="post" class="rc-admin-link" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end">
 <?= csrf_field() ?><input type="hidden" name="action" value="update_ola_policy"><input type="hidden" name="policy_id" value="<?= (int) $policy['id'] ?>">
-<label>نام سیاست<input name="policy_name" required maxlength="150" value="<?= $escapeAdmin($policy['name']) ?>"></label>
+<label>نام سیاست<input name="policy_name" required maxlength="190" value="<?= $escapeAdmin($policy['name']) ?>"></label>
 <label>حوزه سازمانی<select name="department_id"><option value="0">سراسری</option><?php foreach ($adminDepartments as $department): ?><option value="<?= (int) $department['id'] ?>" <?= (int) ($policy['department_id'] ?? 0) === (int) $department['id'] ? 'selected' : '' ?>><?= $escapeAdmin($department['name']) ?></option><?php endforeach; ?></select></label>
 <label>اولویت<select name="priority"><?php foreach (['critical' => 'بحرانی', 'urgent' => 'فوری', 'normal' => 'عادی'] as $key => $label): ?><option value="<?= $key ?>" <?= $policy['priority'] === $key ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?></select></label>
 <label>مهلت پاسخ (دقیقه)<input type="number" min="1" max="525600" name="response_minutes" required value="<?= (int) $policy['response_minutes'] ?>"></label>
