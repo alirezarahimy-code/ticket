@@ -945,10 +945,12 @@ try {
             ['Cookie: ' . $privacySessions['agent']['feature']['cookie']]
         );
         if ($requesterDetail['status'] !== 200 || str_contains($requesterDetail['body'], $internalBody)) {
-            t12s_fail('14-internal-note leaked into requester detail: HTTP ' . $requesterDetail['status']);
+            t12s_fail('14-internal-note leaked into requester detail: HTTP ' . $requesterDetail['status']
+                . ', feature app.log tail:\n' . t12s_clone_log_tail($privacyApp));
         }
         if ($agentDetail['status'] !== 200 || !str_contains($agentDetail['body'], $internalBody)) {
-            t12s_fail('14-internal-note missing from assigned agent detail: HTTP ' . $agentDetail['status']);
+            t12s_fail('14-internal-note missing from assigned agent detail: HTTP ' . $agentDetail['status']
+                . ', feature app.log tail:\n' . t12s_clone_log_tail($privacyApp));
         }
 
         $requesterDownload = t12s_http(
