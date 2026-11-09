@@ -29,6 +29,14 @@ if ($page === 'ticket') {
     $detailReturnParams = [];
     if (isset($detailReturnAllowed[$detailReturnWorkspace]) && $detailReturnAllowed[$detailReturnWorkspace]) {
         $detailReturnParams['workspace'] = $detailReturnWorkspace;
+        $requestedReturnPage = (string) ($_GET['return_page'] ?? '');
+        if ($detailReturnWorkspace === 'agent' && $requestedReturnPage === 'queue'
+            && user_can($user, 'queue.view')) {
+            $detailReturnParams['page'] = 'queue';
+        } elseif ($detailReturnWorkspace === 'supervisor' && $requestedReturnPage === 'supervisor'
+            && user_can($user, 'supervisor.panel')) {
+            $detailReturnParams['page'] = 'supervisor';
+        }
         if ($detailReturnWorkspace === 'agent') {
             $requestedReturnAgentView = (string) ($_GET['agent_view'] ?? 'mine');
             $detailReturnParams['agent_view'] = $requestedReturnAgentView === 'team'
@@ -394,8 +402,10 @@ if ($page === 'ticket') {
     // Preserve the originating workspace/filter context across every lifecycle POST.
     // The POST handler re-validates all values and the workspace permission.
     $postReturnContext = $detailReturnParams;
-    unset($postReturnContext['workspace']);
-    echo '<script>(function(){var context=' . json_encode($postReturnContext, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';document.querySelectorAll("form").forEach(function(form){if((form.method||"get").toLowerCase()!=="post")return;Object.keys(context).forEach(function(key){var input=document.createElement("input");input.type="hidden";input.name="rc_return_"+key;input.value=String(context[key]);form.appendChild(input);});var workspace=document.createElement("input");workspace.type="hidden";workspace.name="rc_return_workspace";workspace.value=' . json_encode($detailReturnWorkspace, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';form.appendChild(workspace);});})();</script>';
+    unset($postReturnContext['workspace'], $postReturnContext['page'], $postReturnContext['return_page']);
+    $postReturnOriginPage = in_array((string) ($detailReturnParams['page'] ?? ''), ['queue', 'supervisor'], true)
+        ? (string) $detailReturnParams['page'] : '';
+    echo '<script>(function(){var context=' . json_encode($postReturnContext, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';document.querySelectorAll("form").forEach(function(form){if((form.method||"get").toLowerCase()!=="post")return;Object.keys(context).forEach(function(key){var input=document.createElement("input");input.type="hidden";input.name="rc_return_"+key;input.value=String(context[key]);form.appendChild(input);});var workspace=document.createElement("input");workspace.type="hidden";workspace.name="rc_return_workspace";workspace.value=' . json_encode($detailReturnWorkspace, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';form.appendChild(workspace);var origin=document.createElement("input");origin.type="hidden";origin.name="rc_return_origin_page";origin.value=' . json_encode($postReturnOriginPage, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';form.appendChild(origin);});})();</script>';
     render_footer();
     exit;
 }
