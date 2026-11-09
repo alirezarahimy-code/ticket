@@ -73,7 +73,11 @@ function request_center_post_error(Throwable $exception, string $page): never
         'bulk_update_tickets' => 'request-center.php?page=queue&queue='
             . rawurlencode(in_array((string) ($_POST['rc_return_queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], true)
                 ? (string) $_POST['rc_return_queue'] : 'all')
-            . '&p=' . max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1))),
+            . '&p=' . max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1)))
+            . (trim((string) ($_POST['rc_return_q'] ?? '')) !== '' ? '&q=' . rawurlencode(substr((string) $_POST['rc_return_q'], 0, 100)) : '')
+            . (in_array((string) ($_POST['rc_return_status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], true) ? '&status=' . rawurlencode((string) $_POST['rc_return_status']) : '')
+            . (in_array((string) ($_POST['rc_return_priority'] ?? ''), ['normal', 'urgent', 'critical'], true) ? '&priority=' . rawurlencode((string) $_POST['rc_return_priority']) : '')
+            . (in_array((string) ($_POST['rc_return_service_group'] ?? ''), ['it', 'support'], true) ? '&service_group=' . rawurlencode((string) $_POST['rc_return_service_group']) : ''),
         'supervisor_decision', 'supervisor_reopen', 'supervisor_assign_ticket' => $ticketId > 0
             ? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor',
         'save_rc_work_hours' => 'request-center.php?workspace=admin#sla-work-hours',
