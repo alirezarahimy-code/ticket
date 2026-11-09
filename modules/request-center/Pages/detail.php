@@ -316,12 +316,14 @@ if ($page === 'ticket') {
     $eventsQuery = db()->prepare('SELECT e.*, u.full_name FROM ticket_events e LEFT JOIN users u ON u.id = e.user_id WHERE ' . implode(' AND ', $eventConditions) . ' ORDER BY e.created_at DESC, e.id DESC LIMIT ' . $eventPageSize . ' OFFSET ' . $eventOffset);
     $eventsQuery->execute($eventParams);
     $ticketEvents = $eventsQuery->fetchAll();
+    $detailEventContext = $detailReturnParams;
+    unset($detailEventContext['page']);
     echo '<section class="card event-log"><div class="section-title"><div><h3>ردگیری و سوابق انجام کار</h3><p class="muted">' . number_format($eventTotal) . ' رخداد مطابق فیلتر؛ صفحه ' . number_format($eventPage) . ' از ' . number_format($eventPages) . '. جزئیات قابل‌مشاهده بر اساس سطح دسترسی پالایش می‌شود.</p></div></div>';
     echo '<form method="get" action="request-center.php" class="inline-form"><input type="hidden" name="page" value="ticket"><input type="hidden" name="id" value="' . (int) $ticket['id'] . '">';
     foreach ($detailReturnParams as $returnKey => $returnValue) {
         echo '<input type="hidden" name="' . e((string) $returnKey) . '" value="' . e((string) $returnValue) . '">';
     }
-    echo '<label>جست‌وجوی رویداد<input type="search" name="event_q" maxlength="100" value="' . e($eventSearch) . '" placeholder="نوع رویداد، وضعیت، توضیحات یا عامل"></label><button class="button secondary" type="submit">جست‌وجو</button>' . ($eventSearch !== '' ? '<a class="button secondary" href="request-center.php?' . e(http_build_query(array_merge(['page' => 'ticket', 'id' => (int) $ticket['id']], $detailReturnParams))) . '">پاک‌کردن</a>' : '') . '</form><div class="event-list">';
+    echo '<label>جست‌وجوی رویداد<input type="search" name="event_q" maxlength="100" value="' . e($eventSearch) . '" placeholder="نوع رویداد، وضعیت، توضیحات یا عامل"></label><button class="button secondary" type="submit">جست‌وجو</button>' . ($eventSearch !== '' ? '<a class="button secondary" href="request-center.php?' . e(http_build_query(array_merge(['page' => 'ticket', 'id' => (int) $ticket['id']], $detailEventContext))) . '">پاک‌کردن</a>' : '') . '</form><div class="event-list">';
     foreach ($ticketEvents as $event) {
         $eventText = ['created' => 'درخواست ثبت شد', 'assigned' => 'درخواست به کارشناس ارجاع شد', 'assignment_changed' => 'مسئول رسیدگی تغییر کرد', 'status_changed' => 'وضعیت درخواست تغییر کرد', 'reply' => 'پاسخ ثبت شد', 'internal_note' => 'یادداشت داخلی ثبت شد', 'claimed' => 'درخواست توسط کارشناس برداشته شد', 'rated' => 'امتیاز رضایت کاربر ثبت شد', 'reopened_by_user' => 'کاربر اعلام کرد مشکل حل نشده است', 'supervisor_approved' => 'تأیید نهایی و بسته‌شدن', 'supervisor_rework' => 'برگشت برای اصلاح توسط سوپروایزر', 'supervisor_reopened' => 'بازگشایی رسمی توسط سوپروایزر', 'cancelled_by_requester' => 'لغو مستقیم توسط ثبت‌کننده پیش از ارجاع', 'ticket_rejected' => 'رد درخواست پس از ارزیابی اولیه', 'cancellation_requested' => 'درخواست لغو در انتظار تصمیم مسئول', 'cancellation_approved' => 'تأیید لغو توسط مسئول رسیدگی', 'cancellation_rejected' => 'رد درخواست لغو و ادامهٔ رسیدگی', 'auto_assigned' => 'ارجاع خودکار به مسئول حوزه', 'auto_closed' => 'بسته‌شدن خودکار (بدون امتیاز کاربر)', 'sla_alert' => 'هشدار SLA ثبت شد', 'ola_alert' => 'هشدار OLA ثبت شد', 'bulk_status_changed' => 'تغییر وضعیت گروهی', 'priority_changed' => 'اولویت تغییر کرد'][$event['event_type']] ?? $event['event_type'];
         $eventDetails = json_decode((string) ($event['details'] ?? ''), true);
@@ -395,7 +397,7 @@ if ($page === 'ticket') {
     }
     if (!$ticketEvents) echo '<p class="muted">رخدادی با این عبارت پیدا نشد.</p>';
     if ($eventPages > 1) {
-        $eventBase = 'request-center.php?' . e(http_build_query(array_merge(['page' => 'ticket', 'id' => (int) $ticket['id']], $detailReturnParams, $eventSearch !== '' ? ['event_q' => $eventSearch] : []))) . '&amp;event_page=';
+        $eventBase = 'request-center.php?' . e(http_build_query(array_merge(['page' => 'ticket', 'id' => (int) $ticket['id']], $detailEventContext, $eventSearch !== '' ? ['event_q' => $eventSearch] : []))) . '&amp;event_page=';
         echo '<div class="actions">' . ($eventPage > 1 ? '<a class="button secondary" href="' . $eventBase . ($eventPage - 1) . '">رخدادهای قدیمی‌تر</a>' : '') . ($eventPage < $eventPages ? '<a class="button secondary" href="' . $eventBase . ($eventPage + 1) . '">رخدادهای جدیدتر</a>' : '') . '</div>';
     }
     echo '</div></section>';
