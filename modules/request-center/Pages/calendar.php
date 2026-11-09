@@ -702,6 +702,38 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
       </aside>
     </div>
 
+    <script id="rc-calendar-interactions">
+(function(){
+ var forms=Array.prototype.slice.call(document.querySelectorAll('form input[name^="rc_appointment_"]')).map(function(input){return input.form;}).filter(function(form,index,all){return form&&all.indexOf(form)===index;});
+ forms.forEach(function(form){
+  var create=form.querySelector('[name="rc_appointment_create"]');
+  var start=form.querySelector('[name="starts_at"]');
+  var end=form.querySelector('[name="ends_at"]');
+  var ticket=form.querySelector('[name="ticket_id"]');
+  var button=form.querySelector('button[type="submit"]');
+  if(start&&end){
+   var syncEnd=function(){
+    end.min=start.value||"";
+    if(start.value&&end.value&&end.value<=start.value){end.setCustomValidity("زمان پایان باید بعد از زمان شروع باشد.");}
+    else{end.setCustomValidity("");}
+   };
+   start.addEventListener("change",syncEnd);
+   end.addEventListener("change",syncEnd);
+  }
+  form.addEventListener("submit",function(event){
+   if(create){
+    if(ticket&&(!/^\\d+$/.test(ticket.value)||Number(ticket.value)<1)){event.preventDefault();ticket.setCustomValidity("شناسه درخواست باید عددی بزرگ‌تر از صفر باشد.");ticket.reportValidity();ticket.focus();return;}
+    if(ticket)ticket.setCustomValidity("");
+    if(start&&end){syncEnd();if(!form.reportValidity()){event.preventDefault();return;}}
+   }
+   if(form.querySelector('[name="rc_appointment_cancel"]')&&!window.confirm("این نوبت لغو شود؟")){event.preventDefault();return;}
+   if(button){button.disabled=true;button.textContent=create?"در حال ثبت نوبت…":"در حال ثبت…";}
+  });
+  if(ticket)ticket.addEventListener("input",function(){ticket.setCustomValidity("");});
+ });
+})();
+</script>
+
     <footer class="rc-footer">مرکز درخواست‌ها · تقویم شمسی کارشناسان — موعد SLA/OLA «خواندنی»، نوبت رسیدگی «کنشی» · چاپ صفحه برای تحویل شیفت مناسب است (@media print).</footer>
   </main>
 </div>
