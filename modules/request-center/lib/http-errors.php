@@ -40,6 +40,20 @@ function request_center_error_page(int $status, string $title, string $message, 
         $problemsHtml .= '<li>' . $escape($problem) . '</li>';
     }
     $problemsBlock = $problemsHtml !== '' ? "<ul class=\"rc-error-problems\">{$problemsHtml}</ul>" : '';
+    $fixBlock = '';
+    if ($status === 503) {
+        $fixBlock = '<div class="rc-error-fix">'
+            . '<h2>راهنمای رفع این خطا (۵ دقیقه)</h2>'
+            . '<ol>'
+            . '<li>قبل از هر چیز از پایگاه‌داده بکاپ بگیرید:<br><code>mariadb-dump --single-transaction --quick &lt;dbname&gt; | gzip &gt; rc-fix-backup-$(date +%F).sql.gz</code></li>'
+            . '<li>مهاجرت <code>migrations/035-request-center-appointments.sql</code> را دستی و یک&zwnj;باره اعمال کنید (idempotent؛ اجرای دوباره بی&zwnj;خطر است):<br><code>mariadb &lt;dbname&gt; &lt; migrations/035-request-center-appointments.sql</code></li>'
+            . '<li>سپس فقط همین ردیف را در جدول registry ثبت کنید:<br><code>INSERT IGNORE INTO schema_updates (version, migration) VALUES (\'1.63\', \'035-request-center-appointments.sql\');</code></li>'
+            . '<li>اگر پیش&zwnj;تر نسخهٔ قدیمی ۰۳۵ در <code>schema_updates</code> ثبت شده بود، ابتدا آن را پاک کنید و فایل ادغام&zwnj;شده را اعمال کنید:<br><code>DELETE FROM schema_updates WHERE migration = \'035-request-center-appointments.sql\';</code><br>یا مستقیم همان فایل را دستی اجرا کنید (مرحلهٔ ۲ کافی است و ثبت در مرحلهٔ ۳ اثبات می&zwnj;کند).</li>'
+            . '<li>صفحه را دوباره بارگذاری کنید. اگر باز هم ۵۰۳ گرفتید، ستون&zwnj;های <code>tickets.rejected_at</code> و جدول <code>request_center_appointments</code> را در دیتابیس بررسی کنید و با مدیر سامانه تماس بگیرید.</li>'
+            . '</ol>'
+            . '<p class="rc-error-fix-note">این خطا عمداً هیچ تغییری در پایگاه‌داده ایجاد نمی&zwnj;کند؛ اعمال مهاجرت فقط با دستور صریح شما انجام می&zwnj;شود.</p>'
+            . '</div>';
+    }
 
     echo '<!doctype html>'
         . '<html lang="fa" dir="rtl"><head><meta charset="utf-8">'
@@ -54,12 +68,18 @@ function request_center_error_page(int $status, string $title, string $message, 
         . '.rc-error-problems{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 26px;color:#7f1d1d;margin:0 0 16px;line-height:1.9}'
         . 'a{display:inline-block;background:#1d4ed8;color:#fff;text-decoration:none;padding:9px 18px;border-radius:9px}'
         . 'a:hover{background:#1e40af}'
+        . '.rc-error-fix{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin:0 0 16px;color:#573a06;font-size:13px;line-height:2}'
+        . '.rc-error-fix h2{font-size:14px;margin:0 0 8px;color:#92400e}'
+        . '.rc-error-fix ol{margin:0;padding-inline-start:20px}'
+        . '.rc-error-fix code{display:inline-block;background:#fff;border:1px solid #fcd34d;border-radius:6px;padding:2px 7px;font-size:11px;direction:ltr;unicode-bidi:embed;margin:2px 0}'
+        . '.rc-error-fix-note{margin:10px 0 0;font-size:11px;color:#92400e;border-top:1px dashed #f5d682;padding-top:8px}'
         . '</style></head><body>'
         . '<main class="rc-error-card" role="alert">'
         . '<p class="rc-error-code">خطای ' . $status . '</p>'
         . '<h1>' . $titleHtml . '</h1>'
         . '<p>' . $messageHtml . '</p>'
         . $problemsBlock
+        . $fixBlock
         . '<a href="request-center.php">بازگشت به مرکز درخواست‌ها</a>'
         . '</main></body></html>';
     exit;

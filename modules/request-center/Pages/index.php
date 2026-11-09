@@ -130,60 +130,37 @@ if ($ticketId > 0) {
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Cache-Control: private, no-store');
-
-?><!doctype html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>مرکز درخواست‌ها</title>
+?>
+<?php
+// پوستهٔ مرکزی سامانه (render_header) + ناوبری ماژول؛ تم سراسری اعمال می‌شود.
+$__rcRender = dirname(__DIR__, 3) . '/lib/render.php';
+if (is_file($__rcRender)) { require_once $__rcRender; }
+render_header('مرکز درخواست‌ها — ' . $workspaceTitle, $user);
+?>
+<div class="rc-page">
 <style>
-:root{color-scheme:light;--ink:#172b4d;--muted:#66758b;--line:#e4eaf1;--surface:#fff;--canvas:#f4f7fb;--brand:#2459a6;--soft:#edf4ff}
-*{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink);font-family:Tahoma,"Segoe UI",sans-serif;line-height:1.8}
-a{color:var(--brand);text-decoration:none}a:hover{text-decoration:underline}
-header{background:#fff;border-bottom:1px solid var(--line)}.bar{max-width:1180px;margin:auto;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}.workspace-nav{max-width:1180px;margin:auto;padding:0 22px 12px;display:flex;gap:8px;flex-wrap:wrap}.workspace-nav a{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--muted);font-size:13px}.workspace-nav a.active{background:var(--soft);border-color:#bfd5f2;color:var(--brand);font-weight:700}
-.brand{font-size:19px;font-weight:700}.bar small{color:var(--muted)}main{max-width:1180px;margin:28px auto;padding:0 22px}
-.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px}.heading h1{font-size:25px;margin:0}.heading p{margin:4px 0 0;color:var(--muted)}
-.button{display:inline-flex;align-items:center;justify-content:center;padding:9px 15px;border-radius:9px;background:var(--brand);color:#fff;font-weight:700}.button.secondary{background:#fff;color:var(--brand);border:1px solid var(--line)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 14px #17365d0a;overflow:hidden}
-.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 15px;text-align:right;border-bottom:1px solid var(--line);vertical-align:middle}.table th{background:#f8fafd;color:var(--muted);font-size:12px}.table tr:last-child td{border-bottom:0}
-.subject{font-weight:700;color:var(--ink)}.meta{display:block;color:var(--muted);font-size:12px}.status,.priority{display:inline-block;border-radius:30px;padding:2px 9px;background:var(--soft);font-size:12px;white-space:nowrap}.priority{background:#fff5e8;color:#89520a}
-.empty{padding:44px 20px;text-align:center;color:var(--muted)}.pagination{display:flex;gap:7px;justify-content:center;padding:18px}.pagination a,.pagination span{padding:5px 11px;border:1px solid var(--line);border-radius:7px;background:#fff}.pagination .current{background:var(--brand);color:#fff}
-.detail-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px}.conversation,.sidebar{padding:18px}.message{padding:14px 0;border-bottom:1px solid var(--line)}.message:last-child{border-bottom:0}.message-head{display:flex;justify-content:space-between;gap:12px}.message-head small,.muted{color:var(--muted)}.message-body{white-space:pre-wrap;overflow-wrap:anywhere}.internal{background:#fff9e9;border-radius:9px;padding:12px;margin:8px 0}
-dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:var(--muted)}dd{margin:0;font-weight:600;overflow-wrap:anywhere}
-.notice{padding:13px 16px;margin-bottom:16px;background:#eef5ff;border:1px solid #d7e6fb;border-radius:10px;color:#27476f}
- .workspace-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.workspace-metric{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.workspace-metric strong{display:block;font-size:23px}.workspace-metric span{font-size:12px;color:var(--muted)}@media(max-width:700px){.workspace-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
- .deadline{display:inline-flex;flex-direction:column;gap:1px;white-space:nowrap;font-size:11px}.deadline b{font-weight:700}.deadline small{font-size:10px}.deadline-late{color:#b42318}.deadline-soon{color:#9a6700}.deadline-paused,.deadline-empty{color:var(--muted)}.deadline-normal{color:#276749}
-@media(max-width:780px){.heading{align-items:flex-start;flex-direction:column}.detail-grid{grid-template-columns:1fr}.table th:nth-child(3),.table td:nth-child(3){display:none}.table th,.table td{padding:10px 8px;font-size:12px}}
-
-/* Requester and agent workspace refinements */
-header{position:sticky;top:0;z-index:15;box-shadow:0 3px 14px rgba(23,43,77,.045)}
-.workspace-nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
-.workspace-nav a{white-space:nowrap;text-decoration:none}
-.heading h1{line-height:1.45;letter-spacing:-.25px}
-.heading p{font-size:13px}
-.button{min-height:38px;border:1px solid var(--brand);font-size:12px;transition:background .15s,border-color .15s,transform .15s}
-.button:hover{background:#19477f;color:#fff;text-decoration:none;transform:translateY(-1px)}
-.button.secondary:hover{background:#f4f8fe;color:var(--brand);border-color:#c8d8ec}
-.workspace-metric{box-shadow:0 3px 12px rgba(23,43,77,.035);min-width:0}
-.workspace-metric strong{font-variant-numeric:tabular-nums}
-.card{min-width:0}
-.table{min-width:760px}
-.table th{white-space:nowrap}
-.table td{overflow-wrap:anywhere}
-.table tbody tr:hover{background:#f8fbff}
-.subject{display:inline-block;max-width:420px;line-height:1.7}
-.pagination{flex-wrap:wrap}
-@media(max-width:780px){main{margin:18px auto;padding:0 14px}.bar{padding:12px 14px}.workspace-nav{padding:0 14px 10px}.heading{gap:10px}.heading h1{font-size:21px}.table th,.table td{font-size:11px}.table th:nth-child(3),.table td:nth-child(3){display:table-cell}}
-@media(max-width:480px){.workspace-metrics{gap:7px}.workspace-metric{padding:10px}.workspace-metric strong{font-size:20px}.bar .button{padding:7px 10px;font-size:11px}.subject{max-width:260px}}
-
+.rc-workspace-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
+.rc-workspace-tabs a{padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--white,#fffdf8);color:var(--muted);font-size:13px;font-weight:600}
+.rc-workspace-tabs a:hover{border-color:var(--navy-2);color:var(--navy-2);text-decoration:none}
+.rc-workspace-tabs a.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.workspace-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}
+.workspace-metric{background:var(--white,#fffdf8);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.workspace-metric strong{display:block;font-size:23px;font-variant-numeric:tabular-nums}
+.workspace-metric span{font-size:12px;color:var(--muted)}
+@media(max-width:700px){.workspace-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.deadline{display:inline-flex;flex-direction:column;gap:1px;white-space:nowrap;font-size:11px}
+.deadline b{font-weight:700}.deadline small{font-size:10px}
+.deadline-late{color:#b42318}.deadline-soon{color:#9a6700}.deadline-paused,.deadline-empty{color:var(--muted)}.deadline-normal{color:#276749}
+.deadline-badge.danger{color:#b42318;font-weight:700}.deadline-badge.warn{color:#9a6700;font-weight:700}
+.rc-breach-alert-item{display:block;border:1px solid #f3c1bb;background:#fff5f5;border-radius:10px;padding:8px 10px;margin:6px 0;font-size:12px}
+.heading{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+.heading h1{font-size:25px;margin:0}.heading p{margin:4px 0 0;color:var(--muted)}
+.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 13px;text-align:right;border-bottom:1px solid var(--line);vertical-align:middle;font-size:12px}.table th{background:#faf7ec;color:var(--muted)}.table tr:last-child td{border-bottom:0}
+.subject{font-weight:700}.meta{display:block;color:var(--muted);font-size:12px}
+.empty{padding:44px 20px;text-align:center;color:var(--muted)}
+@media(max-width:780px){.heading{align-items:flex-start;flex-direction:column}.table td:nth-child(3){display:none}.table th:nth-child(3){display:none}}
 </style>
-</head>
-<body>
-<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escape($user['full_name'] ?? $user['username'] ?? '') ?></small></div><a class="button secondary" href="request-center.php">خانه مرکز درخواست‌ها</a></div>
-<?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $workspace === $key ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escape($key) ?>"><?= $escape($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
-</header>
-<main>
+<?php if (count($workspaceOptions) > 1): ?><nav class="rc-workspace-tabs" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $workspace === $key ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escape($key) ?>"><?= $escape($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 <?php request_center_render_flashes(); ?>
 <script src="modules/request-center/Assets/request-center.js" defer></script>
 <?php
@@ -302,13 +279,13 @@ $agentQueueFilterSuffix = $agentQueueFilterParams !== []
     : '';
 ?>
 <?php if ($workspace === 'agent' && user_can($user, 'queue.view')): ?>
-<nav class="workspace-nav" aria-label="نوع صف کارشناس">
+<nav class="rc-workspace-tabs" aria-label="نوع صف کارشناس">
 <a class="<?= $agentView === 'mine' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=mine">صف شخصی من</a>
 <a class="<?= $agentView === 'team' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=team">صف گروهی مجاز</a>
 </nav>
 <?php endif; ?>
 <?php if ($workspace === 'agent'): ?>
-<nav class="workspace-nav" aria-label="فیلتر صف عملیاتی">
+<nav class="rc-workspace-tabs" aria-label="فیلتر صف عملیاتی">
 <?php
 $agentQueueLabels = ['all' => 'همه', 'unassigned' => 'بدون مسئول', 'overdue' => 'خارج از SLA/OLA', 'mine' => 'مسئول من', 'waiting_user' => 'انتظار کاربر', 'resolved' => 'حل‌شده', 'cancellation_requested' => 'درخواست لغو', 'cancelled' => 'لغوشده', 'rejected' => 'ردشده'];
 foreach ($agentQueueLabels as $queueKey => $queueLabel):
@@ -434,6 +411,5 @@ $metricItems = $workspace === 'requester'
  form.insertAdjacentElement('afterend',summary);
 })();
 </script>
-</main>
-</body>
-</html>
+</div>
+<?php render_footer(); ?>

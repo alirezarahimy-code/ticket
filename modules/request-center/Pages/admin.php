@@ -147,55 +147,41 @@ header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: same-origin');
 header('Cache-Control: private, no-store');
 ?>
-<!doctype html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>مدیریت مرکز درخواست‌ها</title>
+<?php
+$__rcRender = dirname(__DIR__, 3) . '/lib/render.php';
+if (is_file($__rcRender)) { require_once $__rcRender; }
+render_header('مدیریت مرکز درخواست‌ها', $user);
+?>
+<div class="rc-page rc-admin-page">
 <link rel="stylesheet" href="modules/request-center/Assets/request-center.css">
 <style>
 .rc-admin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
-.rc-admin-stat{background:#fff;border:1px solid #e4eaf1;border-radius:13px;padding:16px;min-width:0}
-.rc-admin-stat strong{display:block;font-size:27px;line-height:1.4;color:#172b4d}
-.rc-admin-stat span{color:#66758b;font-size:12px}
+.rc-admin-stat{background:var(--white,#fffdf8);border:1px solid var(--line);border-radius:13px;padding:16px;min-width:0;min-height:94px;box-shadow:0 3px 12px rgba(65,70,44,.06)}
+.rc-admin-stat strong{display:block;font-size:27px;line-height:1.4;font-variant-numeric:tabular-nums}
+.rc-admin-stat span{color:var(--muted);font-size:12px}
 .rc-admin-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:16px}
-.rc-admin-links{display:grid;gap:10px}
-.rc-admin-link{display:block;background:#fff;border:1px solid #e4eaf1;border-radius:12px;padding:14px 16px;color:#172b4d}
-.rc-admin-link b{display:block;margin-bottom:3px}.rc-admin-link small{color:#66758b}
-.rc-admin-table{width:100%;border-collapse:collapse}.rc-admin-table th,.rc-admin-table td{padding:11px 12px;text-align:right;border-bottom:1px solid #e4eaf1}
-.rc-admin-table th{font-size:12px;color:#66758b;background:#f8fafd}
+.rc-admin-layout>*{min-width:0}
+.rc-admin-links{display:grid;gap:10px;align-content:start}
+.rc-admin-link{display:block;background:var(--white,#fffdf8);border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-decoration:none;transition:border-color .15s,transform .15s,box-shadow .15s}
+.rc-admin-link b{display:block;margin-bottom:3px}.rc-admin-link small{color:var(--muted)}
+.rc-admin-link:hover{border-color:var(--navy-2);box-shadow:0 5px 16px rgba(65,70,44,.09);transform:translateY(-1px);text-decoration:none}
+.rc-admin-table{width:100%;border-collapse:collapse;min-width:620px}
+.rc-admin-table th,.rc-admin-table td{padding:11px 12px;text-align:right;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.rc-admin-table th{font-size:12px;color:var(--muted);background:#faf7ec;white-space:nowrap}
+.rc-admin-table tbody tr:hover{background:#f8fbfc}
+.rc-admin-page form label{display:grid;gap:5px;min-width:150px;font-size:12px;color:var(--muted)}
+.rc-admin-page form input:not([type=hidden]):not([type=checkbox]),.rc-admin-page form select,.rc-admin-page form textarea{max-width:100%;min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--white,#fffdf8);font:inherit;font-size:12px}
+.rc-admin-page form input:focus,.rc-admin-page form select:focus,.rc-admin-page form textarea:focus{outline:0;border-color:var(--navy-2);box-shadow:0 0 0 3px rgba(37,107,86,.14)}
+.rc-workspace-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
+.rc-workspace-tabs a{padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--white,#fffdf8);color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap;text-decoration:none}
+.rc-workspace-tabs a.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:20px;flex-wrap:wrap}
+.heading h1{font-size:23px;margin:0;line-height:1.45;letter-spacing:-.25px}
+.heading p{margin:4px 0 0;color:var(--muted)}
 @media(max-width:850px){.rc-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rc-admin-layout{grid-template-columns:1fr}}
 @media(max-width:480px){.rc-admin-grid{grid-template-columns:1fr 1fr}.rc-admin-stat strong{font-size:22px}}
-
-/* Admin workspace responsive and operational readability */
-header{position:sticky;top:0;z-index:15;box-shadow:0 3px 14px rgba(23,43,77,.045)}
-.workspace-nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
-.workspace-nav a{white-space:nowrap;text-decoration:none}
-.heading{align-items:center}
-.heading h1{line-height:1.45;letter-spacing:-.25px}
-.rc-admin-stat{box-shadow:0 3px 12px rgba(23,43,77,.035);min-height:94px}
-.rc-admin-stat strong{font-variant-numeric:tabular-nums}
-.rc-admin-layout>*{min-width:0}
-.rc-admin-links{align-content:start}
-.rc-admin-link{text-decoration:none;transition:border-color .15s,transform .15s,box-shadow .15s}
-.rc-admin-link:hover{border-color:#bfd3eb;box-shadow:0 5px 16px rgba(23,43,77,.07);transform:translateY(-1px);text-decoration:none}
-.rc-admin-table{min-width:620px}
-.rc-admin-table th{white-space:nowrap}
-.rc-admin-table td{overflow-wrap:anywhere}
-.rc-admin-table tbody tr:hover{background:#f8fbff}
-form label{display:grid;gap:5px;min-width:150px;font-size:12px;color:#53657d}
-form input:not([type=hidden]):not([type=checkbox]),form select,form textarea{max-width:100%;min-height:38px;padding:8px 10px;border:1px solid #dbe3ee;border-radius:8px;background:#fff;color:#172b4d;font:inherit;font-size:12px}
-form input:focus,form select:focus,form textarea:focus{outline:0;border-color:#6d98cc;box-shadow:0 0 0 3px rgba(36,89,166,.12)}
-@media(max-width:850px){main{margin:18px auto;padding:0 14px}.bar{padding:12px 14px}.workspace-nav{padding:0 14px 10px}.heading{align-items:flex-start;flex-direction:column}.heading h1{font-size:21px}.rc-admin-layout{gap:12px}.rc-admin-grid{gap:8px}}
-@media(max-width:480px){.rc-admin-stat{padding:11px;min-height:86px}.rc-admin-stat strong{font-size:21px}.rc-admin-stat span{font-size:11px}.rc-admin-grid{gap:7px}.rc-admin-link{padding:12px}}
-
 </style>
-</head>
-<body>
-<header><div class="bar"><div><div class="brand">مرکز درخواست‌ها</div><small><?= $escapeAdmin($user['full_name'] ?? $user['username'] ?? '') ?> · مدیریت اصلی ماژول</small></div><a class="button secondary" href="request-center.php">خانه مرکز درخواست‌ها</a><a class="button secondary" href="index.php">بازگشت به سامانه</a></div>
-<?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'admin' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeAdmin($key) ?>"><?= $escapeAdmin($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
-</header>
-<main>
+<?php if (count($workspaceOptions) > 1): ?><nav class="rc-workspace-tabs" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $key === 'admin' ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escapeAdmin($key) ?>"><?= $escapeAdmin($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 <?php request_center_render_flashes(); ?>
 <script src="modules/request-center/Assets/request-center.js" defer></script>
 <section class="heading"><div><h1>مدیریت مرکز درخواست‌ها</h1><p>نمای عملیاتی و میان‌برهای پیکربندی ماژول؛ دسترسی داده‌ها همچنان تابع سیاست دامنهٔ هسته است.</p></div><a class="button" href="request-center.php?page=new-ticket">ثبت درخواست</a></section>
@@ -391,4 +377,5 @@ form input:focus,form select:focus,form textarea:focus{outline:0;border-color:#6
  });
 })();
 </script>
-</main></body></html>
+</div>
+<?php render_footer(); ?>

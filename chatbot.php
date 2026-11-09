@@ -160,11 +160,8 @@ function chatbot_flow_step(array $flow, array $user, string $question): array
     }
     $subject = (string) ($flow['subject'] ?? '');
     unset($_SESSION['chatbot_flow']);
-    $link = [
-        'url' => 'request-center.php?page=new-ticket&' . http_build_query(['subject' => $subject, 'description' => mb_substr($question, 0, 5000, 'UTF-8')]),
-        'label' => 'ادامه و ثبت نهایی درخواست',
-    ];
-    return chatbot_reply($user, $question, 'متن درخواست آماده شد. با دکمهٔ زیر فرم ثبت درخواست باز می‌شود؛ نوع خدمت را انتخاب کنید و ثبت نهایی را بزنید.', true, null, 'ticket_create', 0.0, $link);
+    // مرکز درخواست‌ها سامانهٔ مستقلی است؛ بات سخنگو دیگر لینک مستقیم به صفحات آن نمی‌دهد.
+    return chatbot_reply($user, $question, 'متن درخواست آماده شد: ' . $subject . ' — ' . mb_substr($question, 0, 5000, 'UTF-8') . '\n\nاین متن را کپی کنید و برای ثبت نهایی به سامانهٔ «مرکز درخواست‌ها» مراجعه کنید.', true, null, 'ticket_create', 0.0, null);
 }
 
 /** شماره درخواست (مثل IT-00123) یا شناسهٔ عددی را از پرسش بیرون می‌کشد. */
@@ -334,10 +331,7 @@ function chatbot_answer(string $question, array $user): array
         } else {
             $cancelAnswer = 'چون درخواست ارجاع شده یا رسیدگی در جریان است، ثبت‌کننده می‌تواند درخواست لغو را با ذکر دلیل ثبت کند؛ تا تصمیم مسئول همان حوزه، گفت‌وگو ادامه دارد اما تغییر وضعیت و ارجاع متوقف است. ' . chatbot_ticket_line($cancelRow);
         }
-        $cancelLink = $cancelRow
-            ? ['url' => 'request-center.php?page=ticket&id=' . (int) $cancelRow['id'], 'label' => 'بازکردن جزئیات درخواست']
-            : ['url' => 'index.php', 'label' => 'رفتن به فهرست درخواست‌ها'];
-        return chatbot_reply($user, $question, $cancelAnswer, true, null, 'ticket_cancellation', 0.0, $cancelLink);
+        return chatbot_reply($user, $question, $cancelAnswer . ' برای پیگیری، به سامانهٔ «مرکز درخواست‌ها» مراجعه کنید.', true, null, 'ticket_cancellation', 0.0, null);
     }
 
     $ref = chatbot_ticket_ref($question);
@@ -347,8 +341,8 @@ function chatbot_answer(string $question, array $user): array
         $answer = $row
             ? 'وضعیت درخواست ' . chatbot_ticket_line($row)
             : 'درخواستی با این شماره پیدا نشد یا دسترسی شما به آن ندارد. شماره را دقیق از روی پیامک یا فرم درخواست کپی کنید.';
-        $link = $row ? ['url' => 'request-center.php?page=ticket&id=' . (int) $row['id'], 'label' => 'مشاهدهٔ جزئیات درخواست'] : null;
-        return chatbot_reply($user, $question, $answer, true, null, 'ticket_status', 0.0, $link);
+        $answer .= ' برای دیدن جزئیات به سامانهٔ «مرکز درخواست‌ها» مراجعه کنید.';
+        return chatbot_reply($user, $question, $answer, true, null, 'ticket_status', 0.0, null);
     }
 
     // «چطور ثبت درخواست کنم؟» یک سؤال راهنما است؛ فقط درخواست مستقیم فرایند ثبت را شروع می‌کند.
@@ -3400,9 +3394,6 @@ function chatbot_render_widget(?array $user): string
         if (j.link) {
           var lk = document.createElement("a"); lk.href = j.link.url; lk.textContent = j.link.label;
           lk.style.display = "inline-block"; lk.style.marginTop = "6px"; pending.appendChild(lk);
-        } else if (!j.matched && j.can_ticket) {
-          var a = document.createElement("a"); a.href = "request-center.php?page=new-ticket"; a.textContent = "ثبت درخواست جدید";
-          a.style.display = "inline-block"; a.style.marginTop = "6px"; pending.appendChild(a);
         }
       }
     }).catch(function(){ pending.textContent = "ارتباط با سرور برقرار نشد. دوباره تلاش کنید."; });

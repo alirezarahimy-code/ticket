@@ -402,8 +402,15 @@ if ($page === 'ticket') {
     }
     if ($canManageTicket && $handlerLevel !== '' && !$cancelHasRequest
         && !in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
-        $dueInputValue = !empty($ticket['due_at']) ? date('Y-m-d\TH:i', strtotime((string) $ticket['due_at'])) : '';
-        echo '<div class="card detail-card"><h3>تغییر موعد پاسخ/حل</h3><p class="muted">مهلت فعلی: ' . e(!empty($ticket['due_at']) ? persian_date((string) $ticket['due_at']) : 'ثبت نشده') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="update_due_date"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>مهلت جدید<input type="datetime-local" name="due_at" required value="' . e($dueInputValue) . '"></label><label>دلیل تغییر (الزامی؛ برای ثبت‌کننده قابل مشاهده است)<textarea name="due_note" required maxlength="1000" rows="2" placeholder="مثلاً: منتظر تهیهٔ قطعات از انبار هستیم؛ پیمانکار ۱۲ آبان اعلام کرد"></textarea></label><button class="button secondary" type="submit">ذخیرهٔ مهلت</button></form></div>';
+        $dueDateJalaliValue = '';
+        $dueTimeValue = '';
+        if (!empty($ticket['due_at'])) {
+            $dueTs = strtotime((string) $ticket['due_at']);
+            [$dueJy, $dueJm, $dueJd] = gregorian_to_jalali((int) date('Y', $dueTs), (int) date('n', $dueTs), (int) date('j', $dueTs));
+            $dueDateJalaliValue = sprintf('%04d/%02d/%02d', $dueJy, $dueJm, $dueJd);
+            $dueTimeValue = date('H:i', $dueTs);
+        }
+        echo '<div class="card detail-card"><h3>تغییر موعد پاسخ/حل</h3><p class="muted">مهلت فعلی: ' . e(!empty($ticket['due_at']) ? persian_date((string) $ticket['due_at']) : 'ثبت نشده') . '</p><form method="post">' . csrf_field() . '<input type="hidden" name="action" value="update_due_date"><input type="hidden" name="ticket_id" value="' . (int) $ticket['id'] . '"><label>مهلت جدید<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px"><div class="jalali-picker" data-jalali-picker style="flex:1;min-width:150px"><input data-jalali-input name="due_date_jalali" value="' . e($dueDateJalaliValue) . '" placeholder="۱۴۰۵/۰۱/۰۱" required data-required-label="تاریخ مهلت" autocomplete="off"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div><input type="time" name="due_time" required value="' . e($dueTimeValue) . '" style="width:120px" aria-label="ساعت مهلت"></div></label><label>دلیل تغییر (الزامی؛ برای ثبت‌کننده قابل مشاهده است)<textarea name="due_note" required maxlength="1000" rows="2" placeholder="مثلاً: منتظر تهیهٔ قطعات از انبار هستیم؛ پیمانکار ۱۲ آبان اعلام کرد"></textarea></label><button class="button secondary" type="submit">ذخیرهٔ مهلت</button></form></div>';
     }
     if ($canAgentTransfer) {
         $transferCandidates = array_values(array_filter($agents ?? [], static fn ($candidate): bool => (int) $candidate['id'] !== (int) ($ticket['assigned_to'] ?? 0)));

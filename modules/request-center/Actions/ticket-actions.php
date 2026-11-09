@@ -1038,8 +1038,25 @@ if (!defined('APP_ROOT')) {
             if (!empty($ticket['cancel_requested_at'])) {
                 throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا آن را تأیید یا رد کنید.');
             }
+            // ورودی جدید: تاریخ شمسی (تقویم شمسی صفحه) + ساعت جدا؛ ورودی legacy «due_at» هم پشتیبانی می‌شود.
             $rawDue = trim((string) ($_POST['due_at'] ?? ''));
-            $parsed = $rawDue !== '' ? strtotime($rawDue) : false;
+            $dueDateJalali = trim((string) ($_POST['due_date_jalali'] ?? ''));
+            $dueTime = trim((string) ($_POST['due_time'] ?? ''));
+            if ($dueDateJalali !== '') {
+                $gregorian = jalali_input_to_gregorian($dueDateJalali);
+                if ($gregorian === null) {
+                    throw new RuntimeException('تاریخ مهلت واردشده معتبر نیست.');
+                }
+                if (!preg_match('/^([01]?\d|2[0-3]):[0-5]\d$/', $dueTime)) {
+                    throw new RuntimeException('ساعت مهلت واردشده معتبر نیست.');
+                }
+                [$dueHour, $dueMinute] = array_map('intval', explode(':', $dueTime));
+                $rawDue = sprintf('%s %02d:%02d:00', substr($gregorian, 0, 10), $dueHour, $dueMinute);
+            }
+            if ($rawDue === '') {
+                throw new RuntimeException('مهلت واردشده معتبر نیست.');
+            }
+            $parsed = strtotime($rawDue);
             if ($parsed === false || $parsed < strtotime('2020-01-01 00:00:00') || $parsed > strtotime('2100-01-01 00:00:00')) {
                 throw new RuntimeException('مهلت واردشده معتبر نیست.');
             }

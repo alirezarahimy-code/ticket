@@ -40,10 +40,13 @@ $rcActorId = (int) $user['id'];
 $rcReturn = 'request-center.php?workspace=' . rawurlencode($workspace)
     . '&calendar=1&agent_view=' . rawurlencode($agentView);
 
-$rcRedirect = static function (string $status, ?string $reason = null) use ($rcReturn): void {
+$rcRedirect = static function (string $status, ?string $reason = null, array $extra = []) use ($rcReturn): void {
     $url = $rcReturn . '&appointments=' . rawurlencode($status);
     if ($reason !== null && $reason !== '') {
         $url .= '&reason=' . rawurlencode($reason);
+    }
+    foreach ($extra as $key => $value) {
+        $url .= '&' . rawurlencode((string) $key) . '=' . rawurlencode((string) $value);
     }
     header('Location: ' . $url);
     exit;
@@ -176,102 +179,163 @@ if (isset($_POST['rc_appointment_complete'])) {
     $rcRedirect($result['ok'] ? 'completed' : 'error', $result['ok'] ? null : ($result['error'] ?? null));
 }
 
+/**
+ * Creates one appointment with the full guard chain. Returns:
+ *   ['ok' => bool, 'error' => ?string, 'id' => ?int, 'ticket' => ?array]
+ * Holiday/weekend lookup failure is fail-closed unless elevated + allow_outside_business.
+ * Notifications (assignee + requester) are sent on success.
+ */
+$rcCreateOne = static function (int $ticketId, string $startsRaw, string $endsRaw, string $kind, string $note, int $assigneeId, bool $outsideFlag) use ($repo, $user, $rcAppointments, $rcElevated, $rcActorId, $rcLog, $rcDatesBetween, $rcHolidaysOn, $idempotency): array {
+    $ticket = $ticketId > 0 ? $repo->findVisible($ticketId, $user) : null;
+    if (!$ticket) {
+        return ['ok' => false, 'error' => 'درخواست پیدا نشد یا به حوزهٔ شما تعلق ندارد.', 'id' => null, 'ticket' => null];
+    }
+
+    // —— تعیین کارشناس مسئول (فقط مدیر می‌تواند برای دیگری ثبت کند) ——
+    if (!$rcElevated || $assigneeId <= 0) {
+        $assigneeId = $rcActorId;
+    } else {
+        $targetStmt = db()->prepare('SELECT role, is_active FROM users WHERE id = ? LIMIT 1');
+        $targetStmt->execute([$assigneeId]);
+        $targetRow = $targetStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$targetRow
+            || (int) ($targetRow['is_active'] ?? 0) !== 1
+            || !in_array((string) ($targetRow['role'] ?? ''), AppointmentRepository::assignableRoleCodes(), true)) {
+            return ['ok' => false, 'error' => 'کارشناس هدف معتبر نیست (حساب باید فعال و عضو نقش‌های رسیدگی باشد).', 'id' => null, 'ticket' => $ticket];
+        }
+    }
+
+    $startsAt = AppointmentRepository::normalizeDateTime($startsRaw);
+    $endsAt = AppointmentRepository::normalizeDateTime($endsRaw);
+    if ($startsAt === null || $endsAt === null) {
+        return ['ok' => false, 'error' => 'زمان شروع/پایان را کامل و معتبر وارد کنید.', 'id' => null, 'ticket' => $ticket];
+    }
+
+    // —— نگهبان تعطیلات و آخرهفته (Fail-closed) ——
+    $business = function_exists('sla_business_hours') ? sla_business_hours() : ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
+    $weekendIso = array_map('intval', (array) ($business['weekend'] ?? [4, 5]));
+    $rangeDays = $rcDatesBetween(substr($startsAt, 0, 10), substr($endsAt, 0, 10));
+    $holidays = $rcHolidaysOn($rangeDays);
+    if (!empty($GLOBALS['rc_holidays_lookup_failed'])) {
+        $elevatedAllows = $rcElevated && $outsideFlag;
+        if (!$elevatedAllows) {
+            $rcLog('rc_appointment_create', 'denied', ['ticket_id' => $ticketId, 'reason' => 'holiday lookup failed']);
+            return ['ok' => false, 'error' => 'بررسی جدول تعطیلات ممکن نشد؛ نوبت ثبت نشد. با مدیر سامانه هماهنگ کنید.', 'id' => null, 'ticket' => $ticket];
+        }
+        $rcLog('rc_appointment_create', 'warning', ['ticket_id' => $ticketId, 'reason' => 'holiday lookup failed', 'elevated_override' => true]);
+    }
+    $outsideProblems = [];
+    foreach ($rangeDays as $day) {
+        if (isset($holidays[$day])) {
+            $outsideProblems[] = $day . ' (تعطیل: ' . $holidays[$day] . ')';
+            continue;
+        }
+        $isoDay = (int) date('N', strtotime($day));
+        if (in_array($isoDay, $weekendIso, true)) {
+            $outsideProblems[] = $day . ' (تعطیل هفتگی)';
+        }
+    }
+    if ($outsideProblems !== [] && (!$rcElevated || !$outsideFlag)) {
+        return ['ok' => false, 'error' => 'این بازه بیرون از تقویم کاری شماست: ' . implode('، ', array_slice($outsideProblems, 0, 3)) . '.', 'id' => null, 'ticket' => $ticket];
+    }
+
+    $result = $rcAppointments->create($ticketId, $assigneeId, $startsAt, $endsAt, $kind, $note, $rcActorId, ($rcElevated && $outsideFlag));
+    $rcLog('rc_appointment_create', $result['ok'] ? 'ok' : 'denied', [
+        'ticket_id' => $ticketId,
+        'assignee_id' => $assigneeId,
+        'appointment_id' => $result['id'] ?? null,
+    ]);
+    if (!$result['ok']) {
+        return ['ok' => false, 'error' => $result['error'] ?? 'ثبت نوبت انجام نشد.', 'id' => null, 'ticket' => $ticket];
+    }
+
+    // —— اعلان‌ها (کارشناس مسئول + ثبت‌کنندهٔ درخواست) ——
+    $apptId = (int) ($result['id'] ?? 0);
+    try {
+        if ($assigneeId !== $rcActorId && function_exists('notify_user')) {
+            notify_user($assigneeId, 'appointment_created', 'نوبت رسیدگی جدید',
+                'نوبتی برای شما روی درخواست ' . (string) ($ticket['ticket_no'] ?? ('#' . $ticketId)) . ' ثبت شد: ' . substr($startsAt, 0, 10) . ' — ' . substr($startsAt, 11, 5) . ' تا ' . substr($endsAt, 11, 5) . '.',
+                $ticketId, $idempotency($apptId . '|created|' . $assigneeId));
+        }
+        $requesterId = isset($ticket['requester_id']) ? (int) $ticket['requester_id'] : 0;
+        if ($requesterId > 0 && $requesterId !== $rcActorId && $requesterId !== $assigneeId && function_exists('notify_user')) {
+            notify_user($requesterId, 'appointment_created', 'نوبت رسیدگی روی درخواست شما ثبت شد',
+                'برای درخواست ' . (string) ($ticket['ticket_no'] ?? ('#' . $ticketId)) . ' نوبتی ثبت شد: ' . substr($startsAt, 0, 10) . ' ساعت ' . substr($startsAt, 11, 5) . '.',
+                $ticketId, $idempotency($apptId . '|created|requester|' . $requesterId));
+        }
+    } catch (Throwable) {}
+
+    return ['ok' => true, 'error' => null, 'id' => $apptId, 'ticket' => $ticket];
+};
+
+$rcKindFromPost = static function (): string {
+    $kind = (string) ($_POST['kind'] ?? 'work');
+    return isset(AppointmentRepository::KINDS[$kind]) ? $kind : 'work';
+};
+
+// ——— ثبت گروهی نوبت‌ها (نمای روز تقویم): یک تاریخ، چند درخواست ———
+if (isset($_POST['rc_appointment_create_batch'])) {
+    $date = trim((string) ($_POST['date'] ?? ''));
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || strtotime($date) === false) {
+        $rcRedirect('error', 'تاریخ روز نامعتبر است.');
+    }
+    $kind = $rcKindFromPost();
+    $note = trim((string) ($_POST['note'] ?? ''));
+    $assigneeId = (int) ($_POST['assignee_id'] ?? 0);
+    $outsideFlag = ((string) ($_POST['allow_outside_business'] ?? '')) === '1';
+
+    $picks = $_POST['pick'] ?? [];
+    $starts = $_POST['starts'] ?? [];
+    $ends = $_POST['ends'] ?? [];
+    if (!is_array($picks) || $picks === []) {
+        $rcRedirect('batch', null, ['ok' => 0, 'failed' => 0, 'empty' => 1]);
+    }
+    $pickIds = array_slice(array_keys($picks), 0, 50); // سقف سخت ۵۰ نوبت در یک بازهٔ ارسال
+    $okCount = 0;
+    $failedCount = 0;
+    foreach ($pickIds as $rawId) {
+        $ticketId = (int) $rawId;
+        if ($ticketId <= 0) {
+            $failedCount++;
+            continue;
+        }
+        $startRaw = is_array($starts) ? trim((string) ($starts[$rawId] ?? '')) : '';
+        $endRaw = is_array($ends) ? trim((string) ($ends[$rawId] ?? '')) : '';
+        $timeOk = static fn (string $t): bool => (bool) preg_match('/^([01]?\d|2[0-3]):[0-5]\d$/', $t);
+        if (!$timeOk($startRaw) || !$timeOk($endRaw)) {
+            $failedCount++;
+            $rcLog('rc_appointment_create_batch', 'denied', ['ticket_id' => $ticketId, 'reason' => 'invalid time format']);
+            continue;
+        }
+        [$sh, $sm] = array_map('intval', explode(':', $startRaw));
+        [$eh, $em] = array_map('intval', explode(':', $endRaw));
+        $startsAt = sprintf('%s %02d:%02d:00', $date, $sh, $sm);
+        $endsAt = sprintf('%s %02d:%02d:00', $date, $eh, $em);
+        $result = $rcCreateOne($ticketId, $startsAt, $endsAt, $kind, $note, $assigneeId, $outsideFlag);
+        if ($result['ok']) {
+            $okCount++;
+        } else {
+            $failedCount++;
+            $rcLog('rc_appointment_create_batch', 'denied', ['ticket_id' => $ticketId, 'reason' => (string) ($result['error'] ?? '')]);
+        }
+    }
+    $rcRedirect('batch', null, ['ok' => $okCount, 'failed' => $failedCount]);
+}
+
+// ——— ثبت تکی نوبت (فرم کلاسیک) ———
 if (!isset($_POST['rc_appointment_create'])) {
     $rcRedirect('error', 'درخواست نامعتبر است.');
 }
 
 $ticketId = (int) ($_POST['ticket_id'] ?? 0);
-$ticket = $ticketId > 0 ? $repo->findVisible($ticketId, $user) : null;
-if (!$ticket) {
-    $rcRedirect('error', 'درخواست پیدا نشد یا به حوزهٔ شما تعلق ندارد.');
-}
-
-$startsAt = AppointmentRepository::normalizeDateTime((string) ($_POST['starts_at'] ?? ''));
-$endsAt = AppointmentRepository::normalizeDateTime((string) ($_POST['ends_at'] ?? ''));
-$kind = (string) ($_POST['kind'] ?? 'work');
+$kind = $rcKindFromPost();
 $note = trim((string) ($_POST['note'] ?? ''));
-
 $assigneeId = (int) ($_POST['assignee_id'] ?? 0);
-if (!$rcElevated || $assigneeId <= 0) {
-    $assigneeId = $rcActorId;
-} else {
-    $targetStmt = db()->prepare('SELECT role, is_active FROM users WHERE id = ? LIMIT 1');
-    $targetStmt->execute([$assigneeId]);
-    $targetRow = $targetStmt->fetch(PDO::FETCH_ASSOC);
-    if (!$targetRow
-        || (int) ($targetRow['is_active'] ?? 0) !== 1
-        || !in_array((string) ($targetRow['role'] ?? ''), AppointmentRepository::assignableRoleCodes(), true)) {
-        $rcRedirect('error', 'کارشناس هدف معتبر نیست (حساب باید فعال و عضو نقش‌های رسیدگی باشد).');
-    }
-}
-
-if ($startsAt === null || $endsAt === null) {
-    $rcRedirect('error', 'زمان شروع/پایان را کامل و معتبر وارد کنید.');
-}
-
-// —— نگهبان تعطیلات و روزهای تعطیل هفتگی (از تقویم کاری/تعطیلات همین سامانه) ——
-$business = function_exists('sla_business_hours') ? sla_business_hours() : ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
-$weekendIso = array_map('intval', (array) ($business['weekend'] ?? [4, 5]));
-$rangeDays = $rcDatesBetween(substr($startsAt, 0, 10), substr($endsAt, 0, 10));
-$holidays = $rcHolidaysOn($rangeDays);
-// Fail-closed: اگر بررسی تعطیلات ممکن نشد، ثبت نوبت مجاز نیست (مدیر باید زیرساخت را درست کند یا با «ثبت حتی بیرون از تقویم کاری» ثبت کند).
-if (!empty($GLOBALS['rc_holidays_lookup_failed'])) {
-    $elevatedAllows = $rcElevated && ((string) ($_POST['allow_outside_business'] ?? '')) === '1';
-    if (!$elevatedAllows) {
-        $rcLog('rc_appointment_create', 'denied', ['ticket_id' => $ticketId, 'reason' => 'holiday lookup failed']);
-        $rcRedirect('error', 'بررسی جدول تعطیلات ممکن نشد؛ نوبت ثبت نشد. با مدیر سامانه هماهنگ کنید (مدیر می‌تواند با گزینهٔ «ثبت حتی بیرون از تقویم کاری/تعطیلات» ثبت کند).');
-    }
-    $rcLog('rc_appointment_create', 'warning', ['ticket_id' => $ticketId, 'reason' => 'holiday lookup failed', 'elevated_override' => true]);
-}
 $outsideFlag = ((string) ($_POST['allow_outside_business'] ?? '')) === '1';
-$weekendHits = [];
-foreach ($rangeDays as $day) {
-    $isoDay = (int) date('N', strtotime($day)); // 1=Mon … 7=Sun (ISO-8601, like sla_business_hours)
-    if (in_array($isoDay, $weekendIso, true)) {
-        $weekendHits[] = $day;
-    }
-}
-$outsideProblems = [];
-foreach ($rangeDays as $day) {
-    if (isset($holidays[$day])) {
-        $outsideProblems[] = $day . ' (تعطیل: ' . $holidays[$day] . ')';
-    }
-}
-foreach ($weekendHits as $day) {
-    $outsideProblems[] = $day . ' (تعطیل هفتگی)';
-}
-if ($outsideProblems !== []) {
-    if (!$rcElevated || !$outsideFlag) {
-        $rcRedirect('error', 'این بازه بیرون از تقویم کاری شماست: ' . implode('، ', array_slice($outsideProblems, 0, 3)) . '. ثبت روی این روزها مجاز نیست؛ مدیر می‌تواند با گزینهٔ «ثبت حتی بیرون از تقویم کاری/تعطیلات» انجام دهد.');
-    }
-}
 
-$result = $rcAppointments->create($ticketId, $assigneeId, $startsAt, $endsAt, $kind, $note, $rcActorId, ($rcElevated && $outsideFlag));
-$rcLog('rc_appointment_create', $result['ok'] ? 'ok' : 'denied', [
-    'ticket_id' => $ticketId,
-    'assignee_id' => $assigneeId,
-    'appointment_id' => $result['id'] ?? null,
-]);
-
+$result = $rcCreateOne($ticketId, (string) ($_POST['starts_at'] ?? ''), (string) ($_POST['ends_at'] ?? ''), $kind, $note, $assigneeId, $outsideFlag);
 if (!$result['ok']) {
-    $rcRedirect('error', $result['error'] ?? 'ثبت نوبت انجام نشد.');
-}
-
-if ($assigneeId !== $rcActorId && function_exists('notify_user')) {
-    $apptId = (int) ($result['id'] ?? 0);
-    try {
-        notify_user($assigneeId, 'appointment_created', 'نوبت رسیدگی جدید',
-            'نوبتی برای شما روی درخواست ' . (string) ($ticket['ticket_no'] ?? ('#' . $ticketId)) . ' ثبت شد: ' . substr($startsAt, 0, 10) . ' — ' . substr($startsAt, 11, 5) . ' تا ' . substr($endsAt, 11, 5) . '.',
-            $ticketId, $idempotency($apptId . '|created|' . $assigneeId));
-    } catch (Throwable) {}
-}
-$requesterId = isset($ticket['requester_id']) ? (int) $ticket['requester_id'] : 0;
-if ($requesterId > 0 && $requesterId !== $rcActorId && $requesterId !== $assigneeId && function_exists('notify_user')) {
-    try {
-        notify_user($requesterId, 'appointment_created', 'نوبت رسیدگی روی درخواست شما ثبت شد',
-            'برای درخواست ' . (string) ($ticket['ticket_no'] ?? ('#' . $ticketId)) . ' نوبتی ثبت شد: ' . substr($startsAt, 0, 10) . ' ساعت ' . substr($startsAt, 11, 5) . '.',
-            $ticketId, $idempotency((int) ($result['id'] ?? 0) . '|created|requester|' . $requesterId));
-    } catch (Throwable) {}
+    $rcRedirect('error', (string) ($result['error'] ?? 'ثبت نوبت انجام نشد.'));
 }
 
 $rcRedirect('created');

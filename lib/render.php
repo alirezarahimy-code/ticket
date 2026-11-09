@@ -124,11 +124,8 @@ function render_header(string $title, ?array $user = null): void
         $menuItems = [
             '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
         ];
-        // مرکز درخواست‌ها ورودی رسمی Workspaceهای RC است؛ مسیر قدیمی
-        // ثبت درخواست فقط به‌عنوان Bridge سازگاری حفظ می‌شود.
-        if (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user)) {
-            $menuItems[] = '<li>' . $menuLink('request-center.php', 'مرکز درخواست‌ها', 'ticket') . '</li>';
-        }
+        // مرکز درخواست‌ها سامانهٔ مستقلی است و در سامانهٔ اصلی هیچ اثری ندارد؛
+        // ورود به آن فقط از نشانی request-center.php انجام می‌شود.
         if (user_can($user, 'cddvd.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=cd-dvd', 'کنترل CD/DVD', 'disc') . '</li>';
         }

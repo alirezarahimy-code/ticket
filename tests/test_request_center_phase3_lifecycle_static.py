@@ -39,9 +39,12 @@ def test_attachment_and_report_endpoints_are_independent():
         page = source(path)
         assert "request-center.php?action=download_attachment" in page
         assert "index.php?action=download_attachment" not in page
-    # A system-home link is allowed; operational forms and data routes remain RC-owned.
-    assert 'href="index.php">بازگشت به سامانه' in source("modules/request-center/Pages/admin.php")
-    assert 'href="index.php">بازگشت به سامانه' in source("modules/request-center/Pages/supervisor-workspace.php")
+    # The module chrome owns the way back to the core system (navigation.php); operational forms remain RC-owned.
+    navigation = source("modules/request-center/lib/navigation.php")
+    assert 'href="index.php"' in navigation
+    assert "بازگشت به سامانهٔ اصلی" in navigation
+    assert 'href="index.php">بازگشت به سامانه' not in source("modules/request-center/Pages/admin.php")
+    assert 'href="index.php">بازگشت به سامانه' not in source("modules/request-center/Pages/supervisor-workspace.php")
     assert 'href="request-center.php?action=export_report' in source("modules/request-center/Pages/reports.php")
 
 
@@ -569,26 +572,22 @@ def test_independent_post_runner_establishes_authenticated_user_context():
     assert bootstrap < authenticated_user < provider_load < dispatch
     assert "Request Center POST failed [action=" in handler
 
-def test_ticket_notification_targets_use_the_independent_request_center_entry():
+def test_ticket_notification_targets_use_the_core_notifications_page():
+    # مرکز درخواست‌ها سامانهٔ مستقلی است و هیچ اثری در سامانهٔ اصلی ندارد؛
+    # اعلان تیکت از طریق صفحهٔ اعلان‌های هسته باز می‌شود.
     notifications = source("lib/notify-users.php")
-    assert "return 'request-center.php?page=ticket&id=' . (int) $notification['ticket_id'];" in notifications
-    assert "return 'index.php?page=ticket&id=' . (int) $notification['ticket_id'];" not in notifications
+    assert "return 'index.php?page=notifications';" in notifications
+    assert "return 'request-center.php?page=ticket&id=' . (int) $notification['ticket_id'];" not in notifications
 
 
-def test_new_internal_request_center_navigation_uses_the_independent_entry():
-    global_search = source("global-search.php")
-    governance = source("governance.php")
-    chatbot = source("chatbot.php")
-    app_js = source("assets/app.js")
-    for page in ("new-ticket", "queue", "supervisor", "services", "reports", "analytics"):
-        assert f"'url' => 'request-center.php?page={page}'" in global_search
-    assert 'href="request-center.php?page=queue"' in governance
-    assert 'href="request-center.php?page=supervisor"' in governance
-    assert "request-center.php?page=ticket&id=" in governance
-    assert "'url' => 'request-center.php?page=new-ticket&' . http_build_query(" in chatbot
-    assert "request-center.php?page=new-ticket" in chatbot
-    assert "request-center.php?page=ticket&id=" in chatbot
-    assert "request-center.php?page=ticket&id=' + encodeURIComponent(item.ticket_id)" in app_js
+def test_core_has_no_request_center_references():
+    # مرکز درخواست‌ها سامانهٔ مستقلی روی request-center.php است؛ سامانهٔ اصلی هیچ لینک/ارجاعی به آن ندارد.
+    # تنها «requires نامرئی» سمت سرور و پل ۳۰۲ اول index.php عمدی‌اند و توسط تست‌های دیگر پوشش داده می‌شوند.
+    for path in ("global-search.php", "governance.php", "chatbot.php", "assets/app.js", "lib/notify-users.php"):
+        assert "request-center.php" not in source(path)
+    # منوی ماژول در navigation.php است و خودش راه برگشت به سامانهٔ اصلی را دارد.
+    navigation = source("modules/request-center/lib/navigation.php")
+    assert 'href="index.php"' in navigation
 
 
 def test_request_center_schema_preflight_runs_before_optional_chatbot_provider():

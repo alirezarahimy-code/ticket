@@ -42,7 +42,8 @@ function notification_target_url(array $notification): string
             : 'index.php?page=dashboard#food-cancel-requests';
     }
     if (!empty($notification['ticket_id'])) {
-        return 'request-center.php?page=ticket&id=' . (int) $notification['ticket_id'];
+        // مرکز درخواست‌ها سامانهٔ مستقلی است؛ سامانهٔ اصلی فقط فهرست اعلان‌ها را نگه می‌دارد.
+        return 'index.php?page=notifications';
     }
     return 'index.php?page=notifications';
 }
