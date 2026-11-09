@@ -80,6 +80,7 @@ function request_center_post_error(Throwable $exception, string $page): never
         'create_ola_policy', 'update_ola_policy' => 'request-center.php?workspace=admin#ola-policies',
         'add_service', 'edit_service', 'delete_service', 'add_service_field',
         'save_service_category', 'delete_service_category' => 'request-center.php?page=services',
+        'add_knowledge' => 'index.php?page=knowledge',
         'add_asset_relation' => 'index.php?page=inventory&id=' . max(0, (int) ($_POST['source_asset_id'] ?? 0)),
         default => $ticketId > 0
             ? request_center_ticket_return_url($ticketId)
