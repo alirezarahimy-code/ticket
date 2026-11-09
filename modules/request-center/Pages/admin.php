@@ -27,6 +27,15 @@ $adminAuditQuery = db()->prepare(
 );
 $adminAuditQuery->execute($adminAuditParams);
 $adminAuditRows = $adminAuditQuery->fetchAll();
+// Configuration changes are stored in the central audit stream, not ticket_events.
+$adminConfigAuditQuery = db()->prepare(
+    'SELECT a.id, a.action_code, a.created_at, a.result, u.full_name AS actor_name '
+    . 'FROM activity_logs a LEFT JOIN users u ON u.id = a.user_id '
+    . "WHERE a.action_code IN ('request_center_work_hours_updated', 'ola_policy_created', 'ola_policy_updated') "
+    . 'ORDER BY a.created_at DESC, a.id DESC LIMIT 20'
+);
+$adminConfigAuditQuery->execute();
+$adminConfigAuditRows = $adminConfigAuditQuery->fetchAll(PDO::FETCH_ASSOC);
 $businessHours = function_exists('sla_business_hours')
     ? sla_business_hours()
     : ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
@@ -221,6 +230,22 @@ header('Cache-Control: private, no-store');
 <td><?= $escapeAdmin($adminAuditLabels[(string) $event['event_type']] ?? $event['event_type']) ?></td>
 <td><?= $escapeAdmin($event['actor_name'] ?: 'سامانه') ?></td>
 <td><?= $escapeAdmin($event['from_status'] ?: '—') ?> ← <?= $escapeAdmin($event['to_status'] ?: '—') ?></td>
+</tr>
+<?php endforeach; ?>
+</tbody></table></div>
+<?php endif; ?>
+</section>
+<section class="card" style="padding:16px;margin-top:18px" aria-labelledby="rc-admin-config-audit-title">
+<h2 id="rc-admin-config-audit-title">آخرین تغییرات پیکربندی مرکز درخواست‌ها</h2>
+<p class="muted">تغییرات تقویم کاری و سیاست‌های OLA از دفتر ثبت مرکزی خوانده می‌شوند؛ جزئیات فنی یا داده‌های حساس در این فهرست نمایش داده نمی‌شود.</p>
+<?php if (!$adminConfigAuditRows): ?><p class="muted">تغییر پیکربندی ثبت‌شده‌ای وجود ندارد.</p><?php else: ?>
+<div style="overflow-x:auto"><table class="rc-admin-table"><thead><tr><th>زمان</th><th>عملیات</th><th>عامل</th><th>نتیجه</th></tr></thead><tbody>
+<?php foreach ($adminConfigAuditRows as $event): ?>
+<tr>
+<td><?= $escapeAdmin($event['created_at']) ?></td>
+<td><?= $escapeAdmin($adminAuditLabels[(string) $event['action_code']] ?? $event['action_code']) ?></td>
+<td><?= $escapeAdmin($event['actor_name'] ?: 'سامانه') ?></td>
+<td><?= $escapeAdmin(['success' => 'موفق', 'failure' => 'ناموفق', 'denied' => 'ردشده', 'unknown' => 'نامشخص'][(string) $event['result']] ?? $event['result']) ?></td>
 </tr>
 <?php endforeach; ?>
 </tbody></table></div>
