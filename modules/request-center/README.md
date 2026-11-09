@@ -331,3 +331,21 @@ GETهای قدیمی index.php?page=... برای همین صفحات به ورو
 - فوکوس صفحه‌کلید با `:focus-visible` پررنگ است و `prefers-reduced-motion` احترام گذاشته می‌شود (`Assets/request-center.css`).
 - صفحات خطا (`lib/http-errors.php`) `role=alert` دارند و بدون چرام رندر می‌شوند.
 - حالت خالی (empty-state) و بارگذاری: جدول‌های فهرست پیام «درخواستی مطابق شرایط پیدا نشد» با دکمهٔ پاک‌کردن فیلتر دارند؛ در حال ارسالِ فرم‌ها به‌صورت بصری مشخص است.
+
+## مرز ماژول و هسته — bootstrap / lib (مرحلهٔ ۱)
+
+**آنچه ماژول از هسته می‌گیرد (و هیچ‌کدام را بازتعریف نمی‌کند):**
+- `bootstrap.php` هسته: ترتیب requireها (db، session، auth/permissions، settings، logging، notify، jalali) — ترتیب آن یخ‌زده (frozen) و تغییرش خارج از قلمرو ماژول است.
+- کتابخانه‌های مشترک هسته در `lib/`: `db-core`, `auth-scope` (ticket_scope), `tickets-sla` (sla/jalali), `http-input` (valid_choice, jalali_input_to_gregorian), `logging-csrf` (flash/csrf), `notify-users`, `activity-audit`, `render.php` (چرام: render_header/footer + `.alert` flash).
+- جدول‌های مشترک دیتابیس: `tickets`، `ticket_messages`، `ticket_attachments`، `ticket_events`، `ticket_sla_alerts`، `holidays`، `settings`، `activity_logs` و جدول‌های `service_catalog`/`categories` برای کاتالوگ.
+
+**آنچه مالک ماژول است (و هسته به آن منطق اضافه نمی‌کند):**
+- همهٔ منطق دامنهٔ درخواست: `RequestCenterRepository.php`، `WorkflowService.php`، `AppointmentRepository.php`، `lib/functions.php` (توابع دامنه؛ انتقال بایت‌به‌بایت یخ‌زده)، `lib/endpoints.php` (Excel)، `post-handler.php` + `Actions/*.php`، تمام `Pages/*.php`.
+- خطاهای خود ماژول: `lib/http-errors.php` (بدون هیچ وابستگی بیرونی) و `lib/html-feedback.php`.
+- دارایی‌های استاتیک ماژول: `Assets/request-center.css` و `Assets/request-center.js`.
+
+**قاعدهٔ وابستگی:** `bootstrap.php` ← تنها نقطهٔ اتصال محیط؛ `lib/` هسته فقط‌خواندنی برای ماژول؛ هیچ فایل ماژول مستقیماً فایل هسته را `require` نمی‌کند مگر از ورودی‌های رسمی (`request-center.php` / `Pages/index.php` / پل `index.php`). افزودن منطق جدید در پل `index.php` ممنوع است.
+
+**وضعیت دو مسیر UI:** یکدست‌سازی کامل است (جزئیات در `ERROR-HANDLING.md`): مسیر رسمی GET ماژول، پل 302 در هسته برای لینک‌های قدیمی (پین‌شده در تست‌ها)، POST تک‌مسیره از `post-handler.php`.
+
+**نکتهٔ استقلال اجرایی:** صفحهٔ «ثبت درخواست» تنها جایی است که سه ماژول دیگر (`organization.php`, `inventory.php`, `cd-dvd.php`) را به‌عنوان تأمین‌کنندهٔ فیلدهای فرم `require_once` می‌کند؛ در غیاب آن فایل‌ها، همان بلوک فقط رد و صفحه کار می‌کند (guard داخلی دارد).
