@@ -239,6 +239,17 @@ $queryString = http_build_query(array_merge($queryParams, array_filter($filters,
 $detailContextParams = array_merge($queryParams, array_filter($filters, static fn ($value): bool => $value !== ''));
 $detailContextParams['p'] = $page;
 ?>
+<?php
+$agentQueueFilterParams = array_filter([
+    'q' => $filters['q'],
+    'status' => $filters['status'],
+    'priority' => $filters['priority'],
+    'service_group' => $filters['service_group'],
+], static fn ($value): bool => $value !== '');
+$agentQueueFilterSuffix = $agentQueueFilterParams !== []
+    ? '&amp;' . $escape(http_build_query($agentQueueFilterParams))
+    : '';
+?>
 <?php if ($workspace === 'agent' && user_can($user, 'queue.view')): ?>
 <nav class="workspace-nav" aria-label="نوع صف کارشناس">
 <a class="<?= $agentView === 'mine' ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=mine">صف شخصی من</a>
@@ -252,7 +263,7 @@ $agentQueueLabels = ['all' => 'همه', 'unassigned' => 'بدون مسئول', '
 foreach ($agentQueueLabels as $queueKey => $queueLabel):
     if (!user_can($user, 'queue.view') && $queueKey !== 'mine') continue;
 ?>
-<a class="<?= $agentQueueName === $queueKey ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=<?= $escape($agentView) ?>&amp;queue=<?= $escape($queueKey) ?>"><?= $escape($queueLabel) ?></a>
+<a class="<?= $agentQueueName === $queueKey ? 'active' : '' ?>" href="request-center.php?workspace=agent&amp;agent_view=<?= $escape($agentView) ?>&amp;queue=<?= $escape($queueKey) ?><?= $agentQueueFilterSuffix ?>"><?= $escape($queueLabel) ?></a>
 <?php endforeach; ?>
 </nav>
 <?php endif; ?>
