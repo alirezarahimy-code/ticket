@@ -106,7 +106,7 @@ git -C <target> checkout <previous-release-tag-or-commit> && <redeploy/restart>
 ## ۸) پیوست: شواهد ساخت بستهٔ کاندید
 
 - مسیر: `downloads/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261109.zip`
-- SHA-256: (ثبت در فایل کناری `.sha256`؛ مقدار جدید پس از ساخت بستهٔ ادغام‌شده در پیوست change-report ثبت می‌شود)
+- SHA-256: `52257379aaa0ae58cd14444fdad8e8fe3c3a84ff1f5f2492a55713f05347d67b` (فایل کناری `.sha256` در همان پوشه)
 - اجزاء: `manifest.json` با `release_status=RC_CANDIDATE_NOT_FOR_PRODUCTION`، `migrations/035-request-center-appointments.sql` (واحد، ادغام‌شده؛ فایل ۰۳۷ جدا وجود ندارد)، VERSION (۱.۶۳) و مستندات معماری
 - توجه: `034` (Logging) و `036` (غذا) عمداً بیرون بسته‌اند.
 - ساخت و اعتبارسنجی لوکال: `python3 tools/build_rc_update.py` (CRC، مسیرهای امن، یکتایی مسیرها، تطبیق بایت‌به‌بایت manifest و sha256 هر فایل)
