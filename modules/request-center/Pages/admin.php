@@ -141,6 +141,29 @@ header('Cache-Control: private, no-store');
 .rc-admin-table th{font-size:12px;color:#66758b;background:#f8fafd}
 @media(max-width:850px){.rc-admin-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rc-admin-layout{grid-template-columns:1fr}}
 @media(max-width:480px){.rc-admin-grid{grid-template-columns:1fr 1fr}.rc-admin-stat strong{font-size:22px}}
+
+/* Admin workspace responsive and operational readability */
+header{position:sticky;top:0;z-index:15;box-shadow:0 3px 14px rgba(23,43,77,.045)}
+.workspace-nav{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}
+.workspace-nav a{white-space:nowrap;text-decoration:none}
+.heading{align-items:center}
+.heading h1{line-height:1.45;letter-spacing:-.25px}
+.rc-admin-stat{box-shadow:0 3px 12px rgba(23,43,77,.035);min-height:94px}
+.rc-admin-stat strong{font-variant-numeric:tabular-nums}
+.rc-admin-layout>*{min-width:0}
+.rc-admin-links{align-content:start}
+.rc-admin-link{text-decoration:none;transition:border-color .15s,transform .15s,box-shadow .15s}
+.rc-admin-link:hover{border-color:#bfd3eb;box-shadow:0 5px 16px rgba(23,43,77,.07);transform:translateY(-1px);text-decoration:none}
+.rc-admin-table{min-width:620px}
+.rc-admin-table th{white-space:nowrap}
+.rc-admin-table td{overflow-wrap:anywhere}
+.rc-admin-table tbody tr:hover{background:#f8fbff}
+form label{display:grid;gap:5px;min-width:150px;font-size:12px;color:#53657d}
+form input:not([type=hidden]):not([type=checkbox]),form select,form textarea{max-width:100%;min-height:38px;padding:8px 10px;border:1px solid #dbe3ee;border-radius:8px;background:#fff;color:#172b4d;font:inherit;font-size:12px}
+form input:focus,form select:focus,form textarea:focus{outline:0;border-color:#6d98cc;box-shadow:0 0 0 3px rgba(36,89,166,.12)}
+@media(max-width:850px){main{margin:18px auto;padding:0 14px}.bar{padding:12px 14px}.workspace-nav{padding:0 14px 10px}.heading{align-items:flex-start;flex-direction:column}.heading h1{font-size:21px}.rc-admin-layout{gap:12px}.rc-admin-grid{gap:8px}}
+@media(max-width:480px){.rc-admin-stat{padding:11px;min-height:86px}.rc-admin-stat strong{font-size:21px}.rc-admin-stat span{font-size:11px}.rc-admin-grid{gap:7px}.rc-admin-link{padding:12px}}
+
 </style>
 </head>
 <body>
