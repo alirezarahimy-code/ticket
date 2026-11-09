@@ -623,6 +623,32 @@ try {
         && (int) ($claimedState['assigned_to'] ?? 0) === $agentId,
         'agent Claim operation assigns the request through the independent POST boundary');
 
+    $requesterCancelRequest = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'cancel_ticket', 'ticket_id' => (string) $ticketRow['id'],
+        'cancel_reason' => 'RC requester cancellation review smoke',
+        'csrf' => (string) ($requesterSessionData['csrf'] ?? ''),
+        'rc_return_workspace' => 'requester',
+    ], ['Cookie: ' . $requesterCookie]);
+    $pendingCancellation = $pdo->prepare('SELECT cancel_requested_at, status FROM tickets WHERE id = ?');
+    $pendingCancellation->execute([(int) $ticketRow['id']]);
+    $pendingCancellationState = $pendingCancellation->fetch(PDO::FETCH_ASSOC);
+    smoke_check($requesterCancelRequest['status'] === 302 && !empty($pendingCancellationState['cancel_requested_at'])
+        && (string) $pendingCancellationState['status'] === 'assigned',
+        'requester cancellation after assignment creates a pending decision without changing the lifecycle state');
+
+    $supervisorRejectCancellation = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'decide_ticket_cancellation', 'ticket_id' => (string) $ticketRow['id'],
+        'decision' => 'reject', 'decision_note' => 'RC supervisor rejected cancellation; handling continues',
+        'rc_return_workspace' => 'supervisor', 'csrf' => $csrf,
+    ], ['Cookie: ' . $cookie]);
+    $cancellationAfterDecision = $pdo->prepare('SELECT cancel_requested_at, status FROM tickets WHERE id = ?');
+    $cancellationAfterDecision->execute([(int) $ticketRow['id']]);
+    $cancellationAfterDecisionState = $cancellationAfterDecision->fetch(PDO::FETCH_ASSOC);
+    smoke_check($supervisorRejectCancellation['status'] === 302
+        && empty($cancellationAfterDecisionState['cancel_requested_at'])
+        && (string) $cancellationAfterDecisionState['status'] === 'assigned',
+        'supervisor rejects a pending requester cancellation and safely resumes handling');
+
     $agentPublicReply = smoke_http_post('http://' . $address . '/request-center.php', [
         'action' => 'reply', 'ticket_id' => (string) $ticketRow['id'],
         'body' => 'RC agent public first response', 'csrf' => $agentCsrf,
