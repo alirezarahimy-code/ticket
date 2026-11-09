@@ -617,6 +617,11 @@ function request_center_ticket_return_url(int $ticketId): string
             : ((user_can($user, 'ticket.edit') || user_can($user, 'queue.view')) ? 'agent' : 'requester');
     }
     $params = ['page' => 'ticket', 'id' => max(0, $ticketId), 'workspace' => $workspace];
+    $originPage = (string) ($_POST['rc_return_origin_page'] ?? '');
+    if (($workspace === 'agent' && $originPage === 'queue' && user_can($user, 'queue.view'))
+        || ($workspace === 'supervisor' && $originPage === 'supervisor' && user_can($user, 'supervisor.panel'))) {
+        $params['return_page'] = $originPage;
+    }
     if ($workspace === 'agent') {
         $params['agent_view'] = (string) ($_POST['rc_return_agent_view'] ?? '') === 'team'
             && user_can($user, 'queue.view') ? 'team' : 'mine';
