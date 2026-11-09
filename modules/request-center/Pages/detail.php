@@ -146,6 +146,36 @@ if ($page === 'ticket') {
     }
     $requiresRating = $isRequester && in_array($ticket['status'], ['resolved', 'closed'], true) && !ticket_rating_is_current($ticket);
     render_header('جزئیات ' . ticket_number((int) $ticket['id']), $user);
+    echo '<style id="rc-ticket-detail-page">
+.page-heading{margin-bottom:16px}.page-heading h1{font-size:23px;line-height:1.7;overflow-wrap:anywhere}.back-link{display:inline-flex;margin-bottom:7px;color:#526f91;font-size:12px;text-decoration:none}.back-link:hover{color:#1f548f;text-decoration:underline}
+.ticket-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}.ticket-meta>span{padding:4px 9px;border:1px solid #e1e8f1;border-radius:999px;background:#fff;color:#5c6f87;font-size:10px}.ticket-meta .status,.ticket-meta .priority{font-style:normal;font-weight:700}
+.ticket-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+.conversation,.ticket-sidebar .card{min-width:0;border:1px solid #e2e9f2;border-radius:14px;background:#fff;box-shadow:0 5px 18px rgba(23,43,77,.04)}
+.conversation{padding:clamp(14px,2vw,22px)}
+.message{position:relative;margin:0 0 13px;padding:14px 15px;border:1px solid #e8edf4;border-radius:12px;background:#fbfcfe;min-width:0}
+.message.mine{border-color:#d8e7f7;background:#f3f8ff}
+.message.agent{border-inline-start:3px solid #4380bd}
+.message.supervisor{border-inline-start:3px solid #7b61b4}
+.message.internal{border-color:#f0dfad;background:#fff9e8}
+.message-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;color:#334c69;font-size:12px}.message-head span{color:#8290a3;font-size:10px;white-space:nowrap}
+.message-body{color:#263b55;font-size:13px;line-height:2;overflow-wrap:anywhere}
+.attachments{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.attachment{display:inline-flex;max-width:100%;padding:6px 10px;border:1px solid #dce6f1;border-radius:8px;background:#fff;color:#245b91;font-size:11px;text-decoration:none;overflow-wrap:anywhere}
+.ticket-sidebar{display:grid;gap:13px;min-width:0}.ticket-sidebar .card{padding:16px}
+.ticket-sidebar h3{margin:0 0 12px;color:#243e5e;font-size:14px}
+.ticket-sidebar dl{display:grid;grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr);gap:8px 10px;margin:0}
+.ticket-sidebar dt{color:#7a899d;font-size:10px}.ticket-sidebar dd{color:#334b68;font-size:11px;overflow-wrap:anywhere}
+.reply-form,.ticket-sidebar form{min-width:0}.reply-form label,.ticket-sidebar label{display:grid;gap:6px;color:#526780;font-size:11px}
+.reply-form textarea,.reply-form input:not([type=hidden]):not([type=file]),.ticket-sidebar input:not([type=hidden]),.ticket-sidebar select,.ticket-sidebar textarea{width:100%;max-width:100%;min-height:39px;padding:9px 11px;border:1px solid #d9e2ee;border-radius:8px;background:#fff;color:#172b4d;font:inherit;font-size:12px}
+.reply-form textarea,.ticket-sidebar textarea{min-height:95px;resize:vertical;line-height:1.8}
+.reply-form textarea:focus,.reply-form input:focus,.ticket-sidebar input:focus,.ticket-sidebar select:focus,.ticket-sidebar textarea:focus{outline:0;border-color:#709bc9;box-shadow:0 0 0 3px rgba(36,89,166,.11)}
+.reply-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:10px}
+.reply-actions .button{min-height:38px}.reply-actions .file-input{max-width:100%}
+.cancellation-pending{padding:14px;border:1px solid #f0d69b;border-radius:11px;background:#fff9e8}
+@media(max-width:980px){.ticket-layout{grid-template-columns:minmax(0,1fr) 280px;gap:12px}}
+@media(max-width:760px){.ticket-layout{grid-template-columns:1fr}.ticket-sidebar{grid-row:1}.ticket-sidebar .card{padding:14px}.page-heading h1{font-size:20px}}
+@media(max-width:480px){.conversation{padding:11px}.message{padding:11px}.message-head{align-items:flex-start;flex-direction:column;gap:3px}.ticket-meta>span{font-size:9px}.ticket-sidebar dl{grid-template-columns:95px minmax(0,1fr)}.reply-actions .button{width:100%}}
+</style>';
      echo '<section class="page-heading"><div><a class="back-link" href="' . e($detailReturnUrl) . '">← بازگشت به فهرست</a><h1>' . e($ticket['subject']) . '</h1><div class="ticket-meta"><span>' . ticket_number((int) $ticket['id']) . '</span><span>' . persian_date($ticket['created_at']) . '</span><span class="tag">' . e(ticket_type_label((string) $ticket['ticket_type'])) . '</span>' . ($ticket['service_name'] ? '<span class="tag">' . e($ticket['service_name']) . '</span>' : '') . '<span class="status ' . e($ticket['status']) . '">' . e(request_center_status_label($ticket['status'])) . '</span><span class="priority ' . e($ticket['priority']) . '">' . e(priority_label($ticket['priority'])) . '</span></div></div></section><div class="ticket-layout" data-view-mode="' . e($viewMode) . '"><section class="conversation">';
     foreach ($messages as $message) {
         if ((int) $message['is_internal'] === 1 && !$canSeeInternal) {
