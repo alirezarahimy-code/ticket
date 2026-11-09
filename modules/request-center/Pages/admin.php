@@ -24,12 +24,6 @@ $adminRecentFilters['q'] = function_exists('mb_substr')
     ? mb_substr($adminRecentFilters['q'], 0, 100, 'UTF-8')
     : substr($adminRecentFilters['q'], 0, 100);
 $recent = $repo->listVisible($user, 1, 12, array_filter($adminRecentFilters, static fn ($value): bool => $value !== ''));
-$adminRecentQuery = array_filter($adminRecentFilters, static fn ($value): bool => $value !== '');
-$adminRecentQueryString = http_build_query(array_merge(['workspace' => 'admin'], array_map(
-    static fn ($value, $key) => $value,
-    $adminRecentQuery,
-    array_keys($adminRecentQuery)
-)));
 
 // The primary-admin workspace exposes a scoped operational audit trail.
 // Never render event details here: they may contain internal-note or private payloads.
