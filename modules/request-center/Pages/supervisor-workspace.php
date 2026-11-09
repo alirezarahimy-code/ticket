@@ -111,13 +111,13 @@ body>main{max-width:1280px;margin:0 auto;padding:28px 24px 48px}
 <div class="rc-supervisor-columns">
 <section class="card rc-supervisor-list"><h2>موارد خارج از SLA/OLA</h2>
 <?php if (!$overdue['rows']): ?><p class="muted">در حال حاضر موردی در محدودهٔ دسترسی شما خارج از تعهد نیست.</p><?php else: ?>
-<?php foreach ($overdue['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · موعد <?= $escapeSupervisor($row['due_at'] ?: 'ثبت نشده') ?></small></article><?php endforeach; ?>
+<?php foreach ($overdue['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?page=ticket&amp;id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · موعد <?= $escapeSupervisor($row['due_at'] ?: 'ثبت نشده') ?></small></article><?php endforeach; ?>
 <?php endif; ?>
 <?php if (user_can($user, 'queue.view')): ?><a class="button secondary" href="request-center.php?page=queue&amp;queue=overdue">مشاهده صف کامل موارد معوق</a><?php endif; ?>
 </section>
 <section class="card rc-supervisor-list"><h2>آخرین تغییرات درخواست‌ها</h2>
 <?php if (!$recent['rows']): ?><p class="muted">درخواستی برای نمایش وجود ندارد.</p><?php else: ?>
-<?php foreach ($recent['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · <?= $escapeSupervisor($row['updated_at']) ?></small></article><?php endforeach; ?>
+<?php foreach ($recent['rows'] as $row): ?><article class="rc-supervisor-item"><b><a href="request-center.php?page=ticket&amp;id=<?= (int) $row['id'] ?>&amp;workspace=supervisor"><?= $escapeSupervisor($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeSupervisor($row['subject']) ?></a></b><small><?= $escapeSupervisor($row['assignee_name'] ?: 'بدون مسئول') ?> · <?= $escapeSupervisor($supervisorStatusLabels[(string) $row['status']] ?? $row['status']) ?> · <?= $escapeSupervisor($row['updated_at']) ?></small></article><?php endforeach; ?>
 <?php endif; ?>
 </section>
 </div>
