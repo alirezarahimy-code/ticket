@@ -763,6 +763,22 @@ try {
     smoke_check($supervisorAssign['status'] === 302 && $assigneeAfterSupervisorReassign === $secondAgentId,
         'supervisor can reassign an active request to another eligible agent with a reason');
 
+    $agentQueueBulk = smoke_http_post('http://' . $address . '/request-center.php', [
+        'action' => 'bulk_update_tickets',
+        'ticket_ids' => [(string) $ticketRow['id']],
+        'bulk_status' => 'resolved',
+        'bulk_note' => 'RC queue bulk resolution smoke',
+        'rc_return_queue' => 'all',
+        'rc_return_p' => '1',
+        'csrf' => $csrf,
+    ], ['Cookie: ' . $cookie]);
+    $bulkStatus = (string) $pdo->query('SELECT status FROM tickets WHERE id = ' . (int) $ticketRow['id'])->fetchColumn();
+    $bulkEventCount = (int) $pdo->query(
+        "SELECT COUNT(*) FROM ticket_events WHERE ticket_id = " . (int) $ticketRow['id'] . " AND event_type = 'bulk_status_changed'"
+    )->fetchColumn();
+    smoke_check($agentQueueBulk['status'] === 302 && $bulkStatus === 'resolved' && $bulkEventCount === 1,
+        'agent queue bulk operation resolves the selected request and writes its event');
+
     // Run the real SLA/OLA maintenance command twice against a disposable ticket.
     $requesterQuery = $pdo->prepare("SELECT id FROM users WHERE role = 'user' AND id <> ? ORDER BY id LIMIT 1");
     $requesterQuery->execute([$userId]);
