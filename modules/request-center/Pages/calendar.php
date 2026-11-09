@@ -490,7 +490,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                   <?php if ($event['status'] === 'planned'): ?>
                   <div class="rc-slot-actions" style="margin:0">
                     <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
-                    <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" onsubmit="return confirm('این نوبت لغو شود؟')"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
+                    <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
                   </div>
                   <?php endif; ?>
                 </div>
@@ -561,7 +561,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                         <?php if ($event['status'] === 'planned'): ?>
                           <div class="rc-slot-actions">
                             <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
-                            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" onsubmit="return confirm('این نوبت لغو شود؟')"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
+                            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
                           </div>
                         <?php endif; ?>
                       <?php endif; ?>
@@ -602,7 +602,7 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
                 </div>
                 <div class="rc-slot-actions" style="margin:0;flex:0 0 auto">
                   <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn" type="submit" title="ثبت اتمام">انجام شد</button></form>
-                  <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" onsubmit="return confirm('این نوبت لغو شود؟')"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn danger" type="submit" title="لغو نوبت">لغو</button></form>
+                  <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn danger" type="submit" title="لغو نوبت">لغو</button></form>
                 </div>
               </div>
               <?php endforeach; ?>
