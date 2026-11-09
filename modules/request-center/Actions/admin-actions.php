@@ -64,6 +64,87 @@ if ($action === 'save_rc_work_hours') {
     redirect('request-center.php?workspace=admin#sla-work-hours');
 }
 
+if ($action === 'create_ola_policy') {
+    $admin = require_login();
+    if (!user_is_primary_admin($admin)) {
+        throw new RuntimeException('فقط ادمین اصلی مرکز درخواست‌ها می‌تواند سیاست OLA ایجاد کند.');
+    }
+
+    $name = post_value('policy_name');
+    $priority = valid_choice(post_value('priority'), ['critical', 'urgent', 'normal'], '');
+    $departmentId = (int) post_value('department_id', '0') ?: null;
+    $minutes = [];
+    foreach (['response_minutes', 'resolution_minutes', 'escalation_1_minutes', 'escalation_2_minutes'] as $field) {
+        $raw = post_value($field, '');
+        if (!preg_match('/^[1-9][0-9]{0,5}$/', $raw)) {
+            throw new RuntimeException('همه مهلت‌های OLA باید عدد صحیح بین ۱ تا ۵۲۵۶۰۰ دقیقه باشند.');
+        }
+        $minutes[$field] = (int) $raw;
+    }
+    if ($name === '' || mb_strlen($name, 'UTF-8') > 190 || $priority === '') {
+        throw new RuntimeException('نام و اولویت سیاست OLA معتبر نیست.');
+    }
+    if ($minutes['escalation_2_minutes'] < $minutes['escalation_1_minutes']) {
+        throw new RuntimeException('مهلت ارجاع دوم نمی‌تواند از ارجاع اول کوتاه‌تر باشد.');
+    }
+    if ($departmentId !== null) {
+        $departmentCheck = db()->prepare('SELECT id FROM departments WHERE id = ? LIMIT 1');
+        $departmentCheck->execute([$departmentId]);
+        if (!$departmentCheck->fetchColumn()) {
+            throw new RuntimeException('معاونت انتخاب‌شده وجود ندارد.');
+        }
+    }
+
+    $isActive = !empty($_POST['is_active']) ? 1 : 0;
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        // Keep active (department, priority) policies unique under concurrent
+        // admin submissions, using the same catalogue lock as policy updates.
+        $pdo->query('SELECT id FROM ola_policies ORDER BY id FOR UPDATE')->fetchAll(PDO::FETCH_COLUMN);
+        if ($isActive === 1) {
+            $duplicate = $pdo->prepare(
+                'SELECT id FROM ola_policies WHERE is_active = 1 AND priority = ? '
+                . 'AND ((department_id IS NULL AND ? IS NULL) OR department_id = ?) LIMIT 1'
+            );
+            $duplicate->execute([$priority, $departmentId, $departmentId]);
+            if ($duplicate->fetchColumn()) {
+                throw new RuntimeException('برای این حوزه و اولویت، سیاست فعال دیگری وجود دارد. ابتدا آن را غیرفعال یا اصلاح کنید.');
+            }
+        }
+
+        $insert = $pdo->prepare(
+            'INSERT INTO ola_policies (name, department_id, priority, response_minutes, resolution_minutes, '
+            . 'escalation_1_minutes, escalation_2_minutes, is_active, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        );
+        $insert->execute([
+            $name, $departmentId, $priority, $minutes['response_minutes'], $minutes['resolution_minutes'],
+            $minutes['escalation_1_minutes'], $minutes['escalation_2_minutes'], $isActive, (int) $admin['id'],
+        ]);
+        $policyId = (int) $pdo->lastInsertId();
+        save_audit_required((int) $admin['id'], 'ola_policy_created', null, [
+            'policy_id' => $policyId,
+            'name' => $name,
+            'department_id' => $departmentId,
+            'priority' => $priority,
+            'response_minutes' => $minutes['response_minutes'],
+            'resolution_minutes' => $minutes['resolution_minutes'],
+            'escalation_1_minutes' => $minutes['escalation_1_minutes'],
+            'escalation_2_minutes' => $minutes['escalation_2_minutes'],
+            'is_active' => $isActive,
+        ]);
+        db_commit('request-center.php');
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            db_rollback('request-center.php');
+        }
+        throw $exception;
+    }
+
+    flash('success', 'سیاست OLA جدید ایجاد شد.');
+    redirect('request-center.php?workspace=admin#ola-policies');
+}
+
 if ($action === 'update_ola_policy') {
     $admin = require_login();
     if (!user_is_primary_admin($admin)) {
