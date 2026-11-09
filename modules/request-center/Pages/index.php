@@ -325,7 +325,7 @@ $metricItems = $workspace === 'requester'
 <button class="button" type="submit">اعمال فیلتر</button><a class="button secondary" href="<?= $escape($workspaceUrl . ($workspace === 'agent' ? '&queue=' . rawurlencode($agentQueueName) : '')) ?>">پاک‌کردن فیلترها</a>
 </form>
 <section class="card">
-<?php if (!$result['rows']): ?><div class="empty">درخواستی در محدودهٔ دسترسی شما وجود ندارد.</div><?php else: ?>
+<?php if (!$result['rows']): ?><div class="empty"><strong>درخواستی مطابق شرایط فعلی پیدا نشد.</strong><p>فیلترهای جست‌وجو یا وضعیت را تغییر دهید؛ برای مشاهدهٔ دوبارهٔ کل موارد مجاز می‌توانید فیلترها را پاک کنید.</p><a class="button secondary" href="request-center.php?<?= $escape(http_build_query($queryParams)) ?>">پاک‌کردن فیلترها و نمایش همه</a></div><?php else: ?>
 <div style="overflow-x:auto"><table class="table"><thead><tr><th>درخواست</th><th>ثبت‌کننده</th><th>مسئول</th><th>وضعیت</th><th>اولویت</th><th>مهلت SLA</th><?php if ($workspace === 'agent'): ?><th>موعد پاسخ OLA</th><th>موعد حل OLA</th><?php endif; ?><th>آخرین تغییر</th></tr></thead><tbody>
 <?php foreach ($result['rows'] as $row): ?>
 <tr>
