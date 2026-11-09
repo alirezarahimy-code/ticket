@@ -74,7 +74,7 @@ function request_center_post_error(Throwable $exception, string $page): never
             . rawurlencode(in_array((string) ($_POST['rc_return_queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], true)
                 ? (string) $_POST['rc_return_queue'] : 'all')
             . '&p=' . max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1))),
-        'supervisor_decision', 'supervisor_reopen' => $ticketId > 0
+        'supervisor_decision', 'supervisor_reopen', 'supervisor_assign_ticket' => $ticketId > 0
             ? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor',
         'save_rc_work_hours' => 'request-center.php?workspace=admin#sla-work-hours',
         'create_ola_policy', 'update_ola_policy' => 'request-center.php?workspace=admin#ola-policies',
