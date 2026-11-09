@@ -30,6 +30,14 @@ if ($page === 'new-ticket') {
     unset($_SESSION['rc_create_retry']);
     $subjectDefault = (string) ($retryDraft['subject'] ?? '');
     $descriptionDefault = (string) ($retryDraft['description'] ?? '');
+    $retryServiceGroup = in_array((string) ($retryDraft['service_group'] ?? ''), ['it', 'support'], true) ? (string) $retryDraft['service_group'] : '';
+    $retryServiceId = max(0, (int) ($retryDraft['service_id'] ?? 0));
+    $retryUnitId = max(0, (int) ($retryDraft['requesting_unit_id'] ?? 0));
+    $retryPriority = in_array((string) ($retryDraft['priority'] ?? ''), ['normal', 'urgent', 'critical'], true) ? (string) $retryDraft['priority'] : '';
+    $retryAssetId = max(0, (int) ($retryDraft['asset_id'] ?? 0));
+    $retrySupportLocation = (string) ($retryDraft['support_location'] ?? '');
+    $retrySupportEquipment = (string) ($retryDraft['support_equipment'] ?? '');
+    $retryCustom = is_array($retryDraft['custom'] ?? null) ? $retryDraft['custom'] : [];
     if (($_GET['request'] ?? '') === 'cd_dvd_edit') {
         $candidate = cd_dvd_fetch_record((int) ($_GET['record_id'] ?? 0));
         if ($candidate && !cd_dvd_can_edit_records($user) && cd_dvd_can_view_record($candidate, $user)) {
@@ -129,9 +137,10 @@ if ($page === 'new-ticket') {
     render_header('ثبت درخواست', $user);
     echo '<section class="page-heading"><div><span class="eyebrow">درخواست جدید</span><h1>ثبت درخواست</h1><p>ابتدا حوزه خدمت را انتخاب کنید تا فرم و مسیر رسیدگی درست نمایش داده شود.</p></div><a class="button secondary" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section><section class="card form-card"><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="create_ticket"><input type="hidden" name="request_token" value="' . e($creationToken) . '">' . ($cdDvdRequestRecord ? '<input type="hidden" name="cd_dvd_record_id" value="' . (int) $cdDvdRequestRecord['id'] . '">' : '');
     echo '<div class="ticket-number-box" data-next-it="' . e(request_center_ticket_number_peek('IT')) . '" data-next-support="' . e(request_center_ticket_number_peek('SUP')) . '"><span>شماره درخواست:</span><strong id="ticket-number-preview">' . e($ticketDefaultGroup === 'support' ? request_center_ticket_number_peek('SUP') : request_center_ticket_number_peek('IT')) . '</strong></div>';
-    echo '<div class="form-grid"><label class="full">موضوع درخواست<input name="subject" required maxlength="255" value="' . e($subjectDefault) . '" placeholder="مثلاً: اختلال در اتصال به پرینتر واحد مالی"></label><label>حوزه خدمت<div class="group-combo"><label class="group-option"><input type="radio" name="service_group" value="it"' . ($ticketDefaultGroup === 'it' ? ' checked' : '') . '><span>خدمات کامپیوتری و IT</span></label><label class="group-option"><input type="radio" name="service_group" value="support"' . ($ticketDefaultGroup === 'support' ? ' checked' : '') . '><span>خدمات پشتیبانی</span></label></div></label><input type="hidden" name="category_id" id="category-selector" value=""><label>خدمت از کاتالوگ<select name="service_id" id="service-selector" required><option value="">انتخاب کنید…</option>';
+    echo '<div class="form-grid"><label class="full">موضوع درخواست<input name="subject" required maxlength="255" value="' . e($subjectDefault) . '" placeholder="مثلاً: اختلال در اتصال به پرینتر واحد مالی"></label><label>حوزه خدمت<div class="group-combo"><label class="group-option"><input type="radio" name="service_group" value="it"' . (($retryServiceGroup !== '' ? $retryServiceGroup : $ticketDefaultGroup) === 'it' ? ' checked' : '') . '><span>خدمات کامپیوتری و IT</span></label><label class="group-option"><input type="radio" name="service_group" value="support"' . (($retryServiceGroup !== '' ? $retryServiceGroup : $ticketDefaultGroup) === 'support' ? ' checked' : '') . '><span>خدمات پشتیبانی</span></label></div></label><input type="hidden" name="category_id" id="category-selector" value=""><label>خدمت از کاتالوگ<select name="service_id" id="service-selector" required><option value="">انتخاب کنید…</option>';
     foreach ($services as $service) {
-        $selected = ($cdDvdServiceId > 0 && (int) $service['id'] === $cdDvdServiceId) ? ' selected' : '';
+        $selectedServiceId = $cdDvdServiceId > 0 ? $cdDvdServiceId : $retryServiceId;
+        $selected = ($selectedServiceId > 0 && (int) $service['id'] === $selectedServiceId) ? ' selected' : '';
         echo '<option value="' . (int) $service['id'] . '" data-service-group="' . e($service['service_group']) . '" data-category-id="' . (int) ($service['category_id'] ?? 0) . '" data-requires-asset="' . (int) $service['requires_asset'] . '"' . $selected . '>' . e($service['name']) . '</option>';
     }
     echo '</select><small class="field-help">ابتدا حوزه و سپس خدمت را انتخاب کنید؛ دسته‌بندی، اولویت و مسیر رسیدگی خودکار تنظیم می‌شود.</small></label>';
@@ -146,20 +155,20 @@ if ($page === 'new-ticket') {
         }
         echo '<label>معاونت سازمانی درخواست‌کننده<select name="requesting_unit_id" required><option value="">انتخاب کنید…</option>';
         foreach ($departments as $department) {
-            echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === $myUnitId ? 'selected' : '') . '>' . e($department['name']) . '</option>';
+            echo '<option value="' . (int) $department['id'] . '" ' . ((int) $department['id'] === ($retryUnitId > 0 ? $retryUnitId : $myUnitId) ? 'selected' : '') . '>' . e($department['name']) . '</option>';
         }
         echo '</select><small class="field-help">' . ($myUnitIsDeputy ? 'معاونت شما به‌صورت پیش‌فرض انتخاب شده است؛ ' : '') . 'درخواست به معاونت انتخاب‌شده ارجاع داده می‌شود.</small></label>';
     } else {
         echo '<label>معاونت سازمانی درخواست‌کننده<input value="هیچ معاونتی در چارت سازمانی تعریف نشده است" readonly></label>';
     }
-     echo '<label>اولویت<select name="priority"><option value="">پیش‌فرض خدمت</option><option value="normal">عادی</option><option value="urgent">فوری</option><option value="critical">حیاتی</option></select></label><label class="ticket-asset-field" data-asset-combo data-asset-required-group="it">سیستم مرتبط <span class="auto-label" data-asset-label>پس از انتخاب خدمت مشخص می‌شود</span><input type="text" id="asset-search" class="asset-search" placeholder="جستجوی سیستم (نام رایانه، شماره اموال یا پلاک)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="asset-results" aria-required="false"><select name="asset_id" id="asset-selector" class="asset-native" tabindex="-1" aria-hidden="true"><option value="">بدون سیستم خاص / انتخاب نشده</option>';
+     echo '<label>اولویت<select name="priority"><option value="">پیش‌فرض خدمت</option><option value="normal"' . ($retryPriority === 'normal' ? ' selected' : '') . '>عادی</option><option value="urgent"' . ($retryPriority === 'urgent' ? ' selected' : '') . '>فوری</option><option value="critical"' . ($retryPriority === 'critical' ? ' selected' : '') . '>حیاتی</option></select></label><label class="ticket-asset-field" data-asset-combo data-asset-required-group="it">سیستم مرتبط <span class="auto-label" data-asset-label>پس از انتخاب خدمت مشخص می‌شود</span><input type="text" id="asset-search" class="asset-search" placeholder="جستجوی سیستم (نام رایانه، شماره اموال یا پلاک)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="asset-results" aria-required="false"><select name="asset_id" id="asset-selector" class="asset-native" tabindex="-1" aria-hidden="true"><option value="">بدون سیستم خاص / انتخاب نشده</option>';
      foreach ($userAssets as $asset) {
           $isCurrent = (int) $asset['id'] === $clientAssetId;
           $tagText = asset_tag_label($asset['asset_tag'], $asset['hostname']);
           if (asset_is_auto_domain_tag($asset['asset_tag'])) { $tagText = ''; }
-          echo '<option value="' . (int) $asset['id'] . '" ' . ((int) $asset['id'] === $autoAssetId ? 'selected' : '') . '>' . e(asset_display_name($asset['hostname']) . ($tagText !== '' ? ' - ' . $tagText : '') . ($isCurrent ? ' (سیستم فعلی)' : '')) . '</option>';
+          echo '<option value="' . (int) $asset['id'] . '" ' . ((int) $asset['id'] === ($retryAssetId > 0 ? $retryAssetId : $autoAssetId) ? 'selected' : '') . '>' . e(asset_display_name($asset['hostname']) . ($tagText !== '' ? ' - ' . $tagText : '') . ($isCurrent ? ' (سیستم فعلی)' : '')) . '</option>';
      }
-       echo '</select><div class="asset-results" id="asset-results" role="listbox" hidden></div><small class="field-help">برای همهٔ خدمات IT، انتخاب سیستم مرتبط از شناسنامهٔ فنی الزامی است. نام رایانه، شمارهٔ اموال یا پلاک را جست‌وجو و از فهرست انتخاب کنید.</small><small class="field-error" data-asset-error hidden></small></label><label class="support-field">محل خدمت / اتاق<span class="auto-label">برای پشتیبانی الزامی</span><input name="support_location" placeholder="ساختمان، طبقه، اتاق یا محل دقیق"></label><label class="support-field">تجهیز یا مورد درخواست<textarea name="support_equipment" rows="2" placeholder="مثلاً صندلی، میز، پرینتر عمومی یا تجهیزات اتاق"></textarea></label>' . ((is_staff_role($user['role']) || is_it_agent($user)) ? '<label>ارجاع به درخواست قبلی (اختیاری، کارشناسان)<input type="number" name="parent_ticket_id" placeholder="شناسه داخلی درخواست"></label>' : '') . '<label class="full">شرح کامل مشکل<textarea name="description" required rows="8" placeholder="چه اتفاقی افتاده؟ از چه زمانی؟ چه پیامی می‌بینید؟">' . e($descriptionDefault) . '</textarea></label>';
+       echo '</select><div class="asset-results" id="asset-results" role="listbox" hidden></div><small class="field-help">برای همهٔ خدمات IT، انتخاب سیستم مرتبط از شناسنامهٔ فنی الزامی است. نام رایانه، شمارهٔ اموال یا پلاک را جست‌وجو و از فهرست انتخاب کنید.</small><small class="field-error" data-asset-error hidden></small></label><label class="support-field">محل خدمت / اتاق<span class="auto-label">برای پشتیبانی الزامی</span><input name="support_location" value="' . e($retrySupportLocation) . '" placeholder="ساختمان، طبقه، اتاق یا محل دقیق"></label><label class="support-field">تجهیز یا مورد درخواست<textarea name="support_equipment" rows="2" placeholder="مثلاً صندلی، میز، پرینتر عمومی یا تجهیزات اتاق">' . e($retrySupportEquipment) . '</textarea></label>' . ((is_staff_role($user['role']) || is_it_agent($user)) ? '<label>ارجاع به درخواست قبلی (اختیاری، کارشناسان)<input type="number" name="parent_ticket_id" placeholder="شناسه داخلی درخواست"></label>' : '') . '<label class="full">شرح کامل مشکل<textarea name="description" required rows="8" placeholder="چه اتفاقی افتاده؟ از چه زمانی؟ چه پیامی می‌بینید؟">' . e($descriptionDefault) . '</textarea></label>';
       foreach ($serviceFields as $serviceId => $fields) {
           if (!$fields) { continue; }
           echo '<fieldset class="service-fields" data-service-fields="' . $serviceId . '"><legend>اطلاعات تکمیلی خدمت</legend><div class="form-grid">';
@@ -168,15 +177,15 @@ if ($page === 'new-ticket') {
               $name = 'custom[' . e($field['field_key']) . ']';
               $options = json_decode((string) $field['options_json'], true) ?: [];
               if ($field['field_type'] === 'textarea') {
-                  echo '<label class="full">' . e($field['label']) . '<textarea name="' . $name . '" rows="3"' . $required . '></textarea></label>';
+                  echo '<label class="full">' . e($field['label']) . '<textarea name="' . $name . '" rows="3"' . $required . '>' . e((string) ($retryCustom[$field['field_key']] ?? '')) . '</textarea></label>';
               } elseif ($field['field_type'] === 'select') {
                   echo '<label>' . e($field['label']) . '<select name="' . $name . '"' . $required . '><option value="">انتخاب کنید</option>';
-                  foreach ($options as $option) { echo '<option value="' . e($option) . '">' . e($option) . '</option>'; }
+                  foreach ($options as $option) { echo '<option value="' . e($option) . '"' . ((string) ($retryCustom[$field['field_key']] ?? '') === (string) $option ? ' selected' : '') . '>' . e($option) . '</option>'; }
                   echo '</select></label>';
               } else {
                    $inputType = $field['field_type'] === 'number' ? 'number' : 'text';
                    $placeholder = $field['field_type'] === 'date' ? '۱۴۰۵/۰۱/۰۱' : '';
-                   echo '<label>' . e($field['label']) . '<input type="' . $inputType . '" name="' . $name . '" placeholder="' . $placeholder . '"' . $required . '></label>';
+                   echo '<label>' . e($field['label']) . '<input type="' . $inputType . '" name="' . $name . '" value="' . e((string) ($retryCustom[$field['field_key']] ?? '')) . '" placeholder="' . $placeholder . '"' . $required . '></label>';
               }
           }
           echo '</div></fieldset>';
