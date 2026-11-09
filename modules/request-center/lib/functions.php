@@ -477,7 +477,7 @@ function request_center_notify_user(int $userId, string $type, string $title, st
 }
 
 /** Notify all permitted parties without allowing notification failure to roll back the lifecycle transition. */
-function request_center_notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null): void
+function request_center_notify_ticket_parties(int $ticketId, string $type, string $title, string $body, ?int $excludeUserId = null, bool $required = false): void
 {
     try {
         $query = db()->prepare('SELECT t.requester_id, t.assigned_to, t.department_id, t.service_group, d.manager_user_id, hu.manager_user_id AS handling_manager_id FROM tickets t LEFT JOIN departments d ON d.id = t.department_id LEFT JOIN handling_units hu ON hu.code = t.service_group WHERE t.id = ? LIMIT 1');
@@ -502,13 +502,16 @@ function request_center_notify_ticket_parties(int $ticketId, string $type, strin
         );
         foreach ($recipients as $recipientId) {
             if ($excludeUserId === null || $recipientId !== $excludeUserId) {
-                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId);
+                request_center_notify_user((int) $recipientId, $type, $title, $body, $ticketId, $required);
             }
         }
     } catch (Throwable $exception) {
         try {
             app_error_log('Request Center party notification lookup failed: ticket=' . $ticketId . '; type=' . $type . '; error=' . get_class($exception));
         } catch (Throwable) {
+        }
+        if ($required) {
+            throw $exception;
         }
     }
 }
@@ -553,7 +556,7 @@ function request_center_notify_ticket_staff(int $ticketId, string $type, string 
 }
 
 /** Resolution notice split between requester and staff, with isolated delivery failures. */
-function request_center_notify_ticket_resolved(int $ticketId, int $actorId): void
+function request_center_notify_ticket_resolved(int $ticketId, int $actorId, bool $required = false): void
 {
     try {
         $ticket = fetch_ticket($ticketId);
@@ -569,19 +572,24 @@ function request_center_notify_ticket_resolved(int $ticketId, int $actorId): voi
             'ticket_resolved',
             'درخواست شما انجام شد',
             'درخواست ' . ticket_number($ticketId) . ' حل شد. لطفاً نتیجه را بررسی و امتیاز رضایت خود را ثبت کنید؛ اگر مشکل برطرف نشده است درخواست را بازگشایی کنید.' . $autoCloseNotice,
-            $ticketId
+            $ticketId,
+            $required
         );
         request_center_notify_ticket_staff(
             $ticketId,
             'ticket_resolved',
             'درخواست حل شد و منتظر امتیاز کاربر است',
             'درخواست ' . ticket_number($ticketId) . ' حل‌شده است و پس از ثبت امتیاز کاربر قابل تأیید نهایی است.',
-            $actorId
+            $actorId,
+            $required
         );
     } catch (Throwable $exception) {
         try {
             app_error_log('Request Center resolved notification failed: ticket=' . $ticketId . '; error=' . get_class($exception));
         } catch (Throwable) {
+        }
+        if ($required) {
+            throw $exception;
         }
     }
 }
