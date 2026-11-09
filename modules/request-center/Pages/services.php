@@ -205,6 +205,57 @@ if ($page === 'services') {
     if ($serviceModals !== '') {
         echo '<div class="service-modal-layer" data-service-modal-layer hidden>' . $serviceModals . '</div>';
     }
+    echo '<script id="rc-service-catalog-interactions">
+(function(){
+ var tabs=document.querySelector("[data-service-tabs]"),panels=Array.prototype.slice.call(document.querySelectorAll(".service-tab-panel"));
+ function activate(id,updateUrl){
+  var panel=document.getElementById(id);if(!panel||!panel.classList.contains("service-tab-panel"))return;
+  panels.forEach(function(item){item.hidden=item!==panel;});
+  if(tabs)tabs.querySelectorAll("[data-service-tab]").forEach(function(link){var active=link.dataset.serviceTab===id;link.classList.toggle("active",active);link.setAttribute("aria-current",active?"page":"false");});
+  if(updateUrl&&window.history&&window.history.replaceState){var url=new URL(window.location.href);url.searchParams.set("tab",id);window.history.replaceState({}, "",url.toString());}
+ }
+ if(tabs){
+  tabs.querySelectorAll("[data-service-tab]").forEach(function(link){link.addEventListener("click",function(event){event.preventDefault();activate(link.dataset.serviceTab,true);});});
+  var requested=new URLSearchParams(window.location.search).get("tab")||window.location.hash.slice(1)||"tab-create";
+  activate(requested,false);
+ }
+ var layer=document.querySelector("[data-service-modal-layer]"),previousFocus=null;
+ function closeModal(){
+  if(!layer)return;layer.querySelectorAll(".service-modal").forEach(function(modal){modal.hidden=true;});
+  layer.hidden=true;document.body.style.overflow="";if(previousFocus&&previousFocus.focus)previousFocus.focus();
+ }
+ function openModal(id,trigger){
+  if(!layer)return;var modal=layer.querySelector("#"+CSS.escape(id));if(!modal)return;
+  previousFocus=trigger||document.activeElement;layer.hidden=false;
+  layer.querySelectorAll(".service-modal").forEach(function(item){item.hidden=item!==modal;});
+  document.body.style.overflow="hidden";var target=modal.querySelector("input:not([type=hidden]):not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled])");if(target)target.focus();
+ }
+ document.addEventListener("click",function(event){
+  var opener=event.target.closest("[data-modal-open]");if(opener){event.preventDefault();openModal(opener.dataset.modalOpen,opener);return;}
+  if(event.target.closest("[data-modal-close]")){event.preventDefault();closeModal();return;}
+  if(layer&&!layer.hidden&&event.target===layer)closeModal();
+ });
+ document.addEventListener("keydown",function(event){
+  if(!layer||layer.hidden)return;
+  if(event.key==="Escape"){event.preventDefault();closeModal();return;}
+  if(event.key!=="Tab")return;
+  var modal=layer.querySelector(".service-modal:not([hidden])");if(!modal)return;
+  var focusable=Array.prototype.slice.call(modal.querySelectorAll("a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1'])")).filter(function(el){return el.offsetParent!==null;});
+  if(!focusable.length){event.preventDefault();return;}
+  var first=focusable[0],last=focusable[focusable.length-1];
+  if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+  else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+ });
+ document.querySelectorAll(".service-delete").forEach(function(form){
+  form.addEventListener("submit",function(event){var button=form.querySelector("button[type=submit]");if(button&&button.dataset.confirm&&!window.confirm(button.dataset.confirm)){event.preventDefault();return;}if(button){button.disabled=true;button.textContent="در حال ثبت…";}});
+ });
+ document.querySelectorAll(".service-field-form").forEach(function(form){
+  var type=form.querySelector("[name=field_type]"),options=form.querySelector("[name=field_options]");
+  function sync(){if(!type||!options)return;var active=type.value==="select";options.disabled=!active;options.required=active;options.closest("label").style.opacity=active?"1":".55";}
+  if(type){type.addEventListener("change",sync);sync();}
+ });
+})();
+</script>'; 
     render_footer();
     exit;
 }
