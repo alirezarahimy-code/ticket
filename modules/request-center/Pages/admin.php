@@ -14,7 +14,23 @@ if (!user_is_primary_admin($user)) {
 }
 
 $summary = $repo->workspaceSummary($user);
-$recent = $repo->listVisible($user, 1, 8);
+$adminRecentFilters = [
+    'q' => trim((string) ($_GET['recent_q'] ?? '')),
+    'status' => valid_choice((string) ($_GET['recent_status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], ''),
+    'priority' => valid_choice((string) ($_GET['recent_priority'] ?? ''), ['normal', 'urgent', 'critical'], ''),
+    'service_group' => valid_choice((string) ($_GET['recent_service_group'] ?? ''), ['it', 'support'], ''),
+];
+$adminRecentFilters['q'] = function_exists('mb_substr')
+    ? mb_substr($adminRecentFilters['q'], 0, 100, 'UTF-8')
+    : substr($adminRecentFilters['q'], 0, 100);
+$recent = $repo->listVisible($user, 1, 12, array_filter($adminRecentFilters, static fn ($value): bool => $value !== ''));
+$adminRecentQuery = array_filter($adminRecentFilters, static fn ($value): bool => $value !== '');
+$adminRecentQueryString = http_build_query(array_merge(['workspace' => 'admin'], array_map(
+    static fn ($value, $key) => $value,
+    $adminRecentQuery,
+    array_keys($adminRecentQuery)
+)));
+
 // The primary-admin workspace exposes a scoped operational audit trail.
 // Never render event details here: they may contain internal-note or private payloads.
 [$adminAuditWhere, $adminAuditParams] = ticket_scope($user);
@@ -152,10 +168,18 @@ header('Cache-Control: private, no-store');
 <div class="rc-admin-layout">
 <section class="card" style="padding:16px">
 <h2>آخرین درخواست‌های به‌روزشده</h2>
+<form method="get" action="request-center.php" style="display:flex;gap:9px;flex-wrap:wrap;align-items:end;margin:12px 0 16px">
+<input type="hidden" name="workspace" value="admin">
+<label>جست‌وجو<input type="search" name="recent_q" maxlength="100" value="<?= $escapeAdmin($adminRecentFilters['q']) ?>" placeholder="شماره یا عنوان"></label>
+<label>وضعیت<select name="recent_status"><option value="">همه وضعیت‌ها</option><?php foreach ($adminStatusLabels as $key => $label): ?><option value="<?= $escapeAdmin($key) ?>" <?= $adminRecentFilters['status'] === $key ? 'selected' : '' ?>><?= $escapeAdmin($label) ?></option><?php endforeach; ?></select></label>
+<label>اولویت<select name="recent_priority"><option value="">همه اولویت‌ها</option><?php foreach (['normal' => 'عادی', 'urgent' => 'فوری', 'critical' => 'بحرانی'] as $key => $label): ?><option value="<?= $key ?>" <?= $adminRecentFilters['priority'] === $key ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?></select></label>
+<label>حوزه خدمت<select name="recent_service_group"><option value="">همه حوزه‌ها</option><option value="it" <?= $adminRecentFilters['service_group'] === 'it' ? 'selected' : '' ?>>فناوری اطلاعات</option><option value="support" <?= $adminRecentFilters['service_group'] === 'support' ? 'selected' : '' ?>>پشتیبانی</option></select></label>
+<button class="button" type="submit">جست‌وجو</button><a class="button secondary" href="request-center.php?workspace=admin">پاک‌کردن</a>
+</form>
 <?php if (!$recent['rows']): ?><p class="muted">درخواستی در محدودهٔ دسترسی وجود ندارد.</p><?php else: ?>
 <div style="overflow-x:auto"><table class="rc-admin-table"><thead><tr><th>درخواست</th><th>مسئول</th><th>وضعیت</th><th>موعد SLA</th></tr></thead><tbody>
 <?php foreach ($recent['rows'] as $row): ?>
-<tr><td><a href="request-center.php?id=<?= (int) $row['id'] ?>&amp;workspace=admin"><?= $escapeAdmin($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeAdmin($row['subject']) ?></a></td><td><?= $escapeAdmin($row['assignee_name'] ?: 'بدون مسئول') ?></td><td><?= $escapeAdmin($adminStatusLabels[(string) $row['status']] ?? $row['status']) ?></td><td><?= $escapeAdmin($row['due_at'] ?: '—') ?></td></tr>
+<tr><td><a href="request-center.php?<?= $escapeAdmin(http_build_query(array_merge(['page' => 'ticket', 'id' => (int) $row['id'], 'workspace' => 'admin'], $adminRecentFilters))) ?>"><?= $escapeAdmin($row['ticket_no'] ?: ('#' . $row['id'])) ?> · <?= $escapeAdmin($row['subject']) ?></a></td><td><?= $escapeAdmin($row['assignee_name'] ?: 'بدون مسئول') ?></td><td><?= $escapeAdmin($adminStatusLabels[(string) $row['status']] ?? $row['status']) ?></td><td><?= $escapeAdmin($row['due_at'] ?: '—') ?></td></tr>
 <?php endforeach; ?>
 </tbody></table></div>
 <?php endif; ?>
