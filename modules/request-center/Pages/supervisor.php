@@ -98,7 +98,7 @@ if ($page === 'supervisor') {
     if ($supervisorPages > 1) {
         echo '<nav class="pagination" aria-label="صفحه‌بندی سوپروایزر">';
         for ($supervisorNav = max(1, $supervisorPage - 3); $supervisorNav <= min($supervisorPages, $supervisorPage + 3); $supervisorNav++) {
-            echo '<a class="' . ($supervisorNav === $supervisorPage ? 'active' : '') . '" href="request-center.php?page=supervisor&p=' . $supervisorNav . '">' . number_format($supervisorNav) . '</a>';
+            echo '<a class="' . ($supervisorNav === $supervisorPage ? 'active' : '') . '" href="' . e($supervisorBaseUrl) . '&p=' . $supervisorNav . '">' . number_format($supervisorNav) . '</a>';
         }
         echo '</nav>';
     }
