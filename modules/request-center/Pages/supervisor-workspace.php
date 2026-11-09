@@ -35,10 +35,10 @@ header('Cache-Control: private, no-store');
 <title>فضای کاری سوپروایزر</title>
 <link rel="stylesheet" href="modules/request-center/Assets/request-center.css">
 <style>
-:root{color-scheme:light;--rс-ink:#172b4d;--rc-muted:#64748b;--rc-line:#e3eaf3;--rc-brand:#245b9b;--rc-brand-dark:#173f70;--rc-canvas:#f3f6fb}
+:root{color-scheme:light;--rc-ink:#172b4d;--rc-muted:#64748b;--rc-line:#e3eaf3;--rc-brand:#245b9b;--rc-brand-dark:#173f70;--rc-canvas:#f3f6fb}
 *{box-sizing:border-box}
 html{min-height:100%;background:var(--rc-canvas)}
-body{margin:0;background:radial-gradient(1000px 360px at 85% -160px,#dceafa 0,transparent 70%),var(--rc-canvas);color:var(--rс-ink);font-family:Tahoma,"Segoe UI",sans-serif;line-height:1.8}
+body{margin:0;background:radial-gradient(1000px 360px at 85% -160px,#dceafa 0,transparent 70%),var(--rc-canvas);color:var(--rc-ink);font-family:Tahoma,"Segoe UI",sans-serif;line-height:1.8}
 body>header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.94);border-bottom:1px solid var(--rc-line);box-shadow:0 4px 18px rgba(20,43,75,.05);backdrop-filter:blur(12px)}
 body>header .bar{max-width:1280px;margin:auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
 body>header .brand{font-size:17px;font-weight:800;color:var(--rc-brand-dark)}
