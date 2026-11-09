@@ -93,6 +93,35 @@ if ($page === 'services') {
             . '</div>';
     };
     render_header('کاتالوگ خدمات', $serviceUser);
+    echo '<style id="rc-service-catalog-page">
+.page-heading{align-items:center;margin-bottom:18px}.page-heading h1{font-size:24px;letter-spacing:-.3px}.page-heading p{font-size:13px;color:#687990}
+.service-toolbar,.service-filters{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 15px}
+.service-toolbar>*{min-width:0}
+.category-list{display:grid;gap:8px}
+.category-list>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border:1px solid #e5ebf3;border-radius:10px;background:#fff}
+.category-list>div>span:first-child{display:grid;gap:2px;min-width:0}
+.category-list strong{font-size:12px;color:#294564;overflow-wrap:anywhere}
+.category-list small,.muted{font-size:11px;color:#78879a}
+.service-card,.service-item,.category-card{min-width:0;border:1px solid #e2e9f2;border-radius:13px;background:#fff;box-shadow:0 4px 15px rgba(23,43,77,.035)}
+.service-card{padding:16px}
+.service-card h2,.service-card h3{margin:0 0 8px;color:#263f5e;font-size:15px}
+.service-modal-layer{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:rgba(17,31,50,.48);backdrop-filter:blur(3px)}
+.service-modal-layer[hidden],.service-modal[hidden]{display:none!important}
+.service-modal{width:min(720px,100%);max-height:min(88vh,850px);overflow:auto}
+.service-modal-card{overflow:hidden;border:1px solid #dfe7f1;border-radius:16px;background:#fff;box-shadow:0 20px 60px rgba(12,28,48,.22)}
+.service-modal-head,.service-modal-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;background:#f8fafd;border-bottom:1px solid #e8edf4}
+.service-modal-head h3{margin:0;font-size:15px;color:#213c5d}.service-modal-head p{margin:3px 0 0}
+.service-modal-body{padding:18px}
+.service-modal-foot{justify-content:flex-end;border-top:1px solid #e8edf4;border-bottom:0}
+.service-modal-close{width:34px;height:34px;border:1px solid #e0e7f0;border-radius:9px;background:#fff;color:#526780;font-size:20px;cursor:pointer}
+.service-modal .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.service-modal label{display:grid;gap:5px;min-width:0;font-size:11px;color:#536780}
+.service-modal input:not([type=checkbox]),.service-modal select,.service-modal textarea{width:100%;min-height:38px;padding:8px 10px;border:1px solid #d9e2ee;border-radius:8px;background:#fff;color:#172b4d;font:inherit;font-size:12px}
+.service-modal input:focus,.service-modal select:focus,.service-modal textarea:focus{outline:0;border-color:#709bc9;box-shadow:0 0 0 3px rgba(36,89,166,.11)}
+.service-modal .full{grid-column:1/-1}
+.service-modal .check-label{display:flex;align-items:center;gap:7px}
+@media(max-width:700px){.page-heading{align-items:flex-start;flex-direction:column}.service-modal-layer{padding:10px}.service-modal-body{padding:13px}.service-modal .form-grid{grid-template-columns:1fr}.service-modal .full{grid-column:auto}}
+</style>';
     echo '<section class="page-heading"><div><span class="eyebrow">Service Catalog</span><h1>کاتالوگ خدمات سازمان</h1><p>هر خدمت فرم تکمیلی، اولویت پیش‌فرض و مسیر رسیدگی مستقل دارد. با سربرگ‌ها بین بخش‌ها جابه‌جا شوید.</p></div><div class="actions"><a class="button secondary" href="request-center.php">خانه مرکز درخواست‌ها</a>' . (user_is_primary_admin($serviceUser) ? '<a class="button secondary" href="request-center.php?workspace=admin">مدیریت مرکز درخواست‌ها</a>' : '') . '<a class="button" href="request-center.php?page=new-ticket">ثبت درخواست</a></div></section>';
 
     // --- سربرگ‌ها (تب‌ها) ---
