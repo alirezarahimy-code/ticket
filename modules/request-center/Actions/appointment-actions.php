@@ -273,7 +273,7 @@ $rcKindFromPost = static function (): string {
     return isset(AppointmentRepository::KINDS[$kind]) ? $kind : 'work';
 };
 
-// ——— ثبت گروهی نوبت‌ها (نمای روز تقویم): یک تاریخ، چند درخواست ———
+// ——— ثبت گروهی نوبت‌ها (نمای روز تقویم): یک تاریخ، چند درخواست — «همه یا هیچ» (تصمیم مالک ۲۰۲۶-۱۱-۱۰) ———
 if (isset($_POST['rc_appointment_create_batch'])) {
     $date = trim((string) ($_POST['date'] ?? ''));
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || strtotime($date) === false) {
@@ -291,35 +291,111 @@ if (isset($_POST['rc_appointment_create_batch'])) {
         $rcRedirect('batch', null, ['ok' => 0, 'failed' => 0, 'empty' => 1, 'view' => 'day', 'date' => $date]);
     }
     $pickIds = array_slice(array_keys($picks), 0, 50); // سقف سخت ۵۰ نوبت در یک بازهٔ ارسال
-    $okCount = 0;
-    $failedCount = 0;
+
+    // کارشناس مسئول: یک‌بار برای کل دسته اعتبارسنجی می‌شود (همان قاعدهٔ ثبت تکی).
+    $resolvedAssigneeId = $rcActorId;
+    if ($rcElevated && $assigneeId > 0) {
+        $targetStmt = db()->prepare('SELECT role, is_active FROM users WHERE id = ? LIMIT 1');
+        $targetStmt->execute([$assigneeId]);
+        $targetRow = $targetStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$targetRow
+            || (int) ($targetRow['is_active'] ?? 0) !== 1
+            || !in_array((string) ($targetRow['role'] ?? ''), AppointmentRepository::assignableRoleCodes(), true)) {
+            $rcRedirect('error', 'کارشناس هدف معتبر نیست؛ هیچ نوبتی ثبت نشد (حساب باید فعال و عضو نقش‌های رسیدگی باشد).');
+        }
+        $resolvedAssigneeId = $assigneeId;
+    }
+
+    // نگهبان تعطیلات و آخرهفته برای «این تاریخ» — همان قاعدهٔ ثبت تکی، یک‌بار برای کل دسته.
+    $business = function_exists('sla_business_hours') ? sla_business_hours() : ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
+    $weekendIso = array_map('intval', (array) ($business['weekend'] ?? [4, 5]));
+    $holidays = $rcHolidaysOn([$date]);
+    if (!empty($GLOBALS['rc_holidays_lookup_failed'])) {
+        if (!($rcElevated && $outsideFlag)) {
+            $rcLog('rc_appointment_create_batch', 'denied', ['reason' => 'holiday lookup failed']);
+            $rcRedirect('error', 'بررسی جدول تعطیلات ممکن نشد؛ هیچ نوبتی ثبت نشد. با مدیر سامانه هماهنگ کنید.');
+        }
+    } else {
+        $holidayTitle = $holidays[$date] ?? null;
+        $isoDay = (int) date('N', strtotime($date));
+        if (!($rcElevated && $outsideFlag)) {
+            if ($holidayTitle !== null) {
+                $rcRedirect('error', 'این تاریخ تعطیل است (' . $holidayTitle . ')؛ هیچ نوبتی ثبت نشد.');
+            }
+            if (in_array($isoDay, $weekendIso, true)) {
+                $rcRedirect('error', 'این روز تعطیل هفتگی است؛ هیچ نوبتی ثبت نشد.');
+            }
+        }
+    }
+
+    // ── فاز ۱: اعتبارسنجی همهٔ ردیف‌ها بدون نوشتن (همه یا هیچ) ──
+    $timeOk = static fn (string $t): bool => (bool) preg_match('/^([01]?\d|2[0-3]):[0-5]\d$/', $t);
+    $batchErrors = [];
+    $items = [];
     foreach ($pickIds as $rawId) {
         $ticketId = (int) $rawId;
-        if ($ticketId <= 0) {
-            $failedCount++;
+        $rowLabel = 'درخواست #' . ($ticketId > 0 ? $ticketId : (string) $rawId);
+        $ticket = $ticketId > 0 ? $repo->findVisible($ticketId, $user) : null;
+        if (!$ticket) {
+            $batchErrors[] = $rowLabel . ': پیدا نشد یا به حوزهٔ شما تعلق ندارد.';
             continue;
         }
         $startRaw = is_array($starts) ? trim((string) ($starts[$rawId] ?? '')) : '';
         $endRaw = is_array($ends) ? trim((string) ($ends[$rawId] ?? '')) : '';
-        $timeOk = static fn (string $t): bool => (bool) preg_match('/^([01]?\d|2[0-3]):[0-5]\d$/', $t);
         if (!$timeOk($startRaw) || !$timeOk($endRaw)) {
-            $failedCount++;
+            $batchErrors[] = $rowLabel . ': ساعت شروع/پایان معتبر نیست.';
             $rcLog('rc_appointment_create_batch', 'denied', ['ticket_id' => $ticketId, 'reason' => 'invalid time format']);
             continue;
         }
         [$sh, $sm] = array_map('intval', explode(':', $startRaw));
         [$eh, $em] = array_map('intval', explode(':', $endRaw));
-        $startsAt = sprintf('%s %02d:%02d:00', $date, $sh, $sm);
-        $endsAt = sprintf('%s %02d:%02d:00', $date, $eh, $em);
-        $result = $rcCreateOne($ticketId, $startsAt, $endsAt, $kind, $note, $assigneeId, $outsideFlag);
-        if ($result['ok']) {
-            $okCount++;
-        } else {
-            $failedCount++;
-            $rcLog('rc_appointment_create_batch', 'denied', ['ticket_id' => $ticketId, 'reason' => (string) ($result['error'] ?? '')]);
-        }
+        $items[] = [
+            'ticket_id' => $ticketId,
+            'assigneeId' => $resolvedAssigneeId,
+            'startsAt' => sprintf('%s %02d:%02d:00', $date, $sh, $sm),
+            'endsAt' => sprintf('%s %02d:%02d:00', $date, $eh, $em),
+            'kind' => $kind,
+            'note' => $note,
+            'actorId' => $rcActorId,
+            'allowOutsideBusinessHours' => $outsideFlag,
+            'ticket' => $ticket,
+        ];
     }
-    $rcRedirect('batch', null, ['ok' => $okCount, 'failed' => $failedCount, 'view' => 'day', 'date' => $date]);
+    if ($batchErrors !== []) {
+        $summary = implode(' | ', array_slice($batchErrors, 0, 3))
+            . (count($batchErrors) > 3 ? ' | و ' . (count($batchErrors) - 3) . ' مورد دیگر' : '');
+        $rcRedirect('error', 'ثبت گروهی انجام نشد؛ هیچ نوبتی ثبت نشد. ' . $summary);
+    }
+
+    // ── فاز ۲: درج در یک تراکنش (همه یا هیچ) ──
+    $batchResult = $rcAppointments->createBatch($items);
+    if (!$batchResult['ok']) {
+        $rcLog('rc_appointment_create_batch', 'denied', ['reason' => (string) ($batchResult['error'] ?? 'batch failed')]);
+        $rcRedirect('error', 'ثبت گروهی انجام نشد؛ هیچ نوبتی ثبت نشد. ' . (string) ($batchResult['error'] ?? ''));
+    }
+    $ids = array_values($batchResult['ids'] ?? []);
+    foreach ($ids as $index => $appointmentId) {
+        $entry = $items[$index];
+        $ticket = $entry['ticket'];
+        $startsAt = $entry['startsAt'];
+        $endsAt = $entry['endsAt'];
+        $rcLog('rc_appointment_create_batch', 'ok', ['ticket_id' => (int) $ticket['id'], 'appointment_id' => (int) $appointmentId]);
+        // —— اعلان‌ها (کارشناس مسئول + ثبت‌کنندهٔ درخواست) ——
+        try {
+            if ($resolvedAssigneeId !== $rcActorId && function_exists('notify_user')) {
+                notify_user($resolvedAssigneeId, 'appointment_created', 'نوبت رسیدگی جدید',
+                    'نوبتی برای شما روی درخواست ' . (string) ($ticket['ticket_no'] ?? ('#' . (int) $ticket['id'])) . ' ثبت شد: ' . substr($startsAt, 0, 10) . ' — ' . substr($startsAt, 11, 5) . ' تا ' . substr($endsAt, 11, 5) . '.',
+                    (int) $ticket['id'], $idempotency($appointmentId . '|created|' . $resolvedAssigneeId));
+            }
+            $requesterId = isset($ticket['requester_id']) ? (int) $ticket['requester_id'] : 0;
+            if ($requesterId > 0 && $requesterId !== $rcActorId && $requesterId !== $resolvedAssigneeId && function_exists('notify_user')) {
+                notify_user($requesterId, 'appointment_created', 'نوبت رسیدگی روی درخواست شما ثبت شد',
+                    'برای درخواست ' . (string) ($ticket['ticket_no'] ?? ('#' . (int) $ticket['id'])) . ' نوبتی ثبت شد: ' . substr($startsAt, 0, 10) . ' ساعت ' . substr($startsAt, 11, 5) . '.',
+                    (int) $ticket['id'], $idempotency($appointmentId . '|created|requester|' . $requesterId));
+            }
+        } catch (Throwable) {}
+    }
+    $rcRedirect('batch', null, ['ok' => count($ids), 'failed' => 0, 'view' => 'day', 'date' => $date]);
 }
 
 // ——— ثبت تکی نوبت (فرم کلاسیک) ———

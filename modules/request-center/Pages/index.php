@@ -78,7 +78,7 @@ if ($workspaceOptions === []) {
 $repo = new RequestCenterRepository(db());
 $schemaProblems = $repo->schemaProblems();
 if ($schemaProblems !== []) {
-    request_center_error_page(503, 'ساختار پایگاه‌داده کامل نیست', 'این ورودی عمداً هیچ تغییری در Schema ایجاد نمی‌کند. ابتدا بستهٔ Migration رسمی همین نسخه را روی یک نسخهٔ پشتیبان‌شده از پایگاه‌داده اعمال کنید، سپس دوباره تلاش کنید.', $schemaProblems);
+    request_center_error_page(503, 'ساختار پایگاه‌داده کامل نیست', 'این ورودی عمداً هیچ تغییری در Schema ایجاد نمی‌کند. ابتدا بستهٔ Migration رسمی همین نسخه را روی یک نسخهٔ پشتیبان‌شده از پایگاه‌داده اعمال کنید، سپس دوباره تلاش کنید.', $schemaProblems, $user);
 }
 if ((string) ($_GET['calendar'] ?? '') === '1' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     require __DIR__ . '/../Actions/appointment-actions.php';

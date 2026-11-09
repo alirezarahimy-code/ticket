@@ -95,6 +95,109 @@ final class AppointmentRepository
      */
     public function create(int $ticketId, int $assigneeId, string $startsAt, string $endsAt, string $kind, ?string $note, int $actorId, bool $allowOutsideBusinessHours = false): array
     {
+        $pre = $this->precheckAppointment($startsAt, $endsAt, $kind, $note, $assigneeId, $allowOutsideBusinessHours);
+        if (!$pre['ok']) {
+            return ['ok' => false, 'error' => $pre['error']];
+        }
+        $note = $pre['note'];
+        try {
+            $this->pdo->beginTransaction();
+            $result = $this->insertAppointmentWithinTransaction($ticketId, $assigneeId, $startsAt, $endsAt, $kind, $note, $actorId);
+            if (!$result['ok']) {
+                $this->pdo->rollBack();
+                return $result;
+            }
+            $this->pdo->commit();
+            return $result;
+        } catch (Throwable) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return ['ok' => false, 'error' => 'ثبت نوبت انجام نشد؛ لطفاً دوباره تلاش کنید.'];
+        }
+    }
+
+    /**
+     * ثبت گروهی نوبت‌ها با سیاست «همه یا هیچ» (تصمیم مالک ۲۰۲۶-۱۱-۱۰):
+     *   ۱) همهٔ پیش‌بررسی‌ها (نوع/زمان/طول/گذشته/پنجرهٔ کاری/جدول/یادداشت) برای همهٔ ردیف‌ها
+     *      بدون نوشتن انجام می‌شود؛ اگر حتی یک ردیف نامعتبر باشد، هیچ‌چیزی ثبت نمی‌شود و همهٔ
+     *      خطاهای معنایی یک‌جا برمی‌گردند.
+     *   ۲) درج‌ها در یک تراکنش واحد انجام می‌شود؛ شکست هر ردیف کل دسته را برمی‌گرداند
+     *      (rollBack)، پس نوبت نیمه‌کاره باقی نمی‌ماند. بررسی تعارض هم‌پوشانی و سقف ظرفیت
+     *      روزانه (که ردیف‌های این دسته را هم می‌بیند) در همان تراکنش اعمال می‌شود.
+     *
+     * @param array<int, array{ticket_id:int, assigneeId:int, startsAt:string, endsAt:string, kind:string, note:mixed, actorId:int, allowOutsideBusinessHours:bool}> $items
+     * @return array{ok:bool, ids?:array<int,int>, error?:string, ticket_id?:int, errors?:array<int,string>}
+     */
+    public function createBatch(array $items): array
+    {
+        if ($items === []) {
+            return ['ok' => true, 'ids' => []];
+        }
+
+        // ── فاز پیش‌بررسی (بدون نوشتن): جمع‌آوری همهٔ خطاهای معنایی ──
+        $prechecked = [];
+        $errors = [];
+        foreach ($items as $item) {
+            $ticketId = (int) ($item['ticket_id'] ?? 0);
+            $pre = $this->precheckAppointment(
+                (string) ($item['startsAt'] ?? ''),
+                (string) ($item['endsAt'] ?? ''),
+                (string) ($item['kind'] ?? ''),
+                $item['note'] ?? null,
+                (int) ($item['assigneeId'] ?? 0),
+                (bool) ($item['allowOutsideBusinessHours'] ?? false)
+            );
+            if (!$pre['ok']) {
+                $errors[] = 'درخواست #' . ($ticketId > 0 ? $ticketId : '?') . ': ' . $pre['error'];
+                continue;
+            }
+            $prechecked[] = [
+                'ticket_id' => $ticketId,
+                'assigneeId' => (int) ($item['assigneeId'] ?? 0),
+                'startsAt' => (string) $item['startsAt'],
+                'endsAt' => (string) $item['endsAt'],
+                'kind' => (string) $item['kind'],
+                'note' => $pre['note'],
+                'actorId' => (int) ($item['actorId'] ?? 0),
+            ];
+        }
+        if ($errors !== []) {
+            return ['ok' => false, 'error' => implode(' | ', array_slice($errors, 0, 3)) . (count($errors) > 3 ? ' | و ' . (count($errors) - 3) . ' مورد دیگر' : ''), 'errors' => $errors];
+        }
+
+        // ── فاز درج در یک تراکنش؛ شکست هر مرحله کل دسته را برمی‌گرداند ──
+        $this->pdo->beginTransaction();
+        try {
+            $ids = [];
+            foreach ($prechecked as $entry) {
+                $result = $this->insertAppointmentWithinTransaction(
+                    $entry['ticket_id'], $entry['assigneeId'], $entry['startsAt'], $entry['endsAt'], $entry['kind'], $entry['note'], $entry['actorId']
+                );
+                if (!$result['ok']) {
+                    $this->pdo->rollBack();
+                    $reason = (string) ($result['error'] ?? 'ثبت نوبت انجام نشد.');
+                    return ['ok' => false, 'error' => 'درخواست #' . $entry['ticket_id'] . ': ' . $reason, 'ticket_id' => $entry['ticket_id']];
+                }
+                $ids[] = (int) $result['id'];
+            }
+            $this->pdo->commit();
+            return ['ok' => true, 'ids' => $ids];
+        } catch (Throwable) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            return ['ok' => false, 'error' => 'ثبت نوبت انجام نشد؛ لطفاً دوباره تلاش کنید.'];
+        }
+    }
+
+    /**
+     * پیش‌بررسی‌های غیرتراکنشیِ ثبت نوبت (بدون نوشتن): نوع، زمان، طول، گذشته،
+     * پنجرهٔ کاری کارشناس، وجود جدول، و نرمال‌سازی یادداشت.
+     * @return array{ok:bool, note?:string|null, error?:string}
+     */
+    private function precheckAppointment(string $startsAt, string $endsAt, string $kind, $note, int $assigneeId, bool $allowOutsideBusinessHours): array
+    {
         if (!isset(self::KINDS[$kind])) {
             return ['ok' => false, 'error' => 'نوع نوبت نامعتبر است.'];
         }
@@ -132,10 +235,19 @@ final class AppointmentRepository
             $note = mb_substr($note, 0, 500);
         }
         $note = $note === '' ? null : $note;
+        return ['ok' => true, 'note' => $note];
+    }
 
+    /**
+     * بدنهٔ تراکنشیِ ثبت نوبت (قفل ردیف کارشناس، سقف ظرفیت روزانه، تعارض، درج).
+     * بدون begin/commit/rollBack؛ مدیریت تراکنش بر عهدهٔ فراخوان است تا ثبت تکی و گروهی
+     * هر دو از یک مسیر بگذرند. روی مغایرت‌ها فقط شکست برمی‌گرداند؛ برگرداندن تراکنش با فراخوان است.
+     * @return array{ok:bool, id?:int, error?:string}
+     */
+    private function insertAppointmentWithinTransaction(int $ticketId, int $assigneeId, string $startsAt, string $endsAt, string $kind, ?string $note, int $actorId): array
+    {
+        $startTs = (int) strtotime($startsAt);
         try {
-            $this->pdo->beginTransaction();
-
             // Locking point واقعی هم‌زمانی: قفل روی ردیف کاربر «مسئول» در همان تراکنش.
             // چرا کافی نیست روی request_center_appointments با LIMIT 1 FOR UPDATE تکیه کنیم؟
             // - در حالت صفر ردیف هم‌پوشان (اولین نوبت کارشناس)، دو تراکنش روی گپ بعدی/قبلی
@@ -167,7 +279,6 @@ final class AppointmentRepository
                 }
             }
             if (!is_array($assigneeRow) || (int) ($assigneeRow['id'] ?? 0) <= 0) {
-                $this->pdo->rollBack();
                 return ['ok' => false, 'error' => 'کارشناس هدف معتبر نیست یا حساب او فعال نیست.'];
             }
             $assigneeDepartmentId = isset($assigneeRow['department_id']) && (int) $assigneeRow['department_id'] > 0
@@ -183,7 +294,6 @@ final class AppointmentRepository
             );
             $countStmt->execute([$assigneeId, self::STATUS_CANCELLED, $dayStart, $dayEnd]);
             if ((int) $countStmt->fetchColumn() >= $limits['assignee']) {
-                $this->pdo->rollBack();
                 return ['ok' => false, 'error' => "ظرفیت روزانهٔ این کارشناس برای این تاریخ تکمیل است (سقف {$limits['assignee']} نوبت)."];
             }
             if ($limits['team'] > 0 && $assigneeDepartmentId !== null) {
@@ -194,7 +304,6 @@ final class AppointmentRepository
                 );
                 $teamStmt->execute([$assigneeDepartmentId, self::STATUS_CANCELLED, $dayStart, $dayEnd]);
                 if ((int) $teamStmt->fetchColumn() >= $limits['team']) {
-                    $this->pdo->rollBack();
                     return ['ok' => false, 'error' => "ظرفیت روزانهٔ تیم شما برای این تاریخ تکمیل است (سقف {$limits['team']} نوبت)."];
                 }
             }
@@ -212,7 +321,6 @@ final class AppointmentRepository
                 $conflict->execute([$assigneeId, self::STATUS_CANCELLED, $endsAt, $startsAt]);
             }
             if ($conflict->fetchColumn() !== false) {
-                $this->pdo->rollBack();
                 return ['ok' => false, 'error' => 'این بازه با نوبت فعال دیگری روی تقویم کارشناس تداخل دارد.'];
             }
 
@@ -221,12 +329,8 @@ final class AppointmentRepository
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             $ins->execute([$ticketId, $assigneeId, $startsAt, $endsAt, $kind, self::STATUS_PLANNED, $note, $actorId]);
             $id = (int) $this->pdo->lastInsertId();
-            $this->pdo->commit();
             return ['ok' => true, 'id' => $id];
         } catch (Throwable) {
-            if ($this->pdo->inTransaction()) {
-                $this->pdo->rollBack();
-            }
             return ['ok' => false, 'error' => 'ثبت نوبت انجام نشد؛ لطفاً دوباره تلاش کنید.'];
         }
     }

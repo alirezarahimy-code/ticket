@@ -356,9 +356,11 @@ $rcFlashMessage = match ($rcFlash) {
     'created'   => 'نوبت رسیدگی با موفقیت ثبت شد.',
     'cancelled' => 'نوبت لغو شد.',
     'completed' => 'نوبت «انجام‌شده» علامت خورد.',
-    'batch'     => $rcBatchFailed === 0
-        ? sprintf('ثبت گروهی با موفقیت انجام شد: %d نوبت ثبت شد.', $rcBatchOk)
-        : sprintf('ثبت گروهی: %d نوبت موفق و %d نوبت ناموفق.', $rcBatchOk, $rcBatchFailed),
+    'batch'     => ($rcBatchFailed === 0 && $rcBatchOk === 0 && trim((string) ($_GET['empty'] ?? '')) === '1')
+        ? 'درخواستی انتخاب نشد؛ هیچ نوبتی ثبت نشد.'
+        : ($rcBatchFailed === 0
+            ? sprintf('ثبت گروهی انجام شد: %d نوبت در یک تراکنش ثبت شد.', $rcBatchOk)
+            : sprintf('ثبت گروهی انجام نشد؛ هیچ نوبتی ثبت نشد. %d ردیف ناموفق.', $rcBatchFailed)),
     'error'     => 'خطا: ' . ($rcReason !== '' ? $rcReason : 'عملیات انجام نشد.'),
     default     => '',
 };
@@ -463,7 +465,7 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
 
           <section class="rc-panel rc-form" aria-label="ثبت نوبت برای این روز">
             <div class="rc-panel-body">
-              <h3>ثبت نوبت برای این روز <small>یک یا چند درخواست را انتخاب کنید؛ ساعت هر نوبت را جدا تنظیم کنید. حداکثر ۵۰ نوبت در هر ثبت.</small></h3>
+              <h3>ثبت نوبت برای این روز <small>یک یا چند درخواست را انتخاب کنید؛ ساعت هر نوبت را جدا تنظیم کنید. حداکثر ۵۰ نوبت در هر ثبت — «همه یا هیچ».</small></h3>
               <?php if ($rcMissing): ?>
                 <div class="rc-alert warn">جدول نوبت‌ها ایجاد نشده است؛ ابتدا مهاجرت <code>migrations/035-request-center-appointments.sql</code> را اجرا کنید.</div>
               <?php else: ?>
@@ -512,7 +514,7 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                   <span class="rc-batch-count"><strong id="rc-batch-count">۰</strong> درخواست انتخاب شده</span>
                   <button class="rc-primary" type="submit">ثبت نوبت‌های انتخاب‌شده</button>
                 </div>
-                <p class="rc-hint">روزهای تعطیل و پنجشنبه‌وجمعه پیش‌فرض مسدودند (مدیر می‌تواند با گزینهٔ بالا ثبت کند). تداخل نوبت فعال هم‌زمان پذیرفته نمی‌شود.</p>
+                <p class="rc-hint">ثبت گروهی «همه یا هیچ» است: اگر حتی یک درخواست نامعتبر باشد (ساعت بیرون از پنجرهٔ کاری، تعطیل، تکمیل ظرفیت روزانه یا تداخل نوبت) <strong>هیچ‌کدام ثبت نمی‌شود</strong>. روزهای تعطیل و پنجشنبه‌وجمعه پیش‌فرض مسدودند (مدیر می‌تواند با گزینهٔ بالا ثبت کند). تداخل نوبت فعال هم‌زمان پذیرفته نمی‌شود.</p>
               </form>
               <?php endif; ?>
             </div>
@@ -559,6 +561,7 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                   if ($holidayTitle !== null) { $cellClasses .= ' holiday'; }
               ?>
               <div class="<?= $cellClasses ?>" role="gridcell"<?= $holidayTitle ? ' title="' . $escape($holidayTitle) . '"' : '' ?>>
+                <a class="rc-day-cover" href="<?= $escape($calendarLink($jmonthParam, 'day', $kindFilter, $cellDate)) ?>" aria-label="نمای روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>" tabindex="-1"></a>
                 <div class="rc-daynum"><a class="rc-day-link" href="<?= $escape($calendarLink($jmonthParam, 'day', $kindFilter, $cellDate)) ?>" title="نمای روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>"><?= $escape($faDigits((string) $cellJd)) ?></a><?php if (!$inMonth): ?><span style="font-weight:400;color:#9aa7b4;font-size:10px"> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?></span><?php endif; ?></div>
                 <?php if ($holidayTitle !== null): ?><span class="rc-hol-tag"><?= $escape($holidayTitle) ?></span><?php endif; ?>
                 <?php foreach (array_slice($cellEvents, 0, 3) as $event): ?>

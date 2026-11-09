@@ -41,6 +41,13 @@ function global_search_catalog(): array
 {
     return [
         ['key' => 'dashboard', 'title' => 'داشبورد', 'url' => 'index.php', 'keywords' => ['خانه', 'صفحه اصلی', 'خلاصه وضعیت', 'کارتابل من', 'home', 'داشبورد']],
+        ['key' => 'rc-home', 'title' => 'مرکز درخواست‌ها (خانهٔ ماژول)', 'url' => 'request-center.php', 'keywords' => ['مرکز درخواست', 'درخواست‌ها', 'تیکت', 'پشتیبانی', 'رسیدگی'], 'perms' => ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']],
+        ['key' => 'new-ticket', 'title' => 'ثبت درخواست جدید', 'url' => 'request-center.php?page=new-ticket', 'keywords' => ['درخواست جدید', 'ثبت درخواست', 'پشتیبانی', 'خدمات کامپیوتری', 'درخواست', 'تیکت', 'تیکت جدید', 'ثبت تیکت']],
+        ['key' => 'queue', 'title' => 'صف کاری (کارتابل درخواست‌ها)', 'url' => 'request-center.php?page=queue', 'keywords' => ['درخواست', 'کارتابل', 'صف', 'وظایف من', 'رسیدگی'], 'perm' => 'queue.view'],
+        ['key' => 'reports', 'title' => 'گزارش درخواست‌ها', 'url' => 'request-center.php?page=reports', 'keywords' => ['گزارش', 'آمار درخواست', 'خروجی اکسل', 'عملکرد'], 'perm' => 'reports.view'],
+        ['key' => 'analytics', 'title' => 'چارت‌ها و نمودارها', 'url' => 'request-center.php?page=analytics', 'keywords' => ['نمودار', 'چارت', 'آمار', 'تحلیل'], 'perm' => 'analytics.view'],
+        ['key' => 'supervisor', 'title' => 'پنل سوپروایزر', 'url' => 'request-center.php?page=supervisor', 'keywords' => ['تأیید نهایی', 'بستن درخواست', 'سوپروایزر', 'بازگشایی', 'SLA', 'نظارت'], 'perm' => 'supervisor.panel'],
+        ['key' => 'services', 'title' => 'خدمات و دسته‌بندی خدمات', 'url' => 'request-center.php?page=services', 'keywords' => ['کاتالوگ خدمات', 'دسته خدمات', 'فیلدهای خدمت', 'فرم خدمت'], 'perm' => 'services.view'],
         ['key' => 'notifications', 'title' => 'اعلان‌ها', 'url' => 'index.php?page=notifications', 'keywords' => ['اعلان', 'پیام', 'اطلاعیه', 'زنگوله']],
         ['key' => 'profile', 'title' => 'پروفایل من', 'url' => 'index.php?page=profile', 'keywords' => ['حساب کاربری', 'مشخصات من', 'عکس پروفایل', 'کد ملی']],
         ['key' => 'search', 'title' => 'جست‌وجوی سراسری', 'url' => 'index.php?page=search', 'keywords' => ['جستجو', 'جست‌وجو', 'search', 'پیدا کردن']],

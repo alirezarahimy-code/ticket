@@ -193,3 +193,47 @@ $defaultEnd = date('Y-m-d', strtotime('+5 days')) . ' 10:45:00';
 $dOk = $repo->create(101, 1, $defaultDay, $defaultEnd, 'work', null, 1);
 check_request_center($dOk['ok'] === true, 'defaults restored: booking inside the global window with empty settings works');
 echo "ALL-PHASE3-WORKING-HOURS-AND-CAPACITY-TESTS-PASSED\n";
+
+// ——— createBatch «همه یا هیچ» (تصمیم مالک ۲۰۲۶-۱۱-۱۰) ———
+$batchDay = date('Y-m-d', strtotime('+30 days'));
+$batchStartA = $batchDay . ' 09:00:00';
+$batchEndA = $batchDay . ' 09:45:00';
+$batchStartB = $batchDay . ' 10:00:00';
+$batchEndB = $batchDay . ' 10:45:00';
+
+$countBefore = (int) $pdo->query('SELECT COUNT(*) FROM request_center_appointments')->fetchColumn();
+$batchInvalid = $repo->createBatch([
+    ['ticket_id' => 101, 'assigneeId' => 1, 'startsAt' => $batchStartA, 'endsAt' => $batchEndA, 'kind' => 'work', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+    ['ticket_id' => 101, 'assigneeId' => 1, 'startsAt' => $batchStartB, 'endsAt' => $batchEndB, 'kind' => 'party', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+]);
+check_request_center($batchInvalid['ok'] === false, 'batch with an invalid kind is rejected');
+check_request_center(str_contains((string) ($batchInvalid['error'] ?? ''), '#101'), 'batch error identifies the offending ticket');
+$countAfterInvalid = (int) $pdo->query('SELECT COUNT(*) FROM request_center_appointments')->fetchColumn();
+check_request_center($countAfterInvalid === $countBefore, 'all-or-nothing: no row is written when any precheck fails');
+
+$batchOverlap = $repo->createBatch([
+    ['ticket_id' => 101, 'assigneeId' => 2, 'startsAt' => $batchStartA, 'endsAt' => $batchEndA, 'kind' => 'work', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+    ['ticket_id' => 101, 'assigneeId' => 2, 'startsAt' => $batchStartA, 'endsAt' => $batchEndA, 'kind' => 'work', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+]);
+check_request_center($batchOverlap['ok'] === false, 'all-or-nothing: intra-batch overlap is rejected');
+$countAfterOverlap = (int) $pdo->query('SELECT COUNT(*) FROM request_center_appointments')->fetchColumn();
+check_request_center($countAfterOverlap === $countBefore, 'all-or-nothing: intra-batch overlap writes nothing');
+
+$batchOk = $repo->createBatch([
+    ['ticket_id' => 101, 'assigneeId' => 1, 'startsAt' => $batchStartA, 'endsAt' => $batchEndA, 'kind' => 'work', 'note' => 'back-to-back', 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+    ['ticket_id' => 101, 'assigneeId' => 1, 'startsAt' => $batchStartB, 'endsAt' => $batchEndB, 'kind' => 'followup', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+]);
+check_request_center($batchOk['ok'] === true && count($batchOk['ids'] ?? []) === 2, 'valid batch creates every appointment');
+$countAfterBatch = (int) $pdo->query('SELECT COUNT(*) FROM request_center_appointments')->fetchColumn();
+check_request_center($countAfterBatch === $countBefore + 2, 'all-or-nothing: a valid batch persists every row');
+
+$otherDay = date('Y-m-d', strtotime('+31 days')) . ' 09:00:00';
+$otherDayEnd = date('Y-m-d', strtotime('+31 days')) . ' 09:45:00';
+$batchConflictWithExisting = $repo->createBatch([
+    ['ticket_id' => 101, 'assigneeId' => 1, 'startsAt' => $otherDay, 'endsAt' => $otherDayEnd, 'kind' => 'work', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+    ['ticket_id' => 101, 'assigneeId' => 1, 'startsAt' => $batchStartA, 'endsAt' => $batchEndA, 'kind' => 'work', 'note' => null, 'actorId' => 1, 'allowOutsideBusinessHours' => false],
+]);
+check_request_center($batchConflictWithExisting['ok'] === false, 'all-or-nothing: overlapping an existing appointment fails the whole batch');
+$countAfterConflict = (int) $pdo->query('SELECT COUNT(*) FROM request_center_appointments')->fetchColumn();
+check_request_center($countAfterConflict === $countAfterBatch, 'all-or-nothing: no row is written when the transaction aborts mid-batch');
+echo "ALL-OR-NOTHING-BATCH-TESTS-PASSED\n";

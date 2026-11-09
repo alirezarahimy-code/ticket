@@ -124,8 +124,12 @@ function render_header(string $title, ?array $user = null): void
         $menuItems = [
             '<li>' . $menuLink('index.php', 'داشبورد', 'home') . '</li>',
         ];
-        // مرکز درخواست‌ها سامانهٔ مستقلی است و در سامانهٔ اصلی هیچ اثری ندارد؛
-        // ورود به آن فقط از نشانی request-center.php انجام می‌شود.
+        // ورودی رسمی «مرکز درخواست‌ها» — سامانهٔ مستقل با پوستهٔ مرکزی (بازگردانی تصمیم مالک ۲۰۲۶-۱۱-۱۰)
+        if (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user)) {
+            $menuItems[] = '<li>' . $menuLink('request-center.php', 'مرکز درخواست‌ها', 'ticket') . '</li>';
+        }
+        // پنج لینک مستقیمِ گروه پشتیبانی (services/queue/governance/supervisor/OLA) عمداً باقی ماندند؛
+        // ورودی بالا، «مرکز درخواست‌ها» را به‌عنوان مبدأ رسمی درخواست‌ها بازمی‌گرداند (تصمیم مالک ۲۰۲۶-۱۱-۱۰).
         if (user_can($user, 'cddvd.view')) {
             $menuItems[] = '<li>' . $menuLink('index.php?page=cd-dvd', 'کنترل CD/DVD', 'disc') . '</li>';
         }

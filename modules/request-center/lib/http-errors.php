@@ -20,8 +20,9 @@ declare(strict_types=1);
  * @param string $title    عنوان کوتاه خطا (فارسی)
  * @param string $message  توضیح کاربرپسند بدون افشای جزئیات فنی
  * @param array<int,string> $problems فهرست اختیاری موارد ناقص (برای 503)؛ هرگز دادهٔ حساس نباشد
+ * @param array|null $user کاربر جاری (در صورت وجود)؛ بلوک «راهنمای رفع ادمین» فقط برای ادمین اصلی نمایش داده می‌شود
  */
-function request_center_error_page(int $status, string $title, string $message, array $problems = []): never
+function request_center_error_page(int $status, string $title, string $message, array $problems = [], ?array $user = null): never
 {
     $status = ($status >= 400 && $status <= 599) ? $status : 500;
 
@@ -42,17 +43,23 @@ function request_center_error_page(int $status, string $title, string $message, 
     $problemsBlock = $problemsHtml !== '' ? "<ul class=\"rc-error-problems\">{$problemsHtml}</ul>" : '';
     $fixBlock = '';
     if ($status === 503) {
+        $rcIsAdmin = is_array($user) && function_exists('user_is_primary_admin') && user_is_primary_admin($user);
+        if (!$rcIsAdmin) {
+            $fixBlock = '<div class="rc-error-fix">'
+                . '<p class="rc-error-fix-note">این بخش به دلیل تکمیل‌نبودن ساختار پایگاه‌داده موقتاً غیرفعال است؛ فقط ادمین سامانه می‌تواند آن را رفع کند. همین صفحه را نزد او ببرید.</p>'
+                . '</div>';
+        } else {
         $fixBlock = '<div class="rc-error-fix">'
-            . '<h2>راهنمای رفع این خطا (۵ دقیقه)</h2>'
+            . '<h2>راهنمای رفع این خطا (ادمین — حدود ۵ دقیقه)</h2>'
             . '<ol>'
-            . '<li>قبل از هر چیز از پایگاه‌داده بکاپ بگیرید:<br><code>mariadb-dump --single-transaction --quick &lt;dbname&gt; | gzip &gt; rc-fix-backup-$(date +%F).sql.gz</code></li>'
-            . '<li>مهاجرت <code>migrations/035-request-center-appointments.sql</code> را دستی و یک&zwnj;باره اعمال کنید (idempotent؛ اجرای دوباره بی&zwnj;خطر است):<br><code>mariadb &lt;dbname&gt; &lt; migrations/035-request-center-appointments.sql</code></li>'
-            . '<li>سپس فقط همین ردیف را در جدول registry ثبت کنید:<br><code>INSERT IGNORE INTO schema_updates (version, migration) VALUES (\'1.63\', \'035-request-center-appointments.sql\');</code></li>'
-            . '<li>اگر پیش&zwnj;تر نسخهٔ قدیمی ۰۳۵ در <code>schema_updates</code> ثبت شده بود، ابتدا آن را پاک کنید و فایل ادغام&zwnj;شده را اعمال کنید:<br><code>DELETE FROM schema_updates WHERE migration = \'035-request-center-appointments.sql\';</code><br>یا مستقیم همان فایل را دستی اجرا کنید (مرحلهٔ ۲ کافی است و ثبت در مرحلهٔ ۳ اثبات می&zwnj;کند).</li>'
-            . '<li>صفحه را دوباره بارگذاری کنید. اگر باز هم ۵۰۳ گرفتید، ستون&zwnj;های <code>tickets.rejected_at</code> و جدول <code>request_center_appointments</code> را در دیتابیس بررسی کنید و با مدیر سامانه تماس بگیرید.</li>'
+            . '<li>ابتدا از پایگاه‌داده بکاپ بگیرید:<br>ویندوز (XAMPP):<br><code>C:\xampp\mysql\bin\mariadb-dump.exe -u root -p &lt;dbname&gt; &gt; C:\backup\rc-backup.sql</code><br>لینوکس:<br><code>mariadb-dump -u root -p &lt;dbname&gt; &gt; ~/rc-backup.sql</code></li>'
+            . '<li>مهاجرت <code>migrations/035-request-center-appointments.sql</code> را یک‌باره اعمال کنید (idempotent؛ اجرای دوباره بی‌خطر است):<br>ویندوز (XAMPP):<br><code>C:\xampp\mysql\bin\mariadb.exe -u root -p &lt;dbname&gt; &lt; migrations\035-request-center-appointments.sql</code><br>لینوکس:<br><code>mariadb -u root -p &lt;dbname&gt; &lt; migrations/035-request-center-appointments.sql</code></li>'
+            . '<li>اگر پیش‌تر نسخهٔ قدیمیِ همان فایل در <code>schema_updates</code> ثبت شده بود، بعد از اعمال دستی فقط همان ردیف را پاک کنید:<br><code>DELETE FROM schema_updates WHERE migration = \'035-request-center-appointments.sql\';</code><br>(خودِ اجرای دستی کافی است؛ این فقط ثبت را هم‌تراز می‌کند.)</li>'
+            . '<li>صفحه را دوباره بارگذاری کنید. اگر باز هم ۵۰۳ گرفتید، ستون‌های <code>tickets.rejected_at</code> و جدول <code>request_center_appointments</code> را در دیتابیس بررسی کنید.</li>'
             . '</ol>'
-            . '<p class="rc-error-fix-note">این خطا عمداً هیچ تغییری در پایگاه‌داده ایجاد نمی&zwnj;کند؛ اعمال مهاجرت فقط با دستور صریح شما انجام می&zwnj;شود.</p>'
+            . '<p class="rc-error-fix-note">این خطا عمداً هیچ تغییری در پایگاه‌داده ایجاد نمی‌کند؛ اعمال مهاجرت فقط با دستور شما انجام می‌شود.</p>'
             . '</div>';
+        }
     }
 
     echo '<!doctype html>'
@@ -66,7 +73,8 @@ function request_center_error_page(int $status, string $title, string $message, 
         . 'h1{font-size:20px;margin:0 0 10px;color:#172b4d}'
         . 'p{color:#47566e;margin:0 0 14px;line-height:1.9}'
         . '.rc-error-problems{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 26px;color:#7f1d1d;margin:0 0 16px;line-height:1.9}'
-        . 'a{display:inline-block;background:#1d4ed8;color:#fff;text-decoration:none;padding:9px 18px;border-radius:9px}'
+        . 'a{display:inline-block;background:#1d4ed8;color:#fff;text-decoration:none;padding:9px 18px;border-radius:9px;margin-inline-end:8px}'
+        . 'a.secondary{background:#fff;color:#1d4ed8;border:1px solid #c7d2fe}'
         . 'a:hover{background:#1e40af}'
         . '.rc-error-fix{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin:0 0 16px;color:#573a06;font-size:13px;line-height:2}'
         . '.rc-error-fix h2{font-size:14px;margin:0 0 8px;color:#92400e}'
@@ -80,7 +88,8 @@ function request_center_error_page(int $status, string $title, string $message, 
         . '<p>' . $messageHtml . '</p>'
         . $problemsBlock
         . $fixBlock
-        . '<a href="request-center.php">بازگشت به مرکز درخواست‌ها</a>'
+        . '<a class="rc-error-home" href="index.php">بازگشت به سامانهٔ اصلی</a>'
+        . '<a class="rc-error-home secondary" href="request-center.php">تلاش دوباره: مرکز درخواست‌ها</a>'
         . '</main></body></html>';
     exit;
 }

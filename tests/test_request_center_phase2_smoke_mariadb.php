@@ -909,9 +909,13 @@ try {
         && $autoCloseEventsAfterRetry === 1 && $autoCloseNotificationsAfterRetry >= 2,
         'automatic close retries after notification storage recovers and persists requester plus staff notices');
 
-    // 8) Phase 3 — a non-RC POST action is forwarded in-process to the front controller (no payload loss, no 419).
+    // 8) Phase 3 — non-RC POST actions never reach the legacy front controller.
+    // Unknown actions fail closed with 404 (fail-closed); logout is handled inline and 303/302s to the login page.
     $forwarded = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'zz_not_an_action', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
-    smoke_check($forwarded['status'] === 200 && str_contains($forwarded['body'], 'داشبورد'), 'non-RC POST action is forwarded in-process and renders the dashboard (status ' . $forwarded['status'] . ')');
+    smoke_check($forwarded['status'] === 404, 'non-RC POST action fails closed with 404 (status ' . $forwarded['status'] . ')');
+    // logout must stay the very last call in this scenario: it destroys the shared smoke session.
+    $logout = smoke_http_post('http://' . $address . '/request-center.php', ['action' => 'logout', 'csrf' => (string) $session['csrf']], ['Cookie: ' . $cookie]);
+    smoke_check(in_array($logout['status'], [302, 303], true) && str_starts_with($logout['location'], 'index.php'), 'inline logout redirects to the main login page (status ' . $logout['status'] . ', location ' . $logout['location'] . ')');
 
     echo "Phase-2 smoke: ALL ASSERTIONS PASS\n";
 } finally {

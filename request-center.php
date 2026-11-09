@@ -37,7 +37,7 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attach
     $downloadSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($downloadSchemaProblems !== []) {
         request_center_error_page(503, 'ساختار پایگاه‌داده آماده نیست',
-            'تا کامل شدن اسکیمای مرکز درخواست‌ها، دانلود پیوست در دسترس نیست.', $downloadSchemaProblems);
+            'تا کامل شدن اسکیمای مرکز درخواست‌ها، دانلود پیوست در دسترس نیست.', $downloadSchemaProblems, $downloadUser);
     }
     request_center_download_attachment($downloadUser);
 }
@@ -56,7 +56,7 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_decision
     $decisionsSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($decisionsSchemaProblems !== []) {
         request_center_error_page(503, 'ساختار پایگاه‌داده آماده نیست',
-            'تا کامل شدن اسکیمای مرکز درخواست‌ها، خروجی در دسترس نیست.', $decisionsSchemaProblems);
+            'تا کامل شدن اسکیمای مرکز درخواست‌ها، خروجی در دسترس نیست.', $decisionsSchemaProblems, $decisionsUser);
     }
     request_center_export_decisions($decisionsUser);
 }
@@ -72,7 +72,7 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report')
     $reportSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($reportSchemaProblems !== []) {
         request_center_error_page(503, 'ساختار پایگاه‌داده آماده نیست',
-            'تا کامل شدن اسکیمای مرکز درخواست‌ها، خروجی در دسترس نیست.', $reportSchemaProblems);
+            'تا کامل شدن اسکیمای مرکز درخواست‌ها، خروجی در دسترس نیست.', $reportSchemaProblems, $reportUser);
     }
     request_center_export_report($reportUser);
 }
@@ -91,8 +91,30 @@ if ($rcMethod === 'POST') {
         request_center_handle_post();
         exit;
     }
-    // Non-RC actions keep their original payload and compatibility semantics.
-    require __DIR__ . '/index.php';
+    // Non-RC platform actions are handled inline — the RC runtime never loads the legacy front controller.
+    if ($rcPostAction === 'logout') {
+        require_once __DIR__ . '/bootstrap.php';
+        if (function_exists('require_csrf')) {
+            require_csrf();
+        }
+        if (function_exists('activity_log')) {
+            activity_log(['action_code' => 'logout', 'module' => 'auth']);
+        }
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], (bool) $params['secure'], (bool) $params['httponly']);
+        }
+        setcookie('itsm_csrf', '', time() - 42000, '/');
+        unset($_COOKIE['itsm_csrf']);
+        session_destroy();
+        if (function_exists('redirect')) {
+            redirect('index.php?page=login');
+        }
+        header('Location: index.php?page=login', true, 303);
+        exit;
+    }
+    request_center_error_page(404, 'عملیات ناشناخته', 'این عملیات در مرکز درخواست‌ها پشتیبانی نمی‌شود.');
     exit;
 }
 
@@ -116,7 +138,7 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     if ($rcSchemaProblems !== []) {
         // دستی‌سازی چرام عمداً در اینجا انجام نمی‌شود: چرام ممکن است به ستون‌های ناقص وابسته باشد.
         request_center_error_page(503, 'مرکز درخواست‌ها در دسترس نیست',
-            'برای جلوگیری از اجرای ناقص عملیات، این بخش تا رفع موارد زیر غیرفعال شد.', $rcSchemaProblems);
+            'برای جلوگیری از اجرای ناقص عملیات، این بخش تا رفع موارد زیر غیرفعال شد.', $rcSchemaProblems, $user);
     }
 
     // Load the optional chatbot only after Request Center schema preflight.

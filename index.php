@@ -1258,11 +1258,19 @@ if ($page === 'search') {
         }
     );
     render_header('جست‌وجوی سراسری', $searchUser);
-    echo '<section class="page-heading"><div><span class="eyebrow">جست‌وجوی سراسری</span><h1>نتایج جست‌وجو</h1><p>در صفحه‌ها، شناسنامه‌ها، تردد، رسانه‌ها و دانش‌نامه جست‌وجو کنید.</p></div></section><form class="card filter-card global-search-page" method="get"><input type="hidden" name="page" value="search"><input name="q" required value="' . e($searchTerm) . '" placeholder="مثلاً تردد، فیش غذا، پشتیبان‌گیری ..."><button class="button" type="submit">جست‌وجو</button></form>';
+    echo '<section class="page-heading"><div><span class="eyebrow">جست‌وجوی سراسری</span><h1>نتایج جست‌وجو</h1><p>در صفحه‌ها، درخواست‌ها، شناسنامه‌ها، تردد، رسانه‌ها و دانش‌نامه جست‌وجو کنید.</p></div></section><form class="card filter-card global-search-page" method="get"><input type="hidden" name="page" value="search"><input name="q" required value="' . e($searchTerm) . '" placeholder="مثلاً درخواست، تردد، فیش غذا، پشتیبان‌گیری ..."><button class="button" type="submit">جست‌وجو</button></form>';
     if ($searchTerm !== '') {
         $needles = array_values(array_unique(array_filter([$searchTerm, global_search_normalize($searchTerm)], static fn(string $v): bool => $v !== '')));
-        // مرکز درخواست‌ها سامانهٔ مستقلی است و در جست‌وجوی سامانهٔ اصلی اثری ندارد.
+        // نتایج مرکز درخواست‌ها دوباره در جست‌وجوی سراسری دیده می‌شوند (بازگردانی تصمیم مالک ۲۰۲۶-۱۱-۱۰)؛
+        // پیوندها به ماژول مستقل، نه به پل‌های سازگاری.
         $ticketRows = [];
+        if (function_exists('request_center_global_search')) {
+            try {
+                $ticketRows = request_center_global_search($searchUser, $needles);
+            } catch (Throwable) {
+                $ticketRows = [];
+            }
+        }
         [$assetSearchScope, $assetSearchParams] = asset_scope($searchUser);
         $assetProfileColumns = db_table_columns('asset_profiles');
         $assetProfileJoin = $assetProfileColumns ? ' LEFT JOIN asset_profiles p ON p.asset_id = a.id ' : ' ';
@@ -1307,6 +1315,7 @@ if ($page === 'search') {
             // کارت «بخش‌ها و صفحه‌ها» اکنون فقط هنگام وجود نتیجه نمایش داده می‌شود.
             echo '<section class="search-results">';
             if($searchSections){echo '<div class="card"><h2>صفحه‌ها و بخش‌های مرتبط <span class="muted">('.count($searchSections).')</span></h2><div class="category-list">';foreach($searchSections as $result){echo '<a class="search-result" href="'.e((string)$result['url']).'"><strong>'.e((string)$result['title']).'</strong><small class="muted">باز کردن این بخش</small></a>'; }echo '</div></div>';}
+            if($ticketRows){echo '<div class="card"><h2>درخواست‌ها <span class="muted">('.count($ticketRows).')</span></h2><div class="category-list">';foreach($ticketRows as $result){echo '<a class="search-result" href="request-center.php?page=ticket&id='.(int)$result['id'].'"><strong>'.e(ticket_number((int)$result['id'])).' • '.e($result['subject']).'</strong><small>'.e($result['department_name']?:'بدون معاونت').' • '.e(ticket_type_label($result['ticket_type'])).' • '.e(status_label($result['status'])).'</small></a>'; }echo '</div></div>';}
             if($assetRows){echo '<div class="card"><h2>شناسنامه‌ها و دارایی‌ها <span class="muted">('.count($assetRows).')</span></h2><div class="category-list">';foreach($assetRows as $result){echo '<a class="search-result" href="index.php?page=inventory&id='.(int)$result['id'].'"><strong>'.asset_tag_label($result['asset_tag'],$result['hostname']).' • '.e(asset_display_name($result['hostname'])).'</strong><small>'.e($result['profile_record']?:$result['serial_number']?:'شناسه ثبت نشده').' • '.e($result['profile_owner']?:$result['department_name']?:'بدون مالک ثبت‌شده').'</small></a>'; }echo '</div></div>';}
             if($articleRows){echo '<div class="card"><h2>دانش‌نامه <span class="muted">('.count($articleRows).')</span></h2><div class="category-list">';foreach($articleRows as $result){echo '<a class="search-result" href="index.php?page=knowledge&id='.(int)$result['id'].'"><strong>'.e($result['title']).'</strong><small>'.e($result['category']?:'راهنما').' • '.e(jalali_date($result['updated_at'],false)).'</small></a>'; }echo '</div></div>';}
             if($trafficRows){echo '<div class="card"><h2>سوابق تردد <span class="muted">('.count($trafficRows).')</span></h2><div class="category-list">';foreach($trafficRows as $result){echo '<a class="search-result" href="index.php?page=traffic-control&tab=history&search='.rawurlencode($searchTerm).'"><strong>'.e($result['full_name']).' • '.e($result['serial_no']).'</strong><small>'.e($result['visit_date']).' • '.e($result['company']?:'بدون شرکت').' • '.e($result['meeting_with']?:'بدون مقصد').'</small></a>'; }echo '</div></div>';}
@@ -2428,15 +2437,53 @@ if ($page !== 'dashboard') {
 }
 
     $isStaff = is_staff_role($user['role']);
+// بازگردانی کارت‌ها و فهرست درخواست‌ها در داشبورد (تصمیم مالک ۲۰۲۶-۱۱-۱۰):
+// موج استقلال (2066cb0) این بلوک را حذف کرده بود؛ بازگردانده شد. پیوندها به ماژول مستقل می‌روند.
+$rcCanSee = function_exists('request_center_dashboard_rows')
+    && (user_can_any($user, ['ticket.create', 'ticket.view_own', 'ticket.edit', 'queue.view', 'ticket.view_unit', 'ticket.view_all', 'supervisor.panel']) || user_is_primary_admin($user));
+$rcCounts = null;
+$rcTickets = null;
+if ($rcCanSee) {
+    try {
+        [$rcCounts, $rcTickets] = request_center_dashboard_rows($user);
+    } catch (Throwable $rcDashError) {
+        error_log('[dashboard] rc rows: ' . $rcDashError->getMessage());
+    }
+}
+$activeCount = 0;
+if (is_array($rcCounts)) {
+    $activeCount = (int) ($rcCounts['new'] ?? 0) + (int) ($rcCounts['manager_review'] ?? 0) + (int) ($rcCounts['assigned'] ?? 0)
+        + (int) ($rcCounts['in_progress'] ?? 0) + (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);
+}
 render_header('داشبورد', $user);
 $cdDvdReady = cd_dvd_available();
-echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ? 'میز کار سازمان' : 'میز کار شما') . '</span><h1>سلام ' . e($user['full_name']) . '،<br><strong>امروز چه کاری در پیش دارید؟</strong></h1><p>بخش مورد نظرتان را از دسترسی‌های سریع پایین همین صفحه یا منوی بالا انتخاب کنید.</p></div><a class="button hero-button" href="index.php?page=knowledge"><span>☰</span> دانش‌نامه</a></section>';
+echo '<section class="dashboard-hero"><div><span class="eyebrow">' . ($isStaff ? 'مرکز کنترل پشتیبانی' : 'فضای درخواست‌های شما') . '</span><h1>سلام ' . e($user['full_name']) . '،<br><strong>چه کمکی از ما می‌خواهید؟</strong></h1><p>درخواست جدید ثبت کنید یا وضعیت درخواست‌های قبلی را دنبال کنید؛ بقیهٔ بخش‌ها در «دسترسی سریع» پایین صفحه است.</p></div><a class="button hero-button" href="request-center.php?page=new-ticket"><span>＋</span> ثبت درخواست جدید</a></section>';
+if (is_array($rcCounts)) {
+    $waiting = (int) ($rcCounts['waiting_user'] ?? 0) + (int) ($rcCounts['pending'] ?? 0);
+    $resolved = (int) ($rcCounts['resolved'] ?? 0) + (int) ($rcCounts['closed'] ?? 0);
+    $cancelled = (int) ($rcCounts['cancelled'] ?? 0);
+    $shown = is_array($rcTickets) ? count($rcTickets) : 0;
+    echo '<section class="stat-grid"><a class="stat-card accent" href="request-center.php?page=reports&amp;status=active" title="نمایش درخواست‌های در حال پیگیری"><span class="stat-icon">◈</span><div><strong>' . (int) $activeCount . '</strong><small>در حال پیگیری</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=waiting_user" title="نمایش درخواست‌های در انتظار پاسخ کاربر"><span class="stat-icon blue">◌</span><div><strong>' . $waiting . '</strong><small>در انتظار پاسخ کاربر</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=resolved" title="نمایش درخواست‌های حل‌شده و بسته‌شده"><span class="stat-icon green">✓</span><div><strong>' . $resolved . '</strong><small>حل‌شده</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=cancelled" title="نمایش درخواست‌های لغوشده"><span class="stat-icon" style="background:#fef3f2;color:#b42318">×</span><div><strong>' . $cancelled . '</strong><small>لغوشده</small></div></a><a class="stat-card" href="request-center.php?page=reports&amp;status=all" title="نمایش همهٔ درخواست‌ها در گزارش‌ها"><span class="stat-icon gray">▣</span><div><strong>' . $shown . '</strong><small>نمایش داده‌شده</small></div></a></section>';
+}
 if ($cdDvdReady) {
     echo cd_dvd_render_surface($user, 'index.php');
      echo '<script src="assets/cd-dvd.js?v=3.4.9"></script>';
 }
 if (function_exists('food_order_render_pending_cancels_card')) {
     echo food_order_render_pending_cancels_card($user);
+}
+if (is_array($rcTickets)) {
+    echo '<section class="list-section"><div class="section-title"><div><h2>' . ($isStaff ? 'آخرین درخواست‌ها' : 'درخواست‌های من') . '</h2><p>آخرین تغییرات در ابتدا نمایش داده می‌شود.</p></div><a href="request-center.php?page=new-ticket">ثبت درخواست ←</a></div>';
+    if ($rcTickets === []) {
+        echo '<div class="card empty-state"><div class="empty-icon">✦</div><h3>هنوز درخواستی ثبت نشده است</h3><p>برای شروع، اولین درخواست خود را ثبت کنید.</p><a class="button" href="request-center.php?page=new-ticket">ثبت اولین درخواست</a></div>';
+    } else {
+        echo '<div class="card ticket-table"><div class="table-head"><span>عنوان درخواست</span><span>ثبت‌کننده</span><span>اولویت</span><span>وضعیت</span><span>آخرین تغییر</span></div>';
+        foreach ($rcTickets as $ticket) {
+            echo '<a class="table-row" href="request-center.php?page=ticket&id=' . (int) $ticket['id'] . '"><span class="ticket-title"><b>' . e(ticket_number((int) $ticket['id'])) . '</b><strong>' . e($ticket['subject']) . '</strong><small>' . e($ticket['category_name'] ?: 'بدون دسته‌بندی') . '</small></span><span>' . e($isStaff ? $ticket['requester_name'] : ($ticket['assignee_name'] ?: 'در انتظار تخصیص')) . '</span><span><i class="priority-dot ' . e($ticket['priority']) . '"></i>' . e(priority_label($ticket['priority'])) . '</span><span><em class="status ' . e($ticket['status']) . '">' . e(status_label($ticket['status'])) . '</em></span><span class="date-cell">' . e(persian_date($ticket['updated_at'])) . ' ←</span></a>';
+        }
+        echo '</div>';
+    }
+    echo '</section>';
 }
 $quickLinks = [];
 if (user_can($user, 'foodorder.self')) {

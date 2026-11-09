@@ -581,10 +581,27 @@ def test_ticket_notification_targets_use_the_core_notifications_page():
 
 
 def test_core_has_no_request_center_references():
-    # مرکز درخواست‌ها سامانهٔ مستقلی روی request-center.php است؛ سامانهٔ اصلی هیچ لینک/ارجاعی به آن ندارد.
-    # تنها «requires نامرئی» سمت سرور و پل ۳۰۲ اول index.php عمدی‌اند و توسط تست‌های دیگر پوشش داده می‌شوند.
-    for path in ("global-search.php", "governance.php", "chatbot.php", "assets/app.js", "lib/notify-users.php"):
+    # تصمیم مالک ۲۰۲۶-۱۱-۱۰ (معکوسِ جزئیِ استقلال): ورودی «مرکز درخواست‌ها» به منوی اصلی،
+    # کارت‌ها/فهرست داشبورد و نتایج جست‌وجوی سراسری برگشت؛ پنج لینک پشتیبانی و پل‌های ۳۰۲ سازگاری ماندند.
+    # ممنوعیتِ ارجاع هسته به فایل‌های ماژول در بقیهٔ هسته همچنان برقرار است.
+    for path in ("governance.php", "chatbot.php", "assets/app.js", "lib/notify-users.php"):
         assert "request-center.php" not in source(path)
+    # جست‌وجوی سراسری دوباره ورودی‌های مرکز درخواست‌ها را در کاتالوگ دارد (تصمیم مالک ۲۰۲۶-۱۱-۱۰).
+    catalog = source("global-search.php")
+    for marker in (
+        "'url' => 'request-center.php?page=new-ticket'",
+        "'url' => 'request-center.php?page=queue'",
+        "'url' => 'request-center.php?page=reports'",
+        "'url' => 'request-center.php?page=supervisor'",
+    ):
+        assert marker in catalog
+    # منوی اصلی: ورودی «مرکز درخواست‌ها» بازگردانده شد (تصمیم مالک ۲۰۲۶-۱۱-۱۰).
+    menu = source("lib/render.php")
+    assert "$menuLink('request-center.php', 'مرکز درخواست‌ها', 'ticket')" in menu
+    # داشبورد: CTA به فرم ثبت درخواست و فهرست درخواست‌ها دوباره به ماژول متصل‌اند.
+    legacy = source("index.php")
+    assert "request-center.php?page=new-ticket" in legacy
+    assert "request_center_dashboard_rows($user)" in legacy
     # منوی ماژول در navigation.php است و خودش راه برگشت به سامانهٔ اصلی را دارد.
     navigation = source("modules/request-center/lib/navigation.php")
     assert 'href="index.php"' in navigation
