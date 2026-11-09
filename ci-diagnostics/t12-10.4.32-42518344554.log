@@ -1,9 +1,0 @@
-    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
-    [probe] tid_check: HTTP 302 location=index.php?page=dashboard tickets_count=1 max_id=1
-T12 SCENARIOS ERROR: create_ticket for feature did not produce its expected ticket route (request-center.php?page=ticket&id=; location=index.php?page=dashboard); app.log tail:
-2026-11-08T23:36:58+03:30 [error] خطای برنامه — یک تابع پیدا نشد؛ احتمالاً فایل‌های سامانه ناهماهنگ‌اند [مشکل جزئی ×0] {"cause":"بر اساس متن خطا؛ برای تأیید جزئیات فنی را ببینید.","action":"سامانه را از یک بستهٔ کامل نصب کنید و نسخهٔ فایل‌ها را یکسان کنید.","technical":"ITSM request failed: Call to undefined function request_center_ticket_return_url() | /index.php","location":"http-post.php:78","code":"SYS-PHP-001","category":"system","escalation_count":0,"escalation_label":"مشکل جزئی"}
-#0 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(586): t12s_create_ticket()
-#1 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(417): {closure}()
-#2 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(426): t12s_run_pair()
-#3 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(585): t12s_finish()
-#4 {main}

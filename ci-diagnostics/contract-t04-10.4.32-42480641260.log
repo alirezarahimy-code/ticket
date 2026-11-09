@@ -1,6 +1,0 @@
-T04 database: 10.4.32-MariaDB-1:10.4.32+maria~ubu2004
-PHP Fatal error:  Uncaught RuntimeException: T04 diagnostic failed: index.php completed HTTP request (status 500) in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php:38
-Stack trace:
-#0 /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php(182): t04_check()
-#1 {main}
-  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php on line 38

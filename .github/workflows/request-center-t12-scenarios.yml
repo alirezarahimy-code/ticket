@@ -112,18 +112,3 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      # Artifact downloads are blocked from the development sandbox; on failure
-      # the runner commits its console log to the session branch so it can be
-      # read. Only on the session branch, never on feature branches.
-      - name: Commit T12 console log on failure (session branch diagnostics)
-        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
-        run: |
-          git config user.name "arena-ci-diagnostics"
-          git config user.email "arena-ci-diagnostics@localhost"
-          git fetch origin "${GITHUB_REF_NAME}"
-          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
-          mkdir -p ci-diagnostics
-          cp "$RUNNER_TEMP/t12-console.log" "ci-diagnostics/t12-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
-          git add ci-diagnostics
-          git commit -m "ci diagnostics: T12 ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
-          git push origin "HEAD:${GITHUB_REF_NAME}" || true

@@ -1,6 +1,0 @@
-T04 database: 10.11.19-MariaDB-ubu2204
-PHP Fatal error:  Uncaught RuntimeException: T04 diagnostic failed: index.php completed HTTP request (status 500); server log: [Sun Nov 8 12:41:00 2026] PHP 8.2.35 Development Server (http://127.0.0.1:18765) started [Sun Nov 8 12:41:00 2026] 127.0.0.1:43208 Accepted [Sun Nov 8 12:41:00 2026] 127.0.0.1:43208 Closed without sending a request; it was probably just an unused speculative preconnection [Sun Nov 8 12:41:00 2026] 127.0.0.1:43208 Closing [Sun Nov 8 12:41:00 2026] 127.0.0.1:43222 Accepted [Sun Nov 8 12:41:00 2026] traffic schema check: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'persian_ticketing_ci.traffic_visits' doesn't exist [Sun Nov 8 12:41:00 2026] 127.0.0.1:43222 [500]: GET /index.php [Sun Nov 8 12:41:00 2026] 127.0.0.1:43222 Closing  in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php:40
-Stack trace:
-#0 /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php(185): t04_check()
-#1 {main}
-  thrown in /home/runner/work/ticket/ticket/tests/test_request_center_web_ddl_runtime.php on line 40

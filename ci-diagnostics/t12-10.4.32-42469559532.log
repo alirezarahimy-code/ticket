@@ -1,9 +1,0 @@
-    [probe] tid_check: HTTP 302 location=index.php?page=ticket&id=1 tickets_count=1 max_id=1
-    [probe] tid_check: HTTP 302 location=request-center.php?page=ticket&id=1 tickets_count=1 max_id=1
-T12 SCENARIOS ERROR: create_ticket for feature did not produce a ticket (location=request-center.php?page=ticket&id=1); app.log tail:
-(app.log missing)
-#0 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(428): t12s_create_ticket()
-#1 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(358): {closure}()
-#2 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(367): t12s_run_pair()
-#3 /home/runner/work/ticket/ticket/tests/test_request_center_t12_scenarios.php(427): t12s_finish()
-#4 {main}

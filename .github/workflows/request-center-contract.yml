@@ -222,37 +222,23 @@ jobs:
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
 
-      - name: Commit Phase-2 smoke log on failure (workbench branch only)
-        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
-        run: |
-          set +e
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
-          mkdir -p ci-diagnostics
-          cp "$RUNNER_TEMP/phase2-smoke.log" "ci-diagnostics/contract-phase2-smoke-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
-          git add ci-diagnostics
-          git commit -m "ci diagnostics: contract Phase-2 smoke ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
-          git push origin "HEAD:${GITHUB_REF_NAME}" || true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload Phase-2 smoke log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-phase2-smoke-${{ matrix.mariadb-version }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/phase2-smoke.log
+          if-no-files-found: warn
+          retention-days: 14
 
-      - name: Commit T04 diagnostic log on failure (workbench branch only)
-        if: failure() && github.ref_name == 'arena/22d4eba7-ticket'
-        run: |
-          set +e
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin "$GITHUB_REF_NAME"
-          git checkout -B "$GITHUB_REF_NAME" "origin/${GITHUB_REF_NAME}"
-          mkdir -p ci-diagnostics
-          cp "$RUNNER_TEMP/t04.log" "ci-diagnostics/contract-t04-${{ matrix.mariadb-version }}-${{ github.run_id }}.log" || true
-          git add ci-diagnostics
-          git commit -m "ci diagnostics: contract T04 ${{ matrix.mariadb-version }} run ${{ github.run_id }} [skip ci]" || true
-          git push origin "HEAD:${GITHUB_REF_NAME}" || true
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload T04 diagnostic log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: contract-t04-${{ matrix.mariadb-version }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/t04.log
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: T05-T06 migration runner failure and registry fault injection
         run: php tests/test_system_update_migration_failure_gates.php
