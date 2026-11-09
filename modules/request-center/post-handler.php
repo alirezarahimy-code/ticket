@@ -19,7 +19,7 @@ const REQUEST_CENTER_POST_ACTIONS = [
     'bulk_update_tickets', 'cancel_ticket', 'claim_ticket', 'create_ticket',
     'decide_ticket_cancellation', 'delete_service', 'delete_service_category',
     'edit_service', 'rate_ticket', 'reopen_ticket', 'reply', 'save_service_category',
-    'create_ola_policy', 'save_rc_work_hours', 'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ola_policy', 'update_ticket',
+    'create_ola_policy', 'save_rc_work_hours', 'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ola_policy', 'update_ticket', 'update_due_date',
 ];
 
 function request_center_is_post_action(string $action): bool

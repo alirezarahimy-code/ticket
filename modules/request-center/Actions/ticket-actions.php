@@ -1017,3 +1017,85 @@ if (!defined('APP_ROOT')) {
             flash('success', 'تغییرات درخواست ذخیره شد.');
             redirect(request_center_ticket_return_url($ticketId));
         }
+
+        if ($action === 'update_due_date') {
+            $staffUser = require_login();
+            if (!user_can($staffUser, 'ticket.edit')) {
+                throw new RuntimeException('دسترسی ویرایش درخواست برای نقش شما مجاز نیست.');
+            }
+            $ticketId = (int) ($_POST['ticket_id'] ?? 0);
+            $ticket = fetch_ticket($ticketId);
+            if (!$ticket || !can_view_ticket($ticket, $staffUser)) {
+                throw new RuntimeException('درخواست پیدا نشد یا به واحد شما تعلق ندارد.');
+            }
+            $handlerLevel = ticket_handler_level($ticket, $staffUser);
+            if ($handlerLevel === '') {
+                throw new RuntimeException('فقط مدیر واحد یا کارشناس مسئول همین درخواست می‌تواند مهلت را تغییر دهد.');
+            }
+            if (in_array((string) $ticket['status'], ['closed', 'cancelled', 'rejected'], true)) {
+                throw new RuntimeException('درخواست بسته‌شده از این مسیر قابل تغییر نیست.');
+            }
+            if (!empty($ticket['cancel_requested_at'])) {
+                throw new RuntimeException('لغو این درخواست در انتظار تصمیم مسئول است؛ ابتدا آن را تأیید یا رد کنید.');
+            }
+            $rawDue = trim((string) ($_POST['due_at'] ?? ''));
+            $parsed = $rawDue !== '' ? strtotime($rawDue) : false;
+            if ($parsed === false || $parsed < strtotime('2020-01-01 00:00:00') || $parsed > strtotime('2100-01-01 00:00:00')) {
+                throw new RuntimeException('مهلت واردشده معتبر نیست.');
+            }
+            $dueNote = trim((string) post_value('due_note'));
+            if ($dueNote === '') {
+                throw new RuntimeException('برای تغییر مهلت، ثبت دلیل قابل مشاهده برای درخواست‌کننده الزامی است.');
+            }
+            if (mb_strlen($dueNote, 'UTF-8') > 1000) {
+                throw new RuntimeException('دلیل تغییر مهلت نباید بیشتر از ۱۰۰۰ نویسه باشد.');
+            }
+            $ticketStatus = (string) $ticket['status'];
+            $oldDue = (string) ($ticket['due_at'] ?? '');
+            $newDue = date('Y-m-d H:i:s', $parsed);
+            if ($oldDue === $newDue) {
+                flash('info', 'مهلت تغییر نکرد.');
+                redirect(request_center_ticket_return_url($ticketId));
+            }
+            $expected = [
+                'requester_id' => $ticket['requester_id'],
+                'assigned_to' => $ticket['assigned_to'] ?? null,
+                'first_response_at' => $ticket['first_response_at'] ?? null,
+                'priority' => $ticket['priority'],
+                'department_id' => $ticket['department_id'] ?? null,
+                'service_group' => $ticket['service_group'] ?? null,
+                'due_at' => $ticket['due_at'] ?? null,
+                'sla_minutes' => $ticket['sla_minutes'] ?? null,
+                'sla_paused_at' => $ticket['sla_paused_at'] ?? null,
+                'sla_pause_minutes' => $ticket['sla_pause_minutes'] ?? null,
+                'ola_policy_id' => $ticket['ola_policy_id'] ?? null,
+                'ola_response_due_at' => $ticket['ola_response_due_at'] ?? null,
+                'ola_due_at' => $ticket['ola_due_at'] ?? null,
+                'ola_escalation_1_at' => $ticket['ola_escalation_1_at'] ?? null,
+                'ola_escalation_2_at' => $ticket['ola_escalation_2_at'] ?? null,
+            ];
+            db()->beginTransaction();
+            $workflow = new RequestCenterWorkflowService(db());
+            $transitioned = $workflow->transition($ticketId, $ticketStatus, $ticketStatus, ['due_at' => $newDue], 'same_state', $expected);
+            if (!$transitioned) {
+                throw new RuntimeException('درخواست هم‌زمان تغییر کرده است؛ صفحه را تازه‌سازی و دوباره تلاش کنید.');
+            }
+            $visibleNote = 'مهلت رسیدگی از «' . ($oldDue !== '' ? persian_date($oldDue) : 'ثبت‌نشده') . '» به «' . persian_date($newDue) . '» تغییر کرد — ' . $dueNote;
+            $workflow->appendMessage($ticketId, (int) $staffUser['id'], $visibleNote);
+            db_commit_or_fail('ticket:update_due_date');
+            log_ticket_event($ticketId, (int) $staffUser['id'], 'due_date_changed', $ticketStatus, $ticketStatus, [
+                'from' => $oldDue,
+                'to' => $newDue,
+                'reason' => $dueNote,
+            ]);
+            request_center_notify_ticket_parties(
+                $ticketId,
+                'ticket_updated',
+                'مهلت رسیدگی تغییر کرد',
+                'مهلت رسیدگی ' . ticket_number($ticketId) . ' به «' . persian_date($newDue) . '» تغییر کرد.',
+                (int) $staffUser['id'],
+                true
+            );
+            flash('success', 'مهلت رسیدگی به‌روزرسانی شد.');
+            redirect(request_center_ticket_return_url($ticketId));
+        }

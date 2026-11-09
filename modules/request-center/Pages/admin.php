@@ -76,7 +76,7 @@ $adminAuditLabels = [
     'supervisor_reopened' => 'بازگشایی سوپروایزر', 'ticket_rejected' => 'رد درخواست',
     'cancellation_requested' => 'درخواست لغو', 'cancellation_approved' => 'تأیید لغو',
     'cancellation_rejected' => 'رد درخواست لغو', 'auto_closed' => 'بستن خودکار',
-    'bulk_status_changed' => 'تغییر گروهی وضعیت', 'priority_changed' => 'تغییر اولویت',
+    'bulk_status_changed' => 'تغییر گروهی وضعیت', 'priority_changed' => 'تغییر اولویت', 'due_date_changed' => 'تغییر موعد پاسخ/حل',
     'ola_policy_created' => 'ایجاد سیاست OLA', 'ola_policy_updated' => 'ویرایش سیاست OLA',
     'request_center_work_hours_updated' => 'تغییر تقویم کاری SLA/OLA',
 ];
