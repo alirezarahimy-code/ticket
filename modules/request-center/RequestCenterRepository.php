@@ -31,7 +31,7 @@ final class RequestCenterRepository
                 'ticket_number_seq' => ['prefix', 'seq'],
                 'notifications' => ['id', 'user_id', 'ticket_id', 'notification_type', 'title', 'body', 'idempotency_key'],
                 'ticket_events' => ['id', 'event_id', 'ticket_id', 'user_id', 'event_type', 'from_status', 'to_status', 'details', 'created_at'],
-                'activity_logs' => ['id', 'event_id', 'action_code', 'module', 'target_type', 'target_id', 'result', 'created_at'],
+                'activity_logs' => ['id', 'event_id', 'user_id', 'action_code', 'module', 'target_type', 'target_id', 'result', 'created_at'],
                 'tickets' => ['id', 'ticket_no', 'subject', 'status', 'priority', 'service_group', 'ticket_type',
                     'created_at', 'updated_at', 'due_at', 'sla_paused_at', 'sla_pause_minutes',
                     'first_response_at', 'ola_response_due_at', 'ola_due_at',
