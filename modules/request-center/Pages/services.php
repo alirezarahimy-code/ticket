@@ -96,6 +96,7 @@ if ($page === 'services') {
     echo '<style id="rc-service-catalog-page">
 .page-heading{align-items:center;margin-bottom:18px}.page-heading h1{font-size:24px;letter-spacing:-.3px}.page-heading p{font-size:13px;color:#687990}
 .service-toolbar,.service-filters{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:0 0 15px}
+.service-search-label{display:grid;gap:5px;max-width:460px;margin:0 0 14px;font-size:11px;font-weight:700;color:#536780}.service-search-label input{width:100%;min-height:40px;padding:9px 12px;border:1px solid #d9e2ee;border-radius:9px;background:#fff;color:#172b4d;font:inherit;font-size:12px}.service-search-label input:focus{outline:0;border-color:#709bc9;box-shadow:0 0 0 3px rgba(36,89,166,.11)}.service-search-empty{padding:16px;border:1px dashed #cbd7e5;border-radius:10px;color:#718198;text-align:center;font-size:12px}
 .service-toolbar>*{min-width:0}
 .category-list{display:grid;gap:8px}
 .category-list>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border:1px solid #e5ebf3;border-radius:10px;background:#fff}
@@ -145,12 +146,12 @@ if ($page === 'services') {
 
     // --- تب ۲: لیست خدمات + فیلتر ---
     echo '<section class="card form-card service-tab-panel" id="tab-list" hidden>';
-    echo '<h2>لیست خدمات</h2><p class="muted">با انتخاب حوزه، فهرست سرویس‌ها فیلتر می‌شود.</p>';
+    echo '<h2>لیست خدمات</h2><p class="muted">با انتخاب حوزه یا جست‌وجوی نام و کد، فهرست سرویس‌ها را محدود کنید.</p><label class="service-search-label" for="rc-service-search">جست‌وجوی خدمت<input id="rc-service-search" type="search" autocomplete="off" placeholder="نام خدمت، کد، دسته یا واحد رسیدگی"></label>';
      echo '<form method="get" class="service-filter-bar"><input type="hidden" name="page" value="services"><input type="hidden" name="tab" value="tab-list"><label>فیلتر حوزه خدمت<select name="group" data-service-filter><option value="" ' . ($serviceGroupFilter === '' ? 'selected' : '') . '>همه حوزه‌ها</option><option value="it" ' . ($serviceGroupFilter === 'it' ? 'selected' : '') . '>خدمات IT</option><option value="support" ' . ($serviceGroupFilter === 'support' ? 'selected' : '') . '>خدمات پشتیبانی</option></select></label><button class="button secondary service-filter-submit" type="submit">اعمال فیلتر</button></form>';
     echo '<div class="service-list"><div class="service-row service-row-head"><span>خدمت</span><span>حوزه</span><span>دسته</span><span>واحد رسیدگی</span><span>اولویت</span>' . ($isServiceAdmin ? '<span data-no-sort>عملیات</span>' : '') . '</div>';
     foreach ($services as $service) {
         $sid = (int) $service['id'];
-        echo '<div class="service-row"><span class="service-name"><strong>' . e($service['name']) . '</strong><small>' . e($service['code']) . ' • ' . (int) $service['field_count'] . ' فیلد' . ((int) $service['requires_asset'] === 1 ? ' • نیازمند شناسنامه' : '') . '</small></span>';
+        echo '<div class="service-row" data-service-search-row data-search-text="' . e(mb_strtolower(implode(' ', [(string) $service['name'], (string) $service['code'], (string) ($service['category_name'] ?? ''), (string) ($service['handling_unit_name'] ?? '')]), 'UTF-8')) . '"><span class="service-name"><strong>' . e($service['name']) . '</strong><small>' . e($service['code']) . ' • ' . (int) $service['field_count'] . ' فیلد' . ((int) $service['requires_asset'] === 1 ? ' • نیازمند شناسنامه' : '') . '</small></span>';
         echo '<span>' . ($service['service_group'] === 'it' ? 'IT' : 'پشتیبانی') . '</span>';
         echo '<span>' . e($service['category_name'] ?: '—') . '</span>';
         echo '<span>' . e($service['handling_unit_name'] ?: 'تعیین‌نشده') . '</span>';
@@ -208,6 +209,8 @@ if ($page === 'services') {
     echo '<script id="rc-service-catalog-interactions">
 (function(){
  var tabs=document.querySelector("[data-service-tabs]"),panels=Array.prototype.slice.call(document.querySelectorAll(".service-tab-panel"));
+ var serviceSearch=document.getElementById("rc-service-search"),serviceRows=Array.prototype.slice.call(document.querySelectorAll("[data-service-search-row]")),serviceSearchEmpty=null;
+ if(serviceSearch){serviceSearchEmpty=document.createElement("div");serviceSearchEmpty.className="service-search-empty";serviceSearchEmpty.textContent="خدمتی با عبارت جست‌وجوشده پیدا نشد.";serviceSearchEmpty.hidden=true;var serviceList=document.querySelector(".service-list");if(serviceList)serviceList.appendChild(serviceSearchEmpty);serviceSearch.addEventListener("input",function(){var term=serviceSearch.value.trim().toLocaleLowerCase("fa");var visible=0;serviceRows.forEach(function(row){var match=!term||row.dataset.searchText.indexOf(term)!==-1;row.hidden=!match;if(match)visible++;});if(serviceSearchEmpty)serviceSearchEmpty.hidden=visible!==0;});}
  function activate(id,updateUrl){
   var panel=document.getElementById(id);if(!panel||!panel.classList.contains("service-tab-panel"))return;
   panels.forEach(function(item){item.hidden=item!==panel;});
