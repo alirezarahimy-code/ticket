@@ -241,3 +241,143 @@ if ($action === 'update_ola_policy') {
     flash('success', 'سیاست OLA ذخیره شد. موعدهای ثبت‌شدهٔ درخواست‌های موجود تغییر نکردند.');
     redirect('request-center.php?workspace=admin#ola-policies');
 }
+
+if ($action === 'save_rc_capacity') {
+    $admin = require_login();
+    if (!user_is_primary_admin($admin)) {
+        throw new RuntimeException('فقط ادمین اصلی مرکز درخواست‌ها می‌تواند ظرفیت نوبت‌ها را تغییر دهد.');
+    }
+    $assigneeCap = trim((string) post_value('assignee_cap', '8'));
+    if (!preg_match('/^([1-9]|[1-9][0-9]|100)$/', $assigneeCap)) {
+        throw new RuntimeException('سقف روزانهٔ هر کارشناس باید عددی بین ۱ تا ۱۰۰ باشد.');
+    }
+    $teamCap = trim((string) post_value('team_cap', '24'));
+    if (!preg_match('/^(0|[1-9][0-9]{0,2}|500)$/', $teamCap)) {
+        throw new RuntimeException('سقف تجمعی تیم باید عددی بین ۰ تا ۵۰۰ باشد (صفر یعنی غیرفعال).');
+    }
+    // استثنای واحدهای سازمانی: مقدار خالی یعنی حذف استثنا و ارث‌بری از سقف سراسری.
+    $deptCaps = [];
+    foreach ((array) ($_POST['dept_cap'] ?? []) as $deptIdRaw => $capRaw) {
+        $deptId = (int) $deptIdRaw;
+        if ($deptId <= 0) {
+            continue;
+        }
+        $capRaw = trim((string) $capRaw);
+        if ($capRaw === '') {
+            $deptCaps[$deptId] = null;
+            continue;
+        }
+        if (!preg_match('/^(0|[1-9][0-9]{0,2}|500)$/', $capRaw)) {
+            throw new RuntimeException('سقف تیم برای واحد #' . $deptId . ' معتبر نیست (۰ تا ۵۰۰؛ صفر یعنی غیرفعال).');
+        }
+        $deptCaps[$deptId] = (int) $capRaw;
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        save_setting('rc.daily_capacity_assignee', $assigneeCap);
+        save_setting('rc.team_daily_capacity', $teamCap);
+        $deleteDept = $pdo->prepare('DELETE FROM settings WHERE `key` = ?');
+        foreach ($deptCaps as $deptId => $cap) {
+            if ($cap === null) {
+                $deleteDept->execute(['rc.team_daily_capacity_dept_' . $deptId]);
+            } else {
+                save_setting('rc.team_daily_capacity_dept_' . $deptId, (string) $cap);
+            }
+        }
+        save_audit_required((int) $admin['id'], 'rc_capacity_updated', null, [
+            'assignee_cap' => (int) $assigneeCap,
+            'team_cap' => (int) $teamCap,
+            'dept_overrides' => $deptCaps,
+        ]);
+        db_commit_or_fail('request-center:save_rc_capacity');
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
+    if (function_exists('setting_forget_cache')) {
+        setting_forget_cache();
+    }
+    flash('success', 'ظرفیت روزانه ذخیره شد. سقف‌ها از همین لحظه در ثبت نوبت‌های بعدی اعمال می‌شوند؛ نوبت‌های ثبت‌شده تغییر نمی‌کنند.');
+    redirect('request-center.php?workspace=admin#rc-capacity');
+}
+
+if ($action === 'rc_holiday_save') {
+    $admin = require_login();
+    if (!user_is_primary_admin($admin)) {
+        throw new RuntimeException('فقط ادمین اصلی مرکز درخواست‌ها می‌تواند تعطیلات را تغییر دهد.');
+    }
+    $holidayDate = jalali_input_to_gregorian((string) post_value('holiday_date', ''));
+    $holidayTitle = trim((string) post_value('holiday_title', ''));
+    if ($holidayDate === null) {
+        throw new RuntimeException('تاریخ تعطیل معتبر نیست (نمونه: 1405/01/01).');
+    }
+    if ($holidayTitle === '' || mb_strlen($holidayTitle) > 190) {
+        throw new RuntimeException('عنوان تعطیلی را وارد کنید (حداکثر ۱۹۰ نویسه).');
+    }
+    $day = substr($holidayDate, 0, 10);
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $exists = $pdo->prepare('SELECT id FROM holidays WHERE holiday_date = ? LIMIT 1 FOR UPDATE');
+        $exists->execute([$day]);
+        $existingId = $exists->fetchColumn();
+        if ($existingId !== false) {
+            $pdo->prepare('UPDATE holidays SET title = ?, is_active = 1, created_by = ? WHERE id = ?')->execute([$holidayTitle, (int) $admin['id'], (int) $existingId]);
+            $holidayId = (int) $existingId;
+            $mode = 'updated';
+        } else {
+            $pdo->prepare('INSERT INTO holidays (holiday_date, title, created_by, is_active) VALUES (?, ?, ?, 1)')->execute([$day, $holidayTitle, (int) $admin['id']]);
+            $holidayId = (int) $pdo->lastInsertId();
+            $mode = 'created';
+        }
+        save_audit_required((int) $admin['id'], 'rc_holiday_saved', null, ['holiday_id' => $holidayId, 'holiday_date' => $day, 'title' => $holidayTitle, 'mode' => $mode]);
+        db_commit_or_fail('request-center:rc_holiday_save');
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
+    if (function_exists('setting_forget_cache')) {
+        setting_forget_cache();
+    }
+    flash('success', 'تعطیلی ذخیره شد. این تعطیلی در سطح کل سامانه اعمال می‌شود (SLA و سایر ماژول‌ها).');
+    redirect('request-center.php?workspace=admin#rc-holidays');
+}
+
+if ($action === 'rc_holiday_delete') {
+    $admin = require_login();
+    if (!user_is_primary_admin($admin)) {
+        throw new RuntimeException('فقط ادمین اصلی مرکز درخواست‌ها می‌تواند تعطیلات را حذف کند.');
+    }
+    $holidayId = (int) post_value('holiday_id', '0');
+    if ($holidayId <= 0) {
+        throw new RuntimeException('تعطیلی انتخاب‌شده معتبر نیست.');
+    }
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $lookup = $pdo->prepare('SELECT id, holiday_date, title FROM holidays WHERE id = ? LIMIT 1 FOR UPDATE');
+        $lookup->execute([$holidayId]);
+        $row = $lookup->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            throw new RuntimeException('تعطیلی موردنظر پیدا نشد.');
+        }
+        $pdo->prepare('DELETE FROM holidays WHERE id = ?')->execute([$holidayId]);
+        save_audit_required((int) $admin['id'], 'rc_holiday_deleted', null, ['holiday_id' => $holidayId, 'holiday_date' => (string) $row['holiday_date'], 'title' => (string) $row['title']]);
+        db_commit_or_fail('request-center:rc_holiday_delete');
+    } catch (Throwable $exception) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $exception;
+    }
+    if (function_exists('setting_forget_cache')) {
+        setting_forget_cache();
+    }
+    flash('success', 'تعطیلی حذف شد. این تغییر در سطح کل سامانه اعمال می‌شود.');
+    redirect('request-center.php?workspace=admin#rc-holidays');
+}

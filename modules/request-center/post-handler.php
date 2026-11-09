@@ -19,7 +19,7 @@ const REQUEST_CENTER_POST_ACTIONS = [
     'bulk_update_tickets', 'cancel_ticket', 'claim_ticket', 'create_ticket',
     'decide_ticket_cancellation', 'delete_service', 'delete_service_category',
     'edit_service', 'rate_ticket', 'reopen_ticket', 'reply', 'save_service_category',
-    'create_ola_policy', 'save_rc_work_hours', 'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ola_policy', 'update_ticket', 'update_due_date',
+    'create_ola_policy', 'save_rc_work_hours', 'save_rc_capacity', 'rc_holiday_save', 'rc_holiday_delete', 'supervisor_assign_ticket', 'supervisor_decision', 'supervisor_reopen', 'update_ola_policy', 'update_ticket', 'update_due_date',
 ];
 
 function request_center_is_post_action(string $action): bool
@@ -109,6 +109,9 @@ function request_center_post_error(Throwable $exception, string $page): never
         'supervisor_decision', 'supervisor_reopen', 'supervisor_assign_ticket' => $ticketId > 0
             ? request_center_ticket_return_url($ticketId) : 'request-center.php?workspace=supervisor',
         'save_rc_work_hours' => 'request-center.php?workspace=admin#sla-work-hours',
+        'save_rc_capacity' => 'request-center.php?workspace=admin#rc-capacity',
+        'rc_holiday_save' => 'request-center.php?workspace=admin#rc-holidays',
+        'rc_holiday_delete' => 'request-center.php?workspace=admin#rc-holidays',
         'create_ola_policy', 'update_ola_policy' => 'request-center.php?workspace=admin#ola-policies',
         'add_service', 'edit_service', 'delete_service', 'add_service_field',
         'save_service_category', 'delete_service_category' => 'request-center.php?page=services',

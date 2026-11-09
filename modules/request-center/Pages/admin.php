@@ -41,7 +41,7 @@ $adminAuditRows = $adminAuditQuery->fetchAll();
 $adminConfigAuditQuery = db()->prepare(
     'SELECT a.id, a.action_code, a.created_at, a.result, u.full_name AS actor_name '
     . 'FROM activity_logs a LEFT JOIN users u ON u.id = a.user_id '
-    . "WHERE a.action_code IN ('request_center_work_hours_updated', 'ola_policy_created', 'ola_policy_updated') "
+    . "WHERE a.action_code IN ('request_center_work_hours_updated', 'ola_policy_created', 'ola_policy_updated', 'rc_capacity_updated', 'rc_holiday_saved', 'rc_holiday_deleted') "
     . 'ORDER BY a.created_at DESC, a.id DESC LIMIT 20'
 );
 $adminConfigAuditQuery->execute();
@@ -52,6 +52,27 @@ $businessHours = function_exists('sla_business_hours')
 $olaPolicies = [];
 $olaPolicyAvailable = false;
 $adminDepartments = db()->query('SELECT id, name FROM departments ORDER BY name, id')->fetchAll(PDO::FETCH_ASSOC);
+// ظرفیت نوبت‌ها — مقادیر فعلی برای فرم «ظرفیت روزانهٔ نوبت‌ها»
+$rcCapacityRows = db()->query("SELECT `key`, `value` FROM settings WHERE `key` IN ('rc.daily_capacity_assignee', 'rc.team_daily_capacity') OR `key` LIKE 'rc.team_daily_capacity_dept_%'")->fetchAll(PDO::FETCH_ASSOC);
+$rcCapacityMap = [];
+foreach ($rcCapacityRows as $capacityRow) {
+    $rcCapacityMap[(string) $capacityRow['key']] = (string) $capacityRow['value'];
+}
+$rcCapacityAssignee = isset($rcCapacityMap['rc.daily_capacity_assignee']) && is_numeric(trim($rcCapacityMap['rc.daily_capacity_assignee'])) ? max(1, (int) $rcCapacityMap['rc.daily_capacity_assignee']) : 8;
+$rcCapacityTeam = isset($rcCapacityMap['rc.team_daily_capacity']) && is_numeric(trim($rcCapacityMap['rc.team_daily_capacity'])) ? max(0, (int) $rcCapacityMap['rc.team_daily_capacity']) : 24;
+$rcCapacityDept = [];
+foreach ($rcCapacityMap as $key => $value) {
+    if (preg_match('/^rc\.team_daily_capacity_dept_([0-9]+)$/', $key, $m) && is_numeric(trim($value))) {
+        $rcCapacityDept[(int) $m[1]] = max(0, (int) $value);
+    }
+}
+// تعطیلات رسمی — فهرست برای کارت مدیریت تعطیلات سمت ماژول (سراسری)
+$rcHolidayRows = [];
+try {
+    $rcHolidayRows = db()->query("SELECT id, holiday_date, title FROM holidays WHERE is_active = 1 AND holiday_date >= CURDATE() - INTERVAL 3 MONTH ORDER BY holiday_date ASC LIMIT 60")->fetchAll(PDO::FETCH_ASSOC);
+} catch (Throwable) {
+    $rcHolidayRows = [];
+}
 try {
     $olaPolicyAvailable = (bool) db()->query("SHOW TABLES LIKE 'ola_policies'")->fetchColumn();
     if ($olaPolicyAvailable) {
@@ -79,6 +100,8 @@ $adminAuditLabels = [
     'bulk_status_changed' => 'تغییر گروهی وضعیت', 'priority_changed' => 'تغییر اولویت', 'due_date_changed' => 'تغییر موعد پاسخ/حل',
     'ola_policy_created' => 'ایجاد سیاست OLA', 'ola_policy_updated' => 'ویرایش سیاست OLA',
     'request_center_work_hours_updated' => 'تغییر تقویم کاری SLA/OLA',
+    'rc_capacity_updated' => 'تغییر ظرفیت نوبت‌ها',
+    'rc_holiday_saved' => 'ثبت/ویرایش تعطیلات', 'rc_holiday_deleted' => 'حذف تعطیل',
 ];
 $escapeAdmin = static fn (mixed $value): string => htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $adminStatusLabels = [
@@ -219,6 +242,42 @@ form input:focus,form select:focus,form textarea:focus{outline:0;border-color:#6
 </fieldset>
 <button class="button" type="submit">ذخیره تقویم کاری</button>
 </form>
+</section>
+<section class="card" id="rc-capacity" style="padding:16px;margin-top:18px">
+<h2>ظرفیت روزانهٔ نوبت‌ها</h2>
+<p class="muted">سقف تعداد نوبت هر کارشناس در یک روز و سقف تجمعی هر تیم. تغییر این اعداد فقط برای ثبت نوبت‌های بعدی اعمال می‌شود؛ نوبت‌های ثبت‌شده دست‌نخورده می‌مانند. سقف تیم را می‌توانید برای هر واحد سازمانی جدا تنظیم کنید (خالی یعنی ارث‌بری از سقف سراسری؛ صفر یعنی غیرفعال).</p>
+<form method="post" class="rc-admin-link" style="display:flex;gap:14px;flex-wrap:wrap;align-items:end">
+<?= csrf_field() ?><input type="hidden" name="action" value="save_rc_capacity">
+<label>سقف روزانهٔ هر کارشناس<input type="number" min="1" max="100" name="assignee_cap" required value="<?= (int) $rcCapacityAssignee ?>"></label>
+<label>سقف تجمعی تیم (سراسری؛ صفر = غیرفعال)<input type="number" min="0" max="500" name="team_cap" required value="<?= (int) $rcCapacityTeam ?>"></label>
+<?php if ($adminDepartments): ?><fieldset style="border:1px solid #e4eaf1;border-radius:9px;padding:8px 12px"><legend>استثنای واحدهای سازمانی</legend>
+<?php foreach ($adminDepartments as $department): ?>
+<label style="display:inline-flex;gap:6px;align-items:center;margin:4px 8px"><?= $escapeAdmin($department['name']) ?> <input type="number" min="0" max="500" name="dept_cap[<?= (int) $department['id'] ?>]" value="<?= isset($rcCapacityDept[(int) $department['id']]) ? (int) $rcCapacityDept[(int) $department['id']] : '' ?>" placeholder="ارث‌بری" style="width:95px"></label>
+<?php endforeach; ?>
+</fieldset><?php endif; ?>
+<button class="button" type="submit">ذخیره ظرفیت‌ها</button>
+</form>
+</section>
+<section class="card" id="rc-holidays" style="padding:16px;margin-top:18px">
+<h2>تعطیلات رسمی <span style="font-size:12px;color:#b91c1c;font-weight:400">(سراسری)</span></h2>
+<p class="muted">این تعطیلات در کل سامانه اعمال می‌شود: موعدهای SLA/OLA، وضعیت نوبت‌ها در مرکز درخواست‌ها و سایر ماژول‌ها. برای تقویم سالانه و ورود گروهی CSV/ICS به <a href="index.php?page=holidays">تابلوی تعطیلات اصلی</a> بروید.</p>
+<form method="post" class="rc-admin-link" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px">
+<?= csrf_field() ?><input type="hidden" name="action" value="rc_holiday_save">
+<label>تاریخ جلالی<div class="jalali-picker" data-jalali-picker><input name="holiday_date" required autocomplete="off" placeholder="1405/01/01" style="width:130px"><button type="button" class="calendar-trigger" aria-label="بازکردن تقویم">▦</button><div class="jalali-calendar" hidden></div></div></label>
+<label>عنوان تعطیلی<input name="holiday_title" required maxlength="190" placeholder="نوروز" style="min-width:180px"></label>
+<button class="button" type="submit">ذخیره تعطیل</button>
+</form>
+<?php if (!$rcHolidayRows): ?><p class="muted">تعطیلی فعالی از سه ماه گذشته به‌بعد ثبت نشده است.</p><?php else: ?>
+<div style="overflow-x:auto"><table class="rc-admin-table"><thead><tr><th>تاریخ</th><th>عنوان</th><th></th></tr></thead><tbody>
+<?php foreach ($rcHolidayRows as $rcHolidayRow): ?>
+<tr>
+<td><?= $escapeAdmin(jalali_date((string) $rcHolidayRow['holiday_date'], false)) ?></td>
+<td><?= $escapeAdmin($rcHolidayRow['title']) ?></td>
+<td><form method="post" data-confirm="این تعطیل حذف شود؟ موعدهای SLA جدید دیگر این روز را حساب نمی‌کنند." style="margin:0"><?= csrf_field() ?><input type="hidden" name="action" value="rc_holiday_delete"><input type="hidden" name="holiday_id" value="<?= (int) $rcHolidayRow['id'] ?>"><button class="mini-button danger" type="submit">حذف</button></form></td>
+</tr>
+<?php endforeach; ?>
+</tbody></table></div>
+<?php endif; ?>
 </section>
 <section class="card" id="ola-policies" style="padding:16px;margin-top:18px">
 <h2>سیاست‌های OLA</h2>
