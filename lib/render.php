@@ -188,7 +188,7 @@ function render_header(string $title, ?array $user = null): void
     }
       echo '</div></header><div class="content-wrap">';
       echo '<div class="ambient-orbits" aria-hidden="true"><span class="orbit orbit-reusable orbit-reusable--top orbit-reusable--lg"></span><span class="orbit orbit-reusable orbit-reusable--ring orbit-reusable--md"></span><span class="orbit orbit-reusable orbit-reusable--bottom orbit-reusable--xl"></span><span class="orbit orbit-reusable orbit-reusable--side orbit-reusable--sm"></span><span class="orbit orbit-reusable orbit-reusable--corner orbit-reusable--md"></span></div>';
-     if ($user) {
+     if ($user && !$isRequestCenterEntry) {
          echo '<div id="notification-toasts" class="notification-toasts" data-cursor="' . (int) $notificationSummary['latest'] . '" aria-live="polite"></div>';
      }
      foreach ($flashes as $flash) {
