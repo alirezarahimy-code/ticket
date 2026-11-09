@@ -163,7 +163,7 @@ if ($action === 'update_ola_policy') {
         }
         $minutes[$field] = (int) $raw;
     }
-    if ($policyId <= 0 || $name === '' || mb_strlen($name, 'UTF-8') > 150 || $priority === '') {
+    if ($policyId <= 0 || $name === '' || mb_strlen($name, 'UTF-8') > 190 || $priority === '') {
         throw new RuntimeException('شناسه، نام و اولویت سیاست OLA معتبر نیست.');
     }
     if ($minutes['escalation_2_minutes'] < $minutes['escalation_1_minutes']) {
