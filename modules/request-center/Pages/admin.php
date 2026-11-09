@@ -32,6 +32,7 @@ $businessHours = function_exists('sla_business_hours')
     : ['start' => 8, 'end' => 16, 'weekend' => [4, 5]];
 $olaPolicies = [];
 $olaPolicyAvailable = false;
+$adminDepartments = db()->query('SELECT id, name FROM departments ORDER BY name, id')->fetchAll(PDO::FETCH_ASSOC);
 try {
     $olaPolicyAvailable = (bool) db()->query("SHOW TABLES LIKE 'ola_policies'")->fetchColumn();
     if ($olaPolicyAvailable) {
@@ -176,7 +177,7 @@ header('Cache-Control: private, no-store');
 <form method="post" class="rc-admin-link" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin-bottom:14px">
 <?= csrf_field() ?><input type="hidden" name="action" value="create_ola_policy">
 <label>نام سیاست جدید<input name="policy_name" required maxlength="190" placeholder="نام قابل تشخیص سیاست"></label>
-<label>حوزه سازمانی<input type="number" min="0" name="department_id" value="0" placeholder="۰ = سراسری"></label>
+<label>حوزه سازمانی<select name="department_id"><option value="0">سراسری</option><?php foreach ($adminDepartments as $department): ?><option value="<?= (int) $department['id'] ?>"><?= $escapeAdmin($department['name']) ?></option><?php endforeach; ?></select></label>
 <label>اولویت<select name="priority" required><option value="">انتخاب اولویت</option><?php foreach (['critical' => 'بحرانی', 'urgent' => 'فوری', 'normal' => 'عادی'] as $key => $label): ?><option value="<?= $key ?>"><?= $label ?></option><?php endforeach; ?></select></label>
 <label>مهلت پاسخ (دقیقه)<input type="number" min="1" max="525600" name="response_minutes" required></label>
 <label>مهلت حل (دقیقه)<input type="number" min="1" max="525600" name="resolution_minutes" required></label>
@@ -195,7 +196,7 @@ header('Cache-Control: private, no-store');
 <form method="post" class="rc-admin-link" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end">
 <?= csrf_field() ?><input type="hidden" name="action" value="update_ola_policy"><input type="hidden" name="policy_id" value="<?= (int) $policy['id'] ?>">
 <label>نام سیاست<input name="policy_name" required maxlength="150" value="<?= $escapeAdmin($policy['name']) ?>"></label>
-<label>حوزه سازمانی<input type="number" min="0" name="department_id" value="<?= (int) ($policy['department_id'] ?? 0) ?>" placeholder="۰ = سراسری"></label>
+<label>حوزه سازمانی<select name="department_id"><option value="0">سراسری</option><?php foreach ($adminDepartments as $department): ?><option value="<?= (int) $department['id'] ?>" <?= (int) ($policy['department_id'] ?? 0) === (int) $department['id'] ? 'selected' : '' ?>><?= $escapeAdmin($department['name']) ?></option><?php endforeach; ?></select></label>
 <label>اولویت<select name="priority"><?php foreach (['critical' => 'بحرانی', 'urgent' => 'فوری', 'normal' => 'عادی'] as $key => $label): ?><option value="<?= $key ?>" <?= $policy['priority'] === $key ? 'selected' : '' ?>><?= $label ?></option><?php endforeach; ?></select></label>
 <label>مهلت پاسخ (دقیقه)<input type="number" min="1" max="525600" name="response_minutes" required value="<?= (int) $policy['response_minutes'] ?>"></label>
 <label>مهلت حل (دقیقه)<input type="number" min="1" max="525600" name="resolution_minutes" required value="<?= (int) $policy['resolution_minutes'] ?>"></label>
