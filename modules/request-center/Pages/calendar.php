@@ -721,12 +721,14 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
    end.addEventListener("change",syncEnd);
   }
   form.addEventListener("submit",function(event){
+   if(form.dataset.submitting==="1"){event.preventDefault();return;}
    if(create){
     if(ticket&&(!/^\\d+$/.test(ticket.value)||Number(ticket.value)<1)){event.preventDefault();ticket.setCustomValidity("شناسه درخواست باید عددی بزرگ‌تر از صفر باشد.");ticket.reportValidity();ticket.focus();return;}
     if(ticket)ticket.setCustomValidity("");
     if(start&&end){syncEnd();if(!form.reportValidity()){event.preventDefault();return;}}
    }
    if(form.querySelector('[name="rc_appointment_cancel"]')&&!window.confirm("این نوبت لغو شود؟")){event.preventDefault();return;}
+   form.dataset.submitting="1";
    if(button){button.disabled=true;button.textContent=create?"در حال ثبت نوبت…":"در حال ثبت…";}
   });
   if(ticket)ticket.addEventListener("input",function(){ticket.setCustomValidity("");});
