@@ -5,6 +5,10 @@
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
 ساخته می‌شود و مهاجرت فقط ۰۳۵ (request_center_appointments) است — سایر مهاجرت‌ها
 (۰۳۲–۰۳۴) متعلق به main/Logging هستند و قبلاً روی هدف اعمال شده‌اند.
+
+تصمیم مالک (۲۰۲۶-۱۱-۰۹): این بسته **فقط به‌روزرسانی مرکز درخواست** را حمل می‌کند.
+هدف نصب، پیش‌تر تمام بسته‌های غذایی موجود را (تا ۱.۶۲.۹۳، با مهاجرت ۰۳۶) اعمال کرده
+است؛ بنابراین فایل‌های موج غذا و مهاجرت ۰۳۶ عمداً از این بسته حذف می‌شوند.
 """
 
 from __future__ import annotations
@@ -34,6 +38,27 @@ EXCLUDED_FILES = {
     "tools/build_update_1_62_88.py",
 }
 
+# ۲۰۲۶-۱۱-۰۹ — تصمیم مالک: بسته فقط RC است. هدف نصب، بسته‌های غذای تحویل‌شده
+# (تا ۱.۶۲.۹۳) را پیشاپیش اعمال کرده است؛ این فایل‌ها متعلق به بستهٔ غذا هستند.
+EXCLUDED_FOOD_PATHS = {
+    "actions/food-order-actions.php",
+    "assets/food-menu.css",
+    "assets/food-menu.js",
+    "assets/food-order.css",
+    "assets/food-order.js",
+    "food-order.php",
+    "food-reconciliation.php",
+    "food-ticket-groups.php",
+    "food-ticket-runtime.php",
+    "food-ticket-templates.php",
+    "food-ticket.php",
+    "migrations/036-food-meal-leftover-disposition.sql",
+    "tools/build_1_62_93_food_reconciliation_update.py",
+    # ورودیِ ignoreِ یک ابزار محلیِ نقشهٔ پیشرفت؛ نه قابلیت RC و نه تغییر رفتار سامانه.
+    ".gitignore",
+}
+EXCLUDED_FOOD_PREFIXES = ("food-ticket-web/",)
+
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -51,6 +76,7 @@ def changed_files() -> list[str]:
     names = git("diff", "--diff-filter=ACMR", "--name-only", BASE_COMMIT, "HEAD").splitlines()
     keep = [n for n in names if n.strip() and not n.startswith(EXCLUDED_PREFIXES)]
     keep = [n for n in keep if n not in EXCLUDED_FILES]
+    keep = [n for n in keep if n not in EXCLUDED_FOOD_PATHS and not n.startswith(EXCLUDED_FOOD_PREFIXES)]
     return sorted(set(keep))
 
 
@@ -141,7 +167,7 @@ def build() -> tuple[Path, Path]:
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package.",
+        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decision (2026-11-09) this package is RC-only: food 1.62.93 files and migration 036 are intentionally excluded; the target must already have the food updates applied.",
     }
 
     out_dir = ROOT / "downloads"
