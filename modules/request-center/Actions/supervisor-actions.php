@@ -163,7 +163,8 @@ if (!defined('APP_ROOT')) {
                 'ticket_assignment_changed',
                 'تخصیص درخواست به‌روزرسانی شد',
                 $assignmentBody,
-                (int) $supervisor['id']
+                (int) $supervisor['id'],
+                true
             );
             db_commit_or_fail('request-center:supervisor_assign_ticket');
             flash('success', $newAssigneeId > 0 ? 'مسئول رسیدگی درخواست به‌روزرسانی شد.' : 'درخواست به صف ارجاع برگشت.');
@@ -271,7 +272,8 @@ if (!defined('APP_ROOT')) {
                     'ticket_rejected',
                     'درخواست شما رد شد',
                     'درخواست ' . ticket_number($ticketId) . ' پس از ارزیابی اولیه رد شد. دلیل: ' . $note,
-                    (int) $supervisor['id']
+                    (int) $supervisor['id'],
+                    true
                 );
                 flash('info', 'درخواست با ثبت دلیل و اطلاع‌رسانی به درخواست‌کننده رد شد.');
             } elseif ($decision === 'approve') {
@@ -327,7 +329,7 @@ if (!defined('APP_ROOT')) {
                         'ola_due_at' => $ticket['ola_due_at'] ?? null,
                     ],
                 ]);
-                request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد. دلیل: ' . $note, (int) $supervisor['id']);
+                request_center_notify_ticket_parties($ticketId, 'ticket_closed', 'درخواست بسته شد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر تأیید و بسته شد. دلیل: ' . $note, (int) $supervisor['id'], true);
                 record_asset_history((int) ($ticket['asset_id'] ?? 0), 'ticket_closed', 'تأیید و بستن درخواست ' . ticket_number($ticketId), (int) $supervisor['id'], $ticketId, $note);
                 flash('success', 'انجام کار تأیید شد و درخواست بسته شد.');
             } else {
@@ -393,7 +395,7 @@ if (!defined('APP_ROOT')) {
                     'ola_escalation_2_at' => $reworkOla['escalation_2_at'],
                     'sla_pause_minutes' => 0,
                 ]);
-                request_center_notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id']);
+                request_center_notify_ticket_parties($ticketId, 'supervisor_rework', 'درخواست برای اصلاح برگشت خورد', 'درخواست ' . ticket_number($ticketId) . ' توسط سوپروایزر برای اصلاح برگشت داده شد: ' . $note, (int) $supervisor['id'], true);
                 flash('info', 'درخواست برای اصلاح و ادامه کار برگشت داده شد.');
             }
             db_commit('request-center.php');
@@ -489,7 +491,7 @@ if (!defined('APP_ROOT')) {
                     'ola_escalation_2_at' => $reopenOla['escalation_2_at'],
                 ],
             ]);
-            request_center_notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد. دلیل: ' . $note, (int) $supervisor['id']);
+            request_center_notify_ticket_parties($ticketId, 'ticket_reopened', 'درخواست بازگشایی شد', 'درخواست ' . ticket_number($ticketId) . ' با تصمیم سوپروایزر بازگشایی شد. دلیل: ' . $note, (int) $supervisor['id'], true);
             db_commit('request-center.php');
             flash('info', $hadStaleCancel ? 'درخواست بازگشایی شد؛ درخواست لغو قدیمی هم پاک‌سازی شد.' : 'درخواست با تصمیم سوپروایزر بازگشایی شد.');
             redirect(request_center_ticket_return_url($ticketId));
