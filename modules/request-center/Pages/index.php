@@ -171,62 +171,6 @@ dl{display:grid;grid-template-columns:100px 1fr;gap:7px 10px;margin:0}dt{color:v
 <?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $workspace === $key ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escape($key) ?>"><?= $escape($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 </header>
 <main>
-<?php if ($ticketId > 0): ?>
-<?php
-$ticket = $repo->findVisible($ticketId, $user);
-if ($ticket === null) {
-    http_response_code(404);
-    ?>
-    <section class="card empty">
-      <h2>درخواست پیدا نشد</h2>
-      <p>درخواست وجود ندارد یا در حوزهٔ دسترسی حساب شما نیست.</p>
-      <a class="button secondary" href="<?= $escape($workspaceUrl) ?>">بازگشت به فهرست</a>
-    </section>
-    <?php
-} else {
-    $includeInternal = ticket_can_see_internal($ticket, $user);
-    $messages = $repo->messages($ticketId, $includeInternal);
-    $attachments = $repo->attachmentsForMessages($messages);
-    $status = $statusLabels[(string) ($ticket['status'] ?? '')] ?? (string) ($ticket['status'] ?? '—');
-    $priority = $priorityLabels[(string) ($ticket['priority'] ?? '')] ?? (string) ($ticket['priority'] ?? '—');
-    ?>
-    <section class="heading"><div><h1><?= $escape($ticket['subject']) ?></h1><p><?= $escape($ticket['ticket_no'] ?: ('#' . $ticketId)) ?> · <?= $escape($typeLabels[(string) ($ticket['ticket_type'] ?? '')] ?? 'درخواست') ?> · <?= $escape($status) ?></p></div><a class="button secondary" href="<?= $escape($workspaceUrl) ?>">فهرست درخواست‌ها</a></section>
-    <div class="notice">برای انجام عملیات، ثبت پاسخ یا یادداشت داخلی، ارجاع، تغییر وضعیت، لغو و تصمیم مدیریتی، وارد صفحهٔ جزئیات و گردش‌کار مستقل همین درخواست شوید.</div>
-    <div class="detail-grid">
-      <section class="card conversation">
-        <h2>گفت‌وگو و پیوست‌ها</h2>
-        <?php if (!$messages): ?><div class="empty">پیامی برای نمایش وجود ندارد.</div><?php endif; ?>
-        <?php foreach ($messages as $message): ?>
-          <article class="message <?= (int) ($message['is_internal'] ?? 0) === 1 ? 'internal' : '' ?>">
-            <div class="message-head"><strong><?= $escape($message['full_name'] ?: 'کاربر') ?></strong><small><?= $escape($message['created_at']) ?><?= (int) ($message['is_internal'] ?? 0) === 1 ? ' · یادداشت داخلی' : '' ?></small></div>
-            <div class="message-body"><?= $escape($message['body']) ?></div>
-            <?php foreach ($attachments[(int) $message['id']] ?? [] as $attachment): ?>
-              <p><a href="request-center.php?action=download_attachment&amp;id=<?= (int) $attachment['id'] ?>">پیوست: <?= $escape($attachment['original_name']) ?></a></p>
-            <?php endforeach; ?>
-          </article>
-        <?php endforeach; ?>
-      </section>
-      <aside class="card sidebar">
-        <h2>مشخصات درخواست</h2>
-        <dl>
-          <dt>ثبت‌کننده</dt><dd><?= $escape($ticket['requester_name']) ?></dd>
-          <dt>مسئول</dt><dd><?= $escape($ticket['assignee_name'] ?: 'تخصیص داده نشده') ?></dd>
-          <dt>واحد</dt><dd><?= $escape($ticket['department_name'] ?: 'ثبت نشده') ?></dd>
-          <dt>حوزه</dt><dd><?= $escape(($ticket['service_group'] ?? '') === 'support' ? 'پشتیبانی' : 'فناوری اطلاعات') ?></dd>
-          <dt>خدمت</dt><dd><?= $escape($ticket['service_name'] ?: 'ثبت نشده') ?></dd>
-          <dt>دسته‌بندی</dt><dd><?= $escape($ticket['category_name'] ?: 'ثبت نشده') ?></dd>
-          <dt>اولویت</dt><dd><?= $escape($priority) ?></dd>
-          <dt>ثبت</dt><dd><?= $escape($ticket['created_at']) ?></dd>
-          <dt>آخرین تغییر</dt><dd><?= $escape($ticket['updated_at']) ?></dd>
-          <dt>مهلت SLA</dt><dd><?= $escape($ticket['due_at'] ?: 'ثبت نشده') ?></dd>
-        </dl>
-        <p><a class="button" href="request-center.php?page=ticket&amp;id=<?= $ticketId ?>">ورود به صفحهٔ عملیات و گردش‌کار</a></p>
-      </aside>
-    </div>
-    <?php
-}
-?>
-<?php else: ?>
 <?php
 $filters = [
     'q' => trim((string) ($_GET['q'] ?? '')),
@@ -368,7 +312,6 @@ $metricItems = $workspace === 'requester'
 <?php endif; ?>
 <?php if ($pages > 1): ?><nav class="pagination" aria-label="صفحه‌بندی"><?php for ($i=max(1,$page-3);$i<=min($pages,$page+3);$i++): ?><?php if ($i === $page): ?><span class="current"><?= $i ?></span><?php else: ?><a href="request-center.php?<?= $escape($queryString) ?><?= $queryString !== "" ? "&amp;" : "" ?>p=<?= $i ?>"><?= $i ?></a><?php endif; ?><?php endfor; ?></nav><?php endif; ?>
 </section>
-<?php endif; ?>
 </main>
 </body>
 </html>
