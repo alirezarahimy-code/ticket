@@ -123,6 +123,7 @@ if ($page === 'queue') {
  update();
 })();
 </script>'; 
+    echo '<script src="modules/request-center/Assets/request-center.js" defer></script>';
     render_footer();
     exit;
 }

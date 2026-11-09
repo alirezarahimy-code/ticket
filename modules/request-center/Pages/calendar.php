@@ -21,6 +21,7 @@ $canUseCalendar = $workspace === 'agent'
     || ($workspace === 'supervisor' && user_can($user, 'supervisor.panel'))
     || ($workspace === 'admin' && user_is_primary_admin($user));
 require_once dirname(__DIR__) . '/lib/http-errors.php';
+require_once dirname(__DIR__) . '/lib/html-feedback.php';
 if (!$canUseCalendar) {
     http_response_code(403); // قرارداد ایستای صفحه‌های ماژول: امضای صریح 403؛ صفحهٔ نهایی توسط helper چاپ می‌شود
     request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به تقویم کارشناسان فقط برای کارشناس/مدیر رسیدگی، سوپروایزر و ادمین مرکز فعال است.');
@@ -340,6 +341,8 @@ $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayL
   </header>
 
   <main class="rc-wrap">
+<?php request_center_render_flashes(); ?>
+<script src="modules/request-center/Assets/request-center.js" defer></script>
     <!-- ─── سربرگ و وضعیت امروز ─── -->
     <div class="rc-hero">
       <h1>تقویم شمسی برنامه‌ریزی رسیدگی</h1>

@@ -576,6 +576,7 @@ if ($page === 'ticket') {
  document.querySelectorAll(".reply-box input[type=file],.cancel-ticket-card textarea,.reply-box textarea").forEach(function(input){input.addEventListener("change",function(){input.setCustomValidity("");});});
 })();
 </script>'; 
+    echo '<script src="modules/request-center/Assets/request-center.js" defer></script>';
     render_footer();
     exit;
 }

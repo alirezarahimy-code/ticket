@@ -14,6 +14,7 @@ require dirname(__DIR__, 3) . '/bootstrap.php';
 $user = require_login();
 require_once dirname(__DIR__) . '/RequestCenterRepository.php';
 require_once dirname(__DIR__) . '/lib/http-errors.php';
+require_once dirname(__DIR__) . '/lib/html-feedback.php';
 
 $escape = static fn (mixed $value): string => htmlspecialchars(
     (string) $value,
@@ -183,6 +184,8 @@ header{position:sticky;top:0;z-index:15;box-shadow:0 3px 14px rgba(23,43,77,.045
 <?php if (count($workspaceOptions) > 1): ?><nav class="workspace-nav" aria-label="فضاهای کاری"><?php foreach ($workspaceOptions as $key => $label): ?><a class="<?= $workspace === $key ? 'active' : '' ?>" href="request-center.php?workspace=<?= $escape($key) ?>"><?= $escape($label) ?></a><?php endforeach; ?></nav><?php endif; ?>
 </header>
 <main>
+<?php request_center_render_flashes(); ?>
+<script src="modules/request-center/Assets/request-center.js" defer></script>
 <?php
 $filters = [
     'q' => trim((string) ($_GET['q'] ?? '')),

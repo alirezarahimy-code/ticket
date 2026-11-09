@@ -154,3 +154,17 @@ body{font-family:Tahoma,"Segoe UI",sans-serif;background:#f4f7fb;color:#172b4d;m
   .rc-board{grid-template-columns:1fr}
   .rc-panel{box-shadow:none;border:none}
 }
+
+/* ── یکدست‌سازی حالت‌های UX (مرحلهٔ ۷) ───────────────────────────── */
+.rc-busy { position: relative; opacity: .75; cursor: progress; }
+form[aria-busy="true"] button[type="submit"].rc-busy { pointer-events: none; }
+:focus-visible { outline: 2px solid var(--rc-brand-dark, #173f70); outline-offset: 2px; border-radius: 4px; }
+.rc-flashes { margin: 0 0 14px; }
+.rc-flashes .rc-flash { border: 1px solid; border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.9; }
+.rc-flash-success { background: #ecfdf3; border-color: #abefc6 !important; color: #027a48; }
+.rc-flash-info { background: #eff8ff; border-color: #b2ddff !important; color: #175cd3; }
+.rc-flash-warning { background: #fffaeb; border-color: #fedf89 !important; color: #b54708; }
+.rc-flash-error, .rc-flash-danger { background: #fef3f2; border-color: #fecdca !important; color: #b42318; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

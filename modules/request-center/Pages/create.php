@@ -325,6 +325,7 @@ if ($page === 'new-ticket') {
  if(assetSelect&&assetSelect.value&&assetSearch){var current=assetOptions.find(function(option){return option.value===assetSelect.value;});if(current)assetSearch.value=current.text;}
 })();
 </script>'; 
+    echo '<script src="modules/request-center/Assets/request-center.js" defer></script>';
     render_footer();
     exit;
 }

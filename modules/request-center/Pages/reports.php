@@ -91,6 +91,7 @@ if ($page === 'reports') {
         }
         echo '</nav>';
     }
+    echo '<script src="modules/request-center/Assets/request-center.js" defer></script>';
     render_footer();
     exit;
 }

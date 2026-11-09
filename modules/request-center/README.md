@@ -323,3 +323,11 @@ GETهای قدیمی index.php?page=... برای همین صفحات به ورو
 ماتریس یکدست 403/404/503/500 و وضعیت نهایی دو مسیر UI (مسیر رسمی `request-center.php` + پل 302 در `index.php` + POST تک‌مسیره) در `modules/request-center/ERROR-HANDLING.md` نوشته شده است.
 
 صفحات خطای ماژول همگی از `modules/request-center/lib/http-errors.php` (`request_center_error_page`) رندر می‌شوند و به چرام سایت وابسته نیستند؛ گارد دسترسی مستقیم فایل‌ها ساده و بدون وابستگی مانده است. هیچ تغییری در رفتار endpointهای POST هسته داده نشده است.
+
+## حالت‌های UX و بازخورد (مرحلهٔ ۷)
+
+- پیام‌های موفقیت/خطا/اطلاع پس از هر عملیات (PRG) در **همهٔ** صفحات ماژول نمایش داده می‌شوند: صفحات با چرام هسته از مسیر `render_header` (توپولوژی `take_flash()`) و صفحات تمام‌صفحهٔ ماژول از `lib/html-feedback.php` (`request_center_render_flashes()` با `role=status|alert` و `aria-live=polite`).
+- فرم‌های POST ماژول به‌صورت خودکار وضعیت «در حال ارسال» می‌گیرند (`Assets/request-center.js`): دکمه‌های ثبت غیرفعال و `aria-busy` می‌شوند تا دوبار-ثبت رخ ندهد؛ فرم‌های GET و فرم‌های opt-out با `data-rc-no-busy` مستثنی‌اند.
+- فوکوس صفحه‌کلید با `:focus-visible` پررنگ است و `prefers-reduced-motion` احترام گذاشته می‌شود (`Assets/request-center.css`).
+- صفحات خطا (`lib/http-errors.php`) `role=alert` دارند و بدون چرام رندر می‌شوند.
+- حالت خالی (empty-state) و بارگذاری: جدول‌های فهرست پیام «درخواستی مطابق شرایط پیدا نشد» با دکمهٔ پاک‌کردن فیلتر دارند؛ در حال ارسالِ فرم‌ها به‌صورت بصری مشخص است.

@@ -53,6 +53,7 @@ if ($page === 'analytics') {
     echo $chart('درخواست بر اساس معاونت', $departmentRows, static fn (array $row): string => (string) $row['label'], static fn (array $row): float => (float) $row['total']);
     echo $chart('میانگین رضایت کارشناسان', $agentRows, static fn (array $row): string => (string) $row['label'] . ' (' . (int) $row['ratings'] . ' نظر)', static fn (array $row): float => (float) $row['average'], ' از ۵');
     echo '</section><section class="card analytics-note"><strong>راهنمای تحلیل</strong><span>امتیاز رضایت فقط پس از حل درخواست و توسط ثبت‌کننده ثبت می‌شود. گزارش‌های این صفحه بر اساس سطح دسترسی شما (حوزه و معاونت) فیلتر می‌شوند.</span></section>';
+    echo '<script src="modules/request-center/Assets/request-center.js" defer></script>';
     render_footer();
     exit;
 }
