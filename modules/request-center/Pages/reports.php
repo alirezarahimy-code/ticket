@@ -10,9 +10,14 @@ if (!defined('APP_ROOT')) {
 /** Request Center reports workspace, executed in legacy front-controller scope. */
 
 if ($page === 'reports') {
-    $reportUser = require_permission('reports.view');
+    require_once dirname(__DIR__) . '/lib/http-errors.php';
+    $reportUser = require_login();
+    if (!user_can($reportUser, 'reports.view')) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به گزارش‌ها فقط برای دارندهٔ مجوز «reports.view» فعال است.');
+    }
     $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'rejected_at', 'due_at', 'sla_minutes']);
     if ($reportMissingColumns) {
+        http_response_code(503);
         render_header('گزارش‌ها', $reportUser);
         echo '<section class="card empty-state"><h2>ساختار گزارش‌ها کامل نیست.</h2><p>این نسخه به ستون‌های جدید درخواست نیاز دارد. فایل‌های Migration را به‌ترتیب روی همان دیتابیس اجرا کنید، سپس صفحه را تازه‌سازی کنید.</p><p><code>upgrade-1.2-itsm.sql</code> و در صورت نیاز <code>upgrade-1.8-routing.sql</code></p><p class="muted">ستون‌های ناقص: ' . e(implode(', ', $reportMissingColumns)) . '</p><a class="button" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section>';
         render_footer();

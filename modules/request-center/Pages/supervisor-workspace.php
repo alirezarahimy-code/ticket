@@ -6,11 +6,11 @@ if (!defined('APP_ROOT')) {
     http_response_code(404);
     exit;
 }
+require_once dirname(__DIR__) . '/lib/http-errors.php';
 
 /** Supervisor workspace dashboard. All records are restricted by ticket_scope(). */
 if (!user_can($user, 'supervisor.panel')) {
-    http_response_code(403);
-    exit('دسترسی به فضای کاری سوپروایزر مجاز نیست.');
+    request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به فضای کاری سوپروایزر فقط برای دارندهٔ مجوز «supervisor.panel» فعال است.');
 }
 
 $summary = $repo->workspaceSummary($user);

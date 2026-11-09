@@ -6,6 +6,7 @@ if (!defined('APP_ROOT')) {
     http_response_code(404);
     exit;
 }
+require_once dirname(__DIR__) . '/lib/http-errors.php';
 
 /**
  * Request Center requester workspace: create-request page.
@@ -16,7 +17,10 @@ if (!defined('APP_ROOT')) {
  */
 
 if ($page === 'new-ticket') {
-    $user = require_permission('ticket.create');
+    $user = require_login();
+    if (!user_can($user, 'ticket.create')) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به ثبت درخواست برای این حساب فعال نیست.');
+    }
     if (defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
         request_center_assert_create_schema();
     }
@@ -132,8 +136,7 @@ if ($page === 'new-ticket') {
         }
     }
     if ($creationToken === '') {
-        http_response_code(503);
-        exit('نشست کاربری برای صدور کلید ثبت امن در دسترس نیست؛ صفحه را دوباره باز کنید.');
+        request_center_error_page(503, 'نشست ثبت در دسترس نیست', 'نشست کاربری برای صدور کلید ثبت امن در دسترس نیست؛ صفحه را دوباره باز کنید.');
     }
     render_header('ثبت درخواست', $user);
     echo '<style id="rc-requester-create-page">

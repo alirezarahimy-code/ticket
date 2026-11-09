@@ -10,7 +10,11 @@ if (!defined('APP_ROOT')) {
 /** Request Center analytics workspace, running in legacy front-controller scope. */
 
 if ($page === 'analytics') {
-    $analyticsUser = require_permission('analytics.view');
+    require_once dirname(__DIR__) . '/lib/http-errors.php';
+    $analyticsUser = require_login();
+    if (!user_can($analyticsUser, 'analytics.view')) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به تحلیل عملکرد فقط برای دارندهٔ مجوز «analytics.view» فعال است.');
+    }
     [$analyticsScope, $analyticsParams] = ticket_scope($analyticsUser);
     $statusQuery = db()->prepare('SELECT t.status, COUNT(*) AS total FROM tickets t ' . $analyticsScope . ' GROUP BY t.status ORDER BY total DESC');
     $statusQuery->execute($analyticsParams);

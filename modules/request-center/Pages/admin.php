@@ -6,11 +6,11 @@ if (!defined('APP_ROOT')) {
     http_response_code(404);
     exit;
 }
+require_once dirname(__DIR__) . '/lib/http-errors.php';
 
 /** Primary-admin workspace for module configuration, scoped audit and operations. */
 if (!user_is_primary_admin($user)) {
-    http_response_code(403);
-    exit('دسترسی به مدیریت مرکز درخواست‌ها مجاز نیست.');
+    request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به مدیریت مرکز درخواست‌ها فقط برای ادمین اصلی فعال است.');
 }
 
 $summary = $repo->workspaceSummary($user);

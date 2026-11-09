@@ -13,6 +13,7 @@ require dirname(__DIR__, 3) . '/bootstrap.php';
 
 $user = require_login();
 require_once dirname(__DIR__) . '/RequestCenterRepository.php';
+require_once dirname(__DIR__) . '/lib/http-errors.php';
 
 $escape = static fn (mixed $value): string => htmlspecialchars(
     (string) $value,
@@ -71,23 +72,12 @@ if ($workspace === 'agent') {
     $workspaceUrl .= '&agent_view=' . rawurlencode($agentView);
 }
 if ($workspaceOptions === []) {
-    http_response_code(403);
-    exit('دسترسی به مرکز درخواست‌ها برای این حساب فعال نیست.');
+    request_center_error_page(403, 'دسترسی فعال نیست', 'دسترسی به مرکز درخواست‌ها برای این حساب فعال نیست. برای دریافت دسترسی با ادمین سامانه تماس بگیرید.');
 }
 $repo = new RequestCenterRepository(db());
 $schemaProblems = $repo->schemaProblems();
 if ($schemaProblems !== []) {
-    http_response_code(503);
-    header('X-Content-Type-Options: nosniff');
-    header('Cache-Control: private, no-store');
-    ?><!doctype html>
-    <html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>آماده‌سازی مرکز درخواست‌ها</title>
-    <link rel="stylesheet" href="modules/request-center/Assets/request-center.css"></head>
-    <body><section class="card"><h1>ساختار پایگاه‌داده برای مرکز درخواست‌ها کامل نیست</h1>
-    <p>این ورودی عمداً هیچ تغییری در Schema ایجاد نمی‌کند. ابتدا بستهٔ Migration رسمی همین نسخه را روی یک نسخهٔ پشتیبان‌شده از پایگاه‌داده اعمال و سپس دوباره تلاش کنید.</p>
-    <ul><?php foreach ($schemaProblems as $problem): ?><li><?= $escape($problem) ?></li><?php endforeach; ?></ul>
-    <p class="muted">برای جلوگیری از تغییر ناخواسته، ادامهٔ درخواست متوقف شد.</p><a href="index.php">بازگشت به سامانه</a></section></body></html><?php
-    exit;
+    request_center_error_page(503, 'ساختار پایگاه‌داده کامل نیست', 'این ورودی عمداً هیچ تغییری در Schema ایجاد نمی‌کند. ابتدا بستهٔ Migration رسمی همین نسخه را روی یک نسخهٔ پشتیبان‌شده از پایگاه‌داده اعمال کنید، سپس دوباره تلاش کنید.', $schemaProblems);
 }
 if ((string) ($_GET['calendar'] ?? '') === '1' && ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     require __DIR__ . '/../Actions/appointment-actions.php';

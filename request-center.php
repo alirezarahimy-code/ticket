@@ -12,6 +12,16 @@ if (!defined('REQUEST_CENTER_INDEPENDENT_ENTRY')) {
     define('REQUEST_CENTER_INDEPENDENT_ENTRY', true);
 }
 
+// خطاهای غیرمنتظره در هیچ مسیری نباید به صفحهٔ سفید 500 تبدیل شوند.
+// قبل از هر چیز لایهٔ خطای ماژول را مطمئن کن؛ خودش بدون هیچ وابستگی است.
+require_once __DIR__ . '/modules/request-center/lib/http-errors.php';
+set_exception_handler(static function (Throwable $exception): void {
+    error_log('[request-center] uncaught ' . get_class($exception) . ': ' . $exception->getMessage()
+        . ' @ ' . $exception->getFile() . ':' . $exception->getLine());
+    request_center_error_page(500, 'خطای داخلی مرکز درخواست‌ها',
+        'عملیات به‌دلیل یک خطای غیرمنتظره کامل نشد. اگر تکرار شد، آن را با ادمین سامانه و نشانی این صفحه مطرح کنید.');
+});
+
 $rcMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $rcPage = trim((string) ($_GET['page'] ?? ''));
 
@@ -26,8 +36,8 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'download_attach
     require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
     $downloadSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($downloadSchemaProblems !== []) {
-        http_response_code(503);
-        exit('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست.');
+        request_center_error_page(503, 'ساختار پایگاه‌داده آماده نیست',
+            'تا کامل شدن اسکیمای مرکز درخواست‌ها، دانلود پیوست در دسترس نیست.', $downloadSchemaProblems);
     }
     request_center_download_attachment($downloadUser);
 }
@@ -40,14 +50,13 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_decision
     require_once __DIR__ . '/modules/request-center/lib/endpoints.php';
     $decisionsUser = require_login();
     if (!user_can($decisionsUser, 'supervisor.panel') && !user_is_primary_admin($decisionsUser)) {
-        http_response_code(403);
-        exit('دسترسی به خروجی تصمیمات سوپروایزر مجاز نیست.');
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'خروجی تصمیمات سوپروایزر فقط برای سوپروایزر یا ادمین اصلی مرکز فعال است.');
     }
     require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
     $decisionsSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($decisionsSchemaProblems !== []) {
-        http_response_code(503);
-        exit('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست.');
+        request_center_error_page(503, 'ساختار پایگاه‌داده آماده نیست',
+            'تا کامل شدن اسکیمای مرکز درخواست‌ها، خروجی در دسترس نیست.', $decisionsSchemaProblems);
     }
     request_center_export_decisions($decisionsUser);
 }
@@ -62,8 +71,8 @@ if ($rcMethod === 'GET' && (string) ($_GET['action'] ?? '') === 'export_report')
     require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
     $reportSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($reportSchemaProblems !== []) {
-        http_response_code(503);
-        exit('ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست.');
+        request_center_error_page(503, 'ساختار پایگاه‌داده آماده نیست',
+            'تا کامل شدن اسکیمای مرکز درخواست‌ها، خروجی در دسترس نیست.', $reportSchemaProblems);
     }
     request_center_export_report($reportUser);
 }
@@ -105,19 +114,9 @@ if ($rcMethod === 'GET' && ($rcPage !== '' && in_array($rcPage, $rcLifecyclePage
     require_once __DIR__ . '/modules/request-center/RequestCenterRepository.php';
     $rcSchemaProblems = (new RequestCenterRepository(db()))->schemaProblems();
     if ($rcSchemaProblems !== []) {
-        // Do not render the system-wide layout while the RC schema is known to
-        // be incomplete: legacy header/footer helpers may query the very
-        // columns that failed preflight and turn this controlled 503 into 500.
-        http_response_code(503);
-        header('Content-Type: text/html; charset=UTF-8');
-        echo '<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><title>مرکز درخواست‌ها در دسترس نیست</title><body>';
-        echo '<main><h1>ساختار پایگاه‌دادهٔ مرکز درخواست‌ها آماده نیست</h1>';
-        echo '<p>برای جلوگیری از اجرای ناقص عملیات، این Workspace تا رفع موارد زیر غیرفعال شد:</p><ul>';
-        foreach ($rcSchemaProblems as $problem) {
-            echo '<li>' . htmlspecialchars((string) $problem, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</li>';
-        }
-        echo '</ul><a href="request-center.php">بازگشت به مرکز درخواست‌ها</a></main></body></html>';
-        exit;
+        // دستی‌سازی چرام عمداً در اینجا انجام نمی‌شود: چرام ممکن است به ستون‌های ناقص وابسته باشد.
+        request_center_error_page(503, 'مرکز درخواست‌ها در دسترس نیست',
+            'برای جلوگیری از اجرای ناقص عملیات، این بخش تا رفع موارد زیر غیرفعال شد.', $rcSchemaProblems);
     }
 
     // Load the optional chatbot only after Request Center schema preflight.

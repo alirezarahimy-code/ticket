@@ -20,9 +20,10 @@ if (!defined('APP_ROOT')) {
 $canUseCalendar = $workspace === 'agent'
     || ($workspace === 'supervisor' && user_can($user, 'supervisor.panel'))
     || ($workspace === 'admin' && user_is_primary_admin($user));
+require_once dirname(__DIR__) . '/lib/http-errors.php';
 if (!$canUseCalendar) {
-    http_response_code(403);
-    exit('دسترسی به تقویم کارشناسان مجاز نیست.');
+    http_response_code(403); // قرارداد ایستای صفحه‌های ماژول: امضای صریح 403؛ صفحهٔ نهایی توسط helper چاپ می‌شود
+    request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به تقویم کارشناسان فقط برای کارشناس/مدیر رسیدگی، سوپروایزر و ادمین مرکز فعال است.');
 }
 
 require_once dirname(__DIR__) . '/AppointmentRepository.php';

@@ -14,7 +14,11 @@ if (!defined('APP_ROOT')) {
  */
 
 if ($page === 'supervisor') {
-    $supervisor = require_permission('supervisor.panel');
+    require_once dirname(__DIR__) . '/lib/http-errors.php';
+    $supervisor = require_login();
+    if (!user_can($supervisor, 'supervisor.panel')) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به صف تصمیم‌های سوپروایزر فقط برای دارندهٔ مجوز «supervisor.panel» فعال است.');
+    }
     [$where, $params] = ticket_scope($supervisor);
     $supervisorFilters = [
         'q' => trim((string) ($_GET['q'] ?? '')),

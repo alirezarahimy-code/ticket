@@ -10,7 +10,11 @@ if (!defined('APP_ROOT')) {
 /** Request Center operational queue; executed in legacy front-controller scope. */
 
 if ($page === 'queue') {
-    $queueUser = require_permission('queue.view');
+    require_once dirname(__DIR__) . '/lib/http-errors.php';
+    $queueUser = require_login();
+    if (!user_can($queueUser, 'queue.view')) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به صف کاری فقط برای دارندهٔ مجوز «queue.view» فعال است.');
+    }
     $queueName = valid_choice((string) ($_GET['queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], 'all');
     $queueFilters = [
         'q' => trim((string) ($_GET['q'] ?? '')),
