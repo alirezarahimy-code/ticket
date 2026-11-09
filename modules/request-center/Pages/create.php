@@ -136,6 +136,34 @@ if ($page === 'new-ticket') {
         exit('نشست کاربری برای صدور کلید ثبت امن در دسترس نیست؛ صفحه را دوباره باز کنید.');
     }
     render_header('ثبت درخواست', $user);
+    echo '<style id="rc-requester-create-page">
+.page-heading{align-items:center;margin-bottom:18px}.page-heading h1{font-size:25px;letter-spacing:-.3px}.page-heading p{color:var(--muted,#66758b);font-size:13px}
+.form-card{max-width:1040px;margin:0 auto 34px;padding:clamp(16px,2.4vw,28px);border:1px solid #e2e9f2;border-radius:16px;box-shadow:0 8px 28px rgba(25,55,90,.06)}
+.form-card form{display:block}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 18px;align-items:start}
+.form-grid>label,.form-grid fieldset{display:flex;flex-direction:column;gap:7px;min-width:0;color:#334a66;font-size:12px;font-weight:700}
+.form-grid>label.full,.form-grid fieldset.full{grid-column:1/-1}
+.form-grid input:not([type=radio]):not([type=checkbox]):not([type=file]),.form-grid select,.form-grid textarea{width:100%;max-width:100%;min-height:42px;padding:10px 12px;border:1px solid #d9e2ee;border-radius:9px;background:#fff;color:#172b4d;font:inherit;font-size:13px;transition:border-color .15s,box-shadow .15s}
+.form-grid textarea{min-height:105px;resize:vertical;line-height:1.9}
+.form-grid input:focus,.form-grid select:focus,.form-grid textarea:focus{outline:0;border-color:#6e9bcf;box-shadow:0 0 0 3px rgba(36,89,166,.12)}
+.form-grid input[readonly]{background:#f5f7fa;color:#738198}
+.form-grid .field-help,.form-grid small{font-size:11px;font-weight:400;color:#718198;line-height:1.8}
+.form-grid .group-combo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.form-grid .group-option{display:flex;align-items:center;gap:8px;padding:12px;border:1px solid #dce5f0;border-radius:10px;background:#f9fbfe;cursor:pointer}
+.form-grid .group-option:has(input:checked){border-color:#8db0d8;background:#eff6ff;color:#1d4f86}
+.form-grid .group-option input{accent-color:#2459a6}
+.ticket-number-box{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 20px;padding:12px 16px;border:1px solid #d9e6f5;border-radius:11px;background:linear-gradient(110deg,#f1f7ff,#fbfdff);color:#526780;font-size:12px}
+.ticket-number-box strong{font-size:17px;color:#1f548f;direction:ltr;font-variant-numeric:tabular-nums}
+.form-grid fieldset.service-fields{grid-column:1/-1;margin:0;padding:16px;border:1px solid #dfe7f0;border-radius:12px;background:#fbfcfe}
+.form-grid fieldset.service-fields legend{padding:0 8px;color:#254f7e;font-size:13px}
+.form-grid .asset-results{max-height:220px;overflow:auto;border:1px solid #dce5f0;border-radius:9px;background:#fff}
+.form-grid .asset-results [role=option]{padding:9px 12px;cursor:pointer}
+.form-grid .asset-results [role=option]:hover{background:#eff6ff}
+.form-grid .file-input{padding:14px;border:1px dashed #b8c9dc;border-radius:11px;background:#f9fbfe}
+.form-grid input[type=file]{max-width:100%;font-size:12px}
+.form-card .actions{display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #edf1f6}
+.form-card .actions .button{min-width:170px;min-height:44px;font-weight:800}
+@media(max-width:700px){.page-heading{align-items:flex-start;gap:12px}.page-heading h1{font-size:21px}.form-grid{grid-template-columns:1fr;gap:13px}.form-grid>label.full,.form-grid fieldset.full{grid-column:auto}.form-card{padding:15px;margin-inline:0}.form-grid .group-combo{grid-template-columns:1fr}.form-card .actions .button{width:100%}}
+</style>';
     echo '<section class="page-heading"><div><span class="eyebrow">درخواست جدید</span><h1>ثبت درخواست</h1><p>ابتدا حوزه خدمت را انتخاب کنید تا فرم و مسیر رسیدگی درست نمایش داده شود.</p></div><a class="button secondary" href="request-center.php">بازگشت به مرکز درخواست‌ها</a></section><section class="card form-card"><form method="post" enctype="multipart/form-data">' . csrf_field() . '<input type="hidden" name="action" value="create_ticket"><input type="hidden" name="request_token" value="' . e($creationToken) . '">' . ($cdDvdRequestRecord ? '<input type="hidden" name="cd_dvd_record_id" value="' . (int) $cdDvdRequestRecord['id'] . '">' : '');
     echo '<div class="ticket-number-box" data-next-it="' . e(request_center_ticket_number_peek('IT')) . '" data-next-support="' . e(request_center_ticket_number_peek('SUP')) . '"><span>شماره درخواست:</span><strong id="ticket-number-preview">' . e($ticketDefaultGroup === 'support' ? request_center_ticket_number_peek('SUP') : request_center_ticket_number_peek('IT')) . '</strong></div>';
     echo '<div class="form-grid"><label class="full">موضوع درخواست<input name="subject" required maxlength="255" value="' . e($subjectDefault) . '" placeholder="مثلاً: اختلال در اتصال به پرینتر واحد مالی"></label><label>حوزه خدمت<div class="group-combo"><label class="group-option"><input type="radio" name="service_group" value="it"' . (($retryServiceGroup !== '' ? $retryServiceGroup : $ticketDefaultGroup) === 'it' ? ' checked' : '') . '><span>خدمات کامپیوتری و IT</span></label><label class="group-option"><input type="radio" name="service_group" value="support"' . (($retryServiceGroup !== '' ? $retryServiceGroup : $ticketDefaultGroup) === 'support' ? ' checked' : '') . '><span>خدمات پشتیبانی</span></label></div></label><input type="hidden" name="category_id" id="category-selector" value=""><label>خدمت از کاتالوگ<select name="service_id" id="service-selector" required><option value="">انتخاب کنید…</option>';
