@@ -15,10 +15,10 @@ if (!user_is_primary_admin($user)) {
 
 $summary = $repo->workspaceSummary($user);
 $adminRecentFilters = [
-    'q' => trim((string) ($_GET['recent_q'] ?? '')),
-    'status' => valid_choice((string) ($_GET['recent_status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], ''),
-    'priority' => valid_choice((string) ($_GET['recent_priority'] ?? ''), ['normal', 'urgent', 'critical'], ''),
-    'service_group' => valid_choice((string) ($_GET['recent_service_group'] ?? ''), ['it', 'support'], ''),
+    'q' => trim((string) ($_GET['recent_q'] ?? $_GET['q'] ?? '')),
+    'status' => valid_choice((string) ($_GET['recent_status'] ?? $_GET['status'] ?? ''), ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], ''),
+    'priority' => valid_choice((string) ($_GET['recent_priority'] ?? $_GET['priority'] ?? ''), ['normal', 'urgent', 'critical'], ''),
+    'service_group' => valid_choice((string) ($_GET['recent_service_group'] ?? $_GET['service_group'] ?? ''), ['it', 'support'], ''),
 ];
 $adminRecentFilters['q'] = function_exists('mb_substr')
     ? mb_substr($adminRecentFilters['q'], 0, 100, 'UTF-8')
