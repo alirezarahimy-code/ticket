@@ -143,17 +143,41 @@ if ($page === 'supervisor') {
     }
     echo '<script id="rc-supervisor-decision-interactions">
 (function(){
+ var confirmations={
+  approve:"با تأیید نهایی، درخواست بسته می‌شود. ادامه می‌دهید؟",
+  rework:"درخواست برای اصلاح به جریان رسیدگی بازمی‌گردد. ادامه می‌دهید؟",
+  reject:"درخواست رد و نتیجه به درخواست‌کننده اعلام می‌شود. ادامه می‌دهید؟",
+  supervisor_reopen:"درخواست بسته‌شده دوباره بازگشایی می‌شود. ادامه می‌دهید؟"
+ };
  document.querySelectorAll(".supervisor-actions form").forEach(function(form){
-  form.addEventListener("submit",function(event){
-   var note=form.querySelector("[name=\"supervisor_note\"]");
-   if(note&&!note.value.trim()){event.preventDefault();note.setCustomValidity("ثبت دلیل تصمیم الزامی است.");note.reportValidity();note.focus();return;}
-   if(note)note.setCustomValidity("");
-   var button=event.submitter||form.querySelector("button[type=\"submit\"]");
-   if(button&&button.dataset.confirm&&!window.confirm(button.dataset.confirm)){event.preventDefault();return;}
-   if(button){button.disabled=true;button.textContent="در حال ثبت تصمیم…";}
-  });
   var note=form.querySelector("[name=\"supervisor_note\"]");
-  if(note)note.addEventListener("input",function(){note.setCustomValidity("");});
+  if(note){
+   note.addEventListener("input",function(){note.setCustomValidity("");});
+   note.addEventListener("blur",function(){
+    if(note.value.trim())note.value=note.value.replace(/^\\s+|\\s+$/g,"");
+   });
+  }
+  form.addEventListener("submit",function(event){
+   if(note&&!note.value.trim()){
+    event.preventDefault();
+    note.setCustomValidity("ثبت دلیل تصمیم الزامی است.");
+    note.reportValidity();
+    note.focus();
+    return;
+   }
+   if(note)note.setCustomValidity("");
+   var submitter=event.submitter||form.querySelector("button[type=\"submit\"]");
+   var decision=form.querySelector("[name=\"decision\"]");
+   var action=form.querySelector("[name=\"action\"]");
+   var key=decision?decision.value:(action?action.value:"");
+   var message=(submitter&&submitter.dataset.confirm)||confirmations[key];
+   if(message&&!window.confirm(message)){event.preventDefault();return;}
+   form.querySelectorAll("button[type=\"submit\"],input[type=\"submit\"]").forEach(function(button){
+    button.disabled=true;
+    if(button.tagName==="BUTTON"){button.dataset.originalText=button.textContent;button.textContent="در حال ثبت…";}
+    else{button.dataset.originalValue=button.value;button.value="در حال ثبت…";}
+   });
+  });
  });
 })();
 </script>'; 
