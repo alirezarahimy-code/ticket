@@ -441,6 +441,30 @@ if ($page === 'ticket') {
     $postReturnOriginPage = in_array((string) ($detailReturnParams['page'] ?? ''), ['queue', 'supervisor'], true)
         ? (string) $detailReturnParams['page'] : '';
     echo '<script>(function(){var context=' . json_encode($postReturnContext, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';document.querySelectorAll("form").forEach(function(form){if((form.method||"get").toLowerCase()!=="post")return;Object.keys(context).forEach(function(key){var input=document.createElement("input");input.type="hidden";input.name="rc_return_"+key;input.value=String(context[key]);form.appendChild(input);});var workspace=document.createElement("input");workspace.type="hidden";workspace.name="rc_return_workspace";workspace.value=' . json_encode($detailReturnWorkspace, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';form.appendChild(workspace);var origin=document.createElement("input");origin.type="hidden";origin.name="rc_return_origin_page";origin.value=' . json_encode($postReturnOriginPage, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';form.appendChild(origin);});})();</script>';
+    echo '<script id="rc-ticket-detail-interactions">
+(function(){
+ document.querySelectorAll(".cancel-ticket-card,.cancellation-decision,.rating-card,.reply-box").forEach(function(form){
+  var textareas=Array.prototype.slice.call(form.querySelectorAll("textarea"));
+  textareas.forEach(function(area){
+   var counter=document.createElement("small");counter.className="field-help rc-character-count";counter.setAttribute("aria-live","polite");
+   function update(){var max=area.maxLength>0?area.maxLength:0;counter.textContent=max?(area.value.length+" / "+max+" نویسه"):(area.value.length+" نویسه");}
+   area.insertAdjacentElement("afterend",counter);area.addEventListener("input",update);update();
+  });
+  form.addEventListener("submit",function(event){
+   var submitter=event.submitter,confirmText=submitter&&submitter.dataset.confirm?submitter.dataset.confirm:form.dataset.confirm;
+   if(confirmText&&!window.confirm(confirmText)){event.preventDefault();return;}
+   var requiredText=Array.prototype.slice.call(form.querySelectorAll("textarea[required],input[required]"));
+   for(var i=0;i<requiredText.length;i++){if(!requiredText[i].value.trim()){event.preventDefault();requiredText[i].focus();return;}}
+   if(form.classList.contains("rating-card")&&!form.querySelector("[name=score]:checked")){event.preventDefault();var first=form.querySelector("[name=score]");if(first)first.focus();return;}
+   if(submitter&&submitter.type==="submit"){submitter.disabled=true;submitter.textContent="در حال ثبت…";}
+  });
+ });
+ document.querySelectorAll(".rating-options input[type=radio]").forEach(function(input){
+  input.addEventListener("change",function(){var group=input.closest(".rating-options");if(group)group.querySelectorAll("label").forEach(function(label){label.classList.toggle("selected",!!label.querySelector("input:checked"));});});
+ });
+ document.querySelectorAll(".reply-box input[type=file],.cancel-ticket-card textarea,.reply-box textarea").forEach(function(input){input.addEventListener("change",function(){input.setCustomValidity("");});});
+})();
+</script>'; 
     render_footer();
     exit;
 }
