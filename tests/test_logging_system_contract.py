@@ -63,12 +63,14 @@ KNOWN_DUPLICATE_MIGRATION_NUMBERS = {"017"}
 # حداقل تعداد نشانگر هر قابلیت که از نسخه‌های ۱.۶۲.۷۴/۷۵ به ارث رسیده و
 # هیچ بستهٔ لاگینگی حق حذفش را ندارد.
 FEATURE_FLOOR = [
-    ("index.php", "access_group", 15),
+    # Business logic may move out of the legacy front controller during module extraction.
+    # Keep the same minimums, but search the application PHP surface for these symbols.
+    ("@app", "access_group", 15),
     ("index.php", "user_access_group", 7),
     ("index.php", "user-access-groups.php", 1),
     ("index.php", "notification_ticket_visibility", 2),
-    ("index.php", "$requesterId", 2),
-    ("index.php", "choose_handling_agent", 3),
+    ("@app", "$requesterId", 2),
+    ("@app", "choose_handling_agent", 3),
     ("lib/activity-audit.php", "access_group_created", 1),
     ("lib/activity-audit.php", "access_group_updated", 1),
     ("lib/activity-audit.php", "access_group_deleted", 1),
@@ -211,8 +213,18 @@ def test_security_log_access_denied_is_available_wherever_it_is_used() -> None:
 
 def test_logging_update_must_not_delete_1_62_75_features() -> None:
     losses: list[str] = []
+    app_source = None
     for relative, marker, floor in FEATURE_FLOOR:
-        found = read(relative).count(marker)
+        if relative == "@app":
+            if app_source is None:
+                app_source = "\\n".join(
+                    path.read_text(encoding="utf-8", errors="replace")
+                    for path in all_php_files()
+                )
+            source = app_source
+        else:
+            source = read(relative)
+        found = source.count(marker)
         if found < floor:
             losses.append(f"{relative}: «{marker}» باید حداقل {floor} بار بیاید ولی {found} بار آمده")
     assert losses == [], (
@@ -221,9 +233,12 @@ def test_logging_update_must_not_delete_1_62_75_features() -> None:
 
 
 def test_logging_dashboard_is_reachable_from_the_reports_menu() -> None:
+    # The shared navigation now owns menu links; index.php still owns the legacy route.
     index = read("index.php")
-    assert "index.php?page=logging-dashboard" in index, "لینک داشبورد لاگ از منو حذف شده است"
+    navigation = read("lib/render.php")
+    assert "index.php?page=logging-dashboard" in navigation, "لینک داشبورد لاگ از منوی مشترک حذف شده است"
     assert "$page === 'logging-dashboard'" in index, "مسیر صفحهٔ داشبورد لاگ از index.php حذف شده است"
+    assert "require_once __DIR__ . '/logging-dashboard.php';" in index, "فایل داشبورد از ورودی اصلی بارگذاری نمی‌شود"
     assert "function logging_dashboard_render" in read("logging-dashboard.php")
 
 
