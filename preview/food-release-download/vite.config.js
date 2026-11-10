@@ -10,6 +10,7 @@ const zipDownloads = {
       '/ticket-update-1.62.3-food-staff-report-theme-20261025.zip',
       '/food-update-1.62.3-download.zip',
       '/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip',
+      '/ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip',
     ]);
     server.middlewares.use((req, res, next) => {
       const pathname = (req.url || '').split('?')[0];
