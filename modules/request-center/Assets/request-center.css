@@ -72,6 +72,12 @@
 .rc-panel h2{font-size:16px;margin:0}
 .rc-panel-body{padding:14px 16px}
 
+/* پاپ‌آپ RC باید بالای هدر sticky سامانه (topbar: position sticky, z-index 15) قرار بگیرد.
+   assets/style.css قانون «.content-wrap > *:not(.ambient-orbits){position:relative;z-index:1}» دارد؛
+   آن z-index:1 یک stacking context می‌سازد که هر z-index داخلی صفحه را زیر هدر نگه می‌دارد.
+   فقط برای ریشهٔ صفحات مرکز درخواست‌ها، آن سقف را برمی‌داریم (relative حفظ می‌شود؛ z-index خودکار). */
+.content-wrap > .rc-page:not(.ambient-orbits){z-index:auto}
+
 /* ═══ نمای ماهانه — «همان تقویم سفارش غذا» ولی برای درخواست‌ها ═══ */
 .rc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;direction:rtl}
 .rc-weekday{padding:8px 4px;text-align:center;font-size:12px;color:var(--rc-muted);font-weight:700}

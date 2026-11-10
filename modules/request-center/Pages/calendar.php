@@ -439,7 +439,7 @@ if (is_file($__rcRender)) { require_once $__rcRender; }
 render_header('تقویم شمسی کارشناسان — مرکز درخواست‌ها', $user);
 ?>
 <div class="rc-page rc-calendar-center">
-<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc3">
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc4">
 <?php request_center_render_flashes(); ?>
 <script src="modules/request-center/Assets/request-center.js" defer></script>
     <!-- ─── سربرگ و وضعیت امروز ─── -->

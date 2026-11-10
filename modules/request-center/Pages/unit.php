@@ -86,7 +86,7 @@ if (is_file($__rcRender)) { require_once $__rcRender; }
 render_header('فضای مدیر واحد', $user);
 ?>
 <div class="rc-page rc-unit-page">
-<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc3">
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc4">
 <style>
 .heading{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;margin:0 0 16px;flex-wrap:wrap}
 .heading h1{font-size:24px;line-height:1.6;margin:0 0 4px}.heading p{margin:0;color:var(--muted);font-size:13px;max-width:640px}

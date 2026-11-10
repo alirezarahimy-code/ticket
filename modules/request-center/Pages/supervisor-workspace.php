@@ -49,7 +49,7 @@ if (is_file($__rcRender)) { require_once $__rcRender; }
 render_header('فضای کاری سوپروایزر', $user);
 ?>
 <div class="rc-page rc-supervisor-page">
-<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc3">
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc4">
 <style>
 .rc-supervisor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
 .rc-supervisor-stat{position:relative;min-height:104px;padding:16px 18px;overflow:hidden;background:var(--white,#fffdf8);border:1px solid var(--line);border-radius:14px;box-shadow:0 5px 18px rgba(65,70,44,.06)}
