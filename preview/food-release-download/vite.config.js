@@ -27,6 +27,12 @@ const zipDownloads = {
         return;
       }
       if (pathname === '/download-rc-request-center-1.63-r4' || pathname === '/download-rc-request-center-1.63-r4.sha256') {
+        res.statusCode = 410;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('این لینک بازنشسته شد (کاندید قبل از اصلاح z-index پاپ‌آپ). از /download-rc-request-center-1.63-r5 استفاده کنید');
+        return;
+      }
+      if (pathname === '/download-rc-request-center-1.63-r5' || pathname === '/download-rc-request-center-1.63-r5.sha256') {
         const isSha = pathname.endsWith('.sha256');
         const filename = isSha
           ? 'ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip.sha256'
