@@ -40,7 +40,24 @@ $rcActorId = (int) $user['id'];
 $rcReturn = 'request-center.php?workspace=' . rawurlencode($workspace)
     . '&calendar=1&agent_view=' . rawurlencode($agentView);
 
-$rcRedirect = static function (string $status, ?string $reason = null, array $extra = []) use ($rcReturn): void {
+// مقصد بازگشت پس از عملیات: کلاینت می‌تواند نماهنگ شود ('month' | 'agenda' | 'day')،
+// ماه و روز جاری را ارسال کند تا کاربر دقیقاً به همان‌جا برگردد (پیش‌فرض تاریخی: روز).
+$rcReturnView = in_array((string) ($_POST['return_view'] ?? ''), ['month', 'agenda', 'day'], true) ? (string) $_POST['return_view'] : '';
+$rcReturnJMonth = preg_match('/^(\d{4})-(0[1-9]|1[0-2])$/', (string) ($_POST['return_jmonth'] ?? '')) ? (string) $_POST['return_jmonth'] : '';
+$rcReturnDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_POST['return_date'] ?? '')) ? (string) $_POST['return_date'] : '';
+$rcReturnExtras = [];
+if ($rcReturnView !== '') {
+    $rcReturnExtras['view'] = $rcReturnView;
+}
+if ($rcReturnJMonth !== '') {
+    $rcReturnExtras['jmonth'] = $rcReturnJMonth;
+}
+if ($rcReturnView === 'day' && $rcReturnDate !== '') {
+    $rcReturnExtras['date'] = $rcReturnDate;
+}
+
+$rcRedirect = static function (string $status, ?string $reason = null, array $extra = []) use ($rcReturn, $rcReturnExtras): void {
+    $extra = array_merge($rcReturnExtras, $extra);
     $url = $rcReturn . '&appointments=' . rawurlencode($status);
     if ($reason !== null && $reason !== '') {
         $url .= '&reason=' . rawurlencode($reason);
@@ -288,7 +305,7 @@ if (isset($_POST['rc_appointment_create_batch'])) {
     $starts = $_POST['starts'] ?? [];
     $ends = $_POST['ends'] ?? [];
     if (!is_array($picks) || $picks === []) {
-        $rcRedirect('batch', null, ['ok' => 0, 'failed' => 0, 'empty' => 1, 'view' => 'day', 'date' => $date]);
+        $rcRedirect('batch', null, ['ok' => 0, 'failed' => 0, 'empty' => 1, 'view' => $rcReturnView !== '' ? $rcReturnView : 'day', 'date' => $date]);
     }
     $pickIds = array_slice(array_keys($picks), 0, 50); // سقف سخت ۵۰ نوبت در یک بازهٔ ارسال
 
@@ -395,7 +412,7 @@ if (isset($_POST['rc_appointment_create_batch'])) {
             }
         } catch (Throwable) {}
     }
-    $rcRedirect('batch', null, ['ok' => count($ids), 'failed' => 0, 'view' => 'day', 'date' => $date]);
+    $rcRedirect('batch', null, ['ok' => count($ids), 'failed' => 0, 'view' => $rcReturnView !== '' ? $rcReturnView : 'day', 'date' => $date]);
 }
 
 // ——— ثبت تکی نوبت (فرم کلاسیک) ———

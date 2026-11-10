@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""سازندهٔ بستهٔ کاندید ارتقاء مرکز درخواست (۱.۶۲.۹۰ ← ۱.۶۲.۹۲-کاندید).
+"""سازندهٔ بستهٔ کاندید ارتقاء مرکز درخواست (۱.۶۲.۹۰ ← ۱.۶۳-کاندید).
 
 تفاوت این بسته با بسته‌های prod: این بستهٔ «کاندید» است؛ انتشار آن (تگ، merge به main
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
@@ -23,10 +23,10 @@ ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63"
 REQUIRES_VERSION = "1.62.90"
 BASE_COMMIT = "d30d7dfa031173535bd750b4e8a7af35593db244"
-RELEASE_DATE = "2026-11-09"
+RELEASE_DATE = "2026-11-11"
 PACKAGE_NAME = f"ticket-update-{REQUIRES_VERSION}-to-{RELEASE_VERSION}-request-center-rc-candidate-{RELEASE_DATE.replace('-', '')}.zip"
 REPORT_NAME = f"CHANGE-REPORT-FA-{RELEASE_VERSION}.md"
-ZIP_DATE = (2026, 11, 9, 15, 30, 0)
+ZIP_DATE = (2026, 11, 11, 12, 0, 0)
 
 EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/")
 MIGRATIONS = [

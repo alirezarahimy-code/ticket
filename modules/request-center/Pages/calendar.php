@@ -292,7 +292,7 @@ $dayLabelFull = $dayJd . ' ' . $jalaliMonthNames[$dayJm - 1] . ' ' . $dayJy . ' 
 $priorityLabelsDay = ['normal' => 'عادی', 'urgent' => 'فوری', 'critical' => 'بحرانی'];
 
 $dayTickets = [];
-if ($view === 'day' && !$rcMissing) {
+if (!$rcMissing) { // نمای روز + پاپ‌آپ ماهانه به فهرست کاندید نیاز دارند
     try {
         [$scopeSqlDay, $scopeParamsDay] = ticket_scope($user, 't');
         $whereDay = $scopeSqlDay !== '' ? preg_replace('/^WHERE\s*/i', '', $scopeSqlDay) : '1 = 1';
@@ -367,6 +367,58 @@ $rcFlashMessage = match ($rcFlash) {
 $rcFlashClass = $rcFlash === 'error' ? 'err' : (($rcFlash === 'batch' && $rcBatchFailed > 0) ? 'warn' : 'ok');
 
 $todayJalaliLabel = $jalaliMonthNames[$tjm - 1] . ' ' . $tjd . '، ' . $weekdayLongFa((int) $nowG->format('N')) . ' ' . $tjy;
+
+// ——— دادهٔ پاپ‌آپ روز (نمای ماهانه): رویدادهای هر روز برای رندر سمت کلاینت ———
+$rcPopupEvents = [];
+foreach ($eventsByDay as $gDate => $gDateEvents) {
+    if (!is_string($gDate) || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $gDate)) {
+        continue;
+    }
+    $gTs = strtotime($gDate);
+    if ($gTs === false) {
+        continue;
+    }
+    [$py, $pm, $pd] = gregorian_to_jalali((int) date('Y', $gTs), (int) date('n', $gTs), (int) date('j', $gTs));
+    $wk = [1 => 'دوشنبه', 2 => 'سه‌شنبه', 3 => 'چهارشنبه', 4 => 'پنجشنبه', 5 => 'جمعه', 6 => 'شنبه', 7 => 'یکشنبه'][(int) date('N', $gTs)] ?? '';
+    $rowsOut = [];
+    foreach ($gDateEvents as $event) {
+        $subjectTrim = mb_strimwidth((string) $event['subject'], 0, 140, '…', 'UTF-8');
+        if ($event['type'] === 'deadline') {
+            $rowsOut[] = [
+                'type' => 'deadline',
+                'time' => (string) $event['time'],
+                'label' => (string) $event['label'],
+                'url' => $calendarTicketUrl((int) $event['id']),
+                'sub' => (string) ($event['ticket_no'] !== '' ? $event['ticket_no'] : ('#' . (int) $event['id'])),
+                'subject' => $subjectTrim,
+                'assignee' => (string) $event['assignee'],
+                'overdue' => (bool) $event['overdue'],
+                'paused' => (bool) $event['paused'],
+            ];
+        } else {
+            $rowsOut[] = [
+                'type' => 'appointment',
+                'time' => (string) $event['time'],
+                'end_time' => (string) ($event['end_time'] ?? ''),
+                'label' => (string) $event['label'],
+                'kind' => (string) ($event['kind'] ?? 'followup'),
+                'appointment_id' => (int) $event['id'],
+                'url' => $calendarTicketUrl((int) $event['ticket_id']),
+                'sub' => (string) ($event['ticket_no'] !== '' ? $event['ticket_no'] : ('درخواست #' . (int) $event['ticket_id'])),
+                'subject' => $subjectTrim,
+                'assignee' => (string) ($event['assignee'] ?? ''),
+                'status' => (string) ($event['status'] ?? 'planned'),
+            ];
+        }
+    }
+    $rcPopupEvents[$gDate] = [
+        'jalali_label' => $faDigits($pd . ' ' . $jalaliMonthNames[$pm - 1] . ' ' . $py),
+        'weekday' => $wk,
+        'day_link' => $calendarLink($jmonthParam, 'day', $kindFilter, $gDate),
+        'events' => $rowsOut,
+    ];
+}
+$rcPopupJson = json_encode($rcPopupEvents, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 ?>
 <?php
 // پوستهٔ مرکزی سامانه (render_header) + تقویم شمسی درون «rc-page»
@@ -453,8 +505,8 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                     </div>
                     <?php if ($event['status'] === 'planned'): ?>
                     <div class="rc-slot-actions" style="margin:0">
-                      <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
-                      <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
+                      <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
+                      <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
                     </div>
                     <?php endif; ?>
                   </div>
@@ -470,7 +522,7 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                 <div class="rc-alert warn">جدول نوبت‌ها ایجاد نشده است؛ ابتدا مهاجرت <code>migrations/035-request-center-appointments.sql</code> را اجرا کنید.</div>
               <?php else: ?>
               <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" id="rc-batch-form">
-                <?= csrf_field() ?><input type="hidden" name="rc_appointment_create_batch" value="1"><input type="hidden" name="date" value="<?= $escape($dayParam) ?>">
+                <?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_create_batch" value="1"><input type="hidden" name="date" value="<?= $escape($dayParam) ?>">
                 <?php if ($rcElevated): ?>
                   <label class="rc-field"><span>کارشناس مسئول <em>خالی = خود شما</em></span>
                     <select class="rc-select" name="assignee_id">
@@ -561,7 +613,7 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                   if ($holidayTitle !== null) { $cellClasses .= ' holiday'; }
               ?>
               <div class="<?= $cellClasses ?>" role="gridcell"<?= $holidayTitle ? ' title="' . $escape($holidayTitle) . '"' : '' ?>>
-                <a class="rc-day-cover" href="<?= $escape($calendarLink($jmonthParam, 'day', $kindFilter, $cellDate)) ?>" aria-label="نمای روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>" tabindex="-1"></a>
+                <button type="button" class="rc-day-cover" data-rc-open-day="<?= $escape($cellDate) ?>" aria-label="باز کردن پاپ‌آپ روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>"></button>
                 <div class="rc-daynum"><a class="rc-day-link" href="<?= $escape($calendarLink($jmonthParam, 'day', $kindFilter, $cellDate)) ?>" title="نمای روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>"><?= $escape($faDigits((string) $cellJd)) ?></a><?php if (!$inMonth): ?><span style="font-weight:400;color:#9aa7b4;font-size:10px"> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?></span><?php endif; ?></div>
                 <?php if ($holidayTitle !== null): ?><span class="rc-hol-tag"><?= $escape($holidayTitle) ?></span><?php endif; ?>
                 <?php foreach (array_slice($cellEvents, 0, 3) as $event): ?>
@@ -626,8 +678,8 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                   </div>
                   <?php if ($event['status'] === 'planned'): ?>
                   <div class="rc-slot-actions" style="margin:0">
-                    <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
-                    <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
+                    <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
+                    <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
                   </div>
                   <?php endif; ?>
                 </div>
@@ -673,8 +725,8 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                         <div style="font-size:11px;color:var(--rc-muted)"><?= $escape($event['subject']) ?></div>
                         <?php if ($event['status'] === 'planned'): ?>
                           <div class="rc-slot-actions">
-                            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
-                            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
+                            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn" type="submit">انجام شد</button></form>
+                            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $event['id'] ?>"><button class="rc-mini-btn danger" type="submit">لغو</button></form>
                           </div>
                         <?php endif; ?>
                       <?php endif; ?>
@@ -714,8 +766,8 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                   <div style="font-size:11px;color:var(--rc-muted)"><?= $escape($upKind) ?> · <a style="color:var(--rc-brand-strong);font-weight:700" href="<?= $escape($calendarTicketUrl((int) $upcoming['ticket_id'])) ?>"><?= $escape($upcoming['ticket_no'] !== '' ? (string) $upcoming['ticket_no'] : ('#' . (int) $upcoming['ticket_id'])) ?></a><?php if ($rcElevated && !empty($upcoming['assignee_name'])): ?> · <?= $escape((string) $upcoming['assignee_name']) ?><?php endif; ?></div>
                 </div>
                 <div class="rc-slot-actions" style="margin:0;flex:0 0 auto">
-                  <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn" type="submit" title="ثبت اتمام">انجام شد</button></form>
-                  <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn danger" type="submit" title="لغو نوبت">لغو</button></form>
+                  <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn" type="submit" title="ثبت اتمام">انجام شد</button></form>
+                  <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>"><?= csrf_field() ?><input type="hidden" name="return_view" value="<?= $escape($view) ?>"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="return_date" value="<?= $escape($dayParam) ?>"><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" value="<?= (int) $upcoming['id'] ?>"><button class="rc-mini-btn danger" type="submit" title="لغو نوبت">لغو</button></form>
                 </div>
               </div>
               <?php endforeach; ?>
@@ -860,6 +912,192 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
  }
 })();
 </script>
+
+    <!-- ═══ پاپ‌آپ روز (فقط نمای ماهانه): کلیک روی هر سلول روز این پنجره را باز می‌کند ═══ -->
+    <?php if ($view === 'month'): ?>
+    <div class="rc-modal" id="rc-day-modal" role="dialog" aria-modal="true" aria-labelledby="rc-day-modal-title" aria-hidden="true" hidden>
+      <div class="rc-modal-backdrop" data-rc-close-modal></div>
+      <div class="rc-modal-dialog" role="document">
+        <header class="rc-modal-head">
+          <div class="rc-modal-headtext">
+            <h2 id="rc-day-modal-title">روز</h2>
+            <p class="rc-hint" id="rc-day-modal-sub">رویدادهای این روز و ثبت نوبت رسیدگی</p>
+          </div>
+          <button type="button" class="rc-iconbtn" data-rc-close-modal aria-label="بستن پاپ‌آپ">&times;</button>
+        </header>
+        <div class="rc-modal-body">
+          <section class="rc-modal-section" aria-label="رویدادهای این روز">
+            <h3 class="rc-modal-h3">رویدادها <span class="rc-modal-badge" id="rc-day-modal-events-count">۰</span></h3>
+            <div class="rc-modal-events" id="rc-day-modal-events"></div>
+          </section>
+          <section class="rc-modal-section" aria-label="ثبت نوبت برای این روز">
+            <h3 class="rc-modal-h3">ثبت نوبت برای این روز <small>«همه یا هیچ» — حداکثر ۵۰ نوبت در هر ثبت</small></h3>
+            <?php if ($rcMissing): ?>
+              <div class="rc-alert warn" role="alert">جدول نوبت‌ها ایجاد نشده است؛ ابتدا مهاجرت <code>migrations/035-request-center-appointments.sql</code> را اجرا کنید.</div>
+            <?php else: ?>
+            <form method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" id="rc-modal-batch-form">
+              <?= csrf_field() ?><input type="hidden" name="return_view" value="month"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>">
+              <input type="hidden" name="rc_appointment_create_batch" value="1"><input type="hidden" name="date" id="rc-modal-date" value="<?= $escape($dayParam) ?>">
+              <?php if ($rcElevated): ?>
+                <label class="rc-field"><span>کارشناس مسئول <em>خالی = خود شما</em></span>
+                  <select class="rc-select" name="assignee_id" id="rc-modal-assignee">
+                    <option value="0">خود من</option>
+                    <?php foreach ($aliasStaff as $staff): ?>
+                      <?php if ((int) $staff['id'] === $rcActorId) { continue; } ?>
+                      <option value="<?= (int) $staff['id'] ?>"><?= $escape((string) $staff['full_name']) ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </label>
+              <?php endif; ?>
+              <label class="rc-field"><span>نوع نوبت</span>
+                <select class="rc-select" name="kind"><?php foreach (AppointmentRepository::KINDS as $kindKey => $kindLabel): ?><option value="<?= $escape($kindKey) ?>"><?= $escape($kindLabel) ?></option><?php endforeach; ?></select>
+              </label>
+              <?php if ($rcElevated): ?>
+                <label class="rc-check"><input type="checkbox" name="allow_outside_business" value="1"> ثبت حتی بیرون از تقویم کاری/ساعات کاری/تعطیلات (فقط مدیر)</label>
+              <?php endif; ?>
+              <div class="rc-modal-candidates">
+                <table class="rc-batch-table">
+                  <thead><tr><th aria-label="انتخاب"></th><th>درخواست</th><th>موضوع</th><th>موعد</th><th>شروع</th><th>پایان</th></tr></thead>
+                  <tbody>
+                  <?php foreach ($dayTickets as $dt):
+                      $tid = (int) $dt['id'];
+                      $dueRaw = trim((string) ($dt['due_at'] ?? ''));
+                      $dueLabel = $dueRaw !== '' ? gregorian_to_jalali((int) date('Y', strtotime(substr($dueRaw, 0, 10))), (int) date('n', strtotime(substr($dueRaw, 0, 10))), (int) date('j', strtotime(substr($dueRaw, 0, 10)))) : null;
+                  ?>
+                    <tr data-modal-row>
+                      <td><input type="checkbox" class="rc-modal-pick" name="pick[<?= $tid ?>]" value="1" aria-label="انتخاب درخواست <?= $escape((string) ($dt['ticket_no'] ?? $tid)) ?>"></td>
+                      <td><a class="rc-modal-ticket-link" href="<?= $escape($calendarTicketUrl($tid)) ?>"><?= $escape($dt['ticket_no'] !== '' ? (string) $dt['ticket_no'] : ('#' . $tid)) ?></a><br><small class="rc-hint"><?= $escape($priorityLabelsDay[(string) $dt['priority']] ?? (string) $dt['priority']) ?></small></td>
+                      <td><span title="<?= $escape((string) $dt['subject']) ?>"><?= $escape(mb_substr((string) $dt['subject'], 0, 110, 'UTF-8')) ?></span></td>
+                      <td style="white-space:nowrap"><?= $dueLabel ? $escape($faDigits(sprintf('%04d/%02d/%02d', $dueLabel[0], $dueLabel[1], $dueLabel[2]))) : '—' ?></td>
+                      <td><input type="time" name="starts[<?= $tid ?>]" value="09:00" step="300" required></td>
+                      <td><input type="time" name="ends[<?= $tid ?>]" value="10:00" step="300" required></td>
+                    </tr>
+                  <?php endforeach; ?>
+                  <?php if ($dayTickets === []): ?>
+                    <tr><td colspan="6" class="rc-empty">درخواست قابل‌نوبت‌گیری در حوزهٔ دسترسی شما نیست.</td></tr>
+                  <?php endif; ?>
+                  </tbody>
+                </table>
+              </div>
+              <div class="rc-batch-foot">
+                <span class="rc-batch-count"><strong id="rc-modal-count">۰</strong> درخواست انتخاب شده</span>
+                <button class="rc-primary" type="submit">ثبت نوبت‌های انتخاب‌شده</button>
+              </div>
+              <p class="rc-hint">ثبت گروهی «همه یا هیچ» است: اگر حتی یک درخواست نامعتبر باشد (ساعت بیرون از پنجرهٔ کاری، تعطیل، تکمیل ظرفیت روزانه یا تداخل نوبت) <strong>هیچ‌کدام ثبت نمی‌شود</strong>. تعطیل‌روزها و پنجشنبه‌وجمعه پیش‌فرض مسدودند.</p>
+            </form>
+            <?php endif; ?>
+          </section>
+        </div>
+        <footer class="rc-modal-foot">
+          <a class="rc-link" id="rc-day-modal-full" href="<?= $escape($calendarLink($jmonthParam, 'day', $kindFilter, $dayParam)) ?>">نمای کامل روز و فرم کلاسیک ←</a>
+        </footer>
+      </div>
+    </div>
+    <!-- فرم‌های پنهان برای «انجام شد»/«لغو» سریع از داخل پاپ‌آپ -->
+    <form id="rc-popup-complete" method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" hidden>
+      <?= csrf_field() ?><input type="hidden" name="return_view" value="month"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="rc_appointment_complete" value="1"><input type="hidden" name="appointment_id" id="rc-popup-complete-id" value="0">
+    </form>
+    <form id="rc-popup-cancel" method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" hidden>
+      <?= csrf_field() ?><input type="hidden" name="return_view" value="month"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" id="rc-popup-cancel-id" value="0">
+    </form>
+    <script id="rc-day-modal-data">
+      window.rcCalendarDays = <?= $rcPopupJson !== false ? $rcPopupJson : '{}' ?>;
+      window.rcCalendarDayBase = <?= json_encode('request-center.php?workspace=' . rawurlencode($workspace) . '&calendar=1&agent_view=' . rawurlencode($agentView) . '&view=day&jmonth=' . rawurlencode($jmonthParam) . ($kindFilter !== '' ? '&kind=' . rawurlencode($kindFilter) : '') . '&date=', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    </script>
+    <script id="rc-day-modal-js">
+(function(){
+  var modal=document.getElementById('rc-day-modal');
+  if(!modal){return;}
+  var days=window.rcCalendarDays||{}, dayBase=window.rcCalendarDayBase||'';
+  var title=document.getElementById('rc-day-modal-title');
+  var sub=document.getElementById('rc-day-modal-sub');
+  var eventsBox=document.getElementById('rc-day-modal-events');
+  var eventsCount=document.getElementById('rc-day-modal-events-count');
+  var dateInput=document.getElementById('rc-modal-date');
+  var fullDay=document.getElementById('rc-day-modal-full');
+  var lastFocus=null;
+  var FA='۰۱۲۳۴۵۶۷۸۹';
+  var fa=function(v){return String(v).replace(/\d/g,function(d){return FA[+d];});};
+  var el=function(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;};
+  var clear=function(n){if(n){while(n.firstChild)n.removeChild(n.firstChild);}};
+
+  function buildEventRow(ev){
+    var cls='rc-modal-event'+(ev.type==='deadline'?' sla':' '+(ev.kind||'followup'));
+    if(ev.overdue)cls+=' overdue';
+    if(ev.paused)cls+=' paused';
+    if(ev.status==='done')cls+=' done';
+    var row=el('div',cls);
+    var time=el('time','rc-modal-event-time',ev.time+(ev.end_time?'–'+ev.end_time:''));
+    row.appendChild(time);
+    var body=el('div','rc-modal-event-body');
+    var line=el('div','rc-modal-event-line');
+    line.appendChild(el('strong',null,(ev.label||'')+' · '));
+    var link=el('a','rc-modal-event-link',ev.sub||'');link.href=ev.url||'#';
+    line.appendChild(link);
+    if(ev.status==='done'){line.appendChild(el('span','rc-modal-done-badge','انجام‌شده'));}
+    body.appendChild(line);
+    if(ev.subject){body.appendChild(el('div','rc-modal-event-subject',ev.subject));}
+    if(ev.assignee){body.appendChild(el('div','rc-modal-event-meta',ev.assignee));}
+    row.appendChild(body);
+    if(ev.type==='appointment' && ev.status==='planned'){
+      var actions=el('div','rc-modal-event-actions');
+      var okBtn=el('button','rc-mini-btn','انجام شد');okBtn.type='button';
+      okBtn.addEventListener('click',function(){document.getElementById('rc-popup-complete-id').value=ev.appointment_id;document.getElementById('rc-popup-complete').submit();});
+      var cancelBtn=el('button','rc-mini-btn danger','لغو');cancelBtn.type='button';
+      cancelBtn.addEventListener('click',function(){if(!window.confirm('این نوبت لغو شود؟')){return;}document.getElementById('rc-popup-cancel-id').value=ev.appointment_id;document.getElementById('rc-popup-cancel').submit();});
+      actions.appendChild(okBtn);actions.appendChild(cancelBtn);row.appendChild(actions);
+    }
+    return row;
+  }
+
+  function openModal(gdate,opener){
+    var meta=days[gdate]||{};
+    lastFocus=opener||null;
+    title.textContent=meta.jalali_label?((meta.weekday?meta.weekday+'، ':'')+meta.jalali_label):'روز';
+    sub.textContent=meta.weekday?(meta.weekday+' — رویدادها و ثبت نوبت رسیدگی'):'رویدادها و ثبت نوبت رسیدگی';
+    if(dateInput){dateInput.value=gdate;}
+    if(fullDay){fullDay.href=dayBase+encodeURIComponent(gdate);}
+    clear(eventsBox);
+    var evts=meta.events||[];
+    if(eventsCount){eventsCount.textContent=fa(evts.length);}
+    if(evts.length===0){
+      eventsBox.appendChild(el('div','rc-empty','رویدادی برای این روز ثبت نشده است. برای درخواست‌ها از فرم زیر نوبت بگذارید.'));
+    }else{
+      evts.forEach(function(ev){eventsBox.appendChild(buildEventRow(ev));});
+    }
+    modal.hidden=false;
+    modal.setAttribute('aria-hidden','false');
+    document.body.classList.add('rc-modal-open');
+    var closeBtn=modal.querySelector('.rc-modal-head [data-rc-close-modal]');
+    if(closeBtn&&closeBtn.focus){closeBtn.focus();}
+  }
+  function closeModal(){
+    modal.hidden=true;
+    modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('rc-modal-open');
+    if(lastFocus&&lastFocus.focus){lastFocus.focus();}
+  }
+  Array.prototype.slice.call(document.querySelectorAll('[data-rc-open-day]')).forEach(function(btn){
+    btn.addEventListener('click',function(){openModal(btn.getAttribute('data-rc-open-day'),btn);});
+  });
+  Array.prototype.slice.call(modal.querySelectorAll('[data-rc-close-modal]')).forEach(function(btn){
+    btn.addEventListener('click',closeModal);
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&!modal.hidden){e.preventDefault();closeModal();}
+  });
+  var picks=Array.prototype.slice.call(modal.querySelectorAll('.rc-modal-pick'));
+  var modalCount=document.getElementById('rc-modal-count');
+  var updateModal=function(){
+    var picked=picks.filter(function(cb){return cb.checked;});
+    if(modalCount){modalCount.textContent=fa(picked.length);}
+    picks.forEach(function(cb){var row=cb.closest('[data-modal-row]');if(row){row.classList.toggle('is-picked',cb.checked);}});
+  };
+  picks.forEach(function(cb){cb.addEventListener('change',updateModal);});
+  updateModal();
+})();
+</script>
+    <?php endif; ?>
 
     <footer class="rc-footer">مرکز درخواست‌ها · تقویم شمسی کارشناسان — موعد SLA/OLA «خواندنی»، نوبت رسیدگی «کنشی» · چاپ صفحه برای تحویل شیفت مناسب است (@media print).</footer>
 </div>

@@ -207,6 +207,36 @@ if ($rcMethod === 'GET' && $rcPage === '') {
 }
 
 // Compatibility bridge for older bookmarks and system-wide pages/actions.
+// محدود به هدف‌های شناخته‌شدهٔ پوستهٔ اصلی سامانه: مسیرهای ناشناخته با 404 صریح پاسخ می‌گیرند
+// و بدون اجازهٔ load شدن هستهٔ legacy از مسیر RC اجرا نمی‌شوند.
 // New lifecycle navigation and successful RC operations must not land here.
+$rcLegacyParams = [];
+parse_str((string) ($_SERVER['QUERY_STRING'] ?? ''), $rcLegacyParams);
+$rcLegacyPage = is_string($rcLegacyParams['page'] ?? null) ? strtolower(trim($rcLegacyParams['page'])) : '';
+$rcLegacyAction = is_string($rcLegacyParams['action'] ?? null) ? strtolower(trim($rcLegacyParams['action'])) : '';
+// فهرست صریح صفحه‌های legacy که در خود index.php پشتیبانی می‌شوند (استخراج‌شده از لینک‌های واقعی کل مخزن).
+$rcBridgePages = [
+    'activity-log', 'analytics', 'asset-history', 'assets', 'backup',
+    'cd-dvd', 'cd-dvd-history', 'change-password', 'chatbot-admin', 'chatbot-api',
+    'dashboard', 'domain-scan', 'food-order', 'food-personnel-link', 'food-ticket',
+    'help', 'holidays', 'inventory', 'inventory-diagnostics', 'knowledge',
+    'local-accounts', 'logging-dashboard', 'login', 'logs', 'new-ticket',
+    'notifications', 'organization', 'profile', 'queue', 'reports',
+    'search', 'services', 'settings', 'supervisor', 'system-health',
+    'ticket', 'tickets', 'traffic-control', 'traffic-control-print',
+];
+// خروجی‌ها/دانلودهای legacy (همان‌هایی که در مخزن استفاده می‌شوند).
+$rcBridgeActions = [
+    'export_view_xlsx', 'download_backup', 'export_report', 'export_assets',
+    'download_attachment', 'profile_photo', 'notification_feed',
+    'export_cd_dvd', 'export_activity_logs', 'diagnose_ldap',
+];
+$rcBridgeAllowed = ($rcLegacyPage !== '' && in_array($rcLegacyPage, $rcBridgePages, true))
+    || ($rcLegacyAction !== '' && in_array($rcLegacyAction, $rcBridgeActions, true));
+if (!$rcBridgeAllowed) {
+    request_center_error_page(404, 'مسیر ناشناخته',
+        'این نشانی در مرکز درخواست‌ها تعریف نشده است. از «مرکز درخواست‌ها» یا منوی سامانه ادامه دهید.');
+    exit;
+}
 require __DIR__ . '/index.php';
 exit;
