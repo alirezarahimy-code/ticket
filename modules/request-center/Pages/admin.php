@@ -153,7 +153,7 @@ if (is_file($__rcRender)) { require_once $__rcRender; }
 render_header('مدیریت مرکز درخواست‌ها', $user);
 ?>
 <div class="rc-page rc-admin-page">
-<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc2">
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc3">
 <style>
 .rc-admin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
 .rc-admin-stat{background:var(--white,#fffdf8);border:1px solid var(--line);border-radius:13px;padding:16px;min-width:0;min-height:94px;box-shadow:0 3px 12px rgba(65,70,44,.06)}

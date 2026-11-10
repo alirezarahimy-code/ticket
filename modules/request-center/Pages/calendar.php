@@ -439,7 +439,7 @@ if (is_file($__rcRender)) { require_once $__rcRender; }
 render_header('تقویم شمسی کارشناسان — مرکز درخواست‌ها', $user);
 ?>
 <div class="rc-page rc-calendar-center">
-<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc2">
+<link rel="stylesheet" href="modules/request-center/Assets/request-center.css?v=20261111rc3">
 <?php request_center_render_flashes(); ?>
 <script src="modules/request-center/Assets/request-center.js" defer></script>
     <!-- ─── سربرگ و وضعیت امروز ─── -->
@@ -631,10 +631,12 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                   if ($isWeekend) { $cellClasses .= ' weekend-cell'; }
                   if ($isToday) { $cellClasses .= ' today'; }
                   if ($holidayTitle !== null) { $cellClasses .= ' holiday'; }
+                  if (count($cellEvents) > 0) { $cellClasses .= ' has-events'; }
               ?>
               <div class="<?= $cellClasses ?>" role="gridcell"<?= $holidayTitle ? ' title="' . $escape($holidayTitle) . '"' : '' ?>>
                 <button type="button" class="rc-day-cover" data-rc-open-day="<?= $escape($cellDate) ?>" aria-label="باز کردن پاپ‌آپ روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>"></button>
-                <div class="rc-daynum"><a class="rc-day-link" href="<?= $escape($calendarLink($jmonthParam, 'day', $kindFilter, $cellDate)) ?>" title="نمای روز <?= $escape($faDigits((string) $cellJd)) ?> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?>"><?= $escape($faDigits((string) $cellJd)) ?></a><?php if (!$inMonth): ?><span style="font-weight:400;color:#9aa7b4;font-size:10px"> <?= $escape($jalaliMonthNames[$cellJm - 1]) ?></span><?php endif; ?></div>
+                <div class="rc-daynum"><span class="rc-daynum-num"><?= $escape($faDigits((string) $cellJd)) ?></span><?php if (!$inMonth): ?><span class="rc-daynum-month"><?= $escape($jalaliMonthNames[$cellJm - 1]) ?></span><?php endif; ?></div>
+                <?php if ($inMonth): ?><span class="rc-day-status"><?= $cellEvents !== [] ? $escape($faDigits((string) count($cellEvents))) . ' رویداد' : 'بدون رویداد' ?></span><?php endif; ?>
                 <?php if ($holidayTitle !== null): ?><span class="rc-hol-tag"><?= $escape($holidayTitle) ?></span><?php endif; ?>
                 <?php foreach (array_slice($cellEvents, 0, 3) as $event): ?>
                   <?php if ($event['type'] === 'deadline'): ?>
@@ -651,13 +653,18 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
                 <?php endforeach; ?>
                 <?php if (count($cellEvents) > 3): ?>
                   <a class="rc-more" href="<?= $escape($calendarLink($jmonthParam, 'agenda', $kindFilter)) ?>">+<?= count($cellEvents) - 3 ?> رویداد دیگر…</a>
-                <?php elseif ($cellEvents === [] && !$isToday && !$holidayTitle && $inMonth): ?>
-                  <span class="rc-more" style="opacity:.55">—</span>
                 <?php endif; ?>
               </div>
               <?php endfor; ?>
             </div>
-            <p class="rc-footer" style="margin:10px 4px 0;text-align:right">ستون‌ها به ترتیب «شنبه تا جمعه» هستند · روزهای «تعطیل/پنجشنبه‌وجمعه» از جدول <code>holidays</code> آمده و با رنگ متمایزند · خوشهٔ قرمز = موعد گذشته یا روز تعطیل.</p>
+            <div class="rc-legend" aria-hidden="true">
+              <span><i class="lg-work"></i>روز عادی</span>
+              <span><i class="lg-weekend"></i>پنجشنبه و جمعه</span>
+              <span><i class="lg-holiday"></i>تعطیل رسمی</span>
+              <span><i class="lg-events"></i>روز دارای رویداد (نوبت/موعد)</span>
+              <span><i class="lg-today"></i>امروز</span>
+            </div>
+            <p class="rc-footer" style="margin:10px 4px 0;text-align:right">ستون‌ها به ترتیب «شنبه تا جمعه» هستند · رنگ‌ها مثل «تقویم سفارش غذا»: آبی عادی، صورتی روشن جمعه/پنجشنبه، صورتی پررنگ تعطیل رسمی، زرد روزی که نوبت/موعد در آن ثبت شده · کلیک روی خانهٔ روز = پاپ‌آپ؛ ساعت‌ها و انتخاب‌ها همان‌جا انجام می‌شود.</p>
           </div>
         </section>
         <?php else: /* view === 'agenda' */ ?>

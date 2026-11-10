@@ -72,29 +72,50 @@
 .rc-panel h2{font-size:16px;margin:0}
 .rc-panel-body{padding:14px 16px}
 
-.rc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--rc-line-soft);border:1px solid var(--rc-line-soft);border-radius:var(--rc-radius-sm);overflow:hidden}
-.rc-weekday{padding:9px 4px;text-align:center;font-size:11.5px;color:var(--rc-muted);font-weight:700;background:#faf7ec}
-.rc-day{min-height:118px;padding:6px 6px 8px;background:var(--rc-surface);min-width:0;position:relative}
-.rc-day.outside{background:#f3efe3}
-.rc-day.outside .rc-daynum{color:#b9b39e}
-.rc-day.weekend-cell{background:#fdf9ec}
-.rc-day.today{background:linear-gradient(180deg,#eef6ef,var(--rc-surface))}
-.rc-day.today .rc-daynum{color:var(--rc-brand-strong)}
-.rc-day.today::after{content:"امروز";position:absolute;top:6px;inset-inline-end:6px;background:var(--rc-brand);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:999px}
-.rc-day.holiday{background:#fff5f5}
-.rc-day.holiday .rc-daynum{color:var(--rc-red)}
-.rc-daynum{font-size:13px;font-weight:800;margin-bottom:4px}
-.rc-day-cover{position:absolute;inset:0;z-index:0;text-decoration:none;border-radius:4px;border:0;background:transparent;padding:0;margin:0;width:100%;height:100%;cursor:pointer;font:inherit;color:inherit}
-.rc-day:hover{box-shadow:inset 0 0 0 2px var(--rc-brand)}
+/* ═══ نمای ماهانه — «همان تقویم سفارش غذا» ولی برای درخواست‌ها ═══ */
+.rc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;direction:rtl}
+.rc-weekday{padding:8px 4px;text-align:center;font-size:12px;color:var(--rc-muted);font-weight:700}
+.rc-day{position:relative;min-height:116px;padding:9px;border:1px solid #cfe4f2;border-radius:13px;background:rgba(224,242,254,.62);color:#132a3a;display:flex;flex-direction:column;gap:4px;min-width:0;transition:transform .15s,box-shadow .15s,border-color .15s}
+.rc-day.outside{opacity:.5;background:#f3f1e9;border-color:#e3dfd0}
+.rc-day.outside .rc-daynum-num{color:#9a958a}
+.rc-day.weekend-cell{background:rgba(254,226,226,.82);border-color:#f2bdbd} /* تعطیل هفتگی (پنجشنبه و جمعه) */
+.rc-day.weekend-cell .rc-daynum-num{color:#a3312b}
+.rc-day.holiday{background:#f5c1c1;border-color:#df9090} /* تعطیل رسمی — پررنگ‌تر از تعطیل هفتگی */
+.rc-day.holiday .rc-daynum-num{color:#7f1d1d}
+.rc-day.has-events{border:2px solid #d2a315;background:rgba(255,244,194,.9)} /* روز دارای رویداد (نوبت/موعد) */
+.rc-day.has-events.weekend-cell,.rc-day.has-events.holiday{border-color:#c99600;background:rgba(255,244,194,.92)}
+.rc-day.today{box-shadow:inset 0 0 0 2px var(--gold,#c8952e);border-color:var(--gold,#c8952e)}
+.rc-day.today.has-events{box-shadow:inset 0 0 0 2px #d2a315}
+.rc-day:hover{border-color:var(--rc-brand);transform:translateY(-1px);box-shadow:0 8px 20px rgba(23,79,67,.16);z-index:2}
+.rc-daynum{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0}
+.rc-daynum-num{font-size:17px;font-weight:800;line-height:1.1}
+.rc-daynum-month{font-weight:400;color:#8a95a1;font-size:10px}
+.rc-day-status{display:inline-flex;align-items:center;gap:4px;width:max-content;max-width:100%;padding:2px 7px;border-radius:999px;background:#eef2f5;color:#475467;font-size:10px;line-height:1.7}
+.rc-day-cover{position:absolute;inset:0;z-index:0;text-decoration:none;border-radius:inherit;border:0;background:transparent;padding:0;margin:0;width:100%;height:100%;cursor:pointer;font:inherit;color:inherit}
 .rc-day-cover:focus-visible{outline:2px solid var(--rc-brand-strong);outline-offset:-2px}
 .rc-day > *:not(.rc-day-cover){position:relative;z-index:1}
-.rc-day-link{display:inline-flex;align-items:center;gap:4px;color:inherit;text-decoration:none;border-radius:8px;padding:1px 5px;margin:-1px -5px;transition:.12s}
-.rc-day-link:hover{background:var(--rc-brand-soft);color:var(--rc-brand-strong)}
 .rc-day-plan{display:block;font-size:9.5px;color:var(--rc-brand);text-decoration:none;margin-top:3px;font-weight:700}
 .rc-day-plan:hover{text-decoration:underline}
-.rc-hol-tag{display:block;font-size:9px;line-height:1.4;color:var(--rc-red);background:#ffe9e7;border:1px solid #f6c5c0;border-radius:7px;padding:2px 5px;margin:3px 0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-hol-tag{display:block;font-size:9px;line-height:1.4;color:#7f1d1d;background:#fee4e2;border:1px solid #f2b8b5;border-radius:7px;padding:2px 5px;margin:2px 0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;color:var(--rc-muted);font-size:11px}
+.rc-legend span{display:inline-flex;align-items:center;gap:6px}
+.rc-legend i{width:11px;height:11px;display:inline-block;border-radius:4px;border:1px solid var(--rc-line-soft);background:#f2f4f7}
+.rc-legend .lg-work{background:rgba(224,242,254,.95);border-color:#cfe4f2}
+.rc-legend .lg-weekend{background:rgba(254,226,226,.9);border-color:#f2bdbd}
+.rc-legend .lg-holiday{background:#f5c1c1;border-color:#df9090}
+.rc-legend .lg-events{background:#fff3ae;border-color:#d2a315}
+.rc-legend .lg-today{background:#fffdf4;border-color:var(--gold,#c8952e)}
+@media (max-width:760px){.rc-grid{gap:4px}.rc-day{min-height:88px;padding:6px 5px;border-radius:9px}.rc-weekday{font-size:10px;padding:4px 0}.rc-daynum-num{font-size:14px}.rc-day-status{font-size:9px;padding:1px 5px}}
+@media (max-width:430px){.rc-day{min-height:72px}.rc-day-status{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rc-day .rc-event{display:none}}
+html[data-theme-mode="dark"] .rc-day{background:rgba(56,84,104,.5);border-color:#3d5a74;color:#dbe7ee}
+html[data-theme-mode="dark"] .rc-day.outside{background:#2a2f28;border-color:#3a4036;opacity:.55}
+html[data-theme-mode="dark"] .rc-day.weekend-cell{background:rgba(120,54,54,.45);border-color:#6e3a3a}
+html[data-theme-mode="dark"] .rc-day.weekend-cell .rc-daynum-num{color:#f0b4b0}
+html[data-theme-mode="dark"] .rc-day.holiday{background:rgba(148,64,64,.55);border-color:#8a4747}
+html[data-theme-mode="dark"] .rc-day.holiday .rc-daynum-num{color:#ffc9c4}
+html[data-theme-mode="dark"] .rc-day.has-events{background:rgba(112,94,26,.5);border-color:#8a7424}
 
-.rc-event{display:block;border-inline-start:3px solid var(--rc-brand);background:var(--rc-brand-soft);color:#1c4433;border-radius:7px;padding:3px 6px;font-size:10.5px;line-height:1.55;margin:3px 0;text-decoration:none;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;transition:.12s}
+.rc-event{display:block;border-inline-start:3px solid var(--rc-brand);background:var(--rc-brand-soft);color:#1c4433;border-radius:7px;padding:4px 7px;font-size:11px;line-height:1.6;margin:3px 0;text-decoration:none;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word;transition:.12s}
 .rc-event:hover{filter:brightness(.96);transform:translateX(-2px)}
 .rc-event b{font-size:9.5px;font-weight:800}
 .rc-event.done{opacity:.55}
