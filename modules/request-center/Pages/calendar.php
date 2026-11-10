@@ -887,7 +887,7 @@ render_header('تقویم شمسی کارشناسان — مرکز درخواس�
       </aside>
     </div>
 
-    <script id="rc-calendar-interactions">
+    <script id="rc-calendar-interactions" nonce="<?= e(csp_nonce()) ?>">
 (function(){
  var forms=Array.prototype.slice.call(document.querySelectorAll('form input[name^="rc_appointment_"]')).map(function(input){return input.form;}).filter(function(form,index,all){return form&&all.indexOf(form)===index;});
  forms.forEach(function(form){
@@ -1059,11 +1059,11 @@ body.rc-modal-open{overflow:hidden}
     <form id="rc-popup-cancel" method="post" action="request-center.php?workspace=<?= $escape($workspace) ?>&amp;calendar=1&amp;agent_view=<?= $escape($agentView) ?>" hidden>
       <?= csrf_field() ?><input type="hidden" name="return_view" value="month"><input type="hidden" name="return_jmonth" value="<?= $escape($jmonthParam) ?>"><input type="hidden" name="rc_appointment_cancel" value="1"><input type="hidden" name="appointment_id" id="rc-popup-cancel-id" value="0">
     </form>
-    <script id="rc-day-modal-data">
+    <script id="rc-day-modal-data" nonce="<?= e(csp_nonce()) ?>">
       window.rcCalendarDays = <?= $rcPopupJson !== false ? $rcPopupJson : '{}' ?>;
       window.rcCalendarDayBase = <?= json_encode('request-center.php?workspace=' . rawurlencode($workspace) . '&calendar=1&agent_view=' . rawurlencode($agentView) . '&view=day&jmonth=' . rawurlencode($jmonthParam) . ($kindFilter !== '' ? '&kind=' . rawurlencode($kindFilter) : '') . '&date=', JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
-    <script id="rc-day-modal-js">
+    <script id="rc-day-modal-js" nonce="<?= e(csp_nonce()) ?>">
 (function(){
   'use strict';
   // اتصال رویدادها به‌صورت تفویضی روی document — مستقل از ترتیب بارگذاری و بدون binding تک‌دکمه‌ای

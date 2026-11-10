@@ -385,7 +385,7 @@ $metricItems = $workspace === 'requester'
 <?php if ($pages > 1): ?><nav class="pagination" aria-label="صفحه‌بندی"><?php for ($i=max(1,$page-3);$i<=min($pages,$page+3);$i++): ?><?php if ($i === $page): ?><span class="current"><?= $i ?></span><?php else: ?><a href="request-center.php?<?= $escape($queryString) ?><?= $queryString !== "" ? "&amp;" : "" ?>p=<?= $i ?>"><?= $i ?></a><?php endif; ?><?php endfor; ?></nav><?php endif; ?>
 </section>
 
-<script id="rc-workspace-filter-interactions">
+<script id="rc-workspace-filter-interactions" nonce="<?= e(csp_nonce()) ?>">
 (function(){
  var form=document.querySelector('form[action="request-center.php"][method="get"]');
  if(!form)return;

@@ -224,7 +224,7 @@ if ($page === 'new-ticket') {
           echo '</div></fieldset>';
       }
       echo '<label class="full file-input">پیوست اختیاری<input type="file" name="attachment" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx,.txt,.zip"><small>حداکثر ۸ مگابایت؛ PDF، تصویر، Word، Excel، TXT و ZIP</small><small class="field-help" data-attachment-feedback aria-live="polite">در صورت نیاز یک فایل پیوست کنید.</small></label></div><div class="actions"><button class="button" type="submit">ثبت درخواست</button></div></form></section>';
-    echo '<script id="rc-create-form-interactions">
+    echo '<script id="rc-create-form-interactions" nonce="' . e(csp_nonce()) . '">
 (function(){
  var form=document.querySelector(".form-card form");if(!form)return;
  var service=document.getElementById("service-selector"),category=document.getElementById("category-selector");

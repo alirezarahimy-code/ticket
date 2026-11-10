@@ -341,7 +341,7 @@ render_header('مدیریت مرکز درخواست‌ها', $user);
 </tbody></table></div>
 <?php endif; ?>
 </section>
-<script id="rc-admin-config-interactions">
+<script id="rc-admin-config-interactions" nonce="<?= e(csp_nonce()) ?>">
 (function(){
  var hours=document.querySelector('form input[name="action"][value="save_rc_work_hours"]');
  if(hours){

@@ -94,7 +94,7 @@ if ($page === 'queue') {
     }
     // اسکریپت درون‌صفحه: تضمین کارکرد سربرگ‌ها و مودال‌ها مستقل از کش app.js
 
-    echo '<script id="rc-queue-interactions">
+    echo '<script id="rc-queue-interactions" nonce="' . e(csp_nonce()) . '">
 (function(){
  var root=document.querySelector(".queue-table");if(!root)return;
  var master=root.querySelector("[data-queue-select-all]");

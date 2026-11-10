@@ -145,7 +145,7 @@ if ($page === 'supervisor') {
         }
         echo '</nav>';
     }
-    echo '<script id="rc-supervisor-decision-interactions">
+    echo '<script id="rc-supervisor-decision-interactions" nonce="' . e(csp_nonce()) . '">
 (function(){
  var confirmations={
   approve:"با تأیید نهایی، درخواست بسته می‌شود. ادامه می‌دهید؟",

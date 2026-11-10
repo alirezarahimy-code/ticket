@@ -206,7 +206,7 @@ if ($page === 'services') {
     if ($serviceModals !== '') {
         echo '<div class="service-modal-layer" data-service-modal-layer hidden>' . $serviceModals . '</div>';
     }
-    echo '<script id="rc-service-catalog-interactions">
+    echo '<script id="rc-service-catalog-interactions" nonce="' . e(csp_nonce()) . '">
 (function(){
  var tabs=document.querySelector("[data-service-tabs]"),panels=Array.prototype.slice.call(document.querySelectorAll(".service-tab-panel"));
  var serviceSearch=document.getElementById("rc-service-search"),serviceRows=Array.prototype.slice.call(document.querySelectorAll("[data-service-search-row]")),serviceSearchEmpty=null;
