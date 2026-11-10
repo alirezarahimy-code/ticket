@@ -175,6 +175,18 @@ class PackageTests(unittest.TestCase):
             self.assertIn("manifest.json", names)
             manifest = json.loads(zf.read("manifest.json"))
             self.assertEqual(zf.read("files/VERSION").decode().strip(), "1.62.94")
+            # محتوای متنی فایل‌ها هم نباید اثری از RC داشته باشد (بازگشتِ خطای «نسخهٔ اول»).
+            import re
+            foreign = re.compile(r"modules/request-center|request-center\.php|REQUEST_CENTER_INDEPENDENT_ENTRY|request_center_", re.I)
+            for name in names:
+                if not name.lower().endswith((".php", ".js", ".html", ".css", ".md", ".json")):
+                    continue
+                self.assertIsNone(foreign.search(zf.read(name).decode("utf-8", errors="ignore")), f"RC token in {name}")
+            shipped_index = zf.read("files/index.php").decode("utf-8")
+            self.assertIn("assets/style.css?v=3.4.61", shipped_index)
+            self.assertIn("assets/organization.js?v=23", shipped_index)
+            self.assertNotIn("lib/render.php", shipped_index)
+            self.assertNotIn("request-center", shipped_index)
         self.assertEqual(manifest["version"], "1.62.94")
         self.assertEqual(manifest["requires_version"], "1.62.93")
         self.assertEqual(manifest["migrations"], [])
@@ -191,7 +203,6 @@ class PackageTests(unittest.TestCase):
             "assets/organization.js",
             "assets/style.css",
             "index.php",
-            "lib/render.php",
             "CHANGE-REPORT-FA-1.62.94.md",
             "VERSION",
         ]

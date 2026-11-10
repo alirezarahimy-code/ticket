@@ -29,9 +29,10 @@
       <div class="feature"><b>۶) بدون RC و بدون مهاجرت</b><span>هیچ اثری از «مرکز درخواست‌ها» داخل بسته نیست؛ <code>VERSION</code> داخل بسته <code>1.62.94</code> است و با ۱٫۶۲٫۹۰ ← ۱٫۶۲٫۹۳ ← ۱٫۶۲٫۹۴ نصب می‌شود. VERSION ریشه و شاخهٔ RC دست‌نخورده.</span></div>
     </section>
     <a class="download" href="/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip?v=20261110" download>⬇ دریافت بستهٔ 1.62.94 (ZIP)</a>
-    <p class="integrity">SHA-256: 42fb9ffc2c8e5405f1d39c860650ff76322defe5a30a2baee57c8c2e0e50f3bc<br><a href="/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip.sha256" download>دریافت فایل checksum</a><br><a href="/CHANGE-REPORT-FA-1.62.94.md" download>دریافت گزارش تغییرات (CHANGE-REPORT-FA-1.62.94.md)</a></p>
+    <p class="integrity">SHA-256: 751f2438b70e935cc49f7cf81a03cb94fede3a84c3cf28d11b5020f45339a45c<br><a href="/ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip.sha256" download>دریافت فایل checksum</a><br><a href="/CHANGE-REPORT-FA-1.62.94.md" download>دریافت گزارش تغییرات (CHANGE-REPORT-FA-1.62.94.md)</a></p>
     <section class="previous">بسته‌های قبلی حفظ شده‌اند و بازنویسی نشده‌اند: <a href="/ticket-update-1.62.3-food-staff-report-theme-20261025.zip" download>دریافت ZIP نسخهٔ 1.62.3</a> · <a href="/ticket-update-1.62.3-food-staff-report-theme-20261025.zip.sha256" download>checksum نسخهٔ 1.62.3</a> · <a href="/ticket-update-1.62.2-food-dashboard-bulk-theme-fixes-20261025.zip" download>دریافت ZIP نسخهٔ 1.62.2</a></section>
-    <p class="notice">بسته مستقل و آفلاین است و migration ندارد. نیازمند نصب نسخهٔ 1.62.93 پیش از آن است. آزمون روی پایگاه‌داده/مرورگر مشتری و انتشار در production یا staging انجام نشده است؛ انتشار (تگ/merge به main) فقط با دستور مالک.</p>
+    <p class="notice" style="color:#f5c97b;border-top-color:#5a4632">⚠️ <b>اصلاحیهٔ ۱۰ نوامبر:</b> نسخهٔ اول این بسته از روی فایل‌های شاخهٔ RC ساخته شده بود و روی نصب واقعی ۱٫۶۲٫۹۳ همهٔ صفحه‌ها را به خطای عمومی می‌برد. <b>فایل‌های فعلی بازسازی‌شده روی پایهٔ واقعی (v1.62.88 + بسته‌های میانی ۱٫۶۲٫۹۰/۱٫۶۲٫۹۳) هستند</b> و فقط دلتای پنج محور را دارند؛ <code>lib/render.php</code> و <code>index.php</code>ِ RC دیگر داخل بسته نیستند و هر <code>require</code>ِ PHP داخل بسته روی پایهٔ ۱٫۶۲٫۹۳ موجود است. SHA-256 این فایل 751f2438…39a45c است.</p>
+    <p class="notice">بسته مستقل و آفلاین است و migration ندارد. نیازمند نصب نسخهٔ 1.62.93 پیش از آن است. ابتدا روی staging تست کنید؛ انتشار (تگ/merge به main) فقط با دستور مالک.</p>
   </main>
 </body>
 </html>
