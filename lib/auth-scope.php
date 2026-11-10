@@ -155,7 +155,12 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
     if ($role === 'support_manager' && $ticketGroup !== 'support') {
         return false;
     }
-    if (in_array($role, ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
+    if ($role === 'agent' && $ticketGroup !== user_service_group($user)) {
+        return false;
+    }
+    if ($role === 'manager' && empty(ticket_manager_scope_unit_ids($user))
+        && $ticketGroup !== user_service_group($user)) {
+        // مدیر بدون درخت سازمانی، همان رفتار قدیمی (فقط حوزهٔ خودش) را دارد.
         return false;
     }
     // ۱.۳۷.۸ — دسترسی‌های مشاهدهٔ درخواست از سطوح دسترسی نقش‌ها خوانده می‌شود:
@@ -177,8 +182,17 @@ function ticket_user_can_view(array $ticket, array $user, ?callable $permissionC
         return (string) ($ticket['service_group'] ?? '') === user_service_group($user);
     }
     if ($user['role'] === 'manager') {
+        // فضای مدیر واحد: مرزِ اختیار او = چارت سازمانی (خودش + زیرمجموعه‌اش، هر دو حوزهٔ IT و پشتیبانی).
+        if ((int) ($ticket['assigned_to'] ?? 0) === (int) $user['id'] && $permissionCheck($user, 'ticket.view_unit')) {
+            // هر درخواستی که به خودِ مدیر ارجاع شده برای خودش قابل مشاهده است.
+            return true;
+        }
         $ids = ticket_manager_scope_unit_ids($user);
-        if (!$ids) return false;
+        if (!$ids) {
+            // بدون درخت مشخص، همان رفتار داخلیِ حوزهٔ خودش باقی می‌ماند.
+            return $permissionCheck($user, 'ticket.view_unit')
+                && (string) ($ticket['service_group'] ?? '') === user_service_group($user);
+        }
         [$predicate, $params] = ticket_requester_tree_predicate('?', $ids);
         try {
             $query = db()->prepare('SELECT ' . $predicate);
@@ -206,12 +220,40 @@ function ticket_handler_level(array $ticket, array $user): string
     if (($user['role'] ?? '') === 'support_manager' && $ticketGroup !== 'support') {
         return '';
     }
-    if (in_array(($user['role'] ?? ''), ['agent', 'manager'], true) && $ticketGroup !== user_service_group($user)) {
+    if (($user['role'] ?? '') === 'agent' && $ticketGroup !== user_service_group($user)) {
         return '';
     }
-    if (($user['role'] ?? '') === 'manager' && (int) ($user['department_id'] ?? 0) > 0
-        && (int) ($user['department_id'] ?? 0) !== (int) ($ticket['department_id'] ?? 0)) {
+    if (($user['role'] ?? '') === 'manager' && empty(ticket_manager_scope_unit_ids($user))
+        && $ticketGroup !== user_service_group($user)) {
+        // مدیر بدون درخت سازمانی: خارج از حوزهٔ خودش اختیاری ندارد.
         return '';
+    }
+    if (($user['role'] ?? '') === 'manager') {
+        $managerScopeIds = ticket_manager_scope_unit_ids($user);
+        $isManagerRequester = ticket_user_is_requester($ticket, $user);
+        if ($managerScopeIds) {
+            // سرپرستی درخواست‌های دیگران داخل درخت واحدهای مدیر برقرار است (هر دو حوزه)؛
+            // درخواستِ خودِ مدیر هرگز از درخت اختیارِ سرپرستی نمی‌گیرد (تفکیک وظایف).
+            if (!$isManagerRequester) {
+                [$treePredicate, $treeParams] = ticket_requester_tree_predicate('?', $managerScopeIds);
+                $inSubtree = false;
+                try {
+                    $treeQuery = db()->prepare('SELECT ' . $treePredicate);
+                    $treeQuery->execute(array_merge([(int) ($ticket['requester_id'] ?? 0)], $treeParams));
+                    $inSubtree = (bool) $treeQuery->fetchColumn();
+                } catch (Throwable $error) {
+                    if (function_exists('app_error_log')) {
+                        app_error_log('[ticket-scope] ' . $error->getMessage());
+                    }
+                }
+                if (!$inSubtree) {
+                    return '';
+                }
+            }
+        } elseif ((int) ($user['department_id'] ?? 0) > 0
+            && (int) ($user['department_id'] ?? 0) !== (int) ($ticket['department_id'] ?? 0)) {
+            return '';
+        }
     }
     // تفکیک وظایف: نما و اختیار تابع «نسبت این کاربر با همین درخواست» است، نه نقش
     // سراسری او. کارشناس یا مدیری که خودش درخواستی ثبت کرده، روی آن درخواست

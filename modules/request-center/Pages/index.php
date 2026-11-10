@@ -38,6 +38,7 @@ $typeLabels = ['incident' => 'رخداد', 'request' => 'درخواست خدمت
 $workspaceLabels = [
     'requester' => 'درخواست‌دهنده',
     'agent' => 'کارشناس و مدیر رسیدگی',
+    'unit' => 'فضای مدیر واحد',
     'supervisor' => 'سوپروایزر',
     'admin' => 'مدیر مرکز درخواست‌ها',
 ];
@@ -45,8 +46,15 @@ $workspaceOptions = [];
 if (user_can($user, 'ticket.create') || user_can($user, 'ticket.view_own')) {
     $workspaceOptions['requester'] = $workspaceLabels['requester'];
 }
-if (user_can($user, 'ticket.edit') || user_can($user, 'queue.view') || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all')) {
+// مدیر واحدِ صرف (مدیر چارت بدون شرایط کارشناسی/پرسنل پشتیبانی) «فضای کارشناس» نمی‌گیرد؛
+// جای او «فضای مدیر واحد» است تا تیکت‌های ارجاع‌یافتهٔ رسیدگی برای او ثبت نشود و برداشت نتواند بکند.
+$rcOrgUnitOnly = function_exists('request_center_is_org_unit_head') && request_center_is_org_unit_head($user);
+if (!$rcOrgUnitOnly
+    && (user_can($user, 'ticket.edit') || user_can($user, 'queue.view') || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all'))) {
     $workspaceOptions['agent'] = $workspaceLabels['agent'];
+}
+if (function_exists('request_center_is_unit_head') && request_center_is_unit_head($user)) {
+    $workspaceOptions['unit'] = $workspaceLabels['unit'];
 }
 if (user_can($user, 'supervisor.panel')) {
     $workspaceOptions['supervisor'] = $workspaceLabels['supervisor'];
@@ -56,7 +64,8 @@ if (user_is_primary_admin($user)) {
 }
 $defaultWorkspace = user_is_primary_admin($user) ? 'admin'
     : (user_can($user, 'supervisor.panel') ? 'supervisor'
-        : (isset($workspaceOptions['agent']) ? 'agent' : 'requester'));
+        : (isset($workspaceOptions['agent']) ? 'agent'
+            : (isset($workspaceOptions['unit']) ? 'unit' : 'requester')));
 $requestedWorkspace = (string) ($_GET['workspace'] ?? $defaultWorkspace);
 $workspace = isset($workspaceOptions[$requestedWorkspace]) ? $requestedWorkspace : $defaultWorkspace;
 $workspaceTitle = $workspaceOptions[$workspace] ?? $workspaceLabels['requester'];
@@ -96,6 +105,10 @@ if ($workspace === 'admin') {
 }
 if ($workspace === 'supervisor') {
     require __DIR__ . '/supervisor-workspace.php';
+    exit;
+}
+if ($workspace === 'unit') {
+    require __DIR__ . '/unit.php';
     exit;
 }
 

@@ -15,6 +15,9 @@ if ($page === 'reports') {
     if (!user_can($reportUser, 'reports.view')) {
         request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به گزارش‌ها فقط برای دارندهٔ مجوز «reports.view» فعال است.');
     }
+    if (function_exists('request_center_is_org_unit_head') && request_center_is_org_unit_head($reportUser)) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'این بخش برای «مدیر واحد» فعال نیست؛ از «فضای مدیر واحد» استفاده کنید.');
+    }
     $reportMissingColumns = db_missing_columns('tickets', ['subject', 'description', 'status', 'priority', 'requester_id', 'department_id', 'service_group', 'created_at', 'updated_at', 'assigned_to', 'ticket_type', 'assigned_at', 'first_response_at', 'resolved_at', 'closed_at', 'rejected_at', 'due_at', 'sla_minutes']);
     if ($reportMissingColumns) {
         http_response_code(503);

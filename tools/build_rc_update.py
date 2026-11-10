@@ -39,6 +39,8 @@ EXCLUDED_FILES = {
     "tools/build_rc_update.py",
     "tools/build_cumulative_update.py",
     "tools/build_update_1_62_88.py",
+    # ابزار کمکی محلیِ بررسی نحوی (برای محیط توسعه؛ بخشی از محصول نیست)
+    "tools/php_syntax_check.py",
 }
 
 # ۲۰۲۶-۱۱-۰۹ — تصمیم مالک: بسته فقط RC است. هدف نصب، بسته‌های غذای تحویل‌شده

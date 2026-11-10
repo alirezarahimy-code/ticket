@@ -15,6 +15,9 @@ if ($page === 'queue') {
     if (!user_can($queueUser, 'queue.view')) {
         request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به صف کاری فقط برای دارندهٔ مجوز «queue.view» فعال است.');
     }
+    if (function_exists('request_center_is_org_unit_head') && request_center_is_org_unit_head($queueUser)) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'این بخش برای «مدیر واحد» فعال نیست؛ از «فضای مدیر واحد» استفاده کنید.');
+    }
     $queueName = valid_choice((string) ($_GET['queue'] ?? 'all'), ['all', 'unassigned', 'overdue', 'mine', 'waiting_user', 'resolved', 'cancellation_requested', 'cancelled', 'rejected'], 'all');
     $queueFilters = [
         'q' => trim((string) ($_GET['q'] ?? '')),

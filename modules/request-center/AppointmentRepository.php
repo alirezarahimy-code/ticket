@@ -449,6 +449,35 @@ final class AppointmentRepository
 
         return ['per_assignee' => $perAssignee, 'per_dept' => $perDept];
     }
+    /**
+     * مصرف ظرفیت روزانهٔ یک کارشناس در یک روز مشخص: ['used' => تعداد نوبت‌های کانسل‌نشده، 'cap' => سقف مجاز روزانه].
+     * صفحه‌های «نمای روز» و تقویم برای نمایش صریح ظرفیت باقیمانده از این استفاده می‌کنند.
+     */
+    public function assigneeDailyCapacity(string $dayDate, int $assigneeId, int $defaultAssigneeCap = 8): array
+    {
+        $fallbackCap = (function () use ($defaultAssigneeCap) {
+            $raw = $this->rcSetting('rc.daily_capacity_assignee');
+            return ($raw !== null && is_numeric(trim((string) $raw))) ? max(1, (int) $raw) : $defaultAssigneeCap;
+        })();
+        if ($assigneeId <= 0 || !$this->tableExists()) {
+            return ['used' => 0, 'cap' => $fallbackCap];
+        }
+        $day = substr($dayDate, 0, 10);
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $day)) {
+            return ['used' => 0, 'cap' => $fallbackCap];
+        }
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT COUNT(*) FROM request_center_appointments
+                 WHERE assignee_id = ? AND status <> ? AND starts_at >= ? AND starts_at <= ?"
+            );
+            $stmt->execute([$assigneeId, self::STATUS_CANCELLED, $day . ' 00:00:00', $day . ' 23:59:59']);
+            return ['used' => (int) $stmt->fetchColumn(), 'cap' => $fallbackCap];
+        } catch (Throwable) {
+            return ['used' => 0, 'cap' => $fallbackCap];
+        }
+    }
+
     /** سقف روزانهٔ تیم (تجمعی) برای یک دایرهٔ مشخص — صفر یعنی غیرفعال. */
     public function teamDailyCapacity(int $departmentId): int
     {

@@ -25,6 +25,7 @@ if ($page === 'ticket') {
             || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all'),
         'supervisor' => user_can($user, 'supervisor.panel'),
         'admin' => user_is_primary_admin($user),
+        'unit' => function_exists('request_center_is_unit_head') && request_center_is_unit_head($user),
     ];
     $detailReturnParams = [];
     if (isset($detailReturnAllowed[$detailReturnWorkspace]) && $detailReturnAllowed[$detailReturnWorkspace]) {

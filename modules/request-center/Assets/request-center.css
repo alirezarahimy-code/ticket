@@ -175,9 +175,8 @@
 @media (max-width:600px){.rc-kpis{grid-template-columns:1fr 1fr;gap:8px}.rc-day{min-height:78px;padding:4px}.rc-event{-webkit-line-clamp:1;font-size:9px}}
 
 @media print{
-  .rc-toolbar,.rc-kindchips,.rc-kpis,.rc-footer,.rc-day-plan,.rc-modal{display:none !important}
+  .rc-toolbar,.rc-kindchips,.rc-kpis,.rc-footer,.rc-day-plan{display:none !important}
 
-body.rc-modal-open{overflow:hidden}
   .rc-calendar-center{max-width:none}
   .rc-panel{box-shadow:none;border:none}
 }
@@ -196,38 +195,15 @@ form[aria-busy="true"] button[type="submit"].rc-busy { pointer-events: none; }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
 
-/* ═══ پاپ‌آپ روز (نمای ماهانه): کلیک روی هر روز ═══ */
-.rc-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:16px}
-.rc-modal[hidden]{display:none}
-.rc-modal-backdrop{position:absolute;inset:0;background:rgba(16,24,39,.48)}
-.rc-modal-dialog{position:relative;width:min(880px,100%);max-height:90vh;overflow:auto;background:var(--rc-surface);border:1px solid var(--rc-line);border-radius:var(--rc-radius);box-shadow:var(--rc-shadow);display:flex;flex-direction:column}
-.rc-modal-head{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--rc-line-soft);background:var(--rc-surface);border-radius:var(--rc-radius) var(--rc-radius) 0 0}
-.rc-modal-head h2{font-size:17px;margin:0;color:var(--rc-brand-strong)}
-.rc-modal-headtext .rc-hint{margin:2px 0 0;font-size:12px}
-.rc-modal-body{padding:16px 18px;display:flex;flex-direction:column;gap:18px}
-.rc-modal-section{min-width:0}
-.rc-modal-h3{font-size:13px;margin:0 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--rc-brand-strong)}
-.rc-modal-h3 small{color:var(--rc-muted);font-weight:400;font-size:11px}
-.rc-modal-badge{background:var(--rc-brand-soft);color:var(--rc-brand-strong);border-radius:999px;font-size:11px;padding:1px 10px;font-weight:700;min-width:26px;text-align:center}
-.rc-modal-events{display:flex;flex-direction:column;gap:8px}
-.rc-modal-event{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--rc-line-soft);border-inline-start:3px solid var(--rc-brand);border-radius:var(--rc-radius-sm);padding:8px 10px;background:var(--rc-canvas)}
-.rc-modal-event.visit{border-inline-start-color:var(--rc-violet)}
-.rc-modal-event.await{border-inline-start-color:var(--rc-amber)}
-.rc-modal-event.followup{border-inline-start-color:#0f766e}
-.rc-modal-event.overdue{border-inline-start-color:var(--rc-red);background:#fff5f5}
-.rc-modal-event.paused{opacity:.72}
-.rc-modal-event.done{opacity:.72}
-.rc-modal-event-time{font-size:12px;font-weight:800;color:var(--rc-brand-strong);min-width:82px;padding-top:2px;white-space:nowrap}
-.rc-modal-event-body{min-width:0;flex:1}
-.rc-modal-event-line{font-size:12.5px;line-height:1.8}
-.rc-modal-event-link{color:var(--rc-brand-strong);font-weight:700;text-decoration:none}
-.rc-modal-event-link:hover{text-decoration:underline}
-.rc-modal-event-subject{font-size:11.5px;color:var(--rc-muted);overflow:hidden;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;line-height:1.7}
-.rc-modal-event-meta{font-size:11px;color:var(--rc-muted)}
-.rc-modal-event-actions{display:flex;gap:6px;align-self:center;flex:0 0 auto}
-.rc-modal-done-badge{color:var(--rc-green);font-size:11px;font-weight:800;margin-inline-start:8px}
-.rc-modal-candidates{overflow:auto;max-height:320px;border:1px solid var(--rc-line-soft);border-radius:var(--rc-radius-sm);margin:10px 0}
-.rc-modal-ticket-link{font-weight:700;color:var(--rc-brand-strong);text-decoration:none}
-.rc-modal-ticket-link:hover{text-decoration:underline}
-.rc-modal-foot{padding:10px 18px;border-top:1px solid var(--rc-line-soft);display:flex;justify-content:flex-end;background:var(--rc-canvas);border-radius:0 0 var(--rc-radius) var(--rc-radius)}
-@media (max-width:640px){.rc-modal{padding:0}.rc-modal-dialog{width:100%;max-height:100vh;height:100%;border-radius:0;border:0}}
+/* ── ظرفیت رسیدگی روز (نمای روز) ── */
+.rc-cap{margin:0 0 14px;padding:12px 14px;border:1px solid var(--rc-line-soft);border-radius:var(--rc-radius-sm);background:var(--rc-surface);display:flex;flex-direction:column;gap:8px}
+.rc-cap-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.rc-cap-head strong{font-size:13px;color:var(--rc-brand-strong)}
+.rc-cap-head span{font-size:12px;color:var(--rc-muted);font-variant-numeric:tabular-nums}
+.rc-cap-bar{height:8px;border-radius:999px;background:#eee7d6;overflow:hidden}
+.rc-cap-bar i{display:block;height:100%;background:var(--rc-brand);border-radius:999px;transition:width .25s ease}
+.rc-cap.is-full .rc-cap-bar i{background:var(--rc-red)}
+.rc-cap-full,.rc-cap-note{font-size:11.5px;line-height:1.8}
+.rc-cap-full{color:var(--rc-red);font-weight:700}
+.rc-cap-note{color:var(--rc-muted)}
+@media print{.rc-cap{display:none}}

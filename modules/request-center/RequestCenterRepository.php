@@ -541,4 +541,111 @@ final class RequestCenterRepository
         ];
     }
 
+    /**
+     * فضای مدیر واحد — فهرست تیکت‌های «خودِ مدیر + زیرمجموعهٔ چارت سازمانی‌اش» (هر دو حوزهٔ IT و پشتیبانی).
+     *
+     * مرز اختیار، همان ticket_manager_scope_unit_ids است و فیلتر service_group عمداً اعمال نمی‌شود
+     * (تصمیم مالک: فقط تیکت‌های خودش و زیرمجموعه‌اش؛ نه بیشتر، نه کمتر). ارجاع‌شده‌های به‌خودش هم
+     * داخل دامنه هستند. نمایش فهرست بر اساس موعد SLA مرتب می‌شود (نزدیک‌ترین موعد اول).
+     *
+     * @return array{total:int, rows:array<int,array<string,mixed>>}
+     */
+    public function listUnitHead(array $user, int $page = 1, int $perPage = 50, array $filters = []): array
+    {
+        $page = max(1, $page);
+        $perPage = min(100, max(1, $perPage));
+        $offset = ($page - 1) * $perPage;
+        $ownId = (int) ($user['id'] ?? 0);
+        $scopeIds = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
+        [$treePredicate, $treeParams] = ticket_requester_tree_predicate('t.requester_id', $scopeIds);
+
+        $clauses = ['((t.requester_id = ?) OR (t.assigned_to = ?) OR (' . $treePredicate . '))'];
+        $params = array_merge([$ownId, $ownId], $treeParams);
+
+        $status = (string) ($filters['status'] ?? '');
+        if (in_array($status, ['new', 'manager_review', 'assigned', 'in_progress', 'waiting_user', 'pending', 'resolved', 'closed', 'cancelled', 'rejected'], true)) {
+            $clauses[] = 't.status = ?';
+            $params[] = $status;
+        }
+        $priority = (string) ($filters['priority'] ?? '');
+        if (in_array($priority, ['normal', 'urgent', 'critical'], true)) {
+            $clauses[] = 't.priority = ?';
+            $params[] = $priority;
+        }
+        $serviceGroup = (string) ($filters['service_group'] ?? '');
+        if (in_array($serviceGroup, ['it', 'support'], true)) {
+            $clauses[] = 't.service_group = ?';
+            $params[] = $serviceGroup;
+        }
+        $search = trim((string) ($filters['q'] ?? ''));
+        if ($search !== '') {
+            $search = function_exists('mb_substr') ? mb_substr($search, 0, 100, 'UTF-8') : substr($search, 0, 100);
+            $clauses[] = '(t.subject LIKE ? OR t.ticket_no LIKE ?)';
+            $params[] = '%' . $search . '%';
+            $params[] = '%' . $search . '%';
+        }
+
+        $where = ' WHERE ' . implode(' AND ', $clauses);
+
+        $count = $this->pdo->prepare('SELECT COUNT(*) FROM tickets t ' . $where);
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+
+        $query = $this->pdo->prepare(
+            'SELECT t.id, t.ticket_no, t.subject, t.status, t.priority, t.service_group,
+                    t.ticket_type, t.created_at, t.updated_at, t.due_at, t.sla_paused_at,
+                    r.full_name AS requester_name, a.full_name AS assignee_name,
+                    d.name AS department_name
+             FROM tickets t
+             JOIN users r ON r.id = t.requester_id
+             LEFT JOIN users a ON a.id = t.assigned_to
+             LEFT JOIN departments d ON d.id = t.department_id
+             ' . $where . '
+             ORDER BY t.due_at IS NULL, t.due_at ASC, t.id DESC
+             LIMIT ' . $perPage . ' OFFSET ' . $offset
+        );
+        $query->execute($params);
+
+        return ['total' => $total, 'rows' => $query->fetchAll(PDO::FETCH_ASSOC)];
+    }
+
+    /**
+     * شمارنده‌های «فضای مدیر واحد» (خودش + زیرمجموعهٔ چارت سازمانی‌اش):
+     * باز، معوق (موعد SLA گذشته و هنوز باز)، منتظر پاسخ کاربر، حل‌شده در ۳۰ روز اخیر.
+     *
+     * @return array{open:int, overdue:int, waiting_user:int, resolved_30d:int}
+     */
+    public function unitHeadSummary(array $user): array
+    {
+        $empty = ['open' => 0, 'overdue' => 0, 'waiting_user' => 0, 'resolved_30d' => 0];
+        $ownId = (int) ($user['id'] ?? 0);
+        $scopeIds = function_exists('ticket_manager_scope_unit_ids') ? ticket_manager_scope_unit_ids($user) : [];
+        [$treePredicate, $treeParams] = ticket_requester_tree_predicate('t.requester_id', $scopeIds);
+        $scope = '((t.requester_id = ?) OR (t.assigned_to = ?) OR (' . $treePredicate . '))';
+        $params = array_merge([$ownId, $ownId], $treeParams);
+        try {
+            $query = $this->pdo->prepare(
+                "SELECT
+                    COALESCE(SUM(CASE WHEN t.status NOT IN ('resolved', 'closed', 'cancelled', 'rejected') THEN 1 ELSE 0 END), 0) AS open_count,
+                    COALESCE(SUM(CASE WHEN t.status NOT IN ('resolved', 'closed', 'cancelled', 'rejected')
+                        AND t.due_at IS NOT NULL AND t.due_at < NOW() THEN 1 ELSE 0 END), 0) AS overdue_count,
+                    COALESCE(SUM(CASE WHEN t.status IN ('waiting_user', 'pending') THEN 1 ELSE 0 END), 0) AS waiting_user_count,
+                    COALESCE(SUM(CASE WHEN t.status IN ('resolved', 'closed')
+                        AND t.updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 ELSE 0 END), 0) AS resolved_30d_count
+                 FROM tickets t
+                 WHERE " . $scope
+            );
+            $query->execute($params);
+            $row = $query->fetch(PDO::FETCH_ASSOC) ?: [];
+            return [
+                'open' => (int) ($row['open_count'] ?? 0),
+                'overdue' => (int) ($row['overdue_count'] ?? 0),
+                'waiting_user' => (int) ($row['waiting_user_count'] ?? 0),
+                'resolved_30d' => (int) ($row['resolved_30d_count'] ?? 0),
+            ];
+        } catch (Throwable) {
+            return $empty;
+        }
+    }
+
 }

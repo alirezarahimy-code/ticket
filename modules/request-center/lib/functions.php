@@ -139,9 +139,12 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
     $serviceGroup = in_array($serviceGroup, ['it', 'support'], true) ? $serviceGroup : 'it';
     $departmentId = (int) ($departmentId ?? 0);
     $loadJoin = ' LEFT JOIN tickets t ON t.assigned_to = u.id AND t.status NOT IN ("resolved", "closed", "cancelled", "rejected")';
-    // ۱.۶۲.۶ — مدیران چارت سازمانی (معاون/مدیر اداره) آخرِ صف ارجاع خودکار می‌روند تا اگر
-    // نقش/پرچم اشتباهی (مثل «ادمین اصلی» شدن ناخواسته) داشته باشند، تا وقتی کاندیدای
-    // واقعی فعال هست انتخاب نشوند. برای اصلاح ریشه‌ای، نقش‌ها از صفحهٔ سازمان ترمیم شوند.
+    // ۱.۶۲.۶ — مدیران چارت سازمانی (معاون/مدیر اداره) آخرِ صف ارجاع خودکار می‌رفتند
+    // تا اگر نقش/پرچم اشتباهی (مثل «ادمین اصلی» شدن ناخواسته) داشته باشند، تا وقتی کاندیدای
+    // واقعی فعال هست انتخاب نشوند.
+    // ۲۰۲۶-۱۱-۱۱ — تصمیم مالک: مدیران چارت (org_auto_role=1) از کاندیدای ارجاع خودکار
+    // کاملاً حذف می‌شوند (نه فقط آخر صف). مدیرِ منصوبِ دستی (org_auto_role=0) همچنان ممکن است
+    // با همان شرطِ department_id انتخاب شود. برای اصلاح ریشه‌ای، نقش‌ها از صفحهٔ سازمان ترمیم شوند.
     $orgManagerRank = ticket_org_manager_rank_sql();
 
     // مالک اصلی هر حوزه اولویت دارد: IT ← ادمین اصلی؛ پشتیبانی ← مدیر پشتیبانی.
@@ -167,6 +170,8 @@ function choose_handling_agent(string $serviceGroup, ?int $departmentId = null, 
         . ' WHERE u.is_active = 1 AND u.role IN ("agent", "manager") AND hu.code = ?'
         // مدیر عادی فقط مسئول همان معاونت/واحدِ ثبت‌شده روی درخواست است؛ از معاونت دیگری انتخاب نشود.
         . ' AND (u.role <> "manager" OR (? > 0 AND u.department_id = ?))'
+        // تصمیم مالک (۲۰۲۶-۱۱-۱۱): مدیران چارت سازمانی از ارجاع خودکار حذف‌اند؛ فقط انتصاب دستی روی یک تیکت ممکن است.
+        . ' AND COALESCE(u.org_auto_role, 0) = 0'
         . ' GROUP BY u.id, u.role, u.is_active, u.is_primary_admin, u.department_id, u.is_it_agent, hu.code ORDER BY ' . $orgManagerRank . 'COUNT(t.id), u.id'
     );
     $fallback->execute([$serviceGroup, $departmentId, $departmentId]);
@@ -685,4 +690,55 @@ function request_center_ticket_return_url(int $ticketId): string
     }
     $params['p'] = max(1, min(100000, (int) ($_POST['rc_return_p'] ?? 1)));
     return 'request-center.php?' . http_build_query($params);
+}
+
+
+/** شناسه‌های واحدهایی که این کاربر در چارت سازمانی، رئیس‌شان است (خالی = مدیر واحد نیست). */
+function request_center_unit_head_scope_ids(array $user): array
+{
+    if (!function_exists('ticket_manager_scope_unit_ids')) {
+        return [];
+    }
+    try {
+        return ticket_manager_scope_unit_ids($user);
+    } catch (Throwable $exception) {
+        if (function_exists('app_error_log')) {
+            app_error_log('[rc-unit-head] ' . $exception->getMessage());
+        }
+        return [];
+    }
+}
+
+/** آیا کاربر «مدیر واحد» است؟ (رئیسِ فعالِ دست‌کم یک واحد چارت، بدون نقش نظارتی سراسری) */
+function request_center_is_unit_head(array $user): bool
+{
+    if (function_exists('user_is_primary_admin') && user_is_primary_admin($user)) {
+        return false;
+    }
+    if (function_exists('user_can') && user_can($user, 'supervisor.panel')) {
+        return false;
+    }
+    return request_center_unit_head_scope_ids($user) !== [];
+}
+
+/**
+ * آیا کاربر «مدیر واحدِ صرف» است؟ (مدیر واحد، بدون هیچ نشانۀ کارشناسی/پرسنل پشتیبانی)
+ * این‌گونه افراد در صف/تقویم/گزارش‌های عملیاتی شرکت نمی‌کنند؛ جای آن‌ها «فضای مدیر واحد» است.
+ */
+function request_center_is_org_unit_head(array $user): bool
+{
+    if (!request_center_is_unit_head($user)) {
+        return false;
+    }
+    $role = (string) ($user['role'] ?? '');
+    if (in_array($role, ['agent', 'support_manager'], true)) {
+        return false;
+    }
+    if (function_exists('is_it_agent') && is_it_agent($user)) {
+        return false;
+    }
+    if (trim((string) ($user['handling_unit_code'] ?? '')) !== '') {
+        return false;
+    }
+    return true;
 }

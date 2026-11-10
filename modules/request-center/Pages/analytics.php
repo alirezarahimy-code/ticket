@@ -15,6 +15,9 @@ if ($page === 'analytics') {
     if (!user_can($analyticsUser, 'analytics.view')) {
         request_center_error_page(403, 'دسترسی مجاز نیست', 'دسترسی به تحلیل عملکرد فقط برای دارندهٔ مجوز «analytics.view» فعال است.');
     }
+    if (function_exists('request_center_is_org_unit_head') && request_center_is_org_unit_head($analyticsUser)) {
+        request_center_error_page(403, 'دسترسی مجاز نیست', 'این بخش برای «مدیر واحد» فعال نیست؛ از «فضای مدیر واحد» استفاده کنید.');
+    }
     [$analyticsScope, $analyticsParams] = ticket_scope($analyticsUser);
     $statusQuery = db()->prepare('SELECT t.status, COUNT(*) AS total FROM tickets t ' . $analyticsScope . ' GROUP BY t.status ORDER BY total DESC');
     $statusQuery->execute($analyticsParams);

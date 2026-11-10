@@ -25,8 +25,12 @@ function request_center_render_navigation(array $user, callable $menuLink, calla
             . '<ul class="submenu" id="' . e($id) . '">' . implode('', $links) . '</ul></details></li>';
     };
 
-    $canAgent = user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
-        || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all');
+    // مدیر واحدِ صرف (مدیر چارت بدون نشانۀ کارشناسی) «کار من»اش «فضای مدیر واحد» است؛
+    // صف/تقویم/گزارش‌های عملیاتی برای او شرکت‌پذیر نیستند (تصمیم مالک).
+    $unitHeadOnly = function_exists('request_center_is_org_unit_head') && request_center_is_org_unit_head($user);
+    $isUnitHead = function_exists('request_center_is_unit_head') && request_center_is_unit_head($user);
+    $canAgent = !$unitHeadOnly && (user_can($user, 'ticket.edit') || user_can($user, 'queue.view')
+        || user_can($user, 'ticket.view_unit') || user_can($user, 'ticket.view_all'));
 
     $workLinks = [];
     if (user_can($user, 'ticket.create') || user_can($user, 'ticket.view_own')) {
@@ -35,10 +39,13 @@ function request_center_render_navigation(array $user, callable $menuLink, calla
     if (user_can($user, 'ticket.create')) {
         $workLinks[] = $submenuLink('request-center.php?page=new-ticket', 'ثبت درخواست جدید');
     }
+    if ($isUnitHead) {
+        $workLinks[] = $submenuLink('request-center.php?workspace=unit', 'فضای مدیر واحد');
+    }
     if ($canAgent) {
         $workLinks[] = $submenuLink('request-center.php?workspace=agent', 'فضای کارشناس (صف شخصی)');
     }
-    if (user_can($user, 'queue.view')) {
+    if (!$unitHeadOnly && user_can($user, 'queue.view')) {
         $workLinks[] = $submenuLink('request-center.php?workspace=agent&agent_view=team', 'صف گروهی مجاز');
         $workLinks[] = $submenuLink('request-center.php?page=queue', 'صف عملیاتی');
     }
@@ -61,10 +68,10 @@ function request_center_render_navigation(array $user, callable $menuLink, calla
     }
 
     $reportLinks = [];
-    if (user_can($user, 'reports.view')) {
+    if (!$unitHeadOnly && user_can($user, 'reports.view')) {
         $reportLinks[] = $submenuLink('request-center.php?page=reports', 'گزارش‌ها');
     }
-    if (user_can($user, 'analytics.view')) {
+    if (!$unitHeadOnly && user_can($user, 'analytics.view')) {
         $reportLinks[] = $submenuLink('request-center.php?page=analytics', 'تحلیل عملکرد');
     }
 
