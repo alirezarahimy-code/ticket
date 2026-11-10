@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """سازندهٔ بستهٔ کاندید ارتقاء مرکز درخواست (۱.۶۲.۹۰ ← ۱.۶۳-کاندید).
 
+پیش‌نیاز هدف: بسته‌های غذا تا ۱٫۶۲٫۹۴ (با مهاجرت ۰۳۶) پیشاپیش اعمال شده باشند؛
+فایل‌های قلمرو ۱٫۶۲٫۹۴ و پیش‌نمایش انتشار غذا عمداً از این بسته حذف می‌شوند.
+
 تفاوت این بسته با بسته‌های prod: این بستهٔ «کاندید» است؛ انتشار آن (تگ، merge به main
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
 ساخته می‌شود و مهاجرت فقط ۰۳۵ (request_center_appointments) است — سایر مهاجرت‌ها
@@ -28,7 +31,7 @@ PACKAGE_NAME = f"ticket-update-{REQUIRES_VERSION}-to-{RELEASE_VERSION}-request-c
 REPORT_NAME = f"CHANGE-REPORT-FA-{RELEASE_VERSION}.md"
 ZIP_DATE = (2026, 11, 11, 12, 0, 0)
 
-EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/")
+EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/", "preview/")
 MIGRATIONS = [
     "035-request-center-appointments.sql",
 ]
@@ -41,6 +44,13 @@ EXCLUDED_FILES = {
 # ۲۰۲۶-۱۱-۰۹ — تصمیم مالک: بسته فقط RC است. هدف نصب، بسته‌های غذای تحویل‌شده
 # (تا ۱.۶۲.۹۳) را پیشاپیش اعمال کرده است؛ این فایل‌ها متعلق به بستهٔ غذا هستند.
 EXCLUDED_FOOD_PATHS = {
+    # قلمرو ۱٫۶۲٫۹۴ (بستهٔ میانی غذا/سازمان) که شاخه پس از کاندید ۲۰۲۶‑۱۱‑۰۹ وارد شد؛
+    # هدف نصب، بستهٔ ۱٫۶۲٫۹۴ را جداگانه اعمال می‌کند؛ این فایل‌ها نباید از مسیر RC بیایند.
+    "actions/org-actions.php",
+    "assets/organization.js",
+    "assets/style.css",
+    "organization.php",
+    "tools/build_1_62_94_update.py",
     "actions/food-order-actions.php",
     "assets/food-menu.css",
     "assets/food-menu.js",
@@ -167,7 +177,7 @@ def build() -> tuple[Path, Path]:
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decision (2026-11-09) this package is RC-only: food 1.62.93 files and migration 036 are intentionally excluded; the target must already have the food updates applied.",
+        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09 and 2026-11-11) this package is RC-only: food 1.62.93/1.62.94 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036) applied.",
     }
 
     out_dir = ROOT / "downloads"
