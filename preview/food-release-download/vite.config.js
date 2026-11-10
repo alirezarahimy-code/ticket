@@ -14,6 +14,22 @@ const zipDownloads = {
     ]);
     server.middlewares.use((req, res, next) => {
       const pathname = (req.url || '').split('?')[0];
+      if (pathname === '/download-rc-request-center-1.63-r2' || pathname === '/download-rc-request-center-1.63-r2.sha256') {
+        const isSha = pathname.endsWith('.sha256');
+        const filename = isSha
+          ? 'ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip.sha256'
+          : 'ticket-update-1.62.90-to-1.63-request-center-rc-candidate-20261111.zip';
+        const body = readFileSync(resolve(server.config.root, 'dist', filename));
+        res.statusCode = 200;
+        res.setHeader('Content-Type', isSha ? 'text/plain; charset=utf-8' : 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('Content-Length', String(body.length));
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        if (req.method === 'HEAD') res.end();
+        else res.end(body);
+        return;
+      }
       if (pathname === '/download-food-update-1.62.3' || pathname === '/download-1.62.3-v2') {
         const filename = pathname === '/download-1.62.3-v2'
           ? 'food-update-1.62.3-download.zip'
