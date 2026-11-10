@@ -58,7 +58,7 @@
     reconciliationTo: '',
     reconciliationMonth: '',
     reconciliationMealType: 'all',
-    reconciliationForm: { food_date: '', meal_type: 'lunch', supplier_order_quantity: '', received_quantity: '', note: '', edit_reason: '' },
+    reconciliationForm: { food_date: '', meal_type: 'lunch', portion_quantity: '', note: '', edit_reason: '' },
     leftoverModal: null,
     invoiceDraft: { invoice_month: '', invoice_date: '', supplier_name: '', invoice_number: '', portion_count: '', amount_toman: '' },
     invoiceUploading: false,
@@ -1019,15 +1019,15 @@
       + '<div class="fm-card fm-reconciliation-stat"><span>مقایسهٔ مستقل (جمع نمی‌شوند)</span><strong>' + (difference == null ? '—' : reconciliationNumber(Math.abs(Number(difference)))) + '</strong><small class="' + differenceClass + '">' + esc(differenceLabel) + '</small></div>'
       + '</div>';
     var dailyTable = dailyRows.length ? '<div class="fm-table-wrap"><table class="fm-rows fm-reconciliation-table"><thead><tr>'
-      + '<th>تاریخ</th><th>وعده</th><th>سفارش فعال پرسنل</th><th>درخواست فعال مهمان</th><th>تقاضای فعال</th><th>لغوشدهٔ پرسنل</th><th>لغوشدهٔ مهمان</th><th>سفارش پیمانکار</th><th>تحویل واقعی</th><th>توزیع پرسنل</th><th>توزیع مهمان</th><th>کل توزیع</th><th>پرس باقیمانده</th><th>کسری/اضافهٔ سفارش</th><th>غایبین</th><th>سرنوشت باقیمانده</th><th>وضعیت</th><th>ثبت/ویرایش</th></tr></thead><tbody>'
+      + '<th>تاریخ</th><th>وعده</th><th>کل سفارشات پرسنل</th><th>تقاضای فعال پرسنل</th><th>لغوشدهٔ پرسنل</th><th>درخواست مهمان (نفرات)</th><th>پرس سفارش/تحویل پیمانکار</th><th>توزیع پرسنل</th><th>مهمان توزیع‌شده</th><th>کل توزیع</th><th>پرس باقیمانده</th><th>کسری/اضافهٔ سفارش</th><th>غایبین</th><th>سرنوشت باقیمانده</th><th>وضعیت</th><th>ثبت/ویرایش</th></tr></thead><tbody>'
       + dailyRows.map(function (item) {
         var status = item.status === 'closed' ? 'بسته' : item.status === 'ordered' ? 'سفارش ثبت شد' : 'ثبت نشده';
         var statusClass = item.status === 'closed' ? 'good' : item.status === 'ordered' ? 'warn' : '';
         var rowDate = esc(faDigits(item.date_jalali || jalaliFromIso(item.date) || item.date || '—'));
         return '<tr><td>' + rowDate + '</td><td>' + (item.meal_type === 'dinner' ? 'شام' : 'ناهار') + '</td>'
-          + '<td>' + reconciliationNumber(item.active_employee_orders) + '</td><td>' + reconciliationNumber(item.active_guest_meals) + '</td><td><b>' + reconciliationNumber(item.active_demand) + '</b></td>'
-          + '<td>' + reconciliationNumber(item.cancelled_employee_orders) + '</td><td>' + reconciliationNumber(item.cancelled_guest_meals) + '</td>'
-          + '<td>' + reconciliationNumber(item.supplier_order_quantity) + '</td><td><b>' + reconciliationNumber(item.received_quantity) + '</b></td>'
+          + '<td>' + reconciliationNumber(item.total_employee_orders) + '</td><td>' + reconciliationNumber(item.active_employee_orders) + '</td><td>' + reconciliationNumber(item.cancelled_employee_orders) + '</td>'
+          + '<td>' + reconciliationNumber(item.active_guest_meals) + '</td>'
+          + '<td><b>' + reconciliationNumber(item.received_quantity != null ? item.received_quantity : item.supplier_order_quantity) + '</b></td>'
           + '<td>' + reconciliationNumber(item.employee_served_quantity) + '</td><td>' + reconciliationNumber(item.guest_served_quantity) + '</td><td>' + reconciliationNumber(item.served_total) + '</td>'
           + reconciliationRemainingCell(item) + reconciliationGapCell(item) + '<td>' + reconciliationNumber(item.absentees) + '</td>'
           + reconciliationLeftoverCell(item)
@@ -1035,12 +1035,11 @@
           + '<td>' + (canMenuEdit ? '<button type="button" class="btn secondary" data-fm-action="reconciliation-select" data-date="' + esc(item.date) + '" data-meal="' + esc(item.meal_type) + '">ثبت/ویرایش</button>' : 'فقط‌خواندنی') + '</td></tr>';
       }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این بازه سفارش یا درخواست مهمان و ثبت تطبیقی پیدا نشد.</div>';
     var dailyForm = canMenuEdit
-      ? '<section class="fm-card fm-reconciliation-editor"><div class="fm-toolbar"><div><h3>ثبت سفارش پیمانکار و تطبیق روزانه</h3><span class="fm-small">ابتدا تعداد سفارش پیمانکار را ثبت کنید؛ پس از تحویل، «پرس تحویل واقعی» را وارد و روز را ببندید. توزیع پرسنل/مهمان خودکار از فیش‌ها محاسبه می‌شود و لغوشده‌ها در تقاضای فعال نیستند.</span></div></div>'
+      ? '<section class="fm-card fm-reconciliation-editor"><div class="fm-toolbar"><div><h3>ثبت سفارش و تطبیق روزانه</h3><span class="fm-small">یک عدد واحد «پرس سفارش/تحویل واقعی» وارد کنید: قبل از تحویل با دکمهٔ «ثبت سفارش پیمانکار» و پس از تحویل با «ثبت تحویل و بستن روز» همان عدد را تأیید/اصلاح کنید. توزیع پرسنل و مهمان توزیع‌شده خودکار از فیش‌ها محاسبه می‌شود و لغوشده‌ها در تقاضای کل نیستند.</span></div></div>'
         + '<form id="fm-reconciliation-form" class="fm-reconciliation-form"><label class="fm-field">تاریخ غذا (شمسی)<input type="text" name="food_date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(formDateInput)) + '" required></label>'
         + '<label class="fm-field">وعده<select name="meal_type"><option value="lunch"' + (formMeal === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (formMeal === 'dinner' ? ' selected' : '') + '>شام</option></select></label>'
-        + '<label class="fm-field">پرس سفارش‌داده‌شده از پیمانکار<input type="number" min="0" step="1" name="supplier_order_quantity" value="' + esc(selectedForm.supplier_order_quantity ?? '') + '" inputmode="numeric"></label>'
-        + '<label class="fm-field">پرس تحویل واقعی<input type="number" min="0" step="1" name="received_quantity" value="' + esc(selectedForm.received_quantity ?? '') + '" inputmode="numeric"></label>'
-        + '<p class="fm-small fm-reconciliation-auto-hint">«توزیع پرسنل» و «توزیع مهمان» به‌طور خودکار از فیش‌های تحویل ثبت‌شده (printed+delivered) محاسبه می‌شود؛ واقعهٔ مهمان = مهمان/چاپ خودکار مهمان. «پرس باقیمانده»، «کسری/اضافهٔ سفارش» و «غایبین» نیز خودکار هستند.</p>'
+        + '<label class="fm-field">پرس سفارش/تحویل واقعی از پیمانکار<input type="number" min="0" step="1" name="portion_quantity" value="' + esc(selectedForm.portion_quantity ?? '') + '" inputmode="numeric"></label>'
+        + '<p class="fm-small fm-reconciliation-auto-hint">«توزیع پرسنل» و «مهمان توزیع‌شده» به‌طور خودکار از فیش‌های تحویل ثبت‌شده (printed+delivered) محاسبه می‌شود؛ واقعهٔ مهمان = مهمان/چاپ خودکار مهمان. «پرس باقیمانده»، «کسری/اضافهٔ سفارش» و «غایبین» نیز خودکار هستند.</p>'
         + '<label class="fm-field fm-field-wide">یادداشت<textarea name="note" rows="2" maxlength="1000">' + esc(selectedForm.note || '') + '</textarea></label>'
         + '<label class="fm-field fm-field-wide">دلیل اصلاح (برای روز بسته‌شده الزامی است)<input type="text" name="edit_reason" maxlength="500" value="' + esc(selectedForm.edit_reason || '') + '"></label>'
         + '<div class="fm-form-actions"><button class="btn primary" type="submit" data-reconciliation-action="order"' + (state.reconciliationSaving ? ' disabled' : '') + '>ثبت سفارش پیمانکار</button><button class="btn secondary" type="submit" data-reconciliation-action="close"' + (state.reconciliationSaving ? ' disabled' : '') + '>ثبت تحویل و بستن روز</button></div></form></section>'
@@ -1060,9 +1059,9 @@
       }).join('') + '</tbody></table></div>' : '<div class="fm-empty">برای این ماه فاکتوری ثبت نشده است.</div>';
     var loading = state.reconciliationLoading ? '<div class="fm-spinner">در حال دریافت گزارش تطبیق…</div>' : '';
     var errors = !state.reconciliationLoaded && !state.reconciliationLoading ? '<div class="fm-empty">برای دریافت گزارش، بازهٔ تاریخ و ماه را انتخاب کنید.</div>' : '';
-    return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای فعال = سفارش فعال پرسنل + درخواست فعال مهمان؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
+    return '<section class="fm-card fm-reconciliation-report"><div class="fm-toolbar"><div><h3>تطبیق سفارش، خرید و توزیع غذا</h3><span class="fm-small">تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها جدا هستند و وارد این جمع نمی‌شوند. کسری/اضافهٔ سفارش روی همین تقاضای کل است.</span></div><button class="btn secondary" type="button" data-fm-action="reconciliation-export"' + (!state.reconciliationLoaded || state.reconciliationLoading ? ' disabled' : '') + '>خروجی Excel</button></div>'
       + '<form id="fm-reconciliation-filter" class="fm-order-date"><label class="fm-field">از تاریخ شمسی<input type="text" name="from" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(from)) + '" required></label><label class="fm-field">تا تاریخ شمسی<input type="text" name="to" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۳۰" value="' + esc(faDigits(to)) + '" required></label><label class="fm-field">ماه فاکتور (شمسی)<input type="text" name="month" data-jalali-month inputmode="numeric" placeholder="۱۴۰۵/۰۷" value="' + esc(faDigits(month)) + '" required></label><label class="fm-field">وعده<select name="meal_type"><option value="all"' + (state.reconciliationMealType === 'all' ? ' selected' : '') + '>همه</option><option value="lunch"' + (state.reconciliationMealType === 'lunch' ? ' selected' : '') + '>ناهار</option><option value="dinner"' + (state.reconciliationMealType === 'dinner' ? ' selected' : '') + '>شام</option></select></label><button class="btn primary" type="submit">نمایش گزارش</button></form>'
-      + loading + errors + (state.reconciliationLoaded ? invoiceSummary + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند. سفارش پیمانکار نیز از تحویل واقعی جداست.</div><section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + '<section class="fm-section-gap"><h3>فاکتورهای ماه ' + esc(faDigits(month)) + '</h3>' + invoiceTable + '</section>' + invoiceForm + renderLeftoverModal() : '') + '</section>';
+      + loading + errors + (state.reconciliationLoaded ? invoiceSummary + '<div class="fm-alert">«پرس فاکتور ماهانه» و «جمع تحویل روزانه» دو عدد مستقل‌اند؛ فقط اختلافشان گزارش می‌شود و هرگز با هم جمع نمی‌شوند. «پرس سفارش/تحویل پیمانکار» در این جدول یک عدد واحد است (در ۹۹٫۹٪ موارد سفارش و تحویل برابرند).</div><section class="fm-section-gap"><h3>تطبیق روزانه</h3>' + dailyTable + '</section>' + dailyForm + '<section class="fm-section-gap"><h3>فاکتورهای ماه ' + esc(faDigits(month)) + '</h3>' + invoiceTable + '</section>' + invoiceForm + renderLeftoverModal() : '') + '</section>';
   }
 
   function renderLeftoverModal() {
@@ -1140,7 +1139,7 @@
     var otherNote = String((form.querySelector('[name="leftover_other_note"]') || {}).value || '').trim();
     var merged = {
       food_date: m.body.food_date, meal_type: m.body.meal_type, action: m.body.action,
-      supplier_order_quantity: m.body.supplier_order_quantity, received_quantity: m.body.received_quantity,
+      portion_quantity: m.body.portion_quantity,
       note: m.body.note, edit_reason: m.body.edit_reason,
       leftover_staff_quantity: counts.staff, leftover_waste_quantity: counts.waste,
       leftover_keep_quantity: counts.keep, leftover_other_quantity: counts.other,
@@ -1236,8 +1235,7 @@
     state.reconciliationForm = {
       food_date: String(date || ''),
       meal_type: mealType === 'dinner' ? 'dinner' : 'lunch',
-      supplier_order_quantity: item && item.supplier_order_quantity != null ? String(item.supplier_order_quantity) : '',
-      received_quantity: item && item.received_quantity != null ? String(item.received_quantity) : '',
+      portion_quantity: item ? String(item.received_quantity != null ? item.received_quantity : (item.supplier_order_quantity != null ? item.supplier_order_quantity : '')) : '',
       note: item ? String(item.note || '') : '',
       edit_reason: '',
     };
@@ -1254,27 +1252,25 @@
     var rawDate = String(values.get('food_date') || '');
     var foodDate = normalizeIsoDate(rawDate);
     var meal = String(values.get('meal_type') || 'lunch') === 'dinner' ? 'dinner' : 'lunch';
-    var supplierOrder = asciiDigits(values.get('supplier_order_quantity') || '').trim();
-    var received = asciiDigits(values.get('received_quantity') || '').trim();
+    var portionQuantity = asciiDigits(values.get('portion_quantity') || '').trim();
     state.reconciliationForm = {
-      food_date: foodDate || rawDate, meal_type: meal, supplier_order_quantity: supplierOrder,
-      received_quantity: received,
+      food_date: foodDate || rawDate, meal_type: meal, portion_quantity: portionQuantity,
       note: String(values.get('note') || ''), edit_reason: String(values.get('edit_reason') || ''),
     };
     if (!foodDate) { state.error = 'تاریخ غذا را به‌درستی انتخاب کنید.'; render(); return; }
-    if (action === 'order' && supplierOrder === '') { state.error = 'تعداد پرس سفارش‌داده‌شده به پیمانکار را وارد کنید.'; render(); return; }
-    if (action === 'close' && received === '') {
-      state.error = 'برای بستن روز، «پرس تحویل واقعی» را وارد کنید؛ در صورت صفر بودن، عدد ۰ بنویسید.'; render(); return;
+    if (action === 'order' && portionQuantity === '') { state.error = 'تعداد پرس سفارش/تحویل واقعی پیمانکار را وارد کنید.'; render(); return; }
+    if (action === 'close' && portionQuantity === '') {
+      state.error = 'برای بستن روز، «پرس سفارش/تحویل واقعی» را وارد کنید؛ در صورت صفر بودن، عدد ۰ بنویسید.'; render(); return;
     }
     state.reconciliationForm.food_date = foodDate;
     var body = {
       food_date: foodDate, meal_type: meal, action: action,
-      supplier_order_quantity: supplierOrder, received_quantity: received,
+      portion_quantity: portionQuantity,
       note: state.reconciliationForm.note, edit_reason: state.reconciliationForm.edit_reason,
     };
     state.error = ''; state.notice = '';
     if (action === 'close') {
-      var remaining = leftoverPreviewFor(foodDate, meal, received);
+      var remaining = leftoverPreviewFor(foodDate, meal, portionQuantity);
       if (remaining !== null && remaining >= 1) {
         state.leftoverModal = { food_date: foodDate, meal_type: meal, remaining: remaining, body: body };
         render();
@@ -2503,7 +2499,7 @@
       if (act === 'reconciliation-export') downloadReconciliation();
       if (act === 'reconciliation-select') selectReconciliationRow(action.dataset.date || '', action.dataset.meal || 'lunch');
       if (act === 'reconciliation-reset') {
-        state.reconciliationForm = { food_date: state.reconciliationFrom || '', meal_type: 'lunch', supplier_order_quantity: '', received_quantity: '', note: '', edit_reason: '' };
+        state.reconciliationForm = { food_date: state.reconciliationFrom || '', meal_type: 'lunch', portion_quantity: '', note: '', edit_reason: '' };
         state.error = ''; render();
       }
       if (act === 'cancel-req-reload') loadCancelRequests();

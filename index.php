@@ -1935,7 +1935,7 @@ HTML;
         $companySelector .= '</select><a class="org-company-edit-link" href="index.php?page=settings#users" title="ویرایش نام نمایشی شرکت‌ها">ویرایش نام</a></form>';
     } else { $companySelector = '<span class="org-company-label">' . e((string) $currentCompany['name']) . '</span>'; }
     echo str_replace(['__CSRF__', '__ORG_COMPANY_SELECTOR__', '__CURRENT_COMPANY_NAME__', '__COMPANY_ID__'], [csrf_field(), $companySelector, e((string) $currentCompany['name']), (string) $companyId], $orgTemplate);
-    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=22"></script>';
+    echo '<script nonce="' . e(csp_nonce()) . '">window.PERSIAN_ORG_DATA = ' . $orgChartData . ';</script><script src="assets/organization.js?v=23"></script>';
     render_footer();
     exit;
 }
@@ -2000,6 +2000,9 @@ if ($page === 'settings') {
     }
     if ($canManageSettingsUsers) {
         $tabLinks .= '<a href="#roles">نقش‌ها و دسترسی‌ها</a>';
+    }
+    if ($canManageSettingsUsers) {
+        $tabLinks .= '<a href="#access-groups">گروه‌های دسترسی</a>';
     }
     if ($canManageSettingsUsers) {
         $tabLinks .= '<a href="#org-admin-repair">ترمیم نقش‌ها و تشخیص ارجاع</a>';

@@ -3775,7 +3775,7 @@ function food_order_render_page(array $user): never
     if (food_guest_request_allowed($user) && food_guest_schema_ready()) {
         echo '<div hidden id="food-guest-app" data-api="index.php?page=food-order&amp;food_api=" data-csrf="' . e(csrf_token()) . '" data-self-name="' . e(food_order_full_name($profile)) . '"></div>';
     }
-    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=23"></script><script defer src="assets/food-order-guest.js?v=8"></script>';
+    echo '<script defer src="assets/food-order-calendar.js?v=1"></script><script defer src="assets/food-order.js?v=24"></script><script defer src="assets/food-order-guest.js?v=8"></script>';
     render_footer();
     exit;
 }

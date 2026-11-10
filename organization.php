@@ -289,7 +289,7 @@ function org_liaison_units(?int $companyId = null): array
         $rows = db()->query($sql . ' ORDER BY ou.id')->fetchAll();
         foreach ($rows as $row) {
             $side = (string) ($row['chart_side'] ?? '');
-            if (in_array($side, ['right', 'left'], true) && !isset($result[$side])) {
+            if (in_array($side, ['right', 'left', 'center'], true) && !isset($result[$side])) {
                 $result[$side] = $row;
             }
         }
@@ -483,10 +483,20 @@ function user_is_org_manager_of(array $user, int $targetUserId): bool
     return $targetUnit > 0 && in_array($targetUnit, user_org_scope_unit_ids($user), true);
 }
 
+/**
+ * ۱.۶۲.۹۴ — اصلاح «گروه‌های دسترسی» برای درخت سازمان: پیش‌تر این تابع فقط به
+ * پرچم is_primary_admin یا نقش ادمین اصلی نگاه می‌کرد و مجوز `org.manage` (که در
+ * کاتالوگ موجود است و گروه/نقش می‌توانندش اعطا کنند) عملاً نادیده گرفته می‌شد؛
+ * نتیجه: کاربر دارای گروه با org.manage صفحه را می‌دید ولی هیچ تغییری نمی‌توانست بدهد.
+ * ترتیب حفظ شده است تا دادهٔ قدیمی (is_primary_admin روی نقش‌های دیگر) نشکند.
+ */
 function user_can_manage_organization(array $user): bool
 {
     if ((int) ($user['is_primary_admin'] ?? 0) === 1) {
         return true;
+    }
+    if (function_exists('user_can')) {
+        return user_can($user, 'org.manage');
     }
     return function_exists('is_admin_role') ? is_admin_role((string) ($user['role'] ?? '')) : (string) ($user['role'] ?? '') === 'admin';
 }

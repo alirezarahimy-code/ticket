@@ -95,7 +95,7 @@ class ReconciliationPhpTests(unittest.TestCase):
 
     def test_export_headers_use_new_columns(self) -> None:
         text = PHP.read_text(encoding="utf-8")
-        for needle in ("'غایبین'", "'سرنوشت باقیمانده'", "'کسری/اضافهٔ سفارش'", "'پرس باقیمانده'", "'پرس تحویل واقعی'"):
+        for needle in ("'غایبین'", "'سرنوشت باقیمانده'", "'کسری/اضافهٔ سفارش'", "'پرس باقیمانده'", "'پرس سفارش/تحویل واقعی پیمانکار'"):
             self.assertIn(needle, text)
         self.assertNotIn("'تقاضا هنگام ثبت خرید'", text)
         self.assertNotIn("'بی‌توزیع", text)

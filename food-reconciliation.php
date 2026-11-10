@@ -33,9 +33,10 @@ function food_reconciliation_schema_ensure(): void
 
 /**
  * محاسبات خالص (بدون پایگاه‌داده) برای «تطبیق روزانه».
- * - تقاضای فعال = سفارش فعال پرسنل + درخواست فعال مهمان
- * - مانده = پرس تحویل واقعی − کل تحویل‌داده‌شده‌ها (توزیع پرسنل + توزیع مهمان)؛ می‌تواند منفی باشد
- * - فاصلهٔ سفارش = تقاضای فعال − پرس سفارش‌داده‌شده از پیمانکار؛ مثبت = کسر سفارش، منفی = اضافه سفارش
+ * - تقاضای کل = سفارش فعال پرسنل + درخواست فعال مهمان (نفرات)؛ لغوشده‌ها داخل این جمع نیستند
+ * - «کسری/اضافهٔ سفارش» بر همین تقاضای کل استوار است
+ * - مانده = پرس سفارش/تحویل واقعی − کل تحویل‌داده‌شده‌ها (توزیع پرسنل + توزیع مهمان)؛ می‌تواند منفی باشد
+ * - فاصلهٔ سفارش = تقاضای کل − پرس سفارش/تحویل پیمانکار؛ مثبت = کسر سفارش، منفی = اضافه سفارش
  */
 function food_reconciliation_calculate(
     int $activeEmployeeOrders,
@@ -333,6 +334,7 @@ function food_reconciliation_rows(string $from, string $to, string $mealFilter =
             'date_jalali' => food_order_jalali_label($date),
             'meal_type' => $mealType,
             'active_employee_orders' => $currentEmployees,
+            'total_employee_orders' => $currentEmployees + (int) $row['cancelled_employee_orders'],
             'active_guest_meals' => $currentGuests,
             'active_demand' => $calc['active_demand'],
             'cancelled_employee_orders' => (int) $row['cancelled_employee_orders'],
@@ -485,7 +487,7 @@ function food_reconciliation_audit(string $action, array $user, int $targetId, m
 
 /**
  * اعتبارسنجی «تعیین تکلیف غذای باقیمانده».
- * اگر مانده (پرس تحویل واقعی − کل تحویل‌داده‌شده‌ها) کمتر از ۱ باشد، تعیین تکلیف لازم نیست و همه‌چیز null می‌شود.
+ * اگر مانده (پرس سفارش/تحویل واقعی − کل تحویل‌داده‌شده‌ها) کمتر از ۱ باشد، تعیین تکلیف لازم نیست و همه‌چیز null می‌شود.
  * اگر مانده ≥ ۱ باشد: حداقل یک گزینه الزامی است و مجموع تعدادها نباید از مانده بیشتر شود.
  *
  * @return array{leftover_staff_quantity: ?int, leftover_waste_quantity: ?int, leftover_keep_quantity: ?int, leftover_other_quantity: ?int, leftover_other_note: ?string}
@@ -537,8 +539,17 @@ function food_reconciliation_save(array $body, array $user): array
     if ($action === 'close' && $date > food_order_today()) {
         throw new RuntimeException('بستن آمار غذا برای تاریخ آینده مجاز نیست.');
     }
-    $supplierOrder = food_reconciliation_count($body['supplier_order_quantity'] ?? '', 'تعداد پرس سفارش‌داده‌شده', $action === 'close');
-    $received = food_reconciliation_count($body['received_quantity'] ?? '', 'تعداد پرس تحویل واقعی', true);
+    // ۱٫۶۳ — ادغام «پرس سفارش‌داده‌شده از پیمانکار» و «پرس تحویل واقعی» در یک عدد واحد (تصمیم مالک ۲۰۲۶-۱۱-۱۰).
+    // فرم جدید فقط portion_quantity می‌فرستد؛ payload دو فیلدیِ قبلی همچنان پذیرفته می‌شود (سازگاری با تب/نسخهٔ باز).
+    $portionPayload = array_key_exists('portion_quantity', $body);
+    if ($portionPayload) {
+        $portion = food_reconciliation_count((string) $body['portion_quantity'], 'تعداد پرس سفارش/تحویل واقعی', $action === 'close');
+        $supplierOrder = $portion;
+        $received = $portion;
+    } else {
+        $supplierOrder = food_reconciliation_count($body['supplier_order_quantity'] ?? '', 'تعداد پرس سفارش‌داده‌شده', $action === 'close');
+        $received = food_reconciliation_count($body['received_quantity'] ?? '', 'تعداد پرس تحویل واقعی', true);
+    }
     $note = trim((string) ($body['note'] ?? ''));
     $reason = trim((string) ($body['edit_reason'] ?? ''));
     if (function_exists('mb_substr')) {
@@ -558,7 +569,7 @@ function food_reconciliation_save(array $body, array $user): array
     $disposition = ['leftover_staff_quantity' => null, 'leftover_waste_quantity' => null, 'leftover_keep_quantity' => null, 'leftover_other_quantity' => null, 'leftover_other_note' => null];
     if ($action === 'close') {
         if ($received === null) {
-            throw new RuntimeException('برای بستن آمار، مقدار «پرس تحویل واقعی» را وارد کنید؛ در صورت صفر بودن، عدد صفر بنویسید.');
+            throw new RuntimeException('برای بستن آمار، مقدار «پرس سفارش/تحویل واقعی» را وارد کنید؛ در صورت صفر بودن، عدد صفر بنویسید.');
         }
         $disposition = food_reconciliation_disposition_parse($body, (int) $remaining);
     }
@@ -580,7 +591,7 @@ function food_reconciliation_save(array $body, array $user): array
             ? (int) $existing['guest_meals_at_order'] : $counts['active_guest_meals'];
         $orderedQuantity = $supplierOrder ?? (int) ($existing['supplier_order_quantity'] ?? -1);
         if ($orderedQuantity < 0) {
-            throw new RuntimeException('تعداد پرس سفارش‌داده‌شده به پیمانکار را وارد کنید.');
+            throw new RuntimeException('تعداد پرس سفارش/تحویل واقعی پیمانکار را وارد کنید.');
         }
         $oldValue = $existing;
         $nowAction = $action === 'close' ? 'closed' : ($wasClosed ? 'closed' : 'ordered');
@@ -901,9 +912,9 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
         : (preg_match('/^\d{4}\/\d{2}\/\d{2}$/', $fromJalali) ? substr($fromJalali, 0, 7) : substr($fromIso, 0, 7));
     $report = food_reconciliation_report($fromRaw, $toRaw, $mealRaw, $reportMonth);
     $headers = [
-        'تاریخ', 'وعده', 'سفارش فعال پرسنل', 'درخواست فعال مهمان', 'تقاضای فعال',
-        'لغوشدهٔ پرسنل', 'لغوشدهٔ مهمان',
-        'پرس سفارش‌داده‌شده', 'پرس تحویل واقعی', 'توزیع پرسنل', 'توزیع مهمان',
+        'تاریخ', 'وعده', 'کل سفارشات پرسنل', 'تقاضای فعال پرسنل', 'لغوشدهٔ پرسنل',
+        'درخواست مهمان (نفرات)',
+        'پرس سفارش/تحویل واقعی پیمانکار', 'توزیع پرسنل', 'مهمان توزیع‌شده',
         'کل توزیع', 'پرس باقیمانده', 'کسری/اضافهٔ سفارش', 'غایبین', 'سرنوشت باقیمانده',
         'وضعیت', 'یادداشت',
         'ماه فاکتور', 'تعداد فاکتور ماه', 'پرس طبق فاکتور ماه', 'جمع تحویل واقعی روزانهٔ ماه',
@@ -926,9 +937,9 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
         $data[] = [
             $item['date_jalali'],
             $item['meal_type'] === 'dinner' ? 'شام' : 'ناهار',
-            $item['active_employee_orders'], $item['active_guest_meals'], $item['active_demand'],
-            $item['cancelled_employee_orders'], $item['cancelled_guest_meals'],
-            $item['supplier_order_quantity'] ?? '—', $item['received_quantity'] ?? '—',
+            $item['total_employee_orders'], $item['active_employee_orders'], $item['cancelled_employee_orders'],
+            $item['active_guest_meals'],
+            ($item['received_quantity'] ?? $item['supplier_order_quantity']) ?? '—',
             $item['employee_served_quantity'] ?? '—', $item['guest_served_quantity'] ?? '—',
             $item['served_total'] ?? '—', $item['remaining_quantity'] ?? '—',
             $gapText($item['order_gap']), $item['absentees'],
@@ -946,12 +957,12 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     $monthlyRow = array_fill(0, count($headers), '');
     $monthlyRow[0] = 'خلاصهٔ ماهانه';
     $monthlyRow[1] = 'فاکتور و تحویل مستقل‌اند و با هم جمع نمی‌شوند';
-    $monthlyRow[18] = $report['month'];
-    $monthlyRow[19] = $monthSummary['invoice_count'];
-    $monthlyRow[20] = $monthSummary['invoice_portions'];
-    $monthlyRow[21] = $monthSummary['daily_received_portions'];
-    $monthlyRow[22] = $monthSummary['invoice_difference'] ?? '—';
-    $monthlyRow[23] = $comparisonStatus;
+    $monthlyRow[16] = $report['month'];
+    $monthlyRow[17] = $monthSummary['invoice_count'];
+    $monthlyRow[18] = $monthSummary['invoice_portions'];
+    $monthlyRow[19] = $monthSummary['daily_received_portions'];
+    $monthlyRow[20] = $monthSummary['invoice_difference'] ?? '—';
+    $monthlyRow[21] = $comparisonStatus;
     $data[] = $monthlyRow;
     foreach ($data as &$row) {
         foreach ($row as &$value) {
@@ -969,7 +980,7 @@ function food_reconciliation_export(string $fromRaw, string $toRaw, string $meal
     $summary = $report['summary'];
     $monthSummary = $report['month_summary'];
     $monthlyDifference = $monthSummary['invoice_difference'] === null ? '—' : (string) $monthSummary['invoice_difference'];
-    $title = 'تطبیق سفارش و توزیع غذا | تحویل واقعی بازه: ' . $summary['received_quantity']
+    $title = 'تطبیق سفارش و توزیع غذا | پرس سفارش/تحویل پیمانکار بازه: ' . $summary['received_quantity']
         . ' پرس | فاکتور ماه ' . $report['month'] . ': ' . $monthSummary['invoice_portions']
         . ' پرس | تحویل واقعی ماه: ' . $monthSummary['daily_received_portions']
         . ' پرس | اختلاف مستقل فاکتور − تحویل: ' . $monthlyDifference . ' پرس';

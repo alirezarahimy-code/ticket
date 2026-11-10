@@ -532,7 +532,7 @@
     if (!day || !day.calendar_id || !day.items || !day.items.length) return 'برای این تاریخ هنوز برنامهٔ غذایی ثبت نشده است.';
     if (day.late_order_window_open) return '';
     if (isPast(state.modalDate)) return 'تاریخ گذشته است و فقط می‌توانید سفارش قبلی خود را ببینید.';
-    if (holiday) return 'این روز تعطیل رسمی است؛ تعطیلی مانع سفارش نیست.';
+    // ۱.۶۲.۹۴ — تصمیم مالک: تعطیل رسمی مانع سفارش نیست؛ فقط برچسب/عنوان تعطیلی نمایش داده می‌شود.
     if (day.order_status === 'closed') return 'سفارش‌گیری این روز بسته شده است. اگر سفارش فعال دارید، می‌توانید درخواست لغو بفرستید تا مدیر پشتیبانی بررسی کند.';
     if (day.order_status !== 'open') return 'وضعیت سفارش این روز مشخص نیست.';
     return '';
