@@ -217,7 +217,7 @@ def test_logging_update_must_not_delete_1_62_75_features() -> None:
     for relative, marker, floor in FEATURE_FLOOR:
         if relative == "@app":
             if app_source is None:
-                app_source = "\\n".join(
+                app_source = "\n".join(
                     path.read_text(encoding="utf-8", errors="replace")
                     for path in all_php_files()
                 )
