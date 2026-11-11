@@ -147,7 +147,7 @@ class OfficialHolidayOrderTests(unittest.TestCase):
         # برچسب تعطیلی در تقویم/مودال همچنان نمایش داده می‌شود
         self.assertIn("تعطیل رسمی", order_js)
         order_php = read(ORDER_PHP)
-        self.assertIn("food-order.js?v=24", order_php)
+        self.assertIn("food-order.js?v=25", order_php)  # v=25: 1.62.95 — تأییدیهٔ تعطیل + نشانگر روشن‌تر
 
 
 if __name__ == "__main__":

@@ -163,7 +163,18 @@
     }
     return '';
   }
-  function buildUrl(route, params) {
+  function isWeekendIso(iso) {
+    try {
+      var dow = new Date(String(iso).slice(0, 10) + 'T00:00:00Z').getUTCDay();
+      return dow === 4 || dow === 5; // پنجشنبه/جمعه (ISO)
+    } catch (e) { return false; }
+  }
+  function holidayOrWeekend(iso, day) {
+    var h = holiday(iso, day);
+    if (h) return h;
+    return isWeekendIso(iso) ? 'پنجشنبه/جمعه' : '';
+  }
+    function buildUrl(route, params) {
     var query = params ? new URLSearchParams(params).toString() : '';
     var base = apiBase;
     if (!base) base = 'index.php?page=food-ticket&food_api=';
@@ -221,7 +232,10 @@
       var meals = day && Array.isArray(day.items) ? day.items : [];
       var orderState = day && day.order_status ? day.order_status : '';
       var count = activeOrderCount(day);
-      var status = holidayName ? 'تعطیل رسمی' : (orderState === 'closed' ? 'سفارش بسته' : orderState === 'open' && meals.some(function (x) { return x.food_active !== false; }) ? 'سفارش باز' : (meals.length ? 'غذا غیرفعال' : 'بدون برنامه'));
+      var closedTitle = holidayName || (cell.isWeekend ? 'تعطیل هفتگی' : '');
+      var status = closedTitle && count > 0
+        ? closedTitle + ' — ' + faDigits(count) + ' سفارش'
+        : (holidayName ? 'تعطیل رسمی' : (orderState === 'closed' ? 'سفارش بسته' : orderState === 'open' && meals.some(function (x) { return x.food_active !== false; }) ? 'سفارش باز' : (meals.length ? 'غذا غیرفعال' : 'بدون برنامه')));
       var classes = ['fo-day'];
       var adjacentAttrs = cell.isCurrentMonth ? '' : ' disabled aria-disabled="true" tabindex="-1"';
       if (!cell.isCurrentMonth) classes.push('is-adjacent');
@@ -772,7 +786,9 @@
       var checked = state.orderReportFields.indexOf(col.key) >= 0 ? ' checked' : '';
       return '<label class="fm-report-field"><input type="checkbox" data-fm-order-field="' + col.key + '"' + checked + '><span>' + esc(col.label) + '</span></label>';
     }).join('');
-    var daily = '<section class="fm-card fm-daily-orders"><div class="fm-toolbar"><div><h3>سفارش‌های ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + ' — روز انتخاب‌شده</h3><span class="fm-small">تاریخ: ' + esc(dateLabel) + ' — فیلدهای انتخاب‌شده در خروجی و چاپ نمایش داده می‌شوند.</span></div></div><form id="fm-orders-date" class="fm-order-date"><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(inputDate)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="orders-today">امروز</button><button class="btn secondary" type="button" data-fm-action="orders-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button>' + (state.mealType === 'lunch' ? '<button class="btn secondary" type="button" data-fm-action="orders-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button>' : '') + '</form>'
+    var reportHoliday = holidayOrWeekend(fallbackDate, getDay(fallbackDate));
+    var holidayBanner = reportHoliday ? '<div class="fm-alert warn" style="margin:14px 16px 0">«' + esc(reportHoliday) + '» — این تاریخ تعطیل است. سفارش‌های ثبت‌شده در تعطیل مثل روز عادی است و در این فهرست (و خروجی Excel و چاپ) نمایش داده می‌شوند.</div>' : '';
+    var daily = '<section class="fm-card fm-daily-orders">' + holidayBanner + '<div class="fm-toolbar"><div><h3>سفارش‌های ' + (state.mealType === 'dinner' ? 'شام' : 'ناهار') + ' — روز انتخاب‌شده</h3><span class="fm-small">تاریخ: ' + esc(dateLabel) + ' — فیلدهای انتخاب‌شده در خروجی و چاپ نمایش داده می‌شوند.</span></div></div><form id="fm-orders-date" class="fm-order-date"><label class="fm-field">تاریخ روز شمسی<input type="text" name="date" data-jalali inputmode="numeric" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(inputDate)) + '" required></label><button class="btn primary" type="submit">مشاهده</button><button class="btn secondary" type="button" data-fm-action="orders-today">امروز</button><button class="btn secondary" type="button" data-fm-action="orders-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button>' + (state.mealType === 'lunch' ? '<button class="btn secondary" type="button" data-fm-action="orders-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button>' : '') + '</form>'
       + '<div class="fm-report-fields"><strong>فیلدهای گزارش</strong>' + fieldChecks + '</div>'
       + (state.loadingOrders ? '<div class="fm-spinner">در حال بارگذاری سفارش‌ها…</div>' : viewBar + '<div class="fm-table-wrap fm-manager-data-warning">' + (state.ordersLoaded ? summaryHtml(state.ordersSummary, rows.length) : '') + body + '</div>')
       + '</section>';

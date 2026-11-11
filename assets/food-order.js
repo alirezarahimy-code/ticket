@@ -103,6 +103,15 @@
     }
     return '';
   }
+  // تعطیل بودن یک تاریخ میلادی: تعطیل رسمی (تقویم holidays/ITSM_HOLIDAYS یا holiday_title روز) یا پنجشنبه/جمعه.
+  function holidayInfo(iso, day) {
+    var title = holidayTitle(iso, day);
+    var weekend = false;
+    try { var dow = new Date(iso + 'T00:00:00Z').getUTCDay(); weekend = (dow === 4 || dow === 5); } catch (e) { weekend = false; }
+    if (title) return { holiday: true, title: title };
+    if (weekend) return { holiday: true, title: 'پنجشنبه یا جمعه' };
+    return { holiday: false, title: '' };
+  }
   function isPast(iso) {
     try { return new Date(iso + 'T00:00:00Z') < new Date(today + 'T00:00:00Z'); } catch (e) { return false; }
   }
@@ -423,8 +432,10 @@
       if (todayFlag) classes.push('is-today');
       if (day && day.order_status === 'closed' && !day.late_order_window_open) classes.push('is-closed');
       var selectedOrder = day && day.my_order ? day.my_order : null;
+      var holidayForCell = holidayInfo(cell.iso, day).holiday;
       var orderOwnerLabel = state.targetMode === 'proxy' ? ('سفارش برای ' + state.targetName) : 'سفارش شما';
       if (selectedOrder) classes.push('has-order');
+      if (selectedOrder && holidayForCell) classes.push('has-holiday-order');
       var tip = [cell.jalali, status, holiday ? holiday : '', items.map(function (x) { return x.food_name; }).join('، '), selectedOrder ? (orderOwnerLabel + ': ' + selectedOrder.food_name) : ''].filter(Boolean).join(' • ');
       var badges = '<span class="fo-day-status ' + (day && (day.order_status === 'open' || day.late_order_window_open) ? 'is-open' : day && day.order_status === 'closed' ? 'is-closed' : '') + '">' + esc(status) + '</span>';
       if (todayFlag) badges += '<span class="fo-day-status">امروز</span>';
@@ -869,6 +880,16 @@
     }
     var selected = root.querySelector('input[name="fo-food"]:checked');
     if (!selected) { setModalError('یک غذا را انتخاب کنید.'); toast('یک غذا را انتخاب کنید.', true); return; }
+    var hol = holidayInfo(state.modalDate, day);
+    if (hol.holiday) {
+      // تعطیل رسمی/هفتگی مثل روز عادی قابل سفارش است (تصمیم مالک)، ولی ثبت آن با تأیید قطعی همراه باشد
+      var holidayMsg = hol.title === 'پنجشنبه یا جمعه'
+        ? 'این روز پنجشنبه یا جمعه است (تعطیل هفتگی). آیا مطمئن هستید؟'
+        : 'این روز تعطیل رسمی است (' + hol.title + '). آیا مطمئن هستید؟';
+      if (!window.confirm(holidayMsg)) {
+        return; // انصراف؛ فرم و انتخاب دست‌نخورده می‌مانند
+      }
+    }
     var isProxy = state.targetMode === 'proxy';
     var recipientName = state.targetName;
     var selectedOption = selected.closest ? selected.closest('.fo-meal-option') : null;
@@ -885,6 +906,8 @@
     try {
       var response = await request('order', null, { method: 'POST', body: JSON.stringify(body) });
       var notice = response.message || 'سفارش ثبت شد.';
+      var holForNotice = holidayInfo(state.modalDate, day);
+      if (holForNotice.holiday) notice += ' (این روز تعطیل است)';
       if (!isProxy && response.food_name) notice += ' غذای ثبت‌شده: ' + String(response.food_name);
       if (isProxy) {
         var foodName = response.food_name || selectedFoodName;
