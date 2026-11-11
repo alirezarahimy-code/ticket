@@ -656,10 +656,10 @@
     var dateForm = '<form id="fm-delivery-date" class="fm-order-date"><label class="fm-field">تاریخ گزارش<input type="text" name="date" data-jalali inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۷/۰۱" value="' + esc(faDigits(singleDateLabel)) + '" required></label><button class="btn primary" type="submit">نمایش گزارش</button><button class="btn secondary" type="button" data-fm-action="delivery-today">امروز</button></form>';
     var results = state.deliveredReportLoading
       ? '<div class="fm-spinner">در حال دریافت فهرست فیش‌های تحویل‌شده…</div>'
-      : '<div class="fm-delivery-counts"><div><span>پرسنلِ فیزیکی/تحویل‌شده</span><strong>' + faDigits(state.deliveredReportEmployeeCount) + '</strong></div><div><span>فیش مهمان چاپ‌شده</span><strong>' + faDigits(state.deliveredReportGuestCount) + '</strong></div><div><span>ناهار (پرسنل / مهمان)</span><strong>' + faDigits(state.deliveredReportMealCounts.lunch.employee_count) + ' / ' + faDigits(state.deliveredReportMealCounts.lunch.guest_count) + '</strong></div><div><span>شام (پرسنل / مهمان)</span><strong>' + faDigits(state.deliveredReportMealCounts.dinner.employee_count) + ' / ' + faDigits(state.deliveredReportMealCounts.dinner.guest_count) + '</strong></div></div><div class="fm-small fm-auto-receipt-note">ثبت خودکارِ بدون چاپ فیزیکی، جدا از فهرست تحویل فیزیکی: ناهار پرسنل ' + faDigits(state.deliveredReportAutoCounts.lunch.staff) + '، شام پرسنل ' + faDigits(state.deliveredReportAutoCounts.dinner.staff) + '، ناهار مهمان ' + faDigits(state.deliveredReportAutoCounts.lunch.guest) + '، شام مهمان ' + faDigits(state.deliveredReportAutoCounts.dinner.guest) + '.</div>'
+      : '<div class="fm-delivery-counts"><div><span>پرسنل تحویل‌شده</span><strong>' + faDigits(state.deliveredReportEmployeeCount) + '</strong></div><div><span>فیش مهمان</span><strong>' + faDigits(state.deliveredReportGuestCount) + '</strong></div><div><span>ناهار (پرسنل / مهمان)</span><strong>' + faDigits(state.deliveredReportMealCounts.lunch.employee_count) + ' / ' + faDigits(state.deliveredReportMealCounts.lunch.guest_count) + '</strong></div><div><span>شام (پرسنل / مهمان)</span><strong>' + faDigits(state.deliveredReportMealCounts.dinner.employee_count) + ' / ' + faDigits(state.deliveredReportMealCounts.dinner.guest_count) + '</strong></div></div><div class="fm-small fm-auto-receipt-note">ثبت خودکارِ بدون چاپ فیزیکی (ردیف‌های آن‌ها با برچسب «چاپ خودکار» در فهرست هم آمده‌اند): ناهار پرسنل ' + faDigits(state.deliveredReportAutoCounts.lunch.staff) + '، شام پرسنل ' + faDigits(state.deliveredReportAutoCounts.dinner.staff) + '، ناهار مهمان ' + faDigits(state.deliveredReportAutoCounts.lunch.guest) + '، شام مهمان ' + faDigits(state.deliveredReportAutoCounts.dinner.guest) + '.</div>'
         + viewBar + '<div class="fm-table-wrap fm-delivery-report-results">' + (state.deliveredReportView === 'menu' ? deliveredReportByMenuHtml(state.deliveredReport) : deliveredReportTableHtml(state.deliveredReport)) + '</div>';
     var actionsEnabled = state.deliveredReportLoaded && !state.deliveredReportLoading;
-    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">تاریخ: ' + esc(faDigits(singleDateLabel || '—')) + ' — فهرست اصلی فقط چاپ فیزیکی و وضعیت تحویل ثبت‌شده را نشان می‌دهد؛ ثبت‌های خودکارِ بدون چاپ فیزیکی در خلاصه‌ای جدا می‌آیند و جزو تحویل محسوب نمی‌شوند. وعدهٔ ناهار و شام جداست. وضعیت تحویل، وضعیت ثبت‌شده در سامانه است و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
+    return '<section class="fm-card fm-daily-orders fm-printed-delivery-report"><div class="fm-toolbar"><div><h3>فیش‌های چاپ‌شده و غذای تحویل‌شده</h3><span class="fm-small">تاریخ: ' + esc(faDigits(singleDateLabel || '—')) + ' — فهرست شامل فیش‌های تحویل ثبت‌شده است؛ ردیف‌های «چاپ خودکار» به‌صورت سیستمی و بدون چاپ فیزیکی برای وعده‌های سلف‌بسته (شام و ناهارِ روزهای تعطیل) ثبت می‌شوند. وضعیت تحویل، وضعیت ثبت‌شده در سامانه است و تأیید مستقل دریافت غذا نیست.</span></div><div class="fm-actions"><button class="btn secondary" type="button" data-fm-action="delivered-report-export"' + (actionsEnabled ? '' : ' disabled') + '>استخراج Excel</button><button class="btn secondary" type="button" data-fm-action="delivered-report-print"' + (actionsEnabled ? '' : ' disabled') + '>چاپ</button></div></div>'
       + dateForm
       + '<div class="fm-report-fields"><strong>فیلدهای گزارش</strong>' + fields + '</div>'
       + (state.deliveredReportLoaded || state.deliveredReportLoading ? results : '<div class="fm-empty">تاریخ موردنظر را انتخاب کنید و «نمایش گزارش» بزنید.</div>')
@@ -2745,24 +2745,10 @@
     refreshAll();
   }
 
-  var reportRefreshBusy = false, reportDraft = false, reportRenderPending = false;
+  var reportDraft = false, reportRenderPending = false;
   function reportInputFocused() { var el = document.activeElement; return !!(root && el && root.contains(el) && el.matches('input,select,textarea')); }
   function safeReportRender() { if (reportDraft || reportInputFocused()) { reportRenderPending = true; return; } reportRenderPending = false; render(); }
-  if (global.setInterval) global.setInterval(async function () {
-    if (!root || !root.isConnected || document.hidden || reportRefreshBusy || reportDraft || root.contains(document.activeElement)) return;
-    if (global.__ftBackoffUntil && Date.now() < global.__ftBackoffUntil) return;
-    var mode = state.embeddedMode || (state.tab === 'orders' ? 'todayorders' : state.tab === 'statistics' ? 'statistics' : '');
-    if (!mode || state.loadingOrders || state.loadingGroupOrders || state.loadingStatistics || state.deliveredReportLoading || state.reconciliationLoading) return;
-    reportRefreshBusy = true;
-    try {
-      if (mode === 'reconciliation') await loadReconciliation(state.reconciliationFrom, state.reconciliationTo, state.reconciliationMealType, state.reconciliationMonth);
-      else if (mode === 'todayorders' && state.ordersDate) {
-        await loadOrders(state.ordersDate);
-        if (!reportDraft && !reportInputFocused() && state.groupOrdersLoaded && state.groupOrdersGroupId) await loadGroupOrders(state.groupOrdersGroupId, state.groupOrdersDate);
-      } else if (mode === 'statistics' && state.statisticsFrom && state.statisticsTo) await loadStatistics(state.statisticsFrom, state.statisticsTo, state.statisticsMode);
-      else if (mode === 'delivered' && deliveryDateForReport()) { state.deliveredReportRange = ''; var d = deliveryDateForReport(); await loadPrintedDeliveryReport(d, d); }
-    } finally { reportRefreshBusy = false; }
-  }, 30000);
+  // گزارش‌ها دیگر خودکار رفرش نمی‌شوند؛ کاربر با دکمهٔ «نمایش گزارش» تازه می‌کند (درخواست مالک).
   global.FoodMenuUI = {
     html: function (mode) {
       var attr = mode ? ' data-fm-mode="' + String(mode).replace(/[^a-z]/g, '') + '"' : '';

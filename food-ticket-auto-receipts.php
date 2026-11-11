@@ -20,7 +20,7 @@ function food_ticket_auto_receipt_label(string $eventType, string $sourceUid): s
     };
 }
 
-function food_ticket_auto_receipt_date(string $date): string
+function food_ticket_auto_receipt_date(string $date, bool $allowToday = false): string
 {
     $date = trim($date);
     if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $match)
@@ -28,7 +28,9 @@ function food_ticket_auto_receipt_date(string $date): string
         throw new RuntimeException('تاریخ ثبت خودکار فیش معتبر نیست.');
     }
     $today = (new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran')))->format('Y-m-d');
-    if ($date >= $today) {
+    // حالت پیش‌فرض (تماس دستی/قدیمی) همچنان فقط روزهایِ پایان‌یافته را می‌پذیرد.
+    // گذر پایان‌روزِ Worker صراحتاً $allowToday = true می‌دهد (ساعت ۲۳ به بعد).
+    if ($date > $today || (!$allowToday && $date === $today)) {
         throw new RuntimeException('ثبت خودکار فقط برای روزی انجام می‌شود که به پایان رسیده باشد.');
     }
     return $date;
@@ -163,12 +165,12 @@ function food_ticket_auto_receipt_insert(array $event): bool
 }
 
 /**
- * اجرای idempotent برای یک روزِ پایان‌یافته.
+ * اجرای idempotent برای یک روزِ پایان‌یافته (یا امروز، فقط از گذر پایان‌روز ساعت ۲۳ به بعد).
  * @return array<string,int|string|bool>
  */
-function food_ticket_auto_receipts_run(string $targetDate): array
+function food_ticket_auto_receipts_run(string $targetDate, bool $allowToday = false): array
 {
-    $date = food_ticket_auto_receipt_date($targetDate);
+    $date = food_ticket_auto_receipt_date($targetDate, $allowToday);
     if (!food_ticket_auto_receipt_schema_ready()) {
         throw new RuntimeException('ساختار ثبت خودکار فیش آماده نیست؛ مهاجرت 021 را اجرا و وضعیت جدول‌ها را بررسی کنید.');
     }
@@ -273,8 +275,9 @@ function food_ticket_auto_receipts_run(string $targetDate): array
                 'event_type' => 'auto_printed',
                 'source_payload' => is_string($payload) ? $payload : '{}',
                 'meal_type' => $mealType,
-                // فقط وعدهٔ شام طبق تصمیم کاربر در گزارش تحویل هم خودکار تحویل‌شده شمرده می‌شود.
-                'delivery_status' => $mealType === 'dinner' ? 'delivered' : 'pending',
+                // وعدهٔ سلف‌بسته (شام؛ ناهارِ پنجشنبه/جمعه و تعطیلات رسمی) خودکار تحویل‌شده ثبت می‌شود —
+                // طبق تصمیم مالک: این ثبت‌ها باید در سامانهٔ تحویل غذا و گزارش‌ها دیده شوند (بدون چاپ فیزیکی).
+                'delivery_status' => 'delivered',
             ]);
             if ($inserted) {
                 $result['staff_created']++;

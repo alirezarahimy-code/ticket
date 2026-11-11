@@ -64,8 +64,6 @@ try {
 $heartbeatFile = $storageDir . '/food_worker.heartbeat';
 $lastPrintedSig = '';
 $lastPrintedAt = 0;
-$lastAutoReceiptRunDay = '';
-$lastAutoReceiptAttemptAt = 0;
 
 // ── پنجرهٔ کاری و کش تنظیمات ─────────────────────────────────────────────
 // تنظیمات تا این تعداد ثانیه کش می‌شوند. قبلاً هر چرخه یک بار کامل از دیتابیس
@@ -74,12 +72,12 @@ $lastAutoReceiptAttemptAt = 0;
 const FOOD_WORKER_CONFIG_TTL = 10;
 $config = [];
 $configLoadedAt = 0.0;
-$previousWindowOpen = null;
-$finalSweepPending = false;
 // مقادیر اولیه تا بخش خواب حتی در مسیرهای خطا هم متغیر تعریف‌نشده نبیند.
 $windowState = ['active_poll_ms' => 500, 'idle_poll_seconds' => 60];
 $readSource = true;
 $drainQueue = true;
+$lastEndOfDayRunDay = '';
+$lastEndOfDayAttemptAt = 0;
 
 fwrite(STDOUT, '[food-ticket-worker] ' . date('c') . ' start loop=' . ($loop ? '1' : '0') . ' pid=' . getmypid() . ' max_minutes=' . $maxMinutes . PHP_EOL);
 
@@ -111,7 +109,6 @@ do {
         logging_begin_execution('worker:food-ticket:cycle');
     }
     $cycle = ['processed' => 0, 'printed' => 0, 'errors' => 0, 'message' => ''];
-    $autoReceiptCycle = null;
     try {
         // اتصال دیتابیس فقط وقتی دوباره ساخته می‌شود که واقعاً قطع شده باشد.
         // نسخه‌های قبلی هر چرخه db(true) صدا می‌زدند یعنی یک TCP connect + احراز هویت
@@ -132,24 +129,9 @@ do {
             }
         }
 
-        // یک بار در شروع هر روز تهران، سفارش‌های روزِ تمام‌شده را فقط در دفتر رویداد ثبت می‌کنیم.
-        // در صورت خاموشی Worker، اجرای نخست پس از بازگشت catch-up می‌کند؛ کلید یکتا در helper مانع تکرار است.
         $tehranNow = new DateTimeImmutable('now', new DateTimeZone('Asia/Tehran'));
         $tehranDay = $tehranNow->format('Y-m-d');
-        if ($lastAutoReceiptRunDay !== $tehranDay && (time() - $lastAutoReceiptAttemptAt) >= 60) {
-            $lastAutoReceiptAttemptAt = time();
-            $autoTargetDate = $tehranNow->modify('-1 day')->format('Y-m-d');
-            try {
-                $autoReceiptCycle = food_ticket_auto_receipts_run($autoTargetDate);
-                if (empty($autoReceiptCycle['locked'])) {
-                    $lastAutoReceiptRunDay = $tehranDay;
-                }
-            } catch (Throwable $autoReceiptError) {
-                $autoReceiptCycle = ['date' => $autoTargetDate, 'error' => $autoReceiptError->getMessage()];
-                $cycle['errors']++;
-                fwrite(STDERR, '[auto-receipts] date=' . $autoTargetDate . ' ' . $autoReceiptError->getMessage() . PHP_EOL);
-            }
-        }
+        $tehranHour = (int) $tehranNow->format('G');
 
         // تنظیمات با TTL خوانده می‌شوند، نه در هر چرخه. setting_forget_cache() هم
         // به همان ریتم گره خورده تا کش تنظیمات عمومی بیش از TTL کهنه نماند.
@@ -172,21 +154,31 @@ do {
                'idle_poll_seconds' => 60, 'persistent_source' => false];
         $windowOpen = (bool) $windowState['open'];
 
-        // جاروی پایانی: یک بار خواندن کاملِ اضافه، در دو حالت
-        //   ۱) گذار از داخل پنجره به بیرون — ترددی که دقیقاً لحظهٔ بسته شدن نوشته شده جا نماند؛
-        //   ۲) نخستین چرخه پس از هر بالا آمدن Worker (previousWindowOpen هنوز null است) —
-        //      چون تسک ویندوز هر ۶ ساعت Worker را تازه می‌کند و ممکن است همان لحظه
-        //      پنجره بسته شده باشد.
-        // ردیف‌های روزهای قبل هرگز دوباره خوانده نمی‌شوند، پس این تنها فرصت آن ردیف است.
-        if ($previousWindowOpen !== false && !$windowOpen) {
-            $finalSweepPending = true;
+        // ── حالت سختگیرانهٔ خارج از پنجره (خواستهٔ مالک) ─────────────
+        // وقتی پنجرهٔ کاری فعال ولی بسته است، Worker هیچ کاری انجام نمی‌دهد:
+        // نه خواندن SOURCE_TABLE (حتی اسکن یک‌بارهٔ ری‌استارت)، نه تخلیهٔ صف چاپ،
+        // نه ثبت خودکار. تنها یک استثنا: یک گذر پایان‌روز در ساعت ۲۳ به بعد
+        // (اول خواندن/چاپ فیش‌های واقعیِ باقی‌ماندهٔ روز، سپس ثبت خودکار
+        // تحویل برای وعده‌هایی که سلف تعطیل است). با --force این حالت دور زده می‌شود
+        // (مداخلهٔ دستیِ آگاهانهٔ ادمین؛ در لاگ ثبت می‌شود).
+        $windowEnabled = (bool) ($windowState['enabled'] ?? false);
+        $forceOutsideWindow = in_array('--force', array_slice($argv, 1), true);
+        $processorEnabled = (int) ($config['enabled'] ?? 0) === 1;
+        $strictClosed = $windowEnabled && !$windowOpen && !$forceOutsideWindow;
+        $endOfDayDue = $processorEnabled
+            && $tehranHour >= 23
+            && $lastEndOfDayRunDay !== $tehranDay
+            && (time() - $lastEndOfDayAttemptAt) >= 600;
+        if ($strictClosed && !$endOfDayDue) {
+            $readSource = false;
+            $drainQueue = false;
+            $cycle['strict_window_idle'] = true;
+        } else {
+            // با --queue-only اصلاً سراغ Access نمی‌رویم؛ آن حالت فقط صف چاپ را تخلیه می‌کند.
+            $readSource = !$queueOnly && ($windowOpen || $endOfDayDue || $forceOutsideWindow);
+            $pendingPrints = ($readSource || $queueOnly) ? 0 : $foodWorkerPendingPrints();
+            $drainQueue = $queueOnly || $readSource || $pendingPrints > 0;
         }
-        $previousWindowOpen = $windowOpen;
-
-        // با --queue-only اصلاً سراغ Access نمی‌رویم؛ آن حالت فقط صف چاپ را تخلیه می‌کند.
-        $readSource = !$queueOnly && ($windowOpen || $finalSweepPending);
-        $pendingPrints = ($readSource || $queueOnly) ? 0 : $foodWorkerPendingPrints();
-        $drainQueue = $queueOnly || $readSource || $pendingPrints > 0;
 
         // اتصال پایدار Access فقط داخل پنجره؛ هنگام خروج بسته می‌شود تا قفل
         // .laccdb روی فایل Access آزاد شود و پشتیبان‌گیری شبانه گیر نکند.
@@ -220,11 +212,6 @@ do {
                     $cycle['message'] = $batchEx->getMessage();
                 }
             }
-            if ($finalSweepPending && $readSource) {
-                $cycle['final_sweep'] = true;
-                $finalSweepPending = false;
-            }
-
             if ($drainQueue) {
                 try {
                     $q = food_ticket_process_print_queue_locked($config);
@@ -245,8 +232,27 @@ do {
             food_ticket_odbc_release();
         }
 
-        if (is_array($autoReceiptCycle)) {
-            $cycle['auto_receipts'] = $autoReceiptCycle;
+        // ── گذر پایان‌روز: یک‌بار در روز، ساعت ۲۳ به بعد ──────────────
+        // ترتیب مهم است: اول SOURCE_TABLE برای امروز خوانده می‌شود (بالا، چون
+        // $endOfDayDue خوانش را فعال می‌کند) تا اثر انگشت‌های واقعیِ ساعت‌های
+        // پایانی چاپ/ثبت شوند؛ فقط سفارش‌های بدون فیشِ تحویل برایشان ثبت خودکار
+        // ساخته می‌شود. اگر پردازش خطا داد، ثبت خودکار امروز/دیروز انجام نمی‌شود
+        // تا سفارش واقعی زیرِ سایهٔ ثبت خودکار جا نماند؛ حداقل ۱۰ دقیقه بعد دوباره تلاش می‌کند.
+        // در حالت --queue-only یا وقتی پردازشگر غیرفعال است اصلاً اجرا نمی‌شود.
+        if ($endOfDayDue && $readSource && $processorEnabled && (int) ($cycle['errors'] ?? 0) === 0) {
+            $lastEndOfDayAttemptAt = time();
+            try {
+                $autoResults = [];
+                $autoResults['yesterday'] = food_ticket_auto_receipts_run($tehranNow->modify('-1 day')->format('Y-m-d'));
+                $autoResults['today'] = food_ticket_auto_receipts_run($tehranDay, true);
+                $cycle['auto_receipts_end_of_day'] = $autoResults;
+                $lastEndOfDayRunDay = $tehranDay;
+            } catch (Throwable $autoReceiptError) {
+                $cycle['errors'] = (int) ($cycle['errors'] ?? 0) + 1;
+                $cycle['auto_receipts_error'] = $autoReceiptError->getMessage();
+                fwrite(STDERR, '[auto-receipts] ' . $autoReceiptError->getMessage() . PHP_EOL);
+                // lastEndOfDayRunDay تنظیم نمی‌شود؛ چرخهٔ بعد دوباره تلاش می‌کند.
+            }
         }
 
         try {

@@ -1054,7 +1054,9 @@ function food_order_printed_delivery_report(string $fromDate, string $toDate): a
           AND (e.print_status = 'printed' OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered'))
           AND ((e.event_type IN ('printed','print') AND e.user_id IS NOT NULL AND e.delivery_status = 'delivered')
                OR (e.source_uid = 'manual-attendance' AND e.event_type = 'printed' AND e.delivery_status = 'delivered')
-               OR e.event_type = 'guest')
+               OR e.event_type = 'guest'
+               OR (e.event_type = 'auto_printed' AND e.delivery_status = 'delivered')
+               OR e.event_type = 'auto_guest')
         ORDER BY e.punch_date, e.food_type, e.full_name, e.id");
     $stmt->execute([$from, $to]);
     $items = [];
