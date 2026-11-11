@@ -6,7 +6,7 @@
 
 تفاوت این بسته با بسته‌های prod: این بستهٔ «کاندید» است؛ انتشار آن (تگ، merge به main
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
-ساخته می‌شود و مهاجرت فقط ۰۳۵ (request_center_appointments) است — سایر مهاجرت‌ها
+ساخته می‌شود و مهاجرت‌های ۰۳۵ و ۰۳۷ (۰۳۷ برای backfill نصب‌هایی است که ۰۳۵ قدیمی را ثبت کرده‌اند) است — سایر مهاجرت‌ها
 (۰۳۲–۰۳۴) متعلق به main/Logging هستند و قبلاً روی هدف اعمال شده‌اند.
 
 تصمیم مالک (۲۰۲۶-۱۱-۰۹): این بسته **فقط به‌روزرسانی مرکز درخواست** را حمل می‌کند.
@@ -24,7 +24,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63"
-REQUIRES_VERSION = "1.62.90"
+REQUIRES_VERSION = "1.62.94"
 BASE_COMMIT = "d30d7dfa031173535bd750b4e8a7af35593db244"
 RELEASE_DATE = "2026-11-11"
 PACKAGE_NAME = f"ticket-update-{REQUIRES_VERSION}-to-{RELEASE_VERSION}-request-center-rc-candidate-{RELEASE_DATE.replace('-', '')}.zip"
@@ -34,6 +34,7 @@ ZIP_DATE = (2026, 11, 11, 12, 0, 0)
 EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/", "preview/")
 MIGRATIONS = [
     "035-request-center-appointments.sql",
+    "037-request-center-lifecycle-backfill.sql",
 ]
 EXCLUDED_FILES = {
     "tools/build_rc_update.py",
@@ -172,14 +173,14 @@ def build() -> tuple[Path, Path]:
         "name": "request-center-rc-candidate",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (۱.۶۲.۹۰ ← ۱.۶۳)",
+        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (۱.۶۲.۹۴ ← ۱.۶۳)",
         "requires_version": REQUIRES_VERSION,
         "migrations": list(MIGRATIONS),
         "files": sorted(files),
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09 and 2026-11-11) this package is RC-only: food 1.62.93/1.62.94 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036) applied.",
+        "description": "Request Center module upgrade candidate built against main 1.62.90, with operational prerequisite 1.62.94. Install only after owner sign-off; requires migrations 035 and 037 via the official runner. Migration 037 backfills lifecycle schema when the older appointment-only 035 filename is already recorded. Migration 034 and food migration 036 are prerequisites included by the 1.62.94 chain and are NOT part of this package. By owner decisions (2026-11-09 and 2026-11-11) this package is RC-only: food 1.62.93/1.62.94 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036) applied.",
     }
 
     out_dir = ROOT / "downloads"
