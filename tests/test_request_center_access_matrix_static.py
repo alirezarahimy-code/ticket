@@ -35,11 +35,21 @@ def test_all_pages_are_covered_by_a_server_side_guard():
             "user_is_primary_admin(",
             "user_can(",
             "fetch_ticket(",          # detail: scope-enforced read + 404
+            "request_center_is_unit_head(",  # unit workspace: domain-specific organizational guard
             "is_staff_role(",
         ]
         if not any(marker in source for marker in markers):
             failures.append(page.name)
     assert not failures, f"صفحه‌های بدون حصار سرور-محور: {failures}"
+
+
+def test_unit_workspace_requires_active_unit_head_before_repository_reads():
+    source = read(PAGES / "unit.php")
+    assert "defined('APP_ROOT')" in source
+    assert "request_center_is_unit_head($user)" in source
+    assert "request_center_error_page(403" in source
+    assert "$repo->listUnitHead($user" in source
+    assert source.index("request_center_is_unit_head($user)") < source.index("$repo->listUnitHead($user")
 
 
 def test_pages_have_no_unguarded_module_requests():
