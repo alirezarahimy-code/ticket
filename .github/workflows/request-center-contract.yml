@@ -7,6 +7,10 @@ on:
       - 'request-center.php'
       - 'modules/request-center/**'
       - 'migrations/035-request-center-appointments.sql'
+      - 'migrations/037-request-center-lifecycle-backfill.sql'
+      - 'tools/build_rc_update.py'
+      - 'downloads/CHANGE-REPORT-FA-1.63.md'
+      - 'tests/test_request_center_migration_replay_mariadb.php'
       - 'tests/test_request_center_phase3_lifecycle_static.py'
       - 'tests/test_request_center_phase3_workspaces_static.py'
       - 'tests/test_request_center_workflow_service_sqlite.php'
@@ -48,7 +52,7 @@ on:
       - 'lib/http-input.php'
       - 'lib/render.php'
   push:
-    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
+    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket, fix/rc-migration-backfill-1.63 ]
 
 permissions:
   contents: write
@@ -114,6 +118,7 @@ jobs:
           php -l modules/request-center/Actions/admin-actions.php
           php -l tests/test_request_center_workflow_service_sqlite.php
           php -l tests/test_request_center_migration_037_mariadb.php
+          php -l tests/test_request_center_migration_replay_mariadb.php
           php -l tests/test_request_center_schema_preflight_mariadb.php
           php -l modules/request-center/AppointmentRepository.php
           php -l modules/request-center/Actions/appointment-actions.php
@@ -187,6 +192,43 @@ jobs:
           CI_DB_NAME: rc_migration_upgrade_ci
           CI_DB_USER: root
           CI_DB_PASS: ci-ephemeral-root-password
+      - name: Prepare database where legacy 035 is already recorded
+        run: |
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password -e "CREATE DATABASE rc_migration_replay_ci CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci < install-empty-db.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE tickets MODIFY COLUMN status ENUM('new','manager_review','assigned','in_progress','waiting_user','pending','resolved','closed','cancelled') NOT NULL DEFAULT 'manager_review'"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE tickets DROP COLUMN rejected_at"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE tickets DROP INDEX idx_tickets_requesting_unit, DROP COLUMN requesting_unit_id"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE tickets DROP INDEX uq_tickets_no, DROP COLUMN ticket_no"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "DROP TABLE ticket_number_seq"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE categories DROP INDEX code, DROP COLUMN code"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE service_catalog DROP FOREIGN KEY fk_services_category, DROP INDEX idx_services_category, DROP COLUMN category_id"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "ALTER TABLE categories ADD COLUMN code VARCHAR(60) NULL; CREATE UNIQUE INDEX uq_categories_code ON categories(code); INSERT INTO categories (name, code, service_group, is_active) VALUES ('دستهٔ سفارشی مالک', 'IT-CAT-HW', 'it', 0)"
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "INSERT INTO schema_updates (version, migration) VALUES ('1.62.93', '035-request-center-appointments.sql')"
+      - name: Verify old 035 is recorded while new 037 remains pending
+        run: php tests/test_request_center_migration_replay_mariadb.php preflight
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: rc_migration_replay_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+      - name: Apply unique 037 lifecycle backfill twice and register success
+        run: |
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci < migrations/037-request-center-lifecycle-backfill.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci < migrations/037-request-center-lifecycle-backfill.sql
+          mariadb --skip-ssl -h 127.0.0.1 -uroot -pci-ephemeral-root-password rc_migration_replay_ci -e "INSERT INTO schema_updates (version, migration) VALUES ('1.63', '037-request-center-lifecycle-backfill.sql')"
+      - name: Verify 037 backfill, registry retention and customized category preservation
+        run: |
+          php tests/test_request_center_migration_037_mariadb.php
+          php tests/test_request_center_migration_replay_mariadb.php postflight
+        env:
+          CI_DB_HOST: 127.0.0.1
+          CI_DB_PORT: '3306'
+          CI_DB_NAME: rc_migration_replay_ci
+          CI_DB_USER: root
+          CI_DB_PASS: ci-ephemeral-root-password
+
       - name: Existing workflow safety contracts
         run: python -m pytest -q tests/test_ticket_workflow_safety_static.py tests/test_ticket_cancellation_static.py tests/test_ticket_three_views_static.py tests/test_ticket_lifecycle_guide_static.py tests/test_ldap_secret_and_legacy_status_static.py
       - name: Existing ticket routing unit tests
@@ -320,3 +362,28 @@ jobs:
           name: t07-diagnostic-mariadb-${{ matrix.mariadb-version }}
           path: ${{ runner.temp }}/t07-diagnostic.log
           retention-days: 7
+
+  build-rc-candidate:
+    if: github.ref == 'refs/heads/fix/rc-migration-backfill-1.63'
+    needs: request-center-contract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build and validate 1.62.94 to 1.63 RC package
+        run: python tools/build_rc_update.py
+      - name: Upload validated RC package artifact (not a release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: request-center-1.63-rc-candidate
+          path: |
+            downloads/ticket-update-1.62.94-to-1.63-request-center-rc-candidate-20261111.zip
+            downloads/ticket-update-1.62.94-to-1.63-request-center-rc-candidate-20261111.zip.sha256
+          if-no-files-found: error
+          retention-days: 14
