@@ -130,6 +130,7 @@ jobs:
           files+=(
             index.php
             bootstrap.php
+            lib/auth-scope.php
             request-center.php
             actions/ticket-actions.php
             actions/supervisor-actions.php
