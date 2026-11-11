@@ -1,6 +1,12 @@
 name: Request Center Contract
 
 on:
+  push:
+    # Run the full two-version MariaDB contract on active RC maintenance branches,
+    # not only after a PR is opened against main.
+    branches:
+      - 'arena/**'
+      - 'fix/rc-contract-tests-*'
   pull_request:
     branches: [ main ]
     paths:
