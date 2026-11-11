@@ -1,12 +1,6 @@
 name: Request Center Contract
 
 on:
-  push:
-    # Run the full two-version MariaDB contract on active RC maintenance branches,
-    # not only after a PR is opened against main.
-    branches:
-      - 'arena/**'
-      - 'fix/rc-contract-tests-*'
   pull_request:
     branches: [ main ]
     paths:
@@ -54,7 +48,7 @@ on:
       - 'lib/http-input.php'
       - 'lib/render.php'
   push:
-    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket ]
+    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket, 'fix/rc-contract-tests-*' ]
 
 permissions:
   contents: write
