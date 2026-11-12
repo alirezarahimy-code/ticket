@@ -26,9 +26,17 @@ jobs:
         run: python -m pip install --quiet pytest
       - name: Verify the central logging contract
         run: python -m pytest -q tests/test_logging_system_contract.py
-      # Rebuild the release archive from this checkout before comparing repository bytes.
-      - name: Rebuild 1.62.88 package before source-of-truth guard
-        run: python tools/build_update_1_62_88.py
+      # نسخه‌های الحاقی اتحاد با SHA‑256 پین‌شده داخل مخزن هستند؛ به‌جای بازساخت بستهٔ کلاسیک ۱٫۶۲٫۸۸
+      # همان بسته‌ها (هستهٔ تحویل ۱٫۶۲٫۹۵) تأیید می‌شوند و سپس نگهبان منبع-حقیقت اجرا می‌شود.
+      - name: Verify pinned 1.62.93/1.62.94/1.62.95 union packages
+        run: |
+          cd downloads
+          sha256sum -c ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip.sha256
+          sha256sum -c ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip.sha256
+          sha256sum -c ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip.sha256
+          unzip -t ticket-update-1.62.90-to-1.62.93-food-reconciliation-leftover-20261106.zip
+          unzip -t ticket-update-1.62.93-to-1.62.94-food-guest-org-holiday-20261110.zip
+          unzip -t ticket-update-1.62.94-to-1.62.95-food-auto-receipts-cddvd-20261111.zip
       # Keeps the repository and the shipped update package byte-identical.
       # Nothing else in CI runs this guard, so a package could silently drift.
       - name: Verify the repository matches the shipped package
