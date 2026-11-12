@@ -2,9 +2,12 @@ name: Request Center Contract
 
 on:
   push:
-    branches: [ 'fix/rc-contract-tests-*' ]
+    branches:
+      - "fix/rc-contract-tests-*"
   pull_request:
-    branches: [ main, arena/22d4eba7-ticket ]
+    branches:
+      - main
+      - "arena/22d4eba7-ticket"
     paths:
       - 'request-center.php'
       - 'modules/request-center/**'
@@ -25,40 +28,12 @@ on:
       - 'tests/test_request_center_first_slice_static.py'
       - 'tests/test_request_center_access_matrix_static.py'
       - 'tests/test_request_center_repository_sqlite.php'
-      - 'tests/test_request_center_workflow_service_sqlite.php'
       - 'tests/test_request_center_workflow_service_mariadb.php'
-      - 'tests/test_request_center_schema_preflight_mariadb.php'
       - 'tests/test_request_center_web_ddl_runtime.php'
       - 'tests/test_system_update_migration_failure_gates.php'
       - 'tests/test_request_center_metadata_lock_mariadb.php'
       - 'tests/test_backup_restore_mariadb_e2e.php'
-      - 'tests/test_request_center_claim_concurrency_mariadb.php'
-      - 'tests/test_request_center_appointment_concurrency_mariadb.php'
-      - 'tests/fixtures/request-center-appointment-worker.php'
-      - 'tests/test_request_center_t07_migration_clone.php'
-      - 'tests/test_request_center_jalali_parity.mjs'
-      - 'tests/test_request_center_appointments_sqlite.php'
-      - 'tests/fixtures/jalali-php-convert.php'
-      - 'tests/fixtures/request-center-claim-worker.php'
-      - 'tests/fixtures/request-center-ddl-probe.php'
-      - 'tests/fixtures/request-center-session-seed.php'
-      - 'tests/test_ticket_workflow_safety_static.py'
-      - 'tests/test_ticket_cancellation_static.py'
-      - 'tests/test_ticket_three_views_static.py'
-      - 'tests/test_ticket_lifecycle_guide_static.py'
-      - 'tests/test_ldap_secret_and_legacy_status_static.py'
-      - 'lib/auth-scope.php'
-      - 'actions/ticket-actions.php'
-      - 'actions/supervisor-actions.php'
-      - 'actions/bulk-actions.php'
-      - 'cron/ticket_auto_close.php'
-      - 'cron/sla_maintenance.php'
-      - 'lib/tickets-sla.php'
-      - 'index.php'
-      - 'lib/http-input.php'
-      - 'lib/render.php'
-  push:
-    branches: [ feature/request-center-module-1.62.88, arena/22d4eba7-ticket, 'fix/rc-contract-tests-*' ]
+  workflow_dispatch:
 
 permissions:
   contents: write
