@@ -67,7 +67,9 @@ def test_a_requester_who_is_also_the_assigned_agent_can_still_work():
     code = strip_php_comments(
         php_function("lib/auth-scope.php", "function ticket_handler_level(array $ticket, array $user): string")
     )
-    block = code[code.index("ticket_user_is_requester($ticket, $user)"):]
+    # روی بلوکِ «اگر ثبت‌کننده است» لنگر بزن، نه اولینِ هر جای تابع:
+    # فراخوان Manager-Tree (isManagerRequester) زودتر از آنجا می‌آید و پنجرهٔ ۶۰۰ نویسه‌ای را منحرف می‌کرد.
+    block = code[code.index("if (ticket_user_is_requester($ticket, $user)) {"):]
     assert "'assignee'" in block[:600], (
         "ثبت‌کننده‌ای که کارشناس مسئول همین درخواست است باید نمای کارشناس بگیرد"
     )
