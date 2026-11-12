@@ -6,7 +6,7 @@
 
 تفاوت این بسته با بسته‌های prod: این بستهٔ «کاندید» است؛ انتشار آن (تگ، merge به main
 و نصب) فقط با تأیید صریح مالک انجام می‌شود. محتوای آن از تفاوت دقیق main → این شاخه
-ساخته می‌شود و مهاجرت فقط ۰۳۵ (request_center_appointments) است — سایر مهاجرت‌ها
+ساخته می‌شود و مهاجرت‌های RC شامل ۰۳۵، ۰۳۷ و ۰۳۸ هستند؛ ۰۳۸ دلتاهای lifecycle را برای نصب‌هایی که ۰۳۵ قدیمی را ثبت کرده‌اند تکمیل می‌کند — سایر مهاجرت‌ها
 (۰۳۲–۰۳۴) متعلق به main/Logging هستند و قبلاً روی هدف اعمال شده‌اند.
 
 تصمیم مالک (۲۰۲۶-۱۱-۰۹): این بسته **فقط به‌روزرسانی مرکز درخواست** را حمل می‌کند.
@@ -24,7 +24,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent.parent
 RELEASE_VERSION = "1.63"
-REQUIRES_VERSION = "1.62.90"
+REQUIRES_VERSION = "1.62.94"
 BASE_COMMIT = "d30d7dfa031173535bd750b4e8a7af35593db244"
 RELEASE_DATE = "2026-11-11"
 PACKAGE_NAME = f"ticket-update-{REQUIRES_VERSION}-to-{RELEASE_VERSION}-request-center-rc-candidate-{RELEASE_DATE.replace('-', '')}.zip"
@@ -34,6 +34,8 @@ ZIP_DATE = (2026, 11, 11, 12, 0, 0)
 EXCLUDED_PREFIXES = ("downloads/", "updates/", "tests/", "docs/system-map/", ".github/", "ci-diagnostics/", "benchmark-results/", "preview/")
 MIGRATIONS = [
     "035-request-center-appointments.sql",
+    "038-org-role-sync-columns.sql",
+    "039-request-center-lifecycle-catchup.sql",
 ]
 EXCLUDED_FILES = {
     "tools/build_rc_update.py",
@@ -65,6 +67,7 @@ EXCLUDED_FOOD_PATHS = {
     "food-ticket-templates.php",
     "food-ticket.php",
     "migrations/036-food-meal-leftover-disposition.sql",
+    "migrations/037-food-auto-receipts-delivered.sql",
     "tools/build_1_62_93_food_reconciliation_update.py",
     # ورودیِ ignoreِ یک ابزار محلیِ نقشهٔ پیشرفت؛ نه قابلیت RC و نه تغییر رفتار سامانه.
     ".gitignore",
@@ -168,18 +171,26 @@ def build() -> tuple[Path, Path]:
     if files.get("VERSION", b"").decode("utf-8", "replace").strip() != RELEASE_VERSION:
         raise SystemExit("files/VERSION با نسخهٔ کاندید نمی‌خواند.")
 
+    unlisted_migrations = sorted(
+        name for name in files
+        if name.startswith("migrations/") and name.endswith(".sql")
+        and Path(name).name not in MIGRATIONS
+    )
+    if unlisted_migrations:
+        raise SystemExit("RC package contains SQL migrations absent from manifest.migrations: " + ", ".join(unlisted_migrations))
+
     manifest = {
         "name": "request-center-rc-candidate",
         "version": RELEASE_VERSION,
         "date": RELEASE_DATE,
-        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (۱.۶۲.۹۰ ← ۱.۶۳)",
+        "title": "کاندید بستهٔ ارتقاء مرکز درخواست — ماژول مستقل + گردش‌کار + نوبت‌ها و تقویم شمسی (پیش‌نیاز ۱.۶۲.۹۴ ← ۱.۶۳)",
         "requires_version": REQUIRES_VERSION,
         "migrations": list(MIGRATIONS),
         "files": sorted(files),
         "sha256": {name: sha256(files[name]) for name in sorted(files)},
         "release_status": "RC_CANDIDATE_NOT_FOR_PRODUCTION",
         "architecture_reference": "docs/architecture/REQUEST-CENTER-ARCHITECTURE.md",
-        "description": "Request Center module upgrade candidate from 1.62.90 (main) to 1.63. Install only after owner sign-off; requires migration 035 via the official runner. Migration 034 is owned by release 1.62.89 (already installed) and is NOT part of this package. By owner decisions (2026-11-09 and 2026-11-11) this package is RC-only: food 1.62.93/1.62.94 files, the release preview harness (preview/) and migration 036 are intentionally excluded; the target must already have the food updates (through 1.62.94 + migration 036) applied.",
+        "description": "Request Center RC candidate sourced from main commit d30d7dfa (1.62.90) to 1.63. Minimum installed version is 1.62.94 because food 1.62.94 and migration 036 are intentionally excluded and must already be installed. Not compatible with the known production version 1.62.77 or with 1.62.90. Migrations 035, 037 and 038 run through the official updater; 038 is an idempotent catch-up for installs that already recorded an older appointments-only 035. Migration 034 belongs to release 1.62.89 and is not included.",
     }
 
     out_dir = ROOT / "downloads"

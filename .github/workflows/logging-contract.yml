@@ -26,10 +26,17 @@ jobs:
         run: python -m pip install --quiet pytest
       - name: Verify the central logging contract
         run: python -m pytest -q tests/test_logging_system_contract.py
-      # Rebuild the release archive from this checkout before comparing repository bytes.
+      # The legacy source-of-truth guard is specific to the 1.62.88 archive.
+      # Newer release trains have their own package-preview workflows; never run
+      # a hard-coded 1.62.88 builder against a different VERSION (for example 1.63).
+      - name: Read application version
+        id: app-version
+        shell: bash
+        run: echo "value=$(tr -d '\r\n' < VERSION)" >> "$GITHUB_OUTPUT"
       - name: Rebuild 1.62.88 package before source-of-truth guard
+        if: steps.app-version.outputs.value == '1.62.88'
         run: python tools/build_update_1_62_88.py
-      # Keeps the repository and the shipped update package byte-identical.
-      # Nothing else in CI runs this guard, so a package could silently drift.
+      # Keeps the 1.62.88 repository and shipped archive byte-identical.
       - name: Verify the repository matches the shipped package
+        if: steps.app-version.outputs.value == '1.62.88'
         run: python -m pytest -q tests/test_version_source_of_truth_static.py
