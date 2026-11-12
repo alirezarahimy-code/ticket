@@ -1,0 +1,11 @@
+# r2: فایل‌های PHP و مستندات ماژول فقط از طریق require در نقاط ورود معتبر بارگذاری می‌شوند؛ دسترسی مستقیم وب ممنوع است.
+# فایل‌های استاتیک (Assets/*.css|js) آزادند.
+<FilesMatch "\.(php|md)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

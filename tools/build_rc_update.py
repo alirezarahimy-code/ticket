@@ -49,6 +49,11 @@ EXCLUDED_FILES = {
     "tools/php_syntax_check.py",
     # ابزار توسعه/مستندسازی نقشهٔ سامانه؛ بخشی از رفتار RUNTIME نیست (هدف ارتقا نسخهٔ main را دارد).
     "tools/build_system_map.py",
+    # ابزارهای بیلد/انتشار موج‌های غذا و سی‌دی‌دی‌وی‌دی که فقط در تاریخ شاخه وجود دارند؛ RUNTIME نیستند.
+    "tools/build_1_62_95_update.py",
+    "tools/build_full_1_62_94.py",
+    "tools/build_full_1_62_95.py",
+    "tools/Run-Logging-Acceptance-1.62.88.ps1",
     # اسکریپتِ بازسازی مخرب دیتابیس؛ با تصمیم مالک به docs/architecture منتقل شد و
     # در هیچ بستهٔ ارتقاء نباید حمل شود (نصب عادی آن را لازم ندارد).
     "rebuild-final.sql",
