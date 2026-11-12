@@ -2,8 +2,20 @@ name: Request Center Contract
 
 on:
   push:
-    branches:
-      - "fix/rc-contract-tests-*"
+    paths:
+      - 'request-center.php'
+      - 'modules/request-center/**'
+      - 'migrations/035-request-center-appointments.sql'
+      - 'migrations/038-org-role-sync-columns.sql'
+      - 'migrations/039-request-center-lifecycle-catchup.sql'
+      - 'schema.sql'
+      - 'install-empty-db.sql'
+      - 'tools/build_rc_update.py'
+      - 'downloads/CHANGE-REPORT-FA-1.63.md'
+      - 'tests/test_org_role_sync_columns_mariadb.php'
+      - 'tests/test_rc_package_prerequisites_static.py'
+      - 'tests/test_request_center_access_matrix_static.py'
+      - 'tests/test_request_center_migration_037_mariadb.php'
   pull_request:
     branches:
       - main
@@ -20,23 +32,12 @@ on:
       - 'downloads/CHANGE-REPORT-FA-1.63.md'
       - 'tests/test_org_role_sync_columns_mariadb.php'
       - 'tests/test_rc_package_prerequisites_static.py'
-      - 'tests/test_request_center_phase3_lifecycle_static.py'
-      - 'tests/test_request_center_phase3_workspaces_static.py'
-      - 'tests/test_request_center_workflow_service_sqlite.php'
-      - 'tests/test_request_center_migration_037_mariadb.php'
-      - 'tests/test_request_center_schema_preflight_mariadb.php'
-      - 'tests/test_request_center_first_slice_static.py'
       - 'tests/test_request_center_access_matrix_static.py'
-      - 'tests/test_request_center_repository_sqlite.php'
-      - 'tests/test_request_center_workflow_service_mariadb.php'
-      - 'tests/test_request_center_web_ddl_runtime.php'
-      - 'tests/test_system_update_migration_failure_gates.php'
-      - 'tests/test_request_center_metadata_lock_mariadb.php'
-      - 'tests/test_backup_restore_mariadb_e2e.php'
+      - 'tests/test_request_center_migration_037_mariadb.php'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   request-center-contract:
